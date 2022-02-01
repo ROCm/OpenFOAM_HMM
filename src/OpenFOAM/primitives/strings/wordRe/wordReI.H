@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,7 +40,7 @@ inline bool Foam::wordRe::valid(const char c)
 inline Foam::wordRe::wordRe()
 :
     word(),
-    re_()
+    regexPtr_(nullptr)
 {}
 
 
@@ -58,25 +58,28 @@ inline Foam::wordRe::wordRe(const wordRe& str)
 inline Foam::wordRe::wordRe(wordRe&& str)
 :
     word(std::move(static_cast<word&>(str))),
-    re_(std::move(str.re_))
+    regexPtr_(str.regexPtr_.release())
 {}
 
 
 inline Foam::wordRe::wordRe(const word& str)
 :
-    word(str)
+    word(str),
+    regexPtr_(nullptr)
 {}
 
 
 inline Foam::wordRe::wordRe(word&& str)
 :
-    word(std::move(str))
+    word(std::move(str)),
+    regexPtr_(nullptr)
 {}
 
 
 inline Foam::wordRe::wordRe(const std::string& str, const compOption opt)
 :
-    word(str, false)  // No stripping
+    word(str, false),  // No stripping
+    regexPtr_(nullptr)
 {
     if (opt != wordRe::LITERAL)
     {
@@ -87,7 +90,8 @@ inline Foam::wordRe::wordRe(const std::string& str, const compOption opt)
 
 inline Foam::wordRe::wordRe(const char* str, const compOption opt)
 :
-    word(str, false)  // No stripping
+    word(str, false),  // No stripping
+    regexPtr_(nullptr)
 {
     if (opt != wordRe::LITERAL)
     {
@@ -100,13 +104,13 @@ inline Foam::wordRe::wordRe(const char* str, const compOption opt)
 
 inline bool Foam::wordRe::isLiteral() const noexcept
 {
-    return !re_.exists();
+    return !bool(regexPtr_);
 }
 
 
 inline bool Foam::wordRe::isPattern() const noexcept
 {
-    return re_.exists();
+    return bool(regexPtr_);
 }
 
 
@@ -131,25 +135,47 @@ inline bool Foam::wordRe::compile(const compOption opt)
 
         if (comp)
         {
-            return re_.set(*this, (opt & wordRe::ICASE));
+            if (!regexPtr_)
+            {
+                regexPtr_.reset(new Foam::regExp());
+            }
+
+            if (!regexPtr_->set(*this, (opt & wordRe::ICASE)))
+            {
+                // Compilation failed
+                regexPtr_.reset(nullptr);
+            }
+
+            return bool(regexPtr_);
         }
     }
 
     // Fall-through behaviour - not a regex
-    re_.clear();
+    regexPtr_.reset(nullptr);
     return false;
 }
 
 
 inline bool Foam::wordRe::compile()
 {
-    return re_.set(*this);
+    if (!regexPtr_)
+    {
+        regexPtr_.reset(new Foam::regExp());
+    }
+
+    if (!regexPtr_->set(*this))
+    {
+        // Compilation failed
+        regexPtr_.reset(nullptr);
+    }
+
+    return bool(regexPtr_);
 }
 
 
 inline void Foam::wordRe::uncompile()
 {
-    re_.clear();
+    regexPtr_.reset(nullptr);
 }
 
 
@@ -160,22 +186,22 @@ inline void Foam::wordRe::uncompile(bool adjust)
     {
         string::stripInvalid<word>(*this);
     }
-    re_.clear();
+    regexPtr_.reset(nullptr);
 }
 
 
 inline void Foam::wordRe::clear()
 {
     word::clear();
-    re_.clear();
+    regexPtr_.reset(nullptr);
 }
 
 
 inline bool Foam::wordRe::match(const std::string& text, bool literal) const
 {
-    if (!literal && re_.exists())
+    if (!literal && regexPtr_)
     {
-        return re_.match(text);  // Match as regex
+        return regexPtr_->match(text);  // Match as regex
     }
 
     return !compare(text);  // Compare as literal
@@ -191,6 +217,7 @@ inline void Foam::wordRe::set(const std::string& str, const compOption opt)
 
 inline void Foam::wordRe::set(const char* str, const compOption opt)
 {
+    // No nullptr protection here
     assign(str);
     compile(opt);
 }
@@ -204,7 +231,7 @@ inline void Foam::wordRe::swap(wordRe& str)
     }
 
     word::swap(static_cast<word&>(str));
-    re_.swap(str.re_);
+    regexPtr_.swap(str.regexPtr_);
 }
 
 
@@ -230,7 +257,7 @@ inline void Foam::wordRe::operator=(const wordRe& str)
     }
     else
     {
-        re_.clear();
+        regexPtr_.reset(nullptr);
     }
 }
 
@@ -238,7 +265,7 @@ inline void Foam::wordRe::operator=(const wordRe& str)
 inline void Foam::wordRe::operator=(const word& str)
 {
     assign(str);
-    re_.clear();
+    regexPtr_.reset(nullptr);
 }
 
 

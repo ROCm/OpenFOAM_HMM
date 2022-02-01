@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,8 +48,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef DictionaryBase_H
-#define DictionaryBase_H
+#ifndef Foam_DictionaryBase_H
+#define Foam_DictionaryBase_H
 
 #include "HashTable.H"
 #include "wordList.H"
@@ -141,11 +141,11 @@ public:
 
         // Editing
 
-            //- Add at head of dictionary
-            void insert(const word& keyword, T*);
+            //- Add to front of dictionary
+            void prepend(const word& keyword, T* ptr);
 
-            //- Add at tail of dictionary
-            void append(const word& keyword, T*);
+            //- Add to back of dictionary
+            void append(const word& keyword, T* ptr);
 
             //- Remove and return entry specified by keyword.
             //  Return nullptr if the keyword was not found.
@@ -189,7 +189,6 @@ public:
     // Housekeeping
 
         //- Deprecated(2020-03) use cfind()
-        //
         //  \deprecated(2020-03) - use cfind() method
         FOAM_DEPRECATED_FOR(2020-03, "cfind() method")
         const T* lookupPtr(const word& keyword) const
@@ -198,12 +197,17 @@ public:
         }
 
         //- Deprecated(2020-03) use find()
-        //
         //  \deprecated(2020-03) - use find() method
         FOAM_DEPRECATED_FOR(2020-03, "find() method")
         T* lookupPtr(const word& keyword)
         {
             return this->find(keyword);
+        }
+
+        //- Add to front of dictionary
+        void insert(const word& keyword, T* ptr)
+        {
+            this->prepend(keyword, ptr);
         }
 };
 

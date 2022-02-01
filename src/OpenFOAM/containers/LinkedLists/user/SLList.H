@@ -31,12 +31,11 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SLList_H
-#define SLList_H
+#ifndef Foam_SLList_H
+#define Foam_SLList_H
 
 #include "SLListBase.H"
 #include "LList.H"
-
 #include "SLListFwd.H"
 
 #endif

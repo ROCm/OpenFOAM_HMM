@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -99,13 +99,13 @@ Foam::DLListBase::crend() const
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline bool Foam::DLListBase::link::registered() const
+inline bool Foam::DLListBase::link::registered() const noexcept
 {
     return prev_ != nullptr && next_ != nullptr;
 }
 
 
-inline void Foam::DLListBase::link::deregister()
+inline void Foam::DLListBase::link::deregister() noexcept
 {
     prev_ = next_ = nullptr;
 }
@@ -252,13 +252,13 @@ inline Foam::DLListBase::iterator::iterator
 
 
 inline Foam::DLListBase::link*
-Foam::DLListBase::iterator::get_node() const
+Foam::DLListBase::iterator::get_node() const noexcept
 {
     return node_;
 }
 
 
-inline bool Foam::DLListBase::iterator::good() const
+inline bool Foam::DLListBase::iterator::good() const noexcept
 {
     return (node_ != nullptr);
 }
@@ -358,13 +358,13 @@ inline Foam::DLListBase::const_iterator::const_iterator
 
 
 inline const Foam::DLListBase::link*
-Foam::DLListBase::const_iterator::get_node() const
+Foam::DLListBase::const_iterator::get_node() const noexcept
 {
     return node_;
 }
 
 
-inline bool Foam::DLListBase::const_iterator::good() const
+inline bool Foam::DLListBase::const_iterator::good() const noexcept
 {
     return (node_ != nullptr);
 }

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,8 +36,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef LPtrList_H
-#define LPtrList_H
+#ifndef Foam_LPtrList_H
+#define Foam_LPtrList_H
 
 #include "LList.H"
 
@@ -46,7 +46,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 
 template<class LListBase, class T> class LPtrList;
 
@@ -74,8 +74,6 @@ class LPtrList
 :
     public LList<LListBase, T*>
 {
-private:
-
     // Private Member Functions
 
         //- Read from Istream using given Istream constructor class
@@ -114,13 +112,13 @@ public:
 
     // Constructors
 
-        //- Null construct
+        //- Default construct
         LPtrList() = default;
 
-        //- Construct and insert the initial T item
+        //- Construct and add initial item pointer
         explicit LPtrList(T* item)
         {
-            this->insert(item);
+            this->prepend(item);
         }
 
         //- Copy construct by using 'clone()' for each element
@@ -134,7 +132,7 @@ public:
         LPtrList(Istream& is, const INew& inew);
 
         //- Construct from Istream using default Istream constructor class
-        LPtrList(Istream& is);
+        explicit LPtrList(Istream& is);
 
 
     //- Destructor

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,7 +85,7 @@ void Foam::advancingFrontAMI::distributePatches
             faceList subFaces(UIndirectList<face>(pp, sendElems));
             primitivePatch subPatch
             (
-                SubList<face>(subFaces, subFaces.size()),
+                SubList<face>(subFaces),
                 pp.points()
             );
 
@@ -115,7 +115,7 @@ void Foam::advancingFrontAMI::distributePatches
         faceList subFaces(UIndirectList<face>(pp, sendElems));
         primitivePatch subPatch
         (
-            SubList<face>(subFaces, subFaces.size()),
+            SubList<face>(subFaces),
             pp.points()
         );
 

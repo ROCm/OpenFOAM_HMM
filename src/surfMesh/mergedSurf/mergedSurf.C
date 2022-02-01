@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -152,11 +152,7 @@ bool Foam::mergedSurf::merge
     PatchTools::gatherAndMerge
     (
         mergeDim,
-        primitivePatch
-        (
-            SubList<face>(unmergedFaces, unmergedFaces.size()),
-            unmergedPoints
-        ),
+        primitivePatch(SubList<face>(unmergedFaces), unmergedPoints),
         points_,
         faces_,
         pointsMap_

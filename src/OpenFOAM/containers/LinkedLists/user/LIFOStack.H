@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,8 +34,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef LIFOStack_H
-#define LIFOStack_H
+#ifndef Foam_LIFOStack_H
+#define Foam_LIFOStack_H
 
 #include "SLList.H"
 
@@ -63,28 +63,28 @@ public:
 
     // Member Functions
 
-        //- Return a copy of the top element
-        T top() const
+        //- Const reference to the top element
+        const T& top() const
         {
             return this->first();
         }
 
-        //- Return a copy of the bottom element
-        T bottom() const
+        //- Const reference to the bottom element
+        const T& bottom() const
         {
             return this->last();
         }
 
         //- Push an element onto the front of the stack
-        void push(const T& element)
+        void push(const T& elem)
         {
-            this->insert(element);
+            this->prepend(elem);
         }
 
         //- Move an element onto the front of the stack
-        void push(T&& element)
+        void push(T&& elem)
         {
-            this->insert(std::move(element));
+            this->prepend(std::move(elem));
         }
 
         //- Pop the top element off the stack

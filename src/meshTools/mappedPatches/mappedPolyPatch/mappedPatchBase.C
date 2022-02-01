@@ -1151,10 +1151,7 @@ void Foam::mappedPatchBase::calcAMI() const
         pointField dummyPoints;
         const primitivePatch dummyPatch
         (
-            SubList<face>
-            (
-                dummyFaces
-            ),
+            SubList<face>(dummyFaces),
             dummyPoints
         );
 

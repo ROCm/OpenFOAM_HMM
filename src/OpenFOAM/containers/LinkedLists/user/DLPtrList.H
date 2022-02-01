@@ -31,8 +31,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef DLPtrList_H
-#define DLPtrList_H
+#ifndef Foam_DLPtrList_H
+#define Foam_DLPtrList_H
 
 #include "LPtrList.H"
 #include "DLListBase.H"

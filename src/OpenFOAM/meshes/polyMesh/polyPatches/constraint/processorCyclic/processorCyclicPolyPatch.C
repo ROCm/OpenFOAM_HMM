@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -347,8 +347,10 @@ bool Foam::processorCyclicPolyPatch::order
     {
         UIPstream fromNeighbour(neighbProcNo(), pBufs);
         fromNeighbour >> masterPts >> masterFaces;
-        SubList<face> fcs(masterFaces, masterFaces.size());
-        masterPtr.reset(new primitivePatch(fcs, masterPts));
+        masterPtr.reset
+        (
+            new primitivePatch(SubList<face>(masterFaces), masterPts)
+        );
     }
 
     const cyclicPolyPatch& cycPatch =

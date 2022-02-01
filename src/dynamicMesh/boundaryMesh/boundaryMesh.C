@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1894,9 +1894,11 @@ Foam::label Foam::boundaryMesh::getNPoints
     const label nFaces
 ) const
 {
-    SubList<face> patchFaces(mesh(), nFaces, startFacei);
-
-    primitivePatch patch(patchFaces, mesh().points());
+    primitivePatch patch
+    (
+        SubList<face>(mesh(), nFaces, startFacei),
+        mesh().points()
+    );
 
     return patch.nPoints();
 }
@@ -1912,9 +1914,11 @@ void Foam::boundaryMesh::triangulateLocal
     labelList& localToGlobal
 ) const
 {
-    SubList<face> patchFaces(mesh(), nFaces, startFacei);
-
-    primitivePatch patch(patchFaces, mesh().points());
+    primitivePatch patch
+    (
+        SubList<face>(mesh(), nFaces, startFacei),
+        mesh().points()
+    );
 
     // Map from local to mesh().points() addressing
     localToGlobal = patch.meshPoints();

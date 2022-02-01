@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -185,20 +185,20 @@ Foam::wordList Foam::DictionaryBase<IDLListType, T>::sortedToc
 
 
 template<class IDLListType, class T>
-void Foam::DictionaryBase<IDLListType, T>::insert(const word& keyword, T* tPtr)
+void Foam::DictionaryBase<IDLListType, T>::prepend(const word& keyword, T* ptr)
 {
     // NOTE: we should probably check that HashTable::insert actually worked
-    hashedTs_.insert(keyword, tPtr);
-    IDLListType::insert(tPtr);
+    hashedTs_.insert(keyword, ptr);
+    IDLListType::prepend(ptr);
 }
 
 
 template<class IDLListType, class T>
-void Foam::DictionaryBase<IDLListType, T>::append(const word& keyword, T* tPtr)
+void Foam::DictionaryBase<IDLListType, T>::append(const word& keyword, T* ptr)
 {
     // NOTE: we should probably check that HashTable::insert actually worked
-    hashedTs_.insert(keyword, tPtr);
-    IDLListType::append(tPtr);
+    hashedTs_.insert(keyword, ptr);
+    IDLListType::append(ptr);
 }
 
 

@@ -34,8 +34,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef FIFOStack_H
-#define FIFOStack_H
+#ifndef Foam_FIFOStack_H
+#define Foam_FIFOStack_H
 
 #include "SLList.H"
 
@@ -63,28 +63,28 @@ public:
 
     // Member Functions
 
-        //- Return a copy of the top element
-        T top() const
+        //- Const reference to the top element
+        const T& top() const
         {
             return this->last();
         }
 
-        //- Return a copy of the bottom element
-        T bottom() const
+        //- Const reference to the bottom element
+        const T& bottom() const
         {
             return this->first();
         }
 
         //- Push an element onto the back of the stack
-        void push(const T& element)
+        void push(const T& elem)
         {
-            this->append(element);
+            this->append(elem);
         }
 
         //- Move an element onto the back of the stack
-        void push(T&& element)
+        void push(T&& elem)
         {
-            this->append(std::move(element));
+            this->append(std::move(elem));
         }
 
         //- Pop the bottom element off the stack

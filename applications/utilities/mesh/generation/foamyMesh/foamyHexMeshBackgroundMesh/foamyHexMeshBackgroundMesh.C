@@ -731,11 +731,7 @@ int main(int argc, char *argv[])
     PatchTools::gatherAndMerge
     (
         tolDim,
-        primitivePatch
-        (
-            SubList<face>(isoFaces, isoFaces.size()),
-            isoPoints
-        ),
+        primitivePatch(SubList<face>(isoFaces), isoPoints),
         mergedPoints,
         mergedFaces,
         pointMergeMap

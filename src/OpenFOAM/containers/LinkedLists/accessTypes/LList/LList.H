@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,11 +36,11 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef LList_H
-#define LList_H
+#ifndef Foam_LList_H
+#define Foam_LList_H
 
 #include "label.H"
-#include <initializer_list>
+#include "stdFoam.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -100,11 +100,11 @@ public:
         //- The type that can represent the container size
         typedef label size_type;
 
-        //- The difference between iterator objects
+        //- The difference between iterators
         typedef label difference_type;
 
 
-    // Forward declaration of STL iterators
+    // Forward Declarations (iterators)
 
         class iterator;
         class const_iterator;
@@ -119,43 +119,52 @@ public:
         public LListBase::link
     {
         //- Stored object
-        T obj_;
+        T val_;
 
         //- Copy construct from given object
-        link(const T& obj)
+        link(const T& elem)
         :
-            obj_(obj)
+            val_(elem)
         {}
 
         //- Move construct from given object
-        link(T&& obj)
+        link(T&& elem)
         :
-            obj_(std::move(obj))
+            val_(std::move(elem))
         {}
 
+
+        //- Delete linked item and return the element value
+        static T remove(typename LListBase::link* node)
+        {
+            link* p = static_cast<link*>(node);
+            T val(std::move(p->val_));
+            delete p;
+            return val;
+        }
 
         //- Dereference LListBase::link to obtain address of stored object
         static constexpr T* ptr(typename LListBase::link* node)
         {
-            return &(static_cast<link*>(node)->obj_);
+            return &(static_cast<link*>(node)->val_);
         }
 
         //- Dereference LListBase::link to obtain address of stored object
         static constexpr const T* ptr(const typename LListBase::link* node)
         {
-            return &(static_cast<const link*>(node)->obj_);
+            return &(static_cast<const link*>(node)->val_);
         }
 
         //- Dereference LListBase::link to obtain the stored object
         static constexpr T& ref(typename LListBase::link* node)
         {
-            return static_cast<link*>(node)->obj_;
+            return static_cast<link*>(node)->val_;
         }
 
         //- Dereference LListBase::link to obtain the stored object
         static constexpr const T& ref(const typename LListBase::link* node)
         {
-            return static_cast<const link*>(node)->obj_;
+            return static_cast<const link*>(node)->val_;
         }
     };
 
@@ -165,16 +174,16 @@ public:
         //- Default construct
         LList() = default;
 
-        //- Construct and copy insert the initial T item
-        explicit LList(const T& item)
+        //- Construct and copy add initial item
+        explicit LList(const T& elem)
         {
-            this->insert(item);
+            this->prepend(elem);
         }
 
-        //- Construct and move insert the initial T item
-        explicit LList(T&& item)
+        //- Construct and move add initial item
+        explicit LList(T&& elem)
         {
-            this->insert(std::move(item));
+            this->prepend(std::move(elem));
         }
 
         //- Construct from Istream
@@ -221,57 +230,54 @@ public:
         }
 
 
-        //- Add copy at head of list
-        void insert(const T& item)
+        //- Add copy at front of list
+        void prepend(const T& elem)
         {
-            LListBase::insert(new link(item));
+            LListBase::prepend(new link(elem));
         }
 
-        //- Move construct at head of list
-        void insert(T&& item)
+        //- Move construct at front of list
+        void prepend(T&& elem)
         {
-            LListBase::insert(new link(std::move(item)));
+            LListBase::prepend(new link(std::move(elem)));
         }
 
-
-        //- Add copy at tail of list
-        void append(const T& item)
+        //- Add copy at back of list
+        void append(const T& elem)
         {
-            LListBase::append(new link(item));
+            LListBase::append(new link(elem));
         }
 
-        //- Move construct at tail of list
-        void append(T&& item)
+        //- Move construct at back of list
+        void append(T&& elem)
         {
-            LListBase::append(new link(std::move(item)));
+            LListBase::append(new link(std::move(elem)));
         }
 
+        //- Erase the first entry
+        bool eraseHead()
+        {
+            link* p = static_cast<link*>(LListBase::removeHead());
+            delete p;
+            return bool(p);
+        }
 
-        //- Remove and return head
+        //- Remove and return first entry
         T removeHead()
         {
-            auto p = LListBase::removeHead();
-            T obj(std::move(link::ref(p)));
-            delete p;
-            return obj;
+            return link::remove(LListBase::removeHead());
         }
 
         //- Remove and return element
         T remove(link* item)
         {
-            auto p = LListBase::remove(item);
-            T obj(std::move(link::ref(p)));
-            delete p;
-            return obj;
+            return link::remove(LListBase::remove(item));
         }
 
         //- Remove and return element specified by iterator
         T remove(iterator& iter)
         {
-            auto p = LListBase::remove(iter);
-            T obj(std::move(link::ref(p)));
-            delete p;
-            return obj;
+            return link::remove(LListBase::remove(iter));
         }
 
 
@@ -279,7 +285,7 @@ public:
         void clear();
 
         //- Transfer the contents of the argument into this List
-        //  and annul the argument list.
+        //- and annul the argument list.
         void transfer(LList<LListBase, T>& lst);
 
 
@@ -567,6 +573,14 @@ public:
             return crend();
         }
 
+
+    // Housekeeping
+
+        //- Add copy at front of list. Same as prepend()
+        void insert(const T& elem) { this->prepend(elem); }
+
+        //- Move construct at front of list. Same as prepend()
+        void insert(T&& elem) { this->prepend(std::move(elem)); }
 };
 
 

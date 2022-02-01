@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -196,13 +196,13 @@ inline Foam::SLListBase::iterator::iterator
 
 
 inline Foam::SLListBase::link*
-Foam::SLListBase::iterator::get_node() const
+Foam::SLListBase::iterator::get_node() const noexcept
 {
     return node_;
 }
 
 
-inline bool Foam::SLListBase::iterator::good() const
+inline bool Foam::SLListBase::iterator::good() const noexcept
 {
     return (node_ != nullptr);
 }
@@ -295,13 +295,13 @@ inline Foam::SLListBase::const_iterator::const_iterator
 
 
 inline const Foam::SLListBase::link*
-Foam::SLListBase::const_iterator::get_node() const
+Foam::SLListBase::const_iterator::get_node() const noexcept
 {
     return node_;
 }
 
 
-inline bool Foam::SLListBase::const_iterator::good() const
+inline bool Foam::SLListBase::const_iterator::good() const noexcept
 {
     return (node_ != nullptr);
 }

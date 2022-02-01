@@ -31,14 +31,14 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SLPtrListFwd_H
-#define SLPtrListFwd_H
+#ifndef Foam_SLPtrListFwd_H
+#define Foam_SLPtrListFwd_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    // Forward declarations
+    // Forward Declarations
     class SLListBase;
     template<class LListBase, class T> class LPtrList;
 

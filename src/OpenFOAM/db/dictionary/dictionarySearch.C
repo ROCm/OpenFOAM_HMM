@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,7 +36,7 @@ namespace
     // Walk lists of patterns and regexps for an exact match
     // or a regular expression match
     template<class WcIterator, class ReIterator>
-    static bool findInPatterns
+    bool findInPatterns
     (
         const bool patternMatch,
         const Foam::word& keyword,
@@ -680,8 +680,8 @@ bool Foam::dictionary::changeKeyword
 
     if (newKeyword.isPattern())
     {
-        patterns_.insert(iter());
-        regexps_.insert(autoPtr<regExp>::New(newKeyword));
+        patterns_.prepend(iter());
+        regexps_.prepend(autoPtr<regExp>::New(newKeyword));
     }
 
     return true;

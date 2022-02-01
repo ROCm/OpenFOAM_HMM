@@ -65,8 +65,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef regExpCxx_H
-#define regExpCxx_H
+#ifndef Foam_regExpCxx_H
+#define Foam_regExpCxx_H
 
 #include <regex>
 #include <string>

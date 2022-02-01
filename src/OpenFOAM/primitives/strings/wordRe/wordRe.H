@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,8 +51,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef wordRe_H
-#define wordRe_H
+#ifndef Foam_wordRe_H
+#define Foam_wordRe_H
 
 #include "word.H"
 #include "regExp.H"
@@ -85,7 +85,7 @@ class wordRe
     // Private Member Data
 
         //- The regular expression
-        regExp re_;
+        std::unique_ptr<Foam::regExp> regexPtr_;
 
 
 public:
@@ -164,10 +164,10 @@ public:
 
     // Access
 
-        //- The wordRe is treated as literal string, not as pattern.
+        //- The wordRe is a literal string, not a pattern.
         inline bool isLiteral() const noexcept;
 
-        //- The wordRe is treated as a pattern, not as literal string.
+        //- The wordRe is a pattern, not a literal string.
         inline bool isPattern() const noexcept;
 
 
@@ -181,7 +181,7 @@ public:
         //  \return false if the token was the incorrect type
         bool assign(const token& tok);
 
-        //- Compile as regular expression
+        //- Compile as regular expression (if possible)
         inline bool compile();
 
         //- Mark as literal string, remove any regular expression

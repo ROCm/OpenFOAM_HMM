@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,12 +68,10 @@ Foam::globalIndex::calcListOffsets
 }
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
 template<class ProcIDsContainer, class Type>
 void Foam::globalIndex::gather
 (
-    const labelUList& off,
+    const labelUList& off,  // needed on master only
     const label comm,
     const ProcIDsContainer& procIDs,
     const UList<Type>& fld,
@@ -82,6 +80,8 @@ void Foam::globalIndex::gather
     const Pstream::commsTypes commsType
 )
 {
+    // low-level: no parRun guard
+
     if
     (
         !is_contiguous<Type>::value
@@ -93,6 +93,8 @@ void Foam::globalIndex::gather
             << exit(FatalError);
         // Could also warn and change to scheduled etc...
     }
+
+    const label startOfRequests = UPstream::nRequests();
 
     if (Pstream::myProcNo(comm) == procIDs[0])
     {
@@ -106,53 +108,12 @@ void Foam::globalIndex::gather
         SubList<Type>(allFld, off[1]-off[0], off[0]) =
            SubList<Type>(fld, off[1]-off[0]);
 
-        if
-        (
-            commsType == Pstream::commsTypes::scheduled
-         || commsType == Pstream::commsTypes::blocking
-        )
+        for (label i = 1; i < procIDs.size(); ++i)
         {
-            for (label i = 1; i < procIDs.size(); ++i)
+            SubList<Type> procSlot(allFld, off[i+1]-off[i], off[i]);
+
+            if (is_contiguous<Type>::value)
             {
-                SubList<Type> procSlot(allFld, off[i+1]-off[i], off[i]);
-
-                if (is_contiguous<Type>::value)
-                {
-                    IPstream::read
-                    (
-                        commsType,
-                        procIDs[i],
-                        procSlot.data_bytes(),
-                        procSlot.size_bytes(),
-                        tag,
-                        comm
-                    );
-                }
-                else
-                {
-                    IPstream fromProc
-                    (
-                        commsType,
-                        procIDs[i],
-                        0,
-                        tag,
-                        comm
-                    );
-                    fromProc >> procSlot;
-                }
-            }
-        }
-        else
-        {
-            // nonBlocking && is_contiguous == true (already checked)
-
-            const label startOfRequests = Pstream::nRequests();
-
-            // Set up reads
-            for (label i = 1; i < procIDs.size(); ++i)
-            {
-                SubList<Type> procSlot(allFld, off[i+1]-off[i], off[i]);
-
                 IPstream::read
                 (
                     commsType,
@@ -163,51 +124,24 @@ void Foam::globalIndex::gather
                     comm
                 );
             }
-
-            // Wait for all to finish
-            Pstream::waitRequests(startOfRequests);
-        }
-    }
-    else
-    {
-        if
-        (
-            commsType == Pstream::commsTypes::scheduled
-         || commsType == Pstream::commsTypes::blocking
-        )
-        {
-            if (is_contiguous<Type>::value)
-            {
-                OPstream::write
-                (
-                    commsType,
-                    procIDs[0],
-                    fld.cdata_bytes(),
-                    fld.size_bytes(),
-                    tag,
-                    comm
-                );
-            }
             else
             {
-                OPstream toMaster
+                IPstream fromProc
                 (
                     commsType,
-                    procIDs[0],
+                    procIDs[i],
                     0,
                     tag,
                     comm
                 );
-                toMaster << fld;
+                fromProc >> procSlot;
             }
         }
-        else
+    }
+    else
+    {
+        if (is_contiguous<Type>::value)
         {
-            // nonBlocking && is_contiguous == true (already checked)
-
-            const label startOfRequests = Pstream::nRequests();
-
-            // Set up write
             OPstream::write
             (
                 commsType,
@@ -217,10 +151,25 @@ void Foam::globalIndex::gather
                 tag,
                 comm
             );
-
-            // Wait for all to finish
-            Pstream::waitRequests(startOfRequests);
         }
+        else
+        {
+            OPstream toMaster
+            (
+                commsType,
+                procIDs[0],
+                0,
+                tag,
+                comm
+            );
+            toMaster << fld;
+        }
+    }
+
+    if (commsType == Pstream::commsTypes::nonBlocking)
+    {
+        // Wait for all to finish
+        UPstream::waitRequests(startOfRequests);
     }
 }
 
@@ -228,7 +177,7 @@ void Foam::globalIndex::gather
 template<class Type, class Addr>
 void Foam::globalIndex::gather
 (
-    const labelUList& off,
+    const labelUList& off,  // needed on master only
     const label comm,
     const UList<int>& procIDs,
     const IndirectListBase<Type, Addr>& fld,
@@ -237,6 +186,8 @@ void Foam::globalIndex::gather
     const Pstream::commsTypes commsType
 )
 {
+    // low-level: no parRun guard
+
     if (commsType == Pstream::commsTypes::nonBlocking)
     {
         WarningInFunction
@@ -289,55 +240,10 @@ void Foam::globalIndex::gather
 }
 
 
-template<class Type>
-void Foam::globalIndex::gather
-(
-    const UList<Type>& fld,
-    List<Type>& allFld,
-    const int tag,
-    const Pstream::commsTypes commsType,
-    const label comm
-) const
-{
-    gather
-    (
-        comm,
-        UPstream::procID(comm),
-        fld,
-        allFld,
-        tag,
-        commsType
-    );
-}
-
-
-template<class Type, class Addr>
-void Foam::globalIndex::gather
-(
-    const IndirectListBase<Type, Addr>& fld,
-    List<Type>& allFld,
-    const int tag,
-    const Pstream::commsTypes commsType,
-    const label comm
-) const
-{
-    gather
-    (
-        offsets_,
-        comm,
-        UPstream::procID(comm),
-        fld,
-        allFld,
-        tag,
-        commsType
-    );
-}
-
-
 template<class ProcIDsContainer, class Type>
 void Foam::globalIndex::gather
 (
-    const labelUList& off,
+    const labelUList& off,  // needed on master only
     const label comm,
     const ProcIDsContainer& procIDs,
     List<Type>& fld,
@@ -345,19 +251,123 @@ void Foam::globalIndex::gather
     const Pstream::commsTypes commsType
 )
 {
-    List<Type> allFld;
+    // low-level: no parRun guard
 
-    gather(off, comm, procIDs, fld, allFld, tag, commsType);
+    List<Type> allData;
+
+    gather(off, comm, procIDs, fld, allData, tag, commsType);
 
     if (Pstream::myProcNo(comm) == procIDs[0])
     {
-        fld.transfer(allFld);
+        fld.transfer(allData);
     }
 }
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
 template<class Type>
 void Foam::globalIndex::gather
+(
+    const UList<Type>& sendData,
+    List<Type>& allData,
+    const int tag,
+    const Pstream::commsTypes commsType,
+    const label comm
+) const
+{
+    if (UPstream::parRun())
+    {
+        gather
+        (
+            offsets_,  // needed on master only
+            comm,
+            UPstream::procID(comm),
+            sendData,
+            allData,
+            tag,
+            commsType
+        );
+        if (!UPstream::master(comm))
+        {
+            allData.clear();  // safety: zero-size on non-master
+        }
+    }
+    else
+    {
+        // Serial: direct copy
+        allData = sendData;
+    }
+}
+
+
+template<class Type, class Addr>
+void Foam::globalIndex::gather
+(
+    const IndirectListBase<Type, Addr>& sendData,
+    List<Type>& allData,
+    const int tag,
+    const Pstream::commsTypes commsType,
+    const label comm
+) const
+{
+    if (UPstream::parRun())
+    {
+        gather
+        (
+            offsets_,  // needed on master only
+            comm,
+            UPstream::procID(comm),
+            sendData,
+            allData,
+            tag,
+            commsType
+        );
+        if (!UPstream::master(comm))
+        {
+            allData.clear();  // safety: zero-size on non-master
+        }
+    }
+    else
+    {
+        // Serial: direct copy
+        allData = List<Type>(sendData);
+    }
+}
+
+
+template<class Type, class OutputContainer>
+OutputContainer Foam::globalIndex::gather
+(
+    const UList<Type>& sendData,
+    const int tag,
+    const Pstream::commsTypes commsType,
+    const label comm
+) const
+{
+    OutputContainer allData;
+    gather(sendData, allData, tag, commsType, comm);
+    return allData;
+}
+
+
+template<class Type, class Addr, class OutputContainer>
+OutputContainer Foam::globalIndex::gather
+(
+    const IndirectListBase<Type, Addr>& sendData,
+    const int tag,
+    const Pstream::commsTypes commsType,
+    const label comm
+) const
+{
+    OutputContainer allData;
+    gather(sendData, allData, tag, commsType, comm);
+    return allData;
+}
+
+
+template<class Type>
+void Foam::globalIndex::gatherInplace
 (
     List<Type>& fld,
     const int tag,
@@ -365,26 +375,30 @@ void Foam::globalIndex::gather
     const label comm
 ) const
 {
-    List<Type> allFld;
-
-    gather
-    (
-        comm,
-        UPstream::procID(comm),
-        fld,
-        allFld,
-        tag,
-        commsType
-    );
-
-    if (Pstream::master(comm))
+    if (UPstream::parRun())
     {
-        fld.transfer(allFld);
+        List<Type> allData;
+
+        gather
+        (
+            comm,
+            UPstream::procID(comm),
+            fld,
+            allData,
+            tag,
+            commsType
+        );
+
+        if (UPstream::master(comm))
+        {
+            fld.transfer(allData);
+        }
+        else
+        {
+            fld.clear();  // zero-size on non-master
+        }
     }
-    else
-    {
-        fld.clear();
-    }
+    // Serial: (no-op)
 }
 
 
@@ -392,10 +406,16 @@ template<class Type, class OutputContainer>
 void Foam::globalIndex::mpiGather
 (
     const UList<Type>& sendData,
-    OutputContainer& allValues,
+    OutputContainer& allData,
     const label comm
 ) const
 {
+    if (!UPstream::parRun())
+    {
+        // Serial: direct copy
+        allData = sendData;
+        return;
+    }
     if (!is_contiguous<Type>::value)
     {
         FatalErrorInFunction
@@ -403,29 +423,25 @@ void Foam::globalIndex::mpiGather
             << abort(FatalError);
     }
 
-    const label proci = Pstream::myProcNo(comm);
-
-    const globalIndex& globalAddr = *this;
-
-    // Must be the same as Pstream::nProcs(comm), at least on master!!
-    const label nproc = globalAddr.nProcs();
-
     auto nSendBytes = sendData.size_bytes();
-
-    // Respect local size information so that we can request
-    // 0 entries to be sent on master
-
-    if (proci < nproc && !globalAddr.localSize(proci))
-    {
-        nSendBytes = 0;
-    }
 
     List<int> recvSizes;
     List<int> recvOffsets;
 
-    if (Pstream::master(comm))
+    if (UPstream::master(comm))
     {
-        allValues.resize_nocopy(globalAddr.size());
+        const globalIndex& globalAddr = *this;
+
+        // Must be the same as Pstream::nProcs(comm), at least on master!!
+        const label nproc = globalAddr.nProcs();
+
+        // Allow request of 0 entries to be sent on master
+        if (!globalAddr.localSize(0))
+        {
+            nSendBytes = 0;
+        }
+
+        allData.resize_nocopy(globalAddr.size());
 
         recvSizes.resize(nproc);
         recvOffsets.resize(nproc+1);
@@ -439,14 +455,14 @@ void Foam::globalIndex::mpiGather
     }
     else
     {
-        allValues.clear();
+        allData.clear();  // safety: zero-size on non-master
     }
 
     UPstream::gather
     (
         sendData.cdata_bytes(),
         nSendBytes,
-        allValues.data_bytes(),
+        allData.data_bytes(),
         recvSizes,
         recvOffsets,
         comm
@@ -461,41 +477,210 @@ OutputContainer Foam::globalIndex::mpiGather
     const label comm
 ) const
 {
-    OutputContainer allValues;
-    mpiGather<Type, OutputContainer>(sendData, allValues, comm);
-    return allValues;
+    OutputContainer allData;
+    mpiGather(sendData, allData, comm);
+    return allData;
+}
+
+
+template<class Type>
+void Foam::globalIndex::mpiGatherInplace
+(
+    List<Type>& fld,
+    const label comm
+) const
+{
+    if (UPstream::parRun())
+    {
+        List<Type> allData;
+        mpiGather(fld, allData, comm);
+
+        if (UPstream::master(comm))
+        {
+            fld.transfer(allData);
+        }
+        else
+        {
+            fld.clear();  // zero-size on non-master
+        }
+    }
+    // Serial: (no-op)
+}
+
+
+template<class Type, class OutputContainer>
+void Foam::globalIndex::mpiGatherOp
+(
+    const UList<Type>& sendData,
+    OutputContainer& allData,
+    const label comm
+)
+{
+    if (UPstream::parRun())
+    {
+        // Gather sizes - only needed on master
+        globalIndex
+        (
+            UPstream::listGatherValues(sendData.size(), comm),
+            accessType::SIZES
+        ).mpiGather(sendData, allData, comm);
+    }
+    else
+    {
+        // Serial: direct copy
+        allData = sendData;
+    }
+}
+
+
+template<class Type, class OutputContainer>
+OutputContainer Foam::globalIndex::mpiGatherOp
+(
+    const UList<Type>& sendData,
+    const label comm
+)
+{
+    OutputContainer allData;
+    mpiGatherOp(sendData, allData, comm);
+    return allData;
+}
+
+
+template<class Type>
+void Foam::globalIndex::mpiGatherInplaceOp
+(
+    List<Type>& fld,
+    const label comm
+)
+{
+    if (UPstream::parRun())
+    {
+        List<Type> allData;
+        mpiGatherOp(fld, allData, comm);
+
+        if (UPstream::master(comm))
+        {
+            fld.transfer(allData);
+        }
+        else
+        {
+            fld.clear();  // zero-size on non-master
+        }
+    }
+    // Serial: (no-op)
 }
 
 
 template<class Type>
 void Foam::globalIndex::gatherOp
 (
-    const UList<Type>& fld,
-    List<Type>& allFld,
+    const UList<Type>& sendData,
+    List<Type>& allData,
     const int tag,
-    const Pstream::commsTypes commsType
+    const Pstream::commsTypes commsType,
+    const label comm
 )
 {
-    globalIndex(fld.size()).gather(fld, allFld, tag, commsType);
+    if (UPstream::parRun())
+    {
+        // Gather sizes - only needed on master
+        globalIndex
+        (
+            UPstream::listGatherValues(sendData.size(), comm),
+            accessType::SIZES
+        ).gather(sendData, allData, tag, commsType, comm);
+    }
+    else
+    {
+        // Serial: direct copy
+        allData = sendData;
+    }
+}
+
+
+template<class Type, class Addr>
+void Foam::globalIndex::gatherOp
+(
+    const IndirectListBase<Type, Addr>& sendData,
+    List<Type>& allData,
+    const int tag,
+    const Pstream::commsTypes commsType,
+    const label comm
+)
+{
+    if (UPstream::parRun())
+    {
+        // Gather sizes - only needed on master
+        globalIndex
+        (
+            UPstream::listGatherValues(sendData.size(), comm),
+            accessType::SIZES
+        ).gather(sendData, allData, tag, commsType, comm);
+    }
+    else
+    {
+        // Serial: direct copy
+        allData = List<Type>(sendData);
+    }
+}
+
+
+template<class Type, class OutputContainer>
+OutputContainer Foam::globalIndex::gatherOp
+(
+    const UList<Type>& sendData,
+    const int tag,
+    const Pstream::commsTypes commsType,
+    const label comm
+)
+{
+    OutputContainer allData;
+    gatherOp(sendData, allData, tag, commsType, comm);
+    return allData;
+}
+
+
+template<class Type, class Addr, class OutputContainer>
+OutputContainer Foam::globalIndex::gatherOp
+(
+    const IndirectListBase<Type, Addr>& sendData,
+    const int tag,
+    const Pstream::commsTypes commsType,
+    const label comm
+)
+{
+    OutputContainer allData;
+    gatherOp(sendData, allData, tag, commsType, comm);
+    return allData;
 }
 
 
 template<class Type>
-void Foam::globalIndex::gatherOp
+void Foam::globalIndex::gatherInplaceOp
 (
     List<Type>& fld,
     const int tag,
-    const Pstream::commsTypes commsType
+    const Pstream::commsTypes commsType,
+    const label comm
 )
 {
-    globalIndex(fld.size()).gather(fld, tag, commsType);
+    if (UPstream::parRun())
+    {
+        // Gather sizes - only needed on master
+        globalIndex
+        (
+            UPstream::listGatherValues(fld.size(), comm),
+            accessType::SIZES
+        ).gather(fld, tag, commsType, comm);
+    }
+    // Serial: (no-op)
 }
 
 
 template<class ProcIDsContainer, class Type>
 void Foam::globalIndex::scatter
 (
-    const labelUList& off,
+    const labelUList& off,  // needed on master only
     const label comm,
     const ProcIDsContainer& procIDs,
     const UList<Type>& allFld,
@@ -516,6 +701,8 @@ void Foam::globalIndex::scatter
         // Could also warn and change to scheduled etc...
     }
 
+    const label startOfRequests = UPstream::nRequests();
+
     if (Pstream::myProcNo(comm) == procIDs[0])
     {
         const SubList<Type> localSlot(allFld, off[1]-off[0], off[0]);
@@ -525,53 +712,12 @@ void Foam::globalIndex::scatter
             fld.deepCopy(localSlot);
         }
 
-        if
-        (
-            commsType == Pstream::commsTypes::scheduled
-         || commsType == Pstream::commsTypes::blocking
-        )
+        for (label i = 1; i < procIDs.size(); ++i)
         {
-            for (label i = 1; i < procIDs.size(); ++i)
+            const SubList<Type> procSlot(allFld, off[i+1]-off[i], off[i]);
+
+            if (is_contiguous<Type>::value)
             {
-                const SubList<Type> procSlot(allFld, off[i+1]-off[i], off[i]);
-
-                if (is_contiguous<Type>::value)
-                {
-                    OPstream::write
-                    (
-                        commsType,
-                        procIDs[i],
-                        procSlot.cdata_bytes(),
-                        procSlot.size_bytes(),
-                        tag,
-                        comm
-                    );
-                }
-                else
-                {
-                    OPstream toProc
-                    (
-                        commsType,
-                        procIDs[i],
-                        0,
-                        tag,
-                        comm
-                    );
-                    toProc << procSlot;
-                }
-            }
-        }
-        else
-        {
-            // nonBlocking && is_contiguous == true (already checked)
-
-            const label startOfRequests = Pstream::nRequests();
-
-            // Set up writes
-            for (label i = 1; i < procIDs.size(); ++i)
-            {
-                const SubList<Type> procSlot(allFld, off[i+1]-off[i], off[i]);
-
                 OPstream::write
                 (
                     commsType,
@@ -582,51 +728,24 @@ void Foam::globalIndex::scatter
                     comm
                 );
             }
-
-            // Wait for all to finish
-            Pstream::waitRequests(startOfRequests);
-        }
-    }
-    else
-    {
-        if
-        (
-            commsType == Pstream::commsTypes::scheduled
-         || commsType == Pstream::commsTypes::blocking
-        )
-        {
-            if (is_contiguous<Type>::value)
-            {
-                IPstream::read
-                (
-                    commsType,
-                    procIDs[0],
-                    fld.data_bytes(),
-                    fld.size_bytes(),
-                    tag,
-                    comm
-                );
-            }
             else
             {
-                IPstream fromMaster
+                OPstream toProc
                 (
                     commsType,
-                    procIDs[0],
+                    procIDs[i],
                     0,
                     tag,
                     comm
                 );
-                fromMaster >> fld;
+                toProc << procSlot;
             }
         }
-        else
+    }
+    else
+    {
+        if (is_contiguous<Type>::value)
         {
-            // nonBlocking && is_contiguous == true (already checked)
-
-            const label startOfRequests = Pstream::nRequests();
-
-            // Set up read
             IPstream::read
             (
                 commsType,
@@ -636,10 +755,25 @@ void Foam::globalIndex::scatter
                 tag,
                 comm
             );
-
-            // Wait for all to finish
-            Pstream::waitRequests(startOfRequests);
         }
+        else
+        {
+            IPstream fromMaster
+            (
+                commsType,
+                procIDs[0],
+                0,
+                tag,
+                comm
+            );
+            fromMaster >> fld;
+        }
+    }
+
+    if (commsType == Pstream::commsTypes::nonBlocking)
+    {
+        // Wait for all to finish
+        UPstream::waitRequests(startOfRequests);
     }
 }
 
@@ -654,16 +788,19 @@ void Foam::globalIndex::scatter
     const label comm
 ) const
 {
-    scatter
-    (
-        offsets_,
-        comm,
-        UPstream::procID(comm),
-        allFld,
-        fld,
-        tag,
-        commsType
-    );
+    // TBD: protection and special handling for serial?
+    {
+        scatter
+        (
+            offsets_,  // needed on master only
+            comm,
+            UPstream::procID(comm),
+            allFld,
+            fld,
+            tag,
+            commsType
+        );
+    }
 }
 
 

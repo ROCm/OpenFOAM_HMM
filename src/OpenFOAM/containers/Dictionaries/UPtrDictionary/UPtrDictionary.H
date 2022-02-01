@@ -33,13 +33,10 @@ Description
     It is derived from DictionaryBase instantiated on a non-memory managed
     form of intrusive doubly-linked list of \<T\>.
 
-SourceFiles
-    UPtrDictionary.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef UPtrDictionary_H
-#define UPtrDictionary_H
+#ifndef Foam_UPtrDictionary_H
+#define Foam_UPtrDictionary_H
 
 #include "DictionaryBase.H"
 #include "DLList.H"
@@ -58,28 +55,27 @@ class UPtrDictionary
 :
     public DictionaryBase<DLList<T*>, T>
 {
-
 public:
 
     // Constructors
 
         //- Construct given initial table size
-        UPtrDictionary(const label size = 128);
+        explicit UPtrDictionary(const label size = 128)
+        :
+            DictionaryBase<DLList<T*>, T>(size)
+        {}
 
         //- Copy construct
-        UPtrDictionary(const UPtrDictionary&);
+        UPtrDictionary(const UPtrDictionary& dict)
+        :
+            DictionaryBase<DLList<T*>, T>(dict)
+        {}
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "UPtrDictionary.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

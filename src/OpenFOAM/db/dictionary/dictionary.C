@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -102,8 +102,8 @@ Foam::dictionary::dictionary
 
         if (e.keyword().isPattern())
         {
-            patterns_.insert(&e);
-            regexps_.insert(autoPtr<regExp>::New(e.keyword()));
+            patterns_.prepend(&e);
+            regexps_.prepend(autoPtr<regExp>::New(e.keyword()));
         }
     }
 }
@@ -124,8 +124,8 @@ Foam::dictionary::dictionary
 
         if (e.keyword().isPattern())
         {
-            patterns_.insert(&e);
-            regexps_.insert(autoPtr<regExp>::New(e.keyword()));
+            patterns_.prepend(&e);
+            regexps_.prepend(autoPtr<regExp>::New(e.keyword()));
         }
     }
 }
@@ -670,8 +670,8 @@ Foam::entry* Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
 
             if (entryPtr->keyword().isPattern())
             {
-                patterns_.insert(entryPtr);
-                regexps_.insert(autoPtr<regExp>::New(entryPtr->keyword()));
+                patterns_.prepend(entryPtr);
+                regexps_.prepend(autoPtr<regExp>::New(entryPtr->keyword()));
             }
 
             return entryPtr;  // now an entry in the dictionary
@@ -698,8 +698,8 @@ Foam::entry* Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
 
         if (entryPtr->keyword().isPattern())
         {
-            patterns_.insert(entryPtr);
-            regexps_.insert(autoPtr<regExp>::New(entryPtr->keyword()));
+            patterns_.prepend(entryPtr);
+            regexps_.prepend(autoPtr<regExp>::New(entryPtr->keyword()));
         }
 
         return entryPtr;  // now an entry in the dictionary

@@ -64,8 +64,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef regExpPosix_H
-#define regExpPosix_H
+#ifndef Foam_regExpPosix_H
+#define Foam_regExpPosix_H
 
 #include "regExpCxx.H"
 #include <regex.h>

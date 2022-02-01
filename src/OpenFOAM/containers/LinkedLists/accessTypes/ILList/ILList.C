@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,7 +61,7 @@ Foam::ILList<LListBase, T>::ILList
 :
     UILList<LListBase, T>()
 {
-    for (const auto& item :lst)
+    for (const auto& item : lst)
     {
         this->append(item.clone(cloneArg).ptr());
     }
@@ -83,37 +83,26 @@ template<class LListBase, class T>
 bool Foam::ILList<LListBase, T>::eraseHead()
 {
     T* p = this->removeHead();
-
-    if (p)
-    {
-        delete p;
-        return true;
-    }
-
-    return false;
+    delete p;
+    return bool(p);
 }
+
 
 template<class LListBase, class T>
 bool Foam::ILList<LListBase, T>::erase(T* item)
 {
     T* p = remove(item);
-
-    if (p)
-    {
-        delete p;
-        return true;
-    }
-
-    return false;
+    delete p;
+    return bool(p);
 }
 
 
 template<class LListBase, class T>
 void Foam::ILList<LListBase, T>::clear()
 {
-    const label len = this->size();
+    label len = this->size();
 
-    for (label i=0; i<len; ++i)
+    while (len--)
     {
         eraseHead();
     }

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019,2022 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -193,7 +193,7 @@ void Foam::meshRefinement::markOutsideFaces
     }
     {
 
-        const label nBnd = mesh_.nFaces()-mesh_.nInternalFaces();
+        const label nBnd = mesh_.nBoundaryFaces();
 
         labelList neiRefineCell(nBnd);
         syncTools::swapBoundaryCellList(mesh_, refineCell, neiRefineCell);
@@ -948,8 +948,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::removeGapCells
 )
 {
     // Swap neighbouring cell centres and cell level
-    labelList neiLevel(mesh_.nFaces()-mesh_.nInternalFaces());
-    pointField neiCc(mesh_.nFaces()-mesh_.nInternalFaces());
+    labelList neiLevel(mesh_.nBoundaryFaces());
+    pointField neiCc(mesh_.nBoundaryFaces());
     calcNeighbourData(neiLevel, neiCc);
 
     labelList refineCell(mesh_.nCells(), -1);
