@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,8 +36,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef OSspecific_H
-#define OSspecific_H
+#ifndef Foam_OSspecific_H
+#define Foam_OSspecific_H
 
 #include "fileNameList.H"
 #include "stringList.H"
@@ -82,10 +82,16 @@ FOAM_DEPRECATED_FOR(2020-05, "hasEnv() function")
 inline bool env(const std::string& envName) { return Foam::hasEnv(envName); }
 
 //- Return the system's host name, as per hostname(1)
-//  \note the full name (as per the '-f' option) may be unreliable
-string hostName(bool full=false);
+string hostName();
 
-//- Return the system's domain name, as per hostname(1) with the '-d' option
+//- Deprecated(2022-01) full hostname resolution may be unreliable
+//  \deprecated(2022-01) - use hostname() function without parameter
+FOAM_DEPRECATED_FOR(2022-01, "hostname() function without parameter")
+string hostName(bool full);
+
+//- Deprecated(2022-01) domain name resolution may be unreliable
+//  \deprecated(2022-01) - avoid usage entirely
+FOAM_DEPRECATED_FOR(2022-01, "nothing : avoid using at all")
 string domainName();
 
 //- Return the user's login name

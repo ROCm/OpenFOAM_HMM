@@ -52,7 +52,7 @@ namespace Foam
 
         const fileName::Type pathType = Foam::type(otherName, false);
 
-        if (pathType == fileName::FILE || pathType == fileName::LINK)
+        if (pathType == fileName::FILE || pathType == fileName::SYMLINK)
         {
             Foam::rm(otherName);
         }
@@ -60,7 +60,7 @@ namespace Foam
         // Disallow writing into symlinked files.
         // Eg, avoid problems with symlinked initial fields
 
-        if (!append && Foam::type(targetName, false) == fileName::LINK)
+        if (!append && Foam::type(targetName, false) == fileName::SYMLINK)
         {
             Foam::rm(targetName);
         }

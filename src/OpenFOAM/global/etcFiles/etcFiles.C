@@ -218,7 +218,7 @@ static inline bool accept
 )
 {
     // followLink(true), checkGzip(true)
-    // -> returns (UNDEFINED | FILE | DIRECTORY), no need to check for (LINK)
+    // -> returns (UNDEFINED | FILE | DIRECTORY), no need to check for (SYMLINK)
     const auto t = name.type(true, true);
 
     return

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,8 +45,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fileName_H
-#define fileName_H
+#ifndef Foam_fileName_H
+#define Foam_fileName_H
 
 #include "word.H"
 
@@ -81,9 +81,10 @@ public:
     enum Type
     {
         UNDEFINED = 0,  //!< Undefined type
-        FILE = 1,       //!< A file
+        FILE = 1,       //!< A regular file
         DIRECTORY = 2,  //!< A directory
-        LINK = 4        //!< A symlink
+        SYMLINK = 4,    //!< A symbolic link
+        LINK = SYMLINK  //!< Same as symlink
     };
 
 
@@ -225,9 +226,9 @@ public:
     // Interrogation
 
         //- Return the directory entry type:
-        //- UNDEFINED, FILE, DIRECTORY (or LINK).
+        //- UNDEFINED, FILE, DIRECTORY (or SYMLINK).
         //
-        //  \param followLink when false it will return LINK for a symlink
+        //  \param followLink when false it will return SYMLINK for a symlink
         //     rather than following it.
         //  \param checkGzip add an additional test for a gzip FILE
         Type type(bool followLink=true, bool checkGzip=false) const;

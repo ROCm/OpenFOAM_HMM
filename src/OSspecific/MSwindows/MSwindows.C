@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
     Copyright (C) 2011 Symscape
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,7 +83,7 @@ namespace Foam
 
 
     // Move file, overwriting existing
-    static bool renameFile(const fileName& src, const fileName& dst)
+    static bool renameFile(const std::string& src, const std::string& dst)
     {
         constexpr const int flags
         (
@@ -132,7 +132,7 @@ class directoryIterator
 public:
 
     //- Construct for dirName, optionally allowing hidden files/dirs
-    directoryIterator(const fileName& dirName, bool allowHidden = false)
+    directoryIterator(const std::string& dirName, bool allowHidden = false)
     :
         handle_(INVALID_HANDLE_VALUE),
         exists_(false),
@@ -170,13 +170,13 @@ public:
     // Member Functions
 
         //- Directory existed for opening
-        bool exists() const
+        bool exists() const noexcept
         {
             return exists_;
         }
 
         //- Directory pointer is valid
-        bool good() const
+        bool good() const noexcept
         {
             return (INVALID_HANDLE_VALUE != handle_);
         }
@@ -192,7 +192,7 @@ public:
         }
 
         //- The current item
-        const std::string& val() const
+        const std::string& val() const noexcept
         {
             return item_;
         }
@@ -225,13 +225,13 @@ public:
     // Member Operators
 
         //- Same as good()
-        operator bool() const
+        operator bool() const noexcept
         {
             return good();
         }
 
         //- Same as val()
-        const std::string& operator*() const
+        const std::string& operator*() const noexcept
         {
             return val();
         }
@@ -407,7 +407,7 @@ bool Foam::setEnv
 }
 
 
-Foam::string Foam::hostName(bool)
+Foam::string Foam::hostName()
 {
     const DWORD bufLen = MAX_COMPUTERNAME_LENGTH + 1;
     TCHAR buf[bufLen];
@@ -417,12 +417,20 @@ Foam::string Foam::hostName(bool)
 }
 
 
+// DEPRECATED (2022-01)
+Foam::string Foam::hostName(bool)
+{
+    return Foam::hostName();
+}
+
+
+// DEPRECATED (2022-01)
 Foam::string Foam::domainName()
 {
     // Could use ::gethostname and ::gethostbyname like POSIX.C, but would
     // then need to link against ws_32. Prefer to minimize dependencies.
 
-    return string::null;
+    return string();
 }
 
 
@@ -452,7 +460,7 @@ Foam::fileName Foam::home()
 
     if (env.empty())
     {
-        env  = Foam::getEnv("USERPROFILE");
+        env = Foam::getEnv("USERPROFILE");
     }
 
     return env;
@@ -595,21 +603,21 @@ Foam::fileName::Type Foam::type
     // Ignore an empty name => always UNDEFINED
     if (name.empty())
     {
-        return fileName::UNDEFINED;
+        return fileName::Type::UNDEFINED;
     }
 
     const DWORD m = ::GetFileAttributes(name.c_str());
 
     if (ms_isreg(m))
     {
-        return fileName::FILE;
+        return fileName::Type::FILE;
     }
     else if (ms_isdir(m))
     {
-        return fileName::DIRECTORY;
+        return fileName::Type::DIRECTORY;
     }
 
-    return fileName::UNDEFINED;
+    return fileName::Type::UNDEFINED;
 }
 
 

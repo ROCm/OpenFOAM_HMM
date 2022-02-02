@@ -633,10 +633,10 @@ int main(int argc, char *argv[])
 
         fileName::Type lnAType = lnA.type(false);
 
-        if (lnAType != fileName::LINK)
+        if (lnAType != fileName::SYMLINK)
         {
             FatalErrorIn("Test-fileName") << "Type of softlink " << lnA
-                << " should be " << fileName::LINK
+                << " should be " << fileName::SYMLINK
                 << " but is " << lnAType << exit(FatalError);
         }
 
@@ -655,10 +655,10 @@ int main(int argc, char *argv[])
                 << endl;
 
             Foam::cp(lnA, lnB, false);
-            if (lnB.type(false) != fileName::LINK)
+            if (lnB.type(false) != fileName::SYMLINK)
             {
                 FatalErrorIn("Test-fileName") << "Type of softlink " << lnB
-                    << " should be " << fileName::LINK
+                    << " should be " << fileName::SYMLINK
                     << " but is " << lnB.type(false) << exit(FatalError);
             }
             if (lnB.type(true) != fileName::DIRECTORY)

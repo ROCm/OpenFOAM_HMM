@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -142,7 +142,7 @@ public:
     // Constructors
 
         //- Construct for dirName, optionally allowing hidden files/dirs
-        directoryIterator(const fileName& dirName, bool allowHidden = false)
+        directoryIterator(const std::string& dirName, bool allowHidden = false)
         :
             dirptr_(nullptr),
             exists_(false),
@@ -168,13 +168,13 @@ public:
     // Member Functions
 
         //- Directory open succeeded
-        bool exists() const
+        bool exists() const noexcept
         {
             return exists_;
         }
 
         //- Directory pointer is valid
-        bool good() const
+        bool good() const noexcept
         {
             return dirptr_;
         }
@@ -190,7 +190,7 @@ public:
         }
 
         //- The current item
-        const std::string& val() const
+        const std::string& val() const noexcept
         {
             return item_;
         }
@@ -220,13 +220,13 @@ public:
     // Member Operators
 
         //- Same as good()
-        operator bool() const
+        operator bool() const noexcept
         {
             return good();
         }
 
         //- Same as val()
-        const std::string& operator*() const
+        const std::string& operator*() const noexcept
         {
             return val();
         }
@@ -302,25 +302,36 @@ bool Foam::setEnv
 }
 
 
-Foam::string Foam::hostName(bool full)
+Foam::string Foam::hostName()
 {
     char buf[128];
     ::gethostname(buf, sizeof(buf));
+    return buf;
+}
 
+
+// DEPRECATED (2022-01)
+Foam::string Foam::hostName(bool full)
+{
     // implementation as per hostname from net-tools
     if (full)
     {
+        char buf[128];
+        ::gethostname(buf, sizeof(buf));
+
         struct hostent *hp = ::gethostbyname(buf);
         if (hp)
         {
             return hp->h_name;
         }
+        return buf;
     }
 
-    return buf;
+    return Foam::hostName();
 }
 
 
+// DEPRECATED (2022-01)
 Foam::string Foam::domainName()
 {
     char buf[128];
@@ -338,7 +349,7 @@ Foam::string Foam::domainName()
         }
     }
 
-    return string::null;
+    return string();
 }
 
 
@@ -713,12 +724,16 @@ mode_t Foam::mode(const fileName& name, const bool followLink)
 }
 
 
-Foam::fileName::Type Foam::type(const fileName& name, const bool followLink)
+Foam::fileName::Type Foam::type
+(
+    const fileName& name,
+    const bool followLink
+)
 {
     // Ignore an empty name => always UNDEFINED
     if (name.empty())
     {
-        return fileName::UNDEFINED;
+        return fileName::Type::UNDEFINED;
     }
 
     if (POSIX::debug)
@@ -730,18 +745,18 @@ Foam::fileName::Type Foam::type(const fileName& name, const bool followLink)
 
     if (S_ISREG(m))
     {
-        return fileName::FILE;
+        return fileName::Type::FILE;
     }
     else if (S_ISLNK(m))
     {
-        return fileName::LINK;
+        return fileName::Type::SYMLINK;
     }
     else if (S_ISDIR(m))
     {
-        return fileName::DIRECTORY;
+        return fileName::Type::DIRECTORY;
     }
 
-    return fileName::UNDEFINED;
+    return fileName::Type::UNDEFINED;
 }
 
 
@@ -1033,7 +1048,7 @@ bool Foam::cp(const fileName& src, const fileName& dest, const bool followLink)
             return false;
         }
     }
-    else if (srcType == fileName::LINK)
+    else if (srcType == fileName::SYMLINK)
     {
         // If dest is a directory, create the destination file name.
         if (destFile.type() == fileName::DIRECTORY)

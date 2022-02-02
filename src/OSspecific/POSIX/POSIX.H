@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef POSIX_H
-#define POSIX_H
+#ifndef Foam_POSIX_H
+#define Foam_POSIX_H
 
 #include "className.H"
 

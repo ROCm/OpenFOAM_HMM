@@ -38,8 +38,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fileOperation_H
-#define fileOperation_H
+#ifndef Foam_fileOperation_H
+#define Foam_fileOperation_H
 
 #include "ISstream.H"
 #include "Ostream.H"
@@ -262,7 +262,7 @@ public:
                 const bool followLink = true
             ) const = 0;
 
-            //- Return the file type: DIRECTORY, FILE or LINK
+            //- Return the file type: DIRECTORY, FILE or SYMLINK
             virtual fileName::Type type
             (
                 const fileName&,

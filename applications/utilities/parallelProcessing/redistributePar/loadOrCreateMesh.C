@@ -459,7 +459,7 @@ bool Foam::removeEmptyDir(const fileName& path)
             Foam::readDir
             (
                 path,
-                fileName::LINK,
+                fileName::SYMLINK,
                 false,                  // filterGz
                 false                   // followLink
             )

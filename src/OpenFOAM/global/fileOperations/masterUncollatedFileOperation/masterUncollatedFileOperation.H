@@ -59,8 +59,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fileOperations_masterUncollatedFileOperation_H
-#define fileOperations_masterUncollatedFileOperation_H
+#ifndef Foam_fileOperations_masterUncollatedFileOperation_H
+#define Foam_fileOperations_masterUncollatedFileOperation_H
 
 #include "fileOperation.H"
 #include "OSspecific.H"
@@ -515,7 +515,7 @@ public:
                 const bool followLink = true
             ) const;
 
-            //- Return the file type: DIRECTORY, FILE or LINK
+            //- Return the file type: DIRECTORY, FILE or SYMLINK
             virtual fileName::Type type
             (
                 const fileName&,

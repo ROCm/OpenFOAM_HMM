@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef MSwindows_H
-#define MSwindows_H
+#ifndef Foam_MSwindows_H
+#define Foam_MSwindows_H
 
 #include "className.H"
 
