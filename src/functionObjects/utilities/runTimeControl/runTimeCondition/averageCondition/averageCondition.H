@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,18 +30,20 @@ Description
     Average run time condition - satisfied when average does not change by
     more than a given value.
 
+See also
+    - Foam::functionObjects::valueAverageBase
+
 SourceFiles
     averageCondition.H
     averageCondition.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef averageCondition_H
-#define averageCondition_H
+#ifndef functionObjects_runTimeControls_averageCondition_H
+#define functionObjects_runTimeControls_averageCondition_H
 
 #include "runTimeCondition.H"
-#include "Switch.H"
-#include "Enum.H"
+#include "valueAverageBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -59,63 +60,18 @@ namespace runTimeControls
 
 class averageCondition
 :
-    public runTimeCondition
+    public runTimeCondition,
+    public valueAverageBase
 {
-public:
-
-    // Public enumerations
-
-        enum class windowType
-        {
-            NONE,
-            APPROXIMATE,
-            EXACT
-        };
-
-        static const Enum<windowType> windowTypeNames;
-
-
 protected:
 
     // Protected Data
-
-        //- Name of function object to retrieve data from
-        word functionObjectName_;
-
-        //- List of fields on which to operate
-        wordList fieldNames_;
-
-        //- Satisfied when difference in mean values is less than this value
-        const scalar tolerance_;
-
-        //- Averaging window
-        const scalar window_;
-
-        //- Averaging window type
-        windowType windowType_;
-
-        //- Average time per field
-        List<scalar> totalTime_;
-
-        //- Reset the averaging process on restart flag
-        Switch resetOnRestart_;
 
         //- Number of start-up iterations before allowing satisfied checks
         label nIterStartUp_;
 
         //- Current iteration count
         label iter_;
-
-    // Protected Member Functions
-
-        //- Templated function to calculate the average
-        template<class Type>
-        void calc
-        (
-            const label fieldi,
-            bool& satisfied,
-            bool& processed
-        );
 
 
 public:
@@ -154,12 +110,6 @@ public:
 } // End namespace runTimeControls
 } // End namespace functionObjects
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "averageConditionTemplates.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

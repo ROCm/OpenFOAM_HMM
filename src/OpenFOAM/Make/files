@@ -365,6 +365,7 @@ $(funcObjs)/logFiles/logFiles.C
 $(funcObjs)/timeControl/timeControl.C
 $(funcObjs)/timeControl/timeControlFunctionObject.C
 $(funcObjs)/regionFunctionObject/regionFunctionObject.C
+$(funcObjs)/valueAverageBase/valueAverageBase.C
 
 Time = db/Time
 $(Time)/TimePaths.C

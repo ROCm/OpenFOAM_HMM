@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -79,14 +78,13 @@ Usage
 
     The inherited entries are elaborated in:
      - \link regionFunctionObject.H \endlink
-     - \link writeFile.H \endlink
+     - \link valueAverageBase.H \endlink
 
     Usage by the \c postProcess utility is not available.
 
 See also
     - Foam::functionObject
-    - Foam::functionObjects::stateFunctionObject
-    - Foam::functionObjects::writeFile
+    - Foam::functionObjects::valueAverageBase
     - ExtendedCodeGuide::functionObjects::field::valueAverage
 
 SourceFiles
@@ -99,6 +97,7 @@ SourceFiles
 #define functionObjects_valueAverage_H
 
 #include "regionFunctionObject.H"
+#include "valueAverageBase.H"
 #include "writeFile.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -115,45 +114,8 @@ namespace functionObjects
 class valueAverage
 :
     public regionFunctionObject,
-    public writeFile
+    public valueAverageBase
 {
-protected:
-
-    // Protected Data
-
-        //- Name of function object to retrieve data from
-        word functionObjectName_;
-
-        //- List of fields on which to operate
-        wordList fieldNames_;
-
-        //- Averaging window
-        scalar window_;
-
-        //- Average time per field
-        List<scalar> totalTime_;
-
-        //- Reset the averaging process on restart
-        Switch resetOnRestart_;
-
-
-    // Protected Member Functions
-
-        //- Templated function to calculate the average
-        template<class Type>
-        void calc
-        (
-            const word& fieldName,
-            const word& meanName,
-            const scalar alpha,
-            const scalar beta,
-            bool& processed
-        );
-
-        //- Output file header information
-        virtual void writeFileHeader(Ostream& os) const;
-
-
 public:
 
     //- Runtime type information
@@ -198,12 +160,6 @@ public:
 
 } // End namespace functionObjects
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "valueAverageTemplates.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
