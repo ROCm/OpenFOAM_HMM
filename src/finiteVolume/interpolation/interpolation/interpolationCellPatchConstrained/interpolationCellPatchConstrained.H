@@ -43,8 +43,6 @@ Description
 namespace Foam
 {
 
-class fvMesh;
-
 /*---------------------------------------------------------------------------*\
                            Class interpolationCellPatchConstrained Declaration
 \*---------------------------------------------------------------------------*/
@@ -54,7 +52,6 @@ class interpolationCellPatchConstrained
 :
     public interpolation<Type>
 {
-
 public:
 
     //- Runtime type information
@@ -75,7 +72,7 @@ public:
         //- Interpolate field to the given point in the given cell
         Type interpolate
         (
-            const vector& position,
+            const vector& position,     /* (unused) */
             const label celli,
             const label facei = -1
         ) const;
@@ -85,7 +82,7 @@ public:
         //  calculating the position, as cell interpolation doesn't need it.
         inline Type interpolate
         (
-            const barycentric& coordinates,
+            const barycentric& coordinates,     /* (unused) */
             const tetIndices& tetIs,
             const label facei = -1
         ) const

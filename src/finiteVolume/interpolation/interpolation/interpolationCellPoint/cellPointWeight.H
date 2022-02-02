@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cellPointWeight_H
-#define cellPointWeight_H
+#ifndef Foam_cellPointWeight_H
+#define Foam_cellPointWeight_H
 
 #include "vector.H"
 #include "barycentric.H"
@@ -46,6 +46,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class polyMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -56,13 +57,13 @@ class cellPointWeight
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
        //- Cell index
        const label celli_;
 
-       //- Weights applied to tet vertices. Equal to the barycentric coordinates
-       //  of the interpolation position.
+       //- Weights applied to tet vertices.
+       //  Equal to the barycentric coordinates of the interpolation position.
        barycentric weights_;
 
        //- Face vertex indices
@@ -111,19 +112,19 @@ public:
     // Member Functions
 
         //- Cell index
-        inline label cell() const
+        label cell() const noexcept
         {
             return celli_;
         }
 
         //- Interpolation weights
-        inline const barycentric& weights() const
+        const barycentric& weights() const noexcept
         {
             return weights_;
         }
 
         //- Interpolation addressing for points on face
-        inline const triFace& faceVertices() const
+        const triFace& faceVertices() const noexcept
         {
             return faceVertices_;
         }

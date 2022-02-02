@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018, 2020 OpenFOAM Foundation
-    Copyright (C) 2011-2020 OpenCFD Ltd.
+    Copyright (C) 2011-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -134,97 +134,97 @@ inline Foam::label Foam::particle::getNewParticleID() const
 }
 
 
-inline const Foam::polyMesh& Foam::particle::mesh() const
+inline const Foam::polyMesh& Foam::particle::mesh() const noexcept
 {
     return mesh_;
 }
 
 
-inline const Foam::barycentric& Foam::particle::coordinates() const
+inline const Foam::barycentric& Foam::particle::coordinates() const noexcept
 {
     return coordinates_;
 }
 
 
-inline Foam::label Foam::particle::cell() const
+inline Foam::label Foam::particle::cell() const noexcept
 {
     return celli_;
 }
 
 
-inline Foam::label& Foam::particle::cell()
+inline Foam::label& Foam::particle::cell() noexcept
 {
     return celli_;
 }
 
 
-inline Foam::label Foam::particle::tetFace() const
+inline Foam::label Foam::particle::tetFace() const noexcept
 {
     return tetFacei_;
 }
 
 
-inline Foam::label& Foam::particle::tetFace()
+inline Foam::label& Foam::particle::tetFace() noexcept
 {
     return tetFacei_;
 }
 
 
-inline Foam::label Foam::particle::tetPt() const
+inline Foam::label Foam::particle::tetPt() const noexcept
 {
     return tetPti_;
 }
 
 
-inline Foam::label& Foam::particle::tetPt()
+inline Foam::label& Foam::particle::tetPt() noexcept
 {
     return tetPti_;
 }
 
 
-inline Foam::label Foam::particle::face() const
+inline Foam::label Foam::particle::face() const noexcept
 {
     return facei_;
 }
 
 
-inline Foam::label& Foam::particle::face()
+inline Foam::label& Foam::particle::face() noexcept
 {
     return facei_;
 }
 
 
-inline Foam::scalar Foam::particle::stepFraction() const
+inline Foam::scalar Foam::particle::stepFraction() const noexcept
 {
     return stepFraction_;
 }
 
 
-inline Foam::scalar& Foam::particle::stepFraction()
+inline Foam::scalar& Foam::particle::stepFraction() noexcept
 {
     return stepFraction_;
 }
 
 
-inline Foam::label Foam::particle::origProc() const
+inline Foam::label Foam::particle::origProc() const noexcept
 {
     return origProc_;
 }
 
 
-inline Foam::label& Foam::particle::origProc()
+inline Foam::label& Foam::particle::origProc() noexcept
 {
     return origProc_;
 }
 
 
-inline Foam::label Foam::particle::origId() const
+inline Foam::label Foam::particle::origId() const noexcept
 {
     return origId_;
 }
 
 
-inline Foam::label& Foam::particle::origId()
+inline Foam::label& Foam::particle::origId() noexcept
 {
     return origId_;
 }
@@ -262,7 +262,7 @@ inline Foam::scalar Foam::particle::currentTimeFraction() const
 }
 
 
-inline Foam::tetIndices Foam::particle::currentTetIndices() const
+inline Foam::tetIndices Foam::particle::currentTetIndices() const noexcept
 {
     return tetIndices(celli_, tetFacei_, tetPti_);
 }
@@ -287,19 +287,19 @@ inline Foam::vector Foam::particle::normal() const
 }
 
 
-inline bool Foam::particle::onFace() const
+inline bool Foam::particle::onFace() const noexcept
 {
     return facei_ >= 0;
 }
 
 
-inline bool Foam::particle::onInternalFace() const
+inline bool Foam::particle::onInternalFace() const noexcept
 {
     return onFace() && mesh_.isInternalFace(facei_);
 }
 
 
-inline bool Foam::particle::onBoundaryFace() const
+inline bool Foam::particle::onBoundaryFace() const noexcept
 {
     return onFace() && !mesh_.isInternalFace(facei_);
 }
@@ -320,8 +320,8 @@ inline Foam::vector Foam::particle::position() const
 inline void Foam::particle::reset()
 {
     stepFraction_ = 0;
-    nBehind_ = 0;
     behind_ = 0;
+    nBehind_ = 0;
 }
 
 

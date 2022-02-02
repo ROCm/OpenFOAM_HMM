@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,61 +24,57 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::cellPointWeightWallModified
-
-Description
-    Foam::cellPointWeightWallModified
-
-SourceFiles
-    cellPointWeightWallModified.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef cellPointWeightWallModified_H
-#define cellPointWeightWallModified_H
-
-#include "cellPointWeight.H"
-#include "wallPolyPatch.H"
+#include "cellPointWeightWallModified.H"
 #include "polyMesh.H"
 #include "polyBoundaryMesh.H"
+#include "wallPolyPatch.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-namespace Foam
+bool Foam::cellPointWeightWallModified::onWall
+(
+    const polyMesh& mesh,
+    const label facei
+)
 {
+    if (facei >= 0)
+    {
+        const polyBoundaryMesh& bm = mesh.boundaryMesh();
+        const label patchi = bm.whichPatch(facei);
 
-class polyMesh;
+        if (patchi != -1 && isA<wallPolyPatch>(bm[patchi]))
+        {
+            return true;
+        }
+    }
 
-/*---------------------------------------------------------------------------*\
-                 Class cellPointWeightWallModified Declaration
-\*---------------------------------------------------------------------------*/
+    return false;
+}
 
-class cellPointWeightWallModified
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::cellPointWeightWallModified::cellPointWeightWallModified
+(
+    const polyMesh& mesh,
+    const vector& position,
+    const label celli,
+    const label facei
+)
 :
-    public cellPointWeight
+    cellPointWeight(mesh, position, celli, facei)
 {
-public:
+    if (facei >= 0 && cellPointWeightWallModified::onWall(mesh, facei))
+    {
+        // Apply cell centre value for wall faces
+        weights_[0] = 1;
+        weights_[1] = 0;
+        weights_[2] = 0;
+        weights_[3] = 0;
+    }
+}
 
-    // Constructors
-
-        //- Construct from components
-        cellPointWeightWallModified
-        (
-            const polyMesh& mesh,
-            const vector& position,
-            const label celli,
-            const label facei = -1
-        );
-};
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

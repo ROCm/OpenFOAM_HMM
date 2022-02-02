@@ -40,18 +40,4 @@ Foam::interpolationCell<Type>::interpolationCell
 {}
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class Type>
-Type Foam::interpolationCell<Type>::interpolate
-(
-    const vector&,
-    const label celli,
-    const label
-) const
-{
-    return this->psi_[celli];
-}
-
-
 // ************************************************************************* //

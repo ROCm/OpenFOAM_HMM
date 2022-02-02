@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,57 +30,25 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const Foam::label Foam::tetIndices::maxNWarnings = 100;
-
-Foam::label Foam::tetIndices::nWarnings = 0;
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::tetIndices::tetIndices()
-:
-    celli_(-1),
-    facei_(-1),
-    tetPti_(-1)
-{}
-
-
-Foam::tetIndices::tetIndices
-(
-    label celli,
-    label facei,
-    label tetPtI
-)
-:
-    celli_(celli),
-    facei_(facei),
-    tetPti_(tetPtI)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::tetIndices::~tetIndices()
-{}
+int Foam::tetIndices::nWarnings_ = 0;
 
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Foam::Istream& Foam::operator>>(Istream& is, tetIndices& tI)
+Foam::Istream& Foam::operator>>(Istream& is, tetIndices& rhs)
 {
-    is  >> tI.cell() >> tI.face() >> tI.tetPt();
+    is  >> rhs.cell() >> rhs.face() >> rhs.tetPt();
 
     is.check(FUNCTION_NAME);
     return is;
 }
 
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const tetIndices& tI)
+Foam::Ostream& Foam::operator<<(Ostream& os, const tetIndices& rhs)
 {
-    os  << tI.cell() << token::SPACE
-        << tI.face() << token::SPACE
-        << tI.tetPt() << token::SPACE
-        << endl;
+    os  << rhs.cell() << token::SPACE
+        << rhs.face() << token::SPACE
+        << rhs.tetPt() << nl;
 
     os.check(FUNCTION_NAME);
     return os;

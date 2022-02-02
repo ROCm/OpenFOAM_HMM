@@ -458,52 +458,52 @@ public:
             inline label getNewParticleID() const;
 
             //- Return the mesh database
-            inline const polyMesh& mesh() const;
+            inline const polyMesh& mesh() const noexcept;
 
             //- Return current particle coordinates
-            inline const barycentric& coordinates() const;
+            inline const barycentric& coordinates() const noexcept;
 
             //- Return current cell particle is in
-            inline label cell() const;
+            inline label cell() const noexcept;
 
             //- Return current cell particle is in for manipulation
-            inline label& cell();
+            inline label& cell() noexcept;
 
             //- Return current tet face particle is in
-            inline label tetFace() const;
+            inline label tetFace() const noexcept;
 
             //- Return current tet face particle is in for manipulation
-            inline label& tetFace();
+            inline label& tetFace() noexcept;
 
             //- Return current tet face particle is in
-            inline label tetPt() const;
+            inline label tetPt() const noexcept;
 
             //- Return current tet face particle is in for manipulation
-            inline label& tetPt();
+            inline label& tetPt() noexcept;
 
             //- Return current face particle is on otherwise -1
-            inline label face() const;
+            inline label face() const noexcept;
 
             //- Return current face particle is on for manipulation
-            inline label& face();
+            inline label& face() noexcept;
 
             //- Return the fraction of time-step completed
-            inline scalar stepFraction() const;
+            inline scalar stepFraction() const noexcept;
 
             //- Return the fraction of time-step completed
-            inline scalar& stepFraction();
+            inline scalar& stepFraction() noexcept;
 
             //- Return the originating processor ID
-            inline label origProc() const;
+            inline label origProc() const noexcept;
 
             //- Return the originating processor ID
-            inline label& origProc();
+            inline label& origProc() noexcept;
 
             //- Return the particle ID on the originating processor
-            inline label origId() const;
+            inline label origId() const noexcept;
 
             //- Return the particle ID on the originating processor
-            inline label& origId();
+            inline label& origId() noexcept;
 
 
         // Check
@@ -519,9 +519,8 @@ public:
             //  from the stored step fraction due to sub-cycling.
             inline scalar currentTimeFraction() const;
 
-            //- Return the indices of the current tet that the
-            //  particle occupies.
-            inline tetIndices currentTetIndices() const;
+            //- Return indices of the current tet that the particle occupies.
+            inline tetIndices currentTetIndices() const noexcept;
 
             //- Return the current tet transformation tensor
             inline barycentricTensor currentTetTransform() const;
@@ -530,13 +529,13 @@ public:
             inline vector normal() const;
 
             //- Is the particle on a face?
-            inline bool onFace() const;
+            inline bool onFace() const noexcept;
 
             //- Is the particle on an internal face?
-            inline bool onInternalFace() const;
+            inline bool onInternalFace() const noexcept;
 
             //- Is the particle on a boundary face?
-            inline bool onBoundaryFace() const;
+            inline bool onBoundaryFace() const noexcept;
 
             //- Return the index of patch that the particle is on
             inline label patch() const;

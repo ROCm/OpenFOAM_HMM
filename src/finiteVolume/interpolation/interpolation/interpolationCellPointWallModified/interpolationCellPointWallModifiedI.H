@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,18 +31,10 @@ License
 template<class Type>
 inline Type Foam::interpolationCellPointWallModified<Type>::interpolate
 (
-    const cellPointWeightWallModified& cpw
+    const cellPointWeight& cpw
 ) const
 {
-    const barycentric& weights = cpw.weights();
-    const triFace& faceVertices = cpw.faceVertices();
-
-    Type t = this->psi_[cpw.cell()]*weights[0];
-    t += this->psip_[faceVertices[0]]*weights[1];
-    t += this->psip_[faceVertices[1]]*weights[2];
-    t += this->psip_[faceVertices[2]]*weights[3];
-
-    return t;
+    return interpolationCellPoint<Type>::interpolate(cpw);
 }
 
 
@@ -53,7 +46,7 @@ inline Type Foam::interpolationCellPointWallModified<Type>::interpolate
     const label facei
 ) const
 {
-    return interpolate
+    return interpolationCellPoint<Type>::interpolate
     (
         cellPointWeightWallModified
         (
@@ -84,17 +77,9 @@ inline Type Foam::interpolationCellPointWallModified<Type>::interpolate
                 << exit(FatalError);
         }
 
-        const polyBoundaryMesh& bm = this->pMesh_.boundaryMesh();
-        label patchi = bm.whichPatch(facei);
-
-        if (patchi != -1)
+        if (cellPointWeightWallModified::onWall(this->pMesh_, facei))
         {
-            if (isA<wallPolyPatch>(bm[patchi]))
-            {
-                Type t = this->psi_[tetIs.cell()];
-
-                return t;
-            }
+            return this->psi_[tetIs.cell()];
         }
     }
 

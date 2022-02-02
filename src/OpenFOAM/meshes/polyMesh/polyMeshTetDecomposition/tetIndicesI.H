@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,43 +26,30 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+inline constexpr Foam::tetIndices::tetIndices() noexcept
+:
+    celli_(-1),
+    facei_(-1),
+    tetPti_(-1)
+{}
+
+
+inline constexpr Foam::tetIndices::tetIndices
+(
+    label celli,
+    label facei,
+    label tetPointi
+) noexcept
+:
+    celli_(celli),
+    facei_(facei),
+    tetPti_(tetPointi)
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-inline Foam::label Foam::tetIndices::cell() const
-{
-    return celli_;
-}
-
-
-inline Foam::label& Foam::tetIndices::cell()
-{
-    return celli_;
-}
-
-
-inline Foam::label Foam::tetIndices::face() const
-{
-    return facei_;
-}
-
-
-inline Foam::label& Foam::tetIndices::face()
-{
-    return facei_;
-}
-
-
-inline Foam::label Foam::tetIndices::tetPt() const
-{
-    return tetPti_;
-}
-
-
-inline Foam::label& Foam::tetIndices::tetPt()
-{
-    return tetPti_;
-}
-
 
 inline Foam::triFace Foam::tetIndices::faceTriIs
 (
@@ -78,20 +65,16 @@ inline Foam::triFace Foam::tetIndices::faceTriIs
     {
         faceBasePtI = 0;
 
-        if (warn)
+        if (warn && nWarnings_ < maxNWarnings)
         {
-            if (nWarnings < maxNWarnings)
-            {
-                WarningInFunction
-                    << "No base point for face " << face() << ", " << f
-                    << ", produces a valid tet decomposition." << endl;
-                ++nWarnings;
-            }
-            if (nWarnings == maxNWarnings)
+            ++nWarnings_;
+            WarningInFunction
+                << "No base point for face " << face() << ", " << f
+                << ", produces a valid tet decomposition." << endl;
+            if (nWarnings_ == maxNWarnings)
             {
                 Warning
                     << "Suppressing any further warnings." << endl;
-                ++nWarnings;
             }
         }
     }
@@ -122,20 +105,16 @@ inline Foam::triFace Foam::tetIndices::triIs
     {
         faceBasePtI = 0;
 
-        if (warn)
+        if (warn && nWarnings_ < maxNWarnings)
         {
-            if (nWarnings < maxNWarnings)
-            {
-                WarningInFunction
-                    << "No base point for face " << face() << ", " << f
-                    << ", produces a valid tet decomposition." << endl;
-                ++nWarnings;
-            }
-            if (nWarnings == maxNWarnings)
+            ++nWarnings_;
+            WarningInFunction
+                << "No base point for face " << face() << ", " << f
+                << ", produces a valid tet decomposition." << endl;
+            if (nWarnings_ == maxNWarnings)
             {
                 Warning
                     << "Suppressing any further warnings." << endl;
-                ++nWarnings;
             }
         }
     }
@@ -198,20 +177,39 @@ inline Foam::triPointRef Foam::tetIndices::oldFaceTri
 }
 
 
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-inline bool Foam::tetIndices::operator==(const Foam::tetIndices& rhs) const
+inline Foam::label Foam::tetIndices::compare
+(
+    const tetIndices& a,
+    const tetIndices& b
+) noexcept
 {
+    label diff;
     return
-        cell() == rhs.cell()
-     && face() == rhs.face()
-     && tetPt() == rhs.tetPt();
+    (
+        ((diff = (a.cell() - b.cell())) != 0) ? diff
+      : ((diff = (a.face() - b.face())) != 0) ? diff
+      : (a.tetPt() - b.tetPt())
+    );
 }
 
 
-inline bool Foam::tetIndices::operator!=(const Foam::tetIndices& rhs) const
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
+
+inline bool Foam::operator==(const tetIndices& a, const tetIndices& b) noexcept
 {
-    return !(*this == rhs);
+    // Possibly slightly faster version than compare
+    return
+    (
+        a.cell() == b.cell()
+     && a.face() == b.face()
+     && a.tetPt() == b.tetPt()
+    );
+}
+
+
+inline bool Foam::operator!=(const tetIndices& a, const tetIndices& b) noexcept
+{
+    return !(a == b);
 }
 
 

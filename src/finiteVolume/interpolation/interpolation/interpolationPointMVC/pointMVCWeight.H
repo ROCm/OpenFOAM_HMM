@@ -35,15 +35,13 @@ Description
     2006 paper Eurographics Symposium on Geometry Processing
     by Torsten Langer, Alexander Belyaev and Hans-Peter Seide
 
-
-
 SourceFiles
     pointMVCWeight.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef pointMVCWeight_H
-#define pointMVCWeight_H
+#ifndef Foam_pointMVCWeight_H
+#define Foam_pointMVCWeight_H
 
 #include "scalarField.H"
 #include "vectorField.H"
@@ -56,12 +54,13 @@ SourceFiles
 namespace Foam
 {
 
-class polyMesh;
+// Forward Declarations
+class face;
 class pointMesh;
-template<class T> class pointPatchField;
+class polyMesh;
+template<class Type> class pointPatchField;
 template<class Type, template<class> class PatchField, class GeoMesh>
 class GeometricField;
-class face;
 
 /*---------------------------------------------------------------------------*\
                            Class pointMVCWeight Declaration
@@ -71,7 +70,7 @@ class pointMVCWeight
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Cell index
         const label cellIndex_;
@@ -129,13 +128,13 @@ public:
     // Member Functions
 
         //- Cell index
-        inline label cell() const
+        label cell() const noexcept
         {
             return cellIndex_;
         }
 
         //- Interpolation weights (in order of cellPoints)
-        inline const scalarField& weights() const
+        const scalarField& weights() const noexcept
         {
             return weights_;
         }

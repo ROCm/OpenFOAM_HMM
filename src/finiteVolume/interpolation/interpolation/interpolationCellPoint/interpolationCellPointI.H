@@ -81,13 +81,15 @@ inline Type Foam::interpolationCellPoint<Type>::interpolate
         }
     }
 
-    const triFace triIs = tetIs.faceTriIs(this->pMesh_);
+    const triFace faceVertices(tetIs.faceTriIs(this->pMesh_));
 
     return
+    (
         this->psi_[tetIs.cell()]*coordinates[0]
-      + psip_[triIs[0]]*coordinates[1]
-      + psip_[triIs[1]]*coordinates[2]
-      + psip_[triIs[2]]*coordinates[3];
+      + psip_[faceVertices[0]]*coordinates[1]
+      + psip_[faceVertices[1]]*coordinates[2]
+      + psip_[faceVertices[2]]*coordinates[3]
+    );
 }
 
 

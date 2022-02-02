@@ -32,8 +32,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef interpolationCellPointWallModified_H
-#define interpolationCellPointWallModified_H
+#ifndef Foam_interpolationCellPointWallModified_H
+#define Foam_interpolationCellPointWallModified_H
 
 #include "interpolationCellPoint.H"
 #include "cellPointWeightWallModified.H"
@@ -61,7 +61,7 @@ public:
     // Constructors
 
         //- Construct from components
-        interpolationCellPointWallModified
+        explicit interpolationCellPointWallModified
         (
             const GeometricField<Type, fvPatchField, volMesh>& psi
         );
@@ -70,7 +70,7 @@ public:
     // Member Functions
 
         //- Interpolate field for the given cellPointWeight
-        inline Type interpolate(const cellPointWeightWallModified& cpw) const;
+        inline Type interpolate(const cellPointWeight& cpw) const;
 
         //- Interpolate field to the given point in the given cell
         inline Type interpolate

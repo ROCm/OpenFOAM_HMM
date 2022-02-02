@@ -28,27 +28,28 @@ Class
     Foam::interpolation
 
 Description
-    Abstract base class for interpolation
+    Abstract base class for volume field interpolation
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef interpolation_H
-#define interpolation_H
+#ifndef Foam_interpolation_H
+#define Foam_interpolation_H
 
 #include "faceList.H"
 #include "volFieldsFwd.H"
 #include "pointFields.H"
-#include "typeInfo.H"
 #include "autoPtr.H"
-#include "runTimeSelectionTables.H"
-#include "tetIndices.H"
+#include "typeInfo.H"
 #include "barycentric.H"
+#include "tetIndices.H"
+#include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Forward Declarations
 class polyMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -58,10 +59,9 @@ class polyMesh;
 template<class Type>
 class interpolation
 {
-
 protected:
 
-    // Protected data
+    // Protected Data
 
         const GeometricField<Type, fvPatchField, volMesh>& psi_;
 
@@ -112,7 +112,7 @@ public:
     // Constructors
 
         //- Construct from components
-        interpolation
+        explicit interpolation
         (
             const GeometricField<Type, fvPatchField, volMesh>& psi
         );
@@ -125,7 +125,7 @@ public:
     // Member Functions
 
         //- Return the field to be interpolated
-        const GeometricField<Type, fvPatchField, volMesh>& psi() const
+        const GeometricField<Type, fvPatchField, volMesh>& psi() const noexcept
         {
             return psi_;
         }
@@ -139,9 +139,9 @@ public:
         ) const = 0;
 
         //- Interpolate field to the given coordinates in the tetrahedron
-        //  defined by the given indices.  Calls interpolate function
-        //  above here except where overridden by derived
-        //  interpolation types.
+        //- defined by the given indices.
+        //  Calls interpolate function (vector, cell, face) except
+        //  where overridden by derived interpolation types.
         virtual Type interpolate
         (
             const barycentric& coordinates,

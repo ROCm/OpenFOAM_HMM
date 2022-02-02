@@ -32,8 +32,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef interpolationPointMVC_H
-#define interpolationPointMVC_H
+#ifndef Foam_interpolationPointMVC_H
+#define Foam_interpolationPointMVC_H
 
 #include "interpolation.H"
 #include "pointMVCWeight.H"
@@ -54,7 +54,7 @@ class interpolationPointMVC
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Interpolated volfield
         const GeometricField<Type, pointPatchField, pointMesh> psip_;
@@ -69,7 +69,7 @@ public:
     // Constructors
 
         //- Construct from components
-        interpolationPointMVC
+        explicit interpolationPointMVC
         (
             const GeometricField<Type, fvPatchField, volMesh>& psi
         );

@@ -31,8 +31,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef interpolationCellPointFace_H
-#define interpolationCellPointFace_H
+#ifndef Foam_interpolationCellPointFace_H
+#define Foam_interpolationCellPointFace_H
 
 #include "interpolation.H"
 
@@ -50,7 +50,7 @@ class interpolationCellPointFace
 :
     public interpolation<Type>
 {
-    // Private data
+    // Private Data
 
         //- Interpolated volfield
         const GeometricField<Type, pointPatchField, pointMesh> psip_;
@@ -89,7 +89,7 @@ public:
     // Constructors
 
         //- Construct from components
-        interpolationCellPointFace
+        explicit interpolationCellPointFace
         (
             const GeometricField<Type, fvPatchField, volMesh>& psi
         );

@@ -27,12 +27,12 @@ Class
     Foam::interpolationCell
 
 Description
-    Uses the cell value for any point in the cell
+    Uses the cell value for any location within the cell
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef interpolationCell_H
-#define interpolationCell_H
+#ifndef Foam_interpolationCell_H
+#define Foam_interpolationCell_H
 
 #include "interpolation.H"
 
@@ -52,7 +52,6 @@ class interpolationCell
 :
     public interpolation<Type>
 {
-
 public:
 
     //- Runtime type information
@@ -62,7 +61,7 @@ public:
     // Constructors
 
         //- Construct from components
-        interpolationCell
+        explicit interpolationCell
         (
             const GeometricField<Type, fvPatchField, volMesh>& psi
         );
@@ -70,25 +69,26 @@ public:
 
     // Member Functions
 
-        //- Interpolate field to the given point in the given cell
-        Type interpolate
-        (
-            const vector& position,
-            const label celli,
-            const label facei = -1
-        ) const;
-
-        //- Interpolate field to the given coordinates in the tetrahedron
-        //  defined by the given indices. This is an optimisation which skips
-        //  calculating the position, as cell interpolation doesn't need it.
+        //- Returns the cell value
         inline Type interpolate
         (
-            const barycentric& coordinates,
-            const tetIndices& tetIs,
-            const label facei = -1
+            const vector& position,             /* (unused) */
+            const label celli,
+            const label facei = -1              /* (unused) */
         ) const
         {
-            return interpolate(vector::zero, tetIs.cell(), facei);
+            return this->psi_[celli];
+        }
+
+        //- Returns the cell value corresponding to the given tetrahedron
+        inline Type interpolate
+        (
+            const barycentric& coordinates,     /* (unused) */
+            const tetIndices& tetIs,
+            const label facei = -1              /* (unused) */
+        ) const
+        {
+            return this->psi_[tetIs.cell()];
         }
 };
 
