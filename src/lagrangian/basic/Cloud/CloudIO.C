@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017, 2020 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -267,7 +267,8 @@ template<class ParticleType>
 void Foam::Cloud<ParticleType>::readFromFiles
 (
     objectRegistry& obr,
-    const wordRes& selectFields
+    const wordRes& selectFields,
+    const wordRes& excludeFields
 ) const
 {
     IOobjectList cloudObjects
@@ -280,39 +281,42 @@ void Foam::Cloud<ParticleType>::readFromFiles
         false
     );
 
-    forAllIters(cloudObjects, iter)
+    const wordRes::filter pred(selectFields, excludeFields);
+
+    forAllConstIters(cloudObjects, iter)
     {
-        if (selectFields.size() && !selectFields.match(iter()->name()))
+        const IOobject& io = *(iter.val());
+        const word& fldName = io.name();
+
+        if (!pred(fldName))
         {
-            continue;
+            continue;  // reject
         }
 
         IOobject ioNew
         (
-            iter()->name(),
+            fldName,
             time().timeName(),
             obr,
             IOobject::NO_READ,
             IOobject::NO_WRITE
         );
 
-        auto& object = *iter();
-
         const bool stored
         (
-            readStoreFile<label>(object, ioNew)
-         || readStoreFile<scalar>(object, ioNew)
-         || readStoreFile<vector>(object, ioNew)
-         || readStoreFile<sphericalTensor>(object, ioNew)
-         || readStoreFile<symmTensor>(object, ioNew)
-         || readStoreFile<tensor>(object, ioNew)
+            readStoreFile<label>(io, ioNew)
+         || readStoreFile<scalar>(io, ioNew)
+         || readStoreFile<vector>(io, ioNew)
+         || readStoreFile<sphericalTensor>(io, ioNew)
+         || readStoreFile<symmTensor>(io, ioNew)
+         || readStoreFile<tensor>(io, ioNew)
         );
 
         if (!stored)
         {
             DebugInfo
-                << "Unhandled field type " << iter()->headerClassName()
-                << endl;
+                << "Unhandled field:" << fldName
+                << " type:" << io.headerClassName() << endl;
         }
     }
 }

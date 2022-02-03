@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -135,9 +135,73 @@ inline bool Foam::wordRes::operator()(const std::string& text) const
 }
 
 
+// * * * * * * * * * * * * * * * * Functors  * * * * * * * * * * * * * * * * //
+
+inline Foam::wordRes::matcher::matcher
+(
+    const UList<wordRe>& allow
+)
+:
+    allow_(allow)
+{}
+
+
+inline Foam::wordRes::filter::filter
+(
+    const UList<wordRe>& allow,
+    const UList<wordRe>& deny
+)
+:
+    allow_(allow),
+    deny_(deny)
+{}
+
+
+inline bool Foam::wordRes::matcher::empty() const noexcept
+{
+    return allow_.empty();
+}
+
+inline bool Foam::wordRes::filter::empty() const noexcept
+{
+    return (allow_.empty() && deny_.empty());
+}
+
+
 inline bool Foam::wordRes::matcher::operator()(const std::string& text) const
 {
-    return (wordRes::first_match(values, text) >= 0);
+    return (wordRes::first_match(allow_, text) >= 0);
+}
+
+
+inline bool Foam::wordRes::filter::operator()(const std::string& text) const
+{
+    if (allow_.empty())
+    {
+        // No allow specified, so accept everything that is NOT blocked
+        return (deny_.empty() || (wordRes::first_match(deny_, text) < 0));
+    }
+    else if (deny_.empty())
+    {
+        // Nothing blocked, apply accept filter
+        return (wordRes::first_match(allow_, text) >= 0);
+    }
+    else
+    {
+        // Both accept and deny filters, need to search more carefully
+        const auto result = wordRes::found_matched(allow_, text);
+
+        return
+        (
+            result == wordRe::LITERAL
+          ? true
+          :
+            (
+                result == wordRe::REGEX
+             && (wordRes::first_match(deny_, text) < 0)
+            )
+        );
+    }
 }
 
 

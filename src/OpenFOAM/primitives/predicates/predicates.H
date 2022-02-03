@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef predicates_H
-#define predicates_H
+#ifndef Foam_predicates_H
+#define Foam_predicates_H
 
 #include <string>
 #include <type_traits>
@@ -44,7 +44,6 @@ SourceFiles
 
 namespace Foam
 {
-
 namespace predicates
 {
 
@@ -115,7 +114,6 @@ struct never : std::false_type
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace predicates
-
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -43,8 +43,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef scalarPredicates_H
-#define scalarPredicates_H
+#ifndef Foam_scalarPredicates_H
+#define Foam_scalarPredicates_H
 
 #include "scalar.H"
 #include "predicates.H"

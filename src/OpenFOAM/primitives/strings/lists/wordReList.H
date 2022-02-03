@@ -37,8 +37,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef wordReList_H
-#define wordReList_H
+#ifndef Foam_wordReList_H
+#define Foam_wordReList_H
 
 #include "wordRe.H"
 #include "List.H"
@@ -48,7 +48,6 @@ Description
 namespace Foam
 {
     typedef UList<wordRe> wordReUList;
-
     typedef List<wordRe> wordReList;
 }
 

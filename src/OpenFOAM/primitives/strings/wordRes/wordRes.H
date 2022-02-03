@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef wordRes_H
-#define wordRes_H
+#ifndef Foam_wordRes_H
+#define Foam_wordRes_H
 
 #include "wordReList.H"
 
@@ -78,25 +78,7 @@ class wordRes
 
 public:
 
-    // Public Classes
-
-        //- Functor wrapper for matching against a List of wordRe
-        struct matcher
-        {
-            const UList<wordRe>& values;
-
-            matcher(const UList<wordRe>& selectors)
-            :
-                values(selectors)
-            {}
-
-            //- True if text matches ANY of the entries.
-            //  Allows use as a predicate.
-            inline bool operator()(const std::string& text) const;
-        };
-
-
-    // Factory Methods
+    // Static Data / Methods
 
         //- Return a null wordRes - a reference to the NullObject
         inline static const wordRes& null();
@@ -153,6 +135,61 @@ public:
 
         //- Identical to match(), for use as a predicate.
         inline bool operator()(const std::string& text) const;
+
+
+    // Functors
+
+        //- Functor wrapper of a list of wordRe for matching
+        struct matcher
+        {
+            //- Construct with 'allow' matcher
+            inline matcher(const UList<wordRe>& allow);
+
+            //- Nothing defined
+            inline bool empty() const noexcept;
+
+            //- True if text matches ANY of the entries.
+            //  Allows use as a predicate.
+            inline bool operator()(const std::string& text) const;
+
+        private:
+            const UList<wordRe>& allow_;
+        };
+
+
+        //- Functor wrapper of allow/deny lists of wordRe for filtering
+        //
+        //  An empty 'allow' accepts everything not in 'deny'.
+        //  A literal 'allow' match has higher priority than any 'deny'.
+        //  A regex 'allow' match has lower priority than any 'deny'.
+        //
+        //  Example (when applied to a list of words),
+        //  \verbatim
+        //     input:  ( abc apple test other val val1 val2 wall wall1 wall2 )
+        //     allow:  ( abc def "t.*" other val val1 "wall.*" )
+        //     deny:   ( "[ab].*" "t.*" other "val[0-9]" wall )
+        //
+        //     result:  (abc other val val1 wall1 wall2)
+        //  \endverbatim
+        struct filter
+        {
+            //- Construct with 'allow' and 'deny' matchers
+            inline filter
+            (
+                const UList<wordRe>& allow,
+                const UList<wordRe>& deny
+            );
+
+            //- Nothing defined
+            inline bool empty() const noexcept;
+
+            //- True if matched but not blocked
+            inline bool operator()(const std::string& text) const;
+
+        private:
+            const UList<wordRe>& allow_;
+            const UList<wordRe>& deny_;
+        };
 };
 
 

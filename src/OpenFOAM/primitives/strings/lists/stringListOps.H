@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -361,16 +361,17 @@ struct foundOp
 //- Return ids for items with matching names.
 //  Uses a combination of allow and deny lists
 //
-//  An empty 'allow' list accepts everything not in the 'deny' list.
-//  A literal match has higher priority over a regex match.
+//  An empty 'allow' accepts everything not in 'deny'.
+//  A literal 'allow' match has higher priority than any 'deny'.
+//  A regex 'allow' match has lower priority than any 'deny'.
 //
-//  Eg,
+//  Example (when applied to a list of words),
 //  \verbatim
-//     input:  ( abc apple wall wall1 wall2 )
-//     allow:  ( abc  def  "wall.*" )
-//     deny:   ( "[ab].*"  wall )
+//     input:  ( abc apple test other val val1 val2 wall wall1 wall2 )
+//     allow:  ( abc def "t.*" other val val1 "wall.*" )
+//     deny:   ( "[ab].*" "t.*" other "val[0-9]" wall )
 //
-//     result:  (abc wall1 wall2)
+//     result:  (abc other val val1 wall1 wall2)
 //  \endverbatim
 //
 //  \return List indices for matches
@@ -379,7 +380,7 @@ labelList findMatching
 (
     const StringListType& input,
     const wordRes& allow,
-    const wordRes& deny = wordRes(),
+    const wordRes& deny = wordRes::null(),
     AccessOp aop = noOp()
 );
 

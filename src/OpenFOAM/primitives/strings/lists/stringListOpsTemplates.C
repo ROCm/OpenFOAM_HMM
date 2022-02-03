@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -147,6 +147,9 @@ Foam::labelList Foam::stringListOps::findMatching
         return identity(len);
     }
 
+    // Use combined accept/reject filter
+    const wordRes::filter pred(allow, deny);
+
     labelList indices(len);
 
     label count = 0;
@@ -154,25 +157,7 @@ Foam::labelList Foam::stringListOps::findMatching
     {
         const std::string& text = aop(input[i]);
 
-        bool accept = false;
-
-        if (allow.size())
-        {
-            const auto result = allow.matched(text);
-
-            accept =
-            (
-                result == wordRe::LITERAL
-              ? true
-              : (result == wordRe::REGEX && !deny.match(text))
-            );
-        }
-        else
-        {
-            accept = !deny.match(text);
-        }
-
-        if (accept)
+        if (pred(text))
         {
             indices[count] = i;
             ++count;
