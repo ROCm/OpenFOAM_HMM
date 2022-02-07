@@ -675,6 +675,8 @@ adjointSpalartAllmaras::adjointSpalartAllmaras
     gradNuTilda_(fvc::grad(nuTilda())),
     minStilda_("SMALL", Stilda_.dimensions(), SMALL)
 {
+    adjointTMVariablesBaseNames_.setSize(1);
+    adjointTMVariablesBaseNames_[0] = "nuaTilda";
     // Read nuaTilda field and reset pointer to the first
     // adjoint turbulence model variable
     variablesSet::setField

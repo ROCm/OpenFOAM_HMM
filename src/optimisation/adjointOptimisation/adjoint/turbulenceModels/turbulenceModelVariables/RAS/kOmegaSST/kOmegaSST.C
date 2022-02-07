@@ -28,6 +28,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "kOmegaSST.H"
+#include "wallDist.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -43,6 +44,34 @@ namespace RASVariables
 
 defineTypeNameAndDebug(kOmegaSST, 0);
 addToRunTimeSelectionTable(RASModelVariables, kOmegaSST, dictionary);
+
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+void kOmegaSST::allocateMeanFields()
+{
+    RASModelVariables::allocateMeanFields();
+    if (solverControl_.average())
+    {
+        GMean_.reset
+        (
+            new volScalarField::Internal
+            (
+                IOobject
+                (
+                    "GMean",
+                    mesh_.time().timeName(),
+                    mesh_,
+                    IOobject::READ_IF_PRESENT,
+                    IOobject::AUTO_WRITE
+                ),
+                mesh_,
+                dimensionedScalar(dimArea/pow3(dimTime), Zero)
+            )
+        );
+    }
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -61,12 +90,75 @@ kOmegaSST::kOmegaSST
     TMVar2Ptr_.ref(mesh_.lookupObjectRef<volScalarField>(TMVar2BaseName_));
     nutPtr_.ref(mesh_.lookupObjectRef<volScalarField>(nutBaseName_));
 
+    distPtr_.ref(const_cast<volScalarField&>(wallDist::New(mesh_).y()));
+
     allocateInitValues();
     allocateMeanFields();
 }
 
 
+tmp<volScalarField::Internal> kOmegaSST::computeG()
+{
+    const turbulenceModel& turbModel = mesh_.lookupObject<turbulenceModel>
+    (
+         IOobject::groupName
+         (
+             turbulenceModel::propertiesName,
+             TMVar2().internalField().group()
+         )
+    );
+    // Recompute G and modify values next to the walls
+    // Ideally, grad(U) should be cached to avoid the overhead
+    const volVectorField& U = turbModel.U();
+    tmp<volTensorField> tgradU = fvc::grad(U);
+    volScalarField::Internal GbyNu0
+    (
+        this->type() + ":GbyNu",
+        (tgradU() && dev(twoSymm(tgradU())))
+    );
+    auto tG =
+        tmp<volScalarField::Internal>::New
+        (
+            turbModel.GName(),
+            nutRefInst()*GbyNu0
+        );
+    // Use correctBoundaryConditions instead of updateCoeffs to avoid
+    // messing with updateCoeffs in the next iteration of omegaEqn
+    TMVar2Inst().correctBoundaryConditions();
+
+    return tG;
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+tmp<volScalarField::Internal> kOmegaSST::G()
+{
+    if (solverControl_.useAveragedFields())
+    {
+        DebugInfo
+            << "Using GMean" << endl;
+        return tmp<volScalarField::Internal>(GMean_());
+    }
+    DebugInfo
+        << "Using instantaneous G" << endl;
+    return computeG();
+}
+
+
+void kOmegaSST::computeMeanFields()
+{
+    RASModelVariables::computeMeanFields();
+    if (solverControl_.doAverageIter())
+    {
+        const label iAverageIter = solverControl_.averageIter();
+        scalar avIter(iAverageIter);
+        scalar oneOverItP1 = 1./(avIter + 1);
+        scalar mult = avIter*oneOverItP1;
+        GMean_() = GMean_()*mult + computeG()*oneOverItP1;
+    }
+}
+
 
 void kOmegaSST::correctBoundaryConditions
 (

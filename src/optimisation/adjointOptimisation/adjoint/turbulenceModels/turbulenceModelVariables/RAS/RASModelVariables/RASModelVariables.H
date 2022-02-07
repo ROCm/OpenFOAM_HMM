@@ -90,8 +90,8 @@ protected:
 
     // Protected Member functions
 
-        void allocateInitValues();
-        void allocateMeanFields();
+        virtual void allocateInitValues();
+        virtual void allocateMeanFields();
 
         refPtr<volScalarField>
         cloneRefPtr(const refPtr<volScalarField>& obj) const;
@@ -213,6 +213,13 @@ public:
             const singlePhaseTransportModel& laminarTransport
         ) const;
 
+        //- Return the turbulence production term
+        virtual tmp<volScalarField::Internal> G()
+        {
+            NotImplemented;
+            return nullptr;
+        }
+
         //- Restore turbulent fields to their initial values
         void restoreInitValues();
 
@@ -220,7 +227,7 @@ public:
         void resetMeanFields();
 
         //- Compute mean fields on the fly
-        void computeMeanFields();
+        virtual void computeMeanFields();
 
         //- Return stress tensor based on the mean flow variables
         tmp<volSymmTensorField> devReff
