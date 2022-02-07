@@ -120,6 +120,8 @@ objectiveMoment::objectiveMoment
     bdSdbMultPtr_.reset(createZeroBoundaryPtr<vector>(mesh_));
     bdxdbMultPtr_.reset(createZeroBoundaryPtr<vector>(mesh_));
     bdxdbDirectMultPtr_.reset(createZeroBoundaryPtr<vector>(mesh_));
+    bdJdnutPtr_.reset(createZeroBoundaryPtr<scalar>(mesh_));
+  //bdJdGradUPtr_.reset(createZeroBoundaryPtr<tensor>(mesh_));
 }
 
 
@@ -302,6 +304,25 @@ void objectiveMoment::update_dxdbDirectMultiplier()
         );
         bdxdbDirectMultPtr_()[patchI] =
             (force^momentDirection_)*invDenom_*rhoInf_;
+    }
+}
+
+
+void objectiveMoment::update_boundarydJdnut()
+{
+    const volVectorField& U = vars_.U();
+    volSymmTensorField devGradU(dev(twoSymm(fvc::grad(U))));
+
+    for (const label patchI : momentPatches_)
+    {
+        const fvPatch& patch = mesh_.boundary()[patchI];
+        tmp<vectorField> nf(patch.nf());
+        const vectorField dx(patch.Cf() - rotationCentre_);
+        bdJdnutPtr_()[patchI] =
+           -rhoInf_
+           *(
+                (dx^(devGradU.boundaryField()[patchI] & nf)) & momentDirection_
+            )*invDenom_;
     }
 }
 

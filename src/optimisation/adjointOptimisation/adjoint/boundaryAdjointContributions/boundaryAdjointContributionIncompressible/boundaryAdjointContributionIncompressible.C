@@ -223,6 +223,30 @@ boundaryAdjointContributionIncompressible::adjointTMVariable2Source()
 }
 
 
+tmp<scalarField>
+boundaryAdjointContributionIncompressible::dJdnut()
+{
+    return
+        sumContributions
+        (
+            objectiveManager_.getObjectiveFunctions(),
+            &objectiveIncompressible::boundarydJdnut
+        );
+}
+
+
+tmp<tensorField>
+boundaryAdjointContributionIncompressible::dJdGradU()
+{
+    return
+        sumContributions
+        (
+            objectiveManager_.getObjectiveFunctions(),
+            &objectiveIncompressible::boundarydJdGradU
+        );
+}
+
+
 tmp<scalarField> boundaryAdjointContributionIncompressible::momentumDiffusion()
 {
     tmp<scalarField> tnuEff(new scalarField(patch_.size(), Zero));

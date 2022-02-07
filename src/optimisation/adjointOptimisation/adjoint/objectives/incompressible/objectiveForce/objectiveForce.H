@@ -111,8 +111,11 @@ public:
         //- Update delta(x)/delta b multiplier
         void update_dxdbMultiplier();
 
-        //- Update dJ/dStress multiplier
-        void update_dJdStressMultiplier();
+        //- Update dJ/dnut multiplier
+        void update_boundarydJdnut();
+
+        //- Update dJ/dGradU multiplier
+        void update_boundarydJdGradU();
 
         //- Return denominator, without density
         virtual scalar denom() const;

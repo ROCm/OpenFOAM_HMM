@@ -113,7 +113,8 @@ objectiveForce::objectiveForce
     bdJdpPtr_.reset(createZeroBoundaryPtr<vector>(mesh_));
     bdSdbMultPtr_.reset(createZeroBoundaryPtr<vector>(mesh_));
     bdxdbMultPtr_.reset(createZeroBoundaryPtr<vector>(mesh_));
-    bdJdStressPtr_.reset(createZeroBoundaryPtr<tensor>(mesh_));
+    bdJdnutPtr_.reset(createZeroBoundaryPtr<scalar>(mesh_));
+    bdJdGradUPtr_.reset(createZeroBoundaryPtr<tensor>(mesh_));
 }
 
 
@@ -268,14 +269,35 @@ void objectiveForce::update_dxdbMultiplier()
 }
 
 
-void objectiveForce::update_dJdStressMultiplier()
+void objectiveForce::update_boundarydJdnut()
 {
+    const volVectorField& U = vars_.U();
+    volSymmTensorField devGradU(dev(twoSymm(fvc::grad(U))));
+
     for (const label patchI : forcePatches_)
     {
         const fvPatch& patch = mesh_.boundary()[patchI];
         tmp<vectorField> tnf = patch.nf();
         const vectorField& nf = tnf();
-        bdJdStressPtr_()[patchI] = (forceDirection_ * nf)/denom();
+        bdJdnutPtr_()[patchI] =
+           -((devGradU.boundaryField()[patchI] & forceDirection_) & nf)/denom();
+    }
+}
+
+
+void objectiveForce::update_boundarydJdGradU()
+{
+    const autoPtr<incompressible::RASModelVariables>&
+        turbVars = vars_.RASModelVariables();
+    const singlePhaseTransportModel& lamTransp = vars_.laminarTransport();
+    volScalarField nuEff(lamTransp.nu() + turbVars->nutRef());
+    for (const label patchI : forcePatches_)
+    {
+        const fvPatch& patch = mesh_.boundary()[patchI];
+        const vectorField& Sf = patch.Sf();
+        bdJdGradUPtr_()[patchI] =
+          - nuEff.boundaryField()[patchI]
+           *dev(forceDirection_*Sf + Sf*forceDirection_);
     }
 }
 

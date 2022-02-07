@@ -156,7 +156,6 @@ objective::objective
     bdxdbMultPtr_(nullptr),
     bdxdbDirectMultPtr_(nullptr),
     bEdgeContribution_(nullptr),
-    bdJdStressPtr_(nullptr),
     divDxDbMultPtr_(nullptr),
     gradDxDbMultPtr_(nullptr),
 
@@ -376,10 +375,6 @@ void objective::doNormalization()
         {
             gradDxDbMultPtr_() *= oneOverNorm;
         }
-        if (hasBoundarydJdStress())
-        {
-            bdJdStressPtr_() *= oneOverNorm;
-        }
     }
 }
 
@@ -507,16 +502,6 @@ const vectorField& objective::boundaryEdgeMultiplier
 }
 
 
-const fvPatchTensorField& objective::boundarydJdStress(const label patchI)
-{
-    if (!bdJdStressPtr_)
-    {
-        bdJdStressPtr_.reset(createZeroBoundaryPtr<tensor>(mesh_));
-    }
-    return bdJdStressPtr_()[patchI];
-}
-
-
 const boundaryVectorField& objective::boundarydJdb()
 {
     if (!bdJdbPtr_)
@@ -577,16 +562,6 @@ const vectorField3& objective::boundaryEdgeMultiplier()
             << exit(FatalError);
     }
     return *bEdgeContribution_;
-}
-
-
-const boundaryTensorField& objective::boundarydJdStress()
-{
-    if (!bdJdStressPtr_)
-    {
-        bdJdStressPtr_.reset(createZeroBoundaryPtr<tensor>(mesh_));
-    }
-    return *bdJdStressPtr_;
 }
 
 
@@ -665,10 +640,6 @@ void objective::nullify()
             {
                 field = vector::zero;
             }
-        }
-        if (hasBoundarydJdStress())
-        {
-            bdJdStressPtr_() == tensor::zero;
         }
         if (hasDivDxDbMult())
         {

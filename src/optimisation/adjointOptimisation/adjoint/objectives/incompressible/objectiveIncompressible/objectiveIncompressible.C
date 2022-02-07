@@ -84,7 +84,9 @@ objectiveIncompressible::objectiveIncompressible
     bdJdpPtr_(nullptr),
     bdJdTPtr_(nullptr),
     bdJdTMvar1Ptr_(nullptr),
-    bdJdTMvar2Ptr_(nullptr)
+    bdJdTMvar2Ptr_(nullptr),
+    bdJdnutPtr_(nullptr),
+    bdJdGradUPtr_(nullptr)
 {
     weight_ = dict.get<scalar>("weight");
     computeMeanFields_ = vars_.computeMeanFields();
@@ -181,6 +183,14 @@ void objectiveIncompressible::doNormalization()
         if (hasBoundarydJdTMVar2())
         {
             bdJdTMvar2Ptr_() *= oneOverNorm;
+        }
+        if (hasBoundarydJdnut())
+        {
+            bdJdnutPtr_() *= oneOverNorm;
+        }
+        if (hasBoundarydJdGradU())
+        {
+            bdJdGradUPtr_() *= oneOverNorm;
         }
 
         // Normalize geometric fields
@@ -375,6 +385,32 @@ const fvPatchScalarField& objectiveIncompressible::boundarydJdTMvar2
 }
 
 
+const fvPatchScalarField& objectiveIncompressible::boundarydJdnut
+(
+    const label patchI
+)
+{
+    if (!bdJdnutPtr_)
+    {
+        bdJdnutPtr_.reset(createZeroBoundaryPtr<scalar>(mesh_));
+    }
+    return bdJdnutPtr_()[patchI];
+}
+
+
+const fvPatchTensorField& objectiveIncompressible::boundarydJdGradU
+(
+    const label patchI
+)
+{
+    if (!bdJdGradUPtr_)
+    {
+        bdJdGradUPtr_.reset(createZeroBoundaryPtr<tensor>(mesh_));
+    }
+    return bdJdGradUPtr_()[patchI];
+}
+
+
 const boundaryVectorField& objectiveIncompressible::boundarydJdv()
 {
     if (!bdJdvPtr_)
@@ -445,6 +481,26 @@ const boundaryScalarField& objectiveIncompressible::boundarydJdTMvar2()
 }
 
 
+const boundaryScalarField& objectiveIncompressible::boundarydJdnut()
+{
+    if (!bdJdnutPtr_)
+    {
+        bdJdnutPtr_.reset(createZeroBoundaryPtr<scalar>(mesh_));
+    }
+    return bdJdnutPtr_();
+}
+
+
+const boundaryTensorField& objectiveIncompressible::boundarydJdGradU()
+{
+    if (!bdJdGradUPtr_)
+    {
+        bdJdGradUPtr_.reset(createZeroBoundaryPtr<tensor>(mesh_));
+    }
+    return *bdJdGradUPtr_;
+}
+
+
 void objectiveIncompressible::update()
 {
     // Objective function value
@@ -472,13 +528,14 @@ void objectiveIncompressible::update()
     update_boundarydJdT();
     update_boundarydJdTMvar1();
     update_boundarydJdTMvar2();
+    update_boundarydJdnut();
+    update_boundarydJdGradU();
     update_boundarydJdb();
     update_dSdbMultiplier();
     update_dndbMultiplier();
     update_dxdbMultiplier();
     update_dxdbDirectMultiplier();
     update_boundaryEdgeContribution();
-    update_dJdStressMultiplier();
 
     // Divide everything with normalization factor
     doNormalization();
@@ -538,6 +595,14 @@ void objectiveIncompressible::nullify()
         if (hasBoundarydJdTMVar2())
         {
             bdJdTMvar2Ptr_() == scalar(0);
+        }
+        if (hasBoundarydJdnut())
+        {
+            bdJdnutPtr_() == scalar(0);
+        }
+        if (hasBoundarydJdGradU())
+        {
+            bdJdGradUPtr_() == tensor::zero;
         }
 
         // Nullify geometric fields and sets nullified_ to true

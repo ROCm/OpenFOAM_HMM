@@ -102,4 +102,16 @@ inline bool Foam::objectiveIncompressible::hasBoundarydJdTMVar2() const
 }
 
 
+inline bool Foam::objectiveIncompressible::hasBoundarydJdnut() const
+{
+    return bool(bdJdnutPtr_);
+}
+
+
+inline bool Foam::objectiveIncompressible::hasBoundarydJdGradU() const
+{
+    return bool(bdJdGradUPtr_);
+}
+
+
 // ************************************************************************* //

@@ -90,12 +90,6 @@ inline bool Foam::objective::hasGradDxDbMult() const
 }
 
 
-inline bool Foam::objective::hasBoundarydJdStress() const
-{
-    return bool(bdJdStressPtr_);
-}
-
-
 inline bool Foam::objective::hasIntegrationStartTime() const
 {
     return bool(integrationStartTimePtr_);

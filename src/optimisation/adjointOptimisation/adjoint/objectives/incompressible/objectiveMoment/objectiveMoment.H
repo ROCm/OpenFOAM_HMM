@@ -118,6 +118,14 @@ public:
         //- Update delta(x)/delta b multiplier coming directly from the
         //- objective
         void update_dxdbDirectMultiplier();
+
+        //- Update dJ/dnut multiplier
+        void update_boundarydJdnut();
+
+        //- Update dJ/dGradU multiplier
+        /* WIP
+        void update_boundarydJdGradU();
+        */
 };
 
 

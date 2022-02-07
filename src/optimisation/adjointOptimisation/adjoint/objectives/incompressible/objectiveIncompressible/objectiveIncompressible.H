@@ -97,6 +97,12 @@ protected:
         //- Adjoint outlet turbulence model var 2
         autoPtr<boundaryScalarField> bdJdTMvar2Ptr_;
 
+        //- Jacobian wrt to nut
+        autoPtr<boundaryScalarField> bdJdnutPtr_;
+
+        //- Term multiplying gradU variations
+        autoPtr<boundaryTensorField> bdJdGradUPtr_;
+
 
 private:
 
@@ -207,6 +213,12 @@ public:
         //- patch
         const fvPatchScalarField& boundarydJdTMvar2(const label);
 
+        //- Objective partial deriv wrt nut for a specific patch
+        const fvPatchScalarField& boundarydJdnut(const label);
+
+        //- Objective partial deriv wrt stress tensor
+        const fvPatchTensorField& boundarydJdGradU(const label);
+
         //- Objective partial deriv wrt velocity for all patches
         const boundaryVectorField& boundarydJdv();
 
@@ -227,6 +239,12 @@ public:
 
         //- Objective partial deriv wrt turbulence model var 2 for all patches
         const boundaryScalarField& boundarydJdTMvar2();
+
+        //- Objective partial deriv wrt nut for all patches
+        const boundaryScalarField& boundarydJdnut();
+
+        //- Objective partial deriv wrt gradU
+        const boundaryTensorField& boundarydJdGradU();
 
         //- Update objective function derivatives
         virtual void update();
@@ -282,6 +300,12 @@ public:
         virtual void update_boundarydJdTMvar2()
         {}
 
+        virtual void update_boundarydJdnut()
+        {}
+
+        virtual void update_boundarydJdGradU()
+        {}
+
         virtual void update_boundarydJdb()
         {}
 
@@ -321,6 +345,8 @@ public:
         inline bool hasBoundarydJdT() const;
         inline bool hasBoundarydJdTMVar1() const;
         inline bool hasBoundarydJdTMVar2() const;
+        inline bool hasBoundarydJdnut() const;
+        inline bool hasBoundarydJdGradU() const;
 };
 
 
