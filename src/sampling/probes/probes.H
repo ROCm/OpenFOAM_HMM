@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,7 +50,7 @@ Description
         writeInterval   1;
 
         // Fields to be probed
-        fields          (p U);
+        fields          (U "p.*");
 
         // Optional: do not recalculate cells if mesh moves
         fixedLocations  false;
@@ -72,15 +72,28 @@ Description
     }
     \endverbatim
 
+    Entries:
+    \table
+        Property | Description                              | Required | Default
+        type     | Type-name: probes                        | yes |
+        probeLocations | Probe locations                    | yes |
+        fields   | word/regex list of fields to sample      | yes |
+        interpolationScheme | scheme to obtain values       | no  | cell
+        fixedLocations | Do not recalculate cells if mesh moves | no | true
+        includeOutOfBounds | Include out-of-bounds locations | no | true
+        sampleOnExecute | Sample on execution and store results | no | false
+    \endtable
+
 SourceFiles
     probes.C
+    probesTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef probes_H
-#define probes_H
+#ifndef Foam_probes_H
+#define Foam_probes_H
 
-#include "stateFunctionObject.H"
+#include "fvMeshFunctionObject.H"
 #include "HashPtrTable.H"
 #include "OFstream.H"
 #include "polyMesh.H"
@@ -89,15 +102,14 @@ SourceFiles
 #include "surfaceFieldsFwd.H"
 #include "surfaceMesh.H"
 #include "wordRes.H"
-
-using namespace Foam::functionObjects;
+#include "IOobjectList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class Time;
 class objectRegistry;
 class dictionary;
@@ -110,70 +122,75 @@ class mapPolyMesh;
 
 class probes
 :
-    public stateFunctionObject,
+    public functionObjects::fvMeshFunctionObject,
     public pointField
 {
 protected:
 
-    // Protected classes
+    // Protected Classes
 
-        //- Class used for grouping field types
-        template<class Type>
-        class fieldGroup
-        :
-            public DynamicList<word>
+        //- Grouping of field names by GeometricField type
+        template<class GeoField>
+        struct fieldGroup : public DynamicList<word> {};
+
+
+    // Data Types
+
+        //- Local control for sampling actions
+        enum sampleActionType : unsigned
         {
-        public:
-            //- Construct null
-            fieldGroup()
-            :
-                DynamicList<word>(0)
-            {}
+            ACTION_NONE  = 0,
+            ACTION_WRITE = 0x1,
+            ACTION_STORE = 0x2,
+            ACTION_ALL = 0xF
         };
 
 
-    // Protected data
-
-        //- Const reference to fvMesh
-        const fvMesh& mesh_;
+    // Protected Data
 
         //- Load fields from files (not from objectRegistry)
         bool loadFromFiles_;
 
-
-      // Read from dictionary
-
-        //- Names of fields to probe
-        wordRes fieldSelection_;
-
-        //- Fixed locations, default = yes
+        //- Fixed locations (default: true)
         //  Note: set to false for moving mesh calculations where locations
         //        should move with the mesh
         bool fixedLocations_;
 
-        //- Interpolation scheme name
-        //  Note: only possible when fixedLocations_ is true
-        word interpolationScheme_;
-
-        //- Include probes that were not found
+        //- Include probes that were not found (default: true)
         bool includeOutOfBounds_;
 
+        //- Output verbosity
+        bool verbose_;
 
-      // Calculated
+        //- Perform sample actions on execute as well
+        bool onExecute_;
 
-        //- Categorized scalar/vector/tensor vol fields
-        fieldGroup<scalar> scalarFields_;
-        fieldGroup<vector> vectorFields_;
-        fieldGroup<sphericalTensor> sphericalTensorFields_;
-        fieldGroup<symmTensor> symmTensorFields_;
-        fieldGroup<tensor> tensorFields_;
+        //- Requested names of fields to probe
+        wordRes fieldSelection_;
 
-        //- Categorized scalar/vector/tensor surf fields
-        fieldGroup<scalar> surfaceScalarFields_;
-        fieldGroup<vector> surfaceVectorFields_;
-        fieldGroup<sphericalTensor> surfaceSphericalTensorFields_;
-        fieldGroup<symmTensor> surfaceSymmTensorFields_;
-        fieldGroup<tensor> surfaceTensorFields_;
+        //- Interpolation/sample scheme to obtain values at the points
+        //  Note: only possible when fixedLocations_ is true
+        word samplePointScheme_;
+
+
+    // Calculated
+
+        //- Current list of field names selected for sampling
+        DynamicList<word> selectedFieldNames_;
+
+        //- Categorized scalar/vector/tensor volume fields
+        fieldGroup<volScalarField> scalarFields_;
+        fieldGroup<volVectorField> vectorFields_;
+        fieldGroup<volSphericalTensorField> sphericalTensorFields_;
+        fieldGroup<volSymmTensorField> symmTensorFields_;
+        fieldGroup<volTensorField> tensorFields_;
+
+        //- Categorized scalar/vector/tensor surface fields
+        fieldGroup<surfaceScalarField> surfaceScalarFields_;
+        fieldGroup<surfaceVectorField> surfaceVectorFields_;
+        fieldGroup<surfaceSphericalTensorField> surfaceSphericalTensorFields_;
+        fieldGroup<surfaceSymmTensorField> surfaceSymmTensorFields_;
+        fieldGroup<surfaceTensorField> surfaceTensorFields_;
 
         //- Cells to be probed (obtained from the locations)
         labelList elementList_;
@@ -185,65 +202,63 @@ protected:
         //  on any processor)
         labelList processor_;
 
-        //- Current open files
+        //- Current open files (non-empty on master only)
         HashPtrTable<OFstream> probeFilePtrs_;
 
-        // Additional fields for patchProbes
+        //- Patch IDs on which the new probes are located (for patchProbes)
+        labelList patchIDList_;
 
-            //- Patch IDs on which the new probes are located
-            labelList patchIDList_;
-
-            //- Original probes location (only used for patchProbes)
-            pointField oldPoints_;
+        //- Original probes location (only used for patchProbes)
+        pointField oldPoints_;
 
 
     // Protected Member Functions
 
-        //- Clear old field groups
-        void clearFieldGroups();
-
-        //- Classify field types, returns the number of fields
-        label classifyFields();
-
         //- Find cells and faces containing probes
         virtual void findElements(const fvMesh& mesh);
 
-        //- Classify field type and open/close file streams,
-        //  returns number of fields to sample
-        label prepare();
+        //- Classify field types, close/open file streams
+        //  \return number of fields to sample
+        label prepare(unsigned request);
+
+        //- Get from registry or load from disk
+        template<class GeoField>
+        tmp<GeoField> getOrLoadField(const word& fieldName) const;
+
+        //- Store results: min/max/average/size
+        template<class Type>
+        void storeResults(const word& fieldName, const Field<Type>& values);
 
 
 private:
 
-        //- Sample and write a particular volume field
+    // Private Member Functions
+
+        //- Write field values
         template<class Type>
-        void sampleAndWrite
+        void writeValues
         (
-            const GeometricField<Type, fvPatchField, volMesh>&
+            const word& fieldName,
+            const Field<Type>& values,
+            const scalar timeValue
         );
 
-
-        //- Sample and write a particular surface field
-        template<class Type>
-        void sampleAndWrite
+        //- Sample and store/write all applicable sampled fields
+        template<class GeoField>
+        void performAction
         (
-            const GeometricField<Type, fvsPatchField, surfaceMesh>&
+            const fieldGroup<GeoField>& fieldNames,  /* must be sorted */
+            unsigned request
         );
 
-        //- Sample and write all the fields of the given type
-        template<class Type>
-        void sampleAndWrite(const fieldGroup<Type>&);
-
-        //- Sample and write all the surface fields of the given type
-        template<class Type>
-        void sampleAndWriteSurfaceFields(const fieldGroup<Type>&);
+        //- Perform sampling action with store/write
+        bool performAction(unsigned request);
 
         //- No copy construct
         probes(const probes&) = delete;
 
         //- No copy assignment
         void operator=(const probes&) = delete;
-
 
 public:
 
@@ -270,14 +285,18 @@ public:
 
     // Member Functions
 
+        //- Enable/disable verbose output
+        //  \return old value
+        bool verbose(const bool on) noexcept;
+
         //- Return names of fields to probe
-        virtual const wordRes& fieldNames() const
+        virtual const wordRes& fieldNames() const noexcept
         {
             return fieldSelection_;
         }
 
         //- Return locations to probe
-        virtual const pointField& probeLocations() const
+        virtual const pointField& probeLocations() const noexcept
         {
             return *this;
         }
@@ -289,7 +308,7 @@ public:
         }
 
         //- Cells to be probed (obtained from the locations)
-        const labelList& elements() const
+        const labelList& elements() const noexcept
         {
             return elementList_;
         }
@@ -297,7 +316,7 @@ public:
         //- Read the probes
         virtual bool read(const dictionary&);
 
-        //- Execute, currently does nothing
+        //- Sample and store result if the sampleOnExecute is enabled.
         virtual bool execute();
 
         //- Sample and write
@@ -313,27 +332,24 @@ public:
         virtual void readUpdate(const polyMesh::readUpdateState state)
         {}
 
+
+    // Sampling
+
         //- Sample a volume field at all locations
         template<class Type>
-        tmp<Field<Type>> sample
-        (
-            const GeometricField<Type, fvPatchField, volMesh>&
-        ) const;
-
-        //- Sample a single vol field on all sample locations
-        template<class Type>
-        tmp<Field<Type>> sample(const word& fieldName) const;
-
-        //- Sample a single scalar field on all sample locations
-        template<class Type>
-        tmp<Field<Type>> sampleSurfaceFields(const word& fieldName) const;
+        tmp<Field<Type>> sample(const VolumeField<Type>&) const;
 
         //- Sample a surface field at all locations
         template<class Type>
-        tmp<Field<Type>> sample
-        (
-            const GeometricField<Type, fvsPatchField, surfaceMesh>&
-        ) const;
+        tmp<Field<Type>> sample(const SurfaceField<Type>&) const;
+
+        //- Sample a volume field at all locations
+        template<class Type>
+        tmp<Field<Type>> sample(const word& fieldName) const;
+
+        //- Sample a surface field at all locations
+        template<class Type>
+        tmp<Field<Type>> sampleSurfaceField(const word& fieldName) const;
 };
 
 

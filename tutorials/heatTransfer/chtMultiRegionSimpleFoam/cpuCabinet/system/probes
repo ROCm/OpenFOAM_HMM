@@ -36,46 +36,40 @@ Volume3_v_fins
 
 probesFins
 {
-    type 	    probes;
+    type            probes;
     libs            (sampling);
     writeControl    timeStep;
     writeInterval   1;
     interpolationScheme cell;
-    region	        v_fins;
-    setFormat          raw;
-    log             true;
-    valueOutput     false;
-    writeFields     false;
+    region          v_fins;
+
+    fields          ( T );
 
     probeLocations
     (
         (0.118 0.01 -0.125)
         (0.118 0.03 -0.125)
     );
-
-    fields          ( T );
 }
 
 probesFluid
 {
-    type 	    probes;
+    type            probes;
     libs            (sampling);
     writeControl    timeStep;
     writeInterval   1;
     interpolationScheme cell;
-    region	        domain0;
-    setFormat          raw;
+    region         domain0;
     log             true;
-    valueOutput     false;
-    writeFields     false;
+    verbose         true;
+
+    fields          (T U);
 
     probeLocations
     (
         (0.118 0.035 -0.125)
         (0.118 0.07 -0.125)
     );
-
-    fields          ( T U);
 }
 #remove (_volFieldValue _surfaceFieldValue)
 

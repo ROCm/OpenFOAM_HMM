@@ -201,13 +201,16 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
     // - faceList_      : faces (now patch faces)
     // - patchIDList_   : patch corresponding to faceList
     // - processor_     : processor
-    elementList_.setSize(nearest.size());
+    elementList_.resize_nocopy(nearest.size());
     elementList_ = -1;
-    faceList_.setSize(nearest.size());
+
+    faceList_.resize_nocopy(nearest.size());
     faceList_ = -1;
-    processor_.setSize(nearest.size());
+
+    processor_.resize_nocopy(nearest.size());
     processor_ = -1;
-    patchIDList_.setSize(nearest.size());
+
+    patchIDList_.resize_nocopy(nearest.size());
     patchIDList_ = -1;
 
     forAll(nearest, sampleI)
@@ -236,13 +239,13 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
 Foam::patchProbes::patchProbes
 (
     const word& name,
-    const Time& t,
+    const Time& runTime,
     const dictionary& dict,
     const bool loadFromFiles,
     const bool readFields
 )
 :
-    probes(name, t, dict, loadFromFiles, false)
+    probes(name, runTime, dict, loadFromFiles, false)
 {
     if (readFields)
     {
@@ -253,24 +256,40 @@ Foam::patchProbes::patchProbes
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::patchProbes::write()
+bool Foam::patchProbes::performAction(unsigned request)
 {
-    if (this->size() && prepare())
+    if (!pointField::empty() && request && prepare(request))
     {
-        sampleAndWrite(scalarFields_);
-        sampleAndWrite(vectorFields_);
-        sampleAndWrite(sphericalTensorFields_);
-        sampleAndWrite(symmTensorFields_);
-        sampleAndWrite(tensorFields_);
+        performAction(scalarFields_, request);
+        performAction(vectorFields_, request);
+        performAction(sphericalTensorFields_, request);
+        performAction(symmTensorFields_, request);
+        performAction(tensorFields_, request);
 
-        sampleAndWriteSurfaceFields(surfaceScalarFields_);
-        sampleAndWriteSurfaceFields(surfaceVectorFields_);
-        sampleAndWriteSurfaceFields(surfaceSphericalTensorFields_);
-        sampleAndWriteSurfaceFields(surfaceSymmTensorFields_);
-        sampleAndWriteSurfaceFields(surfaceTensorFields_);
+        performAction(surfaceScalarFields_, request);
+        performAction(surfaceVectorFields_, request);
+        performAction(surfaceSphericalTensorFields_, request);
+        performAction(surfaceSymmTensorFields_, request);
+        performAction(surfaceTensorFields_, request);
+    }
+    return true;
+}
+
+
+bool Foam::patchProbes::execute()
+{
+    if (onExecute_)
+    {
+        return performAction(ACTION_ALL & ~ACTION_WRITE);
     }
 
     return true;
+}
+
+
+bool Foam::patchProbes::write()
+{
+    return performAction(ACTION_ALL);
 }
 
 

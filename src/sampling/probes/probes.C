@@ -27,8 +27,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "probes.H"
-#include "volFields.H"
 #include "dictionary.H"
+#include "volFields.H"
+#include "surfaceFields.H"
 #include "Time.H"
 #include "IOmanip.H"
 #include "mapPolyMesh.H"
@@ -55,18 +56,14 @@ void Foam::probes::findElements(const fvMesh& mesh)
 {
     DebugInfo<< "probes: resetting sample locations" << endl;
 
-    elementList_.clear();
-    elementList_.setSize(size());
-
-    faceList_.clear();
-    faceList_.setSize(size());
-
-    processor_.setSize(size());
+    elementList_.resize_nocopy(pointField::size());
+    faceList_.resize_nocopy(pointField::size());
+    processor_.resize_nocopy(pointField::size());
     processor_ = -1;
 
     forAll(*this, probei)
     {
-        const vector& location = operator[](probei);
+        const point& location = (*this)[probei];
 
         const label celli = mesh.findCell(location);
 
@@ -107,7 +104,7 @@ void Foam::probes::findElements(const fvMesh& mesh)
     // Check if all probes have been found.
     forAll(elementList_, probei)
     {
-        const vector& location = operator[](probei);
+        const point& location = operator[](probei);
         label celli = elementList_[probei];
         label facei = faceList_[probei];
 
@@ -171,15 +168,53 @@ void Foam::probes::findElements(const fvMesh& mesh)
 }
 
 
-Foam::label Foam::probes::prepare()
+Foam::label Foam::probes::prepare(unsigned request)
 {
-    const label nFields = classifyFields();
+    // Prefilter on selection
+    HashTable<wordHashSet> selected =
+    (
+        loadFromFiles_
+      ? IOobjectList(mesh_, mesh_.time().timeName()).classes(fieldSelection_)
+      : mesh_.classes(fieldSelection_)
+    );
 
-    // adjust file streams
+    // Classify and count fields
+    label nFields = 0;
+    do
+    {
+        #undef  doLocalCode
+        #define doLocalCode(InputType, Target)                                \
+        {                                                                     \
+            Target.clear();  /* Remove old values */                          \
+            const auto iter = selected.cfind(InputType::typeName);            \
+            if (iter.found())                                                 \
+            {                                                                 \
+                /* Add new (current) values */                                \
+                Target.append(iter.val().sortedToc());                        \
+                nFields += Target.size();                                     \
+            }                                                                 \
+        }
+
+        doLocalCode(volScalarField, scalarFields_);
+        doLocalCode(volVectorField, vectorFields_)
+        doLocalCode(volSphericalTensorField, sphericalTensorFields_);
+        doLocalCode(volSymmTensorField, symmTensorFields_);
+        doLocalCode(volTensorField, tensorFields_);
+
+        doLocalCode(surfaceScalarField, surfaceScalarFields_);
+        doLocalCode(surfaceVectorField, surfaceVectorFields_);
+        doLocalCode(surfaceSphericalTensorField, surfaceSphericalTensorFields_);
+        doLocalCode(surfaceSymmTensorField, surfaceSymmTensorFields_);
+        doLocalCode(surfaceTensorField, surfaceTensorFields_);
+        #undef doLocalCode
+    }
+    while (false);
+
+
+    // Adjust file streams
     if (Pstream::master())
     {
-        wordHashSet currentFields;
-
+        wordHashSet currentFields(2*nFields);
         currentFields.insert(scalarFields_);
         currentFields.insert(vectorFields_);
         currentFields.insert(sphericalTensorFields_);
@@ -197,27 +232,7 @@ Foam::label Foam::probes::prepare()
             << "Probing locations: " << *this << nl
             << endl;
 
-
-        fileName probeSubDir = name();
-
-        if (mesh_.name() != polyMesh::defaultRegion)
-        {
-            probeSubDir = probeSubDir/mesh_.name();
-        }
-
-        // Put in undecomposed case
-        // (Note: gives problems for distributed data running)
-
-        fileName probeDir
-        (
-            mesh_.time().globalPath()
-          / functionObject::outputPrefix
-          / probeSubDir
-          / mesh_.time().timeName()
-        );
-        probeDir.clean();  // Remove unneeded ".."
-
-        // ignore known fields, close streams for fields that no longer exist
+        // Close streams for fields that no longer exist
         forAllIters(probeFilePtrs_, iter)
         {
             if (!currentFields.erase(iter.key()))
@@ -228,28 +243,59 @@ Foam::label Foam::probes::prepare()
             }
         }
 
-        // currentFields now just has the new fields - open streams for them
-        for (const word& fieldName : currentFields)
+        if (!(request & ACTION_WRITE))
         {
-            // Create directory if does not exist.
-            mkDir(probeDir);
+            // No writing - can return now
+            return nFields;
+        }
+        else if (currentFields.empty())
+        {
+            // No new fields - can return now
+            return nFields;
+        }
 
-            auto fPtr = autoPtr<OFstream>::New(probeDir/fieldName);
-            auto& fout = *fPtr;
 
-            DebugInfo<< "open probe stream: " << fout.name() << endl;
+        // Have new fields - open streams for them
 
-            probeFilePtrs_.insert(fieldName, fPtr);
+        // Put in undecomposed case
+        // (Note: gives problems for distributed data running)
 
-            unsigned int w = IOstream::defaultPrecision() + 7;
+        fileName probeSubDir = name();
+        if (mesh_.name() != polyMesh::defaultRegion)
+        {
+            probeSubDir = probeSubDir/mesh_.name();
+        }
+
+        fileName probeDir
+        (
+            mesh_.time().globalPath()
+          / functionObject::outputPrefix
+          / probeSubDir
+          / mesh_.time().timeName()
+        );
+        probeDir.clean();  // Remove unneeded ".."
+
+        // Create directory if needed
+        mkDir(probeDir);
+
+        for (const word& fieldName : currentFields.sortedToc())
+        {
+            auto osPtr = autoPtr<OFstream>::New(probeDir/fieldName);
+            auto& os = *osPtr;
+
+            probeFilePtrs_.insert(fieldName, osPtr);
+
+            DebugInfo<< "open probe stream: " << os.name() << endl;
+
+            const unsigned int w = IOstream::defaultPrecision() + 7;
 
             forAll(*this, probei)
             {
-                fout<< "# Probe " << probei << ' ' << operator[](probei);
+                os  << "# Probe " << probei << ' ' << operator[](probei);
 
                 if (processor_[probei] == -1)
                 {
-                    fout<< "  # Not Found";
+                    os  << "  # Not Found";
                 }
                 // Only for patchProbes
                 else if (probei < patchIDList_.size())
@@ -264,31 +310,31 @@ Foam::label Foam::probes::prepare()
                          || processor_[probei] == Pstream::myProcNo()
                         )
                         {
-                            fout<< " at patch " << bm[patchi].name();
+                            os  << " at patch " << bm[patchi].name();
                         }
-                        fout<< " with a distance of "
+                        os  << " with a distance of "
                             << mag(operator[](probei)-oldPoints_[probei])
                             << " m to the original point "
                             << oldPoints_[probei];
                     }
                 }
 
-                fout<< endl;
+                os  << nl;
             }
 
-            fout<< '#' << setw(IOstream::defaultPrecision() + 6)
+            os  << '#' << setw(IOstream::defaultPrecision() + 6)
                 << "Probe";
 
             forAll(*this, probei)
             {
                 if (includeOutOfBounds_ || processor_[probei] != -1)
                 {
-                    fout<< ' ' << setw(w) << probei;
+                    os  << ' ' << setw(w) << probei;
                 }
             }
-            fout<< endl;
+            os  << nl;
 
-            fout<< '#' << setw(IOstream::defaultPrecision() + 6)
+            os  << '#' << setw(IOstream::defaultPrecision() + 6)
                 << "Time" << endl;
         }
     }
@@ -308,23 +354,15 @@ Foam::probes::probes
     const bool readFields
 )
 :
-    stateFunctionObject(name, runTime),
-    pointField(0),
-    mesh_
-    (
-        refCast<const fvMesh>
-        (
-            runTime.lookupObject<objectRegistry>
-            (
-                dict.getOrDefault("region", polyMesh::defaultRegion)
-            )
-        )
-    ),
+    functionObjects::fvMeshFunctionObject(name, runTime, dict),
+    pointField(),
     loadFromFiles_(loadFromFiles),
-    fieldSelection_(),
     fixedLocations_(true),
-    interpolationScheme_("cell"),
-    includeOutOfBounds_(true)
+    includeOutOfBounds_(true),
+    verbose_(false),
+    onExecute_(false),
+    fieldSelection_(),
+    samplePointScheme_("cell")
 {
     if (readFields)
     {
@@ -335,15 +373,28 @@ Foam::probes::probes
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+bool Foam::probes::verbose(const bool on) noexcept
+{
+    bool old(verbose_);
+    verbose_ = on;
+    return old;
+}
+
+
 bool Foam::probes::read(const dictionary& dict)
 {
     dict.readEntry("probeLocations", static_cast<pointField&>(*this));
     dict.readEntry("fields", fieldSelection_);
 
     dict.readIfPresent("fixedLocations", fixedLocations_);
-    if (dict.readIfPresent("interpolationScheme", interpolationScheme_))
+    dict.readIfPresent("includeOutOfBounds", includeOutOfBounds_);
+
+    verbose_ = dict.getOrDefault("verbose", false);
+    onExecute_ = dict.getOrDefault("sampleOnExecute", false);
+
+    if (dict.readIfPresent("interpolationScheme", samplePointScheme_))
     {
-        if (!fixedLocations_ && interpolationScheme_ != "cell")
+        if (!fixedLocations_ && samplePointScheme_ != "cell")
         {
             WarningInFunction
                 << "Only cell interpolation can be applied when "
@@ -352,41 +403,51 @@ bool Foam::probes::read(const dictionary& dict)
                 << endl;
         }
     }
-    dict.readIfPresent("includeOutOfBounds", includeOutOfBounds_);
 
     // Initialise cells to sample from supplied locations
     findElements(mesh_);
 
-    prepare();
+    // Close old (ununsed) streams
+    prepare(ACTION_NONE);
 
+    return true;
+}
+
+
+bool Foam::probes::performAction(unsigned request)
+{
+    if (!pointField::empty() && request && prepare(request))
+    {
+        performAction(scalarFields_, request);
+        performAction(vectorFields_, request);
+        performAction(sphericalTensorFields_, request);
+        performAction(symmTensorFields_, request);
+        performAction(tensorFields_, request);
+
+        performAction(surfaceScalarFields_, request);
+        performAction(surfaceVectorFields_, request);
+        performAction(surfaceSphericalTensorFields_, request);
+        performAction(surfaceSymmTensorFields_, request);
+        performAction(surfaceTensorFields_, request);
+    }
     return true;
 }
 
 
 bool Foam::probes::execute()
 {
+    if (onExecute_)
+    {
+        return performAction(ACTION_ALL & ~ACTION_WRITE);
+    }
+
     return true;
 }
 
 
 bool Foam::probes::write()
 {
-    if (size() && prepare())
-    {
-        sampleAndWrite(scalarFields_);
-        sampleAndWrite(vectorFields_);
-        sampleAndWrite(sphericalTensorFields_);
-        sampleAndWrite(symmTensorFields_);
-        sampleAndWrite(tensorFields_);
-
-        sampleAndWriteSurfaceFields(surfaceScalarFields_);
-        sampleAndWriteSurfaceFields(surfaceVectorFields_);
-        sampleAndWriteSurfaceFields(surfaceSphericalTensorFields_);
-        sampleAndWriteSurfaceFields(surfaceSymmTensorFields_);
-        sampleAndWriteSurfaceFields(surfaceTensorFields_);
-    }
-
-    return true;
+    return performAction(ACTION_ALL);
 }
 
 

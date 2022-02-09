@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,14 +64,14 @@ Description
     }
     \endverbatim
 
-
 SourceFiles
     patchProbes.C
+    patchProbesTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef patchProbes_H
-#define patchProbes_H
+#ifndef Foam_patchProbes_H
+#define Foam_patchProbes_H
 
 #include "probes.H"
 
@@ -79,12 +79,6 @@ SourceFiles
 
 namespace Foam
 {
-
-// Forward declaration of classes
-class objectRegistry;
-class dictionary;
-class fvMesh;
-class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
                           Class patchProbes Declaration
@@ -96,7 +90,7 @@ class patchProbes
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Patches to sample
         wordRes patchNames_;
@@ -104,51 +98,34 @@ protected:
 
     // Protected Member Functions
 
-        //- Sample and write a particular volume field
-        template<class Type>
-        void sampleAndWrite
-        (
-            const GeometricField<Type, fvPatchField, volMesh>&
-        );
-
-        //- Sample and write a particular surface field
-        template<class Type>
-        void sampleAndWrite
-        (
-            const GeometricField<Type, fvsPatchField, surfaceMesh>&
-        );
-
-        //- Sample and write all the fields of the given type
-        template<class Type>
-        void sampleAndWrite(const fieldGroup<Type>&);
-
-         //- Sample and write all the surface fields of the given type
-        template<class Type>
-        void sampleAndWriteSurfaceFields(const fieldGroup<Type>&);
-
-        //- Sample a volume field at all locations
-        template<class Type>
-        tmp<Field<Type>> sample
-        (
-            const GeometricField<Type, fvPatchField, volMesh>&
-        ) const;
-
-        //- Sample a surface field at all locations
-        template<class Type>
-        tmp<Field<Type>> sample
-        (
-            const GeometricField<Type, fvsPatchField, surfaceMesh>&
-        ) const;
-
-        //- Sample a single field on all sample locations
-        template<class Type>
-        tmp<Field<Type>> sample(const word& fieldName) const;
-
         //- Find elements containing patchProbes
-        virtual void findElements(const fvMesh&);
+        virtual void findElements(const fvMesh& mesh);  // override
 
 
 private:
+
+    // Private Member Functions
+
+        //- Write field values
+        template<class Type>
+        void writeValues
+        (
+            const word& fieldName,
+            const Field<Type>& values,
+            const scalar timeValue
+        );
+
+        //- Sample and store/write applicable volume/surface fields
+        template<class GeoField>
+        void performAction
+        (
+            const fieldGroup<GeoField>& fieldNames,  /* must be sorted */
+            unsigned request
+        );
+
+        //- Perform sampling action with store/write
+        bool performAction(unsigned request);
+
 
         //- No copy construct
         patchProbes(const patchProbes&) = delete;
@@ -169,7 +146,7 @@ public:
         patchProbes
         (
             const word& name,
-            const Time& time,
+            const Time& runTime,
             const dictionary& dict,
             const bool loadFromFiles = false,
             const bool readFields = true
@@ -179,13 +156,35 @@ public:
     virtual ~patchProbes() = default;
 
 
-    //- Public members
+    // Member Functions
+
+        //- Sample and store result if the sampleOnExecute is enabled.
+        virtual bool execute();
 
         //- Sample and write
         virtual bool write();
 
         //- Read
         virtual bool read(const dictionary&);
+
+
+    // Sampling
+
+        //- Sample a volume field at all locations
+        template<class Type>
+        tmp<Field<Type>> sample(const VolumeField<Type>&) const;
+
+        //- Sample a surface field at all locations
+        template<class Type>
+        tmp<Field<Type>> sample(const SurfaceField<Type>&) const;
+
+        //- Sample a single field on all sample locations
+        template<class Type>
+        tmp<Field<Type>> sample(const word& fieldName) const;
+
+        //- Sample a surface field at all locations
+        template<class Type>
+        tmp<Field<Type>> sampleSurfaceField(const word& fieldName) const;
 };
 
 
