@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,21 +55,12 @@ namespace vtk
 
 class legacyRawFormatter
 :
-    public formatter
+    public vtk::formatter
 {
     // Private Data Members
 
         static const char* legacyName_;
-        static const outputOptions opts_;
-
-
-    // Private Member Functions
-
-        //- No copy construct
-        legacyRawFormatter(const legacyRawFormatter&) = delete;
-
-        //- No copy assignment
-        void operator=(const legacyRawFormatter&) = delete;
+        static const vtk::outputOptions opts_;
 
 
 protected:
@@ -79,13 +70,19 @@ protected:
         //- Write
         void write(const char* s, std::streamsize n);
 
+        //- No copy construct
+        legacyRawFormatter(const legacyRawFormatter&) = delete;
+
+        //- No copy assignment
+        void operator=(const legacyRawFormatter&) = delete;
+
 
 public:
 
     // Constructors
 
         //- Construct and attach to an output stream
-        legacyRawFormatter(std::ostream& os);
+        explicit legacyRawFormatter(std::ostream& os);
 
 
     //- Destructor
@@ -95,7 +92,7 @@ public:
     // Member Functions
 
         //- The output is LEGACY_BINARY.
-        virtual const outputOptions& opts() const;
+        virtual const vtk::outputOptions& opts() const;
 
         //- Name for the legacy binary output type ("BINARY")
         virtual const char* name() const;
@@ -127,8 +124,8 @@ public:
         inline virtual formatter& endPointData() { return *this; }
         inline virtual formatter& endPiece() { return *this; }
         inline virtual formatter& endVTKFile() { return *this; }
-
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,15 +61,15 @@ class outputOptions
 {
     // Private Member Data
 
-        //- The output style tuning
-        enum styleType
-        {
-            NONE   = 0x00,  //!< Normal
-            HEADER = 0x01   //!< Emit xml header
-        };
+        /// //- The output style tuning
+        /// enum styleType
+        /// {
+        ///     NONE   = 0x00,  //!< Normal
+        ///     HEADER = 0x01   //!< Emit xml header
+        /// };
 
         //- The output format type
-        formatType fmtType_;
+        vtk::formatType fmtType_;
 
         //- ASCII write precision
         mutable unsigned precision_;
@@ -79,15 +79,16 @@ public:
 
     // Constructors
 
-        //- Construct null - XML insitu ASCII format with default precision
+        //- Default construct - XML insitu ASCII format with default precision
         inline outputOptions();
 
         //- Construct with specified format and default (ASCII) precision
+        //
         //  \note This constructor should remain non-explicit.
-        inline outputOptions(enum formatType fmtType);
+        inline outputOptions(enum vtk::formatType fmtType);
 
         //- Construct with specified format and (ASCII) write precision
-        inline outputOptions(enum formatType fmtType, unsigned prec);
+        inline outputOptions(enum vtk::formatType fmtType, unsigned prec);
 
 
     // Selectors
@@ -101,28 +102,28 @@ public:
     // Access
 
         //- The output format type
-        inline formatType fmt() const;
+        inline vtk::formatType fmt() const noexcept;
 
         //- The file extension (legacy or xml) for the given content-type
         inline word ext(vtk::fileTag contentType) const;
 
         //- True if writer uses legacy file format
-        inline bool legacy() const;
+        inline bool legacy() const noexcept;
 
         //- True if writer uses XML file format (non-legacy)
-        inline bool xml() const;
+        inline bool xml() const noexcept;
 
         //- True if output format uses an append mode
-        inline bool append() const;
+        inline bool append() const noexcept;
 
         //- True if output format does not use an append mode
-        inline bool insitu() const;
+        inline bool insitu() const noexcept;
 
         //- True if output format is ASCII
-        inline bool ascii() const;
+        inline bool ascii() const noexcept;
 
         //- Return the ASCII write precision
-        inline unsigned precision() const;
+        inline unsigned precision() const noexcept;
 
 
     // Edit

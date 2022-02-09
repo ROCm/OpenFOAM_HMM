@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,7 +54,7 @@ namespace vtk
 
 class asciiFormatter
 :
-    public formatter
+    public vtk::formatter
 {
     // Private Data Members
 
@@ -89,10 +89,10 @@ public:
     // Constructors
 
         //- Construct and attach to an output stream, use default precision
-        asciiFormatter(std::ostream& os);
+        explicit asciiFormatter(std::ostream& os);
 
         //- Construct and attach to an output stream, use specified precision
-        asciiFormatter(std::ostream& os, unsigned precision);
+        asciiFormatter(std::ostream& os, unsigned prec);
 
 
     //- Destructor. Finishes the output line as required.
@@ -102,7 +102,7 @@ public:
     // Member Functions
 
         //- The output is INLINE_ASCII.
-        virtual const outputOptions& opts() const;
+        virtual const vtk::outputOptions& opts() const;
 
         //- Name for the XML output type ("ascii")
         virtual const char* name() const;
@@ -127,8 +127,8 @@ public:
         //- The encoded length for ascii output is not applicable.
         //  \return 0
         virtual std::size_t encodedLength(std::size_t ignored) const;
-
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

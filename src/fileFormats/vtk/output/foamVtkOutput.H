@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -254,11 +254,29 @@ namespace legacy
     //- Emit header for POINTS (with trailing newline).
     inline void beginPoints(std::ostream& os, label nPoints);
 
+    //- Emit header for VERTICES (with trailing newline).
+    //  The nConnectivity is the sum of all connectivity points used,
+    //  but \b without additional space for the size prefixes.
+    //  The additional prefix sizes are added internally.
+    //  \note With nConnectivity == 0, assume one point per element
+    inline void beginVerts
+    (
+        std::ostream& os,
+        label nVerts,
+        label nConnectivity = 0
+    );
+
     //- Emit header for LINES (with trailing newline).
     //  The nConnectivity is the sum of all connectivity points used,
     //  but \b without additional space for the size prefixes.
     //  The additional prefix sizes are added internally.
-    inline void beginLines(std::ostream& os, label nLines, label nConnectivity);
+    //  \note With nConnectivity == 0, assume two points per element
+    inline void beginLines
+    (
+        std::ostream& os,
+        label nLines,
+        label nConnectivity = 0
+    );
 
     //- Emit header for POLYGONS (with trailing newline).
     //  The nConnectivity is the sum of all connectivity points used,

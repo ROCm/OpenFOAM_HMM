@@ -143,6 +143,7 @@ $(setWriters)/gltf/gltfSetWriterRunTime.C
 $(setWriters)/gnuplot/gnuplotSetWriterRunTime.C
 $(setWriters)/nastran/nastranSetWriterRunTime.C
 $(setWriters)/raw/rawSetWriterRunTime.C
+$(setWriters)/vtk/foamVtkCoordSetWriter.C
 $(setWriters)/vtk/vtkSetWriterRunTime.C
 $(setWriters)/xmgrace/xmgraceSetWriterRunTime.C
 

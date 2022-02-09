@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,7 +53,7 @@ namespace vtk
 
 class legacyAsciiFormatter
 :
-    public asciiFormatter
+    public vtk::asciiFormatter
 {
     // Private Data Members
 
@@ -75,10 +75,10 @@ public:
     // Constructors
 
         //- Construct and attach to an output stream, use default precision
-        legacyAsciiFormatter(std::ostream& os);
+        explicit legacyAsciiFormatter(std::ostream& os);
 
         //- Construct and attach to an output stream, use specified precision
-        legacyAsciiFormatter(std::ostream& os, unsigned precision);
+        legacyAsciiFormatter(std::ostream& os, unsigned prec);
 
 
     //- Destructor
@@ -88,7 +88,7 @@ public:
     // Member Functions
 
         //- The output is LEGACY_ASCII.
-        virtual const outputOptions& opts() const;
+        virtual const vtk::outputOptions& opts() const;
 
         //- Name for the legacy ascii output type ("ASCII")
         virtual const char* name() const;
@@ -107,8 +107,8 @@ public:
         inline virtual formatter& endPointData() { return *this; }
         inline virtual formatter& endPiece() { return *this; }
         inline virtual formatter& endVTKFile() { return *this; }
-
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

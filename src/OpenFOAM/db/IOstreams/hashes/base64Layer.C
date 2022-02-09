@@ -55,25 +55,25 @@ std::size_t Foam::base64Layer::encodedLength(std::size_t n)
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
-inline unsigned char Foam::base64Layer::encode0() const
+inline unsigned char Foam::base64Layer::encode0() const noexcept
 {
     // Top 6 bits of char0
     return base64Chars[((group_[0] & 0xFC) >> 2)];
 }
 
-inline unsigned char Foam::base64Layer::encode1() const
+inline unsigned char Foam::base64Layer::encode1() const noexcept
 {
     // Bottom 2 bits of char0, Top 4 bits of char1
     return base64Chars[((group_[0] & 0x03) << 4) | ((group_[1] & 0xF0) >> 4)];
 }
 
-inline unsigned char Foam::base64Layer::encode2() const
+inline unsigned char Foam::base64Layer::encode2() const noexcept
 {
     // Bottom 4 bits of char1, Top 2 bits of char2
     return base64Chars[((group_[1] & 0x0F) << 2) | ((group_[2] & 0xC0) >> 6)];
 }
 
-inline unsigned char Foam::base64Layer::encode3() const
+inline unsigned char Foam::base64Layer::encode3() const noexcept
 {
     // Bottom 6 bits of char2
     return base64Chars[(group_[2] & 0x3F)];

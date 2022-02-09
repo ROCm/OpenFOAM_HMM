@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -132,7 +132,7 @@ protected:
     // Constructors
 
         //- Construct and attach to an output stream
-        inline formatter(std::ostream& os);
+        inline explicit formatter(std::ostream& os);
 
 
 public:
@@ -155,10 +155,10 @@ public:
     // Access
 
         //- Access to the underlying output stream
-        inline std::ostream& os();
+        inline std::ostream& os() noexcept;
 
         //- The format-type / output options.
-        virtual const outputOptions& opts() const = 0;
+        virtual const vtk::outputOptions& opts() const = 0;
 
         //- Name for the XML output type or the legacy output type.
         virtual const char* name() const = 0;
@@ -540,7 +540,6 @@ public:
                 dataName, formatter::npos, true
             );
         }
-
 };
 
 

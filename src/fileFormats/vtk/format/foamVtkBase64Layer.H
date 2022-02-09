@@ -50,21 +50,12 @@ namespace vtk
 
 class foamVtkBase64Layer
 :
-    public formatter,
-    protected base64Layer
+    public vtk::formatter,
+    protected Foam::base64Layer
 {
     // Private Data Members
 
         static const char* encoding_;
-
-
-    // Private Member Functions
-
-        //- No copy construct
-        foamVtkBase64Layer(const foamVtkBase64Layer&) = delete;
-
-        //- No copy assignment
-        void operator=(const foamVtkBase64Layer&) = delete;
 
 
 protected:
@@ -74,11 +65,17 @@ protected:
         //- Write
         void write(const char* s, std::streamsize n);
 
+        //- No copy construct
+        foamVtkBase64Layer(const foamVtkBase64Layer&) = delete;
+
+        //- No copy assignment
+        void operator=(const foamVtkBase64Layer&) = delete;
+
 
     // Constructors
 
         //- Construct and attach to an output stream
-        foamVtkBase64Layer(std::ostream& os);
+        explicit foamVtkBase64Layer(std::ostream& os);
 
 public:
 
@@ -105,8 +102,8 @@ public:
 
         //- The encoded length for base64 encoded output.
         virtual std::size_t encodedLength(std::size_t n) const;
-
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

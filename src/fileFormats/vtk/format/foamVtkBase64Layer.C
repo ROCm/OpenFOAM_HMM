@@ -41,7 +41,7 @@ void Foam::vtk::foamVtkBase64Layer::write
     std::streamsize n
 )
 {
-    base64Layer::write(s, n);
+    Foam::base64Layer::write(s, n);
 }
 
 
@@ -49,8 +49,8 @@ void Foam::vtk::foamVtkBase64Layer::write
 
 Foam::vtk::foamVtkBase64Layer::foamVtkBase64Layer(std::ostream& os)
 :
-    formatter(os),
-    base64Layer(os)
+    vtk::formatter(os),
+    Foam::base64Layer(os)
 {}
 
 
@@ -58,7 +58,7 @@ Foam::vtk::foamVtkBase64Layer::foamVtkBase64Layer(std::ostream& os)
 
 Foam::vtk::foamVtkBase64Layer::~foamVtkBase64Layer()
 {
-    base64Layer::close();
+    Foam::base64Layer::close();
 }
 
 
@@ -79,7 +79,7 @@ bool Foam::vtk::foamVtkBase64Layer::writeSize(const uint64_t numbytes)
 
 void Foam::vtk::foamVtkBase64Layer::write(const uint8_t val)
 {
-    base64Layer::add(val);
+    Foam::base64Layer::add(val);
 }
 
 
@@ -120,13 +120,13 @@ void Foam::vtk::foamVtkBase64Layer::write(const double val)
 
 void Foam::vtk::foamVtkBase64Layer::flush()
 {
-    base64Layer::close();
+    Foam::base64Layer::close();
 }
 
 
 std::size_t Foam::vtk::foamVtkBase64Layer::encodedLength(std::size_t n) const
 {
-    return base64Layer::encodedLength(n);
+    return Foam::base64Layer::encodedLength(n);
 }
 
 

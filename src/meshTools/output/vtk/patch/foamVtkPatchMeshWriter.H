@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,8 +85,8 @@ protected:
         //- Local number of polys (faces)
         label nLocalPolys_;
 
-        //- Local face vertices (connectivity) count. Sum of face sizes.
-        label nLocalVerts_;
+        //- Local connectivity count for polys (faces) == sum of face sizes
+        label nLocalPolyConn_;
 
         //- Reference to the OpenFOAM mesh (or subset)
         const polyMesh& mesh_;

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,7 +39,7 @@ void Foam::vtk::patchMeshWriter::beginPiece()
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
     nLocalPoints_ = nLocalPolys_ = 0;
-    nLocalVerts_ = 0;
+    nLocalPolyConn_ = 0;
 
     for (const label patchId : patchIDs_)
     {
@@ -50,7 +50,7 @@ void Foam::vtk::patchMeshWriter::beginPiece()
 
         for (const face& f : pp)
         {
-            nLocalVerts_ += f.size();
+            nLocalPolyConn_ += f.size();
         }
     }
 
@@ -150,12 +150,12 @@ void Foam::vtk::patchMeshWriter::writePolysLegacy(const label pointOffset)
     // Connectivity count without additional storage (done internally)
 
     label nPolys = nLocalPolys_;
-    label nVerts = nLocalVerts_;
+    label nPolyConn = nLocalPolyConn_;
 
     if (parallel_)
     {
         reduce(nPolys, sumOp<label>());
-        reduce(nVerts, sumOp<label>());
+        reduce(nPolyConn, sumOp<label>());
     }
 
     if (nPolys != numberOfCells_)
@@ -166,9 +166,9 @@ void Foam::vtk::patchMeshWriter::writePolysLegacy(const label pointOffset)
             << exit(FatalError);
     }
 
-    legacy::beginPolys(os_, nPolys, nVerts);
+    legacy::beginPolys(os_, nPolys, nPolyConn);
 
-    labelList vertLabels(nLocalPolys_ + nLocalVerts_);
+    labelList vertLabels(nLocalPolys_ + nLocalPolyConn_);
 
     {
         // Legacy: size + connectivity together
@@ -227,9 +227,9 @@ void Foam::vtk::patchMeshWriter::writePolys(const label pointOffset)
     // 'connectivity'
     //
     {
-        labelList vertLabels(nLocalVerts_);
+        labelList vertLabels(nLocalPolyConn_);
 
-        label nVerts = nLocalVerts_;
+        label nVerts = nLocalPolyConn_;
 
         if (parallel_)
         {
@@ -312,7 +312,7 @@ void Foam::vtk::patchMeshWriter::writePolys(const label pointOffset)
         // processor-local connectivity offsets
         label off =
         (
-            parallel_ ? globalIndex(nLocalVerts_).localStart() : 0
+            parallel_ ? globalIndex(nLocalPolyConn_).localStart() : 0
         );
 
 
@@ -369,7 +369,7 @@ Foam::vtk::patchMeshWriter::patchMeshWriter
     numberOfCells_(0),
     nLocalPoints_(0),
     nLocalPolys_(0),
-    nLocalVerts_(0),
+    nLocalPolyConn_(0),
 
     mesh_(mesh),
     patchIDs_(patchIDs)

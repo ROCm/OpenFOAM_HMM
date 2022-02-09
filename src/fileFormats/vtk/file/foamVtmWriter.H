@@ -118,7 +118,7 @@ class vtmWriter
             vtmEntry& operator=(const vtmEntry&) = default;
             vtmEntry& operator=(vtmEntry&&) = default;
 
-            //- Construct null
+            //- Default construct
             vtmEntry()
             :
                 type_(NONE)
@@ -157,7 +157,7 @@ class vtmWriter
         // Member Functions
 
             //- Test the type
-            bool isType(Type what) const
+            bool isType(Type what) const noexcept
             {
                return type_ == what;
             }
@@ -166,7 +166,7 @@ class vtmWriter
             void clear();
 
             //- True if the entry is good.
-            bool good() const;
+            bool good() const noexcept;
 
             //- Output valid entry as XML
             bool write(vtk::formatter& format) const;
@@ -207,7 +207,7 @@ public:
 
     // Constructors
 
-        //- Construct null, with autoName on
+        //- Default construct, with autoName on
         vtmWriter();
 
         //- Construct with specified behaviour for autoName

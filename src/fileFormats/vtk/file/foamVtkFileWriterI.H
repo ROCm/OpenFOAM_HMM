@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,13 +53,13 @@ inline bool Foam::vtk::fileWriter::notState(outputState test) const noexcept
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline Foam::vtk::fileTag Foam::vtk::fileWriter::contentType() const
+inline Foam::vtk::fileTag Foam::vtk::fileWriter::contentType() const noexcept
 {
     return contentType_;
 }
 
 
-inline Foam::vtk::outputOptions Foam::vtk::fileWriter::opts() const
+inline Foam::vtk::outputOptions Foam::vtk::fileWriter::opts() const noexcept
 {
     return opts_;
 }
@@ -71,7 +71,7 @@ inline Foam::word Foam::vtk::fileWriter::ext() const
 }
 
 
-inline bool Foam::vtk::fileWriter::legacy() const
+inline bool Foam::vtk::fileWriter::legacy() const noexcept
 {
     return opts_.legacy();
 }

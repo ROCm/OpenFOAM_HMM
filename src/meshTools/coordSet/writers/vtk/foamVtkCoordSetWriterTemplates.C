@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,56 +25,56 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "foamVtkLegacyAsciiFormatter.H"
-#include "foamVtkOutputOptions.H"
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-const char* Foam::vtk::legacyAsciiFormatter::legacyName_ = "ASCII";
-
-const Foam::vtk::outputOptions
-Foam::vtk::legacyAsciiFormatter::opts_(formatType::LEGACY_ASCII);
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::vtk::legacyAsciiFormatter::legacyAsciiFormatter
+template<class Type>
+void Foam::vtk::coordSetWriter::writePointData
 (
-    std::ostream& os
+    const word& fieldName,
+    const UPtrList<const Field<Type>>& fieldPtrs
 )
-:
-    asciiFormatter(os)
-{}
-
-
-Foam::vtk::legacyAsciiFormatter::legacyAsciiFormatter
-(
-    std::ostream& os,
-    unsigned prec
-)
-:
-    asciiFormatter(os, prec)
-{}
-
-
-// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
-
-const Foam::vtk::outputOptions&
-Foam::vtk::legacyAsciiFormatter::opts() const
 {
-    return opts_;
-}
+    // Could check sizes:
 
+    if (isState(outputState::POINT_DATA))
+    {
+        ++nPointData_;
+    }
+    else
+    {
+        reportBadState(FatalErrorInFunction, outputState::POINT_DATA)
+            << " for field " << fieldName << nl << endl
+            << exit(FatalError);
+        return;
+    }
 
-const char* Foam::vtk::legacyAsciiFormatter::name() const
-{
-    return legacyName_;
-}
+    label nValues = 0;
 
+    for (const Field<Type>& field : fieldPtrs)
+    {
+        nValues += field.size();
+    }
 
-const char* Foam::vtk::legacyAsciiFormatter::encoding() const
-{
-    return legacyName_;
+    // if (parallel_)
+    // {
+    //     reduce(nValues, sumOp<label>());
+    // }
+
+    this->beginDataArray<Type>(fieldName, nValues);
+
+    // if (parallel_)
+    // {
+    //     vtk::writeListParallel(format_.ref(), field);
+    // }
+    // else
+    {
+        for (const Field<Type>& field : fieldPtrs)
+        {
+            vtk::writeList(format(), field);
+        }
+    }
+
+    this->endDataArray();
 }
 
 

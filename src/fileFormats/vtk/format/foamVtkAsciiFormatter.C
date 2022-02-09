@@ -68,7 +68,7 @@ inline void Foam::vtk::asciiFormatter::done()
 
 Foam::vtk::asciiFormatter::asciiFormatter(std::ostream& os)
 :
-    formatter(os),
+    vtk::formatter(os),
     pos_(0)
 {}
 
@@ -76,13 +76,13 @@ Foam::vtk::asciiFormatter::asciiFormatter(std::ostream& os)
 Foam::vtk::asciiFormatter::asciiFormatter
 (
     std::ostream& os,
-    unsigned precision
+    unsigned prec
 )
 :
-    formatter(os),
+    vtk::formatter(os),
     pos_(0)
 {
-    os.precision(precision);
+    os.precision(prec);
 }
 
 

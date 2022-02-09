@@ -42,17 +42,17 @@ Description
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class endian;
 
 /*---------------------------------------------------------------------------*\
                          Class vtkPTraits Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class PrimitiveType>
+template<class Type>
 struct vtkPTraits
 {
-    // Static data members
+    // Static Data Members
     static const char* const typeName;
 };
 

@@ -57,7 +57,7 @@ Foam::vtk::legacyRawFormatter::legacyRawFormatter
     std::ostream& os
 )
 :
-    formatter(os)
+    vtk::formatter(os)
 {}
 
 

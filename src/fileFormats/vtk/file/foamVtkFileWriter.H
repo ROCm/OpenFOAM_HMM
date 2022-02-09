@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,6 +42,8 @@ Description
 
 SourceFiles
     foamVtkFileWriter.C
+    foamVtkFileWriterI.H
+    foamVtkFileWriterTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -71,7 +73,7 @@ protected:
     // Protected Member Data
 
         //- Internal tracking of the output state.
-        enum outputState
+        enum outputState : uint8_t
         {
             CLOSED = 0,     //!< File is closed
             OPENED,         //!< File is opened
@@ -86,17 +88,17 @@ protected:
         static const Enum<outputState> stateNames;
 
 
-        //- The content type
-        vtk::fileTag contentType_;
-
-        //- The requested output options
-        outputOptions opts_;
-
-        //- Writing in parallel (via master)
-        bool parallel_;
-
         //- The output state
         outputState state_;
+
+        //- The content type (PolyData, UnstructuredGrid ...)
+        vtk::fileTag contentType_;
+
+        //- Parallel writing (via master)
+        bool parallel_;
+
+        //- Requested output options
+        vtk::outputOptions opts_;
 
         //- The number of CellData written for the Piece thus far.
         label nCellData_;
@@ -128,7 +130,7 @@ protected:
         //- The backend ostream in use
         inline std::ofstream& os() noexcept;
 
-        //- The VTK formatter in use
+        //- The VTK formatter in use. FatalError for off-processor.
         inline vtk::formatter& format();
 
         //- True if output state corresponds to the test state.
@@ -231,16 +233,16 @@ public:
     // Member Functions
 
         //- The content type
-        inline vtk::fileTag contentType() const;
+        inline vtk::fileTag contentType() const noexcept;
 
         //- The output options in use
-        inline vtk::outputOptions opts() const;
+        inline vtk::outputOptions opts() const noexcept;
 
         //- File extension for current format type.
         inline word ext() const;
 
         //- Commonly used query
-        inline bool legacy() const;
+        inline bool legacy() const noexcept;
 
         //- Parallel output requested?
         inline bool parallel() const noexcept;
@@ -258,7 +260,11 @@ public:
         //  If the file name has an extension, it will be used where if
         //  appropriate or changed to suit the format (legacy/xml) type.
         //  \note Expected calling states: (CLOSED).
-        bool open(const fileName& file, bool parallel=Pstream::parRun());
+        virtual bool open
+        (
+            const fileName& file,
+            bool parallel = Pstream::parRun()
+        );
 
         //- End the file contents and close the file after writing.
         //  \note Expected calling states: (PIECE | CELL_DATA | POINT_DATA).

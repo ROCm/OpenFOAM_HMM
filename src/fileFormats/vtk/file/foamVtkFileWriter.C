@@ -290,10 +290,10 @@ Foam::vtk::fileWriter::fileWriter
     const vtk::outputOptions opts
 )
 :
-    contentType_(contentType),
-    opts_(opts),
-    parallel_(false),
     state_(outputState::CLOSED),
+    contentType_(contentType),
+    parallel_(false),
+    opts_(opts),
     nCellData_(0),
     nPointData_(0),
     outputFile_(),
@@ -360,7 +360,7 @@ bool Foam::vtk::fileWriter::open(const fileName& file, bool parallel)
     // This means we can always check if format_ is defined to know if output
     // is desired on any particular process.
 
-    if (Pstream::master() || !parallel_)
+    if (!parallel_ || Pstream::master())
     {
         mkDir(outputFile_.path());
 

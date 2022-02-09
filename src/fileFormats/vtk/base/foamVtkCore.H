@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,7 +52,7 @@ namespace vtk
   // Enumerations
 
     //- The context when outputting a VTK file (XML or legacy).
-    enum OutputContext
+    enum OutputContext : uint8_t
     {
         INLINE,     //!< Generate header and inline data
         HEADER,     //!< Generate header only
@@ -72,21 +72,21 @@ namespace vtk
         LEGACY_BINARY = 0x22, //!< Legacy raw binary, legacyRawFormatter
     };
 
-    //- Test for XML append format
-    inline bool isAppend(enum formatType fmt)
+    //- Test for vtk append format (xml)
+    inline bool isAppend(enum formatType fmt) noexcept
     {
         return (uint8_t(fmt) & 0x10);
     }
 
     //- Test for vtk legacy format
-    inline bool isLegacy(enum formatType fmt)
+    inline bool isLegacy(enum formatType fmt) noexcept
     {
         return (uint8_t(fmt) & 0x20);
     }
 
 
-    //- Equivalent to enumeration in "vtkCellType.h"
-    enum cellType
+    //- Equivalent to enumeration in "vtkCellType.h" (should be uint8_t)
+    enum cellType : uint8_t
     {
         VTK_EMPTY_CELL       = 0,
         VTK_VERTEX           = 1,
@@ -110,7 +110,7 @@ namespace vtk
 
 
     //- Some common XML tags for vtk files
-    enum class fileTag
+    enum class fileTag : uint8_t
     {
         VTK_FILE,               //!< "VTKFile"
         DATA_ARRAY,             //!< "DataArray"
@@ -140,7 +140,7 @@ namespace vtk
     extern const Foam::Enum<fileTag> fileTagNames;
 
     //- Some common XML attributes for vtk files
-    enum class fileAttr
+    enum class fileAttr : uint8_t
     {
         OFFSET,                 //!< "offset"
         NUMBER_OF_COMPONENTS,   //!< "NumberOfComponents"
@@ -156,7 +156,7 @@ namespace vtk
     extern const Foam::Enum<fileAttr> fileAttrNames;
 
     //- Some common names for XML DataArray entries
-    enum class dataArrayAttr
+    enum class dataArrayAttr : uint8_t
     {
         POINTS,                 //!< "Points"
         OFFSETS,                //!< "offsets"

@@ -54,7 +54,7 @@ void Foam::vtk::appendRawFormatter::write
 
 Foam::vtk::appendRawFormatter::appendRawFormatter(std::ostream& os)
 :
-    formatter(os),
+    vtk::formatter(os),
     offset_(0)
 {}
 

@@ -67,7 +67,7 @@ inline Foam::vtk::formatter::formatter(std::ostream& os)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline std::ostream& Foam::vtk::formatter::os()
+inline std::ostream& Foam::vtk::formatter::os() noexcept
 {
     return os_;
 }

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -81,6 +81,9 @@ protected:
 
         //- Local number of points
         label nLocalPoints_;
+
+        //- Local number of vertices (points)
+        label nLocalVerts_;
 
         //- Local number of lines (edges)
         label nLocalLines_;

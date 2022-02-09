@@ -67,6 +67,7 @@ void Foam::vtk::polyWriter::beginPiece
 {
     // Basic sizes
     nLocalPoints_ = points.size();
+    nLocalVerts_  = 0;
     nLocalLines_  = edges.size();
     nLocalPolys_  = 0;
 
@@ -104,6 +105,7 @@ void Foam::vtk::polyWriter::beginPiece
 {
     // Basic sizes
     nLocalPoints_ = points.size();
+    nLocalVerts_  = 0;
     nLocalLines_  = 0;
     nLocalPolys_  = faces.size();
 
@@ -568,6 +570,7 @@ Foam::vtk::polyWriter::polyWriter
     numberOfPoints_(0),
     numberOfCells_(0),
     nLocalPoints_(0),
+    nLocalVerts_(0),
     nLocalLines_(0),
     nLocalPolys_(0)
 {

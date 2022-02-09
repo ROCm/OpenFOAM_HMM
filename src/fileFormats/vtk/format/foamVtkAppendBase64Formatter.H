@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,7 +53,7 @@ namespace vtk
 
 class appendBase64Formatter
 :
-    public foamVtkBase64Layer
+    public vtk::foamVtkBase64Layer
 {
     // Private Data Members
 
@@ -78,7 +78,7 @@ public:
     // Constructors
 
         //- Construct and attach to an output stream
-        appendBase64Formatter(std::ostream& os);
+        explicit appendBase64Formatter(std::ostream& os);
 
 
     //- Destructor. Closes/flushes the underlying layer.
@@ -88,7 +88,7 @@ public:
     // Member Functions
 
         //- The output is APPEND_BASE64.
-        virtual const outputOptions& opts() const;
+        virtual const vtk::outputOptions& opts() const;
 
         //- Output name for XML type ("append")
         virtual const char* name() const;
@@ -100,6 +100,7 @@ public:
         //  \return The previous data offset
         virtual uint64_t offset(const uint64_t numbytes);
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

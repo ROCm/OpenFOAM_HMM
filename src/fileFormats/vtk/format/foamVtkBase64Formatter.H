@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,7 +51,7 @@ namespace vtk
 
 class base64Formatter
 :
-    public foamVtkBase64Layer
+    public vtk::foamVtkBase64Layer
 {
     // Private Data Members
 
@@ -73,7 +73,7 @@ public:
     // Constructors
 
         //- Construct and attach to an output stream
-        base64Formatter(std::ostream& os);
+        explicit base64Formatter(std::ostream& os);
 
 
     //- Destructor. Closes/flushes the underlying layer.
@@ -83,7 +83,7 @@ public:
     // Member Functions
 
         //- The output is INLINE_BASE64.
-        virtual const outputOptions& opts() const;
+        virtual const vtk::outputOptions& opts() const;
 
         //- Name for the XML output type ("binary")
         virtual const char* name() const;
@@ -92,8 +92,8 @@ public:
         //- End the encoding sequence (padding the final characters with '=')
         //  and write a newline to the output if any encoding was done.
         virtual void flush();
-
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

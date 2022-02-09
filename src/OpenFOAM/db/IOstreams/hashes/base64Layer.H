@@ -39,8 +39,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef base64Layer_H
-#define base64Layer_H
+#ifndef Foam_base64Layer_H
+#define Foam_base64Layer_H
 
 #include <iostream>
 
@@ -72,16 +72,10 @@ class base64Layer
 
     // Private Member Functions
 
-        inline unsigned char encode0() const;
-        inline unsigned char encode1() const;
-        inline unsigned char encode2() const;
-        inline unsigned char encode3() const;
-
-        //- No copy construct
-        base64Layer(const base64Layer&) = delete;
-
-        //- No copy assignment
-        void operator=(const base64Layer&) = delete;
+        inline unsigned char encode0() const noexcept;
+        inline unsigned char encode1() const noexcept;
+        inline unsigned char encode2() const noexcept;
+        inline unsigned char encode3() const noexcept;
 
 
 protected:
@@ -90,6 +84,12 @@ protected:
 
         //- Add a character to the group, outputting when the group is full.
         void add(char c);
+
+        //- No copy construct
+        base64Layer(const base64Layer&) = delete;
+
+        //- No copy assignment
+        void operator=(const base64Layer&) = delete;
 
 
 public:

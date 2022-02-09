@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,7 +52,7 @@ namespace vtk
 
 class appendRawFormatter
 :
-    public formatter
+    public vtk::formatter
 {
     // Private Data Members
 
@@ -64,7 +64,12 @@ class appendRawFormatter
         uint64_t offset_;
 
 
-    // Private Member Functions
+protected:
+
+    // Protected Member Functions
+
+        //- Write
+        void write(const char* s, std::streamsize n);
 
         //- No copy construct
         appendRawFormatter(const appendRawFormatter&) = delete;
@@ -73,20 +78,12 @@ class appendRawFormatter
         void operator=(const appendRawFormatter&) = delete;
 
 
-protected:
-
-    // Protected Member Functions
-
-        //- Write
-        void write(const char* s, std::streamsize n);
-
-
 public:
 
     // Constructors
 
         //- Construct and attach to an output stream
-        appendRawFormatter(std::ostream& os);
+        explicit appendRawFormatter(std::ostream& os);
 
 
     //- Destructor
@@ -96,7 +93,7 @@ public:
     // Member Functions
 
         //- The output is APPEND_BINARY.
-        virtual const outputOptions& opts() const;
+        virtual const vtk::outputOptions& opts() const;
 
         //- Output name for XML type ("append")
         virtual const char* name() const;
@@ -122,8 +119,8 @@ public:
 
         //- A no-op for this format
         virtual void flush();
-
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

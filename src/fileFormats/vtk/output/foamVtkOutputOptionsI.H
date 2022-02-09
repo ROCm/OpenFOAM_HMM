@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,8 +25,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "foamVtkOutput.H"
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 inline Foam::vtk::outputOptions::outputOptions()
@@ -38,7 +36,7 @@ inline Foam::vtk::outputOptions::outputOptions()
 
 inline Foam::vtk::outputOptions::outputOptions
 (
-    enum formatType fmtType
+    enum vtk::formatType fmtType
 )
 :
     fmtType_(fmtType),
@@ -48,7 +46,7 @@ inline Foam::vtk::outputOptions::outputOptions
 
 inline Foam::vtk::outputOptions::outputOptions
 (
-    enum formatType fmtType,
+    enum vtk::formatType fmtType,
     unsigned prec
 )
 :
@@ -68,7 +66,7 @@ Foam::vtk::outputOptions::newFormatter(std::ostream& os) const
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-inline Foam::vtk::formatType Foam::vtk::outputOptions::fmt() const
+inline Foam::vtk::formatType Foam::vtk::outputOptions::fmt() const noexcept
 {
     return fmtType_;
 }
@@ -85,7 +83,7 @@ inline Foam::word Foam::vtk::outputOptions::ext(vtk::fileTag contentType) const
 }
 
 
-inline bool Foam::vtk::outputOptions::legacy() const
+inline bool Foam::vtk::outputOptions::legacy() const noexcept
 {
     return
     (
@@ -95,13 +93,13 @@ inline bool Foam::vtk::outputOptions::legacy() const
 }
 
 
-inline bool Foam::vtk::outputOptions::xml() const
+inline bool Foam::vtk::outputOptions::xml() const noexcept
 {
     return !legacy();
 }
 
 
-inline bool Foam::vtk::outputOptions::append() const
+inline bool Foam::vtk::outputOptions::append() const noexcept
 {
     return
     (
@@ -111,19 +109,19 @@ inline bool Foam::vtk::outputOptions::append() const
 }
 
 
-inline bool Foam::vtk::outputOptions::insitu() const
+inline bool Foam::vtk::outputOptions::insitu() const noexcept
 {
     return !append();
 }
 
 
-inline bool Foam::vtk::outputOptions::ascii() const
+inline bool Foam::vtk::outputOptions::ascii() const noexcept
 {
     return !(unsigned(fmtType_) & 0x0F);
 }
 
 
-inline unsigned Foam::vtk::outputOptions::precision() const
+inline unsigned Foam::vtk::outputOptions::precision() const noexcept
 {
     return precision_;
 }

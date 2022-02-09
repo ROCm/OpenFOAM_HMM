@@ -40,7 +40,7 @@ void Foam::vtk::vtmWriter::vtmEntry::clear()
 }
 
 
-bool Foam::vtk::vtmWriter::vtmEntry::good() const
+bool Foam::vtk::vtmWriter::vtmEntry::good() const noexcept
 {
     return
     (
@@ -397,9 +397,7 @@ Foam::label Foam::vtk::vtmWriter::beginBlock(const word& blockName)
 
 Foam::label Foam::vtk::vtmWriter::endBlock(const word& blockName)
 {
-    label nblock = blocks_.size();
-
-    if (nblock)
+    if (!blocks_.empty())
     {
         const word curr(blocks_.remove());
 

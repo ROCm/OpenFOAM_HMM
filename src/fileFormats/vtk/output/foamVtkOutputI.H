@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -119,6 +119,24 @@ inline void Foam::vtk::legacy::beginPoints(std::ostream& os, label nPoints)
 }
 
 
+inline void Foam::vtk::legacy::beginVerts
+(
+    std::ostream& os,
+    label nVerts,
+    label nConnectivity
+)
+{
+    if (!nConnectivity)
+    {
+        nConnectivity = nVerts;
+    }
+    os  << nl
+        << legacy::fileTagNames[vtk::fileTag::VERTS]
+        << ' ' << nVerts
+        << ' ' << (nVerts + nConnectivity) << nl;
+}
+
+
 inline void Foam::vtk::legacy::beginLines
 (
     std::ostream& os,
@@ -126,6 +144,10 @@ inline void Foam::vtk::legacy::beginLines
     label nConnectivity
 )
 {
+    if (!nConnectivity)
+    {
+        nConnectivity = 2*nLines;
+    }
     os  << nl
         << legacy::fileTagNames[vtk::fileTag::LINES]
         << ' ' << nLines
