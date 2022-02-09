@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,7 +45,6 @@ Description
 #include "cyclicPolyPatch.H"
 #include "syncTools.H"
 #include "argList.H"
-#include "polyMesh.H"
 #include "Time.H"
 #include "OFstream.H"
 #include "meshTools.H"
@@ -56,6 +55,10 @@ Description
 #include "wordRes.H"
 #include "processorMeshes.H"
 #include "IOdictionary.H"
+#include "regionProperties.H"
+#include "faceAreaWeightAMI2D.H"
+#include "fvMeshTools.H"
+#include "ReadFields.H"
 
 using namespace Foam;
 
@@ -66,9 +69,294 @@ namespace Foam
     defineTemplateTypeNameAndDebug(IOPtrList<dictionary>, 0);
 }
 
+
+word patchName(const word& name, const fvMesh& mesh0, const fvMesh& mesh1)
+{
+    word pName(name != "none" ? name : word::null);
+    pName += mesh0.name();
+    pName += "_to_";
+    pName += mesh1.name();
+    return pName;
+}
+
+
+void matchPatchFaces
+(
+    const word& entryName,
+    const word& AMIMethod,
+    const dictionary& AMIDict,
+    const PtrList<fvMesh>& meshes,
+
+    const label meshi,
+    const label nSourcei,
+    const label sourcei,
+    const labelList& patchesi,
+
+    const label meshj,
+    const label nSourcej,
+    const label sourcej,
+    const labelList& patchesj,
+
+    DynamicList<labelList>& interfaceMesh0,
+    DynamicList<labelList>& interfacePatch0,
+    DynamicList<wordList>& interfaceNames0,
+    DynamicList<List<DynamicList<label>>>& interfaceFaces0,
+
+    DynamicList<labelList>& interfaceMesh1,
+    DynamicList<labelList>& interfacePatch1,
+    DynamicList<wordList>& interfaceNames1,
+    DynamicList<List<DynamicList<label>>>& interfaceFaces1
+)
+{
+    // Now we have:
+    // - meshi, sourcei, patchesi
+    // - meshj, sourcej, patchesj
+
+
+    // Attempt to match patches
+    forAll(patchesi, i)
+    {
+        const auto& ppi = meshes[meshi].boundaryMesh()[patchesi[i]];
+
+        forAll(patchesj, j)
+        {
+            const auto& ppj = meshes[meshj].boundaryMesh()[patchesj[j]];
+
+            // Use AMI to try and find matches
+            auto AMPtr(AMIInterpolation::New(AMIMethod, AMIDict));
+
+            AMPtr->calculate(ppi, ppj, nullptr);
+            if
+            (
+                gAverage(AMPtr->tgtWeightsSum()) > SMALL
+             || gAverage(AMPtr->srcWeightsSum()) > SMALL
+            )
+            {
+                const label inti = interfaceMesh0.size();
+
+                Info<< "Introducing interface " << inti << " between"
+                    << " mesh " << meshes[meshi].name()
+                    << " patch " << ppi.name()
+                    << " and mesh " << meshes[meshj].name()
+                    << " patch " << ppj.name()
+                    << endl;
+
+                // Mesh 0
+                //~~~~~~~
+
+                interfaceMesh0.append(labelList());
+                auto& intMesh0 = interfaceMesh0.last();
+                intMesh0.setSize(nSourcei, -1);
+                intMesh0[sourcei] = meshi;
+
+                interfacePatch0.append(labelList());
+                auto& intPatch0 = interfacePatch0.last();
+                intPatch0.setSize(nSourcei, -1);
+                intPatch0[sourcei] = ppi.index();
+
+                interfaceNames0.append(wordList());
+                auto& intNames0 = interfaceNames0.last();
+                intNames0.setSize(nSourcei);
+                //intNames0[sourcei] =
+                //    meshes[meshi].name()
+                //  + "_to_"
+                //  + meshes[meshj].name();
+                intNames0[sourcei] =
+                    patchName(entryName, meshes[meshi], meshes[meshj]);
+
+
+                // Mesh 0
+                //~~~~~~~
+
+                interfaceMesh1.append(labelList());
+                auto& intMesh1 = interfaceMesh1.last();
+                intMesh1.setSize(nSourcej, -1);
+                intMesh1[sourcej] = meshj;
+
+                interfacePatch1.append(labelList());
+                auto& intPatch1 = interfacePatch1.last();
+                intPatch1.setSize(nSourcej, -1);
+                intPatch1[sourcej] = ppj.index();
+
+                interfaceNames1.append(wordList());
+                auto& intNames1 = interfaceNames1.last();
+                intNames1.setSize(nSourcej);
+                //intNames1[sourcej] =
+                //    meshes[meshj].name()
+                //  + "_to_"
+                //  + meshes[meshi].name();
+                intNames1[sourcej] =
+                    patchName(entryName, meshes[meshj], meshes[meshi]);
+
+                interfaceFaces0.append(List<DynamicList<label>>());
+                auto& intFaces0 = interfaceFaces0.last();
+                intFaces0.setSize(nSourcei);
+                DynamicList<label>& faces0 = intFaces0[sourcei];
+                faces0.setCapacity(ppi.size());
+
+                interfaceFaces1.append(List<DynamicList<label>>());
+                auto& intFaces1 = interfaceFaces1.last();
+                intFaces1.setSize(nSourcej);
+                DynamicList<label>& faces1 = intFaces1[sourcej];
+                faces1.setCapacity(ppj.size());
+
+
+                // Mark any mesh faces:
+                // - that have a weight > 0.5.
+                // - contribute to these faces (even if < 0.5)
+
+                faces0.clear();
+                faces1.clear();
+
+                // Marked as donor of face with high weight
+                scalarField targetMask;
+                {
+                    const scalarField& weights = AMPtr->srcWeightsSum();
+                    scalarField mask(weights.size(), Zero);
+                    forAll(weights, facei)
+                    {
+                        const scalar sum = weights[facei];
+                        if (sum > 0.5)
+                        {
+                            mask[facei] = sum;
+                        }
+                    }
+
+                    // Push source field mask to target
+                    targetMask = AMPtr->interpolateToTarget(mask);
+                }
+
+                scalarField sourceMask;
+                {
+                    const scalarField& weights = AMPtr->tgtWeightsSum();
+                    scalarField mask(weights.size(), Zero);
+                    forAll(weights, facei)
+                    {
+                        const scalar sum = weights[facei];
+                        if (sum > 0.5)
+                        {
+                            mask[facei] = sum;
+                        }
+                    }
+
+                    // Push target mask back to source
+                    sourceMask = AMPtr->interpolateToSource(mask);
+                }
+
+                {
+                    const scalarField& weights = AMPtr->srcWeightsSum();
+                    forAll(weights, facei)
+                    {
+                        if (weights[facei] > 0.5 || sourceMask[facei] > SMALL)
+                        {
+                            faces0.append(ppi.start()+facei);
+                        }
+                    }
+                }
+                {
+                    const scalarField& weights = AMPtr->tgtWeightsSum();
+                    forAll(weights, facei)
+                    {
+                        if (weights[facei] > 0.5 || targetMask[facei] > SMALL)
+                        {
+                            faces1.append(ppj.start()+facei);
+                        }
+                    }
+                }
+
+                faces0.shrink();
+                faces1.shrink();
+            }
+        }
+    }
+}
+
+
+void matchPatchFaces
+(
+    const bool includeOwn,
+    const PtrList<fvMesh>& meshes,
+    const List<DynamicList<label>>& interRegionSources,
+    const List<wordList>& patchNames,
+    const labelListListList& matchPatchIDs,
+    const List<wordList>& AMIMethods,
+    List<PtrList<dictionary>> patchInfoDicts,
+
+    DynamicList<labelList>& interfaceMesh0,
+    DynamicList<labelList>& interfacePatch0,
+    DynamicList<List<DynamicList<label>>>& interfaceFaces0,
+    DynamicList<wordList>& interfaceNames0,
+
+    DynamicList<labelList>& interfaceMesh1,
+    DynamicList<labelList>& interfacePatch1,
+    DynamicList<List<DynamicList<label>>>& interfaceFaces1,
+    DynamicList<wordList>& interfaceNames1
+)
+{
+    // Add approximate matches
+    forAll(meshes, meshi)
+    {
+        const labelListList& allPatchesi = matchPatchIDs[meshi];
+
+        const label meshjStart(includeOwn ? meshi : meshi+1);
+
+        for (label meshj = meshjStart; meshj < meshes.size(); meshj++)
+        {
+            const labelListList& allPatchesj = matchPatchIDs[meshj];
+
+            for (const label sourcei : interRegionSources[meshi])
+            {
+                const labelList& patchesi = allPatchesi[sourcei];
+
+                for (const label sourcej : interRegionSources[meshj])
+                {
+                    const labelList& patchesj = allPatchesj[sourcej];
+
+                    // Now we have:
+                    // - meshi, sourcei, patchesi
+                    // - meshj, sourcej, patchesj
+
+                    matchPatchFaces
+                    (
+                        patchNames[meshi][sourcei],
+                        (
+                            AMIMethods[meshi][sourcei].size()
+                          ? AMIMethods[meshi][sourcei]
+                          : faceAreaWeightAMI2D::typeName
+                        ),
+                        patchInfoDicts[meshi][sourcei],
+                        meshes,
+
+                        meshi,
+                        allPatchesi.size(), // nSourcei,
+                        sourcei,
+                        patchesi,
+
+                        meshj,
+                        allPatchesj.size(), // nSourcej,
+                        sourcej,
+                        patchesj,
+
+                        interfaceMesh0,
+                        interfacePatch0,
+                        interfaceNames0,
+                        interfaceFaces0,
+
+                        interfaceMesh1,
+                        interfacePatch1,
+                        interfaceNames1,
+                        interfaceFaces1
+                    );
+                }
+            }
+        }
+    }
+}
+
+
 void changePatchID
 (
-    const polyMesh& mesh,
+    const fvMesh& mesh,
     const label faceID,
     const label patchID,
     polyTopoChange& meshMod
@@ -103,100 +391,35 @@ void changePatchID
 }
 
 
-// Filter out the empty patches.
-void filterPatches(polyMesh& mesh, const wordHashSet& addedPatchNames)
+void changePatchID
+(
+    const fvMesh& mesh,
+    const labelList& faceLabels,
+    const label patchID,
+    bitSet& isRepatchedBoundary,
+    polyTopoChange& meshMod
+)
 {
-    const polyBoundaryMesh& patches = mesh.boundaryMesh();
-
-    // Patches to keep
-    DynamicList<polyPatch*> allPatches(patches.size());
-
-    label nOldPatches = returnReduce(patches.size(), sumOp<label>());
-
-    // Copy old patches.
-    forAll(patches, patchi)
+    for (const label facei : faceLabels)
     {
-        const polyPatch& pp = patches[patchi];
-
-        // Note: reduce possible since non-proc patches guaranteed in same order
-        if (!isA<processorPolyPatch>(pp))
+        if (mesh.isInternalFace(facei))
         {
-
-            // Add if
-            // - non zero size
-            // - or added from the createPatchDict
-            // - or cyclic (since referred to by other cyclic half or
-            //   proccyclic)
-
-            if
-            (
-                addedPatchNames.found(pp.name())
-             || returnReduce(pp.size(), sumOp<label>()) > 0
-             || isA<coupledPolyPatch>(pp)
-            )
-            {
-                allPatches.append
-                (
-                    pp.clone
-                    (
-                        patches,
-                        allPatches.size(),
-                        pp.size(),
-                        pp.start()
-                    ).ptr()
-                );
-            }
-            else
-            {
-                Info<< "Removing zero-sized patch " << pp.name()
-                    << " type " << pp.type()
-                    << " at position " << patchi << endl;
-            }
+            FatalErrorInFunction
+                << "Face " << facei
+                << " is not an external face of the mesh." << endl
+                << "This application can only repatch"
+                << " existing boundary faces." << exit(FatalError);
         }
-    }
-    // Copy non-empty processor patches
-    forAll(patches, patchi)
-    {
-        const polyPatch& pp = patches[patchi];
 
-        if (isA<processorPolyPatch>(pp))
+        if (!isRepatchedBoundary.set(facei-mesh.nInternalFaces()))
         {
-            if (pp.size())
-            {
-                allPatches.append
-                (
-                    pp.clone
-                    (
-                        patches,
-                        allPatches.size(),
-                        pp.size(),
-                        pp.start()
-                    ).ptr()
-                );
-            }
-            else
-            {
-                Info<< "Removing empty processor patch " << pp.name()
-                    << " at position " << patchi << endl;
-            }
+            FatalErrorInFunction
+                << "Face " << facei << " is already marked to be moved"
+                << " to patch " << meshMod.region()[facei]
+                << exit(FatalError);
         }
-    }
 
-    label nAllPatches = returnReduce(allPatches.size(), sumOp<label>());
-    if (nAllPatches != nOldPatches)
-    {
-        Info<< "Removing patches." << endl;
-        allPatches.shrink();
-        mesh.removeBoundary();
-        mesh.addPatches(allPatches);
-    }
-    else
-    {
-        Info<< "No patches removed." << endl;
-        forAll(allPatches, i)
-        {
-            delete allPatches[i];
-        }
+        changePatchID(mesh, facei, patchID, meshMod);
     }
 }
 
@@ -498,7 +721,9 @@ int main(int argc, char *argv[])
     );
 
     #include "addOverwriteOption.H"
-    #include "addRegionOption.H"
+    //#include "addRegionOption.H"
+    #include "addAllRegionOptions.H"
+
     argList::addOption("dict", "file", "Alternative createPatchDict");
     argList::addBoolOption
     (
@@ -510,386 +735,674 @@ int main(int argc, char *argv[])
 
     #include "setRootCase.H"
     #include "createTime.H"
-
-    const word meshRegionName =
-        args.getOrDefault<word>("region", polyMesh::defaultRegion);
+    #include "getAllRegionOptions.H"
 
     const bool overwrite = args.found("overwrite");
 
-    #include "createNamedPolyMesh.H"
+    #include "createNamedMeshes.H"
 
     const bool writeObj = args.found("writeObj");
 
-    const word oldInstance = mesh.pointsInstance();
 
-    const word dictName("createPatchDict");
-    #include "setSystemMeshDictionaryIO.H"
-    Info<< "Reading " << dictIO.instance()/dictIO.name() << nl << endl;
+    // Read dictionaries and extract various
+    wordList oldInstances(meshes.size());
+    PtrList<dictionary> dicts(meshes.size());
+    List<wordList> patchNames(meshes.size());
+    List<labelListList> matchPatchIDs(meshes.size());
+    List<wordList> matchMethods(meshes.size());
+    List<PtrList<dictionary>> patchInfoDicts(meshes.size());
 
-    IOdictionary dict(dictIO);
-
-    // Whether to synchronise points
-    const bool pointSync(dict.get<bool>("pointSync"));
-
-    const polyBoundaryMesh& patches = mesh.boundaryMesh();
-
-    // If running parallel check same patches everywhere
-    patches.checkParallelSync(true);
-
-
-    if (writeObj)
+    List<DynamicList<label>> interRegionSources(meshes.size());
+    forAll(meshes, meshi)
     {
-        dumpCyclicMatch("initial_", mesh);
-    }
+        fvMesh& mesh = meshes[meshi];
+        const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
-    // Read patch construct info from dictionary
-    PtrList<dictionary> patchSources(dict.lookup("patches"));
+        // If running parallel check same patches everywhere
+        patches.checkParallelSync(true);
 
-    wordHashSet addedPatchNames;
-    for (const dictionary& dict : patchSources)
-    {
-        addedPatchNames.insert(dict.get<word>("name"));
-    }
+        oldInstances[meshi] = mesh.pointsInstance();
 
+        const word dictName("createPatchDict");
+        #include "setSystemMeshDictionaryIO.H"
+        Info<< "Reading " << dictIO.instance()/dictIO.name() << nl << endl;
 
-    // 1. Add all new patches
-    // ~~~~~~~~~~~~~~~~~~~~~~
+        dicts.set(meshi, new IOdictionary(dictIO));
 
-    if (patchSources.size())
-    {
-        // Old and new patches.
-        DynamicList<polyPatch*> allPatches(patches.size()+patchSources.size());
+        const auto& dict = dicts[meshi];
+        PtrList<dictionary> patchSources(dict.lookup("patches"));
+        patchNames[meshi].setSize(patchSources.size());
+        matchPatchIDs[meshi].setSize(patchSources.size());
+        matchMethods[meshi].setSize(patchSources.size());
+        patchInfoDicts[meshi].setSize(patchSources.size());
 
-        label startFacei = mesh.nInternalFaces();
-
-        // Copy old patches.
-        forAll(patches, patchi)
+        // Read patch construct info from dictionary
+        forAll(patchSources, sourcei)
         {
-            const polyPatch& pp = patches[patchi];
+            const auto& pDict = patchSources[sourcei];
+            patchNames[meshi][sourcei] = pDict.get<word>("name");
 
-            if (!isA<processorPolyPatch>(pp))
+            patchInfoDicts[meshi].set
+            (
+                sourcei,
+                new dictionary(pDict.subDict("patchInfo"))
+            );
+            const dictionary& patchDict = patchInfoDicts[meshi][sourcei];
+            if (patchDict.found("AMIMethod"))
             {
-                allPatches.append
-                (
-                    pp.clone
-                    (
-                        patches,
-                        patchi,
-                        pp.size(),
-                        startFacei
-                    ).ptr()
-                );
-                startFacei += pp.size();
+                matchMethods[meshi][sourcei] = patchDict.get<word>("AMIMethod");
+            }
+
+            wordRes matchNames;
+            if (pDict.readIfPresent("patches", matchNames, keyType::LITERAL))
+            {
+                matchPatchIDs[meshi][sourcei] =
+                    patches.patchSet(matchNames).sortedToc();
+            }
+
+            if (pDict.get<word>("constructFrom") == "autoPatch")
+            {
+                interRegionSources[meshi].append(sourcei);
             }
         }
+    }
 
-        for (const dictionary& dict : patchSources)
+
+
+    // Determine matching faces. This is an interface between two
+    // sets of faces:
+    //  - originating mesh
+    //  - originating patch
+    //  - originating (mesh)facelabels
+    // It matches all mesh against each other. Lower numbered mesh gets
+    // postfix 0, higher numbered mesh postfix 1.
+
+    // Per interface, per mesh, per patchSource:
+    //      1. the lower numbered mesh
+    DynamicList<labelList> interfaceMesh0;
+    //      2. the patch on the interfaceMesh0
+    DynamicList<labelList> interfacePatch0;
+    //      3. the facelabels on the interfaceMesh0
+    DynamicList<List<DynamicList<label>>> interfaceFaces0;
+    //      4. generated interface name
+    DynamicList<wordList> interfaceNames0;
+
+    // Same for the higher numbered mesh
+    DynamicList<labelList> interfaceMesh1;
+    DynamicList<labelList> interfacePatch1;
+    DynamicList<List<DynamicList<label>>> interfaceFaces1;
+    DynamicList<wordList> interfaceNames1;
+    {
+        // Whether to match to patches in own mesh
+        const bool includeOwn = (meshes.size() == 1);
+
+        matchPatchFaces
+        (
+            includeOwn,
+            meshes,
+            interRegionSources,
+            patchNames,
+            matchPatchIDs,
+            matchMethods,   //faceAreaWeightAMI2D::typeName,
+            patchInfoDicts,
+
+            interfaceMesh0,
+            interfacePatch0,
+            interfaceFaces0,
+            interfaceNames0,
+
+            interfaceMesh1,
+            interfacePatch1,
+            interfaceFaces1,
+            interfaceNames1
+        );
+    }
+
+
+    // Read fields
+    List<PtrList<volScalarField>> vsFlds(meshes.size());
+    List<PtrList<volVectorField>> vvFlds(meshes.size());
+    List<PtrList<volSphericalTensorField>> vstFlds(meshes.size());
+    List<PtrList<volSymmTensorField>> vsymtFlds(meshes.size());
+    List<PtrList<surfaceScalarField>> ssFlds(meshes.size());
+    List<PtrList<volTensorField>> vtFlds(meshes.size());
+    List<PtrList<surfaceVectorField>> svFlds(meshes.size());
+    List<PtrList<surfaceSphericalTensorField>> sstFlds(meshes.size());
+    List<PtrList<surfaceSymmTensorField>> ssymtFlds(meshes.size());
+    List<PtrList<surfaceTensorField>> stFlds(meshes.size());
+
+    {
+        forAll(meshes, meshi)
         {
+            const fvMesh& mesh = meshes[meshi];
+
+            bool noFields = true;
+            for (const auto& d : patchInfoDicts[meshi])
+            {
+                if (d.found("patchFields"))
+                {
+                    noFields = false;
+                }
+            }
+
+            if (!noFields)
+            {
+                // Read objects in time directory
+                IOobjectList objects(mesh, runTime.timeName());
+
+                // Read volume fields.
+                ReadFields(mesh, objects, vsFlds[meshi]);
+                ReadFields(mesh, objects, vvFlds[meshi]);
+                ReadFields(mesh, objects, vstFlds[meshi]);
+                ReadFields(mesh, objects, vsymtFlds[meshi]);
+                ReadFields(mesh, objects, vtFlds[meshi]);
+
+                // Read surface fields.
+                ReadFields(mesh, objects, ssFlds[meshi]);
+                ReadFields(mesh, objects, svFlds[meshi]);
+                ReadFields(mesh, objects, sstFlds[meshi]);
+                ReadFields(mesh, objects, ssymtFlds[meshi]);
+                ReadFields(mesh, objects, stFlds[meshi]);
+            }
+        }
+    }
+
+
+
+    // Loop over all regions
+
+    forAll(meshes, meshi)
+    {
+        fvMesh& mesh = meshes[meshi];
+        const polyBoundaryMesh& patches = mesh.boundaryMesh();
+        const dictionary& dict = dicts[meshi];
+
+        if (writeObj)
+        {
+            dumpCyclicMatch("initial_", mesh);
+        }
+
+        // Read patch construct info from dictionary
+        PtrList<dictionary> patchSources(dict.lookup("patches"));
+
+
+        // 1. Add all new patches
+        // ~~~~~~~~~~~~~~~~~~~~~~
+
+        forAll(patchSources, sourcei)
+        {
+            const dictionary& dict = patchSources[sourcei];
+            const word sourceType(dict.get<word>("constructFrom"));
             const word patchName(dict.get<word>("name"));
 
-            label destPatchi = patches.findPatchID(patchName);
+            dictionary patchDict(dict.subDict("patchInfo"));
+            patchDict.set("nFaces", 0);
+            patchDict.set("startFace", 0);  //startFacei);
 
-            if (destPatchi == -1)
+            if (sourceType == "autoPatch")
             {
-                dictionary patchDict(dict.subDict("patchInfo"));
+                // Special : automatically create the necessary inter-region
+                // coupling patches
 
-                destPatchi = allPatches.size();
+                forAll(interfaceMesh0, inti)
+                {
+                    const labelList& allMeshes0 = interfaceMesh0[inti];
+                    const wordList& allNames0 = interfaceNames0[inti];
+                    const labelList& allMeshes1 = interfaceMesh1[inti];
+                    const wordList& allNames1 = interfaceNames1[inti];
 
-                Info<< "Adding new patch " << patchName
-                    << " as patch " << destPatchi
-                    << " from " << patchDict << endl;
+                    forAll(allMeshes0, sourcei)
+                    {
+                        if (allMeshes0[sourcei] == meshi)
+                        {
+                            const auto& mesh1 = meshes[allMeshes1[sourcei]];
+                            const word& patchName = allNames0[sourcei];
+                            if (patches.findPatchID(patchName) == -1)
+                            {
+                                dictionary allDict(patchDict);
+                                allDict.set("sampleRegion", mesh1.name());
+                                const auto& destPatch = allNames1[sourcei];
+                                allDict.set("samplePatch", destPatch);
+                                allDict.set("neighbourPatch", destPatch);
 
-                patchDict.set("nFaces", 0);
-                patchDict.set("startFace", startFacei);
+                                Info<< "Adding new patch " << patchName
+                                    << " from " << allDict << endl;
 
-                // Add an empty patch.
-                allPatches.append
-                (
-                    polyPatch::New
-                    (
-                        patchName,
-                        patchDict,
-                        destPatchi,
-                        patches
-                    ).ptr()
-                );
+                                autoPtr<polyPatch> ppPtr
+                                (
+                                    polyPatch::New
+                                    (
+                                        patchName,
+                                        allDict,
+                                        0,          // overwritten
+                                        patches
+                                    )
+                                );
+                                fvMeshTools::addPatch
+                                (
+                                    mesh,
+                                    ppPtr(),
+                                    patchDict.subOrEmptyDict("patchFields"),
+                                    calculatedFvPatchScalarField::typeName,
+                                    true
+                                );
+                            }
+                        }
+                    }
+                }
+
+                forAll(interfaceMesh1, inti)
+                {
+                    const labelList& allMeshes0 = interfaceMesh0[inti];
+                    const wordList& allNames0 = interfaceNames0[inti];
+                    const labelList& allMeshes1 = interfaceMesh1[inti];
+                    const wordList& allNames1 = interfaceNames1[inti];
+
+                    forAll(allMeshes1, sourcei)
+                    {
+                        if (allMeshes1[sourcei] == meshi)
+                        {
+                            const auto& mesh0 = meshes[allMeshes0[sourcei]];
+                            const word& patchName = allNames1[sourcei];
+                            if (patches.findPatchID(patchName) == -1)
+                            {
+                                dictionary allDict(patchDict);
+                                const auto& destPatch = allNames0[sourcei];
+                                allDict.set("sampleRegion", mesh0.name());
+                                allDict.set("samplePatch", destPatch);
+                                allDict.set("neighbourPatch", destPatch);
+
+                                Info<< "Adding new patch " << patchName
+                                    << " from " << allDict << endl;
+
+                                autoPtr<polyPatch> ppPtr
+                                (
+                                    polyPatch::New
+                                    (
+                                        patchName,
+                                        allDict,
+                                        0,          // overwritten
+                                        patches
+                                    )
+                                );
+                                fvMeshTools::addPatch
+                                (
+                                    mesh,
+                                    ppPtr(),
+                                    patchDict.subOrEmptyDict("patchFields"),
+                                    calculatedFvPatchScalarField::typeName,
+                                    true
+                                );
+                            }
+                        }
+                    }
+                }
             }
             else
             {
-                Info<< "Patch '" << patchName << "' already exists.  Only "
-                    << "moving patch faces - type will remain the same" << endl;
-            }
-        }
+                if (patches.findPatchID(patchName) == -1)
+                {
+                    Info<< "Adding new patch " << patchName
+                        << " from " << patchDict << endl;
 
-        // Copy old patches.
-        forAll(patches, patchi)
-        {
-            const polyPatch& pp = patches[patchi];
-
-            if (isA<processorPolyPatch>(pp))
-            {
-                allPatches.append
-                (
-                    pp.clone
+                    autoPtr<polyPatch> ppPtr
                     (
-                        patches,
-                        patchi,
-                        pp.size(),
-                        startFacei
-                    ).ptr()
-                );
-                startFacei += pp.size();
+                        polyPatch::New
+                        (
+                            patchName,
+                            patchDict,
+                            0,          // overwritten
+                            patches
+                        )
+                    );
+                    fvMeshTools::addPatch
+                    (
+                        mesh,
+                        ppPtr(),
+                        patchDict.subOrEmptyDict("patchFields"),
+                        calculatedFvPatchScalarField::typeName,
+                        true
+                    );
+                }
             }
         }
-
-        allPatches.shrink();
-        mesh.removeBoundary();
-        mesh.addPatches(allPatches);
 
         Info<< endl;
     }
 
 
-
     // 2. Repatch faces
     // ~~~~~~~~~~~~~~~~
 
-    polyTopoChange meshMod(mesh);
-
-    // Mark all repatched faces. This makes sure that the faces to repatch
-    // do not overlap
-    bitSet isRepatchedBoundary(mesh.nBoundaryFaces());
-
-    for (const dictionary& dict : patchSources)
+    forAll(meshes, meshi)
     {
-        const word patchName(dict.get<word>("name"));
-        label destPatchi = patches.findPatchID(patchName);
+        fvMesh& mesh = meshes[meshi];
+        const polyBoundaryMesh& patches = mesh.boundaryMesh();
+        const dictionary& dict = dicts[meshi];
 
-        if (destPatchi == -1)
+        // Whether to synchronise points
+        const bool pointSync(dict.get<bool>("pointSync"));
+
+        // Read patch construct info from dictionary
+        PtrList<dictionary> patchSources(dict.lookup("patches"));
+
+
+        polyTopoChange meshMod(mesh);
+
+        // Mark all repatched faces. This makes sure that the faces to repatch
+        // do not overlap
+        bitSet isRepatchedBoundary(mesh.nBoundaryFaces());
+
+        forAll(patchSources, sourcei)
         {
-            FatalErrorInFunction
-                << "patch " << patchName << " not added. Problem."
-                << abort(FatalError);
-        }
+            const dictionary& dict = patchSources[sourcei];
+            const word patchName(dict.get<word>("name"));
+            const word sourceType(dict.get<word>("constructFrom"));
 
-        const word sourceType(dict.get<word>("constructFrom"));
-
-        if (sourceType == "patches")
-        {
-            labelHashSet patchSources
-            (
-                patches.patchSet(dict.get<wordRes>("patches"))
-            );
-
-            // Repatch faces of the patches.
-            for (const label patchi : patchSources)
+            if (sourceType == "autoPatch")
             {
-                const polyPatch& pp = patches[patchi];
-
-                Info<< "Moving faces from patch " << pp.name()
-                    << " to patch " << destPatchi << endl;
-
-                forAll(pp, i)
+                forAll(interfaceMesh0, inti)
                 {
-                    changePatchID
-                    (
-                        mesh,
-                        pp.start() + i,
-                        destPatchi,
-                        meshMod
-                    );
+                    const labelList& allMeshes0 = interfaceMesh0[inti];
+                    const wordList& allNames0 = interfaceNames0[inti];
+                    const auto& allFaces0 = interfaceFaces0[inti];
 
-                    if (!isRepatchedBoundary.set(pp.offset()+i))
+                    const labelList& allMeshes1 = interfaceMesh1[inti];
+                    const wordList& allNames1 = interfaceNames1[inti];
+                    const auto& allFaces1 = interfaceFaces1[inti];
+
+                    forAll(allMeshes0, sourcei)
                     {
-                        FatalErrorInFunction
-                            << "Face " << pp.start() + i << " from patch "
-                            << pp.name() << " is already marked to be moved"
-                            << " to patch " << meshMod.region()[pp.start() + i]
-                            << exit(FatalError);
+                        if (allMeshes0[sourcei] == meshi)
+                        {
+                            const label destPatchi =
+                                patches.findPatchID(allNames0[sourcei], false);
+
+                            Pout<< "Matched mesh:" << mesh.name()
+                                << " to mesh:"
+                                << meshes[allMeshes1[sourcei]].name()
+                                << " through:" << allNames0[sourcei] << endl;
+
+                            changePatchID
+                            (
+                                mesh,
+                                allFaces0[sourcei],
+                                destPatchi,
+                                isRepatchedBoundary,
+                                meshMod
+                            );
+                        }
+                    }
+                    forAll(allMeshes1, sourcei)
+                    {
+                        if (allMeshes1[sourcei] == meshi)
+                        {
+                            const label destPatchi =
+                                patches.findPatchID(allNames1[sourcei], false);
+
+                            Pout<< "Matched mesh:" << mesh.name()
+                                << " to mesh:"
+                                << meshes[allMeshes0[sourcei]].name()
+                                << " through:" << allNames1[sourcei] << endl;
+
+                            changePatchID
+                            (
+                                mesh,
+                                allFaces1[sourcei],
+                                destPatchi,
+                                isRepatchedBoundary,
+                                meshMod
+                            );
+                        }
                     }
                 }
             }
-        }
-        else if (sourceType == "set")
-        {
-            const word setName(dict.get<word>("set"));
-
-            faceSet set(mesh, setName);
-
-            Info<< "Read " << returnReduce(set.size(), sumOp<label>())
-                << " faces from faceSet " << set.name() << endl;
-
-            // Sort (since faceSet contains faces in arbitrary order)
-            labelList faceLabels(set.sortedToc());
-
-            for (const label facei : faceLabels)
+            else if (sourceType == "patches")
             {
-                if (mesh.isInternalFace(facei))
-                {
-                    FatalErrorInFunction
-                        << "Face " << facei << " specified in set "
-                        << set.name()
-                        << " is not an external face of the mesh." << endl
-                        << "This application can only repatch existing boundary"
-                        << " faces." << exit(FatalError);
-                }
+                const label destPatchi = patches.findPatchID(patchName, false);
+                labelHashSet patchSources
+                (
+                    patches.patchSet(dict.get<wordRes>("patches"))
+                );
 
-                if (!isRepatchedBoundary.set(facei-mesh.nInternalFaces()))
+                // Repatch faces of the patches.
+                for (const label patchi : patchSources)
                 {
-                    FatalErrorInFunction
-                        << "Face " << facei << " from set "
-                        << set.name() << " is already marked to be moved"
-                        << " to patch " << meshMod.region()[facei]
-                        << exit(FatalError);
+                    const polyPatch& pp = patches[patchi];
+
+                    Info<< "Moving faces from patch " << pp.name()
+                        << " to patch " << destPatchi << endl;
+
+                    changePatchID
+                    (
+                        mesh,
+                        pp.start()+identity(pp.size()),
+                        destPatchi,
+                        isRepatchedBoundary,
+                        meshMod
+                    );
                 }
+            }
+            else if (sourceType == "set")
+            {
+                const label destPatchi = patches.findPatchID(patchName, false);
+                const word setName(dict.get<word>("set"));
+
+                faceSet set(mesh, setName);
+
+                Info<< "Read " << returnReduce(set.size(), sumOp<label>())
+                    << " faces from faceSet " << set.name() << endl;
+
+                // Sort (since faceSet contains faces in arbitrary order)
+                labelList faceLabels(set.sortedToc());
 
                 changePatchID
                 (
                     mesh,
-                    facei,
+                    faceLabels,
                     destPatchi,
+                    isRepatchedBoundary,
                     meshMod
                 );
             }
+            else
+            {
+                FatalErrorInFunction
+                    << "Invalid source type " << sourceType << endl
+                    << "Valid source types are 'patches' 'set'"
+                    << exit(FatalError);
+            }
+        }
+        Info<< endl;
+
+
+        // Change mesh, use inflation to reforce calculation of transformation
+        // tensors.
+        Info<< "Doing topology modification to order faces." << nl << endl;
+        autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, true);
+
+        if (map().hasMotionPoints())
+        {
+            mesh.movePoints(map().preMotionPoints());
         }
         else
         {
-            FatalErrorInFunction
-                << "Invalid source type " << sourceType << endl
-                << "Valid source types are 'patches' 'set'" << exit(FatalError);
+           // Force calculation of transformation tensors
+            mesh.movePoints(pointField(mesh.points()));
         }
-    }
-    Info<< endl;
 
 
-    // Change mesh, use inflation to reforce calculation of transformation
-    // tensors.
-    Info<< "Doing topology modification to order faces." << nl << endl;
-    autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, true);
-    mesh.movePoints(map().preMotionPoints());
+        // Update fields
+        mesh.updateMesh(map());
 
-    if (writeObj)
-    {
-        dumpCyclicMatch("coupled_", mesh);
-    }
 
-    // Synchronise points.
-    if (!pointSync)
-    {
-        Info<< "Not synchronising points." << nl << endl;
-    }
-    else
-    {
-        Info<< "Synchronising points." << nl << endl;
-
-        // This is a bit tricky. Both normal and position might be out and
-        // current separation also includes the normal
-        // ( separation_ = (nf&(Cr - Cf))*nf ).
-
-        // For cyclic patches:
-        // - for separated ones use user specified offset vector
-
-        forAll(mesh.boundaryMesh(), patchi)
+        // Update numbering pointing to meshi
+        const auto& oldToNew = map().reverseFaceMap();
+        forAll(interfaceMesh0, inti)
         {
-            const polyPatch& pp = mesh.boundaryMesh()[patchi];
-
-            if (pp.size() && isA<coupledPolyPatch>(pp))
+            const labelList& allMeshes0 = interfaceMesh0[inti];
+            forAll(allMeshes0, sourcei)
             {
-                const coupledPolyPatch& cpp =
-                    refCast<const coupledPolyPatch>(pp);
-
-                if (cpp.separated())
+                if (allMeshes0[sourcei] == meshi)
                 {
-                    Info<< "On coupled patch " << pp.name()
-                        << " separation[0] was "
-                        << cpp.separation()[0] << endl;
-
-                    if (isA<cyclicPolyPatch>(pp) && pp.size())
-                    {
-                        const cyclicPolyPatch& cycpp =
-                            refCast<const cyclicPolyPatch>(pp);
-
-                        if (cycpp.transform() == cyclicPolyPatch::TRANSLATIONAL)
-                        {
-                            // Force to wanted separation
-                            Info<< "On cyclic translation patch " << pp.name()
-                                << " forcing uniform separation of "
-                                << cycpp.separationVector() << endl;
-                            const_cast<vectorField&>(cpp.separation()) =
-                                pointField(1, cycpp.separationVector());
-                        }
-                        else
-                        {
-                            const cyclicPolyPatch& nbr = cycpp.neighbPatch();
-                            const_cast<vectorField&>(cpp.separation()) =
-                                pointField
-                                (
-                                    1,
-                                    nbr[0].centre(mesh.points())
-                                  - cycpp[0].centre(mesh.points())
-                                );
-                        }
-                    }
-                    Info<< "On coupled patch " << pp.name()
-                        << " forcing uniform separation of "
-                        << cpp.separation() << endl;
+                    inplaceRenumber(oldToNew, interfaceFaces0[inti][sourcei]);
                 }
-                else if (!cpp.parallel())
+            }
+        }
+        forAll(interfaceMesh1, inti)
+        {
+            const labelList& allMeshes1 = interfaceMesh1[inti];
+            forAll(allMeshes1, sourcei)
+            {
+                if (allMeshes1[sourcei] == meshi)
                 {
-                    Info<< "On coupled patch " << pp.name()
-                        << " forcing uniform rotation of "
-                        << cpp.forwardT()[0] << endl;
-
-                    const_cast<tensorField&>
-                    (
-                        cpp.forwardT()
-                    ).setSize(1);
-                    const_cast<tensorField&>
-                    (
-                        cpp.reverseT()
-                    ).setSize(1);
-
-                    Info<< "On coupled patch " << pp.name()
-                        << " forcing uniform rotation of "
-                        << cpp.forwardT() << endl;
+                    inplaceRenumber(oldToNew, interfaceFaces1[inti][sourcei]);
                 }
             }
         }
 
-        Info<< "Synchronising points." << endl;
 
-        pointField newPoints(mesh.points());
+        if (writeObj)
+        {
+            dumpCyclicMatch("coupled_", mesh);
+        }
 
-        syncPoints
-        (
-            mesh,
-            newPoints,
-            minMagSqrEqOp<vector>(),
-            point(GREAT, GREAT, GREAT)
-        );
+        // Synchronise points.
+        if (!pointSync)
+        {
+            Info<< "Not synchronising points." << nl << endl;
+        }
+        else
+        {
+            Info<< "Synchronising points." << nl << endl;
 
-        scalarField diff(mag(newPoints-mesh.points()));
-        Info<< "Points changed by average:" << gAverage(diff)
-            << " max:" << gMax(diff) << nl << endl;
+            // This is a bit tricky. Both normal and position might be out and
+            // current separation also includes the normal
+            // ( separation_ = (nf&(Cr - Cf))*nf ).
 
-        mesh.movePoints(newPoints);
+            // For cyclic patches:
+            // - for separated ones use user specified offset vector
+
+            forAll(mesh.boundaryMesh(), patchi)
+            {
+                const polyPatch& pp = mesh.boundaryMesh()[patchi];
+
+                if (pp.size() && isA<coupledPolyPatch>(pp))
+                {
+                    const coupledPolyPatch& cpp =
+                        refCast<const coupledPolyPatch>(pp);
+
+                    if (cpp.separated())
+                    {
+                        Info<< "On coupled patch " << pp.name()
+                            << " separation[0] was "
+                            << cpp.separation()[0] << endl;
+
+                        if (isA<cyclicPolyPatch>(pp) && pp.size())
+                        {
+                            const auto& cycpp =
+                                refCast<const cyclicPolyPatch>(pp);
+
+                            if
+                            (
+                                cycpp.transform()
+                             == cyclicPolyPatch::TRANSLATIONAL
+                            )
+                            {
+                                // Force to wanted separation
+                                Info<< "On cyclic translation patch "
+                                    << pp.name()
+                                    << " forcing uniform separation of "
+                                    << cycpp.separationVector() << endl;
+                                const_cast<vectorField&>(cpp.separation()) =
+                                    pointField(1, cycpp.separationVector());
+                            }
+                            else
+                            {
+                                const auto& nbr = cycpp.neighbPatch();
+                                const_cast<vectorField&>(cpp.separation()) =
+                                    pointField
+                                    (
+                                        1,
+                                        nbr[0].centre(mesh.points())
+                                      - cycpp[0].centre(mesh.points())
+                                    );
+                            }
+                        }
+                        Info<< "On coupled patch " << pp.name()
+                            << " forcing uniform separation of "
+                            << cpp.separation() << endl;
+                    }
+                    else if (!cpp.parallel())
+                    {
+                        Info<< "On coupled patch " << pp.name()
+                            << " forcing uniform rotation of "
+                            << cpp.forwardT()[0] << endl;
+
+                        const_cast<tensorField&>
+                        (
+                            cpp.forwardT()
+                        ).setSize(1);
+                        const_cast<tensorField&>
+                        (
+                            cpp.reverseT()
+                        ).setSize(1);
+
+                        Info<< "On coupled patch " << pp.name()
+                            << " forcing uniform rotation of "
+                            << cpp.forwardT() << endl;
+                    }
+                }
+            }
+
+            Info<< "Synchronising points." << endl;
+
+            pointField newPoints(mesh.points());
+
+            syncPoints
+            (
+                mesh,
+                newPoints,
+                minMagSqrEqOp<vector>(),
+                point(GREAT, GREAT, GREAT)
+            );
+
+            scalarField diff(mag(newPoints-mesh.points()));
+            Info<< "Points changed by average:" << gAverage(diff)
+                << " max:" << gMax(diff) << nl << endl;
+
+            mesh.movePoints(newPoints);
+        }
+
+
+        // 3. Remove zeros-sized patches
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        Info<< "Removing patches with no faces in them." << nl << endl;
+        const wordList oldPatchNames(mesh.boundaryMesh().names());
+        const wordList oldPatchTypes(mesh.boundaryMesh().types());
+        fvMeshTools::removeEmptyPatches(mesh, true);
+        forAll(oldPatchNames, patchi)
+        {
+            const word& pName = oldPatchNames[patchi];
+            if (mesh.boundaryMesh().findPatchID(pName) == -1)
+            {
+                Info<< "Removed zero-sized patch " << pName
+                    << " type " << oldPatchTypes[patchi]
+                    << " at position " << patchi << endl;
+            }
+        }
+
+
+        if (writeObj)
+        {
+            dumpCyclicMatch("final_", mesh);
+        }
+
+
+        // Set the precision of the points data to 10
+        IOstream::defaultPrecision(max(10u, IOstream::defaultPrecision()));
     }
-
-    // 3. Remove zeros-sized patches
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    Info<< "Removing patches with no faces in them." << nl<< endl;
-    filterPatches(mesh, addedPatchNames);
-
-
-    if (writeObj)
-    {
-        dumpCyclicMatch("final_", mesh);
-    }
-
-
-    // Set the precision of the points data to 10
-    IOstream::defaultPrecision(max(10u, IOstream::defaultPrecision()));
 
     if (!overwrite)
     {
@@ -897,14 +1410,25 @@ int main(int argc, char *argv[])
     }
     else
     {
-        mesh.setInstance(oldInstance);
+        forAll(meshes, meshi)
+        {
+            fvMesh& mesh = meshes[meshi];
+
+            mesh.setInstance(oldInstances[meshi]);
+        }
     }
 
     // Write resulting mesh
-    Info<< "Writing repatched mesh to " << runTime.timeName() << nl << endl;
-    mesh.write();
-    topoSet::removeFiles(mesh);
-    processorMeshes::removeFiles(mesh);
+    forAll(meshes, meshi)
+    {
+        fvMesh& mesh = meshes[meshi];
+        Info<< "Writing repatched mesh " << mesh.name()
+            << " to " << runTime.timeName() << nl << endl;
+        mesh.clearOut();    // remove meshPhi
+        mesh.write();
+        topoSet::removeFiles(mesh);
+        processorMeshes::removeFiles(mesh);
+    }
 
     Info<< "End\n" << endl;
 
