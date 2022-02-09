@@ -832,9 +832,19 @@ void readFields
     // construct-from-dictionary. This will not work when going to more
     // processors (e.g. decompose = 1 -> many) ! We could make a special
     // exception for decomposePar but nicer would be to have read-communicator
-    // ...
+    // ... For now detect if decomposing & disable parRun
     if (Pstream::master())
     {
+        // Work out if we're decomposing - none of the subprocs has a mesh
+        bool decompose = true;
+        for (const int procI : Pstream::subProcs())
+        {
+            if (haveMesh[procI])
+            {
+                decompose = false;
+            }
+        }
+
         forAll(masterNames, i)
         {
             const word& name = masterNames[i];
@@ -842,9 +852,16 @@ void readFields
             io.writeOpt(IOobject::AUTO_WRITE);
 
             // Load field (but not oldTime)
-            //const bool oldParRun = Pstream::parRun(false);
+            const bool oldParRun = Pstream::parRun();
+            if (decompose)
+            {
+                Pstream::parRun(false);
+            }
             readField(io, mesh, i, fields);
-            //Pstream::parRun(oldParRun);
+            if (decompose)
+            {
+                Pstream::parRun(oldParRun);
+            }
 
             // Create zero sized field and send
             if (subsetterPtr)
@@ -947,7 +964,8 @@ void correctCoupledBoundaryConditions(fvMesh& mesh)
                 auto& pfld = bfld[patchi];
                 const auto& fvp = mesh.boundary()[patchi];
 
-                if (fvp.coupled() && !isA<cyclicACMIFvPatch>(fvp))
+                const auto* ppPtr = isA<CoupledPatchType>(fvp);
+                if (ppPtr && ppPtr->coupled())
                 {
                     pfld.initEvaluate(Pstream::defaultCommsType);
                 }
@@ -967,7 +985,8 @@ void correctCoupledBoundaryConditions(fvMesh& mesh)
             {
                 const auto& fvp = pfld.patch();
 
-                if (fvp.coupled() && !isA<cyclicACMIFvPatch>(fvp))
+                const auto* ppPtr = isA<CoupledPatchType>(fvp);
+                if (ppPtr && ppPtr->coupled())
                 {
                     pfld.evaluate(Pstream::defaultCommsType);
                 }
@@ -984,7 +1003,8 @@ void correctCoupledBoundaryConditions(fvMesh& mesh)
                 const auto& fvp = mesh.boundary()[patchi];
                 auto& pfld = bfld[patchi];
 
-                if (fvp.coupled() && !isA<cyclicACMIFvPatch>(fvp))
+                const auto* ppPtr = isA<CoupledPatchType>(fvp);
+                if (ppPtr && ppPtr->coupled())
                 {
                     if (patchSchedule[patchEvali].init)
                     {
