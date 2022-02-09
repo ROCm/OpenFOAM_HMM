@@ -132,12 +132,13 @@ int main(int argc, char *argv[])
         "file",
         "Alternative particleTrackDict dictionary"
     );
+    argList::addVerboseOption("Additional verbosity");
 
     #include "setRootCase.H"
     #include "createTime.H"
     instantList timeDirs = timeSelector::select0(runTime, args);
     #include "createNamedMesh.H"
-    #include "createFields.H"
+    #include "createControls.H"
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

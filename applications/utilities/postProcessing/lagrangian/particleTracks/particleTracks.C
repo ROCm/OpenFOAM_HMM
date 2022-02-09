@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -247,16 +247,48 @@ int main(int argc, char *argv[])
         "Generate a file of particle tracks for cases that were"
         " computed using a tracked-parcel-type cloud"
     );
-
     timeSelector::addOptions();
     #include "addRegionOption.H"
 
-    #include "setRootCase.H"
+    // Less frequently used - reduce some clutter
+    argList::setAdvanced("decomposeParDict");
+    argList::setAdvanced("noFunctionObjects");
 
+    argList::addOption
+    (
+        "dict",
+        "file",
+        "Alternative particleTracksProperties dictionary"
+    );
+    argList::addOption
+    (
+        "stride",
+        "int",
+        "Override the sample-frequency"
+    );
+    argList::addOption
+    (
+        "format",
+        "name",
+        "The writer format "
+        "(default: vtk or 'setFormat' from dictionary)"
+    );
+    argList::addVerboseOption("Additional verbosity");
+
+    #include "setRootCase.H"
     #include "createTime.H"
     instantList timeDirs = timeSelector::select0(runTime, args);
     #include "createNamedMesh.H"
-    #include "createFields.H"
+
+    // ------------------------------------------------------------------------
+    // Control properties
+
+    #include "createControls.H"
+
+    args.readIfPresent("format", setFormat);
+
+    args.readIfPresent("stride", sampleFrequency);
+    sampleFrequency = max(1, sampleFrequency);  // sanity
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
