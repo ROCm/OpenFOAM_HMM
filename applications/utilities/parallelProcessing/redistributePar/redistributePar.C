@@ -1341,27 +1341,27 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
     correctCoupledBoundaryConditions
     <
         volScalarField,
-        processorFvPatchField<scalar>
+        processorFvPatch
     >(mesh);
     correctCoupledBoundaryConditions
     <
         volVectorField,
-        processorFvPatchField<vector>
+        processorFvPatch
     >(mesh);
     correctCoupledBoundaryConditions
     <
         volSphericalTensorField,
-        processorFvPatchField<sphericalTensor>
+        processorFvPatch
     >(mesh);
     correctCoupledBoundaryConditions
     <
         volSymmTensorField,
-        processorFvPatchField<symmTensor>
+        processorFvPatch
     >(mesh);
     correctCoupledBoundaryConditions
     <
         volTensorField,
-        processorFvPatchField<tensor>
+        processorFvPatch
     >(mesh);
     // No update surface fields
 
