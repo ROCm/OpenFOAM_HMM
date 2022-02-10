@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2019,2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -143,7 +143,18 @@ void Foam::decompositionConstraints::singleProcessorFaceSets::add
         const labelList& faceLabels = specifiedProcessorFaces[setI];
         for (const label facei : faceLabels)
         {
-            faceToSet[facei] = setI;
+            if (faceToSet[facei] == -1)
+            {
+                faceToSet[facei] = setI;
+            }
+            else if (faceToSet[facei] != setI)
+            {
+                WarningInFunction << "Face " << facei
+                    << " at " << mesh.faceCentres()[facei]
+                    << " is already in existing constraint "
+                    << faceToSet[facei]
+                    << endl;
+            }
         }
     }
 
@@ -190,7 +201,7 @@ void Foam::decompositionConstraints::singleProcessorFaceSets::add
             }
         }
 
-        reduce(store, andOp<bool>());
+        reduce(store, orOp<bool>());
 
         if (store)
         {
