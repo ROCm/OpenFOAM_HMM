@@ -275,7 +275,7 @@ Foam::sampledSurfaces::sampledSurfaces
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::sampledSurfaces::verbose(const bool on)
+bool Foam::sampledSurfaces::verbose(const bool on) noexcept
 {
     bool old(verbose_);
     verbose_ = on;
@@ -353,10 +353,6 @@ bool Foam::sampledSurfaces::read(const dictionary& dict)
             {
                 actions_[surfi] |= ACTION_STORE;
             }
-            if (surfDict.getOrDefault("surfMeshStore", false))
-            {
-                actions_[surfi] |= ACTION_SURF_MESH;
-            }
 
             // Define surface writer, but do NOT yet attach a surface
             writers_.set
@@ -419,10 +415,6 @@ bool Foam::sampledSurfaces::read(const dictionary& dict)
             {
                 actions_[surfi] |= ACTION_STORE;
             }
-            if (surfDict.getOrDefault("surfMeshStore", false))
-            {
-                actions_[surfi] |= ACTION_SURF_MESH;
-            }
 
             // Define surface writer, but do NOT yet attach a surface
             writers_.set
@@ -472,10 +464,6 @@ bool Foam::sampledSurfaces::read(const dictionary& dict)
             {
                 Info<< ", store on registry ("
                     << IOobject::groupName(name(), s.name()) << ')';
-            }
-            if (actions_[surfi] & ACTION_SURF_MESH)
-            {
-                Info<< ", store as surfMesh (DEPRECATED)";
             }
             Info<< nl;
             Info<< "        ";
@@ -532,11 +520,6 @@ bool Foam::sampledSurfaces::performAction(unsigned request)
             if ((request & actions_[surfi]) & ACTION_STORE)
             {
                 storeRegistrySurface(s);
-            }
-
-            if ((request & actions_[surfi]) & ACTION_SURF_MESH)
-            {
-                s.storeSurfMesh();
             }
         }
     }
@@ -765,17 +748,17 @@ bool Foam::sampledSurfaces::update()
 }
 
 
-Foam::scalar Foam::sampledSurfaces::mergeTol()
+Foam::scalar Foam::sampledSurfaces::mergeTol() noexcept
 {
     return mergeTol_;
 }
 
 
-Foam::scalar Foam::sampledSurfaces::mergeTol(const scalar tol)
+Foam::scalar Foam::sampledSurfaces::mergeTol(const scalar tol) noexcept
 {
-    const scalar prev(mergeTol_);
+    const scalar old(mergeTol_);
     mergeTol_ = tol;
-    return prev;
+    return old;
 }
 
 

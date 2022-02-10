@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -112,7 +112,6 @@ Description
         store    | Store surface/fields on registry         | no  |
         surfaceFormat | output surface format               | no  |
         formatOptions | dictionary of format options        | no  |
-        surfMeshStore | Store surface/fields as surfMesh (transitional) | no  |
     \endtable
 
 Note
@@ -121,11 +120,12 @@ Note
 
 SourceFiles
     sampledSurfaces.C
+    sampledSurfacesTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef sampledSurfaces_H
-#define sampledSurfaces_H
+#ifndef Foam_sampledSurfaces_H
+#define Foam_sampledSurfaces_H
 
 #include "fvMeshFunctionObject.H"
 #include "sampledSurface.H"
@@ -162,7 +162,6 @@ class sampledSurfaces
             ACTION_NONE  = 0,
             ACTION_WRITE = 0x1,
             ACTION_STORE = 0x2,
-            ACTION_SURF_MESH = 0x4,
             ACTION_ALL = 0xF
         };
 
@@ -209,13 +208,13 @@ class sampledSurfaces
     // Private Member Functions
 
         //- Return the surfaces
-        const PtrList<sampledSurface>& surfaces() const
+        const PtrList<sampledSurface>& surfaces() const noexcept
         {
             return *this;
         }
 
         //- Return the surfaces
-        PtrList<sampledSurface>& surfaces()
+        PtrList<sampledSurface>& surfaces() noexcept
         {
             return *this;
         }
@@ -247,19 +246,11 @@ class sampledSurfaces
 
         //- Sample and store/write a specific volume field
         template<class Type>
-        void performAction
-        (
-            const GeometricField<Type, fvPatchField, volMesh>& fld,
-            unsigned request
-        );
+        void performAction(const VolumeField<Type>& fld, unsigned request);
 
         //- Sample and store/write a specific surface field
         template<class Type>
-        void performAction
-        (
-            const GeometricField<Type, fvsPatchField, surfaceMesh>& fld,
-            unsigned request
-        );
+        void performAction(const SurfaceField<Type>& fld, unsigned request);
 
         //- Sample and write all applicable sampled fields
         //  Only uses IOobjectList when loadFromFiles_ is active
@@ -352,7 +343,7 @@ public:
 
         //- Enable/disable verbose output
         //  \return old value
-        bool verbose(const bool on);
+        bool verbose(const bool on) noexcept;
 
         //- Read the sampledSurfaces dictionary
         virtual bool read(const dictionary& dict);
@@ -373,10 +364,10 @@ public:
         virtual void readUpdate(const polyMesh::readUpdateState state);
 
         //- Get merge tolerance
-        static scalar mergeTol();
+        static scalar mergeTol() noexcept;
 
         //- Set merge tolerance and return old value
-        static scalar mergeTol(const scalar tol);
+        static scalar mergeTol(const scalar tol) noexcept;
 };
 
 

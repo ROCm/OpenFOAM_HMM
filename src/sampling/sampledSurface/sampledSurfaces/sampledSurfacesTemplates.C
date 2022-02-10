@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,10 +29,7 @@ License
 #include "sampledSurfaces.H"
 #include "volFields.H"
 #include "surfaceFields.H"
-#include "polySurface.H"
 #include "polySurfaceFields.H"
-#include "surfMesh.H"
-#include "surfGeoMesh.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -81,7 +78,7 @@ bool Foam::sampledSurfaces::storeRegistryField
 template<class Type>
 void Foam::sampledSurfaces::performAction
 (
-    const GeometricField<Type, fvPatchField, volMesh>& fld,
+    const VolumeField<Type>& fld,
     unsigned request
 )
 {
@@ -139,15 +136,6 @@ void Foam::sampledSurfaces::performAction
             writeSurface<Type>(writers_[surfi], values, fieldName);
         }
 
-        if ((request & actions_[surfi]) & ACTION_SURF_MESH)
-        {
-            // Face fields only!
-            s.storeSurfMeshField<Type, surfGeoMesh>
-            (
-                fieldName, dims, values
-            );
-        }
-
         if ((request & actions_[surfi]) & ACTION_STORE)
         {
             if (s.isPointData())
@@ -172,7 +160,7 @@ void Foam::sampledSurfaces::performAction
 template<class Type>
 void Foam::sampledSurfaces::performAction
 (
-    const GeometricField<Type, fvsPatchField, surfaceMesh>& fld,
+    const SurfaceField<Type>& fld,
     unsigned request
 )
 {
@@ -195,14 +183,6 @@ void Foam::sampledSurfaces::performAction
         if ((request & actions_[surfi]) & ACTION_WRITE)
         {
             writeSurface<Type>(writers_[surfi], values, fieldName);
-        }
-
-        if ((request & actions_[surfi]) & ACTION_SURF_MESH)
-        {
-            s.storeSurfMeshField<Type, surfGeoMesh>
-            (
-                fieldName, dims, values
-            );
         }
 
         if ((request & actions_[surfi]) & ACTION_STORE)

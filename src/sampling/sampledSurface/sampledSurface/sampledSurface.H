@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -75,7 +75,6 @@ SourceFiles
 #define sampledSurface_H
 
 #include "polySurface.H"
-#include "surfMesh.H"
 #include "typeInfo.H"
 #include "runTimeSelectionTables.H"
 #include "autoPtr.H"
@@ -397,44 +396,6 @@ public:
         bool storeRegistryField
         (
             const objectRegistry& obr,
-            const word& fieldName,
-            const dimensionSet& dims,
-            Field<Type>&& values,
-            word lookupName = ""
-        ) const;
-
-
-    // Specialized surfMesh storage (optional)
-
-        //- Get surface from registry if available.
-        //  \param lookupName Optional lookup name, use surface name if empty
-        //  \return surface or nullptr
-        surfMesh* getSurfMesh(word lookupName = "") const;
-
-        //- Copy surface into registry.
-        //  \param lookupName Optional lookup name, use surface name if empty
-        //  \return surface or nullptr it surface should not be stored
-        surfMesh* storeSurfMesh(word lookupName = "") const;
-
-        //- Remove surface from registry.
-        //  \param lookupName Optional lookup name, use surface name if empty
-        //  \return True if surface existed and was removed
-        bool removeSurfMesh(word lookupName = "") const;
-
-        //- Copy/store sampled Face field onto surfMesh (if it exists)
-        template<class Type, class GeoMeshType>
-        bool storeSurfMeshField
-        (
-            const word& fieldName,
-            const dimensionSet& dims,
-            const Field<Type>& values,
-            word lookupName = ""
-        ) const;
-
-        //- Move/store sampled Face field onto surfMesh (if it exists)
-        template<class Type, class GeoMeshType>
-        bool storeSurfMeshField
-        (
             const word& fieldName,
             const dimensionSet& dims,
             Field<Type>&& values,

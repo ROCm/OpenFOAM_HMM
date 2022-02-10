@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,7 +26,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "sampledSurface.H"
-#include "fvMesh.H"
 #include "MeshedSurface.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -61,7 +60,7 @@ Foam::polySurface* Foam::sampledSurface::storeRegistrySurface
 
     if (!surfptr)
     {
-        // Construct null and add to registry (owned by registry)
+        // Default construct and add to registry (owned by registry)
         surfptr = new polySurface(lookupName, obr, true);
     }
 
@@ -79,47 +78,6 @@ bool Foam::sampledSurface::removeRegistrySurface
 {
     polySurface* surfptr = getRegistrySurface(obr, lookupName);
     return obr.checkOut(surfptr);
-}
-
-
-Foam::surfMesh* Foam::sampledSurface::getSurfMesh(word lookupName) const
-{
-    if (lookupName.empty())
-    {
-        lookupName = this->name();
-    }
-
-    return mesh().getObjectPtr<surfMesh>(lookupName);
-}
-
-
-Foam::surfMesh* Foam::sampledSurface::storeSurfMesh(word lookupName) const
-{
-    if (lookupName.empty())
-    {
-        lookupName = this->name();
-    }
-
-    surfMesh* surfptr = getSurfMesh();
-
-    if (!surfptr)
-    {
-        // Construct null and add owned by registry
-        surfptr = new surfMesh(lookupName, mesh());
-
-        surfptr->store();       // Add to registry - owned by registry
-    }
-
-    surfptr->copySurface(*this);   // Copy in geometry (removes old fields)
-
-    return surfptr;
-}
-
-
-bool Foam::sampledSurface::removeSurfMesh(word lookupName) const
-{
-    surfMesh* surfptr = getSurfMesh(lookupName);
-    return mesh().checkOut(surfptr);
 }
 
 
