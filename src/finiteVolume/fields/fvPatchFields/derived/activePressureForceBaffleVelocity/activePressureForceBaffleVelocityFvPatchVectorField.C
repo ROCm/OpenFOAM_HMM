@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -260,11 +260,13 @@ void Foam::activePressureForceBaffleVelocityFvPatchVectorField::updateCoeffs()
         const labelList& nbrFaceCells = nbrPatch.patch().faceCells();
 
         scalar valueDiff = 0;
+        scalar area = 0;
 
         // Add this side (p*area)
         forAll(cyclicFaceCells, facei)
         {
             valueDiff +=p[cyclicFaceCells[facei]]*mag(initCyclicSf_[facei]);
+            area += mag(initCyclicSf_[facei]);
         }
 
         // Remove other side
@@ -275,7 +277,7 @@ void Foam::activePressureForceBaffleVelocityFvPatchVectorField::updateCoeffs()
 
         if (!fBased_) //pressure based then weighted by area
         {
-            valueDiff = valueDiff/gSum(patch().magSf());
+            valueDiff = valueDiff/(area + VSMALL);
         }
 
         reduce(valueDiff, sumOp<scalar>());
@@ -284,12 +286,13 @@ void Foam::activePressureForceBaffleVelocityFvPatchVectorField::updateCoeffs()
         {
             if (fBased_)
             {
-                Info<< "Force difference = " << valueDiff << endl;
+                Info<< "Force difference (threshold) = " << valueDiff
+                    << "(" << minThresholdValue_ << ")" << endl;
             }
             else
             {
-                Info<< "Area-averaged pressure difference = "
-                    << valueDiff << endl;
+                Info<< "Area-averaged pressure difference (threshold) = "
+                    << valueDiff << "(" << minThresholdValue_ << ")" << endl;
             }
         }
 
