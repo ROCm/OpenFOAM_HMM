@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,15 +31,15 @@ Group
     grpUtilitiesFunctionObjects
 
 Description
-    Writes dictionaries on start-up and on change.
+    Reports dictionary contents on change.
 
 SourceFiles
     writeDictionary.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef functionObjects_writeDictionary_H
-#define functionObjects_writeDictionary_H
+#ifndef Foam_functionObjects_writeDictionary_H
+#define Foam_functionObjects_writeDictionary_H
 
 #include "regionFunctionObject.H"
 #include "wordList.H"
@@ -58,18 +58,17 @@ namespace functionObjects
 
 class writeDictionary
 :
-    public regionFunctionObject
+    public functionObjects::regionFunctionObject
 {
-    // Private data
+    // Private Data
 
         //- Names of dictionaries to monitor
         wordList dictNames_;
 
-        //- List of changed dictionaries (only those registered to database)
+        //- Digest of dictionary contents
         List<SHA1Digest> digests_;
 
-        //- Flag to indicate the first time that a dictionary is been changed
-        //- (per call to execute)
+        //- First time that checking has been called (per execution cycle)
         bool firstChange_;
 
 
@@ -81,8 +80,11 @@ class writeDictionary
         //- Helper to check and write the dictionary if its sha1 has changed
         void checkDictionary(const dictionary& dict, const label dicti);
 
-        //- Helper to write the dictionary if found at location
+        //- Attempt read dictionary at location
         bool tryDirectory(const word& location, const label dicti);
+
+        //- Check all dictionaries
+        bool performCheck();
 
         //- No copy construct
         writeDictionary(const writeDictionary&) = delete;
