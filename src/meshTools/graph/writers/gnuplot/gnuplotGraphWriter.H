@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,18 +25,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::gnuplotGraph
+    Foam::graphWriters::gnuplotWriter
 
 Description
     Output in gnuplot (http://www.gnuplot.info) format
 
 SourceFiles
-    gnuplotGraph.C
+    gnuplotGraphWriter.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef gnuplotGraph_H
-#define gnuplotGraph_H
+#ifndef Foam_gnuplotGraphWriter_H
+#define Foam_gnuplotGraphWriter_H
 
 #include "graph.H"
 
@@ -43,57 +44,42 @@ SourceFiles
 
 namespace Foam
 {
+namespace graphWriters
+{
 
 /*---------------------------------------------------------------------------*\
-                           Class gnuplotGraph Declaration
+                        Class gnuplotWriter Declaration
 \*---------------------------------------------------------------------------*/
 
-class gnuplotGraph
+class gnuplotWriter
 :
     public graph::writer
 {
-
 public:
 
     //- Runtime type information
-    TypeName("gnuplot");
+    TypeNameNoDebug("gnuplot");
 
-    //- FileName extension  for this graph format
-    static const word ext_;
-
-
-    // Constructors
-
-        //- Construct null
-        gnuplotGraph()
-        {}
-
+    //- Default construct
+    gnuplotWriter() = default;
 
     //- Destructor
-    ~gnuplotGraph()
-    {}
+    ~gnuplotWriter() = default;
 
 
     // Member Functions
 
-        // Access
+        //- The fileName extension for this graph format
+        word ext() const { return "gplt"; }
 
-            //- Return the appropriate fileName extension
-            //  for this graph format
-            const word& ext() const
-            {
-                return ext_;
-            }
-
-
-        // Write
-
-            void write(const graph&, Ostream& os) const;
+        //- Write
+        void write(const graph&, Ostream& os) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace graphWriters
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

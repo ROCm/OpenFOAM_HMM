@@ -5,7 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2012 OpenFOAM Foundation
+    Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,26 +26,50 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "rawGraph.H"
+#include "xmgraceGraphWriter.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(rawGraph, 0);
-    const word rawGraph::ext_("xy");
 
-    typedef graph::writer graphWriter;
-    addToRunTimeSelectionTable(graphWriter, rawGraph, word);
+typedef graph::writer graphWriter;
+
+namespace graphWriters
+{
+    defineTypeName(xmgraceWriter);
+    addToRunTimeSelectionTable(graphWriter, xmgraceWriter, word);
+}
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::rawGraph::write(const graph& g, Ostream& os) const
+void Foam::graphWriters::xmgraceWriter::write
+(
+    const graph& g,
+    Ostream& os
+) const
 {
-    g.writeTable(os);
+    os  << "@title " << g.title() << nl
+        << "@xaxis label " << g.xName() << nl
+        << "@yaxis label " << g.yName() << nl;
+
+    label nWritten_ = 0;
+
+    forAllConstIters(g, iter)
+    {
+        os  << "@s" << nWritten_ << " legend "
+            << iter()->name() << nl
+            << "@target G0.S" << nWritten_ << nl
+            << "@type xy" << nl;
+
+        writeXY(g.x(), *iter(), os);
+        os << endl;
+
+        ++nWritten_;
+    }
 }
 
 

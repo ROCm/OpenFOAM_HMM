@@ -594,7 +594,6 @@ meshes/ProcessorTopology/commSchedule.C
 globalMeshData = $(polyMesh)/globalMeshData
 $(globalMeshData)/globalMeshData.C
 $(globalMeshData)/globalPoints.C
-$(globalMeshData)/globalIndex.C
 
 $(polyMesh)/syncTools/syncTools.C
 $(polyMesh)/polyMeshTetDecomposition/polyMeshTetDecomposition.C
@@ -803,22 +802,14 @@ $(interpolationWeights)/linearInterpolationWeights/linearInterpolationWeights.C
 $(interpolationWeights)/splineInterpolationWeights/splineInterpolationWeights.C
 
 
-
 algorithms/indexedOctree/indexedOctreeName.C
 algorithms/indexedOctree/treeDataCell.C
 algorithms/indexedOctree/volumeType.C
 
-
 algorithms/dynamicIndexedOctree/dynamicIndexedOctreeName.C
 algorithms/dynamicIndexedOctree/dynamicTreeDataPoint.C
 
-graph/curve/curve.C
-graph/graph.C
-
-writers = graph/writers
-$(writers)/rawGraph/rawGraph.C
-$(writers)/gnuplotGraph/gnuplotGraph.C
-$(writers)/xmgrGraph/xmgrGraph.C
+parallel/globalIndex/globalIndex.C
 
 meshes/data/data.C
 

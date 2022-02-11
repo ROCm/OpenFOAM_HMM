@@ -27,7 +27,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "emptyPolyPatch.H"
-#include "commSchedule.H"
 #include "globalMeshData.H"
 #include "cyclicPolyPatch.H"
 

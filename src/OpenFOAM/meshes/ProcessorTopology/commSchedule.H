@@ -101,18 +101,16 @@ public:
     // Member Functions
 
         //- Order in which comms is scheduled
-        const labelList& schedule() const
+        const labelList& schedule() const noexcept
         {
             return schedule_;
         }
 
         //- Per processor the order in which communication has been scheduled
-        const labelListList& procSchedule() const
+        const labelListList& procSchedule() const noexcept
         {
             return procSchedule_;
         }
-
-
 };
 
 

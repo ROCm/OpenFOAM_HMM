@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2012 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,50 +26,49 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "gnuplotGraph.H"
+#include "gnuplotGraphWriter.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(gnuplotGraph, 0);
-    const word gnuplotGraph::ext_("gplt");
+typedef graph::writer graphWriter;
 
-    typedef graph::writer graphWriter;
-    addToRunTimeSelectionTable(graphWriter, gnuplotGraph, word);
+namespace graphWriters
+{
+    defineTypeName(gnuplotWriter);
+    addToRunTimeSelectionTable(graphWriter, gnuplotWriter, word);
+}
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::gnuplotGraph::write(const graph& g, Ostream& os) const
+void Foam::graphWriters::gnuplotWriter::write
+(
+    const graph& g,
+    Ostream& os
+) const
 {
-    os  << "#set term postscript color" << endl
-        << "set output \"" << word(g.title()) << ".ps\"" << endl
-        << "set title " << g.title() << " 0,0" << endl << "show title" << endl
-        << "set xlabel " << g.xName() << " 0,0" << endl << "show xlabel" << endl
-        << "set ylabel " << g.yName() << " 0,0" << endl << "show ylabel" << endl
-        << "plot";
+    os  << "set term pngcairo" << nl
+        << "set output \"" << word(g.title()) << ".png\"" << nl
+        << "set title " << g.title() << " 0,0" << nl << "show title" << nl
+        << "set xlabel " << g.xName() << " 0,0" << nl << "show xlabel" << nl
+        << "set ylabel " << g.yName() << " 0,0" << nl << "show ylabel" << nl;
 
-    bool firstField = true;
-
+    label nplots = 0;
     forAllConstIters(g, iter)
     {
-        if (!firstField)
-        {
-            os << ',';
-        }
-        firstField = false;
-
+        os  << (nplots++ ? ", \\" : "plot \\") << nl;
         os  << "'-' title " << iter()->name() << " with lines";
     }
-    os << "; pause -1" << endl;
+    os << "; pause -1" << nl;
 
 
     forAllConstIters(g, iter)
     {
-        os  << endl;
+        os  << nl;
         writeXY(g.x(), *iter(), os);
     }
 }

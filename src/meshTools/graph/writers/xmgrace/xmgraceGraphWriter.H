@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,80 +25,62 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::is_contiguous
+    Foam::graphWriters::xmgraceWriter
 
 Description
-    A template class to specify that a data type can be considered as being
-    contiguous in memory.
+    Output and \b agr file for \em xmgrace
+    (http://plasma-gate.weizmann.ac.il/Grace/)
 
-    Normally only integral and floating-point types can be considered
-    contiguous, but some other types (eg, FixedList, Pair, Vector etc)
-    consisting purely of these fundamental types can be considered
-    as having a contiguous memory layout as well.
-
-Note
-    In OpenFOAM 1906 and earlier, the contiguous trait was handled
-    by templated \c contiguous global functions.
-
-    While possible to mark this as deleted, this does not detect or
-    prevent specializations. Thus omit the usual housekeeping.
-
-Class
-    Foam::is_contiguous_label
-
-Description
-    A template class to specify if a data type is composed solely of
-    Foam::label elements.
-
-Class
-    Foam::is_contiguous_scalar
-
-Description
-    A template class to specify if a data type is composed solely of
-    Foam::scalar elements.
+SourceFiles
+    xmgraceGraphWriter.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Foam_contiguous_H
-#define Foam_contiguous_H
+#ifndef Foam_xmgraceGraphWriter_H
+#define Foam_xmgraceGraphWriter_H
 
-#include "scalarFwd.H"
-#include "labelFwd.H"
-#include <type_traits>
+#include "graph.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace graphWriters
+{
+
+/*---------------------------------------------------------------------------*\
+                        Class xmgraceWriter Declaration
+\*---------------------------------------------------------------------------*/
+
+class xmgraceWriter
+:
+    public graph::writer
+{
+public:
+
+    //- Runtime type information
+    TypeNameNoDebug("xmgr");
+
+    //- Default construct
+    xmgraceWriter() = default;
+
+    //- Destructor
+    ~xmgraceWriter() = default;
+
+
+    // Member Functions
+
+        //- The fileName extension for this graph format
+        word ext() const { return "agr"; }
+
+        //- Write
+        void write(const graph&, Ostream& os) const;
+};
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Base definition for (integral | floating-point) as contiguous
-template<class T>
-struct is_contiguous
-:
-    std::is_arithmetic<T>
-{};
-
-
-// Base definition for 'label'
-template<class T>
-struct is_contiguous_label
-:
-    std::is_same<T, label>
-{};
-
-
-// Base definition for 'scalar'
-template<class T>
-struct is_contiguous_scalar
-:
-    std::is_same<T, scalar>
-{};
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
+} // End namespace graphWriters
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

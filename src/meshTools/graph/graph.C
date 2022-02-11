@@ -29,7 +29,6 @@ License
 #include "graph.H"
 #include "OFstream.H"
 #include "IOmanip.H"
-#include "Pair.H"
 #include "OSspecific.H"
 #include "SubField.H"
 
@@ -272,9 +271,9 @@ void Foam::graph::write(Ostream& os, const word& format) const
 
 void Foam::graph::write(const fileName& pName, const word& format) const
 {
-    autoPtr<writer> graphWriter(writer::New(format));
+    autoPtr<writer> writer(writer::New(format));
 
-    OFstream graphFile(pName + '.' + graphWriter().ext());
+    OFstream graphFile(pName + '.' + writer().ext());
 
     if (graphFile.good())
     {

@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef curve_H
-#define curve_H
+#ifndef Foam_curve_H
+#define Foam_curve_H
 
 #include "string.H"
 #include "primitiveFields.H"
@@ -46,8 +46,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
-
+// Forward Declarations
 class curve;
 Ostream& operator<<(Ostream&, const curve&);
 
@@ -60,13 +59,11 @@ class curve
 :
     public scalarField
 {
-
 public:
 
     //- The style (line, symbol, etc) of a curve
     class curveStyle
     {
-
     public:
 
         //- Enumeration definitions
@@ -116,18 +113,16 @@ public:
 
 private:
 
-    // private data
+    // Private Data
 
         string name_;
+
         curveStyle style_;
 
 
 public:
 
     // Constructors
-
-        //- Construct as interpolation of an existing curve
-        //curve(const curve&, const label);
 
         //- Construct from name, style and size
         curve
@@ -151,7 +146,7 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
         // Access
 
@@ -164,12 +159,6 @@ public:
             {
                 return style_;
             }
-
-
-    // Friend functions
-
-        //- Gradient of the curve
-        //friend curve grad(const curve&);
 
 
     // Ostream operator

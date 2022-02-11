@@ -147,6 +147,14 @@ $(setWriters)/vtk/foamVtkCoordSetWriter.C
 $(setWriters)/vtk/vtkSetWriterRunTime.C
 $(setWriters)/xmgrace/xmgraceSetWriterRunTime.C
 
+graph/curve.C
+graph/graph.C
+
+graphWriters = graph/writers
+$(graphWriters)/raw/rawGraphWriter.C
+$(graphWriters)/gnuplot/gnuplotGraphWriter.C
+$(graphWriters)/xmgrace/xmgraceGraphWriter.C
+
 
 topoSets = topoSet/topoSets
 $(topoSets)/cellBitSet.C

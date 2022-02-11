@@ -35,23 +35,21 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef graph_H
-#define graph_H
+#ifndef Foam_graph_H
+#define Foam_graph_H
 
 #include "string.H"
 #include "point.H"
-#include "HashPtrTable.H"
 #include "curve.H"
+#include "HashPtrTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
-
+// Forward Declaration
 class graph;
-
 Ostream& operator<<(Ostream&, const graph&);
 
 
@@ -63,7 +61,7 @@ class graph
 :
     public HashPtrTable<curve>
 {
-    // private data
+    // Private Data
 
         string title_;
         string xName_;
@@ -71,13 +69,10 @@ class graph
 
         scalarField x_;
 
-
         struct xy
         {
             scalar x_, y_;
 
-            xy()
-            {}
 
         // Friend Operators
 
@@ -143,10 +138,10 @@ public:
         );
 
         //- Construct from Istream
-        graph(Istream& is);
+        explicit graph(Istream& is);
 
 
-    // Member functions
+    // Member Functions
 
         // Access
 
@@ -190,7 +185,6 @@ public:
             //- Abstract base class for a graph writer
             class writer
             {
-
             protected:
 
                 void writeXY
@@ -219,17 +213,13 @@ public:
                 // Selectors
 
                     //- Return a reference to the selected writer
-                    static autoPtr<writer> New
-                    (
-                        const word& writeFormat
-                    );
+                    static autoPtr<writer> New(const word& writeFormat);
 
 
                 // Constructors
 
-                    //- Construct null
-                    writer()
-                    {}
+                    //- Default construct
+                    writer() = default;
 
 
                 //- Destructor
@@ -238,18 +228,13 @@ public:
 
                 // Member Functions
 
-                    // Access
+                    //- The fileName extension for this graph format
+                    virtual word ext() const = 0;
 
-                        //- Return the appropriate fileName extension
-                        //  for this graph format
-                        virtual const word& ext() const = 0;
-
-
-                    // Write
-
-                        //- Write graph in appropriate format
-                        virtual void write(const graph&, Ostream&) const = 0;
+                    //- Write graph in appropriate format
+                    virtual void write(const graph&, Ostream&) const = 0;
             };
+
 
             //- Write out graph data as a simple table
             void writeTable(Ostream&) const;
@@ -272,7 +257,7 @@ public:
             static word wordify(const string& sname);
 
 
-    // Friend operators
+    // Friend Operators
 
         //- Ostream Operator
         friend Ostream& operator<<(Ostream&, const graph&);

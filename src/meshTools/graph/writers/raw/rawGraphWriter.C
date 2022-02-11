@@ -5,7 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2011-2012 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,81 +24,35 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::rawGraph
-
-Description
-    A raw xy graph output
-
-SourceFiles
-    rawGraph.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef rawGraph_H
-#define rawGraph_H
+#include "rawGraphWriter.H"
+#include "addToRunTimeSelectionTable.H"
 
-#include "graph.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+typedef graph::writer graphWriter;
 
-/*---------------------------------------------------------------------------*\
-                           Class rawGraph Declaration
-\*---------------------------------------------------------------------------*/
-
-class rawGraph
-:
-    public graph::writer
+namespace graphWriters
 {
-
-public:
-
-    //- Runtime type information
-    TypeName("raw");
-
-    //- FileName extension  for this graph format
-    static const word ext_;
+    defineTypeName(rawWriter);
+    addToRunTimeSelectionTable(graphWriter, rawWriter, word);
+}
+}
 
 
-    // Constructors
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-        //- Construct null
-        rawGraph()
-        {}
+void Foam::graphWriters::rawWriter::write
+(
+    const graph& g,
+    Ostream& os
+) const
+{
+    g.writeTable(os);
+}
 
-
-    //- Destructor
-    ~rawGraph()
-    {}
-
-
-    // Member Functions
-
-        // Access
-
-            //- Return the appropriate fileName extension
-            //  for this graph format
-            const word& ext() const
-            {
-                return ext_;
-            }
-
-
-        // Write
-
-            void write(const graph&, Ostream& os) const;
-};
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //
