@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -107,7 +107,7 @@ void Foam::polySurface::storeField
 
     if (dimfield)
     {
-        dimfield->dimensions() = dims;
+        dimfield->dimensions().reset(dims);  // Dimensions may have changed
         dimfield->field() = values;
     }
     else
@@ -148,7 +148,7 @@ void Foam::polySurface::storeField
 
     if (dimfield)
     {
-        dimfield->dimensions() = dims;
+        dimfield->dimensions().reset(dims);  // Dimensions may have changed
         dimfield->field() = std::move(values);
     }
     else
