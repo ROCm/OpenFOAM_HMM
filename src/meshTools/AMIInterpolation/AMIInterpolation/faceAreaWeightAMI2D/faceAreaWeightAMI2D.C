@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020,2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -520,6 +520,7 @@ bool Foam::faceAreaWeightAMI2D::calculate
 void Foam::faceAreaWeightAMI2D::write(Ostream& os) const
 {
     advancingFrontAMI::write(os);
+    os.writeEntryIfDifferent<scalar>("Cbb", 0.1, Cbb_);
 }
 
 

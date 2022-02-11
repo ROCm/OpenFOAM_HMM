@@ -252,6 +252,12 @@ public:
         //- Labels of faces that are not overlapped by any target faces
         //  Note: this should be empty for correct functioning
         inline const labelList& srcNonOverlap() const;
+
+
+        // I-O
+
+            //- Write
+            virtual void write(Ostream& os) const;
 };
 
 

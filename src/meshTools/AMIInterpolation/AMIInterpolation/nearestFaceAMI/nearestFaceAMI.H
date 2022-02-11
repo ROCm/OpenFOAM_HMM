@@ -155,6 +155,9 @@ public:
             const primitivePatch& tgtPatch,
             const autoPtr<searchableSurface>& surfPtr = nullptr
         );
+
+        //- Write
+        virtual void write(Ostream& os) const;
 };
 
 
