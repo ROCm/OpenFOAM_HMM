@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2020,2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -473,6 +473,18 @@ bool Foam::advancingFrontAMI::calculate
     }
 
     return false;
+}
+
+
+void Foam::advancingFrontAMI::write(Ostream& os) const
+{
+    AMIInterpolation::write(os);
+    os.writeEntryIfDifferent<word>
+    (
+        "triMode",
+        faceAreaIntersect::triangulationModeNames_[faceAreaIntersect::tmMesh],
+        faceAreaIntersect::triangulationModeNames_[triMode_]
+    );
 }
 
 

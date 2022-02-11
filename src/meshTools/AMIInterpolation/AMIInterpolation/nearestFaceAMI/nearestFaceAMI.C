@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020,2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -402,6 +402,13 @@ bool Foam::nearestFaceAMI::calculate
     upToDate_ = true;
 
     return upToDate_;
+}
+
+
+void Foam::nearestFaceAMI::write(Ostream& os) const
+{
+    AMIInterpolation::write(os);
+    os.writeEntryIfDifferent<scalar>("maxDistance2", GREAT, maxDistance2_);
 }
 
 
