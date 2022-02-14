@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2016 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -71,15 +72,15 @@ Foam::scalar Foam::fv::patchMeanVelocityForce::magUbarAve
     const volVectorField& U
 ) const
 {
-    vector2D sumAmagUsumA
-    (
+    FixedList<scalar, 2> sumAmagUsumA(Zero);
+
+    sumAmagUsumA[0] +=
         sum
         (
             (flowDir_ & U.boundaryField()[patchi_])
-           *mesh_.boundary()[patchi_].magSf()
-        ),
-        sum(mesh_.boundary()[patchi_].magSf())
-    );
+          * mesh_.boundary()[patchi_].magSf()
+        );
+    sumAmagUsumA[1] += sum(mesh_.boundary()[patchi_].magSf());
 
 
     // If the mean velocity force is applied to a cyclic patch
@@ -89,29 +90,29 @@ Foam::scalar Foam::fv::patchMeanVelocityForce::magUbarAve
 
     if (Pstream::parRun() && isA<cyclicPolyPatch>(patches[patchi_]))
     {
-        labelList processorCyclicPatches
+        for
         (
-            processorCyclicPolyPatch::patchIDs(patch_, patches)
-        );
-
-        forAll(processorCyclicPatches, pcpi)
+            const label patchi
+          : processorCyclicPolyPatch::patchIDs(patch_, patches)
+        )
         {
-            const label patchi = processorCyclicPatches[pcpi];
-
-            sumAmagUsumA.x() +=
+            sumAmagUsumA[0] +=
                 sum
                 (
                     (flowDir_ & U.boundaryField()[patchi])
-                   *mesh_.boundary()[patchi].magSf()
+                  * mesh_.boundary()[patchi].magSf()
                 );
-
-            sumAmagUsumA.y() += sum(mesh_.boundary()[patchi].magSf());
+            sumAmagUsumA[1] += sum(mesh_.boundary()[patchi].magSf());
         }
     }
 
-    mesh_.reduce(sumAmagUsumA, sumOp<vector2D>());
+    mesh_.reduce(sumAmagUsumA, sumOp<scalar>());
 
-    return sumAmagUsumA.x()/sumAmagUsumA.y();
+    return
+    (
+        sumAmagUsumA[0]
+      / stabilise(sumAmagUsumA[1], VSMALL)
+    );
 }
 
 

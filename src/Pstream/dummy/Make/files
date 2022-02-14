@@ -1,4 +1,6 @@
 UPstream.C
+UPstreamBroadcast.C
+UPstreamReduce.C
 
 UIPstreamRead.C
 UOPstreamWrite.C

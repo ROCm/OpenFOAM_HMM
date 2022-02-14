@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +27,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "Pstream.H"
-#include "PstreamReduceOps.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -74,99 +73,7 @@ void Foam::UPstream::abort()
 }
 
 
-void Foam::reduce(scalar&, const sumOp<scalar>&, const int, const label)
-{}
-
-
-void Foam::reduce(scalar&, const minOp<scalar>&, const int, const label)
-{}
-
-
-void Foam::reduce(vector2D&, const sumOp<vector2D>&, const int, const label)
-{}
-
-
-void Foam::sumReduce
-(
-    scalar&,
-    label&,
-    const int,
-    const label
-)
-{}
-
-
-void Foam::reduce(scalar&, const sumOp<scalar>&, const int, const label, label&)
-{}
-
-
-void Foam::reduce
-(
-    scalar[],
-    const int,
-    const sumOp<scalar>&,
-    const int,
-    const label,
-    label&
-)
-{}
-
-
-#if defined(WM_SPDP)
-void Foam::reduce
-(
-    solveScalar& Value,
-    const sumOp<solveScalar>& bop,
-    const int tag,
-    const label comm
-)
-{}
-void Foam::reduce
-(
-    solveScalar& Value,
-    const minOp<solveScalar>& bop,
-    const int tag,
-    const label comm
-)
-{}
-void Foam::reduce
-(
-    Vector2D<solveScalar>& Value,
-    const sumOp<Vector2D<solveScalar>>& bop,
-    const int tag,
-    const label comm
-)
-{}
-void Foam::sumReduce
-(
-    solveScalar& Value,
-    label& Count,
-    const int tag,
-    const label comm
-)
-{}
-void Foam::reduce
-(
-    solveScalar& Value,
-    const sumOp<solveScalar>& bop,
-    const int tag,
-    const label comm,
-    label& request
-)
-{}
-void Foam::reduce
-(
-    solveScalar[],
-    const int,
-    const sumOp<solveScalar>&,
-    const int,
-    const label,
-    label&
-)
-{}
-#endif
-
-
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 void Foam::UPstream::allToAll
 (

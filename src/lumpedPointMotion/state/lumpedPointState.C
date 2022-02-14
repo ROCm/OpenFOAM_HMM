@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -405,14 +405,8 @@ bool Foam::lumpedPointState::readData
     {
         // Scatter master data using communication scheme
 
-        const List<Pstream::commsStruct>& comms =
-        (
-            (Pstream::nProcs() < Pstream::nProcsSimpleSum)
-          ? Pstream::linearCommunication()
-          : Pstream::treeCommunication()
-        );
-
         // Get my communication order
+        const List<Pstream::commsStruct>& comms = Pstream::whichCommunication();
         const Pstream::commsStruct& myComm = comms[Pstream::myProcNo()];
 
         // Receive from up

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -655,12 +655,7 @@ bool Foam::fileOperations::uncollatedFileOperation::read
         Pstream::scatter(io.note());
 
         // Get my communication order
-        const List<Pstream::commsStruct>& comms =
-        (
-            (Pstream::nProcs() < Pstream::nProcsSimpleSum)
-          ? Pstream::linearCommunication()
-          : Pstream::treeCommunication()
-        );
+        const List<Pstream::commsStruct>& comms = Pstream::whichCommunication();
         const Pstream::commsStruct& myComm = comms[Pstream::myProcNo()];
 
         // Receive from up

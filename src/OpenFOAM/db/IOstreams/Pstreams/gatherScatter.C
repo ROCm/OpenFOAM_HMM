@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -134,14 +134,7 @@ void Pstream::gather
     const label comm
 )
 {
-    if (UPstream::nProcs(comm) < UPstream::nProcsSimpleSum)
-    {
-        gather(UPstream::linearCommunication(comm), Value, bop, tag, comm);
-    }
-    else
-    {
-        gather(UPstream::treeCommunication(comm), Value, bop, tag, comm);
-    }
+    gather(UPstream::whichCommunication(comm), Value, bop, tag, comm);
 }
 
 
@@ -225,14 +218,7 @@ void Pstream::scatter
 template<class T>
 void Pstream::scatter(T& Value, const int tag, const label comm)
 {
-    if (UPstream::nProcs(comm) < UPstream::nProcsSimpleSum)
-    {
-        scatter(UPstream::linearCommunication(comm), Value, tag, comm);
-    }
-    else
-    {
-        scatter(UPstream::treeCommunication(comm), Value, tag, comm);
-    }
+    scatter(UPstream::whichCommunication(comm), Value, tag, comm);
 }
 
 

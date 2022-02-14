@@ -163,16 +163,6 @@ int main(int argc, char *argv[])
 
     if (Pstream::myProcNo(comm) != -1)
     {
-        //scalar sum = sumReduce(comm, localValue);
-        //scalar sum = localValue;
-        //reduce
-        //(
-        //    UPstream::treeCommunication(comm),
-        //    sum,
-        //    sumOp<scalar>(),
-        //    Pstream::msgType(),
-        //    comm
-        //);
         scalar sum = returnReduce
         (
             localValue,

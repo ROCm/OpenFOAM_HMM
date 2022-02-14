@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,11 +32,11 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef PstreamReduceOps_H
-#define PstreamReduceOps_H
+#ifndef Foam_PstreamReduceOps_H
+#define Foam_PstreamReduceOps_H
 
 #include "ops.H"
-#include "vector2D.H"
+#include "FixedList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,12 +45,12 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Reduce operation with user specified communication schedule
+//- Reduce operation with user specified communication schedule
 template<class T, class BinaryOp>
 void reduce
 (
     const List<UPstream::commsStruct>& comms,
-    T& Value,
+    T& value,
     const BinaryOp& bop,
     const int tag,
     const label comm
@@ -58,96 +58,86 @@ void reduce
 {
     if (UPstream::warnComm != -1 && comm != UPstream::warnComm)
     {
-        Pout<< "** reducing:" << Value << " with comm:" << comm
+        Pout<< "** reducing:" << value << " with comm:" << comm
             << endl;
         error::printStack(Pout);
     }
-    Pstream::gather(comms, Value, bop, tag, comm);
-    Pstream::scatter(comms, Value, tag, comm);
+    Pstream::gather(comms, value, bop, tag, comm);
+    Pstream::scatter(comms, value, tag, comm);
 }
 
 
-// Reduce using either linear or tree communication schedule
+//- Reduce (inplace) using either linear or tree communication schedule
 template<class T, class BinaryOp>
 void reduce
 (
-    T& Value,
+    T& value,
     const BinaryOp& bop,
-    const int tag = Pstream::msgType(),
+    const int tag = UPstream::msgType(),
     const label comm = UPstream::worldComm
 )
 {
-    if (UPstream::nProcs(comm) < UPstream::nProcsSimpleSum)
+    if (UPstream::parRun())
     {
-        reduce(UPstream::linearCommunication(comm), Value, bop, tag, comm);
-    }
-    else
-    {
-        reduce(UPstream::treeCommunication(comm), Value, bop, tag, comm);
+        reduce(UPstream::whichCommunication(comm), value, bop, tag, comm);
     }
 }
 
 
-// Reduce using either linear or tree communication schedule
+//- Reduce (copy) and return value
 template<class T, class BinaryOp>
 T returnReduce
 (
-    const T& Value,
+    const T& value,
     const BinaryOp& bop,
-    const int tag = Pstream::msgType(),
+    const int tag = UPstream::msgType(),
     const label comm = UPstream::worldComm
 )
 {
-    T WorkValue(Value);
-
-    if (UPstream::nProcs(comm) < UPstream::nProcsSimpleSum)
-    {
-        reduce
-        (
-            UPstream::linearCommunication(comm),
-            WorkValue,
-            bop,
-            tag,
-            comm
-        );
-    }
-    else
-    {
-        reduce
-        (
-            UPstream::treeCommunication(comm),
-            WorkValue,
-            bop,
-            tag,
-            comm
-        );
-    }
-
-    return WorkValue;
+    T work(value);
+    reduce(work, bop, tag, comm);
+    return work;
 }
 
 
-// Reduce with sum of both value and count (for averaging)
+//- Reduce with sum of both value and count (for averaging)
 template<class T>
 void sumReduce
 (
-    T& Value,
-    label& Count,
-    const int tag = Pstream::msgType(),
+    T& value,
+    label& count,
+    const int tag = UPstream::msgType(),
     const label comm = UPstream::worldComm
 )
 {
-    reduce(Value, sumOp<T>(), tag, comm);
-    reduce(Count, sumOp<label>(), tag, comm);
+    if (UPstream::parRun())
+    {
+        reduce(value, sumOp<T>(), tag, comm);
+        reduce(count, sumOp<label>(), tag, comm);
+    }
 }
 
 
-// Non-blocking version of reduce. Sets request.
+//- Reduce multiple values (identical size on all processes!)
+template<class T, class BinaryOp>
+void reduce
+(
+    T values[],
+    const int size,
+    const BinaryOp&,
+    const int tag,
+    const label comm
+)
+{
+    NotImplemented;
+}
+
+//- Non-blocking reduce single value. Sets request.
 template<class T, class BinaryOp>
 void reduce
 (
     T& Value,
-    const BinaryOp& bop,
+    const BinaryOp&,
     const int tag,
     const label comm,
     label& request
@@ -156,13 +146,14 @@ void reduce
     NotImplemented;
 }
 
-// Non-blocking version of reduce. Sets request.
+//- Non-blocking reduce multiple values (identical size on all processes!)
+//- Sets request.
 template<class T, class BinaryOp>
 void reduce
 (
-    T Value[],
+    T values[],
     const int size,
-    const BinaryOp& bop,
+    const BinaryOp&,
     const int tag,
     const label comm,
     label& request
@@ -172,111 +163,139 @@ void reduce
 }
 
 
-// Insist there are specialisations for the common reductions of scalar(s)
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Specialisations for bool
+
+//- Logical (and) reduction
 void reduce
 (
-    scalar& Value,
-    const sumOp<scalar>& bop,
-    const int tag = Pstream::msgType(),
+    bool& value,
+    const andOp<bool>&,
+    const int tag = UPstream::msgType(),
     const label comm = UPstream::worldComm
 );
 
+//- Logical (or) reduction
 void reduce
 (
-    scalar& Value,
-    const minOp<scalar>& bop,
-    const int tag = Pstream::msgType(),
+    bool& value,
+    const orOp<bool>&,
+    const int tag = UPstream::msgType(),
     const label comm = UPstream::worldComm
 );
 
-void reduce
-(
-    vector2D& Value,
-    const sumOp<vector2D>& bop,
-    const int tag = Pstream::msgType(),
-    const label comm = UPstream::worldComm
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Specialisations for common reduction types
+
+#undef  Pstream_CommonReductions
+#define Pstream_CommonReductions(Native)                                      \
+                                                                              \
+/*! \brief Reduce (min) single Native value */                                \
+void reduce                                                                   \
+(                                                                             \
+    Native& value,                                                            \
+    const minOp<Native>&,                                                     \
+    const int tag = UPstream::msgType(),                                      \
+    const label comm = UPstream::worldComm                                    \
+);                                                                            \
+                                                                              \
+/*! \brief Reduce (max) single Native value */                                \
+void reduce                                                                   \
+(                                                                             \
+    Native& value,                                                            \
+    const maxOp<Native>&,                                                     \
+    const int tag = UPstream::msgType(),                                      \
+    const label comm = UPstream::worldComm                                    \
+);                                                                            \
+                                                                              \
+/*! \brief Reduce (sum) single Native value */                                \
+void reduce                                                                   \
+(                                                                             \
+    Native& value,                                                            \
+    const sumOp<Native>&,                                                     \
+    const int tag = UPstream::msgType(),                                      \
+    const label comm = UPstream::worldComm                                    \
+);                                                                            \
+                                                                              \
+/*! \brief Reduce (sum) multiple Native values (identical size all procs!) */ \
+void reduce                                                                   \
+(                                                                             \
+    Native values[],                                                          \
+    const int size,                                                           \
+    const sumOp<Native>&,                                                     \
+    const int tag,                                                            \
+    const label comm                                                          \
+);                                                                            \
+                                                                              \
+/*! \brief Reduce (sum) multiple Native values */                             \
+template<unsigned N>                                                          \
+inline void reduce                                                            \
+(                                                                             \
+    FixedList<Native, N>& values,                                             \
+    const sumOp<Native>&,                                                     \
+    const int tag = UPstream::msgType(),                                      \
+    const label comm = UPstream::worldComm                                    \
+)                                                                             \
+{                                                                             \
+    reduce(values.data(), int(values.size()), sumOp<Native>(), tag, comm);    \
+}
+
+
+Pstream_CommonReductions(int32_t);
+Pstream_CommonReductions(int64_t);
+Pstream_CommonReductions(uint32_t);
+Pstream_CommonReductions(uint64_t);
+Pstream_CommonReductions(float);
+Pstream_CommonReductions(double);
+
+#undef Pstream_CommonReductions
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Specialisations for floating-point types
+
+#undef  Pstream_FloatReductions
+#define Pstream_FloatReductions(Native)                                       \
+                                                                              \
+/*! \brief Sum of both Native value and count (for averaging) */              \
+void sumReduce                                                                \
+(                                                                             \
+    Native& value,                                                            \
+    label& count,                                                             \
+    const int tag = UPstream::msgType(),                                      \
+    const label comm = UPstream::worldComm                                    \
+);                                                                            \
+                                                                              \
+/*! \brief Non-blocking reduce (sum) single Native value. Sets request */     \
+void reduce                                                                   \
+(                                                                             \
+    Native& value,                                                            \
+    const sumOp<Native>&,                                                     \
+    const int tag,                                                            \
+    const label comm,                                                         \
+    label& requestID                                                          \
+);                                                                            \
+                                                                              \
+/*! \brief Non-blocking reduce (sum) multiple Native values. Sets request */  \
+void reduce                                                                   \
+(                                                                             \
+    Native values[],                                                          \
+    const int size,                                                           \
+    const sumOp<Native>&,                                                     \
+    const int tag,                                                            \
+    const label comm,                                                         \
+    label& requestID                                                          \
 );
 
-void sumReduce
-(
-    scalar& Value,
-    label& Count,
-    const int tag = Pstream::msgType(),
-    const label comm = UPstream::worldComm
-);
 
-void reduce
-(
-    scalar& Value,
-    const sumOp<scalar>& bop,
-    const int tag,
-    const label comm,
-    label& request
-);
+Pstream_FloatReductions(float);
+Pstream_FloatReductions(double);
 
-void reduce
-(
-    scalar Value[],
-    const int size,
-    const sumOp<scalar>& bop,
-    const int tag,
-    const label comm,
-    label& request
-);
-
-
-#if defined(WM_SPDP)
-void reduce
-(
-    solveScalar& Value,
-    const sumOp<solveScalar>& bop,
-    const int tag = Pstream::msgType(),
-    const label comm = UPstream::worldComm
-);
-
-void reduce
-(
-    solveScalar& Value,
-    const minOp<solveScalar>& bop,
-    const int tag = Pstream::msgType(),
-    const label comm = UPstream::worldComm
-);
-
-void reduce
-(
-    Vector2D<solveScalar>& Value,
-    const sumOp<Vector2D<solveScalar>>& bop,
-    const int tag = Pstream::msgType(),
-    const label comm = UPstream::worldComm
-);
-
-void sumReduce
-(
-    solveScalar& Value,
-    label& Count,
-    const int tag = Pstream::msgType(),
-    const label comm = UPstream::worldComm
-);
-
-void reduce
-(
-    solveScalar& Value,
-    const sumOp<solveScalar>& bop,
-    const int tag,
-    const label comm,
-    label& request
-);
-
-void reduce
-(
-    solveScalar Value[],
-    const int size,
-    const sumOp<solveScalar>& bop,
-    const int tag,
-    const label comm,
-    label& request
-);
-#endif
+#undef Pstream_FloatReductions
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

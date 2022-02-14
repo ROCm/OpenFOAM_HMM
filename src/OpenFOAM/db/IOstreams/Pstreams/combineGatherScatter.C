@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -153,28 +153,14 @@ void Foam::Pstream::combineGather
     const label comm
 )
 {
-    if (UPstream::nProcs(comm) < UPstream::nProcsSimpleSum)
-    {
-        combineGather
-        (
-            UPstream::linearCommunication(comm),
-            Value,
-            cop,
-            tag,
-            comm
-        );
-    }
-    else
-    {
-        combineGather
-        (
-            UPstream::treeCommunication(comm),
-            Value,
-            cop,
-            tag,
-            comm
-        );
-    }
+    combineGather
+    (
+        UPstream::whichCommunication(comm),
+        Value,
+        cop,
+        tag,
+        comm
+    );
 }
 
 
@@ -274,14 +260,7 @@ void Foam::Pstream::combineScatter
     const label comm
 )
 {
-    if (UPstream::nProcs(comm) < UPstream::nProcsSimpleSum)
-    {
-        combineScatter(UPstream::linearCommunication(comm), Value, tag, comm);
-    }
-    else
-    {
-        combineScatter(UPstream::treeCommunication(comm), Value, tag, comm);
-    }
+    combineScatter(UPstream::whichCommunication(comm), Value, tag, comm);
 }
 
 
@@ -402,28 +381,14 @@ void Foam::Pstream::listCombineGather
     const label comm
 )
 {
-    if (UPstream::nProcs(comm) < UPstream::nProcsSimpleSum)
-    {
-        listCombineGather
-        (
-            UPstream::linearCommunication(comm),
-            Values,
-            cop,
-            tag,
-            comm
-        );
-    }
-    else
-    {
-        listCombineGather
-        (
-            UPstream::treeCommunication(comm),
-            Values,
-            cop,
-            tag,
-            comm
-        );
-    }
+    listCombineGather
+    (
+        UPstream::whichCommunication(comm),
+        Values,
+        cop,
+        tag,
+        comm
+    );
 }
 
 
@@ -523,26 +488,13 @@ void Foam::Pstream::listCombineScatter
     const label comm
 )
 {
-    if (UPstream::nProcs(comm) < UPstream::nProcsSimpleSum)
-    {
-        listCombineScatter
-        (
-            UPstream::linearCommunication(comm),
-            Values,
-            tag,
-            comm
-        );
-    }
-    else
-    {
-        listCombineScatter
-        (
-            UPstream::treeCommunication(comm),
-            Values,
-            tag,
-            comm
-        );
-    }
+    listCombineScatter
+    (
+        UPstream::whichCommunication(comm),
+        Values,
+        tag,
+        comm
+    );
 }
 
 
@@ -636,28 +588,14 @@ void Foam::Pstream::mapCombineGather
     const label comm
 )
 {
-    if (UPstream::nProcs(comm) < UPstream::nProcsSimpleSum)
-    {
-        mapCombineGather
-        (
-            UPstream::linearCommunication(comm),
-            Values,
-            cop,
-            tag,
-            comm
-        );
-    }
-    else
-    {
-        mapCombineGather
-        (
-            UPstream::treeCommunication(comm),
-            Values,
-            cop,
-            tag,
-            comm
-        );
-    }
+    mapCombineGather
+    (
+        UPstream::whichCommunication(comm),
+        Values,
+        cop,
+        tag,
+        comm
+    );
 }
 
 
@@ -727,26 +665,13 @@ void Foam::Pstream::mapCombineScatter
     const label comm
 )
 {
-    if (UPstream::nProcs(comm) < UPstream::nProcsSimpleSum)
-    {
-        mapCombineScatter
-        (
-            UPstream::linearCommunication(comm),
-            Values,
-            tag,
-            comm
-        );
-    }
-    else
-    {
-        mapCombineScatter
-        (
-            UPstream::treeCommunication(comm),
-            Values,
-            tag,
-            comm
-        );
-    }
+    mapCombineScatter
+    (
+        UPstream::whichCommunication(comm),
+        Values,
+        tag,
+        comm
+    );
 }
 
 

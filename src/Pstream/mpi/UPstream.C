@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,17 +39,6 @@ License
 #include <cstring>
 #include <cstdlib>
 #include <csignal>
-
-#if defined(WM_SP)
-    #define MPI_SCALAR MPI_FLOAT
-    #define MPI_SOLVESCALAR MPI_FLOAT
-#elif defined(WM_SPDP)
-    #define MPI_SCALAR MPI_FLOAT
-    #define MPI_SOLVESCALAR MPI_DOUBLE
-#elif defined(WM_DP)
-    #define MPI_SCALAR MPI_DOUBLE
-    #define MPI_SOLVESCALAR MPI_DOUBLE
-#endif
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -491,245 +480,7 @@ void Foam::UPstream::abort()
 }
 
 
-void Foam::reduce
-(
-    scalar& Value,
-    const sumOp<scalar>& bop,
-    const int tag,
-    const label communicator
-)
-{
-    if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
-    {
-        Pout<< "** reducing:" << Value << " with comm:" << communicator
-            << " warnComm:" << UPstream::warnComm
-            << endl;
-        error::printStack(Pout);
-    }
-    allReduce(Value, 1, MPI_SCALAR, MPI_SUM, bop, tag, communicator);
-}
-
-
-void Foam::reduce
-(
-    scalar& Value,
-    const minOp<scalar>& bop,
-    const int tag,
-    const label communicator
-)
-{
-    if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
-    {
-        Pout<< "** reducing:" << Value << " with comm:" << communicator
-            << " warnComm:" << UPstream::warnComm
-            << endl;
-        error::printStack(Pout);
-    }
-    allReduce(Value, 1, MPI_SCALAR, MPI_MIN, bop, tag, communicator);
-}
-
-
-void Foam::reduce
-(
-    vector2D& Value,
-    const sumOp<vector2D>& bop,
-    const int tag,
-    const label communicator
-)
-{
-    if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
-    {
-        Pout<< "** reducing:" << Value << " with comm:" << communicator
-            << " warnComm:" << UPstream::warnComm
-            << endl;
-        error::printStack(Pout);
-    }
-    allReduce(Value, 2, MPI_SCALAR, MPI_SUM, bop, tag, communicator);
-}
-
-
-void Foam::sumReduce
-(
-    scalar& Value,
-    label& Count,
-    const int tag,
-    const label communicator
-)
-{
-    if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
-    {
-        Pout<< "** sumReduce:" << Value << " with comm:" << communicator
-            << " warnComm:" << UPstream::warnComm
-            << endl;
-        error::printStack(Pout);
-    }
-    vector2D twoScalars(Value, scalar(Count));
-    reduce(twoScalars, sumOp<vector2D>(), tag, communicator);
-
-    Value = twoScalars.x();
-    Count = twoScalars.y();
-}
-
-
-void Foam::reduce
-(
-    scalar& Value,
-    const sumOp<scalar>& bop,
-    const int tag,
-    const label communicator,
-    label& requestID
-)
-{
-    iallReduce<scalar>(&Value, 1, MPI_SCALAR, MPI_SUM, communicator, requestID);
-}
-
-
-void Foam::reduce
-(
-    scalar values[],
-    const int size,
-    const sumOp<scalar>& bop,
-    const int tag,
-    const label communicator,
-    label& requestID
-)
-{
-    iallReduce<scalar>
-    (
-        values,
-        size,
-        MPI_SCALAR,
-        MPI_SUM,
-        communicator,
-        requestID
-    );
-}
-
-
-#if defined(WM_SPDP)
-void Foam::reduce
-(
-    solveScalar& Value,
-    const sumOp<solveScalar>& bop,
-    const int tag,
-    const label communicator
-)
-{
-    if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
-    {
-        Pout<< "** reducing:" << Value << " with comm:" << communicator
-            << " warnComm:" << UPstream::warnComm
-            << endl;
-        error::printStack(Pout);
-    }
-    allReduce(Value, 1, MPI_SOLVESCALAR, MPI_SUM, bop, tag, communicator);
-}
-
-
-void Foam::reduce
-(
-    solveScalar& Value,
-    const minOp<solveScalar>& bop,
-    const int tag,
-    const label communicator
-)
-{
-    if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
-    {
-        Pout<< "** reducing:" << Value << " with comm:" << communicator
-            << " warnComm:" << UPstream::warnComm
-            << endl;
-        error::printStack(Pout);
-    }
-    allReduce(Value, 1, MPI_SOLVESCALAR, MPI_MIN, bop, tag, communicator);
-}
-
-
-void Foam::reduce
-(
-    Vector2D<solveScalar>& Value,
-    const sumOp<Vector2D<solveScalar>>& bop,
-    const int tag,
-    const label communicator
-)
-{
-    if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
-    {
-        Pout<< "** reducing:" << Value << " with comm:" << communicator
-            << " warnComm:" << UPstream::warnComm
-            << endl;
-        error::printStack(Pout);
-    }
-    allReduce(Value, 2, MPI_SOLVESCALAR, MPI_SUM, bop, tag, communicator);
-}
-
-
-void Foam::sumReduce
-(
-    solveScalar& Value,
-    label& Count,
-    const int tag,
-    const label communicator
-)
-{
-    if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
-    {
-        Pout<< "** reducing:" << Value << " with comm:" << communicator
-            << " warnComm:" << UPstream::warnComm
-            << endl;
-        error::printStack(Pout);
-    }
-    Vector2D<solveScalar> twoScalars(Value, solveScalar(Count));
-    reduce(twoScalars, sumOp<Vector2D<solveScalar>>(), tag, communicator);
-
-    Value = twoScalars.x();
-    Count = twoScalars.y();
-}
-
-
-void Foam::reduce
-(
-    solveScalar& Value,
-    const sumOp<solveScalar>& bop,
-    const int tag,
-    const label communicator,
-    label& requestID
-)
-{
-    iallReduce<solveScalar>
-    (
-        &Value,
-        1,
-        MPI_SOLVESCALAR,
-        MPI_SUM,
-        communicator,
-        requestID
-    );
-}
-
-
-void Foam::reduce
-(
-    solveScalar values[],
-    const int size,
-    const sumOp<solveScalar>& bop,
-    const int tag,
-    const label communicator,
-    label& requestID
-)
-{
-    iallReduce<solveScalar>
-    (
-        values,
-        size,
-        MPI_SOLVESCALAR,
-        MPI_SUM,
-        communicator,
-        requestID
-    );
-}
-#endif
-
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 void Foam::UPstream::allToAll
 (
@@ -1437,22 +1188,15 @@ int Foam::UPstream::allocateTag(const char* s)
 
     if (debug)
     {
-        //if (UPstream::lateBlocking > 0)
-        //{
-        //    string& poutp = Pout.prefix();
-        //    poutp[poutp.size()-2*(UPstream::lateBlocking+2)+tag] = 'X';
-        //    Perr.prefix() = Pout.prefix();
-        //}
-        Pout<< "UPstream::allocateTag " << s
-            << " : tag:" << tag
-            << endl;
+        Pout<< "UPstream::allocateTag "
+            << s << " : tag:" << tag << endl;
     }
 
     return tag;
 }
 
 
-int Foam::UPstream::allocateTag(const word& s)
+int Foam::UPstream::allocateTag(const std::string& s)
 {
     int tag;
     if (PstreamGlobals::freedTags_.size())
@@ -1466,15 +1210,8 @@ int Foam::UPstream::allocateTag(const word& s)
 
     if (debug)
     {
-        //if (UPstream::lateBlocking > 0)
-        //{
-        //    string& poutp = Pout.prefix();
-        //    poutp[poutp.size()-2*(UPstream::lateBlocking+2)+tag] = 'X';
-        //    Perr.prefix() = Pout.prefix();
-        //}
-        Pout<< "UPstream::allocateTag " << s
-            << " : tag:" << tag
-            << endl;
+        Pout<< "UPstream::allocateTag "
+            << s.c_str() << " : tag:" << tag << endl;
     }
 
     return tag;
@@ -1485,29 +1222,19 @@ void Foam::UPstream::freeTag(const char* s, const int tag)
 {
     if (debug)
     {
-        //if (UPstream::lateBlocking > 0)
-        //{
-        //    string& poutp = Pout.prefix();
-        //    poutp[poutp.size()-2*(UPstream::lateBlocking+2)+tag] = ' ';
-        //    Perr.prefix() = Pout.prefix();
-        //}
-        Pout<< "UPstream::freeTag " << s << " tag:" << tag << endl;
+        Pout<< "UPstream::freeTag "
+            << s << " tag:" << tag << endl;
     }
     PstreamGlobals::freedTags_.append(tag);
 }
 
 
-void Foam::UPstream::freeTag(const word& s, const int tag)
+void Foam::UPstream::freeTag(const std::string& s, const int tag)
 {
     if (debug)
     {
-        //if (UPstream::lateBlocking > 0)
-        //{
-        //    string& poutp = Pout.prefix();
-        //    poutp[poutp.size()-2*(UPstream::lateBlocking+2)+tag] = ' ';
-        //    Perr.prefix() = Pout.prefix();
-        //}
-        Pout<< "UPstream::freeTag " << s << " tag:" << tag << endl;
+        Pout<< "UPstream::freeTag "
+            << s.c_str() << " tag:" << tag << endl;
     }
     PstreamGlobals::freedTags_.append(tag);
 }

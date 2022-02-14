@@ -35,8 +35,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef PstreamCombineReduceOps_H
-#define PstreamCombineReduceOps_H
+#ifndef Foam_PstreamCombineReduceOps_H
+#define Foam_PstreamCombineReduceOps_H
 
 #include "UPstream.H"
 #include "Pstream.H"
@@ -73,42 +73,11 @@ void combineReduce
     const label comm = Pstream::worldComm
 )
 {
-    if (UPstream::nProcs(comm) < UPstream::nProcsSimpleSum)
-    {
-        Pstream::combineGather
-        (
-            UPstream::linearCommunication(comm),
-            Value,
-            cop,
-            tag,
-            comm
-        );
-        Pstream::combineScatter
-        (
-            UPstream::linearCommunication(comm),
-            Value,
-            tag,
-            comm
-        );
-    }
-    else
-    {
-        Pstream::combineGather
-        (
-            UPstream::treeCommunication(comm),
-            Value,
-            cop,
-            tag,
-            comm
-        );
-        Pstream::combineScatter
-        (
-            UPstream::treeCommunication(comm),
-            Value,
-            tag,
-            comm
-        );
-    }
+    const List<UPstream::commsStruct>& comms =
+        UPstream::whichCommunication(comm);
+
+    Pstream::combineGather(comms, Value, cop, tag, comm);
+    Pstream::combineScatter(comms, Value, tag, comm);
 }
 
 

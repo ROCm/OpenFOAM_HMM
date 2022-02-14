@@ -69,9 +69,9 @@ public:
     //- Types of communications
     enum class commsTypes : char
     {
-        blocking,
-        scheduled,
-        nonBlocking
+        blocking,       //!< "blocking"
+        scheduled,      //!< "scheduled"
+        nonBlocking     //!< "nonBlocking"
     };
 
     //- Names of the communication types
@@ -198,7 +198,7 @@ private:
         static labelList worldIDs_;
 
 
-        // Communicator specific data
+    // Communicator specific data
 
         //- My processor number
         static DynamicList<int> myProcNo_;
@@ -413,11 +413,11 @@ public:
 
             static int allocateTag(const char*);
 
-            static int allocateTag(const word&);
+            static int allocateTag(const std::string&);
 
             static void freeTag(const char*, const int tag);
 
-            static void freeTag(const word&, const int tag);
+            static void freeTag(const std::string&, const int tag);
 
 
         //- Set as parallel run on/off.
@@ -537,12 +537,27 @@ public:
             return treeCommunication_[communicator];
         }
 
+        //- Communication schedule for linear/tree all-to-master (proc 0).
+        //- Chooses based on the value of UPstream::nProcsSimpleSum
+        static const List<commsStruct>& whichCommunication
+        (
+            const label communicator = worldComm
+        )
+        {
+            return
+            (
+                nProcs(communicator) < nProcsSimpleSum
+              ? linearCommunication_[communicator]
+              : treeCommunication_[communicator]
+            );
+        }
+
+
         //- Message tag of standard messages
         static int& msgType() noexcept
         {
             return msgType_;
         }
-
 
         //- Get the communications type of the stream
         commsTypes commsType() const noexcept
@@ -551,6 +566,7 @@ public:
         }
 
         //- Set the communications type of the stream
+        //  \return the previous value
         commsTypes commsType(const commsTypes ct) noexcept
         {
             commsTypes old(commsType_);
@@ -665,6 +681,20 @@ public:
         (
             const UList<T>& allValues,
             const label communicator = worldComm
+        );
+
+
+
+    // Broadcast Functions
+
+        //- Broadcast buffer contents, sizes must match on processors
+        //  \return True on success
+        static bool broadcast
+        (
+            char* buf,
+            const std::streamsize bufSize,
+            const label communicator = worldComm,
+            const int rootProcNo = masterNo()
         );
 
 
