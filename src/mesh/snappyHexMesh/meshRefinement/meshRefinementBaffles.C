@@ -737,6 +737,13 @@ void Foam::meshRefinement::getZoneFaces
     nBaffles.setSize(zoneIDs.size());
     nBaffles = Zero;
 
+
+    //- Get per face whether it is internal or coupled
+    const bitSet isInternalOrCoupled
+    (
+        syncTools::getInternalOrCoupledFaces(mesh_)
+    );
+
     forAll(zoneIDs, j)
     {
         label zoneI = zoneIDs[j];
@@ -756,7 +763,7 @@ void Foam::meshRefinement::getZoneFaces
         forAll(fz, i)
         {
             label faceI = fz[i];
-            if (mesh_.isInternalFace(faceI))
+            if (isInternalOrCoupled[faceI])
             {
                 if (fz.flipMap()[i])
                 {
