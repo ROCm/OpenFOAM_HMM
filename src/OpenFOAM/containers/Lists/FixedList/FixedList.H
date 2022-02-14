@@ -37,8 +37,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef FixedList_H
-#define FixedList_H
+#ifndef Foam_FixedList_H
+#define Foam_FixedList_H
 
 #include "bool.H"
 #include "label.H"

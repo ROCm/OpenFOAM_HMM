@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,6 +40,11 @@ void Foam::FixedList<T, N>::writeEntry(Ostream& os) const
     if (token::compound::isCompound(tag))
     {
         os  << tag << token::SPACE;
+        if (os.format() == IOstream::BINARY && is_contiguous<T>::value)
+        {
+            // Need the size too so that List<Type>::readList parses correctly
+            os << static_cast<label>(N);
+        }
     }
     os << *this;
 }
@@ -155,7 +160,7 @@ Foam::Istream& Foam::FixedList<T, N>::readList
 
     if (is.format() == IOstream::BINARY && is_contiguous<T>::value)
     {
-        // Binary and contiguous
+        // Binary and contiguous. Length is non-zero
 
         Detail::readContiguous<T>
         (
@@ -169,6 +174,7 @@ Foam::Istream& Foam::FixedList<T, N>::readList
             "FixedList<T, N>::readList(Istream&) : "
             "reading the binary block"
         );
+        return is;
     }
     else
     {
@@ -183,23 +189,22 @@ Foam::Istream& Foam::FixedList<T, N>::readList
         if (tok.isCompound())
         {
             // Compound: transfer contents
+            // - in practice probably never reach this branch
             list = dynamicCast<token::Compound<List<T>>>
             (
                 tok.transferCompoundToken(is)
             );
+            return is;
         }
         else if (tok.isLabel())
         {
-            const label len = tok.labelToken();
-
             // List lengths must match
-            list.checkSize(len);
+            list.checkSize(tok.labelToken());
         }
         else if (!tok.isPunctuation())
         {
             FatalIOErrorInFunction(is)
-                << "incorrect first token, expected <label> "
-                   "or '(' or '{', found "
+                << "incorrect first token, expected <label> or '(' , found "
                 << tok.info() << nl
                 << exit(FatalIOError);
         }
@@ -228,9 +233,10 @@ Foam::Istream& Foam::FixedList<T, N>::readList
         else
         {
             // Uniform content (delimiter == token::BEGIN_BLOCK)
+            // - compatibility for v1812 and earlier (see issue #1160)
 
-            T val;
-            is >> val;
+            T elem;
+            is >> elem;
 
             is.fatalCheck
             (
@@ -240,7 +246,7 @@ Foam::Istream& Foam::FixedList<T, N>::readList
 
             for (unsigned i=0; i<N; ++i)
             {
-                list[i] = val;  // Copy the value
+                list[i] = elem;  // Copy the value
             }
         }
 
