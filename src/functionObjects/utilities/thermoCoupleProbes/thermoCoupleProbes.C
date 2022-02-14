@@ -68,8 +68,7 @@ Foam::functionObjects::thermoCoupleProbes::thermoCoupleProbes
         read(dict);
     }
 
-    // Check if the property exist (resume old calculation)
-    // or of it is new.
+    // Check if the property exists (resume old calculation) or is new
     dictionary probeDict;
     if (getDict(typeName, probeDict))
     {
@@ -77,7 +76,7 @@ Foam::functionObjects::thermoCoupleProbes::thermoCoupleProbes
     }
     else
     {
-       Ttc_ = probes::sample(thermo_.T());
+        Ttc_ = probes::sample(thermo_.T());
     }
 
     // Note: can only create the solver once all samples have been found
@@ -87,10 +86,6 @@ Foam::functionObjects::thermoCoupleProbes::thermoCoupleProbes
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::thermoCoupleProbes::~thermoCoupleProbes()
-{}
-
 
 Foam::label Foam::functionObjects::thermoCoupleProbes::nEqns() const
 {
@@ -168,9 +163,12 @@ void Foam::functionObjects::thermoCoupleProbes::jacobian
 
 bool Foam::functionObjects::thermoCoupleProbes::write()
 {
-    if (this->size())
+    if (!pointField::empty())
     {
-        sampleAndWrite<scalar>(thermo_.T());
+        (void) prepare(ACTION_WRITE);
+
+        const auto& Tfield = thermo_.T();
+        writeValues(Tfield.name(), Ttc_, Tfield.time().timeOutputValue());
 
         dictionary probeDict;
         probeDict.add("Tc", Ttc_);
@@ -184,7 +182,7 @@ bool Foam::functionObjects::thermoCoupleProbes::write()
 
 bool Foam::functionObjects::thermoCoupleProbes::execute()
 {
-    if (this->size())
+    if (!pointField::empty())
     {
         scalar dt = mesh_.time().deltaTValue();
         scalar t = mesh_.time().value();

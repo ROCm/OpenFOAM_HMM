@@ -79,8 +79,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef functionObjects_thermoCoupleProbes_H
-#define functionObjects_thermoCoupleProbes_H
+#ifndef Foam_functionObjects_thermoCoupleProbes_H
+#define Foam_functionObjects_thermoCoupleProbes_H
 
 #include "probes.H"
 #include "ODESystem.H"
@@ -106,7 +106,7 @@ class thermoCoupleProbes
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Thermocouple density
         scalar rho_;
@@ -126,7 +126,7 @@ protected:
         //- Name of the incident radiation field
         word radiationFieldName_;
 
-         //- Fluid thermo reference
+        //- Fluid thermo reference
         const fluidThermo& thermo_;
 
         //- ODESolver
@@ -136,17 +136,18 @@ protected:
         scalarField Ttc_;
 
 
-    // Protected Member Functions
-
-        //- Sample and write a particular volume field
-        template<class Type>
-        void sampleAndWrite
-        (
-            const GeometricField<Type, fvPatchField, volMesh>&
-        );
-
-
 private:
+
+    // Private Member Functions
+
+        //- Sample/write
+        template<class Type>
+        void writeValues
+        (
+            const word& fieldName,
+            const Field<Type>& values,
+            const scalar timeValue
+        );
 
         //- No copy construct
         thermoCoupleProbes(const thermoCoupleProbes&) = delete;
@@ -176,40 +177,40 @@ public:
 
 
     //- Destructor
-    virtual ~thermoCoupleProbes();
+    virtual ~thermoCoupleProbes() = default;
 
 
     // ODE functions (overriding abstract functions in ODE.H)
 
-    //- Number of ODE's to solve
-    virtual label nEqns() const;
+        //- Number of ODE's to solve
+        virtual label nEqns() const;
 
-    virtual void derivatives
-    (
-        const scalar x,
-        const scalarField& y,
-        scalarField& dydx
-    ) const;
+        virtual void derivatives
+        (
+            const scalar x,
+            const scalarField& y,
+            scalarField& dydx
+        ) const;
 
-    virtual void jacobian
-    (
-        const scalar t,
-        const scalarField& y,
-        scalarField& dfdt,
-        scalarSquareMatrix& dfdy
-    ) const;
+        virtual void jacobian
+        (
+            const scalar t,
+            const scalarField& y,
+            scalarField& dfdt,
+            scalarSquareMatrix& dfdy
+        ) const;
 
 
     // Public Member Functions
 
-        //- Sample and write
-        virtual bool write();
-
-        //- Execute, currently does nothing
-        virtual bool execute();
-
         //- Read
         virtual bool read(const dictionary&);
+
+        //- Execute. Evaluates the ODESolver
+        virtual bool execute();
+
+        //- Sample and write
+        virtual bool write();
 };
 
 

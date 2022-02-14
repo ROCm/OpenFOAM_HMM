@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,25 +28,28 @@ License
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-void Foam::functionObjects::thermoCoupleProbes::sampleAndWrite
+void Foam::functionObjects::thermoCoupleProbes::writeValues
 (
-    const GeometricField<Type, fvPatchField, volMesh>& vField
+    const word& fieldName,
+    const Field<Type>& values,
+    const scalar timeValue
 )
 {
     if (Pstream::master())
     {
-        unsigned int w = IOstream::defaultPrecision() + 7;
-        OFstream& probeStream = *probeFilePtrs_[vField.name()];
+        const unsigned int w = IOstream::defaultPrecision() + 7;
+        OFstream& os = *probeFilePtrs_[fieldName];
 
-        probeStream
-            << setw(w)
-            << vField.time().timeOutputValue();
+        os  << setw(w) << timeValue;
 
-        forAll(*this, probeI)
+        forAll(*this, probei)
         {
-            probeStream << ' ' << setw(w) << Ttc_[probeI];
+            // if (includeOutOfBounds_ || processor_[probei] != -1)
+            {
+                os  << ' ' << setw(w) << values[probei];
+            }
         }
-        probeStream << endl;
+        os  << endl;
     }
 }
 
