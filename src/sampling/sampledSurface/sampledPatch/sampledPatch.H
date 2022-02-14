@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,8 +58,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef sampledPatch_H
-#define sampledPatch_H
+#ifndef Foam_sampledPatch_H
+#define Foam_sampledPatch_H
 
 #include "sampledSurface.H"
 #include "MeshedSurfaces.H"
@@ -119,7 +119,7 @@ class sampledPatch
         template<class Type>
         tmp<Field<Type>> sampleOnFaces
         (
-            const GeometricField<Type, fvsPatchField, surfaceMesh>& sField
+            const SurfaceField<Type>& sField
         ) const;
 
         //- Interpolate boundary field (from volume field) onto surface points

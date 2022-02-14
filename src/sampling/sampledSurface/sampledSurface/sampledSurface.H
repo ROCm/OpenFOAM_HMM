@@ -71,8 +71,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef sampledSurface_H
-#define sampledSurface_H
+#ifndef Foam_sampledSurface_H
+#define Foam_sampledSurface_H
 
 #include "polySurface.H"
 #include "typeInfo.H"
@@ -148,9 +148,9 @@ protected:
 
         //- Create cell values by averaging the point values
         template<class Type>
-        static tmp<GeometricField<Type, fvPatchField, volMesh>> pointAverage
+        static tmp<VolumeField<Type>> pointAverage
         (
-            const GeometricField<Type, pointPatchField, pointMesh>& pfld
+            const PointField<Type>& pfld
         );
 
 

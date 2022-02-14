@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,8 +63,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef isoSurfacePoint_H
-#define isoSurfacePoint_H
+#ifndef Foam_isoSurfacePoint_H
+#define Foam_isoSurfacePoint_H
 
 #include "bitSet.H"
 #include "volFields.H"
@@ -206,12 +206,8 @@ class isoSurfacePoint
 
         //- Return input field with coupled (and empty) patch values rewritten
         template<class Type>
-        tmp<SlicedGeometricField
-        <Type, fvPatchField, slicedFvPatchField, volMesh>>
-        adaptPatchFields
-        (
-            const GeometricField<Type, fvPatchField, volMesh>& fld
-        ) const;
+        tmp<VolumeSliceField<Type>>
+        adaptPatchFields(const VolumeField<Type>& fld) const;
 
         //- Generate single point by interpolation or snapping
         template<class Type>
@@ -263,7 +259,7 @@ class isoSurfacePoint
             const volScalarField& cVals,
             const scalarField& pVals,
 
-            const GeometricField<Type, fvPatchField, volMesh>& cCoords,
+            const VolumeField<Type>& cCoords,
             const Field<Type>& pCoords,
 
             const DynamicList<Type>& snappedPoints,
@@ -286,7 +282,7 @@ class isoSurfacePoint
             const volScalarField& cVals,
             const scalarField& pVals,
 
-            const GeometricField<Type, fvPatchField, volMesh>& cCoords,
+            const VolumeField<Type>& cCoords,
             const Field<Type>& pCoords,
 
             const DynamicList<Type>& snappedPoints,
@@ -360,7 +356,7 @@ class isoSurfacePoint
         template<class Type>
         tmp<Field<Type>> interpolateTemplate
         (
-            const GeometricField<Type, fvPatchField, volMesh>& cCoords,
+            const VolumeField<Type>& cCoords,
             const Field<Type>& pCoords
         ) const;
 

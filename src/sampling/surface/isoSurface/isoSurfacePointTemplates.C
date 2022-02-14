@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,27 +36,13 @@ License
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-Foam::tmp<Foam::SlicedGeometricField
-<
-    Type,
-    Foam::fvPatchField,
-    Foam::slicedFvPatchField,
-    Foam::volMesh
->>
+Foam::tmp<Foam::VolumeSliceField<Type>>
 Foam::isoSurfacePoint::adaptPatchFields
 (
-    const GeometricField<Type, fvPatchField, volMesh>& fld
+    const VolumeField<Type>& fld
 ) const
 {
-    typedef SlicedGeometricField
-    <
-        Type,
-        fvPatchField,
-        slicedFvPatchField,
-        volMesh
-    > FieldType;
-
-    auto tslice = tmp<FieldType>::New
+    auto tslice = tmp<VolumeSliceField<Type>>::New
     (
         IOobject
         (
@@ -448,7 +434,7 @@ Foam::label Foam::isoSurfacePoint::generateFaceTriPoints
     const volScalarField& cVals,
     const scalarField& pVals,
 
-    const GeometricField<Type, fvPatchField, volMesh>& cCoords,
+    const VolumeField<Type>& cCoords,
     const Field<Type>& pCoords,
 
     const DynamicList<Type>& snappedPoints,
@@ -531,7 +517,7 @@ void Foam::isoSurfacePoint::generateTriPoints
     const volScalarField& cVals,
     const scalarField& pVals,
 
-    const GeometricField<Type, fvPatchField, volMesh>& cCoords,
+    const VolumeField<Type>& cCoords,
     const Field<Type>& pCoords,
 
     const DynamicList<Type>& snappedPoints,
@@ -809,18 +795,12 @@ template<class Type>
 Foam::tmp<Foam::Field<Type>>
 Foam::isoSurfacePoint::interpolateTemplate
 (
-    const GeometricField<Type, fvPatchField, volMesh>& cCoords,
+    const VolumeField<Type>& cCoords,
     const Field<Type>& pCoords
 ) const
 {
     // Recalculate boundary values
-    tmp<SlicedGeometricField
-    <
-        Type,
-        fvPatchField,
-        slicedFvPatchField,
-        volMesh
-    >> c2(adaptPatchFields(cCoords));
+    tmp<VolumeSliceField<Type>> c2(adaptPatchFields(cCoords));
 
 
     DynamicList<Type> triPoints(3*nCutCells_);

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,8 +58,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef sampledFaceZone_H
-#define sampledFaceZone_H
+#ifndef Foam_sampledFaceZone_H
+#define Foam_sampledFaceZone_H
 
 #include "sampledSurface.H"
 #include "MeshedSurfaces.H"
@@ -116,7 +116,7 @@ class sampledFaceZone
         template<class Type>
         tmp<Field<Type>> sampleOnFaces
         (
-            const GeometricField<Type, fvsPatchField, surfaceMesh>& sField
+            const SurfaceField<Type>& sField
         ) const;
 
         //- Interpolate volume/boundary field onto surface points

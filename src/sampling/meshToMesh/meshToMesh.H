@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,8 +42,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef meshToMesh_H
-#define meshToMesh_H
+#ifndef Foam_meshToMesh_H
+#define Foam_meshToMesh_H
 
 #include "polyMesh.H"
 #include "treeBoundBox.H"
@@ -159,9 +159,9 @@ private:
         template<class Type, class CombineOp>
         void mapInternalSrcToTgt
         (
-            const GeometricField<Type, fvPatchField, volMesh>& field,
+            const VolumeField<Type>& field,
             const CombineOp& cop,
-            GeometricField<Type, fvPatchField, volMesh>& result,
+            VolumeField<Type>& result,
             const bool secondOrder
         ) const;
 
@@ -170,9 +170,9 @@ private:
         template<class Type, class CombineOp>
         void mapInternalTgtToSrc
         (
-            const GeometricField<Type, fvPatchField, volMesh>& field,
+            const VolumeField<Type>& field,
             const CombineOp& cop,
-            GeometricField<Type, fvPatchField, volMesh>& result,
+            VolumeField<Type>& result,
             const bool secondOrder
         ) const;
 
@@ -550,18 +550,18 @@ public:
                 template<class Type, class CombineOp>
                 void mapSrcToTgt
                 (
-                    const GeometricField<Type, fvPatchField, volMesh>& field,
+                    const VolumeField<Type>& field,
                     const CombineOp& cop,
-                    GeometricField<Type, fvPatchField, volMesh>& result,
+                    VolumeField<Type>& result,
                     const bool secondOrder = true
                 ) const;
 
                 //- Interpolate a field with a defined operation.  The initial
                 //  values of the result are set to zero
                 template<class Type, class CombineOp>
-                tmp<GeometricField<Type, fvPatchField, volMesh>> mapSrcToTgt
+                tmp<VolumeField<Type>> mapSrcToTgt
                 (
-                    const GeometricField<Type, fvPatchField, volMesh>& field,
+                    const VolumeField<Type>& field,
                     const CombineOp& cop,
                     const bool secondOrder = true
                 ) const;
@@ -569,10 +569,9 @@ public:
                 //- Interpolate a tmp field with a defined operation.  The
                 //  initial values of the result are set to zero
                 template<class Type, class CombineOp>
-                tmp<GeometricField<Type, fvPatchField, volMesh>> mapSrcToTgt
+                tmp<VolumeField<Type>> mapSrcToTgt
                 (
-                    const tmp<GeometricField<Type, fvPatchField, volMesh>>&
-                        tfield,
+                    const tmp<VolumeField<Type>>& tfield,
                     const CombineOp& cop,
                     const bool secondOrder = true
                 ) const;
@@ -580,19 +579,18 @@ public:
                 //- Convenience function to map a field with a default
                 //  operation (plusEqOp)
                 template<class Type>
-                tmp<GeometricField<Type, fvPatchField, volMesh>> mapSrcToTgt
+                tmp<VolumeField<Type>> mapSrcToTgt
                 (
-                    const GeometricField<Type, fvPatchField, volMesh>& field,
+                    const VolumeField<Type>& field,
                     const bool secondOrder = true
                 ) const;
 
                 //- Convenience function to map a tmp field with a default
                 //  operation (plusEqOp)
                 template<class Type>
-                tmp<GeometricField<Type, fvPatchField, volMesh>> mapSrcToTgt
+                tmp<VolumeField<Type>> mapSrcToTgt
                 (
-                    const tmp<GeometricField<Type, fvPatchField, volMesh>>&
-                        tfield,
+                    const tmp<VolumeField<Type>>& tfield,
                     const bool secondOrder = true
                 ) const;
 
@@ -606,18 +604,18 @@ public:
                 template<class Type, class CombineOp>
                 void mapTgtToSrc
                 (
-                    const GeometricField<Type, fvPatchField, volMesh>& field,
+                    const VolumeField<Type>& field,
                     const CombineOp& cop,
-                    GeometricField<Type, fvPatchField, volMesh>& result,
+                    VolumeField<Type>& result,
                     const bool secondOrder = true
                 ) const;
 
                 //- Interpolate a field with a defined operation.  The initial
                 //  values of the result are set to zero
                 template<class Type, class CombineOp>
-                tmp<GeometricField<Type, fvPatchField, volMesh>> mapTgtToSrc
+                tmp<VolumeField<Type>> mapTgtToSrc
                 (
-                    const GeometricField<Type, fvPatchField, volMesh>& field,
+                    const VolumeField<Type>& field,
                     const CombineOp& cop,
                     const bool secondOrder = true
                 ) const;
@@ -625,9 +623,9 @@ public:
                 //- Interpolate a tmp field with a defined operation.  The
                 //  initial values of the result are set to zero
                 template<class Type, class CombineOp>
-                tmp<GeometricField<Type, fvPatchField, volMesh>> mapTgtToSrc
+                tmp<VolumeField<Type>> mapTgtToSrc
                 (
-                    const tmp<GeometricField<Type, fvPatchField, volMesh>>&
+                    const tmp<VolumeField<Type>>&
                         tfield,
                     const CombineOp& cop,
                     const bool secondOrder = true
@@ -636,19 +634,18 @@ public:
                 //- Convenience function to map a field with a default
                 //  operation (plusEqOp)
                 template<class Type>
-                tmp<GeometricField<Type, fvPatchField, volMesh>> mapTgtToSrc
+                tmp<VolumeField<Type>> mapTgtToSrc
                 (
-                    const GeometricField<Type, fvPatchField, volMesh>& field,
+                    const VolumeField<Type>& field,
                     const bool secondOrder = true
                 ) const;
 
                 //- Convenience function to map a tmp field with a default
                 //  operation (plusEqOp)
                 template<class Type>
-                tmp<GeometricField<Type, fvPatchField, volMesh>> mapTgtToSrc
+                tmp<VolumeField<Type>> mapTgtToSrc
                 (
-                    const tmp<GeometricField<Type, fvPatchField, volMesh>>&
-                        tfield,
+                    const tmp<VolumeField<Type>>& tfield,
                     const bool secondOrder = true
                 ) const;
 };
@@ -661,97 +658,97 @@ public:
 template<>
 void meshToMesh::mapInternalSrcToTgt
 (
-    const GeometricField<sphericalTensor, fvPatchField, volMesh>&,
+    const VolumeField<sphericalTensor>&,
     const plusEqOp<sphericalTensor>&,
-    GeometricField<sphericalTensor, fvPatchField, volMesh>&,
+    VolumeField<sphericalTensor>&,
     const bool
 ) const;
 template<>
 void meshToMesh::mapInternalSrcToTgt
 (
-    const GeometricField<sphericalTensor, fvPatchField, volMesh>&,
+    const VolumeField<sphericalTensor>&,
     const minusEqOp<sphericalTensor>&,
-    GeometricField<sphericalTensor, fvPatchField, volMesh>&,
+    VolumeField<sphericalTensor>&,
     const bool
 ) const;
 template<>
 void meshToMesh::mapInternalSrcToTgt
 (
-    const GeometricField<symmTensor, fvPatchField, volMesh>&,
+    const VolumeField<symmTensor>&,
     const plusEqOp<symmTensor>&,
-    GeometricField<symmTensor, fvPatchField, volMesh>&,
+    VolumeField<symmTensor>&,
     const bool
 ) const;
 template<>
 void meshToMesh::mapInternalSrcToTgt
 (
-    const GeometricField<symmTensor, fvPatchField, volMesh>&,
+    const VolumeField<symmTensor>&,
     const minusEqOp<symmTensor>&,
-    GeometricField<symmTensor, fvPatchField, volMesh>&,
+    VolumeField<symmTensor>&,
     const bool
 ) const;
 template<>
 void meshToMesh::mapInternalSrcToTgt
 (
-    const GeometricField<tensor, fvPatchField, volMesh>&,
+    const VolumeField<tensor>&,
     const plusEqOp<tensor>&,
-    GeometricField<tensor, fvPatchField, volMesh>&,
+    VolumeField<tensor>&,
     const bool
 ) const;
 template<>
 void meshToMesh::mapInternalSrcToTgt
 (
-    const GeometricField<tensor, fvPatchField, volMesh>&,
+    const VolumeField<tensor>&,
     const minusEqOp<tensor>&,
-    GeometricField<tensor, fvPatchField, volMesh>&,
+    VolumeField<tensor>&,
     const bool
 ) const;
 template<>
 void meshToMesh::mapInternalTgtToSrc
 (
-    const GeometricField<sphericalTensor, fvPatchField, volMesh>&,
+    const VolumeField<sphericalTensor>&,
     const plusEqOp<sphericalTensor>&,
-    GeometricField<sphericalTensor, fvPatchField, volMesh>&,
+    VolumeField<sphericalTensor>&,
     const bool
 ) const;
 template<>
 void meshToMesh::mapInternalTgtToSrc
 (
-    const GeometricField<sphericalTensor, fvPatchField, volMesh>&,
+    const VolumeField<sphericalTensor>&,
     const minusEqOp<sphericalTensor>&,
-    GeometricField<sphericalTensor, fvPatchField, volMesh>&,
+    VolumeField<sphericalTensor>&,
     const bool
 ) const;
 template<>
 void meshToMesh::mapInternalTgtToSrc
 (
-    const GeometricField<symmTensor, fvPatchField, volMesh>&,
+    const VolumeField<symmTensor>&,
     const plusEqOp<symmTensor>&,
-    GeometricField<symmTensor, fvPatchField, volMesh>&,
+    VolumeField<symmTensor>&,
     const bool
 ) const;
 template<>
 void meshToMesh::mapInternalTgtToSrc
 (
-    const GeometricField<symmTensor, fvPatchField, volMesh>&,
+    const VolumeField<symmTensor>&,
     const minusEqOp<symmTensor>&,
-    GeometricField<symmTensor, fvPatchField, volMesh>&,
+    VolumeField<symmTensor>&,
     const bool
 ) const;
 template<>
 void meshToMesh::mapInternalTgtToSrc
 (
-    const GeometricField<tensor, fvPatchField, volMesh>&,
+    const VolumeField<tensor>&,
     const plusEqOp<tensor>&,
-    GeometricField<tensor, fvPatchField, volMesh>&,
+    VolumeField<tensor>&,
     const bool
 ) const;
 template<>
 void meshToMesh::mapInternalTgtToSrc
 (
-    const GeometricField<tensor, fvPatchField, volMesh>&,
+    const VolumeField<tensor>&,
     const minusEqOp<tensor>&,
-    GeometricField<tensor, fvPatchField, volMesh>&,
+    VolumeField<tensor>&,
     const bool
 ) const;
 

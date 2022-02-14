@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,16 +62,14 @@ void Foam::expressions::volumeExpr::parseDriver::setInternalFieldResult
 template<class Type>
 void Foam::expressions::volumeExpr::parseDriver::setResult
 (
-    GeometricField<Type, fvPatchField, volMesh>* ptr,
+    VolumeField<Type>* ptr,
     bool logical
 )
 {
-    typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
-
     resultField_.reset(nullptr);
 
     // Characteristics
-    resultType_ = pTraits<fieldType>::typeName;
+    resultType_ = VolumeField<Type>::typeName;
     isLogical_ = logical;
     fieldGeoType_ = VOLUME_DATA;
 
@@ -91,16 +89,14 @@ void Foam::expressions::volumeExpr::parseDriver::setResult
 template<class Type>
 void Foam::expressions::volumeExpr::parseDriver::setResult
 (
-    GeometricField<Type, fvsPatchField, surfaceMesh>* ptr,
+    SurfaceField<Type>* ptr,
     bool logical
 )
 {
-    typedef GeometricField<Type, fvsPatchField, surfaceMesh> fieldType;
-
     resultField_.reset(nullptr);
 
     // Characteristics
-    resultType_ = pTraits<fieldType>::typeName;
+    resultType_ = SurfaceField<Type>::typeName;
     isLogical_ = logical;
     fieldGeoType_ = FACE_DATA;
 
@@ -120,16 +116,14 @@ void Foam::expressions::volumeExpr::parseDriver::setResult
 template<class Type>
 void Foam::expressions::volumeExpr::parseDriver::setResult
 (
-    GeometricField<Type, pointPatchField, pointMesh>* ptr,
+    PointField<Type>* ptr,
     bool logical
 )
 {
-    typedef GeometricField<Type, pointPatchField, pointMesh> fieldType;
-
     resultField_.reset(nullptr);
 
     // Characteristics
-    resultType_ = pTraits<fieldType>::typeName;
+    resultType_ = PointField<Type>::typeName;
     isLogical_ = logical;
     fieldGeoType_ = POINT_DATA;
 
@@ -182,16 +176,14 @@ Foam::expressions::volumeExpr::parseDriver::isResultType
 
 
 template<class Type>
-Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
+Foam::tmp<Foam::VolumeField<Type>>
 Foam::expressions::volumeExpr::parseDriver::getVolField
 (
     const word& fldName,
     bool getOldTime
 )
 {
-    typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
-
-    return this->getOrReadField<fieldType>
+    return this->getOrReadField<VolumeField<Type>>
     (
         fldName,
         true,  // mandatory
@@ -201,16 +193,14 @@ Foam::expressions::volumeExpr::parseDriver::getVolField
 
 
 template<class Type>
-Foam::tmp<Foam::GeometricField<Type, Foam::fvsPatchField, Foam::surfaceMesh>>
+Foam::tmp<Foam::SurfaceField<Type>>
 Foam::expressions::volumeExpr::parseDriver::getSurfaceField
 (
     const word& fldName,
     bool getOldTime
 )
 {
-    typedef GeometricField<Type, fvsPatchField, surfaceMesh> fieldType;
-
-    return this->getOrReadField<fieldType>
+    return this->getOrReadField<SurfaceField<Type>>
     (
         fldName,
         true,  // mandatory
@@ -220,16 +210,14 @@ Foam::expressions::volumeExpr::parseDriver::getSurfaceField
 
 
 template<class Type>
-Foam::tmp<Foam::GeometricField<Type, Foam::pointPatchField, Foam::pointMesh>>
+Foam::tmp<Foam::PointField<Type>>
 Foam::expressions::volumeExpr::parseDriver::getPointField
 (
     const word& fldName,
     bool getOldTime
 )
 {
-    typedef GeometricField<Type, pointPatchField, pointMesh> fieldType;
-
-    return this->getOrReadPointField<fieldType>
+    return this->getOrReadPointField<PointField<Type>>
     (
         fldName,
         true,  // mandatory
@@ -239,15 +227,13 @@ Foam::expressions::volumeExpr::parseDriver::getPointField
 
 
 template<class Type>
-Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
+Foam::tmp<Foam::VolumeField<Type>>
 Foam::expressions::volumeExpr::parseDriver::newVolField
 (
     const Type& val
 ) const
 {
-    typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
-
-    return fieldType::New
+    return VolumeField<Type>::New
     (
         word("constant.") + word(pTraits<Type>::typeName),
         mesh(),
@@ -257,15 +243,13 @@ Foam::expressions::volumeExpr::parseDriver::newVolField
 
 
 template<class Type>
-Foam::tmp<Foam::GeometricField<Type, Foam::fvsPatchField, Foam::surfaceMesh>>
+Foam::tmp<Foam::SurfaceField<Type>>
 Foam::expressions::volumeExpr::parseDriver::newSurfaceField
 (
     const Type& val
 ) const
 {
-    typedef GeometricField<Type, fvsPatchField, surfaceMesh> fieldType;
-
-    return fieldType::New
+    return SurfaceField<Type>::New
     (
         word("constant.") + word(pTraits<Type>::typeName),
         mesh(),
@@ -275,15 +259,13 @@ Foam::expressions::volumeExpr::parseDriver::newSurfaceField
 
 
 template<class Type>
-Foam::tmp<Foam::GeometricField<Type, Foam::pointPatchField, Foam::pointMesh>>
+Foam::tmp<Foam::PointField<Type>>
 Foam::expressions::volumeExpr::parseDriver::newPointField
 (
     const Type& val
 ) const
 {
-    typedef GeometricField<Type, pointPatchField, pointMesh> fieldType;
-
-    return fieldType::New
+    return PointField<Type>::New
     (
         word("constant.") + word(pTraits<Type>::typeName),
         pointMesh::New(mesh()),
@@ -293,10 +275,10 @@ Foam::expressions::volumeExpr::parseDriver::newPointField
 
 
 template<class Type>
-Foam::tmp<Foam::GeometricField<Type, Foam::fvsPatchField, Foam::surfaceMesh>>
+Foam::tmp<Foam::SurfaceField<Type>>
 Foam::expressions::volumeExpr::parseDriver::cellToFace
 (
-    const GeometricField<Type, fvPatchField, volMesh>& field
+    const VolumeField<Type>& field
 ) const
 {
     return fvc::interpolate(field);
@@ -304,10 +286,10 @@ Foam::expressions::volumeExpr::parseDriver::cellToFace
 
 
 template<class Type>
-Foam::tmp<Foam::GeometricField<Type, Foam::pointPatchField, Foam::pointMesh>>
+Foam::tmp<Foam::PointField<Type>>
 Foam::expressions::volumeExpr::parseDriver::cellToPoint
 (
-    const GeometricField<Type, fvPatchField, volMesh>& field
+    const VolumeField<Type>& field
 ) const
 {
     volPointInterpolation interp(this->mesh());
@@ -316,10 +298,10 @@ Foam::expressions::volumeExpr::parseDriver::cellToPoint
 
 
 template<class Type>
-Foam::tmp<Foam::GeometricField<Type,Foam::fvPatchField,Foam::volMesh>>
+Foam::tmp<Foam::VolumeField<Type>>
 Foam::expressions::volumeExpr::parseDriver::pointToCell
 (
-    const GeometricField<Type, pointPatchField, pointMesh>& field
+    const PointField<Type>& field
 ) const
 {
     auto tresult = newVolField<Type>();

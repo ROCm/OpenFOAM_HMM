@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,7 +43,7 @@ void Foam::Function1Types::Sample<Type>::setSampleCell() const
     {
         pointEventNo_ = points.eventNo();
 
-        celli_ = this->template mesh<fvMesh>().findCell(position_);
+        celli_ = mesh.findCell(position_);
 
         if (!returnReduce(celli_ != -1, orOp<bool>()))
         {
@@ -104,18 +104,17 @@ Foam::Function1Types::Sample<Type>::Sample(const Sample& s)
 template<class Type>
 Type Foam::Function1Types::Sample<Type>::value(const scalar x) const
 {
-    typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
-
     const auto& mesh = this->template mesh<fvMesh>();
 
-    const auto* fieldPtr = mesh.template cfindObject<VolFieldType>(fieldName_);
+    const auto* fieldPtr =
+        mesh.template cfindObject<VolumeField<Type>>(fieldName_);
 
     if (!fieldPtr)
     {
         FatalErrorInFunction
             << "Unable to find field " << fieldName_ << " on the mesh database"
-            << ". Valid " << VolFieldType::typeName << " fields are:"
-            << mesh.names(VolFieldType::typeName)
+            << ". Valid " << VolumeField<Type>::typeName << " fields are:"
+            << mesh.template sortedNames<VolumeField<Type>>()
             << exit(FatalError);
     }
 

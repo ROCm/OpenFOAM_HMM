@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2020 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +31,7 @@ Description
     Serial mesh to mesh interpolation class.
 
 Note
-    This class is due to be deprecated in favour of meshToMesh0New
+    This class is due to be deprecated in favour of meshToMesh
 
 SourceFiles
     meshToMesh0.C
@@ -41,8 +41,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef meshToMesh0_H
-#define meshToMesh0_H
+#ifndef Foam_meshToMesh0_H
+#define Foam_meshToMesh0_H
 
 #include "fvMesh.H"
 #include "HashTable.H"
@@ -271,7 +271,7 @@ public:
             void interpolateField
             (
                 Field<Type>&,
-                const GeometricField<Type, fvPatchField, volMesh>&,
+                const VolumeField<Type>&,
                 const labelList& adr,
                 const scalarListList& weights,
                 const CombineOp& cop
@@ -282,7 +282,7 @@ public:
             void interpolateField
             (
                 Field<Type>&,
-                const GeometricField<Type, fvPatchField, volMesh>&,
+                const VolumeField<Type>&,
                 const labelListList& adr,
                 const scalarListList& weights,
                 const CombineOp& cop
@@ -294,7 +294,7 @@ public:
             void interpolateField
             (
                 Field<Type>&,
-                const GeometricField<Type, fvPatchField, volMesh>&,
+                const VolumeField<Type>&,
                 const labelList& adr,
                 const vectorField& centres,
                 const CombineOp& cop
@@ -306,7 +306,7 @@ public:
             void interpolateInternalField
             (
                 Field<Type>&,
-                const GeometricField<Type, fvPatchField, volMesh>&,
+                const VolumeField<Type>&,
                 order=INTERPOLATE,
                 const CombineOp& cop = eqOp<Type>()
             ) const;
@@ -315,7 +315,7 @@ public:
             void interpolateInternalField
             (
                 Field<Type>&,
-                const tmp<GeometricField<Type, fvPatchField, volMesh>>&,
+                const tmp<VolumeField<Type>>&,
                 order=INTERPOLATE,
                 const CombineOp& cop = eqOp<Type>()
             ) const;
@@ -325,8 +325,8 @@ public:
             template<class Type, class CombineOp>
             void interpolate
             (
-                GeometricField<Type, fvPatchField, volMesh>&,
-                const GeometricField<Type, fvPatchField, volMesh>&,
+                VolumeField<Type>&,
+                const VolumeField<Type>&,
                 order=INTERPOLATE,
                 const CombineOp& cop = eqOp<Type>()
             ) const;
@@ -334,8 +334,8 @@ public:
             template<class Type, class CombineOp>
             void interpolate
             (
-                GeometricField<Type, fvPatchField, volMesh>&,
-                const tmp<GeometricField<Type, fvPatchField, volMesh>>&,
+                VolumeField<Type>&,
+                const tmp<VolumeField<Type>>&,
                 order=INTERPOLATE,
                 const CombineOp& cop = eqOp<Type>()
             ) const;
@@ -343,17 +343,17 @@ public:
 
             //- Interpolate volume field
             template<class Type, class CombineOp>
-            tmp<GeometricField<Type, fvPatchField, volMesh>> interpolate
+            tmp<VolumeField<Type>> interpolate
             (
-                const GeometricField<Type, fvPatchField, volMesh>&,
+                const VolumeField<Type>&,
                 order=INTERPOLATE,
                 const CombineOp& cop = eqOp<Type>()
             ) const;
 
             template<class Type, class CombineOp>
-            tmp<GeometricField<Type, fvPatchField, volMesh>> interpolate
+            tmp<VolumeField<Type>> interpolate
             (
-                const tmp<GeometricField<Type, fvPatchField, volMesh>>&,
+                const tmp<VolumeField<Type>>&,
                 order=INTERPOLATE,
                 const CombineOp& cop = eqOp<Type>()
             ) const;

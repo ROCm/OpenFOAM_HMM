@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2010-2018 Bernhard Gschaider
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -231,18 +231,14 @@ bool Foam::expressions::fvExprDriver::isField
         Info<< "fvExprDriver::isField <" << name << '>' << endl;
     }
 
-    typedef GeometricField<Type, fvPatchField, volMesh> vfieldType;
-    typedef GeometricField<Type, fvsPatchField, surfaceMesh> sfieldType;
-    typedef GeometricField<Type, pointPatchField, pointMesh> pfieldType;
-
     return
     (
         wantPointData
-      ? this->foundField<pfieldType>(name)
+      ? this->foundField<PointField<Type>>(name)
       :
         (
-            this->foundField<vfieldType>(name)
-         || this->foundField<sfieldType>(name)
+            this->foundField<VolumeField<Type>>(name)
+         || this->foundField<SurfaceField<Type>>(name)
         )
     );
 }

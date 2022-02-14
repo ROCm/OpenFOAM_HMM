@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -80,7 +80,7 @@ template<class Type>
 static void doCorrectBoundaryConditions
 (
     bool correctBCs,
-    GeometricField<Type, fvPatchField, volMesh>& field
+    VolumeField<Type>& field
 )
 {
     if (correctBCs)
@@ -104,7 +104,7 @@ template<class Type>
 void doCorrectBoundaryConditions
 (
     bool correctBCs,
-    GeometricField<Type, pointPatchField, pointMesh>& field
+    PointField<Type>& field
 )
 {
     if (correctBCs)
@@ -119,7 +119,7 @@ template<class Type>
 void doCorrectBoundaryConditions
 (
     bool correctBCs,
-    GeometricField<Type, fvsPatchField, surfaceMesh>& field
+    SurfaceField<Type>& field
 )
 {}
 
@@ -148,15 +148,11 @@ bool Foam::functionObjects::fvExpressionField::loadAndStore(const IOobject& io)
 template<class Type>
 bool Foam::functionObjects::fvExpressionField::loadField(const IOobject& io)
 {
-    typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
-    // typedef typename VolFieldType::Internal IntVolFieldType;
-    typedef GeometricField<Type, fvsPatchField, surfaceMesh> SurfaceFieldType;
-
     return
     (
-        loadAndStore<VolFieldType>(io)
-        /// || loadAndStore<IntVolFieldType>(io)
-     || loadAndStore<SurfaceFieldType>(io)
+        loadAndStore<VolumeField<Type>>(io)
+        /// || loadAndStore<VolumeInternalField<Type>>(io)
+     || loadAndStore<SurfaceField<Type>>(io)
     );
 }
 

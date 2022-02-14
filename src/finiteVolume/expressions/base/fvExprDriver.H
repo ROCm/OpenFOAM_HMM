@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2010-2018 Bernhard Gschaider
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -166,7 +166,7 @@ protected:
         template<class Type>
         static inline word defaultBoundaryType
         (
-            const GeometricField<Type, fvPatchField, volMesh>&
+            const VolumeField<Type>&
         )
         {
             return "zeroGradient";
@@ -180,7 +180,7 @@ protected:
         template<class Type>
         static inline void correctField
         (
-            GeometricField<Type, fvPatchField, volMesh>& fld
+            VolumeField<Type>& fld
         )
         {
             fld.correctBoundaryConditions();

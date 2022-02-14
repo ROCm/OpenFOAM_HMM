@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,9 +73,9 @@ Foam::meshToMesh::procMapMethodNames_
 template<>
 void Foam::meshToMesh::mapInternalSrcToTgt
 (
-    const GeometricField<sphericalTensor, fvPatchField, volMesh>& field,
+    const VolumeField<sphericalTensor>& field,
     const plusEqOp<sphericalTensor>& cop,
-    GeometricField<sphericalTensor, fvPatchField, volMesh>& result,
+    VolumeField<sphericalTensor>& result,
     const bool secondOrder
 ) const
 {
@@ -86,9 +86,9 @@ void Foam::meshToMesh::mapInternalSrcToTgt
 template<>
 void Foam::meshToMesh::mapInternalSrcToTgt
 (
-    const GeometricField<sphericalTensor, fvPatchField, volMesh>& field,
+    const VolumeField<sphericalTensor>& field,
     const minusEqOp<sphericalTensor>& cop,
-    GeometricField<sphericalTensor, fvPatchField, volMesh>& result,
+    VolumeField<sphericalTensor>& result,
     const bool secondOrder
 ) const
 {
@@ -99,9 +99,9 @@ void Foam::meshToMesh::mapInternalSrcToTgt
 template<>
 void Foam::meshToMesh::mapInternalSrcToTgt
 (
-    const GeometricField<symmTensor, fvPatchField, volMesh>& field,
+    const VolumeField<symmTensor>& field,
     const plusEqOp<symmTensor>& cop,
-    GeometricField<symmTensor, fvPatchField, volMesh>& result,
+    VolumeField<symmTensor>& result,
     const bool secondOrder
 ) const
 {
@@ -112,9 +112,9 @@ void Foam::meshToMesh::mapInternalSrcToTgt
 template<>
 void Foam::meshToMesh::mapInternalSrcToTgt
 (
-    const GeometricField<symmTensor, fvPatchField, volMesh>& field,
+    const VolumeField<symmTensor>& field,
     const minusEqOp<symmTensor>& cop,
-    GeometricField<symmTensor, fvPatchField, volMesh>& result,
+    VolumeField<symmTensor>& result,
     const bool secondOrder
 ) const
 {
@@ -125,9 +125,9 @@ void Foam::meshToMesh::mapInternalSrcToTgt
 template<>
 void Foam::meshToMesh::mapInternalSrcToTgt
 (
-    const GeometricField<tensor, fvPatchField, volMesh>& field,
+    const VolumeField<tensor>& field,
     const plusEqOp<tensor>& cop,
-    GeometricField<tensor, fvPatchField, volMesh>& result,
+    VolumeField<tensor>& result,
     const bool secondOrder
 ) const
 {
@@ -138,9 +138,9 @@ void Foam::meshToMesh::mapInternalSrcToTgt
 template<>
 void Foam::meshToMesh::mapInternalSrcToTgt
 (
-    const GeometricField<tensor, fvPatchField, volMesh>& field,
+    const VolumeField<tensor>& field,
     const minusEqOp<tensor>& cop,
-    GeometricField<tensor, fvPatchField, volMesh>& result,
+    VolumeField<tensor>& result,
     const bool secondOrder
 ) const
 {
@@ -151,9 +151,9 @@ void Foam::meshToMesh::mapInternalSrcToTgt
 template<>
 void Foam::meshToMesh::mapInternalTgtToSrc
 (
-    const GeometricField<sphericalTensor, fvPatchField, volMesh>& field,
+    const VolumeField<sphericalTensor>& field,
     const plusEqOp<sphericalTensor>& cop,
-    GeometricField<sphericalTensor, fvPatchField, volMesh>& result,
+    VolumeField<sphericalTensor>& result,
     const bool secondOrder
 ) const
 {
@@ -164,9 +164,9 @@ void Foam::meshToMesh::mapInternalTgtToSrc
 template<>
 void Foam::meshToMesh::mapInternalTgtToSrc
 (
-    const GeometricField<sphericalTensor, fvPatchField, volMesh>& field,
+    const VolumeField<sphericalTensor>& field,
     const minusEqOp<sphericalTensor>& cop,
-    GeometricField<sphericalTensor, fvPatchField, volMesh>& result,
+    VolumeField<sphericalTensor>& result,
     const bool secondOrder
 ) const
 {
@@ -177,9 +177,9 @@ void Foam::meshToMesh::mapInternalTgtToSrc
 template<>
 void Foam::meshToMesh::mapInternalTgtToSrc
 (
-    const GeometricField<symmTensor, fvPatchField, volMesh>& field,
+    const VolumeField<symmTensor>& field,
     const plusEqOp<symmTensor>& cop,
-    GeometricField<symmTensor, fvPatchField, volMesh>& result,
+    VolumeField<symmTensor>& result,
     const bool secondOrder
 ) const
 {
@@ -190,9 +190,9 @@ void Foam::meshToMesh::mapInternalTgtToSrc
 template<>
 void Foam::meshToMesh::mapInternalTgtToSrc
 (
-    const GeometricField<symmTensor, fvPatchField, volMesh>& field,
+    const VolumeField<symmTensor>& field,
     const minusEqOp<symmTensor>& cop,
-    GeometricField<symmTensor, fvPatchField, volMesh>& result,
+    VolumeField<symmTensor>& result,
     const bool secondOrder
 ) const
 {
@@ -203,9 +203,9 @@ void Foam::meshToMesh::mapInternalTgtToSrc
 template<>
 void Foam::meshToMesh::mapInternalTgtToSrc
 (
-    const GeometricField<tensor, fvPatchField, volMesh>& field,
+    const VolumeField<tensor>& field,
     const plusEqOp<tensor>& cop,
-    GeometricField<tensor, fvPatchField, volMesh>& result,
+    VolumeField<tensor>& result,
     const bool secondOrder
 ) const
 {
@@ -216,9 +216,9 @@ void Foam::meshToMesh::mapInternalTgtToSrc
 template<>
 void Foam::meshToMesh::mapInternalTgtToSrc
 (
-    const GeometricField<tensor, fvPatchField, volMesh>& field,
+    const VolumeField<tensor>& field,
     const minusEqOp<tensor>& cop,
-    GeometricField<tensor, fvPatchField, volMesh>& result,
+    VolumeField<tensor>& result,
     const bool secondOrder
 ) const
 {

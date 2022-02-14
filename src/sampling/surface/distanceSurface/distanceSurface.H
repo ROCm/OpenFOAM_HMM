@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -130,8 +130,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef distanceSurface_H
-#define distanceSurface_H
+#ifndef Foam_distanceSurface_H
+#define Foam_distanceSurface_H
 
 #include "sampledSurface.H"
 #include "searchableSurface.H"
@@ -249,7 +249,7 @@ protected:
         template<class Type>
         tmp<Field<Type>> isoSurfaceInterpolate
         (
-            const GeometricField<Type, fvPatchField, volMesh>& cellValues,
+            const VolumeField<Type>& cellValues,
             const Field<Type>& pointValues
         ) const
         {

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -325,60 +325,48 @@ public:
 
         //- Set result (vol field)
         template<class Type>
-        void setResult
-        (
-            GeometricField<Type, fvPatchField, volMesh>* ptr,
-            bool logical = false
-        );
+        void setResult(VolumeField<Type>* ptr, bool logical = false);
 
         //- Set result (surface field)
         template<class Type>
-        void setResult
-        (
-            GeometricField<Type, fvsPatchField, surfaceMesh>* ptr,
-            bool logical = false
-        );
+        void setResult(SurfaceField<Type>* ptr, bool logical = false);
 
         //- Set result (point field)
         template<class Type>
-        void setResult
-        (
-            GeometricField<Type, pointPatchField, pointMesh>* ptr,
-            bool logical = false
-        );
+        void setResult(PointField<Type>* ptr, bool logical = false);
 
 
     // New Fields
 
         //- Return a new volume field with the mesh size
         template<class Type>
-        tmp<GeometricField<Type, fvPatchField, volMesh>>
+        tmp<VolumeField<Type>>
         newVolField(const Type& val = pTraits<Type>::zero) const;
 
         //- Return a new surface field with the mesh nInternalFaces size
         template<class Type>
-        tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
+        tmp<SurfaceField<Type>>
         newSurfaceField(const Type& val = pTraits<Type>::zero) const;
 
         //- Return a new point field with the mesh nPoints size
         template<class Type>
-        tmp<GeometricField<Type, pointPatchField, pointMesh>>
+        tmp<PointField<Type>>
         newPointField(const Type& val = pTraits<Type>::zero) const;
 
 
         //- Retrieve field (vol field)
         template<class Type>
-        tmp<GeometricField<Type, fvPatchField, volMesh>>
+        tmp<VolumeField<Type>>
         getVolField(const word& fldName, bool getOldTime=false);
 
         //- Retrieve field (surface field)
         template<class Type>
-        tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
+        tmp<SurfaceField<Type>>
         getSurfaceField(const word& fldName, bool getOldTime=false);
 
         //- Retrieve field (surface field)
         template<class Type>
-        tmp<GeometricField<Type, pointPatchField, pointMesh>>
+        tmp<PointField<Type>>
         getPointField(const word& fldName, bool getOldTime=false);
 
 
@@ -386,57 +374,39 @@ public:
 
         //- Interpolate cell to face values
         template<class Type>
-        tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
-        cellToFace
-        (
-            const GeometricField<Type,fvPatchField,volMesh>& field
-        ) const;
+        tmp<SurfaceField<Type>>
+        cellToFace(const VolumeField<Type>& field) const;
 
         //- Interpolate cell to point values
         template<class Type>
-        tmp<GeometricField<Type, pointPatchField, pointMesh>>
-        cellToPoint
-        (
-            const GeometricField<Type, fvPatchField, volMesh>& field
-        ) const;
+        tmp<PointField<Type>>
+        cellToPoint(const VolumeField<Type>& field) const;
 
         //- Interpolate point to cell values
         template<class Type>
-        tmp<GeometricField<Type, fvPatchField, volMesh>>
-        pointToCell
-        (
-            const GeometricField<Type, pointPatchField, pointMesh>& field
-        ) const;
+        tmp<VolumeField<Type>>
+        pointToCell(const PointField<Type>& field) const;
 
 
     // Custom Field Functions
 
         //- The volume-weighted average of a field
         template<class Type>
-        Type volAverage
-        (
-            GeometricField<Type, fvPatchField, volMesh>& fld
-        ) const
+        Type volAverage(VolumeField<Type>& fld) const
         {
             return weightedAverage(fld.mesh().V(), fld.primitiveField());
         }
 
         //- The volume-weighted sum of a field
         template<class Type>
-        Type volSum
-        (
-            GeometricField<Type, fvPatchField, volMesh>& fld
-        ) const
+        Type volSum(VolumeField<Type>& fld) const
         {
             return weightedSum(fld.mesh().V(), fld.primitiveField());
         }
 
         //- The area-weighted average of a field
         template<class Type>
-        Type areaAverage
-        (
-            GeometricField<Type, fvsPatchField, surfaceMesh>& fld
-        ) const
+        Type areaAverage(SurfaceField<Type>& fld) const
         {
             return weightedAverage
             (
@@ -447,10 +417,7 @@ public:
 
         //- The area-weighted sum of a field
         template<class Type>
-        Type areaSum
-        (
-            GeometricField<Type, fvsPatchField, surfaceMesh>& fld
-        ) const
+        Type areaSum(SurfaceField<Type>& fld) const
         {
             return weightedSum
             (

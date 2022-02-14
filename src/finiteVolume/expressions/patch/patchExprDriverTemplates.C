@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -118,17 +118,11 @@ Foam::expressions::patchExpr::parseDriver::getField(const word& name)
     const label patchIndex = patch_.index();
 
 
-    // Field types
-
-    typedef GeometricField<Type, fvPatchField, volMesh> vfieldType;
-    typedef GeometricField<Type, fvsPatchField, surfaceMesh> sfieldType;
-    typedef GeometricField<Type, pointPatchField, pointMesh> pfieldType;
-
     // Local, temporary storage and/or lookup values
     bool found = false;
-    tmp<vfieldType> vfield;
-    tmp<sfieldType> sfield;
-    tmp<pfieldType> pfield;
+    tmp<VolumeField<Type>> vfield;
+    tmp<SurfaceField<Type>> sfield;
+    tmp<PointField<Type>> pfield;
 
     for (int checki = 0; !found && checki < 2; ++checki)
     {
@@ -144,17 +138,17 @@ Foam::expressions::patchExpr::parseDriver::getField(const word& name)
 
         if (!found)
         {
-            vfield.cref(dynamic_cast<const vfieldType*>(ioptr));
+            vfield.cref(dynamic_cast<const VolumeField<Type>*>(ioptr));
             found = vfield.valid();
         }
         if (!found)
         {
-            sfield.cref(dynamic_cast<const sfieldType*>(ioptr));
+            sfield.cref(dynamic_cast<const SurfaceField<Type>*>(ioptr));
             found = sfield.valid();
         }
         if (!found)
         {
-            pfield.cref(dynamic_cast<const pfieldType*>(ioptr));
+            pfield.cref(dynamic_cast<const PointField<Type>*>(ioptr));
             found = pfield.valid();
         }
     }
@@ -165,17 +159,17 @@ Foam::expressions::patchExpr::parseDriver::getField(const word& name)
     {
         const word fldType = this->getTypeOfField(name);
 
-        if (fldType == vfieldType::typeName)
+        if (fldType == VolumeField<Type>::typeName)
         {
-            vfield = this->readAndRegister<vfieldType>(name, mesh());
+            vfield = this->readAndRegister<VolumeField<Type>>(name, mesh());
         }
-        else if (fldType == sfieldType::typeName)
+        else if (fldType == SurfaceField<Type>::typeName)
         {
-            sfield = this->readAndRegister<sfieldType>(name, mesh());
+            sfield = this->readAndRegister<SurfaceField<Type>>(name, mesh());
         }
-        else if (fldType == pfieldType::typeName)
+        else if (fldType == PointField<Type>::typeName)
         {
-            pfield = this->readAndRegister<pfieldType>
+            pfield = this->readAndRegister<PointField<Type>>
             (
                 name,
                 pointMesh::New(mesh())
@@ -209,16 +203,16 @@ Foam::expressions::patchExpr::parseDriver::getField(const word& name)
         << pTraits<Type>::typeName << nl << nl;
 
     FatalError
-        << vfieldType::typeName << " Fields: "
-        << flatOutput(obr.sortedNames<vfieldType>()) << nl;
+        << VolumeField<Type>::typeName << " Fields: "
+        << flatOutput(obr.sortedNames<VolumeField<Type>>()) << nl;
 
     FatalError
-        << sfieldType::typeName << " Fields: "
-        << flatOutput(obr.sortedNames<sfieldType>()) << nl;
+        << SurfaceField<Type>::typeName << " Fields: "
+        << flatOutput(obr.sortedNames<SurfaceField<Type>>()) << nl;
 
     FatalError
-        << pfieldType::typeName << " Fields: "
-        << flatOutput(obr.sortedNames<pfieldType>()) << nl;
+        << PointField<Type>::typeName << " Fields: "
+        << flatOutput(obr.sortedNames<PointField<Type>>()) << nl;
 
     FatalError
         << exit(FatalError);
@@ -245,15 +239,10 @@ Foam::expressions::patchExpr::parseDriver::patchInternalField
     const label patchIndex = patch_.index();
 
 
-    // Field types
-
-    typedef GeometricField<Type, fvPatchField, volMesh> vfieldType;
-    typedef GeometricField<Type, pointPatchField, pointMesh> pfieldType;
-
     // Local, temporary storage and/or lookup values
     bool found = false;
-    tmp<vfieldType> vfield;
-    tmp<pfieldType> pfield;
+    tmp<VolumeField<Type>> vfield;
+    tmp<PointField<Type>> pfield;
 
     for (int checki = 0; !found && checki < 2; ++checki)
     {
@@ -269,12 +258,12 @@ Foam::expressions::patchExpr::parseDriver::patchInternalField
 
         if (!found)
         {
-            vfield.cref(dynamic_cast<const vfieldType*>(ioptr));
+            vfield.cref(dynamic_cast<const VolumeField<Type>*>(ioptr));
             found = vfield.valid();
         }
         if (!found)
         {
-            pfield.cref(dynamic_cast<const pfieldType*>(ioptr));
+            pfield.cref(dynamic_cast<const PointField<Type>*>(ioptr));
             found = pfield.valid();
         }
     }
@@ -285,13 +274,13 @@ Foam::expressions::patchExpr::parseDriver::patchInternalField
     {
         const word fldType = this->getTypeOfField(name);
 
-        if (fldType == vfieldType::typeName)
+        if (fldType == VolumeField<Type>::typeName)
         {
-            vfield = this->readAndRegister<vfieldType>(name, mesh());
+            vfield = this->readAndRegister<VolumeField<Type>>(name, mesh());
         }
-        else if (fldType == pfieldType::typeName)
+        else if (fldType == PointField<Type>::typeName)
         {
-            pfield = this->readAndRegister<pfieldType>
+            pfield = this->readAndRegister<PointField<Type>>
             (
                 name,
                 pointMesh::New(mesh())
@@ -315,12 +304,12 @@ Foam::expressions::patchExpr::parseDriver::patchInternalField
         << pTraits<Type>::typeName << nl << nl;
 
     FatalError
-        << vfieldType::typeName << " Fields: "
-        << flatOutput(obr.sortedNames<vfieldType>()) << nl;
+        << VolumeField<Type>::typeName << " Fields: "
+        << flatOutput(obr.sortedNames<VolumeField<Type>>()) << nl;
 
     FatalError
-        << pfieldType::typeName << " Fields: "
-        << flatOutput(obr.sortedNames<pfieldType>()) << nl;
+        << PointField<Type>::typeName << " Fields: "
+        << flatOutput(obr.sortedNames<PointField<Type>>()) << nl;
 
     FatalError
         << exit(FatalError);
@@ -347,13 +336,9 @@ Foam::expressions::patchExpr::parseDriver::patchNeighbourField
     const label patchIndex = patch_.index();
 
 
-    // Field types
-
-    typedef GeometricField<Type, fvPatchField, volMesh> vfieldType;
-
     // Local, temporary storage and/or lookup values
     bool found = false;
-    tmp<vfieldType> vfield;
+    tmp<VolumeField<Type>> vfield;
 
     for (int checki = 0; !found && checki < 2; ++checki)
     {
@@ -369,7 +354,7 @@ Foam::expressions::patchExpr::parseDriver::patchNeighbourField
 
         if (!found)
         {
-            vfield.cref(dynamic_cast<const vfieldType*>(ioptr));
+            vfield.cref(dynamic_cast<const VolumeField<Type>*>(ioptr));
             found = vfield.valid();
         }
     }
@@ -380,9 +365,9 @@ Foam::expressions::patchExpr::parseDriver::patchNeighbourField
     {
         const word fldType = this->getTypeOfField(name);
 
-        if (fldType == vfieldType::typeName)
+        if (fldType == VolumeField<Type>::typeName)
         {
-            vfield = this->readAndRegister<vfieldType>(name, mesh());
+            vfield = this->readAndRegister<VolumeField<Type>>(name, mesh());
         }
     }
 
@@ -398,8 +383,8 @@ Foam::expressions::patchExpr::parseDriver::patchNeighbourField
         << pTraits<Type>::typeName << nl << nl;
 
     FatalError
-        << vfieldType::typeName << " Fields: "
-        << flatOutput(obr.sortedNames<vfieldType>()) << nl;
+        << VolumeField<Type>::typeName << " Fields: "
+        << flatOutput(obr.sortedNames<VolumeField<Type>>()) << nl;
 
     FatalError
         << exit(FatalError);
@@ -426,13 +411,9 @@ Foam::expressions::patchExpr::parseDriver::patchNormalField
     const label patchIndex = patch_.index();
 
 
-    // Field types
-
-    typedef GeometricField<Type, fvPatchField, volMesh> vfieldType;
-
     // Local, temporary storage and/or lookup values
     bool found = false;
-    tmp<vfieldType> vfield;
+    tmp<VolumeField<Type>> vfield;
 
     for (int checki = 0; !found && checki < 2; ++checki)
     {
@@ -448,7 +429,7 @@ Foam::expressions::patchExpr::parseDriver::patchNormalField
 
         if (!found)
         {
-            vfield.cref(dynamic_cast<const vfieldType*>(ioptr));
+            vfield.cref(dynamic_cast<const VolumeField<Type>*>(ioptr));
             found = vfield.valid();
         }
     }
@@ -459,9 +440,9 @@ Foam::expressions::patchExpr::parseDriver::patchNormalField
     {
         const word fldType = this->getTypeOfField(name);
 
-        if (fldType == vfieldType::typeName)
+        if (fldType == VolumeField<Type>::typeName)
         {
-            vfield = this->readAndRegister<vfieldType>(name, mesh());
+            vfield = this->readAndRegister<VolumeField<Type>>(name, mesh());
         }
     }
 
@@ -477,8 +458,8 @@ Foam::expressions::patchExpr::parseDriver::patchNormalField
         << pTraits<Type>::typeName << nl << nl;
 
     FatalError
-        << vfieldType::typeName << " Fields: "
-        << flatOutput(obr.sortedNames<vfieldType>()) << nl;
+        << VolumeField<Type>::typeName << " Fields: "
+        << flatOutput(obr.sortedNames<VolumeField<Type>>()) << nl;
 
     FatalError
         << exit(FatalError);

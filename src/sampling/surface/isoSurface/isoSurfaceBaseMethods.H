@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,8 +31,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef isoSurfaceBaseMethods_H
-#define isoSurfaceBaseMethods_H
+#ifndef Foam_isoSurfaceBaseMethods_H
+#define Foam_isoSurfaceBaseMethods_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -43,7 +43,7 @@ Description
 #define defineIsoSurfaceInterpolateMethod(ThisClass, Type)                     \
     Foam::tmp<Foam::Field<Type>> ThisClass::interpolate                        \
     (                                                                          \
-        const GeometricField<Type, fvPatchField, volMesh>& cellValues,         \
+        const VolumeField<Type>& cellValues,                                   \
         const Field<Type>& pointValues                                         \
     ) const                                                                    \
     {                                                                          \

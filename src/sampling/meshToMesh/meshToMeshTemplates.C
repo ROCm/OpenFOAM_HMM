@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2015 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -472,9 +472,9 @@ Foam::tmp<Foam::Field<Type>> Foam::meshToMesh::mapTgtToSrc
 template<class Type, class CombineOp>
 void Foam::meshToMesh::mapInternalSrcToTgt
 (
-    const GeometricField<Type, fvPatchField, volMesh>& field,
+    const VolumeField<Type>& field,
     const CombineOp& cop,
-    GeometricField<Type, fvPatchField, volMesh>& result,
+    VolumeField<Type>& result,
     const bool secondOrder
 ) const
 {
@@ -519,9 +519,9 @@ void Foam::meshToMesh::mapAndOpSrcToTgt
 template<class Type, class CombineOp>
 void Foam::meshToMesh::mapSrcToTgt
 (
-    const GeometricField<Type, fvPatchField, volMesh>& field,
+    const VolumeField<Type>& field,
     const CombineOp& cop,
-    GeometricField<Type, fvPatchField, volMesh>& result,
+    VolumeField<Type>& result,
     const bool secondOrder
 ) const
 {
@@ -529,8 +529,7 @@ void Foam::meshToMesh::mapSrcToTgt
 
     const PtrList<AMIPatchToPatchInterpolation>& AMIList = patchAMIs();
 
-    typename GeometricField<Type, fvPatchField, volMesh>::
-        Boundary& resultBf = result.boundaryFieldRef();
+    auto& resultBf = result.boundaryFieldRef();
 
     forAll(AMIList, i)
     {
@@ -581,21 +580,18 @@ void Foam::meshToMesh::mapSrcToTgt
 
 
 template<class Type, class CombineOp>
-Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
+Foam::tmp<Foam::VolumeField<Type>>
 Foam::meshToMesh::mapSrcToTgt
 (
-    const GeometricField<Type, fvPatchField, volMesh>& field,
+    const VolumeField<Type>& field,
     const CombineOp& cop,
     const bool secondOrder
 ) const
 {
-    typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
-
     const fvMesh& tgtMesh = static_cast<const fvMesh&>(tgtRegion_);
 
     const fvBoundaryMesh& tgtBm = tgtMesh.boundary();
-    const typename fieldType::Boundary& srcBfld =
-        field.boundaryField();
+    const auto& srcBfld = field.boundaryField();
 
     PtrList<fvPatchField<Type>> tgtPatchFields(tgtBm.size());
 
@@ -646,9 +642,8 @@ Foam::meshToMesh::mapSrcToTgt
         }
     }
 
-    tmp<fieldType> tresult
-    (
-        new fieldType
+    auto tresult =
+        tmp<VolumeField<Type>>::New
         (
             IOobject
             (
@@ -662,8 +657,7 @@ Foam::meshToMesh::mapSrcToTgt
             field.dimensions(),
             Field<Type>(tgtMesh.nCells(), Zero),
             tgtPatchFields
-        )
-    );
+        );
 
     mapSrcToTgt(field, cop, tresult.ref(), secondOrder);
 
@@ -672,10 +666,10 @@ Foam::meshToMesh::mapSrcToTgt
 
 
 template<class Type, class CombineOp>
-Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
+Foam::tmp<Foam::VolumeField<Type>>
 Foam::meshToMesh::mapSrcToTgt
 (
-    const tmp<GeometricField<Type, fvPatchField, volMesh>>& tfield,
+    const tmp<VolumeField<Type>>& tfield,
     const CombineOp& cop,
     const bool secondOrder
 ) const
@@ -685,10 +679,10 @@ Foam::meshToMesh::mapSrcToTgt
 
 
 template<class Type>
-Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
+Foam::tmp<Foam::VolumeField<Type>>
 Foam::meshToMesh::mapSrcToTgt
 (
-    const GeometricField<Type, fvPatchField, volMesh>& field,
+    const VolumeField<Type>& field,
     const bool secondOrder
 ) const
 {
@@ -697,10 +691,10 @@ Foam::meshToMesh::mapSrcToTgt
 
 
 template<class Type>
-Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
+Foam::tmp<Foam::VolumeField<Type>>
 Foam::meshToMesh::mapSrcToTgt
 (
-    const tmp<GeometricField<Type, fvPatchField, volMesh>>& tfield,
+    const tmp<VolumeField<Type>>& tfield,
     const bool secondOrder
 ) const
 {
@@ -711,9 +705,9 @@ Foam::meshToMesh::mapSrcToTgt
 template<class Type, class CombineOp>
 void Foam::meshToMesh::mapInternalTgtToSrc
 (
-    const GeometricField<Type, fvPatchField, volMesh>& field,
+    const VolumeField<Type>& field,
     const CombineOp& cop,
-    GeometricField<Type, fvPatchField, volMesh>& result,
+    VolumeField<Type>& result,
     const bool secondOrder
 ) const
 {
@@ -758,9 +752,9 @@ void Foam::meshToMesh::mapAndOpTgtToSrc
 template<class Type, class CombineOp>
 void Foam::meshToMesh::mapTgtToSrc
 (
-    const GeometricField<Type, fvPatchField, volMesh>& field,
+    const VolumeField<Type>& field,
     const CombineOp& cop,
-    GeometricField<Type, fvPatchField, volMesh>& result,
+    VolumeField<Type>& result,
     const bool secondOrder
 ) const
 {
@@ -817,21 +811,18 @@ void Foam::meshToMesh::mapTgtToSrc
 
 
 template<class Type, class CombineOp>
-Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
+Foam::tmp<Foam::VolumeField<Type>>
 Foam::meshToMesh::mapTgtToSrc
 (
-    const GeometricField<Type, fvPatchField, volMesh>& field,
+    const VolumeField<Type>& field,
     const CombineOp& cop,
     const bool secondOrder
 ) const
 {
-    typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
-
     const fvMesh& srcMesh = static_cast<const fvMesh&>(srcRegion_);
 
     const fvBoundaryMesh& srcBm = srcMesh.boundary();
-    const typename fieldType::Boundary& tgtBfld =
-        field.boundaryField();
+    const auto& tgtBfld = field.boundaryField();
 
     PtrList<fvPatchField<Type>> srcPatchFields(srcBm.size());
 
@@ -882,9 +873,8 @@ Foam::meshToMesh::mapTgtToSrc
         }
     }
 
-    tmp<fieldType> tresult
-    (
-        new fieldType
+    auto tresult =
+        tmp<VolumeField<Type>>::New
         (
             IOobject
             (
@@ -898,8 +888,7 @@ Foam::meshToMesh::mapTgtToSrc
             field.dimensions(),
             Field<Type>(srcMesh.nCells(), Zero),
             srcPatchFields
-        )
-    );
+        );
 
     mapTgtToSrc(field, cop, tresult.ref(), secondOrder);
 
@@ -908,10 +897,10 @@ Foam::meshToMesh::mapTgtToSrc
 
 
 template<class Type, class CombineOp>
-Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
+Foam::tmp<Foam::VolumeField<Type>>
 Foam::meshToMesh::mapTgtToSrc
 (
-    const tmp<GeometricField<Type, fvPatchField, volMesh>>& tfield,
+    const tmp<VolumeField<Type>>& tfield,
     const CombineOp& cop,
     const bool secondOrder
 ) const
@@ -921,10 +910,10 @@ Foam::meshToMesh::mapTgtToSrc
 
 
 template<class Type>
-Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
+Foam::tmp<Foam::VolumeField<Type>>
 Foam::meshToMesh::mapTgtToSrc
 (
-    const GeometricField<Type, fvPatchField, volMesh>& field,
+    const VolumeField<Type>& field,
     const bool secondOrder
 ) const
 {
@@ -933,10 +922,10 @@ Foam::meshToMesh::mapTgtToSrc
 
 
 template<class Type>
-Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
+Foam::tmp<Foam::VolumeField<Type>>
 Foam::meshToMesh::mapTgtToSrc
 (
-    const tmp<GeometricField<Type, fvPatchField, volMesh>>& tfield,
+    const tmp<VolumeField<Type>>& tfield,
     const bool secondOrder
 ) const
 {

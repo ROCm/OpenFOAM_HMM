@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,7 +61,7 @@ template<class Type, class CombineOp>
 void Foam::meshToMesh0::interpolateField
 (
     Field<Type>& toF,
-    const GeometricField<Type, fvPatchField, volMesh>& fromVf,
+    const VolumeField<Type>& fromVf,
     const labelListList& adr,
     const scalarListList& weights,
     const CombineOp& cop
@@ -87,7 +88,7 @@ template<class Type, class CombineOp>
 void Foam::meshToMesh0::interpolateField
 (
     Field<Type>& toF,
-    const GeometricField<Type, fvPatchField, volMesh>& fromVf,
+    const VolumeField<Type>& fromVf,
     const labelList& adr,
     const scalarListList& weights,
     const CombineOp& cop
@@ -122,7 +123,7 @@ template<class Type, class CombineOp>
 void Foam::meshToMesh0::interpolateField
 (
     Field<Type>& toF,
-    const GeometricField<Type, fvPatchField, volMesh>& fromVf,
+    const VolumeField<Type>& fromVf,
     const labelList& adr,
     const vectorField& centres,
     const CombineOp& cop
@@ -153,7 +154,7 @@ template<class Type, class CombineOp>
 void Foam::meshToMesh0::interpolateInternalField
 (
     Field<Type>& toF,
-    const GeometricField<Type, fvPatchField, volMesh>& fromVf,
+    const VolumeField<Type>& fromVf,
     meshToMesh0::order ord,
     const CombineOp& cop
 ) const
@@ -234,7 +235,7 @@ template<class Type, class CombineOp>
 void Foam::meshToMesh0::interpolateInternalField
 (
     Field<Type>& toF,
-    const tmp<GeometricField<Type, fvPatchField, volMesh>>& tfromVf,
+    const tmp<VolumeField<Type>>& tfromVf,
     meshToMesh0::order ord,
     const CombineOp& cop
 ) const
@@ -247,16 +248,15 @@ void Foam::meshToMesh0::interpolateInternalField
 template<class Type, class CombineOp>
 void Foam::meshToMesh0::interpolate
 (
-    GeometricField<Type, fvPatchField, volMesh>& toVf,
-    const GeometricField<Type, fvPatchField, volMesh>& fromVf,
+    VolumeField<Type>& toVf,
+    const VolumeField<Type>& fromVf,
     meshToMesh0::order ord,
     const CombineOp& cop
 ) const
 {
     interpolateInternalField(toVf, fromVf, ord, cop);
 
-    typename GeometricField<Type, fvPatchField, volMesh>::
-        Boundary& toVfBf = toVf.boundaryFieldRef();
+    auto& toVfBf = toVf.boundaryFieldRef();
 
     forAll(toMesh_.boundaryMesh(), patchi)
     {
@@ -346,8 +346,8 @@ void Foam::meshToMesh0::interpolate
 template<class Type, class CombineOp>
 void Foam::meshToMesh0::interpolate
 (
-    GeometricField<Type, fvPatchField, volMesh>& toVf,
-    const tmp<GeometricField<Type, fvPatchField, volMesh>>& tfromVf,
+    VolumeField<Type>& toVf,
+    const tmp<VolumeField<Type>>& tfromVf,
     meshToMesh0::order ord,
     const CombineOp& cop
 ) const
@@ -358,10 +358,10 @@ void Foam::meshToMesh0::interpolate
 
 
 template<class Type, class CombineOp>
-Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
+Foam::tmp<Foam::VolumeField<Type>>
 Foam::meshToMesh0::interpolate
 (
-    const GeometricField<Type, fvPatchField, volMesh>& fromVf,
+    const VolumeField<Type>& fromVf,
     meshToMesh0::order ord,
     const CombineOp& cop
 ) const
@@ -406,9 +406,8 @@ Foam::meshToMesh0::interpolate
 
 
     // Create the complete field from the pieces
-    tmp<GeometricField<Type, fvPatchField, volMesh>> ttoF
-    (
-        new GeometricField<Type, fvPatchField, volMesh>
+    return
+        tmp<VolumeField<Type>>::New
         (
             IOobject
             (
@@ -422,24 +421,20 @@ Foam::meshToMesh0::interpolate
             fromVf.dimensions(),
             internalField,
             patchFields
-        )
-    );
-
-    return ttoF;
+        );
 }
 
 
 template<class Type, class CombineOp>
-Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
+Foam::tmp<Foam::VolumeField<Type>>
 Foam::meshToMesh0::interpolate
 (
-    const tmp<GeometricField<Type, fvPatchField, volMesh>>& tfromVf,
+    const tmp<VolumeField<Type>>& tfromVf,
     meshToMesh0::order ord,
     const CombineOp& cop
 ) const
 {
-    tmp<GeometricField<Type, fvPatchField, volMesh>> tint =
-        interpolate(tfromVf(), ord, cop);
+    tmp<VolumeField<Type>> tint = interpolate(tfromVf(), ord, cop);
     tfromVf.clear();
 
     return tint;

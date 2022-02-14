@@ -125,15 +125,15 @@ Foam::sampledSurface::sampleOnPoints
 
 
 template<class Type>
-Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
+Foam::tmp<Foam::VolumeField<Type>>
 Foam::sampledSurface::pointAverage
 (
-    const GeometricField<Type, pointPatchField, pointMesh>& pfld
+    const PointField<Type>& pfld
 )
 {
     const fvMesh& mesh = dynamic_cast<const fvMesh&>(pfld.mesh()());
 
-    auto tcellAvg = tmp<GeometricField<Type, fvPatchField, volMesh>>::New
+    auto tcellAvg = tmp<VolumeField<Type>>::New
     (
         IOobject
         (

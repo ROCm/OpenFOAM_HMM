@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -93,8 +93,8 @@ Foam::sampledIsoSurface::sampleOnIsoSurfacePoints
     // Assume volPointInterpolation for the point field!
     const auto& volFld = interpolator.psi();
 
-    tmp<GeometricField<Type, fvPatchField, volMesh>> tvolFld(volFld);
-    tmp<GeometricField<Type, pointPatchField, pointMesh>> tpointFld;
+    tmp<VolumeField<Type>> tvolFld(volFld);
+    tmp<PointField<Type>> tpointFld;
 
     if (subMeshPtr_)
     {

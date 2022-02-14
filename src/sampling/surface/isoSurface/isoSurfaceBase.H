@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,8 +40,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef isoSurfaceBase_H
-#define isoSurfaceBase_H
+#ifndef Foam_isoSurfaceBase_H
+#define Foam_isoSurfaceBase_H
 
 #include "isoSurfaceParams.H"
 #include "bitSet.H"
@@ -139,7 +139,7 @@ protected:
         template<class Type>
         tmp<Field<Type>> interpolateTemplate
         (
-            const GeometricField<Type, fvPatchField, volMesh>& cellValues,
+            const VolumeField<Type>& cellValues,
             const Field<Type>& pointValues
         ) const
         {
@@ -274,7 +274,7 @@ public:
         virtual tmp<Field<Type>>                                               \
         interpolate                                                            \
         (                                                                      \
-            const GeometricField<Type, fvPatchField, volMesh>& cellValues,     \
+            const VolumeField<Type>& cellValues,                               \
             const Field<Type>& pointValues                                     \
         ) const;
 
