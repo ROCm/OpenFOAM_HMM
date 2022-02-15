@@ -169,6 +169,9 @@ private:
         //- Polyhedral decomposition requested
         bool decompose_;
 
+        //- Manifold cells detected
+        bool manifold_;
+
         //- How the mesh cells have been selected or defined
         selectionModeType selectionMode_;
 
@@ -343,6 +346,9 @@ public:
 
         //- Query the decompose flag (normally off)
         inline bool decompose() const noexcept;
+
+        //- Manifold mesh cells detected? Globally consistent quantity.
+        inline bool manifold() const noexcept;
 
         //- Query how the mesh cells have been selected or defined
         inline selectionModeType selectionMode() const noexcept;

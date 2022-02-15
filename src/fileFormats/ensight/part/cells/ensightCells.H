@@ -89,6 +89,9 @@ private:
 
     // Private Data
 
+        //- Manifold cells detected
+        bool manifold_;
+
         //- Begin/end offsets for address of each element type
         FixedList<label, nTypes+1> offsets_;
 
@@ -165,6 +168,9 @@ public:
     // Member Functions
 
     // Access
+
+        //- Manifold mesh cells detected? Globally consistent quantity.
+        inline bool manifold() const noexcept;
 
         //- Processor-local size of all elements.
         using ensightPart::size;

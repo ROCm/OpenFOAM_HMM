@@ -31,6 +31,7 @@ License
 #include "face.H"
 #include "polyMesh.H"
 #include "ListOps.H"
+#include "manifoldCellsMeshObject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -80,7 +81,8 @@ Foam::labelList Foam::ensightOutput::Detail::getPolysNFaces
     const labelUList& addr
 )
 {
-    const cellList& meshCells = mesh.cells();
+    ///const cellList& meshCells = mesh.cells();
+    const cellList& meshCells = manifoldCellsMeshObject::New(mesh).cells();
 
     labelList list(addr.size());
 
@@ -103,7 +105,8 @@ Foam::labelList Foam::ensightOutput::Detail::getPolysNPointsPerFace
     const labelUList& addr
 )
 {
-    const cellList& meshCells = mesh.cells();
+    ///const cellList& meshCells = mesh.cells();
+    const cellList& meshCells = manifoldCellsMeshObject::New(mesh).cells();
     const faceList& meshFaces = mesh.faces();
 
     // Count the number of faces per element
@@ -211,7 +214,8 @@ Foam::ensightOutput::Detail::getPolysFacePoints
     const labelList& pointMap
 )
 {
-    const cellList& meshCells = mesh.cells();
+    ///const cellList& meshCells = mesh.cells();
+    const cellList& meshCells = manifoldCellsMeshObject::New(mesh).cells();
     const faceList& meshFaces = mesh.faces();
     const labelList& owner = mesh.faceOwner();
 
@@ -286,7 +290,8 @@ void Foam::ensightOutput::writePolysPoints
     const labelList& pointMap
 )
 {
-    const cellList& meshCells = mesh.cells();
+    ///const cellList& meshCells = mesh.cells();
+    const cellList& meshCells = manifoldCellsMeshObject::New(mesh).cells();
     const faceList& meshFaces = mesh.faces();
     const labelList& owner = mesh.faceOwner();
 

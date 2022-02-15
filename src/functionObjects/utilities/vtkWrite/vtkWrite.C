@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -347,15 +347,18 @@ bool Foam::functionObjects::vtkWrite::write()
 
         if (doInternal_)
         {
-            if (interpolate_)
-            {
-                pInterp.reset(new volPointInterpolation(meshProxy.mesh()));
-            }
-
             if (vtuMeshCells.empty())
             {
                 // Use the appropriate mesh (baseMesh or subMesh)
                 vtuMeshCells.reset(meshProxy.mesh());
+
+                if (interpolate_ && vtuMeshCells.manifold())
+                {
+                    interpolate_ = false;
+                    WarningInFunction
+                        << "Manifold cells detected - disabling PointData"
+                        << endl;
+                }
             }
 
             internalWriter = autoPtr<vtk::internalWriter>::New
@@ -385,6 +388,11 @@ bool Foam::functionObjects::vtkWrite::write()
 
             internalWriter->writeTimeValue(timeValue);
             internalWriter->writeGeometry();
+
+            if (interpolate_)
+            {
+                pInterp.reset(new volPointInterpolation(meshProxy.mesh()));
+            }
         }
 
 

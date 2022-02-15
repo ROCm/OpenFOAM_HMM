@@ -86,6 +86,17 @@ Description
         {
             // Use the appropriate mesh (baseMesh or subMesh)
             vtuMeshCells.reset(meshProxy.mesh());
+
+            if (doPointValues && vtuMeshCells.manifold())
+            {
+                doPointValues = false;
+                nPointFields = 0;
+                Warning
+                    << nl
+                    << "Manifold cells detected (eg, AMI) - disabling PointData"
+                    << nl
+                    << endl;
+            }
         }
 
         internalWriter = autoPtr<vtk::internalWriter>::New

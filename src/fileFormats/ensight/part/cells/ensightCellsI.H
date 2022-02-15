@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,6 +39,12 @@ inline Foam::label Foam::ensightCells::add(const elemType etype, label id)
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+inline bool Foam::ensightCells::manifold() const noexcept
+{
+    return manifold_;
+}
+
 
 inline const char* Foam::ensightCells::key(const elemType etype)
 {

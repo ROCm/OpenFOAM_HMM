@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,7 @@ License
 #include "foamVtkCore.H"
 #include "polyMesh.H"
 #include "cellShape.H"
+#include "manifoldCellsMeshObject.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -229,6 +230,9 @@ void Foam::vtk::vtuSizing::populateArrays
     const cellModel& tetWedge = cellModel::ref(cellModel::TETWEDGE);
 
     const cellShapeList& shapes = mesh.cellShapes();
+    ///const cellList& meshCells = mesh.cells();
+    const cellList& meshCells = manifoldCellsMeshObject::New(mesh).cells();
+    const faceList& meshFaces = mesh.faces();
 
     // The face owner is needed to determine the face orientation
     const labelList& owner = mesh.faceOwner();
@@ -451,11 +455,11 @@ void Foam::vtk::vtuSizing::populateArrays
             // Whether to insert cell in place of original or not.
             bool firstCell = true;
 
-            const labelList& cFaces = mesh.cells()[celli];
+            const labelList& cFaces = meshCells[celli];
 
             for (const label facei : cFaces)
             {
-                const face& f = mesh.faces()[facei];
+                const face& f = meshFaces[facei];
                 const bool isOwner = (owner[facei] == celli);
 
                 // Count triangles/quads in decomposition
@@ -579,7 +583,8 @@ void Foam::vtk::vtuSizing::populateArrays
             // face-stream
             //   [nFaces, nFace0Pts, id1, id2, ..., nFace1Pts, id1, id2, ...]
             cellTypes[cellIndex] = vtk::cellType::VTK_POLYHEDRON;
-            const labelList& cFaces = mesh.cells()[celli];
+
+            const labelList& cFaces = meshCells[celli];
 
             const label startLabel = faceIndexer;
 

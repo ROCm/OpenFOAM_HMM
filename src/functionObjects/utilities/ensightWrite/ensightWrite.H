@@ -98,7 +98,6 @@ Description
         directory   | The output directory name     | no | postProcessing/NAME
         overwrite   | Remove existing directory             | no  | false
         consecutive | Consecutive output numbering          | no  | false
-        nodeValues  | Write values at nodes                 | no  | false
     \endtable
 
     \heading Output Selection

@@ -30,6 +30,7 @@ License
 #include "bitSet.H"
 #include "polyMesh.H"
 #include "cellModel.H"
+#include "manifoldCellsMeshObject.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -78,6 +79,7 @@ void Foam::ensightCells::resizeAll()
 Foam::ensightCells::ensightCells()
 :
     ensightPart(),
+    manifold_(false),
     offsets_(Zero),
     sizes_(Zero)
 {}
@@ -123,6 +125,7 @@ void Foam::ensightCells::clear()
 
     ensightPart::clear();
 
+    manifold_ = false;
     sizes_ = Zero;
     offsets_ = Zero;
 }
@@ -166,6 +169,8 @@ void Foam::ensightCells::classifyImpl
     const Addressing& cellIds
 )
 {
+    manifold_ = manifoldCellsMeshObject::New(mesh).manifold();
+
     // References to cell shape models
     const cellModel& tet   = cellModel::ref(cellModel::TET);
     const cellModel& pyr   = cellModel::ref(cellModel::PYR);

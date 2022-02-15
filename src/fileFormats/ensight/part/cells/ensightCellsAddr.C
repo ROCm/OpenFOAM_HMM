@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,23 +30,26 @@ License
 #include "globalIndex.H"
 #include "globalMeshData.H"
 #include "ListOps.H"
+#include "manifoldCellsMeshObject.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 Foam::Map<Foam::label>
 Foam::ensightCells::meshPointMap(const polyMesh& mesh) const
 {
-    const label nEstimate = 8*this->size();
+    ///const cellList& meshCells = mesh.cells();
+    const cellList& meshCells = manifoldCellsMeshObject::New(mesh).cells();
+    const faceList& meshFaces = mesh.faces();
 
-    Map<label> pointMap(nEstimate);
+    Map<label> pointMap(8*this->size());
 
     // Pass 1: markup used points from cells
 
     for (const label celli : this->cellIds())
     {
-        for (const label facei : mesh.cells()[celli])
+        for (const label facei : meshCells[celli])
         {
-            for (const label pointi : mesh.faces()[facei])
+            for (const label pointi : meshFaces[facei])
             {
                 pointMap.insert(pointi, 0);
             }
@@ -72,6 +75,9 @@ Foam::label Foam::ensightCells::meshPointMapppings
     bool parallel
 ) const
 {
+    ///const cellList& meshCells = mesh.cells();
+    const cellList& meshCells = manifoldCellsMeshObject::New(mesh).cells();
+
     labelList pointToGlobal;
 
     const bool rewritePointMap = notNull(pointToGlobalRequest);
@@ -177,7 +183,7 @@ Foam::label Foam::ensightCells::meshPointMapppings
 
             for (const label celli : this->cellIds())
             {
-                for (const label facei : mesh.cells()[celli])
+                for (const label facei : meshCells[celli])
                 {
                     for (const label pointi : mesh.faces()[facei])
                     {

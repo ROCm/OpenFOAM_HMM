@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +32,12 @@ License
 inline bool Foam::vtk::vtuSizing::decompose() const noexcept
 {
     return decompose_;
+}
+
+
+inline bool Foam::vtk::vtuSizing::manifold() const noexcept
+{
+    return manifold_;
 }
 
 

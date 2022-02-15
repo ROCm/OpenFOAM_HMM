@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,7 @@ License
 #include "foamVtkCore.H"
 #include "polyMesh.H"
 #include "cellShape.H"
+#include "manifoldCellsMeshObject.H"
 
 // Only used in this file
 #include "foamVtuSizingImpl.C"
@@ -222,6 +223,7 @@ Foam::vtk::vtuSizing::vtuSizing
 void Foam::vtk::vtuSizing::clear() noexcept
 {
     decompose_   = false;
+    manifold_    = false;
     selectionMode_ = FULL_MESH;
     nCells_      = 0;
     nPoints_     = 0;
@@ -263,6 +265,9 @@ void Foam::vtk::vtuSizing::reset
     const cellModel& tetWedge = cellModel::ref(cellModel::TETWEDGE);
 
     const cellShapeList& shapes = mesh.cellShapes();
+    ///const cellList& meshCells = mesh.cells();
+    const cellList& meshCells = manifoldCellsMeshObject::New(mesh).cells();
+    const faceList& meshFaces = mesh.faces();
 
     // Unique vertex labels per polyhedral
     labelHashSet hashUniqId(2*256);
@@ -284,6 +289,9 @@ void Foam::vtk::vtuSizing::reset
         decompose_  = decompose;  // Disallow decomposition
         selectionMode_ = selectionModeType::FULL_MESH;
     }
+
+    // Manifold cells detected?
+    manifold_ = manifoldCellsMeshObject::New(mesh).manifold();
 
     const label nInputCells =
     (
@@ -337,10 +345,10 @@ void Foam::vtk::vtuSizing::reset
             // Count vertices into first decomposed cell
             bool first = true;
 
-            const cell& cFaces = mesh.cells()[celli];
+            const cell& cFaces = meshCells[celli];
             for (const label facei : cFaces)
             {
-                const face& f = mesh.faces()[facei];
+                const face& f = meshFaces[facei];
 
                 // Face decomposed into triangles and quads
                 // Tri -> Tet, Quad -> Pyr
@@ -365,7 +373,7 @@ void Foam::vtk::vtuSizing::reset
         {
             // Polyhedral: Not decomposed
 
-            const labelList& cFaces = mesh.cells()[celli];
+            const labelList& cFaces = meshCells[celli];
 
             // Unique node ids used (XML/INTERNAL, not needed for LEGACY)
             hashUniqId.clear();
@@ -376,7 +384,7 @@ void Foam::vtk::vtuSizing::reset
 
             for (const label facei : cFaces)
             {
-                const face& f = mesh.faces()[facei];
+                const face& f = meshFaces[facei];
                 nFaceLabels_ += f.size();
 
                 hashUniqId.insert(f);
@@ -411,6 +419,8 @@ void Foam::vtk::vtuSizing::resetShapes
     const cellModel& hex      = cellModel::ref(cellModel::HEX);
 
     decompose_ = false;  // Disallow decomposition
+    manifold_ = false;   // Assume no manifold cells possible
+
     selectionMode_ = SHAPE_MESH;
 
     const label nInputCells = shapes.size();
