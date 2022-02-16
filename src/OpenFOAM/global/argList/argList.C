@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1354,15 +1354,15 @@ void Foam::argList::parse
 
                 // Disable any parallel comms happening inside the fileHandler
                 // since we are on master. This can happen e.g. inside
-                // the masterUncollated/collated handler.
+                // the masterUncollated/collated handler. Note that we
+                // also have to protect the actual dictionary parsing since
+                // it might trigger file access (e.g. #include, #codeStream)
                 const bool oldParRun = Pstream::parRun(false);
 
                 autoPtr<ISstream> dictStream
                 (
                     fileHandler().NewIFstream(source)
                 );
-
-                Pstream::parRun(oldParRun);  // Restore parallel state
 
                 if (dictStream && dictStream->good())
                 {
@@ -1411,6 +1411,8 @@ void Foam::argList::parse
                             << exit(FatalError);
                     }
                 }
+
+                Pstream::parRun(oldParRun);  // Restore parallel state
 
                 if (Pstream::nProcs() == 1)
                 {
