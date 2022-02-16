@@ -141,7 +141,7 @@ void Foam::functionObjects::externalCoupled::readColumns
                             << "Trying to read data for processor " << proci
                             << " row " << rowi
                             << ". Does your file have as many rows as there are"
-                            << " patch faces (" << globalFaces.size()
+                            << " patch faces (" << globalFaces.totalSize()
                             << ") ?" << exit(FatalIOError);
                     }
 
@@ -206,7 +206,7 @@ void Foam::functionObjects::externalCoupled::readLines
                             << "Trying to read data for processor " << proci
                             << " row " << rowi
                             << ". Does your file have as many rows as there are"
-                            << " patch faces (" << globalFaces.size()
+                            << " patch faces (" << globalFaces.totalSize()
                             << ") ?" << exit(FatalIOError);
                     }
 

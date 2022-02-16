@@ -39,8 +39,15 @@ void Foam::globalIndex::reportOverflowAndExit
 {
     FatalErrorInFunction
         << "Overflow : sum of sizes exceeds labelMax ("
-        << labelMax << ") after index " << idx << " of "
-        << flatOutput(localSizes) << nl
+        << labelMax << ") after index " << idx;
+
+    if (!localSizes.empty())
+    {
+        FatalError << " of " << flatOutput(localSizes);
+    }
+
+    FatalError
+        << nl
         << "Please recompile with larger datatype for label." << nl
         << exit(FatalError);
 }

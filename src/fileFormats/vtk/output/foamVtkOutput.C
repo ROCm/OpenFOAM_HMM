@@ -135,7 +135,7 @@ void Foam::vtk::writeListParallel
     if (Pstream::master())
     {
         // Write master data - with value offset
-        const label offsetId = procOffset.offset(0);
+        const label offsetId = procOffset.localStart(0);
         for (const label val : values)
         {
             vtk::write(fmt, val + offsetId);
@@ -156,7 +156,7 @@ void Foam::vtk::writeListParallel
             );
 
             // With value offset
-            const label offsetId = procOffset.offset(proci);
+            const label offsetId = procOffset.localStart(proci);
             for (const label val : recvData)
             {
                 vtk::write(fmt, val + offsetId);

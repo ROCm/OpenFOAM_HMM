@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,15 +55,15 @@ Foam::label Foam::metisLikeDecomp::decomposeGeneral
         Info<< type() << "Decomp : running in parallel."
             << " Decomposing all of graph on master processor." << endl;
     }
-    globalIndex globalCells(xadj.size()-1);
+    const globalIndex globalCells(xadj.size()-1);
     label nTotalConnections = returnReduce(adjncy.size(), sumOp<label>());
 
     // Send all to master. Use scheduled to save some storage.
     if (Pstream::master())
     {
         List<label> allAdjncy(nTotalConnections);
-        List<label> allXadj(globalCells.size()+1);
-        List<scalar> allWeights(globalCells.size());
+        List<label> allXadj(globalCells.totalSize()+1);
+        List<scalar> allWeights(globalCells.totalSize());
 
         // Insert my own
         label nTotalCells = 0;
@@ -117,7 +117,7 @@ Foam::label Foam::metisLikeDecomp::decomposeGeneral
             (
                 allDecomp,
                 globalCells.localSize(slave),
-                globalCells.offset(slave)
+                globalCells.localStart(slave)
             );
         }
 

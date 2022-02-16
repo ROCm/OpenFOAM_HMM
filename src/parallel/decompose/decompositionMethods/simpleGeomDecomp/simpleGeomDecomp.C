@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -342,7 +342,7 @@ Foam::labelList Foam::simpleGeomDecomp::decompose
         // Collect all points on master
         if (Pstream::master())
         {
-            pointField allPoints(globalNumbers.size());
+            pointField allPoints(globalNumbers.totalSize());
 
             label nTotalPoints = 0;
             // Master first
@@ -374,7 +374,7 @@ Foam::labelList Foam::simpleGeomDecomp::decompose
                 (
                     finalDecomp,
                     globalNumbers.localSize(subproci),
-                    globalNumbers.offset(subproci)
+                    globalNumbers.localStart(subproci)
                 );
             }
             // Get my own part
@@ -425,8 +425,8 @@ Foam::labelList Foam::simpleGeomDecomp::decompose
         // Collect all points on master
         if (Pstream::master())
         {
-            pointField allPoints(globalNumbers.size());
-            scalarField allWeights(allPoints.size());
+            pointField allPoints(globalNumbers.totalSize());
+            scalarField allWeights(globalNumbers.totalSize());
 
             label nTotalPoints = 0;
             // Master first
@@ -466,7 +466,7 @@ Foam::labelList Foam::simpleGeomDecomp::decompose
                 (
                     finalDecomp,
                     globalNumbers.localSize(subproci),
-                    globalNumbers.offset(subproci)
+                    globalNumbers.localStart(subproci)
                 );
             }
             // Get my own part

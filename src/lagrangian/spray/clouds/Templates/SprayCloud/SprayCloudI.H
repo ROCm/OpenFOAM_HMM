@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -92,7 +92,7 @@ inline Foam::scalar Foam::SprayCloud<CloudType>::penetration
 
     const label nParcel = this->size();
     globalIndex globalParcels(nParcel);
-    const label nParcelSum = globalParcels.size();
+    const label nParcelSum = globalParcels.totalSize();
 
     if (nParcelSum == 0)
     {
@@ -139,7 +139,7 @@ inline Foam::scalar Foam::SprayCloud<CloudType>::penetration
             (
                 allMass,
                 globalParcels.localSize(proci),
-                globalParcels.offset(proci)
+                globalParcels.localStart(proci)
             ) = procMass[proci];
 
             // flatten the distance list
@@ -147,7 +147,7 @@ inline Foam::scalar Foam::SprayCloud<CloudType>::penetration
             (
                 allDist,
                 globalParcels.localSize(proci),
-                globalParcels.offset(proci)
+                globalParcels.localStart(proci)
             ) = procDist[proci];
         }
 

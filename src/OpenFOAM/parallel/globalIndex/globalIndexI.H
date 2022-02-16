@@ -187,12 +187,6 @@ inline const Foam::labelUList Foam::globalIndex::localStarts() const
 }
 
 
-inline Foam::label Foam::globalIndex::offset(const label proci) const
-{
-    return offsets_[proci];
-}
-
-
 inline Foam::label Foam::globalIndex::localStart(const label proci) const
 {
     return offsets_[proci];
@@ -337,7 +331,7 @@ inline Foam::label Foam::globalIndex::toLocal(const label i) const
 
 inline Foam::label Foam::globalIndex::whichProcID(const label i) const
 {
-    if (i < 0 || i >= size())
+    if (i < 0 || i >= totalSize())
     {
         FatalErrorInFunction
             << "Global " << i << " does not belong on any processor."

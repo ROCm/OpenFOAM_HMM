@@ -452,7 +452,7 @@ public:
             //- Range of global indices that can be returned.
             virtual label globalSize() const
             {
-                return globalTris().size();
+                return globalTris().totalSize();
             }
 
             virtual void findNearest

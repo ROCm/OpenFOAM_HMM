@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -143,11 +143,14 @@ public:
 
         // Access
 
+            //- True if the number of rows is zero
+            inline bool empty() const noexcept;
+
             //- The primary size (the number of rows)
             inline label size() const noexcept;
 
-            //- True if the number of rows is zero
-            inline bool empty() const noexcept;
+            //- The total addressed size
+            inline label totalSize() const;
 
             //- Return the offset table (= size()+1)
             inline const List<label>& offsets() const;

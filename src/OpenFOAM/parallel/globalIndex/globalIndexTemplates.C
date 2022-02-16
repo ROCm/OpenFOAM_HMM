@@ -54,11 +54,7 @@ Foam::globalIndex::calcListOffsets
 
             if (checkOverflow && start < values[i])
             {
-                FatalErrorInFunction
-                    << "Overflow : sum of sizes exceeds labelMax ("
-                    << labelMax << ") after index " << i << nl
-                    << "Please recompile with larger datatype for label." << nl
-                    << exit(FatalError);
+                reportOverflowAndExit(i);
             }
         }
         values[len] = start;
@@ -98,7 +94,7 @@ void Foam::globalIndex::gather
 
     if (Pstream::myProcNo(comm) == procIDs[0])
     {
-        allFld.resize_nocopy(off.last());
+        allFld.resize_nocopy(off.last());  // == totalSize()
 
         // Assign my local data - respect offset information
         // so that we can request 0 entries to be copied.
@@ -198,7 +194,7 @@ void Foam::globalIndex::gather
 
     if (Pstream::myProcNo(comm) == procIDs[0])
     {
-        allFld.resize_nocopy(off.last());
+        allFld.resize_nocopy(off.last());  // == totalSize()
 
         // Assign my local data - respect offset information
         // so that we can request 0 entries to be copied
@@ -441,7 +437,7 @@ void Foam::globalIndex::mpiGather
             nSendBytes = 0;
         }
 
-        allData.resize_nocopy(globalAddr.size());
+        allData.resize_nocopy(globalAddr.totalSize());
 
         recvSizes.resize(nproc);
         recvOffsets.resize(nproc+1);
@@ -451,7 +447,7 @@ void Foam::globalIndex::mpiGather
             recvSizes[proci] = globalAddr.localSize(proci) * sizeof(Type);
             recvOffsets[proci] = globalAddr.localStart(proci) * sizeof(Type);
         }
-        recvOffsets[nproc] = globalAddr.size() * sizeof(Type);
+        recvOffsets[nproc] = globalAddr.totalSize() * sizeof(Type);
     }
     else
     {

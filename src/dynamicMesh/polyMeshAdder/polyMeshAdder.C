@@ -2626,7 +2626,7 @@ void Foam::polyMeshAdder::compactPoints
 
     // Compact out unused points
     localPoints.setSize(meshes.size());
-    labelList globalToCompact(globalPoints.size(), -1);
+    labelList globalToCompact(globalPoints.totalSize(), -1);
     label nGlobal = 0;
     forAll(meshes, meshi)
     {

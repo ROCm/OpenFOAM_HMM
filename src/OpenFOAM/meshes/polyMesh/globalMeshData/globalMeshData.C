@@ -157,7 +157,7 @@ void Foam::globalMeshData::calcSharedPoints() const
     // Allocate global numbers
     globalIndex masterNumbering(nMaster);
 
-    nGlobalPoints_ = masterNumbering.size();
+    nGlobalPoints_ = masterNumbering.totalSize();
 
 
     // Push master number to slaves

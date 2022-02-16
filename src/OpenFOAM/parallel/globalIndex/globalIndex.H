@@ -89,7 +89,7 @@ class globalIndex
         static void reportOverflowAndExit
         (
             const label idx,
-            const labelUList& localSizes
+            const labelUList& localSizes = labelUList::null()
         );
 
 public:
@@ -175,7 +175,7 @@ public:
         //- Global sum of localSizes. Same as totalSize()
         inline label size() const;
 
-        //- Global sum of localSizes. Same as size()
+        //- Global sum of localSizes.
         inline label totalSize() const;
 
         //- The local sizes
@@ -286,9 +286,6 @@ public:
         // Global (off-processor) queries
 
             //- Start of proci data
-            inline label offset(const label proci) const;
-
-            //- Start of proci data
             inline label localStart(const label proci) const;
 
             //- Size of proci data
@@ -326,6 +323,15 @@ public:
 
             //- Which processor does global come from? Binary search.
             inline label whichProcID(const label i) const;
+
+
+    // Housekeeping
+
+            //- Same as localStart
+            label offset(const label proci) const
+            {
+                return localStart(proci);
+            }
 
 
     // Iteration

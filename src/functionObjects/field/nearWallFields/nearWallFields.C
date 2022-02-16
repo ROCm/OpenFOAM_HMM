@@ -59,7 +59,7 @@ void Foam::functionObjects::nearWallFields::calcAddressing()
     // Global indexing
     globalIndex globalWalls(nPatchFaces);
 
-    DebugInFunction << "nPatchFaces: " << globalWalls.size() << endl;
+    DebugInFunction << "nPatchFaces: " << globalWalls.totalSize() << endl;
 
     // Construct cloud
     Cloud<findCellParticle> cloud

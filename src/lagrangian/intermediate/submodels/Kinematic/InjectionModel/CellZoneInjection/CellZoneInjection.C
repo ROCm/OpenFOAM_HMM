@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -107,17 +107,17 @@ void Foam::CellZoneInjection<CloudType>::setPositions
 
     // Parallel operation manipulations
     globalIndex globalPositions(positions.size());
-    List<vector> allPositions(globalPositions.size(), point::max);
-    List<label> allInjectorCells(globalPositions.size(), -1);
-    List<label> allInjectorTetFaces(globalPositions.size(), -1);
-    List<label> allInjectorTetPts(globalPositions.size(), -1);
+    List<vector> allPositions(globalPositions.totalSize(), point::max);
+    List<label> allInjectorCells(globalPositions.totalSize(), -1);
+    List<label> allInjectorTetFaces(globalPositions.totalSize(), -1);
+    List<label> allInjectorTetPts(globalPositions.totalSize(), -1);
 
     // Gather all positions on to all processors
     SubList<vector>
     (
         allPositions,
         globalPositions.localSize(Pstream::myProcNo()),
-        globalPositions.offset(Pstream::myProcNo())
+        globalPositions.localStart(Pstream::myProcNo())
     ) = positions;
 
     Pstream::listCombineGather(allPositions, minEqOp<point>());
@@ -128,19 +128,19 @@ void Foam::CellZoneInjection<CloudType>::setPositions
     (
         allInjectorCells,
         globalPositions.localSize(Pstream::myProcNo()),
-        globalPositions.offset(Pstream::myProcNo())
+        globalPositions.localStart(Pstream::myProcNo())
     ) = injectorCells;
     SubList<label>
     (
         allInjectorTetFaces,
         globalPositions.localSize(Pstream::myProcNo()),
-        globalPositions.offset(Pstream::myProcNo())
+        globalPositions.localStart(Pstream::myProcNo())
     ) = injectorTetFaces;
     SubList<label>
     (
         allInjectorTetPts,
         globalPositions.localSize(Pstream::myProcNo()),
-        globalPositions.offset(Pstream::myProcNo())
+        globalPositions.localStart(Pstream::myProcNo())
     ) = injectorTetPts;
 
     // Transfer data

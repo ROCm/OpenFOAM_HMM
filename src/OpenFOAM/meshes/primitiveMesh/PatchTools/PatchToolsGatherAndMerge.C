@@ -158,14 +158,14 @@ void Foam::PatchTools::gatherAndMerge
             }
 
 
-            mergedFaces.setSize(globalFacesPtr().size());
-            mergedPoints.setSize(globalPointsPtr().size());
+            mergedFaces.setSize(globalFacesPtr().totalSize());
+            mergedPoints.setSize(globalPointsPtr().totalSize());
 
             // Insert master data first
-            label pOffset = globalPointsPtr().offset(Pstream::masterNo());
+            label pOffset = globalPointsPtr().localStart(Pstream::masterNo());
             SubList<point>(mergedPoints, myPoints.size(), pOffset) = myPoints;
 
-            label fOffset = globalFacesPtr().offset(Pstream::masterNo());
+            label fOffset = globalFacesPtr().localStart(Pstream::masterNo());
             SubList<FaceType>(mergedFaces, myFaces.size(), fOffset) = myFaces;
 
 
@@ -177,11 +177,11 @@ void Foam::PatchTools::gatherAndMerge
                 pointField slavePoints(fromSlave);
                 List<FaceType> slaveFaces(fromSlave);
 
-                label pOffset = globalPointsPtr().offset(slave);
+                label pOffset = globalPointsPtr().localStart(slave);
                 SubList<point>(mergedPoints, slavePoints.size(), pOffset) =
                     slavePoints;
 
-                label fOffset = globalFacesPtr().offset(slave);
+                label fOffset = globalFacesPtr().localStart(slave);
                 SubList<FaceType>(mergedFaces, slaveFaces.size(), fOffset) =
                     slaveFaces;
             }

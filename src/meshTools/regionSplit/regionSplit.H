@@ -294,7 +294,7 @@ public:
         //- Return total number of regions
         label nRegions() const
         {
-            return globalNumbering().size();
+            return globalNumbering().totalSize();
         }
 
         //- Manually consolidate regions globally by swapping information

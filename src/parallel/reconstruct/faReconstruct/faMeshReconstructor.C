@@ -116,7 +116,7 @@ void Foam::faMeshReconstructor::calcAddressing
         {
             // Determine the respective local portions of the global ordering
 
-            labelList procTargets(globalFaceNum.size());
+            labelList procTargets(globalFaceNum.totalSize());
 
             for (const label proci : Pstream::allProcs())
             {
@@ -128,7 +128,7 @@ void Foam::faMeshReconstructor::calcAddressing
             }
 
             labelList procStarts(globalFaceNum.offsets());
-            labelList procOrders(globalFaceNum.size());
+            labelList procOrders(globalFaceNum.totalSize());
 
             for (const label globali : globalOrder)
             {
