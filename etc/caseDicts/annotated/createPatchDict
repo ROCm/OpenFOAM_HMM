@@ -47,6 +47,9 @@ pointSync false;
 // Patches to create.
 patches
 (
+    // Example of creating cyclic patch pair
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     {
         // Name of new patch
         name cyc_half0;
@@ -70,10 +73,17 @@ patches
             //matchTolerance 1E-2;
         }
 
-        // How to construct: either from 'patches' or 'set'
+        // How to select the faces:
+        //  - set : specify faceSet in 'set'
+        //  - patches : specify names in 'patches'
+        //  - autoPatch : attempts automatic patching of the specified
+        //                candidates in 'patches'.
+        //      - single region : match in the region itself
+        //      - multi regions : match in between regions only
         constructFrom patches;
 
-        // If constructFrom = patches : names of patches. Wildcards allowed.
+        // If constructFrom = patches or autoPatch: names of patches.
+        // Wildcards&patchGroups allowed.
         patches (periodic1);
 
         // If constructFrom = set : name of faceSet
@@ -98,14 +108,65 @@ patches
             // separationVector (1 0 0);
         }
 
-        // How to construct: either from 'patches' or 'set'
+        // How to select the faces:
+        //  - set : specify faceSet in 'set'
+        //  - patches : specify names in 'patches'
+        //  - autoPatch : attempts automatic patching of the specified
+        //                candidates in 'patches'.
+        //      - single region : match in the region itself
+        //      - multi regions : match in between regions only
         constructFrom patches;
 
-        // If constructFrom = patches : names of patches. Wildcards allowed.
+        // If constructFrom = patches or autoPatch: names of patches.
+        // Wildcards&patchGroups allowed.
         patches (periodic2);
 
         // If constructFrom = set : name of faceSet
         set f0;
+    }
+
+
+    // Example of creating mapped patches using geometric matching
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    {
+        // Name of new patch
+        name solid;
+
+        // Dictionary to construct new patch from
+        patchInfo
+        {
+            type        mappedPatch;
+            sampleMode  nearestPatchFaceAMI;
+            AMIMethod   faceAreaWeightAMI;
+
+            // Overwritten
+            //sampleRegion    otherRegion;
+            //samplePatch     otherPatch;
+
+            //- Optional override of added patchfields. If not specified
+            //  any added patchfields are of type calculated.
+            patchFields
+            {
+                T
+                {
+                    type            fixedValue;
+                    value           uniform 300;
+                }
+            }
+        }
+
+        // How to select the faces:
+        //  - set : specify faceSet in 'set'
+        //  - patches : specify names in 'patches'
+        //  - autoPatch : attempts automatic patching of the specified
+        //                candidates in 'patches'.
+        //      - single region : match in the region itself
+        //      - multi regions : match in between regions only
+        constructFrom autoPatch;
+
+        // If constructFrom = patches or autoPatch: names of patches.
+        // Wildcards&patchGroups allowed.
+        patches (coupling_group);
     }
 );
 
