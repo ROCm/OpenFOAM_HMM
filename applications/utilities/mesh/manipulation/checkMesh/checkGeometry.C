@@ -1157,6 +1157,34 @@ Foam::label Foam::checkGeometry
                     globalFaces,
                     globalPoints
                 );
+
+                if (cpp.sameWorld())
+                {
+                    //- Get the patch on the region
+                    const polyPatch& nbrPp = cpp.samplePolyPatch();
+
+                    // Collect neighbour geometry
+                    faceList mergedFaces;
+                    pointField mergedPoints;
+                    autoPtr<globalIndex> globalFaces;
+                    autoPtr<globalIndex> globalPoints;
+
+                    collectAndWriteAMIWeights
+                    (
+                        cpp.sampleMesh(),
+                        wr,
+                        outputDir / pName + "-tgt_" + tmName,
+                        ami.tgtWeightsSum(),
+                        nbrPp.localFaces(),
+                        nbrPp.meshPoints(),
+                        nbrPp.meshPointMap(),
+
+                        mergedFaces,
+                        mergedPoints,
+                        globalFaces,
+                        globalPoints
+                    );
+                }
             }
         }
     }
