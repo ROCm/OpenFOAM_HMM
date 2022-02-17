@@ -135,20 +135,17 @@ template<class StringListType, class AccessOp>
 Foam::labelList Foam::stringListOps::findMatching
 (
     const StringListType& input,
-    const wordRes& allow,
-    const wordRes& deny,
+    const wordRes::filter& pred,
     AccessOp aop
 )
 {
     const label len = input.size();
 
-    if (allow.empty() && deny.empty())
+    if (pred.empty())
     {
+        // Accept all
         return identity(len);
     }
-
-    // Use combined accept/reject filter
-    const wordRes::filter pred(allow, deny);
 
     labelList indices(len);
 
@@ -166,6 +163,28 @@ Foam::labelList Foam::stringListOps::findMatching
     indices.resize(count);
 
     return indices;
+}
+
+
+template<class StringListType, class AccessOp>
+Foam::labelList Foam::stringListOps::findMatching
+(
+    const StringListType& input,
+    const wordRes& allow,
+    const wordRes& deny,
+    AccessOp aop
+)
+{
+    if (allow.empty() && deny.empty())
+    {
+        // Accept all
+        return identity(input.size());
+    }
+
+    // Use combined accept/reject filter
+    const wordRes::filter pred(allow, deny);
+
+    return stringListOps::findMatching(input, pred, aop);
 }
 
 

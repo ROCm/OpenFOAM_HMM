@@ -41,8 +41,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef stringListOps_H
-#define stringListOps_H
+#ifndef Foam_stringListOps_H
+#define Foam_stringListOps_H
 
 #include "labelList.H"
 #include "stringList.H"
@@ -357,6 +357,18 @@ struct foundOp
     }
 };
 
+
+//- Return ids for items with matching names.
+//  The filter predicate is a combination of allow and deny lists
+//
+//  \return List indices for matches
+template<class StringListType, class AccessOp = noOp>
+labelList findMatching
+(
+    const StringListType& input,
+    const wordRes::filter& pred,
+    AccessOp aop = noOp()
+);
 
 //- Return ids for items with matching names.
 //  Uses a combination of allow and deny lists
