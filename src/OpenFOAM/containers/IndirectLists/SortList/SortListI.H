@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,7 +32,7 @@ License
 template<class T>
 inline Foam::SortList<T>::SortList(const UList<T>& values)
 :
-    IndirectList<T>(values, identity(values.size()))
+    IndirectList<T>(values, labelList())
 {
     sort();
 }
@@ -42,7 +42,7 @@ template<class T>
 template<class Compare>
 inline Foam::SortList<T>::SortList(const UList<T>& values, const Compare& comp)
 :
-    IndirectList<T>(values, identity(values.size()))
+    IndirectList<T>(values, labelList())
 {
     sort<Compare>(comp);
 }
@@ -51,14 +51,14 @@ inline Foam::SortList<T>::SortList(const UList<T>& values, const Compare& comp)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
-inline const Foam::labelUList& Foam::SortList<T>::indices() const
+inline const Foam::labelUList& Foam::SortList<T>::indices() const noexcept
 {
     return this->addressing();
 }
 
 
 template<class T>
-inline Foam::labelList& Foam::SortList<T>::indices()
+inline Foam::labelList& Foam::SortList<T>::indices() noexcept
 {
     return this->addressing();
 }
@@ -74,10 +74,9 @@ inline void Foam::SortList<T>::reverse()
 template<class T>
 inline void Foam::SortList<T>::reset()
 {
-    const label len = this->values().size();
+    auto& addr = this->indices();
 
-    labelList& addr = this->indices();
-    addr.resize(len);
+    addr.resize_nocopy(this->values().size());
     ListOps::identity(addr);
 }
 
@@ -86,14 +85,11 @@ template<class T>
 template<class Compare>
 inline void Foam::SortList<T>::sort(const Compare& comp)
 {
-    UList<T>& vals = this->values();
-    labelList& addr = this->indices();
+    auto& vals = this->values();
+    auto& addr = this->indices();
 
-    if (addr.size() != vals.size())
-    {
-        addr.resize(vals.size());
-        ListOps::identity(addr);
-    }
+    addr.resize_nocopy(vals.size());
+    ListOps::identity(addr);
 
     std::stable_sort
     (
@@ -107,43 +103,26 @@ inline void Foam::SortList<T>::sort(const Compare& comp)
 template<class T>
 inline void Foam::SortList<T>::sort()
 {
-    UList<T>& vals = this->values();
-    labelList& addr = this->indices();
+    Foam::sortedOrder(this->values(), this->indices());
+}
 
-    if (addr.size() != vals.size())
-    {
-        addr.resize(vals.size());
-        ListOps::identity(addr);
-    }
 
-    // Forward sort of indices
-    std::stable_sort
-    (
-        addr.begin(),
-        addr.end(),
-        [&](label a, label b) -> bool { return vals[a] < vals[b]; }
-    );
+template<class T>
+inline void Foam::SortList<T>::uniqueSort()
+{
+    Foam::uniqueOrder(this->values(), this->indices());
 }
 
 
 template<class T>
 inline void Foam::SortList<T>::reverseSort()
 {
-    UList<T>& vals = this->values();
-    labelList& addr = this->indices();
-
-    if (addr.size() != vals.size())
-    {
-        addr.resize(vals.size());
-        ListOps::identity(addr);
-    }
-
-    // Reverse sort of indices
-    std::stable_sort
+    // Reverse sorted order for indices
+    Foam::sortedOrder
     (
-        addr.begin(),
-        addr.end(),
-        [&](label a, label b) -> bool { return vals[b] < vals[a]; }
+        this->values(),
+        this->indices(),
+        typename UList<T>::greater(this->values())
     );
 }
 

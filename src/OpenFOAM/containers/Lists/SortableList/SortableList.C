@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -143,7 +143,7 @@ void Foam::SortableList<T>::reverseSort()
 template<class T>
 void Foam::SortableList<T>::partialSort(label n, label start)
 {
-    indices_.resize(this->size());
+    indices_.resize_nocopy(this->size());
     ListOps::identity(indices_);
 
     // Forward partial sort of indices
@@ -163,7 +163,7 @@ void Foam::SortableList<T>::partialSort(label n, label start)
 template<class T>
 void Foam::SortableList<T>::partialReverseSort(label n, label start)
 {
-    indices_.resize(this->size());
+    indices_.resize_nocopy(this->size());
     ListOps::identity(indices_);
 
     // Reverse partial sort of indices

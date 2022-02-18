@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -196,19 +196,23 @@ int main(int argc, char *argv[])
 
         SortList<scalar> sorter1(list1);
 
+        Info<< nl << "Sorted: " << flatOutput(sorter1) << nl;
         Info<< nl << "Sort indices: " << flatOutput(sorter1.indices()) << nl;
 
-        Info<< nl << "Reverse indices: " << flatOutput(sorter1.indices()) << nl;
-
+        // Reverses indices
         sorter1.reverse();
 
-        Info<< nl << "Again indices: " << flatOutput(sorter1.indices()) << nl;
+        Info<< nl << "Reverse: " << flatOutput(sorter1.indices()) << nl;
+
+        sorter1.reset();
+
+        Info<< nl << "Reset indices: " << flatOutput(sorter1.indices()) << nl;
 
         sorter1.reverseSort();
 
         Info<< nl << "Reverse indices: " << flatOutput(sorter1.indices()) << nl;
 
-        Info<< nl << "Sorted  : " << flatOutput(sorter1) << nl;
+        Info<< nl << "Reverse sorted: " << flatOutput(sorter1) << nl;
 
         sorter1.sort(std::greater<scalar>());
 

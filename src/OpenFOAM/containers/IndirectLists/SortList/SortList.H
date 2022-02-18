@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,8 +37,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SortList_H
-#define SortList_H
+#ifndef Foam_SortList_H
+#define Foam_SortList_H
 
 #include "IndirectList.H"
 
@@ -72,13 +72,13 @@ public:
 
     // Member Functions
 
-        //- Return the list of sorted indices. Updated every sort
+        //- Return the list of sorted indices (updated every sort).
         //  Same as addressing()
-        inline const labelUList& indices() const;
+        inline const labelUList& indices() const noexcept;
 
-        //- Return the list of indices. Updated every sort
+        //- Return the list of indices (updated every sort).
         //  Same as addressing()
-        inline labelList& indices();
+        inline labelList& indices() noexcept;
 
         //- Reverse the indices
         inline void reverse();
@@ -94,8 +94,12 @@ public:
         //- Functionally identical to sort with std::less\<T\>()
         inline void sort();
 
-        //- Reverse (stable) sort the list
+        //- Reverse (stable) sort the list.
+        //- Functionally identical to sort with std::greater\<T\>()
         inline void reverseSort();
+
+        //- Sort the list, only retaining unique entries
+        inline void uniqueSort();
 
 
     // Member Operators
