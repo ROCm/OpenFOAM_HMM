@@ -14,6 +14,8 @@ relVelocity
     name relVelocity;
     libs ( utilityFunctionObjects );
 
+    writeControl writeTime;
+
     coeffs
     {
         // User input (duplicate of constant/dynamicMeshDict)
@@ -72,7 +74,7 @@ relVelocity
         }
     #};
 
-    codeExecute  // codeWrite
+    codeWrite
     #{
         const dictionary& context = this->codeContext();
 
