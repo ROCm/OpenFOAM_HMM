@@ -57,6 +57,42 @@ void Foam::PstreamBuffers::finalExchange
 }
 
 
+void Foam::PstreamBuffers::finalExchange
+(
+    const labelUList& sendProcs,
+    const labelUList& recvProcs,
+    labelList& recvSizes,
+    const bool block
+)
+{
+    // Could also check that it is not called twice
+    finishedSendsCalled_ = true;
+
+    if (commsType_ == UPstream::commsTypes::nonBlocking)
+    {
+        Pstream::exchangeSizes
+        (
+            sendProcs,
+            recvProcs,
+            sendBuf_,
+            recvSizes,
+            tag_,
+            comm_
+        );
+
+        Pstream::exchange<DynamicList<char>, char>
+        (
+            sendBuf_,
+            recvSizes,
+            recvBuf_,
+            tag_,
+            comm_,
+            block
+        );
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
 
 Foam::PstreamBuffers::PstreamBuffers
@@ -129,6 +165,42 @@ void Foam::PstreamBuffers::finishedSends
 )
 {
     finalExchange(recvSizes, block);
+
+    if (commsType_ != UPstream::commsTypes::nonBlocking)
+    {
+        FatalErrorInFunction
+            << "Obtaining sizes not supported in "
+            << UPstream::commsTypeNames[commsType_] << endl
+            << " since transfers already in progress. Use non-blocking instead."
+            << exit(FatalError);
+
+        // Note: maybe possible only if using different tag from write started
+        // by ~UOPstream. Needs some work.
+    }
+}
+
+
+void Foam::PstreamBuffers::finishedSends
+(
+    const labelUList& sendProcs,
+    const labelUList& recvProcs,
+    const bool block
+)
+{
+    labelList recvSizes;
+    finalExchange(sendProcs, recvProcs, recvSizes, block);
+}
+
+
+void Foam::PstreamBuffers::finishedSends
+(
+    const labelUList& sendProcs,
+    const labelUList& recvProcs,
+    labelList& recvSizes,
+    const bool block
+)
+{
+    finalExchange(sendProcs, recvProcs, recvSizes, block);
 
     if (commsType_ != UPstream::commsTypes::nonBlocking)
     {

@@ -126,6 +126,16 @@ class PstreamBuffers
         //  This will start receives in non-blocking mode.
         void finalExchange(labelList& recvSizes, const bool block);
 
+        //- Mark all sends as having been done.
+        //  Only exchange sizes between sendProcs/recvProcs
+        void finalExchange
+        (
+            const labelUList& sendProcs,
+            const labelUList& recvProcs,
+            labelList& recvSizes,
+            const bool block
+        );
+
 
 public:
 
@@ -199,6 +209,28 @@ public:
         //  Same as above but also returns sizes (bytes) received.
         //  \note currently only valid for non-blocking.
         void finishedSends(labelList& recvSizes, const bool block = true);
+
+        //- Mark all sends as having been done, with limited
+        //- send/recv processor connections.
+        //  \note currently only valid for non-blocking.
+        void finishedSends
+        (
+            const labelUList& sendProcs,
+            const labelUList& recvProcs,
+            const bool block = true
+        );
+
+        //- Mark all sends as having been done, with limited
+        //- send/recv processor connections.
+        //  Same as above but also returns sizes (bytes) received.
+        //  \note currently only valid for non-blocking.
+        void finishedSends
+        (
+            const labelUList& sendProcs,
+            const labelUList& recvProcs,
+            labelList& recvSizes,
+            const bool block = true
+        );
 };
 
 

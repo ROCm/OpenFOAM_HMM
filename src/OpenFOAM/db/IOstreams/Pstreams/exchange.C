@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -209,7 +209,7 @@ void Foam::Pstream::exchange
             << Foam::abort(FatalError);
     }
 
-    recvBufs.setSize(sendBufs.size());
+    recvBufs.resize_nocopy(sendBufs.size());
 
     if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
     {
@@ -220,7 +220,7 @@ void Foam::Pstream::exchange
 
             if (proci != Pstream::myProcNo(comm) && nRecv > 0)
             {
-                recvBufs[proci].setSize(nRecv);
+                recvBufs[proci].resize_nocopy(nRecv);
             }
         }
 
@@ -347,6 +347,90 @@ void Foam::Pstream::exchange
 template<class Container>
 void Foam::Pstream::exchangeSizes
 (
+    const labelUList& sendProcs,
+    const labelUList& recvProcs,
+    const Container& sendBufs,
+    labelList& recvSizes,
+    const label tag,
+    const label comm
+)
+{
+    if (sendBufs.size() != UPstream::nProcs(comm))
+    {
+        FatalErrorInFunction
+            << "Size of container " << sendBufs.size()
+            << " does not equal the number of processors "
+            << UPstream::nProcs(comm)
+            << Foam::abort(FatalError);
+    }
+
+    labelList sendSizes(sendProcs.size());
+    forAll(sendProcs, i)
+    {
+        sendSizes[i] = sendBufs[sendProcs[i]].size();
+    }
+
+    recvSizes.resize_nocopy(sendBufs.size());
+    recvSizes = 0;  // Ensure non-received entries are properly zeroed
+
+    const label startOfRequests = UPstream::nRequests();
+
+    for (const label proci : recvProcs)
+    {
+        UIPstream::read
+        (
+            UPstream::commsTypes::nonBlocking,
+            proci,
+            reinterpret_cast<char*>(&recvSizes[proci]),
+            sizeof(label),
+            tag,
+            comm
+        );
+    }
+
+    forAll(sendProcs, i)
+    {
+        UOPstream::write
+        (
+            UPstream::commsTypes::nonBlocking,
+            sendProcs[i],
+            reinterpret_cast<char*>(&sendSizes[i]),
+            sizeof(label),
+            tag,
+            comm
+        );
+    }
+
+    UPstream::waitRequests(startOfRequests);
+}
+
+
+/// FUTURE?
+///
+/// template<class Container>
+/// void Foam::Pstream::exchangeSizes
+/// (
+///     const labelUList& sendRecvProcs,
+///     const Container& sendBufs,
+///     labelList& recvSizes,
+///     const label tag,
+///     const label comm
+/// )
+/// {
+///     exchangeSizes<Container>
+///     (
+///         sendRecvProcs,
+///         sendRecvProcs,
+///         sendBufs,
+///         tag,
+///         comm
+///     );
+/// }
+
+
+template<class Container>
+void Foam::Pstream::exchangeSizes
+(
     const Container& sendBufs,
     labelList& recvSizes,
     const label comm
@@ -366,8 +450,8 @@ void Foam::Pstream::exchangeSizes
     {
         sendSizes[proci] = sendBufs[proci].size();
     }
-    recvSizes.setSize(sendSizes.size());
-    allToAll(sendSizes, recvSizes, comm);
+    recvSizes.resize_nocopy(sendSizes.size());
+    UPstream::allToAll(sendSizes, recvSizes, comm);
 }
 
 

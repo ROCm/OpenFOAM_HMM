@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,8 +39,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Pstream_H
-#define Pstream_H
+#ifndef Foam_Pstream_H
+#define Foam_Pstream_H
 
 #include "UPstream.H"
 #include "DynamicList.H"
@@ -340,17 +340,17 @@ public:
 
         // Exchange
 
-            //- Helper: exchange contiguous data. Sends sendData, receives into
-            //  recvData. If block=true will wait for all transfers to finish.
-            template<class Container, class T>
-            static void exchange
+            //- Helper: exchange sizes of sendData for specified
+            //- set of send/receive processes.
+            template<class Container>
+            static void exchangeSizes
             (
-                const UList<Container>& sendData,
-                const labelUList& recvSizes,
-                List<Container>& recvData,
-                const int tag = UPstream::msgType(),
-                const label comm = UPstream::worldComm,
-                const bool block = true
+                const labelUList& sendProcs,
+                const labelUList& recvProcs,
+                const Container& sendData,
+                labelList& sizes,
+                const label tag = UPstream::msgType(),
+                const label comm = UPstream::worldComm
             );
 
             //- Helper: exchange sizes of sendData. sendData is the data per
@@ -362,6 +362,20 @@ public:
                 const Container& sendData,
                 labelList& sizes,
                 const label comm = UPstream::worldComm
+            );
+
+
+            //- Helper: exchange contiguous data. Sends sendData, receives into
+            //  recvData. If block=true will wait for all transfers to finish.
+            template<class Container, class T>
+            static void exchange
+            (
+                const UList<Container>& sendData,
+                const labelUList& recvSizes,
+                List<Container>& recvData,
+                const int tag = UPstream::msgType(),
+                const label comm = UPstream::worldComm,
+                const bool block = true
             );
 
             //- Exchange contiguous data. Sends sendData, receives into
