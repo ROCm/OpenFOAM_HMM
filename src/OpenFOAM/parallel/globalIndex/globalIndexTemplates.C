@@ -108,7 +108,11 @@ void Foam::globalIndex::gather
         {
             SubList<Type> procSlot(allFld, off[i+1]-off[i], off[i]);
 
-            if (is_contiguous<Type>::value)
+            if (procSlot.empty())
+            {
+                // Nothing to do
+            }
+            else if (is_contiguous<Type>::value)
             {
                 IPstream::read
                 (
@@ -136,7 +140,11 @@ void Foam::globalIndex::gather
     }
     else
     {
-        if (is_contiguous<Type>::value)
+        if (fld.empty())
+        {
+            // Nothing to do
+        }
+        else if (is_contiguous<Type>::value)
         {
             OPstream::write
             (
@@ -210,28 +218,42 @@ void Foam::globalIndex::gather
         {
             SubList<Type> procSlot(allFld, off[i+1]-off[i], off[i]);
 
-            IPstream fromProc
-            (
-                commsType,
-                procIDs[i],
-                0,
-                tag,
-                comm
-            );
-            fromProc >> procSlot;
+            if (procSlot.empty())
+            {
+                // Nothing to do
+            }
+            else
+            {
+                IPstream fromProc
+                (
+                    commsType,
+                    procIDs[i],
+                    0,
+                    tag,
+                    comm
+                );
+                fromProc >> procSlot;
+            }
         }
     }
     else
     {
-        OPstream toMaster
-        (
-            commsType,
-            procIDs[0],
-            0,
-            tag,
-            comm
-        );
-        toMaster << fld;
+        if (fld.empty())
+        {
+            // Nothing to do
+        }
+        else
+        {
+            OPstream toMaster
+            (
+                commsType,
+                procIDs[0],
+                0,
+                tag,
+                comm
+            );
+            toMaster << fld;
+        }
     }
 }
 
@@ -684,6 +706,10 @@ void Foam::globalIndex::scatter
             << exit(FatalError);
         // Could also warn and change to scheduled etc...
     }
+
+    // FUTURE:
+    // could decide which procs will receive data and use mpiScatter
+    // to distribute. Could then skip send/receive for those procs...
 
     const label startOfRequests = UPstream::nRequests();
 
