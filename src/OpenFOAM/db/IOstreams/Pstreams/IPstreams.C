@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2013 OpenFOAM Foundation
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,14 +25,76 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "OPstream.H"
+#include "UIPstream.H"
+#include "IPstream.H"
+#include "IOstreams.H"
 
 // * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
 
-Foam::OPstream::OPstream
+Foam::UIPstream::UIPstream
 (
     const commsTypes commsType,
-    const int toProcNo,
+    const int fromProcNo,
+    DynamicList<char>& receiveBuf,
+    label& receiveBufPosition,
+    const int tag,
+    const label comm,
+    const bool clearAtEnd,
+    IOstreamOption::streamFormat fmt
+)
+:
+    UIPstreamBase
+    (
+        commsType,
+        fromProcNo,
+        receiveBuf,
+        receiveBufPosition,
+        tag,
+        comm,
+        clearAtEnd,
+        fmt
+    )
+{
+    if (commsType == commsTypes::nonBlocking)
+    {
+        // Message is already received into buffer
+    }
+    else
+    {
+        bufferIPCrecv();
+    }
+}
+
+
+Foam::UIPstream::UIPstream(const int fromProcNo, PstreamBuffers& buffers)
+:
+    UIPstreamBase(fromProcNo, buffers)
+{
+    if (commsType() == commsTypes::nonBlocking)
+    {
+        // Message is already received into buffer
+        messageSize_ = recvBuf_.size();
+
+        if (debug)
+        {
+            Pout<< "UIPstream::UIPstream PstreamBuffers :"
+                << " fromProcNo:" << fromProcNo_
+                << " tag:" << tag_ << " comm:" << comm_
+                << " receive buffer size:" << messageSize_
+                << Foam::endl;
+        }
+    }
+    else
+    {
+        bufferIPCrecv();
+    }
+}
+
+
+Foam::IPstream::IPstream
+(
+    const commsTypes commsType,
+    const int fromProcNo,
     const label bufSize,
     const int tag,
     const label comm,
@@ -41,16 +102,18 @@ Foam::OPstream::OPstream
 )
 :
     Pstream(commsType, bufSize),
-    UOPstream
+    UIPstream
     (
         commsType,
-        toProcNo,
+        fromProcNo,
         Pstream::transferBuf_,
+        transferBufPosition_,
         tag,
         comm,
-        true,  // sendAtDestruct
+        false,  // Do not clear Pstream::transferBuf_ if at end
         fmt
-    )
+    ),
+    transferBufPosition_(0)
 {}
 
 

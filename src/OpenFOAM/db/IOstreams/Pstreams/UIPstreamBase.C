@@ -74,7 +74,7 @@ inline static label byteAlign(const label pos, const size_t align)
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-inline void Foam::UIPstream::checkEof()
+inline void Foam::UIPstreamBase::checkEof()
 {
     if (recvBufPos_ == messageSize_)
     {
@@ -83,14 +83,14 @@ inline void Foam::UIPstream::checkEof()
 }
 
 
-inline void Foam::UIPstream::prepareBuffer(const size_t align)
+inline void Foam::UIPstreamBase::prepareBuffer(const size_t align)
 {
     recvBufPos_ = byteAlign(recvBufPos_, align);
 }
 
 
 template<class T>
-inline void Foam::UIPstream::readFromBuffer(T& val)
+inline void Foam::UIPstreamBase::readFromBuffer(T& val)
 {
     prepareBuffer(sizeof(T));
 
@@ -100,7 +100,7 @@ inline void Foam::UIPstream::readFromBuffer(T& val)
 }
 
 
-inline void Foam::UIPstream::readFromBuffer
+inline void Foam::UIPstreamBase::readFromBuffer
 (
     void* data,
     const size_t count
@@ -119,7 +119,7 @@ inline void Foam::UIPstream::readFromBuffer
 }
 
 
-inline Foam::Istream& Foam::UIPstream::readString(std::string& str)
+inline Foam::Istream& Foam::UIPstreamBase::readString(std::string& str)
 {
     // Use std::string::assign() to copy content, including '\0'.
     // Stripping (when desired) is the responsibility of the sending side.
@@ -142,15 +142,78 @@ inline Foam::Istream& Foam::UIPstream::readString(std::string& str)
 }
 
 
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::UIPstreamBase::UIPstreamBase
+(
+    const commsTypes commsType,
+    const int fromProcNo,
+    DynamicList<char>& receiveBuf,
+    label& receiveBufPosition,
+    const int tag,
+    const label comm,
+    const bool clearAtEnd,
+    IOstreamOption::streamFormat fmt
+)
+:
+    UPstream(commsType),
+    Istream(fmt, IOstreamOption::currentVersion),
+    fromProcNo_(fromProcNo),
+    recvBuf_(receiveBuf),
+    recvBufPos_(receiveBufPosition),
+    tag_(tag),
+    comm_(comm),
+    clearAtEnd_(clearAtEnd),
+    messageSize_(0)
+{
+    setOpened();
+    setGood();
+}
+
+
+Foam::UIPstreamBase::UIPstreamBase
+(
+    const int fromProcNo,
+    PstreamBuffers& buffers
+)
+:
+    UPstream(buffers.commsType()),
+    Istream(buffers.format(), IOstreamOption::currentVersion),
+    fromProcNo_(fromProcNo),
+    recvBuf_(buffers.recvBuf_[fromProcNo]),
+    recvBufPos_(buffers.recvBufPos_[fromProcNo]),
+    tag_(buffers.tag()),
+    comm_(buffers.comm()),
+    clearAtEnd_(true),
+    messageSize_(0)
+{
+    if
+    (
+        commsType() != UPstream::commsTypes::scheduled
+     && !buffers.finished()
+    )
+    {
+        FatalErrorInFunction
+            << "PstreamBuffers::finishedSends() never called." << endl
+            << "Please call PstreamBuffers::finishedSends() after doing"
+            << " all your sends (using UOPstream) and before doing any"
+            << " receives (using UIPstream)" << Foam::exit(FatalError);
+    }
+
+    setOpened();
+    setGood();
+}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::UIPstream::~UIPstream()
+Foam::UIPstreamBase::~UIPstreamBase()
 {
     if (clearAtEnd_ && eof())
     {
         if (debug)
         {
-            Pout<< "UIPstream::~UIPstream() : tag:" << tag_
+            Pout<< "UIPstreamBase Destructor : tag:" << tag_
                 << " fromProcNo:" << fromProcNo_
                 << " clearing receive buffer of size "
                 << recvBuf_.size()
@@ -163,7 +226,7 @@ Foam::UIPstream::~UIPstream()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-Foam::Istream& Foam::UIPstream::read(token& t)
+Foam::Istream& Foam::UIPstreamBase::read(token& t)
 {
     // Return the put back token if it exists
     // - with additional handling for special stream flags
@@ -341,7 +404,7 @@ Foam::Istream& Foam::UIPstream::read(token& t)
 }
 
 
-Foam::Istream& Foam::UIPstream::read(char& c)
+Foam::Istream& Foam::UIPstreamBase::read(char& c)
 {
     c = recvBuf_[recvBufPos_];
     ++recvBufPos_;
@@ -350,40 +413,40 @@ Foam::Istream& Foam::UIPstream::read(char& c)
 }
 
 
-Foam::Istream& Foam::UIPstream::read(word& str)
+Foam::Istream& Foam::UIPstreamBase::read(word& str)
 {
     return readString(str);
 }
 
 
-Foam::Istream& Foam::UIPstream::read(string& str)
+Foam::Istream& Foam::UIPstreamBase::read(string& str)
 {
     return readString(str);
 }
 
 
-Foam::Istream& Foam::UIPstream::read(label& val)
+Foam::Istream& Foam::UIPstreamBase::read(label& val)
 {
     readFromBuffer(val);
     return *this;
 }
 
 
-Foam::Istream& Foam::UIPstream::read(floatScalar& val)
+Foam::Istream& Foam::UIPstreamBase::read(floatScalar& val)
 {
     readFromBuffer(val);
     return *this;
 }
 
 
-Foam::Istream& Foam::UIPstream::read(doubleScalar& val)
+Foam::Istream& Foam::UIPstreamBase::read(doubleScalar& val)
 {
     readFromBuffer(val);
     return *this;
 }
 
 
-Foam::Istream& Foam::UIPstream::read(char* data, std::streamsize count)
+Foam::Istream& Foam::UIPstreamBase::read(char* data, std::streamsize count)
 {
     if (count)
     {
@@ -398,7 +461,7 @@ Foam::Istream& Foam::UIPstream::read(char* data, std::streamsize count)
 }
 
 
-Foam::Istream& Foam::UIPstream::readRaw(char* data, std::streamsize count)
+Foam::Istream& Foam::UIPstreamBase::readRaw(char* data, std::streamsize count)
 {
     // No check for format() == BINARY since this is either done in the
     // beginRawRead() method, or the caller knows what they are doing.
@@ -409,7 +472,7 @@ Foam::Istream& Foam::UIPstream::readRaw(char* data, std::streamsize count)
 }
 
 
-bool Foam::UIPstream::beginRawRead()
+bool Foam::UIPstreamBase::beginRawRead()
 {
     if (format() != BINARY)
     {
@@ -427,13 +490,13 @@ bool Foam::UIPstream::beginRawRead()
 }
 
 
-void Foam::UIPstream::rewind()
+void Foam::UIPstreamBase::rewind()
 {
     recvBufPos_ = 0;
 }
 
 
-void Foam::UIPstream::print(Ostream& os) const
+void Foam::UIPstreamBase::print(Ostream& os) const
 {
     os  << "Reading from processor " << fromProcNo_
         << " using communicator " << comm_

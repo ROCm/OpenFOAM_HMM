@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,71 +24,72 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Read from UIPstream
-
 \*---------------------------------------------------------------------------*/
 
-#include "UIPstream.H"
+#include "UOPstream.H"
+#include "OPstream.H"
 
 // * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
 
-Foam::UIPstream::UIPstream
+Foam::UOPstream::UOPstream
 (
     const commsTypes commsType,
-    const int fromProcNo,
-    DynamicList<char>& receiveBuf,
-    label& receiveBufPosition,
+    const int toProcNo,
+    DynamicList<char>& sendBuf,
     const int tag,
     const label comm,
-    const bool clearAtEnd,
+    const bool sendAtDestruct,
     IOstreamOption::streamFormat fmt
 )
 :
-    UPstream(commsType),
-    Istream(fmt, IOstreamOption::currentVersion),
-    fromProcNo_(fromProcNo),
-    recvBuf_(receiveBuf),
-    recvBufPos_(receiveBufPosition),
-    tag_(tag),
-    comm_(comm),
-    clearAtEnd_(clearAtEnd),
-    messageSize_(0)
-{
-    NotImplemented;
-}
+    UOPstreamBase(commsType, toProcNo, sendBuf, tag, comm, sendAtDestruct, fmt)
+{}
 
 
-Foam::UIPstream::UIPstream(const int fromProcNo, PstreamBuffers& buffers)
+Foam::UOPstream::UOPstream(const int toProcNo, PstreamBuffers& buffers)
 :
-    UPstream(buffers.commsType_),
-    Istream(buffers.format_, IOstreamOption::currentVersion),
-    fromProcNo_(fromProcNo),
-    recvBuf_(buffers.recvBuf_[fromProcNo]),
-    recvBufPos_(buffers.recvBufPos_[fromProcNo]),
-    tag_(buffers.tag_),
-    comm_(buffers.comm_),
-    clearAtEnd_(true),
-    messageSize_(0)
-{
-    NotImplemented;
-}
+    UOPstreamBase(toProcNo, buffers)
+{}
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-Foam::label Foam::UIPstream::read
+Foam::OPstream::OPstream
 (
     const commsTypes commsType,
-    const int fromProcNo,
-    char* buf,
-    const std::streamsize bufSize,
+    const int toProcNo,
+    const label bufSize,
     const int tag,
-    const label communicator
+    const label comm,
+    IOstreamOption::streamFormat fmt
 )
+:
+    Pstream(commsType, bufSize),
+    UOPstream
+    (
+        commsType,
+        toProcNo,
+        Pstream::transferBuf_,
+        tag,
+        comm,
+        true,  // sendAtDestruct
+        fmt
+    )
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::UOPstream::~UOPstream()
 {
-    NotImplemented;
-    return 0;
+    if (sendAtDestruct_)
+    {
+        if (!bufferIPCsend())
+        {
+            FatalErrorInFunction
+                << "Failed sending outgoing message of size "
+                << sendBuf_.size() << " to processor " << toProcNo_
+                << Foam::abort(FatalError);
+        }
+    }
 }
 
 

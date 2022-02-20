@@ -28,8 +28,6 @@ License
 
 #include "processorFaPatchField.H"
 #include "processorFaPatch.H"
-#include "IPstream.H"
-#include "OPstream.H"
 #include "transformField.H"
 
 // * * * * * * * * * * * * * * * * Constructors * * * * * * * * * * * * * * //

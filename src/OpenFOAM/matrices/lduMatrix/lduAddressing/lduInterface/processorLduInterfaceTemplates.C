@@ -39,7 +39,7 @@ void Foam::processorLduInterface::send
     const UList<Type>& f
 ) const
 {
-    label nBytes = f.byteSize();
+    const label nBytes = f.byteSize();
 
     if
     (

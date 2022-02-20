@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,7 +52,7 @@ inline static label byteAlign(const label pos, const size_t align)
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-inline void Foam::UOPstream::prepareBuffer
+inline void Foam::UOPstreamBase::prepareBuffer
 (
     const size_t count,
     const size_t align
@@ -75,13 +75,13 @@ inline void Foam::UOPstream::prepareBuffer
 
 
 template<class T>
-inline void Foam::UOPstream::writeToBuffer(const T& val)
+inline void Foam::UOPstreamBase::writeToBuffer(const T& val)
 {
     writeToBuffer(&val, sizeof(T), sizeof(T));
 }
 
 
-inline void Foam::UOPstream::writeToBuffer
+inline void Foam::UOPstreamBase::writeToBuffer
 (
     const void* data,
     const size_t count,
@@ -111,7 +111,7 @@ inline void Foam::UOPstream::writeToBuffer
 }
 
 
-inline void Foam::UOPstream::putChar(const char c)
+inline void Foam::UOPstreamBase::putChar(const char c)
 {
     if (!sendBuf_.capacity())
     {
@@ -121,7 +121,7 @@ inline void Foam::UOPstream::putChar(const char c)
 }
 
 
-inline void Foam::UOPstream::putString(const std::string& str)
+inline void Foam::UOPstreamBase::putString(const std::string& str)
 {
     const size_t len = str.size();
     writeToBuffer(len);
@@ -131,7 +131,7 @@ inline void Foam::UOPstream::putString(const std::string& str)
 
 // * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
 
-Foam::UOPstream::UOPstream
+Foam::UOPstreamBase::UOPstreamBase
 (
     const commsTypes commsType,
     const int toProcNo,
@@ -155,15 +155,15 @@ Foam::UOPstream::UOPstream
 }
 
 
-Foam::UOPstream::UOPstream(const int toProcNo, PstreamBuffers& buffers)
+Foam::UOPstreamBase::UOPstreamBase(const int toProcNo, PstreamBuffers& buffers)
 :
-    UPstream(buffers.commsType_),
-    Ostream(buffers.format_, IOstreamOption::currentVersion),
+    UPstream(buffers.commsType()),
+    Ostream(buffers.format(), IOstreamOption::currentVersion),
     toProcNo_(toProcNo),
     sendBuf_(buffers.sendBuf_[toProcNo]),
-    tag_(buffers.tag_),
-    comm_(buffers.comm_),
-    sendAtDestruct_(buffers.commsType_ != UPstream::commsTypes::nonBlocking)
+    tag_(buffers.tag()),
+    comm_(buffers.comm()),
+    sendAtDestruct_(buffers.commsType() != UPstream::commsTypes::nonBlocking)
 {
     setOpened();
     setGood();
@@ -172,35 +172,13 @@ Foam::UOPstream::UOPstream(const int toProcNo, PstreamBuffers& buffers)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::UOPstream::~UOPstream()
-{
-    if (sendAtDestruct_)
-    {
-        if
-        (
-            !UOPstream::write
-            (
-                commsType_,
-                toProcNo_,
-                sendBuf_.cdata(),
-                sendBuf_.size(),
-                tag_,
-                comm_
-            )
-        )
-        {
-            FatalErrorInFunction
-                << "Failed sending outgoing message of size " << sendBuf_.size()
-                << " to processor " << toProcNo_
-                << Foam::abort(FatalError);
-        }
-    }
-}
+Foam::UOPstreamBase::~UOPstreamBase()
+{}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-bool Foam::UOPstream::write(const token& tok)
+bool Foam::UOPstreamBase::write(const token& tok)
 {
     // Direct token handling only for some types
 
@@ -244,7 +222,7 @@ bool Foam::UOPstream::write(const token& tok)
 }
 
 
-Foam::Ostream& Foam::UOPstream::write(const char c)
+Foam::Ostream& Foam::UOPstreamBase::write(const char c)
 {
     if (!isspace(c))
     {
@@ -255,7 +233,7 @@ Foam::Ostream& Foam::UOPstream::write(const char c)
 }
 
 
-Foam::Ostream& Foam::UOPstream::write(const char* str)
+Foam::Ostream& Foam::UOPstreamBase::write(const char* str)
 {
     const word nonWhiteChars(string::validate<word>(str));
 
@@ -272,7 +250,7 @@ Foam::Ostream& Foam::UOPstream::write(const char* str)
 }
 
 
-Foam::Ostream& Foam::UOPstream::write(const word& str)
+Foam::Ostream& Foam::UOPstreamBase::write(const word& str)
 {
     putChar(token::tokenType::WORD);
     putString(str);
@@ -281,7 +259,7 @@ Foam::Ostream& Foam::UOPstream::write(const word& str)
 }
 
 
-Foam::Ostream& Foam::UOPstream::write(const string& str)
+Foam::Ostream& Foam::UOPstreamBase::write(const string& str)
 {
     putChar(token::tokenType::STRING);
     putString(str);
@@ -290,7 +268,7 @@ Foam::Ostream& Foam::UOPstream::write(const string& str)
 }
 
 
-Foam::Ostream& Foam::UOPstream::writeQuoted
+Foam::Ostream& Foam::UOPstreamBase::writeQuoted
 (
     const std::string& str,
     const bool quoted
@@ -310,7 +288,7 @@ Foam::Ostream& Foam::UOPstream::writeQuoted
 }
 
 
-Foam::Ostream& Foam::UOPstream::write(const int32_t val)
+Foam::Ostream& Foam::UOPstreamBase::write(const int32_t val)
 {
     putChar(token::tokenType::LABEL);
     writeToBuffer(val);
@@ -318,7 +296,7 @@ Foam::Ostream& Foam::UOPstream::write(const int32_t val)
 }
 
 
-Foam::Ostream& Foam::UOPstream::write(const int64_t val)
+Foam::Ostream& Foam::UOPstreamBase::write(const int64_t val)
 {
     putChar(token::tokenType::LABEL);
     writeToBuffer(val);
@@ -326,7 +304,7 @@ Foam::Ostream& Foam::UOPstream::write(const int64_t val)
 }
 
 
-Foam::Ostream& Foam::UOPstream::write(const floatScalar val)
+Foam::Ostream& Foam::UOPstreamBase::write(const floatScalar val)
 {
     putChar(token::tokenType::FLOAT);
     writeToBuffer(val);
@@ -334,7 +312,7 @@ Foam::Ostream& Foam::UOPstream::write(const floatScalar val)
 }
 
 
-Foam::Ostream& Foam::UOPstream::write(const doubleScalar val)
+Foam::Ostream& Foam::UOPstreamBase::write(const doubleScalar val)
 {
     putChar(token::tokenType::DOUBLE);
     writeToBuffer(val);
@@ -342,7 +320,7 @@ Foam::Ostream& Foam::UOPstream::write(const doubleScalar val)
 }
 
 
-Foam::Ostream& Foam::UOPstream::write(const char* data, std::streamsize count)
+Foam::Ostream& Foam::UOPstreamBase::write(const char* data, std::streamsize count)
 {
     if (format() != BINARY)
     {
@@ -358,7 +336,7 @@ Foam::Ostream& Foam::UOPstream::write(const char* data, std::streamsize count)
 }
 
 
-Foam::Ostream& Foam::UOPstream::writeRaw
+Foam::Ostream& Foam::UOPstreamBase::writeRaw
 (
     const char* data,
     std::streamsize count
@@ -374,7 +352,7 @@ Foam::Ostream& Foam::UOPstream::writeRaw
 }
 
 
-bool Foam::UOPstream::beginRawWrite(std::streamsize count)
+bool Foam::UOPstreamBase::beginRawWrite(std::streamsize count)
 {
     if (format() != BINARY)
     {
@@ -391,7 +369,7 @@ bool Foam::UOPstream::beginRawWrite(std::streamsize count)
 }
 
 
-void Foam::UOPstream::print(Ostream& os) const
+void Foam::UOPstreamBase::print(Ostream& os) const
 {
     os  << "Writing from processor " << toProcNo_
         << " to processor " << myProcNo() << " in communicator " << comm_

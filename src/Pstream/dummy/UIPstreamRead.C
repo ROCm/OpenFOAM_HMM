@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2013 OpenFOAM Foundation
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,34 +26,31 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "IPstream.H"
+#include "UIPstream.H"
 
-// * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::IPstream::IPstream
+void Foam::UIPstream::bufferIPCrecv()
+{
+    NotImplemented;
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::label Foam::UIPstream::read
 (
     const commsTypes commsType,
     const int fromProcNo,
-    const label bufSize,
+    char* buf,
+    const std::streamsize bufSize,
     const int tag,
-    const label comm,
-    IOstreamOption::streamFormat fmt
+    const label communicator
 )
-:
-    Pstream(commsType, bufSize),
-    UIPstream
-    (
-        commsType,
-        fromProcNo,
-        Pstream::transferBuf_,
-        transferBufPosition_,
-        tag,
-        comm,
-        false,  // Do not clear Pstream::transferBuf_ if at end
-        fmt
-    ),
-    transferBufPosition_(0)
-{}
+{
+    NotImplemented;
+    return 0;
+}
 
 
 // ************************************************************************* //

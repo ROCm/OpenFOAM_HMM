@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,35 @@ License
 
 #include "PstreamBuffers.H"
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::PstreamBuffers::finalExchange
+(
+    labelList& recvSizes,
+    const bool block
+)
+{
+    // Could also check that it is not called twice
+    finishedSendsCalled_ = true;
+
+    if (commsType_ == UPstream::commsTypes::nonBlocking)
+    {
+        // all-to-all
+        Pstream::exchangeSizes(sendBuf_, recvSizes, comm_);
+
+        Pstream::exchange<DynamicList<char>, char>
+        (
+            sendBuf_,
+            recvSizes,
+            recvBuf_,
+            tag_,
+            comm_,
+            block
+        );
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
 
 Foam::PstreamBuffers::PstreamBuffers
@@ -38,14 +67,14 @@ Foam::PstreamBuffers::PstreamBuffers
     IOstreamOption::streamFormat fmt
 )
 :
+    finishedSendsCalled_(false),
+    format_(fmt),
     commsType_(commsType),
     tag_(tag),
     comm_(comm),
-    format_(fmt),
     sendBuf_(UPstream::nProcs(comm)),
     recvBuf_(UPstream::nProcs(comm)),
-    recvBufPos_(UPstream::nProcs(comm), Zero),
-    finishedSendsCalled_(false)
+    recvBufPos_(UPstream::nProcs(comm), Zero)
 {}
 
 
@@ -70,58 +99,6 @@ Foam::PstreamBuffers::~PstreamBuffers()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::PstreamBuffers::finishedSends(const bool block)
-{
-    // Could also check that it is not called twice
-    finishedSendsCalled_ = true;
-
-    if (commsType_ == UPstream::commsTypes::nonBlocking)
-    {
-        Pstream::exchange<DynamicList<char>, char>
-        (
-            sendBuf_,
-            recvBuf_,
-            tag_,
-            comm_,
-            block
-        );
-    }
-}
-
-
-void Foam::PstreamBuffers::finishedSends(labelList& recvSizes, const bool block)
-{
-    // Could also check that it is not called twice
-    finishedSendsCalled_ = true;
-
-    if (commsType_ == UPstream::commsTypes::nonBlocking)
-    {
-        Pstream::exchangeSizes(sendBuf_, recvSizes, comm_);
-
-        Pstream::exchange<DynamicList<char>, char>
-        (
-            sendBuf_,
-            recvSizes,
-            recvBuf_,
-            tag_,
-            comm_,
-            block
-        );
-    }
-    else
-    {
-        FatalErrorInFunction
-            << "Obtaining sizes not supported in "
-            << UPstream::commsTypeNames[commsType_] << endl
-            << " since transfers already in progress. Use non-blocking instead."
-            << exit(FatalError);
-
-        // Note: maybe possible only if using different tag from write started
-        // by ~UOPstream. Needs some work.
-    }
-}
-
-
 void Foam::PstreamBuffers::clear()
 {
     for (DynamicList<char>& buf : sendBuf_)
@@ -133,7 +110,37 @@ void Foam::PstreamBuffers::clear()
         buf.clear();
     }
     recvBufPos_ = 0;
+
     finishedSendsCalled_ = false;
+}
+
+
+void Foam::PstreamBuffers::finishedSends(const bool block)
+{
+    labelList recvSizes;
+    finalExchange(recvSizes, block);
+}
+
+
+void Foam::PstreamBuffers::finishedSends
+(
+    labelList& recvSizes,
+    const bool block
+)
+{
+    finalExchange(recvSizes, block);
+
+    if (commsType_ != UPstream::commsTypes::nonBlocking)
+    {
+        FatalErrorInFunction
+            << "Obtaining sizes not supported in "
+            << UPstream::commsTypeNames[commsType_] << endl
+            << " since transfers already in progress. Use non-blocking instead."
+            << exit(FatalError);
+
+        // Note: maybe possible only if using different tag from write started
+        // by ~UOPstream. Needs some work.
+    }
 }
 
 

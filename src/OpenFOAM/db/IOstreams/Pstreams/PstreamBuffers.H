@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,8 +70,8 @@ SourceFiles
 
 #include "Pstream.H"
 
-#ifndef PstreamBuffers_H
-#define PstreamBuffers_H
+#ifndef Foam_PstreamBuffers_H
+#define Foam_PstreamBuffers_H
 
 #include "DynamicList.H"
 #include "UPstream.H"
@@ -83,15 +83,23 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class PstreamBuffers Declaration
+                       Class PstreamBuffers Declaration
 \*---------------------------------------------------------------------------*/
 
 class PstreamBuffers
 {
-    friend class UOPstream;
-    friend class UIPstream;
+    // Friendship
+    friend class UOPstreamBase;  // Access to sendBuf_
+    friend class UIPstreamBase;  // Access to recvBuf_ recvBufPos_;
+
 
     // Private Data
+
+        //- Track if sends are complete
+        bool finishedSendsCalled_;
+
+        //- Buffer format (ascii | binary)
+        const IOstreamOption::streamFormat format_;
 
         //- Communications type of this stream
         const UPstream::commsTypes commsType_;
@@ -102,9 +110,6 @@ class PstreamBuffers
         //- Communicator
         const label comm_;
 
-        //- Buffer format (ascii | binary)
-        const IOstreamOption::streamFormat format_;
-
         //- Send buffer
         List<DynamicList<char>> sendBuf_;
 
@@ -114,8 +119,12 @@ class PstreamBuffers
         //- Current read positions within recvBuf_
         labelList recvBufPos_;
 
-        //- Track if sends are complete
-        bool finishedSendsCalled_;
+
+    // Private Member Functions
+
+        //- Mark all sends as having been done.
+        //  This will start receives in non-blocking mode.
+        void finalExchange(labelList& recvSizes, const bool block);
 
 
 public:
@@ -138,6 +147,20 @@ public:
 
     // Member Functions
 
+    // Access
+
+        //- The associated buffer format (ascii | binary)
+        IOstreamOption::streamFormat format() const noexcept
+        {
+            return format_;
+        }
+
+        //- The communications type of the stream
+        UPstream::commsTypes commsType() const noexcept
+        {
+            return commsType_;
+        }
+
         //- The transfer message type
         int tag() const noexcept
         {
@@ -150,6 +173,22 @@ public:
             return comm_;
         }
 
+        //- True if finishedSends has been called
+        bool finished() const noexcept
+        {
+            return finishedSendsCalled_;
+        }
+
+
+    // Edit
+
+        //- Reset (clear) individual buffers and reset state.
+        //  Does not clear buffer storage
+        void clear();
+
+
+    // Functions
+
         //- Mark all sends as having been done.
         //  This will start receives in non-blocking mode.
         //  If block will wait for all transfers to finish
@@ -160,10 +199,6 @@ public:
         //  Same as above but also returns sizes (bytes) received.
         //  \note currently only valid for non-blocking.
         void finishedSends(labelList& recvSizes, const bool block = true);
-
-        //- Reset (clear) individual buffers and reset state.
-        //  Does not clear buffer storage
-        void clear();
 };
 
 
