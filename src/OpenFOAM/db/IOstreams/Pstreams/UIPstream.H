@@ -262,6 +262,68 @@ public:
 };
 
 
+/*---------------------------------------------------------------------------*\
+                         Class UIPBstream Declaration
+\*---------------------------------------------------------------------------*/
+
+//- Input inter-processor communications stream
+//- using MPI broadcast - operating on external buffer.
+class UIPBstream
+:
+    public UIPstreamBase
+{
+    // Private Member Functions
+
+        //- Initial buffer recv via broadcast, called by constructor
+        void bufferIPCrecv();
+
+
+public:
+
+    // Constructors
+
+        //- Construct given process index to read from using the given
+        //- attached receive buffer, optional communication characteristics
+        //- and IO format
+        UIPBstream
+        (
+            const commsTypes commsType,         //!< ignored
+            const int fromProcNo,               //!< UPstream::masterNo()
+            DynamicList<char>& receiveBuf,
+            label& receiveBufPosition,
+            const int tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm,
+            const bool clearAtEnd = false,   // destroy receiveBuf if at end
+            IOstreamOption::streamFormat fmt = IOstreamOption::BINARY
+        );
+
+
+    //- Destructor
+    virtual ~UIPBstream() = default;
+
+
+    // Member Functions
+
+        //- Use all read methods from base
+        using UIPstreamBase::read;
+
+
+    // Static Functions
+
+        //- Wrapped version of UPstream::broadcast
+        //  \return the message size
+        static label read
+        (
+            const commsTypes commsTypes,        //!< ignored
+            const int rootProcNo,               //!< UPstream::masterNo()
+            char* buf,
+            const std::streamsize bufSize,
+            const int tag = UPstream::msgType(),  //!< ignored
+            const label comm = UPstream::worldComm
+        );
+};
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

@@ -331,6 +331,69 @@ public:
 };
 
 
+/*---------------------------------------------------------------------------*\
+                         Class UOPBstream Declaration
+\*---------------------------------------------------------------------------*/
+
+//- Output inter-processor communications stream
+//- using MPI broadcast - operating on external buffer.
+//
+// \note does not use commsType, tag etc.
+class UOPBstream
+:
+    public UOPstreamBase
+{
+    // Private Member Functions
+
+        //- Final buffer send, called by destructor
+        bool bufferIPCsend();
+
+
+public:
+
+    // Constructors
+
+        //- Construct given process index to write to using the given
+        //- attached send buffer, optional communication characteristics
+        //- and IO format
+        UOPBstream
+        (
+            const commsTypes commsType,             //!< ignored
+            const int toProcNo,                     //!< UPstream::masterNo()
+            DynamicList<char>& sendBuf,
+            const int tag = UPstream::msgType(),    //!< ignored
+            const label comm = UPstream::worldComm,
+            const bool sendAtDestruct = true,
+            IOstreamOption::streamFormat fmt = IOstreamOption::BINARY
+        );
+
+
+    //- Destructor, usually sends buffer on destruct.
+    virtual ~UOPBstream();
+
+
+    // Member Functions
+
+        //- Use all write methods from base
+        using UOPstreamBase::write;
+
+
+    // Static Functions
+
+        //- Wrapped version of UPstream::broadcast with const-cast
+        //  \return True on success
+        static bool write
+        (
+            const commsTypes commsType,             //!< ignored
+            const int rootProcNo,                   //!< UPstream::masterNo()
+            const char* buf,
+            const std::streamsize bufSize,
+            const int tag = UPstream::msgType(),    //!< ignored
+            const label comm = UPstream::worldComm
+        );
+};
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

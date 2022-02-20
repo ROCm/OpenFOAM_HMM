@@ -274,6 +274,8 @@ $(Pstreams)/UIPstreamBase.C
 $(Pstreams)/UOPstreamBase.C
 $(Pstreams)/IPstreams.C
 $(Pstreams)/OPstreams.C
+$(Pstreams)/IPBstreams.C
+$(Pstreams)/OPBstreams.C
 
 dictionary = db/dictionary
 $(dictionary)/dictionary.C

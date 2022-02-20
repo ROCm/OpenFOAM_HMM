@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,14 +31,14 @@ Description
     Output inter-processor communications stream.
 
 SourceFiles
-    OPstream.C
+    OPstreams.C
 
 \*---------------------------------------------------------------------------*/
 
 #include "Pstream.H"
 
-#ifndef OPstream_H
-#define OPstream_H
+#ifndef Foam_OPstream_H
+#define Foam_OPstream_H
 
 #include "UOPstream.H"
 
@@ -68,6 +68,43 @@ public:
             const int toProcNo,
             const label bufSize = 0,
             const int tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm,
+            IOstreamOption::streamFormat fmt = IOstreamOption::BINARY
+        );
+};
+
+
+/*---------------------------------------------------------------------------*\
+                        Class OPBstream Declaration
+\*---------------------------------------------------------------------------*/
+
+//- Output inter-processor communications stream
+//- using MPI broadcast.
+class OPBstream
+:
+    public Pstream,
+    public UOPBstream
+{
+public:
+
+    // Constructors
+
+        //- Construct for broadcast root, optional buffer size, read format
+        OPBstream
+        (
+            const commsTypes commsType,
+            const int toProcNo,     //!< UPstream::masterNo() - root procNo
+            const label bufSize = 0,
+            const int tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm,
+            IOstreamOption::streamFormat fmt = IOstreamOption::BINARY
+        );
+
+        //- Construct for broadcast root with optional communicator,
+        //- write format
+        explicit OPBstream
+        (
+            const int toProcNo,     //!< UPstream::masterNo() - root procNo
             const label comm = UPstream::worldComm,
             IOstreamOption::streamFormat fmt = IOstreamOption::BINARY
         );
