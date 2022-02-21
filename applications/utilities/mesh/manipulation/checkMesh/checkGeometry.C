@@ -1015,7 +1015,10 @@ Foam::label Foam::checkGeometry
 
         const fileName outputDir
         (
-            mesh.time().globalPath()/functionObject::outputPrefix/"checkMesh"
+            mesh.time().globalPath()
+           /functionObject::outputPrefix
+           /(mesh.name() == polyMesh::defaultRegion ? word::null : mesh.name())
+           /"checkMesh"
         );
 
         forAll(pbm, patchi)
@@ -1031,7 +1034,6 @@ Foam::label Foam::checkGeometry
                         << cpp.name() << " and neighbour patch: "
                         << cpp.neighbPatch().name() << endl;
 
-                    const word pName("patch" + Foam::name(cpp.index()));
                     const AMIPatchToPatchInterpolation& ami = cpp.AMI();
 
                     {
@@ -1044,7 +1046,7 @@ Foam::label Foam::checkGeometry
                         (
                             mesh,
                             wr,
-                            outputDir / pName + "-src_" + tmName,
+                            outputDir / cpp.name() + "-src_" + tmName,
                             ami.srcWeightsSum(),
                             cpp.localFaces(),
                             cpp.meshPoints(),
@@ -1070,7 +1072,7 @@ Foam::label Foam::checkGeometry
                                 (
                                     mergedPoints,
                                     mergedFaces,
-                                    (outputDir / pName + "-src_" + tmName),
+                                    (outputDir / cpp.name() + "-src_" + tmName),
                                     false  // serial - already merged
                                 );
 
@@ -1080,6 +1082,8 @@ Foam::label Foam::checkGeometry
                         }
                     }
                     {
+                        const auto& nbrPp = cpp.neighbPatch();
+
                         // Collect geometry
                         faceList mergedFaces;
                         pointField mergedPoints;
@@ -1089,11 +1093,14 @@ Foam::label Foam::checkGeometry
                         (
                             mesh,
                             wr,
-                            outputDir / pName + "-tgt_" + tmName,
+                            (
+                                outputDir
+                              / nbrPp.name() + "-tgt_" + tmName
+                            ),
                             ami.tgtWeightsSum(),
-                            cpp.neighbPatch().localFaces(),
-                            cpp.neighbPatch().meshPoints(),
-                            cpp.neighbPatch().meshPointMap(),
+                            nbrPp.localFaces(),
+                            nbrPp.meshPoints(),
+                            nbrPp.meshPointMap(),
 
                             mergedFaces,
                             mergedPoints,
@@ -1118,7 +1125,10 @@ Foam::label Foam::checkGeometry
                                 (
                                     mergedPoints,
                                     mergedFaces,
-                                    (outputDir / pName + "-tgt_" + tmName),
+                                    (
+                                        outputDir
+                                      / nbrPp.name() + "-tgt_" + tmName
+                                    ),
                                     false  // serial - already merged
                                 );
 
@@ -1135,8 +1145,6 @@ Foam::label Foam::checkGeometry
                 const auto& cpp = refCast<const mappedPatchBase>(pp);
                 const AMIPatchToPatchInterpolation& ami = cpp.AMI();
 
-                const word pName("patch" + Foam::name(patchi));
-
                 // Collect geometry
                 faceList mergedFaces;
                 pointField mergedPoints;
@@ -1146,7 +1154,7 @@ Foam::label Foam::checkGeometry
                 (
                     mesh,
                     wr,
-                    outputDir / pName + "-src_" + tmName,
+                    outputDir / pp.name() + "-src_" + tmName,
                     ami.srcWeightsSum(),
                     pp.localFaces(),
                     pp.meshPoints(),
@@ -1173,7 +1181,7 @@ Foam::label Foam::checkGeometry
                     (
                         cpp.sampleMesh(),
                         wr,
-                        outputDir / pName + "-tgt_" + tmName,
+                        outputDir / nbrPp.name() + "-tgt_" + tmName,
                         ami.tgtWeightsSum(),
                         nbrPp.localFaces(),
                         nbrPp.meshPoints(),
