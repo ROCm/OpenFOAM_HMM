@@ -45,6 +45,9 @@ SourceFiles
 #include "UPstream.H"
 #include "DynamicList.H"
 
+// Legacy
+// #define Foam_Pstream_scatter_nobroadcast
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam

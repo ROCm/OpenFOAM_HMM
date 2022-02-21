@@ -32,9 +32,7 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "UOPstream.H"
 #include "OPstream.H"
-#include "UIPstream.H"
 #include "IPstream.H"
 #include "contiguous.H"
 
@@ -147,6 +145,34 @@ void Pstream::scatter
     const label comm
 )
 {
+    #ifndef Foam_Pstream_scatter_nobroadcast
+    if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
+    {
+        if (is_contiguous<T>::value)
+        {
+            UPstream::broadcast
+            (
+                reinterpret_cast<char*>(&Value),
+                sizeof(T),
+                comm,
+                UPstream::masterNo()
+            );
+        }
+        else
+        {
+            if (UPstream::master(comm))
+            {
+                OPBstream toAll(UPstream::masterNo(), comm);
+                toAll << Value;
+            }
+            else
+            {
+                IPBstream fromMaster(UPstream::masterNo(), comm);
+                fromMaster >> Value;
+            }
+        }
+    }
+    #else
     if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
     {
         // Get my communication order
@@ -212,6 +238,7 @@ void Pstream::scatter
             }
         }
     }
+    #endif
 }
 
 
