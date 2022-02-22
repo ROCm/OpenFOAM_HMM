@@ -89,7 +89,7 @@ class globalIndex
         static void reportOverflowAndExit
         (
             const label idx,
-            const labelUList& localSizes = labelUList::null()
+            const labelUList& localLens = labelUList::null()
         );
 
 public:
@@ -178,11 +178,14 @@ public:
         //- Global sum of localSizes.
         inline label totalSize() const;
 
-        //- The local sizes
-        labelList sizes() const;
+        //- The local sizes. Same as localSizes()
+        inline labelList sizes() const;
 
         //- The local starts
         inline const labelUList localStarts() const;
+
+        //- The local sizes
+        labelList localSizes() const;
 
         //- Global max of localSizes
         inline label maxSize() const;
@@ -276,7 +279,7 @@ public:
             inline labelList toGlobal(const labelUList& labels) const;
 
             //- From local to global index (inplace)
-            inline void inplaceToGlobal(labelList& labels) const;
+            inline void inplaceToGlobal(labelUList& labels) const;
 
             //- From global to local on current processor.
             //  FatalError if not on local processor.
@@ -314,7 +317,7 @@ public:
             inline void inplaceToGlobal
             (
                 const label proci,
-                labelList& labels
+                labelUList& labels
             ) const;
 
 
@@ -405,7 +408,7 @@ public:
         //- with optional check for label overflow
         static labelList calcOffsets
         (
-            const labelUList& localSizes,
+            const labelUList& localLens,
             const bool checkOverflow = false
         );
 
@@ -422,7 +425,7 @@ public:
         //- with optional check for label overflow
         static List<labelRange> calcRanges
         (
-            const labelUList& localSizes,
+            const labelUList& localLens,
             const bool checkOverflow = false
         );
 
@@ -774,8 +777,21 @@ public:
             template<class Type>
             void scatter
             (
-                const UList<Type>& allFld,
-                UList<Type>& fld,
+                const UList<Type>& allData,
+                UList<Type>& localData,
+                const int tag = UPstream::msgType(),
+                const Pstream::commsTypes = Pstream::commsTypes::nonBlocking,
+                const label comm = UPstream::worldComm  //!< communicator
+            ) const;
+
+            //- Distribute data in processor order
+            //- (in serial: performs a simple copy).
+            //  Communication with default/specified communicator, message tag.
+            //  \note the globalIndex offsets needed on master only.
+            template<class Type, class OutputContainer = List<Type>>
+            OutputContainer scatter
+            (
+                const UList<Type>& allData,
                 const int tag = UPstream::msgType(),
                 const Pstream::commsTypes = Pstream::commsTypes::nonBlocking,
                 const label comm = UPstream::worldComm  //!< communicator

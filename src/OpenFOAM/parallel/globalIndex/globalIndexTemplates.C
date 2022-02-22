@@ -73,22 +73,22 @@ void Foam::globalIndex::gather
     const UList<Type>& fld,
     List<Type>& allFld,
     const int tag,
-    const Pstream::commsTypes commsType
+    const Pstream::commsTypes preferredCommsType
 )
 {
     // low-level: no parRun guard
 
-    if
+    // Automatically change from nonBlocking to scheduled for
+    // non-contiguous data.
+    const UPstream::commsTypes commsType =
     (
-        !is_contiguous<Type>::value
-     && commsType == Pstream::commsTypes::nonBlocking
-    )
-    {
-        FatalErrorInFunction
-            << "Cannot use nonBlocking with non-contiguous data"
-            << exit(FatalError);
-        // Could also warn and change to scheduled etc...
-    }
+        (
+            !is_contiguous<Type>::value
+         && UPstream::commsTypes::nonBlocking == preferredCommsType
+        )
+      ? UPstream::commsTypes::scheduled
+      : preferredCommsType
+    );
 
     const label startOfRequests = UPstream::nRequests();
 
@@ -126,14 +126,7 @@ void Foam::globalIndex::gather
             }
             else
             {
-                IPstream fromProc
-                (
-                    commsType,
-                    procIDs[i],
-                    0,
-                    tag,
-                    comm
-                );
+                IPstream fromProc(commsType, procIDs[i], 0, tag, comm);
                 fromProc >> procSlot;
             }
         }
@@ -158,14 +151,7 @@ void Foam::globalIndex::gather
         }
         else
         {
-            OPstream toMaster
-            (
-                commsType,
-                procIDs[0],
-                0,
-                tag,
-                comm
-            );
+            OPstream toMaster(commsType, procIDs[0], 0, tag, comm);
             toMaster << fld;
         }
     }
@@ -187,18 +173,22 @@ void Foam::globalIndex::gather
     const IndirectListBase<Type, Addr>& fld,
     List<Type>& allFld,
     const int tag,
-    const Pstream::commsTypes commsType
+    const Pstream::commsTypes preferredCommsType
 )
 {
     // low-level: no parRun guard
 
-    if (commsType == Pstream::commsTypes::nonBlocking)
-    {
-        WarningInFunction
-            << "Cannot use nonBlocking with indirect list of data"
-            << exit(FatalError);
-        // Could also warn and change to scheduled etc...
-    }
+    // Automatically change from nonBlocking to scheduled for
+    // non-contiguous data.
+    const UPstream::commsTypes commsType =
+    (
+        (
+            !is_contiguous<Type>::value
+         && UPstream::commsTypes::nonBlocking == preferredCommsType
+        )
+      ? UPstream::commsTypes::scheduled
+      : preferredCommsType
+    );
 
     if (Pstream::myProcNo(comm) == procIDs[0])
     {
@@ -224,14 +214,7 @@ void Foam::globalIndex::gather
             }
             else
             {
-                IPstream fromProc
-                (
-                    commsType,
-                    procIDs[i],
-                    0,
-                    tag,
-                    comm
-                );
+                IPstream fromProc(commsType, procIDs[i], 0, tag, comm);
                 fromProc >> procSlot;
             }
         }
@@ -244,14 +227,7 @@ void Foam::globalIndex::gather
         }
         else
         {
-            OPstream toMaster
-            (
-                commsType,
-                procIDs[0],
-                0,
-                tag,
-                comm
-            );
+            OPstream toMaster(commsType, procIDs[0], 0, tag, comm);
             toMaster << fld;
         }
     }
@@ -692,20 +668,22 @@ void Foam::globalIndex::scatter
     const UList<Type>& allFld,
     UList<Type>& fld,
     const int tag,
-    const Pstream::commsTypes commsType
+    const Pstream::commsTypes preferredCommsType
 )
 {
-    if
+    // low-level: no parRun guard
+
+    // Automatically change from nonBlocking to scheduled for
+    // non-contiguous data.
+    const UPstream::commsTypes commsType =
     (
-        !is_contiguous<Type>::value
-     && commsType == Pstream::commsTypes::nonBlocking
-    )
-    {
-        FatalErrorInFunction
-            << "Cannot use nonBlocking with non-contiguous data"
-            << exit(FatalError);
-        // Could also warn and change to scheduled etc...
-    }
+        (
+            !is_contiguous<Type>::value
+         && UPstream::commsTypes::nonBlocking == preferredCommsType
+        )
+      ? UPstream::commsTypes::scheduled
+      : preferredCommsType
+    );
 
     // FUTURE:
     // could decide which procs will receive data and use mpiScatter
@@ -715,18 +693,15 @@ void Foam::globalIndex::scatter
 
     if (Pstream::myProcNo(comm) == procIDs[0])
     {
-        const SubList<Type> localSlot(allFld, off[1]-off[0], off[0]);
-
-        if (!localSlot.empty())
-        {
-            fld.deepCopy(localSlot);
-        }
-
         for (label i = 1; i < procIDs.size(); ++i)
         {
             const SubList<Type> procSlot(allFld, off[i+1]-off[i], off[i]);
 
-            if (is_contiguous<Type>::value)
+            if (procSlot.empty())
+            {
+                // Nothing to do
+            }
+            else if (is_contiguous<Type>::value)
             {
                 OPstream::write
                 (
@@ -740,21 +715,30 @@ void Foam::globalIndex::scatter
             }
             else
             {
-                OPstream toProc
-                (
-                    commsType,
-                    procIDs[i],
-                    0,
-                    tag,
-                    comm
-                );
+                OPstream toProc(commsType, procIDs[i], 0, tag, comm);
                 toProc << procSlot;
             }
         }
+
+        // Assign my local data - respect offset information
+        // so that we can request 0 entries to be copied.
+        // Also handle the case where we have a slice of the full
+        // list.
+
+        SubList<Type>(fld, off[1]-off[0]) =
+            SubList<Type>(allFld, off[1]-off[0], off[0]);
     }
     else
     {
-        if (is_contiguous<Type>::value)
+        // Note: we are receiving into UList, so sizes MUST match or we
+        // have a problem. Can therefore reasonably assume that a zero-sized
+        // send matches a zero-sized receive, and we can skip that.
+
+        if (fld.empty())
+        {
+            // Nothing to do
+        }
+        else if (is_contiguous<Type>::value)
         {
             IPstream::read
             (
@@ -768,14 +752,7 @@ void Foam::globalIndex::scatter
         }
         else
         {
-            IPstream fromMaster
-            (
-                commsType,
-                procIDs[0],
-                0,
-                tag,
-                comm
-            );
+            IPstream fromMaster(commsType, procIDs[0], 0, tag, comm);
             fromMaster >> fld;
         }
     }
@@ -791,25 +768,63 @@ void Foam::globalIndex::scatter
 template<class Type>
 void Foam::globalIndex::scatter
 (
-    const UList<Type>& allFld,
-    UList<Type>& fld,
+    const UList<Type>& allData,
+    UList<Type>& localData,
     const int tag,
     const Pstream::commsTypes commsType,
     const label comm
 ) const
 {
-    // TBD: protection and special handling for serial?
+    if (UPstream::parRun())
     {
         scatter
         (
             offsets_,  // needed on master only
             comm,
             UPstream::procID(comm),
-            allFld,
-            fld,
+            allData,
+            localData,
             tag,
             commsType
         );
+    }
+    else
+    {
+        // Serial: direct copy
+        // - fails miserably if incorrectly dimensioned!
+        localData.deepCopy(allData);
+    }
+}
+
+
+template<class Type, class OutputContainer>
+OutputContainer Foam::globalIndex::scatter
+(
+    const UList<Type>& allData,
+    const int tag,
+    const Pstream::commsTypes commsType,
+    const label comm
+) const
+{
+    if (UPstream::parRun())
+    {
+        // The globalIndex might be correct on master only,
+        // so scatter local sizes to ensure consistency
+
+        const label localLen
+        (
+            UPstream::listScatterValues<label>(this->localSizes(), comm)
+        );
+
+        OutputContainer localData(localLen);
+        this->scatter(allData, localData, tag, commsType, comm);
+
+        return localData;
+    }
+    else
+    {
+        // Serial: direct copy
+        return OutputContainer(allData);
     }
 }
 
