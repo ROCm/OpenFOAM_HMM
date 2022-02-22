@@ -478,23 +478,22 @@ Foam::autoPtr<Foam::fvMesh> Foam::fvMeshTools::newMesh
             )
         );
         Pstream::parRun(oldParRun);
-
-        // Send patches
-        for (const int slave : Pstream::subProcs())
-        {
-            OPstream toSlave(Pstream::commsTypes::scheduled, slave);
-            toSlave << patchEntries;
-        }
     }
-    else
+
+    if (Pstream::parRun())
     {
-        // Receive patches
-        IPstream fromMaster
-        (
-            Pstream::commsTypes::scheduled,
-            Pstream::masterNo()
-        );
-        fromMaster >> patchEntries;
+        if (Pstream::master())
+        {
+            // Broadcast: send patches to all
+            OPBstream toAll(Pstream::masterNo());  // == worldComm
+            toAll << patchEntries;
+        }
+        else
+        {
+            // Broadcast: receive patches
+            IPBstream fromMaster(Pstream::masterNo());  // == worldComm
+            fromMaster >> patchEntries;
+        }
     }
 
     Pstream::scatter(facesInstance);

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -286,11 +286,11 @@ void Foam::syncTools::syncPointMap
         {
             if (Pstream::master())
             {
-                // Receive the edges using shared points from the slave.
-                for (const int slave : Pstream::subProcs())
+                // Receive the edges using shared points from other procs
+                for (const int proci : Pstream::subProcs())
                 {
-                    IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
-                    Map<T> nbrValues(fromSlave);
+                    IPstream fromProc(Pstream::commsTypes::scheduled, proci);
+                    Map<T> nbrValues(fromProc);
 
                     // Merge neighbouring values with my values
                     forAllConstIters(nbrValues, iter)
@@ -305,16 +305,15 @@ void Foam::syncTools::syncPointMap
                     }
                 }
 
-                // Send back
-                for (const int slave : Pstream::subProcs())
+                // Broadcast: send merged values to all
                 {
-                    OPstream toSlave(Pstream::commsTypes::scheduled, slave);
-                    toSlave << sharedPointValues;
+                    OPBstream toAll(Pstream::masterNo());  // == worldComm
+                    toAll << sharedPointValues;
                 }
             }
             else
             {
-                // Slave: send to master
+                // Send to master
                 {
                     OPstream toMaster
                     (
@@ -323,13 +322,10 @@ void Foam::syncTools::syncPointMap
                     );
                     toMaster << sharedPointValues;
                 }
-                // Receive merged values
+
+                // Broadcast: receive merged values
                 {
-                    IPstream fromMaster
-                    (
-                        Pstream::commsTypes::scheduled,
-                        Pstream::masterNo()
-                    );
+                    IPBstream fromMaster(Pstream::masterNo());  // == worldComm
                     fromMaster >> sharedPointValues;
                 }
             }
@@ -640,11 +636,11 @@ void Foam::syncTools::syncEdgeMap
     {
         if (Pstream::master())
         {
-            // Receive the edges using shared points from the slave.
-            for (const int slave : Pstream::subProcs())
+            // Receive the edges using shared points from other procs
+            for (const int proci : Pstream::subProcs())
             {
-                IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
-                EdgeMap<T> nbrValues(fromSlave);
+                IPstream fromProc(Pstream::commsTypes::scheduled, proci);
+                EdgeMap<T> nbrValues(fromProc);
 
                 // Merge neighbouring values with my values
                 forAllConstIters(nbrValues, iter)
@@ -659,11 +655,10 @@ void Foam::syncTools::syncEdgeMap
                 }
             }
 
-            // Send back
-            for (const int slave : Pstream::subProcs())
+            // Broadcast: send merged values to all
             {
-                OPstream toSlave(Pstream::commsTypes::scheduled, slave);
-                toSlave << sharedEdgeValues;
+                OPBstream toAll(Pstream::masterNo());  // == worldComm
+                toAll << sharedEdgeValues;
             }
         }
         else
@@ -677,13 +672,10 @@ void Foam::syncTools::syncEdgeMap
                 );
                 toMaster << sharedEdgeValues;
             }
-            // Receive merged values
+
+            // Broadcast: receive merged values
             {
-                IPstream fromMaster
-                (
-                    Pstream::commsTypes::scheduled,
-                    Pstream::masterNo()
-                );
+                IPBstream fromMaster(Pstream::masterNo());  // == worldComm
                 fromMaster >> sharedEdgeValues;
             }
         }

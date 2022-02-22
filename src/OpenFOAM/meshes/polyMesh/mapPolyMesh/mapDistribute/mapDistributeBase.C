@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -106,18 +106,11 @@ Foam::List<Foam::labelPair> Foam::mapDistributeBase::schedule
                 }
             }
         }
-        // Send back
-        for (const int slave : Pstream::subProcs(comm))
+
+        // Broadcast: send merged to all
         {
-            OPstream toSlave
-            (
-                Pstream::commsTypes::scheduled,
-                slave,
-                0,
-                tag,
-                comm
-            );
-            toSlave << allComms;
+            OPBstream toAll(Pstream::masterNo(), comm);
+            toAll << allComms;
         }
     }
     else
@@ -133,15 +126,10 @@ Foam::List<Foam::labelPair> Foam::mapDistributeBase::schedule
             );
             toMaster << allComms;
         }
+
+        // Broadcast: receive merged
         {
-            IPstream fromMaster
-            (
-                Pstream::commsTypes::scheduled,
-                Pstream::masterNo(),
-                0,
-                tag,
-                comm
-            );
+            IPBstream fromMaster(Pstream::masterNo(), comm);
             fromMaster >> allComms;
         }
     }

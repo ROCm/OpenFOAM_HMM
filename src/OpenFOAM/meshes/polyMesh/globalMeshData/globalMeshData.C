@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -388,20 +388,20 @@ void Foam::globalMeshData::calcSharedEdges() const
         }
         countSharedEdges(localShared, globalShared, sharedEdgeI);
 
-        // Receive data from slaves and insert
+        // Receive data and insert
         if (Pstream::parRun())
         {
-            for (const int slave : Pstream::subProcs())
+            for (const int proci : Pstream::subProcs())
             {
                 // Receive the edges using shared points from the slave.
-                IPstream fromSlave(Pstream::commsTypes::blocking, slave);
-                EdgeMap<labelList> procSharedEdges(fromSlave);
+                IPstream fromProc(Pstream::commsTypes::blocking, proci);
+                EdgeMap<labelList> procSharedEdges(fromProc);
 
                 if (debug)
                 {
                     Pout<< "globalMeshData::calcSharedEdges : "
                         << "Merging in from proc"
-                        << Foam::name(slave) << " : " << procSharedEdges.size()
+                        << proci << " : " << procSharedEdges.size()
                         << endl;
                 }
                 countSharedEdges(procSharedEdges, globalShared, sharedEdgeI);
@@ -432,36 +432,32 @@ void Foam::globalMeshData::calcSharedEdges() const
         }
 
 
-        // Send back to slaves.
+        // Broadcast: send back to all
         if (Pstream::parRun())
         {
-            for (const int slave : Pstream::subProcs())
-            {
-                // Receive the edges using shared points from the slave.
-                OPstream toSlave(Pstream::commsTypes::blocking, slave);
-                toSlave << globalShared;
-            }
+            OPBstream toAll(Pstream::masterNo());  // == worldComm
+            toAll << globalShared;
         }
     }
     else
     {
-        // Send local edges to master
+        if (Pstream::parRun())
         {
-            OPstream toMaster
-            (
-                Pstream::commsTypes::blocking,
-                Pstream::masterNo()
-            );
-            toMaster << localShared;
-        }
-        // Receive merged edges from master.
-        {
-            IPstream fromMaster
-            (
-                Pstream::commsTypes::blocking,
-                Pstream::masterNo()
-            );
-            fromMaster >> globalShared;
+            // Send local edges to master
+            {
+                OPstream toMaster
+                (
+                    Pstream::commsTypes::blocking,
+                    Pstream::masterNo()
+                );
+                toMaster << localShared;
+            }
+
+            // Broadcast: receive merged edges from master
+            {
+                IPBstream fromMaster(Pstream::masterNo());  // == worldComm
+                fromMaster >> globalShared;
+            }
         }
     }
 
@@ -1896,14 +1892,14 @@ Foam::pointField Foam::globalMeshData::sharedPoints() const
             sharedPoints[sharedPointi] = mesh_.points()[pointLabels[i]];
         }
 
-        // Receive data from slaves and insert
-        for (const int slave : Pstream::subProcs())
+        // Receive data and insert
+        for (const int proci : Pstream::subProcs())
         {
-            IPstream fromSlave(Pstream::commsTypes::blocking, slave);
+            IPstream fromProc(Pstream::commsTypes::blocking, proci);
 
             labelList nbrSharedPointAddr;
             pointField nbrSharedPoints;
-            fromSlave >> nbrSharedPointAddr >> nbrSharedPoints;
+            fromProc >> nbrSharedPointAddr >> nbrSharedPoints;
 
             forAll(nbrSharedPointAddr, i)
             {
@@ -1913,22 +1909,15 @@ Foam::pointField Foam::globalMeshData::sharedPoints() const
             }
         }
 
-        // Send back
-        for (const int slave : Pstream::subProcs())
+        // Broadcast: send back
         {
-            OPstream toSlave
-            (
-                Pstream::commsTypes::blocking,
-                slave,
-                sharedPoints.size_bytes()
-            );
-            toSlave << sharedPoints;
+            OPBstream toAll(Pstream::masterNo());  // == worldComm
+            toAll << sharedPoints;
         }
     }
     else
     {
-        // Slave:
-        // send points
+        // Send address and points
         {
             OPstream toMaster
             (
@@ -1940,13 +1929,9 @@ Foam::pointField Foam::globalMeshData::sharedPoints() const
                 << UIndirectList<point>(mesh_.points(), pointLabels)();
         }
 
-        // Receive sharedPoints
+        // Broadcast: receive sharedPoints
         {
-            IPstream fromMaster
-            (
-                Pstream::commsTypes::blocking,
-                Pstream::masterNo()
-            );
+            IPBstream fromMaster(Pstream::masterNo());  // == worldComm
             fromMaster >> sharedPoints;
         }
     }
