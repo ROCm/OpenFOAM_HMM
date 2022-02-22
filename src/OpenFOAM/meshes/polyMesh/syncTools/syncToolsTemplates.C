@@ -127,6 +127,7 @@ void Foam::syncTools::syncPointMap
 
     if (Pstream::parRun())
     {
+        DynamicList<label> sendRecvProcs;
         PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
 
         // Send
@@ -137,6 +138,7 @@ void Foam::syncTools::syncPointMap
             if (ppp && pp.nPoints())
             {
                 const auto& procPatch = *ppp;
+                const label nbrProci = procPatch.neighbProcNo();
 
                 // Get data per patchPoint in neighbouring point numbers.
 
@@ -157,12 +159,14 @@ void Foam::syncTools::syncPointMap
                     }
                 }
 
-                UOPstream toNeighb(procPatch.neighbProcNo(), pBufs);
-                toNeighb << patchInfo;
+                sendRecvProcs.append(nbrProci);
+                UOPstream toNbr(nbrProci, pBufs);
+                toNbr << patchInfo;
             }
         }
 
-        pBufs.finishedSends();
+        // Limit exchange to involved procs
+        pBufs.finishedSends(sendRecvProcs, sendRecvProcs);
 
         // Receive and combine.
         for (const polyPatch& pp : patches)
@@ -172,8 +176,9 @@ void Foam::syncTools::syncPointMap
             if (ppp && pp.nPoints())
             {
                 const auto& procPatch = *ppp;
+                const label nbrProci = procPatch.neighbProcNo();
 
-                UIPstream fromNbr(procPatch.neighbProcNo(), pBufs);
+                UIPstream fromNbr(nbrProci, pBufs);
                 Map<T> nbrPatchInfo(fromNbr);
 
                 // Transform
@@ -377,6 +382,7 @@ void Foam::syncTools::syncEdgeMap
 
     if (Pstream::parRun())
     {
+        DynamicList<label> sendRecvProcs;
         PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
 
         // Send
@@ -387,6 +393,7 @@ void Foam::syncTools::syncEdgeMap
             if (ppp && pp.nEdges())
             {
                 const auto& procPatch = *ppp;
+                const label nbrProci = procPatch.neighbProcNo();
 
                 // Get data per patch edge in neighbouring edge.
 
@@ -409,12 +416,15 @@ void Foam::syncTools::syncEdgeMap
                     }
                 }
 
-                UOPstream toNeighb(procPatch.neighbProcNo(), pBufs);
-                toNeighb << patchInfo;
+                sendRecvProcs.append(nbrProci);
+                UOPstream toNbr(nbrProci, pBufs);
+                toNbr << patchInfo;
             }
         }
 
-        pBufs.finishedSends();
+        // Limit exchange to involved procs
+        pBufs.finishedSends(sendRecvProcs, sendRecvProcs);
+
 
         // Receive and combine.
         for (const polyPatch& pp : patches)
@@ -1113,6 +1123,7 @@ void Foam::syncTools::syncBoundaryFaceList
         }
         else
         {
+            DynamicList<label> sendRecvProcs;
             PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
 
             // Send
@@ -1123,6 +1134,7 @@ void Foam::syncTools::syncBoundaryFaceList
                 if (ppp && pp.size())
                 {
                     const auto& procPatch = *ppp;
+                    const label nbrProci = procPatch.neighbProcNo();
 
                     const SubList<T> fld
                     (
@@ -1131,12 +1143,15 @@ void Foam::syncTools::syncBoundaryFaceList
                         pp.start()-boundaryOffset
                     );
 
-                    UOPstream toNbr(procPatch.neighbProcNo(), pBufs);
-                    toNbr << fld;;
+                    sendRecvProcs.append(nbrProci);
+                    UOPstream toNbr(nbrProci, pBufs);
+                    toNbr << fld;
                 }
             }
 
-            pBufs.finishedSends();
+            // Limit exchange to involved procs
+            pBufs.finishedSends(sendRecvProcs, sendRecvProcs);
+
 
             // Receive and combine.
             for (const polyPatch& pp : patches)

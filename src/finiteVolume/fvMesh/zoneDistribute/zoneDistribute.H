@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2020 DLR
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,12 +38,13 @@ Description
     Original code supplied by Henning Scheufler, DLR (2019)
 
 SourceFiles
+    zoneDistributeI.H
     zoneDistribute.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef zoneDistribute_H
-#define zoneDistribute_H
+#ifndef Foam_zoneDistribute_H
+#define Foam_zoneDistribute_H
 
 #include "fvMesh.H"
 #include "globalIndex.H"
@@ -51,7 +53,6 @@ SourceFiles
 #include "zoneCPCStencil.H"
 #include "IOobject.H"
 #include "MeshObject.H"
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -68,20 +69,30 @@ class zoneDistribute
 {
     // Private Data
 
-
         //- labels of the points on coupled patches
         labelList coupledBoundaryPoints_;
 
-        //- storage of the addressing for processor-to-processor comms
-        List<labelHashSet> send_;
+        //- Addressing for processor-to-processor comms
+        List<labelList> send_;
 
         //- Return patch of all coupled faces.
         autoPtr<indirectPrimitivePatch> coupledFacesPatch() const;
 
         zoneCPCStencil& stencil_;
 
-        const globalIndex& gblIdx_;
+        //- Global number into cells and faces
+        const globalIndex& globalNumbering_;
 
+        //- Parallel: send data to processors (true/false)
+        //  updated in setUpCommforZone
+        boolList sendTo_;
+
+        //- Parallel: receive data from processors (true/false)
+        //  updated in setUpCommforZone
+        boolList recvFrom_;
+
+
+    // Private Member Functions
 
         //- Gives patchNumber and patchFaceNumber for a given
         //- Geometric volume field
@@ -114,15 +125,12 @@ public:
         //- Construct from fvMesh
         explicit zoneDistribute(const fvMesh&);
 
-
-    // Selectors
-
+        //- Selector
         static zoneDistribute& New(const fvMesh&);
 
 
     //- Destructor
-
-        virtual ~zoneDistribute() = default;
+    virtual ~zoneDistribute() = default;
 
 
     // Member Functions
@@ -142,7 +150,7 @@ public:
         //- Addressing reference
         const globalIndex& globalNumbering() const noexcept
         {
-            return gblIdx_;
+            return globalNumbering_;
         }
 
         //- Gives patchNumber and patchFaceNumber for a given
@@ -170,8 +178,6 @@ public:
             const boolList& zone,
             const GeometricField<Type, fvPatchField, volMesh>& phi
         );
-
-
 };
 
 

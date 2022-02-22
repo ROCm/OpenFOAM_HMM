@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2019-2020 DLR
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,10 +85,10 @@ Type Foam::zoneDistribute::getValue
     const label gblIdx
 ) const
 {
-    if (gblIdx_.isLocal(gblIdx))
+    if (globalNumbering_.isLocal(gblIdx))
     {
-        const label idx = gblIdx_.toLocal(gblIdx);
-        return getLocalValue(phi,idx);
+        const label localIdx = globalNumbering_.toLocal(gblIdx);
+        return getLocalValue(phi,localIdx);
     }
     else // from other proc
     {
@@ -111,7 +111,6 @@ Foam::Map<Foam::Field<Type>> Foam::zoneDistribute::getFields
             << "size of phi:" <<  phi.size()
             << "do not match. Did the mesh change?"
             << exit(FatalError);
-
     }
 
 
@@ -120,20 +119,20 @@ Foam::Map<Foam::Field<Type>> Foam::zoneDistribute::getFields
 
     Map<Field<Type>> stencilWithValues;
 
-    DynamicField<Type> tmpField(100);
+    DynamicField<Type> tmpField(128);
 
-    forAll(zone,celli)
+    forAll(zone, celli)
     {
         if (zone[celli])
         {
-            tmpField.clearStorage();
+            tmpField.clear();
 
             for (const label gblIdx : stencil_[celli])
             {
                 tmpField.append(getValue(phi,neiValues,gblIdx));
             }
 
-            stencilWithValues.insert(celli,tmpField);
+            stencilWithValues.emplace(celli, tmpField);
         }
     }
 
@@ -155,55 +154,97 @@ Foam::Map<Type> Foam::zoneDistribute::getDatafromOtherProc
             << "size of phi:" <<  phi.size()
             << "do not match. Did the mesh change?"
             << exit(FatalError);
-
     }
 
 
     // Get values from other proc
     Map<Type> neiValues;
-    List<Map<Type>> sendValues(Pstream::nProcs());
 
-    if (Pstream::parRun())
+    if (UPstream::parRun())
     {
-        forAll(send_, domaini)
+        const bool commsPrepared = (sendTo_.size() == UPstream::nProcs());
+
+        if (!commsPrepared)
         {
-            for (const label sendIdx : send_[domaini])
+            FatalErrorInFunction
+                << "The send/recv information not initialized - "
+                << "likely that setUpCommforZone() was not called"
+                << endl;
+
+            // But don't exit/abort for now
+        }
+
+
+        List<Map<Type>> sendValues(UPstream::nProcs());
+
+        forAll(send_, proci)
+        {
+            for (const label sendIdx : send_[proci])
             {
-                sendValues[domaini].insert
+                sendValues[proci].insert
                 (
                     sendIdx,
-                    getLocalValue(phi,gblIdx_.toLocal(sendIdx))
+                    getLocalValue(phi, globalNumbering_.toLocal(sendIdx))
                 );
             }
         }
 
-        PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
+
+        PstreamBuffers pBufs(UPstream::commsTypes::nonBlocking);
+        labelList recvSizes;
 
         // Stream data into buffer
-        for (const int domain : Pstream::allProcs())
+        for (const int proci : UPstream::allProcs())
         {
-            if (domain != Pstream::myProcNo())
+            if (proci != UPstream::myProcNo() && !sendValues[proci].empty())
             {
                 // Put data into send buffer
-                UOPstream toDomain(domain, pBufs);
-
-                toDomain << sendValues[domain];
+                UOPstream toProc(proci, pBufs);
+                toProc << sendValues[proci];
             }
         }
 
-        // Wait until everything is written.
-        pBufs.finishedSends();
 
-        Map<Type> tmpValue;
-
-        for (const int domain : Pstream::allProcs())
+        if (commsPrepared)
         {
-            if (domain != Pstream::myProcNo())
-            {
-                // Get data from send buffer
-                UIPstream fromDomain(domain, pBufs);
+            DynamicList<label> sendProcs;
+            DynamicList<label> recvProcs;
 
-                fromDomain >> tmpValue;
+            for (const int proci : UPstream::allProcs())
+            {
+                if (sendTo_[proci])
+                {
+                    sendProcs.append(proci);
+                }
+                if (recvFrom_[proci])
+                {
+                    recvProcs.append(proci);
+                }
+            }
+
+            pBufs.finishedSends(sendProcs, recvProcs, recvSizes);
+        }
+        else
+        {
+            // Fallback to all-to-all communication
+
+            pBufs.finishedSends(recvSizes);
+        }
+
+
+        for (const int proci : UPstream::allProcs())
+        {
+            // Do not use recvFrom_[proci] here
+            // - could be incorrect if comms are not prepared!
+
+            if
+            (
+                proci != UPstream::myProcNo()
+             && (recvSizes[proci] > 0)
+            )
+            {
+                UIPstream fromProc(proci, pBufs);
+                Map<Type> tmpValue(fromProc);
 
                 neiValues += tmpValue;
             }

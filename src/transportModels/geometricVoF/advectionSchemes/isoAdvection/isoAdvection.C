@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 DHI
-    Modified code Copyright (C) 2016-2017 OpenCFD Ltd.
+    Modified code Copyright (C) 2016-2022 OpenCFD Ltd.
     Modified code Copyright (C) 2019-2020 DLR
     Modified code Copyright (C) 2018, 2021 Johan Roenby
 -------------------------------------------------------------------------------
@@ -497,6 +497,7 @@ Foam::DynamicList<Foam::label>  Foam::isoAdvection::syncProcPatches
 
     if (Pstream::parRun())
     {
+        DynamicList<label> sendRecvProcs;
         PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
 
         // Send
@@ -504,10 +505,12 @@ Foam::DynamicList<Foam::label>  Foam::isoAdvection::syncProcPatches
         {
             const processorPolyPatch& procPatch =
                 refCast<const processorPolyPatch>(patches[patchi]);
+            const label nbrProci = procPatch.neighbProcNo();
 
-            UOPstream toNbr(procPatch.neighbProcNo(), pBufs);
+            sendRecvProcs.append(nbrProci);
+            UOPstream toNbr(nbrProci, pBufs);
+
             const scalarField& pFlux = dVf.boundaryField()[patchi];
-
             const List<label>& surfCellFacesOnProcPatch =
                 surfaceCellFacesOnProcPatches_[patchi];
 
@@ -520,7 +523,8 @@ Foam::DynamicList<Foam::label>  Foam::isoAdvection::syncProcPatches
             toNbr << surfCellFacesOnProcPatch << dVfPatch;
         }
 
-        pBufs.finishedSends();
+        // Limit exchange to involved procs
+        pBufs.finishedSends(sendRecvProcs, sendRecvProcs);
 
 
         // Receive and combine
@@ -528,8 +532,9 @@ Foam::DynamicList<Foam::label>  Foam::isoAdvection::syncProcPatches
         {
             const processorPolyPatch& procPatch =
                 refCast<const processorPolyPatch>(patches[patchi]);
+            const label nbrProci = procPatch.neighbProcNo();
 
-            UIPstream fromNeighb(procPatch.neighbProcNo(), pBufs);
+            UIPstream fromNeighb(nbrProci, pBufs);
             List<label> faceIDs;
             List<scalar> nbrdVfs;
 
