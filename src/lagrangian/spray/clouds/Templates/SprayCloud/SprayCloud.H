@@ -35,11 +35,11 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SprayCloud_H
-#define SprayCloud_H
+#ifndef Foam_SprayCloud_H
+#define Foam_SprayCloud_H
 
 #include "sprayCloud.H"
-#include "SortableList.H"
+#include "SortList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
