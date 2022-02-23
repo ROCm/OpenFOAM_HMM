@@ -55,51 +55,114 @@ Foam::label Foam::metisLikeDecomp::decomposeGeneral
         Info<< type() << "Decomp : running in parallel."
             << " Decomposing all of graph on master processor." << endl;
     }
-    const globalIndex globalCells(xadj.size()-1);
-    label nTotalConnections = returnReduce(adjncy.size(), sumOp<label>());
 
-    // Send all to master. Use scheduled to save some storage.
+    const globalIndex globalAdjncy(adjncy.size());
+    const globalIndex globalCells(xadj.size()-1);
+
+    List<label> allAdjncy(globalAdjncy.gather(adjncy));
+
+    // Gathering xadj to master is similar to globalIndex gather()
+    // except for the following:
+    //
+    //   - gathered list is size+1
+    //   - apply local to global renumbering
+
+    const UPstream::commsTypes commsType = UPstream::commsTypes::nonBlocking;
+    const label startOfRequests = UPstream::nRequests();
+
+
+    List<label> allXadj;
     if (Pstream::master())
     {
-        List<label> allAdjncy(nTotalConnections);
-        List<label> allXadj(globalCells.totalSize()+1);
-        List<scalar> allWeights(globalCells.totalSize());
+        allXadj.resize(globalCells.totalSize()+1);
+        allXadj.last() = globalAdjncy.totalSize();  // Final end offset
 
-        // Insert my own
-        label nTotalCells = 0;
-        forAll(cWeights, celli)
-        {
-            allXadj[nTotalCells] = xadj[celli];
-            allWeights[nTotalCells++] = cWeights[celli];
-        }
-        nTotalConnections = 0;
-        forAll(adjncy, i)
-        {
-            allAdjncy[nTotalConnections++] = adjncy[i];
-        }
+        // My values - no renumbering required
+        SubList<label>(allXadj, globalCells.localSize(0)) =
+            SubList<label>(xadj, globalCells.localSize(0));
 
-        for (const int slave : Pstream::subProcs())
+        for (const int proci : globalCells.subProcs())
         {
-            IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
-            List<label> nbrAdjncy(fromSlave);
-            List<label> nbrXadj(fromSlave);
-            List<scalar> nbrWeights(fromSlave);
+            SubList<label> procSlot(allXadj, globalCells.range(proci));
 
-            // Append.
-            forAll(nbrXadj, celli)
+            if (procSlot.empty())
             {
-                allXadj[nTotalCells] = nTotalConnections+nbrXadj[celli];
-                allWeights[nTotalCells++] = nbrWeights[celli];
+                // Nothing to do
             }
-            // No need to renumber xadj since already global.
-            forAll(nbrAdjncy, i)
+            else
             {
-                allAdjncy[nTotalConnections++] = nbrAdjncy[i];
+                IPstream::read
+                (
+                    commsType,
+                    proci,
+                    procSlot.data_bytes(),
+                    procSlot.size_bytes(),
+                    UPstream::msgType(),
+                    UPstream::worldComm
+                );
             }
         }
-        allXadj[nTotalCells] = nTotalConnections;
+    }
+    else
+    {
+        // Send my part of the graph (local numbering)
 
-        labelList allDecomp;
+        if (xadj.size() <= 1)
+        {
+            // Nothing to do
+        }
+        else
+        {
+            SubList<label> procSlot(xadj, xadj.size()-1);
+
+            OPstream::write
+            (
+                commsType,
+                UPstream::masterNo(),
+                procSlot.cdata_bytes(),
+                procSlot.size_bytes(),
+                UPstream::msgType(),
+                UPstream::worldComm
+            );
+        }
+    }
+
+    if (commsType == UPstream::commsTypes::nonBlocking)
+    {
+        // Wait for all to finish
+        UPstream::waitRequests(startOfRequests);
+    }
+
+    // Local to global renumbering
+    if (Pstream::master())
+    {
+        for (const int proci : globalCells.subProcs())
+        {
+            SubList<label> procSlot(allXadj, globalCells.range(proci));
+
+            globalAdjncy.inplaceToGlobal(proci, procSlot);
+        }
+    }
+
+    // Ignore zero-sized weights ... and poorly sized ones too
+    List<scalar> allWeights;
+    if
+    (
+        returnReduce
+        (
+            (cWeights.size() == globalCells.localSize()), andOp<bool>()
+        )
+    )
+    {
+        allWeights = globalCells.gather(cWeights);
+    }
+
+
+    // Global decomposition
+    labelList allDecomp;
+
+    if (Pstream::master())
+    {
         decomposeSerial
         (
             allAdjncy,
@@ -108,45 +171,14 @@ Foam::label Foam::metisLikeDecomp::decomposeGeneral
             allDecomp
         );
 
-
-        // Send allFinalDecomp back
-        for (const int slave : Pstream::subProcs())
-        {
-            OPstream toSlave(Pstream::commsTypes::scheduled, slave);
-            toSlave << SubList<label>
-            (
-                allDecomp,
-                globalCells.localSize(slave),
-                globalCells.localStart(slave)
-            );
-        }
-
-        // Get my own part (always first)
-        decomp = SubList<label>(allDecomp, globalCells.localSize());
+        allAdjncy.clear();    // Not needed anymore
+        allXadj.clear();      // ...
+        allWeights.clear();   // ...
     }
-    else
-    {
-        // Send my part of the graph (already in global numbering)
-        {
-            OPstream toMaster
-            (
-                Pstream::commsTypes::scheduled,
-                Pstream::masterNo()
-            );
-            toMaster
-                << adjncy
-                << SubList<label>(xadj, xadj.size()-1)
-                << cWeights;
-        }
 
-        // Receive back decomposition
-        IPstream fromMaster
-        (
-            Pstream::commsTypes::scheduled,
-            Pstream::masterNo()
-        );
-        fromMaster >> decomp;
-    }
+    // The processor-local decomposition (output)
+    decomp.resize_nocopy(globalCells.localSize());
+    globalCells.scatter(allDecomp, decomp);
 
     return 0;
 }
