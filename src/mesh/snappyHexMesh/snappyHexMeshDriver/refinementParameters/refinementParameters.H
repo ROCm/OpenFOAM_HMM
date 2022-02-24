@@ -115,6 +115,8 @@ class refinementParameters
 
         const scalar minCellFraction_;
 
+        const label nMinCells_;
+
         const bool dryRun_;
 
 
@@ -242,6 +244,13 @@ public:
             scalar minCellFraction() const
             {
                 return minCellFraction_;
+            }
+
+            //- When are disconnected regions small. Absolute number of cells
+            //  in a zone or background. Default 0.
+            label nMinCells() const
+            {
+                return nMinCells_;
             }
 
 

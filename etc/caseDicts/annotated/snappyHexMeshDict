@@ -480,6 +480,8 @@ castellatedMeshControls
     //           when generating meshes with faceZones as baffles or boundary
     //           faces.
     //minCellFraction 0.001;
+    // Optional: same but in absolute number of cells. Default is 0.
+    //nMinCells 100;
 }
 
 // Settings for the snapping.

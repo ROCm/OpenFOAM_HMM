@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -3209,21 +3209,22 @@ void Foam::snappyRefineDriver::deleteSmallRegions
     forAll(nCellsPerRegion, regioni)
     {
         const label zonei = regionToZone[regioni];
+        label& nRegionCells = nCellsPerRegion[regioni];
 
         if
         (
-            nCellsPerRegion[regioni]
-          < refineParams.minCellFraction()*nCellsPerZone[zonei]
+            nRegionCells < refineParams.minCellFraction()*nCellsPerZone[zonei]
+         || nRegionCells < refineParams.nMinCells()
         )
         {
             Info<< "Deleting region " << regioni
-                << " (size " << nCellsPerRegion[regioni]
+                << " (size " << nRegionCells
                 << ") of zone size " << nCellsPerZone[zonei]
                 << endl;
 
             // Mark region to be deleted. 0 size (= global) should never
             // occur.
-            nCellsPerRegion[regioni] = 0;
+            nRegionCells = 0;
         }
     }
 
