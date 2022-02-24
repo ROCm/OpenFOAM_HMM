@@ -54,7 +54,7 @@ Foam::List<Foam::labelPair> Foam::mapDistributeBase::schedule
     const label nProcs = Pstream::nProcs(comm);
 
     // Communications: send and receive processor
-    List<labelPair> allComms;
+    DynamicList<labelPair> allComms;
 
     {
         labelPairHashSet commsSet(nProcs);
@@ -80,41 +80,31 @@ Foam::List<Foam::labelPair> Foam::mapDistributeBase::schedule
     }
 
 
-    // Reduce
+    // Gather/reduce
     if (Pstream::master(comm))
     {
         // Receive and merge
-        for (const int slave : Pstream::subProcs(comm))
+        for (const int proci : Pstream::subProcs(comm))
         {
-            IPstream fromSlave
+            IPstream fromProc
             (
                 Pstream::commsTypes::scheduled,
-                slave,
+                proci,
                 0,
                 tag,
                 comm
             );
-            List<labelPair> nbrData(fromSlave);
+            List<labelPair> nbrData(fromProc);
 
-            forAll(nbrData, i)
+            for (const labelPair& connection : nbrData)
             {
-                if (!allComms.found(nbrData[i]))
-                {
-                    label sz = allComms.size();
-                    allComms.setSize(sz+1);
-                    allComms[sz] = nbrData[i];
-                }
+                allComms.appendUniq(connection);
             }
-        }
-
-        // Broadcast: send merged to all
-        {
-            OPBstream toAll(Pstream::masterNo(), comm);
-            toAll << allComms;
         }
     }
     else
     {
+        if (Pstream::parRun())
         {
             OPstream toMaster
             (
@@ -126,13 +116,10 @@ Foam::List<Foam::labelPair> Foam::mapDistributeBase::schedule
             );
             toMaster << allComms;
         }
-
-        // Broadcast: receive merged
-        {
-            IPBstream fromMaster(Pstream::masterNo(), comm);
-            fromMaster >> allComms;
-        }
     }
+
+    // Broadcast: send comms information to all
+    Pstream::scatter(allComms, tag, comm);
 
 
     // Determine my schedule.

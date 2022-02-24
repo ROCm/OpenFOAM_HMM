@@ -480,22 +480,8 @@ Foam::autoPtr<Foam::fvMesh> Foam::fvMeshTools::newMesh
         Pstream::parRun(oldParRun);
     }
 
-    if (Pstream::parRun())
-    {
-        if (Pstream::master())
-        {
-            // Broadcast: send patches to all
-            OPBstream toAll(Pstream::masterNo());  // == worldComm
-            toAll << patchEntries;
-        }
-        else
-        {
-            // Broadcast: receive patches
-            IPBstream fromMaster(Pstream::masterNo());  // == worldComm
-            fromMaster >> patchEntries;
-        }
-    }
-
+    // Broadcast information to all
+    Pstream::scatter(patchEntries);
     Pstream::scatter(facesInstance);
     Pstream::scatter(pointsInstance);
 

@@ -90,21 +90,8 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
         Pstream::parRun(oldParRun);
     }
 
-    if (Pstream::parRun())
-    {
-        if (Pstream::master())
-        {
-            // Broadcast: send patches
-            OPBstream toAll(Pstream::masterNo());
-            toAll << patchEntries;
-        }
-        else
-        {
-            // Broadcast: receive patches
-            IPBstream fromMaster(Pstream::masterNo());
-            fromMaster >> patchEntries;
-        }
-    }
+    // Broadcast: send patches to all
+    Pstream::scatter(patchEntries);  // == worldComm;
 
 
     // Dummy meshes

@@ -430,36 +430,24 @@ void Foam::globalMeshData::calcSharedEdges() const
                     << " down to " << globalShared.size() << endl;
             }
         }
-
-
-        // Broadcast: send back to all
-        if (Pstream::parRun())
-        {
-            OPBstream toAll(Pstream::masterNo());  // == worldComm
-            toAll << globalShared;
-        }
     }
     else
     {
         if (Pstream::parRun())
         {
             // Send local edges to master
-            {
-                OPstream toMaster
-                (
-                    Pstream::commsTypes::blocking,
-                    Pstream::masterNo()
-                );
-                toMaster << localShared;
-            }
-
-            // Broadcast: receive merged edges from master
-            {
-                IPBstream fromMaster(Pstream::masterNo());  // == worldComm
-                fromMaster >> globalShared;
-            }
+            OPstream toMaster
+            (
+                Pstream::commsTypes::blocking,
+                Pstream::masterNo()
+            );
+            toMaster << localShared;
         }
     }
+
+    // Broadcast: merged edges to all
+    Pstream::scatter(globalShared);  // == worldComm;
+
 
     // Now use the global shared edges list (globalShared) to classify my local
     // ones (localShared)
@@ -1908,17 +1896,12 @@ Foam::pointField Foam::globalMeshData::sharedPoints() const
                 sharedPoints[sharedPointi] = nbrSharedPoints[i];
             }
         }
-
-        // Broadcast: send back
-        {
-            OPBstream toAll(Pstream::masterNo());  // == worldComm
-            toAll << sharedPoints;
-        }
     }
     else
     {
-        // Send address and points
+        if (Pstream::parRun())
         {
+            // Send address and points
             OPstream toMaster
             (
                 Pstream::commsTypes::blocking,
@@ -1926,15 +1909,13 @@ Foam::pointField Foam::globalMeshData::sharedPoints() const
             );
             toMaster
                 << pointAddr
-                << UIndirectList<point>(mesh_.points(), pointLabels)();
-        }
-
-        // Broadcast: receive sharedPoints
-        {
-            IPBstream fromMaster(Pstream::masterNo());  // == worldComm
-            fromMaster >> sharedPoints;
+                << pointField(mesh_.points(), pointLabels);
         }
     }
+
+    // Broadcast: sharedPoints to all
+    Pstream::scatter(sharedPoints);  // == worldComm
+
 
     return sharedPoints;
 }

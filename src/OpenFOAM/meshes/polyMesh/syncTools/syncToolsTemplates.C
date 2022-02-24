@@ -309,33 +309,21 @@ void Foam::syncTools::syncPointMap
                         );
                     }
                 }
-
-                // Broadcast: send merged values to all
-                {
-                    OPBstream toAll(Pstream::masterNo());  // == worldComm
-                    toAll << sharedPointValues;
-                }
             }
             else
             {
                 // Send to master
-                {
-                    OPstream toMaster
-                    (
-                        Pstream::commsTypes::scheduled,
-                        Pstream::masterNo()
-                    );
-                    toMaster << sharedPointValues;
-                }
-
-                // Broadcast: receive merged values
-                {
-                    IPBstream fromMaster(Pstream::masterNo());  // == worldComm
-                    fromMaster >> sharedPointValues;
-                }
+                OPstream toMaster
+                (
+                    Pstream::commsTypes::scheduled,
+                    Pstream::masterNo()
+                );
+                toMaster << sharedPointValues;
             }
-        }
 
+            // Broadcast: send merged values to all
+            Pstream::scatter(sharedPointValues);
+        }
 
         // Merge sharedPointValues (keyed on sharedPointAddr) into
         // pointValues (keyed on mesh points).
@@ -664,12 +652,6 @@ void Foam::syncTools::syncEdgeMap
                     );
                 }
             }
-
-            // Broadcast: send merged values to all
-            {
-                OPBstream toAll(Pstream::masterNo());  // == worldComm
-                toAll << sharedEdgeValues;
-            }
         }
         else
         {
@@ -682,13 +664,10 @@ void Foam::syncTools::syncEdgeMap
                 );
                 toMaster << sharedEdgeValues;
             }
-
-            // Broadcast: receive merged values
-            {
-                IPBstream fromMaster(Pstream::masterNo());  // == worldComm
-                fromMaster >> sharedEdgeValues;
-            }
         }
+
+        // Broadcast: send merged values to all
+        Pstream::scatter(sharedEdgeValues);
     }
 
 
