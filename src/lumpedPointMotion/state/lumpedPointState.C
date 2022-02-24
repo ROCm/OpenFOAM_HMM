@@ -403,47 +403,14 @@ bool Foam::lumpedPointState::readData
 
     if (Pstream::parRun())
     {
-        // Scatter master data using communication scheme
+        // Broadcast master data to everyone
 
-        // Get my communication order
-        const List<Pstream::commsStruct>& comms = Pstream::whichCommunication();
-        const Pstream::commsStruct& myComm = comms[Pstream::myProcNo()];
-
-        // Receive from up
-        if (myComm.above() != -1)
-        {
-            IPstream fromAbove
-            (
-                UPstream::commsTypes::scheduled,
-                myComm.above(),
-                0,
-                Pstream::msgType(),
-                Pstream::worldComm
-            );
-
-            fromAbove >> points_ >> angles_ >> degrees_;
-        }
-
-        // Send to downstairs neighbours
-        forAllReverse(myComm.below(), belowI)
-        {
-            OPstream toBelow
-            (
-                UPstream::commsTypes::scheduled,
-                myComm.below()[belowI],
-                0,
-                Pstream::msgType(),
-                Pstream::worldComm
-            );
-
-            toBelow << points_ << angles_ << degrees_;
-        }
-
-        rotationPtr_.reset(nullptr);
-
-        // MPI barrier
+        Pstream::scatter(points_);
+        Pstream::scatter(angles_);
+        Pstream::scatter(degrees_);
         Pstream::scatter(ok);
     }
+    rotationPtr_.reset(nullptr);
 
     return ok;
 }
