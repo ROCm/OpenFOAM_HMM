@@ -379,12 +379,8 @@ void Foam::faceAreaWeightAMI::calcInterArea
 {
     addProfiling(ami, "faceAreaWeightAMI::interArea");
 
-    // Quick reject if either face has zero area
-    if
-    (
-        (srcMagSf_[srcFacei] < ROOTVSMALL)
-     || (tgtMagSf_[tgtFacei] < ROOTVSMALL)
-    )
+    // Quick reject if either face has zero area/too far away/wrong orientation
+    if (!isCandidate(srcFacei, tgtFacei))
     {
         return;
     }
@@ -459,12 +455,8 @@ bool Foam::faceAreaWeightAMI::overlaps
     const scalar threshold
 ) const
 {
-    // Quick reject if either face has zero area
-    if
-    (
-        (srcMagSf_[srcFacei] < ROOTVSMALL)
-     || (tgtMagSf_[tgtFacei] < ROOTVSMALL)
-    )
+    // Quick reject if either face has zero area/too far away/wrong orientation
+    if (!isCandidate(srcFacei, tgtFacei))
     {
         return false;
     }

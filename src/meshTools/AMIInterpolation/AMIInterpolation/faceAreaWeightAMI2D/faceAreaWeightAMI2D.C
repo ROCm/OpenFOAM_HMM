@@ -133,12 +133,8 @@ void Foam::faceAreaWeightAMI2D::storeInterArea
 {
     addProfiling(ami, "faceAreaWeightAMI2D::calcInterArea");
 
-    // Quick reject if either face has zero area
-    if
-    (
-        (srcMagSf_[srcFacei] < ROOTVSMALL)
-     || (tgtMagSf_[tgtFacei] < ROOTVSMALL)
-    )
+    // Quick reject if either face has zero area/too far away/wrong orientation
+    if (!isCandidate(srcFacei, tgtFacei))
     {
         return;
     }

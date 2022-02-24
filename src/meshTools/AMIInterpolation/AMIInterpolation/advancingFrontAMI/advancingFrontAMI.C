@@ -81,6 +81,57 @@ void Foam::advancingFrontAMI::checkPatches() const
 }
 
 
+bool Foam::advancingFrontAMI::isCandidate
+(
+    const label srcFacei,
+    const label tgtFacei
+) const
+{
+    const auto& srcPatch = this->srcPatch();
+    const auto& tgtPatch = this->tgtPatch();
+
+    if
+    (
+        (srcMagSf_[srcFacei] < ROOTVSMALL)
+     || (tgtMagSf_[tgtFacei] < ROOTVSMALL)
+    )
+    {
+        return false;
+    }
+
+    if (maxDistance2_ > 0)
+    {
+        const point& srcFc = srcPatch.faceCentres()[srcFacei];
+        const point& tgtFc = tgtPatch.faceCentres()[tgtFacei];
+        const vector& srcN = srcPatch.faceNormals()[srcFacei];
+
+        const scalar normalDist((tgtFc-srcFc)&srcN);
+        //if (magSqr(srcFc-tgtFc) >= maxDistance2_)
+        if (sqr(normalDist) >= maxDistance2_)
+        {
+            return false;
+        }
+    }
+
+    if (minCosAngle_ > -1)
+    {
+        const vector& srcN = srcPatch.faceNormals()[srcFacei];
+        vector tgtN = tgtPatch.faceNormals()[tgtFacei];
+        if (!reverseTarget_)
+        {
+            tgtN = -tgtN;
+        }
+
+        if ((srcN & tgtN) <= minCosAngle_)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
 void Foam::advancingFrontAMI::createExtendedTgtPatch()
 {
     // Create processor map of extended cells. This map gets (possibly
@@ -251,7 +302,7 @@ Foam::label Foam::advancingFrontAMI::findTargetFace
     const pointIndexHit sample =
         treePtr_->findNearest(srcPt, magSqr(bb.max() - bb.centre()), fnOp);
 
-    if (sample.hit())
+    if (sample.hit() && isCandidate(srcFacei, sample.index()))
     {
         targetFacei = sample.index();
 
@@ -375,6 +426,8 @@ Foam::advancingFrontAMI::advancingFrontAMI
 )
 :
     AMIInterpolation(dict, reverseTarget),
+    maxDistance2_(dict.getOrDefault<scalar>("maxDistance2", -1)),
+    minCosAngle_(dict.getOrDefault<scalar>("minCosAngle", -1)),
     srcTris_(),
     tgtTris_(),
     extendedTgtPatchPtr_(nullptr),
@@ -404,6 +457,8 @@ Foam::advancingFrontAMI::advancingFrontAMI
 )
 :
     AMIInterpolation(requireMatch, reverseTarget, lowWeightCorrection),
+    maxDistance2_(-1),
+    minCosAngle_(-1),
     srcTris_(),
     tgtTris_(),
     extendedTgtPatchPtr_(nullptr),
@@ -419,6 +474,8 @@ Foam::advancingFrontAMI::advancingFrontAMI
 Foam::advancingFrontAMI::advancingFrontAMI(const advancingFrontAMI& ami)
 :
     AMIInterpolation(ami),
+    maxDistance2_(ami.maxDistance2_),
+    minCosAngle_(ami.minCosAngle_),
     srcTris_(),
     tgtTris_(),
     extendedTgtPatchPtr_(nullptr),
@@ -452,6 +509,24 @@ bool Foam::advancingFrontAMI::calculate
         const auto& src = this->srcPatch();
         const auto& tgt = this->tgtPatch();
 
+
+        if (maxDistance2_ > 0)
+        {
+            // Early trigger face centre calculation
+            (void)src.faceCentres();
+            (void)tgt.faceCentres();
+            // Early trigger face normals calculation
+            (void)src.faceNormals();
+            (void)tgt.faceNormals();
+        }
+        if (minCosAngle_ > -1)
+        {
+            // Early trigger face normals calculation
+            (void)src.faceNormals();
+            (void)tgt.faceNormals();
+        }
+
+
         // Initialise area magnitudes
         srcMagSf_.setSize(src.size(), 1.0);
         tgtMagSf_.setSize(tgt.size(), 1.0);
@@ -479,6 +554,8 @@ bool Foam::advancingFrontAMI::calculate
 void Foam::advancingFrontAMI::write(Ostream& os) const
 {
     AMIInterpolation::write(os);
+    os.writeEntryIfDifferent<scalar>("maxDistance2", -1, maxDistance2_);
+    os.writeEntryIfDifferent<scalar>("minCosAngle", -1, minCosAngle_);
     os.writeEntryIfDifferent<word>
     (
         "triMode",
