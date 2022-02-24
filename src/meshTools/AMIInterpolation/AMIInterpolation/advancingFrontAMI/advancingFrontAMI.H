@@ -106,6 +106,12 @@ protected:
 
     // Protected data
 
+        //- Maximum squared distance
+        const scalar maxDistance2_;
+
+        //- Minimum (cos of) angle. 1 for perfectly matching.
+        const scalar minCosAngle_;
+
         //- Storage for src-side triangle decomposition
         List<DynamicList<face>> srcTris_;
 
@@ -147,6 +153,10 @@ protected:
 
             //- Check AMI patch coupling
             void checkPatches() const;
+
+            //- Is source/target a valid pair (i.e. not too far/different
+            //  orientation). Used for prefiltering before e.g. area overlap
+            bool isCandidate(const label srcFacei, const label tgtFacei) const;
 
             virtual bool calculate
             (
