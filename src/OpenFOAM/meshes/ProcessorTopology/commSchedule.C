@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,8 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "commSchedule.H"
-#include "SortableList.H"
-#include "boolList.H"
+#include "ListOps.H"
 #include "IOstreams.H"
 #include "IOmanip.H"
 #include "StringStream.H"
@@ -41,25 +41,32 @@ namespace Foam
 }
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
-Foam::label Foam::commSchedule::outstandingComms
+namespace Foam
+{
+// Private Member Functions
+
+// Count the number of outstanding communications for a single processor
+static label outstandingComms
 (
     const labelList& commToSchedule,
     DynamicList<label>& procComms
-) const
+)
 {
     label nOutstanding = 0;
 
-    forAll(procComms, i)
+    for (const label commi : procComms)
     {
-        if (commToSchedule[procComms[i]] == -1)
+        if (commToSchedule[commi] == -1)
         {
-            nOutstanding++;
+            ++nOutstanding;
         }
     }
     return nOutstanding;
 }
+
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -94,7 +101,7 @@ Foam::commSchedule::commSchedule
 
     if (debug && Pstream::master())
     {
-        Pout<< "commSchedule::commSchedule : Wanted communication:" << endl;
+        Pout<< "commSchedule : Wanted communication:" << endl;
 
         forAll(comms, i)
         {
@@ -106,7 +113,7 @@ Foam::commSchedule::commSchedule
         Pout<< endl;
 
 
-        Pout<< "commSchedule::commSchedule : Schedule:" << endl;
+        Pout<< "commSchedule : Schedule:" << endl;
 
         // Print header. Use buffered output to prevent parallel output messing
         // up.
@@ -239,8 +246,9 @@ Foam::commSchedule::commSchedule
     }
 
 
-    // Sort commToSchedule and obtain order in comms
-    schedule_ = SortableList<label>(commToSchedule).indices();
+    // Sort commToSchedule to obtain order in comms
+
+    Foam::sortedOrder(commToSchedule, schedule_);
 
     // Sort schedule_ by processor
 

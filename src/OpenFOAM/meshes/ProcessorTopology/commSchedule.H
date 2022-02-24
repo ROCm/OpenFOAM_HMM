@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,10 +50,9 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef commSchedule_H
-#define commSchedule_H
+#ifndef Foam_commSchedule_H
+#define Foam_commSchedule_H
 
-#include "DynamicList.H"
 #include "labelPair.H"
 #include "labelList.H"
 
@@ -67,19 +67,13 @@ namespace Foam
 
 class commSchedule
 {
-    // Private data
+    // Private Data
 
         //- Order in which input communication has been scheduled
         labelList schedule_;
 
         //- Per processor the order in which communication has been scheduled
         labelListList procSchedule_;
-
-    // Private Member Functions
-
-        //- Count the number of outstanding communications for a single
-        //  processor
-        label outstandingComms(const labelList&, DynamicList<label>&) const;
 
 
 public:
