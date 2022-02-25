@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -427,21 +427,50 @@ Foam::fileName Foam::fileName::relative
     const bool caseTag
 ) const
 {
-    const auto top = parent.size();
+    const auto top = parent.length();
     const fileName& f = *this;
 
     // Everything after "parent/xxx/yyy" -> "xxx/yyy"
     //
     // case-relative:
     //     "parent/xxx/yyy" -> "<case>/xxx/yyy"
+    //     "parent/constant/xxx/yyy" -> "<constant>/xxx/yyy"
+    //     "parent/system/xxx/yyy" -> "<system>/xxx/yyy"
+    //
+    // as per stringOps::inplaceExpand()
+
     if
     (
-        top && (f.size() > (top+1)) && f[top] == '/'
+        top && (f.length() > (top+1)) && f[top] == '/'
      && f.starts_with(parent)
     )
     {
         if (caseTag)
         {
+            const auto trailing = f.find('/', top+1);
+
+            if (npos != trailing)
+            {
+                switch (trailing-top-1)
+                {
+                    case 6:  // "system"
+                    {
+                        if (!compare((top+1), 6, "system"))
+                        {
+                            return "<system>"/f.substr(trailing+1);
+                        }
+                        break;
+                    }
+                    case 8:  // "constant"
+                    {
+                        if (!compare((top+1), 8, "constant"))
+                        {
+                            return "<constant>"/f.substr(trailing+1);
+                        }
+                        break;
+                    }
+                }
+            }
             return "<case>"/f.substr(top+1);
         }
         else
@@ -449,8 +478,32 @@ Foam::fileName Foam::fileName::relative
             return f.substr(top+1);
         }
     }
-    else if (caseTag && f.size() && !f.isAbsolute())
+    else if (caseTag && f.length() && !f.isAbsolute())
     {
+        const auto trailing = f.find('/');
+
+        if (npos != trailing)
+        {
+            switch (trailing)
+            {
+                case 6:  // "system"
+                {
+                    if (!compare(0, 6, "system"))
+                    {
+                        return "<system>"/f.substr(trailing+1);
+                    }
+                    break;
+                }
+                case 8:  // "constant"
+                {
+                    if (!compare(0, 8, "constant"))
+                    {
+                        return "<constant>"/f.substr(trailing+1);
+                    }
+                    break;
+                }
+            }
+        }
         return "<case>"/f;
     }
 
