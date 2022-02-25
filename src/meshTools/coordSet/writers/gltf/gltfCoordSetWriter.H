@@ -24,10 +24,11 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::gltfSetWriter
+    Foam::coordSetWriters::gltfWriter
 
 Description
-    Writes point data in glTF v2 format
+    A coordSet(s) writer in glTF v2 format, which is particularly
+    useful for writing track data.
 
     Two files are generated:
     - filename.bin  : a binary file containing all scene entities
@@ -121,23 +122,25 @@ SourceFiles
 #ifndef Foam_coordSetWriters_gltfWriter_H
 #define Foam_coordSetWriters_gltfWriter_H
 
-#include "writer.H"
+#include "coordSetWriter.H"
 #include "colourTable.H"
+#include "foamGltfFwd.H"
 #include "MinMax.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace coordSetWriters
+{
 
 /*---------------------------------------------------------------------------*\
-                        Class gltfSetWriter Declaration
+                         Class gltfWriter Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Type>
-class gltfSetWriter
+class gltfWriter
 :
-    public writer<Type>
+    public coordSetWriter
 {
 public:
 
@@ -160,17 +163,32 @@ private:
 
     // Private Data
 
+        //- Backend output
+        autoPtr<glTF::sceneWriter> writer_;
+
         //- Flag to animate - for particle tracks only
         bool animate_;
 
         //- Flag to add field colours
         bool colour_;
 
+        //- Animation colour option
+        fieldOption animateColourOption_;
+
+        //- Animation colour field name
+        word animateColourName_;
+
+        //- Animation colour value
+        vector animateColourValue_;
+
         //- Local field information
         const dictionary fieldInfoDict_;
 
         //- Animation information
         const dictionary animationDict_;
+
+        //- The mesh indices in glTF scene
+        labelList meshes_;
 
 
     // Private Member Functions
@@ -184,100 +202,114 @@ private:
         //- Return the named min/max field limits (from sub-dictionary)
         scalarMinMax getFieldLimits(const word& fieldName) const;
 
+        //- Setup animation colour or field to search for
+        void setupAnimationColour();
+
         //- Return the alpha field for mesh values
         tmp<scalarField> getAlphaField(const dictionary& dict) const;
 
-        //- Return the animation colour when animating tracks
-        vector getTrackAnimationColour
+
+        //- Templated write operation (static tracks)
+        template<class Type>
+        fileName writeTemplate
         (
-            const colourTable& colours,
-            const wordList& valueSetNames,
-            const List<List<Field<Type>>>& valueSets,
-            const label tracki
-        ) const;
+            const word& fieldName,
+            const UPtrList<const Field<Type>>& fieldPtrs
+        );
+
+        //- Write animated tracks
+        template<class Type>
+        fileName writeTemplate_animate
+        (
+            const word& fieldName,
+            const UPtrList<const Field<Type>>& fieldPtrs
+        );
+
+        //- Templated write operation
+        template<class Type>
+        fileName writeTemplate
+        (
+            const word& fieldName,    //!< Name of field
+            const Field<Type>& vals   //!< Local field values to write
+        );
+
+        //- Templated write operation
+        template<class Type>
+        fileName writeTemplate
+        (
+            const word& fieldName,
+            const List<Field<Type>>& fieldValues
+        );
 
 
 public:
 
-    //- Runtime type information
-    TypeName("gltf");
+    //- Runtime type information (no debug)
+    TypeNameNoDebug("gltf");
 
 
     // Constructors
 
         //- Default construct
-        gltfSetWriter();
+        gltfWriter();
 
-        //- Construct from dictionary
-        explicit gltfSetWriter(const dictionary& dict);
+        //- Default construct with specified options
+        explicit gltfWriter(const dictionary& options);
+
+        //- Construct from components
+        gltfWriter
+        (
+            const coordSet& coords,
+            const fileName& outputPath,
+            const dictionary& options = dictionary()
+        );
+
+        //- Construct from components
+        gltfWriter
+        (
+            const UPtrList<coordSet>& tracks,
+            const fileName& outputPath,
+            const dictionary& options = dictionary()
+        );
 
 
-    //- Destructor
-    virtual ~gltfSetWriter() = default;
+    //- Destructor. Calls close()
+    virtual ~gltfWriter();
 
 
     // Member Functions
 
-        //- Return the file name
-        virtual fileName getFileName
-        (
-            const coordSet&,
-            const wordList&
-        ) const;
+        //- Expected (characteristic) output file name - information only
+        virtual fileName path() const;  // override
 
-        //- Write
-        virtual void write
-        (
-            const coordSet&,
-            const wordList&,
-            const List<const Field<Type>*>&,
-            Ostream&
-        ) const;
+        //- Close and reset, clears backend.
+        virtual void close(bool force = false);  // override
 
-        //- Write tracks (main entry point)
-        virtual void write
-        (
-            const bool writeTracks,
-            const List<scalarField>& times,
-            const PtrList<coordSet>&,
-            const wordList& valueSetNames,
-            const List<List<Field<Type>>>&,
-            Ostream&
-        ) const;
+        //- Begin time step. Clears existing backend.
+        virtual void beginTime(const Time& t);  // override
 
-        //- Write animated tracks
-        virtual void writeAnimateTracks
-        (
-            const bool writeTracks,
-            const List<scalarField>& times,
-            const PtrList<coordSet>& tracks,
-            const wordList& valueSetNames,
-            const List<List<Field<Type>>>& valueSets,
-            Ostream&
-        ) const;
+        //- Begin time step. Clears existing backend.
+        virtual void beginTime(const instant& inst);  // override
 
-        //- Write static tracks
-        virtual void writeStaticTracks
-        (
-            const bool writeTracks,
-            const List<scalarField>& times,
-            const PtrList<coordSet>& tracks,
-            const wordList& valueSetNames,
-            const List<List<Field<Type>>>& valueSets,
-            Ostream&
-        ) const;
+        //- End time step. Clears existing backend.
+        virtual void endTime();  // override
+
+
+    // Write
+
+        declareCoordSetWriterWriteMethod(label);
+        declareCoordSetWriterWriteMethod(scalar);
+        declareCoordSetWriterWriteMethod(vector);
+        declareCoordSetWriterWriteMethod(sphericalTensor);
+        declareCoordSetWriterWriteMethod(symmTensor);
+        declareCoordSetWriterWriteMethod(tensor);
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace coordSetWriters
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "gltfCoordSetWriter.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

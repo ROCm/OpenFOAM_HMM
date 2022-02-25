@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,8 +78,13 @@ bool Foam::functionObjects::particleDistribution::read(const dictionary& dict)
         dict.readEntry("cloud", cloudName_);
         dict.readIfPresent("tagField", tagFieldName_);
         dict.readEntry("nameVsBinWidth", nameVsBinWidth_);
-        const word format(dict.get<word>("setFormat"));
-        writerPtr_ = writer<scalar>::New(format);
+
+        const word setFormat(dict.get<word>("setFormat"));
+        writerPtr_ = coordSetWriter::New
+        (
+            setFormat,
+            dict.subOrEmptyDict("formatOptions").optionalSubDict(setFormat)
+        );
 
         Info<< type() << " " << name() << " output:" << nl
             << "    Processing cloud : " << cloudName_ << nl
@@ -104,12 +109,10 @@ bool Foam::functionObjects::particleDistribution::write()
 
     if (!mesh_.foundObject<cloud>(cloudName_))
     {
-        wordList cloudNames(mesh_.names<cloud>());
-
         WarningInFunction
             << "Unable to find cloud " << cloudName_
             << " in the mesh database.  Available clouds include:"
-            << cloudNames << endl;
+            << flatOutput(mesh_.sortedNames<cloud>()) << endl;
 
         return false;
     }
@@ -153,16 +156,17 @@ bool Foam::functionObjects::particleDistribution::write()
     }
 
 
-    bool ok = false;
     forAll(nameVsBinWidth_, i)
     {
-        ok = false;
-        ok = ok || processField<scalar>(cloudObr, i, tagAddr);
-        ok = ok || processField<vector>(cloudObr, i, tagAddr);
-        ok = ok || processField<tensor>(cloudObr, i, tagAddr);
-        ok = ok || processField<sphericalTensor>(cloudObr, i, tagAddr);
-        ok = ok || processField<symmTensor>(cloudObr, i, tagAddr);
-        ok = ok || processField<tensor>(cloudObr, i, tagAddr);
+        const bool ok
+        (
+            processField<scalar>(cloudObr, i, tagAddr)
+         || processField<vector>(cloudObr, i, tagAddr)
+         || processField<tensor>(cloudObr, i, tagAddr)
+         || processField<sphericalTensor>(cloudObr, i, tagAddr)
+         || processField<symmTensor>(cloudObr, i, tagAddr)
+         || processField<tensor>(cloudObr, i, tagAddr)
+        );
 
         if (log && !ok)
         {
@@ -189,10 +193,10 @@ void Foam::functionObjects::particleDistribution::generateDistribution
         return;
     }
 
-    word fName(fieldName);
+    word fldName(fieldName);
     if (tag != -1)
     {
-        fName = fName + '_' + Foam::name(tag);
+        fldName += '_' + Foam::name(tag);
     }
 
     distributionModels::general distribution
@@ -202,31 +206,20 @@ void Foam::functionObjects::particleDistribution::generateDistribution
         rndGen_
     );
 
-    const Field<scalar> distX(distribution.x());
-    const Field<scalar> distY(distribution.y());
+    Field<scalar> distX(distribution.x());
+    Field<scalar> distY(distribution.y());
 
     pointField xBin(distX.size(), Zero);
-    xBin.replace(0, distX);
-    const coordSet coords
-    (
-        fName,
-        "x",
-        xBin,
-        distX
-    );
+    xBin.replace(vector::X, distX);
 
-    const wordList fieldNames(1, fName);
+    const coordSet coords(fldName, "x", std::move(xBin), std::move(distX));
 
-    fileName outputPath(baseTimeDir());
-    mkDir(outputPath);
-    OFstream graphFile(outputPath/writerPtr_->getFileName(coords, fieldNames));
+    writerPtr_->open(coords, baseTimeDir() / fldName);
+    fileName outFile = writerPtr_->write(fldName, distY);
+    writerPtr_->close(true);
 
-    Log << "    Writing distribution of " << fieldName
-        << " to " << graphFile.name() << endl;
-
-    List<const scalarField*> yPtrs(1);
-    yPtrs[0] = &distY;
-    writerPtr_->write(coords, fieldNames, yPtrs, graphFile);
+    Log << "    Wrote distribution of " << fieldName
+        << " to " << time_.relativePath(outFile) << endl;
 }
 
 

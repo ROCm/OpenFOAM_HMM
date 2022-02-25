@@ -292,7 +292,7 @@ void Foam::meshRefinement::getBafflePatches
     const pointField& locationsInMesh,
     const wordList& zonesInMesh,
     const pointField& locationsOutsideMesh,
-    const refPtr<writer<scalar>>& leakPathFormatter,
+    const refPtr<coordSetWriter>& leakPathFormatter,
     const labelList& neiLevel,
     const pointField& neiCc,
 
@@ -1688,7 +1688,7 @@ void Foam::meshRefinement::findCellZoneInsideWalk
         (
             mesh_,
             cellRegion,
-            mergeDistance_ * vector::one,
+            vector::uniform(mergeDistance_),
             insidePoint
         );
 
@@ -1959,7 +1959,7 @@ void Foam::meshRefinement::findCellZoneTopo
         (
             mesh_,
             cellRegion,
-            mergeDistance_ * vector::one,
+            vector::uniform(mergeDistance_),
             keepPoint
         );
 
@@ -2843,7 +2843,7 @@ void Foam::meshRefinement::zonify
     const pointField& locationsInMesh,
     const wordList& zonesInMesh,
     const pointField& locationsOutsideMesh,
-    const refPtr<writer<scalar>>& leakPathFormatter,
+    const refPtr<coordSetWriter>& leakPathFormatter,
 
     labelList& cellToZone,
     labelList& unnamedRegion1,
@@ -2961,7 +2961,7 @@ void Foam::meshRefinement::zonify
                 << endl;
 
             // Dump leak path
-            if (leakPathFormatter.valid())
+            if (leakPathFormatter)
             {
                 boolList blockedFace(mesh_.nFaces(), false);
                 UIndirectList<bool>(blockedFace, unnamedFaces) = true;
@@ -2972,8 +2972,8 @@ void Foam::meshRefinement::zonify
                         mesh_,
                         locationsInMesh,
                         locationsOutsideMesh,
-                        leakPathFormatter(),
-                        blockedFace
+                        blockedFace,
+                        leakPathFormatter.constCast()
                     )
                 );
                 Info<< "Dumped leak path to " << fName << endl;
@@ -3065,7 +3065,7 @@ void Foam::meshRefinement::zonify
                     << endl;
 
                 // Dump leak path
-                if (leakPathFormatter.valid())
+                if (leakPathFormatter)
                 {
                     boolList blockedFace(mesh_.nFaces(), false);
                     UIndirectList<bool>(blockedFace, unnamedFaces) = true;
@@ -3077,8 +3077,8 @@ void Foam::meshRefinement::zonify
                             mesh_,
                             locationsInMesh,
                             locationsOutsideMesh,
-                            leakPathFormatter(),
-                            blockedFace
+                            blockedFace,
+                            leakPathFormatter.constCast()
                         )
                     );
                     Info<< "Dumped leak path to " << fName << endl;
@@ -4509,7 +4509,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
     const pointField& locationsInMesh,
     const wordList& zonesInMesh,
     const pointField& locationsOutsideMesh,
-    const refPtr<writer<scalar>>& leakPathFormatter
+    const refPtr<coordSetWriter>& leakPathFormatter
 )
 {
     // Introduce baffles
@@ -4536,7 +4536,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
         locationsInMesh,
         zonesInMesh,
         locationsOutsideMesh,
-        refPtr<writer<scalar>>(nullptr),
+        refPtr<coordSetWriter>(nullptr),
 
         neiLevel,
         neiCc,
@@ -4610,7 +4610,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
                 locationsInMesh,
                 zonesInMesh,
                 locationsOutsideMesh,
-                refPtr<writer<scalar>>(nullptr),
+                refPtr<coordSetWriter>(nullptr),
 
                 neiLevel,
                 neiCc,
@@ -4760,7 +4760,7 @@ void Foam::meshRefinement::mergeFreeStandingBaffles
             locationsInMesh,
             locationsOutsideMesh,
             true,   // Exit if any connection between inside and outside
-            refPtr<writer<scalar>>(nullptr) //leakPathFormatter
+            refPtr<coordSetWriter>(nullptr) // leakPathFormatter
         );
 
 
@@ -4785,7 +4785,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMesh
     const pointField& locationsInMesh,
     const wordList& zonesInMesh,
     const pointField& locationsOutsideMesh,
-    const writer<scalar>& leakPathFormatter
+    const refPtr<coordSetWriter>& leakPathFormatter
 )
 {
     // Determine patches to put intersections into
@@ -4834,14 +4834,15 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMesh
     findRegions
     (
         mesh_,
-        mergeDistance_ * vector::one,   // perturbVec
+        vector::uniform(mergeDistance_),   // perturbVec
         locationsInMesh,
         locationsOutsideMesh,
-        false,      // do not exit if outside location found
-        leakPathFormatter,
         cellRegion.nRegions(),
         cellRegion,
-        blockedFace
+        blockedFace,
+        // Leak-path
+        false,      // do not exit if outside location found
+        leakPathFormatter
     );
 
     return splitMesh
@@ -5272,7 +5273,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::removeLimitShells
         locationsInMesh,
         zonesInMesh,
         locationsOutsideMesh,
-        refPtr<writer<scalar>>(nullptr),
+        refPtr<coordSetWriter>(nullptr),
 
         neiLevel,
         neiCc,
@@ -5574,7 +5575,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
     const pointField& locationsInMesh,
     const wordList& zonesInMesh,
     const pointField& locationsOutsideMesh,
-    const refPtr<writer<scalar>>& leakPathFormatter,
+    const refPtr<coordSetWriter>& leakPathFormatter,
     wordPairHashTable& zonesToFaceZone
 )
 {

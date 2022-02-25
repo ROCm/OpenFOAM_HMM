@@ -13,7 +13,6 @@ sampledSet/patchSeed/patchSeedSet.C
 sampledSet/patchEdge/patchEdgeSet.C
 sampledSet/sampledSet/sampledSet.C
 sampledSet/sampledSets/sampledSets.C
-sampledSet/sampledSets/sampledSetsGrouping.C
 sampledSet/triSurfaceMeshPointSet/triSurfaceMeshPointSet.C
 sampledSet/uniform/uniformSet.C
 sampledSet/array/arraySet.C

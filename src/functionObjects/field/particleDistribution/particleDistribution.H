@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -103,7 +103,7 @@ SourceFiles
 #include "scalarField.H"
 #include "Random.H"
 #include "Tuple2.H"
-#include "writer.H"
+#include "coordSetWriter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -118,7 +118,7 @@ namespace functionObjects
 
 class particleDistribution
 :
-    public fvMeshFunctionObject,
+    public functionObjects::fvMeshFunctionObject,
     public writeFile
 {
 protected:
@@ -138,7 +138,7 @@ protected:
         List<Tuple2<word, scalar>> nameVsBinWidth_;
 
         //- Writer
-        autoPtr<writer<scalar>> writerPtr_;
+        mutable autoPtr<coordSetWriter> writerPtr_;
 
 
     // Protected Member Functions

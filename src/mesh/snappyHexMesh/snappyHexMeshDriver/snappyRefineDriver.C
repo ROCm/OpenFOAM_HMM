@@ -67,7 +67,7 @@ Foam::snappyRefineDriver::snappyRefineDriver
     fvMeshDistribute& distributor,
     const labelUList& globalToMasterPatch,
     const labelUList& globalToSlavePatch,
-    const writer<scalar>& setFormatter,
+    coordSetWriter& setFormatter,
     const bool dryRun
 )
 :

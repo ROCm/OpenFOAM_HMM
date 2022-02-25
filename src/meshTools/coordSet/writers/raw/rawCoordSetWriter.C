@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,94 +26,199 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "rawSetWriter.H"
+#include "rawCoordSetWriter.H"
 #include "coordSet.H"
 #include "fileName.H"
 #include "OFstream.H"
+#include "OSspecific.H"
+#include "stringOps.H"
+#include "coordSetWriterMethods.H"
+#include "addToRunTimeSelectionTable.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+namespace coordSetWriters
+{
+    defineTypeName(rawWriter);
+    addToRunTimeSelectionTable(coordSetWriter, rawWriter, word);
+    addToRunTimeSelectionTable(coordSetWriter, rawWriter, wordDict);
+}
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Implementation
+#include "rawCoordSetWriterImpl.C"
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::rawSetWriter<Type>::rawSetWriter()
+Foam::coordSetWriters::rawWriter::rawWriter()
 :
-    writer<Type>()
-{}
+    coordSetWriter(),
+    streamOpt_(),
+    precision_(IOstream::defaultPrecision())
+{
+    buffering_ = true;
+}
 
 
-template<class Type>
-Foam::rawSetWriter<Type>::rawSetWriter(const dictionary& dict)
+Foam::coordSetWriters::rawWriter::rawWriter(const dictionary& options)
 :
-    writer<Type>(dict)
-{}
+    coordSetWriter(options),
+    streamOpt_
+    (
+        IOstream::ASCII,
+        IOstream::compressionEnum("compression", options)
+    ),
+    precision_
+    (
+        options.getOrDefault("precision", IOstream::defaultPrecision())
+    )
+{
+    buffering_ = options.getOrDefault("buffer", true);
+}
+
+
+Foam::coordSetWriters::rawWriter::rawWriter
+(
+    const coordSet& coords,
+    const fileName& outputPath,
+    const dictionary& options
+)
+:
+    rawWriter(options)
+{
+    open(coords, outputPath);
+}
+
+
+Foam::coordSetWriters::rawWriter::rawWriter
+(
+    const UPtrList<coordSet>& tracks,
+    const fileName& outputPath,
+    const dictionary& options
+)
+:
+    rawWriter(options)
+{
+    open(tracks, outputPath);
+}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::coordSetWriters::rawWriter::~rawWriter()
+{
+    close();
+}
+
+
+// * * * * * * * * * * * * * * * * * Controls  * * * * * * * * * * * * * * * //
+
+bool Foam::coordSetWriters::rawWriter::buffering(const bool on)
+{
+    const bool old(buffering_);
+    buffering_ = on;
+    return old;
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::fileName Foam::rawSetWriter<Type>::getFileName
-(
-    const coordSet& points,
-    const wordList& valueSetNames
-) const
+Foam::fileName Foam::coordSetWriters::rawWriter::path() const
 {
-    return this->getBaseName(points, valueSetNames) + ".xy";
+    // Assume !useTracks_, otherwise too fragile
+
+    // 1) rootdir/<TIME>/setName.raw
+    // 2) rootdir/setName.raw
+
+    return getExpectedPath("xy");   // Traditionally 'xy', not 'raw'
+}
+
+
+bool Foam::coordSetWriters::rawWriter::writeBuffered()
+{
+    if (coords_.empty())
+    {
+        clearBuffers();
+        return false;
+    }
+    const auto& coords = coords_[0];
+
+    // Field:
+    // 1) rootdir/<TIME>/setName.raw
+    // 2) rootdir/setName.raw
+
+    fileName outputFile = path();
+
+    if (!isDir(outputFile.path()))
+    {
+        mkDir(outputFile.path());
+    }
+
+    OFstream os(outputFile, streamOpt_);
+    os.precision(precision_);
+
+    writeBufferContents(os, coords, " \t");
+
+    clearBuffers();
+
+    return true;
 }
 
 
 template<class Type>
-void Foam::rawSetWriter<Type>::write
+Foam::fileName Foam::coordSetWriters::rawWriter::writeTemplate
 (
-    const coordSet& points,
-    const wordList& valueSetNames,
-    const List<const Field<Type>*>& valueSets,
-    Ostream& os
-) const
+    const word& fieldName,
+    const Field<Type>& values
+)
 {
-    // Collect sets into columns
-    List<const List<Type>*> columns(valueSets.size());
-
-    forAll(valueSets, i)
+    checkOpen();
+    if (coords_.empty())
     {
-        columns[i] = valueSets[i];
+        return fileName::null;
     }
 
-    this->writeTable(points, columns, os);
+    if (useTracks_ || !buffering_)
+    {
+        UPtrList<const Field<Type>> fieldPtrs(repackageFields(values));
+        return writeTemplate(fieldName, fieldPtrs);
+    }
+
+    // Buffering version
+    appendField(fieldName, values);
+    return path();
 }
 
 
 template<class Type>
-void Foam::rawSetWriter<Type>::write
+Foam::fileName Foam::coordSetWriters::rawWriter::writeTemplate
 (
-    const bool writeTracks,
-    const List<scalarField>& times,
-    const PtrList<coordSet>& tracks,
-    const wordList& valueSetNames,
-    const List<List<Field<Type>>>& valueSets,
-    Ostream& os
-) const
+    const word& fieldName,
+    const List<Field<Type>>& fieldValues
+)
 {
-    if (valueSets.size() != valueSetNames.size())
+    checkOpen();
+    if (coords_.empty())
     {
-        FatalErrorInFunction
-            << "Number of variables:" << valueSetNames.size() << endl
-            << "Number of valueSets:" << valueSets.size()
-            << exit(FatalError);
+        return fileName::null;
     }
+    useTracks_ = true;  // Extra safety
 
-    List<const List<Type>*> columns(valueSets.size());
-
-    forAll(tracks, trackI)
-    {
-        // Collect sets into columns
-        forAll(valueSets, i)
-        {
-            columns[i] = &valueSets[i][trackI];
-        }
-
-        this->writeTable(tracks[trackI], columns, os);
-        os  << nl << nl;
-    }
+    UPtrList<const Field<Type>> fieldPtrs(repackageFields(fieldValues));
+    return writeTemplate(fieldName, fieldPtrs);
 }
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Field writing methods
+defineCoordSetWriterWriteFields(Foam::coordSetWriters::rawWriter);
 
 
 // ************************************************************************* //

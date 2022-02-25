@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,13 +26,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef steadyParticleTracksTemplates_H
-#define steadyParticleTracksTemplates_H
+#ifndef Foam_steadyParticleTracksTemplates_H
+#define Foam_steadyParticleTracksTemplates_H
 
 #include "OFstream.H"
 #include "IOobjectList.H"
-#include "PtrList.H"
-#include "Field.H"
+#include "IOField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -41,42 +41,29 @@ namespace Foam
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-bool fieldOk(const IOobjectList& cloudObjs, const word& name);
-
-template<class Type>
-tmp<Field<Type>> readParticleField
+tmp<IOField<Type>> readParticleField
 (
-    const word& name,
-    const IOobjectList cloudObjs
-);
-
-template<class Type>
-void readFields
-(
-    PtrList<List<Type>>& values,
-    const List<word>& fields,
-    const IOobjectList& cloudObjs
+    const word& fieldName,
+    const IOobjectList& cloudObjects
 );
 
 template<class Type>
 void writeVTK(OFstream& os, const Type& value);
 
 template<class Type>
-void writeVTKFields
+void writeVTKField
 (
     OFstream& os,
-    const PtrList<List<Type>>& values,
-    const List<List<label>>& addr,
-    const List<word>& fieldNames
+    const IOField<Type>& field,
+    const List<labelList>& addr
 );
 
 template<class Type>
 void processFields
 (
     OFstream& os,
-    const List<List<label>>& addr,
-    const List<word>& userFieldNames,
-    const IOobjectList& cloudObjs
+    const List<labelList>& addr,
+    const IOobjectList& cloudObjects
 );
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,175 +25,198 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "nastranSetWriter.H"
+#include "nastranCoordSetWriter.H"
 #include "coordSet.H"
 #include "IOmanip.H"
+#include "OFstream.H"
+#include "OSspecific.H"
+#include "coordSetWriterMethods.H"
 #include "addToRunTimeSelectionTable.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+namespace coordSetWriters
+{
+    defineTypeName(nastranWriter);
+    addToRunTimeSelectionTable(coordSetWriter, nastranWriter, word);
+    addToRunTimeSelectionTable(coordSetWriter, nastranWriter, wordDict);
+}
+}
+
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+template<class Type>
+static inline void putValue(Ostream& os, const Type& value, const int width)
+{
+    if (width) os << setw(width);
+    os << value;
+}
+
+} // End namespace Foam
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+Foam::Ostream& Foam::coordSetWriters::nastranWriter::writeKeyword
+(
+    Ostream& os,
+    const word& keyword
+) const
+{
+    return fileFormats::NASCore::writeKeyword(os, keyword, writeFormat_);
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::nastranSetWriter<Type>::nastranSetWriter()
+Foam::coordSetWriters::nastranWriter::nastranWriter()
 :
-    writer<Type>()
-{}
+    coordSetWriter(),
+    writeFormat_(fieldFormat::FREE),
+    separator_()
+{
+    if (writeFormat_ == fieldFormat::FREE)
+    {
+        separator_ = ",";
+    }
+}
 
 
-template<class Type>
-Foam::nastranSetWriter<Type>::nastranSetWriter(const dictionary& dict)
+Foam::coordSetWriters::nastranWriter::nastranWriter(const dictionary& options)
 :
-    writer<Type>(dict)
-{}
+    coordSetWriter(options),
+    writeFormat_
+    (
+        fileFormats::NASCore::fieldFormatNames.getOrDefault
+        (
+            "format",
+            options,
+            fieldFormat::FREE
+        )
+    ),
+    separator_()
+{
+    if (writeFormat_ == fieldFormat::FREE)
+    {
+        separator_ = ",";
+    }
+}
+
+
+Foam::coordSetWriters::nastranWriter::nastranWriter
+(
+    const coordSet& coords,
+    const fileName& outputPath,
+    const dictionary& options
+)
+:
+    nastranWriter(options)
+{
+    open(coords, outputPath);
+}
+
+
+Foam::coordSetWriters::nastranWriter::nastranWriter
+(
+    const UPtrList<coordSet>& tracks,
+    const fileName& outputPath,
+    const dictionary& options
+)
+:
+    nastranWriter(options)
+{
+    open(tracks, outputPath);
+}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::coordSetWriters::nastranWriter::~nastranWriter()
+{
+    close();
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::fileName Foam::nastranSetWriter<Type>::getFileName
-(
-    const coordSet& points,
-    const wordList& valueSetNames
-) const
+Foam::fileName Foam::coordSetWriters::nastranWriter::path() const
 {
-    return this->getBaseName(points, valueSetNames) + ".nas";
+    // 1) rootdir/<TIME>/setName.{nas}
+    // 2) rootdir/setName.{nas}
+
+    return getExpectedPath("nas");
 }
 
 
-template<class Type>
-void Foam::nastranSetWriter<Type>::write
+void Foam::coordSetWriters::nastranWriter::writeGeometry
 (
-    const coordSet& points,
-    const wordList& valueSetNames,
-    const List<const Field<Type>*>& valueSets,
-    Ostream& os
+    Ostream& os,
+    label nTracks
 ) const
 {
-    os  << "TITLE=OpenFOAM "
-        << this->getBaseName(points, valueSetNames).c_str()
-        << nl
-        << "$" << nl
-        << "BEGIN BULK" << nl;
-
-    forAll(points, pointi)
-    {
-        fileFormats::NASCore::writeCoord
-        (
-            os, points[pointi], pointi, fieldFormat::FREE
-        );
-    }
-
-    if (false)
-    {
-        // Single track with multiple segments
-        const label nEdges = points.size()-1;
-        for (label edgei = 0; edgei < nEdges; ++edgei)
-        {
-            fileFormats::NASCore::writeKeyword
-            (
-                os,
-                "PLOTEL",
-                fieldFormat::FREE
-            );
-
-            // fieldFormat::SHORT
-            //os.setf(std::ios_base::right);
-            //os  << setw(8) << edgei+1
-            //    << setw(8) << edgei+1
-            //    << setw(8) << edgei+2
-            //    << nl;
-            //os.unsetf(std::ios_base::right);
-
-            // fieldFormat::FREE
-            os  << ',' << edgei+1
-                << ',' << edgei+1
-                << ',' << edgei+2
-                << nl;
-        }
-    }
-
-    os << "ENDDATA" << nl;
-}
-
-
-template<class Type>
-void Foam::nastranSetWriter<Type>::write
-(
-    const bool writeTracks,
-    const List<scalarField>& times,
-    const PtrList<coordSet>& tracks,
-    const wordList& valueSetNames,
-    const List<List<Field<Type>>>& valueSets,
-    Ostream& os
-) const
-{
-    if (valueSets.size() != valueSetNames.size())
-    {
-        FatalErrorInFunction
-            << "Number of variables:" << valueSetNames.size() << endl
-            << "Number of valueSets:" << valueSets.size()
-            << exit(FatalError);
-    }
-    if (tracks.empty())
+    if (coords_.empty())
     {
         return;
     }
 
-    os  << "TITLE=OpenFOAM "
-        << this->getBaseName(tracks[0], valueSetNames).c_str()
-        << nl
-        << "$" << nl
-        << "BEGIN BULK" << nl;
+    // Field width (SHORT, LONG formats)
+    const int width =
+    (
+        writeFormat_ == fieldFormat::SHORT ? 8
+      : writeFormat_ == fieldFormat::LONG ? 16
+      : 0
+    );
 
-//    label nTracks = tracks.size();
-//    label nPoints = 0;
-//    forAll(tracks, i)
-//    {
-//        nPoints += tracks[i].size();
-//    }
+    // Separator char (FREE format)
+    const char sep = (writeFormat_ == fieldFormat::FREE ? ',' : '\0');
+
+    // Write points
+    os  << '$' << nl
+        << "$ Points" << nl
+        << '$' << nl;
 
     label globalPointi = 0;
-    for (const coordSet& points : tracks)
+    for (const coordSet& coords : coords_)
     {
-        for (const point& p : points)
+        for (const point& p : coords)
         {
             fileFormats::NASCore::writeCoord
             (
-                os, p, globalPointi, fieldFormat::FREE
+                os, p, globalPointi, writeFormat_
             );
             ++globalPointi;
         }
     }
 
-    if (writeTracks)
+    if (nTracks)
     {
         // Write ids of track points to file
+        globalPointi = 0;
         label globalEdgei = 0;
-        label globalPointi = 0;
-        for (const coordSet& points : tracks)
+
+        for (label tracki = 0; tracki < nTracks; ++tracki)
         {
-            const label nEdges = points.size()-1;
+            const label nEdges = (coords_[tracki].size() - 1);
+
             for (label edgei = 0; edgei < nEdges; ++edgei)
             {
-                fileFormats::NASCore::writeKeyword
-                (
-                    os,
-                    "PLOTEL",
-                    fieldFormat::FREE
-                );
+                writeKeyword(os, "PLOTEL");
+                if (sep) os << sep;
 
-                // fieldFormat::SHORT
-                //os.setf(std::ios_base::right);
-                //os  << setw(8) << globalEdgei+1
-                //    << setw(8) << globalPointi+1
-                //    << setw(8) << globalPointi+2
-                //    << nl;
-                //os.unsetf(std::ios_base::right);
+                putValue(os, globalEdgei+1, width);  // Edge id
+                if (sep) os << sep;
 
-                // fieldFormat::FREE
-                os  << ',' << globalEdgei+1
-                    << ',' << globalPointi+1
-                    << ',' << globalPointi+2
-                    << nl;
+                putValue(os, globalPointi+1, width);
+                if (sep) os << sep;
+
+                putValue(os, globalPointi+2, width);
+                os << nl;
 
                 ++globalEdgei;
                 ++globalPointi;
@@ -201,8 +224,100 @@ void Foam::nastranSetWriter<Type>::write
         }
     }
 
-    os << "ENDDATA" << nl;
+    wroteGeom_ = true;
 }
+
+
+template<class Type>
+Foam::fileName Foam::coordSetWriters::nastranWriter::writeTemplate
+(
+    const word& fieldName,
+    const Field<Type>& values
+)
+{
+    checkOpen();
+    if (coords_.empty())
+    {
+        return fileName::null;
+    }
+
+    fileName outputFile = path();
+
+    if (!wroteGeom_)
+    {
+        if (verbose_)
+        {
+            Info<< "Writing nastran geometry to " << outputFile << endl;
+        }
+
+        if (!isDir(outputFile.path()))
+        {
+            mkDir(outputFile.path());
+        }
+
+        OFstream os(outputFile);
+        fileFormats::NASCore::setPrecision(os, writeFormat_);
+
+        os  << "TITLE=OpenFOAM " << outputFile.nameLessExt()
+            << " geometry" << nl
+            << "BEGIN BULK" << nl;
+
+        writeGeometry(os, (useTracks_ ? coords_.size() : 0));
+
+        os << "ENDDATA" << nl;
+    }
+
+    return outputFile;
+}
+
+
+template<class Type>
+Foam::fileName Foam::coordSetWriters::nastranWriter::writeTemplate
+(
+    const word& fieldName,
+    const List<Field<Type>>& fieldValues
+)
+{
+    checkOpen();
+    if (coords_.empty())
+    {
+        return fileName::null;
+    }
+
+    fileName outputFile = path();
+
+    if (!wroteGeom_)
+    {
+        if (verbose_)
+        {
+            Info<< "Writing nastran geometry to " << outputFile << endl;
+        }
+
+        if (!isDir(outputFile.path()))
+        {
+            mkDir(outputFile.path());
+        }
+
+        OFstream os(outputFile);
+        fileFormats::NASCore::setPrecision(os, writeFormat_);
+
+        os  << "TITLE=OpenFOAM " << outputFile.nameLessExt()
+            << " geometry" << nl
+            << "BEGIN BULK" << nl;
+
+        writeGeometry(os, coords_.size());
+
+        os << "ENDDATA" << nl;
+    }
+
+    return outputFile;
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Field writing methods
+defineCoordSetWriterWriteFields(Foam::coordSetWriters::nastranWriter);
 
 
 // ************************************************************************* //

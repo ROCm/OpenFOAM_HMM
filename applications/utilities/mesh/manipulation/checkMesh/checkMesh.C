@@ -74,7 +74,7 @@ Usage
 #include "Time.H"
 #include "fvMesh.H"
 #include "globalMeshData.H"
-#include "vtkSetWriter.H"
+#include "vtkCoordSetWriter.H"
 #include "vtkSurfaceWriter.H"
 #include "IOdictionary.H"
 #include "regionProperties.H"
@@ -262,11 +262,11 @@ int main(int argc, char *argv[])
 
 
     autoPtr<surfaceWriter> surfWriter;
-    autoPtr<writer<scalar>> setWriter;
+    autoPtr<coordSetWriter> setWriter;
     if (writeSets)
     {
         surfWriter = surfaceWriter::New(surfaceFormat);
-        setWriter = writer<scalar>::New(vtkSetWriter<scalar>::typeName);
+        setWriter = coordSetWriter::New(coordSetWriters::vtkWriter::typeName);
     }
 
 

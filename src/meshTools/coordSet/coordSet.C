@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "coordSet.H"
+#include "globalIndex.H"
 
 // * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * * //
 
@@ -36,11 +37,13 @@ const Foam::Enum
 >
 Foam::coordSet::coordFormatNames
 ({
-    { coordFormat::XYZ, "xyz" },
     { coordFormat::X, "x" },
     { coordFormat::Y, "y" },
     { coordFormat::Z, "z" },
+    { coordFormat::RADIUS, "radius" },
     { coordFormat::DISTANCE, "distance" },
+    { coordFormat::XYZ, "xyz" },
+/// { coordFormat::DEFAULT, "default" },
 });
 
 
@@ -48,18 +51,27 @@ Foam::coordSet::coordFormatNames
 
 void Foam::coordSet::checkDimensions() const
 {
-    if (size() != curveDist_.size())
+    if (points().size() != distance().size())
     {
         FatalErrorInFunction
-            << "Size of points and curve distance must be the same" << nl
-            << "    points size : " << size()
-            << "    curve size  : " << curveDist_.size()
+            << "Size not equal :" << nl
+            << "    points:" << points().size()
+            << "    distance:" << distance().size()
             << abort(FatalError);
     }
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+// Foam::coordSet::coordSet()
+// :
+//     pointField(),
+//     name_(),
+//     distance_(),
+//     axis_(coordFormat::DEFAULT)
+// {}
+
 
 Foam::coordSet::coordSet
 (
@@ -69,8 +81,8 @@ Foam::coordSet::coordSet
 :
     pointField(),
     name_(name),
-    axis_(axisType),
-    curveDist_()
+    distance_(),
+    axis_(axisType)
 {}
 
 
@@ -80,10 +92,7 @@ Foam::coordSet::coordSet
     const word& axis
 )
 :
-    pointField(),
-    name_(name),
-    axis_(coordFormatNames[axis]),
-    curveDist_()
+    coordSet(name, coordFormatNames.get(axis))
 {}
 
 
@@ -92,13 +101,13 @@ Foam::coordSet::coordSet
     const word& name,
     const word& axis,
     const List<point>& points,
-    const scalarList& curveDist
+    const scalarList& dist
 )
 :
     pointField(points),
     name_(name),
-    axis_(coordFormatNames[axis]),
-    curveDist_(curveDist)
+    distance_(dist),
+    axis_(coordFormatNames[axis])
 {
     checkDimensions();
 }
@@ -109,13 +118,13 @@ Foam::coordSet::coordSet
     const word& name,
     const word& axis,
     List<point>&& points,
-    scalarList&& curveDist
+    scalarList&& dist
 )
 :
     pointField(std::move(points)),
     name_(name),
-    axis_(coordFormatNames[axis]),
-    curveDist_(std::move(curveDist))
+    distance_(std::move(dist)),
+    axis_(coordFormatNames.get(axis))
 {
     checkDimensions();
 }
@@ -123,7 +132,7 @@ Foam::coordSet::coordSet
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::coordSet::hasVectorAxis() const
+bool Foam::coordSet::hasVectorAxis() const noexcept
 {
     return axis_ == coordFormat::XYZ;
 }
@@ -131,71 +140,104 @@ bool Foam::coordSet::hasVectorAxis() const
 
 Foam::scalar Foam::coordSet::scalarCoord(const label index) const
 {
-    const point& p = operator[](index);
-
     switch (axis_)
     {
         case coordFormat::X:
         {
-            return p.x();
+            return points()[index].x();
         }
         case coordFormat::Y:
         {
-            return p.y();
+            return points()[index].y();
         }
         case coordFormat::Z:
         {
-            return p.z();
+            return points()[index].z();
+        }
+        case coordFormat::RADIUS:
+        {
+            return mag(points()[index]);
         }
         case coordFormat::DISTANCE:
         {
-            // Note: If this has been constructed from the 'name' and 'axis'
-            // constructor the curveDist list will not have been set
+            // Note: the distance will unset it constructed from
+            // 'name' and 'axis' only
 
-            if (curveDist_.empty())
+            if (distance().empty())
             {
                 FatalErrorInFunction
                     << "Axis type '" << coordFormatNames[axis_]
                     << "' requested but curve distance has not been set"
                     << abort(FatalError);
             }
-
-            return curveDist_[index];
+            return distance()[index];
         }
         default:
         {
             FatalErrorInFunction
                 << "Illegal axis specification '" << coordFormatNames[axis_]
-                << "' for sampling line " << name_
+                << "' for sampling " << name_
                 << exit(FatalError);
-
-            return 0;
         }
     }
+
+    return 0;
 }
 
 
-Foam::point Foam::coordSet::vectorCoord(const label index) const
+const Foam::point& Foam::coordSet::vectorCoord(const label index) const
 {
-    const point& p = operator[](index);
-
-    return p;
+    return points()[index];
 }
 
 
 Foam::Ostream& Foam::coordSet::write(Ostream& os) const
 {
-    os  << "name:" << name_ << " axis:" << coordFormatNames[axis_]
+    os  << "name:" << name_ << " axis:" << coordFormatNames[axis_] << nl
         << nl
-        << nl << "\t(coord)"
-        << endl;
+        << "\t(coord)" << nl;
 
-    for (const point& pt : *this)
+    for (const point& p : *this)
     {
-        os  << '\t' << pt << endl;
+        os  << '\t' << p << nl;
     }
 
     return os;
+}
+
+
+Foam::autoPtr<Foam::coordSet> Foam::coordSet::gatherSort
+(
+    labelList& sortOrder
+) const
+{
+    // Combine sampleSet from processors. Sort by distance.
+    // Return ordering in indexSet.
+    // Note: only master results are valid
+
+    List<point> allPoints(globalIndex::gatherOp(points()));
+    List<scalar> allDistance(globalIndex::gatherOp(distance()));
+
+    if (Pstream::master() && allDistance.empty())
+    {
+        WarningInFunction
+            << "Gathered empty coordSet: " << name() << endl;
+    }
+
+    // Sort according to distance
+    Foam::sortedOrder(allDistance, sortOrder);  // uses stable sort
+
+    // Repopulate gathered points/distances in the correct order
+    allPoints = List<point>(allPoints, sortOrder);
+    allDistance = List<scalar>(allDistance, sortOrder);
+
+    return autoPtr<coordSet>::New
+    (
+        name(),
+        axis(),
+        std::move(allPoints),
+        std::move(allDistance)
+    );
 }
 
 

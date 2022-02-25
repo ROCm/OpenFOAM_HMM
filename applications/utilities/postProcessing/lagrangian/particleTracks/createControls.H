@@ -17,7 +17,12 @@ label maxTracks(propsDict.getOrDefault<label>("maxTracks", -1));
 word setFormat(propsDict.getOrDefault<word>("setFormat", "vtk"));
 
 // Optional - if empty, select all
-const wordRes fieldNames(propsDict.getOrDefault<wordRes>("fields", wordRes()));
+wordRes acceptFields;
+propsDict.readIfPresent("fields", acceptFields);
+
+// Optional
+wordRes excludeFields;
+propsDict.readIfPresent("exclude", excludeFields);
 
 const word UName(propsDict.getOrDefault<word>("U", "U"));
 

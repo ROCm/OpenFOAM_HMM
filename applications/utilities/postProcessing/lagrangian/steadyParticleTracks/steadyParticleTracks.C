@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,73 +46,112 @@ Description
 #include "Time.H"
 #include "timeSelector.H"
 #include "OFstream.H"
-#include "passiveParticleCloud.H"
 #include "labelPairHashes.H"
-#include "SortableList.H"
+#include "IOField.H"
 #include "IOobjectList.H"
-#include "PtrList.H"
-#include "Field.H"
+#include "SortableList.H"
+#include "passiveParticleCloud.H"
 #include "steadyParticleTracksTemplates.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-using namespace Foam;
 
 namespace Foam
 {
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-label validateFields
+// Extract list of IOobjects, modifying the input IOobjectList in the
+// process
+IOobjectList preFilterFields
 (
-    const List<word>& userFields,
-    const IOobjectList& cloudObjs
+    IOobjectList& cloudObjects,
+    const wordRes& acceptFields,
+    const wordRes& excludeFields
 )
 {
-    List<bool> ok(userFields.size(), false);
+    IOobjectList filteredObjects(cloudObjects.capacity());
+    DynamicList<label> missed(acceptFields.size());
 
-    forAll(userFields, i)
+    // Selection here is slighly different than usual
+    // - an empty accept filter means "ignore everything"
+
+    if (!acceptFields.empty())
     {
-        ok[i] = ok[i] || fieldOk<label>(cloudObjs, userFields[i]);
-        ok[i] = ok[i] || fieldOk<scalar>(cloudObjs, userFields[i]);
-        ok[i] = ok[i] || fieldOk<vector>(cloudObjs, userFields[i]);
-        ok[i] = ok[i] || fieldOk<sphericalTensor>(cloudObjs, userFields[i]);
-        ok[i] = ok[i] || fieldOk<symmTensor>(cloudObjs, userFields[i]);
-        ok[i] = ok[i] || fieldOk<tensor>(cloudObjs, userFields[i]);
+        const wordRes::filter pred(acceptFields, excludeFields);
+
+        const wordList allNames(cloudObjects.sortedNames());
+
+        // Detect missing fields
+        forAll(acceptFields, i)
+        {
+            if
+            (
+                acceptFields[i].isLiteral()
+             && !allNames.found(acceptFields[i])
+            )
+            {
+                missed.append(i);
+            }
+        }
+
+        for (const word& fldName : allNames)
+        {
+            const auto iter = cloudObjects.cfind(fldName);
+            if (!pred(fldName) || !iter.found())
+            {
+                continue;  // reject
+            }
+
+            const IOobject& io = *(iter.val());
+
+            if
+            (
+                //OR: fieldTypes::basic.found(io.headerClassName())
+                io.headerClassName() == IOField<label>::typeName
+             || io.headerClassName() == IOField<scalar>::typeName
+             || io.headerClassName() == IOField<vector>::typeName
+             || io.headerClassName() == IOField<sphericalTensor>::typeName
+             || io.headerClassName() == IOField<symmTensor>::typeName
+             || io.headerClassName() == IOField<tensor>::typeName
+            )
+            {
+                // Transfer from cloudObjects -> filteredObjects
+                filteredObjects.add(cloudObjects.remove(fldName));
+            }
+        }
     }
 
-    label nOk = 0;
-    forAll(ok, i)
+    if (missed.size())
     {
-        if (ok[i])
-        {
-            ++nOk;
-        }
-        else
-        {
-            Info << "\n*** Warning: user specified field '" << userFields[i]
-                 << "' unavailable" << endl;
-        }
+        WarningInFunction
+            << nl
+            << "Cannot find field file matching "
+            << UIndirectList<wordRe>(acceptFields, missed) << endl;
     }
 
-    return nOk;
+    return filteredObjects;
 }
 
 
-template<>
-void writeVTK(OFstream& os, const label& value)
+void readFieldsAndWriteVTK
+(
+    OFstream& os,
+    const List<labelList>& particleMap,
+    const IOobjectList& filteredObjects
+)
 {
-    os  << value;
+    processFields<label>(os, particleMap, filteredObjects);
+    processFields<scalar>(os, particleMap, filteredObjects);
+    processFields<vector>(os, particleMap, filteredObjects);
+    processFields<sphericalTensor>(os, particleMap, filteredObjects);
+    processFields<symmTensor>(os, particleMap, filteredObjects);
+    processFields<tensor>(os, particleMap, filteredObjects);
 }
 
+}  // End namespace Foam
 
-template<>
-void writeVTK(OFstream& os, const scalar& value)
-{
-    os  << value;
-}
 
-}
+using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -153,37 +193,31 @@ int main(int argc, char *argv[])
         const fileName vtkTimePath(vtkPath/runTime.timeName());
         mkDir(vtkTimePath);
 
-        Info<< "    Reading particle positions" << endl;
-
-        PtrList<passiveParticle> particles(0);
+        pointField particlePosition;
+        labelList particleToTrack;
+        label nTracks = 0;
 
         // Transfer particles to (more convenient) list
         {
-            passiveParticleCloud ppc(mesh, cloudName);
-            Info<< "\n    Read " << returnReduce(ppc.size(), sumOp<label>())
+            Info<< "    Reading particle positions" << endl;
+
+            passiveParticleCloud myCloud(mesh, cloudName);
+            Info<< "\n    Read " << returnReduce(myCloud.size(), sumOp<label>())
                 << " particles" << endl;
 
-            particles.setSize(ppc.size());
+            const label nParticles = myCloud.size();
 
-            label i = 0;
-            forAllIters(ppc, iter)
+            particlePosition.resize(nParticles);
+            particleToTrack.resize(nParticles);
+
+            LabelPairMap<label> trackTable;
+
+            label np = 0;
+            for (const passiveParticle& p : myCloud)
             {
-                particles.set(i++, ppc.remove(&iter()));
-            }
-
-            // myCloud should now be empty
-        }
-
-        List<label> particleToTrack(particles.size());
-        label nTracks = 0;
-
-        {
-            labelPairLookup trackTable;
-
-            forAll(particles, i)
-            {
-                const label origProc = particles[i].origProc();
-                const label origId = particles[i].origId();
+                const label origId = p.origId();
+                const label origProc = p.origProc();
+                particlePosition[np] = p.position();
 
                 const labelPair key(origProc, origId);
 
@@ -191,17 +225,19 @@ int main(int argc, char *argv[])
 
                 if (iter.found())
                 {
-                    particleToTrack[i] = *iter;
+                    particleToTrack[np] = *iter;
                 }
                 else
                 {
-                    particleToTrack[i] = nTracks;
-                    trackTable.insert(key, nTracks);
-                    ++nTracks;
+                    particleToTrack[np] = trackTable.size();
+                    trackTable.insert(key, trackTable.size());
                 }
-            }
-        }
 
+                ++np;
+            }
+
+            nTracks = trackTable.size();
+        }
 
         if (nTracks == 0)
         {
@@ -230,7 +266,7 @@ int main(int argc, char *argv[])
             }
 
             // Store the particle age per track
-            IOobjectList cloudObjs
+            IOobjectList cloudObjects
             (
                 mesh,
                 runTime.timeName(),
@@ -239,23 +275,28 @@ int main(int argc, char *argv[])
 
             // TODO: gather age across all procs
             {
-                tmp<scalarField> tage =
-                    readParticleField<scalar>("age", cloudObjs);
+                tmp<IOField<scalar>> tage =
+                    readParticleField<scalar>("age", cloudObjects);
 
-                const scalarField& age = tage();
+                const auto& age = tage();
 
                 labelList trackSamples(nTracks, Zero);
 
                 forAll(particleToTrack, i)
                 {
-                    const label trackI = particleToTrack[i];
-                    const label sampleI = trackSamples[trackI];
-                    agePerTrack[trackI][sampleI] = age[i];
-                    particleMap[trackI][sampleI] = i;
-                    trackSamples[trackI]++;
+                    const label tracki = particleToTrack[i];
+                    const label samplei = trackSamples[tracki];
+                    agePerTrack[tracki][samplei] = age[i];
+                    particleMap[tracki][samplei] = i;
+                    ++trackSamples[tracki];
                 }
-                tage.clear();
             }
+
+
+            const IOobjectList filteredObjects
+            (
+                preFilterFields(cloudObjects, acceptFields, excludeFields)
+            );
 
 
             if (Pstream::master())
@@ -295,7 +336,7 @@ int main(int argc, char *argv[])
                         forAll(ids, j)
                         {
                             const label localId = particleIds[j];
-                            const vector pos(particles[localId].position());
+                            const point& pos = particlePosition[localId];
                             os  << pos.x() << ' ' << pos.y() << ' ' << pos.z()
                                 << nl;
                         }
@@ -330,22 +371,14 @@ int main(int argc, char *argv[])
                 }
 
 
-                const label nFields = validateFields(userFields, cloudObjs);
+                const label nFields = filteredObjects.size();
 
                 os  << "POINT_DATA " << nPoints << nl
                     << "FIELD attributes " << nFields << nl;
 
                 Info<< "\n    Processing fields" << nl << endl;
 
-                processFields<label>(os, particleMap, userFields, cloudObjs);
-                processFields<scalar>(os, particleMap, userFields, cloudObjs);
-                processFields<vector>(os, particleMap, userFields, cloudObjs);
-                processFields<sphericalTensor>
-                    (os, particleMap, userFields, cloudObjs);
-                processFields<symmTensor>
-                    (os, particleMap, userFields, cloudObjs);
-                processFields<tensor>(os, particleMap, userFields, cloudObjs);
-
+                readFieldsAndWriteVTK(os, particleMap, filteredObjects);
             }
         }
         Info<< endl;

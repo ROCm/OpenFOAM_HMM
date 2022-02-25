@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -100,12 +100,12 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef functionObjects_histogram_H
-#define functionObjects_histogram_H
+#ifndef Foam_functionObjects_histogram_H
+#define Foam_functionObjects_histogram_H
 
 #include "fvMeshFunctionObject.H"
 #include "writeFile.H"
-#include "writer.H"
+#include "coordSetWriter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -120,8 +120,8 @@ namespace functionObjects
 
 class histogram
 :
-    public fvMeshFunctionObject,
-    public writeFile
+    public functionObjects::fvMeshFunctionObject,
+    public functionObjects::writeFile
 {
     // Private Data
 
@@ -138,18 +138,7 @@ class histogram
         scalar min_;
 
         //- Output formatter to write
-        autoPtr<writer<scalar>> formatterPtr_;
-
-
-    // Private Member Functions
-
-        void writeGraph
-        (
-            const coordSet& coords,
-            const word& valueName,
-            const scalarField& normalizedValues,
-            const scalarField& absoluteValues
-        ) const;
+        mutable autoPtr<coordSetWriter> setWriterPtr_;
 
 
 public:

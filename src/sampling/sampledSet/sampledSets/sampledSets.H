@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,24 +29,86 @@ Class
 
 Description
     Set of sets to sample.
-    Call sampledSets.write() to sample and write files.
+
+    The write() method is used to sample and write files.
+
+    Example of function object specification:
+
+    \verbatim
+    surfaces
+    {
+        type    sets;
+        libs    (sampling);
+
+        // Write at same frequency as fields
+        writeControl    writeTime;
+        writeInterval   1;
+
+        // Fields to be sampled
+        fields          (p U);
+
+        // Scheme to obtain values
+        interpolationScheme cellPoint;
+
+        // Output format
+        surfaceFormat   vtk;
+
+        formatOptions
+        {
+            vtk
+            {
+                precision  10;
+            }
+        }
+
+        sets
+        {
+            Uref
+            {
+                type    cloud;
+                axis    xyz;
+                points  ((-0.0508 0.0508 0.01));
+            }
+        }
+    }
+    \endverbatim
+
+    Entries:
+    \table
+        Property | Description                              | Required | Default
+        type     | Type-name: sets                          | yes |
+        sets     | Dictionary or list of sample sets        | expected |
+        fields   | word/regex list of fields to sample      | yes |
+        interpolationScheme | scheme to obtain values       | no  | cellPoint
+        setFormat | output format                           | yes |
+        sampleOnExecute | Sample (store) on execution as well | no | false
+        formatOptions | dictionary of format options        | no  |
+    \endtable
+
+    Additional per-set entries:
+    \table
+        Property | Description                              | Required | Default
+        store    | Store surface/fields on registry         | no  |
+        setFormat | output format                           | no  |
+        formatOptions | dictionary of format options        | no  |
+    \endtable
 
 SourceFiles
     sampledSets.C
+    sampledSetsImpl.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef sampledSets_H
-#define sampledSets_H
+#ifndef Foam_sampledSets_H
+#define Foam_sampledSets_H
 
-#include "regionFunctionObject.H"
+#include "fvMeshFunctionObject.H"
 #include "sampledSet.H"
-#include "volFieldsFwd.H"
 #include "meshSearch.H"
-#include "interpolation.H"
 #include "coordSet.H"
-#include "writer.H"
-#include "wordRes.H"
+#include "coordSetWriter.H"
+#include "volFieldsFwd.H"
+#include "IOobjectList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,9 +117,8 @@ namespace Foam
 
 // Forward Declarations
 class Time;
-class objectRegistry;
 class dictionary;
-class fvMesh;
+class globalIndex;
 
 /*---------------------------------------------------------------------------*\
                          Class sampledSets Declaration
@@ -65,96 +126,36 @@ class fvMesh;
 
 class sampledSets
 :
-    public functionObjects::regionFunctionObject,
+    public functionObjects::fvMeshFunctionObject,
     public PtrList<sampledSet>
 {
-    // Private Classes
-
-        //- Class used for grouping field types
-        template<class Type>
-        class fieldGroup
-        :
-            public DynamicList<word>
-        {
-        public:
-
-            //- The set formatter
-            autoPtr<writer<Type>> formatter;
-
-            //- Construct null
-            fieldGroup() = default;
-
-            //- Reset format and field list
-            void clear()
-            {
-                DynamicList<word>::clear();
-                formatter.clear();
-            }
-
-            void setFormatter(const word& writeFormat, const dictionary& dict)
-            {
-                formatter = writer<Type>::New(writeFormat, dict);
-            }
-        };
-
-
-        //- Class used for sampling volFields
-        template<class Type>
-        class volFieldSampler
-        :
-            public List<Field<Type>>
-        {
-            //- Name of this collection of values
-            const word name_;
-
-        public:
-
-            //- Construct interpolating field to the sampleSets
-            volFieldSampler
-            (
-                const word& interpolationScheme,
-                const GeometricField<Type, fvPatchField, volMesh>& field,
-                const PtrList<sampledSet>&
-            );
-
-            //- Construct mapping field to the sampleSets
-            volFieldSampler
-            (
-                const GeometricField<Type, fvPatchField, volMesh>& field,
-                const PtrList<sampledSet>&
-            );
-
-            //- Construct from components
-            volFieldSampler
-            (
-                const List<Field<Type>>& values,
-                const word& name
-            );
-
-            //- Return the field name
-            const word& name() const
-            {
-                return name_;
-            }
-        };
-
-
     // Static Data Members
 
-        //- Output verbosity
-        static bool verbose_;
-
+        //- Local control for sampling actions
+        enum sampleActionType : unsigned
+        {
+            ACTION_NONE  = 0,
+            ACTION_WRITE = 0x1,
+            ACTION_STORE = 0x2,
+            ACTION_ALL = 0xF
+        };
 
     // Private Data
-
-        //- Const reference to fvMesh
-        const fvMesh& mesh_;
 
         //- Keep the dictionary to recreate sets for moving mesh cases
         dictionary dict_;
 
         //- Load fields from files (not from objectRegistry)
         bool loadFromFiles_;
+
+        //- Output verbosity
+        bool verbose_;
+
+        //- Perform sample/store actions on execute as well
+        bool onExecute_;
+
+        //- Correct meshSearch and update sets
+        bool needsCorrect_;
 
         //- Output path
         fileName outputPath_;
@@ -168,8 +169,8 @@ class sampledSets
         //- Names of fields to sample
         wordRes fieldSelection_;
 
-        //- Interpolation scheme to use
-        word interpolationScheme_;
+        //- Interpolation/sample scheme to obtain values at the points
+        word samplePointScheme_;
 
         //- Output format to use
         word writeFormat_;
@@ -178,61 +179,76 @@ class sampledSets
         dictionary writeFormatOptions_;
 
 
-    // Categorized scalar/vector/tensor fields
+    // Output control
 
-        fieldGroup<scalar> scalarFields_;
-        fieldGroup<vector> vectorFields_;
-        fieldGroup<sphericalTensor> sphericalTensorFields_;
-        fieldGroup<symmTensor> symmTensorFields_;
-        fieldGroup<tensor> tensorFields_;
+        //- The coordSet writers (one per sampled set)
+        PtrList<coordSetWriter> writers_;
+
+        //- Current list of field names selected for sampling
+        DynamicList<word> selectedFieldNames_;
 
 
-    // Merging structures
+    // Merging
 
-        PtrList<coordSet> masterSampledSets_;
-        labelListList indexSets_;
+        //- Gathered coordSet. (Content only meaningful on master)
+        PtrList<coordSet> gatheredSets_;
+
+        //- Indexed sort order for gathered coordSet.
+        //  (Content only meaningful on master)
+        List<labelList> gatheredSorting_;
+
+        //- The globalIndex for gathering. (Content only meaningful on master)
+        List<globalIndex> globalIndices_;
 
 
     // Private Member Functions
 
-        //- Clear old field groups
-        void clearFieldGroups();
-
-        //- Classify field types, returns the number of fields
-        label classifyFields();
-
-        //- Combine points from all processors. Sort by curveDist and produce
-        //- index list. Valid result only on master processor.
-        void combineSampledSets
+        //- A new coordSet writer, with per-set formatOptions
+        static autoPtr<coordSetWriter> newWriter
         (
-            PtrList<coordSet>& masterSampledSets,
-            labelListList& indexSets
+            word writeType,
+            const dictionary& formatOptions,
+            const dictionary& surfDict
         );
 
-        //- Combine values from all processors.
-        //  Valid result only on master processor.
-        template<class T>
-        void combineSampledValues
-        (
-            const PtrList<volFieldSampler<T>>& sampledFields,
-            const labelListList& indexSets,
-            PtrList<volFieldSampler<T>>& masterFields
-        );
+        //- Perform sampling action with store/write
+        bool performAction(unsigned request);
 
-        //- Write set on master, return fileName
+        //- Count selected/sampled fields
+        //  Returns empty IOobjectList if loadFromFiles_ is not active
+        //
+        //  Adjusts selectedFieldNames_
+        IOobjectList preCheckFields();
+
+        //- Setup the sets (optional writers)
+        void initDict(const dictionary& dict, const bool initial);
+
+        //- Combine points from all processors.
+        //- Sort by curve distance and produce index list.
+        //- Valid result only on master processor.
+        void gatherAllSets();
+
+        //- Write sampled fieldName on coordSet and on outputDir path
         template<class Type>
-        fileName writeSampleFile
+        void writeCoordSet
         (
-            const coordSet& masterSampleSet,
-            const PtrList<volFieldSampler<Type>>& masterFields,
-            const label setI,
-            const fileName& timeDir,
-            const writer<Type>& formatter
+            coordSetWriter& writer,
+            const Field<Type>& values,
+            const word& fieldName
         );
 
-        template<class Type>
-        void sampleAndWrite(fieldGroup<Type>& fields);
+        //- Get from registry or load from disk
+        template<class GeoField>
+        tmp<GeoField> getOrLoadField(const word& fieldName) const;
 
+        //- Sample and store/write a specific volume field
+        template<class Type>
+        void performAction(const VolumeField<Type>& field, unsigned request);
+
+        //- Sample and write all applicable sampled fields
+        //  Only uses IOobjectList when loadFromFiles_ is active
+        template<class GeoField>
+        void performAction(const IOobjectList& objects, unsigned request);
 
         //- No copy construct
         sampledSets(const sampledSets&) = delete;
@@ -253,7 +269,7 @@ public:
         sampledSets
         (
             const word& name,
-            const Time& time,
+            const Time& runTime,
             const dictionary& dict
         );
 
@@ -262,8 +278,8 @@ public:
         sampledSets
         (
             const word& name,
-            const objectRegistry&,
-            const dictionary&,
+            const objectRegistry& obr,
+            const dictionary& dict,
             const bool loadFromFiles = false
         );
 
@@ -276,7 +292,7 @@ public:
 
         //- Enable/disable verbose output
         //  \return old value
-        bool verbose(const bool on);
+        bool verbose(const bool on) noexcept;
 
         //- Read the sampledSets
         virtual bool read(const dictionary&);
@@ -304,12 +320,6 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "sampledSetsTemplates.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

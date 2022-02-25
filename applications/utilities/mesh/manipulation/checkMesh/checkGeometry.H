@@ -7,7 +7,7 @@ namespace Foam
     // Forward Declarations
     class polyMesh;
     class wedgePolyPatch;
-    template<class T> class writer;
+    class coordSetWriter;
     class surfaceWriter;
 
     label findOppositeWedge(const polyMesh&, const wedgePolyPatch&);
@@ -47,6 +47,6 @@ namespace Foam
         const polyMesh& mesh,
         const bool allGeometry,
         autoPtr<surfaceWriter>& surfWriter,
-        const autoPtr<writer<scalar>>& setWriter
+        autoPtr<coordSetWriter>& setWriter
     );
 }

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,7 +40,7 @@ Description
 #include "IOdictionary.H"
 #include "searchableSurfaces.H"
 #include "conformalVoronoiMesh.H"
-#include "vtkSetWriter.H"
+#include "vtkCoordSetWriter.H"
 
 using namespace Foam;
 
@@ -106,8 +106,10 @@ int main(int argc, char *argv[])
             foamyHexMeshDict.getOrDefault("singleRegionName", true)
         );
 
+        autoPtr<coordSetWriter> setWriterPtr(new coordSetWriters::vtkWriter());
+
         // Write some stats
-        allGeometry.writeStats(List<wordList>(0), Info);
+        allGeometry.writeStats(List<wordList>(), Info);
         // Check topology
         allGeometry.checkTopology(true);
         // Check geometry
@@ -115,7 +117,7 @@ int main(int argc, char *argv[])
         (
             100.0,      // max size ratio
             1e-9,       // intersection tolerance
-            autoPtr<writer<scalar>>(new vtkSetWriter<scalar>()),
+            setWriterPtr,
             0.01,       // min triangle quality
             true
         );

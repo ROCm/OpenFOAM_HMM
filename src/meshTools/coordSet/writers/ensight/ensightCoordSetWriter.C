@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,277 +26,321 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "ensightSetWriter.H"
+#include "ensightCoordSetWriter.H"
 #include "coordSet.H"
 #include "IOmanip.H"
 #include "ensightCase.H"
 #include "ensightGeoFile.H"
+#include "ensightOutput.H"
 #include "ensightPTraits.H"
+#include "coordSetWriterMethods.H"
 #include "addToRunTimeSelectionTable.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+namespace coordSetWriters
+{
+    defineTypeName(ensightWriter);
+    addToRunTimeSelectionTable(coordSetWriter, ensightWriter, word);
+    addToRunTimeSelectionTable(coordSetWriter, ensightWriter, wordDict);
+}
+}
+
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+template<class Type>
+static void writeTrackField
+(
+    ensightFile& os,
+    const UPtrList<const Field<Type>>& fieldPtrs
+)
+{
+    // Write field (serial only)
+    os.writeKeyword(ensightPTraits<Type>::typeName);
+    forAll(fieldPtrs, tracki)
+    {
+        // Write as point data
+
+        os.beginPart(tracki);  // Part index (0-based)
+        ensightOutput::Detail::writeFieldComponents
+        (
+            os,
+            ensightFile::coordinates,
+            fieldPtrs[tracki],
+            false  /* serial only! */
+        );
+    }
+}
+
+} // End namespace Foam
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::coordSetWriters::ensightWriter::writeGeometry
+(
+    ensightGeoFile& os,
+    elemOutputType elemOutput
+) const
+{
+    // Writing tracks as x/y/z coordinates, optionally with points
+    // or points/lines as elements.
+    //
+    // The requirements are so basic that they do not warrant an
+    // ensightPart treatment at all.
+
+    forAll(coords_, tracki)
+    {
+        const auto& coords = coords_[tracki];
+        const label nPoints = coords.size();
+
+        word partName("track" + Foam::name(tracki));
+        if (coords_.size() == 1 && elemOutputType::WRITE_LINES != elemOutput)
+        {
+            partName = "sampled";
+        }
+
+        ensightOutput::Detail::writeCoordinates
+        (
+            os,
+            tracki,   // Part index (0-based)
+            partName,
+            nPoints,
+            static_cast<const pointField&>(coords),
+            false     /* serial only! */
+        );
+
+        if (elemOutputType::WRITE_POINTS == elemOutput)
+        {
+            if (nPoints)
+            {
+                os.writeKeyword("point");
+                os.write(nPoints);
+                os.newline();
+                for (label pointi = 0; pointi < nPoints; ++pointi)
+                {
+                    os.write(pointi+1);  // From 0-based to 1-based index
+                    os.newline();
+                }
+            }
+        }
+        if (elemOutputType::WRITE_LINES == elemOutput)
+        {
+            const label nLines = (nPoints-1);
+            if (nPoints == 1)
+            {
+                os.writeKeyword("point");
+                os.write(nPoints);
+                os.newline();
+                for (label pointi = 0; pointi < nPoints; ++pointi)
+                {
+                    os.write(pointi+1);  // From 0-based to 1-based index
+                    os.newline();
+                }
+            }
+            else if (nLines > 0)
+            {
+                os.writeKeyword("bar2");
+                os.write(nLines);
+                os.newline();
+                for (label pointi = 0; pointi < nLines; ++pointi)
+                {
+                    os.write(pointi+1);  // From 0-based to 1-based index
+                    os.write(pointi+2);
+                    os.newline();
+                }
+            }
+        }
+    }
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::ensightSetWriter<Type>::ensightSetWriter()
+Foam::coordSetWriters::ensightWriter::ensightWriter()
 :
-    writer<Type>()
+    coordSetWriter(),
+    writeFormat_(IOstream::ASCII),
+    collateTimes_(true),
+    caching_("fieldsDict")  // Historic name
 {}
 
 
-template<class Type>
-Foam::ensightSetWriter<Type>::ensightSetWriter(const dictionary& dict)
+Foam::coordSetWriters::ensightWriter::ensightWriter(const dictionary& options)
 :
-    writer<Type>(dict)
+    coordSetWriter(options),
+    writeFormat_
+    (
+        IOstreamOption::formatEnum("format", options, IOstream::ASCII)
+    ),
+    collateTimes_(options.getOrDefault("collateTimes", true)),
+    caching_("fieldsDict")  // Historic name
 {}
+
+
+Foam::coordSetWriters::ensightWriter::ensightWriter
+(
+    const coordSet& coords,
+    const fileName& outputPath,
+    const dictionary& options
+)
+:
+    ensightWriter(options)
+{
+    open(coords, outputPath);
+}
+
+
+Foam::coordSetWriters::ensightWriter::ensightWriter
+(
+    const UPtrList<coordSet>& tracks,
+    const fileName& outputPath,
+    const dictionary& options
+)
+:
+    ensightWriter(options)
+{
+    open(tracks, outputPath);
+}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::coordSetWriters::ensightWriter::~ensightWriter()
+{
+    close();
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::fileName Foam::ensightSetWriter<Type>::getFileName
-(
-    const coordSet& points,
-    const wordList& valueSetNames
-) const
+Foam::fileName Foam::coordSetWriters::ensightWriter::path() const
 {
-    return
-        this->getBaseName(points, valueSetNames)
-      //+ '_'
-      //+ ensightPTraits<Type>::typeName
-      + ".case";
+    // Assume collateTimes == true, otherwise too fragile
+
+    // Collated
+    // ========
+    // CaseFile:  rootdir/NAME/NAME.case
+    // Geometry:  rootdir/NAME/data/<index>/geometry
+    // Field:     rootdir/NAME/data/<index>/field
+
+    if (!outputPath_.empty())
+    {
+        return outputPath_ / (ensight::FileName(outputPath_.name()) + ".case");
+    }
+
+    return fileName();
 }
 
 
-template<class Type>
-void Foam::ensightSetWriter<Type>::write
-(
-    const coordSet& points,
-    const wordList& valueSetNames,
-    const List<const Field<Type>*>& valueSets,
-    Ostream& os
-) const
+void Foam::coordSetWriters::ensightWriter::close(const bool force)
 {
-    const fileName base(os.name().lessExt());
-    const fileName meshFile(base + ".mesh");
+    caching_.clear();
+    coordSetWriter::close(force);
+}
 
-    // Write .case file
-    os  << "FORMAT" << nl
-        << "type: ensight gold" << nl
-        << nl
-        << "GEOMETRY" << nl
-        << "model:        1     " << meshFile.name().c_str() << nl
-        << nl
-        << "VARIABLE"
-        << nl;
 
-    for (const word& valueName : valueSetNames)
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Field writing implementations
+
+#include "ensightCoordSetWriterCollated.C"
+#include "ensightCoordSetWriterUncollated.C"
+
+template<class Type>
+Foam::fileName Foam::coordSetWriters::ensightWriter::writeTemplate
+(
+    const word& fieldName,
+    const Field<Type>& values
+)
+{
+    checkOpen();
+    if (coords_.empty())
     {
-        fileName dataFile(base + ".***." + valueName);
-
-        os.setf(ios_base::left);
-        os  << ensightPTraits<Type>::typeName
-            << " per node:            1       "
-            << setw(15) << valueName
-            << " " << dataFile.name().c_str()
-            << nl;
+        return fileName::null;
     }
-    os  << nl
-        << "TIME" << nl
-        << "time set:                      1" << nl
-        << "number of steps:               1" << nl
-        << "filename start number:         0" << nl
-        << "filename increment:            1" << nl
-        << "time values:" << nl
-        << "0.00000e+00" << nl;
-
-    // Write .mesh file
+    if (coords_.size() != 1)
     {
-        string desc("Written by OpenFOAM");
-        OFstream os(meshFile);
-        os.setf(ios_base::scientific, ios_base::floatfield);
-        os.precision(5);
-
-        os  << "Ensight Geometry File" << nl
-            << desc.c_str() << nl
-            << "node id assign" << nl
-            << "element id assign" << nl
-            << "part" << nl
-            << setw(10) << 1 << nl
-            << "internalMesh" << nl
-            << "coordinates" << nl
-            << setw(10) << points.size() << nl;
-
-        for (direction cmpt = 0; cmpt < vector::nComponents; ++cmpt)
-        {
-            for (const point& p : points)
-            {
-                const float comp = narrowFloat(p[cmpt]);
-                os  << setw(12) << comp << nl;
-            }
-        }
-        os  << "point" << nl
-            << setw(10) << points.size() << nl;
-        forAll(points, pointi)
-        {
-            os  << setw(10) << pointi+1 << nl;
-        }
+        FatalErrorInFunction
+            << "Attempted to write field: " << fieldName
+            << " (" << 1 << " entries) for "
+            << coords_.size() << " sets" << nl
+            << exit(FatalError);
     }
 
-    // Write data files
-    forAll(valueSetNames, seti)
+    UPtrList<const Field<Type>> fieldPtrs(repackageFields(values));
+
+    elemOutputType elemOutput =
+    (
+        useTracks_
+      ? elemOutputType::WRITE_LINES
+      : elemOutputType::NO_ELEMENTS
+    );
+
+    if (collateTimes_)
     {
-        const word& valueName = valueSetNames[seti];
-        const Field<Type>& fld = *(valueSets[seti]);
-
-        fileName dataFile(base + ".000." + valueName);
-        OFstream os(dataFile);
-        os.setf(ios_base::scientific, ios_base::floatfield);
-        os.precision(5);
-
-        os  << ensightPTraits<Type>::typeName << nl
-            << "part" << nl
-            << setw(10) << 1 << nl
-            << "coordinates" << nl;
-
-        for (direction d=0; d < pTraits<Type>::nComponents; ++d)
-        {
-            const direction cmpt = ensightPTraits<Type>::componentOrder[d];
-
-            for (const Type& val : fld)
-            {
-                const float comp = narrowFloat(component(val, cmpt));
-                os  << setw(12) << comp << nl;
-            }
-        }
+        return writeCollated(fieldName, fieldPtrs, elemOutput);
+    }
+    else
+    {
+        return writeUncollated(fieldName, fieldPtrs, elemOutput);
     }
 }
 
 
 template<class Type>
-void Foam::ensightSetWriter<Type>::write
+Foam::fileName Foam::coordSetWriters::ensightWriter::writeTemplate
 (
-    const bool writeTracks,
-    const List<scalarField>& times,
-    const PtrList<coordSet>& tracks,
-    const wordList& valueSetNames,
-    const List<List<Field<Type>>>& valueSets,
-    Ostream& os
-) const
+    const word& fieldName,
+    const List<Field<Type>>& fieldValues
+)
 {
-    const fileName base(os.name().lessExt());
-    const fileName meshFile(base + ".mesh");
-
-    // Write .case file
-    os  << "FORMAT" << nl
-        << "type: ensight gold" << nl
-        << nl
-        << "GEOMETRY" << nl
-        << "model:        1     " << meshFile.name().c_str() << nl
-        << nl
-        << "VARIABLE"
-        << nl;
-
-    for (const word& valueName : valueSetNames)
+    checkOpen();
+    if (coords_.empty())
     {
-        fileName dataFile(base + ".***." + valueName);
-
-        os.setf(ios_base::left);
-        os  << ensightPTraits<Type>::typeName
-            << " per node:            1       "
-            << setw(15) << valueName
-            << " " << dataFile.name().c_str()
-            << nl;
+        return fileName::null;
     }
-    os  << nl
-        << "TIME" << nl
-        << "time set:                      1" << nl
-        << "number of steps:               1" << nl
-        << "filename start number:         0" << nl
-        << "filename increment:            1" << nl
-        << "time values:" << nl
-        << "0.00000e+00" << nl;
-
-    // Write .mesh file
+    if (coords_.size() != fieldValues.size())
     {
-        string desc("Written by OpenFOAM");
-        OFstream os(meshFile);
-        os.setf(ios_base::scientific, ios_base::floatfield);
-        os.precision(5);
-        os  << "Ensight Geometry File" << nl
-            << desc.c_str() << nl
-            << "node id assign" << nl
-            << "element id assign" << nl;
-
-        forAll(tracks, tracki)
-        {
-            const coordSet& points = tracks[tracki];
-
-            os  << "part" << nl
-                << setw(10) << tracki+1 << nl
-                << "internalMesh" << nl
-                << "coordinates" << nl
-                << setw(10) << points.size() << nl;
-
-            for (direction cmpt = 0; cmpt < vector::nComponents; ++cmpt)
-            {
-                for (const point& p : points)
-                {
-                    const float comp = narrowFloat(p[cmpt]);
-                    os  << setw(12) << comp << nl;
-                }
-            }
-
-            if (writeTracks)
-            {
-                os  << "bar2" << nl
-                    << setw(10) << points.size()-1 << nl;
-                for (label i = 0; i < points.size()-1; i++)
-                {
-                    os  << setw(10) << i+1
-                        << setw(10) << i+2
-                        << nl;
-                }
-            }
-        }
+        FatalErrorInFunction
+            << "Attempted to write field: " << fieldName
+            << " (" << fieldValues.size() << " entries) for "
+            << coords_.size() << " sets" << nl
+            << exit(FatalError);
     }
 
+    UPtrList<const Field<Type>> fieldPtrs(repackageFields(fieldValues));
 
-    // Write data files
-    forAll(valueSetNames, seti)
+    if (collateTimes_)
     {
-        const word& valueName = valueSetNames[seti];
-        const List<Field<Type>>& fieldVals = valueSets[seti];
-
-        fileName dataFile(base + ".000." + valueName);
-        OFstream os(dataFile);
-        os.setf(ios_base::scientific, ios_base::floatfield);
-        os.precision(5);
-        {
-            os  << ensightPTraits<Type>::typeName << nl;
-
-            forAll(fieldVals, tracki)
-            {
-                const Field<Type>& fld = fieldVals[tracki];
-
-                os  << "part" << nl
-                    << setw(10) << tracki+1 << nl
-                    << "coordinates" << nl;
-
-                for (direction d=0; d < pTraits<Type>::nComponents; ++d)
-                {
-                    const direction cmpt =
-                        ensightPTraits<Type>::componentOrder[d];
-
-                    for (const Type& val : fld)
-                    {
-                        const float comp = narrowFloat(component(val, cmpt));
-                        os  << setw(12) << comp << nl;
-                    }
-                }
-            }
-        }
+        return writeCollated
+        (
+            fieldName,
+            fieldPtrs,
+            elemOutputType::WRITE_LINES
+        );
+    }
+    else
+    {
+        return writeUncollated
+        (
+            fieldName,
+            fieldPtrs,
+            elemOutputType::WRITE_LINES
+        );
     }
 }
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Field writing methods
+defineCoordSetWriterWriteFields(Foam::coordSetWriters::ensightWriter);
 
 
 // ************************************************************************* //

@@ -10,7 +10,7 @@ namespace Foam
     class cellSet;
     class fileName;
     class polyMesh;
-    template<class T> class writer;
+    class coordSetWriter;
     class surfaceWriter;
 
     void printMeshStats(const polyMesh& mesh, const bool allTopology);
@@ -36,7 +36,7 @@ namespace Foam
 
     //- Write vtk representation of (assembled) pointSet to 'set' file in
     //  postProcessing/ directory
-    void mergeAndWrite(const writer<scalar>& writer, const pointSet& set);
+    void mergeAndWrite(coordSetWriter& writer, const pointSet& set);
 }
 
 

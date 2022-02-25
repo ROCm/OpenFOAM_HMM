@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,110 +26,244 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "xmgraceSetWriter.H"
+#include "xmgraceCoordSetWriter.H"
 #include "coordSet.H"
 #include "fileName.H"
 #include "OFstream.H"
+#include "OSspecific.H"
+#include "coordSetWriterMethods.H"
+#include "addToRunTimeSelectionTable.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+namespace coordSetWriters
+{
+    defineTypeName(xmgraceWriter);
+    addToRunTimeSelectionTable(coordSetWriter, xmgraceWriter, word);
+    addToRunTimeSelectionTable(coordSetWriter, xmgraceWriter, wordDict);
+}
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Implementation
+#include "xmgraceCoordSetWriterImpl.C"
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::xmgraceSetWriter<Type>::xmgraceSetWriter()
+Foam::coordSetWriters::xmgraceWriter::xmgraceWriter()
 :
-    writer<Type>()
-{}
+    coordSetWriter(),
+    streamOpt_(),
+    precision_(IOstream::defaultPrecision()),
+    ofile_(nullptr),
+    nWritten_(0)
+{
+    buffering_ = true;
+}
 
 
-template<class Type>
-Foam::xmgraceSetWriter<Type>::xmgraceSetWriter(const dictionary& dict)
+Foam::coordSetWriters::xmgraceWriter::xmgraceWriter(const dictionary& options)
 :
-    writer<Type>(dict)
-{}
+    coordSetWriter(options),
+    streamOpt_
+    (
+        IOstream::ASCII,
+        IOstream::compressionEnum("compression", options)
+    ),
+    precision_
+    (
+        options.getOrDefault("precision", IOstream::defaultPrecision())
+    ),
+    ofile_(nullptr),
+    nWritten_(0)
+{
+    buffering_ = options.getOrDefault("buffer", true);
+}
+
+
+Foam::coordSetWriters::xmgraceWriter::xmgraceWriter
+(
+    const coordSet& coords,
+    const fileName& outputPath,
+    const dictionary& options
+)
+:
+    xmgraceWriter(options)
+{
+    open(coords, outputPath);
+}
+
+
+Foam::coordSetWriters::xmgraceWriter::xmgraceWriter
+(
+    const UPtrList<coordSet>& tracks,
+    const fileName& outputPath,
+    const dictionary& options
+)
+:
+    xmgraceWriter(options)
+{
+    open(tracks, outputPath);
+}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::coordSetWriters::xmgraceWriter::~xmgraceWriter()
+{
+    close();
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::fileName Foam::xmgraceSetWriter<Type>::getFileName
-(
-    const coordSet& points,
-    const wordList& valueSetNames
-) const
+bool Foam::coordSetWriters::xmgraceWriter::buffering(const bool on)
 {
-    return this->getBaseName(points, valueSetNames) + ".agr";
+    const bool old(buffering_);
+    buffering_ = on;
+    return old;
+}
+
+
+Foam::fileName Foam::coordSetWriters::xmgraceWriter::path() const
+{
+    // Assume !useTracks_, otherwise too fragile
+
+    // 1) rootdir/<TIME>/setName.agr
+    // 2) rootdir/setName.agr
+
+    return getExpectedPath("agr");
+}
+
+
+void Foam::coordSetWriters::xmgraceWriter::close(bool force)
+{
+    ofile_.reset(nullptr);
+    nWritten_ = 0;
+    coordSetWriter::close(force);
+}
+
+
+void Foam::coordSetWriters::xmgraceWriter::beginTime(const Time& t)
+{
+    ofile_.reset(nullptr);
+    nWritten_ = 0;
+    coordSetWriter::beginTime(t);
+}
+
+
+void Foam::coordSetWriters::xmgraceWriter::beginTime(const instant& inst)
+{
+    ofile_.reset(nullptr);
+    nWritten_ = 0;
+    coordSetWriter::beginTime(inst);
+}
+
+
+void Foam::coordSetWriters::xmgraceWriter::endTime()
+{
+    ofile_.reset(nullptr);
+    nWritten_ = 0;
+    coordSetWriter::endTime();
 }
 
 
 template<class Type>
-void Foam::xmgraceSetWriter<Type>::write
+Foam::fileName Foam::coordSetWriters::xmgraceWriter::writeTemplate
 (
-    const coordSet& points,
-    const wordList& valueSetNames,
-    const List<const Field<Type>*>& valueSets,
-    Ostream& os
-) const
+    const word& fieldName,
+    const Field<Type>& values
+)
 {
-    os  << "@g0 on" << nl
-        << "@with g0" << nl
-        << "@    title \"" << points.name() << '"' << nl
-        << "@    xaxis label " << '"' << points.axis() << '"' << nl;
-
-    forAll(valueSets, i)
+    checkOpen();
+    if (coords_.empty())
     {
-        os  << "@    s" << i << " legend " << '"'
-            << valueSetNames[i] << '"' << nl
-            << "@target G0.S" << i << nl;
-
-        this->writeTable(points, *valueSets[i], os);
-
-        os  << '&' << nl;
+        return fileName::null;
     }
-}
 
-
-template<class Type>
-void Foam::xmgraceSetWriter<Type>::write
-(
-    const bool writeTracks,
-    const List<scalarField>& times,
-    const PtrList<coordSet>& tracks,
-    const wordList& valueSetNames,
-    const List<List<Field<Type>>>& valueSets,
-    Ostream& os
-) const
-{
-    if (valueSets.size() != valueSetNames.size())
+    if (useTracks_ || !buffering_)
     {
-        FatalErrorInFunction
-            << "Number of variables:" << valueSetNames.size() << endl
-            << "Number of valueSets:" << valueSets.size()
-            << exit(FatalError);
+        UPtrList<const Field<Type>> fieldPtrs(repackageFields(values));
+        return writeTemplate(fieldName, fieldPtrs);
     }
-    if (tracks.size() > 0)
+
+
+    // Regular version
+
+    const auto& coords = coords_[0];
+
+    if (!ofile_)
     {
+        // Field:
+        // 1) rootdir/<TIME>/setName.agr
+        // 2) rootdir/setName.agr
+
+        const fileName outputFile = path();
+
+        if (!isDir(outputFile.path()))
+        {
+            mkDir(outputFile.path());
+        }
+
+        ofile_.reset(new OFstream(outputFile, streamOpt_));
+        auto& os = ofile_();
+        os.precision(precision_);
+
+        // Preamble
         os  << "@g0 on" << nl
             << "@with g0" << nl
-            << "@    title \"" << tracks[0].name() << '"' << nl
-            << "@    xaxis label " << '"' << tracks[0].axis() << '"' << nl;
+            << "@    title \"" << coords.name() << '"' << nl
+            << "@    xaxis label \"" << coords.axis() << '"' << nl;
 
-        // Data index.
-        label sI = 0;
-
-        forAll(tracks, trackI)
-        {
-            forAll(valueSets, i)
-            {
-                os  << "@    s" << sI << " legend " << '"'
-                    << valueSetNames[i] << "_track" << i << '"' << nl
-                    << "@target G0.S" << sI << nl;
-                this->writeTable(tracks[trackI], valueSets[i][trackI], os);
-                os  << '&' << nl;
-
-                sI++;
-            }
-        }
+        nWritten_ = 0;  // Restarted
     }
+    auto& os = ofile_();
+
+    // Plot entry
+    {
+        os  << "@    s" << nWritten_
+            << " legend \"" << fieldName << '"' << nl
+            << "@target G0.S" << nWritten_ << nl;
+
+        writeTable(os, coords, values, " \t");
+
+        os  << '&' << nl;
+        os  << "# end_data" << nl;
+        ++nWritten_;
+    }
+
+    return ofile_().name();
 }
+
+
+template<class Type>
+Foam::fileName Foam::coordSetWriters::xmgraceWriter::writeTemplate
+(
+    const word& fieldName,
+    const List<Field<Type>>& fieldValues
+)
+{
+    checkOpen();
+    if (coords_.empty())
+    {
+        return fileName::null;
+    }
+    useTracks_ = true;  // Extra safety
+
+    UPtrList<const Field<Type>> fieldPtrs(repackageFields(fieldValues));
+    return writeTemplate(fieldName, fieldPtrs);
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Field writing methods
+defineCoordSetWriterWriteFields(Foam::coordSetWriters::xmgraceWriter);
+
 
 // ************************************************************************* //

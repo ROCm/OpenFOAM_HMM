@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,20 +50,20 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef sampledSet_H
-#define sampledSet_H
+#ifndef Foam_sampledSet_H
+#define Foam_sampledSet_H
 
 #include "coordSet.H"
+#include "autoPtr.H"
 #include "typeInfo.H"
 #include "runTimeSelectionTables.H"
-#include "autoPtr.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class polyMesh;
 class meshSearch;
 
@@ -75,7 +75,7 @@ class sampledSet
 :
     public coordSet
 {
-    // Private data
+    // Private Data
 
         //- Reference to mesh
         const polyMesh& mesh_;
@@ -85,6 +85,8 @@ class sampledSet
 
 
 protected:
+
+    // Protected Data
 
         //- Segment numbers
         labelList segments_;
@@ -154,7 +156,7 @@ protected:
             const labelList& samplingCells,
             const labelList& samplingFaces,
             const labelList& samplingSegments,
-            const scalarList& samplingCurveDist
+            const scalarList& samplingDistance
         );
 
         //- Set sample data. Move list contents.
@@ -164,7 +166,7 @@ protected:
             labelList&& samplingCells,
             labelList&& samplingFaces,
             labelList&& samplingSegments,
-            scalarList&& samplingCurveDist
+            scalarList&& samplingDistance
         );
 
 public:
@@ -194,22 +196,58 @@ public:
         //  PtrLists of sampledSet
         class iNew
         {
+            //- Reference to the volume mesh
             const polyMesh& mesh_;
-            const meshSearch& searchEngine_;
+            const meshSearch& search_;
 
         public:
 
             iNew(const polyMesh& mesh, const meshSearch& searchEngine)
             :
                 mesh_(mesh),
-                searchEngine_(searchEngine)
+                search_(searchEngine)
             {}
 
             autoPtr<sampledSet> operator()(Istream& is) const
             {
                 word name(is);
                 dictionary dict(is);
-                return sampledSet::New(name, mesh_, searchEngine_, dict);
+                return sampledSet::New(name, mesh_, search_, dict);
+            }
+        };
+
+
+        //- PtrList read-construction helper that captures dictionaries used
+        //- during creation.
+        class iNewCapture
+        {
+            //- Reference to the volume mesh
+            const polyMesh& mesh_;
+            const meshSearch& search_;
+
+            //- Captured (recorded) dictionaries
+            DynamicList<dictionary>& capture_;
+
+        public:
+
+            iNewCapture
+            (
+                const polyMesh& mesh,
+                const meshSearch& searchEngine,
+                DynamicList<dictionary>& capture
+            )
+            :
+                mesh_(mesh),
+                search_(searchEngine),
+                capture_(capture)
+            {}
+
+            autoPtr<sampledSet> operator()(Istream& is) const
+            {
+                word name(is);
+                capture_.append(dictionary(is));
+
+                return sampledSet::New(name, mesh_, search_, capture_.last());
             }
         };
 
@@ -269,27 +307,27 @@ public:
 
     // Member Functions
 
-        const polyMesh& mesh() const
+        const polyMesh& mesh() const noexcept
         {
             return mesh_;
         }
 
-        const meshSearch& searchEngine() const
+        const meshSearch& searchEngine() const noexcept
         {
             return searchEngine_;
         }
 
-        const labelList& segments() const
+        const labelList& segments() const noexcept
         {
             return segments_;
         }
 
-        const labelList& cells() const
+        const labelList& cells() const noexcept
         {
             return cells_;
         }
 
-        const labelList& faces() const
+        const labelList& faces() const noexcept
         {
             return faces_;
         }
@@ -297,13 +335,16 @@ public:
         //- Output for debugging
         Ostream& write(Ostream&) const;
 
-        //- Helper: gather onto master and sort.
-        //  \return (on master) gathered set and overall sort order
-        autoPtr<coordSet> gather
-        (
-            labelList& indexSet,
-            labelList& allSegments
-        ) const;
+
+    // Other
+
+        /// //- Gather and sort.
+        /// \return (on master) gathered set and overall sort order
+        /// autoPtr<coordSet> gather
+        /// (
+        ///    labelList& sortOrder,
+        ///    labelList& allSegments
+        /// ) const;
 };
 
 

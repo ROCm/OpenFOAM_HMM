@@ -1,0 +1,241 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | www.openfoam.com
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+    Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2015-2022 OpenCFD Ltd.
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+\*---------------------------------------------------------------------------*/
+
+#include "sampledSets.H"
+#include "globalIndex.H"
+#include "interpolation.H"
+#include "volFields.H"
+#include "volPointInterpolation.H"
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+template<class GeoField>
+Foam::tmp<GeoField>
+Foam::sampledSets::getOrLoadField(const word& fieldName) const
+{
+    tmp<GeoField> tfield;
+
+    if (loadFromFiles_)
+    {
+        tfield.reset
+        (
+            new GeoField
+            (
+                IOobject
+                (
+                    fieldName,
+                    mesh_.time().timeName(),
+                    mesh_,
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE,
+                    false
+                ),
+                mesh_
+            )
+        );
+    }
+    else
+    {
+        // Slightly paranoid here
+        tfield.cref(mesh_.cfindObject<GeoField>(fieldName));
+    }
+
+    return tfield;
+}
+
+
+template<class Type>
+void Foam::sampledSets::writeCoordSet
+(
+    coordSetWriter& writer,
+    const Field<Type>& values,
+    const word& fieldName
+)
+{
+    fileName outputName;
+    if (Pstream::master())
+    {
+        outputName = writer.write(fieldName, values);
+    }
+    Pstream::scatter(outputName);
+
+    if (outputName.size())
+    {
+        // Case-local file name with "<case>" to make relocatable
+
+        dictionary propsDict;
+        propsDict.add
+        (
+            "file",
+            time_.relativePath(outputName, true)
+        );
+        setProperty(fieldName, propsDict);
+    }
+}
+
+
+template<class Type>
+void Foam::sampledSets::performAction
+(
+    const VolumeField<Type>& fld,
+    unsigned request
+)
+{
+    const word& fieldName = fld.name();
+
+    // The interpolator for this field
+    autoPtr<interpolation<Type>> interpPtr;
+
+    if (!samplePointScheme_.empty() && samplePointScheme_ != "cell")
+    {
+        interpPtr.reset(interpolation<Type>::New(samplePointScheme_, fld));
+    }
+
+    forAll(*this, seti)
+    {
+        const sampledSet& s = (*this)[seti];
+        const globalIndex& globIdx = globalIndices_[seti];
+        const labelList& globOrder = gatheredSorting_[seti];
+
+        const word& setName = s.name();
+        Field<Type> values(s.size());
+
+        if (interpPtr)
+        {
+            forAll(s, samplei)
+            {
+                const point& p = s[samplei];
+                const label celli = s.cells()[samplei];
+                const label facei = s.faces()[samplei];
+
+                if (celli == -1 && facei == -1)
+                {
+                    // Special condition for illegal sampling points
+                    values[samplei] = pTraits<Type>::max;
+                }
+                else
+                {
+                    values[samplei] = interpPtr().interpolate(p, celli, facei);
+                }
+            }
+        }
+        else
+        {
+            forAll(s, samplei)
+            {
+                const label celli = s.cells()[samplei];
+
+                if (celli == -1)
+                {
+                    values[samplei] = pTraits<Type>::max;
+                }
+                else
+                {
+                    values[samplei] = fld[celli];
+                }
+            }
+        }
+
+        // Collect data from all processors
+        globIdx.gatherInplace(values);
+
+        // Some values only available on master
+        Type avgValue, minValue, maxValue;
+        label sizeValue;
+
+        if (Pstream::master())
+        {
+            avgValue = average(values);
+            minValue = min(values);
+            maxValue = max(values);
+            sizeValue = values.size();
+
+            // Use sorted order
+            values = UIndirectList<Type>(values, globOrder)();
+        }
+        Pstream::scatter(avgValue);
+        Pstream::scatter(minValue);
+        Pstream::scatter(maxValue);
+        Pstream::scatter(sizeValue);
+
+        // Store results: min/max/average/size with the name of the set
+        // for scoping.
+        // Eg, average(lines,T) ...
+        const word resultArg('(' + setName + ',' + fieldName + ')');
+
+        this->setResult("average" + resultArg, avgValue);
+        this->setResult("min" + resultArg, minValue);
+        this->setResult("max" + resultArg, maxValue);
+        this->setResult("size" + resultArg, sizeValue);
+
+        if (verbose_)
+        {
+            Info<< name() << ' ' << setName << " : " << fieldName << nl
+                << "    avg: " << avgValue << nl
+                << "    min: " << minValue << nl
+                << "    max: " << maxValue << nl << nl;
+        }
+
+        if (request & ACTION_WRITE)
+        {
+            writeCoordSet<Type>(writers_[seti], values, fieldName);
+        }
+    }
+}
+
+
+template<class GeoField>
+void Foam::sampledSets::performAction
+(
+    const IOobjectList& objects,
+    unsigned request
+)
+{
+    wordList fieldNames;
+    if (loadFromFiles_)
+    {
+        fieldNames = objects.sortedNames<GeoField>(fieldSelection_);
+    }
+    else
+    {
+        fieldNames = mesh_.thisDb().sortedNames<GeoField>(fieldSelection_);
+    }
+
+    for (const word& fieldName : fieldNames)
+    {
+        tmp<GeoField> tfield = getOrLoadField<GeoField>(fieldName);
+
+        if (tfield)
+        {
+            performAction<typename GeoField::value_type>(tfield(), request);
+        }
+    }
+}
+
+
+// ************************************************************************* //

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,7 @@ License
 
 #include "histogram.H"
 #include "volFields.H"
+#include "ListOps.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -42,41 +43,6 @@ namespace functionObjects
 }
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-void Foam::functionObjects::histogram::writeGraph
-(
-    const coordSet& coords,
-    const word& fieldName,
-    const scalarField& normalizedValues,
-    const scalarField& absoluteValues
-) const
-{
-    fileName outputPath = baseTimeDir();
-    mkDir(outputPath);
-    OFstream graphFile
-    (
-        outputPath
-       /formatterPtr_().getFileName
-        (
-            coords,
-            wordList(1, fieldName)
-        )
-    );
-
-    Log << "    Writing histogram of " << fieldName
-        << " to " << graphFile.name() << endl;
-
-    wordList fieldNames(2);
-    fieldNames[0] = fieldName;
-    fieldNames[1] = fieldName + "Count";
-    List<const scalarField*> yPtrs(2);
-    yPtrs[0] = &normalizedValues;
-    yPtrs[1] = &absoluteValues;
-    formatterPtr_().write(coords, fieldNames, yPtrs, graphFile);
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::functionObjects::histogram::histogram
@@ -86,10 +52,11 @@ Foam::functionObjects::histogram::histogram
     const dictionary& dict
 )
 :
-    fvMeshFunctionObject(name, runTime, dict),
-    writeFile(obr_, name),
+    functionObjects::fvMeshFunctionObject(name, runTime, dict),
+    functionObjects::writeFile(obr_, name),
     max_(-GREAT),
-    min_(GREAT)
+    min_(GREAT),
+    setWriterPtr_(nullptr)
 {
     read(dict);
 }
@@ -116,8 +83,13 @@ bool Foam::functionObjects::histogram::read(const dictionary& dict)
             << abort(FatalError);
     }
 
-    const word format(dict.get<word>("setFormat"));
-    formatterPtr_ = writer<scalar>::New(format);
+    const word writeType(dict.get<word>("setFormat"));
+
+    setWriterPtr_ = coordSetWriter::New
+    (
+        writeType,
+        dict.subOrEmptyDict("formatOptions").optionalSubDict(writeType)
+    );
 
     return true;
 }
@@ -133,38 +105,30 @@ bool Foam::functionObjects::histogram::write()
 {
     Log << type() << " " << name() << " write:" << nl;
 
-    autoPtr<volScalarField> fieldPtr;
-    if (obr_.foundObject<volScalarField>(fieldName_))
+    tmp<volScalarField> tfield;
+    tfield.cref(obr_.cfindObject<volScalarField>(fieldName_));
+
+    if (tfield)
     {
         Log << "    Looking up field " << fieldName_ << endl;
     }
     else
     {
         Log << "    Reading field " << fieldName_ << endl;
-        fieldPtr.reset
+        tfield = tmp<volScalarField>::New
         (
-            new volScalarField
+            IOobject
             (
-                IOobject
-                (
-                    fieldName_,
-                    mesh_.time().timeName(),
-                    mesh_,
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE
-                ),
-                mesh_
-            )
+                fieldName_,
+                mesh_.time().timeName(),
+                mesh_,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh_
         );
     }
-
-    const volScalarField& field =
-    (
-        fieldPtr
-      ? fieldPtr()
-      : obr_.lookupObject<volScalarField>(fieldName_)
-    );
-
+    const auto& field = tfield();
 
     scalar histMax = max_;
     scalar histMin = min_;
@@ -188,14 +152,16 @@ bool Foam::functionObjects::histogram::write()
     }
 
     // Calculate the mid-points of bins for the graph axis
-    pointField xBin(nBins_);
-    const scalar delta = (histMax- histMin)/nBins_;
+    pointField xBin(nBins_, Zero);
+    const scalar delta = (histMax - histMin)/nBins_;
 
-    scalar x = histMin + 0.5*delta;
-    forAll(xBin, i)
     {
-        xBin[i] = point(x, 0, 0);
-        x += delta;
+        scalar x = histMin + 0.5*delta;
+        for (point& p : xBin)
+        {
+            p.x() = x;
+            x += delta;
+        }
     }
 
     scalarField dataNormalized(nBins_, Zero);
@@ -223,23 +189,27 @@ bool Foam::functionObjects::histogram::write()
         {
             dataNormalized /= sumData;
 
-            const coordSet coords
+            const coordSet coords(fieldName_, "x", xBin, mag(xBin));
+
+            auto& writer = *setWriterPtr_;
+
+            writer.open
             (
-                fieldName_,
-                "x",
-                xBin,
-                mag(xBin)
+                coords,
+                (
+                    writeFile::baseTimeDir()
+                  / (coords.name() + coordSetWriter::suffix(fieldName_))
+                )
             );
 
+            Log << "    Writing histogram of " << fieldName_
+                << " to " << writer.path() << endl;
 
-            // Convert count field from labelField to scalarField
-            scalarField count(dataCount.size());
-            forAll(count, i)
-            {
-                count[i] = 1.0*dataCount[i];
-            }
+            writer.nFields(2);
+            writer.write(fieldName_, dataNormalized);
+            writer.write(fieldName_ + "Count", dataCount);
 
-            writeGraph(coords, fieldName_, dataNormalized, count);
+            writer.close(true);
         }
     }
 

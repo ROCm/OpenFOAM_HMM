@@ -25,19 +25,30 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "gltfSetWriter.H"
+#include "gltfCoordSetWriter.H"
 #include "coordSet.H"
 #include "fileName.H"
 #include "OFstream.H"
-#include "floatVector.H"
+#include "OSspecific.H"
 #include "foamGltfScene.H"
+#include "foamGltfSceneWriter.H"
+#include "coordSetWriterMethods.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-template<class Type>
-const Foam::Enum<typename Foam::gltfSetWriter<Type>::fieldOption>
-Foam::gltfSetWriter<Type>::fieldOptionNames_
+namespace Foam
+{
+namespace coordSetWriters
+{
+    defineTypeName(gltfWriter);
+    addToRunTimeSelectionTable(coordSetWriter, gltfWriter, word);
+    addToRunTimeSelectionTable(coordSetWriter, gltfWriter, wordDict);
+}
+}
+
+const Foam::Enum<Foam::coordSetWriters::gltfWriter::fieldOption>
+Foam::coordSetWriters::gltfWriter::fieldOptionNames_
 ({
     // No naming for NONE
     { fieldOption::UNIFORM, "uniform" },
@@ -45,10 +56,90 @@ Foam::gltfSetWriter<Type>::fieldOptionNames_
 });
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
 
 template<class Type>
-Foam::word Foam::gltfSetWriter<Type>::getColourMap
+static tmp<vectorField> getBoundedColours
+(
+    const colourTable& colours,
+    const Field<Type>& field,
+    const scalar boundMin,
+    const scalar boundMax
+)
+{
+    const label boundDelta = (boundMax - boundMin + ROOTVSMALL);
+
+    auto tresult = tmp<vectorField>::New(field.size());
+    auto& result = tresult.ref();
+
+    forAll(field, i)
+    {
+        const Type& val = field[i];
+
+        const scalar f =
+        (
+            pTraits<Type>::nComponents == 1
+          ? scalar(component(val, 0))
+          : scalar(mag(val))
+        );
+
+        // 0-1 clipped by value()
+        result[i] = colours.value((f - boundMin)/boundDelta);
+    }
+
+    return tresult;
+}
+
+
+template<class Type>
+static vector getAnimationColour
+(
+    const dictionary& dict,
+    const colourTable& colours,
+    const Field<Type>& field
+)
+{
+    scalar refValue(0);
+    scalarMinMax valLimits;
+
+    if (pTraits<Type>::nComponents == 1)
+    {
+        MinMax<Type> scanned(minMax(field));
+
+        refValue = scalar(component(field[0], 0));
+        valLimits.min() = scalar(component(scanned.min(), 0));
+        valLimits.max() = scalar(component(scanned.max(), 0));
+    }
+    else
+    {
+        // Use mag() for multiple components
+        refValue = mag(field[0]);
+        valLimits = minMaxMag(field);
+    }
+
+    dict.readIfPresent("min", valLimits.min());
+    dict.readIfPresent("max", valLimits.max());
+
+    const scalar fraction =
+    (
+        (refValue - valLimits.min())
+      / (valLimits.max() - valLimits.min() + ROOTVSMALL)
+    );
+
+    // 0-1 clipped by value()
+    return colours.value(fraction);
+}
+
+
+} // End namespace Foam
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+Foam::word Foam::coordSetWriters::gltfWriter::getColourMap
 (
     const dictionary& dict
 ) const
@@ -60,8 +151,7 @@ Foam::word Foam::gltfSetWriter<Type>::getColourMap
 }
 
 
-template<class Type>
-const Foam::colourTable& Foam::gltfSetWriter<Type>::getColourTable
+const Foam::colourTable& Foam::coordSetWriters::gltfWriter::getColourTable
 (
     const dictionary& dict
 ) const
@@ -70,8 +160,7 @@ const Foam::colourTable& Foam::gltfSetWriter<Type>::getColourTable
 }
 
 
-template<class Type>
-Foam::scalarMinMax Foam::gltfSetWriter<Type>::getFieldLimits
+Foam::scalarMinMax Foam::coordSetWriters::gltfWriter::getFieldLimits
 (
     const word& fieldName
 ) const
@@ -87,8 +176,8 @@ Foam::scalarMinMax Foam::gltfSetWriter<Type>::getFieldLimits
 }
 
 
-template<class Type>
-Foam::tmp<Foam::scalarField> Foam::gltfSetWriter<Type>::getAlphaField
+Foam::tmp<Foam::scalarField>
+Foam::coordSetWriters::gltfWriter::getAlphaField
 (
     const dictionary& dict
 ) const
@@ -141,26 +230,9 @@ Foam::tmp<Foam::scalarField> Foam::gltfSetWriter<Type>::getAlphaField
 }
 
 
-template<class Type>
-Foam::vector Foam::gltfSetWriter<Type>::getTrackAnimationColour
-(
-    const colourTable& colours,
-    const wordList& valueSetNames,
-    const List<List<Field<Type>>>& valueSets,
-    const label tracki
-) const
+void Foam::coordSetWriters::gltfWriter::setupAnimationColour()
 {
-    if (!colour_)
-    {
-        FatalErrorInFunction
-            << "Attempting to get colour when colour option is off"
-            << abort(FatalError);
-    }
-
     const dictionary& dict = animationDict_;
-
-    // Fallback value
-    vector colourValue(Zero);
 
     const entry* eptr = dict.findEntry("colour", keyType::LITERAL);
 
@@ -175,8 +247,11 @@ Foam::vector Foam::gltfSetWriter<Type>::getTrackAnimationColour
         // Value specified
 
         ITstream& is = eptr->stream();
-        is >> colourValue;
+        is >> animateColourValue_;
         dict.checkITstream(is, "colour");
+
+        // Has uniform value
+        animateColourOption_ = fieldOption::UNIFORM;
     }
     else
     {
@@ -188,85 +263,59 @@ Foam::vector Foam::gltfSetWriter<Type>::getTrackAnimationColour
         {
             case fieldOption::NONE:
             {
+                FatalErrorInFunction
+                    << "Cannot select 'none' for colour entry!" << nl
+                    << "... possible programming error"
+                    << exit(FatalError);
                 break;
             }
             case fieldOption::UNIFORM:
             {
-                dict.readEntry("colourValue", colourValue);
+                dict.readEntry("colourValue", animateColourValue_);
+
+                // Has uniform value
+                animateColourOption_ = fieldOption::UNIFORM;
                 break;
             }
             case fieldOption::FIELD:
             {
-                const word fieldName = dict.get<word>("colourField");
-                const label fieldi = valueSetNames.find(fieldName);
-                if (fieldi == -1)
-                {
-                    FatalErrorInFunction
-                        << "Unable to find field " << fieldName
-                        << ". Valid field names are:" << valueSetNames
-                        << exit(FatalError);
-                }
-
-                const Field<Type>& colourFld = valueSets[fieldi][tracki];
-
-
-                scalar refValue(0);
-                scalarMinMax valLimits;
-
-                if (pTraits<Type>::nComponents == 1)
-                {
-                    MinMax<Type> scanned(minMax(colourFld));
-
-                    refValue = scalar(component(colourFld[0], 0));
-                    valLimits.min() = scalar(component(scanned.min(), 0));
-                    valLimits.max() = scalar(component(scanned.max(), 0));
-                }
-                else
-                {
-                    // Use mag() for multiple components
-                    refValue = mag(colourFld[0]);
-                    valLimits = minMaxMag(colourFld);
-                }
-
-                dict.readIfPresent("min", valLimits.min());
-                dict.readIfPresent("max", valLimits.max());
-
-                const scalar fraction =
-                (
-                    (refValue - valLimits.min())
-                  / (valLimits.max() - valLimits.min() + ROOTVSMALL)
-                );
-
-                return colours.value(fraction);  // 0-1 clipped by value()
+                // Needs named field...
+                animateColourName_ = dict.get<word>("colourField");
+                animateColourOption_ = fieldOption::FIELD;
+                break;
             }
         }
     }
-
-    return colourValue;
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::gltfSetWriter<Type>::gltfSetWriter()
+Foam::coordSetWriters::gltfWriter::gltfWriter()
 :
-    writer<Type>(),
+    coordSetWriter(),
+    writer_(nullptr),
     animate_(false),
     colour_(false),
+    animateColourOption_(fieldOption::NONE),
+    animateColourName_(),
+    animateColourValue_(Zero),
     fieldInfoDict_(),
     animationDict_()
 {}
 
 
-template<class Type>
-Foam::gltfSetWriter<Type>::gltfSetWriter(const dictionary& dict)
+Foam::coordSetWriters::gltfWriter::gltfWriter(const dictionary& options)
 :
-    writer<Type>(dict),
-    animate_(dict.getOrDefault("animate", false)),
-    colour_(dict.getOrDefault("colour", false)),
-    fieldInfoDict_(dict.subOrEmptyDict("fieldInfo")),
-    animationDict_(dict.subOrEmptyDict("animationInfo"))
+    coordSetWriter(options),
+    writer_(nullptr),
+    animate_(options.getOrDefault("animate", false)),
+    colour_(options.getOrDefault("colour", false)),
+    animateColourOption_(fieldOption::NONE),
+    animateColourName_(),
+    animateColourValue_(Zero),
+    fieldInfoDict_(options.subOrEmptyDict("fieldInfo")),
+    animationDict_(options.subOrEmptyDict("animationInfo"))
 {
     // fieldInfo
     // {
@@ -281,50 +330,139 @@ Foam::gltfSetWriter<Type>::gltfSetWriter(const dictionary& dict)
 }
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::fileName Foam::gltfSetWriter<Type>::getFileName
+Foam::coordSetWriters::gltfWriter::gltfWriter
 (
-    const coordSet& points,
-    const wordList& valueSetNames
-) const
+    const coordSet& coords,
+    const fileName& outputPath,
+    const dictionary& options
+)
+:
+    gltfWriter(options)
 {
-    return this->getBaseName(points, valueSetNames) + ".gltf";
+    open(coords, outputPath);
 }
 
 
-template<class Type>
-void Foam::gltfSetWriter<Type>::write
+Foam::coordSetWriters::gltfWriter::gltfWriter
 (
-    const coordSet& points,
-    const wordList& valueSetNames,
-    const List<const Field<Type>*>& valueSets,
-    Ostream& os
-) const
+    const UPtrList<coordSet>& tracks,
+    const fileName& outputPath,
+    const dictionary& options
+)
+:
+    gltfWriter(options)
 {
-    if (valueSets.size() != valueSetNames.size())
+    open(tracks, outputPath);
+}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::coordSetWriters::gltfWriter::~gltfWriter()
+{
+    close();
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::fileName Foam::coordSetWriters::gltfWriter::path() const
+{
+    // 1) rootdir/<TIME>/setName.gltf
+    // 2) rootdir/setName.gltf
+
+    return getExpectedPath("gltf");
+}
+
+
+void Foam::coordSetWriters::gltfWriter::close(bool force)
+{
+    writer_.reset(nullptr);
+    coordSetWriter::close(force);
+}
+
+
+void Foam::coordSetWriters::gltfWriter::beginTime(const Time& t)
+{
+    writer_.reset(nullptr);
+    coordSetWriter::beginTime(t);
+}
+
+
+void Foam::coordSetWriters::gltfWriter::beginTime(const instant& inst)
+{
+    writer_.reset(nullptr);
+    coordSetWriter::beginTime(inst);
+}
+
+
+void Foam::coordSetWriters::gltfWriter::endTime()
+{
+    writer_.reset(nullptr);
+    coordSetWriter::endTime();
+}
+
+
+// * * * * * * * * * * * * * * * Implementation * * * * * * * * * * * * * * * //
+
+template<class Type>
+Foam::fileName Foam::coordSetWriters::gltfWriter::writeTemplate
+(
+    const word& fieldName,
+    const UPtrList<const Field<Type>>& fieldPtrs
+)
+{
+    if (coords_.size() != fieldPtrs.size())
     {
         FatalErrorInFunction
-            << "Number of variables:" << valueSetNames.size() << endl
-            << "Number of valueSets:" << valueSets.size()
+            << "Attempted to write field: " << fieldName
+            << " (" << fieldPtrs.size() << " entries) for "
+            << coords_.size() << " sets" << nl
             << exit(FatalError);
     }
 
-    glTF::scene scene;
-    const label meshi = scene.addMesh(points, "points");
-    forAll(valueSetNames, i)
+    const auto& tracks = coords_;
+
+    // const auto& times = trackTimes_;
+
+    if (!writer_)
     {
-        scene.addFieldToMesh(*valueSets[i], valueSetNames[i], meshi);
+        // Field:
+        // 1) rootdir/<TIME>/setName.gltf
+        // 2) rootdir/setName.gltf
+
+        fileName outputFile = path();
+
+        writer_.reset(new glTF::sceneWriter(outputFile));
+
+        auto& scene = writer_->getScene();
+
+        meshes_.resize(tracks.size());
+
+        forAll(tracks, tracki)
+        {
+            word meshName("track:" + Foam::name(tracki));
+            if (tracks.size() == 1)
+            {
+                meshName = "points";
+            }
+
+            meshes_[tracki] = scene.addMesh(tracks[tracki], meshName);
+        }
     }
 
-    if (colour_)
-    {
-        forAll(valueSets, fieldi)
-        {
-            const auto& field = *valueSets[fieldi];
-            const word& fieldName = valueSetNames[fieldi];
 
+    auto& scene = writer_->getScene();
+
+    forAll(tracks, tracki)
+    {
+        const label meshi = meshes_[tracki];
+        const auto& field = fieldPtrs[tracki];
+
+        scene.addFieldToMesh(field, fieldName, meshi);
+
+        if (colour_)
+        {
             const dictionary dict = fieldInfoDict_.subOrEmptyDict(fieldName);
             const auto& colours = getColourTable(dict);
 
@@ -333,11 +471,7 @@ void Foam::gltfSetWriter<Type>::write
 
             const scalarMinMax valLimits = getFieldLimits(fieldName);
 
-            // Generated field colours
-            vectorField fieldColour(field.size());
-
             scalarMinMax fldLimits;
-
             if (pTraits<Type>::nComponents == 1)
             {
                 MinMax<Type> scanned(minMax(field));
@@ -351,24 +485,17 @@ void Foam::gltfSetWriter<Type>::write
                 fldLimits = minMaxMag(field);
             }
 
-            const scalar minf = max(fldLimits.min(), valLimits.min());
-            const scalar maxf = min(fldLimits.max(), valLimits.max());
-            const scalar deltaf = (maxf - minf + SMALL);
-
-            forAll(field, i)
-            {
-                const Type& val = field[i];
-
-                const scalar f =
+            // Generated field colours
+            vectorField fieldColour
+            (
+                getBoundedColours
                 (
-                    pTraits<Type>::nComponents == 1
-                  ? scalar(component(val, 0))
-                  : scalar(mag(val))
-                );
-
-                // 0-1 clipped by value()
-                fieldColour[i] = colours.value((f - minf)/deltaf);
-            }
+                    colours,
+                    field,
+                    max(fldLimits.min(), valLimits.min()),  // boundMin
+                    min(fldLimits.max(), valLimits.max())   // boundMax
+                )
+            );
 
             scene.addColourToMesh
             (
@@ -380,226 +507,260 @@ void Foam::gltfSetWriter<Type>::write
         }
     }
 
-    scene.write(os);
+    return writer_().path();
 }
 
 
 template<class Type>
-void Foam::gltfSetWriter<Type>::write
+Foam::fileName Foam::coordSetWriters::gltfWriter::writeTemplate_animate
 (
-    const bool writeTracks,
-    const List<scalarField>& times,
-    const PtrList<coordSet>& tracks,
-    const wordList& valueSetNames,
-    const List<List<Field<Type>>>& valueSets,
-    Ostream& os
-) const
+    const word& fieldName,
+    const UPtrList<const Field<Type>>& fieldPtrs
+)
 {
-    if (valueSets.size() != valueSetNames.size())
+    if (coords_.size() != fieldPtrs.size())
     {
         FatalErrorInFunction
-            << "Number of variables:" << valueSetNames.size() << endl
-            << "Number of valueSets:" << valueSets.size()
+            << "Attempted to write field: " << fieldName
+            << " (" << fieldPtrs.size() << " entries) for "
+            << coords_.size() << " sets" << nl
             << exit(FatalError);
     }
 
-    if (animate_)
-    {
-        writeAnimateTracks
-        (
-            writeTracks,
-            times,
-            tracks,
-            valueSetNames,
-            valueSets,
-            os
-        );
-    }
-    else
-    {
-        writeStaticTracks
-        (
-            writeTracks,
-            times,
-            tracks,
-            valueSetNames,
-            valueSets,
-            os
-        );
-    }
-}
+    const auto& tracks = this->coords_;
+    const auto& times = this->trackTimes_;
 
-
-template<class Type>
-void Foam::gltfSetWriter<Type>::writeStaticTracks
-(
-    const bool writeTracks,
-    const List<scalarField>& times,
-    const PtrList<coordSet>& tracks,
-    const wordList& valueSetNames,
-    const List<List<Field<Type>>>& valueSets,
-    Ostream& os
-) const
-{
-    glTF::scene scene;
-    forAll(tracks, tracki)
+    if (!writer_)
     {
-        const vectorField& track = tracks[tracki];
-        const label meshi = scene.addMesh(track, "track:" + Foam::name(tracki));
-        forAll(valueSetNames, fieldi)
+        // Field:
+        // 1) rootdir/<TIME>/setName.gltf
+        // 2) rootdir/setName.gltf
+
+        fileName outputFile = path();
+
+        writer_.reset(new glTF::sceneWriter(outputFile));
+
+        auto& scene = writer_->getScene();
+
+        meshes_.resize(tracks.size());
+
+        const label animationi = scene.createAnimation("animation");
+
+        forAll(tracks, tracki)
         {
-            const word& fieldName = valueSetNames[fieldi];
-            const auto& field = valueSets[fieldi][tracki];
-            scene.addFieldToMesh(field, fieldName, meshi);
-        }
+            const auto& track = tracks[tracki];
 
-        if (colour_)
-        {
-            forAll(valueSets, fieldi)
+            if (track.empty())
             {
-                const auto& field = valueSets[fieldi][tracki];
-                const word& fieldName = valueSetNames[fieldi];
-
-                const dictionary dict =
-                    fieldInfoDict_.subOrEmptyDict(fieldName);
-                const auto& colours = getColourTable(dict);
-
-                const auto talpha = getAlphaField(dict);
-                const scalarField& alpha = talpha();
-
-                const scalarMinMax valLimits = getFieldLimits(fieldName);
-
-
-                // Generated field colours
-                vectorField fieldColour(field.size());
-
-                scalarMinMax fldLimits;
-
-                if (pTraits<Type>::nComponents == 1)
-                {
-                    MinMax<Type> scanned(minMax(field));
-
-                    fldLimits.min() = scalar(component(scanned.min(), 0));
-                    fldLimits.max() = scalar(component(scanned.max(), 0));
-                }
-                else
-                {
-                    // Use mag() for multiple components
-                    fldLimits = minMaxMag(field);
-                }
-
-                const scalar minf = max(fldLimits.min(), valLimits.min());
-                const scalar maxf = min(fldLimits.max(), valLimits.max());
-                const scalar deltaf = (maxf - minf + SMALL);
-
-                forAll(field, i)
-                {
-                    const Type& val = field[i];
-
-                    const scalar f =
-                    (
-                        pTraits<Type>::nComponents == 1
-                      ? scalar(component(val, 0))
-                      : scalar(mag(val))
-                    );
-
-                    // 0-1 clipped by value()
-                    fieldColour[i] = colours.value((f - minf)/deltaf);
-                }
-
-                scene.addColourToMesh
-                (
-                    fieldColour,
-                    "Colour:" + fieldName,
-                    meshi,
-                    alpha
-                );
+                meshes_[tracki] = -1;
+                continue;
             }
+
+            // Seed starting position
+
+            meshes_[tracki] =
+                scene.addMesh
+                (
+                    vectorField(1, track[0]),
+                    "track:" + Foam::name(tracki)
+                );
+
+            const label meshi = meshes_[tracki];
+
+            // Time frames
+            const label timeId =
+                scene.addField(times[tracki], "time:" + Foam::name(tracki));
+
+            // Translations
+            const vectorField translation(track - track[0]);
+            const label translationId =
+                scene.addField(translation, "translation");
+
+            scene.addToAnimation(animationi, timeId, translationId, meshi);
         }
     }
 
-    scene.write(os);
-}
 
+    auto& scene = writer_->getScene();
 
-template<class Type>
-void Foam::gltfSetWriter<Type>::writeAnimateTracks
-(
-    const bool writeTracks,
-    const List<scalarField>& times,
-    const PtrList<coordSet>& tracks,
-    const wordList& valueSetNames,
-    const List<List<Field<Type>>>& valueSets,
-    Ostream& os
-) const
-{
-    const auto& colours = getColourTable(animationDict_);
-
-    glTF::scene scene;
-    const label animationi = scene.createAnimation("animation");
+    // Seed starting field values
 
     forAll(tracks, tracki)
     {
         const auto& track = tracks[tracki];
+        const label meshi = meshes_[tracki];
+        const Field<Type>& field = fieldPtrs[tracki];
 
-        if (track.empty())
+        if (track.empty() || meshi < 0)
         {
             continue;
         }
 
-        // Seed starting positions and field values
-        const label meshi =
-            scene.addMesh
-            (
-                vectorField(1, track[0]),
-                "track:" + Foam::name(tracki)
-            );
+        // Seed starting field values
+        scene.addFieldToMesh(Field<Type>(1, field[0]), fieldName, meshi);
+    }
 
-        forAll(valueSetNames, fieldi)
+
+    // Note: colours cannot be animated... setting a fixed value.
+    // However, we need to wait until the field is actually seen
+
+    if (colour_)
+    {
+        if (animateColourOption_ == fieldOption::NONE)
         {
-            const Field<Type>& field = valueSets[fieldi][tracki];
-            const word& fieldName = valueSetNames[fieldi];
-            scene.addFieldToMesh(Field<Type>(1, field[0]), fieldName, meshi);
+            // First time - scan for information
+            setupAnimationColour();
         }
 
-        // Time frames
-        const label timeId =
-            scene.addField(times[tracki], "time:" + Foam::name(tracki));
-
-        // Translations
-        const vectorField translation(track - track[0]);
-        const label translationId = scene.addField(translation, "translation");
-
-        scene.addToAnimation(animationi, timeId, translationId, meshi);
-
-        // Note: colours cannot be animated... setting a fixed value
-        if (colour_)
+        switch (animateColourOption_)
         {
-            const vector colour =
-                getTrackAnimationColour
+            case fieldOption::NONE:
+            {
+                // Should not occur
+                break;
+            }
+            case fieldOption::UNIFORM:
+            {
+                // Colour value is known
+
+                vectorField fieldColour(1, animateColourValue_);
+                scalarField alphaChannel(1, 1.0);
+
+                const auto talpha = getAlphaField(animationDict_);
+
+                if (talpha && talpha().size())
+                {
+                    alphaChannel[0] = talpha()[0];
+                }
+
+                forAll(tracks, tracki)
+                {
+                    const auto& track = tracks[tracki];
+                    const label meshi = meshes_[tracki];
+
+                    if (track.empty() || meshi < 0)
+                    {
+                        continue;
+                    }
+
+                    scene.addColourToMesh
+                    (
+                        fieldColour,
+                        "Colour:fixed",  // ... or "Colour:constant"
+                        meshi,
+                        alphaChannel
+                    );
+                }
+
+                // Mark as done
+                animateColourName_.clear();
+                animateColourOption_ = fieldOption::FIELD;
+                break;
+            }
+            case fieldOption::FIELD:
+            {
+                if
                 (
-                    colours,
-                    valueSetNames,
-                    valueSets,
-                    tracki
-                );
+                    !animateColourName_.empty()
+                 && animateColourName_ == fieldName
+                )
+                {
+                    // This is the desired colour field. Process now
 
-            const auto talpha = getAlphaField(animationDict_);
+                    const auto& colours = getColourTable(animationDict_);
 
-            const scalarField& alpha = talpha();
+                    vectorField fieldColour(1, Zero);
+                    scalarField alphaChannel(1, 1.0);
 
-            scene.addColourToMesh
-            (
-                vectorField(1, colour),
-                "Colour:fixed",  // ... or "Colour:constant"
-                meshi,
-                scalarField(1, alpha[0])
-            );
+                    const auto talpha = getAlphaField(animationDict_);
+
+                    if (talpha && talpha().size())
+                    {
+                        alphaChannel[0] = talpha()[0];
+                    }
+
+                    forAll(tracks, tracki)
+                    {
+                        const auto& track = tracks[tracki];
+                        const label meshi = meshes_[tracki];
+                        const Field<Type>& field = fieldPtrs[tracki];
+
+                        if (track.empty() || meshi < 0)
+                        {
+                            continue;
+                        }
+
+                        fieldColour[0] =
+                            getAnimationColour(animationDict_, colours, field);
+
+                        scene.addColourToMesh
+                        (
+                            fieldColour,
+                            "Colour:fixed",  // ... or "Colour:constant"
+                            meshi,
+                            alphaChannel
+                        );
+                    }
+
+                    // Mark colouring as done. Avoid retriggering
+                    animateColourName_.clear();
+                    animateColourOption_ = fieldOption::FIELD;
+                }
+                break;
+            }
         }
     }
 
-    scene.write(os);
+    return writer_().path();
 }
+
+
+template<class Type>
+Foam::fileName Foam::coordSetWriters::gltfWriter::writeTemplate
+(
+    const word& fieldName,
+    const Field<Type>& values
+)
+{
+    checkOpen();
+    if (coords_.empty())
+    {
+        return fileName::null;
+    }
+
+    UPtrList<const Field<Type>> fieldPtrs(repackageFields(values));
+    return writeTemplate(fieldName, fieldPtrs);
+}
+
+
+template<class Type>
+Foam::fileName Foam::coordSetWriters::gltfWriter::writeTemplate
+(
+    const word& fieldName,
+    const List<Field<Type>>& fieldValues
+)
+{
+    checkOpen();
+    if (coords_.empty())
+    {
+        return fileName::null;
+    }
+
+    UPtrList<const Field<Type>> fieldPtrs(repackageFields(fieldValues));
+
+    if (animate_ && trackTimes_.size() >= coords_.size())
+    {
+        return writeTemplate_animate(fieldName, fieldPtrs);
+    }
+
+    return writeTemplate(fieldName, fieldPtrs);
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Field writing methods
+defineCoordSetWriterWriteFields(Foam::coordSetWriters::gltfWriter);
 
 
 // ************************************************************************* //

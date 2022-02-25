@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,7 +69,7 @@ namespace Foam
 {
 
 // Forward Declarations
-template<class T> class writer;
+class coordSetWriter;
 class triSurface;
 
 /*---------------------------------------------------------------------------*\
@@ -254,7 +255,7 @@ public:
             bool checkIntersection
             (
                 const scalar tol,
-                const autoPtr<writer<scalar>>&,
+                autoPtr<coordSetWriter>& setWriter,
                 const bool report
             ) const;
 
@@ -273,7 +274,7 @@ public:
             (
                 const scalar maxRatio,
                 const scalar tolerance,
-                const autoPtr<writer<scalar>>& setWriter,
+                autoPtr<coordSetWriter>& setWriter,
                 const scalar minQuality,
                 const bool report
             ) const;
