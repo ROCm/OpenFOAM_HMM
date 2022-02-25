@@ -27,7 +27,7 @@ License
 Description
     Variant of gather, scatter.
     Normal gather uses:
-    - construct null and read (>>) from Istream
+    - default construct and read (>>) from Istream
     - binary operator and assignment operator to combine values
 
     combineGather uses:
@@ -47,7 +47,7 @@ template<class T, class CombineOp>
 void Foam::Pstream::combineGather
 (
     const List<UPstream::commsStruct>& comms,
-    T& Value,
+    T& value,
     const CombineOp& cop,
     const int tag,
     const label comm
@@ -55,22 +55,21 @@ void Foam::Pstream::combineGather
 {
     if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
     {
-        // Get my communication order
+        // My communication order
         const commsStruct& myComm = comms[UPstream::myProcNo(comm)];
 
         // Receive from my downstairs neighbours
-        forAll(myComm.below(), belowI)
+        for (const label belowID : myComm.below())
         {
-            label belowID = myComm.below()[belowI];
-
             if (is_contiguous<T>::value)
             {
-                T value;
+                T received;
+
                 UIPstream::read
                 (
                     UPstream::commsTypes::scheduled,
                     belowID,
-                    reinterpret_cast<char*>(&value),
+                    reinterpret_cast<char*>(&received),
                     sizeof(T),
                     tag,
                     comm
@@ -79,10 +78,10 @@ void Foam::Pstream::combineGather
                 if (debug & 2)
                 {
                     Pout<< " received from "
-                        << belowID << " data:" << value << endl;
+                        << belowID << " data:" << received << endl;
                 }
 
-                cop(Value, value);
+                cop(value, received);
             }
             else
             {
@@ -94,25 +93,25 @@ void Foam::Pstream::combineGather
                     tag,
                     comm
                 );
-                T value(fromBelow);
+                T received(fromBelow);
 
                 if (debug & 2)
                 {
                     Pout<< " received from "
-                        << belowID << " data:" << value << endl;
+                        << belowID << " data:" << received << endl;
                 }
 
-                cop(Value, value);
+                cop(value, received);
             }
         }
 
-        // Send up Value
+        // Send up value
         if (myComm.above() != -1)
         {
             if (debug & 2)
             {
                 Pout<< " sending to " << myComm.above()
-                    << " data:" << Value << endl;
+                    << " data:" << value << endl;
             }
 
             if (is_contiguous<T>::value)
@@ -121,7 +120,7 @@ void Foam::Pstream::combineGather
                 (
                     UPstream::commsTypes::scheduled,
                     myComm.above(),
-                    reinterpret_cast<const char*>(&Value),
+                    reinterpret_cast<const char*>(&value),
                     sizeof(T),
                     tag,
                     comm
@@ -137,7 +136,7 @@ void Foam::Pstream::combineGather
                     tag,
                     comm
                 );
-                toAbove << Value;
+                toAbove << value;
             }
         }
     }
@@ -147,7 +146,7 @@ void Foam::Pstream::combineGather
 template<class T, class CombineOp>
 void Foam::Pstream::combineGather
 (
-    T& Value,
+    T& value,
     const CombineOp& cop,
     const int tag,
     const label comm
@@ -156,7 +155,7 @@ void Foam::Pstream::combineGather
     combineGather
     (
         UPstream::whichCommunication(comm),
-        Value,
+        value,
         cop,
         tag,
         comm
@@ -168,14 +167,17 @@ template<class T>
 void Foam::Pstream::combineScatter
 (
     const List<UPstream::commsStruct>& comms,
-    T& Value,
+    T& value,
     const int tag,
     const label comm
 )
 {
+    #ifndef Foam_Pstream_scatter_nobroadcast
+    Pstream::broadcast(value, comm);
+    #else
     if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
     {
-        // Get my communication order
+        // My communication order
         const UPstream::commsStruct& myComm = comms[UPstream::myProcNo(comm)];
 
         // Receive from up
@@ -187,7 +189,7 @@ void Foam::Pstream::combineScatter
                 (
                     UPstream::commsTypes::scheduled,
                     myComm.above(),
-                    reinterpret_cast<char*>(&Value),
+                    reinterpret_cast<char*>(&value),
                     sizeof(T),
                     tag,
                     comm
@@ -203,25 +205,14 @@ void Foam::Pstream::combineScatter
                     tag,
                     comm
                 );
-                Value = T(fromAbove);
-            }
-
-            if (debug & 2)
-            {
-                Pout<< " received from "
-                    << myComm.above() << " data:" << Value << endl;
+                value = T(fromAbove);
             }
         }
 
         // Send to my downstairs neighbours
         forAllReverse(myComm.below(), belowI)
         {
-            label belowID = myComm.below()[belowI];
-
-            if (debug & 2)
-            {
-                Pout<< " sending to " << belowID << " data:" << Value << endl;
-            }
+            const label belowID = myComm.below()[belowI];
 
             if (is_contiguous<T>::value)
             {
@@ -229,7 +220,7 @@ void Foam::Pstream::combineScatter
                 (
                     UPstream::commsTypes::scheduled,
                     belowID,
-                    reinterpret_cast<const char*>(&Value),
+                    reinterpret_cast<const char*>(&value),
                     sizeof(T),
                     tag,
                     comm
@@ -245,22 +236,27 @@ void Foam::Pstream::combineScatter
                     tag,
                     comm
                 );
-                toBelow << Value;
+                toBelow << value;
             }
         }
     }
+    #endif
 }
 
 
 template<class T>
 void Foam::Pstream::combineScatter
 (
-    T& Value,
+    T& value,
     const int tag,
     const label comm
 )
 {
-    combineScatter(UPstream::whichCommunication(comm), Value, tag, comm);
+    #ifndef Foam_Pstream_scatter_nobroadcast
+    Pstream::broadcast(value, comm);
+    #else
+    combineScatter(UPstream::whichCommunication(comm), value, tag, comm);
+    #endif
 }
 
 
@@ -268,7 +264,7 @@ template<class T, class CombineOp>
 void Foam::Pstream::listCombineGather
 (
     const List<UPstream::commsStruct>& comms,
-    List<T>& Values,
+    List<T>& values,
     const CombineOp& cop,
     const int tag,
     const label comm
@@ -276,24 +272,22 @@ void Foam::Pstream::listCombineGather
 {
     if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
     {
-        // Get my communication order
+        // My communication order
         const commsStruct& myComm = comms[UPstream::myProcNo(comm)];
 
         // Receive from my downstairs neighbours
-        forAll(myComm.below(), belowI)
+        for (const label belowID : myComm.below())
         {
-            label belowID = myComm.below()[belowI];
-
             if (is_contiguous<T>::value)
             {
-                List<T> receivedValues(Values.size());
+                List<T> received(values.size());
 
                 UIPstream::read
                 (
                     UPstream::commsTypes::scheduled,
                     belowID,
-                    receivedValues.data_bytes(),
-                    receivedValues.size_bytes(),
+                    received.data_bytes(),
+                    received.size_bytes(),
                     tag,
                     comm
                 );
@@ -301,12 +295,12 @@ void Foam::Pstream::listCombineGather
                 if (debug & 2)
                 {
                     Pout<< " received from "
-                        << belowID << " data:" << receivedValues << endl;
+                        << belowID << " data:" << received << endl;
                 }
 
-                forAll(Values, i)
+                forAll(values, i)
                 {
-                    cop(Values[i], receivedValues[i]);
+                    cop(values[i], received[i]);
                 }
             }
             else
@@ -319,28 +313,28 @@ void Foam::Pstream::listCombineGather
                     tag,
                     comm
                 );
-                List<T> receivedValues(fromBelow);
+                List<T> received(fromBelow);
 
                 if (debug & 2)
                 {
                     Pout<< " received from "
-                        << belowID << " data:" << receivedValues << endl;
+                        << belowID << " data:" << received << endl;
                 }
 
-                forAll(Values, i)
+                forAll(values, i)
                 {
-                    cop(Values[i], receivedValues[i]);
+                    cop(values[i], received[i]);
                 }
             }
         }
 
-        // Send up Value
+        // Send up values
         if (myComm.above() != -1)
         {
             if (debug & 2)
             {
                 Pout<< " sending to " << myComm.above()
-                    << " data:" << Values << endl;
+                    << " data:" << values << endl;
             }
 
             if (is_contiguous<T>::value)
@@ -349,8 +343,8 @@ void Foam::Pstream::listCombineGather
                 (
                     UPstream::commsTypes::scheduled,
                     myComm.above(),
-                    Values.cdata_bytes(),
-                    Values.size_bytes(),
+                    values.cdata_bytes(),
+                    values.size_bytes(),
                     tag,
                     comm
                 );
@@ -365,7 +359,7 @@ void Foam::Pstream::listCombineGather
                     tag,
                     comm
                 );
-                toAbove << Values;
+                toAbove << values;
             }
         }
     }
@@ -375,7 +369,7 @@ void Foam::Pstream::listCombineGather
 template<class T, class CombineOp>
 void Foam::Pstream::listCombineGather
 (
-    List<T>& Values,
+    List<T>& values,
     const CombineOp& cop,
     const int tag,
     const label comm
@@ -384,7 +378,7 @@ void Foam::Pstream::listCombineGather
     listCombineGather
     (
         UPstream::whichCommunication(comm),
-        Values,
+        values,
         cop,
         tag,
         comm
@@ -396,14 +390,17 @@ template<class T>
 void Foam::Pstream::listCombineScatter
 (
     const List<UPstream::commsStruct>& comms,
-    List<T>& Values,
+    List<T>& values,
     const int tag,
     const label comm
 )
 {
+    #ifndef Foam_Pstream_scatter_nobroadcast
+    Pstream::broadcast(values, comm);
+    #else
     if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
     {
-        // Get my communication order
+        // My communication order
         const UPstream::commsStruct& myComm = comms[UPstream::myProcNo(comm)];
 
         // Receive from up
@@ -415,8 +412,8 @@ void Foam::Pstream::listCombineScatter
                 (
                     UPstream::commsTypes::scheduled,
                     myComm.above(),
-                    Values.data_bytes(),
-                    Values.size_bytes(),
+                    values.data_bytes(),
+                    values.size_bytes(),
                     tag,
                     comm
                 );
@@ -431,25 +428,14 @@ void Foam::Pstream::listCombineScatter
                     tag,
                     comm
                 );
-                fromAbove >> Values;
-            }
-
-            if (debug & 2)
-            {
-                Pout<< " received from "
-                    << myComm.above() << " data:" << Values << endl;
+                fromAbove >> values;
             }
         }
 
         // Send to my downstairs neighbours
         forAllReverse(myComm.below(), belowI)
         {
-            label belowID = myComm.below()[belowI];
-
-            if (debug & 2)
-            {
-                Pout<< " sending to " << belowID << " data:" << Values << endl;
-            }
+            const label belowID = myComm.below()[belowI];
 
             if (is_contiguous<T>::value)
             {
@@ -457,8 +443,8 @@ void Foam::Pstream::listCombineScatter
                 (
                     UPstream::commsTypes::scheduled,
                     belowID,
-                    Values.cdata_bytes(),
-                    Values.size_bytes(),
+                    values.cdata_bytes(),
+                    values.size_bytes(),
                     tag,
                     comm
                 );
@@ -473,28 +459,33 @@ void Foam::Pstream::listCombineScatter
                     tag,
                     comm
                 );
-                toBelow << Values;
+                toBelow << values;
             }
         }
     }
+    #endif
 }
 
 
 template<class T>
 void Foam::Pstream::listCombineScatter
 (
-    List<T>& Values,
+    List<T>& values,
     const int tag,
     const label comm
 )
 {
+    #ifndef Foam_Pstream_scatter_nobroadcast
+    Pstream::broadcast(values, comm);
+    #else
     listCombineScatter
     (
         UPstream::whichCommunication(comm),
-        Values,
+        values,
         tag,
         comm
     );
+    #endif
 }
 
 
@@ -502,7 +493,7 @@ template<class Container, class CombineOp>
 void Foam::Pstream::mapCombineGather
 (
     const List<UPstream::commsStruct>& comms,
-    Container& Values,
+    Container& values,
     const CombineOp& cop,
     const int tag,
     const label comm
@@ -510,13 +501,13 @@ void Foam::Pstream::mapCombineGather
 {
     if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
     {
-        // Get my communication order
+        // My communication order
         const commsStruct& myComm = comms[UPstream::myProcNo(comm)];
 
         // Receive from my downstairs neighbours
-        forAll(myComm.below(), belowI)
+        for (const label belowID : myComm.below())
         {
-            label belowID = myComm.below()[belowI];
+            // Map/HashTable: non-contiguous
 
             IPstream fromBelow
             (
@@ -526,43 +517,43 @@ void Foam::Pstream::mapCombineGather
                 tag,
                 comm
             );
-            Container receivedValues(fromBelow);
+            Container received(fromBelow);
 
             if (debug & 2)
             {
                 Pout<< " received from "
-                    << belowID << " data:" << receivedValues << endl;
+                    << belowID << " data:" << received << endl;
             }
 
             for
             (
-                typename Container::const_iterator slaveIter =
-                    receivedValues.begin();
-                slaveIter != receivedValues.end();
-                ++slaveIter
+                auto recvIter = received.cbegin();
+                recvIter != received.cend();
+                ++recvIter
             )
             {
-                typename Container::iterator
-                    masterIter = Values.find(slaveIter.key());
+                auto masterIter = values.find(recvIter.key());
 
-                if (masterIter != Values.end())
+                if (masterIter != values.end())  // == found()
                 {
-                    cop(masterIter(), slaveIter());
+                    // Combine with existing
+                    cop(masterIter.val(), recvIter.val());
                 }
                 else
                 {
-                    Values.insert(slaveIter.key(), slaveIter());
+                    // Insert new key/value
+                    values.insert(recvIter.key(), recvIter.val());
                 }
             }
         }
 
-        // Send up Value
+        // Send up values
         if (myComm.above() != -1)
         {
             if (debug & 2)
             {
                 Pout<< " sending to " << myComm.above()
-                    << " data:" << Values << endl;
+                    << " data:" << values << endl;
             }
 
             OPstream toAbove
@@ -573,7 +564,7 @@ void Foam::Pstream::mapCombineGather
                 tag,
                 comm
             );
-            toAbove << Values;
+            toAbove << values;
         }
     }
 }
@@ -582,7 +573,7 @@ void Foam::Pstream::mapCombineGather
 template<class Container, class CombineOp>
 void Foam::Pstream::mapCombineGather
 (
-    Container& Values,
+    Container& values,
     const CombineOp& cop,
     const int tag,
     const label comm
@@ -591,7 +582,7 @@ void Foam::Pstream::mapCombineGather
     mapCombineGather
     (
         UPstream::whichCommunication(comm),
-        Values,
+        values,
         cop,
         tag,
         comm
@@ -603,14 +594,17 @@ template<class Container>
 void Foam::Pstream::mapCombineScatter
 (
     const List<UPstream::commsStruct>& comms,
-    Container& Values,
+    Container& values,
     const int tag,
     const label comm
 )
 {
+    #ifndef Foam_Pstream_scatter_nobroadcast
+    Pstream::broadcast(values, comm);
+    #else
     if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
     {
-        // Get my communication order
+        // My communication order
         const UPstream::commsStruct& myComm = comms[UPstream::myProcNo(comm)];
 
         // Receive from up
@@ -624,23 +618,23 @@ void Foam::Pstream::mapCombineScatter
                 tag,
                 comm
             );
-            fromAbove >> Values;
+            fromAbove >> values;
 
             if (debug & 2)
             {
                 Pout<< " received from "
-                    << myComm.above() << " data:" << Values << endl;
+                    << myComm.above() << " data:" << values << endl;
             }
         }
 
         // Send to my downstairs neighbours
         forAllReverse(myComm.below(), belowI)
         {
-            label belowID = myComm.below()[belowI];
+            const label belowID = myComm.below()[belowI];
 
             if (debug & 2)
             {
-                Pout<< " sending to " << belowID << " data:" << Values << endl;
+                Pout<< " sending to " << belowID << " data:" << values << endl;
             }
 
             OPstream toBelow
@@ -651,27 +645,32 @@ void Foam::Pstream::mapCombineScatter
                 tag,
                 comm
             );
-            toBelow << Values;
+            toBelow << values;
         }
     }
+    #endif
 }
 
 
 template<class Container>
 void Foam::Pstream::mapCombineScatter
 (
-    Container& Values,
+    Container& values,
     const int tag,
     const label comm
 )
 {
+    #ifndef Foam_Pstream_scatter_nobroadcast
+    Pstream::broadcast(values, comm);
+    #else
     mapCombineScatter
     (
         UPstream::whichCommunication(comm),
-        Values,
+        values,
         tag,
         comm
     );
+    #endif
 }
 
 

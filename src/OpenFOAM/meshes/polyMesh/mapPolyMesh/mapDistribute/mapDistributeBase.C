@@ -54,7 +54,7 @@ Foam::List<Foam::labelPair> Foam::mapDistributeBase::schedule
     const label nProcs = Pstream::nProcs(comm);
 
     // Communications: send and receive processor
-    DynamicList<labelPair> allComms;
+    List<labelPair> allComms;
 
     {
         labelPairHashSet commsSet(nProcs);
@@ -119,7 +119,7 @@ Foam::List<Foam::labelPair> Foam::mapDistributeBase::schedule
     }
 
     // Broadcast: send comms information to all
-    Pstream::scatter(allComms, tag, comm);
+    Pstream::broadcast(allComms, comm);
 
 
     // Determine my schedule.
@@ -133,7 +133,7 @@ Foam::List<Foam::labelPair> Foam::mapDistributeBase::schedule
     );
 
     // Processors involved in my schedule
-    return List<labelPair>(UIndirectList<labelPair>(allComms, mySchedule));
+    return List<labelPair>(allComms, mySchedule);
 
 
     //if (debug)

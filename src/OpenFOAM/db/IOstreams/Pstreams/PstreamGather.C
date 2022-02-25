@@ -36,18 +36,13 @@ Description
 #include "IPstream.H"
 #include "contiguous.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T, class BinaryOp>
-void Pstream::gather
+void Foam::Pstream::gather
 (
     const List<UPstream::commsStruct>& comms,
-    T& Value,
+    T& value,
     const BinaryOp& bop,
     const int tag,
     const label comm
@@ -55,21 +50,21 @@ void Pstream::gather
 {
     if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
     {
-        // Get my communication order
+        // My communication order
         const commsStruct& myComm = comms[UPstream::myProcNo(comm)];
 
         // Receive from my downstairs neighbours
-        forAll(myComm.below(), belowI)
+        for (const label belowID : myComm.below())
         {
-            T value;
+            T received;
 
             if (is_contiguous<T>::value)
             {
                 UIPstream::read
                 (
                     UPstream::commsTypes::scheduled,
-                    myComm.below()[belowI],
-                    reinterpret_cast<char*>(&value),
+                    belowID,
+                    reinterpret_cast<char*>(&received),
                     sizeof(T),
                     tag,
                     comm
@@ -80,18 +75,18 @@ void Pstream::gather
                 IPstream fromBelow
                 (
                     UPstream::commsTypes::scheduled,
-                    myComm.below()[belowI],
+                    belowID,
                     0,
                     tag,
                     comm
                 );
-                fromBelow >> value;
+                fromBelow >> received;
             }
 
-            Value = bop(Value, value);
+            value = bop(value, received);
         }
 
-        // Send up Value
+        // Send up value
         if (myComm.above() != -1)
         {
             if (is_contiguous<T>::value)
@@ -100,7 +95,7 @@ void Pstream::gather
                 (
                     UPstream::commsTypes::scheduled,
                     myComm.above(),
-                    reinterpret_cast<const char*>(&Value),
+                    reinterpret_cast<const char*>(&value),
                     sizeof(T),
                     tag,
                     comm
@@ -116,7 +111,7 @@ void Pstream::gather
                     tag,
                     comm
                 );
-                toAbove << Value;
+                toAbove << value;
             }
         }
     }
@@ -124,58 +119,33 @@ void Pstream::gather
 
 
 template<class T, class BinaryOp>
-void Pstream::gather
+void Foam::Pstream::gather
 (
-    T& Value,
+    T& value,
     const BinaryOp& bop,
     const int tag,
     const label comm
 )
 {
-    gather(UPstream::whichCommunication(comm), Value, bop, tag, comm);
+    gather(UPstream::whichCommunication(comm), value, bop, tag, comm);
 }
 
 
 template<class T>
-void Pstream::scatter
+void Foam::Pstream::scatter
 (
     const List<UPstream::commsStruct>& comms,
-    T& Value,
+    T& value,
     const int tag,
     const label comm
 )
 {
     #ifndef Foam_Pstream_scatter_nobroadcast
-    if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
-    {
-        if (is_contiguous<T>::value)
-        {
-            UPstream::broadcast
-            (
-                reinterpret_cast<char*>(&Value),
-                sizeof(T),
-                comm,
-                UPstream::masterNo()
-            );
-        }
-        else
-        {
-            if (UPstream::master(comm))
-            {
-                OPBstream toAll(UPstream::masterNo(), comm);
-                toAll << Value;
-            }
-            else
-            {
-                IPBstream fromMaster(UPstream::masterNo(), comm);
-                fromMaster >> Value;
-            }
-        }
-    }
+    Pstream::broadcast(value, comm);
     #else
     if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
     {
-        // Get my communication order
+        // My communication order
         const commsStruct& myComm = comms[UPstream::myProcNo(comm)];
 
         // Receive from up
@@ -187,7 +157,7 @@ void Pstream::scatter
                 (
                     UPstream::commsTypes::scheduled,
                     myComm.above(),
-                    reinterpret_cast<char*>(&Value),
+                    reinterpret_cast<char*>(&value),
                     sizeof(T),
                     tag,
                     comm
@@ -203,7 +173,7 @@ void Pstream::scatter
                     tag,
                     comm
                 );
-                fromAbove >> Value;
+                fromAbove >> value;
             }
         }
 
@@ -212,13 +182,15 @@ void Pstream::scatter
         // (only when using a tree schedule!) first.
         forAllReverse(myComm.below(), belowI)
         {
+            const label belowID = myComm.below()[belowI];
+
             if (is_contiguous<T>::value)
             {
                 UOPstream::write
                 (
                     UPstream::commsTypes::scheduled,
-                    myComm.below()[belowI],
-                    reinterpret_cast<const char*>(&Value),
+                    belowID,
+                    reinterpret_cast<const char*>(&value),
                     sizeof(T),
                     tag,
                     comm
@@ -229,12 +201,12 @@ void Pstream::scatter
                 OPstream toBelow
                 (
                     UPstream::commsTypes::scheduled,
-                    myComm.below()[belowI],
+                    belowID,
                     0,
                     tag,
                     comm
                 );
-                toBelow << Value;
+                toBelow << value;
             }
         }
     }
@@ -243,14 +215,14 @@ void Pstream::scatter
 
 
 template<class T>
-void Pstream::scatter(T& Value, const int tag, const label comm)
+void Foam::Pstream::scatter(T& value, const int tag, const label comm)
 {
-    scatter(UPstream::whichCommunication(comm), Value, tag, comm);
+    #ifndef Foam_Pstream_scatter_nobroadcast
+    Pstream::broadcast(value, comm);
+    #else
+    scatter(UPstream::whichCommunication(comm), value, tag, comm);
+    #endif
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

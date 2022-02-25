@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,7 +33,6 @@ Description
     combined using the given combination function and the result is
     broadcast to all nodes
 
-
 \*---------------------------------------------------------------------------*/
 
 #ifndef Foam_PstreamCombineReduceOps_H
@@ -53,31 +53,33 @@ template<class T, class CombineOp>
 void combineReduce
 (
     const List<UPstream::commsStruct>& comms,
-    T& Value,
+    T& value,
     const CombineOp& cop,
     const int tag,
     const label comm
 )
 {
-    Pstream::combineGather(comms, Value, cop, tag, comm);
-    Pstream::combineScatter(comms, Value, tag, comm);
+    Pstream::combineGather(comms, value, cop, tag, comm);
+    Pstream::broadcast(value, comm);
 }
 
 
 template<class T, class CombineOp>
 void combineReduce
 (
-    T& Value,
+    T& value,
     const CombineOp& cop,
-    const int tag = Pstream::msgType(),
-    const label comm = Pstream::worldComm
+    const int tag = UPstream::msgType(),
+    const label comm = UPstream::worldComm
 )
 {
-    const List<UPstream::commsStruct>& comms =
-        UPstream::whichCommunication(comm);
+    if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
+    {
+        const auto& comms = UPstream::whichCommunication(comm);
 
-    Pstream::combineGather(comms, Value, cop, tag, comm);
-    Pstream::combineScatter(comms, Value, tag, comm);
+        Pstream::combineGather(comms, value, cop, tag, comm);
+        Pstream::broadcast(value, comm);
+    }
 }
 
 

@@ -446,7 +446,7 @@ void Foam::globalMeshData::calcSharedEdges() const
     }
 
     // Broadcast: merged edges to all
-    Pstream::scatter(globalShared);  // == worldComm;
+    Pstream::broadcast(globalShared);  // == worldComm;
 
 
     // Now use the global shared edges list (globalShared) to classify my local
@@ -1914,7 +1914,7 @@ Foam::pointField Foam::globalMeshData::sharedPoints() const
     }
 
     // Broadcast: sharedPoints to all
-    Pstream::scatter(sharedPoints);  // == worldComm
+    Pstream::broadcast(sharedPoints);  // == worldComm
 
 
     return sharedPoints;

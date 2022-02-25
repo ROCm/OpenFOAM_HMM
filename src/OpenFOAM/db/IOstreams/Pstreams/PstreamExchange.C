@@ -91,7 +91,7 @@ void Foam::Pstream::exchangeContainer
                 FatalErrorInFunction
                     << "Cannot send outgoing message. "
                     << "to:" << proci << " nBytes:"
-                    << label(sendBufs[proci].size()*sizeof(T))
+                    << label(sendBufs[proci].size_bytes())
                     << Foam::abort(FatalError);
             }
         }
@@ -103,7 +103,7 @@ void Foam::Pstream::exchangeContainer
 
     if (block)
     {
-        Pstream::waitRequests(startOfRequests);
+        UPstream::waitRequests(startOfRequests);
     }
 }
 
@@ -177,7 +177,7 @@ void Foam::Pstream::exchangeBuf
 
     if (block)
     {
-        Pstream::waitRequests(startOfRequests);
+        UPstream::waitRequests(startOfRequests);
     }
 }
 

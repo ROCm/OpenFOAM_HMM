@@ -51,6 +51,43 @@ Foam::UPstream::commsTypeNames
 });
 
 
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+void Foam::UPstream::broadcast
+(
+    std::string& str,
+    const label comm,
+    const int rootProcNo
+)
+{
+    if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
+    {
+        // Broadcast the string length
+        std::size_t len(str.length());
+
+        UPstream::broadcast
+        (
+            reinterpret_cast<char*>(&len),
+            sizeof(std::size_t),
+            comm,
+            rootProcNo
+        );
+
+        if (!UPstream::master(comm))
+        {
+            // Do not touch string on the master even although it would
+            // be a no-op. We are truly paranoid.
+            str.resize(len);
+        }
+
+        if (len)
+        {
+            UPstream::broadcast(&str[0], len, comm, rootProcNo);
+        }
+    }
+}
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::UPstream::setParRun(const label nProcs, const bool haveThreads)

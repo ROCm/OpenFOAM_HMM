@@ -42,42 +42,35 @@ Description
 using namespace Foam;
 
 
-// This is what our new scatter will look like inside
-template<class Type>
-void testBroadcastStream
-(
-    Type& value,
-    const label comm = UPstream::worldComm
-)
+template<class T>
+void printPre(const T& value)
 {
-    Info<< nl << "is_contiguous:" << is_contiguous<Type>::value << endl;
+    Info<< nl << "is_contiguous:" << is_contiguous<T>::value << endl;
     Pout<< "pre-broadcast: " << value << endl;
+}
 
-    if (is_contiguous<Type>::value)
-    {
-         UPstream::broadcast
-         (
-             reinterpret_cast<char*>(&value),
-             sizeof(Type),
-             comm,
-             UPstream::masterNo()
-         );
-    }
-    else
-    {
-        if (UPstream::master())
-        {
-            OPBstream toAll(UPstream::masterNo(), comm);
-            toAll << value;
-        }
-        else
-        {
-            IPBstream fromMaster(UPstream::masterNo(), comm);
-            fromMaster >> value;
-        }
-    }
-
+template<class T>
+void printPost(const T& value)
+{
     Pout<< "post-broadcast: " << value << endl;
+}
+
+
+template<class T>
+void testBroadcast(T& value)
+{
+    printPre(value);
+    Pstream::broadcast(value);
+    printPost(value);
+}
+
+template<class T>
+void testBroadcast(List<T>& values)
+{
+    Info<< nl << "is_contiguous:" << is_contiguous<T>::value << endl;
+    Pout<< "pre-broadcast: " << flatOutput(values) << endl;
+    Pstream::broadcast(values);
+    Pout<< "post-broadcast: " << flatOutput(values) << endl;
 }
 
 
@@ -95,7 +88,7 @@ int main(int argc, char *argv[])
         {
             value = UPstream::nProcs();
         }
-        testBroadcastStream(value);
+        testBroadcast(value);
     }
 
     {
@@ -104,7 +97,18 @@ int main(int argc, char *argv[])
         {
             values = identity(UPstream::nProcs());
         }
-        testBroadcastStream(values);
+        testBroadcast(values);
+    }
+
+    {
+        word value;
+        if (Pstream::master())
+        {
+            value = args.executable();
+        }
+        printPre(value);
+        UPstream::broadcast(value);   // Low-level UPstream broadcast
+        printPost(value);
     }
 
     {
@@ -117,7 +121,7 @@ int main(int argc, char *argv[])
                 values[i] = "value_" + Foam::name(i);
             }
         }
-        testBroadcastStream(values);
+        testBroadcast(values);
     }
 
     {
@@ -126,7 +130,7 @@ int main(int argc, char *argv[])
         {
             values = vector(1,2,3);
         }
-        testBroadcastStream(values);
+        testBroadcast(values);
     }
 
     {
@@ -134,8 +138,15 @@ int main(int argc, char *argv[])
         if (Pstream::master())
         {
             values = vector(1,2,3);
+
+            scalar mult = 1;
+            for (auto& v : values)
+            {
+                v *= mult;
+                mult += 1;
+            }
         }
-        testBroadcastStream(values);
+        testBroadcast(values);
     }
 
     Info<< "End\n" << endl;

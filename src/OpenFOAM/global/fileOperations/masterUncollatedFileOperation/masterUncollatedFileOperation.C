@@ -2074,12 +2074,9 @@ bool Foam::fileOperations::masterUncollatedFileOperation::read
 
         // Scatter operation for regIOobjects
 
-        // Get my communication order
-        const List<Pstream::commsStruct>& comms =
-            Pstream::whichCommunication(Pstream::worldComm);
-
-        const Pstream::commsStruct& myComm =
-            comms[Pstream::myProcNo(Pstream::worldComm)];
+        // My communication order
+        const auto& comms = Pstream::whichCommunication(Pstream::worldComm);
+        const auto& myComm = comms[Pstream::myProcNo(Pstream::worldComm)];
 
         // Receive from up
         if (myComm.above() != -1)

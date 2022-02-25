@@ -654,9 +654,9 @@ bool Foam::fileOperations::uncollatedFileOperation::read
         Pstream::scatter(io.headerClassName());
         Pstream::scatter(io.note());
 
-        // Get my communication order
-        const List<Pstream::commsStruct>& comms = Pstream::whichCommunication();
-        const Pstream::commsStruct& myComm = comms[Pstream::myProcNo()];
+        // My communication order
+        const auto& comms = Pstream::whichCommunication();
+        const auto& myComm = comms[Pstream::myProcNo()];
 
         // Receive from up
         if (myComm.above() != -1)

@@ -34,9 +34,6 @@ SourceFiles
     UPstream.C
     UPstreamCommsStruct.C
     UPstreamTemplates.C
-    combineGatherScatter.C
-    gatherScatter.C
-    gatherScatterList.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -104,7 +101,7 @@ public:
             // Constructors
 
                 //- Default construct. Above == -1
-                commsStruct();
+                commsStruct() noexcept;
 
                 //- Construct from components
                 commsStruct
@@ -684,15 +681,23 @@ public:
         );
 
 
-
     // Broadcast Functions
 
-        //- Broadcast buffer contents, sizes must match on processors
+        //- Broadcast buffer contents to all processes in communicator.
+        //- The sizes must match on all processes.
         //  \return True on success
         static bool broadcast
         (
             char* buf,
             const std::streamsize bufSize,
+            const label communicator = worldComm,
+            const int rootProcNo = masterNo()
+        );
+
+        //- Broadcast string content to all processes in communicator.
+        static void broadcast
+        (
+            std::string& str,
             const label communicator = worldComm,
             const int rootProcNo = masterNo()
         );
@@ -721,11 +726,11 @@ Ostream& operator<<(Ostream&, const UPstream::commsStruct&);
 // Template specialisation for access of commsStruct
 template<>
 UPstream::commsStruct&
-UList<UPstream::commsStruct>::operator[](const label);
+UList<UPstream::commsStruct>::operator[](const label procID);
 
 template<>
 const UPstream::commsStruct&
-UList<UPstream::commsStruct>::operator[](const label) const;
+UList<UPstream::commsStruct>::operator[](const label procID) const;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
