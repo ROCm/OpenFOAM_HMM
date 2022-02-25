@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -115,10 +115,7 @@ void Foam::masterOFstream::commit()
             return;
         }
 
-        boolList valid(Pstream::nProcs());
-        valid[Pstream::myProcNo()] = valid_;
-        Pstream::gatherList(valid);
-
+        boolList valid(UPstream::listGatherValues<bool>(valid_));
 
         // Different files
         PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);

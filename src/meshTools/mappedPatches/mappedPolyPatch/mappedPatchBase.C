@@ -241,15 +241,17 @@ void Foam::mappedPatchBase::collectSamples
     }
 
     {
-        labelList procToWorldIndex(nProcs);
-        procToWorldIndex[myRank] = mySampleWorld;
-        Pstream::gatherList(procToWorldIndex, Pstream::msgType(), myComm);
-        Pstream::scatterList(procToWorldIndex, Pstream::msgType(), myComm);
+        labelList procToWorldIndex
+        (
+            UPstream::listGatherValues<label>(mySampleWorld, myComm)
+        );
+        Pstream::broadcast(procToWorldIndex, myComm);
 
-        labelList nPerProc(nProcs);
-        nPerProc[myRank] = patch_.size();
-        Pstream::gatherList(nPerProc, Pstream::msgType(), myComm);
-        Pstream::scatterList(nPerProc, Pstream::msgType(), myComm);
+        labelList nPerProc
+        (
+            UPstream::listGatherValues<label>(patch_.size(), myComm)
+        );
+        Pstream::broadcast(nPerProc, myComm);
 
         patchFaceWorlds.setSize(patchFaces.size());
         patchFaceProcs.setSize(patchFaces.size());

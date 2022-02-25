@@ -261,15 +261,17 @@ boolList haveFacesFile(const fileName& meshPath)
 {
     const fileName facesPath(meshPath/"faces");
     Info<< "Checking for mesh in " << facesPath << nl << endl;
-    boolList haveMesh(Pstream::nProcs(), false);
-    haveMesh[Pstream::myProcNo()] = fileHandler().isFile
+    boolList haveMesh
     (
-        fileHandler().filePath(facesPath)
+        UPstream::listGatherValues<bool>
+        (
+            fileHandler().isFile(fileHandler().filePath(facesPath))
+        )
     );
-    Pstream::gatherList(haveMesh);
-    Pstream::scatterList(haveMesh);
     Info<< "Per processor mesh availability:" << nl
         << "    " << flatOutput(haveMesh) << nl << endl;
+
+    Pstream::broadcast(haveMesh);
     return haveMesh;
 }
 

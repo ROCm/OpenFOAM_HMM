@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,35 +48,30 @@ Foam::label Foam::meshToMesh::calcDistribution
 
     if (Pstream::parRun())
     {
-        List<label> cellsPresentOnProc(Pstream::nProcs(), Zero);
-        if ((src.nCells() > 0) || (tgt.nCells() > 0))
+        const bitSet hasMesh
+        (
+            UPstream::listGatherValues<bool>
+            (
+                src.nCells() > 0 || tgt.nCells() > 0
+            )
+        );
+
+        const auto nHaveMesh = hasMesh.count();
+
+        if (nHaveMesh == 1)
         {
-            cellsPresentOnProc[Pstream::myProcNo()] = 1;
-        }
-        else
-        {
-            cellsPresentOnProc[Pstream::myProcNo()] = 0;
-        }
-
-        Pstream::gatherList(cellsPresentOnProc);
-        Pstream::scatterList(cellsPresentOnProc);
-
-        label nHaveCells = sum(cellsPresentOnProc);
-
-        if (nHaveCells > 1)
-        {
-            proci = -1;
-
-            DebugInFunction
-                << "Meshes split across multiple processors" << endl;
-        }
-        else if (nHaveCells == 1)
-        {
-            proci = cellsPresentOnProc.find(1);
-
+            proci = hasMesh.find_first();
             DebugInFunction
                 << "Meshes local to processor" << proci << endl;
         }
+        else if (nHaveMesh > 1)
+        {
+            proci = -1;
+            DebugInFunction
+                << "Meshes split across multiple processors" << endl;
+        }
+
+        Pstream::broadcast(proci);
     }
 
     return proci;
