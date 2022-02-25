@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -123,14 +123,9 @@ public:
             //- Get the current trigger index
             label getTrigger() const;
 
-            //- Set the trigger index. Normally only if greater than current
-            //
-            //  \param triggeri the new trigger index
-            //  \param increaseOnly (default) only change if new index
-            //      is greater than the current index.
-            //
+            //- Set new trigger index.
             //  \return True if the index changed
-            bool setTrigger(const label triggeri, bool increaseOnly = true);
+            bool setTrigger(const label triggeri);
 
             //- Set dictionary from named object, return true if set
             bool getObjectDict

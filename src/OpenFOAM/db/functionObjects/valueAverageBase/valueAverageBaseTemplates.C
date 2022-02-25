@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2016 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,17 +26,14 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "Time.H"
-#include "FIFOStack.H"
-
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
 template<class Type>
-void Foam::functionObjects::runTimeControls::averageCondition::calc
+bool Foam::functionObjects::valueAverageBase::calc
 (
     const label fieldi,
-    bool& satisfied,
-    bool& processed
+    bool& converged,
+    dictionary& dict
 )
 {
     const word& fieldName = fieldNames_[fieldi];
@@ -46,16 +43,16 @@ void Foam::functionObjects::runTimeControls::averageCondition::calc
 
     if (pTraits<Type>::typeName != valueType)
     {
-        return;
+        return false;
     }
 
-    const scalar dt = obr_.time().deltaTValue();
+    const scalar dt = state_.time().deltaTValue();
 
     const Type currentValue =
         state_.getObjectResult<Type>(functionObjectName_, fieldName);
-    const word meanName(fieldName + "Mean");
 
     // Current mean value
+    const word meanName(fieldName + "Mean");
     Type meanValue = state_.getResult<Type>(meanName);
 
     switch (windowType_)
@@ -63,40 +60,35 @@ void Foam::functionObjects::runTimeControls::averageCondition::calc
         case windowType::NONE:
         {
             const scalar Dt = totalTime_[fieldi];
-            const scalar alpha = (Dt - dt)/Dt;
             const scalar beta = dt/Dt;
-            meanValue = alpha*meanValue + beta*currentValue;
+            meanValue = (1 - beta)*meanValue + beta*currentValue;
 
             break;
         }
         case windowType::APPROXIMATE:
         {
             const scalar Dt = totalTime_[fieldi];
-            scalar alpha = (Dt - dt)/Dt;
             scalar beta = dt/Dt;
             if (Dt - dt >= window_)
             {
-                alpha = (window_ - dt)/window_;
                 beta = dt/window_;
             }
             else
             {
-                // Ensure that averaging is performed over window time
-                // before condition can be satisfied
-                satisfied = false;
+                converged = false;
             }
 
-            meanValue = alpha*meanValue + beta*currentValue;
-            totalTime_[fieldi] += dt;
+            meanValue = (1 - beta)*meanValue + beta*currentValue;
+
             break;
         }
         case windowType::EXACT:
         {
             FIFOStack<scalar> windowTimes;
             FIFOStack<Type> windowValues;
-            dictionary& dict = this->conditionDict().subDict(fieldName);
-            dict.readIfPresent("windowTimes", windowTimes);
-            dict.readIfPresent("windowValues", windowValues);
+            dictionary& fieldDict = dict.subDict(fieldName);
+            fieldDict.readIfPresent("windowTimes", windowTimes);
+            fieldDict.readIfPresent("windowValues", windowValues);
 
             // Increment time for all existing values
             for (scalar& dti : windowTimes)
@@ -151,8 +143,8 @@ void Foam::functionObjects::runTimeControls::averageCondition::calc
             meanValue /= windowTimes.first();
 
             // Store the state information for the next step
-            dict.set("windowTimes", windowTimes);
-            dict.set("windowValues", windowValues);
+            fieldDict.set("windowTimes", windowTimes);
+            fieldDict.set("windowValues", windowValues);
 
             break;
         }
@@ -160,19 +152,19 @@ void Foam::functionObjects::runTimeControls::averageCondition::calc
 
     scalar delta = mag(meanValue - currentValue);
 
-    Log << "        " << meanName << ": " << meanValue
+    Log << indent << "    " << meanName << ": " << meanValue
         << ", delta: " << delta << nl;
 
-    // Note: Writing result to owner function object and not the local run-time
-    // condition
+    file() << tab << meanValue;
+
     state_.setResult(meanName, meanValue);
 
-    if (delta > tolerance_)
+    if ((tolerance_ > 0) && (delta > tolerance_))
     {
-        satisfied = false;
+        converged = false;
     }
 
-    processed = true;
+    return true;
 }
 
 

@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,21 +24,21 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::functionObjects::runTimeControls::equationMaxIterCondition
+    Foam::noneCondition
 
 Description
-    Maximum number of equation iterations run time condition
+    A no-op condition that simply returns true/nothing to do.
 
 SourceFiles
-    equationMaxIterCondition.H
-    equationMaxIterCondition.C
+    noneCondition.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef functionObjects_runTimeConditions_equationMaxIterCondition_H
-#define functionObjects_runTimeConditions_equationMaxIterCondition_H
+#ifndef functionObjects_runTimeControls_noneCondition_H
+#define functionObjects_runTimeControls_noneCondition_H
 
 #include "runTimeCondition.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,34 +50,20 @@ namespace runTimeControls
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class equationMaxIterCondition Declaration
+                       Class noneCondition Declaration
 \*---------------------------------------------------------------------------*/
 
-class equationMaxIterCondition
+class noneCondition
 :
     public runTimeCondition
 {
-protected:
-
-    // Protected data
-
-        //- Field name
-        const wordList fieldNames_;
-
-        //- Threshold for maximum number of iterations
-        const label threshold_;
-
-        //- Start checking from iteration - always skips first iteration
-        label startIter_;
-
-
 public:
 
     //- Runtime type information
-    TypeName("equationMaxIter");
+    TypeNameNoDebug("none");
 
     //- Constructor
-    equationMaxIterCondition
+    noneCondition
     (
         const word& name,
         const objectRegistry& obr,
@@ -87,7 +72,7 @@ public:
     );
 
     //- Destructor
-    virtual ~equationMaxIterCondition() = default;
+    virtual ~noneCondition() = default;
 
 
     // Public Member Functions

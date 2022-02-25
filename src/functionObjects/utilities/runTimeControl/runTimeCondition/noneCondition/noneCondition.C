@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2016 OpenCFD Ltd.
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,37 +25,57 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
+#include "noneCondition.H"
+#include "addToRunTimeSelectionTable.H"
+#include "fieldTypes.H"
 
-template<class Type>
-void Foam::functionObjects::valueAverage::calc
-(
-    const word& fieldName,
-    const word& meanName,
-    const scalar alpha,
-    const scalar beta,
-    bool& processed
-)
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
 {
-    const word valueType = objectResultType(functionObjectName_, fieldName);
+namespace functionObjects
+{
+namespace runTimeControls
+{
+    defineTypeName(noneCondition, 0);
+    addToRunTimeSelectionTable(runTimeCondition, noneCondition, dictionary);
 
-    if (pTraits<Type>::typeName != valueType)
-    {
-        return;
-    }
+}
+}
+}
 
-    Type currentValue = getObjectResult<Type>(functionObjectName_, fieldName);
 
-    Type meanValue = getResult<Type>(meanName);
-    meanValue = alpha*meanValue + beta*currentValue;
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-    setResult(meanName, meanValue);
+Foam::functionObjects::runTimeControls::noneCondition::noneCondition
+(
+    const word& name,
+    const objectRegistry& obr,
+    const dictionary& dict,
+    stateFunctionObject& state
+)
+:
+    runTimeCondition(name, obr, dict, state)
+{}
 
-    file() << tab << meanValue;
 
-    Log<< "    " << meanName << ": " << meanValue << nl;
+// * * * * * * * * * * * * * * Public Member Functions * * * * * * * * * * * //
 
-    processed = true;
+bool Foam::functionObjects::runTimeControls::noneCondition::apply()
+{
+    return true;
+}
+
+
+void Foam::functionObjects::runTimeControls::noneCondition::write()
+{
+    // do nothing
+}
+
+
+void Foam::functionObjects::runTimeControls::noneCondition::reset()
+{
+    // do nothing
 }
 
 

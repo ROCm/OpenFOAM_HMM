@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,6 +58,7 @@ Foam::functionObjects::runTimeControls::runTimeControl::satisfiedActionNames
     { satisfiedAction::SET_TRIGGER, "setTrigger"},
 };
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::functionObjects::runTimeControls::runTimeControl::runTimeControl
@@ -74,7 +75,8 @@ Foam::functionObjects::runTimeControls::runTimeControl::runTimeControl
     writeStepI_(0),
     satisfiedAction_(satisfiedAction::END),
     triggerIndex_(labelMin),
-    active_(getObjectProperty(name, "active", true))
+    active_(getProperty("active", true)),
+    canRestart_(getProperty("canRestart", false))
 {
     read(dict);
 }
@@ -99,6 +101,8 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::read
 
     if (fvMeshFunctionObject::read(dict))
     {
+        Info<< type() << " " << name() << ":" << nl;
+
         const dictionary& conditionsDict = dict.subDict("conditions");
         const wordList conditionNames(conditionsDict.toc());
         conditions_.setSize(conditionNames.size());
@@ -128,9 +132,7 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::read
         // Check that some conditions are set
         if (conditions_.empty())
         {
-            Info<< type() << " " << name() << " output:" << nl
-                << "    No conditions present" << nl
-                << endl;
+            Info<< "    No conditions present" << endl;
         }
         else
         {
@@ -147,11 +149,11 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::read
 
             if (!check)
             {
-                Info<< type() << " " << name() << " output:" << nl
-                    << "    All conditions are inactive" << nl
-                    << endl;
+                Info<< "    All conditions are inactive" << endl;
             }
         }
+
+        Info<< endl;
 
         // Set the action to perform when all conditions are satisfied
         // - set to end for backwards compatibility with v1806
@@ -177,6 +179,12 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::read
 
 bool Foam::functionObjects::runTimeControls::runTimeControl::execute()
 {
+    if (canRestart_)
+    {
+        active_ = true;
+        canRestart_ = false;
+    }
+
     if (!active_)
     {
         return true;
@@ -199,7 +207,7 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::execute()
         {
             bool conditionSatisfied = condition.apply();
 
-            label groupi = condition.groupID();
+            const label groupi = condition.groupID();
 
             auto conditionIter = groupMap_.cfind(groupi);
 
@@ -271,14 +279,10 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::execute()
 
                     if (nWriteStep_ != 0)
                     {
-                        Info<< " - final step" << nl;
-                    }
-                    else
-                    {
-                        Info<< nl;
+                        Info<< " - final step";
                     }
 
-                    Info<< endl;
+                    Info<< nl << endl;
                     active_ = false;
 
                     // Write any registered objects and set the end-time
@@ -299,11 +303,25 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::execute()
             case satisfiedAction::SET_TRIGGER:
             {
                 Info<< "    Setting trigger " << triggerIndex_ << nl;
+
                 setTrigger(triggerIndex_);
 
                 // Deactivate the model
                 active_ = false;
                 setProperty("active", active_);
+
+                // Can be restarted
+                canRestart_ = true;
+                setProperty("canRestart", canRestart_);
+
+                // Reset all conditions in case the control is recycled/trigger
+                // index is set to a smaller value
+                forAll(conditions_, conditioni)
+                {
+                    runTimeCondition& condition = conditions_[conditioni];
+                    condition.reset();
+                }
+
                 break;
             }
         }

@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +27,6 @@ License
 
 #include "valueAverage.H"
 #include "addToRunTimeSelectionTable.H"
-#include "Time.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -41,21 +39,6 @@ namespace functionObjects
 }
 }
 
-
-// * * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * //
-
-void Foam::functionObjects::valueAverage::writeFileHeader(Ostream& os) const
-{
-    writeHeader(os, "Value averages");
-    writeCommented(os, "Time");
-    forAll(fieldNames_, fieldi)
-    {
-        writeTabbed(os, fieldNames_[fieldi]);
-    }
-    os  << endl;
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::functionObjects::valueAverage::valueAverage
@@ -66,30 +49,9 @@ Foam::functionObjects::valueAverage::valueAverage
 )
 :
     regionFunctionObject(name, runTime, dict),
-    writeFile(obr_, name, typeName, dict),
-    functionObjectName_("unknown-functionObject"),
-    fieldNames_(),
-    window_(-1),
-    totalTime_(),
-    resetOnRestart_(false)
+    valueAverageBase(name, obr_, dict, *this)
 {
-    read(dict);
-
-    if (resetOnRestart_)
-    {
-        forAll(fieldNames_, fieldi)
-        {
-            const word& fieldName = fieldNames_[fieldi];
-
-            if (dict.found(fieldName))
-            {
-                const dictionary& valueDict = dict.subDict(fieldName);
-                valueDict.readEntry("totalTime", totalTime_[fieldi]);
-            }
-        }
-    }
-
-    writeFileHeader(file());
+    readState(this->propertyDict());
 }
 
 
@@ -97,103 +59,25 @@ Foam::functionObjects::valueAverage::valueAverage
 
 bool Foam::functionObjects::valueAverage::read(const dictionary& dict)
 {
-    regionFunctionObject::read(dict);
-    writeFile::read(dict);
-
-    // Make certain that the values are consistent with the defaults:
-    resetOnRestart_ = false;
-
-    dict.readEntry("functionObject", functionObjectName_);
-    dict.readEntry("fields", fieldNames_);
-    if (dict.readIfPresent("window", window_))
+    if (regionFunctionObject::read(dict) && valueAverageBase::read(dict))
     {
-        window_ = obr().time().userTimeToTime(window_);
+        return true;
     }
 
-    totalTime_.setSize(fieldNames_.size());
-    forAll(totalTime_, i)
-    {
-        totalTime_[i] = time_.deltaTValue();
-    }
-
-    dict.readIfPresent("resetOnRestart", resetOnRestart_);
-
-    return true;
+    return false;
 }
 
 
 bool Foam::functionObjects::valueAverage::execute()
 {
-    scalar dt = obr_.time().deltaTValue();
-
-    Log << type() << ": " << name() << " averages:" << nl;
-
-    file() << time_.timeName();
-
-    DynamicList<label> unprocessedFields(fieldNames_.size());
-
-    forAll(fieldNames_, fieldi)
-    {
-        const word& fieldName(fieldNames_[fieldi]);
-        const word meanName(fieldName + "Mean");
-
-        scalar Dt = totalTime_[fieldi];
-        scalar alpha = (Dt - dt)/Dt;
-        scalar beta = dt/Dt;
-
-        if (window_ > 0)
-        {
-            if (Dt - dt >= window_)
-            {
-                alpha = (window_ - dt)/window_;
-                beta = dt/window_;
-            }
-        }
-
-        bool processed = false;
-        calc<scalar>(fieldName, meanName, alpha, beta, processed);
-        calc<vector>(fieldName, meanName, alpha, beta, processed);
-        calc<sphericalTensor>(fieldName, meanName, alpha, beta, processed);
-        calc<symmTensor>(fieldName, meanName, alpha, beta, processed);
-        calc<tensor>(fieldName, meanName, alpha, beta, processed);
-
-        if (!processed)
-        {
-            unprocessedFields.append(fieldi);
-
-            if (writeToFile())
-            {
-                file() << tab << "n/a";
-            }
-        }
-
-        totalTime_[fieldi] += dt;
-    }
-
-    file()<< endl;
-
-    if (unprocessedFields.size())
-    {
-        WarningInFunction
-            << "From function object: " << functionObjectName_ << nl
-            << "Unprocessed fields:" << nl;
-
-        forAll(unprocessedFields, i)
-        {
-            label fieldi = unprocessedFields[i];
-            Log << "        " << fieldNames_[fieldi] << nl;
-        }
-        Log << endl;
-    }
-
-    Log << endl;
-
+    (void)valueAverageBase::calculate(this->propertyDict());
     return true;
 }
 
 
 bool Foam::functionObjects::valueAverage::write()
 {
+    valueAverageBase::writeState(this->propertyDict());
     return true;
 }
 

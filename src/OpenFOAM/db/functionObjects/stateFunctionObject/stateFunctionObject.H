@@ -124,14 +124,9 @@ public:
             //- Get the current trigger index
             label getTrigger() const;
 
-            //- Set the trigger index. Normally only if greater than current
-            //
-            //  \param triggeri the new trigger index
-            //  \param increaseOnly (default) only change if new index
-            //      is greater than the current index.
-            //
+            //- Set new trigger index.
             //  \return True if the index changed
-            bool setTrigger(const label triggeri, bool increaseOnly = true);
+            bool setTrigger(const label triggeri);
 
             //- Set dictionary, return true if set
             bool getDict

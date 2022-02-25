@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +27,6 @@ License
 
 #include "averageCondition.H"
 #include "addToRunTimeSelectionTable.H"
-#include "Time.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -44,18 +42,6 @@ namespace runTimeControls
 }
 }
 
-const Foam::Enum
-<
-    Foam::functionObjects::runTimeControls::averageCondition::windowType
->
-Foam::functionObjects::runTimeControls::averageCondition::windowTypeNames
-({
-    { windowType::NONE, "none" },
-    { windowType::APPROXIMATE, "approximate" },
-    { windowType::EXACT, "exact" }
-});
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::functionObjects::runTimeControls::averageCondition::averageCondition
@@ -67,44 +53,13 @@ Foam::functionObjects::runTimeControls::averageCondition::averageCondition
 )
 :
     runTimeCondition(name, obr, dict, state),
-    functionObjectName_(dict.get<word>("functionObject")),
-    fieldNames_(dict.get<wordList>("fields")),
-    tolerance_(dict.get<scalar>("tolerance")),
-    window_(dict.getOrDefault<scalar>("window", -1)),
-    windowType_
-    (
-        window_ > 0
-      ? windowTypeNames.get("windowType", dict)
-      : windowType::NONE
-    ),
-    totalTime_(fieldNames_.size(), scalar(0)),
-    resetOnRestart_(dict.getOrDefault("resetOnRestart", false)),
+    valueAverageBase(name, obr_, dict, state, false),
     nIterStartUp_(dict.getOrDefault<label>("nIterStartUp", 10)),
     iter_(-1)
 {
     dictionary& conditionDict = this->conditionDict();
 
-    forAll(fieldNames_, fieldi)
-    {
-        const word& fieldName = fieldNames_[fieldi];
-
-        if (resetOnRestart_)
-        {
-            conditionDict.set(fieldName, dictionary());
-        }
-        else
-        {
-            if (conditionDict.found(fieldName))
-            {
-                const dictionary& valueDict = conditionDict.subDict(fieldName);
-                valueDict.readIfPresent("totalTime", totalTime_[fieldi]);
-            }
-            else
-            {
-                conditionDict.set(fieldName, dictionary());
-            }
-        }
-    }
+    readState(conditionDict);
 
     conditionDict.readIfPresent("iter", iter_);
 }
@@ -119,53 +74,18 @@ bool Foam::functionObjects::runTimeControls::averageCondition::apply()
         return true;
     }
 
-    bool satisfied = iter_ > nIterStartUp_;
+    bool running = iter_ > nIterStartUp_;
 
     ++iter_;
 
-    const scalar dt = obr_.time().deltaTValue();
+    dictionary& conditionDict = this->conditionDict();
 
-    Log << "    " << type() << ": " << name_ << " averages:" << nl;
 
-    DynamicList<label> unprocessedFields(fieldNames_.size());
+    Info<< incrIndent;
+    running = valueAverageBase::calculate(conditionDict) && running;
+    Info<< decrIndent;
 
-    forAll(fieldNames_, fieldi)
-    {
-        totalTime_[fieldi] += dt;
-
-        bool processed = false;
-        calc<scalar>(fieldi, satisfied, processed);
-        calc<vector>(fieldi, satisfied, processed);
-        calc<sphericalTensor>(fieldi, satisfied, processed);
-        calc<symmTensor>(fieldi, satisfied, processed);
-        calc<tensor>(fieldi, satisfied, processed);
-
-        if (!processed)
-        {
-            unprocessedFields.append(fieldi);
-        }
-    }
-
-    if (unprocessedFields.size())
-    {
-        WarningInFunction
-            << "From function object: " << functionObjectName_ << nl
-            << "Unprocessed fields:" << nl;
-
-        for (const label fieldi : unprocessedFields)
-        {
-            Info<< "        " << fieldNames_[fieldi] << nl;
-        }
-
-        if (unprocessedFields.size() == fieldNames_.size())
-        {
-            satisfied = false;
-        }
-    }
-
-    Log << endl;
-
-    return satisfied;
+    return running;
 }
 
 
@@ -173,24 +93,17 @@ void Foam::functionObjects::runTimeControls::averageCondition::write()
 {
     dictionary& conditionDict = this->conditionDict();
 
-    forAll(fieldNames_, fieldi)
-    {
-        const word& fieldName = fieldNames_[fieldi];
-
-        if (conditionDict.found(fieldName))
-        {
-            dictionary& valueDict = conditionDict.subDict(fieldName);
-            valueDict.add("totalTime", totalTime_[fieldi], true);
-        }
-        else
-        {
-            dictionary valueDict;
-            valueDict.add("totalTime", totalTime_[fieldi], true);
-            conditionDict.add(fieldName, valueDict);
-        }
-    }
+    valueAverageBase::writeState(conditionDict);
 
     conditionDict.set("iter", iter_);
+}
+
+
+void Foam::functionObjects::runTimeControls::averageCondition::reset()
+{
+    valueAverageBase::resetState(this->conditionDict());
+
+    iter_ = 0;
 }
 
 

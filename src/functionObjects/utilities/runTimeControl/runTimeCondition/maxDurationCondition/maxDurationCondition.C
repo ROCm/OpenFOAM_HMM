@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -107,6 +107,12 @@ void Foam::functionObjects::runTimeControls::maxDurationCondition::write()
     {
         conditionDict().set("startTime", startTime_);
     }
+}
+
+
+void Foam::functionObjects::runTimeControls::maxDurationCondition::reset()
+{
+    initialised_ = false;
 }
 
 
