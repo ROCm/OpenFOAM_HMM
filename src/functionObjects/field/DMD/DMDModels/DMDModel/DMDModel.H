@@ -149,7 +149,7 @@ public:
 
     // Member Functions
 
-        // Process
+        // Evaluation
 
             //- Initialise model data members with a given snapshot
             virtual bool initialise(const RMatrix& snapshot) = 0;
@@ -169,7 +169,7 @@ public:
             }
 
 
-        // IO
+        // I-O
 
             //- Read model settings
             virtual bool read(const dictionary& dict) = 0;

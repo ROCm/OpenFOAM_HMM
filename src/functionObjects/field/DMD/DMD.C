@@ -114,7 +114,7 @@ void Foam::functionObjects::DMD::initialise()
     if (nSnapTotal <= 0)
     {
         FatalErrorInFunction
-            << "  # Zero-size input field = " << fieldName_ << " #"
+            << "Zero-size input field = " << fieldName_
             << exit(FatalError);
     }
 
@@ -150,7 +150,7 @@ Foam::functionObjects::DMD::DMD
     if (runTime.isAdjustTimeStep())
     {
         WarningInFunction
-            << "  # DMD: Available only for fixed time-step computations. #"
+            << "DMD is available only for fixed time-step computations."
             << endl;
     }
 
@@ -158,7 +158,7 @@ Foam::functionObjects::DMD::DMD
     if (mesh_.topoChanging())
     {
         FatalErrorInFunction
-            << "  # DMD: Available only for non-changing mesh topology. #"
+            << "DMD is available only for non-changing mesh topology."
             << exit(FatalError);
     }
 
@@ -230,11 +230,9 @@ bool Foam::functionObjects::DMD::end()
     if (step_ < 2)
     {
         WarningInFunction
-            << "  # DMD needs at least three snapshots to produce output #"
-            << nl
-            << "  # Only " << step_ + 1 << " snapshots are available #"
-            << nl
-            << "  # Skipping DMD output calculation and write #"
+            << "DMD needs at least three snapshots to produce output" << nl
+            << "    Only " << step_ + 1 << " snapshots are available" << nl
+            << "    Skipping DMD output calculation and write"
             << endl;
 
         return false;

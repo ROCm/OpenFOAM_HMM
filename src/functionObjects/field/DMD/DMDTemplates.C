@@ -38,11 +38,11 @@ bool Foam::functionObjects::DMD::getSnapshot()
 
     if (foundObject<VolFieldType>(fieldName_))
     {
-        return getSnapshotField<VolFieldType>();
+        return storeSnapshot<VolFieldType>();
     }
     else if (foundObject<SurfaceFieldType>(fieldName_))
     {
-        return getSnapshotField<SurfaceFieldType>();
+        return storeSnapshot<SurfaceFieldType>();
     }
 
     return false;
@@ -50,7 +50,7 @@ bool Foam::functionObjects::DMD::getSnapshot()
 
 
 template<class GeoFieldType>
-bool Foam::functionObjects::DMD::getSnapshotField()
+bool Foam::functionObjects::DMD::storeSnapshot()
 {
     if (step_ == 0)
     {

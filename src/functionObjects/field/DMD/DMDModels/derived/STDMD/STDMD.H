@@ -92,13 +92,10 @@ Usage
     \verbatim
     DMD1
     {
-        // Mandatory/Optional entries
-        ...
-
-        // Mandatory entries (unmodifiable)
+        // Mandatory entries
         DMDModel            STDMD;
 
-        // Conditional mandatory entries (runtime modifiable)
+        // Conditional mandatory entries
 
             // Option-1
             interval            5.5;
@@ -106,7 +103,7 @@ Usage
             // Option-2
             executeInterval     10;
 
-        // Optional entries (runtime modifiable)
+        // Optional entries
         modeSorter          kiewat;
         nGramSchmidt        5;
         maxRank             50;
@@ -115,12 +112,12 @@ Usage
         fMax                1000000000;
         nAgglomerationProcs 20;
 
-        // Optional entries (runtime modifiable, yet not recommended)
+        // Optional entries (not recommended to change)
         minBasis            0.00000001;
         minEVal             0.00000001;
         sortLimiter         500.0;
 
-        // Mandatory/Optional (inherited) entries
+        // Inherited entries
         ...
     }
     \endverbatim
@@ -335,7 +332,7 @@ class STDMD
 
     // Private Member Functions
 
-        // Process
+        // Evaluation
 
             //- Return (parallel) L2-norm of a given column vector
             scalar L2norm(const RMatrix& z) const;
@@ -354,9 +351,6 @@ class STDMD
 
             //- Compress orthonormal basis for 'Q' and 'G' if '(Q.n()>maxRank)'
             void compress();
-
-
-        // Evaluation
 
             //- Return reduced Koopman operator 'Atilde' (K:Eq. 78)
             //  Also fills 'RxInv'.
@@ -435,7 +429,7 @@ class STDMD
             );
 
 
-        // IO
+        // I-O
 
             //- Write objects of dynamics
             void writeToFile(const word& fileName) const;

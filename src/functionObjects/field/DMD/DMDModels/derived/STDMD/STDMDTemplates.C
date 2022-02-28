@@ -43,7 +43,7 @@ void Foam::DMDModels::STDMD::filterIndexed
 
     // Copy if frequency of element is within [a, b]
     label j = 0;
-    for (const auto& i : indices)
+    for (const label i : indices)
     {
         lstWithin[j] = lst[i];
         ++j;
@@ -64,7 +64,7 @@ void Foam::DMDModels::STDMD::filterIndexed
 
     // Copy if frequency of element is within [a, b]
     label j = 0;
-    for (const auto& i : indices)
+    for (const label i : indices)
     {
         matWithin.subColumn(j) = mat.subColumn(i);
         ++j;
@@ -149,19 +149,19 @@ bool Foam::DMDModels::STDMD::calcModes()
         {
             if (patch_.empty())
             {
-                auto& inModeRe = modeRe.primitiveFieldRef();
-                auto& inModeIm = modeIm.primitiveFieldRef();
+                auto& re = modeRe.primitiveFieldRef();
+                auto& im = modeIm.primitiveFieldRef();
 
-                calcMode(inModeRe, inModeIm, primitiveMode, i);
+                calcMode(re, im, primitiveMode, i);
             }
             else
             {
                 const label patchi = mesh_.boundaryMesh().findPatchID(patch_);
 
-                auto& bfModeRe = modeRe.boundaryFieldRef()[patchi];
-                auto& bfModeIm = modeIm.boundaryFieldRef()[patchi];
+                auto& re = modeRe.boundaryFieldRef()[patchi];
+                auto& im = modeIm.boundaryFieldRef()[patchi];
 
-                calcMode(bfModeRe, bfModeIm, primitiveMode, i);
+                calcMode(re, im, primitiveMode, i);
             }
         }
 

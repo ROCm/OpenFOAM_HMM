@@ -69,7 +69,7 @@ Description
     Output files:
     \verbatim
       dynamics_<field>.dat            | Dynamics data for each mode
-      filteredDynamics_<field>.dat    | Filtered dynamics data for each mode
+      filtered_dynamics_<field>.dat   | Filtered dynamics data for each mode
     \endverbatim
 
     wherein for each mode, the following quantities are output into files:
@@ -173,10 +173,12 @@ class DMD
         //- Dynamic mode decomposition model
         autoPtr<DMDModel> DMDModelPtr_;
 
-        //- Snapshot matrix (effectively a column vector)
+        //- Augmented snapshot matrix (effectively a column vector)
         //  Upper half = current-time snapshot slot
         //  Lower half = previous-time snapshot slot
         //  A snapshot is an input dataset to be processed per execution step
+        //  A single snapshot is usually referred to as the snapshot of a single
+        //  time step, an augmented snapshot is constructed of two snapshots
         RMatrix z_;
 
         //- Name of operand field
@@ -195,7 +197,7 @@ class DMD
 
     // Private Member Functions
 
-        // Process
+        // Evaluation
 
             //- Initialise snapshot at the first-execution step
             //  Initialisation at the ctor or read level is not possible
@@ -210,11 +212,12 @@ class DMD
             template<class Type>
             bool getSnapshot();
 
-            //- Get operand field based on its geometric field type
+            //- Store operand field based on its geometric
+            //- field type after few manipulations
             //  Move previous-time field into previous-time slot in snapshot
             //  copy new current-time field into current-time slot in snapshot
             template<class GeoFieldType>
-            bool getSnapshotField();
+            bool storeSnapshot();
 
 
         // Access

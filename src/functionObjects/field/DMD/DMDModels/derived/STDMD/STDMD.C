@@ -64,7 +64,7 @@ Foam::scalar Foam::DMDModels::STDMD::L2norm(const RMatrix& z) const
     if (z.n() != 1)
     {
         FatalErrorInFunction
-            << "  # Input matrix is not a column vector. #"
+            << "Input matrix is not a column vector."
             << exit(FatalError);
     }
     #endif
@@ -609,7 +609,7 @@ void Foam::DMDModels::STDMD::magnitudes()
                 std::iota(w.begin(), w.end(), 1);
                 w = sin(twoPi/step_*(w - 1 - 0.25*step_))*pr + pr;
 
-                forAll(amps_, i)
+                forAll(mags_, i)
                 {
                     mags_[i] = sorter(w, amps_[i], evals_[i], modeNorm);
                 }
@@ -622,9 +622,9 @@ void Foam::DMDModels::STDMD::magnitudes()
                 Info<< "weighted amplitude scaling method" << endl;
 
                 const scalar modeNorm = 1;
-                const List<scalar> w(step_, 1.0);
+                const List<scalar> w(step_, 1);
 
-                forAll(amps_, i)
+                forAll(mags_, i)
                 {
                     mags_[i] = sorter(w, amps_[i], evals_[i], modeNorm);
                 }
@@ -664,7 +664,7 @@ Foam::scalar Foam::DMDModels::STDMD::sorter
     // Omit eigenvalues with very large or very small mags
     if (!(mag(eigenvalue) < GREAT && mag(eigenvalue) > VSMALL))
     {
-        Info<< "  Returning zero magnitude for mag(eigenvalue) = "
+        Info<< "    Returning zero magnitude for mag(eigenvalue) = "
             << mag(eigenvalue) << endl;
 
         return 0;
@@ -673,7 +673,7 @@ Foam::scalar Foam::DMDModels::STDMD::sorter
     // Omit eigenvalue-STDMD step combinations that pose a risk of overflow
     if (mag(eigenvalue)*step_ > sortLimiter_)
     {
-        Info<< "  Returning zero magnitude for"
+        Info<< "    Returning zero magnitude for"
             << " mag(eigenvalue) = " << mag(eigenvalue)
             << " current index = " << step_
             << " sortLimiter = " << sortLimiter_
@@ -784,7 +784,7 @@ void Foam::DMDModels::STDMD::filter()
 {
     Info<< tab << "Filtering objects of dynamics" << endl;
 
-    // Filter objects according to iMags
+    // Filter objects according to magsi
     filterIndexed(evals_, magsi_);
     filterIndexed(evecs_, magsi_);
     filterIndexed(freqs_, magsi_);
@@ -924,17 +924,17 @@ bool Foam::DMDModels::STDMD::read(const dictionary& dict)
         );
 
     Info<< tab << "Settings are read for:" << nl
-        << "    field: " << fieldName_ << nl
-        << "    modeSorter: " << modeSorterTypeNames[modeSorter_] << nl
-        << "    nModes: " << nModes_ << nl
-        << "    maxRank: " << maxRank_ << nl
-        << "    nGramSchmidt: " << nGramSchmidt_ << nl
-        << "    fMin: " << fMin_ << nl
-        << "    fMax: " << fMax_ << nl
-        << "    minBasis: " << minBasis_ << nl
-        << "    minEVal: " << minEval_ << nl
-        << "    sortLimiter: " << sortLimiter_ << nl
-        << "    nAgglomerationProcs: " << nAgglomerationProcs_ << nl
+        << tab << "    field: " << fieldName_ << nl
+        << tab << "    modeSorter: " << modeSorterTypeNames[modeSorter_] << nl
+        << tab << "    nModes: " << nModes_ << nl
+        << tab << "    maxRank: " << maxRank_ << nl
+        << tab << "    nGramSchmidt: " << nGramSchmidt_ << nl
+        << tab << "    fMin: " << fMin_ << nl
+        << tab << "    fMax: " << fMax_ << nl
+        << tab << "    minBasis: " << minBasis_ << nl
+        << tab << "    minEVal: " << minEval_ << nl
+        << tab << "    sortLimiter: " << sortLimiter_ << nl
+        << tab << "    nAgglomerationProcs: " << nAgglomerationProcs_ << nl
         << endl;
 
     return true;
@@ -973,7 +973,12 @@ bool Foam::DMDModels::STDMD::initialise(const RMatrix& z)
                 nSnap
             );
 
-            std::copy(z.cbegin(), z.cbegin() + nSnap, snapshot0.begin());
+            std::copy
+            (
+                z.cbegin(),
+                z.cbegin() + nSnap,
+                snapshot0.begin()
+            );
 
             const IOstreamOption streamOpt
             (
@@ -1052,7 +1057,7 @@ bool Foam::DMDModels::STDMD::fit()
 
         filter();
 
-        writeToFile(word("filteredDynamics"));
+        writeToFile(word("filtered_dynamics"));
     }
 
     step_ = 0;
