@@ -51,28 +51,4 @@ Foam::DMDModel::DMDModel
 {}
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-Foam::label Foam::DMDModel::nComponents(const word& fieldName) const
-{
-    label nComps = 0;
-    bool processed = false;
-    processed = processed || nComponents<scalar>(fieldName, nComps);
-    processed = processed || nComponents<vector>(fieldName, nComps);
-    processed = processed || nComponents<sphericalTensor>(fieldName, nComps);
-    processed = processed || nComponents<symmTensor>(fieldName, nComps);
-    processed = processed || nComponents<tensor>(fieldName, nComps);
-
-    if (!processed)
-    {
-        FatalErrorInFunction
-            << "  # Unknown type of input field during initialisation = "
-            << fieldName << " #" << nl
-            << exit(FatalError);
-    }
-
-    return nComps;
-}
-
-
 // ************************************************************************* //

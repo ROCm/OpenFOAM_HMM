@@ -109,4 +109,29 @@ bool Foam::functionObjects::DMD::getSnapshotField()
 }
 
 
+template<class Type>
+bool Foam::functionObjects::DMD::nComponents
+(
+    const word& fieldName,
+    label& nComps
+) const
+{
+    typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
+    typedef GeometricField<Type, fvsPatchField, surfaceMesh> SurfaceFieldType;
+
+    if (mesh_.foundObject<VolFieldType>(fieldName))
+    {
+        nComps = pTraits<typename VolFieldType::value_type>::nComponents;
+        return true;
+    }
+    else if (mesh_.foundObject<SurfaceFieldType>(fieldName))
+    {
+        nComps = pTraits<typename SurfaceFieldType::value_type>::nComponents;
+        return true;
+    }
+
+    return false;
+}
+
+
 // ************************************************************************* //

@@ -217,6 +217,16 @@ class DMD
             bool getSnapshotField();
 
 
+        // Access
+
+            //- Return number of components of the base type of a given field
+            label nComponents(const word& fieldName) const;
+
+            //- Get the number of components of the base type of a given field
+            template<class Type>
+            bool nComponents(const word& fieldName, label& nComps) const;
+
+
 public:
 
     //- Runtime type information
