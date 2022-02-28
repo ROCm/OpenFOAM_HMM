@@ -38,7 +38,6 @@ SourceFiles
 #define functionObjects_runTimeControls_noneCondition_H
 
 #include "runTimeCondition.H"
-#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -27,7 +27,6 @@ License
 
 #include "noneCondition.H"
 #include "addToRunTimeSelectionTable.H"
-#include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -37,7 +36,7 @@ namespace functionObjects
 {
 namespace runTimeControls
 {
-    defineTypeName(noneCondition, 0);
+    defineTypeName(noneCondition);
     addToRunTimeSelectionTable(runTimeCondition, noneCondition, dictionary);
 
 }
