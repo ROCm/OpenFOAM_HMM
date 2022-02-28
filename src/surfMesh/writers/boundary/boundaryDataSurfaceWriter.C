@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,8 +56,7 @@ Foam::surfaceWriters::boundaryDataWriter::boundaryDataWriter()
 :
     surfaceWriter(),
     header_(true),
-    streamOpt_(),
-    fieldScale_()
+    streamOpt_()
 {}
 
 
@@ -72,8 +71,7 @@ Foam::surfaceWriters::boundaryDataWriter::boundaryDataWriter
     (
         IOstreamOption::formatEnum("format", options, IOstreamOption::ASCII),
         IOstreamOption::compressionEnum("compression", options)
-    ),
-    fieldScale_(options.subOrEmptyDict("fieldScale"))
+    )
 {}
 
 
@@ -220,24 +218,19 @@ Foam::fileName Foam::surfaceWriters::boundaryDataWriter::writeTemplate
 
     const fileName outputFile(surfaceDir/timeName()/fieldName);
 
+    // Implicit geometry merge()
+    tmp<Field<Type>> tfield = mergeField(localValues);
 
-    // Output scaling for the variable, but not for integer types.
-    // could also solve with clever templating
+    adjustOutputField(fieldName, tfield.ref());
 
-    const scalar varScale =
-    (
-        std::is_integral<Type>::value
-      ? scalar(1)
-      : fieldScale_.getOrDefault<scalar>(fieldName, 1)
-    );
+    if (verbose_)
+    {
+        Info<< " to " << outputFile << endl;
+    }
 
 
     // Dummy Time to use as objectRegistry
     autoPtr<Time> dummyTimePtr(Time::New(argList::envGlobalPath()));
-
-
-    // Implicit geometry merge()
-    tmp<Field<Type>> tfield = mergeField(localValues) * varScale;
 
     const meshedSurf& surf = surface();
 

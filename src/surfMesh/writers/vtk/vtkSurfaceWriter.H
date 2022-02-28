@@ -36,7 +36,8 @@ Description
         format      | ascii or binary format                | no  | binary
         legacy      | Legacy VTK output                     | no  | false
         precision   | Write precision in ascii         | no | same as IOstream
-        fieldScale  | Output field scaling (dictionary)     | no  | empty
+        fieldLevel  | Subtract field level before scaling   | no  | empty dict
+        fieldScale  | Output field scaling                  | no  | empty dict
         normal      | Write face area-normal in output      | no  | false
     \endtable
 
@@ -49,9 +50,13 @@ Description
             format      binary;
             legacy      false;
             precision   10;
+            fieldLevel
+            {
+                p       1e5;    // Absolute -> gauge [Pa]
+            }
             fieldScale
             {
-               "p.*"   0.01;  // [Pa] -> [mbar]
+                "p.*"   0.01;   // [Pa] -> [mbar]
             }
         }
     }
@@ -113,9 +118,6 @@ class vtkWriter
 
         //- Output face area normal
         const bool writeNormal_;
-
-        //- Output field scaling
-        const dictionary fieldScale_;
 
         //- Backend writer - master only
         autoPtr<Foam::vtk::surfaceWriter> writer_;

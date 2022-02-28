@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,7 +34,8 @@ Description
     \table
         Property    | Description                           | Required | Default
         compression | Use file compression                  | no  | false
-        fieldScale  | output field scaling (dictionary)     | no  | empty
+        fieldLevel  | Subtract field level before scaling   | no  | empty dict
+        fieldScale  | Output field scaling                  | no  | empty dict
     \endtable
 
     The geometry is written via the MeshedSurfaceProxy, the fields
@@ -100,9 +101,6 @@ class starcdWriter
 
         //- Output stream option
         IOstreamOption streamOpt_;
-
-        //- Output field scaling
-        const dictionary fieldScale_;
 
 
     // Private Member Functions

@@ -106,29 +106,15 @@ Foam::fileName Foam::surfaceWriters::rawWriter::writeTemplate
     outputFile.ext("raw");
 
 
-    // Output scaling for the variable, but not for integer types.
-    // could also solve with clever templating
+    // Implicit geometry merge()
+    tmp<Field<Type>> tfield = mergeField(localValues);
 
-    const scalar varScale =
-    (
-        std::is_integral<Type>::value
-      ? scalar(1)
-      : fieldScale_.getOrDefault<scalar>(fieldName, 1)
-    );
+    adjustOutputField(fieldName, tfield.ref());
 
     if (verbose_)
     {
-        Info<< "Writing field " << fieldName;
-        if (!equal(varScale, 1))
-        {
-            Info<< " (scaling " << varScale << ')';
-        }
         Info<< " to " << outputFile << endl;
     }
-
-
-    // Implicit geometry merge()
-    tmp<Field<Type>> tfield = mergeField(localValues) * varScale;
 
     const meshedSurf& surf = surface();
 

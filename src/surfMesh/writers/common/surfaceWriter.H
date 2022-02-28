@@ -47,14 +47,26 @@ Description
         someFormat // Eg, ensight, vtk, etc
         {
             verbose         true;
+            fieldLevel
+            {
+                "p.*"   1e5;    // Absolute -> gauge [Pa]
+                T       273.15; // [K] -> [C]
+                U       #eval{ 10/sqrt(3) };  // Uniform magU=10
+            }
+            fieldScale
+            {
+                "p.*"   0.01;   // [Pa] -> [mbar]
+            }
         }
     }
     \endverbatim
 
   Format options:
     \table
-        Property | Description                             | Required | Default
-        verbose  | Additional output verbosity             | no  | no
+        Property | Description                              | Required | Default
+        verbose  | Additional output verbosity              | no  | no
+        fieldLevel | Subtract field level before scaling    | no  | empty dict
+        fieldScale | Output field scaling                   | no  | empty dict
     \endtable
 
 Note
@@ -156,6 +168,12 @@ protected:
         //- The full output directory and file (surface) name
         fileName outputPath_;
 
+        //- Field level to remove (on output)
+        dictionary fieldLevel_;
+
+        //- Field scaling (on output)
+        dictionary fieldScale_;
+
 
     // Protected Member Functions
 
@@ -175,18 +193,28 @@ protected:
         template<class Type>
         tmp<Field<Type>> mergeFieldTemplate(const Field<Type>& fld) const;
 
-#undef  declareSurfaceWriterMergeMethod
-#define declareSurfaceWriterMergeMethod(Type)                                  \
-        tmp<Field<Type>> mergeField(const Field<Type>& fld) const;
+        //- Apply refLevel and fieldScaling
+        template<class Type>
+        void adjustOutputFieldTemplate
+        (
+            const word& fieldName,
+            Field<Type>& fld
+        ) const;
 
-        declareSurfaceWriterMergeMethod(label);
-        declareSurfaceWriterMergeMethod(scalar);
-        declareSurfaceWriterMergeMethod(vector);
-        declareSurfaceWriterMergeMethod(sphericalTensor);
-        declareSurfaceWriterMergeMethod(symmTensor);
-        declareSurfaceWriterMergeMethod(tensor);
+#undef  declareSurfaceFieldMethod
+#define declareSurfaceFieldMethods(Type)                                      \
+                                                                              \
+        tmp<Field<Type>> mergeField(const Field<Type>& fld) const;            \
+        void adjustOutputField(const word& fieldName, Field<Type>& fld) const;
 
-        #undef declareSurfaceWriterMergeMethod
+        declareSurfaceFieldMethods(label);
+        declareSurfaceFieldMethods(scalar);
+        declareSurfaceFieldMethods(vector);
+        declareSurfaceFieldMethods(sphericalTensor);
+        declareSurfaceFieldMethods(symmTensor);
+        declareSurfaceFieldMethods(tensor);
+
+        #undef declareSurfaceFieldMethods
 
         //- Dummy templated write operation
         template<class Type>

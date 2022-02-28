@@ -83,13 +83,18 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeCollated
 
     if (verbose_)
     {
-        Info<< "Writing case file to " << outputFile << endl;
+        Info<< "Writing case file to " << outputFile << nl;
     }
-
-
 
     // Implicit geometry merge()
     tmp<Field<Type>> tfield = mergeField(localValues);
+
+    adjustOutputField(fieldName, tfield.ref());
+
+    if (verbose_)
+    {
+        Info<< endl;
+    }
 
     const meshedSurf& surf = surface();
 

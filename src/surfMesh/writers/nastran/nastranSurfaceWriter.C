@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -311,7 +311,6 @@ Foam::surfaceWriters::nastranWriter::nastranWriter()
     fieldMap_(),
     commonGeometry_(false),
     geometryScale_(1),
-    fieldScale_(),
     separator_()
 {
     // if (writeFormat_ == fieldFormat::FREE)
@@ -339,7 +338,6 @@ Foam::surfaceWriters::nastranWriter::nastranWriter
     fieldMap_(),
     commonGeometry_(options.getOrDefault("commonGeometry", false)),
     geometryScale_(options.getOrDefault<scalar>("scale", 1)),
-    fieldScale_(options.subOrEmptyDict("fieldScale")),
     separator_()
 {
     if (writeFormat_ == fieldFormat::FREE)

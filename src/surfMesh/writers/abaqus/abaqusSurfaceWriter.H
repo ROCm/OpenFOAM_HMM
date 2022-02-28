@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,7 +33,8 @@ Description
     \table
         Property   | Description                            | Required | Default
         scale      | output geometry scaling                | no  | 1
-        fieldScale | output field scaling (dictionary)      | no  | empty
+        fieldLevel  | Subtract field level before scaling   | no  | empty dict
+        fieldScale  | Output field scaling                  | no  | empty dict
         noGeometry | Suppress geometry output (beta feature) | no  | false
     \endtable
 
@@ -44,9 +45,13 @@ Description
         abaqus
         {
             scale   1000;     // [m] -> [mm]
+            fieldLevel
+            {
+                p       1e5;    // Absolute -> gauge [Pa]
+            }
             fieldScale
             {
-               "p.*"   0.01;  // [Pa] -> [mbar]
+                "p.*"   0.01;   // [Pa] -> [mbar]
             }
         }
     }
@@ -109,9 +114,6 @@ class abaqusWriter
 
         //- Output geometry scaling
         const scalar geometryScale_;
-
-        //- Output field scaling
-        const dictionary fieldScale_;
 
         //- BETA feature
         bool noGeometry_;

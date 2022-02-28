@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -269,15 +269,18 @@ Foam::fileName Foam::surfaceWriters::x3dWriter::writeTemplate
     outputFile /= fieldName + '_' + outputPath_.name();
     outputFile.ext("x3d");
 
-    if (verbose_)
-    {
-        Info<< "Writing field " << fieldName << " to " << outputFile << endl;
-    }
-
-    const meshedSurf& surf = surface();
-
     // Implicit geometry merge()
     tmp<Field<Type>> tfield = mergeField(localValues);
+
+    adjustOutputField(fieldName, tfield.ref());
+
+    if (verbose_)
+    {
+        Info<< " to " << outputFile << endl;
+    }
+
+
+    const meshedSurf& surf = surface();
 
     if (Pstream::master() || !parallel_)
     {

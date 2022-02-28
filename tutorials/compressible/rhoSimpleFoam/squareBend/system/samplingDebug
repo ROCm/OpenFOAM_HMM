@@ -10,7 +10,7 @@ debug
     writeControl  timeStep;
     writeInterval 1;
 
-    fields  (rho U);
+    fields  (p rho U);
 
     sampleScheme  cellPoint;
     interpolationScheme cellPoint;
@@ -24,6 +24,11 @@ debug
         {
             collateTimes  true;
             // collateTimes  false;
+            fieldLevel
+            {
+                "p.*"   1e5;
+                U       0;
+            }
         }
         raw
         {

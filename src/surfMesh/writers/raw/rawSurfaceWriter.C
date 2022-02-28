@@ -62,8 +62,7 @@ Foam::surfaceWriters::rawWriter::rawWriter()
     streamOpt_(),
     precision_(IOstream::defaultPrecision()),
     writeNormal_(false),
-    geometryScale_(1),
-    fieldScale_()
+    geometryScale_(1)
 {}
 
 
@@ -83,8 +82,7 @@ Foam::surfaceWriters::rawWriter::rawWriter
         options.getOrDefault("precision", IOstream::defaultPrecision())
     ),
     writeNormal_(options.getOrDefault("normal", false)),
-    geometryScale_(options.getOrDefault<scalar>("scale", 1)),
-    fieldScale_(options.subOrEmptyDict("fieldScale"))
+    geometryScale_(options.getOrDefault<scalar>("scale", 1))
 {}
 
 

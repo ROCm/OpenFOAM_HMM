@@ -238,7 +238,6 @@ Foam::surfaceWriters::abaqusWriter::abaqusWriter()
 :
     surfaceWriter(),
     geometryScale_(1),
-    fieldScale_(),
     noGeometry_(false),
     outputLayout_(outputLayoutType::BY_FIELD)
 {}
@@ -251,7 +250,6 @@ Foam::surfaceWriters::abaqusWriter::abaqusWriter
 :
     surfaceWriter(options),
     geometryScale_(options.getOrDefault<scalar>("scale", 1)),
-    fieldScale_(options.subOrEmptyDict("fieldScale")),
     noGeometry_(options.getOrDefault("noGeometry", false)),
     outputLayout_(outputLayoutType::BY_FIELD)
 {}

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,7 +49,8 @@ Description
         header      | Generate files with FoamFile header   | no  | true
         format      | ascii/binary                          | no  | ascii
         compression | Use file compression                  | no  | false
-        fieldScale  | output field scaling (dictionary)     | no  | empty
+        fieldLevel  | Subtract field level before scaling   | no  | empty dict
+        fieldScale  | Output field scaling                  | no  | empty dict
     \endtable
 
     Typical way of working:
@@ -65,9 +66,13 @@ Description
             boundaryData
             {
                 format  binary;
+                fieldLevel
+                {
+                    p       1e5;    // Absolute -> gauge [Pa]
+                }
                 fieldScale
                 {
-                   "p.*"   0.01;  // [Pa] -> [mbar]
+                    "p.*"   0.01;   // [Pa] -> [mbar]
                 }
             }
         }
@@ -156,9 +161,6 @@ class boundaryDataWriter
 
         //- Output stream option
         IOstreamOption streamOpt_;
-
-        //- Output field scaling
-        const dictionary fieldScale_;
 
 
     // Private Member Functions

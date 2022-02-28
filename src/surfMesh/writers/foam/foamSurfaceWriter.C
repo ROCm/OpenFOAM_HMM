@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,8 +50,7 @@ namespace surfaceWriters
 Foam::surfaceWriters::foamWriter::foamWriter()
 :
     surfaceWriter(),
-    streamOpt_(),
-    fieldScale_()
+    streamOpt_()
 {}
 
 
@@ -65,8 +64,7 @@ Foam::surfaceWriters::foamWriter::foamWriter
     (
         IOstreamOption::formatEnum("format", options, IOstreamOption::ASCII),
         IOstreamOption::compressionEnum("compression", options)
-    ),
-    fieldScale_(options.subOrEmptyDict("fieldScale"))
+    )
 {}
 
 
@@ -195,29 +193,16 @@ Foam::fileName Foam::surfaceWriters::foamWriter::writeTemplate
     );
 
 
-    // Output scaling for the variable, but not for integer types.
-    // could also solve with clever templating
+    // Implicit geometry merge()
+    tmp<Field<Type>> tfield = mergeField(localValues);
 
-    const scalar varScale =
-    (
-        std::is_integral<Type>::value
-      ? scalar(1)
-      : fieldScale_.getOrDefault<scalar>(fieldName, 1)
-    );
+    adjustOutputField(fieldName, tfield.ref());
 
     if (verbose_)
     {
-        Info<< "Writing field " << fieldName;
-        if (!equal(varScale, 1))
-        {
-            Info<< " (scaling " << varScale << ')';
-        }
         Info<< " to " << surfaceDir << endl;
     }
 
-
-    // Implicit geometry merge()
-    tmp<Field<Type>> tfield = mergeField(localValues) * varScale;
 
     if (Pstream::master())
     {

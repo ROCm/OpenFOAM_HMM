@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,9 @@ Description
         Property    | Description                           | Required | Default
         compression | Use file compression                  | no  | false
         precision   | Write precision in ascii              | no  | same as IOstream
-        scale       | output geometry scaling               | no  | 1
-        fieldScale  | output field scaling (dictionary)     | no  | empty
+        scale       | Output geometry scaling               | no  | 1
+        fieldLevel  | Subtract field level before scaling   | no  | empty dict
+        fieldScale  | Output field scaling                  | no  | empty dict
         normal      | Write face area normal in output      | no  | false
     \endtable
 
@@ -117,9 +118,6 @@ class rawWriter
 
         //- Output geometry scaling
         const scalar geometryScale_;
-
-        //- Output field scaling
-        const dictionary fieldScale_;
 
 
     // Private Member Functions

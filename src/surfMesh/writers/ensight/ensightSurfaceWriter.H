@@ -41,11 +41,13 @@ Description
     }
     \endverbatim
 
-    Format options:
+    Format options for ensight:
     \table
         Property | Description                              | Required | Default
         format   | ascii/binary                             | no  | ascii
         collateTimes | use common geometry for times        | no  | true
+        fieldLevel  | Subtract field level before scaling   | no  | empty dict
+        fieldScale  | Output field scaling                  | no  | empty dict
     \endtable
 
     The collated format maintains an internal list of the known times

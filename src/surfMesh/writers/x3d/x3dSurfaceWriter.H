@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,6 +35,8 @@ Description
         compression | Use file compression                  | no  | false
         range       | The min/max range for colour table    | no  | automatic
         colourMap   | The colour map for rendering          | no  | coolToWarm
+        fieldLevel  | Subtract field level before scaling   | no  | empty dict
+        fieldScale  | Output field scaling                  | no  | empty dict
     \endtable
 
     \section Output file locations
@@ -56,6 +58,9 @@ Description
         |-- <field0>_surfaceName.x3d
         `-- <field1>_surfaceName.x3d
     \endverbatim
+
+Note
+    The range is applied after any field scaling.
 
 SourceFiles
     x3dSurfaceWriter.C

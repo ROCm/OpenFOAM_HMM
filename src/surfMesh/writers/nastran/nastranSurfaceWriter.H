@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,7 +36,8 @@ Description
         fields   | field pairs for PLOAD2/PLOAD4            | yes   |
         format   | short / long / free                      | no    | long
         scale    | output geometry scaling                  | no    | 1
-        fieldScale | output field scaling (dictionary)      | no    | empty
+        fieldLevel  | Subtract field level before scaling   | no  | empty dict
+        fieldScale  | Output field scaling                  | no  | empty dict
         commonGeometry | use separate geometry files        | no    | false
     \endtable
 
@@ -145,9 +146,6 @@ private:
 
         //- Output geometry scaling
         const scalar geometryScale_;
-
-        //- Output field scaling
-        const dictionary fieldScale_;
 
         //- Separator (used for free format)
         word separator_;

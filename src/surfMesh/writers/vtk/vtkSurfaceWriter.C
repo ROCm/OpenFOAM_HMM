@@ -67,7 +67,6 @@ Foam::surfaceWriters::vtkWriter::vtkWriter()
     fmtType_(static_cast<unsigned>(vtk::formatType::INLINE_BASE64)),
     precision_(IOstream::defaultPrecision()),
     writeNormal_(false),
-    fieldScale_(),
     writer_(nullptr)
 {}
 
@@ -81,7 +80,6 @@ Foam::surfaceWriters::vtkWriter::vtkWriter
     fmtType_(static_cast<unsigned>(opts.fmt())),
     precision_(opts.precision()),
     writeNormal_(false),
-    fieldScale_(),
     writer_(nullptr)
 {}
 
@@ -98,7 +96,6 @@ Foam::surfaceWriters::vtkWriter::vtkWriter
         options.getOrDefault("precision", IOstream::defaultPrecision())
     ),
     writeNormal_(options.getOrDefault("normal", false)),
-    fieldScale_(options.subOrEmptyDict("fieldScale")),
     writer_(nullptr)
 {
     // format: ascii | binary
@@ -288,30 +285,16 @@ Foam::fileName Foam::surfaceWriters::vtkWriter::writeTemplate
     // Open file, writing geometry (if required)
     fileName outputFile = this->write();
 
+    // Implicit geometry merge()
+    tmp<Field<Type>> tfield = mergeField(localValues);
 
-    // Output scaling for the variable, but not for integer types.
-    // could also solve with clever templating
-
-    const scalar varScale =
-    (
-        std::is_integral<Type>::value
-      ? scalar(1)
-      : fieldScale_.getOrDefault<scalar>(fieldName, 1)
-    );
+    adjustOutputField(fieldName, tfield.ref());
 
     if (verbose_)
     {
-        Info<< "Writing field " << fieldName;
-        if (!equal(varScale, 1))
-        {
-            Info<< " (scaling " << varScale << ')';
-        }
         Info<< " to " << outputFile << endl;
     }
 
-
-    // Implicit geometry merge()
-    tmp<Field<Type>> tfield = mergeField(localValues) * varScale;
 
     if (Pstream::master() || !parallel_)
     {

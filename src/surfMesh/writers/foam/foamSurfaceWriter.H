@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,10 +37,13 @@ Description
         {
             format      ascii;
             compression true;
-
+            fieldLevel
+            {
+                p       1e5;    // Absolute -> gauge [Pa]
+            }
             fieldScale
             {
-               "p.*"   0.01;  // [Pa] -> [mbar]
+                "p.*"   0.01;   // [Pa] -> [mbar]
             }
         }
     }
@@ -51,7 +54,8 @@ Description
         Property | Description                              | Required | Default
         format   | ascii/binary                             | no  | ascii
         compression | output file compression               | no  | false
-        fieldScale | output field scaling (dictionary)      | no  | empty
+        fieldLevel  | Subtract field level before scaling   | no  | empty dict
+        fieldScale  | Output field scaling                  | no  | empty dict
     \endtable
 
     \section Output file locations
@@ -111,9 +115,6 @@ class foamWriter
 
         //- Output stream option (default: ASCII, uncompressed)
         IOstreamOption streamOpt_;
-
-        //- Output field scaling
-        const dictionary fieldScale_;
 
 
     // Private Member Functions

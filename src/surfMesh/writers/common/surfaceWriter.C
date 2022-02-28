@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -152,7 +152,9 @@ Foam::surfaceWriter::surfaceWriter()
     mergeDim_(defaultMergeDim),
     merged_(),
     currTime_(),
-    outputPath_()
+    outputPath_(),
+    fieldLevel_(),
+    fieldScale_()
 {
     surfaceWriter::close();
 }
@@ -163,6 +165,8 @@ Foam::surfaceWriter::surfaceWriter(const dictionary& options)
     surfaceWriter()
 {
     options.readIfPresent("verbose", verbose_);
+    fieldLevel_ = options.subOrEmptyDict("fieldLevel");
+    fieldScale_ = options.subOrEmptyDict("fieldScale");
 }
 
 
@@ -501,21 +505,89 @@ Foam::tmp<Foam::Field<Type>> Foam::surfaceWriter::mergeFieldTemplate
 }
 
 
-#define defineSurfaceWriterMergeMethod(ThisClass, Type)                        \
+template<class Type>
+void Foam::surfaceWriter::adjustOutputFieldTemplate
+(
+    const word& fieldName,
+    Field<Type>& fld
+) const
+{
+    if (verbose_)
+    {
+        Info<< "Writing field " << fieldName;
+    }
+
+    // Output scaling for the variable, but not for integer types
+    // which are typically ids etc.
+    if (!std::is_integral<Type>::value)
+    {
+        scalar value;
+
+        // Remove *uniform* reference level
+        if
+        (
+            fieldLevel_.readIfPresent(fieldName, value, keyType::REGEX)
+         && !equal(value, 0)
+        )
+        {
+            // Could also detect brackets (...) and read accordingly
+            // or automatically scale by 1/sqrt(nComponents) instead ...
+
+            Type refLevel;
+            for (direction cmpt = 0; cmpt < pTraits<Type>::nComponents; ++cmpt)
+            {
+                setComponent(refLevel, cmpt) = value;
+            }
+
+            if (verbose_)
+            {
+                Info<< " [level " << refLevel << ']';
+            }
+
+            fld -= refLevel;
+        }
+
+        // Apply scaling
+        if
+        (
+            fieldScale_.readIfPresent(fieldName, value, keyType::REGEX)
+         && !equal(value, 1)
+        )
+        {
+            if (verbose_)
+            {
+                Info<< " [scaling " << value << ']';
+            }
+            fld *= value;
+        }
+    }
+}
+
+
+#define defineSurfaceFieldMethods(ThisClass, Type)                             \
     Foam::tmp<Foam::Field<Type>>                                               \
     ThisClass::mergeField(const Field<Type>& fld) const                        \
     {                                                                          \
         return mergeFieldTemplate(fld);                                        \
+    }                                                                          \
+                                                                               \
+    void ThisClass::adjustOutputField                                          \
+    (                                                                          \
+        const word& fieldName,                                                 \
+        Field<Type>& fld                                                       \
+    ) const                                                                    \
+    {                                                                          \
+        adjustOutputFieldTemplate(fieldName, fld);                             \
     }
 
-defineSurfaceWriterMergeMethod(Foam::surfaceWriter, Foam::label);
-defineSurfaceWriterMergeMethod(Foam::surfaceWriter, Foam::scalar);
-defineSurfaceWriterMergeMethod(Foam::surfaceWriter, Foam::vector);
-defineSurfaceWriterMergeMethod(Foam::surfaceWriter, Foam::sphericalTensor);
-defineSurfaceWriterMergeMethod(Foam::surfaceWriter, Foam::symmTensor);
-defineSurfaceWriterMergeMethod(Foam::surfaceWriter, Foam::tensor)
+defineSurfaceFieldMethods(Foam::surfaceWriter, Foam::label);
+defineSurfaceFieldMethods(Foam::surfaceWriter, Foam::scalar);
+defineSurfaceFieldMethods(Foam::surfaceWriter, Foam::vector);
+defineSurfaceFieldMethods(Foam::surfaceWriter, Foam::sphericalTensor);
+defineSurfaceFieldMethods(Foam::surfaceWriter, Foam::symmTensor);
+defineSurfaceFieldMethods(Foam::surfaceWriter, Foam::tensor)
 
-#undef defineSurfaceWriterMergeMethod
+#undef defineSurfaceFieldMethod
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
