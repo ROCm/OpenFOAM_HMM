@@ -834,8 +834,15 @@ Foam::DMDModels::STDMD::STDMD
     amps_(Zero),
     mags_(Zero),
     magsi_(Zero),
+    patches_
+    (
+        dict.getOrDefault<wordRes>
+        (
+            "patches",
+            dict.found("patch") ? wordRes(1,dict.get<word>("patch")) : wordRes()
+        )
+    ),
     fieldName_(dict.get<word>("field")),
-    patch_(dict.getOrDefault<word>("patch", word::null)),
     timeName0_(),
     minBasis_(0),
     minEval_(0),

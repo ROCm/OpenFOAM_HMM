@@ -87,16 +87,21 @@ Usage
     \verbatim
     DMD1
     {
-        // Mandatory entries (unmodifiable)
+        // Mandatory entries
         type                DMD;
         libs                (fieldFunctionObjects);
         DMDModel            <DMDModel>;
-        field               <inputField>;
+        field               <word>;
 
-        // Optional entries (unmodifiable)
-        patch               <patchName>;
+        // Optional entries
 
-        // Mandatory/Optional (inherited) entries
+            // Option-1
+            patch               <word>;
+
+            // Option-2
+            patches             (<wordRes>);
+
+        // Inherited entries
         ...
     }
     \endverbatim
@@ -109,6 +114,7 @@ Usage
       DMDModel     | Name of specified DMD model        | word | yes  | -
       field        | Name of operand field              | word | yes  | -
       patch        | Name of operand patch              | word | no   | null
+      patches      | Names of operand patches        | wordRes | no   | null
     \endtable
 
     Options for the \c DMDModel entry:
@@ -181,11 +187,11 @@ class DMD
         //  time step, an augmented snapshot is constructed of two snapshots
         RMatrix z_;
 
+        //- Names of operand patches
+        const wordRes patches_;
+
         //- Name of operand field
         const word fieldName_;
-
-        //- Name of operand patch
-        const word patch_;
 
         //- Number of elements in a snapshot
         label nSnap_;

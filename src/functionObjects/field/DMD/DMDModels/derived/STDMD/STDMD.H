@@ -275,11 +275,11 @@ class STDMD
         //- Indices of 'mags'
         List<label> magsi_;
 
+        //- Names of operand patches
+        const wordRes patches_;
+
         //- Name of operand field
         const word fieldName_;
-
-        //- Name of operand patch
-        const word patch_;
 
         //- First-processed snapshot required by the mode-sorting
         //- algorithms at the final output computations (K:p. 43)
@@ -411,7 +411,8 @@ class STDMD
                 GeoFieldType& modeRe,
                 GeoFieldType& modeIm,
                 const RMatrix& primitiveMode,
-                const label i
+                const label magi,
+                const label rowi = 0
             );
 
             //- Compute a mode for a given non-scalar-based input field
@@ -425,7 +426,8 @@ class STDMD
                 GeoFieldType& modeRe,
                 GeoFieldType& modeIm,
                 const RMatrix& primitiveMode,
-                const label i
+                const label magi,
+                const label rowi = 0
             );
 
 

@@ -91,22 +91,21 @@ void Foam::functionObjects::DMD::initialise()
 {
     const label nComps = nComponents(fieldName_);
 
-    if (patch_.empty())
+    if (patches_.empty())
     {
         nSnap_ = nComps*mesh_.nCells();
     }
     else
     {
-        const label patchi = mesh_.boundaryMesh().findPatchID(patch_);
+        const labelList patchis
+        (
+            mesh_.boundaryMesh().patchSet(patches_).sortedToc()
+        );
 
-        if (patchi < 0)
+        for (const label patchi : patchis)
         {
-            FatalErrorInFunction
-                << "Cannot find patch " << patch_
-                << exit(FatalError);
+            nSnap_ += nComps*(mesh_.C().boundaryField()[patchi]).size();
         }
-
-        nSnap_ = nComps*(mesh_.C().boundaryField()[patchi]).size();
     }
 
     const label nSnapTotal = returnReduce(nSnap_, sumOp<label>());
@@ -141,8 +140,15 @@ Foam::functionObjects::DMD::DMD
     fvMeshFunctionObject(name, runTime, dict),
     DMDModelPtr_(DMDModel::New(mesh_, name, dict)),
     z_(),
+    patches_
+    (
+        dict.getOrDefault<wordRes>
+        (
+            "patches",
+            dict.found("patch") ? wordRes(1,dict.get<word>("patch")) : wordRes()
+        )
+    ),
     fieldName_(dict.get<word>("field")),
-    patch_(dict.getOrDefault<word>("patch", word::null)),
     nSnap_(0),
     step_(0)
 {
