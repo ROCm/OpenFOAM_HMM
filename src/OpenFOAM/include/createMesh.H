@@ -67,13 +67,10 @@ if (args.dryRun() || args.found("dry-run-write"))
 }
 else
 {
+    Foam::Info << "Create mesh";
     if (args.readIfPresent("region", regionName))
     {
-        Foam::Info << "Create mesh " << regionName;
-    }
-    else
-    {
-        Foam::Info << "Create mesh";
+        Foam::Info << ' ' << regionName;
     }
     Foam::Info << " for time = " << runTime.timeName() << Foam::nl;
 

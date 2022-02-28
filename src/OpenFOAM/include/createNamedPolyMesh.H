@@ -26,13 +26,10 @@ Provided Variables
 Foam::word regionName(Foam::polyMesh::defaultRegion);
 
 {
+    Foam::Info << "Create polyMesh";
     if (args.readIfPresent("region", regionName))
     {
-        Foam::Info << "Create polyMesh " << regionName;
-    }
-    else
-    {
-        Foam::Info << "Create polyMesh";
+        Foam::Info << ' ' << regionName;
     }
     Foam::Info << " for time = " << runTime.timeName() << Foam::nl;
 }
@@ -50,5 +47,6 @@ Foam::polyMesh mesh
 );
 
 Foam::Info << Foam::endl;
+
 
 // ************************************************************************* //
