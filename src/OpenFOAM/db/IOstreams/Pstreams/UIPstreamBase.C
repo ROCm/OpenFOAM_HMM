@@ -184,7 +184,7 @@ Foam::UIPstreamBase::UIPstreamBase
     recvBufPos_(buffers.recvBufPos_[fromProcNo]),
     tag_(buffers.tag()),
     comm_(buffers.comm()),
-    clearAtEnd_(true),
+    clearAtEnd_(buffers.allowClearRecv()),
     messageSize_(0)
 {
     if

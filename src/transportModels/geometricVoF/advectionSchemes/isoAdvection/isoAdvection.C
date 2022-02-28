@@ -497,7 +497,7 @@ Foam::DynamicList<Foam::label>  Foam::isoAdvection::syncProcPatches
 
     if (Pstream::parRun())
     {
-        DynamicList<label> sendRecvProcs;
+        DynamicList<label> neighProcs;
         PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
 
         // Send
@@ -507,7 +507,7 @@ Foam::DynamicList<Foam::label>  Foam::isoAdvection::syncProcPatches
                 refCast<const processorPolyPatch>(patches[patchi]);
             const label nbrProci = procPatch.neighbProcNo();
 
-            sendRecvProcs.append(nbrProci);
+            neighProcs.append(nbrProci);
             UOPstream toNbr(nbrProci, pBufs);
 
             const scalarField& pFlux = dVf.boundaryField()[patchi];
@@ -523,8 +523,8 @@ Foam::DynamicList<Foam::label>  Foam::isoAdvection::syncProcPatches
             toNbr << surfCellFacesOnProcPatch << dVfPatch;
         }
 
-        // Limit exchange to involved procs
-        pBufs.finishedSends(sendRecvProcs, sendRecvProcs);
+        // Limited to involved neighbour procs
+        pBufs.finishedNeighbourSends(neighProcs);
 
 
         // Receive and combine

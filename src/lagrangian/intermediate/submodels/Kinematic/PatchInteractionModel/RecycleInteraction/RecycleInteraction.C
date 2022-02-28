@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -254,29 +254,18 @@ void Foam::RecycleInteraction<CloudType>::postEvolve()
             }
         }
 
-        // Start sending. Sets number of bytes transferred
-        labelList allNTrans(Pstream::nProcs());
-        pBufs.finishedSends(allNTrans);
-        bool transferred = false;
-        for (const label n : allNTrans)
-        {
-            if (n)
-            {
-                transferred = true;
-                break;
-            }
-        }
-        reduce(transferred, orOp<bool>());
-        if (!transferred)
+        pBufs.finishedSends();
+
+        if (!returnReduce(pBufs.hasRecvData(), orOp<bool>()))
         {
             // No parcels to transfer
             return;
         }
 
         // Retrieve from receive buffers
-        for (label proci = 0; proci < Pstream::nProcs(); ++proci)
+        for (const int proci : pBufs.allProcs())
         {
-            if (allNTrans[proci])
+            if (pBufs.hasRecvData(proci))
             {
                 UIPstream particleStream(proci, pBufs);
                 IDLList<parcelType> newParticles

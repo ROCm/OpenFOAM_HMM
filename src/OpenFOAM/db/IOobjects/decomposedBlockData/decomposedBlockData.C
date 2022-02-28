@@ -394,8 +394,7 @@ bool Foam::decomposedBlockData::readBlocks
             }
         }
 
-        labelList recvSizes;
-        pBufs.finishedSends(recvSizes);
+        pBufs.finishedSends();
 
         if (!UPstream::master(comm))
         {
@@ -524,8 +523,7 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlocks
             ok = is.good();
         }
 
-        labelList recvSizes;
-        pBufs.finishedSends(recvSizes);
+        pBufs.finishedSends();
 
         if (!UPstream::master(comm))
         {

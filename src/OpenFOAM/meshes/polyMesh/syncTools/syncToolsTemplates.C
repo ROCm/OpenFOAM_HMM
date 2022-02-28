@@ -127,7 +127,7 @@ void Foam::syncTools::syncPointMap
 
     if (Pstream::parRun())
     {
-        DynamicList<label> sendRecvProcs;
+        DynamicList<label> neighbProcs;
         PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
 
         // Send
@@ -159,14 +159,14 @@ void Foam::syncTools::syncPointMap
                     }
                 }
 
-                sendRecvProcs.append(nbrProci);
+                neighbProcs.append(nbrProci);
                 UOPstream toNbr(nbrProci, pBufs);
                 toNbr << patchInfo;
             }
         }
 
         // Limit exchange to involved procs
-        pBufs.finishedSends(sendRecvProcs, sendRecvProcs);
+        pBufs.finishedNeighbourSends(neighbProcs);
 
         // Receive and combine.
         for (const polyPatch& pp : patches)
@@ -370,7 +370,7 @@ void Foam::syncTools::syncEdgeMap
 
     if (Pstream::parRun())
     {
-        DynamicList<label> sendRecvProcs;
+        DynamicList<label> neighbProcs;
         PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
 
         // Send
@@ -404,14 +404,14 @@ void Foam::syncTools::syncEdgeMap
                     }
                 }
 
-                sendRecvProcs.append(nbrProci);
+                neighbProcs.append(nbrProci);
                 UOPstream toNbr(nbrProci, pBufs);
                 toNbr << patchInfo;
             }
         }
 
         // Limit exchange to involved procs
-        pBufs.finishedSends(sendRecvProcs, sendRecvProcs);
+        pBufs.finishedNeighbourSends(neighbProcs);
 
 
         // Receive and combine.
@@ -1102,7 +1102,7 @@ void Foam::syncTools::syncBoundaryFaceList
         }
         else
         {
-            DynamicList<label> sendRecvProcs;
+            DynamicList<label> neighbProcs;
             PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
 
             // Send
@@ -1122,14 +1122,14 @@ void Foam::syncTools::syncBoundaryFaceList
                         pp.start()-boundaryOffset
                     );
 
-                    sendRecvProcs.append(nbrProci);
+                    neighbProcs.append(nbrProci);
                     UOPstream toNbr(nbrProci, pBufs);
                     toNbr << fld;
                 }
             }
 
             // Limit exchange to involved procs
-            pBufs.finishedSends(sendRecvProcs, sendRecvProcs);
+            pBufs.finishedNeighbourSends(neighbProcs);
 
 
             // Receive and combine.

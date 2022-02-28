@@ -191,7 +191,6 @@ Foam::Map<Type> Foam::zoneDistribute::getDatafromOtherProc
 
 
         PstreamBuffers pBufs(UPstream::commsTypes::nonBlocking);
-        labelList recvSizes;
 
         // Stream data into buffer
         for (const int proci : UPstream::allProcs())
@@ -222,13 +221,13 @@ Foam::Map<Type> Foam::zoneDistribute::getDatafromOtherProc
                 }
             }
 
-            pBufs.finishedSends(sendProcs, recvProcs, recvSizes);
+            pBufs.finishedSends(sendProcs, recvProcs);
         }
         else
         {
             // Fallback to all-to-all communication
 
-            pBufs.finishedSends(recvSizes);
+            pBufs.finishedSends();
         }
 
 
@@ -237,11 +236,7 @@ Foam::Map<Type> Foam::zoneDistribute::getDatafromOtherProc
             // Do not use recvFrom_[proci] here
             // - could be incorrect if comms are not prepared!
 
-            if
-            (
-                proci != UPstream::myProcNo()
-             && (recvSizes[proci] > 0)
-            )
+            if (proci != UPstream::myProcNo() && pBufs.hasRecvData(proci))
             {
                 UIPstream fromProc(proci, pBufs);
                 Map<Type> tmpValue(fromProc);

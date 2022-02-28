@@ -871,15 +871,14 @@ void Foam::globalIndex::get
             UOPstream os(proci, sendBufs);
             os << localIDs;
         }
-        labelList recvSizes;
-        sendBufs.finishedSends(recvSizes);
+        sendBufs.finishedSends();
 
 
         PstreamBuffers returnBufs(Pstream::commsTypes::nonBlocking, tag, comm);
 
-        forAll(recvSizes, proci)
+        for (const int proci : sendBufs.allProcs())
         {
-            if (recvSizes[proci])
+            if (sendBufs.hasRecvData(proci))
             {
                 UIPstream is(proci, sendBufs);
                 labelList localIDs(is);

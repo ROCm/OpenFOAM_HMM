@@ -286,34 +286,18 @@ void Foam::Cloud<ParticleType>::move
         }
 
 
-        // Start sending. Sets number of bytes transferred
-        labelList allNTrans(Pstream::nProcs());
-        pBufs.finishedSends(allNTrans);
+        pBufs.finishedSends();
 
-
-        bool transferred = false;
-
-        for (const label n : allNTrans)
+        if (!returnReduce(pBufs.hasRecvData(), orOp<bool>()))
         {
-            if (n)
-            {
-                transferred = true;
-                break;
-            }
-        }
-        reduce(transferred, orOp<bool>());
-
-        if (!transferred)
-        {
+            // No parcels to transfer
             break;
         }
 
         // Retrieve from receive buffers
         for (const label neighbProci : neighbourProcs)
         {
-            label nRec = allNTrans[neighbProci];
-
-            if (nRec)
+            if (pBufs.hasRecvData(neighbProci))
             {
                 UIPstream particleStream(neighbProci, pBufs);
 

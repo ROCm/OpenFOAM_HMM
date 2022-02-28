@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -185,9 +185,8 @@ Foam::parLagrangianRedistributor::redistributeLagrangianPositions
     }
 
 
-    // Start sending. Sets number of bytes transferred
-    labelList allNTrans(Pstream::nProcs());
-    pBufs.finishedSends(allNTrans);
+    // Start sending
+    pBufs.finishedSends();
 
 
     {
@@ -205,18 +204,15 @@ Foam::parLagrangianRedistributor::redistributeLagrangianPositions
             IDLList<passivePositionParticle>()
         );
 
-
         // Retrieve from receive buffers
-        forAll(allNTrans, procI)
+        for (const int proci : pBufs.allProcs())
         {
-            const label nRec = allNTrans[procI];
+            //Pout<< "Receive from processor" << proci << " : "
+            //    << pBufs.hasRecvData(proci) << endl;
 
-            //Pout<< "From processor " << procI << " receiving bytes " << nRec
-            //    << endl;
-
-            if (nRec)
+            if (pBufs.hasRecvData(proci))
             {
-                UIPstream particleStream(procI, pBufs);
+                UIPstream particleStream(proci, pBufs);
 
                 // Receive particles and locate them
                 IDLList<passivePositionParticle> newParticles

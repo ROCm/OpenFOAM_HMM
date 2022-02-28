@@ -171,7 +171,6 @@ void Foam::zoneDistribute::setUpCommforZone
 
 
         PstreamBuffers pBufs(UPstream::commsTypes::nonBlocking);
-        labelList recvSizes;
 
         // Stream data into buffer
         for (const int proci : UPstream::allProcs())
@@ -205,12 +204,12 @@ void Foam::zoneDistribute::setUpCommforZone
 
         if (returnReduce(fullUpdate, orOp<bool>()))
         {
-            pBufs.finishedSends(recvSizes);
+            pBufs.finishedSends();
 
             // Update which ones receive
             for (const int proci : UPstream::allProcs())
             {
-                recvFrom_[proci] = (recvSizes[proci] > 0);
+                recvFrom_[proci] = pBufs.hasRecvData(proci);
             }
         }
         else
@@ -233,18 +232,14 @@ void Foam::zoneDistribute::setUpCommforZone
             }
 
             // Wait until everything is written
-            pBufs.finishedSends(sendProcs, recvProcs, recvSizes);
+            pBufs.finishedSends(sendProcs, recvProcs);
         }
 
         for (const int proci : UPstream::allProcs())
         {
             send_[proci].clear();
 
-            if
-            (
-                proci != UPstream::myProcNo()
-             && recvFrom_[proci]   // Or: (recvSizes[proci] > 0)
-            )
+            if (proci != UPstream::myProcNo() && pBufs.hasRecvData(proci))
             {
                 UIPstream fromProc(proci, pBufs);
                 fromProc >> send_[proci];

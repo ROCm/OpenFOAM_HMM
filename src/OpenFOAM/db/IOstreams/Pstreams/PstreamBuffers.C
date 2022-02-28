@@ -33,10 +33,11 @@ License
 void Foam::PstreamBuffers::finalExchange
 (
     labelList& recvSizes,
-    const bool block
+    const bool wait
 )
 {
     // Could also check that it is not called twice
+    // but that is used for overlapping send/recv (eg, overset)
     finishedSendsCalled_ = true;
 
     if (commsType_ == UPstream::commsTypes::nonBlocking)
@@ -51,7 +52,7 @@ void Foam::PstreamBuffers::finalExchange
             recvBuf_,
             tag_,
             comm_,
-            block
+            wait
         );
     }
 }
@@ -62,10 +63,11 @@ void Foam::PstreamBuffers::finalExchange
     const labelUList& sendProcs,
     const labelUList& recvProcs,
     labelList& recvSizes,
-    const bool block
+    const bool wait
 )
 {
     // Could also check that it is not called twice
+    // but that is used for overlapping send/recv (eg, overset)
     finishedSendsCalled_ = true;
 
     if (commsType_ == UPstream::commsTypes::nonBlocking)
@@ -87,7 +89,7 @@ void Foam::PstreamBuffers::finalExchange
             recvBuf_,
             tag_,
             comm_,
-            block
+            wait
         );
     }
 }
@@ -104,6 +106,7 @@ Foam::PstreamBuffers::PstreamBuffers
 )
 :
     finishedSendsCalled_(false),
+    allowClearRecv_(true),
     format_(fmt),
     commsType_(commsType),
     tag_(tag),
@@ -151,20 +154,107 @@ void Foam::PstreamBuffers::clear()
 }
 
 
-void Foam::PstreamBuffers::finishedSends(const bool block)
+void Foam::PstreamBuffers::clearStorage()
+{
+    // Could also clear out entire sendBuf_, recvBuf_ and reallocate.
+    // Not sure if it makes much difference
+    for (DynamicList<char>& buf : sendBuf_)
+    {
+        buf.clearStorage();
+    }
+    for (DynamicList<char>& buf : recvBuf_)
+    {
+        buf.clearStorage();
+    }
+    recvBufPos_ = 0;
+
+    finishedSendsCalled_ = false;
+}
+
+
+bool Foam::PstreamBuffers::hasSendData() const
+{
+    for (const DynamicList<char>& buf : sendBuf_)
+    {
+        if (!buf.empty())
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+
+bool Foam::PstreamBuffers::hasSendData(const label proci) const
+{
+    return !sendBuf_[proci].empty();
+}
+
+
+bool Foam::PstreamBuffers::hasRecvData() const
+{
+    if (finishedSendsCalled_)
+    {
+        for (const DynamicList<char>& buf : recvBuf_)
+        {
+            if (!buf.empty())
+            {
+                return true;
+            }
+        }
+    }
+    #ifdef FULLDEBUG
+    else
+    {
+        FatalErrorInFunction
+            << "Call finishedSends first" << exit(FatalError);
+    }
+    #endif
+
+    return false;
+}
+
+
+bool Foam::PstreamBuffers::hasRecvData(const label proci) const
+{
+    if (finishedSendsCalled_)
+    {
+        return !recvBuf_[proci].empty();
+    }
+    #ifdef FULLDEBUG
+    else
+    {
+        FatalErrorInFunction
+            << "Call finishedSends first" << exit(FatalError);
+    }
+    #endif
+
+    return false;
+}
+
+
+bool Foam::PstreamBuffers::allowClearRecv(bool on) noexcept
+{
+    bool old(allowClearRecv_);
+    allowClearRecv_ = on;
+    return old;
+}
+
+
+void Foam::PstreamBuffers::finishedSends(const bool wait)
 {
     labelList recvSizes;
-    finalExchange(recvSizes, block);
+    finalExchange(recvSizes, wait);
 }
 
 
 void Foam::PstreamBuffers::finishedSends
 (
     labelList& recvSizes,
-    const bool block
+    const bool wait
 )
 {
-    finalExchange(recvSizes, block);
+    finalExchange(recvSizes, wait);
 
     if (commsType_ != UPstream::commsTypes::nonBlocking)
     {
@@ -184,11 +274,11 @@ void Foam::PstreamBuffers::finishedSends
 (
     const labelUList& sendProcs,
     const labelUList& recvProcs,
-    const bool block
+    const bool wait
 )
 {
     labelList recvSizes;
-    finalExchange(sendProcs, recvProcs, recvSizes, block);
+    finalExchange(sendProcs, recvProcs, recvSizes, wait);
 }
 
 
@@ -197,10 +287,10 @@ void Foam::PstreamBuffers::finishedSends
     const labelUList& sendProcs,
     const labelUList& recvProcs,
     labelList& recvSizes,
-    const bool block
+    const bool wait
 )
 {
-    finalExchange(sendProcs, recvProcs, recvSizes, block);
+    finalExchange(sendProcs, recvProcs, recvSizes, wait);
 
     if (commsType_ != UPstream::commsTypes::nonBlocking)
     {
