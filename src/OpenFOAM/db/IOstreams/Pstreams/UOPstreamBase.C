@@ -369,6 +369,25 @@ bool Foam::UOPstreamBase::beginRawWrite(std::streamsize count)
 }
 
 
+// Not needed yet
+///
+/// //- The current put position (tellp) in the buffer
+/// label pos() const;
+///
+/// Foam::label Foam::UOPstreamBase::pos() const
+/// {
+///     return sendBuf_.size();
+/// }
+
+
+void Foam::UOPstreamBase::rewind()
+{
+    sendBuf_.clear();  // Overwrite into buffer
+    setOpened();
+    setGood();
+}
+
+
 void Foam::UOPstreamBase::print(Ostream& os) const
 {
     os  << "Writing from processor " << toProcNo_

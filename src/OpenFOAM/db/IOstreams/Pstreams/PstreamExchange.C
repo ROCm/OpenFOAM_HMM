@@ -43,7 +43,7 @@ void Foam::Pstream::exchangeContainer
     List<Container>& recvBufs,
     const int tag,
     const label comm,
-    const bool block
+    const bool wait
 )
 {
     const label startOfRequests = Pstream::nRequests();
@@ -101,7 +101,7 @@ void Foam::Pstream::exchangeContainer
     // Wait for all to finish
     // ~~~~~~~~~~~~~~~~~~~~~~
 
-    if (block)
+    if (wait)
     {
         UPstream::waitRequests(startOfRequests);
     }
@@ -117,7 +117,7 @@ void Foam::Pstream::exchangeBuf
     List<char*>& recvBufs,
     const int tag,
     const label comm,
-    const bool block
+    const bool wait
 )
 {
     const label startOfRequests = Pstream::nRequests();
@@ -175,7 +175,7 @@ void Foam::Pstream::exchangeBuf
     // Wait for all to finish
     // ~~~~~~~~~~~~~~~~~~~~~~
 
-    if (block)
+    if (wait)
     {
         UPstream::waitRequests(startOfRequests);
     }
@@ -190,7 +190,7 @@ void Foam::Pstream::exchange
     List<Container>& recvBufs,
     const int tag,
     const label comm,
-    const bool block
+    const bool wait
 )
 {
     // OR  static_assert(is_contiguous<T>::value, "Contiguous data only!")
@@ -234,7 +234,7 @@ void Foam::Pstream::exchange
                 recvBufs,
                 tag,
                 comm,
-                block
+                wait
             );
         }
         else
@@ -327,7 +327,7 @@ void Foam::Pstream::exchange
                     charRecvBufs,
                     tag,
                     comm,
-                    block
+                    wait
                 );
 
                 forAll(nSend, proci)
@@ -410,21 +410,14 @@ void Foam::Pstream::exchangeSizes
 /// template<class Container>
 /// void Foam::Pstream::exchangeSizes
 /// (
-///     const labelUList& sendRecvProcs,
+///     const labelUList& neighProcs,
 ///     const Container& sendBufs,
 ///     labelList& recvSizes,
 ///     const label tag,
 ///     const label comm
 /// )
 /// {
-///     exchangeSizes<Container>
-///     (
-///         sendRecvProcs,
-///         sendRecvProcs,
-///         sendBufs,
-///         tag,
-///         comm
-///     );
+///     exchangeSizes<Container>(neighProcs, neighProcs, sendBufs, tag, comm);
 /// }
 
 
@@ -462,13 +455,13 @@ void Foam::Pstream::exchange
     List<Container>& recvBufs,
     const int tag,
     const label comm,
-    const bool block
+    const bool wait
 )
 {
     labelList recvSizes;
     exchangeSizes(sendBufs, recvSizes, comm);
 
-    exchange<Container, T>(sendBufs, recvSizes, recvBufs, tag, comm, block);
+    exchange<Container, T>(sendBufs, recvSizes, recvBufs, tag, comm, wait);
 }
 
 

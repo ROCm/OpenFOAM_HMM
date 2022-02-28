@@ -177,17 +177,20 @@ public:
                 return true;
             }
 
-            //- Rewind the stream so that it may be read again
-            void rewind();
+
+    // Positioning
+
+        //- Rewind the receive stream position so that it may be read again
+        virtual void rewind();
 
 
-        // Edit
+    // Edit
 
-            //- Set flags of stream
-            virtual ios_base::fmtflags flags(const ios_base::fmtflags)
-            {
-                return ios_base::fmtflags(0);
-            }
+        //- Set flags of stream
+        virtual ios_base::fmtflags flags(const ios_base::fmtflags)
+        {
+            return ios_base::fmtflags(0);
+        }
 
 
     // Print

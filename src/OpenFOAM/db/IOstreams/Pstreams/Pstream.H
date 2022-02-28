@@ -64,8 +64,7 @@ class Pstream
 {
    // Private Static Functions
 
-        //- Exchange contiguous data. Sends sendData, receives into
-        //  recvData. If block=true will wait for all transfers to finish.
+        //- Exchange contiguous data. Sends sendBufs, receives into recvBufs.
         //  Data provided and received as container.
         template<class Container, class T>
         static void exchangeContainer
@@ -75,11 +74,10 @@ class Pstream
             List<Container>& recvBufs,
             const int tag,
             const label comm,
-            const bool block              //!< Wait for all to finish
+            const bool wait               //!< Wait for requests to complete
         );
 
-        //- Exchange contiguous data. Sends sendData, receives into
-        //  recvData. If block=true will wait for all transfers to finish.
+        //- Exchange contiguous data. Sends sendBufs, receives into recvBufs.
         //  Data provided and received as pointers.
         template<class T>
         static void exchangeBuf
@@ -90,7 +88,7 @@ class Pstream
             List<char*>& recvBufs,
             const int tag,
             const label comm,
-            const bool block              //!< Wait for all to finish
+            const bool wait               //!< Wait for requests to complete
         );
 
 
@@ -119,7 +117,7 @@ public:
         :
             UPstream(commsType)
         {
-            if (bufSize)
+            if (bufSize > 0)
             {
                 transferBuf_.setCapacity(bufSize + 2*sizeof(scalar) + 1);
             }
@@ -438,7 +436,7 @@ public:
                 List<Container>& recvData,
                 const int tag = UPstream::msgType(),
                 const label comm = UPstream::worldComm,
-                const bool block = true
+                const bool wait = true  //!< Wait for requests to complete
             );
 
             //- Exchange contiguous data. Sends sendData, receives into
@@ -451,7 +449,7 @@ public:
                 List<Container>& recvData,
                 const int tag = UPstream::msgType(),
                 const label comm = UPstream::worldComm,
-                const bool block = true
+                const bool wait = true  //!< Wait for requests to complete
             );
 };
 

@@ -490,9 +490,26 @@ bool Foam::UIPstreamBase::beginRawRead()
 }
 
 
+// Not needed yet
+///
+/// //- The current get position (tellg) in the buffer
+/// label pos() const;
+///
+/// Foam::label Foam::UIPstreamBase::pos() const
+/// {
+///     return recvBufPos_;
+/// }
+
+
 void Foam::UIPstreamBase::rewind()
 {
-    recvBufPos_ = 0;
+    recvBufPos_ = 0;  // Assume the entire buffer is for us to read from
+    setOpened();
+    setGood();
+    if (recvBuf_.empty() || !messageSize_)
+    {
+        setEof();
+    }
 }
 
 

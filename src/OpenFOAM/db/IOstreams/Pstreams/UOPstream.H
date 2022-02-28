@@ -251,13 +251,19 @@ public:
             }
 
 
-        // Edit
+    // Positioning
 
-            //- Set flags of stream
-            virtual ios_base::fmtflags flags(const ios_base::fmtflags)
-            {
-                return ios_base::fmtflags(0);
-            }
+        //- Rewind the send buffer for overwriting
+        virtual void rewind();
+
+
+    // Edit
+
+        //- Set flags of stream
+        virtual ios_base::fmtflags flags(const ios_base::fmtflags)
+        {
+            return ios_base::fmtflags(0);
+        }
 
 
     // Print
