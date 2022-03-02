@@ -98,13 +98,11 @@ void matchPatchFaces
     const labelList& patchesj,
 
     DynamicList<labelList>& interfaceMesh0,
-    DynamicList<label>& interfaceSource0,
     DynamicList<labelList>& interfacePatch0,
     DynamicList<wordList>& interfaceNames0,
     DynamicList<List<DynamicList<label>>>& interfaceFaces0,
 
     DynamicList<labelList>& interfaceMesh1,
-    DynamicList<label>& interfaceSource1,
     DynamicList<labelList>& interfacePatch1,
     DynamicList<wordList>& interfaceNames1,
     DynamicList<List<DynamicList<label>>>& interfaceFaces1
@@ -138,10 +136,8 @@ void matchPatchFaces
 
                 Info<< "Introducing interface " << inti << " between"
                     << " mesh " << meshes[meshi].name()
-                    //<< " source:" << sourcei
                     << " patch " << ppi.name()
                     << " and mesh " << meshes[meshj].name()
-                    //<< " source:" << sourcej
                     << " patch " << ppj.name()
                     << endl;
 
@@ -153,8 +149,6 @@ void matchPatchFaces
                 intMesh0.setSize(nSourcei, -1);
                 intMesh0[sourcei] = meshi;
 
-                interfaceSource0.append(sourcei);
-
                 interfacePatch0.append(labelList());
                 auto& intPatch0 = interfacePatch0.last();
                 intPatch0.setSize(nSourcei, -1);
@@ -163,19 +157,21 @@ void matchPatchFaces
                 interfaceNames0.append(wordList());
                 auto& intNames0 = interfaceNames0.last();
                 intNames0.setSize(nSourcei);
+                //intNames0[sourcei] =
+                //    meshes[meshi].name()
+                //  + "_to_"
+                //  + meshes[meshj].name();
                 intNames0[sourcei] =
                     patchName(entryName, meshes[meshi], meshes[meshj]);
 
 
-                // Mesh 1
+                // Mesh 0
                 //~~~~~~~
 
                 interfaceMesh1.append(labelList());
                 auto& intMesh1 = interfaceMesh1.last();
                 intMesh1.setSize(nSourcej, -1);
                 intMesh1[sourcej] = meshj;
-
-                interfaceSource1.append(sourcej);
 
                 interfacePatch1.append(labelList());
                 auto& intPatch1 = interfacePatch1.last();
@@ -185,6 +181,10 @@ void matchPatchFaces
                 interfaceNames1.append(wordList());
                 auto& intNames1 = interfaceNames1.last();
                 intNames1.setSize(nSourcej);
+                //intNames1[sourcej] =
+                //    meshes[meshj].name()
+                //  + "_to_"
+                //  + meshes[meshi].name();
                 intNames1[sourcej] =
                     patchName(entryName, meshes[meshj], meshes[meshi]);
 
@@ -283,13 +283,11 @@ void matchPatchFaces
     List<PtrList<dictionary>> patchInfoDicts,
 
     DynamicList<labelList>& interfaceMesh0,
-    DynamicList<label>& interfaceSource0,
     DynamicList<labelList>& interfacePatch0,
     DynamicList<List<DynamicList<label>>>& interfaceFaces0,
     DynamicList<wordList>& interfaceNames0,
 
     DynamicList<labelList>& interfaceMesh1,
-    DynamicList<label>& interfaceSource1,
     DynamicList<labelList>& interfacePatch1,
     DynamicList<List<DynamicList<label>>>& interfaceFaces1,
     DynamicList<wordList>& interfaceNames1
@@ -340,13 +338,11 @@ void matchPatchFaces
                         patchesj,
 
                         interfaceMesh0,
-                        interfaceSource0,
                         interfacePatch0,
                         interfaceNames0,
                         interfaceFaces0,
 
                         interfaceMesh1,
-                        interfaceSource1,
                         interfacePatch1,
                         interfaceNames1,
                         interfaceFaces1
@@ -417,23 +413,10 @@ void changePatchID
 
         if (!isRepatchedBoundary.set(facei-mesh.nInternalFaces()))
         {
-            static label nWarnings = 0;
-            if (nWarnings == 0)
-            {
-                const label newPatchi = meshMod.region()[facei];
-                //FatalErrorInFunction
-                WarningInFunction
-                    << "Face " << facei
-                    << " at " << mesh.faceCentres()[facei]
-                    << " marked for patch " << patchID
-                    << " name " << mesh.boundaryMesh()[patchID].name()
-                    << " is already marked for patch " << newPatchi
-                    << " name " << mesh.boundaryMesh()[newPatchi].name()
-                    << ". Suppressing further warnings"
-                    //<< exit(FatalError);
-                    << endl;
-            }
-            nWarnings++;
+            FatalErrorInFunction
+                << "Face " << facei << " is already marked to be moved"
+                << " to patch " << meshMod.region()[facei]
+                << exit(FatalError);
         }
 
         changePatchID(mesh, facei, patchID, meshMod);
@@ -738,6 +721,7 @@ int main(int argc, char *argv[])
     );
 
     #include "addOverwriteOption.H"
+    //#include "addRegionOption.H"
     #include "addAllRegionOptions.H"
 
     argList::addOption("dict", "file", "Alternative createPatchDict");
@@ -796,25 +780,17 @@ int main(int argc, char *argv[])
         forAll(patchSources, sourcei)
         {
             const auto& pDict = patchSources[sourcei];
-            patchNames[meshi][sourcei] = pDict.getOrDefault<word>
-            (
-                "name",
-                word::null,
-                keyType::LITERAL
-            );
+            patchNames[meshi][sourcei] = pDict.get<word>("name");
 
             patchInfoDicts[meshi].set
             (
                 sourcei,
                 new dictionary(pDict.subDict("patchInfo"))
             );
-            dictionary& patchDict = patchInfoDicts[meshi][sourcei];
+            const dictionary& patchDict = patchInfoDicts[meshi][sourcei];
             if (patchDict.found("AMIMethod"))
             {
                 matchMethods[meshi][sourcei] = patchDict.get<word>("AMIMethod");
-                // Disable full matching since we're trying to use AMIMethod to
-                // find out actual overlap
-                patchDict.add("requireMatch", false);
             }
 
             wordRes matchNames;
@@ -841,11 +817,9 @@ int main(int argc, char *argv[])
     // It matches all mesh against each other. Lower numbered mesh gets
     // postfix 0, higher numbered mesh postfix 1.
 
-    // Per interface, per patchSource:
+    // Per interface, per mesh, per patchSource:
     //      1. the lower numbered mesh
     DynamicList<labelList> interfaceMesh0;
-    //      1b. the source index (i.e. the patch dictionary)
-    DynamicList<label> interfaceSource0;
     //      2. the patch on the interfaceMesh0
     DynamicList<labelList> interfacePatch0;
     //      3. the facelabels on the interfaceMesh0
@@ -855,7 +829,6 @@ int main(int argc, char *argv[])
 
     // Same for the higher numbered mesh
     DynamicList<labelList> interfaceMesh1;
-    DynamicList<label> interfaceSource1;
     DynamicList<labelList> interfacePatch1;
     DynamicList<List<DynamicList<label>>> interfaceFaces1;
     DynamicList<wordList> interfaceNames1;
@@ -870,23 +843,20 @@ int main(int argc, char *argv[])
             interRegionSources,
             patchNames,
             matchPatchIDs,
-            matchMethods,
+            matchMethods,   //faceAreaWeightAMI2D::typeName,
             patchInfoDicts,
 
             interfaceMesh0,
-            interfaceSource0,
             interfacePatch0,
             interfaceFaces0,
             interfaceNames0,
 
             interfaceMesh1,
-            interfaceSource1,
             interfacePatch1,
             interfaceFaces1,
             interfaceNames1
         );
     }
-
 
 
     // Read fields
@@ -944,9 +914,6 @@ int main(int argc, char *argv[])
     forAll(meshes, meshi)
     {
         fvMesh& mesh = meshes[meshi];
-
-        Info<< "\n\nAdding patches to mesh " << mesh.name() << nl << endl;
-
         const polyBoundaryMesh& patches = mesh.boundaryMesh();
         const dictionary& dict = dicts[meshi];
 
@@ -966,20 +933,11 @@ int main(int argc, char *argv[])
         {
             const dictionary& dict = patchSources[sourcei];
             const word sourceType(dict.get<word>("constructFrom"));
-            const word patchName
-            (
-                dict.getOrDefault<word>
-                (
-                    "name",
-                    word::null,
-                    keyType::LITERAL
-                )
-            );
+            const word patchName(dict.get<word>("name"));
 
-            dictionary patchDict(patchInfoDicts[meshi][sourcei]);
+            dictionary patchDict(dict.subDict("patchInfo"));
             patchDict.set("nFaces", 0);
-            patchDict.set("startFace", 0);    // Gets overwritten
-
+            patchDict.set("startFace", 0);  //startFacei);
 
             if (sourceType == "autoPatch")
             {
@@ -993,45 +951,42 @@ int main(int argc, char *argv[])
                     const labelList& allMeshes1 = interfaceMesh1[inti];
                     const wordList& allNames1 = interfaceNames1[inti];
 
-                    if
-                    (
-                        interfaceSource0[inti] == sourcei
-                     && allMeshes0[sourcei] == meshi
-                    )
+                    forAll(allMeshes0, sourcei)
                     {
-                        // Current mesh is mesh0. mesh1 is the remote mesh.
-                        const label sourcej = interfaceSource1[inti];
-                        const word& patchName = allNames0[sourcei];
-                        if (patches.findPatchID(patchName) == -1)
+                        if (allMeshes0[sourcei] == meshi)
                         {
-                            dictionary allDict(patchDict);
-                            const auto& mesh1 = meshes[allMeshes1[sourcej]];
-                            allDict.set("sampleRegion", mesh1.name());
-                            const auto& destPatch = allNames1[sourcej];
-                            allDict.set("samplePatch", destPatch);
-                            allDict.set("neighbourPatch", destPatch);
+                            const auto& mesh1 = meshes[allMeshes1[sourcei]];
+                            const word& patchName = allNames0[sourcei];
+                            if (patches.findPatchID(patchName) == -1)
+                            {
+                                dictionary allDict(patchDict);
+                                allDict.set("sampleRegion", mesh1.name());
+                                const auto& destPatch = allNames1[sourcei];
+                                allDict.set("samplePatch", destPatch);
+                                allDict.set("neighbourPatch", destPatch);
 
-                            Info<< "Adding new patch " << patchName
-                                << " from " << allDict << endl;
+                                Info<< "Adding new patch " << patchName
+                                    << " from " << allDict << endl;
 
-                            autoPtr<polyPatch> ppPtr
-                            (
-                                polyPatch::New
+                                autoPtr<polyPatch> ppPtr
                                 (
-                                    patchName,
-                                    allDict,
-                                    0,          // overwritten
-                                    patches
-                                )
-                            );
-                            fvMeshTools::addPatch
-                            (
-                                mesh,
-                                ppPtr(),
-                                patchDict.subOrEmptyDict("patchFields"),
-                                calculatedFvPatchScalarField::typeName,
-                                true
-                            );
+                                    polyPatch::New
+                                    (
+                                        patchName,
+                                        allDict,
+                                        0,          // overwritten
+                                        patches
+                                    )
+                                );
+                                fvMeshTools::addPatch
+                                (
+                                    mesh,
+                                    ppPtr(),
+                                    patchDict.subOrEmptyDict("patchFields"),
+                                    calculatedFvPatchScalarField::typeName,
+                                    true
+                                );
+                            }
                         }
                     }
                 }
@@ -1043,46 +998,42 @@ int main(int argc, char *argv[])
                     const labelList& allMeshes1 = interfaceMesh1[inti];
                     const wordList& allNames1 = interfaceNames1[inti];
 
-                    if
-                    (
-                        interfaceSource1[inti] == sourcei
-                     && allMeshes1[sourcei] == meshi
-                    )
+                    forAll(allMeshes1, sourcei)
                     {
-                        // Current mesh is mesh1. mesh0 is the remote mesh.
-
-                        const label sourcej = interfaceSource0[inti];
-                        const word& patchName = allNames1[sourcei];
-                        if (patches.findPatchID(patchName) == -1)
+                        if (allMeshes1[sourcei] == meshi)
                         {
-                            dictionary allDict(patchDict);
-                            const auto& destPatch = allNames0[sourcej];
-                            const auto& mesh0 = meshes[allMeshes0[sourcej]];
-                            allDict.set("sampleRegion", mesh0.name());
-                            allDict.set("samplePatch", destPatch);
-                            allDict.set("neighbourPatch", destPatch);
+                            const auto& mesh0 = meshes[allMeshes0[sourcei]];
+                            const word& patchName = allNames1[sourcei];
+                            if (patches.findPatchID(patchName) == -1)
+                            {
+                                dictionary allDict(patchDict);
+                                const auto& destPatch = allNames0[sourcei];
+                                allDict.set("sampleRegion", mesh0.name());
+                                allDict.set("samplePatch", destPatch);
+                                allDict.set("neighbourPatch", destPatch);
 
-                            Info<< "Adding new patch " << patchName
-                                << " from " << allDict << endl;
+                                Info<< "Adding new patch " << patchName
+                                    << " from " << allDict << endl;
 
-                            autoPtr<polyPatch> ppPtr
-                            (
-                                polyPatch::New
+                                autoPtr<polyPatch> ppPtr
                                 (
-                                    patchName,
-                                    allDict,
-                                    0,          // overwritten
-                                    patches
-                                )
-                            );
-                            fvMeshTools::addPatch
-                            (
-                                mesh,
-                                ppPtr(),
-                                patchDict.subOrEmptyDict("patchFields"),
-                                calculatedFvPatchScalarField::typeName,
-                                true
-                            );
+                                    polyPatch::New
+                                    (
+                                        patchName,
+                                        allDict,
+                                        0,          // overwritten
+                                        patches
+                                    )
+                                );
+                                fvMeshTools::addPatch
+                                (
+                                    mesh,
+                                    ppPtr(),
+                                    patchDict.subOrEmptyDict("patchFields"),
+                                    calculatedFvPatchScalarField::typeName,
+                                    true
+                                );
+                            }
                         }
                     }
                 }
@@ -1126,10 +1077,6 @@ int main(int argc, char *argv[])
     forAll(meshes, meshi)
     {
         fvMesh& mesh = meshes[meshi];
-
-        Info<< "\n\nRepatching mesh " << mesh.name() << nl << endl;
-
-
         const polyBoundaryMesh& patches = mesh.boundaryMesh();
         const dictionary& dict = dicts[meshi];
 
@@ -1149,15 +1096,7 @@ int main(int argc, char *argv[])
         forAll(patchSources, sourcei)
         {
             const dictionary& dict = patchSources[sourcei];
-            const word patchName
-            (
-                dict.getOrDefault<word>
-                (
-                    "name",
-                    word::null,
-                    keyType::LITERAL
-                )
-            );
+            const word patchName(dict.get<word>("name"));
             const word sourceType(dict.get<word>("constructFrom"));
 
             if (sourceType == "autoPatch")
@@ -1172,57 +1111,49 @@ int main(int argc, char *argv[])
                     const wordList& allNames1 = interfaceNames1[inti];
                     const auto& allFaces1 = interfaceFaces1[inti];
 
-                    if
-                    (
-                        interfaceSource0[inti] == sourcei
-                     && allMeshes0[sourcei] == meshi
-                    )
+                    forAll(allMeshes0, sourcei)
                     {
-                        // Current mesh is mesh0. mesh1 is the remote mesh.
+                        if (allMeshes0[sourcei] == meshi)
+                        {
+                            const label destPatchi =
+                                patches.findPatchID(allNames0[sourcei], false);
 
-                        const label destPatchi =
-                            patches.findPatchID(allNames0[sourcei], false);
+                            Pout<< "Matched mesh:" << mesh.name()
+                                << " to mesh:"
+                                << meshes[allMeshes1[sourcei]].name()
+                                << " through:" << allNames0[sourcei] << endl;
 
-                        //const auto& mesh1 =
-                        //    meshes[allMeshes1[interfaceSource1[inti]]];
-                        //Pout<< "Matched mesh:" << mesh.name()
-                        //    << " to mesh:" << mesh1.name()
-                        //    << " through:" << allNames0[sourcei] << endl;
-
-                        changePatchID
-                        (
-                            mesh,
-                            allFaces0[sourcei],
-                            destPatchi,
-                            isRepatchedBoundary,
-                            meshMod
-                        );
+                            changePatchID
+                            (
+                                mesh,
+                                allFaces0[sourcei],
+                                destPatchi,
+                                isRepatchedBoundary,
+                                meshMod
+                            );
+                        }
                     }
-                    if
-                    (
-                        interfaceSource1[inti] == sourcei
-                     && allMeshes1[sourcei] == meshi
-                    )
+                    forAll(allMeshes1, sourcei)
                     {
-                        // Current mesh is mesh1. mesh0 is the remote mesh.
+                        if (allMeshes1[sourcei] == meshi)
+                        {
+                            const label destPatchi =
+                                patches.findPatchID(allNames1[sourcei], false);
 
-                        const label destPatchi =
-                            patches.findPatchID(allNames1[sourcei], false);
+                            Pout<< "Matched mesh:" << mesh.name()
+                                << " to mesh:"
+                                << meshes[allMeshes0[sourcei]].name()
+                                << " through:" << allNames1[sourcei] << endl;
 
-                        //const auto& mesh0 =
-                        //    meshes[allMeshes0[interfaceSource0[inti]]];
-                        //Pout<< "Matched mesh:" << mesh.name()
-                        //    << " to mesh:" << mesh0.name()
-                        //    << " through:" << allNames1[sourcei] << endl;
-
-                        changePatchID
-                        (
-                            mesh,
-                            allFaces1[sourcei],
-                            destPatchi,
-                            isRepatchedBoundary,
-                            meshMod
-                        );
+                            changePatchID
+                            (
+                                mesh,
+                                allFaces1[sourcei],
+                                destPatchi,
+                                isRepatchedBoundary,
+                                meshMod
+                            );
+                        }
                     }
                 }
             }
@@ -1282,6 +1213,7 @@ int main(int argc, char *argv[])
                     << exit(FatalError);
             }
         }
+        Info<< endl;
 
 
         // Change mesh, use inflation to reforce calculation of transformation
@@ -1466,6 +1398,10 @@ int main(int argc, char *argv[])
         {
             dumpCyclicMatch("final_", mesh);
         }
+
+
+        // Set the precision of the points data to 10
+        IOstream::defaultPrecision(max(10u, IOstream::defaultPrecision()));
     }
 
     if (!overwrite)
@@ -1482,14 +1418,11 @@ int main(int argc, char *argv[])
         }
     }
 
-    // Set the precision of the points data to 10
-    IOstream::defaultPrecision(max(10u, IOstream::defaultPrecision()));
-
     // Write resulting mesh
     forAll(meshes, meshi)
     {
         fvMesh& mesh = meshes[meshi];
-        Info<< "\n\nWriting repatched mesh " << mesh.name()
+        Info<< "Writing repatched mesh " << mesh.name()
             << " to " << runTime.timeName() << nl << endl;
         mesh.clearOut();    // remove meshPhi
         mesh.write();
