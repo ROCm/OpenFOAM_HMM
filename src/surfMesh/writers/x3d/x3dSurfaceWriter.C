@@ -270,9 +270,7 @@ Foam::fileName Foam::surfaceWriters::x3dWriter::writeTemplate
     outputFile.ext("x3d");
 
     // Implicit geometry merge()
-    tmp<Field<Type>> tfield = mergeField(localValues);
-
-    adjustOutputField(fieldName, tfield.ref());
+    tmp<Field<Type>> tfield = adjustField(fieldName, mergeField(localValues));
 
     if (verbose_)
     {

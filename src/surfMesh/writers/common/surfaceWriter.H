@@ -195,17 +195,22 @@ protected:
 
         //- Apply refLevel and fieldScaling
         template<class Type>
-        void adjustOutputFieldTemplate
+        tmp<Field<Type>> adjustFieldTemplate
         (
             const word& fieldName,
-            Field<Type>& fld
+            const tmp<Field<Type>>& tfield
         ) const;
 
 #undef  declareSurfaceFieldMethod
 #define declareSurfaceFieldMethods(Type)                                      \
                                                                               \
         tmp<Field<Type>> mergeField(const Field<Type>& fld) const;            \
-        void adjustOutputField(const word& fieldName, Field<Type>& fld) const;
+                                                                              \
+        tmp<Field<Type>> adjustField                                          \
+        (                                                                     \
+            const word& fieldName,                                            \
+            const tmp<Field<Type>>& tfield                                    \
+        ) const;
 
         declareSurfaceFieldMethods(label);
         declareSurfaceFieldMethods(scalar);

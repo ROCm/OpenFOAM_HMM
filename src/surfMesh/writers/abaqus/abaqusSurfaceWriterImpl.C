@@ -118,9 +118,7 @@ Foam::fileName Foam::surfaceWriters::abaqusWriter::writeTemplate
 
 
     // Implicit geometry merge()
-    tmp<Field<Type>> tfield = mergeField(localValues);
-
-    adjustOutputField(fieldName, tfield.ref());
+    tmp<Field<Type>> tfield = adjustField(fieldName, mergeField(localValues));
 
     if (verbose_)
     {

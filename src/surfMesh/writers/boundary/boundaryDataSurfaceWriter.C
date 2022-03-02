@@ -219,9 +219,7 @@ Foam::fileName Foam::surfaceWriters::boundaryDataWriter::writeTemplate
     const fileName outputFile(surfaceDir/timeName()/fieldName);
 
     // Implicit geometry merge()
-    tmp<Field<Type>> tfield = mergeField(localValues);
-
-    adjustOutputField(fieldName, tfield.ref());
+    tmp<Field<Type>> tfield = adjustField(fieldName, mergeField(localValues));
 
     if (verbose_)
     {

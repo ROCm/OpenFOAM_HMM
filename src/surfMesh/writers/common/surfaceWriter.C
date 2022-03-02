@@ -506,16 +506,18 @@ Foam::tmp<Foam::Field<Type>> Foam::surfaceWriter::mergeFieldTemplate
 
 
 template<class Type>
-void Foam::surfaceWriter::adjustOutputFieldTemplate
+Foam::tmp<Foam::Field<Type>> Foam::surfaceWriter::adjustFieldTemplate
 (
     const word& fieldName,
-    Field<Type>& fld
+    const tmp<Field<Type>>& tfield
 ) const
 {
     if (verbose_)
     {
         Info<< "Writing field " << fieldName;
     }
+
+    tmp<Field<Type>> tadjusted;
 
     // Output scaling for the variable, but not for integer types
     // which are typically ids etc.
@@ -544,7 +546,14 @@ void Foam::surfaceWriter::adjustOutputFieldTemplate
                 Info<< " [level " << refLevel << ']';
             }
 
-            fld -= refLevel;
+            if (!tadjusted)
+            {
+                // Steal or clone
+                tadjusted.reset(tfield.ptr());
+            }
+
+            // Remove offset level
+            tadjusted.ref() -= refLevel;
         }
 
         // Apply scaling
@@ -558,9 +567,19 @@ void Foam::surfaceWriter::adjustOutputFieldTemplate
             {
                 Info<< " [scaling " << value << ']';
             }
-            fld *= value;
+
+            if (!tadjusted)
+            {
+                // Steal or clone
+                tadjusted.reset(tfield.ptr());
+            }
+
+            // Apply scaling
+            tadjusted.ref() *= value;
         }
     }
+
+    return (tadjusted ? tadjusted : tfield);
 }
 
 
@@ -571,13 +590,14 @@ void Foam::surfaceWriter::adjustOutputFieldTemplate
         return mergeFieldTemplate(fld);                                        \
     }                                                                          \
                                                                                \
-    void ThisClass::adjustOutputField                                          \
+    Foam::tmp<Foam::Field<Type>>                                               \
+    ThisClass::adjustField                                                     \
     (                                                                          \
         const word& fieldName,                                                 \
-        Field<Type>& fld                                                       \
+        const tmp<Field<Type>>& tfield                                         \
     ) const                                                                    \
     {                                                                          \
-        adjustOutputFieldTemplate(fieldName, fld);                             \
+        return adjustFieldTemplate(fieldName, tfield);                         \
     }
 
 defineSurfaceFieldMethods(Foam::surfaceWriter, Foam::label);
