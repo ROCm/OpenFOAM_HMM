@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2112                                 |
+|  \\    /   O peration     | Version:  v2206                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -26,7 +26,7 @@ Documentation
     (
         "$WM_PROJECT_USER_DIR/html"
         "$WM_PROJECT_DIR/doc/Doxygen/html"
-        "https://www.openfoam.com/documentation/guides/latest/doc/"
+        "https://www.openfoam.com/documentation/guides/latest/api/"
     );
 }
 
