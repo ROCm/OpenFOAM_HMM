@@ -28,8 +28,10 @@ License
 #include "gradAlpha.H"
 #include "fvc.H"
 #include "leastSquareGrad.H"
+#include "zoneDistribute.H"
 #include "addToRunTimeSelectionTable.H"
 #include "profiling.H"
+
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
@@ -50,8 +52,7 @@ void Foam::reconstruction::gradAlpha::gradSurf(const volScalarField& phi)
     leastSquareGrad<scalar> lsGrad("polyDegree1",mesh_.geometricD());
 
     zoneDistribute& exchangeFields = zoneDistribute::New(mesh_);
-
-    exchangeFields.setUpCommforZone(interfaceCell_,true);
+    exchangeFields.setUpCommforZone(interfaceCell_, true);
 
     Map<vector> mapCC
     (
@@ -135,10 +136,7 @@ void Foam::reconstruction::gradAlpha::reconstruct(bool forceUpdate)
     if (mesh_.topoChanging())
     {
         // Introduced resizing to cope with changing meshes
-        if (interfaceCell_.size() != mesh_.nCells())
-        {
-            interfaceCell_.resize(mesh_.nCells());
-        }
+        interfaceCell_.resize_nocopy(mesh_.nCells());
     }
     interfaceCell_ = false;
 

@@ -59,7 +59,6 @@ SourceFiles
 #include "autoPtr.H"
 #include "surfaceIteratorPLIC.H"
 #include "reconstructedDistanceFunction.H"
-#include "zoneDistribute.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

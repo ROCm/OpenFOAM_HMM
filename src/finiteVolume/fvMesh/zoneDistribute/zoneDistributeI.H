@@ -26,16 +26,14 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "zoneDistribute.H"
 #include "DynamicField.H"
-#include "syncTools.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<typename Type>
 Type Foam::zoneDistribute::getLocalValue
 (
-    const GeometricField<Type, fvPatchField, volMesh>& phi,
+    const VolumeField<Type>& phi,
     const label localIdx
 ) const
 {
@@ -51,7 +49,7 @@ Type Foam::zoneDistribute::getLocalValue
 template<typename Type>
 Type Foam::zoneDistribute::faceValue
 (
-    const GeometricField<Type, fvPatchField, volMesh>& phi,
+    const VolumeField<Type>& phi,
     const label localIdx
 ) const
 {
@@ -80,7 +78,7 @@ Type Foam::zoneDistribute::faceValue
 template<typename Type>
 Type Foam::zoneDistribute::getValue
 (
-    const GeometricField<Type, fvPatchField, volMesh>& phi,
+    const VolumeField<Type>& phi,
     const Map<Type>& valuesFromOtherProc,
     const label gblIdx
 ) const
@@ -90,8 +88,9 @@ Type Foam::zoneDistribute::getValue
         const label localIdx = globalNumbering_.toLocal(gblIdx);
         return getLocalValue(phi,localIdx);
     }
-    else // from other proc
+    else
     {
+        // From other proc
         return valuesFromOtherProc[gblIdx];
     }
 }
@@ -101,7 +100,7 @@ template<typename Type>
 Foam::Map<Foam::Field<Type>> Foam::zoneDistribute::getFields
 (
     const boolList& zone,
-    const GeometricField<Type, fvPatchField, volMesh>& phi
+    const VolumeField<Type>& phi
 )
 {
     if (zone.size() != phi.size())
@@ -144,7 +143,7 @@ template<typename Type>
 Foam::Map<Type> Foam::zoneDistribute::getDatafromOtherProc
 (
     const boolList& zone,
-    const GeometricField<Type, fvPatchField, volMesh>& phi
+    const VolumeField<Type>& phi
 )
 {
     if (zone.size() != phi.size())
@@ -162,86 +161,51 @@ Foam::Map<Type> Foam::zoneDistribute::getDatafromOtherProc
 
     if (UPstream::parRun())
     {
-        const bool commsPrepared = (sendTo_.size() == UPstream::nProcs());
-
-        if (!commsPrepared)
+        if (sendConnections_.empty())
         {
-            FatalErrorInFunction
-                << "The send/recv information not initialized - "
+            WarningInFunction
+                << "The send/recv connections not initialized - "
                 << "likely that setUpCommforZone() was not called"
                 << endl;
-
             // But don't exit/abort for now
         }
 
-
-        List<Map<Type>> sendValues(UPstream::nProcs());
-
-        forAll(send_, proci)
-        {
-            for (const label sendIdx : send_[proci])
-            {
-                sendValues[proci].insert
-                (
-                    sendIdx,
-                    getLocalValue(phi, globalNumbering_.toLocal(sendIdx))
-                );
-            }
-        }
-
+        // Stream the send data into PstreamBuffers,
+        // which we also use to track the current topology.
 
         PstreamBuffers pBufs(UPstream::commsTypes::nonBlocking);
 
-        // Stream data into buffer
         for (const int proci : UPstream::allProcs())
         {
-            if (proci != UPstream::myProcNo() && !sendValues[proci].empty())
+            if (proci != UPstream::myProcNo() && !send_[proci].empty())
             {
-                // Put data into send buffer
+                // Serialize as Map
+                Map<Type> sendValues(2*send_[proci].size());
+
+                for (const label sendIdx : send_[proci])
+                {
+                    sendValues.insert
+                    (
+                        sendIdx,
+                        getLocalValue(phi, globalNumbering_.toLocal(sendIdx))
+                    );
+                }
+
                 UOPstream toProc(proci, pBufs);
-                toProc << sendValues[proci];
+                toProc << sendValues;
             }
         }
 
+        pBufs.finishedSends(sendConnections_, sendProcs_, recvProcs_);
 
-        if (commsPrepared)
+        for (const int proci : pBufs.allProcs())
         {
-            DynamicList<label> sendProcs;
-            DynamicList<label> recvProcs;
-
-            for (const int proci : UPstream::allProcs())
-            {
-                if (sendTo_[proci])
-                {
-                    sendProcs.append(proci);
-                }
-                if (recvFrom_[proci])
-                {
-                    recvProcs.append(proci);
-                }
-            }
-
-            pBufs.finishedSends(sendProcs, recvProcs);
-        }
-        else
-        {
-            // Fallback to all-to-all communication
-
-            pBufs.finishedSends();
-        }
-
-
-        for (const int proci : UPstream::allProcs())
-        {
-            // Do not use recvFrom_[proci] here
-            // - could be incorrect if comms are not prepared!
-
             if (proci != UPstream::myProcNo() && pBufs.hasRecvData(proci))
             {
                 UIPstream fromProc(proci, pBufs);
-                Map<Type> tmpValue(fromProc);
+                Map<Type> tmpValues(fromProc);
 
-                neiValues += tmpValue;
+                neiValues += tmpValues;
             }
         }
     }

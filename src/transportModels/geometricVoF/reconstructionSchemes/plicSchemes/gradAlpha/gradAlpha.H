@@ -45,10 +45,9 @@ SourceFiles
 #include "typeInfo.H"
 #include "reconstructionSchemes.H"
 #include "volFields.H"
+#include "DynamicField.H"
 #include "dimensionedScalar.H"
-#include "autoPtr.H"
 #include "surfaceIteratorPLIC.H"
-#include "zoneDistribute.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -85,6 +84,7 @@ class gradAlpha
 
         //- SurfaceIterator finds the plane centre for specified VOF value
         surfaceIteratorPLIC sIterPLIC_;
+
 
     // Private Member Functions
 

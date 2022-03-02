@@ -592,8 +592,6 @@ polyBoundaryMesh = $(polyMesh)/polyBoundaryMesh
 $(polyBoundaryMesh)/polyBoundaryMesh.C
 $(polyBoundaryMesh)/polyBoundaryMeshEntries.C
 
-meshes/ProcessorTopology/commSchedule.C
-
 globalMeshData = $(polyMesh)/globalMeshData
 $(globalMeshData)/globalMeshData.C
 $(globalMeshData)/globalPoints.C
@@ -812,6 +810,7 @@ algorithms/indexedOctree/volumeType.C
 algorithms/dynamicIndexedOctree/dynamicIndexedOctreeName.C
 algorithms/dynamicIndexedOctree/dynamicTreeDataPoint.C
 
+parallel/commSchedule/commSchedule.C
 parallel/globalIndex/globalIndex.C
 
 meshes/data/data.C

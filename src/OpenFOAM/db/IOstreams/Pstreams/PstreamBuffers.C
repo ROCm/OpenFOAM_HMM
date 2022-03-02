@@ -27,6 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "PstreamBuffers.H"
+#include "bitSet.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -303,6 +304,74 @@ void Foam::PstreamBuffers::finishedSends
         // Note: maybe possible only if using different tag from write started
         // by ~UOPstream. Needs some work.
     }
+}
+
+
+bool Foam::PstreamBuffers::finishedSends
+(
+    bitSet& sendConnections,
+    DynamicList<label>& sendProcs,
+    DynamicList<label>& recvProcs,
+    const bool wait
+)
+{
+    bool changed = (sendConnections.size() != nProcs());
+
+    if (changed)
+    {
+        sendConnections.resize(nProcs());
+    }
+
+    // Update send connections
+    // - reasonable to assume there are no self-sends on UPstream::myProcNo
+    forAll(sendBuf_, proci)
+    {
+        // ie, hasSendData(proci)
+        if (sendConnections.set(proci, !sendBuf_[proci].empty()))
+        {
+            // The state changed
+            changed = true;
+        }
+    }
+
+    reduce(changed, orOp<bool>());
+
+    if (changed)
+    {
+        // Create send/recv topology
+
+        // The send ranks
+        sendProcs.clear();
+        forAll(sendBuf_, proci)
+        {
+            // ie, hasSendData(proci)
+            if (!sendBuf_[proci].empty())
+            {
+                sendProcs.append(proci);
+            }
+        }
+
+        finishedSends(wait);  // All-to-all
+
+        // The recv ranks
+        recvProcs.clear();
+        forAll(recvBuf_, proci)
+        {
+            // ie, hasRecvData(proci)
+            if (!recvBuf_[proci].empty())
+            {
+                recvProcs.append(proci);
+            }
+        }
+    }
+    else
+    {
+        // Use existing send/recv ranks
+
+        finishedSends(sendProcs, recvProcs, wait);
+    }
+
+    return changed;
 }
 
 

@@ -27,13 +27,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "zoneDistribute.H"
-#include "dummyTransform.H"
-#include "emptyPolyPatch.H"
-#include "processorPolyPatch.H"
-#include "syncTools.H"
-#include "wedgePolyPatch.H"
-
-#include "globalPoints.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -43,61 +36,14 @@ namespace Foam
 }
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-Foam::autoPtr<Foam::indirectPrimitivePatch>
-Foam::zoneDistribute::coupledFacesPatch() const
-{
-    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
-
-    label nCoupled = 0;
-
-    for (const polyPatch& pp : patches)
-    {
-        if (isA<processorPolyPatch>(pp))
-        {
-            nCoupled += pp.size();
-        }
-    }
-    labelList coupledFaces(nCoupled);
-    nCoupled = 0;
-
-    for (const polyPatch& pp : patches)
-    {
-        if (isA<processorPolyPatch>(pp))
-        {
-            label facei = pp.start();
-
-            forAll(pp, i)
-            {
-                coupledFaces[nCoupled++] = facei++;
-            }
-        }
-    }
-
-    return autoPtr<indirectPrimitivePatch>::New
-    (
-        IndirectList<face>
-        (
-            mesh_.faces(),
-            coupledFaces
-        ),
-        mesh_.points()
-    );
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::zoneDistribute::zoneDistribute(const fvMesh& mesh)
 :
     MeshObject<fvMesh, Foam::TopologicalMeshObject, zoneDistribute>(mesh),
-    coupledBoundaryPoints_(coupledFacesPatch()().meshPoints()),
-    send_(UPstream::nProcs()),
     stencil_(zoneCPCStencil::New(mesh)),
     globalNumbering_(stencil_.globalNumbering()),
-    sendTo_(),   // Initial zero-sized
-    recvFrom_()  // Initial zero-sized
+    send_(UPstream::nProcs())
 {}
 
 
@@ -140,20 +86,10 @@ void Foam::zoneDistribute::setUpCommforZone
 
     if (UPstream::parRun())
     {
-        if (sendTo_.empty())
-        {
-            // First time
-            sendTo_.resize(UPstream::nProcs());
-            recvFrom_.resize(UPstream::nProcs());
-            sendTo_ = false;
-            recvFrom_ = false;
-        }
-
-        const labelHashSet& comms = stencil.needsComm();
-
         List<labelHashSet> needed(UPstream::nProcs());
 
-        for (const label celli : comms)
+        // Bin according to originating (sending) processor
+        for (const label celli : stencil.needsComm())
         {
             if (zone[celli])
             {
@@ -169,73 +105,24 @@ void Foam::zoneDistribute::setUpCommforZone
             }
         }
 
+        // Stream the send data into PstreamBuffers,
+        // which we also use to track the current topology.
 
         PstreamBuffers pBufs(UPstream::commsTypes::nonBlocking);
 
-        // Stream data into buffer
         for (const int proci : UPstream::allProcs())
         {
             if (proci != UPstream::myProcNo() && !needed[proci].empty())
             {
-                // Put data into send buffer
+                // Serialize as List
                 UOPstream toProc(proci, pBufs);
-
                 toProc << needed[proci].sortedToc();
             }
         }
 
+        pBufs.finishedSends(sendConnections_, sendProcs_, recvProcs_);
 
-        // Need update, or use existing partial communication info?
-        bool fullUpdate = false;
-        for (const int proci : UPstream::allProcs())
-        {
-            if
-            (
-                proci != UPstream::myProcNo()
-             && (!sendTo_[proci] && !needed[proci].empty())
-            )
-            {
-                // Changed state sendTo_ from false -> true
-                sendTo_[proci] = true;
-                fullUpdate = true;
-            }
-        }
-
-
-        if (returnReduce(fullUpdate, orOp<bool>()))
-        {
-            pBufs.finishedSends();
-
-            // Update which ones receive
-            for (const int proci : UPstream::allProcs())
-            {
-                recvFrom_[proci] = pBufs.hasRecvData(proci);
-            }
-        }
-        else
-        {
-            // No change in senders...
-            // - can communicate with a subset of processors
-            DynamicList<label> sendProcs;
-            DynamicList<label> recvProcs;
-
-            for (const int proci : UPstream::allProcs())
-            {
-                if (sendTo_[proci])
-                {
-                    sendProcs.append(proci);
-                }
-                if (recvFrom_[proci])
-                {
-                    recvProcs.append(proci);
-                }
-            }
-
-            // Wait until everything is written
-            pBufs.finishedSends(sendProcs, recvProcs);
-        }
-
-        for (const int proci : UPstream::allProcs())
+        for (const int proci : pBufs.allProcs())
         {
             send_[proci].clear();
 

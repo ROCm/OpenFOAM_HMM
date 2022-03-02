@@ -29,7 +29,6 @@ License
 #include "ListOps.H"
 #include "Pstream.H"
 #include "commSchedule.H"
-#include "boolList.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -50,22 +49,16 @@ Foam::labelList Foam::ProcessorTopology<Container, ProcPatch>::procNeighbours
 
     forAll(patches, patchi)
     {
-        const typename Container::const_reference patch = patches[patchi];
-
-        if (isA<ProcPatch>(patch))
+        const auto* cpp = isA<ProcPatch>(patches[patchi]);
+        if (cpp)
         {
-            const ProcPatch& procPatch =
-                refCast<const ProcPatch>(patch);
+            const label nbrProci = cpp->neighbProcNo();
 
-            label pNeighbProcNo = procPatch.neighbProcNo();
-
-            if (!isNeighbourProc[pNeighbProcNo])
+            if (!isNeighbourProc[nbrProci])
             {
-                nNeighbours++;
-
-                maxNb = max(maxNb, procPatch.neighbProcNo());
-
-                isNeighbourProc[pNeighbProcNo] = true;
+                isNeighbourProc[nbrProci] = true;
+                maxNb = max(maxNb, nbrProci);
+                ++nNeighbours;
             }
         }
     }
@@ -87,15 +80,13 @@ Foam::labelList Foam::ProcessorTopology<Container, ProcPatch>::procNeighbours
 
     forAll(patches, patchi)
     {
-        const typename Container::const_reference patch = patches[patchi];
-
-        if (isA<ProcPatch>(patch))
+        const auto* cpp = isA<ProcPatch>(patches[patchi]);
+        if (cpp)
         {
-            const ProcPatch& procPatch =
-                refCast<const ProcPatch>(patch);
+            const label nbrProci = cpp->neighbProcNo();
 
-            // Construct reverse map
-            procPatchMap_[procPatch.neighbProcNo()] = patchi;
+            // Reverse map
+            procPatchMap_[nbrProci] = patchi;
         }
     }
 
@@ -113,7 +104,7 @@ Foam::ProcessorTopology<Container, ProcPatch>::ProcessorTopology
 )
 :
     labelListList(Pstream::nProcs(comm)),
-    patchSchedule_(2*patches.size())
+    patchSchedule_()
 {
     if (Pstream::parRun())
     {
@@ -132,6 +123,8 @@ Foam::ProcessorTopology<Container, ProcPatch>::ProcessorTopology
      && Pstream::defaultCommsType == Pstream::commsTypes::scheduled
     )
     {
+        patchSchedule_.resize(2*patches.size());
+
         label patchEvali = 0;
 
         // 1. All non-processor patches
@@ -155,21 +148,21 @@ Foam::ProcessorTopology<Container, ProcPatch>::ProcessorTopology
         // to determine the schedule. Each processor pair stands for both
         // send and receive.
         label nComms = 0;
-        forAll(*this, proci)
+        for (const labelList& neighbours : *this)
         {
-            nComms += operator[](proci).size();
+            nComms += neighbours.size();
         }
         DynamicList<labelPair> comms(nComms);
 
         forAll(*this, proci)
         {
-            const labelList& nbrs = operator[](proci);
+            const labelList& neighbours = operator[](proci);
 
-            forAll(nbrs, i)
+            for (const label nbrProci : neighbours)
             {
-                if (proci < nbrs[i])
+                if (proci < nbrProci)
                 {
-                    comms.append(labelPair(proci, nbrs[i]));
+                    comms.append(labelPair(proci, nbrProci));
                 }
             }
         }
@@ -185,10 +178,8 @@ Foam::ProcessorTopology<Container, ProcPatch>::ProcessorTopology
             ).procSchedule()[Pstream::myProcNo(comm)]
         );
 
-        forAll(mySchedule, iter)
+        for (const label commI : mySchedule)
         {
-            label commI = mySchedule[iter];
-
             // Get the other processor
             label nb = comms[commI][0];
             if (nb == Pstream::myProcNo(comm))

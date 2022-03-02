@@ -45,7 +45,6 @@ namespace Foam
 
 namespace Foam
 {
-// Private Member Functions
 
 // Count the number of outstanding communications for a single processor
 static label outstandingComms
@@ -99,7 +98,7 @@ Foam::commSchedule::commSchedule
     }
     // Note: no need to shrink procToComms. Are small.
 
-    if (debug && Pstream::master())
+    if (debug && UPstream::master())
     {
         Pout<< "commSchedule : Wanted communication:" << endl;
 
@@ -198,7 +197,7 @@ Foam::commSchedule::commSchedule
             busy[comms[maxCommI][1]] = true;
         }
 
-        if (debug && Pstream::master())
+        if (debug && UPstream::master())
         {
             label nIterComms = nScheduled-oldNScheduled;
 
@@ -240,7 +239,7 @@ Foam::commSchedule::commSchedule
         iter++;
     }
 
-    if (debug && Pstream::master())
+    if (debug && UPstream::master())
     {
         Pout<< endl;
     }
@@ -282,7 +281,7 @@ Foam::commSchedule::commSchedule
         procSchedule_[proc1][nProcScheduled[proc1]++] = commI;
     }
 
-    if (debug && Pstream::master())
+    if (debug && UPstream::master())
     {
         Pout<< "commSchedule::commSchedule : Per processor:" << endl;
 

@@ -31,11 +31,27 @@ Description
     Class for parallel communication in a narrow band. It either provides a Map
     with the neighbouring values of the selected region or returns a Map of the
     required values in global addressing. Also holds a reference to the stencil
-    Before the data transfer the communation has to be set up:
+    Before the data transfer the communication has to be set up:
     exchangeFields_.setUpCommforZone(interfaceCell_);
     Is used in the plicRDF
 
     Original code supplied by Henning Scheufler, DLR (2019)
+
+    Additional optimization of processor communication
+    provided by Tetsuo AOYAGI, RIST (2022), to use a more compact
+    exchange of sizes with an updated version of PstreamBuffers.
+    This optimization uses additional sendTo/recvFrom member data
+    to track the topological connectivity, acting like an on-the-fly
+    sub-communicator, and respects corner connectivity.
+
+    -# Initially topological connections are empty (or all false).
+    -# Scan the stencil global cellIds (active zones only) and split
+       into sub-lists according the originating processor (the sender).
+    -# If an originating processor appears/disappears, need to update
+       the connectivity information (requires an all-to-all).
+    -# When possible, the topological send/recv is used in PstreamBuffers
+       finishedSends (minimizes communication).
+    .
 
 SourceFiles
     zoneDistributeI.H
@@ -51,7 +67,6 @@ SourceFiles
 #include "volFields.H"
 
 #include "zoneCPCStencil.H"
-#include "IOobject.H"
 #include "MeshObject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -69,47 +84,41 @@ class zoneDistribute
 {
     // Private Data
 
-        //- labels of the points on coupled patches
-        labelList coupledBoundaryPoints_;
-
-        //- Addressing for processor-to-processor comms
-        List<labelList> send_;
-
-        //- Return patch of all coupled faces.
-        autoPtr<indirectPrimitivePatch> coupledFacesPatch() const;
-
+        //- Reference to the zone stencil
         zoneCPCStencil& stencil_;
 
-        //- Global number into cells and faces
+        //- Global number into index of cells/faces
         const globalIndex& globalNumbering_;
 
-        //- Parallel: send data to processors (true/false)
-        //  updated in setUpCommforZone
-        boolList sendTo_;
+        //- Global cell/face index to send for processor-to-processor comms
+        List<labelList> send_;
 
-        //- Parallel: receive data from processors (true/false)
-        //  updated in setUpCommforZone
-        boolList recvFrom_;
+        //- Parallel [cache]: send connectivity (true/false)
+        bitSet sendConnections_;
+
+        //- Parallel [cache]: send data to these ranks
+        DynamicList<label> sendProcs_;
+
+        //- Parallel [cache]: recv data from these ranks
+        DynamicList<label> recvProcs_;
 
 
     // Private Member Functions
 
-        //- Gives patchNumber and patchFaceNumber for a given
-        //- Geometric volume field
+        //- Return local volField value at (cell or face) index
         template<typename Type>
         Type getLocalValue
         (
-            const GeometricField<Type, fvPatchField, volMesh>& phi,
+            const VolumeField<Type>& phi,
             const label localIdx
         ) const;
-
 
         //- Gives patchNumber and patchFaceNumber for a given
         //- Geometric volume field
         template<typename Type>
         Type faceValue
         (
-            const GeometricField<Type, fvPatchField, volMesh>& phi,
+            const VolumeField<Type>& phi,
             const label localIdx
         ) const;
 
@@ -158,7 +167,7 @@ public:
         template<typename Type>
         Type getValue
         (
-            const GeometricField<Type, fvPatchField, volMesh>& phi,
+            const VolumeField<Type>& phi,
             const Map<Type>& valuesFromOtherProc,
             const label gblIdx
         ) const;
@@ -168,7 +177,7 @@ public:
         Map<Field<Type>> getFields
         (
             const boolList& zone,
-            const GeometricField<Type, fvPatchField, volMesh>& phi
+            const VolumeField<Type>& phi
         );
 
         //- Returns stencil and provides a Map with globalNumbering
@@ -176,7 +185,7 @@ public:
         Map<Type> getDatafromOtherProc
         (
             const boolList& zone,
-            const GeometricField<Type, fvPatchField, volMesh>& phi
+            const VolumeField<Type>& phi
         );
 };
 
