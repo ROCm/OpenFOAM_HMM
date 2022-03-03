@@ -165,7 +165,7 @@ void Foam::dynamicRefineFvMesh::calculateProtectedCells
 
 void Foam::dynamicRefineFvMesh::readDict()
 {
-    dictionary refineDict
+    const dictionary refineDict
     (
         IOdictionary
         (

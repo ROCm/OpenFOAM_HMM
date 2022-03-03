@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2018 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020,2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,7 +57,7 @@ Foam::porosityModels::powerLawLopesdaCostaZone::powerLawLopesdaCostaZone
 :
     zoneName_(name + ":porousZone")
 {
-    dictionary coeffs(dict.optionalSubDict(modelType + "Coeffs"));
+    const dictionary& coeffs(dict.optionalSubDict(modelType + "Coeffs"));
 
     // Vertical direction within porous region
     vector zDir(coeffs.get<vector>("zDir"));
