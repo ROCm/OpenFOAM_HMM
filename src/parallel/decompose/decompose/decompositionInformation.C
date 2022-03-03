@@ -143,7 +143,7 @@ Foam::decompositionInformation::decompositionInformation
     distrib_(),
     nDomains_(0)
 {
-    populate(cellCells.m(), cellCells.offsets(), decomp, nDomains);
+    populate(cellCells.values(), cellCells.offsets(), decomp, nDomains);
 }
 
 

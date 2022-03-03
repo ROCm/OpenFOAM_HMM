@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,7 +25,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    CompactListListTest
+    Test-CompactListList
 
 Description
     Simple demonstration and test application for the CompactListList class.
@@ -32,6 +33,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "CompactListList.H"
+#include "IndirectList.H"
 #include "IOstreams.H"
 #include "StringStream.H"
 #include "faceList.H"
@@ -44,9 +46,9 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     {
-        // null construct
+        // Default construct
         CompactListList<label> cll1;
-        Info<< "cll1:" << cll1 << endl;
+        Info<< "cll1:" << cll1 << nl;
 
         // Resize and assign row by row
         labelList row0(2, Zero);
@@ -61,10 +63,12 @@ int main(int argc, char *argv[])
         cll1[1].deepCopy(row1);
         Info<< "cll1:" << cll1 << endl;
 
-        forAll(cll1.m(), i)
+        forAll(cll1.values(), i)
         {
             Info<< "i:" << i << " whichRow:" << cll1.whichRow(i) << endl;
         }
+
+        Info<< "unpack:" << cll1.unpack<face>() << endl;
     }
 
     List<List<label>> lll(5);
@@ -74,23 +78,23 @@ int main(int argc, char *argv[])
     lll[3].setSize(0, 3);
     lll[4].setSize(1, 4);
 
-    CompactListList<label> cll2(lll);
+    Info<< "packed:" << CompactListList<label>::pack(lll) << endl;
+
+    auto cll2(CompactListList<label>::pack(lll));
 
     Info<< "cll2  = " << cll2 << endl;
 
     forAll(cll2, i)
     {
-        Info<< cll2[i] << endl;
+        Info<< cll2[i] << nl;
     }
-
     Info<< endl;
 
     Info<< "cll2(2, 3) = " << cll2(2, 3) << nl << endl;
     cll2(2, 3) = 999;
     Info<< "cll2(2, 3) = " << cll2(2, 3) << nl << endl;
 
-    Info<< "cll2 as List<List<label >> " << cll2()
-        << endl;
+    Info<< "cll2 as List<List<label>> " << cll2.unpack() << endl;
 
     cll2.setSize(3);
 
@@ -140,16 +144,34 @@ int main(int argc, char *argv[])
         Info<< "cll5 = " << cll5 << endl;
     }
 
+    // Make some faces
     {
-        faceList fcs(2);
-        fcs[0] = face(labelList(1, label(111)));
-        fcs[1] = face(labelList(2, label(222)));
+        faceList fcs(5);
+        forAll(fcs, facei)
+        {
+            fcs[facei] = face(identity(4, facei));
+        }
 
-        CompactListList<label, face> compactFcs(fcs);
-        Info<< "comactFcs:" << compactFcs << endl;
+        Info<< "input faces: " << fcs << endl;
 
-        faceList fcs2 = compactFcs();
-        Info<< "fcs2:" << fcs2 << endl;
+        // From <face>
+        auto compactFcs(CompactListList<label>::pack<face>(fcs));
+        Info<< "compact faces:" << compactFcs << endl;
+
+        faceList fcs2 = compactFcs.unpack<face>();
+        Info<< "deserialized:" << fcs2 << endl;
+
+        // From some faces
+        IndirectList<face> subfaces(fcs, labelList({2, 4, 1}));
+
+        Info<< "sub faces: " << subfaces << endl;
+
+        auto subCompact
+        (
+            CompactListList<label>::pack(subfaces)
+        );
+        Info<< "compact faces:" << subCompact << endl;
+        Info<< "deserialized:" << subCompact.unpack() << endl;
     }
 
     return 0;

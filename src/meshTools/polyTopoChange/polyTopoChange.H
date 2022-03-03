@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,7 +68,6 @@ SourceFiles
 
 #include "DynamicList.H"
 #include "labelList.H"
-#include "CompactListList.H"
 #include "pointField.H"
 #include "Map.H"
 #include "HashSet.H"
@@ -92,6 +91,7 @@ class topoAction;
 class objectMap;
 class IOobject;
 class mapPolyMesh;
+template<class T> class CompactListList;
 
 /*---------------------------------------------------------------------------*\
                        Class polyTopoChange Declaration

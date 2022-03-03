@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1702,7 +1702,8 @@ void Foam::fvMeshDistribute::sendMesh
     // Send
     toDomain
         << mesh.points()
-        << CompactListList<label, face>(mesh.faces())
+        // Send as (offsets/values)
+        << CompactListList<label>::pack<face>(mesh.faces())
         << mesh.faceOwner()
         << mesh.faceNeighbour()
         << mesh.boundaryMesh()
@@ -1744,7 +1745,8 @@ Foam::autoPtr<Foam::fvMesh> Foam::fvMeshDistribute::receiveMesh
 )
 {
     pointField domainPoints(fromNbr);
-    faceList domainFaces = CompactListList<label, face>(fromNbr)();
+    // Receive as (offsets/values), unpack to faceList
+    faceList domainFaces = CompactListList<label>(fromNbr).unpack<face>();
     labelList domainAllOwner(fromNbr);
     labelList domainAllNeighbour(fromNbr);
     PtrList<entry> patchEntries(fromNbr);

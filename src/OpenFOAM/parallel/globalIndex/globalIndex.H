@@ -76,12 +76,12 @@ class globalIndex
     // Private Member Functions
 
         //- Sort and bin. validBins contains bins with non-zero size.
-        static void bin
+        static CompactListList<label>
+        bin
         (
             const labelUList& offsets,
             const labelUList& globalIds,
             labelList& order,
-            CompactListList<label>& sortedElems,
             DynamicList<label>& validBins
         );
 

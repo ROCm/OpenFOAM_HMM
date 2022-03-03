@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,6 +37,7 @@ License
 #include "polyAddCell.H"
 #include "polyModifyCell.H"
 #include "polyRemoveCell.H"
+#include "CompactListList.H"
 #include "objectMap.H"
 #include "processorPolyPatch.H"
 #include "ListOps.H"
@@ -572,8 +573,8 @@ void Foam::polyTopoChange::makeCellCells
         if (nei >= 0)
         {
             label own = faceOwner_[facei];
-            cellCells.m()[cellCells.index(own, nNbrs[own]++)] = nei;
-            cellCells.m()[cellCells.index(nei, nNbrs[nei]++)] = own;
+            cellCells(own, nNbrs[own]++) = nei;
+            cellCells(nei, nNbrs[nei]++) = own;
         }
     }
 }

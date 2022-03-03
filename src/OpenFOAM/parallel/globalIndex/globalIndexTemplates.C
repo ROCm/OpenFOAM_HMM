@@ -840,19 +840,16 @@ void Foam::globalIndex::get
 ) const
 {
     allFld.resize_nocopy(globalIds.size());
+
     if (globalIds.size())
     {
         // Sort according to processor
         labelList order;
-        CompactListList<label> bins;
         DynamicList<label> validBins(Pstream::nProcs());
-        bin
+
+        CompactListList<label> bins
         (
-            offsets(),
-            globalIds,
-            order,
-            bins,
-            validBins
+            bin(offsets(), globalIds, order, validBins)
         );
 
         // Send local indices to individual processors as local index
@@ -860,12 +857,11 @@ void Foam::globalIndex::get
 
         for (const auto proci : validBins)
         {
-            const labelUList& es = bins[proci];
+            labelList localIDs(bins[proci]);
 
-            labelList localIDs(es.size());
-            forAll(es, i)
+            for (label& val : localIDs)
             {
-                localIDs[i] = toLocal(proci, es[i]);
+                val = toLocal(proci, val);
             }
 
             UOPstream os(proci, sendBufs);

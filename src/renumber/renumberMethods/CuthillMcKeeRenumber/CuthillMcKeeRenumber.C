@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -79,7 +79,7 @@ Foam::labelList Foam::CuthillMcKeeRenumber::renumber
         cellCells
     );
 
-    labelList orderedToOld = bandCompression(cellCells());
+    labelList orderedToOld = bandCompression(cellCells.unpack());
 
     if (reverse_)
     {

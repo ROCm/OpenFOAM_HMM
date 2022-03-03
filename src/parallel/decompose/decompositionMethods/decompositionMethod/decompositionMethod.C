@@ -414,7 +414,7 @@ Foam::labelList Foam::decompositionMethod::decompose
     (
         decompose
         (
-            coarseCellCells(),
+            coarseCellCells.unpack(),
             coarsePoints,
             coarseWeights
         )

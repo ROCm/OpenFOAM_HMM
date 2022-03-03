@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,40 +30,37 @@ License
 
 // * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * //
 
-template<class T, class Container>
-Foam::CompactListList<T, Container>::CompactListList(Istream& is)
+template<class T>
+Foam::CompactListList<T>::CompactListList(Istream& is)
+:
+    offsets_(is),
+    values_(is)
 {
-    operator>>(is, *this);
+    // Optionally: enforceSizeSanity();
 }
 
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-template<class T, class Container>
-Foam::Istream& Foam::operator>>(Istream& is, CompactListList<T, Container>& lst)
+template<class T>
+Foam::Istream& Foam::CompactListList<T>::readList(Istream& is)
 {
-    is  >> lst.offsets_ >> lst.m_;
-    // Note: empty list gets output as two empty lists
-    if (lst.offsets_.size())
-    {
-        lst.size_ = lst.offsets_.size()-1;
-    }
-    else
-    {
-        lst.size_ = 0;
-    }
+    offsets_.readList(is);
+    values_.readList(is);
+    // Optionally: enforceSizeSanity();
     return is;
 }
 
 
-template<class T, class Container>
-Foam::Ostream& Foam::operator<<
+template<class T>
+Foam::Ostream& Foam::CompactListList<T>::writeList
 (
     Ostream& os,
-    const CompactListList<T, Container>& lst
-)
+    const label shortLen
+) const
 {
-    os  << lst.offsets_ << lst.m_;
+    offsets_.writeList(os, shortLen);
+    values_.writeList(os, shortLen);
     return os;
 }
 

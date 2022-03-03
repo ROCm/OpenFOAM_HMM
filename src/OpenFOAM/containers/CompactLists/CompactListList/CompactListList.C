@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,181 +27,332 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "CompactListList.H"
+#include "labelRange.H"
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+template<class T>
+void Foam::CompactListList<T>::reportOverflowAndExit
+(
+    const label idx,
+    const labelUList& localLens
+)
+{
+    FatalErrorInFunction
+        << "Overflow : sum of sizes exceeds labelMax ("
+        << labelMax << ") after index " << idx;
+
+    if (!localLens.empty())
+    {
+        FatalError << " of " << flatOutput(localLens);
+    }
+
+    FatalError
+        << nl
+        << "Please recompile with larger datatype for label." << nl
+        << exit(FatalError);
+}
+
+
+template<class T>
+template<class ListListType>
+Foam::CompactListList<T> Foam::CompactListList<T>::packImpl
+(
+    const ListListType& lists,
+    const bool checkOverflow
+)
+{
+    CompactListList<T> compact;
+
+    auto& newOffsets = compact.offsets_;
+    auto& newValues = compact.values_;
+
+    label total = 0;
+    const label len = lists.size();
+
+    if (len)
+    {
+        newOffsets.resize(len+1, Zero);
+
+        for (label i = 0; i < len; ++i)
+        {
+            newOffsets[i] = total;
+            total += lists[i].size();
+
+            if (checkOverflow && total < newOffsets[i])
+            {
+                reportOverflowAndExit(i);
+            }
+        }
+        newOffsets[len] = total;
+    }
+
+    if (total)
+    {
+        // Copy in the data
+        newValues.resize(total);
+
+        auto outIter = newValues.begin();
+
+        for (const auto& list : lists)
+        {
+            forAll(list, i)
+            {
+                *outIter = list[i];
+                ++outIter;
+            }
+        }
+    }
+
+    return compact;
+}
+
+
+template<class T>
+template<class SubListType>
+Foam::CompactListList<T> Foam::CompactListList<T>::pack
+(
+    const UList<SubListType>& lists,
+    const bool checkOverflow
+)
+{
+    return CompactListList<T>::packImpl<UList<SubListType>>
+    (
+        lists,
+        checkOverflow
+    );
+}
+
+
+template<class T>
+template<class SubListType, class Addr>
+Foam::CompactListList<T> Foam::CompactListList<T>::pack
+(
+    const IndirectListBase<SubListType, Addr>& lists,
+    const bool checkOverflow
+)
+{
+    return CompactListList<T>::packImpl<IndirectListBase<SubListType, Addr>>
+    (
+        lists,
+        checkOverflow
+    );
+}
+
 
 // * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * //
 
-template<class T, class Container>
-Foam::CompactListList<T, Container>::CompactListList(const List<Container>& ll)
-:
-    size_(ll.size()),
-    offsets_(ll.size()+1)
+template<class T>
+Foam::CompactListList<T>::CompactListList(const labelUList& listSizes)
 {
-    label sumSize = 0;
-    offsets_[0] = 0;
-    forAll(ll, i)
+    const label len = listSizes.size();
+
+    if (len)
     {
-        sumSize += ll[i].size();
-        offsets_[i+1] = sumSize;
-    }
+        offsets_.resize(len+1);
 
-    m_.setSize(sumSize);
-
-    label k = 0;
-    forAll(ll, i)
-    {
-        const Container& lli = ll[i];
-
-        forAll(lli, j)
+        label total = 0;
+        for (label i = 0; i < len; ++i)
         {
-            m_[k++] = lli[j];
+            offsets_[i] = total;
+            total += listSizes[i];
+
+#ifdef FULLDEBUG
+            if (total < offsets_[i])
+            {
+                reportOverflowAndExit(i, listSizes);
+            }
+#endif
         }
+
+        offsets_[len] = total;
+        values_.resize(total);
     }
 }
 
 
-template<class T, class Container>
-Foam::CompactListList<T, Container>::CompactListList
+template<class T>
+Foam::CompactListList<T>::CompactListList
 (
-    const labelUList& rowSizes
-)
-:
-    size_(rowSizes.size()),
-    offsets_(rowSizes.size()+1)
-{
-    label sumSize = 0;
-    offsets_[0] = 0;
-    forAll(rowSizes, i)
-    {
-        sumSize += rowSizes[i];
-        offsets_[i+1] = sumSize;
-    }
-
-    m_.setSize(sumSize);
-}
-
-
-template<class T, class Container>
-Foam::CompactListList<T, Container>::CompactListList
-(
-    const labelUList& rowSizes,
+    const labelUList& listSizes,
     const T& val
 )
-:
-    size_(rowSizes.size()),
-    offsets_(rowSizes.size()+1)
 {
-    label sumSize = 0;
-    offsets_[0] = 0;
-    forAll(rowSizes, i)
-    {
-        sumSize += rowSizes[i];
-        offsets_[i+1] = sumSize;
-    }
+    const label len = listSizes.size();
 
-    m_.setSize(sumSize, val);
+    if (len)
+    {
+        offsets_.resize(len+1);
+
+        label total = 0;
+        for (label i = 0; i < len; ++i)
+        {
+            offsets_[i] = total;
+            total += listSizes[i];
+
+#ifdef FULLDEBUG
+            if (total < offsets_[i])
+            {
+                reportOverflowAndExit(i, listSizes);
+            }
+#endif
+        }
+
+        offsets_[len] = total;
+        values_.resize(total, val);
+    }
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class T, class Container>
-void Foam::CompactListList<T, Container>::setSize(const label mRows)
+template<class T>
+Foam::label Foam::CompactListList<T>::maxNonLocalSize(const label rowi) const
 {
-    if (mRows == 0)
+    const label len = (offsets_.size() - 1);
+
+    if (len < 1)
+    {
+        return 0;
+    }
+
+    label maxLen = 0;
+
+    for (label i=0; i < len; ++i)
+    {
+        if (i != rowi)
+        {
+            const label localLen = (offsets_[i+1] - offsets_[i]);
+            maxLen = max(maxLen, localLen);
+        }
+    }
+
+    return maxLen;
+}
+
+
+template<class T>
+std::streamsize Foam::CompactListList<T>::byteSize() const
+{
+    if (!is_contiguous<T>::value)
+    {
+        FatalErrorInFunction
+            << "Invalid for non-contiguous data types"
+            << abort(FatalError);
+    }
+    return this->size_bytes();
+}
+
+
+template<class T>
+Foam::labelRange Foam::CompactListList<T>::range(const label i) const
+{
+    return labelRange(offsets_[i], offsets_[i+1] - offsets_[i]);
+}
+
+
+template<class T>
+Foam::List<Foam::labelRange>
+Foam::CompactListList<T>::ranges() const
+{
+    List<labelRange> values;
+
+    const label len = (offsets_.size() - 1);
+
+    if (len < 1)
+    {
+        return values;
+    }
+
+    values.resize(len);
+
+    for (label i=0; i < len; ++i)
+    {
+        values[i].reset(offsets_[i], (offsets_[i+1] - offsets_[i]));
+    }
+
+    return values;
+}
+
+
+template<class T>
+void Foam::CompactListList<T>::resize(const labelUList& listSizes)
+{
+    const label len = listSizes.size();
+
+    if (len)
+    {
+        offsets_.resize(len+1);
+
+        label total = 0;
+        for (label i = 0; i < len; ++i)
+        {
+            offsets_[i] = total;
+            total += listSizes[i];
+#if 0
+            if (checkOverflow && total < offsets_[i])
+            {
+                reportOverflowAndExit(i, listSizes);
+            }
+#endif
+        }
+
+        offsets_[len] = total;
+        values_.resize(total);
+    }
+    else
     {
         clear();
     }
-    if (mRows < size())
-    {
-        size_ = mRows;
-        offsets_.setSize(mRows+1);
-        m_.setSize(offsets_[mRows]);
-    }
-    else if (mRows > size())
-    {
-        FatalErrorInFunction
-            << "Cannot be used to extend the list from " << offsets_.size()
-            << " to " << mRows << nl
-            << "    Please use one of the other setSize member functions"
-            << abort(FatalError);
-    }
 }
 
 
-template<class T, class Container>
-void Foam::CompactListList<T, Container>::setSize
-(
-    const label mRows,
-    const label nData
-)
+template<class T>
+void Foam::CompactListList<T>::setLocalSize(const label rowi, const label len)
 {
-    size_ = mRows;
-    offsets_.setSize(mRows+1);
-    m_.setSize(nData);
-}
-
-
-template<class T, class Container>
-void Foam::CompactListList<T, Container>::setSize
-(
-    const label mRows,
-    const label nData,
-    const T& t
-)
-{
-    size_ = mRows;
-    offsets_.setSize(mRows+1);
-    m_.setSize(nData, t);
-}
-
-
-template<class T, class Container>
-void Foam::CompactListList<T, Container>::setSize(const labelUList& rowSizes)
-{
-    size_ = rowSizes.size();
-    offsets_.setSize(rowSizes.size()+1);
-
-    label sumSize = 0;
-    offsets_[0] = 0;
-    forAll(rowSizes, i)
+    if (rowi >= 0 && rowi+1 < offsets_.size() && len >= 0)
     {
-        sumSize += rowSizes[i];
-        offsets_[i+1] = sumSize;
-    }
+        const label delta = (len - (offsets_[rowi+1] - offsets_[rowi]));
 
-    m_.setSize(sumSize);
-}
-
-
-template<class T, class Container>
-Foam::labelList Foam::CompactListList<T, Container>::sizes() const
-{
-    labelList rowSizes(size());
-
-    if (rowSizes.size() > 0)
-    {
-        forAll(rowSizes, i)
+        // TBD: additional overflow check
+        if (delta)
         {
-            rowSizes[i] = offsets_[i+1] - offsets_[i];
+            for (label i = rowi+1; i < offsets_.size(); ++i)
+            {
+                offsets_[i] += delta;
+            }
         }
     }
-    return rowSizes;
 }
 
 
-template<class T, class Container>
-void Foam::CompactListList<T, Container>::clear()
+template<class T>
+Foam::labelList Foam::CompactListList<T>::localSizes() const
 {
-    size_ = 0;
-    offsets_.clear();
-    m_.clear();
+    labelList values;
+
+    const label len = (offsets_.size() - 1);
+
+    if (len < 1)
+    {
+        return values;
+    }
+
+    values.resize(len);
+
+    for (label i=0; i < len; ++i)
+    {
+        values[i] = offsets_[i+1] - offsets_[i];
+    }
+
+    return values;
 }
 
 
-template<class T, class Container>
-void Foam::CompactListList<T, Container>::swap
+template<class T>
+void Foam::CompactListList<T>::swap
 (
-    CompactListList<T, Container>& other
+    CompactListList<T>& other
 )
 {
     if (this == &other)
@@ -209,16 +360,15 @@ void Foam::CompactListList<T, Container>::swap
         return;  // Self-swap is a no-op
     }
 
-    std::swap(size_, other.size_);
     offsets_.swap(other.offsets_);
-    m_.swap(other.m_);
+    values_.swap(other.values_);
 }
 
 
-template<class T, class Container>
-void Foam::CompactListList<T, Container>::transfer
+template<class T>
+void Foam::CompactListList<T>::transfer
 (
-    CompactListList<T, Container>& list
+    CompactListList<T>& list
 )
 {
     if (this == &list)
@@ -226,25 +376,43 @@ void Foam::CompactListList<T, Container>::transfer
         return;  // Self-assignment is a no-op
     }
 
-    this->clear();
-    this->swap(list);
+    offsets_.transfer(list.offsets_);
+    values_.transfer(list.values_);
 }
 
 
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-template<class T, class Container>
-Foam::List<Container> Foam::CompactListList<T, Container>::operator()()
-const
+template<class T>
+template<class SubListType>
+Foam::List<SubListType>
+Foam::CompactListList<T>::unpack() const
 {
-    List<Container> ll(size());
+    List<SubListType> lists(size());
 
-    forAll(ll, i)
+    forAll(lists, i)
     {
-        ll[i] = Container(operator[](i));
+        lists[i] = SubListType(this->localList(i));
     }
 
-    return ll;
+    return lists;
+}
+
+
+template<class T>
+template<class SubListType>
+Foam::List<SubListType>
+Foam::CompactListList<T>::unpack(const labelRange& range) const
+{
+    List<SubListType> lists(range.size());
+
+    auto outIter = lists.begin();
+
+    for (const label i : range)
+    {
+        *outIter = SubListType(this->localList(i));
+        ++outIter;
+    }
+
+    return lists;
 }
 
 

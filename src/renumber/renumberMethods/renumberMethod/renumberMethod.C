@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,7 +85,7 @@ Foam::labelList Foam::renumberMethod::renumber
     );
 
     // Renumber based on agglomerated points
-    return renumber(cellCells(), points);
+    return renumber(cellCells.unpack(), points);
 }
 
 
@@ -123,7 +123,7 @@ Foam::labelList Foam::renumberMethod::renumber
     (
         renumber
         (
-            coarseCellCells(),
+            coarseCellCells.unpack(),
             coarsePoints
         )
     );

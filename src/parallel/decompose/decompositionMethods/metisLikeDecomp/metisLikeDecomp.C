@@ -233,7 +233,13 @@ Foam::labelList Foam::metisLikeDecomp::decompose
 
     // Decompose using default weights
     labelList decomp;
-    decomposeGeneral(cellCells.m(), cellCells.offsets(), pointWeights, decomp);
+    decomposeGeneral
+    (
+        cellCells.values(),
+        cellCells.offsets(),
+        pointWeights,
+        decomp
+    );
 
     return decomp;
 }
@@ -271,7 +277,13 @@ Foam::labelList Foam::metisLikeDecomp::decompose
 
     // Decompose using default weights
     labelList decomp;
-    decomposeGeneral(cellCells.m(), cellCells.offsets(), agglomWeights, decomp);
+    decomposeGeneral
+    (
+        cellCells.values(),
+        cellCells.offsets(),
+        agglomWeights,
+        decomp
+    );
 
 
     // Rework back into decomposition for original mesh
@@ -305,11 +317,18 @@ Foam::labelList Foam::metisLikeDecomp::decompose
     //   adjncy      : contains neighbours (= edges in graph)
     //   xadj(celli) : start of information in adjncy for celli
 
-    CompactListList<label> cellCells(globalCellCells);
+
+    auto cellCells(CompactListList<label>::pack(globalCellCells));
 
     // Decompose using default weights
     labelList decomp;
-    decomposeGeneral(cellCells.m(), cellCells.offsets(), cellWeights, decomp);
+    decomposeGeneral
+    (
+        cellCells.values(),
+        cellCells.offsets(),
+        cellWeights,
+        decomp
+    );
 
     return decomp;
 }

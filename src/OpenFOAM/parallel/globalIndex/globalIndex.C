@@ -128,28 +128,29 @@ Foam::globalIndex::globalIndex(Istream& is)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::globalIndex::bin
+Foam::CompactListList<Foam::label>
+Foam::globalIndex::bin
 (
     const labelUList& offsets,
     const labelUList& globalIds,
     labelList& order,
-    CompactListList<label>& bins,
     DynamicList<label>& validBins
 )
 {
     sortedOrder(globalIds, order);
-
-    bins.m() = UIndirectList<label>(globalIds, order);
-
-    labelList& binOffsets = bins.offsets();
-    binOffsets.resize_nocopy(offsets.size());
-    binOffsets = Zero;
-
     validBins.clear();
+
+    CompactListList<label> bins;
 
     if (globalIds.size())
     {
-        const label id = bins.m()[0];
+        labelList& binOffsets = bins.offsets();
+        binOffsets.resize(offsets.size(), Zero);
+
+        labelList& binValues = bins.values();
+        binValues = UIndirectList<label>(globalIds, order);
+
+        const label id = binValues[0];
         label proci = findLower(offsets, id+1);
 
         validBins.append(proci);
@@ -157,7 +158,7 @@ void Foam::globalIndex::bin
 
         for (label i = 1; i < order.size(); i++)
         {
-            const label id = bins.m()[i];
+            const label id = binValues[i];
 
             if (id < offsets[proci+1])
             {
@@ -185,6 +186,8 @@ void Foam::globalIndex::bin
             binOffsets[j] = binOffsets[proci]+binSize;
         }
     }
+
+    return bins;
 }
 
 

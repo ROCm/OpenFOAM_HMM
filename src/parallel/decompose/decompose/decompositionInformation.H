@@ -120,19 +120,17 @@ public:
 
 
     //- Destructor
-    ~decompositionInformation()
-    {}
+    ~decompositionInformation() = default;
 
 
     // Member Functions
 
         void clear();
 
-        label nDomains() const
+        label nDomains() const noexcept
         {
             return nDomains_;
         }
-
 
         void printSummary(Ostream& os) const;
 

@@ -50,16 +50,14 @@ namespace Foam
 
 class renumberMethod
 {
-
 protected:
 
-    // Protected data
+    // Protected Data
 
         const dictionary& renumberDict_;
 
-private:
 
-    // Private Member Functions
+    // Protected Member Functions
 
         //- No copy construct
         renumberMethod(const renumberMethod&) = delete;
@@ -118,7 +116,7 @@ public:
         virtual labelList renumber(const pointField&) const
         {
             NotImplemented;
-            return labelList(0);
+            return labelList();
         }
 
         //- Return the order in which cells need to be visited, i.e.

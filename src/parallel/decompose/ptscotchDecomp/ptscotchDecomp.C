@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -516,7 +516,7 @@ Foam::labelList Foam::ptscotchDecomp::decompose
     labelList decomp;
     decompose
     (
-        cellCells.m(),
+        cellCells.values(),
         cellCells.offsets(),
         pointWeights,
         decomp
@@ -563,7 +563,7 @@ Foam::labelList Foam::ptscotchDecomp::decompose
     labelList decomp;
     decompose
     (
-        cellCells.m(),
+        cellCells.values(),
         cellCells.offsets(),
         pointWeights,
         decomp
@@ -604,13 +604,13 @@ Foam::labelList Foam::ptscotchDecomp::decompose
     //   adjncy      : contains neighbours (= edges in graph)
     //   xadj(celli) : start of information in adjncy for celli
 
-    CompactListList<label> cellCells(globalCellCells);
+    auto cellCells(CompactListList<label>::pack(globalCellCells));
 
     // Decompose using weights
     labelList decomp;
     decompose
     (
-        cellCells.m(),
+        cellCells.values(),
         cellCells.offsets(),
         cWeights,
         decomp
