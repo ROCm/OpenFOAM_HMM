@@ -29,7 +29,6 @@ License
 #include "decompositionMethod.H"
 #include "globalIndex.H"
 #include "syncTools.H"
-#include "Tuple2.H"
 #include "faceSet.H"
 #include "regionSplit.H"
 #include "localPointRegion.H"
@@ -481,7 +480,7 @@ void Foam::decompositionMethod::calcCellCells
     // Create global cell numbers
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    globalIndex globalAgglom
+    const globalIndex globalAgglom
     (
         nLocalCoarse,
         Pstream::msgType(),
@@ -680,7 +679,7 @@ void Foam::decompositionMethod::calcCellCells
     // Create global cell numbers
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    globalIndex globalAgglom
+    const globalIndex globalAgglom
     (
         nLocalCoarse,
         Pstream::msgType(),

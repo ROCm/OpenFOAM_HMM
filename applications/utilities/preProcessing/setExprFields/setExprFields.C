@@ -208,8 +208,8 @@ bool setField
 
     doCorrectBoundaryConditions(ctrl.correctBCs, output);
 
-    const label numTotal = returnReduce(output.size(), plusOp<label>());
-    reduce(numValuesChanged, plusOp<label>());
+    const label numTotal = returnReduce(output.size(), sumOp<label>());
+    reduce(numValuesChanged, sumOp<label>());
 
     if (numValuesChanged == numTotal)
     {

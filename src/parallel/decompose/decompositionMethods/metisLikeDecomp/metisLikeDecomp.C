@@ -56,8 +56,11 @@ Foam::label Foam::metisLikeDecomp::decomposeGeneral
             << " Decomposing all of graph on master processor." << endl;
     }
 
+    // Protect against zero-sized offset list
+    const label numCells = max(0, (xadj.size()-1));
+
     const globalIndex globalAdjncy(adjncy.size());
-    const globalIndex globalCells(xadj.size()-1);
+    const globalIndex globalCells(numCells);
 
     List<label> allAdjncy(globalAdjncy.gather(adjncy));
 
@@ -107,13 +110,13 @@ Foam::label Foam::metisLikeDecomp::decomposeGeneral
     {
         // Send my part of the graph (local numbering)
 
-        if (xadj.size() <= 1)
+        if (!numCells)
         {
             // Nothing to do
         }
         else
         {
-            SubList<label> procSlot(xadj, xadj.size()-1);
+            SubList<label> procSlot(xadj, numCells);
 
             OPstream::write
             (

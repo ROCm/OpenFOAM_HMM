@@ -49,8 +49,10 @@ void Foam::decompositionInformation::populate
         subdist.resize(nDomain, Zero);
     }
 
-    const label nCells = max(0, xadj.size()-1);
-    for (label celli = 0; celli < nCells; ++celli)
+    // Protect against zero-sized offset list
+    const label numCells = max(0, (xadj.size()-1));
+
+    for (label celli = 0; celli < numCells; ++celli)
     {
         const label ownProc = decomp[celli];
 

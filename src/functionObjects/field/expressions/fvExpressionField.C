@@ -265,8 +265,8 @@ bool Foam::functionObjects::fvExpressionField::setField
 
     if (action_ == actionType::opModify && log)
     {
-        const label numTotal = returnReduce(output.size(), plusOp<label>());
-        reduce(numValuesChanged, plusOp<label>());
+        const label numTotal = returnReduce(output.size(), sumOp<label>());
+        reduce(numValuesChanged, sumOp<label>());
 
         Info<< this->name() << ": set ";
         if (numValuesChanged == numTotal)
