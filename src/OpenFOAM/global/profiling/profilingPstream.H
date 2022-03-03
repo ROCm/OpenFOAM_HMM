@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef profilingPstream_H
-#define profilingPstream_H
+#ifndef Foam_profilingPstream_H
+#define Foam_profilingPstream_H
 
 #include "cpuTime.H"
 #include "FixedList.H"
@@ -62,13 +62,14 @@ public:
         {
             GATHER = 0,
             SCATTER,
+            BROADCAST,
             REDUCE,
             WAIT,
             ALL_TO_ALL
         };
 
         //- The timing values
-        typedef FixedList<double, 5> timingList;
+        typedef FixedList<double, 6> timingList;
 
 
 private:
@@ -163,6 +164,12 @@ public:
         inline static void addScatterTime()
         {
             addTime(SCATTER);
+        }
+
+        //- Add time increment to broadcastTime
+        inline static void addBroadcastTime()
+        {
+            addTime(BROADCAST);
         }
 
         //- Add time increment to reduceTime

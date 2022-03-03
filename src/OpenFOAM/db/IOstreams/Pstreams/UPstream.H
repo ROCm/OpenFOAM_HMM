@@ -177,6 +177,12 @@ public:
 
 private:
 
+    // Private Data
+
+        //- Communications type of this stream
+        commsTypes commsType_;
+
+
     // Private Static Data
 
         //- By default this is not a parallel run
@@ -250,14 +256,6 @@ private:
         );
 
 
-protected:
-
-    // Protected Data
-
-        //- Communications type of this stream
-        commsTypes commsType_;
-
-
 public:
 
     // Declare name of the class and its debug switch
@@ -271,8 +269,7 @@ public:
         //- in accuracy
         static bool floatTransfer;
 
-        //- Number of processors at which the sum algorithm changes from linear
-        //- to tree
+        //- Number of processors to change from linear to tree communication
         static int nProcsSimpleSum;
 
         //- Default commsType

@@ -58,7 +58,7 @@ void Foam::PstreamDetail::allBroadcast
         PstreamGlobals::MPICommunicators_[communicator]
     );
 
-    profilingPstream::addScatterTime();
+    profilingPstream::addBroadcastTime();
 }
 
 
@@ -69,7 +69,6 @@ void Foam::PstreamDetail::allReduce
     int count,
     MPI_Datatype datatype,
     MPI_Op optype,
-    const int tag,
     const label communicator
 )
 {

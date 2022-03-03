@@ -77,7 +77,7 @@ void Foam::UIPstream::bufferIPCrecv()
 
     messageSize_ = UIPstream::read
     (
-        commsType_,
+        commsType(),
         fromProcNo_,
         recvBuf_.data(),
         recvBuf_.capacity(),

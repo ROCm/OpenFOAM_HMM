@@ -171,7 +171,7 @@ void reduce
 (
     bool& value,
     const andOp<bool>&,
-    const int tag = UPstream::msgType(),
+    const int tag = UPstream::msgType(),  /*!< (ignored) */
     const label comm = UPstream::worldComm
 );
 
@@ -180,7 +180,7 @@ void reduce
 (
     bool& value,
     const orOp<bool>&,
-    const int tag = UPstream::msgType(),
+    const int tag = UPstream::msgType(),  /*!< (ignored) */
     const label comm = UPstream::worldComm
 );
 
@@ -197,7 +197,7 @@ void reduce                                                                   \
 (                                                                             \
     Native& value,                                                            \
     const minOp<Native>&,                                                     \
-    const int tag = UPstream::msgType(),                                      \
+    const int tag = UPstream::msgType(),  /*!< (ignored) */                   \
     const label comm = UPstream::worldComm                                    \
 );                                                                            \
                                                                               \
@@ -206,7 +206,7 @@ void reduce                                                                   \
 (                                                                             \
     Native& value,                                                            \
     const maxOp<Native>&,                                                     \
-    const int tag = UPstream::msgType(),                                      \
+    const int tag = UPstream::msgType(),  /*!< (ignored) */                   \
     const label comm = UPstream::worldComm                                    \
 );                                                                            \
                                                                               \
@@ -215,7 +215,7 @@ void reduce                                                                   \
 (                                                                             \
     Native& value,                                                            \
     const sumOp<Native>&,                                                     \
-    const int tag = UPstream::msgType(),                                      \
+    const int tag = UPstream::msgType(),  /*!< (ignored) */                   \
     const label comm = UPstream::worldComm                                    \
 );                                                                            \
                                                                               \
@@ -225,7 +225,7 @@ void reduce                                                                   \
     Native values[],                                                          \
     const int size,                                                           \
     const sumOp<Native>&,                                                     \
-    const int tag,                                                            \
+    const int tag,  /*!< (ignored) */                                         \
     const label comm                                                          \
 );                                                                            \
                                                                               \
@@ -235,7 +235,7 @@ inline void reduce                                                            \
 (                                                                             \
     FixedList<Native, N>& values,                                             \
     const sumOp<Native>&,                                                     \
-    const int tag = UPstream::msgType(),                                      \
+    const int tag = UPstream::msgType(),  /*!< (ignored) */                   \
     const label comm = UPstream::worldComm                                    \
 )                                                                             \
 {                                                                             \
@@ -265,7 +265,7 @@ void sumReduce                                                                \
 (                                                                             \
     Native& value,                                                            \
     label& count,                                                             \
-    const int tag = UPstream::msgType(),                                      \
+    const int tag = UPstream::msgType(),  /*!< (ignored) */                   \
     const label comm = UPstream::worldComm                                    \
 );                                                                            \
                                                                               \
@@ -274,7 +274,7 @@ void reduce                                                                   \
 (                                                                             \
     Native& value,                                                            \
     const sumOp<Native>&,                                                     \
-    const int tag,                                                            \
+    const int tag,  /*!< (ignored) */                                         \
     const label comm,                                                         \
     label& requestID                                                          \
 );                                                                            \
@@ -285,7 +285,7 @@ void reduce                                                                   \
     Native values[],                                                          \
     const int size,                                                           \
     const sumOp<Native>&,                                                     \
-    const int tag,                                                            \
+    const int tag,  /*!< (ignored) */                                         \
     const label comm,                                                         \
     label& requestID                                                          \
 );

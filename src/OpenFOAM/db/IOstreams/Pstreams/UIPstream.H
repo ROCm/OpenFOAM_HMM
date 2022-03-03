@@ -290,13 +290,13 @@ public:
         //- and IO format
         UIPBstream
         (
-            const commsTypes commsType,         //!< ignored
-            const int fromProcNo,               //!< UPstream::masterNo()
+            const commsTypes commsType,     //!< ignored
+            const int rootProcNo,           //!< normally UPstream::masterNo()
             DynamicList<char>& receiveBuf,
             label& receiveBufPosition,
-            const int tag = UPstream::msgType(),
+            const int tag = UPstream::msgType(),  //!< ignored
             const label comm = UPstream::worldComm,
-            const bool clearAtEnd = false,   // destroy receiveBuf if at end
+            const bool clearAtEnd = false,  //!< destroy receiveBuf if at end
             IOstreamOption::streamFormat fmt = IOstreamOption::BINARY
         );
 
@@ -317,8 +317,8 @@ public:
         //  \return the message size
         static label read
         (
-            const commsTypes commsTypes,        //!< ignored
-            const int rootProcNo,               //!< UPstream::masterNo()
+            const commsTypes commsTypes,    //!< ignored
+            const int rootProcNo,           //!< normally UPstream::masterNo()
             char* buf,
             const std::streamsize bufSize,
             const int tag = UPstream::msgType(),  //!< ignored

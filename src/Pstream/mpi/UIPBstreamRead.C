@@ -27,7 +27,6 @@ License
 
 #include "UIPstream.H"
 #include "PstreamGlobals.H"
-#include "profilingPstream.H"
 #include "IOstreams.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

@@ -40,13 +40,13 @@ void Foam::reduce
 (
     bool& value,
     const andOp<bool>&,
-    const int tag,
+    const int tag,  /* (unused) */
     const label comm
 )
 {
     // This can also work:
-    // PstreamDetail::allReduce(&value, 1, MPI_BYTE, MPI_BAND, tag, comm);
-    PstreamDetail::allReduce(&value, 1, MPI_C_BOOL, MPI_LAND, tag, comm);
+    // PstreamDetail::allReduce(&value, 1, MPI_BYTE, MPI_BAND, comm);
+    PstreamDetail::allReduce(&value, 1, MPI_C_BOOL, MPI_LAND, comm);
 }
 
 
@@ -54,13 +54,13 @@ void Foam::reduce
 (
     bool& value,
     const orOp<bool>&,
-    const int tag,
+    const int tag,  /* (unused) */
     const label comm
 )
 {
     // This can also work:
-    // PstreamDetail::allReduce(&value, 1, MPI_BYTE, MPI_BOR, tag, comm);
-    PstreamDetail::allReduce(&value, 1, MPI_C_BOOL, MPI_LOR, tag, comm);
+    // PstreamDetail::allReduce(&value, 1, MPI_BYTE, MPI_BOR, comm);
+    PstreamDetail::allReduce(&value, 1, MPI_C_BOOL, MPI_LOR, comm);
 }
 
 
@@ -75,13 +75,13 @@ void Foam::reduce                                                             \
 (                                                                             \
     Native& value,                                                            \
     const minOp<Native>&,                                                     \
-    const int tag,                                                            \
+    const int tag,  /* (unused) */                                            \
     const label comm                                                          \
 )                                                                             \
 {                                                                             \
     PstreamDetail::allReduce<Native>                                          \
     (                                                                         \
-        &value, 1, TaggedType, MPI_MIN, tag, comm                             \
+        &value, 1, TaggedType, MPI_MIN, comm                                  \
     );                                                                        \
 }                                                                             \
                                                                               \
@@ -89,13 +89,13 @@ void Foam::reduce                                                             \
 (                                                                             \
     Native& value,                                                            \
     const maxOp<Native>&,                                                     \
-    const int tag,                                                            \
+    const int tag,  /* (unused) */                                            \
     const label comm                                                          \
 )                                                                             \
 {                                                                             \
     PstreamDetail::allReduce<Native>                                          \
     (                                                                         \
-        &value, 1, TaggedType, MPI_MAX, tag, comm                             \
+        &value, 1, TaggedType, MPI_MAX, comm                                  \
     );                                                                        \
 }                                                                             \
                                                                               \
@@ -103,13 +103,13 @@ void Foam::reduce                                                             \
 (                                                                             \
     Native& value,                                                            \
     const sumOp<Native>&,                                                     \
-    const int tag,                                                            \
+    const int tag,  /* (unused) */                                            \
     const label comm                                                          \
 )                                                                             \
 {                                                                             \
     PstreamDetail::allReduce<Native>                                          \
     (                                                                         \
-        &value, 1, TaggedType, MPI_SUM, tag, comm                             \
+        &value, 1, TaggedType, MPI_SUM, comm                                  \
     );                                                                        \
 }                                                                             \
                                                                               \
@@ -118,13 +118,13 @@ void Foam::reduce                                                             \
     Native values[],                                                          \
     const int size,                                                           \
     const sumOp<Native>&,                                                     \
-    const int tag,                                                            \
+    const int tag,  /* (unused) */                                            \
     const label comm                                                          \
 )                                                                             \
 {                                                                             \
     PstreamDetail::allReduce<Native>                                          \
     (                                                                         \
-        values, size, TaggedType, MPI_SUM, tag, comm                          \
+        values, size, TaggedType, MPI_SUM, comm                               \
     );                                                                        \
 }                                                                             \
 
@@ -150,7 +150,7 @@ void Foam::sumReduce                                                          \
 (                                                                             \
     Native& value,                                                            \
     label& count,                                                             \
-    const int tag,                                                            \
+    const int tag,  /* (unused) */                                            \
     const label comm                                                          \
 )                                                                             \
 {                                                                             \
@@ -162,7 +162,7 @@ void Foam::sumReduce                                                          \
                                                                               \
         PstreamDetail::allReduce<Native>                                      \
         (                                                                     \
-            values, 2, TaggedType, MPI_SUM, tag, comm                         \
+            values, 2, TaggedType, MPI_SUM, comm                              \
         );                                                                    \
                                                                               \
         value = values[0];                                                    \
@@ -174,7 +174,7 @@ void Foam::reduce                                                             \
 (                                                                             \
     Native& value,                                                            \
     const sumOp<Native>&,                                                     \
-    const int tag,                                                            \
+    const int tag,  /* (unused) */                                            \
     const label comm,                                                         \
     label& requestID                                                          \
 )                                                                             \
@@ -190,7 +190,7 @@ void Foam::reduce                                                             \
     Native values[],                                                          \
     const int size,                                                           \
     const sumOp<Native>&,                                                     \
-    const int tag,                                                            \
+    const int tag,  /* (unused) */                                            \
     const label comm,                                                         \
     label& requestID                                                          \
 )                                                                             \

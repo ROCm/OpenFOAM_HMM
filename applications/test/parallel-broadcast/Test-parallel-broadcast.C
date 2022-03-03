@@ -34,6 +34,7 @@ Description
 #include "List.H"
 #include "argList.H"
 #include "Time.H"
+#include "bitSet.H"
 #include "vector.H"
 #include "IPstream.H"
 #include "OPstream.H"
@@ -71,6 +72,16 @@ void testBroadcast(List<T>& values)
     Pout<< "pre-broadcast: " << flatOutput(values) << endl;
     Pstream::broadcast(values);
     Pout<< "post-broadcast: " << flatOutput(values) << endl;
+}
+
+
+void testBroadcast(bitSet& values)
+{
+    Pout<< "pre-broadcast: "
+        << values.size() << ": " << flatOutput(values.values()) << endl;
+    Pstream::broadcast(values);
+    Pout<< "post-broadcast: "
+        << values.size() << ": " << flatOutput(values.values()) << endl;
 }
 
 
@@ -145,6 +156,22 @@ int main(int argc, char *argv[])
                 v *= mult;
                 mult += 1;
             }
+        }
+        testBroadcast(values);
+    }
+
+    {
+        bitSet values;
+        if (Pstream::master())
+        {
+            values.set(labelList({1, 4, 8}));
+            values.resize(10);
+        }
+        else
+        {
+            // Just something different
+            values.set(labelList({0, 2}));
+            values.resize(5);
         }
         testBroadcast(values);
     }

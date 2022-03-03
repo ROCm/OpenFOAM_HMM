@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,45 +50,6 @@ namespace functionObjects
     );
 
 } // End namespace functionObject
-
-
-    // Processor and time for each of: -min -max -sum
-    typedef FixedList<Tuple2<label, scalar>, 3> statData;
-
-
-    //- Reduction class. If x and y are not equal assign value.
-    struct statsEqOp
-    {
-        void operator()
-        (
-            FixedList<statData, 2>& xStats,
-            const FixedList<statData, 2>& yStats
-        ) const
-        {
-            forAll(xStats, i)
-            {
-                statData& x = xStats[i];
-                const statData& y = yStats[i];
-
-                // 0 : min
-                // 1 : max
-                // 2 : sum
-                if (x[0].second() > y[0].second())
-                {
-                    x[0].second() = y[0].second();
-                    x[0].first()  = y[0].first();
-                }
-                if (x[1].second() < y[1].second())
-                {
-                    x[1].second() = y[1].second();
-                    x[1].first()  = y[1].first();
-                }
-                x[2].second() += y[2].second();
-                x[2].first()++;
-            }
-        }
-    };
-
 } // End namespace Foam
 
 
@@ -124,57 +85,59 @@ void Foam::functionObjects::parProfiling::report()
         return;
     }
 
-    typedef FixedList<Tuple2<label, scalar>, 3> statData;
-    FixedList<statData, 2> times;
+    // (Time, Processor) for each of: min/max/sum
+    typedef FixedList<Tuple2<double, int>, 3> statData;
+    typedef FixedList<statData, 2> statDataTimes;
+
+    // Reduction: if x and y are unequal assign value.
+    auto statsEqOp = [](statDataTimes& xStats, const statDataTimes& yStats)
+    {
+        forAll(xStats, i)
+        {
+            statData& x = xStats[i];
+            const statData& y = yStats[i];
+
+            // 0: min, 1: max, 2: total (or avg)
+            if (x[0].first() > y[0].first())
+            {
+                x[0] = y[0];
+            }
+            if (x[1].first() < y[1].first())
+            {
+                x[1] = y[1];
+            }
+            x[2].first() += y[2].first();
+        }
+    };
+
+    statDataTimes times;
 
     {
-        const scalar masterTime =
+        const double masterTime =
         (
             profilingPstream::times(profilingPstream::REDUCE)
           + profilingPstream::times(profilingPstream::GATHER)
           + profilingPstream::times(profilingPstream::SCATTER)
+            // Include broadcast with reduce instead of all-to-all
+          + profilingPstream::times(profilingPstream::BROADCAST)
         );
 
-        statData& reduceStats = times[0];
-
-        Tuple2<label, scalar>& minTime = reduceStats[0];
-        minTime.first() = Pstream::myProcNo();
-        minTime.second() = masterTime;
-
-        Tuple2<label, scalar>& maxTime = reduceStats[1];
-        maxTime.first() = Pstream::myProcNo();
-        maxTime.second() = masterTime;
-
-        Tuple2<label, scalar>& sumTime = reduceStats[2];
-        sumTime.first() = 1;
-        sumTime.second() = masterTime;
+        times[0] = Tuple2<double, int>(masterTime, Pstream::myProcNo());
     }
 
     {
-        const scalar allTime =
+        const double allTime =
         (
             profilingPstream::times(profilingPstream::WAIT)
           + profilingPstream::times(profilingPstream::ALL_TO_ALL)
         );
 
-        statData& allToAllStats = times[1];
-
-        Tuple2<label, scalar>& minTime = allToAllStats[0];
-        minTime.first() = Pstream::myProcNo();
-        minTime.second() = allTime;
-
-        Tuple2<label, scalar>& maxTime = allToAllStats[1];
-        maxTime.first() = Pstream::myProcNo();
-        maxTime.second() = allTime;
-
-        Tuple2<label, scalar>& sumTime = allToAllStats[2];
-        sumTime.first() = 1;
-        sumTime.second() = allTime;
+        times[1] = Tuple2<double, int>(allTime, Pstream::myProcNo());
     }
 
     profilingPstream::suspend();
 
-    Pstream::combineGather(times, statsEqOp());
+    Pstream::combineGather(times, statsEqOp);
 
     profilingPstream::resume();
 
@@ -184,21 +147,23 @@ void Foam::functionObjects::parProfiling::report()
         const statData& reduceStats = times[0];
         const statData& allToAllStats = times[1];
 
-        scalar reduceAvg = reduceStats[2].second()/Pstream::nProcs();
-        scalar allToAllAvg = allToAllStats[2].second()/Pstream::nProcs();
+        double reduceAvg = reduceStats[2].first()/Pstream::nProcs();
+        double allToAllAvg = allToAllStats[2].first()/Pstream::nProcs();
 
         Info<< type() << ':' << nl
             << incrIndent
+
             << indent << "reduce    : avg = " << reduceAvg << 's' << nl
-            << indent << "            min = " << reduceStats[0].second()
-            << "s (processor " << reduceStats[0].first() << ')' << nl
-            << indent << "            max = " << reduceStats[1].second()
-            << "s (processor " << reduceStats[1].first() << ')' << nl
+            << indent << "            min = " << reduceStats[0].first()
+            << "s (processor " << reduceStats[0].second() << ')' << nl
+            << indent << "            max = " << reduceStats[1].first()
+            << "s (processor " << reduceStats[1].second() << ')' << nl
+
             << indent << "all-all   : avg = " << allToAllAvg << 's' << nl
-            << indent << "            min = " << allToAllStats[0].second()
-            << "s (processor " << allToAllStats[0].first() << ')' << nl
-            << indent << "            max = " << allToAllStats[1].second()
-            << "s (processor " << allToAllStats[1].first() << ')'
+            << indent << "            min = " << allToAllStats[0].first()
+            << "s (processor " << allToAllStats[0].second() << ')' << nl
+            << indent << "            max = " << allToAllStats[1].first()
+            << "s (processor " << allToAllStats[1].second() << ')'
             << decrIndent << endl;
     }
 }

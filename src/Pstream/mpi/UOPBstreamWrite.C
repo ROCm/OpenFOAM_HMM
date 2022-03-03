@@ -27,7 +27,6 @@ License
 
 #include "UOPstream.H"
 #include "PstreamGlobals.H"
-#include "profilingPstream.H"
 
 #include <mpi.h>
 
@@ -69,7 +68,7 @@ bool Foam::UOPBstream::bufferIPCsend()
     {
         if
         (
-            !Pstream::broadcast
+            !UPstream::broadcast
             (
                 sendBuf_.data(),
                 sendBuf_.size(),  // same as bufSize

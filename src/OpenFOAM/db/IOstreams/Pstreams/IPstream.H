@@ -102,10 +102,10 @@ public:
         //- Construct for broadcast root, optional buffer size, read format
         IPBstream
         (
-            const commsTypes commsType,
-            const int fromProcNo,   //!< UPstream::masterNo() - root procNo
+            const commsTypes commsType,     //!< ignored
+            const int rootProcNo,           //!< normally UPstream::masterNo()
             const label bufSize = 0,
-            const int tag = UPstream::msgType(),
+            const int tag = UPstream::msgType(),  //!< ignored
             const label comm = UPstream::worldComm,
             IOstreamOption::streamFormat fmt = IOstreamOption::BINARY
         );
@@ -114,7 +114,7 @@ public:
         //- write format
         explicit IPBstream
         (
-            const int fromProcNo,   //!< UPstream::masterNo() - root procNo
+            const int rootProcNo,           //!< normally UPstream::masterNo()
             const label comm = UPstream::worldComm,
             IOstreamOption::streamFormat fmt = IOstreamOption::BINARY
         );

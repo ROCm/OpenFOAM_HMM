@@ -77,14 +77,7 @@ bool Foam::UPstream::broadcast
         PstreamGlobals::MPICommunicators_[communicator]
     );
 
-    if (rootProcNo == UPstream::myProcNo(communicator))
-    {
-        profilingPstream::addScatterTime();
-    }
-    else
-    {
-        profilingPstream::addGatherTime();
-    }
+    profilingPstream::addBroadcastTime();
 
     return !failed;
 }

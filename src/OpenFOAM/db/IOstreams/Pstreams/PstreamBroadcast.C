@@ -29,7 +29,7 @@ License
 #include "IPstream.H"
 #include "contiguous.H"
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 template<class T>
 void Foam::Pstream::genericBroadcast(T& value, const label comm)
@@ -80,7 +80,7 @@ void Foam::Pstream::broadcast(List<T>& values, const label comm)
     }
     else if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
     {
-        // Broadcast the size of the list
+        // Broadcast the size
         label len(values.size());
         UPstream::broadcast
         (
@@ -114,7 +114,7 @@ void Foam::Pstream::broadcast(DynamicList<T, SizeMin>& values, const label comm)
     }
     else if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
     {
-        // Broadcast the size of the list
+        // Broadcast the size
         label len(values.size());
         UPstream::broadcast
         (

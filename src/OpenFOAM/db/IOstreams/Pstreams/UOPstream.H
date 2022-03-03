@@ -364,10 +364,10 @@ public:
         //- and IO format
         UOPBstream
         (
-            const commsTypes commsType,             //!< ignored
-            const int toProcNo,                     //!< UPstream::masterNo()
+            const commsTypes commsType,     //!< ignored
+            const int toProcNo,             //!< normally UPstream::masterNo()
             DynamicList<char>& sendBuf,
-            const int tag = UPstream::msgType(),    //!< ignored
+            const int tag = UPstream::msgType(),  //!< ignored
             const label comm = UPstream::worldComm,
             const bool sendAtDestruct = true,
             IOstreamOption::streamFormat fmt = IOstreamOption::BINARY
@@ -390,11 +390,11 @@ public:
         //  \return True on success
         static bool write
         (
-            const commsTypes commsType,             //!< ignored
-            const int rootProcNo,                   //!< UPstream::masterNo()
+            const commsTypes commsType,     //!< ignored
+            const int rootProcNo,           //!< normally UPstream::masterNo()
             const char* buf,
             const std::streamsize bufSize,
-            const int tag = UPstream::msgType(),    //!< ignored
+            const int tag = UPstream::msgType(),  //!< ignored
             const label comm = UPstream::worldComm
         );
 };

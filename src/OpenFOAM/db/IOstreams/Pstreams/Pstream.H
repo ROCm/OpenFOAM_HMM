@@ -54,6 +54,9 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
+class bitSet;
+
 /*---------------------------------------------------------------------------*\
                            Class Pstream Declaration
 \*---------------------------------------------------------------------------*/
@@ -163,6 +166,14 @@ public:
         static void broadcast
         (
             DynamicList<T, SizeMin>& values,
+            const label comm = UPstream::worldComm
+        );
+
+        //- Broadcast bitSet values
+        //- to all processes in communicator.
+        static void broadcast
+        (
+            bitSet& values,
             const label comm = UPstream::worldComm
         );
 

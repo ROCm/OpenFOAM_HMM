@@ -89,13 +89,13 @@ public:
 
     // Constructors
 
-        //- Construct for broadcast root, optional buffer size, read format
+        //- Construct for broadcast root, optional buffer size, write format
         OPBstream
         (
-            const commsTypes commsType,
-            const int toProcNo,     //!< UPstream::masterNo() - root procNo
+            const commsTypes commsType,     //!< ignored
+            const int rootProcNo,           //!< normally UPstream::masterNo()
             const label bufSize = 0,
-            const int tag = UPstream::msgType(),
+            const int tag = UPstream::msgType(),  //!< ignored
             const label comm = UPstream::worldComm,
             IOstreamOption::streamFormat fmt = IOstreamOption::BINARY
         );
@@ -104,7 +104,7 @@ public:
         //- write format
         explicit OPBstream
         (
-            const int toProcNo,     //!< UPstream::masterNo() - root procNo
+            const int rootProcNo,           //!< normally UPstream::masterNo()
             const label comm = UPstream::worldComm,
             IOstreamOption::streamFormat fmt = IOstreamOption::BINARY
         );

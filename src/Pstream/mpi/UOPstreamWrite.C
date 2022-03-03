@@ -38,7 +38,7 @@ bool Foam::UOPstream::bufferIPCsend()
 {
     return UOPstream::write
     (
-        commsType_,
+        commsType(),
         toProcNo_,
         sendBuf_.cdata(),
         sendBuf_.size(),

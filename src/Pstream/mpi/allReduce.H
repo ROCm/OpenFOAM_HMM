@@ -70,7 +70,6 @@ void allReduce
     int count,
     MPI_Datatype datatype,
     MPI_Op optype,
-    const int tag,
     const label communicator
 );
 
