@@ -224,7 +224,7 @@ void Foam::Pstream::exchange
             }
         }
 
-        if (Pstream::maxCommsSize <= 0)
+        if (UPstream::maxCommsSize <= int(sizeof(T)))
         {
             // Do the exchanging in one go
             exchangeContainer<Container, T>
@@ -244,55 +244,64 @@ void Foam::Pstream::exchange
             // guaranteed that some processor's sending size is some other
             // processor's receive size. Also we can ignore any local comms.
 
-            label maxNSend = 0;
-            forAll(sendBufs, proci)
-            {
-                if (proci != Pstream::myProcNo(comm))
-                {
-                    maxNSend = max(maxNSend, sendBufs[proci].size());
-                }
-            }
-
-            const label maxNBytes = sizeof(T)*maxNSend;
-
-            // We need to send maxNBytes bytes so the number of iterations:
-            //  maxNBytes                           iterations
-            //  ---------                           ----------
+            // We need to send bytes so the number of iterations:
+            //  maxChunkSize                        iterations
+            //  ------------                        ----------
             //  0                                   0
-            //  1..maxCommsSize                     1
-            //  maxCommsSize+1..2*maxCommsSize      2
+            //  1..maxChunkSize                     1
+            //  maxChunkSize+1..2*maxChunkSize      2
             //      etc.
 
-            label nIter;
-            if (maxNBytes == 0)
-            {
-                nIter = 0;
-            }
-            else
-            {
-                nIter = (maxNBytes-1)/Pstream::maxCommsSize+1;
-            }
-            reduce(nIter, maxOp<label>(), tag, comm);
+            const label maxChunkSize(UPstream::maxCommsSize/sizeof(T));
 
+            label nIter(0);
+            {
+                label nSendMax = 0;
+                forAll(sendBufs, proci)
+                {
+                    if (proci != Pstream::myProcNo(comm))
+                    {
+                        nSendMax = max(nSendMax, sendBufs[proci].size());
+                    }
+                }
 
-            List<const char*> charSendBufs(sendBufs.size());
-            List<char*> charRecvBufs(sendBufs.size());
+                if (nSendMax)
+                {
+                    nIter = 1 + ((nSendMax-1)/maxChunkSize);
+                }
+                reduce(nIter, maxOp<label>(), tag, comm);
+
+                /// Info<< "send " << nSendMax << " elements ("
+                ///     << (nSendMax*sizeof(T)) << " bytes) in " << nIter
+                ///     << " iterations of " << maxChunkSize << " chunks ("
+                ///     << (maxChunkSize*sizeof(T)) << " bytes) maxCommsSize:"
+                ///     << Pstream::maxCommsSize << endl;
+            }
 
             labelList nRecv(sendBufs.size());
-            labelList startRecv(sendBufs.size(), Zero);
             labelList nSend(sendBufs.size());
+            labelList startRecv(sendBufs.size(), Zero);
             labelList startSend(sendBufs.size(), Zero);
 
-            for (label iter = 0; iter < nIter; iter++)
+            List<const char*> charPtrSend(sendBufs.size());
+            List<char*> charPtrRecv(sendBufs.size());
+
+            for (label iter = 0; iter < nIter; ++iter)
             {
                 forAll(sendBufs, proci)
                 {
                     nSend[proci] = min
                     (
-                        Pstream::maxCommsSize,
+                        maxChunkSize,
                         sendBufs[proci].size()-startSend[proci]
                     );
-                    charSendBufs[proci] =
+                    nRecv[proci] = min
+                    (
+                        maxChunkSize,
+                        recvBufs[proci].size()-startRecv[proci]
+                    );
+
+                    charPtrSend[proci] =
                     (
                         nSend[proci] > 0
                       ? reinterpret_cast<const char*>
@@ -301,14 +310,7 @@ void Foam::Pstream::exchange
                         )
                       : nullptr
                     );
-
-                    nRecv[proci] = min
-                    (
-                        Pstream::maxCommsSize,
-                        recvBufs[proci].size()-startRecv[proci]
-                    );
-
-                    charRecvBufs[proci] =
+                    charPtrRecv[proci] =
                     (
                         nRecv[proci] > 0
                       ? reinterpret_cast<char*>
@@ -319,12 +321,16 @@ void Foam::Pstream::exchange
                     );
                 }
 
+                /// Info<< "iter " << iter
+                ///     << ": beg=" << flatOutput(startSend)
+                ///     << " len=" << flatOutput(nSend) << endl;
+
                 exchangeBuf<T>
                 (
                     nSend,
-                    charSendBufs,
+                    charPtrSend,
                     nRecv,
-                    charRecvBufs,
+                    charPtrRecv,
                     tag,
                     comm,
                     wait
