@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2020 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,15 +36,16 @@ inline Foam::label Foam::nonUniformTable::index
     scalar T
 ) const
 {
-    if (T < Trange_.min() || T > Trange_.max())
+    scalar nd = 0;
+    if (T > Trange_.min() || T < Trange_.max())
     {
-        FatalErrorInFunction
-            << "Temperature " << T << " out of range " << Trange_ << nl
-            << "    for nonUniformTable " << name_
-            << exit(FatalError);
+        nd = (T - Trange_.min())/deltaT_;
+    }
+    else if (T > Trange_.max())
+    {
+        nd = (Trange_.max() - Trange_.min())/deltaT_;
     }
 
-    const scalar nd = (T - Trange_.min())/deltaT_;
     const label j = nd;
 
     label i = jumpTable_[j];
