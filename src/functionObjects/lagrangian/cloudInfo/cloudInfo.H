@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,6 +58,8 @@ Usage
         Property     | Description                          | Required | Default
         type         | type name: cloudInfo                 | yes |
         clouds       | list of clouds names to process      | yes |
+        selection    | Parcel selection control         | no  | empty-dict
+        sampleOnExecute| Sample/report (on execute) without writing | no | false
     \endtable
 
     The output data of each cloud is written to a file named \<cloudName\>.dat
@@ -72,11 +74,12 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef functionObjects_cloudInfo_H
-#define functionObjects_cloudInfo_H
+#ifndef Foam_functionObjects_cloudInfo_H
+#define Foam_functionObjects_cloudInfo_H
 
 #include "regionFunctionObject.H"
 #include "logFiles.H"
+#include "parcelSelectionDetail.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -91,13 +94,31 @@ namespace functionObjects
 
 class cloudInfo
 :
-    public regionFunctionObject,
-    public logFiles
+    public functionObjects::regionFunctionObject,
+    public functionObjects::logFiles,
+    public Foam::Detail::parcelSelection
 {
 protected:
 
-        //- Switch to send output to Info as well
-        Switch log_;
+    // Data Types
+
+        //- Local control for sampling actions
+        enum sampleActionType : unsigned
+        {
+            ACTION_NONE  = 0,
+            ACTION_WRITE = 0x1,
+            ACTION_STORE = 0x2,
+            ACTION_ALL = 0xF
+        };
+
+
+    // Protected Data
+
+        //- Additional verbosity
+        bool verbose_;
+
+        //- Perform sample actions on execute as well
+        bool onExecute_;
 
         //- List of cloud names
         wordList cloudNames_;
@@ -105,11 +126,14 @@ protected:
         //- Output file per cloud
         PtrList<OFstream> filePtrs_;
 
+
     // Protected Member Functions
 
         //- File header information
         virtual void writeFileHeader(Ostream& os) const;
 
+        //- Perform operation report/write
+        bool performAction(unsigned request);
 
         //- No copy construct
         cloudInfo(const cloudInfo&) = delete;

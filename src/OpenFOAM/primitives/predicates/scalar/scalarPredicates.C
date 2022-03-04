@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -182,30 +182,8 @@ Foam::predicates::scalars::scalars
 (
     std::initializer_list<std::pair<word, scalar>> entries
 )
-:
-    List<unary>(entries.size())
 {
-    // Access
-    const auto get0 =
-        [](const std::pair<word,scalar>& entry) { return entry.first; };
-    const auto get1 =
-        [](const std::pair<word,scalar>& entry) { return entry.second; };
-
-    // Check for bad/unknown operations
-    if (hasBadEntries(entries, get0))
-    {
-        printBadEntries(FatalErrorInFunction, entries, get0, get1)
-            << exit(FatalError);
-    }
-
-    // Appears to be good
-    auto& list = *this;
-    label idx = 0;
-    for (const auto& entry : entries)
-    {
-        list[idx] = predicates::scalars::operation(entry);
-        ++idx;
-    }
+    assign(entries);
 }
 
 
@@ -213,14 +191,29 @@ Foam::predicates::scalars::scalars
 (
     const UList<Tuple2<word, scalar>>& entries
 )
-:
-    List<unary>(entries.size())
 {
+    assign(entries);
+}
+
+
+Foam::predicates::scalars::scalars(Istream& is)
+{
+    is >> *this;
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::predicates::scalars::assign
+(
+    std::initializer_list<std::pair<word, scalar>> entries
+)
+{
+    typedef std::pair<word, scalar> tuple_type;
+
     // Access
-    const auto get0 =
-        [](const Tuple2<word,scalar>& entry) { return entry.first(); };
-    const auto get1 =
-        [](const Tuple2<word,scalar>& entry) { return entry.second(); };
+    const auto get0 = [](const tuple_type& entry) { return entry.first; };
+    const auto get1 = [](const tuple_type& entry) { return entry.second; };
 
     // Check for bad/unknown operations
     if (hasBadEntries(entries, get0))
@@ -229,26 +222,47 @@ Foam::predicates::scalars::scalars
             << exit(FatalError);
     }
 
-    // Appears to be good
-    auto& list = *this;
-    label idx = 0;
-    for (const auto& entry : entries)
+    // Appears to be good, fill the list
+    this->resize_nocopy(entries.size());
+    auto iter = this->begin();
+
+    for (const tuple_type& entry : entries)
     {
-        list[idx] = predicates::scalars::operation(entry);
-        ++idx;
+        *iter = predicates::scalars::operation(entry);
+        ++iter;
     }
 }
 
 
-Foam::predicates::scalars::scalars(Istream& is)
-:
-    List<unary>()
+void Foam::predicates::scalars::assign
+(
+    const UList<Tuple2<word, scalar>>& entries
+)
 {
-    is >> *this;
+    typedef Tuple2<word, scalar> tuple_type;
+
+    // Access
+    const auto get0 = [](const tuple_type& entry) { return entry.first(); };
+    const auto get1 = [](const tuple_type& entry) { return entry.second(); };
+
+    // Check for bad/unknown operations
+    if (hasBadEntries(entries, get0))
+    {
+        printBadEntries(FatalErrorInFunction, entries, get0, get1)
+            << exit(FatalError);
+    }
+
+    // Appears to be good, fill the list
+    this->resize_nocopy(entries.size());
+    auto iter = this->begin();
+
+    for (const tuple_type& entry : entries)
+    {
+        *iter = predicates::scalars::operation(entry);
+        ++iter;
+    }
 }
 
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::label Foam::predicates::scalars::find
 (
@@ -310,29 +324,7 @@ Foam::Istream& Foam::operator>>(Istream& is, Foam::predicates::scalars& list)
     // Read tuples
     List<Tuple2<word, scalar>> entries(is);
 
-    // Access
-    const auto get0 =
-        [](const Tuple2<word,scalar>& entry) { return entry.first(); };
-    const auto get1 =
-        [](const Tuple2<word,scalar>& entry) { return entry.second(); };
-
-
-    // Check for bad/unknown operations
-    if (hasBadEntries(entries, get0))
-    {
-        printBadEntries(FatalIOErrorInFunction(is), entries, get0, get1)
-            << exit(FatalIOError);
-    }
-
-    // Appears to be good
-    list.resize(entries.size());
-
-    label idx = 0;
-    for (const Tuple2<word, scalar>& entry : entries)
-    {
-        list[idx] = predicates::scalars::operation(entry);
-        ++idx;
-    }
+    list.assign(entries);
 
     return is;
 }

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,13 +70,13 @@ inline bool Foam::predicates::scalars::found
 }
 
 
-inline bool Foam::predicates::scalars::match(const scalar& value) const
+inline bool Foam::predicates::scalars::match(const scalar value) const
 {
     return this->matchAny(value);
 }
 
 
-inline bool Foam::predicates::scalars::matchAny(const scalar& value) const
+inline bool Foam::predicates::scalars::matchAny(const scalar value) const
 {
     for (const unary& test : *this)
     {
@@ -90,7 +90,7 @@ inline bool Foam::predicates::scalars::matchAny(const scalar& value) const
 }
 
 
-inline bool Foam::predicates::scalars::matchAll(const scalar& value) const
+inline bool Foam::predicates::scalars::matchAll(const scalar value) const
 {
     for (const unary& test : *this)
     {
@@ -106,7 +106,7 @@ inline bool Foam::predicates::scalars::matchAll(const scalar& value) const
 
 inline Foam::labelList Foam::predicates::scalars::matching
 (
-    const scalar& value
+    const scalar value
 ) const
 {
     labelList indices(this->size());
@@ -154,7 +154,7 @@ inline Foam::labelList Foam::predicates::scalars::matching
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-inline bool Foam::predicates::scalars::operator()(const scalar& value) const
+inline bool Foam::predicates::scalars::operator()(const scalar value) const
 {
     return this->found(value);
 }

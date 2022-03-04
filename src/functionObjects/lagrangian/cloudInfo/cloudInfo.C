@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2015 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,8 +27,10 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "cloudInfo.H"
+#include "cloud.H"
 #include "kinematicCloud.H"
 #include "dictionary.H"
+#include "mathematicalConstants.H"
 #include "PstreamReduceOps.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -74,8 +76,10 @@ Foam::functionObjects::cloudInfo::cloudInfo
     const dictionary& dict
 )
 :
-    regionFunctionObject(name, runTime, dict),
-    logFiles(obr_, name, dict)
+    functionObjects::regionFunctionObject(name, runTime, dict),
+    functionObjects::logFiles(obr_, name, dict),
+    verbose_(false),
+    onExecute_(false)
 {
     read(dict);
 }
@@ -85,24 +89,41 @@ Foam::functionObjects::cloudInfo::cloudInfo
 
 bool Foam::functionObjects::cloudInfo::read(const dictionary& dict)
 {
+    parcelSelect_.clear();
+    verbose_ = false;
+    onExecute_ = false;
+
     if (regionFunctionObject::read(dict) && logFiles::read(dict))
     {
         logFiles::resetNames(dict.get<wordList>("clouds"));
 
         Info<< type() << " " << name() << ": ";
-        if (writeToFile() && names().size())
+        if (names().size())
         {
             Info<< "applying to clouds:" << nl;
-            forAll(names(), cloudi)
+            for (const word& cldName : names())
             {
-                Info<< "    " << names()[cloudi] << nl;
-                writeFileHeader(files(cloudi));
+                Info<< "    " << cldName << nl;
             }
             Info<< endl;
+
+            // Actions to define selection
+            parcelSelect_ = dict.subOrEmptyDict("selection");
+
+            verbose_ = dict.getOrDefault("verbose", false);
+            onExecute_ = dict.getOrDefault("sampleOnExecute", false);
         }
         else
         {
             Info<< "no clouds to be processed" << nl << endl;
+        }
+
+        if (writeToFile())
+        {
+            forAll(names(), cloudi)
+            {
+                writeFileHeader(files(cloudi));
+            }
         }
     }
 
@@ -110,30 +131,133 @@ bool Foam::functionObjects::cloudInfo::read(const dictionary& dict)
 }
 
 
-bool Foam::functionObjects::cloudInfo::execute()
+bool Foam::functionObjects::cloudInfo::performAction(unsigned request)
 {
-    return true;
-}
+    if (!request || names().empty())
+    {
+        return true;
+    }
 
-
-bool Foam::functionObjects::cloudInfo::write()
-{
     forAll(names(), cloudi)
     {
+        // The reported quantities
+        label nTotParcels = 0;
+        scalar totMass = 0, Dmax = 0, D10 = 0, D32 = 0;
+        bool applyFilter = false;
+
         const word& cloudName = names()[cloudi];
 
-        const kinematicCloud& cloud =
-            obr_.lookupObject<kinematicCloud>(cloudName);
+        const auto* kinCloudPtr = obr_.cfindObject<kinematicCloud>(cloudName);
 
-        const label nTotParcels =
-            returnReduce(cloud.nParcels(), sumOp<label>());
+        if (!kinCloudPtr)
+        {
+            // Safety
+            continue;
+        }
 
-        const scalar totMass =
-            returnReduce(cloud.massInSystem(), sumOp<scalar>());
+        const auto& kinCloud = *kinCloudPtr;
+        const auto* plainCloudPtr = isA<cloud>(kinCloud);
 
-        const scalar Dmax = cloud.Dmax();
-        const scalar D10 = cloud.Dij(1, 0);
-        const scalar D32 = cloud.Dij(3, 2);
+        if (!parcelSelect_.empty() && plainCloudPtr)
+        {
+            const auto& plainCloud = *plainCloudPtr;
+
+            // Filtering - simply use cloud methods
+
+            objectRegistry obrTmp
+            (
+                IOobject
+                (
+                    "tmp::cloudInfo::" + cloudName,
+                    obr_.time().constant(),
+                    obr_,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    false
+                )
+            );
+
+            plainCloud.writeObjects(obrTmp);
+
+            // Apply output filter (for the current cloud)
+            applyFilter = calculateFilter(obrTmp, log);
+
+            // Expected/required fields
+            const auto* diamFldPtr = obrTmp.cfindObject<IOField<scalar>>("d");
+            const auto* rhoFldPtr = obrTmp.cfindObject<IOField<scalar>>("rho");
+            const auto* nParticleFldPtr =
+                obrTmp.cfindObject<IOField<scalar>>("nParticle");
+
+            do
+            {
+                #undef  doLocalCode
+                #define doLocalCode(FldPtr, FldName)                          \
+                if (applyFilter && !FldPtr)                                   \
+                {                                                             \
+                    WarningInFunction                                         \
+                        << "Missing \"" << #FldName                           \
+                        << "\" field - disabling filter" << nl;               \
+                    applyFilter = false;                                      \
+                    break;                                                    \
+                }
+
+                doLocalCode(diamFldPtr, d);
+                doLocalCode(rhoFldPtr, rho);
+                doLocalCode(nParticleFldPtr, nParticle);
+                #undef doLocalCode
+            }
+            while (false);
+
+            if (applyFilter)
+            {
+                // Filtered. Need to do everything by hand!
+
+                const auto& diams = *diamFldPtr;
+                const auto& rhos = *rhoFldPtr;
+                const auto& nParts = *nParticleFldPtr;
+
+                FixedList<scalar, 4> Dsums(Zero);
+
+                for (const label particlei : parcelAddr_)
+                {
+                    ++nTotParcels;
+
+                    const scalar d = diams[particlei];
+                    const scalar rho = rhos[particlei];
+                    const scalar np = nParts[particlei];
+
+                    totMass += np*rho*pow3(d);
+                    Dmax = max(Dmax, d);
+
+                    Dsums[0] += np;
+                    Dsums[1] += np*(d);
+                    Dsums[2] += np*(sqr(d));
+                    Dsums[3] += np*(pow3(d));
+                }
+
+                reduce(nTotParcels, sumOp<label>());
+                reduce(totMass, sumOp<scalar>());
+                reduce(Dmax, maxOp<scalar>());
+                reduce(Dsums, sumOp<scalar>());
+
+                totMass *= (constant::mathematical::pi/6.0);
+
+                Dmax = max(0, Dmax);
+                D10 = Dsums[1]/(max(Dsums[0], VSMALL));
+                D32 = Dsums[3]/(max(Dsums[2], VSMALL));
+            }
+        }
+
+        if (!applyFilter)
+        {
+            // No filter - use regular cloud methods
+            nTotParcels = returnReduce(kinCloud.nParcels(), sumOp<label>());
+            totMass = returnReduce(kinCloud.massInSystem(), sumOp<scalar>());
+
+            Dmax = kinCloud.Dmax();
+            D10 = kinCloud.Dij(1, 0);
+            D32 = kinCloud.Dij(3, 2);
+        }
 
         Log << type() << " " << name() <<  " write:" << nl
             << "    number of parcels : " << nTotParcels << nl
@@ -143,7 +267,7 @@ bool Foam::functionObjects::cloudInfo::write()
             << "    D32 diameter      : " << D32 << nl
             << endl;
 
-        if (writeToFile())
+        if ((request & ACTION_WRITE) && writeToFile())
         {
             auto& os = files(cloudi);
 
@@ -159,6 +283,23 @@ bool Foam::functionObjects::cloudInfo::write()
     }
 
     return true;
+}
+
+
+bool Foam::functionObjects::cloudInfo::execute()
+{
+    if (onExecute_)
+    {
+        return performAction(ACTION_ALL & ~ACTION_WRITE);
+    }
+
+    return true;
+}
+
+
+bool Foam::functionObjects::cloudInfo::write()
+{
+    return performAction(ACTION_ALL);
 }
 
 

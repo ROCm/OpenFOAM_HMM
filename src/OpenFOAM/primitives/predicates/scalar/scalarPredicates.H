@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -256,6 +256,14 @@ public:
 
     // Member Functions
 
+        //- Assign new predicates from an initializer list of
+        //- (opName opValue) tuples
+        void assign(std::initializer_list<std::pair<word, scalar>> entries);
+
+        //- Assign new predicates from a list of (opName opValue) tuples
+        void assign(const UList<Tuple2<word, scalar>>& entries);
+
+
     // Search
 
         //- Index of the first match for the value.
@@ -279,23 +287,23 @@ public:
         //- Match any condition in the list.
         //
         //  \return True if the value matches any condition in the list.
-        inline bool match(const scalar& value) const;
+        inline bool match(const scalar value) const;
 
         //- Match any condition in the list.
         //
         //  \return True if the value matches any condition in the list.
-        inline bool matchAny(const scalar& value) const;
+        inline bool matchAny(const scalar value) const;
 
         //- Match all conditions in the list.
         //
         //  \return True if the value matches all conditions in the list.
-        inline bool matchAll(const scalar& value) const;
+        inline bool matchAll(const scalar value) const;
 
         //- Extract list indices for all matches.
         //
         //  \return The locations (indices) in the input list where match()
         //      is true
-        inline labelList matching(const scalar& value) const;
+        inline labelList matching(const scalar value) const;
 
         //- Extract list indices for all matches.
         //
@@ -313,7 +321,7 @@ public:
     // Member Operators
 
         //- Identical to found(), match(), for use as a predicate.
-        inline bool operator()(const scalar& value) const;
+        inline bool operator()(const scalar value) const;
 };
 
 
