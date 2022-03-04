@@ -4,6 +4,7 @@ type                sets;
 libs                (sampling);
 interpolationScheme cellPatchConstrained;
 setFormat           raw;
+
 fields              ( CfMean );
 
 _planes
@@ -17,7 +18,7 @@ _planes
 }
 
 sets
-(
+{
     // Intersections of patches with plane
     planeAA
     {
@@ -28,7 +29,7 @@ sets
             normal ( 0 0 1 );
         }
     }
-);
+}
 
 
 // ************************************************************************* //

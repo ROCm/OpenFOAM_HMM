@@ -5,7 +5,7 @@ sample1
     type        sets;
     libs        (sampling);
     setFormat   gltf;
-
+    writeControl    writeTime;
     interpolationScheme cellPointFace;
 
     formatOptions
@@ -25,10 +25,9 @@ sample1
     }
 
     fields          ( p T k epsilon U );
-    writeControl    writeTime;
 
     sets
-    (
+    {
         line
         {
             type            face;
@@ -41,7 +40,7 @@ sample1
         {
             type            cellCentre;
         }
-    );
+    }
 }
 
 

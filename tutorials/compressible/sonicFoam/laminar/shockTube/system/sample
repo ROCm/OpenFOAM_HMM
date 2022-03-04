@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2112                                 |
+|  \\    /   O peration     | Version:  v2206                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -18,10 +18,11 @@ type            sets;
 libs            (sampling);
 interpolationScheme cellPoint;
 setFormat       raw;
+
 fields          (T mag(U) p);
 
 sets
-(
+{
     data
     {
         type    uniform;
@@ -30,7 +31,7 @@ sets
         end     (4.995 0 0);
         nPoints 1000;
     }
-);
+}
 
 
 // ************************************************************************* //

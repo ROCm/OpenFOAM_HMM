@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2112                                 |
+|  \\    /   O peration     | Version:  v2206                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -63,9 +63,12 @@ functions
 
         interpolationScheme cellPoint;
         setFormat       raw;
+        fixedLocations  false;
+
+        fields          (alpha.water);
 
         sets
-        (
+        {
             s1
             {
                 type            uniform;
@@ -128,11 +131,7 @@ functions
                 end             ( 6.15 0.275 0.5 );
                 nPoints         101;
             }
-        );
-
-        fixedLocations  false;
-
-        fields          (alpha.water);
+        }
     }
 }
 

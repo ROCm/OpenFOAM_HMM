@@ -66,7 +66,7 @@ functions
         libs            (reactingEulerFoamFunctionObjects);
         region          water;
         field           T.liquid;
-        writeControl    outputTime;
+        writeControl    writeTime;
         writeInterval   1;
         htcModel        fixedReferenceTemperature;
         patches         (water_to_solid);
@@ -80,7 +80,7 @@ functions
         log             on;
         enabled         true;
 
-        writeControl    outputTime;
+        writeControl    writeTime;
         writeInterval   1;
 
         writeFields     false;

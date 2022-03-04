@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2112                                 |
+|  \\    /   O peration     | Version:  v2206                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -20,13 +20,14 @@ interpolationScheme cellPoint;
 setFormat           raw;
 executeControl      writeTime;
 writeControl        writeTime;
+
 fields
 (
     turbulenceProperties:epsilon
 );
 
 sets
-(
+{
     y
     {
         type    midPoint;
@@ -34,7 +35,7 @@ sets
         start   (0.5 0 0.5);
         end     (0.5 1 0.5);
     }
-);
+}
 
 
 // ************************************************************************* //

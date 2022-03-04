@@ -55,7 +55,7 @@ functions
         type            heatTransferCoeff;
         libs            (fieldFunctionObjects);
         field           T;
-        writeControl    outputTime;
+        writeControl    writeTime;
         writeInterval   1;
         htcModel        fixedReferenceTemperature;
         patches         (ceiling);
