@@ -304,11 +304,11 @@ void Foam::fvMatrix<Type>::setValuesFromList
 
 
 template<class Type>
-Foam::label Foam::fvMatrix<Type>::checkImplicit(const label fieldI)
+Foam::scalar Foam::fvMatrix<Type>::checkImplicit(const label fieldI)
 {
     const auto& bpsi = this->psi(fieldI).boundaryField();
 
-    label id = -1;
+    scalar id = -1;
     forAll (bpsi, patchI)
     {
         if (bpsi[patchI].useImplicit())
@@ -316,7 +316,6 @@ Foam::label Foam::fvMatrix<Type>::checkImplicit(const label fieldI)
             if (debug)
             {
                 Pout<< "fvMatrix<Type>::checkImplicit "
-                    << " fieldi:" << fieldI
                     << " field:" << this->psi(fieldI).name()
                     << " on mesh:"
                     << this->psi(fieldI).mesh().name()
@@ -324,13 +323,14 @@ Foam::label Foam::fvMatrix<Type>::checkImplicit(const label fieldI)
                     << endl;
             }
 
-            id += (label(2) << patchI);
+            id += Foam::log(scalar(patchI + 2));
+            useImplicit_ = true;
         }
     }
-    if (id >= 0)
+
+    if (useImplicit_)
     {
         lduAssemblyName_ = word("lduAssembly") + name(id);
-        useImplicit_ = true;
     }
     return id;
 }
@@ -1167,7 +1167,7 @@ void Foam::fvMatrix<Type>::addFvMatrix(fvMatrix& matrix)
 
     for (label fieldi = 0; fieldi < nMatrices(); fieldi++)
     {
-        label id = checkImplicit(fieldi);
+        scalar id = checkImplicit(fieldi);
         if (id > 0)
         {
             break;

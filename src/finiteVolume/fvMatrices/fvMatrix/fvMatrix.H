@@ -219,7 +219,7 @@ protected:
         // Implicit helper functions
 
             //- Name the implicit assembly addressing
-            label checkImplicit(const label fieldI = 0);
+            scalar checkImplicit(const label fieldI = 0);
 
 
         // Matrix completion functionality
