@@ -1,0 +1,15 @@
+// -*- C++ -*-
+
+profiling
+{
+    type  parProfiling;
+
+    libs  (utilityFunctionObjects);
+
+    // Report stats on exit only (instead of every time step)
+    executeControl  onEnd;
+    writeControl    none;
+}
+
+
+// ************************************************************************* //

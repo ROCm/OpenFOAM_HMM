@@ -337,73 +337,18 @@ Foam::labelList Foam::simpleGeomDecomp::decompose
     }
     else
     {
-        globalIndex globalNumbers(points.size());
+        const globalIndex globalNumbers(points.size());
 
-        // Collect all points on master
+        pointField allPoints(globalNumbers.gather(points));
+
+        labelList allDecomp;
         if (Pstream::master())
         {
-            pointField allPoints(globalNumbers.totalSize());
-
-            label nTotalPoints = 0;
-            // Master first
-            SubField<point>(allPoints, points.size()) = points;
-            nTotalPoints += points.size();
-
-            // Add received
-            for (const int subproci : Pstream::subProcs())
-            {
-                IPstream fromProc(Pstream::commsTypes::scheduled, subproci);
-                pointField nbrPoints(fromProc);
-                SubField<point>
-                (
-                    allPoints,
-                    nbrPoints.size(),
-                    nTotalPoints
-                ) = nbrPoints;
-                nTotalPoints += nbrPoints.size();
-            }
-
-            // Decompose
-            labelList finalDecomp(decomposeOneProc(allPoints));
-
-            // Send back
-            for (const int subproci : Pstream::subProcs())
-            {
-                OPstream toProc(Pstream::commsTypes::scheduled, subproci);
-                toProc << SubField<label>
-                (
-                    finalDecomp,
-                    globalNumbers.localSize(subproci),
-                    globalNumbers.localStart(subproci)
-                );
-            }
-            // Get my own part
-            finalDecomp.setSize(points.size());
-
-            return finalDecomp;
+            allDecomp = decomposeOneProc(allPoints);
+            allPoints.clear();  // Not needed anymore
         }
-        else
-        {
-            // Send my points
-            {
-                OPstream toMaster
-                (
-                    Pstream::commsTypes::scheduled,
-                    Pstream::masterNo()
-                );
-                toMaster<< points;
-            }
 
-            // Receive back decomposition
-            IPstream fromMaster
-            (
-                Pstream::commsTypes::scheduled,
-                Pstream::masterNo()
-            );
-            labelList finalDecomp(fromMaster);
-
-            return finalDecomp;
-        }
+        return globalNumbers.scatter(allDecomp);
     }
 }
 
@@ -414,88 +359,31 @@ Foam::labelList Foam::simpleGeomDecomp::decompose
     const scalarField& weights
 ) const
 {
-    if (!Pstream::parRun())
+    if (returnReduce((points.size() != weights.size()), orOp<bool>()))
+    {
+        // Ignore zero-sized weights ... and poorly sized ones too
+        return decompose(points);
+    }
+    else if (!Pstream::parRun())
     {
         return decomposeOneProc(points, weights);
     }
     else
     {
-        globalIndex globalNumbers(points.size());
+        const globalIndex globalNumbers(points.size());
 
-        // Collect all points on master
+        pointField allPoints(globalNumbers.gather(points));
+        scalarField allWeights(globalNumbers.gather(weights));
+
+        labelList allDecomp;
         if (Pstream::master())
         {
-            pointField allPoints(globalNumbers.totalSize());
-            scalarField allWeights(globalNumbers.totalSize());
-
-            label nTotalPoints = 0;
-            // Master first
-            SubField<point>(allPoints, points.size()) = points;
-            SubField<scalar>(allWeights, points.size()) = weights;
-            nTotalPoints += points.size();
-
-            // Add received
-            for (const int subproci : Pstream::subProcs())
-            {
-                IPstream fromProc(Pstream::commsTypes::scheduled, subproci);
-                pointField nbrPoints(fromProc);
-                scalarField nbrWeights(fromProc);
-                SubField<point>
-                (
-                    allPoints,
-                    nbrPoints.size(),
-                    nTotalPoints
-                ) = nbrPoints;
-                SubField<scalar>
-                (
-                    allWeights,
-                    nbrWeights.size(),
-                    nTotalPoints
-                ) = nbrWeights;
-                nTotalPoints += nbrPoints.size();
-            }
-
-            // Decompose
-            labelList finalDecomp(decomposeOneProc(allPoints, allWeights));
-
-            // Send back
-            for (const int subproci : Pstream::subProcs())
-            {
-                OPstream toProc(Pstream::commsTypes::scheduled, subproci);
-                toProc << SubField<label>
-                (
-                    finalDecomp,
-                    globalNumbers.localSize(subproci),
-                    globalNumbers.localStart(subproci)
-                );
-            }
-            // Get my own part
-            finalDecomp.setSize(points.size());
-
-            return finalDecomp;
+            allDecomp = decomposeOneProc(allPoints, allWeights);
+            allPoints.clear();  // Not needed anymore
+            allWeights.clear(); // ...
         }
-        else
-        {
-            // Send my points
-            {
-                OPstream toMaster
-                (
-                    Pstream::commsTypes::scheduled,
-                    Pstream::masterNo()
-                );
-                toMaster<< points << weights;
-            }
 
-            // Receive back decomposition
-            IPstream fromMaster
-            (
-                Pstream::commsTypes::scheduled,
-                Pstream::masterNo()
-            );
-            labelList finalDecomp(fromMaster);
-
-            return finalDecomp;
-        }
+        return globalNumbers.scatter(allDecomp);
     }
 }
 

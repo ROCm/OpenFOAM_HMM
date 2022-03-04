@@ -142,6 +142,12 @@ inline Foam::label Foam::globalIndex::size() const
 }
 
 
+inline Foam::labelList Foam::globalIndex::sizes() const
+{
+    return localSizes();
+}
+
+
 inline Foam::label Foam::globalIndex::nProcs() const noexcept
 {
     const label len = (offsets_.size() - 1);
@@ -289,7 +295,7 @@ inline Foam::labelList Foam::globalIndex::toGlobal
 inline void Foam::globalIndex::inplaceToGlobal
 (
     const label proci,
-    labelList& labels
+    labelUList& labels
 ) const
 {
     const label off = offsets_[proci];
@@ -301,7 +307,7 @@ inline void Foam::globalIndex::inplaceToGlobal
 }
 
 
-inline void Foam::globalIndex::inplaceToGlobal(labelList& labels) const
+inline void Foam::globalIndex::inplaceToGlobal(labelUList& labels) const
 {
     inplaceToGlobal(Pstream::myProcNo(), labels);
 }

@@ -28,8 +28,6 @@ License
 
 #include "processorFaPatch.H"
 #include "addToRunTimeSelectionTable.H"
-#include "IPstream.H"
-#include "OPstream.H"
 #include "transformField.H"
 #include "faBoundaryMesh.H"
 #include "faMesh.H"

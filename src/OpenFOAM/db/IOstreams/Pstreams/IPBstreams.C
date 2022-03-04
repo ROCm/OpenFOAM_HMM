@@ -1,0 +1,107 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | www.openfoam.com
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+    Copyright (C) 2022 OpenCFD Ltd.
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+\*---------------------------------------------------------------------------*/
+
+#include "UIPstream.H"
+#include "IPstream.H"
+#include "IOstreams.H"
+
+// * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
+
+Foam::UIPBstream::UIPBstream
+(
+    const commsTypes commsType,
+    const int fromProcNo,
+    DynamicList<char>& receiveBuf,
+    label& receiveBufPosition,
+    const int tag,
+    const label comm,
+    const bool clearAtEnd,
+    IOstreamOption::streamFormat fmt
+)
+:
+    UIPstreamBase
+    (
+        commsType,
+        fromProcNo,
+        receiveBuf,
+        receiveBufPosition,
+        tag,
+        comm,
+        clearAtEnd,
+        fmt
+    )
+{
+    bufferIPCrecv();
+}
+
+
+Foam::IPBstream::IPBstream
+(
+    const commsTypes commsType,
+    const int fromProcNo,
+    const label bufSize,
+    const int tag,
+    const label comm,
+    IOstreamOption::streamFormat fmt
+)
+:
+    Pstream(commsType, bufSize),
+    UIPBstream
+    (
+        commsType,
+        fromProcNo,
+        Pstream::transferBuf_,
+        transferBufPosition_,
+        tag,
+        comm,
+        false,  // Do not clear Pstream::transferBuf_ if at end
+        fmt
+    ),
+    transferBufPosition_(0)
+{}
+
+
+Foam::IPBstream::IPBstream
+(
+    const int fromProcNo,
+    const label comm,
+    IOstreamOption::streamFormat fmt
+)
+:
+    IPBstream
+    (
+        UPstream::commsTypes::scheduled,    // irrelevant
+        fromProcNo,
+        label(0),  // bufSize
+        UPstream::msgType(),                // irrelevant
+        comm,
+        fmt
+    )
+{}
+
+
+// ************************************************************************* //

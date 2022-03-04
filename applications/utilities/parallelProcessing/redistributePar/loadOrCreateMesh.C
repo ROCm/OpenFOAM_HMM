@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -88,25 +88,10 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
         );
 
         Pstream::parRun(oldParRun);
-
-        // Send patches
-        for (const int slave : Pstream::subProcs())
-        {
-            OPstream toSlave(Pstream::commsTypes::scheduled, slave);
-            toSlave << patchEntries;
-        }
-    }
-    else
-    {
-        // Receive patches
-        IPstream fromMaster
-        (
-            Pstream::commsTypes::scheduled,
-            Pstream::masterNo()
-        );
-        fromMaster >> patchEntries;
     }
 
+    // Broadcast: send patches to all
+    Pstream::scatter(patchEntries);  // == worldComm;
 
 
     // Dummy meshes

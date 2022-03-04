@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2013 OpenFOAM Foundation
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,11 +25,28 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "UOPstream.H"
 #include "OPstream.H"
+#include "IOstreams.H"
 
 // * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
 
-Foam::OPstream::OPstream
+Foam::UOPBstream::UOPBstream
+(
+    const commsTypes commsType,
+    const int toProcNo,
+    DynamicList<char>& sendBuf,
+    const int tag,
+    const label comm,
+    const bool sendAtDestruct,
+    IOstreamOption::streamFormat fmt
+)
+:
+    UOPstreamBase(commsType, toProcNo, sendBuf, tag, comm, sendAtDestruct, fmt)
+{}
+
+
+Foam::OPBstream::OPBstream
 (
     const commsTypes commsType,
     const int toProcNo,
@@ -41,7 +57,7 @@ Foam::OPstream::OPstream
 )
 :
     Pstream(commsType, bufSize),
-    UOPstream
+    UOPBstream
     (
         commsType,
         toProcNo,
@@ -52,6 +68,42 @@ Foam::OPstream::OPstream
         fmt
     )
 {}
+
+
+Foam::OPBstream::OPBstream
+(
+    const int toProcNo,
+    const label comm,
+    IOstreamOption::streamFormat fmt
+)
+:
+    OPBstream
+    (
+        UPstream::commsTypes::scheduled,    // irrelevant
+        toProcNo,
+        label(0),  // bufSize
+        UPstream::msgType(),                // irrelevant
+        comm,
+        fmt
+    )
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::UOPBstream::~UOPBstream()
+{
+    if (sendAtDestruct_)
+    {
+        if (!bufferIPCsend())
+        {
+            FatalErrorInFunction
+                << "Failed broadcast message of size "
+                << sendBuf_.size() << " root: " << toProcNo_
+                << Foam::abort(FatalError);
+        }
+    }
+}
 
 
 // ************************************************************************* //

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -80,48 +80,31 @@ Foam::List<Foam::labelPair> Foam::mapDistributeBase::schedule
     }
 
 
-    // Reduce
+    // Gather/reduce
     if (Pstream::master(comm))
     {
         // Receive and merge
-        for (const int slave : Pstream::subProcs(comm))
+        for (const int proci : Pstream::subProcs(comm))
         {
-            IPstream fromSlave
+            IPstream fromProc
             (
                 Pstream::commsTypes::scheduled,
-                slave,
+                proci,
                 0,
                 tag,
                 comm
             );
-            List<labelPair> nbrData(fromSlave);
+            List<labelPair> nbrData(fromProc);
 
-            forAll(nbrData, i)
+            for (const labelPair& connection : nbrData)
             {
-                if (!allComms.found(nbrData[i]))
-                {
-                    label sz = allComms.size();
-                    allComms.setSize(sz+1);
-                    allComms[sz] = nbrData[i];
-                }
+                allComms.appendUniq(connection);
             }
-        }
-        // Send back
-        for (const int slave : Pstream::subProcs(comm))
-        {
-            OPstream toSlave
-            (
-                Pstream::commsTypes::scheduled,
-                slave,
-                0,
-                tag,
-                comm
-            );
-            toSlave << allComms;
         }
     }
     else
     {
+        if (Pstream::parRun())
         {
             OPstream toMaster
             (
@@ -133,18 +116,10 @@ Foam::List<Foam::labelPair> Foam::mapDistributeBase::schedule
             );
             toMaster << allComms;
         }
-        {
-            IPstream fromMaster
-            (
-                Pstream::commsTypes::scheduled,
-                Pstream::masterNo(),
-                0,
-                tag,
-                comm
-            );
-            fromMaster >> allComms;
-        }
     }
+
+    // Broadcast: send comms information to all
+    Pstream::broadcast(allComms, comm);
 
 
     // Determine my schedule.
@@ -158,7 +133,7 @@ Foam::List<Foam::labelPair> Foam::mapDistributeBase::schedule
     );
 
     // Processors involved in my schedule
-    return List<labelPair>(UIndirectList<labelPair>(allComms, mySchedule));
+    return List<labelPair>(allComms, mySchedule);
 
 
     //if (debug)

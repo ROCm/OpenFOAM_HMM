@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -403,53 +403,14 @@ bool Foam::lumpedPointState::readData
 
     if (Pstream::parRun())
     {
-        // Scatter master data using communication scheme
+        // Broadcast master data to everyone
 
-        const List<Pstream::commsStruct>& comms =
-        (
-            (Pstream::nProcs() < Pstream::nProcsSimpleSum)
-          ? Pstream::linearCommunication()
-          : Pstream::treeCommunication()
-        );
-
-        // Get my communication order
-        const Pstream::commsStruct& myComm = comms[Pstream::myProcNo()];
-
-        // Receive from up
-        if (myComm.above() != -1)
-        {
-            IPstream fromAbove
-            (
-                UPstream::commsTypes::scheduled,
-                myComm.above(),
-                0,
-                Pstream::msgType(),
-                Pstream::worldComm
-            );
-
-            fromAbove >> points_ >> angles_ >> degrees_;
-        }
-
-        // Send to downstairs neighbours
-        forAllReverse(myComm.below(), belowI)
-        {
-            OPstream toBelow
-            (
-                UPstream::commsTypes::scheduled,
-                myComm.below()[belowI],
-                0,
-                Pstream::msgType(),
-                Pstream::worldComm
-            );
-
-            toBelow << points_ << angles_ << degrees_;
-        }
-
-        rotationPtr_.reset(nullptr);
-
-        // MPI barrier
+        Pstream::scatter(points_);
+        Pstream::scatter(angles_);
+        Pstream::scatter(degrees_);
         Pstream::scatter(ok);
     }
+    rotationPtr_.reset(nullptr);
 
     return ok;
 }

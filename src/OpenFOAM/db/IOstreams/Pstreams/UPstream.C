@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,6 +49,43 @@ Foam::UPstream::commsTypeNames
     { commsTypes::scheduled, "scheduled" },
     { commsTypes::nonBlocking, "nonBlocking" },
 });
+
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+void Foam::UPstream::broadcast
+(
+    std::string& str,
+    const label comm,
+    const int rootProcNo
+)
+{
+    if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
+    {
+        // Broadcast the string length
+        std::size_t len(str.length());
+
+        UPstream::broadcast
+        (
+            reinterpret_cast<char*>(&len),
+            sizeof(std::size_t),
+            comm,
+            rootProcNo
+        );
+
+        if (!UPstream::master(comm))
+        {
+            // Do not touch string on the master even although it would
+            // be a no-op. We are truly paranoid.
+            str.resize(len);
+        }
+
+        if (len)
+        {
+            UPstream::broadcast(&str[0], len, comm, rootProcNo);
+        }
+    }
+}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -414,7 +451,7 @@ registerOptSwitch
 
 int Foam::UPstream::nProcsSimpleSum
 (
-    Foam::debug::optimisationSwitch("nProcsSimpleSum", 16)
+    Foam::debug::optimisationSwitch("nProcsSimpleSum", 0)
 );
 registerOptSwitch
 (

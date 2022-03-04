@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,74 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "PstreamBuffers.H"
+#include "bitSet.H"
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::PstreamBuffers::finalExchange
+(
+    labelList& recvSizes,
+    const bool wait
+)
+{
+    // Could also check that it is not called twice
+    // but that is used for overlapping send/recv (eg, overset)
+    finishedSendsCalled_ = true;
+
+    if (commsType_ == UPstream::commsTypes::nonBlocking)
+    {
+        // all-to-all
+        Pstream::exchangeSizes(sendBuf_, recvSizes, comm_);
+
+        Pstream::exchange<DynamicList<char>, char>
+        (
+            sendBuf_,
+            recvSizes,
+            recvBuf_,
+            tag_,
+            comm_,
+            wait
+        );
+    }
+}
+
+
+void Foam::PstreamBuffers::finalExchange
+(
+    const labelUList& sendProcs,
+    const labelUList& recvProcs,
+    labelList& recvSizes,
+    const bool wait
+)
+{
+    // Could also check that it is not called twice
+    // but that is used for overlapping send/recv (eg, overset)
+    finishedSendsCalled_ = true;
+
+    if (commsType_ == UPstream::commsTypes::nonBlocking)
+    {
+        Pstream::exchangeSizes
+        (
+            sendProcs,
+            recvProcs,
+            sendBuf_,
+            recvSizes,
+            tag_,
+            comm_
+        );
+
+        Pstream::exchange<DynamicList<char>, char>
+        (
+            sendBuf_,
+            recvSizes,
+            recvBuf_,
+            tag_,
+            comm_,
+            wait
+        );
+    }
+}
+
 
 // * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
 
@@ -38,14 +106,15 @@ Foam::PstreamBuffers::PstreamBuffers
     IOstreamOption::streamFormat fmt
 )
 :
+    finishedSendsCalled_(false),
+    allowClearRecv_(true),
+    format_(fmt),
     commsType_(commsType),
     tag_(tag),
     comm_(comm),
-    format_(fmt),
     sendBuf_(UPstream::nProcs(comm)),
     recvBuf_(UPstream::nProcs(comm)),
-    recvBufPos_(UPstream::nProcs(comm), Zero),
-    finishedSendsCalled_(false)
+    recvBufPos_(UPstream::nProcs(comm), Zero)
 {}
 
 
@@ -70,45 +139,125 @@ Foam::PstreamBuffers::~PstreamBuffers()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::PstreamBuffers::finishedSends(const bool block)
+void Foam::PstreamBuffers::clear()
 {
-    // Could also check that it is not called twice
-    finishedSendsCalled_ = true;
-
-    if (commsType_ == UPstream::commsTypes::nonBlocking)
+    for (DynamicList<char>& buf : sendBuf_)
     {
-        Pstream::exchange<DynamicList<char>, char>
-        (
-            sendBuf_,
-            recvBuf_,
-            tag_,
-            comm_,
-            block
-        );
+        buf.clear();
     }
+    for (DynamicList<char>& buf : recvBuf_)
+    {
+        buf.clear();
+    }
+    recvBufPos_ = 0;
+
+    finishedSendsCalled_ = false;
 }
 
 
-void Foam::PstreamBuffers::finishedSends(labelList& recvSizes, const bool block)
+void Foam::PstreamBuffers::clearStorage()
 {
-    // Could also check that it is not called twice
-    finishedSendsCalled_ = true;
-
-    if (commsType_ == UPstream::commsTypes::nonBlocking)
+    // Could also clear out entire sendBuf_, recvBuf_ and reallocate.
+    // Not sure if it makes much difference
+    for (DynamicList<char>& buf : sendBuf_)
     {
-        Pstream::exchangeSizes(sendBuf_, recvSizes, comm_);
-
-        Pstream::exchange<DynamicList<char>, char>
-        (
-            sendBuf_,
-            recvSizes,
-            recvBuf_,
-            tag_,
-            comm_,
-            block
-        );
+        buf.clearStorage();
     }
+    for (DynamicList<char>& buf : recvBuf_)
+    {
+        buf.clearStorage();
+    }
+    recvBufPos_ = 0;
+
+    finishedSendsCalled_ = false;
+}
+
+
+bool Foam::PstreamBuffers::hasSendData() const
+{
+    for (const DynamicList<char>& buf : sendBuf_)
+    {
+        if (!buf.empty())
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+
+bool Foam::PstreamBuffers::hasSendData(const label proci) const
+{
+    return !sendBuf_[proci].empty();
+}
+
+
+bool Foam::PstreamBuffers::hasRecvData() const
+{
+    if (finishedSendsCalled_)
+    {
+        for (const DynamicList<char>& buf : recvBuf_)
+        {
+            if (!buf.empty())
+            {
+                return true;
+            }
+        }
+    }
+    #ifdef FULLDEBUG
     else
+    {
+        FatalErrorInFunction
+            << "Call finishedSends first" << exit(FatalError);
+    }
+    #endif
+
+    return false;
+}
+
+
+bool Foam::PstreamBuffers::hasRecvData(const label proci) const
+{
+    if (finishedSendsCalled_)
+    {
+        return !recvBuf_[proci].empty();
+    }
+    #ifdef FULLDEBUG
+    else
+    {
+        FatalErrorInFunction
+            << "Call finishedSends first" << exit(FatalError);
+    }
+    #endif
+
+    return false;
+}
+
+
+bool Foam::PstreamBuffers::allowClearRecv(bool on) noexcept
+{
+    bool old(allowClearRecv_);
+    allowClearRecv_ = on;
+    return old;
+}
+
+
+void Foam::PstreamBuffers::finishedSends(const bool wait)
+{
+    labelList recvSizes;
+    finalExchange(recvSizes, wait);
+}
+
+
+void Foam::PstreamBuffers::finishedSends
+(
+    labelList& recvSizes,
+    const bool wait
+)
+{
+    finalExchange(recvSizes, wait);
+
+    if (commsType_ != UPstream::commsTypes::nonBlocking)
     {
         FatalErrorInFunction
             << "Obtaining sizes not supported in "
@@ -122,18 +271,107 @@ void Foam::PstreamBuffers::finishedSends(labelList& recvSizes, const bool block)
 }
 
 
-void Foam::PstreamBuffers::clear()
+void Foam::PstreamBuffers::finishedSends
+(
+    const labelUList& sendProcs,
+    const labelUList& recvProcs,
+    const bool wait
+)
 {
-    for (DynamicList<char>& buf : sendBuf_)
+    labelList recvSizes;
+    finalExchange(sendProcs, recvProcs, recvSizes, wait);
+}
+
+
+void Foam::PstreamBuffers::finishedSends
+(
+    const labelUList& sendProcs,
+    const labelUList& recvProcs,
+    labelList& recvSizes,
+    const bool wait
+)
+{
+    finalExchange(sendProcs, recvProcs, recvSizes, wait);
+
+    if (commsType_ != UPstream::commsTypes::nonBlocking)
     {
-        buf.clear();
+        FatalErrorInFunction
+            << "Obtaining sizes not supported in "
+            << UPstream::commsTypeNames[commsType_] << endl
+            << " since transfers already in progress. Use non-blocking instead."
+            << exit(FatalError);
+
+        // Note: maybe possible only if using different tag from write started
+        // by ~UOPstream. Needs some work.
     }
-    for (DynamicList<char>& buf : recvBuf_)
+}
+
+
+bool Foam::PstreamBuffers::finishedSends
+(
+    bitSet& sendConnections,
+    DynamicList<label>& sendProcs,
+    DynamicList<label>& recvProcs,
+    const bool wait
+)
+{
+    bool changed = (sendConnections.size() != nProcs());
+
+    if (changed)
     {
-        buf.clear();
+        sendConnections.resize(nProcs());
     }
-    recvBufPos_ = 0;
-    finishedSendsCalled_ = false;
+
+    // Update send connections
+    // - reasonable to assume there are no self-sends on UPstream::myProcNo
+    forAll(sendBuf_, proci)
+    {
+        // ie, hasSendData(proci)
+        if (sendConnections.set(proci, !sendBuf_[proci].empty()))
+        {
+            // The state changed
+            changed = true;
+        }
+    }
+
+    reduce(changed, orOp<bool>());
+
+    if (changed)
+    {
+        // Create send/recv topology
+
+        // The send ranks
+        sendProcs.clear();
+        forAll(sendBuf_, proci)
+        {
+            // ie, hasSendData(proci)
+            if (!sendBuf_[proci].empty())
+            {
+                sendProcs.append(proci);
+            }
+        }
+
+        finishedSends(wait);  // All-to-all
+
+        // The recv ranks
+        recvProcs.clear();
+        forAll(recvBuf_, proci)
+        {
+            // ie, hasRecvData(proci)
+            if (!recvBuf_[proci].empty())
+            {
+                recvProcs.append(proci);
+            }
+        }
+    }
+    else
+    {
+        // Use existing send/recv ranks
+
+        finishedSends(sendProcs, recvProcs, wait);
+    }
+
+    return changed;
 }
 
 

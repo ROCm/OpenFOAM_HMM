@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -96,8 +96,7 @@ void Foam::functionObjects::syncObjects::sync()
     );
 
 
-    const label nProcs = Pstream::nProcs(pBufs.comm());
-    for (label proci = 0; proci < nProcs; proci++)
+    for (const int proci : pBufs.allProcs())
     {
         // Get database to send
         const objectRegistry& sendObr = mappedPatchBase::subRegistry
@@ -123,7 +122,7 @@ void Foam::functionObjects::syncObjects::sync()
     // Start sending and receiving and block
     pBufs.finishedSends();
 
-    for (label proci = 0; proci < nProcs; proci++)
+    for (const int proci : pBufs.allProcs())
     {
         // Get database to receive data into
         const objectRegistry& receiveObr = mappedPatchBase::subRegistry

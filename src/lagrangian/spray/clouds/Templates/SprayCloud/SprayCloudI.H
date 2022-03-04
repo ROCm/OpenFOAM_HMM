@@ -88,95 +88,73 @@ inline Foam::scalar Foam::SprayCloud<CloudType>::penetration
             << exit(FatalError);
     }
 
-    scalar distance = 0.0;
-
     const label nParcel = this->size();
-    globalIndex globalParcels(nParcel);
-    const label nParcelSum = globalParcels.totalSize();
+    const globalIndex globalParcels(nParcel);
+    const label nTotParcel = globalParcels.totalSize();
 
-    if (nParcelSum == 0)
+    if (nTotParcel == 0)
     {
-        return distance;
+        return 0;
     }
 
     // lists of parcels mass and distance from initial injection point
-    List<List<scalar>> procMass(Pstream::nProcs());
-    List<List<scalar>> procDist(Pstream::nProcs());
+    List<scalar> mass(nParcel);
+    List<scalar> dist(nParcel);
 
-    List<scalar>& mass = procMass[Pstream::myProcNo()];
-    List<scalar>& dist = procDist[Pstream::myProcNo()];
-
-    mass.setSize(nParcel);
-    dist.setSize(nParcel);
-
-    label i = 0;
-    scalar mSum = 0.0;
-    for (const parcelType& p : *this)
+    scalar mTotal = 0;
     {
-        scalar m = p.nParticle()*p.mass();
-        scalar d = mag(p.position() - p.position0());
-        mSum += m;
+        label i = 0;
+        for (const parcelType& p : *this)
+        {
+            scalar m = p.nParticle()*p.mass();
+            scalar d = mag(p.position() - p.position0());
+            mTotal += m;
 
-        mass[i] = m;
-        dist[i] = d;
-
-        ++i;
+            mass[i] = m;
+            dist[i] = d;
+            ++i;
+        }
     }
+    // Total mass across all processors
+    reduce(mTotal, sumOp<scalar>());
 
-    // calculate total mass across all processors
-    reduce(mSum, sumOp<scalar>());
-    Pstream::gatherList(procMass);
-    Pstream::gatherList(procDist);
+    scalar distance = 0;
+    globalParcels.gatherInplace(mass);
+    globalParcels.gatherInplace(dist);
 
     if (Pstream::master())
     {
-        // flatten the mass lists
-        List<scalar> allMass(nParcelSum, Zero);
-        SortableList<scalar> allDist(nParcelSum, Zero);
-        for (const int proci : Pstream::allProcs())
+        if (nTotParcel == 1)
         {
-            SubList<scalar>
-            (
-                allMass,
-                globalParcels.localSize(proci),
-                globalParcels.localStart(proci)
-            ) = procMass[proci];
-
-            // flatten the distance list
-            SubList<scalar>
-            (
-                allDist,
-                globalParcels.localSize(proci),
-                globalParcels.localStart(proci)
-            ) = procDist[proci];
+            distance = dist[0];
         }
-
-        // sort allDist distances into ascending order
-        // note: allMass masses are left unsorted
-        allDist.sort();
-
-        if (nParcelSum > 1)
+        else
         {
-            const scalar mLimit = fraction*mSum;
-            const labelList& indices = allDist.indices();
+            // Distances - sored into ascending order
+            // Masses - leave unsorted
 
-            if (mLimit > (mSum - allMass[indices.last()]))
+            const SortList<scalar> sortedDist(dist);
+
+            const scalar mLimit = fraction*mTotal;
+            const labelList& indices = sortedDist.indices();
+
+            if (mLimit > (mTotal - mass[indices.last()]))
             {
-                distance = allDist.last();
+                distance = sortedDist.last();
             }
             else
             {
                 // assuming that 'fraction' is generally closer to 1 than 0,
                 // loop through in reverse distance order
-                const scalar mThreshold = (1.0 - fraction)*mSum;
-                scalar mCurrent = 0.0;
+                const scalar mThreshold = (1.0 - fraction)*mTotal;
+                scalar mCurrent = 0;
                 label i0 = 0;
 
                 forAllReverse(indices, i)
                 {
                     label indI = indices[i];
 
-                    mCurrent += allMass[indI];
+                    mCurrent += mass[indI];
 
                     if (mCurrent > mThreshold)
                     {
@@ -187,20 +165,19 @@ inline Foam::scalar Foam::SprayCloud<CloudType>::penetration
 
                 if (i0 == indices.size() - 1)
                 {
-                    distance = allDist.last();
+                    distance = sortedDist.last();
                 }
                 else
                 {
                     // linearly interpolate to determine distance
-                    scalar alpha = (mCurrent - mThreshold)/allMass[indices[i0]];
+                    scalar alpha = (mCurrent - mThreshold)/mass[indices[i0]];
                     distance =
-                        allDist[i0] + alpha*(allDist[i0+1] - allDist[i0]);
+                    (
+                        sortedDist[i0]
+                      + alpha*(sortedDist[i0+1] - sortedDist[i0])
+                    );
                 }
             }
-        }
-        else
-        {
-            distance = allDist.first();
         }
     }
 

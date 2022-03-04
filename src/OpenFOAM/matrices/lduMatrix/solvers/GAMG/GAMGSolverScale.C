@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "GAMGSolver.H"
-#include "vector2D.H"
+#include "FixedList.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -58,21 +58,21 @@ void Foam::GAMGSolver::scale
     const solveScalar* const __restrict__ AcfPtr = Acf.begin();
 
 
-    solveScalar scalingFactorNum = 0.0;
-    solveScalar scalingFactorDenom = 0.0;
+    FixedList<solveScalar, 2> scalingFactor(Zero);
 
     for (label i=0; i<nCells; i++)
     {
-        scalingFactorNum += sourcePtr[i]*fieldPtr[i];
-        scalingFactorDenom += AcfPtr[i]*fieldPtr[i];
+        scalingFactor[0] += fieldPtr[i]*sourcePtr[i];
+        scalingFactor[1] += fieldPtr[i]*AcfPtr[i];
     }
 
-    Vector2D<solveScalar> scalingVector(scalingFactorNum, scalingFactorDenom);
-    A.mesh().reduce(scalingVector, sumOp<Vector2D<solveScalar>>());
+    A.mesh().reduce(scalingFactor, sumOp<solveScalar>());
 
     const solveScalar sf =
-        scalingVector.x()
-       /stabilise(scalingVector.y(), pTraits<solveScalar>::vsmall);
+    (
+        scalingFactor[0]
+      / stabilise(scalingFactor[1], pTraits<solveScalar>::vsmall)
+    );
 
     if (debug >= 2)
     {

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,41 +63,38 @@ void writeProcStats
 {
     // Determine surface bounding boxes, faces, points
     List<treeBoundBox> surfBb(Pstream::nProcs());
+    surfBb[Pstream::myProcNo()] = treeBoundBox(s.points());
+    Pstream::gatherList(surfBb);
+
+    labelList nPoints(UPstream::listGatherValues<label>(s.points().size()));
+    labelList nFaces(UPstream::listGatherValues<label>(s.size()));
+
+    if (Pstream::master())
     {
-        surfBb[Pstream::myProcNo()] = treeBoundBox(s.points());
-        Pstream::gatherList(surfBb);
-        Pstream::scatterList(surfBb);
-    }
-
-    labelList nPoints(Pstream::nProcs());
-    nPoints[Pstream::myProcNo()] = s.points().size();
-    Pstream::gatherList(nPoints);
-    Pstream::scatterList(nPoints);
-
-    labelList nFaces(Pstream::nProcs());
-    nFaces[Pstream::myProcNo()] = s.size();
-    Pstream::gatherList(nFaces);
-    Pstream::scatterList(nFaces);
-
-    forAll(surfBb, proci)
-    {
-        Info<< "processor" << proci << nl;
-
-        const List<treeBoundBox>& bbs = meshBb[proci];
-        if (bbs.size())
+        forAll(surfBb, proci)
         {
-            Info<< "\tMesh bounds          : " << bbs[0] << nl;
-            for (label i = 1; i < bbs.size(); i++)
+            Info<< "processor" << proci << nl;
+
+            const List<treeBoundBox>& bbs = meshBb[proci];
+            forAll(bbs, i)
             {
-                Info<< "\t                       " << bbs[i]<< nl;
+                if (!i)
+                {
+                    Info<< "\tMesh bounds          : ";
+                }
+                else
+                {
+                    Info<< "\t                       ";
+                }
+                Info<< bbs[i] << nl;
             }
+            Info<< "\tSurface bounding box : " << surfBb[proci] << nl
+                << "\tTriangles            : " << nFaces[proci] << nl
+                << "\tVertices             : " << nPoints[proci]
+                << endl;
         }
-        Info<< "\tSurface bounding box : " << surfBb[proci] << nl
-            << "\tTriangles            : " << nFaces[proci] << nl
-            << "\tVertices             : " << nPoints[proci]
-            << endl;
+        Info<< endl;
     }
-    Info<< endl;
 }
 
 

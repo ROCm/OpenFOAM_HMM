@@ -24,9 +24,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Read from UIPstream
-
 \*---------------------------------------------------------------------------*/
 
 #include "UIPstream.H"
@@ -36,195 +33,64 @@ Description
 
 #include <mpi.h>
 
-// * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::UIPstream::UIPstream
-(
-    const commsTypes commsType,
-    const int fromProcNo,
-    DynamicList<char>& receiveBuf,
-    label& receiveBufPosition,
-    const int tag,
-    const label comm,
-    const bool clearAtEnd,
-    IOstreamOption::streamFormat fmt
-)
-:
-    UPstream(commsType),
-    Istream(fmt, IOstreamOption::currentVersion),
-    fromProcNo_(fromProcNo),
-    recvBuf_(receiveBuf),
-    recvBufPos_(receiveBufPosition),
-    tag_(tag),
-    comm_(comm),
-    clearAtEnd_(clearAtEnd),
-    messageSize_(0)
+void Foam::UIPstream::bufferIPCrecv()
 {
-    setOpened();
-    setGood();
-
-    if (commsType == commsTypes::nonBlocking)
+    // Called by constructor
+    if (debug)
     {
-        // Message is already received into buffer
+        Pout<< "UIPstream IPC read buffer :"
+            << " from:" << fromProcNo_
+            << " tag:" << tag_ << " comm:" << comm_
+            << " wanted size:" << recvBuf_.capacity()
+            << Foam::endl;
     }
-    else
+
+    // No buffer size allocated/specified - probe size of incoming message
+    if (!recvBuf_.capacity())
     {
-        if (debug)
-        {
-            Pout<< "UIPstream::UIPstream :"
-                << " read from:" << fromProcNo
-                << " tag:" << tag_ << " comm:" << comm_
-                << " wanted size:" << recvBuf_.capacity()
-                << Foam::endl;
-        }
+        profilingPstream::beginTiming();
 
-        // No buffer size allocated/specified - probe size of incoming message
-        if (!recvBuf_.capacity())
-        {
-            profilingPstream::beginTiming();
+        MPI_Status status;
 
-            MPI_Status status;
-
-            MPI_Probe
-            (
-                fromProcNo_,
-                tag_,
-                PstreamGlobals::MPICommunicators_[comm_],
-                &status
-            );
-            MPI_Get_count(&status, MPI_BYTE, &messageSize_);
-
-            // Assume these are from gathers ...
-            profilingPstream::addGatherTime();
-
-            recvBuf_.resize(messageSize_);
-
-            if (debug)
-            {
-                Pout<< "UIPstream::UIPstream : probed size:"
-                    << messageSize_ << Foam::endl;
-            }
-        }
-
-        messageSize_ = UIPstream::read
+        MPI_Probe
         (
-            commsType,
             fromProcNo_,
-            recvBuf_.data(),
-            recvBuf_.capacity(),
             tag_,
-            comm_
+            PstreamGlobals::MPICommunicators_[comm_],
+            &status
         );
+        MPI_Get_count(&status, MPI_BYTE, &messageSize_);
 
-        // Set addressed size. Leave actual allocated memory intact.
+        // Assume these are from gathers ...
+        profilingPstream::addGatherTime();
+
         recvBuf_.resize(messageSize_);
 
-        if (!messageSize_)
+        if (debug)
         {
-            setEof();
+            Pout<< "UIPstream::UIPstream : probed size:"
+                << messageSize_ << Foam::endl;
         }
     }
-}
 
-
-Foam::UIPstream::UIPstream(const int fromProcNo, PstreamBuffers& buffers)
-:
-    UPstream(buffers.commsType_),
-    Istream(buffers.format_, IOstreamOption::currentVersion),
-    fromProcNo_(fromProcNo),
-    recvBuf_(buffers.recvBuf_[fromProcNo]),
-    recvBufPos_(buffers.recvBufPos_[fromProcNo]),
-    tag_(buffers.tag_),
-    comm_(buffers.comm_),
-    clearAtEnd_(true),
-    messageSize_(0)
-{
-    if
+    messageSize_ = UIPstream::read
     (
-        commsType() != UPstream::commsTypes::scheduled
-     && !buffers.finishedSendsCalled_
-    )
+        commsType(),
+        fromProcNo_,
+        recvBuf_.data(),
+        recvBuf_.capacity(),
+        tag_,
+        comm_
+    );
+
+    // Set addressed size. Leave actual allocated memory intact.
+    recvBuf_.resize(messageSize_);
+
+    if (!messageSize_)
     {
-        FatalErrorInFunction
-            << "PstreamBuffers::finishedSends() never called." << endl
-            << "Please call PstreamBuffers::finishedSends() after doing"
-            << " all your sends (using UOPstream) and before doing any"
-            << " receives (using UIPstream)" << Foam::exit(FatalError);
-    }
-
-    setOpened();
-    setGood();
-
-    if (commsType() == commsTypes::nonBlocking)
-    {
-        // Message is already received into buffer
-        messageSize_ = recvBuf_.size();
-
-        if (debug)
-        {
-            Pout<< "UIPstream::UIPstream PstreamBuffers :"
-                << " fromProcNo:" << fromProcNo
-                << " tag:" << tag_ << " comm:" << comm_
-                << " receive buffer size:" << messageSize_
-                << Foam::endl;
-        }
-    }
-    else
-    {
-        if (debug)
-        {
-            Pout<< "UIPstream::UIPstream PstreamBuffers :"
-                << " read from:" << fromProcNo
-                << " tag:" << tag_ << " comm:" << comm_
-                << " wanted size:" << recvBuf_.capacity()
-                << Foam::endl;
-        }
-
-        // No buffer size allocated/specified - probe size of incoming message
-        if (!recvBuf_.capacity())
-        {
-            profilingPstream::beginTiming();
-
-            MPI_Status status;
-
-            MPI_Probe
-            (
-                fromProcNo_,
-                tag_,
-                PstreamGlobals::MPICommunicators_[comm_],
-                &status
-            );
-            MPI_Get_count(&status, MPI_BYTE, &messageSize_);
-
-            // Assume these are from gathers ...
-            profilingPstream::addGatherTime();
-
-            recvBuf_.resize(messageSize_);
-
-            if (debug)
-            {
-                Pout<< "UIPstream::UIPstream PstreamBuffers : probed size:"
-                    << messageSize_ << Foam::endl;
-            }
-        }
-
-        messageSize_ = UIPstream::read
-        (
-            commsType(),
-            fromProcNo_,
-            recvBuf_.data(),
-            recvBuf_.capacity(),
-            tag_,
-            comm_
-        );
-
-        // Set addressed size. Leave actual allocated memory intact.
-        recvBuf_.resize(messageSize_);
-
-        if (!messageSize_)
-        {
-            setEof();
-        }
+        setEof();
     }
 }
 
@@ -287,7 +153,6 @@ Foam::label Foam::UIPstream::read
             FatalErrorInFunction
                 << "MPI_Recv cannot receive incoming message"
                 << Foam::abort(FatalError);
-
             return 0;
         }
 
@@ -336,7 +201,7 @@ Foam::label Foam::UIPstream::read
         )
         {
             FatalErrorInFunction
-                << "MPI_Recv cannot start non-blocking receive"
+                << "MPI_Irecv cannot start non-blocking receive"
                 << Foam::abort(FatalError);
 
             return 0;

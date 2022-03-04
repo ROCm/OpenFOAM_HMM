@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,7 +43,7 @@ void Foam::Pstream::exchangeContainer
     List<Container>& recvBufs,
     const int tag,
     const label comm,
-    const bool block
+    const bool wait
 )
 {
     const label startOfRequests = Pstream::nRequests();
@@ -91,7 +91,7 @@ void Foam::Pstream::exchangeContainer
                 FatalErrorInFunction
                     << "Cannot send outgoing message. "
                     << "to:" << proci << " nBytes:"
-                    << label(sendBufs[proci].size()*sizeof(T))
+                    << label(sendBufs[proci].size_bytes())
                     << Foam::abort(FatalError);
             }
         }
@@ -101,9 +101,9 @@ void Foam::Pstream::exchangeContainer
     // Wait for all to finish
     // ~~~~~~~~~~~~~~~~~~~~~~
 
-    if (block)
+    if (wait)
     {
-        Pstream::waitRequests(startOfRequests);
+        UPstream::waitRequests(startOfRequests);
     }
 }
 
@@ -117,7 +117,7 @@ void Foam::Pstream::exchangeBuf
     List<char*>& recvBufs,
     const int tag,
     const label comm,
-    const bool block
+    const bool wait
 )
 {
     const label startOfRequests = Pstream::nRequests();
@@ -175,9 +175,9 @@ void Foam::Pstream::exchangeBuf
     // Wait for all to finish
     // ~~~~~~~~~~~~~~~~~~~~~~
 
-    if (block)
+    if (wait)
     {
-        Pstream::waitRequests(startOfRequests);
+        UPstream::waitRequests(startOfRequests);
     }
 }
 
@@ -190,7 +190,7 @@ void Foam::Pstream::exchange
     List<Container>& recvBufs,
     const int tag,
     const label comm,
-    const bool block
+    const bool wait
 )
 {
     // OR  static_assert(is_contiguous<T>::value, "Contiguous data only!")
@@ -209,7 +209,7 @@ void Foam::Pstream::exchange
             << Foam::abort(FatalError);
     }
 
-    recvBufs.setSize(sendBufs.size());
+    recvBufs.resize_nocopy(sendBufs.size());
 
     if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
     {
@@ -220,11 +220,11 @@ void Foam::Pstream::exchange
 
             if (proci != Pstream::myProcNo(comm) && nRecv > 0)
             {
-                recvBufs[proci].setSize(nRecv);
+                recvBufs[proci].resize_nocopy(nRecv);
             }
         }
 
-        if (Pstream::maxCommsSize <= 0)
+        if (UPstream::maxCommsSize <= int(sizeof(T)))
         {
             // Do the exchanging in one go
             exchangeContainer<Container, T>
@@ -234,7 +234,7 @@ void Foam::Pstream::exchange
                 recvBufs,
                 tag,
                 comm,
-                block
+                wait
             );
         }
         else
@@ -244,55 +244,64 @@ void Foam::Pstream::exchange
             // guaranteed that some processor's sending size is some other
             // processor's receive size. Also we can ignore any local comms.
 
-            label maxNSend = 0;
-            forAll(sendBufs, proci)
-            {
-                if (proci != Pstream::myProcNo(comm))
-                {
-                    maxNSend = max(maxNSend, sendBufs[proci].size());
-                }
-            }
-
-            const label maxNBytes = sizeof(T)*maxNSend;
-
-            // We need to send maxNBytes bytes so the number of iterations:
-            //  maxNBytes                           iterations
-            //  ---------                           ----------
+            // We need to send bytes so the number of iterations:
+            //  maxChunkSize                        iterations
+            //  ------------                        ----------
             //  0                                   0
-            //  1..maxCommsSize                     1
-            //  maxCommsSize+1..2*maxCommsSize      2
+            //  1..maxChunkSize                     1
+            //  maxChunkSize+1..2*maxChunkSize      2
             //      etc.
 
-            label nIter;
-            if (maxNBytes == 0)
-            {
-                nIter = 0;
-            }
-            else
-            {
-                nIter = (maxNBytes-1)/Pstream::maxCommsSize+1;
-            }
-            reduce(nIter, maxOp<label>(), tag, comm);
+            const label maxChunkSize(UPstream::maxCommsSize/sizeof(T));
 
+            label nIter(0);
+            {
+                label nSendMax = 0;
+                forAll(sendBufs, proci)
+                {
+                    if (proci != Pstream::myProcNo(comm))
+                    {
+                        nSendMax = max(nSendMax, sendBufs[proci].size());
+                    }
+                }
 
-            List<const char*> charSendBufs(sendBufs.size());
-            List<char*> charRecvBufs(sendBufs.size());
+                if (nSendMax)
+                {
+                    nIter = 1 + ((nSendMax-1)/maxChunkSize);
+                }
+                reduce(nIter, maxOp<label>(), tag, comm);
+
+                /// Info<< "send " << nSendMax << " elements ("
+                ///     << (nSendMax*sizeof(T)) << " bytes) in " << nIter
+                ///     << " iterations of " << maxChunkSize << " chunks ("
+                ///     << (maxChunkSize*sizeof(T)) << " bytes) maxCommsSize:"
+                ///     << Pstream::maxCommsSize << endl;
+            }
 
             labelList nRecv(sendBufs.size());
-            labelList startRecv(sendBufs.size(), Zero);
             labelList nSend(sendBufs.size());
+            labelList startRecv(sendBufs.size(), Zero);
             labelList startSend(sendBufs.size(), Zero);
 
-            for (label iter = 0; iter < nIter; iter++)
+            List<const char*> charPtrSend(sendBufs.size());
+            List<char*> charPtrRecv(sendBufs.size());
+
+            for (label iter = 0; iter < nIter; ++iter)
             {
                 forAll(sendBufs, proci)
                 {
                     nSend[proci] = min
                     (
-                        Pstream::maxCommsSize,
+                        maxChunkSize,
                         sendBufs[proci].size()-startSend[proci]
                     );
-                    charSendBufs[proci] =
+                    nRecv[proci] = min
+                    (
+                        maxChunkSize,
+                        recvBufs[proci].size()-startRecv[proci]
+                    );
+
+                    charPtrSend[proci] =
                     (
                         nSend[proci] > 0
                       ? reinterpret_cast<const char*>
@@ -301,14 +310,7 @@ void Foam::Pstream::exchange
                         )
                       : nullptr
                     );
-
-                    nRecv[proci] = min
-                    (
-                        Pstream::maxCommsSize,
-                        recvBufs[proci].size()-startRecv[proci]
-                    );
-
-                    charRecvBufs[proci] =
+                    charPtrRecv[proci] =
                     (
                         nRecv[proci] > 0
                       ? reinterpret_cast<char*>
@@ -319,15 +321,19 @@ void Foam::Pstream::exchange
                     );
                 }
 
+                /// Info<< "iter " << iter
+                ///     << ": beg=" << flatOutput(startSend)
+                ///     << " len=" << flatOutput(nSend) << endl;
+
                 exchangeBuf<T>
                 (
                     nSend,
-                    charSendBufs,
+                    charPtrSend,
                     nRecv,
-                    charRecvBufs,
+                    charPtrRecv,
                     tag,
                     comm,
-                    block
+                    wait
                 );
 
                 forAll(nSend, proci)
@@ -342,6 +348,83 @@ void Foam::Pstream::exchange
     // Do myself
     recvBufs[Pstream::myProcNo(comm)] = sendBufs[Pstream::myProcNo(comm)];
 }
+
+
+template<class Container>
+void Foam::Pstream::exchangeSizes
+(
+    const labelUList& sendProcs,
+    const labelUList& recvProcs,
+    const Container& sendBufs,
+    labelList& recvSizes,
+    const label tag,
+    const label comm
+)
+{
+    if (sendBufs.size() != UPstream::nProcs(comm))
+    {
+        FatalErrorInFunction
+            << "Size of container " << sendBufs.size()
+            << " does not equal the number of processors "
+            << UPstream::nProcs(comm)
+            << Foam::abort(FatalError);
+    }
+
+    labelList sendSizes(sendProcs.size());
+    forAll(sendProcs, i)
+    {
+        sendSizes[i] = sendBufs[sendProcs[i]].size();
+    }
+
+    recvSizes.resize_nocopy(sendBufs.size());
+    recvSizes = 0;  // Ensure non-received entries are properly zeroed
+
+    const label startOfRequests = UPstream::nRequests();
+
+    for (const label proci : recvProcs)
+    {
+        UIPstream::read
+        (
+            UPstream::commsTypes::nonBlocking,
+            proci,
+            reinterpret_cast<char*>(&recvSizes[proci]),
+            sizeof(label),
+            tag,
+            comm
+        );
+    }
+
+    forAll(sendProcs, i)
+    {
+        UOPstream::write
+        (
+            UPstream::commsTypes::nonBlocking,
+            sendProcs[i],
+            reinterpret_cast<char*>(&sendSizes[i]),
+            sizeof(label),
+            tag,
+            comm
+        );
+    }
+
+    UPstream::waitRequests(startOfRequests);
+}
+
+
+/// FUTURE?
+///
+/// template<class Container>
+/// void Foam::Pstream::exchangeSizes
+/// (
+///     const labelUList& neighProcs,
+///     const Container& sendBufs,
+///     labelList& recvSizes,
+///     const label tag,
+///     const label comm
+/// )
+/// {
+///     exchangeSizes<Container>(neighProcs, neighProcs, sendBufs, tag, comm);
+/// }
 
 
 template<class Container>
@@ -366,8 +449,8 @@ void Foam::Pstream::exchangeSizes
     {
         sendSizes[proci] = sendBufs[proci].size();
     }
-    recvSizes.setSize(sendSizes.size());
-    allToAll(sendSizes, recvSizes, comm);
+    recvSizes.resize_nocopy(sendSizes.size());
+    UPstream::allToAll(sendSizes, recvSizes, comm);
 }
 
 
@@ -378,13 +461,13 @@ void Foam::Pstream::exchange
     List<Container>& recvBufs,
     const int tag,
     const label comm,
-    const bool block
+    const bool wait
 )
 {
     labelList recvSizes;
     exchangeSizes(sendBufs, recvSizes, comm);
 
-    exchange<Container, T>(sendBufs, recvSizes, recvBufs, tag, comm, block);
+    exchange<Container, T>(sendBufs, recvSizes, recvBufs, tag, comm, wait);
 }
 
 

@@ -40,8 +40,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ProcessorTopology_H
-#define ProcessorTopology_H
+#ifndef Foam_ProcessorTopology_H
+#define Foam_ProcessorTopology_H
 
 #include "labelList.H"
 #include "lduSchedule.H"
@@ -60,10 +60,7 @@ class ProcessorTopology
 :
     public labelListList
 {
-
-private:
-
-    // Private data
+    // Private Data
 
         //- Local map from neighbour proc to patchi. Different per processor!
         //  -1 or patchi for connection to procID
@@ -76,8 +73,8 @@ private:
 
     // Private Member Functions
 
-        //- Return all neighbouring processors of this processor. Set
-        //  procPatchMap_.
+        //- Return all neighbouring processors of this processor.
+        //  Sets procPatchMap_.
         labelList procNeighbours(const label nProcs, const Container&);
 
 public:
@@ -88,25 +85,27 @@ public:
         ProcessorTopology(const Container& patches, const label comm);
 
 
+    // Static Functions
+
+        //- Calculate non-blocking (i.e. unscheduled) schedule
+        static lduSchedule nonBlockingSchedule(const Container& patches);
+
+
     // Member Functions
 
-        //- From neighbour processor to index in boundaryMesh. Local information
-        //  (so not same over all processors)
-        const labelList& procPatchMap() const
+        //- From neighbour processor to index in boundaryMesh.
+        //  Local information (so not same over all processors)
+        const labelList& procPatchMap() const noexcept
         {
             return procPatchMap_;
         }
 
         //- Order in which the patches should be initialised/evaluated
-        //  corresponding to the schedule
-        const lduSchedule& patchSchedule() const
+        //- corresponding to the schedule
+        const lduSchedule& patchSchedule() const noexcept
         {
             return patchSchedule_;
         }
-
-        //- Calculate non-blocking (i.e. unscheduled) schedule
-        static lduSchedule nonBlockingSchedule(const Container& patches);
-
 };
 
 

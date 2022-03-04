@@ -36,8 +36,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef processorLduInterface_H
-#define processorLduInterface_H
+#ifndef Foam_processorLduInterface_H
+#define Foam_processorLduInterface_H
 
 #include "lduInterface.H"
 #include "primitiveFieldsFwd.H"
@@ -67,7 +67,7 @@ class processorLduInterface
     // Private Member Functions
 
         //- Increase buffer size if required
-        static void resizeBuf(List<char>& buf, const label size);
+        static void resizeBuf(List<char>& buf, const label len);
 
 
 public:
@@ -78,7 +78,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         processorLduInterface() = default;
 
 

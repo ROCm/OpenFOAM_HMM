@@ -253,10 +253,10 @@ void Foam::multiLevelDecomp::subsetGlobalCellCells
     labelList& cutConnections
 ) const
 {
+    const globalIndex globalCells(cellCells.size());
+
     // Determine new index for cells by inverting subset
     labelList oldToNew(invert(cellCells.size(), set));
-
-    globalIndex globalCells(cellCells.size());
 
     // Subset locally the elements for which I have data
     subCellCells = UIndirectList<labelList>(cellCells, set);
@@ -275,7 +275,7 @@ void Foam::multiLevelDecomp::subsetGlobalCellCells
     // subCellCells : indexes into oldToNew and allDist
 
     // Globally compact numbering for cells in set.
-    globalIndex globalSubCells(set.size());
+    const globalIndex globalSubCells(set.size());
 
     // Now subCellCells contains indices into oldToNew which are the
     // new locations of the neighbouring cells.
@@ -417,7 +417,7 @@ void Foam::multiLevelDecomp::decompose
                 nOutsideConnections
             );
 
-            label nPoints = returnReduce(domainPoints.size(), plusOp<label>());
+            label nPoints = returnReduce(domainPoints.size(), sumOp<label>());
             Pstream::listCombineGather(nOutsideConnections, plusEqOp<label>());
             Pstream::listCombineScatter(nOutsideConnections);
             label nPatches = 0;
@@ -525,7 +525,7 @@ void Foam::multiLevelDecomp::decompose
                     }
                 }
 
-                reduce(nPoints, plusOp<label>());
+                reduce(nPoints, sumOp<label>());
                 Pstream::listCombineGather
                 (
                     nOutsideConnections,

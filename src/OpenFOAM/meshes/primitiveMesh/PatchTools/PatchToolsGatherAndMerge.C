@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -136,7 +136,7 @@ void Foam::PatchTools::gatherAndMerge
 
     if (Pstream::parRun())
     {
-        // Renumber the setPatch points/faces into unique points
+        // Renumber the points/faces into unique points
         globalPointsPtr = mesh.globalData().mergePoints
         (
             meshPoints,
@@ -147,65 +147,22 @@ void Foam::PatchTools::gatherAndMerge
 
         globalFacesPtr.reset(new globalIndex(localFaces.size()));
 
-        if (Pstream::master())
+        // Renumber faces locally
+        List<FaceType> myFaces(localFaces);
+        for (auto& f : myFaces)
         {
-            // Get renumbered local data
-            pointField myPoints(mesh.points(), uniqueMeshPointLabels);
-            List<FaceType> myFaces(localFaces);
-            for (auto& f : myFaces)
-            {
-                inplaceRenumber(pointToGlobal, f);
-            }
-
-
-            mergedFaces.setSize(globalFacesPtr().totalSize());
-            mergedPoints.setSize(globalPointsPtr().totalSize());
-
-            // Insert master data first
-            label pOffset = globalPointsPtr().localStart(Pstream::masterNo());
-            SubList<point>(mergedPoints, myPoints.size(), pOffset) = myPoints;
-
-            label fOffset = globalFacesPtr().localStart(Pstream::masterNo());
-            SubList<FaceType>(mergedFaces, myFaces.size(), fOffset) = myFaces;
-
-
-            // Receive slave ones
-            for (const int slave : Pstream::subProcs())
-            {
-                IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
-
-                pointField slavePoints(fromSlave);
-                List<FaceType> slaveFaces(fromSlave);
-
-                label pOffset = globalPointsPtr().localStart(slave);
-                SubList<point>(mergedPoints, slavePoints.size(), pOffset) =
-                    slavePoints;
-
-                label fOffset = globalFacesPtr().localStart(slave);
-                SubList<FaceType>(mergedFaces, slaveFaces.size(), fOffset) =
-                    slaveFaces;
-            }
+            inplaceRenumber(pointToGlobal, f);
         }
-        else
-        {
-            // Get renumbered local data
-            pointField myPoints(mesh.points(), uniqueMeshPointLabels);
-            List<FaceType> myFaces(localFaces);
-            for (auto& f : myFaces)
-            {
-                inplaceRenumber(pointToGlobal, f);
-            }
 
-            // Construct processor stream with estimate of size. Could
-            // be improved.
-            OPstream toMaster
-            (
-                Pstream::commsTypes::scheduled,
-                Pstream::masterNo(),
-                myPoints.byteSize() + 4*sizeof(label)*myFaces.size()
-            );
-            toMaster << myPoints << myFaces;
-        }
+        // Can also use
+        //     UIndirectList<point>(mesh.points(), uniqueMeshPointLabels)
+        // but favour communication over local memory use
+        globalPointsPtr().gather
+        (
+            pointField(mesh.points(), uniqueMeshPointLabels),
+            mergedPoints
+        );
+        globalFacesPtr().gather(myFaces, mergedFaces);
     }
     else
     {

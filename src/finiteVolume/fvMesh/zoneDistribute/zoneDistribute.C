@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2020 DLR
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,13 +27,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "zoneDistribute.H"
-#include "dummyTransform.H"
-#include "emptyPolyPatch.H"
-#include "processorPolyPatch.H"
-#include "syncTools.H"
-#include "wedgePolyPatch.H"
-
-#include "globalPoints.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -43,61 +36,15 @@ namespace Foam
 }
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-Foam::autoPtr<Foam::indirectPrimitivePatch>
-Foam::zoneDistribute::coupledFacesPatch() const
-{
-    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
-
-    label nCoupled = 0;
-
-    for (const polyPatch& pp : patches)
-    {
-        if (isA<processorPolyPatch>(pp))
-        {
-            nCoupled += pp.size();
-        }
-    }
-    labelList coupledFaces(nCoupled);
-    nCoupled = 0;
-
-    for (const polyPatch& pp : patches)
-    {
-        if (isA<processorPolyPatch>(pp))
-        {
-            label facei = pp.start();
-
-            forAll(pp, i)
-            {
-                coupledFaces[nCoupled++] = facei++;
-            }
-        }
-    }
-
-    return autoPtr<indirectPrimitivePatch>::New
-    (
-        IndirectList<face>
-        (
-            mesh_.faces(),
-            coupledFaces
-        ),
-        mesh_.points()
-    );
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::zoneDistribute::zoneDistribute(const fvMesh& mesh)
 :
     MeshObject<fvMesh, Foam::TopologicalMeshObject, zoneDistribute>(mesh),
-    coupledBoundaryPoints_(coupledFacesPatch()().meshPoints()),
-    send_(Pstream::nProcs()),
     stencil_(zoneCPCStencil::New(mesh)),
-    gblIdx_(stencil_.globalNumbering())
-{
-}
+    globalNumbering_(stencil_.globalNumbering()),
+    send_(UPstream::nProcs())
+{}
 
 
 // * * * * * * * * * * * * * * * * Selectors  * * * * * * * * * * * * * * //
@@ -124,7 +71,11 @@ void Foam::zoneDistribute::updateStencil(const boolList& zone)
 }
 
 
-void Foam::zoneDistribute::setUpCommforZone(const boolList& zone,bool updateStencil)
+void Foam::zoneDistribute::setUpCommforZone
+(
+    const boolList& zone,
+    bool updateStencil
+)
 {
     zoneCPCStencil& stencil = zoneCPCStencil::New(mesh_);
 
@@ -133,60 +84,56 @@ void Foam::zoneDistribute::setUpCommforZone(const boolList& zone,bool updateSten
         stencil.updateStencil(zone);
     }
 
-    const labelHashSet comms = stencil.needsComm();
-
-    List<labelHashSet> needed(Pstream::nProcs());
-
-    if (Pstream::parRun())
+    if (UPstream::parRun())
     {
-        for (const label celli : comms)
+        List<labelHashSet> needed(UPstream::nProcs());
+
+        // Bin according to originating (sending) processor
+        for (const label celli : stencil.needsComm())
         {
             if (zone[celli])
             {
                 for (const label gblIdx : stencil_[celli])
                 {
-                    if (!gblIdx_.isLocal(gblIdx))
+                    if (!globalNumbering_.isLocal(gblIdx))
                     {
-                        const label procID = gblIdx_.whichProcID (gblIdx);
+                        const label procID =
+                            globalNumbering_.whichProcID(gblIdx);
                         needed[procID].insert(gblIdx);
                     }
                 }
             }
         }
 
-        PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
+        // Stream the send data into PstreamBuffers,
+        // which we also use to track the current topology.
 
-        // Stream data into buffer
-        for (const int domain : Pstream::allProcs())
+        PstreamBuffers pBufs(UPstream::commsTypes::nonBlocking);
+
+        for (const int proci : UPstream::allProcs())
         {
-            if (domain != Pstream::myProcNo())
+            if (proci != UPstream::myProcNo() && !needed[proci].empty())
             {
-                // Put data into send buffer
-                UOPstream toDomain(domain, pBufs);
-
-                toDomain << needed[domain];
+                // Serialize as List
+                UOPstream toProc(proci, pBufs);
+                toProc << needed[proci].sortedToc();
             }
         }
 
-        // wait until everything is written.
-        pBufs.finishedSends();
+        pBufs.finishedSends(sendConnections_, sendProcs_, recvProcs_);
 
-        for (const int domain : Pstream::allProcs())
+        for (const int proci : pBufs.allProcs())
         {
-            send_[domain].clear();
+            send_[proci].clear();
 
-            if (domain != Pstream::myProcNo())
+            if (proci != UPstream::myProcNo() && pBufs.hasRecvData(proci))
             {
-                // get data from send buffer
-                UIPstream fromDomain(domain, pBufs);
-
-                fromDomain >> send_[domain];
+                UIPstream fromProc(proci, pBufs);
+                fromProc >> send_[proci];
             }
         }
     }
 }
-
-
 
 
 // ************************************************************************* //

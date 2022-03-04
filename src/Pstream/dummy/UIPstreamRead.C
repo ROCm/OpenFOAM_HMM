@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,28 +24,32 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Write primitive and binary block from OPstream
-
 \*---------------------------------------------------------------------------*/
 
-#include "UOPstream.H"
+#include "UIPstream.H"
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::UIPstream::bufferIPCrecv()
+{
+    NotImplemented;
+}
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::UOPstream::write
+Foam::label Foam::UIPstream::read
 (
     const commsTypes commsType,
-    const int toProcNo,
-    const char* buf,
+    const int fromProcNo,
+    char* buf,
     const std::streamsize bufSize,
     const int tag,
     const label communicator
 )
 {
     NotImplemented;
-
-    return false;
+    return 0;
 }
 
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,11 +31,12 @@ License
 #include "absorptionEmissionModel.H"
 #include "scatterModel.H"
 #include "constants.H"
-#include "addToRunTimeSelectionTable.H"
 #include "unitConversion.H"
 #include "interpolationCell.H"
 #include "interpolationCellPoint.H"
 #include "Random.H"
+#include "OBJstream.H"
+#include "addToRunTimeSelectionTable.H"
 
 using namespace Foam::constant;
 
@@ -679,44 +680,28 @@ void Foam::radiation::laserDTRM::calculate()
         Info<< "Final number of particles..."
             << returnReduce(DTRMCloud_.size(), sumOp<label>()) << endl;
 
-        OFstream osRef(type() + ":particlePath.obj");
-        label vertI = 0;
-
-        List<pointField> positions(Pstream::nProcs());
-        List<pointField> p0(Pstream::nProcs());
-
-        DynamicList<point>  positionsMyProc;
-        DynamicList<point>  p0MyProc;
-
-        for (const DTRMParticle& p : DTRMCloud_)
+        pointField lines(2*DTRMCloud_.size());
         {
-            positionsMyProc.append(p.position());
-            p0MyProc.append(p.p0());
-        }
-
-        positions[Pstream::myProcNo()].transfer(positionsMyProc);
-        p0[Pstream::myProcNo()].transfer(p0MyProc);
-
-        Pstream::gatherList(positions);
-        Pstream::scatterList(positions);
-        Pstream::gatherList(p0);
-        Pstream::scatterList(p0);
-
-        for (const int proci : Pstream::allProcs())
-        {
-            const pointField& pos = positions[proci];
-            const pointField& pfinal = p0[proci];
-            forAll(pos, i)
+            label i = 0;
+            for (const DTRMParticle& p : DTRMCloud_)
             {
-                meshTools::writeOBJ(osRef, pos[i]);
-                vertI++;
-                meshTools::writeOBJ(osRef, pfinal[i]);
-                vertI++;
-                osRef << "l " << vertI-1 << ' ' << vertI << nl;
+                lines[i] = p.position();
+                lines[i+1] = p.p0();
+                i += 2;
             }
         }
 
-        osRef.flush();
+        globalIndex::gatherInplaceOp(lines);
+
+        if (Pstream::master())
+        {
+            OBJstream os(type() + ":particlePath.obj");
+
+            for (label pointi = 0; pointi < lines.size(); pointi += 2)
+            {
+                os.write(linePointRef(lines[pointi], lines[pointi+1]));
+            }
+        }
 
         scalar totalQ = gSum(Q_.primitiveFieldRef()*mesh_.V());
         Info << "Total energy absorbed [W]: " << totalQ << endl;

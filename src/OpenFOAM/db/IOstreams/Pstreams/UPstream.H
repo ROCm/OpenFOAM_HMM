@@ -34,9 +34,6 @@ SourceFiles
     UPstream.C
     UPstreamCommsStruct.C
     UPstreamTemplates.C
-    combineGatherScatter.C
-    gatherScatter.C
-    gatherScatterList.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -69,9 +66,9 @@ public:
     //- Types of communications
     enum class commsTypes : char
     {
-        blocking,
-        scheduled,
-        nonBlocking
+        blocking,       //!< "blocking"
+        scheduled,      //!< "scheduled"
+        nonBlocking     //!< "nonBlocking"
     };
 
     //- Names of the communication types
@@ -104,7 +101,7 @@ public:
             // Constructors
 
                 //- Default construct. Above == -1
-                commsStruct();
+                commsStruct() noexcept;
 
                 //- Construct from components
                 commsStruct
@@ -180,6 +177,12 @@ public:
 
 private:
 
+    // Private Data
+
+        //- Communications type of this stream
+        commsTypes commsType_;
+
+
     // Private Static Data
 
         //- By default this is not a parallel run
@@ -198,7 +201,7 @@ private:
         static labelList worldIDs_;
 
 
-        // Communicator specific data
+    // Communicator specific data
 
         //- My processor number
         static DynamicList<int> myProcNo_;
@@ -253,14 +256,6 @@ private:
         );
 
 
-protected:
-
-    // Protected Data
-
-        //- Communications type of this stream
-        commsTypes commsType_;
-
-
 public:
 
     // Declare name of the class and its debug switch
@@ -274,8 +269,7 @@ public:
         //- in accuracy
         static bool floatTransfer;
 
-        //- Number of processors at which the sum algorithm changes from linear
-        //- to tree
+        //- Number of processors to change from linear to tree communication
         static int nProcsSimpleSum;
 
         //- Default commsType
@@ -413,11 +407,11 @@ public:
 
             static int allocateTag(const char*);
 
-            static int allocateTag(const word&);
+            static int allocateTag(const std::string&);
 
             static void freeTag(const char*, const int tag);
 
-            static void freeTag(const word&, const int tag);
+            static void freeTag(const std::string&, const int tag);
 
 
         //- Set as parallel run on/off.
@@ -537,12 +531,27 @@ public:
             return treeCommunication_[communicator];
         }
 
+        //- Communication schedule for linear/tree all-to-master (proc 0).
+        //- Chooses based on the value of UPstream::nProcsSimpleSum
+        static const List<commsStruct>& whichCommunication
+        (
+            const label communicator = worldComm
+        )
+        {
+            return
+            (
+                nProcs(communicator) < nProcsSimpleSum
+              ? linearCommunication_[communicator]
+              : treeCommunication_[communicator]
+            );
+        }
+
+
         //- Message tag of standard messages
         static int& msgType() noexcept
         {
             return msgType_;
         }
-
 
         //- Get the communications type of the stream
         commsTypes commsType() const noexcept
@@ -551,6 +560,7 @@ public:
         }
 
         //- Set the communications type of the stream
+        //  \return the previous value
         commsTypes commsType(const commsTypes ct) noexcept
         {
             commsTypes old(commsType_);
@@ -668,6 +678,28 @@ public:
         );
 
 
+    // Broadcast Functions
+
+        //- Broadcast buffer contents to all processes in communicator.
+        //- The sizes must match on all processes.
+        //  \return True on success
+        static bool broadcast
+        (
+            char* buf,
+            const std::streamsize bufSize,
+            const label communicator = worldComm,
+            const int rootProcNo = masterNo()
+        );
+
+        //- Broadcast string content to all processes in communicator.
+        static void broadcast
+        (
+            std::string& str,
+            const label communicator = worldComm,
+            const int rootProcNo = masterNo()
+        );
+
+
     // Housekeeping
 
         //- Process index of first sub-process
@@ -691,11 +723,11 @@ Ostream& operator<<(Ostream&, const UPstream::commsStruct&);
 // Template specialisation for access of commsStruct
 template<>
 UPstream::commsStruct&
-UList<UPstream::commsStruct>::operator[](const label);
+UList<UPstream::commsStruct>::operator[](const label procID);
 
 template<>
 const UPstream::commsStruct&
-UList<UPstream::commsStruct>::operator[](const label) const;
+UList<UPstream::commsStruct>::operator[](const label procID) const;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

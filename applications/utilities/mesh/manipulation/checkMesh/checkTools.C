@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -423,8 +423,8 @@ void Foam::mergeAndWrite
 {
     const polyMesh& mesh = refCast<const polyMesh>(set.db());
 
-    pointField mergedPts;
-    labelList mergedIDs;
+    labelField mergedIDs(set.sortedToc());
+    pointField mergedPts(mesh.points(), mergedIDs);
 
     if (Pstream::parRun())
     {
@@ -432,55 +432,12 @@ void Foam::mergeAndWrite
         // (mesh.globalData().mergePoints etc) since this might
         // hide any synchronisation problem
 
-        globalIndex globalNumbering(mesh.nPoints());
+        // Renumber local ids -> global ids
+        globalIndex(mesh.nPoints()).inplaceToGlobal(mergedIDs);
 
-        mergedPts.setSize(returnReduce(set.size(), sumOp<label>()));
-        mergedIDs.setSize(mergedPts.size());
-
-        labelList setPointIDs(set.sortedToc());
-
-        // Get renumbered local data
-        pointField myPoints(mesh.points(), setPointIDs);
-        labelList myIDs(globalNumbering.toGlobal(setPointIDs));
-
-        if (Pstream::master())
-        {
-            // Insert master data first
-            label pOffset = 0;
-            SubList<point>(mergedPts, myPoints.size(), pOffset) = myPoints;
-            SubList<label>(mergedIDs, myIDs.size(), pOffset) = myIDs;
-            pOffset += myPoints.size();
-
-            // Receive slave ones
-            for (const int slave : Pstream::subProcs())
-            {
-                IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
-
-                pointField slavePts(fromSlave);
-                labelList slaveIDs(fromSlave);
-
-                SubList<point>(mergedPts, slavePts.size(), pOffset) = slavePts;
-                SubList<label>(mergedIDs, slaveIDs.size(), pOffset) = slaveIDs;
-                pOffset += slaveIDs.size();
-            }
-        }
-        else
-        {
-            // Construct processor stream with estimate of size. Could
-            // be improved.
-            OPstream toMaster
-            (
-                Pstream::commsTypes::scheduled,
-                Pstream::masterNo(),
-                myPoints.byteSize() + myIDs.byteSize()
-            );
-            toMaster << myPoints << myIDs;
-        }
-    }
-    else
-    {
-        mergedIDs = set.sortedToc();
-        mergedPts = pointField(mesh.points(), mergedIDs);
+        globalIndex gatherer(mergedIDs.size(), globalIndex::gatherOnly{});
+        gatherer.gatherInplace(mergedIDs);
+        gatherer.gatherInplace(mergedPts);
     }
 
 

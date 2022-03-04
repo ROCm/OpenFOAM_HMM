@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -2475,18 +2475,21 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh
         InfoInFunction << "Constructed from triSurface:" << endl;
         writeStats(Info);
 
-        labelList nTris(Pstream::nProcs());
-        nTris[Pstream::myProcNo()] = triSurface::size();
-        Pstream::gatherList(nTris);
-        Pstream::scatterList(nTris);
+        labelList nTris
+        (
+            UPstream::listGatherValues<label>(triSurface::size())
+        );
 
-        Info<< endl<< "\tproc\ttris\tbb" << endl;
-        forAll(nTris, proci)
+        if (Pstream::master())
         {
-            Info<< '\t' << proci << '\t' << nTris[proci]
-                 << '\t' << procBb_[proci] << endl;
+            Info<< endl<< "\tproc\ttris\tbb" << endl;
+            forAll(nTris, proci)
+            {
+                Info<< '\t' << proci << '\t' << nTris[proci]
+                    << '\t' << procBb_[proci] << endl;
+            }
+            Info<< endl;
         }
-        Info<< endl;
     }
 }
 
@@ -2573,18 +2576,21 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh(const IOobject& io)
                 << "Read distributedTriSurface " << io.name()
                 << " from actual path " << actualFile << ':' << endl;
 
-            labelList nTris(Pstream::nProcs());
-            nTris[Pstream::myProcNo()] = triSurface::size();
-            Pstream::gatherList(nTris);
-            Pstream::scatterList(nTris);
+            labelList nTris
+            (
+                UPstream::listGatherValues<label>(triSurface::size())
+            );
 
-            Info<< endl<< "\tproc\ttris\tbb" << endl;
-            forAll(nTris, proci)
+            if (Pstream::master())
             {
-                Info<< '\t' << proci << '\t' << nTris[proci]
-                     << '\t' << procBb_[proci] << endl;
+                Info<< endl<< "\tproc\ttris\tbb" << endl;
+                forAll(nTris, proci)
+                {
+                    Info<< '\t' << proci << '\t' << nTris[proci]
+                        << '\t' << procBb_[proci] << endl;
+                }
+                Info<< endl;
             }
-            Info<< endl;
         }
     }
     if (debug)
@@ -2714,18 +2720,21 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh
                 << " from actual path " << actualFile
                 << " and dictionary:" << endl;
 
-            labelList nTris(Pstream::nProcs());
-            nTris[Pstream::myProcNo()] = triSurface::size();
-            Pstream::gatherList(nTris);
-            Pstream::scatterList(nTris);
+            labelList nTris
+            (
+                UPstream::listGatherValues<label>(triSurface::size())
+            );
 
-            Info<< endl<< "\tproc\ttris\tbb" << endl;
-            forAll(nTris, proci)
+            if (Pstream::master())
             {
-                Info<< '\t' << proci << '\t' << nTris[proci]
-                     << '\t' << procBb_[proci] << endl;
+                Info<< endl<< "\tproc\ttris\tbb" << endl;
+                forAll(nTris, proci)
+                {
+                    Info<< '\t' << proci << '\t' << nTris[proci]
+                        << '\t' << procBb_[proci] << endl;
+                }
+                Info<< endl;
             }
-            Info<< endl;
         }
     }
     if (debug)
@@ -4534,19 +4543,22 @@ void Foam::distributedTriSurfaceMesh::distribute
     // Debug information
     if (debug)
     {
-        labelList nTris(Pstream::nProcs());
-        nTris[Pstream::myProcNo()] = triSurface::size();
-        Pstream::gatherList(nTris);
-        Pstream::scatterList(nTris);
+        labelList nTris
+        (
+            UPstream::listGatherValues<label>(triSurface::size())
+        );
 
-        InfoInFunction
-            << "before distribution:" << endl << "\tproc\ttris" << endl;
-
-        forAll(nTris, proci)
+        if (Pstream::master())
         {
-            Info<< '\t' << proci << '\t' << nTris[proci] << endl;
+            InfoInFunction
+                << "before distribution:" << endl << "\tproc\ttris" << endl;
+
+            forAll(nTris, proci)
+            {
+                Info<< '\t' << proci << '\t' << nTris[proci] << endl;
+            }
+            Info<< endl;
         }
-        Info<< endl;
     }
 
 
@@ -4757,32 +4769,33 @@ void Foam::distributedTriSurfaceMesh::distribute
 
     if (debug)
     {
-        labelList nTris(Pstream::nProcs());
-        nTris[Pstream::myProcNo()] = triSurface::size();
-        Pstream::gatherList(nTris);
-        Pstream::scatterList(nTris);
+        labelList nTris
+        (
+            UPstream::listGatherValues<label>(triSurface::size())
+        );
 
-        InfoInFunction
-            << "after distribution:" << endl << "\tproc\ttris" << endl;
-
-        forAll(nTris, proci)
+        if (Pstream::master())
         {
-            Info<< '\t' << proci << '\t' << nTris[proci] << endl;
+            InfoInFunction
+                << "after distribution:" << endl << "\tproc\ttris" << endl;
+
+            forAll(nTris, proci)
+            {
+                Info<< '\t' << proci << '\t' << nTris[proci] << endl;
+            }
+            Info<< endl;
         }
-        Info<< endl;
 
         if (debug & 2)
         {
             OBJstream str(searchableSurface::time().path()/"after.obj");
             Info<< "Writing local bounding box to " << str.name() << endl;
             const List<treeBoundBox>& myBbs = procBb_[Pstream::myProcNo()];
-            forAll(myBbs, i)
+            for (const treeBoundBox& bb : myBbs)
             {
-                pointField pts(myBbs[i].points());
-                const edgeList& es = treeBoundBox::edges;
-                forAll(es, ei)
+                pointField pts(bb.points());
+                for (const edge& e : treeBoundBox::edges)
                 {
-                    const edge& e = es[ei];
                     str.write(linePointRef(pts[e[0]], pts[e[1]]));
                 }
             }
@@ -4791,15 +4804,13 @@ void Foam::distributedTriSurfaceMesh::distribute
         {
             OBJstream str(searchableSurface::time().path()/"after_all.obj");
             Info<< "Writing all bounding boxes to " << str.name() << endl;
-            for (auto myBbs : procBb_)
+            for (const auto& myBbs : procBb_)
             {
-                forAll(myBbs, i)
+                for (const treeBoundBox& bb : myBbs)
                 {
-                    pointField pts(myBbs[i].points());
-                    const edgeList& es = treeBoundBox::edges;
-                    forAll(es, ei)
+                    pointField pts(bb.points());
+                    for (const edge& e : treeBoundBox::edges)
                     {
-                        const edge& e = es[ei];
                         str.write(linePointRef(pts[e[0]], pts[e[1]]));
                     }
                 }

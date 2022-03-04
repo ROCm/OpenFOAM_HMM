@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -79,47 +79,37 @@ Foam::label Foam::AMIInterpolation::calcDistribution
     const primitivePatch& tgtPatch
 ) const
 {
+    // Either not parallel or no faces on any processor
     label proci = 0;
 
     if (Pstream::parRun())
     {
-        labelList facesPresentOnProc(Pstream::nProcs(), Zero);
-        if ((srcPatch.size() > 0) || (tgtPatch.size() > 0))
+        const bitSet hasFaces
+        (
+            UPstream::listGatherValues<bool>
+            (
+                srcPatch.size() > 0 || tgtPatch.size() > 0
+            )
+        );
+
+        const auto nHaveFaces = hasFaces.count();
+
+        if (nHaveFaces == 1)
         {
-            facesPresentOnProc[Pstream::myProcNo()] = 1;
+            proci = hasFaces.find_first();
+            DebugInFunction
+                << "AMI local to processor" << proci << endl;
         }
-        else
-        {
-            facesPresentOnProc[Pstream::myProcNo()] = 0;
-        }
-
-        Pstream::gatherList(facesPresentOnProc);
-        Pstream::scatterList(facesPresentOnProc);
-
-        label nHaveFaces = sum(facesPresentOnProc);
-
-        if (nHaveFaces > 1)
+        else if (nHaveFaces > 1)
         {
             proci = -1;
-            if (debug)
-            {
-                InfoInFunction
-                    << "AMI split across multiple processors" << endl;
-            }
+            DebugInFunction
+                << "AMI split across multiple processors" << endl;
         }
-        else if (nHaveFaces == 1)
-        {
-            proci = facesPresentOnProc.find(1);
-            if (debug)
-            {
-                InfoInFunction
-                    << "AMI local to processor" << proci << endl;
-            }
-        }
+
+        Pstream::broadcast(proci);
     }
 
-
-    // Either not parallel or no faces on any processor
     return proci;
 }
 

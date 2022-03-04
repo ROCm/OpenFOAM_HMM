@@ -182,7 +182,7 @@ void surfaceNoise::readSurfaceData
             pBufs.finishedSends();
 
             // Receive data from the master
-            UIPstream fromProc(0, pBufs);
+            UIPstream fromProc(Pstream::masterNo(), pBufs);
 
             scalarList pSlice(fromProc);
 
@@ -260,7 +260,7 @@ scalar surfaceNoise::writeSurfaceData
 
         if (!Pstream::master())
         {
-            UOPstream toProc(0, pBufs);
+            UOPstream toProc(Pstream::masterNo(), pBufs);
             toProc << data;
         }
 
@@ -375,7 +375,7 @@ scalar surfaceNoise::surfaceAverage
 
         if (!Pstream::master())
         {
-            UOPstream toProc(0, pBufs);
+            UOPstream toProc(Pstream::masterNo(), pBufs);
             toProc << data;
         }
 

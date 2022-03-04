@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,54 +24,69 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-InNamespace
-    Foam
+Namespace
+    Foam::PstreamDetail
 
 Description
-    Various functions to wrap MPI_Allreduce
+    Some implementation details for Pstream and/or MPI.
+
+InNamespace
+    Foam::PstreamDetail
+
+Description
+    Functions to wrap MPI_Bcast, MPI_Allreduce, MPI_Iallreduce
 
 SourceFiles
     allReduceTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef allReduce_H
-#define allReduce_H
+#ifndef Foam_allReduce_H
+#define Foam_allReduce_H
 
 #include "UPstream.H"
-
 #include <mpi.h>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace PstreamDetail
+{
 
-template<class Type, class BinaryOp>
+template<class Type>
+void allBroadcast
+(
+    Type* values,
+    int count,
+    MPI_Datatype datatype,
+    const label communicator
+);
+
+template<class Type>
 void allReduce
 (
-    Type& Value,
+    Type* values,
     int count,
-    MPI_Datatype MPIType,
-    MPI_Op op,
-    const BinaryOp& bop,
-    const int tag,
+    MPI_Datatype datatype,
+    MPI_Op optype,
     const label communicator
 );
 
 template<class Type>
 void iallReduce
 (
-    void* Value,
+    Type* values,
     int count,
-    MPI_Datatype MPIType,
-    MPI_Op op,
+    MPI_Datatype datatype,
+    MPI_Op optype,
     const label communicator,
     label& requestID
 );
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace PstreamDetail
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

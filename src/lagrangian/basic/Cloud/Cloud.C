@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017, 2020 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -89,7 +89,7 @@ Foam::Cloud<ParticleType>::Cloud
     // Ask for the tetBasePtIs to trigger all processors to build
     // them, otherwise, if some processors have no particles then
     // there is a comms mismatch.
-    polyMesh_.tetBasePtIs();
+    (void)polyMesh_.tetBasePtIs();
 
     if (particles.size())
     {
@@ -163,54 +163,55 @@ void Foam::Cloud<ParticleType>::move
     // Which processors this processor is connected to
     const labelList& neighbourProcs = pData[Pstream::myProcNo()];
 
-    // Indexing from the processor number into the neighbourProcs list
-    labelList neighbourProcIndices(Pstream::nProcs(), -1);
-
-    forAll(neighbourProcs, i)
-    {
-        neighbourProcIndices[neighbourProcs[i]] = i;
-    }
-
     // Initialise the stepFraction moved for the particles
-    forAllIters(*this, pIter)
+    for (ParticleType& p : *this)
     {
-        pIter().reset();
+        p.reset();
     }
 
-    // List of lists of particles to be transferred for all of the
-    // neighbour processors
-    List<IDLList<ParticleType>> particleTransferLists
-    (
-        neighbourProcs.size()
-    );
-
-    // List of destination processorPatches indices for all of the
-    // neighbour processors
-    List<DynamicList<label>> patchIndexTransferLists
-    (
-        neighbourProcs.size()
-    );
-
-    // Allocate transfer buffers
-    PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
-
-    // Clear the global positions as there are about to change
+    // Clear the global positions as these are about to change
     globalPositionsPtr_.clear();
+
+
+    // For v2112 and earlier: pre-assembled lists of particles
+    // to be transferred and target patch on a per processor basis.
+    // Apart from memory overhead of assembling the lists this adds
+    // allocations/de-allocation when building linked-lists.
+
+    // Now stream particle transfer tuples directly into PstreamBuffers.
+    // Use a local cache of UOPstream wrappers for the formatters
+    // (since there are potentially many particles being shifted about).
+
+
+    // Allocate transfer buffers,
+    // automatic clearStorage when UIPstream closes is disabled.
+    PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
+    pBufs.allowClearRecv(false);
+
+    // Cache of opened UOPstream wrappers
+    PtrList<UOPstream> UOPstreamPtrs(Pstream::nProcs());
 
     // While there are particles to transfer
     while (true)
     {
-        particleTransferLists = IDLList<ParticleType>();
-        forAll(patchIndexTransferLists, i)
+        // Reset transfer buffers
+        pBufs.clear();
+
+        // Rewind existing streams
+        forAll(UOPstreamPtrs, proci)
         {
-            patchIndexTransferLists[i].clear();
+            auto* osptr = UOPstreamPtrs.get(proci);
+            if (osptr)
+            {
+                osptr->rewind();
+            }
         }
 
         // Loop over all particles
         for (ParticleType& p : *this)
         {
             // Move the particle
-            bool keepParticle = p.move(cloud, td, trackTime);
+            const bool keepParticle = p.move(cloud, td, trackTime);
 
             // If the particle is to be kept
             // (i.e. it hasn't passed through an inlet or outlet)
@@ -235,22 +236,27 @@ void Foam::Cloud<ParticleType>::move
 
                     const label patchi = p.patch();
 
-                    const label n = neighbourProcIndices
-                    [
-                        refCast<const processorPolyPatch>
-                        (
-                            pbm[patchi]
-                        ).neighbProcNo()
-                    ];
+                    const label toProci =
+                    (
+                        refCast<const processorPolyPatch>(pbm[patchi])
+                        .neighbProcNo()
+                    );
+
+                    // Get/create output stream
+                    auto* osptr = UOPstreamPtrs.get(toProci);
+                    if (!osptr)
+                    {
+                        osptr = new UOPstream(toProci, pBufs);
+                        UOPstreamPtrs.set(toProci, osptr);
+                    }
 
                     p.prepareForParallelTransfer();
 
-                    particleTransferLists[n].append(this->remove(&p));
+                    // Tuple: (patchi particle)
+                    (*osptr) << procPatchNeighbours[patchi] << p;
 
-                    patchIndexTransferLists[n].append
-                    (
-                        procPatchNeighbours[patchi]
-                    );
+                    // Can now remove from my list
+                    deleteParticle(p);
                 }
             }
             else
@@ -264,76 +270,32 @@ void Foam::Cloud<ParticleType>::move
             break;
         }
 
+        pBufs.finishedNeighbourSends(neighbourProcs);
 
-        // Clear transfer buffers
-        pBufs.clear();
-
-        // Stream into send buffers
-        forAll(particleTransferLists, i)
+        if (!returnReduce(pBufs.hasRecvData(), orOp<bool>()))
         {
-            if (particleTransferLists[i].size())
-            {
-                UOPstream particleStream
-                (
-                    neighbourProcs[i],
-                    pBufs
-                );
-
-                particleStream
-                    << patchIndexTransferLists[i]
-                    << particleTransferLists[i];
-            }
-        }
-
-
-        // Start sending. Sets number of bytes transferred
-        labelList allNTrans(Pstream::nProcs());
-        pBufs.finishedSends(allNTrans);
-
-
-        bool transferred = false;
-
-        for (const label n : allNTrans)
-        {
-            if (n)
-            {
-                transferred = true;
-                break;
-            }
-        }
-        reduce(transferred, orOp<bool>());
-
-        if (!transferred)
-        {
+            // No parcels to transfer
             break;
         }
 
         // Retrieve from receive buffers
-        for (const label neighbProci : neighbourProcs)
+        for (const label proci : neighbourProcs)
         {
-            label nRec = allNTrans[neighbProci];
-
-            if (nRec)
+            if (pBufs.hasRecvData(proci))
             {
-                UIPstream particleStream(neighbProci, pBufs);
+                UIPstream is(proci, pBufs);
 
-                labelList receivePatchIndex(particleStream);
-
-                IDLList<ParticleType> newParticles
-                (
-                    particleStream,
-                    typename ParticleType::iNew(polyMesh_)
-                );
-
-                label pI = 0;
-
-                for (ParticleType& newp : newParticles)
+                // Read out each (patchi particle) tuple
+                while (!is.eof())
                 {
-                    label patchi = procPatches[receivePatchIndex[pI++]];
+                    label patchi = pTraits<label>(is);
+                    auto* newp = new ParticleType(polyMesh_, is);
 
-                    newp.correctAfterParallelTransfer(patchi, td);
+                    // The real patch index
+                    patchi = procPatches[patchi];
 
-                    addParticle(newParticles.remove(&newp));
+                    (*newp).correctAfterParallelTransfer(patchi, td);
+                    addParticle(newp);
                 }
             }
         }
@@ -365,9 +327,9 @@ void Foam::Cloud<ParticleType>::autoMap(const mapPolyMesh& mapper)
     const vectorField& positions = globalPositionsPtr_();
 
     label i = 0;
-    forAllIters(*this, iter)
+    for (ParticleType& p : *this)
     {
-        iter().autoMap(positions[i], mapper);
+        p.autoMap(positions[i], mapper);
         ++i;
     }
 }
@@ -376,20 +338,19 @@ void Foam::Cloud<ParticleType>::autoMap(const mapPolyMesh& mapper)
 template<class ParticleType>
 void Foam::Cloud<ParticleType>::writePositions() const
 {
-    OFstream pObj
+    OFstream os
     (
         this->db().time().path()/this->name() + "_positions.obj"
     );
 
-    forAllConstIters(*this, pIter)
+    for (const ParticleType& p : *this)
     {
-        const ParticleType& p = pIter();
         const point position(p.position());
-        pObj<< "v " << position.x() << " " << position.y() << " "
+        os  << "v "
+            << position.x() << ' '
+            << position.y() << ' '
             << position.z() << nl;
     }
-
-    pObj.flush();
 }
 
 
@@ -402,13 +363,12 @@ void Foam::Cloud<ParticleType>::storeGlobalPositions() const
     // within autoMap, and this pre-processing would not be necessary.
 
     globalPositionsPtr_.reset(new vectorField(this->size()));
-
     vectorField& positions = globalPositionsPtr_();
 
     label i = 0;
-    forAllConstIters(*this, iter)
+    for (const ParticleType& p : *this)
     {
-        positions[i] = iter().position();
+        positions[i] = p.position();
         ++i;
     }
 }

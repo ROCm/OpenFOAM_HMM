@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2019-2020 DLR
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,16 +26,14 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "zoneDistribute.H"
 #include "DynamicField.H"
-#include "syncTools.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<typename Type>
 Type Foam::zoneDistribute::getLocalValue
 (
-    const GeometricField<Type, fvPatchField, volMesh>& phi,
+    const VolumeField<Type>& phi,
     const label localIdx
 ) const
 {
@@ -51,7 +49,7 @@ Type Foam::zoneDistribute::getLocalValue
 template<typename Type>
 Type Foam::zoneDistribute::faceValue
 (
-    const GeometricField<Type, fvPatchField, volMesh>& phi,
+    const VolumeField<Type>& phi,
     const label localIdx
 ) const
 {
@@ -80,18 +78,19 @@ Type Foam::zoneDistribute::faceValue
 template<typename Type>
 Type Foam::zoneDistribute::getValue
 (
-    const GeometricField<Type, fvPatchField, volMesh>& phi,
+    const VolumeField<Type>& phi,
     const Map<Type>& valuesFromOtherProc,
     const label gblIdx
 ) const
 {
-    if (gblIdx_.isLocal(gblIdx))
+    if (globalNumbering_.isLocal(gblIdx))
     {
-        const label idx = gblIdx_.toLocal(gblIdx);
-        return getLocalValue(phi,idx);
+        const label localIdx = globalNumbering_.toLocal(gblIdx);
+        return getLocalValue(phi,localIdx);
     }
-    else // from other proc
+    else
     {
+        // From other proc
         return valuesFromOtherProc[gblIdx];
     }
 }
@@ -101,7 +100,7 @@ template<typename Type>
 Foam::Map<Foam::Field<Type>> Foam::zoneDistribute::getFields
 (
     const boolList& zone,
-    const GeometricField<Type, fvPatchField, volMesh>& phi
+    const VolumeField<Type>& phi
 )
 {
     if (zone.size() != phi.size())
@@ -111,7 +110,6 @@ Foam::Map<Foam::Field<Type>> Foam::zoneDistribute::getFields
             << "size of phi:" <<  phi.size()
             << "do not match. Did the mesh change?"
             << exit(FatalError);
-
     }
 
 
@@ -120,20 +118,20 @@ Foam::Map<Foam::Field<Type>> Foam::zoneDistribute::getFields
 
     Map<Field<Type>> stencilWithValues;
 
-    DynamicField<Type> tmpField(100);
+    DynamicField<Type> tmpField(128);
 
-    forAll(zone,celli)
+    forAll(zone, celli)
     {
         if (zone[celli])
         {
-            tmpField.clearStorage();
+            tmpField.clear();
 
             for (const label gblIdx : stencil_[celli])
             {
                 tmpField.append(getValue(phi,neiValues,gblIdx));
             }
 
-            stencilWithValues.insert(celli,tmpField);
+            stencilWithValues.emplace(celli, tmpField);
         }
     }
 
@@ -145,7 +143,7 @@ template<typename Type>
 Foam::Map<Type> Foam::zoneDistribute::getDatafromOtherProc
 (
     const boolList& zone,
-    const GeometricField<Type, fvPatchField, volMesh>& phi
+    const VolumeField<Type>& phi
 )
 {
     if (zone.size() != phi.size())
@@ -155,57 +153,59 @@ Foam::Map<Type> Foam::zoneDistribute::getDatafromOtherProc
             << "size of phi:" <<  phi.size()
             << "do not match. Did the mesh change?"
             << exit(FatalError);
-
     }
 
 
     // Get values from other proc
     Map<Type> neiValues;
-    List<Map<Type>> sendValues(Pstream::nProcs());
 
-    if (Pstream::parRun())
+    if (UPstream::parRun())
     {
-        forAll(send_, domaini)
+        if (sendConnections_.empty())
         {
-            for (const label sendIdx : send_[domaini])
+            WarningInFunction
+                << "The send/recv connections not initialized - "
+                << "likely that setUpCommforZone() was not called"
+                << endl;
+            // But don't exit/abort for now
+        }
+
+        // Stream the send data into PstreamBuffers,
+        // which we also use to track the current topology.
+
+        PstreamBuffers pBufs(UPstream::commsTypes::nonBlocking);
+
+        for (const int proci : UPstream::allProcs())
+        {
+            if (proci != UPstream::myProcNo() && !send_[proci].empty())
             {
-                sendValues[domaini].insert
-                (
-                    sendIdx,
-                    getLocalValue(phi,gblIdx_.toLocal(sendIdx))
-                );
+                // Serialize as Map
+                Map<Type> sendValues(2*send_[proci].size());
+
+                for (const label sendIdx : send_[proci])
+                {
+                    sendValues.insert
+                    (
+                        sendIdx,
+                        getLocalValue(phi, globalNumbering_.toLocal(sendIdx))
+                    );
+                }
+
+                UOPstream toProc(proci, pBufs);
+                toProc << sendValues;
             }
         }
 
-        PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
+        pBufs.finishedSends(sendConnections_, sendProcs_, recvProcs_);
 
-        // Stream data into buffer
-        for (const int domain : Pstream::allProcs())
+        for (const int proci : pBufs.allProcs())
         {
-            if (domain != Pstream::myProcNo())
+            if (proci != UPstream::myProcNo() && pBufs.hasRecvData(proci))
             {
-                // Put data into send buffer
-                UOPstream toDomain(domain, pBufs);
+                UIPstream fromProc(proci, pBufs);
+                Map<Type> tmpValues(fromProc);
 
-                toDomain << sendValues[domain];
-            }
-        }
-
-        // Wait until everything is written.
-        pBufs.finishedSends();
-
-        Map<Type> tmpValue;
-
-        for (const int domain : Pstream::allProcs())
-        {
-            if (domain != Pstream::myProcNo())
-            {
-                // Get data from send buffer
-                UIPstream fromDomain(domain, pBufs);
-
-                fromDomain >> tmpValue;
-
-                neiValues += tmpValue;
+                neiValues += tmpValues;
             }
         }
     }

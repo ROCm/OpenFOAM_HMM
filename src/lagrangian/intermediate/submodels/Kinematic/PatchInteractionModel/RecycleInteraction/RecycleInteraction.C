@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -205,10 +205,13 @@ void Foam::RecycleInteraction<CloudType>::postEvolve()
 {
     if (Pstream::parRun())
     {
-        // Relocate the recycled parcels into slots for each receiving processor
-        List<IDLList<parcelType>> transferParcels(Pstream::nProcs());
-        List<DynamicList<scalar>> fractions(Pstream::nProcs());
-        List<DynamicList<label>> patchAddr(Pstream::nProcs());
+        // See comments in Cloud::move() about transfer particles handling
+
+        // Allocate transfer buffers
+        PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
+
+        // Cache of opened UOPstream wrappers
+        PtrList<UOPstream> UOPstreamPtrs(Pstream::nProcs());
 
         auto& rnd = this->owner().rndGen();
 
@@ -217,7 +220,7 @@ void Foam::RecycleInteraction<CloudType>::postEvolve()
             auto& patchParcels = recycledParcels_[addri];
             auto& injectionPatch = injectionPatchPtr_[addri];
 
-            forAllIters(patchParcels, pIter)
+            for (parcelType& p : patchParcels)
             {
                 // Choose a random location to insert the parcel
                 const scalar fraction01 = rnd.template sample01<scalar>();
@@ -225,101 +228,76 @@ void Foam::RecycleInteraction<CloudType>::postEvolve()
                 // Identify the processor that owns the location
                 const label toProci = injectionPatch.whichProc(fraction01);
 
-                // Store info in slot for target processor
-                transferParcels[toProci].append(patchParcels.remove(pIter));
-                fractions[toProci].append(fraction01);
-                patchAddr[toProci].append(addri);
+                // Get/create output stream
+                auto* osptr = UOPstreamPtrs.get(toProci);
+                if (!osptr)
+                {
+                    osptr = new UOPstream(toProci, pBufs);
+                    UOPstreamPtrs.set(toProci, osptr);
+                }
+
+                // Tuple: (address fraction particle)
+                (*osptr) << addri << fraction01 << p;
+
+                // Can now remove from list and delete
+                delete(patchParcels.remove(&p));
             }
         }
 
-        // Set-up the sends
-        PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
+        pBufs.finishedSends();
 
-        // Clear transfer buffers
-        pBufs.clear();
-
-        // Stream into send buffers
-        forAll(transferParcels, proci)
+        if (!returnReduce(pBufs.hasRecvData(), orOp<bool>()))
         {
-            if (transferParcels[proci].size())
-            {
-                UOPstream particleStream(proci,  pBufs);
-
-                particleStream
-                    << transferParcels[proci]
-                    << fractions[proci]
-                    << patchAddr[proci];
-
-                transferParcels[proci].clear();
-            }
-        }
-
-        // Start sending. Sets number of bytes transferred
-        labelList allNTrans(Pstream::nProcs());
-        pBufs.finishedSends(allNTrans);
-        bool transferred = false;
-        for (const label n : allNTrans)
-        {
-            if (n)
-            {
-                transferred = true;
-                break;
-            }
-        }
-        reduce(transferred, orOp<bool>());
-        if (!transferred)
-        {
-            // No parcels to transfer
+            // No parcels to recycle
             return;
         }
 
         // Retrieve from receive buffers
-        for (label proci = 0; proci < Pstream::nProcs(); ++proci)
+        for (const int proci : pBufs.allProcs())
         {
-            if (allNTrans[proci])
+            if (pBufs.hasRecvData(proci))
             {
-                UIPstream particleStream(proci, pBufs);
-                IDLList<parcelType> newParticles
-                (
-                    particleStream,
-                    typename parcelType::iNew(this->owner().mesh())
-                );
-                scalarList fractions(particleStream);
-                labelList patchAddr(particleStream);
+                UIPstream is(proci, pBufs);
 
-                label parceli = 0;
-                for (parcelType& newp : newParticles)
+                // Read out each (address fraction particle) tuple
+                while (!is.eof())
                 {
+                    const label addri = pTraits<label>(is);
+                    const scalar fraction01 = pTraits<scalar>(is);
+                    auto* newp = new parcelType(this->owner().mesh(), is);
+
                     // Parcel to be recycled
                     vector newPosition;
                     label cellOwner;
                     label dummy;
-                    const label addri = patchAddr[parceli];
                     injectionPatchPtr_[addri].setPositionAndCell
                     (
                         mesh_,
-                        fractions[parceli],
+                        fraction01,
                         this->owner().rndGen(),
                         newPosition,
                         cellOwner,
                         dummy,
                         dummy
                     );
-                    newp.relocate(newPosition, cellOwner);
-                    newp.U() = this->owner().U()[cellOwner];
-                    newp.nParticle() *= recycleFraction_;
+                    newp->relocate(newPosition, cellOwner);
+                    newp->nParticle() *= recycleFraction_;
 
+                    // Assume parcel velocity is same as the carrier velocity
+                    newp->U() = this->owner().U()[cellOwner];
+
+                    // Injector ID
                     const label idx =
-                        (
-                            injIdToIndex_.size()
-                          ? injIdToIndex_.lookup(newp.typeId(), 0)
-                          : 0
-                        );
-                    ++nInjected_[addri][idx];
-                    massInjected_[addri][idx] += newp.nParticle()*newp.mass();
+                    (
+                        injIdToIndex_.size()
+                      ? injIdToIndex_.lookup(newp->typeId(), 0)
+                      : 0
+                    );
 
-                    this->owner().addParticle(newParticles.remove(&newp));
-                    ++parceli;
+                    ++nInjected_[addri][idx];
+                    massInjected_[addri][idx] += newp->nParticle()*newp->mass();
+
+                    this->owner().addParticle(newp);
                 }
             }
         }
@@ -328,8 +306,10 @@ void Foam::RecycleInteraction<CloudType>::postEvolve()
     {
         forAll(recycledParcels_, addri)
         {
-            forAllIters(recycledParcels_[addri], iter)
+            for (parcelType& p : recycledParcels_[addri])
             {
+                parcelType* newp = recycledParcels_[addri].remove(&p);
+
                 // Parcel to be recycled
                 vector newPosition;
                 label cellOwner;
@@ -345,19 +325,19 @@ void Foam::RecycleInteraction<CloudType>::postEvolve()
                 );
 
                 // Update parcel properties
-                parcelType* newp = recycledParcels_[addri].remove(iter);
                 newp->relocate(newPosition, cellOwner);
                 newp->nParticle() *= recycleFraction_;
 
                 // Assume parcel velocity is same as the carrier velocity
                 newp->U() = this->owner().U()[cellOwner];
 
+                // Injector ID
                 const label idx =
-                    (
-                        injIdToIndex_.size()
-                        ? injIdToIndex_.lookup(newp->typeId(), 0)
-                        : 0
-                    );
+                (
+                    injIdToIndex_.size()
+                  ? injIdToIndex_.lookup(newp->typeId(), 0)
+                  : 0
+                );
                 ++nInjected_[addri][idx];
                 massInjected_[addri][idx] += newp->nParticle()*newp->mass();
 
@@ -380,7 +360,7 @@ void Foam::RecycleInteraction<CloudType>::info(Ostream& os)
 
     forAll(nRemoved_, patchi)
     {
-        label lsd = nRemoved_[patchi].size();
+        const label lsd = nRemoved_[patchi].size();
         npr0[patchi].setSize(lsd, Zero);
         mpr0[patchi].setSize(lsd, Zero);
         npi0[patchi].setSize(lsd, Zero);

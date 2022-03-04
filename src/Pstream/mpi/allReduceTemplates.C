@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2015 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,18 +28,16 @@ License
 
 #include "allReduce.H"
 #include "profilingPstream.H"
+#include "PstreamGlobals.H"
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-template<class Type, class BinaryOp>
-void Foam::allReduce
+template<class Type>
+void Foam::PstreamDetail::allBroadcast
 (
-    Type& Value,
-    int MPICount,
-    MPI_Datatype MPIType,
-    MPI_Op MPIOp,
-    const BinaryOp& bop,
-    const int tag,
+    Type* values,
+    int count,
+    MPI_Datatype datatype,
     const label communicator
 )
 {
@@ -50,129 +48,75 @@ void Foam::allReduce
 
     profilingPstream::beginTiming();
 
-    if (UPstream::nProcs(communicator) <= UPstream::nProcsSimpleSum)
+    // const int retval =
+    MPI_Bcast
+    (
+        values,
+        count,
+        datatype,
+        0,  // (root process) is master == UPstream::masterNo()
+        PstreamGlobals::MPICommunicators_[communicator]
+    );
+
+    profilingPstream::addBroadcastTime();
+}
+
+
+template<class Type>
+void Foam::PstreamDetail::allReduce
+(
+    Type* values,
+    int count,
+    MPI_Datatype datatype,
+    MPI_Op optype,
+    const label communicator
+)
+{
+    if (!UPstream::parRun())
     {
-        if (UPstream::master(communicator))
+        return;
+    }
+
+    if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
+    {
+        Pout<< "** reducing:";
+        if (count == 1)
         {
-            for (const int proci : UPstream::subProcs(communicator))
-            {
-                Type value;
-
-                if
-                (
-                    MPI_Recv
-                    (
-                        &value,
-                        MPICount,
-                        MPIType,
-                        proci,
-                        tag,
-                        PstreamGlobals::MPICommunicators_[communicator],
-                        MPI_STATUS_IGNORE
-                    )
-                )
-                {
-                    FatalErrorInFunction
-                        << "MPI_Recv failed"
-                        << Foam::abort(FatalError);
-                }
-
-                Value = bop(Value, value);
-            }
+            Pout<< (*values);
         }
         else
         {
-            if
-            (
-                MPI_Send
-                (
-                    &Value,
-                    MPICount,
-                    MPIType,
-                    UPstream::masterNo(),
-                    tag,
-                    PstreamGlobals::MPICommunicators_[communicator]
-                )
-            )
-            {
-                FatalErrorInFunction
-                    << "MPI_Send failed"
-                    << Foam::abort(FatalError);
-            }
+            Pout<< UList<Type>(values, count);
         }
-
-
-        if (UPstream::master(communicator))
-        {
-            for (const int proci : UPstream::subProcs(communicator))
-            {
-                if
-                (
-                    MPI_Send
-                    (
-                        &Value,
-                        MPICount,
-                        MPIType,
-                        proci,
-                        tag,
-                        PstreamGlobals::MPICommunicators_[communicator]
-                    )
-                )
-                {
-                    FatalErrorInFunction
-                        << "MPI_Send failed"
-                        << Foam::abort(FatalError);
-                }
-            }
-        }
-        else
-        {
-            if
-            (
-                MPI_Recv
-                (
-                    &Value,
-                    MPICount,
-                    MPIType,
-                    UPstream::masterNo(),
-                    tag,
-                    PstreamGlobals::MPICommunicators_[communicator],
-                    MPI_STATUS_IGNORE
-                )
-            )
-            {
-                FatalErrorInFunction
-                    << "MPI_Recv failed"
-                    << Foam::abort(FatalError);
-            }
-        }
+        Pout<< " with comm:" << communicator
+            << " warnComm:" << UPstream::warnComm << endl;
+        error::printStack(Pout);
     }
-    else
-    {
-        Type sum;
-        MPI_Allreduce
-        (
-            &Value,
-            &sum,
-            MPICount,
-            MPIType,
-            MPIOp,
-            PstreamGlobals::MPICommunicators_[communicator]
-        );
-        Value = sum;
-    }
+
+    profilingPstream::beginTiming();
+
+    // const int retval =
+    MPI_Allreduce
+    (
+        MPI_IN_PLACE,
+        values,
+        count,
+        datatype,
+        optype,
+        PstreamGlobals::MPICommunicators_[communicator]
+    );
 
     profilingPstream::addReduceTime();
 }
 
 
 template<class Type>
-void Foam::iallReduce
+void Foam::PstreamDetail::iallReduce
 (
-    void* recvBuf,
-    int MPICount,
-    MPI_Datatype MPIType,
-    MPI_Op MPIOp,
+    Type* values,
+    int count,
+    MPI_Datatype datatype,
+    MPI_Op optype,
     const label communicator,
     label& requestID
 )
@@ -184,9 +128,16 @@ void Foam::iallReduce
 
     if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
     {
-        Pout<< "** non-blocking reducing:"
-            << UList<Type>(static_cast<Type*>(recvBuf), MPICount)
-            << " with comm:" << communicator
+        Pout<< "** non-blocking reducing:";
+        if (count == 1)
+        {
+            Pout<< (*values);
+        }
+        else
+        {
+            Pout<< UList<Type>(values, count);
+        }
+        Pout<< " with comm:" << communicator
             << " warnComm:" << UPstream::warnComm << endl;
         error::printStack(Pout);
     }
@@ -200,10 +151,10 @@ void Foam::iallReduce
         MPI_Iallreduce
         (
             MPI_IN_PLACE,
-            recvBuf,
-            MPICount,
-            MPIType,
-            MPIOp,
+            values,
+            count,
+            datatype,
+            optype,
             PstreamGlobals::MPICommunicators_[communicator],
             &request
         )
@@ -211,7 +162,7 @@ void Foam::iallReduce
     {
         FatalErrorInFunction
             << "MPI_Iallreduce failed for "
-            << UList<Type>(static_cast<Type*>(recvBuf), MPICount)
+            << UList<Type>(values, count)
             << Foam::abort(FatalError);
     }
 
@@ -238,17 +189,17 @@ void Foam::iallReduce
         MPI_Allreduce
         (
             MPI_IN_PLACE,
-            recvBuf,
-            MPICount,
-            MPIType,
-            MPIOp,
+            values,
+            count,
+            datatype,
+            optype,
             PstreamGlobals::MPICommunicators_[communicator]
         )
     )
     {
         FatalErrorInFunction
             << "MPI_Allreduce failed for "
-            << UList<Type>(static_cast<Type*>(recvBuf), MPICount)
+            << UList<Type>(values, count)
             << Foam::abort(FatalError);
     }
     requestID = -1;

@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef PstreamGlobals_H
-#define PstreamGlobals_H
+#ifndef Foam_PstreamGlobals_H
+#define Foam_PstreamGlobals_H
 
 #include "DynamicList.H"
 #include <mpi.h>
@@ -62,14 +62,12 @@ extern DynamicList<int> freedTags_;
 extern DynamicList<MPI_Comm> MPICommunicators_;
 extern DynamicList<MPI_Group> MPIGroups_;
 
-
 void checkCommunicator(const label comm, const label toProcNo);
-
-};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace PstreamGlobals
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

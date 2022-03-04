@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,14 +31,14 @@ Description
     Input inter-processor communications stream.
 
 SourceFiles
-    IPstream.C
+    IPstreams.C
 
 \*---------------------------------------------------------------------------*/
 
 #include "Pstream.H"
 
-#ifndef IPstream_H
-#define IPstream_H
+#ifndef Foam_IPstream_H
+#define Foam_IPstream_H
 
 #include "UIPstream.H"
 
@@ -73,6 +73,48 @@ public:
             const int fromProcNo,
             const label bufSize = 0,
             const int tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm,
+            IOstreamOption::streamFormat fmt = IOstreamOption::BINARY
+        );
+};
+
+
+/*---------------------------------------------------------------------------*\
+                          Class IPBstream Declaration
+\*---------------------------------------------------------------------------*/
+
+//- Input inter-processor communications stream
+//- using MPI broadcast.
+class IPBstream
+:
+    public Pstream,
+    public UIPBstream
+{
+    // Private Data
+
+        //- Receive index into Pstream::transferBuf_
+        label transferBufPosition_;
+
+public:
+
+    // Constructors
+
+        //- Construct for broadcast root, optional buffer size, read format
+        IPBstream
+        (
+            const commsTypes commsType,     //!< ignored
+            const int rootProcNo,           //!< normally UPstream::masterNo()
+            const label bufSize = 0,
+            const int tag = UPstream::msgType(),  //!< ignored
+            const label comm = UPstream::worldComm,
+            IOstreamOption::streamFormat fmt = IOstreamOption::BINARY
+        );
+
+        //- Construct for broadcast root with optional communicator,
+        //- write format
+        explicit IPBstream
+        (
+            const int rootProcNo,           //!< normally UPstream::masterNo()
             const label comm = UPstream::worldComm,
             IOstreamOption::streamFormat fmt = IOstreamOption::BINARY
         );

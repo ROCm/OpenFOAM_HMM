@@ -266,14 +266,16 @@ StringStreams = $(Streams)/StringStreams
 $(StringStreams)/StringStream.C
 
 Pstreams = $(Streams)/Pstreams
-$(Pstreams)/UIPstream.C
-$(Pstreams)/IPstream.C
-/* $(Pstreams)/UPstream.C in global.Cver */
+/* $(Pstreams)/UPstream.C in global.C */
 $(Pstreams)/UPstreamCommsStruct.C
 $(Pstreams)/Pstream.C
-$(Pstreams)/UOPstream.C
-$(Pstreams)/OPstream.C
 $(Pstreams)/PstreamBuffers.C
+$(Pstreams)/UIPstreamBase.C
+$(Pstreams)/UOPstreamBase.C
+$(Pstreams)/IPstreams.C
+$(Pstreams)/OPstreams.C
+$(Pstreams)/IPBstreams.C
+$(Pstreams)/OPBstreams.C
 
 dictionary = db/dictionary
 $(dictionary)/dictionary.C
@@ -590,8 +592,6 @@ polyBoundaryMesh = $(polyMesh)/polyBoundaryMesh
 $(polyBoundaryMesh)/polyBoundaryMesh.C
 $(polyBoundaryMesh)/polyBoundaryMeshEntries.C
 
-meshes/ProcessorTopology/commSchedule.C
-
 globalMeshData = $(polyMesh)/globalMeshData
 $(globalMeshData)/globalMeshData.C
 $(globalMeshData)/globalPoints.C
@@ -810,6 +810,7 @@ algorithms/indexedOctree/volumeType.C
 algorithms/dynamicIndexedOctree/dynamicIndexedOctreeName.C
 algorithms/dynamicIndexedOctree/dynamicTreeDataPoint.C
 
+parallel/commSchedule/commSchedule.C
 parallel/globalIndex/globalIndex.C
 
 meshes/data/data.C

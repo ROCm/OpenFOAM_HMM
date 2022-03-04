@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,9 +24,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Write primitive and binary block from OPstream
-
 \*---------------------------------------------------------------------------*/
 
 #include "UOPstream.H"
@@ -34,6 +31,22 @@ Description
 #include "profilingPstream.H"
 
 #include <mpi.h>
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+bool Foam::UOPstream::bufferIPCsend()
+{
+    return UOPstream::write
+    (
+        commsType(),
+        toProcNo_,
+        sendBuf_.cdata(),
+        sendBuf_.size(),
+        tag_,
+        comm_
+    );
+}
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -70,13 +83,13 @@ bool Foam::UOPstream::write
     PstreamGlobals::checkCommunicator(communicator, toProcNo);
 
 
-    bool transferFailed = true;
+    bool failed = true;
 
     profilingPstream::beginTiming();
 
     if (commsType == commsTypes::blocking)
     {
-        transferFailed = MPI_Bsend
+        failed = MPI_Bsend
         (
             const_cast<char*>(buf),
             bufSize,
@@ -99,7 +112,7 @@ bool Foam::UOPstream::write
     }
     else if (commsType == commsTypes::scheduled)
     {
-        transferFailed = MPI_Send
+        failed = MPI_Send
         (
             const_cast<char*>(buf),
             bufSize,
@@ -124,7 +137,7 @@ bool Foam::UOPstream::write
     {
         MPI_Request request;
 
-        transferFailed = MPI_Isend
+        failed = MPI_Isend
         (
             const_cast<char*>(buf),
             bufSize,
@@ -151,12 +164,11 @@ bool Foam::UOPstream::write
     else
     {
         FatalErrorInFunction
-            << "Unsupported communications type "
-            << UPstream::commsTypeNames[commsType]
+            << "Unsupported communications type " << int(commsType)
             << Foam::abort(FatalError);
     }
 
-    return !transferFailed;
+    return !failed;
 }
 
 

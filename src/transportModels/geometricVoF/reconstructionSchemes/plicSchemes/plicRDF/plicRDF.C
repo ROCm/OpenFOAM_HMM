@@ -29,6 +29,7 @@ License
 #include "interpolationCellPoint.H"
 #include "fvc.H"
 #include "leastSquareGrad.H"
+#include "zoneDistribute.H"
 #include "addToRunTimeSelectionTable.H"
 #include "profiling.H"
 
@@ -50,11 +51,11 @@ void Foam::reconstruction::plicRDF::interpolateNormal()
 {
     addProfilingInFunction(geometricVoF);
     scalar dt = mesh_.time().deltaTValue();
-    zoneDistribute& exchangeFields = zoneDistribute::New(mesh_);
 
     leastSquareGrad<scalar> lsGrad("polyDegree1",mesh_.geometricD());
 
-    exchangeFields.setUpCommforZone(interfaceCell_,false);
+    zoneDistribute& exchangeFields = zoneDistribute::New(mesh_);
+    exchangeFields.setUpCommforZone(interfaceCell_, false);
 
     Map<vector> mapCentre
     (
@@ -74,8 +75,8 @@ void Foam::reconstruction::plicRDF::interpolateNormal()
         exchangeFields.getDatafromOtherProc(interfaceCell_, alpha1_)
     );
 
-    DynamicField<vector > cellCentre(100);
-    DynamicField<scalar > alphaValues(100);
+    DynamicField<vector> cellCentre(100);
+    DynamicField<scalar> alphaValues(100);
 
     DynamicList<vector> foundNormals(30);
 

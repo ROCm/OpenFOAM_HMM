@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -2072,24 +2072,11 @@ bool Foam::fileOperations::masterUncollatedFileOperation::read
         Pstream::scatter(io.note());    //, Pstream::msgType(), comm_);
 
 
-        // scatter operation for regIOobjects
+        // Scatter operation for regIOobjects
 
-        // Get my communication order
-        // const List<Pstream::commsStruct>& comms =
-        //(
-        //    (Pstream::nProcs(comm_) < Pstream::nProcsSimpleSum)
-        //  ? Pstream::linearCommunication(comm_)
-        //  : Pstream::treeCommunication(comm_)
-        //);
-        // const Pstream::commsStruct& myComm = comms[Pstream::myProcNo(comm_)];
-        const List<Pstream::commsStruct>& comms =
-        (
-            (Pstream::nProcs(Pstream::worldComm) < Pstream::nProcsSimpleSum)
-          ? Pstream::linearCommunication(Pstream::worldComm)
-          : Pstream::treeCommunication(Pstream::worldComm)
-        );
-        const Pstream::commsStruct& myComm =
-            comms[Pstream::myProcNo(Pstream::worldComm)];
+        // My communication order
+        const auto& comms = Pstream::whichCommunication(Pstream::worldComm);
+        const auto& myComm = comms[Pstream::myProcNo(Pstream::worldComm)];
 
         // Receive from up
         if (myComm.above() != -1)

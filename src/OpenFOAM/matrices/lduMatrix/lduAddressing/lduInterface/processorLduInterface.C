@@ -38,11 +38,12 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions *  * * * * * * * * * * //
 
-void Foam::processorLduInterface::resizeBuf(List<char>& buf, const label size)
+void Foam::processorLduInterface::resizeBuf(List<char>& buf, const label len)
 {
-    if (buf.size() < size)
+    if (buf.size() < len)
     {
-        buf.resize(size);
+        // Use nocopy variant since it will be overwritten
+        buf.resize_nocopy(len);
     }
 }
 

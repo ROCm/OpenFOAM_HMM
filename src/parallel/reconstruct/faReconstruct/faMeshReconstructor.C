@@ -162,7 +162,7 @@ void Foam::faMeshReconstructor::calcAddressing
         {
             labelList localOrder;
 
-            UIPstream fromProc(Pstream::master(), pBufs);
+            UIPstream fromProc(Pstream::masterNo(), pBufs);
             fromProc >> localOrder;
 
             faFaceProcAddr_ = labelList(faFaceProcAddr_, localOrder);

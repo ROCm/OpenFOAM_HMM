@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,21 +25,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::UOPstream
+    Foam::UOPstreamBase
 
 Description
-    Output inter-processor communications stream operating on external
-    buffer.
+    Base class for output inter-processor communications stream
+    (ie, parallel streams).
+    Not to be used directly, thus contructors are protected.
 
 SourceFiles
-    UOPstream.C
+    UOPstreamBase.C
 
 \*---------------------------------------------------------------------------*/
 
 #include "Pstream.H"
 
-#ifndef UOPstream_H
-#define UOPstream_H
+#ifndef Foam_UOPstream_H
+#define Foam_UOPstream_H
 
 #include "UPstream.H"
 #include "Ostream.H"
@@ -52,27 +53,14 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class UOPstream Declaration
+                        Class UOPstreamBase Declaration
 \*---------------------------------------------------------------------------*/
 
-class UOPstream
+class UOPstreamBase
 :
     public UPstream,
     public Ostream
 {
-    // Private Data
-
-        int toProcNo_;
-
-        DynamicList<char>& sendBuf_;
-
-        const int tag_;
-
-        const label comm_;
-
-        const bool sendAtDestruct_;
-
-
     // Private Member Functions
 
         //- Prepare send buffer for count bytes of output,
@@ -100,14 +88,27 @@ class UOPstream
         inline void putString(const std::string& str);
 
 
-public:
+protected:
 
-    // Constructors
+    // Protected Data
+
+        int toProcNo_;
+
+        DynamicList<char>& sendBuf_;
+
+        const int tag_;
+
+        const label comm_;
+
+        const bool sendAtDestruct_;
+
+
+    // Protected Constructors
 
         //- Construct given process index to write to using the given
         //- attached send buffer, optional communication characteristics
         //- and IO format
-        UOPstream
+        UOPstreamBase
         (
             const commsTypes commsType,
             const int toProcNo,
@@ -119,11 +120,13 @@ public:
         );
 
         //- Construct given buffers
-        UOPstream(const int toProcNo, PstreamBuffers& buffers);
+        UOPstreamBase(const int toProcNo, PstreamBuffers& buffers);
 
+
+public:
 
     //- Destructor.
-    ~UOPstream();
+    virtual ~UOPstreamBase();
 
 
     // Member Functions
@@ -138,17 +141,6 @@ public:
 
 
         // Write Functions
-
-            //- Write given buffer to given processor
-            static bool write
-            (
-                const commsTypes commsType,
-                const int toProcNo,
-                const char* buf,
-                const std::streamsize bufSize,
-                const int tag = UPstream::msgType(),
-                const label communicator = UPstream::worldComm
-            );
 
             //- Write token to stream or otherwise handle it.
             //  \return false if the token type was not handled by this method
@@ -259,19 +251,152 @@ public:
             }
 
 
-        // Edit
+    // Positioning
 
-            //- Set flags of stream
-            ios_base::fmtflags flags(const ios_base::fmtflags)
-            {
-                return ios_base::fmtflags(0);
-            }
+        //- Rewind the send buffer for overwriting
+        virtual void rewind();
+
+
+    // Edit
+
+        //- Set flags of stream
+        virtual ios_base::fmtflags flags(const ios_base::fmtflags)
+        {
+            return ios_base::fmtflags(0);
+        }
 
 
     // Print
 
         //- Print stream description to Ostream
         void print(Ostream& os) const;
+};
+
+
+/*---------------------------------------------------------------------------*\
+                          Class UOPstream Declaration
+\*---------------------------------------------------------------------------*/
+
+//- Output inter-processor communications stream
+//- using MPI send/recv etc. - operating on external buffer.
+class UOPstream
+:
+    public UOPstreamBase
+{
+    // Private Member Functions
+
+        //- Final buffer send, called by destructor
+        bool bufferIPCsend();
+
+
+public:
+
+    // Constructors
+
+        //- Construct given process index to write to using the given
+        //- attached send buffer, optional communication characteristics
+        //- and IO format
+        UOPstream
+        (
+            const commsTypes commsType,
+            const int toProcNo,
+            DynamicList<char>& sendBuf,
+            const int tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm,
+            const bool sendAtDestruct = true,
+            IOstreamOption::streamFormat fmt = IOstreamOption::BINARY
+        );
+
+        //- Construct given buffers
+        UOPstream(const int toProcNo, PstreamBuffers& buffers);
+
+
+    //- Destructor, usually sends buffer on destruct.
+    virtual ~UOPstream();
+
+
+    // Member Functions
+
+        //- Use all write methods from base class
+        using UOPstreamBase::write;
+
+
+    // Static Functions
+
+        //- Write buffer contents to given processor
+        //  \return True on success
+        static bool write
+        (
+            const commsTypes commsType,
+            const int toProcNo,
+            const char* buf,
+            const std::streamsize bufSize,
+            const int tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm
+        );
+};
+
+
+/*---------------------------------------------------------------------------*\
+                         Class UOPBstream Declaration
+\*---------------------------------------------------------------------------*/
+
+//- Output inter-processor communications stream
+//- using MPI broadcast - operating on external buffer.
+//
+// \note does not use commsType, tag etc.
+class UOPBstream
+:
+    public UOPstreamBase
+{
+    // Private Member Functions
+
+        //- Final buffer send, called by destructor
+        bool bufferIPCsend();
+
+
+public:
+
+    // Constructors
+
+        //- Construct given process index to write to using the given
+        //- attached send buffer, optional communication characteristics
+        //- and IO format
+        UOPBstream
+        (
+            const commsTypes commsType,     //!< ignored
+            const int toProcNo,             //!< normally UPstream::masterNo()
+            DynamicList<char>& sendBuf,
+            const int tag = UPstream::msgType(),  //!< ignored
+            const label comm = UPstream::worldComm,
+            const bool sendAtDestruct = true,
+            IOstreamOption::streamFormat fmt = IOstreamOption::BINARY
+        );
+
+
+    //- Destructor, usually sends buffer on destruct.
+    virtual ~UOPBstream();
+
+
+    // Member Functions
+
+        //- Use all write methods from base
+        using UOPstreamBase::write;
+
+
+    // Static Functions
+
+        //- Wrapped version of UPstream::broadcast with const-cast
+        //  \return True on success
+        static bool write
+        (
+            const commsTypes commsType,     //!< ignored
+            const int rootProcNo,           //!< normally UPstream::masterNo()
+            const char* buf,
+            const std::streamsize bufSize,
+            const int tag = UPstream::msgType(),  //!< ignored
+            const label comm = UPstream::worldComm
+        );
 };
 
 

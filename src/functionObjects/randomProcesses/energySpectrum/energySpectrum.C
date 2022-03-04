@@ -223,7 +223,7 @@ bool Foam::functionObjects::energySpectrum::write()
     {
         PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
 
-        UOPstream toProc(0, pBufs);
+        UOPstream toProc(Pstream::masterNo(), pBufs);
 
         toProc << Uc << C << cellAddr_;
 

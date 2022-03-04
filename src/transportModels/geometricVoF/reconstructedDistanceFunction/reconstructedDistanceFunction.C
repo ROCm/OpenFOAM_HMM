@@ -67,11 +67,7 @@ Foam::reconstructedDistanceFunction::coupledFacesPatch() const
 
     return autoPtr<indirectPrimitivePatch>::New
     (
-        IndirectList<face>
-        (
-            mesh_.faces(),
-            nCoupledFaces
-        ),
+        IndirectList<face>(mesh_.faces(), std::move(nCoupledFaces)),
         mesh_.points()
     );
 }
