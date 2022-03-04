@@ -32,6 +32,7 @@ License
 #include "globalIndex.H"
 #include "volFields.H"
 #include "mapPolyMesh.H"
+#include "IOmanip.H"
 #include "IOobjectList.H"
 #include "UIndirectList.H"
 #include "ListOps.H"
@@ -76,6 +77,81 @@ Foam::autoPtr<Foam::coordSetWriter> Foam::sampledSets::newWriter
 }
 
 
+Foam::OFstream* Foam::sampledSets::createProbeFile(const word& fieldName)
+{
+    // Open new output stream
+
+    OFstream* osptr = probeFilePtrs_.lookup(fieldName, nullptr);
+
+    if (!osptr && Pstream::master())
+    {
+        // Put in undecomposed case
+        // (Note: gives problems for distributed data running)
+
+        fileName probeSubDir = name();
+        if (mesh_.name() != polyMesh::defaultRegion)
+        {
+            probeSubDir = probeSubDir/mesh_.name();
+        }
+
+        fileName probeDir
+        (
+            mesh_.time().globalPath()
+          / functionObject::outputPrefix
+          / probeSubDir
+          / mesh_.time().timeName()
+        );
+        probeDir.clean();  // Remove unneeded ".."
+
+        // Create directory if needed
+        Foam::mkDir(probeDir);
+
+        probeFilePtrs_.insert
+        (
+            fieldName,
+            autoPtr<OFstream>::New(probeDir/fieldName)
+        );
+        osptr = probeFilePtrs_.lookup(fieldName, nullptr);
+
+        if (osptr)
+        {
+            auto& os = *osptr;
+
+            DebugInfo<< "open probe stream: " << os.name() << endl;
+
+            const unsigned int width(IOstream::defaultPrecision() + 7);
+
+            label nPoints = 0;
+            forAll(*this, seti)
+            {
+                const coordSet& s = gatheredSets_[seti];
+
+                const pointField& pts = static_cast<const pointField&>(s);
+
+                for (const point& p : pts)
+                {
+                    os  << "# Probe " << nPoints++ << ' ' << p << nl;
+                }
+            }
+
+            os  << '#' << setw(IOstream::defaultPrecision() + 6)
+                << "Probe";
+
+            for (label probei = 0; probei < nPoints; ++probei)
+            {
+                os  << ' ' << setw(width) << probei;
+            }
+            os  << nl;
+
+            os  << '#' << setw(IOstream::defaultPrecision() + 6)
+                << "Time" << endl;
+        }
+    }
+
+    return osptr;
+}
+
+
 void Foam::sampledSets::gatherAllSets()
 {
     // Any writer references will become invalid
@@ -101,7 +177,7 @@ void Foam::sampledSets::gatherAllSets()
 }
 
 
-Foam::IOobjectList Foam::sampledSets::preCheckFields()
+Foam::IOobjectList Foam::sampledSets::preCheckFields(unsigned request)
 {
     wordList allFields;    // Just needed for warnings
     HashTable<wordHashSet> selected;
@@ -146,7 +222,7 @@ Foam::IOobjectList Foam::sampledSets::preCheckFields()
         }
     }
 
-    if (missed.size())
+    if (missed.size() && (request != ACTION_NONE))
     {
         WarningInFunction
             << nl
@@ -189,11 +265,29 @@ Foam::IOobjectList Foam::sampledSets::preCheckFields()
 
     const label nFields = selectedFieldNames_.size();
 
-    forAll(writers_, seti)
+    if (writeAsProbes_)
     {
-        coordSetWriter& writer = writers_[seti];
+        // Close streams for fields that no longer exist
+        forAllIters(probeFilePtrs_, iter)
+        {
+            if (!selectedFieldNames_.found(iter.key()))
+            {
+                DebugInfo
+                    << "close probe stream: "
+                    << iter()->name() << endl;
 
-        writer.nFields(nFields);
+                probeFilePtrs_.remove(iter);
+            }
+        }
+    }
+    else if ((request & ACTION_WRITE) != 0)
+    {
+        forAll(writers_, seti)
+        {
+            coordSetWriter& writer = writers_[seti];
+
+            writer.nFields(nFields);
+        }
     }
 
     return objects;
@@ -213,7 +307,7 @@ void Foam::sampledSets::initDict(const dictionary& dict, const bool initial)
     if (eptr && eptr->isDict())
     {
         PtrList<sampledSet> sampSets(eptr->dict().size());
-        if (initial)
+        if (initial && !writeAsProbes_)
         {
             writers_.resize(sampSets.size());
         }
@@ -247,7 +341,7 @@ void Foam::sampledSets::initDict(const dictionary& dict, const bool initial)
             sampSets.set(seti, sampSet);
 
             // Define writer, but do not attached
-            if (initial)
+            if (initial && !writeAsProbes_)
             {
                 writers_.set
                 (
@@ -263,7 +357,7 @@ void Foam::sampledSets::initDict(const dictionary& dict, const bool initial)
         }
 
         sampSets.resize(seti);
-        if (initial)
+        if (initial && !writeAsProbes_)
         {
             writers_.resize(seti);
         }
@@ -283,7 +377,7 @@ void Foam::sampledSets::initDict(const dictionary& dict, const bool initial)
         );
 
         PtrList<sampledSet> sampSets(input.size());
-        if (initial)
+        if (initial && !writeAsProbes_)
         {
             writers_.resize(sampSets.size());
         }
@@ -305,7 +399,7 @@ void Foam::sampledSets::initDict(const dictionary& dict, const bool initial)
             sampSets.set(seti, sampSet);
 
             // Define writer, but do not attached
-            if (initial)
+            if (initial && !writeAsProbes_)
             {
                 writers_.set
                 (
@@ -321,7 +415,7 @@ void Foam::sampledSets::initDict(const dictionary& dict, const bool initial)
         }
 
         sampSets.resize(seti);
-        if (initial)
+        if (initial && !writeAsProbes_)
         {
             writers_.resize(seti);
         }
@@ -351,6 +445,7 @@ Foam::sampledSets::sampledSets
     verbose_(false),
     onExecute_(false),
     needsCorrect_(false),
+    writeAsProbes_(false),
     outputPath_
     (
         time_.globalPath()/functionObject::outputPrefix/name
@@ -359,8 +454,9 @@ Foam::sampledSets::sampledSets
     samplePointScheme_(),
     writeFormat_(),
     writeFormatOptions_(dict.subOrEmptyDict("formatOptions")),
-    writers_(),
     selectedFieldNames_(),
+    writers_(),
+    probeFilePtrs_(),
     gatheredSets_(),
     gatheredSorting_(),
     globalIndices_()
@@ -369,7 +465,6 @@ Foam::sampledSets::sampledSets
     {
         outputPath_ /= mesh_.name();
     }
-
     outputPath_.clean();  // Remove unneeded ".."
 
     read(dict);
@@ -391,6 +486,7 @@ Foam::sampledSets::sampledSets
     verbose_(false),
     onExecute_(false),
     needsCorrect_(false),
+    writeAsProbes_(false),
     outputPath_
     (
         time_.globalPath()/functionObject::outputPrefix/name
@@ -399,8 +495,9 @@ Foam::sampledSets::sampledSets
     samplePointScheme_(),
     writeFormat_(),
     writeFormatOptions_(dict.subOrEmptyDict("formatOptions")),
-    writers_(),
     selectedFieldNames_(),
+    writers_(),
+    probeFilePtrs_(),
     gatheredSets_(),
     gatheredSorting_(),
     globalIndices_()
@@ -456,6 +553,15 @@ bool Foam::sampledSets::read(const dictionary& dict)
     {
         dict.readEntry("setFormat", writeFormat_);
     }
+
+    // Hard-coded handling of ensemble 'probes' writer
+    writeAsProbes_ = ("probes" == writeFormat_);
+    if (!writeAsProbes_)
+    {
+        // Close all streams
+        probeFilePtrs_.clear();
+    }
+
     // const dictionary formatOptions(dict.subOrEmptyDict("formatOptions"));
     // Writer type and format options
     // const word writerType =
@@ -472,17 +578,28 @@ bool Foam::sampledSets::read(const dictionary& dict)
         fieldSelection_.uniq();
 
         // Report
-        forAll(*this, seti)
+        if (writeAsProbes_)
         {
-            const sampledSet& s = (*this)[seti];
+            Info<< "Sampled set as probes ensemble:" << nl;
 
-            if (!seti)
+            forAll(*this, seti)
             {
-                Info<< "Sampled set:" << nl;
+                const sampledSet& s = (*this)[seti];
+                Info<< "  " << s.name();
             }
+            Info<< nl;
+        }
+        else
+        {
+            Info<< "Sampled set:" << nl;
 
-            Info<< "    " << s.name() << " -> " << writers_[seti].type()
-                << nl;
+            forAll(*this, seti)
+            {
+                const sampledSet& s = (*this)[seti];
+
+                Info<< "    " << s.name() << " -> "
+                    << writers_[seti].type() << nl;
+            }
         }
 
         Info<< endl;
@@ -502,6 +619,11 @@ bool Foam::sampledSets::read(const dictionary& dict)
             Pout<< "  " << s << endl;
         }
         Pout<< ')' << endl;
+    }
+
+    if (writeAsProbes_)
+    {
+        (void) preCheckFields(ACTION_NONE);
     }
 
     // FUTURE:
@@ -532,7 +654,7 @@ bool Foam::sampledSets::performAction(unsigned request)
     // Determine availability of fields.
     // Count number of fields (only seems to be needed for VTK legacy)
 
-    IOobjectList objects = preCheckFields();
+    IOobjectList objects = preCheckFields(request);
 
     const label nFields = selectedFieldNames_.size();
 
@@ -543,34 +665,40 @@ bool Foam::sampledSets::performAction(unsigned request)
     }
 
     // Update writers
-
-    forAll(*this, seti)
+    if (!writeAsProbes_)
     {
-        const coordSet& s = gatheredSets_[seti];
-
-        if (request & ACTION_WRITE)
+        forAll(*this, seti)
         {
-            coordSetWriter& writer = writers_[seti];
+            const coordSet& s = gatheredSets_[seti];
 
-            if (writer.needsUpdate())
+            if ((request & ACTION_WRITE) != 0)
             {
-                writer.setCoordinates(s);
-            }
+                coordSetWriter& writer = writers_[seti];
 
-            if (writer.buffering())
-            {
-                writer.open
-                (
-                    outputPath_
-                  / word(s.name() + coordSetWriter::suffix(selectedFieldNames_))
-                );
-            }
-            else
-            {
-                writer.open(outputPath_/s.name());
-            }
+                if (writer.needsUpdate())
+                {
+                    writer.setCoordinates(s);
+                }
 
-            writer.beginTime(mesh_.time());
+                if (writer.buffering())
+                {
+                    writer.open
+                    (
+                        outputPath_
+                      / word
+                        (
+                            s.name()
+                          + coordSetWriter::suffix(selectedFieldNames_)
+                        )
+                    );
+                }
+                else
+                {
+                    writer.open(outputPath_/s.name());
+                }
+
+                writer.beginTime(mesh_.time());
+            }
         }
     }
 
@@ -584,19 +712,22 @@ bool Foam::sampledSets::performAction(unsigned request)
 
 
     // Finish this time step
-    forAll(writers_, seti)
+    if (!writeAsProbes_)
     {
-        // Write geometry if no fields were written so that we still
-        // can have something to look at
-
-        if (request & ACTION_WRITE)
+        forAll(writers_, seti)
         {
-            /// if (!writers_[seti].wroteData())
-            /// {
-            ///     writers_[seti].write();
-            /// }
+            // Write geometry if no fields were written so that we still
+            // can have something to look at
 
-            writers_[seti].endTime();
+            if ((request & ACTION_WRITE) != 0)
+            {
+                /// if (!writers_[seti].wroteData())
+                /// {
+                ///     writers_[seti].write();
+                /// }
+
+                writers_[seti].endTime();
+            }
         }
     }
 

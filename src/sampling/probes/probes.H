@@ -234,6 +234,9 @@ private:
 
     // Private Member Functions
 
+        //- Create new streams as required
+        void createProbeFiles(const wordList& fieldNames);
+
         //- Write field values
         template<class Type>
         void writeValues

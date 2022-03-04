@@ -136,16 +136,16 @@ void Foam::probes::writeValues
 {
     if (Pstream::master())
     {
-        const unsigned int w = IOstream::defaultPrecision() + 7;
+        const unsigned int width(IOstream::defaultPrecision() + 7);
         OFstream& os = *probeFilePtrs_[fieldName];
 
-        os  << setw(w) << timeValue;
+        os  << setw(width) << timeValue;
 
         forAll(values, probei)
         {
             if (includeOutOfBounds_ || processor_[probei] != -1)
             {
-                os  << ' ' << setw(w) << values[probei];
+                os  << ' ' << setw(width) << values[probei];
             }
         }
         os  << endl;

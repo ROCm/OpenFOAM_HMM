@@ -93,6 +93,10 @@ Description
         formatOptions | dictionary of format options        | no  |
     \endtable
 
+Note
+    Special setFormat \c probes can be used to output ensemble results
+    in a format similar to the probes function object.
+
 SourceFiles
     sampledSets.C
     sampledSetsImpl.C
@@ -103,6 +107,8 @@ SourceFiles
 #define Foam_sampledSets_H
 
 #include "fvMeshFunctionObject.H"
+#include "HashPtrTable.H"
+#include "OFstream.H"
 #include "sampledSet.H"
 #include "meshSearch.H"
 #include "coordSet.H"
@@ -157,6 +163,9 @@ class sampledSets
         //- Correct meshSearch and update sets
         bool needsCorrect_;
 
+        //- Output in raw format like 'probes' does
+        bool writeAsProbes_;
+
         //- Output path
         fileName outputPath_;
 
@@ -181,11 +190,14 @@ class sampledSets
 
     // Output control
 
+        //- Current list of field names selected for sampling
+        DynamicList<word> selectedFieldNames_;
+
         //- The coordSet writers (one per sampled set)
         PtrList<coordSetWriter> writers_;
 
-        //- Current list of field names selected for sampling
-        DynamicList<word> selectedFieldNames_;
+        //- Current open files (non-empty on master only) when writing as probes
+        HashPtrTable<OFstream> probeFilePtrs_;
 
 
     // Merging
@@ -203,6 +215,9 @@ class sampledSets
 
     // Private Member Functions
 
+        //- Get or create new stream as required (on master)
+        OFstream* createProbeFile(const word& fieldName);
+
         //- A new coordSet writer, with per-set formatOptions
         static autoPtr<coordSetWriter> newWriter
         (
@@ -218,7 +233,7 @@ class sampledSets
         //  Returns empty IOobjectList if loadFromFiles_ is not active
         //
         //  Adjusts selectedFieldNames_
-        IOobjectList preCheckFields();
+        IOobjectList preCheckFields(unsigned request);
 
         //- Setup the sets (optional writers)
         void initDict(const dictionary& dict, const bool initial);

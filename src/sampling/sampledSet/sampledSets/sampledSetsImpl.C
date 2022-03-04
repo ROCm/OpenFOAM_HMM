@@ -107,6 +107,7 @@ void Foam::sampledSets::performAction
 )
 {
     const word& fieldName = fld.name();
+    const scalar timeValue = fld.time().timeOutputValue();
 
     // The interpolator for this field
     autoPtr<interpolation<Type>> interpPtr;
@@ -114,6 +115,19 @@ void Foam::sampledSets::performAction
     if (!samplePointScheme_.empty() && samplePointScheme_ != "cell")
     {
         interpPtr.reset(interpolation<Type>::New(samplePointScheme_, fld));
+    }
+
+    const unsigned int width(IOstream::defaultPrecision() + 7);
+    OFstream* osptr = nullptr;
+
+    if (writeAsProbes_ && (request & ACTION_WRITE))
+    {
+        osptr = createProbeFile(fieldName);
+
+        if (Pstream::master() && osptr)
+        {
+            (*osptr) << setw(width) << timeValue;
+        }
     }
 
     // Ensemble min/max/avg values
@@ -215,10 +229,29 @@ void Foam::sampledSets::performAction
                 << "    max: " << limits.max() << nl << nl;
         }
 
-        if (request & ACTION_WRITE)
+        if ((request & ACTION_WRITE) != 0)
         {
-            writeCoordSet<Type>(writers_[seti], values, fieldName);
+            if (writeAsProbes_)
+            {
+                if (osptr)
+                {
+                    for (const Type& val : values)
+                    {
+                        (*osptr) << ' ' << setw(width) << val;
+                    }
+                }
+            }
+            else
+            {
+                writeCoordSet<Type>(writers_[seti], values, fieldName);
+            }
         }
+    }
+
+    // Finish probes write
+    if (Pstream::master() && osptr)
+    {
+        (*osptr) << endl;
     }
 
     if (sizeEnsemble)
