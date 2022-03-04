@@ -116,6 +116,11 @@ void Foam::sampledSets::performAction
         interpPtr.reset(interpolation<Type>::New(samplePointScheme_, fld));
     }
 
+    // Ensemble min/max/avg values
+    Type avgEnsemble = Zero;
+    label sizeEnsemble = 0;
+    MinMax<Type> limitsEnsemble;
+
     forAll(*this, seti)
     {
         const sampledSet& s = (*this)[seti];
@@ -164,24 +169,33 @@ void Foam::sampledSets::performAction
         // Collect data from all processors
         globIdx.gatherInplace(values);
 
-        // Some values only available on master
-        Type avgValue, minValue, maxValue;
-        label sizeValue;
+        // Local min/max/avg values - calculate on master
+        Type avgValue = Zero;
+        label sizeValue = 0;
+        MinMax<Type> limits;
 
         if (Pstream::master())
         {
-            avgValue = average(values);
-            minValue = min(values);
-            maxValue = max(values);
+            avgValue = sum(values);
             sizeValue = values.size();
+            limits = MinMax<Type>(values);
+
+            // Ensemble values
+            avgEnsemble += avgValue;
+            sizeEnsemble += sizeValue;
+            limitsEnsemble += limits;
+
+            if (sizeValue)
+            {
+                avgValue /= sizeValue;
+            }
 
             // Use sorted order
             values = UIndirectList<Type>(values, globOrder)();
         }
         Pstream::scatter(avgValue);
-        Pstream::scatter(minValue);
-        Pstream::scatter(maxValue);
         Pstream::scatter(sizeValue);
+        Pstream::scatter(limits);
 
         // Store results: min/max/average/size with the name of the set
         // for scoping.
@@ -189,22 +203,43 @@ void Foam::sampledSets::performAction
         const word resultArg('(' + setName + ',' + fieldName + ')');
 
         this->setResult("average" + resultArg, avgValue);
-        this->setResult("min" + resultArg, minValue);
-        this->setResult("max" + resultArg, maxValue);
+        this->setResult("min" + resultArg, limits.min());
+        this->setResult("max" + resultArg, limits.max());
         this->setResult("size" + resultArg, sizeValue);
 
         if (verbose_)
         {
             Info<< name() << ' ' << setName << " : " << fieldName << nl
                 << "    avg: " << avgValue << nl
-                << "    min: " << minValue << nl
-                << "    max: " << maxValue << nl << nl;
+                << "    min: " << limits.min() << nl
+                << "    max: " << limits.max() << nl << nl;
         }
 
         if (request & ACTION_WRITE)
         {
             writeCoordSet<Type>(writers_[seti], values, fieldName);
         }
+    }
+
+    if (sizeEnsemble)
+    {
+        avgEnsemble /= sizeEnsemble;
+    }
+
+    if (size())
+    {
+        Pstream::scatter(avgEnsemble);
+        Pstream::scatter(sizeEnsemble);
+        Pstream::scatter(limitsEnsemble);
+
+        // Store results: min/max/average/size for the ensemble
+        // Eg, average(T) ...
+        const word resultArg('(' + fieldName + ')');
+
+        this->setResult("average" + resultArg, avgEnsemble);
+        this->setResult("min" + resultArg, limitsEnsemble.min());
+        this->setResult("max" + resultArg, limitsEnsemble.max());
+        this->setResult("size" + resultArg, sizeEnsemble);
     }
 }
 

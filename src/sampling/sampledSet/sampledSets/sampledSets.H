@@ -51,7 +51,7 @@ Description
         interpolationScheme cellPoint;
 
         // Output format
-        surfaceFormat   vtk;
+        setFormat   vtk;
 
         formatOptions
         {
