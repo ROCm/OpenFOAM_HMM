@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -108,11 +108,11 @@ Usage
           -patches '( front \".*back\" )'
         \endverbatim
 
-      - \par -excludePatches NAME | LIST
+      - \par -exclude-patches NAME | LIST
         Exclude single or multiple patches (name or regex) from writing.
         For example,
         \verbatim
-          -excludePatches '( inlet_1 inlet_2 "proc.*" )'
+          -exclude-patches '( inlet_1 inlet_2 "proc.*" )'
         \endverbatim
 
 \*---------------------------------------------------------------------------*/
@@ -169,6 +169,8 @@ int main(int argc, char *argv[])
     // Less frequently used - reduce some clutter
     argList::setAdvanced("decomposeParDict");
     argList::setAdvanced("noFunctionObjects");
+
+    argList::addVerboseOption("Additional verbosity");
 
     #include "addAllRegionOptions.H"
 
@@ -259,9 +261,14 @@ int main(int argc, char *argv[])
     // );
     argList::addBoolOption
     (
-        "finite-area",
-        "Write finite area fields",
+        "no-finite-area",
+        "Suppress output of finite-area mesh/fields",
         true  // mark as an advanced option
+    );
+    argList::ignoreOptionCompat
+    (
+        {"finite-area", 2112},  // use -no-finite-area to disable
+        false           // bool option, no argument
     );
 
     argList::addOption
@@ -273,12 +280,14 @@ int main(int argc, char *argv[])
     );
     argList::addOption
     (
-        "excludePatches",
+        "exclude-patches",
         "wordRes",
         "Exclude single or multiple patches from writing\n"
         "Eg, 'outlet' or '( inlet \".*Wall\" )'"
         , true  // mark as an advanced option
     );
+    argList::addOptionCompat("exclude-patches", {"excludePatches", 2112});
+
     argList::addOption
     (
         "faceZones",
@@ -293,6 +302,19 @@ int main(int argc, char *argv[])
         "Specify single or multiple fields to write (all by default)\n"
         "Eg, 'T' or '( \"U.*\" )'"
     );
+    argList::addOption
+    (
+        "exclude-fields",
+        "wordRes",
+        "Exclude single or multiple fields",
+        true  // mark as an advanced option
+    );
+    argList::addBoolOption
+    (
+        "no-fields",
+        "Suppress conversion of fields"
+    );
+
     argList::addOption
     (
         "cellZones",
@@ -315,11 +337,12 @@ int main(int argc, char *argv[])
       : IOstreamOption::BINARY
     );
 
+    const int optVerbose = args.verbose();
     const bool doBoundary    = !args.found("no-boundary");
     const bool doInternal    = !args.found("no-internal");
     const bool doCellZones   = !args.found("no-cellZones");
     const bool doLagrangian  = !args.found("no-lagrangian");
-    const bool doFiniteArea  = args.found("finite-area");
+    const bool doFiniteArea  = !args.found("no-finite-area");
     const bool doPointValues = !args.found("no-point-data");
     const bool nearCellValue = args.found("nearCellValue") && doBoundary;
 
@@ -360,13 +383,14 @@ int main(int argc, char *argv[])
     writeOpts.useInternalMesh(doInternal);
     writeOpts.useCellZones(doCellZones);
 
+    // Patch selection/deselection
     if (args.found("patches"))
     {
         writeOpts.patchSelection(args.getList<wordRe>("patches"));
     }
-    if (args.found("excludePatches"))
+    if (args.found("exclude-patches"))
     {
-        writeOpts.patchExclude(args.getList<wordRe>("excludePatches"));
+        writeOpts.patchExclude(args.getList<wordRe>("exclude-patches"));
     }
 
     if (args.found("faceZones"))
@@ -381,8 +405,35 @@ int main(int argc, char *argv[])
     // Report the setup
     writeOpts.print(Info);
 
-    wordRes fieldPatterns;
-    args.readListIfPresent<wordRe>("fields", fieldPatterns);
+    // Field selection/deselection
+    wordRes includedFields, excludedFields;
+    autoPtr<wordRes::filter> fieldSelector(nullptr);
+    const bool doConvertFields = !args.found("no-fields");
+    if (doConvertFields)
+    {
+        bool resetFilter = false;
+        if (args.readListIfPresent<wordRe>("fields", includedFields))
+        {
+            resetFilter = true;
+            Info<< "Including fields "
+                << flatOutput(includedFields) << nl << endl;
+        }
+        if (args.readListIfPresent<wordRe>("exclude-fields", excludedFields))
+        {
+            resetFilter = true;
+            Info<< "Excluding fields "
+                << flatOutput(excludedFields) << nl << endl;
+        }
+        if (resetFilter)
+        {
+            fieldSelector =
+                autoPtr<wordRes::filter>::New(includedFields, excludedFields);
+        }
+    }
+    else if (doConvertFields)
+    {
+        Info<< "Field conversion disabled with the '-no-fields' option" << nl;
+    }
 
     // ------------------------------------------------------------------------
 
@@ -525,7 +576,6 @@ int main(int argc, char *argv[])
             // Objects at this time
             IOobjectList objects(mesh, runTime.timeName());
 
-            // Restrict to objects that are available for all times
             objects.filterObjects
             (
                 availableRegionObjectNames[regioni]

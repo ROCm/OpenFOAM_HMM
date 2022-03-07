@@ -94,19 +94,13 @@ template<class GeoField>
 Foam::PtrList<const GeoField> Foam::readFields
 (
     const typename GeoField::Mesh& mesh,
-    const IOobjectList& objects,
-    const wordRes& selection
+    const IOobjectList& objects
 )
 {
     const bool syncPar = true;
 
     // Available fields of type GeoField, sorted order
-    const wordList fieldNames =
-    (
-        selection.empty()
-      ? objects.sortedNames<GeoField>()
-      : objects.sortedNames<GeoField>(selection)
-    );
+    const wordList fieldNames(objects.sortedNames<GeoField>());
 
     // Construct the fields
     PtrList<const GeoField> fields(fieldNames.size());
@@ -133,19 +127,13 @@ template<class GeoField>
 Foam::PtrList<const GeoField> Foam::readFields
 (
     const fvMeshSubsetProxy& proxy,
-    const IOobjectList& objects,
-    const wordRes& selection
+    const IOobjectList& objects
 )
 {
     const bool syncPar = true;
 
     // Available fields of type GeoField, sorted order
-    const wordList fieldNames =
-    (
-        selection.empty()
-      ? objects.sortedNames<GeoField>()
-      : objects.sortedNames<GeoField>(selection)
-    );
+    const wordList fieldNames(objects.sortedNames<GeoField>());
 
     // Construct the fields
     PtrList<const GeoField> fields(fieldNames.size());

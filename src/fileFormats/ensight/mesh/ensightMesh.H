@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,8 +57,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ensightMesh_H
-#define ensightMesh_H
+#ifndef Foam_ensightMesh_H
+#define Foam_ensightMesh_H
 
 #include "Map.H"
 #include "ensightCells.H"
@@ -114,6 +114,9 @@ private:
         //- Track if it needs an update
         mutable bool needsUpdate_;
 
+        //- Output verbosity level
+        int verbose_;
+
 
     // Private Member Functions
 
@@ -142,6 +145,14 @@ public:
 
 
     // Member Functions
+
+        //- Output verbosity level
+        int verbose() const noexcept;
+
+        //- Change the output verbosity level.
+        //  \return old level
+        int verbose(const int level) noexcept;
+
 
     // Access
 

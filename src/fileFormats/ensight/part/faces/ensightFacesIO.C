@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +27,7 @@ License
 
 #include "ensightFaces.H"
 #include "ensightOutput.H"
-
+#include "InfoProxy.H"
 #include "polyMesh.H"
 #include "globalIndex.H"
 #include "globalMeshData.H"
@@ -78,7 +78,7 @@ void Foam::ensightFaces::write
                 uniqueMeshPointLabels
             );
 
-        nPoints = globalPointsPtr().size();  // nPoints (global)
+        nPoints = globalPointsPtr().totalSize();  // nPoints (global)
     }
     else
     {
@@ -132,6 +132,32 @@ void Foam::ensightFaces::write
         patchFaces,
         parallel  //!< Collective write?
     );
+}
+
+
+// * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
+
+template<>
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const InfoProxy<ensightFaces>& ip
+)
+{
+    const ensightFaces& part = ip.t_;
+
+    os << part.name().c_str();
+
+    for (label typei=0; typei < ensightFaces::nTypes; ++typei)
+    {
+        const auto etype = ensightFaces::elemType(typei);
+
+        os  << ' ' << ensightFaces::elemNames[etype]
+            << ':' << part.total(etype);
+    }
+    os  << nl;
+
+    return os;
 }
 
 

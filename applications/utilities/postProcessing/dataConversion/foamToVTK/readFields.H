@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef readFields_H
-#define readFields_H
+#ifndef Foam_readFields_H
+#define Foam_readFields_H
 
 #include "fvMeshSubsetProxy.H"
 #include "IOobjectList.H"
@@ -94,8 +94,7 @@ template<class GeoField>
 PtrList<const GeoField> readFields
 (
     const typename GeoField::Mesh& mesh,
-    const IOobjectList& objects,
-    const wordRes& selection
+    const IOobjectList& objects
 );
 
 
@@ -104,8 +103,7 @@ template<class GeoField>
 PtrList<const GeoField> readFields
 (
     const fvMeshSubsetProxy& proxy,
-    const IOobjectList& objects,
-    const wordRes& selection
+    const IOobjectList& objects
 );
 
 

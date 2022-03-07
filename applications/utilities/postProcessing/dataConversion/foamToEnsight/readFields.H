@@ -81,20 +81,16 @@ tmp<GeoField> getField
 
 //- Convert an internal field to zero-gradient volume field
 template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh>>
-makeZeroGradientField
+tmp<VolumeField<Type>> makeZeroGradientField
 (
-    const tmp
-    <
-        typename GeometricField<Type, fvPatchField, volMesh>::Internal
-    >& tdf
+    const tmp<VolumeInternalField<Type>>& tdf
 )
 {
     if (tdf)
     {
         auto& df = tdf.ref();
 
-        auto tfield = GeometricField<Type, fvPatchField, volMesh>::New
+        auto tfield = VolumeField<Type>::New
         (
             df.name(),
             df.mesh(),
@@ -119,17 +115,16 @@ makeZeroGradientField
 
 //- Convert a volume field to zero-gradient volume field
 template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh>>
-makeZeroGradientField
+tmp<VolumeField<Type>> makeZeroGradientField
 (
-    const tmp<GeometricField<Type, fvPatchField, volMesh>>& tdf
+    const tmp<VolumeField<Type>>& tdf
 )
 {
     if (tdf)
     {
         auto& df = tdf.ref();
 
-        auto tfield = GeometricField<Type, fvPatchField, volMesh>::New
+        auto tfield = VolumeField<Type>::New
         (
             df.name(),
             df.mesh(),

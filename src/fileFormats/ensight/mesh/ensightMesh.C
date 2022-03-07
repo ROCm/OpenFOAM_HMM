@@ -110,7 +110,8 @@ Foam::ensightMesh::ensightMesh
 :
     options_(new options(opts)),
     mesh_(mesh),
-    needsUpdate_(true)
+    needsUpdate_(true),
+    verbose_(0)
 {
     if (!option().lazy())
     {
@@ -120,6 +121,20 @@ Foam::ensightMesh::ensightMesh
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+int Foam::ensightMesh::verbose() const noexcept
+{
+    return verbose_;
+}
+
+
+int Foam::ensightMesh::verbose(const int level) noexcept
+{
+    int old(verbose_);
+    verbose_ = level;
+    return old;
+}
+
 
 void Foam::ensightMesh::correct()
 {
@@ -214,6 +229,10 @@ void Foam::ensightMesh::correct()
 
             // Finalize
             part.reduce();
+            if (verbose_)
+            {
+                Info<< part.info();
+            }
         }
     }
 
@@ -235,6 +254,10 @@ void Foam::ensightMesh::correct()
 
             // Finalize
             part.reduce();
+            if (verbose_)
+            {
+                Info<< part.info();
+            }
         }
         else
         {
@@ -253,6 +276,10 @@ void Foam::ensightMesh::correct()
 
                 // Finalize
                 part.reduce();
+                if (verbose_)
+                {
+                    Info<< part.info();
+                }
             }
         }
 
@@ -345,7 +372,10 @@ void Foam::ensightMesh::correct()
 
         // Finalize
         part.reduce();
-
+        if (verbose_)
+        {
+            Info<< part.info();
+        }
         if (!part.total())
         {
             boundaryParts_.erase(patchId);
@@ -379,7 +409,10 @@ void Foam::ensightMesh::correct()
 
         // Finalize
         part.reduce();
-
+        if (verbose_)
+        {
+            Info<< part.info();
+        }
         if (!part.total())
         {
             faceZoneParts_.erase(zoneId);

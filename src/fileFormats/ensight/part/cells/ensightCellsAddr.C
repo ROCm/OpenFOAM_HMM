@@ -106,7 +106,7 @@ Foam::label Foam::ensightCells::meshPointMapppings
                     uniqueMeshPointLabels
                 );
 
-            nPoints = globalPointsPtr().size();   // nPoints (global)
+            nPoints = globalPointsPtr().totalSize();   // nPoints (global)
         }
         else
         {
@@ -125,7 +125,7 @@ Foam::label Foam::ensightCells::meshPointMapppings
                     uniqueMeshPointLabels
                 );
 
-            nPoints = globalPointsPtr().size();   // nPoints (global)
+            nPoints = globalPointsPtr().totalSize();   // nPoints (global)
 
             meshPointMap.clear();
 

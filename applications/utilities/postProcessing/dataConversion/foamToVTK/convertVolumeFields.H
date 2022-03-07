@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,7 +48,7 @@ Description
       : 0
     );
 
-    const label nPointFields =
+    label nPointFields =
     (
         doPointValues
       ? objects.count(stringListOps::foundOp<word>(fieldTypes::point))
@@ -82,11 +82,6 @@ Description
 
     if (doInternal)
     {
-        if (doPointValues)
-        {
-            pInterp.reset(new volPointInterpolation(mesh));
-        }
-
         if (vtuMeshCells.empty())
         {
             // Use the appropriate mesh (baseMesh or subMesh)
@@ -119,6 +114,11 @@ Description
 
         internalWriter->writeTimeValue(mesh.time().value());
         internalWriter->writeGeometry();
+
+        if (doPointValues)
+        {
+            pInterp.reset(new volPointInterpolation(mesh));
+        }
     }
 
 
@@ -132,7 +132,7 @@ Description
     labelList patchIds;
     if (doBoundary)
     {
-        patchIds = getSelectedPatches(patches, includePatches, excludePatches);
+        patchIds = getSelectedPatches(patches, patchSelector);
     }
 
     if (oneBoundary && patchIds.size())

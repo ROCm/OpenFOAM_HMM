@@ -27,6 +27,7 @@ License
 
 #include "ensightCells.H"
 #include "ensightOutput.H"
+#include "InfoProxy.H"
 #include "polyMesh.H"
 #include "globalIndex.H"
 #include "globalMeshData.H"
@@ -323,6 +324,32 @@ void Foam::ensightCells::write
             );
         }
     }
+}
+
+
+// * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
+
+template<>
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const InfoProxy<ensightCells>& ip
+)
+{
+    const ensightCells& part = ip.t_;
+
+    os << part.name().c_str();
+
+    for (label typei=0; typei < ensightCells::nTypes; ++typei)
+    {
+        const auto etype = ensightCells::elemType(typei);
+
+        os  << ' ' << ensightCells::elemNames[etype]
+            << ':' << part.total(etype);
+    }
+    os  << nl;
+
+    return os;
 }
 
 

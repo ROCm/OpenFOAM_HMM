@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,7 +53,8 @@ Foam::ensightFaMesh::ensightFaMesh
 )
 :
     mesh_(mesh),
-    needsUpdate_(true)
+    needsUpdate_(true),
+    verbose_(0)
 {
     // Lazy?
     if (true)
@@ -64,6 +65,20 @@ Foam::ensightFaMesh::ensightFaMesh
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+int Foam::ensightFaMesh::verbose() const noexcept
+{
+    return verbose_;
+}
+
+
+int Foam::ensightFaMesh::verbose(const int level) noexcept
+{
+    int old(verbose_);
+    verbose_ = level;
+    return old;
+}
+
 
 void Foam::ensightFaMesh::correct()
 {
@@ -86,6 +101,11 @@ void Foam::ensightFaMesh::correct()
 
         // Finalize
         part.reduce();
+
+        if (verbose_)
+        {
+            Info<< part.info();
+        }
 
         // if (!part.total())
         // {

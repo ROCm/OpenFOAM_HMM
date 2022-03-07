@@ -55,6 +55,7 @@ PtrList<ensightFaMesh> ensightMeshesFa(regionNames.size());
             regioni,
             new ensightMesh(mesh, writeOpts)
         );
+        ensightMeshes[regioni].verbose(optVerbose);
 
         // New ensight case file, initialize header etc.
         ensightCases.set
@@ -87,6 +88,7 @@ PtrList<ensightFaMesh> ensightMeshesFa(regionNames.size());
                     regioni,
                     new ensightFaMesh(meshesFa[regioni])
                 );
+                ensightMeshesFa[regioni].verbose(optVerbose);
             }
         }
     }

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ensightOutput_H
-#define ensightOutput_H
+#ifndef Foam_ensightOutput_H
+#define Foam_ensightOutput_H
 
 #include "ensightFile.H"
 #include "ensightGeoFile.H"
@@ -50,6 +50,7 @@ SourceFiles
 #include "ListOps.H"
 #include "ListListOps.H"
 #include "IndirectList.H"
+#include "CompactListList.H"
 #include "DynamicList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -127,21 +128,32 @@ namespace ensightOutput
 void writeFaceList
 (
     ensightGeoFile& os,
-    const UList<face>& faces
+    const UList<face>& faces,
+    const label pointOffset = 0  //!< Additional point offset for each face
 );
 
-//- Write list of faces
+//- Write list of faces (indirect addressing)
 void writeFaceList
 (
     ensightGeoFile& os,
-    const UIndirectList<face>& faces
+    const UIndirectList<face>& faces,
+    const label pointOffset = 0  //!< Additional point offset for each face
+);
+
+//- Write list of faces (stored in compact form)
+void writeFaceList
+(
+    ensightGeoFile& os,
+    const CompactListList<label>& faces,
+    const label pointOffset = 0  //!< Additional point offset for each face
 );
 
 //- Write cell connectivity via cell shapes
 void writeCellShapes
 (
     ensightGeoFile& os,
-    const UList<cellShape>& shapes
+    const UList<cellShape>& shapes,
+    const label pointOffset = 0  //!< Additional point offset
 );
 
 
@@ -259,6 +271,35 @@ labelList getPolysNFaces(const polyMesh& mesh, const labelUList& addr);
 
 //- The number of points for each face of the poly elements
 labelList getPolysNPointsPerFace(const polyMesh& mesh, const labelUList& addr);
+
+//- Generate 0-based point ids for each poly element face
+//  The returned CompactListList is divided per output face
+CompactListList<label> getPolysFacePoints
+(
+    const polyMesh& mesh,
+    const labelUList& addr,     //!< Cell ids to write
+    const labelList& pointMap   //!< Point map to use
+);
+
+
+//- Write CompactListList<label> by components
+void writeLabelListList
+(
+    ensightGeoFile& os,
+    const labelUList& offsets,
+    const labelUList& values,
+    const label pointOffset
+);
+
+
+//- Write a list of faces or cell shapes with one-entity per line
+template<class LabelListListType>
+void writeLabelListList
+(
+    ensightGeoFile& os,
+    const LabelListListType& listOfLists,
+    const label pointOffset
+);
 
 
 //- Copy specified field component into a scalar buffer

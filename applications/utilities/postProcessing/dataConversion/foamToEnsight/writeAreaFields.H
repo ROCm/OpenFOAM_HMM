@@ -34,7 +34,7 @@ bool writeAreaField
 (
     ensightCase& ensCase,
     const ensightFaMesh& ensMesh,
-    const tmp<GeometricField<Type, faPatchField, areaMesh>>& tfield
+    const tmp<AreaField<Type>>& tfield
 )
 {
     if (!tfield)
@@ -66,13 +66,13 @@ label writeAreaFields
     const IOobjectList& objects
 )
 {
-    typedef GeometricField<Type, faPatchField, areaMesh> GeoField;
+    typedef AreaField<Type> FieldType;
 
     const faMesh& mesh = ensMesh.mesh();
 
     label count = 0;
 
-    for (const word& fieldName : objects.sortedNames<GeoField>())
+    for (const word& fieldName : objects.sortedNames<FieldType>())
     {
         if
         (
@@ -80,7 +80,7 @@ label writeAreaFields
             (
                 ensCase,
                 ensMesh,
-                getField<GeoField>(objects.findObject(fieldName), mesh)
+                getField<FieldType>(objects.findObject(fieldName), mesh)
             )
         )
         {

@@ -34,7 +34,7 @@ bool writeVolField
 (
     ensightCase& ensCase,
     const ensightMesh& ensMesh,
-    const tmp<GeometricField<Type, fvPatchField, volMesh>>& tfield,
+    const tmp<VolumeField<Type>>& tfield,
     const bool nearCellValue = false
 )
 {
@@ -86,13 +86,13 @@ label writeVolFields
     const bool nearCellValue = false
 )
 {
-    typedef GeometricField<Type, fvPatchField, volMesh> GeoField;
+    typedef VolumeField<Type> FieldType;
 
     const fvMesh& mesh = dynamicCast<const fvMesh>(ensMesh.mesh());
 
     label count = 0;
 
-    for (const word& fieldName : objects.sortedNames<GeoField>())
+    for (const word& fieldName : objects.sortedNames<FieldType>())
     {
         if
         (
@@ -100,7 +100,7 @@ label writeVolFields
             (
                 ensCase,
                 ensMesh,
-                getField<GeoField>(objects.findObject(fieldName), mesh),
+                getField<FieldType>(objects.findObject(fieldName), mesh),
                 nearCellValue
             )
         )

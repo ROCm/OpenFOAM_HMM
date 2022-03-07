@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,8 +41,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fa_ensightMesh_H
-#define fa_ensightMesh_H
+#ifndef Foam_fa_ensightMesh_H
+#define Foam_fa_ensightMesh_H
 
 #include "ensightFaces.H"
 
@@ -73,6 +73,9 @@ class ensightFaMesh
         //- Track if it needs an update
         mutable bool needsUpdate_;
 
+        //- Output verbosity level
+        int verbose_;
+
 
     // Private Member Functions
 
@@ -98,6 +101,14 @@ public:
 
 
     // Member Functions
+
+        //- Output verbosity level
+        int verbose() const noexcept;
+
+        //- Change the output verbosity level.
+        //  \return old level
+        int verbose(const int level) noexcept;
+
 
     // Access
 

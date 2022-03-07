@@ -49,8 +49,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ensightFaces_H
-#define ensightFaces_H
+#ifndef Foam_ensightFaces_H
+#define Foam_ensightFaces_H
 
 #include "ensightPart.H"
 #include "face.H"
@@ -64,6 +64,7 @@ namespace Foam
 
 // Forward Declarations
 class polyMesh;
+template<class T> class InfoProxy;
 
 /*---------------------------------------------------------------------------*\
                         Class ensightFaces Declaration
@@ -243,6 +244,10 @@ public:
 
     // Output
 
+        //- Return info proxy
+        InfoProxy<ensightFaces> info() const { return *this; }
+
+
         //- Globally unique mesh points.
         //- Required when writing point fields.
         label uniqueMeshPoints
@@ -264,6 +269,10 @@ public:
             bool parallel
         ) const;
 };
+
+
+template<>
+Ostream& operator<<(Ostream&, const InfoProxy<ensightFaces>&);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

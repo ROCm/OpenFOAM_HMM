@@ -76,7 +76,7 @@ Foam::label Foam::ensightFaces::uniqueMeshPoints
                 uniqueMeshPointLabels
             );
 
-        nPoints = globalPointsPtr().size();  // nPoints (global)
+        nPoints = globalPointsPtr().totalSize();  // nPoints (global)
     }
     else
     {

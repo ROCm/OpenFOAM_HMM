@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,8 +32,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ensightCells_H
-#define ensightCells_H
+#ifndef Foam_ensightCells_H
+#define Foam_ensightCells_H
 
 #include "ensightPart.H"
 #include "FixedList.H"
@@ -47,6 +47,7 @@ namespace Foam
 // Forward Declarations
 class bitSet;
 class polyMesh;
+template<class T> class InfoProxy;
 
 /*---------------------------------------------------------------------------*\
                         Class ensightCells Declaration
@@ -161,7 +162,6 @@ public:
     virtual ~ensightCells() = default;
 
 
-
     // Member Functions
 
     // Access
@@ -245,6 +245,10 @@ public:
 
     // Output
 
+        //- Return info proxy
+        InfoProxy<ensightCells> info() const { return *this; }
+
+
         //- Globally unique mesh points. Required when writing point fields.
         label uniqueMeshPoints
         (
@@ -266,6 +270,10 @@ public:
             bool parallel
         ) const;
 };
+
+
+template<>
+Ostream& operator<<(Ostream&, const InfoProxy<ensightCells>&);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -35,7 +35,7 @@ bool writePointField
 (
     ensightCase& ensCase,
     const ensightMesh& ensMesh,
-    const tmp<GeometricField<Type, pointPatchField, pointMesh>>& tfield
+    const tmp<PointField<Type>>& tfield
 )
 {
     if (!tfield)
@@ -68,13 +68,13 @@ label writePointFields
     const IOobjectList& objects
 )
 {
-    typedef GeometricField<Type, pointPatchField, pointMesh> GeoField;
+    typedef PointField<Type> FieldType;
 
     const pointMesh& ptMesh = pointMesh::New(ensMesh.mesh());
 
     label count = 0;
 
-    for (const word& fieldName : objects.sortedNames<GeoField>())
+    for (const word& fieldName : objects.sortedNames<FieldType>())
     {
         if
         (
@@ -82,7 +82,7 @@ label writePointFields
             (
                 ensCase,
                 ensMesh,
-                getField<GeoField>(ptMesh, objects, fieldName)
+                getField<FieldType>(ptMesh, objects, fieldName)
             )
         )
         {

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,12 +43,7 @@ Description
     {
         if (nSurfaceScalarField == -1)
         {
-            sScalars = readFields<surfaceScalarField>
-            (
-                meshProxy,
-                objects,
-                selectedFields
-            );
+            sScalars = readFields<surfaceScalarField>(meshProxy, objects);
 
             reportFields::print("    surfScalar   :", Info, sScalars);
             nSurfaceScalarField = sScalars.size();
@@ -60,12 +55,7 @@ Description
 
         if (nSurfaceVectorField == -1)
         {
-            sVectors = readFields<surfaceVectorField>
-            (
-                meshProxy,
-                objects,
-                selectedFields
-            );
+            sVectors = readFields<surfaceVectorField>(meshProxy, objects);
 
             reportFields::print("    surfVector   :", Info, sVectors);
             nSurfaceVectorField = sVectors.size();
@@ -155,12 +145,7 @@ Description
     {
         if (nSurfaceScalarField == -1)
         {
-            sScalars = readFields<surfaceScalarField>
-            (
-                meshProxy,
-                objects,
-                selectedFields
-            );
+            sScalars = readFields<surfaceScalarField>(meshProxy, objects);
             nSurfaceScalarField = sScalars.size();
 
             reportFields::print("    surfScalar   :", Info, sScalars);
@@ -172,12 +157,7 @@ Description
 
         if (nSurfaceVectorField == -1)
         {
-            sVectors = readFields<surfaceVectorField>
-            (
-                meshProxy,
-                objects,
-                selectedFields
-            );
+            sVectors = readFields<surfaceVectorField>(meshProxy, objects);
             nSurfaceVectorField = sVectors.size();
 
             reportFields::print("    surfVector   :", Info, sVectors);

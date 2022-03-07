@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -26,27 +26,37 @@ forAll(meshes, regioni)
 {
     const auto& mesh = meshes[regioni];
 
-    IOobjectList objects(mesh, timeDirs.last().name());
+    IOobjectList objects(0);
 
-    if (!fieldPatterns.empty())
+    if (doConvertFields)
     {
-        objects.filterObjects(fieldPatterns);
-    }
+        objects = IOobjectList(mesh, timeDirs.last().name());
 
-    // Remove "*_0" restart fields
-    objects.prune_0();
+        if (fieldSelector && !fieldSelector().empty())
+        {
+            objects.filterObjects(fieldSelector());
+        }
 
-    if (!doPointValues)
-    {
-        // Prune point fields if disabled
-        objects.filterClasses
-        (
-            [](const word& clsName)
-            {
-                return fieldTypes::point.found(clsName);
-            },
-            true // prune
-        );
+        if (fieldSelector && !fieldSelector().empty())
+        {
+            objects.filterObjects(fieldSelector());
+        }
+
+        // Remove "*_0" restart fields
+        objects.prune_0();
+
+        if (!doPointValues)
+        {
+            // Prune point fields if disabled
+            objects.filterClasses
+            (
+                [](const word& clsName)
+                {
+                    return fieldTypes::point.found(clsName);
+                },
+                true // prune
+            );
+        }
     }
 
     wordList objectNames(objects.sortedNames());

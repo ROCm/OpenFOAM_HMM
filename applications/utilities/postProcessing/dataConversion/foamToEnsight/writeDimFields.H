@@ -33,7 +33,7 @@ bool writeDimField
 (
     ensightCase& ensCase,
     const ensightMesh& ensMesh,
-    const tmp<DimensionedField<Type, volMesh>>& tdf
+    const tmp<VolumeInternalField<Type>>& tdf
 )
 {
     if (!tdf)
@@ -63,17 +63,13 @@ label writeDimFields
     const IOobjectList& objects
 )
 {
-    typedef typename
-        GeometricField
-        <
-            Type, fvPatchField, volMesh
-        >::Internal DimField;
+    typedef VolumeInternalField<Type> FieldType;
 
     const fvMesh& mesh = dynamicCast<const fvMesh>(ensMesh.mesh());
 
     label count = 0;
 
-    for (const word& fieldName : objects.sortedNames<DimField>())
+    for (const word& fieldName : objects.sortedNames<FieldType>())
     {
         if
         (
@@ -81,7 +77,7 @@ label writeDimFields
             (
                 ensCase,
                 ensMesh,
-                getField<DimField>(objects.findObject(fieldName), mesh)
+                getField<FieldType>(objects.findObject(fieldName), mesh)
             )
         )
         {

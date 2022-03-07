@@ -31,6 +31,27 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+template<class LabelListListType>
+void Foam::ensightOutput::Detail::writeLabelListList
+(
+    ensightGeoFile& os,
+    const LabelListListType& listOfLists,
+    const label pointOffset
+)
+{
+    const label off = (pointOffset + 1);  // 1-based for Ensight
+
+    forAll(listOfLists, listi)
+    {
+        for (const label pointi : listOfLists[listi])
+        {
+            os.write(pointi + off);
+        }
+        os.newline();  // One list (cell/faces) per line (ASCII)
+    }
+}
+
+
 template<template<typename> class FieldContainer, class Type>
 void Foam::ensightOutput::Detail::copyComponent
 (

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,7 +26,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ensightOutput.H"
-
 #include "cell.H"
 #include "cellShape.H"
 #include "face.H"
@@ -133,20 +132,29 @@ Foam::labelList Foam::ensightOutput::Detail::getPolysNPointsPerFace
 }
 
 
-void Foam::ensightOutput::writeFaceList
+void Foam::ensightOutput::Detail::writeLabelListList
 (
     ensightGeoFile& os,
-    const UList<face>& faces
+    const labelUList& offsets,
+    const labelUList& values,
+    const label pointOffset
 )
 {
-    for (const face& f : faces)
-    {
-        for (const label labi : f)
-        {
-            os.write(labi + 1);
-        }
+    const label off = (pointOffset + 1);  // 1-based for Ensight
 
-        os.newline();
+    const label nLists = (offsets.size() - 1);
+
+    for (label i = 0; i < nLists; ++i)
+    {
+        const labelUList list
+        (
+            values.slice(offsets[i], (offsets[i+i] - offsets[i]))
+        );
+        for (const label pointi : list)
+        {
+            os.write(pointi + off);
+        }
+        os.newline();  // One list (cell/faces) per line (ASCII)
     }
 }
 
@@ -154,40 +162,119 @@ void Foam::ensightOutput::writeFaceList
 void Foam::ensightOutput::writeFaceList
 (
     ensightGeoFile& os,
-    const UIndirectList<face>& faces
+    const UList<face>& faces,
+    const label pointOffset
 )
 {
-    for (const face& f : faces)
-    {
-        for (const label labi : f)
-        {
-            os.write(labi + 1);
-        }
+    ensightOutput::Detail::writeLabelListList(os, faces, pointOffset);
+}
 
-        os.newline();
-    }
+
+void Foam::ensightOutput::writeFaceList
+(
+    ensightGeoFile& os,
+    const UIndirectList<face>& faces,
+    const label pointOffset
+)
+{
+    ensightOutput::Detail::writeLabelListList(os, faces, pointOffset);
+}
+
+
+void Foam::ensightOutput::writeFaceList
+(
+    ensightGeoFile& os,
+    const CompactListList<label>& faces,
+    const label pointOffset
+)
+{
+    ensightOutput::Detail::writeLabelListList(os, faces, pointOffset);
 }
 
 
 void Foam::ensightOutput::writeCellShapes
 (
     ensightGeoFile& os,
-    const UList<cellShape>& shapes
+    const UList<cellShape>& shapes,
+    const label pointOffset
 )
 {
-    for (const cellShape& cellPoints : shapes)
+    ensightOutput::Detail::writeLabelListList(os, shapes, pointOffset);
+}
+
+
+Foam::CompactListList<Foam::label>
+Foam::ensightOutput::Detail::getPolysFacePoints
+(
+    const polyMesh& mesh,
+    const labelUList& addr,
+    const labelList& pointMap
+)
+{
+    const cellList& meshCells = mesh.cells();
+    const faceList& meshFaces = mesh.faces();
+    const labelList& owner = mesh.faceOwner();
+
+
+    // The caller should have already checked for possible overflow,
+    // so can skip that here.
+    // but still need the sizing for allocations
+
+    label nFaces = 0, nPoints = 0;
+    for (const label cellId : addr)
     {
-        // Convert global -> local index
-        // (note: Ensight indices start with 1)
+        nFaces += meshCells[cellId].size();
 
-        // In ASCII, write one cell per line
-        for (const label pointi : cellPoints)
+        for (const label faceId : meshCells[cellId])
         {
-            os.write(pointi + 1);
+            nPoints += meshFaces[faceId].size();
         }
-
-        os.newline();
     }
+
+
+    CompactListList<label> compact(nFaces, nPoints);
+    labelList& offsets = compact.offsets();
+    labelList& verts = compact.values();
+
+    // Restart counts
+    nFaces = nPoints = 0;
+
+    for (const label cellId : addr)
+    {
+        for (const label faceId : meshCells[cellId])
+        {
+            const face& f = meshFaces[faceId];
+
+            offsets[nFaces++] = nPoints;
+
+            if (faceId < owner.size() && owner[faceId] != cellId)
+            {
+                // The neighbour of an internal face
+                // - handle like face::reverseFace()
+
+                verts[nPoints++] = pointMap[f[0]];
+                for (label pti = f.size()-1; pti > 0; --pti)
+                {
+                    verts[nPoints++] = pointMap[f[pti]];
+                }
+            }
+            else
+            {
+                for (const label pointi : f)
+                {
+                    verts[nPoints++] = pointMap[pointi];
+                }
+            }
+        }
+    }
+
+    // Finally
+    if (nFaces)
+    {
+        offsets[nFaces] = nPoints;
+    }
+
+    return compact;
 }
 
 
@@ -203,6 +290,8 @@ void Foam::ensightOutput::writePolysPoints
     const faceList& meshFaces = mesh.faces();
     const labelList& owner = mesh.faceOwner();
 
+    const label off = (1);  // 1-based for Ensight
+
     for (const label cellId : addr)
     {
         for (const label faceId : meshCells[cellId])
@@ -214,21 +303,21 @@ void Foam::ensightOutput::writePolysPoints
                 // The neighbour of an internal face
                 // - write as face::reverseFace()
 
-                os.write(pointMap[f[0]] + 1);
+                os.write(pointMap[f[0]] + off);
                 for (label pti = f.size()-1; pti > 0; --pti)
                 {
-                    os.write(pointMap[f[pti]] + 1);
+                    os.write(pointMap[f[pti]] + off);
                 }
             }
             else
             {
                 for (const label pointi : f)
                 {
-                    os.write(pointMap[pointi] + 1);
+                    os.write(pointMap[pointi] + off);
                 }
             }
 
-            os.newline();
+            os.newline();  // One face per line (ASCII)
         }
     }
 }
@@ -243,6 +332,8 @@ void Foam::ensightOutput::writePolysPoints
     const labelUList& owner
 )
 {
+    const label off = (1);  // 1-based for Ensight
+
     for (const label cellId : addr)
     {
         for (const label faceId : meshCells[cellId])
@@ -254,21 +345,21 @@ void Foam::ensightOutput::writePolysPoints
                 // The neighbour of an internal face
                 // - write as face::reverseFace()
 
-                os.write(f[0] + 1);
+                os.write(f[0] + off);
                 for (label pti = f.size()-1; pti > 0; --pti)
                 {
-                    os.write(f[pti] + 1);
+                    os.write(f[pti] + off);
                 }
             }
             else
             {
                 for (const label pointi : f)
                 {
-                    os.write(pointi + 1);
+                    os.write(pointi + off);
                 }
             }
 
-            os.newline();
+            os.newline();  // One face per line (ASCII)
         }
     }
 }
