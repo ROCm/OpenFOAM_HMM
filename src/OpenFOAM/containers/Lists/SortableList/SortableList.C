@@ -105,7 +105,7 @@ inline Foam::SortableList<T>::SortableList(std::initializer_list<T> values)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
-void Foam::SortableList<T>::clear()
+inline void Foam::SortableList<T>::clear()
 {
     List<T>::clear();
     indices_.clear();
@@ -113,7 +113,7 @@ void Foam::SortableList<T>::clear()
 
 
 template<class T>
-Foam::List<T>& Foam::SortableList<T>::shrink()
+inline Foam::List<T>& Foam::SortableList<T>::shrink()
 {
     indices_.clear();
     return static_cast<List<T>&>(*this);

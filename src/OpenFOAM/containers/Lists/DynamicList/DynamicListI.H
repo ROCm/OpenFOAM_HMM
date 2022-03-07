@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -493,21 +493,7 @@ Foam::DynamicList<T, SizeMin>::transfer
 
 
 template<class T, int SizeMin>
-inline void
-Foam::DynamicList<T, SizeMin>::transfer
-(
-    SortableList<T>& list
-)
-{
-    list.shrink();  // Shrink away sort indices
-    capacity_ = list.size(); // Capacity after transfer == list size
-    List<T>::transfer(list);
-}
-
-
-template<class T, int SizeMin>
-inline Foam::DynamicList<T, SizeMin>&
-Foam::DynamicList<T, SizeMin>::append
+inline void Foam::DynamicList<T, SizeMin>::append
 (
     const T& val
 )
@@ -516,13 +502,11 @@ Foam::DynamicList<T, SizeMin>::append
     resize(idx + 1);
 
     this->operator[](idx) = val;  // copy element
-    return *this;
 }
 
 
 template<class T, int SizeMin>
-inline Foam::DynamicList<T, SizeMin>&
-Foam::DynamicList<T, SizeMin>::append
+inline void Foam::DynamicList<T, SizeMin>::append
 (
     T&& val
 )
@@ -531,13 +515,11 @@ Foam::DynamicList<T, SizeMin>::append
     resize(idx + 1);
 
     this->operator[](idx) = std::move(val);  // move assign element
-    return *this;
 }
 
 
 template<class T, int SizeMin>
-inline Foam::DynamicList<T, SizeMin>&
-Foam::DynamicList<T, SizeMin>::append
+inline void Foam::DynamicList<T, SizeMin>::append
 (
     const UList<T>& lst
 )
@@ -556,14 +538,12 @@ Foam::DynamicList<T, SizeMin>::append
     {
         this->operator[](idx++) = val;  // copy element
     }
-    return *this;
 }
 
 
 template<class T, int SizeMin>
 template<unsigned N>
-inline Foam::DynamicList<T, SizeMin>&
-Foam::DynamicList<T, SizeMin>::append
+inline void Foam::DynamicList<T, SizeMin>::append
 (
     const FixedList<T, N>& lst
 )
@@ -575,13 +555,11 @@ Foam::DynamicList<T, SizeMin>::append
     {
         this->operator[](idx++) = val;  // copy element
     }
-    return *this;
 }
 
 
 template<class T, int SizeMin>
-inline Foam::DynamicList<T, SizeMin>&
-Foam::DynamicList<T, SizeMin>::append
+inline void Foam::DynamicList<T, SizeMin>::append
 (
     std::initializer_list<T> lst
 )
@@ -593,14 +571,12 @@ Foam::DynamicList<T, SizeMin>::append
     {
         this->operator[](idx++) = val;  // copy element
     }
-    return *this;
 }
 
 
 template<class T, int SizeMin>
 template<class Addr>
-inline Foam::DynamicList<T, SizeMin>&
-Foam::DynamicList<T, SizeMin>::append
+inline void Foam::DynamicList<T, SizeMin>::append
 (
     const IndirectListBase<T, Addr>& lst
 )
@@ -614,13 +590,11 @@ Foam::DynamicList<T, SizeMin>::append
     {
         this->operator[](idx++) = lst[i];  // copy element
     }
-    return *this;
 }
 
 
 template<class T, int SizeMin>
-inline Foam::DynamicList<T, SizeMin>&
-Foam::DynamicList<T, SizeMin>::append
+inline void Foam::DynamicList<T, SizeMin>::append
 (
     List<T>&& list
 )
@@ -641,47 +615,18 @@ Foam::DynamicList<T, SizeMin>::append
     }
 
     list.clear();
-    return *this;
-}
-
-
-template<class T, int SizeMin>
-inline Foam::DynamicList<T, SizeMin>&
-Foam::DynamicList<T, SizeMin>::append
-(
-    DynamicList<T, SizeMin>&& lst
-)
-{
-    append(std::move(static_cast<List<T>&>(lst)));
-    lst.clearStorage();  // Ensure capacity=0
-    return *this;
 }
 
 
 template<class T, int SizeMin>
 template<int AnySizeMin>
-inline Foam::DynamicList<T, SizeMin>&
-Foam::DynamicList<T, SizeMin>::append
+inline void Foam::DynamicList<T, SizeMin>::append
 (
-    DynamicList<T, AnySizeMin>&& lst
+    DynamicList<T, AnySizeMin>&& list
 )
 {
-    append(std::move(static_cast<List<T>&>(lst)));
-    lst.clearStorage();  // Ensure capacity=0
-    return *this;
-}
-
-
-template<class T, int SizeMin>
-inline Foam::DynamicList<T, SizeMin>&
-Foam::DynamicList<T, SizeMin>::append
-(
-    SortableList<T>&& lst
-)
-{
-    lst.shrink();  // Shrink away sort indices
-    append(std::move(static_cast<List<T>&>(lst)));
-    return *this;
+    append(std::move(static_cast<List<T>&>(list)));
+    list.clearStorage();  // Ensure capacity=0
 }
 
 
@@ -936,17 +881,6 @@ inline void Foam::DynamicList<T, SizeMin>::operator=
 
     clear();
     transfer(list);
-}
-
-
-template<class T, int SizeMin>
-inline void Foam::DynamicList<T, SizeMin>::operator=
-(
-    SortableList<T>&& lst
-)
-{
-    clear();
-    transfer(lst);
 }
 
 

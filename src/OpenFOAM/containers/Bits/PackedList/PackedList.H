@@ -89,8 +89,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef PackedList_H
-#define PackedList_H
+#ifndef Foam_PackedList_H
+#define Foam_PackedList_H
 
 #include "BitOps.H"
 #include "labelList.H"
@@ -362,10 +362,9 @@ public:
         //- Currently identical to resize. Subject to future change (Oct-2021)
         inline void resize_nocopy(const label numElem);
 
-        //- Reserve allocation space for at least this size.
+        //- Reserve allocation space for at least this size
+        //- (uses a size doubling strategy).
         //  Never shrinks the allocated size.
-        //  The list size is adjusted as per DynamicList with
-        //  SizeInc=0, SizeMult=2, SizeDiv=1
         inline void reserve(const label numElem);
 
         //- Clear the list, i.e. set addressable size to zero.

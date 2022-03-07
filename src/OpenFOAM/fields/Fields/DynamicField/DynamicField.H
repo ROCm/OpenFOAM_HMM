@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef DynamicField_H
-#define DynamicField_H
+#ifndef Foam_DynamicField_H
+#define Foam_DynamicField_H
 
 #include "Field.H"
 #include "DynamicList.H"
@@ -283,14 +283,13 @@ public:
         inline void transfer(DynamicField<T, AnySizeMin>& list);
 
         //- Append an element at the end of the list
-        inline DynamicField<T, SizeMin>& append(const T& val);
+        inline void append(const T& val);
 
         //- Move append an element
-        inline DynamicField<T, SizeMin>& append(T&& val);
+        inline void append(T&& val);
 
         //- Append a List at the end of this list
-        inline DynamicField<T, SizeMin>&
-        append(const UList<T>& list);
+        inline void append(const UList<T>& list);
 
         //- Remove and return the top element
         inline T remove();

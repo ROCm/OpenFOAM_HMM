@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -406,15 +406,6 @@ Foam::List<T>::List(DynamicList<T, SizeMin>&& list)
 
 
 template<class T>
-Foam::List<T>::List(SortableList<T>&& list)
-:
-    UList<T>()
-{
-    transfer(list);
-}
-
-
-template<class T>
 Foam::List<T>::List(SLList<T>&& list)
 :
     UList<T>()
@@ -480,15 +471,6 @@ void Foam::List<T>::transfer(DynamicList<T, SizeMin>& list)
 
     // Ensure DynamicList has proper capacity=0 too
     list.clearStorage();
-}
-
-
-template<class T>
-void Foam::List<T>::transfer(SortableList<T>& list)
-{
-    // Shrink away the sort indices
-    list.shrink();
-    transfer(static_cast<List<T>&>(list));
 }
 
 
@@ -633,13 +615,6 @@ void Foam::List<T>::operator=(List<T>&& list)
 template<class T>
 template<int SizeMin>
 void Foam::List<T>::operator=(DynamicList<T, SizeMin>&& list)
-{
-    transfer(list);
-}
-
-
-template<class T>
-void Foam::List<T>::operator=(SortableList<T>&& list)
 {
     transfer(list);
 }

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,8 +40,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef List_H
-#define List_H
+#ifndef Foam_List_H
+#define Foam_List_H
 
 #include "autoPtr.H"
 #include "UList.H"
@@ -58,7 +58,6 @@ template<class T, unsigned N> class FixedList;
 template<class T, int SizeMin> class DynamicList;
 
 template<class T> class PtrList;
-template<class T> class SortableList;
 
 template<class T> Istream& operator>>(Istream& is, List<T>& list);
 
@@ -182,9 +181,6 @@ public:
         template<int SizeMin>
         List(DynamicList<T, SizeMin>&& list);
 
-        //- Move construct from SortableList
-        List(SortableList<T>&& list);
-
         //- Move construct from SLList
         List(SLList<T>&& list);
 
@@ -258,10 +254,6 @@ public:
             template<int SizeMin>
             void transfer(DynamicList<T, SizeMin>& list);
 
-            //- Transfer the contents of the argument List into this list
-            //- and annul the argument list
-            void transfer(SortableList<T>& list);
-
             //- Return subscript-checked element of UList and resizing the list
             //- if required.
             inline T& newElmt(const label i);
@@ -301,9 +293,6 @@ public:
         //- Move assignment. Takes constant time.
         template<int SizeMin>
         void operator=(DynamicList<T, SizeMin>&& list);
-
-        //- Move assignment. Takes constant time.
-        void operator=(SortableList<T>&& list);
 
         //- Move assignment. Takes constant time
         void operator=(SLList<T>&& list);

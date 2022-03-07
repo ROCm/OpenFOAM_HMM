@@ -106,6 +106,18 @@ int main(int argc, char *argv[])
         testFind(val, idl1);
     }
 
+    {
+        auto iter = idl1.cbegin();
+        const auto endIter = idl1.cend();
+
+        while (iter != endIter)
+        {
+            // No post-fix increment:
+            Info<< *iter << nl;
+            ++iter;
+        }
+    }
+
     inplaceReverseList(addresses);
 
     idl1.addressing() = std::move(addresses);

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,8 +42,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef DynamicList_H
-#define DynamicList_H
+#ifndef Foam_DynamicList_H
+#define Foam_DynamicList_H
 
 #include "List.H"
 
@@ -154,9 +154,6 @@ public:
         //- Move construct from List
         inline DynamicList(List<T>&& lst);
 
-        //- Move construct from SortableList
-        DynamicList(SortableList<T>&& lst);
-
         //- Construct from Istream. Size set to size of list read.
         explicit DynamicList(Istream& is);
 
@@ -259,47 +256,32 @@ public:
             template<int AnySizeMin>
             inline void transfer(DynamicList<T, AnySizeMin>& list);
 
-            //- Transfer contents  of the argument SortableList into this.
-            inline void transfer(SortableList<T>& list);
-
-            //- Append an element to the end of this list.
-            inline DynamicList<T, SizeMin>& append(const T& val);
+            //- Copy append an element to the end of this list.
+            inline void append(const T& val);
 
             //- Move append an element
-            inline DynamicList<T, SizeMin>& append(T&& val);
+            inline void append(T&& val);
 
             //- Append another list to the end of this list.
-            inline DynamicList<T, SizeMin>& append(const UList<T>& lst);
+            inline void append(const UList<T>& lst);
 
             //- Append a FixedList to the end of this list.
             template<unsigned N>
-            inline DynamicList<T, SizeMin>&
-            append(const FixedList<T, N>& lst);
+            inline void append(const FixedList<T, N>& lst);
 
             //- Append an initializer list at the end of this list.
-            inline DynamicList<T, SizeMin>&
-            append(std::initializer_list<T> lst);
+            inline void append(std::initializer_list<T> lst);
 
             //- Append a IndirectList at the end of this list
             template<class Addr>
-            inline DynamicList<T, SizeMin>&
-            append(const IndirectListBase<T, Addr>& lst);
+            inline void append(const IndirectListBase<T, Addr>& lst);
 
             //- Move append list
-            inline DynamicList<T, SizeMin>& append(List<T>&& lst);
-
-            //- Move append list
-            inline DynamicList<T, SizeMin>&
-            append(DynamicList<T, SizeMin>&& lst);
+            inline void append(List<T>&& lst);
 
             //- Move append list
             template<int AnySizeMin>
-            inline DynamicList<T, SizeMin>&
-            append(DynamicList<T, AnySizeMin>&& lst);
-
-            //- Move append list
-            inline DynamicList<T, SizeMin>&
-            append(SortableList<T>&& lst);
+            inline void append(DynamicList<T, AnySizeMin>&& list);
 
             //- Append an element if not already in the list.
             //  \return the change in list length
@@ -376,9 +358,6 @@ public:
             //- Move assignment
             template<int AnySizeMin>
             inline void operator=(DynamicList<T, AnySizeMin>&& lst);
-
-            //- Move assignment
-            inline void operator=(SortableList<T>&& lst);
 
 
     // Reading/writing

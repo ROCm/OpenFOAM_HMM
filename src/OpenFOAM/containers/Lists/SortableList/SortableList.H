@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,8 +43,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SortableList_H
-#define SortableList_H
+#ifndef Foam_SortableList_H
+#define Foam_SortableList_H
 
 #include "labelList.H"
 
@@ -106,22 +106,22 @@ public:
     // Member Functions
 
         //- Return the list of sorted indices. Updated every sort
-        const labelList& indices() const
+        const labelList& indices() const noexcept
         {
             return indices_;
         }
 
         //- Return non-const access to the sorted indices. Updated every sort
-        labelList& indices()
+        labelList& indices() noexcept
         {
             return indices_;
         }
 
         //- Clear the list and the indices
-        void clear();
+        inline void clear();
 
         //- Clear the indices and return a reference to the underlying List
-        List<T>& shrink();
+        inline List<T>& shrink();
 
         //- Forward (stable) sort the list (if changed after construction).
         //  Resizes the indices as required
@@ -163,15 +163,7 @@ public:
 };
 
 
-// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
-
-// Exchange contents of lists - see SortableList::swap().
-template<class T>
-inline void Swap(SortableList<T>& a, SortableList<T>& b)
-{
-    a.swap(b);
-}
-
+// Note: uses default Foam::Swap (move construct/assignment)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

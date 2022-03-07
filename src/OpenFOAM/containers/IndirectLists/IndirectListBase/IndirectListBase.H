@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,8 +39,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef IndirectListBase_H
-#define IndirectListBase_H
+#ifndef Foam_IndirectListBase_H
+#define Foam_IndirectListBase_H
 
 #include "List.H"
 
@@ -242,9 +242,11 @@ public:
     // Iterators
 
         //- A non-const iterator for an indirect list
+        //  Only supports forward prefix increment, since the addressing
+        //  may/may not support postfix or decrement.
         class iterator
         {
-            typename UList<T>::pointer data_;
+            T* begin_;
             typename addressing_type::const_iterator iter_;
 
         public:
@@ -258,17 +260,14 @@ public:
             iterator
             (
                 UList<T>& list,
-                typename addressing_type::const_iterator baseIter
+                typename addressing_type::const_iterator addrIter
             )
             :
-                data_(list.begin()),
-                iter_(baseIter)
+                begin_(list.data()),
+                iter_(addrIter)
             {}
 
-            reference operator*() const
-            {
-                return data_[*iter_];
-            }
+            reference operator*() const { return *(begin_ + *iter_); }
 
             iterator& operator++()
             {
@@ -276,12 +275,12 @@ public:
                 return *this;
             }
 
-            bool operator==(iterator& rhs) const
+            bool operator==(const iterator& rhs) const
             {
-                return iter_ == rhs.iter_;
+                return (iter_ == rhs.iter_);
             }
 
-            bool operator!=(iterator& rhs) const
+            bool operator!=(const iterator& rhs) const
             {
                 return (iter_ != rhs.iter_);
             }
@@ -289,9 +288,11 @@ public:
 
 
         //- A const iterator for an indirect list
+        //  Only supports forward prefix increment, since the addressing
+        //  may/may not support postfix or decrement.
         class const_iterator
         {
-            typename UList<T>::const_pointer data_;
+            const T* begin_;
             typename addressing_type::const_iterator iter_;
 
         public:
@@ -305,17 +306,14 @@ public:
             const_iterator
             (
                 const UList<T>& list,
-                typename addressing_type::const_iterator baseIter
+                typename addressing_type::const_iterator addrIter
             )
             :
-                data_(list.begin()),
-                iter_(baseIter)
+                begin_(list.cdata()),
+                iter_(addrIter)
             {}
 
-            reference operator*() const
-            {
-                return data_[*iter_];
-            }
+            reference operator*() const { return *(begin_ + *iter_); }
 
             const_iterator& operator++()
             {
@@ -323,14 +321,14 @@ public:
                 return *this;
             }
 
-            bool operator==(const_iterator& rhs) const
+            bool operator==(const const_iterator& rhs) const
             {
-                return iter_ == rhs.iter_;
+                return (iter_ == rhs.iter_);
             }
 
-            bool operator!=(const_iterator& rhs) const
+            bool operator!=(const const_iterator& rhs) const
             {
-                return iter_ != rhs.iter_;
+                return (iter_ != rhs.iter_);
             }
         };
 
@@ -364,17 +362,11 @@ public:
             return const_iterator(values_, addr_.cend());
         }
 
-        //- Return a const_iterator at end of list
-        inline const_iterator begin() const
-        {
-            return cbegin();
-        }
+        //- Return a const_iterator at begin of list
+        const_iterator begin() const { return cbegin(); }
 
         //- Return a const_iterator at end of list
-        inline const_iterator end() const
-        {
-            return cend();
-        }
+        const_iterator end() const { return cend(); }
 
 
     // Writing

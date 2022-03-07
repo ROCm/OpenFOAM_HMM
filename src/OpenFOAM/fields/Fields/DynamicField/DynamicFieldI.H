@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -582,8 +582,7 @@ inline void Foam::DynamicField<T, SizeMin>::transfer
 
 
 template<class T, int SizeMin>
-inline Foam::DynamicField<T, SizeMin>&
-Foam::DynamicField<T, SizeMin>::append
+inline void Foam::DynamicField<T, SizeMin>::append
 (
     const T& val
 )
@@ -592,13 +591,11 @@ Foam::DynamicField<T, SizeMin>::append
     resize(idx + 1);
 
     this->operator[](idx) = val;  // copy element
-    return *this;
 }
 
 
 template<class T, int SizeMin>
-inline Foam::DynamicField<T, SizeMin>&
-Foam::DynamicField<T, SizeMin>::append
+inline void Foam::DynamicField<T, SizeMin>::append
 (
     T&& val
 )
@@ -607,13 +604,11 @@ Foam::DynamicField<T, SizeMin>::append
     resize(idx + 1);
 
     this->operator[](idx) = std::move(val);  // move assign element
-    return *this;
 }
 
 
 template<class T, int SizeMin>
-inline Foam::DynamicField<T, SizeMin>&
-Foam::DynamicField<T, SizeMin>::append
+inline void Foam::DynamicField<T, SizeMin>::append
 (
     const UList<T>& list
 )
@@ -632,7 +627,6 @@ Foam::DynamicField<T, SizeMin>::append
     {
         this->operator[](idx++) = val;  // copy element
     }
-    return *this;
 }
 
 
