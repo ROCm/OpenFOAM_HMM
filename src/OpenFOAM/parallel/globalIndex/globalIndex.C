@@ -188,12 +188,6 @@ void Foam::globalIndex::bin
 }
 
 
-void Foam::globalIndex::reset(const label localSize)
-{
-    reset(localSize, Pstream::msgType(), UPstream::worldComm, true);
-}
-
-
 void Foam::globalIndex::reset
 (
     const label localSize,
@@ -209,25 +203,27 @@ void Foam::globalIndex::reset
 void Foam::globalIndex::reset
 (
     const label localSize,
-    const int tag,
     const label comm,
     const bool parallel
 )
 {
+    labelList localLens;
+
     const label len = Pstream::nProcs(comm);
 
     if (len)
     {
-        // Seed with localSize, zero elsewhere (for non-parallel branch)
-        // NB: can consider UPstream::listGatherValues
-
-        labelList localLens(len, Zero);
-        localLens[Pstream::myProcNo(comm)] = localSize;
-
-        if (parallel)
+        if (parallel && UPstream::parRun())
         {
-            Pstream::gatherList(localLens, tag, comm);
-            Pstream::scatterList(localLens, tag, comm);
+            localLens = UPstream::listGatherValues(localSize, comm);
+            Pstream::broadcast(localLens, comm);
+        }
+        else
+        {
+            // Non-parallel branch: use localSize on-proc, zero elsewhere
+
+            localLens.resize(len, Zero);
+            localLens[Pstream::myProcNo(comm)] = localSize;
         }
 
         reset(localLens, true);  // checkOverflow = true

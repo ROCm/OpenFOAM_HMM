@@ -33,7 +33,7 @@ License
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::PstreamDetail::allBroadcast
+void Foam::PstreamDetail::broadcast0
 (
     Type* values,
     int count,
@@ -59,6 +59,55 @@ void Foam::PstreamDetail::allBroadcast
     );
 
     profilingPstream::addBroadcastTime();
+}
+
+
+template<class Type>
+void Foam::PstreamDetail::reduce0
+(
+    Type* values,
+    int count,
+    MPI_Datatype datatype,
+    MPI_Op optype,
+    const label communicator
+)
+{
+    if (!UPstream::parRun())
+    {
+        return;
+    }
+
+    if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
+    {
+        Pout<< "** reducing:";
+        if (count == 1)
+        {
+            Pout<< (*values);
+        }
+        else
+        {
+            Pout<< UList<Type>(values, count);
+        }
+        Pout<< " with comm:" << communicator
+            << " warnComm:" << UPstream::warnComm << endl;
+        error::printStack(Pout);
+    }
+
+    profilingPstream::beginTiming();
+
+    // const int retval =
+    MPI_Reduce
+    (
+        MPI_IN_PLACE,
+        values,
+        count,
+        datatype,
+        optype,
+        0,  // (root process) is master == UPstream::masterNo()
+        PstreamGlobals::MPICommunicators_[communicator]
+    );
+
+    profilingPstream::addReduceTime();
 }
 
 

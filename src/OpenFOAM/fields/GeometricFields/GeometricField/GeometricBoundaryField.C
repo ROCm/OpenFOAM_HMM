@@ -440,16 +440,18 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::Boundary::evaluate()
         const lduSchedule& patchSchedule =
             bmesh_.mesh().globalData().patchSchedule();
 
-        forAll(patchSchedule, patchEvali)
+        for (const auto& schedEval : patchSchedule)
         {
-            if (patchSchedule[patchEvali].init)
+            const label patchi = schedEval.patch;
+
+            if (schedEval.init)
             {
-                this->operator[](patchSchedule[patchEvali].patch)
+                this->operator[](patchi)
                     .initEvaluate(Pstream::commsTypes::scheduled);
             }
             else
             {
-                this->operator[](patchSchedule[patchEvali].patch)
+                this->operator[](patchi)
                     .evaluate(Pstream::commsTypes::scheduled);
             }
         }

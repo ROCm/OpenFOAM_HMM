@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -423,16 +423,16 @@ void Foam::motionSmootherAlgo::setDisplacementPatchFields
     // fixedValue bc's first.
     labelHashSet adaptPatchSet(patchIDs);
 
-    const lduSchedule& patchSchedule = displacement.mesh().globalData().
-        patchSchedule();
+    const lduSchedule& patchSchedule =
+        displacement.mesh().globalData().patchSchedule();
 
-    forAll(patchSchedule, patchEvalI)
+    for (const auto& schedEval : patchSchedule)
     {
-        const label patchi = patchSchedule[patchEvalI].patch;
+        const label patchi = schedEval.patch;
 
         if (!adaptPatchSet.found(patchi))
         {
-            if (patchSchedule[patchEvalI].init)
+            if (schedEval.init)
             {
                 displacementBf[patchi]
                     .initEvaluate(Pstream::commsTypes::scheduled);
@@ -575,17 +575,16 @@ void Foam::motionSmootherAlgo::correctBoundaryConditions
 
     const lduSchedule& patchSchedule = mesh_.globalData().patchSchedule();
 
-    pointVectorField::Boundary& displacementBf =
-        displacement.boundaryFieldRef();
+    auto& displacementBf = displacement.boundaryFieldRef();
 
     // 1. evaluate on adaptPatches
-    forAll(patchSchedule, patchEvalI)
+    for (const auto& schedEval : patchSchedule)
     {
-        const label patchi = patchSchedule[patchEvalI].patch;
+        const label patchi = schedEval.patch;
 
         if (adaptPatchSet.found(patchi))
         {
-            if (patchSchedule[patchEvalI].init)
+            if (schedEval.init)
             {
                 displacementBf[patchi]
                     .initEvaluate(Pstream::commsTypes::blocking);
@@ -600,13 +599,13 @@ void Foam::motionSmootherAlgo::correctBoundaryConditions
 
 
     // 2. evaluate on non-AdaptPatches
-    forAll(patchSchedule, patchEvalI)
+    for (const auto& schedEval : patchSchedule)
     {
-        const label patchi = patchSchedule[patchEvalI].patch;
+        const label patchi = schedEval.patch;
 
         if (!adaptPatchSet.found(patchi))
         {
-            if (patchSchedule[patchEvalI].init)
+            if (schedEval.init)
             {
                 displacementBf[patchi]
                     .initEvaluate(Pstream::commsTypes::blocking);

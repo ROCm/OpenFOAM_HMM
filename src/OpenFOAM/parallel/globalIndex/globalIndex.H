@@ -127,9 +127,14 @@ public:
             enum accessType accType
         );
 
-        //- Construct from local size.
-        //  Communication with default communicator and message tag.
-        inline explicit globalIndex(const label localSize);
+        //- Construct from local size, using gather/broadcast
+        //- with default/specified communicator if parallel.
+        inline explicit globalIndex
+        (
+            const label localSize,
+            const label comm = UPstream::worldComm,   //!< communicator
+            const bool parallel = UPstream::parRun()  //!< use parallel comms
+        );
 
         //- Construct by gathering local sizes without rescattering.
         //- This 'one-sided' globalIndex will be empty on non-master processes.
@@ -148,18 +153,7 @@ public:
         (
             const label localSize,
             const globalIndex::gatherNone,
-            const label comm = -1   //!< dummy communicator
-        );
-
-        //- Construct from local size.
-        //  Communication with given communicator and message tag,
-        //  unless parallel == false
-        inline globalIndex
-        (
-            const label localSize,
-            const int tag,          //!< message tag
-            const label comm,       //!< communicator
-            const bool parallel     //!< use parallel comms
+            const label comm = -1   //!< no communicator needed
         );
 
         //- Construct from Istream.
@@ -211,9 +205,14 @@ public:
         //- Write-access to the offsets, for changing after construction
         inline labelList& offsets() noexcept;
 
-        //- Reset from local size.
-        //  Does communication with default communicator and message tag.
-        void reset(const label localSize);
+        //- Reset from local size, using gather/broadcast
+        //- with default/specified communicator if parallel.
+        void reset
+        (
+            const label localSize,
+            const label comm = UPstream::worldComm,   //!< communicator
+            const bool parallel = UPstream::parRun()  //!< use parallel comms
+        );
 
         //- Reset by gathering local sizes without rescattering.
         //- This 'one-sided' globalIndex will be empty on non-master processes.
@@ -226,23 +225,12 @@ public:
             const label comm = UPstream::worldComm  //!< communicator
         );
 
-        //- Reset from local size.
-        //  Does communication with given communicator and message tag,
-        //  unless parallel == false
-        void reset
-        (
-            const label localSize,
-            const int tag,          //!< message tag
-            const label comm,       //!< communicator
-            const bool parallel     //!< use parallel comms
-        );
-
         //- Reset from list of local sizes,
         //- with optional check for label overflow.
         //- No communication required
         void reset
         (
-            const labelUList& sizes,
+            const labelUList& localLens,
             const bool checkOverflow = false
         );
 
@@ -326,15 +314,6 @@ public:
 
             //- Which processor does global come from? Binary search.
             inline label whichProcID(const label i) const;
-
-
-    // Housekeeping
-
-            //- Same as localStart
-            label offset(const label proci) const
-            {
-                return localStart(proci);
-            }
 
 
     // Iteration
@@ -818,6 +797,41 @@ public:
 
         friend Istream& operator>>(Istream& is, globalIndex& gi);
         friend Ostream& operator<<(Ostream& os, const globalIndex& gi);
+
+
+    // Housekeeping
+
+        //- Construct from local size, using gather/broadcast
+        //- with default/specified communicator if parallel.
+        FOAM_DEPRECATED_FOR(2022-03, "construct without message tag")
+        globalIndex
+        (
+            const label localSize,
+            const int tag,          // message tag (unused)
+            const label comm,       // communicator
+            const bool parallel     // use parallel comms
+        )
+        {
+            reset(localSize, comm, parallel);
+        }
+
+        //- Reset from local size, using gather/broadcast
+        //- with default/specified communicator if parallel.
+        FOAM_DEPRECATED_FOR(2022-03, "reset without message tag")
+        void reset
+        (
+            const label localSize,
+            const int tag,          // message tag (unused)
+            const label comm,       // communicator
+            const bool parallel     // use parallel comms
+        )
+        {
+            reset(localSize, comm, parallel);
+        }
+
+        //- Prefer localStart() to avoid confusing with offsets()
+        FOAM_DEPRECATED_FOR(2022-02, "use localStart()")
+        label offset(const label proci) const { return localStart(proci); }
 };
 
 

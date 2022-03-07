@@ -210,7 +210,7 @@ void broadcast_chunks
             << "Contiguous data only." << sizeof(T) << Foam::abort(FatalError);
     }
 
-    if (UPstream::maxCommsSize <= int(sizeof(T)))
+    if (UPstream::maxCommsSize <= 0)
     {
         // Do in one go
         Info<< "send " << sendData.size() << " elements in one go" << endl;
@@ -230,48 +230,61 @@ void broadcast_chunks
     // guaranteed that some processor's sending size is some other
     // processor's receive size. Also we can ignore any local comms.
 
-    // We need to send bytes so the number of iterations:
+    // We need to send chunks so the number of iterations:
     //  maxChunkSize                        iterations
     //  ------------                        ----------
     //  0                                   0
     //  1..maxChunkSize                     1
     //  maxChunkSize+1..2*maxChunkSize      2
-    //      etc.
+    //  ...
 
-    const label maxChunkSize(UPstream::maxCommsSize/sizeof(T));
+    const label maxChunkSize
+    (
+        max
+        (
+            static_cast<label>(1),
+            static_cast<label>(UPstream::maxCommsSize/sizeof(T))
+        )
+    );
 
-    label nIter(0);
+    label nChunks(0);
     {
-        label nSendMax = 0;
+        // Get max send count (elements)
         // forAll(sendBufs, proci)
         // {
         //     if (proci != Pstream::myProcNo(comm))
         //     {
-        //         nSendMax = max(nSendMax, sendBufs[proci].size());
+        //         nChunks = max(nChunks, sendBufs[proci].size());
         //     }
         // }
-        nSendMax = sendSize;
+        nChunks = sendSize;
 
-        if (nSendMax)
+        // Convert from send count (elements) to number of chunks.
+        // Can normally calculate with (count-1), but add some safety
+        if (nChunks)
         {
-            nIter = 1 + ((nSendMax-1)/maxChunkSize);
+            nChunks = 1 + (nChunks/maxChunkSize);
         }
-        reduce(nIter, maxOp<label>(), tag, comm);
+        reduce(nChunks, maxOp<label>(), tag, comm);
 
         Info
-            << "send " << nSendMax << " elements ("
-            << (nSendMax*sizeof(T)) << " bytes) in " << nIter
-            << " iterations of " << maxChunkSize << " chunks ("
+            << "send " << sendSize << " elements ("
+            << (sendSize*sizeof(T)) << " bytes) in " << nChunks
+            << " chunks of " << maxChunkSize << " elements ("
             << (maxChunkSize*sizeof(T)) << " bytes) for maxCommsSize:"
             << Pstream::maxCommsSize
             << endl;
     }
 
+    // stress-test with shortened sendSize
+    // will produce useless loops, but no calls
+    // sendSize /= 2;
+
     label nSend(0);
     label startSend(0);
     char* charPtrSend;
 
-    for (label iter = 0; iter < nIter; ++iter)
+    for (label iter = 0; iter < nChunks; ++iter)
     {
         nSend = min
         (
@@ -297,6 +310,8 @@ void broadcast_chunks
             startSend += nSend;
         }
     }
+
+    Info<< "final: " << startSend << endl;
 }
 
 
@@ -305,8 +320,9 @@ void broadcast_chunks
 int main(int argc, char *argv[])
 {
     argList::noCheckProcessorDirectories();
+    argList::addOption("comms-size", "int", "override Pstream::maxCommsSize");
+
     #include "setRootCase.H"
-    #include "createTime.H"
 
     if (!Pstream::parRun())
     {
@@ -322,6 +338,9 @@ int main(int argc, char *argv[])
     broadcast_chunks<labelList, label>(input1);
 
     Pstream::maxCommsSize = 33;
+
+    args.readIfPresent("comms-size", Pstream::maxCommsSize);
+
     broadcast_chunks<labelList, label>(input1);
 
     // Mostly the same with PstreamBuffers

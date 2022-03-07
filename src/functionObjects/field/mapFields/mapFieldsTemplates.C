@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -91,9 +91,10 @@ void Foam::functionObjects::mapFields::evaluateConstraintTypes
         const lduSchedule& patchSchedule =
             fld.mesh().globalData().patchSchedule();
 
-        forAll(patchSchedule, patchEvali)
+        for (const auto& schedEval : patchSchedule)
         {
-            label patchi = patchSchedule[patchEvali].patch;
+            const label patchi = schedEval.patch;
+
             fvPatchField<Type>& tgtField = fldBf[patchi];
 
             if
@@ -102,7 +103,7 @@ void Foam::functionObjects::mapFields::evaluateConstraintTypes
              && polyPatch::constraintType(tgtField.patch().patch().type())
             )
             {
-                if (patchSchedule[patchEvali].init)
+                if (schedEval.init)
                 {
                     tgtField.initEvaluate(Pstream::commsTypes::scheduled);
                 }

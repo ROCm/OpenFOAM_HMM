@@ -480,13 +480,7 @@ void Foam::decompositionMethod::calcCellCells
     // Create global cell numbers
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    const globalIndex globalAgglom
-    (
-        nLocalCoarse,
-        Pstream::msgType(),
-        Pstream::worldComm,
-        parallel
-    );
+    const globalIndex globalAgglom(nLocalCoarse, Pstream::worldComm, parallel);
 
 
     // Get agglomerate owner on other side of coupled faces
@@ -679,13 +673,7 @@ void Foam::decompositionMethod::calcCellCells
     // Create global cell numbers
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    const globalIndex globalAgglom
-    (
-        nLocalCoarse,
-        Pstream::msgType(),
-        Pstream::worldComm,
-        parallel
-    );
+    const globalIndex globalAgglom(nLocalCoarse, Pstream::worldComm, parallel);
 
 
     // Get agglomerate owner on other side of coupled faces

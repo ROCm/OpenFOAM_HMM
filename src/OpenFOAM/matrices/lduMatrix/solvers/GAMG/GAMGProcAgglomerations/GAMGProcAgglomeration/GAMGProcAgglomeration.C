@@ -126,17 +126,16 @@ Foam::labelListList Foam::GAMGProcAgglomeration::globalCellCells
     const lduAddressing& addr = mesh.lduAddr();
     lduInterfacePtrsList interfaces = mesh.interfaces();
 
-    const label myProcID = Pstream::myProcNo(mesh.comm());
+    const label myProcID = UPstream::myProcNo(mesh.comm());
 
-    globalIndex globalNumbering
+    const globalIndex globalNumbering
     (
         addr.size(),
-        Pstream::msgType(),
         mesh.comm(),
-        Pstream::parRun()
+        UPstream::parRun()
     );
 
-    labelList globalIndices
+    const labelList globalIndices
     (
         identity
         (
@@ -163,9 +162,9 @@ Foam::labelListList Foam::GAMGProcAgglomeration::globalCellCells
             }
         }
 
-        if (Pstream::parRun())
+        if (UPstream::parRun())
         {
-            Pstream::waitRequests(nReq);
+            UPstream::waitRequests(nReq);
         }
 
         forAll(interfaces, inti)

@@ -224,7 +224,7 @@ void Foam::Pstream::exchange
             }
         }
 
-        if (UPstream::maxCommsSize <= int(sizeof(T)))
+        if (UPstream::maxCommsSize <= 0)
         {
             // Do the exchanging in one go
             exchangeContainer<Container, T>
@@ -244,38 +244,41 @@ void Foam::Pstream::exchange
             // guaranteed that some processor's sending size is some other
             // processor's receive size. Also we can ignore any local comms.
 
-            // We need to send bytes so the number of iterations:
+            // We need to send chunks so the number of iterations:
             //  maxChunkSize                        iterations
             //  ------------                        ----------
             //  0                                   0
             //  1..maxChunkSize                     1
             //  maxChunkSize+1..2*maxChunkSize      2
-            //      etc.
+            //  ...
 
-            const label maxChunkSize(UPstream::maxCommsSize/sizeof(T));
+            const label maxChunkSize
+            (
+                max
+                (
+                    static_cast<label>(1),
+                    static_cast<label>(UPstream::maxCommsSize/sizeof(T))
+                )
+            );
 
-            label nIter(0);
+            label nChunks(0);
             {
-                label nSendMax = 0;
+                // Get max send count (elements)
                 forAll(sendBufs, proci)
                 {
                     if (proci != Pstream::myProcNo(comm))
                     {
-                        nSendMax = max(nSendMax, sendBufs[proci].size());
+                        nChunks = max(nChunks, sendBufs[proci].size());
                     }
                 }
 
-                if (nSendMax)
+                // Convert from send count (elements) to number of chunks.
+                // Can normally calculate with (count-1), but add some safety
+                if (nChunks)
                 {
-                    nIter = 1 + ((nSendMax-1)/maxChunkSize);
+                    nChunks = 1 + (nChunks/maxChunkSize);
                 }
-                reduce(nIter, maxOp<label>(), tag, comm);
-
-                /// Info<< "send " << nSendMax << " elements ("
-                ///     << (nSendMax*sizeof(T)) << " bytes) in " << nIter
-                ///     << " iterations of " << maxChunkSize << " chunks ("
-                ///     << (maxChunkSize*sizeof(T)) << " bytes) maxCommsSize:"
-                ///     << Pstream::maxCommsSize << endl;
+                reduce(nChunks, maxOp<label>(), tag, comm);
             }
 
             labelList nRecv(sendBufs.size());
@@ -286,7 +289,7 @@ void Foam::Pstream::exchange
             List<const char*> charPtrSend(sendBufs.size());
             List<char*> charPtrRecv(sendBufs.size());
 
-            for (label iter = 0; iter < nIter; ++iter)
+            for (label iter = 0; iter < nChunks; ++iter)
             {
                 forAll(sendBufs, proci)
                 {

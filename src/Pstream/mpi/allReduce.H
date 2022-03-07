@@ -54,8 +54,9 @@ namespace Foam
 namespace PstreamDetail
 {
 
+// MPI_Bcast, using root=0
 template<class Type>
-void allBroadcast
+void broadcast0
 (
     Type* values,
     int count,
@@ -63,6 +64,18 @@ void allBroadcast
     const label communicator
 );
 
+// MPI_Reduce, using root=0
+template<class Type>
+void reduce0
+(
+    Type* values,
+    int count,
+    MPI_Datatype datatype,
+    MPI_Op optype,
+    const label communicator
+);
+
+// MPI_Allreduce
 template<class Type>
 void allReduce
 (
@@ -73,6 +86,8 @@ void allReduce
     const label communicator
 );
 
+
+// MPI_Iallreduce
 template<class Type>
 void iallReduce
 (

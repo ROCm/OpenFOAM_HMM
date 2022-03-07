@@ -77,9 +77,14 @@ inline Foam::globalIndex::globalIndex
 }
 
 
-inline Foam::globalIndex::globalIndex(const label localSize)
+inline Foam::globalIndex::globalIndex
+(
+    const label localSize,
+    const label comm,
+    const bool parallel
+)
 {
-    reset(localSize);
+    reset(localSize, comm, parallel);
 }
 
 
@@ -106,18 +111,6 @@ inline Foam::globalIndex::globalIndex
 {
     offsets_[0] = 0;
     offsets_[1] = localSize;
-}
-
-
-inline Foam::globalIndex::globalIndex
-(
-    const label localSize,
-    const int tag,
-    const label comm,
-    const bool parallel
-)
-{
-    reset(localSize, tag, comm, parallel);
 }
 
 

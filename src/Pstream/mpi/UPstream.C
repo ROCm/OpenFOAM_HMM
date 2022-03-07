@@ -296,7 +296,7 @@ bool Foam::UPstream::init(int& argc, char**& argv, const bool needsThread)
         wordList worlds(numprocs);
         worlds[Pstream::myProcNo()] = world;
         Pstream::gatherList(worlds);
-        Pstream::scatterList(worlds);
+        Pstream::broadcast(worlds);
 
         // Compact
         if (Pstream::master())
@@ -315,8 +315,8 @@ bool Foam::UPstream::init(int& argc, char**& argv, const bool needsThread)
                 worldIDs_[proci] = allWorlds_.find(world);
             }
         }
-        Pstream::scatter(allWorlds_);
-        Pstream::scatter(worldIDs_);
+        Pstream::broadcast(allWorlds_);
+        Pstream::broadcast(worldIDs_);
 
         DynamicList<label> subRanks;
         forAll(worlds, proci)

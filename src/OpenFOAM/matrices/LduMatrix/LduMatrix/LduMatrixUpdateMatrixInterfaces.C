@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -148,13 +148,13 @@ void Foam::LduMatrix<Type, DType, LUType>::updateMatrixInterfaces
         const lduSchedule& patchSchedule = this->patchSchedule();
 
         // Loop over all the "normal" interfaces relating to standard patches
-        forAll(patchSchedule, i)
+        for (const auto& schedEval : patchSchedule)
         {
-            label interfacei = patchSchedule[i].patch;
+            const label interfacei = schedEval.patch;
 
             if (interfaces_.set(interfacei))
             {
-                if (patchSchedule[i].init)
+                if (schedEval.init)
                 {
                     interfaces_[interfacei].initInterfaceMatrixUpdate
                     (

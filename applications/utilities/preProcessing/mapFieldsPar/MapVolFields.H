@@ -95,9 +95,10 @@ void evaluateConstraintTypes(GeometricField<Type, fvPatchField, volMesh>& fld)
         const lduSchedule& patchSchedule =
             fld.mesh().globalData().patchSchedule();
 
-        forAll(patchSchedule, patchEvali)
+        for (const auto& schedEval : patchSchedule)
         {
-            label patchi = patchSchedule[patchEvali].patch;
+            const label patchi = schedEval.patch;
+
             fvPatchField<Type>& tgtField = fldBf[patchi];
 
             if
@@ -106,7 +107,7 @@ void evaluateConstraintTypes(GeometricField<Type, fvPatchField, volMesh>& fld)
              && polyPatch::constraintType(tgtField.patch().patch().type())
             )
             {
-                if (patchSchedule[patchEvali].init)
+                if (schedEval.init)
                 {
                     tgtField.initEvaluate(Pstream::commsTypes::scheduled);
                 }

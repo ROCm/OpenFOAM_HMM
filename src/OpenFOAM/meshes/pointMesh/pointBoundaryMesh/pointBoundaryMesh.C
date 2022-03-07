@@ -93,8 +93,8 @@ void Foam::pointBoundaryMesh::calcGeometry()
 
     if
     (
-        Pstream::defaultCommsType == Pstream::commsTypes::blocking
-     || Pstream::defaultCommsType == Pstream::commsTypes::nonBlocking
+        pBufs.commsType() == Pstream::commsTypes::blocking
+     || pBufs.commsType() == Pstream::commsTypes::nonBlocking
     )
     {
         forAll(*this, patchi)
@@ -109,18 +109,18 @@ void Foam::pointBoundaryMesh::calcGeometry()
             operator[](patchi).calcGeometry(pBufs);
         }
     }
-    else if (Pstream::defaultCommsType == Pstream::commsTypes::scheduled)
+    else if (pBufs.commsType() == Pstream::commsTypes::scheduled)
     {
         const lduSchedule& patchSchedule = mesh().globalData().patchSchedule();
 
         // Dummy.
         pBufs.finishedSends();
 
-        forAll(patchSchedule, patchEvali)
+        for (const auto& schedEval : patchSchedule)
         {
-            label patchi = patchSchedule[patchEvali].patch;
+            const label patchi = schedEval.patch;
 
-            if (patchSchedule[patchEvali].init)
+            if (schedEval.init)
             {
                 operator[](patchi).initGeometry(pBufs);
             }
@@ -139,8 +139,8 @@ void Foam::pointBoundaryMesh::movePoints(const pointField& p)
 
     if
     (
-        Pstream::defaultCommsType == Pstream::commsTypes::blocking
-     || Pstream::defaultCommsType == Pstream::commsTypes::nonBlocking
+        pBufs.commsType() == Pstream::commsTypes::blocking
+     || pBufs.commsType() == Pstream::commsTypes::nonBlocking
     )
     {
         forAll(*this, patchi)
@@ -155,18 +155,18 @@ void Foam::pointBoundaryMesh::movePoints(const pointField& p)
             operator[](patchi).movePoints(pBufs, p);
         }
     }
-    else if (Pstream::defaultCommsType == Pstream::commsTypes::scheduled)
+    else if (pBufs.commsType() == Pstream::commsTypes::scheduled)
     {
         const lduSchedule& patchSchedule = mesh().globalData().patchSchedule();
 
         // Dummy.
         pBufs.finishedSends();
 
-        forAll(patchSchedule, patchEvali)
+        for (const auto& schedEval : patchSchedule)
         {
-            label patchi = patchSchedule[patchEvali].patch;
+            const label patchi = schedEval.patch;
 
-            if (patchSchedule[patchEvali].init)
+            if (schedEval.init)
             {
                 operator[](patchi).initMovePoints(pBufs, p);
             }
@@ -185,8 +185,8 @@ void Foam::pointBoundaryMesh::updateMesh()
 
     if
     (
-        Pstream::defaultCommsType == Pstream::commsTypes::blocking
-     || Pstream::defaultCommsType == Pstream::commsTypes::nonBlocking
+        pBufs.commsType() == Pstream::commsTypes::blocking
+     || pBufs.commsType() == Pstream::commsTypes::nonBlocking
     )
     {
         forAll(*this, patchi)
@@ -201,18 +201,18 @@ void Foam::pointBoundaryMesh::updateMesh()
             operator[](patchi).updateMesh(pBufs);
         }
     }
-    else if (Pstream::defaultCommsType == Pstream::commsTypes::scheduled)
+    else if (pBufs.commsType() == Pstream::commsTypes::scheduled)
     {
         const lduSchedule& patchSchedule = mesh().globalData().patchSchedule();
 
         // Dummy.
         pBufs.finishedSends();
 
-        forAll(patchSchedule, patchEvali)
+        for (const auto& schedEval : patchSchedule)
         {
-            label patchi = patchSchedule[patchEvali].patch;
+            const label patchi = schedEval.patch;
 
-            if (patchSchedule[patchEvali].init)
+            if (schedEval.init)
             {
                 operator[](patchi).initUpdateMesh(pBufs);
             }

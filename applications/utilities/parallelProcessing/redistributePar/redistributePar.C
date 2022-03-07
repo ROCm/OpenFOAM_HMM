@@ -999,16 +999,16 @@ void correctCoupledBoundaryConditions(fvMesh& mesh)
             const lduSchedule& patchSchedule =
                 fld.mesh().globalData().patchSchedule();
 
-            forAll(patchSchedule, patchEvali)
+            for (const auto& schedEval : patchSchedule)
             {
-                const label patchi = patchSchedule[patchEvali].patch;
+                const label patchi = schedEval.patch;
                 const auto& fvp = mesh.boundary()[patchi];
                 auto& pfld = bfld[patchi];
 
                 const auto* ppPtr = isA<CoupledPatchType>(fvp);
                 if (ppPtr && ppPtr->coupled())
                 {
-                    if (patchSchedule[patchEvali].init)
+                    if (schedEval.init)
                     {
                         pfld.initEvaluate(Pstream::commsTypes::scheduled);
                     }
