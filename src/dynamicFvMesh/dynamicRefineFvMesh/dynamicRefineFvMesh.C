@@ -165,7 +165,7 @@ void Foam::dynamicRefineFvMesh::calculateProtectedCells
 
 void Foam::dynamicRefineFvMesh::readDict()
 {
-    dictionary refineDict
+    const dictionary refineDict
     (
         IOdictionary
         (
@@ -196,7 +196,63 @@ void Foam::dynamicRefineFvMesh::readDict()
 
 void Foam::dynamicRefineFvMesh::mapFields(const mapPolyMesh& mpm)
 {
-    dynamicFvMesh::mapFields(mpm);
+    //dynamicFvMesh::mapFields(mpm);
+    dynamicMotionSolverListFvMesh::mapFields(mpm);
+
+
+    // Correct old-time volumes for refined/unrefined cells. We know at this
+    // point that the points have not moved and the cells have only been split
+    // or merged. We hope that dynamicMotionSolverListFvMesh::mapFields
+    // does not use old-time volumes ...
+    {
+        const labelList& cellMap = mpm.cellMap();
+        const labelList& reverseCellMap = mpm.reverseCellMap();
+
+        // Each split cell becomes original + 7 additional
+        labelList nSubCells(mpm.nOldCells(), 0);
+
+        forAll(cellMap, celli)
+        {
+            const label oldCelli = cellMap[celli];
+            if (oldCelli >= 0 && reverseCellMap[oldCelli] >= 0)
+            {
+                // Found master cell. 
+                nSubCells[oldCelli]++;
+            }
+        }
+
+        // Start off from mapped old volumes
+        scalarField correctedV0(this->V0());
+
+        // Correct any split cells
+        const auto& V = this->V();
+        forAll(cellMap, celli)
+        {
+            const label oldCelli = cellMap[celli];
+            if (oldCelli >= 0 && nSubCells[oldCelli] == 8)
+            {
+                // Found split cell. Use current volume instead of mapped
+                // old one
+                correctedV0[celli] = V[celli];
+            }
+        }
+
+        const auto& cellsFromCells = mpm.cellsFromCellsMap();
+        for (const auto& s : cellsFromCells)
+        {
+            // Reset unsplit cell
+            const label celli = s.index();
+            correctedV0[celli] = V[celli];
+            //? Or sum up old volumes?
+            //const labelList& oldCells = s.masterObjects();
+            //for (const label oldCelli : oldCells)
+            //{
+            //}
+        }
+
+        setV0().field() = correctedV0;
+    }
+
 
     // Correct the flux for modified/added faces. All the faces which only
     // have been renumbered will already have been handled by the mapping.
@@ -1027,7 +1083,8 @@ Foam::dynamicRefineFvMesh::dynamicRefineFvMesh
     const bool doInit
 )
 :
-    dynamicFvMesh(io, doInit),
+    //dynamicFvMesh(io, doInit),
+    dynamicMotionSolverListFvMesh(io, doInit),
     meshCutter_(*this)
 {
     if (doInit)
@@ -1041,7 +1098,8 @@ bool Foam::dynamicRefineFvMesh::init(const bool doInit)
 {
     if (doInit)
     {
-        dynamicFvMesh::init(doInit);
+        //dynamicFvMesh::init(doInit);
+        dynamicMotionSolverListFvMesh::init(doInit);
     }
 
     protectedCell_.setSize(nCells());
@@ -1208,7 +1266,7 @@ bool Foam::dynamicRefineFvMesh::init(const bool doInit)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::dynamicRefineFvMesh::update()
+bool Foam::dynamicRefineFvMesh::updateTopology()
 {
     // Re-read dictionary. Chosen since usually -small so trivial amount
     // of time compared to actual refinement. Also very useful to be able
@@ -1413,6 +1471,15 @@ bool Foam::dynamicRefineFvMesh::update()
 }
 
 
+bool Foam::dynamicRefineFvMesh::update()
+{
+    bool hasChanged = updateTopology();
+    hasChanged = dynamicMotionSolverListFvMesh::update() && hasChanged;
+
+    return hasChanged;
+}
+
+
 bool Foam::dynamicRefineFvMesh::writeObject
 (
     IOstreamOption streamOpt,
@@ -1424,7 +1491,8 @@ bool Foam::dynamicRefineFvMesh::writeObject
 
     bool writeOk =
     (
-        dynamicFvMesh::writeObject(streamOpt, valid)
+        //dynamicFvMesh::writeObject(streamOpt, valid)
+        dynamicMotionSolverListFvMesh::writeObject(streamOpt, valid)
      && meshCutter_.write(valid)
     );
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -138,6 +138,22 @@ Foam::dynamicMotionSolverListFvMesh::~dynamicMotionSolverListFvMesh()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+
+void Foam::dynamicMotionSolverListFvMesh::mapFields
+(
+    const mapPolyMesh& mpm
+)
+{
+    dynamicFvMesh::mapFields(mpm);
+
+    // Update the motionSolvers for any topo change ...
+    for (auto& ms : motionSolvers_)
+    {
+        ms.updateMesh(mpm);
+    }
+}
+
 
 bool Foam::dynamicMotionSolverListFvMesh::update()
 {
