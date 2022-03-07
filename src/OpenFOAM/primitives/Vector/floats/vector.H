@@ -5,7 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,56 +24,71 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Class
+    Foam::vector
+
+Description
+    A Vector of values with scalar precision,
+    where scalar is float/double depending on the compilation flags.
+
+SourceFiles
+    floatVectors.C
+
 \*---------------------------------------------------------------------------*/
 
-#include "doubleVector.H"
+#ifndef Foam_vector_H
+#define Foam_vector_H
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+#include "scalar.H"
+#include "Vector.H"
 
-template<>
-const char* const Foam::doubleVector::vsType::typeName = "doubleVector";
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<>
-const char* const Foam::doubleVector::vsType::componentNames[] =
+namespace Foam
 {
-    "x", "y", "z"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+
+//! \class Foam::floatVector
+//! \brief A Vector of values with float precision
+typedef Vector<float> floatVector;
+
+//! \class Foam::doubleVector
+//! \brief A Vector of values with double precision
+typedef Vector<double> doubleVector;
+
+// With float or double precision (depending on compilation)
+typedef Vector<scalar> vector;
+
+// With float or double precision (depending on compilation)
+typedef Vector<solveScalar> solveVector;
+
+
+// Traits
+
+template<class Type>
+class flux
+:
+    public innerProduct<vector, Type>
+{};
+
+
+template<>
+class flux<scalar>
+{
+public:
+
+    typedef scalar type;
 };
 
-template<>
-const Foam::doubleVector Foam::doubleVector::vsType::zero
-(
-    doubleVector::uniform(0)
-);
 
-template<>
-const Foam::doubleVector Foam::doubleVector::vsType::one
-(
-    doubleVector::uniform(1)
-);
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<>
-const Foam::doubleVector Foam::doubleVector::vsType::max
-(
-    doubleVector::uniform(doubleScalarVGREAT)
-);
+} // End namespace Foam
 
-template<>
-const Foam::doubleVector Foam::doubleVector::vsType::min
-(
-    doubleVector::uniform(-doubleScalarVGREAT)
-);
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<>
-const Foam::doubleVector Foam::doubleVector::vsType::rootMax
-(
-    doubleVector::uniform(doubleScalarROOTVGREAT)
-);
-
-template<>
-const Foam::doubleVector Foam::doubleVector::vsType::rootMin
-(
-    doubleVector::uniform(-doubleScalarROOTVGREAT)
-);
-
+#endif
 
 // ************************************************************************* //

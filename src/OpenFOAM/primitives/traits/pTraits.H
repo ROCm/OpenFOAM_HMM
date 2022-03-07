@@ -36,8 +36,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef pTraits_H
-#define pTraits_H
+#ifndef Foam_pTraits_H
+#define Foam_pTraits_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

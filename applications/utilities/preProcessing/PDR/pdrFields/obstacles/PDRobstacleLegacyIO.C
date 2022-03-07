@@ -27,7 +27,6 @@ License
 
 #include "PDRobstacle.H"
 #include "vector.H"
-#include "doubleVector.H"
 #include "stringOps.H"
 #include "unitConversion.H"
 #include <cmath>

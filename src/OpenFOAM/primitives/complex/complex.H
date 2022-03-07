@@ -299,7 +299,11 @@ public:
     // Constructors
 
         //- Copy construct from primitive
-        explicit pTraits(const complex& val);
+        explicit pTraits(const complex& val)
+        :
+            p_(val)
+        {}
+
 
         //- Read construct from Istream
         explicit pTraits(Istream& is);

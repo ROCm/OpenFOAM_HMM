@@ -58,8 +58,6 @@ void Foam::primitiveMeshTools::makeFaceCentresAndAreas
         }
         else
         {
-            typedef Vector<solveScalar> solveVector;
-
             solveVector sumN = Zero;
             solveScalar sumA = 0.0;
             solveVector sumAc = Zero;
@@ -112,8 +110,6 @@ void Foam::primitiveMeshTools::makeCellCentresAndVols
     scalarField& cellVols_s
 )
 {
-    typedef Vector<solveScalar> solveVector;
-
     PrecisionAdaptor<solveVector, vector> tcellCtrs(cellCtrs_s, false);
     PrecisionAdaptor<solveScalar, scalar> tcellVols(cellVols_s, false);
     Field<solveVector>& cellCtrs = tcellCtrs.ref();
@@ -590,8 +586,6 @@ Foam::tmp<Foam::scalarField> Foam::primitiveMeshTools::faceFlatness
 
     tmp<scalarField> tfaceFlatness(new scalarField(mesh.nFaces(), 1.0));
     scalarField& faceFlatness = tfaceFlatness.ref();
-
-    typedef Vector<solveScalar> solveVector;
 
     forAll(fcs, facei)
     {

@@ -47,12 +47,6 @@ const Scalar pTraits<Scalar>::vsmall = ScalarVSMALL;
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-pTraits<Scalar>::pTraits(const Scalar& val) noexcept
-:
-    p_(val)
-{}
-
-
 pTraits<Scalar>::pTraits(Istream& is)
 {
     is >> p_;

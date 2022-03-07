@@ -63,8 +63,6 @@ Foam::label Foam::averageNeighbourFvGeometryScheme::clipFaceTet
     // Clip correction vector if any triangle becomes too small. Return number
     // of correction vectors clipped
 
-    typedef Vector<solveScalar> solveVector;
-
     const pointField& p = mesh_.points();
 
     label nClipped = 0;
@@ -142,8 +140,6 @@ void Foam::averageNeighbourFvGeometryScheme::makePyrHeights
     ownHeight.setSize(mesh_.nFaces());
     neiHeight.setSize(mesh_.nInternalFaces());
 
-    typedef Vector<solveScalar> solveVector;
-
     const labelList& own = mesh_.faceOwner();
     const labelList& nei = mesh_.faceNeighbour();
 
@@ -183,8 +179,6 @@ Foam::label Foam::averageNeighbourFvGeometryScheme::clipPyramids
 {
     // Clip correction vector if any pyramid becomes too small. Return number of
     // cells clipped
-
-    typedef Vector<solveScalar> solveVector;
 
     const labelList& own = mesh_.faceOwner();
     const labelList& nei = mesh_.faceNeighbour();
@@ -274,8 +268,6 @@ Foam::averageNeighbourFvGeometryScheme::averageNeighbourCentres
     const scalarField& faceWeights
 ) const
 {
-    typedef Vector<solveScalar> solveVector;
-
     const labelList& own = mesh_.faceOwner();
     const labelList& nei = mesh_.faceNeighbour();
 
@@ -386,8 +378,6 @@ Foam::averageNeighbourFvGeometryScheme::averageCentres
     const vectorField& faceNormals
 ) const
 {
-    typedef Vector<solveScalar> solveVector;
-
     const labelList& own = mesh_.faceOwner();
     const labelList& nei = mesh_.faceNeighbour();
 

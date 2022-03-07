@@ -42,12 +42,6 @@ const uint32_t Foam::pTraits<uint32_t>::rootMax = pTraits<uint32_t>::max;
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::pTraits<uint32_t>::pTraits(const uint32_t& val) noexcept
-:
-    p_(val)
-{}
-
-
 Foam::pTraits<uint32_t>::pTraits(Istream& is)
 {
     is >> p_;

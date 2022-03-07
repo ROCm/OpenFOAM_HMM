@@ -32,11 +32,11 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef STLpoint_H
-#define STLpoint_H
+#ifndef Foam_STLpoint_H
+#define Foam_STLpoint_H
 
 #include "point.H"
-#include "floatVector.H"
+#include "vector.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,39 +49,37 @@ namespace Foam
 
 class STLpoint
 :
-    public floatVector
+    public Vector<float>
 {
-
 public:
 
     // Constructors
 
-        //- Construct null
-        inline STLpoint()
-        {}
+        //- Default construct
+        STLpoint() = default;
 
         //- Construct from single-precision point
         inline STLpoint(const Vector<float>& p)
         :
-            floatVector(p)
+            Vector<float>(p)
         {}
 
         //- Construct from double-precision point
         inline STLpoint(const Vector<double>& p)
         :
-            floatVector(float(p.x()), float(p.y()), float(p.z()))
+            Vector<float>(float(p.x()), float(p.y()), float(p.z()))
         {}
 
         //- Construct from single-precision components
         inline STLpoint(float x, float y, float z)
         :
-            floatVector(x, y, z)
+            Vector<float>(x, y, z)
         {}
 
         //- Construct from double-precision components
         inline STLpoint(double x, double y, double z)
         :
-            floatVector(float(x), float(y), float(z))
+            Vector<float>(float(x), float(y), float(z))
         {}
 
 

@@ -51,19 +51,13 @@ const Foam::complex Foam::pTraits<Foam::complex>::rootMax
 );
 
 
-Foam::pTraits<Foam::complex>::pTraits(const complex& val)
-:
-    p_(val)
-{}
-
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::pTraits<Foam::complex>::pTraits(Istream& is)
 {
     is >> p_;
 }
 
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::complex::complex(Istream& is)
 {

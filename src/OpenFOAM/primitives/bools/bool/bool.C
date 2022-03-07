@@ -42,12 +42,6 @@ const bool Foam::pTraits<bool>::one = true;
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::pTraits<bool>::pTraits(const bool& p) noexcept
-:
-    p_(p)
-{}
-
-
 Foam::pTraits<bool>::pTraits(Istream& is)
 {
     is >> p_;

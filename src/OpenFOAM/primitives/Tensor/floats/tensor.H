@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,11 +24,11 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
+Class
     Foam::tensor
 
 Description
-    Tensor of scalars, i.e. Tensor<scalar>.
+    Tensor of scalars, i.e. Tensor\<scalar\>.
 
     Analytical functions for the computation of complex eigenvalues and
     complex eigenvectors from a given tensor.
@@ -37,12 +37,13 @@ See also
     Test-Tensor.C
 
 SourceFiles
+    floatTensors.C
     tensor.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef tensor_H
-#define tensor_H
+#ifndef Foam_tensor_H
+#define Foam_tensor_H
 
 #include "Tensor.H"
 #include "vector.H"
@@ -57,9 +58,19 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+//! \class Foam::floatTensor
+//! \brief A Tensor of values with float precision
+typedef Tensor<float> floatTensor;
+
+//! \class Foam::doubleTensor
+//! \brief A Tensor of values with double precision
+typedef Tensor<double> doubleTensor;
+
+// With float or double precision (depending on compilation)
 typedef Tensor<scalar> tensor;
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 //- Return complex eigenvalues of a given tensor
 //  \param T tensor

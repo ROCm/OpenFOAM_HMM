@@ -32,46 +32,6 @@ License
 
 using namespace Foam::constant::mathematical;
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-template<>
-const char* const Foam::tensor::vsType::typeName = "tensor";
-
-template<>
-const char* const Foam::tensor::vsType::componentNames[] =
-{
-    "xx", "xy", "xz",
-    "yx", "yy", "yz",
-    "zx", "zy", "zz"
-};
-
-template<>
-const Foam::tensor Foam::tensor::vsType::zero(tensor::uniform(0));
-
-template<>
-const Foam::tensor Foam::tensor::vsType::one(tensor::uniform(1));
-
-template<>
-const Foam::tensor Foam::tensor::vsType::max(tensor::uniform(VGREAT));
-
-template<>
-const Foam::tensor Foam::tensor::vsType::min(tensor::uniform(-VGREAT));
-
-template<>
-const Foam::tensor Foam::tensor::vsType::rootMax(tensor::uniform(ROOTVGREAT));
-
-template<>
-const Foam::tensor Foam::tensor::vsType::rootMin(tensor::uniform(-ROOTVGREAT));
-
-template<>
-const Foam::tensor Foam::tensor::I
-(
-    1, 0, 0,
-    0, 1, 0,
-    0, 0, 1
-);
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 Foam::Vector<Foam::complex> Foam::eigenValues(const tensor& T)

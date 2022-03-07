@@ -174,7 +174,10 @@ public:
     // Constructors
 
         //- Copy construct from primitive
-        explicit pTraits(const int64_t& val) noexcept;
+        explicit pTraits(int64_t val) noexcept
+        :
+            p_(val)
+        {}
 
         //- Read construct from Istream
         explicit pTraits(Istream& is);

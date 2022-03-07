@@ -247,8 +247,6 @@ void Foam::highAspectRatioFvGeometryScheme::makeAverageCentres
             << "calculating weighted average face/cell centre" << endl;
     }
 
-    typedef Vector<solveScalar> solveVector;
-
     const faceList& fs = mesh.faces();
 
     // Start off from primitiveMesh faceCentres (preserved for triangles)

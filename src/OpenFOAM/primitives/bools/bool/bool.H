@@ -109,7 +109,10 @@ public:
     // Constructors
 
         //- Copy construct from primitive
-        explicit pTraits(const bool& p) noexcept;
+        explicit pTraits(bool val) noexcept
+        :
+            p_(val)
+        {}
 
         //- Read construct from Istream
         explicit pTraits(Istream& is);

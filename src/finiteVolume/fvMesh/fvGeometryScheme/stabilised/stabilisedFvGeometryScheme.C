@@ -74,8 +74,6 @@ void Foam::stabilisedFvGeometryScheme::makeFaceCentresAndAreas
         // For more complex faces, decompose into triangles
         else
         {
-            typedef Vector<solveScalar> solveVector;
-
             // Compute an estimate of the centre as the average of the points
             solveVector fCentre = p[f[0]];
             for (label pi = 1; pi < nPoints; pi++)

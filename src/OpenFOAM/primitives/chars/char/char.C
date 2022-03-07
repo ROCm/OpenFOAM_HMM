@@ -36,12 +36,6 @@ const char* const Foam::pTraits<char>::typeName = "char";
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::pTraits<char>::pTraits(const char p) noexcept
-:
-    p_(p)
-{}
-
-
 Foam::pTraits<char>::pTraits(Istream& is)
 {
     is >> p_;

@@ -42,12 +42,6 @@ const uint8_t Foam::pTraits<uint8_t>::rootMax = UINT8_MAX;
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::pTraits<uint8_t>::pTraits(const uint8_t& val) noexcept
-:
-    p_(val)
-{}
-
-
 Foam::pTraits<uint8_t>::pTraits(Istream& is)
 {
     is >> p_;
