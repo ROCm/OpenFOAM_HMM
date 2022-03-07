@@ -30,7 +30,7 @@ License
 #include "vectorTools.H"
 #include "triangle.H"
 #include "tetrahedron.H"
-#include "ConstCirculator.H"
+#include "Circulator.H"
 #include "DelaunayMeshTools.H"
 #include "OBJstream.H"
 
@@ -195,20 +195,20 @@ void Foam::conformalVoronoiMesh::createEdgePointGroupByCirculating
 
     if (circ.size()) do
     {
-        const sideVolumeType volType = normalVolumeTypes[circ()];
+        const sideVolumeType volType = normalVolumeTypes[circ.curr()];
         const sideVolumeType nextVolType = normalVolumeTypes[circ.next()];
 
-        const vector& normal = feNormals[circ()];
+        const vector& normal = feNormals[circ.curr()];
         const vector& nextNormal = feNormals[circ.next()];
 
         vector normalDir = (normal ^ edDir);
-        normalDir *= circNormalDirs()/mag(normalDir);
+        normalDir *= circNormalDirs.curr()/mag(normalDir);
 
         vector nextNormalDir = (nextNormal ^ edDir);
         nextNormalDir *= circNormalDirs.next()/mag(nextNormalDir);
 
-//        Info<< "    " << circ() << " " << circ.next() << nl
-//            << "    " << circNormalDirs() << " " << circNormalDirs.next()
+//        Info<< "    " << circ.curr() << " " << circ.next() << nl
+//            << "    " << circNormalDirs.curr() << " " << circNormalDirs.next()
 //            << nl
 //            << "    normals = " << normal << " " << nextNormal << nl
 //            << " normalDirs = " << normalDir << " " << nextNormalDir << nl

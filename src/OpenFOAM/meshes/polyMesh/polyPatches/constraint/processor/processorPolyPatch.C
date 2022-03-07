@@ -36,7 +36,7 @@ License
 #include "Time.H"
 #include "transformList.H"
 #include "PstreamBuffers.H"
-#include "ConstCirculator.H"
+#include "Circulator.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -666,12 +666,12 @@ Foam::label Foam::processorPolyPatch::matchFace
 
     do
     {
-        const scalar diffSqr = magSqr(aPts[aCirc()] - bPts[bCirc()]);
+        const scalar diffSqr = magSqr(aPts[*aCirc] - bPts[*bCirc]);
 
         if (diffSqr < absTolSqr)
         {
             // Found a matching point. Set the fulcrum of b to the iterator
-            ConstCirculator<face> bCirc2 = bCirc;
+            ConstCirculator<face> bCirc2(bCirc);
             ++aCirc;
 
             bCirc2.setFulcrumToIterator();
@@ -689,7 +689,7 @@ Foam::label Foam::processorPolyPatch::matchFace
 
             do
             {
-                const scalar diffSqr2 = magSqr(aPts[aCirc()] - bPts[bCirc2()]);
+                const scalar diffSqr2 = magSqr(aPts[*aCirc] - bPts[*bCirc2]);
 
                 if (diffSqr2 > absTolSqr)
                 {

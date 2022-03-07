@@ -34,7 +34,6 @@ Description
 #include "ListOps.H"
 #include "face.H"
 #include "Circulator.H"
-#include "ConstCirculator.H"
 
 
 using namespace Foam;
@@ -58,21 +57,31 @@ int main(int argc, char *argv[])
 
     face f(identity(4));
 
+    // ConstCirculator<face> foo;
+    // Info<< "size: " << foo.size() << nl;
+
     ConstCirculator<face> cStart(f);
 
-    if (cStart.size()) do
+    if (!cStart.empty())
     {
-        Info<< "Iterate forwards over face (prev/curr/next) : "
-            << cStart.prev() << " / " << cStart() << " / " << cStart.next()
+        do
+        {
+            Info<< "Iterate forwards over face (prev/curr/next) : "
+                << cStart.prev() << " / "
+                << cStart.curr() << " / "
+                << cStart.next()
             << endl;
+        } while (cStart.circulate(CirculatorBase::CLOCKWISE));
+    }
 
-    } while (cStart.circulate(CirculatorBase::CLOCKWISE));
-
-    if (cStart.size()) do
+    if (!cStart.empty())
     {
-        Info<< "Iterate backwards over face : " << cStart() << endl;
+        do
+        {
+            Info<< "Iterate backwards over face : " << cStart() << endl;
 
-    } while (cStart.circulate(CirculatorBase::ANTICLOCKWISE));
+        } while (cStart.circulate(CirculatorBase::ANTICLOCKWISE));
+    }
 
 
     Info<< nl << nl << "Test non-const circulator" << nl << endl;
@@ -89,15 +98,18 @@ int main(int argc, char *argv[])
 
     } while (cStart2.circulate(CirculatorBase::CLOCKWISE));
 
-    if (cStart2.size()) do
+    if (!cStart2.empty())
     {
-        Info<< "Iterate forwards over face, adding 1 to each element : "
-            << cStart2();
+        do
+        {
+            Info<< "Iterate forwards over face, adding 1 to each element : "
+                << cStart2();
 
-        cStart2() += 1;
+            cStart2() += 1;
 
-        Info<< " -> " << cStart2() << endl;
-    } while (cStart2.circulate(CirculatorBase::CLOCKWISE));
+            Info<< " -> " << cStart2() << endl;
+        } while (cStart2.circulate(CirculatorBase::CLOCKWISE));
+    }
 
     Info<< "Face after : " << f << endl;
 
@@ -139,11 +151,14 @@ int main(int argc, char *argv[])
     face fZero;
     Circulator<face> cZero(fZero);
 
-    if (cZero.size()) do
+    if (!cZero.empty())
     {
-        Info<< "Iterate forwards over face : " << cZero() << endl;
+        do
+        {
+            Info<< "Iterate forwards over face : " << cZero() << endl;
 
-    } while (cZero.circulate(CirculatorBase::CLOCKWISE));
+        } while (cZero.circulate(CirculatorBase::CLOCKWISE));
+    }
 
     fZero = face(identity(5));
 
@@ -163,16 +178,19 @@ int main(int argc, char *argv[])
     ConstCirculator<face> circForward(f);
     ConstCirculator<face> circBackward(f);
 
-    if (circForward.size() && circBackward.size()) do
+    if (circForward.size() && circBackward.size())
     {
-        Info<< "Iterate over face forwards : " << circForward()
-            << ", backwards : " << circBackward() << endl;
+        do
+        {
+            Info<< "Iterate over face forwards : " << circForward()
+                << ", backwards : " << circBackward() << endl;
+        }
+        while
+        (
+            circForward.circulate(CirculatorBase::CLOCKWISE),
+            circBackward.circulate(CirculatorBase::ANTICLOCKWISE)
+        );
     }
-    while
-    (
-        circForward.circulate(CirculatorBase::CLOCKWISE),
-        circBackward.circulate(CirculatorBase::ANTICLOCKWISE)
-    );
 
     Info<< "\nEnd\n" << endl;
 

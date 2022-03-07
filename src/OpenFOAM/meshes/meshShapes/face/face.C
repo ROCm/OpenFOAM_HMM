@@ -30,7 +30,7 @@ License
 #include "triFace.H"
 #include "triPointRef.H"
 #include "mathematicalConstants.H"
-#include "ConstCirculator.H"
+#include "Circulator.H"
 #include <algorithm>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -330,7 +330,7 @@ int Foam::face::compare(const face& a, const face& b)
     // Look forwards around the faces for a match
     do
     {
-        if (aCirc() != bCirc())
+        if (*aCirc != *bCirc)
         {
             break;
         }
@@ -358,7 +358,7 @@ int Foam::face::compare(const face& a, const face& b)
     // Look backwards around the faces for a match
     do
     {
-        if (aCirc() != bCirc())
+        if (*aCirc != *bCirc)
         {
             break;
         }

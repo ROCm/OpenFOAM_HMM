@@ -93,17 +93,17 @@ class edgeFaceCirculator
         //- The underlying mesh pointer
         const primitiveMesh* meshPtr_;
 
-        //- Current face
-        label faceLabel_;
-
-        //- Current side of face
+        //- Is current side of face the owner side?
         bool ownerSide_;
-
-        //- Edge (between index and index+1 on faces[faceLabel_]
-        label index_;
 
         //- Is boundary edge?
         bool isBoundaryEdge_;
+
+        //- Current face
+        label faceLabel_;
+
+        //- Edge (between index and index+1 on faces[faceLabel_]
+        label index_;
 
         //- Starting face so we know when to stop. Used when circulating over
         //  internal edges.
@@ -124,7 +124,7 @@ class edgeFaceCirculator
         //- Set faceLabel_ to be the other face on the cell that uses the edge.
         inline void otherFace(const label celli);
 
-        //- Construct null - this is also an end iterator
+        //- Default construct - this is also an end iterator
         inline edgeFaceCirculator();
 
 

@@ -100,10 +100,10 @@ void Foam::edgeFaceCirculator::otherFace(const label celli)
 Foam::edgeFaceCirculator::edgeFaceCirculator()
 :
     meshPtr_(nullptr),
-    faceLabel_(-1),
     ownerSide_(false),
-    index_(-1),
     isBoundaryEdge_(false),
+    faceLabel_(-1),
+    index_(-1),
     startFaceLabel_(0)
 {}
 
@@ -120,8 +120,8 @@ Foam::edgeFaceCirculator::edgeFaceCirculator
     meshPtr_(&mesh),
     faceLabel_(faceLabel),
     ownerSide_(ownerSide),
-    index_(index),
     isBoundaryEdge_(isBoundaryEdge),
+    index_(index),
     startFaceLabel_(faceLabel_)
 {}
 
@@ -129,10 +129,10 @@ Foam::edgeFaceCirculator::edgeFaceCirculator
 Foam::edgeFaceCirculator::edgeFaceCirculator(const edgeFaceCirculator& circ)
 :
     meshPtr_(circ.meshPtr_),
-    faceLabel_(circ.faceLabel_),
     ownerSide_(circ.ownerSide_),
-    index_(circ.index_),
     isBoundaryEdge_(circ.isBoundaryEdge_),
+    faceLabel_(circ.faceLabel_),
+    index_(circ.index_),
     startFaceLabel_(circ.startFaceLabel_)
 {}
 
@@ -340,10 +340,10 @@ void Foam::edgeFaceCirculator::setCanonical()
 
 void Foam::edgeFaceCirculator::operator=(const edgeFaceCirculator& circ)
 {
-    faceLabel_ = circ.faceLabel_;
     ownerSide_ = circ.ownerSide_;
-    index_ = circ.index_;
     isBoundaryEdge_ = circ.isBoundaryEdge_;
+    faceLabel_ = circ.faceLabel_;
+    index_ = circ.index_;
     startFaceLabel_ = circ.startFaceLabel_;
 }
 
@@ -422,25 +422,6 @@ Foam::edgeFaceCirculator::operator++()
 }
 
 
-Foam::edgeFaceCirculator Foam::edgeFaceCirculator::begin() const
-{
-    edgeFaceCirculator iter
-    (
-        *meshPtr_,
-        faceLabel_,
-        ownerSide_,
-        index_,
-        isBoundaryEdge_
-    );
-
-    if (isBoundaryEdge_)
-    {
-        iter.setCanonical();
-    }
-    return iter;
-}
-
-
 Foam::edgeFaceCirculator Foam::edgeFaceCirculator::cbegin() const
 {
     edgeFaceCirculator iter
@@ -459,6 +440,11 @@ Foam::edgeFaceCirculator Foam::edgeFaceCirculator::cbegin() const
     return iter;
 }
 
+
+Foam::edgeFaceCirculator Foam::edgeFaceCirculator::begin() const
+{
+    return cbegin();
+}
 
 const Foam::edgeFaceCirculator Foam::edgeFaceCirculator::end() const
 {

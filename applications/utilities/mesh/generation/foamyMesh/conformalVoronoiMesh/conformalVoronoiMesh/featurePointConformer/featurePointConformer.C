@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,7 +32,7 @@ License
 #include "conformalVoronoiMesh.H"
 #include "cellShapeControl.H"
 #include "DelaunayMeshTools.H"
-#include "ConstCirculator.H"
+#include "Circulator.H"
 #include "backgroundMeshDecomposition.H"
 #include "autoPtr.H"
 #include "mapDistribute.H"
@@ -238,7 +238,7 @@ void Foam::featurePointConformer::createMasterAndSlavePoints
     if (circ.size()) do
     {
 //        const edgeStatus eStatusPrev = feMesh.getEdgeStatus(circ.prev());
-        const edgeStatus eStatusCurr = feMesh.getEdgeStatus(circ());
+        const edgeStatus eStatusCurr = feMesh.getEdgeStatus(circ.curr());
 //        const edgeStatus eStatusNext = feMesh.getEdgeStatus(circ.next());
 
 //        Info<< "    Prev = "
@@ -253,7 +253,7 @@ void Foam::featurePointConformer::createMasterAndSlavePoints
         // feature point
         label sign = getSign(eStatusCurr);
 
-        const vector n = sharedFaceNormal(feMesh, circ(), circ.next());
+        const vector n = sharedFaceNormal(feMesh, circ.curr(), circ.next());
 
         const vector pointMotionDirection = sign*0.5*ppDist*n;
 
