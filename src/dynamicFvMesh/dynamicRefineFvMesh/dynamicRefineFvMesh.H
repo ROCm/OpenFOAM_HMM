@@ -75,7 +75,8 @@ SourceFiles
 #ifndef dynamicRefineFvMesh_H
 #define dynamicRefineFvMesh_H
 
-#include "dynamicFvMesh.H"
+//#include "dynamicFvMesh.H"
+#include "dynamicMotionSolverListFvMesh.H"
 #include "hexRef8.H"
 #include "bitSet.H"
 
@@ -90,7 +91,8 @@ namespace Foam
 
 class dynamicRefineFvMesh
 :
-    public dynamicFvMesh
+    //public dynamicFvMesh
+    public dynamicMotionSolverListFvMesh
 {
 protected:
 
@@ -209,6 +211,9 @@ protected:
                 const surfaceScalarField& magSf,
                 const labelList& faceMap
             );
+
+            //- Update topology (refinement, unrefinement)
+            bool updateTopology();
 
 
 private:
