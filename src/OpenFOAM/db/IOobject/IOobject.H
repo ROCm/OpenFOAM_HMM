@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -481,6 +481,9 @@ public:
 
 
     // Checks
+
+        //- True if headerClassName() is non-empty (after reading)
+        inline bool hasHeaderClassName() const noexcept;
 
         //- Test if headerClassName() equals the given class name
         inline bool isHeaderClassName(const word& clsName) const;

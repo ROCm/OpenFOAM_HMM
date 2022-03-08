@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -104,7 +104,7 @@ bool Foam::functionObjects::readFields::execute()
         const bool ok =
         (
             io.typeHeaderOk<regIOobject>(false) // Preload header info
-         && !io.headerClassName().empty()       // Extra safety
+         && io.hasHeaderClassName()             // Extra safety
          &&
             (
                 loadField<scalar>(io)

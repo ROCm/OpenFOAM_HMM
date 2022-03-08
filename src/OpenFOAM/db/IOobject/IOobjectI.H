@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -145,6 +145,12 @@ inline unsigned Foam::IOobject::scalarByteSize() const noexcept
 
 
 // Checks
+
+inline bool Foam::IOobject::hasHeaderClassName() const noexcept
+{
+    return !headerClassName_.empty();
+}
+
 
 inline bool Foam::IOobject::isHeaderClassName(const word& clsName) const
 {

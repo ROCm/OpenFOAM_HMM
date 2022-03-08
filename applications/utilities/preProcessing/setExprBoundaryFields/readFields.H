@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -129,7 +129,7 @@ class readFieldsHandler
                 const bool ok =
                 (
                     io.typeHeaderOk<regIOobject>(false) // Preload header info
-                 && !io.headerClassName().empty()       // Extra safety
+                 && io.hasHeaderClassName()             // Extra safety
                  &&
                     (
                         loadField<scalar>(io)

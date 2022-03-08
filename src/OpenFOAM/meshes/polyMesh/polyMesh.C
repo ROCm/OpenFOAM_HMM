@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017, 2020 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -313,7 +313,7 @@ Foam::polyMesh::polyMesh(const IOobject& io, const bool doInit)
     oldPointsPtr_(nullptr),
     oldCellCentresPtr_(nullptr)
 {
-    if (!owner_.headerClassName().empty())
+    if (owner_.hasHeaderClassName())
     {
         initMesh();
     }
