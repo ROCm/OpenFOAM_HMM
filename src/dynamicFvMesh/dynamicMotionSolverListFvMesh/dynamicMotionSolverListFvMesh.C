@@ -70,7 +70,11 @@ Foam::dynamicMotionSolverListFvMesh::dynamicMotionSolverListFvMesh
 }
 
 
-bool Foam::dynamicMotionSolverListFvMesh::init(const bool doInit)
+bool Foam::dynamicMotionSolverListFvMesh::init
+(
+    const bool doInit,
+    const bool mandatory
+)
 {
     if (doInit)
     {
@@ -120,14 +124,21 @@ bool Foam::dynamicMotionSolverListFvMesh::init(const bool doInit)
         }
         motionSolvers_.setSize(i);
     }
-    else
+    else if (mandatory)
     {
         motionSolvers_.setSize(1);
-        motionSolvers_.set(i++, motionSolver::New(*this));
+        motionSolvers_.set(i++, motionSolver::New(*this, dict));
     }
 
     // Assume something changed
     return true;
+}
+
+
+bool Foam::dynamicMotionSolverListFvMesh::init(const bool doInit)
+{
+    // Fall-back to always constructing motionSolver
+    return init(doInit, true);
 }
 
 

@@ -50,7 +50,7 @@ namespace Foam
 class motionSolver;
 
 /*---------------------------------------------------------------------------*\
-                           Class dynamicMotionSolverListFvMesh Declaration
+                Class dynamicMotionSolverListFvMesh Declaration
 \*---------------------------------------------------------------------------*/
 
 class dynamicMotionSolverListFvMesh
@@ -98,6 +98,10 @@ public:
 
         //- Initialise all non-demand-driven data
         virtual bool init(const bool doInit);
+
+        //- Initialise all non-demand-driven data. Used for initialising
+        //  without default motionSolver (used by dynamicRefineFvMesh)
+        virtual bool init(const bool doInit, const bool mandatory);
 
         //- Update the mesh for both mesh motion and topology change
         virtual bool update();

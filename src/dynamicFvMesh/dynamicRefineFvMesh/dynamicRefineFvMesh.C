@@ -1099,7 +1099,8 @@ bool Foam::dynamicRefineFvMesh::init(const bool doInit)
     if (doInit)
     {
         //dynamicFvMesh::init(doInit);
-        dynamicMotionSolverListFvMesh::init(doInit);
+        // Note: allow zero motion solvers
+        dynamicMotionSolverListFvMesh::init(doInit, false);
     }
 
     protectedCell_.setSize(nCells());
