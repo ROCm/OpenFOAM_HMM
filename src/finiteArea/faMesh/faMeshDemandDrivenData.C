@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1090,7 +1090,7 @@ void Foam::faMesh::calcPointAreaNormals_orig(vectorField& result) const
                 Pstream::commsTypes::blocking,
                 procPatch.neighbProcNo(),
                 patchPointNormals.cdata_bytes(),
-                patchPointNormals.byteSize()
+                patchPointNormals.size_bytes()
             );
             }
 
@@ -1106,7 +1106,7 @@ void Foam::faMesh::calcPointAreaNormals_orig(vectorField& result) const
                     Pstream::commsTypes::blocking,
                     procPatch.neighbProcNo(),
                     ngbPatchPointNormals.data_bytes(),
-                    ngbPatchPointNormals.byteSize()
+                    ngbPatchPointNormals.size_bytes()
                 );
             }
 
@@ -1330,7 +1330,7 @@ void Foam::faMesh::calcPointAreaNormals(vectorField& result) const
                 (
                     Pstream::commsTypes::blocking,
                     procPatch.neighbProcNo(),
-                    reinterpret_cast<const char*>(patchPointNormals.cdata()),
+                    patchPointNormals.cdata_bytes(),
                     patchPointNormals.size_bytes()
                 );
             }
@@ -1343,7 +1343,7 @@ void Foam::faMesh::calcPointAreaNormals(vectorField& result) const
                 (
                     Pstream::commsTypes::blocking,
                     procPatch.neighbProcNo(),
-                    reinterpret_cast<char*>(patchPointNormals.data()),
+                    patchPointNormals.data_bytes(),
                     patchPointNormals.size_bytes()
                 );
             }
@@ -1656,8 +1656,8 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit(vectorField& result) const
                 (
                     Pstream::commsTypes::blocking,
                     procPatch.neighbProcNo(),
-                    toNgbProcLsPoints.byteSize()
-                  + toNgbProcLsPointStarts.byteSize()
+                    toNgbProcLsPoints.size_bytes()
+                  + toNgbProcLsPointStarts.size_bytes()
                   + 10*sizeof(label)
                 );
 
@@ -1686,7 +1686,7 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit(vectorField& result) const
                     Pstream::commsTypes::blocking,
                     procPatch.neighbProcNo(),
                     10*patchPointLabels.size()*sizeof(vector)
-                  + fromNgbProcLsPointStarts.byteSize()
+                  + fromNgbProcLsPointStarts.size_bytes()
                   + 10*sizeof(label)
                 );
 

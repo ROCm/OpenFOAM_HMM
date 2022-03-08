@@ -531,7 +531,7 @@ const Foam::scalarField& Foam::faPatch::weights() const
 }
 
 
-void Foam::faPatch::movePoints(const pointField& points)
+void Foam::faPatch::movePoints(PstreamBuffers&, const pointField&)
 {}
 
 

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -150,7 +151,16 @@ public:
                 return true;
             }
 
-            //- Are the coupled planes separated
+            //- Does this side own the patch ?
+            virtual bool owner() const = 0;
+
+            //- Does the coupled side own the patch ?
+            virtual bool neighbour() const
+            {
+                return !owner();
+            }
+
+            //- Are the coupled planes separated?
             bool separated() const
             {
                 return separation_.size();
@@ -204,16 +214,16 @@ public:
 
 
         //- Initialise the calculation of the patch geometry
-        virtual void initGeometry() = 0;
+        virtual void initGeometry(PstreamBuffers&) = 0;
 
         //- Calculate the patch geometry
-        virtual void calcGeometry() = 0;
+        virtual void calcGeometry(PstreamBuffers&) = 0;
 
         //- Initialise the patches for moving points
-        virtual void initMovePoints(const pointField&) = 0;
+        virtual void initMovePoints(PstreamBuffers&, const pointField&) = 0;
 
         //- Correct patches after moving points
-        virtual void movePoints(const pointField&) = 0;
+        virtual void movePoints(PstreamBuffers&, const pointField&) = 0;
 
 
         // Access functions for demand driven data

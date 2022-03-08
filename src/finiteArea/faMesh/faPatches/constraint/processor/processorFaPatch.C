@@ -128,12 +128,6 @@ Foam::label Foam::processorFaPatch::comm() const
 }
 
 
-int Foam::processorFaPatch::tag() const
-{
-    return Pstream::msgType();
-}
-
-
 void Foam::processorFaPatch::makeNonGlobalPatchPoints() const
 {
     // If it is not running parallel or there are no global points
@@ -181,16 +175,21 @@ void Foam::processorFaPatch::makeNonGlobalPatchPoints() const
 }
 
 
-void Foam::processorFaPatch::initGeometry()
+void Foam::processorFaPatch::initGeometry(PstreamBuffers& pBufs)
 {
     if (Pstream::parRun())
     {
-        OPstream toNeighbProc
-        (
-            Pstream::commsTypes::blocking,
-            neighbProcNo(),
-            3*(sizeof(label) + size()*sizeof(vector))
-        );
+        if (neighbProcNo() >= Pstream::nProcs(pBufs.comm()))
+        {
+            FatalErrorInFunction
+                << "On patch " << name()
+                << " trying to access out of range neighbour processor "
+                << neighbProcNo() << ". This can happen if" << nl
+                << "    trying to run on an incorrect number of processors"
+                << exit(FatalError);
+        }
+
+        UOPstream toNeighbProc(neighbProcNo(), pBufs);
 
         toNeighbProc
             << edgeCentres()
@@ -200,17 +199,13 @@ void Foam::processorFaPatch::initGeometry()
 }
 
 
-void Foam::processorFaPatch::calcGeometry()
+void Foam::processorFaPatch::calcGeometry(PstreamBuffers& pBufs)
 {
     if (Pstream::parRun())
     {
         {
-            IPstream fromNeighbProc
-            (
-                Pstream::commsTypes::blocking,
-                neighbProcNo(),
-                3*(sizeof(label) + size()*sizeof(vector))
-            );
+            UIPstream fromNeighbProc(neighbProcNo(), pBufs);
+
             fromNeighbProc
                 >> neighbEdgeCentres_
                 >> neighbEdgeLengths_
@@ -246,28 +241,46 @@ void Foam::processorFaPatch::calcGeometry()
 }
 
 
-void Foam::processorFaPatch::initMovePoints(const pointField& p)
+void Foam::processorFaPatch::initMovePoints
+(
+    PstreamBuffers& pBufs,
+    const pointField& p
+)
 {
-    faPatch::movePoints(p);
-    initGeometry();
+    faPatch::movePoints(pBufs, p);
+    initGeometry(pBufs);
 }
 
 
-void Foam::processorFaPatch::movePoints(const pointField&)
+void Foam::processorFaPatch::movePoints
+(
+    PstreamBuffers& pBufs,
+    const pointField&
+)
 {
-    calcGeometry();
+    processorFaPatch::calcGeometry(pBufs);
 }
 
 
-void Foam::processorFaPatch::initUpdateMesh()
+void Foam::processorFaPatch::initUpdateMesh(PstreamBuffers& pBufs)
 {
     // For completeness
-    faPatch::initUpdateMesh();
+    faPatch::initUpdateMesh(pBufs);
 
     neighbPointsPtr_.clear();
 
     if (Pstream::parRun())
     {
+        if (neighbProcNo() >= Pstream::nProcs(pBufs.comm()))
+        {
+            FatalErrorInFunction
+                << "On patch " << name()
+                << " trying to access out of range neighbour processor "
+                << neighbProcNo() << ". This can happen if" << nl
+                << "    trying to run on an incorrect number of processors"
+                << exit(FatalError);
+        }
+
         // Express all points as patch edge and index in edge.
         labelList patchEdge(nPoints());
         labelList indexInEdge(nPoints());
@@ -288,12 +301,7 @@ void Foam::processorFaPatch::initUpdateMesh()
             indexInEdge[patchPointI] = e.find(pointLabels()[patchPointI]);
         }
 
-        OPstream toNeighbProc
-        (
-            Pstream::commsTypes::blocking,
-            neighbProcNo(),
-            2*sizeof(label) + 2*nPoints()*sizeof(label)
-        );
+        UOPstream toNeighbProc(neighbProcNo(), pBufs);
 
         toNeighbProc
             << patchEdge
@@ -302,10 +310,12 @@ void Foam::processorFaPatch::initUpdateMesh()
 }
 
 
-void Foam::processorFaPatch::updateMesh()
+void Foam::processorFaPatch::updateMesh(PstreamBuffers& pBufs)
 {
     // For completeness
-    faPatch::updateMesh();
+    faPatch::updateMesh(pBufs);
+
+    neighbPointsPtr_.clear();
 
     if (Pstream::parRun())
     {
@@ -315,11 +325,8 @@ void Foam::processorFaPatch::updateMesh()
         {
             // Note cannot predict exact size since edgeList not (yet) sent as
             // binary entity but as List of edges.
-            IPstream fromNeighbProc
-            (
-                Pstream::commsTypes::blocking,
-                neighbProcNo()
-            );
+
+            UIPstream fromNeighbProc(neighbProcNo(), pBufs);
 
             fromNeighbProc
                 >> nbrPatchEdge
@@ -352,7 +359,6 @@ void Foam::processorFaPatch::updateMesh()
         {
             // Differing number of points. Probably patch includes
             // part of a cyclic.
-            neighbPointsPtr_.clear();
         }
     }
 }

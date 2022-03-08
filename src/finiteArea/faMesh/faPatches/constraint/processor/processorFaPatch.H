@@ -115,22 +115,22 @@ protected:
         // Geometry Functions
 
             //- Initialise the calculation of the patch geometry
-            void initGeometry();
+            void initGeometry(PstreamBuffers&);
 
             //- Calculate the patch geometry
-            void calcGeometry();
+            void calcGeometry(PstreamBuffers&);
 
             //- Initialise the patches for moving points
-            void initMovePoints(const pointField&);
+            void initMovePoints(PstreamBuffers&, const pointField&);
 
             //- Correct patches after moving points
-            void movePoints(const pointField&);
+            void movePoints(PstreamBuffers&, const pointField&);
 
             //- Initialise the update of the patch topology
-            virtual void initUpdateMesh();
+            virtual void initUpdateMesh(PstreamBuffers&);
 
             //- Update of the patch topology
-            virtual void updateMesh();
+            virtual void updateMesh(PstreamBuffers&);
 
 
 public:
@@ -194,20 +194,21 @@ public:
             return Pstream::parRun();
         }
 
-        //- Is this the master side?
-        virtual bool master() const noexcept
+        //- Does this side own the patch ?
+        virtual bool owner() const noexcept
         {
             return (myProcNo_ < neighbProcNo_);
         }
 
 
-        // Communications support
+        //- The message tag to use for communication
+        virtual int tag() const
+        {
+            return UPstream::msgType();
+        }
 
-            //- Return communicator used for communication
-            virtual label comm() const;
-
-            //- Return message tag to use for communication
-            virtual int tag() const;
+        //- Return communicator used for communication
+        virtual label comm() const;
 
 
         //- Return face transformation tensor

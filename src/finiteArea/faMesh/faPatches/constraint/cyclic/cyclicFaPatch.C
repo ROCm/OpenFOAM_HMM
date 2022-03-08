@@ -236,28 +236,36 @@ void Foam::cyclicFaPatch::makeDeltaCoeffs(scalarField& dc) const
 }
 
 
-void Foam::cyclicFaPatch::initGeometry()
+void Foam::cyclicFaPatch::initGeometry(PstreamBuffers& pBufs)
 {
-    faPatch::initGeometry();
+    faPatch::initGeometry(pBufs);
 }
 
 
-void Foam::cyclicFaPatch::calcGeometry()
+void Foam::cyclicFaPatch::calcGeometry(PstreamBuffers& pBufs)
 {
-    faPatch::calcGeometry();
+    faPatch::calcGeometry(pBufs);
     calcTransforms();
 }
 
 
-void Foam::cyclicFaPatch::initMovePoints(const pointField& p)
+void Foam::cyclicFaPatch::initMovePoints
+(
+    PstreamBuffers& pBufs,
+    const pointField& p
+)
 {
-    faPatch::initMovePoints(p);
+    faPatch::initMovePoints(pBufs, p);
 }
 
 
-void Foam::cyclicFaPatch::movePoints(const pointField& p)
+void Foam::cyclicFaPatch::movePoints
+(
+    PstreamBuffers& pBufs,
+    const pointField& p
+)
 {
-    faPatch::movePoints(p);
+    faPatch::movePoints(pBufs, p);
     calcTransforms();
 }
 

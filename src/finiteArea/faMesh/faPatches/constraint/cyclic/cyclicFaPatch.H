@@ -109,8 +109,9 @@ public:
 
         // Access
 
-            //- Is this the master side?  Yes: it contains both sets of faces
-            virtual bool master() const
+            //- Does this side own the patch ?
+            //- Yes: it contains both sets of faces
+            virtual bool owner() const
             {
                 return true;
             }
@@ -120,11 +121,6 @@ public:
             {
                 NotImplemented;
                 return index();
-            }
-
-            virtual bool owner() const
-            {
-                return master();
             }
 
             //- Return processor number
@@ -147,16 +143,16 @@ public:
             }
 
             //- Initialise the calculation of the patch geometry
-            virtual void initGeometry();
+            virtual void initGeometry(PstreamBuffers&);
 
             //- Calculate the patch geometry
-            virtual void calcGeometry();
+            virtual void calcGeometry(PstreamBuffers&);
 
             //- Initialise the patches for moving points
-            virtual void initMovePoints(const pointField&);
+            virtual void initMovePoints(PstreamBuffers&, const pointField&);
 
             //- Correct patches after moving points
-            virtual void movePoints(const pointField&);
+            virtual void movePoints(PstreamBuffers&, const pointField&);
 
             //- Return delta (P to N) vectors across coupled patch
             virtual tmp<vectorField> delta() const;
