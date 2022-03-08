@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,8 +39,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef wedgeFaPatch_H
-#define wedgeFaPatch_H
+#ifndef Foam_wedgeFaPatch_H
+#define Foam_wedgeFaPatch_H
 
 #include "faPatch.H"
 #include "wedgePolyPatch.H"
@@ -51,14 +51,14 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class wedgeFaPatch Declaration
+                        Class wedgeFaPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class wedgeFaPatch
 :
     public faPatch
 {
-    // Private data
+    // Private Data
 
         const wedgePolyPatch* wedgePolyPatchPtr_;
 
@@ -68,7 +68,7 @@ class wedgeFaPatch
         //- Is it axis point looked for?
         mutable bool axisPointChecked_;
 
-        //- Finde axis point
+        //- Find axis point
         void findAxisPoint() const;
 
 
@@ -83,7 +83,8 @@ public:
         const word& name,
         const dictionary& dict,
         const label index,
-        const faBoundaryMesh& bm
+        const faBoundaryMesh& bm,
+        const word& patchType
     );
 
 
@@ -91,7 +92,7 @@ public:
     virtual ~wedgeFaPatch() = default;
 
 
-    // Member functions
+    // Member Functions
 
         // Access
 

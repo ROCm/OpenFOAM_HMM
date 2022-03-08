@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,28 +50,65 @@ Foam::emptyFaPatch::emptyFaPatch
     const word& name,
     const label index,
     const faBoundaryMesh& bm,
-    const label ngbPolyPatchIndex
+    const label nbrPolyPatchi,
+    const word& patchType
 )
 :
-    emptyFaPatch(name, labelList(), index, bm, ngbPolyPatchIndex)
+    emptyFaPatch(name, labelList(), index, bm, nbrPolyPatchi, patchType)
 {}
 
 
 Foam::emptyFaPatch::emptyFaPatch
 (
     const word& name,
-    const labelList& edgeLabels,
+    const labelUList& edgeLabels,
     const label index,
     const faBoundaryMesh& bm,
-    const label ngbPolyPatchIndex
+    const label nbrPolyPatchi,
+    const word& patchType
 )
 :
-    faPatch(name, edgeLabels, index, bm, ngbPolyPatchIndex)
+    faPatch(name, edgeLabels, index, bm, nbrPolyPatchi, patchType)
+{}
+
+
+Foam::emptyFaPatch::emptyFaPatch
+(
+    const word& name,
+    const dictionary& dict,
+    const label index,
+    const faBoundaryMesh& bm,
+    const word& patchType
+)
+:
+    faPatch(name, dict, index, bm, patchType)
+{}
+
+
+Foam::emptyFaPatch::emptyFaPatch
+(
+    const emptyFaPatch& p,
+    const faBoundaryMesh& bm
+)
+:
+    faPatch(p, bm)
+{}
+
+
+Foam::emptyFaPatch::emptyFaPatch
+(
+    const emptyFaPatch& p,
+    const faBoundaryMesh& bm,
+    const label index,
+    const labelUList& edgeLabels,
+    const label nbrPolyPatchi
+)
+:
+    faPatch(p, bm, index, edgeLabels, nbrPolyPatchi)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
 
 // Over-riding the face normals return from the underlying patch
 // This is the only piece of info used out of the underlying primitivePatch

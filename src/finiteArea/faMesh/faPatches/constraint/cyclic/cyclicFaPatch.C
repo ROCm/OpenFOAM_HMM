@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,6 +41,22 @@ namespace Foam
 }
 
 const Foam::scalar Foam::cyclicFaPatch::matchTol_ = 1e-3;
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::cyclicFaPatch::cyclicFaPatch
+(
+    const word& name,
+    const dictionary& dict,
+    const label index,
+    const faBoundaryMesh& bm,
+    const word& patchType
+)
+:
+    coupledFaPatch(name, dict, index, bm, patchType)
+{}
+
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

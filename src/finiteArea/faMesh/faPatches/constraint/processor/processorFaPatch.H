@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,8 +39,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef processorFaPatch_H
-#define processorFaPatch_H
+#ifndef Foam_processorFaPatch_H
+#define Foam_processorFaPatch_H
 
 #include "coupledFaPatch.H"
 #include "processorLduInterface.H"
@@ -59,7 +59,7 @@ class processorFaPatch
     public coupledFaPatch,
     public processorLduInterface
 {
-    // Private data
+    // Private Data
 
         //- My processor number
         int myProcNo_;
@@ -78,16 +78,29 @@ class processorFaPatch
 
         //- Corresponding neighbouring local point label for every local point
         //  (so localPoints()[i] == neighb.localPoints()[neighbPoints_[i]])
-        mutable labelList* neighbPointsPtr_;
+        mutable autoPtr<labelList> neighbPointsPtr_;
 
         //- The set of labels of the processor patch points which are
         //  non-global, i.e. present in this processor patch
-        mutable labelList* nonGlobalPatchPointsPtr_;
+        mutable autoPtr<labelList> nonGlobalPatchPointsPtr_;
 
 
 protected:
 
     // Protected Member functions
+
+        //- Construct from components with specified name
+        processorFaPatch
+        (
+            const word& name,
+            const labelUList& edgeLabels,
+            const label index,
+            const faBoundaryMesh& bm,
+            const label nbrPolyPatchi,
+            const label myProcNo,
+            const label neighbProcNo,
+            const word& patchType = typeName
+        );
 
         //- Make patch weighting factors
         void makeWeights(scalarField&) const;
@@ -99,7 +112,7 @@ protected:
         void makeNonGlobalPatchPoints() const;
 
 
-        // Geometry functions
+        // Geometry Functions
 
             //- Initialise the calculation of the patch geometry
             void initGeometry();
@@ -128,27 +141,17 @@ public:
 
     // Constructors
 
-        //- Construct from components
+        //- Construct from components with automatically generated standard name
         processorFaPatch
         (
-            const word& name,
-            const labelList& edgeLabels,
+            const labelUList& edgeLabels,
             const label index,
             const faBoundaryMesh& bm,
-            const label ngbPolyPatchIndex,
+            const label nbrPolyPatchi,
             const label myProcNo,
-            const label neighbProcNo
-        )
-        :
-            coupledFaPatch(name, edgeLabels, index, bm, ngbPolyPatchIndex),
-            myProcNo_(myProcNo),
-            neighbProcNo_(neighbProcNo),
-            neighbEdgeCentres_(),
-            neighbEdgeLengths_(),
-            neighbEdgeFaceCentres_(),
-            neighbPointsPtr_(nullptr),
-            nonGlobalPatchPointsPtr_(nullptr)
-        {}
+            const label neighbProcNo,
+            const word& patchType = typeName
+        );
 
         //- Construct from dictionary
         processorFaPatch
@@ -156,18 +159,9 @@ public:
             const word& name,
             const dictionary& dict,
             const label index,
-            const faBoundaryMesh& bm
-        )
-        :
-            coupledFaPatch(name, dict, index, bm),
-            myProcNo_(dict.get<label>("myProcNo")),
-            neighbProcNo_(dict.get<label>("neighbProcNo")),
-            neighbEdgeCentres_(),
-            neighbEdgeLengths_(),
-            neighbEdgeFaceCentres_(),
-            neighbPointsPtr_(nullptr),
-            nonGlobalPatchPointsPtr_(nullptr)
-        {}
+            const faBoundaryMesh& bm,
+            const word& patchType = typeName
+        );
 
 
     //- Destructor

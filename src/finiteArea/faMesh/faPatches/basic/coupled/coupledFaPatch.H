@@ -39,8 +39,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef coupledFaPatch_H
-#define coupledFaPatch_H
+#ifndef Foam_coupledFaPatch_H
+#define Foam_coupledFaPatch_H
 
 #include "lduInterface.H"
 #include "faPatch.H"
@@ -59,7 +59,7 @@ class coupledFaPatch
     public lduInterface,
     public faPatch
 {
-    // Private data
+    // Private Data
 
         //- offset (distance) vector from one side of the couple to the other
         mutable vectorField separation_;
@@ -115,10 +115,11 @@ public:
             const labelList& edgeLabels,
             const label index,
             const faBoundaryMesh& bm,
-            const label ngbPolyPatchIndex
+            const label nbrPolyPatchIndex,
+            const word& patchType
         )
         :
-            faPatch(name, edgeLabels, index, bm, ngbPolyPatchIndex)
+            faPatch(name, edgeLabels, index, bm, nbrPolyPatchIndex, patchType)
         {}
 
         //- Construct from dictionary
@@ -127,10 +128,11 @@ public:
             const word& name,
             const dictionary& dict,
             const label index,
-            const faBoundaryMesh& bm
+            const faBoundaryMesh& bm,
+            const word& patchType
         )
         :
-            faPatch(name, dict, index, bm)
+            faPatch(name, dict, index, bm, patchType)
         {}
 
 
@@ -147,7 +149,6 @@ public:
             {
                 return true;
             }
-
 
             //- Are the coupled planes separated
             bool separated() const

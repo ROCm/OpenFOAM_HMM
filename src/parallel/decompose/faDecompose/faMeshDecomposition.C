@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1266,11 +1266,6 @@ bool Foam::faMeshDecomposition::writeDecomposition()
                 nPatches,
                 new processorFaPatch
                 (
-                    processorPolyPatch::newName
-                    (
-                        procI,
-                        curNeighbourProcessors[procPatchI]
-                    ),
                     curEdgeLabels,
                     nPatches,
                     procMesh.boundary(),

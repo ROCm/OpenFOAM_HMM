@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,8 +42,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef faPatch_H
-#define faPatch_H
+#ifndef Foam_faPatch_H
+#define Foam_faPatch_H
 
 #include "patchIdentifier.H"
 #include "labelList.H"
@@ -157,9 +157,10 @@ public:
                 const word& name,
                 const dictionary& dict,
                 const label index,
-                const faBoundaryMesh& bm
+                const faBoundaryMesh& bm,
+                const word& patchType
             ),
-            (name, dict, index, bm)
+            (name, dict, index, bm, patchType)
         );
 
 
@@ -169,10 +170,11 @@ public:
         faPatch
         (
             const word& name,
-            const labelList& edgeLabels,
+            const labelUList& edgeLabels,
             const label index,
             const faBoundaryMesh& bm,
-            const label ngbPolyPatchIndex
+            const label nbrPolyPatchi,
+            const word& patchType
         );
 
         //- Construct from dictionary
@@ -181,34 +183,66 @@ public:
             const word& name,
             const dictionary& dict,
             const label index,
-            const faBoundaryMesh& bm
+            const faBoundaryMesh& bm,
+            const word& patchType
         );
 
-        //- Construct as copy, resetting the boundary mesh
-        faPatch(const faPatch&, const faBoundaryMesh&);
+        //- Copy construct, resetting the boundary mesh
+        faPatch(const faPatch& p, const faBoundaryMesh& bm);
+
+        //- Copy construct, resetting boundary mesh and addressing
+        faPatch
+        (
+            const faPatch& p,
+            const faBoundaryMesh& bm,
+            const label index,
+            const labelUList& edgeLabels,
+            const label nbrPolyPatchi
+        );
+
+
+        //- Construct and return a clone, resetting the boundary mesh
+        virtual autoPtr<faPatch> clone(const faBoundaryMesh& bm) const
+        {
+            return autoPtr<faPatch>::New(*this, bm);
+        }
 
         //- Construct and return a clone, resetting the edge list
         //- and boundary mesh
         virtual autoPtr<faPatch> clone
         (
             const faBoundaryMesh& bm,
-            const labelList& edgeLabels,
+            const labelUList& edgeLabels,
             const label index,
-            const label ngbPolyPatchIndex
+            const label nbrPolyPatchi
         ) const
         {
-            return
-                autoPtr<faPatch>::New
-                (name(), edgeLabels, index, bm, ngbPolyPatchIndex);
+            return autoPtr<faPatch>::New
+            (
+                *this,
+                bm,
+                index,
+                edgeLabels,
+                nbrPolyPatchi
+            );
         }
 
 
     // Selectors
 
-        //- Return a pointer to a new patch created
-        //- on freestore from dictionary
+        //- Return pointer to a new patch created on freestore from dictionary
         static autoPtr<faPatch> New
         (
+            const word& name,
+            const dictionary& dict,
+            const label index,
+            const faBoundaryMesh& bm
+        );
+
+        //- Return pointer to a new patch created on freestore from dictionary
+        static autoPtr<faPatch> New
+        (
+            const word& patchType,
             const word& name,
             const dictionary& dict,
             const label index,
@@ -220,6 +254,15 @@ public:
     virtual ~faPatch();
 
 
+    // Static Member Functions
+
+        //- Return true if the given type is a constraint type
+        static bool constraintType(const word& pt);
+
+        //- Return a list of all the constraint patch types
+        static wordList constraintTypes();
+
+
     // Member Functions
 
         //- Return the list of edges
@@ -227,9 +270,6 @@ public:
         {
             return static_cast<const labelList&>(*this);
         }
-
-        //- Define new list of edges
-        void edgeLabels(const UList<label>& newEdgeLabels);
 
         //- Number of patch points
         label nPoints() const
@@ -359,7 +399,7 @@ public:
         // Topological changes
 
             //- Reset the list of edges (use with caution)
-            void resetEdges(const UList<label>& newEdges);
+            void resetEdges(const labelUList& newEdges);
 
             //- Reset the list of edges (use with caution)
             void resetEdges(labelList&& newEdges);

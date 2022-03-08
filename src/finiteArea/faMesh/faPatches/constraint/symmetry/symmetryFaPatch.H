@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,8 +39,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef symmetryFaPatch_H
-#define symmetryFaPatch_H
+#ifndef Foam_symmetryFaPatch_H
+#define Foam_symmetryFaPatch_H
 
 #include "faPatch.H"
 #include "symmetryPolyPatch.H"
@@ -51,14 +51,13 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class symmetryFaPatch Declaration
+                       Class symmetryFaPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class symmetryFaPatch
 :
     public faPatch
 {
-
 protected:
 
     // Protected Member Functions
@@ -70,7 +69,7 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName(symmetryPolyPatch::typeName_());
+    TypeName(symmetryPolyPatch::typeName_());  // ie, "symmetry"
 
 
     // Constructors
@@ -79,10 +78,11 @@ public:
         symmetryFaPatch
         (
             const word& name,
-            const labelList& edgeLabels,
+            const labelUList& edgeLabels,
             const label index,
             const faBoundaryMesh& bm,
-            const label ngbPolyPatchIndex
+            const label nbrPolyPatchi,
+            const word& patchType
         );
 
         //- Construct from dictionary
@@ -91,30 +91,55 @@ public:
             const word& name,
             const dictionary& dict,
             const label index,
-            const faBoundaryMesh& bm
+            const faBoundaryMesh& bm,
+            const word& patchType
         );
 
+        //- Copy construct, resetting boundary mesh
+        symmetryFaPatch(const symmetryFaPatch& p, const faBoundaryMesh& bm);
+
+        //- Copy construct, resetting boundary mesh and addressing
+        symmetryFaPatch
+        (
+            const symmetryFaPatch& p,
+            const faBoundaryMesh& bm,
+            const label index,
+            const labelUList& edgeLabels,
+            const label nbrPolyPatchi
+        );
+
+
+        //- Construct and return a clone, resetting the boundary mesh
+        virtual autoPtr<faPatch> clone(const faBoundaryMesh& bm) const
+        {
+            return autoPtr<faPatch>
+            (
+                new symmetryFaPatch(*this, bm)
+            );
+        }
+
         //- Construct and return a clone, resetting the edge list
-        //  and boundary mesh
+        //- and boundary mesh
         virtual autoPtr<faPatch> clone
         (
             const faBoundaryMesh& bm,
-            const labelList& edgeLabels,
+            const labelUList& edgeLabels,
             const label index,
-            const label ngbPolyPatchIndex
+            const label nbrPolyPatchi
         ) const
         {
             return autoPtr<faPatch>
             (
                 new symmetryFaPatch
                 (
-                    name(), edgeLabels, index, bm, ngbPolyPatchIndex
+                    *this,
+                    bm,
+                    index,
+                    edgeLabels,
+                    nbrPolyPatchi
                 )
             );
         }
-
-    //- Destructor
-    virtual ~symmetryFaPatch() = default;
 };
 
 

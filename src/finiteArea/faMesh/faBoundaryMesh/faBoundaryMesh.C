@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,26 +41,63 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// bool Foam::faBoundaryMesh::hasGroupIDs() const
-// {
-//     /// if (groupIDsPtr_)
-//     /// {
-//     ///     // Use existing cache
-//     ///     return !groupIDsPtr_->empty();
-//     /// }
-//
-//     const faPatchList& patches = *this;
-//
-//     for (const faPatch& p : patches)
-//     {
-//         if (!p.inGroups().empty())
-//         {
-//             return true;
-//         }
-//     }
-//
-//     return false;
-// }
+bool Foam::faBoundaryMesh::hasGroupIDs() const
+{
+    if (groupIDsPtr_)
+    {
+        // Use existing cache
+        return !groupIDsPtr_->empty();
+    }
+
+    const faPatchList& patches = *this;
+
+    for (const faPatch& p : patches)
+    {
+        if (!p.inGroups().empty())
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+void Foam::faBoundaryMesh::calcGroupIDs() const
+{
+    if (groupIDsPtr_)
+    {
+        return;  // Or FatalError
+    }
+
+    groupIDsPtr_.reset(new HashTable<labelList>(16));
+    auto& groupLookup = *groupIDsPtr_;
+
+    const faPatchList& patches = *this;
+
+    forAll(patches, patchi)
+    {
+        const wordList& groups = patches[patchi].inGroups();
+
+        for (const word& groupName : groups)
+        {
+            groupLookup(groupName).append(patchi);
+        }
+    }
+
+    // Remove groups that clash with patch names
+    forAll(patches, patchi)
+    {
+        if (groupLookup.erase(patches[patchi].name()))
+        {
+            WarningInFunction
+                << "Removed group '" << patches[patchi].name()
+                << "' which clashes with patch " << patchi
+                << " of the same name."
+                << endl;
+        }
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -205,6 +242,61 @@ Foam::label Foam::faBoundaryMesh::nNonProcessor() const
 }
 
 
+const Foam::HashTable<Foam::labelList>&
+Foam::faBoundaryMesh::groupPatchIDs() const
+{
+    if (!groupIDsPtr_)
+    {
+        calcGroupIDs();
+    }
+
+    return *groupIDsPtr_;
+}
+
+
+void Foam::faBoundaryMesh::setGroup
+(
+    const word& groupName,
+    const labelUList& patchIDs
+)
+{
+    groupIDsPtr_.clear();
+
+    faPatchList& patches = *this;
+
+    boolList donePatch(patches.size(), false);
+
+    // Add to specified patches
+    for (const label patchi : patchIDs)
+    {
+        patches[patchi].inGroups().appendUniq(groupName);
+        donePatch[patchi] = true;
+    }
+
+    // Remove from other patches
+    forAll(patches, patchi)
+    {
+        if (!donePatch[patchi])
+        {
+            wordList& groups = patches[patchi].inGroups();
+
+            if (groups.found(groupName))
+            {
+                label newi = 0;
+                forAll(groups, i)
+                {
+                    if (groups[i] != groupName)
+                    {
+                        groups[newi++] = groups[i];
+                    }
+                }
+                groups.resize(newi);
+            }
+        }
+    }
+}
+
+
 Foam::wordList Foam::faBoundaryMesh::names() const
 {
     return PtrListOps::get<word>(*this, nameOp<faPatch>());
@@ -285,7 +377,7 @@ Foam::labelRange Foam::faBoundaryMesh::range() const
 Foam::labelList Foam::faBoundaryMesh::indices
 (
     const wordRe& matcher,
-    const bool useGroups  /* ignored */
+    const bool useGroups
 ) const
 {
     if (matcher.empty())
@@ -293,9 +385,34 @@ Foam::labelList Foam::faBoundaryMesh::indices
         return labelList();
     }
 
+    // Only check groups if requested and they exist
+    const bool checkGroups = (useGroups && this->hasGroupIDs());
+
+    labelHashSet ids;
+
     if (matcher.isPattern())
     {
-        return PtrListOps::findMatching(*this, matcher);
+        if (checkGroups)
+        {
+            const auto& groupLookup = groupPatchIDs();
+            forAllConstIters(groupLookup, iter)
+            {
+                if (matcher.match(iter.key()))
+                {
+                    // Hash ids associated with the group
+                    ids.insert(iter.val());
+                }
+            }
+        }
+
+        if (ids.empty())
+        {
+            return PtrListOps::findMatching(*this, matcher);
+        }
+        else
+        {
+            ids.insert(PtrListOps::findMatching(*this, matcher));
+        }
     }
     else
     {
@@ -308,16 +425,26 @@ Foam::labelList Foam::faBoundaryMesh::indices
         {
             return labelList(one{}, patchId);
         }
+        else if (checkGroups)
+        {
+            const auto iter = groupPatchIDs().cfind(matcher);
+
+            if (iter.found())
+            {
+                // Hash ids associated with the group
+                ids.insert(iter.val());
+            }
+        }
     }
 
-    return labelList();
+    return ids.sortedToc();
 }
 
 
 Foam::labelList Foam::faBoundaryMesh::indices
 (
     const wordRes& matcher,
-    const bool useGroups  /* ignored */
+    const bool useGroups
 ) const
 {
     if (matcher.empty())
@@ -329,7 +456,34 @@ Foam::labelList Foam::faBoundaryMesh::indices
         return this->indices(matcher.first(), useGroups);
     }
 
-    return PtrListOps::findMatching(*this, matcher);
+    labelHashSet ids;
+
+    // Only check groups if requested and they exist
+    if (useGroups && this->hasGroupIDs())
+    {
+        ids.resize(2*this->size());
+
+        const auto& groupLookup = groupPatchIDs();
+        forAllConstIters(groupLookup, iter)
+        {
+            if (matcher.match(iter.key()))
+            {
+                // Hash ids associated with the group
+                ids.insert(iter.val());
+            }
+        }
+    }
+
+    if (ids.empty())
+    {
+        return PtrListOps::findMatching(*this, matcher);
+    }
+    else
+    {
+        ids.insert(PtrListOps::findMatching(*this, matcher));
+    }
+
+    return ids.sortedToc();
 }
 
 
@@ -343,14 +497,42 @@ Foam::label Foam::faBoundaryMesh::findIndex(const wordRe& key) const
 }
 
 
-Foam::label Foam::faBoundaryMesh::findPatchID(const word& patchName) const
+Foam::label Foam::faBoundaryMesh::findPatchID
+(
+    const word& patchName,
+    bool allowNotFound
+) const
 {
     if (patchName.empty())
     {
         return -1;
     }
 
-    return PtrListOps::firstMatching(*this, patchName);
+    const label patchId = PtrListOps::firstMatching(*this, patchName);
+
+    if (patchId >= 0)
+    {
+        return patchId;
+    }
+
+    if (!allowNotFound)
+    {
+        FatalErrorInFunction
+            << "Patch '" << patchName << "' not found. "
+            << "Available patch names: " << names() << endl
+            << exit(FatalError);
+    }
+
+    // Patch not found
+    if (debug)
+    {
+        Pout<< "label faBoundaryMesh::findPatchID(const word&) const"
+            << "Patch named " << patchName << " not found.  "
+            << "Available patch names: " << names() << endl;
+    }
+
+    // Not found, return -1
+    return -1;
 }
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,8 +39,8 @@ Author
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef faBoundaryMesh_H
-#define faBoundaryMesh_H
+#ifndef Foam_faBoundaryMesh_H
+#define Foam_faBoundaryMesh_H
 
 #include "faPatchList.H"
 #include "lduInterfacePtrsList.H"
@@ -57,6 +57,7 @@ namespace Foam
 class faMesh;
 class faBoundaryMesh;
 class wordRes;
+
 Ostream& operator<<(Ostream&, const faBoundaryMesh&);
 
 /*---------------------------------------------------------------------------*\
@@ -74,16 +75,16 @@ class faBoundaryMesh
         const faMesh& mesh_;
 
         //- Demand-driven: list of patch ids per group
-        /// mutable autoPtr<HashTable<labelList>> groupIDsPtr_;
+        mutable autoPtr<HashTable<labelList>> groupIDsPtr_;
 
 
     // Private Member Functions
 
         //- Some patches have inGroup entries
-        /// bool hasGroupIDs() const;
+        bool hasGroupIDs() const;
 
         //- Calculate group name to patch ids lookup
-        /// void calcGroupIDs() const;
+        void calcGroupIDs() const;
 
         //- No copy construct
         faBoundaryMesh(const faBoundaryMesh&) = delete;
@@ -167,21 +168,21 @@ public:
 
 
         //- Return (sorted) patch indices for all matches.
-        //  [FUTURE] Optionally matches patch groups.
+        //  Optionally matches patch groups.
         //  A no-op (returns empty list) for an empty matcher
         labelList indices
         (
             const wordRe& matcher,
-            const bool useGroups = true  //!< currently ignored
+            const bool useGroups = true
         ) const;
 
         //- Return (sorted) patch indices for all matches.
-        //  [FUTURE] Optionally matches patch groups.
+        //  Optionally matches patch groups.
         //  A no-op (returns empty list) for an empty matcher
         labelList indices
         (
             const wordRes& matcher,
-            const bool useGroups = true  //!< currently ignored
+            const bool useGroups = true
         ) const;
 
         //- Return patch index for the first match, return -1 if not found
@@ -190,10 +191,20 @@ public:
 
         //- Find patch index given a name, return -1 if not found
         //  A no-op (returns -1) for an empty name
-        label findPatchID(const word& patchName) const;
+        label findPatchID
+        (
+            const word& patchName,
+            const bool allowNotFound = true
+        ) const;
 
         //- Return patch index for a given edge label
         label whichPatch(const label edgeIndex) const;
+
+        //- The patch indices per patch group
+        const HashTable<labelList>& groupPatchIDs() const;
+
+        //- Set/add group with patches
+        void setGroup(const word& groupName, const labelUList& patchIDs);
 
         //- Check boundary definition
         bool checkDefinition(const bool report = false) const;

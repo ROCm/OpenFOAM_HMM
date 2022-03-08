@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,8 +40,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef emptyFaPatch_H
-#define emptyFaPatch_H
+#ifndef Foam_emptyFaPatch_H
+#define Foam_emptyFaPatch_H
 
 #include "faPatch.H"
 
@@ -72,17 +72,19 @@ public:
             const word& name,
             const label index,
             const faBoundaryMesh& bm,
-            const label ngbPolyPatchIndex = -1
+            const label nbrPolyPatchi = -1,
+            const word& patchType = typeName
         );
 
         //- Construct from components
         emptyFaPatch
         (
             const word& name,
-            const labelList& edgeLabels,
+            const labelUList& edgeLabels,
             const label index,
             const faBoundaryMesh& bm,
-            const label ngbPolyPatchIndex
+            const label nbrPolyPatchi = -1,
+            const word& patchType = typeName
         );
 
         //- Construct from dictionary
@@ -91,32 +93,43 @@ public:
             const word& name,
             const dictionary& dict,
             const label index,
-            const faBoundaryMesh& bm
-        )
-        :
-            faPatch(name, dict, index, bm)
-        {}
+            const faBoundaryMesh& bm,
+            const word& patchType
+        );
+
+        //- Copy construct, resetting the boundary mesh
+        emptyFaPatch(const emptyFaPatch& p, const faBoundaryMesh& bm);
+
+        //- Copy construct, resetting boundary mesh and addressing
+        emptyFaPatch
+        (
+            const emptyFaPatch& p,
+            const faBoundaryMesh& bm,
+            const label index,
+            const labelUList& edgeLabels,
+            const label nbrPolyPatchi = -1
+        );
+
+
+        //- Construct and return a clone, resetting the boundary mesh
+        virtual autoPtr<faPatch> clone(const faBoundaryMesh& bm) const
+        {
+            return autoPtr<faPatch>(new emptyFaPatch(*this, bm));
+        }
 
         //- Construct and return a clone, resetting the edge list
         //  and boundary mesh
         virtual autoPtr<faPatch> clone
         (
             const faBoundaryMesh& bm,
-            const labelList& edgeLabels,
+            const labelUList& edgeLabels,
             const label index,
-            const label ngbPolyPatchIndex
+            const label nbrPolyPatchi = -1
         ) const
         {
             return autoPtr<faPatch>
             (
-                new emptyFaPatch
-                (
-                    name(),
-                    edgeLabels,
-                    index,
-                    bm,
-                    ngbPolyPatchIndex
-                )
+                new emptyFaPatch(*this, bm, index, edgeLabels, nbrPolyPatchi)
             );
         }
 

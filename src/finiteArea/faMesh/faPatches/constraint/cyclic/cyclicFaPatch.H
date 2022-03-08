@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,8 +39,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cyclicFaPatch_H
-#define cyclicFaPatch_H
+#ifndef Foam_cyclicFaPatch_H
+#define Foam_cyclicFaPatch_H
 
 #include "coupledFaPatch.H"
 #include "cyclicLduInterface.H"
@@ -60,13 +60,13 @@ class cyclicFaPatch
     public coupledFaPatch,
     public cyclicLduInterface
 {
-    // Private member functions
+    // Private Member Functions
 
         void calcTransforms();
 
 protected:
 
-    // Protected static data
+    // Protected Static Data
 
         //- Relative tolerance (for geometric matching). Is factor of
         //  maximum edge length per face.
@@ -96,18 +96,16 @@ public:
             const word& name,
             const dictionary& dict,
             const label index,
-            const faBoundaryMesh& bm
-        )
-        :
-            coupledFaPatch(name, dict, index, bm)
-        {}
+            const faBoundaryMesh& bm,
+            const word& patchType
+        );
 
 
     //- Destructor
     virtual ~cyclicFaPatch() = default;
 
 
-    // Member functions
+    // Member Functions
 
         // Access
 

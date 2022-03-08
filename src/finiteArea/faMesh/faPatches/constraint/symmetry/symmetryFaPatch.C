@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,7 +42,7 @@ namespace Foam
 void Foam::symmetryFaPatch::makeCorrVecs(vectorField& cv) const
 {
     // Non-orthogonal correction not allowed
-    cv = vector::zero;
+    cv = Zero;
 }
 
 
@@ -50,13 +51,14 @@ void Foam::symmetryFaPatch::makeCorrVecs(vectorField& cv) const
 Foam::symmetryFaPatch::symmetryFaPatch
 (
     const word& name,
-    const labelList& edgeLabels,
+    const labelUList& edgeLabels,
     const label index,
     const faBoundaryMesh& bm,
-    const label ngbPolyPatchIndex
+    const label nbrPolyPatchi,
+    const word& patchType
 )
 :
-    faPatch(name, edgeLabels, index, bm, ngbPolyPatchIndex)
+    faPatch(name, edgeLabels, index, bm, nbrPolyPatchi, patchType)
 {}
 
 
@@ -65,10 +67,11 @@ Foam::symmetryFaPatch::symmetryFaPatch
     const word& name,
     const dictionary& dict,
     const label index,
-    const faBoundaryMesh& bm
+    const faBoundaryMesh& bm,
+    const word& patchType
 )
 :
-    faPatch(name, dict, index, bm)
+    faPatch(name, dict, index, bm, patchType)
 {
     if (ngbPolyPatchIndex() < 0)
     {
@@ -77,6 +80,29 @@ Foam::symmetryFaPatch::symmetryFaPatch
             << this->name() << exit(FatalError);
     }
 }
+
+
+Foam::symmetryFaPatch::symmetryFaPatch
+(
+    const symmetryFaPatch& p,
+    const faBoundaryMesh& bm
+)
+:
+    faPatch(p, bm)
+{}
+
+
+Foam::symmetryFaPatch::symmetryFaPatch
+(
+    const symmetryFaPatch& p,
+    const faBoundaryMesh& bm,
+    const label index,
+    const labelUList& edgeLabels,
+    const label nbrPolyPatchi
+)
+:
+    faPatch(p, bm, index, edgeLabels, nbrPolyPatchi)
+{}
 
 
 // ************************************************************************* //

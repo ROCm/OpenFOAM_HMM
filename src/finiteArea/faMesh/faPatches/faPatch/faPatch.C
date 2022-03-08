@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,6 +34,8 @@ License
 #include "edgeFields.H"
 #include "edgeHashes.H"
 #include "polyMesh.H"
+#include "polyPatch.H"
+//#include "pointPatchField.H"
 #include "demandDrivenData.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -43,6 +45,39 @@ namespace Foam
     defineTypeNameAndDebug(faPatch, 0);
     defineRunTimeSelectionTable(faPatch, dictionary);
     addToRunTimeSelectionTable(faPatch, faPatch, dictionary);
+}
+
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+bool Foam::faPatch::constraintType(const word& patchType)
+{
+    // Reasonable to expect any faPatch constraint has an identically
+    // named polyPatch/pointPatch equivalent
+
+    return polyPatch::constraintType(patchType);
+}
+
+
+Foam::wordList Foam::faPatch::constraintTypes()
+{
+    const auto& cnstrTable = *dictionaryConstructorTablePtr_;
+
+    wordList cTypes(cnstrTable.size());
+
+    label i = 0;
+
+    forAllConstIters(cnstrTable, iter)
+    {
+        if (constraintType(iter.key()))
+        {
+            cTypes[i++] = iter.key();
+        }
+    }
+
+    cTypes.resize(i);
+
+    return cTypes;
 }
 
 
@@ -61,20 +96,26 @@ void Foam::faPatch::clearOut()
 Foam::faPatch::faPatch
 (
     const word& name,
-    const labelList& edgeLabels,
+    const labelUList& edgeLabels,
     const label index,
     const faBoundaryMesh& bm,
-    const label ngbPolyPatchIndex
+    const label nbrPolyPatchi,
+    const word& patchType
 )
 :
     patchIdentifier(name, index),
     labelList(edgeLabels),
-    nbrPolyPatchId_(ngbPolyPatchIndex),
+    nbrPolyPatchId_(nbrPolyPatchi),
     boundaryMesh_(bm),
     edgeFacesPtr_(nullptr),
     pointLabelsPtr_(nullptr),
     pointEdgesPtr_(nullptr)
-{}
+{
+    if (!patchType.empty() && constraintType(patchType))
+    {
+        inGroups().appendUniq(patchType);
+    }
+}
 
 
 Foam::faPatch::faPatch
@@ -82,7 +123,8 @@ Foam::faPatch::faPatch
     const word& name,
     const dictionary& dict,
     const label index,
-    const faBoundaryMesh& bm
+    const faBoundaryMesh& bm,
+    const word& patchType
 )
 :
     patchIdentifier(name, dict, index),
@@ -92,18 +134,47 @@ Foam::faPatch::faPatch
     edgeFacesPtr_(nullptr),
     pointLabelsPtr_(nullptr),
     pointEdgesPtr_(nullptr)
-{}
+{
+    if (!patchType.empty() && constraintType(patchType))
+    {
+        inGroups().appendUniq(patchType);
+    }
+}
 
 
-Foam::faPatch::faPatch(const faPatch& p, const faBoundaryMesh& bm)
+Foam::faPatch::faPatch
+(
+    const faPatch& p,
+    const faBoundaryMesh& bm,
+    const label index,
+    const labelUList& edgeLabels,
+    const label nbrPolyPatchi
+)
 :
-    patchIdentifier(p, p.index()),
-    labelList(p),
+    patchIdentifier(p, index),
+    labelList(edgeLabels),
     nbrPolyPatchId_(p.nbrPolyPatchId_),
     boundaryMesh_(bm),
     edgeFacesPtr_(nullptr),
     pointLabelsPtr_(nullptr),
     pointEdgesPtr_(nullptr)
+{}
+
+
+Foam::faPatch::faPatch
+(
+    const faPatch& p,
+    const faBoundaryMesh& bm
+)
+:
+    faPatch
+    (
+        p,
+        bm,
+        p.index(),
+        p.edgeLabels(),
+        p.nbrPolyPatchId_
+    )
 {}
 
 
@@ -464,7 +535,7 @@ void Foam::faPatch::movePoints(const pointField& points)
 {}
 
 
-void Foam::faPatch::resetEdges(const UList<label>& newEdges)
+void Foam::faPatch::resetEdges(const labelUList& newEdges)
 {
     clearOut();
     static_cast<labelList&>(*this) = newEdges;

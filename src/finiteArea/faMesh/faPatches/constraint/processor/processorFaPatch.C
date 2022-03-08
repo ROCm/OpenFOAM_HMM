@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,7 +32,6 @@ License
 #include "faBoundaryMesh.H"
 #include "faMesh.H"
 #include "globalMeshData.H"
-#include "demandDrivenData.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,9 +45,79 @@ namespace Foam
 
 Foam::processorFaPatch::~processorFaPatch()
 {
-    deleteDemandDrivenData(neighbPointsPtr_);
-    deleteDemandDrivenData(nonGlobalPatchPointsPtr_);
+    neighbPointsPtr_.clear();
+    nonGlobalPatchPointsPtr_.clear();
 }
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::processorFaPatch::processorFaPatch
+(
+    const word& name,
+    const labelUList& edgeLabels,
+    const label index,
+    const faBoundaryMesh& bm,
+    const label nbrPolyPatchi,
+    const label myProcNo,
+    const label neighbProcNo,
+    const word& patchType
+)
+:
+    coupledFaPatch(name, edgeLabels, index, bm, nbrPolyPatchi, patchType),
+    myProcNo_(myProcNo),
+    neighbProcNo_(neighbProcNo),
+    neighbEdgeCentres_(),
+    neighbEdgeLengths_(),
+    neighbEdgeFaceCentres_(),
+    neighbPointsPtr_(nullptr),
+    nonGlobalPatchPointsPtr_(nullptr)
+{}
+
+
+Foam::processorFaPatch::processorFaPatch
+(
+    const labelUList& edgeLabels,
+    const label index,
+    const faBoundaryMesh& bm,
+    const label nbrPolyPatchi,
+    const label myProcNo,
+    const label neighbProcNo,
+    const word& patchType
+)
+:
+    processorFaPatch
+    (
+        processorPolyPatch::newName(myProcNo, neighbProcNo),
+        edgeLabels,
+        index,
+        bm,
+        nbrPolyPatchi,
+        myProcNo,
+        neighbProcNo,
+        patchType
+    )
+{}
+
+
+Foam::processorFaPatch::processorFaPatch
+(
+    const word& name,
+    const dictionary& dict,
+    const label index,
+    const faBoundaryMesh& bm,
+    const word& patchType
+)
+:
+    coupledFaPatch(name, dict, index, bm, patchType),
+    myProcNo_(dict.get<label>("myProcNo")),
+    neighbProcNo_(dict.get<label>("neighbProcNo")),
+    neighbEdgeCentres_(),
+    neighbEdgeLengths_(),
+    neighbEdgeFaceCentres_(),
+    neighbPointsPtr_(nullptr),
+    nonGlobalPatchPointsPtr_(nullptr)
+{}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
@@ -78,83 +147,36 @@ void Foam::processorFaPatch::makeNonGlobalPatchPoints() const
      || !boundaryMesh().mesh()().globalData().nGlobalPoints()
     )
     {
-        nonGlobalPatchPointsPtr_ = new labelList(identity(nPoints()));
+        // 1 -> 1 mapping
+        nonGlobalPatchPointsPtr_.reset(new labelList(identity(nPoints())));
     }
     else
     {
+        nonGlobalPatchPointsPtr_.reset(new labelList(nPoints()));
+        labelList& ngpp = *nonGlobalPatchPointsPtr_;
+
         // Get reference to shared points
         const labelList& sharedPoints =
             boundaryMesh().mesh()().globalData().sharedPointLabels();
-
-        nonGlobalPatchPointsPtr_ = new labelList(nPoints());
-        labelList& ngpp = *nonGlobalPatchPointsPtr_;
 
         const labelList& faMeshPatchPoints = pointLabels();
 
         const labelList& meshPoints =
             boundaryMesh().mesh().patch().meshPoints();
 
-        label noFiltPoints = 0;
+        label nNonShared = 0;
 
-        forAll(faMeshPatchPoints, pointI)
+        forAll(faMeshPatchPoints, pointi)
         {
-            label curP = meshPoints[faMeshPatchPoints[pointI]];
-
-            bool found = false;
-
-            forAll(sharedPoints, sharedI)
+            const label mpi = meshPoints[faMeshPatchPoints[pointi]];
+            if (!sharedPoints.found(mpi))
             {
-                if (sharedPoints[sharedI] == curP)
-                {
-                    found = true;
-                    break;
-                }
-            }
-
-            if (!found)
-            {
-                ngpp[noFiltPoints] = pointI;
-                ++noFiltPoints;
+                ngpp[nNonShared] = pointi;
+                ++nNonShared;
             }
         }
 
-        ngpp.setSize(noFiltPoints);
-
-
-//         // Get reference to shared points
-//         const labelList& sharedPoints =
-//             boundaryMesh().mesh().globalData().sharedPointLabels();
-
-//         nonGlobalPatchPointsPtr_ = new labelList(nPoints());
-//         labelList& ngpp = *nonGlobalPatchPointsPtr_;
-
-//         const labelList& patchPoints = pointLabels();
-
-//         label noFiltPoints = 0;
-
-//         forAll(patchPoints, pointI)
-//         {
-//             label curP = patchPoints[pointI];
-
-//             bool found = false;
-
-//             forAll(sharedPoints, pI)
-//             {
-//                 if (sharedPoints[pI] == curP)
-//                 {
-//                     found = true;
-//                     break;
-//                 }
-//             }
-
-//             if (!found)
-//             {
-//                 ngpp[noFiltPoints] = pointI;
-//                 noFiltPoints++;
-//             }
-//         }
-
-//         ngpp.setSize(noFiltPoints);
+        ngpp.resize(nNonShared);
     }
 }
 
@@ -242,7 +264,7 @@ void Foam::processorFaPatch::initUpdateMesh()
     // For completeness
     faPatch::initUpdateMesh();
 
-    deleteDemandDrivenData(neighbPointsPtr_);
+    neighbPointsPtr_.clear();
 
     if (Pstream::parRun())
     {
@@ -308,7 +330,7 @@ void Foam::processorFaPatch::updateMesh()
         {
             // Convert neighbour edges and indices into face back into
             // my edges and points.
-            neighbPointsPtr_ = new labelList(nPoints());
+            neighbPointsPtr_.reset(new labelList(nPoints()));
             labelList& neighbPoints = *neighbPointsPtr_;
 
             const edgeList::subList patchEdges =
@@ -330,7 +352,7 @@ void Foam::processorFaPatch::updateMesh()
         {
             // Differing number of points. Probably patch includes
             // part of a cyclic.
-            neighbPointsPtr_ = nullptr;
+            neighbPointsPtr_.clear();
         }
     }
 }
@@ -355,7 +377,7 @@ const Foam::labelList& Foam::processorFaPatch::neighbPoints() const
             << abort(FatalError);
     }
 
-   return *neighbPointsPtr_;
+    return *neighbPointsPtr_;
 }
 
 

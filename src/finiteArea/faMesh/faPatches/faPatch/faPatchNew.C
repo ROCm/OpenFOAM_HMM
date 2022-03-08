@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,9 +39,23 @@ Foam::autoPtr<Foam::faPatch> Foam::faPatch::New
     const faBoundaryMesh& bm
 )
 {
-    DebugInFunction << "Constructing faPatch" << endl;
+    word patchType(dict.get<word>("type"));
+    // Not needed:  dict.readIfPresent("geometricType", patchType);
 
-    const word patchType(dict.get<word>("type"));
+    return faPatch::New(patchType, name, dict, index, bm);
+}
+
+
+Foam::autoPtr<Foam::faPatch> Foam::faPatch::New
+(
+    const word& patchType,
+    const word& name,
+    const dictionary& dict,
+    const label index,
+    const faBoundaryMesh& bm
+)
+{
+    DebugInFunction << "Constructing faPatch" << endl;
 
     auto* ctorPtr = dictionaryConstructorTable(patchType);
 
@@ -56,7 +70,7 @@ Foam::autoPtr<Foam::faPatch> Foam::faPatch::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<faPatch>(ctorPtr(name, dict, index, bm));
+    return autoPtr<faPatch>(ctorPtr(name, dict, index, bm, patchType));
 }
 
 
