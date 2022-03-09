@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,14 +30,22 @@ Class
 Description
     Selector class for finite area/finite volume differencing schemes.
 
+    The schemes data are treated as MUST_READ_IF_MODIFIED even if
+    the requested readOption is nominally MUST_READ or READ_IF_PRESENT.
+    This allows run-time modifications to behave as expected.
+
+    The optional fallback dictionary content for constructors is used
+    when a file is missing or for a NO_READ, with a null pointer being
+    treated like an empty dictionary.
+
 SourceFiles
     schemesLookup.C
     schemesLookupDetail.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef schemesLookup_H
-#define schemesLookup_H
+#ifndef Foam_schemesLookup_H
+#define Foam_schemesLookup_H
 
 #include "IOdictionary.H"
 
@@ -161,9 +169,17 @@ public:
 
     // Constructors
 
-        //- Construct for objectRegistry, system dictName, and optional
-        //- fallback dictionary content (for a NO_READ or missing file)
-        //  A null dictionary pointer is treated like an empty dictionary.
+        //- Construct for objectRegistry, readOption, (system) dictionary name.
+        schemesLookup
+        (
+            const objectRegistry& obr,
+            const IOobject::readOption rOpt,
+            const word& dictName,
+            const dictionary* fallback = nullptr
+        );
+
+        //- Construct for objectRegistry, (system) dictionary name
+        //- using the readOption from the registry.
         schemesLookup
         (
             const objectRegistry& obr,

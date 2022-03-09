@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,6 +62,7 @@ void Foam::schemesLookup::checkSteady()
         is >> schemeName;
     }
 
+    // OR: steady_ = schemeName.starts_with("steady");
     steady_ =
     (
         schemeName == "steady"
@@ -106,6 +107,7 @@ void Foam::schemesLookup::read(const dictionary& dict)
 Foam::schemesLookup::schemesLookup
 (
     const objectRegistry& obr,
+    const IOobject::readOption rOpt,
     const word& dictName,
     const dictionary* fallback
 )
@@ -117,12 +119,7 @@ Foam::schemesLookup::schemesLookup
             dictName,
             obr.time().system(),
             obr,
-            (
-                obr.readOpt() == IOobject::MUST_READ
-             || obr.readOpt() == IOobject::READ_IF_PRESENT
-              ? IOobject::MUST_READ_IF_MODIFIED
-              : obr.readOpt()
-            ),
+            rOpt,
             IOobject::NO_WRITE
         ),
         fallback
@@ -143,16 +140,33 @@ Foam::schemesLookup::schemesLookup
     fluxRequiredDefault_(false),
     steady_(false)
 {
+    // Treat as MUST_READ_IF_MODIFIED whenever possible
     if
     (
         readOpt() == IOobject::MUST_READ
-     || readOpt() == IOobject::MUST_READ_IF_MODIFIED
      || (readOpt() == IOobject::READ_IF_PRESENT && headerOk())
     )
+    {
+        readOpt() = IOobject::MUST_READ_IF_MODIFIED;
+        addWatch();
+    }
+
+    if (readOpt() == IOobject::MUST_READ_IF_MODIFIED)
     {
         read(schemesDict());
     }
 }
+
+
+Foam::schemesLookup::schemesLookup
+(
+    const objectRegistry& obr,
+    const word& dictName,
+    const dictionary* fallback
+)
+:
+    schemesLookup(obr, obr.readOpt(), dictName, fallback)
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

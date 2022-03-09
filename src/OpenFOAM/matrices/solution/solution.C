@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -143,6 +143,7 @@ void Foam::solution::read(const dictionary& dict)
 Foam::solution::solution
 (
     const objectRegistry& obr,
+    const IOobject::readOption rOpt,
     const fileName& dictName,
     const dictionary* fallback
 )
@@ -154,12 +155,7 @@ Foam::solution::solution
             dictName,
             obr.time().system(),
             obr,
-            (
-                obr.readOpt() == IOobject::MUST_READ
-             || obr.readOpt() == IOobject::READ_IF_PRESENT
-              ? IOobject::MUST_READ_IF_MODIFIED
-              : obr.readOpt()
-            ),
+            rOpt,
             IOobject::NO_WRITE
         ),
         fallback
@@ -170,16 +166,33 @@ Foam::solution::solution
     eqnRelaxDict_(),
     solvers_()
 {
+    // Treat as MUST_READ_IF_MODIFIED whenever possible
     if
     (
         readOpt() == IOobject::MUST_READ
-     || readOpt() == IOobject::MUST_READ_IF_MODIFIED
      || (readOpt() == IOobject::READ_IF_PRESENT && headerOk())
     )
+    {
+        readOpt() = IOobject::MUST_READ_IF_MODIFIED;
+        addWatch();
+    }
+
+    if (readOpt() == IOobject::MUST_READ_IF_MODIFIED)
     {
         read(solutionDict());
     }
 }
+
+
+Foam::solution::solution
+(
+    const objectRegistry& obr,
+    const fileName& dictName,
+    const dictionary* fallback
+)
+:
+    solution(obr, obr.readOpt(), dictName, fallback)
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

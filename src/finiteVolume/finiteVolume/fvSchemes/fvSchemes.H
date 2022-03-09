@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,12 +32,17 @@ Description
     fvMesh is derived from fvSchemes so that all fields have access to the
     fvSchemes from the mesh reference they hold.
 
-SourceFiles
+    The optional fallback dictionary content for constructors is used
+    when a file is missing or for a NO_READ, with a null pointer being
+    treated like an empty dictionary.
+
+SeeAlso
+    Foam::schemesLookup
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fvSchemes_H
-#define fvSchemes_H
+#ifndef Foam_fvSchemes_H
+#define Foam_fvSchemes_H
 
 #include "schemesLookup.H"
 
@@ -56,17 +61,29 @@ class fvSchemes
 {
 public:
 
+    //- No copy construct
+    fvSchemes(const fvSchemes&) = delete;
+
+    //- No copy assignment
+    void operator=(const fvSchemes&) = delete;
+
+
     // Constructors
 
-        //- No copy construct
-        fvSchemes(const fvSchemes&) = delete;
+        //- Construct for objectRegistry, readOption, (system) dictionary name.
+        fvSchemes
+        (
+            const objectRegistry& obr,
+            const IOobject::readOption rOpt,
+            const word& dictName,
+            const dictionary* fallback = nullptr
+        )
+        :
+            schemesLookup(obr, rOpt, dictName, fallback)
+        {}
 
-        //- No copy assignment
-        void operator=(const fvSchemes&) = delete;
-
-        //- Construct for objectRegistry, dictionary name and optional
-        //- fallback dictionary content (for a NO_READ or missing file)
-        //  A null dictionary pointer is treated like an empty dictionary.
+        //- Construct for objectRegistry, (system) dictionary name
+        //- using the readOption from the registry.
         fvSchemes
         (
             const objectRegistry& obr,
@@ -77,23 +94,37 @@ public:
             schemesLookup(obr, dictName, fallback)
         {}
 
-        //- Construct for objectRegistry, and optional
-        //- fallback dictionary content (for a NO_READ or missing file)
-        //  A null dictionary pointer is treated like an empty dictionary.
+        //- Construct for objectRegistry, readOption with the
+        //- default dictionary name ("fvSchemes").
+        fvSchemes
+        (
+            const objectRegistry& obr,
+            const IOobject::readOption rOpt,
+            const dictionary* fallback = nullptr
+        )
+        :
+            schemesLookup(obr, rOpt, "fvSchemes", fallback)
+        {}
+
+        //- Construct for objectRegistry with the
+        //- default dictionary name ("fvSchemes").
+        //  Uses the readOption from the registry.
         explicit fvSchemes
         (
             const objectRegistry& obr,
             const dictionary* fallback = nullptr
         )
         :
-            fvSchemes(obr, "fvSchemes", fallback)
+            schemesLookup(obr, "fvSchemes", fallback)
         {}
 
-        //- Construct for objectRegistry, and
-        //- fallback dictionary content (for a NO_READ or missing file)
+        //- Construct for objectRegistry with the
+        //- default dictionary name ("fvSchemes") and
+        //- fallback dictionary content.
+        //  Uses the readOption from the registry.
         fvSchemes(const objectRegistry& obr, const dictionary& dict)
         :
-            fvSchemes(obr, "fvSchemes", &dict)
+            schemesLookup(obr, "fvSchemes", &dict)
         {}
 };
 

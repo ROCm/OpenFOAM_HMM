@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,12 +32,17 @@ Description
     faMesh is derived from faSchemes so that all fields have access to the
     faSchemes from the mesh reference they hold.
 
-SourceFiles
+    The optional fallback dictionary content for constructors is used
+    when a file is missing or for a NO_READ, with a null pointer being
+    treated like an empty dictionary.
+
+SeeAlso
+    Foam::schemesLookup
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef faSchemes_H
-#define faSchemes_H
+#ifndef Foam_faSchemes_H
+#define Foam_faSchemes_H
 
 #include "schemesLookup.H"
 
@@ -65,9 +70,20 @@ public:
 
     // Constructors
 
-        //- Construct for objectRegistry, dictionary name and optional
-        //- fallback dictionary content (for a NO_READ or missing file)
-        //  A null dictionary pointer is treated like an empty dictionary.
+        //- Construct for objectRegistry, readOption, (system) dictionary name.
+        faSchemes
+        (
+            const objectRegistry& obr,
+            const IOobject::readOption rOpt,
+            const word& dictName,
+            const dictionary* fallback = nullptr
+        )
+        :
+            schemesLookup(obr, rOpt, dictName, fallback)
+        {}
+
+        //- Construct for objectRegistry, (system) dictionary name
+        //- using the readOption from the registry.
         faSchemes
         (
             const objectRegistry& obr,
@@ -78,23 +94,37 @@ public:
             schemesLookup(obr, dictName, fallback)
         {}
 
-        //- Construct for objectRegistry, and optional
-        //- fallback dictionary content (for a NO_READ or missing file)
-        //  A null dictionary pointer is treated like an empty dictionary.
+        //- Construct for objectRegistry, readOption with the
+        //- default dictionary name ("faSchemes").
+        faSchemes
+        (
+            const objectRegistry& obr,
+            const IOobject::readOption rOpt,
+            const dictionary* fallback = nullptr
+        )
+        :
+            schemesLookup(obr, rOpt, "faSchemes", fallback)
+        {}
+
+        //- Construct for objectRegistry with the
+        //- default dictionary name ("faSchemes").
+        //  Uses the readOption from the registry.
         explicit faSchemes
         (
             const objectRegistry& obr,
             const dictionary* fallback = nullptr
         )
         :
-            faSchemes(obr, "faSchemes", fallback)
+            schemesLookup(obr, "faSchemes", fallback)
         {}
 
-        //- Construct for objectRegistry, and
-        //- fallback dictionary content (for a NO_READ or missing file)
+        //- Construct for objectRegistry with the
+        //- default dictionary name ("faSchemes") and
+        //- fallback dictionary content.
+        //  Uses the readOption from the registry.
         faSchemes(const objectRegistry& obr, const dictionary& dict)
         :
-            faSchemes(obr, "faSchemes", &dict)
+            schemesLookup(obr, "faSchemes", &dict)
         {}
 };
 

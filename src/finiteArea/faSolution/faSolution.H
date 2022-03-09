@@ -32,14 +32,17 @@ Description
     faMesh is derived from faSolution so that all fields have access to the
     faSolution from the mesh reference they hold.
 
-Author
-    Zeljko Tukovic, FMENA
-    Hrvoje Jasak, Wikki Ltd.
+    The optional fallback dictionary content for constructors is used
+    when a file is missing or for a NO_READ, with a null pointer being
+    treated like an empty dictionary.
+
+SeeAlso
+    Foam::solution
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef faSolution_H
-#define faSolution_H
+#ifndef Foam_faSolution_H
+#define Foam_faSolution_H
 
 #include "solution.H"
 
@@ -67,9 +70,20 @@ public:
 
     // Constructors
 
-        //- Construct for objectRegistry, dictionary name and optional
-        //- fallback dictionary content (for a NO_READ or missing file)
-        //  A null dictionary pointer is treated like an empty dictionary.
+        //- Construct for objectRegistry, readOption, (system) dictionary name.
+        faSolution
+        (
+            const objectRegistry& obr,
+            const IOobject::readOption rOpt,
+            const word& dictName,
+            const dictionary* fallback = nullptr
+        )
+        :
+            solution(obr, rOpt, dictName, fallback)
+        {}
+
+        //- Construct for objectRegistry, (system) dictionary name
+        //- using the readOption from the registry.
         faSolution
         (
             const objectRegistry& obr,
@@ -80,16 +94,28 @@ public:
             solution(obr, dictName, fallback)
         {}
 
-        //- Construct for objectRegistry, and optional
-        //- fallback dictionary content (for a NO_READ or missing file)
-        //  A null dictionary pointer is treated like an empty dictionary.
+        //- Construct for objectRegistry, readOption with the
+        //- default dictionary name ("faSolution").
+        faSolution
+        (
+            const objectRegistry& obr,
+            const IOobject::readOption rOpt,
+            const dictionary* fallback = nullptr
+        )
+        :
+            solution(obr, rOpt, "faSolution", fallback)
+        {}
+
+        //- Construct for objectRegistry with the
+        //- default dictionary name ("faSolution").
+        //  Uses the readOption from the registry.
         explicit faSolution
         (
             const objectRegistry& obr,
             const dictionary* fallback = nullptr
         )
         :
-            faSolution(obr, "faSolution", fallback)
+            solution(obr, "faSolution", fallback)
         {}
 };
 

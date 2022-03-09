@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,13 +30,21 @@ Class
 Description
     Selector class for relaxation factors, solver type and solution.
 
+    The solution data are treated as MUST_READ_IF_MODIFIED even if
+    the requested readOption is nominally MUST_READ or READ_IF_PRESENT.
+    This allows run-time modifications to behave as expected.
+
+    The optional fallback dictionary content for constructors is used
+    when a file is missing or for a NO_READ, with a null pointer being
+    treated like an empty dictionary.
+
 SourceFiles
     solution.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef solution_H
-#define solution_H
+#ifndef Foam_solution_H
+#define Foam_solution_H
 
 #include "IOdictionary.H"
 #include "HashPtrTable.H"
@@ -112,27 +120,23 @@ public:
 
     // Constructors
 
-        //- Construct for given objectRegistry, dictionary name and optional
-        //- fallback dictionary content (for a NO_READ or missing file)
-        //  A null dictionary pointer is treated like an empty dictionary.
+        //- Construct for objectRegistry, readOption, (system) dictionary name.
+        solution
+        (
+            const objectRegistry& obr,
+            const IOobject::readOption rOpt,
+            const fileName& dictName,
+            const dictionary* fallback = nullptr
+        );
+
+        //- Construct for objectRegistry, (system) dictionary name
+        //- using the readOption from the registry.
         solution
         (
             const objectRegistry& obr,
             const fileName& dictName,
             const dictionary* fallback = nullptr
         );
-
-        //- Construct for given objectRegistry, dictionary name and
-        //- fallback dictionary content (for a NO_READ or missing file)
-        solution
-        (
-            const objectRegistry& obr,
-            const fileName& dictName,
-            const dictionary& dict
-        )
-        :
-            solution(obr, dictName, &dict)
-        {}
 
 
     //- Destructor
@@ -159,7 +163,7 @@ public:
             scalar equationRelaxationFactor(const word& name) const;
 
             //- Return the selected sub-dictionary of solvers if the "select"
-            //  keyword is given, otherwise return the complete dictionary
+            //- keyword is given, otherwise return the complete dictionary
             const dictionary& solutionDict() const;
 
             //- Return the solver controls dictionary for the given field

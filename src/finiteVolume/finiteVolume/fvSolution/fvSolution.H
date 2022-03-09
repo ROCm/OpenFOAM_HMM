@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,10 +32,17 @@ Description
     fvMesh is derived from fvSolution so that all fields have access to the
     fvSolution from the mesh reference they hold.
 
+    The optional fallback dictionary content for constructors is used
+    when a file is missing or for a NO_READ, with a null pointer being
+    treated like an empty dictionary.
+
+SeeAlso
+    Foam::solution
+
 \*---------------------------------------------------------------------------*/
 
-#ifndef fvSolution_H
-#define fvSolution_H
+#ifndef Foam_fvSolution_H
+#define Foam_fvSolution_H
 
 #include "solution.H"
 
@@ -63,6 +70,18 @@ public:
 
     // Constructors
 
+        //- Construct for objectRegistry, readOption, (system) dictionary name.
+        fvSolution
+        (
+            const objectRegistry& obr,
+            const IOobject::readOption rOpt,
+            const word& dictName,
+            const dictionary* fallback = nullptr
+        )
+        :
+            solution(obr, rOpt, dictName, fallback)
+        {}
+
         //- Construct for objectRegistry, dictionary name and optional
         //- fallback dictionary content (for a NO_READ or missing file)
         //  A null dictionary pointer is treated like an empty dictionary.
@@ -76,9 +95,21 @@ public:
             solution(obr, dictName, fallback)
         {}
 
-        //- Construct for objectRegistry, and optional
-        //- fallback dictionary content (for a NO_READ or missing file)
-        //  A null dictionary pointer is treated like an empty dictionary.
+        //- Construct for objectRegistry, readOption with the
+        //- default dictionary name ("fvSolution").
+        fvSolution
+        (
+            const objectRegistry& obr,
+            const IOobject::readOption rOpt,
+            const dictionary* fallback = nullptr
+        )
+        :
+            solution(obr, rOpt, "fvSolution", fallback)
+        {}
+
+        //- Construct for objectRegistry with the
+        //- default dictionary name ("fvSolution").
+        //  Uses the readOption from the registry.
         explicit fvSolution
         (
             const objectRegistry& obr,
@@ -88,7 +119,9 @@ public:
             fvSolution(obr, "fvSolution", fallback)
         {}
 
-        //- Construct for objectRegistry and optional contents
+        //- Construct for objectRegistry with the
+        //- default dictionary name ("fvSolution") and optional contents.
+        //  Uses the readOption from the registry.
         fvSolution(const objectRegistry& obr, const dictionary& dict)
         :
             fvSolution(obr, "fvSolution", &dict)
