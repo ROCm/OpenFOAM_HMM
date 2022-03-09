@@ -424,6 +424,33 @@ void Foam::uniqueOrder
 }
 
 
+template<class T>
+Foam::List<T> Foam::uniqueSort(const UList<T>& input)
+{
+    List<T> output(input);
+
+    const label len = output.size();
+
+    if (len > 1)
+    {
+        Foam::stableSort(output);
+
+        label count = 0;
+        for (label i = 1; i < len; ++i)
+        {
+            if (output[count] != output[i])
+            {
+                output[++count] = output[i];
+            }
+        }
+
+        output.resize(count+1);
+    }
+
+    return output;
+}
+
+
 template<class ListType>
 void Foam::inplaceUniqueSort(ListType& input)
 {

@@ -217,6 +217,10 @@ void uniqueOrder
 );
 
 
+//- Return sorted list with removal of duplicates
+template<class T>
+List<T> uniqueSort(const UList<T>& input);
+
 //- Inplace sorting and removal of duplicates.
 //  Do not use FixedList for the input list, since it doesn't resize.
 template<class ListType>
