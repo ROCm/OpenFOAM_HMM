@@ -43,8 +43,8 @@ Author
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef faMesh_H
-#define faMesh_H
+#ifndef Foam_faMesh_H
+#define Foam_faMesh_H
 
 #include "MeshObject.H"
 #include "polyMesh.H"
@@ -454,6 +454,15 @@ class faMesh
         }
 
 
+    // Static Functions
+
+        //- Test if faSchemes/faSolution files are available
+        static bool hasSystemFiles(const polyMesh& pMesh);
+
+        //- Test if all files needed for read construction are available
+        static bool hasFiles(const polyMesh& pMesh);
+
+
 public:
 
     // Public Typedefs
@@ -502,6 +511,12 @@ public:
 
     //- Destructor
     virtual ~faMesh();
+
+
+    // Static Functions
+
+        //- Read construction from polyMesh if all files are available
+        static autoPtr<faMesh> TryNew(const polyMesh& pMesh);
 
 
     // Member Functions

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -65,18 +65,7 @@ PtrList<ensightFaMesh> ensightMeshesFa(regionNames.size());
 
         if (doFiniteArea)
         {
-            autoPtr<faMesh> faMeshPtr;
-
-            const bool oldThrowingError = FatalError.throwing(true);
-            try
-            {
-                faMeshPtr.reset(new faMesh(mesh));
-            }
-            catch (const Foam::error& err)
-            {
-                faMeshPtr.reset(nullptr);
-            }
-            FatalError.throwing(oldThrowingError);
+            autoPtr<faMesh> faMeshPtr(faMesh::TryNew(mesh));
 
             if (faMeshPtr)
             {
@@ -91,7 +80,7 @@ PtrList<ensightFaMesh> ensightMeshesFa(regionNames.size());
                     )
                 );
 
-                meshesFa.set(regioni, faMeshPtr);
+                meshesFa.set(regioni, std::move(faMeshPtr));
 
                 ensightMeshesFa.set
                 (

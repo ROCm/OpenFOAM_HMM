@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,16 +46,7 @@ if (doFiniteArea)
 
     if (nAreaFields)
     {
-        const bool oldThrowingError = FatalError.throwing(true);
-        try
-        {
-            faMeshPtr.reset(new faMesh(meshProxy.baseMesh()));
-        }
-        catch (const Foam::error& err)
-        {
-            faMeshPtr.clear();
-        }
-        FatalError.throwing(oldThrowingError);
+        faMeshPtr = faMesh::TryNew(meshProxy.baseMesh());
     }
 
     if (faMeshPtr && nAreaFields)
