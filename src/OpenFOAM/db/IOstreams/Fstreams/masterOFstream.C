@@ -102,7 +102,7 @@ void Foam::masterOFstream::commit()
                 filePaths
             );
 
-        Pstream::scatter(uniform);
+        Pstream::broadcast(uniform);
 
         if (uniform)
         {

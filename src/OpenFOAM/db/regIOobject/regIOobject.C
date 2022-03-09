@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -247,7 +247,7 @@ Foam::label Foam::regIOobject::addWatch(const fileName& f)
     if
     (
         registered_
-     && readOpt() == MUST_READ_IF_MODIFIED
+     && readOpt() == IOobject::MUST_READ_IF_MODIFIED
      && time().runTimeModifiable()
     )
     {
@@ -269,7 +269,7 @@ void Foam::regIOobject::addWatch()
     if
     (
         registered_
-     && readOpt() == MUST_READ_IF_MODIFIED
+     && readOpt() == IOobject::MUST_READ_IF_MODIFIED
      && time().runTimeModifiable()
     )
     {
@@ -291,13 +291,15 @@ void Foam::regIOobject::addWatch()
         }
 
         // If master-only reading only the master will have all dependencies
-        // so scatter these to slaves
-        bool masterOnly =
+        // so broadcast these to other ranks
+        const bool masterOnly
+        (
             global()
          && (
                 IOobject::fileModificationChecking == IOobject::timeStampMaster
              || IOobject::fileModificationChecking == IOobject::inotifyMaster
-            );
+            )
+        );
 
         if (masterOnly && Pstream::parRun())
         {
@@ -305,13 +307,13 @@ void Foam::regIOobject::addWatch()
             fileNameList watchFiles;
             if (Pstream::master())
             {
-                watchFiles.setSize(watchIndices_.size());
+                watchFiles.resize(watchIndices_.size());
                 forAll(watchIndices_, i)
                 {
                     watchFiles[i] = fileHandler().getFile(watchIndices_[i]);
                 }
             }
-            Pstream::scatter(watchFiles);
+            Pstream::broadcast(watchFiles);
 
             if (!Pstream::master())
             {

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -97,7 +97,7 @@ Foam::label Foam::unwatchedIOdictionary::addWatch(const fileName& f)
 {
     label index = -1;
 
-    if (readOpt() == MUST_READ_IF_MODIFIED)
+    if (readOpt() == IOobject::MUST_READ_IF_MODIFIED)
     {
         index = files_.find(f);
 
@@ -113,7 +113,7 @@ Foam::label Foam::unwatchedIOdictionary::addWatch(const fileName& f)
 
 void Foam::unwatchedIOdictionary::addWatch()
 {
-    if (readOpt() == MUST_READ_IF_MODIFIED)
+    if (readOpt() == IOobject::MUST_READ_IF_MODIFIED)
     {
         fileName f = filePath();
         if (f.empty())
@@ -132,17 +132,19 @@ void Foam::unwatchedIOdictionary::addWatch()
         }
 
         // If master-only reading only the master will have all dependencies
-        // so scatter these to slaves
-        bool masterOnly =
+        // so broadcast these to other ranks
+        const bool masterOnly
+        (
             global()
          && (
                 IOobject::fileModificationChecking == IOobject::timeStampMaster
              || IOobject::fileModificationChecking == IOobject::inotifyMaster
-            );
+            )
+        );
 
         if (masterOnly && Pstream::parRun())
         {
-            Pstream::scatter(files_);
+            Pstream::broadcast(files_);
         }
 
         addWatch(f);

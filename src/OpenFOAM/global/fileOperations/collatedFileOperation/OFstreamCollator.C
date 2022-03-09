@@ -57,21 +57,17 @@ bool Foam::OFstreamCollator::writeFile
 {
     if (debug)
     {
-        Pout<< "OFstreamCollator : Writing master " << masterData.size()
-            << " bytes to " << fName
-            << " using comm " << comm << endl;
+        Pout<< "OFstreamCollator : Writing master " << label(masterData.size())
+            << " bytes to " << fName << " using comm " << comm
+            << " and " << slaveData.size() << " sub-ranks" << endl;
 
-        if (slaveData.size())
+        forAll(slaveData, proci)
         {
-            Pout<< "OFstreamCollator :  Slave data" << endl;
-            forAll(slaveData, proci)
+            if (slaveData.set(proci))
             {
-                if (slaveData.set(proci))
-                {
-                    Pout<< "    " << proci
-                        << " size:" << slaveData[proci].size()
-                        << endl;
-                }
+                Pout<< "    " << proci
+                    << " size:" << slaveData[proci].size()
+                    << endl;
             }
         }
     }
@@ -101,17 +97,26 @@ bool Foam::OFstreamCollator::writeFile
         }
     }
 
+    // Assuming threaded writing hides any slowness so we
+    // can use scheduled communication to send the data to
+    // the master processor in order. However can be unstable
+    // for some mpi so default is non-blocking.
+    const UPstream::commsTypes myCommsType
+    (
+        (
+            fileOperations::masterUncollatedFileOperation::
+                maxMasterFileBufferSize == 0
+        )
+      ? UPstream::commsTypes::scheduled
+      : UPstream::commsTypes::nonBlocking
+    );
+
 
     UList<char> slice
     (
         const_cast<char*>(masterData.data()),
         label(masterData.size())
     );
-
-    // Assuming threaded writing hides any slowness so we
-    // can use scheduled communication to send the data to
-    // the master processor in order. However can be unstable
-    // for some mpi so default is non-blocking.
 
     List<std::streamoff> blockOffset;
     decomposedBlockData::writeBlocks
@@ -122,12 +127,7 @@ bool Foam::OFstreamCollator::writeFile
         slice,
         recvSizes,
         slaveData,
-        (
-            fileOperations::masterUncollatedFileOperation::
-                maxMasterFileBufferSize == 0
-          ? UPstream::commsTypes::scheduled
-          : UPstream::commsTypes::nonBlocking
-        ),
+        myCommsType,
         false       // do not reduce return state
     );
 
@@ -366,8 +366,8 @@ bool Foam::OFstreamCollator::write
             totalSize += recvSize;
             maxLocalSize = max(maxLocalSize, recvSize);
         }
-        Pstream::scatter(totalSize, Pstream::msgType(), localComm_);
-        Pstream::scatter(maxLocalSize, Pstream::msgType(), localComm_);
+        Pstream::broadcast(totalSize, localComm_);
+        Pstream::broadcast(maxLocalSize, localComm_);
     }
 
     if (!useThread || maxBufferSize_ == 0 || maxLocalSize > maxBufferSize_)

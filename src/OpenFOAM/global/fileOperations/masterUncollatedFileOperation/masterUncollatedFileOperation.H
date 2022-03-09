@@ -73,6 +73,7 @@ Description
 namespace Foam
 {
 
+// Forward Declarations
 class PstreamBuffers;
 
 namespace fileOperations
@@ -97,7 +98,7 @@ protected:
         mutable HashPtrTable<instantList> times_;
 
 
-    // Protected Classes
+    // Protected Operation Functors
 
         class mkDirOp
         {
@@ -108,9 +109,9 @@ protected:
                 mode_(mode)
             {}
 
-            bool operator()(const fileName& fName) const
+            bool operator()(const fileName& f) const
             {
-                return Foam::mkDir(fName, mode_);
+                return Foam::mkDir(f, mode_);
             }
         };
 
@@ -123,9 +124,9 @@ protected:
                 mode_(mode)
             {}
 
-            bool operator()(const fileName& fName) const
+            bool operator()(const fileName& f) const
             {
-                return Foam::chMod(fName, mode_);
+                return Foam::chMod(f, mode_);
             }
         };
 
@@ -138,9 +139,9 @@ protected:
                 followLink_(followLink)
             {}
 
-            mode_t operator()(const fileName& fName) const
+            mode_t operator()(const fileName& f) const
             {
-                return Foam::mode(fName, followLink_);
+                return Foam::mode(f, followLink_);
             }
         };
 
@@ -153,9 +154,10 @@ protected:
                 followLink_(followLink)
             {}
 
-            label operator()(const fileName& fName) const
+            // Returns label not fileName::Type for reductions
+            label operator()(const fileName& f) const
             {
-                return Foam::type(fName, followLink_);
+                return Foam::type(f, followLink_);
             }
         };
 
@@ -170,9 +172,9 @@ protected:
                 followLink_(followLink)
             {}
 
-            bool operator()(const fileName& fName) const
+            bool operator()(const fileName& f) const
             {
-                return Foam::exists(fName, checkGzip_, followLink_);
+                return Foam::exists(f, checkGzip_, followLink_);
             }
         };
 
@@ -185,10 +187,9 @@ protected:
                 followLink_(followLink)
             {}
 
-        public:
-            bool operator()(const fileName& fName) const
+            bool operator()(const fileName& f) const
             {
-                return Foam::isDir(fName, followLink_);
+                return Foam::isDir(f, followLink_);
             }
         };
 
@@ -202,10 +203,10 @@ protected:
                 checkGzip_(checkGzip),
                 followLink_(followLink)
             {}
-        public:
-            bool operator()(const fileName& fName) const
+
+            bool operator()(const fileName& f) const
             {
-                return Foam::isFile(fName, checkGzip_, followLink_);
+                return Foam::isFile(f, checkGzip_, followLink_);
             }
         };
 
@@ -218,10 +219,9 @@ protected:
                 followLink_(followLink)
             {}
 
-        public:
-            off_t operator()(const fileName& fName) const
+            off_t operator()(const fileName& f) const
             {
-                return Foam::fileSize(fName, followLink_);
+                return Foam::fileSize(f, followLink_);
             }
         };
 
@@ -234,26 +234,24 @@ protected:
                 followLink_(followLink)
             {}
 
-        public:
-            time_t operator()(const fileName& fName) const
+            time_t operator()(const fileName& f) const
             {
-                return Foam::lastModified(fName, followLink_);
+                return Foam::lastModified(f, followLink_);
             }
         };
 
-        class lastModifiedHROp
+        class highResLastModifiedOp
         {
             const bool followLink_;
         public:
-            lastModifiedHROp(const bool followLink)
+            highResLastModifiedOp(const bool followLink)
             :
                 followLink_(followLink)
             {}
 
-        public:
-            double operator()(const fileName& fName) const
+            double operator()(const fileName& f) const
             {
-                return Foam::highResLastModified(fName, followLink_);
+                return Foam::highResLastModified(f, followLink_);
             }
         };
 
@@ -266,18 +264,18 @@ protected:
                 ext_(ext)
             {}
 
-            bool operator()(const fileName& fName) const
+            bool operator()(const fileName& f) const
             {
-                return Foam::mvBak(fName, ext_);
+                return Foam::mvBak(f, ext_);
             }
         };
 
         class rmOp
         {
         public:
-            bool operator()(const fileName& fName) const
+            bool operator()(const fileName& f) const
             {
-                return Foam::rm(fName);
+                return Foam::rm(f);
             }
         };
 
@@ -285,17 +283,14 @@ protected:
         {
             bool silent_;
         public:
-            rmDirOp()
-            :
-                silent_(false)
-            {}
-            rmDirOp(const bool silent)
+            rmDirOp(const bool silent=false)
             :
                 silent_(silent)
             {}
-            bool operator()(const fileName& fName) const
+
+            bool operator()(const fileName& f) const
             {
-                return Foam::rmDir(fName, silent_);
+                return Foam::rmDir(f, silent_);
             }
         };
 
@@ -308,7 +303,6 @@ protected:
                 followLink_(followLink)
             {}
 
-        public:
             bool operator()(const fileName& src, const fileName& dest) const
             {
                 return Foam::cp(src, dest, followLink_);
@@ -333,7 +327,6 @@ protected:
                 followLink_(followLink)
             {}
 
-        public:
             bool operator()(const fileName& src, const fileName& dest) const
             {
                 return Foam::mv(src, dest, followLink_);
@@ -349,13 +342,12 @@ protected:
                 isFile_(isFile)
             {}
 
-            fileName operator()(const fileName& fName) const
+            const fileName& operator()(const fileName& f) const
             {
                 return
                 (
-                    (isFile_ && Foam::isFile(fName))
-                 || (!isFile_ && Foam::isDir(fName))
-                  ? fName
+                    (isFile_ ? Foam::isFile(f) : Foam::isDir(f))
+                  ? f
                   : fileName::null
                 );
             }
@@ -379,9 +371,9 @@ protected:
                 followLink_(followLink)
             {}
 
-            fileNameList operator()(const fileName& fName) const
+            fileNameList operator()(const fileName& f) const
             {
-                return Foam::readDir(fName, type_, filtergz_, followLink_);
+                return Foam::readDir(f, type_, filtergz_, followLink_);
             }
         };
 
@@ -397,7 +389,7 @@ protected:
         template<class Type, class fileOp>
         Type masterOp
         (
-            const fileName&,
+            const fileName& fName,
             const fileOp& fop,
             const int tag,
             const label comm
@@ -406,8 +398,8 @@ protected:
         template<class Type, class fileOp>
         Type masterOp
         (
-            const fileName&,
-            const fileName&,
+            const fileName& src,
+            const fileName& dest,
             const fileOp& fop,
             const int tag,
             const label comm

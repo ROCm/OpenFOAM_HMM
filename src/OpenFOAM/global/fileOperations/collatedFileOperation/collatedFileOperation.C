@@ -111,8 +111,6 @@ void Foam::fileOperations::collatedFileOperation::printBanner
         stringList hosts(Pstream::nProcs());
         if (Pstream::master(comm_))
         {
-            // Don't usually need the pid
-            // hosts[Pstream::myProcNo()] = hostName()+"."+name(pid());
             hosts[Pstream::myProcNo()] = hostName();
         }
         Pstream::gatherList(hosts);

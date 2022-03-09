@@ -456,7 +456,7 @@ Foam::fileOperation::lookupAndCacheProcessorsPath
                     << " names to sub-processes" << endl;
             }
 
-            Pstream::scatter(dirEntries, Pstream::msgType(), comm_);
+            Pstream::broadcast(dirEntries, comm_);
         }
         else
         {
@@ -1232,7 +1232,7 @@ Foam::label Foam::fileOperation::nProcs
             nProcs = 1;
         }
     }
-    Pstream::scatter(nProcs, Pstream::msgType(), comm_);
+    Pstream::broadcast(nProcs, comm_);
     return nProcs;
 }
 

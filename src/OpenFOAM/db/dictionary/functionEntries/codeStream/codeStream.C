@@ -210,7 +210,7 @@ Foam::functionEntries::codeStream::getFunction
 
             off_t mySize = Foam::fileSize(libPath);
             off_t masterSize = mySize;
-            Pstream::scatter(masterSize);
+            Pstream::broadcast(masterSize);
 
             for
             (

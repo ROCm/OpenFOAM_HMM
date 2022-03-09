@@ -80,7 +80,11 @@ bool Foam::IOobject::readHeader(dictionary& headerDict, Istream& is)
     // Check Istream not already bad
     if (!is.good())
     {
-        if (rOpt_ == MUST_READ || rOpt_ == MUST_READ_IF_MODIFIED)
+        if
+        (
+            rOpt_ == IOobject::MUST_READ
+         || rOpt_ == IOobject::MUST_READ_IF_MODIFIED
+        )
         {
             FatalIOErrorInFunction(is)
                 << " stream not open for reading essential object from file "
@@ -124,13 +128,22 @@ bool Foam::IOobject::readHeader(dictionary& headerDict, Istream& is)
     }
 
     // Check stream is still OK
-    if (is.good())
+    objState_ = (is.good() ? GOOD : BAD);
+
+    if (IOobject::debug)
     {
-        objState_ = GOOD;
+        Info<< " .... read - state: "
+            << (objState_ == GOOD ? "good" : "bad") << endl;
+
     }
-    else
+
+    if (objState_ == BAD)
     {
-        if (rOpt_ == MUST_READ || rOpt_ == MUST_READ_IF_MODIFIED)
+        if
+        (
+            rOpt_ == IOobject::MUST_READ
+         || rOpt_ == IOobject::MUST_READ_IF_MODIFIED
+        )
         {
             FatalIOErrorInFunction(is)
                 << " stream failure while reading header"
@@ -148,14 +161,7 @@ bool Foam::IOobject::readHeader(dictionary& headerDict, Istream& is)
                 << " of file " << is.relativeName() << endl;
         }
 
-        objState_ = BAD;
-
         return false;
-    }
-
-    if (IOobject::debug)
-    {
-        Info<< " .... read" << endl;
     }
 
     return true;

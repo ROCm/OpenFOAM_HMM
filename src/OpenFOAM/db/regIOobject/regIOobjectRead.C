@@ -42,12 +42,14 @@ bool Foam::regIOobject::readHeaderOk
 )
 {
     // Everyone check or just master
-    bool masterOnly =
+    const bool masterOnly
+    (
         global()
      && (
             IOobject::fileModificationChecking == IOobject::timeStampMaster
          || IOobject::fileModificationChecking == IOobject::inotifyMaster
-        );
+        )
+    );
 
 
     // Check if header is ok for READ_IF_PRESENT
@@ -60,7 +62,7 @@ bool Foam::regIOobject::readHeaderOk
             {
                 isHeaderOk = headerOk();
             }
-            Pstream::scatter(isHeaderOk);
+            Pstream::broadcast(isHeaderOk);
         }
         else
         {
@@ -213,12 +215,14 @@ bool Foam::regIOobject::read()
 
 
     // Read
-    bool masterOnly =
+    const bool masterOnly
+    (
         global()
      && (
             IOobject::fileModificationChecking == IOobject::timeStampMaster
          || IOobject::fileModificationChecking == IOobject::inotifyMaster
-        );
+        )
+    );
 
     // Note: IOstream::binary flag is for all the processor comms. (Only for
     //       dictionaries should it be ascii)

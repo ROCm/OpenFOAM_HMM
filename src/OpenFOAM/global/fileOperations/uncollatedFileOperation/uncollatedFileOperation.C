@@ -67,21 +67,17 @@ Foam::fileName Foam::fileOperations::uncollatedFileOperation::filePathInfo
 {
     if (io.instance().isAbsolute())
     {
-        fileName objectPath = io.instance()/io.name();
+        fileName objectPath(io.instance()/io.name());
 
         if (isFileOrDir(isFile, objectPath))
         {
             return objectPath;
         }
-        else
-        {
-            return fileName::null;
-        }
     }
     else
     {
-        fileName path = io.path();
-        fileName objectPath = path/io.name();
+        fileName path(io.path());
+        fileName objectPath(path/io.name());
 
         if (isFileOrDir(isFile, objectPath))
         {
@@ -161,9 +157,9 @@ Foam::fileName Foam::fileOperations::uncollatedFileOperation::filePathInfo
                 }
             }
         }
-
-        return fileName::null;
     }
+
+    return fileName::null;
 }
 
 
@@ -195,7 +191,7 @@ Foam::fileOperations::uncollatedFileOperation::uncollatedFileOperation
 }
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Filesystem Operations * * * * * * * * * * * * * //
 
 bool Foam::fileOperations::uncollatedFileOperation::mkDir
 (
@@ -371,6 +367,8 @@ bool Foam::fileOperations::uncollatedFileOperation::mv
     return Foam::mv(src, dst, followLink);
 }
 
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::fileName Foam::fileOperations::uncollatedFileOperation::filePath
 (
@@ -613,8 +611,9 @@ bool Foam::fileOperations::uncollatedFileOperation::read
     const word& typeName
 ) const
 {
-    bool ok = true;
-    if (Pstream::master() || !masterOnly)
+    bool ok = false;
+
+    if (!masterOnly || Pstream::master(UPstream::worldComm))
     {
         if (debug)
         {
@@ -649,46 +648,32 @@ bool Foam::fileOperations::uncollatedFileOperation::read
 
     if (masterOnly && Pstream::parRun())
     {
-        // Master reads headerclassname from file. Make sure this gets
-        // transferred as well as contents.
-        Pstream::scatter(io.headerClassName());
-        Pstream::scatter(io.note());
+        UPstream::broadcast(io.headerClassName(), UPstream::worldComm);
+        UPstream::broadcast(io.note(), UPstream::worldComm);
 
-        // My communication order
-        const auto& comms = Pstream::whichCommunication();
-        const auto& myComm = comms[Pstream::myProcNo()];
-
-        // Receive from up
-        if (myComm.above() != -1)
+        if (UPstream::master(UPstream::worldComm))
         {
-            IPstream fromAbove
+            OPBstream toAll
             (
-                Pstream::commsTypes::scheduled,
-                myComm.above(),
-                0,
-                Pstream::msgType(),
-                Pstream::worldComm,
+                UPstream::masterNo(),
+                UPstream::worldComm,
                 format
             );
-            ok = io.readData(fromAbove);
-        }
-
-        // Send to my downstairs neighbours
-        forAll(myComm.below(), belowI)
-        {
-            OPstream toBelow
-            (
-                Pstream::commsTypes::scheduled,
-                myComm.below()[belowI],
-                0,
-                Pstream::msgType(),
-                Pstream::worldComm,
-                format
-            );
-            bool okWrite = io.writeData(toBelow);
+            bool okWrite = io.writeData(toAll);
             ok = ok && okWrite;
         }
+        else
+        {
+            IPBstream fromMaster
+            (
+                UPstream::masterNo(),
+                UPstream::worldComm,
+                format
+            );
+            ok = io.readData(fromMaster);
+        }
     }
+
     return ok;
 }
 

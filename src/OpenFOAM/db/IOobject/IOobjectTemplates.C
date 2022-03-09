@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,42 +42,44 @@ bool Foam::IOobject::typeHeaderOk
     const bool verbose
 )
 {
-    bool ok = true;
-
     // Everyone check or just master
-    bool masterOnly =
+    const bool masterOnly
+    (
         typeGlobal<Type>()
      && (
-            IOobject::fileModificationChecking == timeStampMaster
-         || IOobject::fileModificationChecking == inotifyMaster
-        );
+            IOobject::fileModificationChecking == IOobject::timeStampMaster
+         || IOobject::fileModificationChecking == IOobject::inotifyMaster
+        )
+    );
 
     const fileOperation& fp = Foam::fileHandler();
 
     // Determine local status
+    bool ok = false;
+    fileName fName;
+
     if (!masterOnly || Pstream::master())
     {
-        fileName fName(typeFilePath<Type>(*this, search));
-
+        fName = typeFilePath<Type>(*this, search);
         ok = fp.readHeader(*this, fName, Type::typeName);
-        if (ok && checkType && headerClassName_ != Type::typeName)
-        {
-            if (verbose)
-            {
-                WarningInFunction
-                    << "unexpected class name " << headerClassName_
-                    << " expected " << Type::typeName
-                    << " when reading " << fName << endl;
-            }
+    }
 
-            ok = false;
+    if (ok && checkType && headerClassName_ != Type::typeName)
+    {
+        ok = false;
+        if (verbose)
+        {
+            WarningInFunction
+                << "Unexpected class name \"" << headerClassName_
+                << "\" expected \"" << Type::typeName
+                << "\" when reading " << fName << endl;
         }
     }
 
     // If masterOnly make sure all processors know about it
     if (masterOnly)
     {
-        Pstream::scatter(ok);
+        Pstream::broadcast(ok);
     }
 
     return ok;

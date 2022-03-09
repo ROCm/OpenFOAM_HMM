@@ -43,7 +43,7 @@ bool Foam::IOobjectList::checkNames(wordList& masterNames, const bool syncPar)
     if (syncPar && Pstream::parRun())
     {
         const wordList localNames(masterNames);
-        Pstream::scatter(masterNames);
+        Pstream::broadcast(masterNames);
 
         if (localNames != masterNames)
         {

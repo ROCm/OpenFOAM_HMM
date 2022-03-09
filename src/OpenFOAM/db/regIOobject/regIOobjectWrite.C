@@ -95,15 +95,17 @@ bool Foam::regIOobject::writeObject
 
 
     // Everyone check or just master
-    bool masterOnly =
+    const bool masterOnly
+    (
         isGlobal
      && (
             IOobject::fileModificationChecking == IOobject::timeStampMaster
          || IOobject::fileModificationChecking == IOobject::inotifyMaster
-        );
+        )
+    );
 
     bool osGood = false;
-    if (Pstream::master() || !masterOnly)
+    if (!masterOnly || Pstream::master())
     {
         osGood = fileHandler().writeObject(*this, streamOpt, valid);
     }
