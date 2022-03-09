@@ -600,6 +600,10 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::createBaffles
     autoPtr<mapPolyMesh> mapPtr;
     if (returnReduce(nBaffles, sumOp<label>()))
     {
+        // Remove any unnecessary fields
+        mesh_.clearOut();
+        mesh_.moving(false);
+
         // Change the mesh (no inflation, parallel sync)
         mapPtr = meshMod.changeMesh(mesh_, false, true);
         mapPolyMesh& map = *mapPtr;
@@ -1313,6 +1317,10 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::mergeBaffles
             );
         }
 
+
+        // Remove any unnecessary fields
+        mesh_.clearOut();
+        mesh_.moving(false);
 
         // Change the mesh (no inflation)
         mapPtr = meshMod.changeMesh(mesh_, false, true);
@@ -5346,6 +5354,10 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::dupNonManifoldPoints
         // Insert changes into meshMod
         pointDuplicator.setRefinement(regionSide, meshMod);
 
+        // Remove any unnecessary fields
+        mesh_.clearOut();
+        mesh_.moving(false);
+
         // Change the mesh (no inflation, parallel sync)
         mapPtr = meshMod.changeMesh(mesh_, false, true);
         mapPolyMesh& map = *mapPtr;
@@ -5420,6 +5432,10 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::mergePoints
 
         // Insert changes
         polyMeshAdder::mergePoints(mesh_, pointToMaster, meshMod);
+
+        // Remove any unnecessary fields
+        mesh_.clearOut();
+        mesh_.moving(false);
 
         // Change the mesh (no inflation, parallel sync)
         mapPtr = meshMod.changeMesh(mesh_, false, true);
@@ -5987,6 +6003,10 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
         meshFlipMap,
         meshMod
     );
+
+    // Remove any unnecessary fields
+    mesh_.clearOut();
+    mesh_.moving(false);
 
     // Change the mesh (no inflation, parallel sync)
     autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh_, false, true);
