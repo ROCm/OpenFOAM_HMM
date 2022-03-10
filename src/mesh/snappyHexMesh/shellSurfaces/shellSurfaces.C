@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -169,18 +169,18 @@ void Foam::shellSurfaces::orient()
 
         if (modes_[shellI] != DISTANCE && isA<triSurfaceMesh>(s))
         {
-            const triSurfaceMesh& shell = refCast<const triSurfaceMesh>(s);
+            hasSurface = true;
 
+            const triSurfaceMesh& shell = refCast<const triSurfaceMesh>(s);
             if (shell.triSurface::size())
             {
-                hasSurface = true;
                 // Assume surface is compact!
-                overallBb.add(shell.points());
+                overallBb.add(s.bounds());
             }
         }
     }
 
-    if (hasSurface)
+    if (returnReduce(hasSurface, orOp<bool>()))
     {
         const point outsidePt = overallBb.max() + overallBb.span();
 
