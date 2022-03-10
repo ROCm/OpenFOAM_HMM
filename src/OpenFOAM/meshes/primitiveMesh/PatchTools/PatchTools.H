@@ -218,12 +218,20 @@ public:
 
 
     //- Gather points and faces onto master and merge into single patch.
-    //  Note: uses faces/points, not localFaces/localPoints.
+    //  Note: Normally uses faces/points (not localFaces/localPoints)
+    //
+    //  \param[in] mergeDist Geometric merge tolerance for Foam::mergePoints
+    //  \param[in] pp The patch to merge
+    //  \param[out] mergedPoints
+    //  \param[out] mergedFaces
+    //  \param[out] pointMergeMap
+    //  \param[in] useLocal gather/merge the localFaces/localPoints
+    //      instead of (global) faces/points
     template<class FaceList, class PointField>
     static void gatherAndMerge
     (
         const scalar mergeDist,
-        const PrimitivePatch<FaceList, PointField>& p,
+        const PrimitivePatch<FaceList, PointField>& pp,
         Field
         <
             typename PrimitivePatch<FaceList, PointField>::point_type
@@ -232,7 +240,8 @@ public:
         <
             typename PrimitivePatch<FaceList, PointField>::face_type
         >& mergedFaces,
-        labelList& pointMergeMap
+        labelList& pointMergeMap,
+        const bool useLocal = false
     );
 
     //- Gather (mesh!) points and faces onto master and merge collocated

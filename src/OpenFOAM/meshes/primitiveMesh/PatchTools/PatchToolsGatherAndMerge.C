@@ -37,7 +37,7 @@ template<class FaceList, class PointField>
 void Foam::PatchTools::gatherAndMerge
 (
     const scalar mergeDist,
-    const PrimitivePatch<FaceList, PointField>& p,
+    const PrimitivePatch<FaceList, PointField>& pp,
     Field
     <
         typename PrimitivePatch<FaceList, PointField>::point_type
@@ -46,73 +46,86 @@ void Foam::PatchTools::gatherAndMerge
     <
         typename PrimitivePatch<FaceList, PointField>::face_type
     >& mergedFaces,
-    labelList& pointMergeMap
+    labelList& pointMergeMap,
+    const bool useLocal
 )
 {
     typedef typename PrimitivePatch<FaceList,PointField>::face_type FaceType;
     typedef typename PrimitivePatch<FaceList,PointField>::point_type PointType;
 
-    // Collect points from all processors
-    labelList pointSizes;
+    // Faces from all ranks
+    const globalIndex faceAddr(pp.size(), globalIndex::gatherOnly{});
+
+    // Points from all ranks
+    const globalIndex pointAddr
+    (
+        (useLocal ? pp.localPoints().size() : pp.points().size()),
+        globalIndex::gatherOnly{}
+    );
+
+    if (useLocal)
     {
-        const globalIndex gi(p.points().size());
-
-        gi.gather(p.points(), mergedPoints);
-
-        pointSizes = gi.sizes();
+        faceAddr.gather(pp.localFaces(), mergedFaces);
+        pointAddr.gather(pp.localPoints(), mergedPoints);
+    }
+    else
+    {
+        faceAddr.gather(pp, mergedFaces);
+        pointAddr.gather(pp.points(), mergedPoints);
     }
 
-    // Collect faces from all processors and renumber using sizes of
-    // gathered points
+    // Relabel faces according to global point offsets
+    for (const label proci : faceAddr.subProcs())
     {
-        List<List<FaceType>> gatheredFaces(Pstream::nProcs());
-        gatheredFaces[Pstream::myProcNo()] = p;
-        Pstream::gatherList(gatheredFaces);
+        SubList<FaceType> slot(mergedFaces, faceAddr.range(proci));
 
-        if (Pstream::master())
+        for (auto& f : slot)
         {
-            mergedFaces = static_cast<const List<FaceType>&>
-            (
-                ListListOps::combineOffset<List<FaceType>>
-                (
-                    gatheredFaces,
-                    pointSizes,
-                    accessOp<List<FaceType>>(),
-                    offsetOp<FaceType>()
-                )
-            );
+            pointAddr.inplaceToGlobal(proci, f);
         }
     }
 
-    if (Pstream::master())
+    // Merging points
+    bool hasMerged = false;
+
+    if (Pstream::parRun() && Pstream::master())
     {
         Field<PointType> newPoints;
         labelList oldToNew;
 
-        bool hasMerged = mergePoints
+        hasMerged = Foam::mergePoints
         (
             mergedPoints,
             mergeDist,
-            false,                  // verbosity
+            false,  // verbosity
             oldToNew,
             newPoints
         );
 
         if (hasMerged)
         {
-            // Store point mapping
-            pointMergeMap.transfer(oldToNew);
-
-            // Copy points
-            mergedPoints.transfer(newPoints);
-
             // Relabel faces
             for (auto& f : mergedFaces)
             {
-                inplaceRenumber(pointMergeMap, f);
+                inplaceRenumber(oldToNew, f);
+            }
+
+            // Store newly merged points
+            mergedPoints.transfer(newPoints);
+
+            // Store point mapping
+            if (notNull(pointMergeMap))
+            {
+                pointMergeMap.transfer(oldToNew);
             }
         }
     }
+
+    // TDB:
+    // if (!hasMerged && notNull(pointMergeMap))
+    // {
+    //     pointMergeMap.clear();
+    // }
 }
 
 

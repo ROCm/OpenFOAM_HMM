@@ -576,7 +576,7 @@ public:
                 //  - the global number for all local points.
                 autoPtr<globalIndex> mergePoints
                 (
-                    const labelList& meshPoints,
+                    const labelUList& meshPoints,
                     const Map<label>& meshPointMap,  //!< currently unused
                     labelList& pointToGlobal,
                     labelList& uniqueMeshPoints

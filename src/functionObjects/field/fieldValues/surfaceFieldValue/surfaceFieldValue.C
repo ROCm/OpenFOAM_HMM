@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,7 +32,7 @@ License
 #include "coupledPolyPatch.H"
 #include "sampledSurface.H"
 #include "mergePoints.H"
-#include "uindirectPrimitivePatch.H"
+#include "indirectPrimitivePatch.H"
 #include "PatchTools.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -353,104 +353,43 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::combineMeshGeometry
     pointField& points
 ) const
 {
-    List<faceList> allFaces(Pstream::nProcs());
-    List<pointField> allPoints(Pstream::nProcs());
+    labelList whichFaces(faceId_);
 
+    // Remap patch-face ids to mesh face ids
+    forAll(whichFaces, i)
     {
-        IndirectList<face> selectedFaces(mesh_.faces(), labelList(faceId_));
-        labelList& meshFaceIds = selectedFaces.addressing();
-
-        forAll(meshFaceIds, i)
+        const label patchi = facePatchId_[i];
+        if (patchi != -1)
         {
-            const label patchi = facePatchId_[i];
-            if (patchi != -1)
-            {
-                meshFaceIds[i] += mesh_.boundaryMesh()[patchi].start();
-            }
-        }
-
-        // Add local faces and points to the all* lists
-        uindirectPrimitivePatch pp(selectedFaces, mesh_.points());
-
-        allFaces[Pstream::myProcNo()] = pp.localFaces();
-        allPoints[Pstream::myProcNo()] = pp.localPoints();
-    }
-
-    Pstream::gatherList(allFaces);
-    Pstream::gatherList(allPoints);
-
-    // Renumber and flatten
-    label nFaces = 0;
-    label nPoints = 0;
-    forAll(allFaces, proci)
-    {
-        nFaces += allFaces[proci].size();
-        nPoints += allPoints[proci].size();
-    }
-
-    faces.resize(nFaces);
-    points.resize(nPoints);
-
-    nFaces = 0;
-    nPoints = 0;
-
-    // My data first
-    {
-        for (const face& f : allFaces[Pstream::myProcNo()])
-        {
-            faces[nFaces++] = offsetOp<face>()(f, nPoints);
-        }
-
-        for (const point& p : allPoints[Pstream::myProcNo()])
-        {
-            points[nPoints++] = p;
+            whichFaces[i] += mesh_.boundaryMesh()[patchi].start();
         }
     }
 
-    // Other proc data follows
-    forAll(allFaces, proci)
-    {
-        if (proci == Pstream::myProcNo())
-        {
-            continue;
-        }
-
-        for (const face& f : allFaces[proci])
-        {
-            faces[nFaces++] = offsetOp<face>()(f, nPoints);
-        }
-
-        for (const point& p : allPoints[proci])
-        {
-            points[nPoints++] = p;
-        }
-    }
-
-    // Merge
-    labelList oldToNew;
-    pointField newPoints;
-    bool hasMerged = mergePoints
+    indirectPrimitivePatch pp
     (
-        points,
-        SMALL,
-        false,
-        oldToNew,
-        newPoints
+        IndirectList<face>(mesh_.faces(), std::move(whichFaces)),
+        mesh_.points()
     );
 
-    if (hasMerged)
-    {
-        if (debug)
-        {
-            Pout<< "Merged from " << points.size()
-                << " down to " << newPoints.size() << " points" << endl;
-        }
 
-        points.transfer(newPoints);
-        for (face& f : faces)
-        {
-            inplaceRenumber(oldToNew, f);
-        }
+    if (Pstream::parRun())
+    {
+        labelList pointsMap;
+
+        PatchTools::gatherAndMerge
+        (
+            SMALL,  // mergeDist
+            pp,
+            points,
+            faces,
+            pointsMap,
+            true   // useLocal=true
+        );
+    }
+    else
+    {
+        faces = pp.localFaces();
+        points = pp.localPoints();
     }
 }
 

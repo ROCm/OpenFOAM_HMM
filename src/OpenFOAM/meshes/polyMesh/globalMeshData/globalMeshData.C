@@ -138,7 +138,7 @@ void Foam::globalMeshData::calcSharedPoints() const
 
     // Calculate all shared points (exclude points that are only
     // on two coupled patches). This does all the hard work.
-    globalPoints parallelPoints(mesh_, false, true);
+    const globalPoints parallelPoints(mesh_, false, true);
 
     // Count the number of master points
     label nMaster = 0;
@@ -155,7 +155,7 @@ void Foam::globalMeshData::calcSharedPoints() const
     }
 
     // Allocate global numbers
-    globalIndex masterNumbering(nMaster);
+    const globalIndex masterNumbering(nMaster);
 
     nGlobalPoints_ = masterNumbering.totalSize();
 
@@ -2472,7 +2472,7 @@ Foam::autoPtr<Foam::globalIndex> Foam::globalMeshData::mergePoints
 
 Foam::autoPtr<Foam::globalIndex> Foam::globalMeshData::mergePoints
 (
-    const labelList& meshPoints,
+    const labelUList& meshPoints,
     const Map<label>& /* unused: meshPointMap */,
     labelList& pointToGlobal,
     labelList& uniqueMeshPoints
@@ -2498,7 +2498,7 @@ Foam::autoPtr<Foam::globalIndex> Foam::globalMeshData::mergePoints
     // - from coupled point to global patch point
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    globalIndex globalPPoints(meshPoints.size());
+    const globalIndex globalPPoints(meshPoints.size());
 
     labelList patchToCoupled(meshPoints.size(), -1);
     label nCoupled = 0;

@@ -468,9 +468,15 @@ public:
             bool hasPointNormals() const { return bool(pointNormalsPtr_); }
 
             bool hasBoundaryPoints() const { return bool(boundaryPointsPtr_); }
+
+            // These ones are currently all calculated together:
+            // - edges(), faceFaces(), edgeFaces(), faceEdges()
+
+            bool hasEdges() const { return bool(edgesPtr_); }
             bool hasFaceFaces() const { return bool(faceFacesPtr_); }
             bool hasEdgeFaces() const { return bool(edgeFacesPtr_); }
             bool hasFaceEdges() const { return bool(faceEdgesPtr_); }
+
             bool hasPointEdges() const { return bool(pointEdgesPtr_); }
             bool hasPointFaces() const { return bool(pointFacesPtr_); }
 
