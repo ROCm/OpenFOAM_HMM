@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2012 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,11 +35,11 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef coordSet_H
-#define coordSet_H
+#ifndef Foam_coordSet_H
+#define Foam_coordSet_H
 
 #include "pointField.H"
-#include "word.H"
+#include "scalarList.H"
 #include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -57,49 +57,55 @@ class coordSet
 {
 public:
 
-    // Public data types
+    // Public Data Types
 
         //- Enumeration defining the output format for coordinates
         enum class coordFormat
         {
-            XYZ,
-            X,
-            Y,
-            Z,
-            DISTANCE
+            X,          //!< Use 'x' component of points for (scalar) axis
+            Y,          //!< Use 'y' component of points for (scalar) axis
+            Z,          //!< Use 'z' component of points for (scalar) axis
+            RADIUS,     //!< Use mag of points for (scalar) axis
+            DISTANCE,   //!< Use additional distance field for (scalar) axis
+            XYZ,        //!< Use x,y,z point values
+            /// DEFAULT
         };
 
         //- String representation of coordFormat enum
         static const Enum<coordFormat> coordFormatNames;
 
-private:
-
-        //- Check for consistent dimensions of points and curve distance
-        void checkDimensions() const;
-
 
 protected:
 
+    // Protected Data
+
         //- Name
-        const word name_;
+        word name_;
 
-        //- Axis write type
-        const coordFormat axis_;
+        //- Cumulative distance for "distance" write specifier.
+        scalarList distance_;
 
-        //- Cumulative distance "distance" write specifier.
-        scalarList curveDist_;
+        //- Axis type
+        coordFormat axis_;
+
+
+    // Protected Member Functions
+
+        //- Check for consistent dimensions of points and curve distance
+        void checkDimensions() const;
 
 
 public:
 
     // Constructors
 
-        //- Construct from components
-        //  Note: curveDist will be empty
+        /// //- Default construct
+        /// coordSet();
+
+        //- Default construct with name and axis type
         coordSet(const word& name, const coordFormat axisType);
 
-        //- Construct from components
-        //  Note: curveDist will be empty
+        //- Default construct with name and axis type
         coordSet(const word& name, const word& axis);
 
         //- Copy construct from components
@@ -108,7 +114,7 @@ public:
             const word& name,
             const word& axis,
             const List<point>& points,
-            const scalarList& curveDist
+            const scalarList& dist
         );
 
         //- Move construct from components
@@ -117,66 +123,116 @@ public:
             const word& name,
             const word& axis,
             List<point>&& points,
-            scalarList&& curveDist
+            scalarList&& dist
         );
 
 
-    // Member functions
+    // Member Functions
 
-        const word& name() const
+    // Access
+
+        //- The coord-set name
+        const word& name() const noexcept
         {
             return name_;
         }
 
-        word axis() const
+        //- The sort axis name
+        const word& axis() const
         {
             return coordFormatNames[axis_];
         }
 
-        //- Set the points
+        //- Return the points
+        const pointField& points() const noexcept
+        {
+            return static_cast<const pointField&>(*this);
+        }
+
+        //- Return the cumulative distance
+        const scalarList& distance() const noexcept
+        {
+            return distance_;
+        }
+
+        //- Return the number of points
+        label nPoints() const noexcept
+        {
+            return pointField::size();
+        }
+
+
+    // Edit
+
+        //- Rename the coordinate set
+        void rename(const word& newName)
+        {
+            name_ = newName;
+        }
+
+        //- Copy assign new points
         void setPoints(const List<point>& newPoints)
         {
             static_cast<pointField&>(*this) = newPoints;
         }
 
-        //- Set the points
+        //- Move assign new points
         void setPoints(List<point>&& newPoints)
         {
             static_cast<pointField&>(*this) = std::move(newPoints);
         }
 
-        //- Return the cumulative distance
-        const scalarList& curveDist() const
+        //- Copy assign the cumulative distance
+        void setDistance(const scalarList& dist, const bool check=true)
         {
-            return curveDist_;
+            distance_ = dist;
+            if (check) checkDimensions();
         }
 
-        //- Set the cumulative distance
-        void setCurveDist(const scalarList& curveDist)
+        //- Move assign the cumulative distance
+        void setDistance(scalarList&& dist, const bool check=true)
         {
-            curveDist_ = curveDist;
-            checkDimensions();
+            distance_ = std::move(dist);
+            if (check) checkDimensions();
         }
 
-        //- Set the cumulative distance
-        void setCurveDist(scalarList&& curveDist)
-        {
-            curveDist_ = std::move(curveDist);
-            checkDimensions();
-        }
 
-        //- Is axis specification a vector
-        bool hasVectorAxis() const;
+    // Output-related
+
+        //- True if axis specification is a vector
+        bool hasVectorAxis() const noexcept;
 
         //- Get coordinate of point according to axis specification.
-        //  If axis="distance" is the curveDist[index]
+        //  If axis="distance" is the distance[index]
         scalar scalarCoord(const label index) const;
 
         //- Get point according to axis="xyz" specification
-        vector vectorCoord(const label index) const;
+        const vector& vectorCoord(const label index) const;
 
         //- Write to stream
         Ostream& write(Ostream& os) const;
+
+
+    // Other
+
+        //- Gather and sort.
+        //  \return (on master) gathered set and overall sort order
+        autoPtr<coordSet> gatherSort(labelList& sortOrder) const;
+
+
+    // Housekeeping
+
+        //- Return the cumulative distance
+        const scalarList& curveDist() const noexcept
+        {
+            return distance_;
+        }
+
+        //- Copy assign the cumulative distance
+        void setCurveDist(const scalarList& dist)
+        {
+            setDistance(dist);
+        }
 };
 
 

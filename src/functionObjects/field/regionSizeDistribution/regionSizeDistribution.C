@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "regionSizeDistribution.H"
+#include "regionSplit.H"
+#include "volFields.H"
 #include "fvcVolumeIntegrate.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -47,30 +49,46 @@ namespace Foam
 }
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
-void Foam::functionObjects::regionSizeDistribution::writeGraph
-(
-    const coordSet& coords,
-    const word& valueName,
-    const scalarField& values
-) const
+namespace Foam
 {
-    const wordList valNames(1, valueName);
 
-    fileName outputPath = baseTimeDir();
-    mkDir(outputPath);
+template<class Type>
+static Map<Type> regionSum(const regionSplit& regions, const Field<Type>& fld)
+{
+    // Per region the sum of fld
+    Map<Type> regionToSum(regions.nRegions()/Pstream::nProcs());
 
-    OFstream str(outputPath/formatterPtr_().getFileName(coords, valNames));
+    forAll(fld, celli)
+    {
+        const label regioni = regions[celli];
+        regionToSum(regioni, Type(Zero)) += fld[celli];
+    }
 
-    Log << "    Writing distribution of " << valueName << " to " << str.name()
-        << endl;
+    Pstream::mapCombineGather(regionToSum, plusEqOp<Type>());
+    Pstream::mapCombineScatter(regionToSum);
 
-    List<const scalarField*> valPtrs(1);
-    valPtrs[0] = &values;
-    formatterPtr_().write(coords, valNames, valPtrs, str);
+    return regionToSum;
 }
 
+
+template<class Type>
+static List<Type> extractData(const labelUList& keys, const Map<Type>& regionData)
+{
+    List<Type> sortedData(keys.size());
+
+    forAll(keys, i)
+    {
+        sortedData[i] = regionData[keys[i]];
+    }
+    return sortedData;
+}
+
+} // End namespace Foam
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::functionObjects::regionSizeDistribution::writeAlphaFields
 (
@@ -222,7 +240,7 @@ Foam::functionObjects::regionSizeDistribution::divide
         }
         else
         {
-            result[i] = 0.0;
+            result[i] = 0;
         }
     }
     return tresult;
@@ -232,8 +250,9 @@ Foam::functionObjects::regionSizeDistribution::divide
 void Foam::functionObjects::regionSizeDistribution::writeGraphs
 (
     const word& fieldName,              // name of field
-    const labelList& indices,           // index of bin for each region
     const scalarField& sortedField,     // per region field data
+
+    const labelList& indices,           // index of bin for each region
     const scalarField& binCount,        // per bin number of regions
     const coordSet& coords              // graph data for bins
 ) const
@@ -260,12 +279,44 @@ void Foam::functionObjects::regionSizeDistribution::writeGraphs
             sqrt(divide(binSqrSum, binCount) - Foam::sqr(binAvg))
         );
 
-        // Write average
-        writeGraph(coords, fieldName + "_sum", binSum);
-        // Write average
-        writeGraph(coords, fieldName + "_avg", binAvg);
-        // Write deviation
-        writeGraph(coords, fieldName + "_dev", binDev);
+
+        auto& writer = formatterPtr_();
+
+        word outputName;
+        if (writer.buffering())
+        {
+            outputName =
+            (
+                coords.name()
+              + coordSetWriter::suffix
+                (
+                    wordList
+                    ({
+                        fieldName + "_sum",
+                        fieldName + "_avg",
+                        fieldName + "_dev"
+                    })
+                )
+            );
+        }
+        else
+        {
+            outputName = coords.name();
+        }
+
+        writer.open
+        (
+            coords,
+            (baseTimeDir() / outputName)
+        );
+
+        Log << "    Writing distribution of "
+            << fieldName << " to " << writer.path() << endl;
+
+        writer.write(fieldName + "_sum", binSum);
+        writer.write(fieldName + "_avg", binAvg);
+        writer.write(fieldName + "_dev", binDev);
+        writer.close(true);
     }
 }
 
@@ -290,18 +341,15 @@ void Foam::functionObjects::regionSizeDistribution::writeGraphs
     scalarField sortedField
     (
         sortedNormalisation
-      * extractData
-        (
-            sortedRegions,
-            regionField
-        )
+      * extractData(sortedRegions, regionField)
     );
 
     writeGraphs
     (
         fieldName,      // name of field
-        indices,        // index of bin for each region
         sortedField,    // per region field data
+
+        indices,        // index of bin for each region
         binCount,       // per bin number of regions
         coords          // graph data for bins
     );
@@ -343,8 +391,12 @@ bool Foam::functionObjects::regionSizeDistribution::read(const dictionary& dict)
     dict.readEntry("patches", patchNames_);
     dict.readEntry("fields", fields_);
 
-    const word format(dict.get<word>("setFormat"));
-    formatterPtr_ = writer<scalar>::New(format);
+    const word setFormat(dict.get<word>("setFormat"));
+    formatterPtr_ = coordSetWriter::New
+    (
+        setFormat,
+        dict.subOrEmptyDict("formatOptions").optionalSubDict(setFormat)
+    );
 
     if (dict.found(coordinateSystem::typeName_()))
     {
@@ -385,15 +437,16 @@ bool Foam::functionObjects::regionSizeDistribution::write()
 {
     Log << type() << " " << name() << " write:" << nl;
 
-    autoPtr<volScalarField> alphaPtr;
-    if (obr_.foundObject<volScalarField>(alphaName_))
+    tmp<volScalarField> talpha;
+    talpha.cref(obr_.cfindObject<volScalarField>(alphaName_));
+    if (talpha)
     {
         Log << "    Looking up field " << alphaName_ << endl;
     }
     else
     {
         Info<< "    Reading field " << alphaName_ << endl;
-        alphaPtr.reset
+        talpha.reset
         (
             new volScalarField
             (
@@ -409,14 +462,7 @@ bool Foam::functionObjects::regionSizeDistribution::write()
             )
         );
     }
-
-
-    const volScalarField& alpha =
-    (
-         alphaPtr
-       ? *alphaPtr
-       : obr_.lookupObject<volScalarField>(alphaName_)
-    );
+    const auto& alpha = talpha();
 
     Log << "    Volume of alpha          = "
         << fvc::domainIntegrate(alpha).value()
@@ -460,10 +506,9 @@ bool Foam::functionObjects::regionSizeDistribution::write()
             if (fvp.coupled())
             {
                 tmp<scalarField> townFld(fvp.patchInternalField());
-                const scalarField& ownFld = townFld();
-
                 tmp<scalarField> tnbrFld(fvp.patchNeighbourField());
-                const scalarField& nbrFld = tnbrFld();
+                const auto& ownFld = townFld();
+                const auto& nbrFld = tnbrFld();
 
                 label start = fvp.patch().patch().start();
 
@@ -663,13 +708,15 @@ bool Foam::functionObjects::regionSizeDistribution::write()
     if (allRegionVolume.size())
     {
         // Construct mids of bins for plotting
-        pointField xBin(nBins_);
+        pointField xBin(nBins_, Zero);
 
-        scalar x = 0.5*delta;
-        forAll(xBin, i)
         {
-            xBin[i] = point(x, 0, 0);
-            x += delta;
+            scalar x = 0.5*delta;
+            for (point& p : xBin)
+            {
+                p.x() = x;
+                x += delta;
+            }
         }
 
         const coordSet coords("diameter", "x", xBin, mag(xBin));
@@ -682,11 +729,7 @@ bool Foam::functionObjects::regionSizeDistribution::write()
 
         scalarField sortedVols
         (
-            extractData
-            (
-                sortedRegions,
-                allRegionAlphaVolume
-            )
+            extractData(sortedRegions, allRegionAlphaVolume)
         );
 
         vectorField centroids(sortedVols.size(), Zero);
@@ -712,11 +755,7 @@ bool Foam::functionObjects::regionSizeDistribution::write()
             // 2. centroid
             vectorField sortedMoment
             (
-                extractData
-                (
-                    sortedRegions,
-                    allRegionAlphaDistance
-                )
+                extractData(sortedRegions, allRegionAlphaDistance)
             );
 
             centroids = sortedMoment/sortedVols + origin_;
@@ -756,17 +795,30 @@ bool Foam::functionObjects::regionSizeDistribution::write()
             if (Pstream::master())
             {
                 // Construct mids of bins for plotting
-                pointField xBin(nDownstreamBins_);
+                pointField xBin(nDownstreamBins_, Zero);
 
-                scalar x = 0.5*deltaX;
-                forAll(xBin, i)
                 {
-                    xBin[i] = point(x, 0, 0);
-                    x += deltaX;
+                    scalar x = 0.5*deltaX;
+                    for (point& p : xBin)
+                    {
+                        p.x() = x;
+                        x += deltaX;
+                    }
                 }
 
                 const coordSet coords("distance", "x", xBin, mag(xBin));
-                writeGraph(coords, "isoPlanes", binDownCount);
+
+                auto& writer = formatterPtr_();
+                writer.nFields(1);
+
+                writer.open
+                (
+                    coords,
+                    writeFile::baseTimeDir() / (coords.name() + "_isoPlanes")
+                );
+
+                writer.write("isoPlanes", binDownCount);
+                writer.close(true);
             }
 
             // Write to log
@@ -819,7 +871,17 @@ bool Foam::functionObjects::regionSizeDistribution::write()
         // Write counts
         if (Pstream::master())
         {
-            writeGraph(coords, "count", binCount);
+            auto& writer = formatterPtr_();
+            writer.nFields(1);
+
+            writer.open
+            (
+                coords,
+                writeFile::baseTimeDir() / (coords.name() + "_count")
+            );
+
+            writer.write("count", binCount);
+            writer.close(true);
         }
 
         // Write to log
@@ -849,28 +911,28 @@ bool Foam::functionObjects::regionSizeDistribution::write()
         writeGraphs
         (
             "volume",           // name of field
-            indices,            // per region the bin index
             sortedVols,         // per region field data
+
+            indices,            // per region the bin index
             binCount,           // per bin number of regions
             coords              // graph data for bins
         );
 
-        // Collect some more field
+        // Collect some more fields
         {
-            wordList scalarNames(obr_.names(volScalarField::typeName));
-
-            const labelList selected(fields_.matching(scalarNames));
-
-            for (const label fieldi : selected)
+            for
+            (
+                const word& fldName
+              : obr_.sortedNames<volScalarField>(fields_)
+            )
             {
-                const word& fldName = scalarNames[fieldi];
-
                 Log << "    Scalar field " << fldName << endl;
 
-                const scalarField& fld = obr_.lookupObject
-                <
-                    volScalarField
-                >(fldName).primitiveField();
+                tmp<Field<scalar>> tfld
+                (
+                    obr_.lookupObject<volScalarField>(fldName).primitiveField()
+                );
+                const auto& fld = tfld();
 
                 writeGraphs
                 (
@@ -887,21 +949,20 @@ bool Foam::functionObjects::regionSizeDistribution::write()
                 );
             }
         }
+
         {
-            wordList vectorNames(obr_.names(volVectorField::typeName));
-
-            const labelList selected(fields_.matching(vectorNames));
-
-            for (const label fieldi : selected)
+            for
+            (
+                const word& fldName
+              : obr_.sortedNames<volVectorField>(fields_)
+            )
             {
-                const word& fldName = vectorNames[fieldi];
-
                 Log << "    Vector field " << fldName << endl;
 
-                vectorField fld = obr_.lookupObject
-                <
-                    volVectorField
-                >(fldName).primitiveField();
+                tmp<Field<vector>> tfld
+                (
+                    obr_.lookupObject<volVectorField>(fldName).primitiveField()
+                );
 
                 if (csysPtr_)
                 {
@@ -910,18 +971,18 @@ bool Foam::functionObjects::regionSizeDistribution::write()
                         << csysPtr_->name()
                         << endl;
 
-                    fld = csysPtr_->localVector(fld);
+                    tfld = csysPtr_->localVector(tfld());
                 }
-
+                const auto& fld = tfld();
 
                 // Components
 
-                for (direction cmp = 0; cmp < vector::nComponents; cmp++)
+                for (direction cmpt = 0; cmpt < vector::nComponents; ++cmpt)
                 {
                     writeGraphs
                     (
-                        fldName + vector::componentNames[cmp],
-                        alphaVol*fld.component(cmp),// per cell field data
+                        fldName + vector::componentNames[cmpt],
+                        alphaVol*fld.component(cmpt),// per cell field data
 
                         regions,        // per cell the region(=droplet)
                         sortedRegions,  // valid regions in sorted order

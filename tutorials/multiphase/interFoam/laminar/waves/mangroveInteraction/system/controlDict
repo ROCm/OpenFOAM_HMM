@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2112                                 |
+|  \\    /   O peration     | Version:  v2206                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -75,7 +75,7 @@ functions
         );
 
         sets
-        (
+        {
             s1
             {
                 type    uniform;
@@ -156,7 +156,7 @@ functions
                 end     ( 4.77 0.275 0.5 );
                 nPoints 101;
             }
-        );
+        }
     }
 }
 

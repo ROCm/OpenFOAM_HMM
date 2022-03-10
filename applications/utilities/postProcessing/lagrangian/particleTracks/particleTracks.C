@@ -42,199 +42,34 @@ Description
 #include "fvMesh.H"
 #include "Time.H"
 #include "timeSelector.H"
-#include "OFstream.H"
+#include "coordSetWriter.H"
 #include "passiveParticleCloud.H"
-#include "writer.H"
-#include "ListOps.H"
+#include "particleTracksSampler.H"
 
-#define createTrack(field, trackValues)                                        \
-createTrackField                                                               \
-(                                                                              \
-    field,                                                                     \
-    sampleFrequency,                                                           \
-    maxPositions,                                                              \
-    startIds,                                                                  \
-    allOrigProcs,                                                              \
-    allOrigIds,                                                                \
-    trackValues                                                                \
-);
-
-#define setFields(fields, fieldNames)                                          \
-setTrackFields                                                                 \
-(                                                                              \
-    obr,                                                                       \
-    fields,                                                                    \
-    fieldNames,                                                                \
-    nTracks,                                                                   \
-    startIds,                                                                  \
-    allOrigProcs,                                                              \
-    allOrigIds,                                                                \
-    maxPositions,                                                              \
-    sampleFrequency                                                            \
-);
-
-#define writeFields(fields, fieldNames, tracks, times, dirs)                   \
-writeTrackFields                                                               \
-(                                                                              \
-    fields,                                                                    \
-    fieldNames,                                                                \
-    tracks,                                                                    \
-    times,                                                                     \
-    dirs,                                                                      \
-    setFormat,                                                                 \
-    formatOptions,                                                             \
-    cloudName                                                                  \
-);
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 using namespace Foam;
 
 template<class Type>
-void createTrackField
-(
-    const Field<Type>& values,
-    const label sampleFrequency,
-    const label maxPositions,
-    const labelList& startIds,
-    const List<labelField>& allOrigProcs,
-    const List<labelField>& allOrigIds,
-    List<DynamicList<Type>>& trackValues
-)
-{
-    List<Field<Type>> procField(Pstream::nProcs());
-    procField[Pstream::myProcNo()] = values;
-    Pstream::gatherList(procField);
-
-    if (!Pstream::master())
-    {
-        return;
-    }
-
-    const label nTracks = trackValues.size();
-
-    forAll(procField, proci)
-    {
-        forAll(procField[proci], i)
-        {
-            const label globalId =
-                startIds[allOrigProcs[proci][i]] + allOrigIds[proci][i];
-
-            if (globalId % sampleFrequency == 0)
-            {
-                const label trackId = globalId/sampleFrequency;
-
-                if
-                (
-                    trackId < nTracks
-                 && trackValues[trackId].size() < maxPositions
-                )
-                {
-                    trackValues[trackId].append(procField[proci][i]);
-                }
-            }
-        }
-    }
-}
-
-
-template<class Type>
 void writeTrackFields
 (
-    List<List<DynamicList<Type>>>& fieldValues,
-    const wordList& fieldNames,
-    const PtrList<coordSet>& tracks,
-    const List<scalarField>& times,
-    const List<vectorField>& dirs,
-    const word& setFormat,
-    const dictionary& formatOptions,
-    const word& cloudName
+    coordSetWriter& writer,
+    HashTable<List<DynamicList<Type>>>& fieldTable
 )
 {
-    if (fieldValues.empty())
+    for (const word& fieldName : fieldTable.sortedToc())
     {
-        return;
-    }
+        // Steal and reshape from List<DynamicList> to List<Field>
+        auto& input = fieldTable[fieldName];
 
-    auto writerPtr = writer<Type>::New(setFormat, formatOptions);
-
-    const fileName outFile(writerPtr().getFileName(tracks[0], wordList(0)));
-
-    const fileName outPath
-    (
-        functionObject::outputPrefix/cloud::prefix/cloudName/"particleTracks"
-    );
-    mkDir(outPath);
-
-    OFstream os(outPath/(pTraits<Type>::typeName & "tracks." + outFile.ext()));
-
-    Info<< "Writing " << pTraits<Type>::typeName << " particle tracks in "
-        << setFormat << " format to " << os.name() << endl;
-
-
-    List<List<Field<Type>>> fields(fieldValues.size());
-    forAll(fields, fieldi)
-    {
-        fields[fieldi].setSize(fieldValues[fieldi].size());
-        forAll(fields[fieldi], tracki)
+        List<Field<Type>> fields(input.size());
+        forAll(input, tracki)
         {
-            fields[fieldi][tracki].transfer(fieldValues[fieldi][tracki]);
+            fields[tracki].transfer(input[tracki]);
         }
+
+        writer.write(fieldName, fields);
     }
-
-    writerPtr().write(true, times, tracks, fieldNames, fields, os);
-}
-
-
-template<class Type>
-Foam::label setTrackFields
-(
-    const objectRegistry& obr,
-    List<List<DynamicList<Type>>>& fields,
-    List<word>& fieldNames,
-    const label nTracks,
-    const labelList& startIds,
-    const List<labelField>& allOrigProcs,
-    const List<labelField>& allOrigIds,
-    const label maxPositions,
-    const label sampleFrequency
-)
-{
-    const auto availableFieldPtrs = obr.lookupClass<IOField<Type>>();
-
-    fieldNames = availableFieldPtrs.toc();
-
-    if (Pstream::parRun())
-    {
-        Pstream::combineGather(fieldNames, ListOps::uniqueEqOp<word>());
-        Pstream::combineScatter(fieldNames);
-        Foam::sort(fieldNames);
-    }
-
-    const label nFields = fieldNames.size();
-
-    if (fields.empty())
-    {
-        fields.setSize(nFields);
-        fieldNames.setSize(nFields);
-        forAll(fields, i)
-        {
-            fields[i].setSize(nTracks);
-        }
-    }
-
-    forAll(fieldNames, fieldi)
-    {
-        const word& fieldName = fieldNames[fieldi];
-
-        const auto* fldPtr = obr.cfindObject<IOField<Type>>(fieldName);
-
-        createTrack
-        (
-            fldPtr ? static_cast<const Field<Type>>(*fldPtr) : Field<Type>(),
-            fields[fieldi]
-        );
-    }
-
-    return nFields;
 }
 
 
@@ -268,6 +103,14 @@ int main(int argc, char *argv[])
     );
     argList::addOption
     (
+        "fields",
+        "wordRes",
+        "Specify single or multiple fields to write "
+        "(default: all or 'fields' from dictionary)\n"
+        "Eg, 'T' or '( \"U.*\" )'"
+    );
+    argList::addOption
+    (
         "format",
         "name",
         "The writer format "
@@ -285,137 +128,147 @@ int main(int argc, char *argv[])
 
     #include "createControls.H"
 
+    args.readListIfPresent<wordRe>("fields", acceptFields);
     args.readIfPresent("format", setFormat);
 
     args.readIfPresent("stride", sampleFrequency);
     sampleFrequency = max(1, sampleFrequency);  // sanity
 
+    // Setup the writer
+    auto writerPtr =
+        coordSetWriter::New
+        (
+            setFormat,
+            formatOptions.optionalSubDict(setFormat, keyType::LITERAL)
+        );
+
+    writerPtr().useTracks(true);
+
+    if (args.verbose())
+    {
+        writerPtr().verbose(true);
+    }
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    const fileName vtkPath(runTime.rootPath()/runTime.globalCaseName()/"VTK");
-    mkDir(vtkPath);
+    particleTracksSampler trackSampler;
 
     Info<< "Scanning times to determine track data for cloud " << cloudName
         << nl << endl;
 
-    labelList maxIds(Pstream::nProcs(), -1);
-    forAll(timeDirs, timei)
     {
-        runTime.setTime(timeDirs[timei], timei);
-        Info<< "Time = " << runTime.timeName() << endl;
-
-        Info<< "    Reading particle positions" << endl;
-        passiveParticleCloud myCloud(mesh, cloudName);
-
-        Info<< "    Read " << returnReduce(myCloud.size(), sumOp<label>())
-            << " particles" << endl;
-
-        for (const passiveParticle& p : myCloud)
+        labelList maxIds(Pstream::nProcs(), -1);
+        forAll(timeDirs, timei)
         {
-            const label origId = p.origId();
-            const label origProc = p.origProc();
+            runTime.setTime(timeDirs[timei], timei);
+            Info<< "Time = " << runTime.timeName() << endl;
 
-            // Handle case where we are processing particle data generated in
-            // parallel using more cores than when running this application.
-            if (origProc >= maxIds.size())
+            passiveParticleCloud myCloud(mesh, cloudName);
+
+            Info<< "    Read " << returnReduce(myCloud.size(), sumOp<label>())
+                << " particles" << endl;
+
+            for (const passiveParticle& p : myCloud)
             {
-                maxIds.setSize(origProc+1, -1);
-            }
+                const label origId = p.origId();
+                const label origProc = p.origProc();
 
-            maxIds[origProc] = max(maxIds[origProc], origId);
+                // Handle case where processing particle data generated in
+                // parallel using more cores than for this application.
+                if (origProc >= maxIds.size())
+                {
+                    maxIds.resize(origProc+1, -1);
+                }
+
+                maxIds[origProc] = max(maxIds[origProc], origId);
+            }
+        }
+
+        const label maxNProcs = returnReduce(maxIds.size(), maxOp<label>());
+        maxIds.resize(maxNProcs, -1);
+
+        Pstream::listCombineGather(maxIds, maxEqOp<label>());
+        Pstream::listCombineScatter(maxIds);
+
+        // From ids to count
+        const labelList numIds = maxIds + 1;
+
+        // Set parcel addressing
+        trackSampler.reset(numIds);
+
+        Info<< nl
+            << "Detected particles originating from "
+            << maxNProcs << " processors." << nl
+            << "Particle statistics:" << endl;
+
+        if (Pstream::master())
+        {
+            const globalIndex& parcelAddr = trackSampler.parcelAddr();
+
+            for (const label proci : parcelAddr.allProcs())
+            {
+                Info<< "    Found " << parcelAddr.localSize(proci)
+                    << " particles originating"
+                    << " from processor " << proci << nl;
+            }
         }
     }
 
-    label maxNProcs = returnReduce(maxIds.size(), maxOp<label>());
-
-    Info<< "Detected particles originating from " << maxNProcs
-        << " processors." << nl << endl;
-
-    maxIds.setSize(maxNProcs, -1);
-
-    Pstream::listCombineGather(maxIds, maxEqOp<label>());
-    Pstream::listCombineScatter(maxIds);
-
-    labelList numIds = maxIds + 1;
-
-    Info<< nl << "Particle statistics:" << endl;
-    forAll(maxIds, proci)
-    {
-        Info<< "    Found " << numIds[proci] << " particles originating"
-            << " from processor " << proci << endl;
-    }
-    Info<< nl << endl;
-
-
-    // Calculate starting ids for particles on each processor
-    labelList startIds(numIds.size(), Zero);
-    for (label i = 0; i < numIds.size()-1; ++i)
-    {
-        startIds[i+1] += startIds[i] + numIds[i];
-    }
-    label nParticle = startIds.last() + numIds[startIds.size()-1];
+    trackSampler.setSampleRate(sampleFrequency, maxPositions, maxTracks);
 
 
     // Number of tracks to generate
-    const label nTracks =
-        maxTracks > 0
-      ? min(nParticle/sampleFrequency, maxTracks)
-      : nParticle/sampleFrequency;
+    const label nTracks = trackSampler.nTracks();
+
 
     // Storage for all particle tracks
-    List<DynamicList<vector>> allTracks(nTracks);
+    List<DynamicList<point>> allTrackPos(nTracks);
     List<DynamicList<scalar>> allTrackTimes(nTracks);
 
-    // Lists of field, tracki, trackValues
-    //List<List<DynamicList<label>>> labelFields;
-    List<List<DynamicList<scalar>>> scalarFields;
-    List<List<DynamicList<vector>>> vectorFields;
-    List<List<DynamicList<sphericalTensor>>> sphTensorFields;
-    List<List<DynamicList<symmTensor>>> symTensorFields;
-    List<List<DynamicList<tensor>>> tensorFields;
-    //List<word> labelFieldNames;
-    List<word> scalarFieldNames;
-    List<word> vectorFieldNames;
-    List<word> sphTensorFieldNames;
-    List<word> symTensorFieldNames;
-    List<word> tensorFieldNames;
+    // Track field values by name/type
+    HashTable<List<DynamicList<label>>> labelFields;  // <- mostly unused
+    HashTable<List<DynamicList<scalar>>> scalarFields;
+    HashTable<List<DynamicList<vector>>> vectorFields;
+    HashTable<List<DynamicList<sphericalTensor>>> sphericalTensorFields;
+    HashTable<List<DynamicList<symmTensor>>> symmTensorFields;
+    HashTable<List<DynamicList<tensor>>> tensorFields;
 
-    Info<< "\nGenerating " << nTracks << " particle tracks for cloud "
-        << cloudName << nl << endl;
+    Info<< nl
+        << "Generating " << nTracks
+        << " particle tracks for cloud " << cloudName << nl << endl;
 
     forAll(timeDirs, timei)
     {
         runTime.setTime(timeDirs[timei], timei);
-        Info<< "Time = " << runTime.timeName() << endl;
+        Info<< "Time = " << runTime.timeName() << " (processing)" << endl;
 
         // Read particles. Will be size 0 if no particles.
-        Info<< "    Reading particle positions" << endl;
         passiveParticleCloud myCloud(mesh, cloudName);
 
-        pointField localPositions(myCloud.size(), Zero);
-        scalarField localTimes(myCloud.size(), Zero);
+        pointField localPositions(myCloud.size());
+        scalarField localTimes(myCloud.size(), runTime.value());
 
-        List<labelField> allOrigIds(Pstream::nProcs());
-        List<labelField> allOrigProcs(Pstream::nProcs());
-
-        // Collect the track data on all processors that have positions
-        allOrigIds[Pstream::myProcNo()].setSize(myCloud.size(), Zero);
-        allOrigProcs[Pstream::myProcNo()].setSize(myCloud.size(), Zero);
-
-        label i = 0;
-        for (const passiveParticle& p : myCloud)
+        // Gather track data from all processors that have positions
+        trackSampler.resetCloud(myCloud.size());
         {
-            allOrigIds[Pstream::myProcNo()][i] = p.origId();
-            allOrigProcs[Pstream::myProcNo()][i] = p.origProc();
-            localPositions[i] = p.position();
-            localTimes[i] = runTime.value();
-            ++i;
+            labelField& origIds = trackSampler.origParcelIds_;
+            labelField& origProcs = trackSampler.origProcIds_;
+
+            label np = 0;
+            for (const passiveParticle& p : myCloud)
+            {
+                origIds[np] = p.origId();
+                origProcs[np] = p.origProc();
+                localPositions[np] = p.position();
+                ++np;
+            }
+
+            trackSampler.gatherInplace(origIds);
+            trackSampler.gatherInplace(origProcs);
         }
 
-        // Collect the track data on the master processor
-        Pstream::gatherList(allOrigIds);
-        Pstream::gatherList(allOrigProcs);
 
+        // Read cloud fields (from disk) into object registry
         objectRegistry obr
         (
             IOobject
@@ -426,63 +279,122 @@ int main(int argc, char *argv[])
             )
         );
 
-        myCloud.readFromFiles(obr, fieldNames);
+        myCloud.readFromFiles(obr, acceptFields, excludeFields);
 
         // Create track positions and track time fields
         // (not registered as IOFields)
-        // Note: createTrack is a local #define to reduce arg count...
-        createTrack(localPositions, allTracks);
-        createTrack(localTimes, allTrackTimes);
+
+        trackSampler.createTrackField(localPositions, allTrackPos);
+        trackSampler.createTrackField(localTimes, allTrackTimes);
 
         // Create the track fields
-        // Note: setFields is a local #define to reduce arg count...
-        //setFields(labelFields, labelFieldNames);
-        setFields(scalarFields, scalarFieldNames);
-        setFields(vectorFields, vectorFieldNames);
-        setFields(sphTensorFields, sphTensorFieldNames);
-        setFields(symTensorFields, symTensorFieldNames);
-        setFields(tensorFields, tensorFieldNames);
+        ///trackSampler.setTrackFields(obr, labelFields);
+        trackSampler.setTrackFields(obr, scalarFields);
+        trackSampler.setTrackFields(obr, vectorFields);
+        trackSampler.setTrackFields(obr, sphericalTensorFields);
+        trackSampler.setTrackFields(obr, symmTensorFields);
+        trackSampler.setTrackFields(obr, tensorFields);
     }
 
+    const label nFields =
+    (
+        labelFields.size()
+      + scalarFields.size()
+      + vectorFields.size()
+      + sphericalTensorFields.size()
+      + symmTensorFields.size()
+      + tensorFields.size()
+    );
+
+    Info<< nl
+        << "Extracted " << nFields << " cloud fields" << nl;
+
+    if (nFields)
+    {
+        #undef  doLocalCode
+        #define doLocalCode(FieldContent)                                     \
+        if (!FieldContent.empty())                                            \
+        {                                                                     \
+            Info<< "   ";                                                     \
+            for (const word& fieldName : FieldContent.sortedToc())            \
+            {                                                                 \
+                Info<< ' ' << fieldName;                                      \
+            }                                                                 \
+            Info<< nl;                                                        \
+        }
+
+        doLocalCode(labelFields);
+        doLocalCode(scalarFields);
+        doLocalCode(vectorFields);
+        doLocalCode(sphericalTensorFields);
+        doLocalCode(symmTensorFields);
+        doLocalCode(tensorFields);
+        #undef doLocalCode
+    }
+
+    Info<< nl
+        << "Writing particle tracks (" << setFormat << " format)" << nl;
 
     if (Pstream::master())
     {
-        PtrList<coordSet> tracks(allTracks.size());
-        List<scalarField> times(tracks.size());
+        PtrList<coordSet> tracks(allTrackPos.size());
+        List<scalarField> times(allTrackPos.size());
         forAll(tracks, tracki)
         {
             tracks.set
             (
                 tracki,
-                new coordSet("track" + Foam::name(tracki), "distance")
+                new coordSet("track" + Foam::name(tracki), "xyz")
             );
-            tracks[tracki].transfer(allTracks[tracki]);
+            tracks[tracki].transfer(allTrackPos[tracki]);
             times[tracki].transfer(allTrackTimes[tracki]);
+
+            if (!tracki) tracks[0].rename("tracks");
         }
 
-        Info<< nl;
+        /// Currently unused
+        /// List<vectorField> dirs(nTracks);
+        /// const auto Uiter = vectorFields.cfind(UName);
+        /// if (Uiter.found())
+        /// {
+        ///     const auto& UTracks = *Uiter;
+        ///     forAll(UTracks, tracki)
+        ///     {
+        ///         const auto& U = UTracks[tracki];
+        ///         dirs[tracki] = U/(mag(U) + ROOTVSMALL);
+        ///     }
+        /// }
 
-        const label Uid = vectorFieldNames.find(UName);
-        List<vectorField> dirs(nTracks);
 
-        if (Uid != -1)
+        // Write tracks with fields
+        if (nFields)
         {
-            const auto& UTracks = vectorFields[Uid];
-            forAll(UTracks, tracki)
-            {
-                const auto& U = UTracks[tracki];
-                dirs[tracki] = U/(mag(U) + ROOTVSMALL);
-            }
-        }
+            auto& writer = *writerPtr;
 
-        // Write track fields
-        // Note: writeFields is a local #define to reduce arg count...
-        //writeFields(allLabelFields, labelFieldNames, tracks);
-        writeFields(scalarFields, scalarFieldNames, tracks, times, dirs);
-        writeFields(vectorFields, vectorFieldNames, tracks, times, dirs);
-        writeFields(sphTensorFields, sphTensorFieldNames, tracks, times, dirs);
-        writeFields(symTensorFields, symTensorFieldNames, tracks, times, dirs);
-        writeFields(tensorFields, tensorFieldNames, tracks, times, dirs);
+            const fileName outputPath
+            (
+                functionObject::outputPrefix/cloud::prefix/cloudName
+              / "particleTracks" / "tracks"
+            );
+
+            Info<< "    "
+                << runTime.relativePath(outputPath) << endl;
+
+            writer.open(tracks, outputPath);
+            writer.setTrackTimes(times);
+            writer.nFields(nFields);
+
+            ///writeTrackFields(writer, labelFields);
+            writeTrackFields(writer, scalarFields);
+            writeTrackFields(writer, vectorFields);
+            writeTrackFields(writer, sphericalTensorFields);
+            writeTrackFields(writer, symmTensorFields);
+            writeTrackFields(writer, tensorFields);
+        }
+        else
+        {
+            Info<< "Warning: no fields, did not write" << endl;
+        }
     }
 
     Info<< nl << "End\n" << endl;

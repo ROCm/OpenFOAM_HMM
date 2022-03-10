@@ -940,7 +940,7 @@ void Foam::shortestPathSet::genSamples
     // Get the target point
     const label outsideCelli = mesh.findCell(outsidePoint);
 
-    // Maintain overall track length. Used to make curveDist continuous.
+    // Maintain overall track length. Used to make curve distance continuous.
     scalar trackLength = 0;
 
     List<topoDistanceData<label>> allFaceInfo(mesh.nFaces());

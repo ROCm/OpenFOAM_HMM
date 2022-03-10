@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,7 +51,7 @@ Description
 #include "refinementParameters.H"
 #include "snapParameters.H"
 #include "layerParameters.H"
-#include "vtkSetWriter.H"
+#include "vtkCoordSetWriter.H"
 #include "faceSet.H"
 #include "motionSmoother.H"
 #include "polyTopoChange.H"
@@ -854,19 +854,25 @@ int main(int argc, char *argv[])
 
     const bool keepPatches(meshDict.getOrDefault("keepPatches", false));
 
-    // format to be used for writing lines
-    const word setFormat
-    (
-        meshDict.getOrDefault<word>
+    // Writer for writing lines
+    autoPtr<coordSetWriter> setFormatter;
+    {
+        const word setFormat
         (
-            "setFormat",
-            vtkSetWriter<scalar>::typeName
-        )
-    );
-    const autoPtr<writer<scalar>> setFormatter
-    (
-        writer<scalar>::New(setFormat)
-    );
+            meshDict.getOrDefault<word>
+            (
+                "setFormat",
+                coordSetWriters::vtkWriter::typeName  // Default: "vtk"
+            )
+        );
+
+        setFormatter = coordSetWriter::New
+        (
+            setFormat,
+            meshDict.subOrEmptyDict("formatOptions").optionalSubDict(setFormat)
+        );
+    }
+
 
     const scalar maxSizeRatio
     (

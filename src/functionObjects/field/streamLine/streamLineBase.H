@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,14 +36,14 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef streamLineBase_H
-#define streamLineBase_H
+#ifndef Foam_functionObjects_streamLineBase_H
+#define Foam_functionObjects_streamLineBase_H
 
 #include "fvMeshFunctionObject.H"
 #include "DynamicList.H"
 #include "scalarList.H"
 #include "vectorList.H"
-#include "writer.H"
+#include "coordSetWriter.H"
 #include "indirectPrimitivePatch.H"
 #include "interpolation.H"
 #include "Enum.H"
@@ -53,6 +53,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class meshSearch;
 class sampledSet;
 
@@ -65,7 +66,7 @@ namespace functionObjects
 
 class streamLineBase
 :
-    public fvMeshFunctionObject
+    public functionObjects::fvMeshFunctionObject
 {
 public:
 
@@ -128,16 +129,13 @@ protected:
         wordList vectorNames_;
 
 
-      // Demand driven
+    // Demand driven
 
-        //- File writer for scalar data
-        autoPtr<writer<scalar>> scalarFormatterPtr_;
-
-        //- File writer for vector data
-        autoPtr<writer<vector>> vectorFormatterPtr_;
+        //- File writer for tracks data
+        mutable autoPtr<coordSetWriter> trackWriterPtr_;
 
 
-      // Generated data
+    // Generated Data
 
         //- All tracks. Per track the points it passed through
         DynamicList<List<point>> allTracks_;

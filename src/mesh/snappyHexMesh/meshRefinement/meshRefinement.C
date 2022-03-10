@@ -441,7 +441,7 @@ void Foam::meshRefinement::nearestFace
 (
     const labelUList& startFaces,
     const bitSet& isBlockedFace,
-    
+
     autoPtr<mapDistribute>& mapPtr,
     labelList& faceToStart,
     const label nIter
@@ -2808,23 +2808,19 @@ Foam::fileName Foam::meshRefinement::writeLeakPath
     const polyMesh& mesh,
     const pointField& locationsInMesh,
     const pointField& locationsOutsideMesh,
-    const writer<scalar>& leakPathFormatter,
-    const boolList& blockedFace
+    const boolList& blockedFace,
+    coordSetWriter& writer
 )
 {
     const polyBoundaryMesh& pbm = mesh.boundaryMesh();
 
-    fileName outputDir;
-    if (Pstream::master())
-    {
-        outputDir =
-            mesh.time().globalPath()
-          / functionObject::outputPrefix
-          / mesh.pointsInstance();
-        outputDir.clean();
-        mkDir(outputDir);
-    }
-
+    fileName outputDir
+    (
+        mesh.time().globalPath()
+      / functionObject::outputPrefix
+      / mesh.pointsInstance()
+    );
+    outputDir.clean();  // Remove unneeded ".."
 
     // Write the leak path
 
@@ -2877,7 +2873,7 @@ Foam::fileName Foam::meshRefinement::writeLeakPath
             label& n = nElemsPerSegment[segmenti];
 
             points[n] = leakPath[elemi];
-            dist[n] = leakPath.curveDist()[elemi];
+            dist[n] = leakPath.distance()[elemi];
             n++;
         }
     }
@@ -2887,13 +2883,11 @@ Foam::fileName Foam::meshRefinement::writeLeakPath
     {
         // Collect data from all processors
         List<pointList> gatheredPts(Pstream::nProcs());
-        gatheredPts[Pstream::myProcNo()] =
-            std::move(segmentPoints[segmenti]);
+        gatheredPts[Pstream::myProcNo()] = std::move(segmentPoints[segmenti]);
         Pstream::gatherList(gatheredPts);
 
         List<scalarList> gatheredDist(Pstream::nProcs());
-        gatheredDist[Pstream::myProcNo()] =
-            std::move(segmentDist[segmenti]);
+        gatheredDist[Pstream::myProcNo()] = std::move(segmentDist[segmenti]);
         Pstream::gatherList(gatheredDist);
 
         // Combine processor lists into one big list.
@@ -2912,7 +2906,7 @@ Foam::fileName Foam::meshRefinement::writeLeakPath
             )
         );
 
-        // Sort according to curveDist
+        // Sort according to distance
         labelList indexSet(Foam::sortedOrder(allDist));
 
         allLeakPaths.set
@@ -2932,42 +2926,28 @@ Foam::fileName Foam::meshRefinement::writeLeakPath
     fileName fName;
     if (Pstream::master())
     {
-        List<List<scalarField>> allLeakData(1);
-        List<scalarField>& varData = allLeakData[0];
-        varData.setSize(allLeakPaths.size());
+        List<scalarField> allLeakData(allLeakPaths.size());
         forAll(allLeakPaths, segmenti)
         {
-            varData[segmenti] = allLeakPaths[segmenti].curveDist();
+            allLeakData[segmenti] = allLeakPaths[segmenti].distance();
         }
 
-        const wordList valueSetNames(1, "leakPath");
+        writer.nFields(1);
 
-        fName =
-            outputDir
-           /leakPathFormatter.getFileName
-            (
-                allLeakPaths[0],
-                valueSetNames
-            );
+        writer.open
+        (
+            allLeakPaths,
+            (outputDir / allLeakPaths[0].name())
+        );
 
-        // Note scope to force writing to finish before
-        // FatalError exit
-        OFstream ofs(fName);
-        if (ofs.opened())
-        {
-            leakPathFormatter.write
-            (
-                true,                   // write tracks
-                List<scalarField>(),    // times
-                allLeakPaths,
-                valueSetNames,
-                allLeakData,
-                ofs
-            );
-        }
+        fName = writer.write("leakPath", allLeakData);
+
+        // Force writing to finish before FatalError exit
+        writer.close(true);
     }
 
-    Pstream::scatter(fName);
+    // Probably do not need to broadcast name (only written on master anyhow)
+    UPstream::broadcast(fName);
 
     return fName;
 }
@@ -2982,11 +2962,12 @@ Foam::label Foam::meshRefinement::findRegions
     const vector& perturbVec,
     const pointField& locationsInMesh,
     const pointField& locationsOutsideMesh,
-    const bool exitIfLeakPath,
-    const refPtr<writer<scalar>>& leakPathFormatter,
     const label nRegions,
     labelList& cellRegion,
-    const boolList& blockedFace
+    const boolList& blockedFace,
+    // Leak-path
+    const bool exitIfLeakPath,
+    const refPtr<coordSetWriter>& leakPathFormatter
 )
 {
     bitSet insideCell(mesh.nCells());
@@ -3022,7 +3003,10 @@ Foam::label Foam::meshRefinement::findRegions
     // mesh do not conflict with those inside
     forAll(locationsOutsideMesh, i)
     {
-        // Find the region containing the point
+        // Find the region containing the point,
+        // and the corresponding inside region index
+
+        label indexi;
         label regioni = findRegion
         (
             mesh,
@@ -3031,46 +3015,39 @@ Foam::label Foam::meshRefinement::findRegions
             locationsOutsideMesh[i]
         );
 
-        if (regioni != -1)
+        if (regioni == -1 && (indexi = insideRegions.find(regioni)) != -1)
         {
-            // Do a quick check for locationsOutsideMesh overlapping with
-            // inside ones.
-            label index = insideRegions.find(regioni);
-            if (index != -1)
+            if (leakPathFormatter)
             {
-                if (leakPathFormatter.valid())
-                {
-                    const fileName fName
+                const fileName fName
+                (
+                    writeLeakPath
                     (
-                        writeLeakPath
-                        (
-                            mesh,
-                            locationsInMesh,
-                            locationsOutsideMesh,
-                            leakPathFormatter,
-                            blockedFace
-                        )
-                    );
-                    Info<< "Dumped leak path to " << fName << endl;
-                }
+                        mesh,
+                        locationsInMesh,
+                        locationsOutsideMesh,
+                        blockedFace,
+                        leakPathFormatter.constCast()
+                    )
+                );
+                Info<< "Dumped leak path to " << fName << endl;
+            }
 
-                if (exitIfLeakPath)
-                {
-                    FatalErrorInFunction
-                        << "Location in mesh " << locationsInMesh[index]
-                        << " is inside same mesh region " << regioni
-                        << " as one of the locations outside mesh "
-                        << locationsOutsideMesh
-                        << exit(FatalError);
-                }
-                else
-                {
-                    WarningInFunction
-                        << "Location in mesh " << locationsInMesh[index]
-                        << " is inside same mesh region " << regioni
-                        << " as one of the locations outside mesh "
-                        << locationsOutsideMesh << endl;
-                }
+            auto& err =
+            (
+                exitIfLeakPath
+              ? FatalErrorInFunction
+              : WarningInFunction
+            );
+
+            err << "Location in mesh " << locationsInMesh[indexi]
+                << " is inside same mesh region " << regioni
+                << " as one of the locations outside mesh "
+                << locationsOutsideMesh << endl;
+
+            if (exitIfLeakPath)
+            {
+                FatalError << exit(FatalError);
             }
         }
     }
@@ -3103,7 +3080,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMeshRegions
     const pointField& locationsInMesh,
     const pointField& locationsOutsideMesh,
     const bool exitIfLeakPath,
-    const refPtr<writer<scalar>>& leakPathFormatter
+    const refPtr<coordSetWriter>& leakPathFormatter
 )
 {
     // Force calculation of face decomposition (used in findCell)
@@ -3120,14 +3097,15 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMeshRegions
     label nRemove = findRegions
     (
         mesh_,
-        mergeDistance_ * vector::one,   // perturbVec
+        vector::uniform(mergeDistance_),   // perturbVec
         locationsInMesh,
         locationsOutsideMesh,
-        exitIfLeakPath,
-        leakPathFormatter,
         cellRegion.nRegions(),
         cellRegion,
-        blockedFace
+        blockedFace,
+        // Leak-path
+        exitIfLeakPath,
+        leakPathFormatter
     );
 
     // Subset

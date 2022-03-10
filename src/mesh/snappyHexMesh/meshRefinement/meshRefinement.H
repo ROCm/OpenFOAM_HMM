@@ -60,7 +60,7 @@ SourceFiles
 #include "surfaceZonesInfo.H"
 #include "volumeType.H"
 #include "DynamicField.H"
-#include "writer.H"
+#include "coordSetWriter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -587,7 +587,7 @@ private:
                 const pointField& locationsInMesh,
                 const wordList& regionsInMesh,
                 const pointField& locationsOutsideMesh,
-                const refPtr<writer<scalar>>& leakPathFormatter,
+                const refPtr<coordSetWriter>& leakPathFormatter,
 
                 const labelList& neiLevel,
                 const pointField& neiCc,
@@ -622,8 +622,8 @@ private:
                 const polyMesh& mesh,
                 const pointField& locationsInMesh,
                 const pointField& locationsOutsideMesh,
-                const writer<scalar>& leakPathFormatter,
-                const boolList& blockedFace
+                const boolList& blockedFace,
+                coordSetWriter& leakPathWriter
             );
 
 
@@ -846,7 +846,7 @@ private:
                 const pointField& locationsInMesh,
                 const wordList& zonesInMesh,
                 const pointField& locationsOutsideMesh,
-                const refPtr<writer<scalar>>& leakPathFormatter,
+                const refPtr<coordSetWriter>& leakPathFormatter,
 
                 labelList& cellToZone,
                 labelList& unnamedRegion1,
@@ -1303,7 +1303,7 @@ public:
                 const pointField& locationsInMesh,
                 const wordList& regionsInMesh,
                 const pointField& locationsOutsideMesh,
-                const refPtr<writer<scalar>>& leakPathFormatter
+                const refPtr<coordSetWriter>& leakPathFormatter
             );
 
             //- Merge free-standing baffles
@@ -1334,7 +1334,7 @@ public:
                 const pointField& locationsInMesh,
                 const wordList& regionsInMesh,
                 const pointField& locationsOutsideMesh,
-                const writer<scalar>& leakPathFormatter
+                const refPtr<coordSetWriter>& leakPathFormatter
             );
 
             //- Remove cells from limitRegions if level -1
@@ -1436,7 +1436,7 @@ public:
                 const pointField& locationsInMesh,
                 const wordList& regionsInMesh,
                 const pointField& locationsOutsideMesh,
-                const refPtr<writer<scalar>>& leakPathFormatter,
+                const refPtr<coordSetWriter>& leakPathFormatter,
                 wordPairHashTable& zonesToFaceZone
             );
 
@@ -1543,11 +1543,12 @@ public:
                 const vector& perturbVec,
                 const pointField& locationsInMesh,
                 const pointField& locationsOutsideMesh,
-                const bool exitIfLeakPath,
-                const refPtr<writer<scalar>>& leakPathFormatter,
                 const label nRegions,
                 labelList& cellRegion,
-                const boolList& blockedFace
+                const boolList& blockedFace,
+                // Leak-path
+                const bool exitIfLeakPath,
+                const refPtr<coordSetWriter>& leakPathFormatter
             );
 
             //- Split mesh. Keep part containing point. Return empty map if
@@ -1558,8 +1559,9 @@ public:
                 const labelList& globalToSlavePatch,
                 const pointField& locationsInMesh,
                 const pointField& locationsOutsideMesh,
+                // Leak-path
                 const bool exitIfLeakPath,
-                const refPtr<writer<scalar>>& leakPathFormatter
+                const refPtr<coordSetWriter>& leakPathFormatter
             );
 
             //- Split faces into two

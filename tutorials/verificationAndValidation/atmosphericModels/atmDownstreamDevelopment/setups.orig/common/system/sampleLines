@@ -14,7 +14,7 @@ _sampler
     enabled                 false;
 
     sets
-    (
+    {
         x_0mPatch    // inlet patch face centres
         {
             type        face;
@@ -57,7 +57,7 @@ _sampler
             start       (5000 50 0);
             end         (5000 50 500);
         }
-    );
+    }
 }
 
 samples_u

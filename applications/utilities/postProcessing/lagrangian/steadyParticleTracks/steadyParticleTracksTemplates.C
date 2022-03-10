@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,113 +31,71 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-bool Foam::fieldOk(const IOobjectList& cloudObjs, const word& name)
-{
-    return cloudObjs.cfindObject<IOField<Type>>(name) != nullptr;
-}
-
-
-template<class Type>
-Foam::tmp<Foam::Field<Type>> Foam::readParticleField
+Foam::tmp<Foam::IOField<Type>> Foam::readParticleField
 (
-    const word& name,
-    const IOobjectList cloudObjs
+    const word& fieldName,
+    const IOobjectList& cloudObjects
 )
 {
-    const IOobject* obj = cloudObjs.cfindObject<IOField<Type>>(name);
-    if (obj != nullptr)
+    const IOobject* io = cloudObjects.cfindObject<IOField<Type>>(fieldName);
+    if (io)
     {
-        IOField<Type> newField(*obj);
-        return tmp<Field<Type>>::New(std::move(newField));
+        return tmp<IOField<Type>>::New(*io);
     }
 
     FatalErrorInFunction
-        << "Error: cloud field name " << name
-        << " not found or the wrong type"
+        << "Cloud field name " << fieldName
+        << " not found or the incorrect type"
         << abort(FatalError);
 
-    return Field<Type>::null();
-}
-
-
-template<class Type>
-void Foam::readFields
-(
-    PtrList<List<Type>>& values,
-    const List<word>& fieldNames,
-    const IOobjectList& cloudObjs
-)
-{
-    forAll(fieldNames, fieldi)
-    {
-        const word& fieldName = fieldNames[fieldi];
-
-        const IOobject* obj = cloudObjs.cfindObject<IOField<Type>>(fieldName);
-        if (obj != nullptr)
-        {
-            Info<< "        reading field " << fieldName << endl;
-            IOField<Type> newField(*obj);
-            values.set(fieldi, new List<Type>(std::move(newField)));
-        }
-        else
-        {
-            FatalErrorInFunction
-                << "Unable to read field " << fieldName
-                << abort(FatalError);
-        }
-    }
+    return nullptr;
 }
 
 
 template<class Type>
 void Foam::writeVTK(OFstream& os, const Type& value)
 {
-    os  << value.component(0);
-    for (label i=1; i<pTraits<Type>::nComponents; i++)
+    os  << component(value, 0);
+    for (label d=1; d < pTraits<Type>::nComponents; ++d)
     {
-        os  << ' ' << value.component(i);
+        os  << ' ' << component(value, d);
     }
 }
 
 
 template<class Type>
-void Foam::writeVTKFields
+void Foam::writeVTKField
 (
     OFstream& os,
-    const PtrList<List<Type>>& values,
-    const List<List<label>>& addr,
-    const List<word>& fieldNames
+    const IOField<Type>& field,
+    const List<labelList>& addr
 )
 {
-    label step = max(floor(8/pTraits<Type>::nComponents), 1);
+    const label step = max(1, floor(8/pTraits<Type>::nComponents));
 
-    forAll(values, fieldi)
+    Info<< "        writing field " << field.name() << endl;
+    os  << nl << field.name() << ' '
+        << int(pTraits<Type>::nComponents) << ' '
+        << field.size() << " float" << nl;
+
+    ///label offset = 0;
+    for (const labelList& ids : addr)
     {
-        Info<< "        writing field " << fieldNames[fieldi] << endl;
-        os  << nl << fieldNames[fieldi] << ' '
-            << int(pTraits<Type>::nComponents) << ' '
-            << values[fieldi].size() << " float" << nl;
-        label offset = 0;
-        forAll(addr, tracki)
+        List<Type> data(UIndirectList<Type>(field, ids));
+        label nData = data.size() - 1;
+        forAll(data, i)
         {
-            const List<label> ids(addr[tracki]);
-
-            List<Type> data(UIndirectList<Type>(values[fieldi], ids));
-            label nData = data.size() - 1;
-            forAll(data, i)
+            writeVTK<Type>(os, data[i]);
+            if (((i + 1) % step == 0) || (i == nData))
             {
-                writeVTK<Type>(os, data[i]);
-                if (((i + 1) % step == 0) || (i == nData))
-                {
-                    os  << nl;
-                }
-                else
-                {
-                    os  << ' ';
-                }
+                os  << nl;
             }
-            offset += ids.size();
+            else
+            {
+                os  << ' ';
+            }
         }
+        /// offset += ids.size();
     }
 }
 
@@ -146,36 +104,28 @@ template<class Type>
 void Foam::processFields
 (
     OFstream& os,
-    const List<List<label>>& addr,
-    const List<word>& userFieldNames,
-    const IOobjectList& cloudObjs
+    const List<labelList>& addr,
+    const IOobjectList& cloudObjects
 )
 {
-    IOobjectList objects(cloudObjs.lookupClass(IOField<Type>::typeName));
-
-    if (objects.size())
+    for (const word& fldName : cloudObjects.sortedNames<IOField<Type>>())
     {
-        DynamicList<word> fieldNames(objects.size());
-        forAll(userFieldNames, i)
+        const IOobject* io = cloudObjects.cfindObject<IOField<Type>>(fldName);
+
+        if (!io)
         {
-            const IOobject* obj = objects.findObject(userFieldNames[i]);
-            if (obj != nullptr)
-            {
-                fieldNames.append(obj->name());
-            }
+            FatalErrorInFunction
+                << "Could not read field:" << fldName
+                << " type:" << IOField<Type>::typeName
+                << abort(FatalError);
         }
-        fieldNames.shrink();
+        else
+        {
+            Info<< "        reading field " << fldName << endl;
+            IOField<Type> field(*io);
 
-        PtrList<List<Type>> values(fieldNames.size());
-        readFields<Type>(values, fieldNames, cloudObjs);
-
-        writeVTKFields<Type>
-        (
-            os,
-            values,
-            addr,
-            fieldNames
-        );
+            writeVTKField<Type>(os, field, addr);
+        }
     }
 }
 

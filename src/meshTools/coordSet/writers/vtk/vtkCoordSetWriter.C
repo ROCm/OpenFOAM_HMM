@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,177 +25,310 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "vtkSetWriter.H"
+#include "vtkCoordSetWriter.H"
 #include "coordSet.H"
 #include "fileName.H"
-#include "OFstream.H"
+#include "foamVtkCoordSetWriter.H"
+#include "coordSetWriterMethods.H"
 #include "addToRunTimeSelectionTable.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+namespace coordSetWriters
+{
+    defineTypeName(vtkWriter);
+    addToRunTimeSelectionTable(coordSetWriter, vtkWriter, word);
+    addToRunTimeSelectionTable(coordSetWriter, vtkWriter, wordDict);
+}
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::vtkSetWriter<Type>::vtkSetWriter()
+Foam::coordSetWriters::vtkWriter::vtkWriter()
 :
-    writer<Type>()
+    coordSetWriter(),
+    fmtType_(static_cast<unsigned>(vtk::formatType::INLINE_BASE64)),
+    precision_(IOstream::defaultPrecision()),
+    writer_(nullptr)
 {}
 
 
-template<class Type>
-Foam::vtkSetWriter<Type>::vtkSetWriter(const dictionary& dict)
+Foam::coordSetWriters::vtkWriter::vtkWriter
+(
+    const vtk::outputOptions& opts
+)
 :
-    writer<Type>(dict)
+    coordSetWriter(),
+    fmtType_(static_cast<unsigned>(opts.fmt())),
+    precision_(opts.precision()),
+    writer_(nullptr)
 {}
+
+
+Foam::coordSetWriters::vtkWriter::vtkWriter(const dictionary& options)
+:
+    coordSetWriter(options),
+    fmtType_(static_cast<unsigned>(vtk::formatType::INLINE_BASE64)),
+    precision_
+    (
+        options.getOrDefault("precision", IOstream::defaultPrecision())
+    ),
+    writer_(nullptr)
+{
+    // format: ascii | binary
+    // legacy: true | false
+
+    vtk::outputOptions opts(vtk::formatType::INLINE_BASE64);
+    opts.ascii
+    (
+        IOstream::ASCII
+     == IOstream::formatEnum("format", options, IOstream::BINARY)
+    );
+
+    opts.legacy(options.getOrDefault("legacy", false));
+
+    // Convert back to raw data type
+    fmtType_ = static_cast<unsigned>(opts.fmt());
+}
+
+
+Foam::coordSetWriters::vtkWriter::vtkWriter
+(
+    const coordSet& coords,
+    const fileName& outputPath,
+    const dictionary& options
+)
+:
+    vtkWriter(options)
+{
+    open(coords, outputPath);
+}
+
+
+Foam::coordSetWriters::vtkWriter::vtkWriter
+(
+    const UPtrList<coordSet>& tracks,
+    const fileName& outputPath,
+    const dictionary& options
+)
+:
+    vtkWriter(options)
+{
+    open(tracks, outputPath);
+}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::coordSetWriters::vtkWriter::~vtkWriter()
+{
+    close();
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::fileName Foam::vtkSetWriter<Type>::getFileName
-(
-    const coordSet& points,
-    const wordList& valueSetNames
-) const
+Foam::fileName Foam::coordSetWriters::vtkWriter::path() const
 {
-    return this->getBaseName(points, valueSetNames) + ".vtk";
+    // 1) rootdir/<TIME>/setName.{vtk|vtp}
+    // 2) rootdir/setName.{vtk|vtp}
+
+    // From raw unsigned value to vtk::outputOptions
+    vtk::outputOptions opts(static_cast<vtk::formatType>(fmtType_));
+
+    return getExpectedPath(vtk::polyWriter::ext(opts));
 }
 
 
-template<class Type>
-void Foam::vtkSetWriter<Type>::write
-(
-    const coordSet& points,
-    const wordList& valueSetNames,
-    const List<const Field<Type>*>& valueSets,
-    Ostream& os
-) const
+void Foam::coordSetWriters::vtkWriter::close(bool force)
 {
-    os  << "# vtk DataFile Version 2.0" << nl
-        << points.name() << nl
-        << "ASCII" << nl
-        << "DATASET POLYDATA" << nl
-        << "POINTS " << points.size() << " double" << nl;
+    writer_.clear();
+    coordSetWriter::close(force);
+}
 
-    for (const point& pt : points)
+
+void Foam::coordSetWriters::vtkWriter::beginTime(const Time& t)
+{
+    writer_.clear();
+    coordSetWriter::beginTime(t);
+}
+
+
+void Foam::coordSetWriters::vtkWriter::beginTime(const instant& inst)
+{
+    writer_.clear();
+    coordSetWriter::beginTime(inst);
+}
+
+
+void Foam::coordSetWriters::vtkWriter::endTime()
+{
+    writer_.clear();
+    coordSetWriter::endTime();
+}
+
+
+Foam::fileName Foam::coordSetWriters::vtkWriter::write()
+{
+    checkOpen();
+    if (needsUpdate())
     {
-        os  << float(pt.x()) << ' '
-            << float(pt.y()) << ' '
-            << float(pt.z()) << nl;
+        writer_.clear();
+    }
+    merge();
+
+    if (coords_.empty())
+    {
+        return fileName::null;
     }
 
-    os  << "POINT_DATA " << points.size() << nl
-        << " FIELD attributes " << valueSetNames.size() << nl;
+    // From raw unsigned values to vtk::outputOptions
+    vtk::outputOptions opts(static_cast<vtk::formatType>(fmtType_), precision_);
 
-    forAll(valueSetNames, setI)
+
+    // Geometry:  rootdir/<TIME>/setName.{vtk|vtp}
+
+    fileName outputFile = getExpectedPath(vtk::polyWriter::ext(opts));
+
+    if (verbose_)
     {
-        os  << valueSetNames[setI] << ' '
-            << int(pTraits<Type>::nComponents) << ' '
-            << points.size() << " float" << nl;
+        Info<< "Writing geometry to " << outputFile << endl;
+    }
 
-        const Field<Type>& fld = *valueSets[setI];
-
-        forAll(fld, pointi)
+    if (!writer_ && true)  // always (non-parallel)
+    {
+        UPtrList<const pointField> points(coords_.size());
+        forAll(coords_, tracki)
         {
-            if (pointi)
-            {
-                os  << ' ';
-            }
-            writer<Type>::write(fld[pointi], os);
+            points.set(tracki, coords_.get(tracki));
         }
-        os  << nl;
+
+        writer_.reset
+        (
+            new vtk::coordSetWriter
+            (
+                points,
+                opts,
+                outputFile,
+                false  // serial!
+            )
+        );
+
+        if (useTracks_ || coords_.size() > 1)
+        {
+            writer_->setElementType(vtk::coordSetWriter::LINE_ELEMENTS);
+        }
+
+        if (this->hasTime())
+        {
+            // Time name in title
+            writer_->setTime(currTime_);
+            writer_->writeTimeValue();
+        }
+        else
+        {
+            // Set name in title
+            writer_->beginFile(outputPath_.nameLessExt());
+        }
+
+        writer_->writeGeometry();
     }
+
+    wroteGeom_ = true;
+    return outputFile;
 }
 
 
+// * * * * * * * * * * * * * * * Implementation * * * * * * * * * * * * * * * //
+
 template<class Type>
-void Foam::vtkSetWriter<Type>::write
+Foam::fileName Foam::coordSetWriters::vtkWriter::writeTemplate
 (
-    const bool writeTracks,
-    const List<scalarField>& times,
-    const PtrList<coordSet>& tracks,
-    const wordList& valueSetNames,
-    const List<List<Field<Type>>>& valueSets,
-    Ostream& os
-) const
+    const word& fieldName,
+    const UPtrList<const Field<Type>>& fieldPtrs
+)
 {
-    if (valueSets.size() != valueSetNames.size())
+    if (coords_.size() != fieldPtrs.size())
     {
         FatalErrorInFunction
-            << "Number of variables:" << valueSetNames.size() << endl
-            << "Number of valueSets:" << valueSets.size()
+            << "Attempted to write field: " << fieldName
+            << " (" << fieldPtrs.size() << " entries) for "
+            << coords_.size() << " sets" << nl
             << exit(FatalError);
     }
 
-    label nTracks = tracks.size();
-    label nPoints = 0;
-    forAll(tracks, i)
+    // Open file, writing geometry (if required)
+    fileName outputFile = this->write();
+
+    if (!nFields_ && writer_->legacy())
     {
-        nPoints += tracks[i].size();
+        // Emit error message, but attempt to recover anyhow
+        nFields_ = 1;
+
+        FatalErrorInFunction
+            << "Using VTK legacy format, but did not define nFields!"
+            << nl
+            << "Assuming nFields=1 (may be incorrect) and continuing..."
+            << nl
+            << "    Field " << fieldName << " to " << outputFile << nl;
+
+        Info<< FatalError;
+        Info<< endl;
     }
 
-    os  << "# vtk DataFile Version 2.0" << nl
-        << tracks[0].name() << nl
-        << "ASCII" << nl
-        << "DATASET POLYDATA" << nl
-        << "POINTS " << nPoints << " double" << nl;
+    writer_->beginPointData(nFields_);
 
-    for (const coordSet& points : tracks)
-    {
-        for (const point& pt : points)
-        {
-            os  << float(pt.x()) << ' '
-                << float(pt.y()) << ' '
-                << float(pt.z()) << nl;
-        }
-    }
+    writer_->writePointData(fieldName, fieldPtrs);
 
-    if (writeTracks)
-    {
-        os  << "LINES " << nTracks << ' ' << nPoints+nTracks << nl;
-
-        // Write ids of track points to file
-        label globalPtI = 0;
-        forAll(tracks, trackI)
-        {
-            const coordSet& points = tracks[trackI];
-
-            const label len = points.size();
-
-            os  << len;
-            for (label i = 0; i < len; ++i)
-            {
-                os  << ' ' << globalPtI;
-                ++globalPtI;
-            }
-            os << nl;
-        }
-    }
-
-    os  << "POINT_DATA " << nPoints << nl
-        << " FIELD attributes " << valueSetNames.size() << nl;
-
-    forAll(valueSetNames, setI)
-    {
-        os  << valueSetNames[setI] << ' '
-            << int(pTraits<Type>::nComponents) << ' '
-            << nPoints << " float" << nl;
-
-        const List<Field<Type>>& fieldVals = valueSets[setI];
-
-        for (const Field<Type>& vals : fieldVals)
-        {
-            forAll(vals, j)
-            {
-                if (j)
-                {
-                    os  << ' ';
-                }
-                writer<Type>::write(vals[j], os);
-            }
-            os  << nl;
-        }
-    }
+    wroteGeom_ = true;
+    return outputFile;
 }
+
+
+template<class Type>
+Foam::fileName Foam::coordSetWriters::vtkWriter::writeTemplate
+(
+    const word& fieldName,
+    const Field<Type>& values
+)
+{
+    checkOpen();
+    if (coords_.empty())
+    {
+        return fileName::null;
+    }
+
+    UPtrList<const Field<Type>> fieldPtrs(repackageFields(values));
+    return writeTemplate(fieldName, fieldPtrs);
+}
+
+
+template<class Type>
+Foam::fileName Foam::coordSetWriters::vtkWriter::writeTemplate
+(
+    const word& fieldName,
+    const List<Field<Type>>& fieldValues
+)
+{
+    checkOpen();
+    if (coords_.empty())
+    {
+        return fileName::null;
+    }
+    useTracks_ = true;  // Extra safety
+
+    UPtrList<const Field<Type>> fieldPtrs(repackageFields(fieldValues));
+    return writeTemplate(fieldName, fieldPtrs);
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Field writing methods
+defineCoordSetWriterWriteFields(Foam::coordSetWriters::vtkWriter);
 
 
 // ************************************************************************* //

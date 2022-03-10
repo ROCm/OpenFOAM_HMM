@@ -19,7 +19,7 @@ sampleSets
     fields ( U );
 
     sets
-    (
+    {
         centres
         {
             type    cellCentre;
@@ -28,7 +28,7 @@ sampleSets
             // bounds  (-0.2 -1 -1) (-0.195 0 1);
             bounds  (-0.025 -1 -1) (-0.0225 0 1);  // single cell layer
         }
-    );
+    }
 }
 
 

@@ -8,7 +8,12 @@ IOdictionary propsDict(dictIO);
 
 const word cloudName(propsDict.get<word>("cloud"));
 
-List<word> userFields(propsDict.lookup("fields"));
+// Mandatory - if empty, select none
+wordRes acceptFields(propsDict.get<wordRes>("fields"));
+
+// Optional
+wordRes excludeFields;
+propsDict.readIfPresent("exclude", excludeFields);
 
 const dictionary formatOptions
 (

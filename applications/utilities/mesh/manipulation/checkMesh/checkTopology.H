@@ -6,7 +6,7 @@ namespace Foam
     // Forward Declarations
     class polyMesh;
     class pointSet;
-    template<class T> class writer;
+    class coordSetWriter;
     class surfaceWriter;
 
     template<class PatchType>
@@ -24,6 +24,6 @@ namespace Foam
         const bool allTopology,
         const bool allGeometry,
         autoPtr<surfaceWriter>& surfWriter,
-        const autoPtr<writer<scalar>>& setWriter
+        autoPtr<coordSetWriter>& setWriter
     );
 }

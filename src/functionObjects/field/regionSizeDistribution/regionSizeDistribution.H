@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -169,17 +169,16 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef functionObjects_regionSizeDistribution_H
-#define functionObjects_regionSizeDistribution_H
+#ifndef Foam_functionObjects_regionSizeDistribution_H
+#define Foam_functionObjects_regionSizeDistribution_H
 
 #include "fvMeshFunctionObject.H"
 #include "writeFile.H"
-#include "writer.H"
+#include "coordSetWriter.H"
 #include "Map.H"
 #include "volFieldsFwd.H"
 #include "wordRes.H"
 #include "coordinateSystem.H"
-#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -197,7 +196,7 @@ namespace functionObjects
 
 class regionSizeDistribution
 :
-    public fvMeshFunctionObject,
+    public functionObjects::fvMeshFunctionObject,
     public writeFile
 {
     // Private Data
@@ -224,7 +223,7 @@ class regionSizeDistribution
         wordRes fields_;
 
         //- Output formatter to write
-        autoPtr<writer<scalar>> formatterPtr_;
+        mutable autoPtr<coordSetWriter> formatterPtr_;
 
         //- Optional coordinate system
         autoPtr<coordinateSystem> csysPtr_;
@@ -253,20 +252,6 @@ class regionSizeDistribution
 
     // Private Member Functions
 
-        template<class Type>
-        Map<Type> regionSum(const regionSplit&, const Field<Type>&) const;
-
-        //- Get data in order
-        template<class Type>
-        List<Type> extractData(const labelUList& keys, const Map<Type>&) const;
-
-        void writeGraph
-        (
-            const coordSet& coords,
-            const word& valueName,
-            const scalarField& values
-        ) const;
-
         //- Write volfields with the parts of alpha which are not
         //- droplets (liquidCore, backGround)
         void writeAlphaFields
@@ -287,8 +272,9 @@ class regionSizeDistribution
         void writeGraphs
         (
             const word& fieldName,              // name of field
-            const labelList& indices,           // index of bin for each region
             const scalarField& sortedField,     // per region field data
+
+            const labelList& indices,           // index of bin for each region
             const scalarField& binCount,        // per bin number of regions
             const coordSet& coords              // graph data for bins
         ) const;
@@ -301,6 +287,7 @@ class regionSizeDistribution
             const regionSplit& regions,         // per cell the region(=droplet)
             const labelList& sortedRegions,     // valid regions in sorted order
             const scalarField& sortedNormalisation,
+
             const labelList& indices,           // index of bin for each region
             const scalarField& binCount,        // per bin number of regions
             const coordSet& coords              // graph data for bins
@@ -352,12 +339,6 @@ public:
 
 } // End namespace functionObjects
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "regionSizeDistributionTemplates.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,7 +32,7 @@ License
 #include "Time.H"
 #include "DynamicField.H"
 #include "PatchTools.H"
-#include "writer.H"
+#include "coordSetWriter.H"
 #include "triSurfaceMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -611,7 +611,7 @@ bool Foam::searchableSurfaces::checkSizes
 bool Foam::searchableSurfaces::checkIntersection
 (
     const scalar tolerance,
-    const autoPtr<writer<scalar>>& setWriter,
+    autoPtr<coordSetWriter>& setWriter,
     const bool report
 ) const
 {
@@ -669,7 +669,7 @@ bool Foam::searchableSurfaces::checkIntersection
 
                 label nHits = 0;
                 DynamicField<point> intersections(edges0.size()/100);
-                DynamicField<scalar> intersectionEdge(intersections.capacity());
+                DynamicField<label> intersectionEdge(intersections.capacity());
 
                 forAll(hits, edgeI)
                 {
@@ -680,7 +680,7 @@ bool Foam::searchableSurfaces::checkIntersection
                     )
                     {
                         intersections.append(hits[edgeI].hitPoint());
-                        intersectionEdge.append(1.0*edgeI);
+                        intersectionEdge.append(edgeI);
                         nHits++;
                     }
                 }
@@ -698,7 +698,7 @@ bool Foam::searchableSurfaces::checkIntersection
                             << " locations."
                             << endl;
 
-                        if (setWriter)
+                        if (setWriter && setWriter->enabled())
                         {
                             scalarField dist(mag(intersections));
                             coordSet track
@@ -708,31 +708,27 @@ bool Foam::searchableSurfaces::checkIntersection
                                 std::move(intersections),
                                 std::move(dist)
                             );
-                            wordList valueSetNames(1, "edgeIndex");
-                            List<const scalarField*> valueSets
-                            (
-                                1,
-                                &intersectionEdge
-                            );
 
-                            fileName fName
-                            (
-                                setWriter().getFileName(track, valueSetNames)
-                            );
-                            Info<< "    Writing intersection locations to "
-                                << fName << endl;
-                            OFstream os
-                            (
-                                s0.searchableSurface::time().path()
-                               /fName
-                            );
-                            setWriter().write
+
+                            auto& writer = *setWriter;
+                            writer.nFields(1);
+
+                            writer.open
                             (
                                 track,
-                                valueSetNames,
-                                valueSets,
-                                os
+                                (
+                                    s0.searchableSurface::time().path()
+                                  / (track.name() + "_edgeIndex")
+                                )
                             );
+
+                            fileName fName =
+                                writer.write("edgeIndex", intersectionEdge);
+
+                            writer.close(true);
+
+                            Info<< "    Wrote intersection locations to "
+                                << fName << endl;
                         }
                     }
 
@@ -841,7 +837,7 @@ Foam::label Foam::searchableSurfaces::checkGeometry
 (
     const scalar maxRatio,
     const scalar tol,
-    const autoPtr<writer<scalar>>& setWriter,
+    autoPtr<coordSetWriter>& setWriter,
     const scalar minQuality,
     const bool report
 ) const

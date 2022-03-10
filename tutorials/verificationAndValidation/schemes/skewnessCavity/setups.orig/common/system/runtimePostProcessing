@@ -2,15 +2,8 @@
 
 postPro1
 {
-    type                runTimePostProcessing;
-    functionObjectLibs  (runTimePostProcessing);
-    outputControl       outputTime;
-    output
-    {
-        name            image;
-        width           1000;
-        height          1000;
-    }
+    #includeEtc "caseDicts/postProcessing/visualization/runTimePostPro.cfg"
+
     camera
     {
         // If camera is moving, optionally provide start and end times
@@ -47,9 +40,11 @@ postPro1
         surface         (0.5 0.5 0.5);
         line            (1 0 0);
     }
+
     // Line data
     lines
     {}
+
     // Surface data
     surfaces
     {

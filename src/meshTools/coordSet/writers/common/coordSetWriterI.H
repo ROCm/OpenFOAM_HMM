@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,49 +25,85 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "regionSizeDistribution.H"
-#include "regionSplit.H"
-#include "volFields.H"
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::Map<Type> Foam::functionObjects::regionSizeDistribution::regionSum
-(
-    const regionSplit& regions,
-    const Field<Type>& fld
-) const
+inline bool Foam::coordSetWriter::is_open() const noexcept
 {
-    // Per region the sum of fld
-    Map<Type> regionToSum(regions.nRegions()/Pstream::nProcs());
-
-    forAll(fld, celli)
-    {
-        const label regioni = regions[celli];
-        regionToSum(regioni, Type(Zero)) += fld[celli];
-    }
-
-    Pstream::mapCombineGather(regionToSum, plusEqOp<Type>());
-    Pstream::mapCombineScatter(regionToSum);
-
-    return regionToSum;
+    return !outputPath_.empty();
 }
 
 
-template<class Type>
-Foam::List<Type> Foam::functionObjects::regionSizeDistribution::extractData
-(
-    const labelUList& keys,
-    const Map<Type>& regionData
-) const
+inline Foam::label Foam::coordSetWriter::nFields() const noexcept
 {
-    List<Type> sortedData(keys.size());
+    return nFields_;
+}
 
-    forAll(keys, i)
-    {
-        sortedData[i] = regionData[keys[i]];
-    }
-    return sortedData;
+
+inline Foam::label Foam::coordSetWriter::nFields(const label n) noexcept
+{
+    label old(nFields_);
+    nFields_ = n;
+    return old;
+}
+
+
+inline bool Foam::coordSetWriter::useTracks() const noexcept
+{
+    return useTracks_;
+}
+
+
+inline bool Foam::coordSetWriter::useTracks(const bool on) noexcept
+{
+    bool old(useTracks_);
+    useTracks_ = on;
+    return old;
+}
+
+
+inline bool Foam::coordSetWriter::useTimeDir() const noexcept
+{
+    return useTimeDir_;
+}
+
+
+inline bool Foam::coordSetWriter::useTimeDir(const bool on) noexcept
+{
+    bool old(useTimeDir_);
+    useTimeDir_ = on;
+    return old;
+}
+
+
+inline bool Foam::coordSetWriter::verbose() const noexcept
+{
+    return verbose_;
+}
+
+
+inline bool Foam::coordSetWriter::verbose(bool on) noexcept
+{
+    bool old(verbose_);
+    verbose_ = on;
+    return old;
+}
+
+
+inline bool Foam::coordSetWriter::hasTime() const
+{
+    return currTime_.name().size();
+}
+
+
+inline const Foam::word& Foam::coordSetWriter::timeName() const
+{
+    return currTime_.name();
+}
+
+
+inline Foam::scalar Foam::coordSetWriter::timeValue() const
+{
+    return currTime_.name().empty() ? 0 : currTime_.value();
 }
 
 

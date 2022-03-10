@@ -44,7 +44,7 @@ electricPotential
     timeEnd         100;
     executeControl  timeStep;
     executeInterval 1;
-    writeControl    outputTime;
+    writeControl    writeTime;
     writeInterval   -1;
 }
 

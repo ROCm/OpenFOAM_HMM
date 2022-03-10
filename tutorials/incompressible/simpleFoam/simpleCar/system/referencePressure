@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2112                                 |
+|  \\    /   O peration     | Version:  v2206                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -15,7 +15,7 @@ sample1
     fields          ( p );
 
     sets
-    (
+    {
         cloud
         {
             type    cloud;
@@ -29,7 +29,7 @@ sample1
                 (1 1.0 0.05)
             );
         }
-    );
+    }
 }
 
 average1

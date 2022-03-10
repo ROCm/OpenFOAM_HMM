@@ -482,6 +482,7 @@ DebugSwitches
     constantAbsorptionEmission  0;
     constantAlphaContactAngle   0;
     constantScatter     0;
+    coordSetWriter      0;
     coordinateSystem    0;
     corrected           0;
     coupled             0;
@@ -983,7 +984,6 @@ DebugSwitches
     wedge               0;
     weighted            0;
     word                0;
-    writer              0;
     xmgr                0;
     zeroGradient        0;
     zoneToCell          0;

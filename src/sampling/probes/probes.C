@@ -50,6 +50,119 @@ namespace Foam
 }
 
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::probes::createProbeFiles(const wordList& fieldNames)
+{
+    // Open new output streams
+
+    bool needsNewFiles = false;
+    for (const word& fieldName : fieldNames)
+    {
+        if (!probeFilePtrs_.found(fieldName))
+        {
+            needsNewFiles = true;
+            break;
+        }
+    }
+
+    if (needsNewFiles && Pstream::master())
+    {
+        DebugInfo
+            << "Probing fields: " << fieldNames << nl
+            << "Probing locations: " << *this << nl
+            << endl;
+
+        // Put in undecomposed case
+        // (Note: gives problems for distributed data running)
+
+        fileName probeSubDir = name();
+        if (mesh_.name() != polyMesh::defaultRegion)
+        {
+            probeSubDir = probeSubDir/mesh_.name();
+        }
+
+        fileName probeDir
+        (
+            mesh_.time().globalPath()
+          / functionObject::outputPrefix
+          / probeSubDir
+          / mesh_.time().timeName()
+        );
+        probeDir.clean();  // Remove unneeded ".."
+
+        // Create directory if needed
+        Foam::mkDir(probeDir);
+
+        for (const word& fieldName : fieldNames)
+        {
+            if (probeFilePtrs_.found(fieldName))
+            {
+                // Safety
+                continue;
+            }
+
+            auto osPtr = autoPtr<OFstream>::New(probeDir/fieldName);
+            auto& os = *osPtr;
+
+            probeFilePtrs_.insert(fieldName, osPtr);
+
+            DebugInfo<< "open probe stream: " << os.name() << endl;
+
+            const unsigned int width(IOstream::defaultPrecision() + 7);
+
+            forAll(*this, probei)
+            {
+                os  << "# Probe " << probei << ' ' << operator[](probei);
+
+                if (processor_[probei] == -1)
+                {
+                    os  << "  # Not Found";
+                }
+                // Only for patchProbes
+                else if (probei < patchIDList_.size())
+                {
+                    const label patchi = patchIDList_[probei];
+                    if (patchi != -1)
+                    {
+                        const polyBoundaryMesh& bm = mesh_.boundaryMesh();
+                        if
+                        (
+                            patchi < bm.nNonProcessor()
+                         || processor_[probei] == Pstream::myProcNo()
+                        )
+                        {
+                            os  << " at patch " << bm[patchi].name();
+                        }
+                        os  << " with a distance of "
+                            << mag(operator[](probei)-oldPoints_[probei])
+                            << " m to the original point "
+                            << oldPoints_[probei];
+                    }
+                }
+
+                os  << nl;
+            }
+
+            os  << '#' << setw(IOstream::defaultPrecision() + 6)
+                << "Probe";
+
+            forAll(*this, probei)
+            {
+                if (includeOutOfBounds_ || processor_[probei] != -1)
+                {
+                    os  << ' ' << setw(width) << probei;
+                }
+            }
+            os  << nl;
+
+            os  << '#' << setw(IOstream::defaultPrecision() + 6)
+                << "Time" << endl;
+        }
+    }
+}
+
+
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void Foam::probes::findElements(const fvMesh& mesh)
@@ -243,99 +356,9 @@ Foam::label Foam::probes::prepare(unsigned request)
             }
         }
 
-        if (!(request & ACTION_WRITE))
+        if ((request & ACTION_WRITE) && !currentFields.empty())
         {
-            // No writing - can return now
-            return nFields;
-        }
-        else if (currentFields.empty())
-        {
-            // No new fields - can return now
-            return nFields;
-        }
-
-
-        // Have new fields - open streams for them
-
-        // Put in undecomposed case
-        // (Note: gives problems for distributed data running)
-
-        fileName probeSubDir = name();
-        if (mesh_.name() != polyMesh::defaultRegion)
-        {
-            probeSubDir = probeSubDir/mesh_.name();
-        }
-
-        fileName probeDir
-        (
-            mesh_.time().globalPath()
-          / functionObject::outputPrefix
-          / probeSubDir
-          / mesh_.time().timeName()
-        );
-        probeDir.clean();  // Remove unneeded ".."
-
-        // Create directory if needed
-        mkDir(probeDir);
-
-        for (const word& fieldName : currentFields.sortedToc())
-        {
-            auto osPtr = autoPtr<OFstream>::New(probeDir/fieldName);
-            auto& os = *osPtr;
-
-            probeFilePtrs_.insert(fieldName, osPtr);
-
-            DebugInfo<< "open probe stream: " << os.name() << endl;
-
-            const unsigned int w = IOstream::defaultPrecision() + 7;
-
-            forAll(*this, probei)
-            {
-                os  << "# Probe " << probei << ' ' << operator[](probei);
-
-                if (processor_[probei] == -1)
-                {
-                    os  << "  # Not Found";
-                }
-                // Only for patchProbes
-                else if (probei < patchIDList_.size())
-                {
-                    const label patchi = patchIDList_[probei];
-                    if (patchi != -1)
-                    {
-                        const polyBoundaryMesh& bm = mesh_.boundaryMesh();
-                        if
-                        (
-                            patchi < bm.nNonProcessor()
-                         || processor_[probei] == Pstream::myProcNo()
-                        )
-                        {
-                            os  << " at patch " << bm[patchi].name();
-                        }
-                        os  << " with a distance of "
-                            << mag(operator[](probei)-oldPoints_[probei])
-                            << " m to the original point "
-                            << oldPoints_[probei];
-                    }
-                }
-
-                os  << nl;
-            }
-
-            os  << '#' << setw(IOstream::defaultPrecision() + 6)
-                << "Probe";
-
-            forAll(*this, probei)
-            {
-                if (includeOutOfBounds_ || processor_[probei] != -1)
-                {
-                    os  << ' ' << setw(w) << probei;
-                }
-            }
-            os  << nl;
-
-            os  << '#' << setw(IOstream::defaultPrecision() + 6)
-                << "Time" << endl;
+            createProbeFiles(currentFields.sortedToc());
         }
     }
 

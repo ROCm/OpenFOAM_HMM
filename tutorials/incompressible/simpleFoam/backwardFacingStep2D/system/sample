@@ -1,3 +1,5 @@
+// -*- C++ -*-
+
 type            sets;
 libs            (sampling);
 
@@ -7,8 +9,10 @@ interpolationScheme cellPoint;
 
 setFormat       raw;
 
+fields          (p U turbulenceProperties:devReff);
+
 sets
-(
+{
     Uref
     {
         type    cloud;
@@ -56,6 +60,7 @@ sets
         end     (0.127 0.1016 0);
         nPoints 100;
     }
-);
+}
 
-fields          (p U turbulenceProperties:devReff);
+
+// ************************************************************************* //

@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,183 +25,242 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "csvSetWriter.H"
+#include "csvCoordSetWriter.H"
 #include "coordSet.H"
 #include "fileName.H"
 #include "OFstream.H"
+#include "OSspecific.H"
+#include "coordSetWriterMethods.H"
+#include "addToRunTimeSelectionTable.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+namespace coordSetWriters
+{
+    defineTypeName(csvWriter);
+    addToRunTimeSelectionTable(coordSetWriter, csvWriter, word);
+    addToRunTimeSelectionTable(coordSetWriter, csvWriter, wordDict);
+}
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Implementation
+#include "csvCoordSetWriterImpl.C"
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::csvSetWriter<Type>::csvSetWriter()
+Foam::coordSetWriters::csvWriter::csvWriter()
 :
-    writer<Type>()
-{}
+    coordSetWriter(),
+    streamOpt_(),
+    precision_(IOstream::defaultPrecision())
+{
+    buffering_ = true;
+}
 
 
-template<class Type>
-Foam::csvSetWriter<Type>::csvSetWriter(const dictionary& dict)
+Foam::coordSetWriters::csvWriter::csvWriter(const dictionary& options)
 :
-    writer<Type>(dict)
-{}
+    coordSetWriter(options),
+    streamOpt_
+    (
+        IOstream::ASCII,
+        IOstream::compressionEnum("compression", options)
+    ),
+    precision_
+    (
+        options.getOrDefault("precision", IOstream::defaultPrecision())
+    )
+{
+    buffering_ = options.getOrDefault("buffer", true);
+}
+
+
+Foam::coordSetWriters::csvWriter::csvWriter
+(
+    const coordSet& coords,
+    const fileName& outputPath,
+    const dictionary& options
+)
+:
+    csvWriter(options)
+{
+    open(coords, outputPath);
+}
+
+
+Foam::coordSetWriters::csvWriter::csvWriter
+(
+    const UPtrList<coordSet>& tracks,
+    const fileName& outputPath,
+    const dictionary& options
+)
+:
+    csvWriter(options)
+{
+    open(tracks, outputPath);
+}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::coordSetWriters::csvWriter::~csvWriter()
+{
+    close();
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::fileName Foam::csvSetWriter<Type>::getFileName
-(
-    const coordSet& points,
-    const wordList& valueSetNames
-) const
+bool Foam::coordSetWriters::csvWriter::buffering(const bool on)
 {
-    return this->getBaseName(points, valueSetNames) + ".csv";
+    const bool old(buffering_);
+    buffering_ = on;
+    return old;
 }
 
 
-template<class Type>
-void Foam::csvSetWriter<Type>::write
-(
-    const coordSet& points,
-    const wordList& valueSetNames,
-    const List<const Field<Type>*>& valueSets,
-    Ostream& os
-) const
+Foam::fileName Foam::coordSetWriters::csvWriter::path() const
 {
-    writeHeader(points,valueSetNames,os);
+    // Assume !useTracks_, otherwise too fragile
 
-    // Collect sets into columns
-    List<const List<Type>*> columns(valueSets.size());
+    // 1) rootdir/<TIME>/setName.csv
+    // 2) rootdir/setName.csv
 
-    forAll(valueSets, i)
-    {
-        columns[i] = valueSets[i];
-    }
-
-    this->writeTable(points, columns, os);
+    return getExpectedPath("csv");
 }
 
 
-template<class Type>
-void Foam::csvSetWriter<Type>::write
-(
-    const bool writeTracks,
-    const List<scalarField>& times,
-    const PtrList<coordSet>& tracks,
-    const wordList& valueSetNames,
-    const List<List<Field<Type>>>& valueSets,
-    Ostream& os
-) const
+bool Foam::coordSetWriters::csvWriter::writeBuffered()
 {
-    writeHeader(tracks[0],valueSetNames,os);
-
-    if (valueSets.size() != valueSetNames.size())
+    if (coords_.empty())
     {
-        FatalErrorInFunction
-            << "Number of variables:" << valueSetNames.size() << endl
-            << "Number of valueSets:" << valueSets.size()
-            << exit(FatalError);
+        clearBuffers();
+        return false;
     }
+    const auto& coords = coords_[0];
 
-    List<const List<Type>*> columns(valueSets.size());
 
-    forAll(tracks, trackI)
+    DynamicList<word> headCols(3 + nDataColumns());
+
+    do
     {
-        // Collect sets into columns
-        forAll(valueSets, i)
+        if (coords.hasVectorAxis())
         {
-            columns[i] = &valueSets[i][trackI];
+            // x, y, z
+            headCols.append("x");
+            headCols.append("y");
+            headCols.append("z");
+        }
+        else
+        {
+            headCols.append(coords.axis());
         }
 
-        this->writeTable(tracks[trackI], columns, os);
-        os  << nl << nl;
-    }
-}
+        // label, scalar
+        headCols.append(labelNames_);
+        headCols.append(scalarNames_);
 
-
-template<class Type>
-void Foam::csvSetWriter<Type>::writeSeparator(Ostream& os) const
-{
-    os << token::COMMA;
-}
-
-
-namespace Foam
-{
-    // otherwise compiler complains about specialization
-    template<>
-    void csvSetWriter<scalar>::writeHeader
-    (
-        const coordSet& points,
-        const wordList& valueSetNames,
-        Ostream& os
-    ) const
-    {
-        writeCoordHeader(points, os);
-
-        forAll(valueSetNames, i)
-        {
-            if (i)
-            {
-                writeSeparator(os);
+        // vector space
+        #undef doLocalCode
+        #define doLocalCode(Type)                                             \
+                                                                              \
+            for (const word& fldName : Type##Names_)                          \
+            {                                                                 \
+                for (direction d=0; d < pTraits<Type>::nComponents; ++d)      \
+                {                                                             \
+                    headCols.append(fldName + '_' + Foam::name(d));           \
+                }                                                             \
             }
-            os << valueSetNames[i];
-        }
 
-        os << nl;
+        doLocalCode(vector);
+        doLocalCode(sphericalTensor);
+        doLocalCode(symmTensor);
+        doLocalCode(tensor);
+        #undef doLocalCode
     }
+    while (false);
+
+
+    // Field:
+    // 1) rootdir/<TIME>/setName.csv
+    // 2) rootdir/setName.csv
+
+    fileName outputFile = path();
+
+    if (!isDir(outputFile.path()))
+    {
+        mkDir(outputFile.path());
+    }
+
+    OFstream os(outputFile, streamOpt_);
+    os.precision(precision_);
+
+    writeLine(os, headCols, ",");
+
+    writeBufferContents(os, coords, ",");
+
+    clearBuffers();
+
+    return true;
+}
+
+
+// * * * * * * * * * * * * * * * Implementation * * * * * * * * * * * * * * * //
+
+template<class Type>
+Foam::fileName Foam::coordSetWriters::csvWriter::writeTemplate
+(
+    const word& fieldName,
+    const Field<Type>& values
+)
+{
+    checkOpen();
+    if (coords_.empty())
+    {
+        return fileName::null;
+    }
+
+    if (useTracks_ || !buffering_)
+    {
+        UPtrList<const Field<Type>> fieldPtrs(repackageFields(values));
+        return writeTemplate(fieldName, fieldPtrs);
+    }
+
+    // Buffering version
+    appendField(fieldName, values);
+    return path();
 }
 
 
 template<class Type>
-void Foam::csvSetWriter<Type>::writeHeader
+Foam::fileName Foam::coordSetWriters::csvWriter::writeTemplate
 (
-    const coordSet& points,
-    const wordList& valueSetNames,
-    Ostream& os
-) const
+    const word& fieldName,
+    const List<Field<Type>>& fieldValues
+)
 {
-    writeCoordHeader(points, os);
-
-    forAll(valueSetNames, i)
+    checkOpen();
+    if (coords_.empty())
     {
-        for (label j=0; j<Type::nComponents; j++)
-        {
-            if (i || j)
-            {
-                writeSeparator(os);
-            }
-            os << valueSetNames[i] << "_" << j;
-        }
+        return fileName::null;
     }
+    useTracks_ = true;  // Extra safety
 
-    os << nl;
+    UPtrList<const Field<Type>> fieldPtrs(repackageFields(fieldValues));
+    return writeTemplate(fieldName, fieldPtrs);
 }
 
 
-template<class Type>
-void Foam::csvSetWriter<Type>::writeCoordHeader
-(
-    const coordSet& points,
-    Ostream& os
-) const
-{
-    const word axisName(points.axis());
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    if (points.hasVectorAxis())
-    {
-        for (auto iter = axisName.cbegin(); iter != axisName.cend(); ++iter)
-        {
-            os << *iter;
-            writeSeparator(os);
-        }
-    }
-    else
-    {
-        os << axisName;
-        writeSeparator(os);
-    }
-}
+// Field writing methods
+defineCoordSetWriterWriteFields(Foam::coordSetWriters::csvWriter);
 
 
 // ************************************************************************* //

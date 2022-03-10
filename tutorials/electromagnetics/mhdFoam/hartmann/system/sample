@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2112                                 |
+|  \\    /   O peration     | Version:  v2206                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -21,8 +21,10 @@ interpolationScheme cellPoint;
 
 setFormat       raw;
 
+fields          ( Ux );
+
 sets
-(
+{
     line_centreProfile
     {
         type    uniform;
@@ -31,9 +33,6 @@ sets
         end     (10.001 1 0.01);
         nPoints 100;
     }
-);
-
-fields          ( Ux );
-
+}
 
 // ************************************************************************* //

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,135 +26,239 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "gnuplotSetWriter.H"
+#include "gnuplotCoordSetWriter.H"
 #include "coordSet.H"
 #include "fileName.H"
 #include "OFstream.H"
+#include "OSspecific.H"
+#include "coordSetWriterMethods.H"
 #include "addToRunTimeSelectionTable.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+namespace coordSetWriters
+{
+    defineTypeName(gnuplotWriter);
+    addToRunTimeSelectionTable(coordSetWriter, gnuplotWriter, word);
+    addToRunTimeSelectionTable(coordSetWriter, gnuplotWriter, wordDict);
+}
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Implementation
+#include "gnuplotCoordSetWriterImpl.C"
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::gnuplotSetWriter<Type>::gnuplotSetWriter()
+Foam::coordSetWriters::gnuplotWriter::gnuplotWriter()
 :
-    writer<Type>()
-{}
+    coordSetWriter(),
+    streamOpt_(),
+    precision_(IOstream::defaultPrecision())
+{
+    buffering_ = true;
+}
 
 
-template<class Type>
-Foam::gnuplotSetWriter<Type>::gnuplotSetWriter(const dictionary& dict)
+Foam::coordSetWriters::gnuplotWriter::gnuplotWriter(const dictionary& options)
 :
-    writer<Type>(dict)
-{}
+    coordSetWriter(options),
+    streamOpt_
+    (
+        IOstream::ASCII,
+        IOstream::compressionEnum("compression", options)
+    ),
+    precision_
+    (
+        options.getOrDefault("precision", IOstream::defaultPrecision())
+    )
+{
+    buffering_ = options.getOrDefault("buffer", true);
+}
+
+
+Foam::coordSetWriters::gnuplotWriter::gnuplotWriter
+(
+    const coordSet& coords,
+    const fileName& outputPath,
+    const dictionary& options
+)
+:
+    gnuplotWriter(options)
+{
+    open(coords, outputPath);
+}
+
+
+Foam::coordSetWriters::gnuplotWriter::gnuplotWriter
+(
+    const UPtrList<coordSet>& tracks,
+    const fileName& outputPath,
+    const dictionary& options
+)
+:
+    gnuplotWriter(options)
+{
+    open(tracks, outputPath);
+}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::coordSetWriters::gnuplotWriter::~gnuplotWriter()
+{
+    close();
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::fileName Foam::gnuplotSetWriter<Type>::getFileName
-(
-    const coordSet& points,
-    const wordList& valueSetNames
-) const
+bool Foam::coordSetWriters::gnuplotWriter::buffering(const bool on)
 {
-    return this->getBaseName(points, valueSetNames) + ".gplt";
+    const bool old(buffering_);
+    buffering_ = on;
+    return old;
+}
+
+
+Foam::fileName Foam::coordSetWriters::gnuplotWriter::path() const
+{
+    // 1) rootdir/<TIME>/setName.{gplt}
+    // 2) rootdir/setName.{gplt}
+
+    return getExpectedPath("gplt");
+}
+
+
+bool Foam::coordSetWriters::gnuplotWriter::writeBuffered()
+{
+    if (coords_.empty())
+    {
+        clearBuffers();
+        return false;
+    }
+
+    // Field:
+    // 1) rootdir/<TIME>/setName.gplt
+    // 2) rootdir/setName.gplt
+
+    fileName outputFile = path();
+
+    if (!isDir(outputFile.path()))
+    {
+        mkDir(outputFile.path());
+    }
+
+    OFstream os(outputFile, streamOpt_);
+    os.precision(precision_);
+
+    os  << "set term pngcairo" << nl
+        << "set output \"" << outputFile.nameLessExt() << ".png\"" << nl;
+
+    label nplots = 0;
+    do
+    {
+        #undef doLocalCode
+        #define doLocalCode(Type)                                             \
+        for (const word& fldName : Type##Names_)                              \
+        {                                                                     \
+            os  << (nplots++ ? ", \\" : "plot \\") << nl;                     \
+            os  << "  '-' title \"" << fldName << "\" with lines";            \
+        }
+
+        doLocalCode(label);
+        doLocalCode(scalar);
+        doLocalCode(vector);
+        doLocalCode(sphericalTensor);
+        doLocalCode(symmTensor);
+        doLocalCode(tensor);
+        #undef doLocalCode
+    }
+    while (false);
+
+    os  << nl << nl;
+
+    if (nplots)
+    {
+        #undef doLocalCode
+        #define doLocalCode(Type)                                             \
+        for (const Field<Type>& fld : Type##Fields_)                          \
+        {                                                                     \
+            writeTable(os, coords_[0], fld, " \t");                           \
+            os  << "end_data" << nl << nl;                                    \
+        }
+
+        doLocalCode(label);
+        doLocalCode(scalar);
+        doLocalCode(vector);
+        doLocalCode(sphericalTensor);
+        doLocalCode(symmTensor);
+        doLocalCode(tensor);
+        #undef doLocalCode
+    }
+
+    os  << "# end plot" << nl;
+
+    clearBuffers();
+
+    return true;
 }
 
 
 template<class Type>
-void Foam::gnuplotSetWriter<Type>::write
+Foam::fileName Foam::coordSetWriters::gnuplotWriter::writeTemplate
 (
-    const coordSet& points,
-    const wordList& valueSetNames,
-    const List<const Field<Type>*>& valueSets,
-    Ostream& os
-) const
+    const word& fieldName,
+    const Field<Type>& values
+)
 {
-    os  << "set term postscript color" << nl
-        << "set output \"" << points.name() << ".ps\"" << nl;
-
-    // Set secondary Y axis if using two columns. Falls back to same
-    // values if both on same scale. However, ignore if more columns.
-    if (valueSetNames.size() == 2)
+    checkOpen();
+    if (coords_.empty())
     {
-        os  << "set ylabel \"" << valueSetNames[0] << "\"" << nl
-            << "set y2label \"" << valueSetNames[1] << "\"" << nl
-            << "set ytics nomirror" << nl << "set y2tics" << nl;
+        return fileName::null;
     }
 
-    os  << "plot";
-
-    forAll(valueSets, i)
+    if (useTracks_ || !buffering_)
     {
-        if (i)
-        {
-            os << ',';
-        }
-
-        os  << " \"-\" title \"" << valueSetNames[i] << "\" with lines";
-
-        if (valueSetNames.size() == 2)
-        {
-            os  << " axes x1y" << (i+1) ;
-        }
+        UPtrList<const Field<Type>> fieldPtrs(repackageFields(values));
+        return writeTemplate(fieldName, fieldPtrs);
     }
-    os  << nl;
 
-    forAll(valueSets, i)
-    {
-        this->writeTable(points, *valueSets[i], os);
-        os  << "e" << nl;
-    }
+
+    // Buffering version
+    appendField(fieldName, values);
+
+    return path();
 }
 
 
 template<class Type>
-void Foam::gnuplotSetWriter<Type>::write
+Foam::fileName Foam::coordSetWriters::gnuplotWriter::writeTemplate
 (
-    const bool writeTracks,
-    const List<scalarField>& times,
-    const PtrList<coordSet>& tracks,
-    const wordList& valueSetNames,
-    const List<List<Field<Type>>>& valueSets,
-    Ostream& os
-) const
+    const word& fieldName,
+    const List<Field<Type>>& fieldValues
+)
 {
-    if (valueSets.size() != valueSetNames.size())
+    checkOpen();
+    if (coords_.empty())
     {
-        FatalErrorInFunction
-            << "Number of variables:" << valueSetNames.size() << endl
-            << "Number of valueSets:" << valueSets.size()
-            << exit(FatalError);
+        return fileName::null;
     }
-    if (tracks.size() > 0)
-    {
-        os  << "set term postscript color" << nl
-            << "set output \"" << tracks[0].name() << ".ps\"" << nl;
 
-        forAll(tracks, trackI)
-        {
-            os  << "plot";
-
-            forAll(valueSets, i)
-            {
-                if (i != 0)
-                {
-                    os << ',';
-                }
-
-                os  << " \"-\" title \"" << valueSetNames[i] << "\" with lines";
-            }
-            os << nl;
-
-            forAll(valueSets, i)
-            {
-                this->writeTable(tracks[trackI], valueSets[i][trackI], os);
-                os  << "e" << nl;
-            }
-        }
-    }
+    UPtrList<const Field<Type>> fieldPtrs(repackageFields(fieldValues));
+    return writeTemplate(fieldName, fieldPtrs);
 }
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Field writing methods
+defineCoordSetWriterWriteFields(Foam::coordSetWriters::gnuplotWriter);
 
 
 // ************************************************************************* //

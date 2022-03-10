@@ -10,7 +10,7 @@ writeControl        writeTime;
 fields              (U);
 
 sets
-(
+{
     lineZ1
     {
         type        midPoint;
@@ -19,7 +19,7 @@ sets
         end         (0 0 6001);
         nPoints     200;
     }
-);
+}
 
 
 // *********************************************************************** //

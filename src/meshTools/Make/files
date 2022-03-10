@@ -136,16 +136,19 @@ coordSet/coordSet.C
 
 setWriters = coordSet/writers
 
-$(setWriters)/common/writers.C
-$(setWriters)/csv/csvSetWriterRunTime.C
-$(setWriters)/ensight/ensightSetWriterRunTime.C
-$(setWriters)/gltf/gltfSetWriterRunTime.C
-$(setWriters)/gnuplot/gnuplotSetWriterRunTime.C
-$(setWriters)/nastran/nastranSetWriterRunTime.C
-$(setWriters)/raw/rawSetWriterRunTime.C
+$(setWriters)/common/coordSetWriter.C
+$(setWriters)/common/coordSetWriterBuffers.C
+$(setWriters)/common/coordSetWriterNew.C
+$(setWriters)/csv/csvCoordSetWriter.C
+$(setWriters)/ensight/ensightCoordSetWriter.C
+$(setWriters)/gltf/gltfCoordSetWriter.C
+$(setWriters)/gnuplot/gnuplotCoordSetWriter.C
+$(setWriters)/nastran/nastranCoordSetWriter.C
+$(setWriters)/null/nullCoordSetWriter.C
+$(setWriters)/raw/rawCoordSetWriter.C
 $(setWriters)/vtk/foamVtkCoordSetWriter.C
-$(setWriters)/vtk/vtkSetWriterRunTime.C
-$(setWriters)/xmgrace/xmgraceSetWriterRunTime.C
+$(setWriters)/vtk/vtkCoordSetWriter.C
+$(setWriters)/xmgrace/xmgraceCoordSetWriter.C
 
 graph/curve.C
 graph/graph.C

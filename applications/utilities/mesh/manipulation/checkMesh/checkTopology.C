@@ -36,7 +36,7 @@ License
 #include "IOmanip.H"
 #include "emptyPolyPatch.H"
 #include "processorPolyPatch.H"
-#include "vtkSetWriter.H"
+#include "vtkCoordSetWriter.H"
 #include "vtkSurfaceWriter.H"
 #include "checkTools.H"
 #include "treeBoundBox.H"
@@ -117,7 +117,7 @@ Foam::label Foam::checkTopology
     const bool allTopology,
     const bool allGeometry,
     autoPtr<surfaceWriter>& surfWriter,
-    const autoPtr<writer<scalar>>& setWriter
+    autoPtr<coordSetWriter>& setWriter
 )
 {
     label noFailedChecks = 0;
@@ -203,7 +203,7 @@ Foam::label Foam::checkTopology
                 << " illegal cells to set " << cells.name() << endl;
             cells.instance() = mesh.pointsInstance();
             cells.write();
-            if (surfWriter)
+            if (surfWriter && surfWriter->enabled())
             {
                 mergeAndWrite(*surfWriter, cells);
             }
@@ -227,7 +227,7 @@ Foam::label Foam::checkTopology
                 << " unused points to set " << points.name() << endl;
             points.instance() = mesh.pointsInstance();
             points.write();
-            if (setWriter)
+            if (setWriter && setWriter->enabled())
             {
                 mergeAndWrite(*setWriter, points);
             }
@@ -249,7 +249,7 @@ Foam::label Foam::checkTopology
                 << " unordered faces to set " << faces.name() << endl;
             faces.instance() = mesh.pointsInstance();
             faces.write();
-            if (surfWriter)
+            if (surfWriter && surfWriter->enabled())
             {
                 mergeAndWrite(*surfWriter, faces);
             }
@@ -269,7 +269,7 @@ Foam::label Foam::checkTopology
                 << faces.name() << endl;
             faces.instance() = mesh.pointsInstance();
             faces.write();
-            if (surfWriter)
+            if (surfWriter && surfWriter->enabled())
             {
                 mergeAndWrite(*surfWriter, faces);
             }
@@ -290,11 +290,10 @@ Foam::label Foam::checkTopology
                 << endl;
             cells.instance() = mesh.pointsInstance();
             cells.write();
-            if (surfWriter)
+            if (surfWriter && surfWriter->enabled())
             {
                 mergeAndWrite(*surfWriter, cells);
             }
-
         }
     }
 
@@ -314,7 +313,7 @@ Foam::label Foam::checkTopology
                 << faces.name() << endl;
             faces.instance() = mesh.pointsInstance();
             faces.write();
-            if (surfWriter)
+            if (surfWriter && surfWriter->enabled())
             {
                 mergeAndWrite(*surfWriter, faces);
             }
@@ -369,7 +368,7 @@ Foam::label Foam::checkTopology
                 << endl;
             oneCells.instance() = mesh.pointsInstance();
             oneCells.write();
-            if (surfWriter)
+            if (surfWriter && surfWriter->enabled())
             {
                 mergeAndWrite(*surfWriter, oneCells);
             }
@@ -385,7 +384,7 @@ Foam::label Foam::checkTopology
                 << endl;
             twoCells.instance() = mesh.pointsInstance();
             twoCells.write();
-            if (surfWriter)
+            if (surfWriter && surfWriter->enabled())
             {
                 mergeAndWrite(*surfWriter, twoCells);
             }
@@ -530,7 +529,7 @@ Foam::label Foam::checkTopology
                     << " points that are in multiple regions to set "
                     << points.name() << endl;
                 points.write();
-                if (setWriter)
+                if (setWriter && setWriter->enabled())
                 {
                     mergeAndWrite(*setWriter, points);
                 }
@@ -641,7 +640,7 @@ Foam::label Foam::checkTopology
             << " conflicting points to set " << points.name() << endl;
         points.instance() = mesh.pointsInstance();
         points.write();
-        if (setWriter)
+        if (setWriter && setWriter->enabled())
         {
             mergeAndWrite(*setWriter, points);
         }

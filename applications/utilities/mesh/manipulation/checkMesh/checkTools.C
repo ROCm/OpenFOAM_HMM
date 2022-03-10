@@ -41,7 +41,7 @@ License
 #include "faceSet.H"
 #include "cellSet.H"
 #include "Time.H"
-#include "writer.H"
+#include "coordSetWriter.H"
 #include "surfaceWriter.H"
 #include "syncTools.H"
 #include "globalIndex.H"
@@ -417,7 +417,7 @@ void Foam::mergeAndWrite
 
 void Foam::mergeAndWrite
 (
-    const writer<scalar>& writer,
+    coordSetWriter& writer,
     const pointSet& set
 )
 {
@@ -441,39 +441,26 @@ void Foam::mergeAndWrite
     }
 
 
-    // Write with scalar pointID
+    // Write with pointID
     if (Pstream::master())
     {
-        scalarField scalarPointIDs(mergedIDs.size());
-        forAll(mergedIDs, i)
-        {
-            scalarPointIDs[i] = 1.0*mergedIDs[i];
-        }
+        coordSet coords(set.name(), "distance", mergedPts, mag(mergedPts));
 
-        coordSet points(set.name(), "distance", mergedPts, mag(mergedPts));
+        // Output. E.g. pointSet p0 -> postProcessing/<time>/p0.vtk
 
-        List<const scalarField*> flds(1, &scalarPointIDs);
-
-        wordList fldNames(1, "pointID");
-
-        // Output e.g. pointSet p0 to
-        // postProcessing/<time>/p0.vtk
-        fileName outputDir
+        fileName outputPath
         (
             set.time().globalPath()
           / functionObject::outputPrefix
           / mesh.pointsInstance()
-          // set.name()
+          / set.name()
         );
-        outputDir.clean();  // Remove unneeded ".."
-        mkDir(outputDir);
+        outputPath.clean();  // Remove unneeded ".."
 
-        fileName outputFile(outputDir/writer.getFileName(points, wordList()));
-        //fileName outputFile(outputDir/set.name());
-
-        OFstream os(outputFile);
-
-        writer.write(points, fldNames, flds, os);
+        writer.open(coords, outputPath);
+        writer.nFields(1);
+        writer.write("pointID", mergedIDs);
+        writer.close(true);
     }
 }
 

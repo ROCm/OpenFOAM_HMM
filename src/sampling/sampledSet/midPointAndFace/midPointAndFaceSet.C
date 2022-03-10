@@ -57,11 +57,11 @@ void Foam::midPointAndFaceSet::genSamples()
     while (size() > 0)
     {
         // Add first face
-        mpfSamplePoints[mpfSamplei] = operator[](samplei);
+        mpfSamplePoints[mpfSamplei] = points()[samplei];
         mpfSampleCells[mpfSamplei] = cells_[samplei];
         mpfSampleFaces[mpfSamplei] = faces_[samplei];
         mpfSampleSegments[mpfSamplei] = segments_[samplei];
-        mpfSampleCurveDist[mpfSamplei] = curveDist_[samplei];
+        mpfSampleCurveDist[mpfSamplei] = distance_[samplei];
         ++mpfSamplei;
 
         while
@@ -70,7 +70,7 @@ void Foam::midPointAndFaceSet::genSamples()
          && (segments_[samplei] == segments_[samplei+1])
         )
         {
-            point midPoint(0.5*(operator[](samplei) + operator[](samplei+1)));
+            point midPoint(0.5*(points()[samplei] + points()[samplei+1]));
             label cellm = pointInCell(midPoint, samplei);
 
             if (cellm != -1)

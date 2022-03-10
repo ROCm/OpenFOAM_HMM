@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,7 @@ License
 #include "streamLineBase.H"
 #include "fvMesh.H"
 #include "ReadFields.H"
+#include "OFstream.H"
 #include "sampledSet.H"
 #include "globalIndex.H"
 #include "mapDistribute.H"
@@ -626,8 +627,7 @@ bool Foam::functionObjects::streamLineBase::writeToFile()
 
 
     // Note: filenames scattered below since used in global call
-    fileName scalarVtkFile;
-    fileName vectorVtkFile;
+    HashTable<fileName> outputFileNames;
 
     if (Pstream::master())
     {
@@ -706,117 +706,112 @@ bool Foam::functionObjects::streamLineBase::writeToFile()
             }
         }
 
-        // Convert scalar values
 
-        if (!allScalars_.empty() && !tracks.empty())
+        const bool canWrite =
+        (
+            !tracks.empty()
+         && trackWriterPtr_
+         && trackWriterPtr_->enabled()
+         && (!allScalars_.empty() || !allVectors_.empty())
+        );
+
+        if (canWrite)
         {
-            List<List<scalarField>> scalarValues(allScalars_.size());
+            auto& writer = trackWriterPtr_();
 
-            forAll(allScalars_, scalari)
+            writer.nFields(allScalars_.size() + allVectors_.size());
+
+            writer.open
+            (
+                tracks,
+                (vtkPath / tracks[0].name())
+            );
+
+
+            // Temporary measure
+            if (!allScalars_.empty())
             {
-                DynamicList<scalarList>& allTrackVals = allScalars_[scalari];
-                scalarValues[scalari].setSize(nTracks);
+                List<List<scalarField>> scalarValues(allScalars_.size());
 
-                forAll(allTrackVals, tracki)
+                forAll(allScalars_, scalari)
                 {
-                    scalarList& vals = allTrackVals[tracki];
-                    if (vals.size())
+                    DynamicList<scalarList>& allTrackVals = allScalars_[scalari];
+                    scalarValues[scalari].resize(nTracks);
+
+                    forAll(allTrackVals, tracki)
                     {
-                        const label newTracki = oldToNewTrack[tracki];
-                        scalarValues[scalari][newTracki].transfer(vals);
+                        scalarList& vals = allTrackVals[tracki];
+                        if (vals.size())
+                        {
+                            const label newTracki = oldToNewTrack[tracki];
+                            scalarValues[scalari][newTracki].transfer(vals);
+                        }
                     }
+                }
+
+                forAll(scalarNames_, i)
+                {
+                    fileName outFile =
+                        writer.write(scalarNames_[i], scalarValues[i]);
+
+                    outputFileNames.insert
+                    (
+                        scalarNames_[i],
+                        time_.relativePath(outFile, true)
+                    );
                 }
             }
 
-            scalarVtkFile = fileName
-            (
-                vtkPath
-              / scalarFormatterPtr_().getFileName
-                (
-                    tracks[0],
-                    scalarNames_
-                )
-            );
-
-            Log << "    Writing data to " << scalarVtkFile.path() << endl;
-
-            scalarFormatterPtr_().write
-            (
-                true,                   // writeTracks
-                List<scalarField>(),    // times
-                tracks,
-                scalarNames_,
-                scalarValues,
-                OFstream(scalarVtkFile)()
-            );
-        }
-
-        // Convert vector values
-
-        if (!allVectors_.empty() && !tracks.empty())
-        {
-            List<List<vectorField>> vectorValues(allVectors_.size());
-
-            forAll(allVectors_, vectori)
+            if (!allVectors_.empty())
             {
-                DynamicList<vectorList>& allTrackVals = allVectors_[vectori];
-                vectorValues[vectori].setSize(nTracks);
+                List<List<vectorField>> vectorValues(allVectors_.size());
 
-                forAll(allTrackVals, tracki)
+                forAll(allVectors_, vectori)
                 {
-                    vectorList& vals = allTrackVals[tracki];
-                    if (vals.size())
+                    DynamicList<vectorList>& allTrackVals = allVectors_[vectori];
+                    vectorValues[vectori].setSize(nTracks);
+
+                    forAll(allTrackVals, tracki)
                     {
-                        const label newTracki = oldToNewTrack[tracki];
-                        vectorValues[vectori][newTracki].transfer(vals);
+                        vectorList& vals = allTrackVals[tracki];
+                        if (vals.size())
+                        {
+                            const label newTracki = oldToNewTrack[tracki];
+                            vectorValues[vectori][newTracki].transfer(vals);
+                        }
                     }
+                }
+
+                forAll(vectorNames_, i)
+                {
+                    fileName outFile =
+                        writer.write(vectorNames_[i], vectorValues[i]);
+
+                    outputFileNames.insert
+                    (
+                        scalarNames_[i],
+                        time_.relativePath(outFile, true)
+                    );
                 }
             }
 
-            vectorVtkFile = fileName
-            (
-                vtkPath
-              / vectorFormatterPtr_().getFileName(tracks[0], vectorNames_)
-            );
-
-            //Info<< "    Writing vector data to " << vectorVtkFile << endl;
-
-            vectorFormatterPtr_().write
-            (
-                true,                   // writeTracks
-                List<scalarField>(),    // times
-                tracks,
-                vectorNames_,
-                vectorValues,
-                OFstream(vectorVtkFile)()
-            );
+            writer.close(true);
         }
+
+        // Log << "    Writing data to " << scalarVtkFile.path() << endl;
     }
 
 
-    // File names are generated on the master but setProperty needs to
-    // be across all procs
-    Pstream::scatter(scalarVtkFile);
-    for (const word& fieldName : scalarNames_)
-    {
-        dictionary propsDict;
-        propsDict.add
-        (
-            "file",
-            time_.relativePath(scalarVtkFile, true)
-        );
-        setProperty(fieldName, propsDict);
-    }
+    // File names generated on the master but setProperty needed everywher
+    Pstream::scatter(outputFileNames);
 
-    Pstream::scatter(vectorVtkFile);
-    for (const word& fieldName : vectorNames_)
+    forAllConstIters(outputFileNames, iter)
     {
+        const word& fieldName = iter.key();
+        const fileName& outputName = iter.val();
+
         dictionary propsDict;
-        propsDict.add
-        (
-            "file",
-            time_.relativePath(vectorVtkFile, true)
-        );
+        propsDict.add("file", outputName);
         setProperty(fieldName, propsDict);
     }
 
@@ -844,7 +839,7 @@ Foam::functionObjects::streamLineBase::streamLineBase
     const dictionary& dict
 )
 :
-    fvMeshFunctionObject(name, runTime, dict),
+    functionObjects::fvMeshFunctionObject(name, runTime, dict),
     dict_(dict),
     fields_()
 {}
@@ -858,7 +853,7 @@ Foam::functionObjects::streamLineBase::streamLineBase
     const wordList& fieldNames
 )
 :
-    fvMeshFunctionObject(name, runTime, dict),
+    functionObjects::fvMeshFunctionObject(name, runTime, dict),
     dict_(dict),
     fields_(fieldNames)
 {}
@@ -959,8 +954,13 @@ bool Foam::functionObjects::streamLineBase::read(const dictionary& dict)
     sampledSetPtr_.clear();
     sampledSetAxis_.clear();
 
-    scalarFormatterPtr_ = writer<scalar>::New(dict.get<word>("setFormat"));
-    vectorFormatterPtr_ = writer<vector>::New(dict.get<word>("setFormat"));
+    const word setFormat(dict.get<word>("setFormat"));
+
+    trackWriterPtr_ = coordSetWriter::New
+    (
+        setFormat,
+        dict.subOrEmptyDict("formatOptions").optionalSubDict(setFormat)
+    );
 
     return true;
 }

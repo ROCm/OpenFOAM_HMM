@@ -41,7 +41,7 @@ SourceFiles
 #include "labelList.H"
 #include "scalarField.H"
 #include "Tuple2.H"
-#include "writer.H"
+#include "coordSetWriter.H"
 #include "DynamicList.H"
 #include "labelVector.H"
 #include "meshRefinement.H"
@@ -83,7 +83,7 @@ class snappyRefineDriver
         const labelList globalToSlavePatch_;
 
         //- How to write lines. Used e.g. when writing leak-paths
-        const writer<scalar>& setFormatter_;
+        coordSetWriter& setFormatter_;
 
         //- Are we operating in test mode?
         const bool dryRun_;
@@ -275,7 +275,7 @@ public:
             fvMeshDistribute& distributor,
             const labelUList& globalToMasterPatch,
             const labelUList& globalToSlavePatch,
-            const writer<scalar>& setFormatter,
+            coordSetWriter& setFormatter,
             const bool dryRun = false
         );
 

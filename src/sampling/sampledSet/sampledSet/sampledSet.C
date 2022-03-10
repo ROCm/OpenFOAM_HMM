@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,7 +30,6 @@ License
 #include "polyMesh.H"
 #include "primitiveMesh.H"
 #include "meshSearch.H"
-#include "writer.H"
 #include "particle.H"
 #include "globalIndex.H"
 
@@ -52,16 +51,16 @@ void Foam::sampledSet::checkDimensions() const
         (cells_.size() != size())
      || (faces_.size() != size())
      || (segments_.size() != size())
-     || (curveDist_.size() != size())
+     || (distance_.size() != size())
     )
     {
         FatalErrorInFunction
-            << "sizes not equal : "
+            << "Sizes not equal : "
             << "  points:" << size()
             << "  cells:" << cells_.size()
             << "  faces:" << faces_.size()
             << "  segments:" << segments_.size()
-            << "  curveDist:" << curveDist_.size()
+            << "  distance:" << distance_.size()
             << abort(FatalError);
     }
 }
@@ -75,14 +74,12 @@ Foam::label Foam::sampledSet::getBoundaryCell(const label facei) const
 
 Foam::label Foam::sampledSet::getNeighbourCell(const label facei) const
 {
-    if (facei >= mesh().nInternalFaces())
-    {
-        return mesh().faceOwner()[facei];
-    }
-    else
+    if (facei < mesh().nInternalFaces())
     {
         return mesh().faceNeighbour()[facei];
     }
+
+    return mesh().faceOwner()[facei];
 }
 
 
@@ -384,11 +381,11 @@ void Foam::sampledSet::setSamples
     const labelList& samplingCells,
     const labelList& samplingFaces,
     const labelList& samplingSegments,
-    const scalarList& samplingCurveDist
+    const scalarList& samplingDistance
 )
 {
     setPoints(samplingPts);
-    curveDist_ = samplingCurveDist;
+    setDistance(samplingDistance, false);  // check=false
 
     segments_ = samplingSegments;
     cells_ = samplingCells;
@@ -404,59 +401,17 @@ void Foam::sampledSet::setSamples
     labelList&& samplingCells,
     labelList&& samplingFaces,
     labelList&& samplingSegments,
-    scalarList&& samplingCurveDist
+    scalarList&& samplingDistance
 )
 {
     setPoints(std::move(samplingPts));
-    curveDist_ = std::move(samplingCurveDist);
+    setDistance(std::move(samplingDistance), false);  // check=false
 
     segments_ = std::move(samplingSegments);
     cells_ = std::move(samplingCells);
     faces_ = std::move(samplingFaces);
 
     checkDimensions();
-}
-
-
-Foam::autoPtr<Foam::coordSet> Foam::sampledSet::gather
-(
-    labelList& indexSet,
-    labelList& allSegments
-) const
-{
-    // Combine sampleSet from processors. Sort by curveDist. Return
-    // ordering in indexSet.
-    // Note: only master results are valid
-
-    List<point> allPts;
-    globalIndex::gatherOp(*this, allPts);
-
-    globalIndex::gatherOp(segments(), allSegments);
-
-    scalarList allCurveDist;
-    globalIndex::gatherOp(curveDist(), allCurveDist);
-
-
-    if (Pstream::master() && allCurveDist.empty())
-    {
-        WarningInFunction
-            << "Sample set " << name()
-            << " has zero points." << endl;
-    }
-
-    // Sort curveDist and use to fill masterSamplePts
-    Foam::sortedOrder(allCurveDist, indexSet);      // uses stable sort
-    scalarList sortedDist(allCurveDist, indexSet);  // with indices for mapping
-
-    allSegments = UIndirectList<label>(allSegments, indexSet)();
-
-    return autoPtr<coordSet>::New
-    (
-        name(),
-        axis(),
-        List<point>(UIndirectList<point>(allPts, indexSet)),
-        sortedDist
-    );
 }
 
 
@@ -511,6 +466,25 @@ Foam::sampledSet::sampledSet
     cells_(),
     faces_()
 {}
+
+
+// Foam::autoPtr<Foam::coordSet> Foam::sampledSet::gather
+// (
+//     labelList& sortOrder,
+//     labelList& allSegments
+// ) const
+// {
+//     autoPtr<coordSet> result(coordSet::gatherSort(sortOrder));
+//
+//     // Optional
+//     if (notNull(allSegments))
+//     {
+//         globalIndex::gatherOp(segments(), allSegments);
+//         allSegments = UIndirectList<label>(allSegments, sortOrder)();
+//     }
+//
+//     return result;
+// }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
