@@ -421,7 +421,7 @@ void extractSurface
         label sz = compactZoneID.size();
         compactZoneID.insert(iter.key(), sz);
     }
-    Pstream::mapCombineScatter(compactZoneID);
+    Pstream::broadcast(compactZoneID);
 
 
     // Rework HashTable into labelList just for speed of conversion

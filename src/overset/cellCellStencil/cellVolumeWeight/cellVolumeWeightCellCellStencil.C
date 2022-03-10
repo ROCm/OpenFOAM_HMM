@@ -378,7 +378,7 @@ void Foam::cellCellStencils::cellVolumeWeight::findHoles
         // Synchronise region status on processors
         // (could instead swap status through processor patches)
         Pstream::listCombineGather(regionType, maxEqOp<label>());
-        Pstream::listCombineScatter(regionType);
+        Pstream::broadcast(regionType);
 
         // Communicate region status through interpolative cells
         labelList cellRegionType(labelUIndList(regionType, cellRegion));
@@ -756,7 +756,7 @@ bool Foam::cellCellStencils::cellVolumeWeight::update()
         nCellsPerZone[zoneID[cellI]]++;
     }
     Pstream::listCombineGather(nCellsPerZone, plusEqOp<label>());
-    Pstream::listCombineScatter(nCellsPerZone);
+    Pstream::broadcast(nCellsPerZone);
 
 
     Info<< typeName << " : detected " << nZones

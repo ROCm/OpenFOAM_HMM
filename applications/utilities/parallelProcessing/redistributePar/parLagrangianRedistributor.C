@@ -85,7 +85,7 @@ void Foam::parLagrangianRedistributor::findClouds
 
     // Synchronise cloud names
     Pstream::combineGather(cloudNames, ListOps::uniqueEqOp<word>());
-    Pstream::combineScatter(cloudNames);
+    Pstream::broadcast(cloudNames);
 
     objectNames.setSize(cloudNames.size());
 
@@ -123,7 +123,7 @@ void Foam::parLagrangianRedistributor::findClouds
     forAll(objectNames, i)
     {
         Pstream::combineGather(objectNames[i], ListOps::uniqueEqOp<word>());
-        Pstream::combineScatter(objectNames[i]);
+        Pstream::broadcast(objectNames[i]);
     }
 }
 

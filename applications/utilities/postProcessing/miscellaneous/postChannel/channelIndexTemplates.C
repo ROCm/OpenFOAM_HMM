@@ -41,7 +41,7 @@ Foam::Field<T> Foam::channelIndex::regionSum(const Field<T>& cellField) const
 
     // Global sum
     Pstream::listCombineGather(regionField, plusEqOp<T>());
-    Pstream::listCombineScatter(regionField);
+    Pstream::broadcast(regionField);
 
     return regionField;
 }

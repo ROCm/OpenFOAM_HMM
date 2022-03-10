@@ -475,7 +475,7 @@ Foam::label Foam::checkTopology
                 }
 
                 Pstream::listCombineGather(regionDisconnected, andEqOp<bool>());
-                Pstream::listCombineScatter(regionDisconnected);
+                Pstream::broadcast(regionDisconnected);
             }
 
 

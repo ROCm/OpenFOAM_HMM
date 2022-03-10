@@ -821,7 +821,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::createZoneBaffles
         if (nTotalBaffles > 0)
         {
             Pstream::listCombineGather(nBaffles, plusEqOp<label>());
-            Pstream::listCombineScatter(nBaffles);
+            Pstream::broadcast(nBaffles);
 
             Info<< nl
                 << setf(ios_base::left)
@@ -1948,7 +1948,7 @@ void Foam::meshRefinement::findCellZoneTopo
     // - keepRegion is identical ,,
     // - cellZones are identical ,,
     Pstream::listCombineGather(regionToCellZone, maxEqOp<label>());
-    Pstream::listCombineScatter(regionToCellZone);
+    Pstream::broadcast(regionToCellZone);
 
 
     // Find the region containing the keepPoint
@@ -1999,7 +1999,7 @@ void Foam::meshRefinement::findCellZoneTopo
         // This done at top of loop to account for geometric matching
         // not being synchronised.
         Pstream::listCombineGather(regionToCellZone, maxEqOp<label>());
-        Pstream::listCombineScatter(regionToCellZone);
+        Pstream::broadcast(regionToCellZone);
 
 
         bool changed = false;
@@ -5733,7 +5733,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
         // 2.Combine faceZoneNames allocated on different processors
 
         Pstream::mapCombineGather(zonesToFaceZone, eqOp<word>());
-        Pstream::mapCombineScatter(zonesToFaceZone);
+        Pstream::broadcast(zonesToFaceZone);
 
 
         // 3. Allocate faceZones from (now synchronised) faceZoneNames
@@ -5957,7 +5957,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
                 }
             }
             Pstream::mapCombineGather(nPosOrientation, plusEqOp<label>());
-            Pstream::mapCombineScatter(nPosOrientation);
+            Pstream::broadcast(nPosOrientation);
 
 
             Info<< "Split " << nFreeStanding << " free-standing zone faces"

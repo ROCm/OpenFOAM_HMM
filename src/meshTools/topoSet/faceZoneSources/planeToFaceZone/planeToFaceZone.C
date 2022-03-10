@@ -219,7 +219,7 @@ void Foam::planeToFaceZone::combine(faceZoneSet& fzSet, const bool add) const
                 }
             }
             Pstream::listCombineGather(regionRegions, bitOrEqOp<bitSet>());
-            Pstream::listCombineScatter(regionRegions);
+            Pstream::broadcast(regionRegions);
 
             // Collapse the region connections into a map between each region
             // and the lowest numbered region that it connects to
@@ -261,7 +261,7 @@ void Foam::planeToFaceZone::combine(faceZoneSet& fzSet, const bool add) const
                 ++ regionNFaces[regioni];
             }
             Pstream::listCombineGather(regionNFaces, plusEqOp<label>());
-            Pstream::listCombineScatter(regionNFaces);
+            Pstream::broadcast(regionNFaces);
             Info<< "    Found " << nRegions << " contiguous regions with "
                 << regionNFaces << " faces" << endl;
         }
@@ -285,9 +285,13 @@ void Foam::planeToFaceZone::combine(faceZoneSet& fzSet, const bool add) const
             }
             Pstream::listCombineGather(regionWeights, plusEqOp<scalar>());
             Pstream::listCombineGather(regionCentres, plusEqOp<point>());
-            Pstream::listCombineScatter(regionWeights);
-            Pstream::listCombineScatter(regionCentres);
-            regionCentres /= regionWeights;
+
+            if (Pstream::master())
+            {
+                regionCentres /= regionWeights;
+            }
+            //Pstream::broadcast(regionWeights);
+            Pstream::broadcast(regionCentres);
 
             // Find the region centroid closest to the reference point
             selectedRegioni =

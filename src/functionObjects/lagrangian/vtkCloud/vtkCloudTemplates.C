@@ -57,7 +57,7 @@ Foam::wordList Foam::functionObjects::vtkCloud::writeFields
 
     wordList fieldNames(obrTmp.names<IOField<Type>>());
     Pstream::combineGather(fieldNames, ListOps::uniqueEqOp<word>());
-    Pstream::combineScatter(fieldNames);
+    Pstream::broadcast(fieldNames);
 
     // Consistent order on all processors
     Foam::sort(fieldNames);

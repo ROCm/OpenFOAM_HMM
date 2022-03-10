@@ -134,12 +134,12 @@ void Foam::ensightCells::clearOut()
 
 void Foam::ensightCells::reduce()
 {
-    // No listCombineGather, listCombineScatter for FixedList
     forAll(sizes_, typei)
     {
         sizes_[typei] = size(elemType(typei));
-        Foam::reduce(sizes_[typei], sumOp<label>());
     }
+    // Can reduce FixedList with sumOp<label> in a single operation
+    Foam::reduce(sizes_, sumOp<label>());
 }
 
 

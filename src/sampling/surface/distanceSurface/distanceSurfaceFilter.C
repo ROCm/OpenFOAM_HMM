@@ -171,7 +171,7 @@ void Foam::distanceSurface::filterKeepLargestRegion
         }
     }
 
-    Pstream::scatter(keepRegion);
+    Pstream::broadcast(keepRegion);
 
     forAll(regionColour, celli)
     {
@@ -295,7 +295,7 @@ void Foam::distanceSurface::filterKeepNearestRegions
         }
     }
 
-    Pstream::scatter(keepRegion);
+    Pstream::broadcast(keepRegion);
 
     forAll(regionColour, celli)
     {
@@ -366,7 +366,7 @@ void Foam::distanceSurface::filterRegionProximity
         }
     }
 
-    Pstream::listCombineScatter(distRegion);
+    Pstream::broadcast(distRegion);
 
 
     // Define the per-face acceptance based on the region average distance

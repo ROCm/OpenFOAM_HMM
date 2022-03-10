@@ -278,7 +278,7 @@ void Foam::isoSurfacePoint::syncUnseparatedPoints
 
         // Combine on master.
         Pstream::listCombineGather(sharedPts, minEqOp<point>());
-        Pstream::listCombineScatter(sharedPts);
+        Pstream::broadcast(sharedPts);
 
         // Now we will all have the same information. Merge it back with
         // my local information.

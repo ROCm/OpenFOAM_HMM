@@ -203,7 +203,7 @@ Foam::IOobjectList Foam::sampledSets::preCheckFields(unsigned request)
     // if (Pstream::parRun())
     // {
     //     Pstream::mapCombineGather(selected, HashSetOps::plusEqOp<word>());
-    //     Pstream::mapCombineScatter(selected);
+    //     Pstream::broadcast(selected);
     // }
 
 

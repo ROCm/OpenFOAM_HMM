@@ -313,7 +313,7 @@ void deleteEmptyPatches(fvMesh& mesh)
     {
         masterNames = patches.names();
     }
-    Pstream::scatter(masterNames);
+    Pstream::broadcast(masterNames);
 
 
     labelList oldToNew(patches.size(), -1);
@@ -662,9 +662,10 @@ void countExtrudePatches
     // Synchronise decision. Actual numbers are not important, just make
     // sure that they're > 0 on all processors.
     Pstream::listCombineGather(zoneSidePatch, plusEqOp<label>());
-    Pstream::listCombineScatter(zoneSidePatch);
     Pstream::listCombineGather(zoneZonePatch, plusEqOp<label>());
-    Pstream::listCombineScatter(zoneZonePatch);
+
+    Pstream::broadcast(zoneSidePatch);
+    Pstream::broadcast(zoneZonePatch);
 }
 
 
@@ -1858,7 +1859,7 @@ int main(int argc, char *argv[])
 
 
     Pstream::listCombineGather(isInternal, orEqOp<bool>());
-    Pstream::listCombineScatter(isInternal);
+    Pstream::broadcast(isInternal);
 
     // Check zone either all internal or all external faces
     checkZoneInside(mesh, zoneNames, zoneID, extrudeMeshFaces, isInternal);
@@ -2320,7 +2321,7 @@ int main(int argc, char *argv[])
 
         // Reduce
         Pstream::mapCombineGather(globalSum, plusEqOp<point>());
-        Pstream::mapCombineScatter(globalSum);
+        Pstream::broadcast(globalSum);
 
         forAll(localToGlobalRegion, localRegionI)
         {

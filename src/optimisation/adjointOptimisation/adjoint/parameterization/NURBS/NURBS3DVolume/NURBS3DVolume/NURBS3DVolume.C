@@ -996,7 +996,7 @@ Foam::vectorField Foam::NURBS3DVolume::computeControlPointSensitivities
 
     // Sum contributions from all processors
     Pstream::listCombineGather(controlPointDerivs, plusEqOp<vector>());
-    Pstream::listCombineScatter(controlPointDerivs);
+    Pstream::broadcast(controlPointDerivs);
 
     return controlPointDerivs;
 }
@@ -1082,7 +1082,7 @@ Foam::vectorField Foam::NURBS3DVolume::computeControlPointSensitivities
     }
     // Sum contributions from all processors
     Pstream::listCombineGather(controlPointDerivs, plusEqOp<vector>());
-    Pstream::listCombineScatter(controlPointDerivs);
+    Pstream::broadcast(controlPointDerivs);
 
     return controlPointDerivs;
 }

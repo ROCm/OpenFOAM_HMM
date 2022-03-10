@@ -121,7 +121,7 @@ Foam::IOobjectList Foam::sampledSurfaces::preCheckFields()
     if (Pstream::parRun())
     {
         Pstream::mapCombineGather(selected, HashSetOps::plusEqOp<word>());
-        Pstream::mapCombineScatter(selected);
+        Pstream::broadcast(selected);
     }
 
 

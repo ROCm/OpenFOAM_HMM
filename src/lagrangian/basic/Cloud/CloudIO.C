@@ -105,7 +105,7 @@ void Foam::Cloud<ParticleType>::writeCloudUniformProperties() const
     np[Pstream::myProcNo()] = ParticleType::particleCount_;
 
     Pstream::listCombineGather(np, maxEqOp<label>());
-    Pstream::listCombineScatter(np);
+    Pstream::broadcast(np);
 
     uniformPropsDict.add
     (

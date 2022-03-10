@@ -2498,9 +2498,9 @@ Foam::label Foam::snappyRefineDriver::directionalSmooth
 
             {
                 scalar minSeed = min(allSeedPointDist);
-                Pstream::scatter(minSeed);
                 scalar maxSeed = max(allSeedPointDist);
-                Pstream::scatter(maxSeed);
+                Pstream::broadcast(minSeed);
+                Pstream::broadcast(maxSeed);
 
                 forAll(normalizedPosition, posI)
                 {
@@ -2551,7 +2551,7 @@ Foam::label Foam::snappyRefineDriver::directionalSmooth
                 );
             }
 
-            Pstream::scatter(keyAndValue);
+            Pstream::broadcast(keyAndValue);
 
             // Construct an iterpolation table for further queries
             // - although normalized values are used for query,
@@ -3248,11 +3248,11 @@ void Foam::snappyRefineDriver::deleteSmallRegions
         nCellsPerZone[zonei]++;
     }
     Pstream::listCombineGather(nCellsPerRegion, plusEqOp<label>());
-    Pstream::listCombineScatter(nCellsPerRegion);
     Pstream::listCombineGather(regionToZone, maxEqOp<label>());
-    Pstream::listCombineScatter(regionToZone);
     Pstream::listCombineGather(nCellsPerZone, plusEqOp<label>());
-    Pstream::listCombineScatter(nCellsPerZone);
+    Pstream::broadcast(nCellsPerRegion);
+    Pstream::broadcast(regionToZone);
+    Pstream::broadcast(nCellsPerZone);
 
 
     // Mark small regions. Note that all processors have the same information

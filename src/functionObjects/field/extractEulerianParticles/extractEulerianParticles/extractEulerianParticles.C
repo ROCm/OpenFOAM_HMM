@@ -334,7 +334,7 @@ void Foam::functionObjects::extractEulerianParticles::calculateAddressing
     // Create map from new regions to slots in particles list
     // - filter through new-to-new addressing to identify new particles
     Pstream::listCombineGather(newToNewRegion, maxEqOp<label>());
-    Pstream::listCombineScatter(newToNewRegion);
+    Pstream::broadcast(newToNewRegion);
 
     label nParticle = -1;
     labelHashSet newRegions;
@@ -354,7 +354,7 @@ void Foam::functionObjects::extractEulerianParticles::calculateAddressing
     // Accumulate old region data or create a new particle if there is no
     // mapping from the old-to-new region
     Pstream::listCombineGather(oldToNewRegion, maxEqOp<label>());
-    Pstream::listCombineScatter(oldToNewRegion);
+    Pstream::broadcast(oldToNewRegion);
     List<eulerianParticle> newParticles(newRegionToParticleMap.size());
     forAll(oldToNewRegion, oldRegioni)
     {

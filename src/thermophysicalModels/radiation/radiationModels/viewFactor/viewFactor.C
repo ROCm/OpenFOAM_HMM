@@ -504,9 +504,9 @@ void Foam::radiation::viewFactor::calculate()
         Pstream::listCombineGather(E, maxEqOp<scalar>());
         Pstream::listCombineGather(qrExt, maxEqOp<scalar>());
 
-        Pstream::listCombineScatter(T4);
-        Pstream::listCombineScatter(E);
-        Pstream::listCombineScatter(qrExt);
+        Pstream::broadcast(T4);
+        Pstream::broadcast(E);
+        Pstream::broadcast(qrExt);
 
         if (Pstream::master())
         {
@@ -601,9 +601,8 @@ void Foam::radiation::viewFactor::calculate()
         }
 
     }
-    // Scatter q and fill qr
-    Pstream::listCombineScatter(q);
-    Pstream::listCombineGather(q, maxEqOp<scalar>());
+    // Broadcast q and fill qr
+    Pstream::broadcast(q);
 
     label globCoarseId = 0;
     for (const label patchID : selectedPatches_)

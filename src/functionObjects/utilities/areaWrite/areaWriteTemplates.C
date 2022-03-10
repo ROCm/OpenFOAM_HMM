@@ -78,7 +78,7 @@ void Foam::areaWrite::performAction
         {
             // Synchronize names
             Pstream::combineGather(fieldNames, ListOps::uniqueEqOp<word>());
-            Pstream::combineScatter(fieldNames);
+            Pstream::broadcast(fieldNames);
         }
 
         // Sort for consistent order on all processors

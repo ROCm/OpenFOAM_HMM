@@ -288,10 +288,9 @@ bool setFaceFieldType
         }
 
         Pstream::listCombineGather(nChanged, plusEqOp<label>());
-        Pstream::listCombineScatter(nChanged);
+        Pstream::broadcast(nChanged);
 
-        typename GeometricField<Type, fvPatchField, volMesh>::
-            Boundary& fieldBf = field.boundaryFieldRef();
+        auto& fieldBf = field.boundaryFieldRef();
 
         // Reassign.
         forAll(field.boundaryField(), patchi)

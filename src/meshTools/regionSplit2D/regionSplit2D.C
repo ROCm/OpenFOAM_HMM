@@ -140,7 +140,7 @@ Foam::regionSplit2D::regionSplit2D
     // - not concerned about the op (keys are unique)
     // - map size will be the number of regions in the set of faces
     Pstream::mapCombineGather(regionToCompactAddr, minEqOp<label>());
-    Pstream::mapCombineScatter(regionToCompactAddr);
+    Pstream::broadcast(regionToCompactAddr);
 
     nRegions_ = regionToCompactAddr.size();
 

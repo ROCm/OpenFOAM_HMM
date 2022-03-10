@@ -881,7 +881,7 @@ Foam::List<Foam::scalar> Foam::lumpedPointMovement::areas
     }
 
     Pstream::listCombineGather(zoneAreas, plusEqOp<scalar>());
-    Pstream::listCombineScatter(zoneAreas);
+    Pstream::broadcast(zoneAreas);
 
     return zoneAreas;
 }
@@ -1010,10 +1010,9 @@ bool Foam::lumpedPointMovement::forcesAndMoments
     }
 
     Pstream::listCombineGather(forces, plusEqOp<vector>());
-    Pstream::listCombineScatter(forces);
-
     Pstream::listCombineGather(moments, plusEqOp<vector>());
-    Pstream::listCombineScatter(moments);
+    Pstream::broadcast(forces);
+    Pstream::broadcast(moments);
 
     return true;
 }

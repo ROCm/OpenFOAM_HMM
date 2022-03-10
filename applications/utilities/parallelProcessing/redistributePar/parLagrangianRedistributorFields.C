@@ -54,7 +54,7 @@ Foam::wordList Foam::parLagrangianRedistributor::filterObjects
     // - Combine names from all processors
 
     Pstream::combineGather(fieldNames, ListOps::uniqueEqOp<word>());
-    Pstream::combineScatter(fieldNames);
+    Pstream::broadcast(fieldNames);
 
     // Sort for consistent order on all processors
     Foam::sort(fieldNames);

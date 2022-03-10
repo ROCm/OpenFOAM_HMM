@@ -266,7 +266,7 @@ bool Foam::areaWrite::write()
         if (Pstream::parRun())
         {
             Pstream::mapCombineGather(selected, HashSetOps::plusEqOp<word>());
-            Pstream::mapCombineScatter(selected);
+            Pstream::broadcast(selected);
         }
 
         missed.clear();

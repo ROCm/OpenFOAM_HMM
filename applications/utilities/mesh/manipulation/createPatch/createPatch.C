@@ -715,7 +715,7 @@ void syncPoints
 
         // Combine on master.
         Pstream::listCombineGather(sharedPts, cop);
-        Pstream::listCombineScatter(sharedPts);
+        Pstream::broadcast(sharedPts);
 
         // Now we will all have the same information. Merge it back with
         // my local information.

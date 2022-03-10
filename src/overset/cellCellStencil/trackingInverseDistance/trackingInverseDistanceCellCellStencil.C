@@ -518,7 +518,7 @@ Foam::cellCellStencils::trackingInverseDistance::trackingInverseDistance
         nCellsPerZone[zoneID[celli]]++;
     }
     Pstream::listCombineGather(nCellsPerZone, plusEqOp<label>());
-    Pstream::listCombineScatter(nCellsPerZone);
+    Pstream::broadcast(nCellsPerZone);
 
     meshParts_.setSize(nZones);
     forAll(meshParts_, zonei)

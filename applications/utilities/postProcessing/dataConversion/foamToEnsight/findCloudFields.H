@@ -109,7 +109,7 @@ if (timeDirs.size() && doLagrangian)
                 cloudFields,
                 HashTableOps::plusEqOp<word>()
             );
-            Pstream::mapCombineScatter(cloudFields);
+            Pstream::broadcast(cloudFields);
         }
     }
 }

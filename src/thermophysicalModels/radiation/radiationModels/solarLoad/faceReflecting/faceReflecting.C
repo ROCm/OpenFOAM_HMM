@@ -328,11 +328,11 @@ void Foam::faceReflecting::calculate()
 
     // Distribute ray indexes to all proc's
     Pstream::listCombineGather(refDisDirsIndex, maxEqOp<label>());
-    Pstream::listCombineScatter(refDisDirsIndex);
-
-    // Make sure all the processors have the same map
     Pstream::mapCombineGather(refFacesDirIndex, minEqOp<label>());
-    Pstream::mapCombineScatter(refFacesDirIndex);
+
+    // Make sure all the processors have the same information
+    Pstream::broadcast(refDisDirsIndex);
+    Pstream::broadcast(refFacesDirIndex);
 
     scalar maxBounding = 5.0*mag(mesh_.bounds().max() - mesh_.bounds().min());
 

@@ -545,14 +545,14 @@ void Foam::fileMonitor::updateStates
         // Scatter or reduce to synchronise state
         if (masterOnly)
         {
-            // Scatter
+            // Broadcast
             if (stats.storage().size() == 1)
             {
-                Pstream::scatter(stats.storage()[0]);
+                Pstream::broadcast(stats.storage()[0]);
             }
             else
             {
-                Pstream::listCombineScatter(stats.storage());
+                Pstream::broadcast(stats.storage());
             }
         }
         else

@@ -1954,7 +1954,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
             Pout<< "Wanted distribution:" << nProcCells << endl;
 
             Pstream::listCombineGather(nProcCells, plusEqOp<label>());
-            Pstream::listCombineScatter(nProcCells);
+            Pstream::broadcast(nProcCells);
 
             Pout<< "Wanted resulting decomposition:" << endl;
             forAll(nProcCells, proci)
@@ -3531,13 +3531,16 @@ const
         }
 
         Pstream::listCombineGather(nCells, plusEqOp<label>());
-        Pstream::listCombineScatter(nCells);
 
-        Info<< "Cells per refinement level:" << endl;
-        forAll(nCells, leveli)
+        /// Pstream::broadcast(nCells);
+        if (Pstream::master())
         {
-            Info<< "    " << leveli << '\t' << nCells[leveli]
-                << endl;
+            Info<< "Cells per refinement level:" << endl;
+            forAll(nCells, leveli)
+            {
+                Info<< "    " << leveli << '\t' << nCells[leveli]
+                    << endl;
+            }
         }
     }
 }

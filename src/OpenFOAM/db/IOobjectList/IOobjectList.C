@@ -68,7 +68,7 @@ void Foam::IOobjectList::syncNames(wordList& objNames)
     {
         // Synchronize names
         Pstream::combineGather(objNames, ListOps::uniqueEqOp<word>());
-        Pstream::combineScatter(objNames);
+        Pstream::broadcast(objNames);
     }
 
     // Sort for consistent order on all processors

@@ -452,8 +452,7 @@ void getInterfaceSizes
 
     // Rework
 
-    Pstream::scatter(regionsToSize);
-
+    Pstream::broadcast(regionsToSize);
 
 
     // Now we have the global sizes of all inter-regions.
@@ -1113,7 +1112,7 @@ label findCorrespondingRegion
     }
 
     Pstream::listCombineGather(cellsInZone, plusEqOp<label>());
-    Pstream::listCombineScatter(cellsInZone);
+    Pstream::broadcast(cellsInZone);
 
     // Pick region with largest overlap of zoneI
     label regionI = findMax(cellsInZone);

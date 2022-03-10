@@ -228,7 +228,7 @@ bool Foam::sampledMeshedSurface::update(const meshSearch& meshSearcher)
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Pstream::listCombineGather(nearest, minFirstEqOp<scalar>{});
-    Pstream::listCombineScatter(nearest);
+    Pstream::broadcast(nearest);
 
     labelList cellOrFaceLabels(fc.size(), -1);
 

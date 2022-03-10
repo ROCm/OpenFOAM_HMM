@@ -43,10 +43,12 @@ if (doLagrangian)
         nameOp<fileName>()
     );
 
-    // Synchronise cloud names
-    Pstream::combineGather(cloudNames, ListOps::uniqueEqOp<word>());
-    Pstream::combineScatter(cloudNames);
-
+    if (Pstream::parRun())
+    {
+        // Synchronise cloud names
+        Pstream::combineGather(cloudNames, ListOps::uniqueEqOp<word>());
+        Pstream::broadcast(cloudNames);
+    }
     // Consistent order
     Foam::sort(cloudNames);
 

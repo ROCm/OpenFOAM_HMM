@@ -283,7 +283,7 @@ bool Foam::distributedTriSurfaceMesh::read()
         // Force underlying triSurfaceMesh to calculate volume type
         // (is topological walk; does not construct tree)
         surfaceClosed_ = triSurfaceMesh::hasVolumeType();
-        Pstream::scatter(surfaceClosed_);
+        Pstream::broadcast(surfaceClosed_);
         dict_.add("closed", surfaceClosed_);
 
         // Delay calculating outside vol type since constructs tree. Is ok
@@ -1720,8 +1720,8 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
         forAll(bbs, proci)
         {
             Pstream::listCombineGather(bbs[proci], plusEqOp<boundBox>());
-            Pstream::listCombineScatter(bbs[proci]);
         }
+        Pstream::broadcast(bbs);
     }
     else if (distType_ == DISTRIBUTED)
     {
@@ -1769,8 +1769,8 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
         forAll(bbs, proci)
         {
             Pstream::listCombineGather(bbs[proci], plusEqOp<boundBox>());
-            Pstream::listCombineScatter(bbs[proci]);
         }
+        Pstream::broadcast(bbs);
     }
 //    //// Tbd. initial duplicate filtering of border points only
 //    if (distType_ == DISTRIBUTED)
@@ -1967,8 +1967,8 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
 //        forAll(bbs, proci)
 //        {
 //            Pstream::listCombineGather(bbs[proci], plusEqOp<boundBox>());
-//            Pstream::listCombineScatter(bbs[proci]);
 //        }
+//        Pstream::broadcast(bbs);
 //    }
     else
     {
@@ -2070,8 +2070,8 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
         forAll(bbs, proci)
         {
             Pstream::listCombineGather(bbs[proci], plusEqOp<boundBox>());
-            Pstream::listCombineScatter(bbs[proci]);
         }
+        Pstream::broadcast(bbs);
     }
     return bbs;
 }

@@ -868,7 +868,7 @@ Foam::scalar Foam::TDACChemistryModel<ReactionThermo, ThermoType>::solve
     {
         List<bool> active(composition.active());
         Pstream::listCombineGather(active, orEqOp<bool>());
-        Pstream::listCombineScatter(active);
+        Pstream::broadcast(active);
 
         forAll(active, i)
         {

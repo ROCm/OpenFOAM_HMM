@@ -303,7 +303,6 @@ int main(int argc, char *argv[])
             Pstream::mapCombineGather(patchSize, plusEqOp<label>());
             Pstream::mapCombineGather(zoneSize, plusEqOp<label>());
 
-
             // Allocate compact numbering for all patches/faceZones
             forAllConstIters(patchSize, iter)
             {
@@ -315,8 +314,7 @@ int main(int argc, char *argv[])
                 compactZoneID.insert(iter.key(), compactZoneID.size());
             }
 
-
-            Pstream::mapCombineScatter(compactZoneID);
+            Pstream::broadcast(compactZoneID);
 
 
             // Rework HashTable into labelList just for speed of conversion

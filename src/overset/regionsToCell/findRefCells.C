@@ -69,7 +69,7 @@ void Foam::setRefCells
         }
 
         Pstream::listCombineGather(regionNeedReference, orEqOp<bool>());
-        Pstream::listCombineScatter(regionNeedReference);
+        Pstream::broadcast(regionNeedReference);
     }
 
 
@@ -190,7 +190,7 @@ void Foam::setRefCells
         }
 
         Pstream::listCombineGather(hasRef, plusEqOp<label>());
-        Pstream::listCombineScatter(hasRef);
+        Pstream::broadcast(hasRef);
 
         forAll(hasRef, regionI)
         {

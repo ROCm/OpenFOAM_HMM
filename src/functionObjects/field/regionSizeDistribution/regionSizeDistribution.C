@@ -67,7 +67,7 @@ static Map<Type> regionSum(const regionSplit& regions, const Field<Type>& fld)
     }
 
     Pstream::mapCombineGather(regionToSum, plusEqOp<Type>());
-    Pstream::mapCombineScatter(regionToSum);
+    Pstream::broadcast(regionToSum);
 
     return regionToSum;
 }
@@ -216,7 +216,7 @@ Foam::functionObjects::regionSizeDistribution::findPatchRegions
 
     // Make sure all the processors have the same set of regions
     Pstream::mapCombineGather(patchRegions, minEqOp<label>());
-    Pstream::mapCombineScatter(patchRegions);
+    Pstream::broadcast(patchRegions);
 
     return patchRegions;
 }

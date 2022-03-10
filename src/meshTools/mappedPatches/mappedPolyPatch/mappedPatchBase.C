@@ -245,12 +245,12 @@ void Foam::mappedPatchBase::collectSamples
         (
             UPstream::listGatherValues<label>(mySampleWorld, myComm)
         );
-        Pstream::broadcast(procToWorldIndex, myComm);
-
         labelList nPerProc
         (
             UPstream::listGatherValues<label>(patch_.size(), myComm)
         );
+
+        Pstream::broadcast(procToWorldIndex, myComm);
         Pstream::broadcast(nPerProc, myComm);
 
         patchFaceWorlds.setSize(patchFaces.size());
@@ -680,7 +680,7 @@ void Foam::mappedPatchBase::findSamples
         Pstream::msgType(),
         myComm
     );
-    Pstream::listCombineScatter(nearest, Pstream::msgType(), myComm);
+    Pstream::broadcast(nearest, myComm);
 
     //if (debug)
     //{

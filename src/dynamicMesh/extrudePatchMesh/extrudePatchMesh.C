@@ -215,7 +215,7 @@ void Foam::extrudePatchMesh::extrudeMesh(const List<polyPatch*>& regionPatches)
 
             // Reduce
             Pstream::mapCombineGather(globalSum, plusEqOp<point>());
-            Pstream::mapCombineScatter(globalSum);
+            Pstream::broadcast(globalSum);
 
             forAll(localToGlobalRegion, localRegionI)
             {

@@ -179,7 +179,7 @@ void Foam::patchSeedSet::calcSamples
 
             // Find nearest. Combine on master.
             Pstream::listCombineGather(nearest, mappedPatchBase::nearestEqOp());
-            Pstream::listCombineScatter(nearest);
+            Pstream::broadcast(nearest);
 
 
             // 3. Pick up my local faces that have won
