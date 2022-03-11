@@ -27,11 +27,13 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-inline char* Foam::CStringList::stringCopy(char *dest, const std::string& str)
+inline char* Foam::CStringList::stringCopy(char *dest, const std::string& src)
 {
-    for (auto iter = str.cbegin(); iter != str.cend(); ++iter)
+    // Like string::copy() but without extra checks
+    const size_t len = src.length();
+    for (size_t i = 0; i < len; ++i)
     {
-        *dest = *iter;
+        *dest = src[i];
         ++dest;
     }
     *(dest++) = '\0';
@@ -58,10 +60,10 @@ inline int Foam::CStringList::count(const char * const argv[])
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-inline Foam::CStringList::CStringList()
+inline constexpr Foam::CStringList::CStringList() noexcept
 :
     argc_(0),
-    len_(0),
+    nbytes_(0),
     argv_(nullptr),
     data_(nullptr)
 {}
@@ -98,7 +100,7 @@ inline Foam::CStringList::~CStringList()
 inline void Foam::CStringList::clear()
 {
     argc_ = 0;
-    len_  = 0;
+    nbytes_ = 0;
 
     if (data_)
     {
@@ -125,13 +127,7 @@ inline int Foam::CStringList::size() const noexcept
 }
 
 
-inline size_t Foam::CStringList::length() const
-{
-    return len_;
-}
-
-
-inline char** Foam::CStringList::strings() const
+inline char** Foam::CStringList::strings() const noexcept
 {
     return argv_;
 }
@@ -140,12 +136,6 @@ inline char** Foam::CStringList::strings() const
 inline char** Foam::CStringList::strings(int start) const
 {
     return &(argv_[start]);
-}
-
-
-inline const char* Foam::CStringList::data() const
-{
-    return data_;
 }
 
 
@@ -164,6 +154,12 @@ inline int Foam::CStringList::reset(const SubStrings<StringType>& input)
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+inline const char* Foam::CStringList::get(int i) const
+{
+    return argv_[i];
+}
+
 
 inline const char* Foam::CStringList::operator[](int i) const
 {

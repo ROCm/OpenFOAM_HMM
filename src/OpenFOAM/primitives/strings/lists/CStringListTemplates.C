@@ -30,10 +30,7 @@ License
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class ListType>
-int Foam::CStringList::resetContent
-(
-    const ListType& input
-)
+int Foam::CStringList::resetContent(const ListType& input)
 {
     clear();
 
@@ -48,12 +45,12 @@ int Foam::CStringList::resetContent
     // Count overall required string length, including each trailing nul char
     for (const auto& str : input)
     {
-        len_ += str.length() + 1;
+        nbytes_ += str.length() + 1;
     }
-    --len_; // No final nul in overall count
+    --nbytes_;  // Do not include final nul char in overall count
 
     argv_ = new char*[input.size()+1];  // Extra +1 for terminating nullptr
-    data_ = new char[len_+1];           // Extra +1 for terminating nul char
+    data_ = new char[nbytes_+1];        // Extra +1 for terminating nul char
 
     argv_[0] = data_;   // Starts here
 
@@ -75,14 +72,14 @@ template<class StringType>
 Foam::List<StringType>
 Foam::CStringList::asList(int argc, const char * const argv[])
 {
-    List<StringType> lst(argc);
+    List<StringType> list(argc);
 
     for (int i=0; i < argc; ++i)
     {
-        lst[i] = argv[i];
+        list[i] = argv[i];
     }
 
-    return lst;
+    return list;
 }
 
 

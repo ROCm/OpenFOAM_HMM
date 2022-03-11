@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,8 +48,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef CStringList_H
-#define CStringList_H
+#ifndef Foam_CStringList_H
+#define Foam_CStringList_H
 
 #include "fileNameList.H"
 #include "stringList.H"
@@ -76,7 +76,7 @@ class CStringList
 
         //- Overall length of the raw content
         //  Does not include the final nul-character
-        size_t len_;
+        size_t nbytes_;
 
         //- List of strings, including trailing nullptr
         char** argv_;
@@ -90,9 +90,8 @@ class CStringList
         //- Copy string characters into dest as NUL-terminated string.
         //  Forces conversion of std::sub_match to string form
         //
-        //  \return the location one-past the end of dest, which is used
-        //      for the next destination
-        static inline char* stringCopy(char *dest, const std::string& str);
+        //  \return location one-past end of dest (ie, the next destination)
+        static inline char* stringCopy(char *dest, const std::string& src);
 
         //- Copy the input list of strings.
         //  \return number of arguments (argc)
@@ -112,7 +111,7 @@ public:
     // Constructors
 
         //- Default construct, adding content later (via reset).
-        inline CStringList();
+        inline constexpr CStringList() noexcept;
 
         //- Copy construct from a list of strings
         //  Copies the input characters.
@@ -138,27 +137,36 @@ public:
 
     // Access
 
-        //- True if the size is zero.
+        //- True if the size (ie, argc) is zero.
         inline bool empty() const noexcept;
 
         //- Return the number of C-strings (ie, argc)
         inline int size() const noexcept;
 
+        //- The flattened character content, with interspersed nul-chars
+        const char* cdata_bytes() const noexcept { return data_; }
+
+        //- Overall length of the flattened character (data) content
+        //- including interspersed nul-chars but not the trailing nul-char
+        size_t size_bytes() const noexcept { return nbytes_; }
+
+        //- Same as cdata_bytes()
+        const char* data() const noexcept { return data_; }
+
+        //- Same as size_bytes()
+        size_t length() const noexcept { return nbytes_; }
+
+        //- Return string element at the given index. No bounds checking.
+        const char* get(int i) const;
+
         //- Return the list of C-strings (ie, argv)
         //  The position at argc is a nullptr
-        inline char** strings() const;
+        inline char** strings() const noexcept;
 
         //- Return the sublist of C-strings (ie, argv) starting at the
         //- specified offset.
         //  \param start the offset, must be less than argc
         inline char** strings(int start) const;
-
-
-        //- Overall length of the flattened character (data) content
-        inline size_t length() const;
-
-        //- The flattened character content, with interspersed nul-chars
-        inline const char* data() const;
 
 
     // Edit

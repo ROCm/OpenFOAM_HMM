@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,10 +34,15 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const CStringList& list)
 {
     const int n = list.size();
 
-    for (int i = 0; i<n; ++i)
+    for (int i = 0, space = 0; i < n; ++i)
     {
-        if (i) os << ' ';
-        if (list[i]) os << list[i];
+        const char* p = list.get(i);
+
+        if (p && *p)
+        {
+            if (space++) os << ' ';
+            os << p;
+        }
     }
 
     return os;
