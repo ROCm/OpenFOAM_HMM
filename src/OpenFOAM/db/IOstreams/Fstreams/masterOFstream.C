@@ -31,7 +31,6 @@ License
 #include "OSspecific.H"
 #include "PstreamBuffers.H"
 #include "masterUncollatedFileOperation.H"
-#include "boolList.H"
 #include <algorithm>
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -115,7 +114,7 @@ void Foam::masterOFstream::commit()
             return;
         }
 
-        boolList valid(UPstream::listGatherValues<bool>(valid_));
+        boolList procValid(UPstream::listGatherValues<bool>(valid_));
 
         // Different files
         PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
@@ -131,18 +130,18 @@ void Foam::masterOFstream::commit()
         }
 
         labelList recvSizes;
-        pBufs.finishedSends(recvSizes);
+        pBufs.finishedGathers(recvSizes);
 
         if (Pstream::master())
         {
             // Write master data
-            if (valid[Pstream::masterNo()])
+            if (procValid[Pstream::masterNo()])
             {
                 checkWrite(filePaths[Pstream::masterNo()], this->str());
             }
             this->reset();
 
-            // Find the max slave size
+            // Find the max receive size
             recvSizes[Pstream::masterNo()] = 0;
             List<char> buf
             (
@@ -156,7 +155,7 @@ void Foam::masterOFstream::commit()
                 const std::streamsize count(recvSizes[proci]);
                 is.read(buf.data(), count);
 
-                if (valid[proci])
+                if (procValid[proci])
                 {
                     checkWrite(filePaths[proci], buf.cdata(), count);
                 }

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,7 +34,7 @@ License
 template<class Type>
 Type Foam::fileOperations::masterUncollatedFileOperation::scatterList
 (
-    const UList<Type>& masterLst,
+    const UList<Type>& allValues,
     const int tag,
     const label comm
 ) const
@@ -46,23 +46,23 @@ Type Foam::fileOperations::masterUncollatedFileOperation::scatterList
         for (const int proci : Pstream::subProcs(comm))
         {
             UOPstream os(proci, pBufs);
-            os << masterLst[proci];
+            os << allValues[proci];
         }
     }
-    pBufs.finishedSends();
+    pBufs.finishedScatters();
 
-    Type myResult;
+    Type value;
 
     if (Pstream::master(comm))
     {
-        myResult = masterLst[Pstream::myProcNo(comm)];
+        value = allValues[0];
     }
     else
     {
         UIPstream is(Pstream::masterNo(), pBufs);
-        is >> myResult;
+        is >> value;
     }
-    return myResult;
+    return value;
 }
 
 

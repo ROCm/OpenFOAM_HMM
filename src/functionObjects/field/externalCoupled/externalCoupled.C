@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -108,9 +108,10 @@ void Foam::functionObjects::externalCoupled::readColumns
 ) const
 {
     // Get sizes for all processors
-    const globalIndex globalFaces(nRows);
+    const globalIndex globalFaces(nRows, globalIndex::gatherOnly{});
 
     PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
+
     if (Pstream::master())
     {
         string line;
@@ -158,15 +159,15 @@ void Foam::functionObjects::externalCoupled::readColumns
             }
 
             // Send to proci
-            UOPstream str(proci, pBufs);
-            str << values;
+            UOPstream toProc(proci, pBufs);
+            toProc << values;
         }
     }
-    pBufs.finishedSends();
+    pBufs.finishedScatters();
 
-    // Read from PstreamBuffers
-    UIPstream str(Pstream::masterNo(), pBufs);
-    str >> data;
+    // Get scattered data from PstreamBuffers
+    UIPstream fromMaster(UPstream::masterNo(), pBufs);
+    fromMaster >> data;
 }
 
 
@@ -178,7 +179,7 @@ void Foam::functionObjects::externalCoupled::readLines
 ) const
 {
     // Get sizes for all processors
-    const globalIndex globalFaces(nRows);
+    const globalIndex globalFaces(nRows, globalIndex::gatherOnly{});
 
     PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
 
@@ -220,14 +221,13 @@ void Foam::functionObjects::externalCoupled::readLines
         }
     }
 
+    pBufs.finishedScatters();
 
-    pBufs.finishedSends();
-
-    // Read lines from PstreamBuffers
-    UIPstream str(Pstream::masterNo(), pBufs);
+    // Get scattered data from PstreamBuffers
+    UIPstream fromMaster(UPstream::masterNo(), pBufs);
     for (label rowi = 0; rowi < nRows; ++rowi)
     {
-        string line(str);
+        string line(fromMaster);
         lines << line.c_str() << nl;
     }
 }

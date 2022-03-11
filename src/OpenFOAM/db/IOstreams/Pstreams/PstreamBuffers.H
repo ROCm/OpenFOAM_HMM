@@ -63,6 +63,32 @@ Description
         }
     \endcode
 
+    There are additional special versions of finishedSends() for
+    restricted neighbour communication as well as for special
+    one-to-all and all-to-one communication patterns.
+    For example,
+    \code
+        PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
+
+        if (Pstream::master())
+        {
+            someObject vals;
+            for (const int proci : Pstream::subProcs())
+            {
+                UOPstream send(proci, pBufs);
+                send << vals;
+            }
+        }
+
+        pBufs.finishedScatters();
+
+        if (!Pstream::master())
+        {
+            UIPstream recv(Pstream::masterNo(), pBufs);
+            someObject vals(recv);
+        }
+    \endcode
+
 SourceFiles
     PstreamBuffers.C
 
@@ -143,6 +169,9 @@ class PstreamBuffers
             const bool wait
         );
 
+        //- For all-to-one or one-to-all
+        void finalExchangeGatherScatter(const bool isGather, const bool wait);
+
 
 public:
 
@@ -206,6 +235,13 @@ public:
             return UPstream::rangeType(static_cast<int>(nProcs()));
         }
 
+        //- Range of sub-processes indices associated with PstreamBuffers
+        UPstream::rangeType subProcs() const noexcept
+        {
+            // Proc 1 -> nProcs (int value)
+            return UPstream::rangeType(1, static_cast<int>(nProcs()-1));
+        }
+
 
     // Queries
 
@@ -250,7 +286,7 @@ public:
         bool allowClearRecv(bool on) noexcept;
 
 
-    // Functions
+    // Regular Functions
 
         //- Mark sends as done
         //
@@ -267,6 +303,9 @@ public:
         //
         //  \warning currently only valid for nonBlocking comms.
         void finishedSends(labelList& recvSizes, const bool wait = true);
+
+
+    // Functions with restricted neighbours
 
         //- Mark sends as done using subset of send/recv ranks
         //- to exchange data on.
@@ -360,6 +399,37 @@ public:
         {
             finishedSends(neighProcs, neighProcs, recvSizes, wait);
         }
+
+
+    // Gather/scatter modes
+
+        //- Mark all sends to master as done.
+        //
+        //  Non-blocking mode: populates receive buffers.
+        //
+        //  \param wait wait for requests to complete (in nonBlocking mode)
+        //
+        //  \warning currently only valid for nonBlocking comms.
+        void finishedGathers(const bool wait = true);
+
+        //- Mark all sends to master as done.
+        //- Recovers the sizes (bytes) received.
+        //
+        //  Non-blocking mode: populates receive buffers (all-to-one).
+        //  \param[out] recvSizes the sizes (bytes) received
+        //  \param wait wait for requests to complete (in nonBlocking mode)
+        //
+        //  \warning currently only valid for nonBlocking comms.
+        void finishedGathers(labelList& recvSizes, const bool wait = true);
+
+        //- Mark all sends to sub-procs as done.
+        //
+        //  Non-blocking mode: populates receive buffers.
+        //
+        //  \param wait wait for requests to complete (in nonBlocking mode)
+        //
+        //  \warning currently only valid for nonBlocking comms.
+        void finishedScatters(const bool wait = true);
 };
 
 

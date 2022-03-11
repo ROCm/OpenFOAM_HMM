@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -394,7 +394,7 @@ bool Foam::decomposedBlockData::readBlocks
             }
         }
 
-        pBufs.finishedSends();
+        pBufs.finishedScatters();
 
         if (!UPstream::master(comm))
         {
@@ -403,7 +403,7 @@ bool Foam::decomposedBlockData::readBlocks
         }
     }
 
-    Pstream::scatter(ok, Pstream::msgType(), comm);
+    Pstream::broadcast(ok, comm);
 
     return ok;
 }
@@ -523,7 +523,7 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlocks
             ok = is.good();
         }
 
-        pBufs.finishedSends();
+        pBufs.finishedScatters();
 
         if (!UPstream::master(comm))
         {
@@ -535,7 +535,7 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlocks
         }
     }
 
-    Pstream::scatter(ok, Pstream::msgType(), comm);
+    Pstream::broadcast(ok, comm);
 
     //- Set stream properties from realIsPtr on master
 
@@ -916,7 +916,7 @@ bool Foam::decomposedBlockData::writeBlocks
     {
         //- Enable to get synchronised error checking. Is the one that keeps
         //  slaves as slow as the master (which does all the writing)
-        Pstream::scatter(ok, Pstream::msgType(), comm);
+        Pstream::broadcast(ok, comm);
     }
 
     return ok;

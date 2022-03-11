@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -179,11 +179,10 @@ void surfaceNoise::readSurfaceData
                 }
             }
 
-            pBufs.finishedSends();
+            pBufs.finishedScatters();
 
             // Receive data from the master
             UIPstream fromProc(Pstream::masterNo(), pBufs);
-
             scalarList pSlice(fromProc);
 
             forAll(pSlice, faceI)
@@ -264,7 +263,7 @@ scalar surfaceNoise::writeSurfaceData
             toProc << data;
         }
 
-        pBufs.finishedSends();
+        pBufs.finishedGathers();
 
         scalar areaAverage = 0;
         if (Pstream::master())
@@ -379,7 +378,7 @@ scalar surfaceNoise::surfaceAverage
             toProc << data;
         }
 
-        pBufs.finishedSends();
+        pBufs.finishedGathers();
 
         scalar areaAverage = 0;
         if (Pstream::master())

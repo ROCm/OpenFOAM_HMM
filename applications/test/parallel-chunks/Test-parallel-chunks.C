@@ -353,18 +353,15 @@ int main(int argc, char *argv[])
         {
             sendData = identity(500);
 
-            for (const int proci : Pstream::allProcs())
+            for (const int proci : Pstream::subProcs())
             {
-                if (proci != Pstream::myProcNo())
-                {
-                    UOPstream os(proci, pBufs);
-                    os << sendData;
-                }
+                UOPstream os(proci, pBufs);
+                os << sendData;
             }
         }
 
         Info<< "call finishedSends()" << endl;
-        pBufs.finishedSends();
+        pBufs.finishedScatters();
 
         if (!Pstream::master())
         {

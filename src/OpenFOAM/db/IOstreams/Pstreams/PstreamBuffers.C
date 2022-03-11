@@ -96,6 +96,66 @@ void Foam::PstreamBuffers::finalExchange
 }
 
 
+void Foam::PstreamBuffers::finalExchangeGatherScatter
+(
+    const bool isGather,
+    const bool wait
+)
+{
+    // Could also check that it is not called twice
+    // but that is used for overlapping send/recv (eg, overset)
+    finishedSendsCalled_ = true;
+
+    if (commsType_ == UPstream::commsTypes::nonBlocking)
+    {
+        labelList recvSizes;
+
+        if (isGather)
+        {
+            // gather mode (all-to-one): master [0] <- everyone
+
+            recvSizes = UPstream::listGatherValues(sendBuf_[0].size(), comm_);
+
+            if (!UPstream::master(comm_))
+            {
+                recvSizes.resize_nocopy(recvBuf_.size());
+                recvSizes = Zero;
+            }
+        }
+        else
+        {
+            // scatter mode (one-to-all): master [0] -> everyone
+
+            recvSizes.resize_nocopy(sendBuf_.size());
+
+            if (UPstream::master(comm_))
+            {
+                forAll(sendBuf_, proci)
+                {
+                    recvSizes[proci] = sendBuf_[proci].size();
+                }
+            }
+
+            const label myRecv(UPstream::listScatterValues(recvSizes, comm_));
+
+            recvSizes = Zero;
+            recvSizes[0] = myRecv;
+        }
+
+
+        Pstream::exchange<DynamicList<char>, char>
+        (
+            sendBuf_,
+            recvSizes,
+            recvBuf_,
+            tag_,
+            comm_,
+            wait
+        );
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
 
 Foam::PstreamBuffers::PstreamBuffers
@@ -372,6 +432,50 @@ bool Foam::PstreamBuffers::finishedSends
     }
 
     return changed;
+}
+
+
+void Foam::PstreamBuffers::finishedGathers(const bool wait)
+{
+    finalExchangeGatherScatter(true, wait);
+}
+
+
+void Foam::PstreamBuffers::finishedScatters(const bool wait)
+{
+    finalExchangeGatherScatter(false, wait);
+}
+
+
+void Foam::PstreamBuffers::finishedGathers
+(
+    labelList& recvSizes,
+    const bool wait
+)
+{
+    finalExchangeGatherScatter(true, wait);
+
+    if (commsType_ != UPstream::commsTypes::nonBlocking)
+    {
+        FatalErrorInFunction
+            << "Obtaining sizes not supported in "
+            << UPstream::commsTypeNames[commsType_] << endl
+            << " since transfers already in progress. Use non-blocking instead."
+            << exit(FatalError);
+
+        // Note: maybe possible only if using different tag from write started
+        // by ~UOPstream. Needs some work.
+    }
+
+    // For nonBlocking mode, simply recover received sizes
+    // from the buffers themselves.
+
+    recvSizes.resize_nocopy(recvBuf_.size());
+
+    forAll(recvBuf_, proci)
+    {
+        recvSizes[proci] = recvBuf_[proci].size();
+    }
 }
 
 

@@ -71,14 +71,12 @@ int main(int argc, char *argv[])
 
         if (!Pstream::master())
         {
-            Perr<< "slave sending to master "
-                << Pstream::masterNo() << endl;
+            Perr<< "sending to master" << endl;
             UOPstream toMaster(Pstream::masterNo(), pBufs);
             toMaster << data;
         }
 
-        // Start sending and receiving and block
-        pBufs.finishedSends();
+        pBufs.finishedGathers();
 
         // Consume
         DynamicList<vector> allData;
@@ -87,36 +85,34 @@ int main(int argc, char *argv[])
             // Collect my own data
             allData.append(data);
 
-            for (const int slave : Pstream::subProcs())
+            for (const int proci : Pstream::subProcs())
             {
-                Perr << "master receiving from slave " << slave << endl;
-                UIPstream fromSlave(slave, pBufs);
-                allData.append(vector(fromSlave));
+                Perr << "master receiving from " << proci << endl;
+                UIPstream fromProc(proci, pBufs);
+                allData.append(vector(fromProc));
             }
         }
 
 
         // Send allData back
-        PstreamBuffers pBufs2(Pstream::commsTypes::nonBlocking);
+        pBufs.clear();
         if (Pstream::master())
         {
-            for (const int slave : Pstream::subProcs())
+            for (const int proci : Pstream::subProcs())
             {
-                Perr << "master sending to slave " << slave << endl;
-                UOPstream toSlave(slave, pBufs2);
+                Perr << "master sending to " << proci << endl;
+                UOPstream toProc(proci, pBufs);
                 toSlave << allData;
             }
         }
 
-        // Start sending and receiving and block
-        pBufs2.finishedSends();
+        pBufs.finishedScatters();
 
         // Consume
         if (!Pstream::master())
         {
-            Perr<< "slave receiving from master "
-                << Pstream::masterNo() << endl;
-            UIPstream fromMaster(Pstream::masterNo(), pBufs2);
+            Perr<< "receive from master" << endl;
+            UIPstream fromMaster(Pstream::masterNo(), pBufs);
             fromMaster >> allData;
             Perr<< allData << endl;
         }
