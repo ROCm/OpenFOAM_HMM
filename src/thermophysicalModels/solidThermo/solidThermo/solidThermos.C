@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,10 +36,12 @@ License
 #include "hConstThermo.H"
 #include "hPowerThermo.H"
 #include "hPolynomialThermo.H"
+#include "hTabulatedThermo.H"
 #include "constIsoSolidTransport.H"
 #include "constAnIsoSolidTransport.H"
 #include "exponentialSolidTransport.H"
 #include "polynomialSolidTransport.H"
+#include "tabulatedSolidTransport.H"
 #include "pureMixture.H"
 #include "sensibleEnthalpy.H"
 #include "sensibleInternalEnergy.H"
@@ -101,6 +104,17 @@ makeSolidThermo
     specie
 );
 
+makeSolidThermo
+(
+    solidThermo,
+    heSolidThermo,
+    pureMixture,
+    tabulatedSolidTransport,
+    sensibleEnthalpy,
+    hTabulatedThermo,
+    icoPolynomial,
+    specie
+);
 
 makeSolidThermoPhysicsType
 (
