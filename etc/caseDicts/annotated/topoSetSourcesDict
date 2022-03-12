@@ -274,7 +274,6 @@ faceSet_doc
     //- Select based on cellSet
     {
         source  cellToFace;
-        source  faceToCell;
         sets    (c0 c1);
         // or
         set     c0;             // Name of cellSet
@@ -316,7 +315,7 @@ faceSet_doc
     //- Select by explicitly providing face labels
     {
         source  labelToFace;
-        value  (12 13 56);      // labels of faces
+        value   (12 13 56);     // labels of faces
     }
 
 

@@ -273,7 +273,7 @@ addLayersControls
     slipFeatureAngle 30;
     nGrow           0;
     nBufferCellsNoExtrude 0;
-    minMedianAxisAngle 90;
+    minMedialAxisAngle 90;
     maxFaceThicknessRatio 0.2;
     maxThicknessToMedialRatio 0.3;
     minThickness    1e-06;
