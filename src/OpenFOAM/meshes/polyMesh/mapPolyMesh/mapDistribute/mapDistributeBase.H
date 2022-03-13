@@ -172,24 +172,24 @@ protected:
             labelList& compactStart
         );
 
-        template<class T, class CombineOp, class negateOp>
+        template<class T, class CombineOp, class NegateOp>
         static void flipAndCombine
         (
             const labelUList& map,
             const bool hasFlip,
             const UList<T>& rhs,
             const CombineOp& cop,
-            const negateOp& negOp,
+            const NegateOp& negOp,
             List<T>& lhs
         );
 
-        template<class T, class negateOp>
+        template<class T, class NegateOp>
         static T accessAndFlip
         (
             const UList<T>& fld,
             const label index,
             const bool hasFlip,
-            const negateOp& negOp
+            const NegateOp& negOp
         );
 
 public:
@@ -390,7 +390,7 @@ public:
             //- Distribute data. Note:schedule only used for
             //  Pstream::commsTypes::scheduled for now, all others just use
             //  send-to-all, receive-from-all.
-            template<class T, class negateOp>
+            template<class T, class NegateOp>
             static void distribute
             (
                 const Pstream::commsTypes commsType,
@@ -401,14 +401,14 @@ public:
                 const labelListList& constructMap,
                 const bool constructHasFlip,
                 List<T>&,
-                const negateOp& negOp,
+                const NegateOp& negOp,
                 const int tag = UPstream::msgType(),
                 const label comm = UPstream::worldComm
             );
 
             //- Distribute data. If multiple processors writing to same
             //  position adds contributions using cop.
-            template<class T, class CombineOp, class negateOp>
+            template<class T, class CombineOp, class NegateOp>
             static void distribute
             (
                 const Pstream::commsTypes commsType,
@@ -421,7 +421,7 @@ public:
                 List<T>&,
                 const T& nullValue,
                 const CombineOp& cop,
-                const negateOp& negOp,
+                const NegateOp& negOp,
                 const int tag = UPstream::msgType(),
                 const label comm = UPstream::worldComm
             );
@@ -435,11 +435,11 @@ public:
             ) const;
 
             //- Distribute data using default commsType.
-            template<class T, class negateOp>
+            template<class T, class NegateOp>
             void distribute
             (
                 List<T>& fld,
-                const negateOp& negOp,
+                const NegateOp& negOp,
                 const int tag = UPstream::msgType()
             ) const;
 

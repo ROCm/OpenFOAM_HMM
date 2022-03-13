@@ -27,7 +27,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "Random.H"
-#include "Swap.H"
 #include "Pstream.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

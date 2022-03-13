@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2016 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,49 +30,23 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<> Foam::scalar Foam::flipOp::operator()(const scalar& v) const
-{
-    return -v;
-}
+#undef  defineNegateOp
+#define defineNegateOp(Type)                                                  \
+                                                                              \
+    template<> Type Foam::flipOp::operator()(const Type& val) const           \
+    {                                                                         \
+        return -val;                                                          \
+    }
 
 
-template<> Foam::vector Foam::flipOp::operator()(const vector& v) const
-{
-    return -v;
-}
+defineNegateOp(Foam::scalar);
+defineNegateOp(Foam::vector);
+defineNegateOp(Foam::sphericalTensor);
+defineNegateOp(Foam::symmTensor);
+defineNegateOp(Foam::tensor);
+defineNegateOp(Foam::triad);
 
-
-template<> Foam::sphericalTensor Foam::flipOp::operator()
-(
-    const sphericalTensor& v
-) const
-{
-    return -v;
-}
-
-
-template<> Foam::symmTensor Foam::flipOp::operator()
-(
-    const symmTensor& v
-) const
-{
-    return -v;
-}
-
-
-template<> Foam::tensor Foam::flipOp::operator()(const tensor& v) const
-{
-    return -v;
-}
-
-
-template<> Foam::triad Foam::flipOp::operator()
-(
-    const triad& v
-) const
-{
-    return -v;
-}
+#undef defineNegateOp
 
 
 // ************************************************************************* //

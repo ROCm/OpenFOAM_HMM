@@ -26,7 +26,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "scalarMatrices.H"
-#include "Swap.H"
 #include "ListOps.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

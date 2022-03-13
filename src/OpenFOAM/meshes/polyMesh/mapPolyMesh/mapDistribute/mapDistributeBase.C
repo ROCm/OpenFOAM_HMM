@@ -961,7 +961,7 @@ void Foam::mapDistributeBase::compact
                         elemIsUsed,
                         map[i],
                         constructHasFlip_,
-                        noOp()          // do not flip elemIsUsed value
+                        identityOp()   // Do not flip elemIsUsed value
                     );
                 }
 
@@ -992,7 +992,7 @@ void Foam::mapDistributeBase::compact
                     elemIsUsed,
                     map[i],
                     constructHasFlip_,
-                    noOp()              // do not flip elemIsUsed value
+                    identityOp()   // Do not flip elemIsUsed value
                 );
             }
         }

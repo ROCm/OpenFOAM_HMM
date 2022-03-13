@@ -2882,7 +2882,7 @@ void Foam::snappySnapDriver::determineBaffleFeatures
             listPlusEqOp<point>(),
             List<point>(),
             mapDistribute::transform(),
-            noOp()
+            identityOp()  // No flipping
         );
     }
 

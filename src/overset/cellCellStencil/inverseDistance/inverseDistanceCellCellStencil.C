@@ -1554,7 +1554,7 @@ void Foam::cellCellStencils::inverseDistance::createStencil
             samples,
             greatPoint,                             // nullValue
             minMagSqrEqOp<point>(),
-            flipOp(),                               // negateOp
+            flipOp(),                               // NegateOp
             UPstream::msgType(),
             cellInterpolationMap().comm()
         );

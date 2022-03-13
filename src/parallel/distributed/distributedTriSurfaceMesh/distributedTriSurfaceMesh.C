@@ -1385,7 +1385,7 @@ void Foam::distributedTriSurfaceMesh::surfaceSide
     mapDistributeBase::distribute
     (
         Pstream::commsTypes::nonBlocking,
-        List<labelPair>(0),
+        List<labelPair>(),
         nearestInfo.size(),
         map.constructMap(),
         map.constructHasFlip(),
@@ -1394,7 +1394,7 @@ void Foam::distributedTriSurfaceMesh::surfaceSide
         volType,
         zero,
         volumeCombineOp(),
-        noOp(),           // no flipping
+        identityOp(),           // No flipping
         UPstream::msgType(),
         map.comm()
     );
@@ -3197,7 +3197,7 @@ void Foam::distributedTriSurfaceMesh::findNearest
     mapDistributeBase::distribute
     (
         Pstream::commsTypes::nonBlocking,
-        List<labelPair>(0),
+        List<labelPair>(),
         samples.size(),
         map1.constructMap(),
         map1.constructHasFlip(),
@@ -3206,7 +3206,7 @@ void Foam::distributedTriSurfaceMesh::findNearest
         nearestInfo,
         nearestZero,
         nearestEqOp(),
-        noOp(),             // no flipping
+        identityOp(),           // No flipping
         UPstream::msgType(),
         map1.comm()
     );
@@ -3357,7 +3357,7 @@ void Foam::distributedTriSurfaceMesh::findNearest
     mapDistributeBase::distribute
     (
         Pstream::commsTypes::nonBlocking,
-        List<labelPair>(0),
+        List<labelPair>(),
         samples.size(),
         map2.constructMap(),
         map2.constructHasFlip(),
@@ -3366,7 +3366,7 @@ void Foam::distributedTriSurfaceMesh::findNearest
         localBest,
         nearestZero,
         nearestEqOp(),
-        noOp(),             // no flipping
+        identityOp(),           // No flipping
         UPstream::msgType(),
         map2.comm()
     );
@@ -4191,7 +4191,7 @@ void Foam::distributedTriSurfaceMesh::getVolumeType
     mapDistributeBase::distribute
     (
         Pstream::commsTypes::nonBlocking,
-        List<labelPair>(0),
+        List<labelPair>(),
         samples.size(),
         map.constructMap(),
         map.constructHasFlip(),
@@ -4200,7 +4200,7 @@ void Foam::distributedTriSurfaceMesh::getVolumeType
         volType,
         zero,
         volumeCombineOp(),
-        noOp(),           // no flipping
+        identityOp(),           // No flipping
         UPstream::msgType(),
         map.comm()
     );

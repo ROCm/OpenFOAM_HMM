@@ -346,7 +346,7 @@ void Foam::Field<Type>::map
         }
         else
         {
-            distMap.distribute(newMapF, noOp());
+            distMap.distribute(newMapF, identityOp());
         }
 
         if (mapper.direct() && notNull(mapper.directAddressing()))
@@ -417,7 +417,7 @@ void Foam::Field<Type>::autoMap
         }
         else
         {
-            distMap.distribute(fCpy, noOp());
+            distMap.distribute(fCpy, identityOp());
         }
 
         if

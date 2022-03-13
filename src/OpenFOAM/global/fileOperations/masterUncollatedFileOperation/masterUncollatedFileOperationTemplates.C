@@ -66,11 +66,11 @@ Type Foam::fileOperations::masterUncollatedFileOperation::scatterList
 }
 
 
-template<class Type, class fileOp>
+template<class Type, class FileOp>
 Type Foam::fileOperations::masterUncollatedFileOperation::masterOp
 (
     const fileName& fName,
-    const fileOp& fop,
+    const FileOp& fop,
     const int tag,
     const label comm
 ) const
@@ -78,7 +78,7 @@ Type Foam::fileOperations::masterUncollatedFileOperation::masterOp
     if (IFstream::debug)
     {
         Pout<< "masterUncollatedFileOperation::masterOp : Operation "
-            << typeid(fileOp).name()
+            << typeid(FileOp).name()
             << " on " << fName << endl;
     }
     if (Pstream::parRun())
@@ -109,12 +109,12 @@ Type Foam::fileOperations::masterUncollatedFileOperation::masterOp
 }
 
 
-template<class Type, class fileOp>
+template<class Type, class FileOp>
 Type Foam::fileOperations::masterUncollatedFileOperation::masterOp
 (
     const fileName& src,
     const fileName& dest,
-    const fileOp& fop,
+    const FileOp& fop,
     const int tag,
     const label comm
 ) const

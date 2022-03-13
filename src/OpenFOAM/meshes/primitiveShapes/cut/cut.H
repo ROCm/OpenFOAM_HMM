@@ -64,9 +64,8 @@ public:
 
     // Constructors
 
-        //- Construct null
-        uniformOp()
-        {}
+        //- Default construct
+        uniformOp() = default;
 
         //- Construct from data
         uniformOp(Type data)
@@ -75,7 +74,7 @@ public:
         {}
 
 
-    // Member functions
+    // Member Functions
 
         //- Access the data
         Type data() const
@@ -103,9 +102,8 @@ public:
 
     // Constructors
 
-        //- Construct null
-        noOp()
-        {}
+        //- Default construct
+        noOp() = default;
 
         //- Construct from base
         noOp(const uniformOp<zero::null>& op)
@@ -114,7 +112,7 @@ public:
         {}
 
 
-    // Member operators
+    // Member Operators
 
         //- Operate on nothing
         result operator()() const
@@ -149,9 +147,8 @@ public:
 
     // Constructors
 
-        //- Construct null
-        areaOp()
-        {}
+        //- Default construct
+        areaOp() = default;
 
         //- Construct from base
         areaOp(const uniformOp<zero::null>& op)
@@ -160,7 +157,7 @@ public:
         {}
 
 
-    // Member operators
+    // Member Operators
 
         //- Operate on nothing
         result operator()() const
@@ -194,9 +191,8 @@ public:
 
     // Constructors
 
-        //- Construct null
-        volumeOp()
-        {}
+        //- Default construct
+        volumeOp() = default;
 
         //- Construct from base
         volumeOp(const uniformOp<zero::null>& op)
@@ -205,7 +201,7 @@ public:
         {}
 
 
-    // Member operators
+    // Member Operators
 
         //- Operate on nothing
         result operator()() const
@@ -247,7 +243,7 @@ public:
         {}
 
 
-    // Member operators
+    // Member Operators
 
         //- Operate on nothing
         result operator()() const
@@ -290,7 +286,7 @@ public:
         {}
 
 
-    // Member operators
+    // Member Operators
 
         //- Operate on nothing
         result operator()() const
@@ -336,7 +332,7 @@ public:
                 {}
 
 
-            // Member operators
+            // Member Operators
 
                 //- Add together two lists
                 result operator+(const result& x) const
@@ -350,9 +346,8 @@ public:
 
     // Constructors
 
-        //- Construct null
-        listOp()
-        {}
+        //- Default construct
+        listOp() = default;
 
         //- Construct from base
         listOp(const uniformOp<zero::null>& op)
@@ -361,7 +356,7 @@ public:
         {}
 
 
-    // Member operators
+    // Member Operators
 
         //- Operate on nothing
         result operator()() const
@@ -413,7 +408,7 @@ public:
         {}
 
 
-    // Member operators
+    // Member Operators
 
         //- Operate on nothing
         result operator()() const

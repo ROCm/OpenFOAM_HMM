@@ -280,7 +280,7 @@ public:
                     cop,
                     nullValue,
                     mapDistribute::transform(),
-                    noOp()
+                    identityOp()  // No flipping
                 );
             }
 
@@ -301,7 +301,7 @@ public:
                     cop,
                     nullValue,
                     mapDistribute::transformPosition(),
-                    noOp()
+                    identityOp()  // No flipping
                 );
             }
 
@@ -324,7 +324,7 @@ public:
                     cop,
                     nullValue,
                     mapDistribute::transform(),
-                    noOp()
+                    identityOp()  // No flipping
                 );
             }
 
@@ -347,7 +347,7 @@ public:
                     cop,
                     nullValue,
                     mapDistribute::transformPosition(),
-                    noOp()
+                    identityOp()  // No flipping
                 );
             }
 

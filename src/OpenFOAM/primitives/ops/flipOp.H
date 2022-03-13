@@ -37,8 +37,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef flipOp_H
-#define flipOp_H
+#ifndef Foam_flipOp_H
+#define Foam_flipOp_H
 
 #include "fieldTypes.H"
 
@@ -46,6 +46,21 @@ SourceFiles
 
 namespace Foam
 {
+
+/*---------------------------------------------------------------------------*\
+                           Class noOp Declaration
+\*---------------------------------------------------------------------------*/
+
+//- Same as Foam::identityOp. Should \em never be specialized.
+struct noOp
+{
+    template<class T>
+    const T& operator()(const T& val) const noexcept
+    {
+        return val;
+    }
+};
+
 
 /*---------------------------------------------------------------------------*\
                            Class flipOp Declaration
@@ -61,21 +76,10 @@ struct flipOp
 };
 
 
-//- Pass through value. Should never be specialized.
-struct noOp
-{
-    template<class T>
-    const T& operator()(const T& val) const noexcept
-    {
-        return val;
-    }
-};
-
-
 //- Invert boolean value
 struct flipBoolOp
 {
-    bool operator()(const bool& val) const noexcept
+    bool operator()(const bool val) const noexcept
     {
         return !val;
     }
@@ -85,7 +89,7 @@ struct flipBoolOp
 //- Negate integer values
 struct flipLabelOp
 {
-    label operator()(const label& val) const
+    label operator()(const label val) const
     {
         return -val;
     }

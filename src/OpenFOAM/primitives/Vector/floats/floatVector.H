@@ -1,7 +1,7 @@
-// Compatibility include
+// Compatibility include. For v2112 and earlier
 
-#ifndef floatVector_H
-#define floatVector_H
+#ifndef FoamCompat_floatVector_H
+#define FoamCompat_floatVector_H
 
 #include "vector.H"
 

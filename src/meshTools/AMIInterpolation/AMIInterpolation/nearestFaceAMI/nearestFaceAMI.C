@@ -193,7 +193,7 @@ Foam::autoPtr<Foam::mapDistribute> Foam::nearestFaceAMI::calcDistributed
     mapDistributeBase::distribute
     (
         Pstream::commsTypes::nonBlocking,
-        List<labelPair>(0),
+        List<labelPair>(),
         src.size(),
         map.constructMap(),
         map.constructHasFlip(),
@@ -202,7 +202,7 @@ Foam::autoPtr<Foam::mapDistribute> Foam::nearestFaceAMI::calcDistributed
         remoteInfo,
         nearestZero,
         nearestEqOp(),
-        noOp()              // no flipping
+        identityOp()  // No flipping
     );
 
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef FieldOps_H
-#define FieldOps_H
+#ifndef Foam_FieldOps_H
+#define Foam_FieldOps_H
 
 #include "flipOp.H"
 #include "ListOps.H"
@@ -127,7 +127,7 @@ void ternary
 //- depending on the conditional.
 //
 //  The meaning of the conditional is adjusted by the flip operation,
-//  which is typically Foam::noOp() or Foam::flipBoolOp()
+//  which is typically Foam::identityOp() or Foam::flipBoolOp()
 //
 //  Similar parameter requirements as Foam::subset()
 //
@@ -150,7 +150,7 @@ void ternarySelect
 //- depending on the conditional.
 //
 //  The meaning of the conditional is adjusted by the flip operation,
-//  which is typically Foam::noOp() or Foam::flipBoolOp()
+//  which is typically Foam::identityOp() or Foam::flipBoolOp()
 template<class T, class FlipOp>
 void ternarySelect
 (
@@ -172,7 +172,7 @@ void ternarySelect
     const Field<T>& b
 )
 {
-    ternarySelect(result, cond, a, b, noOp());
+    ternarySelect(result, cond, a, b, identityOp{});
 }
 
 
@@ -186,7 +186,7 @@ void ternarySelect
     const Field<T>& b
 )
 {
-    ternarySelect(result, cond, a, b, noOp());
+    ternarySelect(result, cond, a, b, identityOp{});
 }
 
 

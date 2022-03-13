@@ -42,8 +42,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef UList_H
-#define UList_H
+#ifndef Foam_UList_H
+#define Foam_UList_H
 
 #include "bool.H"
 #include "label.H"
@@ -51,10 +51,9 @@ SourceFiles
 #include "zero.H"
 #include "one.H"
 #include "contiguous.H"
-#include "nullObject.H"
 #include "stdFoam.H"
+#include "nullObject.H"
 #include "Hash.H"
-#include "Swap.H"
 #include "ListPolicy.H"
 
 #include <initializer_list>

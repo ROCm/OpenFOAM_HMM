@@ -487,11 +487,11 @@ public:
             ) const;
 
             //- Distribute data using default commsType.
-            template<class T, class negateOp>
+            template<class T, class NegateOp>
             void distribute
             (
                 List<T>& fld,
-                const negateOp& negOp,
+                const NegateOp& negOp,
                 const bool dummyTransform = true,
                 const int tag = UPstream::msgType()
             ) const;

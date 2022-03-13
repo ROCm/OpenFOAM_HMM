@@ -33,7 +33,7 @@ License
 #include "IOstreams.H"
 #include "StringStream.H"
 #include "ListOps.H"
-#include "flipOp.H"
+#include "StringListOps.H"
 
 using namespace Foam;
 
@@ -216,7 +216,7 @@ int main()
             (
                 table1.keys().begin(),
                 table1.keys().end(),
-                noOp{}
+                identityOp{}
             )
         );
         sort(sortKeys);

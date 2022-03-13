@@ -34,7 +34,7 @@ Description
 #include "argList.H"
 #include "ITstream.H"
 #include "ListOps.H"
-#include "flipOp.H"
+#include "StringListOps.H"
 
 using namespace Foam;
 
@@ -172,7 +172,7 @@ int main(int argc, char *argv[])
         (
             stringInput.cbegin(),
             stringInput.cend(),
-            Foam::noOp{}
+            Foam::identityOp{}
         )
     );
 

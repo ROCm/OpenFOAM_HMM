@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,28 +23,14 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Namespace
-    stdFoam
-
 Description
-    Global macros and templates used by OpenFOAM and some standard
-    C++ headers.
-
-    Some of the templates defined here correspond to useful
-    std templates that are part of future C++ standards, or that
-    are in a state of change. Defining them here provides some additional
-    control over which definitions are used within the OpenFOAM code-base.
-
-SeeAlso
-    - http://en.cppreference.com/w/cpp/iterator/begin
-    - http://en.cppreference.com/w/cpp/iterator/end
-    - http://en.cppreference.com/w/cpp/iterator/rbegin
-    - http://en.cppreference.com/w/cpp/iterator/rend
+    Includes some standard C++ headers, defines global macros and templates
+    used in multiple places by OpenFOAM.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef stdFoam_H
-#define stdFoam_H
+#ifndef Foam_stdFoam_H
+#define Foam_stdFoam_H
 
 #include <initializer_list>
 #include <memory>
@@ -71,18 +57,69 @@ SeeAlso
 //- Namespace for OpenFOAM
 namespace Foam
 {
-    //- Implementation details for various OpenFOAM classes
-    namespace Detail {}
 
-    //- Additional OpenFOAM modules
-    namespace Module {}
+//- Implementation details for various OpenFOAM classes
+namespace Detail {}
 
-    // Standard items
+//- Additional OpenFOAM modules
+namespace Module {}
 
-    //- Allow use of std::unique_ptr directly as Foam::unique_ptr
-    using std::unique_ptr;
+// Standard items
+
+//- Allow use of std::unique_ptr directly as Foam::unique_ptr
+using std::unique_ptr;
+
+
+//- A functor that returns its argument unchanged (cf. C++20 std::identity)
+//- Should \em never be specialized.
+struct identityOp
+{
+    using is_transparent = void;
+
+    template<class T>
+    constexpr T&& operator()(T&& val) const noexcept
+    {
+        return std::forward<T>(val);
+    }
+};
+
+
+//- Swap non-array types as per std::swap, but in Foam namespace.
+//  \sa http://www.cplusplus.com/reference/utility/swap/
+//
+//  \note For complex structures, it is usual to provide a swap() member
+//  function and specialize Swap()
+template<class T>
+void Swap(T& a, T& b)
+{
+    std::swap(a, b);
 }
 
+
+//- Swap array types as per std::swap example, but in Foam namespace.
+//  \sa http://www.cplusplus.com/reference/utility/swap/
+template<class T, size_t N>
+void Swap(T (&a)[N], T (&b)[N])
+{
+    for (size_t i = 0; i < N; ++i)
+    {
+        Foam::Swap(a[i], b[i]);
+    }
+}
+
+} // End namespace Foam
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+//- Namespace for std templates that are are part of future C++ standards
+//- or that are in a state of change.
+//
+// SeeAlso
+//     - http://en.cppreference.com/w/cpp/iterator/begin
+//     - http://en.cppreference.com/w/cpp/iterator/end
+//     - http://en.cppreference.com/w/cpp/iterator/rbegin
+//     - http://en.cppreference.com/w/cpp/iterator/rend
 
 namespace stdFoam
 {

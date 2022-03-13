@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
         {
             const mapDistribute& faceMap = map.faceMap();
             pointField fc(mesh.faceCentres());
-            faceMap.distribute(fc, noOp());
+            faceMap.distribute(fc, identityOp());
             Pout<< "Construct size:" << faceMap.constructSize() << endl;
             forAll(distributedMesh.faceCentres(), facei)
             {
@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
         {
             const mapDistribute& cellMap = map.cellMap();
             pointField cc(mesh.cellCentres());
-            cellMap.distribute(cc, noOp());
+            cellMap.distribute(cc, identityOp());
             Pout<< "Construct size:" << cellMap.constructSize() << endl;
             forAll(distributedMesh.cellCentres(), celli)
             {
@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
         {
             const mapDistribute& pointMap = map.pointMap();
             pointField pc(mesh.points());
-            pointMap.distribute(pc, noOp());
+            pointMap.distribute(pc, identityOp());
             Pout<< "Construct size:" << pointMap.constructSize() << endl;
             forAll(distributedMesh.points(), pointi)
             {

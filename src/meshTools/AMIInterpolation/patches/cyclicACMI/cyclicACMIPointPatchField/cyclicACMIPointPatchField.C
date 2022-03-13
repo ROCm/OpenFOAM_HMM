@@ -26,7 +26,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "cyclicACMIPointPatchField.H"
-#include "Swap.H"
 #include "transformField.H"
 #include "pointFields.H"
 

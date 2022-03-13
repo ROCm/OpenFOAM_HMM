@@ -26,7 +26,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "cyclicAMIPointPatchField.H"
-#include "Swap.H"
 #include "transformField.H"
 #include "pointFields.H"
 

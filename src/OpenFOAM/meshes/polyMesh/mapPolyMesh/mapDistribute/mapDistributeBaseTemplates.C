@@ -33,14 +33,14 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template<class T, class CombineOp, class negateOp>
+template<class T, class CombineOp, class NegateOp>
 void Foam::mapDistributeBase::flipAndCombine
 (
     const labelUList& map,
     const bool hasFlip,
     const UList<T>& rhs,
     const CombineOp& cop,
-    const negateOp& negOp,
+    const NegateOp& negOp,
     List<T>& lhs
 )
 {
@@ -78,13 +78,13 @@ void Foam::mapDistributeBase::flipAndCombine
 }
 
 
-template<class T, class negateOp>
+template<class T, class NegateOp>
 T Foam::mapDistributeBase::accessAndFlip
 (
     const UList<T>& fld,
     const label index,
     const bool hasFlip,
-    const negateOp& negOp
+    const NegateOp& negOp
 )
 {
     T t;
@@ -117,7 +117,7 @@ T Foam::mapDistributeBase::accessAndFlip
 
 
 // Distribute list.
-template<class T, class negateOp>
+template<class T, class NegateOp>
 void Foam::mapDistributeBase::distribute
 (
     const Pstream::commsTypes commsType,
@@ -128,7 +128,7 @@ void Foam::mapDistributeBase::distribute
     const labelListList& constructMap,
     const bool constructHasFlip,
     List<T>& field,
-    const negateOp& negOp,
+    const NegateOp& negOp,
     const int tag,
     const label comm
 )
@@ -649,7 +649,7 @@ void Foam::mapDistributeBase::distribute
 
 
 // Distribute list.
-template<class T, class CombineOp, class negateOp>
+template<class T, class CombineOp, class NegateOp>
 void Foam::mapDistributeBase::distribute
 (
     const Pstream::commsTypes commsType,
@@ -662,7 +662,7 @@ void Foam::mapDistributeBase::distribute
     List<T>& field,
     const T& nullValue,
     const CombineOp& cop,
-    const negateOp& negOp,
+    const NegateOp& negOp,
     const int tag,
     const label comm
 )
@@ -1246,11 +1246,11 @@ const
 
 
 //- Distribute data using default commsType.
-template<class T, class negateOp>
+template<class T, class NegateOp>
 void Foam::mapDistributeBase::distribute
 (
     List<T>& fld,
-    const negateOp& negOp,
+    const NegateOp& negOp,
     const int tag
 ) const
 {

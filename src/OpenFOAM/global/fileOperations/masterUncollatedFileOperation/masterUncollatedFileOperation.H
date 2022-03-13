@@ -386,21 +386,21 @@ protected:
         template<class Type>
         Type scatterList(const UList<Type>&, const int, const label comm) const;
 
-        template<class Type, class fileOp>
+        template<class Type, class FileOp>
         Type masterOp
         (
             const fileName& fName,
-            const fileOp& fop,
+            const FileOp& fop,
             const int tag,
             const label comm
         ) const;
 
-        template<class Type, class fileOp>
+        template<class Type, class FileOp>
         Type masterOp
         (
             const fileName& src,
             const fileName& dest,
-            const fileOp& fop,
+            const FileOp& fop,
             const int tag,
             const label comm
         ) const;

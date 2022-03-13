@@ -47,7 +47,7 @@ SourceFiles
 #include "labelList.H"
 #include "stringList.H"
 #include "wordRes.H"
-#include "flipOp.H"
+#include "ops.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -362,12 +362,12 @@ struct foundOp
 //  The filter predicate is a combination of allow and deny lists
 //
 //  \return List indices for matches
-template<class StringListType, class AccessOp = noOp>
+template<class StringListType, class AccessOp = identityOp>
 labelList findMatching
 (
     const StringListType& input,
     const wordRes::filter& pred,
-    AccessOp aop = noOp()
+    AccessOp aop = identityOp()
 );
 
 //- Return ids for items with matching names.
@@ -387,13 +387,13 @@ labelList findMatching
 //  \endverbatim
 //
 //  \return List indices for matches
-template<class StringListType, class AccessOp = noOp>
+template<class StringListType, class AccessOp = identityOp>
 labelList findMatching
 (
     const StringListType& input,
     const wordRes& allow,
     const wordRes& deny = wordRes::null(),
-    AccessOp aop = noOp()
+    AccessOp aop = identityOp()
 );
 
 } // End namespace stringListOps

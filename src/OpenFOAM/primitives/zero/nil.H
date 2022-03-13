@@ -1,22 +1,17 @@
-/*---------------------------------------------------------------------------*\
-Compatibility include
+// Compatibility include. Superseded (MAY-2017) by Foam::zero::null
 
-Typedef
-    Foam::nil
-
-Description
-    The older name for Foam::zero::null.
-
-\*---------------------------------------------------------------------------*/
-
-#ifndef nil_H
-#define nil_H
+#ifndef FoamCompat_nil_H
+#define FoamCompat_nil_H
 
 #include "zero.H"
 
 namespace Foam
 {
-    typedef zero::null nil;
+
+//- Superseded (MAY-2017) by Foam::zero::null
+//  \deprecated(2017-05) - use Foam::zero::null instead
+typedef zero::null nil;
+
 }
 
 #endif

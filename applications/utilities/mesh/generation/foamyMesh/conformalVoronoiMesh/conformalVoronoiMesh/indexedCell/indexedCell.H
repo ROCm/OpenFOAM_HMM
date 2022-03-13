@@ -45,7 +45,6 @@ SourceFiles
 #include "List.H"
 #include "globalIndex.H"
 #include "Pstream.H"
-#include "Swap.H"
 #include "InfoProxy.H"
 #include "tetCell.H"
 #include "typeInfo.H"

@@ -45,9 +45,9 @@ SourceFiles
 #include "uLabel.H"
 #include "zero.H"
 #include "contiguous.H"
+#include "stdFoam.H"
 #include "autoPtr.H"
 #include "Hash.H"
-#include "Swap.H"
 #include "SLListFwd.H"
 #include "ListPolicy.H"
 

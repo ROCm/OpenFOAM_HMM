@@ -127,11 +127,11 @@ void Foam::mapDistribute::applyInverseTransforms
 }
 
 
-template<class T, class negateOp>
+template<class T, class NegateOp>
 void Foam::mapDistribute::distribute
 (
     List<T>& fld,
-    const negateOp& negOp,
+    const NegateOp& negOp,
     const bool dummyTransform,
     const int tag
 ) const

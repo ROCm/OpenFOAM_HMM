@@ -614,7 +614,7 @@ void testEdgeFlip2(const polyMesh& mesh, Random& rndGen)
             edgePointCombineOp(),
             PointPair(point::max, point::max),
             edgePointTransformOp(),
-            noOp()
+            identityOp()
         );
 
         forAll(fld, edgeI)
