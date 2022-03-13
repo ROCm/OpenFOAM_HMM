@@ -1273,6 +1273,7 @@ void Foam::argList::parse
             {
                 source = "-roots";
                 runControl_.distributed(true);
+
                 if (roots.empty())
                 {
                     FatalErrorInFunction
@@ -1487,12 +1488,12 @@ void Foam::argList::parse
                     options_.set("case", roots[subproci-1]/globalCase_);
 
                     OPstream toProc(Pstream::commsTypes::scheduled, subproci);
+
                     toProc
                         << args_ << options_
                         << runControl_.distributed()
                         << label(runControl_.dryRun())
                         << label(runControl_.verbose());
-
                 }
                 options_.erase("case");
 
@@ -1540,6 +1541,7 @@ void Foam::argList::parse
                 for (const int subproci : Pstream::subProcs())
                 {
                     OPstream toProc(Pstream::commsTypes::scheduled, subproci);
+
                     toProc
                         << args_ << options_
                         << runControl_.distributed()
@@ -1559,6 +1561,7 @@ void Foam::argList::parse
                 Pstream::commsTypes::scheduled,
                 Pstream::masterNo()
             );
+
             fromMaster
                 >> args_ >> options_
                 >> isDistributed

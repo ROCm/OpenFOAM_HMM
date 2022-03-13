@@ -149,7 +149,7 @@ then
         then
             case "$foamVar_end" in
             (/*)    # Absolute path
-                _foamAddLib "foamVar_end"
+                _foamAddLib "$foamVar_end"
                 ;;
             (*)     # Relative to prefix
                 _foamAddLib "$foamVar_prefix/$foamVar_end"

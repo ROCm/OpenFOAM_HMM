@@ -62,7 +62,8 @@ License
     makeCloudFunctionObjectType(PatchPostProcessing, CloudType);               \
     makeCloudFunctionObjectType(PatchParticleHistogram, CloudType);            \
     makeCloudFunctionObjectType(RemoveParcels, CloudType);                     \
-    makeCloudFunctionObjectType(VoidFraction, CloudType);
+    makeCloudFunctionObjectType(VoidFraction, CloudType);                      \
+    makeCloudFunctionObjectType(KinematicReynoldsNumber, CloudType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

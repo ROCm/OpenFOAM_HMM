@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2020 ENERCON GmbH
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -131,7 +131,7 @@ atmTurbulentHeatFluxTemperatureFvPatchScalarField
     fixedGradientFvPatchScalarField(atmpsf),
     heatSource_(atmpsf.heatSource_),
     alphaEffName_(atmpsf.alphaEffName_),
-    Cp0_(atmpsf.Cp0_),
+    Cp0_(atmpsf.Cp0_.clone()),
     q_(atmpsf.q_.clone(this->patch().patch()))
 {}
 
@@ -146,7 +146,7 @@ atmTurbulentHeatFluxTemperatureFvPatchScalarField
     fixedGradientFvPatchScalarField(atmpsf, iF),
     heatSource_(atmpsf.heatSource_),
     alphaEffName_(atmpsf.alphaEffName_),
-    Cp0_(atmpsf.Cp0_),
+    Cp0_(atmpsf.Cp0_.clone()),
     q_(atmpsf.q_.clone(this->patch().patch()))
 {}
 

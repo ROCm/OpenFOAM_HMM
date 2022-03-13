@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,8 +37,8 @@ Description
 
 #include "token.H"
 
-#ifndef runTimeSelectionTables_H
-#define runTimeSelectionTables_H
+#ifndef Foam_runTimeSelectionTables_H
+#define Foam_runTimeSelectionTables_H
 
 #include <memory>   // For std::unique_ptr
 #include <utility>  // For std::pair
@@ -89,6 +89,7 @@ Description
 
 
 // Not used directly: storage and helper methods for runtime tables
+// - uses automatic cleanup for compat table (issue #2314)
 #define defineRunTimeSelectionTableBase(baseType,prefix,Tspecialize)           \
                                                                                \
     /* Define table singleton (storage) */                                     \
@@ -124,8 +125,6 @@ Description
         {                                                                      \
             delete prefix##TablePtr_;                                          \
             prefix##TablePtr_ = nullptr;                                       \
-            prefix##CompatTablePtr_.reset(nullptr);                            \
-            constructed = false;                                               \
         }                                                                      \
     }                                                                          \
                                                                                \

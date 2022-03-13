@@ -51,7 +51,7 @@ Description
       Operand        | Type         | Location
       input          | -            | -
       output file    | -            | -
-      output field   | scalarField  | \<time\>/lagrangian/\<cloud\>/kinematicRe
+      output field   | scalarField  | \<time\>/lagrangian/\<cloud\>/Re
     \endtable
 
 Usage
@@ -62,15 +62,15 @@ Usage
         KinematicReynoldsNumber1
         {
             // Mandatory entries
-            type             KinematicReynoldsNumber;
+            type             ReynoldsNumber;
         }
     }
     \endverbatim
 
     where the entries mean:
     \table
-      Property     | Description                        | Type   | Reqd | Deflt
-      type         | Type name: KinematicReynoldsNumber | word   | yes  | -
+      Property     | Description                 | Type   | Reqd | Deflt
+      type         | Type name: ReynoldsNumber   | word   | yes  | -
     \endtable
 
 See also

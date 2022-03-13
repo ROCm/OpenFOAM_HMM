@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,15 +67,20 @@ void Foam::functionObjects::timeActivatedFileUpdate::updateFile()
 
     if (i > lastIndex_)
     {
-        Log << nl << type() << ": copying file" << nl << timeVsFile_[i].second()
-            << nl << "to:" << nl << fileToUpdate_ << nl << endl;
+        const fileName& srcFile = timeVsFile_[i].second();
+
+        // Report case-relative path for information
+        Log << nl << type() << ": copying file" << nl
+            << "from: " << time_.relativePath(srcFile, true) << nl
+            << "to  : " << time_.relativePath(fileToUpdate_, true) << nl
+            << endl;
 
         if (Pstream::master() || time_.distributed())
         {
             // Slaves do not copy if running non-distributed
-            fileName destFile(fileToUpdate_ + Foam::name(pid()));
-            cp(timeVsFile_[i].second(), destFile);
-            mv(destFile, fileToUpdate_);
+            fileName tmpFile(fileToUpdate_ + Foam::name(pid()));
+            Foam::cp(srcFile, tmpFile);
+            Foam::mv(tmpFile, fileToUpdate_);
         }
         lastIndex_ = i;
         modified_ = true;
@@ -122,16 +127,23 @@ bool Foam::functionObjects::timeActivatedFileUpdate::read
 
     forAll(timeVsFile_, i)
     {
-        timeVsFile_[i].second() = timeVsFile_[i].second().expand();
-        if (!isFile(timeVsFile_[i].second()))
-        {
-            FatalErrorInFunction
-                << "File: " << timeVsFile_[i].second() << " not found"
-                << nl << exit(FatalError);
-        }
+        timeVsFile_[i].second().expand();
+        const fileName& srcFile = timeVsFile_[i].second();
 
+        // Report case-relative path for information
         Info<< "    " << timeVsFile_[i].first() << tab
-            << timeVsFile_[i].second() << endl;
+            << time_.relativePath(srcFile, true) << endl;
+
+        if (Pstream::master() || time_.distributed())
+        {
+            if (!Foam::isFile(srcFile))
+            {
+                // Report full path on error
+                FatalErrorInFunction
+                    << "File not found: " << srcFile << endl
+                    << exit(FatalError);
+            }
+        }
     }
 
     // Copy starting files
