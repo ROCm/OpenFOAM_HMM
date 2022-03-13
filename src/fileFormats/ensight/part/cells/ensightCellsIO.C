@@ -31,6 +31,7 @@ License
 #include "polyMesh.H"
 #include "globalIndex.H"
 #include "globalMeshData.H"
+#include "manifoldCellsMeshObject.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -135,6 +136,8 @@ void Foam::ensightCells::writePolysConnectivity
         }
     }
 
+    ///const cellList& meshCells = mesh.cells();
+    const cellList& meshCells = manifoldCellsMeshObject::New(mesh).cells();
 
     // List of points id for each face of the above list
     if (Pstream::master())
@@ -180,7 +183,7 @@ void Foam::ensightCells::writePolysConnectivity
         );
 
         toMaster
-            << mesh.cells()
+            << meshCells
             << addr
             << faces
             << mesh.faceOwner();
