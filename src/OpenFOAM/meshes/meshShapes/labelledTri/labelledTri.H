@@ -103,6 +103,23 @@ public:
         //- Construct from a list of 3 or 4 labels. Default region is 0.
         inline explicit labelledTri(std::initializer_list<label>);
 
+        //- Copy construct from a subset of point labels
+        //- and optional region index (0 if unspecified)
+        inline labelledTri
+        (
+            const labelUList& list,
+            const FixedList<label, 3>& triIndices,
+            const label region = 0
+        );
+
+        //- Copy construct from a subset of point labels
+        //- with region index from input labelledTri
+        inline labelledTri
+        (
+            const labelUList& list,
+            const labelledTri& triIndices
+        );
+
         //- Construct from Istream
         inline labelledTri(Istream& is);
 

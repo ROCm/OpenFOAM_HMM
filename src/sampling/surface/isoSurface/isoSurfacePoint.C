@@ -949,7 +949,7 @@ Foam::triSurface Foam::isoSurfacePoint::stitchTriPoints
             );
             rawPointi += 3;
 
-            if ((tri[0] != tri[1]) && (tri[0] != tri[2]) && (tri[1] != tri[2]))
+            if (tri.valid())
             {
                 newToOldTri.append(oldTriI);
                 dynTris.append(tri);

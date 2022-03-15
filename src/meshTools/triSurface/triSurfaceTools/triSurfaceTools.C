@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +27,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "triSurfaceTools.H"
-
 #include "triSurface.H"
 #include "MeshedSurface.H"
 #include "OFstream.H"
@@ -1594,12 +1593,7 @@ Foam::triSurface Foam::triSurfaceTools::collapseEdges
     pointField newPoints(localPoints);
 
     // Map for old to new points
-    labelList pointMap(localPoints.size());
-    forAll(localPoints, pointi)
-    {
-        pointMap[pointi] = pointi;
-    }
-
+    labelList pointMap(identity(localPoints.size()));
 
     // Do actual 'collapsing' of edges
 
@@ -1688,43 +1682,36 @@ Foam::triSurface Foam::triSurfaceTools::collapseEdges
 
 
     // Storage for new triangles
-    List<labelledTri> newTris(surf.size());
-    label newTriI = 0;
+    List<labelledTri> newTriangles(surf.size());
+    label nNewTris = 0;
 
     const List<labelledTri>& localFaces = surf.localFaces();
-
 
     // Get only non-collapsed triangles and renumber vertex labels.
     forAll(localFaces, facei)
     {
-        const labelledTri& f = localFaces[facei];
-
-        const label a = pointMap[f[0]];
-        const label b = pointMap[f[1]];
-        const label c = pointMap[f[2]];
-
-        if
-        (
-            (a != b) && (a != c) && (b != c)
-         && (faceStatus[facei] != COLLAPSED)
-        )
+        if (faceStatus[facei] != COLLAPSED)
         {
-            // uncollapsed triangle
-            newTris[newTriI++] = labelledTri(a, b, c, f.region());
-        }
-        else
-        {
-            //Pout<< "Collapsed triangle " << facei
-            //    << " vertices:" << f << endl;
+            // Uncollapsed triangle
+            labelledTri f(localFaces[facei]);
+
+            // inplace renumber
+            f[0] = pointMap[f[0]];
+            f[1] = pointMap[f[1]];
+            f[2] = pointMap[f[2]];
+
+            if (f.valid())
+            {
+                newTriangles[nNewTris++] = f;
+            }
         }
     }
-    newTris.setSize(newTriI);
-
+    newTriangles.resize(nNewTris);
 
 
     // Pack faces
 
-    triSurface tempSurf(newTris, surf.patches(), newPoints);
+    triSurface tempSurf(newTriangles, surf.patches(), newPoints);
 
     return
         triSurface
@@ -1919,23 +1906,22 @@ Foam::triSurface Foam::triSurfaceTools::mergePoints
 
         // Storage for new triangles
         List<labelledTri> newTriangles(surf.size());
-        label newTriangleI = 0;
+        label nNewTris = 0;
 
-        forAll(surf, facei)
+        // Iterate and work on a copy
+        for (labelledTri f : surf.localFaces())
         {
-            const labelledTri& f = surf.localFaces()[facei];
+            // inplace renumber
+            f[0] = pointMap[f[0]];
+            f[1] = pointMap[f[1]];
+            f[2] = pointMap[f[2]];
 
-            label newA = pointMap[f[0]];
-            label newB = pointMap[f[1]];
-            label newC = pointMap[f[2]];
-
-            if ((newA != newB) && (newA != newC) && (newB != newC))
+            if (f.valid())
             {
-                newTriangles[newTriangleI++] =
-                    labelledTri(newA, newB, newC, f.region());
+                newTriangles[nNewTris++] = f;
             }
         }
-        newTriangles.setSize(newTriangleI);
+        newTriangles.resize(nNewTris);
 
         return triSurface
         (

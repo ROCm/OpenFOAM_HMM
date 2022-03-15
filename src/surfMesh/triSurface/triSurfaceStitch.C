@@ -68,12 +68,7 @@ bool Foam::triSurface::stitchTriangles
                 tri.region()
             );
 
-            if
-            (
-                (newTri[0] != newTri[1])
-             && (newTri[0] != newTri[2])
-             && (newTri[1] != newTri[2])
-            )
+            if (newTri.valid())
             {
                 operator[](newTriangleI++) = newTri;
             }

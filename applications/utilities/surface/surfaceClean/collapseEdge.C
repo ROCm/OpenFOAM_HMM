@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,23 +58,22 @@ static triSurface pack
 )
 {
     List<labelledTri> newTriangles(surf.size());
-    label newTriangleI = 0;
+    label nNewTris = 0;
 
-    forAll(surf, facei)
+    // Iterate and work on a copy
+    for (labelledTri f : surf.localFaces())
     {
-        const labelledTri& f = surf.localFaces()[facei];
+        // inplace renumber
+        f[0] = pointMap[f[0]];
+        f[1] = pointMap[f[1]];
+        f[2] = pointMap[f[2]];
 
-        label newA = pointMap[f[0]];
-        label newB = pointMap[f[1]];
-        label newC = pointMap[f[2]];
-
-        if ((newA != newB) && (newA != newC) && (newB != newC))
+        if (f.valid())
         {
-            newTriangles[newTriangleI++] =
-                labelledTri(newA, newB, newC, f.region());
+            newTriangles[nNewTris++] = f;
         }
     }
-    newTriangles.setSize(newTriangleI);
+    newTriangles.resize(nNewTris);
 
     return triSurface(newTriangles, surf.patches(), localPoints);
 }
@@ -92,11 +91,7 @@ label collapseEdge(triSurface& surf, const scalar minLen)
 
 
         // Mapping from old to new points
-        labelList pointMap(surf.nPoints());
-        forAll(pointMap, i)
-        {
-            pointMap[i] = i;
-        }
+        labelList pointMap(identity(surf.nPoints()));
 
         // Storage for new points.
         pointField newPoints(localPoints);

@@ -820,7 +820,7 @@ Foam::triSurface Foam::isoSurfaceCell::stitchTriPoints
                 triPointReverseMap[rawPointi+2],
                 0
             );
-            if ((tri[0] != tri[1]) && (tri[0] != tri[2]) && (tri[1] != tri[2]))
+            if (tri.valid())
             {
                 newToOldTri.append(oldTriI);
                 dynTris.append(tri);

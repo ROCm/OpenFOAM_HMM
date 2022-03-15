@@ -40,8 +40,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef triFace_H
-#define triFace_H
+#ifndef Foam_triFace_H
+#define Foam_triFace_H
 
 #include "FixedList.H"
 #include "edgeList.H"
@@ -118,6 +118,12 @@ public:
 
         //- Return second vertex label
         label second() const { return operator[](1); }
+
+
+    // Queries
+
+        //- Return true if the vertices are unique and non-negative.
+        inline bool valid() const;
 
 
     // Other

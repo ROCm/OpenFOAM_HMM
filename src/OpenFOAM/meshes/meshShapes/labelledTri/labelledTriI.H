@@ -106,6 +106,29 @@ inline Foam::labelledTri::labelledTri(std::initializer_list<label> list)
 }
 
 
+inline Foam::labelledTri::labelledTri
+(
+    const labelUList& list,
+    const FixedList<label, 3>& triIndices,
+    const label region
+)
+:
+    triFace(list, triIndices),
+    index_(region)
+{}
+
+
+inline Foam::labelledTri::labelledTri
+(
+    const labelUList& list,
+    const labelledTri& triIndices
+)
+:
+    triFace(list, triIndices),
+    index_(triIndices.region())
+{}
+
+
 inline Foam::labelledTri::labelledTri(Istream& is)
 {
     operator>>(is, *this);
