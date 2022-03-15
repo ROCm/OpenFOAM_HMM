@@ -1887,20 +1887,19 @@ Foam::triSurface Foam::triSurfaceTools::mergePoints
     const scalar mergeTol
 )
 {
-    pointField newPoints(surf.nPoints());
+    labelList pointMap;
+    labelList uniquePoints;
 
-    labelList pointMap(surf.nPoints());
-
-    bool hasMerged = Foam::mergePoints
+    label nChanged = Foam::mergePoints
     (
         surf.localPoints(),
-        mergeTol,
-        false,
         pointMap,
-        newPoints
+        uniquePoints,
+        mergeTol,
+        false
     );
 
-    if (hasMerged)
+    if (nChanged)
     {
         // Pack the triangles
 
@@ -1922,6 +1921,8 @@ Foam::triSurface Foam::triSurfaceTools::mergePoints
             }
         }
         newTriangles.resize(nNewTris);
+
+        pointField newPoints(surf.localPoints(), uniquePoints);
 
         return triSurface
         (

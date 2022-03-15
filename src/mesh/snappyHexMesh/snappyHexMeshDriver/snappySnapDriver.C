@@ -73,7 +73,7 @@ Foam::label Foam::snappySnapDriver::getCollocatedPoints
 )
 {
     labelList pointMap;
-    label nUnique = mergePoints
+    label nUnique = Foam::mergePoints
     (
         points,                         // points
         tol,                            // mergeTol

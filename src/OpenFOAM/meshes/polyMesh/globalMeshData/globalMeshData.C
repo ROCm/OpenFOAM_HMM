@@ -1932,20 +1932,16 @@ Foam::pointField Foam::globalMeshData::geometricSharedPoints() const
     // Merge tolerance
     scalar tolDim = matchTol_ * mesh_.bounds().mag();
 
-    // And see how many are unique
-    labelList pMap;
-    pointField mergedPoints;
-
-    Foam::mergePoints
+    labelList pointMap;
+    Foam::inplaceMergePoints
     (
         sharedPoints,   // coordinates to merge
         tolDim,         // tolerance
         false,          // verbosity
-        pMap,
-        mergedPoints
+        pointMap
     );
 
-    return mergedPoints;
+    return sharedPoints;
 }
 
 

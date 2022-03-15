@@ -862,25 +862,22 @@ void Foam::meshToMesh::distributeAndMergeCells
         // only merging points in debug mode
 
         labelList oldToNew;
-        pointField newTgtPoints;
-        bool hasMerged = mergePoints
+        label nChanged = Foam::inplaceMergePoints
         (
             tgtPoints,
             SMALL,
             false,
-            oldToNew,
-            newTgtPoints
+            oldToNew
         );
 
-        if (hasMerged)
+        if (nChanged)
         {
-            Pout<< "Merged from " << tgtPoints.size()
-                << " down to " << newTgtPoints.size() << " points" << endl;
+            Pout<< "Merged from " << oldToNew.size()
+                << " down to " << tgtPoints.size() << " points" << endl;
 
-            tgtPoints.transfer(newTgtPoints);
-            forAll(tgtFaces, i)
+            for (auto& f : tgtFaces)
             {
-                inplaceRenumber(oldToNew, tgtFaces[i]);
+                inplaceRenumber(oldToNew, f);
             }
         }
     }

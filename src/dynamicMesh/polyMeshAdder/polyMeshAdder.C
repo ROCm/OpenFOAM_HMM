@@ -2124,11 +2124,7 @@ Foam::Map<Foam::label> Foam::polyMeshAdder::findSharedPoints
     //labelList sharedToMerged;
     //label nUnique = Foam::mergePoints
     //(
-    //    pointField
-    //    (
-    //        mesh.points(),
-    //        sharedPointLabels
-    //    ),
+    //    UIndirectList<point>(mesh.points(), sharedPointLabels),
     //    mergeDist,
     //    false,
     //    sharedToMerged

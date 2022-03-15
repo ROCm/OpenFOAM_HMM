@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,23 +38,19 @@ bool Foam::triSurface::stitchTriangles
     bool verbose
 )
 {
-    pointField& ps = storedPoints();
+    pointField& ps = this->storedPoints();
 
-    // Merge points
+    // Merge points (inplace)
     labelList pointMap;
-    pointField newPoints;
-    bool hasMerged = mergePoints(ps, tol, verbose, pointMap, newPoints);
+    label nChanged = Foam::inplaceMergePoints(ps, tol, verbose, pointMap);
 
-    if (hasMerged)
+    if (nChanged)
     {
         if (verbose)
         {
-            Pout<< "stitchTriangles : Merged from " << ps.size()
-                << " points down to " << newPoints.size() << endl;
+            Pout<< "stitchTriangles : Merged from " << pointMap.size()
+                << " points down to " << ps.size() << endl;
         }
-
-        // Set the coordinates to the merged ones
-        ps.transfer(newPoints);
 
         // Reset the triangle point labels to the unique points array
         label newTriangleI = 0;
@@ -143,7 +140,7 @@ bool Foam::triSurface::stitchTriangles
         }
     }
 
-    return hasMerged;
+    return bool(nChanged);
 }
 
 

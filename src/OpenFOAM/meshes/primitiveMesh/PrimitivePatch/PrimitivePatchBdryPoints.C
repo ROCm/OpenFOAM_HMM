@@ -35,8 +35,6 @@ template<class FaceList, class PointField>
 void
 Foam::PrimitivePatch<FaceList, PointField>::calcBdryPoints() const
 {
-    DebugInFunction << "Calculating boundary points" << nl;
-
     if (boundaryPointsPtr_)
     {
         // Error to recalculate if already allocated
@@ -45,16 +43,81 @@ Foam::PrimitivePatch<FaceList, PointField>::calcBdryPoints() const
             << abort(FatalError);
     }
 
-    labelHashSet bp(2*nEdges());
+    labelHashSet bp(0);
 
-    for (const edge& e : boundaryEdges())
+    if (hasEdges())
     {
-        bp.insert(e.first());
-        bp.insert(e.second());
+        DebugInFunction
+            << "Calculating boundary points from existing addressing"
+            << nl;
+
+        bp.resize(4*nBoundaryEdges());
+
+        for (const edge& e : boundaryEdges())
+        {
+            bp.insert(e.first());
+            bp.insert(e.second());
+        }
+    }
+    else
+    {
+        DebugInFunction
+            << "Calculating boundary points with manual edge addressing"
+            << nl;
+
+
+        // Calculate manually.
+        // Needs localFaces, but uses local hashes of the edges here
+        // instead of forcing a full faceFaces/edgeFaces/faceEdges calculation
+
+        // Get reference to localFaces
+        const List<face_type>& locFcs = localFaces();
+
+        // Guess the max number of edges/neighbours for a face
+        label edgeCount = 0;
+        for (const auto& f : locFcs)
+        {
+            edgeCount += f.nEdges();
+        }
+
+        // ie, EdgeMap<label> to keep counts
+        HashTable<label, edge, Hash<edge>> knownEdges(2*edgeCount);
+
+        for (const auto& f : locFcs)
+        {
+            const label numEdges = f.nEdges();
+
+            for (label edgei = 0; edgei < numEdges; ++edgei)
+            {
+                ++ knownEdges(f.edge(edgei));
+            }
+        }
+
+        edgeCount = 0;
+
+        forAllConstIters(knownEdges, iter)
+        {
+            if (1 == iter.val())  // Singly connected edge
+            {
+                ++edgeCount;
+            }
+        }
+
+        bp.resize(4*edgeCount);
+
+        forAllConstIters(knownEdges, iter)
+        {
+            const edge& e = iter.key();
+
+            if (1 == iter.val())  // Singly connected edge
+            {
+                bp.insert(e.first());
+                bp.insert(e.second());
+            }
+        }
     }
 
     boundaryPointsPtr_.reset(new labelList(bp.sortedToc()));
-
     DebugInfo << "    Finished." << nl;
 }
 

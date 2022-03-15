@@ -31,7 +31,6 @@ License
 #include "emptyPolyPatch.H"
 #include "coupledPolyPatch.H"
 #include "sampledSurface.H"
-#include "mergePoints.H"
 #include "indirectPrimitivePatch.H"
 #include "PatchTools.H"
 #include "addToRunTimeSelectionTable.H"
@@ -374,16 +373,25 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::combineMeshGeometry
 
     if (Pstream::parRun())
     {
-        labelList pointsMap;
-
-        PatchTools::gatherAndMerge
+        // Topological merge
+        labelList pointToGlobal;
+        labelList uniqueMeshPointLabels;
+        autoPtr<globalIndex> globalPoints;
+        autoPtr<globalIndex> globalFaces;
+        Foam::PatchTools::gatherAndMerge
         (
-            SMALL,  // mergeDist
-            pp,
-            points,
+            mesh_,
+            pp.localFaces(),
+            pp.meshPoints(),
+            pp.meshPointMap(),
+
+            pointToGlobal,
+            uniqueMeshPointLabels,
+            globalPoints,
+            globalFaces,
+
             faces,
-            pointsMap,
-            true   // useLocal=true
+            points
         );
     }
     else

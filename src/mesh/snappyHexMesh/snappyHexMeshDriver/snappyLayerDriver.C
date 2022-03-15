@@ -4502,9 +4502,9 @@ void Foam::snappyLayerDriver::mapFaceZonePoints
         // too many points; the problem would be if merging baffles.
         // Trust mergeZoneBaffles to do sufficient checks.
         labelList oldToNew;
-        label nNew = mergePoints
+        label nNew = Foam::mergePoints
         (
-            pointField(mesh.points(), candidates),
+            UIndirectList<point>(mesh.points(), candidates),
             meshRefiner_.mergeDistance(),
             false,
             oldToNew

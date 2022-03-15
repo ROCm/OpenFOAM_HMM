@@ -233,25 +233,22 @@ void Foam::advancingFrontAMI::distributeAndMergePatches
 
     // Merge
     labelList oldToNew;
-    pointField newTgtPoints;
-    bool hasMerged = mergePoints
+    bool nChanged = Foam::inplaceMergePoints
     (
         tgtPoints,
         SMALL,
         false,
-        oldToNew,
-        newTgtPoints
+        oldToNew
     );
 
-    if (hasMerged)
+    if (nChanged)
     {
         if (debug)
         {
-            Pout<< "Merged from " << tgtPoints.size()
-                << " down to " << newTgtPoints.size() << " points" << endl;
+            Pout<< "Merged from " << oldToNew.size()
+                << " down to " << tgtPoints.size() << " points" << endl;
         }
 
-        tgtPoints.transfer(newTgtPoints);
         for (face& f : tgtFaces)
         {
             inplaceRenumber(oldToNew, f);

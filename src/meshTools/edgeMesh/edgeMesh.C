@@ -212,29 +212,22 @@ void Foam::edgeMesh::scalePoints(const scalar scaleFactor)
 
 void Foam::edgeMesh::mergePoints(const scalar mergeDist)
 {
-    pointField newPoints;
     labelList pointMap;
 
-    const bool hasMerged = Foam::mergePoints
+    label nChanged = Foam::inplaceMergePoints
     (
         points_,
         mergeDist,
         false,
-        pointMap,
-        newPoints,
-        vector::zero
+        pointMap
     );
 
-    if (hasMerged)
+    if (nChanged)
     {
         pointEdgesPtr_.reset(nullptr);   // connectivity change
 
-        points_.transfer(newPoints);
-
-        forAll(edges_, edgeI)
+        for (edge& e : edges_)
         {
-            edge& e = edges_[edgeI];
-
             e[0] = pointMap[e[0]];
             e[1] = pointMap[e[1]];
         }

@@ -31,6 +31,7 @@ License
 #include "IFstream.H"
 #include "IOmanip.H"
 #include "StringStream.H"
+#include "DynamicList.H"
 #include "mergePoints.H"
 #include "Map.H"
 

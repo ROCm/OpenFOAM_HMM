@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020,2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,11 +45,10 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef PatchTools_H
-#define PatchTools_H
+#ifndef Foam_PatchTools_H
+#define Foam_PatchTools_H
 
 #include "PrimitivePatch.H"
-#include "HashSet.H"
 #include "globalIndex.H"
 #include "autoPtr.H"
 
@@ -225,8 +224,12 @@ public:
     //  \param[out] mergedPoints
     //  \param[out] mergedFaces
     //  \param[out] pointMergeMap
-    //  \param[in] useLocal gather/merge the localFaces/localPoints
-    //      instead of (global) faces/points
+    //  \param[in] useLocal gather/merge patch localFaces/localPoints
+    //      instead of faces/points
+    //
+    //  \note
+    //  - OpenFOAM-v2112 and earlier: geometric merge on all patch points.
+    //  - OpenFOAM-v2206 and later: geometric merge on patch boundary points.
     template<class FaceList, class PointField>
     static void gatherAndMerge
     (

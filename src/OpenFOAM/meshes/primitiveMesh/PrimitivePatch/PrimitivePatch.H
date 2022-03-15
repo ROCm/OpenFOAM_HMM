@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,8 +51,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef PrimitivePatch_H
-#define PrimitivePatch_H
+#ifndef Foam_PrimitivePatch_H
+#define Foam_PrimitivePatch_H
 
 #include "boolList.H"
 #include "labelList.H"
@@ -347,6 +347,8 @@ public:
             }
 
             //- Return list of boundary points, address into LOCAL point list
+            //  Uses edge addressing (if it exists) or calculates directly
+            //  from localFaces()
             const labelList& boundaryPoints() const;
 
             //- Return face-face addressing

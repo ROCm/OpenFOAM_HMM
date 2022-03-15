@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -906,7 +906,7 @@ Foam::triSurface Foam::isoSurfacePoint::stitchTriPoints
     // Check that enough merged.
     if (debug)
     {
-        Pout<< "isoSurfacePoint : merged from " << triPoints.size()
+        Pout<< "isoSurfacePoint : merged from " << triPointReverseMap.size()
             << " down to " << newPoints.size() << " unique points." << endl;
 
         pointField newNewPoints;
@@ -925,7 +925,7 @@ Foam::triSurface Foam::isoSurfacePoint::stitchTriPoints
             FatalErrorInFunction
                 << "Merged points contain duplicates"
                 << " when merging with distance " << mergeDistance_ << endl
-                << "merged:" << newPoints.size() << " re-merged:"
+                << "merged:" << oldToNew.size() << " re-merged:"
                 << newNewPoints.size()
                 << abort(FatalError);
         }

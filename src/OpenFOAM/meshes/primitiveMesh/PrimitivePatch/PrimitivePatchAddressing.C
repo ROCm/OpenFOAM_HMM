@@ -62,11 +62,11 @@ Foam::PrimitivePatch<FaceList, PointField>::calcAddressing() const
     // get reference to pointFaces
     const labelListList& pf = pointFaces();
 
-    // Guess the max number of edges and neighbours for a face
+    // Guess the max number of edges/neighbours for a face
     label maxEdges = 0;
     for (const auto& f : locFcs)
     {
-        maxEdges += f.size();
+        maxEdges += f.nEdges();
     }
 
     // create the lists for the various results. (resized on completion)

@@ -55,7 +55,7 @@ void Foam::meshDualiser::checkPolyTopoChange(const polyTopoChange& meshMod)
     }
 
     labelList oldToNew;
-    label nUnique = mergePoints
+    label nUnique = Foam::mergePoints
     (
         points,
         1e-6,
@@ -223,7 +223,7 @@ Foam::label Foam::meshDualiser::addInternalFace
         pointField facePoints(meshMod.points(), newFace);
 
         labelList oldToNew;
-        label nUnique = mergePoints
+        label nUnique = Foam::mergePoints
         (
             facePoints,
             1e-6,

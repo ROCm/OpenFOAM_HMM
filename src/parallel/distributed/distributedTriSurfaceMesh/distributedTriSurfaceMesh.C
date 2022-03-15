@@ -1860,9 +1860,8 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
 //            (
 //                globalBorderCentres,
 //                mergeDist_,
-//                false,          //const bool verbose,
+//                false,          // verbose = false
 //                allToMerged
-//                // maybe bounds().mid() ?
 //            );
 //
 //            if (debug)
@@ -2006,9 +2005,8 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
                 (
                     allCentres,
                     mergeDist_,
-                    false,          //const bool verbose,
+                    false,          // verbose = false
                     allToMerged
-                    // maybe bounds().mid() ?
                 );
 
                 if (debug)

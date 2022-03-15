@@ -1810,7 +1810,7 @@ bool Foam::extendedEdgeMesh::mergePointsAndSort
 
     // Detect and merge collocated feature points
     labelList oldToMerged;
-    label nNewPoints = ::Foam::mergePoints
+    label nNewPoints = Foam::mergePoints
     (
         points(),
         SMALL,

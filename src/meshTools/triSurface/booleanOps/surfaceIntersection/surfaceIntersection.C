@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1486,22 +1486,18 @@ const Foam::labelListList& Foam::surfaceIntersection::surf2EdgeCuts() const
 
 void Foam::surfaceIntersection::mergePoints(const scalar mergeDist)
 {
-    pointField newPoints;
     labelList pointMap;
 
-    const label nMerged = Foam::mergePoints
+    label nChanged = Foam::inplaceMergePoints
     (
         cutPoints_,
         mergeDist,
         false,
-        pointMap,
-        newPoints
+        pointMap
     );
 
-    if (nMerged)
+    if (nChanged)
     {
-        cutPoints_.transfer(newPoints);
-
         forAll(cutEdges_, edgei)
         {
             edge& e = cutEdges_[edgei];

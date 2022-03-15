@@ -767,7 +767,7 @@ Foam::triSurface Foam::isoSurfaceCell::stitchTriPoints
     }
 
     pointField newPoints;
-    mergePoints
+    Foam::mergePoints
     (
         triPoints,
         mergeDistance_,
@@ -779,27 +779,25 @@ Foam::triSurface Foam::isoSurfaceCell::stitchTriPoints
     // Check that enough merged.
     if (debug)
     {
-        Pout<< "isoSurfaceCell : merged from " << triPoints.size()
+        Pout<< "isoSurfaceCell : merged from " << triPointReverseMap.size()
             << " points down to " << newPoints.size() << endl;
 
-        pointField newNewPoints;
         labelList oldToNew;
-        bool hasMerged = mergePoints
+        const label nUnique = Foam::mergePoints
         (
             newPoints,
             mergeDistance_,
             true,
-            oldToNew,
-            newNewPoints
+            oldToNew
         );
 
-        if (hasMerged)
+        if (nUnique != newPoints.size())
         {
             FatalErrorInFunction
                 << "Merged points contain duplicates"
                 << " when merging with distance " << mergeDistance_ << endl
                 << "merged:" << newPoints.size() << " re-merged:"
-                << newNewPoints.size()
+                << nUnique
                 << abort(FatalError);
         }
     }
@@ -852,30 +850,28 @@ Foam::triSurface Foam::isoSurfaceCell::stitchTriPoints
             centres[triI] = tris[triI].centre(newPoints);
         }
 
-        pointField mergedCentres;
         labelList oldToMerged;
-        bool hasMerged = mergePoints
+        label nUnique = Foam::mergePoints
         (
             centres,
             mergeDistance_,
             false,
-            oldToMerged,
-            mergedCentres
+            oldToMerged
         );
 
         if (debug)
         {
             Pout<< "isoSurfaceCell : detected "
-                << centres.size()-mergedCentres.size()
+                << (oldToMerged.size() - nUnique)
                 << " duplicate triangles." << endl;
         }
 
-        if (hasMerged)
+        if (oldToMerged.size() != nUnique)
         {
             // Filter out duplicates.
             label newTriI = 0;
             DynamicList<label> newToOldTri(tris.size());
-            labelList newToMaster(mergedCentres.size(), -1);
+            labelList newToMaster(nUnique, -1);
             forAll(tris, triI)
             {
                 label mergedI = oldToMerged[triI];
@@ -918,26 +914,25 @@ void Foam::isoSurfaceCell::calcAddressing
         edgeCentres[edgeI++] = 0.5*(points[tri[2]]+points[tri[0]]);
     }
 
-    pointField mergedCentres;
     labelList oldToMerged;
-    bool hasMerged = mergePoints
+    const label nUnique = Foam::mergePoints
     (
         edgeCentres,
         mergeDistance_,
         false,
-        oldToMerged,
-        mergedCentres
+        oldToMerged
     );
 
     if (debug)
     {
         Pout<< "isoSurfaceCell : detected "
-            << mergedCentres.size()
+            << nUnique
             << " edges on " << surf.size() << " triangles." << endl;
     }
 
-    if (!hasMerged)
+    if (nUnique == edgeCentres.size())
     {
+        // Nothing to do
         return;
     }
 
@@ -954,9 +949,9 @@ void Foam::isoSurfaceCell::calcAddressing
 
 
     // Determine edgeFaces
-    edgeFace0.setSize(mergedCentres.size());
+    edgeFace0.resize(nUnique);
     edgeFace0 = -1;
-    edgeFace1.setSize(mergedCentres.size());
+    edgeFace1.resize(nUnique);
     edgeFace1 = -1;
     edgeFacesRest.clear();
 
@@ -976,7 +971,7 @@ void Foam::isoSurfaceCell::calcAddressing
         else
         {
             //WarningInFunction
-            //    << "Edge " << edgeI << " with centre " << mergedCentres[edgeI]
+            //    << "Edge " << edgeI << " with centre "
             //    << " used by more than two triangles: " << edgeFace0[edgeI]
             //    << ", "
             //    << edgeFace1[edgeI] << " and " << triI << endl;

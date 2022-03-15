@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -695,15 +695,13 @@ bool Foam::MeshedSurface<Face>::stitchFaces
     const bool verbose
 )
 {
-    pointField& pointLst = this->storedPoints();
+    pointField& ps = this->storedPoints();
 
-    // Merge points
-    labelList  pointMap(pointLst.size());
-    pointField newPoints(pointLst.size());
+    // Merge points (inplace)
+    labelList pointMap;
+    label nChanged = Foam::inplaceMergePoints(ps, tol, verbose, pointMap);
 
-    bool hasMerged = mergePoints(pointLst, tol, verbose, pointMap, newPoints);
-
-    if (!hasMerged)
+    if (!nChanged)
     {
         return false;
     }
@@ -712,9 +710,6 @@ bool Foam::MeshedSurface<Face>::stitchFaces
     {
         InfoInFunction<< "Renumbering all faces" << endl;
     }
-
-    // Set the coordinates to the merged ones
-    pointLst.transfer(newPoints);
 
     List<Face>& faceLst = this->storedFaces();
 

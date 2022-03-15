@@ -85,47 +85,71 @@ void Foam::PatchTools::gatherAndMerge
         }
     }
 
+
     // Merging points
-    bool hasMerged = false;
+    label nPointsChanged(0);
+
+    labelList boundaryPoints;
+
+    if (Pstream::parRun())
+    {
+        const globalIndex localPointAddr
+        (
+            pp.localPoints().size(),
+            globalIndex::gatherOnly{}
+        );
+
+        const globalIndex bndPointAddr
+        (
+            pp.boundaryPoints().size(),
+            globalIndex::gatherOnly{}
+        );
+
+        bndPointAddr.gather(pp.boundaryPoints(), boundaryPoints);
+
+        // Relabel according to global point offsets
+        for (const label proci : localPointAddr.subProcs())
+        {
+            SubList<label> slot(boundaryPoints, bndPointAddr.range(proci));
+            localPointAddr.inplaceToGlobal(proci, slot);
+        }
+    }
+
 
     if (Pstream::parRun() && Pstream::master())
     {
-        Field<PointType> newPoints;
-        labelList oldToNew;
+        labelList pointToUnique;
 
-        hasMerged = Foam::mergePoints
+        nPointsChanged = Foam::inplaceMergePoints
         (
             mergedPoints,
+            boundaryPoints,  // selection of points to merge
             mergeDist,
-            false,  // verbosity
-            oldToNew,
-            newPoints
+            false,           // verbose = false
+            pointToUnique
         );
 
-        if (hasMerged)
+        if (nPointsChanged)
         {
-            // Relabel faces
+            // Renumber faces to use unique point numbers
             for (auto& f : mergedFaces)
             {
-                inplaceRenumber(oldToNew, f);
+                inplaceRenumber(pointToUnique, f);
             }
-
-            // Store newly merged points
-            mergedPoints.transfer(newPoints);
 
             // Store point mapping
             if (notNull(pointMergeMap))
             {
-                pointMergeMap.transfer(oldToNew);
+                pointMergeMap.transfer(pointToUnique);
             }
         }
     }
 
-    // TDB:
-    // if (!hasMerged && notNull(pointMergeMap))
-    // {
-    //     pointMergeMap.clear();
-    // }
+    if (!nPointsChanged && notNull(pointMergeMap))
+    {
+        // Safety
+        pointMergeMap = identity(mergedPoints.size());
+    }
 }
 
 

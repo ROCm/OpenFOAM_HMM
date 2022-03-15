@@ -131,13 +131,12 @@ void Foam::patchEdgeSet::genSamples()
 
 
     labelList pointMap;
-    const label nMerged = mergePoints
+    const label nMerged = Foam::mergePoints
     (
         samplingPts,
-        SMALL,          //const scalar mergeTol,
-        false,          //const bool verbose,
-        pointMap,
-        origin_
+        SMALL,          // mergeTol
+        false,          // verbose = false
+        pointMap
     );
 
     if (nMerged == samplingPts.size())
