@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,41 +83,70 @@ void Foam::fa::limitVelocity::correct(areaVectorField& U)
 {
     const scalar maxSqrU = sqr(max_);
 
+    // Count nTotFaces ourselves
+    // (maybe only applying on a subset)
+    label nFacesAbove(0);
+    const label nTotFaces(returnReduce(faces_.size(), sumOp<label>()));
+
     vectorField& Uif = U.primitiveFieldRef();
 
     for (const label facei : faces_)
     {
-        const scalar magSqrUi = magSqr(Uif[facei]);
+        auto& Uval = Uif[facei];
+
+        const scalar magSqrUi = magSqr(Uval);
 
         if (magSqrUi > maxSqrU)
         {
-            Uif[facei] *= sqrt(maxSqrU/max(magSqrUi, SMALL));
+            Uval *= sqrt(maxSqrU/max(magSqrUi, SMALL));
+            ++nFacesAbove;
         }
     }
 
     // Handle boundaries in the case of 'all'
+    label nEdgesAbove(0);
+
     if (!faceSetOption::useSubMesh())
     {
         for (faPatchVectorField& Up : U.boundaryFieldRef())
         {
             if (!Up.fixesValue())
             {
-                forAll(Up, facei)
+                for (auto& Uval : Up)
                 {
-                    const scalar magSqrUi = magSqr(Up[facei]);
+                    const scalar magSqrUi = magSqr(Uval);
 
                     if (magSqrUi > maxSqrU)
                     {
-                        Up[facei] *= sqrt(maxSqrU/max(magSqrUi, SMALL));
+                        Uval *= sqrt(maxSqrU/max(magSqrUi, SMALL));
+                        ++nEdgesAbove;
                     }
                 }
             }
         }
     }
 
-    // We've changed internal values so give boundary conditions opportunity
-    // to correct.
-    U.correctBoundaryConditions();
+    // Percent, max 2 decimal places
+    const auto percent = [](scalar num, label denom) -> scalar
+    {
+        return (denom ? 1e-2*round(1e4*num/denom) : 0);
+    };
+
+
+    reduce(nFacesAbove, sumOp<label>());
+    reduce(nEdgesAbove, sumOp<label>());
+
+    Info<< type() << ' ' << name_ << " Limited "
+        << nFacesAbove << " ("
+        << percent(nFacesAbove, nTotFaces)
+        << "%) of faces, with max limit " << max_ << endl;
+
+    if (nFacesAbove || nEdgesAbove)
+    {
+        // We've changed internal values so give
+        // boundary conditions opportunity to correct
+        U.correctBoundaryConditions();
+    }
 }
 
 

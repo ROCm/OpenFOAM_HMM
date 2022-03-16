@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -80,41 +80,86 @@ void Foam::fv::limitVelocity::correct(volVectorField& U)
 {
     const scalar maxSqrU = sqr(max_);
 
+    // Count nTotCells ourselves
+    // (maybe only applying on a subset)
+    label nCellsAbove(0);
+    const label nTotCells(returnReduce(cells_.size(), sumOp<label>()));
+
     vectorField& Uif = U.primitiveFieldRef();
 
     for (const label celli : cells_)
     {
-        const scalar magSqrUi = magSqr(Uif[celli]);
+        auto& Uval = Uif[celli];
+
+        const scalar magSqrUi = magSqr(Uval);
 
         if (magSqrUi > maxSqrU)
         {
-            Uif[celli] *= sqrt(maxSqrU/magSqrUi);
+            Uval *= sqrt(maxSqrU/magSqrUi);
+            ++nCellsAbove;
         }
     }
 
     // Handle boundaries in the case of 'all'
+
+    label nFacesAbove(0);
+    label nTotFaces(0);
+
     if (!cellSetOption::useSubMesh())
     {
         for (fvPatchVectorField& Up : U.boundaryFieldRef())
         {
             if (!Up.fixesValue())
             {
-                forAll(Up, facei)
+                // Do not count patches that fix velocity themselves
+                nTotFaces += Up.size();
+
+                for (auto& Uval : Up)
                 {
-                    const scalar magSqrUi = magSqr(Up[facei]);
+                    const scalar magSqrUi = magSqr(Uval);
 
                     if (magSqrUi > maxSqrU)
                     {
-                        Up[facei] *= sqrt(maxSqrU/magSqrUi);
+                        Uval *= sqrt(maxSqrU/magSqrUi);
+                        ++nFacesAbove;
                     }
                 }
             }
         }
     }
 
-    // We've changed internal values so give
-    // boundary conditions opportunity to correct
-    U.correctBoundaryConditions();
+    // Percent, max 2 decimal places
+    const auto percent = [](scalar num, label denom) -> scalar
+    {
+        return (denom ? 1e-2*round(1e4*num/denom) : 0);
+    };
+
+
+    reduce(nCellsAbove, sumOp<label>());
+
+    // Report total numbers and percent
+    Info<< type() << ' ' << name_ << " Limited ";
+
+    Info<< nCellsAbove << " ("
+        << percent(nCellsAbove, nTotCells)
+        << "%) of cells";
+
+    reduce(nTotFaces, sumOp<label>());
+    reduce(nFacesAbove, sumOp<label>());
+    if (nTotFaces)
+    {
+        Info<< ", " << nFacesAbove << " ("
+            << percent(nFacesAbove, nTotFaces)
+            << "%) of faces";
+    }
+    Info<< ", with max limit " << max_ << endl;
+
+    if (nCellsAbove || nFacesAbove)
+    {
+        // We've changed internal values so give
+        // boundary conditions opportunity to correct
+        U.correctBoundaryConditions();
+    }
 }
 
 

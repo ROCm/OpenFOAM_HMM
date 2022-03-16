@@ -126,43 +126,53 @@ void Foam::fv::limitTemperature::correct(volScalarField& he)
     scalar Tmin0 = min(T);
     scalar Tmax0 = max(T);
 
-    label nOverTmax = 0;
-    label nLowerTmin = 0;
+    // Count nTotCells ourselves
+    // (maybe only applying on a subset)
+    label nBelowMin(0);
+    label nAboveMax(0);
+    const label nTotCells(returnReduce(cells_.size(), sumOp<label>()));
 
     forAll(cells_, i)
     {
         const label celli = cells_[i];
         if (hec[celli] < heMin[i])
         {
-            nLowerTmin++;
+            hec[celli] = heMin[i];
+            ++nBelowMin;
         }
         else if (hec[celli] > heMax[i])
         {
-            nOverTmax++;
+            hec[celli] = heMax[i];
+            ++nAboveMax;
         }
-        hec[celli]= max(min(hec[celli], heMax[i]), heMin[i]);
     }
 
-    reduce(nOverTmax, sumOp<label>());
-    reduce(nLowerTmin, sumOp<label>());
+    reduce(nBelowMin, sumOp<label>());
+    reduce(nAboveMax, sumOp<label>());
 
     reduce(Tmin0, minOp<scalar>());
     reduce(Tmax0, maxOp<scalar>());
 
-    Info<< type() << " " << name_ << " Lower limited "
-        << nLowerTmin << " ("
-        << 100*scalar(nLowerTmin)/mesh_.globalData().nTotalCells()
-        << "%) of cells" << endl;
+    // Percent, max 2 decimal places
+    const auto percent = [](scalar num, label denom) -> scalar
+    {
+        return (denom ? 1e-2*round(1e4*num/denom) : 0);
+    };
 
-    Info<< type() << " " << name_ << " Upper limited "
-        << nOverTmax << " ("
-        << 100*scalar(nOverTmax)/mesh_.globalData().nTotalCells()
-        << "%) of cells" << endl;
+    Info<< type() << ' ' << name_ << " Lower limited " << nBelowMin << " ("
+        << percent(nBelowMin, nTotCells)
+        << "%) of cells, with min limit " << Tmin_ << endl;
 
-    Info<< type() << " " << name_ << " Unlimited Tmax " << Tmax0 << nl
-        <<  "Unlimited Tmin " << Tmin0 << endl;
+    Info<< type() << ' ' << name_ << " Upper limited " << nAboveMax << " ("
+        << percent(nAboveMax, nTotCells)
+        << "%) of cells, with max limit " << Tmax_ << endl;
+
+    Info<< type() << ' ' << name_ << " Unlimited Tmin " << Tmin0 << endl;
+    Info<< type() << ' ' << name_ << " Unlimited Tmax " << Tmax0 << endl;
+
 
     // Handle boundaries in the case of 'all'
+    bool changedValues = (nBelowMin || nAboveMax);
     if (!cellSetOption::useSubMesh())
     {
         volScalarField::Boundary& bf = he.boundaryFieldRef();
@@ -183,16 +193,28 @@ void Foam::fv::limitTemperature::correct(volScalarField& he)
 
                 forAll(hep, facei)
                 {
-                    hep[facei] =
-                        max(min(hep[facei], heMaxp[facei]), heMinp[facei]);
+                    if (hep[facei] < heMinp[facei])
+                    {
+                        hep[facei] = heMinp[facei];
+                        changedValues = true;
+                    }
+                    else if (hep[facei] > heMaxp[facei])
+                    {
+                        hep[facei] = heMaxp[facei];
+                        changedValues = true;
+                    }
                 }
             }
         }
     }
 
-    // We've changed internal values so give
-    // boundary conditions opportunity to correct
-    he.correctBoundaryConditions();
+
+    if (returnReduce(changedValues, orOp<bool>()))
+    {
+        // We've changed internal values so give
+        // boundary conditions opportunity to correct
+        he.correctBoundaryConditions();
+    }
 }
 
 

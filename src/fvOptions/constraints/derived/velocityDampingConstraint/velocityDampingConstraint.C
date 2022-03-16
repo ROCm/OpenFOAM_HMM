@@ -62,7 +62,10 @@ void Foam::fv::velocityDampingConstraint::addDamping(fvMatrix<vector>& eqn)
     const volVectorField& U = eqn.psi();
     scalarField& diag = eqn.diag();
 
-    label nDamped = 0;
+    // Count nTotCells ourselves
+    // (maybe only applying on a subset)
+    label nDamped(0);
+    const label nTotCells(returnReduce(cells_.size(), sumOp<label>()));
 
     for (label celli : cells_)
     {
@@ -79,10 +82,16 @@ void Foam::fv::velocityDampingConstraint::addDamping(fvMatrix<vector>& eqn)
 
     reduce(nDamped, sumOp<label>());
 
-    Info<< type() << " " << name_ << " damped "
+    // Percent, max 2 decimal places
+    const auto percent = [](scalar num, label denom) -> scalar
+    {
+        return (denom ? 1e-2*round(1e4*num/denom) : 0);
+    };
+
+    Info<< type() << ' ' << name_ << " damped "
         << nDamped << " ("
-        << 100*scalar(nDamped)/mesh_.globalData().nTotalCells()
-        << "%) of cells" << endl;
+        << percent(nDamped, nTotCells)
+        << "%) of cells, with max limit " << UMax_ << endl;
 }
 
 
