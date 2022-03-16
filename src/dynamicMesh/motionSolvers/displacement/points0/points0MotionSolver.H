@@ -106,7 +106,7 @@ public:
 
 
     //- Destructor
-    virtual ~points0MotionSolver();
+    virtual ~points0MotionSolver() = default;
 
 
     // Member Functions

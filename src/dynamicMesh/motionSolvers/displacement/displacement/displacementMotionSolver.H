@@ -133,7 +133,7 @@ public:
 
 
     //- Destructor
-    virtual ~displacementMotionSolver();
+    virtual ~displacementMotionSolver() = default;
 
 
     // Member Functions

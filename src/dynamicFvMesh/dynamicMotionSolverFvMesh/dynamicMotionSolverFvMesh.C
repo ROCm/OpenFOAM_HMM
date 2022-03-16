@@ -30,6 +30,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "motionSolver.H"
 #include "volFields.H"
+#include "zoneMotion.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -104,12 +105,6 @@ Foam::dynamicMotionSolverFvMesh::dynamicMotionSolverFvMesh
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::dynamicMotionSolverFvMesh::~dynamicMotionSolverFvMesh()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 const Foam::motionSolver& Foam::dynamicMotionSolverFvMesh::motion() const
@@ -120,9 +115,6 @@ const Foam::motionSolver& Foam::dynamicMotionSolverFvMesh::motion() const
 
 bool Foam::dynamicMotionSolverFvMesh::update()
 {
-    // Scan through AMI patches and update
-
-
     fvMesh::movePoints(motionPtr_->newPoints());
 
     volVectorField* Uptr = getObjectPtr<volVectorField>("U");

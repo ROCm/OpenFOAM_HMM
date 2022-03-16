@@ -49,10 +49,8 @@ void Foam::primitiveMeshGeometry::updateFaceCentresAndAreas
 {
     const faceList& fs = mesh_.faces();
 
-    forAll(changedFaces, i)
+    for (label facei : changedFaces)
     {
-        label facei = changedFaces[i];
-
         const labelList& f = fs[facei];
         label nPoints = f.size();
 
@@ -70,19 +68,19 @@ void Foam::primitiveMeshGeometry::updateFaceCentresAndAreas
             vector sumAc = Zero;
 
             point fCentre = p[f[0]];
-            for (label pi = 1; pi < nPoints; pi++)
+            for (label pi = 1; pi < nPoints; ++pi)
             {
                 fCentre += p[f[pi]];
             }
 
             fCentre /= nPoints;
 
-            for (label pi = 0; pi < nPoints; pi++)
+            for (label pi = 0; pi < nPoints; ++pi)
             {
                 const point& nextPoint = p[f[(pi + 1) % nPoints]];
 
-                vector c = p[f[pi]] + nextPoint + fCentre;
-                vector n = (nextPoint - p[f[pi]])^(fCentre - p[f[pi]]);
+                vector c(p[f[pi]] + nextPoint + fCentre);
+                vector n((nextPoint - p[f[pi]])^(fCentre - p[f[pi]]));
                 scalar a = mag(n);
 
                 sumN += n;
@@ -117,9 +115,8 @@ void Foam::primitiveMeshGeometry::updateCellCentresAndVols
     scalarField nCellFaces(mesh_.nCells());
     UIndirectList<scalar>(nCellFaces, changedCells) = 0.0;
 
-    forAll(changedFaces, i)
+    for (label facei : changedFaces)
     {
-        label facei = changedFaces[i];
         cEst[own[facei]] += faceCentres_[facei];
         nCellFaces[own[facei]] += 1;
 
@@ -130,16 +127,13 @@ void Foam::primitiveMeshGeometry::updateCellCentresAndVols
         }
     }
 
-    forAll(changedCells, i)
+    for (label celli : changedCells)
     {
-        label celli = changedCells[i];
         cEst[celli] /= nCellFaces[celli];
     }
 
-    forAll(changedFaces, i)
+    for (label facei : changedFaces)
     {
-        label facei = changedFaces[i];
-
         // Calculate 3*face-pyramid volume
         scalar pyr3Vol = max
         (
@@ -198,10 +192,8 @@ Foam::labelList Foam::primitiveMeshGeometry::affectedCells
 
     labelHashSet affectedCells(2*changedFaces.size());
 
-    forAll(changedFaces, i)
+    for (label facei : changedFaces)
     {
-        label facei = changedFaces[i];
-
         affectedCells.insert(own[facei]);
 
         if (mesh_.isInternalFace(facei))
@@ -213,10 +205,8 @@ Foam::labelList Foam::primitiveMeshGeometry::affectedCells
 }
 
 
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::primitiveMeshGeometry::primitiveMeshGeometry
 (
     const primitiveMesh& mesh
@@ -226,9 +216,6 @@ Foam::primitiveMeshGeometry::primitiveMeshGeometry
 {
     correct();
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -312,7 +299,7 @@ bool Foam::primitiveMeshGeometry::checkFaceDotProduct
                         setPtr->insert(facei);
                     }
 
-                    severeNonOrth++;
+                    ++severeNonOrth;
                 }
                 else
                 {
@@ -328,7 +315,7 @@ bool Foam::primitiveMeshGeometry::checkFaceDotProduct
                             << " deg." << endl;
                     }
 
-                    errorNonOrth++;
+                    ++errorNonOrth;
 
                     if (setPtr)
                     {
@@ -415,10 +402,8 @@ bool Foam::primitiveMeshGeometry::checkFacePyramids
 
     label nErrorPyrs = 0;
 
-    forAll(checkFaces, i)
+    for (label facei : checkFaces)
     {
-        label facei = checkFaces[i];
-
         // Create the owner pyramid - it will have negative volume
         scalar pyrVol = pyramidPointFaceRef
         (
@@ -448,7 +433,7 @@ bool Foam::primitiveMeshGeometry::checkFacePyramids
                 setPtr->insert(facei);
             }
 
-            nErrorPyrs++;
+            ++nErrorPyrs;
         }
 
         if (mesh.isInternalFace(facei))
@@ -478,7 +463,7 @@ bool Foam::primitiveMeshGeometry::checkFacePyramids
                     setPtr->insert(facei);
                 }
 
-                nErrorPyrs++;
+                ++nErrorPyrs;
             }
         }
     }
@@ -529,10 +514,8 @@ bool Foam::primitiveMeshGeometry::checkFaceSkewness
 
     label nWarnSkew = 0;
 
-    forAll(checkFaces, i)
+    for (label facei : checkFaces)
     {
-        label facei = checkFaces[i];
-
         if (mesh.isInternalFace(facei))
         {
             scalar dOwn = mag(faceCentres[facei] - cellCentres[own[facei]]);
@@ -565,7 +548,7 @@ bool Foam::primitiveMeshGeometry::checkFaceSkewness
                     setPtr->insert(facei);
                 }
 
-                nWarnSkew++;
+                ++nWarnSkew;
             }
 
             if (skewness > maxSkew)
@@ -606,7 +589,7 @@ bool Foam::primitiveMeshGeometry::checkFaceSkewness
                     setPtr->insert(facei);
                 }
 
-                nWarnSkew++;
+                ++nWarnSkew;
             }
 
             if (skewness > maxSkew)
@@ -664,10 +647,8 @@ bool Foam::primitiveMeshGeometry::checkFaceWeights
 
     label nWarnWeight = 0;
 
-    forAll(checkFaces, i)
+    for (label facei : checkFaces)
     {
-        label facei = checkFaces[i];
-
         if (mesh.isInternalFace(facei))
         {
             const point& fc = faceCentres[facei];
@@ -690,7 +671,7 @@ bool Foam::primitiveMeshGeometry::checkFaceWeights
                     setPtr->insert(facei);
                 }
 
-                nWarnWeight++;
+                ++nWarnWeight;
             }
 
             minWeight = min(minWeight, weight);
@@ -755,10 +736,8 @@ bool Foam::primitiveMeshGeometry::checkFaceAngles
 
     label errorFacei = -1;
 
-    forAll(checkFaces, i)
+    for (label facei : checkFaces)
     {
-        label facei = checkFaces[i];
-
         const face& f = fcs[facei];
 
         const vector faceNormal = normalised(faceAreas[facei]);
@@ -795,7 +774,7 @@ bool Foam::primitiveMeshGeometry::checkFaceAngles
                         {
                             // Count only one error per face.
                             errorFacei = facei;
-                            nConcave++;
+                            ++nConcave;
                         }
 
                         if (setPtr)
@@ -916,13 +895,13 @@ bool Foam::primitiveMeshGeometry::checkFaceAngles
 //            scalar flatness = magArea / (sumA+VSMALL);
 //
 //            sumFlatness += flatness;
-//            nSummed++;
+//            ++nSummed;
 //
 //            minFlatness = min(minFlatness, flatness);
 //
 //            if (flatness < warnFlatness)
 //            {
-//                nWarped++;
+//                ++nWarped;
 //
 //                if (setPtr)
 //                {
@@ -1098,17 +1077,15 @@ bool Foam::primitiveMeshGeometry::checkFaceArea
 {
     label nZeroArea = 0;
 
-    forAll(checkFaces, i)
+    for (label facei : checkFaces)
     {
-        label facei = checkFaces[i];
-
         if (mag(faceAreas[facei]) < minArea)
         {
             if (setPtr)
             {
                 setPtr->insert(facei);
             }
-            nZeroArea++;
+            ++nZeroArea;
         }
     }
 
@@ -1163,9 +1140,9 @@ bool Foam::primitiveMeshGeometry::checkCellDeterminant
     label nSumDet = 0;
     label nWarnDet = 0;
 
-    forAll(affectedCells, i)
+    for (label celli : affectedCells)
     {
-        const cell& cFaces = cells[affectedCells[i]];
+        const cell& cFaces = cells[celli];
 
         tensor areaSum(Zero);
         scalar magAreaSum = 0;
@@ -1184,7 +1161,7 @@ bool Foam::primitiveMeshGeometry::checkCellDeterminant
 
         minDet = min(minDet, scaledDet);
         sumDet += scaledDet;
-        nSumDet++;
+        ++nSumDet;
 
         if (scaledDet < warnDet)
         {
@@ -1197,7 +1174,7 @@ bool Foam::primitiveMeshGeometry::checkCellDeterminant
                     setPtr->insert(facei);
                 }
             }
-            nWarnDet++;
+            ++nWarnDet;
         }
     }
 

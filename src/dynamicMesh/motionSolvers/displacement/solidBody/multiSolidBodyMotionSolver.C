@@ -133,12 +133,6 @@ Foam::multiSolidBodyMotionSolver::multiSolidBodyMotionSolver
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::multiSolidBodyMotionSolver::~multiSolidBodyMotionSolver()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::pointField> Foam::multiSolidBodyMotionSolver::curPoints() const
