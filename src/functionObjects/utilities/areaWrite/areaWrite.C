@@ -249,10 +249,13 @@ bool Foam::areaWrite::write()
 
         selected.clear();
 
-        const IOobjectList objects(areaMesh.thisDb(), obr_.time().timeName());
+        IOobjectList objects(0);
 
         if (loadFromFiles_)
         {
+            // Check files for a particular time
+            objects = IOobjectList(areaMesh.thisDb(), obr_.time().timeName());
+
             allFields = objects.names();
             selected = objects.classes(fieldSelection_);
         }

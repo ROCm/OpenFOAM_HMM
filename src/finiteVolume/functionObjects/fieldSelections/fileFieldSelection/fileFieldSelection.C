@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,45 +27,98 @@ License
 
 #include "fileFieldSelection.H"
 #include "objectRegistry.H"
+#include "IOobjectList.H"
+#include "fvMesh.H"
 #include "volMesh.H"
 #include "fvPatchField.H"
 #include "surfaceMesh.H"
 #include "fvsPatchField.H"
 #include "pointMesh.H"
 #include "pointPatchField.H"
+#include "GeometricField.H"
 #include "UniformDimensionedField.H"
 
-void Foam::functionObjects::fileFieldSelection::addInternalFieldTypes
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+template<class Type>
+void Foam::functionObjects::fileFieldSelection::addFromFile
 (
+    const IOobjectList& objects,
     DynamicList<fieldInfo>& set
 ) const
 {
-    const fvMesh& mesh = static_cast<const fvMesh&>(obr_);
+    for (const fieldInfo& fi : *this)
+    {
+        const wordList names(objects.sortedNames<Type>(fi.name()));
 
-    const IOobjectList allObjects(mesh, mesh.time().timeName());
+        if (names.size())
+        {
+            for (const word& name : names)
+            {
+                set.append(fieldInfo(wordRe(name)));
+            }
 
-    addFromFile<DimensionedField<scalar, volMesh>>(allObjects, set);
-    addFromFile<DimensionedField<vector, volMesh>>(allObjects, set);
-    addFromFile<DimensionedField<sphericalTensor, volMesh>>(allObjects, set);
-    addFromFile<DimensionedField<symmTensor, volMesh>>(allObjects, set);
-    addFromFile<DimensionedField<tensor, volMesh>>(allObjects, set);
+            fi.found() = true;
+        }
+    }
+}
+
+
+template<template<class> class PatchType, class MeshType>
+void Foam::functionObjects::fileFieldSelection::addGeoFieldTypes
+(
+    const IOobjectList& objects,
+    DynamicList<fieldInfo>& set
+) const
+{
+    #undef  doLocalCode
+    #define doLocalCode(DataType)                                             \
+    addFromFile<GeometricField<DataType, PatchType, MeshType>>(objects, set);
+
+    doLocalCode(scalar);
+    doLocalCode(vector);
+    doLocalCode(sphericalTensor);
+    doLocalCode(symmTensor);
+    doLocalCode(tensor);
+    #undef doLocalCode
+}
+
+
+void Foam::functionObjects::fileFieldSelection::addInternalFieldTypes
+(
+    const IOobjectList& objects,
+    DynamicList<fieldInfo>& set
+) const
+{
+    #undef  doLocalCode
+    #define doLocalCode(DataType)                                             \
+    addFromFile<DimensionedField<DataType, volMesh>>(objects, set);
+
+    doLocalCode(scalar);
+    doLocalCode(vector);
+    doLocalCode(sphericalTensor);
+    doLocalCode(symmTensor);
+    doLocalCode(tensor);
+    #undef doLocalCode
 }
 
 
 void Foam::functionObjects::fileFieldSelection::addUniformFieldTypes
 (
+    const IOobjectList& objects,
     DynamicList<fieldInfo>& set
 ) const
 {
-    const fvMesh& mesh = static_cast<const fvMesh&>(obr_);
+    #undef  doLocalCode
+    #define doLocalCode(DataType)                                             \
+    addFromFile<UniformDimensionedField<DataType>>(objects, set);
 
-    const IOobjectList allObjects(mesh, mesh.time().timeName());
-
-    addFromFile<UniformDimensionedField<scalar>>(allObjects, set);
-    addFromFile<UniformDimensionedField<vector>>(allObjects, set);
-    addFromFile<UniformDimensionedField<sphericalTensor>>(allObjects, set);
-    addFromFile<UniformDimensionedField<symmTensor>>(allObjects, set);
-    addFromFile<UniformDimensionedField<tensor>>(allObjects, set);
+    doLocalCode(scalar);
+    doLocalCode(vector);
+    doLocalCode(sphericalTensor);
+    doLocalCode(symmTensor);
+    doLocalCode(tensor);
+    #undef doLocalCode
 }
 
 
@@ -85,20 +138,23 @@ Foam::functionObjects::fileFieldSelection::fileFieldSelection
 
 bool Foam::functionObjects::fileFieldSelection::updateSelection()
 {
+    const fvMesh& mesh = static_cast<const fvMesh&>(obr_);
+    const IOobjectList objects(mesh, mesh.time().timeName());
+
     List<fieldInfo> oldSet(std::move(selection_));
 
     DynamicList<fieldInfo> newSelection(oldSet.size());
 
     // Geometric fields
-    addGeoFieldTypes<fvPatchField, volMesh>(newSelection);
-    addGeoFieldTypes<fvsPatchField, surfaceMesh>(newSelection);
-    addGeoFieldTypes<pointPatchField, pointMesh>(newSelection);
+    addGeoFieldTypes<fvPatchField, volMesh>(objects, newSelection);
+    addGeoFieldTypes<fvsPatchField, surfaceMesh>(objects, newSelection);
+    addGeoFieldTypes<pointPatchField, pointMesh>(objects, newSelection);
 
     // Internal fields
-    addInternalFieldTypes(newSelection);
+    addInternalFieldTypes(objects, newSelection);
 
     // Uniform fields
-    addUniformFieldTypes(newSelection);
+    addUniformFieldTypes(objects, newSelection);
 
     selection_.transfer(newSelection);
 

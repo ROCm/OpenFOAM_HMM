@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,6 +44,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class IOobjectList;
 
 namespace functionObjects
@@ -57,45 +58,53 @@ class fileFieldSelection
 :
     public fieldSelection
 {
-private:
-
     // Private Member Functions
-
-        //- No copy construct
-        fileFieldSelection(const fileFieldSelection&) = delete;
-
-
-protected:
-
-    // Protected Member Functions
-
-        //- Add registered GeometricField types to selection
-        template<template<class> class PatchType, class MeshType>
-        void addGeoFieldTypes(DynamicList<fieldInfo>& set) const;
-
-        //- Add registered Internal types to selection
-        void addInternalFieldTypes(DynamicList<fieldInfo>& set) const;
-
-        //- Add registered uniform types to selection
-        void addUniformFieldTypes(DynamicList<fieldInfo>& set) const;
 
         //- Add objects of a given type
         template<class Type>
         void addFromFile
         (
-            const IOobjectList& allFileObjects,
+            const IOobjectList& objects,
+            DynamicList<fieldInfo>& set
+        ) const;
+
+        //- Add registered GeometricField types to selection
+        template<template<class> class PatchType, class MeshType>
+        void addGeoFieldTypes
+        (
+            const IOobjectList& objects,
+            DynamicList<fieldInfo>& set
+        ) const;
+
+        //- Add registered Internal types to selection
+        void addInternalFieldTypes
+        (
+            const IOobjectList& objects,
+            DynamicList<fieldInfo>& set
+        ) const;
+
+        //- Add registered uniform types to selection
+        void addUniformFieldTypes
+        (
+            const IOobjectList& objects,
             DynamicList<fieldInfo>& set
         ) const;
 
 
+        //- No copy construct
+        fileFieldSelection(const fileFieldSelection&) = delete;
+
+
 public:
 
-    //- Construct from object registry
-    fileFieldSelection
-    (
-        const objectRegistry& obr,
-        const bool includeComponents = false
-    );
+    // Constructors
+
+        //- Construct from object registry
+        explicit fileFieldSelection
+        (
+            const objectRegistry& obr,
+            const bool includeComponents = false
+        );
 
 
     //- Destructor
@@ -113,12 +122,6 @@ public:
 
 } // End namespace functionObjects
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "fileFieldSelectionTemplates.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
