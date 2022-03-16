@@ -8,6 +8,7 @@ $(fvGeometryScheme)/highAspectRatio/highAspectRatioFvGeometryScheme.C
 $(fvGeometryScheme)/highAspectRatio/cellAspectRatio.C
 $(fvGeometryScheme)/averageNeighbour/averageNeighbourFvGeometryScheme.C
 $(fvGeometryScheme)/stabilised/stabilisedFvGeometryScheme.C
+$(fvGeometryScheme)/solidBody/solidBodyFvGeometryScheme.C
 
 surfaceInterpolation = interpolation/surfaceInterpolation
 $(surfaceInterpolation)/surfaceInterpolation/surfaceInterpolation.C
