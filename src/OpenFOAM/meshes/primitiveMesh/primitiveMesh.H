@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -598,8 +598,8 @@ public:
 
             // Mesh motion
 
-                //- Move points, returns volumes swept by faces in motion
-                tmp<scalarField> movePoints
+                //- Move points
+                void movePoints
                 (
                     const pointField& p,
                     const pointField& oldP

@@ -469,7 +469,7 @@ public:
             using surfaceInterpolation::movePoints;
 
             //- Move points, returns volumes swept by faces in motion
-            virtual tmp<scalarField> movePoints(const pointField&);
+            virtual void movePoints(const pointField&);
 
             //- Update all geometric data. This gets redirected up from
             //- primitiveMesh level

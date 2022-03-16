@@ -157,6 +157,8 @@ Foam::stabilisedFvGeometryScheme::stabilisedFvGeometryScheme
 
 void Foam::stabilisedFvGeometryScheme::movePoints()
 {
+    fvGeometryScheme::movePoints();
+
     if (debug)
     {
         Pout<< "stabilisedFvGeometryScheme::movePoints() : "
