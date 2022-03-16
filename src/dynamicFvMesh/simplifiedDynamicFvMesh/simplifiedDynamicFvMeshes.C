@@ -29,7 +29,7 @@ License
 #include "simplifiedDynamicFvMesh.H"
 #include "staticFvMesh.H"
 #include "dynamicMotionSolverFvMesh.H"
-
+#include "motionSolver.H"
 
 namespace Foam
 {
