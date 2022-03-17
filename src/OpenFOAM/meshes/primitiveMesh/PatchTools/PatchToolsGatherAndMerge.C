@@ -51,7 +51,6 @@ void Foam::PatchTools::gatherAndMerge
 )
 {
     typedef typename PrimitivePatch<FaceList,PointField>::face_type FaceType;
-    typedef typename PrimitivePatch<FaceList,PointField>::point_type PointType;
 
     // Faces from all ranks
     const globalIndex faceAddr(pp.size(), globalIndex::gatherOnly{});
