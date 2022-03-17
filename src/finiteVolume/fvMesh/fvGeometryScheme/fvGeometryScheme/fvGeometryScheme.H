@@ -137,6 +137,9 @@ public:
         //- Update basic geometric properties from provided points
         virtual void movePoints();
 
+        //- Update mesh for topology changes
+        virtual void updateMesh(const mapPolyMesh& mpm);
+
         //- Return linear difference weighting factors
         virtual tmp<surfaceScalarField> weights() const = 0;
 

@@ -999,7 +999,7 @@ void Foam::fvMesh::updateMesh(const mapPolyMesh& mpm)
     mapFields(mpm);
 
     // Clear the current volume and other geometry factors
-    surfaceInterpolation::clearOut();
+    surfaceInterpolation::updateMesh(mpm);
 
     // Clear any non-updateable addressing
     clearAddressing(true);

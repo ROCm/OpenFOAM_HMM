@@ -145,4 +145,8 @@ void Foam::fvGeometryScheme::movePoints()
 }
 
 
+void Foam::fvGeometryScheme::updateMesh(const mapPolyMesh& mpm)
+{}
+
+
 // ************************************************************************* //
