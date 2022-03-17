@@ -110,6 +110,73 @@ namespace Foam
     };
 
 
+    //typedef Tuple2<Pair<point>, volumeType> NearType;
+    //
+    ////- Combine operator for volume types
+    //struct NearTypeCombineOp
+    //{
+    //    //const auto& this_;
+    //
+    //    void operator()(NearType& nearX, const NearType& nearY) const
+    //    {
+    //        const volumeType& x = nearX.second();
+    //        const volumeType& y = nearY.second();
+    //
+    //        if (x == volumeType::MIXED || y == volumeType::MIXED)
+    //        {
+    //            FatalErrorInFunction << "Illegal volume type "
+    //                << volumeType::names[x]
+    //                << "," << volumeType::names[y]
+    //                << " nearX:" << nearX << " nearY:" << nearY
+    //                << exit(FatalError);
+    //        }
+    //        else
+    //        {
+    //            switch (x)
+    //            {
+    //                case volumeType::UNKNOWN:
+    //                {
+    //                    if (y == volumeType::INSIDE
+    //                    || y == volumeType::OUTSIDE)
+    //                    {
+    //                        nearX = nearY;
+    //                    }
+    //                }
+    //                break;
+    //                case volumeType::INSIDE:
+    //                {
+    //                    if (y == volumeType::OUTSIDE)
+    //                    {
+    //                        FatalErrorInFunction
+    //                            << "Conflicting volume types "
+    //                            << volumeType::names[x] << ","
+    //                            << volumeType::names[y]
+    //                            << " nearX:" << nearX << " nearY:" << nearY
+    //                            << exit(FatalError);
+    //                    }
+    //                }
+    //                break;
+    //                case volumeType::OUTSIDE:
+    //                {
+    //                    if (y == volumeType::INSIDE)
+    //                    {
+    //                        FatalErrorInFunction
+    //                            << "Conflicting volume types "
+    //                            << volumeType::names[x] << ","
+    //                            << volumeType::names[y]
+    //                            << " nearX:" << nearX << " nearY:" << nearY
+    //                            << exit(FatalError);
+    //                    }
+    //                }
+    //                break;
+    //                case volumeType::MIXED:
+    //                break;
+    //            }
+    //        }
+    //    }
+    //};
+
+
     //- Combine operator for nearest
     typedef Tuple2<pointIndexHit, scalar> nearestAndDist;
 
@@ -569,7 +636,8 @@ void Foam::distributedTriSurfaceMesh::findLine
     if (debug)
     {
         Pout<< "distributedTriSurfaceMesh::findLine :"
-            << " intersecting with "
+            << " intersecting surface " << searchableSurface::name()
+            << " with "
             << start.size() << " rays" << endl;
     }
     addProfiling(findLine, "distributedTriSurfaceMesh::findLine");
@@ -1177,6 +1245,7 @@ void Foam::distributedTriSurfaceMesh::surfaceSide
     if (debug)
     {
         Pout<< "distributedTriSurfaceMesh::surfaceSide :"
+            << " on surface " << searchableSurface::name()
             << " finding surface side given points on surface for "
             << samples.size() << " samples" << endl;
     }
@@ -1399,10 +1468,46 @@ void Foam::distributedTriSurfaceMesh::surfaceSide
         map.comm()
     );
 
+    //// Pack sample, nearest and volType so we get nicer error messages
+    ////typedef Tuple2<Pair<point>, volumeType>> NearType;
+    //List<NearType> nearTypes(volType.size());
+    //forAll(localSamples, i)
+    //{
+    //    const point& sample = localSamples[i];
+    //    const point& near = nearest[i];
+    //    nearTypes[i] = NearType(Pair<point>(sample, near), volType[i]);
+    //}
+    //
+    //
+    //const NearType zero(Pair<point>(Zero, Zero), volumeType::UNKNOWN);
+    //mapDistributeBase::distribute
+    //(
+    //    Pstream::commsTypes::nonBlocking,
+    //    List<labelPair>(0),
+    //    nearestInfo.size(),
+    //    map.constructMap(),
+    //    map.constructHasFlip(),
+    //    map.subMap(),
+    //    map.subHasFlip(),
+    //    nearTypes,
+    //    zero,
+    //    NearTypeCombineOp(),
+    //    noOp(),           // no flipping
+    //    UPstream::msgType(),
+    //    map.comm()
+    //);
+    //volType.setSize(nearTypes.size());
+    //forAll(nearTypes, i)
+    //{
+    //    volType[i] = nearTypes[i].second();
+    //}
+
     if (debug)
     {
         Pout<< "distributedTriSurfaceMesh::surfaceSide :"
-            << " finished finding surface side given points on surface for "
+            << " finished finding surface" << searchableSurface::name()
+            << " given points on surface "
+            << searchableSurface::name() << " for "
             << samples.size() << " samples" << endl;
     }
 }
@@ -1706,7 +1811,8 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
         if (debug)
         {
             Pout<< "distributedTriSurfaceMesh::independentlyDistributedBbs :"
-                << " determining processor bounding boxes" << endl;
+                << " determining processor bounding boxes for surface"
+                << searchableSurface::name() << endl;
         }
 
         // Find bounding box for all triangles on new distribution.
@@ -1739,7 +1845,8 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
         {
             Pout<< "distributedTriSurfaceMesh::independentlyDistributedBbs :"
                 << " determining decomposition for " << s.size()
-                << " centroids" << endl;
+                << " centroids of surface " << searchableSurface::name()
+                << endl;
         }
 
         // Triangle centres
@@ -1976,7 +2083,8 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
         if (debug)
         {
             Pout<< "distributedTriSurfaceMesh::independentlyDistributedBbs :"
-                << " collecting all centroids" << endl;
+                << " collecting all centroids for surface "
+                << searchableSurface::name() << endl;
         }
 
         // Collect all triangle centres
@@ -2013,6 +2121,7 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
                 {
                     Pout<< "distributedTriSurfaceMesh::"
                         << "independentlyDistributedBbs :"
+                        << " surface:" << searchableSurface::name()
                         << " merged " << allCentres.size()
                         << " centroids down to " << nMerged << endl;
                 }
@@ -2470,7 +2579,9 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh
 
     if (debug)
     {
-        InfoInFunction << "Constructed from triSurface:" << endl;
+        InfoInFunction << "Constructed from triSurface "
+            << searchableSurface::name()
+            << endl;
         writeStats(Info);
 
         labelList nTris
@@ -3021,6 +3132,7 @@ void Foam::distributedTriSurfaceMesh::findNearest
     if (debug)
     {
         Pout<< "distributedTriSurfaceMesh::findNearest :"
+            << " surface " << searchableSurface::name()
             << " trying to find nearest for " << samples.size()
             << " samples with max sphere "
             << (samples.size() ? Foam::sqrt(max(nearestDistSqr)) : Zero)
@@ -3114,7 +3226,7 @@ void Foam::distributedTriSurfaceMesh::findNearest
 
     if (debug)
     {
-        Pout<< "Pass1:"
+        Pout<< searchableSurface::name() << " Pass1:"
             << " of " << samples.size() << " samples sending to" << endl;
         label nSend = 0;
         forAll(map1.subMap(), proci)
@@ -3179,6 +3291,7 @@ void Foam::distributedTriSurfaceMesh::findNearest
         if (debug)
         {
             Pout<< "distributedTriSurfaceMesh::findNearest :"
+                << " surface " << searchableSurface::name()
                 << " searched locally for " << localPoints.size()
                 << " samples with max sphere "
                 << (localDistSqr.size() ? Foam::sqrt(max(localDistSqr)) : Zero)
@@ -3282,7 +3395,7 @@ void Foam::distributedTriSurfaceMesh::findNearest
 
     if (debug)
     {
-        Pout<< "Pass2:"
+        Pout << searchableSurface::name() << " Pass2:"
             << " of " << samples.size() << " samples sending to" << endl;
         label nSend = 0;
         forAll(map2.subMap(), proci)
@@ -3344,6 +3457,7 @@ void Foam::distributedTriSurfaceMesh::findNearest
     if (debug)
     {
         Pout<< "distributedTriSurfaceMesh::findNearest :"
+            << " surface " << searchableSurface::name()
             << " searched locally for " << localSamples.size()
             << " samples with max sphere "
             << (localDistSqr.size() ? Foam::sqrt(max(localDistSqr)) : Zero)
@@ -3410,6 +3524,7 @@ void Foam::distributedTriSurfaceMesh::findNearest
     if (debug)
     {
         Pout<< "distributedTriSurfaceMesh::findNearest :"
+            << " surface " << searchableSurface::name()
             << " trying to find nearest and region for " << samples.size()
             << " samples with max sphere "
             << (samples.size() ? Foam::sqrt(max(nearestDistSqr)) : Zero)
@@ -3592,6 +3707,7 @@ void Foam::distributedTriSurfaceMesh::findLineAll
     if (debug)
     {
         Pout<< "distributedTriSurfaceMesh::findLineAll :"
+            << " surface " << searchableSurface::name()
             << " intersecting with "
             << start.size() << " rays" << endl;
     }
@@ -3731,6 +3847,7 @@ void Foam::distributedTriSurfaceMesh::findLineAll
     if (debug)
     {
         Pout<< "distributedTriSurfaceMesh::findLineAll :"
+            << " surface " << searchableSurface::name()
             << " finished intersecting with "
             << start.size() << " rays" << endl;
     }
@@ -3746,6 +3863,7 @@ void Foam::distributedTriSurfaceMesh::getRegion
     if (debug)
     {
         Pout<< "distributedTriSurfaceMesh::getRegion :"
+            << " surface " << searchableSurface::name()
             << " getting region for "
             << info.size() << " triangles" << endl;
     }
@@ -3770,6 +3888,7 @@ void Foam::distributedTriSurfaceMesh::getRegion
         if (debug)
         {
             Pout<< "distributedTriSurfaceMesh::getRegion :"
+                << " surface " << searchableSurface::name()
                 << " finished getting region for "
                 << info.size() << " triangles" << endl;
         }
@@ -3814,6 +3933,7 @@ void Foam::distributedTriSurfaceMesh::getRegion
     if (debug)
     {
         Pout<< "distributedTriSurfaceMesh::getRegion :"
+            << " surface " << searchableSurface::name()
             << " finished getting region for "
             << info.size() << " triangles" << endl;
     }
@@ -3835,6 +3955,7 @@ void Foam::distributedTriSurfaceMesh::getNormal
     if (debug)
     {
         Pout<< "distributedTriSurfaceMesh::getNormal :"
+            << " surface " << searchableSurface::name()
             << " getting normal for "
             << info.size() << " triangles" << endl;
     }
@@ -3879,6 +4000,7 @@ void Foam::distributedTriSurfaceMesh::getNormal
     if (debug)
     {
         Pout<< "distributedTriSurfaceMesh::getNormal :"
+            << " surface " << searchableSurface::name()
             << " finished getting normal for "
             << info.size() << " triangles" << endl;
     }
@@ -3990,6 +4112,7 @@ void Foam::distributedTriSurfaceMesh::getVolumeType
         if (debug)
         {
             Pout<< "distributedTriSurfaceMesh::getVolumeType :"
+                << " surface " << searchableSurface::name()
                 << " triggering outsidePoint" << outsidePt
                 << " orientation" << endl;
         }
@@ -4005,11 +4128,22 @@ void Foam::distributedTriSurfaceMesh::getVolumeType
 
         List<volumeType> outsideVolTypes;
         surfaceSide(outsidePts, nearestInfo, outsideVolTypes);
-        outsideVolType_ = outsideVolTypes[0];
+
+        // All processors (that have enough surface) will return the same
+        // status, all others will return UNKNOWN. Make INSIDE/OUTSIDE win.
+        outsideVolType_ = volumeType
+        (
+            returnReduce
+            (
+                label(outsideVolTypes[0]),
+                maxOp<label>()
+            )
+        );
 
         if (debug)
         {
             Pout<< "distributedTriSurfaceMesh::getVolumeType :"
+                << " surface " << searchableSurface::name()
                 << " determined outsidePoint" << outsidePt
                 << " to be " << volumeType::names[outsideVolType_] << endl;
         }
@@ -4035,13 +4169,27 @@ void Foam::distributedTriSurfaceMesh::getVolumeType
             if (debug)
             {
                 Pout<< "distributedTriSurfaceMesh::getVolumeType :"
+                    << " surface " << searchableSurface::name()
                     << " triggering orientation caching for "
                     << midPoints.size() << " leaf mids" << endl;
             }
 
             // Get volume type of mid points
             List<volumeType> midVolTypes;
-            getVolumeType(midPoints, midVolTypes);
+
+            // Note: could recurse here (since now outsideVolType_ is set)
+            // but this would use the cached mid point data which we're trying
+            // to calculate. Instead bypass caching and do a full search
+            {
+                List<pointIndexHit> nearestInfo;
+                findNearest
+                (
+                    midPoints,
+                    scalarField(midPoints.size(), Foam::sqr(GREAT)),
+                    nearestInfo
+                );
+                surfaceSide(midPoints, nearestInfo, midVolTypes);
+            }
 
             // Cache on local tree
             label index = 0;
@@ -4055,6 +4203,7 @@ void Foam::distributedTriSurfaceMesh::getVolumeType
             if (debug)
             {
                 Pout<< "distributedTriSurfaceMesh::getVolumeType :"
+                    << " surface " << searchableSurface::name()
                     << " done orientation caching for "
                     << midPoints.size() << " leaf mids" << endl;
             }
@@ -4065,6 +4214,7 @@ void Foam::distributedTriSurfaceMesh::getVolumeType
     if (debug)
     {
         Pout<< "distributedTriSurfaceMesh::getVolumeType :"
+            << " surface " << searchableSurface::name()
             << " finding orientation for " << samples.size()
             << " samples" << endl;
     }
@@ -4157,6 +4307,7 @@ void Foam::distributedTriSurfaceMesh::getVolumeType
     if (debug)
     {
         Pout<< "distributedTriSurfaceMesh::getVolumeType :"
+            << " surface " << searchableSurface::name()
             << " original samples:" << samples.size()
             << " resulting in local queries:"
             << localPoints.size()
@@ -4204,6 +4355,46 @@ void Foam::distributedTriSurfaceMesh::getVolumeType
     );
 
 
+    //// Combine nearest and volType so we can give nicer error messages
+    //List<NearType> nearTypes(volType.size());
+    //// For all volType we do have the originating point but not the nearest
+    //forAll(localPoints, i)
+    //{
+    //    nearTypes[i] =
+    //        NearType(Pair<point>(localPoints[i], Zero), volType[i]);
+    //}
+    //// But for all full-search we also have the nearest
+    //forAll(fullSearchMap, i)
+    //{
+    //    nearTypes[fullSearchMap[i]] = NearType
+    //    (
+    //        Pair<point>(fullSearchPoints[i], nearestInfo[i].hitPoint()),
+    //        fullSearchType[i]
+    //    );
+    //}
+    //const NearType zero(Pair<point>(Zero, Zero), volumeType::UNKNOWN);
+    //mapDistributeBase::distribute
+    //(
+    //    Pstream::commsTypes::nonBlocking,
+    //    List<labelPair>(0),
+    //    samples.size(),
+    //    map.constructMap(),
+    //    map.constructHasFlip(),
+    //    map.subMap(),
+    //    map.subHasFlip(),
+    //    nearTypes,
+    //    zero,
+    //    NearTypeCombineOp(),
+    //    noOp(),           // no flipping
+    //    UPstream::msgType(),
+    //    map.comm()
+    //);
+    //volType.setSize(nearTypes.size());
+    //forAll(nearTypes, i)
+    //{
+    //    volType[i] = nearTypes[i].second();
+    //}
+
     // Add the points outside the bounding box
     for (label samplei : outsideSamples)
     {
@@ -4213,6 +4404,7 @@ void Foam::distributedTriSurfaceMesh::getVolumeType
     if (debug)
     {
         Pout<< "distributedTriSurfaceMesh::getVolumeType :"
+            << " surface " << searchableSurface::name()
             << " finished finding orientation for " << samples.size()
             << " samples" << endl;
     }
@@ -4234,6 +4426,7 @@ void Foam::distributedTriSurfaceMesh::getField
     if (debug)
     {
         Pout<< "distributedTriSurfaceMesh::getField :"
+            << " surface " << searchableSurface::name()
             << " retrieving field for "
             << info.size() << " triangles" << endl;
     }
@@ -4282,6 +4475,7 @@ void Foam::distributedTriSurfaceMesh::getField
     if (debug)
     {
         Pout<< "distributedTriSurfaceMesh::getField :"
+            << " surface " << searchableSurface::name()
             << " finished retrieving field for "
             << info.size() << " triangles" << endl;
     }
@@ -4481,6 +4675,7 @@ void Foam::distributedTriSurfaceMesh::distribute
     if (debug)
     {
         Pout<< "distributedTriSurfaceMesh::distribute :"
+            << " surface " << searchableSurface::name()
             << " distributing surface according to method:"
             << distributionTypeNames_[distType_]
             << " follow bbs:" << flatOutput(bbs) << endl;
@@ -4786,7 +4981,11 @@ void Foam::distributedTriSurfaceMesh::distribute
 
         if (debug & 2)
         {
-            OBJstream str(searchableSurface::time().path()/"after.obj");
+            OBJstream str
+            (
+                searchableSurface::time().path()
+               /searchableSurface::name() + "_after.obj"
+            );
             Info<< "Writing local bounding box to " << str.name() << endl;
             const List<treeBoundBox>& myBbs = procBb_[Pstream::myProcNo()];
             for (const treeBoundBox& bb : myBbs)
@@ -4800,7 +4999,11 @@ void Foam::distributedTriSurfaceMesh::distribute
         }
         if (debug & 2)
         {
-            OBJstream str(searchableSurface::time().path()/"after_all.obj");
+            OBJstream str
+            (
+                searchableSurface::time().path()
+               /searchableSurface::name() + "_after_all.obj"
+            );
             Info<< "Writing all bounding boxes to " << str.name() << endl;
             for (const auto& myBbs : procBb_)
             {
@@ -4819,6 +5022,7 @@ void Foam::distributedTriSurfaceMesh::distribute
     if (debug)
     {
         Pout<< "distributedTriSurfaceMesh::distribute :"
+            << " surface " << searchableSurface::name()
             << " done distributing surface according to method:"
             << distributionTypeNames_[distType_]
             << " follow bbs:" << flatOutput(bbs) << endl;
@@ -4835,6 +5039,7 @@ bool Foam::distributedTriSurfaceMesh::writeObject
     if (debug)
     {
         Pout<< "distributedTriSurfaceMesh::writeObject :"
+            << " surface " << searchableSurface::name()
             << " writing surface valid:" << valid << endl;
     }
 
@@ -4868,6 +5073,7 @@ bool Foam::distributedTriSurfaceMesh::writeObject
     if (debug)
     {
         Pout<< "distributedTriSurfaceMesh::writeObject :"
+            << " surface " << searchableSurface::name()
             << " done writing surface" << endl;
     }
 

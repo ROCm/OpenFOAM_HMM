@@ -42,11 +42,22 @@ runApplication -s 9 surfaceRefineRedGreen \
 runApplication -s 10 surfaceRefineRedGreen \
     constant/triSurface/box_12_9.obj constant/triSurface/box.obj
 
-
+#- Offset to create second surface
 runApplication surfaceTransformPoints \
     -rotate '((1 0 0)(1 0.8 0.9))' \
     -translate '(0.1 0.101 0.103)' \
     constant/triSurface/box.obj constant/triSurface/box_trans.obj
+
+#- Invert surface (so inwards pointing normals) to use as refinement box
+runApplication surfaceOrient -inside  \
+    constant/triSurface/box.obj \
+    '(100 100 100)'             \
+    constant/triSurface/box_flipped.obj
+
+runApplication -s scale surfaceTransformPoints \
+    -translate '(0.2 0.3 0.3)' \
+    -write-scale '(0.5)' \
+    constant/triSurface/box_flipped.obj constant/triSurface/box_scaled.obj
 
 
 runApplication snappyHexMesh

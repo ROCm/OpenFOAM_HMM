@@ -38,6 +38,11 @@ geometry
         file "box_trans.obj";
         type distributedTriSurfaceMesh;
     }
+    shell
+    {
+        file "box_scaled.obj";
+        type distributedTriSurfaceMesh;
+    }
 };
 
 
@@ -129,6 +134,12 @@ castellatedMeshControls
 
     refinementRegions
     {
+        shell
+        {
+            // Refine a volume
+            mode    outside;
+            levels  ((1.0 6));
+        }
     }
 
 

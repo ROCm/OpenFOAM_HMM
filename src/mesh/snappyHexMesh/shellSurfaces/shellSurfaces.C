@@ -35,6 +35,7 @@ License
 #include "orientedSurface.H"
 #include "pointIndexHit.H"
 #include "volumeType.H"
+#include "distributedTriSurfaceMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -167,7 +168,12 @@ void Foam::shellSurfaces::orient()
     {
         const searchableSurface& s = allGeometry_[shells_[shellI]];
 
-        if (modes_[shellI] != DISTANCE && isA<triSurfaceMesh>(s))
+        if
+        (
+            modes_[shellI] != DISTANCE
+        &&  isA<triSurfaceMesh>(s)
+        && !isA<distributedTriSurfaceMesh>(s)
+        )
         {
             hasSurface = true;
 
@@ -190,7 +196,12 @@ void Foam::shellSurfaces::orient()
         {
             const searchableSurface& s = allGeometry_[shells_[shellI]];
 
-            if (modes_[shellI] != DISTANCE && isA<triSurfaceMesh>(s))
+            if
+            (
+                modes_[shellI] != DISTANCE
+            &&  isA<triSurfaceMesh>(s)
+            && !isA<distributedTriSurfaceMesh>(s)
+            )
             {
                 triSurfaceMesh& shell = const_cast<triSurfaceMesh&>
                 (
