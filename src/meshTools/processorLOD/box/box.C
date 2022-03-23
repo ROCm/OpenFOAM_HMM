@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -148,7 +148,7 @@ void Foam::processorLODs::box::setRefineFlags
         labelList& procRefineFlags = refineFlags[proci];
         procRefineFlags.setSize(remoteSrcBoxes.size(), FIXED);
 
-        if (scalar(nTgtObjects)/scalar(nObjects) < 0.1)
+        if (nObjects == 0 || scalar(nTgtObjects)/scalar(nObjects) < 0.1)
         {
             // Sending less than 10% of objects of this type
             // - shortcut by sending all
