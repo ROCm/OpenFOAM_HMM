@@ -29,8 +29,6 @@ boundaryField
         mode            flux;
         Ta              $internalField;
         q               uniform 0;
-        kappaLayers     ( 0 );
-        thicknessLayers ( 0 );
         value           $internalField;
         kappaName       none;
     }
@@ -42,8 +40,6 @@ boundaryField
         mode            flux;
         Ta              $internalField;
         q               uniform 0;
-        kappaLayers     ( 0 );
-        thicknessLayers ( 0 );
         value           $internalField;
         kappaName       none;
     }
@@ -55,8 +51,6 @@ boundaryField
         mode            flux;
         Ta              $internalField;
         q               uniform 0;
-        kappaLayers     ( 0 );
-        thicknessLayers ( 0 );
         value           $internalField;
         kappaName       none;
     }
@@ -68,8 +62,6 @@ boundaryField
         mode            flux;
         Ta              $internalField;
         q               uniform 0;
-        kappaLayers     ( 0 );
-        thicknessLayers ( 0 );
         value           $internalField;
         kappaName       none;
     }
@@ -81,8 +73,6 @@ boundaryField
         mode            flux;
         Ta              $internalField;
         q               uniform 0;
-        kappaLayers     ( 0 );
-        thicknessLayers ( 0 );
         value           $internalField;
         kappaName       none;
     }
@@ -94,8 +84,6 @@ boundaryField
         mode            flux;
         Ta              $internalField;
         q               uniform 0;
-        kappaLayers     ( 0 );
-        thicknessLayers ( 0 );
         value           $internalField;
         kappaName       none;
     }
