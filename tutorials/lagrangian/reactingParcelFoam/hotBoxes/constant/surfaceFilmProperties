@@ -75,8 +75,8 @@ thermoSingleLayerCoeffs
             {
                 minValue        50;
                 maxValue        100;
-                expectation     75;
-                variance        100;
+                mu              75;
+                sigma           100;
             }
         }
 
@@ -111,7 +111,7 @@ thermoSingleLayerCoeffs
             {
                 minValue        5e-04;
                 maxValue        0.0012;
-                d               7.5e-05;
+                lambda          7.5e-05;
                 n               0.5;
             }
         }

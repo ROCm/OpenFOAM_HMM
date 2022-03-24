@@ -92,7 +92,7 @@ subModels
                 {
                     minValue        5e-04;
                     maxValue        0.0012;
-                    d               7.5e-05;
+                    lambda          7.5e-05;
                     n               0.5;
                 }
             }

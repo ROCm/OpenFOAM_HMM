@@ -56,8 +56,8 @@ kinematicSingleLayerCoeffs
             {
                 minValue        50;
                 maxValue        100;
-                expectation     75;
-                variance        100;
+                mu              75;
+                sigma           100;
             }
         }
 

@@ -78,13 +78,13 @@ subModels
             flowRateProfile constant 1;
             sizeDistribution
             {
-                type        normal;
+                type            normal;
                 normalDistribution
                 {
-                    expectation 100e-6;
-                    variance 25e-6;
-                    minValue 20e-6;
-                    maxValue 180e-6;
+                    mu              100e-6;
+                    sigma           25e-6;
+                    minValue        20e-6;
+                    maxValue        180e-6;
                 }
             }
         }

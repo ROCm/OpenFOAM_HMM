@@ -14,9 +14,11 @@ valueAverage1
     functionObject  momentum1;
     fields          (momentum_x momentum_y momentum_z);
 
+
     // Optional entries
     resetOnRestart  false;
     window          1;
+    windowType      exact;
 
     // Optional (inherited) entries
     writePrecision  10;
