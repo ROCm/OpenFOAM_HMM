@@ -148,8 +148,6 @@ kOmegaSSTDES<BasicTurbulenceModel>::kOmegaSSTDES
         )
     )
 {
-    correctNut();
-
     if (type == typeName)
     {
         this->printCoeffs(type);

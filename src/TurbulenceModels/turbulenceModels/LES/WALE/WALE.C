@@ -173,6 +173,11 @@ bool WALE<BasicTurbulenceModel>::read()
 template<class BasicTurbulenceModel>
 void WALE<BasicTurbulenceModel>::correct()
 {
+    if (!this->turbulence_)
+    {
+        return;
+    }
+
     LESeddyViscosity<BasicTurbulenceModel>::correct();
     correctNut();
 }

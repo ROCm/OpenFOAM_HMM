@@ -142,6 +142,11 @@ bool Smagorinsky<BasicTurbulenceModel>::read()
 template<class BasicTurbulenceModel>
 void Smagorinsky<BasicTurbulenceModel>::correct()
 {
+    if (!this->turbulence_)
+    {
+        return;
+    }
+
     LESeddyViscosity<BasicTurbulenceModel>::correct();
     correctNut();
 }
