@@ -56,7 +56,7 @@ Foam::distributionModels::normal::normal
         distributionModelDict_.getCompat<scalar>
         (
             "mu",
-            {{"expectation", 2112}}
+            {{"expectation", 2106}}
         )
     ),
     sigma_
@@ -64,7 +64,7 @@ Foam::distributionModels::normal::normal
         distributionModelDict_.getCompat<scalar>
         (
             "sigma",
-            {{"variance", 2112}}
+            {{"variance", 2106}}
         )
     )
 {

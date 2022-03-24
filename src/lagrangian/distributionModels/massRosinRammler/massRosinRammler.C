@@ -50,7 +50,7 @@ Foam::distributionModels::massRosinRammler::massRosinRammler
 )
 :
     distributionModel(typeName, dict, rndGen),
-    lambda_(distributionModelDict_.getCompat<scalar>("lambda", {{"d", 2112}})),
+    lambda_(distributionModelDict_.getCompat<scalar>("lambda", {{"d", 2106}})),
     n_(distributionModelDict_.get<scalar>("n"))
 {
     if (lambda_ < VSMALL || n_ < VSMALL)
