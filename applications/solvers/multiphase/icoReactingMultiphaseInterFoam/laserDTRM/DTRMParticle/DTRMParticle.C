@@ -106,7 +106,6 @@ bool Foam::DTRMParticle::move
         //Cache old data of particle to use for reflected particle
         const point pos0 = position();
         const label cell1 = cell();
-        const tetIndices tetIs = this->currentTetIndices();
 
         scalar f = 1 - stepFraction();
         const vector s = p1() - p0() - deviationFromMeshCentre();

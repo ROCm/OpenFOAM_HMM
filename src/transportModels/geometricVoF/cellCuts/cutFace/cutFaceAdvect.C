@@ -40,7 +40,7 @@ Foam::cutFaceAdvect::cutFaceAdvect
 :
     cutFace(mesh),
     mesh_(mesh),
-    alpha1_(alpha1),
+    //alpha1_(alpha1),
     subFaceCentre_(Zero),
     subFaceArea_(Zero),
     subFacePoints_(10),

@@ -80,7 +80,7 @@ class cutFaceAdvect
         const fvMesh& mesh_;
 
         //- Reference to VoF field
-        const volScalarField& alpha1_;
+        //const volScalarField& alpha1_;
 
         //- Storage for centre of subface
         point subFaceCentre_;
