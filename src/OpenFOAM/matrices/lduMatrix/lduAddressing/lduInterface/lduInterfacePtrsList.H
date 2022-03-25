@@ -31,8 +31,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef lduInterfacePtrsList_H
-#define lduInterfacePtrsList_H
+#ifndef Foam_lduInterfacePtrsList_H
+#define Foam_lduInterfacePtrsList_H
 
 #include "lduInterface.H"
 #include "UPtrList.H"
@@ -41,8 +41,11 @@ Description
 
 namespace Foam
 {
-    typedef UPtrList<const lduInterface> lduInterfacePtrsList;
-}
+
+//- Store lists of lduInterface as a UPtrList
+typedef UPtrList<const lduInterface> lduInterfacePtrsList;
+
+} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -123,8 +123,7 @@ Foam::tmp<Foam::edgeScalarField> Foam::faNVDscheme<Type,NVDweight>::weights
     }
 
 
-    GeometricField<scalar, faePatchField, edgeMesh>::Boundary&
-        bWeights = weightingFactors.boundaryFieldRef();
+    auto& bWeights = weightingFactors.boundaryFieldRef();
 
     forAll(bWeights, patchI)
     {

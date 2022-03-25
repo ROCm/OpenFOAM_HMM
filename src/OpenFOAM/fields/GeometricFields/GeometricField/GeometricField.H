@@ -33,21 +33,16 @@ Description
 SourceFiles
     GeometricFieldI.H
     GeometricField.C
-    GeometricBoundaryField.C
     GeometricFieldFunctions.H
     GeometricFieldFunctions.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef GeometricField_H
-#define GeometricField_H
+#ifndef Foam_GeometricField_H
+#define Foam_GeometricField_H
 
 #include "regIOobject.H"
-#include "dimensionedTypes.H"
-#include "DimensionedField.H"
-#include "FieldField.H"
-#include "lduInterfaceFieldPtrsList.H"
-#include "LduInterfaceFieldPtrsList.H"
+#include "GeometricBoundaryField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -84,178 +79,32 @@ class GeometricField
 :
     public DimensionedField<Type, GeoMesh>
 {
-    // Private Member Functions
-
-        //- Read from file if it is present
-        bool readIfPresent();
-
-        //- Read old time field from file if it is present
-        bool readOldTimeIfPresent();
-
-
 public:
 
     // Public Typedefs
 
-        //- Type of mesh on which this GeometricField is instantiated
+        //- The mesh type for the GeometricField
         typedef typename GeoMesh::Mesh Mesh;
 
-        //- Type of boundary mesh on which this GeometricField::Boundary is
-        //- instantiated
+        //- The boundary mesh type for the boundary fields
         typedef typename GeoMesh::BoundaryMesh BoundaryMesh;
 
-        //- Type of the internal field from which this GeometricField is derived
+        //- The internal field type from which this GeometricField is derived
         typedef DimensionedField<Type, GeoMesh> Internal;
 
-        //- Type of the patch field of which the GeometricField::Boundary is
-        //- composed
+        //- Type of boundary fields
+        typedef GeometricBoundaryField<Type, PatchField, GeoMesh> Boundary;
+
+        //- The patch field type for the GeometricBoundaryField
         typedef PatchField<Type> Patch;
 
-
-    //- The boundary fields
-    class Boundary
-    :
-        public FieldField<PatchField, Type>
-    {
-        // Private Data
-
-            //- Reference to BoundaryMesh for which this field is defined
-            const BoundaryMesh& bmesh_;
-
-
-    public:
-
-        // Constructors
-
-            //- Construct from a BoundaryMesh, setting patches later
-            explicit Boundary(const BoundaryMesh& bmesh);
-
-            //- Construct from a BoundaryMesh, reference to the internal field
-            //- and a patch type
-            Boundary
-            (
-                const BoundaryMesh& bmesh,
-                const Internal& field,
-                const word& patchFieldType = PatchField<Type>::calculatedType()
-            );
-
-            //- Construct from a BoundaryMesh, reference to the internal field
-            //- and a wordList of patch types and optional the actual patch
-            //- types (to override constraint patches)
-            Boundary
-            (
-                const BoundaryMesh& bmesh,
-                const Internal& field,
-                const wordList& wantedPatchTypes,
-                const wordList& actualPatchTypes = wordList()
-            );
-
-            //- Construct from a BoundaryMesh, reference to the internal field
-            //- and a PtrList<PatchField<Type>>
-            Boundary
-            (
-                const BoundaryMesh& bmesh,
-                const Internal& field,
-                const PtrList<PatchField<Type>>&
-            );
-
-            //- Construct as copy setting the reference to the internal field
-            Boundary
-            (
-                const Internal& field,
-                const Boundary& btf
-            );
-
-            //- Construct as copy setting the reference to the internal field
-            //- and resetting type of field for given patch IDs
-            Boundary
-            (
-                const Internal& field,
-                const Boundary& btf,
-                const labelList& patchIDs,
-                const word& patchFieldName
-            );
-
-            //- Copy construct
-            //  Dangerous because Field may be set to a field which gets deleted
-            //  Need new type of BoundaryField, one which is part of a geometric
-            //  field for which snGrad etc. may be called and a free standing
-            //  BoundaryField for which such operations are unavailable.
-            Boundary(const Boundary& btf);
-
-            //- Construct from dictionary
-            Boundary
-            (
-                const BoundaryMesh& bmesh,
-                const Internal& field,
-                const dictionary& dict
-            );
-
-
-        // Member Functions
-
-            //- Read the boundary field
-            void readField
-            (
-                const Internal& field,
-                const dictionary& dict
-            );
-
-            //- Update the boundary condition coefficients
-            void updateCoeffs();
-
-            //- Evaluate boundary conditions
-            void evaluate();
-
-            //- Return a list of the patch types
-            wordList types() const;
-
-            //- Return BoundaryField of the cell values neighbouring
-            //- the boundary
-            Boundary boundaryInternalField() const;
-
-            //- Return a list of pointers for each patch field with only those
-            //- pointing to interfaces being set
-            LduInterfaceFieldPtrsList<Type> interfaces() const;
-
-            //- Return a list of pointers for each patch field with only those
-            //- pointing to interfaces being set
-            lduInterfaceFieldPtrsList scalarInterfaces() const;
-
-            //- Write boundary field as dictionary entry
-            void writeEntry(const word& keyword, Ostream& os) const;
-
-            //- Write dictionary entries of the individual boundary fields.
-            void writeEntries(Ostream& os) const;
-
-
-        // Member Operators
-
-            //- Assignment to BoundaryField<Type, PatchField, BoundaryMesh>
-            void operator=(const Boundary&);
-
-            //- Assignment to FieldField<PatchField, Type>
-            void operator=(const FieldField<PatchField, Type>&);
-
-            //- Assignment to Type
-            void operator=(const Type&);
-
-
-            //- Forced assignment to
-            //  BoundaryField<Type, PatchField, BoundaryMesh>
-            void operator==(const Boundary&);
-
-            //- Forced assignment to FieldField<PatchField, Type>
-            void operator==(const FieldField<PatchField, Type>&);
-
-            //- Forced assignment to Type
-            void operator==(const Type&);
-    };
+        //- The field component type
+        typedef typename Field<Type>::cmptType cmptType;
 
 
 private:
 
-    // Private data
+    // Private Data
 
         //- Current time index.
         //  Used to trigger the storing of the old-time value
@@ -267,11 +116,17 @@ private:
         //- Pointer to previous iteration (used for under-relaxation)
         mutable GeometricField<Type, PatchField, GeoMesh>* fieldPrevIterPtr_;
 
-        //- Boundary Type field containing boundary field values
+        //- Boundary field containing boundary field values
         Boundary boundaryField_;
 
 
     // Private Member Functions
+
+        //- Read from file if it is present
+        bool readIfPresent();
+
+        //- Read old time field from file if it is present
+        bool readOldTimeIfPresent();
 
         //- Read the field from the dictionary
         void readFields(const dictionary& dict);
@@ -285,10 +140,6 @@ public:
     //- Runtime type information
     TypeName("GeometricField");
 
-
-    // Public typedefs
-
-        typedef typename Field<Type>::cmptType cmptType;
 
     // Static Member Functions
 

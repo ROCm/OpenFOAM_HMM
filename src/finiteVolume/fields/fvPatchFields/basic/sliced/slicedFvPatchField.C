@@ -40,7 +40,7 @@ Foam::slicedFvPatchField<Type>::slicedFvPatchField
 :
     fvPatchField<Type>(p, iF, Field<Type>())
 {
-    // Set the fvPatchField to a slice of the given complete field
+    // Set fvPatchField to a slice of the given complete field
     UList<Type>::shallowCopy(p.patchSlice(completeField));
 }
 
@@ -145,9 +145,8 @@ Foam::slicedFvPatchField<Type>::clone
 template<class Type>
 Foam::slicedFvPatchField<Type>::~slicedFvPatchField()
 {
-    // Set the fvPatchField storage pointer to nullptr before its destruction
-    // to protect the field it a slice of.
-    UList<Type>::shallowCopy(UList<Type>(nullptr, 0));
+    // Set fvPatchField to nullptr to avoid deletion of underlying field
+    UList<Type>::shallowCopy(UList<Type>());
 }
 
 

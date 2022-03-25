@@ -343,7 +343,7 @@ Foam::PDRblock::innerMesh(const IOobject& io) const
     );
     polyMesh& pmesh = *meshPtr;
 
-    PtrList<polyPatch> patches(patches_.size());
+    polyPatchList patches(patches_.size());
 
     label startFace = nInternalFaces();
 

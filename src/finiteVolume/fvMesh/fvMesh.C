@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2011-2017,2022 OpenFOAM Foundation
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,11 +67,7 @@ void Foam::fvMesh::clearGeomNotOldVol()
         MoveableMeshObject
     >(*this);
 
-    slicedVolScalarField::Internal* VPtr =
-        static_cast<slicedVolScalarField::Internal*>(VPtr_);
-    deleteDemandDrivenData(VPtr);
-    VPtr_ = nullptr;
-
+    deleteDemandDrivenData(VPtr_);
     deleteDemandDrivenData(SfPtr_);
     deleteDemandDrivenData(magSfPtr_);
     deleteDemandDrivenData(CPtr_);
@@ -81,11 +77,11 @@ void Foam::fvMesh::clearGeomNotOldVol()
 
 void Foam::fvMesh::updateGeomNotOldVol()
 {
-    bool haveV = (VPtr_ != nullptr);
-    bool haveSf = (SfPtr_ != nullptr);
-    bool haveMagSf = (magSfPtr_ != nullptr);
-    bool haveCP = (CPtr_ != nullptr);
-    bool haveCf = (CfPtr_ != nullptr);
+    const bool haveV = (VPtr_ != nullptr);
+    const bool haveSf = (SfPtr_ != nullptr);
+    const bool haveMagSf = (magSfPtr_ != nullptr);
+    const bool haveCP = (CPtr_ != nullptr);
+    const bool haveCf = (CfPtr_ != nullptr);
 
     clearGeomNotOldVol();
 
@@ -603,7 +599,7 @@ Foam::SolverPerformance<Foam::tensor> Foam::fvMesh::solve
 
 void Foam::fvMesh::addFvPatches
 (
-    PtrList<polyPatch>& plist,
+    polyPatchList& plist,
     const bool validBoundary
 )
 {
@@ -626,7 +622,7 @@ void Foam::fvMesh::addFvPatches
 )
 {
     // Acquire ownership of the pointers
-    PtrList<polyPatch> plist(const_cast<List<polyPatch*>&>(p));
+    polyPatchList plist(const_cast<List<polyPatch*>&>(p));
 
     addFvPatches(plist, validBoundary);
 }
@@ -970,10 +966,10 @@ void Foam::fvMesh::updateMesh(const mapPolyMesh& mpm)
         storeOldVol(mpm.oldCellVolumes());
 
         // Few checks
-        if (VPtr_ && (V().size() != mpm.nOldCells()))
+        if (VPtr_ && (VPtr_->size() != mpm.nOldCells()))
         {
             FatalErrorInFunction
-                << "V:" << V().size()
+                << "V:" << VPtr_->size()
                 << " not equal to the number of old cells "
                 << mpm.nOldCells()
                 << exit(FatalError);

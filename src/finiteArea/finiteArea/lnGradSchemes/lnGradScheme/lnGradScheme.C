@@ -138,8 +138,7 @@ lnGradScheme<Type>::lnGrad
             deltaCoeffs[faceI]*(vf[neighbour[faceI]] - vf[owner[faceI]]);
     }
 
-    typename GeometricField<Type, faePatchField, edgeMesh>::Boundary& ssfb =
-        ssf.boundaryFieldRef();
+    auto& ssfb = ssf.boundaryFieldRef();
 
     forAll(vf.boundaryField(), patchI)
     {

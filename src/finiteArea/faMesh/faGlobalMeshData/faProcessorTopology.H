@@ -34,11 +34,10 @@ Author
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef faProcessorTopology_H
-#define faProcessorTopology_H
+#ifndef Foam_faProcessorTopology_H
+#define Foam_faProcessorTopology_H
 
 #include "ProcessorTopology.H"
-#include "faPatchList.H"
 #include "processorFaPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

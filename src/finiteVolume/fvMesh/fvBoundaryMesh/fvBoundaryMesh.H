@@ -35,10 +35,10 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fvBoundaryMesh_H
-#define fvBoundaryMesh_H
+#ifndef Foam_fvBoundaryMesh_H
+#define Foam_fvBoundaryMesh_H
 
-#include "fvPatchList.H"
+#include "fvPatch.H"
 #include "lduInterfacePtrsList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -36,18 +36,19 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fvPatch_H
-#define fvPatch_H
+#ifndef Foam_fvPatch_H
+#define Foam_fvPatch_H
 
 #include "polyPatch.H"
 #include "labelList.H"
 #include "SubList.H"
+#include "SubField.H"
+#include "PtrList.H"
 #include "typeInfo.H"
+#include "autoPtr.H"
 #include "tmp.H"
 #include "primitiveFields.H"
-#include "SubField.H"
 #include "fvPatchFieldsFwd.H"
-#include "autoPtr.H"
 #include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -57,7 +58,11 @@ namespace Foam
 
 // Forward Declarations
 class fvBoundaryMesh;
+class fvPatch;
 class surfaceInterpolation;
+
+//- Store lists of fvPatch as a PtrList
+typedef PtrList<fvPatch> fvPatchList;
 
 /*---------------------------------------------------------------------------*\
                            Class fvPatch Declaration

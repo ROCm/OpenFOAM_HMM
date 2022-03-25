@@ -959,7 +959,7 @@ Foam::polyMesh::cellTree() const
 
 void Foam::polyMesh::addPatches
 (
-    PtrList<polyPatch>& plist,
+    polyPatchList& plist,
     const bool validBoundary
 )
 {
@@ -1060,7 +1060,7 @@ void Foam::polyMesh::addPatches
 )
 {
     // Acquire ownership of the pointers
-    PtrList<polyPatch> plist(const_cast<List<polyPatch*>&>(p));
+    polyPatchList plist(const_cast<List<polyPatch*>&>(p));
 
     addPatches(plist, validBoundary);
 }

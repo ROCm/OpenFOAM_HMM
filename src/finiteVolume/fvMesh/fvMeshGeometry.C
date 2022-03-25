@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2011-2017,2022 OpenFOAM Foundation
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -183,7 +183,7 @@ const Foam::volScalarField::Internal& Foam::fvMesh::V() const
         DebugInFunction
             << "Constructing from primitiveMesh::cellVolumes()" << endl;
 
-        VPtr_ = new slicedVolScalarField::Internal
+        VPtr_ = new SlicedDimensionedField<scalar, volMesh>
         (
             IOobject
             (
@@ -200,7 +200,7 @@ const Foam::volScalarField::Internal& Foam::fvMesh::V() const
         );
     }
 
-    return *static_cast<slicedVolScalarField::Internal*>(VPtr_);
+    return *VPtr_;
 }
 
 
@@ -275,15 +275,9 @@ Foam::tmp<Foam::volScalarField::Internal> Foam::fvMesh::Vsc() const
         {
             return V0() + tFrac*(V() - V0());
         }
-        else
-        {
-            return V();
-        }
     }
-    else
-    {
-        return V();
-    }
+
+    return V();
 }
 
 
@@ -304,15 +298,9 @@ Foam::tmp<Foam::volScalarField::Internal> Foam::fvMesh::Vsc0() const
         {
             return V0() + t0Frac*(V() - V0());
         }
-        else
-        {
-            return V0();
-        }
     }
-    else
-    {
-        return V0();
-    }
+
+    return V0();
 }
 
 

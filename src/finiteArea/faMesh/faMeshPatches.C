@@ -36,7 +36,7 @@ License
 
 void Foam::faMesh::addFaPatches
 (
-    PtrList<faPatch>& plist,
+    faPatchList& plist,
     const bool validBoundary
 )
 {
@@ -67,13 +67,13 @@ void Foam::faMesh::addFaPatches
 )
 {
     // Acquire ownership of the pointers
-    PtrList<faPatch> plist(const_cast<List<faPatch*>&>(p));
+    faPatchList plist(const_cast<List<faPatch*>&>(p));
 
     addFaPatches(plist, validBoundary);
 }
 
 
-Foam::PtrList<Foam::faPatch> Foam::faMesh::createOnePatch
+Foam::faPatchList Foam::faMesh::createOnePatch
 (
     const word& patchName,
     const word& patchType
@@ -98,7 +98,7 @@ Foam::PtrList<Foam::faPatch> Foam::faMesh::createOnePatch
 }
 
 
-Foam::PtrList<Foam::faPatch> Foam::faMesh::createPatchList
+Foam::faPatchList Foam::faMesh::createPatchList
 (
     const dictionary& bndDict,
     const word& emptyPatchName,
@@ -495,7 +495,7 @@ Foam::PtrList<Foam::faPatch> Foam::faMesh::createPatchList
     // Now convert list of definitions to list of patches
 
     label nPatches = 0;
-    PtrList<faPatch> newPatches(faPatchDefs.size());
+    faPatchList newPatches(faPatchDefs.size());
 
     for (faPatchData& patchDef : faPatchDefs)
     {

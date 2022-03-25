@@ -495,7 +495,7 @@ void Foam::faMeshReconstructor::createMesh()
     auto& completeMesh = *serialAreaMesh_;
 
     // Add in non-processor boundary patches
-    PtrList<faPatch> completePatches(singlePatchEdgeLabels_.size());
+    faPatchList completePatches(singlePatchEdgeLabels_.size());
     forAll(completePatches, patchi)
     {
         const labelList& patchEdgeLabels = singlePatchEdgeLabels_[patchi];

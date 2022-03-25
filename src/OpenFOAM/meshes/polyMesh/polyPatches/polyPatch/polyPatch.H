@@ -39,14 +39,15 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef polyPatch_H
-#define polyPatch_H
+#ifndef Foam_polyPatch_H
+#define Foam_polyPatch_H
 
 #include "patchIdentifier.H"
 #include "primitivePatch.H"
 #include "typeInfo.H"
 #include "runTimeSelectionTables.H"
 #include "SubField.H"
+#include "PtrList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -59,8 +60,10 @@ class polyPatch;
 class polyTopoChange;
 class PstreamBuffers;
 
-Ostream& operator<<(Ostream&, const polyPatch&);
+//- Store lists of polyPatch as a PtrList
+typedef PtrList<polyPatch> polyPatchList;
 
+Ostream& operator<<(Ostream&, const polyPatch&);
 
 /*---------------------------------------------------------------------------*\
                            Class polyPatch Declaration

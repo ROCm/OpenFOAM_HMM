@@ -35,12 +35,13 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef pointPatch_H
-#define pointPatch_H
+#ifndef Foam_pointPatch_H
+#define Foam_pointPatch_H
 
 #include "labelList.H"
 #include "vectorField.H"
 #include "pointField.H"
+#include "PtrList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,7 +51,11 @@ namespace Foam
 // Forward Declarations
 class pointBoundaryMesh;
 class pointConstraint;
+class pointPatch;
 class PstreamBuffers;
+
+//- Store lists of pointPatch as a PtrList
+typedef PtrList<pointPatch> pointPatchList;
 
 /*---------------------------------------------------------------------------*\
                       Class pointPatch Declaration

@@ -39,8 +39,8 @@ SourceFiles
 #ifndef Foam_polyBoundaryMesh_H
 #define Foam_polyBoundaryMesh_H
 
-#include "polyPatchList.H"
 #include "regIOobject.H"
+#include "polyPatch.H"
 #include "labelPair.H"
 #include "HashSet.H"
 
@@ -55,7 +55,6 @@ class wordRe;
 class wordRes;
 
 Ostream& operator<<(Ostream& os, const polyBoundaryMesh& pbm);
-
 
 /*---------------------------------------------------------------------------*\
                       Class polyBoundaryMesh Declaration

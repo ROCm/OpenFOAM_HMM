@@ -150,10 +150,7 @@ void Foam::fv::gaussGrad<Type>::correctBoundaryConditions
     >& gGrad
 )
 {
-    typename GeometricField
-    <
-        typename outerProduct<vector, Type>::type, fvPatchField, volMesh
-    >::Boundary& gGradbf = gGrad.boundaryFieldRef();
+    auto& gGradbf = gGrad.boundaryFieldRef();
 
     forAll(vsf.boundaryField(), patchi)
     {

@@ -49,6 +49,7 @@ SourceFiles
 #include "labelList.H"
 #include "pointField.H"
 #include "typeInfo.H"
+#include "PtrList.H"
 #include "faPatchFieldsFwd.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
@@ -61,6 +62,10 @@ namespace Foam
 // Forward Declarations
 class faBoundaryMesh;
 class faPatch;
+
+//- Store lists of faPatch as a PtrList
+typedef PtrList<faPatch> faPatchList;
+
 Ostream& operator<<(Ostream&, const faPatch&);
 
 /*---------------------------------------------------------------------------*\

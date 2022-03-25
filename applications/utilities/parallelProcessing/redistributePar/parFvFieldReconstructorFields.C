@@ -129,8 +129,7 @@ Foam::parFvFieldReconstructor::reconstructFvVolumeField
 
     PtrList<fvPatchField<Type>> patchFields(fld.mesh().boundary().size());
 
-    const typename GeometricField<Type, fvPatchField, volMesh>::Boundary&
-        bfld = fld.boundaryField();
+    const auto& bfld = fld.boundaryField();
 
     forAll(bfld, patchI)
     {
@@ -293,8 +292,7 @@ Foam::parFvFieldReconstructor::reconstructFvSurfaceField
 
     PtrList<fvsPatchField<Type>> patchFields(fld.mesh().boundary().size());
 
-    const typename GeometricField<Type, fvsPatchField, surfaceMesh>::Boundary&
-        bfld = fld.boundaryField();
+    const auto& bfld = fld.boundaryField();
 
     forAll(bfld, patchI)
     {

@@ -45,7 +45,14 @@ SourceFiles
 namespace Foam
 {
 
+// Geometric internal field
 template<class Type, class GeoMesh> class DimensionedField;
+
+// Geometric boundary field
+template<class Type, template<class> class PatchField, class GeoMesh>
+class GeometricBoundaryField;
+
+// Geometric field (internal + boundary)
 template<class Type, template<class> class PatchField, class GeoMesh>
 class GeometricField;
 
@@ -60,6 +67,10 @@ template<class Type> class fvPatchField;
 //- A volume field for a given type
 template<class Type>
 using VolumeField = GeometricField<Type, fvPatchField, volMesh>;
+
+//- A volume boundary field for a given Type
+template<class Type>
+using VolumeBoundaryField = GeometricBoundaryField<Type, fvPatchField, volMesh>;
 
 //- A volume internal field for a given Type
 template<class Type>

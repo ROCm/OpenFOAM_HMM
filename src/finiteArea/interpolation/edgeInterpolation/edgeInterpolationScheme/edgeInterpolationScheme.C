@@ -317,8 +317,7 @@ Foam::edgeInterpolationScheme<Type>::interpolate
 
     // Interpolate across coupled patches using given lambdas
 
-    const typename GeometricField<Type, faPatchField, areaMesh>::Boundary&
-        vfb = vf.boundaryField();
+    const auto& vfb = vf.boundaryField();
 
     forAll(lambdas.boundaryField(), pi)
     {

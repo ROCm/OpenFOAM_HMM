@@ -1225,7 +1225,7 @@ bool Foam::faMeshDecomposition::writeDecomposition()
 
         const faPatchList& meshPatches = boundary();
 
-        PtrList<faPatch> procPatches
+        faPatchList procPatches
         (
             curPatchSizes.size() + curProcessorPatchSizes.size()
         );

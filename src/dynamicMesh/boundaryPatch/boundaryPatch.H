@@ -37,8 +37,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef boundaryPatch_H
-#define boundaryPatch_H
+#ifndef Foam_boundaryPatch_H
+#define Foam_boundaryPatch_H
 
 #include "patchIdentifier.H"
 #include "autoPtr.H"

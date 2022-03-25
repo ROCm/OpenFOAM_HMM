@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,8 +36,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef LduInterfaceField_H
-#define LduInterfaceField_H
+#ifndef Foam_LduInterfaceField_H
+#define Foam_LduInterfaceField_H
 
 #include "lduInterfaceField.H"
 #include "primitiveFieldsFwd.H"
@@ -48,8 +48,9 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class lduMatrix;
+template<class Type> class LduInterfaceField;
 
 /*---------------------------------------------------------------------------*\
                      Class LduInterfaceField Declaration

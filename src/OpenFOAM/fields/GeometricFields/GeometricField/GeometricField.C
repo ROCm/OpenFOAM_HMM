@@ -1372,7 +1372,6 @@ Foam::Ostream& Foam::operator<<
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "GeometricFieldNew.C"
-#include "GeometricBoundaryField.C"
 #include "GeometricFieldFunctions.C"
 
 // ************************************************************************* //

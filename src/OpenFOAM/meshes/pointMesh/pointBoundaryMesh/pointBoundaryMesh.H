@@ -35,10 +35,10 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef pointBoundaryMesh_H
-#define pointBoundaryMesh_H
+#ifndef Foam_pointBoundaryMesh_H
+#define Foam_pointBoundaryMesh_H
 
-#include "pointPatchList.H"
+#include "pointPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

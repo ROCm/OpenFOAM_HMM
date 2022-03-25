@@ -414,14 +414,14 @@ class faMesh
     // Helpers
 
         //- Create a single patch
-        PtrList<faPatch> createOnePatch
+        faPatchList createOnePatch
         (
             const word& patchName,
             const word& patchType = ""
         ) const;
 
         //- Create list of patches from boundary definition
-        PtrList<faPatch> createPatchList
+        faPatchList createPatchList
         (
             const dictionary& bndDict,
             const word& emptyPatchName = "",
@@ -526,7 +526,7 @@ public:
         //- Add boundary patches. Constructor helper
         void addFaPatches
         (
-            PtrList<faPatch>& plist,
+            faPatchList& plist,
             const bool validBoundary = true
         );
 

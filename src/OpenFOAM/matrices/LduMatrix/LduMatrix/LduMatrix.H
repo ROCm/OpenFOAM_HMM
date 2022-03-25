@@ -50,8 +50,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef LduMatrix_H
-#define LduMatrix_H
+#ifndef Foam_LduMatrix_H
+#define Foam_LduMatrix_H
 
 #include "lduMesh.H"
 #include "Field.H"

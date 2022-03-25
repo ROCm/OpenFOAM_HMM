@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2011-2017,2022 OpenFOAM Foundation
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,8 +47,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fvMesh_H
-#define fvMesh_H
+#ifndef Foam_fvMesh_H
+#define Foam_fvMesh_H
 
 #include "polyMesh.H"
 #include "lduMesh.H"
@@ -58,26 +58,24 @@ SourceFiles
 #include "fvSchemes.H"
 #include "fvSolution.H"
 #include "data.H"
-#include "DimensionedField.H"
 #include "volFieldsFwd.H"
 #include "surfaceFieldsFwd.H"
 #include "pointFieldsFwd.H"
+#include "SlicedDimensionedField.H"
 #include "slicedVolFieldsFwd.H"
 #include "slicedSurfaceFieldsFwd.H"
 #include "className.H"
 #include "SolverPerformance.H"
-
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Forward Declarations
 class fvMeshLduAddressing;
 class volMesh;
-template<class Type>
-class fvMatrix;
+template<class Type> class fvMatrix;
 
 /*---------------------------------------------------------------------------*\
                            Class fvMesh Declaration
@@ -109,8 +107,8 @@ protected:
         //  will take care of the old-time levels.
         mutable label curTimeIndex_;
 
-        //- Cell volumes old time level
-        mutable void* VPtr_;
+        //- Cell volumes
+        mutable SlicedDimensionedField<scalar, volMesh>* VPtr_;
 
         //- Cell volumes old time level
         mutable DimensionedField<scalar, volMesh>* V0Ptr_;
@@ -259,7 +257,7 @@ public:
             //- Add boundary patches. Constructor helper
             void addFvPatches
             (
-                PtrList<polyPatch>& plist,
+                polyPatchList& plist,
                 const bool validBoundary = true
             );
 

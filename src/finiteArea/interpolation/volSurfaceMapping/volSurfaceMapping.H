@@ -38,8 +38,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef volSurfaceMapping_H
-#define volSurfaceMapping_H
+#ifndef Foam_volSurfaceMapping_H
+#define Foam_volSurfaceMapping_H
 
 #include "faMesh.H"
 #include "volMesh.H"
@@ -49,6 +49,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 template<class Type> class fvPatchField;
 
 /*---------------------------------------------------------------------------*\
@@ -86,12 +87,11 @@ public:
 
     // Member Functions
 
-        //- Map Boundary field to surface
+        //- Map volume boundary field to surface
         template<class Type>
         tmp<Field<Type>> mapToSurface
         (
-            const typename
-            GeometricField<Type, fvPatchField, volMesh>::Boundary& df
+            const GeometricBoundaryField<Type, fvPatchField, volMesh>& df
         ) const;
 
         //- Map vol Field to surface Field
@@ -102,8 +102,7 @@ public:
         template<class Type>
         tmp<Field<Type>> mapInternalToSurface
         (
-            const typename
-            GeometricField<Type, fvPatchField, volMesh>::Boundary& df
+            const GeometricBoundaryField<Type, fvPatchField, volMesh>& df
         ) const;
 
         //- Map surface field to volume boundary field
@@ -111,7 +110,7 @@ public:
         void mapToVolume
         (
             const GeometricField<Type, faPatchField, areaMesh>& af,
-            typename GeometricField<Type, fvPatchField, volMesh>::Boundary& bf
+            GeometricBoundaryField<Type, fvPatchField, volMesh>& bf
         ) const;
 
         //- Map surface tmp field to volume boundary field
@@ -119,7 +118,7 @@ public:
         void mapToVolume
         (
             const tmp<GeometricField<Type, faPatchField, areaMesh>>& taf,
-            typename GeometricField<Type, fvPatchField, volMesh>::Boundary& bf
+            GeometricBoundaryField<Type, fvPatchField, volMesh>& bf
         ) const;
 
         //- Map surface field to field

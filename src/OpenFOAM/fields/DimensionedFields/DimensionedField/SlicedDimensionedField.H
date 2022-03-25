@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2022 OpenFOAM Foundation
     Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -24,64 +24,70 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-InClass
-    Foam::surfaceFields
+Class
+    Foam::SlicedDimensionedField
 
 Description
-
-SourceFiles
-    surfaceFields.C
+    Specialisation of DimensionedField that holds a slice of a given
+    field so that it acts as a DimensionedField.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Foam_surfaceFieldsFwd_H
-#define Foam_surfaceFieldsFwd_H
+#ifndef Foam_SlicedDimensionedField_H
+#define Foam_SlicedDimensionedField_H
 
-#include "fieldTypes.H"
+#include "DimensionedField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Geometric field (internal + boundary)
-template<class Type, template<class> class PatchField, class GeoMesh>
-class GeometricField;
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-// Forward Declarations
-class surfaceMesh;
-template<class Type> class fvsPatchField;
-
-
-//- A (volume) surface field for a given type
-template<class Type>
-using SurfaceField = GeometricField<Type, fvsPatchField, surfaceMesh>;
-
-
-// Typedefs
-
-typedef GeometricField<scalar, fvsPatchField, surfaceMesh> surfaceScalarField;
-typedef GeometricField<vector, fvsPatchField, surfaceMesh> surfaceVectorField;
-typedef GeometricField<sphericalTensor, fvsPatchField, surfaceMesh>
-    surfaceSphericalTensorField;
-typedef GeometricField<symmTensor, fvsPatchField, surfaceMesh>
-    surfaceSymmTensorField;
-typedef GeometricField<tensor, fvsPatchField, surfaceMesh> surfaceTensorField;
-
-
 /*---------------------------------------------------------------------------*\
-                       Namespace fieldTypes Declaration
+                   Class SlicedDimensionedField Declaration
 \*---------------------------------------------------------------------------*/
 
-namespace fieldTypes
+template<class Type, class GeoMesh>
+class SlicedDimensionedField
+:
+    public DimensionedField<Type, GeoMesh>
 {
-    //- Standard surface field types (scalar, vector, tensor, etc)
-    extern const wordList surface;
+public:
 
-} // End namespace fieldTypes
+    // Public Typedefs
+
+        //- Type of mesh on which this SlicedDimensionedField is instantiated
+        typedef typename GeoMesh::Mesh Mesh;
+
+
+    // Constructors
+
+        //- Construct from components and field to slice
+        SlicedDimensionedField
+        (
+            const IOobject& io,
+            const Mesh& mesh,
+            const dimensionSet& ds,
+            const Field<Type>& iField
+        )
+        :
+            DimensionedField<Type, GeoMesh>(io, mesh, ds, Field<Type>())
+        {
+            // Set internalField to the slice of the complete field
+            UList<Type>::shallowCopy
+            (
+                SubList<Type>(iField, GeoMesh::size(mesh))
+            );
+        }
+
+
+    //- Destructor
+    ~SlicedDimensionedField()
+    {
+        // Set internalField to nullptr to avoid deletion of underlying field
+        UList<Type>::shallowCopy(UList<Type>());
+    }
+};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

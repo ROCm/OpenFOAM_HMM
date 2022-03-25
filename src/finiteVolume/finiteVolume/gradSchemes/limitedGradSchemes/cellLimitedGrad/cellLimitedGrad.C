@@ -122,8 +122,7 @@ Foam::fv::cellLimitedGrad<Type, Limiter>::calcGrad
     }
 
 
-    const typename GeometricField<Type, fvPatchField, volMesh>::Boundary& bsf =
-        vsf.boundaryField();
+    const auto& bsf = vsf.boundaryField();
 
     forAll(bsf, patchi)
     {

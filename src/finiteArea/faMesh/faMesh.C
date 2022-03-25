@@ -438,7 +438,7 @@ Foam::faMesh::faMesh(const polyPatch& pp)
     DebugInFunction << "Creating from polyPatch:" << pp.name() << endl;
 
     // Add single faPatch "default", but with processor connections
-    PtrList<faPatch> newPatches
+    faPatchList newPatches
     (
         createOnePatch("default")
     );
@@ -479,7 +479,7 @@ Foam::faMesh::faMesh
 {
     DebugInFunction << "Creating from definition (dictionary)" << endl;
 
-    PtrList<faPatch> newPatches
+    faPatchList newPatches
     (
         createPatchList
         (

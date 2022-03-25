@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,11 +48,8 @@ slicedBoundaryField
     const bool preserveProcessorOnly
 )
 {
-    tmp<FieldField<PatchField, Type>> tbf
-    (
-        new FieldField<PatchField, Type>(mesh.boundary().size())
-    );
-    FieldField<PatchField, Type>& bf = tbf.ref();
+    auto tbf = tmp<FieldField<PatchField, Type>>::New(mesh.boundary().size());
+    auto& bf = tbf.ref();
 
     forAll(mesh.boundary(), patchi)
     {
@@ -123,11 +121,8 @@ slicedBoundaryField
     const bool preserveCouples
 )
 {
-    tmp<FieldField<PatchField, Type>> tbf
-    (
-        new FieldField<PatchField, Type>(mesh.boundary().size())
-    );
-    FieldField<PatchField, Type>& bf = tbf.ref();
+    auto tbf = tmp<FieldField<PatchField, Type>>::New(mesh.boundary().size());
+    auto& bf = tbf.ref();
 
     forAll(mesh.boundary(), patchi)
     {
@@ -157,10 +152,10 @@ slicedBoundaryField
                 new SlicedPatchField<Type>
                 (
                     mesh.boundary()[patchi],
-                    DimensionedField<Type, GeoMesh>::null()
+                    DimensionedField<Type, GeoMesh>::null(),
+                    bField[patchi]
                 )
             );
-            bf[patchi].UList<Type>::shallowCopy(bField[patchi]);
         }
     }
 
@@ -169,38 +164,6 @@ slicedBoundaryField
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template
-<
-    class Type,
-    template<class> class PatchField,
-    template<class> class SlicedPatchField,
-    class GeoMesh
->
-Foam::SlicedGeometricField<Type, PatchField, SlicedPatchField, GeoMesh>::
-Internal::Internal
-(
-    const IOobject& io,
-    const Mesh& mesh,
-    const dimensionSet& ds,
-    const Field<Type>& iField
-)
-:
-    DimensionedField<Type, GeoMesh>
-    (
-        io,
-        mesh,
-        ds,
-        Field<Type>()
-    )
-{
-    // Set the internalField to the slice of the complete field
-    UList<Type>::shallowCopy
-    (
-        typename Field<Type>::subField(iField, GeoMesh::size(mesh))
-    );
-}
-
 
 template
 <
@@ -228,10 +191,10 @@ SlicedGeometricField
         slicedBoundaryField(mesh, completeField, preserveCouples)
     )
 {
-    // Set the internalField to the slice of the complete field
+    // Set internalField to the slice of the complete field
     UList<Type>::shallowCopy
     (
-        typename Field<Type>::subField(completeField, GeoMesh::size(mesh))
+        SubList<Type>(completeField, GeoMesh::size(mesh))
     );
 
     correctBoundaryConditions();
@@ -272,10 +235,10 @@ SlicedGeometricField
         )
     )
 {
-    // Set the internalField to the slice of the complete field
+    // Set internalField to the slice of the complete field
     UList<Type>::shallowCopy
     (
-        typename Field<Type>::subField(completeIField, GeoMesh::size(mesh))
+        SubList<Type>(completeIField, GeoMesh::size(mesh))
     );
 
     correctBoundaryConditions();
@@ -306,7 +269,7 @@ SlicedGeometricField
         slicedBoundaryField(gf.mesh(), gf.boundaryField(), preserveCouples)
     )
 {
-    // Set the internalField to the supplied internal field
+    // Set internalField to the internal field
     UList<Type>::shallowCopy(gf.primitiveField());
 
     correctBoundaryConditions();
@@ -335,7 +298,7 @@ SlicedGeometricField
         slicedBoundaryField(gf.mesh(), gf.boundaryField(), true)
     )
 {
-    // Set the internalField to the supplied internal field
+    // Set internalField to the internal field
     UList<Type>::shallowCopy(gf.primitiveField());
 }
 
@@ -357,12 +320,9 @@ clone() const
     return tmp
     <
         SlicedGeometricField<Type, PatchField, SlicedPatchField, GeoMesh>
-    >
+    >::New
     (
-        new SlicedGeometricField<Type, PatchField, SlicedPatchField, GeoMesh>
-        (
-            *this
-        )
+        *this
     );
 }
 
@@ -379,25 +339,8 @@ template
 Foam::SlicedGeometricField<Type, PatchField, SlicedPatchField, GeoMesh>::
 ~SlicedGeometricField()
 {
-    // Set the internalField storage pointer to nullptr before its destruction
-    // to protect the field it a slice of.
-    UList<Type>::shallowCopy(UList<Type>(nullptr, 0));
-}
-
-
-template
-<
-    class Type,
-    template<class> class PatchField,
-    template<class> class SlicedPatchField,
-    class GeoMesh
->
-Foam::SlicedGeometricField<Type, PatchField, SlicedPatchField, GeoMesh>::
-Internal::~Internal()
-{
-    // Set the internalField storage pointer to nullptr before its destruction
-    // to protect the field it a slice of.
-    UList<Type>::shallowCopy(UList<Type>(nullptr, 0));
+    // Set internalField to nullptr to avoid deletion of underlying field
+    UList<Type>::shallowCopy(UList<Type>());
 }
 
 

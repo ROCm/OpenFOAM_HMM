@@ -419,7 +419,7 @@ bool Foam::domainDecomposition::writeDecomposition(const bool decomposeSets)
             nInterProcPatches += curSubPatchIDs[procPatchi].size();
         }
 
-        PtrList<polyPatch> procPatches
+        polyPatchList procPatches
         (
             curPatchSizes.size() + nInterProcPatches
         );

@@ -583,7 +583,7 @@ public:
             //- Add boundary patches
             void addPatches
             (
-                PtrList<polyPatch>& plist,
+                polyPatchList& plist,
                 const bool validBoundary = true
             );
 

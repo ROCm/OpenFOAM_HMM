@@ -227,8 +227,7 @@ void Foam::MRFZone::zero
         phii[internalFaces_[i]] = Zero;
     }
 
-    typename GeometricField<Type, fvsPatchField, surfaceMesh>::Boundary& phibf =
-        phi.boundaryFieldRef();
+    auto& phibf = phi.boundaryFieldRef();
 
     forAll(includedFaces_, patchi)
     {

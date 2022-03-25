@@ -333,7 +333,7 @@ Foam::blockMesh::topology(bool applyTransform) const
         const polyBoundaryMesh& pbmOld = origTopo.boundaryMesh();
         const polyBoundaryMesh& pbmNew = topoMesh.boundaryMesh();
 
-        PtrList<polyPatch> newPatches(pbmOld.size());
+        polyPatchList newPatches(pbmOld.size());
 
         forAll(pbmOld, patchi)
         {

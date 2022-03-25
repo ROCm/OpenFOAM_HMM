@@ -36,8 +36,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef lduInterface_H
-#define lduInterface_H
+#ifndef Foam_lduInterface_H
+#define Foam_lduInterface_H
 
 #include "labelField.H"
 #include "typeInfo.H"
@@ -48,8 +48,11 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
+class lduInterface;
+
 /*---------------------------------------------------------------------------*\
-                     Class lduInterface Declaration
+                        Class lduInterface Declaration
 \*---------------------------------------------------------------------------*/
 
 class lduInterface

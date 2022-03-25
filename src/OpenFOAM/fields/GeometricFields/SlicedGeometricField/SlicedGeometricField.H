@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2011-2017,2022 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,10 +42,11 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SlicedGeometricField_H
-#define SlicedGeometricField_H
+#ifndef Foam_SlicedGeometricField_H
+#define Foam_SlicedGeometricField_H
 
 #include "GeometricField.H"
+#include "SlicedDimensionedField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -69,10 +70,13 @@ class SlicedGeometricField
 {
 public:
 
-    typedef typename GeoMesh::Mesh Mesh;
-    typedef typename GeoMesh::BoundaryMesh BoundaryMesh;
+    // Public Typedefs
 
-    class Internal;
+        typedef typename GeoMesh::Mesh Mesh;
+        typedef typename GeoMesh::BoundaryMesh BoundaryMesh;
+
+        //- The internal field slice for this SlicedGeometricField
+        typedef SlicedDimensionedField<Type, GeoMesh> Internal;
 
 
 private:
@@ -81,7 +85,8 @@ private:
 
         //- Slice the given field and a create a PtrList of SlicedPatchField
         //  from which the boundary field is built
-        tmp<FieldField<PatchField, Type>>  slicedBoundaryField
+        tmp<FieldField<PatchField, Type>>
+        slicedBoundaryField
         (
             const Mesh& mesh,
             const Field<Type>& completeField,
@@ -91,7 +96,8 @@ private:
 
         //- Slice the given field and a create a PtrList of SlicedPatchField
         //  from which the boundary field is built
-        tmp<FieldField<PatchField, Type>>  slicedBoundaryField
+        tmp<FieldField<PatchField, Type>>
+        slicedBoundaryField
         (
             const Mesh& mesh,
             const FieldField<PatchField, Type>& bField,
@@ -133,7 +139,7 @@ public:
         );
 
         //- Construct from components and separate fields to slice for the
-        //  internal field and boundary field
+        //- internal field and boundary field
         SlicedGeometricField
         (
             const IOobject&,
@@ -146,7 +152,7 @@ public:
         );
 
         //- Construct from GeometricField. Reuses full internal and
-        //  patch fields except on couples (preserveCouples=true).
+        //- patch fields except on couples (preserveCouples=true).
         SlicedGeometricField
         (
             const IOobject&,
@@ -154,7 +160,7 @@ public:
             const bool preserveCouples=true
         );
 
-        //- Construct as copy
+        //- Copy construct
         SlicedGeometricField
         (
             const SlicedGeometricField
@@ -168,54 +174,17 @@ public:
 
         //- Clone
         tmp<SlicedGeometricField<Type, PatchField, SlicedPatchField, GeoMesh>>
-            clone() const;
+        clone() const;
 
 
     //- Destructor
     ~SlicedGeometricField();
 
 
-    // Member functions
+    // Member Functions
 
         //- Correct boundary field
         void correctBoundaryConditions();
-};
-
-
-/*---------------------------------------------------------------------------*\
-       Class SlicedGeometricField::Internal Declaration
-\*---------------------------------------------------------------------------*/
-
-//- The internalField of a SlicedGeometricField
-template
-<
-    class Type,
-    template<class> class PatchField,
-    template<class> class SlicedPatchField,
-    class GeoMesh
->
-class SlicedGeometricField<Type, PatchField, SlicedPatchField, GeoMesh>::
-Internal
-:
-    public GeometricField<Type, PatchField, GeoMesh>::Internal
-{
-
-public:
-
-    // Constructors
-
-        //- Construct from components and field to slice
-        Internal
-        (
-            const IOobject&,
-            const Mesh&,
-            const dimensionSet&,
-            const Field<Type>& iField
-        );
-
-
-    //- Destructor
-    ~Internal();
 };
 
 

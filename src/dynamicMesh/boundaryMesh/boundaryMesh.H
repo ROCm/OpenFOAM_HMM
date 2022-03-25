@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,15 +36,15 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef boundaryMesh_H
-#define boundaryMesh_H
+#ifndef Foam_boundaryMesh_H
+#define Foam_boundaryMesh_H
 
 #include "bMesh.H"
 #include "boundaryPatch.H"
+#include "className.H"
+#include "polyPatch.H"
 #include "PrimitivePatch.H"
 #include "PtrList.H"
-#include "polyPatchList.H"
-#include "className.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

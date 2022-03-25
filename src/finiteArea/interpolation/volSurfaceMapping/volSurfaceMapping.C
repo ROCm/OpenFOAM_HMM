@@ -33,7 +33,7 @@ License
 template<class Type>
 Foam::tmp<Foam::Field<Type>> Foam::volSurfaceMapping::mapToSurface
 (
-    const typename GeometricField<Type, fvPatchField, volMesh>::Boundary& df
+    const GeometricBoundaryField<Type, fvPatchField, volMesh>& df
 ) const
 {
     // Grab labels for all faces in faMesh
@@ -98,7 +98,7 @@ Foam::tmp<Foam::Field<Type>> Foam::volSurfaceMapping::mapToSurface
 template<class Type>
 Foam::tmp<Foam::Field<Type>> Foam::volSurfaceMapping::mapInternalToSurface
 (
-    const typename GeometricField<Type, fvPatchField, volMesh>::Boundary& df
+    const GeometricBoundaryField<Type, fvPatchField, volMesh>& df
 ) const
 {
     // Grab labels for all faces in faMesh
@@ -134,7 +134,7 @@ template<class Type>
 void Foam::volSurfaceMapping::mapToVolume
 (
     const GeometricField<Type, faPatchField, areaMesh>& af,
-    typename GeometricField<Type, fvPatchField, volMesh>::Boundary& bf
+    GeometricBoundaryField<Type, fvPatchField, volMesh>& bf
 ) const
 {
     // Grab labels for all faces in faMesh
@@ -166,7 +166,7 @@ template<class Type>
 void Foam::volSurfaceMapping::mapToVolume
 (
     const tmp<GeometricField<Type, faPatchField, areaMesh>>& taf,
-    typename GeometricField<Type, fvPatchField, volMesh>::Boundary& bf
+    GeometricBoundaryField<Type, fvPatchField, volMesh>& bf
 ) const
 {
     mapToVolume(taf(), bf);
