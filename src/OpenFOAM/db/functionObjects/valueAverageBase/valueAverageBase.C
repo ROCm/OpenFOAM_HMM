@@ -195,7 +195,8 @@ bool Foam::functionObjects::valueAverageBase::calculate(dictionary& dict)
 
         const bool processed =
         (
-             calc<scalar>(fieldi, converged, dict)
+             calc<label, scalar>(fieldi, converged, dict)
+          || calc<scalar>(fieldi, converged, dict)
           || calc<vector>(fieldi, converged, dict)
           || calc<sphericalTensor>(fieldi, converged, dict)
           || calc<symmTensor>(fieldi, converged, dict)

@@ -120,7 +120,7 @@ protected:
 
         //- Templated function to calculate the average
         //  Return true if processed
-        template<class Type>
+        template<class Type, class Type2=Type>
         bool calc(const label fieldi, bool& converged, dictionary& dict);
 
         //- Output file header information

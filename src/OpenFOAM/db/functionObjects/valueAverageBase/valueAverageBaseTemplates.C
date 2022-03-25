@@ -28,7 +28,7 @@ License
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
-template<class Type>
+template<class Type, class Type2>
 bool Foam::functionObjects::valueAverageBase::calc
 (
     const label fieldi,
@@ -48,12 +48,12 @@ bool Foam::functionObjects::valueAverageBase::calc
 
     const scalar dt = state_.time().deltaTValue();
 
-    const Type currentValue =
+    const Type2 currentValue =
         state_.getObjectResult<Type>(functionObjectName_, fieldName);
 
     // Current mean value
     const word meanName(fieldName + "Mean");
-    Type meanValue = state_.getResult<Type>(meanName);
+    Type2 meanValue = state_.getResult<Type2>(meanName);
 
     switch (windowType_)
     {
@@ -85,7 +85,7 @@ bool Foam::functionObjects::valueAverageBase::calc
         case windowType::EXACT:
         {
             FIFOStack<scalar> windowTimes;
-            FIFOStack<Type> windowValues;
+            FIFOStack<Type2> windowValues;
             dictionary& fieldDict = dict.subDict(fieldName);
             fieldDict.readIfPresent("windowTimes", windowTimes);
             fieldDict.readIfPresent("windowValues", windowValues);
@@ -117,8 +117,8 @@ bool Foam::functionObjects::valueAverageBase::calc
             auto timeIter = windowTimes.cbegin();
             auto valueIter = windowValues.cbegin();
 
-            meanValue = pTraits<Type>::zero;
-            Type valueOld(pTraits<Type>::zero);
+            meanValue = pTraits<Type2>::zero;
+            Type valueOld(pTraits<Type2>::zero);
 
             for
             (
@@ -127,7 +127,7 @@ bool Foam::functionObjects::valueAverageBase::calc
                 ++i, ++timeIter, ++valueIter
             )
             {
-                const Type& value = valueIter();
+                const Type2& value = valueIter();
                 const scalar dt = timeIter();
 
                 meanValue += dt*value;
