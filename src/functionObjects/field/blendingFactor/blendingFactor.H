@@ -85,6 +85,13 @@ Usage
 
     Usage by the \c postProcess utility is not available.
 
+Note
+  - The \c blendingFactor function object overwrites the \c DEShybrid:Factor
+    field internally when \c blendedSchemeBase debug flag is active.
+    However, users are allowed to write out the original \c DEShybrid:Factor
+    field by executing the \c writeObjects function object before
+    any \c blendingFactor function object execution.
+
 SourceFiles
     blendingFactor.C
     blendingFactorTemplates.C
