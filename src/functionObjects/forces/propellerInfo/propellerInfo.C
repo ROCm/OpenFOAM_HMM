@@ -468,8 +468,7 @@ void Foam::functionObjects::propellerInfo::updateSampleDiskCells()
         }
     }
 
-    Pstream::listCombineGather(pointMask_, orEqOp<bool>());
-    Pstream::broadcast(pointMask_);
+    Pstream::listCombineAllGather(pointMask_, orEqOp<bool>());
 }
 
 
@@ -774,8 +773,7 @@ Foam::tmp<Foam::Field<Type>> Foam::functionObjects::propellerInfo::interpolate
         }
     }
 
-    Pstream::listCombineGather(field, maxEqOp<Type>());
-    Pstream::broadcast(field);
+    Pstream::listCombineAllGather(field, maxEqOp<Type>());
 
     return tfield;
 }

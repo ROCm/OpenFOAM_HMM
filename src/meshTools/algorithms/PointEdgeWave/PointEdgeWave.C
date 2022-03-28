@@ -32,7 +32,6 @@ License
 #include "cyclicPolyPatch.H"
 #include "UIPstream.H"
 #include "UOPstream.H"
-#include "PstreamCombineReduceOps.H"
 #include "debug.H"
 #include "typeInfo.H"
 #include "globalMeshData.H"

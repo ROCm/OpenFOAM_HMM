@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -517,8 +517,7 @@ Foam::cellCellStencils::trackingInverseDistance::trackingInverseDistance
     {
         nCellsPerZone[zoneID[celli]]++;
     }
-    Pstream::listCombineGather(nCellsPerZone, plusEqOp<label>());
-    Pstream::broadcast(nCellsPerZone);
+    Pstream::listCombineAllGather(nCellsPerZone, plusEqOp<label>());
 
     meshParts_.setSize(nZones);
     forAll(meshParts_, zonei)
@@ -627,8 +626,7 @@ bool Foam::cellCellStencils::trackingInverseDistance::update()
             }
         }
 
-        Pstream::gatherList(procBb);
-        Pstream::scatterList(procBb);
+        Pstream::allGatherList(procBb);
 
         // Move local bounding boxes to per-mesh indexing
         forAll(meshBb, zonei)

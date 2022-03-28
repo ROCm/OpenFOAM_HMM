@@ -820,8 +820,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::createZoneBaffles
 
         if (nTotalBaffles > 0)
         {
-            Pstream::listCombineGather(nBaffles, plusEqOp<label>());
-            Pstream::broadcast(nBaffles);
+            Pstream::listCombineAllGather(nBaffles, plusEqOp<label>());
 
             Info<< nl
                 << setf(ios_base::left)
@@ -1947,8 +1946,7 @@ void Foam::meshRefinement::findCellZoneTopo
     // - region numbers are identical on all processors
     // - keepRegion is identical ,,
     // - cellZones are identical ,,
-    Pstream::listCombineGather(regionToCellZone, maxEqOp<label>());
-    Pstream::broadcast(regionToCellZone);
+    Pstream::listCombineAllGather(regionToCellZone, maxEqOp<label>());
 
 
     // Find the region containing the keepPoint
@@ -1998,8 +1996,7 @@ void Foam::meshRefinement::findCellZoneTopo
         // - cellZones are identical ,,
         // This done at top of loop to account for geometric matching
         // not being synchronised.
-        Pstream::listCombineGather(regionToCellZone, maxEqOp<label>());
-        Pstream::broadcast(regionToCellZone);
+        Pstream::listCombineAllGather(regionToCellZone, maxEqOp<label>());
 
 
         bool changed = false;
@@ -5732,8 +5729,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
 
         // 2.Combine faceZoneNames allocated on different processors
 
-        Pstream::mapCombineGather(zonesToFaceZone, eqOp<word>());
-        Pstream::broadcast(zonesToFaceZone);
+        Pstream::mapCombineAllGather(zonesToFaceZone, eqOp<word>());
 
 
         // 3. Allocate faceZones from (now synchronised) faceZoneNames
@@ -5956,8 +5952,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
                     nPosOrientation.find(faceToConnectedZone[faceI])() += n;
                 }
             }
-            Pstream::mapCombineGather(nPosOrientation, plusEqOp<label>());
-            Pstream::broadcast(nPosOrientation);
+            Pstream::mapCombineAllGather(nPosOrientation, plusEqOp<label>());
 
 
             Info<< "Split " << nFreeStanding << " free-standing zone faces"

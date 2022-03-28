@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2018 OpenFOAM Foundation
-    Copyright (C) 2020,2022 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -175,10 +175,8 @@ Foam::porosityModels::powerLawLopesdaCostaZone::powerLawLopesdaCostaZone
         groundSurfaceProcTris[Pstream::myProcNo()] = groundSurface;
         groundSurfaceProcPoints[Pstream::myProcNo()] = groundSurface.points();
 
-        Pstream::gatherList(groundSurfaceProcTris);
-        Pstream::scatterList(groundSurfaceProcTris);
-        Pstream::gatherList(groundSurfaceProcPoints);
-        Pstream::scatterList(groundSurfaceProcPoints);
+        Pstream::allGatherList(groundSurfaceProcTris);
+        Pstream::allGatherList(groundSurfaceProcPoints);
 
         label nTris = 0;
         forAll(groundSurfaceProcTris, i)

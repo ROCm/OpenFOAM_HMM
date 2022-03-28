@@ -399,8 +399,7 @@ void Foam::fvMeshDistribute::getFieldNames
     {
         List<wordList> allNames(Pstream::nProcs());
         allNames[Pstream::myProcNo()] = list;
-        Pstream::gatherList(allNames);
-        Pstream::scatterList(allNames);
+        Pstream::allGatherList(allNames);
 
         for (const int proci : Pstream::subProcs())
         {

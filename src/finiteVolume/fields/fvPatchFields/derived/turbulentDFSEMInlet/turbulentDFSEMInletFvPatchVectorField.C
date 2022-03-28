@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -161,15 +161,10 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::initialisePatch()
         }
     }
 
-    for (auto& s : sumTriMagSf_)
-    {
-        s = 0.0;
-    }
-
+    sumTriMagSf_ = Zero;
     sumTriMagSf_[Pstream::myProcNo() + 1] = sum(triMagSf);
 
-    Pstream::listCombineGather(sumTriMagSf_, maxEqOp<scalar>());
-    Pstream::broadcast(sumTriMagSf_);
+    Pstream::listCombineAllGather(sumTriMagSf_, maxEqOp<scalar>());
 
     for (label i = 1; i < triMagSf.size(); ++i)
     {
@@ -494,8 +489,7 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::calcOverlappingProcEddies
 
     List<boundBox> patchBBs(Pstream::nProcs());
     patchBBs[Pstream::myProcNo()] = patchBounds_;
-    Pstream::gatherList(patchBBs);
-    Pstream::scatterList(patchBBs);
+    Pstream::allGatherList(patchBBs);
 
     // Per processor indices into all segments to send
     List<DynamicList<label>> dynSendMap(Pstream::nProcs());
@@ -537,8 +531,7 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::calcOverlappingProcEddies
     {
         sendSizes[Pstream::myProcNo()][procI] = sendMap[procI].size();
     }
-    Pstream::gatherList(sendSizes);
-    Pstream::scatterList(sendSizes);
+    Pstream::allGatherList(sendSizes);
 
     // Determine order of receiving
     labelListList constructMap(Pstream::nProcs());

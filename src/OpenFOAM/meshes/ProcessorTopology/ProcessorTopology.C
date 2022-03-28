@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -113,8 +114,7 @@ Foam::ProcessorTopology<Container, ProcPatch>::ProcessorTopology
             procNeighbours(this->size(), patches);
 
         // Distribute to all processors
-        Pstream::gatherList(*this, Pstream::msgType(), comm);
-        Pstream::scatterList(*this, Pstream::msgType(), comm);
+        Pstream::allGatherList(*this, Pstream::msgType(), comm);
     }
 
     if

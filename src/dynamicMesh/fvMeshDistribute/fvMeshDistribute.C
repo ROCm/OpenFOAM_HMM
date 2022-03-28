@@ -27,7 +27,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "fvMeshDistribute.H"
-#include "PstreamCombineReduceOps.H"
 #include "fvMeshAdder.H"
 #include "faceCoupleInfo.H"
 #include "processorFvPatchField.H"

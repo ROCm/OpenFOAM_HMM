@@ -227,8 +227,7 @@ bool Foam::sampledMeshedSurface::update(const meshSearch& meshSearcher)
     // See which processor has the nearest. Mark and subset
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    Pstream::listCombineGather(nearest, minFirstEqOp<scalar>{});
-    Pstream::broadcast(nearest);
+    Pstream::listCombineAllGather(nearest, minFirstEqOp<scalar>{});
 
     labelList cellOrFaceLabels(fc.size(), -1);
 

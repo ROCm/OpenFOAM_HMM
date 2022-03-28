@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "PstreamCombineReduceOps.H"
+#include "Pstream.H"
+#include "ops.H"
 #include <algorithm>
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
@@ -171,7 +172,7 @@ Foam::Tuple2<T1,T2> Foam::FieldOps::findMinData
         result.second() = data[i];
     }
 
-    Foam::combineReduce(result, minFirstEqOp<T1>());
+    Pstream::combineAllGather(result, minFirstEqOp<T1>());
     return result;
 }
 
@@ -192,7 +193,7 @@ Foam::Tuple2<T1,T2> Foam::FieldOps::findMaxData
         result.second() = data[i];
     }
 
-    Foam::combineReduce(result, maxFirstEqOp<T1>());
+    Pstream::combineAllGather(result, maxFirstEqOp<T1>());
     return result;
 }
 

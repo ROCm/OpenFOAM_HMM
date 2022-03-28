@@ -87,10 +87,8 @@ bool Foam::functionObjects::columnAverage::columnAverageField
         }
 
         // Global sum
-        Pstream::listCombineGather(regionField, plusEqOp<Type>());
-        Pstream::listCombineGather(regionCount, plusEqOp<label>());
-        Pstream::broadcast(regionField);
-        Pstream::broadcast(regionCount);
+        Pstream::listCombineAllGather(regionField, plusEqOp<Type>());
+        Pstream::listCombineAllGather(regionCount, plusEqOp<label>());
 
         forAll(regionField, regioni)
         {

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020,2022 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,8 +50,7 @@ Foam::autoPtr<Foam::mapDistribute> Foam::nearestFaceAMI::calcFaceMap
     List<boundBox> procBbs(Pstream::nProcs());
     procBbs[Pstream::myProcNo()] =
         boundBox(tgtPatch.points(), tgtPatch.meshPoints(), true);
-    Pstream::gatherList(procBbs);
-    Pstream::scatterList(procBbs);
+    Pstream::allGatherList(procBbs);
 
     // Identify which of my local src faces intersect with each processor
     // tgtPatch bb within the current match's search distance

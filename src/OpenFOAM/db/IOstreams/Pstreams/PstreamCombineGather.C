@@ -143,26 +143,6 @@ void Foam::Pstream::combineGather
 }
 
 
-template<class T, class CombineOp>
-void Foam::Pstream::combineGather
-(
-    T& value,
-    const CombineOp& cop,
-    const int tag,
-    const label comm
-)
-{
-    combineGather
-    (
-        UPstream::whichCommunication(comm),
-        value,
-        cop,
-        tag,
-        comm
-    );
-}
-
-
 template<class T>
 void Foam::Pstream::combineScatter
 (
@@ -244,6 +224,26 @@ void Foam::Pstream::combineScatter
 }
 
 
+template<class T, class CombineOp>
+void Foam::Pstream::combineGather
+(
+    T& value,
+    const CombineOp& cop,
+    const int tag,
+    const label comm
+)
+{
+    Pstream::combineGather
+    (
+        UPstream::whichCommunication(comm),
+        value,
+        cop,
+        tag,
+        comm
+    );
+}
+
+
 template<class T>
 void Foam::Pstream::combineScatter
 (
@@ -259,6 +259,42 @@ void Foam::Pstream::combineScatter
     #endif
 }
 
+
+template<class T, class CombineOp>
+void Foam::Pstream::combineAllGather
+(
+    const List<UPstream::commsStruct>& comms,
+    T& value,
+    const CombineOp& cop,
+    const int tag,
+    const label comm
+)
+{
+    Pstream::combineGather(comms, value, cop, tag, comm);
+    Pstream::broadcast(value, comm);
+}
+
+
+template<class T, class CombineOp>
+void Foam::Pstream::combineAllGather
+(
+    T& value,
+    const CombineOp& cop,
+    const int tag,
+    const label comm
+)
+{
+    if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
+    {
+        const auto& comms = UPstream::whichCommunication(comm);
+
+        Pstream::combineGather(comms, value, cop, tag, comm);
+        Pstream::broadcast(value, comm);
+    }
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class T, class CombineOp>
 void Foam::Pstream::listCombineGather
@@ -366,26 +402,6 @@ void Foam::Pstream::listCombineGather
 }
 
 
-template<class T, class CombineOp>
-void Foam::Pstream::listCombineGather
-(
-    List<T>& values,
-    const CombineOp& cop,
-    const int tag,
-    const label comm
-)
-{
-    listCombineGather
-    (
-        UPstream::whichCommunication(comm),
-        values,
-        cop,
-        tag,
-        comm
-    );
-}
-
-
 template<class T>
 void Foam::Pstream::listCombineScatter
 (
@@ -467,6 +483,26 @@ void Foam::Pstream::listCombineScatter
 }
 
 
+template<class T, class CombineOp>
+void Foam::Pstream::listCombineGather
+(
+    List<T>& values,
+    const CombineOp& cop,
+    const int tag,
+    const label comm
+)
+{
+    Pstream::listCombineGather
+    (
+        UPstream::whichCommunication(comm),
+        values,
+        cop,
+        tag,
+        comm
+    );
+}
+
+
 template<class T>
 void Foam::Pstream::listCombineScatter
 (
@@ -478,7 +514,7 @@ void Foam::Pstream::listCombineScatter
     #ifndef Foam_Pstream_scatter_nobroadcast
     Pstream::broadcast(values, comm);
     #else
-    listCombineScatter
+    Pstream::listCombineScatter
     (
         UPstream::whichCommunication(comm),
         values,
@@ -488,6 +524,42 @@ void Foam::Pstream::listCombineScatter
     #endif
 }
 
+
+template<class T, class CombineOp>
+void Foam::Pstream::listCombineAllGather
+(
+    const List<UPstream::commsStruct>& comms,
+    List<T>& values,
+    const CombineOp& cop,
+    const int tag,
+    const label comm
+)
+{
+    Pstream::listCombineGather(comms, values, cop, tag, comm);
+    Pstream::broadcast(values, comm);
+}
+
+
+template<class T, class CombineOp>
+void Foam::Pstream::listCombineAllGather
+(
+    List<T>& values,
+    const CombineOp& cop,
+    const int tag,
+    const label comm
+)
+{
+    if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
+    {
+        const auto& comms = UPstream::whichCommunication(comm);
+
+        Pstream::listCombineGather(comms, values, cop, tag, comm);
+        Pstream::broadcast(values, comm);
+    }
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Container, class CombineOp>
 void Foam::Pstream::mapCombineGather
@@ -570,26 +642,6 @@ void Foam::Pstream::mapCombineGather
 }
 
 
-template<class Container, class CombineOp>
-void Foam::Pstream::mapCombineGather
-(
-    Container& values,
-    const CombineOp& cop,
-    const int tag,
-    const label comm
-)
-{
-    mapCombineGather
-    (
-        UPstream::whichCommunication(comm),
-        values,
-        cop,
-        tag,
-        comm
-    );
-}
-
-
 template<class Container>
 void Foam::Pstream::mapCombineScatter
 (
@@ -652,6 +704,26 @@ void Foam::Pstream::mapCombineScatter
 }
 
 
+template<class Container, class CombineOp>
+void Foam::Pstream::mapCombineGather
+(
+    Container& values,
+    const CombineOp& cop,
+    const int tag,
+    const label comm
+)
+{
+    Pstream::mapCombineGather
+    (
+        UPstream::whichCommunication(comm),
+        values,
+        cop,
+        tag,
+        comm
+    );
+}
+
+
 template<class Container>
 void Foam::Pstream::mapCombineScatter
 (
@@ -663,7 +735,7 @@ void Foam::Pstream::mapCombineScatter
     #ifndef Foam_Pstream_scatter_nobroadcast
     Pstream::broadcast(values, comm);
     #else
-    mapCombineScatter
+    Pstream::mapCombineScatter
     (
         UPstream::whichCommunication(comm),
         values,
@@ -671,6 +743,40 @@ void Foam::Pstream::mapCombineScatter
         comm
     );
     #endif
+}
+
+
+template<class Container, class CombineOp>
+void Foam::Pstream::mapCombineAllGather
+(
+    const List<UPstream::commsStruct>& comms,
+    Container& values,
+    const CombineOp& cop,
+    const int tag,
+    const label comm
+)
+{
+    Pstream::mapCombineGather(comms, values, cop, tag, comm);
+    Pstream::broadcast(values, comm);
+}
+
+
+template<class Container, class CombineOp>
+void Foam::Pstream::mapCombineAllGather
+(
+    Container& values,
+    const CombineOp& cop,
+    const int tag,
+    const label comm
+)
+{
+    if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
+    {
+        const auto& comms = UPstream::whichCommunication(comm);
+
+        Pstream::mapCombineGather(comms, values, cop, tag, comm);
+        Pstream::broadcast(values, comm);
+    }
 }
 
 

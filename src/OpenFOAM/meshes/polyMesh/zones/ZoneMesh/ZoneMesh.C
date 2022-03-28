@@ -765,13 +765,11 @@ bool Foam::ZoneMesh<ZoneType, MeshType>::checkParallelSync
     // Collect all names
     List<wordList> allNames(Pstream::nProcs());
     allNames[Pstream::myProcNo()] = this->names();
-    Pstream::gatherList(allNames);
-    Pstream::scatterList(allNames);
+    Pstream::allGatherList(allNames);
 
     List<wordList> allTypes(Pstream::nProcs());
     allTypes[Pstream::myProcNo()] = this->types();
-    Pstream::gatherList(allTypes);
-    Pstream::scatterList(allTypes);
+    Pstream::allGatherList(allTypes);
 
     // Have every processor check but only master print error.
 

@@ -104,12 +104,11 @@ if (timeDirs.size() && doLagrangian)
     {
         for (auto& cloudFields : regionCloudFields)
         {
-            Pstream::mapCombineGather
+            Pstream::mapCombineAllGather
             (
                 cloudFields,
                 HashTableOps::plusEqOp<word>()
             );
-            Pstream::broadcast(cloudFields);
         }
     }
 }

@@ -32,7 +32,7 @@ Description
 
     Require
     - combineOperator (e.g. sumEqOp - not sumOp!) that is defined for the
-      type and combineReduce(UList\<T\>, combineOperator) should be defined.
+      type be defined.
     - null value which gets overridden by any valid value.
     - transform function
 
@@ -57,7 +57,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class polyBoundaryMesh;
 
 /*---------------------------------------------------------------------------*\

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2020 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -153,8 +153,7 @@ void Foam::planeToFaceZone::combine(faceZoneSet& fzSet, const bool add) const
                     bitSet(),  // No border edges
                     newSetFaceRegions
                 );
-            Pstream::gatherList(procNRegions);
-            Pstream::scatterList(procNRegions);
+            Pstream::allGatherList(procNRegions);
 
             // Cumulative sum the number of regions on each processor to get an
             // offset which makes the local region ID-s globally unique
@@ -218,8 +217,7 @@ void Foam::planeToFaceZone::combine(faceZoneSet& fzSet, const bool add) const
                     regionRegions[regioni].unset(regioni);
                 }
             }
-            Pstream::listCombineGather(regionRegions, bitOrEqOp<bitSet>());
-            Pstream::broadcast(regionRegions);
+            Pstream::listCombineAllGather(regionRegions, bitOrEqOp<bitSet>());
 
             // Collapse the region connections into a map between each region
             // and the lowest numbered region that it connects to
@@ -260,8 +258,8 @@ void Foam::planeToFaceZone::combine(faceZoneSet& fzSet, const bool add) const
             {
                 ++ regionNFaces[regioni];
             }
-            Pstream::listCombineGather(regionNFaces, plusEqOp<label>());
-            Pstream::broadcast(regionNFaces);
+            Pstream::listCombineAllGather(regionNFaces, plusEqOp<label>());
+
             Info<< "    Found " << nRegions << " contiguous regions with "
                 << regionNFaces << " faces" << endl;
         }

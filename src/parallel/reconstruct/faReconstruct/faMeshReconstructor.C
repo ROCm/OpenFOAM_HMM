@@ -30,7 +30,6 @@ License
 #include "globalMeshData.H"
 #include "edgeHashes.H"
 #include "Time.H"
-#include "PstreamCombineReduceOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -386,7 +385,7 @@ void Foam::faMeshReconstructor::calcAddressing
 
 
         // Collect from all processors
-        combineReduce
+        Pstream::combineAllGather
         (
             patchEdgeLabels,
             ListOps::appendEqOp<label>()

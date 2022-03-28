@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2017 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,8 +40,7 @@ void Foam::functionObjects::fieldValue::combineFields(Field<Type>& field)
         List<Field<Type>> allValues(Pstream::nProcs());
         allValues[Pstream::myProcNo()] = field;
 
-        Pstream::gatherList(allValues);
-        Pstream::scatterList(allValues);
+        Pstream::allGatherList(allValues);
 
         field =
             ListListOps::combine<Field<Type>>

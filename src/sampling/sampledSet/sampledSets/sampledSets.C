@@ -199,12 +199,9 @@ Foam::IOobjectList Foam::sampledSets::preCheckFields(unsigned request)
         selected = mesh_.classes(fieldSelection_);
     }
 
+    // Parallel consistency (no-op in serial)
     // Probably not needed...
-    // if (Pstream::parRun())
-    // {
-    //     Pstream::mapCombineGather(selected, HashSetOps::plusEqOp<word>());
-    //     Pstream::broadcast(selected);
-    // }
+    /// Pstream::mapCombineAllGather(selected, HashSetOps::plusEqOp<word>());
 
 
     DynamicList<label> missed(fieldSelection_.size());

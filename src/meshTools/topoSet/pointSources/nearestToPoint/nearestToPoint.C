@@ -104,8 +104,7 @@ void Foam::nearestToPoint::combine(topoSet& set, const bool add) const
     }
 
 
-    Pstream::listCombineGather(nearest, mappedPatchBase::nearestEqOp());
-    Pstream::broadcast(nearest);
+    Pstream::listCombineAllGather(nearest, mappedPatchBase::nearestEqOp());
 
     for (const auto& near : nearest)
     {

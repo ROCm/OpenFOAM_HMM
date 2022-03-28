@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -327,12 +327,10 @@ void Foam::faceReflecting::calculate()
     }
 
     // Distribute ray indexes to all proc's
-    Pstream::listCombineGather(refDisDirsIndex, maxEqOp<label>());
-    Pstream::mapCombineGather(refFacesDirIndex, minEqOp<label>());
-
     // Make sure all the processors have the same information
-    Pstream::broadcast(refDisDirsIndex);
-    Pstream::broadcast(refFacesDirIndex);
+
+    Pstream::listCombineAllGather(refDisDirsIndex, maxEqOp<label>());
+    Pstream::mapCombineAllGather(refFacesDirIndex, minEqOp<label>());
 
     scalar maxBounding = 5.0*mag(mesh_.bounds().max() - mesh_.bounds().min());
 

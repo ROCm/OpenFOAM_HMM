@@ -38,7 +38,6 @@ Description
 #ifndef Foam_PstreamCombineReduceOps_H
 #define Foam_PstreamCombineReduceOps_H
 
-#include "UPstream.H"
 #include "Pstream.H"
 #include "ops.H"
 
@@ -59,8 +58,7 @@ void combineReduce
     const label comm
 )
 {
-    Pstream::combineGather(comms, value, cop, tag, comm);
-    Pstream::broadcast(value, comm);
+    Pstream::combineAllGather(comms, value, cop, tag, comm);
 }
 
 
@@ -73,13 +71,7 @@ void combineReduce
     const label comm = UPstream::worldComm
 )
 {
-    if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
-    {
-        const auto& comms = UPstream::whichCommunication(comm);
-
-        Pstream::combineGather(comms, value, cop, tag, comm);
-        Pstream::broadcast(value, comm);
-    }
+    Pstream::combineAllGather(value, cop, tag, comm);
 }
 
 

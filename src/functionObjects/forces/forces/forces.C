@@ -1063,10 +1063,8 @@ void Foam::functionObjects::forces::calcForcesMoment()
         }
     }
 
-    Pstream::listCombineGather(force_, plusEqOp<vectorField>());
-    Pstream::listCombineGather(moment_, plusEqOp<vectorField>());
-    Pstream::broadcast(force_);
-    Pstream::broadcast(moment_);
+    Pstream::listCombineAllGather(force_, plusEqOp<vectorField>());
+    Pstream::listCombineAllGather(moment_, plusEqOp<vectorField>());
 }
 
 

@@ -2649,7 +2649,7 @@ int main(int argc, char *argv[])
     bool nfs = true;
     {
         List<fileName> roots(1, args.rootPath());
-        combineReduce(roots, ListOps::uniqueEqOp<fileName>());
+        Pstream::combineAllGather(roots, ListOps::uniqueEqOp<fileName>());
         nfs = (roots.size() == 1);
     }
 
@@ -3280,8 +3280,7 @@ int main(int argc, char *argv[])
                     )
                 );
                 meshDir[Pstream::myProcNo()] = fName.path();
-                Pstream::gatherList(meshDir);
-                Pstream::scatterList(meshDir);
+                Pstream::allGatherList(meshDir);
                 //Info<< "Per processor faces dirs:" << nl
                 //    << "    " << meshDir << nl << endl;
             }

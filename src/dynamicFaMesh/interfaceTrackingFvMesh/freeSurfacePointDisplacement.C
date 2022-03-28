@@ -30,7 +30,6 @@ License
 #include "emptyFaPatch.H"
 #include "wedgeFaPatch.H"
 #include "wallFvPatch.H"
-#include "PstreamCombineReduceOps.H"
 #include "coordinateSystem.H"
 #include "unitConversion.H"
 #include "scalarMatrices.H"
@@ -466,8 +465,7 @@ Foam::interfaceTrackingFvMesh::pointDisplacement()
                 }
             }
 
-            Pstream::gatherList(procLsPoints);
-            Pstream::scatterList(procLsPoints);
+            Pstream::allGatherList(procLsPoints);
 
             if (curSharedPointIndex != -1)
             {

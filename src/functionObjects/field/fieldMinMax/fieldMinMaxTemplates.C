@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -186,19 +186,13 @@ void Foam::functionObjects::fieldMinMax::calcMinMaxFieldType
     }
 
     // Collect info from all processors and output
-    Pstream::gatherList(minVs);
-    Pstream::scatterList(minVs);
-    Pstream::gatherList(minCells);
-    Pstream::scatterList(minCells);
-    Pstream::gatherList(minCs);
-    Pstream::scatterList(minCs);
+    Pstream::allGatherList(minVs);
+    Pstream::allGatherList(minCells);
+    Pstream::allGatherList(minCs);
 
-    Pstream::gatherList(maxVs);
-    Pstream::scatterList(maxVs);
-    Pstream::gatherList(maxCells);
-    Pstream::scatterList(maxCells);
-    Pstream::gatherList(maxCs);
-    Pstream::scatterList(maxCs);
+    Pstream::allGatherList(maxVs);
+    Pstream::allGatherList(maxCells);
+    Pstream::allGatherList(maxCs);
 
     minId = findMin(minVs);
     const Type& minValue = minVs[minId];

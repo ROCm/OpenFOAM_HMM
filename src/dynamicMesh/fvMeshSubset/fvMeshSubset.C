@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1011,14 +1011,12 @@ void Foam::fvMeshSubset::setCellSubset
         List<wordList> patchNames(Pstream::nProcs());
         patchNames[Pstream::myProcNo()] = oldPatches.names();
         patchNames[Pstream::myProcNo()].setSize(nextPatchID);
-        Pstream::gatherList(patchNames);
-        Pstream::scatterList(patchNames);
+        Pstream::allGatherList(patchNames);
 
         // Get patch sizes (up to nextPatchID).
         // Note that up to nextPatchID the globalPatchMap is an identity so
         // no need to index through that.
-        Pstream::listCombineGather(globalPatchSizes, plusEqOp<label>());
-        Pstream::broadcast(globalPatchSizes);
+        Pstream::listCombineAllGather(globalPatchSizes, plusEqOp<label>());
 
         // Now all processors have all the patchnames.
         // Decide: if all processors have the same patch names and size is zero

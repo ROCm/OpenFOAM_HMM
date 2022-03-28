@@ -163,9 +163,7 @@ Foam::autoPtr<Foam::mapDistribute> Foam::meshToMesh::calcProcMap
                 procBb[Pstream::myProcNo()] = treeBoundBoxList();
             }
 
-
-            Pstream::gatherList(procBb);
-            Pstream::scatterList(procBb);
+            Pstream::allGatherList(procBb);
 
 
             if (debug)
@@ -257,8 +255,7 @@ Foam::autoPtr<Foam::mapDistribute> Foam::meshToMesh::calcProcMap
             {
                 sendSizes[Pstream::myProcNo()][proci] = sendMap[proci].size();
             }
-            Pstream::gatherList(sendSizes);
-            Pstream::scatterList(sendSizes);
+            Pstream::allGatherList(sendSizes);
 
 
             // determine order of receiving

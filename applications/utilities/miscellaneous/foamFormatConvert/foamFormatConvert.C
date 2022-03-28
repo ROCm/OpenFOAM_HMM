@@ -223,7 +223,7 @@ bool writeOptionalMeshObject
 
     // Make sure all know if there is a valid class name
     wordList classNames(1, io.headerClassName());
-    combineReduce(classNames, uniqueEqOp<word>());
+    Pstream::combineAllGather(classNames, uniqueEqOp<word>());
 
     // Check for correct type
     if (classNames[0] == T::typeName)
@@ -422,7 +422,7 @@ int main(int argc, char *argv[])
             )
         );
 
-        combineReduce(lagrangianDirs, uniqueEqOp<fileName>());
+        Pstream::combineAllGather(lagrangianDirs, uniqueEqOp<fileName>());
 
         if (!lagrangianDirs.empty())
         {
@@ -459,7 +459,7 @@ int main(int argc, char *argv[])
                 )
             );
 
-            combineReduce(cloudDirs, uniqueEqOp<fileName>());
+            Pstream::combineAllGather(cloudDirs, uniqueEqOp<fileName>());
 
             forAll(cloudDirs, i)
             {
@@ -485,7 +485,7 @@ int main(int argc, char *argv[])
                 );
 
                 // Combine with all other cloud objects
-                combineReduce(cloudFields, uniqueEqOp<word>());
+                Pstream::combineAllGather(cloudFields, uniqueEqOp<word>());
 
                 for (const word& name : cloudFields)
                 {

@@ -550,8 +550,7 @@ Foam::autoPtr<Foam::mapDistribute> Foam::processorLODs::box::createLODMap
     {
         sendSizes[localProci][proci] = sendElems[proci].size();
     }
-    Pstream::gatherList(sendSizes);
-    Pstream::scatterList(sendSizes);
+    Pstream::allGatherList(sendSizes);
 
 
     // Determine order of receiving

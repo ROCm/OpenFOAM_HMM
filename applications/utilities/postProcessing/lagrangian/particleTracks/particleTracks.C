@@ -187,8 +187,7 @@ int main(int argc, char *argv[])
         const label maxNProcs = returnReduce(maxIds.size(), maxOp<label>());
         maxIds.resize(maxNProcs, -1);
 
-        Pstream::listCombineGather(maxIds, maxEqOp<label>());
-        Pstream::broadcast(maxIds);
+        Pstream::listCombineAllGather(maxIds, maxEqOp<label>());
 
         // From ids to count
         const labelList numIds = maxIds + 1;

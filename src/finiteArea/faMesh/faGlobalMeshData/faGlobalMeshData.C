@@ -33,7 +33,6 @@ Author
 #include "faGlobalMeshData.H"
 #include "faMesh.H"
 #include "globalMeshData.H"
-#include "PstreamCombineReduceOps.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -110,7 +109,7 @@ void Foam::faGlobalMeshData::updateMesh()
 
     sharedPointLabels_ = sharedPointLabels.toc();
 
-    combineReduce(globalList, plusEqOp<labelField>());
+    Pstream::combineAllGather(globalList, plusEqOp<labelField>());
 
     nGlobalPoints_ = 0;
     for (label i=0; i<globalList.size(); ++i)

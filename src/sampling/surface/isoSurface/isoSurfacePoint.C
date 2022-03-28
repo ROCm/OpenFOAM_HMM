@@ -276,9 +276,8 @@ void Foam::isoSurfacePoint::syncUnseparatedPoints
             sharedPts[pd.sharedPointAddr()[i]] = pointValues[meshPointi];
         }
 
-        // Combine on master.
-        Pstream::listCombineGather(sharedPts, minEqOp<point>());
-        Pstream::broadcast(sharedPts);
+        // Globally consistent
+        Pstream::listCombineAllGather(sharedPts, minEqOp<point>());
 
         // Now we will all have the same information. Merge it back with
         // my local information.

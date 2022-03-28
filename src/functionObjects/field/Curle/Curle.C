@@ -223,8 +223,7 @@ bool Foam::functionObjects::Curle::execute()
 
     pDash /= 4*mathematical::pi;
 
-    Pstream::listCombineGather(pDash, plusEqOp<scalar>());
-    Pstream::broadcast(pDash);
+    Pstream::listCombineAllGather(pDash, plusEqOp<scalar>());
 
     if (surfaceWriterPtr_)
     {

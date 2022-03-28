@@ -1018,13 +1018,11 @@ bool Foam::polyBoundaryMesh::checkParallelSync(const bool report) const
 
     List<wordList> allNames(Pstream::nProcs());
     allNames[Pstream::myProcNo()] = names;
-    Pstream::gatherList(allNames);
-    Pstream::scatterList(allNames);
+    Pstream::allGatherList(allNames);
 
     List<wordList> allTypes(Pstream::nProcs());
     allTypes[Pstream::myProcNo()] = types;
-    Pstream::gatherList(allTypes);
-    Pstream::scatterList(allTypes);
+    Pstream::allGatherList(allTypes);
 
     // Have every processor check but print error on master
     // (in processor sequence).

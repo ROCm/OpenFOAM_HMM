@@ -286,7 +286,7 @@ Foam::parLagrangianRedistributor::redistributeLagrangianPositions
         nsTransPs[sendProcI] = subMap[sendProcI].size();
     }
     // Send sizes across. Note: blocks.
-    combineReduce(sizes, Pstream::listEq());
+    Pstream::combineAllGather(sizes, Pstream::listEq());
 
     labelListList constructMap(Pstream::nProcs());
     label constructSize = 0;

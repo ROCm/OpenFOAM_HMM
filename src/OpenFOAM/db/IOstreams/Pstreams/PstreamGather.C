@@ -118,19 +118,6 @@ void Foam::Pstream::gather
 }
 
 
-template<class T, class BinaryOp>
-void Foam::Pstream::gather
-(
-    T& value,
-    const BinaryOp& bop,
-    const int tag,
-    const label comm
-)
-{
-    gather(UPstream::whichCommunication(comm), value, bop, tag, comm);
-}
-
-
 template<class T>
 void Foam::Pstream::scatter
 (
@@ -211,6 +198,19 @@ void Foam::Pstream::scatter
         }
     }
     #endif
+}
+
+
+template<class T, class BinaryOp>
+void Foam::Pstream::gather
+(
+    T& value,
+    const BinaryOp& bop,
+    const int tag,
+    const label comm
+)
+{
+    Pstream::gather(UPstream::whichCommunication(comm), value, bop, tag, comm);
 }
 
 

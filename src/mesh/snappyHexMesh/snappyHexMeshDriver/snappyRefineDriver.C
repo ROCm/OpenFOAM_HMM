@@ -3247,12 +3247,9 @@ void Foam::snappyRefineDriver::deleteSmallRegions
         nCellsPerRegion[regioni]++;
         nCellsPerZone[zonei]++;
     }
-    Pstream::listCombineGather(nCellsPerRegion, plusEqOp<label>());
-    Pstream::listCombineGather(regionToZone, maxEqOp<label>());
-    Pstream::listCombineGather(nCellsPerZone, plusEqOp<label>());
-    Pstream::broadcast(nCellsPerRegion);
-    Pstream::broadcast(regionToZone);
-    Pstream::broadcast(nCellsPerZone);
+    Pstream::listCombineAllGather(nCellsPerRegion, plusEqOp<label>());
+    Pstream::listCombineAllGather(regionToZone, maxEqOp<label>());
+    Pstream::listCombineAllGather(nCellsPerZone, plusEqOp<label>());
 
 
     // Mark small regions. Note that all processors have the same information

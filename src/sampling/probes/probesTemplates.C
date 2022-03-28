@@ -225,8 +225,7 @@ Foam::probes::sample(const VolumeField<Type>& vField) const
         }
     }
 
-    Pstream::listCombineGather(values, isNotEqOp<Type>());
-    Pstream::broadcast(values);
+    Pstream::listCombineAllGather(values, isNotEqOp<Type>());
 
     return tvalues;
 }
@@ -249,8 +248,7 @@ Foam::probes::sample(const SurfaceField<Type>& sField) const
         }
     }
 
-    Pstream::listCombineGather(values, isNotEqOp<Type>());
-    Pstream::broadcast(values);
+    Pstream::listCombineAllGather(values, isNotEqOp<Type>());
 
     return tvalues;
 }

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -713,8 +713,7 @@ void Foam::backgroundMeshDecomposition::buildPatchAndTree()
     // Give the bounds of every processor to every other processor
     allBackgroundMeshBounds_[Pstream::myProcNo()] = overallBb;
 
-    Pstream::gatherList(allBackgroundMeshBounds_);
-    Pstream::scatterList(allBackgroundMeshBounds_);
+    Pstream::allGatherList(allBackgroundMeshBounds_);
 
     // find global bounding box
     globalBackgroundBounds_ = treeBoundBox(boundBox::invertedBox);

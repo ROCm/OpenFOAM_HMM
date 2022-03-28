@@ -129,12 +129,13 @@ public:
 
     // Static Functions
 
-        // Broadcast
+    // Broadcast
 
         //- Broadcast buffer or string content to all processes in communicator
         using UPstream::broadcast;
 
-        //- Generic broadcast using streams to serialize/de-serialize
+        //- Generic broadcast using streams to serialize/de-serialize.
+        //  Not normally used directly.
         template<class T>
         static void genericBroadcast
         (
@@ -178,125 +179,232 @@ public:
         );
 
 
-        // Gather
+    // Gather
 
-            //- Gather data.
-            //- Apply \c bop to combine \c value from different processors
-            template<class T, class BinaryOp>
-            static void gather
-            (
-                const List<commsStruct>& comms,
-                T& value,
-                const BinaryOp& bop,
-                const int tag,
-                const label comm
-            );
+        //- Gather (reduce) data, appyling \c bop to combine \c value
+        //- from different processors. The basis for Foam::reduce().
+        //  Uses the specified communication schedule.
+        template<class T, class BinaryOp>
+        static void gather
+        (
+            const List<commsStruct>& comms,
+            T& value,
+            const BinaryOp& bop,
+            const int tag,
+            const label comm
+        );
 
-            //- Like above but switches between linear/tree communication
-            template<class T, class BinaryOp>
-            static void gather
-            (
-                T& value,
-                const BinaryOp& bop,
-                const int tag = UPstream::msgType(),
-                const label comm = UPstream::worldComm
-            );
-
-
-        // Gather/combine data
-        // Inplace combine values from processors.
-        // (Uses construct from Istream instead of <<)
-
-            template<class T, class CombineOp>
-            static void combineGather
-            (
-                const List<commsStruct>& comms,
-                T& value,
-                const CombineOp& cop,
-                const int tag,
-                const label comm
-            );
-
-            //- Like above but switches between linear/tree communication
-            template<class T, class CombineOp>
-            static void combineGather
-            (
-                T& value,
-                const CombineOp& cop,
-                const int tag = UPstream::msgType(),
-                const label comm = UPstream::worldComm
-            );
+        //- Gather (reduce) data, applying \c bop to combine \c value
+        //- from different processors. The basis for Foam::reduce().
+        //  Uses linear/tree communication.
+        template<class T, class BinaryOp>
+        static void gather
+        (
+            T& value,
+            const BinaryOp& bop,
+            const int tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm
+        );
 
 
-        // Combine variants working on whole List at a time.
+    // Gather/combine data
+    // Inplace combine values from processors.
+    // (Uses construct from Istream instead of <<)
 
-            template<class T, class CombineOp>
-            static void listCombineGather
-            (
-                const List<commsStruct>& comms,
-                List<T>& value,
-                const CombineOp& cop,
-                const int tag,
-                const label comm
-            );
+        //- Gather data, applying \c cop to inplace combine \c value
+        //- from different processors.
+        //  Uses the specified communication schedule.
+        template<class T, class CombineOp>
+        static void combineGather
+        (
+            const List<commsStruct>& comms,
+            T& value,
+            const CombineOp& cop,
+            const int tag,
+            const label comm
+        );
 
-            //- Like above but switches between linear/tree communication
-            template<class T, class CombineOp>
-            static void listCombineGather
-            (
-                List<T>& values,
-                const CombineOp& cop,
-                const int tag = UPstream::msgType(),
-                const label comm = UPstream::worldComm
-            );
+        //- Gather data, applying \c cop to inplace combine \c value
+        //- from different processors.
+        //  Uses linear/tree communication.
+        template<class T, class CombineOp>
+        static void combineGather
+        (
+            T& value,
+            const CombineOp& cop,
+            const int tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm
+        );
+
+        //- Gather data, applying \c cop to inplace combine \c value
+        //- from different processors.
+        //- After completion all processors have the same data.
+        //  Uses the specified communication schedule.
+        //  Wraps combineGather/broadcast (may change in the future).
+        template<class T, class CombineOp>
+        static void combineAllGather
+        (
+            const List<commsStruct>& comms,
+            T& value,
+            const CombineOp& cop,
+            const int tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm
+        );
+
+        //- Gather data, applying \c cop to inplace combine \c value
+        //- from different processors.
+        //- After completion all processors have the same data.
+        //  Uses linear/tree communication.
+        //  Wraps combineGather/broadcast (may change in the future).
+        template<class T, class CombineOp>
+        static void combineAllGather
+        (
+            T& value,
+            const CombineOp& cop,
+            const int tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm
+        );
 
 
-        // Combine variants working on whole map at a time.
-        // Container needs iterators, find() and insert methods defined.
+    // Combine variants working on whole List at a time.
 
-            template<class Container, class CombineOp>
-            static void mapCombineGather
-            (
-                const List<commsStruct>& comms,
-                Container& values,
-                const CombineOp& cop,
-                const int tag,
-                const label comm
-            );
+        template<class T, class CombineOp>
+        static void listCombineGather
+        (
+            const List<commsStruct>& comms,
+            List<T>& values,
+            const CombineOp& cop,
+            const int tag,
+            const label comm
+        );
 
-            //- Like above but switches between linear/tree communication
-            template<class Container, class CombineOp>
-            static void mapCombineGather
-            (
-                Container& values,
-                const CombineOp& cop,
-                const int tag = UPstream::msgType(),
-                const label comm = UPstream::worldComm
-            );
+        //- Like above but switches between linear/tree communication
+        template<class T, class CombineOp>
+        static void listCombineGather
+        (
+            List<T>& values,
+            const CombineOp& cop,
+            const int tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm
+        );
+
+        //- After completion all processors have the same data.
+        template<class T, class CombineOp>
+        static void listCombineAllGather
+        (
+            const List<commsStruct>& comms,
+            List<T>& values,
+            const CombineOp& cop,
+            const int tag,
+            const label comm
+        );
+
+        //- After completion all processors have the same data.
+        template<class T, class CombineOp>
+        static void listCombineAllGather
+        (
+            List<T>& values,
+            const CombineOp& cop,
+            const int tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm
+        );
 
 
-        // Gather/scatter keeping the individual processor data separate.
-        // The values is a List of size UPstream::nProcs() where
-        // values[UPstream::myProcNo()] is the data for the current processor.
+    // Combine variants working on whole map at a time.
+    // Container needs iterators, find() and insert methods defined.
 
-            //- Gather data but keep individual values separate
-            template<class T>
-            static void gatherList
-            (
-                const List<commsStruct>& comms,
-                List<T>& values,
-                const int tag,
-                const label comm
-            );
+        template<class Container, class CombineOp>
+        static void mapCombineGather
+        (
+            const List<commsStruct>& comms,
+            Container& values,
+            const CombineOp& cop,
+            const int tag,
+            const label comm
+        );
 
-            //- Like above but switches between linear/tree communication
-            template<class T>
-            static void gatherList
-            (
-                List<T>& values,
-                const int tag = UPstream::msgType(),
-                const label comm = UPstream::worldComm
-            );
+        //- Like above but switches between linear/tree communication
+        template<class Container, class CombineOp>
+        static void mapCombineGather
+        (
+            Container& values,
+            const CombineOp& cop,
+            const int tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm
+        );
+
+
+        //- After completion all processors have the same data.
+        template<class Container, class CombineOp>
+        static void mapCombineAllGather
+        (
+            const List<commsStruct>& comms,
+            Container& values,
+            const CombineOp& cop,
+            const int tag,
+            const label comm
+        );
+
+        //- After completion all processors have the same data.
+        template<class Container, class CombineOp>
+        static void mapCombineAllGather
+        (
+            Container& values,
+            const CombineOp& cop,
+            const int tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm
+        );
+
+
+    // Gather/scatter keeping the individual processor data separate.
+    // The values is a List of size UPstream::nProcs() where
+    // values[UPstream::myProcNo()] is the data for the current processor.
+
+        //- Gather data, but keep individual values separate.
+        //- Uses the specified communication schedule.
+        template<class T>
+        static void gatherList
+        (
+            const List<commsStruct>& comms,
+            List<T>& values,
+            const int tag,
+            const label comm
+        );
+
+        //- Gather data, but keep individual values separate.
+        //- Uses linear/tree communication.
+        template<class T>
+        static void gatherList
+        (
+            List<T>& values,
+            const int tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm
+        );
+
+        //- Gather data, but keep individual values separate.
+        //- Uses the specified communication schedule.
+        //  After completion all processors have the same data.
+        //  Wraps gatherList/scatterList (may change in the future).
+        template<class T>
+        static void allGatherList
+        (
+            const List<commsStruct>& comms,
+            List<T>& values,
+            const int tag,
+            const label comm
+        );
+
+        //- Gather data, but keep individual values separate.
+        //- Uses linear/tree communication.
+        //  After completion all processors have the same data.
+        //  Wraps gatherList/scatterList (may change in the future).
+        template<class T>
+        static void allGatherList
+        (
+            List<T>& values,
+            const int tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm
+        );
 
 
         // Scatter

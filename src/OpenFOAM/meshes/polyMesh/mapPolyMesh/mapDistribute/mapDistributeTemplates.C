@@ -27,7 +27,6 @@ License
 
 #include "Pstream.H"
 #include "PstreamBuffers.H"
-#include "PstreamCombineReduceOps.H"
 #include "globalIndexAndTransform.H"
 #include "transformField.H"
 #include "flipOp.H"

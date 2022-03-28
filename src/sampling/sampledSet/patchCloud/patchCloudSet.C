@@ -154,9 +154,8 @@ void Foam::patchCloudSet::calcSamples
     }
 
 
-    // Find nearest.
-    Pstream::listCombineGather(nearest, mappedPatchBase::nearestEqOp());
-    Pstream::broadcast(nearest);
+    // Find nearest - globally consistent
+    Pstream::listCombineAllGather(nearest, mappedPatchBase::nearestEqOp());
 
 
     if (debug && Pstream::master())

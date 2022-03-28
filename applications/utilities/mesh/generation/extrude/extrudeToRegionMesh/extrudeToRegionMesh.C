@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -661,11 +661,8 @@ void countExtrudePatches
     }
     // Synchronise decision. Actual numbers are not important, just make
     // sure that they're > 0 on all processors.
-    Pstream::listCombineGather(zoneSidePatch, plusEqOp<label>());
-    Pstream::listCombineGather(zoneZonePatch, plusEqOp<label>());
-
-    Pstream::broadcast(zoneSidePatch);
-    Pstream::broadcast(zoneZonePatch);
+    Pstream::listCombineAllGather(zoneSidePatch, plusEqOp<label>());
+    Pstream::listCombineAllGather(zoneZonePatch, plusEqOp<label>());
 }
 
 
@@ -1465,8 +1462,7 @@ int main(int argc, char *argv[])
     {
         List<wordList> allNames(Pstream::nProcs());
         allNames[Pstream::myProcNo()] = mesh.boundaryMesh().names();
-        Pstream::gatherList(allNames);
-        Pstream::scatterList(allNames);
+        Pstream::allGatherList(allNames);
 
         FatalErrorInFunction
             << "Patches are not synchronised on all processors."
@@ -1858,8 +1854,7 @@ int main(int argc, char *argv[])
     const primitiveFacePatch extrudePatch(std::move(zoneFaces), mesh.points());
 
 
-    Pstream::listCombineGather(isInternal, orEqOp<bool>());
-    Pstream::broadcast(isInternal);
+    Pstream::listCombineAllGather(isInternal, orEqOp<bool>());
 
     // Check zone either all internal or all external faces
     checkZoneInside(mesh, zoneNames, zoneID, extrudeMeshFaces, isInternal);
@@ -2320,8 +2315,7 @@ int main(int argc, char *argv[])
         }
 
         // Reduce
-        Pstream::mapCombineGather(globalSum, plusEqOp<point>());
-        Pstream::broadcast(globalSum);
+        Pstream::mapCombineAllGather(globalSum, plusEqOp<point>());
 
         forAll(localToGlobalRegion, localRegionI)
         {

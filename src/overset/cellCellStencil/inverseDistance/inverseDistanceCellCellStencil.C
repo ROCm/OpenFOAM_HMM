@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1151,8 +1151,7 @@ void Foam::cellCellStencils::inverseDistance::findHoles
     {
         // Synchronise region status on processors
         // (could instead swap status through processor patches)
-        Pstream::listCombineGather(regionType, maxEqOp<label>());
-        Pstream::broadcast(regionType);
+        Pstream::listCombineAllGather(regionType, maxEqOp<label>());
 
         DebugInfo<< FUNCTION_NAME << " : Gathered region type" << endl;
 
@@ -1756,12 +1755,9 @@ bool Foam::cellCellStencils::inverseDistance::update()
     {
         nCellsPerZone[zoneID[cellI]]++;
     }
-    Pstream::listCombineGather(nCellsPerZone, plusEqOp<label>());
-    Pstream::broadcast(nCellsPerZone);
-
+    Pstream::listCombineAllGather(nCellsPerZone, plusEqOp<label>());
 
     const boundBox& allBb(mesh_.bounds());
-
 
     PtrList<fvMeshSubset> meshParts(nZones);
     List<treeBoundBoxList> meshBb(nZones);
@@ -1803,8 +1799,7 @@ bool Foam::cellCellStencils::inverseDistance::update()
             }
         }
 
-        Pstream::gatherList(procBb);
-        Pstream::scatterList(procBb);
+        Pstream::allGatherList(procBb);
 
         // Move local bounding boxes to per-mesh indexing
         forAll(meshBb, zoneI)

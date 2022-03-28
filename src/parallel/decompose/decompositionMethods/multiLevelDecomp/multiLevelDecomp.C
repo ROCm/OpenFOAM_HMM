@@ -418,8 +418,12 @@ void Foam::multiLevelDecomp::decompose
             );
 
             label nPoints = returnReduce(domainPoints.size(), sumOp<label>());
-            Pstream::listCombineGather(nOutsideConnections, plusEqOp<label>());
-            Pstream::broadcast(nOutsideConnections);
+
+            Pstream::listCombineAllGather
+            (
+                nOutsideConnections,
+                plusEqOp<label>()
+            );
             label nPatches = 0;
             label nFaces = 0;
             for (const label nConnect : nOutsideConnections)
@@ -526,12 +530,11 @@ void Foam::multiLevelDecomp::decompose
                 }
 
                 reduce(nPoints, sumOp<label>());
-                Pstream::listCombineGather
+                Pstream::listCombineAllGather
                 (
                     nOutsideConnections,
                     plusEqOp<label>()
                 );
-                Pstream::broadcast(nOutsideConnections);
 
                 label nPatches = 0;
                 label nFaces = 0;

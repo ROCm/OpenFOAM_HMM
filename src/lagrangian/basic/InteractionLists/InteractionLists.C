@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,9 +58,7 @@ void Foam::InteractionLists<ParticleType>::buildInteractionLists()
 
     allExtendedProcBbs[Pstream::myProcNo()] = extendedProcBb;
 
-    Pstream::gatherList(allExtendedProcBbs);
-
-    Pstream::scatterList(allExtendedProcBbs);
+    Pstream::allGatherList(allExtendedProcBbs);
 
     List<treeBoundBox> extendedProcBbsInRange;
     List<label> extendedProcBbsTransformIndex;

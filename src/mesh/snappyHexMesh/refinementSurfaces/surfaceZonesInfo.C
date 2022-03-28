@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2015 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -485,8 +485,7 @@ Foam::labelList Foam::surfaceZonesInfo::addCellZonesToMesh
     // Check they are synced
     List<wordList> allCellZones(Pstream::nProcs());
     allCellZones[Pstream::myProcNo()] = mesh.cellZones().names();
-    Pstream::gatherList(allCellZones);
-    Pstream::scatterList(allCellZones);
+    Pstream::allGatherList(allCellZones);
 
     for (label proci = 1; proci < allCellZones.size(); proci++)
     {
@@ -646,8 +645,7 @@ Foam::labelListList Foam::surfaceZonesInfo::addFaceZonesToMesh
     // Check they are synced
     List<wordList> allFaceZones(Pstream::nProcs());
     allFaceZones[Pstream::myProcNo()] = faceZones.names();
-    Pstream::gatherList(allFaceZones);
-    Pstream::scatterList(allFaceZones);
+    Pstream::allGatherList(allFaceZones);
 
     for (label proci = 1; proci < allFaceZones.size(); proci++)
     {

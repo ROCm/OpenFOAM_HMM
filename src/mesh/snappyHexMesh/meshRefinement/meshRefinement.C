@@ -1953,8 +1953,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
             labelList nProcCells(distributor.countCells(distribution));
             Pout<< "Wanted distribution:" << nProcCells << endl;
 
-            Pstream::listCombineGather(nProcCells, plusEqOp<label>());
-            Pstream::broadcast(nProcCells);
+            Pstream::listCombineAllGather(nProcCells, plusEqOp<label>());
 
             Pout<< "Wanted resulting decomposition:" << endl;
             forAll(nProcCells, proci)
@@ -2210,24 +2209,25 @@ void Foam::meshRefinement::checkCoupledFaceZones(const polyMesh& mesh)
     {
         List<wordList> zoneNames(Pstream::nProcs());
         zoneNames[Pstream::myProcNo()] = fZones.names();
-        Pstream::gatherList(zoneNames);
-        Pstream::scatterList(zoneNames);
+        Pstream::allGatherList(zoneNames);
+
         // All have same data now. Check.
         forAll(zoneNames, proci)
         {
-            if (proci != Pstream::myProcNo())
+            if
+            (
+                proci != Pstream::myProcNo()
+             && (zoneNames[proci] != zoneNames[Pstream::myProcNo()])
+            )
             {
-                if (zoneNames[proci] != zoneNames[Pstream::myProcNo()])
-                {
-                    FatalErrorInFunction
-                        << "faceZones are not synchronised on processors." << nl
-                        << "Processor " << proci << " has faceZones "
-                        << zoneNames[proci] << nl
-                        << "Processor " << Pstream::myProcNo()
-                        << " has faceZones "
-                        << zoneNames[Pstream::myProcNo()] << nl
-                        << exit(FatalError);
-                }
+                FatalErrorInFunction
+                    << "faceZones are not synchronised on processors." << nl
+                    << "Processor " << proci << " has faceZones "
+                    << zoneNames[proci] << nl
+                    << "Processor " << Pstream::myProcNo()
+                    << " has faceZones "
+                    << zoneNames[Pstream::myProcNo()] << nl
+                    << exit(FatalError);
             }
         }
     }

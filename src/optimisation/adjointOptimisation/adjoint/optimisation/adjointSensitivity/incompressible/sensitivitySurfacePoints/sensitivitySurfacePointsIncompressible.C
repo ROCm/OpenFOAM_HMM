@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2020 PCOpt/NTUA
     Copyright (C) 2013-2020 FOSS GP
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -715,8 +715,7 @@ void sensitivitySurfacePoints::assembleSensitivities()
                 patchScalarSens[3*ptI + 2] =
                     wallPointSensNormalVecPtr_()[patchI][ptI].z();
             }
-            Pstream::gatherList(procPatchSens);
-            Pstream::scatterList(procPatchSens);
+            Pstream::allGatherList(procPatchSens);
 
             forAll(procPatchSens, procI)
             {

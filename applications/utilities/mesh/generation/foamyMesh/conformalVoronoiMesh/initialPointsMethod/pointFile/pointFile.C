@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -142,10 +142,7 @@ Foam::List<Vb::Point> Foam::pointFile::initialPoints() const
             List<boolList> allProcPt(Pstream::nProcs());
 
             allProcPt[Pstream::myProcNo()] = procPt;
-
-            Pstream::gatherList(allProcPt);
-
-            Pstream::scatterList(allProcPt);
+            Pstream::allGatherList(allProcPt);
 
             forAll(procPt, ptI)
             {

@@ -84,11 +84,8 @@ void Foam::cloudSet::calcSamples
             minFoundProc[i] = foundProc[i];
         }
     }
-    Pstream::listCombineGather(minFoundProc, minEqOp<label>());
-    Pstream::listCombineGather(maxFoundProc, maxEqOp<label>());
-
-    Pstream::broadcast(minFoundProc);
-    Pstream::broadcast(maxFoundProc);
+    Pstream::listCombineAllGather(minFoundProc, minEqOp<label>());
+    Pstream::listCombineAllGather(maxFoundProc, maxEqOp<label>());
 
 
     DynamicField<point> missingPoints(sampleCoords_.size());

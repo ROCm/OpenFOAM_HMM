@@ -28,7 +28,6 @@ License
 
 #include "globalMeshData.H"
 #include "Pstream.H"
-#include "PstreamCombineReduceOps.H"
 #include "processorPolyPatch.H"
 #include "globalPoints.H"
 #include "polyMesh.H"
@@ -1926,8 +1925,8 @@ Foam::pointField Foam::globalMeshData::geometricSharedPoints() const
     // Get coords of my shared points
     pointField sharedPoints(mesh_.points(), sharedPointLabels());
 
-    // Append from all processors
-    combineReduce(sharedPoints, ListOps::appendEqOp<point>());
+    // Append from all processors, globally consistent
+    Pstream::combineAllGather(sharedPoints, ListOps::appendEqOp<point>());
 
     // Merge tolerance
     scalar tolDim = matchTol_ * mesh_.bounds().mag();

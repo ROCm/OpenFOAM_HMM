@@ -266,11 +266,8 @@ bool Foam::areaWrite::write()
             selected = areaMesh.thisDb().classes(fieldSelection_);
         }
 
-        if (Pstream::parRun())
-        {
-            Pstream::mapCombineGather(selected, HashSetOps::plusEqOp<word>());
-            Pstream::broadcast(selected);
-        }
+        // Parallel consistency (no-op in serial)
+        Pstream::mapCombineAllGather(selected, HashSetOps::plusEqOp<word>());
 
         missed.clear();
 

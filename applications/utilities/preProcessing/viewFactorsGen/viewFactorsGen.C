@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -456,12 +456,9 @@ int main(int argc, char *argv[])
     remoteCoarseSf[Pstream::myProcNo()] = localCoarseSf;
     remoteCoarseAgg[Pstream::myProcNo()] = localAgg;
 
-    Pstream::gatherList(remoteCoarseCf);
-    Pstream::scatterList(remoteCoarseCf);
-    Pstream::gatherList(remoteCoarseSf);
-    Pstream::scatterList(remoteCoarseSf);
-    Pstream::gatherList(remoteCoarseAgg);
-    Pstream::scatterList(remoteCoarseAgg);
+    Pstream::allGatherList(remoteCoarseCf);
+    Pstream::allGatherList(remoteCoarseSf);
+    Pstream::allGatherList(remoteCoarseAgg);
 
 
     globalIndex globalNumbering(nCoarseFaces);

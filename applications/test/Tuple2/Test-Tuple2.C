@@ -39,7 +39,7 @@ Description
 #include "List.H"
 #include "ListOps.H"
 #include "ops.H"
-#include "PstreamCombineReduceOps.H"
+#include "Pstream.H"
 #include <functional>
 
 using namespace Foam;
@@ -138,8 +138,8 @@ int main()
             maxFirstEqOp<label>()(maxIndexed, item);
         }
 
-        Foam::combineReduce(minIndexed, minFirstEqOp<label>());
-        Foam::combineReduce(maxIndexed, maxFirstEqOp<label>());
+        Pstream::combineAllGather(minIndexed, minFirstEqOp<label>());
+        Pstream::combineAllGather(maxIndexed, maxFirstEqOp<label>());
 
         Info<< "Min indexed: " << minIndexed << nl
             << "Max indexed: " << maxIndexed << nl;
@@ -156,8 +156,8 @@ int main()
             maxIndexed = maxFirstOp<label>()(maxIndexed, item);
         }
 
-        Foam::combineReduce(minIndexed, minFirstEqOp<label>());
-        Foam::combineReduce(maxIndexed, maxFirstEqOp<label>());
+        Pstream::combineAllGather(minIndexed, minFirstEqOp<label>());
+        Pstream::combineAllGather(maxIndexed, maxFirstEqOp<label>());
 
         Info<< "Min indexed: " << minIndexed << nl
             << "Max indexed: " << maxIndexed << nl;

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -157,8 +157,7 @@ bool Foam::DistributedDelaunayMesh<Triangulation>::distributeBoundBoxes
     // Give the bounds of every processor to every other processor
     allBackgroundMeshBounds_()[Pstream::myProcNo()] = bb;
 
-    Pstream::gatherList(allBackgroundMeshBounds_());
-    Pstream::scatterList(allBackgroundMeshBounds_());
+    Pstream::allGatherList(allBackgroundMeshBounds_());
 
     return true;
 }

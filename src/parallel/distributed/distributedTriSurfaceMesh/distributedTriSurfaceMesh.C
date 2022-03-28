@@ -323,7 +323,7 @@ Foam::word Foam::distributedTriSurfaceMesh::findLocalInstance
 bool Foam::distributedTriSurfaceMesh::read()
 {
     // Get bb of all domains.
-    procBb_.setSize(Pstream::nProcs());
+    procBb_.resize_nocopy(Pstream::nProcs());
 
     if (dict_.empty())
     {
@@ -334,8 +334,6 @@ bool Foam::distributedTriSurfaceMesh::read()
 
         procBb_[Pstream::myProcNo()] =
             treeBoundBoxList(1, treeBoundBox(localBb));
-        Pstream::gatherList(procBb_);
-        Pstream::scatterList(procBb_);
 
         dict_.add("bounds", procBb_[Pstream::myProcNo()]);
 
@@ -372,8 +370,6 @@ bool Foam::distributedTriSurfaceMesh::read()
     else
     {
         dict_.readEntry("bounds", procBb_[Pstream::myProcNo()]);
-        Pstream::gatherList(procBb_);
-        Pstream::scatterList(procBb_);
 
         // Wanted distribution type
         distType_ = distributionTypeNames_.get("distributionType", dict_);
@@ -391,6 +387,8 @@ bool Foam::distributedTriSurfaceMesh::read()
             volumeType::UNKNOWN
         );
     }
+
+    Pstream::allGatherList(procBb_);
 
     return true;
 }
@@ -4603,8 +4601,7 @@ Foam::distributedTriSurfaceMesh::localQueries
     {
         sendSizes[Pstream::myProcNo()][proci] = sendMap[proci].size();
     }
-    Pstream::gatherList(sendSizes);
-    Pstream::scatterList(sendSizes);
+    Pstream::allGatherList(sendSizes);
 
 
     // Determine receive map
@@ -4690,16 +4687,11 @@ void Foam::distributedTriSurfaceMesh::distribute
     {
         List<List<treeBoundBox>> newProcBb(Pstream::nProcs());
 
-        switch(distType_)
+        switch (distType_)
         {
             case FOLLOW:
-                newProcBb[Pstream::myProcNo()].setSize(bbs.size());
-                forAll(bbs, i)
-                {
-                    newProcBb[Pstream::myProcNo()][i] = bbs[i];
-                }
-                Pstream::gatherList(newProcBb);
-                Pstream::scatterList(newProcBb);
+                newProcBb[Pstream::myProcNo()] = bbs;
+                Pstream::allGatherList(newProcBb);
             break;
 
             case INDEPENDENT:

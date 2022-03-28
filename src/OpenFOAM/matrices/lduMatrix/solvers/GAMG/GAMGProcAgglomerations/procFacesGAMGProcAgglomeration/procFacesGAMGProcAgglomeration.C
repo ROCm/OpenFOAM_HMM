@@ -81,8 +81,7 @@ Foam::procFacesGAMGProcAgglomeration::singleCellMesh
         }
     }
 
-    Pstream::gatherList(procFaces, Pstream::msgType(), mesh.comm());
-    Pstream::scatterList(procFaces, Pstream::msgType(), mesh.comm());
+    Pstream::allGatherList(procFaces, Pstream::msgType(), mesh.comm());
 
     autoPtr<lduPrimitiveMesh> singleCellMeshPtr;
 

@@ -111,15 +111,10 @@ void Foam::patchInjectionBase::updateMesh(const polyMesh& mesh)
         }
     }
 
-    forAll(sumTriMagSf_, i)
-    {
-        sumTriMagSf_[i] = 0.0;
-    }
-
+    sumTriMagSf_ = Zero;
     sumTriMagSf_[Pstream::myProcNo() + 1] = sum(triMagSf);
 
-    Pstream::listCombineGather(sumTriMagSf_, maxEqOp<scalar>());
-    Pstream::broadcast(sumTriMagSf_);
+    Pstream::listCombineAllGather(sumTriMagSf_, maxEqOp<scalar>());
 
     for (label i = 1; i < triMagSf.size(); i++)
     {

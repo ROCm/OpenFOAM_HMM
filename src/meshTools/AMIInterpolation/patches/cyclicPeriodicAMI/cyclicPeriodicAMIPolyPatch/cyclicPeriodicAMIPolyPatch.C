@@ -131,13 +131,11 @@ void Foam::cyclicPeriodicAMIPolyPatch::syncTransforms() const
                 // Sync a list of separation vectors
                 List<vectorField> sep(Pstream::nProcs());
                 sep[Pstream::myProcNo()] = periodicPatch.separation();
-                Pstream::gatherList(sep);
-                Pstream::scatterList(sep);
+                Pstream::allGatherList(sep);
 
                 List<boolList> coll(Pstream::nProcs());
                 coll[Pstream::myProcNo()] = periodicPatch.collocated();
-                Pstream::gatherList(coll);
-                Pstream::scatterList(coll);
+                Pstream::allGatherList(coll);
 
                 // If locally we have zero faces pick the first one that has a
                 // separation vector
@@ -166,13 +164,11 @@ void Foam::cyclicPeriodicAMIPolyPatch::syncTransforms() const
                 // Sync a list of forward and reverse transforms
                 List<tensorField> forwardT(Pstream::nProcs());
                 forwardT[Pstream::myProcNo()] = periodicPatch.forwardT();
-                Pstream::gatherList(forwardT);
-                Pstream::scatterList(forwardT);
+                Pstream::allGatherList(forwardT);
 
                 List<tensorField> reverseT(Pstream::nProcs());
                 reverseT[Pstream::myProcNo()] = periodicPatch.reverseT();
-                Pstream::gatherList(reverseT);
-                Pstream::scatterList(reverseT);
+                Pstream::allGatherList(reverseT);
 
                 // If locally we have zero faces pick the first one that has a
                 // transformation vector

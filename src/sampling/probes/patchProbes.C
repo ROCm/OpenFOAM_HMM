@@ -165,9 +165,8 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
     }
 
 
-    // Find nearest.
-    Pstream::listCombineGather(nearest, mappedPatchBase::nearestEqOp());
-    Pstream::broadcast(nearest);
+    // Find nearest - globally consistent
+    Pstream::listCombineAllGather(nearest, mappedPatchBase::nearestEqOp());
 
     oldPoints_.resize(this->size());
 

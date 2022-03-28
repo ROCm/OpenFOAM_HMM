@@ -287,8 +287,7 @@ bool setFaceFieldType
             }
         }
 
-        Pstream::listCombineGather(nChanged, plusEqOp<label>());
-        Pstream::broadcast(nChanged);
+        Pstream::listCombineAllGather(nChanged, plusEqOp<label>());
 
         auto& fieldBf = field.boundaryFieldRef();
 

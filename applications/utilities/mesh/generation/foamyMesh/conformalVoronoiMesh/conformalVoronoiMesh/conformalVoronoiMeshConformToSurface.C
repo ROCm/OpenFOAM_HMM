@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -692,11 +692,8 @@ Foam::label Foam::conformalVoronoiMesh::synchroniseSurfaceTrees
     );
 
     List<pointIndexHitAndFeatureDynList> procSurfLocations(Pstream::nProcs());
-
     procSurfLocations[Pstream::myProcNo()] = surfaceHits;
-
-    Pstream::gatherList(procSurfLocations);
-    Pstream::scatterList(procSurfLocations);
+    Pstream::allGatherList(procSurfLocations);
 
     List<labelHashSet> hits(Pstream::nProcs());
 
@@ -732,8 +729,7 @@ Foam::label Foam::conformalVoronoiMesh::synchroniseSurfaceTrees
         }
     }
 
-    Pstream::listCombineGather(hits, plusEqOp<labelHashSet>());
-    Pstream::broadcast(hits);
+    Pstream::listCombineAllGather(hits, plusEqOp<labelHashSet>());
 
     forAll(surfaceHits, eI)
     {
@@ -780,11 +776,8 @@ Foam::label Foam::conformalVoronoiMesh::synchroniseEdgeTrees
     );
 
     List<pointIndexHitAndFeatureDynList> procEdgeLocations(Pstream::nProcs());
-
     procEdgeLocations[Pstream::myProcNo()] = featureEdgeHits;
-
-    Pstream::gatherList(procEdgeLocations);
-    Pstream::scatterList(procEdgeLocations);
+    Pstream::allGatherList(procEdgeLocations);
 
     List<labelHashSet> hits(Pstream::nProcs());
 
@@ -823,8 +816,7 @@ Foam::label Foam::conformalVoronoiMesh::synchroniseEdgeTrees
         }
     }
 
-    Pstream::listCombineGather(hits, plusEqOp<labelHashSet>());
-    Pstream::broadcast(hits);
+    Pstream::listCombineAllGather(hits, plusEqOp<labelHashSet>());
 
     forAll(featureEdgeHits, eI)
     {

@@ -188,13 +188,6 @@ void Foam::Pstream::gatherList
 
 
 template<class T>
-void Foam::Pstream::gatherList(List<T>& values, const int tag, const label comm)
-{
-    gatherList(UPstream::whichCommunication(comm), values, tag, comm);
-}
-
-
-template<class T>
 void Foam::Pstream::scatterList
 (
     const List<UPstream::commsStruct>& comms,
@@ -325,6 +318,18 @@ void Foam::Pstream::scatterList
 
 
 template<class T>
+void Foam::Pstream::gatherList
+(
+    List<T>& values,
+    const int tag,
+    const label comm
+)
+{
+    Pstream::gatherList(UPstream::whichCommunication(comm), values, tag, comm);
+}
+
+
+template<class T>
 void Foam::Pstream::scatterList
 (
     List<T>& values,
@@ -332,7 +337,39 @@ void Foam::Pstream::scatterList
     const label comm
 )
 {
-    scatterList(UPstream::whichCommunication(comm), values, tag, comm);
+    Pstream::scatterList(UPstream::whichCommunication(comm), values, tag, comm);
+}
+
+
+template<class T>
+void Foam::Pstream::allGatherList
+(
+    const List<UPstream::commsStruct>& comms,
+    List<T>& values,
+    const int tag,
+    const label comm
+)
+{
+    Pstream::gatherList(comms, values, tag, comm);
+    Pstream::scatterList(comms, values, tag, comm);
+}
+
+
+template<class T>
+void Foam::Pstream::allGatherList
+(
+    List<T>& values,
+    const int tag,
+    const label comm
+)
+{
+    if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
+    {
+        const auto& comms = UPstream::whichCommunication(comm);
+
+        Pstream::gatherList(comms, values, tag, comm);
+        Pstream::scatterList(comms, values, tag, comm);
+    }
 }
 
 

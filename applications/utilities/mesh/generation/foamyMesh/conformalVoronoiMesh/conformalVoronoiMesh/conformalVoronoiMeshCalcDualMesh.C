@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1564,8 +1564,7 @@ Foam::label Foam::conformalVoronoiMesh::createPatchInfo
         }
 
         // Because the previous test was insufficient, combine the lists.
-        Pstream::gatherList(procUsedList);
-        Pstream::scatterList(procUsedList);
+        Pstream::allGatherList(procUsedList);
 
         forAll(procUsedList, proci)
         {

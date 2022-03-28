@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -500,13 +500,9 @@ void Foam::radiation::viewFactor::calculate()
             qrExt[compactGlobalIds[i]] = compactCoarseHo[i];
         }
 
-        Pstream::listCombineGather(T4, maxEqOp<scalar>());
-        Pstream::listCombineGather(E, maxEqOp<scalar>());
-        Pstream::listCombineGather(qrExt, maxEqOp<scalar>());
-
-        Pstream::broadcast(T4);
-        Pstream::broadcast(E);
-        Pstream::broadcast(qrExt);
+        Pstream::listCombineAllGather(T4, maxEqOp<scalar>());
+        Pstream::listCombineAllGather(E, maxEqOp<scalar>());
+        Pstream::listCombineAllGather(qrExt, maxEqOp<scalar>());
 
         if (Pstream::master())
         {

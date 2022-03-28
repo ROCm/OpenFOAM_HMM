@@ -118,11 +118,8 @@ Foam::IOobjectList Foam::sampledSurfaces::preCheckFields()
         selected = obr_.classes(fieldSelection_);
     }
 
-    if (Pstream::parRun())
-    {
-        Pstream::mapCombineGather(selected, HashSetOps::plusEqOp<word>());
-        Pstream::broadcast(selected);
-    }
+    // Parallel consistency (no-op in serial)
+    Pstream::mapCombineAllGather(selected, HashSetOps::plusEqOp<word>());
 
 
     DynamicList<label> missed(fieldSelection_.size());

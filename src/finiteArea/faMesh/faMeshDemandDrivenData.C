@@ -34,7 +34,6 @@ License
 #include "fac.H"
 #include "processorFaPatch.H"
 #include "wedgeFaPatch.H"
-#include "PstreamCombineReduceOps.H"
 #include "cartesianCS.H"
 #include "scalarMatrices.H"
 #include "processorFaPatchFields.H"
@@ -1146,7 +1145,7 @@ void Foam::faMesh::calcPointAreaNormals_orig(vectorField& result) const
             gpNormals[addr[i]] += spNormals[i];
         }
 
-        combineReduce(gpNormals, plusEqOp<vectorField>());
+        Pstream::combineAllGather(gpNormals, plusEqOp<vectorField>());
 
         // Extract local data
         forAll(addr, i)
@@ -1398,7 +1397,7 @@ void Foam::faMesh::calcPointAreaNormals(vectorField& result) const
             gpNormals[addr[i]] += spNormals[i];
         }
 
-        combineReduce(gpNormals, plusEqOp<vectorField>());
+        Pstream::combineAllGather(gpNormals, plusEqOp<vectorField>());
 
         // Extract local data
         forAll(addr, i)
@@ -1918,8 +1917,7 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit(vectorField& result) const
                 tol = 0.001*mag(bb.max() - bb.min());
             }
 
-            Pstream::gatherList(procLsPoints);
-            Pstream::scatterList(procLsPoints);
+            Pstream::allGatherList(procLsPoints);
 
             if (curSharedPointIndex != -1)
             {

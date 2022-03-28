@@ -713,9 +713,8 @@ void syncPoints
             sharedPts[pd.sharedPointAddr()[i]] = points[meshPointi];
         }
 
-        // Combine on master.
-        Pstream::listCombineGather(sharedPts, cop);
-        Pstream::broadcast(sharedPts);
+        // Combine - globally consistent
+        Pstream::listCombineAllGather(sharedPts, cop);
 
         // Now we will all have the same information. Merge it back with
         // my local information.

@@ -119,8 +119,7 @@ Foam::pointHistory::pointHistory
         }
     }
 
-    Pstream::gatherList(minDist);
-    Pstream::scatterList(minDist);
+    Pstream::allGatherList(minDist);
 
     processor_ = -1;
     scalar min = GREAT;

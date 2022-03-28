@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -106,8 +106,7 @@ Foam::labelList Foam::fileOperations::hostCollatedFileOperation::subRanks
 
         stringList hosts(Pstream::nProcs());
         hosts[Pstream::myProcNo()] = myHostName;
-        Pstream::gatherList(hosts);
-        Pstream::scatterList(hosts);
+        Pstream::allGatherList(hosts);
 
         // Collect procs with same hostname
         forAll(hosts, proci)

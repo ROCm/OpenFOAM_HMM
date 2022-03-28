@@ -120,8 +120,7 @@ void Foam::CellZoneInjection<CloudType>::setPositions
         globalPositions.localStart(Pstream::myProcNo())
     ) = positions;
 
-    Pstream::listCombineGather(allPositions, minEqOp<point>());
-    Pstream::broadcast(allPositions);
+    Pstream::listCombineAllGather(allPositions, minEqOp<point>());
 
     // Gather local cell tet and tet-point Ids, but leave non-local ids set -1
     SubList<label>

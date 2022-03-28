@@ -142,8 +142,7 @@ void Foam::regionModels::singleLayerRegion::initialise()
         }
     }
 
-    Pstream::listCombineGather(passivePatchIDs_, maxEqOp<label>());
-    Pstream::broadcast(passivePatchIDs_);
+    Pstream::listCombineAllGather(passivePatchIDs_, maxEqOp<label>());
 
     magSf.field() = 0.5*(magSf + passiveMagSf);
     magSf.correctBoundaryConditions();

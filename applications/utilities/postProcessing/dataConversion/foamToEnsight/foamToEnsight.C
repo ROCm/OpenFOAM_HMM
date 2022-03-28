@@ -122,7 +122,7 @@ Usage
 #include "IOobjectList.H"
 #include "IOmanip.H"
 #include "OFstream.H"
-#include "PstreamCombineReduceOps.H"
+#include "Pstream.H"
 #include "HashOps.H"
 #include "regionProperties.H"
 

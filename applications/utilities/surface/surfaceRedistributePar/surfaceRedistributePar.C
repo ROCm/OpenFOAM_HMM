@@ -198,8 +198,7 @@ int main(int argc, char *argv[])
                 boundBox(mesh.points(), false)
             ).extend(rndGen, 1e-3)
         );
-        Pstream::gatherList(meshBb);
-        Pstream::scatterList(meshBb);
+        Pstream::allGatherList(meshBb);
     }
 
     IOobject io

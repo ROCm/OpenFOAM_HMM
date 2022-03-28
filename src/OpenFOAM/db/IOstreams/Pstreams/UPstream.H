@@ -82,17 +82,17 @@ public:
         {
             // Private Data
 
-                //- procID of above processor
+                //- The procID of the processor directly above
                 label above_;
 
-                //- procIDs of processors directly below me
+                //- The procIDs of all processors directly below
                 labelList below_;
 
                 //- procIDs of all processors below (so not just directly below)
                 labelList allBelow_;
 
                 //- procIDs of all processors not below.
-                //  (inverse set of allBelow_ and minus myProcNo)
+                //  Inverse set of allBelow_ without myProcNo.
                 labelList allNotBelow_;
 
 
@@ -125,21 +125,27 @@ public:
 
             // Member Functions
 
+                //- The procID of the processor directly above
                 label above() const noexcept
                 {
                     return above_;
                 }
 
+                //- The procIDs of all processors directly below
                 const labelList& below() const noexcept
                 {
                     return below_;
                 }
 
+                //- The procIDs of all processors below
+                //- (so not just directly below)
                 const labelList& allBelow() const noexcept
                 {
                     return allBelow_;
                 }
 
+                //- The procIDs of all processors that are above.
+                //- The inverse set of allBelow without myProcNo.
                 const labelList& allNotBelow() const noexcept
                 {
                     return allNotBelow_;

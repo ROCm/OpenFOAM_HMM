@@ -202,8 +202,7 @@ void Foam::mappedPatchBase::collectSamples
         List<pointField> globalFc(nProcs);
         globalFc[myRank] = facePoints;
 
-        Pstream::gatherList(globalFc, Pstream::msgType(), myComm);
-        Pstream::scatterList(globalFc, Pstream::msgType(), myComm);
+        Pstream::allGatherList(globalFc, Pstream::msgType(), myComm);
 
         // Rework into straight list
         patchFc = ListListOps::combine<pointField>
@@ -216,8 +215,8 @@ void Foam::mappedPatchBase::collectSamples
     {
         List<pointField> globalSamples(nProcs);
         globalSamples[myRank] = samplePoints(facePoints);
-        Pstream::gatherList(globalSamples, Pstream::msgType(), myComm);
-        Pstream::scatterList(globalSamples, Pstream::msgType(), myComm);
+        Pstream::allGatherList(globalSamples, Pstream::msgType(), myComm);
+
         // Rework into straight list
         samples = ListListOps::combine<pointField>
         (
@@ -230,8 +229,7 @@ void Foam::mappedPatchBase::collectSamples
         labelListList globalFaces(nProcs);
         globalFaces[myRank] = identity(patch_.size());
         // Distribute to all processors
-        Pstream::gatherList(globalFaces, Pstream::msgType(), myComm);
-        Pstream::scatterList(globalFaces, Pstream::msgType(), myComm);
+        Pstream::allGatherList(globalFaces, Pstream::msgType(), myComm);
 
         patchFaces = ListListOps::combine<labelList>
         (
@@ -607,14 +605,12 @@ void Foam::mappedPatchBase::findSamples
     wordList samplePatches(nProcs);
     {
         samplePatches[myRank] = samplePatch_;
-        Pstream::gatherList(samplePatches, Pstream::msgType(), myComm);
-        Pstream::scatterList(samplePatches, Pstream::msgType(), myComm);
+        Pstream::allGatherList(samplePatches, Pstream::msgType(), myComm);
     }
     wordList sampleRegions(nProcs);
     {
         sampleRegions[myRank] = sampleRegion_;
-        Pstream::gatherList(sampleRegions, Pstream::msgType(), myComm);
-        Pstream::scatterList(sampleRegions, Pstream::msgType(), myComm);
+        Pstream::allGatherList(sampleRegions, Pstream::msgType(), myComm);
     }
 
 
@@ -672,15 +668,14 @@ void Foam::mappedPatchBase::findSamples
     }
 
 
-    // Find nearest. Combine on master.
-    Pstream::listCombineGather
+    // Find nearest - globally consistent
+    Pstream::listCombineAllGather
     (
         nearest,
         nearestWorldEqOp(),
         Pstream::msgType(),
         myComm
     );
-    Pstream::broadcast(nearest, myComm);
 
     //if (debug)
     //{
