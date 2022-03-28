@@ -1,6 +1,8 @@
 PstreamGlobals.C
 UPstream.C
+UPstreamAllToAll.C
 UPstreamBroadcast.C
+UPstreamGatherScatter.C
 UPstreamReduce.C
 
 UIPstreamRead.C

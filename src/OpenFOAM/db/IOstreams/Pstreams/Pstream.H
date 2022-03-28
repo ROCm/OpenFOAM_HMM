@@ -143,6 +143,15 @@ public:
             const label comm = UPstream::worldComm
         );
 
+        //- Generic broadcast multiple values (contiguous or non-contiguous)
+        //- to all processes in communicator.
+        template<class ListType>
+        static void genericListBroadcast
+        (
+            ListType& values,
+            const label comm = UPstream::worldComm
+        );
+
         //- Broadcast value (contiguous or non-contiguous)
         //- to all processes in communicator.
         template<class T>

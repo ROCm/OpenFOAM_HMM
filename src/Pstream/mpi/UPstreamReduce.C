@@ -27,7 +27,7 @@ License
 
 #include "Pstream.H"
 #include "PstreamReduceOps.H"
-#include "allReduce.H"
+#include "UPstreamWrapping.H"
 
 #include <mpi.h>
 #include <cinttypes>
@@ -179,9 +179,9 @@ void Foam::reduce                                                             \
     label& requestID                                                          \
 )                                                                             \
 {                                                                             \
-    PstreamDetail::iallReduce<Native>                                         \
+    PstreamDetail::allReduce<Native>                                          \
     (                                                                         \
-        &value, 1, TaggedType, MPI_SUM, comm, requestID                       \
+        &value, 1, TaggedType, MPI_SUM, comm, &requestID                      \
     );                                                                        \
 }                                                                             \
                                                                               \
@@ -195,9 +195,9 @@ void Foam::reduce                                                             \
     label& requestID                                                          \
 )                                                                             \
 {                                                                             \
-    PstreamDetail::iallReduce<Native>                                         \
+    PstreamDetail::allReduce<Native>                                          \
     (                                                                         \
-        values, size, TaggedType, MPI_SUM, comm, requestID                    \
+        values, size, TaggedType, MPI_SUM, comm, &requestID                   \
     );                                                                        \
 }
 

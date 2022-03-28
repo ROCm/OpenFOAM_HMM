@@ -585,78 +585,89 @@ public:
         //- Shutdown (finalize) MPI as required and exit program with errNo.
         static void exit(int errNo = 1);
 
-        //- Exchange label with all processors (in the communicator).
-        //  sendData[proci] is the label to send to proci.
+        //- Exchange integer data with all processors (in the communicator).
+        //  \c sendData[proci] is the value to send to proci.
         //  After return recvData contains the data from the other processors.
         static void allToAll
         (
-            const labelUList& sendData,
-            labelUList& recvData,
+            const UList<int32_t>& sendData,
+            UList<int32_t>& recvData,
             const label communicator = worldComm
         );
 
-        //- Exchange data with all processors (in the communicator)
-        //  sendSizes, sendOffsets give (per processor) the slice of
-        //  sendData to send, similarly recvSizes, recvOffsets give the slice
-        //  of recvData to receive
+        //- Exchange integer data with all processors (in the communicator).
+        //  \c sendData[proci] is the value to send to proci.
+        //  After return recvData contains the data from the other processors.
         static void allToAll
         (
-            const char* sendData,
-            const UList<int>& sendSizes,
-            const UList<int>& sendOffsets,
-
-            char* recvData,
-            const UList<int>& recvSizes,
-            const UList<int>& recvOffsets,
-
+            const UList<int64_t>& sendData,
+            UList<int64_t>& recvData,
             const label communicator = worldComm
         );
 
-        //- Receive data from all processors on the master (low-level)
-        static void mpiGather
-        (
-            const char* sendData,
-            int sendSize,
 
-            char* recvData,
-            int recvSize,
-            const label communicator = worldComm
+    // Low-level gather/scatter routines
+
+        #undef  Pstream_CommonRoutines
+        #define Pstream_CommonRoutines(Native)                                \
+                                                                              \
+        /*! \brief Receive identically-sized \c Native data from all ranks */ \
+        static void mpiGather                                                 \
+        (                                                                     \
+            const Native* sendData,                                           \
+            int sendCount,                                                    \
+            char* recvData,                                                   \
+            int recvCount,                                                    \
+            const label communicator = worldComm                              \
+        );                                                                    \
+                                                                              \
+        /*! \brief Send identically-sized \c Native data to all ranks */      \
+        static void mpiScatter                                                \
+        (                                                                     \
+            const Native* sendData,                                           \
+            int sendCount,                                                    \
+            char* recvData,                                                   \
+            int recvCount,                                                    \
+            const label communicator = worldComm                              \
+        );                                                                    \
+
+        Pstream_CommonRoutines(char);
+
+
+        #undef  Pstream_CommonRoutines
+        #define Pstream_CommonRoutines(Native)                                \
+                                                                              \
+        /*! \brief Receive variable length \c Native data from all ranks */   \
+        static void gather                                                    \
+        (                                                                     \
+            const Native* sendData,                                           \
+            int sendCount,  /*!< Ignored on master if recvCount[0] == 0 */    \
+            Native* recvData,               /*!< Ignored on non-root rank */  \
+            const UList<int>& recvCounts,   /*!< Ignored on non-root rank */  \
+            const UList<int>& recvOffsets,  /*!< Ignored on non-root rank */  \
+            const label communicator = worldComm                              \
+        );                                                                    \
+                                                                              \
+        /*! \brief Send variable length \c Native data to all ranks */        \
+        static void scatter                                                   \
+        (                                                                     \
+            const Native* sendData,         /*!< Ignored on non-root rank */  \
+            const UList<int>& sendCounts,   /*!< Ignored on non-root rank */  \
+            const UList<int>& sendOffsets,  /*!< Ignored on non-root rank */  \
+            Native* recvData,                                                 \
+            int recvCount,                                                    \
+            const label communicator = worldComm                              \
         );
 
-        //- Send data to all processors from master (low-level)
-        static void mpiScatter
-        (
-            const char* sendData,
-            int sendSize,
+        Pstream_CommonRoutines(char);
+        Pstream_CommonRoutines(int32_t);
+        Pstream_CommonRoutines(int64_t);
+        Pstream_CommonRoutines(uint32_t);
+        Pstream_CommonRoutines(uint64_t);
+        Pstream_CommonRoutines(float);
+        Pstream_CommonRoutines(double);
 
-            char* recvData,
-            int recvSize,
-            const label communicator = worldComm
-        );
-
-        //- Receive data from all processors on the master
-        static void gather
-        (
-            const char* sendData,
-            int sendSize,
-
-            char* recvData,
-            const UList<int>& recvSizes,
-            const UList<int>& recvOffsets,
-            const label communicator = worldComm
-        );
-
-        //- Send data to all processors from the root of the communicator
-        static void scatter
-        (
-            const char* sendData,
-            const UList<int>& sendSizes,
-            const UList<int>& sendOffsets,
-
-            char* recvData,
-            int recvSize,
-            const label communicator = worldComm
-        );
+        #undef Pstream_CommonRoutines
 
 
     // Gather single, contiguous value(s)

@@ -37,29 +37,29 @@ bool Foam::UPstream::broadcast
 (
     char* buf,
     const std::streamsize bufSize,
-    const label communicator,
+    const label comm,
     const int rootProcNo
 )
 {
-    if (!UPstream::parRun() || UPstream::nProcs(communicator) < 2)
+    if (!UPstream::parRun() || UPstream::nProcs(comm) < 2)
     {
         // Nothing to do - ignore
         return true;
     }
 
-    //Needed?  PstreamGlobals::checkCommunicator(communicator, rootProcNo);
+    //Needed?  PstreamGlobals::checkCommunicator(comm, rootProcNo);
 
     if (debug)
     {
         Pout<< "UPstream::broadcast : root:" << rootProcNo
-            << " comm:" << communicator
+            << " comm:" << comm
             << " size:" << label(bufSize)
             << Foam::endl;
     }
-    if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
+    if (UPstream::warnComm != -1 && comm != UPstream::warnComm)
     {
         Pout<< "UPstream::broadcast : root:" << rootProcNo
-            << " comm:" << communicator
+            << " comm:" << comm
             << " size:" << label(bufSize)
             << " warnComm:" << UPstream::warnComm
             << Foam::endl;
@@ -74,7 +74,7 @@ bool Foam::UPstream::broadcast
         bufSize,
         MPI_BYTE,
         rootProcNo,
-        PstreamGlobals::MPICommunicators_[communicator]
+        PstreamGlobals::MPICommunicators_[comm]
     );
 
     profilingPstream::addBroadcastTime();

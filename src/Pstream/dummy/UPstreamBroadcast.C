@@ -33,7 +33,7 @@ bool Foam::UPstream::broadcast
 (
     char* buf,
     const std::streamsize bufSize,
-    const label communicator,
+    const label comm,
     const int rootProcNo
 )
 {

@@ -51,6 +51,40 @@ void Foam::Pstream::genericBroadcast(T& value, const label comm)
 }
 
 
+template<class ListType>
+void Foam::Pstream::genericListBroadcast(ListType& values, const label comm)
+{
+    if (!is_contiguous<typename ListType::value_type>::value)
+    {
+        Pstream::genericBroadcast(values, comm);
+    }
+    else if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
+    {
+        // Broadcast the size
+        label len(values.size());
+        UPstream::broadcast
+        (
+            reinterpret_cast<char*>(&len),
+            sizeof(label),
+            comm,
+            UPstream::masterNo()
+        );
+        values.resize_nocopy(len);  // A no-op on master
+
+        if (len)
+        {
+            UPstream::broadcast
+            (
+                values.data_bytes(),
+                values.size_bytes(),
+                comm,
+                UPstream::masterNo()
+            );
+        }
+    }
+}
+
+
 template<class T>
 void Foam::Pstream::broadcast(T& value, const label comm)
 {
@@ -74,68 +108,14 @@ void Foam::Pstream::broadcast(T& value, const label comm)
 template<class T>
 void Foam::Pstream::broadcast(List<T>& values, const label comm)
 {
-    if (!is_contiguous<T>::value)
-    {
-        Pstream::genericBroadcast(values, comm);
-    }
-    else if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
-    {
-        // Broadcast the size
-        label len(values.size());
-        UPstream::broadcast
-        (
-            reinterpret_cast<char*>(&len),
-            sizeof(label),
-            comm,
-            UPstream::masterNo()
-        );
-        values.resize_nocopy(len);  // A no-op on master
-
-        if (len)
-        {
-            UPstream::broadcast
-            (
-                values.data_bytes(),
-                values.size_bytes(),
-                comm,
-                UPstream::masterNo()
-            );
-        }
-    }
+    Pstream::genericListBroadcast(values, comm);
 }
 
 
 template<class T, int SizeMin>
 void Foam::Pstream::broadcast(DynamicList<T, SizeMin>& values, const label comm)
 {
-    if (!is_contiguous<T>::value)
-    {
-        Pstream::genericBroadcast(values, comm);
-    }
-    else if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
-    {
-        // Broadcast the size
-        label len(values.size());
-        UPstream::broadcast
-        (
-            reinterpret_cast<char*>(&len),
-            sizeof(label),
-            comm,
-            UPstream::masterNo()
-        );
-        values.resize_nocopy(len);  // A no-op on master
-
-        if (len)
-        {
-            UPstream::broadcast
-            (
-                values.data_bytes(),
-                values.size_bytes(),
-                comm,
-                UPstream::masterNo()
-            );
-        }
-    }
+    Pstream::genericListBroadcast(values, comm);
 }
 
 

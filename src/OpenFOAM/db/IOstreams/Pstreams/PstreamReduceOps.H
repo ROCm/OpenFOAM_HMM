@@ -45,7 +45,8 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//- Reduce operation with user specified communication schedule
+//- Reduce inplace (cf. MPI Allreduce)
+//- using specified communication schedule.
 template<class T, class BinaryOp>
 void reduce
 (
@@ -66,7 +67,8 @@ void reduce
 }
 
 
-//- Reduce (inplace) using either linear or tree communication schedule
+//- Reduce inplace (cf. MPI Allreduce)
+//- using linear/tree communication schedule
 template<class T, class BinaryOp>
 void reduce
 (
@@ -99,7 +101,8 @@ T returnReduce
 }
 
 
-//- Reduce with sum of both value and count (for averaging)
+//- Reduce inplace (cf. MPI Allreduce)
+//- the sum of both value and count (for averaging)
 template<class T>
 void sumReduce
 (
@@ -117,7 +120,8 @@ void sumReduce
 }
 
 
-//- Reduce multiple values (identical size on all processes!)
+//- Reduce inplace (cf. MPI Allreduce)
+//- multiple values (identical size on all processes!)
 template<class T, class BinaryOp>
 void reduce
 (
@@ -131,7 +135,8 @@ void reduce
     NotImplemented;
 }
 
-//- Non-blocking reduce single value. Sets request.
+//- Non-blocking reduce inplace (cf. MPI Iallreduce)
+//- single value. Sets request.
 template<class T, class BinaryOp>
 void reduce
 (
@@ -145,8 +150,9 @@ void reduce
     NotImplemented;
 }
 
-//- Non-blocking reduce multiple values (identical size on all processes!)
-//- Sets request.
+//- Non-blocking reduce inplace (cf. MPI Iallreduce)
+//- of multiple values (same size on all processes!)
+//  Sets request.
 template<class T, class BinaryOp>
 void reduce
 (
@@ -166,7 +172,7 @@ void reduce
 
 // Specialisations for bool
 
-//- Logical (and) reduction
+//- Logical (and) reduction (cf. MPI AllReduce)
 void reduce
 (
     bool& value,
@@ -175,7 +181,7 @@ void reduce
     const label comm = UPstream::worldComm
 );
 
-//- Logical (or) reduction
+//- Logical (or) reduction (cf. MPI AllReduce)
 void reduce
 (
     bool& value,
