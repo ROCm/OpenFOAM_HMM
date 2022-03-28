@@ -408,389 +408,432 @@ public:
             const bool checkOverflow = false
         );
 
+        //- Collect single values in processor order on master (== procIDs[0]).
+        //  Handles contiguous/non-contiguous data.
+        template<class ProcIDsContainer, class Type>
+        static void gatherValues
+        (
+            const label comm,           //!< communicator
+            const ProcIDsContainer& procIDs,
+            const Type& localValue,
+            List<Type>& allValues,      //! output field (master only)
+            const int tag = UPstream::msgType(),
+            const UPstream::commsTypes = UPstream::commsTypes::scheduled
+        );
 
-    // Other
+        //- Collect data in processor order on master (== procIDs[0]).
+        //  Handles contiguous/non-contiguous data, skips empty fields.
+        template<class ProcIDsContainer, class Type>
+        static void gather
+        (
+            const labelUList& offsets,  //!< offsets (master only)
+            const label comm,           //!< communicator
+            const ProcIDsContainer& procIDs,
+            const UList<Type>& fld,
+            List<Type>& allFld,         //! output field (master only)
+            const int tag = UPstream::msgType(),
+            const UPstream::commsTypes = UPstream::commsTypes::nonBlocking
+        );
 
-        // Gather (helpers)
+        //- Collect indirect data in processor order on master
+        //  Handles contiguous/non-contiguous data, skips empty fields.
+        template<class Type, class Addr>
+        static void gather
+        (
+            const labelUList& offsets,  //!< offsets (master only)
+            const label comm,           //!< communicator
+            const UList<int>& procIDs,
+            const IndirectListBase<Type, Addr>& fld,
+            List<Type>& allFld,         //! output field (master only)
+            const int tag = UPstream::msgType(),
+            const UPstream::commsTypes = UPstream::commsTypes::scheduled
+        );
 
-            //- Collect data in processor order on master (== procIDs[0]).
-            //  \note offsets needed on master only.
-            template<class ProcIDsContainer, class Type>
-            static void gather
-            (
-                const labelUList& offsets,
-                const label comm,       //!< communicator
-                const ProcIDsContainer& procIDs,
-                const UList<Type>& fld,
-                List<Type>& allFld,
-                const int tag = UPstream::msgType(),
-                const Pstream::commsTypes = Pstream::commsTypes::nonBlocking
-            );
 
-            //- Collect indirect data in processor order on master
-            //  \note offsets needed on master only.
-            template<class Type, class Addr>
-            static void gather
-            (
-                const labelUList& offsets,
-                const label comm,       //!< communicator
-                const UList<int>& procIDs,
-                const IndirectListBase<Type, Addr>& fld,
-                List<Type>& allFld,
-                const int tag = UPstream::msgType(),
-                const Pstream::commsTypes = Pstream::commsTypes::scheduled
-            );
+    // Misc low-level gather routines
 
-            //- Inplace collect in processor order on master (== procIDs[0]).
-            //  \note offsets needed on master only.
-            template<class ProcIDsContainer, class Type>
-            static void gather
-            (
-                const labelUList& offsets,
-                const label comm,       //!< communicator
-                const ProcIDsContainer& procIDs,
-                List<Type>& fld,
-                const int tag = UPstream::msgType(),
-                const Pstream::commsTypes = Pstream::commsTypes::nonBlocking
-            );
-
-            //- Collect data in processor order on master (== procIDs[0]).
-            //  \note the globalIndex offsets needed on master only.
-            template<class ProcIDsContainer, class Type>
-            void gather
-            (
-                const label comm,       //!< communicator
-                const ProcIDsContainer& procIDs,
-                const UList<Type>& fld,
-                List<Type>& allFld,
-                const int tag = UPstream::msgType(),
-                const Pstream::commsTypes commsType =
-                    Pstream::commsTypes::nonBlocking
-            ) const
+        //- Inplace collect in processor order on master (== procIDs[0]).
+        //  Note: adjust naming?
+        template<class ProcIDsContainer, class Type>
+        static void gather
+        (
+            const labelUList& offsets,  //!< offsets (master only)
+            const label comm,           //!< communicator
+            const ProcIDsContainer& procIDs,
+            List<Type>& fld,            //!< in/out field
+            const int tag = UPstream::msgType(),
+            const UPstream::commsTypes ct = UPstream::commsTypes::nonBlocking
+        )
+        {
+            List<Type> allData;
+            gather(offsets, comm, procIDs, fld, allData, tag, ct);
+            if (Pstream::myProcNo(comm) == procIDs[0])
             {
-                gather(offsets_, comm, procIDs, fld, allFld, tag, commsType);
+                fld.transfer(allData);
             }
+        }
 
-            //- Inplace collect in processor order on master (== procIDs[0]).
-            //  \note the globalIndex offsets needed on master only.
-            template<class ProcIDsContainer, class Type>
-            void gather
-            (
-                const label comm,       //!< communicator
-                const ProcIDsContainer& procIDs,
-                List<Type>& fld,
-                const int tag = UPstream::msgType(),
-                const Pstream::commsTypes commsType =
-                    Pstream::commsTypes::nonBlocking
-            ) const
-            {
-                gather(offsets_, comm, procIDs, fld, tag, commsType);
-            }
+        //- Collect data in processor order on master (== procIDs[0]).
+        //  \note the globalIndex offsets needed on master only.
+        template<class ProcIDsContainer, class Type>
+        void gather
+        (
+            const label comm,           //!< communicator
+            const ProcIDsContainer& procIDs,
+            const UList<Type>& fld,     //!< input field
+            List<Type>& allFld,         //! output field (master only)
+            const int tag = UPstream::msgType(),
+            const UPstream::commsTypes ct = UPstream::commsTypes::nonBlocking
+        ) const
+        {
+            gather(offsets_, comm, procIDs, fld, allFld, tag, ct);
+        }
 
-
-        // Gather
-
-            //- Collect data in processor order on master
-            //- (in serial: performs a simple copy).
-            //  Communication with default/specified communicator, message tag.
-            template<class Type>
-            void gather
-            (
-                const UList<Type>& sendData,
-                List<Type>& allData,
-                const int tag = UPstream::msgType(),
-                const Pstream::commsTypes = Pstream::commsTypes::nonBlocking,
-                const label comm = UPstream::worldComm  //!< communicator
-            ) const;
-
-            //- Collect data indirectly in processor order on master
-            //- (in serial: performs a simple copy).
-            //  Communication with default/specified communicator, message tag.
-            template<class Type, class Addr>
-            void gather
-            (
-                const IndirectListBase<Type, Addr>& sendData,
-                List<Type>& allData,
-                const int tag = UPstream::msgType(),
-                const Pstream::commsTypes = Pstream::commsTypes::scheduled,
-                const label comm = UPstream::worldComm  //!< communicator
-            ) const;
-
-            //- Collect data in processor order on master
-            //- (in serial: performs a simple copy).
-            //  Communication with default/specified communicator, message tag.
-            //
-            //  \return output (master), zero-sized on non-master
-            template<class Type, class OutputContainer = List<Type>>
-            OutputContainer gather
-            (
-                const UList<Type>& sendData,
-                const int tag = UPstream::msgType(),
-                const Pstream::commsTypes = Pstream::commsTypes::nonBlocking,
-                const label comm = UPstream::worldComm  //!< communicator
-            ) const;
-
-            //- Collect data indirectly in processor order on master.
-            //  Communication with default/specified communicator, message tag.
-            //
-            //  \return output (master), zero-sized on non-master
-            template<class Type, class Addr, class OutputContainer = List<Type>>
-            OutputContainer gather
-            (
-                const IndirectListBase<Type, Addr>& sendData,
-                const int tag = UPstream::msgType(),
-                const Pstream::commsTypes = Pstream::commsTypes::scheduled,
-                const label comm = UPstream::worldComm  //!< communicator
-            ) const;
-
-            //- Inplace collect data in processor order on master
-            //- (in serial: a no-op).
-            //  Communication with default/specified communicator, message tag.
-            //  After the gather, the field is zero-sized on the slaves.
-            template<class Type>
-            void gatherInplace
-            (
-                List<Type>& fld,
-                const int tag = UPstream::msgType(),
-                const Pstream::commsTypes = Pstream::commsTypes::nonBlocking,
-                const label comm = UPstream::worldComm  //!< communicator
-            ) const;
-
-            //- Collect \em contiguous data using a MPI_Gatherv call
-            //- (in serial: performs a simple copy).
-            //  Communication with default/specified communicator.
-            //  \attention The nProcs for globalIndex and communicator
-            //      must match!!
-            //
-            //  The allData is output (master), zero-sized on non-master
-            template<class Type, class OutputContainer = List<Type>>
-            void mpiGather
-            (
-                const UList<Type>& sendData,
-                OutputContainer& allData,
-                const label comm = UPstream::worldComm  //!< communicator
-            ) const;
-
-            //- Collect \em contiguous data using a MPI_Gatherv call
-            //- (in serial: performs a simple copy).
-            //  Communication with default/specified communicator.
-            //  \attention The nProcs for globalIndex and communicator
-            //      must match!!
-            //
-            //  \return output (master), zero-sized on non-master
-            template<class Type, class OutputContainer = List<Type>>
-            OutputContainer mpiGather
-            (
-                const UList<Type>& sendData,
-                const label comm = UPstream::worldComm  //!< communicator
-            ) const;
-
-            //- Inplace collect \em contiguous data using a MPI_Gatherv call
-            //- (in serial: a no-op).
-            //  Communication with default/specified communicator.
-            //  \attention The nProcs for globalIndex and communicator
-            //      must match!!
-            //
-            //  After the gather, the field is zero-sized on non-master.
-            template<class Type>
-            void mpiGatherInplace
-            (
-                List<Type>& fld,
-                const label comm = UPstream::worldComm  //!< communicator
-            ) const;
+        //- Inplace collect in processor order on master (== procIDs[0]).
+        //  \note the globalIndex offsets needed on master only.
+        //  Note: adjust naming?
+        template<class ProcIDsContainer, class Type>
+        void gather
+        (
+            const label comm,           //!< communicator
+            const ProcIDsContainer& procIDs,
+            List<Type>& fld,            //!< in/out field
+            const int tag = UPstream::msgType(),
+            const UPstream::commsTypes ct = UPstream::commsTypes::nonBlocking
+        ) const
+        {
+            gather(offsets_, comm, procIDs, fld, tag, ct);
+        }
 
 
-        // Gather Operations
+    // Gather
 
-            //- Collect \em contiguous data using a MPI_Gatherv call
-            //- (in serial: performs a simple copy).
-            //  Communication with default/specified communicator.
-            //
-            //  The allData is output (master), zero-sized on non-master
-            template<class Type, class OutputContainer = List<Type>>
-            static void mpiGatherOp
-            (
-                const UList<Type>& sendData,
-                OutputContainer& allData,
-                const label comm = UPstream::worldComm  //!< communicator
-            );
+        //- Collect data in processor order on master
+        //- (in serial: performs a simple copy).
+        //  Communication with default/specified communicator, message tag.
+        template<class Type>
+        void gather
+        (
+            const UList<Type>& sendData,
+            List<Type>& allData,
+            const int tag = UPstream::msgType(),
+            const UPstream::commsTypes = UPstream::commsTypes::nonBlocking,
+            const label comm = UPstream::worldComm  //!< communicator
+        ) const;
 
-            //- Collect \em contiguous data using a MPI_Gatherv call
-            //- (in serial: performs a simple copy).
-            //  Communication with default/specified communicator.
-            //
-            //  \return output (master), zero-sized on non-master
-            template<class Type, class OutputContainer = List<Type>>
-            static OutputContainer mpiGatherOp
-            (
-                const UList<Type>& sendData,
-                const label comm = UPstream::worldComm  //!< communicator
-            );
+        //- Collect data indirectly in processor order on master
+        //- (in serial: performs a simple copy).
+        //  Communication with default/specified communicator, message tag.
+        template<class Type, class Addr>
+        void gather
+        (
+            const IndirectListBase<Type, Addr>& sendData,
+            List<Type>& allData,
+            const int tag = UPstream::msgType(),
+            const UPstream::commsTypes = UPstream::commsTypes::nonBlocking,
+            const label comm = UPstream::worldComm  //!< communicator
+        ) const;
 
-            //- Inplace collect \em contiguous data using a MPI_Gatherv call
-            //- (in serial: a no-op).
-            //  Communication with default/specified communicator.
-            //
-            //  After the gather, the field is zero-sized on non-master.
-            template<class Type>
-            static void mpiGatherInplaceOp
-            (
-                List<Type>& fld,
-                const label comm = UPstream::worldComm  //!< communicator
-            );
+        //- Collect data in processor order on master
+        //- (in serial: performs a simple copy).
+        //  Communication with default/specified communicator, message tag.
+        //
+        //  \return output (master), zero-sized on non-master
+        template<class Type, class OutputContainer = List<Type>>
+        OutputContainer gather
+        (
+            const UList<Type>& sendData,
+            const int tag = UPstream::msgType(),
+            const UPstream::commsTypes = UPstream::commsTypes::nonBlocking,
+            const label comm = UPstream::worldComm  //!< communicator
+        ) const;
 
-            //- Collect data in processor order on master
-            //- (in serial: performs a simple copy).
-            //  Communication with default/specified communicator, message tag.
-            //
-            //  The allFld is output (master), zero-sized on non-master
-            template<class Type>
-            static void gatherOp
-            (
-                const UList<Type>& sendData,
-                List<Type>& allData,
-                const int tag = UPstream::msgType(),
-                const Pstream::commsTypes = Pstream::commsTypes::nonBlocking,
-                const label comm = UPstream::worldComm  //!< communicator
-            );
+        //- Collect data indirectly in processor order on master.
+        //  Communication with default/specified communicator, message tag.
+        //
+        //  \return output (master), zero-sized on non-master
+        template<class Type, class Addr, class OutputContainer = List<Type>>
+        OutputContainer gather
+        (
+            const IndirectListBase<Type, Addr>& sendData,
+            const int tag = UPstream::msgType(),
+            const UPstream::commsTypes = UPstream::commsTypes::nonBlocking,
+            const label comm = UPstream::worldComm  //!< communicator
+        ) const;
 
-            //- Collect data in processor order on master
-            //- (in serial: performs a simple copy).
-            //  Communication with default/specified communicator, message tag.
-            //
-            //  The allFld is output (master), zero-sized on non-master
-            template<class Type, class Addr>
-            static void gatherOp
-            (
-                const IndirectListBase<Type, Addr>& sendData,
-                List<Type>& allData,
-                const int tag = UPstream::msgType(),
-                const Pstream::commsTypes = Pstream::commsTypes::nonBlocking,
-                const label comm = UPstream::worldComm  //!< communicator
-            );
+        //- Inplace collect data in processor order on master
+        //- (in serial: a no-op).
+        //  Communication with default/specified communicator, message tag.
+        //  After the gather, the field is zero-sized on the slaves.
+        template<class Type>
+        void gatherInplace
+        (
+            List<Type>& fld,
+            const int tag = UPstream::msgType(),
+            const UPstream::commsTypes = UPstream::commsTypes::nonBlocking,
+            const label comm = UPstream::worldComm  //!< communicator
+        ) const;
 
-            //- Collect and return data in processor order on master
-            //- (in serial: performs a simple copy).
-            //  Communication with default/specified communicator, message tag.
-            //
-            //  \return output (master), zero-sized on non-master
-            template<class Type, class OutputContainer = List<Type>>
-            static OutputContainer gatherOp
-            (
-                const UList<Type>& sendData,
-                const int tag = UPstream::msgType(),
-                const Pstream::commsTypes = Pstream::commsTypes::nonBlocking,
-                const label comm = UPstream::worldComm  //!< communicator
-            );
+        //- Use MPI_Gatherv call for contiguous data when possible
+        //- (in serial: performs a simple copy).
+        //  Communication with default/specified communicator.
+        //  \attention The nProcs for globalIndex and communicator
+        //      must match!!
+        //
+        //  The allData is output (master), zero-sized on non-master
+        template<class Type, class OutputContainer = List<Type>>
+        void mpiGather
+        (
+            const UList<Type>& sendData,
+            OutputContainer& allData,
+            const label comm = UPstream::worldComm,  //!< communicator
 
-            //- Collect and return data in processor order on master
-            //- (in serial: performs a simple copy).
-            //  Communication with default/specified communicator, message tag.
-            //
-            //  \return output (master), zero-sized on non-master
-            template<class Type, class Addr, class OutputContainer = List<Type>>
-            static OutputContainer gatherOp
-            (
-                const IndirectListBase<Type, Addr>& sendData,
-                const int tag = UPstream::msgType(),
-                const Pstream::commsTypes = Pstream::commsTypes::nonBlocking,
-                const label comm = UPstream::worldComm  //!< communicator
-            );
+            // For fallback routines:
+            const UPstream::commsTypes = UPstream::commsTypes::nonBlocking,
+            const int tag = UPstream::msgType()
+        ) const;
 
-            //- Inplace collect data in processor order on master
-            //- (in serial: a no-op).
-            //  Communication with default/specified communicator, message tag.
-            //
-            //  After the gather, the field is zero-sized on the slaves.
-            template<class Type>
-            static void gatherInplaceOp
-            (
-                List<Type>& fld,
-                const int tag = UPstream::msgType(),
-                const Pstream::commsTypes = Pstream::commsTypes::nonBlocking,
-                const label comm = UPstream::worldComm  //!< communicator
-            );
+        //- Use MPI_Gatherv call for contiguous data when possible
+        //- (in serial: performs a simple copy).
+        //  Communication with default/specified communicator.
+        //  \attention The nProcs for globalIndex and communicator
+        //      must match!!
+        //
+        //  \return output (master), zero-sized on non-master
+        template<class Type, class OutputContainer = List<Type>>
+        OutputContainer mpiGather
+        (
+            const UList<Type>& sendData,
+            const label comm = UPstream::worldComm,  //!< communicator
 
+            // For fallback routines:
+            const UPstream::commsTypes = UPstream::commsTypes::nonBlocking,
+            const int tag = UPstream::msgType()
+        ) const;
 
-        // Scatter
+        //- Use MPI_Gatherv call to inplace collect contiguous data
+        //- when possible.
+        //- (in serial: a no-op).
+        //  Communication with default/specified communicator.
+        //  \attention The nProcs for globalIndex and communicator
+        //      must match!!
+        //
+        //  After the gather, the field is zero-sized on non-master.
+        template<class Type>
+        void mpiGatherInplace
+        (
+            List<Type>& fld,
+            const label comm = UPstream::worldComm,  //!< communicator
 
-            //- Distribute data in processor order.
-            //  Requires fld to be correctly sized!
-            //  Communication with default/specified communicator, message tag.
-            //  \note offsets needed on master only.
-            template<class ProcIDsContainer, class Type>
-            static void scatter
-            (
-                const labelUList& offsets,
-                const label comm,       //!< communicator
-                const ProcIDsContainer& procIDs,
-                const UList<Type>& allFld,
-                UList<Type>& fld,
-                const int tag = UPstream::msgType(),
-                const Pstream::commsTypes = Pstream::commsTypes::nonBlocking
-            );
-
-            //- Distribute data in processor order.
-            //  Requires fld to be correctly sized!
-            //  Communication with default/specified communicator, message tag.
-            //  \note the globalIndex offsets needed on master only.
-            template<class ProcIDsContainer, class Type>
-            void scatter
-            (
-                const label comm,       //!< communicator
-                const ProcIDsContainer& procIDs,
-                const UList<Type>& allFld,
-                UList<Type>& fld,
-                const int tag = UPstream::msgType(),
-                const Pstream::commsTypes commsType =
-                    Pstream::commsTypes::nonBlocking
-            ) const
-            {
-                scatter(offsets_, comm, procIDs, allFld, fld, tag, commsType);
-            }
-
-            //- Distribute data in processor order.
-            //  Requires fld to be correctly sized!
-            //  Communication with default/specified communicator, message tag.
-            //  \note the globalIndex offsets needed on master only.
-            template<class Type>
-            void scatter
-            (
-                const UList<Type>& allData,
-                UList<Type>& localData,
-                const int tag = UPstream::msgType(),
-                const Pstream::commsTypes = Pstream::commsTypes::nonBlocking,
-                const label comm = UPstream::worldComm  //!< communicator
-            ) const;
-
-            //- Distribute data in processor order
-            //- (in serial: performs a simple copy).
-            //  Communication with default/specified communicator, message tag.
-            //  \note the globalIndex offsets needed on master only.
-            template<class Type, class OutputContainer = List<Type>>
-            OutputContainer scatter
-            (
-                const UList<Type>& allData,
-                const int tag = UPstream::msgType(),
-                const Pstream::commsTypes = Pstream::commsTypes::nonBlocking,
-                const label comm = UPstream::worldComm  //!< communicator
-            ) const;
+            // For fallback routines:
+            const UPstream::commsTypes = UPstream::commsTypes::nonBlocking,
+            const int tag = UPstream::msgType()
+        ) const;
 
 
-        // Scatter
+    // Gather Operations
 
-            //- Get (potentially remote) data.
-            //- Elements required given as global indices
-            //  Communication with default/specified communicator, message tag.
-            template<class Type, class CombineOp>
-            void get
-            (
-                List<Type>& allFld,
-                const labelUList& globalIds,
-                const CombineOp& cop,
-                const label comm = UPstream::worldComm,  //!< communicator
-                const int tag = UPstream::msgType()
-            ) const;
+        //- Use MPI_Gatherv call to collect contiguous data when possible
+        //- (in serial: performs a simple copy).
+        //  Communication with default/specified communicator.
+        //
+        //  The allData is output (master), zero-sized on non-master
+        template<class Type, class OutputContainer = List<Type>>
+        static void mpiGatherOp
+        (
+            const UList<Type>& sendData,
+            OutputContainer& allData,
+            const label comm = UPstream::worldComm,  //!< communicator
+
+            // For fallback routines:
+            const UPstream::commsTypes = UPstream::commsTypes::nonBlocking,
+            const int tag = UPstream::msgType()
+        );
+
+        //- Use MPI_Gatherv call to collect contiguous data when possible
+        //- (in serial: performs a simple copy).
+        //  Communication with default/specified communicator.
+        //
+        //  \return output (master), zero-sized on non-master
+        template<class Type, class OutputContainer = List<Type>>
+        static OutputContainer mpiGatherOp
+        (
+            const UList<Type>& sendData,
+            const label comm = UPstream::worldComm,  //!< communicator
+
+            // For fallback routines:
+            const UPstream::commsTypes = UPstream::commsTypes::nonBlocking,
+            const int tag = UPstream::msgType()
+        );
+
+        //- Use MPI_Gatherv call to inplace collect contiguous data
+        //- when possible.
+        //- (in serial: a no-op).
+        //  Communication with default/specified communicator.
+        //
+        //  After the gather, the field is zero-sized on non-master.
+        template<class Type>
+        static void mpiGatherInplaceOp
+        (
+            List<Type>& fld,
+            const label comm = UPstream::worldComm,  //!< communicator
+
+            // For fallback routines:
+            const UPstream::commsTypes = UPstream::commsTypes::nonBlocking,
+            const int tag = UPstream::msgType()
+        );
+
+        //- Collect data in processor order on master
+        //- (in serial: performs a simple copy).
+        //  Communication with default/specified communicator, message tag.
+        //
+        //  The allFld is output (master), zero-sized on non-master
+        template<class Type>
+        static void gatherOp
+        (
+            const UList<Type>& sendData,
+            List<Type>& allData,
+            const int tag = UPstream::msgType(),
+            const UPstream::commsTypes = UPstream::commsTypes::nonBlocking,
+            const label comm = UPstream::worldComm  //!< communicator
+        );
+
+        //- Collect data in processor order on master
+        //- (in serial: performs a simple copy).
+        //  Communication with default/specified communicator, message tag.
+        //
+        //  The allFld is output (master), zero-sized on non-master
+        template<class Type, class Addr>
+        static void gatherOp
+        (
+            const IndirectListBase<Type, Addr>& sendData,
+            List<Type>& allData,
+            const int tag = UPstream::msgType(),
+            const UPstream::commsTypes = UPstream::commsTypes::nonBlocking,
+            const label comm = UPstream::worldComm  //!< communicator
+        );
+
+        //- Collect and return data in processor order on master
+        //- (in serial: performs a simple copy).
+        //  Communication with default/specified communicator, message tag.
+        //
+        //  \return output (master), zero-sized on non-master
+        template<class Type, class OutputContainer = List<Type>>
+        static OutputContainer gatherOp
+        (
+            const UList<Type>& sendData,
+            const int tag = UPstream::msgType(),
+            const UPstream::commsTypes = UPstream::commsTypes::nonBlocking,
+            const label comm = UPstream::worldComm  //!< communicator
+        );
+
+        //- Collect and return data in processor order on master
+        //- (in serial: performs a simple copy).
+        //  Communication with default/specified communicator, message tag.
+        //
+        //  \return output (master), zero-sized on non-master
+        template<class Type, class Addr, class OutputContainer = List<Type>>
+        static OutputContainer gatherOp
+        (
+            const IndirectListBase<Type, Addr>& sendData,
+            const int tag = UPstream::msgType(),
+            const UPstream::commsTypes = UPstream::commsTypes::nonBlocking,
+            const label comm = UPstream::worldComm  //!< communicator
+        );
+
+        //- Inplace collect data in processor order on master
+        //- (in serial: a no-op).
+        //  Communication with default/specified communicator, message tag.
+        //
+        //  After the gather, the field is zero-sized on the slaves.
+        template<class Type>
+        static void gatherInplaceOp
+        (
+            List<Type>& fld,
+            const int tag = UPstream::msgType(),
+            const UPstream::commsTypes = UPstream::commsTypes::nonBlocking,
+            const label comm = UPstream::worldComm  //!< communicator
+        );
+
+
+    // Scatter
+
+        //- Distribute data in processor order.
+        //  Requires fld to be correctly sized!
+        //  Communication with default/specified communicator, message tag.
+        template<class ProcIDsContainer, class Type>
+        static void scatter
+        (
+            const labelUList& offsets,  //!< offsets (master only)
+            const label comm,           //!< communicator
+            const ProcIDsContainer& procIDs,
+            const UList<Type>& allFld,
+            UList<Type>& fld,
+            const int tag = UPstream::msgType(),
+            const UPstream::commsTypes = UPstream::commsTypes::nonBlocking
+        );
+
+        //- Distribute data in processor order.
+        //  Requires fld to be correctly sized!
+        //  Communication with default/specified communicator, message tag.
+        //  \note the globalIndex offsets needed on master only.
+        template<class ProcIDsContainer, class Type>
+        void scatter
+        (
+            const label comm,           //!< communicator
+            const ProcIDsContainer& procIDs,
+            const UList<Type>& allFld,
+            UList<Type>& fld,
+            const int tag = UPstream::msgType(),
+            const UPstream::commsTypes ct =
+                UPstream::commsTypes::nonBlocking
+        ) const
+        {
+            scatter(offsets_, comm, procIDs, allFld, fld, tag, ct);
+        }
+
+        //- Distribute data in processor order.
+        //  Requires fld to be correctly sized!
+        //  Communication with default/specified communicator, message tag.
+        //  \note the globalIndex offsets needed on master only.
+        template<class Type>
+        void scatter
+        (
+            const UList<Type>& allData,
+            UList<Type>& localData,
+            const int tag = UPstream::msgType(),
+            const UPstream::commsTypes = UPstream::commsTypes::nonBlocking,
+            const label comm = UPstream::worldComm  //!< communicator
+        ) const;
+
+        //- Distribute data in processor order
+        //- (in serial: performs a simple copy).
+        //  Communication with default/specified communicator, message tag.
+        //  \note the globalIndex offsets needed on master only.
+        template<class Type, class OutputContainer = List<Type>>
+        OutputContainer scatter
+        (
+            const UList<Type>& allData,
+            const int tag = UPstream::msgType(),
+            const UPstream::commsTypes = UPstream::commsTypes::nonBlocking,
+            const label comm = UPstream::worldComm  //!< communicator
+        ) const;
+
+
+    // Scatter
+
+        //- Get (potentially remote) data.
+        //- Elements required given as global indices
+        //  Communication with default/specified communicator, message tag.
+        template<class Type, class CombineOp>
+        void get
+        (
+            List<Type>& allFld,
+            const labelUList& globalIds,
+            const CombineOp& cop,
+            const label comm = UPstream::worldComm,  //!< communicator
+            const int tag = UPstream::msgType()
+        ) const;
 
 
     // IOstream Operators

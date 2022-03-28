@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,8 +37,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef GAMGAgglomeration_H
-#define GAMGAgglomeration_H
+#ifndef Foam_GAMGAgglomeration_H
+#define Foam_GAMGAgglomeration_H
 
 #include "MeshObject.H"
 #include "lduPrimitiveMesh.H"
@@ -160,18 +160,6 @@ protected:
             const label nCells,
             const label nCoarseCells
         ) const;
-
-        //- Gather value from all procIDs onto procIDs[0]
-        template<class Type>
-        static void gatherList
-        (
-            const label comm,
-            const labelList& procIDs,
-
-            const Type& myVal,
-            List<Type>& allVals,
-            const int tag = Pstream::msgType()
-        );
 
         void clearLevel(const label leveli);
 

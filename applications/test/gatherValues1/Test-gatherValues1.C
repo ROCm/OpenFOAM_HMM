@@ -68,6 +68,29 @@ int main(int argc, char *argv[])
     }
 
 
+    // This now compiles (and works)
+    // - reverts to normal gather for non-contiguous
+    {
+        const wordList sendData({"hello", "world"});
+
+        // One-sided sizing!  master only
+        const globalIndex allProcAddr
+        (
+            sendData.size(),
+            globalIndex::gatherOnly{}
+        );
+
+        Pout<< "listGather sizes: " << flatOutput(allProcAddr.sizes()) << nl;
+
+        // Collect all values
+        wordList allValues
+        (
+            allProcAddr.mpiGather(sendData)
+        );
+
+        Pout<< "all-data: " << allValues << endl;
+    }
+
     // Gather all values
     {
         const auto& sendData = localValues;
@@ -75,8 +98,8 @@ int main(int argc, char *argv[])
         // One-sided sizing!  master only
         const globalIndex allProcAddr
         (
-            UPstream::listGatherValues<label>(sendData.size()),
-            globalIndex::SIZES
+            sendData.size(),
+            globalIndex::gatherOnly{}
         );
 
         Pout<< "listGather sizes: " << flatOutput(allProcAddr.sizes()) << nl;

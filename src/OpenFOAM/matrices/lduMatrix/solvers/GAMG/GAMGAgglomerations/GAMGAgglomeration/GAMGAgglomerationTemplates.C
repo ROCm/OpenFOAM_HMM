@@ -32,50 +32,6 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::GAMGAgglomeration::gatherList
-(
-    const label comm,
-    const labelList& procIDs,
-    const Type& myVal,
-    List<Type>& allVals,
-    const int tag
-)
-{
-    if (Pstream::myProcNo(comm) == procIDs[0])
-    {
-        allVals.setSize(procIDs.size());
-
-        allVals[0] = myVal;
-        for (label i=1; i<procIDs.size(); i++)
-        {
-            IPstream fromSlave
-            (
-                Pstream::commsTypes::scheduled,
-                procIDs[i],
-                0,
-                tag,
-                comm
-            );
-
-            fromSlave >> allVals[i];
-        }
-    }
-    else
-    {
-        OPstream toMaster
-        (
-            Pstream::commsTypes::scheduled,
-            procIDs[0],
-            0,
-            tag,
-            comm
-        );
-        toMaster << myVal;
-    }
-}
-
-
-template<class Type>
 void Foam::GAMGAgglomeration::restrictField
 (
     Field<Type>& cf,
@@ -114,11 +70,12 @@ void Foam::GAMGAgglomeration::restrictField
 
     restrictField(cf, ff, fineToCoarse);
 
-    label coarseLevelIndex = fineLevelIndex+1;
+    const label coarseLevelIndex = fineLevelIndex+1;
 
     if (procAgglom && hasProcMesh(coarseLevelIndex))
     {
-        label fineComm = UPstream::parent(procCommunicator_[coarseLevelIndex]);
+        const label coarseComm =
+            UPstream::parent(procCommunicator_[coarseLevelIndex]);
 
         const List<label>& procIDs = agglomProcIDs(coarseLevelIndex);
         const labelList& offsets = cellOffsets(coarseLevelIndex);
@@ -126,7 +83,7 @@ void Foam::GAMGAgglomeration::restrictField
         globalIndex::gather
         (
             offsets,
-            fineComm,
+            coarseComm,
             procIDs,
             cf,
             UPstream::msgType(),
@@ -180,19 +137,17 @@ void Foam::GAMGAgglomeration::prolongField
 {
     const labelList& fineToCoarse = restrictAddressing_[levelIndex];
 
-    label coarseLevelIndex = levelIndex+1;
+    const label coarseLevelIndex = levelIndex+1;
 
     if (procAgglom && hasProcMesh(coarseLevelIndex))
     {
-        label coarseComm = UPstream::parent
-        (
-            procCommunicator_[coarseLevelIndex]
-        );
+        const label coarseComm =
+            UPstream::parent(procCommunicator_[coarseLevelIndex]);
 
         const List<label>& procIDs = agglomProcIDs(coarseLevelIndex);
         const labelList& offsets = cellOffsets(coarseLevelIndex);
 
-        label localSize = nCells_[levelIndex];
+        const label localSize = nCells_[levelIndex];
 
         Field<Type> allCf(localSize);
         globalIndex::scatter

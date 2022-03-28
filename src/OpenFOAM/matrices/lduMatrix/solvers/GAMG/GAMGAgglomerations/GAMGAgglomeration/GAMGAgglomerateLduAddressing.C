@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -206,9 +206,6 @@ void Foam::GAMGAgglomeration::agglomerateLduAddressing
     boolList& faceFlipMap = faceFlipMap_[fineLevelIndex];
 
 
-    label nFlipped = 0;
-    label nDissapear = 0;
-
     forAll(faceRestrictAddr, fineFacei)
     {
         label coarseFacei = faceRestrictAddr[fineFacei];
@@ -225,7 +222,6 @@ void Foam::GAMGAgglomeration::agglomerateLduAddressing
             if (cOwn == rmUpperAddr && cNei == rmLowerAddr)
             {
                 faceFlipMap[fineFacei] = true;
-                nFlipped++;
             }
             else if (cOwn == rmLowerAddr && cNei == rmUpperAddr)
             {
@@ -243,10 +239,6 @@ void Foam::GAMGAgglomeration::agglomerateLduAddressing
                     << " cNei:" << cNei
                     << exit(FatalError);
             }
-        }
-        else
-        {
-            nDissapear++;
         }
     }
 
@@ -513,39 +505,37 @@ void Foam::GAMGAgglomeration::procAgglomerateRestrictAddressing
 {
     // Collect number of cells
     labelList nFineCells;
-    gatherList
+    globalIndex::gatherValues
     (
         comm,
         procIDs,
         restrictAddressing_[levelIndex].size(),
-        nFineCells
-    );
+        nFineCells,
 
-    labelList offsets(nFineCells.size()+1);
-    {
-        offsets[0] = 0;
-        forAll(nFineCells, i)
-        {
-            offsets[i+1] = offsets[i] + nFineCells[i];
-        }
-    }
+        UPstream::msgType(),
+        UPstream::commsTypes::scheduled
+    );
+    labelList fineOffsets(globalIndex::calcOffsets(nFineCells));
 
     // Combine and renumber nCoarseCells
     labelList nCoarseCells;
-    gatherList
+    globalIndex::gatherValues
     (
         comm,
         procIDs,
         nCells_[levelIndex],
-        nCoarseCells
+        nCoarseCells,
+
+        UPstream::msgType(),
+        UPstream::commsTypes::scheduled
     );
+    labelList coarseOffsets(globalIndex::calcOffsets(nCoarseCells));
 
     // (cell)restrictAddressing
-    const globalIndex cellOffsetter(offsets);
-
     labelList procRestrictAddressing;
-    cellOffsetter.gather
+    globalIndex::gather
     (
+        fineOffsets,
         comm,
         procIDs,
         restrictAddressing_[levelIndex],
@@ -558,29 +548,22 @@ void Foam::GAMGAgglomeration::procAgglomerateRestrictAddressing
 
     if (Pstream::myProcNo(comm) == procIDs[0])
     {
-        labelList coarseCellOffsets(procIDs.size()+1);
-        {
-            coarseCellOffsets[0] = 0;
-            forAll(procIDs, i)
-            {
-                coarseCellOffsets[i+1] = coarseCellOffsets[i]+nCoarseCells[i];
-            }
-        }
-
-        nCells_[levelIndex] = coarseCellOffsets.last();
+        nCells_[levelIndex] = coarseOffsets.last();  // ie, totalSize()
 
         // Renumber consecutively
-        for (label proci = 1; proci < procIDs.size(); proci++)
+        for (label proci = 1; proci < procIDs.size(); ++proci)
         {
             SubList<label> procSlot
             (
                 procRestrictAddressing,
-                offsets[proci+1]-offsets[proci],
-                offsets[proci]
+                fineOffsets[proci+1]-fineOffsets[proci],
+                fineOffsets[proci]
             );
+
+            // procSlot += coarseOffsets[proci];
             forAll(procSlot, i)
             {
-                procSlot[i] += coarseCellOffsets[proci];
+                procSlot[i] += coarseOffsets[proci];
             }
         }
 
@@ -686,51 +669,6 @@ void Foam::GAMGAgglomeration::combineLevels(const label curLevel)
     // and replace with the corresponding entry from the coarser level
     meshLevels_.set(prevLevel, meshLevels_.set(curLevel, nullptr));
 }
-
-
-//void Foam::GAMGAgglomeration::gatherList
-//(
-//    const label comm,
-//    const labelList& procIDs,
-//
-//    const label myVal,
-//    labelList& vals,
-//    const int tag
-//)
-//{
-//    vals.setSize(procIDs.size());
-//
-//    if (Pstream::myProcNo(comm) == procIDs[0])
-//    {
-//        vals[0] = myVal;
-//
-//        for (label i=1; i<procIDs.size(); i++)
-//        {
-//            label& slaveVal = vals[i];
-//            IPstream::read
-//            (
-//                Pstream::commsTypes::scheduled,
-//                procIDs[i],
-//                reinterpret_cast<char*>(&slaveVal),
-//                sizeof(slaveVal),
-//                tag,
-//                comm
-//            );
-//        }
-//    }
-//    else
-//    {
-//        OPstream::write
-//        (
-//            Pstream::commsTypes::scheduled,
-//            procIDs[0],
-//            reinterpret_cast<const char*>(&myVal),
-//            sizeof(myVal),
-//            tag,
-//            comm
-//        );
-//    }
-//}
 
 
 void Foam::GAMGAgglomeration::calculateRegionMaster
