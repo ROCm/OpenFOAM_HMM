@@ -135,6 +135,11 @@ void Foam::fv::effectivenessHeatExchangerSource::writeFileHeader(Ostream& os)
     writeFile::writeTabbed(os, "Tref [K]");
     writeFile::writeTabbed(os, "Effectiveness");
 
+    if (secondaryCpPtr_)
+    {
+        writeFile::writeTabbed(os, "Secondary outlet T [K]");
+    }
+
     os  << endl;
 }
 
@@ -153,6 +158,16 @@ Foam::fv::effectivenessHeatExchangerSource::effectivenessHeatExchangerSource
     writeFile(mesh, name, modelType, coeffs_),
     secondaryMassFlowRate_(0),
     secondaryInletT_(0),
+    secondaryCpPtr_
+    (
+        Function1<scalar>::NewIfPresent
+        (
+            "secondaryCp",
+            coeffs_,
+            word::null,
+            &mesh
+        )
+    ),
     primaryInletT_(0),
     userPrimaryInletT_(false),
     targetQdotActive_(false),
@@ -317,8 +332,7 @@ void Foam::fv::effectivenessHeatExchangerSource::addSup
         << indent << "Secondary inlet T [K]     : " << secondaryInletT_ << nl
         << indent << "Tref [K]                  : " << Tref << nl
         << indent << "Effectiveness             : "
-        << eTable_()(mag(sumPhi), secondaryMassFlowRate_) << decrIndent
-        << nl << endl;
+        << eTable_()(mag(sumPhi), secondaryMassFlowRate_) << decrIndent;
 
     if (Pstream::master())
     {
@@ -329,9 +343,25 @@ void Foam::fv::effectivenessHeatExchangerSource::addSup
             << tab << Qt
             << tab << secondaryInletT_
             << tab << Tref
-            << tab << eTable_()(mag(sumPhi), secondaryMassFlowRate_)
-            << endl;
+            << tab << eTable_()(mag(sumPhi), secondaryMassFlowRate_);
+
+        if (secondaryCpPtr_)
+        {
+            // Secondary Cp as a function of the starting secondary temperature
+            const scalar secondaryCp = secondaryCpPtr_->value(secondaryInletT_);
+            const scalar secondaryOutletT =
+                Qt/(secondaryMassFlowRate_*secondaryCp) + secondaryInletT_;
+
+            Info<< nl << incrIndent << indent
+                << "Secondary outlet T [K]    : " << secondaryOutletT
+                << decrIndent;
+
+            os  << tab << secondaryOutletT;
+        }
+        os  << endl;
     }
+
+    Info<< nl << endl;
 }
 
 

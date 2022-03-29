@@ -205,6 +205,7 @@ SourceFiles
 #include "autoPtr.H"
 #include "interpolation2DTable.H"
 #include "writeFile.H"
+#include "Function1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -231,6 +232,9 @@ protected:
 
         //- Inlet secondary temperature [K]
         scalar secondaryInletT_;
+
+        //- Secondary specific heat capacity [J/kg/K]
+        autoPtr<Function1<scalar>> secondaryCpPtr_;
 
         //- Primary air temperature at the heat exchanger inlet [K]
         scalar primaryInletT_;
