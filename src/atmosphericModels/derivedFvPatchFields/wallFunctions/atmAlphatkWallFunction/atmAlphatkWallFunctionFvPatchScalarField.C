@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2020 ENERCON GmbH
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -145,7 +145,7 @@ atmAlphatkWallFunctionFvPatchScalarField
     fixedValueFvPatchScalarField(wfpsf),
     Cmu_(wfpsf.Cmu_),
     kappa_(wfpsf.kappa_),
-    Pr_(wfpsf.Pr_),
+    Pr_(wfpsf.Pr_.clone()),
     Prt_(wfpsf.Prt_.clone(this->patch().patch())),
     z0_(wfpsf.z0_.clone(this->patch().patch()))
 {
@@ -163,7 +163,7 @@ atmAlphatkWallFunctionFvPatchScalarField
     fixedValueFvPatchScalarField(wfpsf, iF),
     Cmu_(wfpsf.Cmu_),
     kappa_(wfpsf.kappa_),
-    Pr_(wfpsf.Pr_),
+    Pr_(wfpsf.Pr_.clone()),
     Prt_(wfpsf.Prt_.clone(this->patch().patch())),
     z0_(wfpsf.z0_.clone(this->patch().patch()))
 {
@@ -289,9 +289,18 @@ void atmAlphatkWallFunctionFvPatchScalarField::write(Ostream& os) const
     fvPatchField<scalar>::write(os);
     os.writeEntry("Cmu", Cmu_);
     os.writeEntry("kappa", kappa_);
-    Pr_->writeData(os);
-    Prt_->writeData(os);
-    z0_->writeData(os);
+    if (Pr_)
+    {
+        Pr_->writeData(os);
+    }
+    if (Prt_)
+    {
+        Prt_->writeData(os);
+    }
+    if (z0_)
+    {
+        z0_->writeData(os);
+    }
     writeEntry("value", os);
 }
 

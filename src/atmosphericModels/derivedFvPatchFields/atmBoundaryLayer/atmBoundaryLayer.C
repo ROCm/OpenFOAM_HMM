@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -115,10 +115,10 @@ atmBoundaryLayer::atmBoundaryLayer(const atmBoundaryLayer& abl)
     ppMin_(abl.ppMin_),
     time_(abl.time_),
     patch_(abl.patch_),
-    flowDir_(abl.flowDir_),
-    zDir_(abl.zDir_),
-    Uref_(abl.Uref_),
-    Zref_(abl.Zref_),
+    flowDir_(abl.flowDir_.clone()),
+    zDir_(abl.zDir_.clone()),
+    Uref_(abl.Uref_.clone()),
+    Zref_(abl.Zref_.clone()),
     z0_(abl.z0_.clone(patch_)),
     d_(abl.d_.clone(patch_))
 {}
@@ -274,10 +274,22 @@ void atmBoundaryLayer::write(Ostream& os) const
     os.writeEntry("Cmu", Cmu_);
     os.writeEntry("C1", C1_);
     os.writeEntry("C2", C2_);
-    flowDir_->writeData(os);
-    zDir_->writeData(os);
-    Uref_->writeData(os);
-    Zref_->writeData(os);
+    if (flowDir_)
+    {
+        flowDir_->writeData(os);
+    }
+    if (zDir_)
+    {
+        zDir_->writeData(os);
+    }
+    if (Uref_)
+    {
+        Uref_->writeData(os);
+    }
+    if (Zref_)
+    {
+        Zref_->writeData(os);
+    }
     if (z0_)
     {
         z0_->writeData(os) ;
