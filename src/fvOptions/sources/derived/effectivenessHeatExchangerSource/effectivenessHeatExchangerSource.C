@@ -75,7 +75,7 @@ void Foam::fv::effectivenessHeatExchangerSource::initialise()
     label count = 0;
     forAll(fZone, i)
     {
-        label facei = fZone[i];
+        const label facei = fZone[i];
         label faceId = -1;
         label facePatchId = -1;
         if (mesh_.isInternalFace(facei))
@@ -156,8 +156,8 @@ Foam::fv::effectivenessHeatExchangerSource::effectivenessHeatExchangerSource
 :
     fv::cellSetOption(name, modelType, dict, mesh),
     writeFile(mesh, name, modelType, coeffs_),
-    secondaryMassFlowRate_(0),
-    secondaryInletT_(0),
+    userPrimaryInletT_(false),
+    targetQdotActive_(false),
     secondaryCpPtr_
     (
         Function1<scalar>::NewIfPresent
@@ -168,13 +168,13 @@ Foam::fv::effectivenessHeatExchangerSource::effectivenessHeatExchangerSource
             &mesh
         )
     ),
-    primaryInletT_(0),
-    userPrimaryInletT_(false),
-    targetQdotActive_(false),
-    targetQdot_(0),
-    targetQdotCalcInterval_(5),
-    targetQdotRelax_(0.5),
     eTable_(),
+    targetQdotCalcInterval_(5),
+    secondaryMassFlowRate_(0),
+    secondaryInletT_(0),
+    primaryInletT_(0),
+    targetQdot_(0),
+    targetQdotRelax_(0.5),
     UName_("U"),
     TName_("T"),
     phiName_("phi"),
@@ -212,12 +212,10 @@ void Foam::fv::effectivenessHeatExchangerSource::addSup
 )
 {
     const auto& thermo = mesh_.lookupObject<basicThermo>(basicThermo::dictName);
+    const auto& phi = mesh_.lookupObject<surfaceScalarField>(phiName_);
+    const auto& T = mesh_.lookupObject<volScalarField>(TName_);
 
     const surfaceScalarField Cpf(fvc::interpolate(thermo.Cp()));
-
-    const auto& phi = mesh_.lookupObject<surfaceScalarField>(phiName_);
-
-    const auto& T = mesh_.lookupObject<volScalarField>(TName_);
     const surfaceScalarField Tf(fvc::interpolate(T));
 
     scalar sumPhi = 0;
@@ -226,29 +224,30 @@ void Foam::fv::effectivenessHeatExchangerSource::addSup
     scalar primaryInletTfMean = 0;
     forAll(faceId_, i)
     {
-        label facei = faceId_[i];
+        const label facei = faceId_[i];
         if (facePatchId_[i] != -1)
         {
-            label patchi = facePatchId_[i];
-            scalar phii = phi.boundaryField()[patchi][facei]*faceSign_[i];
+            const label patchi = facePatchId_[i];
+            const scalar phii = phi.boundaryField()[patchi][facei]*faceSign_[i];
+            const scalar magPhii = mag(phii);
 
             sumPhi += phii;
-
-            scalar Cpfi = Cpf.boundaryField()[patchi][facei];
-            scalar Tfi = Tf.boundaryField()[patchi][facei];
-            scalar magPhii = mag(phii);
-
             sumMagPhi += magPhii;
+
+            const scalar Cpfi = Cpf.boundaryField()[patchi][facei];
+            const scalar Tfi = Tf.boundaryField()[patchi][facei];
+
             CpfMean += Cpfi*magPhii;
             primaryInletTfMean += Tfi*magPhii;
         }
         else
         {
-            scalar phii = phi[facei]*faceSign_[i];
-            scalar magPhii = mag(phii);
+            const scalar phii = phi[facei]*faceSign_[i];
+            const scalar magPhii = mag(phii);
 
             sumPhi += phii;
             sumMagPhi += magPhii;
+
             CpfMean += Cpf[facei]*magPhii;
             primaryInletTfMean += Tf[facei]*magPhii;
         }
@@ -265,9 +264,9 @@ void Foam::fv::effectivenessHeatExchangerSource::addSup
         primaryInletT = primaryInletTfMean/(sumMagPhi + ROOTVSMALL);
     }
 
-    const scalar alpha =
-        eTable_()(mag(sumPhi), secondaryMassFlowRate_)
-       *CpfMean*mag(sumPhi);
+    const scalar effectiveness = eTable_()(mag(sumPhi), secondaryMassFlowRate_);
+
+    const scalar alpha = effectiveness*CpfMean*mag(sumPhi);
 
     const scalar Qt = alpha*(secondaryInletT_ - primaryInletT);
 
@@ -277,7 +276,7 @@ void Foam::fv::effectivenessHeatExchangerSource::addSup
      && (mesh_.time().timeIndex() % targetQdotCalcInterval_ == 0)
     )
     {
-        scalar dT = (targetQdot_ - Qt)/(alpha + ROOTVSMALL);
+        const scalar dT = (targetQdot_ - Qt)/(alpha + ROOTVSMALL);
         secondaryInletT_ += targetQdotRelax_*dT;
     }
 
@@ -289,7 +288,7 @@ void Foam::fv::effectivenessHeatExchangerSource::addSup
         Tref = gMax(TCells);
         forAll(deltaTCells, i)
         {
-            deltaTCells[i] = max(Tref - TCells[i], 0.0);
+            deltaTCells[i] = max(Tref - TCells[i], scalar(0));
         }
     }
     else
@@ -297,7 +296,7 @@ void Foam::fv::effectivenessHeatExchangerSource::addSup
         Tref = gMin(TCells);
         forAll(deltaTCells, i)
         {
-            deltaTCells[i] = max(TCells[i] - Tref, 0.0);
+            deltaTCells[i] = max(TCells[i] - Tref, scalar(0));
         }
     }
 
@@ -307,7 +306,7 @@ void Foam::fv::effectivenessHeatExchangerSource::addSup
     scalar sumWeight = 0;
     forAll(cells_, i)
     {
-        label celli = cells_[i];
+        const label celli = cells_[i];
         sumWeight += V[celli]*mag(U[celli])*deltaTCells[i];
     }
     reduce(sumWeight, sumOp<scalar>());
@@ -318,21 +317,21 @@ void Foam::fv::effectivenessHeatExchangerSource::addSup
 
         forAll(cells_, i)
         {
-            label celli = cells_[i];
+            const label celli = cells_[i];
             heSource[celli] -=
                 Qt*V[celli]*mag(U[celli])*deltaTCells[i]
                /(sumWeight + ROOTVSMALL);
         }
     }
 
-    Info<< nl
+    Log << nl
         << type() << ": " << name() << nl << incrIndent
-        << indent << "Net mass flux [Kg/s]      : " << sumPhi << nl
+        << indent << "Net mass flux [kg/s]      : " << sumPhi << nl
         << indent << "Total heat exchange [W]   : " << Qt << nl
         << indent << "Secondary inlet T [K]     : " << secondaryInletT_ << nl
         << indent << "Tref [K]                  : " << Tref << nl
-        << indent << "Effectiveness             : "
-        << eTable_()(mag(sumPhi), secondaryMassFlowRate_) << decrIndent;
+        << indent << "Effectiveness             : " << effectiveness
+        << decrIndent;
 
     if (Pstream::master())
     {
@@ -343,7 +342,7 @@ void Foam::fv::effectivenessHeatExchangerSource::addSup
             << tab << Qt
             << tab << secondaryInletT_
             << tab << Tref
-            << tab << eTable_()(mag(sumPhi), secondaryMassFlowRate_);
+            << tab << effectiveness;
 
         if (secondaryCpPtr_)
         {
@@ -352,7 +351,7 @@ void Foam::fv::effectivenessHeatExchangerSource::addSup
             const scalar secondaryOutletT =
                 Qt/(secondaryMassFlowRate_*secondaryCp) + secondaryInletT_;
 
-            Info<< nl << incrIndent << indent
+            Log << nl << incrIndent << indent
                 << "Secondary outlet T [K]    : " << secondaryOutletT
                 << decrIndent;
 
@@ -367,55 +366,55 @@ void Foam::fv::effectivenessHeatExchangerSource::addSup
 
 bool Foam::fv::effectivenessHeatExchangerSource::read(const dictionary& dict)
 {
-    if (fv::cellSetOption::read(dict) && writeFile::read(dict))
+    if (!(fv::cellSetOption::read(dict) && writeFile::read(dict)))
     {
-        UName_ = coeffs_.getOrDefault<word>("U", "U");
-        TName_ = coeffs_.getOrDefault<word>("T", "T");
-        phiName_ = coeffs_.getOrDefault<word>("phi", "phi");
-        coeffs_.readEntry("faceZone", faceZoneName_);
-
-        coeffs_.readEntry("secondaryMassFlowRate", secondaryMassFlowRate_);
-        coeffs_.readEntry("secondaryInletT", secondaryInletT_);
-
-        if (coeffs_.readIfPresent("primaryInletT", primaryInletT_))
-        {
-            userPrimaryInletT_ = true;
-            Info<< type() << " " << this->name() << ": " << indent << nl
-                << "employing user-specified primary flow inlet temperature: "
-                << primaryInletT_ << endl;
-        }
-        else
-        {
-            Info<< type() << " " << this->name() << ": " << indent << nl
-                << "employing flux-weighted primary flow inlet temperature"
-                << endl;
-        }
-
-        if (coeffs_.readIfPresent("targetQdot", targetQdot_))
-        {
-            targetQdotActive_ = true;
-            Info<< indent << "employing target heat rejection of "
-                << targetQdot_ << nl;
-
-            coeffs_.readIfPresent
-            (
-                "targetQdotCalcInterval",
-                targetQdotCalcInterval_
-            );
-
-            Info<< indent << "updating secondary inlet temperature every "
-                << targetQdotCalcInterval_ << " iterations" << nl;
-
-            coeffs_.readIfPresent("targetQdotRelax", targetQdotRelax_);
-
-            Info<< indent << "temperature relaxation:  "
-                << targetQdotRelax_ << endl;
-        }
-
-        return true;
+        return false;
     }
 
-    return false;
+    coeffs_.readEntry("secondaryMassFlowRate", secondaryMassFlowRate_);
+    coeffs_.readEntry("secondaryInletT", secondaryInletT_);
+
+    if (coeffs_.readIfPresent("primaryInletT", primaryInletT_))
+    {
+        userPrimaryInletT_ = true;
+        Info<< type() << " " << this->name() << ": " << indent << nl
+            << "employing user-specified primary flow inlet temperature: "
+            << primaryInletT_ << endl;
+    }
+    else
+    {
+        Info<< type() << " " << this->name() << ": " << indent << nl
+            << "employing flux-weighted primary flow inlet temperature"
+            << endl;
+    }
+
+    if (coeffs_.readIfPresent("targetQdot", targetQdot_))
+    {
+        targetQdotActive_ = true;
+        Info<< indent << "employing target heat rejection of "
+            << targetQdot_ << nl;
+
+        coeffs_.readIfPresent
+        (
+            "targetQdotCalcInterval",
+            targetQdotCalcInterval_
+        );
+
+        Info<< indent << "updating secondary inlet temperature every "
+            << targetQdotCalcInterval_ << " iterations" << nl;
+
+        coeffs_.readIfPresent("targetQdotRelax", targetQdotRelax_);
+
+        Info<< indent << "temperature relaxation:  "
+            << targetQdotRelax_ << endl;
+    }
+
+    UName_ = coeffs_.getOrDefault<word>("U", "U");
+    TName_ = coeffs_.getOrDefault<word>("T", "T");
+    phiName_ = coeffs_.getOrDefault<word>("phi", "phi");
+    coeffs_.readEntry("faceZone", faceZoneName_);
+
+    return true;
 }
 
 
