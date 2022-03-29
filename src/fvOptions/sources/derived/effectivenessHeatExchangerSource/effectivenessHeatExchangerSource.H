@@ -204,6 +204,7 @@ SourceFiles
 #include "cellSetOption.H"
 #include "autoPtr.H"
 #include "interpolation2DTable.H"
+#include "writeFile.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -218,7 +219,8 @@ namespace fv
 
 class effectivenessHeatExchangerSource
 :
-    public fv::cellSetOption
+    public fv::cellSetOption,
+    public functionObjects::writeFile
 {
 protected:
 
@@ -283,6 +285,9 @@ private:
 
         //- Calculate total area of faceZone across processors
         void calculateTotalArea(scalar& area);
+
+        //- Output file header information
+        virtual void writeFileHeader(Ostream& os);
 
 
 public:

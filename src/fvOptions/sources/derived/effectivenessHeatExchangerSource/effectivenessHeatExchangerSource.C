@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2015 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -125,6 +125,20 @@ void Foam::fv::effectivenessHeatExchangerSource::initialise()
 }
 
 
+void Foam::fv::effectivenessHeatExchangerSource::writeFileHeader(Ostream& os)
+{
+    writeFile::writeHeader(os, "Effectiveness heat exchanger source");
+    writeFile::writeCommented(os, "Time");
+    writeFile::writeTabbed(os, "Net mass flux [kg/s]");
+    writeFile::writeTabbed(os, "Total heat exchange [W]");
+    writeFile::writeTabbed(os, "Secondary inlet T [K]");
+    writeFile::writeTabbed(os, "Tref [K]");
+    writeFile::writeTabbed(os, "Effectiveness");
+
+    os  << endl;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::fv::effectivenessHeatExchangerSource::effectivenessHeatExchangerSource
@@ -136,6 +150,7 @@ Foam::fv::effectivenessHeatExchangerSource::effectivenessHeatExchangerSource
 )
 :
     fv::cellSetOption(name, modelType, dict, mesh),
+    writeFile(mesh, name, modelType, coeffs_),
     secondaryMassFlowRate_(0),
     secondaryInletT_(0),
     primaryInletT_(0),
@@ -167,6 +182,8 @@ Foam::fv::effectivenessHeatExchangerSource::effectivenessHeatExchangerSource
     eTable_.reset(new interpolation2DTable<scalar>(coeffs_));
 
     initialise();
+
+    writeFileHeader(file());
 }
 
 
@@ -293,20 +310,34 @@ void Foam::fv::effectivenessHeatExchangerSource::addSup
         }
     }
 
-    Info<< type() << ": " << name() << nl << incrIndent
+    Info<< nl
+        << type() << ": " << name() << nl << incrIndent
         << indent << "Net mass flux [Kg/s]      : " << sumPhi << nl
-        << indent << "Total heat exchange [W] : " << Qt << nl
+        << indent << "Total heat exchange [W]   : " << Qt << nl
         << indent << "Secondary inlet T [K]     : " << secondaryInletT_ << nl
         << indent << "Tref [K]                  : " << Tref << nl
         << indent << "Effectiveness             : "
         << eTable_()(mag(sumPhi), secondaryMassFlowRate_) << decrIndent
         << nl << endl;
+
+    if (Pstream::master())
+    {
+        Ostream& os = file();
+        writeCurrentTime(os);
+
+        os  << tab << sumPhi
+            << tab << Qt
+            << tab << secondaryInletT_
+            << tab << Tref
+            << tab << eTable_()(mag(sumPhi), secondaryMassFlowRate_)
+            << endl;
+    }
 }
 
 
 bool Foam::fv::effectivenessHeatExchangerSource::read(const dictionary& dict)
 {
-    if (fv::cellSetOption::read(dict))
+    if (fv::cellSetOption::read(dict) && writeFile::read(dict))
     {
         UName_ = coeffs_.getOrDefault<word>("U", "U");
         TName_ = coeffs_.getOrDefault<word>("T", "T");
