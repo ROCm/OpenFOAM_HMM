@@ -26,6 +26,7 @@ EXE_LIBS = \
     -ldynamicMesh \
     -ldynamicFvMesh \
     -ltwoPhaseMixtureThermo \
+    -ltwoPhaseProperties \
     -ltwoPhaseSurfaceTension \
     -lcompressibleTransportModels \
     -lfluidThermophysicalModels \

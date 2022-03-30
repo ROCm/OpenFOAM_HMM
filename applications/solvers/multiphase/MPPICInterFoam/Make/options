@@ -35,10 +35,10 @@ EXE_LIBS = \
     -lspecie \
     -lincompressibleTransportModels \
     -limmiscibleIncompressibleTwoPhaseMixture \
+    -ltwoPhaseProperties \
     -linterfaceProperties \
     -lturbulenceModels \
     -lsampling \
     -lregionModels \
     -lsurfaceFilmModels \
     -lcompressibleTwoPhaseMixtureTurbulenceModels
-

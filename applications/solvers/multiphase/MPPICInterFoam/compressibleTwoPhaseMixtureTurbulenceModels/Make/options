@@ -19,6 +19,7 @@ LIB_LIBS = \
     -lmeshTools \
     -lincompressibleTransportModels \
     -limmiscibleIncompressibleTwoPhaseMixture \
+    -ltwoPhaseProperties \
     -linterfaceProperties \
     -lturbulenceModels \
     -lincompressibleTurbulenceModels \

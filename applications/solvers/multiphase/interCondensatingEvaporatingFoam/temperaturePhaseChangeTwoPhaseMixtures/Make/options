@@ -13,7 +13,7 @@ LIB_LIBS = \
     -lmeshTools \
     -lgeometricVoF \
     -ltwoPhaseMixture \
-    -linterfaceProperties \
     -ltwoPhaseProperties \
+    -linterfaceProperties \
     -lincompressibleTransportModels \
     -lfluidThermophysicalModels

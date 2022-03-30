@@ -10,4 +10,6 @@ EXE_LIBS = \
     -lsurfMesh \
     -lmeshTools \
     -lsampling \
-    -lgeometricVoF
+    -lgeometricVoF \
+    -ltwoPhaseMixture \
+    -ltwoPhaseProperties

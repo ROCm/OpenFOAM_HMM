@@ -25,6 +25,8 @@ LIB_LIBS = \
     -lcompressibleTransportModels \
     -lincompressibleTransportModels \
     -lgeometricVoF \
+    -ltwoPhaseMixture \
+    -ltwoPhaseProperties \
     -lturbulenceModels \
     -lcompressibleTurbulenceModels \
     -lthermophysicalProperties \

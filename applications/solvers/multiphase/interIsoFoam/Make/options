@@ -33,5 +33,7 @@ EXE_LIBS = \
     -lincompressibleTurbulenceModels \
     -lwaveModels \
     -lgeometricVoF \
+    -ltwoPhaseMixture \
+    -ltwoPhaseProperties \
     -lVoFphaseTurbulentTransportModels \
     -lincompressibleInterPhaseTransportModels

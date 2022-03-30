@@ -28,8 +28,8 @@ EXE_LIBS = \
     -ldynamicFvMesh \
     -lphaseTemperatureChangeTwoPhaseMixtures \
     -ltwoPhaseMixture \
-    -linterfaceProperties \
     -ltwoPhaseProperties \
+    -linterfaceProperties \
     -lincompressibleTransportModels \
     -lturbulenceModels \
     -lincompressibleTurbulenceModels \

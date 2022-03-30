@@ -23,8 +23,8 @@ EXE_LIBS = \
     -lsampling \
     -lphaseChangeTwoPhaseMixtures \
     -ltwoPhaseMixture \
-    -linterfaceProperties \
     -ltwoPhaseProperties \
+    -linterfaceProperties \
     -lincompressibleTransportModels \
     -lturbulenceModels \
     -lincompressibleTurbulenceModels \

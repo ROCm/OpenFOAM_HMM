@@ -23,6 +23,7 @@ EXE_LIBS = \
     -lincompressibleTransportModels \
     -linterfaceProperties \
     -limmiscibleIncompressibleTwoPhaseMixture \
+    -ltwoPhaseProperties \
     -lturbulenceModels \
     -lincompressibleTurbulenceModels \
     -ldynamicMesh \
