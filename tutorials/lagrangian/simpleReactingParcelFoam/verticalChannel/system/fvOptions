@@ -5,23 +5,22 @@
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
-forces
+FoamFile
 {
-    type          forces;
-    libs          (forces);
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvOptions;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    writeControl  timeStep;
-    timeInterval  1;
-
-    patches       ("propeller.*");
-    rho           rhoInf;     // Indicates incompressible
-    log           true;
-    rhoInf        1;          // Redundant for incompressible
-
-    CofR          (0 0 0);    // Rotation around centre line of propeller
-    pitchAxis     (0 1 0);
+limitT
+{
+    type       limitTemperature;
+    min        101;
+    max        600;
+    selectionMode all;
 }
 
 
-// ************************************************************************* //
+//************************************************************************** //
