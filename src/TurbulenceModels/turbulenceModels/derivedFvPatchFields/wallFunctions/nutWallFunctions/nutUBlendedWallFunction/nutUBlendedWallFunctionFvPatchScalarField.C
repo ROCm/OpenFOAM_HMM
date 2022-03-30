@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -103,7 +103,8 @@ Foam::nutUBlendedWallFunctionFvPatchScalarField::calcUTau
             {
                 const scalar yPlus = y[facei]*ut/nuw[facei];
                 const scalar uTauVis = magUp[facei]/yPlus;
-                const scalar uTauLog = kappa_*magUp[facei]/log(E_*yPlus);
+                const scalar uTauLog =
+                    kappa_*magUp[facei]/log(max(E_*yPlus, 1 + 1e-4));
 
                 const scalar utNew =
                     pow(pow(uTauVis, n_) + pow(uTauLog, n_), 1.0/n_);
