@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2017 OpenFOAM Foundation
+    Copyright (C) 2016-2021 OpenFOAM Foundation
     Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -864,7 +864,7 @@ Foam::scalar Foam::TDACChemistryModel<ReactionThermo, ThermoType>::solve
             << "    " << nActiveSpecies/nAvg << endl;
     }
 
-    if (Pstream::parRun())
+    if (reduced && Pstream::parRun())
     {
         List<bool> active(composition.active());
         Pstream::listCombineAllGather(active, orEqOp<bool>());
