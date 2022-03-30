@@ -3578,7 +3578,7 @@ void Foam::snappyRefineDriver::doRefine
     }
 
 
-    if (refineParams.minCellFraction() > 0)
+    if (refineParams.minCellFraction() > 0 || refineParams.nMinCells() > 0)
     {
         // Some small disconnected bits of mesh might remain since at
         // this point faceZones have not been converted into e.g. baffles.
