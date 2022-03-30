@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2010-2018 Bernhard Gschaider
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,8 +36,8 @@ Description
     \table
         Property     | Description                          | Required | Default
         variables    | List of variables for expressions    | no  | ()
-        lookup\<scalar\> | Dictionary of scalar Function1     | no  | {}
-        lookup\<vector\> | Dictionary of vector Function1     | no  | {}
+        functions\<scalar\> | Dictionary of scalar Function1   | no  | {}
+        functions\<vector\> | Dictionary of vector Function1   | no  | {}
         allowShadowing | Allow variables to shadow field names | no  | false
     \endtable
 
@@ -49,9 +49,10 @@ Description
         debug.parser  | Add debug for parser                | no  | false
     \endtable
 
-    The \c lookup<scalar> and \c lookup<vector> are dictionaries
-    of Function1 definitions that can either be used to establish
-    a time-varying quantity, to remap a field of scalar values, or both.
+    The \c functions<scalar> and \c functions<vector> entries are
+    dictionaries of Foam::Function1 definitions that can either be used
+    to establish a time-varying quantity, to remap a field of scalar
+    values, or both.
 
 SourceFiles
     exprDriverI.H
@@ -64,8 +65,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef expressions_exprDriver_H
-#define expressions_exprDriver_H
+#ifndef Foam_expressions_exprDriver_H
+#define Foam_expressions_exprDriver_H
 
 #include "exprResult.H"
 #include "exprString.H"

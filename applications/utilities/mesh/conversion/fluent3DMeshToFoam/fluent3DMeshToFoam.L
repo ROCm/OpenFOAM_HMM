@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2011-2016,2022 OpenFOAM Foundation
     Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -158,6 +158,7 @@ quote                      \"
 dash                       "-"
 dotColonDash               [.:-]
 commaPipe                  [,\|]
+squareBracket              [\[\]]
 
 schemeSpecialInitial       [!$%&*/\\:;<=>?~_^#.@']
 schemeSpecialSubsequent    [.+-]
@@ -172,6 +173,7 @@ zeroLabel                  {digit}*
 signedInteger              [-+]?{integer}
 word                       ({alpha}|{digit}|{dotColonDash})*
 wordBraces                 ({word}|{lbrac}|{rbrac})*
+wordSquareBrackets         ({word}|{squareBracket})*
 wordBracesExtras           ({word}|{lbrac}|{rbrac}|{commaPipe})*
 
 exponent_part              [eE][-+]?{digit}+
@@ -193,7 +195,7 @@ scalarList                 ({scalarListElement}+{space})
 schemeSymbolList           ({schemeSymbolListElement}+{space})
 
 starStar                   ("**")
-text                       ({space}({word}*{space})*)
+text                       ({space}({wordSquareBrackets}*{space})*)
 textBraces                 ({space}({wordBraces}*{space})*)
 textExtras                 ({space}({word}*{commaPipe}{space})*)
 textBracesExtras           ({space}({wordBracesExtras}*{space})*)
