@@ -51,16 +51,16 @@ namespace Foam
 
 Foam::structuredRenumber::structuredRenumber
 (
-    const dictionary& renumberDict
+    const dictionary& dict
 )
 :
-    renumberMethod(renumberDict),
-    methodDict_(renumberDict.optionalSubDict(typeName + "Coeffs")),
-    patches_(methodDict_.get<wordRes>("patches")),
-    nLayers_(methodDict_.getOrDefault<label>("nLayers", labelMax)),
-    depthFirst_(methodDict_.get<bool>("depthFirst")),
-    reverse_(methodDict_.get<bool>("reverse")),
-    method_(renumberMethod::New(methodDict_))
+    renumberMethod(dict),
+    coeffsDict_(dict.optionalSubDict(typeName + "Coeffs")),
+    patches_(coeffsDict_.get<wordRes>("patches")),
+    nLayers_(coeffsDict_.getOrDefault<label>("nLayers", labelMax)),
+    depthFirst_(coeffsDict_.get<bool>("depthFirst")),
+    reverse_(coeffsDict_.get<bool>("reverse")),
+    method_(renumberMethod::New(coeffsDict_))
 {}
 
 

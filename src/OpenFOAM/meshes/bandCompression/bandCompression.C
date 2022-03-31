@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,252 +24,310 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    The function renumbers the addressing such that the band of the
-    matrix is reduced. The algorithm uses a simple search through the
-    neighbour list
-
-    See http://en.wikipedia.org/wiki/Cuthill-McKee_algorithm
-
 \*---------------------------------------------------------------------------*/
 
 #include "bandCompression.H"
-#include "SLList.H"
-#include "IOstreams.H"
-#include "DynamicList.H"
-#include "ListOps.H"
 #include "bitSet.H"
+#include "CircularBuffer.H"
+#include "CompactListList.H"
+#include "DynamicList.H"
+#include "ListOps.H"  // sortedOrder
+#include "IOstreams.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
-Foam::labelList Foam::bandCompression(const labelListList& cellCellAddressing)
+namespace
 {
-    labelList newOrder(cellCellAddressing.size());
 
-    // the business bit of the renumbering
-    SLList<label> nextCell;
+// Process connections with the Cuthill-McKee algorithm.
+// The connections are CompactListList<label> or a labelListList.
+template<class ConnectionListListType>
+Foam::labelList cuthill_mckee_algorithm
+(
+    const ConnectionListListType& cellCellAddressing
+)
+{
+    using namespace Foam;
 
-    bitSet visited(cellCellAddressing.size());
+    const label nOldCells(cellCellAddressing.size());
 
-    label cellInOrder = 0;
+    // Which cells are visited/unvisited
+    bitSet unvisited(nOldCells, true);
+
+    // The new output order
+    labelList newOrder(nOldCells);
 
 
-    // Work arrays. Kept outside of loop to minimise allocations.
-    // - neighbour cells
-    DynamicList<label> nbrs;
-    // - corresponding weights
+    // Various work arrays
+    // ~~~~~~~~~~~~~~~~~~~
+
+    // Neighbour cells
+    DynamicList<label> nbrCells;
+
+    // Neighbour ordering
+    DynamicList<label> nbrOrder;
+
+    // Corresponding weights for neighbour cells
     DynamicList<label> weights;
 
-    // - ordering
-    labelList order;
+    // FIFO buffer for renumbering.
+    CircularBuffer<label> queuedCells(1024);
 
+    label cellInOrder = 0;
 
     while (true)
     {
         // For a disconnected region find the lowest connected cell.
+        label currCelli = -1;
+        label minCount = labelMax;
 
-        label currentCell = -1;
-        label minWeight = labelMax;
-
-        forAll(visited, celli)
+        for (const label celli : unvisited)
         {
-            // find the lowest connected cell that has not been visited yet
-            if (!visited[celli])
+            const label nbrCount = cellCellAddressing[celli].size();
+
+            if (minCount > nbrCount)
             {
-                if (cellCellAddressing[celli].size() < minWeight)
-                {
-                    minWeight = cellCellAddressing[celli].size();
-                    currentCell = celli;
-                }
+                minCount = nbrCount;
+                currCelli = celli;
             }
         }
 
-
-        if (currentCell == -1)
+        if (currCelli == -1)
         {
             break;
         }
 
 
-        // Starting from currentCell walk breadth-first
+        // Starting from currCelli - walk breadth-first
+
+        queuedCells.append(currCelli);
+
+        // Loop through queuedCells list. Add the first cell into the
+        // cell order if it has not already been visited and ask for its
+        // neighbours. If the neighbour in question has not been visited,
+        // add it to the end of the queuedCells list
+
+        while (!queuedCells.empty())
+        {
+            // Process as FIFO
+            currCelli = queuedCells.first();
+            queuedCells.pop_front();
+
+            if (unvisited.test(currCelli))
+            {
+                // First visit...
+                unvisited.unset(currCelli);
+
+                // Add into cellOrder
+                newOrder[cellInOrder] = currCelli;
+                ++cellInOrder;
+
+                // Add in increasing order of connectivity
+
+                // 1. Count neighbours of unvisited neighbours
+                nbrCells.clear();
+                weights.clear();
+
+                // Find if the neighbours have been visited
+                const auto& neighbours = cellCellAddressing[currCelli];
+
+                for (const label nbr : neighbours)
+                {
+                    const label nbrCount = cellCellAddressing[nbr].size();
+
+                    if (unvisited.test(nbr))
+                    {
+                        // Not visited (or removed), add to the list
+                        nbrCells.append(nbr);
+                        weights.append(nbrCount);
+                    }
+                }
+
+                // Resize DynamicList prior to sortedOrder
+                nbrOrder.resize_nocopy(weights.size());
+
+                // 2. Ascending order
+                Foam::sortedOrder(weights, nbrOrder);
+
+                // 3. Add to FIFO in sorted order
+                for (const label nbrIdx : nbrOrder)
+                {
+                    queuedCells.append(nbrCells[nbrIdx]);
+                }
+            }
+        }
+    }
+
+    // Now we have new-to-old in newOrder.
+    return newOrder;
+}
+
+} // End anonymous namespace
 
 
-        // use this cell as a start
-        nextCell.append(currentCell);
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+Foam::labelList Foam::meshTools::bandCompression
+(
+    const labelUList& cellCells,
+    const labelUList& offsets
+)
+{
+    // Protect against zero-sized offset list
+    const label nOldCells = max(0, (offsets.size()-1));
+
+    // Count number of neighbours
+    labelList numNbrs(nOldCells, Zero);
+    for (label celli = 0; celli < nOldCells; ++celli)
+    {
+        const label beg = offsets[celli];
+        const label end = offsets[celli+1];
+
+        for (label idx = beg; idx < end; ++idx)
+        {
+            ++numNbrs[celli];
+            ++numNbrs[cellCells[idx]];
+        }
+    }
+
+
+    // Which cells are visited/unvisited
+    bitSet unvisited(nOldCells, true);
+
+    // The new output order
+    labelList newOrder(nOldCells);
+
+
+    // Various work arrays
+    // ~~~~~~~~~~~~~~~~~~~
+
+    // Neighbour cells
+    DynamicList<label> nbrCells;
+
+    // Neighbour ordering
+    DynamicList<label> nbrOrder;
+
+    // Corresponding weights for neighbour cells
+    DynamicList<label> weights;
+
+    // FIFO buffer for renumbering.
+    CircularBuffer<label> queuedCells(1024);
+
+
+    label cellInOrder = 0;
+
+    while (true)
+    {
+        // Find lowest connected cell that has not been visited yet
+        label currCelli = -1;
+        label minCount = labelMax;
+
+        for (const label celli : unvisited)
+        {
+            const label nbrCount = numNbrs[celli];
+
+            if (minCount > nbrCount)
+            {
+                minCount = nbrCount;
+                currCelli = celli;
+            }
+        }
+
+        if (currCelli == -1)
+        {
+            break;
+        }
+
+
+        // Starting from currCellii - walk breadth-first
+
+        queuedCells.append(currCelli);
 
         // loop through the nextCell list. Add the first cell into the
         // cell order if it has not already been visited and ask for its
         // neighbours. If the neighbour in question has not been visited,
         // add it to the end of the nextCell list
 
-        while (nextCell.size())
+        // Loop through queuedCells list. Add the first cell into the
+        // cell order if it has not already been visited and ask for its
+        // neighbours. If the neighbour in question has not been visited,
+        // add it to the end of the queuedCells list
+
+        while (!queuedCells.empty())
         {
-            currentCell = nextCell.removeHead();
+            // Process as FIFO
+            currCelli = queuedCells.first();
+            queuedCells.pop_front();
 
-            if (visited.set(currentCell))
+            if (unvisited.test(currCelli))
             {
-                // On first visit...
+                // First visit...
+                unvisited.unset(currCelli);
 
-                // add into cellOrder
-                newOrder[cellInOrder] = currentCell;
-                cellInOrder++;
-
-                // find if the neighbours have been visited
-                const labelList& neighbours = cellCellAddressing[currentCell];
+                // Add into cellOrder
+                newOrder[cellInOrder] = currCelli;
+                ++cellInOrder;
 
                 // Add in increasing order of connectivity
 
                 // 1. Count neighbours of unvisited neighbours
-                nbrs.clear();
+                nbrCells.clear();
                 weights.clear();
 
-                forAll(neighbours, nI)
+                const label beg = offsets[currCelli];
+                const label end = offsets[currCelli+1];
+
+                for (label idx = beg; idx < end; ++idx)
                 {
-                    label nbr = neighbours[nI];
-                    if (!visited[nbr])
+                    const label nbr = cellCells[idx];
+                    const label nbrCount = numNbrs[nbr];
+
+                    if (unvisited.test(nbr))
                     {
-                        // not visited, add to the list
-                        nbrs.append(nbr);
-                        weights.append(cellCellAddressing[nbr].size());
+                        // Not visited (or removed), add to the list
+                        nbrCells.append(nbr);
+                        weights.append(nbrCount);
                     }
                 }
-                // 2. Sort in ascending order
-                sortedOrder(weights, order);
-                // 3. Add in sorted order
-                forAll(order, i)
+
+                // Resize DynamicList prior to sortedOrder
+                nbrOrder.resize_nocopy(weights.size());
+
+                // 2. Ascending order
+                Foam::sortedOrder(weights, nbrOrder);
+
+                // 3. Add to FIFO in sorted order
+                for (const label nbrIdx : nbrOrder)
                 {
-                    nextCell.append(nbrs[i]);
+                    queuedCells.append(nbrCells[nbrIdx]);
                 }
             }
         }
     }
+
+    // Now we have new-to-old in newOrder.
 
     return newOrder;
 }
 
 
-Foam::labelList Foam::bandCompression
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+Foam::labelList Foam::meshTools::bandCompression
 (
-    const labelList& cellCells,
-    const labelList& offsets
+    const CompactListList<label>& cellCellAddressing
 )
 {
-    // Count number of neighbours
-    labelList numNbrs(offsets.size()-1, Zero);
-    forAll(numNbrs, celli)
-    {
-        label start = offsets[celli];
-        label end = offsets[celli+1];
-
-        for (label facei = start; facei < end; facei++)
-        {
-            numNbrs[celli]++;
-            numNbrs[cellCells[facei]]++;
-        }
-    }
+    return cuthill_mckee_algorithm(cellCellAddressing);
+}
 
 
-    labelList newOrder(offsets.size()-1);
-
-    // the business bit of the renumbering
-    SLList<label> nextCell;
-
-    bitSet visited(offsets.size()-1);
-
-    label cellInOrder = 0;
-
-
-    // Work arrays. Kept outside of loop to minimise allocations.
-    // - neighbour cells
-    DynamicList<label> nbrs;
-    // - corresponding weights
-    DynamicList<label> weights;
-
-    // - ordering
-    labelList order;
-
-
-    while (true)
-    {
-        // For a disconnected region find the lowest connected cell.
-
-        label currentCell = -1;
-        label minWeight = labelMax;
-
-        forAll(visited, celli)
-        {
-            // find the lowest connected cell that has not been visited yet
-            if (!visited[celli])
-            {
-                if (numNbrs[celli] < minWeight)
-                {
-                    minWeight = numNbrs[celli];
-                    currentCell = celli;
-                }
-            }
-        }
-
-
-        if (currentCell == -1)
-        {
-            break;
-        }
-
-
-        // Starting from currentCell walk breadth-first
-
-
-        // use this cell as a start
-        nextCell.append(currentCell);
-
-        // loop through the nextCell list. Add the first cell into the
-        // cell order if it has not already been visited and ask for its
-        // neighbours. If the neighbour in question has not been visited,
-        // add it to the end of the nextCell list
-
-        while (nextCell.size())
-        {
-            currentCell = nextCell.removeHead();
-
-            if (!visited[currentCell])
-            {
-                visited.set(currentCell);
-
-                // add into cellOrder
-                newOrder[cellInOrder] = currentCell;
-                cellInOrder++;
-
-                // Add in increasing order of connectivity
-
-                // 1. Count neighbours of unvisited neighbours
-                nbrs.clear();
-                weights.clear();
-
-                label start = offsets[currentCell];
-                label end = offsets[currentCell+1];
-
-                for (label facei = start; facei < end; facei++)
-                {
-                    label nbr = cellCells[facei];
-                    if (!visited[nbr])
-                    {
-                        // not visited, add to the list
-                        nbrs.append(nbr);
-                        weights.append(numNbrs[nbr]);
-                    }
-                }
-                // 2. Sort in ascending order
-                sortedOrder(weights, order);
-                // 3. Add in sorted order
-                forAll(order, i)
-                {
-                    nextCell.append(nbrs[i]);
-                }
-            }
-        }
-    }
-
-    return newOrder;
+Foam::labelList Foam::meshTools::bandCompression
+(
+    const labelListList& cellCellAddressing
+)
+{
+    return cuthill_mckee_algorithm(cellCellAddressing);
 }
 
 

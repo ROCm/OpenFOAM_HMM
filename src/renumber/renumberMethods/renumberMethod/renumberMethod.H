@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef renumberMethod_H
-#define renumberMethod_H
+#ifndef Foam_renumberMethod_H
+#define Foam_renumberMethod_H
 
 #include "polyMesh.H"
 #include "pointField.H"
@@ -98,9 +99,9 @@ public:
     // Constructors
 
         //- Construct given the renumber dictionary
-        renumberMethod(const dictionary& renumberDict)
+        explicit renumberMethod(const dictionary& dict)
         :
-            renumberDict_(renumberDict)
+            renumberDict_(dict)
         {}
 
 
@@ -110,8 +111,8 @@ public:
 
     // Member Functions
 
-        //- Return the order in which cells need to be visited, i.e.
-        //  from ordered back to original cell label.
+        //- Return the order in which cells need to be visited
+        //- (ie. from ordered back to original cell label).
         //  This is only defined for geometric renumberMethods.
         virtual labelList renumber(const pointField&) const
         {
@@ -119,13 +120,13 @@ public:
             return labelList();
         }
 
-        //- Return the order in which cells need to be visited, i.e.
-        //  from ordered back to original cell label.
+        //- Return the order in which cells need to be visited
+        //- (ie. from ordered back to original cell label).
         //  Use the mesh connectivity (if needed)
         virtual labelList renumber(const polyMesh&, const pointField&) const;
 
-        //- Return the order in which cells need to be visited, i.e.
-        //  from ordered back to original cell label.
+        //- Return the order in which cells need to be visited
+        //- (ie. from ordered back to original cell label).
         //  Addressing in losort addressing (= neighbour + offsets into
         //  neighbour)
         virtual labelList renumber
@@ -135,8 +136,8 @@ public:
             const pointField&
         ) const;
 
-        //- Return the order in which cells need to be visited, i.e.
-        //  from ordered back to original cell label.
+        //- Return the order in which cells need to be visited
+        //- (ie. from ordered back to original cell label).
         //  Gets passed agglomeration map (from fine to coarse cells) and coarse
         //  cell
         //  location. Can be overridden by renumberMethods that provide this
@@ -146,20 +147,28 @@ public:
         virtual labelList renumber
         (
             const polyMesh& mesh,
-            const labelList& cellToRegion,
-            const pointField& regionPoints
+            const labelList& fineToCoarse,
+            const pointField& coarsePoints
         ) const;
 
-        //- Return the order in which cells need to be visited, i.e.
-        //  from ordered back to original cell label.
+        //- Return the order in which cells need to be visited
+        //- (ie. from ordered back to original cell label).
+        //  Uses 'unpack' internally, so should be overloaded when possible
+        virtual labelList renumber
+        (
+            const CompactListList<label>& cellCells,
+            const pointField& cellCentres
+        ) const;
+
+        //- Return the order in which cells need to be visited
+        //- (ie. from ordered back to original cell label).
         //  The connectivity is equal to mesh.cellCells() except
         //  - the connections are across coupled patches
         virtual labelList renumber
         (
             const labelListList& cellCells,
-            const pointField& cc
+            const pointField& cellCentres
         ) const = 0;
-
 };
 
 

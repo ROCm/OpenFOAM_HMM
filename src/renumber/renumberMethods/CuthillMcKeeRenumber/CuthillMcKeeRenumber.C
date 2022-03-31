@@ -48,15 +48,13 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::CuthillMcKeeRenumber::CuthillMcKeeRenumber(const dictionary& renumberDict)
+Foam::CuthillMcKeeRenumber::CuthillMcKeeRenumber(const dictionary& dict)
 :
-    renumberMethod(renumberDict),
+    renumberMethod(dict),
     reverse_
     (
-        renumberDict.optionalSubDict
-        (
-            typeName + "Coeffs"
-        ).getOrDefault("reverse", false)
+        dict.optionalSubDict(typeName + "Coeffs")
+            .getOrDefault("reverse", false)
     )
 {}
 
@@ -79,7 +77,7 @@ Foam::labelList Foam::CuthillMcKeeRenumber::renumber
         cellCells
     );
 
-    labelList orderedToOld = bandCompression(cellCells.unpack());
+    labelList orderedToOld = meshTools::bandCompression(cellCells);
 
     if (reverse_)
     {
@@ -97,7 +95,24 @@ Foam::labelList Foam::CuthillMcKeeRenumber::renumber
     const pointField& cc
 ) const
 {
-    labelList orderedToOld = bandCompression(cellCells, offsets);
+    labelList orderedToOld = meshTools::bandCompression(cellCells, offsets);
+
+    if (reverse_)
+    {
+        reverse(orderedToOld);
+    }
+
+    return orderedToOld;
+}
+
+
+Foam::labelList Foam::CuthillMcKeeRenumber::renumber
+(
+    const CompactListList<label>& cellCells,
+    const pointField& cc
+) const
+{
+    labelList orderedToOld = meshTools::bandCompression(cellCells);
 
     if (reverse_)
     {
@@ -114,7 +129,7 @@ Foam::labelList Foam::CuthillMcKeeRenumber::renumber
     const pointField& points
 ) const
 {
-    labelList orderedToOld = bandCompression(cellCells);
+    labelList orderedToOld = meshTools::bandCompression(cellCells);
 
     if (reverse_)
     {

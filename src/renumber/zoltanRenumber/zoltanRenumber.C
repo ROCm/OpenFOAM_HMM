@@ -261,10 +261,10 @@ static void get_geom_list
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::zoltanRenumber::zoltanRenumber(const dictionary& renumberDict)
+Foam::zoltanRenumber::zoltanRenumber(const dictionary& dict)
 :
-    renumberMethod(renumberDict),
-    coeffsDict_(renumberDict.optionalSubDict(typeName+"Coeffs"))
+    renumberMethod(dict),
+    coeffsDict_(dict.optionalSubDict(typeName+"Coeffs"))
 {}
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -293,7 +293,7 @@ Foam::PrimitivePatch<FaceList, PointField>::projectFaceCentres
             << abort(FatalError);
     }
 
-    labelList slaveFaceOrder = bandCompression(faceFaces());
+    labelList slaveFaceOrder = meshTools::bandCompression(faceFaces());
 
     // calculate master face centres
     Field<point_type> masterFaceCentres(targetPatch.size());

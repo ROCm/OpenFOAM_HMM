@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,7 +30,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "PrimitivePatch.H"
-#include "SLList.H"
+#include "DynamicList.H"
 #include "ListOps.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -73,10 +73,10 @@ Foam::PrimitivePatch<FaceList, PointField>::calcPointFaces() const
             << abort(FatalError);
     }
 
-    const List<face_type>& locFcs = localFaces();
+    // Local storage while creating pointFaces
+    List<DynamicList<label>> pointFcs(meshPoints().size());
 
-    // set up storage for pointFaces
-    List<SLList<label>> pointFcs(meshPoints().size());
+    const List<face_type>& locFcs = localFaces();
 
     forAll(locFcs, facei)
     {
@@ -86,13 +86,13 @@ Foam::PrimitivePatch<FaceList, PointField>::calcPointFaces() const
         }
     }
 
-    // Copy the list
+    // Copy the lists, recovering content
     pointFacesPtr_.reset(new labelListList(pointFcs.size()));
     auto& pf = *pointFacesPtr_;
 
     forAll(pointFcs, pointi)
     {
-        pf[pointi] = pointFcs[pointi];
+        pf[pointi].transfer(pointFcs[pointi]);
     }
 
     DebugInfo << "    Finished." << endl;

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,8 +46,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef springRenumber_H
-#define springRenumber_H
+#ifndef Foam_springRenumber_H
+#define Foam_springRenumber_H
 
 #include "renumberMethod.H"
 
@@ -61,17 +62,26 @@ class springRenumber
 :
     public renumberMethod
 {
-    // Private data
+    // Private Data
 
-        const dictionary& dict_;
-
-        const scalar maxCo_;
+        const dictionary& coeffsDict_;
 
         const label maxIter_;
 
+        const scalar maxCo_;
+
         const scalar freezeFraction_;
 
+
     // Private Member Functions
+
+        //- The spring renumber implementation.
+        //  The connections are CompactListList<label> or a labelListList.
+        template<class ConnectionListListType>
+        labelList renumberImpl
+        (
+            const ConnectionListListType& cellCellAddressing
+        ) const;
 
         //- No copy construct
         springRenumber(const springRenumber&) = delete;
@@ -89,7 +99,7 @@ public:
     // Constructors
 
         //- Construct given the renumber dictionary
-        springRenumber(const dictionary& renumberDict);
+        explicit springRenumber(const dictionary& dict);
 
 
     //- Destructor
@@ -98,32 +108,40 @@ public:
 
     // Member Functions
 
-        //- Return the order in which cells need to be visited, i.e.
-        //  from ordered back to original cell label.
+        //- Return the order in which cells need to be visited
+        //- (ie. from ordered back to original cell label).
         //  This is only defined for geometric renumberMethods.
         virtual labelList renumber(const pointField&) const
         {
             NotImplemented;
-            return labelList(0);
+            return labelList();
         }
 
-        //- Return the order in which cells need to be visited, i.e.
-        //  from ordered back to original cell label.
+        //- Return the order in which cells need to be visited
+        //- (ie. from ordered back to original cell label).
         //  Use the mesh connectivity (if needed)
         virtual labelList renumber
         (
             const polyMesh& mesh,
-            const pointField& cc
+            const pointField&
         ) const;
 
-        //- Return the order in which cells need to be visited, i.e.
-        //  from ordered back to original cell label.
+        //- Return the order in which cells need to be visited
+        //- (ie. from ordered back to original cell label).
+        virtual labelList renumber
+        (
+            const CompactListList<label>& cellCells,
+            const pointField& cellCentres
+        ) const;
+
+        //- Return the order in which cells need to be visited
+        //- (ie. from ordered back to original cell label).
         //  The connectivity is equal to mesh.cellCells() except
         //  - the connections are across coupled patches
         virtual labelList renumber
         (
             const labelListList& cellCells,
-            const pointField& cc
+            const pointField& cellCentres
         ) const;
 };
 

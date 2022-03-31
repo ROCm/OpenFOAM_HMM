@@ -47,58 +47,43 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::springRenumber::springRenumber(const dictionary& renumberDict)
+Foam::springRenumber::springRenumber(const dictionary& dict)
 :
-    renumberMethod(renumberDict),
-    dict_(renumberDict.optionalSubDict(typeName+"Coeffs")),
-    maxCo_(dict_.get<scalar>("maxCo")),
-    maxIter_(dict_.get<label>("maxIter")),
-    freezeFraction_(dict_.get<scalar>("freezeFraction"))
+    renumberMethod(dict),
+    coeffsDict_(dict.optionalSubDict(typeName+"Coeffs")),
+    maxIter_(coeffsDict_.get<label>("maxIter")),
+    maxCo_(coeffsDict_.get<scalar>("maxCo")),
+    freezeFraction_(coeffsDict_.get<scalar>("freezeFraction"))
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::labelList Foam::springRenumber::renumber
+template<class ConnectionListListType>
+Foam::labelList Foam::springRenumber::renumberImpl
 (
-    const polyMesh& mesh,
-    const pointField& points
+    const ConnectionListListType& cellCells
 ) const
 {
-    CompactListList<label> cellCells;
-    decompositionMethod::calcCellCells
-    (
-        mesh,
-        identity(mesh.nCells()),
-        mesh.nCells(),
-        false,                      // local only
-        cellCells
-    );
+    const label nOldCells(cellCells.size());
 
-    return renumber(cellCells.unpack(), points);
-}
-
-
-Foam::labelList Foam::springRenumber::renumber
-(
-    const labelListList& cellCells,
-    const pointField& points
-) const
-{
     // Look at cell index as a 1D position parameter.
     // Move cells to the average 'position' of their neighbour.
 
-    scalarField position(cellCells.size());
+    scalarField position(nOldCells);
     forAll(position, celli)
     {
         position[celli] = celli;
     }
 
-    labelList oldToNew(identity(cellCells.size()));
+    // Sum force per cell. Also reused for the displacement
+    scalarField sumForce(nOldCells);
 
-    scalar maxCo = maxCo_ * cellCells.size();
+    labelList oldToNew(identity(nOldCells));
 
-    for (label iter = 0; iter < maxIter_; iter++)
+    scalar maxCo = (maxCo_ * nOldCells);
+
+    for (label iter = 0; iter < maxIter_; ++iter)
     {
         //Pout<< "Iteration : " << iter << nl
         //    << "------------"
@@ -111,15 +96,15 @@ Foam::labelList Foam::springRenumber::renumber
         //    << endl;
 
         // Sum force per cell.
-        scalarField sumForce(cellCells.size(), Zero);
-        forAll(cellCells, oldCelli)
+        sumForce = Zero;
+        for (label oldCelli = 0; oldCelli < nOldCells; ++oldCelli)
         {
-            const labelList& cCells = cellCells[oldCelli];
-            label celli = oldToNew[oldCelli];
+            const label celli = oldToNew[oldCelli];
+            const auto& neighbours = cellCells[oldCelli];
 
-            forAll(cCells, i)
+            for (const label nbr : neighbours)
             {
-                label nbrCelli = oldToNew[cCells[i]];
+                const label nbrCelli = oldToNew[nbr];
 
                 sumForce[celli] += (position[nbrCelli]-position[celli]);
             }
@@ -140,8 +125,9 @@ Foam::labelList Foam::springRenumber::renumber
             << "  deltaT:" << deltaT
             << "  average force:" << average(mag(sumForce)) << endl;
 
-        // Determine displacement.
-        scalarField displacement(deltaT*sumForce);
+        // Determine displacement
+        scalarField& displacement = sumForce;
+        displacement *= deltaT;
 
         //Pout<< "Displacement :" << nl
         //    << "    min    : " << min(displacement) << nl
@@ -167,7 +153,47 @@ Foam::labelList Foam::springRenumber::renumber
     // Reorder oldToNew
     inplaceReorder(shuffle, oldToNew);
 
-    return invert(oldToNew.size(), oldToNew);
+    return invert(nOldCells, oldToNew);
+}
+
+
+Foam::labelList Foam::springRenumber::renumber
+(
+    const polyMesh& mesh,
+    const pointField&
+) const
+{
+    CompactListList<label> cellCells;
+    decompositionMethod::calcCellCells
+    (
+        mesh,
+        identity(mesh.nCells()),
+        mesh.nCells(),
+        false,                      // local only
+        cellCells
+    );
+
+    return renumberImpl(cellCells);
+}
+
+
+Foam::labelList Foam::springRenumber::renumber
+(
+    const CompactListList<label>& cellCells,
+    const pointField&
+) const
+{
+    return renumberImpl(cellCells);
+}
+
+
+Foam::labelList Foam::springRenumber::renumber
+(
+    const labelListList& cellCells,
+    const pointField&
+) const
+{
+    return renumberImpl(cellCells);
 }
 
 

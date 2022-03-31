@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2015 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,11 +37,10 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SloanRenumber_H
-#define SloanRenumber_H
+#ifndef Foam_SloanRenumber_H
+#define Foam_SloanRenumber_H
 
 #include "renumberMethod.H"
-#include "Switch.H"
 
 namespace Foam
 {
@@ -53,7 +53,7 @@ class SloanRenumber
 :
     public renumberMethod
 {
-    // Private data
+    // Private Data
 
         const bool reverse_;
 
@@ -76,7 +76,7 @@ public:
     // Constructors
 
         //- Construct given the renumber dictionary
-        SloanRenumber(const dictionary& renumberDict);
+        explicit SloanRenumber(const dictionary& dict);
 
 
     //- Destructor
@@ -85,17 +85,17 @@ public:
 
     // Member Functions
 
-        //- Return the order in which cells need to be visited, i.e.
-        //  from ordered back to original cell label.
+        //- Return the order in which cells need to be visited
+        //- (ie. from ordered back to original cell label).
         //  This is only defined for geometric renumberMethods.
         virtual labelList renumber(const pointField&) const
         {
             NotImplemented;
-            return labelList(0);
+            return labelList();
         }
 
-        //- Return the order in which cells need to be visited, i.e.
-        //  from ordered back to original cell label.
+        //- Return the order in which cells need to be visited
+        //- (ie. from ordered back to original cell label).
         //  Use the mesh connectivity (if needed)
         virtual labelList renumber
         (
@@ -103,8 +103,16 @@ public:
             const pointField& cc
         ) const;
 
-        //- Return the order in which cells need to be visited, i.e.
-        //  from ordered back to original cell label.
+        //- Return the order in which cells need to be visited
+        //- (ie. from ordered back to original cell label).
+        virtual labelList renumber
+        (
+            const CompactListList<label>& cellCells,
+            const pointField& cellCentres
+        ) const;
+
+        //- Return the order in which cells need to be visited
+        //- (ie. from ordered back to original cell label).
         //  The connectivity is equal to mesh.cellCells() except
         //  - the connections are across coupled patches
         virtual labelList renumber

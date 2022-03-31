@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2012 OpenFOAM Foundation
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,8 +27,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "randomRenumber.H"
-#include "addToRunTimeSelectionTable.H"
 #include "Random.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,9 +47,9 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::randomRenumber::randomRenumber(const dictionary& renumberDict)
+Foam::randomRenumber::randomRenumber(const dictionary& dict)
 :
-    renumberMethod(renumberDict)
+    renumberMethod(dict)
 {}
 
 
@@ -79,6 +79,16 @@ Foam::labelList Foam::randomRenumber::renumber
 Foam::labelList Foam::randomRenumber::renumber
 (
     const polyMesh& mesh,
+    const pointField& points
+) const
+{
+    return renumber(points);
+}
+
+
+Foam::labelList Foam::randomRenumber::renumber
+(
+    const CompactListList<label>& cellCells,
     const pointField& points
 ) const
 {

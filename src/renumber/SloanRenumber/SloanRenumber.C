@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,7 +47,6 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 using namespace boost;
-using namespace std;
 
 //Defining the graph type
 typedef adjacency_list
@@ -90,17 +89,66 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::SloanRenumber::SloanRenumber(const dictionary& renumberDict)
+Foam::SloanRenumber::SloanRenumber(const dictionary& dict)
 :
-    renumberMethod(renumberDict),
+    renumberMethod(dict),
     reverse_
     (
-        renumberDict.optionalSubDict
-        (
-            typeName + "Coeffs"
-        ).getOrDefault("reverse", false)
+        dict.optionalSubDict(typeName + "Coeffs")
+            .getOrDefault("reverse", false)
     )
 {}
+
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace
+{
+
+Foam::labelList renumberImpl(Graph& G, const bool useReverse)
+{
+    using namespace Foam;
+
+    //Creating two iterators over the vertices
+    graph_traits<Graph>::vertex_iterator ui, ui_end;
+
+    //Creating a property_map with the degrees of the degrees of each vertex
+    property_map<Graph,vertex_degree_t>::type deg = get(vertex_degree, G);
+    for (boost::tie(ui, ui_end) = vertices(G); ui != ui_end; ++ui)
+    {
+        deg[*ui] = degree(*ui, G);
+    }
+
+    //Creating a property_map for the indices of a vertex
+    property_map<Graph, vertex_index_t>::type index_map = get(vertex_index, G);
+
+    //Creating a vector of vertices
+    std::vector<Vertex> sloan_order(num_vertices(G));
+
+    sloan_ordering
+    (
+        G,
+        sloan_order.begin(),
+        get(vertex_color, G),
+        make_degree_map(G),
+        get(vertex_priority, G)
+    );
+
+    labelList orderedToOld(sloan_order.size());
+    forAll(orderedToOld, c)
+    {
+        orderedToOld[c] = index_map[sloan_order[c]];
+    }
+
+    if (useReverse)
+    {
+        Foam::reverse(orderedToOld);
+    }
+
+    return orderedToOld;
+}
+
+} // End anonymous namespace
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -132,6 +180,7 @@ Foam::labelList Foam::SloanRenumber::renumber
     {
         add_edge(mesh.faceOwner()[facei], mesh.faceNeighbour()[facei], G);
     }
+
     // Add cyclics
     for (const polyPatch& pp : mesh.boundaryMesh())
     {
@@ -161,100 +210,57 @@ Foam::labelList Foam::SloanRenumber::renumber
         }
     }
 
-
-    //Creating two iterators over the vertices
-    graph_traits<Graph>::vertex_iterator ui, ui_end;
-
-    //Creating a property_map with the degrees of the degrees of each vertex
-    property_map<Graph,vertex_degree_t>::type deg = get(vertex_degree, G);
-    for (boost::tie(ui, ui_end) = vertices(G); ui != ui_end; ++ui)
-        deg[*ui] = degree(*ui, G);
-
-    //Creating a property_map for the indices of a vertex
-    property_map<Graph, vertex_index_t>::type index_map = get(vertex_index, G);
-
-    //Creating a vector of vertices
-    std::vector<Vertex> sloan_order(num_vertices(G));
-
-    sloan_ordering
-    (
-        G,
-        sloan_order.begin(),
-        get(vertex_color, G),
-        make_degree_map(G),
-        get(vertex_priority, G)
-    );
-
-    labelList orderedToOld(sloan_order.size());
-    forAll(orderedToOld, c)
-    {
-        orderedToOld[c] = index_map[sloan_order[c]];
-    }
-
-    if (reverse_)
-    {
-        reverse(orderedToOld);
-    }
-
-    return orderedToOld;
+    return renumberImpl(G, reverse_);
 }
 
 
 Foam::labelList Foam::SloanRenumber::renumber
 (
-    const labelListList& cellCells,
-    const pointField& points
+    const CompactListList<label>& cellCells,
+    const pointField&
 ) const
 {
     Graph G(cellCells.size());
 
     forAll(cellCells, celli)
     {
-        const labelList& nbrs = cellCells[celli];
-        forAll(nbrs, i)
+        const auto& neighbours = cellCells[celli];
+
+        for (const label nbr : neighbours)
         {
-            if (nbrs[i] > celli)
+            if (celli < nbr)
             {
-                add_edge(celli, nbrs[i], G);
+                add_edge(celli, nbr, G);
             }
         }
     }
 
-    //Creating two iterators over the vertices
-    graph_traits<Graph>::vertex_iterator ui, ui_end;
+    return renumberImpl(G, reverse_);
+}
 
-    //Creating a property_map with the degrees of the degrees of each vertex
-    property_map<Graph,vertex_degree_t>::type deg = get(vertex_degree, G);
-    for (boost::tie(ui, ui_end) = vertices(G); ui != ui_end; ++ui)
-        deg[*ui] = degree(*ui, G);
 
-    //Creating a property_map for the indices of a vertex
-    property_map<Graph, vertex_index_t>::type index_map = get(vertex_index, G);
+Foam::labelList Foam::SloanRenumber::renumber
+(
+    const labelListList& cellCells,
+    const pointField&
+) const
+{
+    Graph G(cellCells.size());
 
-    //Creating a vector of vertices
-    std::vector<Vertex> sloan_order(num_vertices(G));
-
-    sloan_ordering
-    (
-        G,
-        sloan_order.begin(),
-        get(vertex_color, G),
-        make_degree_map(G),
-        get(vertex_priority, G)
-    );
-
-    labelList orderedToOld(sloan_order.size());
-    forAll(orderedToOld, c)
+    forAll(cellCells, celli)
     {
-        orderedToOld[c] = index_map[sloan_order[c]];
+        const auto& neighbours = cellCells[celli];
+
+        for (const label nbr : neighbours)
+        {
+            if (celli < nbr)
+            {
+                add_edge(celli, nbr, G);
+            }
+        }
     }
 
-    if (reverse_)
-    {
-        reverse(orderedToOld);
-    }
-
-    return orderedToOld;
+    return renumberImpl(G, reverse_);
 }
 
 

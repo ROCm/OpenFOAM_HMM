@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,15 +31,16 @@ Description
     The bandCompression function renumbers the addressing such that the
     band of the matrix is reduced. The algorithm uses a simple search
     through the neighbour list in order of connectivity.
-    (CutHill-McKee algorithm)
+
+    See http://en.wikipedia.org/wiki/Cuthill-McKee_algorithm
 
 SourceFiles
     bandCompression.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef bandCompression_H
-#define bandCompression_H
+#ifndef Foam_bandCompression_H
+#define Foam_bandCompression_H
 
 #include "labelList.H"
 
@@ -47,16 +49,71 @@ SourceFiles
 namespace Foam
 {
 
-//- Renumbers the addressing to reduce the band of the matrix.
-//  The algorithm uses a simple search through the neighbour list
-//  Returns the order in which the cells need to be visited (i.e. ordered to
-//  original)
-labelList bandCompression(const labelListList& addressing);
-
-//- Renumber with addressing in losort form (neighbour + start in neighbour)
-labelList bandCompression(const labelList& cellCells, const labelList& offsets);
+// Forward Declarations
+template<class T> class CompactListList;
 
 } // End namespace Foam
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+namespace meshTools
+{
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+//- Renumber (mesh) addressing to reduce the band of the matrix,
+//- using the Cuthill-McKee algorithm.
+//
+//  \returns order in which the cells are to be visited (ordered to original)
+labelList bandCompression(const CompactListList<label>& addressing);
+
+//- Renumber (mesh) addressing to reduce the band of the matrix,
+//- using the Cuthill-McKee algorithm.
+//
+//  \returns order in which the cells are to be visited (ordered to original)
+labelList bandCompression(const labelListList& addressing);
+
+//- Renumber with addressing in losort form (neighbour + start in neighbour),
+//- using the Cuthill-McKee algorithm.
+//
+//  \returns order in which the cells are to be visited (ordered to original)
+labelList bandCompression
+(
+    const labelUList& cellCells,
+    const labelUList& offsets
+);
+
+
+} // End namespace meshTools
+} // End namespace Foam
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+//- Forward to meshTools::bandCompression
+inline labelList bandCompression(const labelListList& cellCellAddressing)
+{
+    return meshTools::bandCompression(cellCellAddressing);
+}
+
+//- Forward to meshTools::bandCompression
+inline labelList bandCompression
+(
+    const labelUList& cellCells,
+    const labelUList& offsets
+)
+{
+    return meshTools::bandCompression(cellCells, offsets);
+}
+
+} // End namespace Foam
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

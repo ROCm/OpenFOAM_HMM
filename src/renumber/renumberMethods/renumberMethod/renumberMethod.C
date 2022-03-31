@@ -24,9 +24,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-InClass
-    renumberMethod
-
 \*---------------------------------------------------------------------------*/
 
 #include "renumberMethod.H"
@@ -40,7 +37,7 @@ namespace Foam
     defineRunTimeSelectionTable(renumberMethod, dictionary);
 }
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
 Foam::autoPtr<Foam::renumberMethod> Foam::renumberMethod::New
 (
@@ -68,6 +65,8 @@ Foam::autoPtr<Foam::renumberMethod> Foam::renumberMethod::New
 }
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
 Foam::labelList Foam::renumberMethod::renumber
 (
     const polyMesh& mesh,
@@ -84,7 +83,16 @@ Foam::labelList Foam::renumberMethod::renumber
         cellCells
     );
 
-    // Renumber based on agglomerated points
+    return renumber(cellCells, points);
+}
+
+
+Foam::labelList Foam::renumberMethod::renumber
+(
+    const CompactListList<label>& cellCells,
+    const pointField& points
+) const
+{
     return renumber(cellCells.unpack(), points);
 }
 
@@ -121,11 +129,7 @@ Foam::labelList Foam::renumberMethod::renumber
     // Renumber based on agglomerated points
     labelList coarseDistribution
     (
-        renumber
-        (
-            coarseCellCells.unpack(),
-            coarsePoints
-        )
+        renumber(coarseCellCells, coarsePoints)
     );
 
     // Rework back into renumbering for original mesh_

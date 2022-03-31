@@ -37,10 +37,11 @@ License
 #include "polyAddCell.H"
 #include "polyModifyCell.H"
 #include "polyRemoveCell.H"
+#include "CircularBuffer.H"
 #include "CompactListList.H"
 #include "objectMap.H"
 #include "processorPolyPatch.H"
-#include "ListOps.H"
+#include "ListOps.H"  // sortedOrder
 #include "mapPolyMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -588,111 +589,130 @@ Foam::label Foam::polyTopoChange::getCellOrder
     labelList& oldToNew
 ) const
 {
-    labelList newOrder(cellCellAddressing.size());
+    const label nOldCells(cellCellAddressing.size());
 
-    // Fifo buffer for string of cells
-    SLList<label> nextCell;
+    // Which cells are visited/unvisited
+    bitSet unvisited(nOldCells, true);
 
-    // Whether cell has been done already
-    bitSet visited(cellCellAddressing.size());
+    // Exclude removed cells
+    for (label celli = 0; celli < nOldCells; ++celli)
+    {
+        if (cellRemoved(celli))
+        {
+            unvisited.unset(celli);
+        }
+    }
 
-    label cellInOrder = 0;
+    // The new output order
+    labelList newOrder(unvisited.count());
 
 
-    // Work arrays. Kept outside of loop to minimise allocations.
-    // - neighbour cells
-    DynamicList<label> nbrs;
-    // - corresponding weights
+    // Various work arrays
+    // ~~~~~~~~~~~~~~~~~~~
+
+    //- Neighbour cells
+    DynamicList<label> nbrCells;
+
+    //- Neighbour ordering
+    DynamicList<label> nbrOrder;
+
+    //- Corresponding weights for neighbour cells
     DynamicList<label> weights;
 
-    // - ordering
-    labelList order;
+    // FIFO buffer for renumbering.
+    CircularBuffer<label> queuedCells(1024);
 
+
+    label cellInOrder = 0;
 
     while (true)
     {
         // For a disconnected region find the lowest connected cell.
+        label currCelli = -1;
+        label minCount = labelMax;
 
-        label currentCell = -1;
-        label minWeight = labelMax;
-
-        forAll(visited, celli)
+        for (const label celli : unvisited)
         {
-            // find the lowest connected cell that has not been visited yet
-            if (!cellRemoved(celli) && !visited.test(celli))
+            const label nbrCount = cellCellAddressing[celli].size();
+
+            if (minCount > nbrCount)
             {
-                if (cellCellAddressing[celli].size() < minWeight)
-                {
-                    minWeight = cellCellAddressing[celli].size();
-                    currentCell = celli;
-                }
+                minCount = nbrCount;
+                currCelli = celli;
             }
         }
 
-
-        if (currentCell == -1)
+        if (currCelli == -1)
         {
             break;
         }
 
 
-        // Starting from currentCell walk breadth-first
+        // Starting from currCelli - walk breadth-first
 
+        queuedCells.append(currCelli);
 
-        // use this cell as a start
-        nextCell.append(currentCell);
-
-        // loop through the nextCell list. Add the first cell into the
+        // Loop through queuedCells list. Add the first cell into the
         // cell order if it has not already been visited and ask for its
         // neighbours. If the neighbour in question has not been visited,
-        // add it to the end of the nextCell list
+        // add it to the end of the queuedCells list
 
-        while (nextCell.size())
+        while (!queuedCells.empty())
         {
-            currentCell = nextCell.removeHead();
+            // Process as FIFO
+            currCelli = queuedCells.first();
+            queuedCells.pop_front();
 
-            if (visited.set(currentCell))
+            if (unvisited.test(currCelli))
             {
-                // On first visit...
+                // First visit...
+                unvisited.unset(currCelli);
 
-                // add into cellOrder
-                newOrder[cellInOrder] = currentCell;
-                cellInOrder++;
+                // Add into cellOrder
+                newOrder[cellInOrder] = currCelli;
+                ++cellInOrder;
 
-                // find if the neighbours have been visited
-                const labelUList neighbours = cellCellAddressing[currentCell];
+                // Find if the neighbours have been visited
+                const auto& neighbours = cellCellAddressing[currCelli];
 
                 // Add in increasing order of connectivity
 
                 // 1. Count neighbours of unvisited neighbours
-                nbrs.clear();
+                nbrCells.clear();
                 weights.clear();
 
                 for (const label nbr : neighbours)
                 {
-                    if (!cellRemoved(nbr) && !visited.test(nbr))
+                    const label nbrCount = cellCellAddressing[nbr].size();
+
+                    if (unvisited.test(nbr))
                     {
-                        // not visited, add to the list
-                        nbrs.append(nbr);
-                        weights.append(cellCellAddressing[nbr].size());
+                        // Not visited (or removed), add to the list
+                        nbrCells.append(nbr);
+                        weights.append(nbrCount);
                     }
                 }
-                // 2. Sort
-                sortedOrder(weights, order);
-                // 3. Add in sorted order
-                for (const label nbri : order)
+
+                // Resize DynamicList prior to sortedOrder
+                nbrOrder.resize_nocopy(weights.size());
+
+                // 2. Ascending order
+                Foam::sortedOrder(weights, nbrOrder);
+
+                // 3. Add to FIFO in sorted order
+                for (const label nbrIdx : nbrOrder)
                 {
-                    nextCell.append(nbrs[nbri]);
+                    queuedCells.append(nbrCells[nbrIdx]);
                 }
             }
         }
     }
 
     // Now we have new-to-old in newOrder.
-    newOrder.setSize(cellInOrder);
+    newOrder.resize(cellInOrder);  // Extra safety, but should be a no-op
 
     // Invert to get old-to-new. Make sure removed (i.e. unmapped) cells are -1.
-    oldToNew = invert(cellCellAddressing.size(), newOrder);
+    oldToNew = invert(nOldCells, newOrder);
 
     return cellInOrder;
 }
