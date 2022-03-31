@@ -95,6 +95,7 @@ Usage
 #include "regionProperties.H"
 
 #include "parFvFieldReconstructor.H"
+#include "parPointFieldDistributor.H"
 #include "parLagrangianRedistributor.H"
 #include "unmappedPassivePositionParticleCloud.H"
 #include "hexRef8Data.H"
@@ -535,7 +536,7 @@ void determineDecomposition
 
 // Variant of GeometricField::correctBoundaryConditions that only
 // evaluates selected patch fields
-template<class GeoField, class CoupledPatchType>
+template<class CoupledPatchType, class GeoField>
 void correctCoupledBoundaryConditions(fvMesh& mesh)
 {
     HashTable<GeoField*> flds
@@ -576,6 +577,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
     //Info<< "Before distribution:" << endl;
     //printMeshData(mesh);
 
+    // Storage of fields
 
     PtrList<volScalarField> volScalarFields;
     PtrList<volVectorField> volVectorFields;
@@ -595,7 +597,24 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
     PtrList<DimensionedField<symmTensor, volMesh>> dimSymmTensorFields;
     PtrList<DimensionedField<tensor, volMesh>> dimTensorFields;
 
-    DynamicList<word> pointFieldNames;
+    PtrList<pointScalarField> pointScalarFields;
+    PtrList<pointVectorField> pointVectorFields;
+    PtrList<pointTensorField> pointTensorFields;
+    PtrList<pointSphericalTensorField> pointSphTensorFields;
+    PtrList<pointSymmTensorField> pointSymmTensorFields;
+
+    // Self-contained pointMesh for reading pointFields
+    const pointMesh oldPointMesh(mesh);
+
+    // Track how many (if any) pointFields are read/mapped
+    label nPointFields = 0;
+
+    parPointFieldDistributor pointDistributor
+    (
+        oldPointMesh,   // source mesh
+        false,          // savePoints=false (ie, delay until later)
+        false           // Do not write
+    );
 
 
     if (doReadFields)
@@ -656,195 +675,79 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
         }
 
 
-        // volFields
-
         if (Pstream::master() && decompose)
         {
             runTime.caseName() = baseRunTime.caseName();
             runTime.processorCase(false);
         }
 
-        fieldsDistributor::readFields
-        (
-            haveMesh,
-            mesh,
-            subsetterPtr,
-            objects,
-            volScalarFields
-        );
+        // Field reading
 
-        fieldsDistributor::readFields
-        (
-            haveMesh,
-            mesh,
-            subsetterPtr,
-            objects,
-            volVectorFields
-        );
+        #undef  doFieldReading
+        #define doFieldReading(Storage)                                       \
+        {                                                                     \
+            fieldsDistributor::readFields                                     \
+            (                                                                 \
+                haveMesh, mesh, subsetterPtr, objects, Storage                \
+            );                                                                \
+        }
 
-        fieldsDistributor::readFields
-        (
-            haveMesh,
-            mesh,
-            subsetterPtr,
-            objects,
-            volSphereTensorFields
-        );
+        // volField
+        doFieldReading(volScalarFields);
+        doFieldReading(volVectorFields);
+        doFieldReading(volSphereTensorFields);
+        doFieldReading(volSymmTensorFields);
+        doFieldReading(volTensorFields);
 
-        fieldsDistributor::readFields
-        (
-            haveMesh,
-            mesh,
-            subsetterPtr,
-            objects,
-            volSymmTensorFields
-        );
-
-        fieldsDistributor::readFields
-        (
-            haveMesh,
-            mesh,
-            subsetterPtr,
-            objects,
-            volTensorFields
-        );
-
-
-        // surfaceFields
-
-        fieldsDistributor::readFields
-        (
-            haveMesh,
-            mesh,
-            subsetterPtr,
-            objects,
-            surfScalarFields
-        );
-
-        fieldsDistributor::readFields
-        (
-            haveMesh,
-            mesh,
-            subsetterPtr,
-            objects,
-            surfVectorFields
-        );
-
-        fieldsDistributor::readFields
-        (
-            haveMesh,
-            mesh,
-            subsetterPtr,
-            objects,
-            surfSphereTensorFields
-        );
-
-        fieldsDistributor::readFields
-        (
-            haveMesh,
-            mesh,
-            subsetterPtr,
-            objects,
-            surfSymmTensorFields
-        );
-
-        fieldsDistributor::readFields
-        (
-            haveMesh,
-            mesh,
-            subsetterPtr,
-            objects,
-            surfTensorFields
-        );
-
+        // surfaceField
+        doFieldReading(surfScalarFields);
+        doFieldReading(surfVectorFields);
+        doFieldReading(surfSphereTensorFields);
+        doFieldReading(surfSymmTensorFields);
+        doFieldReading(surfTensorFields);
 
         // Dimensioned internal fields
-        fieldsDistributor::readFields
-        (
-            haveMesh,
-            mesh,
-            subsetterPtr,
-            objects,
-            dimScalarFields
-        );
+        doFieldReading(dimScalarFields);
+        doFieldReading(dimVectorFields);
+        doFieldReading(dimSphereTensorFields);
+        doFieldReading(dimSymmTensorFields);
+        doFieldReading(dimTensorFields);
 
-        fieldsDistributor::readFields
-        (
-            haveMesh,
-            mesh,
-            subsetterPtr,
-            objects,
-            dimVectorFields
-        );
+        // pointFields
+        nPointFields = 0;
 
-        fieldsDistributor::readFields
-        (
-            haveMesh,
-            mesh,
-            subsetterPtr,
-            objects,
-            dimSphereTensorFields
-        );
-
-        fieldsDistributor::readFields
-        (
-            haveMesh,
-            mesh,
-            subsetterPtr,
-            objects,
-            dimSymmTensorFields
-        );
-
-        fieldsDistributor::readFields
-        (
-            haveMesh,
-            mesh,
-            subsetterPtr,
-            objects,
-            dimTensorFields
-        );
-
-
-        // pointFields currently not supported. Read their names so we
-        // can delete them.
-        {
-            // Get my objects of type
-            pointFieldNames.append
-            (
-                objects.lookupClass(pointScalarField::typeName).sortedNames()
-            );
-            pointFieldNames.append
-            (
-                objects.lookupClass(pointVectorField::typeName).sortedNames()
-            );
-            pointFieldNames.append
-            (
-                objects.lookupClass
-                (
-                    pointSphericalTensorField::typeName
-                ).sortedNames()
-            );
-            pointFieldNames.append
-            (
-                objects.lookupClass
-                (
-                    pointSymmTensorField::typeName
-                ).sortedNames()
-            );
-            pointFieldNames.append
-            (
-                objects.lookupClass(pointTensorField::typeName).sortedNames()
-            );
-
-            // Make sure all processors have the same set
-            Pstream::scatter(pointFieldNames);
+        #undef  doFieldReading
+        #define doFieldReading(Storage)                                       \
+        {                                                                     \
+            fieldsDistributor::readFields                                     \
+            (                                                                 \
+                haveMesh, oldPointMesh, subsetterPtr, objects, Storage,       \
+                true  /* (deregister field) */                                \
+            );                                                                \
+            nPointFields += Storage.size();                                   \
         }
+
+        doFieldReading(pointScalarFields);
+        doFieldReading(pointVectorFields);
+        doFieldReading(pointSphTensorFields);
+        doFieldReading(pointSymmTensorFields);
+        doFieldReading(pointTensorFields);
+        #undef doFieldReading
+
+
+        // Done reading
 
         if (Pstream::master() && decompose)
         {
             runTime.caseName() = proc0CaseName;
             runTime.processorCase(oldProcCase);
         }
+    }
+
+    // Save pointMesh information before any topology changes occur!
+    if (nPointFields)
+    {
+        pointDistributor.saveMeshPoints();
     }
 
 
@@ -859,32 +762,38 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
     printMeshData(mesh);
 
     // Get other side of processor boundaries
-    correctCoupledBoundaryConditions
-    <
-        volScalarField,
-        processorFvPatch
-    >(mesh);
-    correctCoupledBoundaryConditions
-    <
-        volVectorField,
-        processorFvPatch
-    >(mesh);
-    correctCoupledBoundaryConditions
-    <
-        volSphericalTensorField,
-        processorFvPatch
-    >(mesh);
-    correctCoupledBoundaryConditions
-    <
-        volSymmTensorField,
-        processorFvPatch
-    >(mesh);
-    correctCoupledBoundaryConditions
-    <
-        volTensorField,
-        processorFvPatch
-    >(mesh);
+    do
+    {
+        #undef  doCorrectCoupled
+        #define doCorrectCoupled(FieldType)  \
+        correctCoupledBoundaryConditions<processorFvPatch, FieldType>(mesh);
+
+        doCorrectCoupled(volScalarField);
+        doCorrectCoupled(volVectorField);
+        doCorrectCoupled(volSphericalTensorField);
+        doCorrectCoupled(volSymmTensorField);
+        doCorrectCoupled(volTensorField);
+        #undef doCorrectCoupled
+    }
+    while (false);
+
     // No update surface fields
+
+
+    // Map pointFields
+    if (nPointFields)
+    {
+        // Construct new pointMesh from distributed mesh
+        const pointMesh& newPointMesh = pointMesh::New(mesh);
+
+        pointDistributor.resetTarget(newPointMesh, rawMap());
+
+        pointDistributor.distributeAndStore(pointScalarFields);
+        pointDistributor.distributeAndStore(pointVectorFields);
+        pointDistributor.distributeAndStore(pointSphTensorFields);
+        pointDistributor.distributeAndStore(pointSymmTensorFields);
+        pointDistributor.distributeAndStore(pointTensorFields);
+    }
 
 
     // Set the minimum write precision
@@ -925,24 +834,9 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
                 << " to write reconstructed mesh and fields." << endl;
             runTime.caseName() = baseRunTime.caseName();
             const bool oldProcCase(runTime.processorCase(false));
-            const bool oldParRun = Pstream::parRun(false);
 
             mesh.write();
             topoSet::removeFiles(mesh);
-            for (const word& fieldName : pointFieldNames)
-            {
-                IOobject io
-                (
-                    fieldName,
-                    runTime.timeName(),
-                    mesh
-                );
-
-                const fileName fieldFile(io.objectPath());
-                if (topoSet::debug) DebugVar(fieldFile);
-                rm(fieldFile);
-            }
-            Pstream::parRun(oldParRun);
 
             // Now we've written all. Reset caseName on master
             Info<< "Restoring caseName to " << proc0CaseName << endl;
@@ -965,19 +859,6 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
             writeHandler = fileHandler(std::move(defaultHandler));
         }
         topoSet::removeFiles(mesh);
-        for (const word& fieldName : pointFieldNames)
-        {
-            IOobject io
-            (
-                fieldName,
-                runTime.timeName(),
-                mesh
-            );
-
-            const fileName fieldFile(io.objectPath());
-            if (topoSet::debug) DebugVar(fieldFile);
-            rm(fieldFile);
-        }
     }
     Info<< "Written redistributed mesh to " << mesh.facesInstance() << nl
         << endl;
@@ -1724,6 +1605,7 @@ int main(int argc, char *argv[])
     #include "addOverwriteOption.H"
     argList::addBoolOption("decompose", "Decompose case");
     argList::addBoolOption("reconstruct", "Reconstruct case");
+    argList::addVerboseOption("Additional verbosity");
     argList::addDryRunOption
     (
         "Test without writing the decomposition. "
@@ -1793,6 +1675,12 @@ int main(int argc, char *argv[])
     const bool writeCellDist = args.found("cellDist");
     const bool dryrun = args.dryRun();
     const bool newTimes = args.found("newTimes");
+
+    if (args.verbose())
+    {
+        // Report on output
+        parPointFieldDistributor::verbose_ = 1;
+    }
 
     bool decompose = args.found("decompose");
     bool overwrite = args.found("overwrite");
@@ -2240,17 +2128,28 @@ int main(int argc, char *argv[])
             distMap = fvMeshTools::readProcAddressing(mesh, baseMeshPtr);
 
             // Construct field mapper
-            autoPtr<parFvFieldReconstructor> fvReconstructorPtr
-            (
-                new parFvFieldReconstructor
+            auto fvReconstructorPtr =
+                autoPtr<parFvFieldReconstructor>::New
                 (
                     baseMeshPtr(),
                     mesh,
                     distMap(),
                     Pstream::master()       // do I need to write?
-                )
-            );
+                );
 
+            // Construct point field mapper
+            const auto& basePointMesh = pointMesh::New(baseMeshPtr());
+            const auto& procPointMesh = pointMesh::New(mesh);
+
+            auto pointFieldDistributorPtr =
+                autoPtr<parPointFieldDistributor>::New
+                (
+                    procPointMesh,   // source
+                    basePointMesh,   // target
+                    distMap(),
+                    false,           // delay
+                    UPstream::master()  // Write reconstructed on master
+                );
 
 
             // Since we start from Times[0] and not runTime.timeName() we
@@ -2324,7 +2223,8 @@ int main(int argc, char *argv[])
                     distMap =
                         fvMeshTools::readProcAddressing(mesh, baseMeshPtr);
 
-                    // Reset field mapper
+                    // Reset field mappers
+
                     fvReconstructorPtr.reset
                     (
                         new parFvFieldReconstructor
@@ -2335,6 +2235,23 @@ int main(int argc, char *argv[])
                             Pstream::master()
                         )
                     );
+
+                    // Construct point field mapper
+                    const auto& basePointMesh = pointMesh::New(baseMeshPtr());
+                    const auto& procPointMesh = pointMesh::New(mesh);
+
+                    pointFieldDistributorPtr.reset
+                    (
+                        new parPointFieldDistributor
+                        (
+                            procPointMesh,  // source
+                            basePointMesh,  // target
+                            distMap(),
+                            false,          // delay until later
+                            UPstream::master()  // Write reconstruct on master
+                        )
+                    );
+
                     lagrangianReconstructorPtr.clear();
                 }
 
@@ -2350,6 +2267,12 @@ int main(int argc, char *argv[])
                     objects,
                     selectedFields
                 );
+
+                // pointfields
+                // - distribute and write (verbose)
+                pointFieldDistributorPtr()
+                    .distributeAllFields(objects, selectedFields);
+
 
                 // Clouds (note: might not be present on all processors)
                 reconstructLagrangian

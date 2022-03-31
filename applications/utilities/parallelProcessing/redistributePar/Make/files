@@ -1,6 +1,8 @@
 passivePositionParticleCloud.C
 parLagrangianRedistributor.C
+parPointFieldDistributor.C
 parFvFieldReconstructor.C
+
 loadOrCreateMesh.C
 redistributePar.C
 
