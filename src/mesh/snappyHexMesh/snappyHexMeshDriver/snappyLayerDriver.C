@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -5154,7 +5154,7 @@ void Foam::snappyLayerDriver::addLayers
             meshRefinement::updateList
             (
                 map.cellMap(),
-                0,
+                label(0),
                 cellNLayers
             );
             forAll(cellNLayers, i)
@@ -5237,7 +5237,7 @@ void Foam::snappyLayerDriver::addLayers
             meshRefinement::updateList
             (
                 newToOldPatchPoints,
-                0,
+                label(0),
                 basePatchNLayers
             );
             meshRefinement::updateList
@@ -5267,13 +5267,13 @@ void Foam::snappyLayerDriver::addLayers
             meshRefinement::updateList
             (
                 newToOldPatchPoints,
-                0,
+                label(0),
                 deltaNLayers
             );
             meshRefinement::updateList
             (
                 newToOldPatchPoints,
-                0,
+                label(0),
                 nAddedLayers
             );
         }
