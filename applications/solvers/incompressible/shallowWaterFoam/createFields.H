@@ -20,7 +20,7 @@ volScalarField h0
     IOobject
     (
         "h0",
-        runTime.findInstance("polyMesh", "points"),
+        runTime.findInstance(polyMesh::meshSubDir, "points"),
         mesh,
         IOobject::READ_IF_PRESENT
     ),

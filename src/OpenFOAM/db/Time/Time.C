@@ -801,14 +801,8 @@ Foam::word Foam::Time::findInstance
     const word& stopInstance
 ) const
 {
-    IOobject startIO
-    (
-        name,           // name might be empty!
-        timeName(),
-        dir,
-        *this,
-        rOpt
-    );
+    // Note: name might be empty!
+    IOobject startIO(name, timeName(), dir, *this, rOpt);
 
     IOobject io
     (

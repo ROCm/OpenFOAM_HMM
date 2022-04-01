@@ -297,7 +297,7 @@ public:
             //  (e.g. IOdictionary)
             virtual fileName filePath() const;
 
-            //- Read and check header info
+            //- Read and check header info. Does not check the headerClassName.
             bool headerOk();
 
             //- Return Istream and check object type against that given

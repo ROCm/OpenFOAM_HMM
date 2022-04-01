@@ -1443,9 +1443,7 @@ Foam::fileOperations::masterUncollatedFileOperation::findInstance
             << endl;
     }
 
-
     const Time& time = startIO.time();
-
     IOobject io(startIO);
 
     // Note: - if name is empty, just check the directory itself
@@ -1486,36 +1484,45 @@ Foam::fileOperations::masterUncollatedFileOperation::findInstance
     }
 
 
-    // Search back through the time directories to find the time
-    // closest to and lower than current time
+    // Handling failures afterwards
+    const bool exitIfMissing
+    (
+        startIO.readOpt() == IOobject::MUST_READ
+     || startIO.readOpt() == IOobject::MUST_READ_IF_MODIFIED
+    );
+
+    enum failureCodes { FAILED_STOPINST = 1, FAILED_CONSTINST = 2 };
+    int failed(0);
 
     instantList ts = time.times();
+
     // if (Pstream::master(comm_))
     if (Pstream::master(UPstream::worldComm))
     {
         const bool oldParRun(Pstream::parRun(false));
 
-        label instanceI;
+        label instIndex = ts.size()-1;
 
-        for (instanceI = ts.size()-1; instanceI >= 0; --instanceI)
+        // Backward search for first time that is <= startValue
+        for (; instIndex >= 0; --instIndex)
         {
-            if (ts[instanceI].value() <= startValue)
+            if (ts[instIndex].value() <= startValue)
             {
                 break;
             }
         }
 
-        // continue searching from here
-        for (; instanceI >= 0; --instanceI)
+        // Continue (forward) searching from here
+        for (; instIndex >= 0; --instIndex)
         {
             // Shortcut: if actual directory is the timeName we've
             // already tested it
-            if (ts[instanceI].name() == time.timeName())
+            if (ts[instIndex].name() == time.timeName())
             {
                 continue;
             }
 
-            io.instance() = ts[instanceI].name();
+            io.instance() = ts[instIndex].name();
             if (exists(pDirs, io))
             {
                 foundInstance = io.instance();
@@ -1530,97 +1537,115 @@ Foam::fileOperations::masterUncollatedFileOperation::findInstance
             }
 
             // Check if hit minimum instance
-            if (ts[instanceI].name() == stopInstance)
+            if (io.instance() == stopInstance)
             {
-                if
-                (
-                    startIO.readOpt() == IOobject::MUST_READ
-                 || startIO.readOpt() == IOobject::MUST_READ_IF_MODIFIED
-                )
-                {
-                    if (io.name().empty())
-                    {
-                        FatalErrorInFunction
-                            << "Cannot find directory "
-                            << io.local() << " in times " << time.timeName()
-                            << " down to " << stopInstance
-                            << exit(FatalError);
-                    }
-                    else
-                    {
-                        FatalErrorInFunction
-                            << "Cannot find file \"" << io.name()
-                            << "\" in directory " << io.local()
-                            << " in times " << time.timeName()
-                            << " down to " << stopInstance
-                            << exit(FatalError);
-                    }
-                }
-                foundInstance = io.instance();
                 if (debug)
                 {
                     Pout<< "masterUncollatedFileOperation::findInstance :"
-                        << " name:" << io.name() << " local:" << io.local()
-                        << " found at stopinstance:" << io.instance() << endl;
+                        << " name:" << io.name()
+                        << " local:" << io.local()
+                        << " at stop-instance:" << io.instance() << endl;
+                }
+
+                if (exitIfMissing)
+                {
+                    failed = failureCodes::FAILED_STOPINST;
+                }
+                else
+                {
+                    foundInstance = io.instance();
                 }
                 break;
             }
         }
 
 
-        if (foundInstance.empty())
-        {
-            // times() usually already includes the constant() so would
-            // have been checked above. Re-test if
-            // - times() is empty. Sometimes this can happen (e.g. decomposePar
-            //   with collated)
-            // - times()[0] is not constant
-            if (!ts.size() || ts[0].name() != time.constant())
-            {
-                // Note. This needs to be a hard-coded constant, rather than the
-                // constant function of the time, because the latter points to
-                // the case constant directory in parallel cases
+        // times() usually already includes the constant() so would
+        // have been checked above. However, re-test under these conditions:
+        // - times() is empty. Sometimes this can happen (e.g. decomposePar
+        //   with collated)
+        // - times()[0] is not constant
+        // - Times is empty.
+        //   Sometimes this can happen (eg, decomposePar with collated)
+        // - Times[0] is not constant
+        // - The startValue is negative (eg, kivaTest).
+        //   This plays havoc with the reverse search, causing it to miss
+        //   'constant'
 
-                io.instance() = time.constant();
-                if (exists(pDirs, io))
+        if
+        (
+            !failed && foundInstance.empty()
+         && (ts.empty() || ts[0].name() != time.constant() || startValue < 0)
+        )
+        {
+            // Note. This needs to be a hard-coded "constant" (not constant
+            // function of Time), because the latter points to
+            // the case constant directory in parallel cases.
+            // However, parRun is disabled so they are actually the same.
+
+            io.instance() = time.constant();
+
+            if (exists(pDirs, io))
+            {
+                if (debug)
                 {
-                    if (debug)
-                    {
-                        Pout<< "masterUncollatedFileOperation::findInstance :"
-                            << " name:" << io.name()
-                            << " local:" << io.local()
-                            << " found at:" << io.instance() << endl;
-                    }
-                    foundInstance = io.instance();
+                    Pout<< "masterUncollatedFileOperation::findInstance :"
+                        << " name:" << io.name()
+                        << " local:" << io.local()
+                        << " at:" << io.instance() << endl;
                 }
+                foundInstance = io.instance();
             }
         }
 
-        if (foundInstance.empty())
+        if (!failed && foundInstance.empty())
         {
-            if
-            (
-                startIO.readOpt() == IOobject::MUST_READ
-             || startIO.readOpt() == IOobject::MUST_READ_IF_MODIFIED
-            )
+            if (exitIfMissing)
             {
-                FatalErrorInFunction
-                    << "Cannot find file \"" << io.name() << "\" in directory "
-                    << io.local() << " in times " << startIO.instance()
-                    << " down to " << time.constant()
-                    << exit(FatalError);
+                failed = failureCodes::FAILED_CONSTINST;
             }
             else
             {
                 foundInstance = time.constant();
             }
         }
-        Pstream::parRun(oldParRun);
+
+        UPstream::parRun(oldParRun);  // Restore parallel state
     }
 
     // Pstream::broadcast(foundInstance, comm_);
     Pstream::broadcast(foundInstance, UPstream::worldComm);
     io.instance() = foundInstance;
+
+
+    // Handle failures
+    // ~~~~~~~~~~~~~~~
+    if (failed)
+    {
+        FatalErrorInFunction << "Cannot find";
+
+        if (!io.name().empty())
+        {
+            FatalError
+                << " file \"" << io.name() << "\" in";
+        }
+
+        FatalError
+            << " directory "
+            << io.local() << " in times "
+            << startIO.instance() << " down to ";
+
+        if (failed == failureCodes::FAILED_STOPINST)
+        {
+            FatalError << stopInstance;
+        }
+        else
+        {
+            FatalError << "constant";
+        }
+        FatalError << exit(FatalError);
+    }
+
     if (debug)
     {
         Pout<< "masterUncollatedFileOperation::findInstance :"

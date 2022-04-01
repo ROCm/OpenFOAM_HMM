@@ -1006,7 +1006,6 @@ Foam::IOobject Foam::fileOperation::findInstance
 ) const
 {
     const Time& time = startIO.time();
-
     IOobject io(startIO);
 
     // Note: - if name is empty, just check the directory itself
@@ -1025,120 +1024,140 @@ Foam::IOobject Foam::fileOperation::findInstance
         return io;
     }
 
-    // Search back through the time directories to find the first time
-    // that is less than or equal to the current time
-
-    instantList ts = time.times();
-    label instanceI = ts.size()-1;
-
-    for (; instanceI >= 0; --instanceI)
-    {
-        if (ts[instanceI].value() <= startValue)
-        {
-            break;
-        }
-    }
-
-    // Found the time, continue from here
-    for (; instanceI >= 0; --instanceI)
-    {
-        io.instance() = ts[instanceI].name();
-
-        // Shortcut: if actual directory is the timeName we've already tested it
-        if
-        (
-            io.instance() == startIO.instance()
-         && io.instance() != stopInstance
-        )
-        {
-            continue;
-        }
-
-        if (exists(io))
-        {
-            DebugInFunction
-                << "Found exact match for \"" << io.name()
-                << "\" in " << io.instance()/io.local()
-                << endl;
-
-            return io;
-        }
-
-        // Check if hit minimum instance
-        if (io.instance() == stopInstance)
-        {
-            DebugInFunction
-                << "Hit stopInstance " << stopInstance << endl;
-
-            if
-            (
-                startIO.readOpt() == IOobject::MUST_READ
-             || startIO.readOpt() == IOobject::MUST_READ_IF_MODIFIED
-            )
-            {
-                if (io.name().empty())
-                {
-                    FatalErrorInFunction
-                        << "Cannot find directory "
-                        << io.local() << " in times " << startIO.instance()
-                        << " down to " << stopInstance
-                        << exit(FatalError);
-                }
-                else
-                {
-                    FatalErrorInFunction
-                        << "Cannot find file \"" << io.name()
-                        << "\" in directory " << io.local()
-                        << " in times " << startIO.instance()
-                        << " down to " << stopInstance
-                        << exit(FatalError);
-                }
-            }
-
-            return io;
-        }
-    }
-
-    // Times usually already includes 'constant' so would have been checked
-    // above.
-    // However, re-test under these conditions:
-    // - Times is empty.
-    //   Sometimes this can happen (eg, decomposePar with collated)
-    // - Times[0] is not constant
-    // - The startValue is negative (eg, kivaTest).
-    //   This plays havoc with the reverse search, causing it to miss 'constant'
-
-    if
-    (
-        ts.empty()
-     || ts.first().name() != time.constant()
-     || startValue < 0
-    )
-    {
-        io.instance() = time.constant();
-        if (exists(io))
-        {
-            DebugInFunction
-                << "Found constant match for \"" << io.name()
-                << "\" in " << io.instance()/io.local()
-                << endl;
-
-            return io;
-        }
-    }
-
-
-    if
+    // Handling failures afterwards
+    const bool exitIfMissing
     (
         startIO.readOpt() == IOobject::MUST_READ
      || startIO.readOpt() == IOobject::MUST_READ_IF_MODIFIED
-    )
+    );
+
+    enum failureCodes { FAILED_STOPINST = 1, FAILED_CONSTINST = 2 };
+    int failed(0);
+
+    instantList ts = time.times();
+
     {
-        FatalErrorInFunction
-            << "Cannot find file \"" << io.name() << "\" in directory "
-            << io.local() << " in times " << startIO.instance()
-            << " down to " << time.constant()
-            << exit(FatalError);
+        label instIndex = ts.size()-1;
+
+        // Backward search for first time that is <= startValue
+        for (; instIndex >= 0; --instIndex)
+        {
+            if (ts[instIndex].value() <= startValue)
+            {
+                break;
+            }
+        }
+
+        // Continue (forward) searching from here
+        for (; instIndex >= 0; --instIndex)
+        {
+            io.instance() = ts[instIndex].name();
+
+            // Shortcut: if actual directory is the timeName we've
+            // already tested it
+            if
+            (
+                io.instance() == startIO.instance()
+             && io.instance() != stopInstance
+            )
+            {
+                continue;
+            }
+
+            if (exists(io))
+            {
+                DebugInFunction
+                    << "Found exact match for \"" << io.name()
+                    << "\" in " << io.instance()/io.local()
+                    << endl;
+
+                return io;
+            }
+
+            // Check if hit minimum instance
+            if (io.instance() == stopInstance)
+            {
+                DebugInFunction
+                    << "Hit stopInstance " << stopInstance << endl;
+
+                if (exitIfMissing)
+                {
+                    failed = failureCodes::FAILED_STOPINST;
+                }
+                else
+                {
+                    return io;
+                }
+                break;
+            }
+        }
+
+
+        // times() usually already includes the constant() so would
+        // have been checked above. However, re-test under these conditions:
+        // - times() is empty. Sometimes this can happen (e.g. decomposePar
+        //   with collated)
+        // - times()[0] is not constant
+        // - Times is empty.
+        //   Sometimes this can happen (eg, decomposePar with collated)
+        // - Times[0] is not constant
+        // - The startValue is negative (eg, kivaTest).
+        //   This plays havoc with the reverse search, causing it to miss
+        //   'constant'
+
+        if
+        (
+            !failed
+         && (ts.empty() || ts[0].name() != time.constant() || startValue < 0)
+        )
+        {
+            io.instance() = time.constant();
+
+            if (exists(io))
+            {
+                DebugInFunction
+                    << "Found constant match for \"" << io.name()
+                    << "\" in " << io.instance()/io.local()
+                    << endl;
+
+                return io;
+            }
+        }
+    }
+
+
+    if (!failed && exitIfMissing)
+    {
+        failed = failureCodes::FAILED_CONSTINST;
+    }
+
+    // Handle failures
+    // ~~~~~~~~~~~~~~~
+
+    if (failed)
+    {
+        FatalErrorInFunction << "Cannot find";
+
+        if (!io.name().empty())
+        {
+            FatalError
+                << " file \"" << io.name() << "\" in";
+        }
+
+        FatalError
+            << " directory "
+            << io.local() << " in times "
+            << startIO.instance() << " down to ";
+
+        if (failed == failureCodes::FAILED_STOPINST)
+        {
+            FatalError << stopInstance;
+        }
+        else
+        {
+            FatalError << "constant";
+        }
+        FatalError << exit(FatalError);
     }
 
     return io;
@@ -1225,7 +1244,8 @@ Foam::label Foam::fileOperation::nProcs
         {
             WarningInFunction
                 << "Defunct collated naming: " << processorsBaseDir << nl
-                << "Manually rename with the decomposition number. Eg," << nl << nl
+                << "Manually rename with the decomposition number. Eg,"
+                << nl << nl
                 << "    mv processors processors16" << nl << nl
                 << "...returning 1" << endl;
 

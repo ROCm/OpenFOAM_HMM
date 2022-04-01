@@ -535,9 +535,10 @@ public:
             //- Get sorted list of times
             virtual instantList findTimes(const fileName&, const word&) const;
 
-            //- Find instance where IOobject is. Fails if cannot be found
-            //  and readOpt() is MUST_READ/MUST_READ_IF_MODIFIED. Otherwise
-            //  returns stopInstance.
+            //- Find instance where IOobject is.
+            //  FatalError if it cannot be found and readOpt is
+            //  (MUST_READ or MUST_READ_IF_MODIFIED).
+            //  Otherwise it returns the stopInstance.
             virtual IOobject findInstance
             (
                 const IOobject& io,

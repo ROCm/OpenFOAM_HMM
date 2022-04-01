@@ -39,30 +39,30 @@ Description
     \par Read options
 
     Define what is done on object construction and explicit reads:
+      - \par NO_READ
+        Do not read
       - \par MUST_READ
         Object must be read from Istream on construction. \n
-        Error if Istream does not exist or can't be read.
+        Error if Istream does not exist or cannot be read.
         Does not check timestamp or re-read.
       - \par MUST_READ_IF_MODIFIED
         Object must be read from Istream on construction. \n
-        Error if Istream does not exist or can't be read. If object is
+        Error if Istream does not exist or cannot be read. If object is
         registered its timestamp will be checked every timestep and possibly
         re-read.
       - \par READ_IF_PRESENT
-        Read object from Istream if Istream exists, otherwise don't. \n
-        Error only if Istream exists but can't be read.
+        Read object from Istream, but only if Istream exists. \n
+        Error only if Istream exists but cannot be read.
         Does not check timestamp or re-read.
-      - \par NO_READ
-        Don't read
 
     \par Write options
 
     Define what is done on object destruction and explicit writes:
+      - \par NO_WRITE
+        No automatic writing, but can be written explicitly
       - \par AUTO_WRITE
         Object is written automatically when requested to by the
         objectRegistry.
-      - \par NO_WRITE
-        No automatic write on destruction but can be written explicitly
 
     When serializing, the IOobject characteristics are typically written
     as a \c FoamFile header, which is a sub-dictionary with the following
@@ -95,8 +95,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef IOobject_H
-#define IOobject_H
+#ifndef Foam_IOobject_H
+#define Foam_IOobject_H
 
 #include "fileName.H"
 #include "typeInfo.H"
@@ -135,17 +135,17 @@ public:
         //- Enumeration defining the read options
         enum readOption : char
         {
-            MUST_READ,
-            MUST_READ_IF_MODIFIED,
-            READ_IF_PRESENT,
-            NO_READ
+            NO_READ = 0,
+            MUST_READ = 1,
+            MUST_READ_IF_MODIFIED = 3,
+            READ_IF_PRESENT = 4
         };
 
         //- Enumeration defining the write options
         enum writeOption : char
         {
-            AUTO_WRITE = 0,
-            NO_WRITE = 1
+            NO_WRITE = 0,
+            AUTO_WRITE = 0x10
         };
 
         //- Enumeration defining the file checking options

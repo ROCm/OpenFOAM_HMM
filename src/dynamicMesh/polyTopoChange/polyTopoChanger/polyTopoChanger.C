@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -116,9 +116,14 @@ Foam::polyTopoChanger::polyTopoChanger
             (
                 mesh.meshDir(),
                 "meshModifiers",
-                rOpt
+                (
+                    // Safety? promote NO_READ to READ_IF_PRESENT
+                    rOpt == IOobject::NO_READ
+                  ? IOobject::READ_IF_PRESENT
+                  : rOpt
+                )
             ),
-            mesh.meshSubDir,
+            polyMesh::meshSubDir,
             mesh,
             rOpt,
             IOobject::NO_WRITE
