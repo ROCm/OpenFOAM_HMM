@@ -405,10 +405,14 @@ bool Foam::lumpedPointState::readData
     {
         // Broadcast master data to everyone
 
-        Pstream::scatter(points_);
-        Pstream::scatter(angles_);
-        Pstream::scatter(degrees_);
-        Pstream::scatter(ok);
+        Pstream::broadcasts
+        (
+            UPstream::worldComm,
+            ok,
+            degrees_,
+            points_,
+            angles_
+        );
     }
     rotationPtr_.reset(nullptr);
 

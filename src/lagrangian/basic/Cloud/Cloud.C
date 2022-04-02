@@ -281,7 +281,7 @@ void Foam::Cloud<ParticleType>::move
         // Retrieve from receive buffers
         for (const label proci : neighbourProcs)
         {
-            if (pBufs.hasRecvData(proci))
+            if (pBufs.recvDataCount(proci))
             {
                 UIPstream is(proci, pBufs);
 

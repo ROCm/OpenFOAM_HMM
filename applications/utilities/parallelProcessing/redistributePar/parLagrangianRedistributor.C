@@ -208,9 +208,9 @@ Foam::parLagrangianRedistributor::redistributeLagrangianPositions
         for (const int proci : pBufs.allProcs())
         {
             //Pout<< "Receive from processor" << proci << " : "
-            //    << pBufs.hasRecvData(proci) << endl;
+            //    << pBufs.recvDataCount(proci) << endl;
 
-            if (pBufs.hasRecvData(proci))
+            if (pBufs.recvDataCount(proci))
             {
                 UIPstream particleStream(proci, pBufs);
 

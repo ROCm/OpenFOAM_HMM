@@ -441,7 +441,7 @@ int main(int argc, char *argv[])
             {
                 files = getFiles(args.path(), timeName);
             }
-            Pstream::scatter(files);
+            Pstream::broadcast(files);
 
             count += restoreFields
             (

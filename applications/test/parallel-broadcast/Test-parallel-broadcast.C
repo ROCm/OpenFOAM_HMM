@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
             value = args.executable();
         }
         printPre(value);
-        UPstream::broadcast(value);   // Low-level UPstream broadcast
+        Pstream::broadcast(value);   // Streamed broadcast
         printPost(value);
     }
 

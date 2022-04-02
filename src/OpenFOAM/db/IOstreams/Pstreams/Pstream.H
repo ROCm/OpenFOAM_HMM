@@ -54,9 +54,6 @@ SourceFiles
 namespace Foam
 {
 
-// Forward Declarations
-class bitSet;
-
 /*---------------------------------------------------------------------------*\
                            Class Pstream Declaration
 \*---------------------------------------------------------------------------*/
@@ -131,61 +128,21 @@ public:
 
     // Broadcast
 
-        //- Broadcast buffer or string content to all processes in communicator
+        //- Broadcast buffer content to all processes in communicator.
         using UPstream::broadcast;
 
-        //- Generic broadcast using streams to serialize/de-serialize.
-        //  Not normally used directly.
-        template<class T>
-        static void genericBroadcast
-        (
-            T& value,
-            const label comm = UPstream::worldComm
-        );
-
-        //- Generic broadcast multiple values (contiguous or non-contiguous)
+        //- Broadcast content (contiguous or non-contiguous)
         //- to all processes in communicator.
-        template<class ListType>
-        static void genericListBroadcast
-        (
-            ListType& values,
-            const label comm = UPstream::worldComm
-        );
-
-        //- Broadcast value (contiguous or non-contiguous)
-        //- to all processes in communicator.
-        template<class T>
+        template<class Type>
         static void broadcast
         (
-            T& value,
+            Type& value,
             const label comm = UPstream::worldComm
         );
 
-        //- Broadcast multiple values (contiguous or non-contiguous)
-        //- to all processes in communicator.
-        template<class T>
-        static void broadcast
-        (
-            List<T>& values,
-            const label comm = UPstream::worldComm
-        );
-
-        //- Broadcast multiple values (contiguous or non-contiguous)
-        //- to all processes in communicator.
-        template<class T, int SizeMin>
-        static void broadcast
-        (
-            DynamicList<T, SizeMin>& values,
-            const label comm = UPstream::worldComm
-        );
-
-        //- Broadcast bitSet values
-        //- to all processes in communicator.
-        static void broadcast
-        (
-            bitSet& values,
-            const label comm = UPstream::worldComm
-        );
+        //- Broadcast multiple items to all processes in communicator.
+        template<class Type, class... Args>
+        static void broadcasts(const label comm, Type& arg1, Args&&... args);
 
 
     // Gather
@@ -542,9 +499,9 @@ public:
                 const label comm = UPstream::worldComm
             );
 
-            //- Helper: exchange sizes of sendData. sendData is the data per
-            //  processor (in the communicator). Returns sizes of sendData
-            //  on the sending processor.
+            //- Helper: exchange sizes of sendData.
+            //- The sendData is the data per processor (in the communicator).
+            //  Returns sizes of sendData on the sending processor.
             template<class Container>
             static void exchangeSizes
             (
@@ -554,8 +511,9 @@ public:
             );
 
 
-            //- Helper: exchange contiguous data. Sends sendData, receives into
-            //  recvData. If block=true will wait for all transfers to finish.
+            //- Helper: exchange contiguous data.
+            //- Sends sendData, receives into recvData.
+            //  If wait=true will wait for all transfers to finish.
             template<class Container, class T>
             static void exchange
             (
@@ -567,9 +525,10 @@ public:
                 const bool wait = true  //!< Wait for requests to complete
             );
 
-            //- Exchange contiguous data. Sends sendData, receives into
-            //  recvData. Determines sizes to receive.
-            //  If block=true will wait for all transfers to finish.
+            //- Exchange contiguous data.
+            //- Sends sendData, receives into recvData.
+            //- Determines sizes to receive.
+            //  If wait=true will wait for all transfers to finish.
             template<class Container, class T>
             static void exchange
             (

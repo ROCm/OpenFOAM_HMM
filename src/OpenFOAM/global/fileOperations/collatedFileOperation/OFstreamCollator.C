@@ -366,8 +366,7 @@ bool Foam::OFstreamCollator::write
             totalSize += recvSize;
             maxLocalSize = max(maxLocalSize, recvSize);
         }
-        Pstream::broadcast(totalSize, localComm_);
-        Pstream::broadcast(maxLocalSize, localComm_);
+        Pstream::broadcasts(localComm_, totalSize, maxLocalSize);
     }
 
     if (!useThread || maxBufferSize_ == 0 || maxLocalSize > maxBufferSize_)

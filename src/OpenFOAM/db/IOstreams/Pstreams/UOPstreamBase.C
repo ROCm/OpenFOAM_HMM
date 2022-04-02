@@ -320,7 +320,11 @@ Foam::Ostream& Foam::UOPstreamBase::write(const doubleScalar val)
 }
 
 
-Foam::Ostream& Foam::UOPstreamBase::write(const char* data, std::streamsize count)
+Foam::Ostream& Foam::UOPstreamBase::write
+(
+    const char* data,
+    std::streamsize count
+)
 {
     if (format() != BINARY)
     {

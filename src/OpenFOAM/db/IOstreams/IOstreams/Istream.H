@@ -43,8 +43,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Istream_H
-#define Istream_H
+#ifndef Foam_Istream_H
+#define Foam_Istream_H
 
 #include "IOstream.H"
 #include "token.H"

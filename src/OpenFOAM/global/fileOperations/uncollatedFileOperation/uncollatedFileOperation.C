@@ -648,8 +648,12 @@ bool Foam::fileOperations::uncollatedFileOperation::read
 
     if (masterOnly && Pstream::parRun())
     {
-        UPstream::broadcast(io.headerClassName(), UPstream::worldComm);
-        UPstream::broadcast(io.note(), UPstream::worldComm);
+        Pstream::broadcasts
+        (
+            UPstream::worldComm,
+            io.headerClassName(),
+            io.note()
+        );
 
         if (UPstream::master(UPstream::worldComm))
         {

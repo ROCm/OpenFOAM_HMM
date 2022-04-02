@@ -211,8 +211,8 @@ int main(int argc, char *argv[])
 
         label proci = globalFaces.whichProcID(unsetFacei);
         label seedFacei = globalFaces.toLocal(proci, unsetFacei);
-        Info<< "Seeding from processor " << proci << " face " << seedFacei
-            << endl;
+        Info<< "Seeding from processor " << proci
+            << " face " << seedFacei << endl;
 
         if (proci == Pstream::myProcNo())
         {

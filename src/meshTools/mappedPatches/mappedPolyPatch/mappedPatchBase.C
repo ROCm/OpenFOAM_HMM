@@ -248,8 +248,7 @@ void Foam::mappedPatchBase::collectSamples
             UPstream::listGatherValues<label>(patch_.size(), myComm)
         );
 
-        Pstream::broadcast(procToWorldIndex, myComm);
-        Pstream::broadcast(nPerProc, myComm);
+        Pstream::broadcasts(myComm, procToWorldIndex, nPerProc);
 
         patchFaceWorlds.setSize(patchFaces.size());
         patchFaceProcs.setSize(patchFaces.size());

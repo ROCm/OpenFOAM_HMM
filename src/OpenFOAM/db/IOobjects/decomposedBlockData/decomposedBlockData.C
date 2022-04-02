@@ -370,12 +370,7 @@ bool Foam::decomposedBlockData::readBlocks
     }
     else
     {
-        PstreamBuffers pBufs
-        (
-            UPstream::commsTypes::nonBlocking,
-            UPstream::msgType(),
-            comm
-        );
+        PstreamBuffers pBufs(comm, UPstream::commsTypes::nonBlocking);
 
         if (UPstream::master(comm))
         {
@@ -497,12 +492,7 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlocks
     }
     else
     {
-        PstreamBuffers pBufs
-        (
-            UPstream::commsTypes::nonBlocking,
-            UPstream::msgType(),
-            comm
-        );
+        PstreamBuffers pBufs(comm, UPstream::commsTypes::nonBlocking);
 
         if (UPstream::master(comm))
         {
@@ -537,13 +527,15 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlocks
 
     Pstream::broadcast(ok, comm);
 
-    //- Set stream properties from realIsPtr on master
+    // Broadcast master header info,
+    // set stream properties from realIsPtr on master
 
-    // Scatter master header info
     int verValue;
     int fmtValue;
     unsigned labelWidth;
     unsigned scalarWidth;
+    word headerName(headerIO.name());
+
     if (UPstream::master(comm))
     {
         verValue = realIsPtr().version().canonical();
@@ -551,23 +543,27 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlocks
         labelWidth = realIsPtr().labelByteSize();
         scalarWidth = realIsPtr().scalarByteSize();
     }
-    Pstream::scatter(verValue); //,  Pstream::msgType(), comm);
-    Pstream::scatter(fmtValue); //,  Pstream::msgType(), comm);
-    Pstream::scatter(labelWidth); //,  Pstream::msgType(), comm);
-    Pstream::scatter(scalarWidth); //,  Pstream::msgType(), comm);
+
+    Pstream::broadcasts
+    (
+        UPstream::worldComm,   // Future? comm,
+        verValue,
+        fmtValue,
+        labelWidth,
+        scalarWidth,
+        headerName,
+        headerIO.headerClassName(),
+        headerIO.note()
+        // Unneeded: headerIO.instance()
+        // Unneeded: headerIO.local()
+    );
 
     realIsPtr().version(IOstreamOption::versionNumber::canonical(verValue));
     realIsPtr().format(IOstreamOption::streamFormat(fmtValue));
     realIsPtr().setLabelByteSize(labelWidth);
     realIsPtr().setScalarByteSize(scalarWidth);
 
-    word name(headerIO.name());
-    Pstream::scatter(name, Pstream::msgType(), comm);
-    headerIO.rename(name);
-    Pstream::scatter(headerIO.headerClassName(), Pstream::msgType(), comm);
-    Pstream::scatter(headerIO.note(), Pstream::msgType(), comm);
-    //Pstream::scatter(headerIO.instance(), Pstream::msgType(), comm);
-    //Pstream::scatter(headerIO.local(), Pstream::msgType(), comm);
+    headerIO.rename(headerName);
 
     return realIsPtr;
 }
@@ -944,6 +940,8 @@ bool Foam::decomposedBlockData::writeData(Ostream& os) const
 
     int verValue;
     int fmtValue;
+    // Unneeded: word masterName(name());
+    fileName masterLocation(instance()/db().dbDir()/local());
 
     // Re-read my own data to find out the header information
     if (Pstream::master(comm_))
@@ -955,23 +953,22 @@ bool Foam::decomposedBlockData::writeData(Ostream& os) const
         fmtValue = static_cast<int>(headerStream.format());
     }
 
-    // Scatter header information
-    Pstream::scatter(verValue, Pstream::msgType(), comm_);
-    Pstream::scatter(fmtValue, Pstream::msgType(), comm_);
+    // Broadcast header information
+    Pstream::broadcasts
+    (
+        comm_,
+        verValue,
+        fmtValue,
+        // Unneeded: masterName
+        io.headerClassName(),
+        io.note(),
+        // Unneeded: io.instance()
+        // Unneeded: io.local()
+        masterLocation
+    );
 
     streamOpt.version(IOstreamOption::versionNumber::canonical(verValue));
     streamOpt.format(IOstreamOption::streamFormat(fmtValue));
-
-    //word masterName(name());
-    //Pstream::scatter(masterName, Pstream::msgType(), comm_);
-
-    Pstream::scatter(io.headerClassName(), Pstream::msgType(), comm_);
-    Pstream::scatter(io.note(), Pstream::msgType(), comm_);
-    //Pstream::scatter(io.instance(), Pstream::msgType(), comm);
-    //Pstream::scatter(io.local(), Pstream::msgType(), comm);
-
-    fileName masterLocation(instance()/db().dbDir()/local());
-    Pstream::scatter(masterLocation, Pstream::msgType(), comm_);
 
     if (!Pstream::master(comm_))
     {

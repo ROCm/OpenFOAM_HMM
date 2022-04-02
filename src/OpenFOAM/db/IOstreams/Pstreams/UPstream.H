@@ -708,14 +708,6 @@ public:
             const int rootProcNo = masterNo()
         );
 
-        //- Broadcast string content to all processes in communicator.
-        static void broadcast
-        (
-            std::string& str,
-            const label communicator = worldComm,
-            const int rootProcNo = masterNo()
-        );
-
 
     // Housekeeping
 

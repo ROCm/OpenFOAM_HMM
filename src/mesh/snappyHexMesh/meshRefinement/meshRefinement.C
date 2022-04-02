@@ -2947,7 +2947,7 @@ Foam::fileName Foam::meshRefinement::writeLeakPath
     }
 
     // Probably do not need to broadcast name (only written on master anyhow)
-    UPstream::broadcast(fName);
+    Pstream::broadcast(fName);
 
     return fName;
 }

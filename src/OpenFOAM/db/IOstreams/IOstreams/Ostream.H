@@ -36,8 +36,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Ostream_H
-#define Ostream_H
+#ifndef Foam_Ostream_H
+#define Foam_Ostream_H
 
 #include "IOstream.H"
 #include "keyType.H"
@@ -49,6 +49,9 @@ namespace Foam
 
 // Forward Declarations
 class token;
+
+constexpr char tab = '\t';  //!< The tab \c '\\t' character(0x09)
+constexpr char nl = '\n';   //!< The newline \c '\\n' character (0x0a)
 
 /*---------------------------------------------------------------------------*\
                            Class Ostream Declaration
@@ -398,12 +401,6 @@ inline Ostream& endEntry(Ostream& os)
     os.endEntry();
     return os;
 }
-
-
-// Useful aliases for tab and newline characters
-constexpr char tab = '\t';
-constexpr char nl = '\n';
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -31,91 +31,55 @@ License
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-template<class T>
-void Foam::Pstream::genericBroadcast(T& value, const label comm)
+template<class Type>
+void Foam::Pstream::broadcast(Type& value, const label comm)
 {
-    // Generic: use stream interface
     if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
     {
-        if (UPstream::master(comm))
+        if (is_contiguous<Type>::value)
         {
-            OPBstream toAll(UPstream::masterNo(), comm);
-            toAll << value;
-        }
-        else
-        {
-            IPBstream fromMaster(UPstream::masterNo(), comm);
-            fromMaster >> value;
-        }
-    }
-}
-
-
-template<class ListType>
-void Foam::Pstream::genericListBroadcast(ListType& values, const label comm)
-{
-    if (!is_contiguous<typename ListType::value_type>::value)
-    {
-        Pstream::genericBroadcast(values, comm);
-    }
-    else if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
-    {
-        // Broadcast the size
-        label len(values.size());
-        UPstream::broadcast
-        (
-            reinterpret_cast<char*>(&len),
-            sizeof(label),
-            comm,
-            UPstream::masterNo()
-        );
-        values.resize_nocopy(len);  // A no-op on master
-
-        if (len)
-        {
+            // Note: contains parallel guard internally as well
             UPstream::broadcast
             (
-                values.data_bytes(),
-                values.size_bytes(),
+                reinterpret_cast<char*>(&value),
+                sizeof(Type),
                 comm,
                 UPstream::masterNo()
             );
         }
+        else
+        {
+            if (UPstream::master(comm))
+            {
+                OPBstream os(UPstream::masterNo(), comm);
+                os << value;
+            }
+            else
+            {
+                IPBstream is(UPstream::masterNo(), comm);
+                is >> value;
+            }
+        }
     }
 }
 
 
-template<class T>
-void Foam::Pstream::broadcast(T& value, const label comm)
+template<class Type, class... Args>
+void Foam::Pstream::broadcasts(const label comm, Type& arg1, Args&&... args)
 {
-    if (!is_contiguous<T>::value)
+    if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
     {
-        Pstream::genericBroadcast(value, comm);
+        if (UPstream::master(comm))
+        {
+            OPBstream os(UPstream::masterNo(), comm);
+            Detail::outputLoop(os, arg1, std::forward<Args>(args)...);
+        }
+        else
+        {
+            IPBstream is(UPstream::masterNo(), comm);
+            Detail::inputLoop(is, arg1, std::forward<Args>(args)...);
+        }
     }
-    else if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
-    {
-        UPstream::broadcast
-        (
-            reinterpret_cast<char*>(&value),
-            sizeof(T),
-            comm,
-            UPstream::masterNo()
-        );
-    }
-}
-
-
-template<class T>
-void Foam::Pstream::broadcast(List<T>& values, const label comm)
-{
-    Pstream::genericListBroadcast(values, comm);
-}
-
-
-template<class T, int SizeMin>
-void Foam::Pstream::broadcast(DynamicList<T, SizeMin>& values, const label comm)
-{
-    Pstream::genericListBroadcast(values, comm);
 }
 
 
