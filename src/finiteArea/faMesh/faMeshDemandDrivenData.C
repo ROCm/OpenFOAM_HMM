@@ -343,11 +343,13 @@ void Foam::faMesh::calcAreaCentres() const
     const pointField& localPoints = points();
     const faceList& localFaces = faces();
 
+    // Internal (face centres)
     forAll(localFaces, faceI)
     {
         centres.ref()[faceI] = localFaces[faceI].centre(localPoints);
     }
 
+    // Boundary (edge centres)
     forAll(boundary(), patchI)
     {
         const edgeList::subList patchEdges =
@@ -357,22 +359,6 @@ void Foam::faMesh::calcAreaCentres() const
         {
             centres.boundaryFieldRef()[patchI][edgeI] =
                 patchEdges[edgeI].centre(localPoints);
-        }
-    }
-
-    forAll(centres.boundaryField(), patchI)
-    {
-        //HJ: this is wrong!  5/Aug/2011
-        if
-        (
-            isA<processorFaPatchVectorField>
-            (
-                centres.boundaryField()[patchI]
-            )
-        )
-        {
-            centres.boundaryFieldRef()[patchI].initEvaluate();
-            centres.boundaryFieldRef()[patchI].evaluate();
         }
     }
 }
@@ -408,7 +394,7 @@ void Foam::faMesh::calcEdgeCentres() const
 
     const pointField& localPoints = points();
 
-
+    // Internal edges
     label edgei = 0;
     for (const edge& e : patch().internalEdges())
     {
@@ -416,7 +402,7 @@ void Foam::faMesh::calcEdgeCentres() const
         ++edgei;
     }
 
-
+    // Boundary edges
     forAll(boundary(), patchI)
     {
         const edgeList::subList patchEdges =
@@ -456,7 +442,7 @@ void Foam::faMesh::calcS() const
         *this,
         dimArea
     );
-    DimensionedField<scalar, areaMesh>& S = *SPtr_;
+    auto& S = *SPtr_;
 
     const pointField& localPoints = points();
     const faceList& localFaces = faces();
@@ -494,36 +480,26 @@ void Foam::faMesh::calcFaceAreaNormals() const
             dimless
         );
 
-    areaVectorField& faceAreaNormals = *faceAreaNormalsPtr_;
+    areaVectorField& faceNormals = *faceAreaNormalsPtr_;
 
     const pointField& localPoints = points();
     const faceList& localFaces = faces();
 
-    vectorField& nInternal = faceAreaNormals.ref();
+    // Internal (faces)
+    vectorField& nInternal = faceNormals.ref();
     forAll(localFaces, faceI)
     {
         nInternal[faceI] = localFaces[faceI].unitNormal(localPoints);
     }
 
+    // Boundary - copy from edges
+
+    const edgeVectorField::Boundary& edgeNormalsBoundary =
+        edgeAreaNormals().boundaryField();
+
     forAll(boundary(), patchI)
     {
-        faceAreaNormals.boundaryFieldRef()[patchI] =
-            edgeAreaNormals().boundaryField()[patchI];
-    }
-
-    forAll(faceAreaNormals.boundaryField(), patchI)
-    {
-        if
-        (
-            isA<processorFaPatchVectorField>
-            (
-                faceAreaNormals.boundaryField()[patchI]
-            )
-        )
-        {
-            faceAreaNormals.boundaryFieldRef()[patchI].initEvaluate();
-            faceAreaNormals.boundaryFieldRef()[patchI].evaluate();
-        }
+        faceNormals.boundaryFieldRef()[patchI] = edgeNormalsBoundary[patchI];
     }
 }
 
@@ -873,324 +849,6 @@ Foam::labelList Foam::faMesh::boundaryPoints() const
     bitSet markPoints(markupBoundaryPoints(this->patch()));
 
     return markPoints.sortedToc();
-}
-
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~
-// Point normal calculations
-// ~~~~~~~~~~~~~~~~~~~~~~~~~
-
-// Original method (general)
-// -------------------------
-// - For each point, obtain the list of connected patch faces
-//   (from point-to-face addressing).
-//
-// - Create a primitive patch for those faces and use that to obtain the
-//   outer edge loop(s). This is effectively an agglomeration of the patch
-//   faces connected to a point.
-//
-// - Perform a pair-wise walk of the edge loop to obtain triangles from
-//   the originating point outwards (fan-like triangulation).
-//   Calculate an area-weighted value for each triangle.
-//
-//   NOTE: not sure why internal and boundary point agglomeration was
-//   handled separately.
-//
-// Problems:
-// - possibly susceptible to edge-loop errors (issue #2233) that cause
-//   the agglomeration logic to include the current point twice?
-// - use of outer edge loop makes it more sensitive to face warpage.
-// - relatively expensive with point-face connectivity,
-//   creation/destruction of a primitive-patch around each point.
-//
-// Original method (boundary correction)
-// -------------------------------------
-//
-// - correct wedge directly, use processor patch information to exchange
-//   the current summed values
-//
-// - explicit correction of other boundaries.
-//   Polls the patch for the ngbPolyPatchPointNormals(), which internally
-//   calls ngbPolyPatchFaces and can return -1 for unmatched edges.
-//   This occurs when the outside perimeter of the faPatch aligns with
-//   a polyMesh processor. The neighbour face is off-processor and cannot
-//   be found. Accessing the mesh face at -1 == SEGFAULT.
-
-void Foam::faMesh::calcPointAreaNormals_orig(vectorField& result) const
-{
-    DebugInFunction
-        << "Calculating pointAreaNormals : original method" << endl;
-
-    result.resize(nPoints());
-    result = Zero;
-
-    labelList intPoints(internalPoints());
-    labelList bndPoints(boundaryPoints());
-
-    const pointField& points = patch().localPoints();
-    const faceList& faces = patch().localFaces();
-    const labelListList& pointFaces = patch().pointFaces();
-
-    for (const label curPoint : intPoints)
-    {
-        faceList curFaceList(pointFaces[curPoint].size());
-
-        forAll(curFaceList, faceI)
-        {
-            curFaceList[faceI] = faces[pointFaces[curPoint][faceI]];
-        }
-
-        primitiveFacePatch curPatch(curFaceList, points);
-
-        labelList curPointPoints = curPatch.edgeLoops()[0];
-
-        for (label i = 0; i < curPointPoints.size(); ++i)
-        {
-            vector d1 =
-                points[curPatch.meshPoints()[curPointPoints[i]]]
-              - points[curPoint];
-
-            label p = i + 1;
-
-            if (i == (curPointPoints.size() - 1))
-            {
-                p = 0;
-            }
-
-            vector d2 =
-                points[curPatch.meshPoints()[curPointPoints[p]]]
-              - points[curPoint];
-
-            vector n = (d1 ^ d2)/(mag(d1 ^ d2) + SMALL);
-
-            scalar sinAlpha = mag(d1^d2)/(mag(d1)*mag(d2));
-
-            scalar w = sinAlpha/(mag(d1)*mag(d2));
-
-            result[curPoint] += w*n;
-        }
-    }
-
-    for (const label curPoint : bndPoints)
-    {
-        faceList curFaceList(pointFaces[curPoint].size());
-
-        forAll(curFaceList, faceI)
-        {
-            curFaceList[faceI] = faces[pointFaces[curPoint][faceI]];
-        }
-
-        primitiveFacePatch curPatch(curFaceList, points);
-
-        labelList agglomFacePoints = curPatch.edgeLoops()[0];
-
-        SLList<label> slList;
-
-        label curPointLabel = -1;
-
-        for (label i=0; i<agglomFacePoints.size(); ++i)
-        {
-            if (curPatch.meshPoints()[agglomFacePoints[i]] == curPoint)
-            {
-                curPointLabel = i;
-            }
-            else if ( curPointLabel != -1 )
-            {
-                slList.append(curPatch.meshPoints()[agglomFacePoints[i]]);
-            }
-        }
-
-        for (label i=0; i<curPointLabel; ++i)
-        {
-            slList.append(curPatch.meshPoints()[agglomFacePoints[i]]);
-        }
-
-        labelList curPointPoints(slList);
-
-        for (label i=0; i < (curPointPoints.size() - 1); ++i)
-        {
-            vector d1 = points[curPointPoints[i]] - points[curPoint];
-
-            vector d2 = points[curPointPoints[i + 1]] - points[curPoint];
-
-            vector n = (d1 ^ d2)/(mag(d1 ^ d2) + SMALL);
-
-            scalar sinAlpha = mag(d1 ^ d2)/(mag(d1)*mag(d2));
-
-            scalar w = sinAlpha/(mag(d1)*mag(d2));
-
-            result[curPoint] += w*n;
-        }
-    }
-
-    // Correct wedge points
-    forAll(boundary(), patchI)
-    {
-        const faPatch& fap = boundary()[patchI];
-
-        if (isA<wedgeFaPatch>(fap))
-        {
-            const wedgeFaPatch& wedgePatch = refCast<const wedgeFaPatch>(fap);
-
-            const labelList& patchPoints = wedgePatch.pointLabels();
-
-            const vector N
-            (
-                transform
-                (
-                    wedgePatch.edgeT(),
-                    wedgePatch.centreNormal()
-                ).normalise()
-            );
-
-            for (const label pti : patchPoints)
-            {
-                result[pti] -= N*(N&result[pti]);
-            }
-
-            // Axis point correction
-            if (wedgePatch.axisPoint() > -1)
-            {
-                result[wedgePatch.axisPoint()] =
-                    wedgePatch.axis()
-                   *(
-                       wedgePatch.axis()
-                      &result[wedgePatch.axisPoint()]
-                    );
-            }
-        }
-    }
-
-
-    // Processor patch points correction
-    for (const faPatch& fap : boundary())
-    {
-        if (Pstream::parRun() && isA<processorFaPatch>(fap))
-        {
-            const processorFaPatch& procPatch =
-                refCast<const processorFaPatch>(fap);
-
-            const labelList& patchPointLabels = procPatch.pointLabels();
-
-            vectorField patchPointNormals
-            (
-                patchPointLabels.size(),
-                Zero
-            );
-
-            forAll(patchPointNormals, pointI)
-            {
-                patchPointNormals[pointI] = result[patchPointLabels[pointI]];
-            }
-
-            {
-            OPstream::write
-            (
-                Pstream::commsTypes::blocking,
-                procPatch.neighbProcNo(),
-                patchPointNormals.cdata_bytes(),
-                patchPointNormals.size_bytes()
-            );
-            }
-
-            vectorField ngbPatchPointNormals
-            (
-                procPatch.neighbPoints().size(),
-                Zero
-            );
-
-            {
-                IPstream::read
-                (
-                    Pstream::commsTypes::blocking,
-                    procPatch.neighbProcNo(),
-                    ngbPatchPointNormals.data_bytes(),
-                    ngbPatchPointNormals.size_bytes()
-                );
-            }
-
-            const labelList& nonGlobalPatchPoints =
-                procPatch.nonGlobalPatchPoints();
-
-            for (const label pti : nonGlobalPatchPoints)
-            {
-                result[patchPointLabels[pti]] +=
-                    ngbPatchPointNormals[procPatch.neighbPoints()[pti]];
-            }
-        }
-    }
-
-
-    // Correct global points
-    if (globalData().nGlobalPoints() > 0)
-    {
-        const labelList& spLabels(globalData().sharedPointLabels());
-
-        vectorField spNormals(spLabels.size(), Zero);
-        forAll(spNormals, pointI)
-        {
-            spNormals[pointI] = result[spLabels[pointI]];
-        }
-
-        const labelList& addr = globalData().sharedPointAddr();
-
-        vectorField gpNormals
-        (
-            globalData().nGlobalPoints(),
-            Zero
-        );
-
-        forAll(addr, i)
-        {
-            gpNormals[addr[i]] += spNormals[i];
-        }
-
-        Pstream::combineAllGather(gpNormals, plusEqOp<vectorField>());
-
-        // Extract local data
-        forAll(addr, i)
-        {
-            spNormals[i] = gpNormals[addr[i]];
-        }
-
-        forAll(spNormals, pointI)
-        {
-            result[spLabels[pointI]] = spNormals[pointI];
-        }
-    }
-
-
-    // Boundary points correction
-    forAll(boundary(), patchI)
-    {
-        const faPatch& fap = boundary()[patchI];
-
-        if (correctPatchPointNormals(patchI) && !fap.coupled())
-        {
-            if (fap.ngbPolyPatchIndex() < 0)
-            {
-                FatalErrorInFunction
-                    << "Neighbour polyPatch index is not defined "
-                    << "for faPatch " << fap.name()
-                    << abort(FatalError);
-            }
-
-            const labelList& patchPoints = fap.pointLabels();
-
-            const vectorField N(fap.ngbPolyPatchPointNormals());
-
-            forAll(patchPoints, pointI)
-            {
-                result[patchPoints[pointI]]
-                    -= N[pointI]*(N[pointI]&result[patchPoints[pointI]]);
-            }
-        }
-    }
-
-    for (vector& n : result)
-    {
-        n.normalise();
-    }
 }
 
 

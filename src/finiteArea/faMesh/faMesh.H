@@ -309,10 +309,10 @@ class faMesh
 
     // Static Private Data
 
-        //- Use the original method for point normals
-        static int origPointAreaMethod_;
+        //- Geometry treatment (0: primitive, 1: standard)
+        static int geometryOrder_;
 
-        //- Use quadrics fit
+        //- Quadrics fit for pointAreaNormals (experimental)
         static const int quadricsFit_;
 
 
@@ -354,36 +354,42 @@ class faMesh
             void calcPatchStarts() const;
 
             //- Calculate edge lengths
+            //  Triggers communication via calcEdgeAreaNormals
             void calcLe() const;
 
             //- Calculate mag edge lengths
+            //  No communication
             void calcMagLe() const;
 
             //- Calculate face centres
+            //  No communication
             void calcAreaCentres() const;
 
             //- Calculate edge centres
+            //  No communication
             void calcEdgeCentres() const;
 
             //- Calculate face areas
+            //  No communication
             void calcS() const;
 
             //- Calculate face area normals
+            //  Triggers communication via calcEdgeAreaNormals
             void calcFaceAreaNormals() const;
 
             //- Calculate edge area normals
+            //  Triggers communication via pointAreaNormals
             void calcEdgeAreaNormals() const;
 
             //- Calculate point area normals
-            void calcPointAreaNormals_orig(vectorField& result) const;
-
-            //- Calculate point area normals
+            //  Triggers communication for processor patches
             void calcPointAreaNormals(vectorField& result) const;
 
             //- Calculate point area normals by quadrics fit
             void calcPointAreaNormalsByQuadricsFit(vectorField& result) const;
 
             //- Calculate face curvatures
+            //  Triggers communication via edgeLengthCorrection
             void calcFaceCurvatures() const;
 
             //- Calculate edge transformation tensors
