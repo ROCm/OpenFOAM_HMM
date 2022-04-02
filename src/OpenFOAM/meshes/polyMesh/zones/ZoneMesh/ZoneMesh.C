@@ -31,6 +31,7 @@ License
 #include "DynamicList.H"
 #include "Pstream.H"
 #include "PtrListOps.H"
+#include "globalIndex.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -760,41 +761,47 @@ bool Foam::ZoneMesh<ZoneType, MeshType>::checkParallelSync
 
     bool hasError = false;
 
-    // Collect all names
-    List<wordList> allNames(Pstream::nProcs());
-    allNames[Pstream::myProcNo()] = this->names();
-    Pstream::allGatherList(allNames);
+    const wordList localNames(this->names());
+    const wordList localTypes(this->types());
 
-    List<wordList> allTypes(Pstream::nProcs());
-    allTypes[Pstream::myProcNo()] = this->types();
-    Pstream::allGatherList(allTypes);
+    // Check and report error(s) on master
 
-    // Have every processor check but only master print error.
+    const globalIndex procAddr
+    (
+        // Don't need to collect master itself
+        (Pstream::master() ? 0 : localNames.size()),
+        globalIndex::gatherOnly{}
+    );
 
-    for (label proci = 1; proci < allNames.size(); ++proci)
+    const wordList allNames(procAddr.gather(localNames));
+    const wordList allTypes(procAddr.gather(localTypes));
+
+    // Automatically restricted to master
+    for (const int proci : procAddr.subProcs())
     {
-        if
-        (
-            (allNames[proci] != allNames[0])
-         || (allTypes[proci] != allTypes[0])
-        )
+        const auto procNames(allNames.slice(procAddr.range(proci)));
+        const auto procTypes(allTypes.slice(procAddr.range(proci)));
+
+        if (procNames != localNames || procTypes != localTypes)
         {
             hasError = true;
 
-            if (debug || (report && Pstream::master()))
+            if (debug || report)
             {
                 Info<< " ***Inconsistent zones across processors, "
-                       "processor 0 has zone names:" << allNames[0]
-                    << " zone types:" << allTypes[0]
-                    << " processor " << proci << " has zone names:"
-                    << allNames[proci]
-                    << " zone types:" << allTypes[proci]
+                       "processor 0 has zone names:" << localNames
+                    << " zone types:" << localTypes
+                    << " processor " << proci
+                    << " has zone names:" << procNames
+                    << " zone types:" << procTypes
                     << endl;
             }
         }
     }
 
-    // Check contents
+    Pstream::broadcast(hasError);
+
+    // Check local contents
     if (!hasError)
     {
         for (const ZoneType& zn : zones)

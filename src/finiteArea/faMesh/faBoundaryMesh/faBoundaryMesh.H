@@ -210,7 +210,12 @@ public:
         void setGroup(const word& groupName, const labelUList& patchIDs);
 
         //- Check boundary definition
+        //  \return True if in error.
         bool checkDefinition(const bool report = false) const;
+
+        //- Check whether all procs have all patches and in same order.
+        //  \return True if in error.
+        bool checkParallelSync(const bool report = false) const;
 
 
     // Edit

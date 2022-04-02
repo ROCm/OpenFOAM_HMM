@@ -959,8 +959,8 @@ bool Foam::polyBoundaryMesh::checkParallelSync(const bool report) const
     bool hasError = false;
 
     // Collect non-proc patches and check proc patches are last.
-    wordList names(bm.size());
-    wordList types(bm.size());
+    wordList localNames(bm.size());
+    wordList localTypes(bm.size());
 
     label nonProci = 0;
 
@@ -970,64 +970,66 @@ bool Foam::polyBoundaryMesh::checkParallelSync(const bool report) const
         {
             if (nonProci != patchi)
             {
-                // There is processor patch in between normal patches.
+                // A processor patch in between normal patches!
                 hasError = true;
 
                 if (debug || report)
                 {
                     Pout<< " ***Problem with boundary patch " << patchi
-                        << " named " << bm[patchi].name()
-                        << " of type " <<  bm[patchi].type()
-                        << ". The patch seems to be preceeded by processor"
-                        << " patches. This is can give problems."
-                        << endl;
+                        << " name:" << bm[patchi].name()
+                        << " type:" <<  bm[patchi].type()
+                        << " - seems to be preceeded by processor patches."
+                        << " This is usually a problem." << endl;
                 }
             }
             else
             {
-                names[nonProci] = bm[patchi].name();
-                types[nonProci] = bm[patchi].type();
-                nonProci++;
+                localNames[nonProci] = bm[patchi].name();
+                localTypes[nonProci] = bm[patchi].type();
+                ++nonProci;
             }
         }
     }
-    names.setSize(nonProci);
-    types.setSize(nonProci);
+    localNames.resize(nonProci);
+    localTypes.resize(nonProci);
 
-    List<wordList> allNames(Pstream::nProcs());
-    allNames[Pstream::myProcNo()] = names;
-    Pstream::allGatherList(allNames);
+    // Check and report error(s) on master
 
-    List<wordList> allTypes(Pstream::nProcs());
-    allTypes[Pstream::myProcNo()] = types;
-    Pstream::allGatherList(allTypes);
+    const globalIndex procAddr
+    (
+        // Don't need to collect master itself
+        (Pstream::master() ? 0 : nonProci),
+        globalIndex::gatherOnly{}
+    );
 
-    // Have every processor check but print error on master
-    // (in processor sequence).
+    const wordList allNames(procAddr.gather(localNames));
+    const wordList allTypes(procAddr.gather(localTypes));
 
-    for (const int proci : Pstream::subProcs())
+    // Automatically restricted to master
+    for (const int proci : procAddr.subProcs())
     {
-        if
-        (
-            (allNames[proci] != allNames.first())
-         || (allTypes[proci] != allTypes.first())
-        )
+        const auto procNames(allNames.slice(procAddr.range(proci)));
+        const auto procTypes(allTypes.slice(procAddr.range(proci)));
+
+        if (procNames != localNames || procTypes != localTypes)
         {
             hasError = true;
 
-            if (debug || (report && Pstream::master()))
+            if (debug || report)
             {
                 Info<< " ***Inconsistent patches across processors, "
-                       "processor 0 has patch names:"
-                    << allNames.first()
-                    << " patch types:" << allTypes.first()
-                    << " processor " << proci
-                    << " has patch names:" << allNames[proci]
-                    << " patch types:" << allTypes[proci]
+                       "processor0 has patch names:" << localNames
+                    << " patch types:" << localTypes
+                    << " processor" << proci
+                    << " has patch names:" << procNames
+                    << " patch types:" << procTypes
                     << endl;
             }
         }
     }
+
+    // Reduce (not broadcast) to respect local out-of-order errors (first loop)
+    reduce(hasError, orOp<bool>());
 
     return hasError;
 }
