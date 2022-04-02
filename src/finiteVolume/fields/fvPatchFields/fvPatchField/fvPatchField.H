@@ -68,7 +68,6 @@ template<class Type> class fvPatchField;
 template<class Type> class calculatedFvPatchField;
 template<class Type> class fvMatrix;
 
-
 template<class Type>
 Ostream& operator<<(Ostream&, const fvPatchField<Type>&);
 
@@ -246,7 +245,7 @@ public:
         //  (does not set the patch field values)
         static tmp<fvPatchField<Type>> New
         (
-            const word&,
+            const word& patchFieldType,
             const fvPatch&,
             const DimensionedField<Type, volMesh>&
         );
@@ -257,7 +256,7 @@ public:
         //  Allows override of constraint type
         static tmp<fvPatchField<Type>> New
         (
-            const word&,
+            const word& patchFieldType,
             const word& actualPatchType,
             const fvPatch&,
             const DimensionedField<Type, volMesh>&

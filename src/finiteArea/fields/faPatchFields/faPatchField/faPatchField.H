@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,8 +45,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef faPatchField_H
-#define faPatchField_H
+#ifndef Foam_faPatchField_H
+#define Foam_faPatchField_H
 
 #include "faPatch.H"
 #include "DimensionedField.H"
@@ -176,7 +176,8 @@ public:
         (
             const faPatch&,
             const DimensionedField<Type, areaMesh>&,
-            const dictionary&
+            const dictionary&,
+            const bool valueRequired=true
         );
 
         //- Construct by mapping the given faPatchField onto a new patch

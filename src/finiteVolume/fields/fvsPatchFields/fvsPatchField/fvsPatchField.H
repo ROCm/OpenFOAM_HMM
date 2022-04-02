@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,21 +55,15 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 
 class objectRegistry;
 class dictionary;
 class fvPatchFieldMapper;
 class surfaceMesh;
 
-
-// Forward declaration of friend functions and operators
-
-template<class Type>
-class fvsPatchField;
-
-template<class Type>
-class calculatedFvsPatchField;
+template<class Type> class fvsPatchField;
+template<class Type> class calculatedFvsPatchField;
 
 template<class Type>
 Ostream& operator<<(Ostream&, const fvsPatchField<Type>&);
@@ -170,7 +164,8 @@ public:
         (
             const fvPatch&,
             const DimensionedField<Type, surfaceMesh>&,
-            const dictionary&
+            const dictionary&,
+            const bool valueRequired=true
         );
 
         //- Construct by mapping the given fvsPatchField onto a new patch
@@ -215,7 +210,7 @@ public:
         //  (does not set the patch field values)
         static tmp<fvsPatchField<Type>> New
         (
-            const word&,
+            const word& patchFieldType,
             const fvPatch&,
             const DimensionedField<Type, surfaceMesh>&
         );
@@ -226,7 +221,7 @@ public:
         //  Allows override of constraint type
         static tmp<fvsPatchField<Type>> New
         (
-            const word&,
+            const word& patchFieldType,
             const word& actualPatchType,
             const fvPatch&,
             const DimensionedField<Type, surfaceMesh>&

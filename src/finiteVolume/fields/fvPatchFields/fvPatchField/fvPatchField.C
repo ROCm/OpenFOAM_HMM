@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -119,9 +119,12 @@ Foam::fvPatchField<Type>::fvPatchField
     internalField_(iF),
     updated_(false),
     manipulatedMatrix_(false),
-    useImplicit_(dict.getOrDefault<bool>("useImplicit", false)),
-    patchType_(dict.getOrDefault<word>("patchType", word::null))
+    useImplicit_(false),
+    patchType_()
 {
+    dict.readIfPresent("useImplicit", useImplicit_, keyType::LITERAL);
+    dict.readIfPresent("patchType", patchType_, keyType::LITERAL);
+
     if (valueRequired)
     {
         if (dict.found("value"))
@@ -134,7 +137,8 @@ Foam::fvPatchField<Type>::fvPatchField
         else
         {
             FatalIOErrorInFunction(dict)
-                << "Essential entry 'value' missing on patch " << p.name() << nl
+                << "Essential entry 'value' missing on patch "
+                << p.name() << endl
                 << exit(FatalIOError);
         }
     }
@@ -390,7 +394,7 @@ void Foam::fvPatchField<Type>::write(Ostream& os) const
         os.writeEntry("useImplicit", "true");
     }
 
-    if (patchType_.size())
+    if (!patchType_.empty())
     {
         os.writeEntry("patchType", patchType_);
     }

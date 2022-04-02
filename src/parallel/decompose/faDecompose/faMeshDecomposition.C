@@ -329,11 +329,11 @@ void Foam::faMeshDecomposition::decomposeMesh()
                 ).val();
         }
 
-        // create processor finite area mesh
+        // Create processor finite area mesh
         faMesh procMesh
         (
             procFvMesh,
-            procFaceLabels_[procI]
+            labelList(procFaceLabels_[procI])
         );
 
         const uindirectPrimitivePatch& patch = this->patch();
@@ -1073,7 +1073,7 @@ void Foam::faMeshDecomposition::decomposeMesh()
         faMesh procMesh
         (
             procFvMesh,
-            procFaceLabels_[procI]
+            labelList(procFaceLabels_[procI])
         );
 
 
@@ -1205,7 +1205,7 @@ bool Foam::faMeshDecomposition::writeDecomposition()
         faMesh procMesh
         (
             procFvMesh,
-            procFaceLabels_[procI]
+            labelList(procFaceLabels_[procI])
         );
 
         // Create processor boundary patches

@@ -202,9 +202,9 @@ public:
         //  (does not set the patch field values)
         static autoPtr<pointPatchField<Type>> New
         (
-            const word&,
-            const pointPatch&,
-            const DimensionedField<Type, pointMesh>&
+            const word& patchFieldType,
+            const pointPatch& p,
+            const DimensionedField<Type, pointMesh>& iF
         );
 
         //- Return a pointer to a new patchField created on freestore given
@@ -213,10 +213,10 @@ public:
         //  Allows override of constraint type
         static autoPtr<pointPatchField<Type>> New
         (
-            const word&,
+            const word& patchFieldType,
             const word& actualPatchType,
-            const pointPatch&,
-            const DimensionedField<Type, pointMesh>&
+            const pointPatch& p,
+            const DimensionedField<Type, pointMesh>& iF
         );
 
         //- Return a pointer to a new patchField created on freestore from

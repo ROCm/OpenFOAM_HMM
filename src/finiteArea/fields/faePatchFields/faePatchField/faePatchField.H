@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -220,7 +220,19 @@ public:
         //  (does not set the patch field values)
         static tmp<faePatchField<Type>> New
         (
-            const word&,
+            const word& patchFieldType,
+            const faPatch&,
+            const DimensionedField<Type, edgeMesh>&
+        );
+
+        //- Return a pointer to a new patchField created on freestore given
+        //  patch and internal field
+        //  (does not set the patch field values)
+        //  Allows override of constraint type
+        static tmp<faePatchField<Type>> New
+        (
+            const word& patchFieldType,
+            const word& actualPatchType,
             const faPatch&,
             const DimensionedField<Type, edgeMesh>&
         );

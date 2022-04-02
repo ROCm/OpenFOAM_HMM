@@ -164,7 +164,7 @@ Foam::exprMixedFvPatchField<Type>::exprMixedFvPatchField
     driver_.readDict(dict_);
 
     // Similar to fvPatchField constructor, which we have bypassed
-    dict.readIfPresent("patchType", this->patchType());
+    dict.readIfPresent("patchType", this->patchType(), keyType::LITERAL);
 
     bool needsRefValue = true;
     if (dict.found("refValue"))

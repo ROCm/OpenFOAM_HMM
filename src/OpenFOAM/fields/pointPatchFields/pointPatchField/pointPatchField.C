@@ -42,7 +42,7 @@ Foam::pointPatchField<Type>::pointPatchField
     patch_(p),
     internalField_(iF),
     updated_(false),
-    patchType_(word::null)
+    patchType_()
 {}
 
 
@@ -57,8 +57,10 @@ Foam::pointPatchField<Type>::pointPatchField
     patch_(p),
     internalField_(iF),
     updated_(false),
-    patchType_(dict.getOrDefault<word>("patchType", word::null))
-{}
+    patchType_()
+{
+    dict.readIfPresent("patchType", patchType_, keyType::LITERAL);
+}
 
 
 template<class Type>
@@ -118,7 +120,7 @@ void Foam::pointPatchField<Type>::write(Ostream& os) const
 {
     os.writeEntry("type", type());
 
-    if (patchType_.size())
+    if (!patchType_.empty())
     {
         os.writeEntry("patchType", patchType_);
     }

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,7 +37,10 @@ Foam::autoPtr<Foam::pointPatchField<Type>> Foam::pointPatchField<Type>::New
     const DimensionedField<Type, pointMesh>& iF
 )
 {
-    DebugInFunction << "Constructing pointPatchField<Type>" << endl;
+    DebugInFunction
+        << "patchFieldType = " << patchFieldType
+        << " [" << actualPatchType
+        << "] : " << p.type() << " name = " << p.name() << endl;
 
     auto* ctorPtr = pointPatchConstructorTable(patchFieldType);
 
@@ -53,11 +56,7 @@ Foam::autoPtr<Foam::pointPatchField<Type>> Foam::pointPatchField<Type>::New
 
     autoPtr<pointPatchField<Type>> pfPtr(ctorPtr(p, iF));
 
-    if
-    (
-        actualPatchType.empty()
-     || actualPatchType != p.type()
-    )
+    if (actualPatchType.empty() || actualPatchType != p.type())
     {
         if (pfPtr().constraintType() != p.constraintType())
         {
@@ -110,9 +109,15 @@ Foam::autoPtr<Foam::pointPatchField<Type>> Foam::pointPatchField<Type>::New
     const dictionary& dict
 )
 {
-    DebugInFunction << "Constructing pointPatchField<Type>" << endl;
-
     const word patchFieldType(dict.get<word>("type"));
+
+    word actualPatchType;
+    dict.readIfPresent("patchType", actualPatchType, keyType::LITERAL);
+
+    DebugInFunction
+        << "patchFieldType = " << patchFieldType
+        << " [" << actualPatchType
+        << "] : " << p.type() << " name = " << p.name() << endl;
 
     auto* ctorPtr = dictionaryConstructorTable(patchFieldType);
 
@@ -137,11 +142,7 @@ Foam::autoPtr<Foam::pointPatchField<Type>> Foam::pointPatchField<Type>::New
     // Construct (but not necessarily returned)
     autoPtr<pointPatchField<Type>> pfPtr(ctorPtr(p, iF, dict));
 
-    if
-    (
-        !dict.found("patchType")
-     || dict.get<word>("patchType") != p.type()
-    )
+    if (actualPatchType.empty() || actualPatchType != p.type())
     {
         if (pfPtr().constraintType() != p.constraintType())
         {
@@ -176,7 +177,9 @@ Foam::autoPtr<Foam::pointPatchField<Type>> Foam::pointPatchField<Type>::New
     const pointPatchFieldMapper& pfMapper
 )
 {
-    DebugInFunction << "Constructing pointPatchField<Type>" << endl;
+    DebugInFunction
+        << "patchFieldType = " << ptf.type()
+        << " : " << p.type() << " name = " << p.name() << endl;
 
     auto* ctorPtr = patchMapperConstructorTable(ptf.type());
 
