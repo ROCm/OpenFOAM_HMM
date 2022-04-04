@@ -156,8 +156,8 @@ Foam::PatchTools::pointNormals
     // 1. Start off with local normals (note:without calculating pointNormals
     //    to avoid them being stored)
 
-    tmp<pointField> textrudeN(new pointField(p.nPoints(), Zero));
-    pointField& extrudeN = textrudeN.ref();
+    auto textrudeN = tmp<pointField>::New(p.nPoints(), Zero);
+    auto& extrudeN = textrudeN.ref();
     {
         const faceList& localFaces = p.localFaces();
         const vectorField& faceNormals = p.faceNormals();

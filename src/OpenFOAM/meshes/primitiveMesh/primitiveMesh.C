@@ -333,14 +333,14 @@ Foam::tmp<Foam::scalarField> Foam::primitiveMesh::movePoints
     }
 
     // Create swept volumes
-    const faceList& f = faces();
+    const faceList& fcs = faces();
 
-    tmp<scalarField> tsweptVols(new scalarField(f.size()));
-    scalarField& sweptVols = tsweptVols.ref();
+    auto tsweptVols = tmp<scalarField>::New(fcs.size());
+    auto& sweptVols = tsweptVols.ref();
 
-    forAll(f, facei)
+    forAll(fcs, facei)
     {
-        sweptVols[facei] = f[facei].sweptVol(oldPoints, newPoints);
+        sweptVols[facei] = fcs[facei].sweptVol(oldPoints, newPoints);
     }
 
     // Force recalculation of all geometric data with new points
@@ -364,20 +364,15 @@ const Foam::cellShapeList& Foam::primitiveMesh::cellShapes() const
 
 void Foam::primitiveMesh::updateGeom()
 {
-    if (!faceCentresPtr_)
+    if (!faceCentresPtr_ || !faceAreasPtr_)
     {
+        // These are always calculated in tandem, but only once
         calcFaceCentresAndAreas();
     }
-    if (!faceAreasPtr_)
+
+    if (!cellCentresPtr_ || !cellVolumesPtr_)
     {
-        calcFaceCentresAndAreas();
-    }
-    if (!cellCentresPtr_)
-    {
-        calcCellCentresAndVols();
-    }
-    if (!cellVolumesPtr_)
-    {
+        // These are always calculated in tandem, but only once
         calcCellCentresAndVols();
     }
 }

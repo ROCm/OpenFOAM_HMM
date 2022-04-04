@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef surfaceInterpolation_H
-#define surfaceInterpolation_H
+#ifndef Foam_surfaceInterpolation_H
+#define Foam_surfaceInterpolation_H
 
 #include "tmp.H"
 #include "scalar.H"
@@ -49,6 +49,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class fvMesh;
 class fvGeometryScheme;
 
@@ -58,7 +59,7 @@ class fvGeometryScheme;
 
 class surfaceInterpolation
 {
-    // Private data
+    // Private Data
 
         // Reference to fvMesh
         const fvMesh& mesh_;
@@ -108,7 +109,7 @@ public:
     virtual ~surfaceInterpolation();
 
 
-    // Member functions
+    // Member Functions
 
         //- Return reference to geometry calculation scheme
         virtual const fvGeometryScheme& geometry() const;
@@ -134,6 +135,12 @@ public:
 
         //- Update all geometric data
         virtual void updateGeom();
+
+
+    // Storage Management
+
+        //- Has weights
+        bool hasWeights() const noexcept { return bool(weights_); }
 };
 
 

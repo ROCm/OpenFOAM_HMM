@@ -763,18 +763,15 @@ bool Foam::primitiveMeshGeometry::checkFaceAngles
 
         const vector faceNormal = normalised(faceAreas[facei]);
 
-        // Get edge from f[0] to f[size-1];
+        // Normalized vector from f[size-1] to f[0];
         vector ePrev(p[f.first()] - p[f.last()]);
         scalar magEPrev = mag(ePrev);
         ePrev /= magEPrev + VSMALL;
 
         forAll(f, fp0)
         {
-            // Get vertex after fp
-            label fp1 = f.fcIndex(fp0);
-
             // Normalized vector between two consecutive points
-            vector e10(p[f[fp1]] - p[f[fp0]]);
+            vector e10(p[f.nextLabel(fp0)] - p[f.thisLabel(fp0)]);
             scalar magE10 = mag(e10);
             e10 /= magE10 + VSMALL;
 

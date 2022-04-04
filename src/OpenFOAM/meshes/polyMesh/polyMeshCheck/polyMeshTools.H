@@ -24,7 +24,7 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Namespace
+Class
     Foam::polyMeshTools
 
 Description
@@ -36,8 +36,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef polyMeshTools_H
-#define polyMeshTools_H
+#ifndef Foam_polyMeshTools_H
+#define Foam_polyMeshTools_H
 
 #include "polyMesh.H"
 #include "primitiveMeshTools.H"
@@ -48,18 +48,17 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                        Namespace polyMeshTools Declaration
+                        Class polyMeshTools Declaration
 \*---------------------------------------------------------------------------*/
 
 class polyMeshTools
 :
     public primitiveMeshTools
 {
-
 public:
 
-    //- Generate orthogonality field. (1 for fully orthogonal, < 1 for
-    //  non-orthogonal)
+    //- Generate orthogonality field.
+    //- (1 for fully orthogonal, < 1 for non-orthogonal)
     static tmp<scalarField> faceOrthogonality
     (
         const polyMesh& mesh,
@@ -93,8 +92,8 @@ public:
         const scalarField& vol
     );
 
-    //- Combine readUpdateState. topo change trumps geom-only
-    //  change etc.
+    //- Combine readUpdateState.
+    //- topo change trumps geom-only change etc.
     static polyMesh::readUpdateState combine
     (
         const polyMesh::readUpdateState& state0,

@@ -106,21 +106,20 @@ void Foam::primitiveMesh::printAllocated() const
         Pout<< "    Cell-centres" << endl;
     }
 
-    if (faceCentresPtr_)
-    {
-        Pout<< "    Face-centres" << endl;
-    }
-
     if (cellVolumesPtr_)
     {
         Pout<< "    Cell-volumes" << endl;
+    }
+
+    if (faceCentresPtr_)
+    {
+        Pout<< "    Face-centres" << endl;
     }
 
     if (faceAreasPtr_)
     {
         Pout<< "    Face-areas" << endl;
     }
-
 }
 
 
@@ -134,8 +133,8 @@ void Foam::primitiveMesh::clearGeom()
     }
 
     deleteDemandDrivenData(cellCentresPtr_);
-    deleteDemandDrivenData(faceCentresPtr_);
     deleteDemandDrivenData(cellVolumesPtr_);
+    deleteDemandDrivenData(faceCentresPtr_);
     deleteDemandDrivenData(faceAreasPtr_);
 }
 

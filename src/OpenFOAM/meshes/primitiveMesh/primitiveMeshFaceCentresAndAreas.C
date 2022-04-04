@@ -42,16 +42,15 @@ void Foam::primitiveMesh::calcFaceCentresAndAreas() const
     if (debug)
     {
         Pout<< "primitiveMesh::calcFaceCentresAndAreas() : "
-            << "Calculating face centres and face areas"
+            << "Calculating face centres and areas"
             << endl;
     }
 
-    // It is an error to attempt to recalculate faceCentres
-    // if the pointer is already set
+    // These are always calculated in tandem, but only once.
     if (faceCentresPtr_ || faceAreasPtr_)
     {
         FatalErrorInFunction
-            << "Face centres or face areas already calculated"
+            << "Face centres and areas already calculated"
             << abort(FatalError);
     }
 
@@ -66,7 +65,7 @@ void Foam::primitiveMesh::calcFaceCentresAndAreas() const
     if (debug)
     {
         Pout<< "primitiveMesh::calcFaceCentresAndAreas() : "
-            << "Finished calculating face centres and face areas"
+            << "Finished calculating face centres and areas"
             << endl;
     }
 }

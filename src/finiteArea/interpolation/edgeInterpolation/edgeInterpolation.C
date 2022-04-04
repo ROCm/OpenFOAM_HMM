@@ -59,10 +59,10 @@ Foam::edgeInterpolation::edgeInterpolation(const faMesh& fam)
     lPN_(nullptr),
     weightingFactors_(nullptr),
     differenceFactors_(nullptr),
-    orthogonal_(false),
     correctionVectors_(nullptr),
-    skew_(true),
-    skewCorrectionVectors_(nullptr)
+    skewCorrectionVectors_(nullptr),
+    orthogonal_(false),
+    skew_(true)
 {}
 
 

@@ -50,8 +50,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef primitiveMesh_H
-#define primitiveMesh_H
+#ifndef Foam_primitiveMesh_H
+#define Foam_primitiveMesh_H
 
 #include "DynamicList.H"
 #include "edgeList.H"
@@ -188,7 +188,7 @@ class primitiveMesh
         void operator=(const primitiveMesh&) = delete;
 
 
-        // Topological calculations
+        // Topological Calculations
 
             //- Calculate cell shapes
             void calcCellShapes() const;
@@ -809,8 +809,8 @@ public:
             inline bool hasPointPoints() const noexcept;
             inline bool hasCellPoints() const noexcept;
             inline bool hasCellCentres() const noexcept;
-            inline bool hasFaceCentres() const noexcept;
             inline bool hasCellVolumes() const noexcept;
+            inline bool hasFaceCentres() const noexcept;
             inline bool hasFaceAreas() const noexcept;
 
             // On-the-fly addressing calculation. These functions return either

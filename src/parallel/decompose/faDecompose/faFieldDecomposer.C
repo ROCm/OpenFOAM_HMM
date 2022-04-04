@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -126,7 +126,11 @@ processorAreaPatchFieldDecomposer
         mesh.edgeOwner(),
         mesh.edgeNeighbour(),
         addressingSlice,
-        mesh.weights().internalField()
+        (
+            mesh.hasWeights()
+          ? mesh.weights().primitiveField()
+          : scalarField::null()
+        )
     )
 {}
 
@@ -310,7 +314,9 @@ void Foam::faFieldDecomposer::reset(const faMesh& completeMesh)
     processorEdgePatchFieldDecomposerPtrs_.resize(nMappers);
 
     // Create weightings now - needed for proper parallel synchronization
-    (void)completeMesh.weights();
+    //// (void)completeMesh.weights();
+    // Disabled the above (2022-04-04)
+    // Use weights if they already exist, otherwise simply ignore
 
     // faPatches don't have their own start() - so these are invariant
     const labelList completePatchStarts

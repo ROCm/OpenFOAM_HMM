@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,18 +61,15 @@ bool Foam::combineFaces::convexFace
     // Get outwards pointing normal of f, only the sign matters.
     const vector areaNorm = f.areaNormal(points);
 
-    // Get edge from f[0] to f[size-1];
+    // Normalized vector from f[size-1] to f[0];
     vector ePrev(points[f.first()] - points[f.last()]);
     scalar magEPrev = mag(ePrev);
     ePrev /= magEPrev + VSMALL;
 
     forAll(f, fp0)
     {
-        // Get vertex after fp
-        label fp1 = f.fcIndex(fp0);
-
         // Normalized vector between two consecutive points
-        vector e10(points[f[fp1]] - points[f[fp0]]);
+        vector e10(points[f.nextLabel(fp0)] - points[f.thisLabel(fp0)]);
         scalar magE10 = mag(e10);
         e10 /= magE10 + VSMALL;
 
@@ -138,12 +135,10 @@ void Foam::combineFaces::regioniseFaces
 {
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
-    forAll(cEdges, i)
+    for (const label edgei : cEdges)
     {
-        const label edgeI = cEdges[i];
-
         label f0, f1;
-        meshTools::getEdgeFaces(mesh_, celli, edgeI, f0, f1);
+        meshTools::getEdgeFaces(mesh_, celli, edgei, f0, f1);
 
         const vector& a0 = mesh_.faceAreas()[f0];
         const vector& a1 = mesh_.faceAreas()[f1];

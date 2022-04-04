@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,21 +32,23 @@ License
 #include "pyramidPointFaceRef.H"
 #include "PrecisionAdaptor.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 void Foam::primitiveMeshTools::makeFaceCentresAndAreas
 (
-    const primitiveMesh& mesh,
+    const UList<face>& fcs,
     const pointField& p,
     vectorField& fCtrs,
     vectorField& fAreas
 )
 {
-    const faceList& fs = mesh.faces();
+    // Safety first - ensure properly sized
+    fCtrs.resize_nocopy(fcs.size());
+    fAreas.resize_nocopy(fcs.size());
 
-    forAll(fs, facei)
+    forAll(fcs, facei)
     {
-        const labelList& f = fs[facei];
+        const face& f = fcs[facei];
         const label nPoints = f.size();
 
         // If the face is a triangle, do a direct calculation for efficiency
@@ -59,26 +61,25 @@ void Foam::primitiveMeshTools::makeFaceCentresAndAreas
         else
         {
             solveVector sumN = Zero;
-            solveScalar sumA = 0.0;
+            solveScalar sumA = Zero;
             solveVector sumAc = Zero;
 
             solveVector fCentre = p[f[0]];
-            for (label pi = 1; pi < nPoints; pi++)
+            for (label pi = 1; pi < nPoints; ++pi)
             {
                 fCentre += solveVector(p[f[pi]]);
             }
-
             fCentre /= nPoints;
 
-            for (label pi = 0; pi < nPoints; pi++)
+            for (label pi = 0; pi < nPoints; ++pi)
             {
-                const label nextPi(pi == nPoints-1 ? 0 : pi+1);
-                const solveVector nextPoint(p[f[nextPi]]);
-                const solveVector thisPoint(p[f[pi]]);
+                const solveVector thisPoint(p[f.thisLabel(pi)]);
+                const solveVector nextPoint(p[f.nextLabel(pi)]);
 
                 solveVector c = thisPoint + nextPoint + fCentre;
                 solveVector n = (nextPoint - thisPoint)^(fCentre - thisPoint);
                 solveScalar a = mag(n);
+
                 sumN += n;
                 sumA += a;
                 sumAc += a*c;
@@ -101,6 +102,18 @@ void Foam::primitiveMeshTools::makeFaceCentresAndAreas
 }
 
 
+void Foam::primitiveMeshTools::makeFaceCentresAndAreas
+(
+    const primitiveMesh& mesh,
+    const pointField& p,
+    vectorField& fCtrs,
+    vectorField& fAreas
+)
+{
+    makeFaceCentresAndAreas(mesh.faces(), p, fCtrs, fAreas);
+}
+
+
 void Foam::primitiveMeshTools::makeCellCentresAndVols
 (
     const primitiveMesh& mesh,
@@ -117,7 +130,7 @@ void Foam::primitiveMeshTools::makeCellCentresAndVols
 
     // Clear the fields for accumulation
     cellCtrs = Zero;
-    cellVols = 0.0;
+    cellVols = Zero;
 
     const labelList& own = mesh.faceOwner();
     const labelList& nei = mesh.faceNeighbour();
@@ -201,7 +214,7 @@ void Foam::primitiveMeshTools::makeCellCentresAndVols
 
 Foam::scalar Foam::primitiveMeshTools::faceSkewness
 (
-    const primitiveMesh& mesh,
+    const UList<face>& fcs,
     const pointField& p,
     const vectorField& fCtrs,
     const vectorField& fAreas,
@@ -211,6 +224,8 @@ Foam::scalar Foam::primitiveMeshTools::faceSkewness
     const point& neiCc
 )
 {
+    const face& f = fcs[facei];
+
     vector Cpf = fCtrs[facei] - ownCc;
     vector d = neiCc - ownCc;
 
@@ -224,7 +239,6 @@ Foam::scalar Foam::primitiveMeshTools::faceSkewness
     // from the face centre to the edge of the face in the direction
     // of the skewness
     scalar fd = 0.2*mag(d) + ROOTVSMALL;
-    const face& f = mesh.faces()[facei];
     forAll(f, pi)
     {
         fd = max(fd, mag(svHat & (p[f[pi]] - fCtrs[facei])));
@@ -232,6 +246,60 @@ Foam::scalar Foam::primitiveMeshTools::faceSkewness
 
     // Normalised skewness
     return mag(sv)/fd;
+}
+
+
+Foam::scalar Foam::primitiveMeshTools::boundaryFaceSkewness
+(
+    const UList<face>& fcs,
+    const pointField& p,
+    const vectorField& fCtrs,
+    const vectorField& fAreas,
+
+    const label facei,
+    const point& ownCc
+)
+{
+    const face& f = fcs[facei];
+
+    vector Cpf = fCtrs[facei] - ownCc;
+
+    vector normal = normalised(fAreas[facei]);
+    vector d = normal*(normal & Cpf);
+
+    // Skewness vector
+    vector sv =
+        Cpf
+      - ((fAreas[facei] & Cpf)/((fAreas[facei] & d) + ROOTVSMALL))*d;
+    vector svHat = sv/(mag(sv) + ROOTVSMALL);
+
+    // Normalisation distance calculated as the approximate distance
+    // from the face centre to the edge of the face in the direction
+    // of the skewness
+    scalar fd = 0.4*mag(d) + ROOTVSMALL;
+    forAll(f, pi)
+    {
+        fd = max(fd, mag(svHat & (p[f[pi]] - fCtrs[facei])));
+    }
+
+    // Normalised skewness
+    return mag(sv)/fd;
+}
+
+
+Foam::scalar Foam::primitiveMeshTools::faceSkewness
+(
+    const primitiveMesh& mesh,
+    const pointField& p,
+    const vectorField& fCtrs,
+    const vectorField& fAreas,
+
+    const label facei,
+    const point& ownCc,
+    const point& neiCc
+)
+{
+    return faceSkewness(mesh.faces(), p, fCtrs, fAreas, facei, ownCc, neiCc);
 }
 
 
@@ -246,30 +314,7 @@ Foam::scalar Foam::primitiveMeshTools::boundaryFaceSkewness
     const point& ownCc
 )
 {
-    vector Cpf = fCtrs[facei] - ownCc;
-
-    vector normal = normalised(fAreas[facei]);
-    vector d = normal*(normal & Cpf);
-
-
-    // Skewness vector
-    vector sv =
-        Cpf
-      - ((fAreas[facei] & Cpf)/((fAreas[facei] & d) + ROOTVSMALL))*d;
-    vector svHat = sv/(mag(sv) + ROOTVSMALL);
-
-    // Normalisation distance calculated as the approximate distance
-    // from the face centre to the edge of the face in the direction
-    // of the skewness
-    scalar fd = 0.4*mag(d) + ROOTVSMALL;
-    const face& f = mesh.faces()[facei];
-    forAll(f, pi)
-    {
-        fd = max(fd, mag(svHat & (p[f[pi]] - fCtrs[facei])));
-    }
-
-    // Normalised skewness
-    return mag(sv)/fd;
+    return boundaryFaceSkewness(mesh.faces(), p, fCtrs, fAreas, facei, ownCc);
 }
 
 
@@ -298,8 +343,8 @@ Foam::tmp<Foam::scalarField> Foam::primitiveMeshTools::faceOrthogonality
     const labelList& own = mesh.faceOwner();
     const labelList& nei = mesh.faceNeighbour();
 
-    tmp<scalarField> tortho(new scalarField(mesh.nInternalFaces()));
-    scalarField& ortho = tortho.ref();
+    auto tortho = tmp<scalarField>::New(mesh.nInternalFaces());
+    auto& ortho = tortho.ref();
 
     // Internal faces
     forAll(nei, facei)
@@ -327,15 +372,17 @@ Foam::tmp<Foam::scalarField> Foam::primitiveMeshTools::faceSkewness
 {
     const labelList& own = mesh.faceOwner();
     const labelList& nei = mesh.faceNeighbour();
+    const faceList& faces = mesh.faces();
 
-    tmp<scalarField> tskew(new scalarField(mesh.nFaces()));
-    scalarField& skew = tskew.ref();
+    auto tskew = tmp<scalarField>::New(mesh.nFaces());
+    auto& skew = tskew.ref();
 
-    forAll(nei, facei)
+    // Internal faces
+    for (label facei = 0; facei < mesh.nInternalFaces(); ++facei)
     {
         skew[facei] = faceSkewness
         (
-            mesh,
+            faces,
             p,
             fCtrs,
             fAreas,
@@ -350,11 +397,11 @@ Foam::tmp<Foam::scalarField> Foam::primitiveMeshTools::faceSkewness
     // Boundary faces: consider them to have only skewness error.
     // (i.e. treat as if mirror cell on other side)
 
-    for (label facei = mesh.nInternalFaces(); facei < mesh.nFaces(); facei++)
+    for (label facei = mesh.nInternalFaces(); facei < mesh.nFaces(); ++facei)
     {
         skew[facei] = boundaryFaceSkewness
         (
-            mesh,
+            faces,
             p,
             fCtrs,
             fAreas,
@@ -513,15 +560,14 @@ Foam::tmp<Foam::scalarField> Foam::primitiveMeshTools::faceConcavity
     vectorField faceNormals(faceAreas);
     faceNormals /= mag(faceNormals) + ROOTVSMALL;
 
-    tmp<scalarField> tfaceAngles(new scalarField(mesh.nFaces()));
-    scalarField& faceAngles = tfaceAngles.ref();
-
+    auto tfaceAngles = tmp<scalarField>::New(mesh.nFaces());
+    auto&& faceAngles = tfaceAngles.ref();
 
     forAll(fcs, facei)
     {
         const face& f = fcs[facei];
 
-        // Get edge from f[0] to f[size-1];
+        // Normalized vector from f[size-1] to f[0];
         vector ePrev(p[f.first()] - p[f.last()]);
         scalar magEPrev = mag(ePrev);
         ePrev /= magEPrev + ROOTVSMALL;
@@ -530,11 +576,8 @@ Foam::tmp<Foam::scalarField> Foam::primitiveMeshTools::faceConcavity
 
         forAll(f, fp0)
         {
-            // Get vertex after fp
-            label fp1 = f.fcIndex(fp0);
-
             // Normalized vector between two consecutive points
-            vector e10(p[f[fp1]] - p[f[fp0]]);
+            vector e10(p[f.nextLabel(fp0)] - p[f.thisLabel(fp0)]);
             scalar magE10 = mag(e10);
             e10 /= magE10 + ROOTVSMALL;
 
@@ -584,8 +627,8 @@ Foam::tmp<Foam::scalarField> Foam::primitiveMeshTools::faceFlatness
     // primitiveMeshFaceCentresAndAreas.C)
     scalarField magAreas(mag(faceAreas));
 
-    tmp<scalarField> tfaceFlatness(new scalarField(mesh.nFaces(), 1.0));
-    scalarField& faceFlatness = tfaceFlatness.ref();
+    auto tfaceFlatness = tmp<scalarField>::New(mesh.nFaces(), scalar(1));
+    auto& faceFlatness = tfaceFlatness.ref();
 
     forAll(fcs, facei)
     {
@@ -641,8 +684,8 @@ Foam::tmp<Foam::scalarField> Foam::primitiveMeshTools::cellDeterminant
         }
     }
 
-    tmp<scalarField> tcellDeterminant(new scalarField(mesh.nCells()));
-    scalarField& cellDeterminant = tcellDeterminant.ref();
+    auto tcellDeterminant = tmp<scalarField>::New(mesh.nCells());
+    auto& cellDeterminant = tcellDeterminant.ref();
 
     const cellList& c = mesh.cells();
 

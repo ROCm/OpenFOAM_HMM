@@ -39,16 +39,15 @@ void Foam::primitiveMesh::calcCellCentresAndVols() const
     if (debug)
     {
         Pout<< "primitiveMesh::calcCellCentresAndVols() : "
-            << "Calculating cell centres and cell volumes"
+            << "Calculating cell centres and volumes"
             << endl;
     }
 
-    // It is an error to attempt to recalculate cellCentres
-    // if the pointer is already set
+    // These are always calculated in tandem, but only once.
     if (cellCentresPtr_ || cellVolumesPtr_)
     {
         FatalErrorInFunction
-            << "Cell centres or cell volumes already calculated"
+            << "Cell centres or volumes already calculated"
             << abort(FatalError);
     }
 
@@ -73,7 +72,7 @@ void Foam::primitiveMesh::calcCellCentresAndVols() const
     if (debug)
     {
         Pout<< "primitiveMesh::calcCellCentresAndVols() : "
-            << "Finished calculating cell centres and cell volumes"
+            << "Finished calculating cell centres and volumes"
             << endl;
     }
 }
