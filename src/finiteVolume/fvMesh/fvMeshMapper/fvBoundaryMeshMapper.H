@@ -50,7 +50,15 @@ class fvBoundaryMeshMapper
 :
     public PtrList<fvPatchMapper>
 {
-    // Private Member Functions
+public:
+
+    // Public Types
+
+        //- The patch mapper type
+        typedef fvPatchMapper mapper_type;
+
+
+    // Generated Methods
 
         //- No copy construct
         fvBoundaryMeshMapper(const fvBoundaryMeshMapper&) = delete;
@@ -58,8 +66,6 @@ class fvBoundaryMeshMapper
         //- No copy assignment
         void operator=(const fvBoundaryMeshMapper&) = delete;
 
-
-public:
 
     // Constructors
 

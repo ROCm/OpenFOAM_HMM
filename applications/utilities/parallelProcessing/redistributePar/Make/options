@@ -1,7 +1,9 @@
 EXE_INC = \
-    -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/fileFormats/lnInclude \
+    -I$(LIB_SRC)/surfMesh/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
+    -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -I$(LIB_SRC)/finiteArea/lnInclude \
     -I$(LIB_SRC)/lagrangian/basic/lnInclude \
     -I$(LIB_SRC)/dynamicMesh/lnInclude \
     -I$(LIB_SRC)/mesh/snappyHexMesh/lnInclude \
@@ -9,8 +11,11 @@ EXE_INC = \
     -I$(LIB_SRC)/parallel/decompose/decompose/lnInclude \
 
 EXE_LIBS = \
-    -lfiniteVolume \
+    -lfileFormats \
+    -lsurfMesh \
     -lmeshTools \
+    -lfiniteVolume \
+    -lfiniteArea \
     -llagrangian \
     -ldynamicMesh \
     -lsnappyHexMesh \

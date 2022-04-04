@@ -27,12 +27,12 @@ Class
     Foam::fvPatchFieldMapper
 
 Description
-    Foam::fvPatchFieldMapper
+    A FieldMapper for finite-volume patch fields
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fvPatchFieldMapper_H
-#define fvPatchFieldMapper_H
+#ifndef Foam_fvPatchFieldMapper_H
+#define Foam_fvPatchFieldMapper_H
 
 #include "primitiveFields.H"
 
@@ -49,14 +49,12 @@ class fvPatchFieldMapper
 :
     public FieldMapper
 {
-
 public:
 
     // Constructors
 
-        //- Null constructor
-        fvPatchFieldMapper()
-        {}
+        //- Default construct
+        fvPatchFieldMapper() = default;
 };
 
 

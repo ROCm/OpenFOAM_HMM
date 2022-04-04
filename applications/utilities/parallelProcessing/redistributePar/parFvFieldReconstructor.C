@@ -27,7 +27,6 @@ License
 
 #include "parFvFieldReconstructor.H"
 
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::parFvFieldReconstructor::createPatchFaceMaps()
@@ -96,9 +95,8 @@ Foam::parFvFieldReconstructor::parFvFieldReconstructor
 
 void Foam::parFvFieldReconstructor::reconstructPoints()
 {
-    // Reconstruct the points for moving mesh cases and write
-    // them out
-    distributedUnallocatedDirectFieldMapper mapper
+    // Reconstruct the points for moving mesh cases and write them out
+    distributedFieldMapper mapper
     (
         labelUList::null(),
         distMap_.pointMap()

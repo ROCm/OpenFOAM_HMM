@@ -50,7 +50,15 @@ class pointBoundaryMeshMapper
 :
     public PtrList<pointPatchMapper>
 {
-    // Private Member Functions
+public:
+
+    // Public Types
+
+        //- The patch mapper type
+        typedef pointPatchMapper mapper_type;
+
+
+    // Generated Methods
 
         //- No copy construct
         pointBoundaryMeshMapper(const pointBoundaryMeshMapper&) = delete;
@@ -58,8 +66,6 @@ class pointBoundaryMeshMapper
         //- No copy assignment
         void operator=(const pointBoundaryMeshMapper&) = delete;
 
-
-public:
 
     // Constructors
 

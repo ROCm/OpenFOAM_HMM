@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,7 +33,7 @@ License
 
 void Foam::mapDistributePolyMesh::calcPatchSizes()
 {
-    oldPatchSizes_.setSize(oldPatchStarts_.size());
+    oldPatchSizes_.resize_nocopy(oldPatchStarts_.size());
 
     if (oldPatchStarts_.size())
     {
@@ -192,6 +192,12 @@ Foam::mapDistributePolyMesh::mapDistributePolyMesh(Istream& is)
 
 void Foam::mapDistributePolyMesh::transfer(mapDistributePolyMesh& rhs)
 {
+    if (this == &rhs)
+    {
+        // Self-assignment is a no-op
+        return;
+    }
+
     nOldPoints_ = rhs.nOldPoints_;
     nOldFaces_ = rhs.nOldFaces_;
     nOldCells_ = rhs.nOldCells_;
@@ -283,6 +289,12 @@ void Foam::mapDistributePolyMesh::distributePatchIndices(labelList& lst) const
 
 void Foam::mapDistributePolyMesh::operator=(const mapDistributePolyMesh& rhs)
 {
+    if (this == &rhs)
+    {
+        // Self-assignment is a no-op
+        return;
+    }
+
     nOldPoints_ = rhs.nOldPoints_;
     nOldFaces_ = rhs.nOldFaces_;
     nOldCells_ = rhs.nOldCells_;
@@ -298,7 +310,11 @@ void Foam::mapDistributePolyMesh::operator=(const mapDistributePolyMesh& rhs)
 
 void Foam::mapDistributePolyMesh::operator=(mapDistributePolyMesh&& rhs)
 {
-    transfer(rhs);
+    if (this != &rhs)
+    {
+        // Avoid self assignment
+        transfer(rhs);
+    }
 }
 
 
@@ -327,9 +343,10 @@ Foam::Istream& Foam::operator>>(Istream& is, mapDistributePolyMesh& map)
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const mapDistributePolyMesh& map)
 {
-    os  << map.nOldPoints_
-        << token::SPACE << map.nOldFaces_
-        << token::SPACE << map.nOldCells_ << token::NL
+    os  << map.nOldPoints_ << token::SPACE
+        << map.nOldFaces_ << token::SPACE
+        << map.nOldCells_ << token::NL
+
         << map.oldPatchSizes_ << token::NL
         << map.oldPatchStarts_ << token::NL
         << map.oldPatchNMeshPoints_ << token::NL

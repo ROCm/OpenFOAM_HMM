@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,95 +24,101 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::distributedUnallocatedDirectFvPatchFieldMapper
+    Foam::DistributedFieldMapper
 
 Description
-    FieldMapper with direct mapping from remote quantities.
+    A templated field mapper
+    with direct mapping from local or remote quantities.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef distributedUnallocatedDirectFvPatchFieldMapper_H
-#define distributedUnallocatedDirectFvPatchFieldMapper_H
+#ifndef Foam_distributedFieldMapper_H
+#define Foam_distributedFieldMapper_H
 
-#include "fvPatchFieldMapper.H"
+#include "directFieldMapper.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Forward Declarations
+template<class DirectFieldMapperType> class DistributedFieldMapper;
+
+// Standard Types
+
+//- A directFieldMapper with distributed (with local or remote) quantities
+typedef DistributedFieldMapper<directFieldMapper> distributedFieldMapper;
+
+
 /*---------------------------------------------------------------------------*\
-        Class distributedUnallocatedDirectFvPatchFieldMapper Declaration
+                   Class DistributedFieldMapper Declaration
 \*---------------------------------------------------------------------------*/
 
-class distributedUnallocatedDirectFvPatchFieldMapper
+template<class DirectFieldMapperType>
+class DistributedFieldMapper
 :
-    public fvPatchFieldMapper
+    public DirectFieldMapperType
 {
-    const labelUList& directAddressing_;
+    // Private Data
 
-    const mapDistributeBase& distMap_;
+        //- The distributed map
+        const mapDistributeBase& distMap_;
 
-    bool hasUnmapped_;
 
 public:
 
+    // Public Types
+
+        //- The base direct mapper type
+        typedef DirectFieldMapperType mapper_type;
+
+
     // Constructors
 
-        //- Construct given addressing
-        distributedUnallocatedDirectFvPatchFieldMapper
+        //- Construct with addressing and distribute map
+        DistributedFieldMapper
         (
-            const labelUList& directAddressing,
+            const labelUList& directAddr,
             const mapDistributeBase& distMap
         )
         :
-            directAddressing_(directAddressing),
-            distMap_(distMap),
-            hasUnmapped_(directAddressing_.size() && min(directAddressing_) < 0)
+            DirectFieldMapperType(directAddr),
+            distMap_(distMap)
         {}
 
 
     //- Destructor
-    virtual ~distributedUnallocatedDirectFvPatchFieldMapper() = default;
+    virtual ~DistributedFieldMapper() = default;
 
 
     // Member Functions
 
+        //- The mapper size is given by the direct addressing size (if valid)
+        //- or from the distributeMap construct size.
         virtual label size() const
         {
             return
             (
-                notNull(directAddressing_)
-              ? directAddressing_.size()
+                DirectFieldMapperType::hasDirectAddressing()
+              ? DirectFieldMapperType::size()
               : distMap_.constructSize()
             );
         }
 
-        virtual bool direct() const
-        {
-            return true;
-        }
-
+        //- It is a distributed mapper
         virtual bool distributed() const
         {
             return true;
         }
 
+        //- Return the distribution map
         virtual const mapDistributeBase& distributeMap() const
         {
             return distMap_;
         }
-
-        virtual bool hasUnmapped() const
-        {
-            return hasUnmapped_;
-        }
-
-        virtual const labelUList& directAddressing() const
-        {
-            return directAddressing_;
-        }
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

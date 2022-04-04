@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2013-2018 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2013 OpenFOAM Foundation
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,71 +25,128 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::directFieldMapper
+    Foam::DirectFieldMapper
 
 Description
-    FieldMapper with direct mapping.
+    A templated direct mapper for the given FieldMapper type
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef directFieldMapper_H
-#define directFieldMapper_H
+#ifndef Foam_directFieldMapper_H
+#define Foam_directFieldMapper_H
+
+#include "FieldMapper.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Forward Declarations
+template<class FieldMapperType> class DirectFieldMapper;
+
+// Standard Types
+
+//- A FieldMapper with direct mapping
+typedef DirectFieldMapper<FieldMapper> directFieldMapper;
+
+
 /*---------------------------------------------------------------------------*\
-                           Class directFieldMapper Declaration
+                      Class DirectFieldMapper Declaration
 \*---------------------------------------------------------------------------*/
 
-class directFieldMapper
+template<class FieldMapperType>
+class DirectFieldMapper
 :
-    public FieldMapper
+    public FieldMapperType
 {
-    const labelUList& directAddressing_;
+    // Private Data
 
-    bool hasUnmapped_;
+        //- Addressing from new back to old
+        const labelUList& directAddressing_;
+
+        //- Does map contain any unmapped values
+        bool hasUnmapped_;
+
+
+    // Private Member Functions
+
+        //- Any negative (unmapped) values in the addressing?
+        static bool hasUnmappedEntry(const labelUList& directAddr)
+        {
+            for (const label val : directAddr)
+            {
+                if (val < 0) return true;  // early exit
+            }
+            return false;
+        }
 
 public:
 
+    // Public Types
+
+        //- The base mapper type
+        typedef FieldMapperType mapper_type;
+
+
     // Constructors
 
-        //- Construct given addressing
-        directFieldMapper(const labelUList& directAddressing)
+        //- Construct given addressing, check for unmapped (negative) values
+        explicit DirectFieldMapper
+        (
+            const labelUList& directAddr,
+            const bool checkUnmapped = true
+        )
         :
-            directAddressing_(directAddressing),
-            hasUnmapped_(directAddressing_.size() && min(directAddressing_) < 0)
+            FieldMapperType(),
+            directAddressing_(directAddr),
+            hasUnmapped_(checkUnmapped && hasUnmappedEntry(directAddr))
         {}
 
 
     //- Destructor
-    virtual ~directFieldMapper() = default;
+    virtual ~DirectFieldMapper() = default;
 
 
     // Member Functions
 
-        label size() const
+        //- True if directAddressing is not the null object (unallocated)
+        virtual bool hasDirectAddressing() const
+        {
+            return notNull(directAddressing_);
+        }
+
+        //- The mapper size is given by the size of the direct addressing
+        virtual label size() const
         {
             return directAddressing_.size();
         }
 
-        bool direct() const
+        //- It is a direct mapper
+        virtual bool direct() const
         {
             return true;
         }
 
-        bool hasUnmapped() const
+        //- Any unmapped values?
+        virtual bool hasUnmapped() const
         {
             return hasUnmapped_;
         }
 
-        const labelUList& directAddressing() const
+        //- Allow modification
+        virtual bool& hasUnmapped()
+        {
+            return hasUnmapped_;
+        }
+
+        //- Return the direct addressing values
+        virtual const labelUList& directAddressing() const
         {
             return directAddressing_;
         }
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

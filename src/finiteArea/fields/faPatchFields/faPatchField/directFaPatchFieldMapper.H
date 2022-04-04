@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,44 +23,30 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::pointPatchFieldMapper
+Typedef
+    Foam::directFaPatchFieldMapper
 
 Description
-    Foam::pointPatchFieldMapper
+    A direct faPatchFieldMapper
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Foam_pointPatchFieldMapper_H
-#define Foam_pointPatchFieldMapper_H
+#ifndef Foam_directFaPatchFieldMapper_H
+#define Foam_directFaPatchFieldMapper_H
 
-#include "primitiveFields.H"
+#include "directFieldMapper.H"
+#include "faPatchFieldMapper.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-/*---------------------------------------------------------------------------*\
-                    Class pointPatchFieldMapper Declaration
-\*---------------------------------------------------------------------------*/
+typedef
+    DirectFieldMapper<faPatchFieldMapper>
+    directFaPatchFieldMapper;
 
-class pointPatchFieldMapper
-:
-    public FieldMapper
-{
-public:
-
-    // Constructors
-
-        //- Default construct
-        pointPatchFieldMapper() = default;
-};
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
