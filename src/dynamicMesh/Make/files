@@ -81,7 +81,6 @@ polyTopoChange/repatchPolyTopoChanger/repatchPolyTopoChanger.C
 
 fvMeshAdder/fvMeshAdder.C
 fvMeshDistribute/fvMeshDistribute.C
-fvMeshDistribute/IOmapDistributePolyMesh.C
 polyMeshAdder/faceCoupleInfo.C
 polyMeshAdder/polyMeshAdder.C
 

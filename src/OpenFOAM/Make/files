@@ -666,6 +666,7 @@ $(mapPolyMesh)/mapDistribute/mapDistribute.C
 $(mapPolyMesh)/mapDistribute/mapDistributeBase.C
 $(mapPolyMesh)/mapDistribute/mapDistributePolyMesh.C
 $(mapPolyMesh)/mapDistribute/IOmapDistribute.C
+$(mapPolyMesh)/mapDistribute/IOmapDistributePolyMesh.C
 $(mapPolyMesh)/mapAddedPolyMesh.C
 
 PrimitivePatch = $(primitiveMesh)/PrimitivePatch
