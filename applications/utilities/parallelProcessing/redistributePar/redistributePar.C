@@ -1031,10 +1031,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
 
             // Subset 0 cells, no parallel comms.
             // This is used to create zero-sized fields.
-            subsetterPtr.reset
-            (
-                new fvMeshSubset(mesh, bitSet(), nonProcI, false)
-            );
+            subsetterPtr.reset(new fvMeshSubset(mesh, zero{}));
         }
 
 

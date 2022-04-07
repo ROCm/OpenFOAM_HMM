@@ -27,15 +27,15 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "fvMeshSubset.H"
-#include "boolList.H"
 #include "BitOps.H"
-#include "pointIndList.H"
 #include "Pstream.H"
-#include "emptyPolyPatch.H"
 #include "cyclicPolyPatch.H"
-#include "removeCells.H"
-#include "polyTopoChange.H"
-#include "mapPolyMesh.H"
+#include "emptyPolyPatch.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+Foam::word Foam::fvMeshSubset::exposedPatchName("oldInternalFaces");
+
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
@@ -58,20 +58,63 @@ inline void markUsed
 } // End anonymous namespace
 
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-Foam::word Foam::fvMeshSubset::exposedPatchName("oldInternalFaces");
-
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-bool Foam::fvMeshSubset::checkCellSubset() const
+namespace Foam
 {
-    if (!fvMeshSubsetPtr_)
+
+// Perform a subset of a subset
+static labelList subsetSubset
+(
+    const label nElems,
+    const labelUList& selectedElements, // First subset
+    const labelUList& subsetMap         // Subset within first subset
+)
+{
+    if (selectedElements.empty() || subsetMap.empty())
+    {
+        // Trivial case
+        return labelList();
+    }
+
+    // Mark selected elements.
+    const bitSet selected(nElems, selectedElements);
+
+    // Count subset of selected elements
+    label n = 0;
+    forAll(subsetMap, i)
+    {
+        if (selected[subsetMap[i]])
+        {
+            ++n;
+        }
+    }
+
+    // Collect selected elements
+    labelList subsettedElements(n);
+    n = 0;
+
+    forAll(subsetMap, i)
+    {
+        if (selected[subsetMap[i]])
+        {
+            subsettedElements[n] = i;
+            ++n;
+        }
+    }
+
+    return subsettedElements;
+}
+
+} // End namespace Foam
+
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+bool Foam::fvMeshSubset::checkHasSubMesh() const
+{
+    if (!subMeshPtr_)
     {
         FatalErrorInFunction
-            << "setCellSubset()" << nl
-            << "before attempting to access subset data"
+            << "Mesh is not subsetted!" << nl
             << abort(FatalError);
 
         return false;
@@ -118,7 +161,7 @@ void Foam::fvMeshSubset::calcFaceFlipMap() const
 void Foam::fvMeshSubset::doCoupledPatches
 (
     const bool syncPar,
-    labelList& nCellsUsingFace
+    labelUList& nCellsUsingFace
 ) const
 {
     // Synchronize facesToSubset on both sides of coupled patches.
@@ -186,8 +229,8 @@ void Foam::fvMeshSubset::doCoupledPatches
                          && nbrCellsUsingFace[i] == 0
                         )
                         {
-                            // Face's neighbour is no longer there. Mark face
-                            // off as coupled
+                            // Face's neighbour is no longer there.
+                            // Mark face off as coupled
                             nCellsUsingFace[pp.start()+i] = 3;
                             ++nUncoupled;
                         }
@@ -229,7 +272,7 @@ void Foam::fvMeshSubset::doCoupledPatches
         reduce(nUncoupled, sumOp<label>());
     }
 
-    if (nUncoupled > 0)
+    if (nUncoupled)
     {
         Info<< "Uncoupled " << nUncoupled << " faces on coupled patches. "
             << "(processorPolyPatch, cyclicPolyPatch)" << endl;
@@ -237,107 +280,32 @@ void Foam::fvMeshSubset::doCoupledPatches
 }
 
 
-void Foam::fvMeshSubset::removeCellsImpl
-(
-    const bitSet& cellsToRemove,
-    const labelList& exposedFaces,
-    const labelList& patchIDs,
-    const bool syncCouples
-)
-{
-    // Mesh changing engine.
-    polyTopoChange meshMod(baseMesh());
-
-    removeCells cellRemover(baseMesh(), syncCouples);
-
-    cellRemover.setRefinement
-    (
-        cellsToRemove,
-        exposedFaces,
-        patchIDs,
-        meshMod
-    );
-
-    // Create mesh, return map from old to new mesh.
-    autoPtr<mapPolyMesh> map = meshMod.makeMesh
-    (
-        fvMeshSubsetPtr_,
-        IOobject
-        (
-            baseMesh().name(),
-            baseMesh().time().timeName(),
-            baseMesh().time(),
-            IOobject::READ_IF_PRESENT,  // read fv* if present
-            IOobject::NO_WRITE
-        ),
-        baseMesh(),
-        syncCouples
-    );
-
-    pointMap_ = map().pointMap();
-    faceMap_ = map().faceMap();
-    cellMap_ = map().cellMap();
-    patchMap_ = identity(baseMesh().boundaryMesh().size());
-}
-
-
-Foam::labelList Foam::fvMeshSubset::subsetSubset
-(
-    const label nElems,
-    const labelUList& selectedElements,
-    const labelUList& subsetMap
-)
-{
-    // Mark selected elements.
-    const bitSet selected(nElems, selectedElements);
-
-    // Count subset of selected elements
-    label n = 0;
-    forAll(subsetMap, i)
-    {
-        if (selected[subsetMap[i]])
-        {
-            ++n;
-        }
-    }
-
-    // Collect selected elements
-    labelList subsettedElements(n);
-    n = 0;
-
-    forAll(subsetMap, i)
-    {
-        if (selected[subsetMap[i]])
-        {
-            subsettedElements[n] = i;
-            ++n;
-        }
-    }
-
-    return subsettedElements;
-}
-
-
 void Foam::fvMeshSubset::subsetZones()
 {
     // Keep all zones, even if zero size.
+
+    #ifdef FULLDEBUG
+    checkHasSubMesh();
+    #endif
+
+    auto& newSubMesh = subMeshPtr_();
 
     // PointZones
 
     const pointZoneMesh& pointZones = baseMesh().pointZones();
 
-    List<pointZone*> pZonePtrs(pointZones.size());
+    List<pointZone*> pZones(pointZones.size());
 
     forAll(pointZones, zonei)
     {
         const pointZone& pz = pointZones[zonei];
 
-        pZonePtrs[zonei] = new pointZone
+        pZones[zonei] = new pointZone
         (
             pz.name(),
             subsetSubset(baseMesh().nPoints(), pz, pointMap()),
             zonei,
-            fvMeshSubsetPtr_().pointZones()
+            newSubMesh.pointZones()
         );
     }
 
@@ -348,7 +316,7 @@ void Foam::fvMeshSubset::subsetZones()
 
     const faceZoneMesh& faceZones = baseMesh().faceZones();
 
-    List<faceZone*> fZonePtrs(faceZones.size());
+    List<faceZone*> fZones(faceZones.size());
 
     forAll(faceZones, zonei)
     {
@@ -361,14 +329,7 @@ void Foam::fvMeshSubset::subsetZones()
         labelList zone(baseMesh().nFaces(), Zero);
         forAll(fz, j)
         {
-            if (fz.flipMap()[j])
-            {
-                zone[fz[j]] = 1;
-            }
-            else
-            {
-                zone[fz[j]] = -1;
-            }
+            zone[fz[j]] = (fz.flipMap()[j] ? 1 : -1);
         }
 
         // Select faces
@@ -400,72 +361,38 @@ void Foam::fvMeshSubset::subsetZones()
             }
         }
 
-        fZonePtrs[zonei] = new faceZone
+        fZones[zonei] = new faceZone
         (
             fz.name(),
             subAddressing,
             subFlipStatus,
             zonei,
-            fvMeshSubsetPtr_().faceZones()
+            newSubMesh.faceZones()
         );
     }
+
 
     // Cell Zones
 
     const cellZoneMesh& cellZones = baseMesh().cellZones();
 
-    List<cellZone*> cZonePtrs(cellZones.size());
+    List<cellZone*> cZones(cellZones.size());
 
     forAll(cellZones, zonei)
     {
         const cellZone& cz = cellZones[zonei];
 
-        cZonePtrs[zonei] = new cellZone
+        cZones[zonei] = new cellZone
         (
             cz.name(),
             subsetSubset(baseMesh().nCells(), cz, cellMap()),
             zonei,
-            fvMeshSubsetPtr_().cellZones()
+            newSubMesh.cellZones()
         );
     }
 
-
     // Add the zones
-    fvMeshSubsetPtr_().addZones(pZonePtrs, fZonePtrs, cZonePtrs);
-}
-
-
-Foam::bitSet Foam::fvMeshSubset::getCellsToRemove
-(
-    const bitSet& selectedCells
-) const
-{
-    // Work on a copy
-    bitSet cellsToRemove(selectedCells);
-
-    // Ensure we have the full range
-    cellsToRemove.resize(baseMesh().nCells(), false);
-
-    // Invert the selection
-    cellsToRemove.flip();
-
-    return cellsToRemove;
-}
-
-
-Foam::bitSet Foam::fvMeshSubset::getCellsToRemove
-(
-    const label regioni,
-    const labelUList& regions
-) const
-{
-    return BitSetOps::create
-    (
-        baseMesh().nCells(),
-        regioni,
-        regions,
-        false  // on=false: invert return cells to remove
-    );
+    newSubMesh.addZones(pZones, fZones, cZones);
 }
 
 
@@ -474,7 +401,7 @@ Foam::bitSet Foam::fvMeshSubset::getCellsToRemove
 Foam::fvMeshSubset::fvMeshSubset(const fvMesh& baseMesh)
 :
     baseMesh_(baseMesh),
-    fvMeshSubsetPtr_(nullptr),
+    subMeshPtr_(nullptr),
     faceFlipMapPtr_(nullptr),
     pointMap_(),
     faceMap_(),
@@ -483,31 +410,25 @@ Foam::fvMeshSubset::fvMeshSubset(const fvMesh& baseMesh)
 {}
 
 
-Foam::fvMeshSubset::fvMeshSubset
-(
-    const fvMesh& baseMesh,
-    const bitSet& selectedCells,
-    const label patchID,
-    const bool syncCouples
-)
+Foam::fvMeshSubset::fvMeshSubset(const fvMesh& baseMesh, const Foam::zero)
 :
     fvMeshSubset(baseMesh)
 {
-    setCellSubset(selectedCells, patchID, syncCouples);
+    reset(Foam::zero{});
 }
 
 
 Foam::fvMeshSubset::fvMeshSubset
 (
     const fvMesh& baseMesh,
-    const labelHashSet& selectedCells,
+    const bitSet& selectedCells,
     const label patchID,
-    const bool syncCouples
+    const bool syncPar
 )
 :
     fvMeshSubset(baseMesh)
 {
-    setCellSubset(selectedCells, patchID, syncCouples);
+    reset(selectedCells, patchID, syncPar);
 }
 
 
@@ -516,12 +437,26 @@ Foam::fvMeshSubset::fvMeshSubset
     const fvMesh& baseMesh,
     const labelUList& selectedCells,
     const label patchID,
-    const bool syncCouples
+    const bool syncPar
 )
 :
     fvMeshSubset(baseMesh)
 {
-    setCellSubset(selectedCells, patchID, syncCouples);
+    reset(selectedCells, patchID, syncPar);
+}
+
+
+Foam::fvMeshSubset::fvMeshSubset
+(
+    const fvMesh& baseMesh,
+    const labelHashSet& selectedCells,
+    const label patchID,
+    const bool syncPar
+)
+:
+    fvMeshSubset(baseMesh)
+{
+    reset(selectedCells, patchID, syncPar);
 }
 
 
@@ -531,12 +466,12 @@ Foam::fvMeshSubset::fvMeshSubset
     const label regioni,
     const labelUList& regions,
     const label patchID,
-    const bool syncCouples
+    const bool syncPar
 )
 :
     fvMeshSubset(baseMesh)
 {
-    setCellSubset(regioni, regions, patchID, syncCouples);
+    reset(regioni, regions, patchID, syncPar);
 }
 
 
@@ -544,7 +479,7 @@ Foam::fvMeshSubset::fvMeshSubset
 
 void Foam::fvMeshSubset::clear()
 {
-    fvMeshSubsetPtr_.reset(nullptr);
+    subMeshPtr_.reset(nullptr);
     faceFlipMapPtr_.reset(nullptr);
 
     pointMap_.clear();
@@ -554,13 +489,104 @@ void Foam::fvMeshSubset::clear()
 }
 
 
-void Foam::fvMeshSubset::setCellSubset
+void Foam::fvMeshSubset::reset()
+{
+    clear();
+}
+
+
+void Foam::fvMeshSubset::reset
+(
+    autoPtr<fvMesh>&& subMeshPtr,
+    labelList&& pointMap,
+    labelList&& faceMap,
+    labelList&& cellMap,
+    labelList&& patchMap
+)
+{
+    subMeshPtr_.reset(std::move(subMeshPtr));
+    faceFlipMapPtr_.reset(nullptr);
+
+    pointMap_ = std::move(pointMap);
+    faceMap_ = std::move(faceMap);
+    cellMap_ = std::move(cellMap);
+    patchMap_ = std::move(patchMap);
+
+    // Sanity
+    if (!subMeshPtr_)
+    {
+        clear();
+    }
+}
+
+
+void Foam::fvMeshSubset::reset(const Foam::zero)
+{
+    clear();
+
+    // Create zero-sized subMesh
+    subMeshPtr_.reset
+    (
+        new fvMesh
+        (
+            IOobject
+            (
+                baseMesh_.name(),
+                baseMesh_.time().timeName(),
+                baseMesh_.time(),
+                IOobject::READ_IF_PRESENT,  // Read fv* if present
+                IOobject::NO_WRITE
+            ),
+            Foam::zero{}                    // zero-sized
+            // Uses syncPar (bounds) - should generally be OK
+        )
+    );
+    auto& newSubMesh = subMeshPtr_();
+
+
+    // Clone non-processor patches
+    {
+        const polyBoundaryMesh& oldBoundary = baseMesh_.boundaryMesh();
+        const polyBoundaryMesh& newBoundary = newSubMesh.boundaryMesh();
+
+        polyPatchList newPatches(oldBoundary.nNonProcessor());
+
+        patchMap_ = identity(newPatches.size());
+
+        forAll(newPatches, patchi)
+        {
+            newPatches.set
+            (
+                patchi,
+                oldBoundary[patchi].clone
+                (
+                    newBoundary,
+                    patchi,
+                    0,  // patch size
+                    0   // patch start
+                )
+            );
+        }
+
+        newSubMesh.addFvPatches(newPatches);
+    }
+
+
+    // Add the zones
+    subsetZones();
+}
+
+
+void Foam::fvMeshSubset::reset
 (
     const bitSet& selectedCells,
     const label patchID,
     const bool syncPar
 )
 {
+    // Clear all old maps and pointers
+    clear();
+
     const cellList& oldCells = baseMesh().cells();
     const faceList& oldFaces = baseMesh().faces();
     const pointField& oldPoints = baseMesh().points();
@@ -586,9 +612,6 @@ void Foam::fvMeshSubset::setCellSubset
             << "Should be between 0 and " << oldPatches.size()-1
             << abort(FatalError);
     }
-
-    // Clear all old maps and pointers
-    clear();
 
     // The selected cells - sorted in ascending order
     cellMap_ = selectedCells.sortedToc();
@@ -623,6 +646,7 @@ void Foam::fvMeshSubset::setCellSubset
     labelList nCellsUsingFace(oldFaces.size(), Zero);
 
     label nFacesInSet = 0;
+
     forAll(oldFaces, oldFacei)
     {
         bool faceUsed = false;
@@ -648,7 +672,7 @@ void Foam::fvMeshSubset::setCellSubset
             ++nFacesInSet;
         }
     }
-    faceMap_.setSize(nFacesInSet);
+    faceMap_.resize(nFacesInSet);
 
     // Handle coupled faces. Modifies patch faces to be uncoupled to 3.
     doCoupledPatches(syncPar, nCellsUsingFace);
@@ -878,7 +902,7 @@ void Foam::fvMeshSubset::setCellSubset
     //
     // Create new points
     //
-    pointField newPoints(pointUIndList(oldPoints, pointMap_));
+    pointField newPoints(oldPoints, pointMap_);
 
 
     //
@@ -972,7 +996,7 @@ void Foam::fvMeshSubset::setCellSubset
     // surfaceInterpolation cannot find its fvSchemes.
     // It will try to read, for example.  "system/region0SubSet/fvSchemes"
     //
-    fvMeshSubsetPtr_ = autoPtr<fvMesh>::New
+    subMeshPtr_ = autoPtr<fvMesh>::New
     (
         IOobject
         (
@@ -991,8 +1015,8 @@ void Foam::fvMeshSubset::setCellSubset
 
 
     // Add old patches
-    List<polyPatch*> newBoundary(nbSize);
-    patchMap_.setSize(nbSize);
+    polyPatchList newBoundary(nbSize);
+    patchMap_.resize(nbSize);
     label nNewPatches = 0;
     label patchStart = nInternalFaces;
 
@@ -1065,24 +1089,32 @@ void Foam::fvMeshSubset::setCellSubset
                 map[patchFacei] = oldPatches[oldPatchi].whichFace(oldFacei);
             }
 
-            newBoundary[nNewPatches] = oldPatches[oldPatchi].clone
+            newBoundary.set
             (
-                fvMeshSubsetPtr_().boundaryMesh(),
                 nNewPatches,
-                map,
-                patchStart
-            ).ptr();
+                oldPatches[oldPatchi].clone
+                (
+                    subMeshPtr_().boundaryMesh(),
+                    nNewPatches,
+                    map,
+                    patchStart
+                )
+            );
         }
         else
         {
             // Clone (even if 0 size)
-            newBoundary[nNewPatches] = oldPatches[oldPatchi].clone
+            newBoundary.set
             (
-                fvMeshSubsetPtr_().boundaryMesh(),
                 nNewPatches,
-                newSize,
-                patchStart
-            ).ptr();
+                oldPatches[oldPatchi].clone
+                (
+                    subMeshPtr_().boundaryMesh(),
+                    nNewPatches,
+                    newSize,
+                    patchStart
+                )
+            );
         }
 
         patchStart += newSize;
@@ -1104,14 +1136,18 @@ void Foam::fvMeshSubset::setCellSubset
         // Newly created patch so is at end. Check if any faces in it.
         if (oldInternalSize > 0)
         {
-            newBoundary[nNewPatches] = new emptyPolyPatch
+            newBoundary.set
             (
-                exposedPatchName,
-                boundaryPatchSizes[oldInternalPatchID],
-                patchStart,
                 nNewPatches,
-                fvMeshSubsetPtr_().boundaryMesh(),
-                emptyPolyPatch::typeName
+                new emptyPolyPatch
+                (
+                    exposedPatchName,
+                    boundaryPatchSizes[oldInternalPatchID],
+                    patchStart,
+                    nNewPatches,
+                    subMeshPtr_().boundaryMesh(),
+                    emptyPolyPatch::typeName
+                )
             );
 
             //Pout<< "    " << exposedPatchName << " : "
@@ -1148,24 +1184,32 @@ void Foam::fvMeshSubset::setCellSubset
                 map[patchFacei] = oldPatches[oldPatchi].whichFace(oldFacei);
             }
 
-            newBoundary[nNewPatches] = oldPatches[oldPatchi].clone
+            newBoundary.set
             (
-                fvMeshSubsetPtr_().boundaryMesh(),
                 nNewPatches,
-                map,
-                patchStart
-            ).ptr();
+                oldPatches[oldPatchi].clone
+                (
+                    subMeshPtr_().boundaryMesh(),
+                    nNewPatches,
+                    map,
+                    patchStart
+                )
+            );
         }
         else
         {
             // Patch still exists. Add it
-            newBoundary[nNewPatches] = oldPatches[oldPatchi].clone
+            newBoundary.set
             (
-                fvMeshSubsetPtr_().boundaryMesh(),
                 nNewPatches,
-                newSize,
-                patchStart
-            ).ptr();
+                oldPatches[oldPatchi].clone
+                (
+                    subMeshPtr_().boundaryMesh(),
+                    nNewPatches,
+                    newSize,
+                    patchStart
+                )
+            );
         }
 
         //Pout<< "    " << oldPatches[oldPatchi].name() << " : "
@@ -1178,26 +1222,26 @@ void Foam::fvMeshSubset::setCellSubset
 
 
     // Reset the patch lists
-    newBoundary.setSize(nNewPatches);
-    patchMap_.setSize(nNewPatches);
+    newBoundary.resize(nNewPatches);
+    patchMap_.resize(nNewPatches);
 
 
     // Add the fvPatches
-    fvMeshSubsetPtr_().addFvPatches(newBoundary, syncPar);
+    subMeshPtr_().addFvPatches(newBoundary, syncPar);
 
     // Subset and add any zones
     subsetZones();
 }
 
 
-void Foam::fvMeshSubset::setCellSubset
+void Foam::fvMeshSubset::reset
 (
     const labelUList& selectedCells,
     const label patchID,
     const bool syncPar
 )
 {
-    setCellSubset
+    reset
     (
         BitSetOps::create(baseMesh().nCells(), selectedCells),
         patchID,
@@ -1206,14 +1250,14 @@ void Foam::fvMeshSubset::setCellSubset
 }
 
 
-void Foam::fvMeshSubset::setCellSubset
+void Foam::fvMeshSubset::reset
 (
     const labelHashSet& selectedCells,
     const label patchID,
     const bool syncPar
 )
 {
-    setCellSubset
+    reset
     (
         BitSetOps::create(baseMesh().nCells(), selectedCells),
         patchID,
@@ -1222,7 +1266,7 @@ void Foam::fvMeshSubset::setCellSubset
 }
 
 
-void Foam::fvMeshSubset::setCellSubset
+void Foam::fvMeshSubset::reset
 (
     const label regioni,
     const labelUList& regions,
@@ -1230,73 +1274,11 @@ void Foam::fvMeshSubset::setCellSubset
     const bool syncPar
 )
 {
-    setCellSubset
+    reset
     (
         BitSetOps::create(baseMesh().nCells(), regioni, regions),
         patchID,
         syncPar
-    );
-}
-
-
-Foam::labelList Foam::fvMeshSubset::getExposedFaces
-(
-    const bitSet& selectedCells,
-    const bool syncCouples
-) const
-{
-    return
-        removeCells(baseMesh(), syncCouples)
-       .getExposedFaces(getCellsToRemove(selectedCells));
-}
-
-
-Foam::labelList Foam::fvMeshSubset::getExposedFaces
-(
-    const label regioni,
-    const labelUList& regions,
-    const bool syncCouples
-) const
-{
-    return
-        removeCells(baseMesh(), syncCouples)
-       .getExposedFaces(getCellsToRemove(regioni, regions));
-}
-
-
-void Foam::fvMeshSubset::setCellSubset
-(
-    const bitSet& selectedCells,
-    const labelList& exposedFaces,
-    const labelList& patchIDs,
-    const bool syncCouples
-)
-{
-    removeCellsImpl
-    (
-        getCellsToRemove(selectedCells),
-        exposedFaces,
-        patchIDs,
-        syncCouples
-    );
-}
-
-
-void Foam::fvMeshSubset::setCellSubset
-(
-    const label selectRegion,
-    const labelList& regions,
-    const labelList& exposedFaces,
-    const labelList& patchIDs,
-    const bool syncCouples
-)
-{
-    removeCellsImpl
-    (
-        getCellsToRemove(selectRegion, regions),
-        exposedFaces,
-        patchIDs,
-        syncCouples
     );
 }
 

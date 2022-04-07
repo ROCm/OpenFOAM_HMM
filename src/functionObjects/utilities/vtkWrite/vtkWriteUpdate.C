@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -123,7 +123,7 @@ bool Foam::functionObjects::vtkWrite::updateSubset
         }
     }
 
-    subsetter.setCellSubset(cellsToSelect.addressing());
+    subsetter.reset(cellsToSelect.addressing());
 
     return true;
 }

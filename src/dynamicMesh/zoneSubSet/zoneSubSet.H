@@ -62,8 +62,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef zoneSubSet_H
-#define zoneSubSet_H
+#ifndef Foam_zoneSubSet_H
+#define Foam_zoneSubSet_H
 
 #include "fvMeshSubset.H"
 

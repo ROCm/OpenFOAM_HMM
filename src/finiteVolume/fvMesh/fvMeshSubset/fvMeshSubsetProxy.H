@@ -37,11 +37,11 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fvMeshSubsetProxy_H
-#define fvMeshSubsetProxy_H
+#ifndef Foam_fvMeshSubsetProxy_H
+#define Foam_fvMeshSubsetProxy_H
 
-#include "wordRes.H"
 #include "fvMeshSubset.H"
+#include "wordRes.H"
 #include "zeroGradientFvPatchField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

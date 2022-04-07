@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -242,7 +242,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::makeMesh
     {
         const polyBoundaryMesh& oldPatches = mesh.boundaryMesh();
 
-        List<polyPatch*> newBoundary(patchMap.size());
+        polyPatchList newBoundary(patchMap.size());
 
         forAll(patchMap, patchi)
         {
@@ -250,25 +250,33 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::makeMesh
 
             if (oldPatchi != -1)
             {
-                newBoundary[patchi] = oldPatches[oldPatchi].clone
+                newBoundary.set
                 (
-                    newMesh.boundaryMesh(),
                     patchi,
-                    patchSizes[patchi],
-                    patchStarts[patchi]
-                ).ptr();
+                    oldPatches[oldPatchi].clone
+                    (
+                        newMesh.boundaryMesh(),
+                        patchi,
+                        patchSizes[patchi],
+                        patchStarts[patchi]
+                    )
+                );
             }
             else
             {
                 // Added patch
-                newBoundary[patchi] = new emptyPolyPatch
+                newBoundary.set
                 (
-                    "patch" + Foam::name(patchi),
-                    patchSizes[patchi],
-                    patchStarts[patchi],
                     patchi,
-                    newMesh.boundaryMesh(),
-                    word::null
+                    new emptyPolyPatch
+                    (
+                        "patch" + Foam::name(patchi),
+                        patchSizes[patchi],
+                        patchStarts[patchi],
+                        patchi,
+                        newMesh.boundaryMesh(),
+                        word::null
+                    )
                 );
             }
         }
