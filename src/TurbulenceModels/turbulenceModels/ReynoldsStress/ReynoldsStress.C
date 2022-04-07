@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -100,6 +100,65 @@ void Foam::ReynoldsStress<BasicTurbulenceModel>::correctWallShearStress
                 // the pressure
                 Rw[facei] = -nutw[facei]*2*dev(symm(gradUw));
             }
+        }
+    }
+}
+
+
+template<class BasicTurbulenceModel>
+void Foam::ReynoldsStress<BasicTurbulenceModel>::checkRealizabilityConditions
+(
+    const volSymmTensorField& R
+) const
+{
+    const label maxDiffs = 5;
+    label nDiffs = 0;
+
+    // (S:Eq. 4a-4c)
+    forAll(R, celli)
+    {
+        bool diff = false;
+
+        if (maxDiffs < nDiffs)
+        {
+            Info<< "More than " << maxDiffs << " times"
+                << " Reynolds-stress realizability checks failed."
+                << " Skipping further comparisons." << endl;
+            return;
+        }
+
+        const symmTensor& r = R[celli];
+
+        if (r.xx() < 0)
+        {
+            WarningInFunction
+                << "Reynolds stress " << r << " at cell " << celli
+                << " does not obey the constraint: Rxx >= 0"
+                << endl;
+            diff = true;
+        }
+
+        if (r.xx()*r.yy() - sqr(r.xy()) < 0)
+        {
+            WarningInFunction
+                << "Reynolds stress " << r << " at cell " << celli
+                << " does not obey the constraint: Rxx*Ryy - sqr(Rxy) >= 0"
+                << endl;
+            diff = true;
+        }
+
+        if (det(r) < 0)
+        {
+            WarningInFunction
+                << "Reynolds stress " << r << " at cell " << celli
+                << " does not obey the constraint: det(R) >= 0"
+                << endl;
+            diff = true;
+        }
+
+        if (diff)
+        {
+            ++nDiffs;
         }
     }
 }

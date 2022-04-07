@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +32,15 @@ Group
 
 Description
     Reynolds-stress turbulence model base class
+
+    Reference:
+    \verbatim
+        Realizability conditions (tag:S):
+            Schumann, U. (1977).
+            Realizability of Reynolds‐stress turbulence models.
+            The Physics of Fluids, 20(5), 721-725.
+            DOI:10.1063/1.861942
+    \endverbatim
 
 SourceFiles
     ReynoldsStress.C
@@ -74,6 +83,7 @@ protected:
 
         void boundNormalStress(volSymmTensorField& R) const;
         void correctWallShearStress(volSymmTensorField& R) const;
+        void checkRealizabilityConditions(const volSymmTensorField& R) const;
 
         //- Update the eddy-viscosity
         virtual void correctNut() = 0;
