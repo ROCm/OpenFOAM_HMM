@@ -41,6 +41,8 @@ Description
 #include "fvOptions.H"
 #include "simpleControl.H"
 #include "pimpleControl.H"
+#include "dummyCourantNo.H"
+#include "solidRegionDiffNo.H"
 #include "coordinateSystem.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -88,17 +90,31 @@ int main(int argc, char *argv[])
     {
         pimpleControl pimple(mesh);
 
+        #include "createDyMControls.H"
+
         while (runTime.run())
         {
+            #include "readDyMControls.H"
+            #include "readSolidTimeControls.H"
+
+            #include "solidDiffusionNo.H"
+            #include "setMultiRegionDeltaT.H"
+
             ++runTime;
 
             Info<< "Time = " << runTime.timeName() << nl << endl;
 
             while (pimple.loop())
             {
-                if (pimple.firstIter())
+                if (pimple.firstIter() || moveMeshOuterCorrectors)
                 {
-                    mesh.update();
+                    // Do any mesh changes
+                    mesh.controlledUpdate();
+
+                    if (mesh.changing() && checkMeshCourantNo)
+                    {
+                        #include "meshCourantNo.H"
+                    }
                 }
 
                 while (pimple.correct())
