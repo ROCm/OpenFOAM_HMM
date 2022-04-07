@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +32,29 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(IOmapDistributePolyMesh, 0);
+    defineTypeNameAndDebug(IOmapDistributePolyMesh, 0);
+}
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+bool Foam::IOmapDistributePolyMesh::readContents()
+{
+    if
+    (
+        (
+            readOpt() == IOobject::MUST_READ
+         || readOpt() == IOobject::MUST_READ_IF_MODIFIED
+        )
+     || (readOpt() == IOobject::READ_IF_PRESENT && headerOk())
+    )
+    {
+        readStream(typeName) >> *this;
+        close();
+        return true;
+    }
+
+    return false;
 }
 
 
@@ -44,18 +67,7 @@ Foam::IOmapDistributePolyMesh::IOmapDistributePolyMesh(const IOobject& io)
     // Warn for MUST_READ_IF_MODIFIED
     warnNoRereading<IOmapDistributePolyMesh>();
 
-    if
-    (
-        (
-            io.readOpt() == IOobject::MUST_READ
-         || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
-        )
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
-    {
-        readStream(typeName) >> *this;
-        close();
-    }
+    readContents();
 }
 
 
@@ -70,19 +82,7 @@ Foam::IOmapDistributePolyMesh::IOmapDistributePolyMesh
     // Warn for MUST_READ_IF_MODIFIED
     warnNoRereading<IOmapDistributePolyMesh>();
 
-    if
-    (
-        (
-            io.readOpt() == IOobject::MUST_READ
-         || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
-        )
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
-    {
-        readStream(typeName) >> *this;
-        close();
-    }
-    else
+    if (!readContents())
     {
         mapDistributePolyMesh::operator=(map);
     }
@@ -102,18 +102,7 @@ Foam::IOmapDistributePolyMesh::IOmapDistributePolyMesh
 
     mapDistributePolyMesh::transfer(map);
 
-    if
-    (
-        (
-            io.readOpt() == IOobject::MUST_READ
-         || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
-        )
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
-    {
-        readStream(typeName) >> *this;
-        close();
-    }
+    readContents();
 }
 
 

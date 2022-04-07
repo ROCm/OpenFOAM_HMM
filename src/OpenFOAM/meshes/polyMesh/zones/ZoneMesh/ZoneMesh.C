@@ -152,7 +152,7 @@ void Foam::ZoneMesh<ZoneType, MeshType>::calcGroupIDs() const
 
 
 template<class ZoneType, class MeshType>
-bool Foam::ZoneMesh<ZoneType, MeshType>::read()
+bool Foam::ZoneMesh<ZoneType, MeshType>::readContents()
 {
     if
     (
@@ -166,12 +166,13 @@ bool Foam::ZoneMesh<ZoneType, MeshType>::read()
 
         PtrList<ZoneType>& zones = *this;
 
-        // Read zones
+        // Read zones as entries
         Istream& is = readStream(typeName);
 
         PtrList<entry> patchEntries(is);
         zones.resize(patchEntries.size());
 
+        // Transcribe
         forAll(zones, zonei)
         {
             zones.set
@@ -187,11 +188,8 @@ bool Foam::ZoneMesh<ZoneType, MeshType>::read()
             );
         }
 
-        // Check state of IOstream
         is.check(FUNCTION_NAME);
-
         close();
-
         return true;
     }
 
@@ -213,7 +211,7 @@ Foam::ZoneMesh<ZoneType, MeshType>::ZoneMesh
     regIOobject(io),
     mesh_(mesh)
 {
-    read();
+    readContents();
 }
 
 
@@ -230,7 +228,7 @@ Foam::ZoneMesh<ZoneType, MeshType>::ZoneMesh
     mesh_(mesh)
 {
     // Optionally read contents, otherwise keep size
-    read();
+    readContents();
 }
 
 
@@ -246,7 +244,7 @@ Foam::ZoneMesh<ZoneType, MeshType>::ZoneMesh
     regIOobject(io),
     mesh_(mesh)
 {
-    if (!read())
+    if (!readContents())
     {
         // Nothing read. Use supplied zones
         PtrList<ZoneType>& zones = *this;

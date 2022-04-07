@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -86,15 +86,15 @@ void Foam::coordinateSystems::readFromStream(const bool valid)
 }
 
 
-bool Foam::coordinateSystems::readObject(const IOobject& io)
+bool Foam::coordinateSystems::readContents()
 {
     if
     (
         (
-            io.readOpt() == IOobject::MUST_READ
-         || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
+            readOpt() == IOobject::MUST_READ
+         || readOpt() == IOobject::MUST_READ_IF_MODIFIED
         )
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
+     || (readOpt() == IOobject::READ_IF_PRESENT && headerOk())
     )
     {
         readFromStream();
@@ -105,7 +105,6 @@ bool Foam::coordinateSystems::readObject(const IOobject& io)
 }
 
 
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::coordinateSystems::coordinateSystems(const IOobject& io)
@@ -113,7 +112,7 @@ Foam::coordinateSystems::coordinateSystems(const IOobject& io)
     regIOobject(io),
     PtrList<coordinateSystem>()
 {
-    readObject(io);
+    readContents();
 }
 
 
@@ -126,7 +125,7 @@ Foam::coordinateSystems::coordinateSystems
     regIOobject(io),
     PtrList<coordinateSystem>()
 {
-    if (!readObject(io))
+    if (!readContents())
     {
         static_cast<PtrList<coordinateSystem>&>(*this) = content;
     }
@@ -142,7 +141,7 @@ Foam::coordinateSystems::coordinateSystems
     regIOobject(io),
     PtrList<coordinateSystem>(std::move(content))
 {
-    readObject(io);
+    readContents();
 }
 
 

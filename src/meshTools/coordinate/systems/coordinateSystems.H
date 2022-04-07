@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,8 +59,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef coordinateSystems_H
-#define coordinateSystems_H
+#ifndef Foam_coordinateSystems_H
+#define Foam_coordinateSystems_H
 
 #include "regIOobject.H"
 #include "PtrList.H"
@@ -86,10 +86,8 @@ class coordinateSystems
         //- Read "coordinateSystems" or older "IOPtrList<coordinateSystem>"
         void readFromStream(const bool valid = true);
 
-        //- Attempt read if MUST_READ.., or READ_IF_PRESENT and has header
-        //  \return False if no read should have been attempted
-        bool readObject(const IOobject& io);
-
+        //- Read if IOobject flags set. Return true if read.
+        bool readContents();
 
         //- No copy construct
         coordinateSystems(const coordinateSystems&) = delete;

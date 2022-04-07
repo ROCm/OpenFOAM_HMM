@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ZoneMesh_H
-#define ZoneMesh_H
+#ifndef Foam_ZoneMesh_H
+#define Foam_ZoneMesh_H
 
 #include "regIOobject.H"
 #include "pointField.H"
@@ -83,7 +83,7 @@ class ZoneMesh
     // Private Member Functions
 
         //- Read if IOobject flags set. Return true if read.
-        bool read();
+        bool readContents();
 
         //- Create zone map
         void calcZoneMap() const;

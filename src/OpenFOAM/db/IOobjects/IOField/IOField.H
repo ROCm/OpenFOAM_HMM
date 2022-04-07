@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef IOField_H
-#define IOField_H
+#ifndef Foam_IOField_H
+#define Foam_IOField_H
 
 #include "regIOobject.H"
 #include "Field.H"
@@ -56,8 +56,17 @@ class IOField
     public regIOobject,
     public Field<Type>
 {
+    // Private Member Functions
+
+        //- Read if IOobject flags set. Return true if read.
+        bool readContents();
+
 public:
 
+    //- The underlying content type
+    typedef Field<Type> content_type;
+
+    //- Runtime type information
     TypeName("Field");
 
 

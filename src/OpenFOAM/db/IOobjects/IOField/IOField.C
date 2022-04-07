@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,29 @@ License
 
 #include "IOField.H"
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+template<class Type>
+bool Foam::IOField<Type>::readContents()
+{
+    if
+    (
+        (
+            readOpt() == IOobject::MUST_READ
+         || readOpt() == IOobject::MUST_READ_IF_MODIFIED
+        )
+     || (readOpt() == IOobject::READ_IF_PRESENT && headerOk())
+    )
+    {
+        readStream(typeName) >> *this;
+        close();
+        return true;
+    }
+
+    return false;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
@@ -38,18 +61,7 @@ Foam::IOField<Type>::IOField(const IOobject& io)
     // Check for MUST_READ_IF_MODIFIED
     warnNoRereading<IOField<Type>>();
 
-    if
-    (
-        (
-            io.readOpt() == IOobject::MUST_READ
-         || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
-        )
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
-    {
-        readStream(typeName) >> *this;
-        close();
-    }
+    readContents();
 }
 
 
@@ -91,28 +103,16 @@ Foam::IOField<Type>::IOField(const IOobject& io, const bool valid)
 
 
 template<class Type>
-Foam::IOField<Type>::IOField(const IOobject& io, const label size)
+Foam::IOField<Type>::IOField(const IOobject& io, const label len)
 :
     regIOobject(io)
 {
     // Check for MUST_READ_IF_MODIFIED
     warnNoRereading<IOField<Type>>();
 
-    if
-    (
-        (
-            io.readOpt() == IOobject::MUST_READ
-         || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
-        )
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
+    if (!readContents())
     {
-        readStream(typeName) >> *this;
-        close();
-    }
-    else
-    {
-        Field<Type>::setSize(size);
+        Field<Type>::resize(len);
     }
 }
 
@@ -125,19 +125,7 @@ Foam::IOField<Type>::IOField(const IOobject& io, const UList<Type>& content)
     // Check for MUST_READ_IF_MODIFIED
     warnNoRereading<IOField<Type>>();
 
-    if
-    (
-        (
-            io.readOpt() == IOobject::MUST_READ
-         || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
-        )
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
-    {
-        readStream(typeName) >> *this;
-        close();
-    }
-    else
+    if (!readContents())
     {
         Field<Type>::operator=(content);
     }
@@ -154,18 +142,7 @@ Foam::IOField<Type>::IOField(const IOobject& io, Field<Type>&& content)
 
     Field<Type>::transfer(content);
 
-    if
-    (
-        (
-            io.readOpt() == IOobject::MUST_READ
-         || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
-        )
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
-    {
-        readStream(typeName) >> *this;
-        close();
-    }
+    readContents();
 }
 
 
@@ -181,19 +158,7 @@ Foam::IOField<Type>::IOField(const IOobject& io, const tmp<Field<Type>>& tfld)
         Field<Type>::transfer(tfld.ref());
     }
 
-    if
-    (
-        (
-            io.readOpt() == IOobject::MUST_READ
-         || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
-        )
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
-    {
-        readStream(typeName) >> *this;
-        close();
-    }
-    else if (!reuse)
+    if (!readContents() && !reuse)
     {
         Field<Type>::operator=(tfld());
     }

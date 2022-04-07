@@ -42,7 +42,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::polyTopoChanger::readModifiers()
+bool Foam::polyTopoChanger::readContents()
 {
     if
     (
@@ -51,9 +51,6 @@ void Foam::polyTopoChanger::readModifiers()
      || (readOpt() == IOobject::READ_IF_PRESENT && headerOk())
     )
     {
-        // Warn for MUST_READ_IF_MODIFIED
-        warnNoRereading<polyTopoChanger>();
-
         PtrList<polyMeshModifier>& modifiers = *this;
 
         // Read modifiers
@@ -78,9 +75,11 @@ void Foam::polyTopoChanger::readModifiers()
         }
 
         is.check(FUNCTION_NAME);
-
         close();
+        return true;
     }
+
+    return false;
 }
 
 
@@ -96,7 +95,10 @@ Foam::polyTopoChanger::polyTopoChanger
     regIOobject(io),
     mesh_(mesh)
 {
-    readModifiers();
+    // Warn for MUST_READ_IF_MODIFIED
+    warnNoRereading<polyTopoChanger>();
+
+    readContents();
 }
 
 

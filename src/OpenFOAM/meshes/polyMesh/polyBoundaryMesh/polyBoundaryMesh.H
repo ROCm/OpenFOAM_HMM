@@ -91,6 +91,9 @@ class polyBoundaryMesh
         //- Calculate group name to patch ids lookup
         void calcGroupIDs() const;
 
+        //- Read if IOobject flags set. Return true if read.
+        bool readContents(const bool allowReadIfPresent);
+
         //- No copy construct
         polyBoundaryMesh(const polyBoundaryMesh&) = delete;
 

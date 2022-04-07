@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,8 +39,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef CompactIOList_H
-#define CompactIOList_H
+#ifndef Foam_CompactIOList_H
+#define Foam_CompactIOList_H
 
 #include "IOList.H"
 #include "regIOobject.H"
@@ -50,7 +50,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class Istream;
 class Ostream;
 template<class T, class BaseType> class CompactIOList;
@@ -81,10 +81,18 @@ class CompactIOList
         //- Read according to header type
         void readFromStream();
 
+        //- Read if IOobject flags set. Return true if read.
+        //  Reads according to the header type
+        bool readContents();
+
         //- Has too many elements in it?
         bool overflows() const;
 
+
 public:
+
+    //- The underlying content type
+    typedef List<T> content_type;
 
     //- Runtime type information
     TypeName("CompactList");

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,8 +37,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef IOmapDistribute_H
-#define IOmapDistribute_H
+#ifndef Foam_IOmapDistribute_H
+#define Foam_IOmapDistribute_H
 
 #include "mapDistribute.H"
 #include "regIOobject.H"
@@ -57,6 +57,10 @@ class IOmapDistribute
     public regIOobject,
     public mapDistribute
 {
+    // Private Member Functions
+
+        //- Read if IOobject flags set. Return true if read.
+        bool readContents();
 
 public:
 
@@ -65,13 +69,13 @@ public:
 
     // Constructors
 
-        //- Construct given an IOobject
+        //- Construct from IOobject
         IOmapDistribute(const IOobject& io);
 
-        //- Construct given an IOobject, copying mapDistribute contents
+        //- Construct from IOobject, copying mapDistribute contents
         IOmapDistribute(const IOobject& io, const mapDistribute& map);
 
-        //- Construct, moving mapDistribute contents
+        //- Construct from IOobject, moving mapDistribute contents
         IOmapDistribute(const IOobject& io, mapDistribute&& map);
 
 
@@ -79,14 +83,13 @@ public:
     virtual ~IOmapDistribute() = default;
 
 
-    // Member functions
+    // Member Functions
 
         //- ReadData function required for regIOobject read operation
         virtual bool readData(Istream&);
 
         //- WriteData function required for regIOobject write operation
         virtual bool writeData(Ostream&) const;
-
 };
 
 

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,8 +37,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef IOmapDistributePolyMesh_H
-#define IOmapDistributePolyMesh_H
+#ifndef Foam_IOmapDistributePolyMesh_H
+#define Foam_IOmapDistributePolyMesh_H
 
 #include "mapDistributePolyMesh.H"
 #include "regIOobject.H"
@@ -56,25 +57,30 @@ class IOmapDistributePolyMesh
     public regIOobject,
     public mapDistributePolyMesh
 {
+    // Private Member Functions
+
+        //- Read if IOobject flags set. Return true if read.
+        bool readContents();
 
 public:
 
     //- Runtime type information
     TypeName("mapDistributePolyMesh");
 
+
     // Constructors
 
-        //- Construct given an IOobject
-        IOmapDistributePolyMesh(const IOobject& io);
+        //- Construct from IOobject
+        explicit IOmapDistributePolyMesh(const IOobject& io);
 
-        //- Construct given an IOobject and mapDistributePolyMesh
+        //- Construct from IOobject, copying mapDistributePolyMesh contents
         IOmapDistributePolyMesh
         (
             const IOobject& io,
             const mapDistributePolyMesh& map
         );
 
-        //- Construct given an IOobject and mapDistributePolyMesh
+        //- Construct from IOobject, moving mapDistributePolyMesh contents
         IOmapDistributePolyMesh
         (
             const IOobject& io,
@@ -93,7 +99,6 @@ public:
 
         //- The writeData method for regIOobject write operation
         virtual bool writeData(Ostream& os) const;
-
 };
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,33 @@ License
 
 #include "IOMap.H"
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+template<class T>
+bool Foam::IOMap<T>::readContents()
+{
+    if
+    (
+        (
+            readOpt() == IOobject::MUST_READ
+         || readOpt() == IOobject::MUST_READ_IF_MODIFIED
+        )
+     || (readOpt() == IOobject::READ_IF_PRESENT && headerOk())
+    )
+    {
+        // For if MUST_READ_IF_MODIFIED
+        addWatch();
+
+        readStream(typeName) >> *this;
+        close();
+
+        return true;
+    }
+
+    return false;
+}
+
+
 // * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * //
 
 template<class T>
@@ -35,46 +62,18 @@ Foam::IOMap<T>::IOMap(const IOobject& io)
 :
     regIOobject(io)
 {
-    if
-    (
-        (
-            io.readOpt() == IOobject::MUST_READ
-         || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
-        )
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
-    {
-        // For if MUST_READ_IF_MODIFIED
-        addWatch();
-
-        readStream(typeName) >> *this;
-        close();
-    }
+    readContents();
 }
+
 
 template<class T>
 Foam::IOMap<T>::IOMap(const IOobject& io, const label size)
 :
     regIOobject(io)
 {
-    if
-    (
-        (
-            io.readOpt() == IOobject::MUST_READ
-         || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
-        )
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
+    if (!readContents())
     {
-        // For if MUST_READ_IF_MODIFIED
-        addWatch();
-
-        readStream(typeName) >> *this;
-        close();
-    }
-    else
-    {
-        Map<T>::setSize(size);
+        Map<T>::resize(size);
     }
 }
 
@@ -84,22 +83,7 @@ Foam::IOMap<T>::IOMap(const IOobject& io, const Map<T>& content)
 :
     regIOobject(io)
 {
-    if
-    (
-        (
-            io.readOpt() == IOobject::MUST_READ
-         || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
-        )
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
-    {
-        // For if MUST_READ_IF_MODIFIED
-        addWatch();
-
-        readStream(typeName) >> *this;
-        close();
-    }
-    else
+    if (!readContents())
     {
         Map<T>::operator=(content);
     }
@@ -113,21 +97,7 @@ Foam::IOMap<T>::IOMap(const IOobject& io, Map<T>&& content)
 {
     Map<T>::transfer(content);
 
-    if
-    (
-        (
-            io.readOpt() == IOobject::MUST_READ
-         || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
-        )
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
-    {
-        // For if MUST_READ_IF_MODIFIED
-        addWatch();
-
-        readStream(typeName) >> *this;
-        close();
-    }
+    readContents();
 }
 
 

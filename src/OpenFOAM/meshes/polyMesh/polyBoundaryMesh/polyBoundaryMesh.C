@@ -107,22 +107,17 @@ void Foam::polyBoundaryMesh::calcGroupIDs() const
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::polyBoundaryMesh::polyBoundaryMesh
-(
-    const IOobject& io,
-    const polyMesh& mesh
-)
-:
-    polyPatchList(),
-    regIOobject(io),
-    mesh_(mesh)
+bool Foam::polyBoundaryMesh::readContents(const bool allowReadIfPresent)
 {
     if
     (
-        readOpt() == IOobject::MUST_READ
-     || readOpt() == IOobject::MUST_READ_IF_MODIFIED
+        this->readOpt() == IOobject::MUST_READ
+     || this->readOpt() == IOobject::MUST_READ_IF_MODIFIED
+     ||
+        (
+            allowReadIfPresent
+         && (this->readOpt() == IOobject::READ_IF_PRESENT && this->headerOk())
+        )
     )
     {
         // Warn for MUST_READ_IF_MODIFIED
@@ -133,9 +128,11 @@ Foam::polyBoundaryMesh::polyBoundaryMesh
         // Read polyPatchList
         Istream& is = readStream(typeName);
 
+        // Read patches as entries
         PtrList<entry> patchEntries(is);
-        patches.setSize(patchEntries.size());
+        patches.resize(patchEntries.size());
 
+        // Transcribe
         forAll(patches, patchi)
         {
             patches.set
@@ -152,9 +149,27 @@ Foam::polyBoundaryMesh::polyBoundaryMesh
         }
 
         is.check(FUNCTION_NAME);
-
         close();
+        return true;
     }
+
+    return false;
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::polyBoundaryMesh::polyBoundaryMesh
+(
+    const IOobject& io,
+    const polyMesh& mesh
+)
+:
+    polyPatchList(),
+    regIOobject(io),
+    mesh_(mesh)
+{
+    readContents(false);  // READ_IF_PRESENT allowed: False
 }
 
 
@@ -182,47 +197,10 @@ Foam::polyBoundaryMesh::polyBoundaryMesh
     regIOobject(io),
     mesh_(pm)
 {
-    if
-    (
-        (this->readOpt() == IOobject::READ_IF_PRESENT && this->headerOk())
-     || this->readOpt() == IOobject::MUST_READ
-     || this->readOpt() == IOobject::MUST_READ_IF_MODIFIED
-    )
-    {
-        // Warn for MUST_READ_IF_MODIFIED
-        warnNoRereading<polyBoundaryMesh>();
-
-        polyPatchList& patches = *this;
-
-        // Read polyPatchList
-        Istream& is = readStream(typeName);
-
-        PtrList<entry> patchEntries(is);
-        patches.resize(patchEntries.size());
-
-        forAll(patches, patchi)
-        {
-            patches.set
-            (
-                patchi,
-                polyPatch::New
-                (
-                    patchEntries[patchi].keyword(),
-                    patchEntries[patchi].dict(),
-                    patchi,
-                    *this
-                )
-            );
-        }
-
-        is.check(FUNCTION_NAME);
-
-        close();
-    }
-    else
+    if (!readContents(true))  // READ_IF_PRESENT allowed: True
     {
         polyPatchList& patches = *this;
-        patches.setSize(ppl.size());
+        patches.resize(ppl.size());
         forAll(patches, patchi)
         {
             patches.set(patchi, ppl[patchi].clone(*this));

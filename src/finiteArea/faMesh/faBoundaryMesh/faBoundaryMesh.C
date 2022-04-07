@@ -100,22 +100,17 @@ void Foam::faBoundaryMesh::calcGroupIDs() const
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::faBoundaryMesh::faBoundaryMesh
-(
-    const IOobject& io,
-    const faMesh& mesh
-)
-:
-    faPatchList(),
-    regIOobject(io),
-    mesh_(mesh)
+bool Foam::faBoundaryMesh::readContents(const bool allowReadIfPresent)
 {
     if
     (
         readOpt() == IOobject::MUST_READ
      || readOpt() == IOobject::MUST_READ_IF_MODIFIED
+     ||
+        (
+            allowReadIfPresent
+         && (readOpt() == IOobject::READ_IF_PRESENT && headerOk())
+        )
     )
     {
         // Warn for MUST_READ_IF_MODIFIED
@@ -126,9 +121,11 @@ Foam::faBoundaryMesh::faBoundaryMesh
         // Read faPatch list
         Istream& is = readStream(typeName);
 
+        // Read patches as entries
         PtrList<entry> patchEntries(is);
-        patches.setSize(patchEntries.size());
+        patches.resize(patchEntries.size());
 
+        // Transcribe
         forAll(patches, patchi)
         {
             patches.set
@@ -145,9 +142,27 @@ Foam::faBoundaryMesh::faBoundaryMesh
         }
 
         is.check(FUNCTION_NAME);
-
         close();
+        return true;
     }
+
+    return false;
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::faBoundaryMesh::faBoundaryMesh
+(
+    const IOobject& io,
+    const faMesh& mesh
+)
+:
+    faPatchList(),
+    regIOobject(io),
+    mesh_(mesh)
+{
+    readContents(false);  // READ_IF_PRESENT allowed: False
 }
 
 
