@@ -49,6 +49,7 @@ for (const int proci : Pstream::allProcs())
 
                     const vector d(remFc - fc);
 
+
                     if (((d & fA) < 0.) && ((d & remA) > 0))
                     {
                         start.append(fc + 0.001*d);

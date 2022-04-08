@@ -1,0 +1,3 @@
+viewFactorsGenExt.C
+
+EXE = $(FOAM_APPBIN)/viewFactorsGenExt
