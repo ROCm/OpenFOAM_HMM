@@ -32,10 +32,9 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef indexedFace_H
-#define indexedFace_H
+#ifndef Foam_CGAL_indexedFace_H
+#define Foam_CGAL_indexedFace_H
 
-#include "CGAL/Triangulation_2.h"
 #include "indexedVertex.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

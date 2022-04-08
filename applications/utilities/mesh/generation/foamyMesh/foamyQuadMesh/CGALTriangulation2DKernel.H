@@ -33,9 +33,17 @@ Description
 #ifndef CGALTriangulation2DKernel_H
 #define CGALTriangulation2DKernel_H
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Silence boost bind deprecation warnings (before CGAL-5.2.1)
+#include "CGAL/version.h"
+#if defined(CGAL_VERSION_NR) && (CGAL_VERSION_NR < 1050211000)
+#define BOOST_BIND_GLOBAL_PLACEHOLDERS
+#endif
+
+// ------------------------------------------------------------------------- //
 
 #include "CGAL/Delaunay_triangulation_2.h"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef CGAL_INEXACT
 
