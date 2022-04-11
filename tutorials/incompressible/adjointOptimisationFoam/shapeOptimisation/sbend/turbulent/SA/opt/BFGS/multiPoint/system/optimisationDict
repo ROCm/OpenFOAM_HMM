@@ -23,7 +23,6 @@ primalSolvers
         active                 true;
         type                   incompressible;
         solver                 simple;
-        useSolverNameForFields true;
 
         solutionControls
         {
@@ -41,7 +40,6 @@ primalSolvers
         active                 true;
         type                   incompressible;
         solver                 simple;
-        useSolverNameForFields true;
 
         solutionControls
         {
@@ -71,7 +69,6 @@ adjointManagers
                 active                 true;
                 type                   incompressible;
                 solver                 adjointSimple;
-                useSolverNameForFields true;
 
                 // manage objectives
                 //------------------
@@ -124,7 +121,6 @@ adjointManagers
                 active                 true;
                 type                   incompressible;
                 solver                 adjointSimple;
-                useSolverNameForFields true;
 
                 // manage objectives
                 //------------------

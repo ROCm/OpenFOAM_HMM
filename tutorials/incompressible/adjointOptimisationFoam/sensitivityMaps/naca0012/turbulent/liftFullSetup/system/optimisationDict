@@ -23,7 +23,6 @@ primalSolvers
         active                 true;
         type                   incompressible;
         solver                 simple;
-        useSolverNameForFields false;
         solutionControls
         {
             nIters 3000;
@@ -52,7 +51,6 @@ adjointManagers
                 active                 true;
                 type                   incompressible;
                 solver                 adjointSimple;
-                useSolverNameForFields false;
                 computeSensitivities   true;
 
                 // manage objectives
