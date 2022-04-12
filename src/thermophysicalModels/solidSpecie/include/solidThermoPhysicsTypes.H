@@ -40,10 +40,12 @@ Description
 #include "hConstThermo.H"
 #include "hPolynomialThermo.H"
 #include "hPowerThermo.H"
+#include "hTabulatedThermo.H"
 #include "constIsoSolidTransport.H"
 #include "constAnIsoSolidTransport.H"
 #include "exponentialSolidTransport.H"
 #include "polynomialSolidTransport.H"
+#include "tabulatedSolidTransport.H"
 
 #include "sensibleEnthalpy.H"
 #include "thermo.H"
@@ -121,6 +123,19 @@ namespace Foam
             >,
             8
         > hPolyTranspPolyIcoSolidThermoPhysics;
+
+     typedef
+        tabulatedSolidTransport
+        <
+            species::thermo
+            <
+                hTabulatedThermo
+                <
+                    icoPolynomial<specie, 8>
+                >,
+                sensibleEnthalpy
+            >
+        > hTabulatedPolyIcoSolidThermoPhysics;
 }
 
 
