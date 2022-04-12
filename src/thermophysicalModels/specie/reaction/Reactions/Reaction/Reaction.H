@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,8 +37,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Reaction_H
-#define Reaction_H
+#ifndef Foam_Reaction_H
+#define Foam_Reaction_H
 
 #include "speciesTable.H"
 #include "HashPtrTable.H"
@@ -97,14 +97,19 @@ public:
                 exponent(1)
             {}
 
-            specieCoeffs(const speciesTable& species, Istream& is);
+            specieCoeffs
+            (
+                const speciesTable& species,
+                Istream& is,
+                bool failUnknownSpecie = true
+            );
 
-            bool operator==(const specieCoeffs& sc) const
+            bool operator==(const specieCoeffs& sc) const noexcept
             {
                 return index == sc.index;
             }
 
-            bool operator!=(const specieCoeffs& sc) const
+            bool operator!=(const specieCoeffs& sc) const noexcept
             {
                 return index != sc.index;
             }
@@ -155,10 +160,18 @@ protected:
 
     // Protected Member Functions
 
-        //- Return string representation of the left of the reaction
+        //- Add string representation for given species reaction coeffs
+        static void reactionStr
+        (
+            OStringStream& reaction,
+            const speciesTable& species,
+            const List<specieCoeffs>& reactCoeffs
+        );
+
+        //- Add string representation of the left of the reaction
         void reactionStrLeft(OStringStream& reaction) const;
 
-        //- Return string representation of the right of the reaction
+        //- Add string representation of the right of the reaction
         void reactionStrRight(OStringStream& reaction) const;
 
 
@@ -212,7 +225,8 @@ public:
             const speciesTable& species,
             const ReactionTable<ReactionThermo>& thermoDatabase,
             const dictionary& dict,
-            bool initReactionThermo = true
+            bool initReactionThermo = true,
+            bool failUnknownSpecie = true
         );
 
         //- Construct and return a clone
@@ -278,7 +292,8 @@ public:
                 Istream&,
                 const speciesTable&,
                 List<specieCoeffs>& lhs,
-                List<specieCoeffs>& rhs
+                List<specieCoeffs>& rhs,
+                bool failUnknownSpecie = true
             );
 
 

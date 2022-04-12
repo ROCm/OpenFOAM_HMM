@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,7 +69,14 @@ Foam::solidReaction<ReactionThermo>::solidReaction
     const dictionary& dict
 )
 :
-    Reaction<ReactionThermo>(species, thermoDatabase, dict, false),
+    Reaction<ReactionThermo>
+    (
+        species,
+        thermoDatabase,
+        dict,
+        false,  // initReactionThermo = false
+        false   // failUnknownSpecie = false
+    ),
     pyrolisisGases_(dict.parent().parent().lookup("gaseousSpecies")),
     glhs_(),
     grhs_()
@@ -79,7 +86,26 @@ Foam::solidReaction<ReactionThermo>::solidReaction
         IStringStream(dict.getString("reaction"))(),
         pyrolisisGases_,
         glhs_,
-        grhs_
+        grhs_,
+        false   // failUnknownSpecie = false
+    );
+
+    speciesTable allSpecies(species);
+    for (const word& gasName : pyrolisisGases_)
+    {
+        allSpecies.append(gasName);
+    }
+    List<specieCoeffs> dummyLhs;
+    List<specieCoeffs> dummyRhs;
+
+    // Rescan (and fail) if a species is neither gas nor solid
+    this->setLRhs
+    (
+        IStringStream(dict.getString("reaction"))(),
+        allSpecies,
+        dummyLhs,
+        dummyRhs
+        // failUnknownSpecie = true
     );
 }
 
@@ -125,20 +151,21 @@ Foam::string Foam::solidReaction<ReactionThermo>::solidReactionStr
 ) const
 {
     this->reactionStrLeft(reaction);
-    if (glhs().size() > 0)
+    if (!glhs().empty())
     {
         reaction << " + ";
         solidReactionStrLeft(reaction);
     }
+
     reaction << " = ";
+
     this->reactionStrRight(reaction);
-    if (grhs().size() > 0)
+    if (!grhs().empty())
     {
         reaction << " + ";
         solidReactionStrRight(reaction);
     }
     return reaction.str();
-
 }
 
 
@@ -148,22 +175,7 @@ void Foam::solidReaction<ReactionThermo>::solidReactionStrLeft
     OStringStream& reaction
 ) const
 {
-    for (label i = 0; i < glhs().size(); ++i)
-    {
-        if (i > 0)
-        {
-            reaction << " + ";
-        }
-        if (mag(glhs()[i].stoichCoeff - 1) > SMALL)
-        {
-            reaction << glhs()[i].stoichCoeff;
-        }
-        reaction << gasSpecies()[glhs()[i].index];
-        if (mag(glhs()[i].exponent - glhs()[i].stoichCoeff) > SMALL)
-        {
-            reaction << "^" << glhs()[i].exponent;
-        }
-    }
+    Reaction<ReactionThermo>::reactionStr(reaction, gasSpecies(), glhs());
 }
 
 
@@ -173,23 +185,8 @@ void Foam::solidReaction<ReactionThermo>::solidReactionStrRight
     OStringStream& reaction
 ) const
 {
-
-    for (label i = 0; i < grhs().size(); ++i)
-    {
-        if (i > 0)
-        {
-            reaction << " + ";
-        }
-        if (mag(grhs()[i].stoichCoeff - 1) > SMALL)
-        {
-            reaction << grhs()[i].stoichCoeff;
-        }
-        reaction << gasSpecies()[grhs()[i].index];
-        if (mag(grhs()[i].exponent - grhs()[i].stoichCoeff) > SMALL)
-        {
-            reaction << "^" << grhs()[i].exponent;
-        }
-    }
+    Reaction<ReactionThermo>::reactionStr(reaction, gasSpecies(), grhs());
 }
+
 
 // ************************************************************************* //

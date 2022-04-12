@@ -48,7 +48,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class fvMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -60,13 +60,9 @@ class pyrolysisChemistryModel
 :
     public solidChemistryModel<CompType, SolidThermo>
 {
-    // Private Member Functions
-
-        //- No copy assignment
-        void operator=(const pyrolysisChemistryModel&) = delete;
-
-
 protected:
+
+    // Protected Data
 
         //- List of gas species present in reaction system
         speciesTable pyrolisisGases_;
@@ -74,7 +70,7 @@ protected:
         //- Thermodynamic data of gases
         PtrList<GasThermo> gasThermo_;
 
-         //- Number of gas species
+        //- Number of gas species
         label nGases_;
 
         //- Number of components being solved by ODE
@@ -83,17 +79,20 @@ protected:
         //- List of reaction rate per gas [kg/m3/s]
         PtrList<volScalarField::Internal> RRg_;
 
+        //- List of accumulative solid concentrations
+        mutable PtrList<volScalarField> Ys0_;
+
 
     // Protected Member Functions
 
         //- Write access to source terms for gases
         inline PtrList<volScalarField::Internal>& RRg();
 
+        //- No copy assignment
+        void operator=(const pyrolysisChemistryModel&) = delete;
+
 
 private:
-
-        //- List of accumulative solid concentrations
-        mutable PtrList<volScalarField> Ys0_;
 
         //- Cell counter
         label cellCounter_;

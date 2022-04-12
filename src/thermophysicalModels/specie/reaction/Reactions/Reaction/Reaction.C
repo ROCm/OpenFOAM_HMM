@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,27 +38,41 @@ Foam::label Foam::Reaction<ReactionThermo>::nUnNamedReactions = 0;
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
 template<class ReactionThermo>
+void Foam::Reaction<ReactionThermo>::reactionStr
+(
+    OStringStream& reaction,
+    const speciesTable& species,
+    const List<specieCoeffs>& reactCoeffs
+)
+{
+    for (label i = 0; i < reactCoeffs.size(); ++i)
+    {
+        const specieCoeffs& coeff = reactCoeffs[i];
+
+        if (i)
+        {
+            reaction << " + ";
+        }
+        if (mag(coeff.stoichCoeff - 1) > SMALL)
+        {
+            reaction << coeff.stoichCoeff;
+        }
+        reaction << species[coeff.index];
+        if (mag(coeff.exponent - coeff.stoichCoeff) > SMALL)
+        {
+            reaction << "^" << coeff.exponent;
+        }
+    }
+}
+
+
+template<class ReactionThermo>
 void Foam::Reaction<ReactionThermo>::reactionStrLeft
 (
     OStringStream& reaction
 ) const
 {
-    for (label i = 0; i < lhs_.size(); ++i)
-    {
-        if (i > 0)
-        {
-            reaction << " + ";
-        }
-        if (mag(lhs_[i].stoichCoeff - 1) > SMALL)
-        {
-            reaction << lhs_[i].stoichCoeff;
-        }
-        reaction << species_[lhs_[i].index];
-        if (mag(lhs_[i].exponent - lhs_[i].stoichCoeff) > SMALL)
-        {
-            reaction << "^" << lhs_[i].exponent;
-        }
-    }
+    reactionStr(reaction, species_, lhs_);
 }
 
 
@@ -68,22 +82,7 @@ void Foam::Reaction<ReactionThermo>::reactionStrRight
     OStringStream& reaction
 ) const
 {
-    for (label i = 0; i < rhs_.size(); ++i)
-    {
-        if (i > 0)
-        {
-            reaction << " + ";
-        }
-        if (mag(rhs_[i].stoichCoeff - 1) > SMALL)
-        {
-            reaction << rhs_[i].stoichCoeff;
-        }
-        reaction << species_[rhs_[i].index];
-        if (mag(rhs_[i].exponent - rhs_[i].stoichCoeff) > SMALL)
-        {
-            reaction << "^" << rhs_[i].exponent;
-        }
-    }
+    reactionStr(reaction, species_, rhs_);
 }
 
 
@@ -195,7 +194,8 @@ template<class ReactionThermo>
 Foam::Reaction<ReactionThermo>::specieCoeffs::specieCoeffs
 (
     const speciesTable& species,
-    Istream& is
+    Istream& is,
+    bool failUnknownSpecie
 )
 {
     token t(is);
@@ -223,8 +223,16 @@ Foam::Reaction<ReactionThermo>::specieCoeffs::specieCoeffs
             specieName.resize(i);
         }
 
-        // -1 if not found
+        // Lookup specie name: -1 if not found
         index = species[specieName];
+
+        if (failUnknownSpecie && index < 0)
+        {
+            FatalErrorInFunction
+                << "Unknown specie " << specieName << nl
+                << "Not in " << flatOutput(species) << endl
+                << exit(FatalError);
+        }
     }
     else
     {
@@ -241,16 +249,24 @@ void Foam::Reaction<ReactionThermo>::setLRhs
     Istream& is,
     const speciesTable& species,
     List<specieCoeffs>& lhs,
-    List<specieCoeffs>& rhs
+    List<specieCoeffs>& rhs,
+    bool failUnknownSpecie
 )
 {
     DynamicList<specieCoeffs> dlrhs;
 
+    bool parsingRight = false;
+
     while (is.good())
     {
-        dlrhs.append(specieCoeffs(species, is));
+        dlrhs.append(specieCoeffs(species, is, failUnknownSpecie));
 
-        if (dlrhs.last().index != -1)
+        if (dlrhs.last().index < 0)
+        {
+            dlrhs.remove();
+        }
+
+        if (is.good())
         {
             token t(is);
             if (t.isPunctuation())
@@ -260,55 +276,39 @@ void Foam::Reaction<ReactionThermo>::setLRhs
                 }
                 else if (t == token::ASSIGN)
                 {
-                    lhs = dlrhs.shrink();
+                    if (parsingRight)
+                    {
+                        FatalErrorInFunction
+                            << "Multiple '=' in reaction equation" << endl
+                            << exit(FatalError);
+                    }
+
+                    lhs = dlrhs;
                     dlrhs.clear();
+                    parsingRight = true;
                 }
                 else
                 {
-                    rhs = dlrhs.shrink();
-                    is.putBack(t);
-                    return;
+                    FatalErrorInFunction
+                        << "Unknown punctuation token '" << t
+                        << "' in reaction equation" << endl
+                        << exit(FatalError);
                 }
             }
             else
             {
-                rhs = dlrhs.shrink();
+                rhs = dlrhs;
                 is.putBack(t);
                 return;
             }
         }
-        else
+        else if (parsingRight)
         {
-            dlrhs.remove();
-            if (is.good())
+            if (!dlrhs.empty())
             {
-                token t(is);
-                if (t.isPunctuation())
-                {
-                    if (t == token::ADD)
-                    {
-                    }
-                    else if (t == token::ASSIGN)
-                    {
-                        lhs = dlrhs.shrink();
-                        dlrhs.clear();
-                    }
-                    else
-                    {
-                        rhs = dlrhs.shrink();
-                        is.putBack(t);
-                        return;
-                    }
-                }
+                rhs = dlrhs;
             }
-            else
-            {
-                if (!dlrhs.empty())
-                {
-                    rhs = dlrhs.shrink();
-                }
-                return;
-            }
+            return;
         }
     }
 
@@ -324,7 +324,8 @@ Foam::Reaction<ReactionThermo>::Reaction
     const speciesTable& species,
     const ReactionTable<ReactionThermo>& thermoDatabase,
     const dictionary& dict,
-    bool initReactionThermo
+    bool initReactionThermo,
+    bool failUnknownSpecie
 )
 :
     ReactionThermo::thermoType(*thermoDatabase[species[0]]),
@@ -336,7 +337,8 @@ Foam::Reaction<ReactionThermo>::Reaction
         IStringStream(dict.getString("reaction"))(),
         species_,
         lhs_,
-        rhs_
+        rhs_,
+        failUnknownSpecie
     );
 
     if (initReactionThermo)

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,8 +37,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef solidReaction_H
-#define solidReaction_H
+#ifndef Foam_solidReaction_H
+#define Foam_solidReaction_H
 
 #include "speciesTable.H"
 #include "Reaction.H"
@@ -49,8 +49,7 @@ namespace Foam
 {
 
 // Forward Declarations
-template<class ReactionThermo>
-class solidReaction;
+template<class ReactionThermo> class solidReaction;
 
 template<class ReactionThermo>
 inline Ostream& operator<<(Ostream&, const solidReaction<ReactionThermo>&);
@@ -64,8 +63,6 @@ class solidReaction
 :
     public Reaction<ReactionThermo>
 {
-private:
-
     // Private Data
 
         typedef typename Reaction<ReactionThermo>::specieCoeffs specieCoeffs;
@@ -82,15 +79,14 @@ private:
 
     // Private Member Functions
 
-
         //- Return string representation of reaction
-        string solidReactionStr(OStringStream&) const;
+        string solidReactionStr(OStringStream& reaction) const;
 
-        //- Return string representation of the left of the reaction
-        void solidReactionStrLeft(OStringStream&) const;
+        //- Add string representation of the left of the reaction
+        void solidReactionStrLeft(OStringStream& reaction) const;
 
-        //- Return string representation of the right of the reaction
-        void solidReactionStrRight(OStringStream&) const;
+        //- Add string representation of the right of the reaction
+        void solidReactionStrRight(OStringStream& reaction) const;
 
         //- No copy assignment
         void operator=(const solidReaction&) = delete;
