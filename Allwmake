@@ -37,7 +37,7 @@ echo
 echo ========================================
 date "+%Y-%m-%d %H:%M:%S %z" 2>/dev/null || echo "date is unknown"
 echo "Starting compile ${WM_PROJECT_DIR##*/} ${0##*/}"
-echo "  $WM_COMPILER ${WM_COMPILER_TYPE:-system} compiler"
+echo "  $WM_COMPILER ${WM_COMPILER_TYPE:-system} compiler [${WM_COMPILE_CONTROL}]"
 echo "  ${WM_OPTIONS}, with ${WM_MPLIB} ${FOAM_MPI}"
 echo ========================================
 echo

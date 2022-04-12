@@ -37,11 +37,8 @@ ifeq (,$(WM_COMPILE_OPTION))
     WM_COMPILE_OPTION = Opt
 endif
 
-ifeq (,$(WM_SCHEDULER))
-    AND = &&
-else
-    AND = '&&'
-endif
+# Older macro for (shell) branching
+AND := &&
 
 include $(DEFAULT_RULES)/general
 sinclude $(DEFAULT_RULES)/override
