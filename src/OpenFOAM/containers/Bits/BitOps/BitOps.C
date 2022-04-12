@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,8 +30,31 @@ License
 #include "HashSet.H"
 #include "List.H"
 #include "labelRange.H"
+#include <algorithm>
 
 // * * * * * * * * * * * * * * * * * BitOps  * * * * * * * * * * * * * * * * //
+
+// See bitSet::setMany for original implementation
+void Foam::BitOps::set(List<bool>& bools, const labelUList& locations)
+{
+    // Check the max expected value first
+    const auto max = std::max_element(locations.begin(), locations.end());
+    const label len = (max != locations.end() ? (1 + *max) : 0);
+
+    if (len > bools.size())
+    {
+        bools.resize(len, false);
+    }
+
+    for (label i : locations)
+    {
+        if (i >= 0)
+        {
+            bools[i] = true;
+        }
+    }
+}
+
 
 // See bitSet::set(labelRange) for original implementation
 void Foam::BitOps::set(List<bool>& bools, const labelRange& range)
@@ -45,28 +68,17 @@ void Foam::BitOps::set(List<bool>& bools, const labelRange& range)
         return;
     }
 
-    // Range finishes at or beyond the right side.
-    // - zero fill any gaps that we might create.
-    // - flood-fill the rest, which now corresponds to the full range.
-    //
-    // NB: use labelRange after() for the exclusive end-value, which
-    // corresponds to our new set size.
+    // Check maximum extent of the range.
+    // The after() method is the exclusive end-value,
+    // which corresponds to our potential new length.
+    // - resize now to avoid allocations within the loop
+
     if (slice.after() >= bools.size())
     {
-        label i = bools.size();
-
-        bools.resize(slice.after(), true);
-
-        // Backfill with false
-        while (i < slice.start())
-        {
-            bools.unset(i);
-            ++i;
-        }
-        return;
+        bools.resize(slice.after(), false);
     }
 
-    for (label i = slice.first(); i <= slice.last(); ++i)
+    for (const label i : slice)
     {
         bools.set(i);
     }
@@ -79,7 +91,7 @@ void Foam::BitOps::set(labelHashSet& hashset, const labelRange& range)
     labelRange slice(range);
     slice.adjust();  // No negative start, size adjusted accordingly
 
-    for (label i = slice.first(); i <= slice.last(); ++i)
+    for (const label i : slice)
     {
         hashset.set(i);
     }
@@ -92,10 +104,19 @@ void Foam::BitOps::set(bitSet& bitset, const labelRange& range)
 }
 
 
+void Foam::BitOps::unset(List<bool>& bools, const labelUList& locations)
+{
+    for (const label i : locations)
+    {
+        bools.unset(i);
+    }
+}
+
+
 // See bitSet::unset(labelRange) for original implementation
 void Foam::BitOps::unset(List<bool>& bools, const labelRange& range)
 {
-    for (label i = range.first(); i <= range.last(); ++i)
+    for (const label i : range)
     {
         bools.unset(i);
     }
@@ -104,7 +125,7 @@ void Foam::BitOps::unset(List<bool>& bools, const labelRange& range)
 
 void Foam::BitOps::unset(labelHashSet& hashset, const labelRange& range)
 {
-    for (label i = range.first(); i <= range.last(); ++i)
+    for (const label i : range)
     {
         hashset.unset(i);
     }
@@ -114,6 +135,74 @@ void Foam::BitOps::unset(labelHashSet& hashset, const labelRange& range)
 void Foam::BitOps::unset(bitSet& bitset, const labelRange& range)
 {
     bitset.unset(range);
+}
+
+
+Foam::List<bool> Foam::BitOps::select
+(
+    const label n,
+    const labelUList& locations
+)
+{
+    List<bool> bools(n, false);
+
+    BitOps::set(bools, locations);
+
+    return bools;
+}
+
+
+Foam::List<bool> Foam::BitOps::select(const labelUList& locations)
+{
+    List<bool> bools;
+
+    BitOps::set(bools, locations);
+
+    return bools;
+}
+
+
+// Note: code is like ListOps findIndices() and/or bitSet toc()
+Foam::List<Foam::label> Foam::BitOps::toc(const UList<bool>& bools)
+{
+    const label len = bools.size();
+
+    // Pass 1: count occurrences
+    label count = 0;
+
+    for (const bool b : bools)
+    {
+        if (b) ++count;
+    }
+
+    labelList indices(count);
+
+    // Pass 2: fill content
+    if (count)
+    {
+        const label total(count);
+        count = 0;
+
+        for (label i = 0; i < len; ++i)
+        {
+            if (bools[i])
+            {
+                indices[count] = i;
+                if (++count == total)  // Terminate early
+                {
+                    break;
+                }
+            }
+        }
+    }
+
+    return indices;
+}
+
+
+Foam::List<Foam::label> Foam::BitOps::sortedToc(const UList<bool>& bools)
+{
+    return BitOps::toc(bools);
 }
 
 

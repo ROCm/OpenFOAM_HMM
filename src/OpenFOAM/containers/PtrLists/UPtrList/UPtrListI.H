@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -113,6 +113,13 @@ template<class T>
 inline bool Foam::UPtrList<T>::empty() const noexcept
 {
     return ptrs_.empty();
+}
+
+
+template<class T>
+inline const T* Foam::UPtrList<T>::test(const label i) const
+{
+    return (i >= 0 && i < ptrs_.size()) ? ptrs_[i] : nullptr;
 }
 
 

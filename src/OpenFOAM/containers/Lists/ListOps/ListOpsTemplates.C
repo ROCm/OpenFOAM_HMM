@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1127,7 +1127,34 @@ void Foam::ListOps::uniqueEqOp<T>::operator()
 
 
 template<class ListType, class UnaryPredicate>
-Foam::label Foam::ListOps::find
+Foam::label Foam::ListOps::count_if
+(
+    const ListType& input,
+    const UnaryPredicate& pred,
+    const label start
+)
+{
+    label num = 0;
+
+    const label len = input.size();
+
+    if (start >= 0)
+    {
+        for (label i = start; i < len; ++i)
+        {
+            if (pred(input[i]))
+            {
+                ++num;
+            }
+        }
+    }
+
+    return num;
+}
+
+
+template<class ListType, class UnaryPredicate>
+Foam::label Foam::ListOps::find_if
 (
     const ListType& input,
     const UnaryPredicate& pred,
@@ -1152,14 +1179,14 @@ Foam::label Foam::ListOps::find
 
 
 template<class ListType, class UnaryPredicate>
-bool Foam::ListOps::found
+bool Foam::ListOps::found_if
 (
     const ListType& input,
     const UnaryPredicate& pred,
     const label start
 )
 {
-    return (ListOps::find(input, pred, start) >= 0);
+    return (ListOps::find_if(input, pred, start) >= 0);
 }
 
 
@@ -1173,7 +1200,7 @@ Foam::labelList Foam::ListOps::findIndices
 {
     const label len = input.size();
 
-    // Pass 1: count occurrences
+    // Pass 1: count occurrences where pred is true. ie, count_if()
     label count = 0;
 
     if (start >= 0)

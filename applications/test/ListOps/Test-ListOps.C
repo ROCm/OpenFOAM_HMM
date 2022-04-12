@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2013 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -131,20 +131,20 @@ int main(int argc, char *argv[])
     const auto evenNonZero = [](const label& x){ return x && !(x % 2); };
 
     Info<< "location of first even/non-zero: "
-        << ListOps::find(test6, evenNonZero) << nl;
+        << ListOps::find_if(test6, evenNonZero) << nl;
 
     Info<< "find > 12 && divisible by 5 : "
-        << ListOps::find
+        << ListOps::find_if
            (
                test6,
                [](const label& x) { return x > 12 && !(x % 5); }
            ) << nl;
 
     Info<< "Found >= 8 : "
-        << ListOps::found(test6, labelMinMax(8, labelMax)) << nl;
+        << ListOps::found_if(test6, labelMinMax(8, labelMax)) << nl;
 
     Info<< "Found >= 25 : "
-        << ListOps::found(test6, labelMinMax(25, labelMax)) << nl;
+        << ListOps::found_if(test6, labelMinMax(25, labelMax)) << nl;
 
 
     Info<< "Subset of non-zero, even values: "
