@@ -1,27 +1,35 @@
 #include "createMesh.H"
 
-IOdictionary filmDict
+dictionary filmDict;
+
+IOobject io
 (
-    IOobject
-    (
-        "surfaceFilmProperties",
-        runTime.constant(),
-        runTime,
-        IOobject::MUST_READ,
-        IOobject::NO_WRITE,
-        false
-    )
+    "surfaceFilmProperties",
+    mesh.time().constant(),
+    mesh,
+    IOobject::READ_IF_PRESENT,
+    IOobject::NO_WRITE,
+    false
 );
 
-const word filmRegionName = filmDict.get<word>("region");
+if (io.typeHeaderOk<IOdictionary>())
+{
+    IOdictionary propDict(io);
 
-fvMesh filmMesh
-(
-    IOobject
+    filmDict = std::move(propDict);
+
+    const word filmRegionName = filmDict.get<word>("region");
+
+    fvMesh filmMesh
     (
-        filmRegionName,
-        runTime.timeName(),
-        runTime,
-        IOobject::MUST_READ
-    )
-);
+        IOobject
+        (
+            filmRegionName,
+            runTime.timeName(),
+            runTime,
+            IOobject::MUST_READ
+        )
+    );
+}
+
+
