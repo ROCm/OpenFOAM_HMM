@@ -304,7 +304,7 @@ void Foam::rigidBodyMeshMotion::solve()
                 forcesDict.add("CofR", vector::zero);
 
                 functionObjects::forces f("forces", db(), forcesDict);
-                f.calcForcesMoment();
+                f.calcForcesMoments();
 
                 fx[bodyID] = ramp*spatialVector(f.momentEff(), f.forceEff());
             }

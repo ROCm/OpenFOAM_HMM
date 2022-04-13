@@ -228,7 +228,7 @@ void Foam::rigidBodyMeshMotionSolver::solve()
             forcesDict.add("CofR", vector::zero);
 
             functionObjects::forces f("forces", db(), forcesDict);
-            f.calcForcesMoment();
+            f.calcForcesMoments();
 
             fx[bodyID] = spatialVector(f.momentEff(), f.forceEff());
         }
