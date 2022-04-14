@@ -30,6 +30,10 @@ Description
     A \c topoSetFaceSource to select faces whose face
     centre enclosed by a given \c searchableSurface.
 
+    The surface has to be closed - if not a warning will be given:
+    "The surface XXX appears to be unclosed ... ignoring" and the surface
+    will not be used.
+
     Operands:
     \table
       Operand   | Type        | Location

@@ -363,7 +363,9 @@ faceSet_doc
     }
 
 
-    //- Select faces with centres within a searchableSurface
+    //- Select faces with centres within a (closed!) searchableSurface
+    //  (if surface is not closed a warning will be given and surface will
+    //   be ignored)
     {
         source  searchableSurfaceToFace;
         surfaceType  triSurfaceMesh;  // The surface type
