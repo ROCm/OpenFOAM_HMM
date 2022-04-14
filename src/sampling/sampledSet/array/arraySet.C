@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018,2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,6 +55,15 @@ void Foam::arraySet::calcSamples
 ) const
 {
     const meshSearch& queryMesh = searchEngine();
+
+    if (cmptMin(pointsDensity_) < 1)
+    {
+        FatalErrorInFunction << "Illegal specification for pointsDensity "
+            << pointsDensity_
+            << ". It specifies the number of points per coordinate axis"
+            << " so should contain positive integers only."
+            << exit(FatalError);
+    }
 
     const scalar dx = spanBox_.x()/(pointsDensity_.x() + 1);
     const scalar dy = spanBox_.y()/(pointsDensity_.y() + 1);

@@ -39,7 +39,18 @@ Description
         spanBox   | The sample box dimensions (vector)     | yes      |
     \endtable
 
-    The dictionary can also contain an embedded coordinateSystem specification.
+    The dictionary should also contain an embedded (Cartesian) coordinateSystem
+    specification, for example,
+
+    \verbatim
+        origin (-0.05 -0.05 -0.05);
+        rotation
+        {
+            type    axes;
+            e1 (1 0 0);
+            e2 (0 1 0);
+        }
+    \endverbatim
 
 SourceFiles
     arraySet.C
