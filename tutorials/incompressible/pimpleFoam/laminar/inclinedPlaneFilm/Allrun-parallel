@@ -5,9 +5,9 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 runApplication blockMesh
 
-runApplication decomposePar
+runApplication makeFaMesh
 
-runParallel makeFaMesh
+runApplication decomposePar
 
 runParallel $(getApplication)
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -150,19 +150,6 @@ tmp<faVectorMatrix> contactAngleForce::correct(areaVectorField& U)
 
             force[facei] +=
                 Ccf_*n*sigma[facei]*(1 - cosTheta)/invDx/rhof[facei];
-        }
-    }
-
-    forAll(sigma.boundaryField(), patchi)
-    {
-        const faPatchField<scalar>& alphaPf = sigma.boundaryField()[patchi];
-        const faPatchField<scalar>& sigmaPf = sigma.boundaryField()[patchi];
-        const labelUList& faces = alphaPf.patch().edgeFaces();
-
-        forAll(sigmaPf, edgei)
-        {
-            label face0 = faces[edgei];
-            force[face0] = vector::zero;
         }
     }
 
