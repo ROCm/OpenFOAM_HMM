@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,69 +23,84 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::vectorField
-
-Description
-    Specialisation of Field\<T\> for vector.
-
-SourceFiles
-    vectorFieldTemplates.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef Foam_vectorField_H
-#define Foam_vectorField_H
+#include "vectorField.H"
 
-#include "scalarField.H"
-#include "vector.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Specializations * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-typedef Field<vector> vectorField;
+// Note: the mag of vector and division is written out to avoid any casting
+// between float and double.
+//
+// This enables specialization for floatVector and doubleVector independent
+// of the definition of 'scalar' or 'vector' - useful for mixed-precision
+// operation.
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+template<>
+void Field<Vector<float>>::normalise()
+{
+    typedef float cmptType;
 
-//- Inplace normalise (float) vector field
-template<> void Field<Vector<float>>::normalise();
+    constexpr float tol = floatScalarROOTVSMALL;
 
-//- Inplace normalise (double) vector field
-template<> void Field<Vector<double>>::normalise();
+    for (Vector<cmptType>& v : *this)
+    {
+        // Foam::mag but using cmptType instead of scalar
+        cmptType s
+        (
+            ::sqrt(magSqr(v.x()) + magSqr(v.y()) + magSqr(v.z()))
+        );
+
+        if (s < tol)
+        {
+            v.x() = 0;
+            v.y() = 0;
+            v.z() = 0;
+        }
+        else
+        {
+            v.x() /= s;
+            v.y() /= s;
+            v.z() /= s;
+        }
+    }
+}
 
 
-//- Zip together vector field from components
-template<class Cmpt>
-void zip
-(
-    Field<Vector<Cmpt>>& result,
-    const UList<Cmpt>& x,
-    const UList<Cmpt>& y,
-    const UList<Cmpt>& z
-);
+template<>
+void Field<Vector<double>>::normalise()
+{
+    typedef double cmptType;
 
-//- Zip together vector field from components
-template<class Cmpt>
-tmp<Field<Vector<Cmpt>>> zip
-(
-    const Field<Cmpt>& x,
-    const Field<Cmpt>& y,
-    const Field<Cmpt>& z
-);
+    constexpr double tol = doubleScalarROOTVSMALL;
 
-//- Unzip vector field into components
-template<class Cmpt>
-void unzip
-(
-    const UList<Vector<Cmpt>>& input,
-    Field<Cmpt>& x,
-    Field<Cmpt>& y,
-    Field<Cmpt>& z
-);
+    for (Vector<cmptType>& v : *this)
+    {
+        // Foam::mag but using cmptType instead of scalar
+        cmptType s
+        (
+            ::sqrt(magSqr(v.x()) + magSqr(v.y()) + magSqr(v.z()))
+        );
+
+        if (s < tol)
+        {
+            v.x() = 0;
+            v.y() = 0;
+            v.z() = 0;
+        }
+        else
+        {
+            v.x() /= s;
+            v.y() /= s;
+            v.z() /= s;
+        }
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -94,13 +108,5 @@ void unzip
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "vectorFieldTemplates.C"
-#endif
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

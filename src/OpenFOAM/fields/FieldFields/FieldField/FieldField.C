@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -221,6 +221,16 @@ void FieldField<Field, Type>::negate()
     forAll(*this, i)
     {
         this->operator[](i).negate();
+    }
+}
+
+
+template<template<class> class Field, class Type>
+void FieldField<Field, Type>::normalise()
+{
+    forAll(*this, i)
+    {
+        this->operator[](i).normalise();
     }
 }
 

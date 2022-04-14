@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef FieldField_H
-#define FieldField_H
+#ifndef Foam_FieldField_H
+#define Foam_FieldField_H
 
 #include "tmp.H"
 #include "PtrList.H"
@@ -48,7 +49,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 
 template<template<class> class Field, class Type>
 class FieldField;
@@ -131,10 +132,13 @@ public:
         );
 
 
-    // Member functions
+    // Member Functions
 
-        //- Negate this field
+        //- Negate this field. See notes in Field
         void negate();
+
+        //- Normalise this field. See notes in Field
+        void normalise();
 
         //- Return a component field of the field
         tmp<FieldField<Field, cmptType>> component(const direction) const;

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,8 +40,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef triad_H
-#define triad_H
+#ifndef Foam_triad_H
+#define Foam_triad_H
 
 #include "vector.H"
 #include "tensor.H"
@@ -70,7 +70,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         inline triad();
 
         //- Construct from components
@@ -112,11 +112,12 @@ public:
         //- Return the vector orthogonal to the two provided
         static inline vector orthogonal(const vector& v1, const vector& v2);
 
-        //- Orthogonalize this triad so that it is ortho-normal
-        void orthogonalize();
+        //- Inplace orthogonalise so that it is ortho-normal
+        void orthogonalise();
 
-        //- Normalize each set axis vector to have a unit magnitude
-        void normalize();
+        //- Normalise each set axis vector to have a unit magnitude
+        //  Uses vector::normalise with handling of small magnitudes.
+        void normalise();
 
         //- Align this triad with the given vector v
         //  by rotating the most aligned axis to be coincident with v
@@ -151,7 +152,7 @@ public:
         inline void operator=(const tensor& t);
 
         //- Add the triad t2 to this triad
-        //  without normalizing or orthogonalizing
+        //  without normalising or orthogonalising
         void operator+=(const triad& t2);
 
 
@@ -159,6 +160,15 @@ public:
 
         friend Istream& operator>>(Istream&, triad&);
         friend Ostream& operator<<(Ostream&, const triad&);
+
+
+    // Housekeeping
+
+        //- Same as orthogonalise
+        void orthogonalize() { this->orthogonalise(); }
+
+        //- Same as normalise
+        void normalize() { this->normalise(); }
 };
 
 

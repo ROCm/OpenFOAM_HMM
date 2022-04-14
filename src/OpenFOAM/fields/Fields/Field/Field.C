@@ -533,6 +533,12 @@ void Foam::Field<Type>::negate()
 }
 
 
+// A no-op except for vector specialization
+template<class Type>
+void Foam::Field<Type>::normalise()
+{}
+
+
 template<class Type>
 Foam::tmp<Foam::Field<typename Foam::Field<Type>::cmptType>>
 Foam::Field<Type>::component

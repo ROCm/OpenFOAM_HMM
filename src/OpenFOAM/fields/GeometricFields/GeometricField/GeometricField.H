@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -527,8 +527,11 @@ public:
 
     // Member Function *this Operators
 
-        //- Negate the field inplace
+        //- Negate the field inplace. See notes in Field
         void negate();
+
+        //- Normalise the field inplace. See notes in Field
+        void normalise();
 
         //- Replace specified field component with content from another field
         void replace

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,8 +41,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Vector_H
-#define Vector_H
+#ifndef Foam_Vector_H
+#define Foam_Vector_H
 
 #include "contiguous.H"
 #include "VectorSpace.H"
@@ -130,15 +130,20 @@ public:
         //- Access to the vector z component
         inline Cmpt& z();
 
+        //- Inplace normalise the vector by its magnitude
+        //  For small magnitudes (less than ROOTVSMALL) set to zero.
+        //  Will not be particularly useful for a vector of labels
+        inline Vector<Cmpt>& normalise(const scalar tol = ROOTVSMALL);
 
-        //- Normalise the vector by its magnitude
-        inline Vector<Cmpt>& normalise();
+        //- Inplace removal of components that are collinear to the given
+        //- unit vector.
+        inline Vector<Cmpt>& removeCollinear(const Vector<Cmpt>& unitVec);
 
 
         //- Return *this (used for point which is a typedef to Vector<scalar>.
         inline const Vector<Cmpt>& centre
         (
-            const Foam::List<Vector<Cmpt>>&
+            const Foam::UList<Vector<Cmpt>>&  /* (unused) */
         ) const;
 };
 

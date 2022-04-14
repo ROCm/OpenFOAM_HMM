@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,8 +42,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef pointPatchField_H
-#define pointPatchField_H
+#ifndef Foam_pointPatchField_H
+#define Foam_pointPatchField_H
 
 #include "pointPatch.H"
 #include "DimensionedField.H"
@@ -54,7 +54,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 
 class objectRegistry;
 class dictionary;
@@ -75,7 +75,7 @@ Ostream& operator<<(Ostream&, const pointPatchField<Type>&);
 template<class Type>
 class pointPatchField
 {
-    // Private data
+    // Private Data
 
         //- Reference to patch
         const pointPatch& patch_;
@@ -471,14 +471,13 @@ public:
         );
 
 
-    // Housekeeping
+    // Other Methods
 
-    // Includes some dummy methods to ensure that various
-    // FieldFieldFunctions will be definable.
-
-        //- Negate the field inplace
-        //  [dummy placeholder for FieldField] (2019-11)
+        //- Negate the field inplace. Dummy placeholder for FieldField
         void negate() {}
+
+        //- Normalise the field inplace. Dummy placeholder for FieldField
+        void normalise() {}
 };
 
 

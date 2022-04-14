@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -91,11 +91,11 @@ inline Cmpt& Foam::Vector2D<Cmpt>::y()
 
 
 template<class Cmpt>
-inline Foam::Vector2D<Cmpt>& Foam::Vector2D<Cmpt>::normalise()
+inline Foam::Vector2D<Cmpt>& Foam::Vector2D<Cmpt>::normalise(const scalar tol)
 {
     const scalar s(Foam::mag(*this));
 
-    if (s < ROOTVSMALL)
+    if (s < tol)
     {
         *this = Zero;
     }
@@ -104,6 +104,15 @@ inline Foam::Vector2D<Cmpt>& Foam::Vector2D<Cmpt>::normalise()
         *this /= s;
     }
 
+    return *this;
+}
+
+
+template<class Cmpt>
+inline Foam::Vector2D<Cmpt>&
+Foam::Vector2D<Cmpt>::removeCollinear(const Vector2D<Cmpt>& unitVec)
+{
+    *this -= (*this & unitVec) * unitVec;
     return *this;
 }
 

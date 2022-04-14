@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,8 +42,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Field_H
-#define Field_H
+#ifndef Foam_Field_H
+#define Foam_Field_H
 
 #include "tmp.H"
 #include "direction.H"
@@ -340,9 +340,15 @@ public:
             const UList<scalar>& weights
         );
 
-        //- Negate this field (negative).
+        //- Inplace negate this field (negative).
         //  Inverts the state for a bool field.
         void negate();
+
+        //- Inplace normalise this field.
+        //- Generally a no-op except for vector fields.
+        //  Vector fields are normalised by their magnitude.
+        //  Small vectors (mag less than ROOTVSMALL) are set to zero.
+        void normalise();
 
         //- Return a component field of the field
         tmp<Field<cmptType>> component(const direction) const;

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1190,6 +1190,14 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::negate()
 {
     primitiveFieldRef().negate();
     boundaryFieldRef().negate();
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+void Foam::GeometricField<Type, PatchField, GeoMesh>::normalise()
+{
+    primitiveFieldRef().normalise();
+    boundaryFieldRef().normalise();
 }
 
 

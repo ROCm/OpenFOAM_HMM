@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,8 +37,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Vector2D_H
-#define Vector2D_H
+#ifndef Foam_Vector2D_H
+#define Foam_Vector2D_H
 
 #include "contiguous.H"
 #include "VectorSpace.H"
@@ -116,8 +116,16 @@ public:
         //- Access to the vector y component
         inline Cmpt& y();
 
+
         //- Normalise the vector by its magnitude
-        inline Vector2D<Cmpt>& normalise();
+        //  For small magnitudes (less than ROOTVSMALL) set to zero.
+        //  Will not be particularly useful for a vector of labels
+        inline Vector2D<Cmpt>& normalise(const scalar tol = ROOTVSMALL);
+
+        //- Inplace removal of components that are collinear to the given
+        //- unit vector.
+        inline Vector2D<Cmpt>& removeCollinear(const Vector2D<Cmpt>& unitVec);
+
 
         //- Perp dot product (dot product with perpendicular vector)
         inline scalar perp(const Vector2D<Cmpt>& b) const;
