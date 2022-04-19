@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2020,2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,13 +53,45 @@ bool Foam::triSurfaceMesh::addFaceToEdge
     EdgeMap<label>& facesPerEdge
 )
 {
-    label& count = facesPerEdge(e, 0);  // lookup or new entry
-    if (count == 2)
+    //label& count = facesPerEdge(e, 0);  // lookup or new entry
+    //if (count == 2)
+    //{
+    //    return false;
+    //}
+    //++count;
+    //return true;
+
+    auto fnd = facesPerEdge.find(e);
+    if (fnd)
     {
-        return false;
+        label& count = fnd.val();
+        const int dir = edge::compare(e, fnd.key());
+        if (dir == 1)
+        {
+            // Incorrect order. Mark with special value
+            count = -1;
+        }
+        else if (dir == 0)
+        {
+            FatalErrorInFunction
+                << "Incorrect matched edge " << fnd.key()
+                << " to edge " << e << exit(FatalError);
+            return false;
+        }
+        else if (count != -1)
+        {
+            if (count == 2)
+            {
+                return false;
+            }
+            ++count;
+        }
+    }
+    else
+    {
+        facesPerEdge.insert(e, 1);
     }
 
-    ++count;
     return true;
 }
 
@@ -75,6 +107,7 @@ bool Foam::triSurfaceMesh::isSurfaceClosed() const
 
     const pointField& pts = triSurface::points();
 
+/*
     // Construct pointFaces. Let's hope surface has compact point
     // numbering ...
     labelListList pointFaces;
@@ -148,7 +181,22 @@ bool Foam::triSurfaceMesh::isSurfaceClosed() const
         // Check for any edges used only once.
         forAllConstIters(facesPerEdge, iter)
         {
-            if (iter.val() != 2)
+            if (iter.val() == -1)
+            {
+                // Special value for incorrect orientation
+                if (debug)
+                {
+                    Pout<< "triSurfaceMesh::isSurfaceClosed :"
+                        << " surface is closed but has inconsistent"
+                        << " face orientation" << endl;
+                }
+                WarningInFunction << "Surface " << searchableSurface::name()
+                    << " is closed but has inconsistent face orientation"
+                    << " at edge " << pts[iter.key().first()]
+                    << pts[iter.key().second()] << endl;
+                return false;
+            }
+            else if (iter.val() != 2)
             {
                 if (debug)
                 {
@@ -157,6 +205,69 @@ bool Foam::triSurfaceMesh::isSurfaceClosed() const
                 }
                 return false;
             }
+        }
+    }
+*/
+
+    const triSurface& ts = *this;
+    EdgeMap<label> facesPerEdge(2*ts.size());
+    for (const auto& f : ts)
+    {
+        forAll(f, fp)
+        {
+            // Count number of occurences of edge between fp and fp+1
+            const bool okFace = addFaceToEdge(f.edge(fp), facesPerEdge);
+
+            if (!okFace)
+            {
+                if (debug)
+                {
+                    Pout<< "triSurfaceMesh::isSurfaceClosed :"
+                        << " surface is non-manifold" << endl;
+                }
+                return false;
+            }
+        }
+    }
+
+
+    // Check for any edges used only once.
+    bool haveWarned = false;
+    forAllConstIters(facesPerEdge, iter)
+    {
+        if (iter.val() != 2 && iter.val() != -1)
+        {
+            if (debug)
+            {
+                Pout<< "triSurfaceMesh::isSurfaceClosed :"
+                    << " surface is open" << endl;
+            }
+            return false;
+        }
+    }
+
+    // Check for any edges with inconsistent normal orientation.
+    forAllConstIters(facesPerEdge, iter)
+    {
+        if (iter.val() == -1)
+        {
+            // Special value for incorrect orientation
+            if (!haveWarned)
+            {
+                WarningInFunction
+                    << "Surface " << searchableSurface::name()
+                    << " is closed but has inconsistent face orientation"
+                    << nl
+                    << "    at edge " << pts[iter.key().first()]
+                    << pts[iter.key().second()]
+                    << nl
+                    << "    This means it probably cannot be used"
+                    << " for inside/outside queries."
+                    << " Suppressing further messages." << endl;
+                haveWarned = true;
+            }
+            //- Return open?
+            //return false;
         }
     }
 
