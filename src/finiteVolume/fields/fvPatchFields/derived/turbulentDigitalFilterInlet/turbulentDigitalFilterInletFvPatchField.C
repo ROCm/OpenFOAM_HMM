@@ -28,6 +28,7 @@ License
 #include "turbulentDigitalFilterInletFvPatchField.H"
 #include "addToRunTimeSelectionTable.H"
 #include "faceAreaWeightAMI.H"
+#include "turbulentDFSEMInletFvPatchVectorField.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -284,6 +285,11 @@ turbulentDigitalFilterInletFvPatchField
             << "supported by the digital filter method."
             << endl;
     }
+
+    const scalar t = this->db().time().timeOutputValue();
+    const Field<TypeR> R(Rptr_->value(t));
+
+    turbulentDFSEMInletFvPatchVectorField::checkStresses(R);
 }
 
 

@@ -811,71 +811,76 @@ turbulentDFSEMInletFvPatchVectorField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::turbulentDFSEMInletFvPatchVectorField::checkStresses
+void Foam::turbulentDFSEMInletFvPatchVectorField::checkStresses
 (
-    const symmTensorField& Rf
+    const symmTensorField& R
 )
 {
-    // Perform checks of the stress tensor based on Cholesky decomposition
-    // constraints
+    constexpr label maxDiffs = 5;
+    label nDiffs = 0;
 
-    forAll(Rf, facei)
+    // (S:Eq. 4a-4c)
+    forAll(R, i)
     {
-        const symmTensor& R = Rf[facei];
+        bool diff = false;
 
-        if (R.xx() <= 0)
+        if (maxDiffs < nDiffs)
         {
-            FatalErrorInFunction
-                << "Reynolds stress " << R << " at face " << facei
-                << " does not obey the constraint: R_xx > 0"
-                << exit(FatalError);
+            Info<< "More than " << maxDiffs << " times"
+                << " Reynolds-stress realizability checks failed."
+                << " Skipping further comparisons." << endl;
+            return;
         }
 
-        const scalar a_xx = sqrt(R.xx());
+        const symmTensor& r = R[i];
 
-        const scalar a_xy = R.xy()/a_xx;
-
-        const scalar a_yy_2 = R.yy() - sqr(a_xy);
-
-        if (a_yy_2 < 0)
+        if (r.xx() < 0)
         {
-            FatalErrorInFunction
-                << "Reynolds stress " << R << " at face " << facei
-                << " leads to an invalid Cholesky decomposition due to the "
-                << "constraint R_yy - sqr(a_xy) >= 0"
-                << exit(FatalError);
-        }
-
-        const scalar a_yy = Foam::sqrt(a_yy_2);
-
-        const scalar a_xz = R.xz()/a_xx;
-
-        const scalar a_yz = (R.yz() - a_xy*a_xz)/a_yy;
-
-        const scalar a_zz_2 = R.zz() - sqr(a_xz) - sqr(a_yz);
-
-        if (a_zz_2 < 0)
-        {
-            FatalErrorInFunction
-                << "Reynolds stress " << R << " at face " << facei
-                << " leads to an invalid Cholesky decomposition due to the "
-                << "constraint R_zz - sqr(a_xz) - sqr(a_yz) >= 0"
-                << exit(FatalError);
-        }
-
-        const scalar a_zz = Foam::sqrt(a_zz_2);
-
-        if (debug)
-        {
-            Pout<< "R: " << R
-                << " a_xx:" << a_xx << " a_xy:" << a_xy << " a_xz:" << a_xy
-                <<                     " a_yy:" << a_yy << " a_yz:" << a_yz
-                <<                                         " a_zz:" << a_zz
+            WarningInFunction
+                << "Reynolds stress " << r << " at index " << i
+                << " does not obey the constraint: Rxx >= 0"
                 << endl;
+            diff = true;
+        }
+
+        if ((r.xx()*r.yy() - sqr(r.xy())) < 0)
+        {
+            WarningInFunction
+                << "Reynolds stress " << r << " at index " << i
+                << " does not obey the constraint: Rxx*Ryy - sqr(Rxy) >= 0"
+                << endl;
+            diff = true;
+        }
+
+        if (det(r) < 0)
+        {
+            WarningInFunction
+                << "Reynolds stress " << r << " at index " << i
+                << " does not obey the constraint: det(R) >= 0"
+                << endl;
+            diff = true;
+        }
+
+        if (diff)
+        {
+            ++nDiffs;
         }
     }
+}
 
-    return true;
+
+void Foam::turbulentDFSEMInletFvPatchVectorField::checkStresses
+(
+    const scalarField& R
+)
+{
+    if (min(R) <= 0)
+    {
+        FatalErrorInFunction
+            << "Reynolds stresses contain at least one "
+            << "nonpositive element. min(R) = " << min(R)
+            << exit(FatalError);
+    }
 }
 
 
