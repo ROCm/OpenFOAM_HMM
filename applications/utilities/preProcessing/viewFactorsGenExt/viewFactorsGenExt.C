@@ -451,6 +451,9 @@ int main(int argc, char *argv[])
     const scalar alpha =
          viewFactorDict.getOrDefault<scalar>("alpha", 0.21);
 
+    const scalar intTol =
+         viewFactorDict.getOrDefault<scalar>("intTol", 1e-2);
+
     // Read agglomeration map
     labelListIOList finalAgglom
     (

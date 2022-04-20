@@ -126,7 +126,7 @@ for (const int proci : Pstream::allProcs())
 
             const Vector3f delta(ray(ray.tMax) - end[rayI]);
 
-            if (delta.Length() < 1e-4)
+            if (delta.Length() < intTol)
             {
                 rayStartFace.append(startIndex[rayI]);
                 rayEndFace.append(endIndex[rayI]);
