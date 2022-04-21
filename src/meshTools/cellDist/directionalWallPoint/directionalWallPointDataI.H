@@ -44,15 +44,15 @@ inline bool directionalWallPointData<Type>::update
 )
 {
     vector d(pt - w2.origin());
-    // Knock out component in direction of n
-    d -= n*(d&n);
+    d.removeCollinear(n);
+
     scalar dist2 = magSqr(d);
 
     if (this->valid(n))
     {
         vector d(pt - this->origin());
-        // Knock out component in direction of n
-        d -= n*(d&n);
+        d.removeCollinear(n);
+
         scalar currentDistSqr(magSqr(d));
 
         scalar diff = currentDistSqr - dist2;

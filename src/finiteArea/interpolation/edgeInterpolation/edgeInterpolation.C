@@ -382,7 +382,7 @@ void Foam::edgeInterpolation::makeDeltaCoeffs() const
             faceCentres[neighbour[edgeI]]
           - faceCentres[owner[edgeI]];
 
-        unitDelta -= edgeNormal*(edgeNormal & unitDelta);
+        unitDelta.removeCollinear(edgeNormal);
         unitDelta.normalise();
 
 
@@ -482,7 +482,7 @@ void Foam::edgeInterpolation::makeCorrectionVectors() const
             faceCentres[neighbour[edgeI]]
           - faceCentres[owner[edgeI]];
 
-        unitDelta -= edgeNormal*(edgeNormal & unitDelta);
+        unitDelta.removeCollinear(edgeNormal);
         unitDelta.normalise();
 
         // Edge normal - area tangent

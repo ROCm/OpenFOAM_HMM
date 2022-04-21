@@ -385,7 +385,7 @@ void Foam::searchableExtrudedCircle::findParametricNearest
     vector radialStart;
     {
         radialStart = start-curvePoints[0];
-        radialStart -= (radialStart&axialVecs[0])*axialVecs[0];
+        radialStart.removeCollinear(axialVecs[0]);
         radialStart.normalise();
 
         qStart = quaternion(radialStart, 0.0);
@@ -396,11 +396,11 @@ void Foam::searchableExtrudedCircle::findParametricNearest
     quaternion qProjectedEnd;
     {
         vector radialEnd(end-curvePoints.last());
-        radialEnd -= (radialEnd&axialVecs.last())*axialVecs.last();
+        radialEnd.removeCollinear(axialVecs.last());
         radialEnd.normalise();
 
         vector projectedEnd = radialEnd;
-        projectedEnd -= (projectedEnd&axialVecs[0])*axialVecs[0];
+        projectedEnd.removeCollinear(axialVecs[0]);
         projectedEnd.normalise();
 
         qProjectedEnd = quaternion(projectedEnd, 0.0);
@@ -413,7 +413,7 @@ void Foam::searchableExtrudedCircle::findParametricNearest
         quaternion q(slerp(qStart, qProjectedEnd, lambdas[i]));
         vector radialDir(q.transform(radialStart));
 
-        radialDir -= (radialDir & axialVecs[i]) * axialVecs.last();
+        radialDir.removeCollinear(axialVecs[i]);
         radialDir.normalise();
 
         info[i] = pointIndexHit(true, curvePoints[i]+radius_*radialDir, 0);
@@ -462,7 +462,7 @@ void Foam::searchableExtrudedCircle::getNormal
             // Subtract axial direction
             const vector axialVec = edges[curvePt.index()].unitVec(points);
 
-            normal[i] -= (normal[i] & axialVec) * axialVec;
+            normal[i].removeCollinear(axialVec);
             normal[i].normalise();
         }
     }

@@ -90,6 +90,12 @@ Description
 
 #ifndef NO_CGAL
 
+// Silence boost bind deprecation warnings (before CGAL-5.2.1)
+#include "CGAL/version.h"
+#if defined(CGAL_VERSION_NR) && (CGAL_VERSION_NR < 1050211000)
+#define BOOST_BIND_GLOBAL_PLACEHOLDERS
+#endif
+
 #include <CGAL/AABB_tree.h>
 #include <CGAL/AABB_traits.h>
 #include <CGAL/AABB_face_graph_triangle_primitive.h>

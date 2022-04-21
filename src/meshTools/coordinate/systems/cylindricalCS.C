@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -235,8 +235,7 @@ Foam::tensor Foam::coordSystem::cylindrical::R(const point& global) const
 
     vector ax2(global - origin_);
 
-    // Remove colinear component
-    ax2 -= ((ax1 & ax2) * ax1);
+    ax2.removeCollinear(ax1);
 
     const scalar magAxis2(mag(ax2));
 
