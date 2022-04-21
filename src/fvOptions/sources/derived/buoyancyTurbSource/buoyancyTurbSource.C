@@ -148,7 +148,7 @@ Foam::fv::buoyancyTurbSource::buoyancyTurbSource
             (
                 "beta",
                 3.3e-3,
-                [&](const scalar x){ return x > SMALL; }
+                [=](const scalar x){ return x > SMALL; }
             )
         )
     ),

@@ -116,7 +116,7 @@ bool Foam::functionObjects::blendingFactor::read(const dictionary& dict)
             (
                 "tolerance",
                 0.001,
-                [&](const scalar tol){ return (tol > 0) && (tol < 1); }
+                [](scalar tol){ return (tol > 0 && tol < 1); }
             );
 
         return true;

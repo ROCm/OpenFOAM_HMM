@@ -572,10 +572,7 @@ Foam::averageNeighbourFvGeometryScheme::averageNeighbourFvGeometryScheme
         (
             "nIters",
             1,
-            [&](const label& nIters)
-            {
-                return nIters >= 0;
-            }
+            [](label val) { return val >= 0; }
         )
     ),
     relax_
@@ -583,10 +580,7 @@ Foam::averageNeighbourFvGeometryScheme::averageNeighbourFvGeometryScheme
         dict.getCheck<scalar>
         (
             "relax",
-            [&](const scalar& relax)
-            {
-                return relax > 0 && relax <= 1;
-            }
+            [](scalar val) { return val > 0 && val <= 1; }
         )
     ),
     minRatio_
@@ -595,10 +589,7 @@ Foam::averageNeighbourFvGeometryScheme::averageNeighbourFvGeometryScheme
         (
             "minRatio",
             0.5,
-            [&](const scalar& minRatio)
-            {
-                return minRatio >= 0 && minRatio <= 1;
-            }
+            [](scalar val) { return val >= 0 && val <= 1; }
         )
     )
 {

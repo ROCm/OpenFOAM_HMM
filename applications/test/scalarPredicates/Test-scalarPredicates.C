@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -184,7 +184,7 @@ int main(int argc, char *argv[])
         testPredicate(values, greaterOp1<scalar>(100));
 
         // Also with dissimilar type
-        testPredicate(values, lessEqOp1<label>(0));
+        testPredicate(values, lessEqualOp1<label>(0));
     }
 
     Info<< "\nEnd\n" << endl;

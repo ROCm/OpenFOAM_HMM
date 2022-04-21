@@ -13,9 +13,9 @@
 #define TOK_EQUAL                           13
 #define TOK_NOT_EQUAL                       14
 #define TOK_LESS                            15
-#define TOK_LESS_EQ                         16
+#define TOK_LESS_EQUAL                      16
 #define TOK_GREATER                         17
-#define TOK_GREATER_EQ                      18
+#define TOK_GREATER_EQUAL                   18
 #define TOK_PLUS                            19
 #define TOK_MINUS                           20
 #define TOK_TIMES                           21

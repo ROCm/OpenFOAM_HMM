@@ -6,7 +6,7 @@ divert(-1)dnl
 #     \\  /    A nd           | www.openfoam.com
 #      \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2019-2021 OpenCFD Ltd.
+#     Copyright (C) 2019-2022 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -26,7 +26,7 @@ define([operator_precedence],
 %left BIT_XOR .                         // 9
 %left BIT_AND .                         // 8
 %left EQUAL NOT_EQUAL .                 // 7
-%left LESS LESS_EQ GREATER GREATER_EQ . // 6
+%left LESS LESS_EQUAL GREATER GREATER_EQUAL . // 6
 %left PLUS MINUS .                      // 4
 %left TIMES DIVIDE PERCENT .            // 3
 %right NEGATE LNOT BIT_NOT .            // 2: right-to-left
@@ -41,7 +41,7 @@ define([standard_tokens],
   QUESTION COLON LOR LAND LNOT
   BIT_OR BIT_XOR BIT_AND BIT_NOT
   EQUAL NOT_EQUAL
-  LESS LESS_EQ GREATER GREATER_EQ
+  LESS LESS_EQUAL GREATER GREATER_EQUAL
   PLUS MINUS TIMES DIVIDE PERCENT
   NEGATE DOT
   BOOL LTRUE LFALSE

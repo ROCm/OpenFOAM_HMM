@@ -171,7 +171,7 @@ bool Foam::linearInterpolationWeights::integrationWeights
     // Currently no fancy logic on cached index like in value
 
     //- Find lower or equal index
-    const label i1 = findLower(samples_, t1, 0, lessEqOp<scalar>());
+    const label i1 = findLower(samples_, t1, 0, lessEqualOp<scalar>());
 
     if (t2 <= t1 + ROOTVSMALL)
     {

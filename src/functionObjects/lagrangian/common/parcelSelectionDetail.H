@@ -98,9 +98,9 @@ Description
     The expressions are a (op scalar) pair that form a unary scalar
     predicate. The \a op is one of the following:
     - lt, less
-    - le, lessEq
+    - le, lessEqual, lessEq
     - gt, greater
-    - ge, greaterEq
+    - ge, greaterEqual, greaterEq
     - eq, equal
     - neq, notEqual
 

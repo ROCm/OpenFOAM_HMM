@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -236,16 +236,19 @@ BoolOp(xor, (!x) != (!y))   // With forced bool context
 BoolOp(equal, x == y)
 BoolOp(notEqual, x != y)
 BoolOp(less, x < y)
-BoolOp(lessEq, x <= y)
+BoolOp(lessEqual, x <= y)
 BoolOp(greater, x > y)
-BoolOp(greaterEq, x >= y)
+BoolOp(greaterEqual, x >= y)
+
+BoolOp(lessEq, x <= y)          // OpenFOAM-v2112 and earlier
+BoolOp(greaterEq, x >= y)       // OpenFOAM-v2112 and earlier
 
 Bool1Op(equal, x == value)
 Bool1Op(notEqual, x != value)
 Bool1Op(less, x < value)
-Bool1Op(lessEq, x <= value)
+Bool1Op(lessEqual, x <= value)
 Bool1Op(greater, x > value)
-Bool1Op(greaterEq, x >= value)
+Bool1Op(greaterEqual, x >= value)
 
 WeightedOp(multiply, (weight*y))
 

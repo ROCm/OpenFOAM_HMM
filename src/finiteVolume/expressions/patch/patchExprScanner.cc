@@ -789,7 +789,7 @@ tr70:
 	goto st14;
 tr71:
 #line 383 "patchExprScanner.rl"
-	{te = p+1;{ EMIT_TOKEN(LESS_EQ); }}
+	{te = p+1;{ EMIT_TOKEN(LESS_EQUAL); }}
 	goto st14;
 tr72:
 #line 384 "patchExprScanner.rl"
@@ -797,7 +797,7 @@ tr72:
 	goto st14;
 tr73:
 #line 385 "patchExprScanner.rl"
-	{te = p+1;{ EMIT_TOKEN(GREATER_EQ); }}
+	{te = p+1;{ EMIT_TOKEN(GREATER_EQUAL); }}
 	goto st14;
 tr74:
 #line 338 "patchExprScanner.rl"

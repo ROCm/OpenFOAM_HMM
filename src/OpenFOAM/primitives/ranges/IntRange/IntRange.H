@@ -104,6 +104,49 @@ public:
         class const_reverse_iterator;
 
 
+    // Public Classes
+
+        //- Unary predicate for greater than 0 (int values)
+        struct gt0
+        {
+            template<class Int>
+            constexpr bool operator()(const Int val) const noexcept
+            {
+                return val > 0;
+            }
+        };
+
+        //- Unary predicate for less than 0 (int values)
+        struct lt0
+        {
+            template<class Int>
+            constexpr bool operator()(const Int val) const noexcept
+            {
+                return val < 0;
+            }
+        };
+
+        //- Unary predicate for greater-equal 0 (int values)
+        struct ge0
+        {
+            template<class Int>
+            constexpr bool operator()(const Int val) const noexcept
+            {
+                return val >= 0;
+            }
+        };
+
+        //- Unary predicate for less-equal 0 (int values)
+        struct le0
+        {
+            template<class Int>
+            constexpr bool operator()(const Int val) const noexcept
+            {
+                return val <= 0;
+            }
+        };
+
+
     // Generated Methods: copy/move construct, copy/move assignment
 
 
