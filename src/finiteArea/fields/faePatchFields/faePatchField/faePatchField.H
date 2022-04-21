@@ -45,8 +45,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef faePatchField_H
-#define faePatchField_H
+#ifndef Foam_faePatchField_H
+#define Foam_faePatchField_H
 
 #include "faPatch.H"
 #include "DimensionedField.H"
@@ -82,7 +82,7 @@ class faePatchField
 :
     public Field<Type>
 {
-    // Private data
+    // Private Data
 
         //- Reference to a patch
         const faPatch& patch_;
@@ -93,7 +93,13 @@ class faePatchField
 
 public:
 
+    //- The internal field type associated with the patch field
+    typedef DimensionedField<Type, edgeMesh> Internal;
+
+    //- The patch type for the patch field
     typedef faPatch Patch;
+
+    //- Type for a \em calculated patch
     typedef calculatedFaePatchField<Type> Calculated;
 
 

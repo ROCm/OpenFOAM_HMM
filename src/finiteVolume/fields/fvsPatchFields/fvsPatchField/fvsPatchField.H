@@ -44,8 +44,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fvsPatchField_H
-#define fvsPatchField_H
+#ifndef Foam_fvsPatchField_H
+#define Foam_fvsPatchField_H
 
 #include "fvPatch.H"
 #include "DimensionedField.H"
@@ -78,7 +78,7 @@ class fvsPatchField
 :
     public Field<Type>
 {
-    // Private data
+    // Private Data
 
         //- Reference to patch
         const fvPatch& patch_;
@@ -89,7 +89,13 @@ class fvsPatchField
 
 public:
 
+    //- The internal field type associated with the patch field
+    typedef DimensionedField<Type, surfaceMesh> Internal;
+
+    //- The patch type for the patch field
     typedef fvPatch Patch;
+
+    //- Type for a \em calculated patch
     typedef calculatedFvsPatchField<Type> Calculated;
 
 

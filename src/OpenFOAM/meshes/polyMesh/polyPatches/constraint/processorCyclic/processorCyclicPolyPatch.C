@@ -358,7 +358,7 @@ bool Foam::processorCyclicPolyPatch::order
 
     // (ab)use the cyclicPolyPatch ordering:
     //  - owner side stores geometry
-    //  - slave side does ordering according to owner side
+    //  - neighbour side does ordering according to owner side
     cycPatch.neighbPatch().initOrder(pBufs, masterPtr());
 
     return cycPatch.order(pBufs, pp, faceMap, rotation);

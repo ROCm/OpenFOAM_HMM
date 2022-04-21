@@ -95,8 +95,16 @@ class pointPatchField
 
 public:
 
+    //- The Field value_type
     typedef Type value_type;
+
+    //- The internal field type associated with the patch field
+    typedef DimensionedField<Type, pointMesh> Internal;
+
+    //- The patch type for the patch field
     typedef pointPatch Patch;
+
+    //- Type for a \em calculated patch
     typedef calculatedPointPatchField<Type> Calculated;
 
 

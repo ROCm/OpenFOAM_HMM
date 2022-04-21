@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,21 +63,21 @@ bool Foam::orientedType::checkType
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::orientedType::orientedType()
+Foam::orientedType::orientedType() noexcept
 :
     oriented_(UNKNOWN)
 {}
 
 
-Foam::orientedType::orientedType(const orientedType& ot)
+Foam::orientedType::orientedType(const orientedType& ot) noexcept
 :
     oriented_(ot.oriented_)
 {}
 
 
-Foam::orientedType::orientedType(const bool oriented)
+Foam::orientedType::orientedType(const bool isOriented) noexcept
 :
-    oriented_(oriented ? ORIENTED : UNORIENTED)
+    oriented_(isOriented ? ORIENTED : UNORIENTED)
 {}
 
 
@@ -103,9 +103,9 @@ Foam::orientedType::orientedOption Foam::orientedType::oriented() const noexcept
 }
 
 
-void Foam::orientedType::setOriented(const bool oriented) noexcept
+void Foam::orientedType::setOriented(const bool on) noexcept
 {
-    oriented_ = oriented ? ORIENTED : UNORIENTED;
+    oriented_ = on ? ORIENTED : UNORIENTED;
 }
 
 
@@ -221,7 +221,7 @@ void Foam::orientedType::operator/=(const scalar s)
 }
 
 
-bool Foam::orientedType::operator()() const
+bool Foam::orientedType::operator()() const noexcept
 {
     return oriented_ == ORIENTED;
 }

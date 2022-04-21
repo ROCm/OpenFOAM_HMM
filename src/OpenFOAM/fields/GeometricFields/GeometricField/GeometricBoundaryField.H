@@ -114,22 +114,22 @@ public:
         );
 
         //- Construct from a BoundaryMesh, reference to the internal field
-        //- and a PtrList<PatchField<Type>>
+        //- and a PtrList<PatchField<Type>> (to be cloned)
         GeometricBoundaryField
         (
             const BoundaryMesh& bmesh,
             const DimensionedField<Type, GeoMesh>& field,
-            const PtrList<PatchField<Type>>&
+            const PtrList<PatchField<Type>>& ptfl
         );
 
-        //- Construct as copy setting the reference to the internal field
+        //- Construct as copy, setting the reference to the internal field
         GeometricBoundaryField
         (
             const DimensionedField<Type, GeoMesh>& field,
             const GeometricBoundaryField<Type, PatchField, GeoMesh>& btf
         );
 
-        //- Construct as copy setting the reference to the internal field
+        //- Construct as copy, setting the reference to the internal field
         //- and resetting type of field for given patch IDs
         GeometricBoundaryField
         (
@@ -170,10 +170,14 @@ public:
         //- Evaluate boundary conditions
         void evaluate();
 
+        //- Evaluate boundary conditions on a subset of coupled patches
+        template<class CoupledPatchType>
+        void evaluateCoupled();
+
         //- Return a list of the patch types
         wordList types() const;
 
-        //- Return boundary field of cell values neighbouring the boundary
+        //- Return boundary field of values neighbouring the boundary
         GeometricBoundaryField boundaryInternalField() const;
 
         //- Return a list of pointers for each patch field with only those

@@ -32,12 +32,12 @@ Description
 
 SourceFiles
     facePointPatch.C
-    newPointPatch.C
+    facePointPatchNew.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef facePointPatch_H
-#define facePointPatch_H
+#ifndef Foam_facePointPatch_H
+#define Foam_facePointPatch_H
 
 #include "pointPatch.H"
 #include "polyPatch.H"
@@ -61,7 +61,7 @@ class facePointPatch
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Reference to the underlying polyPatch
         const polyPatch& polyPatch_;

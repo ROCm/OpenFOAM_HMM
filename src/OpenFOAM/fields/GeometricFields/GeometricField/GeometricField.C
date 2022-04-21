@@ -311,6 +311,88 @@ template<class Type, template<class> class PatchField, class GeoMesh>
 Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
 (
     const IOobject& io,
+    Internal&& diField,
+    const PtrList<PatchField<Type>>& ptfl
+)
+:
+    Internal(io, std::move(diField)),
+    timeIndex_(this->time().timeIndex()),
+    field0Ptr_(nullptr),
+    fieldPrevIterPtr_(nullptr),
+    boundaryField_(this->mesh().boundary(), *this, ptfl)
+{
+    DebugInFunction
+        << "Move construct from components" << nl << this->info() << endl;
+
+    readIfPresent();
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
+(
+    const IOobject& io,
+    const tmp<Internal>& tfield,
+    const PtrList<PatchField<Type>>& ptfl
+)
+:
+    Internal(io, tfield),
+    timeIndex_(this->time().timeIndex()),
+    field0Ptr_(nullptr),
+    fieldPrevIterPtr_(nullptr),
+    boundaryField_(this->mesh().boundary(), *this, ptfl)
+{
+    DebugInFunction
+        << "Construct from tmp internalField" << nl << this->info() << endl;
+
+    readIfPresent();
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
+(
+    const Internal& diField,
+    const PtrList<PatchField<Type>>& ptfl
+)
+:
+    Internal(diField),
+    timeIndex_(this->time().timeIndex()),
+    field0Ptr_(nullptr),
+    fieldPrevIterPtr_(nullptr),
+    boundaryField_(this->mesh().boundary(), *this, ptfl)
+{
+    DebugInFunction
+        << "Copy construct from components" << nl << this->info() << endl;
+
+    readIfPresent();
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
+(
+    Internal&& diField,
+    const PtrList<PatchField<Type>>& ptfl
+)
+:
+    Internal(std::move(diField)),
+    timeIndex_(this->time().timeIndex()),
+    field0Ptr_(nullptr),
+    fieldPrevIterPtr_(nullptr),
+    boundaryField_(this->mesh().boundary(), *this, ptfl)
+{
+    DebugInFunction
+        << "Move construct from components" << nl << this->info() << endl;
+
+    readIfPresent();
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
+(
+    const IOobject& io,
     const Mesh& mesh,
     const dimensionSet& ds,
     const Field<Type>& iField,
@@ -371,6 +453,52 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
 {
     DebugInFunction
         << "Copy construct from components" << nl << this->info() << endl;
+
+    readIfPresent();
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
+(
+    const IOobject& io,
+    const Mesh& mesh,
+    const dimensionSet& ds,
+    Field<Type>&& iField,
+    const PtrList<PatchField<Type>>& ptfl
+)
+:
+    Internal(io, mesh, ds, std::move(iField)),
+    timeIndex_(this->time().timeIndex()),
+    field0Ptr_(nullptr),
+    fieldPrevIterPtr_(nullptr),
+    boundaryField_(mesh.boundary(), *this, ptfl)
+{
+    DebugInFunction
+        << "Move construct from components" << nl << this->info() << endl;
+
+    readIfPresent();
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
+(
+    const IOobject& io,
+    const Mesh& mesh,
+    const dimensionSet& ds,
+    const tmp<Field<Type>>& tfield,
+    const PtrList<PatchField<Type>>& ptfl
+)
+:
+    Internal(io, mesh, ds, tfield),
+    timeIndex_(this->time().timeIndex()),
+    field0Ptr_(nullptr),
+    fieldPrevIterPtr_(nullptr),
+    boundaryField_(mesh.boundary(), *this, ptfl)
+{
+    DebugInFunction
+        << "Construct from tmp internalField" << nl << this->info() << endl;
 
     readIfPresent();
 }

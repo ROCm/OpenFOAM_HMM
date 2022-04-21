@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,8 +44,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fvPatchField_H
-#define fvPatchField_H
+#ifndef Foam_fvPatchField_H
+#define Foam_fvPatchField_H
 
 #include "fvPatch.H"
 #include "DimensionedField.H"
@@ -108,7 +108,13 @@ class fvPatchField
 
 public:
 
+    //- The internal field type associated with the patch field
+    typedef DimensionedField<Type, volMesh> Internal;
+
+    //- The patch type for the patch field
     typedef fvPatch Patch;
+
+    //- Type for a \em calculated patch
     typedef calculatedFvPatchField<Type> Calculated;
 
 

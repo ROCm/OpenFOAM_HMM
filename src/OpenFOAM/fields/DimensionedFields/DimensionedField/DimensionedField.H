@@ -38,8 +38,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef DimensionedField_H
-#define DimensionedField_H
+#ifndef Foam_DimensionedField_H
+#define Foam_DimensionedField_H
 
 #include "regIOobject.H"
 #include "Field.H"
@@ -51,7 +51,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 template<class Type, class GeoMesh> class DimensionedField;
 
 template<class Type, class GeoMesh>
@@ -95,7 +95,7 @@ public:
 
 private:
 
-    // Private data
+    // Private Data
 
         //- Reference to mesh
         const Mesh& mesh_;

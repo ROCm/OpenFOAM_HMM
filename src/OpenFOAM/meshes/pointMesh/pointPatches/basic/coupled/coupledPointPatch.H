@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef coupledPointPatch_H
-#define coupledPointPatch_H
+#ifndef Foam_coupledPointPatch_H
+#define Foam_coupledPointPatch_H
 
 #include "coupledPolyPatch.H"
 
@@ -45,6 +45,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class pointBoundaryMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -53,15 +54,6 @@ class pointBoundaryMesh;
 
 class coupledPointPatch
 {
-    // Private Member Functions
-
-        //- No copy construct
-        coupledPointPatch(const coupledPointPatch&) = delete;
-
-        //- No copy assignment
-        void operator=(const coupledPointPatch&) = delete;
-
-
 protected:
 
     // Protected Member Functions
@@ -85,6 +77,12 @@ protected:
         virtual void updateMesh(PstreamBuffers&) = 0;
 
 
+        //- No copy construct
+        coupledPointPatch(const coupledPointPatch&) = delete;
+
+        //- No copy assignment
+        void operator=(const coupledPointPatch&) = delete;
+
 public:
 
     //- Runtime type information
@@ -94,12 +92,11 @@ public:
     // Constructors
 
         //- Construct from components
-        coupledPointPatch(const pointBoundaryMesh& bm);
+        explicit coupledPointPatch(const pointBoundaryMesh& bm);
 
 
     //- Destructor
-    virtual ~coupledPointPatch();
-
+    virtual ~coupledPointPatch() = default;
 };
 
 

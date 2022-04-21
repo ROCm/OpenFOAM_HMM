@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef orientedType_H
-#define orientedType_H
+#ifndef Foam_orientedType_H
+#define Foam_orientedType_H
 
 #include "Enum.H"
 
@@ -61,7 +61,7 @@ public:
     // Public Data Types
 
         //- Enumeration defining oriented flags
-        enum orientedOption
+        enum orientedOption : unsigned char
         {
             UNKNOWN = 0,
             ORIENTED = 1,
@@ -84,14 +84,14 @@ public:
 
     // Constructors
 
-        //- Default construct as "UNKNOWN"
-        orientedType();
+        //- Default construct as \c UNKNOWN
+        orientedType() noexcept;
 
         //- Copy construct
-        orientedType(const orientedType& ot);
+        orientedType(const orientedType& ot) noexcept;
 
         //- Construct from bool
-        explicit orientedType(const bool oriented);
+        explicit orientedType(const bool isOriented) noexcept;
 
         //- Construct from Istream
         explicit orientedType(Istream& is);
@@ -112,18 +112,24 @@ public:
         //- Return the oriented flag
         orientedOption oriented() const noexcept;
 
-        //- Set the oriented flag
-        void setOriented(const bool oriented = true) noexcept;
+        //- Set the oriented flag: on/off
+        void setOriented(const bool on = true) noexcept;
 
         //- Read the "oriented" state from dictionary
         void read(const dictionary& dict);
 
-        //- Write the "oriented" flag entry (if ORIENTED)
+        //- Write the "oriented" flag entry (if \c ORIENTED)
         //  \return True if entry was written
         bool writeEntry(Ostream& os) const;
 
 
     // Member Operators
+
+        //- True if type is \c ORIENTED
+        explicit operator bool() const noexcept
+        {
+            return (oriented_ == orientedOption::ORIENTED);
+        }
 
         void operator=(const orientedType& ot);
 
@@ -133,7 +139,9 @@ public:
         void operator/=(const orientedType& ot);
         void operator*=(const scalar s);
         void operator/=(const scalar s);
-        bool operator()() const;
+
+        //- True if type is \c ORIENTED. Same as bool operator
+        bool operator()() const noexcept;
 
 
     // IOstream Operators

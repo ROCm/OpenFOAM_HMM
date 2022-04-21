@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,7 +35,7 @@ Description
     patch they need to be identical on both sides with the normals pointing
     in opposite directions.  This is achieved by calling the reverseFace
     function in the decomposition.  It is therefore possible to re-create
-    the ordering of patch points on the slave side by reversing all the
+    the ordering of patch points on the neighbour side by reversing all the
     patch faces of the owner.
 
 SourceFiles
@@ -42,8 +43,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef processorPointPatch_H
-#define processorPointPatch_H
+#ifndef Foam_processorPointPatch_H
+#define Foam_processorPointPatch_H
 
 #include "coupledFacePointPatch.H"
 #include "processorPolyPatch.H"
@@ -61,7 +62,7 @@ class processorPointPatch
 :
     public coupledFacePointPatch
 {
-    // Private data
+    // Private Data
 
         const processorPolyPatch& procPolyPatch_;
 
@@ -112,10 +113,10 @@ public:
 
 
     //- Destructor
-    virtual ~processorPointPatch();
+    virtual ~processorPointPatch() = default;
 
 
-    // Member functions
+    // Member Functions
 
         //- Return message tag to use for communication
         virtual int tag() const
@@ -147,16 +148,16 @@ public:
             return procPolyPatch_.neighbProcNo();
         }
 
-        //- Is this a master patch
-        bool isMaster() const
+        //- Does the processor own the patch ?
+        bool owner() const
         {
-            return myProcNo() < neighbProcNo();
+            return procPolyPatch_.owner();
         }
 
-        //- Is this a slave patch
-        bool isSlave() const
+        //- Is the processor the patch neighbour ?
+        bool neighbour() const
         {
-            return !isMaster();
+            return !owner();
         }
 
         //- Return the underlying processorPolyPatch
@@ -166,8 +167,10 @@ public:
         }
 
         //- Return mesh points in the correct order for the receiving side
-        const labelList& reverseMeshPoints() const;
-
+        const labelList& reverseMeshPoints() const
+        {
+            return reverseMeshPoints_;
+        }
 };
 
 

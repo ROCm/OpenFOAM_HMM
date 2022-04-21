@@ -484,8 +484,8 @@ void Foam::cyclicPolyPatch::getCentresAndAnchors
                         << endl;
                 }
 
-                // Note: getCentresAndAnchors gets called on the slave side
-                // so separationVector is owner-slave points.
+                // Note: getCentresAndAnchors gets called on the neighbour side
+                // so separationVector is owner-neighbour points.
 
                 half0Ctrs -= separationVector_;
                 anchors0 -= separationVector_;

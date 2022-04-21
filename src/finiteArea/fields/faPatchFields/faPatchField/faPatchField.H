@@ -101,7 +101,13 @@ class faPatchField
 
 public:
 
+    //- The internal field type associated with the patch field
+    typedef DimensionedField<Type, areaMesh> Internal;
+
+    //- The patch type for the patch field
     typedef faPatch Patch;
+
+    //- Type for a \em calculated patch
     typedef calculatedFaPatchField<Type> Calculated;
 
 

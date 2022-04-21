@@ -485,7 +485,10 @@ public:
 
     // Public Typedefs
 
+        //- The mesh type
         typedef faMesh Mesh;
+
+        //- The boundary type associated with the mesh
         typedef faBoundaryMesh BoundaryMesh;
 
 
