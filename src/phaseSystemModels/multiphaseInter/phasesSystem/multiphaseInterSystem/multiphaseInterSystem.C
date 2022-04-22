@@ -926,15 +926,25 @@ Foam::tmp<Foam::volScalarField> Foam::multiphaseInterSystem::nuEff() const
 
 Foam::tmp<Foam::volScalarField> Foam::multiphaseInterSystem::kappaEff() const
 {
-    return(this->kappa() + this->Cp()*turb_->mut()/Prt_);
+    const volScalarField kappaEff
+    (
+        this->kappa() + this->Cp()*turb_->mut()/Prt_
+    );
+
+    return tmp<volScalarField>::New(kappaEff);
 }
 
 
 Foam::tmp<Foam::scalarField>
 Foam::multiphaseInterSystem::kappaEff(const label patchi) const
 {
-    tmp<scalarField> tCp(this->Cp()().boundaryField()[patchi]);
-    return this->kappa(patchi) + tCp()*turb_->mut(patchi)/Prt_.value();
+    const scalarField Cp(this->Cp()().boundaryField()[patchi]);
+    const scalarField kappaEffp
+    (
+         this->kappa(patchi) + Cp*turb_->mut(patchi)/Prt_.value()
+    );
+
+    return tmp<scalarField>::New(kappaEffp);
 }
 
 
