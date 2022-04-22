@@ -333,35 +333,6 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField::kappa
     // Get kappa from relevant thermo
     tmp<scalarField> tk(temperatureCoupledBase::kappa(Tp));
 
-    // Optionally modify with explicit resistance
-    if (thicknessLayer_ || thicknessLayers_.size())
-    {
-        scalarField KDelta(tk*patch().deltaCoeffs());
-
-        // Harmonic averaging of kappa*deltaCoeffs
-        {
-            KDelta = 1.0/KDelta;
-            if (thicknessLayer_)
-            {
-                const scalar t = db().time().timeOutputValue();
-                KDelta +=
-                    thicknessLayer_().value(t)
-                   /kappaLayer_().value(t);
-            }
-            if (thicknessLayers_.size())
-            {
-                forAll(thicknessLayers_, iLayer)
-                {
-                    KDelta += thicknessLayers_[iLayer]/kappaLayers_[iLayer];
-                }
-            }
-            KDelta = 1.0/KDelta;
-        }
-
-        // Update kappa from KDelta
-        tk = KDelta/patch().deltaCoeffs();
-    }
-
     return tk;
 }
 
@@ -398,6 +369,7 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
 
     scalarField TcNbr;
     scalarField KDeltaNbr;
+
     if (mpp.sameWorld())
     {
         const polyMesh& nbrMesh = mpp.sampleMesh();
@@ -425,6 +397,33 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
     distribute(this->internalField().name() + "_value", TcNbr);
     distribute(this->internalField().name() + "_weights", KDeltaNbr);
 
+    scalarField KDeltaC(this->size(), GREAT);
+    if (thicknessLayer_ || thicknessLayers_.size())
+    {
+        // Harmonic averaging
+        {
+            KDeltaC = 0.0;
+
+            if (thicknessLayer_)
+            {
+                const scalar t = db().time().timeOutputValue();
+                KDeltaC +=
+                     thicknessLayer_().value(t)
+                    /kappaLayer_().value(t);
+
+            }
+            if (thicknessLayers_.size())
+            {
+                forAll(thicknessLayers_, iLayer)
+                {
+                    KDeltaC += thicknessLayers_[iLayer]/kappaLayers_[iLayer];
+                }
+            }
+            KDeltaC = 1.0/(KDeltaC + SMALL);
+        }
+    }
+
+    scalarField alpha(kappaTp*(1 + KDeltaNbr/KDeltaC)*patch().deltaCoeffs());
 
     scalarField qr(Tp.size(), Zero);
     if (qrName_ != "none")
@@ -537,7 +536,8 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
     }
     else
     {
-        valueFraction() = KDeltaNbr/(KDeltaNbr + KDelta);
+
+        valueFraction() = KDeltaNbr/(KDeltaNbr + alpha);
         refValue() = TcNbr;
         refGrad() = (qr + qrNbr)/kappaTp;
     }
