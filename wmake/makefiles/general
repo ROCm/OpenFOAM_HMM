@@ -6,7 +6,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2019-2020 OpenCFD Ltd.
+#     Copyright (C) 2019-2022 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -146,7 +146,7 @@ silent:
 
 $(EXE)$(EXT_EXE): $(OBJECTS)
 	@$(WM_SCRIPTS)/makeTargetDir $(EXE)
-	$(call QUIET_MESSAGE,ld,$(EXE)$(EXT_EXE))
+	$(call QUIET_MESSAGE,link,$(EXE)$(EXT_EXE))
 	$E $(LINKEXE) $(OBJECTS) -L$(LIB_PLATFORMS) \
 	    $(EXE_LIBS) $(PROJECT_LIBS) $(SYS_LIBS) \
 	    $(LINK_LIBS) $(GLIBS) -o $(EXE)$(EXT_EXE)
@@ -156,7 +156,7 @@ exe: $(SEXE)$(EXT_EXE) | silent
 
 $(SEXE)$(EXT_EXE): $(OBJECTS)
 	@$(WM_SCRIPTS)/makeTargetDir $(SEXE)
-	$(call QUIET_MESSAGE,ld,$(SEXE)$(EXT_EXE))
+	$(call QUIET_MESSAGE,link,$(SEXE)$(EXT_EXE))
 	$E $(LINKEXE) $(OBJECTS) $(EXE_LIBS) \
 	    $(SYS_LIBS) $(LINK_LIBS) $(GLIBS) -o $(SEXE)$(EXT_EXE)
 
@@ -174,13 +174,13 @@ libso: $(LIB)$(EXT_SO) | silent
 ifneq (,$(findstring windows,$(WM_OSTYPE)))
 $(LIB)$(EXT_SO): $(OBJECTS)
 	@$(WM_SCRIPTS)/makeTargetDir $(LIB)
-	$(call QUIET_MESSAGE,ld,$(LIB)$(EXT_SO))
+	$(call QUIET_MESSAGE,link,$(LIB)$(EXT_SO))
 	$E $(LINKLIBSO) $(OBJECTS) -L$(LIB_PLATFORMS) \
 	    $(PROJECT_LIBS) $(LIB_LIBS) $(GLIB_LIBS) -o $(LIB)$(EXT_SO)
 else
 $(LIB)$(EXT_SO): $(OBJECTS)
 	@$(WM_SCRIPTS)/makeTargetDir $(LIB)
-	$(call QUIET_MESSAGE,ld,$(LIB)$(EXT_SO))
+	$(call QUIET_MESSAGE,link,$(LIB)$(EXT_SO))
 	$E $(LINKLIBSO) $(OBJECTS) -L$(LIB_PLATFORMS) \
 	    $(LIB_LIBS) $(GLIB_LIBS) -o $(LIB)$(EXT_SO)
 endif
