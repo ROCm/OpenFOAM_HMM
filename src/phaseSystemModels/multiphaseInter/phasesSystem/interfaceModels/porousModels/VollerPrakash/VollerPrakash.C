@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,6 +67,16 @@ Foam::porousModels::VollerPrakash::S() const
 {
     const volScalarField& solidAlpha =
         mesh_.lookupObject<volScalarField>(solidPhase_);
+
+    if (mesh_.time().outputTime() && debug)
+    {
+        volScalarField Su
+        (
+            "Su" + solidAlpha.name(),
+            Cu_*sqr(solidAlpha)/(pow3(1.0 - solidAlpha) + 1e-3)
+        );
+        Su.write();
+    }
 
     return Cu_*sqr(solidAlpha)/(pow3(1.0 - solidAlpha) + 1e-3);
 }
