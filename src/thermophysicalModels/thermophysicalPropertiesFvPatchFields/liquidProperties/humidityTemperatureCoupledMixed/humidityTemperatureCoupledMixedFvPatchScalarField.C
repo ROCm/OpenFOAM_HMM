@@ -747,7 +747,7 @@ void Foam::humidityTemperatureCoupledMixedFvPatchScalarField::updateCoeffs()
 
     if (debug && fluid_)
     {
-        scalar Qdm = gSum(dm);
+        scalar Qdm = gSum(dm*magSf);
         scalar QMass = gSum(mass_);
         scalar Qt = gSum(myKDelta_*(Tp - Tin)*magSf);
         scalar QtSolid = gSum(KDeltaNbr*(Tp - nbrIntFld)*magSf);
