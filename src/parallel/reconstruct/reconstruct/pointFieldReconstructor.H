@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,12 +32,12 @@ Description
 
 SourceFiles
     pointFieldReconstructor.C
-    pointFieldReconstructorFields.C
+    pointFieldReconstructorTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef pointFieldReconstructor_H
-#define pointFieldReconstructor_H
+#ifndef Foam_pointFieldReconstructor_H
+#define Foam_pointFieldReconstructor_H
 
 #include "pointMesh.H"
 #include "pointFields.H"
@@ -55,7 +55,7 @@ namespace Foam
 
 class pointFieldReconstructor
 {
-    // Private data
+    // Private Data
 
         //- Reconstructed mesh reference
         const pointMesh& mesh_;
@@ -86,6 +86,8 @@ class pointFieldReconstructor
 
 
 public:
+
+    // Public Classes
 
         class pointPatchFieldReconstructor
         :
@@ -128,6 +130,12 @@ public:
         };
 
 
+    // Static Data
+
+        //- Output verbosity when writing
+        static int verbose_;
+
+
     // Constructors
 
         //- Construct from components
@@ -143,41 +151,48 @@ public:
     // Member Functions
 
         //- Return number of fields reconstructed
-        label nReconstructed() const
+        label nReconstructed() const noexcept
         {
             return nReconstructed_;
         }
 
+
         //- Reconstruct field
         template<class Type>
         tmp<GeometricField<Type, pointPatchField, pointMesh>>
-        reconstructField(const IOobject& fieldIoObject);
-
-        //- Reconstruct and write specified fields
-        template<class Type>
-        label reconstructFields
+        reconstructField
         (
-            const IOobjectList& objects,
-            const UList<word>& fieldNames
+            const IOobject& fieldObject,
+            const PtrList<GeometricField<Type, pointPatchField, pointMesh>>&
+        ) const;
+
+
+        //- Read and reconstruct point field
+        template<class Type>
+        tmp<GeometricField<Type, pointPatchField, pointMesh>>
+        reconstructPointField(const IOobject& fieldObject);
+
+        //- Reconstruct and write specified point fields
+        template<class Type>
+        label reconstructPointFields
+        (
+            const UPtrList<const IOobject>& fieldObjects
         );
 
-        //- Reconstruct and write all or selected fields
+        //- Reconstruct and write all or selected point fields
         //  An empty wordRes corresponds to select ALL.
         template<class Type>
-        label reconstructFields
+        label reconstructPointFields
         (
             const IOobjectList& objects,
             const wordRes& selectedFields = wordRes()
         );
 
-        //- Reconstruct and write all or selected fields
-        //  An empty wordHashSet corresponds to select ALL.
-        //  \note this may be removed in the future (2018-11)
-        template<class Type>
-        label reconstructFields
+        //- Reconstruct and write all known field types
+        label reconstructAllFields
         (
             const IOobjectList& objects,
-            const wordHashSet& selectedFields
+            const wordRes& selectedFields = wordRes()
         );
 };
 
@@ -189,7 +204,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "pointFieldReconstructorFields.C"
+    #include "pointFieldReconstructorTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

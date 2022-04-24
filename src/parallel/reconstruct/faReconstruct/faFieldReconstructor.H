@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,12 +36,12 @@ Author
 
 SourceFiles
     faFieldReconstructor.C
-    faFieldReconstructorFields.C
+    faFieldReconstructorTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef faFieldReconstructor_H
-#define faFieldReconstructor_H
+#ifndef Foam_faFieldReconstructor_H
+#define Foam_faFieldReconstructor_H
 
 #include "PtrList.H"
 #include "faMesh.H"
@@ -59,7 +60,7 @@ namespace Foam
 
 class faFieldReconstructor
 {
-    // Private data
+    // Private Data
 
         //- Reconstructed mesh reference
         faMesh& mesh_;
@@ -76,6 +77,9 @@ class faFieldReconstructor
         //- List of processor boundary addressing lists
         const PtrList<labelIOList>& boundaryProcAddressing_;
 
+        //- Number of fields reconstructed
+        label nReconstructed_;
+
 
     // Private Member Functions
 
@@ -87,6 +91,8 @@ class faFieldReconstructor
 
 
 public:
+
+    // Public Classes
 
         class faPatchFieldReconstructor
         :
@@ -111,7 +117,7 @@ public:
                 {}
 
 
-            // Member functions
+            // Member Functions
 
                 virtual label size() const
                 {
@@ -140,13 +146,19 @@ public:
         };
 
 
+    // Static Data
+
+        //- Output verbosity when writing
+        static int verbose_;
+
+
     // Constructors
 
         //- Construct from components
         faFieldReconstructor
         (
-            faMesh& mesh,
-            const PtrList<faMesh>& procMeshes,
+            faMesh& mesh,                       // Target mesh
+            const PtrList<faMesh>& procMeshes,  // Source meshes
             const PtrList<labelIOList>& edgeProcAddressing,
             const PtrList<labelIOList>& faceProcAddressing,
             const PtrList<labelIOList>& boundaryProcAddressing
@@ -155,34 +167,80 @@ public:
 
     // Member Functions
 
+        //- Return number of fields reconstructed
+        label nReconstructed() const noexcept
+        {
+            return nReconstructed_;
+        }
+
         //- Reconstruct area field
         template<class Type>
         tmp<GeometricField<Type, faPatchField, areaMesh>>
-        reconstructFaAreaField
+        reconstructField
         (
-            const IOobject& fieldIoObject
-        );
+            const IOobject& fieldObject,
+            const PtrList<GeometricField<Type, faPatchField, areaMesh>>&
+        ) const;
+
+        //- Read and reconstruct area field
+        template<class Type>
+        tmp<GeometricField<Type, faPatchField, areaMesh>>
+        reconstructAreaField(const IOobject& fieldObject);
+
 
         //- Reconstruct edge field
         template<class Type>
         tmp<GeometricField<Type, faePatchField, edgeMesh>>
-        reconstructFaEdgeField
+        reconstructField
         (
-            const IOobject& fieldIoObject
+            const IOobject& fieldObject,
+            const PtrList<GeometricField<Type, faePatchField, edgeMesh>>&
+        ) const;
+
+        //- Read and reconstruct edge field
+        template<class Type>
+        tmp<GeometricField<Type, faePatchField, edgeMesh>>
+        reconstructEdgeField(const IOobject& fieldObject);
+
+
+        //- Read, reconstruct and write specified area fields
+        template<class Type>
+        label reconstructAreaFields
+        (
+            const UPtrList<const IOobject>& fieldObjects
         );
 
-        //- Reconstruct and write all area fields
+        //- Read, reconstruct and write specified edge fields
         template<class Type>
-        void reconstructFaAreaFields
+        label reconstructEdgeFields
         (
-            const IOobjectList& objects
+            const UPtrList<const IOobject>& fieldObjects
         );
 
-        //- Reconstruct and write all area fields
+
+        //- Read, reconstruct and write all/selected area fields
+        //  An empty wordRes corresponds to select ALL.
         template<class Type>
-        void reconstructFaEdgeFields
+        label reconstructAreaFields
         (
-            const IOobjectList& objects
+            const IOobjectList& objects,
+            const wordRes& selectedFields = wordRes()
+        );
+
+        //- Read, reconstruct and write all/selected edge fields
+        //  An empty wordRes corresponds to select ALL.
+        template<class Type>
+        label reconstructEdgeFields
+        (
+            const IOobjectList& objects,
+            const wordRes& selectedFields = wordRes()
+        );
+
+        //- Reconstruct all supported area/edge field types
+        label reconstructAllFields
+        (
+            const IOobjectList& objects,
+            const wordRes& selectedFields = wordRes()
         );
 };
 
@@ -194,7 +252,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "faFieldReconstructorFields.C"
+#   include "faFieldReconstructorTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -77,7 +77,7 @@ void Foam::faMeshReconstructor::calcAddressing
     for (label& facei : faFaceProcAddr_)
     {
         // Use finiteVolume info, ignoring face flips
-        facei = mag(fvFaceProcAddr[facei] - 1);
+        facei = mag(fvFaceProcAddr[facei])-1;
     }
 
 
@@ -449,7 +449,7 @@ void Foam::faMeshReconstructor::initPatch() const
 
 void Foam::faMeshReconstructor::createMesh()
 {
-    const Time& runTime = procMesh_.mesh().time();
+    const Time& runTime = procMesh_.thisDb().time();
 
     // Time for non-parallel case (w/o functionObjects or libs)
     serialRunTime_ = Time::New(runTime.globalPath().toAbsolute());
@@ -654,7 +654,7 @@ void Foam::faMeshReconstructor::writeAddressing(const word& timeName) const
         "procAddressing",
         timeName,
         faMesh::meshSubDir,
-        procMesh_.mesh(),  // The polyMesh
+        procMesh_.thisDb(),
         IOobject::NO_READ,
         IOobject::NO_WRITE,
         false  // not registered
@@ -662,19 +662,19 @@ void Foam::faMeshReconstructor::writeAddressing(const word& timeName) const
 
     // boundaryProcAddressing
     ioAddr.rename("boundaryProcAddressing");
-    labelIOList(ioAddr, faBoundaryProcAddr_).write();
+    IOListRef<label>(ioAddr, faBoundaryProcAddr_).write();
 
     // faceProcAddressing
     ioAddr.rename("faceProcAddressing");
-    labelIOList(ioAddr, faFaceProcAddr_).write();
+    IOListRef<label>(ioAddr, faFaceProcAddr_).write();
 
     // pointProcAddressing
     ioAddr.rename("pointProcAddressing");
-    labelIOList(ioAddr, faPointProcAddr_).write();
+    IOListRef<label>(ioAddr, faPointProcAddr_).write();
 
     // edgeProcAddressing
     ioAddr.rename("edgeProcAddressing");
-    labelIOList(ioAddr, faEdgeProcAddr_).write();
+    IOListRef<label>(ioAddr, faEdgeProcAddr_).write();
 }
 
 
@@ -699,7 +699,7 @@ void Foam::faMeshReconstructor::writeMesh(const word& timeName) const
         IOobject io(fullMesh.boundary());
 
         io.rename("faceLabels");
-        labelIOList(io, singlePatchFaceLabels_).write();
+        IOListRef<label>(io, singlePatchFaceLabels_).write();
 
         fullMesh.boundary().write();
 

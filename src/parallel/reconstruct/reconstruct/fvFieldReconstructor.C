@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +27,13 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "fvFieldReconstructor.H"
+#include "volFields.H"
+#include "surfaceFields.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+int Foam::fvFieldReconstructor::verbose_ = 1;
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -68,6 +76,40 @@ Foam::fvFieldReconstructor::fvFieldReconstructor
                 << exit(FatalError);
         }
     }
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::label Foam::fvFieldReconstructor::reconstructAllFields
+(
+    const IOobjectList& objects,
+    const wordRes& selected
+)
+{
+    label nTotal = 0;
+
+    do
+    {
+        #undef  doLocalCode
+        #define doLocalCode(Method)                                           \
+        {                                                                     \
+            nTotal += this->Method <scalar> (objects, selected);              \
+            nTotal += this->Method <vector> (objects, selected);              \
+            nTotal += this->Method <sphericalTensor> (objects, selected);     \
+            nTotal += this->Method <symmTensor> (objects, selected);          \
+            nTotal += this->Method <tensor> (objects, selected);              \
+        }
+
+        doLocalCode(reconstructInternalFields);
+        doLocalCode(reconstructVolumeFields);
+        doLocalCode(reconstructSurfaceFields);
+
+        #undef doLocalCode
+    }
+    while (false);
+
+    return nTotal;
 }
 
 

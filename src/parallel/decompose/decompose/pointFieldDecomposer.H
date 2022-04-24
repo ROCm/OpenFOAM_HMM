@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,12 +32,13 @@ Description
 
 SourceFiles
     pointFieldDecomposer.C
-    pointFieldDecomposerFields.C
+    pointFieldDecomposerCache.C
+    pointFieldDecomposerTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef pointFieldDecomposer_H
-#define pointFieldDecomposer_H
+#ifndef Foam_pointFieldDecomposer_H
+#define Foam_pointFieldDecomposer_H
 
 #include "pointMesh.H"
 #include "pointPatchFieldMapperPatchRef.H"
@@ -48,6 +49,9 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
+class IOobjectList;
+
 /*---------------------------------------------------------------------------*\
                     Class pointFieldDecomposer Declaration
 \*---------------------------------------------------------------------------*/
@@ -55,6 +59,8 @@ namespace Foam
 class pointFieldDecomposer
 {
 public:
+
+    // Public Classes
 
         //- Point patch field decomposer class
         class patchFieldDecomposer
@@ -122,13 +128,18 @@ private:
         PtrList<patchFieldDecomposer> patchFieldDecomposerPtrs_;
 
 
+    // Private Member Functions
+
+        //- No copy construct
+        pointFieldDecomposer(const pointFieldDecomposer&) = delete;
+
+        //- No copy assignment
+        void operator=(const pointFieldDecomposer&) = delete;
+
 public:
 
-    //- No copy construct
-    pointFieldDecomposer(const pointFieldDecomposer&) = delete;
-
-    //- No copy assignment
-    void operator=(const pointFieldDecomposer&) = delete;
+    // Public Classes
+    class fieldsCache;
 
 
     // Constructors
@@ -184,6 +195,69 @@ public:
 };
 
 
+/*---------------------------------------------------------------------------*\
+              Class pointFieldDecomposer::fieldsCache Declaration
+\*---------------------------------------------------------------------------*/
+
+class pointFieldDecomposer::fieldsCache
+{
+    // Private Data
+
+        class privateCache;
+
+        //- All field and field-field types for lagrangian
+        std::unique_ptr<privateCache> cache_;
+
+
+    // Private Member Functions
+
+        //- No copy construct
+        fieldsCache(const fieldsCache&) = delete;
+
+        //- No copy assignment
+        void operator=(const fieldsCache&) = delete;
+
+
+public:
+
+    // Constructors
+
+        //- Default construct
+        fieldsCache();
+
+
+    //- Destructor
+    ~fieldsCache();
+
+
+    // Member Functions
+
+        //- No fields
+        bool empty() const;
+
+        //- Total number of fields
+        label size() const;
+
+        //- Clear out
+        void clear();
+
+
+        //- Read all fields given mesh and objects
+        void readAllFields
+        (
+            const pointMesh& mesh,
+            const IOobjectList& objects
+        );
+
+        //- Decompose and write all fields
+        void decomposeAllFields
+        (
+            const pointFieldDecomposer& decomposer,
+            bool report = false
+        ) const;
+};
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
@@ -191,7 +265,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "pointFieldDecomposerFields.C"
+    #include "pointFieldDecomposerTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

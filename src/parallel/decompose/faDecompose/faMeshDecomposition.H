@@ -39,8 +39,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef faMeshDecomposition_H
-#define faMeshDecomposition_H
+#ifndef Foam_faMeshDecomposition_H
+#define Foam_faMeshDecomposition_H
 
 #include "polyMesh.H"
 #include "faMesh.H"

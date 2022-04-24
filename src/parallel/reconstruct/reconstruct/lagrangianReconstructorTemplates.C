@@ -153,30 +153,33 @@ template<class Type>
 Foam::label Foam::lagrangianReconstructor::reconstructFields
 (
     const word& cloudName,
-    const IOobjectList& objects,
-    const UList<word>& fieldNames
+    const UPtrList<const IOobject>& fieldObjects
 )
 {
     typedef IOField<Type> fieldType;
 
     label nFields = 0;
-    for (const word& fieldName : fieldNames)
-    {
-        const IOobject* io = objects.cfindObject<fieldType>(fieldName);
-        if (io)
-        {
-            if (nFields++)
-            {
-                Info<< "    Reconstructing lagrangian "
-                    << fieldType::typeName << "s\n" << nl;
-            }
-            Info<< "        " << fieldName << endl;
 
-            reconstructField<Type>(cloudName, fieldName)().write();
+    for (const IOobject& io : fieldObjects)
+    {
+        if (io.isHeaderClass<fieldType>())
+        {
+            if (verbose_)
+            {
+                if (!nFields)
+                {
+                    Info<< "    Reconstructing lagrangian "
+                        << fieldType::typeName << "s\n" << nl;
+                }
+                Info<< "        " << io.name() << endl;
+            }
+            ++nFields;
+
+            reconstructField<Type>(cloudName, io.name())().write();
         }
     }
 
-    if (nFields) Info<< endl;
+    if (verbose_ && nFields) Info<< endl;
     return nFields;
 }
 
@@ -191,14 +194,15 @@ Foam::label Foam::lagrangianReconstructor::reconstructFields
 {
     typedef IOField<Type> fieldType;
 
-    const wordList fieldNames =
+    return reconstructFields<Type>
     (
-        selectedFields.empty()
-      ? objects.sortedNames<fieldType>()
-      : objects.sortedNames<fieldType>(selectedFields)
+        cloudName,
+        (
+            selectedFields.empty()
+          ? objects.sorted<fieldType>()
+          : objects.sorted<fieldType>(selectedFields)
+        )
     );
-
-    return reconstructFields<Type>(cloudName, objects, fieldNames);
 }
 
 
@@ -211,38 +215,41 @@ Foam::label Foam::lagrangianReconstructor::reconstructFieldFields
 )
 {
     typedef CompactIOField<Field<Type>, Type> fieldType;
+    typedef IOField<Field<Type>> fieldTypeB;
 
-    wordList fieldNames =
-    (
-        selectedFields.empty()
-      ? objects.names<fieldType>()
-      : objects.names<fieldType>(selectedFields)
-    );
+    UPtrList<const IOobject> fieldObjects;
 
-    // Append IOField Field names
-    fieldNames.append
-    (
-        objects.empty()
-      ? objects.names<IOField<Field<Type>>>()
-      : objects.names<IOField<Field<Type>>>(selectedFields)
-    );
-
-    Foam::sort(fieldNames);
-
-    label nFields = 0;
-    for (const word& fieldName : fieldNames)
+    if (selectedFields.empty())
     {
-        if (!nFields++)
-        {
-            Info<< "    Reconstructing lagrangian "
-                << fieldType::typeName << "s\n" << nl;
-        }
-        Info<< "        " << fieldName << endl;
-
-        reconstructFieldField<Type>(cloudName, fieldName)().write();
+        fieldObjects.append(objects.sorted<fieldType>());
+        fieldObjects.append(objects.sorted<fieldTypeB>());
+    }
+    else
+    {
+        fieldObjects.append(objects.sorted<fieldType>(selectedFields));
+        fieldObjects.append(objects.sorted<fieldTypeB>(selectedFields));
     }
 
-    if (nFields) Info<< endl;
+    Foam::sort(fieldObjects, nameOp<IOobject>());
+
+    label nFields = 0;
+    for (const IOobject& io : fieldObjects)
+    {
+        if (verbose_)
+        {
+            if (!nFields)
+            {
+                Info<< "    Reconstructing lagrangian "
+                    << fieldType::typeName << "s\n" << nl;
+            }
+            Info<< "        " << io.name() << endl;
+        }
+        ++nFields;
+
+        reconstructFieldField<Type>(cloudName, io.name())().write();
+    }
+
+    if (verbose_ && nFields) Info<< endl;
     return nFields;
 }
 

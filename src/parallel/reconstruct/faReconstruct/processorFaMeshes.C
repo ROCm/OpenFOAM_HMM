@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,102 +28,50 @@ License
 
 #include "processorFaMeshes.H"
 #include "Time.H"
+#include "OSspecific.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::processorFaMeshes::read()
 {
-    forAll(fvMeshes_, procI)
+    forAll(fvMeshes_, proci)
     {
-        meshes_.set
+        meshes_.set(proci, new faMesh(fvMeshes_[proci]));
+
+        // Read the addressing information
+
+        IOobject ioAddr
         (
-            procI,
-            new faMesh(fvMeshes_[procI])
+            "procAddressing",
+            "constant",  // Placeholder
+            faMesh::meshSubDir,
+            meshes_[proci].thisDb(),
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
         );
 
-        pointProcAddressing_.set
-        (
-            procI,
-            new labelIOList
-            (
-                IOobject
-                (
-                    "pointProcAddressing",
-                    meshes_[procI].time().findInstance
-                    (
-                        meshes_[procI].meshDir(),
-                        "pointProcAddressing"
-                    ),
-                    meshes_[procI].meshSubDir,
-                    fvMeshes_[procI],
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE
-                )
-            )
-        );
+        const auto& runTime = meshes_[proci].thisDb().time();
+        const auto& meshDir = meshes_[proci].meshDir();
 
-        edgeProcAddressing_.set
-        (
-            procI,
-            new labelIOList
-            (
-                IOobject
-                (
-                    "edgeProcAddressing",
-                    meshes_[procI].time().findInstance
-                    (
-                        meshes_[procI].meshDir(),
-                        "edgeProcAddressing"
-                    ),
-                    meshes_[procI].meshSubDir,
-                    fvMeshes_[procI],
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE
-                )
-            )
-        );
+        // pointProcAddressing (faMesh)
+        ioAddr.rename("pointProcAddressing");
+        ioAddr.instance() = runTime.findInstance(meshDir, ioAddr.name());
+        pointProcAddressing_.set(proci, new labelIOList(ioAddr));
 
-        faceProcAddressing_.set
-        (
-            procI,
-            new labelIOList
-            (
-                IOobject
-                (
-                    "faceProcAddressing",
-                    meshes_[procI].time().findInstance
-                    (
-                        meshes_[procI].meshDir(),
-                        "faceProcAddressing"
-                    ),
-                    meshes_[procI].meshSubDir,
-                    fvMeshes_[procI],
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE
-                )
-            )
-        );
+        // edgeProcAddressing (faMesh)
+        ioAddr.rename("edgeProcAddressing");
+        ioAddr.instance() = runTime.findInstance(meshDir, ioAddr.name());
+        edgeProcAddressing_.set(proci, new labelIOList(ioAddr));
 
-        boundaryProcAddressing_.set
-        (
-            procI,
-            new labelIOList
-            (
-                IOobject
-                (
-                    "boundaryProcAddressing",
-                    meshes_[procI].time().findInstance
-                    (
-                        meshes_[procI].meshDir(),
-                        "faceProcAddressing"
-                    ),
-                    meshes_[procI].meshSubDir,
-                    fvMeshes_[procI],
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE
-                )
-            )
-        );
+        // faceProcAddressing (faMesh)
+        ioAddr.rename("faceProcAddressing");
+        ioAddr.instance() = runTime.findInstance(meshDir, ioAddr.name());
+        faceProcAddressing_.set(proci, new labelIOList(ioAddr));
+
+        // boundaryProcAddressing (faMesh)
+        ioAddr.rename("boundaryProcAddressing");
+        ioAddr.instance() = runTime.findInstance(meshDir, ioAddr.name());
+        boundaryProcAddressing_.set(proci, new labelIOList(ioAddr));
     }
 }
 
@@ -131,17 +80,53 @@ void Foam::processorFaMeshes::read()
 
 Foam::processorFaMeshes::processorFaMeshes
 (
-    const UPtrList<fvMesh>& processorFvMeshes
+    const UPtrList<fvMesh>& procFvMeshes
 )
 :
-    fvMeshes_(processorFvMeshes),
-    meshes_(processorFvMeshes.size()),
+    fvMeshes_(procFvMeshes),
+    meshes_(procFvMeshes.size()),
     pointProcAddressing_(meshes_.size()),
     edgeProcAddressing_(meshes_.size()),
     faceProcAddressing_(meshes_.size()),
     boundaryProcAddressing_(meshes_.size())
 {
     read();
+}
+
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+void Foam::processorFaMeshes::removeFiles(const faMesh& mesh)
+{
+    IOobject ioAddr
+    (
+        "procAddressing",
+        mesh.facesInstance(),
+        faMesh::meshSubDir,
+        mesh.thisDb(),
+        IOobject::NO_READ,
+        IOobject::NO_WRITE,
+        false  // not registered
+    );
+
+    // procAddressing
+    rm(ioAddr.objectPath());
+
+    // pointProcAddressing
+    ioAddr.rename("pointProcAddressing");
+    rm(ioAddr.objectPath());
+
+    // edgeProcAddressing
+    ioAddr.rename("edgeProcAddressing");
+    rm(ioAddr.objectPath());
+
+    // faceProcAddressing
+    ioAddr.rename("faceProcAddressing");
+    rm(ioAddr.objectPath());
+
+    // boundaryProcAddressing
+    ioAddr.rename("boundaryProcAddressing");
+    rm(ioAddr.objectPath());
 }
 
 

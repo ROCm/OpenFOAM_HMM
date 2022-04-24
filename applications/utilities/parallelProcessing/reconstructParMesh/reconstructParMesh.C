@@ -522,14 +522,11 @@ void writeMaps
 
     Info<< "    pointProcAddressing" << endl;
     ioAddr.rename("pointProcAddressing");
-    labelIOList(ioAddr, pointProcAddressing).write();
-
+    IOListRef<label>(ioAddr, pointProcAddressing).write();
 
     // From processor face to reconstructed mesh face
-
     Info<< "    faceProcAddressing" << endl;
     ioAddr.rename("faceProcAddressing");
-
     labelIOList faceProcAddr(ioAddr, faceProcAddressing);
 
     // Now add turning index to faceProcAddressing.
@@ -572,17 +569,15 @@ void writeMaps
 
 
     // From processor cell to reconstructed mesh cell
-
     Info<< "    cellProcAddressing" << endl;
     ioAddr.rename("cellProcAddressing");
-    labelIOList(ioAddr, cellProcAddressing).write();
+    IOListRef<label>(ioAddr, cellProcAddressing).write();
 
 
     // From processor patch to reconstructed mesh patch
-
     Info<< "    boundaryProcAddressing" << endl;
     ioAddr.rename("boundaryProcAddressing");
-    labelIOList(ioAddr, boundProcAddressing).write();
+    IOListRef<label>(ioAddr, boundProcAddressing).write();
 
     Info<< endl;
 }

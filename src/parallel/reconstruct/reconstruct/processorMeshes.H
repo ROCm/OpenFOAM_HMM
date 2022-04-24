@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef processorMeshes_H
-#define processorMeshes_H
+#ifndef Foam_processorMeshes_H
+#define Foam_processorMeshes_H
 
 #include "PtrList.H"
 #include "fvMesh.H"
@@ -54,7 +54,7 @@ namespace Foam
 
 class processorMeshes
 {
-    // Private data
+    // Private Data
 
         const word meshName_;
 
@@ -104,40 +104,41 @@ public:
     // Member Functions
 
         //- Update the meshes based on the mesh files saved in time directories
-        fvMesh::readUpdateState readUpdate();
+        polyMesh::readUpdateState readUpdate();
 
         //- Reconstruct point position after motion in parallel
         void reconstructPoints(fvMesh&);
 
-        const PtrList<fvMesh>& meshes() const
+        const PtrList<fvMesh>& meshes() const noexcept
         {
             return meshes_;
         }
 
-        PtrList<fvMesh>& meshes()
+        PtrList<fvMesh>& meshes() noexcept
         {
             return meshes_;
         }
 
-        const PtrList<labelIOList>& pointProcAddressing() const
+        const PtrList<labelIOList>& pointProcAddressing() const noexcept
         {
             return pointProcAddressing_;
         }
 
-        PtrList<labelIOList>& faceProcAddressing()
+        PtrList<labelIOList>& faceProcAddressing() noexcept
         {
             return faceProcAddressing_;
         }
 
-        const PtrList<labelIOList>& cellProcAddressing() const
+        const PtrList<labelIOList>& cellProcAddressing() const noexcept
         {
             return cellProcAddressing_;
         }
 
-        const PtrList<labelIOList>& boundaryProcAddressing() const
+        const PtrList<labelIOList>& boundaryProcAddressing() const noexcept
         {
             return boundaryProcAddressing_;
         }
+
 
         //- Helper: remove all procAddressing files from mesh instance
         static void removeFiles(const polyMesh& mesh);

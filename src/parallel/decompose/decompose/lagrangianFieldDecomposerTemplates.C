@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,95 +32,6 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::lagrangianFieldDecomposer::readFields
-(
-    const label cloudI,
-    const IOobjectList& lagrangianObjects,
-    PtrList<PtrList<IOField<Type>>>& lagrangianFields
-)
-{
-    // Search list of objects for lagrangian fields
-    IOobjectList lagrangianTypeObjects
-    (
-        lagrangianObjects.lookupClass(IOField<Type>::typeName)
-    );
-
-    lagrangianFields.set
-    (
-        cloudI,
-        new PtrList<IOField<Type>>
-        (
-            lagrangianTypeObjects.size()
-        )
-    );
-
-    label lagrangianFieldi = 0;
-    forAllConstIters(lagrangianTypeObjects, iter)
-    {
-        lagrangianFields[cloudI].set
-        (
-            lagrangianFieldi++,
-            new IOField<Type>(*iter())
-        );
-    }
-}
-
-
-template<class Type>
-void Foam::lagrangianFieldDecomposer::readFieldFields
-(
-    const label cloudI,
-    const IOobjectList& lagrangianObjects,
-    PtrList<PtrList<CompactIOField<Field<Type>, Type>>>& lagrangianFields
-)
-{
-    // Search list of objects for lagrangian fields
-    IOobjectList lagrangianTypeObjectsA
-    (
-        lagrangianObjects.lookupClass(IOField<Field<Type>>::typeName)
-    );
-
-    IOobjectList lagrangianTypeObjectsB
-    (
-        lagrangianObjects.lookupClass
-        (
-            CompactIOField<Field<Type>,
-            Type>::typeName
-        )
-    );
-
-    lagrangianFields.set
-    (
-        cloudI,
-        new PtrList<CompactIOField<Field<Type>, Type>>
-        (
-            lagrangianTypeObjectsA.size() + lagrangianTypeObjectsB.size()
-        )
-    );
-
-    label lagrangianFieldi = 0;
-
-    forAllConstIters(lagrangianTypeObjectsA, iter)
-    {
-        lagrangianFields[cloudI].set
-        (
-            lagrangianFieldi++,
-            new CompactIOField<Field<Type>, Type>(*iter())
-        );
-    }
-
-    forAllConstIters(lagrangianTypeObjectsB, iter)
-    {
-        lagrangianFields[cloudI].set
-        (
-            lagrangianFieldi++,
-            new CompactIOField<Field<Type>, Type>(*iter())
-        );
-    }
-}
-
-
-template<class Type>
 Foam::tmp<Foam::IOField<Type>>
 Foam::lagrangianFieldDecomposer::decomposeField
 (
@@ -127,9 +39,6 @@ Foam::lagrangianFieldDecomposer::decomposeField
     const IOField<Type>& field
 ) const
 {
-    // Create and map the internal field values
-    Field<Type> procField(field, particleIndices_);
-
     // Create the field for the processor
     return tmp<IOField<Type>>::New
     (
@@ -143,7 +52,8 @@ Foam::lagrangianFieldDecomposer::decomposeField
             IOobject::NO_WRITE,
             false
         ),
-        procField
+        // Mapping internal field values
+        Field<Type>(field, particleIndices_)
     );
 }
 
@@ -156,9 +66,6 @@ Foam::lagrangianFieldDecomposer::decomposeFieldField
     const CompactIOField<Field<Type>, Type>& field
 ) const
 {
-    // Create and map the internal field values
-    Field<Field<Type>> procField(field, particleIndices_);
-
     // Create the field for the processor
     return tmp<CompactIOField<Field<Type>, Type>>::New
     (
@@ -172,7 +79,8 @@ Foam::lagrangianFieldDecomposer::decomposeFieldField
             IOobject::NO_WRITE,
             false
         ),
-        procField
+        // Mapping internal field values
+        Field<Field<Type>>(field, particleIndices_)
     );
 }
 
@@ -184,13 +92,11 @@ void Foam::lagrangianFieldDecomposer::decomposeFields
     const PtrList<GeoField>& fields
 ) const
 {
-    //if (particleIndices_.size())
+    const bool existsOnProc = (particleIndices_.size() > 0);
+
+    for (const GeoField& fld : fields)
     {
-        bool valid = particleIndices_.size() > 0;
-        forAll(fields, fieldi)
-        {
-            decomposeField(cloudName, fields[fieldi])().write(valid);
-        }
+        decomposeField(cloudName, fld)().write(existsOnProc);
     }
 }
 
@@ -202,13 +108,11 @@ void Foam::lagrangianFieldDecomposer::decomposeFieldFields
     const PtrList<GeoField>& fields
 ) const
 {
-    //if (particleIndices_.size())
+    const bool existsOnProc = (particleIndices_.size() > 0);
+
+    for (const GeoField& fld : fields)
     {
-        bool valid = particleIndices_.size() > 0;
-        forAll(fields, fieldi)
-        {
-            decomposeFieldField(cloudName, fields[fieldi])().write(valid);
-        }
+        decomposeFieldField(cloudName, fld)().write(existsOnProc);
     }
 }
 

@@ -78,6 +78,7 @@ Usage
 #include "fvMesh.H"
 #include "fvMeshTools.H"
 #include "fvMeshDistribute.H"
+#include "fieldsDistributor.H"
 #include "decompositionMethod.H"
 #include "decompositionModel.H"
 #include "timeSelector.H"
@@ -260,7 +261,6 @@ void printMeshData(const polyMesh& mesh)
 {
     // Collect all data on master
 
-    globalIndex globalCells(mesh.nCells());
     labelListList patchNeiProcNo(Pstream::nProcs());
     labelListList patchSize(Pstream::nProcs());
     const labelList& pPatches = mesh.globalData().processorPatches();
@@ -281,74 +281,94 @@ void printMeshData(const polyMesh& mesh)
 
     // Print stats
 
-    globalIndex globalBoundaryFaces(mesh.nBoundaryFaces());
+    const globalIndex globalCells(mesh.nCells());
+    const globalIndex globalBoundaryFaces(mesh.nBoundaryFaces());
 
     label maxProcCells = 0;
+    label maxProcFaces = 0;
     label totProcFaces = 0;
     label maxProcPatches = 0;
     label totProcPatches = 0;
-    label maxProcFaces = 0;
 
-    for (const int procI : Pstream::allProcs())
+    for (const int proci : Pstream::allProcs())
     {
+        const label nLocalCells = globalCells.localSize(proci);
+        const label nBndFaces = globalBoundaryFaces.localSize(proci);
+
         Info<< nl
-            << "Processor " << procI << nl
-            << "    Number of cells = " << globalCells.localSize(procI)
-            << endl;
+            << "Processor " << proci;
 
-        label nProcFaces = 0;
-
-        const labelList& nei = patchNeiProcNo[procI];
-
-        forAll(patchNeiProcNo[procI], i)
+        if (!nLocalCells)
         {
-            Info<< "    Number of faces shared with processor "
-                << patchNeiProcNo[procI][i] << " = " << patchSize[procI][i]
-                << endl;
-
-            nProcFaces += patchSize[procI][i];
+            Info<< " (empty)" << endl;
+            continue;
+        }
+        else
+        {
+            Info<< nl
+                << "    Number of cells = " << nLocalCells << endl;
         }
 
-        Info<< "    Number of processor patches = " << nei.size() << nl
-            << "    Number of processor faces = " << nProcFaces << nl
-            << "    Number of boundary faces = "
-            << globalBoundaryFaces.localSize(procI)-nProcFaces << endl;
+        label nProcFaces = 0;
+        const labelList& nei = patchNeiProcNo[proci];
 
-        maxProcCells = max(maxProcCells, globalCells.localSize(procI));
+        forAll(patchNeiProcNo[proci], i)
+        {
+            Info<< "    Number of faces shared with processor "
+                << patchNeiProcNo[proci][i] << " = "
+                << patchSize[proci][i] << nl;
+
+            nProcFaces += patchSize[proci][i];
+        }
+
+        {
+            Info<< "    Number of processor patches = " << nei.size() << nl
+                << "    Number of processor faces = " << nProcFaces << nl
+                << "    Number of boundary faces = "
+                << nBndFaces-nProcFaces << endl;
+        }
+
+        maxProcCells = max(maxProcCells, nLocalCells);
         totProcFaces += nProcFaces;
         totProcPatches += nei.size();
-        maxProcPatches = max(maxProcPatches, nei.size());
         maxProcFaces = max(maxProcFaces, nProcFaces);
+        maxProcPatches = max(maxProcPatches, nei.size());
     }
 
-    // Stats
-
-    scalar avgProcCells = scalar(globalCells.size())/Pstream::nProcs();
-    scalar avgProcPatches = scalar(totProcPatches)/Pstream::nProcs();
-    scalar avgProcFaces = scalar(totProcFaces)/Pstream::nProcs();
-
-    // In case of all faces on one processor. Just to avoid division by 0.
-    if (totProcPatches == 0)
-    {
-        avgProcPatches = 1;
-    }
-    if (totProcFaces == 0)
-    {
-        avgProcFaces = 1;
-    }
+    // Summary stats
 
     Info<< nl
-        << "Number of processor faces = " << totProcFaces/2 << nl
-        << "Max number of cells = " << maxProcCells
-        << " (" << 100.0*(maxProcCells-avgProcCells)/avgProcCells
-        << "% above average " << avgProcCells << ")" << nl
-        << "Max number of processor patches = " << maxProcPatches
-        << " (" << 100.0*(maxProcPatches-avgProcPatches)/avgProcPatches
-        << "% above average " << avgProcPatches << ")" << nl
-        << "Max number of faces between processors = " << maxProcFaces
-        << " (" << 100.0*(maxProcFaces-avgProcFaces)/avgProcFaces
-        << "% above average " << avgProcFaces << ")" << nl
-        << endl;
+        << "Number of processor faces = " << (totProcFaces/2) << nl
+        << "Max number of cells = " << maxProcCells;
+
+    if (maxProcCells != globalCells.totalSize())
+    {
+        scalar avgValue = scalar(globalCells.totalSize())/Pstream::nProcs();
+
+        Info<< " (" << 100.0*(maxProcCells-avgValue)/avgValue
+            << "% above average " << avgValue << ')';
+    }
+    Info<< nl;
+
+    Info<< "Max number of processor patches = " << maxProcPatches;
+    if (totProcPatches)
+    {
+        scalar avgValue = scalar(totProcPatches)/Pstream::nProcs();
+
+        Info<< " (" << 100.0*(maxProcPatches-avgValue)/avgValue
+            << "% above average " << avgValue << ')';
+    }
+    Info<< nl;
+
+    Info<< "Max number of faces between processors = " << maxProcFaces;
+    if (totProcFaces)
+    {
+        scalar avgValue = scalar(totProcFaces)/Pstream::nProcs();
+
+        Info<< " (" << 100.0*(maxProcFaces-avgValue)/avgValue
+            << "% above average " << avgValue << ')';
+    }
+    Info<< nl << endl;
 }
 
 
@@ -513,180 +533,6 @@ void determineDecomposition
 }
 
 
-// Generic mesh-based field reading
-template<class GeoField>
-void readField
-(
-    const IOobject& io,
-    const fvMesh& mesh,
-    const label i,
-    PtrList<GeoField>& fields
-)
-{
-    fields.set(i, new GeoField(io, mesh));
-}
-
-
-// Definition of readField for GeometricFields only
-template<class Type, template<class> class PatchField, class GeoMesh>
-void readField
-(
-    const IOobject& io,
-    const fvMesh& mesh,
-    const label i,
-    PtrList<GeometricField<Type, PatchField, GeoMesh>>& fields
-)
-{
-    fields.set
-    (
-        i,
-        new GeometricField<Type, PatchField, GeoMesh>(io, mesh, false)
-    );
-}
-
-
-// Read vol or surface fields
-template<class GeoField>
-void readFields
-(
-    const boolList& haveMesh,
-    const fvMesh& mesh,
-    const autoPtr<fvMeshSubset>& subsetterPtr,
-    IOobjectList& allObjects,
-    PtrList<GeoField>& fields
-)
-{
-    // Get my objects of type
-    IOobjectList objects(allObjects.lookupClass(GeoField::typeName));
-
-    // Check that we all have all objects
-    wordList objectNames = objects.sortedNames();
-
-    // Get master names
-    wordList masterNames(objectNames);
-    Pstream::scatter(masterNames);
-
-    if (haveMesh[Pstream::myProcNo()] && objectNames != masterNames)
-    {
-        FatalErrorInFunction
-            << "Objects not synchronised across processors." << nl
-            << "Master has " << flatOutput(masterNames) << nl
-            << "Processor " << Pstream::myProcNo()
-            << " has " << flatOutput(objectNames)
-            << exit(FatalError);
-    }
-
-    fields.setSize(masterNames.size());
-
-    // Have master send all fields to processors that don't have a mesh. The
-    // issue is if a patchField does any parallel operations inside its
-    // construct-from-dictionary. This will not work when going to more
-    // processors (e.g. decompose = 1 -> many) ! We could make a special
-    // exception for decomposePar but nicer would be to have read-communicator
-    // ... For now detect if decomposing & disable parRun
-    if (Pstream::master())
-    {
-        // Work out if we're decomposing - none of the subprocs has a mesh
-        bool decompose = true;
-        for (const int procI : Pstream::subProcs())
-        {
-            if (haveMesh[procI])
-            {
-                decompose = false;
-            }
-        }
-
-        forAll(masterNames, i)
-        {
-            const word& name = masterNames[i];
-            IOobject& io = *objects[name];
-            io.writeOpt(IOobject::AUTO_WRITE);
-
-            // Load field (but not oldTime)
-            const bool oldParRun = Pstream::parRun();
-            if (decompose)
-            {
-                Pstream::parRun(false);
-            }
-            readField(io, mesh, i, fields);
-            if (decompose)
-            {
-                Pstream::parRun(oldParRun);
-            }
-
-            // Create zero sized field and send
-            if (subsetterPtr)
-            {
-                const bool oldParRun = Pstream::parRun(false);
-                tmp<GeoField> tsubfld = subsetterPtr().interpolate(fields[i]);
-                Pstream::parRun(oldParRun);
-
-                // Send to all processors that don't have a mesh
-                for (const int procI : Pstream::subProcs())
-                {
-                    if (!haveMesh[procI])
-                    {
-                        OPstream toProc(Pstream::commsTypes::blocking, procI);
-                        toProc<< tsubfld();
-                    }
-                }
-            }
-        }
-    }
-    else if (!haveMesh[Pstream::myProcNo()])
-    {
-        // Don't have mesh (nor fields). Receive empty field from master.
-
-        forAll(masterNames, i)
-        {
-            const word& name = masterNames[i];
-
-            // Receive field
-            IPstream fromMaster
-            (
-                Pstream::commsTypes::blocking,
-                Pstream::masterNo()
-            );
-            dictionary fieldDict(fromMaster);
-
-            fields.set
-            (
-                i,
-                new GeoField
-                (
-                    IOobject
-                    (
-                        name,
-                        mesh.time().timeName(),
-                        mesh,
-                        IOobject::NO_READ,
-                        IOobject::AUTO_WRITE
-                    ),
-                    mesh,
-                    fieldDict
-                )
-            );
-
-            //// Write it for next time round (since mesh gets written as well)
-            //fields[i].write();
-        }
-    }
-    else
-    {
-        // Have mesh so just try to load
-        forAll(masterNames, i)
-        {
-            const word& name = masterNames[i];
-            IOobject& io = *objects[name];
-            io.writeOpt(IOobject::AUTO_WRITE);
-
-            // Load field (but not oldtime)
-            readField(io, mesh, i, fields);
-        }
-    }
-}
-
-
 // Variant of GeometricField::correctBoundaryConditions that only
 // evaluates selected patch fields
 template<class GeoField, class CoupledPatchType>
@@ -817,7 +663,8 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
             runTime.caseName() = baseRunTime.caseName();
             runTime.processorCase(false);
         }
-        readFields
+
+        fieldsDistributor::readFields
         (
             haveMesh,
             mesh,
@@ -826,7 +673,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
             volScalarFields
         );
 
-        readFields
+        fieldsDistributor::readFields
         (
             haveMesh,
             mesh,
@@ -835,7 +682,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
             volVectorFields
         );
 
-        readFields
+        fieldsDistributor::readFields
         (
             haveMesh,
             mesh,
@@ -844,7 +691,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
             volSphereTensorFields
         );
 
-        readFields
+        fieldsDistributor::readFields
         (
             haveMesh,
             mesh,
@@ -853,7 +700,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
             volSymmTensorFields
         );
 
-        readFields
+        fieldsDistributor::readFields
         (
             haveMesh,
             mesh,
@@ -865,7 +712,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
 
         // surfaceFields
 
-        readFields
+        fieldsDistributor::readFields
         (
             haveMesh,
             mesh,
@@ -874,7 +721,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
             surfScalarFields
         );
 
-        readFields
+        fieldsDistributor::readFields
         (
             haveMesh,
             mesh,
@@ -883,7 +730,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
             surfVectorFields
         );
 
-        readFields
+        fieldsDistributor::readFields
         (
             haveMesh,
             mesh,
@@ -892,7 +739,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
             surfSphereTensorFields
         );
 
-        readFields
+        fieldsDistributor::readFields
         (
             haveMesh,
             mesh,
@@ -901,7 +748,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
             surfSymmTensorFields
         );
 
-        readFields
+        fieldsDistributor::readFields
         (
             haveMesh,
             mesh,
@@ -912,7 +759,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
 
 
         // Dimensioned internal fields
-        readFields
+        fieldsDistributor::readFields
         (
             haveMesh,
             mesh,
@@ -921,7 +768,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
             dimScalarFields
         );
 
-        readFields
+        fieldsDistributor::readFields
         (
             haveMesh,
             mesh,
@@ -930,7 +777,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
             dimVectorFields
         );
 
-        readFields
+        fieldsDistributor::readFields
         (
             haveMesh,
             mesh,
@@ -939,7 +786,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
             dimSphereTensorFields
         );
 
-        readFields
+        fieldsDistributor::readFields
         (
             haveMesh,
             mesh,
@@ -948,7 +795,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
             dimSymmTensorFields
         );
 
-        readFields
+        fieldsDistributor::readFields
         (
             haveMesh,
             mesh,

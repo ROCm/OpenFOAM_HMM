@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,12 +32,12 @@ Description
 
 SourceFiles
     fvFieldReconstructor.C
-    fvFieldReconstructorFields.C
+    fvFieldReconstructorTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fvFieldReconstructor_H
-#define fvFieldReconstructor_H
+#ifndef Foam_fvFieldReconstructor_H
+#define Foam_fvFieldReconstructor_H
 
 #include "PtrList.H"
 #include "fvMesh.H"
@@ -56,7 +56,7 @@ namespace Foam
 
 class fvFieldReconstructor
 {
-    // Private data
+    // Private Data
 
         //- Reconstructed mesh reference
         fvMesh& mesh_;
@@ -87,6 +87,8 @@ class fvFieldReconstructor
 
 
 public:
+
+    // Public Classes
 
         //- Mapper for sizing only - does not do any actual mapping.
         class fvPatchFieldReconstructor
@@ -130,6 +132,12 @@ public:
         };
 
 
+    // Static Data
+
+        //- Output verbosity when writing
+        static int verbose_;
+
+
     // Constructors
 
         //- Construct from components
@@ -146,7 +154,7 @@ public:
     // Member Functions
 
         //- Return number of fields reconstructed
-        label nReconstructed() const
+        label nReconstructed() const noexcept
         {
             return nReconstructed_;
         }
@@ -154,76 +162,74 @@ public:
         //- Reconstruct volume internal field
         template<class Type>
         tmp<DimensionedField<Type, volMesh>>
-        reconstructFvVolumeInternalField
+        reconstructField
         (
-            const IOobject& fieldIoObject,
+            const IOobject& fieldObject,
             const PtrList<DimensionedField<Type, volMesh>>& procFields
         ) const;
 
         //- Read and reconstruct volume internal field
         template<class Type>
         tmp<DimensionedField<Type, volMesh>>
-        reconstructFvVolumeInternalField(const IOobject& fieldIoObject) const;
+        reconstructInternalField(const IOobject& fieldObject) const;
 
 
         //- Reconstruct volume field
         template<class Type>
         tmp<GeometricField<Type, fvPatchField, volMesh>>
-        reconstructFvVolumeField
+        reconstructField
         (
-            const IOobject& fieldIoObject,
+            const IOobject& fieldObject,
             const PtrList<GeometricField<Type, fvPatchField, volMesh>>&
         ) const;
 
         //- Read and reconstruct volume field
         template<class Type>
         tmp<GeometricField<Type, fvPatchField, volMesh>>
-        reconstructFvVolumeField(const IOobject& fieldIoObject) const;
+        reconstructVolumeField(const IOobject& fieldObject) const;
 
 
         //- Reconstruct surface field
         template<class Type>
         tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
-        reconstructFvSurfaceField
+        reconstructField
         (
-            const IOobject& fieldIoObject,
+            const IOobject& fieldObject,
             const PtrList<GeometricField<Type, fvsPatchField, surfaceMesh>>&
         ) const;
 
         //- Read and reconstruct surface field
         template<class Type>
         tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
-        reconstructFvSurfaceField(const IOobject& fieldIoObject) const;
+        reconstructSurfaceField(const IOobject& fieldObject) const;
+
 
         //- Read, reconstruct and write specified volume internal fields
         template<class Type>
-        label reconstructFvVolumeInternalFields
+        label reconstructInternalFields
         (
-            const IOobjectList& objects,
-            const UList<word>& fieldNames
+            const UPtrList<const IOobject>& fieldObjects
         );
 
         //- Read, reconstruct and write specified volume fields
         template<class Type>
-        label reconstructFvVolumeFields
+        label reconstructVolumeFields
         (
-            const IOobjectList& objects,
-            const UList<word>& fieldNames
+            const UPtrList<const IOobject>& fieldObjects
         );
 
         //- Read, reconstruct and write specified surface fields
         template<class Type>
-        label reconstructFvSurfaceFields
+        label reconstructSurfaceFields
         (
-            const IOobjectList& objects,
-            const UList<word>& fieldNames
+            const UPtrList<const IOobject>& fieldObjects
         );
 
 
         //- Read, reconstruct and write all/selected volume internal fields
         //  An empty wordRes corresponds to select ALL.
         template<class Type>
-        label reconstructFvVolumeInternalFields
+        label reconstructInternalFields
         (
             const IOobjectList& objects,
             const wordRes& selectedFields = wordRes()
@@ -232,7 +238,7 @@ public:
         //- Read, reconstruct and write all/selected volume fields
         //  An empty wordRes corresponds to select ALL.
         template<class Type>
-        label reconstructFvVolumeFields
+        label reconstructVolumeFields
         (
             const IOobjectList& objects,
             const wordRes& selectedFields = wordRes()
@@ -241,40 +247,17 @@ public:
         //- Read, reconstruct and write all/selected surface fields
         //  An empty wordRes corresponds to select ALL.
         template<class Type>
-        label reconstructFvSurfaceFields
+        label reconstructSurfaceFields
         (
             const IOobjectList& objects,
             const wordRes& selectedFields = wordRes()
         );
 
-        //- Read, reconstruct and write all/selected volume internal fields
-        //  An empty wordHashSet corresponds to select ALL.
-        //  \note this may be removed in the future (2018-11)
-        template<class Type>
-        label reconstructFvVolumeInternalFields
+        //- Reconstruct all known field types
+        label reconstructAllFields
         (
             const IOobjectList& objects,
-            const wordHashSet& selectedFields
-        );
-
-        //- Read, reconstruct and write all/selected volume fields
-        //  An empty wordHashSet corresponds to select ALL.
-        //  \note this may be removed in the future (2018-11)
-        template<class Type>
-        label reconstructFvVolumeFields
-        (
-            const IOobjectList& objects,
-            const wordHashSet& selectedFields
-        );
-
-        //- Read, reconstruct and write all/selected surface fields
-        //  An empty wordHashSet corresponds to select ALL.
-        //  \note this may be removed in the future (2018-11)
-        template<class Type>
-        label reconstructFvSurfaceFields
-        (
-            const IOobjectList& objects,
-            const wordHashSet& selectedFields
+            const wordRes& selectedFields = wordRes()
         );
 };
 
@@ -286,7 +269,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "fvFieldReconstructorFields.C"
+    #include "fvFieldReconstructorTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

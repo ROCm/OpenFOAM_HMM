@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,6 +37,7 @@ License
 #include "DynamicList.H"
 #include "fvFieldDecomposer.H"
 #include "IOobjectList.H"
+#include "PtrDynList.H"
 #include "cellSet.H"
 #include "faceSet.H"
 #include "pointSet.H"
@@ -178,32 +179,32 @@ bool Foam::domainDecomposition::writeDecomposition(const bool decomposeSets)
     }
 
 
-    PtrList<const cellSet> cellSets;
-    PtrList<const faceSet> faceSets;
-    PtrList<const pointSet> pointSets;
+    PtrDynList<const cellSet> cellSets;
+    PtrDynList<const faceSet> faceSets;
+    PtrDynList<const pointSet> pointSets;
     if (decomposeSets)
     {
         // Read sets
         IOobjectList objects(*this, facesInstance(), "polyMesh/sets");
         {
-            IOobjectList cSets(objects.lookupClass(cellSet::typeName));
-            forAllConstIters(cSets, iter)
+            IOobjectList sets(objects.lookupClass<cellSet>());
+            forAllConstIters(sets, iter)
             {
-                cellSets.append(new cellSet(*iter()));
+                cellSets.append(new cellSet(*(iter.val())));
             }
         }
         {
-            IOobjectList fSets(objects.lookupClass(faceSet::typeName));
-            forAllConstIters(fSets, iter)
+            IOobjectList sets(objects.lookupClass<faceSet>());
+            forAllConstIters(sets, iter)
             {
-                faceSets.append(new faceSet(*iter()));
+                faceSets.append(new faceSet(*(iter.val())));
             }
         }
         {
-            IOobjectList pSets(objects.lookupClass(pointSet::typeName));
-            forAllConstIters(pSets, iter)
+            IOobjectList sets(objects.lookupClass<pointSet>());
+            forAllConstIters(sets, iter)
             {
-                pointSets.append(new pointSet(*iter()));
+                pointSets.append(new pointSet(*(iter.val())));
             }
         }
     }
@@ -225,13 +226,11 @@ bool Foam::domainDecomposition::writeDecomposition(const bool decomposeSets)
     );
 
 
-
     label maxProcCells = 0;
+    label maxProcFaces = 0;
     label totProcFaces = 0;
     label maxProcPatches = 0;
     label totProcPatches = 0;
-    label maxProcFaces = 0;
-
 
     // Write out the meshes
     for (label proci = 0; proci < nProcs_; proci++)
@@ -265,7 +264,6 @@ bool Foam::domainDecomposition::writeDecomposition(const bool decomposeSets)
         {
             // Mark the original face as used
             // Remember to decrement the index by one (turning index)
-            //
             label curF = mag(curFaceLabels[facei]) - 1;
 
             faceLookup[curF] = facei;
@@ -855,31 +853,35 @@ bool Foam::domainDecomposition::writeDecomposition(const bool decomposeSets)
 
         Info<< "Number of cells = " << procMesh.nCells() << nl;
 
+        if (procMesh.nCells())
+        {
+            Info<< "    Number of points = " << procMesh.nPoints() << nl;
+        }
+
         maxProcCells = max(maxProcCells, procMesh.nCells());
 
         label nBoundaryFaces = 0;
         label nProcPatches = 0;
         label nProcFaces = 0;
 
-        forAll(procMesh.boundaryMesh(), patchi)
+        for (const polyPatch& pp : procMesh.boundaryMesh())
         {
-            if (isA<processorPolyPatch>(procMesh.boundaryMesh()[patchi]))
+            const auto* cpp = isA<processorPolyPatch>(pp);
+
+            if (cpp)
             {
-                const processorPolyPatch& ppp =
-                refCast<const processorPolyPatch>
-                (
-                    procMesh.boundaryMesh()[patchi]
-                );
+                const auto& procPatch = *cpp;
 
                 Info<< "    Number of faces shared with processor "
-                    << ppp.neighbProcNo() << " = " << ppp.size() << endl;
+                    << procPatch.neighbProcNo() << " = "
+                    << procPatch.size() << nl;
 
-                nProcPatches++;
-                nProcFaces += ppp.size();
+                nProcFaces += procPatch.size();
+                ++nProcPatches;
             }
             else
             {
-                nBoundaryFaces += procMesh.boundaryMesh()[patchi].size();
+                nBoundaryFaces += pp.size();
             }
         }
 
@@ -892,103 +894,79 @@ bool Foam::domainDecomposition::writeDecomposition(const bool decomposeSets)
 
         totProcFaces += nProcFaces;
         totProcPatches += nProcPatches;
-        maxProcPatches = max(maxProcPatches, nProcPatches);
         maxProcFaces = max(maxProcFaces, nProcFaces);
+        maxProcPatches = max(maxProcPatches, nProcPatches);
 
-        // create and write the addressing information
-        labelIOList pointProcAddressing
-        (
-            IOobject
-            (
-                "pointProcAddressing",
-                procMesh.facesInstance(),
-                procMesh.meshSubDir,
-                procMesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            procPointAddressing_[proci]
-        );
-        pointProcAddressing.write();
+        // Write the addressing information
 
-        labelIOList faceProcAddressing
+        IOobject ioAddr
         (
-            IOobject
-            (
-                "faceProcAddressing",
-                procMesh.facesInstance(),
-                procMesh.meshSubDir,
-                procMesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            procFaceAddressing_[proci]
+            "procAddressing",
+            procMesh.facesInstance(),
+            polyMesh::meshSubDir,
+            procMesh.thisDb(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false  // not registered
         );
-        faceProcAddressing.write();
 
-        labelIOList cellProcAddressing
-        (
-            IOobject
-            (
-                "cellProcAddressing",
-                procMesh.facesInstance(),
-                procMesh.meshSubDir,
-                procMesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            procCellAddressing_[proci]
-        );
-        cellProcAddressing.write();
+        // pointProcAddressing
+        ioAddr.rename("pointProcAddressing");
+        IOListRef<label>(ioAddr, procPointAddressing_[proci]).write();
+
+        // faceProcAddressing
+        ioAddr.rename("faceProcAddressing");
+        IOListRef<label>(ioAddr, procFaceAddressing_[proci]).write();
+
+        // cellProcAddressing
+        ioAddr.rename("cellProcAddressing");
+        IOListRef<label>(ioAddr, procCellAddressing_[proci]).write();
 
         // Write patch map for backwards compatibility.
         // (= identity map for original patches, -1 for processor patches)
         label nMeshPatches = curPatchSizes.size();
-        labelList procBoundaryAddressing(identity(nMeshPatches));
-        procBoundaryAddressing.setSize(nMeshPatches+nProcPatches, -1);
+        labelList procBoundaryAddr(identity(nMeshPatches));
+        procBoundaryAddr.resize(nMeshPatches+nProcPatches, -1);
 
-        labelIOList boundaryProcAddressing
-        (
-            IOobject
-            (
-                "boundaryProcAddressing",
-                procMesh.facesInstance(),
-                procMesh.meshSubDir,
-                procMesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            procBoundaryAddressing
-        );
-        boundaryProcAddressing.write();
+        // boundaryProcAddressing
+        ioAddr.rename("boundaryProcAddressing");
+        IOListRef<label>(ioAddr, procBoundaryAddr).write();
     }
 
-    scalar avgProcCells = scalar(nCells())/nProcs_;
-    scalar avgProcPatches = scalar(totProcPatches)/nProcs_;
-    scalar avgProcFaces = scalar(totProcFaces)/nProcs_;
 
-    // In case of all faces on one processor. Just to avoid division by 0.
-    if (totProcPatches == 0)
-    {
-        avgProcPatches = 1;
-    }
-    if (totProcFaces == 0)
-    {
-        avgProcFaces = 1;
-    }
-
+    // Summary stats
     Info<< nl
-        << "Number of processor faces = " << totProcFaces/2 << nl
-        << "Max number of cells = " << maxProcCells
-        << " (" << 100.0*(maxProcCells-avgProcCells)/avgProcCells
-        << "% above average " << avgProcCells << ")" << nl
-        << "Max number of processor patches = " << maxProcPatches
-        << " (" << 100.0*(maxProcPatches-avgProcPatches)/avgProcPatches
-        << "% above average " << avgProcPatches << ")" << nl
-        << "Max number of faces between processors = " << maxProcFaces
-        << " (" << 100.0*(maxProcFaces-avgProcFaces)/avgProcFaces
-        << "% above average " << avgProcFaces << ")" << nl
-        << endl;
+        << "Number of processor faces = " << (totProcFaces/2) << nl
+        << "Max number of cells = " << maxProcCells;
+
+    if (maxProcCells != nCells())
+    {
+        scalar avgValue = scalar(nCells())/nProcs_;
+
+        Info<< " (" << 100.0*(maxProcCells-avgValue)/avgValue
+            << "% above average " << avgValue << ')';
+    }
+    Info<< nl;
+
+    Info<< "Max number of processor patches = " << maxProcPatches;
+    if (totProcPatches)
+    {
+        scalar avgValue = scalar(totProcPatches)/nProcs_;
+
+        Info<< " (" << 100.0*(maxProcPatches-avgValue)/avgValue
+            << "% above average " << avgValue << ')';
+    }
+    Info<< nl;
+
+    Info<< "Max number of faces between processors = " << maxProcFaces;
+    if (totProcFaces)
+    {
+        scalar avgValue = scalar(totProcFaces)/nProcs_;
+
+        Info<< " (" << 100.0*(maxProcFaces-avgValue)/avgValue
+            << "% above average " << avgValue << ')';
+    }
+    Info<< nl << endl;
 
     return true;
 }

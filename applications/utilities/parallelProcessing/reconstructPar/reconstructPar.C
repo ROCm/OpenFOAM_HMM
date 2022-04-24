@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -334,11 +334,6 @@ int main(int argc, char *argv[])
         // Read all meshes and addressing to reconstructed mesh
         processorMeshes procMeshes(databases, regionName);
 
-
-        // Check face addressing for meshes that have been decomposed
-        // with a very old foam version
-        #include "checkFaceAddressingComp.H"
-
         // Loop over all times
         forAll(timeDirs, timei)
         {
@@ -362,11 +357,11 @@ int main(int argc, char *argv[])
             }
 
             // Check if any new meshes need to be read.
-            fvMesh::readUpdateState meshStat = mesh.readUpdate();
+            polyMesh::readUpdateState meshStat = mesh.readUpdate();
 
-            fvMesh::readUpdateState procStat = procMeshes.readUpdate();
+            polyMesh::readUpdateState procStat = procMeshes.readUpdate();
 
-            if (procStat == fvMesh::POINTS_MOVED)
+            if (procStat == polyMesh::POINTS_MOVED)
             {
                 // Reconstruct the points for moving mesh cases and write
                 // them out
@@ -407,83 +402,7 @@ int main(int argc, char *argv[])
                     procMeshes.boundaryProcAddressing()
                 );
 
-                reconstructor.reconstructFvVolumeInternalFields<scalar>
-                (
-                    objects,
-                    selectedFields
-                );
-                reconstructor.reconstructFvVolumeInternalFields<vector>
-                (
-                    objects,
-                    selectedFields
-                );
-                reconstructor.reconstructFvVolumeInternalFields<sphericalTensor>
-                (
-                    objects,
-                    selectedFields
-                );
-                reconstructor.reconstructFvVolumeInternalFields<symmTensor>
-                (
-                    objects,
-                    selectedFields
-                );
-                reconstructor.reconstructFvVolumeInternalFields<tensor>
-                (
-                    objects,
-                    selectedFields
-                );
-
-                reconstructor.reconstructFvVolumeFields<scalar>
-                (
-                    objects,
-                    selectedFields
-                );
-                reconstructor.reconstructFvVolumeFields<vector>
-                (
-                    objects,
-                    selectedFields
-                );
-                reconstructor.reconstructFvVolumeFields<sphericalTensor>
-                (
-                    objects,
-                    selectedFields
-                );
-                reconstructor.reconstructFvVolumeFields<symmTensor>
-                (
-                    objects,
-                    selectedFields
-                );
-                reconstructor.reconstructFvVolumeFields<tensor>
-                (
-                    objects,
-                    selectedFields
-                );
-
-                reconstructor.reconstructFvSurfaceFields<scalar>
-                (
-                    objects,
-                    selectedFields
-                );
-                reconstructor.reconstructFvSurfaceFields<vector>
-                (
-                    objects,
-                    selectedFields
-                );
-                reconstructor.reconstructFvSurfaceFields<sphericalTensor>
-                (
-                    objects,
-                    selectedFields
-                );
-                reconstructor.reconstructFvSurfaceFields<symmTensor>
-                (
-                    objects,
-                    selectedFields
-                );
-                reconstructor.reconstructFvSurfaceFields<tensor>
-                (
-                    objects,
-                    selectedFields
-                );
+                reconstructor.reconstructAllFields(objects, selectedFields);
 
                 if (reconstructor.nReconstructed() == 0)
                 {
@@ -515,31 +434,7 @@ int main(int argc, char *argv[])
                     procMeshes.boundaryProcAddressing()
                 );
 
-                reconstructor.reconstructFields<scalar>
-                (
-                    objects,
-                    selectedFields
-                );
-                reconstructor.reconstructFields<vector>
-                (
-                    objects,
-                    selectedFields
-                );
-                reconstructor.reconstructFields<sphericalTensor>
-                (
-                    objects,
-                    selectedFields
-                );
-                reconstructor.reconstructFields<symmTensor>
-                (
-                    objects,
-                    selectedFields
-                );
-                reconstructor.reconstructFields<tensor>
-                (
-                    objects,
-                    selectedFields
-                );
+                reconstructor.reconstructAllFields(objects, selectedFields);
 
                 if (reconstructor.nReconstructed() == 0)
                 {
@@ -631,78 +526,7 @@ int main(int argc, char *argv[])
 
                         reconstructor.reconstructPositions(cloudName);
 
-                        reconstructor.reconstructFields<label>
-                        (
-                            cloudName,
-                            cloudObjs,
-                            selectedLagrangianFields
-                        );
-                        reconstructor.reconstructFieldFields<label>
-                        (
-                            cloudName,
-                            cloudObjs,
-                            selectedLagrangianFields
-                        );
-
-                        reconstructor.reconstructFields<scalar>
-                        (
-                            cloudName,
-                            cloudObjs,
-                            selectedLagrangianFields
-                        );
-                        reconstructor.reconstructFieldFields<scalar>
-                        (
-                            cloudName,
-                            cloudObjs,
-                            selectedLagrangianFields
-                        );
-
-                        reconstructor.reconstructFields<vector>
-                        (
-                            cloudName,
-                            cloudObjs,
-                            selectedLagrangianFields
-                        );
-                        reconstructor.reconstructFieldFields<vector>
-                        (
-                            cloudName,
-                            cloudObjs,
-                            selectedLagrangianFields
-                        );
-
-                        reconstructor.reconstructFields<sphericalTensor>
-                        (
-                            cloudName,
-                            cloudObjs,
-                            selectedLagrangianFields
-                        );
-                        reconstructor.reconstructFieldFields<sphericalTensor>
-                        (
-                            cloudName,
-                            cloudObjs,
-                            selectedLagrangianFields
-                        );
-
-                        reconstructor.reconstructFields<symmTensor>
-                        (
-                            cloudName,
-                            cloudObjs,
-                            selectedLagrangianFields
-                        );
-                        reconstructor.reconstructFieldFields<symmTensor>
-                        (
-                            cloudName,
-                            cloudObjs,
-                            selectedLagrangianFields
-                        );
-
-                        reconstructor.reconstructFields<tensor>
-                        (
-                            cloudName,
-                            cloudObjs,
-                            selectedLagrangianFields
-                        );
-                        reconstructor.reconstructFieldFields<tensor>
+                        reconstructor.reconstructAllFields
                         (
                             cloudName,
                             cloudObjs,
@@ -724,12 +548,12 @@ int main(int argc, char *argv[])
             }
             else if
             (
-                objects.lookupClass(areaScalarField::typeName).size()
-             || objects.lookupClass(areaVectorField::typeName).size()
-             || objects.lookupClass(areaSphericalTensorField::typeName).size()
-             || objects.lookupClass(areaSymmTensorField::typeName).size()
-             || objects.lookupClass(areaTensorField::typeName).size()
-             || objects.lookupClass(edgeScalarField::typeName).size()
+                objects.count<areaScalarField>()
+             || objects.count<areaVectorField>()
+             || objects.count<areaSphericalTensorField>()
+             || objects.count<areaSymmTensorField>()
+             || objects.count<areaTensorField>()
+             || objects.count<edgeScalarField>()
             )
             {
                 Info << "Reconstructing FA fields" << nl << endl;
@@ -747,13 +571,7 @@ int main(int argc, char *argv[])
                     procFaMeshes.boundaryProcAddressing()
                 );
 
-                reconstructor.reconstructFaAreaFields<scalar>(objects);
-                reconstructor.reconstructFaAreaFields<vector>(objects);
-                reconstructor.reconstructFaAreaFields<sphericalTensor>(objects);
-                reconstructor.reconstructFaAreaFields<symmTensor>(objects);
-                reconstructor.reconstructFaAreaFields<tensor>(objects);
-
-                reconstructor.reconstructFaEdgeFields<scalar>(objects);
+                reconstructor.reconstructAllFields(objects);
             }
             else
             {
@@ -782,21 +600,19 @@ int main(int argc, char *argv[])
                         polyMesh::meshSubDir/"sets"
                     );
 
-                    IOobjectList cSets(objects.lookupClass(cellSet::typeName));
-                    forAllConstIters(cSets, iter)
+                    for (const word& setName : objects.sortedNames<cellSet>())
                     {
-                        cSetNames.insert(iter.key(), cSetNames.size());
+                        cSetNames.insert(setName, cSetNames.size());
                     }
 
-                    IOobjectList fSets(objects.lookupClass(faceSet::typeName));
-                    forAllConstIters(fSets, iter)
+                    for (const word& setName : objects.sortedNames<faceSet>())
                     {
-                        fSetNames.insert(iter.key(), fSetNames.size());
+                        fSetNames.insert(setName, fSetNames.size());
                     }
-                    IOobjectList pSets(objects.lookupClass(pointSet::typeName));
-                    forAllConstIters(pSets, iter)
+
+                    for (const word& setName : objects.sortedNames<pointSet>())
                     {
-                        pSetNames.insert(iter.key(), pSetNames.size());
+                        pSetNames.insert(setName, pSetNames.size());
                     }
                 }
 
@@ -840,30 +656,25 @@ int main(int argc, char *argv[])
                         const labelList& cellMap =
                             procMeshes.cellProcAddressing()[proci];
 
-                        IOobjectList cSets
-                        (
-                            objects.lookupClass(cellSet::typeName)
-                        );
-
-                        forAllConstIters(cSets, iter)
+                        for (const IOobject& io : objects.sorted<cellSet>())
                         {
                             // Load cellSet
-                            const cellSet procSet(*iter());
-                            label setI = cSetNames[iter.key()];
-                            if (!cellSets.set(setI))
+                            const cellSet procSet(io);
+                            const label seti = cSetNames[io.name()];
+                            if (!cellSets.set(seti))
                             {
                                 cellSets.set
                                 (
-                                    setI,
+                                    seti,
                                     new cellSet
                                     (
                                         mesh,
-                                        iter.key(),
+                                        io.name(),
                                         procSet.size()
                                     )
                                 );
                             }
-                            cellSet& cSet = cellSets[setI];
+                            cellSet& cSet = cellSets[seti];
                             cSet.instance() = runTime.timeName();
 
                             for (const label celli : procSet)
@@ -876,30 +687,25 @@ int main(int argc, char *argv[])
                         const labelList& faceMap =
                             procMeshes.faceProcAddressing()[proci];
 
-                        IOobjectList fSets
-                        (
-                            objects.lookupClass(faceSet::typeName)
-                        );
-
-                        forAllConstIters(fSets, iter)
+                        for (const IOobject& io : objects.sorted<faceSet>())
                         {
                             // Load faceSet
-                            const faceSet procSet(*iter());
-                            label setI = fSetNames[iter.key()];
-                            if (!faceSets.set(setI))
+                            const faceSet procSet(io);
+                            const label seti = fSetNames[io.name()];
+                            if (!faceSets.set(seti))
                             {
                                 faceSets.set
                                 (
-                                    setI,
+                                    seti,
                                     new faceSet
                                     (
                                         mesh,
-                                        iter.key(),
+                                        io.name(),
                                         procSet.size()
                                     )
                                 );
                             }
-                            faceSet& fSet = faceSets[setI];
+                            faceSet& fSet = faceSets[seti];
                             fSet.instance() = runTime.timeName();
 
                             for (const label facei : procSet)
@@ -911,32 +717,28 @@ int main(int argc, char *argv[])
                         const labelList& pointMap =
                             procMeshes.pointProcAddressing()[proci];
 
-                        IOobjectList pSets
-                        (
-                            objects.lookupClass(pointSet::typeName)
-                        );
-                        forAllConstIters(pSets, iter)
+                        for (const IOobject& io : objects.sorted<pointSet>())
                         {
                             // Load pointSet
-                            const pointSet propSet(*iter());
-                            label setI = pSetNames[iter.key()];
-                            if (!pointSets.set(setI))
+                            const pointSet procSet(io);
+                            const label seti = pSetNames[io.name()];
+                            if (!pointSets.set(seti))
                             {
                                 pointSets.set
                                 (
-                                    setI,
+                                    seti,
                                     new pointSet
                                     (
                                         mesh,
-                                        iter.key(),
-                                        propSet.size()
+                                        io.name(),
+                                        procSet.size()
                                     )
                                 );
                             }
-                            pointSet& pSet = pointSets[setI];
+                            pointSet& pSet = pointSets[seti];
                             pSet.instance() = runTime.timeName();
 
-                            for (const label pointi : propSet)
+                            for (const label pointi : procSet)
                             {
                                 pSet.insert(pointMap[pointi]);
                             }

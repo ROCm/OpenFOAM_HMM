@@ -32,12 +32,12 @@ Description
 
 SourceFiles
     dimFieldDecomposer.C
-    dimFieldDecomposerFields.C
+    dimFieldDecomposerTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef dimFieldDecomposer_H
-#define dimFieldDecomposer_H
+#ifndef Foam_dimFieldDecomposer_H
+#define Foam_dimFieldDecomposer_H
 
 #include "fvMesh.H"
 #include "surfaceFields.H"
@@ -121,7 +121,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "dimFieldDecomposerFields.C"
+    #include "dimFieldDecomposerTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

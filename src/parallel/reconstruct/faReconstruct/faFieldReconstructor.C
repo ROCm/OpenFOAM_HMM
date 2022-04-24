@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +27,13 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "faFieldReconstructor.H"
+#include "areaFields.H"
+#include "edgeFields.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+int Foam::faFieldReconstructor::verbose_ = 1;
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -42,8 +50,42 @@ Foam::faFieldReconstructor::faFieldReconstructor
     procMeshes_(procMeshes),
     edgeProcAddressing_(edgeProcAddressing),
     faceProcAddressing_(faceProcAddressing),
-    boundaryProcAddressing_(boundaryProcAddressing)
+    boundaryProcAddressing_(boundaryProcAddressing),
+    nReconstructed_(0)
 {}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::label Foam::faFieldReconstructor::reconstructAllFields
+(
+    const IOobjectList& objects,
+    const wordRes& selected
+)
+{
+    label nTotal = 0;
+
+    do
+    {
+        #undef  doLocalCode
+        #define doLocalCode(Method)                                           \
+        {                                                                     \
+            nTotal += this->Method <scalar> (objects, selected);              \
+            nTotal += this->Method <vector> (objects, selected);              \
+            nTotal += this->Method <sphericalTensor> (objects, selected);     \
+            nTotal += this->Method <symmTensor> (objects, selected);          \
+            nTotal += this->Method <tensor> (objects, selected);              \
+        }
+
+        doLocalCode(reconstructAreaFields);
+        doLocalCode(reconstructEdgeFields);
+
+        #undef doLocalCode
+    }
+    while (false);
+
+    return nTotal;
+}
 
 
 // ************************************************************************* //

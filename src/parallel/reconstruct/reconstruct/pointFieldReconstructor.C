@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +27,12 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "pointFieldReconstructor.H"
+#include "pointFields.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+int Foam::pointFieldReconstructor::verbose_ = 1;
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -92,6 +99,26 @@ Foam::pointFieldReconstructor::pointFieldReconstructor
             }
         }
     }
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::label Foam::pointFieldReconstructor::reconstructAllFields
+(
+    const IOobjectList& objects,
+    const wordRes& selected
+)
+{
+    label nTotal = 0;
+
+    nTotal += reconstructPointFields<scalar>(objects, selected);
+    nTotal += reconstructPointFields<vector>(objects, selected);
+    nTotal += reconstructPointFields<symmTensor>(objects, selected);
+    nTotal += reconstructPointFields<sphericalTensor>(objects, selected);
+    nTotal += reconstructPointFields<tensor>(objects, selected);
+
+    return nTotal;
 }
 
 

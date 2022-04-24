@@ -47,8 +47,8 @@ Foam::dimFieldDecomposer::decomposeField
             IOobject
             (
                 field.name(),
-                procMesh_.time().timeName(),
-                procMesh_,
+                procMesh_.thisDb().time().timeName(),
+                procMesh_.thisDb(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
                 false
