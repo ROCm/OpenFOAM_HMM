@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -117,7 +117,7 @@ Foam::meltingEvaporationModels::Lee<Thermo, OtherThermo>::KSp
         {
             return
             (
-                coeff*pos(Tactivate_ - refValue)
+                -coeff*pos(Tactivate_ - refValue)
             );
         }
     }
