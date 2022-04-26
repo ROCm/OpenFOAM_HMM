@@ -161,7 +161,8 @@ void Foam::Cloud<ParticleType>::move
     const labelList& procPatchNeighbours = pData.processorPatchNeighbours();
 
     // Which processors this processor is connected to
-    const labelList& neighbourProcs = pData[Pstream::myProcNo()];
+    const labelList& neighbourProcs =
+        pData.topology().procNeighbours()[Pstream::myProcNo()];
 
     // Initialise the stepFraction moved for the particles
     for (ParticleType& p : *this)

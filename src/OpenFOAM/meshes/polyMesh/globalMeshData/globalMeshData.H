@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -81,8 +81,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef globalMeshData_H
-#define globalMeshData_H
+#ifndef Foam_globalMeshData_H
+#define Foam_globalMeshData_H
 
 #include "processorTopology.H"
 #include "labelPair.H"
@@ -106,8 +106,6 @@ class bitSet;
 \*---------------------------------------------------------------------------*/
 
 class globalMeshData
-:
-    public processorTopology
 {
     // Private Data
 
@@ -128,6 +126,9 @@ class globalMeshData
 
 
         // Processor patch addressing (be careful if not running in parallel!)
+
+            //- The processor/processor topology
+            processorTopology processorTopology_;
 
             //- List of processor patch labels
             //  (size of list = number of processor patches)
@@ -377,6 +378,19 @@ public:
 
         // Processor patch addressing (be careful when not running in parallel)
 
+            //- The processor to processor topology.
+            const processorTopology& topology() const noexcept
+            {
+                return processorTopology_;
+            }
+
+            //- Order in which the patches should be initialised/evaluated
+            //- corresponding to the schedule
+            const lduSchedule& patchSchedule() const noexcept
+            {
+                return processorTopology_.patchSchedule();
+            }
+
             //- Return list of processor patch labels
             //  (size of list = number of processor patches)
             const labelList& processorPatches() const noexcept
@@ -393,7 +407,7 @@ public:
             }
 
             //- Return processorPatchIndices of the neighbours
-            //  processor patches. -1 if not running parallel.
+            //- processor patches. -1 if not running parallel.
             const labelList& processorPatchNeighbours() const noexcept
             {
                 return processorPatchNeighbours_;

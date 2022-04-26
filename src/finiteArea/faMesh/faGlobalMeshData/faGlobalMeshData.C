@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,8 +24,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-
 Author
     Hrvoje Jasak
 
@@ -33,16 +32,25 @@ Author
 #include "faGlobalMeshData.H"
 #include "faMesh.H"
 #include "globalMeshData.H"
+#include "processorFaPatch.H"
+#include "processorTopologyNew.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::faGlobalMeshData::faGlobalMeshData(const faMesh& mesh)
 :
-    faProcessorTopology(mesh.boundary(), UPstream::worldComm),
     mesh_(mesh),
+    processorTopology_
+    (
+        processorTopology::New<processorFaPatch>
+        (
+            mesh.boundary(),
+            UPstream::worldComm
+        )
+    ),
     nGlobalPoints_(-1),
-    sharedPointLabels_(0),
-    sharedPointAddr_(0)
+    sharedPointLabels_(),
+    sharedPointAddr_()
 {
     updateMesh();
 }
@@ -50,13 +58,14 @@ Foam::faGlobalMeshData::faGlobalMeshData(const faMesh& mesh)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
+// A non-default destructor since we had incomplete types in the header
 Foam::faGlobalMeshData::~faGlobalMeshData()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::faMesh& Foam::faGlobalMeshData::mesh() const
+const Foam::faMesh& Foam::faGlobalMeshData::mesh() const noexcept
 {
     return mesh_;
 }

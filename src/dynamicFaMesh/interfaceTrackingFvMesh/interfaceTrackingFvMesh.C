@@ -30,6 +30,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "motionSolver.H"
 #include "volFields.H"
+#include "processorFaPatch.H"
 #include "wedgeFaPatch.H"
 #include "wedgeFaPatchFields.H"
 #include "slipFaPatchFields.H"

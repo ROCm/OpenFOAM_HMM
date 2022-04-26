@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
     argList::noFunctionObjects();
     argList::addNote
     (
-        "Create a metis graph file representation for an OpenFOAM mesh"
+        "Create graph of OpenFOAM mesh connections"
     );
 
     #include "setRootCase.H"
@@ -59,9 +59,9 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createPolyMesh.H"
 
-    const globalMeshData& globData = mesh.globalData();
-
-    const labelListList& connectivity = globData;
+    // Adjacency table
+    const labelListList& connectivity =
+        mesh.globalData().topology().procNeighbours();
 
     if (Pstream::master())
     {

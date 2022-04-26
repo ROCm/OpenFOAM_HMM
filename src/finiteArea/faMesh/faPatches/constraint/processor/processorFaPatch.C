@@ -27,6 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "processorFaPatch.H"
+#include "processorPolyPatch.H"  // For newName()
 #include "addToRunTimeSelectionTable.H"
 #include "transformField.H"
 #include "faBoundaryMesh.H"

@@ -57,6 +57,7 @@ Description
 
 #include "fvMeshTools.H"
 #include "topoSet.H"
+#include "processorPolyPatch.H"
 #include "processorMeshes.H"
 
 using namespace Foam;

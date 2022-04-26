@@ -60,6 +60,7 @@ Description
 #include "wedgePolyPatch.H"
 #include "planeExtrusion.H"
 #include "emptyPolyPatch.H"
+#include "processorPolyPatch.H"
 #include "processorMeshes.H"
 #include "hexRef8Data.H"
 

@@ -28,6 +28,7 @@ License
 #include "interfaceTrackingFvMesh.H"
 #include "primitivePatchInterpolation.H"
 #include "emptyFaPatch.H"
+#include "processorFaPatch.H"
 #include "wedgeFaPatch.H"
 #include "wallFvPatch.H"
 #include "coordinateSystem.H"

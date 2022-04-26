@@ -26,6 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "fieldExtents.H"
+#include "processorPolyPatch.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //

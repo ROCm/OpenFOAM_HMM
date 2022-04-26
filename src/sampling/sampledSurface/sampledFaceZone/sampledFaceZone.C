@@ -29,6 +29,7 @@ License
 #include "dictionary.H"
 #include "polyMesh.H"
 #include "polyPatch.H"
+#include "processorPolyPatch.H"
 #include "volFields.H"
 #include "surfaceFields.H"
 #include "volPointInterpolation.H"

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2017,2020-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1201,30 +1201,30 @@ void Foam::addPatchCellLayer::calcExtrudeInfo
 
             if (otherProci != -1)
             {
-                if (gd[Pstream::myProcNo()].found(otherProci))
+                // Use existing processorPolyPatch to otherProci?
+
+                label procPatchi =
+                    gd.topology().procPatchLookup(otherProci);
+
+                if (procPatchi < 0)
                 {
-                    // There is already a processorPolyPatch to otherProci.
-                    // Use it. Note that we can only index procPatchMap
-                    // if the processor actually is a neighbour processor
-                    // so that is why we first check.
-                    edgePatchID[edgei] = gd.procPatchMap()[otherProci];
-                }
-                else
-                {
-                    // Cannot find a patch to processor. See if already
-                    // marked for addition
-                    if (nbrProcToPatch.found(otherProci))
+                    // No existing processorPolyPatch to otherProci.
+                    // See if already marked for addition
+                    procPatchi = nbrProcToPatch.lookup(otherProci, -1);
+
+                    if (procPatchi < 0)
                     {
-                        edgePatchID[edgei] = nbrProcToPatch[otherProci];
-                    }
-                    else
-                    {
-                        edgePatchID[edgei] = nPatches;
-                        nbrProcToPatch.insert(otherProci, nPatches);
-                        patchToNbrProc.insert(nPatches, otherProci);
-                        nPatches++;
+                        // Add new proc-patch, mark for addition.
+
+                        procPatchi = nPatches;
+                        ++nPatches;
+
+                        nbrProcToPatch.insert(otherProci, procPatchi);
+                        patchToNbrProc.insert(procPatchi, otherProci);
                     }
                 }
+
+                edgePatchID[edgei] = procPatchi;
             }
         }
     }

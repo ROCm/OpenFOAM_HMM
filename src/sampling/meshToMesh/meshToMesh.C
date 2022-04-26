@@ -31,6 +31,7 @@ License
 #include "globalIndex.H"
 #include "meshToMeshMethod.H"
 #include "nearestFaceAMI.H"
+#include "processorPolyPatch.H"
 #include "faceAreaWeightAMI.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
