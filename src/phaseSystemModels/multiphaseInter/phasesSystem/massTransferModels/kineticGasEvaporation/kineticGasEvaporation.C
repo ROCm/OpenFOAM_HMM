@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -206,7 +206,7 @@ Foam::meltingEvaporationModels::kineticGasEvaporation<Thermo, OtherThermo>
     );
 
     word speciesName = IOobject::member(this->transferSpecie());
-    tmp<volScalarField> L = this->L(speciesName, T);
+    tmp<volScalarField> L = mag(this->L(speciesName, T));
 
     updateInterface(T);
 
