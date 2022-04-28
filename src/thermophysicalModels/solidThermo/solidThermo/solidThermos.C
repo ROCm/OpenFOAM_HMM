@@ -33,6 +33,7 @@ License
 #include "specie.H"
 #include "rhoConst.H"
 #include "icoPolynomial.H"
+#include "icoTabulated.H"
 #include "hConstThermo.H"
 #include "hPowerThermo.H"
 #include "hPolynomialThermo.H"
@@ -113,6 +114,18 @@ makeSolidThermo
     sensibleEnthalpy,
     hTabulatedThermo,
     icoPolynomial,
+    specie
+);
+
+makeSolidThermo
+(
+    solidThermo,
+    heSolidThermo,
+    pureMixture,
+    tabulatedSolidTransport,
+    sensibleEnthalpy,
+    hTabulatedThermo,
+    icoTabulated,
     specie
 );
 
