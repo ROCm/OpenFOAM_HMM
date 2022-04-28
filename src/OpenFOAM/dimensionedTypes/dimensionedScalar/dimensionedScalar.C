@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -334,6 +334,21 @@ dimensionedScalar hypot
         "hypot(" + x.name() + ',' + y.name() + ')',
         hypot(x.dimensions(), y.dimensions()),
         ::hypot(x.value(), y.value())
+    );
+}
+
+
+dimensionedScalar stabilise
+(
+    const dimensionedScalar& x,
+    const dimensionedScalar& y
+)
+{
+    return dimensionedScalar
+    (
+        "stabilise(" + x.name() + ',' + y.name() + ')',
+        stabilise(x.dimensions(), y.dimensions()),
+        stabilise(x.value(), y.value())
     );
 }
 

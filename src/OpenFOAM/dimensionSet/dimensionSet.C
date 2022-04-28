@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -512,6 +512,21 @@ Foam::dimensionSet Foam::hypot(const dimensionSet& ds1, const dimensionSet& ds2)
     if (dimensionSet::checking())
     {
         checkDims("hypot(a, b)", ds1, ds2);
+    }
+
+    return ds1;
+}
+
+
+Foam::dimensionSet Foam::stabilise
+(
+    const dimensionSet& ds1,
+    const dimensionSet& ds2
+)
+{
+    if (dimensionSet::checking())
+    {
+        checkDims("stabilise(a, b)", ds1, ds2);
     }
 
     return ds1;
