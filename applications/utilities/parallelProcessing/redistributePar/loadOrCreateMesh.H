@@ -45,6 +45,9 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
+class faMesh;
+
 //- Check for availability of specified mesh file (default: "faces")
 boolList haveMeshFile
 (
@@ -54,6 +57,9 @@ boolList haveMeshFile
     const bool verbose = true
 );
 
+
+//- Remove procAddressing
+void removeProcAddressing(const faMesh& mesh);
 
 //- Remove procAddressing
 void removeProcAddressing(const polyMesh& mesh);

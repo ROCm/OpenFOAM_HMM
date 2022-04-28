@@ -27,6 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "loadOrCreateMesh.H"
+#include "faMesh.H"
 #include "Pstream.H"
 #include "OSspecific.H"
 
@@ -63,6 +64,26 @@ Foam::boolList Foam::haveMeshFile
 
     Pstream::broadcast(haveFileOnProc);
     return haveFileOnProc;
+}
+
+
+void Foam::removeProcAddressing(const faMesh& mesh)
+{
+    IOobject ioAddr
+    (
+        "procAddressing",
+        mesh.facesInstance(),
+        faMesh::meshSubDir,
+        mesh.thisDb()
+    );
+
+    for (const auto prefix : {"boundary", "edge", "face", "point"})
+    {
+        ioAddr.rename(prefix + word("ProcAddressing"));
+
+        const fileName procFile(ioAddr.objectPath());
+        Foam::rm(procFile);
+    }
 }
 
 

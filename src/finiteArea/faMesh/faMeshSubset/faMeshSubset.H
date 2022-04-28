@@ -186,6 +186,16 @@ public:
             const bool allowUnmapped = false
         );
 
+        //- Map edge field.
+        //  Optionally allow unmapped faces not to produce a warning
+        template<class Type>
+        static tmp<GeometricField<Type, faePatchField, edgeMesh>>
+        interpolate
+        (
+            const GeometricField<Type, faePatchField, edgeMesh>&,
+            const faMesh& sMesh
+        );
+
 
     // Field Mapping
 
@@ -196,6 +206,15 @@ public:
         interpolate
         (
             const GeometricField<Type, faPatchField, areaMesh>&,
+            const bool allowUnmapped = false
+        ) const;
+
+        //- Map edge field.
+        template<class Type>
+        tmp<GeometricField<Type, faePatchField, edgeMesh>>
+        interpolate
+        (
+            const GeometricField<Type, faePatchField, edgeMesh>&,
             const bool allowUnmapped = false
         ) const;
 };
