@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -480,6 +480,33 @@ namespace Foam
             hTabulatedPolyIcoSolidThermoPhysics
         );
 
+        // From pure phase (tabulated) to solid phase (icoTabulated)
+        makeInterfacePureType
+        (
+            Lee,
+            heRhoThermo,
+            rhoThermo,
+            pureMixture,
+            tabulatedThermoPhysics,
+            heSolidThermo,
+            solidThermo,
+            pureMixture,
+            hTabulatedIcoTabulatedSolidThermoPhysics
+        );
+
+        // From solid phase (icoTabulated) to pure phase (tabulated)
+        makeInterfacePureType
+        (
+            Lee,
+            heSolidThermo,
+            solidThermo,
+            pureMixture,
+            hTabulatedIcoTabulatedSolidThermoPhysics,
+            heRhoThermo,
+            rhoThermo,
+            pureMixture,
+            tabulatedThermoPhysics
+        );
 
 
         // interfaceHeatResistance model definitions
