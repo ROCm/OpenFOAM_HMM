@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2020 ENERCON GmbH
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,7 @@ License
 
 #include "atmPlantCanopyUSource.H"
 #include "addToRunTimeSelectionTable.H"
+#include "fvmSup.H"
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
@@ -99,7 +100,7 @@ void Foam::fv::atmPlantCanopyUSource::addSup
     if (V_ > VSMALL)
     {
         // (SP:Eq. 42)
-        eqn -= (plantCd_*leafAreaDensity_*mag(U))*U;
+        eqn -= fvm::Sp(plantCd_*leafAreaDensity_*mag(U), U);
     }
 }
 
@@ -115,7 +116,7 @@ void Foam::fv::atmPlantCanopyUSource::addSup
 
     if (V_ > VSMALL)
     {
-        eqn -= rho*(plantCd_*leafAreaDensity_*mag(U))*U;
+        eqn -= fvm::Sp(rho*plantCd_*leafAreaDensity_*mag(U), U);
     }
 }
 
@@ -132,7 +133,7 @@ void Foam::fv::atmPlantCanopyUSource::addSup
 
     if (V_ > VSMALL)
     {
-        eqn -= alpha*rho*(plantCd_*leafAreaDensity_*mag(U))*U;
+        eqn -= fvm::Sp(alpha*rho*plantCd_*leafAreaDensity_*mag(U), U);
     }
 }
 

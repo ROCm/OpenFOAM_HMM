@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,13 +52,19 @@ Description
     It assumes a drop-wise type of condensation, whereby its heat transfer
     Nusselt number is calculated using:
     \f{eqnarray*}{
-        51104 + 2044 T   & T > 295 & T < 373 \\
-        255510           & T > 373 &
+        51104 + 2044 (T - 273.15)   & T > 295 & T < 373 \\
+        255510                      & T > 373 &
     \f}
 
-    Reference:
-    - T. Bergam, A.Lavine, F. Incropera and D. Dewitt. Heat and Mass Transfer.
-      7th Edition. Chapter 10.
+    References:
+    \verbatim
+        Standard models (tag:BLID):
+            Bergman, T. L., Lavine, A. S.,
+            Incropera, F. P., & Dewitt, D. P. (2011).
+            Fundamentals of heat and mass transfer.
+            John Wiley & Sons. 7th Edition. Chapter 10.
+            ISBN:9780470501979
+    \endverbatim
 
     The mass transfer correlation used is:
 

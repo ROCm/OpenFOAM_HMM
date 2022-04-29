@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,6 +30,7 @@ License
 #include "boundedConvectionScheme.H"
 #include "blendedSchemeBase.H"
 #include "fvcCellReduce.H"
+#include "DEShybrid.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -72,12 +73,18 @@ void Foam::functionObjects::blendingFactor::calcBlendingFactor
 
     // Convert into vol field whose values represent the local face minima
     // Note:
-    // - factor applied to 1st scheme, and (1-factor) to 2nd scheme
     // - not using the store(...) mechanism due to need to correct BCs
-    volScalarField& indicator =
-        lookupObjectRef<volScalarField>(resultName_);
+    auto& indicator = lookupObjectRef<volScalarField>(resultName_);
 
-    indicator = 1 - fvc::cellReduce(factorf, minEqOp<scalar>(), GREAT);
+    if (isA<DEShybrid<Type>>(blendedScheme))
+    {
+        indicator = fvc::cellReduce(factorf, minEqOp<scalar>(), GREAT);
+    }
+    else
+    {
+        indicator = 1 - fvc::cellReduce(factorf, minEqOp<scalar>(), GREAT);
+    }
+
     indicator.correctBoundaryConditions();
 }
 

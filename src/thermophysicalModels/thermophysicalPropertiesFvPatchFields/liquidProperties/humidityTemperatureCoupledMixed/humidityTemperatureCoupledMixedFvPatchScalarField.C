@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -77,9 +77,10 @@ Foam::humidityTemperatureCoupledMixedFvPatchScalarField::htcCondensation
     const scalar Re
 ) const
 {
-    if (Tsat > 295 && Tsat < 373)
+    // (BLID:Eq. 10.52-10.53)
+    if (Tsat > 295.15 && Tsat < 373.15)
     {
-        return 51104 + 2044*Tsat;
+        return 51104 + 2044*(Tsat - 273.15);
     }
     else
     {

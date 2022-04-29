@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2018-2019 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -126,7 +126,7 @@ void Foam::diameterModels::linearTsub::correct()
 
         const volScalarField Tsub
         (
-            liquid.thermo().T() - satModel.Tsat(liquid.thermo().p())
+            satModel.Tsat(liquid.thermo().p()) - liquid.thermo().T()
         );
 
         d_ = max
@@ -135,7 +135,7 @@ void Foam::diameterModels::linearTsub::correct()
             min
             (
                 d2_,
-                (d1_*(Tsub - Tsub2_) + d2_*(Tsub - Tsub1_))/(Tsub2_ - Tsub1_)
+                (d1_*(Tsub - Tsub2_) - d2_*(Tsub - Tsub1_))/(Tsub1_ - Tsub2_)
             )
         );
     }

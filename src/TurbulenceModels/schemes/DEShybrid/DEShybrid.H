@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -226,32 +226,60 @@ class DEShybrid
                 )
             );
 
-            const volScalarField factor
+
+            const word factorName(IOobject::scopedName(typeName, "Factor"));
+            const fvMesh& mesh = this->mesh();
+
+            const IOobject factorIO
             (
-                IOobject
-                (
-                    typeName + ":Factor",
-                    this->mesh().time().timeName(),
-                    this->mesh(),
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                ),
-                max(sigmaMax_*tanh(pow(A, CH1_)), sigmaMin_)
+                factorName,
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
             );
 
             if (blendedSchemeBaseName::debug)
             {
-                factor.write();
-            }
+                auto* factorPtr = mesh.getObjectPtr<volScalarField>(factorName);
 
-            return tmp<surfaceScalarField>
-            (
-                new surfaceScalarField
+                if (!factorPtr)
+                {
+                    factorPtr =
+                        new volScalarField
+                        (
+                            factorIO,
+                            mesh,
+                            dimensionedScalar(dimless, Zero)
+                        );
+
+                    const_cast<fvMesh&>(mesh).objectRegistry::store(factorPtr);
+                }
+
+                auto& factor = *factorPtr;
+
+                factor = max(sigmaMax_*tanh(pow(A, CH1_)), sigmaMin_);
+
+                return tmp<surfaceScalarField>::New
                 (
                     vf.name() + "BlendingFactor",
                     fvc::interpolate(factor)
-                )
-            );
+                );
+            }
+            else
+            {
+                const volScalarField factor
+                (
+                    factorIO,
+                    max(sigmaMax_*tanh(pow(A, CH1_)), sigmaMin_)
+                );
+
+                return tmp<surfaceScalarField>::New
+                (
+                    vf.name() + "BlendingFactor",
+                    fvc::interpolate(factor)
+                );
+            }
         }
 
 
