@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,7 +45,7 @@ inline Foam::quaternion::quaternion(const scalar w, const vector& v)
 inline Foam::quaternion::quaternion(const vector& d, const scalar theta)
 :
     w_(cos(0.5*theta)),
-    v_((sin(0.5*theta)/mag(d))*d)
+    v_(sin(0.5*theta)*Foam::normalised(d))
 {}
 
 
@@ -53,19 +53,19 @@ inline Foam::quaternion::quaternion
 (
     const vector& d,
     const scalar cosTheta,
-    const bool normalized
+    const bool isNormalised
 )
 {
-    scalar cosHalfTheta2 = 0.5*(cosTheta + 1);
+    const scalar cosHalfTheta2 = 0.5*(cosTheta + 1);
     w_ = sqrt(cosHalfTheta2);
 
-    if (normalized)
+    if (isNormalised)
     {
         v_ = sqrt(1 - cosHalfTheta2)*d;
     }
     else
     {
-        v_ = (sqrt(1 - cosHalfTheta2)/mag(d))*d;
+        v_ = sqrt(1 - cosHalfTheta2)*Foam::normalised(d);
     }
 }
 
@@ -282,39 +282,43 @@ inline Foam::quaternion::quaternion
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline Foam::scalar Foam::quaternion::w() const
+inline Foam::scalar Foam::quaternion::w() const noexcept
 {
     return w_;
 }
 
 
-inline const Foam::vector& Foam::quaternion::v() const
+inline const Foam::vector& Foam::quaternion::v() const noexcept
 {
     return v_;
 }
 
 
-inline Foam::scalar& Foam::quaternion::w()
+inline Foam::scalar& Foam::quaternion::w() noexcept
 {
     return w_;
 }
 
 
-inline Foam::vector& Foam::quaternion::v()
+inline Foam::vector& Foam::quaternion::v() noexcept
 {
     return v_;
 }
 
 
-inline Foam::quaternion Foam::quaternion::normalized() const
+inline Foam::quaternion& Foam::quaternion::normalise()
 {
-    return *this/mag(*this);
-}
+    const scalar s(Foam::mag(*this));
 
-
-inline void Foam::quaternion::normalize()
-{
-    operator/=(mag(*this));
+    if (s < ROOTVSMALL)
+    {
+        *this = Zero;
+    }
+    else
+    {
+        *this /= s;
+    }
+    return *this;
 }
 
 
@@ -338,7 +342,7 @@ inline Foam::vector Foam::quaternion::invTransform(const vector& u) const
 
 inline Foam::quaternion Foam::quaternion::transform(const quaternion& q) const
 {
-    return Foam::normalize((*this)*q);
+    return Foam::normalised((*this)*q);
 }
 
 
@@ -347,7 +351,7 @@ inline Foam::quaternion Foam::quaternion::invTransform
     const quaternion& q
 ) const
 {
-    return Foam::normalize(conjugate(*this)*q);
+    return Foam::normalised(conjugate(*this)*q);
 }
 
 
@@ -618,6 +622,13 @@ inline void Foam::quaternion::operator=(const vector& v)
 }
 
 
+inline void Foam::quaternion::operator=(const Foam::zero)
+{
+    w_ = 0;
+    v_ = Zero;
+}
+
+
 inline void Foam::quaternion::operator*=(const scalar s)
 {
     w_ *= s;
@@ -653,14 +664,31 @@ inline Foam::quaternion Foam::conjugate(const quaternion& q)
 
 inline Foam::quaternion Foam::inv(const quaternion& q)
 {
-    scalar magSqrq = magSqr(q);
-    return quaternion(q.w()/magSqrq, -q.v()/magSqrq);
+    const scalar s(Foam::magSqr(q));
+
+    if (s < VSMALL)
+    {
+        return Zero;
+    }
+    else
+    {
+        return quaternion(q.w()/s, -q.v()/s);
+    }
 }
 
 
-inline Foam::quaternion Foam::normalize(const quaternion& q)
+inline Foam::quaternion Foam::normalised(const quaternion& q)
 {
-    return q/mag(q);
+    const scalar s(Foam::mag(q));
+
+    if (s < ROOTVSMALL)
+    {
+        return Zero;
+    }
+    else
+    {
+        return q/s;
+    }
 }
 
 

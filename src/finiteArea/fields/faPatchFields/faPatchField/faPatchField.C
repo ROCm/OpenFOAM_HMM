@@ -42,7 +42,7 @@ Foam::faPatchField<Type>::faPatchField
     patch_(p),
     internalField_(iF),
     updated_(false),
-    patchType_(word::null)
+    patchType_()
 {}
 
 
@@ -58,7 +58,7 @@ Foam::faPatchField<Type>::faPatchField
     patch_(p),
     internalField_(iF),
     updated_(false),
-    patchType_(word::null)
+    patchType_()
 {}
 
 
@@ -75,7 +75,7 @@ Foam::faPatchField<Type>::faPatchField
     patch_(p),
     internalField_(iF),
     updated_(false),
-    patchType_(word::null)
+    patchType_()
 {}
 
 
@@ -84,15 +84,20 @@ Foam::faPatchField<Type>::faPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF,
-    const dictionary& dict
+    const dictionary& dict,
+    const bool valueRequired
 )
 :
     Field<Type>(p.size()),
     patch_(p),
     internalField_(iF),
     updated_(false),
-    patchType_(dict.getOrDefault<word>("patchType", word::null))
+    patchType_()
 {
+    dict.readIfPresent("patchType", patchType_, keyType::LITERAL);
+
+    /// if (valueRequired) - not yet needed. Already a lazy evaluation
+
     if (dict.found("value"))
     {
         faPatchField<Type>::operator=
@@ -208,7 +213,7 @@ void Foam::faPatchField<Type>::write(Ostream& os) const
 {
     os.writeEntry("type", type());
 
-    if (patchType_.size())
+    if (!patchType_.empty())
     {
         os.writeEntry("patchType", patchType_);
     }

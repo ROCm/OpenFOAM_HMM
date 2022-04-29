@@ -482,6 +482,8 @@ inline scalar mag
 }
 
 
+//- Return the vector type normalised by its magnitude
+//  For small magnitudes (less than ROOTVSMALL) return zero.
 template<class Form, class Cmpt, direction Ncmpts>
 inline VectorSpace<Form, Cmpt, Ncmpts> normalised
 (

@@ -81,7 +81,8 @@ meshSearch/meshSearch.C
 meshSearch/meshSearchFACE_CENTRE_TRISMeshObject.C
 meshSearch/meshSearchMeshObject.C
 
-fields/polyMeshFields.C
+fields/pointPatchFields/uniformFixedValue/uniformFixedValuePointPatchFields.C
+fields/volume/polyMeshFields.C
 meshTools/meshTools.C
 
 algorithms = algorithms

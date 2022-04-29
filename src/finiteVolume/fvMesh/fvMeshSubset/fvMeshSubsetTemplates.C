@@ -34,7 +34,7 @@ License
 #include "directPointPatchFieldMapper.H"
 #include "flipOp.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 template<class Type>
 Foam::tmp
@@ -145,6 +145,7 @@ Foam::fvMeshSubset::interpolate
 
             // allowUnmapped : special mode for if we do not want to be
             // warned for unmapped faces (e.g. from fvMeshDistribute).
+
             const bool hasUnmapped = mapper.hasUnmapped();
             if (allowUnmapped)
             {
@@ -190,6 +191,8 @@ Foam::fvMeshSubset::interpolate
 }
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
 template<class Type>
 Foam::tmp
 <
@@ -212,6 +215,8 @@ Foam::fvMeshSubset::interpolate
     );
 }
 
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 template<class Type>
 Foam::tmp
@@ -375,6 +380,8 @@ Foam::fvMeshSubset::interpolate
 }
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
 template<class Type>
 Foam::tmp
 <
@@ -396,6 +403,8 @@ Foam::fvMeshSubset::interpolate
     );
 }
 
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 template<class Type>
 Foam::tmp
@@ -528,6 +537,8 @@ Foam::fvMeshSubset::interpolate
 }
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
 template<class Type>
 Foam::tmp
 <
@@ -548,6 +559,8 @@ Foam::fvMeshSubset::interpolate
     );
 }
 
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 template<class Type>
 Foam::tmp
@@ -580,6 +593,8 @@ Foam::fvMeshSubset::interpolate
     return tresult;
 }
 
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
 Foam::tmp

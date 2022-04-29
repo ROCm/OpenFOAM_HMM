@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,11 +32,15 @@ template<class Type>
 Foam::tmp<Foam::faePatchField<Type>> Foam::faePatchField<Type>::New
 (
     const word& patchFieldType,
+    const word& actualPatchType,
     const faPatch& p,
     const DimensionedField<Type, edgeMesh>& iF
 )
 {
-    DebugInFunction << "Constructing faePatchField" << endl;
+    DebugInFunction
+        << "patchFieldType = " << patchFieldType
+        << " [" << actualPatchType
+        << "] : " << p.type() << " name = " << p.name() << endl;
 
     auto* ctorPtr = patchConstructorTable(patchFieldType);
 
@@ -50,16 +54,29 @@ Foam::tmp<Foam::faePatchField<Type>> Foam::faePatchField<Type>::New
         ) << exit(FatalError);
     }
 
-    auto* patchTypeCtor = patchConstructorTable(p.type());
+    if (actualPatchType.empty() || actualPatchType != p.type())
+    {
+        auto* patchTypeCtor = patchConstructorTable(p.type());
 
-    if (patchTypeCtor)
-    {
-        return patchTypeCtor(p, iF);
+        if (patchTypeCtor)
+        {
+            return patchTypeCtor(p, iF);
+        }
     }
-    else
-    {
-        return ctorPtr(p, iF);
-    }
+
+    return ctorPtr(p, iF);
+}
+
+
+template<class Type>
+Foam::tmp<Foam::faePatchField<Type>> Foam::faePatchField<Type>::New
+(
+    const word& patchFieldType,
+    const faPatch& p,
+    const DimensionedField<Type, edgeMesh>& iF
+)
+{
+    return New(patchFieldType, word::null, p, iF);
 }
 
 
@@ -71,9 +88,19 @@ Foam::tmp<Foam::faePatchField<Type>> Foam::faePatchField<Type>::New
     const dictionary& dict
 )
 {
-    DebugInFunction << "Constructing faePatchField" << endl;
-
     const word patchFieldType(dict.get<word>("type"));
+
+    // word actualPatchType;
+    // dict.readIfPresent("patchType", actualPatchType, keyType::LITERAL);
+    //
+    // DebugInFunction
+    //     << "patchFieldType = " << patchFieldType
+    //     << " [" << actualPatchType
+    //     << "] : " << p.type() << " name = " << p.name() << endl;
+
+    DebugInFunction
+        << "patchFieldType = " << patchFieldType
+        << " : " << p.type() << " name = " << p.name() << endl;
 
     auto* ctorPtr = dictionaryConstructorTable(patchFieldType);
 
@@ -100,8 +127,8 @@ Foam::tmp<Foam::faePatchField<Type>> Foam::faePatchField<Type>::New
     if (patchTypeCtor && patchTypeCtor != ctorPtr)
     {
         FatalIOErrorInFunction(dict)
-            << "inconsistent patch and patchField types for \n"
-            << "    patch type " << p.type()
+            << "inconsistent patch and patchField types for\n"
+               "    patch type " << p.type()
             << " and patchField type " << patchFieldType
             << exit(FatalIOError);
     }
@@ -119,7 +146,9 @@ Foam::tmp<Foam::faePatchField<Type>> Foam::faePatchField<Type>::New
     const faPatchFieldMapper& pfMapper
 )
 {
-    DebugInFunction << "Constructing faePatchField<Type>" << endl;
+    DebugInFunction
+        << "patchFieldType = " << ptf.type()
+        << " : " << p.type() << " name = " << p.name() << endl;
 
     auto* ctorPtr = patchMapperConstructorTable(ptf.type());
 

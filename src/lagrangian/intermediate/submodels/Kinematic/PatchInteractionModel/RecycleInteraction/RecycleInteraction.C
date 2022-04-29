@@ -255,7 +255,7 @@ void Foam::RecycleInteraction<CloudType>::postEvolve()
         // Retrieve from receive buffers
         for (const int proci : pBufs.allProcs())
         {
-            if (pBufs.hasRecvData(proci))
+            if (pBufs.recvDataCount(proci))
             {
                 UIPstream is(proci, pBufs);
 

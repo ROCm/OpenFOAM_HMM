@@ -118,9 +118,9 @@ Foam::edgeFaceCirculator::edgeFaceCirculator
 )
 :
     meshPtr_(&mesh),
-    faceLabel_(faceLabel),
     ownerSide_(ownerSide),
     isBoundaryEdge_(isBoundaryEdge),
+    faceLabel_(faceLabel),
     index_(index),
     startFaceLabel_(faceLabel_)
 {}

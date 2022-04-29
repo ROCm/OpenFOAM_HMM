@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -117,11 +117,11 @@ inline Foam::vector Foam::triad::orthogonal
 }
 
 
-inline void Foam::triad::normalize()
+inline void Foam::triad::normalise()
 {
-    if (set(0)) operator[](0) /= mag(operator[](0));
-    if (set(1)) operator[](1) /= mag(operator[](1));
-    if (set(2)) operator[](2) /= mag(operator[](2));
+    if (set(0)) (*this)[0].normalise();
+    if (set(1)) (*this)[1].normalise();
+    if (set(2)) (*this)[2].normalise();
 }
 
 

@@ -32,7 +32,7 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(coupledFacePointPatch, 0);
+    defineTypeNameAndDebug(coupledFacePointPatch, 0);
 }
 
 
@@ -47,12 +47,6 @@ Foam::coupledFacePointPatch::coupledFacePointPatch
     facePointPatch(patch, bm),
     coupledPointPatch(bm),
     coupledPolyPatch_(refCast<const coupledPolyPatch>(patch))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::coupledFacePointPatch::~coupledFacePointPatch()
 {}
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,8 +45,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef faePatchField_H
-#define faePatchField_H
+#ifndef Foam_faePatchField_H
+#define Foam_faePatchField_H
 
 #include "faPatch.H"
 #include "DimensionedField.H"
@@ -82,7 +82,7 @@ class faePatchField
 :
     public Field<Type>
 {
-    // Private data
+    // Private Data
 
         //- Reference to a patch
         const faPatch& patch_;
@@ -93,7 +93,13 @@ class faePatchField
 
 public:
 
+    //- The internal field type associated with the patch field
+    typedef DimensionedField<Type, edgeMesh> Internal;
+
+    //- The patch type for the patch field
     typedef faPatch Patch;
+
+    //- Type for a \em calculated patch
     typedef calculatedFaePatchField<Type> Calculated;
 
 
@@ -220,7 +226,19 @@ public:
         //  (does not set the patch field values)
         static tmp<faePatchField<Type>> New
         (
-            const word&,
+            const word& patchFieldType,
+            const faPatch&,
+            const DimensionedField<Type, edgeMesh>&
+        );
+
+        //- Return a pointer to a new patchField created on freestore given
+        //  patch and internal field
+        //  (does not set the patch field values)
+        //  Allows override of constraint type
+        static tmp<faePatchField<Type>> New
+        (
+            const word& patchFieldType,
+            const word& actualPatchType,
             const faPatch&,
             const DimensionedField<Type, edgeMesh>&
         );

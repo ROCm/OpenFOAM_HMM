@@ -558,7 +558,7 @@ void Foam::searchableSurfacesQueries::findNearest
 
                             // Calculate vector to move onto intersection line
                             vector d(r.refPoint()-near[i]);
-                            d -= (d&n)*n;
+                            d.removeCollinear(n);
 
                             // Trim the max distance
                             scalar magD = mag(d);

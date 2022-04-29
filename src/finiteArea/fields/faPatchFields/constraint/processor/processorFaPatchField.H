@@ -151,14 +151,7 @@ public:
             //- Return true if running parallel
             virtual bool coupled() const
             {
-                if (Pstream::parRun())
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
+                return Pstream::parRun();
             }
 
             //- Return neighbour field given internal field

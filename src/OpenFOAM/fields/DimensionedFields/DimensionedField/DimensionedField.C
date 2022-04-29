@@ -99,7 +99,6 @@ Foam::DimensionedField<Type, GeoMesh>::DimensionedField
     mesh_(mesh),
     dimensions_(dims)
 {
-    //Info<<"Move construct dimensioned for " << io.name() << nl;
     checkFieldSize();
 }
 
@@ -118,7 +117,6 @@ Foam::DimensionedField<Type, GeoMesh>::DimensionedField
     mesh_(mesh),
     dimensions_(dims)
 {
-    //Info<<"Move construct dimensioned for " << io.name() << nl;
     checkFieldSize();
 }
 

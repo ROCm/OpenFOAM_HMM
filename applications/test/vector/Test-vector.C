@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +31,7 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "vector.H"
+#include "vectorField.H"
 #include "IOstreams.H"
 #include <algorithm>
 #include <random>
@@ -110,6 +110,16 @@ void testData(const VecSpace& vs)
 }
 
 
+template<class Type>
+void testNormalise(Field<Type>& fld)
+{
+    Info<< nl << pTraits<Type>::typeName << " Field" << nl
+        << "  orig: " << fld << nl;
+    fld.normalise();
+    Info<< "  norm: " << fld << nl;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 //  Main program:
 
@@ -136,6 +146,38 @@ int main(int argc, char *argv[])
 
         std::shuffle(vec2.begin(), vec2.end(), std::default_random_engine());
         Info<< "shuffled: " << vec2 << nl;
+    }
+
+    // Basic tests for fields
+    {
+        scalarField sfld1
+        ({
+            0.0,
+            1.0,
+            2.0
+        });
+
+        testNormalise(sfld1);
+
+        Field<floatVector> vfld1
+        ({
+            floatVector(0.0, 1.0, 2.0),
+            floatVector(0, 0, floatScalarSMALL),
+            floatVector(0, 0, floatScalarVSMALL),
+            floatVector(0, 2, 1),
+        });
+
+        testNormalise(vfld1);
+
+        Field<doubleVector> vfld2
+        ({
+            doubleVector(0.0, 1.0, 2.0),
+            doubleVector(0, 0, doubleScalarSMALL),
+            doubleVector(0, 0, doubleScalarVSMALL),
+            doubleVector(0, 2, 1),
+        });
+
+        testNormalise(vfld2);
     }
 
     Info<< "\nEnd\n" << nl;

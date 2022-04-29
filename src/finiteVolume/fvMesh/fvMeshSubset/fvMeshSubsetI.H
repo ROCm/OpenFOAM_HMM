@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,35 +35,35 @@ inline const Foam::fvMesh& Foam::fvMeshSubset::baseMesh() const noexcept
 
 inline const Foam::fvMesh& Foam::fvMeshSubset::mesh() const noexcept
 {
-    return fvMeshSubsetPtr_ ? *fvMeshSubsetPtr_ : baseMesh_;
+    return subMeshPtr_ ? *subMeshPtr_ : baseMesh_;
 }
 
 
 inline bool Foam::fvMeshSubset::hasSubMesh() const noexcept
 {
-    return bool(fvMeshSubsetPtr_);
+    return bool(subMeshPtr_);
 }
 
 
 inline const Foam::fvMesh& Foam::fvMeshSubset::subMesh() const
 {
-    checkCellSubset();
+    checkHasSubMesh();
 
-    return *fvMeshSubsetPtr_;
+    return *subMeshPtr_;
 }
 
 
 inline Foam::fvMesh& Foam::fvMeshSubset::subMesh()
 {
-    checkCellSubset();
+    checkHasSubMesh();
 
-    return *fvMeshSubsetPtr_;
+    return *subMeshPtr_;
 }
 
 
 inline const Foam::labelList& Foam::fvMeshSubset::pointMap() const
 {
-    checkCellSubset();
+    checkHasSubMesh();
 
     return pointMap_;
 }
@@ -71,7 +71,7 @@ inline const Foam::labelList& Foam::fvMeshSubset::pointMap() const
 
 inline const Foam::labelList& Foam::fvMeshSubset::faceMap() const
 {
-    checkCellSubset();
+    checkHasSubMesh();
 
     return faceMap_;
 }
@@ -90,7 +90,7 @@ inline const Foam::labelList& Foam::fvMeshSubset::faceFlipMap() const
 
 inline const Foam::labelList& Foam::fvMeshSubset::cellMap() const
 {
-    checkCellSubset();
+    checkHasSubMesh();
 
     return cellMap_;
 }
@@ -98,7 +98,7 @@ inline const Foam::labelList& Foam::fvMeshSubset::cellMap() const
 
 inline const Foam::labelList& Foam::fvMeshSubset::patchMap() const
 {
-    checkCellSubset();
+    checkHasSubMesh();
 
     return patchMap_;
 }

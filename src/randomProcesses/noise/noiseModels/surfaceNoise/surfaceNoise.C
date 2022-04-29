@@ -82,9 +82,13 @@ void surfaceNoise::initialise(const fileName& fName)
         nAvailableTimes = allTimes.size() - startTimeIndex_;
     }
 
-    Pstream::scatter(pIndex_);
-    Pstream::scatter(startTimeIndex_);
-    Pstream::scatter(nAvailableTimes);
+    Pstream::broadcasts
+    (
+        UPstream::worldComm,
+        pIndex_,
+        startTimeIndex_,
+        nAvailableTimes
+    );
 
 
     // Note: all processors should call the windowing validate function
@@ -108,9 +112,13 @@ void surfaceNoise::initialise(const fileName& fName)
         nFace_ = surf.size();
     }
 
-    Pstream::scatter(times_);
-    Pstream::scatter(deltaT_);
-    Pstream::scatter(nFace_);
+    Pstream::broadcasts
+    (
+        UPstream::worldComm,
+        times_,
+        deltaT_,
+        nFace_
+    );
 }
 
 
@@ -319,7 +327,7 @@ scalar surfaceNoise::writeSurfaceData
                 areaAverage = sum(allData)/(allData.size() + ROOTVSMALL);
             }
         }
-        Pstream::scatter(areaAverage);
+        Pstream::broadcast(areaAverage);
 
         return areaAverage;
     }
@@ -409,7 +417,7 @@ scalar surfaceNoise::surfaceAverage
             // areaAverage = sum(allData*surf.magSf())/sum(surf.magSf());
             areaAverage = sum(allData)/allData.size();
         }
-        Pstream::scatter(areaAverage);
+        Pstream::broadcast(areaAverage);
 
         return areaAverage;
     }

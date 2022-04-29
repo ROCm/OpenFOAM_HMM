@@ -44,12 +44,14 @@ Foam::predicates::scalars::opNames
     { opType::NOT_EQUAL,  "notEqual" },
     { opType::LESS, "lt" },
     { opType::LESS, "less" },
-    { opType::LESS_EQ, "le" },
-    { opType::LESS_EQ, "lessEq" },
+    { opType::LESS_EQUAL, "le" },
+    { opType::LESS_EQUAL, "lessEqual" },
+    { opType::LESS_EQUAL, "lessEq" },
     { opType::GREATER, "gt" },
     { opType::GREATER, "greater" },
-    { opType::GREATER_EQ, "ge" },
-    { opType::GREATER_EQ, "greaterEq" },
+    { opType::GREATER_EQUAL, "ge" },
+    { opType::GREATER_EQUAL, "greaterEqual" },
+    { opType::GREATER_EQUAL, "greaterEq" },
 });
 
 
@@ -73,14 +75,14 @@ std::function<bool(Foam::scalar)> Foam::predicates::scalars::operation
         case opType::LESS:
             return lessOp(opVal);
             break;
-        case opType::LESS_EQ:
-            return lessEqOp(opVal);
+        case opType::LESS_EQUAL:
+            return lessEqualOp(opVal);
             break;
         case opType::GREATER:
             return greaterOp(opVal);
             break;
-        case opType::GREATER_EQ:
-            return greaterEqOp(opVal);
+        case opType::GREATER_EQUAL:
+            return greaterEqualOp(opVal);
             break;
         case opType::ALWAYS:
             return trueOp();

@@ -657,7 +657,7 @@ tr68:
 	goto st14;
 tr69:
 #line 251 "fieldExprScanner.rl"
-	{te = p+1;{ EMIT_TOKEN(LESS_EQ); }}
+	{te = p+1;{ EMIT_TOKEN(LESS_EQUAL); }}
 	goto st14;
 tr70:
 #line 252 "fieldExprScanner.rl"
@@ -665,7 +665,7 @@ tr70:
 	goto st14;
 tr71:
 #line 253 "fieldExprScanner.rl"
-	{te = p+1;{ EMIT_TOKEN(GREATER_EQ); }}
+	{te = p+1;{ EMIT_TOKEN(GREATER_EQUAL); }}
 	goto st14;
 tr72:
 #line 206 "fieldExprScanner.rl"

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,7 +42,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::polyTopoChanger::readModifiers()
+bool Foam::polyTopoChanger::readContents()
 {
     if
     (
@@ -51,9 +51,6 @@ void Foam::polyTopoChanger::readModifiers()
      || (readOpt() == IOobject::READ_IF_PRESENT && headerOk())
     )
     {
-        // Warn for MUST_READ_IF_MODIFIED
-        warnNoRereading<polyTopoChanger>();
-
         PtrList<polyMeshModifier>& modifiers = *this;
 
         // Read modifiers
@@ -78,9 +75,11 @@ void Foam::polyTopoChanger::readModifiers()
         }
 
         is.check(FUNCTION_NAME);
-
         close();
+        return true;
     }
+
+    return false;
 }
 
 
@@ -96,7 +95,10 @@ Foam::polyTopoChanger::polyTopoChanger
     regIOobject(io),
     mesh_(mesh)
 {
-    readModifiers();
+    // Warn for MUST_READ_IF_MODIFIED
+    warnNoRereading<polyTopoChanger>();
+
+    readContents();
 }
 
 
@@ -116,9 +118,14 @@ Foam::polyTopoChanger::polyTopoChanger
             (
                 mesh.meshDir(),
                 "meshModifiers",
-                rOpt
+                (
+                    // Safety? promote NO_READ to READ_IF_PRESENT
+                    rOpt == IOobject::NO_READ
+                  ? IOobject::READ_IF_PRESENT
+                  : rOpt
+                )
             ),
-            mesh.meshSubDir,
+            polyMesh::meshSubDir,
             mesh,
             rOpt,
             IOobject::NO_WRITE

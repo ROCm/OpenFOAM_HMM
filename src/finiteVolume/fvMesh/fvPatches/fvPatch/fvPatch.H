@@ -113,6 +113,7 @@ public:
 
 public:
 
+    //- The boundary type associated with the patch
     typedef fvBoundaryMesh BoundaryMesh;
 
     friend class fvBoundaryMesh;

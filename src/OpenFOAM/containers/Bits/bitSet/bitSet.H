@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,8 +43,8 @@ See also
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef bitSet_H
-#define bitSet_H
+#ifndef Foam_bitSet_H
+#define Foam_bitSet_H
 
 #include "className.H"
 #include "PackedList.H"
@@ -135,7 +135,7 @@ public:
 
     // Constructors
 
-        //- Default construct an empty, zero-sized set
+        //- Default construct an empty, zero-sized bitSet
         inline bitSet() noexcept;
 
         //- Construct from Istream
@@ -153,10 +153,12 @@ public:
         //- Move construct
         inline bitSet(bitSet&& bitset);
 
-        //- Copy construct a subset
+        //- Construct a new bitSet by extracting the specified (unique)
+        //- locations of an existing bitSet.
         bitSet(const bitSet& bitset, const labelUList& addr);
 
-        //- Copy construct a subset
+        //- Construct a new set by extracting the specified (unique)
+        //- locations of an existing bitSet.
         template<class Addr>
         bitSet
         (
@@ -164,18 +166,26 @@ public:
             const IndirectListBase<label, Addr>& addr
         );
 
-        //- Copy construct a subset range
+        //- Construct a new bitSet by extracting the specified range
+        //- locations of an existing bitSet.
         bitSet(const bitSet& bitset, const labelRange& range);
 
         //- Construct from a list of bools
         inline explicit bitSet(const UList<bool>& bools);
 
-        //- Construct with given size with all bits set to 0,
-        //- subsequently add specified locations as 1.
+        //- Construct with given pre-size (filled with 0),
+        //- subsequently add specified locations as 1,
+        //- auto-vivify entries if needed.
+        explicit bitSet(const label n, const labelRange& range);
+
+        //- Construct with given pre-size (filled with 0),
+        //- subsequently add specified locations as 1,
+        //- auto-vivify entries if needed.
         inline bitSet(const label n, const labelUList& locations);
 
-        //- Construct with given size with all bits set to 0,
-        //- subsequently add specified locations as 1.
+        //- Construct with given pre-size (filled with 0),
+        //- subsequently add specified locations as 1,
+        //- auto-vivify entries if needed.
         template<class Addr>
         bitSet
         (
@@ -183,26 +193,32 @@ public:
             const IndirectListBase<label, Addr>& locations
         );
 
-        //- Construct with given size with all bits set to 0,
-        //- subsequently add specified locations as 1.
+        //- Construct with given pre-size (filled with 0),
+        //- subsequently add specified locations as 1,
+        //- auto-vivify entries if needed.
         template<unsigned N>
         bitSet(const label n, const FixedList<label, N>& locations);
 
-        //- Construct with given size with all bits set to 0,
-        //- subsequently add specified locations as 1.
+        //- Construct with given pre-size (filled with 0),
+        //- subsequently add specified locations as 1,
+        //- auto-vivify entries if needed.
         inline bitSet(const label n, std::initializer_list<label> locations);
 
         //- Construct with automatic sizing (filled with 0),
-        //- and populate with specified locations as 1.
+        //- and set the specified locations as 1.
+        explicit bitSet(const labelRange& range);
+
+        //- Construct with automatic sizing (filled with 0),
+        //- and set the specified locations as 1.
         inline explicit bitSet(const labelUList& locations);
 
         //- Construct with automatic sizing (filled with 0),
-        //- and populate with specified locations as 1.
+        //- and set the specified locations as 1.
         template<class Addr>
         inline explicit bitSet(const IndirectListBase<label, Addr>& locations);
 
         //- Construct with automatic sizing (filled with 0),
-        //- and populate with specified locations as 1.
+        //- and set the specified locations as 1.
         template<unsigned N>
         explicit bitSet(const FixedList<label, N>& locations);
 
@@ -216,7 +232,7 @@ public:
 
         //- True if all bits in this bitset are set or if the set is \b empty.
         //  Returning true for an empty set may not seem intuitive, but
-        //  conforms to how boost has defined things.
+        //  conforms with boost definitions and std::all_of behaviour.
         //  \note Method name compatibility with boost::dynamic_bitset
         inline bool all() const;
 
@@ -388,26 +404,26 @@ public:
         inline bitSet& extend(const bitSet& other);
 
         //- Set the locations listed by the iterator range,
-        //  auto-vivify entries if needed.
+        //- auto-vivify entries if needed.
         //
         //  \return number of locations changed
         template<class InputIter>
         label setMany(InputIter first, InputIter last);
 
-        //- Set the listed locations to true.
+        //- Set the listed locations to 1.
         //  Does auto-vivify for non-existent entries.
         //
         //  \return number of locations changed
         inline label set(const labelUList& locations);
 
-        //- Set the listed locations to true.
+        //- Set the listed locations to 1.
         //  Does auto-vivify for non-existent entries.
         //
         //  \return number of locations changed
         template<class Addr>
         inline label set(const IndirectListBase<label, Addr>& locations);
 
-        //- Set the listed locations to true.
+        //- Set the listed locations to 1.
         //  Does auto-vivify for non-existent entries.
         //
         //  \return number of locations changed

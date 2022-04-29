@@ -794,23 +794,10 @@ void Foam::cellCellStencils::inverseDistance::markDonors
 //        forAll(cellRegion, celli)
 //        {
 //            label region = cellRegion[celli];
-//
-//            // Count originating processor. Use isLocal as efficiency since
-//            // most cells are locally originating.
-//            if (globalRegions.isLocal(region))
+//            label proci = globalRegions.whichProcID(region);
+//            if (haveRegion.insert(region))
 //            {
-//                if (haveRegion.insert(region))
-//                {
-//                    nOriginating[Pstream::myProcNo()]++;
-//                }
-//            }
-//            else
-//            {
-//                label proci = globalRegions.whichProcID(region);
-//                if (haveRegion.insert(region))
-//                {
-//                    nOriginating[proci]++;
-//                }
+//                nOriginating[proci]++;
 //            }
 //        }
 //    }

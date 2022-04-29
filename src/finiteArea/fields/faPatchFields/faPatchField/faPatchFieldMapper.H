@@ -26,10 +26,13 @@ License
 Class
     Foam::faPatchFieldMapper
 
+Description
+    A FieldMapper for finite-area patch fields
+
 \*---------------------------------------------------------------------------*/
 
-#ifndef faPatchFieldMapper_H
-#define faPatchFieldMapper_H
+#ifndef Foam_faPatchFieldMapper_H
+#define Foam_faPatchFieldMapper_H
 
 #include "primitiveFields.H"
 
@@ -46,14 +49,12 @@ class faPatchFieldMapper
 :
     public FieldMapper
 {
-
 public:
 
     // Constructors
 
-        //- Null constructor
-        faPatchFieldMapper()
-        {}
+        //- Default construct
+        faPatchFieldMapper() = default;
 };
 
 

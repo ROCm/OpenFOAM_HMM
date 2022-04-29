@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,17 +24,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::distributedUnallocatedDirectFvPatchFieldMapper
+    Foam::faBoundaryMeshEntries
 
 Description
-    FieldMapper with direct mapping from remote quantities.
+    Read and store dictionary entries for finite-area boundary patches.
+
+SourceFiles
+    faBoundaryMeshEntries.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef distributedUnallocatedDirectFvPatchFieldMapper_H
-#define distributedUnallocatedDirectFvPatchFieldMapper_H
+#ifndef Foam_faBoundaryMeshEntries_H
+#define Foam_faBoundaryMeshEntries_H
 
-#include "fvPatchFieldMapper.H"
+#include "regIOobject.H"
+#include "PtrList.H"
+#include "entry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -43,77 +47,51 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-        Class distributedUnallocatedDirectFvPatchFieldMapper Declaration
+                    Class faBoundaryMeshEntries Declaration
 \*---------------------------------------------------------------------------*/
 
-class distributedUnallocatedDirectFvPatchFieldMapper
+class faBoundaryMeshEntries
 :
-    public fvPatchFieldMapper
+    public regIOobject,
+    public PtrList<entry>
 {
-    const labelUList& directAddressing_;
-
-    const mapDistributeBase& distMap_;
-
-    bool hasUnmapped_;
-
 public:
+
+    //- Runtime type information
+    TypeNameNoDebug("faBoundaryMesh");
+
 
     // Constructors
 
-        //- Construct given addressing
-        distributedUnallocatedDirectFvPatchFieldMapper
-        (
-            const labelUList& directAddressing,
-            const mapDistributeBase& distMap
-        )
+        //- Read construct from IOobject
+        explicit faBoundaryMeshEntries(const IOobject& io)
         :
-            directAddressing_(directAddressing),
-            distMap_(distMap),
-            hasUnmapped_(directAddressing_.size() && min(directAddressing_) < 0)
-        {}
-
-
-    //- Destructor
-    virtual ~distributedUnallocatedDirectFvPatchFieldMapper() = default;
-
-
-    // Member Functions
-
-        virtual label size() const
+            regIOobject(io),
+            PtrList<entry>()
         {
-            return
+            if
             (
-                notNull(directAddressing_)
-              ? directAddressing_.size()
-              : distMap_.constructSize()
-            );
+                (
+                    io.readOpt() == IOobject::MUST_READ
+                 || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
+                )
+             || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
+            )
+            {
+                readStream(typeName) >> *this;
+            }
         }
 
-        virtual bool direct() const
-        {
-            return true;
-        }
 
-        virtual bool distributed() const
-        {
-            return true;
-        }
+   // Member Functions
 
-        virtual const mapDistributeBase& distributeMap() const
+        bool writeData(Ostream&) const
         {
-            return distMap_;
-        }
-
-        virtual bool hasUnmapped() const
-        {
-            return hasUnmapped_;
-        }
-
-        virtual const labelUList& directAddressing() const
-        {
-            return directAddressing_;
+            NotImplemented;
+            return false;
         }
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

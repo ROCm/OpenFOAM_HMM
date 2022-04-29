@@ -32,8 +32,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef morphFieldMapper_H
-#define morphFieldMapper_H
+#ifndef Foam_morphFieldMapper_H
+#define Foam_morphFieldMapper_H
 
 #include "Field.H"
 #include "Map.H"
@@ -51,14 +51,12 @@ class morphFieldMapper
 :
     public FieldMapper
 {
-
 public:
 
     // Constructors
 
-        //- Null constructor
-        morphFieldMapper()
-        {}
+        //- Default construct
+        morphFieldMapper() = default;
 
 
     //- Destructor
@@ -75,7 +73,6 @@ public:
 
         //- Return list of inserted objects
         virtual const labelList& insertedObjectLabels() const = 0;
-
 };
 
 

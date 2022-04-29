@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef polyTopoChanger_H
-#define polyTopoChanger_H
+#ifndef Foam_polyTopoChanger_H
+#define Foam_polyTopoChanger_H
 
 #include "regIOobject.H"
 #include "PtrList.H"
@@ -67,7 +67,8 @@ class polyTopoChanger
 {
     // Private Member Functions
 
-        void readModifiers();
+        //- Read if IOobject flags set, set modifiers. Return true if read.
+        bool readContents();
 
         //- No copy construct
         polyTopoChanger(const polyTopoChanger&) = delete;

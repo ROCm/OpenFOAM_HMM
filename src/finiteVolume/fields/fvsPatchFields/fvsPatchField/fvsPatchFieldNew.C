@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,7 +37,10 @@ Foam::tmp<Foam::fvsPatchField<Type>> Foam::fvsPatchField<Type>::New
     const DimensionedField<Type, surfaceMesh>& iF
 )
 {
-    DebugInFunction << "Constructing fvsPatchField" << endl;
+    DebugInFunction
+        << "patchFieldType = " << patchFieldType
+        << " [" << actualPatchType
+        << "] : " << p.type() << " name = " << p.name() << endl;
 
     auto* ctorPtr = patchConstructorTable(patchFieldType);
 
@@ -51,11 +54,7 @@ Foam::tmp<Foam::fvsPatchField<Type>> Foam::fvsPatchField<Type>::New
         ) << exit(FatalError);
     }
 
-    if
-    (
-        actualPatchType == word::null
-     || actualPatchType != p.type()
-    )
+    if (actualPatchType.empty() || actualPatchType != p.type())
     {
         auto* patchTypeCtor = patchConstructorTable(p.type());
 
@@ -89,9 +88,15 @@ Foam::tmp<Foam::fvsPatchField<Type>> Foam::fvsPatchField<Type>::New
     const dictionary& dict
 )
 {
-    DebugInFunction << "Constructing fvsPatchField" << endl;
-
     const word patchFieldType(dict.get<word>("type"));
+
+    word actualPatchType;
+    dict.readIfPresent("patchType", actualPatchType, keyType::LITERAL);
+
+    DebugInFunction
+        << "patchFieldType = " << patchFieldType
+        << " [" << actualPatchType
+        << "] : " << p.type() << " name = " << p.name() << endl;
 
     auto* ctorPtr = dictionaryConstructorTable(patchFieldType);
 
@@ -113,11 +118,7 @@ Foam::tmp<Foam::fvsPatchField<Type>> Foam::fvsPatchField<Type>::New
         }
     }
 
-    if
-    (
-        !dict.found("patchType")
-     || dict.get<word>("patchType") != p.type()
-    )
+    if (actualPatchType.empty() || actualPatchType != p.type())
     {
         auto* patchTypeCtor = dictionaryConstructorTable(p.type());
 
@@ -144,7 +145,9 @@ Foam::tmp<Foam::fvsPatchField<Type>> Foam::fvsPatchField<Type>::New
     const fvPatchFieldMapper& pfMapper
 )
 {
-    DebugInFunction << "Constructing fvsPatchField" << endl;
+    DebugInFunction
+        << "patchFieldType = " << ptf.type()
+        << " : " << p.type() << " name = " << p.name() << endl;
 
     auto* ctorPtr = patchMapperConstructorTable(ptf.type());
 

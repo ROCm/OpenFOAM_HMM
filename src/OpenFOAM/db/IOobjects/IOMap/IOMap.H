@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,8 +36,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef IOMap_H
-#define IOMap_H
+#ifndef Foam_IOMap_H
+#define Foam_IOMap_H
 
 #include "Map.H"
 #include "regIOobject.H"
@@ -57,7 +57,15 @@ class IOMap
     public regIOobject,
     public Map<T>
 {
+    // Private Member Functions
+
+        //- Read if IOobject flags set. Return true if read.
+        bool readContents();
+
 public:
+
+    //- The underlying content type
+    typedef Map<T> content_type;
 
     //- Runtime type information
     TypeName("Map");
@@ -101,6 +109,7 @@ public:
         {
             return globalFilePath(type());
         }
+
 
     // Member Operators
 

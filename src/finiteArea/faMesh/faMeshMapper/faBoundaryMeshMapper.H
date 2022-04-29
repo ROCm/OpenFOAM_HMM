@@ -50,7 +50,15 @@ class faBoundaryMeshMapper
 :
     public PtrList<faPatchMapper>
 {
-    // Private Member Functions
+public:
+
+    // Public Types
+
+        //- The patch mapper type
+        typedef faPatchMapper mapper_type;
+
+
+    // Generated Methods
 
         //- No copy construct
         faBoundaryMeshMapper(const faBoundaryMeshMapper&) = delete;
@@ -58,8 +66,6 @@ class faBoundaryMeshMapper
         //- No copy assignment
         void operator=(const faBoundaryMeshMapper&) = delete;
 
-
-public:
 
     // Constructors
 
@@ -74,14 +80,14 @@ public:
         {
             const faBoundaryMesh& patches = mesh.boundary();
 
-            forAll(patches, patchI)
+            forAll(patches, patchi)
             {
                 set
                 (
-                    patchI,
+                    patchi,
                     new faPatchMapper
                     (
-                        patches[patchI],
+                        patches[patchi],
                         mpm
                     )
                 );

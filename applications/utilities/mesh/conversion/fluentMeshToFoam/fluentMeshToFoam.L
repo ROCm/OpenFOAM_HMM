@@ -1698,7 +1698,7 @@ int main(int argc, char *argv[])
         fileName bczf
         (
             runTime.path()/runTime.constant()
-           /"polyMesh"/"boundaryAdjacentCellZones"
+           /polyMesh::meshSubDir/"boundaryAdjacentCellZones"
         );
 
         OFstream boundaryCellZonesFile(bczf);

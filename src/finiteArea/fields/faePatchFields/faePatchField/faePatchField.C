@@ -170,6 +170,11 @@ template<class Type>
 void Foam::faePatchField<Type>::write(Ostream& os) const
 {
     os.writeEntry("type", type());
+
+    // if (!patchType_.empty())
+    // {
+    //     os.writeEntry("patchType", patchType_);
+    // }
 }
 
 

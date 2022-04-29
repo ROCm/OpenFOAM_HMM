@@ -200,7 +200,7 @@ Foam::Map<Type> Foam::zoneDistribute::getDatafromOtherProc
 
         for (const int proci : pBufs.allProcs())
         {
-            if (proci != UPstream::myProcNo() && pBufs.hasRecvData(proci))
+            if (proci != UPstream::myProcNo() && pBufs.recvDataCount(proci))
             {
                 UIPstream fromProc(proci, pBufs);
                 Map<Type> tmpValues(fromProc);

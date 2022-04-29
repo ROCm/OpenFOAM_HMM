@@ -31,11 +31,10 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef pointPatchFieldMapper_H
-#define pointPatchFieldMapper_H
+#ifndef Foam_pointPatchFieldMapper_H
+#define Foam_pointPatchFieldMapper_H
 
 #include "primitiveFields.H"
-#include "FieldMapper.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,14 +49,12 @@ class pointPatchFieldMapper
 :
     public FieldMapper
 {
-
 public:
 
     // Constructors
 
-        //- Null constructor
-        pointPatchFieldMapper()
-        {}
+        //- Default construct
+        pointPatchFieldMapper() = default;
 };
 
 

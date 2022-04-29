@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,8 +47,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef UPtrList_H
-#define UPtrList_H
+#ifndef Foam_UPtrList_H
+#define Foam_UPtrList_H
 
 #include "PtrListDetail.H"
 #include <iterator>
@@ -132,7 +132,7 @@ public:
         //  the values (not the addresses) within the original list.
         explicit UPtrList(PtrList<T>& list);
 
-        //- Construct from UList of pointers
+        //- Construct from UList of pointers (shallow copy)
         inline explicit UPtrList(const UList<T*>& list);
 
         //- Construct from UList, taking the address of each list element
@@ -163,17 +163,23 @@ public:
         //- Return reference to the last element of the list
         inline const T& last() const;
 
+        //- Return const pointer to element (can be nullptr),
+        //- or nullptr for out-of-range access (ie, \em with bounds checking).
+        //  The return value can be tested as a bool.
+        inline const T* test(const label i) const;
+
         //- Return pointer to element (can be nullptr),
-        //- without bounds checking.
+        //- \em without bounds checking.
+        //  The return value can be tested as a bool.
         inline T* get(const label i);
 
         //- Return const pointer to element (can be nullptr),
-        //- without bounds checking.
+        //- \em without bounds checking.
         inline const T* get(const label i) const;
 
         //- Return const pointer to element (can be nullptr),
-        //- without bounds checking - same as get().
-        //  The return value can also be tested as a bool.
+        //- \em without bounds checking - same as get().
+        //  The return value can be tested as a bool.
         const T* set(const label i) const { return this->get(i); }
 
 

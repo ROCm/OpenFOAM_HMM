@@ -312,7 +312,10 @@ public:
             //- From global to local on proci
             inline label toLocal(const label proci, const label i) const;
 
-            //- Which processor does global come from? Binary search.
+            //- Which processor does global id come from?
+            //  Does an initial check for isLocal first (assumed to occur
+            //  reasonably frequently) followed by a binary search.
+            //- Fatal for out of range ids (eg, negative or >= totalSize()
             inline label whichProcID(const label i) const;
 
 

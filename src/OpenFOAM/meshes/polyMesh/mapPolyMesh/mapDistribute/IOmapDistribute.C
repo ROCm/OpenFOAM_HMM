@@ -36,6 +36,28 @@ namespace Foam
 }
 
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+bool Foam::IOmapDistribute::readContents()
+{
+    if
+    (
+        (
+            readOpt() == IOobject::MUST_READ
+         || readOpt() == IOobject::MUST_READ_IF_MODIFIED
+        )
+     || (readOpt() == IOobject::READ_IF_PRESENT && headerOk())
+    )
+    {
+        readStream(typeName) >> *this;
+        close();
+        return true;
+    }
+
+    return false;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::IOmapDistribute::IOmapDistribute(const IOobject& io)
@@ -45,18 +67,7 @@ Foam::IOmapDistribute::IOmapDistribute(const IOobject& io)
     // Warn for MUST_READ_IF_MODIFIED
     warnNoRereading<IOmapDistribute>();
 
-    if
-    (
-        (
-            io.readOpt() == IOobject::MUST_READ
-         || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
-        )
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
-    {
-        readStream(typeName) >> *this;
-        close();
-    }
+    readContents();
 }
 
 
@@ -71,19 +82,7 @@ Foam::IOmapDistribute::IOmapDistribute
     // Warn for MUST_READ_IF_MODIFIED
     warnNoRereading<IOmapDistribute>();
 
-    if
-    (
-        (
-            io.readOpt() == IOobject::MUST_READ
-         || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
-        )
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
-    {
-        readStream(typeName) >> *this;
-        close();
-    }
-    else
+    if (!readContents())
     {
         mapDistribute::operator=(map);
     }
@@ -103,18 +102,7 @@ Foam::IOmapDistribute::IOmapDistribute
 
     mapDistribute::transfer(map);
 
-    if
-    (
-        (
-            io.readOpt() == IOobject::MUST_READ
-         || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
-        )
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
-    {
-        readStream(typeName) >> *this;
-        close();
-    }
+    readContents();
 }
 
 

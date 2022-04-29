@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -174,7 +174,7 @@ public:
 
         //- Construct given IOobject, mesh, dimensioned<Type> and patch type.
         //  This assigns both dimensions and values.
-        //  The internal name for the dimensioned\<Type\> has no influence.
+        //  The name of the dimensioned\<Type\> has no influence.
         GeometricField
         (
             const IOobject& io,
@@ -185,7 +185,7 @@ public:
 
         //- Construct given IOobject, mesh, dimensioned<Type> and patch types.
         //  This assigns both dimensions and values.
-        //  The internal name for the dimensioned\<Type\> has no influence.
+        //  The name of the dimensioned\<Type\> has no influence.
         GeometricField
         (
             const IOobject& io,
@@ -195,11 +195,41 @@ public:
             const wordList& actualPatchTypes = wordList()
         );
 
-        //- Copy construct from components
+        //- Copy construct from internal field and a patch list to clone
         GeometricField
         (
             const IOobject& io,
             const Internal& diField,
+            const PtrList<PatchField<Type>>& ptfl
+        );
+
+        //- Move construct from internal field and a patch list to clone
+        GeometricField
+        (
+            const IOobject& io,
+            Internal&& diField,
+            const PtrList<PatchField<Type>>& ptfl
+        );
+
+        //- Move construct from internal field and a patch list to clone
+        GeometricField
+        (
+            const IOobject& io,
+            const tmp<Internal>& tfield,
+            const PtrList<PatchField<Type>>& ptfl
+        );
+
+        //- Copy construct from internal field and a patch list to clone
+        GeometricField
+        (
+            const Internal& diField,
+            const PtrList<PatchField<Type>>& ptfl
+        );
+
+        //- Move construct from internal field and a patch list to clone
+        GeometricField
+        (
+            Internal&& diField,
             const PtrList<PatchField<Type>>& ptfl
         );
 
@@ -230,6 +260,26 @@ public:
             const Mesh& mesh,
             const dimensionSet& ds,
             const Field<Type>& iField,
+            const PtrList<PatchField<Type>>& ptfl
+        );
+
+        //- Move construct from internal field and a patch list to clone
+        GeometricField
+        (
+            const IOobject& io,
+            const Mesh& mesh,
+            const dimensionSet& ds,
+            Field<Type>&& iField,
+            const PtrList<PatchField<Type>>& ptfl
+        );
+
+        //- Copy construct from components
+        GeometricField
+        (
+            const IOobject& io,
+            const Mesh& mesh,
+            const dimensionSet& ds,
+            const tmp<Field<Type>>& tiField,
             const PtrList<PatchField<Type>>& ptfl
         );
 
@@ -268,7 +318,7 @@ public:
             const GeometricField<Type, PatchField, GeoMesh>& gf
         );
 
-        //- Construct as copy of tmp<GeometricField> resetting IO parameters
+        //- Construct from tmp\<GeometricField\> resetting IO parameters
         GeometricField
         (
             const IOobject& io,
@@ -527,8 +577,11 @@ public:
 
     // Member Function *this Operators
 
-        //- Negate the field inplace
+        //- Negate the field inplace. See notes in Field
         void negate();
+
+        //- Normalise the field inplace. See notes in Field
+        void normalise();
 
         //- Replace specified field component with content from another field
         void replace

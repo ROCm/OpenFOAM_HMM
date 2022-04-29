@@ -43,8 +43,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef PtrList_H
-#define PtrList_H
+#ifndef Foam_PtrList_H
+#define Foam_PtrList_H
 
 #include "UPtrList.H"
 #include "SLPtrListFwd.H"
@@ -134,8 +134,8 @@ public:
     // Access
 
         //- Return const pointer to element (can be nullptr),
-        //  without bounds checking - same as get().
-        //  The return value can also be tested as a bool.
+        //- without bounds checking - same as get().
+        //  The return value can be tested as a bool.
         const T* set(const label i) const { return this->get(i); }
 
 

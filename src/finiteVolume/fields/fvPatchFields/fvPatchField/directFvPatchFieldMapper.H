@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2013 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,17 +23,18 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
+Typedef
     Foam::directFvPatchFieldMapper
 
 Description
-    direct fvPatchFieldMapper
+    A fvPatchFieldMapper with direct mapping
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef directFvPatchFieldMapper_H
-#define directFvPatchFieldMapper_H
+#ifndef Foam_directFvPatchFieldMapper_H
+#define Foam_directFvPatchFieldMapper_H
 
+#include "directFieldMapper.H"
 #include "fvPatchFieldMapper.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -42,70 +42,11 @@ Description
 namespace Foam
 {
 
-/*---------------------------------------------------------------------------*\
-                       Class directFvPatchFieldMapper Declaration
-\*---------------------------------------------------------------------------*/
+typedef
+    DirectFieldMapper<fvPatchFieldMapper>
+    directFvPatchFieldMapper;
 
-class directFvPatchFieldMapper
-:
-    public fvPatchFieldMapper
-{
-
-    //- Addressing from new back to old
-    const labelUList& directAddressing_;
-
-    //- Does map contain any unmapped values
-    bool hasUnmapped_;
-
-
-public:
-
-    // Constructors
-
-        //- Construct given addressing
-        directFvPatchFieldMapper(const labelUList& directAddressing)
-        :
-            directAddressing_(directAddressing),
-            hasUnmapped_(directAddressing_.size() && min(directAddressing_) < 0)
-        {}
-
-
-    //- Destructor
-    virtual ~directFvPatchFieldMapper() = default;
-
-
-    // Member Functions
-
-        label size() const
-        {
-            return directAddressing_.size();
-        }
-
-        bool direct() const
-        {
-            return true;
-        }
-
-        bool hasUnmapped() const
-        {
-            return hasUnmapped_;
-        }
-
-        bool& hasUnmapped()
-        {
-            return hasUnmapped_;
-        }
-
-        const labelUList& directAddressing() const
-        {
-            return directAddressing_;
-        }
-};
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

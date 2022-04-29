@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,12 +50,12 @@ void Foam::polyMeshGeometry::updateFaceCentresAndAreas
     const labelList& changedFaces
 )
 {
-    const faceList& fs = mesh_.faces();
+    const faceList& fcs = mesh_.faces();
 
     for (const label facei : changedFaces)
     {
-        const labelList& f = fs[facei];
-        label nPoints = f.size();
+        const face& f = fcs[facei];
+        const label nPoints = f.size();
 
         // If the face is a triangle, do a direct calculation for efficiency
         // and to avoid round-off error-related problems
@@ -66,33 +66,41 @@ void Foam::polyMeshGeometry::updateFaceCentresAndAreas
         }
         else
         {
-            vector sumN = Zero;
-            scalar sumA = Zero;
-            vector sumAc = Zero;
+            solveVector sumN = Zero;
+            solveScalar sumA = Zero;
+            solveVector sumAc = Zero;
 
-            point fCentre = p[f[0]];
+            solveVector fCentre = p[f[0]];
             for (label pi = 1; pi < nPoints; ++pi)
             {
-                fCentre += p[f[pi]];
+                fCentre += solveVector(p[f[pi]]);
             }
-
             fCentre /= nPoints;
 
             for (label pi = 0; pi < nPoints; ++pi)
             {
-                const point& nextPoint = p[f[(pi + 1) % nPoints]];
+                const solveVector thisPoint(p[f.thisLabel(pi)]);
+                const solveVector nextPoint(p[f.nextLabel(pi)]);
 
-                vector c = p[f[pi]] + nextPoint + fCentre;
-                vector n = (nextPoint - p[f[pi]])^(fCentre - p[f[pi]]);
-                scalar a = mag(n);
+                solveVector c = thisPoint + nextPoint + fCentre;
+                solveVector n = (nextPoint - thisPoint)^(fCentre - thisPoint);
+                solveScalar a = mag(n);
 
                 sumN += n;
                 sumA += a;
                 sumAc += a*c;
             }
 
-            faceCentres_[facei] = (1.0/3.0)*sumAc/(sumA + VSMALL);
-            faceAreas_[facei] = 0.5*sumN;
+            if (sumA < ROOTVSMALL)
+            {
+                faceCentres_[facei] = fCentre;
+                faceAreas_[facei] = Zero;
+            }
+            else
+            {
+                faceCentres_[facei] = (1.0/3.0)*sumAc/sumA;
+                faceAreas_[facei] = 0.5*sumN;
+            }
         }
     }
 }
@@ -946,6 +954,7 @@ bool Foam::polyMeshGeometry::checkFaceSkewness
 
     const labelList& own = mesh.faceOwner();
     const labelList& nei = mesh.faceNeighbour();
+    const faceList& faces = mesh.faces();
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
     // Calculate coupled cell centre
@@ -962,7 +971,7 @@ bool Foam::polyMeshGeometry::checkFaceSkewness
         {
             scalar skewness = primitiveMeshTools::faceSkewness
             (
-                mesh,
+                faces,
                 points,
                 faceCentres,
                 faceAreas,
@@ -996,7 +1005,7 @@ bool Foam::polyMeshGeometry::checkFaceSkewness
         {
             scalar skewness = primitiveMeshTools::faceSkewness
             (
-                mesh,
+                faces,
                 points,
                 faceCentres,
                 faceAreas,
@@ -1030,7 +1039,7 @@ bool Foam::polyMeshGeometry::checkFaceSkewness
         {
             scalar skewness = primitiveMeshTools::boundaryFaceSkewness
             (
-                mesh,
+                faces,
                 points,
                 faceCentres,
                 faceAreas,
@@ -1072,7 +1081,7 @@ bool Foam::polyMeshGeometry::checkFaceSkewness
 
         scalar skewness = primitiveMeshTools::faceSkewness
         (
-            mesh,
+            faces,
             points,
             faceCentres,
             faceAreas,
@@ -1449,18 +1458,15 @@ bool Foam::polyMeshGeometry::checkFaceAngles
 
         const vector faceNormal = normalised(faceAreas[facei]);
 
-        // Get edge from f[0] to f[size-1];
+        // Normalized vector from f[size-1] to f[0];
         vector ePrev(p[f.first()] - p[f.last()]);
         scalar magEPrev = mag(ePrev);
         ePrev /= magEPrev + VSMALL;
 
         forAll(f, fp0)
         {
-            // Get vertex after fp
-            label fp1 = f.fcIndex(fp0);
-
             // Normalized vector between two consecutive points
-            vector e10(p[f[fp1]] - p[f[fp0]]);
+            vector e10(p[f.nextLabel(fp0)] - p[f.thisLabel(fp0)]);
             scalar magE10 = mag(e10);
             e10 /= magE10 + VSMALL;
 

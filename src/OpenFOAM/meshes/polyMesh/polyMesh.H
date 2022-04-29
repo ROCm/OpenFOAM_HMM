@@ -306,9 +306,12 @@ private:
 
 public:
 
-    // Public typedefs
+    // Public Typedefs
 
+        //- The mesh type
         typedef polyMesh Mesh;
+
+        //- The boundary type associated with the mesh
         typedef polyBoundaryMesh BoundaryMesh;
 
 

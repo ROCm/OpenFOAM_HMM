@@ -38,8 +38,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef edgeInterpolation_H
-#define edgeInterpolation_H
+#ifndef Foam_edgeInterpolation_H
+#define Foam_edgeInterpolation_H
 
 #include "tmp.H"
 #include "scalar.H"
@@ -52,6 +52,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class polyMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -60,7 +61,7 @@ class polyMesh;
 
 class edgeInterpolation
 {
-    // Private data
+    // Private Data
 
         // Reference to faMesh
         const faMesh& faMesh_;
@@ -77,20 +78,20 @@ class edgeInterpolation
             //- Face-gradient difference factors
             mutable edgeScalarField* differenceFactors_;
 
-            //- Is mesh orthogonal
-            mutable bool orthogonal_;
-
             //- Non-orthogonality correction vectors
             mutable edgeVectorField* correctionVectors_;
-
-            //- Is mesh skew
-            mutable bool skew_;
 
             //- Skew correction vectors
             mutable edgeVectorField* skewCorrectionVectors_;
 
+            //- Is mesh orthogonal
+            mutable bool orthogonal_;
 
-    // Private member functions
+            //- Is mesh skew
+            mutable bool skew_;
+
+
+    // Private Member Functions
 
         //- Construct geodesic distance between P and N
         void makeLPN() const;
@@ -107,15 +108,12 @@ class edgeInterpolation
         //- Construct skewness correction vectors
         void makeSkewCorrectionVectors() const;
 
-//         //- Construct Least-squares gradient vectors
-//         void makeLeastSquareVectors() const;
-
 
 protected:
 
-    // Protected member functions
+    // Protected Member Functions
 
-        // Storage management
+        // Storage Management
 
             //- Clear all geometry and addressing
             void clearOut();
@@ -137,10 +135,10 @@ public:
     ~edgeInterpolation();
 
 
-    // Member functions
+    // Member Functions
 
         //- Return mesh reference
-        const faMesh& mesh() const
+        const faMesh& mesh() const noexcept
         {
             return faMesh_;
         }
@@ -154,21 +152,29 @@ public:
         //- Return reference to difference factors array
         const edgeScalarField& deltaCoeffs() const;
 
-        //- Return whether mesh is orthogonal or not
-        bool orthogonal() const;
-
         //- Return reference to non-orthogonality correction vectors array
         const edgeVectorField& correctionVectors() const;
-
-        //- Return whether mesh is skew or not
-        bool skew() const;
 
         //- Return reference to skew vectors array
         const edgeVectorField& skewCorrectionVectors() const;
 
+        //- Return whether mesh is orthogonal or not
+        bool orthogonal() const;
+
+        //- Return whether mesh is skew or not
+        bool skew() const;
+
+
+    // Mesh Motion
 
         //- Do what is necessary if the mesh has moved
         bool movePoints() const;
+
+
+    // Storage Management
+
+        //- True if weights exist
+        bool hasWeights() const noexcept { return bool(weightingFactors_); }
 };
 
 

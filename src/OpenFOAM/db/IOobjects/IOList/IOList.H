@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef IOList_H
-#define IOList_H
+#ifndef Foam_IOList_H
+#define Foam_IOList_H
 
 #include "List.H"
 #include "regIOobject.H"
@@ -56,7 +56,15 @@ class IOList
     public regIOobject,
     public List<T>
 {
+    // Private Member Functions
+
+        //- Read if IOobject flags set. Return true if read.
+        bool readContents();
+
 public:
+
+    //- The underlying content type
+    typedef List<T> content_type;
 
     //- Runtime type information
     TypeName("List");
@@ -96,7 +104,6 @@ public:
 
         //- Copy or move assignment of entries
         using List<T>::operator=;
-
 };
 
 

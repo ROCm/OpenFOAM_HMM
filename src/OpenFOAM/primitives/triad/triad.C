@@ -99,7 +99,7 @@ Foam::triad::triad(const quaternion& q)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::triad::orthogonalize()
+void Foam::triad::orthogonalise()
 {
     // Hack for 2D z-slab cases
     // if (!set(2))

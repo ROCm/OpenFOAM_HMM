@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,8 +38,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef PtrDynList_H
-#define PtrDynList_H
+#ifndef Foam_PtrDynList_H
+#define Foam_PtrDynList_H
 
 #include "PtrList.H"
 #include <type_traits>
@@ -103,13 +103,14 @@ public:
         inline label capacity() const noexcept;
 
         //- Return const pointer to element (can be nullptr),
-        //  with bounds checking.
-        inline const T* get(const label i) const;
+        //- with bounds checking.
+        //  The return value can be tested as a bool.
+        const T* get(const label i) const { return this->test(i); }
 
         //- Return const pointer to element (if set) or nullptr,
-        //  with bounds checking.
+        //- with bounds checking.
         //  The return value can be tested as a bool.
-        const T* set(const label i) const { return this->get(i); }
+        const T* set(const label i) const { return this->test(i); }
 
 
     // Sizing

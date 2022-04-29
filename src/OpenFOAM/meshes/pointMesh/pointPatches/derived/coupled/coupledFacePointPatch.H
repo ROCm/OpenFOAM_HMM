@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef coupledFacePointPatch_H
-#define coupledFacePointPatch_H
+#ifndef Foam_coupledFacePointPatch_H
+#define Foam_coupledFacePointPatch_H
 
 #include "coupledPointPatch.H"
 #include "facePointPatch.H"
@@ -47,8 +47,6 @@ SourceFiles
 namespace Foam
 {
 
-class pointBoundaryMesh;
-
 /*---------------------------------------------------------------------------*\
                       Class coupledFacePointPatch Declaration
 \*---------------------------------------------------------------------------*/
@@ -58,26 +56,24 @@ class coupledFacePointPatch
     public facePointPatch,
     public coupledPointPatch
 {
-    // Private data
+    // Private Data
 
         const coupledPolyPatch& coupledPolyPatch_;
 
 
-    // Private Member Functions
+protected:
+
+    // Protected Member Functions
+
+        //- Calculate mesh points
+        virtual void calcGeometry(PstreamBuffers&) = 0;
+
 
         //- No copy construct
         coupledFacePointPatch(const coupledFacePointPatch&) = delete;
 
         //- No copy assignment
         void operator=(const coupledFacePointPatch&) = delete;
-
-
-protected:
-
-        // Construction of demand-driven data
-
-            //- Calculate mesh points
-            virtual void calcGeometry(PstreamBuffers&) = 0;
 
 
 public:
@@ -97,7 +93,7 @@ public:
 
 
     //- Destructor
-    virtual ~coupledFacePointPatch();
+    virtual ~coupledFacePointPatch() = default;
 };
 
 

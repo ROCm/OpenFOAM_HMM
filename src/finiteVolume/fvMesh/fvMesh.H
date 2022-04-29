@@ -174,9 +174,12 @@ protected:
 
 public:
 
-    // Public typedefs
+    // Public Typedefs
 
+        //- The mesh type
         typedef fvMesh Mesh;
+
+        //- The boundary type associated with the mesh
         typedef fvBoundaryMesh BoundaryMesh;
 
 

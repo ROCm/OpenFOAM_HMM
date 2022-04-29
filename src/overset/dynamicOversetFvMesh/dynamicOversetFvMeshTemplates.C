@@ -119,27 +119,31 @@ void Foam::dynamicOversetFvMesh::correctBoundaryConditions
     const bool typeOnly
 )
 {
-    const label nReq = Pstream::nRequests();
+    const label startOfRequests = UPstream::nRequests();
 
     forAll(bfld, patchi)
     {
         if (typeOnly == (isA<PatchType>(bfld[patchi]) != nullptr))
         {
-            bfld[patchi].initEvaluate(Pstream::defaultCommsType);
+            bfld[patchi].initEvaluate(UPstream::defaultCommsType);
         }
     }
 
-    // Block for any outstanding requests
-    if (Pstream::parRun())
+    // Wait for outstanding requests
+    if
+    (
+        UPstream::parRun()
+     && UPstream::defaultCommsType == UPstream::commsTypes::nonBlocking
+    )
     {
-        Pstream::waitRequests(nReq);
+        UPstream::waitRequests(startOfRequests);
     }
 
     forAll(bfld, patchi)
     {
         if (typeOnly == (isA<PatchType>(bfld[patchi]) != nullptr))
         {
-            bfld[patchi].evaluate(Pstream::defaultCommsType);
+            bfld[patchi].evaluate(UPstream::defaultCommsType);
         }
     }
 }
@@ -899,7 +903,7 @@ void Foam::dynamicOversetFvMesh::correctCoupledBoundaryConditions(GeoField& fld)
 {
     typename GeoField::Boundary& bfld = fld.boundaryFieldRef();
 
-    const label nReq = Pstream::nRequests();
+    const label startOfRequests = UPstream::nRequests();
 
     forAll(bfld, patchi)
     {
@@ -910,10 +914,14 @@ void Foam::dynamicOversetFvMesh::correctCoupledBoundaryConditions(GeoField& fld)
         }
     }
 
-    // Block for any outstanding requests
-    if (Pstream::parRun())
+    // Wait for outstanding requests
+    if
+    (
+        UPstream::parRun()
+     && UPstream::defaultCommsType == UPstream::commsTypes::nonBlocking
+    )
     {
-        Pstream::waitRequests(nReq);
+        UPstream::waitRequests(startOfRequests);
     }
 
     forAll(bfld, patchi)

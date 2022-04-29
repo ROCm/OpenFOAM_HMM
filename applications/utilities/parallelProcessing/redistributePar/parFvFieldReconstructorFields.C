@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,9 +37,8 @@ License
 #include "mapDistributePolyMesh.H"
 #include "processorFvPatch.H"
 
-#include "directFvPatchFieldMapper.H"
-#include "distributedUnallocatedDirectFieldMapper.H"
-#include "distributedUnallocatedDirectFvPatchFieldMapper.H"
+#include "distributedFieldMapper.H"
+#include "distributedFvPatchFieldMapper.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -50,7 +49,7 @@ Foam::parFvFieldReconstructor::reconstructFvVolumeInternalField
     const DimensionedField<Type, volMesh>& fld
 ) const
 {
-    distributedUnallocatedDirectFieldMapper mapper
+    distributedFieldMapper mapper
     (
         labelUList::null(),
         distMap_.cellMap()
@@ -113,7 +112,7 @@ Foam::parFvFieldReconstructor::reconstructFvVolumeField
     // Create the internalField by remote mapping
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    distributedUnallocatedDirectFieldMapper mapper
+    distributedFieldMapper mapper
     (
         labelUList::null(),
         distMap_.cellMap()
@@ -138,7 +137,7 @@ Foam::parFvFieldReconstructor::reconstructFvVolumeField
             // Clone local patch field
             patchFields.set(patchI, bfld[patchI].clone());
 
-            distributedUnallocatedDirectFvPatchFieldMapper mapper
+            distributedFvPatchFieldMapper mapper
             (
                 labelUList::null(),
                 patchFaceMaps_[patchI]
@@ -256,7 +255,7 @@ Foam::parFvFieldReconstructor::reconstructFvSurfaceField
     // Create the internalField by remote mapping
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    distributedUnallocatedDirectFieldMapper mapper
+    distributedFieldMapper mapper
     (
         labelUList::null(),
         distMap_.faceMap()
@@ -301,7 +300,7 @@ Foam::parFvFieldReconstructor::reconstructFvSurfaceField
             // Clone local patch field
             patchFields.set(patchI, bfld[patchI].clone());
 
-            distributedUnallocatedDirectFvPatchFieldMapper mapper
+            distributedFvPatchFieldMapper mapper
             (
                 labelUList::null(),
                 patchFaceMaps_[patchI]

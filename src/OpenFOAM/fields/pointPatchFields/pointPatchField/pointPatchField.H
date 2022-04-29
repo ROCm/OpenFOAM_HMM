@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,8 +42,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef pointPatchField_H
-#define pointPatchField_H
+#ifndef Foam_pointPatchField_H
+#define Foam_pointPatchField_H
 
 #include "pointPatch.H"
 #include "DimensionedField.H"
@@ -54,7 +54,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 
 class objectRegistry;
 class dictionary;
@@ -75,7 +75,7 @@ Ostream& operator<<(Ostream&, const pointPatchField<Type>&);
 template<class Type>
 class pointPatchField
 {
-    // Private data
+    // Private Data
 
         //- Reference to patch
         const pointPatch& patch_;
@@ -95,8 +95,16 @@ class pointPatchField
 
 public:
 
+    //- The Field value_type
     typedef Type value_type;
+
+    //- The internal field type associated with the patch field
+    typedef DimensionedField<Type, pointMesh> Internal;
+
+    //- The patch type for the patch field
     typedef pointPatch Patch;
+
+    //- Type for a \em calculated patch
     typedef calculatedPointPatchField<Type> Calculated;
 
 
@@ -202,9 +210,9 @@ public:
         //  (does not set the patch field values)
         static autoPtr<pointPatchField<Type>> New
         (
-            const word&,
-            const pointPatch&,
-            const DimensionedField<Type, pointMesh>&
+            const word& patchFieldType,
+            const pointPatch& p,
+            const DimensionedField<Type, pointMesh>& iF
         );
 
         //- Return a pointer to a new patchField created on freestore given
@@ -213,10 +221,10 @@ public:
         //  Allows override of constraint type
         static autoPtr<pointPatchField<Type>> New
         (
-            const word&,
+            const word& patchFieldType,
             const word& actualPatchType,
-            const pointPatch&,
-            const DimensionedField<Type, pointMesh>&
+            const pointPatch& p,
+            const DimensionedField<Type, pointMesh>& iF
         );
 
         //- Return a pointer to a new patchField created on freestore from
@@ -471,14 +479,13 @@ public:
         );
 
 
-    // Housekeeping
+    // Other Methods
 
-    // Includes some dummy methods to ensure that various
-    // FieldFieldFunctions will be definable.
-
-        //- Negate the field inplace
-        //  [dummy placeholder for FieldField] (2019-11)
+        //- Negate the field inplace. Dummy placeholder for FieldField
         void negate() {}
+
+        //- Normalise the field inplace. Dummy placeholder for FieldField
+        void normalise() {}
 };
 
 

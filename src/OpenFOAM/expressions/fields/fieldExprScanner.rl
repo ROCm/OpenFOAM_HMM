@@ -248,9 +248,9 @@ static int driverTokenType
     '?'  =>{ EMIT_TOKEN(QUESTION); };
     ':'  =>{ EMIT_TOKEN(COLON); };
     '<'  =>{ EMIT_TOKEN(LESS); };
-    '<=' =>{ EMIT_TOKEN(LESS_EQ); };
+    '<=' =>{ EMIT_TOKEN(LESS_EQUAL); };
     '>'  =>{ EMIT_TOKEN(GREATER); };
-    '>=' =>{ EMIT_TOKEN(GREATER_EQ); };
+    '>=' =>{ EMIT_TOKEN(GREATER_EQUAL); };
     '==' =>{ EMIT_TOKEN(EQUAL); };
     '!=' =>{ EMIT_TOKEN(NOT_EQUAL); };
     '&&' =>{ EMIT_TOKEN(LAND); };

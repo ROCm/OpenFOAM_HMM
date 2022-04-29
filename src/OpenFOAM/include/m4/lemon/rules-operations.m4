@@ -6,7 +6,7 @@ divert(-1)dnl
 #     \\  /    A nd           | www.openfoam.com
 #      \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2019 OpenCFD Ltd.
+#     Copyright (C) 2019-2022 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -62,9 +62,9 @@ define([rules_compare_operations],
 [rule_binary_logical_op($1, $2, $3, equalOp, EQUAL, ==)
 rule_binary_logical_op($1, $2, $3, notEqualOp, NOT_EQUAL, !=)
 rule_binary_logical_op($1, $2, $3, lessOp, LESS, <)
-rule_binary_logical_op($1, $2, $3, lessEqOp, LESS_EQ, <=)
+rule_binary_logical_op($1, $2, $3, lessEqualOp, LESS_EQUAL, <=)
 rule_binary_logical_op($1, $2, $3, greaterOp, GREATER, >)
-rule_binary_logical_op($1, $2, $3, greaterEqOp, GREATER_EQ, >=)
+rule_binary_logical_op($1, $2, $3, greaterEqualOp, GREATER_EQUAL, >=)
 rule_ternary_op($2, $1, $3)
 ])
 

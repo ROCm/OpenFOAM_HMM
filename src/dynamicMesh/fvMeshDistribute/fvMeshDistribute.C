@@ -28,6 +28,7 @@ License
 
 #include "fvMeshDistribute.H"
 #include "fvMeshAdder.H"
+#include "fvMeshSubset.H"
 #include "faceCoupleInfo.H"
 #include "processorFvPatchField.H"
 #include "processorFvsPatchField.H"

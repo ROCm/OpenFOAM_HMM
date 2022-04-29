@@ -175,6 +175,9 @@ private:
             const List<splitCell8>&
         );
 
+        //- Read if IOobject flags set. Return true if read.
+        bool readContents();
+
         //- Check consistency of structure, i.e. indices into splitCells_.
         void checkIndices() const;
 

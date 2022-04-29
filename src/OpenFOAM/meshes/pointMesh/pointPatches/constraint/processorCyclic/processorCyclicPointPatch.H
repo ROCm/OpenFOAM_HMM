@@ -34,7 +34,7 @@ Description
     patch they need to be identical on both sides with the normals pointing
     in opposite directions.  This is achieved by calling the reverseFace
     function in the decomposition.  It is therefore possible to re-create
-    the ordering of patch points on the slave side by reversing all the
+    the ordering of patch points on the neighbour side by reversing all the
     patch faces of the owner.
 
 SourceFiles
@@ -42,8 +42,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef processorCyclicPointPatch_H
-#define processorCyclicPointPatch_H
+#ifndef Foam_processorCyclicPointPatch_H
+#define Foam_processorCyclicPointPatch_H
 
 #include "processorPointPatch.H"
 #include "processorCyclicPolyPatch.H"
@@ -61,9 +61,12 @@ class processorCyclicPointPatch
 :
     public processorPointPatch
 {
-    // Private data
+    // Private Data
 
         const processorCyclicPolyPatch& procCycPolyPatch_;
+
+
+    // Private Member Functions
 
         //- No copy construct
         processorCyclicPointPatch(const processorCyclicPointPatch&) = delete;
@@ -87,13 +90,11 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
+    virtual ~processorCyclicPointPatch();
 
-        virtual ~processorCyclicPointPatch();
 
-
-    // Member functions
-
+    // Member Functions
 
         //- Return message tag to use for communication
         virtual int tag() const

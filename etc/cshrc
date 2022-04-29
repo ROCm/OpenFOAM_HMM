@@ -6,7 +6,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2016-2021 OpenCFD Ltd.
+#     Copyright (C) 2016-2022 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -86,6 +86,8 @@ setenv WM_COMPILE_OPTION Opt
 
 # [WM_COMPILE_CONTROL] - additional control for compiler rules
 #   +gold   : with gold linker
+#   +lld    : with  lld linker (with clang)
+#   +mold   : with mold linker (with clang)
 #   ~openmp : without openmp
 #   version=... : compiler suffix (eg, "11" for gcc-11)
 #setenv WM_COMPILE_CONTROL "+gold"

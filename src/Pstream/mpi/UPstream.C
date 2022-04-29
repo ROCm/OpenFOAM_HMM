@@ -315,8 +315,7 @@ bool Foam::UPstream::init(int& argc, char**& argv, const bool needsThread)
                 worldIDs_[proci] = allWorlds_.find(world);
             }
         }
-        Pstream::broadcast(allWorlds_);
-        Pstream::broadcast(worldIDs_);
+        Pstream::broadcasts(UPstream::worldComm, allWorlds_, worldIDs_);
 
         DynamicList<label> subRanks;
         forAll(worlds, proci)

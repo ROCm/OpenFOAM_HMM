@@ -3952,20 +3952,12 @@ Foam::label Foam::meshRefinement::markPatchZones
             break;
         }
 
-        label procI = globalFaces.whichProcID(globalSeed);
-        label seedFaceI = globalFaces.toLocal(procI, globalSeed);
-
-        //Info<< "Seeding zone " << currentZoneI
-        //    << " from processor " << procI << " face " << seedFaceI
-        //    << endl;
-
-        if (procI == Pstream::myProcNo())
+        if (globalFaces.isLocal(globalSeed))
         {
-            edgeTopoDistanceData<label>& faceInfo = allFaceInfo[seedFaceI];
-
+            const label seedFaceI = globalFaces.toLocal(globalSeed);
 
             // Set face
-            faceInfo = edgeTopoDistanceData<label>(0, currentZoneI);
+            edgeTopoDistanceData<label>& faceInfo = allFaceInfo[seedFaceI];
 
             // .. and seed its edges
             const labelList& fEdges = patch.faceEdges()[seedFaceI];
@@ -4134,14 +4126,10 @@ void Foam::meshRefinement::consistentOrientation
             break;
         }
 
-        label procI = globalFaces.whichProcID(globalSeed);
-        label seedFaceI = globalFaces.toLocal(procI, globalSeed);
-
-        //Info<< "Seeding from processor " << procI << " face " << seedFaceI
-        //    << endl;
-
-        if (procI == Pstream::myProcNo())
+        if (globalFaces.isLocal(globalSeed))
         {
+            const label seedFaceI = globalFaces.toLocal(globalSeed);
+
             // Determine orientation of seedFace
 
             patchFaceOrientation& faceInfo = allFaceInfo[seedFaceI];

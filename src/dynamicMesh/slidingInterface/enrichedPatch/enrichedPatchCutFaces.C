@@ -222,7 +222,7 @@ void Foam::enrichedPatch::calcCutFaces() const
 
                 // Get the vector along the edge and the right vector
                 vector ahead = curPoint - lp[prevPointLabel];
-                ahead -= normal*(normal & ahead);
+                ahead.removeCollinear(normal);
                 ahead.normalise();
 
                 const vector right = normalised(normal ^ ahead);
@@ -248,7 +248,7 @@ void Foam::enrichedPatch::calcCutFaces() const
                         vector newDir = lp[nextPoints[nextI]] - curPoint;
                         // Pout<< " newDir: " << newDir
                         //     << " mag: " << mag(newDir) << flush;
-                        newDir -= normal*(normal & newDir);
+                        newDir.removeCollinear(normal);
                         scalar magNewDir = mag(newDir);
                         // Pout<< " corrected: " << newDir
                         //     << " mag: " << mag(newDir) << flush;

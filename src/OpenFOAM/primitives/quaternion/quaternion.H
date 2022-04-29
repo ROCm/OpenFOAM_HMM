@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,14 +36,15 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef quaternion_H
-#define quaternion_H
+#ifndef Foam_quaternion_H
+#define Foam_quaternion_H
 
 #include "scalar.H"
 #include "vector.H"
 #include "tensor.H"
 #include "word.H"
 #include "Enum.H"
+#include "stdFoam.H"  // For deprecation macros
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -141,7 +142,7 @@ public:
 
     // Constructors
 
-        //- Construct zero initialized
+        //- Construct initialized to zero
         inline quaternion(const Foam::zero);
 
         //- Construct given scalar and vector parts
@@ -151,12 +152,12 @@ public:
         inline quaternion(const vector& d, const scalar theta);
 
         //- Construct a rotation quaternion given direction d
-        //- and cosine angle cosTheta and flag if d is normalized
+        //- and cosine angle cosTheta and flag if d is normalised
         inline quaternion
         (
             const vector& d,
             const scalar cosTheta,
-            const bool normalized
+            const bool isNormalised
         );
 
         //- Construct a real quaternion from the given scalar part,
@@ -185,33 +186,31 @@ public:
 
     // Access
 
-       //- Scalar part of the quaternion ( = cos(theta/2) for rotation)
-       inline scalar w() const;
+        //- Scalar part of the quaternion ( = cos(theta/2) for rotation)
+        inline scalar w() const noexcept;
 
-       //- Vector part of the quaternion ( = axis of rotation)
-       inline const vector& v() const;
+        //- Vector part of the quaternion ( = axis of rotation)
+        inline const vector& v() const noexcept;
 
-       //- The rotation tensor corresponding to the quaternion
-       inline tensor R() const;
+        //- The rotation tensor corresponding to the quaternion
+        inline tensor R() const;
 
-       //- Return the Euler rotation angles corresponding to the
-       //- specified rotation order
-       inline vector eulerAngles(const eulerOrder order) const;
-
-       //- Return the quaternion normalized by its magnitude
-       inline quaternion normalized() const;
+        //- Return the Euler rotation angles corresponding to the
+        //- specified rotation order
+        inline vector eulerAngles(const eulerOrder order) const;
 
 
     // Edit
 
-       //- Scalar part of the quaternion ( = cos(theta/2) for rotation)
-       inline scalar& w();
+        //- Scalar part of the quaternion ( = cos(theta/2) for rotation)
+        inline scalar& w() noexcept;
 
-       //- Vector part of the quaternion ( = axis of rotation)
-       inline vector& v();
+        //- Vector part of the quaternion ( = axis of rotation)
+        inline vector& v() noexcept;
 
-       //- Normalize the quaternion by its magnitude
-       inline void normalize();
+        //- Inplace normalise the quaternion by its magnitude
+        //  For small magnitudes (less than ROOTVSMALL) set to zero.
+        inline quaternion& normalise();
 
 
     // Transform
@@ -222,10 +221,10 @@ public:
        //- Rotate the given vector anti-clockwise
        inline vector invTransform(const vector& v) const;
 
-       //- Rotate the given quaternion (and normalize)
+       //- Rotate the given quaternion (and normalise)
        inline quaternion transform(const quaternion& q) const;
 
-       //- Rotate the given quaternion anti-clockwise (and normalize)
+       //- Rotate the given quaternion anti-clockwise (and normalise)
        inline quaternion invTransform(const quaternion& q) const;
 
 
@@ -242,8 +241,27 @@ public:
         //- Change vector portion only
         inline void operator=(const vector& v);
 
+        //- Assign scalar and vector to zero
+        inline void operator=(const Foam::zero);
+
         inline void operator*=(const scalar s);
         inline void operator/=(const scalar s);
+
+
+    // Housekeeping
+
+        //- Inplace normalise the quaternion by its magnitude
+        FOAM_DEPRECATED_FOR(2022-04, "normalise() method")
+        void normalize() { this->normalise(); }
+
+        //- Return the quaternion normalised by its magnitude
+        FOAM_DEPRECATED_FOR(2022-04, "Use Foam::normalised() function")
+        quaternion normalized() const
+        {
+            quaternion q(*this);
+            q.normalise();
+            return q;
+        }
 };
 
 
@@ -264,8 +282,12 @@ inline scalar mag(const quaternion& q);
 //- Return the conjugate of the given quaternion
 inline quaternion conjugate(const quaternion& q);
 
-//- Return the normalized (unit) quaternion of the given quaternion
-inline quaternion normalize(const quaternion& q);
+//- Return the normalised (unit) quaternion of the given quaternion
+inline quaternion normalised(const quaternion& q);
+
+//- Return the normalised (unit) quaternion of the given quaternion
+FOAM_DEPRECATED_FOR(2022-04, "Use Foam::normalised() function")
+inline quaternion normalize(const quaternion& q) { return Foam::normalised(q); }
 
 //- Return the inverse of the given quaternion
 inline quaternion inv(const quaternion& q);

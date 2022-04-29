@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,8 +40,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef removeCells_H
-#define removeCells_H
+#ifndef Foam_removeCells_H
+#define Foam_removeCells_H
 
 #include "labelList.H"
 #include "typeInfo.H"
@@ -63,13 +63,14 @@ class mapPolyMesh;
 
 class removeCells
 {
-    // Private data
+    // Private Data
 
         //- Reference to mesh
         const polyMesh& mesh_;
 
         //- Whether or not to synchronize parallel case.
         const bool syncPar_;
+
 
 public:
 
@@ -79,11 +80,8 @@ public:
 
     // Constructors
 
-        //- Construct from mesh. With parallel synchronization.
-        explicit removeCells(const polyMesh& mesh);
-
-        //- Construct from mesh, optionally with parallel synchronization.
-        removeCells(const polyMesh& mesh, const bool syncPar);
+        //- Construct from mesh. Parallel synchronized by default
+        explicit removeCells(const polyMesh& mesh, const bool syncPar = true);
 
 
     //- Destructor

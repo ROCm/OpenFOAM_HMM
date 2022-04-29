@@ -28,6 +28,29 @@ License
 
 #include "IOList.H"
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+template<class T>
+bool Foam::IOList<T>::readContents()
+{
+    if
+    (
+        (
+            readOpt() == IOobject::MUST_READ
+         || readOpt() == IOobject::MUST_READ_IF_MODIFIED
+        )
+     || (readOpt() == IOobject::READ_IF_PRESENT && headerOk())
+    )
+    {
+        readStream(typeName) >> *this;
+        close();
+        return true;
+    }
+
+    return false;
+}
+
+
 // * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * //
 
 template<class T>
@@ -38,18 +61,7 @@ Foam::IOList<T>::IOList(const IOobject& io)
     // Check for MUST_READ_IF_MODIFIED
     warnNoRereading<IOList<T>>();
 
-    if
-    (
-        (
-            io.readOpt() == IOobject::MUST_READ
-         || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
-        )
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
-    {
-        readStream(typeName) >> *this;
-        close();
-    }
+    readContents();
 }
 
 
@@ -61,21 +73,9 @@ Foam::IOList<T>::IOList(const IOobject& io, const label len)
     // Check for MUST_READ_IF_MODIFIED
     warnNoRereading<IOList<T>>();
 
-    if
-    (
-        (
-            io.readOpt() == IOobject::MUST_READ
-         || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
-        )
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
+    if (!readContents())
     {
-        readStream(typeName) >> *this;
-        close();
-    }
-    else
-    {
-        List<T>::setSize(len);
+        List<T>::resize(len);
     }
 }
 
@@ -88,19 +88,7 @@ Foam::IOList<T>::IOList(const IOobject& io, const UList<T>& content)
     // Check for MUST_READ_IF_MODIFIED
     warnNoRereading<IOList<T>>();
 
-    if
-    (
-        (
-            io.readOpt() == IOobject::MUST_READ
-         || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
-        )
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
-    {
-        readStream(typeName) >> *this;
-        close();
-    }
-    else
+    if (!readContents())
     {
         List<T>::operator=(content);
     }
@@ -117,18 +105,7 @@ Foam::IOList<T>::IOList(const IOobject& io, List<T>&& content)
 
     List<T>::transfer(content);
 
-    if
-    (
-        (
-            io.readOpt() == IOobject::MUST_READ
-         || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
-        )
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
-    {
-        readStream(typeName) >> *this;
-        close();
-    }
+    readContents();
 }
 
 

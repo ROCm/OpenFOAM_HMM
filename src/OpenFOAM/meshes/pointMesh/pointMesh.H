@@ -32,8 +32,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef pointMesh_H
-#define pointMesh_H
+#ifndef Foam_pointMesh_H
+#define Foam_pointMesh_H
 
 #include "GeoMesh.H"
 #include "MeshObject.H"
@@ -74,12 +74,17 @@ class pointMesh
 
 public:
 
+    // Public Typedefs
+
+        //- The mesh type
+        typedef pointMesh Mesh;
+
+        //- The boundary type associated with the mesh
+        typedef pointBoundaryMesh BoundaryMesh;
+
+
     // Declare name of the class and its debug switch
     ClassName("pointMesh");
-
-
-    typedef pointMesh Mesh;
-    typedef pointBoundaryMesh BoundaryMesh;
 
 
     // Constructors

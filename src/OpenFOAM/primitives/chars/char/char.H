@@ -87,7 +87,7 @@ inline bool isspace(char c) noexcept
 namespace Foam
 {
 
-// Template specialisation for pTraits<char>
+//- Template specialisation for pTraits\<char\>
 template<>
 class pTraits<char>
 {

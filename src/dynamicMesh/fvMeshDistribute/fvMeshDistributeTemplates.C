@@ -395,25 +395,35 @@ void Foam::fvMeshDistribute::getFieldNames
 
 
     // Check all procs have same names
-    if (syncPar)
+    if (syncPar && Pstream::parRun())
     {
-        List<wordList> allNames(Pstream::nProcs());
-        allNames[Pstream::myProcNo()] = list;
-        Pstream::allGatherList(allNames);
+        // Check and report error(s) on master
 
-        for (const int proci : Pstream::subProcs())
+        const globalIndex procAddr
+        (
+            // Don't need to collect master itself
+            (Pstream::master() ? 0 : list.size()),
+            globalIndex::gatherOnly{}
+        );
+
+        const wordList allNames(procAddr.gather(list));
+
+        // Automatically restricted to master
+        for (const int proci : procAddr.subProcs())
         {
-            if (allNames[proci] != allNames[0])
+            const auto procNames(allNames.slice(procAddr.range(proci)));
+
+            if (procNames != list)
             {
                 FatalErrorInFunction
-                    << "When checking for equal "
-                    << GeoField::typeName
+                    << "When checking for equal " << GeoField::typeName
                     << " :" << nl
-                    << "processor0 has:" << allNames[0] << endl
-                    << "processor" << proci << " has:" << allNames[proci] << nl
+                    << "processor0 has:" << list << nl
+                    << "processor" << proci << " has:" << procNames << nl
                     << GeoField::typeName
                     << " need to be synchronised on all processors."
                     << exit(FatalError);
+                break;
             }
         }
     }

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,7 +24,7 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Namespace
+Class
     Foam::primitiveMeshTools
 
 Description
@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef primitiveMeshTools_H
-#define primitiveMeshTools_H
+#ifndef Foam_primitiveMeshTools_H
+#define Foam_primitiveMeshTools_H
 
 #include "bitSet.H"
 #include "primitiveFields.H"
@@ -47,24 +47,36 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
+class face;
 class primitiveMesh;
 
 /*---------------------------------------------------------------------------*\
-                   Namespace primitiveMeshTools Declaration
+                     Class primitiveMeshTools Declaration
 \*---------------------------------------------------------------------------*/
 
 class primitiveMeshTools
 {
 public:
 
-    //- Calculate face centres and areas
+    //- Calculate face centres and areas for specified faces.
+    //  Adjusts the lengths of centres and area normals if required.
     static void makeFaceCentresAndAreas
     (
-        const primitiveMesh& mesh,
-        const pointField& p,
-        vectorField& fCtrs,
-        vectorField& fAreas
+        const UList<face>& faces,   //!< The faces to consider
+        const pointField& p,        //!< Support points for faces
+        vectorField& fCtrs,         //!< [out] The face centres
+        vectorField& fAreas         //!< [out] The face area normals
+    );
+
+    //- Calculate face centres and areas for all mesh faces.
+    //  Adjusts the lengths of centres and area normals if required.
+    static void makeFaceCentresAndAreas
+    (
+        const primitiveMesh& mesh,  //!< The mesh faces
+        const pointField& p,        //!< Support points for faces
+        vectorField& fCtrs,         //!< [out] The face centres
+        vectorField& fAreas         //!< [out] The face area normals
     );
 
     //- Calculate cell centres and volumes from face properties
@@ -117,7 +129,7 @@ public:
     );
 
     //- Generate face concavity field. Returns per face the (sin of the)
-    //  most concave angle between two consecutive edges
+    //- most concave angle between two consecutive edges
     static tmp<scalarField> faceConcavity
     (
         const scalar maxSin,
@@ -127,8 +139,8 @@ public:
     );
 
     //- Generate face flatness field. Compares the individual triangles'
-    //  normals against the face average normal. Between 0 (fully warped)
-    //  and 1 (fully flat)
+    //- normals against the face average normal. Between 0 (fully warped)
+    //- and 1 (fully flat)
     static tmp<scalarField> faceFlatness
     (
         const primitiveMesh& mesh,
@@ -138,7 +150,7 @@ public:
     );
 
     //- Generate edge alignment field. Is per face the minimum aligned edge
-    //  (does not use edge addressing)
+    //- (does not use edge addressing)
     static tmp<scalarField> edgeAlignment
     (
         const primitiveMesh& mesh,
@@ -161,8 +173,8 @@ public:
         //- Skewness of single face
         static scalar faceSkewness
         (
-            const primitiveMesh& mesh,
-            const pointField& p,
+            const UList<face>& faces,   //!< The faces to consider
+            const pointField& p,        //!< Support points for faces
             const vectorField& fCtrs,
             const vectorField& fAreas,
 
@@ -174,8 +186,33 @@ public:
         //- Skewness of single boundary face
         static scalar boundaryFaceSkewness
         (
-            const primitiveMesh& mesh,
-            const pointField& p,
+            const UList<face>& faces,   //!< The faces to consider
+            const pointField& p,        //!< Support points for faces
+            const vectorField& fCtrs,
+            const vectorField& fAreas,
+
+            const label facei,
+            const point& ownCc
+        );
+
+        //- Skewness of single face
+        static scalar faceSkewness
+        (
+            const primitiveMesh& mesh,  //!< The mesh faces
+            const pointField& p,        //!< Support points for faces
+            const vectorField& fCtrs,
+            const vectorField& fAreas,
+
+            const label facei,
+            const point& ownCc,
+            const point& neiCc
+        );
+
+        //- Skewness of single boundary face
+        static scalar boundaryFaceSkewness
+        (
+            const primitiveMesh& mesh,  //!< The mesh faces
+            const pointField& p,        //!< Support points for faces
             const vectorField& fCtrs,
             const vectorField& fAreas,
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,8 +32,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef FieldMapper_H
-#define FieldMapper_H
+#ifndef Foam_FieldMapper_H
+#define Foam_FieldMapper_H
 
 #include "mapDistributeBase.H"
 #include "nullObject.H"
@@ -49,14 +49,12 @@ namespace Foam
 
 class FieldMapper
 {
-
 public:
 
     // Constructors
 
-        //- Null constructor
-        FieldMapper()
-        {}
+        //- Default construct
+        FieldMapper() = default;
 
 
     //- Destructor
@@ -65,28 +63,23 @@ public:
 
     // Member Functions
 
+        //- The size of the mapper
         virtual label size() const = 0;
 
+        //- Is it a direct (non-interpolating) mapper?
         virtual bool direct() const = 0;
 
+        //- Does the mapper have remote contributions?
         virtual bool distributed() const
         {
             return false;
         }
 
-        virtual const mapDistributeBase& distributeMap() const
-        {
-            FatalErrorInFunction
-                << "attempt to access null distributeMap"
-                << abort(FatalError);
-
-            return NullObjectRef<mapDistributeBase>();
-        }
-
-        //- Are there unmapped values? I.e. do all size() elements get
-        //  get value
+        //- Any unmapped values?
+        //  I.e. do all size() elements get value
         virtual bool hasUnmapped() const = 0;
 
+        //- Return the direct addressing values
         virtual const labelUList& directAddressing() const
         {
             FatalErrorInFunction
@@ -96,6 +89,17 @@ public:
             return labelUList::null();
         }
 
+        //- Return the distribution map
+        virtual const mapDistributeBase& distributeMap() const
+        {
+            FatalErrorInFunction
+                << "attempt to access null distributeMap"
+                << abort(FatalError);
+
+            return NullObjectRef<mapDistributeBase>();
+        }
+
+        //- Return the interpolation addressing
         virtual const labelListList& addressing() const
         {
             FatalErrorInFunction
@@ -105,6 +109,7 @@ public:
             return labelListList::null();
         }
 
+        //- Return the interpolation weights
         virtual const scalarListList& weights() const
         {
             FatalErrorInFunction
@@ -117,10 +122,11 @@ public:
 
     // Member Operators
 
+        //- Perform mapping on the given field
         template<class Type>
-        tmp<Field<Type>> operator()(const Field<Type>& f) const
+        tmp<Field<Type>> operator()(const Field<Type>& fld) const
         {
-            return tmp<Field<Type>>::New(f, *this);
+            return tmp<Field<Type>>::New(fld, *this);
         }
 };
 

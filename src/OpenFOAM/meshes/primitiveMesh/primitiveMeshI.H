@@ -192,15 +192,15 @@ inline bool Foam::primitiveMesh::hasCellCentres() const noexcept
 }
 
 
-inline bool Foam::primitiveMesh::hasFaceCentres() const noexcept
-{
-    return bool(faceCentresPtr_);
-}
-
-
 inline bool Foam::primitiveMesh::hasCellVolumes() const noexcept
 {
     return bool(cellVolumesPtr_);
+}
+
+
+inline bool Foam::primitiveMesh::hasFaceCentres() const noexcept
+{
+    return bool(faceCentresPtr_);
 }
 
 

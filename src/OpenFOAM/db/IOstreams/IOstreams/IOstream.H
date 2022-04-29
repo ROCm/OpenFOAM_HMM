@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,8 +42,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef IOstream_H
-#define IOstream_H
+#ifndef Foam_IOstream_H
+#define Foam_IOstream_H
 
 #include "char.H"
 #include "bool.H"
@@ -467,6 +467,36 @@ inline IOstream& scientific(IOstream& io)
     io.setf(ios_base::scientific, ios_base::floatfield);
     return io;
 }
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Detail
+{
+
+//- Termination for input looping (no-op)
+template<class IS> inline void inputLoop(IS&) {}
+
+//- Termination for output looping (no-op)
+template<class OS> inline void outputLoop(OS&) {}
+
+//- Input looping. Read into first parameter and recurse.
+template<class IS, class Type, class... Args>
+inline void inputLoop(IS& is, Type& arg1, Args&&... args)
+{
+    is >> arg1;
+    Detail::inputLoop(is, std::forward<Args>(args)...);
+}
+
+//- Output looping. Write first parameter and recurse.
+template<class OS, class Type, class... Args>
+inline void outputLoop(OS& os, const Type& arg1, Args&&... args)
+{
+    os << arg1;
+    Detail::outputLoop(os, std::forward<Args>(args)...);
+}
+
+} // End namespace Detail
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

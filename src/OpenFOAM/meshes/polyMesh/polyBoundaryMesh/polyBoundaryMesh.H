@@ -91,6 +91,9 @@ class polyBoundaryMesh
         //- Calculate group name to patch ids lookup
         void calcGroupIDs() const;
 
+        //- Read if IOobject flags set. Return true if read.
+        bool readContents(const bool allowReadIfPresent);
+
         //- No copy construct
         polyBoundaryMesh(const polyBoundaryMesh&) = delete;
 
@@ -271,11 +274,12 @@ public:
             labelHashSet& nonGroupPatches
         ) const;
 
-        //- Check whether all procs have all patches and in same order. Return
-        //  true if in error.
+        //- Check whether all procs have all patches and in same order.
+        //  \return True if in error.
         bool checkParallelSync(const bool report = false) const;
 
-        //- Check boundary definition. Return true if in error.
+        //- Check boundary definition.
+        //  \return True if in error.
         bool checkDefinition(const bool report = false) const;
 
         //- Correct polyBoundaryMesh after moving points

@@ -1042,7 +1042,7 @@ void Foam::globalIndex::get
 
         for (const int proci : sendBufs.allProcs())
         {
-            if (sendBufs.hasRecvData(proci))
+            if (sendBufs.recvDataCount(proci))
             {
                 UIPstream is(proci, sendBufs);
                 labelList localIDs(is);

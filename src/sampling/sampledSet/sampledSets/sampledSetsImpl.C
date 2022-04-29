@@ -82,7 +82,7 @@ void Foam::sampledSets::writeCoordSet
     {
         outputName = writer.write(fieldName, values);
     }
-    UPstream::broadcast(outputName);
+    Pstream::broadcast(outputName);
 
     if (outputName.size())
     {
@@ -207,9 +207,7 @@ void Foam::sampledSets::performAction
             // Use sorted order
             values = UIndirectList<Type>(values, globOrder)();
         }
-        Pstream::broadcast(avgValue);
-        Pstream::broadcast(sizeValue);
-        Pstream::broadcast(limits);
+        Pstream::broadcasts(UPstream::worldComm, avgValue, sizeValue, limits);
 
         // Store results: min/max/average/size with the name of the set
         // for scoping.
@@ -261,9 +259,13 @@ void Foam::sampledSets::performAction
 
     if (size())
     {
-        Pstream::broadcast(avgEnsemble);
-        Pstream::broadcast(sizeEnsemble);
-        Pstream::broadcast(limitsEnsemble);
+        Pstream::broadcasts
+        (
+            UPstream::worldComm,
+            avgEnsemble,
+            sizeEnsemble,
+            limitsEnsemble
+        );
 
         // Store results: min/max/average/size for the ensemble
         // Eg, average(T) ...

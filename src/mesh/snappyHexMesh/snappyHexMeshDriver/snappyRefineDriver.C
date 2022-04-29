@@ -2499,8 +2499,7 @@ Foam::label Foam::snappyRefineDriver::directionalSmooth
             {
                 scalar minSeed = min(allSeedPointDist);
                 scalar maxSeed = max(allSeedPointDist);
-                Pstream::broadcast(minSeed);
-                Pstream::broadcast(maxSeed);
+                Pstream::broadcasts(UPstream::worldComm, minSeed, maxSeed);
 
                 forAll(normalizedPosition, posI)
                 {

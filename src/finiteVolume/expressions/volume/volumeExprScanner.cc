@@ -809,7 +809,7 @@ tr69:
 	goto st14;
 tr70:
 #line 403 "volumeExprScanner.rl"
-	{te = p+1;{ EMIT_TOKEN(LESS_EQ); }}
+	{te = p+1;{ EMIT_TOKEN(LESS_EQUAL); }}
 	goto st14;
 tr71:
 #line 404 "volumeExprScanner.rl"
@@ -817,7 +817,7 @@ tr71:
 	goto st14;
 tr72:
 #line 405 "volumeExprScanner.rl"
-	{te = p+1;{ EMIT_TOKEN(GREATER_EQ); }}
+	{te = p+1;{ EMIT_TOKEN(GREATER_EQUAL); }}
 	goto st14;
 tr73:
 #line 358 "volumeExprScanner.rl"

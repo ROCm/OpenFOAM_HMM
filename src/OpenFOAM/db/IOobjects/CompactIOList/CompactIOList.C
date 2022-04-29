@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,6 +59,23 @@ void Foam::CompactIOList<T, BaseType>::readFromStream()
 
 
 template<class T, class BaseType>
+bool Foam::CompactIOList<T, BaseType>::readContents()
+{
+    if
+    (
+        readOpt() == IOobject::MUST_READ
+     || (readOpt() == IOobject::READ_IF_PRESENT && headerOk())
+    )
+    {
+        readFromStream();
+        return true;
+    }
+
+    return false;
+}
+
+
+template<class T, class BaseType>
 bool Foam::CompactIOList<T, BaseType>::overflows() const
 {
     label size = 0;
@@ -82,14 +99,7 @@ Foam::CompactIOList<T, BaseType>::CompactIOList(const IOobject& io)
 :
     regIOobject(io)
 {
-    if
-    (
-        io.readOpt() == IOobject::MUST_READ
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
-    {
-        readFromStream();
-    }
+    readContents();
 }
 
 
@@ -102,17 +112,9 @@ Foam::CompactIOList<T, BaseType>::CompactIOList
 :
     regIOobject(io)
 {
-    if
-    (
-        io.readOpt() == IOobject::MUST_READ
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
+    if (!readContents())
     {
-        readFromStream();
-    }
-    else
-    {
-        List<T>::setSize(len);
+        List<T>::resize(len);
     }
 }
 
@@ -126,15 +128,7 @@ Foam::CompactIOList<T, BaseType>::CompactIOList
 :
     regIOobject(io)
 {
-    if
-    (
-        io.readOpt() == IOobject::MUST_READ
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
-    {
-        readFromStream();
-    }
-    else
+    if (!readContents())
     {
         List<T>::operator=(content);
     }
@@ -152,14 +146,7 @@ Foam::CompactIOList<T, BaseType>::CompactIOList
 {
     List<T>::transfer(content);
 
-    if
-    (
-        io.readOpt() == IOobject::MUST_READ
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
-    {
-        readFromStream();
-    }
+    readContents();
 }
 
 

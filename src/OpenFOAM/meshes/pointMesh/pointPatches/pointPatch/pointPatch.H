@@ -68,6 +68,7 @@ class pointPatch
         //- Reference to boundary mesh
         const pointBoundaryMesh& boundaryMesh_;
 
+
 protected:
 
     // Protected Member Functions
@@ -152,10 +153,10 @@ public:
         //- Return mesh points
         virtual const labelList& meshPoints() const = 0;
 
-        //- Return mesh points
+        //- Return pointField of points in patch
         virtual const vectorField& localPoints() const = 0;
 
-        //- Return  point normals
+        //- Return point unit normals
         virtual const vectorField& pointNormals() const = 0;
 
         //- Return the constraint type this pointPatch implements.

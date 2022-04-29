@@ -338,7 +338,9 @@ inline Foam::label Foam::globalIndex::whichProcID(const label i) const
             << abort(FatalError);
     }
 
-    return findLower(offsets_, i+1);
+    const label proci(Pstream::myProcNo());
+
+    return isLocal(proci, i) ? proci : findLower(offsets_, i+1);
 }
 
 

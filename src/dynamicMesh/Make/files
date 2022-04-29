@@ -81,14 +81,12 @@ polyTopoChange/repatchPolyTopoChanger/repatchPolyTopoChanger.C
 
 fvMeshAdder/fvMeshAdder.C
 fvMeshDistribute/fvMeshDistribute.C
-fvMeshDistribute/IOmapDistributePolyMesh.C
 polyMeshAdder/faceCoupleInfo.C
 polyMeshAdder/polyMeshAdder.C
 
 fvMeshTools/fvMeshTools.C
 
-fvMeshSubset/fvMeshSubset.C
-fvMeshSubsetProxy/fvMeshSubsetProxy.C
+fvMeshSubset/fvMeshSubsetter.C
 
 motionSmoother/motionSmoother.C
 motionSmoother/motionSmootherAlgo.C

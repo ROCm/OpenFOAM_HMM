@@ -59,10 +59,10 @@ Foam::edgeInterpolation::edgeInterpolation(const faMesh& fam)
     lPN_(nullptr),
     weightingFactors_(nullptr),
     differenceFactors_(nullptr),
-    orthogonal_(false),
     correctionVectors_(nullptr),
-    skew_(true),
-    skewCorrectionVectors_(nullptr)
+    skewCorrectionVectors_(nullptr),
+    orthogonal_(false),
+    skew_(true)
 {}
 
 
@@ -382,7 +382,7 @@ void Foam::edgeInterpolation::makeDeltaCoeffs() const
             faceCentres[neighbour[edgeI]]
           - faceCentres[owner[edgeI]];
 
-        unitDelta -= edgeNormal*(edgeNormal & unitDelta);
+        unitDelta.removeCollinear(edgeNormal);
         unitDelta.normalise();
 
 
@@ -482,7 +482,7 @@ void Foam::edgeInterpolation::makeCorrectionVectors() const
             faceCentres[neighbour[edgeI]]
           - faceCentres[owner[edgeI]];
 
-        unitDelta -= edgeNormal*(edgeNormal & unitDelta);
+        unitDelta.removeCollinear(edgeNormal);
         unitDelta.normalise();
 
         // Edge normal - area tangent

@@ -177,12 +177,21 @@ public:
 
     // Constructors
 
-        //- Construct given comms type, communication options, IO format
+        //- Construct given comms type, message tag, communicator, IO format
         explicit PstreamBuffers
         (
             const UPstream::commsTypes commsType,
             const int tag = UPstream::msgType(),
             const label comm = UPstream::worldComm,
+            IOstreamOption::streamFormat fmt = IOstreamOption::BINARY
+        );
+
+        //- Construct given communicator, comms type, message tag, IO format
+        explicit PstreamBuffers
+        (
+            const label comm,
+            const UPstream::commsTypes commsType,
+            const int tag = UPstream::msgType(),
             IOstreamOption::streamFormat fmt = IOstreamOption::BINARY
         );
 
@@ -251,20 +260,6 @@ public:
             return finishedSendsCalled_;
         }
 
-        //- True if any (local) send buffers have data
-        bool hasSendData() const;
-
-        //- True if (local) send buffer has data on specified processor.
-        bool hasSendData(const label proci) const;
-
-        //- True if any (local) recv buffers have data.
-        //- Must call finishedSends() or finishedNeighbourSends() first!
-        bool hasRecvData() const;
-
-        //- True if (local) recv buffer has data on specified processor.
-        //- Must call finishedSends() or finishedNeighbourSends() first!
-        bool hasRecvData(const label proci) const;
-
         //- Is clearStorage of individual receive buffer by external hooks
         //- allowed? (default: true)
         bool allowClearRecv() const noexcept
@@ -272,12 +267,41 @@ public:
             return allowClearRecv_;
         }
 
+        //- True if any (local) send buffers have data
+        bool hasSendData() const;
+
+        //- True if any (local) recv buffers have unconsumed data.
+        //- Must call finishedSends() or other finished.. method first!
+        bool hasRecvData() const;
+
+        //- Number of send bytes for the specified processor.
+        label sendDataCount(const label proci) const;
+
+        //- Number of unconsumed receive bytes for the specified processor.
+        //- Must call finishedSends() or other finished.. method first!
+        label recvDataCount(const label proci) const;
+
+        //- Number of unconsumed receive bytes for all processors.
+        //- Must call finishedSends() or other finished.. method first!
+        labelList recvDataCounts() const;
+
+        //- Number of unconsumed receive bytes for the specified processor.
+        //- Must call finishedSends() or other finished.. method first!
+        //  The method is only useful in limited situations, such as when
+        //  PstreamBuffers has been used to fill contiguous data
+        //  (eg, using OPstream::write).
+        const UList<char> peekRecvData(const label proci) const;
+
 
     // Edit
 
         //- Clear individual buffers and reset states.
-        //  Does not clear individual buffer storage.
+        //  Does not remove the buffer storage.
         void clear();
+
+        //- Clear an individual receive buffer (eg, data not required)
+        //  Does not remove the buffer storage.
+        void clearRecv(const label proci);
 
         //- Clear individual buffer storage and reset states.
         void clearStorage();
@@ -406,6 +430,7 @@ public:
         //- Mark all sends to master as done.
         //
         //  Non-blocking mode: populates receive buffers.
+        //  Can use recvDataCounts() method to recover sizes received.
         //
         //  \param wait wait for requests to complete (in nonBlocking mode)
         //
@@ -425,11 +450,22 @@ public:
         //- Mark all sends to sub-procs as done.
         //
         //  Non-blocking mode: populates receive buffers.
+        //  Can use recvDataCounts() method to recover sizes received.
         //
         //  \param wait wait for requests to complete (in nonBlocking mode)
         //
         //  \warning currently only valid for nonBlocking comms.
         void finishedScatters(const bool wait = true);
+
+        //- Mark all sends to sub-procs as done.
+        //- Recovers the sizes (bytes) received.
+        //
+        //  Non-blocking mode: populates receive buffers (all-to-one).
+        //  \param[out] recvSizes the sizes (bytes) received
+        //  \param wait wait for requests to complete (in nonBlocking mode)
+        //
+        //  \warning currently only valid for nonBlocking comms.
+        void finishedScatters(labelList& recvSizes, const bool wait = true);
 };
 
 

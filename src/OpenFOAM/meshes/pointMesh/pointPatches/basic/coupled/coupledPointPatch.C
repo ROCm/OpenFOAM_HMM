@@ -28,25 +28,17 @@ License
 #include "coupledPointPatch.H"
 #include "pointBoundaryMesh.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-defineTypeNameAndDebug(coupledPointPatch, 0);
+    defineTypeNameAndDebug(coupledPointPatch, 0);
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::coupledPointPatch::coupledPointPatch(const pointBoundaryMesh& bm)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::coupledPointPatch::~coupledPointPatch()
 {}
 
 

@@ -89,13 +89,10 @@ void Foam::volPointInterpolation::addSeparated
         Pout<< "volPointInterpolation::addSeparated" << endl;
     }
 
-    typename GeometricField<Type, pointPatchField, pointMesh>::
-        Internal& pfi = pf.ref();
+    auto& pfi = pf.ref();
+    auto& pfbf = pf.boundaryFieldRef();
 
-    typename GeometricField<Type, pointPatchField, pointMesh>::
-        Boundary& pfbf = pf.boundaryFieldRef();
-
-    const label nReq = Pstream::nRequests();
+    const label startOfRequests = UPstream::nRequests();
 
     forAll(pfbf, patchi)
     {
@@ -110,8 +107,8 @@ void Foam::volPointInterpolation::addSeparated
         }
     }
 
-    // Block for any outstanding requests
-    Pstream::waitRequests(nReq);
+    // Wait for outstanding requests
+    UPstream::waitRequests(startOfRequests);
 
     forAll(pfbf, patchi)
     {

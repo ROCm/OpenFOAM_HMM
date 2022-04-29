@@ -663,7 +663,7 @@ void Foam::ccm::writer::writeInterfaces
         (
             "interfaces",
             "constant",
-            "polyMesh",
+            polyMesh::meshSubDir,
             mesh_,
             IOobject::READ_IF_PRESENT,
             IOobject::NO_WRITE,

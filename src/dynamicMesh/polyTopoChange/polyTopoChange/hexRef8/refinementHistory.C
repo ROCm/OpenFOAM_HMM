@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,6 +42,24 @@ namespace Foam
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+bool Foam::refinementHistory::readContents()
+{
+    if
+    (
+        readOpt() == IOobject::MUST_READ
+     || readOpt() == IOobject::MUST_READ_IF_MODIFIED
+     || (readOpt() == IOobject::READ_IF_PRESENT && headerOk())
+    )
+    {
+        readStream(typeName) >> *this;
+        close();
+        return true;
+    }
+
+    return false;
+}
+
 
 void Foam::refinementHistory::writeEntry
 (
@@ -554,16 +572,7 @@ Foam::refinementHistory::refinementHistory(const IOobject& io)
     // Warn for MUST_READ_IF_MODIFIED
     warnNoRereading<refinementHistory>();
 
-    if
-    (
-        io.readOpt() == IOobject::MUST_READ
-     || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
-    {
-        readStream(typeName) >> *this;
-        close();
-    }
+    readContents();
 
     // When running in redistributePar + READ_IF_PRESENT it can happen
     // that some processors do have refinementHistory and some don't so
@@ -593,22 +602,13 @@ Foam::refinementHistory::refinementHistory
     regIOobject(io),
     active_(active),
     splitCells_(splitCells),
-    freeSplitCells_(0),
+    freeSplitCells_(),
     visibleCells_(visibleCells)
 {
     // Warn for MUST_READ_IF_MODIFIED
     warnNoRereading<refinementHistory>();
 
-    if
-    (
-        io.readOpt() == IOobject::MUST_READ
-     || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
-    {
-        readStream(typeName) >> *this;
-        close();
-    }
+    readContents();
 
     // Check indices.
     checkIndices();
@@ -633,22 +633,12 @@ Foam::refinementHistory::refinementHistory
 :
     regIOobject(io),
     active_(false),
-    freeSplitCells_(0)
+    freeSplitCells_()
 {
     // Warn for MUST_READ_IF_MODIFIED
     warnNoRereading<refinementHistory>();
 
-    if
-    (
-        io.readOpt() == IOobject::MUST_READ
-     || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
-    {
-        readStream(typeName) >> *this;
-        close();
-    }
-    else
+    if (!readContents())
     {
         visibleCells_.setSize(nCells);
         splitCells_.setCapacity(nCells);
@@ -688,22 +678,12 @@ Foam::refinementHistory::refinementHistory
 :
     regIOobject(io),
     active_(active),
-    freeSplitCells_(0)
+    freeSplitCells_()
 {
     // Warn for MUST_READ_IF_MODIFIED
     warnNoRereading<refinementHistory>();
 
-    if
-    (
-        io.readOpt() == IOobject::MUST_READ
-     || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
-    {
-        readStream(typeName) >> *this;
-        close();
-    }
-    else
+    if (!readContents())
     {
         visibleCells_.setSize(nCells);
         splitCells_.setCapacity(nCells);
@@ -870,7 +850,7 @@ Foam::refinementHistory::refinementHistory(const IOobject& io, Istream& is)
 :
     regIOobject(io),
     splitCells_(is),
-    freeSplitCells_(0),
+    freeSplitCells_(),
     visibleCells_(is)
 {
     active_ = (returnReduce(visibleCells_.size(), sumOp<label>()) > 0);

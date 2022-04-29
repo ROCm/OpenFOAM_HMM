@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -88,8 +88,7 @@ Foam::tensor Foam::coordinateRotations::axes::rotation
         ax2 = findOrthogonal(axis1);
     }
 
-    // Remove colinear component
-    ax2 -= ((ax1 & ax2) * ax1);
+    ax2.removeCollinear(ax1);
 
     magAxis2 = mag(ax2);
 
@@ -102,8 +101,7 @@ Foam::tensor Foam::coordinateRotations::axes::rotation
 
         ax2 = findOrthogonal(axis1);
 
-        // Remove colinear component
-        ax2 -= ((ax1 & ax2) * ax1);
+        ax2.removeCollinear(ax1);
 
         magAxis2 = mag(ax2);
 

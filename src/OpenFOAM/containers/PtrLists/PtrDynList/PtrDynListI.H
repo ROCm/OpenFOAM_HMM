@@ -91,13 +91,6 @@ inline Foam::label Foam::PtrDynList<T, SizeMin>::capacity() const noexcept
 
 
 template<class T, int SizeMin>
-inline const T* Foam::PtrDynList<T, SizeMin>::get(const label i) const
-{
-    return (i >= 0 && i < PtrList<T>::size()) ? PtrList<T>::get(i) : nullptr;
-}
-
-
-template<class T, int SizeMin>
 inline void Foam::PtrDynList<T, SizeMin>::reserve(const label len)
 {
     if (capacity_ < len)

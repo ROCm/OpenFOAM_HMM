@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,8 +42,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ListOps_H
-#define ListOps_H
+#ifndef Foam_ListOps_H
+#define Foam_ListOps_H
 
 #include "FlatOutput.H"
 #include "labelPair.H"
@@ -628,18 +628,44 @@ struct greater
 //  Optionally with an alternative start index, so that (map[i] == i+start)
 void identity(labelUList& map, label start=0);
 
+//- Count the number of matching entries.
+//  When start is specified, any occurrences before start are ignored.
+//  Linear search.
+//  Like std::count_if but works with list indexing
+template<class ListType, class UnaryPredicate>
+label count_if
+(
+    const ListType& input,
+    const UnaryPredicate& pred,
+    const label start=0
+);
+
 
 //- Find index of the first occurrence that satisfies the predicate.
 //  When start is specified, any occurrences before start are ignored.
 //  Linear search.
+//  Like std::find_if but works with list indexing.
 //  \return position in list or -1 if not found.
+template<class ListType, class UnaryPredicate>
+label find_if
+(
+    const ListType& input,
+    const UnaryPredicate& pred,
+    const label start=0
+);
+
+
+//- Same as ListOps::find_if
 template<class ListType, class UnaryPredicate>
 label find
 (
     const ListType& input,
     const UnaryPredicate& pred,
     const label start=0
-);
+)
+{
+    return ListOps::find_if(input, pred, start);
+}
 
 
 //- True if there is a value in the list that satisfies the predicate.
@@ -647,12 +673,25 @@ label find
 //  Linear search.
 //  \return true if found.
 template<class ListType, class UnaryPredicate>
-bool found
+bool found_if
 (
     const ListType& input,
     const UnaryPredicate& pred,
     const label start=0
 );
+
+
+//- Same as found_if
+template<class ListType, class UnaryPredicate>
+bool found
+(
+    const ListType& input,
+    const UnaryPredicate& pred,
+    const label start=0
+)
+{
+    return ListOps::found_if(input, pred, start);
+}
 
 
 //- Linear search to find all occurences of given element.

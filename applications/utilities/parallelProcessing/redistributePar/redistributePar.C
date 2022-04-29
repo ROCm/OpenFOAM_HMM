@@ -948,84 +948,10 @@ void correctCoupledBoundaryConditions(fvMesh& mesh)
         mesh.objectRegistry::lookupClass<GeoField>()
     );
 
-    forAllIters(flds, iter)
+    for (const word& fldName : flds.sortedToc())
     {
-        GeoField& fld = *iter();
-
-        typename GeoField::Boundary& bfld = fld.boundaryFieldRef();
-        if
-        (
-            Pstream::defaultCommsType == Pstream::commsTypes::blocking
-         || Pstream::defaultCommsType == Pstream::commsTypes::nonBlocking
-        )
-        {
-            const label nReq = Pstream::nRequests();
-
-            forAll(bfld, patchi)
-            {
-                auto& pfld = bfld[patchi];
-                const auto& fvp = mesh.boundary()[patchi];
-
-                const auto* ppPtr = isA<CoupledPatchType>(fvp);
-                if (ppPtr && ppPtr->coupled())
-                {
-                    pfld.initEvaluate(Pstream::defaultCommsType);
-                }
-            }
-
-            // Block for any outstanding requests
-            if
-            (
-                Pstream::parRun()
-             && Pstream::defaultCommsType == Pstream::commsTypes::nonBlocking
-            )
-            {
-                Pstream::waitRequests(nReq);
-            }
-
-            for (auto& pfld : bfld)
-            {
-                const auto& fvp = pfld.patch();
-
-                const auto* ppPtr = isA<CoupledPatchType>(fvp);
-                if (ppPtr && ppPtr->coupled())
-                {
-                    pfld.evaluate(Pstream::defaultCommsType);
-                }
-            }
-        }
-        else if (Pstream::defaultCommsType == Pstream::commsTypes::scheduled)
-        {
-            const lduSchedule& patchSchedule =
-                fld.mesh().globalData().patchSchedule();
-
-            for (const auto& schedEval : patchSchedule)
-            {
-                const label patchi = schedEval.patch;
-                const auto& fvp = mesh.boundary()[patchi];
-                auto& pfld = bfld[patchi];
-
-                const auto* ppPtr = isA<CoupledPatchType>(fvp);
-                if (ppPtr && ppPtr->coupled())
-                {
-                    if (schedEval.init)
-                    {
-                        pfld.initEvaluate(Pstream::commsTypes::scheduled);
-                    }
-                    else
-                    {
-                        pfld.evaluate(Pstream::commsTypes::scheduled);
-                    }
-                }
-            }
-        }
-        else
-        {
-            FatalErrorInFunction
-                << "Unsupported communications type "
-                << Pstream::commsTypeNames[Pstream::defaultCommsType]
-                << exit(FatalError);
-        }
+        GeoField& fld = *(flds[fldName]);
+        fld.boundaryFieldRef().template evaluateCoupled<CoupledPatchType>();
     }
 }
 
@@ -1105,10 +1031,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
 
             // Subset 0 cells, no parallel comms.
             // This is used to create zero-sized fields.
-            subsetterPtr.reset
-            (
-                new fvMeshSubset(mesh, bitSet(), nonProcI, false)
-            );
+            subsetterPtr.reset(new fvMeshSubset(mesh, zero{}));
         }
 
 

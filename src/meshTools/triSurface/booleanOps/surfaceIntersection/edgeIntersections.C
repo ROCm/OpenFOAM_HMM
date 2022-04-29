@@ -326,7 +326,7 @@ bool Foam::edgeIntersections::rotatePerturb
             scalar magN = mag(n) + VSMALL;
             n /= magN;
 
-            rndVec -= n*(n & rndVec);
+            rndVec.removeCollinear(n);
             rndVec.normalise();
 
             // Scale to be moved by tolerance.

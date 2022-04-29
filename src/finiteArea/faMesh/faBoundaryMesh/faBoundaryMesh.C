@@ -28,7 +28,9 @@ License
 
 #include "faBoundaryMesh.H"
 #include "faMesh.H"
+#include "globalIndex.H"
 #include "primitiveMesh.H"
+#include "processorFaPatch.H"
 #include "PtrListOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -100,22 +102,17 @@ void Foam::faBoundaryMesh::calcGroupIDs() const
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::faBoundaryMesh::faBoundaryMesh
-(
-    const IOobject& io,
-    const faMesh& mesh
-)
-:
-    faPatchList(),
-    regIOobject(io),
-    mesh_(mesh)
+bool Foam::faBoundaryMesh::readContents(const bool allowReadIfPresent)
 {
     if
     (
         readOpt() == IOobject::MUST_READ
      || readOpt() == IOobject::MUST_READ_IF_MODIFIED
+     ||
+        (
+            allowReadIfPresent
+         && (readOpt() == IOobject::READ_IF_PRESENT && headerOk())
+        )
     )
     {
         // Warn for MUST_READ_IF_MODIFIED
@@ -126,9 +123,11 @@ Foam::faBoundaryMesh::faBoundaryMesh
         // Read faPatch list
         Istream& is = readStream(typeName);
 
+        // Read patches as entries
         PtrList<entry> patchEntries(is);
-        patches.setSize(patchEntries.size());
+        patches.resize(patchEntries.size());
 
+        // Transcribe
         forAll(patches, patchi)
         {
             patches.set
@@ -145,9 +144,27 @@ Foam::faBoundaryMesh::faBoundaryMesh
         }
 
         is.check(FUNCTION_NAME);
-
         close();
+        return true;
     }
+
+    return false;
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::faBoundaryMesh::faBoundaryMesh
+(
+    const IOobject& io,
+    const faMesh& mesh
+)
+:
+    faPatchList(),
+    regIOobject(io),
+    mesh_(mesh)
+{
+    readContents(false);  // READ_IF_PRESENT allowed: False
 }
 
 
@@ -607,6 +624,94 @@ Foam::label Foam::faBoundaryMesh::whichPatch(const label edgeIndex) const
         << abort(FatalError);
 
     return -1;
+}
+
+
+bool Foam::faBoundaryMesh::checkParallelSync(const bool report) const
+{
+    if (!Pstream::parRun())
+    {
+        return false;
+    }
+
+    const faBoundaryMesh& bm = *this;
+
+    bool hasError = false;
+
+    // Collect non-proc patches and check proc patches are last.
+    wordList localNames(bm.size());
+    wordList localTypes(bm.size());
+
+    label nonProci = 0;
+
+    forAll(bm, patchi)
+    {
+        if (!isA<processorFaPatch>(bm[patchi]))
+        {
+            if (nonProci != patchi)
+            {
+                // A processor patch in between normal patches!
+                hasError = true;
+
+                if (debug || report)
+                {
+                    Pout<< " ***Problem with boundary patch " << patchi
+                        << " name:" << bm[patchi].name()
+                        << " type:" <<  bm[patchi].type()
+                        << " - seems to be preceeded by processor patches."
+                        << " This is usually a problem." << endl;
+                }
+            }
+            else
+            {
+                localNames[nonProci] = bm[patchi].name();
+                localTypes[nonProci] = bm[patchi].type();
+                ++nonProci;
+            }
+        }
+    }
+    localNames.resize(nonProci);
+    localTypes.resize(nonProci);
+
+    // Check and report error(s) on master
+
+    const globalIndex procAddr
+    (
+        // Don't need to collect master itself
+        (Pstream::master() ? 0 : nonProci),
+        globalIndex::gatherOnly{}
+    );
+
+    const wordList allNames(procAddr.gather(localNames));
+    const wordList allTypes(procAddr.gather(localTypes));
+
+    // Automatically restricted to master
+    for (const int proci : procAddr.subProcs())
+    {
+        const auto procNames(allNames.slice(procAddr.range(proci)));
+        const auto procTypes(allTypes.slice(procAddr.range(proci)));
+
+        if (procNames != localNames || procTypes != localTypes)
+        {
+            hasError = true;
+
+            if (debug || report)
+            {
+                Info<< " ***Inconsistent patches across processors, "
+                       "processor0 has patch names:" << localNames
+                    << " patch types:" << localTypes
+                    << " processor" << proci
+                    << " has patch names:" << procNames
+                    << " patch types:" << procTypes
+                    << endl;
+            }
+        }
+    }
+
+    // Reduce (not broadcast) to respect local out-of-order errors (first loop)
+    reduce(hasError, orOp<bool>());
+
+    return hasError;
 }
 
 

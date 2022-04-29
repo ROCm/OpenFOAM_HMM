@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -516,12 +516,15 @@ void getInterfaceSizes
     }
 
 
-    // Now all processor have consistent interface information
-
-    Pstream::scatter(interfaces);
-    Pstream::scatter(interfaceNames);
-    Pstream::scatter(interfaceSizes);
-    Pstream::scatter(regionsToInterface);
+    // Consistent interface information for all processors
+    Pstream::broadcasts
+    (
+        UPstream::worldComm,
+        interfaces,
+        interfaceNames,
+        interfaceSizes,
+        regionsToInterface
+    );
 
     // Mark all inter-region faces.
     faceToInterface.setSize(mesh.nFaces(), -1);

@@ -146,7 +146,9 @@ protected:
 
 public:
 
+    //- The boundary type associated with the patch
     typedef faBoundaryMesh BoundaryMesh;
+
 
     //- Runtime type information
     TypeName("patch");

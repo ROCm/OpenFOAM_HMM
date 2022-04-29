@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,19 +28,23 @@ Class
     Foam::fvMeshSubset
 
 Description
-    Given the original mesh and the list of selected cells, it creates the
-    mesh consisting only of the desired cells, with the mapping list for
-    points, faces, and cells.
+    Holds a reference to the original mesh (the baseMesh)
+    and optionally to a subset of that mesh (the subMesh)
+    with mapping lists for points, faces, and cells.
 
-    Puts all exposed internal faces into either
+    Can be constructed or reset to subset on the list of selected cells,
+    which it creates as subMesh consisting only of the desired cells,
+    with the mapping list for points, faces, and cells.
+
+    Places all exposed internal faces into either
     - a user supplied patch
     - a newly created patch "oldInternalFaces"
 
-    - setCellSubset does coupled patch subsetting as well. If it detects
-      a face on a coupled patch 'losing' its neighbour it will move the
-      face into the oldInternalFaces patch.
+    - reset() does coupled patch subsetting as well.
+      If it detects a face on a coupled patch 'losing' its neighbour
+      it will move the face into the oldInternalFaces patch.
 
-    - if a user supplied patch is used it is up to the destination
+    - if a user supplied patch is used, it is up to the destination
       patchField to handle exposed internal faces (mapping from face -1).
       If not provided the default is to assign the internalField. All the
       basic patch field types (e.g. fixedValue) will give a warning and
@@ -49,18 +53,20 @@ Description
 
 SourceFiles
     fvMeshSubset.C
+    fvMeshSubsetI.H
+    fvMeshSubsetTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fvMeshSubset_H
-#define fvMeshSubset_H
+#ifndef Foam_fvMeshSubset_H
+#define Foam_fvMeshSubset_H
 
 #include "fvMesh.H"
 #include "pointMesh.H"
+#include "surfaceMesh.H"
 #include "GeometricField.H"
 #include "bitSet.H"
 #include "HashSet.H"
-#include "surfaceMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -75,11 +81,11 @@ class fvMeshSubset
 {
     // Private Data
 
-        //- Mesh to subset from
+        //- The base mesh to subset from
         const fvMesh& baseMesh_;
 
-        //- Demand-driven subset mesh pointer
-        autoPtr<fvMesh> fvMeshSubsetPtr_;
+        //- Demand-driven subset mesh (pointer)
+        autoPtr<fvMesh> subMeshPtr_;
 
         //- Optional face mapping array with flip encoded (-1/+1)
         mutable autoPtr<labelList> faceFlipMapPtr_;
@@ -99,53 +105,26 @@ class fvMeshSubset
 
     // Private Member Functions
 
-        //- Check if subset has been performed
-        bool checkCellSubset() const;
+        //- Modify nCellsUsingFace for coupled faces becoming 'uncoupled.
+        void doCoupledPatches
+        (
+            const bool syncPar,
+            labelUList& nCellsUsingFace
+        ) const;
+
+        //- Create zones for subMesh
+        void subsetZones();
 
         //- Calculate face flip map
         void calcFaceFlipMap() const;
 
-        //- Adapt nCellsUsingFace for coupled faces becoming 'uncoupled'.
-        void doCoupledPatches
-        (
-            const bool syncPar,
-            labelList& nCellsUsingFace
-        ) const;
 
-        //- Forwarding to Foam::removeCells
-        void removeCellsImpl
-        (
-            const bitSet& cellsToRemove,
-            const labelList& exposedFaces,
-            const labelList& patchIDs,
-            const bool syncCouples
-        );
+protected:
 
+    // Protected Member Functions
 
-        //- Subset of subset
-        static labelList subsetSubset
-        (
-            const label nElems,
-            const labelUList& selectedElements,
-            const labelUList& subsetMap
-        );
-
-        //- Create zones for submesh
-        void subsetZones();
-
-        //- Helper: extract cells-to-remove from cells-to-keep
-        bitSet getCellsToRemove
-        (
-            const bitSet& selectedCells
-        ) const;
-
-        //- Helper: extract cells-to-remove from cells-to-keep
-        bitSet getCellsToRemove
-        (
-            const label regioni,
-            const labelUList& regions
-        ) const;
-
+        //- FatalError if subset has not been performed
+        bool checkHasSubMesh() const;
 
         //- No copy construct
         fvMeshSubset(const fvMeshSubset&) = delete;
@@ -164,11 +143,14 @@ public:
 
     // Constructors
 
-        //- Construct given a mesh to subset
+        //- Construct using the entire mesh (no subset)
         explicit fvMeshSubset(const fvMesh& baseMesh);
 
+        //- Construct a zero-sized subset mesh, non-processor patches only
+        fvMeshSubset(const fvMesh& baseMesh, const Foam::zero);
+
         //- Construct for a cell-subset of the given mesh
-        //  See setCellSubset() for more details.
+        //  See reset() for more details.
         fvMeshSubset
         (
             const fvMesh& baseMesh,
@@ -178,7 +160,7 @@ public:
         );
 
         //- Construct for a cell-subset of the given mesh
-        //  See setCellSubset() for more details.
+        //  See reset() for more details.
         fvMeshSubset
         (
             const fvMesh& baseMesh,
@@ -188,7 +170,7 @@ public:
         );
 
         //- Construct for a cell-subset of the given mesh
-        //  See setCellSubset() for more details.
+        //  See reset() for more details.
         fvMeshSubset
         (
             const fvMesh& baseMesh,
@@ -198,7 +180,7 @@ public:
         );
 
         //- Construct for a cell-subset of the given mesh
-        //  See setCellSubset() for more details.
+        //  See reset() for more details.
         fvMeshSubset
         (
             const fvMesh& baseMesh,
@@ -246,42 +228,59 @@ public:
 
     // Edit
 
-        //- Reset maps and subsetting
+        //- Reset subMesh and all maps
         void clear();
 
+        //- Reset subMesh and all maps. Same as clear()
+        void reset();
 
-        //- Define cell subset based on the selectedCells.
-        //  Create "oldInternalFaces" patch for exposed
-        //  internal faces (patchID==-1) or use supplied patch.
-        //  Handles coupled patches if necessary by making coupled patch
-        //  face part of patchID (so uncoupled)
-        void setCellSubset
+        //- Reset to a zero-sized subset mesh, non-processor patches only
+        void reset(const Foam::zero);
+
+        //- Reset from components
+        void reset
+        (
+            autoPtr<fvMesh>&& subMeshPtr,   //!< Mesh subset
+            labelList&& pointMap,           //!< Point mapping
+            labelList&& faceMap,            //!< Face mapping
+            labelList&& cellMap,            //!< Cell mapping
+            labelList&& patchMap            //!< Patch mapping
+        );
+
+        //- Use the specified subset of cells.
+        //
+        //  \par selectedCells The subset of cells to use
+        //  \par patchID Patch id for exposed internal faces.
+        //       Uses existing or creates "oldInternalFaces" for patchID == -1.
+        //  \par syncPar
+        //
+        //  \note Handles coupled patches if necessary by making
+        //      coupled patch faces part of patchID (ie, uncoupled)
+        void reset
         (
             const bitSet& selectedCells,
             const label patchID = -1,
             const bool syncPar = true
         );
 
-        //- Define cell subset, using the specified cells
-        //- to define the selection
-        void setCellSubset
+        //- Use the specified subset of cells.
+        void reset
         (
             const labelUList& selectedCells,
             const label patchID = -1,
             const bool syncPar = true
         );
 
-        //- Define cell subset, using the specified cells
-        //- labelHashSet to define the selection
-        void setCellSubset
+        //- Use the specified subset of cells.
+        void reset
         (
             const labelHashSet& selectedCells,
             const label patchID = -1,
             const bool syncPar = true
         );
 
-        //- Define cell subset, using the cells for which region == regioni.
-        void setCellSubset
+        //- Use the cells of cells corresponding to where region == regioni.
+        void reset
         (
             const label regioni,
             const labelUList& regions,
@@ -290,57 +289,68 @@ public:
         );
 
 
-    // Two-step subsetting
+    // Legacy method names (v2112 and earlier)
 
-        //- Get labels of exposed faces.
-        //  These are
-        //  - internal faces that become boundary faces
-        //  - coupled faces that become uncoupled (since one of the
-        //    sides gets deleted)
-        labelList getExposedFaces
+        //- Use the specified subset of cells. Same as reset()
+        void setCellSubset
         (
             const bitSet& selectedCells,
-            const bool syncCouples = true
-        ) const;
+            const label patchID = -1,
+            const bool syncPar = true
+        )
+        {
+            reset(selectedCells, patchID, syncPar);
+        }
 
-        //- Get labels of exposed faces.
-        //  These are
-        //  - internal faces that become boundary faces
-        //  - coupled faces that become uncoupled (since one of the
-        //    sides gets deleted)
-        labelList getExposedFaces
+        //- Use the specified subset of cells. Same as reset()
+        void setCellSubset
+        (
+            const labelUList& selectedCells,
+            const label patchID = -1,
+            const bool syncPar = true
+        )
+        {
+            reset(selectedCells, patchID, syncPar);
+        }
+
+        //- Use the specified subset of cells. Same as reset()
+        void setCellSubset
+        (
+            const labelHashSet& selectedCells,
+            const label patchID = -1,
+            const bool syncPar = true
+        )
+        {
+            reset(selectedCells, patchID, syncPar);
+        }
+
+        //- Use the specified subset of cells. Same as reset()
+        void setCellSubset
         (
             const label regioni,
             const labelUList& regions,
-            const bool syncCouples = true
-        ) const;
+            const label patchID = -1,
+            const bool syncPar = true
+        )
+        {
+            reset(regioni, regions, patchID, syncPar);
+        }
 
-        //- For every exposed face (from above getExposedFaces)
-        //  used supplied (existing!) patch
-        void setCellSubset
+
+    // Field Mapping (static functions)
+
+        //- Map volume internal (dimensioned) field
+        template<class Type>
+        static tmp<DimensionedField<Type, volMesh>>
+        interpolate
         (
-            const bitSet& selectedCells,
-            const labelList& exposedFaces,
-            const labelList& patchIDs,
-            const bool syncCouples = true
+            const DimensionedField<Type, volMesh>&,
+            const fvMesh& sMesh,
+            const labelUList& cellMap
         );
 
-        //- For every exposed face (from above getExposedFaces)
-        //  used supplied (existing!) patch
-        void setCellSubset
-        (
-            const label regioni,
-            const labelList& regions,
-            const labelList& exposedFaces,
-            const labelList& patchIDs,
-            const bool syncCouples = true
-        );
-
-
-    // Field Mapping
-
-        //- Map volume field. Optionally allow unmapped faces not to produce
-        //  a warning
+        //- Map volume field.
+        //  Optionally allow unmapped faces not to produce a warning
         template<class Type>
         static tmp<GeometricField<Type, fvPatchField, volMesh>>
         interpolate
@@ -353,16 +363,9 @@ public:
             const bool allowUnmapped = false
         );
 
-        template<class Type>
-        tmp<GeometricField<Type, fvPatchField, volMesh>>
-        interpolate
-        (
-            const GeometricField<Type, fvPatchField, volMesh>&,
-            const bool allowUnmapped = false
-        ) const;
-
-        //- Map surface field. Optionally negates value if flipping
-        //  a face (from exposing an internal face)
+        //- Map surface field.
+        //  Optionally negates value if flipping a face
+        //  (from exposing an internal face)
         template<class Type>
         static tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
         interpolate
@@ -373,16 +376,6 @@ public:
             const labelUList& cellMap,
             const labelUList& faceMap
         );
-
-        //- Map surface field. Optionally allow unmapped faces not to produce
-        //  a warning (not currently used)
-        template<class Type>
-        tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
-        interpolate
-        (
-            const GeometricField<Type, fvsPatchField, surfaceMesh>&,
-            const bool allowUnmapped = false
-        ) const;
 
         //- Map point field
         template<class Type>
@@ -395,27 +388,11 @@ public:
             const labelUList& pointMap
         );
 
-        //- Map point field. Optionally allow unmapped points not to produce
-        //  a warning (not currently used)
-        template<class Type>
-        tmp<GeometricField<Type, pointPatchField, pointMesh>>
-        interpolate
-        (
-            const GeometricField<Type, pointPatchField, pointMesh>&,
-            const bool allowUnmapped = false
-        ) const;
 
-        //- Map dimensioned field
-        template<class Type>
-        static tmp<DimensionedField<Type, volMesh>>
-        interpolate
-        (
-            const DimensionedField<Type, volMesh>&,
-            const fvMesh& sMesh,
-            const labelUList& cellMap
-        );
+    // Field Mapping
 
-        //- Map Dimensioned. Optional unmapped argument not used
+        //- Map volume internal (dimensioned) field
+        //- Optional unmapped argument (currently unused)
         template<class Type>
         tmp<DimensionedField<Type, volMesh>>
         interpolate
@@ -424,73 +401,37 @@ public:
             const bool allowUnmapped = false
         ) const;
 
-
-    // Compatibility
-
-        //- Deprecated(2018-07) old method name and old parameter ordering.
-        //  \deprecated(2018-07) - use setCellSubset() method
-        inline void setLargeCellSubset
+        //- Map volume field.
+        //  Optionally allow unmapped faces not to produce a warning
+        template<class Type>
+        tmp<GeometricField<Type, fvPatchField, volMesh>>
+        interpolate
         (
-            const labelUList& region,
-            const label currentRegion,
-            const label patchID = -1,
-            const bool syncCouples = true
-        )
-        {
-            Info<< "WARNING: using highly deprecated method: "
-                << "fvMeshSubset::setLargeCellSubset()" << nl;
+            const GeometricField<Type, fvPatchField, volMesh>&,
+            const bool allowUnmapped = false
+        ) const;
 
-            setCellSubset
-            (
-                currentRegion,
-                region,
-                patchID,
-                syncCouples
-            );
-        }
-
-
-        //- Deprecated(2018-07) old method name
-        //  \deprecated(2018-07) - use setCellSubset() method
-        inline void setLargeCellSubset
+        //- Map surface field.
+        //  Optionally allow unmapped faces not to produce a warning
+        //  (currently unused)
+        template<class Type>
+        tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
+        interpolate
         (
-            const labelHashSet& globalCellMap,
-            const label patchID = -1,
-            const bool syncPar = true
-        )
-        {
-            Info<< "WARNING: using highly deprecated method: "
-                << "fvMeshSubset::setLargeCellSubset()" << nl;
+            const GeometricField<Type, fvsPatchField, surfaceMesh>&,
+            const bool allowUnmapped = false
+        ) const;
 
-            setCellSubset(globalCellMap, patchID, syncPar);
-        }
-
-
-        //- Deprecated(2018-07) method
-        //  For every exposed face (from getExposedFaces) use supplied
-        //  (existing!) patch ids
-        //  \deprecated(2018-07) - use setCellSubset() method
-        inline void setLargeCellSubset
+        //- Map point field.
+        //  Optionally allow unmapped points not to produce a warning
+        //  (currently unused)
+        template<class Type>
+        tmp<GeometricField<Type, pointPatchField, pointMesh>>
+        interpolate
         (
-            const labelList& regions,
-            const label regioni,
-            const labelList& exposedFaces,
-            const labelList& patchIDs,
-            const bool syncCouples = true
-        )
-        {
-            Info<< "WARNING: using highly deprecated method: "
-                << "fvMeshSubset::setLargeCellSubset()" << nl;
-
-            setCellSubset
-            (
-                regioni,
-                regions,
-                exposedFaces,
-                patchIDs,
-                syncCouples
-            );
-        }
+            const GeometricField<Type, pointPatchField, pointMesh>&,
+            const bool allowUnmapped = false
+        ) const;
 };
 
 
@@ -505,7 +446,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "fvMeshSubsetInterpolate.C"
+    #include "fvMeshSubsetTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

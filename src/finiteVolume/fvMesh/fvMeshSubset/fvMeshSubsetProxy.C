@@ -197,7 +197,7 @@ bool Foam::fvMeshSubsetProxy::correct(bool verbose)
 
     if (changed || selectedCells_.empty())
     {
-        subsetter_.setCellSubset(selectedCells_, exposedPatchId_);
+        subsetter_.reset(selectedCells_, exposedPatchId_);
     }
 
     return returnReduce(changed, orOp<bool>());

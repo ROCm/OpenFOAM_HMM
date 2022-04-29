@@ -15,4 +15,5 @@ LIB_LIBS = \
     -lsolidSpecie \
     -lfluidThermophysicalModels \
     -lreactionThermophysicalModels \
+    -lthermophysicalProperties \
     -lcompressibleTransportModels

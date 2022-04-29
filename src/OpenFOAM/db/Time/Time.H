@@ -38,8 +38,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Time_H
-#define Time_H
+#ifndef Foam_Time_H
+#define Foam_Time_H
 
 #include "TimePaths.H"
 #include "objectRegistry.H"
@@ -420,10 +420,15 @@ public:
             //- Read the objects that have been modified
             void readModifiedObjects();
 
-            //- Return the location of "dir" containing the file "name".
-            //- (eg, used in reading mesh data)
-            //  If name is null, search for the directory "dir" only.
-            //  Does not search beyond stopInstance (if set) or constant.
+            //- Return time instance (location) of \em dir that contains
+            //- the file \em name (eg, used in reading mesh data).
+            //  When \em is empty, searches for directory \em dir only.
+            //  Does not search beyond stopInstance (if set) or \em constant.
+            //
+            //  \note If the instance cannot be found, returns the
+            //  stopInstance (if set and reached) or \em constant.
+            //  FatalError if it cannot be found and readOpt is
+            //  (MUST_READ or MUST_READ_IF_MODIFIED).
             word findInstance
             (
                 const fileName& dir,

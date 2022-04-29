@@ -666,6 +666,7 @@ $(mapPolyMesh)/mapDistribute/mapDistribute.C
 $(mapPolyMesh)/mapDistribute/mapDistributeBase.C
 $(mapPolyMesh)/mapDistribute/mapDistributePolyMesh.C
 $(mapPolyMesh)/mapDistribute/IOmapDistribute.C
+$(mapPolyMesh)/mapDistribute/IOmapDistributePolyMesh.C
 $(mapPolyMesh)/mapAddedPolyMesh.C
 
 PrimitivePatch = $(primitiveMesh)/PrimitivePatch
@@ -726,6 +727,7 @@ $(Fields)/labelField/labelFieldIOField.C
 $(Fields)/scalarField/scalarField.C
 $(Fields)/scalarField/scalarIOField.C
 $(Fields)/scalarField/scalarFieldIOField.C
+$(Fields)/vectorField/vectorField.C
 $(Fields)/vectorField/vectorIOField.C
 $(Fields)/vectorField/vectorFieldIOField.C
 $(Fields)/vector2DField/vector2DIOField.C

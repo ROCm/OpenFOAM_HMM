@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,9 +52,9 @@ const Foam::word Foam::faMesh::prefix("finite-area");
 
 Foam::word Foam::faMesh::meshSubDir = "faMesh";
 
-int Foam::faMesh::origPointAreaMethod_ = 0;  // Tuning
+int Foam::faMesh::geometryOrder_ = 1;      // 1: Standard treatment
 
-const int Foam::faMesh::quadricsFit_ = 0;  // Tuning
+const int Foam::faMesh::quadricsFit_ = 0;  // Tuning (experimental)
 
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
@@ -264,19 +264,46 @@ void Foam::faMesh::clearOut() const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::faMesh::faMesh(const polyMesh& pMesh, const zero)
+bool Foam::faMesh::init(const bool doInit)
+{
+    if (doInit)
+    {
+        setPrimitiveMeshData();
+    }
+
+    // Create global mesh data
+    if (Pstream::parRun())
+    {
+        (void)globalData();
+    }
+
+    // Calculate topology for the patches (processor-processor comms etc.)
+    boundary_.updateMesh();
+
+    // Calculate the geometry for the patches (transformation tensors etc.)
+    boundary_.calcGeometry();
+
+    return false;
+}
+
+
+Foam::faMesh::faMesh(const polyMesh& pMesh, const Foam::zero)
 :
-    faMesh(pMesh, labelList())
+    faMesh(pMesh, labelList(), static_cast<const IOobject&>(pMesh))
 {}
 
 
-Foam::faMesh::faMesh(const polyMesh& pMesh)
+Foam::faMesh::faMesh
+(
+    const polyMesh& pMesh,
+    const bool doInit
+)
 :
     MeshObject<polyMesh, Foam::UpdateableMeshObject, faMesh>(pMesh),
-    edgeInterpolation(*this),
     faSchemes(mesh()),
+    edgeInterpolation(*this),
     faSolution(mesh()),
-    data(mesh()),
+    data(mesh()),   // Always NO_READ, NO_WRITE
     faceLabels_
     (
         IOobject
@@ -294,7 +321,14 @@ Foam::faMesh::faMesh(const polyMesh& pMesh)
         IOobject
         (
             "faBoundary",
-            time().findInstance(meshDir(), "faBoundary"),
+            // Allow boundary file that is newer than faceLabels
+            time().findInstance
+            (
+                meshDir(),
+                "faBoundary",
+                IOobject::MUST_READ,
+                faceLabels_.instance()
+            ),
             faMesh::meshSubDir,
             mesh(),
             IOobject::MUST_READ,
@@ -331,19 +365,12 @@ Foam::faMesh::faMesh(const polyMesh& pMesh)
 
     setPrimitiveMeshData();
 
-    // Create global mesh data
-    if (Pstream::parRun())
+    if (doInit)
     {
-        globalData();
+        faMesh::init(false);  // do not init lower levels
     }
 
-    // Calculate topology for the patches (processor-processor comms etc.)
-    boundary_.updateMesh();
-
-    // Calculate the geometry for the patches (transformation tensors etc.)
-    boundary_.calcGeometry();
-
-    if (fileHandler().isFile(pMesh.time().timePath()/"S0"))
+    if (doInit && fileHandler().isFile(pMesh.time().timePath()/"S0"))
     {
         S0Ptr_ = new DimensionedField<scalar, areaMesh>
         (
@@ -365,14 +392,25 @@ Foam::faMesh::faMesh(const polyMesh& pMesh)
 Foam::faMesh::faMesh
 (
     const polyMesh& pMesh,
-    const UList<label>& faceLabels
+    labelList&& faceLabels
+)
+:
+    faMesh(pMesh, std::move(faceLabels), static_cast<const IOobject&>(pMesh))
+{}
+
+
+Foam::faMesh::faMesh
+(
+    const polyMesh& pMesh,
+    labelList&& faceLabels,
+    const IOobject& io
 )
 :
     MeshObject<polyMesh, Foam::UpdateableMeshObject, faMesh>(pMesh),
+    faSchemes(mesh(), io.readOpt()),
     edgeInterpolation(*this),
-    faSchemes(mesh()),
-    faSolution(mesh()),
-    data(mesh()),
+    faSolution(mesh(), io.readOpt()),
+    data(mesh()),   // Always NO_READ, NO_WRITE
     faceLabels_
     (
         IOobject
@@ -384,7 +422,7 @@ Foam::faMesh::faMesh
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
-        faceLabels
+        std::move(faceLabels)
     ),
     boundary_
     (
@@ -427,7 +465,7 @@ Foam::faMesh::faMesh
 {}
 
 
-Foam::faMesh::faMesh(const polyPatch& pp)
+Foam::faMesh::faMesh(const polyPatch& pp, const bool doInit)
 :
     faMesh
     (
@@ -447,24 +485,18 @@ Foam::faMesh::faMesh(const polyPatch& pp)
 
     setPrimitiveMeshData();
 
-    // Create global mesh data
-    if (Pstream::parRun())
+    if (doInit)
     {
-        globalData();
+        faMesh::init(false);  // do not init lower levels
     }
-
-    // Calculate topology for the patches (processor-processor comms etc.)
-    boundary_.updateMesh();
-
-    // Calculate the geometry for the patches (transformation tensors etc.)
-    boundary_.calcGeometry();
 }
 
 
 Foam::faMesh::faMesh
 (
     const polyMesh& pMesh,
-    const dictionary& faMeshDefinition
+    const dictionary& faMeshDefinition,
+    const bool doInit
 )
 :
     faMesh
@@ -493,22 +525,14 @@ Foam::faMesh::faMesh
         )
     );
 
-
     addFaPatches(newPatches);
 
-    // Create global mesh data
-    if (Pstream::parRun())
+    if (doInit)
     {
-        globalData();
+        faMesh::init(false);  // do not init lower levels
     }
 
-    // Calculate topology for the patches (processor-processor comms etc.)
-    boundary_.updateMesh();
-
-    // Calculate the geometry for the patches (transformation tensors etc.)
-    boundary_.calcGeometry();
-
-    if (fileHandler().isFile(pMesh.time().timePath()/"S0"))
+    if (doInit && fileHandler().isFile(pMesh.time().timePath()/"S0"))
     {
         S0Ptr_ = new DimensionedField<scalar, areaMesh>
         (
@@ -570,6 +594,21 @@ bool Foam::faMesh::hasDb() const
 const Foam::objectRegistry& Foam::faMesh::thisDb() const
 {
     return mesh().thisDb();
+}
+
+
+void Foam::faMesh::removeFiles(const fileName& instanceDir) const
+{
+    fileName meshFilesPath = thisDb().time().path()/instanceDir/meshDir();
+
+    Foam::rm(meshFilesPath/"faceLabels");
+    Foam::rm(meshFilesPath/"faBoundary");
+}
+
+
+void Foam::faMesh::removeFiles() const
+{
+    removeFiles(mesh().instance());
 }
 
 
@@ -707,14 +746,7 @@ const Foam::vectorField& Foam::faMesh::pointAreaNormals() const
     {
         pointAreaNormalsPtr_.reset(new vectorField(nPoints()));
 
-        if (origPointAreaMethod_)
-        {
-            calcPointAreaNormals_orig(*pointAreaNormalsPtr_);
-        }
-        else
-        {
-            calcPointAreaNormals(*pointAreaNormalsPtr_);
-        }
+        calcPointAreaNormals(*pointAreaNormalsPtr_);
 
         if (quadricsFit_ > 0)
         {
@@ -821,11 +853,10 @@ bool Foam::faMesh::movePoints()
     }
 
     // Move boundary points
-    const_cast<faBoundaryMesh&>(boundary_).movePoints(newPoints);
+    boundary_.movePoints(newPoints);
 
     // Move interpolation
-    const edgeInterpolation& cei = *this;
-    const_cast<edgeInterpolation&>(cei).edgeInterpolation::movePoints();
+    edgeInterpolation::movePoints();
 
     // Note: Fluxes were dummy?
 

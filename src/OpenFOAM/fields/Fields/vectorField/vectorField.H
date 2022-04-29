@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef vectorField_H
-#define vectorField_H
+#ifndef Foam_vectorField_H
+#define Foam_vectorField_H
 
 #include "scalarField.H"
 #include "vector.H"
@@ -51,6 +51,13 @@ namespace Foam
 typedef Field<vector> vectorField;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+//- Inplace normalise (float) vector field
+template<> void Field<Vector<float>>::normalise();
+
+//- Inplace normalise (double) vector field
+template<> void Field<Vector<double>>::normalise();
+
 
 //- Zip together vector field from components
 template<class Cmpt>

@@ -52,7 +52,7 @@ namespace Foam
 void Foam::processorPointPatch::initGeometry(PstreamBuffers& pBufs)
 {
     // Algorithm:
-    // Depending on whether the patch is a master or a slave, get the primitive
+    // Depending on whether the patch is a owner or neighbour, get the primitive
     // patch points and filter away the points from the global patch.
 
     // Create the reversed patch and pick up its points
@@ -115,20 +115,6 @@ Foam::processorPointPatch::processorPointPatch
     coupledFacePointPatch(patch, bm),
     procPolyPatch_(refCast<const processorPolyPatch>(patch))
 {}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::processorPointPatch::~processorPointPatch()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-const Foam::labelList& Foam::processorPointPatch::reverseMeshPoints() const
-{
-    return reverseMeshPoints_;
-}
 
 
 // ************************************************************************* //

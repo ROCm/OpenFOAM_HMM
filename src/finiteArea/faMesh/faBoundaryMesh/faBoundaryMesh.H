@@ -86,6 +86,9 @@ class faBoundaryMesh
         //- Calculate group name to patch ids lookup
         void calcGroupIDs() const;
 
+        //- Read if IOobject flags set. Return true if read.
+        bool readContents(const bool allowReadIfPresent);
+
         //- No copy construct
         faBoundaryMesh(const faBoundaryMesh&) = delete;
 
@@ -207,7 +210,12 @@ public:
         void setGroup(const word& groupName, const labelUList& patchIDs);
 
         //- Check boundary definition
+        //  \return True if in error.
         bool checkDefinition(const bool report = false) const;
+
+        //- Check whether all procs have all patches and in same order.
+        //  \return True if in error.
+        bool checkParallelSync(const bool report = false) const;
 
 
     // Edit

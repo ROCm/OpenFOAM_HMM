@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -323,6 +323,20 @@ Foam::bitSet::bitSet(const bitSet& bitset, const labelRange& range)
 }
 
 
+Foam::bitSet::bitSet(const label n, const labelRange& range)
+:
+    bitSet(n)
+{
+    this->set(range);
+}
+
+
+Foam::bitSet::bitSet(const labelRange& range)
+{
+    this->set(range);
+}
+
+
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 void Foam::bitSet::assign(const UList<bool>& bools)
@@ -384,6 +398,7 @@ void Foam::bitSet::set(const labelRange& range)
     // corresponds to our new set size.
     if (slice.after() >= size())
     {
+        reserve(slice.after());
         resize(slice.start(), false);
         resize(slice.after(), true);
         return;

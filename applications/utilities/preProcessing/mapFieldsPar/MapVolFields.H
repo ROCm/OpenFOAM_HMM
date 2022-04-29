@@ -41,16 +41,17 @@ namespace Foam
 template<class Type>
 void evaluateConstraintTypes(GeometricField<Type, fvPatchField, volMesh>& fld)
 {
-    typename GeometricField<Type, fvPatchField, volMesh>::
-        Boundary& fldBf = fld.boundaryFieldRef();
+    auto& fldBf = fld.boundaryFieldRef();
+
+    const UPstream::commsTypes commsType(UPstream::defaultCommsType);
 
     if
     (
-        Pstream::defaultCommsType == Pstream::commsTypes::blocking
-     || Pstream::defaultCommsType == Pstream::commsTypes::nonBlocking
+        commsType == UPstream::commsTypes::blocking
+     || commsType == UPstream::commsTypes::nonBlocking
     )
     {
-        const label nReq = Pstream::nRequests();
+        const label startOfRequests = UPstream::nRequests();
 
         forAll(fldBf, patchi)
         {
@@ -62,18 +63,18 @@ void evaluateConstraintTypes(GeometricField<Type, fvPatchField, volMesh>& fld)
              && polyPatch::constraintType(tgtField.patch().patch().type())
             )
             {
-                tgtField.initEvaluate(Pstream::defaultCommsType);
+                tgtField.initEvaluate(commsType);
             }
         }
 
-        // Block for any outstanding requests
+        // Wait for outstanding requests
         if
         (
-            Pstream::parRun()
-         && Pstream::defaultCommsType == Pstream::commsTypes::nonBlocking
+            UPstream::parRun()
+         && commsType == UPstream::commsTypes::nonBlocking
         )
         {
-            Pstream::waitRequests(nReq);
+            UPstream::waitRequests(startOfRequests);
         }
 
         forAll(fldBf, patchi)
@@ -86,11 +87,11 @@ void evaluateConstraintTypes(GeometricField<Type, fvPatchField, volMesh>& fld)
              && polyPatch::constraintType(tgtField.patch().patch().type())
             )
             {
-                tgtField.evaluate(Pstream::defaultCommsType);
+                tgtField.evaluate(commsType);
             }
         }
     }
-    else if (Pstream::defaultCommsType == Pstream::commsTypes::scheduled)
+    else if (commsType == UPstream::commsTypes::scheduled)
     {
         const lduSchedule& patchSchedule =
             fld.mesh().globalData().patchSchedule();
@@ -109,11 +110,11 @@ void evaluateConstraintTypes(GeometricField<Type, fvPatchField, volMesh>& fld)
             {
                 if (schedEval.init)
                 {
-                    tgtField.initEvaluate(Pstream::commsTypes::scheduled);
+                    tgtField.initEvaluate(commsType);
                 }
                 else
                 {
-                    tgtField.evaluate(Pstream::commsTypes::scheduled);
+                    tgtField.evaluate(commsType);
                 }
             }
         }

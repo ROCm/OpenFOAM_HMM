@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +27,8 @@ Namespace
     Foam::BitOps
 
 Description
-    Various bit-wise operations, etc.
+    Various bit-wise operations and adaptor methods for containers
+    that are somewhat similar to bitSet (eg, boolList, labelHashSet).
 
     The population count uses the Hamming weight
     (http://en.wikipedia.org/wiki/Hamming_weight).
@@ -42,8 +43,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef BitOps_H
-#define BitOps_H
+#ifndef Foam_BitOps_H
+#define Foam_BitOps_H
 
 #include "label.H"
 #include "UList.H"
@@ -83,23 +84,29 @@ inline unsigned int count(const UList<bool>& bools, const bool val=true)
 //  For compatibility with bitSet::all()
 inline bool all(const UList<bool>& bools)
 {
-    return std::all_of(bools.begin(), bools.end(), [](bool b){return b;});
+    return std::all_of(bools.begin(), bools.end(), identityOp());
 }
 
 //- True if any entries are 'true'.
 //  For compatibility with bitSet::any()
 inline bool any(const UList<bool>& bools)
 {
-    return std::any_of(bools.begin(), bools.end(), [](bool b){return b;});
+    return std::any_of(bools.begin(), bools.end(), identityOp());
 }
 
 //- True if no entries are 'true'.
 //  For compatibility with bitSet::none()
 inline bool none(const UList<bool>& bools)
 {
-    return std::none_of(bools.begin(), bools.end(), [](bool b){return b;});
+    return std::none_of(bools.begin(), bools.end(), identityOp());
 }
 
+
+//- Set the listed locations (assign 'true').
+//  Does auto-vivify for non-existent entries.
+//
+//  For compatibility with bitSet::set(labelUList)
+void set(List<bool>& bools, const labelUList& locations);
 
 //- Set the specified range 'on' in a boolList.
 //  For compatibility with bitSet::set(labelRange)
@@ -113,6 +120,12 @@ void set(labelHashSet& hashset, const labelRange& range);
 void set(bitSet& bitset, const labelRange& range);
 
 
+//- Unset the listed locations (assign 'false').
+//  No auto-vivify non-existent entries.
+//
+//  For compatibility with bitSet::set(labelUList)
+void unset(List<bool>& bools, const labelUList& locations);
+
 //- Unset the specified range 'on' in a boolList.
 //  For compatibility with bitSet::unset(labelRange)
 void unset(List<bool>& bools, const labelRange& range);
@@ -123,6 +136,34 @@ void unset(labelHashSet& hashset, const labelRange& range);
 
 //- Forward to bitSet::unset(labelRange)
 void unset(bitSet& bitset, const labelRange& range);
+
+
+//- Construct a selection list of bools (all false) with the given pre-size,
+//- subsequently add specified locations as true,
+//- auto-vivify entries if needed.
+//  Similar to bitSet construction from locations
+//
+//  \return a List of bools
+List<bool> select(const label n, const labelUList& locations);
+
+//- Construct an auto-sized selection list of bools (all false),
+//- and populate the specified locations as true.
+//  Similar to bitSet construction from locations
+//
+//  \return a List of bools
+List<bool> select(const labelUList& locations);
+
+//- Return the (sorted) values corresponding to 'true' entries.
+//  Similar to bitSet::toc()
+//
+//  \return a List of labels
+List<label> toc(const UList<bool>& bools);
+
+//- Return the (sorted) values corresponding to 'true' entries.
+//  Similar to bitSet::sortedToc() and labelHashSet::sortedToc()
+//
+//  \return a List of labels
+List<label> sortedToc(const UList<bool>& bools);
 
 
 //- Count arbitrary number of bits (of an integral type)
@@ -254,7 +295,7 @@ namespace BitSetOps
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 //- Create a bitSet with length n with the specified \a on locations.
-//  The resulting bitSet is guaranteed to have exactly the specified length,
+//  The resulting bitSet is guaranteed to have \b exactly the specified length,
 //  any values or positions larger than n-1 are silently ignored.
 //
 //  \param n the size of the output bitSet
@@ -271,7 +312,7 @@ bitSet create
 
 
 //- Create a bitSet with length n with the specified \a on locations.
-//  The resulting bitSet is guaranteed to have exactly the specified length,
+//  The resulting bitSet is guaranteed to have \b exactly the specified length,
 //  any values or positions larger than n-1 are silently ignored.
 //
 //  \param n the size of the output bitSet
@@ -290,7 +331,7 @@ bitSet create
 //- Create a bitSet with length n with the specified \a on locations
 //- when the list values are equal to the select value.
 //
-//  The resulting bitSet is guaranteed to have exactly the specified length,
+//  The resulting bitSet is guaranteed to have \b exactly the specified length,
 //  any values or positions larger than n-1 are silently ignored.
 //
 //  \param n the size of the output bitSet

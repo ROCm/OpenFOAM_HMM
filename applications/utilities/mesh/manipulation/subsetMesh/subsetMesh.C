@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,7 +42,7 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "fvMeshSubset.H"
+#include "fvMeshSubsetter.H"  // Not fvMeshSubset (need two-step subsetting)
 #include "argList.H"
 #include "IOobjectList.H"
 #include "volFields.H"
@@ -517,8 +517,8 @@ int main(int argc, char *argv[])
     }
 
 
-    // Mesh subsetting engine
-    fvMeshSubset subsetter(mesh);
+    // Two-step mesh subsetting engine
+    fvMeshSubsetter subsetter(mesh);
 
     {
         bitSet selectedCells =
@@ -530,13 +530,8 @@ int main(int argc, char *argv[])
 
         if (exposedPatchIDs.size() == 1)
         {
-            // Single patch for exposed faces
-            subsetter.setCellSubset
-            (
-                selectedCells,
-                exposedPatchIDs.first(),
-                true
-            );
+            // Single patch for exposed faces (syncPar)
+            subsetter.reset(selectedCells, exposedPatchIDs.first(), true);
         }
         else
         {
@@ -545,7 +540,7 @@ int main(int argc, char *argv[])
 
             labelList exposedFaces
             (
-                subsetter.getExposedFaces(selectedCells, true)
+                subsetter.getExposedFaces(selectedCells, true)  // syncPar
             );
 
             subsetter.setCellSubset
@@ -553,7 +548,7 @@ int main(int argc, char *argv[])
                 selectedCells,
                 exposedFaces,
                 labelUIndList(nearestExposedPatch, exposedFaces)(),
-                true
+                true  // syncPar
             );
         }
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,17 @@ Class
     Foam::faMesh
 
 Description
-    Finite area mesh.  Used for 2-D non-Euclidian finite area method.
+    Finite area mesh (used for 2-D non-Euclidian finite area method)
+    defined using a \em patch of faces on a polyMesh
+    (ie, uindirectPrimitivePatch).
+
+    The ordering of faces and points on the faMesh corresponds to
+    the localFaces and localPoints as per Foam::PrimitivePatch but
+    the edge addressing is handled slightly differently.
+    The internal edges of the faMesh will generally correspond identically
+    to the internalEdges of the PrimitivePatch (may change in the future)
+    but the boundaryEdges will be reordered compared to the PrimitivePatch
+    to allow edge boundary slices to be obtained.
 
 SourceFiles
     faMesh.C
@@ -84,8 +94,8 @@ class faMesh
 :
     public MeshObject<polyMesh, Foam::UpdateableMeshObject, faMesh>,
     public lduMesh,
-    public edgeInterpolation,
     public faSchemes,
+    public edgeInterpolation,  // may need input from faSchemes
     public faSolution,
     public data
 {
@@ -213,10 +223,10 @@ class faMesh
 
         // Primitive size data
 
-            //- Number of points
+            //- Total number of points
             mutable label nPoints_;
 
-            //- Number of edges
+            //- Total number of edges
             mutable label nEdges_;
 
             //- Number of internal edges
@@ -309,10 +319,10 @@ class faMesh
 
     // Static Private Data
 
-        //- Use the original method for point normals
-        static int origPointAreaMethod_;
+        //- Geometry treatment (0: primitive, 1: standard)
+        static int geometryOrder_;
 
-        //- Use quadrics fit
+        //- Quadrics fit for pointAreaNormals (experimental)
         static const int quadricsFit_;
 
 
@@ -324,10 +334,12 @@ class faMesh
         //- No copy assignment
         void operator=(const faMesh&) = delete;
 
-        //- Set indirect patch, removing any old one
+        //- Set indirect patch, removing any old one.
+        //  No communication
         void initPatch() const;
 
-        //- Set primitive mesh data
+        //- Set primitive mesh data.
+        //  No communication
         void setPrimitiveMeshData();
 
         //- Get list of (proc/patchi/patchEdgei/meshFacei) tuple pairs in an
@@ -354,36 +366,42 @@ class faMesh
             void calcPatchStarts() const;
 
             //- Calculate edge lengths
+            //  Triggers communication via calcEdgeAreaNormals
             void calcLe() const;
 
             //- Calculate mag edge lengths
+            //  No communication
             void calcMagLe() const;
 
             //- Calculate face centres
+            //  No communication
             void calcAreaCentres() const;
 
             //- Calculate edge centres
+            //  No communication
             void calcEdgeCentres() const;
 
             //- Calculate face areas
+            //  No communication
             void calcS() const;
 
             //- Calculate face area normals
+            //  Triggers communication via calcEdgeAreaNormals
             void calcFaceAreaNormals() const;
 
             //- Calculate edge area normals
+            //  Triggers communication via pointAreaNormals
             void calcEdgeAreaNormals() const;
 
             //- Calculate point area normals
-            void calcPointAreaNormals_orig(vectorField& result) const;
-
-            //- Calculate point area normals
+            //  Triggers communication for processor patches
             void calcPointAreaNormals(vectorField& result) const;
 
             //- Calculate point area normals by quadrics fit
             void calcPointAreaNormalsByQuadricsFit(vectorField& result) const;
 
             //- Calculate face curvatures
+            //  Triggers communication via edgeLengthCorrection
             void calcFaceCurvatures() const;
 
             //- Calculate edge transformation tensors
@@ -467,7 +485,10 @@ public:
 
     // Public Typedefs
 
+        //- The mesh type
         typedef faMesh Mesh;
+
+        //- The boundary type associated with the mesh
         typedef faBoundaryMesh BoundaryMesh;
 
 
@@ -483,29 +504,38 @@ public:
 
     // Constructors
 
+        //- Read construct from polyMesh, using its IOobject properties
+        explicit faMesh(const polyMesh& pMesh, const bool doInit = true);
+
         //- Construct zero-sized from polyMesh
         //  Boundary is added using addFaPatches() member function
         faMesh(const polyMesh& pMesh, const Foam::zero);
 
-        //- Construct from polyMesh
-        explicit faMesh(const polyMesh& pMesh);
+        //- Construct from components (face labels) without boundary,
+        //- using IOobject properties from polyMesh.
+        //  Boundary is added using addFaPatches() member function.
+        faMesh(const polyMesh& pMesh, labelList&& faceLabels);
 
-        //- Construct for specified face labels without boundary.
-        //  Boundary is added using addFaPatches() member function
+        //- Construct from components (face labels) without boundary,
+        //- using alternative IOobject properties
+        //- (primarily the readOption).
+        //  Boundary is added using addFaPatches() member function.
         faMesh
         (
             const polyMesh& pMesh,
-            const UList<label>& faceLabels
+            labelList&& faceLabels,
+            const IOobject& io
         );
 
         //- Construct from single polyPatch
-        explicit faMesh(const polyPatch& pp);
+        explicit faMesh(const polyPatch& pp, const bool doInit = true);
 
         //- Construct from definition
         faMesh
         (
             const polyMesh& pMesh,
-            const dictionary& faMeshDefinition
+            const dictionary& faMeshDefinition,
+            const bool doInit = true
         );
 
 
@@ -521,7 +551,7 @@ public:
 
     // Member Functions
 
-    // Helpers
+    // Topological Change
 
         //- Add boundary patches. Constructor helper
         void addFaPatches
@@ -536,6 +566,9 @@ public:
             const List<faPatch*>& p,
             const bool validBoundary = true
         );
+
+        //- Initialise non-demand-driven data etc
+        bool init(const bool doInit);
 
 
         // Database
@@ -688,19 +721,28 @@ public:
             tmp<vectorField> haloFaceNormals(const label patchi) const;
 
 
-        // Mesh motion and morphing
+    // Storage management
 
-            //- Is mesh moving
-            bool moving() const
-            {
-                return mesh().moving();
-            }
+        //- Remove all files from mesh instance
+        void removeFiles(const fileName& instanceDir) const;
 
-            //- Update after mesh motion
-            virtual bool movePoints();
+        //- Remove all files from mesh instance()
+        void removeFiles() const;
 
-            //- Update after topo change
-            virtual void updateMesh(const mapPolyMesh&);
+
+    // Mesh motion and morphing
+
+        //- Is mesh moving
+        bool moving() const
+        {
+            return mesh().moving();
+        }
+
+        //- Update after mesh motion
+        virtual bool movePoints();
+
+        //- Update after topo change
+        virtual void updateMesh(const mapPolyMesh&);
 
 
         // Mapping

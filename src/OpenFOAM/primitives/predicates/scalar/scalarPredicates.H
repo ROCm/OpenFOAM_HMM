@@ -81,11 +81,15 @@ public:
             EQUAL,              //!< "eq", "equal"
             NOT_EQUAL,          //!< "neq", "notEqual"
             LESS,               //!< "lt", "less"
-            LESS_EQ,            //!< "le", "lessEq"
+            LESS_EQUAL,         //!< "le", "lessEqual", "lessEq"
             GREATER,            //!< "gt", "greater"
-            GREATER_EQ,         //!< "ge", "greaterEq"
+            GREATER_EQUAL,      //!< "ge", "greaterEqual", "greaterEq"
             ALWAYS,             //!< Always matches
             NEVER,              //!< Never matches
+
+            // OpenFOAM-v2112 and earlier:
+            LESS_EQ = LESS_EQUAL,
+            GREATER_EQ = GREATER_EQUAL,
         };
 
         //- Names for the opType enumeration.
@@ -133,7 +137,7 @@ public:
 
 
         //- Test if value is 'less_equal' to prescribed
-        static unary lessEqOp(const scalar opVal)
+        static unary lessEqualOp(const scalar opVal)
         {
             return std::bind
             (
@@ -154,7 +158,7 @@ public:
 
 
         //- Test if value is 'greater_equal' to prescribed
-        static unary greaterEqOp(const scalar opVal)
+        static unary greaterEqualOp(const scalar opVal)
         {
             return std::bind
             (

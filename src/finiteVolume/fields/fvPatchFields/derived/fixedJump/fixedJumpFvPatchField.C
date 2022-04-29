@@ -256,7 +256,7 @@ void Foam::fixedJumpFvPatchField<Type>::write(Ostream& os) const
     fvPatchField<Type>::write(os);
 
     // Write patchType if not done already by fvPatchField
-    if (!this->patchType().size())
+    if (this->patchType().empty())
     {
         os.writeEntry("patchType", this->interfaceFieldType());
     }

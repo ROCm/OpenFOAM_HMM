@@ -71,20 +71,7 @@ inline void decrCount(const Foam::labelUList& list, Foam::labelList& counter)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::removeCells::removeCells
-(
-    const polyMesh& mesh
-)
-:
-    removeCells(mesh, true)
-{}
-
-
-Foam::removeCells::removeCells
-(
-    const polyMesh& mesh,
-    const bool syncPar
-)
+Foam::removeCells::removeCells(const polyMesh& mesh, const bool syncPar)
 :
     mesh_(mesh),
     syncPar_(syncPar)

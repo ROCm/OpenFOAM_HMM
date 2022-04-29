@@ -95,11 +95,11 @@ void Foam::zoneDistribute::setUpCommforZone
             {
                 for (const label gblIdx : stencil_[celli])
                 {
-                    if (!globalNumbering_.isLocal(gblIdx))
+                    const label proci = globalNumbering_.whichProcID(gblIdx);
+
+                    if (proci != Pstream::myProcNo())
                     {
-                        const label procID =
-                            globalNumbering_.whichProcID(gblIdx);
-                        needed[procID].insert(gblIdx);
+                        needed[proci].insert(gblIdx);
                     }
                 }
             }
@@ -126,7 +126,7 @@ void Foam::zoneDistribute::setUpCommforZone
         {
             send_[proci].clear();
 
-            if (proci != UPstream::myProcNo() && pBufs.hasRecvData(proci))
+            if (proci != UPstream::myProcNo() && pBufs.recvDataCount(proci))
             {
                 UIPstream fromProc(proci, pBufs);
                 fromProc >> send_[proci];

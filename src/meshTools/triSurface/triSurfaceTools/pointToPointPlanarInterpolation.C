@@ -101,7 +101,8 @@ Foam::pointToPointPlanarInterpolation::calcCoordinateSystem
         {
             const point& p2 = points[i];
             vector e2(p2 - p0);
-            e2 -= (e2&e1)*e1;
+            e2.removeCollinear(e1);
+
             scalar magE2 = mag(e2);
 
             if (magE2 > maxDist)

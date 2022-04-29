@@ -12,6 +12,9 @@ $(fvGeometryScheme)/stabilised/stabilisedFvGeometryScheme.C
 surfaceInterpolation = interpolation/surfaceInterpolation
 $(surfaceInterpolation)/surfaceInterpolation/surfaceInterpolation.C
 
+fvMesh/fvMeshSubset/fvMeshSubset.C
+fvMesh/fvMeshSubset/fvMeshSubsetProxy.C
+
 fvMesh/singleCellFvMesh/singleCellFvMesh.C
 
 fvMesh/simplifiedFvMesh/simplifiedFvMesh/simplifiedFvMesh.C

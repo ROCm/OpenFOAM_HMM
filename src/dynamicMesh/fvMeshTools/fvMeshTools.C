@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -481,9 +481,13 @@ Foam::autoPtr<Foam::fvMesh> Foam::fvMeshTools::newMesh
     }
 
     // Broadcast information to all
-    Pstream::scatter(patchEntries);
-    Pstream::scatter(facesInstance);
-    Pstream::scatter(pointsInstance);
+    Pstream::broadcasts
+    (
+        UPstream::worldComm,
+        patchEntries,
+        facesInstance,
+        pointsInstance
+    );
 
 
     // Dummy meshes
@@ -687,11 +691,16 @@ Foam::autoPtr<Foam::fvMesh> Foam::fvMeshTools::newMesh
     // ~~~~~~~~~~~~~~~
 
     wordList pointZoneNames(mesh.pointZones().names());
-    Pstream::scatter(pointZoneNames);
     wordList faceZoneNames(mesh.faceZones().names());
-    Pstream::scatter(faceZoneNames);
     wordList cellZoneNames(mesh.cellZones().names());
-    Pstream::scatter(cellZoneNames);
+
+    Pstream::broadcasts
+    (
+        UPstream::worldComm,
+        pointZoneNames,
+        faceZoneNames,
+        cellZoneNames
+    );
 
     if (!haveMesh)
     {

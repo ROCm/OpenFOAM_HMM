@@ -74,9 +74,8 @@ public:
         {}
 
 
-    // Destructor
-
-        virtual ~cyclicSlipPointPatch() = default;
+    //- Destructor
+    virtual ~cyclicSlipPointPatch() = default;
 
 
     // Member Functions
