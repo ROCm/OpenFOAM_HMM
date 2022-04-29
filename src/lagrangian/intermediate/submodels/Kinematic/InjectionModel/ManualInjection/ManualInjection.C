@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -159,7 +159,7 @@ Foam::scalar Foam::ManualInjection<CloudType>::timeEnd() const
 {
     // Injection is instantaneous - but allow for a finite interval to
     // avoid numerical issues when interval is zero
-    return ROOTVSMALL;
+    return this->SOI_ + SMALL;
 }
 
 
