@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,7 +69,7 @@ Foam::volScalarField& Foam::functionObjects::scalarTransport::transportedField()
                 mesh_.time().timeName(),
                 mesh_,
                 IOobject::MUST_READ,
-                IOobject::AUTO_WRITE
+                IOobject::NO_WRITE
             ),
             mesh_
         );
@@ -374,6 +374,14 @@ bool Foam::functionObjects::scalarTransport::execute()
 
 bool Foam::functionObjects::scalarTransport::write()
 {
+    Log << type() << " write: " << name() << nl
+        << tab << fieldName_ << nl
+        << endl;
+
+    volScalarField& s = transportedField();
+
+    s.write();
+
     return true;
 }
 
