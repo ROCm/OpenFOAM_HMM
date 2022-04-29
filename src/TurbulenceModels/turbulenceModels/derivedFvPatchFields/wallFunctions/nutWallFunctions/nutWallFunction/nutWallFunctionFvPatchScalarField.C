@@ -92,21 +92,10 @@ void Foam::nutWallFunctionFvPatchScalarField::writeLocalEntries
     Ostream& os
 ) const
 {
-    os.writeEntry("blending",  blendingTypeNames[blending_]);
-
-    if (blending_ == blendingType::BINOMIAL)
-    {
-        os.writeEntry("n", n_);
-    }
-
-    if (UName_ != word::null)
-    {
-        os.writeEntry("U", UName_);
-    }
-
     os.writeEntry("Cmu", Cmu_);
     os.writeEntry("kappa", kappa_);
     os.writeEntry("E", E_);
+    os.writeEntryIfDifferent<word>("U", word::null, UName_);
 }
 
 
@@ -347,7 +336,6 @@ void Foam::nutWallFunctionFvPatchScalarField::write
 {
     fvPatchField<scalar>::write(os);
     writeLocalEntries(os);
-    writeEntry("value", os);
 }
 
 

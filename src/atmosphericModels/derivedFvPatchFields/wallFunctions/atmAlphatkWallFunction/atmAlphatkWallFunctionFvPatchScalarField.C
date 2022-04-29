@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2020 ENERCON GmbH
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,6 +57,29 @@ void atmAlphatkWallFunctionFvPatchScalarField::checkType()
             << " must be wall" << nl
             << "    Current patch type is " << patch().type() << nl << endl
             << abort(FatalError);
+    }
+}
+
+
+void atmAlphatkWallFunctionFvPatchScalarField::writeLocalEntries
+(
+    Ostream& os
+) const
+{
+    os.writeEntryIfDifferent<scalar>("Cmu", 0.09, Cmu_);
+    os.writeEntryIfDifferent<scalar>("kappa", 0.41, kappa_);
+
+    if (Pr_)
+    {
+        Pr_->writeData(os);
+    }
+    if (Prt_)
+    {
+        Prt_->writeData(os);
+    }
+    if (z0_)
+    {
+        z0_->writeData(os);
     }
 }
 
@@ -287,11 +310,7 @@ void atmAlphatkWallFunctionFvPatchScalarField::rmap
 void atmAlphatkWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
-    os.writeEntry("Cmu", Cmu_);
-    os.writeEntry("kappa", kappa_);
-    Pr_->writeData(os);
-    Prt_->writeData(os);
-    z0_->writeData(os);
+    writeLocalEntries(os);
     writeEntry("value", os);
 }
 

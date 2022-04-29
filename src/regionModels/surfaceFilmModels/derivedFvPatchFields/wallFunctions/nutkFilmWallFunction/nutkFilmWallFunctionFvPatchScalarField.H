@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -95,6 +96,9 @@ protected:
 
         //- Calculate the friction velocity
         virtual tmp<scalarField> calcUTau(const scalarField& magGradU) const;
+
+        //- Write local wall function variables
+        void writeLocalEntries(Ostream&) const;
 
 
 public:

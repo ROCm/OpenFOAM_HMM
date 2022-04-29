@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2020 ENERCON GmbH
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -131,6 +131,9 @@ protected:
 
         //- Calculate the turbulent viscosity
         virtual tmp<scalarField> calcNut() const;
+
+        //- Write local wall function variables
+        void writeLocalEntries(Ostream&) const;
 
 
 public:

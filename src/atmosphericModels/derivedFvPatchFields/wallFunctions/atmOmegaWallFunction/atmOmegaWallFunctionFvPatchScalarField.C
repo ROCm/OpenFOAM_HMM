@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2020 ENERCON GmbH
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -96,6 +96,18 @@ void Foam::atmOmegaWallFunctionFvPatchScalarField::calculate
            *magGradUw[facei]
            *Cmu25*sqrt(k[celli])
            /(nutw.kappa()*(y[facei] + z0[facei]));
+    }
+}
+
+
+void Foam::atmOmegaWallFunctionFvPatchScalarField::writeLocalEntries
+(
+    Ostream& os
+) const
+{
+    if (z0_)
+    {
+        z0_->writeData(os);
     }
 }
 
@@ -196,8 +208,9 @@ void Foam::atmOmegaWallFunctionFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    omegaWallFunctionFvPatchScalarField::write(os);
-    z0_->writeData(os);
+    fvPatchField<scalar>::write(os);
+    writeLocalEntries(os);
+    writeEntry("value", os);
 }
 
 

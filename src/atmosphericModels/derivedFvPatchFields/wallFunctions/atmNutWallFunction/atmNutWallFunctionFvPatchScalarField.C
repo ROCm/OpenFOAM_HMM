@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2020 CENER
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -111,6 +111,20 @@ tmp<scalarField> atmNutWallFunctionFvPatchScalarField::calcNut() const
 }
 
 
+void Foam::atmNutWallFunctionFvPatchScalarField::writeLocalEntries
+(
+    Ostream& os
+) const
+{
+    os.writeEntryIfDifferent<scalar>("z0Min", SMALL, z0Min_);
+
+    if (z0_)
+    {
+        z0_->writeData(os);
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 atmNutWallFunctionFvPatchScalarField::atmNutWallFunctionFvPatchScalarField
@@ -212,10 +226,8 @@ void atmNutWallFunctionFvPatchScalarField::rmap
 
 void atmNutWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchField<scalar>::write(os);
-    nutWallFunctionFvPatchScalarField::writeLocalEntries(os);
-    os.writeEntry("z0Min", z0Min_);
-    z0_->writeData(os);
+    nutWallFunctionFvPatchScalarField::write(os);
+    writeLocalEntries(os);
     writeEntry("value", os);
 }
 

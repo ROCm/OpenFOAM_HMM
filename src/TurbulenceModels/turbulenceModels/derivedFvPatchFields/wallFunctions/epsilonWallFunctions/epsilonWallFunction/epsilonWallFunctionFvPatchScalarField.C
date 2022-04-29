@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2019 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -294,6 +294,21 @@ void Foam::epsilonWallFunctionFvPatchScalarField::calculate
                *Cmu25*sqrt(k[celli])
                /(nutw.kappa()*y[facei]);
         }
+    }
+}
+
+
+void Foam::epsilonWallFunctionFvPatchScalarField::writeLocalEntries
+(
+    Ostream& os
+) const
+{
+    os.writeEntryIfDifferent<bool>("lowReCorrection", false, lowReCorrection_);
+    os.writeEntry("blending", blendingTypeNames[blending_]);
+
+    if (blending_ == blendingType::BINOMIAL)
+    {
+        os.writeEntry("n", n_);
     }
 }
 
@@ -622,10 +637,9 @@ void Foam::epsilonWallFunctionFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    os.writeEntry("lowReCorrection", lowReCorrection_);
-    os.writeEntry("blending", blendingTypeNames[blending_]);
-    os.writeEntry("n", n_);
-    fixedValueFvPatchField<scalar>::write(os);
+    fvPatchField<scalar>::write(os);
+    writeLocalEntries(os);
+    writeEntry("value", os);
 }
 
 

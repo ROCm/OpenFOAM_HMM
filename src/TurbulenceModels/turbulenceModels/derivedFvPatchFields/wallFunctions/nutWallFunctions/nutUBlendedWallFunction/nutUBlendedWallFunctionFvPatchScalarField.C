@@ -119,6 +119,15 @@ Foam::nutUBlendedWallFunctionFvPatchScalarField::calcUTau
 }
 
 
+void Foam::nutUBlendedWallFunctionFvPatchScalarField::writeLocalEntries
+(
+    Ostream& os
+) const
+{
+    os.writeEntryIfDifferent<scalar>("n", 4.0, n_);
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::nutUBlendedWallFunctionFvPatchScalarField::
@@ -213,9 +222,8 @@ void Foam::nutUBlendedWallFunctionFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    fvPatchField<scalar>::write(os);
+    nutWallFunctionFvPatchScalarField::write(os);
     writeLocalEntries(os);
-    os.writeEntry("n", n_);
     writeEntry("value", os);
 }
 

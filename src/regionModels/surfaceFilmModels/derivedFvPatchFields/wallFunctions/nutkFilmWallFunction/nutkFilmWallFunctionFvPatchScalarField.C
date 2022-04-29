@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -150,6 +150,24 @@ tmp<scalarField> nutkFilmWallFunctionFvPatchScalarField::calcNut() const
 }
 
 
+void nutkFilmWallFunctionFvPatchScalarField::writeLocalEntries
+(
+    Ostream& os
+) const
+{
+    os.writeEntryIfDifferent<word>
+    (
+        "filmRegion",
+        "surfaceFilmProperties",
+        filmRegionName_
+    );
+    os.writeEntryIfDifferent<scalar>("B", 5.5, B_);
+    os.writeEntryIfDifferent<scalar>("yPlusCrit", 11.05, yPlusCrit_);
+    os.writeEntryIfDifferent<scalar>("Cmu", 0.09, Cmu_);
+    os.writeEntryIfDifferent<scalar>("kappa", 0.41, kappa_);
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 nutkFilmWallFunctionFvPatchScalarField::nutkFilmWallFunctionFvPatchScalarField
@@ -249,15 +267,7 @@ tmp<scalarField> nutkFilmWallFunctionFvPatchScalarField::yPlus() const
 void nutkFilmWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
-    os.writeEntryIfDifferent<word>
-    (
-        "filmRegion",
-        "surfaceFilmProperties",
-        filmRegionName_
-    );
     writeLocalEntries(os);
-    os.writeEntry("B", B_);
-    os.writeEntry("yPlusCrit", yPlusCrit_);
     writeEntry("value", os);
 }
 

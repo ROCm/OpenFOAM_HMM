@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016, 2019 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -161,6 +161,12 @@ public:
 
         //- Calculate and return the yPlus at the boundary
         virtual tmp<scalarField> yPlus() const;
+
+
+        // I-O
+
+            //- Write
+            virtual void write(Ostream&) const;
 };
 
 

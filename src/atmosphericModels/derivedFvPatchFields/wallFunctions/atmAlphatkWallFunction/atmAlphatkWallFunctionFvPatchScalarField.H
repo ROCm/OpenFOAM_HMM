@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2020 ENERCON GmbH
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -139,6 +139,9 @@ protected:
 
         //- Check the type of the patch
         virtual void checkType();
+
+        //- Write local wall function variables
+        void writeLocalEntries(Ostream&) const;
 
 
 public:

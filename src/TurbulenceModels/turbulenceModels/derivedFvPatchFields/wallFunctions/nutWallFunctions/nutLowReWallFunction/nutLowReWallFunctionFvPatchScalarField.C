@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -126,6 +126,16 @@ yPlus() const
     const scalarField& nuEff = tnuEff();
 
     return y*sqrt(nuEff*mag(Uw.snGrad()))/nuw;
+}
+
+
+void Foam::nutLowReWallFunctionFvPatchScalarField::write
+(
+    Ostream& os
+) const
+{
+    nutWallFunctionFvPatchScalarField::write(os);
+    writeEntry("value", os);
 }
 
 

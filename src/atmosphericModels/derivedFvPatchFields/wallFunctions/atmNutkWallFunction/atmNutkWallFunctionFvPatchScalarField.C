@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
     Copyright (C) 2020 ENERCON GmbH
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -106,6 +106,20 @@ tmp<scalarField> atmNutkWallFunctionFvPatchScalarField::calcNut() const
 }
 
 
+void Foam::atmNutkWallFunctionFvPatchScalarField::writeLocalEntries
+(
+    Ostream& os
+) const
+{
+    os.writeEntryIfDifferent<bool>("boundNut", false, boundNut_);
+
+    if (z0_)
+    {
+        z0_->writeData(os);
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 atmNutkWallFunctionFvPatchScalarField::atmNutkWallFunctionFvPatchScalarField
@@ -199,10 +213,8 @@ void atmNutkWallFunctionFvPatchScalarField::rmap
 
 void atmNutkWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchField<scalar>::write(os);
-    nutWallFunctionFvPatchScalarField::writeLocalEntries(os);
-    os.writeEntry("boundNut", boundNut_);
-    z0_->writeData(os);
+    nutWallFunctionFvPatchScalarField::write(os);
+    writeLocalEntries(os);
     writeEntry("value", os);
 }
 

@@ -123,6 +123,20 @@ Foam::nutUWallFunctionFvPatchScalarField::calcYPlus
 }
 
 
+void Foam::nutUWallFunctionFvPatchScalarField::writeLocalEntries
+(
+    Ostream& os
+) const
+{
+    os.writeEntry("blending", blendingTypeNames[blending_]);
+
+    if (blending_ == blendingType::BINOMIAL)
+    {
+        os.writeEntry("n", n_);
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::nutUWallFunctionFvPatchScalarField::nutUWallFunctionFvPatchScalarField
@@ -227,7 +241,7 @@ void Foam::nutUWallFunctionFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    fvPatchField<scalar>::write(os);
+    nutWallFunctionFvPatchScalarField::write(os);
     writeLocalEntries(os);
     writeEntry("value", os);
 }

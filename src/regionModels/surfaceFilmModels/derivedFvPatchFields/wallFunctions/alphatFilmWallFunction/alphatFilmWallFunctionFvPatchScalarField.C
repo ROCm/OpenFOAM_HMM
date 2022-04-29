@@ -246,11 +246,11 @@ void alphatFilmWallFunctionFvPatchScalarField::write(Ostream& os) const
         "surfaceFilmProperties",
         filmRegionName_
     );
-    os.writeEntry("B", B_);
-    os.writeEntry("yPlusCrit", yPlusCrit_);
-    os.writeEntry("Cmu", Cmu_);
-    os.writeEntry("kappa", kappa_);
-    os.writeEntry("Prt", Prt_);
+    os.writeEntryIfDifferent<scalar>("B", 5.5, B_);
+    os.writeEntryIfDifferent<scalar>("yPlusCrit", 11.05, yPlusCrit_);
+    os.writeEntryIfDifferent<scalar>("Cmu", 0.09, Cmu_);
+    os.writeEntryIfDifferent<scalar>("kappa", 0.41, kappa_);
+    os.writeEntryIfDifferent<scalar>("Prt", 0.85, Prt_);
     writeEntry("value", os);
 }
 

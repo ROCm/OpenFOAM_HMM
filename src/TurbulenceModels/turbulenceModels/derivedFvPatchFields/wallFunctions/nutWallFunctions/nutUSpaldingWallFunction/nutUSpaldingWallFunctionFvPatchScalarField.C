@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -195,8 +195,6 @@ void Foam::nutUSpaldingWallFunctionFvPatchScalarField::writeLocalEntries
     Ostream& os
 ) const
 {
-    nutWallFunctionFvPatchScalarField::writeLocalEntries(os);
-
     os.writeEntryIfDifferent<label>("maxIter", 10, maxIter_);
     os.writeEntryIfDifferent<scalar>("tolerance", 0.01, tolerance_);
 }
@@ -341,7 +339,7 @@ void Foam::nutUSpaldingWallFunctionFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    fvPatchField<scalar>::write(os);
+    nutWallFunctionFvPatchScalarField::write(os);
     writeLocalEntries(os);
     writeEntry("value", os);
 }

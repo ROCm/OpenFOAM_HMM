@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016, 2019 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,6 +30,19 @@ License
 #include "nutWallFunctionFvPatchScalarField.H"
 #include "turbulenceModel.H"
 #include "addToRunTimeSelectionTable.H"
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+void Foam::kLowReWallFunctionFvPatchScalarField::writeLocalEntries
+(
+    Ostream& os
+) const
+{
+    os.writeEntryIfDifferent<scalar>("Ceps2", 1.9, Ceps2_);
+    os.writeEntryIfDifferent<scalar>("Ck", -0.416, Ck_);
+    os.writeEntryIfDifferent<scalar>("Bk", 8.366, Bk_);
+    os.writeEntryIfDifferent<scalar>("C", 11.0, C_);
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -184,11 +197,9 @@ void Foam::kLowReWallFunctionFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    os.writeEntry("Ceps2", Ceps2_);
-    os.writeEntry("Ck", Ck_);
-    os.writeEntry("Bk", Bk_);
-    os.writeEntry("C", C_);
-    fixedValueFvPatchField<scalar>::write(os);
+    fvPatchField<scalar>::write(os);
+    writeLocalEntries(os);
+    writeEntry("value", os);
 }
 
 
