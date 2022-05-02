@@ -49,8 +49,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fvMeshDistribute_H
-#define fvMeshDistribute_H
+#ifndef Foam_fvMeshDistribute_H
+#define Foam_fvMeshDistribute_H
 
 #include "Field.H"
 #include "fvMeshSubset.H"

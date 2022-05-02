@@ -27,377 +27,62 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "loadOrCreateMesh.H"
-#include "processorPolyPatch.H"
-#include "processorCyclicPolyPatch.H"
-#include "Time.H"
-#include "polyBoundaryMeshEntries.H"
-#include "IOobjectList.H"
-#include "pointSet.H"
-#include "faceSet.H"
-#include "cellSet.H"
-#include "basicFvGeometryScheme.H"
+#include "Pstream.H"
+#include "OSspecific.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-// Read mesh if available. Otherwise create empty mesh with same non-proc
-// patches as proc0 mesh. Requires:
-//  - all processors to have all patches (and in same order).
-//  - io.instance() set to facesInstance
-Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
+Foam::boolList Foam::haveMeshFile
 (
-    const bool decompose,
-    const IOobject& io
+    const Time& runTime,
+    const fileName& meshPath,
+    const word& meshFile,
+    const bool verbose
 )
 {
-    // Region name
-    // ~~~~~~~~~~~
-
-    fileName meshSubDir;
-
-    if (io.name() == polyMesh::defaultRegion)
-    {
-        meshSubDir = polyMesh::meshSubDir;
-    }
-    else
-    {
-        meshSubDir = io.name()/polyMesh::meshSubDir;
-    }
-
-
-    // Patch types
-    // ~~~~~~~~~~~
-    // Read and scatter master patches (without reading master mesh!)
-
-    PtrList<entry> patchEntries;
-    if (Pstream::master())
-    {
-        const bool oldParRun = Pstream::parRun(false);
-
-        patchEntries = polyBoundaryMeshEntries
+    boolList haveFileOnProc
+    (
+        UPstream::listGatherValues<bool>
         (
-            IOobject
+            fileHandler().isFile
             (
-                "boundary",
-                io.instance(),  //facesInstance,
-                meshSubDir,
-                io.db(),
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE,
-                false
-            )
-        );
-
-        Pstream::parRun(oldParRun);
-    }
-
-    // Broadcast: send patches to all
-    Pstream::scatter(patchEntries);  // == worldComm;
-
-
-    // Dummy meshes
-    // ~~~~~~~~~~~~
-
-    // Check who has a mesh
-    bool haveMesh;
-    if (decompose)
-    {
-        // Mesh needs to be present on the master only
-        haveMesh = Pstream::master();
-    }
-    else
-    {
-        const fileName facesFile
-        (
-            io.time().path()
-           /io.instance()   //facesInstance
-           /meshSubDir
-           /"faces"
-        );
-
-        // Check presence of the searched-for faces file
-        haveMesh = fileHandler().isFile(fileHandler().filePath(facesFile));
-    }
-
-    if (!haveMesh)
-    {
-        const bool oldParRun = Pstream::parRun(false);
-
-
-        // Create dummy mesh. Only used on procs that don't have mesh.
-        IOobject noReadIO(io);
-        noReadIO.readOpt(IOobject::NO_READ);
-        noReadIO.writeOpt(IOobject::AUTO_WRITE);
-        fvMesh dummyMesh(noReadIO, Zero, false);
-
-        // Add patches
-        List<polyPatch*> patches(patchEntries.size());
-        label nPatches = 0;
-
-        forAll(patchEntries, patchi)
-        {
-            const entry& e = patchEntries[patchi];
-            const word type(e.dict().get<word>("type"));
-            const word& name = e.keyword();
-
-            if
-            (
-                type != processorPolyPatch::typeName
-             && type != processorCyclicPolyPatch::typeName
-            )
-            {
-                dictionary patchDict(e.dict());
-                patchDict.set("nFaces", 0);
-                patchDict.set("startFace", 0);
-
-                patches[patchi] = polyPatch::New
+                fileHandler().filePath
                 (
-                    name,
-                    patchDict,
-                    nPatches++,
-                    dummyMesh.boundaryMesh()
-                ).ptr();
-            }
-        }
-        patches.setSize(nPatches);
-        dummyMesh.addFvPatches(patches, false);  // no parallel comms
-
-
-        // Add some dummy zones so upon reading it does not read them
-        // from the undecomposed case. Should be done as extra argument to
-        // regIOobject::readStream?
-        List<pointZone*> pz
-        (
-            1,
-            new pointZone
-            (
-                "dummyPointZone",
-                0,
-                dummyMesh.pointZones()
+                    runTime.path()/meshPath/meshFile
+                )
             )
-        );
-        List<faceZone*> fz
-        (
-            1,
-            new faceZone
-            (
-                "dummyFaceZone",
-                0,
-                dummyMesh.faceZones()
-            )
-        );
-        List<cellZone*> cz
-        (
-            1,
-            new cellZone
-            (
-                "dummyCellZone",
-                0,
-                dummyMesh.cellZones()
-            )
-        );
-        dummyMesh.addZones(pz, fz, cz);
-        dummyMesh.pointZones().clear();
-        dummyMesh.faceZones().clear();
-        dummyMesh.cellZones().clear();
-        //Pout<< "Writing dummy mesh to " << dummyMesh.polyMesh::objectPath()
-        //    << endl;
-        dummyMesh.write();
+        )
+    );
 
-        Pstream::parRun(oldParRun);  // Restore parallel state
-    }
-
-
-
-    // Read mesh
-    // ~~~~~~~~~
-    // Now all processors have a (possibly zero size) mesh so read in
-    // parallel
-
-    //Pout<< "Reading mesh from " << io.objectPath() << endl;
-    auto meshPtr = autoPtr<fvMesh>::New(io);
-    fvMesh& mesh = *meshPtr;
-
-    // Make sure to use a non-parallel geometry calculation method
+    if (verbose)
     {
-        tmp<fvGeometryScheme> basicGeometry
-        (
-            fvGeometryScheme::New
-            (
-                mesh,
-                dictionary(),
-                basicFvGeometryScheme::typeName
-            )
-        );
-        mesh.geometry(basicGeometry);
+        Info<< "Per processor availability of \""
+            << meshFile << "\" file in " << meshPath << nl
+            << "    " << flatOutput(haveFileOnProc) << nl << endl;
     }
 
+    Pstream::broadcast(haveFileOnProc);
+    return haveFileOnProc;
+}
 
-    // Sync patches
-    // ~~~~~~~~~~~~
 
-    if (!Pstream::master() && haveMesh)
+void Foam::removeProcAddressing(const polyMesh& mesh)
+{
+    IOobject ioAddr
+    (
+        "procAddressing",
+        mesh.facesInstance(),
+        polyMesh::meshSubDir,
+        mesh.thisDb()
+    );
+
+    for (const auto prefix : {"boundary", "cell", "face", "point"})
     {
-        // Check master names against mine
+        ioAddr.rename(prefix + word("ProcAddressing"));
 
-        const polyBoundaryMesh& patches = mesh.boundaryMesh();
-
-        forAll(patchEntries, patchi)
-        {
-            const entry& e = patchEntries[patchi];
-            const word type(e.dict().get<word>("type"));
-            const word& name = e.keyword();
-
-            if
-            (
-                type == processorPolyPatch::typeName
-             || type == processorCyclicPolyPatch::typeName
-            )
-            {
-                break;
-            }
-
-            if (patchi >= patches.size())
-            {
-                FatalErrorInFunction
-                    << "Non-processor patches not synchronised."
-                    << endl
-                    << "Processor " << Pstream::myProcNo()
-                    << " has only " << patches.size()
-                    << " patches, master has "
-                    << patchi
-                    << exit(FatalError);
-            }
-
-            if
-            (
-                type != patches[patchi].type()
-             || name != patches[patchi].name()
-            )
-            {
-                FatalErrorInFunction
-                    << "Non-processor patches not synchronised."
-                    << endl
-                    << "Master patch " << patchi
-                    << " name:" << type
-                    << " type:" << type << endl
-                    << "Processor " << Pstream::myProcNo()
-                    << " patch " << patchi
-                    << " has name:" << patches[patchi].name()
-                    << " type:" << patches[patchi].type()
-                    << exit(FatalError);
-            }
-        }
+        const fileName procFile(ioAddr.objectPath());
+        Foam::rm(procFile);
     }
-
-
-    // Determine zones
-    // ~~~~~~~~~~~~~~~
-
-    wordList pointZoneNames(mesh.pointZones().names());
-    Pstream::scatter(pointZoneNames);
-    wordList faceZoneNames(mesh.faceZones().names());
-    Pstream::scatter(faceZoneNames);
-    wordList cellZoneNames(mesh.cellZones().names());
-    Pstream::scatter(cellZoneNames);
-
-    if (!haveMesh)
-    {
-        // Add the zones. Make sure to remove the old dummy ones first
-        mesh.pointZones().clear();
-        mesh.faceZones().clear();
-        mesh.cellZones().clear();
-
-        List<pointZone*> pz(pointZoneNames.size());
-        forAll(pointZoneNames, i)
-        {
-            pz[i] = new pointZone
-            (
-                pointZoneNames[i],
-                i,
-                mesh.pointZones()
-            );
-        }
-        List<faceZone*> fz(faceZoneNames.size());
-        forAll(faceZoneNames, i)
-        {
-            fz[i] = new faceZone
-            (
-                faceZoneNames[i],
-                i,
-                mesh.faceZones()
-            );
-        }
-        List<cellZone*> cz(cellZoneNames.size());
-        forAll(cellZoneNames, i)
-        {
-            cz[i] = new cellZone
-            (
-                cellZoneNames[i],
-                i,
-                mesh.cellZones()
-            );
-        }
-        mesh.addZones(pz, fz, cz);
-    }
-
-
-    // Determine sets
-    // ~~~~~~~~~~~~~~
-
-    wordList pointSetNames;
-    wordList faceSetNames;
-    wordList cellSetNames;
-    if (Pstream::master())
-    {
-        // Read sets
-        const bool oldParRun = Pstream::parRun(false);
-        IOobjectList objects(mesh, mesh.facesInstance(), "polyMesh/sets");
-        Pstream::parRun(oldParRun);
-
-        pointSetNames = objects.sortedNames(pointSet::typeName);
-        faceSetNames = objects.sortedNames(faceSet::typeName);
-        cellSetNames = objects.sortedNames(cellSet::typeName);
-    }
-    Pstream::scatter(pointSetNames);
-    Pstream::scatter(faceSetNames);
-    Pstream::scatter(cellSetNames);
-
-    if (!haveMesh)
-    {
-        for (const word& setName : pointSetNames)
-        {
-            pointSet(mesh, setName, 0).write();
-        }
-        for (const word& setName : faceSetNames)
-        {
-            faceSet(mesh, setName, 0).write();
-        }
-        for (const word& setName : cellSetNames)
-        {
-            cellSet(mesh, setName, 0).write();
-        }
-    }
-
-
-    // Force recreation of globalMeshData.
-    mesh.globalData();
-
-
-    // Do some checks.
-
-    // Check if the boundary definition is unique
-    mesh.boundaryMesh().checkDefinition(true);
-    // Check if the boundary processor patches are correct
-    mesh.boundaryMesh().checkParallelSync(true);
-    // Check names of zones are equal
-    mesh.cellZones().checkDefinition(true);
-    mesh.cellZones().checkParallelSync(true);
-    mesh.faceZones().checkDefinition(true);
-    mesh.faceZones().checkParallelSync(true);
-    mesh.pointZones().checkDefinition(true);
-    mesh.pointZones().checkParallelSync(true);
-
-    return meshPtr;
 }
 
 

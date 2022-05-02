@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,11 +32,13 @@ Description
 
 SourceFiles
     fvMeshTools.C
+    fvMeshToolsProcAddr.C
+    fvMeshToolsTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fvMeshTools_H
-#define fvMeshTools_H
+#ifndef Foam_fvMeshTools_H
+#define Foam_fvMeshTools_H
 
 #include "fvMesh.H"
 
@@ -45,12 +47,18 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
+class mapDistributePolyMesh;
+class writeHandler;
+
 /*---------------------------------------------------------------------------*\
                          Class fvMeshTools Declaration
 \*---------------------------------------------------------------------------*/
 
 class fvMeshTools
 {
+    // Private Member Functions
+
     template<class GeoField>
     static void addPatchFields
     (
@@ -91,6 +99,8 @@ class fvMeshTools
 
 public:
 
+    // Member Functions
+
     //- Add patch. Inserts patch before all processor patches.
     //  Supply per field the new patchField per field as a
     //  subdictionary or a default type. If validBoundary call is parallel
@@ -115,8 +125,8 @@ public:
     //- Change patchField to zero on registered fields
     static void zeroPatchFields(fvMesh& mesh, const label patchi);
 
-    //- Reorder and remove trailing patches. If validBoundary call is parallel
-    //  synced
+    //- Reorder and remove trailing patches.
+    //  Is parallel synced when validBoundary is true
     static void reorderPatches
     (
         fvMesh&,
@@ -124,29 +134,66 @@ public:
         const label nPatches,
         const bool validBoundary
     );
+
     //- Remove zero sized patches. All but processor patches are
     //  assumed to be present on all processors (so size will be reduced
     //  if validBoundary). Return map from new
     //  to old patches
     static labelList removeEmptyPatches(fvMesh&, const bool validBoundary);
 
-    //- Read mesh or create dummy mesh (0 cells, >0 patches). Works in two
-    //  modes according to masterOnlyReading:
-    //  true : all slaves create dummy mesh
+
+    //- Set the fvGeometryScheme to basic (to avoid parallel communication)
+    static void setBasicGeometry(fvMesh& mesh);
+
+    //- Read mesh or create dummy mesh (0 cells, >0 patches).
+    //
+    //  Works in two modes according to masterOnlyReading:
+    //  true : create dummy mesh on all procs
     //  false: checks locally for mesh directories and only creates dummy mesh
     //         if not present
     static autoPtr<fvMesh> newMesh
     (
         const IOobject& io,
-        const bool masterOnlyReading
+        const bool masterOnlyReading,
+        const bool verbose = false
     );
 
-    //- Create additional fv* files
+    //- Read mesh if available, or create empty mesh with non-proc as per
+    //- proc0 mesh.
+    //  Requires:
+    //  - all processors to have all patches (and in same order).
+    //  - io.instance() set to facesInstance
+    static autoPtr<fvMesh> loadOrCreateMesh
+    (
+        const IOobject& io,
+        const bool decompose,
+        const bool verbose = false
+    );
+
+    //- Create additional fvSchemes/fvSolution files
     static void createDummyFvMeshFiles
     (
         const objectRegistry& parent,
         const word& regionName,
         const bool verbose = false
+    );
+
+
+    //- Read procAddressing components (reconstructing)
+    static autoPtr<mapDistributePolyMesh> readProcAddressing
+    (
+        const fvMesh& procMesh,
+        const autoPtr<fvMesh>& baseMeshPtr
+    );
+
+    //- Write addressing if decomposing (1 to many) or reconstructing
+    //- (many to 1)
+    static void writeProcAddressing
+    (
+        const fvMesh& procMesh,
+        const mapDistributePolyMesh& map,
+        const bool decompose,
+        autoPtr<fileOperation>&& writeHandler
     );
 };
 

@@ -14,6 +14,8 @@ $(surfaceInterpolation)/surfaceInterpolation/surfaceInterpolation.C
 
 fvMesh/fvMeshSubset/fvMeshSubset.C
 fvMesh/fvMeshSubset/fvMeshSubsetProxy.C
+fvMesh/fvMeshTools/fvMeshTools.C
+fvMesh/fvMeshTools/fvMeshToolsProcAddr.C
 
 fvMesh/singleCellFvMesh/singleCellFvMesh.C
 

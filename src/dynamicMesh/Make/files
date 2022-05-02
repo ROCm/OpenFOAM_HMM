@@ -84,8 +84,6 @@ fvMeshDistribute/fvMeshDistribute.C
 polyMeshAdder/faceCoupleInfo.C
 polyMeshAdder/polyMeshAdder.C
 
-fvMeshTools/fvMeshTools.C
-
 fvMeshSubset/fvMeshSubsetter.C
 
 motionSmoother/motionSmoother.C

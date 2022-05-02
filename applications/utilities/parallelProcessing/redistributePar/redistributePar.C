@@ -92,7 +92,6 @@ Usage
 #include "zeroGradientFvPatchFields.H"
 #include "topoSet.H"
 #include "regionProperties.H"
-#include "basicFvGeometryScheme.H"
 
 #include "parFvFieldReconstructor.H"
 #include "parLagrangianRedistributor.H"
@@ -254,49 +253,6 @@ void copyUniform
             }
         }
     }
-}
-
-
-boolList haveFacesFile(const fileName& meshPath)
-{
-    const fileName facesPath(meshPath/"faces");
-    Info<< "Checking for mesh in " << facesPath << nl << endl;
-    boolList haveMesh
-    (
-        UPstream::listGatherValues<bool>
-        (
-            fileHandler().isFile(fileHandler().filePath(facesPath))
-        )
-    );
-    Info<< "Per processor mesh availability:" << nl
-        << "    " << flatOutput(haveMesh) << nl << endl;
-
-    Pstream::broadcast(haveMesh);
-    return haveMesh;
-}
-
-
-void setBasicGeometry(fvMesh& mesh)
-{
-    // Set the fvGeometryScheme to basic since it does not require
-    // any parallel communication to construct the geometry. During
-    // redistributePar one might temporarily end up with processors
-    // with zero procBoundaries. Normally procBoundaries trigger geometry
-    // calculation (e.g. send over cellCentres) so on the processors without
-    // procBoundaries this will not happen. The call to the geometry calculation
-    // is not synchronised and this might lead to a hang for geometry schemes
-    // that do require synchronisation
-
-    tmp<fvGeometryScheme> basicGeometry
-    (
-        fvGeometryScheme::New
-        (
-            mesh,
-            dictionary(),
-            basicFvGeometryScheme::typeName
-        )
-    );
-    mesh.geometry(basicGeometry);
 }
 
 
@@ -553,213 +509,6 @@ void determineDecomposition
         {
             writeDecomposition("cellDist", mesh, decomp);
         }
-    }
-}
-
-
-// Write addressing if decomposing (1 to many) or reconstructing (many to 1)
-void writeProcAddressing
-(
-    autoPtr<fileOperation>&& writeHandler,
-    const fvMesh& mesh,
-    const mapDistributePolyMesh& map,
-    const bool decompose
-)
-{
-    Info<< "Writing procAddressing files to " << mesh.facesInstance()
-        << endl;
-
-    labelIOList cellMap
-    (
-        IOobject
-        (
-            "cellProcAddressing",
-            mesh.facesInstance(),
-            polyMesh::meshSubDir,
-            mesh,
-            IOobject::NO_READ
-        ),
-        0
-    );
-
-    labelIOList faceMap
-    (
-        IOobject
-        (
-            "faceProcAddressing",
-            mesh.facesInstance(),
-            polyMesh::meshSubDir,
-            mesh,
-            IOobject::NO_READ
-        ),
-        0
-    );
-
-    labelIOList pointMap
-    (
-        IOobject
-        (
-            "pointProcAddressing",
-            mesh.facesInstance(),
-            polyMesh::meshSubDir,
-            mesh,
-            IOobject::NO_READ
-        ),
-        0
-    );
-
-    labelIOList patchMap
-    (
-        IOobject
-        (
-            "boundaryProcAddressing",
-            mesh.facesInstance(),
-            polyMesh::meshSubDir,
-            mesh,
-            IOobject::NO_READ
-        ),
-        0
-    );
-
-    // Decomposing: see how cells moved from undecomposed case
-    if (decompose)
-    {
-        cellMap = identity(map.nOldCells());
-        map.distributeCellData(cellMap);
-
-        faceMap = identity(map.nOldFaces());
-        {
-            const mapDistribute& faceDistMap = map.faceMap();
-
-            if (faceDistMap.subHasFlip() || faceDistMap.constructHasFlip())
-            {
-                // Offset by 1
-                faceMap = faceMap + 1;
-            }
-            // Apply face flips
-            mapDistributeBase::distribute
-            (
-                Pstream::commsTypes::nonBlocking,
-                List<labelPair>(),
-                faceDistMap.constructSize(),
-                faceDistMap.subMap(),
-                faceDistMap.subHasFlip(),
-                faceDistMap.constructMap(),
-                faceDistMap.constructHasFlip(),
-                faceMap,
-                flipLabelOp()
-            );
-        }
-
-        pointMap = identity(map.nOldPoints());
-        map.distributePointData(pointMap);
-
-        patchMap = identity(map.oldPatchSizes().size());
-        const mapDistribute& patchDistMap = map.patchMap();
-        // Use explicit distribute since we need to provide a null value
-        // (for new patches) and this is the only call that allow us to
-        // provide one ...
-        mapDistributeBase::distribute
-        (
-            Pstream::commsTypes::nonBlocking,
-            List<labelPair>(),
-            patchDistMap.constructSize(),
-            patchDistMap.subMap(),
-            patchDistMap.subHasFlip(),
-            patchDistMap.constructMap(),
-            patchDistMap.constructHasFlip(),
-            patchMap,
-            label(-1),
-            eqOp<label>(),
-            flipOp(),
-            UPstream::msgType()
-        );
-    }
-    else    // reconstruct
-    {
-        cellMap = identity(mesh.nCells());
-        map.cellMap().reverseDistribute(map.nOldCells(), cellMap);
-
-        faceMap = identity(mesh.nFaces());
-        {
-            const mapDistribute& faceDistMap = map.faceMap();
-
-            if (faceDistMap.subHasFlip() || faceDistMap.constructHasFlip())
-            {
-                // Offset by 1
-                faceMap = faceMap + 1;
-            }
-
-            mapDistributeBase::distribute
-            (
-                Pstream::commsTypes::nonBlocking,
-                List<labelPair>(),
-                map.nOldFaces(),
-                faceDistMap.constructMap(),
-                faceDistMap.constructHasFlip(),
-                faceDistMap.subMap(),
-                faceDistMap.subHasFlip(),
-                faceMap,
-                flipLabelOp()
-            );
-        }
-
-        pointMap = identity(mesh.nPoints());
-        map.pointMap().reverseDistribute(map.nOldPoints(), pointMap);
-
-        const mapDistribute& patchDistMap = map.patchMap();
-        patchMap = identity(mesh.boundaryMesh().size());
-        patchDistMap.reverseDistribute
-        (
-            map.oldPatchSizes().size(),
-            label(-1),
-            patchMap
-        );
-    }
-
-    autoPtr<fileOperation> defaultHandler;
-    if (writeHandler)
-    {
-        defaultHandler = fileHandler(std::move(writeHandler));
-    }
-
-    const bool cellOk = cellMap.write();
-    const bool faceOk = faceMap.write();
-    const bool pointOk = pointMap.write();
-    const bool patchOk = patchMap.write();
-
-    if (defaultHandler)
-    {
-        writeHandler = fileHandler(std::move(defaultHandler));
-    }
-
-    if (!cellOk || !faceOk || !pointOk || !patchOk)
-    {
-        WarningInFunction
-            << "Failed to write " << cellMap.objectPath()
-            << ", " << faceMap.objectPath()
-            << ", " << pointMap.objectPath()
-            << ", " << patchMap.objectPath()
-            << endl;
-    }
-}
-
-
-// Remove addressing
-void removeProcAddressing(const polyMesh& mesh)
-{
-    for (const auto prefix : {"boundary", "cell", "face", "point"})
-    {
-        IOobject io
-        (
-            prefix + word("ProcAddressing"),
-            mesh.facesInstance(),
-            polyMesh::meshSubDir,
-            mesh
-        );
-
-        const fileName procFile(io.objectPath());
-        rm(procFile);
     }
 }
 
@@ -1391,7 +1140,13 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
     {
         // Decompose (1 -> N) or reconstruct (N -> 1)
         // so {boundary,cell,face,point}ProcAddressing have meaning
-        writeProcAddressing(std::move(writeHandler), mesh, map, decompose);
+        fvMeshTools::writeProcAddressing
+        (
+            mesh,
+            map,
+            decompose,
+            std::move(writeHandler)
+        );
     }
     else
     {
@@ -1530,322 +1285,6 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
 // Field Mapping
 //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-autoPtr<mapDistributePolyMesh> createReconstructMap
-(
-    const autoPtr<fvMesh>& baseMeshPtr,
-    const fvMesh& mesh,
-    const labelList& cellProcAddressing,
-    const labelList& faceProcAddressing,
-    const labelList& pointProcAddressing,
-    const labelList& boundaryProcAddressing
-)
-{
-    // Send addressing to master
-    labelListList cellAddressing(Pstream::nProcs());
-    cellAddressing[Pstream::myProcNo()] = cellProcAddressing;
-    Pstream::gatherList(cellAddressing);
-
-    labelListList faceAddressing(Pstream::nProcs());
-    faceAddressing[Pstream::myProcNo()] = faceProcAddressing;
-    Pstream::gatherList(faceAddressing);
-
-    labelListList pointAddressing(Pstream::nProcs());
-    pointAddressing[Pstream::myProcNo()] = pointProcAddressing;
-    Pstream::gatherList(pointAddressing);
-
-    labelListList boundaryAddressing(Pstream::nProcs());
-    {
-        // Remove -1 entries
-        DynamicList<label> patchProcAddressing(boundaryProcAddressing.size());
-        forAll(boundaryProcAddressing, i)
-        {
-            if (boundaryProcAddressing[i] != -1)
-            {
-                patchProcAddressing.append(boundaryProcAddressing[i]);
-            }
-        }
-        boundaryAddressing[Pstream::myProcNo()] = patchProcAddressing;
-        Pstream::gatherList(boundaryAddressing);
-    }
-
-
-    autoPtr<mapDistributePolyMesh> mapPtr;
-
-    if (baseMeshPtr && baseMeshPtr->nCells())
-    {
-        const fvMesh& baseMesh = *baseMeshPtr;
-
-        labelListList cellSubMap(Pstream::nProcs());
-        cellSubMap[Pstream::masterNo()] = identity(mesh.nCells());
-
-        mapDistribute cellMap
-        (
-            baseMesh.nCells(),
-            std::move(cellSubMap),
-            std::move(cellAddressing)
-        );
-
-        labelListList faceSubMap(Pstream::nProcs());
-        faceSubMap[Pstream::masterNo()] = identity(mesh.nFaces());
-
-        mapDistribute faceMap
-        (
-            baseMesh.nFaces(),
-            std::move(faceSubMap),
-            std::move(faceAddressing),
-            false,          //subHasFlip
-            true            //constructHasFlip
-        );
-
-        labelListList pointSubMap(Pstream::nProcs());
-        pointSubMap[Pstream::masterNo()] = identity(mesh.nPoints());
-
-        mapDistribute pointMap
-        (
-            baseMesh.nPoints(),
-            std::move(pointSubMap),
-            std::move(pointAddressing)
-        );
-
-        labelListList patchSubMap(Pstream::nProcs());
-        // Send (filtered) patches to master
-        patchSubMap[Pstream::masterNo()] =
-            boundaryAddressing[Pstream::myProcNo()];
-
-        mapDistribute patchMap
-        (
-            baseMesh.boundaryMesh().size(),
-            std::move(patchSubMap),
-            std::move(boundaryAddressing)
-        );
-
-        const label nOldPoints = mesh.nPoints();
-        const label nOldFaces = mesh.nFaces();
-        const label nOldCells = mesh.nCells();
-
-        const polyBoundaryMesh& pbm = mesh.boundaryMesh();
-        labelList oldPatchStarts(pbm.size());
-        labelList oldPatchNMeshPoints(pbm.size());
-        forAll(pbm, patchI)
-        {
-            oldPatchStarts[patchI] = pbm[patchI].start();
-            oldPatchNMeshPoints[patchI] = pbm[patchI].nPoints();
-        }
-
-        mapPtr.reset
-        (
-            new mapDistributePolyMesh
-            (
-                nOldPoints,
-                nOldFaces,
-                nOldCells,
-                std::move(oldPatchStarts),
-                std::move(oldPatchNMeshPoints),
-                std::move(pointMap),
-                std::move(faceMap),
-                std::move(cellMap),
-                std::move(patchMap)
-            )
-        );
-    }
-    else
-    {
-        labelListList cellSubMap(Pstream::nProcs());
-        cellSubMap[Pstream::masterNo()] = identity(mesh.nCells());
-        labelListList cellConstructMap(Pstream::nProcs());
-
-        mapDistribute cellMap
-        (
-            0,
-            std::move(cellSubMap),
-            std::move(cellConstructMap)
-        );
-
-        labelListList faceSubMap(Pstream::nProcs());
-        faceSubMap[Pstream::masterNo()] = identity(mesh.nFaces());
-        labelListList faceConstructMap(Pstream::nProcs());
-
-        mapDistribute faceMap
-        (
-            0,
-            std::move(faceSubMap),
-            std::move(faceConstructMap),
-            false,          //subHasFlip
-            true            //constructHasFlip
-        );
-
-        labelListList pointSubMap(Pstream::nProcs());
-        pointSubMap[Pstream::masterNo()] = identity(mesh.nPoints());
-        labelListList pointConstructMap(Pstream::nProcs());
-
-        mapDistribute pointMap
-        (
-            0,
-            std::move(pointSubMap),
-            std::move(pointConstructMap)
-        );
-
-        labelListList patchSubMap(Pstream::nProcs());
-        // Send (filtered) patches to master
-        patchSubMap[Pstream::masterNo()] =
-            boundaryAddressing[Pstream::myProcNo()];
-        labelListList patchConstructMap(Pstream::nProcs());
-
-        mapDistribute patchMap
-        (
-            0,
-            std::move(patchSubMap),
-            std::move(patchConstructMap)
-        );
-
-        const label nOldPoints = mesh.nPoints();
-        const label nOldFaces = mesh.nFaces();
-        const label nOldCells = mesh.nCells();
-
-        const polyBoundaryMesh& pbm = mesh.boundaryMesh();
-        labelList oldPatchStarts(pbm.size());
-        labelList oldPatchNMeshPoints(pbm.size());
-        forAll(pbm, patchI)
-        {
-            oldPatchStarts[patchI] = pbm[patchI].start();
-            oldPatchNMeshPoints[patchI] = pbm[patchI].nPoints();
-        }
-
-        mapPtr.reset
-        (
-            new mapDistributePolyMesh
-            (
-                nOldPoints,
-                nOldFaces,
-                nOldCells,
-                std::move(oldPatchStarts),
-                std::move(oldPatchNMeshPoints),
-                std::move(pointMap),
-                std::move(faceMap),
-                std::move(cellMap),
-                std::move(patchMap)
-            )
-        );
-    }
-
-    return mapPtr;
-}
-
-
-void readProcAddressing
-(
-    const fvMesh& mesh,
-    const autoPtr<fvMesh>& baseMeshPtr,
-    autoPtr<mapDistributePolyMesh>& distMap
-)
-{
-    //IOobject io
-    //(
-    //    "procAddressing",
-    //    mesh.facesInstance(),
-    //    polyMesh::meshSubDir,
-    //    mesh,
-    //    IOobject::MUST_READ
-    //);
-    //if (io.typeHeaderOk<labelIOList>(true))
-    //{
-    //    Pout<< "Reading addressing from " << io.name() << " at "
-    //        << mesh.facesInstance() << nl << endl;
-    //    distMap.reset(new IOmapDistributePolyMesh(io));
-    //}
-    //else
-    {
-        Info<< "Reading addressing from procXXXAddressing at "
-            << mesh.facesInstance() << nl << endl;
-        labelIOList cellProcAddressing
-        (
-            IOobject
-            (
-                "cellProcAddressing",
-                mesh.facesInstance(),
-                polyMesh::meshSubDir,
-                mesh,
-                IOobject::READ_IF_PRESENT
-            ),
-            labelList()
-        );
-        labelIOList faceProcAddressing
-        (
-            IOobject
-            (
-                "faceProcAddressing",
-                mesh.facesInstance(),
-                polyMesh::meshSubDir,
-                mesh,
-                IOobject::READ_IF_PRESENT
-            ),
-            labelList()
-        );
-        labelIOList pointProcAddressing
-        (
-            IOobject
-            (
-                "pointProcAddressing",
-                mesh.facesInstance(),
-                polyMesh::meshSubDir,
-                mesh,
-                IOobject::READ_IF_PRESENT
-            ),
-            labelList()
-        );
-        labelIOList boundaryProcAddressing
-        (
-            IOobject
-            (
-                "boundaryProcAddressing",
-                mesh.facesInstance(),
-                polyMesh::meshSubDir,
-                mesh,
-                IOobject::READ_IF_PRESENT
-            ),
-            labelList()
-        );
-
-
-        if
-        (
-            mesh.nCells() != cellProcAddressing.size()
-         || mesh.nPoints() != pointProcAddressing.size()
-         || mesh.nFaces() != faceProcAddressing.size()
-         || mesh.boundaryMesh().size() != boundaryProcAddressing.size()
-        )
-        {
-            FatalErrorInFunction
-                << "Read addressing inconsistent with mesh sizes" << nl
-                << "cells:" << mesh.nCells()
-                << " addressing:" << cellProcAddressing.objectPath()
-                << " size:" << cellProcAddressing.size() << nl
-                << "faces:" << mesh.nFaces()
-                << " addressing:" << faceProcAddressing.objectPath()
-                << " size:" << faceProcAddressing.size() << nl
-                << "points:" << mesh.nPoints()
-                << " addressing:" << pointProcAddressing.objectPath()
-                << " size:" << pointProcAddressing.size()
-                << "patches:" << mesh.boundaryMesh().size()
-                << " addressing:" << boundaryProcAddressing.objectPath()
-                << " size:" << boundaryProcAddressing.size()
-                << exit(FatalError);
-        }
-
-        distMap.clear();
-        distMap = createReconstructMap
-        (
-            baseMeshPtr,
-            mesh,
-            cellProcAddressing,
-            faceProcAddressing,
-            pointProcAddressing,
-            boundaryProcAddressing
-        );
-    }
-}
-
 
 void reconstructMeshFields
 (
@@ -2745,9 +2184,11 @@ int main(int argc, char *argv[])
                 // Check who has a mesh (by checking for 'faces' file)
                 const boolList haveMesh
                 (
-                    haveFacesFile
+                    haveMeshFile
                     (
-                        runTime.path()/facesInstance/meshSubDir
+                        runTime,
+                        facesInstance/meshSubDir,
+                        "faces"
                     )
                 );
 
@@ -2840,22 +2281,22 @@ int main(int argc, char *argv[])
                 )
                 {
                     Info<< "loading mesh from " << facesInstance << endl;
-                    autoPtr<fvMesh> meshPtr = loadOrCreateMesh
+                    autoPtr<fvMesh> meshPtr = fvMeshTools::loadOrCreateMesh
                     (
-                        decompose,
                         IOobject
                         (
                             regionName,
                             facesInstance,
                             runTime,
                             Foam::IOobject::MUST_READ
-                        )
+                        ),
+                        decompose
                     );
                     fvMesh& mesh = meshPtr();
 
                     // Use basic geometry calculation to avoid synchronisation
                     // problems. See comment in routine
-                    setBasicGeometry(mesh);
+                    fvMeshTools::setBasicGeometry(mesh);
 
 
                     // Determine decomposition
@@ -2919,20 +2360,20 @@ int main(int argc, char *argv[])
                 true            // read on master only
             );
 
-            setBasicGeometry(baseMeshPtr());
+            fvMeshTools::setBasicGeometry(baseMeshPtr());
 
 
             Info<< "Reading local, decomposed mesh" << endl;
-            autoPtr<fvMesh> meshPtr = loadOrCreateMesh
+            autoPtr<fvMesh> meshPtr = fvMeshTools::loadOrCreateMesh
             (
-                decompose,
                 IOobject
                 (
                     regionName,
                     baseMeshPtr().facesInstance(),
                     runTime,
                     Foam::IOobject::MUST_READ
-                )
+                ),
+                decompose
             );
             fvMesh& mesh = meshPtr();
 
@@ -2949,7 +2390,7 @@ int main(int argc, char *argv[])
 
             // Read addressing back to base mesh
             autoPtr<mapDistributePolyMesh> distMap;
-            readProcAddressing(mesh, baseMeshPtr, distMap);
+            distMap = fvMeshTools::readProcAddressing(mesh, baseMeshPtr);
 
             // Construct field mapper
             autoPtr<parFvFieldReconstructor> fvReconstructorPtr
@@ -3032,8 +2473,9 @@ int main(int argc, char *argv[])
                         );
                     }
 
-                    // Re-read procXXXaddressing
-                    readProcAddressing(mesh, baseMeshPtr, distMap);
+                    // Re-read procaddressing
+                    distMap =
+                        fvMeshTools::readProcAddressing(mesh, baseMeshPtr);
 
                     // Reset field mapper
                     fvReconstructorPtr.reset
@@ -3188,9 +2630,16 @@ int main(int argc, char *argv[])
             }
             Pstream::scatter(masterInstDir);
 
-            // Check who has a mesh
-            const fileName meshPath(runTime.path()/masterInstDir/meshSubDir);
-            const boolList haveMesh(haveFacesFile(meshPath));
+            // Check who has a polyMesh
+            const boolList haveMesh
+            (
+                haveMeshFile
+                (
+                    runTime,
+                    masterInstDir/meshSubDir,
+                    "faces"
+                )
+            );
 
             // Collect objectPath of polyMesh for the current file handler. This
             // is where the mesh would be written if it didn't exist already.
@@ -3222,17 +2671,16 @@ int main(int argc, char *argv[])
                 runTime.processorCase(false);
             }
 
-            autoPtr<fvMesh> meshPtr = loadOrCreateMesh
+            autoPtr<fvMesh> meshPtr = fvMeshTools::loadOrCreateMesh
             (
-                decompose,
-                //haveMesh[Pstream::myProcNo()],
                 IOobject
                 (
                     regionName,
                     masterInstDir,
                     runTime,
                     Foam::IOobject::MUST_READ
-                )
+                ),
+                decompose
             );
             fvMesh& mesh = meshPtr();
 

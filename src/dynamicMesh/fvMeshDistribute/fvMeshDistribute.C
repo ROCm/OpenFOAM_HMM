@@ -1841,10 +1841,9 @@ Foam::autoPtr<Foam::fvMesh> Foam::fvMeshDistribute::receiveMesh
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::fvMeshDistribute::fvMeshDistribute(fvMesh& mesh)//, const scalar mergeTol)
+Foam::fvMeshDistribute::fvMeshDistribute(fvMesh& mesh)
 :
     mesh_(mesh)
-    //mergeTol_(mergeTol)
 {}
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,23 +48,24 @@ void Foam::fvMeshTools::addPatchFields
 
     forAllIters(flds, iter)
     {
-        GeoField& fld = *iter();
-
+        GeoField& fld = *iter.val();
         auto& bfld = fld.boundaryFieldRef();
 
-        label sz = bfld.size();
-        bfld.setSize(sz+1);
+        const label newPatchi = bfld.size();
+        bfld.resize(newPatchi+1);
 
-        if (patchFieldDict.found(fld.name()))
+        const dictionary* dict = patchFieldDict.findDict(fld.name());
+
+        if (dict)
         {
             bfld.set
             (
-                sz,
+                newPatchi,
                 GeoField::Patch::New
                 (
-                    mesh.boundary()[sz],
-                    fld(),
-                    patchFieldDict.subDict(fld.name())
+                    mesh.boundary()[newPatchi],
+                    fld.internalField(),
+                    *dict
                 )
             );
         }
@@ -72,15 +73,15 @@ void Foam::fvMeshTools::addPatchFields
         {
             bfld.set
             (
-                sz,
+                newPatchi,
                 GeoField::Patch::New
                 (
                     defaultPatchFieldType,
-                    mesh.boundary()[sz],
-                    fld()
+                    mesh.boundary()[newPatchi],
+                    fld.internalField()
                 )
             );
-            bfld[sz] == defaultPatchValue;
+            bfld[newPatchi] == defaultPatchValue;
         }
     }
 }
@@ -101,11 +102,12 @@ void Foam::fvMeshTools::setPatchFields
 
     forAllIters(flds, iter)
     {
-        GeoField& fld = *iter();
-
+        GeoField& fld = *iter.val();
         auto& bfld = fld.boundaryFieldRef();
 
-        if (patchFieldDict.found(fld.name()))
+        const dictionary* dict = patchFieldDict.findDict(fld.name());
+
+        if (dict)
         {
             bfld.set
             (
@@ -113,15 +115,13 @@ void Foam::fvMeshTools::setPatchFields
                 GeoField::Patch::New
                 (
                     mesh.boundary()[patchi],
-                    fld(),
-                    patchFieldDict.subDict(fld.name())
+                    fld.internalField(),
+                    *dict
                 )
             );
         }
     }
 }
-
-
 
 
 template<class GeoField>
@@ -139,8 +139,7 @@ void Foam::fvMeshTools::setPatchFields
 
     forAllIters(flds, iter)
     {
-        GeoField& fld = *iter();
-
+        GeoField& fld = *iter.val();
         auto& bfld = fld.boundaryFieldRef();
 
         bfld[patchi] == value;
@@ -159,8 +158,8 @@ void Foam::fvMeshTools::trimPatchFields(fvMesh& mesh, const label nPatches)
 
     forAllIters(flds, iter)
     {
-        GeoField& fld = *iter();
-        fld.boundaryFieldRef().setSize(nPatches);
+        GeoField& fld = *iter.val();
+        fld.boundaryFieldRef().resize(nPatches);
     }
 }
 
@@ -180,8 +179,7 @@ void Foam::fvMeshTools::reorderPatchFields
 
     forAllIters(flds, iter)
     {
-        GeoField& fld = *iter();
-
+        GeoField& fld = *iter.val();
         auto& bfld = fld.boundaryFieldRef();
 
         bfld.reorder(oldToNew);

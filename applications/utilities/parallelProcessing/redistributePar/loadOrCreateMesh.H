@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,29 +28,35 @@ InNamespace
     Foam
 
 Description
-    Load or create (0 size) a mesh. Used in distributing meshes to a
-    larger number of processors
+    Miscellaneous file handling for meshes.
 
 SourceFiles
     loadOrCreateMesh.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef loadOrCreateMesh_H
-#define loadOrCreateMesh_H
+#ifndef Foam_loadOrCreateMesh_H
+#define Foam_loadOrCreateMesh_H
 
-#include "fvMesh.H"
+#include "fvMeshTools.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-//- Load (if it exists) or create zero cell mesh given an IOobject:
-//      name     : regionName
-//      instance : exact directory where to find mesh (i.e. does not
-//                 do a findInstance
-autoPtr<fvMesh> loadOrCreateMesh(const bool decompose, const IOobject& io);
+//- Check for availability of specified mesh file (default: "faces")
+boolList haveMeshFile
+(
+    const Time& runTime,
+    const fileName& meshPath,
+    const word& meshFile = "faces",
+    const bool verbose = true
+);
+
+
+//- Remove procAddressing
+void removeProcAddressing(const polyMesh& mesh);
 
 //- Remove empty directory. Return true if removed.
 bool removeEmptyDir(const fileName& path);
