@@ -32,7 +32,7 @@ License
 #include "polyPatch.H"
 #include "volFields.H"
 #include "surfaceFields.H"
-#include "uindirectPrimitivePatch.H"
+#include "indirectPrimitivePatch.H"
 
 #include "addToRunTimeSelectionTable.H"
 

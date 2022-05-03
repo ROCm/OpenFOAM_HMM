@@ -38,12 +38,12 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef createShellMesh_H
-#define createShellMesh_H
+#ifndef Foam_createShellMesh_H
+#define Foam_createShellMesh_H
 
-#include "primitiveFacePatch.H"
 #include "bitSet.H"
 #include "labelPair.H"
+#include "primitivePatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

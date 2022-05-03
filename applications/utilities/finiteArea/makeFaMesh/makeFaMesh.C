@@ -49,7 +49,7 @@ Original Authors
 #include "faFieldDecomposer.H"
 #include "faMeshReconstructor.H"
 #include "PtrListOps.H"
-#include "foamVtkUIndPatchWriter.H"
+#include "foamVtkIndPatchWriter.H"
 #include "OBJstream.H"
 
 using namespace Foam;

@@ -36,8 +36,8 @@ License
 #include "triSurface.H"
 #include "SortableList.H"
 #include "OFstream.H"
-#include "primitiveFacePatch.H"
-#include "uindirectPrimitivePatch.H"
+#include "primitivePatch.H"
+#include "indirectPrimitivePatch.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

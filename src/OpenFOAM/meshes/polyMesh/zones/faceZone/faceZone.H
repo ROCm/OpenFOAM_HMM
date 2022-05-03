@@ -40,12 +40,12 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef faceZone_H
-#define faceZone_H
+#ifndef Foam_faceZone_H
+#define Foam_faceZone_H
 
 #include "zone.H"
 #include "faceZoneMeshFwd.H"
-#include "primitiveFacePatch.H"
+#include "primitivePatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

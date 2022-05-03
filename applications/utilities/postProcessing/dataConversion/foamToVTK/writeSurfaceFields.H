@@ -38,7 +38,7 @@ SourceFiles
 #define writeSurfaceFields_H
 
 #include "readFields.H"
-#include "primitiveFacePatch.H"
+#include "primitivePatch.H"
 #include "foamVtkGenericPatchGeoFieldsWriter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

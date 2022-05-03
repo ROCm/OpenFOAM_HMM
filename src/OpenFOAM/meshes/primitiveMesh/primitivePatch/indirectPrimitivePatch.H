@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,13 +28,20 @@ Typedef
     Foam::indirectPrimitivePatch
 
 Description
-    A PrimitivePatch with an IndirectList for the faces, const reference
-    for the point field.
+    A PrimitivePatch with an IndirectList for the faces,
+    const reference for the point field.
+
+Typedef
+    Foam::uindirectPrimitivePatch
+
+Description
+    A PrimitivePatch with UIndirectList for the faces,
+    const reference for the point field.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef indirectPrimitivePatch_H
-#define indirectPrimitivePatch_H
+#ifndef Foam_indirectPrimitivePatch_H
+#define Foam_indirectPrimitivePatch_H
 
 #include "PrimitivePatch.H"
 #include "face.H"
@@ -45,8 +52,15 @@ Description
 
 namespace Foam
 {
-    typedef PrimitivePatch<IndirectList<face>, const pointField&>
-        indirectPrimitivePatch;
+
+typedef
+    PrimitivePatch<IndirectList<face>, const pointField&>
+    indirectPrimitivePatch;
+
+typedef
+    PrimitivePatch<UIndirectList<face>, const pointField&>
+    uindirectPrimitivePatch;
+
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

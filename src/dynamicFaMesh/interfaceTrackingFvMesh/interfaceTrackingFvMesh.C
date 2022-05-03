@@ -48,7 +48,7 @@ License
 #include "turbulentTransportModel.H"
 #include "demandDrivenData.H"
 #include "unitConversion.H"
-#include "foamVtkUIndPatchWriter.H"
+#include "foamVtkIndPatchWriter.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

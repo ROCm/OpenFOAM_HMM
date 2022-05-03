@@ -32,7 +32,6 @@ Description
 #include "argList.H"
 #include "Time.H"
 #include "polyMesh.H"
-#include "primitiveFacePatch.H"
 #include "primitivePatch.H"
 #include "IndirectList.H"
 #include "Fstream.H"

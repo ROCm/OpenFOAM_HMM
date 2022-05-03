@@ -29,7 +29,7 @@ License
 #include "planeToFaceZone.H"
 #include "polyMesh.H"
 #include "faceZoneSet.H"
-#include "uindirectPrimitivePatch.H"
+#include "indirectPrimitivePatch.H"
 #include "PatchTools.H"
 #include "syncTools.H"
 #include "addToRunTimeSelectionTable.H"

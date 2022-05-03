@@ -45,7 +45,7 @@ Original Authors
 #include "areaFields.H"
 #include "edgeFields.H"
 #include "processorFaPatch.H"
-#include "foamVtkUIndPatchWriter.H"
+#include "foamVtkIndPatchWriter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

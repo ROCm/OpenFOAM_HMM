@@ -37,11 +37,11 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef layerAdditionRemoval_H
-#define layerAdditionRemoval_H
+#ifndef Foam_layerAdditionRemoval_H
+#define Foam_layerAdditionRemoval_H
 
 #include "polyMeshModifier.H"
-#include "primitiveFacePatch.H"
+#include "primitivePatch.H"
 #include "ZoneIDs.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
