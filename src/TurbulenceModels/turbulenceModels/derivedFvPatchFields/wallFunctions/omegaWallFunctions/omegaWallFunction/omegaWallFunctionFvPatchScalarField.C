@@ -202,8 +202,8 @@ void Foam::omegaWallFunctionFvPatchScalarField::calculate
 {
     const label patchi = patch.index();
 
-    const nutWallFunctionFvPatchScalarField& nutw =
-        nutWallFunctionFvPatchScalarField::nutw(turbModel, patchi);
+    const tmp<scalarField> tnutw = turbModel.nut(patchi);
+    const scalarField& nutw = tnutw();
 
     const scalarField& y = turbModel.y()[patchi];
 
@@ -217,7 +217,9 @@ void Foam::omegaWallFunctionFvPatchScalarField::calculate
 
     const scalarField magGradUw(mag(Uw.snGrad()));
 
-    const scalar Cmu25 = pow025(nutw.Cmu());
+    const scalar Cmu25 = pow025(wallCoeffs_.Cmu());
+    const scalar kappa = wallCoeffs_.kappa();
+    const scalar yPlusLam = wallCoeffs_.yPlusLam();
 
     // Set omega and G
     forAll(nutw, facei)
@@ -230,13 +232,13 @@ void Foam::omegaWallFunctionFvPatchScalarField::calculate
         const scalar omegaVis = 6.0*nuw[facei]/(beta1_*sqr(y[facei]));
 
         // Contribution from the inertial sublayer
-        const scalar omegaLog = sqrt(k[celli])/(Cmu25*nutw.kappa()*y[facei]);
+        const scalar omegaLog = sqrt(k[celli])/(Cmu25*kappa*y[facei]);
 
         switch (blending_)
         {
             case blendingType::STEPWISE:
             {
-                if (yPlus > nutw.yPlusLam())
+                if (yPlus > yPlusLam)
                 {
                     omega0[celli] += w*omegaLog;
                 }
@@ -296,14 +298,14 @@ void Foam::omegaWallFunctionFvPatchScalarField::calculate
             }
         }
 
-        if (!(blending_ == blendingType::STEPWISE) || yPlus > nutw.yPlusLam())
+        if (!(blending_ == blendingType::STEPWISE) || yPlus > yPlusLam)
         {
             G0[celli] +=
                 w
                *(nutw[facei] + nuw[facei])
                *magGradUw[facei]
                *Cmu25*sqrt(k[celli])
-               /(nutw.kappa()*y[facei]);
+               /(kappa*y[facei]);
         }
     }
 }
@@ -321,6 +323,8 @@ void Foam::omegaWallFunctionFvPatchScalarField::writeLocalEntries
     {
         os.writeEntry("n", n_);
     }
+
+    wallCoeffs_.writeEntries(os);
 }
 
 
@@ -338,6 +342,7 @@ Foam::omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
     initialised_(false),
     master_(-1),
     beta1_(0.075),
+    wallCoeffs_(),
     G_(),
     omega_(),
     cornerWeights_()
@@ -358,6 +363,7 @@ Foam::omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
     initialised_(false),
     master_(-1),
     beta1_(ptf.beta1_),
+    wallCoeffs_(ptf.wallCoeffs_),
     G_(),
     omega_(),
     cornerWeights_()
@@ -393,6 +399,7 @@ Foam::omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
     initialised_(false),
     master_(-1),
     beta1_(dict.getOrDefault<scalar>("beta1", 0.075)),
+    wallCoeffs_(dict),
     G_(),
     omega_(),
     cornerWeights_()
@@ -436,6 +443,7 @@ Foam::omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
     initialised_(false),
     master_(-1),
     beta1_(owfpsf.beta1_),
+    wallCoeffs_(owfpsf.wallCoeffs_),
     G_(),
     omega_(),
     cornerWeights_()
@@ -454,6 +462,7 @@ Foam::omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
     initialised_(false),
     master_(-1),
     beta1_(owfpsf.beta1_),
+    wallCoeffs_(owfpsf.wallCoeffs_),
     G_(),
     omega_(),
     cornerWeights_()

@@ -55,7 +55,9 @@ calcNut() const
     const tmp<scalarField> tnuw = turbModel.nu(patchi);
     const scalarField& nuw = tnuw();
 
-    const scalar Cmu25 = pow025(Cmu_);
+    const scalar Cmu25 = pow025(wallCoeffs_.Cmu());
+    const scalar kappa = wallCoeffs_.kappa();
+    const scalar E = wallCoeffs_.E();
 
     tmp<scalarField> tnutw(new scalarField(patch().size(), Zero));
     scalarField& nutw = tnutw.ref();
@@ -71,7 +73,7 @@ calcNut() const
 
         // Inertial sublayer contribution
         const scalar nutLog =
-            nuw[facei]*(yPlus*kappa_/log(max(E_*yPlus, 1 + 1e-4)) - 1.0);
+            nuw[facei]*(yPlus*kappa/log(max(E*yPlus, 1 + 1e-4)) - 1.0);
 
         nutw[facei] = blend(nutVis, nutLog, yPlus);
     }
@@ -180,7 +182,8 @@ yPlus() const
     const fvPatchVectorField& Uw = U(turbModel).boundaryField()[patchi];
     const scalarField magGradUw(mag(Uw.snGrad()));
 
-    const scalar Cmu25 = pow025(Cmu_);
+    const scalar Cmu25 = pow025(wallCoeffs_.Cmu());
+    const scalar yPlusLam = wallCoeffs_.yPlusLam();
 
     auto tyPlus = tmp<scalarField>::New(patch().size(), Zero);
     auto& yPlus = tyPlus.ref();
@@ -190,7 +193,7 @@ yPlus() const
         // inertial sublayer
         yPlus[facei] = Cmu25*y[facei]*sqrt(kwc[facei])/nuw[facei];
 
-        if (yPlusLam_ > yPlus[facei])
+        if (yPlusLam > yPlus[facei])
         {
             // viscous sublayer
             yPlus[facei] =

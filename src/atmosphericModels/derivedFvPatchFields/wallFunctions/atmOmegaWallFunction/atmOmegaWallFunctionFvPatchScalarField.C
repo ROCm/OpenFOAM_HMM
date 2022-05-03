@@ -45,8 +45,8 @@ void Foam::atmOmegaWallFunctionFvPatchScalarField::calculate
 {
     const label patchi = patch.index();
 
-    const nutWallFunctionFvPatchScalarField& nutw =
-        nutWallFunctionFvPatchScalarField::nutw(turbModel, patchi);
+    const tmp<scalarField> tnutw = turbModel.nut(patchi);
+    const scalarField& nutw = tnutw();
 
     const scalarField& y = turbModel.y()[patchi];
 
@@ -60,7 +60,8 @@ void Foam::atmOmegaWallFunctionFvPatchScalarField::calculate
 
     const scalarField magGradUw(mag(Uw.snGrad()));
 
-    const scalar Cmu25 = pow025(nutw.Cmu());
+    const scalar Cmu25 = pow025(wallCoeffs_.Cmu());
+    const scalar kappa = wallCoeffs_.kappa();
 
     const scalar t = db().time().timeOutputValue();
     const scalarField z0(z0_->value(t));
@@ -88,14 +89,14 @@ void Foam::atmOmegaWallFunctionFvPatchScalarField::calculate
         const scalar w = cornerWeights[facei];
 
         omega0[celli] +=
-            w*sqrt(k[celli])/(Cmu25*nutw.kappa()*(y[facei] + z0[facei]));
+            w*sqrt(k[celli])/(Cmu25*kappa*(y[facei] + z0[facei]));
 
         G0[celli] +=
             w
            *(nutw[facei] + nuw[facei])
            *magGradUw[facei]
            *Cmu25*sqrt(k[celli])
-           /(nutw.kappa()*(y[facei] + z0[facei]));
+           /(kappa*(y[facei] + z0[facei]));
     }
 }
 
@@ -109,6 +110,8 @@ void Foam::atmOmegaWallFunctionFvPatchScalarField::writeLocalEntries
     {
         z0_->writeData(os);
     }
+
+    wallCoeffs_.writeEntries(os);
 }
 
 

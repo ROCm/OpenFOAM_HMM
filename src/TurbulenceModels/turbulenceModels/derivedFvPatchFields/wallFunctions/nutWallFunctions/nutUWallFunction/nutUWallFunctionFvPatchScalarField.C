@@ -53,6 +53,9 @@ Foam::nutUWallFunctionFvPatchScalarField::calcNut() const
     const tmp<scalarField> tnuw = turbModel.nu(patchi);
     const scalarField& nuw = tnuw();
 
+    const scalar kappa = wallCoeffs_.kappa();
+    const scalar E = wallCoeffs_.E();
+
     tmp<scalarField> tyPlus = calcYPlus(magUp);
     const scalarField& yPlus = tyPlus();
 
@@ -67,7 +70,7 @@ Foam::nutUWallFunctionFvPatchScalarField::calcNut() const
         // Inertial sublayer contribution
         const scalar nutLog =
             nuw[facei]
-           *(yPlus[facei]*kappa_/log(max(E_*yPlus[facei], 1 + 1e-4)) - 1.0);
+           *(yPlus[facei]*kappa/log(max(E*yPlus[facei], 1 + 1e-4)) - 1.0);
 
         nutw[facei] = blend(nutVis, nutLog, yPlus[facei]);
     }
@@ -96,14 +99,18 @@ Foam::nutUWallFunctionFvPatchScalarField::calcYPlus
     const tmp<scalarField> tnuw = turbModel.nu(patchi);
     const scalarField& nuw = tnuw();
 
+    const scalar kappa = wallCoeffs_.kappa();
+    const scalar E = wallCoeffs_.E();
+    const scalar yPlusLam = wallCoeffs_.yPlusLam();
+
     tmp<scalarField> tyPlus(new scalarField(patch().size(), Zero));
     scalarField& yPlus = tyPlus.ref();
 
     forAll(yPlus, facei)
     {
-        const scalar kappaRe = kappa_*magUp[facei]*y[facei]/nuw[facei];
+        const scalar kappaRe = kappa*magUp[facei]*y[facei]/nuw[facei];
 
-        scalar yp = yPlusLam_;
+        scalar yp = yPlusLam;
         const scalar ryPlusLam = 1.0/yp;
 
         int iter = 0;
@@ -112,7 +119,7 @@ Foam::nutUWallFunctionFvPatchScalarField::calcYPlus
         do
         {
             yPlusLast = yp;
-            yp = (kappaRe + yp)/(1.0 + log(E_*yp));
+            yp = (kappaRe + yp)/(1.0 + log(E*yp));
 
         } while (mag(ryPlusLam*(yp - yPlusLast)) > 0.01 && ++iter < 10 );
 
@@ -219,12 +226,14 @@ Foam::nutUWallFunctionFvPatchScalarField::yPlus() const
     const scalarField magUp(mag(Uw.patchInternalField() - Uw));
     const scalarField magGradUw(mag(Uw.snGrad()));
 
+    const scalar yPlusLam = wallCoeffs_.yPlusLam();
+
     tmp<scalarField> tyPlus = calcYPlus(magUp);
     scalarField& yPlus = tyPlus.ref();
 
     forAll(yPlus, facei)
     {
-        if (yPlusLam_ > yPlus[facei])
+        if (yPlusLam > yPlus[facei])
         {
             // viscous sublayer
             yPlus[facei] =

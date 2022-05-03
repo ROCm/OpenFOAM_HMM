@@ -76,7 +76,9 @@ calcNut() const
     const tmp<scalarField> tnuw = turbModel.nu(patchi);
     const scalarField& nuw = tnuw();
 
-    const scalar Cmu25 = pow025(Cmu_);
+    const scalar Cmu25 = pow025(wallCoeffs_.Cmu());
+    const scalar kappa = wallCoeffs_.kappa();
+    const scalar E = wallCoeffs_.E();
 
     tmp<scalarField> tnutw(new scalarField(*this));
     scalarField& nutw = tnutw.ref();
@@ -89,7 +91,7 @@ calcNut() const
         const scalar yPlus = uStar*y[facei]/nuw[facei];
         const scalar KsPlus = uStar*Ks_[facei]/nuw[facei];
 
-        scalar Edash = E_;
+        scalar Edash = E;
         if (2.25 < KsPlus)
         {
             Edash /= fnRough(KsPlus, Cs_[facei]);
@@ -105,7 +107,7 @@ calcNut() const
                 min
                 (
                     nuw[facei]
-                   *(yPlus*kappa_/log(max(Edash*yPlus, 1+1e-4)) - 1),
+                   *(yPlus*kappa/log(max(Edash*yPlus, 1+1e-4)) - 1),
                     2*limitingNutw
                 ), 0.5*limitingNutw
             );

@@ -62,6 +62,8 @@ tmp<scalarField> atmNutUWallFunctionFvPatchScalarField::calcNut() const
     const tmp<scalarField> tnuw = turbModel.nu(patchi);
     const scalarField& nuw = tnuw();
 
+    const scalar kappa = wallCoeffs_.kappa();
+
     const scalar t = db().time().timeOutputValue();
     const scalarField z0(z0_->value(t));
 
@@ -84,7 +86,7 @@ tmp<scalarField> atmNutUWallFunctionFvPatchScalarField::calcNut() const
     forAll(nutw, facei)
     {
         const scalar Edash = (y[facei] + z0[facei])/(z0[facei] + 1e-4);
-        const scalar uStar = magUpn[facei]*kappa_/log(max(Edash, 1.0 + 1e-4));
+        const scalar uStar = magUpn[facei]*kappa/log(max(Edash, 1.0 + 1e-4));
 
         nutw[facei] = sqr(uStar)/max(magUpn[facei], 1e-6)*y[facei] - nuw[facei];
     }

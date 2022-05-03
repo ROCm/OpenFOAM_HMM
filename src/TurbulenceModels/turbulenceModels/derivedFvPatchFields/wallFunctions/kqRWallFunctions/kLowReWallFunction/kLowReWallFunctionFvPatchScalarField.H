@@ -101,6 +101,7 @@ SourceFiles
 #define kLowReWallFunctionFvPatchScalarField_H
 
 #include "fixedValueFvPatchField.H"
+#include "wallFunctionCoefficients.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -130,6 +131,9 @@ protected:
 
         //- C coefficient
         scalar C_;
+
+        //- Wall-function coefficients
+        wallFunctionCoefficients wallCoeffs_;
 
 
     // Protected Member Functions

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016, 2019 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -92,10 +92,8 @@ void Foam::nutWallFunctionFvPatchScalarField::writeLocalEntries
     Ostream& os
 ) const
 {
-    os.writeEntry("Cmu", Cmu_);
-    os.writeEntry("kappa", kappa_);
-    os.writeEntry("E", E_);
     os.writeEntryIfDifferent<word>("U", word::null, UName_);
+    wallCoeffs_.writeEntries(os);
 }
 
 
@@ -111,10 +109,7 @@ Foam::nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
     blending_(blendingType::STEPWISE),
     n_(4.0),
     UName_(word::null),
-    Cmu_(0.09),
-    kappa_(0.41),
-    E_(9.8),
-    yPlusLam_(yPlusLam(kappa_, E_))
+    wallCoeffs_()
 {
     checkType();
 }
@@ -132,10 +127,7 @@ Foam::nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
     blending_(ptf.blending_),
     n_(ptf.n_),
     UName_(ptf.UName_),
-    Cmu_(ptf.Cmu_),
-    kappa_(ptf.kappa_),
-    E_(ptf.E_),
-    yPlusLam_(ptf.yPlusLam_)
+    wallCoeffs_(ptf.wallCoeffs_)
 {
     checkType();
 }
@@ -168,13 +160,7 @@ Foam::nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
         )
     ),
     UName_(dict.getOrDefault<word>("U", word::null)),
-    Cmu_(dict.getOrDefault<scalar>("Cmu", 0.09)),
-    kappa_
-    (
-        dict.getCheckOrDefault<scalar>("kappa", 0.41, scalarMinMax::ge(SMALL))
-    ),
-    E_(dict.getCheckOrDefault<scalar>("E", 9.8, scalarMinMax::ge(SMALL))),
-    yPlusLam_(yPlusLam(kappa_, E_))
+    wallCoeffs_(dict)
 {
     checkType();
 }
@@ -189,10 +175,7 @@ Foam::nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
     blending_(wfpsf.blending_),
     n_(wfpsf.n_),
     UName_(wfpsf.UName_),
-    Cmu_(wfpsf.Cmu_),
-    kappa_(wfpsf.kappa_),
-    E_(wfpsf.E_),
-    yPlusLam_(wfpsf.yPlusLam_)
+    wallCoeffs_(wfpsf.wallCoeffs_)
 {
     checkType();
 }
@@ -208,10 +191,7 @@ Foam::nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
     blending_(wfpsf.blending_),
     n_(wfpsf.n_),
     UName_(wfpsf.UName_),
-    Cmu_(wfpsf.Cmu_),
-    kappa_(wfpsf.kappa_),
-    E_(wfpsf.E_),
-    yPlusLam_(wfpsf.yPlusLam_)
+    wallCoeffs_(wfpsf.wallCoeffs_)
 {
     checkType();
 }
@@ -235,23 +215,6 @@ Foam::nutWallFunctionFvPatchScalarField::nutw
 }
 
 
-Foam::scalar Foam::nutWallFunctionFvPatchScalarField::yPlusLam
-(
-    const scalar kappa,
-    const scalar E
-)
-{
-    scalar ypl = 11.0;
-
-    for (label i = 0; i < 10; ++i)
-    {
-        ypl = log(max(E*ypl, 1.0))/kappa;
-    }
-
-    return ypl;
-}
-
-
 Foam::scalar Foam::nutWallFunctionFvPatchScalarField::blend
 (
     const scalar nutVis,
@@ -265,7 +228,7 @@ Foam::scalar Foam::nutWallFunctionFvPatchScalarField::blend
     {
         case blendingType::STEPWISE:
         {
-            if (yPlus > yPlusLam_)
+            if (yPlus > wallCoeffs_.yPlusLam())
             {
                 nutw = nutLog;
             }
@@ -307,12 +270,6 @@ Foam::scalar Foam::nutWallFunctionFvPatchScalarField::blend
     }
 
     return nutw;
-}
-
-
-Foam::scalar Foam::nutWallFunctionFvPatchScalarField::yPlusLam() const
-{
-    return yPlusLam_;
 }
 
 

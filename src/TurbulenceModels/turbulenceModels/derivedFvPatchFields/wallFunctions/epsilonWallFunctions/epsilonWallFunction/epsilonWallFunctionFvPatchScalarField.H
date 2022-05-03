@@ -173,6 +173,7 @@ SourceFiles
 #define epsilonWallFunctionFvPatchScalarField_H
 
 #include "fixedValueFvPatchField.H"
+#include "wallFunctionCoefficients.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -229,6 +230,9 @@ protected:
 
         //- Master patch ID
         label master_;
+
+        //- Wall-function coefficients
+        wallFunctionCoefficients wallCoeffs_;
 
         //- Local copy of turbulence G field
         scalarField G_;

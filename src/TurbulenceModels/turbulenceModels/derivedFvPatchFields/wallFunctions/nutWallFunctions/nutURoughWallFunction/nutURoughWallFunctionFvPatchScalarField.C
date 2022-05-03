@@ -56,6 +56,8 @@ Foam::nutURoughWallFunctionFvPatchScalarField::calcNut() const
     // The flow velocity at the adjacent cell centre
     const scalarField magUp(mag(Uw.patchInternalField() - Uw));
 
+    const scalar yPlusLam = wallCoeffs_.yPlusLam();
+
     tmp<scalarField> tyPlus = calcYPlus(magUp);
     scalarField& yPlus = tyPlus.ref();
 
@@ -64,7 +66,7 @@ Foam::nutURoughWallFunctionFvPatchScalarField::calcNut() const
 
     forAll(yPlus, facei)
     {
-        if (yPlusLam_ < yPlus[facei])
+        if (yPlusLam < yPlus[facei])
         {
             const scalar Re = magUp[facei]*y[facei]/nuw[facei] + ROOTVSMALL;
             nutw[facei] = nuw[facei]*(sqr(yPlus[facei])/Re - 1);
@@ -95,6 +97,10 @@ Foam::nutURoughWallFunctionFvPatchScalarField::calcYPlus
     const tmp<scalarField> tnuw = turbModel.nu(patchi);
     const scalarField& nuw = tnuw();
 
+    const scalar kappa = wallCoeffs_.kappa();
+    const scalar E = wallCoeffs_.E();
+    const scalar yPlusLam = wallCoeffs_.yPlusLam();
+
     tmp<scalarField> tyPlus(new scalarField(patch().size(), Zero));
     scalarField& yPlus = tyPlus.ref();
 
@@ -114,9 +120,9 @@ Foam::nutURoughWallFunctionFvPatchScalarField::calcYPlus
             {
                 const scalar magUpara = magUp[facei];
                 const scalar Re = magUpara*y[facei]/nuw[facei];
-                const scalar kappaRe = kappa_*Re;
+                const scalar kappaRe = kappa*Re;
 
-                scalar yp = yPlusLam_;
+                scalar yp = yPlusLam;
                 const scalar ryPlusLam = 1.0/yp;
 
                 int iter = 0;
@@ -155,7 +161,7 @@ Foam::nutURoughWallFunctionFvPatchScalarField::calcYPlus
                             (c_1*sint_2*KsPlus/t_1) + (c_3*logt_1*cos(t_2));
                     }
 
-                    scalar denom = 1.0 + log(E_*yp) - G - yPlusGPrime;
+                    scalar denom = 1.0 + log(E*yp) - G - yPlusGPrime;
                     if (mag(denom) > VSMALL)
                     {
                         yp = (kappaRe + yp*(1 - yPlusGPrime))/denom;
@@ -178,9 +184,9 @@ Foam::nutURoughWallFunctionFvPatchScalarField::calcYPlus
         {
             const scalar magUpara = magUp[facei];
             const scalar Re = magUpara*y[facei]/nuw[facei];
-            const scalar kappaRe = kappa_*Re;
+            const scalar kappaRe = kappa*Re;
 
-            scalar yp = yPlusLam_;
+            scalar yp = yPlusLam;
             const scalar ryPlusLam = 1.0/yp;
 
             int iter = 0;
@@ -189,7 +195,7 @@ Foam::nutURoughWallFunctionFvPatchScalarField::calcYPlus
             do
             {
                 yPlusLast = yp;
-                yp = (kappaRe + yp)/(1.0 + log(E_*yp));
+                yp = (kappaRe + yp)/(1.0 + log(E*yp));
 
             }
             while

@@ -65,7 +65,8 @@ tmp<scalarField> atmNutkWallFunctionFvPatchScalarField::calcNut() const
     auto tnutw = tmp<scalarField>::New(*this);
     auto& nutw = tnutw.ref();
 
-    const scalar Cmu25 = pow025(Cmu_);
+    const scalar Cmu25 = pow025(wallCoeffs_.Cmu());
+    const scalar kappa = wallCoeffs_.kappa();
 
     const scalar t = db().time().timeOutputValue();
     const scalarField z0(z0_->value(t));
@@ -94,7 +95,7 @@ tmp<scalarField> atmNutkWallFunctionFvPatchScalarField::calcNut() const
         const scalar yPlus = uStar*y[facei]/nuw[facei];
         const scalar Edash = (y[facei] + z0[facei])/z0[facei];
 
-        nutw[facei] = nuw[facei]*(yPlus*kappa_/log(max(Edash, 1 + 1e-4)) - 1);
+        nutw[facei] = nuw[facei]*(yPlus*kappa/log(max(Edash, 1 + 1e-4)) - 1);
     }
 
     if (boundNut_)

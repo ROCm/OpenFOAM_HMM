@@ -92,6 +92,9 @@ Foam::nutUBlendedWallFunctionFvPatchScalarField::calcUTau
 
     const scalarField& nutw = *this;
 
+    const scalar kappa = wallCoeffs_.kappa();
+    const scalar E = wallCoeffs_.E();
+
     forAll(uTaup, facei)
     {
         scalar ut = sqrt((nutw[facei] + nuw[facei])*magGradU[facei]);
@@ -104,7 +107,7 @@ Foam::nutUBlendedWallFunctionFvPatchScalarField::calcUTau
                 const scalar yPlus = y[facei]*ut/nuw[facei];
                 const scalar uTauVis = magUp[facei]/yPlus;
                 const scalar uTauLog =
-                    kappa_*magUp[facei]/log(max(E_*yPlus, 1 + 1e-4));
+                    kappa*magUp[facei]/log(max(E*yPlus, 1 + 1e-4));
 
                 const scalar utNew =
                     pow(pow(uTauVis, n_) + pow(uTauLog, n_), 1.0/n_);

@@ -202,8 +202,8 @@ void Foam::epsilonWallFunctionFvPatchScalarField::calculate
 {
     const label patchi = patch.index();
 
-    const nutWallFunctionFvPatchScalarField& nutw =
-        nutWallFunctionFvPatchScalarField::nutw(turbModel, patchi);
+    const tmp<scalarField> tnutw = turbModel.nut(patchi);
+    const scalarField& nutw = tnutw();
 
     const scalarField& y = turbModel.y()[patchi];
 
@@ -217,8 +217,10 @@ void Foam::epsilonWallFunctionFvPatchScalarField::calculate
 
     const scalarField magGradUw(mag(Uw.snGrad()));
 
-    const scalar Cmu25 = pow025(nutw.Cmu());
-    const scalar Cmu75 = pow(nutw.Cmu(), 0.75);
+    const scalar Cmu25 = pow025(wallCoeffs_.Cmu());
+    const scalar Cmu75 = pow(wallCoeffs_.Cmu(), 0.75);
+    const scalar kappa = wallCoeffs_.kappa();
+    const scalar yPlusLam = wallCoeffs_.yPlusLam();
 
     // Set epsilon and G
     forAll(nutw, facei)
@@ -236,13 +238,13 @@ void Foam::epsilonWallFunctionFvPatchScalarField::calculate
 
         // Contribution from the inertial sublayer
         const scalar epsilonLog =
-            w*Cmu75*pow(k[celli], 1.5)/(nutw.kappa()*y[facei]);
+            w*Cmu75*pow(k[celli], 1.5)/(kappa*y[facei]);
 
         switch (blending_)
         {
             case blendingType::STEPWISE:
             {
-                if (lowReCorrection_ && yPlus < nutw.yPlusLam())
+                if (lowReCorrection_ && yPlus < yPlusLam)
                 {
                     epsilonBlended = epsilonVis;
                 }
@@ -285,14 +287,14 @@ void Foam::epsilonWallFunctionFvPatchScalarField::calculate
 
         epsilon0[celli] += epsilonBlended;
 
-        if (!(lowReCorrection_ && yPlus < nutw.yPlusLam()))
+        if (!(lowReCorrection_ && yPlus < yPlusLam))
         {
             G0[celli] +=
                 w
                *(nutw[facei] + nuw[facei])
                *magGradUw[facei]
                *Cmu25*sqrt(k[celli])
-               /(nutw.kappa()*y[facei]);
+               /(kappa*y[facei]);
         }
     }
 }
@@ -310,6 +312,8 @@ void Foam::epsilonWallFunctionFvPatchScalarField::writeLocalEntries
     {
         os.writeEntry("n", n_);
     }
+
+    wallCoeffs_.writeEntries(os);
 }
 
 
@@ -328,6 +332,7 @@ epsilonWallFunctionFvPatchScalarField
     lowReCorrection_(false),
     initialised_(false),
     master_(-1),
+    wallCoeffs_(),
     G_(),
     epsilon_(),
     cornerWeights_()
@@ -349,6 +354,7 @@ epsilonWallFunctionFvPatchScalarField
     lowReCorrection_(ptf.lowReCorrection_),
     initialised_(false),
     master_(-1),
+    wallCoeffs_(ptf.wallCoeffs_),
     G_(),
     epsilon_(),
     cornerWeights_()
@@ -385,6 +391,7 @@ epsilonWallFunctionFvPatchScalarField
     lowReCorrection_(dict.getOrDefault("lowReCorrection", false)),
     initialised_(false),
     master_(-1),
+    wallCoeffs_(dict),
     G_(),
     epsilon_(),
     cornerWeights_()
@@ -406,6 +413,7 @@ epsilonWallFunctionFvPatchScalarField
     lowReCorrection_(ewfpsf.lowReCorrection_),
     initialised_(false),
     master_(-1),
+    wallCoeffs_(ewfpsf.wallCoeffs_),
     G_(),
     epsilon_(),
     cornerWeights_()
@@ -425,6 +433,7 @@ epsilonWallFunctionFvPatchScalarField
     lowReCorrection_(ewfpsf.lowReCorrection_),
     initialised_(false),
     master_(-1),
+    wallCoeffs_(ewfpsf.wallCoeffs_),
     G_(),
     epsilon_(),
     cornerWeights_()

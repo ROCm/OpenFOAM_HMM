@@ -201,6 +201,7 @@ SourceFiles
 #define omegaWallFunctionFvPatchScalarField_H
 
 #include "fixedValueFvPatchField.H"
+#include "wallFunctionCoefficients.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -263,6 +264,9 @@ protected:
 
         //- beta1 coefficient
         scalar beta1_;
+
+        //- Wall-function coefficients
+        wallFunctionCoefficients wallCoeffs_;
 
         //- Local copy of turbulence G field
         scalarField G_;

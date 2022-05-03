@@ -64,7 +64,8 @@ tmp<scalarField> atmNutWallFunctionFvPatchScalarField::calcNut() const
     auto tnutw = tmp<scalarField>::New(*this);
     auto& nutw = tnutw.ref();
 
-    const scalar Cmu25 = pow025(Cmu_);
+    const scalar Cmu25 = pow025(wallCoeffs_.Cmu());
+    const scalar kappa = wallCoeffs_.kappa();
 
     const fvPatchVectorField& Uw = turbModel.U().boundaryField()[patchi];
     const scalarField magUp(mag(Uw.patchInternalField() - Uw));
@@ -95,7 +96,7 @@ tmp<scalarField> atmNutWallFunctionFvPatchScalarField::calcNut() const
         const scalar Edash = (y[facei] + z0[facei])/(z0[facei] + z0Min_);
 
         // (RH:Eq. 6)
-        const scalar uStarU = magUp[facei]*kappa_/log(max(Edash, 1 + SMALL));
+        const scalar uStarU = magUp[facei]*kappa/log(max(Edash, 1 + SMALL));
 
         // (RH:Eq. 7)
         const scalar uStarK = Cmu25*Foam::sqrt(k[celli]);

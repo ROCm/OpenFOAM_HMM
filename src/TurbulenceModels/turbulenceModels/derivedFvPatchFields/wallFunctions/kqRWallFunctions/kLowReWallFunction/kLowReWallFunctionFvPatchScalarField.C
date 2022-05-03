@@ -42,6 +42,7 @@ void Foam::kLowReWallFunctionFvPatchScalarField::writeLocalEntries
     os.writeEntryIfDifferent<scalar>("Ck", -0.416, Ck_);
     os.writeEntryIfDifferent<scalar>("Bk", 8.366, Bk_);
     os.writeEntryIfDifferent<scalar>("C", 11.0, C_);
+    wallCoeffs_.writeEntries(os);
 }
 
 
@@ -57,7 +58,8 @@ Foam::kLowReWallFunctionFvPatchScalarField::kLowReWallFunctionFvPatchScalarField
     Ceps2_(1.9),
     Ck_(-0.416),
     Bk_(8.366),
-    C_(11.0)
+    C_(11.0),
+    wallCoeffs_()
 {}
 
 
@@ -73,7 +75,8 @@ Foam::kLowReWallFunctionFvPatchScalarField::kLowReWallFunctionFvPatchScalarField
     Ceps2_(ptf.Ceps2_),
     Ck_(ptf.Ck_),
     Bk_(ptf.Bk_),
-    C_(ptf.C_)
+    C_(ptf.C_),
+    wallCoeffs_(ptf.wallCoeffs_)
 {}
 
 
@@ -96,7 +99,8 @@ Foam::kLowReWallFunctionFvPatchScalarField::kLowReWallFunctionFvPatchScalarField
     ),
     Ck_(dict.getOrDefault<scalar>("Ck", -0.416)),
     Bk_(dict.getOrDefault<scalar>("Bk", 8.366)),
-    C_(dict.getOrDefault<scalar>("C", 11.0))
+    C_(dict.getOrDefault<scalar>("C", 11.0)),
+    wallCoeffs_(dict)
 {}
 
 
@@ -109,7 +113,8 @@ Foam::kLowReWallFunctionFvPatchScalarField::kLowReWallFunctionFvPatchScalarField
     Ceps2_(kwfpsf.Ceps2_),
     Ck_(kwfpsf.Ck_),
     Bk_(kwfpsf.Bk_),
-    C_(kwfpsf.C_)
+    C_(kwfpsf.C_),
+    wallCoeffs_(kwfpsf.wallCoeffs_)
 {}
 
 
@@ -123,7 +128,8 @@ Foam::kLowReWallFunctionFvPatchScalarField::kLowReWallFunctionFvPatchScalarField
     Ceps2_(kwfpsf.Ceps2_),
     Ck_(kwfpsf.Ck_),
     Bk_(kwfpsf.Bk_),
-    C_(kwfpsf.C_)
+    C_(kwfpsf.C_),
+    wallCoeffs_(kwfpsf.wallCoeffs_)
 {}
 
 
@@ -147,9 +153,6 @@ void Foam::kLowReWallFunctionFvPatchScalarField::updateCoeffs()
         )
     );
 
-    const nutWallFunctionFvPatchScalarField& nutw =
-        nutWallFunctionFvPatchScalarField::nutw(turbModel, patchi);
-
     const scalarField& y = turbModel.y()[patchi];
 
     const tmp<scalarField> tnuw = turbModel.nu(patchi);
@@ -158,7 +161,9 @@ void Foam::kLowReWallFunctionFvPatchScalarField::updateCoeffs()
     const tmp<volScalarField> tk = turbModel.k();
     const volScalarField& k = tk();
 
-    const scalar Cmu25 = pow025(nutw.Cmu());
+    const scalar Cmu25 = pow025(wallCoeffs_.Cmu());
+    const scalar kappa = wallCoeffs_.kappa();
+    const scalar yPlusLam = wallCoeffs_.yPlusLam();
 
     scalarField& kw = *this;
 
@@ -169,9 +174,9 @@ void Foam::kLowReWallFunctionFvPatchScalarField::updateCoeffs()
         const scalar uTau = Cmu25*sqrt(k[celli]);
         const scalar yPlus = uTau*y[facei]/nuw[facei];
 
-        if (yPlus > nutw.yPlusLam())
+        if (yPlus > yPlusLam)
         {
-            kw[facei] = Ck_/nutw.kappa()*log(yPlus) + Bk_;
+            kw[facei] = Ck_/kappa*log(yPlus) + Bk_;
         }
         else
         {

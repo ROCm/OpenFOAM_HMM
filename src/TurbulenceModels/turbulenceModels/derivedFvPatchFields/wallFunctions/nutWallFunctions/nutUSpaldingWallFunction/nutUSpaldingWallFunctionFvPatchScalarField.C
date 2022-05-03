@@ -126,6 +126,9 @@ Foam::nutUSpaldingWallFunctionFvPatchScalarField::calcUTau
     const tmp<scalarField> tnuw = turbModel.nu(patchi);
     const scalarField& nuw = tnuw();
 
+    const scalar kappa = wallCoeffs_.kappa();
+    const scalar E = wallCoeffs_.E();
+
     const scalarField& nutw = *this;
 
     tmp<scalarField> tuTau(new scalarField(patch().size(), Zero));
@@ -146,18 +149,18 @@ Foam::nutUSpaldingWallFunctionFvPatchScalarField::calcUTau
 
             do
             {
-                scalar kUu = min(kappa_*magUp[facei]/ut, 50);
+                scalar kUu = min(kappa*magUp[facei]/ut, 50);
                 scalar fkUu = exp(kUu) - 1 - kUu*(1 + 0.5*kUu);
 
                 scalar f =
                     - ut*y[facei]/nuw[facei]
                     + magUp[facei]/ut
-                    + 1/E_*(fkUu - 1.0/6.0*kUu*sqr(kUu));
+                    + 1/E*(fkUu - 1.0/6.0*kUu*sqr(kUu));
 
                 scalar df =
                     y[facei]/nuw[facei]
                   + magUp[facei]/sqr(ut)
-                  + 1/E_*kUu*fkUu/ut;
+                  + 1/E*kUu*fkUu/ut;
 
                 scalar uTauNew = ut + f/df;
                 err[facei] = mag((ut - uTauNew)/ut);

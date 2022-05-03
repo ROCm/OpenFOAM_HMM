@@ -167,6 +167,7 @@ SourceFiles
 #define nutWallFunctionFvPatchScalarField_H
 
 #include "fixedValueFvPatchFields.H"
+#include "wallFunctionCoefficients.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -214,18 +215,8 @@ protected:
         //  retrieved from the turbulence model
         word UName_;
 
-        //- Empirical model coefficient
-        scalar Cmu_;
-
-        //- von Kármán constant
-        scalar kappa_;
-
-        //- Wall roughness parameter
-        scalar E_;
-
-        //- Estimated y+ value at the intersection
-        //- of the viscous and inertial sublayers
-        scalar yPlusLam_;
+        //- Wall-function coefficients
+        wallFunctionCoefficients wallCoeffs_;
 
 
     // Protected Member Functions
@@ -296,36 +287,12 @@ public:
 
     // Member Functions
 
-        //- Return Cmu
-        scalar Cmu() const
-        {
-            return Cmu_;
-        }
-
-        //- Return kappa
-        scalar kappa() const
-        {
-            return kappa_;
-        }
-
-        //- Return E
-        scalar E() const
-        {
-            return E_;
-        }
-
         //- Return the nut patchField for the given wall patch
         static const nutWallFunctionFvPatchScalarField& nutw
         (
             const turbulenceModel& turbModel,
             const label patchi
         );
-
-        //- Estimate the y+ at the intersection of the two sublayers
-        static scalar yPlusLam(const scalar kappa, const scalar E);
-
-        //- Return the estimated y+ at the two-sublayer intersection
-        scalar yPlusLam() const;
 
         //- Return the blended nut according to the chosen blending treatment
         scalar blend
