@@ -322,46 +322,6 @@ Foam::label Foam::inplaceMapValue
 
 
 template<class T>
-Foam::labelList Foam::sortedOrder
-(
-    const UList<T>& input
-)
-{
-    labelList order;
-    sortedOrder(input, order, typename UList<T>::less(input));
-    return order;
-}
-
-
-template<class T>
-void Foam::sortedOrder
-(
-    const UList<T>& input,
-    labelList& order
-)
-{
-    sortedOrder(input, order, typename UList<T>::less(input));
-}
-
-
-template<class T, class ListComparePredicate>
-void Foam::sortedOrder
-(
-    const UList<T>& input,
-    labelList& order,
-    const ListComparePredicate& comp
-)
-{
-    // List lengths must be identical. Old content is overwritten
-    order.resize_nocopy(input.size());
-
-    ListOps::identity(order);
-
-    Foam::stableSort(order, comp);
-}
-
-
-template<class T>
 Foam::labelList Foam::duplicateOrder
 (
     const UList<T>& input
@@ -398,7 +358,7 @@ void Foam::duplicateOrder
         return;
     }
 
-    sortedOrder(input, order, comp);
+    Foam::sortedOrder(input, order, comp);
 
     const label last = (order.size()-1);
     label count = 0;
@@ -445,7 +405,7 @@ void Foam::uniqueOrder
     const ListComparePredicate& comp
 )
 {
-    sortedOrder(input, order, comp);
+    Foam::sortedOrder(input, order, comp);
 
     if (order.size() > 1)
     {

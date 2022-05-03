@@ -48,6 +48,7 @@ SourceFiles
 #include "FlatOutput.H"
 #include "labelPair.H"
 #include "labelList.H"
+#include "IndirectList.H"
 #include "HashSet.H"
 #include "Map.H"
 #include "bitSet.H"
@@ -178,24 +179,6 @@ template<class Container>
 label inplaceMapValue(const Map<label>& mapper, Container& input);
 
 
-//- Return the (stable) sort order for the list
-template<class T>
-labelList sortedOrder(const UList<T>& input);
-
-//- Generate the (stable) sort order for the list
-template<class T>
-void sortedOrder(const UList<T>& input, labelList& order);
-
-//- Sort using specified list compare predicate
-template<class T, class ListComparePredicate>
-void sortedOrder
-(
-    const UList<T>& input,
-    labelList& order,
-    const ListComparePredicate& comp
-);
-
-
 //- Return (sorted) indices corresponding to duplicate list values
 template<class T>
 labelList duplicateOrder(const UList<T>& input);
@@ -320,7 +303,7 @@ void inplaceSubset
 
 //- Copy a subset of the input list when predicate is true.
 //
-//  \param[in,out] input the list input values.
+//  \param[in] input the list input values.
 //  \param[in] pred the selection predicate
 //  \param[in] invert set as true to invert the selection logic
 template<class T, class UnaryPredicate>

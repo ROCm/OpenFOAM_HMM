@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -257,41 +257,6 @@ Foam::label Foam::UList<T>::rfind(const T& val, label pos) const
 }
 
 
-template<class T>
-void Foam::sort(UList<T>& a)
-{
-    std::sort(a.begin(), a.end());
-}
-
-
-template<class T, class Compare>
-void Foam::sort(UList<T>& a, const Compare& comp)
-{
-    std::sort(a.begin(), a.end(), comp);
-}
-
-
-template<class T>
-void Foam::stableSort(UList<T>& a)
-{
-    std::stable_sort(a.begin(), a.end());
-}
-
-
-template<class T, class Compare>
-void Foam::stableSort(UList<T>& a, const Compare& comp)
-{
-    std::stable_sort(a.begin(), a.end(), comp);
-}
-
-
-template<class T>
-void Foam::shuffle(UList<T>& a)
-{
-    std::shuffle(a.begin(), a.end(), std::default_random_engine());
-}
-
-
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T>
@@ -368,6 +333,43 @@ template<class T>
 bool Foam::UList<T>::operator>=(const UList<T>& list) const
 {
     return !operator<(list);
+}
+
+
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
+template<class T>
+void Foam::sort(UList<T>& list)
+{
+    std::sort(list.begin(), list.end());
+}
+
+
+template<class T, class Compare>
+void Foam::sort(UList<T>& list, const Compare& comp)
+{
+    std::sort(list.begin(), list.end(), comp);
+}
+
+
+template<class T>
+void Foam::stableSort(UList<T>& list)
+{
+    std::stable_sort(list.begin(), list.end());
+}
+
+
+template<class T, class Compare>
+void Foam::stableSort(UList<T>& list, const Compare& comp)
+{
+    std::stable_sort(list.begin(), list.end(), comp);
+}
+
+
+template<class T>
+void Foam::shuffle(UList<T>& list)
+{
+    std::shuffle(list.begin(), list.end(), std::default_random_engine());
 }
 
 

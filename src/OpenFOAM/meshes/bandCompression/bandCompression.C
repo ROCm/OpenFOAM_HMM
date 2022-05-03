@@ -31,7 +31,6 @@ License
 #include "CircularBuffer.H"
 #include "CompactListList.H"
 #include "DynamicList.H"
-#include "ListOps.H"  // sortedOrder
 #include "IOstreams.H"
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //

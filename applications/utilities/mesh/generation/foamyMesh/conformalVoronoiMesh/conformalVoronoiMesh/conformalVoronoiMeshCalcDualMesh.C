@@ -163,9 +163,8 @@ void Foam::conformalVoronoiMesh::calcTetMesh
 
     label nPatches = patchNames.size();
 
-    List<DynamicList<face>> patchFaces(nPatches, DynamicList<face>(0));
-
-    List<DynamicList<label>> patchOwners(nPatches, DynamicList<label>(0));
+    List<DynamicList<face>> patchFaces(nPatches);
+    List<DynamicList<label>> patchOwners(nPatches);
 
     faces.setSize(number_of_finite_facets());
 
@@ -1711,12 +1710,11 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
             patchDicts[patchi].getOrDefault<label>("neighbProcNo", -1);
     }
 
-    List<DynamicList<face>> patchFaces(nPatches, DynamicList<face>(0));
-    List<DynamicList<label>> patchOwners(nPatches, DynamicList<label>(0));
+    List<DynamicList<face>> patchFaces(nPatches);
+    List<DynamicList<label>> patchOwners(nPatches);
     // Per patch face the index of the slave node of the point pair
-    List<DynamicList<label>> patchPPSlaves(nPatches, DynamicList<label>(0));
-
-    List<DynamicList<bool>> indirectPatchFace(nPatches, DynamicList<bool>(0));
+    List<DynamicList<label>> patchPPSlaves(nPatches);
+    List<DynamicList<bool>> indirectPatchFace(nPatches);
 
 
     faces.setSize(number_of_finite_edges());

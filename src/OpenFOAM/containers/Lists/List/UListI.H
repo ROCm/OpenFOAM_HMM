@@ -448,7 +448,9 @@ inline void Foam::UList<T>::swap(UList<T>& list)
 template<class T>
 inline void Foam::reverse(UList<T>& list, const label n)
 {
-    for (label i=0; i<n/2; ++i)
+    const label nBy2 = n/2;
+
+    for (label i = 0; i < nBy2; ++i)
     {
         Foam::Swap(list[i], list[n-1-i]);
     }
@@ -458,7 +460,7 @@ inline void Foam::reverse(UList<T>& list, const label n)
 template<class T>
 inline void Foam::reverse(UList<T>& list)
 {
-    reverse(list, list.size());
+    Foam::reverse(list, list.size());
 }
 
 

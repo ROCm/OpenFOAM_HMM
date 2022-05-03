@@ -41,8 +41,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef disabledBoolList_H
-#define disabledBoolList_H
+#ifndef Foam_disabledBoolList_H
+#define Foam_disabledBoolList_H
 
 /*---------------------------------------------------------------------------*\
                       Class disabledBoolList Declaration
@@ -60,6 +60,9 @@ struct disabledBoolList
     bool test(int) const { return true; }
 
     void set(bool) {}
+
+    // Perhaps not?
+    /// bool operator()(const label i) const { return true; }
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
