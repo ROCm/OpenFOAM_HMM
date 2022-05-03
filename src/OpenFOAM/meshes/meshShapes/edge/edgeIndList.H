@@ -37,13 +37,12 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef edgeIndList_H
-#define edgeIndList_H
+#ifndef Foam_edgeIndList_H
+#define Foam_edgeIndList_H
 
 // Include all normal list typedefs as well
 #include "edgeList.H"
 #include "IndirectList.H"
-#include "UIndirectList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

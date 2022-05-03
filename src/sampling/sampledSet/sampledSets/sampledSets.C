@@ -34,7 +34,7 @@ License
 #include "mapPolyMesh.H"
 #include "IOmanip.H"
 #include "IOobjectList.H"
-#include "UIndirectList.H"
+#include "IndirectList.H"
 #include "ListOps.H"
 #include "addToRunTimeSelectionTable.H"
 

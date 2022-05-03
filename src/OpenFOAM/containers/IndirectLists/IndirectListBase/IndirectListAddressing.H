@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,8 +33,10 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef IndirectListAddressing_H
-#define IndirectListAddressing_H
+#ifndef Foam_IndirectListAddressing_H
+#define Foam_IndirectListAddressing_H
+
+#include <utility>   // std::move
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

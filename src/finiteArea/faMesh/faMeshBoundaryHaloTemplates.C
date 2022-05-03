@@ -26,7 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "faMeshBoundaryHalo.H"
-#include "UIndirectList.H"
+#include "IndirectList.H"
 #include "Pstream.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

@@ -37,13 +37,12 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef pointIndList_H
-#define pointIndList_H
+#ifndef Foam_pointIndList_H
+#define Foam_pointIndList_H
 
 // Include all normal list typedefs as well
 #include "pointList.H"
 #include "IndirectList.H"
-#include "UIndirectList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -27,7 +27,7 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "UIndirectList.H"
+#include "IndirectList.H"
 #include "DynamicList.H"
 #include "IOstreams.H"
 #include "ListOps.H"

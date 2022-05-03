@@ -37,13 +37,12 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef vectorIndList_H
-#define vectorIndList_H
+#ifndef Foam_vectorIndList_H
+#define Foam_vectorIndList_H
 
 // Include all normal list typedefs as well
 #include "vectorList.H"
 #include "IndirectList.H"
-#include "UIndirectList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

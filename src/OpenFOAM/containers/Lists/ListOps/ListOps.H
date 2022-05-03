@@ -246,6 +246,7 @@ void inplaceUniqueSort
 //  \endcode
 //
 //  \return The subsetted list
+//  \see IndirectList::subset
 template<class BoolListType, class T>
 List<T> subset
 (
@@ -261,6 +262,7 @@ List<T> subset
 //  \param[in] invert set as true to invert the selection logic
 //
 //  \return The subsetted list
+//  \see IndirectList::subset
 template<class T>
 List<T> subset
 (
@@ -306,6 +308,9 @@ void inplaceSubset
 //  \param[in] input the list input values.
 //  \param[in] pred the selection predicate
 //  \param[in] invert set as true to invert the selection logic
+//
+//  \return The subsetted list
+//  \see IndirectList::subset_if
 template<class T, class UnaryPredicate>
 List<T> subsetList
 (

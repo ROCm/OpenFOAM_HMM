@@ -151,6 +151,10 @@ int main(int argc, char *argv[])
         << subsetList(test6, evenNonZero) << nl
         << endl;
 
+    Info<< "Subset of non-zero, even values: "
+        << IndirectList<label>::subset_if(test6, evenNonZero) << nl
+        << endl;
+
     test6.append(identity(13, 12));
 
     Info<< "Randomized: " << flatOutput(test6) << endl;

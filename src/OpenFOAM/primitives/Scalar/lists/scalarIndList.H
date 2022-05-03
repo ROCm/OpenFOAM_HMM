@@ -37,13 +37,12 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef scalarIndList_H
-#define scalarIndList_H
+#ifndef Foam_scalarIndList_H
+#define Foam_scalarIndList_H
 
 // Include all normal list typedefs as well
 #include "scalarList.H"
 #include "IndirectList.H"
-#include "UIndirectList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -35,7 +35,7 @@ License
 #include "HashOps.H"
 #include "ListOps.H"
 #include "Time.H"
-#include "UIndirectList.H"
+#include "IndirectList.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //

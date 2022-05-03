@@ -29,7 +29,7 @@ License
 #include "Istream.H"
 #include "cell.H"
 #include "cellModel.H"
-#include "UIndirectList.H"
+#include "IndirectList.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
