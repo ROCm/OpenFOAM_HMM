@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,9 +51,29 @@ Foam::labelList Foam::randomDecomp::randomMap(const label nCells) const
 
     labelList finalDecomp(nCells);
 
-    for (label& val : finalDecomp)
+    if (agglom_ > 1)
     {
-        val = rndGen.position<label>(0, nDomains_ - 1);
+        label cached = 0;
+        label repeat = 0;
+
+        for (label& val : finalDecomp)
+        {
+            if (!repeat)
+            {
+                cached = rndGen.position<label>(0, nDomains_ - 1);
+                repeat = agglom_;
+            }
+            --repeat;
+
+            val = cached;
+        }
+    }
+    else
+    {
+        for (label& val : finalDecomp)
+        {
+            val = rndGen.position<label>(0, nDomains_ - 1);
+        }
     }
 
     return finalDecomp;
@@ -65,11 +85,18 @@ Foam::labelList Foam::randomDecomp::randomMap(const label nCells) const
 Foam::randomDecomp::randomDecomp
 (
     const dictionary& decompDict,
-    const word& regionName
+    const word& regionName,
+    int select
 )
 :
-    decompositionMethod(decompDict, regionName)
-{}
+    decompositionMethod(decompDict, regionName),
+    agglom_(1)
+{
+    const dictionary& coeffs = findCoeffsDict(typeName + "Coeffs", select);
+
+    // No sanity check needed here (done in randomMap routine)
+    coeffs.readIfPresent("agglom", agglom_);
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

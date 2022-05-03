@@ -27,15 +27,25 @@ Class
     Foam::randomDecomp
 
 Description
-    Decomposition according to pseudo-random number generator.
+    Decomposition according to pseudo-random number generator,
+    which is useful for development and stress testing implementations
+    but obviously sub-optimal for normal uses.
+    Can optionally specify the number of consecutive cells to assign
+    to the same processor (agglomeration).
+
+    Coefficients:
+    \table
+        Property  | Description                             | Required | Default
+        agglom    | Number of cells to agglomerate          | no  | 1
+    \endtable
 
 SourceFiles
     randomDecomp.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef randomDecomp_H
-#define randomDecomp_H
+#ifndef Foam_randomDecomp_H
+#define Foam_randomDecomp_H
 
 #include "decompositionMethod.H"
 
@@ -50,6 +60,12 @@ class randomDecomp
 :
     public decompositionMethod
 {
+    // Private Data
+
+        //- Number of cells to agglomerate per random value (default: 1)
+        label agglom_;
+
+
     // Private Member Functions
 
         //- Random distribution on the 0-nCells interval
@@ -74,7 +90,8 @@ public:
         explicit randomDecomp
         (
             const dictionary& decompDict,
-            const word& regionName = ""
+            const word& regionName = "",
+            int select = selectionType::DEFAULT
         );
 
 

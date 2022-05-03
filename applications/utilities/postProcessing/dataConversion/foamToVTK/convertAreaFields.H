@@ -49,8 +49,10 @@ if (doFiniteArea)
         faMeshPtr = faMesh::TryNew(meshProxy.baseMesh());
     }
 
-    if (faMeshPtr && nAreaFields)
+    if (faMeshPtr && (nAreaFields || withMeshIds))
     {
+        const faMesh& areaMesh = faMeshPtr();
+
         reportFields::area(Info, objects);
 
         const auto& pp = faMeshPtr->patch();
@@ -66,17 +68,36 @@ if (doFiniteArea)
             Pstream::parRun()
         );
 
-        writer.beginFile(faMeshPtr->name());
+        writer.beginFile(areaMesh.name());
 
         writer.writeTimeValue(timeValue);
         writer.writeGeometry();
 
-        writer.beginCellData(nAreaFields);
+        // Optionally with (cellID, faceLabels, procID) fields
+        writer.beginCellData
+        (
+            (withMeshIds ? 2 + (writer.parallel() ? 1 : 0) : 0)
+          + nAreaFields
+        );
+
+        if (withMeshIds)
+        {
+            const globalIndex procAddr(areaMesh.nFaces());
+
+            // Use global indexed values for the 'cell' ids
+            writer.writeCellData("cellID", identity(procAddr.range()));
+
+            // Use proc-local data for faceLabels
+            // (confusing enough already without renumbering)
+            writer.writeCellData("faceLabels", areaMesh.faceLabels());
+
+            writer.writeProcIDs();  // parallel only
+        }
 
         writeAllAreaFields
         (
             writer,
-            *faMeshPtr,
+            areaMesh,
             objects,
             true // syncPar
         );
