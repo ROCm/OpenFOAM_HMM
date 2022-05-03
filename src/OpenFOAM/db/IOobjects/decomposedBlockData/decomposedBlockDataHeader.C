@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,24 +36,27 @@ License
 namespace Foam
 {
 
-inline void writeSpaces(Ostream& os, label nSpaces)
+// Like Ostream::writeEntry, but with fewer spaces
+template<class T>
+static inline void writeHeaderEntry
+(
+    Ostream& os,
+    const word& key,
+    const T& value
+)
 {
-    if (nSpaces < 1)
-    {
-        nSpaces = 1;
-    }
-    while (nSpaces--)
+    os.indent();
+    os.write(key);
+
+    label padding = (12 - label(key.size()));
+
+    // Write padding spaces (always at least one)
+    do
     {
         os.write(char(token::SPACE));
     }
-}
+    while (--padding > 0);
 
-// Similar to writeEntry, but with fewer spaces
-template<class T>
-inline void writeHeaderEntry(Ostream& os, const word& key, const T& value)
-{
-    os << indent << key;
-    writeSpaces(os, 12 - label(key.size()));
     os << value << char(token::END_STATEMENT) << nl;
 }
 

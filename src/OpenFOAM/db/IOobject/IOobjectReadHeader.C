@@ -128,16 +128,17 @@ bool Foam::IOobject::readHeader(dictionary& headerDict, Istream& is)
     }
 
     // Check stream is still OK
-    objState_ = (is.good() ? GOOD : BAD);
+    objState_ = (is.good() ? objectState::GOOD : objectState::BAD);
 
     if (IOobject::debug)
     {
         Info<< " .... read - state: "
-            << (objState_ == GOOD ? "good" : "bad") << endl;
+            << (objState_ == objectState::GOOD ? "good" : "bad")
+            << endl;
 
     }
 
-    if (objState_ == BAD)
+    if (objState_ == objectState::BAD)
     {
         if
         (

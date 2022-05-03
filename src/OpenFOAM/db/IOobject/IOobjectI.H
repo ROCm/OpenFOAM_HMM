@@ -227,13 +227,13 @@ inline Foam::fileName Foam::IOobject::objectPath() const
 
 inline bool Foam::IOobject::good() const noexcept
 {
-    return objState_ == GOOD;
+    return objState_ == objectState::GOOD;
 }
 
 
 inline bool Foam::IOobject::bad() const noexcept
 {
-    return objState_ == BAD;
+    return objState_ == objectState::BAD;
 }
 
 

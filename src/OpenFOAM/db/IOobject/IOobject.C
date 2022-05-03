@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -312,8 +312,8 @@ Foam::IOobject::IOobject
     const word& name,
     const fileName& instance,
     const objectRegistry& registry,
-    readOption ro,
-    writeOption wo,
+    readOption rOpt,
+    writeOption wOpt,
     bool registerObject,
     bool globalObject
 )
@@ -323,11 +323,11 @@ Foam::IOobject::IOobject
     note_(),
     instance_(instance),
     local_(),
-    rOpt_(ro),
-    wOpt_(wo),
+    rOpt_(rOpt),
+    wOpt_(wOpt),
     registerObject_(registerObject),
     globalObject_(globalObject),
-    objState_(GOOD),
+    objState_(objectState::GOOD),
     sizeofLabel_(static_cast<unsigned char>(sizeof(label))),
     sizeofScalar_(static_cast<unsigned char>(sizeof(scalar))),
 
@@ -349,8 +349,8 @@ Foam::IOobject::IOobject
     const fileName& instance,
     const fileName& local,
     const objectRegistry& registry,
-    readOption ro,
-    writeOption wo,
+    readOption rOpt,
+    writeOption wOpt,
     bool registerObject,
     bool globalObject
 )
@@ -360,11 +360,11 @@ Foam::IOobject::IOobject
     note_(),
     instance_(instance),
     local_(local),
-    rOpt_(ro),
-    wOpt_(wo),
+    rOpt_(rOpt),
+    wOpt_(wOpt),
     registerObject_(registerObject),
     globalObject_(globalObject),
-    objState_(GOOD),
+    objState_(objectState::GOOD),
     sizeofLabel_(static_cast<unsigned char>(sizeof(label))),
     sizeofScalar_(static_cast<unsigned char>(sizeof(scalar))),
 
@@ -384,8 +384,8 @@ Foam::IOobject::IOobject
 (
     const fileName& path,
     const objectRegistry& registry,
-    readOption ro,
-    writeOption wo,
+    readOption rOpt,
+    writeOption wOpt,
     bool registerObject,
     bool globalObject
 )
@@ -395,11 +395,11 @@ Foam::IOobject::IOobject
     note_(),
     instance_(),
     local_(),
-    rOpt_(ro),
-    wOpt_(wo),
+    rOpt_(rOpt),
+    wOpt_(wOpt),
     registerObject_(registerObject),
     globalObject_(globalObject),
-    objState_(GOOD),
+    objState_(objectState::GOOD),
     sizeofLabel_(static_cast<unsigned char>(sizeof(label))),
     sizeofScalar_(static_cast<unsigned char>(sizeof(scalar))),
 
@@ -471,14 +471,27 @@ Foam::IOobject::IOobject
 Foam::IOobject::IOobject
 (
     const IOobject& io,
-    readOption ro,
-    writeOption wo
+    const word& name,
+    const fileName& local
+)
+:
+    IOobject(io, name)
+{
+    local_ = local;
+}
+
+
+Foam::IOobject::IOobject
+(
+    const IOobject& io,
+    readOption rOpt,
+    writeOption wOpt
 )
 :
     IOobject(io)
 {
-    rOpt_ = ro;
-    wOpt_ = wo;
+    rOpt_ = rOpt;
+    wOpt_ = wOpt;
 }
 
 
@@ -589,7 +602,7 @@ Foam::fileName Foam::IOobject::globalFilePath
 
 void Foam::IOobject::setBad(const string& s)
 {
-    if (objState_ != GOOD)
+    if (objState_ != objectState::GOOD)
     {
         FatalErrorInFunction
             << "Recurrent failure for object " << s
@@ -602,7 +615,7 @@ void Foam::IOobject::setBad(const string& s)
             << "Broken object " << s << info() << endl;
     }
 
-    objState_ = BAD;
+    objState_ = objectState::BAD;
 }
 
 

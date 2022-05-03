@@ -107,8 +107,8 @@ Foam::IOobjectList::IOobjectList
     const objectRegistry& db,
     const fileName& instance,
     const fileName& local,
-    IOobject::readOption r,
-    IOobject::writeOption w,
+    IOobject::readOption rOpt,
+    IOobject::writeOption wOpt,
     bool registerObject
 )
 :
@@ -131,8 +131,8 @@ Foam::IOobjectList::IOobjectList
             newInstance,
             local,
             db,
-            r,
-            w,
+            rOpt,
+            wOpt,
             registerObject
         );
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,8 +38,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef regIOobject_H
-#define regIOobject_H
+#ifndef Foam_regIOobject_H
+#define Foam_regIOobject_H
 
 #include "IOobject.H"
 #include "refPtr.H"
@@ -174,8 +174,13 @@ public:
             //- Add file watch on object (if registered and READ_IF_MODIFIED)
             virtual void addWatch();
 
+            //- Query the registered state (ie, has been checked in).
+            //- This is not necessarily the same as registerObject(),
+            //- which is just a stated preference.
+            inline bool registered() const noexcept;
+
             //- Is this object owned by the registry?
-            inline bool ownedByRegistry() const;
+            inline bool ownedByRegistry() const noexcept;
 
             //- Register object with its registry
             //- and transfer ownership to the registry.
@@ -223,18 +228,18 @@ public:
             template<class Type>
             inline static Type& store(tmp<Type>&& ptr);
 
-            //- Release ownership of this object from its registry
-            //  \param unregister optionally set as non-registered
-            inline void release(const bool unregister = false);
+            //- Set object as \b not ownedByRegistry
+            //  \param unregister optionally set as non-registered too
+            inline void release(const bool unregister = false) noexcept;
 
 
         // Dependency Checking
 
             //- Event number at last update.
-            inline label eventNo() const;
+            inline label eventNo() const noexcept;
 
             //- Event number at last update.
-            inline label& eventNo();
+            inline label& eventNo() noexcept;
 
             //- Return true if up-to-date with respect to given object
             bool upToDate(const regIOobject&) const;
@@ -318,11 +323,11 @@ public:
             //  \return index of watch
             virtual label addWatch(const fileName&);
 
-            //- Return file-monitoring handles
-            inline const labelList& watchIndices() const;
+            //- Read access to file-monitoring handles
+            inline const labelList& watchIndices() const noexcept;
 
-            //- Return file-monitoring handles
-            inline labelList& watchIndices();
+            //- Write access to file-monitoring handles
+            inline labelList& watchIndices() noexcept;
 
             //- Return true if the object's file (or files for objectRegistry)
             //- have been modified. (modified state is cached by Time)

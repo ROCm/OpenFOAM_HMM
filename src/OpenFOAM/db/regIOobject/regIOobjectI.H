@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,13 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline bool Foam::regIOobject::ownedByRegistry() const
+inline bool Foam::regIOobject::registered() const noexcept
+{
+    return registered_;
+}
+
+
+inline bool Foam::regIOobject::ownedByRegistry() const noexcept
 {
     return ownedByRegistry_;
 }
@@ -172,7 +178,7 @@ inline Type& Foam::regIOobject::store(tmp<Type>&& ptr)
 }
 
 
-inline void Foam::regIOobject::release(const bool unregister)
+inline void Foam::regIOobject::release(const bool unregister) noexcept
 {
     ownedByRegistry_ = false;
     if (unregister)
@@ -182,24 +188,24 @@ inline void Foam::regIOobject::release(const bool unregister)
 }
 
 
-inline Foam::label Foam::regIOobject::eventNo() const
+inline Foam::label Foam::regIOobject::eventNo() const noexcept
 {
     return eventNo_;
 }
 
-inline Foam::label& Foam::regIOobject::eventNo()
+inline Foam::label& Foam::regIOobject::eventNo() noexcept
 {
     return eventNo_;
 }
 
 
-inline const Foam::labelList& Foam::regIOobject::watchIndices() const
+inline const Foam::labelList& Foam::regIOobject::watchIndices() const noexcept
 {
     return watchIndices_;
 }
 
 
-inline Foam::labelList& Foam::regIOobject::watchIndices()
+inline Foam::labelList& Foam::regIOobject::watchIndices() noexcept
 {
     return watchIndices_;
 }

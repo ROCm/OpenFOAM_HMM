@@ -65,24 +65,20 @@ Foam::Ostream& Foam::Ostream::writeKeyword(const keyType& kw)
         return *this;
     }
 
-    label nSpaces = entryIndentation_ - label(kw.size());
+    label padding = (entryIndentation_ - label(kw.size()));
 
     // Account for quotes surrounding pattern
     if (kw.isPattern())
     {
-        nSpaces -= 2;
+        padding -= 2;
     }
 
-    // Could also increment by indentSize_ ...
-    if (nSpaces < 1)
-    {
-        nSpaces = 1;
-    }
-
-    while (nSpaces--)
+    // Write padding spaces (always at least one)
+    do
     {
         write(char(token::SPACE));
     }
+    while (--padding > 0);
 
     return *this;
 }

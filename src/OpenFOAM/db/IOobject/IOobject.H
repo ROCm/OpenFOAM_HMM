@@ -270,7 +270,7 @@ public:
             return bannerEnabled_;
         }
 
-        //- Enable/disable an output file banner
+        //- Enable/disable output file banner
         //  \return the previous value
         static bool bannerEnabled(bool on) noexcept
         {
@@ -360,8 +360,8 @@ public:
             const word& name,
             const fileName& instance,
             const objectRegistry& registry,
-            readOption r=NO_READ,
-            writeOption w=NO_WRITE,
+            readOption rOpt = NO_READ,
+            writeOption wOpt = NO_WRITE,
             bool registerObject = true,
             bool globalObject = false
         );
@@ -373,8 +373,8 @@ public:
             const fileName& instance,
             const fileName& local,
             const objectRegistry& registry,
-            readOption r=NO_READ,
-            writeOption w=NO_WRITE,
+            readOption rOpt = NO_READ,
+            writeOption wOpt = NO_WRITE,
             bool registerObject = true,
             bool globalObject = false
         );
@@ -389,33 +389,24 @@ public:
         (
             const fileName& path,
             const objectRegistry& registry,
-            readOption r=NO_READ,
-            writeOption w=NO_WRITE,
+            readOption rOpt = NO_READ,
+            writeOption wOpt = NO_WRITE,
             bool registerObject = true,
             bool globalObject = false
         );
 
         //- Copy construct, resetting registry
-        IOobject
-        (
-            const IOobject& io,
-            const objectRegistry& registry
-        );
+        IOobject(const IOobject& io, const objectRegistry& registry);
 
         //- Copy construct, resetting name
-        IOobject
-        (
-            const IOobject& io,
-            const word& name
-        );
+        IOobject(const IOobject& io, const word& name);
 
-        //- Copy construct, resetting io options
-        IOobject
-        (
-            const IOobject& io,
-            readOption,
-            writeOption
-        );
+        //- Copy construct, resetting name and local component
+        IOobject(const IOobject& io, const word& name, const fileName& local);
+
+        //- Copy construct, resetting read/write options
+        IOobject(const IOobject& io, readOption rOpt, writeOption wOpt);
+
 
         //- Clone
         autoPtr<IOobject> clone() const
@@ -440,7 +431,7 @@ public:
         //- Return Time associated with the objectRegistry
         const Time& time() const;
 
-        //- Return name
+        //- Return the object name
         inline const word& name() const noexcept;
 
         //- Return name of the class name read from header
@@ -452,10 +443,10 @@ public:
         //- Return the optional note
         inline const string& note() const noexcept;
 
-        //- Return non-constant access to the optional note
+        //- Modifiable access to the optional note
         inline string& note() noexcept;
 
-        //- Rename
+        //- Rename the object
         virtual void rename(const word& newName)
         {
             name_ = newName;
@@ -522,14 +513,19 @@ public:
         //- Return member (name without the extension)
         inline word member() const;
 
+        //- Return the Time::rootPath()
         const fileName& rootPath() const;
 
+        //- Return the Time::caseName()
         const fileName& caseName() const;
 
+        //- Read access to instance path component
         inline const fileName& instance() const noexcept;
 
+        //- Write access to instance path component
         inline fileName& instance() noexcept;
 
+        //- Read access to local path component
         inline const fileName& local() const noexcept;
 
         //- The complete path
@@ -633,8 +629,10 @@ public:
 
     // Error Handling
 
+        //- Did last readHeader() succeed?
         inline bool good() const noexcept;
 
+        //- Did last readHeader() fail?
         inline bool bad() const noexcept;
 
 
@@ -650,6 +648,7 @@ public:
 
     // Member Operators
 
+        //- Copy assignment, copies all values (except the registry)
         void operator=(const IOobject& io);
 
 
