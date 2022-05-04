@@ -150,9 +150,11 @@ Foam::Istream& Foam::operator>>(Istream& is, mapDistributePolyMesh& map)
     is  >> map.nOldPoints_
         >> map.nOldFaces_
         >> map.nOldCells_
+
         >> map.oldPatchSizes_
         >> map.oldPatchStarts_
         >> map.oldPatchNMeshPoints_
+
         >> map.pointMap_
         >> map.faceMap_
         >> map.cellMap_
@@ -171,6 +173,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const mapDistributePolyMesh& map)
         << map.oldPatchSizes_ << token::NL
         << map.oldPatchStarts_ << token::NL
         << map.oldPatchNMeshPoints_ << token::NL
+
         << map.pointMap_ << token::NL
         << map.faceMap_ << token::NL
         << map.cellMap_ << token::NL
