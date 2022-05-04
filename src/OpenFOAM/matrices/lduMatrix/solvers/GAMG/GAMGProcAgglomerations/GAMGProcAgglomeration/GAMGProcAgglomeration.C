@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -279,7 +279,7 @@ bool Foam::GAMGProcAgglomeration::agglomerate
     const lduMesh& levelMesh = agglom_.meshLevels_[fineLevelIndex];
     label levelComm = levelMesh.comm();
 
-    if (Pstream::myProcNo(levelComm) != -1)
+    if (fineLevelIndex > 0 && Pstream::myProcNo(levelComm) != -1)
     {
         // Collect meshes and restrictAddressing onto master
         // Overwrites the fine mesh (meshLevels_[index-1]) and addressing
