@@ -38,8 +38,9 @@ SourceFiles
 #ifndef Foam_IOField_H
 #define Foam_IOField_H
 
-#include "regIOobject.H"
 #include "Field.H"
+#include "regIOobject.H"
+#include "refPtr.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -100,7 +101,8 @@ public:
 
     // Member Functions
 
-        bool writeData(Ostream& os) const;
+        //- The writeData method for regIOobject write operation
+        virtual bool writeData(Ostream& os) const;
 
 
     // Member Operators
@@ -110,6 +112,72 @@ public:
 
         //- Copy or move assignment of entries
         using Field<Type>::operator=;
+};
+
+
+/*---------------------------------------------------------------------------*\
+                         Class IOFieldRef Declaration
+\*---------------------------------------------------------------------------*/
+
+//- A IOField wrapper for writing external data.
+template<class Type>
+class IOFieldRef
+:
+    public regIOobject
+{
+    // Private Data
+
+        //- Reference to the external content
+        refPtr<Field<Type>> contentRef_;
+
+
+public:
+
+    //- The underlying content type
+    typedef Field<Type> content_type;
+
+
+    //- Type is identical to IOField
+    virtual const word& type() const
+    {
+        return IOField<Type>::typeName;
+    }
+
+
+    // Generated Methods
+
+        //- No default construct
+        IOFieldRef() = delete;
+
+        //- No copy construct
+        IOFieldRef(const IOFieldRef&) = delete;
+
+        //- No copy assignment
+        void operator=(const IOFieldRef&) = delete;
+
+
+    // Constructors
+
+        //- Construct from IOobject and const data reference
+        IOFieldRef(const IOobject& io, const Field<Type>& content);
+
+
+    //- Destructor
+    virtual ~IOFieldRef() = default;
+
+
+    // Member Functions
+
+        //- Allow cast to const content
+        //  Fatal if content is not set
+        operator const Field<Type>&() const
+        {
+            return contentRef_.cref();
+        }
+
+        //- The writeData method for regIOobject write operation
+        //  Fatal if content is not set
+        virtual bool writeData(Ostream& os) const;
 };
 
 

@@ -317,7 +317,7 @@ $(IOdictionary)/localIOdictionary.C
 $(IOdictionary)/unwatchedIOdictionary.C
 $(IOdictionary)/IOdictionary.C
 
-db/IOobjects/IOMap/IOMapName.C
+db/IOobjects/IOMap/IOMaps.C
 db/IOobjects/decomposedBlockData/decomposedBlockData.C
 db/IOobjects/decomposedBlockData/decomposedBlockDataHeader.C
 db/IOobjects/GlobalIOField/GlobalIOFields.C

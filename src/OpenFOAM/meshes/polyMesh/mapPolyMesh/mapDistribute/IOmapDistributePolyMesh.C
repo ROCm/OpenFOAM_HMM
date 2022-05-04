@@ -106,17 +106,59 @@ Foam::IOmapDistributePolyMesh::IOmapDistributePolyMesh
 }
 
 
+Foam::IOmapDistributePolyMeshRef::IOmapDistributePolyMeshRef
+(
+    const IOobject& io,
+    const mapDistributePolyMesh& map
+)
+:
+    regIOobject(io),
+    contentRef_(map)  // cref
+{}
+
+
+// Not sure if we need this yet...
+//
+/// Foam::IOmapDistributePolyMeshRef::IOmapDistributePolyMeshRef
+/// (
+///     const IOobject& io,
+///     mapDistributePolyMesh& map
+/// )
+/// :
+///     regIOobject(io),
+///     contentRef_()
+/// {
+///     contentRef_.ref(map);  // writable reference
+/// }
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::IOmapDistributePolyMesh::readData(Istream& is)
 {
-    return (is >> *this).good();
+    is >> *this;
+    return is.good();
 }
 
 
 bool Foam::IOmapDistributePolyMesh::writeData(Ostream& os) const
 {
-    return (os << *this).good();
+    os << *this;
+    return os.good();
+}
+
+
+bool Foam::IOmapDistributePolyMeshRef::readData(Istream& is)
+{
+    is >> contentRef_.ref();
+    return is.good();
+}
+
+
+bool Foam::IOmapDistributePolyMeshRef::writeData(Ostream& os) const
+{
+    os << contentRef_.cref();
+    return os.good();
 }
 
 

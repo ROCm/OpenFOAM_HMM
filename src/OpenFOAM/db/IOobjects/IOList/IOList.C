@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -109,12 +109,33 @@ Foam::IOList<T>::IOList(const IOobject& io, List<T>&& content)
 }
 
 
+template<class T>
+Foam::IOListRef<T>::IOListRef
+(
+    const IOobject& io,
+    const List<T>& content
+)
+:
+    regIOobject(io),
+    contentRef_(content)
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
 bool Foam::IOList<T>::writeData(Ostream& os) const
 {
-    return (os << *this).good();
+    os << static_cast<const List<T>&>(*this);
+    return os.good();
+}
+
+
+template<class T>
+bool Foam::IOListRef<T>::writeData(Ostream& os) const
+{
+    os << contentRef_.cref();
+    return os.good();
 }
 
 
