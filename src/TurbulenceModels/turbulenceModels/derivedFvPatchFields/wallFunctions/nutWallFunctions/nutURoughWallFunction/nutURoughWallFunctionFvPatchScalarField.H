@@ -31,33 +31,33 @@ Group
     grpWallFunctions
 
 Description
-    This boundary condition provides a wall constraint on the turbulent
-    viscosity, i.e. \c nut, based on velocity i.e. \c U, for low- and
-    high-Reynolds number turbulence models for rough walls.
+    This boundary condition provides a wall function on the turbulent
+    viscosity (i.e. \c nut) based on velocity (i.e. \c U) for low- and
+    high-Reynolds number applications for rough walls.
 
 Usage
     Example of the boundary condition specification:
     \verbatim
     <patchName>
     {
-        // Mandatory entries (unmodifiable)
+        // Mandatory entries
         type                nutURoughWallFunction;
         roughnessHeight     1e-5;
         roughnessConstant   0.5;
         roughnessFactor     1;
 
-        // Optional entries (unmodifiable)
+        // Optional entries
         maxIter             10;
         tolerance           0.0001;
 
-        // Optional (inherited) entries
+        // Inherited entries
         ...
     }
     \endverbatim
 
     where the entries mean:
     \table
-      Property  | Description                         | Type | Req'd  | Dflt
+      Property  | Description                         | Type | Reqd   | Deflt
       type      | Type name: nutURoughWallFunction    | word | yes    | -
       roughnessHeight   | Roughness height            | scalar | yes  | -
       roughnessConstant | Roughness constant          | scalar | yes  | -
@@ -242,7 +242,7 @@ public:
             }
 
 
-        // Evaluation functions
+        // Evaluation
 
             //- Calculate and return the yPlus at the boundary
             virtual tmp<scalarField> yPlus() const;

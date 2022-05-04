@@ -31,27 +31,28 @@ Group
     grpWallFunctions
 
 Description
-    This boundary condition provides a wall constraint on the
-    turbulent viscosity, i.e. \c nut, for low Reynolds number models.
-    It sets \c nut to zero, and provides an access function to calculate \c y+.
+    This boundary condition provides a simple wrapper around a zero
+    fixed-value condition for the turbulent viscosity (i.e. \c nut)
+    for low-Reynolds number applications. It sets \c nut to zero,
+    and provides an access function to calculate \c y+.
 
 Usage
     Example of the boundary condition specification:
     \verbatim
     <patchName>
     {
-        // Mandatory entries (unmodifiable)
+        // Mandatory entries
         type            nutLowReWallFunction;
 
-        // Optional (inherited) entries
+        // Inherited entries
         ...
     }
     \endverbatim
 
     where the entries mean:
     \table
-      Property  | Description                      | Type | Req'd  | Dflt
-      type      | Type name: nutLowReWallFunction  | word | yes    | -
+      Property  | Description                      | Type | Reqd | Deflt
+      type      | Type name: nutLowReWallFunction  | word | yes  | -
     \endtable
 
     The inherited entries are elaborated in:

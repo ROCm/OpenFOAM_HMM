@@ -30,21 +30,21 @@ Group
     grpWallFunctions
 
 Description
-    This boundary condition provides a wall constraint on the turbulent
-    viscosity, i.e. \c nut, based on velocity, i.e. \c U, using a
+    This boundary condition provides a wall function for the turbulent
+    viscosity (i.e. \c nut) based on velocity (i.e. \c U) using a
     binomial-function wall-function blending method between the viscous
     and inertial sublayer predictions of \c nut for low- and high-Reynolds
-    number turbulence models.
+    number applications.
 
-        \f[
-            u_\tau = (u_{\tau,v}^n + u_{\tau,l}^n)^{1/n}
-        \f]
+    \f[
+        u_\tau = (u_{\tau,vis}^n + u_{\tau,log}^n)^{1/n}
+    \f]
 
     where
     \vartable
       u_\tau     | Friction velocity
-      u_{\tau,v} | Friction velocity in the viscous sublayer
-      u_{\tau,l} | Friction velocity in the inertial sublayer
+      u_{\tau,vis} | Friction velocity in the viscous sublayer
+      u_{\tau,log} | Friction velocity in the inertial sublayer
     \endvartable
 
     Reference:
@@ -62,22 +62,22 @@ Usage
     \verbatim
     <patchName>
     {
-        // Mandatory entries (unmodifiable)
+        // Mandatory entries
         type            nutUBlendedWallFunction;
 
-        // Optional entries (unmodifiable)
+        // Optional entries
         n               4.0;
 
-        // Optional (inherited) entries
+        // Inherited entries
         ...
      }
     \endverbatim
 
     where the entries mean:
     \table
-      Property  | Description                         | Type   | Req'd  | Dflt
-      type      | Type name: nutUBlendedWallFunction  | word   | yes    | -
-      n         | Blending factor                     | scalar | no     | 4.0
+      Property  | Description                         | Type   | Reqd | Deflt
+      type      | Type name: nutUBlendedWallFunction  | word   | yes  | -
+      n         | Blending factor                     | scalar | no   | 4.0
     \endtable
 
     The inherited entries are elaborated in:
@@ -91,10 +91,6 @@ Note
     \c turbulence->validate) returns a slightly different value every time
     it is called.
     See \link nutUSpaldingWallFunctionFvPatchScalarField.C \endlink.
-
-See also
-    - Foam::nutWallFunctionFvPatchScalarField
-    - Foam::omegaWallFunctionFvPatchScalarField
 
 SourceFiles
     nutUBlendedWallFunctionFvPatchScalarField.C
@@ -210,7 +206,7 @@ public:
 
     // Member Functions
 
-        // Evaluation functions
+        // Evaluation
 
             //- Calculate and return the yPlus at the boundary
             virtual tmp<scalarField> yPlus() const;

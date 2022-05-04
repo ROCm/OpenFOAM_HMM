@@ -31,66 +31,58 @@ Group
     grpWallFunctions
 
 Description
-    This boundary condition provides a wall constraint on the turbulent kinetic
-    energy, i.e. \c k, for low- and high-Reynolds number turbulence models.
+    This boundary condition provides a wall function for the turbulent kinetic
+    energy (i.e. \c k) for low- and high-Reynolds number simulations.
 
 Usage
     Example of the boundary condition specification:
     \verbatim
     <patchName>
     {
-        // Mandatory entries (unmodifiable)
+        // Mandatory entries
         type            kLowReWallFunction;
 
-        // Optional entries (unmodifiable)
+        // Optional entries
         Ceps2           1.9;
         Ck              -0.416;
         Bk              8.366;
         C               11.0;
 
-        // Optional (inherited) entries
+        // Inherited entries
         ...
     }
     \endverbatim
 
     where the entries mean:
     \table
-      Property  | Description                     | Type   | Req'd | Dflt
-      type      | Type name: kLowReWallFunction   | word   | yes   | -
-      Ceps2     | Model coefficient               | scalar | no    |  1.9
-      Ck        | Model coefficient               | scalar | no    | -0.416
-      Bk        | Model coefficient               | scalar | no    |  8.366
-      C         | Model coefficient               | scalar | no    |  11.0
+      Property  | Description                     | Type   | Reqd | Deflt
+      type      | Type name: kLowReWallFunction   | word   | yes  | -
+      Ceps2     | Model coefficient               | scalar | no   |  1.9
+      Ck        | Model coefficient               | scalar | no   | -0.416
+      Bk        | Model coefficient               | scalar | no   |  8.366
+      C         | Model coefficient               | scalar | no   |  11.0
     \endtable
 
     The inherited entries are elaborated in:
       - \link fixedValueFvPatchField.H \endlink
+      - \link wallFunctionCoefficients.H \endlink
 
     Viscous and inertial sublayer predictions for \c k are blended in
     a stepwise manner:
 
     \f[
-        k = k_{log} \qquad if \quad y^+ > y^+_{lam}
+        k = k_{log} \qquad if \quad y^+ > y^+_{intersection}
     \f]
     \f[
-        k = k_{vis} \qquad if \quad y^+ <= y^+_{lam}
+        k = k_{vis} \qquad if \quad y^+ <= y^+_{intersection}
     \f]
     where
     \vartable
       k_{vis}   | k prediction in the viscous sublayer
       k_{log}   | k prediction in the inertial sublayer
       y^+       | estimated wall-normal height of the cell centre in wall units
-      y^+_{lam} | estimated intersection of the viscous and inertial sublayers
+      y^+_{intersection} | estimated \f$y^+\f$ where sublayers intersect
     \endvartable
-
-Note
-    The coefficients \c Cmu, \c kappa, and \c E are obtained from
-    the specified \c nutWallFunction in order to ensure that each patch
-    possesses the same set of values for these coefficients.
-
-See also
-    - Foam::fixedValueFvPatchField
-    - Foam::kqRWallFunctionFvPatchScalarField
 
 SourceFiles
     kLowReWallFunctionFvPatchScalarField.C
@@ -212,7 +204,7 @@ public:
 
     // Member Functions
 
-        // Evaluation functions
+        // Evaluation
 
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();

@@ -61,20 +61,18 @@ Usage
     \verbatim
     <patchName>
     {
-        // Mandatory entries (unmodifiable)
+        // Mandatory entries
         type            atmOmegaWallFunction;
+        z0              <PatchFunction1<scalar>>;
 
-        // Mandatory entries (runtime modifiable)
-        z0              uniform 0.001;
-
-        // Optional (inherited) entries
+        // Inherited entries
         ...
     }
     \endverbatim
 
     where the entries mean:
     \table
-      Property | Description                      | Type   | Reqd   | Dflt
+      Property | Description                      | Type   | Reqd   | Deflt
       type     | Type name: atmOmegaWallFunction  | word   | yes    | -
       z0    | Surface roughness length [m] | PatchFunction1<scalar> | yes | -
     \endtable
@@ -82,9 +80,6 @@ Usage
     The inherited entries are elaborated in:
       - \link omegaWallFunctionFvPatchScalarField.H \endlink
       - \link PatchFunction1.H \endlink
-
-See also
-    - Foam::omegaWallFunctionFvPatchScalarField
 
 SourceFiles
     atmOmegaWallFunctionFvPatchScalarField.C

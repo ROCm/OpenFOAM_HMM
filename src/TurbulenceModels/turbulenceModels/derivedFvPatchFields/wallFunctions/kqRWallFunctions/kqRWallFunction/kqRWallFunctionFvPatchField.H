@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017, 2019 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,28 +32,28 @@ Group
 
 Description
     This boundary condition provides a simple wrapper around the zero-gradient
-    condition, which can be used for the turbulent kinetic energy, i.e. \c k,
-    square-root of turbulent kinetic energy, i.e. \c q, and Reynolds stress
-    tensor fields, i.e. \c R, for the cases of high Reynolds number flow
-    using wall functions.
+    condition, which can be used for the turbulent kinetic energy (i.e. \c k),
+    square-root of turbulent kinetic energy (i.e. \c q) and Reynolds stress
+    symmetric-tensor fields (i.e. \c R) for the cases of high Reynolds number
+    flow using wall functions. It is not a wall-function condition.
 
 Usage
     Example of the boundary condition specification:
     \verbatim
     <patchName>
     {
-        // Mandatory entries (unmodifiable)
+        // Mandatory entries
         type            kqRWallFunction;
 
-        // Optional (inherited) entries
+        // Inherited entries
         ...
     }
     \endverbatim
 
     where the entries mean:
     \table
-      Property  | Description                   | Type | Req'd  | Dflt
-      type      | Type name: kqRWallFunction    | word | yes    | -
+      Property  | Description                   | Type | Reqd | Deflt
+      type      | Type name: kqRWallFunction    | word | yes  | -
     \endtable
 
     The inherited entries are elaborated in:

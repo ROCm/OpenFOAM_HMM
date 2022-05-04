@@ -31,20 +31,20 @@ Group
     grpWallFunctions
 
 Description
-    This boundary condition provides a wall constraint on the turbulent
-    viscosity, i.e. \c nut, based on velocity, i.e. \c U. Using Spalding's
+    This boundary condition provides a wall function for the turbulent
+    viscosity (i.e. \c nut) based on velocity (i.e. \c U). Using Spalding's
     law gives a continuous \c nut profile to the wall.
 
-        \f[
-            y^+ = u^+ + \frac{1}{E} \left[exp(\kappa u^+) - 1 - \kappa u^+\,
-                - 0.5 (\kappa u^+)^2 - \frac{1}{6} (\kappa u^+)^3\right]
-        \f]
+    \f[
+        y^+ = u^+ + \frac{1}{E} \left[exp(\kappa u^+) - 1 - \kappa u^+\,
+            - 0.5 (\kappa u^+)^2 - \frac{1}{6} (\kappa u^+)^3\right]
+    \f]
 
     where
     \vartable
-        y^+     | Non-dimensional position
-        u^+     | Non-dimensional velocity
-        \kappa  | von Kármán constant
+      y^+     | Wall-normal height of a cell centre in wall units
+      u^+     | Velocity at \f$y^+\f$ in wall units
+      \kappa  | von Karman constant
     \endvartable
 
 Usage
@@ -52,35 +52,35 @@ Usage
     \verbatim
     <patchName>
     {
-        // Mandatory entries (unmodifiable)
+        // Mandatory entries
         type            nutUSpaldingWallFunction;
 
-        // Optional entries (unmodifiable)
+        // Optional entries
         maxIter         10;
         tolerance       0.0001;
 
-        // Optional (inherited) entries
+        // Inherited entries
         ...
     }
     \endverbatim
 
     where the entries mean:
     \table
-      Property  | Description                         | Type   | Req'd  | Dflt
-      type      | Type name: nutUBlendedWallFunction  | word   | yes    | -
-      maxIter   | Number of Newton-Raphson iterations | label  | no     | 10
-      tolerance | Convergence tolerance               | scalar | no     | 0.0001
+      Property  | Description                         | Type   | Reqd | Deflt
+      type      | Type name: nutUSpaldingWallFunction | word   | yes  | -
+      maxIter   | Number of Newton-Raphson iterations | label  | no   | 10
+      tolerance | Convergence tolerance               | scalar | no   | 0.0001
     \endtable
 
     The inherited entries are elaborated in:
       - \link nutWallFunctionFvPatchScalarField.H \endlink
 
 Note
-    - Suffers from non-exact restart since \c correctNut() (called through
+  - Suffers from non-exact restart since \c correctNut() (called through
     \c turbulence->validate) returns a slightly different value every time
     it is called. This is since the seed for the Newton-Raphson iteration
     uses the current value of \c *this (\c =nut ).
-    - This can be avoided by overriding the tolerance. This also switches on
+  - This can be avoided by overriding the tolerance. This also switches on
     a pre-detection whether the current nut already satisfies the turbulence
     conditions and if so does not change it at all. This means that the nut
     only changes if it 'has really changed'. This probably should be used with
@@ -224,7 +224,7 @@ public:
 
     // Member Functions
 
-        // Evaluation functions
+        // Evaluation
 
             //- Calculate and return the yPlus at the boundary
             virtual tmp<scalarField> yPlus() const;

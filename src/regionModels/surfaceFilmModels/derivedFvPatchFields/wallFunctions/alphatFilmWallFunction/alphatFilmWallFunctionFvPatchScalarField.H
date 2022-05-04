@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,31 +37,40 @@ Description
     mass released from the film model.
 
 Usage
-    \table
-        Property     | Description             | Required    | Default value
-        B            | model coefficient       | no          | 5.5
-        yPlusCrit    | critical y+ for transition to turbulent flow | no|11.05
-        Cmu          | model coefficient       | no          | 0.09
-        kappa        | Von-Karman constant     | no          | 0.41
-        Prt          | turbulent Prandtl number | no         | 0.85
-    \endtable
-
     Example of the boundary condition specification:
     \verbatim
     <patchName>
     {
+        // Mandatory entries
         type            alphatFilmWallFunction;
-        B               5.5;
-        yPlusCrit       11.05;
-        Cmu             0.09;
-        kappa           0.41;
-        Prt             0.85;
-        value           uniform 0;
+
+        // Optional entries
+        filmRegion      <word>;
+        B               <scalar>;
+        yPlusCrit       <scalar>;
+        Cmu             <scalar>;
+        kappa           <scalar>;
+        Prt             <scalar>;
+
+        // Inherited entries
+        ...
     }
     \endverbatim
 
-See also
-    Foam::fixedValueFvPatchField
+    where the entries mean:
+    \table
+      Property   | Description                    | Type   | Reqd  | Deflt
+      type       | Type name: alphatFilmWallFunction | word | yes  | -
+      filmRegion | Name of film region   | word | no | surfaceFilmProperties
+      B          | Model coefficient              | scalar | no    | 5.5
+      yPlusCrit  | Critical y+ for transition to turbulence | scalar | no | 11.5
+      Cmu        | Empirical model coefficient    | scalar | no    | 0.09
+      Prt        | Turbulent Prandtl number       | scalar | no    | 0.85
+      kappa      | von Karman constant            | scalar | no    | 0.41
+    \endtable
+
+    The inherited entries are elaborated in:
+      - \link fixedValueFvPatchFields.H \endlink
 
 SourceFiles
     alphatFilmWallFunctionFvPatchScalarField.C
@@ -91,24 +101,24 @@ class alphatFilmWallFunctionFvPatchScalarField
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Name of film region
         word filmRegionName_;
 
-        //- B Coefficient (default = 5.5)
+        //- B Coefficient
         scalar B_;
 
-        //- y+ value for laminar -> turbulent transition (default = 11.05)
+        //- y+ value for laminar -> turbulent transition
         scalar yPlusCrit_;
 
-        //- Turbulent Cmu coefficient (default = 0.09)
+        //- Empirical model coefficient
         scalar Cmu_;
 
-        //- Von-Karman constant (default = 0.41)
+        //- Von-Karman constant
         scalar kappa_;
 
-        //- Turbulent Prandtl number (default = 0.85)
+        //- Turbulent Prandtl number
         scalar Prt_;
 
 
@@ -136,8 +146,8 @@ public:
         );
 
         //- Construct by mapping given
-        //  alphatFilmWallFunctionFvPatchScalarField
-        //  onto a new patch
+        //- alphatFilmWallFunctionFvPatchScalarField
+        //- onto a new patch
         alphatFilmWallFunctionFvPatchScalarField
         (
             const alphatFilmWallFunctionFvPatchScalarField&,
@@ -181,9 +191,9 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
-        // Evaluation functions
+        // Evaluation
 
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();

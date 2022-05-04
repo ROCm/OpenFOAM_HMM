@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,31 +44,36 @@ Description
     where
 
     \vartable
-        \alpha_t| turblence thermal diffusivity
-        \mu_t   | turblence viscosity
-        Pr_t    | turblent Prandtl number
+        \alpha_t| Turbulence thermal diffusivity
+        \mu_t   | Turbulence viscosity
+        Pr_t    | Turbulent Prandtl number
     \endvartable
 
 Usage
-    \table
-        Property     | Description             | Required    | Default value
-        nut          | turbulence viscosity field name | no  | nut
-        Prt          | turbulent Prandtl number | no          | 0.85
-    \endtable
-
     Example of the boundary condition specification:
     \verbatim
     <patchName>
     {
+        // Mandatory entries
         type            alphatWallFunction;
-        nut             nut;
-        Prt             0.85;
-        value           uniform 0; // optional value entry
+
+        // Optional entries
+        Prt             <scalar>;
+
+        // Inherited entries
+        ...
     }
     \endverbatim
 
-See also
-    Foam::fixedValueFvPatchField
+    where the entries mean:
+    \table
+      Property  | Description                    | Type   | Reqd | Deflt
+      type      | Type name: alphatWallFunction  | word   | yes  | -
+      Prt       | Turbulent Prandtl number       | scalar | no   | 0.85
+    \endtable
+
+    The inherited entries are elaborated in:
+      - \link fixedValueFvPatchFields.H \endlink
 
 SourceFiles
     alphatWallFunctionFvPatchScalarField.C
@@ -94,9 +100,9 @@ class alphatWallFunctionFvPatchScalarField
 :
     public fixedValueFvPatchScalarField
 {
-    // Private data
+    // Private Data
 
-        //- Turbulent Prandtl number (default = 0.85)
+        //- Turbulent Prandtl number
         scalar Prt_;
 
 
@@ -124,8 +130,8 @@ public:
         );
 
         //- Construct by mapping given
-        //  alphatWallFunctionFvPatchScalarField
-        //  onto a new patch
+        //- alphatWallFunctionFvPatchScalarField
+        //- onto a new patch
         alphatWallFunctionFvPatchScalarField
         (
             const alphatWallFunctionFvPatchScalarField&,
@@ -169,9 +175,9 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
-        // Evaluation functions
+        // Evaluation
 
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();

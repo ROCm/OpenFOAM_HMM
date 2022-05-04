@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,17 +31,16 @@ Group
     grpCoupledBoundaryConditions
 
 Description
-    This boundary condition provides a jump condition, using the \c cyclic
-    condition as a base.
+    This boundary condition provides a jump condition,
+    using the \c cyclic condition as a base.
 
     The porous baffle introduces a pressure jump defined by:
 
-        \f[
-            \Delta p = -(D \mu U + 0.5 I \rho |U|^2 )L
-        \f]
+    \f[
+        \Delta p = -(D \mu U + 0.5 I \rho |U|^2 )L
+    \f]
 
     where
-
     \vartable
         p      | pressure [Pa]
         \rho   | density [kg/m3]
@@ -51,36 +50,52 @@ Description
         L      | porous media length in the flow direction
     \endvartable
 
-
 Usage
-    \table
-        Property     | Description             | Required    | Default value
-        patchType    | underlying patch type should be \c cyclic| yes |
-        phi          | flux field name         | no          | phi
-        rho          | density field name      | no          | rho
-        D            | Darcy coefficient       | yes         |
-        I            | inertial coefficient    | yes         |
-        length       | porous media length in the flow direction | yes |
-        uniformJump  | applies a uniform pressure drop on the patch based on the
-    \endtable
-
     Example of the boundary condition specification:
     \verbatim
     <patchName>
     {
+        // Mandatory entries
         type            porousBafflePressure;
-        patchType       cyclic;
-        jump            uniform 0;
         D               0.001;
         I               1000000;
         length          0.1;
+
+        // Optional entries
+        phi             phi;
+        rho             rho;
         uniformJump     false;
         value           uniform 0;
+
+        // Inherited entries
+        patchType       cyclic;
+        jump            uniform 0;
+        ...
     }
     \endverbatim
 
+    where the entries mean:
+    \table
+      Property  | Description                          | Type | Reqd | Deflt
+      type      | Type name: porousBafflePressure      | word | yes  | -
+      D         | Darcy coefficient       | Function1<scalar> | yes  | -
+      I         | Inertial coefficient    | Function1<scalar> | yes  | -
+      length    | Porous media length in the flow direction   <!--
+                -->                                 | scalar  | yes  | -
+      uniformJump | Flag to apply a uniform pressure drop on  <!--
+                --> the patch based on the             | bool | no   | false
+      phi       | Name of flux field                   | word | no   | phi
+      rho       | Name of density field                | word | no   | rho
+      patchType | Underlying patch type should be \c cyclic | word | yes | -
+      jump      | Jump value                    | scalarField | yes  | -
+    \endtable
+
+    The inherited entries are elaborated in:
+      - \link fixedJumpFvPatchField.H \endlink
+      - \link Function1.H \endlink
+
 Note
-     The underlying \c patchType should be set to \c cyclic
+    The underlying \c patchType should be set to \c cyclic.
 
 SourceFiles
     porousBafflePressureFvPatchField.C
@@ -106,7 +121,7 @@ class porousBafflePressureFvPatchField
 :
     public fixedJumpFvPatchField<scalar>
 {
-    // Private data
+    // Private Data
 
         //- Name of flux field (default = phi)
         const word phiName_;
@@ -151,7 +166,7 @@ public:
         );
 
         //- Construct by mapping given porousBafflePressureFvPatchField
-        // onto a new patch
+        //- onto a new patch
         porousBafflePressureFvPatchField
         (
             const porousBafflePressureFvPatchField&,
@@ -195,17 +210,17 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
-
-        // Evaluation functions
+        // Evaluation
 
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();
 
+        // I-O
 
-        //- Write
-        virtual void write(Ostream&) const;
+            //- Write
+            virtual void write(Ostream&) const;
 };
 
 

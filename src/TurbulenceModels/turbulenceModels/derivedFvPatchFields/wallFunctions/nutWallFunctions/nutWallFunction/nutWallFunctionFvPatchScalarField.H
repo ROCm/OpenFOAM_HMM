@@ -31,132 +31,35 @@ Group
     grpWallFunctions
 
 Description
-    The class \c nutWallFunction is a base class that parents the derived
-    boundary conditions which provide a wall constraint on various fields, such
-    as turbulent viscosity, i.e. \c nut, or turbulent kinetic energy dissipation
-    rate, i.e. \c epsilon, for low- and high-Reynolds number turbulence models.
-    The class is not an executable itself, yet a provider for common entries
-    to its derived boundary conditions.
-
-    Reference:
-    \verbatim
-        Default model coefficients (tag:VM):
-            Versteeg, H. K., & Malalasekera, W. (2011).
-            An introduction to computational fluid dynamics: The finite
-            volume method. Harlow: Pearson Education.
-            Subsection "3.5.2 k-epsilon model".
-
-        Binomial blending of the viscous and inertial sublayers (tag:ME):
-            Menter, F., & Esch, T. (2001).
-            Elements of industrial heat transfer prediction.
-            In Proceedings of the 16th Brazilian Congress of Mechanical
-            Engineering (COBEM), November 2001. vol. 20, p. 117-127.
-
-        Exponential/Max blending of the viscous and inertial sublayers (tag:PH):
-            Popovac, M., & Hanjalić, K. (2007).
-            Compound wall treatment for RANS computation of complex
-            turbulent flows and heat transfer.
-            Flow, turbulence and combustion, 78(2), 177-202.
-            DOI:10.1007/s10494-006-9067-x
-    \endverbatim
+    The class \c nutWallFunction is an abstract base class that
+    hosts \f$y^+\f$ calculation methods and common functions for
+    \c nut wall-function boundary conditions.
 
 Usage
     Example of the boundary condition specification:
     \verbatim
     <patchName>
     {
-        // Mandatory and other optional entries
+        // Top-level entries
         ...
 
-        // Optional (inherited) entries
-        Cmu             0.09;
-        kappa           0.41;
-        E               9.8;
-        blending        stepwise;
-        n               4.0;
-        U               U;
+        // Optional entries
+        U             U;
 
-        // Optional (inherited) entries
+        // Inherited entries
         ...
     }
     \endverbatim
 
     where the entries mean:
     \table
-      Property  | Description                    | Type   | Req'd | Dflt
-      Cmu       | Empirical model coefficient    | scalar | no    | 0.09
-      kappa     | von Kármán constant            | scalar | no    | 0.41
-      E         | Wall roughness parameter       | scalar | no    | 9.8
-      blending  | Viscous/inertial sublayer blending | word | no  | stepwise
-      n         | Binomial blending exponent     | scalar | no    | 2.0
-      U         | Name of the velocity field     | word   | no    | U
+      Property  | Description                    | Type   | Reqd  | Deflt
+      U         | Name of operand velocity field | word   | no    | U
     \endtable
 
     The inherited entries are elaborated in:
       - \link fixedValueFvPatchFields.H \endlink
-
-    Options for the \c blending entry:
-    \verbatim
-      stepwise    | Stepwise switch (discontinuous)
-      max         | Maximum value switch (discontinuous)
-      binomial    | Binomial blending (smooth)
-      exponential | Exponential blending (smooth)
-    \endverbatim
-
-    wherein \c nut predictions for the viscous and inertial sublayers are
-    blended according to the following expressions:
-
-    - \c stepwise (default):
-
-    \f[
-        \nu_t = {\nu_t}_{log} \qquad if \quad y^+ > y^+_{lam}
-    \f]
-
-    \f[
-        \nu_t = {\nu_t}_{vis} \qquad if \quad y^+ <= y^+_{lam}
-    \f]
-
-    where
-    \vartable
-      {\nu_t}_{vis} | \f$\nu_t\f$ prediction in the viscous sublayer
-      {\nu_t}_{log} | \f$\nu_t\f$ prediction in the inertial sublayer
-      y^+   | estimated wall-normal height of the cell centre in wall units
-      y^+_{lam}  | estimated intersection of the viscous and inertial sublayers
-    \endvartable
-
-
-    - \c max (PH:Eq. 27):
-
-    \f[
-        \nu_t = max({\nu_t}_{vis}, {\nu_t}_{log})
-    \f]
-
-
-    - \c binomial (ME:Eqs. 15-16):
-
-    \f[
-        \nu_t = (({\nu_t}_{vis})^n + ({\nu_t}_{log})^n)^{1/n}
-    \f]
-    where
-    \vartable
-      n               | Binomial blending exponent
-    \endvartable
-
-
-    - \c exponential (PH:Eq. 32):
-
-    \f[
-        \nu_t = {\nu_t}_{vis} \exp[-\Gamma] + {\nu_t}_{log} \exp[-1/\Gamma]
-    \f]
-
-    where (PH:Eq. 31)
-    \vartable
-      \Gamma       | Blending expression
-      \Gamma       | \f$0.01 (y^+)^4 / (1.0 + 5.0 y^+)\f$
-    \endvartable
-
-See also
-    - Foam::fixedValueFvPatchField
+      - \link wallFunctionCoefficients.H \endlink
 
 SourceFiles
     nutWallFunctionFvPatchScalarField.C
@@ -277,7 +180,7 @@ public:
         virtual tmp<scalarField> yPlus() const = 0;
 
 
-        // Evaluation functions
+        // Evaluation
 
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();

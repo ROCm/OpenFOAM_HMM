@@ -27,8 +27,34 @@ Class
     Foam::wallFunctionCoefficients
 
 Description
-    Class to describe the wall-function coefficients being
+    Class to host the wall-function coefficients being
     used in the wall function boundary conditions.
+
+Usage
+    Example of the boundary condition specification:
+    \verbatim
+    <patchName>
+    {
+        // Top-level entries
+        ...
+
+        // Optional entries
+        Cmu             0.09;
+        kappa           0.41;
+        E               9.8;
+
+        // Inherited entries
+        ...
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property  | Description                    | Type   | Reqd  | Deflt
+      Cmu       | Empirical model coefficient    | scalar | no    | 0.09
+      kappa     | von Karman constant            | scalar | no    | 0.41
+      E         | Wall roughness parameter       | scalar | no    | 9.8
+    \endtable
 
 SourceFiles
     wallFunctionCoefficients.C
