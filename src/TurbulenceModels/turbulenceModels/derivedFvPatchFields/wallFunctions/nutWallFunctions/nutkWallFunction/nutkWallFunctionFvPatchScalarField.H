@@ -70,6 +70,7 @@ SourceFiles
 #define nutkWallFunctionFvPatchScalarField_H
 
 #include "nutWallFunctionFvPatchScalarField.H"
+#include "wallFunctionBlenders.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -82,7 +83,8 @@ namespace Foam
 
 class nutkWallFunctionFvPatchScalarField
 :
-    public nutWallFunctionFvPatchScalarField
+    public nutWallFunctionFvPatchScalarField,
+    private wallFunctionBlenders
 {
 protected:
 

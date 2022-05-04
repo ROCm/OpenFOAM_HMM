@@ -33,6 +33,7 @@ derivedFvPatchFields/porousBafflePressure/porousBafflePressureFvPatchField.C
 wallFunctions = derivedFvPatchFields/wallFunctions
 
 $(wallFunctions)/wallFunction/wallFunctionCoefficients/wallFunctionCoefficients.C
+$(wallFunctions)/wallFunction/wallFunctionBlenders/wallFunctionBlenders.C
 
 nutWallFunctions = $(wallFunctions)/nutWallFunctions
 $(nutWallFunctions)/nutWallFunction/nutWallFunctionFvPatchScalarField.C

@@ -186,29 +186,7 @@ class nutWallFunctionFvPatchScalarField
 {
 protected:
 
-    // Protected Enumerations
-
-        //- Options for the blending treatment of viscous and inertial sublayers
-        enum blendingType
-        {
-            STEPWISE,       //!< "Stepwise switch (discontinuous)"
-            MAX,            //!< "Maximum value switch (discontinuous)"
-            BINOMIAL,       //!< "Binomial blending (smooth)"
-            EXPONENTIAL     //!< "Exponential blending (smooth)"
-        };
-
-        //- Names for blendingType
-        static const Enum<blendingType> blendingTypeNames;
-
-
     // Protected Data
-
-        //- Blending treatment (default = blendingType::STEPWISE)
-        const enum blendingType blending_;
-
-        //- Binomial blending exponent being used when
-        //- blendingType is blendingType::BINOMIAL (default = 4)
-        const scalar n_;
 
         //- Name of velocity field
         //  Default is null (not specified) in which case the velocity is
@@ -293,14 +271,6 @@ public:
             const turbulenceModel& turbModel,
             const label patchi
         );
-
-        //- Return the blended nut according to the chosen blending treatment
-        scalar blend
-        (
-            const scalar nutVis,
-            const scalar nutLog,
-            const scalar yPlus
-        ) const;
 
         //- Calculate and return the yPlus at the boundary
         //  yPlus is the first-cell-centre height from boundary in wall units

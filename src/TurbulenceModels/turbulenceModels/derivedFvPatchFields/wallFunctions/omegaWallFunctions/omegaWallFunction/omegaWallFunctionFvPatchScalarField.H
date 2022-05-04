@@ -202,6 +202,7 @@ SourceFiles
 
 #include "fixedValueFvPatchField.H"
 #include "wallFunctionCoefficients.H"
+#include "wallFunctionBlenders.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -216,45 +217,15 @@ class turbulenceModel;
 
 class omegaWallFunctionFvPatchScalarField
 :
-    public fixedValueFvPatchField<scalar>
+    public fixedValueFvPatchField<scalar>,
+    private wallFunctionBlenders
 {
-    // Private Enumerations
-
-        //- Options for the blending treatment of viscous and inertial sublayers
-        enum blendingType
-        {
-            STEPWISE,       //!< "Stepwise switch (discontinuous)"
-            MAX,            //!< "Maximum value switch (discontinuous)"
-            BINOMIAL2,      //!< "Binomial blending (smooth) n = 2"
-            BINOMIAL,       //!< "Binomial blending (smooth)"
-            EXPONENTIAL,    //!< "Exponential blending (smooth)"
-            TANH            //!< "Tanh blending (smooth)"
-        };
-
-        //- Names for blendingType
-        static const Enum<blendingType> blendingTypeNames;
-
-
-    // Private Data
-
-        //- Blending treatment (default = blendingType::BINOMIAL2)
-        enum blendingType blending_;
-
-        //- Blending exponent being used when
-        //- blendingType is blendingType::BINOMIAL (default = 2)
-        const scalar n_;
-
-
 protected:
 
     // Protected Data
 
         //- Tolerance used in weighted calculations
         static scalar tolerance_;
-
-        //- Deprecated(2019-11) Blending switch
-        //  \deprecated(2019-11) - use blending:: options
-        bool blended_;
 
         //- Initialised flag
         bool initialised_;

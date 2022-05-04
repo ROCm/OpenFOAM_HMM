@@ -145,7 +145,6 @@ Usage
       \Gamma_G        | Blending expression for \f$G\f$
     \endvartable
 
-
     \c G predictions for the viscous and inertial sublayers are blended
     in a stepwise manner, and \c G below \f$y^+_{lam}\f$ (i.e. in the viscous
     sublayer) is presumed to be zero.
@@ -174,6 +173,7 @@ SourceFiles
 
 #include "fixedValueFvPatchField.H"
 #include "wallFunctionCoefficients.H"
+#include "wallFunctionBlenders.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -188,33 +188,9 @@ class turbulenceModel;
 
 class epsilonWallFunctionFvPatchScalarField
 :
-    public fixedValueFvPatchField<scalar>
+    public fixedValueFvPatchField<scalar>,
+    private wallFunctionBlenders
 {
-    // Private Enumerations
-
-        //- Options for the blending treatment of viscous and inertial sublayers
-        enum blendingType
-        {
-            STEPWISE,       //!< "Stepwise switch (discontinuous)"
-            MAX,            //!< "Maximum value switch (discontinuous)"
-            BINOMIAL,       //!< "Binomial blending (smooth)"
-            EXPONENTIAL     //!< "Exponential blending (smooth)"
-        };
-
-        //- Names for blendingType
-        static const Enum<blendingType> blendingTypeNames;
-
-
-    // Private Data
-
-        //- Blending treatment (default = blendingType::STEPWISE)
-        const enum blendingType blending_;
-
-        //- Binomial blending exponent being used when
-        //- blendingType is blendingType::BINOMIAL (default = 2)
-        const scalar n_;
-
-
 protected:
 
     // Protected Data

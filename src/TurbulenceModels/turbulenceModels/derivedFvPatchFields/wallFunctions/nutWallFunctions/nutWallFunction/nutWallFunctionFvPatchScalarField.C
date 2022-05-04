@@ -40,21 +40,6 @@ namespace Foam
     defineTypeNameAndDebug(nutWallFunctionFvPatchScalarField, 0);
 }
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-const Foam::Enum
-<
-    Foam::nutWallFunctionFvPatchScalarField::blendingType
->
-Foam::nutWallFunctionFvPatchScalarField::blendingTypeNames
-({
-    { blendingType::STEPWISE , "stepwise" },
-    { blendingType::MAX , "max" },
-    { blendingType::BINOMIAL , "binomial" },
-    { blendingType::EXPONENTIAL, "exponential" }
-});
-
-
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void Foam::nutWallFunctionFvPatchScalarField::checkType()
@@ -106,8 +91,6 @@ Foam::nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF),
-    blending_(blendingType::STEPWISE),
-    n_(4.0),
     UName_(word::null),
     wallCoeffs_()
 {
@@ -124,8 +107,6 @@ Foam::nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(ptf, p, iF, mapper),
-    blending_(ptf.blending_),
-    n_(ptf.n_),
     UName_(ptf.UName_),
     wallCoeffs_(ptf.wallCoeffs_)
 {
@@ -141,24 +122,6 @@ Foam::nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF, dict),
-    blending_
-    (
-        blendingTypeNames.getOrDefault
-        (
-            "blending",
-            dict,
-            blendingType::STEPWISE
-        )
-    ),
-    n_
-    (
-        dict.getCheckOrDefault<scalar>
-        (
-            "n",
-            4.0,
-            scalarMinMax::ge(0)
-        )
-    ),
     UName_(dict.getOrDefault<word>("U", word::null)),
     wallCoeffs_(dict)
 {
@@ -172,8 +135,6 @@ Foam::nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(wfpsf),
-    blending_(wfpsf.blending_),
-    n_(wfpsf.n_),
     UName_(wfpsf.UName_),
     wallCoeffs_(wfpsf.wallCoeffs_)
 {
@@ -188,8 +149,6 @@ Foam::nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(wfpsf, iF),
-    blending_(wfpsf.blending_),
-    n_(wfpsf.n_),
     UName_(wfpsf.UName_),
     wallCoeffs_(wfpsf.wallCoeffs_)
 {
@@ -212,64 +171,6 @@ Foam::nutWallFunctionFvPatchScalarField::nutw
             turbModel.nut()().boundaryField()[patchi],
             patchi
         );
-}
-
-
-Foam::scalar Foam::nutWallFunctionFvPatchScalarField::blend
-(
-    const scalar nutVis,
-    const scalar nutLog,
-    const scalar yPlus
-) const
-{
-    scalar nutw = 0.0;
-
-    switch (blending_)
-    {
-        case blendingType::STEPWISE:
-        {
-            if (yPlus > wallCoeffs_.yPlusLam())
-            {
-                nutw = nutLog;
-            }
-            else
-            {
-                nutw = nutVis;
-            }
-            break;
-        }
-
-        case blendingType::MAX:
-        {
-            // (PH:Eq. 27)
-            nutw = max(nutVis, nutLog);
-            break;
-        }
-
-        case blendingType::BINOMIAL:
-        {
-            // (ME:Eqs. 15-16)
-            nutw =
-                pow
-                (
-                    pow(nutVis, n_) + pow(nutLog, n_),
-                    1.0/n_
-                );
-            break;
-        }
-
-        case blendingType::EXPONENTIAL:
-        {
-            // (PH:Eq. 31)
-            const scalar Gamma = 0.01*pow4(yPlus)/(1.0 + 5.0*yPlus);
-            const scalar invGamma = 1.0/(Gamma + ROOTVSMALL);
-
-            nutw = nutVis*exp(-Gamma) + nutLog*exp(-invGamma);
-            break;
-        }
-    }
-
-    return nutw;
 }
 
 

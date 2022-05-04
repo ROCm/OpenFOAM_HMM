@@ -34,20 +34,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const Foam::Enum
-<
-    Foam::epsilonWallFunctionFvPatchScalarField::blendingType
->
-Foam::epsilonWallFunctionFvPatchScalarField::blendingTypeNames
-({
-    { blendingType::STEPWISE , "stepwise" },
-    { blendingType::MAX , "max" },
-    { blendingType::BINOMIAL , "binomial" },
-    { blendingType::EXPONENTIAL, "exponential" }
-});
-
 Foam::scalar Foam::epsilonWallFunctionFvPatchScalarField::tolerance_ = 1e-5;
-
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
@@ -231,8 +218,6 @@ void Foam::epsilonWallFunctionFvPatchScalarField::calculate
 
         const scalar w = cornerWeights[facei];
 
-        scalar epsilonBlended = 0.0;
-
         // Contribution from the viscous sublayer
         const scalar epsilonVis = w*2.0*k[celli]*nuw[facei]/sqr(y[facei]);
 
@@ -240,54 +225,64 @@ void Foam::epsilonWallFunctionFvPatchScalarField::calculate
         const scalar epsilonLog =
             w*Cmu75*pow(k[celli], 1.5)/(kappa*y[facei]);
 
-        switch (blending_)
+        switch (blender_)
         {
-            case blendingType::STEPWISE:
+            case blenderType::STEPWISE:
             {
                 if (lowReCorrection_ && yPlus < yPlusLam)
                 {
-                    epsilonBlended = epsilonVis;
+                    epsilon0[celli] += epsilonVis;
                 }
                 else
                 {
-                    epsilonBlended = epsilonLog;
+                    epsilon0[celli] += epsilonLog;
                 }
                 break;
             }
 
-            case blendingType::MAX:
-            {
-                // (PH:Eq. 27)
-                epsilonBlended = max(epsilonVis, epsilonLog);
-                break;
-            }
-
-            case blendingType::BINOMIAL:
+            case blenderType::BINOMIAL:
             {
                 // (ME:Eqs. 15-16)
-                epsilonBlended =
+                epsilon0[celli] +=
                     pow
                     (
                         pow(epsilonVis, n_) + pow(epsilonLog, n_),
-                        1.0/n_
+                        scalar(1)/n_
                     );
                 break;
             }
 
-            case blendingType::EXPONENTIAL:
+            case blenderType::MAX:
+            {
+                // (PH:Eq. 27)
+                epsilon0[celli] += max(epsilonVis, epsilonLog);
+                break;
+            }
+
+            case blenderType::EXPONENTIAL:
             {
                 // (PH:p. 193)
-                const scalar Gamma = 0.001*pow4(yPlus)/(1.0 + yPlus);
-                const scalar invGamma = 1.0/(Gamma + ROOTVSMALL);
-                epsilonBlended =
+                const scalar Gamma = 0.001*pow4(yPlus)/(scalar(1) + yPlus);
+                const scalar invGamma = scalar(1)/(Gamma + ROOTVSMALL);
+                epsilon0[celli] +=
                     epsilonVis*exp(-Gamma) + epsilonLog*exp(-invGamma);
+                break;
+            }
+
+            case blenderType::TANH:
+            {
+                // (KAS:Eqs. 33-34)
+                const scalar phiTanh = tanh(pow4(0.1*yPlus));
+                const scalar b1 = epsilonVis + epsilonLog;
+                const scalar b2 =
+                    pow(pow(epsilonVis, 1.2) + pow(epsilonLog, 1.2), 1.0/1.2);
+
+                epsilon0[celli] += phiTanh*b1 + (1 - phiTanh)*b2;
                 break;
             }
         }
 
-        epsilon0[celli] += epsilonBlended;
-
-        if (!(lowReCorrection_ && yPlus < yPlusLam))
+        if (!lowReCorrection_ || (yPlus > yPlusLam))
         {
             G0[celli] +=
                 w
@@ -305,14 +300,8 @@ void Foam::epsilonWallFunctionFvPatchScalarField::writeLocalEntries
     Ostream& os
 ) const
 {
+    wallFunctionBlenders::writeEntries(os);
     os.writeEntryIfDifferent<bool>("lowReCorrection", false, lowReCorrection_);
-    os.writeEntry("blending", blendingTypeNames[blending_]);
-
-    if (blending_ == blendingType::BINOMIAL)
-    {
-        os.writeEntry("n", n_);
-    }
-
     wallCoeffs_.writeEntries(os);
 }
 
@@ -327,8 +316,7 @@ epsilonWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(p, iF),
-    blending_(blendingType::STEPWISE),
-    n_(2.0),
+    wallFunctionBlenders(),
     lowReCorrection_(false),
     initialised_(false),
     master_(-1),
@@ -349,8 +337,7 @@ epsilonWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(ptf, p, iF, mapper),
-    blending_(ptf.blending_),
-    n_(ptf.n_),
+    wallFunctionBlenders(ptf),
     lowReCorrection_(ptf.lowReCorrection_),
     initialised_(false),
     master_(-1),
@@ -370,24 +357,7 @@ epsilonWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(p, iF, dict),
-    blending_
-    (
-        blendingTypeNames.getOrDefault
-        (
-            "blending",
-            dict,
-            blendingType::STEPWISE
-        )
-    ),
-    n_
-    (
-        dict.getCheckOrDefault<scalar>
-        (
-            "n",
-            2.0,
-            scalarMinMax::ge(0)
-        )
-    ),
+    wallFunctionBlenders(dict, blenderType::STEPWISE, scalar(2)),
     lowReCorrection_(dict.getOrDefault("lowReCorrection", false)),
     initialised_(false),
     master_(-1),
@@ -408,8 +378,7 @@ epsilonWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(ewfpsf),
-    blending_(ewfpsf.blending_),
-    n_(ewfpsf.n_),
+    wallFunctionBlenders(ewfpsf),
     lowReCorrection_(ewfpsf.lowReCorrection_),
     initialised_(false),
     master_(-1),
@@ -428,8 +397,7 @@ epsilonWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(ewfpsf, iF),
-    blending_(ewfpsf.blending_),
-    n_(ewfpsf.n_),
+    wallFunctionBlenders(ewfpsf),
     lowReCorrection_(ewfpsf.lowReCorrection_),
     initialised_(false),
     master_(-1),
