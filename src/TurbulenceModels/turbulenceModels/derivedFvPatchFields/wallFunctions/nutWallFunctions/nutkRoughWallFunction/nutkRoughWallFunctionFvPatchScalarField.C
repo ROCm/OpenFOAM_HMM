@@ -50,10 +50,8 @@ Foam::scalar Foam::nutkRoughWallFunctionFvPatchScalarField::fnRough
             sin(0.4258*(log(KsPlus) - 0.811))
         );
     }
-    else
-    {
-        return (1.0 + Cs*KsPlus);
-    }
+
+    return (1.0 + Cs*KsPlus);
 }
 
 
@@ -62,7 +60,7 @@ calcNut() const
 {
     const label patchi = patch().index();
 
-    const turbulenceModel& turbModel = db().lookupObject<turbulenceModel>
+    const auto& turbModel = db().lookupObject<turbulenceModel>
     (
         IOobject::groupName
         (
@@ -70,9 +68,12 @@ calcNut() const
             internalField().group()
         )
     );
+
     const scalarField& y = turbModel.y()[patchi];
+
     const tmp<volScalarField> tk = turbModel.k();
     const volScalarField& k = tk();
+
     const tmp<scalarField> tnuw = turbModel.nu(patchi);
     const scalarField& nuw = tnuw();
 
@@ -80,8 +81,8 @@ calcNut() const
     const scalar kappa = wallCoeffs_.kappa();
     const scalar E = wallCoeffs_.E();
 
-    tmp<scalarField> tnutw(new scalarField(*this));
-    scalarField& nutw = tnutw.ref();
+    auto tnutw = tmp<scalarField>::New(*this);
+    auto& nutw = tnutw.ref();
 
     forAll(nutw, facei)
     {
@@ -226,7 +227,7 @@ void Foam::nutkRoughWallFunctionFvPatchScalarField::rmap
 {
     nutkWallFunctionFvPatchScalarField::rmap(ptf, addr);
 
-    const nutkRoughWallFunctionFvPatchScalarField& nrwfpsf =
+    const auto& nrwfpsf =
         refCast<const nutkRoughWallFunctionFvPatchScalarField>(ptf);
 
     Ks_.rmap(nrwfpsf.Ks_, addr);

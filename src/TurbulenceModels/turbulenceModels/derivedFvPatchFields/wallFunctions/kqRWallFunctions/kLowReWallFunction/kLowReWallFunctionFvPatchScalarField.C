@@ -144,7 +144,7 @@ void Foam::kLowReWallFunctionFvPatchScalarField::updateCoeffs()
 
     const label patchi = patch().index();
 
-    const turbulenceModel& turbModel = db().lookupObject<turbulenceModel>
+    const auto& turbModel = db().lookupObject<turbulenceModel>
     (
         IOobject::groupName
         (

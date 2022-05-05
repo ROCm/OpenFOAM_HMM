@@ -40,7 +40,7 @@ Foam::nutUWallFunctionFvPatchScalarField::calcNut() const
 {
     const label patchi = patch().index();
 
-    const turbulenceModel& turbModel = db().lookupObject<turbulenceModel>
+    const auto& turbModel = db().lookupObject<turbulenceModel>
     (
         IOobject::groupName
         (
@@ -48,8 +48,10 @@ Foam::nutUWallFunctionFvPatchScalarField::calcNut() const
             internalField().group()
         )
     );
+
     const fvPatchVectorField& Uw = U(turbModel).boundaryField()[patchi];
     const scalarField magUp(mag(Uw.patchInternalField() - Uw));
+
     const tmp<scalarField> tnuw = turbModel.nu(patchi);
     const scalarField& nuw = tnuw();
 
@@ -60,8 +62,8 @@ Foam::nutUWallFunctionFvPatchScalarField::calcNut() const
     tmp<scalarField> tyPlus = calcYPlus(magUp);
     const scalarField& yPlus = tyPlus();
 
-    tmp<scalarField> tnutw(new scalarField(patch().size(), Zero));
-    scalarField& nutw = tnutw.ref();
+    auto tnutw = tmp<scalarField>::New(patch().size(), Zero);
+    auto& nutw = tnutw.ref();
 
     forAll(yPlus, facei)
     {
@@ -144,7 +146,7 @@ Foam::nutUWallFunctionFvPatchScalarField::calcYPlus
 {
     const label patchi = patch().index();
 
-    const turbulenceModel& turbModel = db().lookupObject<turbulenceModel>
+    const auto& turbModel = db().lookupObject<turbulenceModel>
     (
         IOobject::groupName
         (
@@ -152,7 +154,9 @@ Foam::nutUWallFunctionFvPatchScalarField::calcYPlus
             internalField().group()
         )
     );
+
     const scalarField& y = turbModel.y()[patchi];
+
     const tmp<scalarField> tnuw = turbModel.nu(patchi);
     const scalarField& nuw = tnuw();
 
@@ -160,8 +164,8 @@ Foam::nutUWallFunctionFvPatchScalarField::calcYPlus
     const scalar E = wallCoeffs_.E();
     const scalar yPlusLam = wallCoeffs_.yPlusLam();
 
-    tmp<scalarField> tyPlus(new scalarField(patch().size(), Zero));
-    scalarField& yPlus = tyPlus.ref();
+    auto tyPlus = tmp<scalarField>::New(patch().size(), Zero);
+    auto& yPlus = tyPlus.ref();
 
     forAll(yPlus, facei)
     {
@@ -180,7 +184,7 @@ Foam::nutUWallFunctionFvPatchScalarField::calcYPlus
 
         } while (mag(ryPlusLam*(yp - yPlusLast)) > 0.01 && ++iter < 10 );
 
-        yPlus[facei] = max(0.0, yp);
+        yPlus[facei] = max(scalar(0), yp);
     }
 
     return tyPlus;

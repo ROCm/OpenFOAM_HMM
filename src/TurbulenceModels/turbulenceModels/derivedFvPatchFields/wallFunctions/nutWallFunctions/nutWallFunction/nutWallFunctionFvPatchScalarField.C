@@ -65,10 +65,8 @@ const Foam::volVectorField& Foam::nutWallFunctionFvPatchScalarField::U
     {
         return turb.U();
     }
-    else
-    {
-        return db().lookupObject<volVectorField>(UName_);
-    }
+
+    return db().lookupObject<volVectorField>(UName_);
 }
 
 

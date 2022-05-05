@@ -204,7 +204,11 @@ void Foam::atmEpsilonWallFunctionFvPatchScalarField::autoMap
 )
 {
     epsilonWallFunctionFvPatchScalarField::autoMap(m);
-    z0_->autoMap(m);
+
+    if (z0_)
+    {
+        z0_->autoMap(m);
+    }
 }
 
 
@@ -216,10 +220,12 @@ void Foam::atmEpsilonWallFunctionFvPatchScalarField::rmap
 {
     epsilonWallFunctionFvPatchScalarField::rmap(ptf, addr);
 
-    const atmEpsilonWallFunctionFvPatchScalarField& atmpsf =
+    const auto& atmpsf =
         refCast<const atmEpsilonWallFunctionFvPatchScalarField>(ptf);
-
-    z0_->rmap(atmpsf.z0_(), addr);
+    if (z0_)
+    {
+        z0_->rmap(atmpsf.z0_(), addr);
+    }
 }
 
 

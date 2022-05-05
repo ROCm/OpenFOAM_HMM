@@ -45,15 +45,15 @@ tmp<scalarField> atmNutkWallFunctionFvPatchScalarField::calcNut() const
 {
     const label patchi = patch().index();
 
-    const auto& turbModel =
-        db().lookupObject<turbulenceModel>
+    const auto& turbModel = db().lookupObject<turbulenceModel>
+    (
+        IOobject::groupName
         (
-            IOobject::groupName
-            (
-                turbulenceModel::propertiesName,
-                internalField().group()
-            )
-        );
+            turbulenceModel::propertiesName,
+            internalField().group()
+        )
+    );
+
     const scalarField& y = turbModel.y()[patchi];
 
     const tmp<volScalarField> tk = turbModel.k();
@@ -193,7 +193,11 @@ void atmNutkWallFunctionFvPatchScalarField::autoMap
 )
 {
     nutkWallFunctionFvPatchScalarField::autoMap(m);
-    z0_->autoMap(m);
+
+    if (z0_)
+    {
+        z0_->autoMap(m);
+    }
 }
 
 
@@ -205,10 +209,13 @@ void atmNutkWallFunctionFvPatchScalarField::rmap
 {
     nutkWallFunctionFvPatchScalarField::rmap(ptf, addr);
 
-    const atmNutkWallFunctionFvPatchScalarField& nrwfpsf =
+    const auto& nrwfpsf =
         refCast<const atmNutkWallFunctionFvPatchScalarField>(ptf);
 
-    z0_->rmap(nrwfpsf.z0_(), addr);
+    if (z0_)
+    {
+        z0_->rmap(nrwfpsf.z0_(), addr);
+    }
 }
 
 

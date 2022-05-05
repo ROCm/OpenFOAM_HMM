@@ -187,7 +187,11 @@ void Foam::atmOmegaWallFunctionFvPatchScalarField::autoMap
 )
 {
     omegaWallFunctionFvPatchScalarField::autoMap(m);
-    z0_->autoMap(m);
+
+    if (z0_)
+    {
+        z0_->autoMap(m);
+    }
 }
 
 
@@ -199,10 +203,13 @@ void Foam::atmOmegaWallFunctionFvPatchScalarField::rmap
 {
     omegaWallFunctionFvPatchScalarField::rmap(ptf, addr);
 
-    const atmOmegaWallFunctionFvPatchScalarField& atmpsf =
+    const auto& atmpsf =
         refCast<const atmOmegaWallFunctionFvPatchScalarField>(ptf);
 
-    z0_->rmap(atmpsf.z0_(), addr);
+    if (z0_)
+    {
+        z0_->rmap(atmpsf.z0_(), addr);
+    }
 }
 
 

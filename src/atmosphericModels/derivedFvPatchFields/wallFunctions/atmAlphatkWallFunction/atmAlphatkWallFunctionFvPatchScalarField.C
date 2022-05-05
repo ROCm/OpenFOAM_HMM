@@ -41,9 +41,7 @@ namespace Foam
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 scalar atmAlphatkWallFunctionFvPatchScalarField::tolerance_ = 0.01;
-
 label atmAlphatkWallFunctionFvPatchScalarField::maxIters_ = 10;
-
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
@@ -206,15 +204,14 @@ void atmAlphatkWallFunctionFvPatchScalarField::updateCoeffs()
     const label patchi = patch().index();
 
     // Retrieve turbulence properties from model
-    const auto& turbModel =
-        db().lookupObject<turbulenceModel>
+    const auto& turbModel = db().lookupObject<turbulenceModel>
+    (
+        IOobject::groupName
         (
-            IOobject::groupName
-            (
-                turbulenceModel::propertiesName,
-                internalField().group()
-            )
-        );
+            turbulenceModel::propertiesName,
+            internalField().group()
+        )
+    );
 
     const scalarField& y = turbModel.y()[patchi];
 
@@ -286,8 +283,15 @@ void atmAlphatkWallFunctionFvPatchScalarField::autoMap
 )
 {
     fixedValueFvPatchScalarField::autoMap(m);
-    Prt_->autoMap(m);
-    z0_->autoMap(m);
+
+    if (Prt_)
+    {
+        Prt_->autoMap(m);
+    }
+    if (z0_)
+    {
+        z0_->autoMap(m);
+    }
 }
 
 
@@ -299,11 +303,17 @@ void atmAlphatkWallFunctionFvPatchScalarField::rmap
 {
     fixedValueFvPatchScalarField::rmap(ptf, addr);
 
-    const atmAlphatkWallFunctionFvPatchScalarField& nrwfpsf =
+    const auto& nrwfpsf =
         refCast<const atmAlphatkWallFunctionFvPatchScalarField>(ptf);
 
-    z0_->rmap(nrwfpsf.z0_(), addr);
-    Prt_->rmap(nrwfpsf.Prt_(), addr);
+    if (Prt_)
+    {
+        Prt_->rmap(nrwfpsf.Prt_(), addr);
+    }
+    if (z0_)
+    {
+        z0_->rmap(nrwfpsf.z0_(), addr);
+    }
 }
 
 

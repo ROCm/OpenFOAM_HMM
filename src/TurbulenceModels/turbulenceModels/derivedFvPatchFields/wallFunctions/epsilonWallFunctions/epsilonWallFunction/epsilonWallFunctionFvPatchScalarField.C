@@ -45,7 +45,7 @@ void Foam::epsilonWallFunctionFvPatchScalarField::setMaster()
         return;
     }
 
-    const volScalarField& epsilon =
+    const auto& epsilon =
         static_cast<const volScalarField&>(this->internalField());
 
     const volScalarField::Boundary& bf = epsilon.boundaryField();
@@ -70,7 +70,7 @@ void Foam::epsilonWallFunctionFvPatchScalarField::setMaster()
 
 void Foam::epsilonWallFunctionFvPatchScalarField::createAveragingWeights()
 {
-    const volScalarField& epsilon =
+    const auto& epsilon =
         static_cast<const volScalarField&>(this->internalField());
 
     const volScalarField::Boundary& bf = epsilon.boundaryField();
@@ -133,12 +133,12 @@ Foam::epsilonWallFunctionFvPatchScalarField::epsilonPatch
     const label patchi
 )
 {
-    const volScalarField& epsilon =
+    const auto& epsilon =
         static_cast<const volScalarField&>(this->internalField());
 
     const volScalarField::Boundary& bf = epsilon.boundaryField();
 
-    const epsilonWallFunctionFvPatchScalarField& epf =
+    const auto& epf =
         refCast<const epsilonWallFunctionFvPatchScalarField>(bf[patchi]);
 
     return const_cast<epsilonWallFunctionFvPatchScalarField&>(epf);
@@ -222,8 +222,7 @@ void Foam::epsilonWallFunctionFvPatchScalarField::calculate
         const scalar epsilonVis = w*2.0*k[celli]*nuw[facei]/sqr(y[facei]);
 
         // Contribution from the inertial sublayer
-        const scalar epsilonLog =
-            w*Cmu75*pow(k[celli], 1.5)/(kappa*y[facei]);
+        const scalar epsilonLog = w*Cmu75*pow(k[celli], 1.5)/(kappa*y[facei]);
 
         switch (blender_)
         {
@@ -455,7 +454,7 @@ void Foam::epsilonWallFunctionFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    const turbulenceModel& turbModel = db().lookupObject<turbulenceModel>
+    const auto& turbModel = db().lookupObject<turbulenceModel>
     (
         IOobject::groupName
         (
@@ -503,7 +502,7 @@ void Foam::epsilonWallFunctionFvPatchScalarField::updateWeightedCoeffs
         return;
     }
 
-    const turbulenceModel& turbModel = db().lookupObject<turbulenceModel>
+    const auto& turbModel = db().lookupObject<turbulenceModel>
     (
         IOobject::groupName
         (

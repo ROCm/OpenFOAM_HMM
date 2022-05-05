@@ -205,38 +205,38 @@ public:
         // Access
 
             //- Return the roughness height
-            scalar roughnessHeight() const
+            scalar roughnessHeight() const noexcept
             {
                 return roughnessHeight_;
             }
 
             //- Return reference to the roughness height to allow adjustment
-            scalar& roughnessHeight()
+            scalar& roughnessHeight() noexcept
             {
                 return roughnessHeight_;
             }
 
             //- Return the roughness constant scale
-            scalar roughnessConstant() const
+            scalar roughnessConstant() const noexcept
             {
                 return roughnessConstant_;
             }
 
             //- Return reference to the roughness constant to allow adjustment
-            scalar& roughnessConstant()
+            scalar& roughnessConstant() noexcept
             {
                 return roughnessConstant_;
             }
 
             //- Return the roughness scale factor
-            scalar roughnessFactor() const
+            scalar roughnessFactor() const noexcept
             {
                 return roughnessFactor_;
             }
 
             //- Return reference to the roughness scale factor to allow
             //- adjustment
-            scalar& roughnessFactor()
+            scalar& roughnessFactor() noexcept
             {
                 return roughnessFactor_;
             }
