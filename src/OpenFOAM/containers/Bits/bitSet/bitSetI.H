@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -316,6 +316,7 @@ inline Foam::label Foam::bitSet::find_first() const
     // Process block-wise, detecting any '1' bits
 
     const label nblocks = num_blocks(size());
+
     for (label blocki = 0; blocki < nblocks; ++blocki)
     {
         label pos = (blocki * elem_per_block);
@@ -535,6 +536,21 @@ inline Foam::labelList Foam::bitSet::sortedToc() const
 }
 
 
+inline void Foam::bitSet::resize_last()
+{
+    const label pos = find_last();
+
+    if (pos >= 0)
+    {
+        resize(pos+1);
+    }
+    else
+    {
+        clear();
+    }
+}
+
+
 inline void Foam::bitSet::swap(bitSet& bitset)
 {
     PackedList<1>::swap(bitset);
@@ -573,7 +589,7 @@ inline void Foam::bitSet::fill(const bool val)
 
 inline void Foam::bitSet::set(const bitSet& bitset)
 {
-    orEq(bitset, false);  // Non-strict: Lets the set size grow.
+    orEq(bitset);
 }
 
 
@@ -754,28 +770,40 @@ inline Foam::bitSet Foam::operator~(const bitSet& bitset)
 inline Foam::bitSet Foam::operator&(const bitSet& a, const bitSet& b)
 {
     bitSet result(a);
-    return (result &= b);
+    result &= b;
+
+    result.resize_last();
+    return result;
 }
 
 
 inline Foam::bitSet Foam::operator|(const bitSet& a, const bitSet& b)
 {
     bitSet result(a);
-    return (result |= b);
+    result |= b;
+
+    result.resize_last();
+    return result;
 }
 
 
 inline Foam::bitSet Foam::operator^(const bitSet& a, const bitSet& b)
 {
     bitSet result(a);
-    return (result ^= b);
+    result ^= b;
+
+    result.resize_last();
+    return result;
 }
 
 
 inline Foam::bitSet Foam::operator-(const bitSet& a, const bitSet& b)
 {
     bitSet result(a);
-    return (result -= b);
+    result |= b;
+
+    result.resize_last();
+    return result;
 }
 
 

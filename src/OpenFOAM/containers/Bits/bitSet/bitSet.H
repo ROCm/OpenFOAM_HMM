@@ -83,7 +83,8 @@ protected:
         //      A = (A & ~B)
         //  \endcode
         //  A and B can have different sizes.
-        //  Does not change the original set size.
+        //  Never changes the original set size.
+        //  Non-overlapping parts are considered \em off.
         bitSet& minusEq(const bitSet& other);
 
         //- The set logical AND
@@ -91,8 +92,9 @@ protected:
         //      A = (A & B)
         //
         //  \endcode
-        //  A and B can have different sizes..
-        //  Does not change the original set size.
+        //  A and B can have different sizes.
+        //  Never changes the original set size.
+        //  Non-overlapping parts are considered \em off.
         bitSet& andEq(const bitSet& other);
 
         //- The set logical OR
@@ -101,18 +103,17 @@ protected:
         //  \endcode
         //  A and B can have different sizes
         //
-        //  \note
-        //      The default (strict=true) ignores additional length from B,
-        //      whereas (strict=false) permits the set to automatically grow
-        //      to accommodate additional elements arising from B.
-        bitSet& orEq(const bitSet& other, const bool strict=true);
+        //  The size grows to accommodate new \em on bits.
+        bitSet& orEq(const bitSet& other);
 
         //- The set logical XOR
         //  \code
         //      A = (A ^ B)
         //  \endcode
-        //  A and B can have different sizes. Sizing behaviour as per orEq.
-        bitSet& xorEq(const bitSet& other, const bool strict=true);
+        //  A and B can have different sizes.
+        //
+        //  The size grows to accommodate new \em on bits.
+        bitSet& xorEq(const bitSet& other);
 
 
 public:
@@ -122,6 +123,7 @@ public:
         class reference;
         class const_iterator;
         typedef unsigned int const_reference;
+
 
     // Static Member Functions
 
@@ -363,9 +365,13 @@ public:
         //- Invert all bits in the addressable region
         inline void flip();
 
-        //- Invert bits at the specified position.
+        //- Invert bit at the specified position.
         //  A no-op if the position is out-of-range
         inline void flip(const label pos);
+
+        //- Resize to include the last \em on bit only.
+        //  Functionally identical to resize(find_last()+1)
+        inline void resize_last();
 
         //- Swap contents
         inline void swap(bitSet& bitset);
@@ -573,23 +579,24 @@ public:
         inline bitSet& operator=(const bool val);
 
         //- Bitwise-AND all the bits in other with the bits in this bitset.
-        //  The operands may have dissimilar sizes without affecting the size
-        //  of the set.
+        //  The operands may have dissimilar sizes,
+        //  never changes the original set size.
+        //  Non-overlapping elements are considered \em off.
         inline bitSet& operator&=(const bitSet& other);
 
         //- Bitwise-OR operator - similar to the set() method.
-        //  The operands may have dissimilar sizes without affecting the size
-        //  of the set.
+        //  The operands may have dissimilar sizes,
+        //  the set grows to accommodate new \em on bits.
         inline bitSet& operator|=(const bitSet& other);
 
         //- Bitwise-XOR operator - retains unique entries.
-        //  The operands may have dissimilar sizes without affecting the size
-        //  of the set.
+        //  The operands may have dissimilar sizes,
+        //  the set grows to accommodate new \em on bits.
         inline bitSet& operator^=(const bitSet& other);
 
         //- Remove entries from this list - identical to the unset() method.
-        //  The operands may have dissimilar sizes without affecting the size
-        //  of the set.
+        //  The operands may have dissimilar sizes,
+        //  never changes the original set size.
         inline bitSet& operator-=(const bitSet& other);
 
 

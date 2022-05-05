@@ -344,12 +344,35 @@ int main(int argc, char *argv[])
 
     Info<< "\noperator|=\n";
     {
+        bitSet a; a.set(labelRange(15, 8));
+        bitSet b; b.set(labelRange(30, 8));
+
+        report(a, false);
+        report(b, false);
+        report((a |= b), true);
+    }
+    {
+        Info<< " other test\n";
+
         bitSet list3 = list1;
         report((list3 |= list2), true);
     }
 
     Info<< "\noperator&=\n";
     {
+        bitSet a; a.set(labelRange(30, 8));
+        bitSet b; b.set(labelRange(0, 8));
+
+        report(a, false);
+        report(b, false);
+        Info<< "  (a & b)\n";
+        report((a & b), true);
+        Info<< "  (b & a)\n";
+        report((b & a), true);
+    }
+    {
+        Info<< " other test\n";
+
         bitSet list3 = list1;
         report((list3 &= list2), true);
     }
