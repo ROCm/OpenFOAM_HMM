@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,48 +26,47 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "parFvFieldReconstructor.H"
+#include "parFvFieldDistributor.H"
+#include "bitSet.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+int Foam::parFvFieldDistributor::verbose_ = 1;
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::parFvFieldReconstructor::createPatchFaceMaps()
+void Foam::parFvFieldDistributor::createPatchFaceMaps()
 {
-    const fvBoundaryMesh& fvb = procMesh_.boundary();
+    const fvBoundaryMesh& fvb = srcMesh_.boundary();
 
-    patchFaceMaps_.setSize(fvb.size());
-    forAll(fvb, patchI)
+    patchFaceMaps_.resize(fvb.size());
+
+    forAll(fvb, patchi)
     {
-        if (!isA<processorFvPatch>(fvb[patchI]))
+        if (!isA<processorFvPatch>(fvb[patchi]))
         {
-            // Create map for patch faces only
-
-            // Mark all used elements (i.e. destination patch faces)
-            boolList faceIsUsed(distMap_.faceMap().constructSize(), false);
-            const polyPatch& basePatch = baseMesh_.boundaryMesh()[patchI];
-            forAll(basePatch, i)
-            {
-                faceIsUsed[basePatch.start()+i] = true;
-            }
+            // Create compact map for patch faces only
+            // - compact for used faces only (destination patch faces)
+            labelList oldToNewSub;
+            labelList oldToNewConstruct;
 
             // Copy face map
             patchFaceMaps_.set
             (
-                patchI,
+                patchi,
                 new mapDistributeBase(distMap_.faceMap())
             );
 
-            // Compact out unused elements
-            labelList oldToNewSub;
-            labelList oldToNewConstruct;
-            patchFaceMaps_[patchI].compact
+            patchFaceMaps_[patchi].compactRemoteData
             (
-                faceIsUsed,
-                procMesh_.nFaces(),      // maximum index of subMap
+                bitSet(tgtMesh_.boundaryMesh()[patchi].range()),
                 oldToNewSub,
                 oldToNewConstruct,
+                srcMesh_.nFaces(),   // max index of subMap
                 UPstream::msgType()
             );
-            //Pout<< "patchMap:" << patchFaceMaps_[patchI] << endl;
+            //Pout<< "patchMap:" << patchFaceMaps_[patchi] << endl;
         }
     }
 }
@@ -74,16 +74,16 @@ void Foam::parFvFieldReconstructor::createPatchFaceMaps()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::parFvFieldReconstructor::parFvFieldReconstructor
+Foam::parFvFieldDistributor::parFvFieldDistributor
 (
-    fvMesh& baseMesh,
-    const fvMesh& procMesh,
+    const fvMesh& srcMesh,
+    fvMesh& tgtMesh,
     const mapDistributePolyMesh& distMap,
     const bool isWriteProc
 )
 :
-    baseMesh_(baseMesh),
-    procMesh_(procMesh),
+    srcMesh_(srcMesh),
+    tgtMesh_(tgtMesh),
     distMap_(distMap),
     isWriteProc_(isWriteProc)
 {
@@ -93,7 +93,7 @@ Foam::parFvFieldReconstructor::parFvFieldReconstructor
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::parFvFieldReconstructor::reconstructPoints()
+void Foam::parFvFieldDistributor::reconstructPoints()
 {
     // Reconstruct the points for moving mesh cases and write them out
     distributedFieldMapper mapper
@@ -101,11 +101,13 @@ void Foam::parFvFieldReconstructor::reconstructPoints()
         labelUList::null(),
         distMap_.pointMap()
     );
-    pointField basePoints(procMesh_.points(), mapper);
-    baseMesh_.movePoints(basePoints);
+
+    pointField newPoints(srcMesh_.points(), mapper);
+    tgtMesh_.movePoints(newPoints);
+
     if (Pstream::master())
     {
-        baseMesh_.write();
+        tgtMesh_.write();
     }
 }
 

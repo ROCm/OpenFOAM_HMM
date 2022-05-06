@@ -94,13 +94,14 @@ Usage
 #include "topoSet.H"
 #include "regionProperties.H"
 
-#include "parFvFieldReconstructor.H"
+#include "parFvFieldDistributor.H"
 #include "parPointFieldDistributor.H"
-#include "parLagrangianRedistributor.H"
-#include "unmappedPassivePositionParticleCloud.H"
 #include "hexRef8Data.H"
 #include "meshRefinement.H"
 #include "pointFields.H"
+
+#include "readDistributedFields.H"
+#include "redistributeLagrangian.H"
 
 #include "cyclicACMIFvPatch.H"
 #include "masterUncollatedFileOperation.H"
@@ -498,7 +499,7 @@ void determineDecomposition
 
     if (Pstream::master() && decompose)
     {
-        Info<< "Restoring caseName to " << proc0CaseName << endl;
+        Info<< "Restoring caseName" << endl;
         tm.caseName() = proc0CaseName;
         tm.processorCase(oldProcCase);
     }
@@ -519,7 +520,7 @@ void determineDecomposition
                 tm.caseName() = baseRunTime.caseName();
                 tm.processorCase(false);
                 writeDecomposition("cellDist", mesh, decomp);
-                Info<< "Restoring caseName to " << proc0CaseName << endl;
+                Info<< "Restoring caseName" << endl;
                 tm.caseName() = proc0CaseName;
                 tm.processorCase(oldProcCase);
 
@@ -539,14 +540,8 @@ void determineDecomposition
 template<class CoupledPatchType, class GeoField>
 void correctCoupledBoundaryConditions(fvMesh& mesh)
 {
-    HashTable<GeoField*> flds
-    (
-        mesh.objectRegistry::lookupClass<GeoField>()
-    );
-
-    for (const word& fldName : flds.sortedToc())
+    for (GeoField& fld : mesh.sorted<GeoField>())
     {
-        GeoField& fld = *(flds[fldName]);
         fld.boundaryFieldRef().template evaluateCoupled<CoupledPatchType>();
     }
 }
@@ -755,7 +750,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
     fvMeshDistribute distributor(mesh);
 
     // Do all the distribution of mesh and fields
-    autoPtr<mapDistributePolyMesh> rawMap = distributor.distribute(decomp);
+    autoPtr<mapDistributePolyMesh> distMap = distributor.distribute(decomp);
 
     // Print some statistics
     Info<< "After distribution:" << endl;
@@ -786,7 +781,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
         // Construct new pointMesh from distributed mesh
         const pointMesh& newPointMesh = pointMesh::New(mesh);
 
-        pointDistributor.resetTarget(newPointMesh, rawMap());
+        pointDistributor.resetTarget(newPointMesh, distMap());
 
         pointDistributor.distributeAndStore(pointScalarFields);
         pointDistributor.distributeAndStore(pointVectorFields);
@@ -811,19 +806,20 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
     }
 
 
-    IOmapDistributePolyMesh map
+    // Register mapDistributePolyMesh for automatic writing...
+    IOmapDistributePolyMeshRef distMapRef
     (
         IOobject
         (
             "procAddressing",
             mesh.facesInstance(),
             polyMesh::meshSubDir,
-            mesh,
+            mesh.thisDb(),
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
-        )
+        ),
+        distMap()
     );
-    map.transfer(rawMap());
 
 
     if (reconstruct)
@@ -839,7 +835,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
             topoSet::removeFiles(mesh);
 
             // Now we've written all. Reset caseName on master
-            Info<< "Restoring caseName to " << proc0CaseName << endl;
+            Info<< "Restoring caseName" << endl;
             runTime.caseName() = proc0CaseName;
             runTime.processorCase(oldProcCase);
         }
@@ -860,8 +856,8 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
         }
         topoSet::removeFiles(mesh);
     }
-    Info<< "Written redistributed mesh to " << mesh.facesInstance() << nl
-        << endl;
+    Info<< "Written redistributed mesh to "
+        << mesh.facesInstance() << nl << endl;
 
 
     if (decompose || reconstruct)
@@ -871,7 +867,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
         fvMeshTools::writeProcAddressing
         (
             mesh,
-            map,
+            distMap(),
             decompose,
             std::move(writeHandler)
         );
@@ -917,7 +913,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
         refData.sync(io);
 
         // Distribute
-        refData.distribute(map);
+        refData.distribute(distMap());
 
 
         // Now we've read refinement data we can remove it
@@ -937,7 +933,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
                 refData.write();
 
                 // Now we've written all. Reset caseName on master
-                Info<< "Restoring caseName to " << proc0CaseName << endl;
+                Info<< "Restoring caseName" << endl;
                 runTime.caseName() = proc0CaseName;
                 runTime.processorCase(oldProcCase);
 
@@ -971,7 +967,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
     //
     //    forAll(cellSets, i)
     //    {
-    //        cellSets[i].distribute(map);
+    //        cellSets[i].distribute(distMap());
     //    }
     //
     //    if (reconstruct)
@@ -985,11 +981,11 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
     //
     //            forAll(cellSets, i)
     //            {
-    //                cellSets[i].distribute(map);
+    //                cellSets[i].distribute(distMap());
     //            }
     //
     //            // Now we've written all. Reset caseName on master
-    //            Info<< "Restoring caseName to " << proc0CaseName << endl;
+    //            Info<< "Restoring caseName" << endl;
     //            runTime.caseName() = proc0CaseName;
     //            runTime.processorCase(oldProcCase);
     //        }
@@ -998,592 +994,19 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
     //    {
     //        forAll(cellSets, i)
     //        {
-    //            cellSets[i].distribute(map);
+    //            cellSets[i].distribute(distMap());
     //        }
     //    }
     //}
 
 
-    return autoPtr<mapDistributePolyMesh>::New(std::move(map));
+    return distMap;
 }
 
 
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//
-// Field Mapping
-//
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-void reconstructMeshFields
-(
-    const parFvFieldReconstructor& fvReconstructor,
-    const IOobjectList& objects,
-    const wordRes& selectedFields
-)
-{
-    // Dimensioned fields
-
-    fvReconstructor.reconstructFvVolumeInternalFields<scalar>
-    (
-        objects,
-        selectedFields
-    );
-    fvReconstructor.reconstructFvVolumeInternalFields<vector>
-    (
-        objects,
-        selectedFields
-    );
-    fvReconstructor.reconstructFvVolumeInternalFields<sphericalTensor>
-    (
-        objects,
-        selectedFields
-    );
-    fvReconstructor.reconstructFvVolumeInternalFields<symmTensor>
-    (
-        objects,
-        selectedFields
-    );
-    fvReconstructor.reconstructFvVolumeInternalFields<tensor>
-    (
-        objects,
-        selectedFields
-    );
-
-
-    // volFields
-
-    fvReconstructor.reconstructFvVolumeFields<scalar>
-    (
-        objects,
-        selectedFields
-    );
-    fvReconstructor.reconstructFvVolumeFields<vector>
-    (
-        objects,
-        selectedFields
-    );
-    fvReconstructor.reconstructFvVolumeFields<sphericalTensor>
-    (
-        objects,
-        selectedFields
-    );
-    fvReconstructor.reconstructFvVolumeFields<symmTensor>
-    (
-        objects,
-        selectedFields
-    );
-    fvReconstructor.reconstructFvVolumeFields<tensor>
-    (
-        objects,
-        selectedFields
-    );
-
-
-    // surfaceFields
-
-    fvReconstructor.reconstructFvSurfaceFields<scalar>
-    (
-        objects,
-        selectedFields
-    );
-    fvReconstructor.reconstructFvSurfaceFields<vector>
-    (
-        objects,
-        selectedFields
-    );
-    fvReconstructor.reconstructFvSurfaceFields<sphericalTensor>
-    (
-        objects,
-        selectedFields
-    );
-    fvReconstructor.reconstructFvSurfaceFields<symmTensor>
-    (
-        objects,
-        selectedFields
-    );
-    fvReconstructor.reconstructFvSurfaceFields<tensor>
-    (
-        objects,
-        selectedFields
-    );
-}
-
-
-void reconstructLagrangian
-(
-    autoPtr<parLagrangianRedistributor>& lagrangianReconstructorPtr,
-    const fvMesh& baseMesh,
-    const fvMesh& mesh,
-    const mapDistributePolyMesh& distMap,
-    const wordRes& selectedLagrangianFields
-)
-{
-    // Clouds (note: might not be present on all processors)
-
-    wordList cloudNames;
-    List<wordList> fieldNames;
-    // Find all cloudNames on all processors
-    parLagrangianRedistributor::findClouds(mesh, cloudNames, fieldNames);
-
-    if (cloudNames.size())
-    {
-        if (!lagrangianReconstructorPtr)
-        {
-            lagrangianReconstructorPtr.reset
-            (
-                new parLagrangianRedistributor
-                (
-                    mesh,
-                    baseMesh,
-                    mesh.nCells(),      // range of cell indices in clouds
-                    distMap
-                )
-            );
-        }
-        const parLagrangianRedistributor& lagrangianReconstructor =
-            *lagrangianReconstructorPtr;
-
-        for (const word& cloudName : cloudNames)
-        {
-            Info<< "Reconstructing lagrangian fields for cloud "
-                << cloudName << nl << endl;
-
-            autoPtr<mapDistributeBase> lagrangianMapPtr =
-                lagrangianReconstructor.redistributeLagrangianPositions
-                (
-                    cloudName
-                );
-
-            const mapDistributeBase& lagrangianMap = *lagrangianMapPtr;
-
-            IOobjectList cloudObjs
-            (
-                mesh,
-                mesh.time().timeName(),
-                cloud::prefix/cloudName
-            );
-
-            lagrangianReconstructor.redistributeFields<label>
-            (
-                lagrangianMap,
-                cloudName,
-                cloudObjs,
-                selectedLagrangianFields
-            );
-            lagrangianReconstructor.redistributeFieldFields<label>
-            (
-                lagrangianMap,
-                cloudName,
-                cloudObjs,
-                selectedLagrangianFields
-            );
-            lagrangianReconstructor.redistributeFields<scalar>
-            (
-                lagrangianMap,
-                cloudName,
-                cloudObjs,
-                selectedLagrangianFields
-            );
-            lagrangianReconstructor.redistributeFieldFields<scalar>
-            (
-                lagrangianMap,
-                cloudName,
-                cloudObjs,
-                selectedLagrangianFields
-            );
-            lagrangianReconstructor.redistributeFields<vector>
-            (
-                lagrangianMap,
-                cloudName,
-                cloudObjs,
-                selectedLagrangianFields
-            );
-            lagrangianReconstructor.redistributeFieldFields<vector>
-            (
-                lagrangianMap,
-                cloudName,
-                cloudObjs,
-                selectedLagrangianFields
-            );
-            lagrangianReconstructor.redistributeFields
-            <sphericalTensor>
-            (
-                lagrangianMap,
-                cloudName,
-                cloudObjs,
-                selectedLagrangianFields
-            );
-            lagrangianReconstructor.redistributeFieldFields
-            <sphericalTensor>
-            (
-                lagrangianMap,
-                cloudName,
-                cloudObjs,
-                selectedLagrangianFields
-            );
-            lagrangianReconstructor.redistributeFields<symmTensor>
-            (
-                lagrangianMap,
-                cloudName,
-                cloudObjs,
-                selectedLagrangianFields
-            );
-            lagrangianReconstructor.redistributeFieldFields
-            <symmTensor>
-            (
-                lagrangianMap,
-                cloudName,
-                cloudObjs,
-                selectedLagrangianFields
-            );
-            lagrangianReconstructor.redistributeFields<tensor>
-            (
-                lagrangianMap,
-                cloudName,
-                cloudObjs,
-                selectedLagrangianFields
-            );
-            lagrangianReconstructor.redistributeFieldFields<tensor>
-            (
-                lagrangianMap,
-                cloudName,
-                cloudObjs,
-                selectedLagrangianFields
-            );
-        }
-    }
-}
-
-
-// Read clouds (note: might not be present on all processors)
-void readLagrangian
-(
-    const fvMesh& mesh,
-    const wordList& cloudNames,
-    const wordRes& selectedLagrangianFields,
-    PtrList<unmappedPassivePositionParticleCloud>& clouds
-)
-{
-    (void)mesh.tetBasePtIs();
-
-    forAll(cloudNames, i)
-    {
-        //Pout<< "Loading cloud " << cloudNames[i] << endl;
-        clouds.set
-        (
-            i,
-            new unmappedPassivePositionParticleCloud(mesh, cloudNames[i], false)
-        );
-
-
-        //for (passivePositionParticle& p : clouds[i]))
-        //{
-        //    Pout<< "Particle position:" << p.position()
-        //        << " cell:" << p.cell()
-        //        << " with cc:" << mesh.cellCentres()[p.cell()]
-        //        << endl;
-        //}
-
-
-        IOobjectList cloudObjs(clouds[i], clouds[i].time().timeName());
-
-        //Pout<< "Found clould objects:" << cloudObjs.names() << endl;
-
-        parLagrangianRedistributor::readFields
-        <IOField<label>>
-        (
-            clouds[i],
-            cloudObjs,
-            selectedLagrangianFields
-        );
-        parLagrangianRedistributor::readFields
-        <IOField<Field<label>>>
-        (
-            clouds[i],
-            cloudObjs,
-            selectedLagrangianFields
-        );
-        parLagrangianRedistributor::readFields
-        <CompactIOField<Field<label>, label>>
-        (
-            clouds[i],
-            cloudObjs,
-            selectedLagrangianFields
-        );
-
-
-        parLagrangianRedistributor::readFields
-        <IOField<scalar>>
-        (
-            clouds[i],
-            cloudObjs,
-            selectedLagrangianFields
-        );
-        parLagrangianRedistributor::readFields
-        <IOField<Field<scalar>>>
-        (
-            clouds[i],
-            cloudObjs,
-            selectedLagrangianFields
-        );
-        parLagrangianRedistributor::readFields
-        <CompactIOField<Field<scalar>, scalar>>
-        (
-            clouds[i],
-            cloudObjs,
-            selectedLagrangianFields
-        );
-
-
-        parLagrangianRedistributor::readFields
-        <IOField<vector>>
-        (
-            clouds[i],
-            cloudObjs,
-            selectedLagrangianFields
-        );
-        parLagrangianRedistributor::readFields
-        <IOField<Field<vector>>>
-        (
-            clouds[i],
-            cloudObjs,
-            selectedLagrangianFields
-        );
-        parLagrangianRedistributor::readFields
-        <CompactIOField<Field<vector>, vector>>
-        (
-            clouds[i],
-            cloudObjs,
-            selectedLagrangianFields
-        );
-
-
-        parLagrangianRedistributor::readFields
-        <IOField<sphericalTensor>>
-        (
-            clouds[i],
-            cloudObjs,
-            selectedLagrangianFields
-        );
-        parLagrangianRedistributor::readFields
-        <IOField<Field<sphericalTensor>>>
-        (
-            clouds[i],
-            cloudObjs,
-            selectedLagrangianFields
-        );
-        parLagrangianRedistributor::readFields
-        <CompactIOField<Field<sphericalTensor>, sphericalTensor>>
-        (
-            clouds[i],
-            cloudObjs,
-            selectedLagrangianFields
-        );
-
-
-        parLagrangianRedistributor::readFields
-        <IOField<symmTensor>>
-        (
-            clouds[i],
-            cloudObjs,
-            selectedLagrangianFields
-        );
-        parLagrangianRedistributor::readFields
-        <IOField<Field<symmTensor>>>
-        (
-            clouds[i],
-            cloudObjs,
-            selectedLagrangianFields
-        );
-        parLagrangianRedistributor::readFields
-        <CompactIOField<Field<symmTensor>, symmTensor>>
-        (
-            clouds[i],
-            cloudObjs,
-            selectedLagrangianFields
-        );
-
-
-        parLagrangianRedistributor::readFields
-        <IOField<tensor>>
-        (
-            clouds[i],
-            cloudObjs,
-            selectedLagrangianFields
-        );
-        parLagrangianRedistributor::readFields
-        <IOField<Field<tensor>>>
-        (
-            clouds[i],
-            cloudObjs,
-            selectedLagrangianFields
-        );
-        parLagrangianRedistributor::readFields
-        <CompactIOField<Field<tensor>, tensor>>
-        (
-            clouds[i],
-            cloudObjs,
-            selectedLagrangianFields
-        );
-    }
-}
-
-
-void redistributeLagrangian
-(
-    autoPtr<parLagrangianRedistributor>& lagrangianReconstructorPtr,
-    const fvMesh& mesh,
-    const label nOldCells,
-    const mapDistributePolyMesh& distMap,
-    PtrList<unmappedPassivePositionParticleCloud>& clouds
-)
-{
-    if (clouds.size())
-    {
-        if (!lagrangianReconstructorPtr)
-        {
-            lagrangianReconstructorPtr.reset
-            (
-                new parLagrangianRedistributor
-                (
-                    mesh,
-                    mesh,
-                    nOldCells,  // range of cell indices in clouds
-                    distMap
-                )
-            );
-        }
-        const parLagrangianRedistributor& distributor =
-            lagrangianReconstructorPtr();
-
-        forAll(clouds, i)
-        {
-            autoPtr<mapDistributeBase> lagrangianMapPtr =
-                distributor.redistributeLagrangianPositions(clouds[i]);
-            const mapDistributeBase& lagrangianMap = *lagrangianMapPtr;
-
-            distributor.redistributeStoredFields
-            <IOField<label>>
-            (
-                lagrangianMap,
-                clouds[i]
-            );
-            distributor.redistributeStoredFields
-            <IOField<Field<label>>>
-            (
-                lagrangianMap,
-                clouds[i]
-            );
-            distributor.redistributeStoredFields
-            <CompactIOField<Field<label>, label>>
-            (
-                lagrangianMap,
-                clouds[i]
-            );
-
-
-            distributor.redistributeStoredFields
-            <IOField<scalar>>
-            (
-                lagrangianMap,
-                clouds[i]
-            );
-            distributor.redistributeStoredFields
-            <IOField<Field<scalar>>>
-            (
-                lagrangianMap,
-                clouds[i]
-            );
-            distributor.redistributeStoredFields
-            <CompactIOField<Field<scalar>, scalar>>
-            (
-                lagrangianMap,
-                clouds[i]
-            );
-
-
-            distributor.redistributeStoredFields
-            <IOField<vector>>
-            (
-                lagrangianMap,
-                clouds[i]
-            );
-            distributor.redistributeStoredFields
-            <IOField<Field<vector>>>
-            (
-                lagrangianMap,
-                clouds[i]
-            );
-            distributor.redistributeStoredFields
-            <CompactIOField<Field<vector>, vector>>
-            (
-                lagrangianMap,
-                clouds[i]
-            );
-
-
-            distributor.redistributeStoredFields
-            <IOField<sphericalTensor>>
-            (
-                lagrangianMap,
-                clouds[i]
-            );
-            distributor.redistributeStoredFields
-            <IOField<Field<sphericalTensor>>>
-            (
-                lagrangianMap,
-                clouds[i]
-            );
-            distributor.redistributeStoredFields
-            <CompactIOField<Field<sphericalTensor>, sphericalTensor>>
-            (
-                lagrangianMap,
-                clouds[i]
-            );
-
-
-            distributor.redistributeStoredFields
-            <IOField<symmTensor>>
-            (
-                lagrangianMap,
-                clouds[i]
-            );
-            distributor.redistributeStoredFields
-            <IOField<Field<symmTensor>>>
-            (
-                lagrangianMap,
-                clouds[i]
-            );
-            distributor.redistributeStoredFields
-            <CompactIOField<Field<symmTensor>, symmTensor>>
-            (
-                lagrangianMap,
-                clouds[i]
-            );
-
-
-            distributor.redistributeStoredFields
-            <IOField<tensor>>
-            (
-                lagrangianMap,
-                clouds[i]
-            );
-            distributor.redistributeStoredFields
-            <IOField<Field<tensor>>>
-            (
-                lagrangianMap,
-                clouds[i]
-            );
-            distributor.redistributeStoredFields
-            <CompactIOField<Field<tensor>, tensor>>
-            (
-                lagrangianMap,
-                clouds[i]
-            );
-        }
-    }
-}
-
+/*---------------------------------------------------------------------------*\
+                                     main
+\*---------------------------------------------------------------------------*/
 
 int main(int argc, char *argv[])
 {
@@ -1622,6 +1045,10 @@ int main(int argc, char *argv[])
     (
         "newTimes",
         "Only reconstruct new times (i.e. that do not exist already)"
+    );
+    argList::addVerboseOption
+    (
+        "Additional verbosity. (Can be used multiple times)"
     );
 
 
@@ -1675,15 +1102,16 @@ int main(int argc, char *argv[])
     const bool writeCellDist = args.found("cellDist");
     const bool dryrun = args.dryRun();
     const bool newTimes = args.found("newTimes");
+    const int optVerbose = args.verbose();
 
-    if (args.verbose())
+    bool decompose = args.found("decompose");
+    bool overwrite = args.found("overwrite");
+
+    if (optVerbose)
     {
         // Report on output
         parPointFieldDistributor::verbose_ = 1;
     }
-
-    bool decompose = args.found("decompose");
-    bool overwrite = args.found("overwrite");
 
     // Disable NaN setting and floating point error trapping. This is to avoid
     // any issues inside the field redistribution inside fvMeshDistribute
@@ -1821,7 +1249,7 @@ int main(int argc, char *argv[])
     }
 
 
-    Info<< "Create undecomposed database"<< nl << endl;
+    Info<< "Create undecomposed database" << nl << endl;
     Time baseRunTime
     (
         runTime.controlDict(),
@@ -1858,7 +1286,7 @@ int main(int argc, char *argv[])
 
 
     // Demand driven lagrangian mapper
-    autoPtr<parLagrangianRedistributor> lagrangianReconstructorPtr;
+    autoPtr<parLagrangianDistributor> lagrangianDistributorPtr;
 
 
     if (reconstruct)
@@ -1881,8 +1309,7 @@ int main(int argc, char *argv[])
 
 
         Info<< nl
-            << "Pass1 : reconstructing mesh and addressing" << nl << endl;
-
+            << "Reconstructing mesh and addressing" << nl << endl;
 
         forAll(regionNames, regioni)
         {
@@ -1893,7 +1320,8 @@ int main(int argc, char *argv[])
             );
             const fileName meshSubDir(regionDir/polyMesh::meshSubDir);
 
-            Info<< "\n\nReconstructing mesh " << regionName << nl << endl;
+            Info<< nl << nl
+                << "Reconstructing mesh " << regionName << nl << endl;
 
             // Loop over all times
             forAll(timeDirs, timeI)
@@ -2071,7 +1499,7 @@ int main(int argc, char *argv[])
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
             Info<< nl
-                << "Pass2 : reconstructing fields" << nl << endl;
+                << "Reconstructing fields" << nl << endl;
 
             runTime.setTime(timeDirs[0], 0);
             baseRunTime.setTime(timeDirs[0], 0);
@@ -2128,13 +1556,13 @@ int main(int argc, char *argv[])
             distMap = fvMeshTools::readProcAddressing(mesh, baseMeshPtr);
 
             // Construct field mapper
-            auto fvReconstructorPtr =
-                autoPtr<parFvFieldReconstructor>::New
+            auto fvDistributorPtr =
+                autoPtr<parFvFieldDistributor>::New
                 (
-                    baseMeshPtr(),
-                    mesh,
+                    mesh,            // source
+                    baseMeshPtr(),   // target
                     distMap(),
-                    Pstream::master()       // do I need to write?
+                    UPstream::master()  // Write reconstructed on master
                 );
 
             // Construct point field mapper
@@ -2161,7 +1589,7 @@ int main(int argc, char *argv[])
                 Info<< "    Detected initial mesh motion;"
                     << " reconstructing points" << nl
                     << endl;
-                fvReconstructorPtr().reconstructPoints();
+                fvDistributorPtr().reconstructPoints();
             }
 
 
@@ -2183,18 +1611,18 @@ int main(int argc, char *argv[])
 
 
                 // Check if any new meshes need to be read.
-                fvMesh::readUpdateState procStat = mesh.readUpdate();
+                polyMesh::readUpdateState procStat = mesh.readUpdate();
 
-                if (procStat == fvMesh::POINTS_MOVED)
+                if (procStat == polyMesh::POINTS_MOVED)
                 {
-                    Info<< "    Dected mesh motion; reconstructing points" << nl
-                        << endl;
-                    fvReconstructorPtr().reconstructPoints();
+                    Info<< "    Detected mesh motion; reconstructing points"
+                        << nl << endl;
+                    fvDistributorPtr().reconstructPoints();
                 }
                 else if
                 (
-                    procStat == fvMesh::TOPO_CHANGE
-                 || procStat == fvMesh::TOPO_PATCH_CHANGE
+                    procStat == polyMesh::TOPO_CHANGE
+                 || procStat == polyMesh::TOPO_PATCH_CHANGE
                 )
                 {
                     Info<< "    Detected topology change;"
@@ -2225,14 +1653,14 @@ int main(int argc, char *argv[])
 
                     // Reset field mappers
 
-                    fvReconstructorPtr.reset
+                    fvDistributorPtr.reset
                     (
-                        new parFvFieldReconstructor
+                        new parFvFieldDistributor
                         (
-                            baseMeshPtr(),
-                            mesh,
+                            mesh,           // source
+                            baseMeshPtr(),  // target
                             distMap(),
-                            Pstream::master()
+                            UPstream::master()  // Write reconstruct on master
                         )
                     );
 
@@ -2252,7 +1680,7 @@ int main(int argc, char *argv[])
                         )
                     );
 
-                    lagrangianReconstructorPtr.clear();
+                    lagrangianDistributorPtr.reset();
                 }
 
 
@@ -2261,12 +1689,8 @@ int main(int argc, char *argv[])
 
 
                 // Mesh fields (vol, surface, volInternal)
-                reconstructMeshFields
-                (
-                    fvReconstructorPtr(),
-                    objects,
-                    selectedFields
-                );
+                fvDistributorPtr()
+                    .distributeAllFields(objects, selectedFields);
 
                 // pointfields
                 // - distribute and write (verbose)
@@ -2277,7 +1701,7 @@ int main(int argc, char *argv[])
                 // Clouds (note: might not be present on all processors)
                 reconstructLagrangian
                 (
-                    lagrangianReconstructorPtr,
+                    lagrangianDistributorPtr,
                     baseMeshPtr(),
                     mesh,
                     distMap(),
@@ -2393,7 +1817,7 @@ int main(int argc, char *argv[])
 
                 if (decompose)
                 {
-                    Info<< "Restoring caseName to " << proc0CaseName << endl;
+                    Info<< "Restoring caseName" << endl;
                     runTime.caseName() = proc0CaseName;
                     runTime.processorCase(oldProcCase);
                 }
@@ -2491,7 +1915,7 @@ int main(int argc, char *argv[])
 
             if (Pstream::master() && decompose)
             {
-                Info<< "Restoring caseName to " << proc0CaseName << endl;
+                Info<< "Restoring caseName" << endl;
                 runTime.caseName() = proc0CaseName;
                 runTime.processorCase(oldProcCase);
             }
@@ -2533,43 +1957,31 @@ int main(int argc, char *argv[])
             }
 
 
-
-            wordList cloudNames;
-            List<wordList> fieldNames;
-
             // Detect lagrangian fields
             if (Pstream::master() && decompose)
             {
                 runTime.caseName() = baseRunTime.caseName();
                 runTime.processorCase(false);
             }
-            parLagrangianRedistributor::findClouds
-            (
-                mesh,
-                cloudNames,
-                fieldNames
-            );
 
             // Read lagrangian fields and store on cloud (objectRegistry)
             PtrList<unmappedPassivePositionParticleCloud> clouds
             (
-                cloudNames.size()
+                readLagrangian
+                (
+                    mesh,
+                    selectedLagrangianFields
+                )
             );
-            readLagrangian
-            (
-                mesh,
-                cloudNames,
-                selectedLagrangianFields,
-                clouds
-            );
+
             if (Pstream::master() && decompose)
             {
                 runTime.caseName() = proc0CaseName;
                 runTime.processorCase(oldProcCase);
             }
 
-            // Load fields, do all distribution (mesh and fields - but not
-            // lagrangian fields; these are done later)
+            // Load fields, do all distribution (mesh and fields)
+            // - but not lagrangian fields; these are done later
             autoPtr<mapDistributePolyMesh> distMap = redistributeAndWrite
             (
                 std::move(writeHandler),
@@ -2591,7 +2003,7 @@ int main(int argc, char *argv[])
             // Redistribute any clouds
             redistributeLagrangian
             (
-                lagrangianReconstructorPtr,
+                lagrangianDistributorPtr,
                 mesh,
                 nOldCells,
                 distMap(),

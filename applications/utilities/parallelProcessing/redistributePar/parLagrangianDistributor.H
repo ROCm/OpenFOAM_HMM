@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::parLagrangianRedistributor
+    Foam::parLagrangianDistributor
 
 Description
     Lagrangian field redistributor.
@@ -33,13 +33,14 @@ Description
     Runs in parallel. Redistributes from fromMesh to toMesh.
 
 SourceFiles
-    parLagrangianRedistributor.C
-    parLagrangianRedistributorFields.C
+    parLagrangianDistributor.C
+    parLagrangianDistributorFields.C
+    parLagrangianDistributorTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef parLagrangianRedistributor_H
-#define parLagrangianRedistributor_H
+#ifndef Foam_parLagrangianDistributor_H
+#define Foam_parLagrangianDistributor_H
 
 #include "PtrList.H"
 #include "fvMesh.H"
@@ -49,19 +50,19 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class mapDistributePolyMesh;
 class mapDistributeBase;
 class IOobjectList;
 class passivePositionParticleCloud;
 
 /*---------------------------------------------------------------------------*\
-                    Class parLagrangianRedistributor Declaration
+                    Class parLagrangianDistributor Declaration
 \*---------------------------------------------------------------------------*/
 
-class parLagrangianRedistributor
+class parLagrangianDistributor
 {
-    // Private data
+    // Private Data
 
         //- Source mesh reference
         const fvMesh& srcMesh_;
@@ -82,10 +83,10 @@ class parLagrangianRedistributor
     // Private Member Functions
 
         //- No copy construct
-        parLagrangianRedistributor(const parLagrangianRedistributor&) = delete;
+        parLagrangianDistributor(const parLagrangianDistributor&) = delete;
 
         //- No copy assignment
-        void operator=(const parLagrangianRedistributor&) = delete;
+        void operator=(const parLagrangianDistributor&) = delete;
 
 
 public:
@@ -93,7 +94,7 @@ public:
     // Constructors
 
         //- Construct from components
-        parLagrangianRedistributor
+        parLagrangianDistributor
         (
             const fvMesh& srcMesh,
             const fvMesh& tgtMesh,
@@ -102,28 +103,16 @@ public:
         );
 
 
-    // Member Functions
+    // Static Functions
 
         //- Find all clouds (on all processors) and for each cloud all
-        //  the objects. Result will be synchronised on all processors
+        //- the objects. Result will be synchronised on all processors
         static void findClouds
         (
             const fvMesh&,
             wordList& cloudNames,
             List<wordList>& objectNames
         );
-
-        //- Redistribute and write lagrangian positions
-        autoPtr<mapDistributeBase> redistributeLagrangianPositions
-        (
-            passivePositionParticleCloud& cloud
-        ) const;
-
-        //- Read, redistribute and write lagrangian positions
-        autoPtr<mapDistributeBase> redistributeLagrangianPositions
-        (
-            const word& cloudName
-        ) const;
 
         //- Pick up any fields of a given type
         template<class Type>
@@ -132,26 +121,6 @@ public:
             const IOobjectList& objects,
             const wordRes& selectedFields = wordRes()
         );
-
-        //- Read, redistribute and write all/selected lagrangian fields
-        template<class Type>
-        label redistributeFields
-        (
-            const mapDistributeBase& map,
-            const word& cloudName,
-            const IOobjectList& objects,
-            const wordRes& selectedFields = wordRes()
-        ) const;
-
-        //- Read, redistribute and write all/selected lagrangian fieldFields
-        template<class Type>
-        label redistributeFieldFields
-        (
-            const mapDistributeBase& map,
-            const word& cloudName,
-            const IOobjectList& objects,
-            const wordRes& selectedFields = wordRes()
-        ) const;
 
         //- Read and store all fields of a cloud
         template<class Container>
@@ -162,14 +131,81 @@ public:
             const wordRes& selectedFields = wordRes()
         );
 
+        //- Read and store all fields for known cloud field types
+        static label readAllFields
+        (
+            const passivePositionParticleCloud& cloud,
+            const IOobjectList& objects,
+            const wordRes& selectedFields = wordRes()
+        );
+
+        //- Read and store all fields for known cloud field types
+        //  Uses the current cloud instance to obtain the IOobjectList
+        static label readAllFields
+        (
+            const passivePositionParticleCloud& cloud,
+            const wordRes& selectedFields = wordRes()
+        );
+
+
+    // Member Functions
+
+        //- Redistribute and write lagrangian positions
+        autoPtr<mapDistributeBase> distributeLagrangianPositions
+        (
+            passivePositionParticleCloud& cloud
+        ) const;
+
+        //- Read, redistribute and write lagrangian positions
+        autoPtr<mapDistributeBase> distributeLagrangianPositions
+        (
+            const word& cloudName
+        ) const;
+
+        //- Redistribute all fields for known cloud field types
+        label distributeAllFields
+        (
+            const mapDistributeBase& lagrangianMap,
+            const word& cloudName,
+            const IOobjectList& cloudObjs,
+            const wordRes& selectedFields
+        ) const;
+
+        //- Redistribute and write all stored lagrangian fields
+        label distributeAllStoredFields
+        (
+            const mapDistributeBase& lagrangianMap,
+            passivePositionParticleCloud& cloud
+        ) const;
+
+
+        //- Read, redistribute and write all/selected lagrangian fields
+        template<class Type>
+        label distributeFields
+        (
+            const mapDistributeBase& map,
+            const word& cloudName,
+            const IOobjectList& objects,
+            const wordRes& selectedFields = wordRes()
+        ) const;
+
+        //- Read, redistribute and write all/selected lagrangian fieldFields
+        template<class Type>
+        label distributeFieldFields
+        (
+            const mapDistributeBase& map,
+            const word& cloudName,
+            const IOobjectList& objects,
+            const wordRes& selectedFields = wordRes()
+        ) const;
+
         //- Redistribute and write stored lagrangian fields
         template<class Container>
-        label redistributeStoredFields
+        label distributeStoredFields
         (
             const mapDistributeBase& map,
             passivePositionParticleCloud& cloud
         ) const;
-
 };
 
 
@@ -180,7 +216,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "parLagrangianRedistributorFields.C"
+#   include "parLagrangianDistributorTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

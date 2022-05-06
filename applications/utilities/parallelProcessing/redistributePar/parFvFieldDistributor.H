@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,22 +25,24 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::parFvFieldReconstructor
+    Foam::parFvFieldDistributor
 
 Description
     Finite volume reconstructor for volume and surface fields.
 
-    Runs in parallel. Reconstructs from procMesh to baseMesh. baseMesh
-    is non-zero cells on processor0 only.
+    Runs in parallel.
+    Reconstructs/redistributes from procMesh to baseMesh.
+    baseMesh is non-zero cells on processor0 only.
 
 SourceFiles
-    parFvFieldReconstructor.C
-    parFvFieldReconstructorFields.C
+    parFvFieldDistributor.C
+    parFvFieldDistributorFields.C
+    parFvFieldDistributorTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef parFvFieldReconstructor_H
-#define parFvFieldReconstructor_H
+#ifndef Foam_parFvFieldDistributor_H
+#define Foam_parFvFieldDistributor_H
 
 #include "PtrList.H"
 #include "fvMesh.H"
@@ -50,33 +52,33 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class mapDistributePolyMesh;
 class mapDistributeBase;
 class IOobjectList;
 
 /*---------------------------------------------------------------------------*\
-                    Class parFvFieldReconstructor Declaration
+                    Class parFvFieldDistributor Declaration
 \*---------------------------------------------------------------------------*/
 
-class parFvFieldReconstructor
+class parFvFieldDistributor
 {
-    // Private data
+    // Private Data
 
-        //- Reconstructed mesh reference
-        fvMesh& baseMesh_;
+        //- Processor mesh reference (source mesh)
+        const fvMesh& srcMesh_;
 
-        //- Processor mesh reference
-        const fvMesh& procMesh_;
+        //- Destination mesh reference (eg, reconstructed mesh)
+        fvMesh& tgtMesh_;
 
         //- Distribution map reference
         const mapDistributePolyMesh& distMap_;
 
-        //- Do I need to to write (usually master only)
-        const bool isWriteProc_;
-
         //- Patch mappers
         PtrList<mapDistributeBase> patchFaceMaps_;
+
+        //- Do I need to write (eg, master only for reconstruct)
+        bool isWriteProc_;
 
 
     // Private Member Functions
@@ -85,21 +87,30 @@ class parFvFieldReconstructor
         void createPatchFaceMaps();
 
         //- No copy construct
-        parFvFieldReconstructor(const parFvFieldReconstructor&) = delete;
+        parFvFieldDistributor(const parFvFieldDistributor&) = delete;
 
         //- No copy assignment
-        void operator=(const parFvFieldReconstructor&) = delete;
+        void operator=(const parFvFieldDistributor&) = delete;
 
 
 public:
 
+    //- Output verbosity when writing
+    static int verbose_;
+
+
     // Constructors
 
         //- Construct from components
-        parFvFieldReconstructor
+        //
+        //  \param srcMesh  The source mesh (eg, processor)
+        //  \param tgtMesh  The target mesh (eg, reconstructed)
+        //  \param distMap  The distribution map
+        //  \param isWriteProc  Tagged for output writing (on this proc)
+        parFvFieldDistributor
         (
-            fvMesh& baseMesh,
-            const fvMesh& procMesh,
+            const fvMesh& srcMesh,
+            fvMesh& tgtMesh,
             const mapDistributePolyMesh& distMap,
             const bool isWriteProc
         );
@@ -107,61 +118,85 @@ public:
 
     // Member Functions
 
-        //- Reconstruct volume internal field
+        //- Get status of write enabled (on this proc)
+        bool isWriteProc() const noexcept
+        {
+            return isWriteProc_;
+        }
+
+        //- Change status of write enabled (on this proc)
+        bool isWriteProc(const bool on) noexcept
+        {
+            bool old(isWriteProc_);
+            isWriteProc_ = on;
+            return old;
+        }
+
+
+        //- Helper: reconstruct and write mesh points
+        //  (note: should be moved to something like processorMeshes class)
+        void reconstructPoints();
+
+        //- Distribute all fields for known field types
+        void distributeAllFields
+        (
+            const IOobjectList& objects,
+            const wordRes& selectedFields
+        ) const;
+
+        //- Redistribute volume internal field
         template<class Type>
         tmp<DimensionedField<Type, volMesh>>
-        reconstructFvVolumeInternalField
+        distributeField
         (
             const DimensionedField<Type, volMesh>&
         ) const;
 
-        //- Read and reconstruct volume internal field
+        //- Read and distribute volume internal field
         template<class Type>
         tmp<DimensionedField<Type, volMesh>>
-        reconstructFvVolumeInternalField(const IOobject& fieldIoObject) const;
+        distributeInternalField(const IOobject& fieldObject) const;
 
 
-
-        //- Reconstruct volume field
+        //- Redistribute volume field
         template<class Type>
         tmp<GeometricField<Type, fvPatchField, volMesh>>
-        reconstructFvVolumeField
+        distributeField
         (
             const GeometricField<Type, fvPatchField, volMesh>& fld
         ) const;
 
-        //- Read and reconstruct volume field
+        //- Read and distribute volume field
         template<class Type>
         tmp<GeometricField<Type, fvPatchField, volMesh>>
-        reconstructFvVolumeField(const IOobject& fieldIoObject) const;
+        distributeVolumeField(const IOobject& fieldObject) const;
 
 
-
-        //- Reconstruct surface field
+        //- Redistribute surface field
         template<class Type>
         tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
-        reconstructFvSurfaceField
+        distributeField
         (
             const GeometricField<Type, fvsPatchField, surfaceMesh>&
         ) const;
 
-        //- Read and reconstruct surface field
+        //- Read and distribute surface field
         template<class Type>
         tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
-        reconstructFvSurfaceField(const IOobject& fieldIoObject) const;
+        distributeSurfaceField(const IOobject& fieldObject) const;
 
 
-        //- Read, reconstruct and write all/selected volume internal fields
+        //- Read, redistribute and write all/selected volume internal fields
         template<class Type>
-        label reconstructFvVolumeInternalFields
+        label distributeInternalFields
         (
             const IOobjectList& objects,
             const wordRes& selectedFields = wordRes()
         ) const;
 
-        //- Read, reconstruct and write all/selected volume fields
+        //- Read, redistribute and write all/selected volume fields
         template<class Type>
-        label reconstructFvVolumeFields
+        label distributeVolumeFields
         (
             const IOobjectList& objects,
             const wordRes& selectedFields = wordRes()
@@ -169,15 +204,11 @@ public:
 
         //- Read, reconstruct and write all/selected surface fields
         template<class Type>
-        label reconstructFvSurfaceFields
+        label distributeSurfaceFields
         (
             const IOobjectList& objects,
             const wordRes& selectedFields = wordRes()
         ) const;
-
-        //- Helper: reconstruct and write mesh points
-        //  (note: should be moved to something like processorMeshes class)
-        void reconstructPoints();
 };
 
 
@@ -188,7 +219,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "parFvFieldReconstructorFields.C"
+#   include "parFvFieldDistributorTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
