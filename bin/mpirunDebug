@@ -176,7 +176,7 @@ do
         -decomposeParDict)
             # Grab values and add to args immediately
             decompDict="$2"
-            appArgs="${appArgs}${appArgs:+ }$1 \"$2\""
+            appArgs="${appArgs}${appArgs:+ }$1 '$2'"
             shift
             ;;
 
@@ -204,7 +204,7 @@ do
     -decomposeParDict)
         # Grab values and add to args immediately
         decompDict="$2"
-        appArgs="${appArgs}${appArgs:+ }$1 \"$2\""
+        appArgs="${appArgs}${appArgs:+ }$1 '$2'"
         shift
         ;;
 
@@ -213,7 +213,7 @@ do
         then
             appName="$1"
         else
-            appArgs="${appArgs}${appArgs:+ }\"$1\""
+            appArgs="${appArgs}${appArgs:+ }'$1'"
         fi
         ;;
     esac
