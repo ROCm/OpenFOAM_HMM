@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,11 +32,11 @@ License
 template<class T>
 Foam::labelList Foam::sortedOrder
 (
-    const UPtrList<T>& input
+    const UPtrList<T>& list
 )
 {
     labelList order;
-    sortedOrder(input, order, typename PtrListOps::less<T>(input));
+    Foam::sortedOrder(list, order, typename UPtrList<T>::less(list));
     return order;
 }
 
@@ -44,57 +44,47 @@ Foam::labelList Foam::sortedOrder
 template<class T>
 void Foam::sortedOrder
 (
-    const UPtrList<T>& input,
+    const UPtrList<T>& list,
     labelList& order
 )
 {
-    sortedOrder(input, order, typename PtrListOps::less<T>(input));
+    Foam::sortedOrder(list, order, typename UPtrList<T>::less(list));
 }
 
 
 template<class T, class ListComparePredicate>
 void Foam::sortedOrder
 (
-    const UPtrList<T>& input,
+    const UPtrList<T>& list,
     labelList& order,
     const ListComparePredicate& comp
 )
 {
     // List lengths must be identical. Old content is overwritten
-    order.resize_nocopy(input.size());
+    order.resize_nocopy(list.size());
 
-    ListOps::identity(order);
+    // Same as std::iota and ListOps::identity
+    label value = 0;
+    for (label& item : order)
+    {
+        item = value;
+        ++value;
+    }
 
-    Foam::stableSort(order, comp);
-}
-
-
-template<class T>
-void Foam::sort(UPtrList<T>& list)
-{
-    labelList order;
-    sortedOrder(list, order);
-    list.sortOrder(order, false);  // false = allow nullptr
-}
-
-
-template<class T, class Compare>
-void Foam::sort(UPtrList<T>& list, const Compare& comp)
-{
-    labelList order;
-    sortedOrder(list, order, comp);
-    list.sortOrder(order, false);  // false = allow nullptr
+    std::stable_sort(order.begin(), order.end(), comp);
 }
 
 
 template<class T>
 void Foam::shuffle(UPtrList<T>& list)
 {
+    // Cannot use std::shuffle directly since that would dereference
+    // the list entries, which may contain null pointers.
+    // The alternative would be to expose the pointer details (a bit ugly).
     labelList order(identity(list.size()));
     Foam::shuffle(order);
-    list.sortOrder(order, false);  // false = allow nullptr
+    list.sortOrder(order, false);  // false = no nullptr check
 }
-
 
 
 // Templated implementation for types(), names(), etc - file-scope

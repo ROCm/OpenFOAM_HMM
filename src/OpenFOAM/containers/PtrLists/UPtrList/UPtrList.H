@@ -110,6 +110,72 @@ public:
         class const_iterator;
 
 
+    // Public Classes
+
+        //- A wrapper for a binary comparison of values that interjects
+        //- pointer dereferencing with null pointer guards.
+        //  It will also sort any null pointers to the end
+        //  (eg, rubbish that can be truncated)
+        template<class Compare>
+        struct value_compare
+        {
+            const Compare& comp;
+
+            value_compare(const Compare& cmp)
+            :
+                comp(cmp)
+            {}
+
+            //- Compare dereferenced pointers
+            bool operator()(const T* const a, const T* const b) const
+            {
+                return (a && b) ? comp(*a, *b) : bool(a);
+            }
+        };
+
+        //- A UPtrList compare binary predicate for normal sort order.
+        //- Null entries (if any) sort to the end.
+        struct less
+        {
+            const UPtrList<T>& values;
+
+            less(const UPtrList<T>& list)
+            :
+                values(list)
+            {}
+
+            //- Compare dereferenced pointer locations for normal sort.
+            bool operator()(const label ai, const label bi) const
+            {
+                const T* const a = values.get(ai);
+                const T* const b = values.get(bi);
+
+                return (a && b) ? (*a < *b) : bool(a);
+            }
+        };
+
+        //- A UPtrList compare binary predicate for reverse sort order.
+        //  Null entries (if any) sort to the end.
+        struct greater
+        {
+            const UPtrList<T>& values;
+
+            greater(const UPtrList<T>& list)
+            :
+                values(list)
+            {}
+
+            //- Compare dereferenced pointer locations for reverse sort
+            bool operator()(const label ai, const label bi) const
+            {
+                const T* const a = values.get(ai);
+                const T* const b = values.get(bi);
+
+                return (a && b) ? (*b < *a) : bool(b);
+            }
+        };
+
+
     // Constructors
 
         //- Default construct
@@ -215,13 +281,19 @@ public:
 
         //- Reorder elements.
         //- Reordering must be unique (ie, shuffle).
-        //  Optionally verify that all pointers have been set.
-        void reorder(const labelUList& oldToNew, const bool testNull = true);
+        //  Optionally check that all pointers have been set.
+        void reorder(const labelUList& oldToNew, const bool check = false);
 
         //- Reorder elements according to new order mapping (newToOld).
         //- Reordering must be unique (ie, shuffle).
-        //  Optionally verify that all pointers have been set.
-        void sortOrder(const labelUList& order, const bool testNull = true);
+        //  Optionally check that all pointers have been set.
+        void sortOrder(const labelUList& order, const bool check = false);
+
+
+    // Checks
+
+        //- Check and raise FatalError if any nullptr exists in the list
+        inline void checkNonNull() const;
 
 
     // Member Operators
@@ -362,22 +434,29 @@ public:
         };
 
 
-        //- Return an iterator to begin traversing the UPtrList
+        //- Iterator to begin of raw pointers traversal (use with caution)
+        T** begin_ptr() noexcept { return ptrs_.begin(); }
+
+        //- Iterator beyond end of raw pointers traversal (use with caution)
+        T** end_ptr() noexcept { return ptrs_.end(); }
+
+
+        //- Return an iterator to begin of UPtrList traversal
         inline iterator begin() noexcept;
 
-        //- Return an iterator to end traversing the UPtrList
+        //- Return iterator beyond end of UPtrList traversal
         inline iterator end() noexcept;
 
-        //- Return an const_iterator to begin traversing the UPtrList
+        //- Return const_iterator to begin of UPtrList traversal
         inline const_iterator cbegin() const noexcept;
 
-        //- Return an const_iterator to end traversing the UPtrList
+        //- Return const_iterator beyond end of UPtrList traversal
         inline const_iterator cend() const noexcept;
 
-        //- Return an const_iterator to begin traversing the UPtrList
+        //- Return const_iterator to begin of UPtrList traversal
         inline const_iterator begin() const noexcept;
 
-        //- Return an const_iterator to end traversing the UPtrList
+        //- Return const_iterator beyond end of UPtrList traversal
         inline const_iterator end() const noexcept;
 
 
@@ -390,6 +469,20 @@ public:
             const UPtrList<T>& list
         );
 };
+
+
+// * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
+
+//- Inplace (stable) sorting of pointer list.
+template<class T>
+void sort(UPtrList<T>& list);
+
+//- Inplace (stable) sorting of pointer list using given comparator,
+//- which compares objects, not pointers.
+//  This sort function includes null pointer guards and will also sort
+//  any null pointers to the end (eg, rubbish that can be truncated)
+template<class T, class Compare>
+void sort(UPtrList<T>& list, const Compare& comp);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

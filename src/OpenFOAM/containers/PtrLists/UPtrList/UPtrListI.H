@@ -215,6 +215,13 @@ inline T* Foam::UPtrList<T>::set(const label i, T* ptr)
 }
 
 
+template<class T>
+inline void Foam::UPtrList<T>::checkNonNull() const
+{
+    ptrs_.checkNonNull();
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T>

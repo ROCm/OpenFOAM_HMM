@@ -50,6 +50,9 @@ Foam::label Foam::Detail::PtrListDetail<T>::count() const
 template<class T>
 Foam::label Foam::Detail::PtrListDetail<T>::findNull() const
 {
+    // Same as  List<T*>::find(nullptr);
+    // except perhaps without pointer ambiguities...
+
     label idx = 0;
 
     for (const T* ptr : *this)
