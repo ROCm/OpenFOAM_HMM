@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef HashTableDetail_H
-#define HashTableDetail_H
+#ifndef Foam_HashTableDetail_H
+#define Foam_HashTableDetail_H
 
 #include "zero.H"
 #include <memory>
@@ -73,13 +73,13 @@ template<class T> struct isPointerLike<std::unique_ptr<T>> : std::true_type {};
 \*---------------------------------------------------------------------------*/
 
 //- Internal storage type for HashTable entries
-//  Structure with a (K,V) tuple and a linked-list for collisions
+//  Comprises a (K,V) tuple and a linked-list entry for hash collisions.
 //  Could store key/val as std::pair, but no particular advantage
 //  unless the iterator dereference type changes.
 template<class K, class V>
 struct HashTablePair
 {
-    // Types
+    // Data Types
 
         //- Type of key
         typedef K key_type;
@@ -87,26 +87,26 @@ struct HashTablePair
         //- Type of content
         typedef V mapped_type;
 
-        //- This struct stores a value
+        //- This class stores a value
         static constexpr bool stores_value() noexcept
         {
             return true;
         }
 
 
-    // Member Data
+    // Data
 
         //- The lookup key
-        key_type key_;
+        const K key_;
 
         //- The mapped data
-        mapped_type val_;
+        V val_;
 
         //- Addressing (next in collision list)
         HashTablePair* next_;
 
 
-    // Member Functions
+    // Generated Methods
 
         //- No copy construct
         HashTablePair(const HashTablePair&) = delete;
@@ -114,6 +114,8 @@ struct HashTablePair
         //- No copy assignment
         void operator=(const HashTablePair&) = delete;
 
+
+    // Constructors
 
         //- Construct from next pointer, key, contents
         template<class... Args>
@@ -130,22 +132,37 @@ struct HashTablePair
         {}
 
 
+    // Member Functions
+
         //- The key
-        const key_type& key() const
+        const key_type& key() const noexcept
         {
             return key_;
         }
 
         //- Const access to the mapped value
-        const mapped_type& cval() const
+        const mapped_type& cval() const noexcept
+        {
+            return val_;
+        }
+
+        //- Const access to the mapped value
+        const mapped_type& val() const noexcept
         {
             return val_;
         }
 
         //- Non-const access to the mapped value
-        mapped_type& val()
+        mapped_type& val() noexcept
         {
             return val_;
+        }
+
+
+        //- Compare keys
+        bool operator<(const HashTablePair& rhs) const
+        {
+            return key_ < rhs.key_;
         }
 
         //- Write (key, val) pair - for pointer types
@@ -190,38 +207,38 @@ struct HashTablePair
 \*---------------------------------------------------------------------------*/
 
 //- Internal storage type for HashSet entries
-//  Structure with a single (K) value and a linked-list for collisions
+//  Comprises a single (K) value and a linked-list entry for hash collisions
 template<class K>
 struct HashTableSingle
 {
-    // Types
+    // Data Types
 
         //- Type of key
         typedef K key_type;
 
-        //- Type of content
+        //- Type of content (no content: placeholder)
         typedef Foam::zero::null mapped_type;
 
         //- Content storage type to the entry
         typedef key_type value_type;
 
-        //- This struct does not store a value
+        //- This class does not store any value
         static constexpr bool stores_value() noexcept
         {
             return false;
         }
 
 
-    // Member Data
+    // Data
 
         //- The lookup key == content
-        key_type key_;
+        const K key_;
 
         //- Addressing (next in collision list)
         HashTableSingle* next_;
 
 
-    // Member Functions
+    // Generated Methods
 
         //- No copy construct
         HashTableSingle(const HashTableSingle&) = delete;
@@ -229,6 +246,8 @@ struct HashTableSingle
         //- No copy assignment
         void operator=(const HashTableSingle&) = delete;
 
+
+    // Constructors
 
         //- Construct from next pointer, key, (unused) contents
         template<class... Args>
@@ -244,25 +263,40 @@ struct HashTableSingle
         {}
 
 
+    // Member Functions
+
         //- The key
-        const key_type& key() const
+        const key_type& key() const noexcept
         {
             return key_;
         }
 
         //- Const access to the (dummy) mapped value
-        const mapped_type& cval() const
+        const mapped_type& cval() const noexcept
+        {
+            return Foam::zero::null::dummy;
+        }
+
+        //- Const access to the (dummy) mapped value
+        const mapped_type& val() const noexcept
         {
             return Foam::zero::null::dummy;
         }
 
         //- Non-const access to the (dummy) mapped value
-        mapped_type& val()
+        mapped_type& val() noexcept
         {
             return Foam::zero::null::dummy;
         }
 
-        //- Write the key. There is no value
+
+        //- Compare keys
+        bool operator<(const HashTableSingle& rhs) const
+        {
+            return key_ < rhs.key_;
+        }
+
+        //- Write the key. There is no value to write.
         void print(Ostream& os) const
         {
             os << key_;

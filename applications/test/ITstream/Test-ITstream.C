@@ -34,7 +34,7 @@ Description
 #include "argList.H"
 #include "ITstream.H"
 #include "ListOps.H"
-#include "StringListOps.H"
+#include "stringListOps.H"
 
 using namespace Foam;
 
