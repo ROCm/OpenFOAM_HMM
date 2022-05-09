@@ -15,6 +15,9 @@ done
 #unset FOAM_SIGFPE
 runApplication createPatch -allRegions -overwrite
 
+# Output weights on AMI mapped patches
+runApplication checkMesh -allRegions -allGeometry
+
 restore0Dir
 
 echo
