@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,17 +29,18 @@ Class
 
 Description
     An instant of time. Contains the time value and name.
+    Uses Foam::Time when formatting the name.
 
 SourceFiles
-    instant.C
+    instants.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef instant_H
-#define instant_H
+#ifndef Foam_instant_H
+#define Foam_instant_H
 
-#include "word.H"
 #include "Instant.H"
+#include "word.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,15 +59,13 @@ public:
 
     // Static Data Members
 
+        //- The type name (eg, for pTraits)
         static const char* const typeName;
 
 
-    // Constructors
+    // Generated Methods
 
-        //- Copy and move construct from components
-        using Instant<word>::Instant;
-
-        //- Construct null, with time-value = 0.
+        //- Default construct, with value = 0 and empty name
         instant() = default;
 
         //- Copy construct
@@ -75,25 +74,28 @@ public:
         //- Move construct
         instant(instant&&) = default;
 
-        //- Construct from timeValue, auto generating the name
-        explicit instant(scalar timeValue);
-
-        //- Construct from timeName, parsing timeName for a value
-        explicit instant(const word& timeName);
-
-        //- Construct from timeName, parsing timeName for a value
-        explicit instant(word&& timeName);
-
-
-    // Operators
-
         //- Copy assignment
         instant& operator=(const instant&) = default;
 
         //- Move assignment
         instant& operator=(instant&&) = default;
 
+
+    // Constructors
+
+        //- Inherit all constructors (eg, copy/move construct from components)
+        using Instant<word>::Instant;
+
+        //- Construct from timeValue, auto generating the name
+        explicit instant(scalar timeValue);
+
+        //- Copy construct from timeName, parsing timeName for a value
+        explicit instant(const word& timeName);
+
+        //- Move construct from timeName, parsing timeName for a value
+        explicit instant(word&& timeName);
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

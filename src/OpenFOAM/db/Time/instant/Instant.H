@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,19 +27,17 @@ Class
     Foam::Instant
 
 Description
-    A tuple of value and key.
+    A tuple of scalar value and key.
     The value often corresponds to a time value, thus the naming of the class.
     The key will usually be a time name or a file name etc.
 
-SourceFiles
-    Instant.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef Instant_H
-#define Instant_H
+#ifndef Foam_Instant_H
+#define Foam_Instant_H
 
 #include "scalar.H"
+#include <utility>  // std::move
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -64,28 +62,19 @@ class Instant
 
 public:
 
-    // Public classes
+    // Public Classes
 
         //- Less function for sorting
         struct less
         {
-            bool operator()(const Instant& a, const Instant& b) const
+            bool operator()(const Instant& a, const Instant& b) const noexcept
             {
                 return a.value() < b.value();
             }
         };
 
 
-    // Constructors
-
-        //- Construct null, with value = 0.
-        Instant();
-
-        //- Copy construct from components
-        Instant(scalar val, const T& key);
-
-        //- Move construct from components
-        Instant(scalar val, T&& key);
+    // Generated Methods
 
         //- Copy construct
         Instant(const Instant&) = default;
@@ -93,86 +82,131 @@ public:
         //- Move construct
         Instant(Instant&&) = default;
 
-
-    // Member Functions
-
-        //- The value (const access)
-        scalar value() const
-        {
-            return val_;
-        }
-
-        //- The value (non-const access)
-        scalar& value()
-        {
-            return val_;
-        }
-
-        //- The name/key (const access)
-        const T& name() const
-        {
-            return key_;
-        }
-
-        //- The name/key (non-const access)
-        T& name()
-        {
-            return key_;
-        }
-
-        //- True if values are equal (includes SMALL for rounding)
-        bool equal(scalar val) const;
-
-        //- True if values are equal (includes SMALL for rounding)
-        template<class T2>
-        bool equal(const Instant<T2>& other) const;
-
-
-    // Operators
-
         //- Copy assignment
         Instant& operator=(const Instant&) = default;
 
         //- Move assignment
         Instant& operator=(Instant&&) = default;
+
+
+    // Constructors
+
+        //- Default construct, with value = 0 and empty name
+        Instant()
+        :
+            val_(0),
+            key_()
+        {}
+
+        //- Copy construct from components
+        Instant(scalar val, const T& key)
+        :
+            val_(val),
+            key_(key)
+        {}
+
+        //- Move construct from components
+        Instant(scalar val, T&& key)
+        :
+            val_(val),
+            key_(std::move(key))
+        {}
+
+
+    // Member Functions
+
+        //- The value (const access)
+        scalar value() const noexcept
+        {
+            return val_;
+        }
+
+        //- The value (non-const access)
+        scalar& value() noexcept
+        {
+            return val_;
+        }
+
+        //- The name/key (const access)
+        const T& name() const noexcept
+        {
+            return key_;
+        }
+
+        //- The name/key (non-const access)
+        T& name() noexcept
+        {
+            return key_;
+        }
+
+        //- True if values are equal (includes SMALL for rounding)
+        bool equal(scalar val) const noexcept
+        {
+            return ((val_ > val - SMALL) && (val_ < val + SMALL));
+        }
+
+        //- True if values are equal (includes SMALL for rounding)
+        template<class T2>
+        bool equal(const Instant<T2>& other) const noexcept
+        {
+            return (*this).equal(other.value());
+        }
 };
 
 
-// IOstream Operators
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
-template<class T> Istream& operator>>(Istream& is, Instant<T>& inst);
-template<class T> Ostream& operator<<(Ostream& os, const Instant<T>& inst);
-
-
-// Global Operators
-
-//- Compare instant values for equality
 template<class T1, class T2>
-bool operator==(const Instant<T1>& a, const Instant<T2>& b);
+inline bool operator==(const Instant<T1>& a, const Instant<T2>& b) noexcept
+{
+    return a.equal(b.value());
+}
 
-//- Compare instant values for inequality
-template<class T1, class T2>
-bool operator!=(const Instant<T1>& a, const Instant<T2>& b);
 
-//- Compare instant values for less-than
 template<class T1, class T2>
-bool operator<(const Instant<T1>& a, const Instant<T2>& b);
+inline bool operator!=(const Instant<T1>& a, const Instant<T2>& b) noexcept
+{
+    return !a.equal(b.value());
+}
 
-//- Compare instant values for greater-than
+
 template<class T1, class T2>
-bool operator>(const Instant<T1>& a, const Instant<T2>& b);
+inline bool operator<(const Instant<T1>& a, const Instant<T2>& b) noexcept
+{
+    return (a.value() < b.value());
+}
+
+
+template<class T1, class T2>
+inline bool operator>(const Instant<T1>& a, const Instant<T2>& b) noexcept
+{
+    return (b.value() < a.value());
+}
+
+
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
+//- Read instant tuple from Istream
+template<class T>
+inline Istream& operator>>(Istream& is, Instant<T>& inst)
+{
+    is >> inst.value() >> inst.name();
+    return is;
+}
+
+
+//- Write instant tuple to Ostream
+template<class T>
+inline Ostream& operator<<(Ostream& os, const Instant<T>& inst)
+{
+    os << inst.value() << '\t' << inst.name();
+    return os;
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "Instant.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

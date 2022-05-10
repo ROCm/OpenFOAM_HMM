@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,8 @@ License
 
 #include "instant.H"
 #include "Time.H"
-#include <cstdlib>
+#include <cstdlib>  // std::atof
+#include <utility>  // std::move
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -45,14 +46,18 @@ Foam::instant::instant(scalar timeValue)
 
 Foam::instant::instant(const word& timeName)
 :
-    Instant<word>(std::atof(timeName.c_str()), timeName)
-{}
+    Instant<word>(0, timeName)
+{
+    value() = std::atof(name().c_str());
+}
 
 
 Foam::instant::instant(word&& timeName)
 :
-    Instant<word>(std::atof(timeName.c_str()), std::move(timeName))
-{}
+    Instant<word>(0, std::move(timeName))
+{
+    value() = std::atof(name().c_str());
+}
 
 
 // ************************************************************************* //

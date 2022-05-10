@@ -31,8 +31,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef instantList_H
-#define instantList_H
+#ifndef Foam_instantList_H
+#define Foam_instantList_H
 
 #include "instant.H"
 #include "List.H"
@@ -41,7 +41,11 @@ Description
 
 namespace Foam
 {
-    typedef List<instant> instantList;
+
+typedef
+    List<instant>
+    instantList;
+
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -31,17 +31,20 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fileNameInstant_H
-#define fileNameInstant_H
+#ifndef Foam_fileNameInstant_H
+#define Foam_fileNameInstant_H
 
 #include "fileName.H"
-#include "Instant.H"
+#include "instant.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    typedef Instant<fileName> fileNameInstant;
+
+typedef
+    Instant<fileName>
+    fileNameInstant;
 
 } // End namespace Foam
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,6 +65,7 @@ Description
 #include "fileOperation.H"
 #include "OSspecific.H"
 #include "HashPtrTable.H"
+#include "DynamicList.H"
 #include "List.H"
 #include "unthreadedInitialise.H"
 
@@ -95,7 +96,7 @@ protected:
         const label myComm_;
 
         //- Cached times for a given directory
-        mutable HashPtrTable<instantList> times_;
+        mutable HashPtrTable<DynamicList<instant>> times_;
 
 
     // Protected Operation Functors
@@ -756,7 +757,7 @@ public:
             virtual void flush() const;
 
             //- Return cached times
-            const HashPtrTable<instantList>& times() const
+            const HashPtrTable<DynamicList<instant>>& times() const noexcept
             {
                 return times_;
             }

@@ -2234,9 +2234,9 @@ Foam::instantList Foam::fileOperations::masterUncollatedFileOperation::findTimes
         if (debug)
         {
             Pout<< "masterUncollatedFileOperation::findTimes :"
-                << " Found " << iter()->size() << " cached times" << endl;
+                << " Found " << iter.val()->size() << " cached times" << endl;
         }
-        return *iter();
+        return *(iter.val());
     }
     else
     {
@@ -2252,19 +2252,20 @@ Foam::instantList Foam::fileOperations::masterUncollatedFileOperation::findTimes
         }
         Pstream::broadcast(times);    //, comm_);
 
-        // Note: do we also cache if no times have been found since it might
-        //       indicate a directory that is being filled later on ...
-
-        instantList* tPtr = new instantList(std::move(times));
-
-        times_.set(directory, tPtr);
-
         if (debug)
         {
             Pout<< "masterUncollatedFileOperation::findTimes :"
-                << " Caching times:" << *tPtr << nl
+                << " Caching times:" << times << nl
                 << "    for directory:" << directory << endl;
         }
+
+        // Note: do we also cache if no times have been found since it might
+        //       indicate a directory that is being filled later on ...
+
+        auto* tPtr = new DynamicList<instant>(std::move(times));
+
+        times_.set(directory, tPtr);
+
         return *tPtr;
     }
 }
@@ -2280,33 +2281,40 @@ void Foam::fileOperations::masterUncollatedFileOperation::setTime
         return;
     }
 
-    // Mutable access to instantList for modification and sorting
+    // Mutable access to instant list for modification and sorting
     // - cannot use auto type deduction here
 
-    HashPtrTable<instantList>::iterator iter = times_.find(tm.path());
+    HashPtrTable<DynamicList<instant>>::iterator iter = times_.find(tm.path());
 
     if (iter.found())
     {
-        instantList& times = *iter();
+        DynamicList<instant>& times = *(iter.val());
 
         const instant timeNow(tm.value(), tm.timeName());
 
-        // Exclude constant when checking and sorting
-        const label skipConst =
+        // The start index for checking and sorting (excluding "constant")
+        const label startIdx =
         (
-            (!times.empty() && times[0].name() == tm.constant())
-          ? 1
-          : 0
+            (times.empty() || times[0].name() != tm.constant())
+          ? 0
+          : 1
         );
 
-        if
+        // This routine always results in a sorted list of times, so first
+        // check if the new time is greater than the latest existing time.
+        // Can then simply append without extra searching or sorting
+
+        if (times.size() <= startIdx || times.last() < timeNow)
+        {
+            times.append(timeNow);
+        }
+        else if
         (
             findSortedIndex
             (
-                SubList<instant>(times, times.size()-skipConst, skipConst),
+                SubList<instant>(times, times.size()-startIdx, startIdx),
                 timeNow
-            )
-         == -1
+            ) < 0
         )
         {
             if (debug)
@@ -2317,9 +2325,10 @@ void Foam::fileOperations::masterUncollatedFileOperation::setTime
             }
 
             times.append(timeNow);
+
             SubList<instant> realTimes
             (
-                times, times.size()-skipConst, skipConst
+                times, times.size()-startIdx, startIdx
             );
             Foam::stableSort(realTimes);
         }
