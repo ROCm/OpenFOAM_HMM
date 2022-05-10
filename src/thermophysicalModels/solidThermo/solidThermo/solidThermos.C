@@ -43,6 +43,7 @@ License
 #include "exponentialSolidTransport.H"
 #include "polynomialSolidTransport.H"
 #include "tabulatedSolidTransport.H"
+#include "tabulatedAnIsoSolidTransport.H"
 #include "pureMixture.H"
 #include "sensibleEnthalpy.H"
 #include "sensibleInternalEnergy.H"
@@ -126,6 +127,18 @@ makeSolidThermo
     sensibleEnthalpy,
     hTabulatedThermo,
     icoTabulated,
+    specie
+);
+
+makeSolidThermo
+(
+    solidThermo,
+    heSolidThermo,
+    pureMixture,
+    tabulatedAnIsoSolidTransport,
+    sensibleEnthalpy,
+    hTabulatedThermo,
+    icoPolynomial,
     specie
 );
 
