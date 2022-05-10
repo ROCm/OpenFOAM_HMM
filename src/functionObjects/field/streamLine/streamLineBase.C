@@ -735,7 +735,7 @@ bool Foam::functionObjects::streamLineBase::writeToFile()
 
                 forAll(allScalars_, scalari)
                 {
-                    DynamicList<scalarList>& allTrackVals = allScalars_[scalari];
+                    auto& allTrackVals = allScalars_[scalari];
                     scalarValues[scalari].resize(nTracks);
 
                     forAll(allTrackVals, tracki)
@@ -768,7 +768,7 @@ bool Foam::functionObjects::streamLineBase::writeToFile()
 
                 forAll(allVectors_, vectori)
                 {
-                    DynamicList<vectorList>& allTrackVals = allVectors_[vectori];
+                    auto& allTrackVals = allVectors_[vectori];
                     vectorValues[vectori].setSize(nTracks);
 
                     forAll(allTrackVals, tracki)
@@ -789,7 +789,7 @@ bool Foam::functionObjects::streamLineBase::writeToFile()
 
                     outputFileNames.insert
                     (
-                        scalarNames_[i],
+                        vectorNames_[i],
                         time_.relativePath(outFile, true)
                     );
                 }

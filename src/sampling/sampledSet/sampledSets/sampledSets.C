@@ -99,7 +99,8 @@ Foam::OFstream* Foam::sampledSets::createProbeFile(const word& fieldName)
             mesh_.time().globalPath()
           / functionObject::outputPrefix
           / probeSubDir
-          / mesh_.time().timeName()
+            // Use startTime as the instance for output files
+          / mesh_.time().timeName(mesh_.time().startTime().value())
         );
         probeDir.clean();  // Remove unneeded ".."
 
