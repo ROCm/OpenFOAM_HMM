@@ -26,7 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "mappedFixedInternalValueFvPatchField.H"
-#include "UIndirectList.H"
+#include "IndirectList.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

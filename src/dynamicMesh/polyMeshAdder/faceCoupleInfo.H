@@ -133,12 +133,12 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef faceCoupleInfo_H
-#define faceCoupleInfo_H
+#ifndef Foam_faceCoupleInfo_H
+#define Foam_faceCoupleInfo_H
 
 #include "pointField.H"
 #include "indirectPrimitivePatch.H"
-#include "primitiveFacePatch.H"
+#include "primitivePatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -146,7 +146,6 @@ namespace Foam
 {
 
 typedef HashTable<labelList, edge, Hash<edge>> edgeLookup;
-
 
 // Forward Declarations
 class face;

@@ -31,7 +31,7 @@ Description
 #include "string.H"
 #include "macros.H"
 #include "IOstreams.H"
-#include "UList.H"
+#include "List.H"
 #include "HashSet.H"
 
 #include <typeinfo>

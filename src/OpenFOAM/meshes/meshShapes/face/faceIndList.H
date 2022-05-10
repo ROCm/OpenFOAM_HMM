@@ -37,13 +37,12 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef faceIndList_H
-#define faceIndList_H
+#ifndef Foam_faceIndList_H
+#define Foam_faceIndList_H
 
 // Include all normal list typedefs as well
 #include "faceList.H"
 #include "IndirectList.H"
-#include "UIndirectList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

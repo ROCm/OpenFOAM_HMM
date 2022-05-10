@@ -42,8 +42,8 @@ Description
       - procSchedule()[proci] gives per proci
 
     Does not care whether 'talking' is first send, second receive or maybe
-    full swap. This is all responsibility of caller. See ProcessorTopology
-    class for use in scheduling processor boundary swaps.
+    full swap. This is all responsibility of caller.
+    See Foam::rocessorTopology for use in scheduling processor boundary swaps.
 
 SourceFiles
     commSchedule.C
@@ -78,13 +78,17 @@ class commSchedule
 
 public:
 
+    //- Runtime type information
     ClassName("commSchedule");
+
 
     // Constructors
 
         //- Construct from wanted communication. Wanted communication is between
-        //  two processors. Can be a one-way communication or
-        //  two-way communication, that is up to the caller. This class just
+        //- two processors. Can be a one-way communication or
+        //- two-way communication, that is up to the caller.
+        //
+        //  This class just
         //  determines an order for it such that any processor is only talking
         //  to one other at a time. After construction:
         //  - schedule is the order in which comms is done.

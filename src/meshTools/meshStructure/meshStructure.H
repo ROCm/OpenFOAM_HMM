@@ -39,11 +39,11 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef meshStructure_H
-#define meshStructure_H
+#ifndef Foam_meshStructure_H
+#define Foam_meshStructure_H
 
 #include "labelList.H"
-#include "uindirectPrimitivePatch.H"
+#include "indirectPrimitivePatch.H"
 #include "className.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -51,7 +51,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declaration
 class polyMesh;
 class globalIndex;
 

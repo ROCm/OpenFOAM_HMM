@@ -28,6 +28,7 @@ License
 #include "vtkWrite.H"
 #include "cellBitSet.H"
 #include "topoSetCellSource.H"
+#include "processorPolyPatch.H"
 
 // * * * * * * * * * * * * * * Local Data Members  * * * * * * * * * * * * * //
 

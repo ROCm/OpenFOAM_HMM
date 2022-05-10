@@ -43,7 +43,7 @@ Foam::bitSet& Foam::bitSet::minusEq(const bitSet& other)
 {
     if (&other == this)
     {
-        // Self '-=' : results in clearing all bits
+        // Self '-=' : clears all bits
         if (debug & 2)
         {
             InfoInFunction
@@ -53,11 +53,11 @@ Foam::bitSet& Foam::bitSet::minusEq(const bitSet& other)
         reset();
         return *this;
     }
-    else if (empty() || other.empty())
+    else if (none() || other.none())
     {
+        // no-op: nothing can change
         return *this;
     }
-
 
     // The operation (on overlapping blocks)
     {
@@ -88,21 +88,32 @@ Foam::bitSet& Foam::bitSet::andEq(const bitSet& other)
 
         return *this;
     }
-    else if (empty())
+    else if (none())
     {
-        // empty set : no-op (no overlap possible)
+        // no-op: nothing is set - no intersection possible
         return *this;
     }
-    else if (other.empty())
+    else if (other.none())
     {
-        reset();  // Other is empty - no overlap possible
+        // no-op: other has nothing set - no intersection possible
+        reset();
         return *this;
     }
 
+
+    const label origSize(size());
+    const label otherSize(other.size());
+
+    if (origSize > otherSize)
+    {
+        // Clear bits (and blocks) that do not overlap at all
+        resize(otherSize);
+        resize(origSize);
+    }
 
     // The operation (on overlapping blocks)
     {
-        const label nblocks = num_blocks(std::min(size(), other.size()));
+        const label nblocks = num_blocks(std::min(origSize, otherSize));
         const auto& rhs = other.blocks_;
 
         for (label blocki = 0; blocki < nblocks; ++blocki)
@@ -115,7 +126,7 @@ Foam::bitSet& Foam::bitSet::andEq(const bitSet& other)
 }
 
 
-Foam::bitSet& Foam::bitSet::orEq(const bitSet& other, const bool strict)
+Foam::bitSet& Foam::bitSet::orEq(const bitSet& other)
 {
     if (&other == this)
     {
@@ -129,52 +140,21 @@ Foam::bitSet& Foam::bitSet::orEq(const bitSet& other, const bool strict)
 
         return *this;
     }
-    else if (other.empty())
+    else if (other.none())
     {
-        if ((debug & 2) && !empty())
-        {
-            // OK if both are empty
-            InfoInFunction
-                << "Perform |= using empty operand: ignore" << nl;
-        }
-
-        // No (normal) overlap: no-op
+        // no-op: nothing can change
         return *this;
     }
-    else if (empty())
+
+
+    // Largest new bit that could be introduced
+    const label otherMax(other.find_last());
+
+    if (otherMax >= size())
     {
-        if (debug & 2)
-        {
-            InfoInFunction
-                << "Perform |= on empty bitSet" << nl;
-        }
-
-        if (strict)
-        {
-            // No (normal) overlap: no-op
-            return *this;
-        }
+        // Extend to accommodate bits from 'other'
+        resize(otherMax+1);
     }
-    else if ((debug & 2) && (size() != other.size()))
-    {
-        InfoInFunction
-            << "Perform |= on dissimilar sized bitSets: "
-            << size()  << " vs. " << other.size() << nl;
-    }
-
-    label minpos = -1; // Min trim point
-
-    if ((size() < other.size()) && !strict)
-    {
-        // The size (B > A) and we are non-strict (greedy), which means we may
-        // acquire additional bits from B. However, we would like to avoid
-        // spurious changes in the size of A (ie, B is longer but the extra
-        // bits are unset and thus don't affect the logical result).
-
-        minpos = size();
-        resize(other.size());   // Blocks now overlap
-    }
-
 
     // The operation (on overlapping blocks)
     {
@@ -187,26 +167,15 @@ Foam::bitSet& Foam::bitSet::orEq(const bitSet& other, const bool strict)
         }
     }
 
-
-    // Cleanup - minpos >= 0 means we need to check/adjust the trim point
-    if (minpos >= 0)
-    {
-        trim(minpos); // Adjust the trim point (size)
-    }
-    else
-    {
-        clear_trailing_bits();
-    }
-
     return *this;
 }
 
 
-Foam::bitSet& Foam::bitSet::xorEq(const bitSet& other, const bool strict)
+Foam::bitSet& Foam::bitSet::xorEq(const bitSet& other)
 {
     if (&other == this)
     {
-        // Self '^=' : results in clearing all bits
+        // Self '^=' : clears all bits
 
         if (debug & 2)
         {
@@ -217,47 +186,21 @@ Foam::bitSet& Foam::bitSet::xorEq(const bitSet& other, const bool strict)
         reset();
         return *this;
     }
-    else if (other.empty())
+    else if (other.none())
     {
-        if ((debug & 2) && !empty())
-        {
-            // OK if both are empty
-            InfoInFunction
-                << "Perform ^= using empty operand: ignore" << nl;
-        }
-
-        // No (normal) overlap: no-op
+        // no-op: nothing can change
         return *this;
     }
-    else if (empty())
+
+
+    // Largest new bit that could be introduced
+    const label otherMax(other.find_last());
+
+    if (otherMax >= size())
     {
-        if (debug & 2)
-        {
-            InfoInFunction
-                << "Perform ^= on empty bitSet" << nl;
-        }
-
-        if (strict)
-        {
-            // No (normal) overlap: no-op
-            return *this;
-        }
+        // Extend to accommodate bits from 'other'
+        resize(otherMax+1);
     }
-    else if ((debug & 2) && (size() != other.size()))
-    {
-        InfoInFunction
-            << "Perform ^= on dissimilar sized bitSets: "
-            << size()  << " vs. " << other.size() << nl;
-    }
-
-    label minpos = -1; // Min trim point
-
-    if ((size() < other.size()) && !strict)
-    {
-        minpos = size();        // This logic is explained in the orEq() method
-        resize(other.size());   // Blocks now overlap
-    }
-
 
     // The operation (on overlapping blocks)
     {
@@ -268,17 +211,6 @@ Foam::bitSet& Foam::bitSet::xorEq(const bitSet& other, const bool strict)
         {
             blocks_[blocki] ^= rhs[blocki];
         }
-    }
-
-
-    // Cleanup - minpos >= 0 means we need to check/adjust the trim point
-    if (minpos >= 0)
-    {
-        trim(minpos); // Adjust the trim point (size)
-    }
-    else
-    {
-        clear_trailing_bits();
     }
 
     return *this;

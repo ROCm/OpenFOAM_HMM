@@ -32,7 +32,6 @@ License
 #include "edgeHashes.H"
 #include "foamVtkLineWriter.H"
 #include "foamVtkIndPatchWriter.H"
-#include "foamVtkUIndPatchWriter.H"
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 

@@ -167,12 +167,33 @@ Foam::IOField<Type>::IOField(const IOobject& io, const tmp<Field<Type>>& tfld)
 }
 
 
+template<class Type>
+Foam::IOFieldRef<Type>::IOFieldRef
+(
+    const IOobject& io,
+    const Field<Type>& content
+)
+:
+    regIOobject(io),
+    contentRef_(content)  // cref
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
 bool Foam::IOField<Type>::writeData(Ostream& os) const
 {
-    return (os << static_cast<const Field<Type>&>(*this)).good();
+    os << static_cast<const Field<Type>&>(*this);
+    return os.good();
+}
+
+
+template<class Type>
+bool Foam::IOFieldRef<Type>::writeData(Ostream& os) const
+{
+    os << contentRef_.cref();
+    return os.good();
 }
 
 

@@ -37,7 +37,7 @@ License
 #include "OBJstream.H"
 #include "PatchTools.H"
 #include "foamVtkSurfaceWriter.H"
-#include "uindirectPrimitivePatch.H"
+#include "indirectPrimitivePatch.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

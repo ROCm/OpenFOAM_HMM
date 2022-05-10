@@ -59,7 +59,7 @@ public:
 
     ~Scalar()
     {
-        Info<<"delete Scalar: " << data_ << endl;
+        Info<< "delete Scalar: " << data_ << endl;
     }
 
     const scalar& value() const
@@ -324,7 +324,7 @@ int main(int argc, char *argv[])
         list1.set(i, new Scalar(1.3*i));
     }
 
-    Info<<"Emplace set " << list2.size() << " values" << nl;
+    Info<< "Emplace set " << list2.size() << " values" << nl;
     forAll(list2, i)
     {
         list2.emplace(i, (10 + 1.3*i));
@@ -338,9 +338,9 @@ int main(int argc, char *argv[])
 
 
     Info<< nl
-        <<"list1: " << list1 << nl
-        <<"list2: " << list2 << nl
-        <<"list-appended: " << listApp << endl;
+        << "list1: " << list1 << nl
+        << "list2: " << list2 << nl
+        << "list-appended: " << listApp << endl;
 
 
     // Release values
@@ -357,27 +357,27 @@ int main(int argc, char *argv[])
             }
         }
 
-        Info<<"Released pointers from";
+        Info<< "Released pointers from";
         print(Info, listApp) << nl;
 
-        Info<<"Into plain list of pointers";
+        Info<< "Into plain list of pointers";
         print(Info, ptrs) << nl;
 
         PtrDynList<Scalar> newlist1(ptrs);
 
-        Info<<"Constructed from plain list of pointers";
+        Info<< "Constructed from plain list of pointers";
         print(Info, ptrs) << nl;
         print(Info, newlist1) << nl;
     }
 
 
-    Info<<"indirectly delete some items via set(.., nullptr) :" << endl;
+    Info<< "indirectly delete some items via set(.., nullptr) :" << endl;
     for (label i = 2; i < 5; i++)
     {
         list1.set(i, nullptr);
     }
 
-    Info<<"release some items:" << endl;
+    Info<< "release some items:" << endl;
 
     for (label i = -2; i < 5; i++)
     {
@@ -389,31 +389,31 @@ int main(int argc, char *argv[])
         }
     }
 
-    Info<<"list1: ";
+    Info<< "list1: ";
     print(Info, list1) << nl;
 
     list1.resize(list1.squeezeNull());
-    Info<<"squeezed null: ";
+    Info<< "squeezed null: ";
     print(Info, list1) << nl;
 
-    Info<<"transfer list2 -> list1:" << endl;
+    Info<< "transfer list2 -> list1:" << endl;
     list1.transfer(list2);
 
-    Info<<"list1: " << list1 << nl
-        <<"list2: " << list2 << endl;
+    Info<< "list1: " << list1 << nl
+        << "list2: " << list2 << endl;
 
-    Info<<"indirectly delete some items via setSize :" << endl;
+    Info<< "indirectly delete some items via setSize :" << endl;
     list1.setSize(4);
 
-    Info<<"list1: " << list1 << endl;
+    Info<< "list1: " << list1 << endl;
 
     {
         PtrList<Scalar> list1a(list1, false);
 
-        Info<<"Clone constructed" << endl;
-        Info<<"in:  " << list1 << nl
-            <<"out: " << list1a << nl
-            <<"addresses:" << nl;
+        Info<< "Clone constructed" << endl;
+        Info<< "in:  " << list1 << nl
+            << "out: " << list1a << nl
+            << "addresses:" << nl;
         printAddr(Info, list1);
         printAddr(Info, list1a);
         Info<<"values:" << nl;
@@ -423,112 +423,112 @@ int main(int argc, char *argv[])
         {
             auto* ptr = &(list1a.first());
             list1a.set(0, ptr);
-            Info<<"values:" << nl;
+            Info<< "values:" << nl;
             print(Info, list1a);
         }
 
 
         PtrList<Scalar> list1b(list1a, true);
 
-        Info<<"Reuse constructed" << endl;
-        Info<<"in:  " << list1a << nl
-            <<"out: " << list1b << nl
-            <<"addresses:" << nl;
+        Info<< "Reuse constructed" << endl;
+        Info<< "in:  " << list1a << nl
+            << "out: " << list1b << nl
+            << "addresses:" << nl;
         printAddr(Info, list1a);
         printAddr(Info, list1b);
 
 
         PtrList<Scalar> list1c(list1b.clone());
 
-        Info<<"Explicit clone()" << endl;
-        Info<<"in:  " << list1b << nl
-            <<"out: " << list1c << nl
-            <<"addresses:" << nl;
+        Info<< "Explicit clone()" << endl;
+        Info<< "in:  " << list1b << nl
+            << "out: " << list1c << nl
+            << "addresses:" << nl;
         printAddr(Info, list1b);
         printAddr(Info, list1c);
     }
 
     PtrList<Scalar> list3(std::move(list1));
-    Info<<"Move constructed" << endl;
+    Info<< "Move constructed" << endl;
 
-    Info<<"list1: " << list1 << nl
-        <<"list2: " << list2 << nl
-        <<"list3: " << list3 << endl;
+    Info<< "list1: " << list1 << nl
+        << "list2: " << list2 << nl
+        << "list3: " << list3 << endl;
 
 
-    Info<<"Move construct:" << endl;
+    Info<< "Move construct:" << endl;
 
     PtrList<Scalar> list4(std::move(list3));
 
-    Info<<"list3: " << list3 << nl
-        <<"list4: " << list4 << endl;
+    Info<< "list3: " << list3 << nl
+        << "list4: " << list4 << endl;
 
-    Info<<"Move assign:" << endl;
+    Info<< "Move assign:" << endl;
     list3 = std::move(list4);
 
-    Info<<"list3: " << list3 << nl
-        <<"list4: " << list4 << endl;
+    Info<< "list3: " << list3 << nl
+        << "list4: " << list4 << endl;
 
 
-    Info<<"UPtrList from PtrList" << nl;
+    Info<< "UPtrList from PtrList" << nl;
 
     UPtrList<Scalar> ulist1(list3);
 
-    Info<<"ulist1: " << ulist1 << nl;
-    Info<<"PtrList addresses:";
+    Info<< "ulist1: " << ulist1 << nl;
+    Info<< "PtrList addresses:";
     printAddr(Info, list3);
-    Info<<"UPtrList addresses:";
+    Info<< "UPtrList addresses:";
     printAddr(Info, ulist1);
     Info<< nl;
 
     {
-        Info<<"UPtrList(const UPtrList&)" << nl;
+        Info<< "UPtrList(const UPtrList&)" << nl;
 
         const UPtrList<Scalar>& cref = ulist1;
 
         UPtrList<Scalar> ulist1cp(cref);
 
-        Info<<"src addresses:";
+        Info<< "src addresses:";
         printAddr(Info, cref);
-        Info<<"dst addresses:";
+        Info<< "dst addresses:";
         printAddr(Info, ulist1cp);
         Info<< nl;
     }
 
 
-    Info<<"Move construct:" << endl;
+    Info<< "Move construct:" << endl;
 
     UPtrList<Scalar> ulist2(std::move(ulist1));
 
-    Info<<"ulist1: " << ulist1 << nl
-        <<"ulist2: " << ulist2 << nl;
+    Info<< "ulist1: " << ulist1 << nl
+        << "ulist2: " << ulist2 << nl;
 
-    Info<<"Copy assign:" << endl;
+    Info<< "Copy assign:" << endl;
     ulist1 = ulist2;
 
-    Info<<"ulist1: " << ulist1 << nl
-        <<"ulist2: " << ulist2 << nl;
+    Info<< "ulist1: " << ulist1 << nl
+        << "ulist2: " << ulist2 << nl;
 
-    Info<<"Move assign:" << endl;
+    Info<< "Move assign:" << endl;
     ulist1 = std::move(ulist2);
 
-    Info<<"ulist1: " << ulist1 << nl
-        <<"ulist2: " << ulist2 << nl;
+    Info<< "ulist1: " << ulist1 << nl
+        << "ulist2: " << ulist2 << nl;
 
     // Test iterator random access
     {
         auto iter1 = ulist1.begin();
         auto iter2 = iter1 + 3;
 
-        Info<<"begin:" << *iter1 << " (+3):" << *iter2 << nl;
+        Info<< "begin:" << *iter1 << " (+3):" << *iter2 << nl;
         Info<< "diff= " << (iter1 - iter2) << nl;
         Info<< "iter[2]=" << iter1[2] << nl;
         Info<< "iter1 < iter2 : " << (iter1 < iter2) << nl;
         Info<< "iter1 >= iter2 : " << (iter1 >= iter2) << nl;
 
-        Info<<"->" << iter1->value() << nl;
-        Info<<"*"  << (*iter1).value() << nl;
-        Info<<"()" << iter1().value() << nl;
+        Info<< "->" << iter1->value() << nl;
+        Info<< "*"  << (*iter1).value() << nl;
+        Info<< "()" << iter1().value() << nl;
     }
 
     PtrList<plane> planes;
@@ -541,7 +541,7 @@ int main(int argc, char *argv[])
         Info<< "    plane " << p << endl;
     }
 
-    Info<<"Testing PtrDynList" << nl;
+    Info<< "Testing PtrDynList" << nl;
 
     PtrDynList<plane> dynPlanes;
 
@@ -566,10 +566,10 @@ int main(int argc, char *argv[])
     report(Info, dynPlanes, true);
 
     dynPlanes.clear();
-    Info<<"clear()" << nl;
+    Info<< "clear()" << nl;
     report(Info, dynPlanes);
 
-    Info<<"now append again" << endl;
+    Info<< "now append again" << endl;
     {
         dynPlanes.append(new plane(vector::one, vector::one));
         dynPlanes.append(new plane(vector(1,2,3), vector::one));
@@ -597,13 +597,13 @@ int main(int argc, char *argv[])
 
         stdPlanes.resize(stdPlanes.squeezeNull());
 
-        Info<<"After pruning nullptr entries" << endl;
+        Info<< "After pruning nullptr entries" << endl;
         printAddr(Info, stdPlanes);
     }
 
     dynPlanes.resize(dynPlanes.squeezeNull());
 
-    Info<<"After pruning nullptr entries" << endl;
+    Info<< "After pruning nullptr entries" << endl;
     report(Info, dynPlanes, true);
 
 
@@ -621,25 +621,48 @@ int main(int argc, char *argv[])
         sortedOrder(dynPlanes2, order);
         Info<< "sorted order: " << flatOutput(order) << nl;
 
-        sortedOrder(dynPlanes2, order, PtrListOps::greater<plane>(dynPlanes2));
+        sortedOrder(dynPlanes2, order, UPtrList<plane>::greater(dynPlanes2));
         Info<< "sorted order: " << flatOutput(order) << nl;
 
+        // Shuffle
+        shuffle(dynPlanes2);
+        Info<< "Shuffled" << endl;
+        report(Info, dynPlanes2, false);
+
+        // Reverse sort
+        sort
+        (
+            dynPlanes2,
+            [](const plane& a, const plane& b) { return (b < a); }
+        );
+        Info<< "Reverse sorted" << endl;
+        report(Info, dynPlanes2, false);
+
+        // Forward sort
         sort(dynPlanes2);
+        Info<< "Sorted" << endl;
+        report(Info, dynPlanes2, false);
+
+        // Reverse pointer list - not yet available or needed!
+        /// reverse(dynPlanes2);
+        /// Info<< "Reversed" << endl;
+        /// report(Info, dynPlanes2, false);
+
         // dynPlanes2.squeezeNull();
 
-        Info<<"Append" << endl;
+        Info<< "Append" << endl;
         report(Info, dynPlanes2, false);
 
         dynPlanes.append(std::move(dynPlanes2));
 
-        Info<<"Result" << endl;
+        Info<< "Result" << endl;
         report(Info, dynPlanes, false);
 
-        Info<<"From" << endl;
+        Info<< "From" << endl;
         report(Info, dynPlanes2, false);
     }
 
-    Info<<"free()" << endl;
+    Info<< "free()" << endl;
 
     dynPlanes.free();
     report(Info, dynPlanes, true);

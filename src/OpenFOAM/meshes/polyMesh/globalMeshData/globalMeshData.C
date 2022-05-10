@@ -27,14 +27,15 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "globalMeshData.H"
-#include "Pstream.H"
-#include "processorPolyPatch.H"
 #include "globalPoints.H"
 #include "polyMesh.H"
 #include "mapDistribute.H"
 #include "labelIOList.H"
 #include "mergePoints.H"
+#include "processorPolyPatch.H"
+#include "processorTopologyNew.H"
 #include "globalIndexAndTransform.H"
+#include "Pstream.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -61,15 +62,15 @@ public:
 
 void Foam::globalMeshData::initProcAddr()
 {
-    processorPatchIndices_.setSize(mesh_.boundaryMesh().size());
+    processorPatchIndices_.resize_nocopy(mesh_.boundaryMesh().size());
     processorPatchIndices_ = -1;
 
-    processorPatchNeighbours_.setSize(mesh_.boundaryMesh().size());
+    processorPatchNeighbours_.resize_nocopy(mesh_.boundaryMesh().size());
     processorPatchNeighbours_ = -1;
 
     // Construct processor patch indexing. processorPatchNeighbours_ only
     // set if running in parallel!
-    processorPatches_.setSize(mesh_.boundaryMesh().size());
+    processorPatches_.resize_nocopy(mesh_.boundaryMesh().size());
 
     label nNeighbours = 0;
 
@@ -81,7 +82,7 @@ void Foam::globalMeshData::initProcAddr()
             processorPatchIndices_[patchi] = nNeighbours++;
         }
     }
-    processorPatches_.setSize(nNeighbours);
+    processorPatches_.resize(nNeighbours);
 
 
     if (Pstream::parRun())
@@ -1728,14 +1729,21 @@ void Foam::globalMeshData::calcGlobalCoPointSlaves() const
 
 Foam::globalMeshData::globalMeshData(const polyMesh& mesh)
 :
-    processorTopology(mesh.boundaryMesh(), UPstream::worldComm),
     mesh_(mesh),
     nTotalPoints_(-1),
     nTotalFaces_(-1),
     nTotalCells_(-1),
-    processorPatches_(0),
-    processorPatchIndices_(0),
-    processorPatchNeighbours_(0),
+    processorTopology_
+    (
+        processorTopology::New<processorPolyPatch>
+        (
+            mesh.boundaryMesh(),
+            UPstream::worldComm
+        )
+    ),
+    processorPatches_(),
+    processorPatchIndices_(),
+    processorPatchNeighbours_(),
     nGlobalPoints_(-1),
     sharedPointLabelsPtr_(nullptr),
     sharedPointAddrPtr_(nullptr),
@@ -1750,10 +1758,9 @@ Foam::globalMeshData::globalMeshData(const polyMesh& mesh)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
+// A non-default destructor since we had incomplete types in the header
 Foam::globalMeshData::~globalMeshData()
-{
-    clearOut();
-}
+{}
 
 
 void Foam::globalMeshData::clearOut()
@@ -1780,6 +1787,7 @@ void Foam::globalMeshData::clearOut()
     globalPointSlavesPtr_.clear();
     globalPointTransformedSlavesPtr_.clear();
     globalPointSlavesMapPtr_.clear();
+
     // Edge
     globalEdgeNumberingPtr_.clear();
     globalEdgeSlavesPtr_.clear();
@@ -2728,7 +2736,7 @@ void Foam::globalMeshData::updateMesh()
 
     if (debug)
     {
-        Pout<< "globalMeshData : nTotalFaces_:" << nTotalFaces_ << endl;
+        Pout<< "globalMeshData : nTotalFaces:" << nTotalFaces_ << endl;
     }
 
     nTotalCells_ = returnReduce
@@ -2741,7 +2749,7 @@ void Foam::globalMeshData::updateMesh()
 
     if (debug)
     {
-        Pout<< "globalMeshData : nTotalCells_:" << nTotalCells_ << endl;
+        Pout<< "globalMeshData : nTotalCells:" << nTotalCells_ << endl;
     }
 
     nTotalPoints_ = returnReduce
@@ -2757,7 +2765,7 @@ void Foam::globalMeshData::updateMesh()
 
     if (debug)
     {
-        Pout<< "globalMeshData : nTotalPoints_:" << nTotalPoints_ << endl;
+        Pout<< "globalMeshData : nTotalPoints:" << nTotalPoints_ << endl;
     }
 }
 

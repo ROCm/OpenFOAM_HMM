@@ -29,6 +29,7 @@ License
 #include "surfaceAlignedSBRStressFvMotionSolver.H"
 #include "addToRunTimeSelectionTable.H"
 #include "pointIndexHit.H"
+#include "processorPolyPatch.H"
 #include "fvmLaplacian.H"
 #include "fvcDiv.H"
 #include "surfaceInterpolate.H"

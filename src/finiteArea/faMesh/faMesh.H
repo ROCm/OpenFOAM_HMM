@@ -66,7 +66,7 @@ Author
 #include "DimensionedField.H"
 #include "areaFieldsFwd.H"
 #include "edgeFieldsFwd.H"
-#include "uindirectPrimitivePatch.H"
+#include "indirectPrimitivePatch.H"
 #include "edgeInterpolation.H"
 #include "labelIOList.H"
 #include "FieldFields.H"

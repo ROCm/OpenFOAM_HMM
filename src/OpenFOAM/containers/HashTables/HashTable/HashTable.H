@@ -34,7 +34,8 @@ Description
     depends on the method used to generate the hash key index, the
     table capacity, insertion order etc. When the key order is
     important, use the sortedToc() method to obtain a list of sorted
-    keys and use that for further access.
+    keys and use that for further access, or the sorted() method
+    to obtain a UPtrList of entries to traverse in sorted order.
 
     Internally the table uses closed addressing into a flat storage space
     with collisions handled by linked-list chaining.
@@ -80,8 +81,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef HashTable_H
-#define HashTable_H
+#ifndef Foam_HashTable_H
+#define Foam_HashTable_H
 
 #include "word.H"
 #include "zero.H"
@@ -102,6 +103,7 @@ namespace Foam
 
 template<class T> class List;
 template<class T> class UList;
+template<class T> class UPtrList;
 template<class T, unsigned N> class FixedList;
 template<class T, class Key, class Hash> class HashTable;
 
@@ -120,51 +122,21 @@ class HashTable
 :
     public HashTableCore
 {
-    // Types
+public:
 
-        //- Table entry. A hashed node with a linked-list for collisions
+    // Data Types
+
+        //- The template instance used for this HashTable
+        typedef HashTable<T, Key, Hash> this_type;
+
+        //- A table entry (node) that encapsulates the key/val tuple
+        //- with an additional linked-list entry for hash collisions
         typedef typename std::conditional
         <
             std::is_same<zero::null, typename std::remove_cv<T>::type>::value,
             Detail::HashTableSingle<Key>,
             Detail::HashTablePair<Key, T>
         >::type node_type;
-
-
-    // Private Data
-
-        //- The number of nodes currently stored in table
-        label size_;
-
-        //- Number of nodes allocated in table
-        label capacity_;
-
-        //- The table of primary nodes
-        node_type** table_;
-
-
-    // Private Member Functions
-
-        //- Return the hash index of the Key within the current table size.
-        //  No checks for zero-sized tables.
-        inline label hashKeyIndex(const Key& key) const;
-
-        //- Assign a new hash-entry to a possibly already existing key.
-        //  \return True if the new entry was set.
-        template<class... Args>
-        bool setEntry(const bool overwrite, const Key& key, Args&&... args);
-
-        //- Read hash table
-        Istream& readTable(Istream& is);
-
-        //- Write hash table
-        Ostream& writeTable(Ostream& os) const;
-
-
-public:
-
-    //- The template instance used for this HashTable
-    typedef HashTable<T, Key, Hash> this_type;
 
 
     // STL type definitions
@@ -209,6 +181,39 @@ public:
         //- Forward iterator with const access
         class const_iterator;
 
+
+private:
+
+    // Private Data
+
+        //- The number of nodes currently stored in table
+        label size_;
+
+        //- Number of nodes allocated in table
+        label capacity_;
+
+        //- The table of primary nodes
+        node_type** table_;
+
+
+    // Private Member Functions
+
+        //- Return the hash index of the Key within the current table size.
+        //  No checks for zero-sized tables.
+        inline label hashKeyIndex(const Key& key) const;
+
+        //- Assign a new hash-entry to a possibly already existing key.
+        //  \return True if the new entry was set.
+        template<class... Args>
+        bool setEntry(const bool overwrite, const Key& key, Args&&... args);
+
+        //- Read hash table
+        Istream& readTable(Istream& is);
+
+        //- Write hash table
+        Ostream& writeTable(Ostream& os) const;
+
+
 protected:
 
         //- Internally used base for iterator and const_iterator
@@ -219,6 +224,7 @@ protected:
 
         //- An iterator with non-const access to HashTable internals.
         friend class Iterator<false>;
+
 
 public:
 
@@ -334,6 +340,17 @@ public:
             const BinaryPredicate& pred,
             const bool invert = false
         ) const;
+
+
+    // Sorted entries
+
+        //- Const access to the hash-table contents in sorted order
+        //- (sorted by keys).
+        UPtrList<const node_type> sorted() const;
+
+        //- Non-const access to the hash-table contents in sorted order
+        //- (sorted by keys).
+        UPtrList<node_type> sorted();
 
 
     // Counting
@@ -701,6 +718,7 @@ public:
             using iterator_category = std::forward_iterator_tag;
             using difference_type   = this_type::difference_type;
 
+            using node_type   = this_type::node_type;
             using key_type    = this_type::key_type;
             using mapped_type = this_type::mapped_type;
             using value_type  = this_type::value_type;
@@ -724,25 +742,37 @@ public:
 
         // Member Functions/Operators
 
+            //- Const access to the entry (node)
+            const node_type* node() const noexcept
+            {
+                return Iterator<false>::entry_;
+            }
+
+            //- Non-const access to the entry (node)
+            node_type* node() noexcept
+            {
+                return Iterator<false>::entry_;
+            }
+
             //- Const access to referenced object (value)
-            inline const_reference val() const
+            const_reference val() const
             {
                 return Iterator<false>::entry_->cval();
             }
 
             //- Non-const access to referenced object (value)
-            inline reference val()
+            reference val()
             {
                 return Iterator<false>::entry_->val();
             }
 
             //- Const access to referenced object (value)
-            inline const_reference operator*() const  { return this->val(); }
-            inline const_reference operator()() const { return this->val(); }
+            const_reference operator*() const  { return this->val(); }
+            const_reference operator()() const { return this->val(); }
 
             //- Non-const access to referenced object (value)
-            inline reference operator*()  { return this->val(); }
-            inline reference operator()() { return this->val(); }
+            reference operator*()  { return this->val(); }
+            reference operator()() { return this->val(); }
 
             inline iterator& operator++();
             inline iterator operator++(int);
@@ -762,6 +792,7 @@ public:
             using iterator_category = std::forward_iterator_tag;
             using difference_type   = this_type::difference_type;
 
+            using node_type   = this_type::node_type;
             using key_type    = this_type::key_type;
             using mapped_type = const this_type::mapped_type;
             using value_type  = const this_type::value_type;
@@ -799,15 +830,21 @@ public:
 
         // Member Functions/Operators
 
+            //- Const access to the entry (node)
+            const node_type* node() const noexcept
+            {
+                return Iterator<true>::entry_;
+            }
+
             //- Const access to referenced object (value)
-            inline reference val() const
+            reference val() const
             {
                 return Iterator<true>::entry_->cval();
             }
 
             //- Const access to referenced object (value)
-            inline reference operator*() const  { return this->val(); }
-            inline reference operator()() const { return this->val(); }
+            reference operator*() const  { return this->val(); }
+            reference operator()() const { return this->val(); }
 
             inline const_iterator& operator++();
             inline const_iterator operator++(int);
@@ -853,8 +890,8 @@ public:
             {}
 
             //- Return the key
-            inline reference operator*() const  { return this->key(); }
-            inline reference operator()() const { return this->key(); }
+            reference operator*() const  { return this->key(); }
+            reference operator()() const { return this->key(); }
 
             inline key_iterator_base& operator++()
             {

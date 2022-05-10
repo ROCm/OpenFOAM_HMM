@@ -43,14 +43,13 @@ Description
 // Include all normal list typedefs as well
 #include "labelList.H"
 #include "IndirectList.H"
-#include "UIndirectList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    // NB: labelUIndList is defined in UIndirectList itself
     typedef IndirectList<label>  labelIndList;
+    // labelUIndList is defined in UIndirectList itself
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

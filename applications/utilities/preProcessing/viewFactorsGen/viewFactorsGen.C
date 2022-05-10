@@ -57,7 +57,7 @@ Description
 #include "distributedTriSurfaceMesh.H"
 #include "meshTools.H"
 
-#include "uindirectPrimitivePatch.H"
+#include "indirectPrimitivePatch.H"
 #include "DynamicField.H"
 #include "unitConversion.H"
 

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,17 +36,17 @@ Author
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef faGlobalMeshData_H
-#define faGlobalMeshData_H
+#ifndef Foam_faGlobalMeshData_H
+#define Foam_faGlobalMeshData_H
 
-#include "faProcessorTopology.H"
+#include "processorTopology.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Class forward declarations
+// Class Declarations
 class faMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -53,25 +54,28 @@ class faMesh;
 \*---------------------------------------------------------------------------*/
 
 class faGlobalMeshData
-:
-    public faProcessorTopology
 {
-    // Private data
+    // Private Data
 
         //- Reference to mesh
         const faMesh& mesh_;
 
-        // Globally shared point addressing
+        //- The processor/processor topology
+        processorTopology processorTopology_;
 
-            //- Total number of global points
-            label nGlobalPoints_;
 
-            //- Indices of local points that are globally shared
-            labelList sharedPointLabels_;
+    // Globally shared point addressing
 
-            //- Indices of globally shared points in the master list
-            //  This list contains all the shared points in the mesh
-            labelList sharedPointAddr_;
+        //- Total number of global points
+        label nGlobalPoints_;
+
+        //- Indices of local points that are globally shared
+        labelList sharedPointLabels_;
+
+        //- Indices of globally shared points in the master list
+        //  This list contains all the shared points in the mesh
+        labelList sharedPointAddr_;
+
 
     // Private Member Functions
 
@@ -87,8 +91,12 @@ public:
     //- Runtime type information
     ClassName("faGlobalMeshData");
 
-    //- Construct from mesh
-    faGlobalMeshData(const faMesh& mesh);
+
+    // Constructors
+
+        //- Construct from mesh
+        explicit faGlobalMeshData(const faMesh& mesh);
+
 
     //- Destructor
     ~faGlobalMeshData();
@@ -96,34 +104,50 @@ public:
 
     // Member Functions
 
-        // Access
+    // Access
 
-            //- Return mesh reference
-            const faMesh& mesh() const;
+        //- Return mesh reference
+        const faMesh& mesh() const noexcept;
 
-        // Globally shared point addressing
 
-            //- Return number of globally shared points
-            label nGlobalPoints() const
-            {
-                return nGlobalPoints_;
-            }
+    // Processor-Topology
 
-            //- Return indices of local points that are globally shared
-            const labelList& sharedPointLabels() const
-            {
-                return sharedPointLabels_;
-            }
+        //- The processor to processor topology.
+        const processorTopology& topology() const noexcept
+        {
+            return processorTopology_;
+        }
 
-            //- Return addressing into the complete globally shared points
-            //  list
-            const labelList& sharedPointAddr() const
-            {
-                return sharedPointAddr_;
-            }
+        //- Order in which the patches should be initialised/evaluated
+        //- corresponding to the schedule
+        const lduSchedule& patchSchedule() const noexcept
+        {
+            return processorTopology_.patchSchedule();
+        }
 
-            //- Change global mesh data given a topological change.
-            void updateMesh();
+
+    // Globally shared point addressing
+
+        //- Return number of globally shared points
+        label nGlobalPoints() const noexcept
+        {
+            return nGlobalPoints_;
+        }
+
+        //- Return indices of local points that are globally shared
+        const labelList& sharedPointLabels() const noexcept
+        {
+            return sharedPointLabels_;
+        }
+
+        //- Return addressing into the complete globally shared points list
+        const labelList& sharedPointAddr() const noexcept
+        {
+            return sharedPointAddr_;
+        }
+
+        //- Change global mesh data given a topological change.
+        void updateMesh();
 };
 
 

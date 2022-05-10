@@ -30,7 +30,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "pointMesh.H"
 #include "faceList.H"
-#include "primitiveFacePatch.H"
+#include "primitivePatch.H"
 #include "emptyPolyPatch.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //

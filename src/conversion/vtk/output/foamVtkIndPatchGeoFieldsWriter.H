@@ -31,6 +31,14 @@ Description
     as a vtp file or a legacy vtk file
     with support for geometric fields.
 
+Typedef
+    Foam::vtk::uindirectPatchGeoFieldsWriter
+
+Description
+    Write uindirectPrimitivePatch faces/points
+    as a vtp file or a legacy vtk file
+    with support for geometric fields.
+
 See Also
     Foam::vtk::GenericPatchWriter
 
@@ -54,6 +62,10 @@ namespace vtk
 typedef
     GenericPatchGeoFieldsWriter<indirectPrimitivePatch>
     indirectPatchGeoFieldsWriter;
+
+typedef
+    GenericPatchGeoFieldsWriter<uindirectPrimitivePatch>
+    uindirectPatchGeoFieldsWriter;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

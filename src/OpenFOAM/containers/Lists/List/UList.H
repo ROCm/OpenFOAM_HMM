@@ -74,6 +74,7 @@ class labelRange;
 template<class T> class List;
 template<class T> class SubList;
 template<class T> class UList;
+template<class T> class IndirectList;
 template<class T, class Addr> class IndirectListBase;
 
 template<class T> Istream& operator>>(Istream&, UList<T>&);
@@ -510,9 +511,19 @@ public:
 
     // Special Methods
 
-        //- A bitSet::test() method for a list of bool
-        //
-        //  \return The element value, or false for out-of-range access
+        //- Test \c bool value at specified position,
+        //- always false for out-of-range access. Same as test().
+        //  \note Predicate definition as per bitSet, HashSet
+        template<class TypeT = T>
+        typename std::enable_if<std::is_same<bool, TypeT>::value, bool>::type
+        inline operator()(const label i) const
+        {
+            return (i >= 0 && i < size_ && v_[i]);
+        }
+
+        //- Test \c bool value at specified position,
+        //- always false for out-of-range access.
+        //  \note Method name compatibility with bitSet, HashSet
         template<class TypeT = T>
         typename std::enable_if<std::is_same<bool, TypeT>::value, bool>::type
         inline test(const label i) const
@@ -520,9 +531,9 @@ public:
             return (i >= 0 && i < size_ && v_[i]);
         }
 
-        //- A bitSet::get() method for a list of bool
-        //
-        //  \return The element value, or false for out-of-range access
+        //- Return \c bool value at specified position,
+        //- always false for out-of-range access.
+        //  \note Method name compatibility with bitSet
         template<class TypeT = T>
         typename std::enable_if<std::is_same<bool, TypeT>::value, bool>::type
         inline get(const label i) const
@@ -530,9 +541,10 @@ public:
             return (i >= 0 && i < size_ && v_[i]);
         }
 
-        //- A bitSet::unset() method for a list of bool
-        //
+        //- Unset the \c bool entry at specified position,
+        //- always false for out-of-range access.
         //  \return True if value changed and was not out-of-range
+        //  \note Method name compatibility with bitSet
         template<class TypeT = T>
         typename std::enable_if<std::is_same<bool, TypeT>::value, bool>::type
         inline unset(const label i)
@@ -624,26 +636,31 @@ Ostream& operator<<(Ostream& os, const std::vector<T>& list);
 
 // * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
 
+//- Sort the list
 template<class T>
-void sort(UList<T>& a);
+void sort(UList<T>& list);
 
+//- Sort the list with the specified comparator
 template<class T, class Compare>
-void sort(UList<T>& a, const Compare& comp);
+void sort(UList<T>& list, const Compare& comp);
 
+//- Stable sort the list
 template<class T>
-void stableSort(UList<T>& a);
+void stableSort(UList<T>& list);
 
+//- Stable sort the list with the specified comparator
 template<class T, class Compare>
-void stableSort(UList<T>& a, const Compare& comp);
+void stableSort(UList<T>& list, const Compare& comp);
 
+//- Randomise the list order
 template<class T>
-void shuffle(UList<T>& a);
+void shuffle(UList<T>& list);
 
-// Reverse the first n elements of the list
+//- Reverse the first n elements of the list
 template<class T>
 inline void reverse(UList<T>& list, const label n);
 
-// Reverse all the elements of the list
+//- Reverse all elements of the list
 template<class T>
 inline void reverse(UList<T>& list);
 

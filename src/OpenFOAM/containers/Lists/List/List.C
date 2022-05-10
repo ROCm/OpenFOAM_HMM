@@ -636,4 +636,52 @@ void Foam::List<T>::operator=(SLList<T>&& list)
 }
 
 
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
+template<class T>
+Foam::labelList Foam::sortedOrder
+(
+    const UList<T>& list
+)
+{
+    labelList order;
+    Foam::sortedOrder(list, order, typename UList<T>::less(list));
+    return order;
+}
+
+
+template<class T>
+void Foam::sortedOrder
+(
+    const UList<T>& list,
+    labelList& order
+)
+{
+    Foam::sortedOrder(list, order, typename UList<T>::less(list));
+}
+
+
+template<class T, class ListComparePredicate>
+void Foam::sortedOrder
+(
+    const UList<T>& list,
+    labelList& order,
+    const ListComparePredicate& comp
+)
+{
+    // List lengths must be identical. Old content is overwritten
+    order.resize_nocopy(list.size());
+
+    // Same as std::iota and ListOps::identity
+    label value = 0;
+    for (label& item : order)
+    {
+        item = value;
+        ++value;
+    }
+
+    Foam::stableSort(order, comp);
+}
+
+
 // ************************************************************************* //

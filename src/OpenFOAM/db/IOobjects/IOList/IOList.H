@@ -40,6 +40,7 @@ SourceFiles
 
 #include "List.H"
 #include "regIOobject.H"
+#include "refPtr.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -94,7 +95,8 @@ public:
 
     // Member Functions
 
-        bool writeData(Ostream& os) const;
+        //- The writeData method for regIOobject write operation
+        virtual bool writeData(Ostream& os) const;
 
 
     // Member Operators
@@ -104,6 +106,72 @@ public:
 
         //- Copy or move assignment of entries
         using List<T>::operator=;
+};
+
+
+/*---------------------------------------------------------------------------*\
+                          Class IOListRef Declaration
+\*---------------------------------------------------------------------------*/
+
+//- A IOList wrapper for writing external data.
+template<class T>
+class IOListRef
+:
+    public regIOobject
+{
+    // Private Data
+
+        //- Reference to the external content
+        refPtr<List<T>> contentRef_;
+
+
+public:
+
+    //- The underlying content type
+    typedef List<T> content_type;
+
+
+    //- Type is identical to IOList
+    virtual const word& type() const
+    {
+        return IOList<T>::typeName;
+    }
+
+
+    // Generated Methods
+
+        //- No default construct
+        IOListRef() = delete;
+
+        //- No copy construct
+        IOListRef(const IOListRef&) = delete;
+
+        //- No copy assignment
+        void operator=(const IOListRef&) = delete;
+
+
+    // Constructors
+
+        //- Construct from IOobject and const data reference
+        IOListRef(const IOobject& io, const List<T>& content);
+
+
+    //- Destructor
+    virtual ~IOListRef() = default;
+
+
+    // Member Functions
+
+        //- Allow cast to const content
+        //  Fatal if content is not set
+        operator const List<T>&() const
+        {
+            return contentRef_.cref();
+        }
+
+        //- The writeData method for regIOobject write operation
+        //  Fatal if content is not set
+        virtual bool writeData(Ostream& os) const;
 };
 
 

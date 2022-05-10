@@ -34,7 +34,7 @@ License
 #include "IOdictionary.H"
 
 #include "ccmBoundaryInfo.H"
-#include "uindirectPrimitivePatch.H"
+#include "indirectPrimitivePatch.H"
 #include "SortableList.H"
 #include "mergePoints.H"
 #include "bitSet.H"

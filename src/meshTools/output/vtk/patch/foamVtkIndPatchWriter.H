@@ -30,6 +30,13 @@ Description
     Write indirectPrimitivePatch faces/points (optionally with fields)
     as a vtp file or a legacy vtk file.
 
+Typedef
+    Foam::vtk::uindirectPatchWriter
+
+Description
+    Write uindirectPrimitivePatch faces/points (optionally with fields)
+    as a vtp file or a legacy vtk file.
+
 See Also
     Foam::vtk::GenericPatchWriter
 
@@ -53,6 +60,10 @@ namespace vtk
 typedef
     GenericPatchWriter<indirectPrimitivePatch>
     indirectPatchWriter;
+
+typedef
+    GenericPatchWriter<uindirectPrimitivePatch>
+    uindirectPatchWriter;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

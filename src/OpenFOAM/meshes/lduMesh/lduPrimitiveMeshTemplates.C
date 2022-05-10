@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,38 +37,37 @@ Foam::lduSchedule Foam::lduPrimitiveMesh::nonBlockingSchedule
 )
 {
     lduSchedule schedule(2*interfaces.size());
-    label slotI = 0;
 
-    forAll(interfaces, i)
+    // 1. All non-processor patches
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    label patchEvali = 0;
+
+    forAll(interfaces, patchi)
     {
-        if (interfaces.set(i) && !isA<ProcPatch>(interfaces[i]))
+        if (interfaces.set(patchi) && !isA<ProcPatch>(interfaces[patchi]))
         {
-            schedule[slotI].patch = i;
-            schedule[slotI].init = true;
-            slotI++;
-            schedule[slotI].patch = i;
-            schedule[slotI].init = false;
-            slotI++;
+            schedule[patchEvali++].setInitEvaluate(patchi);
+            schedule[patchEvali++].setEvaluate(patchi);
         }
     }
 
-    forAll(interfaces, i)
+    // 2. All processor patches
+    // ~~~~~~~~~~~~~~~~~~~~~~~~
+
+    forAll(interfaces, patchi)
     {
-        if (interfaces.set(i) && isA<ProcPatch>(interfaces[i]))
+        if (interfaces.set(patchi) && isA<ProcPatch>(interfaces[patchi]))
         {
-            schedule[slotI].patch = i;
-            schedule[slotI].init = true;
-            slotI++;
+            schedule[patchEvali++].setInitEvaluate(patchi);
         }
     }
 
-    forAll(interfaces, i)
+    forAll(interfaces, patchi)
     {
-        if (interfaces.set(i) && isA<ProcPatch>(interfaces[i]))
+        if (interfaces.set(patchi) && isA<ProcPatch>(interfaces[patchi]))
         {
-            schedule[slotI].patch = i;
-            schedule[slotI].init = false;
-            slotI++;
+            schedule[patchEvali++].setEvaluate(patchi);
         }
     }
 

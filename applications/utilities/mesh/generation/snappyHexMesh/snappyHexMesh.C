@@ -55,7 +55,7 @@ Description
 #include "faceSet.H"
 #include "motionSmoother.H"
 #include "polyTopoChange.H"
-#include "uindirectPrimitivePatch.H"
+#include "indirectPrimitivePatch.H"
 #include "surfZoneIdentifierList.H"
 #include "UnsortedMeshedSurface.H"
 #include "MeshedSurface.H"

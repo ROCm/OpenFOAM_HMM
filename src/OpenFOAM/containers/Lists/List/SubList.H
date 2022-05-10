@@ -39,11 +39,10 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SubList_H
-#define SubList_H
+#ifndef Foam_SubList_H
+#define Foam_SubList_H
 
 #include "List.H"
-#include "FixedList.H"
 #include "labelRange.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -52,6 +51,7 @@ namespace Foam
 {
 
 // Forward Declarations
+template<class T, unsigned N> class FixedList;
 template<class T> class SubList;
 
 // Common list types

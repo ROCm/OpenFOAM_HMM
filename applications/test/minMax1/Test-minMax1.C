@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -190,6 +190,8 @@ int main(int argc, char *argv[])
             << nl;
 
         Info<< "Subset = " << subsetList(values1, limiter) << nl;
+        Info<< "Subset = "
+            << IndirectList<scalar>::subset_if(values1, limiter) << nl;
 
         Info<< nl << "test clip() with limiter: " << limiter << nl;
         for (const scalar& val : values1)

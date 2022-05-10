@@ -30,7 +30,7 @@ License
 #include "edgeFields.H"
 #include "calculatedFaPatchFields.H"
 #include "zeroGradientFaPatchFields.H"
-#include "UIndirectList.H"
+#include "IndirectList.H"
 #include "UniformList.H"
 #include "demandDrivenData.H"
 

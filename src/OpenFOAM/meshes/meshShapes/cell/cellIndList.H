@@ -37,13 +37,12 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cellIndList_H
-#define cellIndList_H
+#ifndef Foam_cellIndList_H
+#define Foam_cellIndList_H
 
 // Include all normal list typedefs as well
 #include "cellList.H"
 #include "IndirectList.H"
-#include "UIndirectList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

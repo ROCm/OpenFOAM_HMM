@@ -70,6 +70,7 @@ namespace Foam
     //  \endcode
     //
     //  \return List indices for matching strings
+    //  \see IndirectList::subset_if
     template<class UnaryMatchPredicate, class StringType>
     labelList findMatchingStrings
     (
@@ -161,6 +162,7 @@ namespace Foam
     //  \code
     //    subsetMatchingStrings<regExp, stringList>(myRegExp, list);
     //  \endcode
+    //  \see IndirectList::subset_if
     template<class UnaryMatchPredicate, class StringListType>
     StringListType subsetMatchingStrings
     (
@@ -324,8 +326,6 @@ namespace Foam
     {
         inplaceSubsetMatchingStrings(wordRes::matcher(regexs), input, invert);
     }
-
-
 
 
 /*---------------------------------------------------------------------------*\

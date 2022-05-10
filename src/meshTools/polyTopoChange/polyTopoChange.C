@@ -41,7 +41,6 @@ License
 #include "CompactListList.H"
 #include "objectMap.H"
 #include "processorPolyPatch.H"
-#include "ListOps.H"  // sortedOrder
 #include "mapPolyMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //

@@ -42,6 +42,7 @@ SourceFiles
 
 #include "mapDistributePolyMesh.H"
 #include "regIOobject.H"
+#include "refPtr.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -98,6 +99,74 @@ public:
         virtual bool readData(Istream& is);
 
         //- The writeData method for regIOobject write operation
+        virtual bool writeData(Ostream& os) const;
+};
+
+
+/*---------------------------------------------------------------------------*\
+                 Class IOmapDistributePolyMeshRef Declaration
+\*---------------------------------------------------------------------------*/
+
+//- A IOmapDistributePolyMesh wrapper for using referenced external data.
+class IOmapDistributePolyMeshRef
+:
+    public regIOobject
+{
+    // Private Data
+
+        //- Reference to the external content
+        refPtr<mapDistributePolyMesh> contentRef_;
+
+public:
+
+    //- Type is identical to IOmapDistributePolyMesh
+    virtual const word& type() const
+    {
+        return IOmapDistributePolyMesh::typeName;
+    }
+
+
+    // Generated Methods
+
+        //- No default construct
+        IOmapDistributePolyMeshRef() = delete;
+
+        //- No copy construct
+        IOmapDistributePolyMeshRef(const IOmapDistributePolyMeshRef&) = delete;
+
+        //- No copy assignment
+        void operator=(const IOmapDistributePolyMeshRef&) = delete;
+
+
+    // Constructors
+
+        //- Construct from IOobject and const data reference
+        IOmapDistributePolyMeshRef
+        (
+            const IOobject& io,
+            const mapDistributePolyMesh& map
+        );
+
+
+    //- Destructor
+    virtual ~IOmapDistributePolyMeshRef() = default;
+
+
+    // Member Functions
+
+        //- Allow cast to const content
+        //  Fatal if content is not set
+        operator const mapDistributePolyMesh&() const
+        {
+            return contentRef_.cref();
+        }
+
+        //- The readData method for regIOobject read operation
+        //  Fatal if content is constant (or not set)
+        virtual bool readData(Istream& is);
+
+        //- The writeData method for regIOobject write operation
+        //  Fatal if content is not set
         virtual bool writeData(Ostream& os) const;
 };
 

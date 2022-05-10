@@ -39,7 +39,7 @@ SourceFiles
 #define writeAreaFields_H
 
 #include "readFields.H"
-#include "foamVtkUIndPatchGeoFieldsWriter.H"
+#include "foamVtkIndPatchGeoFieldsWriter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

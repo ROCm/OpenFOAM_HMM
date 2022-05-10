@@ -34,7 +34,7 @@ License
 #include "tetPointRef.H"
 #include "DynamicField.H"
 #include "syncTools.H"
-#include "uindirectPrimitivePatch.H"
+#include "indirectPrimitivePatch.H"
 #include "polyMeshTetDecomposition.H"
 #include "foamVtkInternalMeshWriter.H"
 #include "foamVtkLineWriter.H"

@@ -344,7 +344,7 @@ public:
         //- a minimum position, below which trimming will not occur.
         //
         //  \return true if trimming changed the size.
-        inline bool trim(label minpos=-1);
+        inline bool trim(label minpos = -1);
 
         //- Clear all bits but do not adjust the addressable size.
         //  \note Method name compatibility with boost::dynamic_bitset

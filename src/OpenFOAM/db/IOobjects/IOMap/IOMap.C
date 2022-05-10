@@ -106,7 +106,8 @@ Foam::IOMap<T>::IOMap(const IOobject& io, Map<T>&& content)
 template<class T>
 bool Foam::IOMap<T>::writeData(Ostream& os) const
 {
-    return (os << *this).good();
+    os << *this;
+    return os.good();
 }
 
 

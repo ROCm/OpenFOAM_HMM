@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,12 +26,13 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef HashTable_C
-#define HashTable_C
+#ifndef Foam_HashTable_C
+#define Foam_HashTable_C
 
 #include "HashTable.H"
 #include "List.H"
 #include "FixedList.H"
+#include "UPtrList.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -154,6 +155,45 @@ Foam::List<Key> Foam::HashTable<T, Key, Hash>::sortedToc
 
     return list;
 }
+
+
+template<class T, class Key, class Hash>
+Foam::UPtrList<const typename Foam::HashTable<T, Key, Hash>::node_type>
+Foam::HashTable<T, Key, Hash>::sorted() const
+{
+    UPtrList<const node_type> list(size_);
+
+    label count = 0;
+
+    for (const_iterator iter = cbegin(); iter != cend(); ++iter)
+    {
+        list.set(count++, iter.node());
+    }
+
+    Foam::sort(list);
+
+    return list;
+}
+
+
+template<class T, class Key, class Hash>
+Foam::UPtrList<typename Foam::HashTable<T, Key, Hash>::node_type>
+Foam::HashTable<T, Key, Hash>::sorted()
+{
+    UPtrList<node_type> list(size_);
+
+    label count = 0;
+
+    for (iterator iter = begin(); iter != end(); ++iter)
+    {
+        list.set(count++, iter.node());
+    }
+
+    Foam::sort(list);
+
+    return list;
+}
+
 
 
 template<class T, class Key, class Hash>

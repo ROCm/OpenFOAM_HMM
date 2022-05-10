@@ -109,6 +109,20 @@ inline void Foam::Detail::PtrListDetail<T>::resize(const label newLen)
 }
 
 
+template<class T>
+inline void Foam::Detail::PtrListDetail<T>::checkNonNull() const
+{
+    const label idx = this->findNull();
+
+    if (idx >= 0)
+    {
+        FatalErrorInFunction
+            << "Element " << idx << " is null" << nl
+            << abort(FatalError);
+    }
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T>

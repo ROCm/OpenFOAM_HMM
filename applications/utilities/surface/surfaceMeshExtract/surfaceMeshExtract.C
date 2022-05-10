@@ -51,7 +51,7 @@ Description
 #include "emptyPolyPatch.H"
 #include "processorPolyPatch.H"
 #include "ListListOps.H"
-#include "uindirectPrimitivePatch.H"
+#include "indirectPrimitivePatch.H"
 #include "globalMeshData.H"
 #include "globalIndex.H"
 #include "timeSelector.H"

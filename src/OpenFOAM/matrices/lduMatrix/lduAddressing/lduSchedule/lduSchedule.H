@@ -32,8 +32,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef lduSchedule_H
-#define lduSchedule_H
+#ifndef Foam_lduSchedule_H
+#define Foam_lduSchedule_H
 
 #include "List.H"
 
@@ -42,14 +42,17 @@ Description
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward Declarations
 
 struct lduScheduleEntry;
 Ostream& operator<<(Ostream& os, const lduScheduleEntry& lb);
 
+//- A List of lduSchedule entries.
+typedef List<lduScheduleEntry> lduSchedule;
+
 
 /*---------------------------------------------------------------------------*\
-                      Class lduSchedule Declaration
+                      Class lduScheduleEntry Declaration
 \*---------------------------------------------------------------------------*/
 
 struct lduScheduleEntry
@@ -57,11 +60,22 @@ struct lduScheduleEntry
     label patch;
     bool init;
 
-    friend bool operator!=
-    (
-        const lduScheduleEntry& lb1,
-        const lduScheduleEntry& lb2
-    )
+    //- Define patch for initEvaluate()
+    void setInitEvaluate(const label patchi) noexcept
+    {
+        patch = patchi;
+        init = true;
+    }
+
+    //- Define patch for evaluate()
+    void setEvaluate(const label patchi) noexcept
+    {
+        patch = patchi;
+        init = false;
+    }
+
+    //- Always unequal: each entry is supposed to be unique!
+    friend bool operator!=(const lduScheduleEntry&, const lduScheduleEntry&)
     {
         return true;
     }
@@ -72,9 +86,6 @@ struct lduScheduleEntry
         return os;
     }
 };
-
-
-typedef List<lduScheduleEntry> lduSchedule;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

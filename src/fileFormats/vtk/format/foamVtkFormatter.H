@@ -46,7 +46,7 @@ SourceFiles
 #include "uint64.H"
 #include "direction.H"
 #include "word.H"
-#include "UList.H"
+#include "List.H"
 #include "DynamicList.H"
 #include "foamVtkCore.H"
 #include "foamVtkPTraits.H"

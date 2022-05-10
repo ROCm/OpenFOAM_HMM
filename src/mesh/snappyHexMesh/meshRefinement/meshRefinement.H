@@ -44,15 +44,14 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef meshRefinement_H
-#define meshRefinement_H
+#ifndef Foam_meshRefinement_H
+#define Foam_meshRefinement_H
 
 #include "hexRef8.H"
 #include "mapPolyMesh.H"
 #include "autoPtr.H"
 #include "labelPairHashes.H"
 #include "indirectPrimitivePatch.H"
-#include "uindirectPrimitivePatch.H"
 #include "pointFieldsFwd.H"
 #include "Tuple2.H"
 #include "pointIndexHit.H"

@@ -27,7 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "IOobject.H"
-#include "UList.H"
+#include "List.H"
 #include "hexRef8Data.H"
 #include "mapPolyMesh.H"
 #include "mapDistributePolyMesh.H"

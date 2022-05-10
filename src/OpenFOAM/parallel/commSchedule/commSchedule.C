@@ -90,7 +90,8 @@ Foam::commSchedule::commSchedule
         if (proc0 < 0 || proc0 >= nProcs || proc1 < 0 || proc1 >= nProcs)
         {
             FatalErrorInFunction
-                << "Illegal processor " << comms[commI] << abort(FatalError);
+                << "Illegal processor(s): "
+                << comms[commI] << abort(FatalError);
         }
 
         procToComms[proc0].append(commI);

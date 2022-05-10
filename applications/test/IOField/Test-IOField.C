@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,6 +34,7 @@ Description
 
 #include "argList.H"
 #include "IOField.H"
+#include "IOList.H"
 #include "primitiveFields.H"
 #include "polyMesh.H"
 #include "Time.H"
@@ -181,6 +182,7 @@ int main(int argc, char *argv[])
     argList::addBoolOption("bool", "Use bool for tests");
     argList::addBoolOption("scalar", "Use scalar for tests");
     argList::addBoolOption("label", "Use label for tests (default)");
+    argList::addBoolOption("ref", "Test writing by ref");
 
     #include "addTimeOptions.H"
 
@@ -230,6 +232,36 @@ int main(int argc, char *argv[])
     if (!tested || args.found("label"))
     {
         doTests<label>(io, sz);
+    }
+
+    if (args.found("ref"))
+    {
+        Info<< nl << "Testing writing referenced external data" << nl << endl;
+
+        IOobject ioOutput
+        (
+            args.executable(),
+            "constant",
+            runTime,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        );
+
+        labelList ints(identity(200));
+
+        ioOutput.rename(args.executable() + "-labels");
+        Info<< "write " << ioOutput.objectRelPath() << endl;
+        {
+            IOListRef<label>(ioOutput, ints).write();
+        }
+
+        ioOutput.rename(args.executable() + "-points");
+        Info<< "write " << ioOutput.objectRelPath() << endl;
+        {
+            IOFieldRef<vector>(ioOutput, mesh.points()).write();
+        }
+
     }
 
 

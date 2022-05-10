@@ -49,7 +49,7 @@ License
 
 #include "holeToFace.H"
 #include "refinementParameters.H"
-#include "uindirectPrimitivePatch.H"
+#include "indirectPrimitivePatch.H"
 #include "OBJstream.H"
 #include "PatchTools.H"
 

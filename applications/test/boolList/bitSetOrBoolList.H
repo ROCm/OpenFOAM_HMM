@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,8 +32,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef bitSetOrBoolList_H
-#define bitSetOrBoolList_H
+#ifndef Foam_bitSetOrBoolList_H
+#define Foam_bitSetOrBoolList_H
 
 #include "bitSet.H"
 #include "boolList.H"
@@ -87,6 +87,13 @@ public:
         bool test(const label i) const
         {
             return bits_.test(i) || bools_.test(i);
+        }
+
+        //- Test predicate
+        bool operator()(const label i) const
+        {
+            // Can also use test(i) etc...
+            return bits_(i) || bools_(i);
         }
 };
 

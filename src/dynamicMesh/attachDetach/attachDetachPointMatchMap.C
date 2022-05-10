@@ -29,7 +29,7 @@ License
 #include "attachDetach.H"
 #include "polyMesh.H"
 #include "primitiveMesh.H"
-#include "primitiveFacePatch.H"
+#include "primitivePatch.H"
 #include "polyTopoChanger.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

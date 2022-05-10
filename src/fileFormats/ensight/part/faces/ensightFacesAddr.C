@@ -31,7 +31,7 @@ License
 #include "polyMesh.H"
 #include "globalIndex.H"
 #include "globalMeshData.H"
-#include "uindirectPrimitivePatch.H"
+#include "indirectPrimitivePatch.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 

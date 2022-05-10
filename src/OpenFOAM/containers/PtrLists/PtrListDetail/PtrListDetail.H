@@ -42,8 +42,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef PtrListDetail_H
-#define PtrListDetail_H
+#ifndef Foam_PtrListDetail_H
+#define Foam_PtrListDetail_H
 
 #include "List.H"
 
@@ -92,8 +92,11 @@ public:
         //- Return the count of non-nullptr entries
         label count() const;
 
-        //- Locate the first null entry, -1 if there are not any
+        //- Locate the first null entry, -1 if there are none (or empty list)
         label findNull() const;
+
+        //- FatalError if any null exists in the list
+        inline void checkNonNull() const;
 
         //- Assign all pointers to nullptr, without deleting.
         void setNull();

@@ -52,11 +52,11 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef slidingInterface_H
-#define slidingInterface_H
+#ifndef Foam_slidingInterface_H
+#define Foam_slidingInterface_H
 
 #include "polyMeshModifier.H"
-#include "primitiveFacePatch.H"
+#include "primitivePatch.H"
 #include "polyPatchID.H"
 #include "ZoneIDs.H"
 #include "intersection.H"

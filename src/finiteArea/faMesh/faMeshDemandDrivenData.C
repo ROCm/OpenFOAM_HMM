@@ -30,7 +30,6 @@ License
 #include "faMeshLduAddressing.H"
 #include "areaFields.H"
 #include "edgeFields.H"
-#include "primitiveFacePatch.H"
 #include "fac.H"
 #include "processorFaPatch.H"
 #include "wedgeFaPatch.H"

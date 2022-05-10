@@ -1048,8 +1048,8 @@ Foam::autoPtr<Foam::refinementHistory> Foam::refinementHistory::clone
             new refinementHistory
             (
                 io,
-                DynamicList<splitCell8>(0),
-                labelList(0),
+                List<splitCell8>(),
+                labelList(),
                 false
             )
         );

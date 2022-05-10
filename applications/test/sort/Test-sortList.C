@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,9 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
+#include "SortList.H"
 #include "SortableList.H"
+#include "IndirectList.H"
 #include "ListOps.H"
 #include "HashSet.H"
 #include "stringOps.H"
@@ -49,6 +51,18 @@ void printInfo(const SortableList<T>& list)
 
 int main(int argc, char *argv[])
 {
+    {
+        const labelList orig({7, 9, 7, 12, 9, 1, 12, 2, 4, 7, 4, 0});
+
+        Info<< "original list: " << flatOutput(orig) << endl;
+
+        auto unique = IndirectList<label>::uniq(orig);
+
+        Info<< "unique  list: " << flatOutput(unique) << endl;
+        Info<< "unique  idx : " << flatOutput(unique.addressing()) << endl;
+    }
+
+
     const labelList orig({7, 9, 1, 2, 4, 7, 4, 0});
 
     labelList order;

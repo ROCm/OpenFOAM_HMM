@@ -2,14 +2,14 @@
 Description
     Compatibility include
 
-    foamVtkUIndPatchWriter.H combined into foamVtkIndPatchWriter.H (MAY-2022)
+    UIndirectList.H combined into IndirectList.H (MAY-2022)
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Foam_vtk_UIndPatchWriter_H
-#define Foam_vtk_UIndPatchWriter_H
+#ifndef Foam_UIndirectList_H
+#define Foam_UIndirectList_H
 
-#include "foamVtkIndPatchWriter.H"
+#include "IndirectList.H"
 
 #endif
 

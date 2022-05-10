@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,7 +33,7 @@ License
 #include "IOstreams.H"
 #include "StringStream.H"
 #include "ListOps.H"
-#include "StringListOps.H"
+#include "stringListOps.H"
 
 using namespace Foam;
 
@@ -71,8 +71,17 @@ int main()
         << "table1 [" << table1.size() << "] " << endl;
     forAllConstIters(table1, iter)
     {
-        Info<< iter.key() << " => " << iter() << nl;
+        Info<< iter.key() << " => " << iter.val() << nl;
     }
+
+
+    Info<< "\ntable1 sorted() :" << endl;
+    for (const auto& iter : table1.sorted())
+    {
+        Info<< "    " << iter.key() << " => " << iter.val() << nl;
+    }
+    Info<< endl;
+
 
     table1.set("acr", 108);
     table1.set("adx", 109);
@@ -81,6 +90,22 @@ int main()
     table1("aeq") += 1000;
 
     Info<< "\noverwrote some values table1: " << table1 << endl;
+
+
+    // Test writable sorted access
+    for (auto& iter : table1.sorted())
+    {
+        // Should not compile:  iter.key() = "illegal";
+        iter.val() *= 2;
+    }
+
+    Info<< "\nInplace modified - via sorted() access :" << endl;
+    for (const auto& iter : table1.sorted())
+    {
+        Info<< "    " << iter.key() << " => " << iter.val() << nl;
+    }
+    Info<< endl;
+
 
     Info<< "\ntest find:" << endl;
     Info<< table1.find("aaa")() << nl

@@ -373,9 +373,26 @@ Istream& operator>>(Istream& is, List<T>& list)
 
 // * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
 
-//- Create identity map of the given length with (map[i] == i)
+//- Return an identity map of the given length with (map[i] == i)
 //  Optionally with an alternative start index, so that (map[i] == i+start)
 labelList identity(const label len, label start=0);
+
+//- Return the (stable) sort order for the list
+template<class T>
+labelList sortedOrder(const UList<T>& input);
+
+//- Generate the (stable) sort order for the list
+template<class T>
+void sortedOrder(const UList<T>& input, labelList& order);
+
+//- Sort using specified list compare predicate
+template<class T, class ListComparePredicate>
+void sortedOrder
+(
+    const UList<T>& input,
+    labelList& order,
+    const ListComparePredicate& comp
+);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

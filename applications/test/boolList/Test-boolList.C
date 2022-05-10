@@ -157,18 +157,34 @@ int main(int argc, char *argv[])
     {
         boolList list2(5, true);
         list2.unset(2);
+        list2.unset(3);
 
         Info<< "Test wrapper idea" << nl;
 
         bitSetOrBoolList wrapper(list2);
 
-        if (wrapper.test(1))
+        // Use predicate, or test() method
+
+        if (list2(1))
         {
-            Info<< "1 is on" << nl;
+            Info<< "1 is on (original)" << nl;
         }
-        if (!wrapper.test(2))
+        if (!list2(2))
         {
-            Info<< "2 is off" << nl;
+            Info<< "2 is off (original)" << nl;
+        }
+        if (!list2(100))
+        {
+            Info<< "100 is off (original)" << nl;
+        }
+
+        if (wrapper(1))
+        {
+            Info<< "1 is on (wrapped)" << nl;
+        }
+        if (!wrapper(2))
+        {
+            Info<< "2 is off (wrapped)" << nl;
         }
     }
 

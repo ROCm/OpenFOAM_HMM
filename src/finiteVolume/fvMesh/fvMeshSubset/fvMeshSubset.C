@@ -31,6 +31,7 @@ License
 #include "Pstream.H"
 #include "cyclicPolyPatch.H"
 #include "emptyPolyPatch.H"
+#include "processorPolyPatch.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

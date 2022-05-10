@@ -58,7 +58,7 @@ Description
 #include "attachDetach.H"
 #include "attachPolyTopoChanger.H"
 #include "regionSide.H"
-#include "primitiveFacePatch.H"
+#include "primitivePatch.H"
 #include "processorMeshes.H"
 
 using namespace Foam;

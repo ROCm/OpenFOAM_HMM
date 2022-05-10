@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,11 +66,7 @@ Foam::label Foam::UPtrList<T>::squeezeNull()
 
 
 template<class T>
-void Foam::UPtrList<T>::reorder
-(
-    const labelUList& oldToNew,
-    const bool testNull
-)
+void Foam::UPtrList<T>::reorder(const labelUList& oldToNew, const bool check)
 {
     const label len = this->size();
 
@@ -87,37 +83,31 @@ void Foam::UPtrList<T>::reorder
 
     for (label i=0; i<len; ++i)
     {
-        const label idx = oldToNew[i];
+        const label newIdx = oldToNew[i];
 
-        if (idx < 0 || idx >= len)
+        if (newIdx < 0 || newIdx >= len)
         {
             FatalErrorInFunction
-                << "Illegal index " << idx << nl
+                << "Illegal index " << newIdx << nl
                 << "Valid indices are [0," << len << ") for type "
                 << typeid(T).name() << nl
                 << abort(FatalError);
         }
 
-        if (newList[idx])
+        if (newList[newIdx])
         {
             FatalErrorInFunction
-                << "reorder map is not unique; element " << idx
+                << "reorder map is not unique; element " << newIdx
                 << " already used for type " << typeid(T).name()
                 << abort(FatalError);
         }
-        newList[idx] = ptrs_[i];
+        newList[newIdx] = ptrs_[i];
     }
 
-    // Verify that all pointers were indeed set
-    if (testNull)
+    // Verify all pointers were indeed set
+    if (check)
     {
-        const label idx = newList.findNull();
-        if (idx >= 0)
-        {
-            FatalErrorInFunction
-                << "Element " << idx << " not set after reordering." << nl
-                << abort(FatalError);
-        }
+        newList.checkNonNull();
     }
 
     ptrs_.transfer(newList);
@@ -125,11 +115,7 @@ void Foam::UPtrList<T>::reorder
 
 
 template<class T>
-void Foam::UPtrList<T>::sortOrder
-(
-    const labelUList& order,
-    const bool testNull
-)
+void Foam::UPtrList<T>::sortOrder(const labelUList& order, const bool check)
 {
     const label len = this->size();
 
@@ -147,39 +133,33 @@ void Foam::UPtrList<T>::sortOrder
 
     for (label i=0; i<len; ++i)
     {
-        const label idx = order[i];
+        const label oldIdx = order[i];
 
-        if (idx < 0 || idx >= len)
+        if (oldIdx < 0 || oldIdx >= len)
         {
             FatalErrorInFunction
-                << "Illegal index " << idx << nl
+                << "Illegal index " << oldIdx << nl
                 << "Valid indices are [0," << len << ") for type "
                 << typeid(T).name() << nl
                 << abort(FatalError);
         }
 
-        if (guard[idx])
+        if (guard[oldIdx])
         {
             FatalErrorInFunction
-                << "order map is not unique; element " << idx
+                << "order map is not unique; element " << oldIdx
                 << " already used for type " << typeid(T).name()
                 << abort(FatalError);
         }
 
-        guard[idx] = ptrs_[idx];
-        newList[i] = ptrs_[idx];
+        guard[oldIdx] = ptrs_[oldIdx];
+        newList[i] = ptrs_[oldIdx];
     }
 
     // Verify that all pointers were indeed set
-    if (testNull)
+    if (check)
     {
-        const label idx = newList.findNull();
-        if (idx >= 0)
-        {
-            FatalErrorInFunction
-                << "Element " << idx << " not set after reordering." << nl
-                << abort(FatalError);
-        }
+        newList.checkNonNull();
     }
 
     ptrs_.transfer(newList);
@@ -192,6 +172,28 @@ template<class T>
 Foam::Ostream& Foam::operator<<(Ostream& os, const UPtrList<T>& list)
 {
     return list.ptrs_.write(os);
+}
+
+
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
+template<class T, class Compare>
+void Foam::sort(UPtrList<T>& list, const Compare& comp)
+{
+    std::stable_sort
+    (
+        list.begin_ptr(),
+        list.end_ptr(),
+        typename UPtrList<T>::template value_compare<Compare>(comp)
+    );
+}
+
+
+template<class T>
+void Foam::sort(UPtrList<T>& list)
+{
+    // ie, lessOp<T>() or std::less<T>()
+    Foam::sort(list, [](const T& a, const T& b) { return (a < b); });
 }
 
 

@@ -27,11 +27,11 @@ License
 
 #include "voxelMeshSearch.H"
 #include "polyMesh.H"
-#include "processorPolyPatch.H"
 #include "IOobject.H"
 #include "fvMesh.H"
 #include "block.H"
 #include "emptyPolyPatch.H"
+#include "processorPolyPatch.H"
 #include "fvMeshTools.H"
 
 /* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */

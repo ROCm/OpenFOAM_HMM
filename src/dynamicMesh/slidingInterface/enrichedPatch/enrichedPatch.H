@@ -51,12 +51,12 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef enrichedPatch_H
-#define enrichedPatch_H
+#ifndef Foam_enrichedPatch_H
+#define Foam_enrichedPatch_H
 
-#include "primitiveFacePatch.H"
 #include "Map.H"
 #include "point.H"
+#include "primitivePatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

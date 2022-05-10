@@ -31,7 +31,7 @@ License
 #include "calculatedFvPatchFields.H"
 #include "extrapolatedCalculatedFvPatchFields.H"
 #include "coupledFvPatchFields.H"
-#include "UIndirectList.H"
+#include "IndirectList.H"
 #include "UniformList.H"
 #include "demandDrivenData.H"
 
