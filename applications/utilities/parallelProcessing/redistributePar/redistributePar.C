@@ -2824,7 +2824,8 @@ int main(int argc, char *argv[])
                             meshSubDir,
                             baseRunTime,
                             IOobject::NO_READ
-                        )
+                        ),
+                        label(0)
                     );
                     haveUndecomposedMesh = facesIO.headerOk();
                     Pstream::parRun(oldParRun);
