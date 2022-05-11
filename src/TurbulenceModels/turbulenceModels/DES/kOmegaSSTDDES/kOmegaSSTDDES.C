@@ -38,40 +38,12 @@ namespace LESModels
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
-tmp<volScalarField> kOmegaSSTDDES<BasicTurbulenceModel>::rd
-(
-    const volScalarField& magGradU
-) const
-{
-    tmp<volScalarField> tr
-    (
-        min
-        (
-            this->nuEff()
-           /(
-                max
-                (
-                    magGradU,
-                    dimensionedScalar("SMALL", magGradU.dimensions(), SMALL)
-                )
-                *sqr(this->kappa_*this->y_)
-            ),
-            scalar(10)
-        )
-    );
-    tr.ref().boundaryFieldRef() == 0.0;
-
-    return tr;
-}
-
-
-template<class BasicTurbulenceModel>
 tmp<volScalarField> kOmegaSSTDDES<BasicTurbulenceModel>::fd
 (
     const volScalarField& magGradU
 ) const
 {
-    return 1 - tanh(pow(Cd1_*rd(magGradU), Cd2_));
+    return 1 - tanh(pow(Cd1_*this->r(this->nuEff(), magGradU), Cd2_));
 }
 
 

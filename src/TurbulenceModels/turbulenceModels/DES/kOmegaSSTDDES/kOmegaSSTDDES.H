@@ -71,8 +71,6 @@ class kOmegaSSTDDES
 
         tmp<volScalarField> fd(const volScalarField& magGradU) const;
 
-        tmp<volScalarField> rd(const volScalarField& magGradU) const;
-
         //- No copy construct
         kOmegaSSTDDES(const kOmegaSSTDDES&) = delete;
 

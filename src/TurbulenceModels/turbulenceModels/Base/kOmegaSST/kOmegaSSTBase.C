@@ -133,6 +133,17 @@ void kOmegaSSTBase<BasicEddyViscosityModel>::correctNut()
 
 
 template<class BasicEddyViscosityModel>
+Foam::tmp<Foam::volScalarField> kOmegaSSTBase<BasicEddyViscosityModel>::S2
+(
+    const volScalarField& F1,
+    const volTensorField& gradU
+) const
+{
+    return 2*magSqr(symm(gradU));
+}
+
+
+template<class BasicEddyViscosityModel>
 tmp<volScalarField::Internal> kOmegaSSTBase<BasicEddyViscosityModel>::Pk
 (
     const volScalarField::Internal& G
@@ -143,11 +154,10 @@ tmp<volScalarField::Internal> kOmegaSSTBase<BasicEddyViscosityModel>::Pk
 
 
 template<class BasicEddyViscosityModel>
-tmp<volScalarField::Internal>
-kOmegaSSTBase<BasicEddyViscosityModel>::epsilonByk
+tmp<volScalarField::Internal> kOmegaSSTBase<BasicEddyViscosityModel>::epsilonByk
 (
-    const volScalarField& F1,
-    const volTensorField& gradU
+    const volScalarField& /* F1 not used */,
+    const volTensorField& /* gradU not used */
 ) const
 {
     return betaStar_*omega_();
@@ -165,8 +175,7 @@ tmp<volScalarField::Internal> kOmegaSSTBase<BasicEddyViscosityModel>::GbyNu
     return min
     (
         GbyNu0,
-        (c1_/a1_)*betaStar_*omega_()
-       *max(a1_*omega_(), b1_*F2*sqrt(S2))
+        (c1_/a1_)*betaStar_*omega_()*max(a1_*omega_(), b1_*F2*sqrt(S2))
     );
 }
 
@@ -174,13 +183,10 @@ tmp<volScalarField::Internal> kOmegaSSTBase<BasicEddyViscosityModel>::GbyNu
 template<class BasicEddyViscosityModel>
 tmp<fvScalarMatrix> kOmegaSSTBase<BasicEddyViscosityModel>::kSource() const
 {
-    return tmp<fvScalarMatrix>
+    return tmp<fvScalarMatrix>::New
     (
-        new fvScalarMatrix
-        (
-            k_,
-            dimVolume*this->rho_.dimensions()*k_.dimensions()/dimTime
-        )
+        k_,
+        dimVolume*this->rho_.dimensions()*k_.dimensions()/dimTime
     );
 }
 
@@ -188,13 +194,10 @@ tmp<fvScalarMatrix> kOmegaSSTBase<BasicEddyViscosityModel>::kSource() const
 template<class BasicEddyViscosityModel>
 tmp<fvScalarMatrix> kOmegaSSTBase<BasicEddyViscosityModel>::omegaSource() const
 {
-    return tmp<fvScalarMatrix>
+    return tmp<fvScalarMatrix>::New
     (
-        new fvScalarMatrix
-        (
-            omega_,
-            dimVolume*this->rho_.dimensions()*omega_.dimensions()/dimTime
-        )
+        omega_,
+        dimVolume*this->rho_.dimensions()*omega_.dimensions()/dimTime
     );
 }
 
@@ -207,13 +210,10 @@ tmp<fvScalarMatrix> kOmegaSSTBase<BasicEddyViscosityModel>::Qsas
     const volScalarField::Internal& beta
 ) const
 {
-    return tmp<fvScalarMatrix>
+    return tmp<fvScalarMatrix>::New
     (
-        new fvScalarMatrix
-        (
-            omega_,
-            dimVolume*this->rho_.dimensions()*omega_.dimensions()/dimTime
-        )
+        omega_,
+        dimVolume*this->rho_.dimensions()*omega_.dimensions()/dimTime
     );
 }
 
@@ -500,18 +500,6 @@ void kOmegaSSTBase<BasicEddyViscosityModel>::correct()
 
     volScalarField::Internal divU(fvc::div(fvc::absolute(this->phi(), U)));
 
-    tmp<volTensorField> tgradU = fvc::grad(U);
-    volScalarField S2(2*magSqr(symm(tgradU())));
-    volScalarField::Internal GbyNu0
-    (
-        this->type() + ":GbyNu",
-        (tgradU() && dev(twoSymm(tgradU())))
-    );
-    volScalarField::Internal G(this->GName(), nut*GbyNu0);
-
-    // Update omega and G at the wall
-    omega_.boundaryFieldRef().updateCoeffs();
-
     volScalarField CDkOmega
     (
         (2*alphaOmega2_)*(fvc::grad(k_) & fvc::grad(omega_))/omega_
@@ -519,6 +507,19 @@ void kOmegaSSTBase<BasicEddyViscosityModel>::correct()
 
     volScalarField F1(this->F1(CDkOmega));
     volScalarField F23(this->F23());
+
+    tmp<volTensorField> tgradU = fvc::grad(U);
+    volScalarField S2(this->S2(F1, tgradU()));
+    volScalarField::Internal GbyNu0
+    (
+        this->type() + ":GbyNu",
+        (tgradU() && dev(twoSymm(tgradU())))
+    );
+    volScalarField::Internal G(this->GName(), nut*GbyNu0);
+    tgradU.clear();
+
+    // Update omega and G at the wall
+    omega_.boundaryFieldRef().updateCoeffs();
 
     {
         volScalarField::Internal gamma(this->gamma(F1));

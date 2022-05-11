@@ -56,6 +56,25 @@ void kOmegaSSTDES<BasicTurbulenceModel>::correctNut()
 
 
 template<class BasicTurbulenceModel>
+tmp<volScalarField> kOmegaSSTDES<BasicTurbulenceModel>::r
+(
+    const volScalarField& nur,
+    const volScalarField& magGradU
+) const
+{
+    const dimensionedScalar eps("SMALL", magGradU.dimensions(), SMALL);
+
+    tmp<volScalarField> tr =
+        min(nur/(max(magGradU, eps)*sqr(this->kappa_*this->y_)), scalar(10));
+
+    tr.ref().boundaryFieldRef() == 0;
+
+    return tr;
+
+}
+
+
+template<class BasicTurbulenceModel>
 tmp<volScalarField> kOmegaSSTDES<BasicTurbulenceModel>::dTilda
 (
     const volScalarField& magGradU,
@@ -187,31 +206,19 @@ tmp<volScalarField> kOmegaSSTDES<BasicTurbulenceModel>::LESRegion() const
 
     const volScalarField F1(this->F1(CDkOmega));
 
-    tmp<volScalarField> tLESRegion
+    return tmp<volScalarField>::New
     (
-        new volScalarField
+        IOobject::scopedName("DES", "LESRegion"),
+        neg
         (
-            IOobject
+            dTilda
             (
-                "DES::LESRegion",
-                this->mesh_.time().timeName(),
-                this->mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            neg
-            (
-                dTilda
-                (
-                    mag(fvc::grad(U)),
-                    F1*CDESkom_ + (1 - F1)*CDESkeps_
-                )
-              - sqrt(k)/(this->betaStar_*omega)
+                mag(fvc::grad(U)),
+                F1*CDESkom_ + (1 - F1)*CDESkeps_
             )
+          - sqrt(k)/(this->betaStar_*omega)
         )
     );
-
-    return tLESRegion;
 }
 
 

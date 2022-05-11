@@ -104,6 +104,12 @@ protected:
         virtual void correctNut(const volScalarField& S2);
         virtual void correctNut();
 
+        tmp<volScalarField> r
+        (
+            const volScalarField& nur,
+            const volScalarField& magGradU
+        ) const;
+
         //- Length scale
         virtual tmp<volScalarField> dTilda
         (

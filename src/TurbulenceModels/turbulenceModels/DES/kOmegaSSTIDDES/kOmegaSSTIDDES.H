@@ -77,12 +77,6 @@ class kOmegaSSTIDDES
         tmp<volScalarField> ft(const volScalarField& magGradU) const;
         tmp<volScalarField> fl(const volScalarField& magGradU) const;
 
-        tmp<volScalarField> rd
-        (
-            const volScalarField& nur,
-            const volScalarField& magGradU
-        ) const;
-
         //- Delay function
         tmp<volScalarField> fdt(const volScalarField& magGradU) const;
 
@@ -104,9 +98,10 @@ protected:
             dimensionedScalar Cl_;
             dimensionedScalar Ct_;
 
-        // Fields
 
-            const IDDESDelta& IDDESDelta_;
+        //- IDDES delta
+        const IDDESDelta& IDDESDelta_;
+
 
     // Protected Member Functions
 

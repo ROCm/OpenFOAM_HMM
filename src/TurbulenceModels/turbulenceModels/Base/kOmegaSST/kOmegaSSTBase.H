@@ -253,6 +253,13 @@ protected:
 
         virtual void correctNut();
 
+        //- Return square of strain rate
+        virtual tmp<volScalarField> S2
+        (
+            const volScalarField& F1,
+            const volTensorField& gradU
+        ) const;
+
         //- Return k production rate
         virtual tmp<volScalarField::Internal> Pk
         (
@@ -321,22 +328,20 @@ public:
         //- Return the effective diffusivity for k
         tmp<volScalarField> DkEff(const volScalarField& F1) const
         {
-            return tmp<volScalarField>
+            return tmp<volScalarField>::New
             (
-                new volScalarField("DkEff", alphaK(F1)*this->nut_ + this->nu())
+                "DkEff",
+                alphaK(F1)*this->nut_ + this->nu()
             );
         }
 
         //- Return the effective diffusivity for omega
         tmp<volScalarField> DomegaEff(const volScalarField& F1) const
         {
-            return tmp<volScalarField>
+            return tmp<volScalarField>::New
             (
-                new volScalarField
-                (
-                    "DomegaEff",
-                    alphaOmega(F1)*this->nut_ + this->nu()
-                )
+                "DomegaEff",
+                alphaOmega(F1)*this->nut_ + this->nu()
             );
         }
 

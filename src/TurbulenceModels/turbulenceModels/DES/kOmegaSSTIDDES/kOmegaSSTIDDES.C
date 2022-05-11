@@ -64,7 +64,7 @@ tmp<volScalarField> kOmegaSSTIDDES<BasicTurbulenceModel>::ft
     const volScalarField& magGradU
 ) const
 {
-    return tanh(pow3(sqr(Ct_)*rd(this->nut_, magGradU)));
+    return tanh(pow3(sqr(Ct_)*this->r(this->nut_, magGradU)));
 }
 
 
@@ -74,36 +74,7 @@ tmp<volScalarField> kOmegaSSTIDDES<BasicTurbulenceModel>::fl
     const volScalarField& magGradU
 ) const
 {
-    return tanh(pow(sqr(Cl_)*rd(this->nu(), magGradU), 10));
-}
-
-
-template<class BasicTurbulenceModel>
-tmp<volScalarField> kOmegaSSTIDDES<BasicTurbulenceModel>::rd
-(
-    const volScalarField& nur,
-    const volScalarField& magGradU
-) const
-{
-    tmp<volScalarField> tr
-    (
-        min
-        (
-            nur
-           /(
-                max
-                (
-                    magGradU,
-                    dimensionedScalar("SMALL", magGradU.dimensions(), SMALL)
-                )
-                *sqr(this->kappa_*this->y_)
-            ),
-            scalar(10)
-        )
-    );
-    tr.ref().boundaryFieldRef() == 0.0;
-
-    return tr;
+    return tanh(pow(sqr(Cl_)*this->r(this->nu(), magGradU), 10));
 }
 
 
@@ -113,7 +84,7 @@ tmp<volScalarField> kOmegaSSTIDDES<BasicTurbulenceModel>::fdt
     const volScalarField& magGradU
 ) const
 {
-    return 1 - tanh(pow(Cdt1_*rd(this->nut_, magGradU), Cdt2_));
+    return 1 - tanh(pow(Cdt1_*this->r(this->nut_, magGradU), Cdt2_));
 }
 
 
