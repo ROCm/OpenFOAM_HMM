@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,8 +69,11 @@ public:
         //- Construct from IOobject
         explicit GlobalIOList(const IOobject& io);
 
-        //- Construct from IOobject
-        GlobalIOList(const IOobject& io, const label size);
+        //- Construct from IOobject and zero size (if not read)
+        GlobalIOList(const IOobject& io, Foam::zero);
+
+        //- Construct from IOobject and list size (if not read)
+        GlobalIOList(const IOobject& io, const label len);
 
         //- Construct from IOobject and a List
         GlobalIOList(const IOobject& io, const UList<Type>& content);

@@ -67,7 +67,7 @@ template<class T, class BaseType> Ostream& operator<<
 );
 
 /*---------------------------------------------------------------------------*\
-                           Class CompactIOList Declaration
+                        Class CompactIOList Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class T, class BaseType>
@@ -106,6 +106,9 @@ public:
         //- Construct from IOobject
         explicit CompactIOList(const IOobject& io);
 
+        //- Construct from IOobject and zero size (if not read)
+        CompactIOList(const IOobject& io, Foam::zero);
+
         //- Construct from IOobject and default length of CompactIOList
         CompactIOList(const IOobject& io, const label len);
 
@@ -115,9 +118,9 @@ public:
         //- Construct by transferring the List content
         CompactIOList(const IOobject& io, List<T>&& content);
 
-    // Destructor
 
-        virtual ~CompactIOList() = default;
+    //- Destructor
+    virtual ~CompactIOList() = default;
 
 
     // Member Functions

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,9 +51,9 @@ void Foam::CompactIOField<T, BaseType>::readFromStream(const bool valid)
         else
         {
             FatalIOErrorInFunction(is)
-                << "unexpected class name " << headerClassName()
-                << " expected " << typeName << " or " << IOField<T>::typeName
-                << endl
+                << "Unexpected class name " << headerClassName()
+                << " expected " << typeName
+                << " or " << IOField<T>::typeName << nl
                 << "    while reading object " << name()
                 << exit(FatalIOError);
         }
@@ -104,7 +104,27 @@ template<class T, class BaseType>
 Foam::CompactIOField<T, BaseType>::CompactIOField
 (
     const IOobject& io,
-    const label size
+    Foam::zero
+)
+:
+    regIOobject(io)
+{
+    if
+    (
+        io.readOpt() == IOobject::MUST_READ
+     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
+    )
+    {
+        readFromStream();
+    }
+}
+
+
+template<class T, class BaseType>
+Foam::CompactIOField<T, BaseType>::CompactIOField
+(
+    const IOobject& io,
+    const label len
 )
 :
     regIOobject(io)
@@ -119,7 +139,7 @@ Foam::CompactIOField<T, BaseType>::CompactIOField
     }
     else
     {
-        Field<T>::setSize(size);
+        Field<T>::resize(len);
     }
 }
 

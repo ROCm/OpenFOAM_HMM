@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,7 +43,19 @@ Foam::GlobalIOList<Type>::GlobalIOList(const IOobject& io)
 
 
 template<class Type>
-Foam::GlobalIOList<Type>::GlobalIOList(const IOobject& io, const label size)
+Foam::GlobalIOList<Type>::GlobalIOList(const IOobject& io, Foam::zero)
+:
+    regIOobject(io)
+{
+    // Check for MUST_READ_IF_MODIFIED
+    warnNoRereading<GlobalIOList<Type>>();
+
+    readHeaderOk(IOstream::BINARY, typeName);
+}
+
+
+template<class Type>
+Foam::GlobalIOList<Type>::GlobalIOList(const IOobject& io, const label len)
 :
     regIOobject(io)
 {
@@ -52,7 +64,7 @@ Foam::GlobalIOList<Type>::GlobalIOList(const IOobject& io, const label size)
 
     if (!readHeaderOk(IOstream::BINARY, typeName))
     {
-        List<Type>::setSize(size);
+        List<Type>::resize(len);
     }
 }
 

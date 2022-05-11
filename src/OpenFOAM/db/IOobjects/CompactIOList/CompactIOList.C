@@ -107,6 +107,19 @@ template<class T, class BaseType>
 Foam::CompactIOList<T, BaseType>::CompactIOList
 (
     const IOobject& io,
+    Foam::zero
+)
+:
+    regIOobject(io)
+{
+    readContents();
+}
+
+
+template<class T, class BaseType>
+Foam::CompactIOList<T, BaseType>::CompactIOList
+(
+    const IOobject& io,
     const label len
 )
 :

@@ -66,6 +66,18 @@ Foam::IOList<T>::IOList(const IOobject& io)
 
 
 template<class T>
+Foam::IOList<T>::IOList(const IOobject& io, Foam::zero)
+:
+    regIOobject(io)
+{
+    // Check for MUST_READ_IF_MODIFIED
+    warnNoRereading<IOList<T>>();
+
+    readContents();
+}
+
+
+template<class T>
 Foam::IOList<T>::IOList(const IOobject& io, const label len)
 :
     regIOobject(io)

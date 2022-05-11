@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,18 +39,17 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef CompactIOField_H
-#define CompactIOField_H
+#ifndef Foam_CompactIOField_H
+#define Foam_CompactIOField_H
 
 #include "IOField.H"
-#include "regIOobject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 template<class T, class BaseType> class CompactIOField;
 
 template<class T, class BaseType> Istream& operator>>
@@ -94,11 +93,14 @@ public:
         //- Construct from IOobject
         explicit CompactIOField(const IOobject& io);
 
-        //- Construct from IOobject; does local processor require reading?
+        //- Construct from IOobject, with local processor conditional reading
         CompactIOField(const IOobject& io, const bool valid);
 
-        //- Construct from IOobject and size
-        CompactIOField(const IOobject& io, const label size);
+        //- Construct from IOobject and zero size (if not read)
+        CompactIOField(const IOobject& io, Foam::zero);
+
+        //- Construct from IOobject and size (if not read)
+        CompactIOField(const IOobject& io, const label len);
 
         //- Construct from IOobject and a List/Field content
         CompactIOField(const IOobject& io, const UList<T>& content);

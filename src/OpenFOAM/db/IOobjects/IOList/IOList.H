@@ -79,13 +79,16 @@ public:
         //- Construct from IOobject
         explicit IOList(const IOobject& io);
 
-        //- Construct from IOobject and size of IOList
+        //- Construct from IOobject and zero size (if not read)
+        IOList(const IOobject& io, Foam::zero);
+
+        //- Construct from IOobject and list size (if not read)
         IOList(const IOobject& io, const label len);
 
-        //- Construct from IOobject and a copy of UList content
+        //- Construct from IOobject and a copy of content
         IOList(const IOobject& io, const UList<T>& content);
 
-        //- Construct by transferring the List content
+        //- Construct by transferring the content
         IOList(const IOobject& io, List<T>&& content);
 
 

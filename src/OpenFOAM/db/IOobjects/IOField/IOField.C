@@ -103,6 +103,18 @@ Foam::IOField<Type>::IOField(const IOobject& io, const bool valid)
 
 
 template<class Type>
+Foam::IOField<Type>::IOField(const IOobject& io, Foam::zero)
+:
+    regIOobject(io)
+{
+    // Check for MUST_READ_IF_MODIFIED
+    warnNoRereading<IOField<Type>>();
+
+    readContents();
+}
+
+
+template<class Type>
 Foam::IOField<Type>::IOField(const IOobject& io, const label len)
 :
     regIOobject(io)

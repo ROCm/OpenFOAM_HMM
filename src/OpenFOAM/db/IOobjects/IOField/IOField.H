@@ -79,13 +79,16 @@ public:
         //- Construct from IOobject
         explicit IOField(const IOobject& io);
 
-        //- Construct from IOobject; does local processor require reading?
+        //- Construct from IOobject, with local processor conditional reading
         IOField(const IOobject& io, const bool valid);
 
-        //- Construct from IOobject and size (does not set values)
-        IOField(const IOobject& io, const label size);
+        //- Construct from IOobject and zero size (if not read)
+        IOField(const IOobject& io, Foam::zero);
 
-        //- Construct from IOobject and a List/Field content
+        //- Construct from IOobject and field size (if not read)
+        IOField(const IOobject& io, const label len);
+
+        //- Construct from IOobject and copy of List/Field content
         IOField(const IOobject& io, const UList<Type>& content);
 
         //- Construct by transferring the Field content
