@@ -1,9 +1,9 @@
 /* OPENFOAM note
  *
  * https://sqlite.org/src/raw/
- * https://www.sqlite.org/src/artifact/25888183
- * Artifact 258881835bd5bccd0c74fb110fe54244ff18e8e7ef3d949cbdab7187f02132bb:
- * File tool/lemon.c part of check-in [f2f279b2]] at 2021-10-04
+ * https://www.sqlite.org/src/artifact/ea5c8589
+ * Artifact ea5c8589c7749e9bd32ba10432aeeed3c16e215de72a12ada2bc707884837149:
+ * File tool/lemon.c part of check-in [201569e0] at 2022-04-07
  */
 /*
 ** This file contains all sources (including headers) to the LEMON
@@ -3048,6 +3048,7 @@ void Parse(struct lemon *gp)
     }
     if( c=='/' && cp[1]=='*' ){          /* Skip C style comments */
       cp+=2;
+      if( (*cp)=='/' ) cp++;
       while( (c= *cp)!=0 && (c!='/' || cp[-1]!='*') ){
         if( c=='\n' ) lineno++;
         cp++;
@@ -4323,7 +4324,6 @@ void ReportTable(
   int sqlFlag     /* Generate the *.sql file too */
 ){
   FILE *out, *in, *sql;
-  char line[LINESIZE];
   int  lineno;
   struct state *stp;
   struct action *ap;
@@ -4801,7 +4801,6 @@ void ReportTable(
   /* Generate a table containing the symbolic name of every symbol
   */
   for(i=0; i<lemp->nsymbol; i++){
-    lemon_sprintf(line,"\"%s\",",lemp->symbols[i]->name);
     fprintf(out,"  /* %4d */ \"%s\",\n",i, lemp->symbols[i]->name); lineno++;
   }
   tplt_xfer(lemp->name,in,out,&lineno);

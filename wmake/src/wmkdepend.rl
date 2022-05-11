@@ -553,7 +553,7 @@ int main(int argc, char* argv[])
         }
         else if (!strncmp(argv[i], "-o", 2))
         {
-            // Option: -oFile */
+            // Option: -oFile
             if (optLen > 2)
             {
                 outputFile.assign(argv[i] + 2);

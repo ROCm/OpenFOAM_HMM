@@ -21,10 +21,10 @@ echo ========================================
 
 #------------------------------------------------------------------------------
 
-wmake -all $targetType solvers
 wmake -all $targetType utilities
+wmake -all $targetType solvers
 
-# Optional
+# Extra tools (optional)
 ## wmake -all $targetType tools
 
 #------------------------------------------------------------------------------

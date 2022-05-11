@@ -1,5 +1,5 @@
---- lempar.c.orig	2020-11-05 19:44:09.412097759 +0100
-+++ lempar.c	2020-11-06 09:03:57.932738075 +0100
+--- lempar.c.orig	2022-05-11 05:42:38.000000000 +0200
++++ lempar.c	2022-05-11 09:13:31.688352277 +0200
 @@ -89,6 +89,11 @@
  /************* End control #defines *******************************************/
  #define YY_NLOOKAHEAD ((int)(sizeof(yy_lookahead)/sizeof(yy_lookahead[0])))
@@ -68,7 +68,7 @@
  int ParseCoverage(FILE *out){
    int stateno, iLookAhead, i;
    int nMissed = 0;
-@@ -889,6 +901,7 @@
+@@ -840,6 +852,7 @@
  ** Outputs:
  ** None.
  */
@@ -76,7 +76,7 @@
  void Parse(
    void *yyp,                   /* The parser */
    int yymajor,                 /* The major token code number */
-@@ -1063,6 +1076,7 @@
+@@ -1057,6 +1070,7 @@
  ** Return the fallback token corresponding to canonical token iToken, or
  ** 0 if iToken has no fallback.
  */
