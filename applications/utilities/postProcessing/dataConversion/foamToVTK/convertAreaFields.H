@@ -44,7 +44,7 @@ if (doFiniteArea)
     const label nAreaFields =
         objects.count(stringListOps::foundOp<word>(fieldTypes::area));
 
-    if (nAreaFields)
+    if (nAreaFields || withMeshIds)
     {
         faMeshPtr = faMesh::TryNew(meshProxy.baseMesh());
     }
@@ -67,6 +67,8 @@ if (doFiniteArea)
             ),
             Pstream::parRun()
         );
+        Info<< "    Area      : "
+            << args.relativePath(writer.output()) << nl;
 
         writer.beginFile(areaMesh.name());
 

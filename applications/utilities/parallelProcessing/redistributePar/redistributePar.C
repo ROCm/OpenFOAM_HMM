@@ -2443,6 +2443,7 @@ int main(int argc, char *argv[])
         "Test without writing the decomposition. "
         "Changes -cellDist to only write volScalarField."
     );
+    argList::addVerboseOption("Additional verbosity");
     argList::addBoolOption
     (
         "cellDist",
