@@ -145,7 +145,6 @@ void Foam::mapDistribute::distribute
 }
 
 
-//- Distribute data using default commsType.
 template<class T>
 void Foam::mapDistribute::distribute
 (
@@ -168,11 +167,11 @@ void Foam::mapDistribute::distribute
 {
     fld.shrink();
 
-    List<T>& fldList = static_cast<List<T>&>(fld);
+    List<T>& list = static_cast<List<T>&>(fld);
 
-    distribute(fldList, dummyTransform, tag);
+    distribute(list, dummyTransform, tag);
 
-    fld.setCapacity(fldList.size());
+    fld.setCapacity(list.size());
 }
 
 
@@ -224,6 +223,7 @@ void Foam::mapDistribute::distribute
 {
     // Distribute. Leave out dummy transforms since we're doing them ourselves
     distribute(fld, false, tag);
+
     // Do transforms
     applyTransforms(git, fld, top);
 }

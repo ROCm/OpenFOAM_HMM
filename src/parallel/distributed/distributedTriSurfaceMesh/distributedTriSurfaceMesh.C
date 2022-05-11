@@ -1452,7 +1452,7 @@ void Foam::distributedTriSurfaceMesh::surfaceSide
     mapDistributeBase::distribute
     (
         Pstream::commsTypes::nonBlocking,
-        List<labelPair>(),
+        List<labelPair>::null(),
         nearestInfo.size(),
         map.constructMap(),
         map.constructHasFlip(),
@@ -1481,7 +1481,7 @@ void Foam::distributedTriSurfaceMesh::surfaceSide
     //mapDistributeBase::distribute
     //(
     //    Pstream::commsTypes::nonBlocking,
-    //    List<labelPair>(0),
+    //    List<labelPair>::null(),
     //    nearestInfo.size(),
     //    map.constructMap(),
     //    map.constructHasFlip(),
@@ -3306,7 +3306,7 @@ void Foam::distributedTriSurfaceMesh::findNearest
     mapDistributeBase::distribute
     (
         Pstream::commsTypes::nonBlocking,
-        List<labelPair>(),
+        List<labelPair>::null(),
         samples.size(),
         map1.constructMap(),
         map1.constructHasFlip(),
@@ -3467,7 +3467,7 @@ void Foam::distributedTriSurfaceMesh::findNearest
     mapDistributeBase::distribute
     (
         Pstream::commsTypes::nonBlocking,
-        List<labelPair>(),
+        List<labelPair>::null(),
         samples.size(),
         map2.constructMap(),
         map2.constructHasFlip(),
@@ -4338,7 +4338,7 @@ void Foam::distributedTriSurfaceMesh::getVolumeType
     mapDistributeBase::distribute
     (
         Pstream::commsTypes::nonBlocking,
-        List<labelPair>(),
+        List<labelPair>::null(),
         samples.size(),
         map.constructMap(),
         map.constructHasFlip(),
@@ -4374,7 +4374,7 @@ void Foam::distributedTriSurfaceMesh::getVolumeType
     //mapDistributeBase::distribute
     //(
     //    Pstream::commsTypes::nonBlocking,
-    //    List<labelPair>(0),
+    //    List<labelPair>::null(),
     //    samples.size(),
     //    map.constructMap(),
     //    map.constructHasFlip(),

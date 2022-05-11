@@ -550,7 +550,7 @@ void Foam::meshToMesh::calculate(const word& methodName, const bool normalise)
         mapDistributeBase::distribute
         (
             Pstream::commsTypes::nonBlocking,
-            List<labelPair>(),
+            List<labelPair>::null(),
             tgtRegion_.nCells(),
             map.constructMap(),
             false,
@@ -568,7 +568,7 @@ void Foam::meshToMesh::calculate(const word& methodName, const bool normalise)
         mapDistributeBase::distribute
         (
             Pstream::commsTypes::nonBlocking,
-            List<labelPair>(),
+            List<labelPair>::null(),
             tgtRegion_.nCells(),
             map.constructMap(),
             false,

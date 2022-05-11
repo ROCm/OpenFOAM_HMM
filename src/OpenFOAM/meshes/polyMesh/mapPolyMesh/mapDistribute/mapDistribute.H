@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -126,15 +126,15 @@ Note:
     values as index+flip, similar to e.g. faceProcAddressing. The flip
     will only be applied to fieldTypes (scalar, vector, .. triad)
 
-
 SourceFiles
     mapDistribute.C
+    mapDistributeIO.C
     mapDistributeTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef mapDistribute_H
-#define mapDistribute_H
+#ifndef Foam_mapDistribute_H
+#define Foam_mapDistribute_H
 
 #include "mapDistributeBase.H"
 #include "transformList.H"
@@ -146,11 +146,8 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class globalIndexAndTransform;
-
-
-// Forward declaration of friend functions and operators
-
 class mapDistribute;
 
 Istream& operator>>(Istream&, mapDistribute&);
@@ -158,17 +155,17 @@ Ostream& operator<<(Ostream&, const mapDistribute&);
 
 
 /*---------------------------------------------------------------------------*\
-                           Class mapDistribute Declaration
+                        Class mapDistribute Declaration
 \*---------------------------------------------------------------------------*/
 
 class mapDistribute
 :
     public mapDistributeBase
 {
-    // Private data
+    // Private Data
 
         //- For every globalIndexAndTransform::transformPermutations
-        //  gives the elements that need to be transformed
+        //- gives the elements that need to be transformed
         labelListList transformElements_;
 
         //- Destination in constructMap for transformed elements
@@ -327,8 +324,17 @@ public:
 
     // Constructors
 
-        //- Construct null
-        mapDistribute(const label comm = UPstream::worldComm);
+        //- Inherit constructors
+        using mapDistributeBase::mapDistributeBase;
+
+        //- Default construct - uses worldComm
+        mapDistribute();
+
+        //- Default construct with specified communicator
+        explicit mapDistribute(const label comm);
+
+        //- Move construct from base, no transforms
+        explicit mapDistribute(mapDistributeBase&& map);
 
         //- Copy construct
         explicit mapDistribute(const mapDistribute& map);
@@ -336,14 +342,10 @@ public:
         //- Move construct
         explicit mapDistribute(mapDistribute&& map);
 
-        //- Move construct from components
-        mapDistribute
+        //- Read construct from dictionary
+        explicit mapDistribute
         (
-            const label constructSize,
-            labelListList&& subMap,
-            labelListList&& constructMap,
-            const bool subHasFlip = false,
-            const bool constructHasFlip = false,
+            const dictionary& dict,
             const label comm = UPstream::worldComm
         );
 
@@ -357,44 +359,6 @@ public:
             labelList&& transformStart,
             const bool subHasFlip = false,
             const bool constructHasFlip = false,
-            const label comm = UPstream::worldComm
-        );
-
-        //- Construct from reverse addressing: per data item the send
-        //- processor and the receive processor.
-        //
-        //  \note data are not stored per processor so cannot use printLayout.
-        mapDistribute
-        (
-            const labelUList& sendProcs,
-            const labelUList& recvProcs,
-            const label comm = UPstream::worldComm
-        );
-
-        //- Construct from list of (possibly) remote elements in globalIndex
-        //- numbering (or -1).
-        //  Determines compact numbering (see above) and distribute map to
-        //  get data into this ordering and renumbers the elements to be in
-        //  compact numbering.
-        mapDistribute
-        (
-            const globalIndex&,
-            labelList& elements,
-            List<Map<label>>& compactMap,
-            const int tag = Pstream::msgType(),
-            const label comm = UPstream::worldComm
-        );
-
-        //- Special variant that works with the info sorted into bins
-        //- according to local indices.
-        //  For example, cellCells where cellCells[localCelli] is a list of
-        //  global cells.
-        mapDistribute
-        (
-            const globalIndex&,
-            labelListList& cellCells,
-            List<Map<label>>& compactMap,
-            const int tag = Pstream::msgType(),
             const label comm = UPstream::worldComm
         );
 
@@ -412,7 +376,7 @@ public:
             const labelPairList& transformedElements,
             labelList& transformedIndices,
             List<Map<label>>& compactMap,
-            const int tag = Pstream::msgType(),
+            const int tag = UPstream::msgType(),
             const label comm = UPstream::worldComm
         );
 
@@ -425,18 +389,7 @@ public:
             const List<labelPairList>& transformedElements,
             labelListList& transformedIndices,
             List<Map<label>>& compactMap,
-            const int tag = Pstream::msgType(),
-            const label comm = UPstream::worldComm
-        );
-
-        //- Construct from my elements to send. Assumes layout is my elements
-        //  first followed by elements from all other processors in consecutive
-        //  order
-        explicit mapDistribute
-        (
-            labelListList&& subMap,
-            const bool subHasFlip = false,
-            const bool constructHasFlip = false,
+            const int tag = UPstream::msgType(),
             const label comm = UPstream::worldComm
         );
 
@@ -457,13 +410,13 @@ public:
 
             //- For every globalIndexAndTransform::transformPermutations
             //  gives the elements that need to be transformed
-            const labelListList& transformElements() const
+            const labelListList& transformElements() const noexcept
             {
                 return transformElements_;
             }
 
             //- Destination in constructMap for transformed elements
-            const labelList& transformStart() const
+            const labelList& transformStart() const noexcept
             {
                 return transformStart_;
             }
@@ -473,6 +426,9 @@ public:
 
 
         // Other
+
+            //- Reset to zero size, only retaining communicator
+            void clear();
 
             //- Transfer the contents of the argument and annul the argument.
             void transfer(mapDistribute& map);
@@ -510,7 +466,7 @@ public:
             void reverseDistribute
             (
                 const label constructSize,
-                List<T>&,
+                List<T>& fld,
                 const bool dummyTransform = true,
                 const int tag = UPstream::msgType()
             ) const;
@@ -565,11 +521,6 @@ public:
             //  storage (local data first, then non-local data)
             void printLayout(Ostream& os) const;
 
-            //- Correct for topo change.
-            void updateMesh(const mapPolyMesh&)
-            {
-                NotImplemented;
-            }
 
     // Member Operators
 
@@ -580,14 +531,28 @@ public:
         void operator=(mapDistribute&& rhs);
 
 
-    // IOstream operators
+    // IOstream Operators
 
-        //- Read dictionary from Istream
+        //- Read entries from dictionary format
+        void readDict(const dictionary& dict);
+
+        //- Write entries in dictionary format
+        void writeEntries(Ostream& os) const;
+
+        //- Read plain content (not dictionary) from Istream
         friend Istream& operator>>(Istream&, mapDistribute&);
 
-        //- Write dictionary to Ostream
+        //- Write plain content (not dictionary) to Ostream
         friend Ostream& operator<<(Ostream&, const mapDistribute&);
 
+
+    // Housekeeping
+
+        //- No correction for topo change
+        void updateMesh(const mapPolyMesh&)
+        {
+            NotImplemented;
+        }
 };
 
 

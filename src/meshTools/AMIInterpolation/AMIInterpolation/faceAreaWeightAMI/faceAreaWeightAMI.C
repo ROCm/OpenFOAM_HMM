@@ -738,7 +738,7 @@ bool Foam::faceAreaWeightAMI::calculate
         mapDistributeBase::distribute
         (
             Pstream::commsTypes::nonBlocking,
-            List<labelPair>(),
+            List<labelPair>::null(),
             tgtPatch0.size(),
             extendedTgtMapPtr_->constructMap(),
             false,                      // has flip
@@ -753,7 +753,7 @@ bool Foam::faceAreaWeightAMI::calculate
         mapDistributeBase::distribute
         (
             Pstream::commsTypes::nonBlocking,
-            List<labelPair>(),
+            List<labelPair>::null(),
             tgtPatch0.size(),
             extendedTgtMapPtr_->constructMap(),
             false,

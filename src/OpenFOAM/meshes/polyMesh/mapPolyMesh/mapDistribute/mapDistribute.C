@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -134,13 +134,13 @@ void Foam::mapDistribute::printLayout(Ostream& os) const
 {
     mapDistributeBase::printLayout(os);
 
-    forAll(transformElements_, trafoI)
+    forAll(transformElements_, i)
     {
-        if (transformElements_[trafoI].size() > 0)
+        if (!transformElements_[i].empty())
         {
-            os  << "transform " << trafoI << ':' << endl
-                << "    start : " << transformStart_[trafoI] << endl
-                << "    size  : " << transformElements_[trafoI].size() << endl;
+            os  << "transform " << i << ':' << nl
+                << "    start : " << transformStart_[i] << nl
+                << "    size  : " << transformElements_[i].size() << endl;
         }
     }
 }
@@ -148,9 +148,21 @@ void Foam::mapDistribute::printLayout(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+Foam::mapDistribute::mapDistribute()
+:
+    mapDistribute(UPstream::worldComm)
+{}
+
+
 Foam::mapDistribute::mapDistribute(const label comm)
 :
     mapDistributeBase(comm)
+{}
+
+
+Foam::mapDistribute::mapDistribute(mapDistributeBase&& map)
+:
+    mapDistributeBase(std::move(map))
 {}
 
 
@@ -168,28 +180,6 @@ Foam::mapDistribute::mapDistribute(mapDistribute&& map)
 {
     transfer(map);
 }
-
-
-Foam::mapDistribute::mapDistribute
-(
-    const label constructSize,
-    labelListList&& subMap,
-    labelListList&& constructMap,
-    const bool subHasFlip,
-    const bool constructHasFlip,
-    const label comm
-)
-:
-    mapDistributeBase
-    (
-        constructSize,
-        std::move(subMap),
-        std::move(constructMap),
-        subHasFlip,
-        constructHasFlip,
-        comm
-    )
-{}
 
 
 Foam::mapDistribute::mapDistribute
@@ -215,57 +205,6 @@ Foam::mapDistribute::mapDistribute
     ),
     transformElements_(std::move(transformElements)),
     transformStart_(std::move(transformStart))
-{}
-
-
-Foam::mapDistribute::mapDistribute
-(
-    const labelUList& sendProcs,
-    const labelUList& recvProcs,
-    const label comm
-)
-:
-    mapDistributeBase(sendProcs, recvProcs, comm)
-{}
-
-
-Foam::mapDistribute::mapDistribute
-(
-    const globalIndex& globalNumbering,
-    labelList& elements,
-    List<Map<label>>& compactMap,
-    const int tag,
-    const label comm
-)
-:
-    mapDistributeBase
-    (
-        globalNumbering,
-        elements,
-        compactMap,
-        tag,
-        comm
-    )
-{}
-
-
-Foam::mapDistribute::mapDistribute
-(
-    const globalIndex& globalNumbering,
-    labelListList& cellCells,
-    List<Map<label>>& compactMap,
-    const int tag,
-    const label comm
-)
-:
-    mapDistributeBase
-    (
-        globalNumbering,
-        cellCells,
-        compactMap,
-        tag,
-        comm
-    )
 {}
 
 
@@ -338,8 +277,8 @@ Foam::mapDistribute::mapDistribute
     transformElements_.setSize(nTrafo);
     forAll(transformStart_, trafoI)
     {
-        transformStart_[trafoI] = constructSize_;
-        constructSize_ += nPerTransform[trafoI];
+        transformStart_[trafoI] = constructSize();
+        constructSize() += nPerTransform[trafoI];
         transformElements_[trafoI].setSize(nPerTransform[trafoI]);
     }
 
@@ -391,7 +330,7 @@ Foam::mapDistribute::mapDistribute
 :
     mapDistributeBase(comm)
 {
-    const label myRank = Pstream::myProcNo(comm_);
+    const label myRank = Pstream::myProcNo(comm);
 
     // Construct per processor compact addressing of the global elements
     // needed. The ones from the local processor are not included since
@@ -454,8 +393,8 @@ Foam::mapDistribute::mapDistribute
     transformElements_.setSize(nTrafo);
     forAll(transformStart_, trafoI)
     {
-        transformStart_[trafoI] = constructSize_;
-        constructSize_ += nPerTransform[trafoI];
+        transformStart_[trafoI] = constructSize();
+        constructSize() += nPerTransform[trafoI];
         transformElements_[trafoI].setSize(nPerTransform[trafoI]);
     }
 
@@ -498,24 +437,6 @@ Foam::mapDistribute::mapDistribute
 }
 
 
-Foam::mapDistribute::mapDistribute
-(
-    labelListList&& subMap,
-    const bool subHasFlip,
-    const bool constructHasFlip,
-    const label comm
-)
-:
-    mapDistributeBase(std::move(subMap), subHasFlip, constructHasFlip, comm)
-{}
-
-
-Foam::mapDistribute::mapDistribute(Istream& is)
-{
-    is  >> *this;
-}
-
-
 Foam::autoPtr<Foam::mapDistribute> Foam::mapDistribute::clone() const
 {
     return autoPtr<mapDistribute>::New(*this);
@@ -530,11 +451,19 @@ Foam::label Foam::mapDistribute::whichTransform(const label index) const
 }
 
 
+void Foam::mapDistribute::clear()
+{
+    mapDistributeBase::clear();
+    transformElements_.clear();
+    transformStart_.clear();
+}
+
+
 void Foam::mapDistribute::transfer(mapDistribute& rhs)
 {
     if (this == &rhs)
     {
-        // Self-assignment is a no-op
+        return;  // Self-assignment is a no-op
     }
 
     mapDistributeBase::transfer(rhs);
@@ -565,31 +494,6 @@ void Foam::mapDistribute::operator=(mapDistribute&& rhs)
         // Avoid self-assignment
         transfer(rhs);
     }
-}
-
-
-// * * * * * * * * * * * * * * Istream Operator  * * * * * * * * * * * * * * //
-
-Foam::Istream& Foam::operator>>(Istream& is, mapDistribute& map)
-{
-    is.fatalCheck(FUNCTION_NAME);
-
-    is  >> static_cast<mapDistributeBase&>(map)
-        >> map.transformElements_ >> map.transformStart_;
-
-    return is;
-}
-
-
-// * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * * //
-
-Foam::Ostream& Foam::operator<<(Ostream& os, const mapDistribute& map)
-{
-    os  << static_cast<const mapDistributeBase&>(map) << token::NL
-        << map.transformElements_ << token::NL
-        << map.transformStart_;
-
-    return os;
 }
 
 

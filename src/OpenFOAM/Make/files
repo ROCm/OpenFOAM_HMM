@@ -663,8 +663,12 @@ $(mapPolyMesh)/mapPolyMesh.C
 $(mapPolyMesh)/faceMapper/faceMapper.C
 $(mapPolyMesh)/cellMapper/cellMapper.C
 $(mapPolyMesh)/mapDistribute/mapDistribute.C
+$(mapPolyMesh)/mapDistribute/mapDistributeIO.C
 $(mapPolyMesh)/mapDistribute/mapDistributeBase.C
+$(mapPolyMesh)/mapDistribute/mapDistributeBaseIO.C
+$(mapPolyMesh)/mapDistribute/mapDistributeBaseSubset.C
 $(mapPolyMesh)/mapDistribute/mapDistributePolyMesh.C
+$(mapPolyMesh)/mapDistribute/mapDistributePolyMeshIO.C
 $(mapPolyMesh)/mapDistribute/IOmapDistribute.C
 $(mapPolyMesh)/mapDistribute/IOmapDistributePolyMesh.C
 $(mapPolyMesh)/mapAddedPolyMesh.C

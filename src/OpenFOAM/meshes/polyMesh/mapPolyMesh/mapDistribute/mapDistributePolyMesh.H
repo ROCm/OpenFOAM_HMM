@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -104,19 +104,33 @@ class mapDistributePolyMesh
 
         void calcPatchSizes();
 
-        //- No copy construct
-        mapDistributePolyMesh(const mapDistributePolyMesh&) = delete;
-
+        void deepCopy(const mapDistributePolyMesh& rhs);
 
 public:
 
     // Constructors
 
-        //- Default construct
+        //- Default construct - uses worldComm
         mapDistributePolyMesh();
+
+        //- Default construct with specified communicator
+        explicit mapDistributePolyMesh(const label comm);
+
+        //- Read construct from dictionary
+        explicit mapDistributePolyMesh
+        (
+            const dictionary& dict,
+            const label comm = UPstream::worldComm
+        );
+
+        //- Copy construct
+        mapDistributePolyMesh(const mapDistributePolyMesh& map);
 
         //- Move construct
         mapDistributePolyMesh(mapDistributePolyMesh&& map);
+
+        //- Copy/move construct
+        mapDistributePolyMesh(mapDistributePolyMesh& map, bool reuse);
 
         //- Construct from components. Note that mesh has to be changed already
         //  since uses mesh.nPoints etc as the new size.
@@ -233,6 +247,12 @@ public:
             }
 
 
+        // Edit
+
+            //- Reset to zero size, only retaining communicator(s)
+            void clear();
+
+
         // Other
 
             //- Transfer the contents of the argument and annul the argument.
@@ -276,12 +296,6 @@ public:
             void distributePatchIndices(labelList& patchIDs) const;
 
 
-            //- Correct for topo change.
-            void updateMesh(const mapPolyMesh&)
-            {
-                NotImplemented;
-            }
-
 
     // Member Operators
 
@@ -292,14 +306,55 @@ public:
         void operator=(mapDistributePolyMesh&& map);
 
 
-    // IOstream operators
+    // IOstream Operators
 
-        //- Read content (not dictionary) from Istream
+        //- Info proxy to print summary information to a stream
+        InfoProxy<mapDistributePolyMesh> info() const
+        {
+            return *this;
+        }
+
+        //- Read entries from dictionary format
+        void readDict(const dictionary& dict);
+
+
+        //- Write cellMap in dictionary format
+        void writeCellMapEntries(Ostream& os) const;
+
+        //- Write faceMap in dictionary format
+        void writeFaceMapEntries(Ostream& os) const;
+
+        //- Write pointMap entries in dictionary format
+        void writePointMapEntries(Ostream& os) const;
+
+        //- Write patchMap in dictionary format
+        void writePatchMapEntries(Ostream& os) const;
+
+        //- Write all map entries in dictionary format
+        void writeEntries(Ostream& os) const;
+
+
+        //- Read plain content (not dictionary) from Istream
         friend Istream& operator>>(Istream&, mapDistributePolyMesh&);
 
-        //- Write content (not dictionary) to Ostream
+        //- Write plain content (not dictionary) to Ostream
         friend Ostream& operator<<(Ostream&, const mapDistributePolyMesh&);
+
+
+    // Housekeeping
+
+        //- No correction for topo change
+        void updateMesh(const mapPolyMesh&)
+        {
+            NotImplemented;
+        }
 };
+
+
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
+template<>
+Ostream& operator<<(Ostream& os, const InfoProxy<mapDistributePolyMesh>& ip);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

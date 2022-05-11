@@ -1531,7 +1531,7 @@ void Foam::cellCellStencils::inverseDistance::createStencil
         mapDistributeBase::distribute<point, minMagSqrEqOp<point>, flipOp>
         (
             Pstream::commsTypes::nonBlocking,
-            List<labelPair>(),
+            List<labelPair>::null(),
             mesh_.nCells(),
             cellInterpolationMap().constructMap(),
             false,

@@ -27,6 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "mapDistributeBase.H"
+#include "bitSet.H"
 #include "commSchedule.H"
 #include "labelPairHashes.H"
 #include "globalIndex.H"
@@ -37,6 +38,146 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(mapDistributeBase, 0);
+}
+
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+bool Foam::mapDistributeBase::hasFlipAddressing(const labelUList& map)
+{
+    for (const label val : map)
+    {
+        if (!val)
+        {
+            // Cannot be flipped addressing if it contains zero.
+            return false;
+        }
+        else if (val < 0)
+        {
+            // Must be flipped addressing if it contains negatives.
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+bool Foam::mapDistributeBase::hasFlipAddressing(const labelListList& maps)
+{
+    for (const labelList& map : maps)
+    {
+        for (const label val : map)
+        {
+            if (!val)
+            {
+                // Cannot be flipped addressing if it contains zero.
+                return false;
+            }
+            else if (val < 0)
+            {
+                // Must be flipped addressing if it contains negatives.
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+
+Foam::label Foam::mapDistributeBase::getMappedSize
+(
+    const labelListList& maps,
+    const bool hasFlip
+)
+{
+    label maxIndex = -1;
+
+    for (const labelList& map : maps)
+    {
+        for (label index : map)
+        {
+            if (hasFlip)
+            {
+                index = mag(index)-1;
+            }
+
+            maxIndex = max(maxIndex, index);
+        }
+    }
+
+    return (maxIndex+1);
+}
+
+
+Foam::label Foam::mapDistributeBase::countUnmapped
+(
+    const labelUList& elements,
+    const labelListList& maps,
+    const bool hasFlip
+)
+{
+    if (elements.empty())
+    {
+        return 0;
+    }
+
+    // Moderately efficient markup/search
+
+    bitSet unvisited(elements);
+    label nUnmapped = unvisited.count();
+
+    if (hasFlip)
+    {
+        for (const labelList& map : maps)
+        {
+            for (label index : map)
+            {
+                index = mag(index)-1;
+
+                if (unvisited.unset(index))
+                {
+                    --nUnmapped;
+                    if (!nUnmapped) break;
+                }
+            }
+        }
+    }
+    else
+    {
+        for (const labelList& map : maps)
+        {
+            for (label index : map)
+            {
+                if (unvisited.unset(index))
+                {
+                    --nUnmapped;
+                    if (!nUnmapped) break;
+                }
+            }
+        }
+    }
+
+    return nUnmapped;
+}
+
+
+void Foam::mapDistributeBase::checkReceivedSize
+(
+    const label proci,
+    const label expectedSize,
+    const label receivedSize
+)
+{
+    if (receivedSize != expectedSize)
+    {
+        FatalErrorInFunction
+            << "Expected from processor " << proci
+            << " " << expectedSize << " but received "
+            << receivedSize << " elements."
+            << abort(FatalError);
+    }
 }
 
 
@@ -121,7 +262,6 @@ Foam::List<Foam::labelPair> Foam::mapDistributeBase::schedule
     // Broadcast: send comms information to all
     Pstream::broadcast(allComms, comm);
 
-
     // Determine my schedule.
     labelList mySchedule
     (
@@ -134,28 +274,6 @@ Foam::List<Foam::labelPair> Foam::mapDistributeBase::schedule
 
     // Processors involved in my schedule
     return List<labelPair>(allComms, mySchedule);
-
-
-    //if (debug)
-    //{
-    //    Pout<< "I need to:" << endl;
-    //    const List<labelPair>& comms = schedule();
-    //    forAll(comms, i)
-    //    {
-    //        const labelPair& twoProcs = comms[i];
-    //        label sendProc = twoProcs[0];
-    //        label recvProc = twoProcs[1];
-    //
-    //        if (recvProc == myRank)
-    //        {
-    //            Pout<< "    receive from " << sendProc << endl;
-    //        }
-    //        else
-    //        {
-    //            Pout<< "    send to " << recvProc << endl;
-    //        }
-    //    }
-    //}
 }
 
 
@@ -167,29 +285,26 @@ const Foam::List<Foam::labelPair>& Foam::mapDistributeBase::schedule() const
         (
             new List<labelPair>
             (
-                schedule(subMap_, constructMap_, Pstream::msgType(), comm_)
+                schedule(subMap_, constructMap_, UPstream::msgType(), comm_)
             )
         );
     }
+
     return *schedulePtr_;
 }
 
 
-void Foam::mapDistributeBase::checkReceivedSize
+const Foam::List<Foam::labelPair>& Foam::mapDistributeBase::whichSchedule
 (
-    const label proci,
-    const label expectedSize,
-    const label receivedSize
-)
+    const UPstream::commsTypes commsType
+) const
 {
-    if (receivedSize != expectedSize)
+    if (commsType == UPstream::commsTypes::scheduled)
     {
-        FatalErrorInFunction
-            << "Expected from processor " << proci
-            << " " << expectedSize << " but received "
-            << receivedSize << " elements."
-            << abort(FatalError);
+        return schedule();
     }
+
+    return List<labelPair>::null();
 }
 
 
@@ -224,12 +339,9 @@ void Foam::mapDistributeBase::printLayout(Ostream& os) const
         }
     }
 
-    label localSize;
-    if (maxIndex[myRank] == labelMin)
-    {
-        localSize = 0;
-    }
-    else
+    label localSize(0);
+
+    if (maxIndex[myRank] != labelMin)
     {
         localSize = maxIndex[myRank]+1;
     }
@@ -237,18 +349,21 @@ void Foam::mapDistributeBase::printLayout(Ostream& os) const
     os  << "Layout: (constructSize:" << constructSize_
         << " subHasFlip:" << subHasFlip_
         << " constructHasFlip:" << constructHasFlip_
-        << ")" << endl
-        << "local (processor " << myRank << "):" << endl
-        << "    start : 0" << endl
+        << ")" << nl
+        << "local (processor " << myRank << "):" << nl
+        << "    start : 0" << nl
         << "    size  : " << localSize << endl;
 
     label offset = localSize;
     forAll(minIndex, proci)
     {
-        if (proci != myRank)
+        if (proci != myRank && !constructMap_[proci].empty())
         {
-            if (constructMap_[proci].size() > 0)
+            label size(0);
+
+            if (maxIndex[proci] != labelMin)
             {
+                size = maxIndex[proci]-minIndex[proci]+1;
                 if (minIndex[proci] != offset)
                 {
                     FatalErrorInFunction
@@ -257,14 +372,13 @@ void Foam::mapDistributeBase::printLayout(Ostream& os) const
                         << " minIndex:" << minIndex[proci]
                         << abort(FatalError);
                 }
-
-                label size = maxIndex[proci]-minIndex[proci]+1;
-                os  << "processor " << proci << ':' << endl
-                    << "    start : " << offset << endl
-                    << "    size  : " << size << endl;
-
-                offset += size;
             }
+
+            os  << "processor " << proci << ':' << nl
+                << "    start : " << offset << nl
+                << "    size  : " << size << endl;
+
+            offset += size;
         }
     }
 }
@@ -280,8 +394,6 @@ void Foam::mapDistributeBase::calcCompactAddressing
     const label myRank = Pstream::myProcNo(comm_);
     const label nProcs = Pstream::nProcs(comm_);
 
-    compactMap.setSize(nProcs);
-
     // Count all (non-local) elements needed. Just for presizing map.
     labelList nNonLocal(nProcs, Zero);
 
@@ -293,6 +405,8 @@ void Foam::mapDistributeBase::calcCompactAddressing
             nNonLocal[proci]++;
         }
     }
+
+    compactMap.resize_nocopy(nProcs);
 
     forAll(compactMap, proci)
     {
@@ -328,8 +442,6 @@ void Foam::mapDistributeBase::calcCompactAddressing
     const label myRank = Pstream::myProcNo(comm_);
     const label nProcs = Pstream::nProcs(comm_);
 
-    compactMap.setSize(nProcs);
-
     // Count all (non-local) elements needed. Just for presizing map.
     labelList nNonLocal(nProcs, Zero);
 
@@ -344,6 +456,8 @@ void Foam::mapDistributeBase::calcCompactAddressing
             }
         }
     }
+
+    compactMap.resize_nocopy(nProcs);
 
     forAll(compactMap, proci)
     {
@@ -401,7 +515,6 @@ void Foam::mapDistributeBase::exchangeAddressing
     }
 
 
-
     // Find out what to receive/send in compact addressing.
 
     // What I want to receive is what others have to send
@@ -430,7 +543,7 @@ void Foam::mapDistributeBase::exchangeAddressing
                 const label compactI = compactStart[proci] + iter.val();
                 remoteElem[i] = iter.key();
                 localElem[i]  = compactI;
-                iter() = compactI;
+                iter.val() = compactI;
                 i++;
             }
         }
@@ -510,7 +623,7 @@ void Foam::mapDistributeBase::exchangeAddressing
                 const label compactI = compactStart[proci] + iter.val();
                 remoteElem[i] = iter.key();
                 localElem[i]  = compactI;
-                iter() = compactI;
+                iter.val() = compactI;
                 i++;
             }
         }
@@ -538,15 +651,22 @@ void Foam::mapDistributeBase::exchangeAddressing
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+Foam::mapDistributeBase::mapDistributeBase()
+:
+    mapDistributeBase(UPstream::worldComm)
+{}
+
+
 Foam::mapDistributeBase::mapDistributeBase(const label comm)
 :
     constructSize_(0),
+    subMap_(),
+    constructMap_(),
     subHasFlip_(false),
     constructHasFlip_(false),
     comm_(comm),
-    schedulePtr_()
+    schedulePtr_(nullptr)
 {}
-
 
 
 Foam::mapDistributeBase::mapDistributeBase(const mapDistributeBase& map)
@@ -557,13 +677,13 @@ Foam::mapDistributeBase::mapDistributeBase(const mapDistributeBase& map)
     subHasFlip_(map.subHasFlip_),
     constructHasFlip_(map.constructHasFlip_),
     comm_(map.comm_),
-    schedulePtr_()
+    schedulePtr_(nullptr)
 {}
 
 
 Foam::mapDistributeBase::mapDistributeBase(mapDistributeBase&& map)
 :
-    mapDistributeBase()
+    mapDistributeBase(map.comm())
 {
     transfer(map);
 }
@@ -585,7 +705,7 @@ Foam::mapDistributeBase::mapDistributeBase
     subHasFlip_(subHasFlip),
     constructHasFlip_(constructHasFlip),
     comm_(comm),
-    schedulePtr_()
+    schedulePtr_(nullptr)
 {}
 
 
@@ -597,10 +717,12 @@ Foam::mapDistributeBase::mapDistributeBase
 )
 :
     constructSize_(0),
+    subMap_(),
+    constructMap_(),
     subHasFlip_(false),
     constructHasFlip_(false),
     comm_(comm),
-    schedulePtr_()
+    schedulePtr_(nullptr)
 {
     const label myRank = Pstream::myProcNo(comm_);
     const label nProcs = Pstream::nProcs(comm_);
@@ -627,7 +749,7 @@ Foam::mapDistributeBase::mapDistributeBase
 
         if (myRank == sendProc)
         {
-            // I am the sender. Count destination processor.
+            // I am the sender.
             nSend[recvProc]++;
         }
         if (myRank == recvProc)
@@ -647,6 +769,9 @@ Foam::mapDistributeBase::mapDistributeBase
     nSend = 0;
     nRecv = 0;
 
+    // Largest entry inside constructMap
+    label maxRecvIndex = -1;
+
     forAll(sendProcs, sampleI)
     {
         const label sendProc = sendProcs[sampleI];
@@ -661,10 +786,11 @@ Foam::mapDistributeBase::mapDistributeBase
         {
             // I am the receiver.
             constructMap_[sendProc][nRecv[sendProc]++] = sampleI;
-            // Largest entry inside constructMap
-            constructSize_ = sampleI+1;
+            maxRecvIndex = sampleI;
         }
     }
+
+    constructSize_ = maxRecvIndex+1;
 }
 
 
@@ -678,10 +804,12 @@ Foam::mapDistributeBase::mapDistributeBase
 )
 :
     constructSize_(0),
+    subMap_(),
+    constructMap_(),
     subHasFlip_(false),
     constructHasFlip_(false),
     comm_(comm),
-    schedulePtr_()
+    schedulePtr_(nullptr)
 {
     // Construct per processor compact addressing of the global elements
     // needed. The ones from the local processor are not included since
@@ -739,10 +867,12 @@ Foam::mapDistributeBase::mapDistributeBase
 )
 :
     constructSize_(0),
+    subMap_(),
+    constructMap_(),
     subHasFlip_(false),
     constructHasFlip_(false),
     comm_(comm),
-    schedulePtr_()
+    schedulePtr_(nullptr)
 {
     // Construct per processor compact addressing of the global elements
     // needed. The ones from the local processor are not included since
@@ -800,10 +930,11 @@ Foam::mapDistributeBase::mapDistributeBase
 :
     constructSize_(0),
     subMap_(std::move(subMap)),
+    constructMap_(),
     subHasFlip_(subHasFlip),
     constructHasFlip_(constructHasFlip),
     comm_(comm),
-    schedulePtr_()
+    schedulePtr_(nullptr)
 {
     const label myRank = Pstream::myProcNo(comm_);
     const label nProcs = Pstream::nProcs(comm_);
@@ -847,13 +978,43 @@ Foam::mapDistributeBase::mapDistributeBase
 }
 
 
-Foam::mapDistributeBase::mapDistributeBase(Istream& is)
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+Foam::labelList Foam::mapDistributeBase::subMapSizes() const
 {
-    is >> *this;
+    labelList sizes(subMap_.size());
+    forAll(subMap_, i)
+    {
+        sizes[i] = subMap_[i].size();
+    }
+
+    return sizes;
 }
 
 
-// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+Foam::labelList Foam::mapDistributeBase::constructMapSizes() const
+{
+    labelList sizes(constructMap_.size());
+    forAll(constructMap_, i)
+    {
+        sizes[i] = constructMap_[i].size();
+    }
+
+    return sizes;
+}
+
+
+void Foam::mapDistributeBase::clear()
+{
+    constructSize_ = 0;
+    subMap_.clear();
+    constructMap_.clear();
+    subHasFlip_ = false;
+    constructHasFlip_ = false;
+    // Leave comm_ intact
+    schedulePtr_.reset(nullptr);
+}
+
 
 void Foam::mapDistributeBase::transfer(mapDistributeBase& rhs)
 {
@@ -869,7 +1030,7 @@ void Foam::mapDistributeBase::transfer(mapDistributeBase& rhs)
     subHasFlip_ = rhs.subHasFlip_;
     constructHasFlip_ = rhs.constructHasFlip_;
     comm_ = rhs.comm_;
-    schedulePtr_.clear();
+    schedulePtr_.reset(nullptr);
 
     rhs.constructSize_ = 0;
     rhs.subHasFlip_ = false;
@@ -1312,7 +1473,7 @@ void Foam::mapDistributeBase::operator=(const mapDistributeBase& rhs)
     subHasFlip_ = rhs.subHasFlip_;
     constructHasFlip_ = rhs.constructHasFlip_;
     comm_ = rhs.comm_;
-    schedulePtr_.clear();
+    schedulePtr_.reset(nullptr);
 }
 
 
@@ -1323,34 +1484,6 @@ void Foam::mapDistributeBase::operator=(mapDistributeBase&& rhs)
         // Avoid self assignment
         transfer(rhs);
     }
-}
-
-
-// * * * * * * * * * * * * * * Istream Operator  * * * * * * * * * * * * * * //
-
-Foam::Istream& Foam::operator>>(Istream& is, mapDistributeBase& map)
-{
-    is.fatalCheck(FUNCTION_NAME);
-
-    is  >> map.constructSize_ >> map.subMap_ >> map.constructMap_
-        >> map.subHasFlip_ >> map.constructHasFlip_
-        >> map.comm_;
-
-    return is;
-}
-
-
-// * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * * //
-
-Foam::Ostream& Foam::operator<<(Ostream& os, const mapDistributeBase& map)
-{
-    os  << map.constructSize_ << token::NL
-        << map.subMap_ << token::NL
-        << map.constructMap_ << token::NL
-        << map.subHasFlip_ << token::SPACE << map.constructHasFlip_
-        << token::SPACE << map.comm_ << token::NL;
-
-    return os;
 }
 
 

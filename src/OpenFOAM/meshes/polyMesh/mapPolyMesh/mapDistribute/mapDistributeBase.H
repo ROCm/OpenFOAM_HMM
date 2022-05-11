@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2016 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,31 +66,33 @@ Note:
 
 SourceFiles
     mapDistributeBase.C
+    mapDistributeBaseIO.C
     mapDistributeBaseTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef mapDistributeBase_H
-#define mapDistributeBase_H
+#ifndef Foam_mapDistributeBase_H
+#define Foam_mapDistributeBase_H
 
+#include "boolList.H"
 #include "labelList.H"
 #include "labelPair.H"
 #include "Pstream.H"
-#include "boolList.H"
 #include "Map.H"
+#include "InfoProxy.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-class mapPolyMesh;
+// Forward Declarations
+
+class bitSet;
+class dictionary;
 class globalIndex;
 class PstreamBuffers;
-
-
-// Forward declaration of friend functions and operators
-
+class mapPolyMesh;
 class mapDistributeBase;
 
 Istream& operator>>(Istream&, mapDistributeBase&);
@@ -103,9 +105,7 @@ Ostream& operator<<(Ostream&, const mapDistributeBase&);
 
 class mapDistributeBase
 {
-protected:
-
-    // Protected data
+    // Private Data
 
         //- Size of reconstructed data
         label constructSize_;
@@ -129,13 +129,27 @@ protected:
         mutable autoPtr<List<labelPair>> schedulePtr_;
 
 
-    // Private Member Functions
+protected:
 
+    // Protected Member Functions
+
+        //- Fatal if expected and received size are not equal
         static void checkReceivedSize
         (
             const label proci,
             const label expectedSize,
             const label receivedSize
+        );
+
+        //- Scan the maps for the max addressed index.
+        //
+        //  \param maps  The maps to scan
+        //  \param hasFlip  True if maps has flip addressing
+        //  \return max-size needed for addressing (eg, constructSize)
+        static label getMappedSize
+        (
+            const labelListList& maps,
+            const bool hasFlip
         );
 
         //- Construct per processor compact addressing of the global elements
@@ -172,6 +186,7 @@ protected:
             labelList& compactStart
         );
 
+
         template<class T, class CombineOp, class NegateOp>
         static void flipAndCombine
         (
@@ -183,14 +198,49 @@ protected:
             List<T>& lhs
         );
 
+        //- Lookup a field value at specified index and return its value
+        //- after any flip negation operations
         template<class T, class NegateOp>
         static T accessAndFlip
         (
-            const UList<T>& fld,
+            const UList<T>& values,
             const label index,
             const bool hasFlip,
             const NegateOp& negOp
         );
+
+        //- Lookup field values at specified indices and return
+        //- after any flip negation operations
+        template<class T, class NegateOp>
+        static List<T> accessAndFlip
+        (
+            const UList<T>& values,
+            const labelUList& indices,
+            const bool hasFlip,
+            const NegateOp& negOp
+        );
+
+
+private:
+
+    // Private Member Functions
+
+        //- Helper for renumbering compacted map elements and updating the
+        //- supplied old-to-new mapping to account for the visit order of
+        //- the original elements
+        //
+        //  \param origElements  The original elements visited (eg, meshPoints)
+        //  \param[in,out] oldToNew The old-to-new mapping
+        //  \param[in,out] mapElements  The map to be renumbered
+        //  \param hasFlip  True if map has flip addressing
+        static void renumberVisitOrder
+        (
+            const labelUList& origElements,
+            labelList& oldToNew,
+            labelListList& maps,
+            const bool hasFlip
+        );
+
 
 public:
 
@@ -200,8 +250,11 @@ public:
 
     // Constructors
 
-        //- Construct null
-        mapDistributeBase(const label comm = UPstream::worldComm);
+        //- Default construct (uses worldComm)
+        mapDistributeBase();
+
+        //- Default construct with specified communicator
+        explicit mapDistributeBase(const label comm);
 
         //- Copy construct
         mapDistributeBase(const mapDistributeBase& map);
@@ -209,7 +262,14 @@ public:
         //- Move construct
         mapDistributeBase(mapDistributeBase&& map);
 
-        //- Construct from components
+        //- Read construct from dictionary
+        explicit mapDistributeBase
+        (
+            const dictionary& dict,
+            const label comm = UPstream::worldComm
+        );
+
+        //- Move construct from components
         mapDistributeBase
         (
             const label constructSize,
@@ -221,8 +281,9 @@ public:
         );
 
         //- Construct from reverse addressing: per data item the send
-        //  processor and the receive processor. (note: data is not stored
-        //  sorted per processor so cannot use printLayout).
+        //- processor and the receive processor.
+        //
+        //  \note data is not sorted per processor - cannot use printLayout!
         mapDistributeBase
         (
             const labelUList& sendProcs,
@@ -231,9 +292,11 @@ public:
         );
 
         //- Construct from list of (possibly) remote elements in globalIndex
-        //  numbering (or -1). Determines compact numbering (see above) and
-        //  distribute map to get data into this ordering and renumbers the
-        //  elements to be in compact numbering.
+        //- numbering (or -1).
+        //
+        //  Determines compact numbering (see above) and distribute map
+        //  to get data into this ordering and renumbers the elements to
+        //  be in compact numbering.
         mapDistributeBase
         (
             const globalIndex&,
@@ -244,7 +307,9 @@ public:
         );
 
         //- Special variant that works with the info sorted into bins
-        //  according to local indices. E.g. think cellCells where
+        //- according to local indices.
+        //
+        //  E.g. think cellCells where
         //  cellCells[localCellI] is a list of global cells
         mapDistributeBase
         (
@@ -255,9 +320,9 @@ public:
             const label comm = UPstream::worldComm
         );
 
-        //- Construct from my elements to send. Assumes layout is my elements
-        //  first followed by elements from all other processors in consecutive
-        //  order
+        //- Construct from my elements to send.
+        //  Assumes layout is my elements first followed by elements
+        //  from all other processors in consecutive order.
         explicit mapDistributeBase
         (
             labelListList&& subMap,
@@ -267,128 +332,209 @@ public:
         );
 
         //- Construct from Istream
-        mapDistributeBase(Istream& is);
+        explicit mapDistributeBase(Istream& is);
+
+
+    // Static Functions
+
+        //- Test for flip addressing, where flips are encoded as negative
+        //- indices and non-flips are encoded as positive non-zero indices.
+        //
+        //  Exits early on the first detected zero or negative, which
+        //  makes this more efficient than testing min(map) \< 0.
+        //
+        //  \note may return a false negative (ie, no flips detected)
+        //     even when flip addressing is used, but the local map does not
+        //     contain any flipped elements
+        static bool hasFlipAddressing(const labelUList& map);
+
+        //- Test for flip addressing, where flips are encoded as negative
+        //- indices and non-flips are encoded as positive non-zero indices.
+        //
+        //  See notes above.
+        static bool hasFlipAddressing(const labelListList& maps);
+
+        //- Count the number of unmapped elements.
+        //
+        //  \param elements  The elements that are expected to be mapped
+        //  \param maps  The maps to scan
+        //  \param hasFlip  True if maps has flip addressing
+        //  \return number of unmapped elements
+        static label countUnmapped
+        (
+            const labelUList& elements,
+            const labelListList& maps,
+            const bool hasFlip
+        );
 
 
     // Member Functions
 
-        // Access
+    // Access
 
-            //- Constructed data size
-            label constructSize() const
-            {
-                return constructSize_;
-            }
+        //- Constructed data size
+        label constructSize() const noexcept
+        {
+            return constructSize_;
+        }
 
-            //- Constructed data size
-            label& constructSize()
-            {
-                return constructSize_;
-            }
+        //- Constructed data size
+        label& constructSize() noexcept
+        {
+            return constructSize_;
+        }
 
-            //- From subsetted data back to original data
-            const labelListList& subMap() const
-            {
-                return subMap_;
-            }
+        //- From subsetted data back to original data
+        const labelListList& subMap() const noexcept
+        {
+            return subMap_;
+        }
 
-            //- From subsetted data back to original data
-            labelListList& subMap()
-            {
-                return subMap_;
-            }
+        //- From subsetted data back to original data
+        labelListList& subMap() noexcept
+        {
+            return subMap_;
+        }
 
-            //- From subsetted data to new reconstructed data
-            const labelListList& constructMap() const
-            {
-                return constructMap_;
-            }
+        //- From subsetted data to new reconstructed data
+        const labelListList& constructMap() const noexcept
+        {
+            return constructMap_;
+        }
 
-            //- From subsetted data to new reconstructed data
-            labelListList& constructMap()
-            {
-                return constructMap_;
-            }
+        //- From subsetted data to new reconstructed data
+        labelListList& constructMap() noexcept
+        {
+            return constructMap_;
+        }
 
-            //- Does subMap include a sign
-            bool subHasFlip() const
-            {
-                return subHasFlip_;
-            }
+        //- Does subMap include a sign
+        bool subHasFlip() const noexcept
+        {
+            return subHasFlip_;
+        }
 
-            //- Does subMap include a sign
-            bool& subHasFlip()
-            {
-                return subHasFlip_;
-            }
+        //- Does subMap include a sign
+        bool& subHasFlip() noexcept
+        {
+            return subHasFlip_;
+        }
 
-            //- Does constructMap include a sign
-            bool constructHasFlip() const
-            {
-                return constructHasFlip_;
-            }
+        //- Does constructMap include a sign
+        bool constructHasFlip() const noexcept
+        {
+            return constructHasFlip_;
+        }
 
-            //- Does constructMap include a sign
-            bool& constructHasFlip()
-            {
-                return constructHasFlip_;
-            }
+        //- Does constructMap include a sign
+        bool& constructHasFlip() noexcept
+        {
+            return constructHasFlip_;
+        }
 
-            label comm() const
-            {
-                return comm_;
-            }
+        //- The communicator used
+        label comm() const noexcept
+        {
+            return comm_;
+        }
 
-            //- Calculate a schedule. See above.
-            static List<labelPair> schedule
-            (
-                const labelListList& subMap,
-                const labelListList& constructMap,
-                const int tag,
-                const label comm = UPstream::worldComm
-            );
+        //- The number of sub-lists within the maps
+        label nMaps() const noexcept
+        {
+            return constructMap_.size();
+        }
 
-            //- Return a schedule. Demand driven. See above.
-            const List<labelPair>& schedule() const;
+        //- The sizes of the subMap lists
+        labelList subMapSizes() const;
+
+        //- The sizes of the constructMap lists
+        labelList constructMapSizes() const;
 
 
-        // Other
+    // Schedule
 
-            //- Transfer the contents of the argument and annul the argument.
-            void transfer(mapDistributeBase& rhs);
+        //- Calculate a communication schedule. See above.
+        static List<labelPair> schedule
+        (
+            const labelListList& subMap,
+            const labelListList& constructMap,
+            const int tag,  // Message tag: msgType()
+            const label comm = UPstream::worldComm
+        );
 
-            //- Helper for construct from globalIndex. Renumbers element
-            //  (in globalIndex numbering) into compact indices.
-            static label renumber
-            (
-                const globalIndex&,
-                const List<Map<label>>& compactMap,
-                const label globalElement
-            );
+        //- Return a schedule. Demand driven. See above.
+        const List<labelPair>& schedule() const;
 
-            //- Compact maps. Gets per field a bool whether it is used (locally)
-            //  and works out itself what this side and sender side can remove
-            //  from maps. Only compacts non-local elements (i.e. the stuff
-            //  that gets sent over), does not change the local layout
-            void compact
-            (
-                const boolList& elemIsUsed,
-                const int tag = UPstream::msgType()
-            );
+        //- Return real or dummy schedule depending on the
+        //- communication type
+        const List<labelPair>& whichSchedule
+        (
+            const UPstream::commsTypes commsType
+        ) const;
 
-            //- Compact all maps and layout. Returns compaction maps for
-            //  subMap and constructMap
-            void compact
-            (
-                const boolList& elemIsUsed,
-                const label localSize,            // max index for subMap
-                labelList& oldToNewSub,
-                labelList& oldToNewConstruct,
-                const int tag = UPstream::msgType()
-            );
 
-            //- Distribute data. Note:schedule only used for
-            //  Pstream::commsTypes::scheduled for now, all others just use
+    // Other
+
+        //- Reset to zero size, only retaining communicator
+        void clear();
+
+        //- Transfer the contents of the argument and annul the argument.
+        void transfer(mapDistributeBase& rhs);
+
+        //- Helper for construct from globalIndex. Renumbers element
+        //  (in globalIndex numbering) into compact indices.
+        static label renumber
+        (
+            const globalIndex&,
+            const List<Map<label>>& compactMap,
+            const label globalElement
+        );
+
+        //- Helper for renumbering the (compacted) map elements
+        //- using the supplied old-to-new mapping.
+        //  Only compacts the maps, does not change the local layout.
+        //
+        //  \param[in,out] mapElements  The map to be renumbered
+        //  \param oldToNew The old-to-new mapping
+        //  \param hasFlip  True if map has flip addressing
+        //
+        //  \return max-size needed for new addressing (eg, constructSize)
+        static label renumberMap
+        (
+            labelListList& mapElements,
+            const labelUList& oldToNew,
+            const bool hasFlip
+        );
+
+
+    // Compaction
+
+        //- Compact all maps and layout.
+        //  Returns compaction maps for subMap and constructMap
+        void compact
+        (
+            const boolList& elemIsUsed,
+            const int tag = UPstream::msgType()
+        );
+
+        //- Compact all maps and layout.
+        //  Returns compaction maps for subMap and constructMap
+        void compact
+        (
+            const boolList& elemIsUsed,
+            const label localSize,            // max index for subMap
+            labelList& oldToNewSub,
+            labelList& oldToNewConstruct,
+            const int tag = UPstream::msgType()
+        );
+
+
+    // Distribute
+
+            //- Distribute data with specified negate operator (for flips).
+            //
+            //  \note schedule currently only used for
+            //  Pstream::commsTypes::scheduled, all others just use
             //  send-to-all, receive-from-all.
             template<class T, class NegateOp>
             static void distribute
@@ -400,13 +546,15 @@ public:
                 const bool subHasFlip,
                 const labelListList& constructMap,
                 const bool constructHasFlip,
-                List<T>&,
+                List<T>& field,
                 const NegateOp& negOp,
                 const int tag = UPstream::msgType(),
                 const label comm = UPstream::worldComm
             );
 
-            //- Distribute data. If multiple processors writing to same
+            //- Distribute data with specified combine operation
+            //
+            //  If multiple processors writing to same
             //  position adds contributions using cop.
             template<class T, class CombineOp, class NegateOp>
             static void distribute
@@ -418,7 +566,7 @@ public:
                 const bool subHasFlip,
                 const labelListList& constructMap,
                 const bool constructHasFlip,
-                List<T>&,
+                List<T>& field,
                 const T& nullValue,
                 const CombineOp& cop,
                 const NegateOp& negOp,
@@ -426,68 +574,138 @@ public:
                 const label comm = UPstream::worldComm
             );
 
-            //- Distribute data using default commsType.
+
+            //- Distribute data using default commsType
+            //- and the default flip/negate operator.
             template<class T>
             void distribute
             (
-                List<T>& fld,
+                List<T>& values,
                 const int tag = UPstream::msgType()
             ) const;
 
-            //- Distribute data using default commsType.
+            //- Distribute data using default commsType
+            //- and the default flip/negate operator.
+            template<class T>
+            void distribute
+            (
+                DynamicList<T>& values,
+                const int tag = UPstream::msgType()
+            ) const;
+
+            //- Distribute data using default commsType
+            //- and the specified negate operator (for flips).
             template<class T, class NegateOp>
             void distribute
             (
-                List<T>& fld,
+                List<T>& values,
                 const NegateOp& negOp,
                 const int tag = UPstream::msgType()
             ) const;
 
-            //- Distribute data using default commsType.
-            template<class T>
+            //- Distribute data using specified commsType
+            //- and the specified negate operator (for flips).
+            //  Accepts a nullValue to initialize unmapped elements
+            //  (ie, when the constructSize is larger than the number of
+            //  mapped elements).
+            template<class T, class NegateOp>
             void distribute
             (
-                DynamicList<T>& fld,
+                const Pstream::commsTypes commsType,
+                List<T>& values,
+                const NegateOp& negOp,
                 const int tag = UPstream::msgType()
             ) const;
 
-            //- Reverse distribute data using default commsType.
+            //- Distribute data using specified commsType
+            //- and the specified negate operator (for flips).
+            //  Accepts a nullValue to initialize unmapped elements
+            //  (ie, when the constructSize is larger than the number of
+            //  mapped elements).
+            template<class T, class NegateOp>
+            void distribute
+            (
+                const Pstream::commsTypes commsType,
+                const T& nullValue,
+                List<T>& values,
+                const NegateOp& negOp,
+                const int tag = UPstream::msgType()
+            ) const;
+
+
+            //- Reverse distribute data using default commsType
+            //- and the default flip/negate operator
             template<class T>
             void reverseDistribute
             (
                 const label constructSize,
-                List<T>&,
+                List<T>& values,
                 const int tag = UPstream::msgType()
             ) const;
 
-            //- Reverse distribute data using default commsType.
-            //  Since constructSize might be larger than supplied size supply
-            //  a nullValue
+            //- Reverse distribute data using default commsType
+            //- and the default flip/negate operator.
+            //  Accepts a nullValue to initialize unmapped elements
+            //  (ie, when the constructSize is larger than the subMap).
             template<class T>
             void reverseDistribute
             (
                 const label constructSize,
                 const T& nullValue,
-                List<T>& fld,
+                List<T>& values,
                 const int tag = UPstream::msgType()
             ) const;
 
+            //- Reverse distribute data using specified commsType
+            //- and the default flip/negate operator
+            template<class T>
+            void reverseDistribute
+            (
+                const Pstream::commsTypes commsType,
+                const label constructSize,
+                List<T>& values,
+                const int tag = UPstream::msgType()
+            ) const;
+
+            //- Reverse distribute data using specified commsType
+            //- and the specified flip/negate operator.
+            template<class T, class NegateOp>
+            void reverseDistribute
+            (
+                const Pstream::commsTypes commsType,
+                const label constructSize,
+                List<T>& values,
+                const NegateOp& negOp,
+                const int tag = UPstream::msgType()
+            ) const;
+
+            //- Reverse distribute data using specified commsType
+            //- and the default flip/negate operator.
+            //  Accepts a nullValue to initialize unmapped elements
+            //  (ie, when the constructSize is larger than the subMap).
+            template<class T>
+            void reverseDistribute
+            (
+                const Pstream::commsTypes commsType,
+                const label constructSize,
+                const T& nullValue,
+                List<T>& values,
+                const int tag = UPstream::msgType()
+            ) const;
+
+
             //- Do all sends using PstreamBuffers
             template<class T>
-            void send(PstreamBuffers&, const List<T>&) const;
+            void send(PstreamBuffers& pBufs, const List<T>& field) const;
+
             //- Do all receives using PstreamBuffers
             template<class T>
-            void receive(PstreamBuffers&, List<T>&) const;
+            void receive(PstreamBuffers& pBufs, List<T>& field) const;
+
 
             //- Debug: print layout. Can only be used on maps with sorted
             //  storage (local data first, then non-local data)
             void printLayout(Ostream& os) const;
-
-            //- Correct for topo change.
-            void updateMesh(const mapPolyMesh&)
-            {
-                NotImplemented;
-            }
 
 
     // Member Operators
@@ -499,15 +717,41 @@ public:
         void operator=(mapDistributeBase&& rhs);
 
 
-    // IOstream operators
+    // IOstream Operators
 
-        //- Read dictionary from Istream
+        //- Info proxy to print summary information to a stream
+        InfoProxy<mapDistributeBase> info() const
+        {
+            return *this;
+        }
+
+        //- Read entries from dictionary format
+        void readDict(const dictionary& dict);
+
+        //- Write entries in dictionary format
+        void writeEntries(Ostream& os) const;
+
+        //- Read plain content (not dictionary) from Istream
         friend Istream& operator>>(Istream&, mapDistributeBase&);
 
-        //- Write dictionary to Ostream
+        //- Write plain content (not dictionary) to Ostream
         friend Ostream& operator<<(Ostream&, const mapDistributeBase&);
 
+
+    // Housekeeping
+
+        //- No correction for topo change
+        void updateMesh(const mapPolyMesh&)
+        {
+            NotImplemented;
+        }
 };
+
+
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
+template<>
+Ostream& operator<<(Ostream& os, const InfoProxy<mapDistributeBase>& ip);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

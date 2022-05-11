@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -80,42 +80,86 @@ void Foam::mapDistributeBase::flipAndCombine
 template<class T, class NegateOp>
 T Foam::mapDistributeBase::accessAndFlip
 (
-    const UList<T>& fld,
+    const UList<T>& values,
     const label index,
     const bool hasFlip,
     const NegateOp& negOp
 )
 {
-    T t;
     if (hasFlip)
     {
         if (index > 0)
         {
-            t = fld[index-1];
+            return values[index-1];
         }
         else if (index < 0)
         {
-            t = negOp(fld[-index-1]);
+            return negOp(values[-index-1]);
         }
         else
         {
             FatalErrorInFunction
                 << "Illegal index " << index
-                << " into field of size " << fld.size()
+                << " into field of size " << values.size()
                 << " with face-flipping"
                 << exit(FatalError);
-            t = fld[index];
+        }
+    }
+
+    return values[index];
+}
+
+
+template<class T, class NegateOp>
+Foam::List<T> Foam::mapDistributeBase::accessAndFlip
+(
+    const UList<T>& values,
+    const labelUList& indices,
+    const bool hasFlip,
+    const NegateOp& negOp
+)
+{
+    const label len = indices.size();
+
+    List<T> output(len);
+
+    if (hasFlip)
+    {
+        for (label i = 0; i < len; ++i)
+        {
+            const label index = indices[i];
+
+            if (index > 0)
+            {
+                output[i] = values[index-1];
+            }
+            else if (index < 0)
+            {
+                output[i] = negOp(values[-index-1]);
+            }
+            else
+            {
+                FatalErrorInFunction
+                    << "Illegal index " << index
+                    << " into field of size " << values.size()
+                    << " with flipping"
+                    << exit(FatalError);
+            }
         }
     }
     else
     {
-        t = fld[index];
+        // Like indirect list
+        for (label i = 0; i < len; ++i)
+        {
+            output[i] = values[indices[i]];
+        }
     }
-    return t;
+
+    return output;
 }
 
 
-// Distribute list.
 template<class T, class NegateOp>
 void Foam::mapDistributeBase::distribute
 (
@@ -139,13 +183,10 @@ void Foam::mapDistributeBase::distribute
     {
         // Do only me to me.
 
-        const labelList& mySubMap = subMap[myRank];
-
-        List<T> subField(mySubMap.size());
-        forAll(mySubMap, i)
-        {
-            subField[i] = accessAndFlip(field, mySubMap[i], subHasFlip, negOp);
-        }
+        List<T> subField
+        (
+            accessAndFlip(field, subMap[myRank], subHasFlip, negOp)
+        );
 
         // Receive sub field from myself (subField)
         const labelList& map = constructMap[myRank];
@@ -186,44 +227,37 @@ void Foam::mapDistributeBase::distribute
                     comm
                 );
 
-                List<T> subField(map.size());
-                forAll(subField, i)
-                {
-                    subField[i] = accessAndFlip
-                    (
-                        field,
-                        map[i],
-                        subHasFlip,
-                        negOp
-                    );
-                }
+                List<T> subField
+                (
+                    accessAndFlip(field, map, subHasFlip, negOp)
+                );
+
                 toNbr << subField;
             }
         }
 
-        // Subset myself
-        const labelList& mySubMap = subMap[myRank];
-
-        List<T> subField(mySubMap.size());
-        forAll(mySubMap, i)
         {
-            subField[i] = accessAndFlip(field, mySubMap[i], subHasFlip, negOp);
+            // Subset myself
+            List<T> subField
+            (
+                accessAndFlip(field, subMap[myRank], subHasFlip, negOp)
+            );
+
+            // Receive sub field from myself (subField)
+            const labelList& map = constructMap[myRank];
+
+            field.setSize(constructSize);
+
+            flipAndCombine
+            (
+                map,
+                constructHasFlip,
+                subField,
+                eqOp<T>(),
+                negOp,
+                field
+            );
         }
-
-        // Receive sub field from myself (subField)
-        const labelList& map = constructMap[myRank];
-
-        field.setSize(constructSize);
-
-        flipAndCombine
-        (
-            map,
-            constructHasFlip,
-            subField,
-            eqOp<T>(),
-            negOp,
-            field
-        );
 
         // Receive sub field from neighbour
         for (const int domain : Pstream::allProcs(comm))
@@ -265,24 +299,17 @@ void Foam::mapDistributeBase::distribute
 
         // Receive sub field from myself
         {
-            const labelList& mySubMap = subMap[myRank];
-
-            List<T> subField(mySubMap.size());
-            forAll(subField, i)
-            {
-                subField[i] = accessAndFlip
-                (
-                    field,
-                    mySubMap[i],
-                    subHasFlip,
-                    negOp
-                );
-            }
+            List<T> subField
+            (
+                accessAndFlip(field, subMap[myRank], subHasFlip, negOp)
+            );
 
             // Receive sub field from myself (subField)
+            const labelList& map = constructMap[myRank];
+
             flipAndCombine
             (
-                constructMap[myRank],
+                map,
                 constructHasFlip,
                 subField,
                 eqOp<T>(),
@@ -292,14 +319,13 @@ void Foam::mapDistributeBase::distribute
         }
 
         // Schedule will already have pruned 0-sized comms
-        forAll(schedule, i)
+        for (const labelPair& twoProcs : schedule)
         {
-            const labelPair& twoProcs = schedule[i];
             // twoProcs is a swap pair of processors. The first one is the
             // one that needs to send first and then receive.
 
-            label sendProc = twoProcs[0];
-            label recvProc = twoProcs[1];
+            const label sendProc = twoProcs[0];
+            const label recvProc = twoProcs[1];
 
             if (myRank == sendProc)
             {
@@ -315,17 +341,11 @@ void Foam::mapDistributeBase::distribute
                     );
 
                     const labelList& map = subMap[recvProc];
-                    List<T> subField(map.size());
-                    forAll(subField, i)
-                    {
-                        subField[i] = accessAndFlip
-                        (
-                            field,
-                            map[i],
-                            subHasFlip,
-                            negOp
-                        );
-                    }
+                    List<T> subField
+                    (
+                        accessAndFlip(field, map, subHasFlip, negOp)
+                    );
+
                     toNbr << subField;
                 }
                 {
@@ -393,17 +413,11 @@ void Foam::mapDistributeBase::distribute
                     );
 
                     const labelList& map = subMap[sendProc];
-                    List<T> subField(map.size());
-                    forAll(subField, i)
-                    {
-                        subField[i] = accessAndFlip
-                        (
-                            field,
-                            map[i],
-                            subHasFlip,
-                            negOp
-                        );
-                    }
+                    List<T> subField
+                    (
+                        accessAndFlip(field, map, subHasFlip, negOp)
+                    );
+
                     toNbr << subField;
                 }
             }
@@ -412,7 +426,7 @@ void Foam::mapDistributeBase::distribute
     }
     else if (commsType == Pstream::commsTypes::nonBlocking)
     {
-        label nOutstanding = Pstream::nRequests();
+        const label nOutstanding = Pstream::nRequests();
 
         if (!is_contiguous<T>::value)
         {
@@ -428,17 +442,11 @@ void Foam::mapDistributeBase::distribute
                     // Put data into send buffer
                     UOPstream toDomain(domain, pBufs);
 
-                    List<T> subField(map.size());
-                    forAll(subField, i)
-                    {
-                        subField[i] = accessAndFlip
-                        (
-                            field,
-                            map[i],
-                            subHasFlip,
-                            negOp
-                        );
-                    }
+                    List<T> subField
+                    (
+                        accessAndFlip(field, map, subHasFlip, negOp)
+                    );
+
                     toDomain << subField;
                 }
             }
@@ -448,34 +456,26 @@ void Foam::mapDistributeBase::distribute
 
             {
                 // Set up 'send' to myself
-                const labelList& mySub = subMap[myRank];
-                List<T> mySubField(mySub.size());
-                forAll(mySub, i)
-                {
-                    mySubField[i] = accessAndFlip
-                    (
-                        field,
-                        mySub[i],
-                        subHasFlip,
-                        negOp
-                    );
-                }
+                List<T> mySubField
+                (
+                    accessAndFlip(field, subMap[myRank], subHasFlip, negOp)
+                );
+
                 // Combine bits. Note that can reuse field storage
                 field.setSize(constructSize);
-                // Receive sub field from myself
-                {
-                    const labelList& map = constructMap[myRank];
 
-                    flipAndCombine
-                    (
-                        map,
-                        constructHasFlip,
-                        mySubField,
-                        eqOp<T>(),
-                        negOp,
-                        field
-                    );
-                }
+                // Receive sub field from myself
+                const labelList& map = constructMap[myRank];
+
+                flipAndCombine
+                (
+                    map,
+                    constructHasFlip,
+                    mySubField,
+                    eqOp<T>(),
+                    negOp,
+                    field
+                );
             }
 
             // Block ourselves, waiting only for the current comms
@@ -517,25 +517,15 @@ void Foam::mapDistributeBase::distribute
 
                 if (domain != myRank && map.size())
                 {
-                    List<T>& subField = sendFields[domain];
-                    subField.setSize(map.size());
-                    forAll(map, i)
-                    {
-                        subField[i] = accessAndFlip
-                        (
-                            field,
-                            map[i],
-                            subHasFlip,
-                            negOp
-                        );
-                    }
+                    sendFields[domain] =
+                        accessAndFlip(field, map, subHasFlip, negOp);
 
                     OPstream::write
                     (
                         Pstream::commsTypes::nonBlocking,
                         domain,
-                        subField.cdata_bytes(),
-                        subField.size_bytes(),
+                        sendFields[domain].cdata_bytes(),
+                        sendFields[domain].size_bytes(),
                         tag,
                         comm
                     );
@@ -552,7 +542,8 @@ void Foam::mapDistributeBase::distribute
 
                 if (domain != myRank && map.size())
                 {
-                    recvFields[domain].setSize(map.size());
+                    recvFields[domain].resize(map.size());
+
                     IPstream::read
                     (
                         Pstream::commsTypes::nonBlocking,
@@ -567,22 +558,9 @@ void Foam::mapDistributeBase::distribute
 
 
             // Set up 'send' to myself
-
             {
-                const labelList& map = subMap[myRank];
-
-                List<T>& subField = sendFields[myRank];
-                subField.setSize(map.size());
-                forAll(map, i)
-                {
-                    subField[i] = accessAndFlip
-                    (
-                        field,
-                        map[i],
-                        subHasFlip,
-                        negOp
-                    );
-                }
+                sendFields[myRank] =
+                    accessAndFlip(field, subMap[myRank], subHasFlip, negOp);
             }
 
 
@@ -647,7 +625,6 @@ void Foam::mapDistributeBase::distribute
 }
 
 
-// Distribute list.
 template<class T, class CombineOp, class NegateOp>
 void Foam::mapDistributeBase::distribute
 (
@@ -673,18 +650,15 @@ void Foam::mapDistributeBase::distribute
     {
         // Do only me to me.
 
-        const labelList& mySubMap = subMap[myRank];
-
-        List<T> subField(mySubMap.size());
-        forAll(mySubMap, i)
-        {
-            subField[i] = accessAndFlip(field, mySubMap[i], subHasFlip, negOp);
-        }
+        List<T> subField
+        (
+            accessAndFlip(field, subMap[myRank], subHasFlip, negOp)
+        );
 
         // Receive sub field from myself (subField)
         const labelList& map = constructMap[myRank];
 
-        field.setSize(constructSize);
+        field.resize_nocopy(constructSize);
         field = nullValue;
 
         flipAndCombine(map, constructHasFlip, subField, cop, negOp, field);
@@ -712,37 +686,38 @@ void Foam::mapDistributeBase::distribute
                     tag,
                     comm
                 );
-                List<T> subField(map.size());
-                forAll(subField, i)
-                {
-                    subField[i] = accessAndFlip
-                    (
-                        field,
-                        map[i],
-                        subHasFlip,
-                        negOp
-                    );
-                }
+                List<T> subField
+                (
+                    accessAndFlip(field, map, subHasFlip, negOp)
+                );
+
                 toNbr << subField;
             }
         }
 
-        // Subset myself
-        const labelList& mySubMap = subMap[myRank];
-
-        List<T> subField(mySubMap.size());
-        forAll(mySubMap, i)
         {
-            subField[i] = accessAndFlip(field, mySubMap[i], subHasFlip, negOp);
+            // Subset myself
+            List<T> subField
+            (
+                accessAndFlip(field, subMap[myRank], subHasFlip, negOp)
+            );
+
+            // Receive sub field from myself (subField)
+            const labelList& map = constructMap[myRank];
+
+            field.resize_nocopy(constructSize);
+            field = nullValue;
+
+            flipAndCombine
+            (
+                map,
+                constructHasFlip,
+                subField,
+                cop,
+                negOp,
+                field
+            );
         }
-
-        // Receive sub field from myself (subField)
-        const labelList& map = constructMap[myRank];
-
-        field.setSize(constructSize);
-        field = nullValue;
-
-        flipAndCombine(map, constructHasFlip, subField, cop, negOp, field);
 
         // Receive sub field from neighbour
         for (const int domain : Pstream::allProcs(comm))
@@ -783,20 +758,11 @@ void Foam::mapDistributeBase::distribute
         List<T> newField(constructSize, nullValue);
 
         {
-            const labelList& mySubMap = subMap[myRank];
-
             // Subset myself
-            List<T> subField(mySubMap.size());
-            forAll(subField, i)
-            {
-                subField[i] = accessAndFlip
-                (
-                    field,
-                    mySubMap[i],
-                    subHasFlip,
-                    negOp
-                );
-            }
+            List<T> subField
+            (
+                accessAndFlip(field, subMap[myRank], subHasFlip, negOp)
+            );
 
             // Receive sub field from myself (subField)
             const labelList& map = constructMap[myRank];
@@ -814,14 +780,13 @@ void Foam::mapDistributeBase::distribute
 
 
         // Schedule will already have pruned 0-sized comms
-        forAll(schedule, i)
+        for (const labelPair& twoProcs : schedule)
         {
-            const labelPair& twoProcs = schedule[i];
             // twoProcs is a swap pair of processors. The first one is the
             // one that needs to send first and then receive.
 
-            label sendProc = twoProcs[0];
-            label recvProc = twoProcs[1];
+            const label sendProc = twoProcs[0];
+            const label recvProc = twoProcs[1];
 
             if (myRank == sendProc)
             {
@@ -838,17 +803,11 @@ void Foam::mapDistributeBase::distribute
 
                     const labelList& map = subMap[recvProc];
 
-                    List<T> subField(map.size());
-                    forAll(subField, i)
-                    {
-                        subField[i] = accessAndFlip
-                        (
-                            field,
-                            map[i],
-                            subHasFlip,
-                            negOp
-                        );
-                    }
+                    List<T> subField
+                    (
+                        accessAndFlip(field, map, subHasFlip, negOp)
+                    );
+
                     toNbr << subField;
                 }
                 {
@@ -915,17 +874,11 @@ void Foam::mapDistributeBase::distribute
 
                     const labelList& map = subMap[sendProc];
 
-                    List<T> subField(map.size());
-                    forAll(subField, i)
-                    {
-                        subField[i] = accessAndFlip
-                        (
-                            field,
-                            map[i],
-                            subHasFlip,
-                            negOp
-                        );
-                    }
+                    List<T> subField
+                    (
+                        accessAndFlip(field, map, subHasFlip, negOp)
+                    );
+
                     toNbr << subField;
                 }
             }
@@ -934,7 +887,7 @@ void Foam::mapDistributeBase::distribute
     }
     else if (commsType == Pstream::commsTypes::nonBlocking)
     {
-        label nOutstanding = Pstream::nRequests();
+        const label nOutstanding = Pstream::nRequests();
 
         if (!is_contiguous<T>::value)
         {
@@ -950,17 +903,11 @@ void Foam::mapDistributeBase::distribute
                     // Put data into send buffer
                     UOPstream toDomain(domain, pBufs);
 
-                    List<T> subField(map.size());
-                    forAll(subField, i)
-                    {
-                        subField[i] = accessAndFlip
-                        (
-                            field,
-                            map[i],
-                            subHasFlip,
-                            negOp
-                        );
-                    }
+                    List<T> subField
+                    (
+                        accessAndFlip(field, map, subHasFlip, negOp)
+                    );
+
                     toDomain << subField;
                 }
             }
@@ -970,37 +917,27 @@ void Foam::mapDistributeBase::distribute
 
             {
                 // Set up 'send' to myself
-                const labelList& myMap = subMap[myRank];
-
-                List<T> mySubField(myMap.size());
-                forAll(myMap, i)
-                {
-                    mySubField[i] = accessAndFlip
-                    (
-                        field,
-                        myMap[i],
-                        subHasFlip,
-                        negOp
-                    );
-                }
+                List<T> mySubField
+                (
+                    accessAndFlip(field, subMap[myRank], subHasFlip, negOp)
+                );
 
                 // Combine bits. Note that can reuse field storage
-                field.setSize(constructSize);
+                field.resize_nocopy(constructSize);
                 field = nullValue;
-                // Receive sub field from myself
-                {
-                    const labelList& map = constructMap[myRank];
 
-                    flipAndCombine
-                    (
-                        map,
-                        constructHasFlip,
-                        mySubField,
-                        cop,
-                        negOp,
-                        field
-                    );
-                }
+                // Receive sub field from myself
+                const labelList& map = constructMap[myRank];
+
+                flipAndCombine
+                (
+                    map,
+                    constructHasFlip,
+                    mySubField,
+                    cop,
+                    negOp,
+                    field
+                );
             }
 
             // Block ourselves, waiting only for the current comms
@@ -1042,25 +979,15 @@ void Foam::mapDistributeBase::distribute
 
                 if (domain != myRank && map.size())
                 {
-                    List<T>& subField = sendFields[domain];
-                    subField.setSize(map.size());
-                    forAll(map, i)
-                    {
-                        subField[i] = accessAndFlip
-                        (
-                            field,
-                            map[i],
-                            subHasFlip,
-                            negOp
-                        );
-                    }
+                    sendFields[domain] =
+                        accessAndFlip(field, map, subHasFlip, negOp);
 
                     OPstream::write
                     (
                         Pstream::commsTypes::nonBlocking,
                         domain,
-                        subField.cdata_bytes(),
-                        subField.size_bytes(),
+                        sendFields[domain].cdata_bytes(),
+                        sendFields[domain].size_bytes(),
                         tag,
                         comm
                     );
@@ -1093,26 +1020,14 @@ void Foam::mapDistributeBase::distribute
             // Set up 'send' to myself
 
             {
-                const labelList& map = subMap[myRank];
-
-                List<T>& subField = sendFields[myRank];
-                subField.setSize(map.size());
-                forAll(map, i)
-                {
-                    subField[i] = accessAndFlip
-                    (
-                        field,
-                        map[i],
-                        subHasFlip,
-                        negOp
-                    );
-                }
+                sendFields[myRank] =
+                    accessAndFlip(field, subMap[myRank], subHasFlip, negOp);
             }
 
 
             // Combine bits. Note that can reuse field storage
 
-            field.setSize(constructSize);
+            field.resize_nocopy(constructSize);
             field = nullValue;
 
             // Receive sub field from myself (subField)
@@ -1185,17 +1100,11 @@ const
             // Put data into send buffer
             UOPstream toDomain(domain, pBufs);
 
-            List<T> subField(map.size());
-            forAll(subField, i)
-            {
-                subField[i] = accessAndFlip
-                (
-                    field,
-                    map[i],
-                    subHasFlip_,
-                    flipOp()
-                );
-            }
+            List<T> subField
+            (
+                accessAndFlip(field, map, subHasFlip_, flipOp())
+            );
+
             toDomain << subField;
         }
     }
@@ -1210,7 +1119,7 @@ void Foam::mapDistributeBase::receive(PstreamBuffers& pBufs, List<T>& field)
 const
 {
     // Consume
-    field.setSize(constructSize_);
+    field.resize_nocopy(constructSize_);
 
     for (const int domain : Pstream::allProcs(comm_))
     {
@@ -1244,231 +1153,217 @@ const
 }
 
 
-//- Distribute data using default commsType.
 template<class T, class NegateOp>
 void Foam::mapDistributeBase::distribute
 (
-    List<T>& fld,
+    const Pstream::commsTypes commsType,
+    List<T>& values,
     const NegateOp& negOp,
     const int tag
 ) const
 {
-    if (Pstream::defaultCommsType == Pstream::commsTypes::nonBlocking)
-    {
-        distribute
-        (
-            Pstream::commsTypes::nonBlocking,
-            List<labelPair>(),
-            constructSize_,
-            subMap_,
-            subHasFlip_,
-            constructMap_,
-            constructHasFlip_,
-            fld,
-            negOp,
-            tag,
-            comm_
-        );
-    }
-    else if (Pstream::defaultCommsType == Pstream::commsTypes::scheduled)
-    {
-        distribute
-        (
-            Pstream::commsTypes::scheduled,
-            schedule(),
-            constructSize_,
-            subMap_,
-            subHasFlip_,
-            constructMap_,
-            constructHasFlip_,
-            fld,
-            negOp,
-            tag,
-            comm_
-        );
-    }
-    else
-    {
-        distribute
-        (
-            Pstream::commsTypes::blocking,
-            List<labelPair>(),
-            constructSize_,
-            subMap_,
-            subHasFlip_,
-            constructMap_,
-            constructHasFlip_,
-            fld,
-            negOp,
-            tag,
-            comm_
-        );
-    }
+    distribute
+    (
+        commsType,
+        whichSchedule(commsType),
+        constructSize_,
+        subMap_,
+        subHasFlip_,
+        constructMap_,
+        constructHasFlip_,
+        values,
+        negOp,
+        tag,
+        comm_
+    );
 }
 
 
-//- Distribute data using default commsType.
-template<class T>
+template<class T, class NegateOp>
 void Foam::mapDistributeBase::distribute
 (
-    List<T>& fld,
+    const Pstream::commsTypes commsType,
+    const T& nullValue,
+    List<T>& values,
+    const NegateOp& negOp,
     const int tag
 ) const
 {
-    distribute(fld, flipOp(), tag);
+    distribute
+    (
+        commsType,
+        whichSchedule(commsType),
+        constructSize_,
+        subMap_,
+        subHasFlip_,
+        constructMap_,
+        constructHasFlip_,
+        values,
+        nullValue,
+        eqOp<T>(),
+        negOp,
+        tag,
+        comm_
+    );
 }
 
 
-//- Distribute data using default commsType.
-template<class T>
+template<class T, class NegateOp>
 void Foam::mapDistributeBase::distribute
 (
-    DynamicList<T>& fld,
+    List<T>& values,
+    const NegateOp& negOp,
     const int tag
 ) const
 {
-    fld.shrink();
-
-    List<T>& fldList = static_cast<List<T>&>(fld);
-
-    distribute(fldList, tag);
-
-    fld.setCapacity(fldList.size());
+    distribute
+    (
+        UPstream::defaultCommsType, values, negOp, tag
+    );
 }
 
 
-//- Reverse distribute data using default commsType.
+template<class T>
+void Foam::mapDistributeBase::distribute
+(
+    List<T>& values,
+    const int tag
+) const
+{
+    distribute(values, flipOp(), tag);
+}
+
+
+template<class T>
+void Foam::mapDistributeBase::distribute
+(
+    DynamicList<T>& values,
+    const int tag
+) const
+{
+    values.shrink();
+
+    List<T>& list = static_cast<List<T>&>(values);
+
+    distribute(list, tag);
+
+    values.setCapacity(list.size());
+}
+
+
+template<class T>
+void Foam::mapDistributeBase::reverseDistribute
+(
+    const Pstream::commsTypes commsType,
+    const label constructSize,
+    List<T>& values,
+    const int tag
+) const
+{
+    reverseDistribute<T, flipOp>
+    (
+        commsType,
+        constructSize,
+        values,
+        flipOp(),
+        tag
+    );
+}
+
+
+template<class T, class NegateOp>
+void Foam::mapDistributeBase::reverseDistribute
+(
+    const Pstream::commsTypes commsType,
+    const label constructSize,
+    List<T>& values,
+    const NegateOp& negOp,
+    const int tag
+) const
+{
+    distribute
+    (
+        commsType,
+        whichSchedule(commsType),
+        constructSize,
+        constructMap_,
+        constructHasFlip_,
+        subMap_,
+        subHasFlip_,
+        values,
+        negOp,
+        tag,
+        comm_
+    );
+}
+
+
+template<class T>
+void Foam::mapDistributeBase::reverseDistribute
+(
+    const Pstream::commsTypes commsType,
+    const label constructSize,
+    const T& nullValue,
+    List<T>& values,
+    const int tag
+) const
+{
+    distribute
+    (
+        commsType,
+        whichSchedule(commsType),
+        constructSize,
+        constructMap_,
+        constructHasFlip_,
+        subMap_,
+        subHasFlip_,
+        values,
+
+        nullValue,
+        eqOp<T>(),
+        flipOp(),
+
+        tag,
+        comm_
+    );
+}
+
+
 template<class T>
 void Foam::mapDistributeBase::reverseDistribute
 (
     const label constructSize,
-    List<T>& fld,
+    List<T>& values,
     const int tag
 ) const
 {
-    if (Pstream::defaultCommsType == Pstream::commsTypes::nonBlocking)
-    {
-        distribute
-        (
-            Pstream::commsTypes::nonBlocking,
-            List<labelPair>(),
-            constructSize,
-            constructMap_,
-            constructHasFlip_,
-            subMap_,
-            subHasFlip_,
-            fld,
-            flipOp(),
-            tag,
-            comm_
-        );
-    }
-    else if (Pstream::defaultCommsType == Pstream::commsTypes::scheduled)
-    {
-        distribute
-        (
-            Pstream::commsTypes::scheduled,
-            schedule(),
-            constructSize,
-            constructMap_,
-            constructHasFlip_,
-            subMap_,
-            subHasFlip_,
-            fld,
-            flipOp(),
-            tag,
-            comm_
-        );
-    }
-    else
-    {
-        distribute
-        (
-            Pstream::commsTypes::blocking,
-            List<labelPair>(),
-            constructSize,
-            constructMap_,
-            constructHasFlip_,
-            subMap_,
-            subHasFlip_,
-            fld,
-            flipOp(),
-            tag,
-            comm_
-        );
-    }
+    reverseDistribute
+    (
+        UPstream::defaultCommsType,
+        constructSize,
+        values,
+        tag
+    );
 }
 
 
-//- Reverse distribute data using default commsType.
-//  Since constructSize might be larger than supplied size supply
-//  a nullValue
 template<class T>
 void Foam::mapDistributeBase::reverseDistribute
 (
     const label constructSize,
     const T& nullValue,
-    List<T>& fld,
+    List<T>& values,
     const int tag
 ) const
 {
-    if (Pstream::defaultCommsType == Pstream::commsTypes::nonBlocking)
-    {
-        distribute
-        (
-            Pstream::commsTypes::nonBlocking,
-            List<labelPair>(),
-            constructSize,
-            constructMap_,
-            constructHasFlip_,
-            subMap_,
-            subHasFlip_,
-            fld,
-            nullValue,
-            eqOp<T>(),
-            flipOp(),
-            tag,
-            comm_
-        );
-    }
-    else if (Pstream::defaultCommsType == Pstream::commsTypes::scheduled)
-    {
-        distribute
-        (
-            Pstream::commsTypes::scheduled,
-            schedule(),
-            constructSize,
-            constructMap_,
-            constructHasFlip_,
-            subMap_,
-            subHasFlip_,
-            fld,
-            nullValue,
-            eqOp<T>(),
-            flipOp(),
-            tag,
-            comm_
-        );
-    }
-    else
-    {
-        distribute
-        (
-            Pstream::commsTypes::blocking,
-            List<labelPair>(),
-            constructSize,
-            constructMap_,
-            constructHasFlip_,
-            subMap_,
-            subHasFlip_,
-            fld,
-            nullValue,
-            eqOp<T>(),
-            flipOp(),
-            tag,
-            comm_
-        );
-    }
+    reverseDistribute
+    (
+        UPstream::defaultCommsType,
+        constructSize,
+        nullValue,
+        values,
+        tag
+    );
 }
 
 

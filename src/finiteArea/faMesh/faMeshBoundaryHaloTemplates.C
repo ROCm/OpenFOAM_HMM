@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,7 +45,7 @@ void Foam::faMeshBoundaryHalo::distributeSparse
     }
 
     // Construct data in compact addressing
-    List<Type> compactFld(constructSize_, Zero);
+    List<Type> compactFld(constructSize(), Zero);
 
     if (sparseInputLocations.empty())
     {

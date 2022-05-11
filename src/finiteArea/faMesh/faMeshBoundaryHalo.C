@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -108,8 +108,8 @@ void Foam::faMeshBoundaryHalo::reset(const faMesh& areaMesh)
         return;
     }
 
-    const label nProcs = Pstream::nProcs(comm_);
-    const label myRank = Pstream::myProcNo(comm_);
+    const label nProcs = UPstream::nProcs(comm());
+    const label myRank = UPstream::myProcNo(comm());
 
     const globalIndex globalFaceNum(areaMesh.mesh().nFaces());
 
@@ -164,8 +164,8 @@ void Foam::faMeshBoundaryHalo::reset(const faMesh& areaMesh)
         globalFaceNum,
         connectivity,
         compactMap,
-        Pstream::msgType(),
-        comm_
+        UPstream::msgType(),
+        comm()
     );
 
     // List of local mesh faces referenced.
