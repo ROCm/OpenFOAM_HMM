@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ITstream_H
-#define ITstream_H
+#ifndef Foam_ITstream_H
+#define Foam_ITstream_H
 
 #include "Istream.H"
 #include "tokenList.H"
@@ -345,6 +345,9 @@ public:
 
 
     // Member Operators
+
+        //- Use operator() from Istream
+        using Istream::operator();
 
         //- Copy assignment, with rewind()
         void operator=(const ITstream& is);

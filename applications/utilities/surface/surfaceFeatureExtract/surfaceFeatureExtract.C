@@ -429,7 +429,7 @@ int main(int argc, char *argv[])
             // Suboption: "insideBox"
             if (subsetDict.found("insideBox"))
             {
-                treeBoundBox bb(subsetDict.lookup("insideBox")());
+                treeBoundBox bb(subsetDict.lookup("insideBox"));
 
                 Info<< "Subset edges inside box " << bb << endl;
                 features().subsetBox(edgeStat, bb);
@@ -447,7 +447,7 @@ int main(int argc, char *argv[])
             // Suboption: "outsideBox"
             else if (subsetDict.found("outsideBox"))
             {
-                treeBoundBox bb(subsetDict.lookup("outsideBox")());
+                treeBoundBox bb(subsetDict.lookup("outsideBox"));
 
                 Info<< "Exclude edges outside box " << bb << endl;
                 features().excludeBox(edgeStat, bb);
@@ -490,7 +490,7 @@ int main(int argc, char *argv[])
             // Suboption: "plane"
             if (subsetDict.found("plane"))
             {
-                plane cutPlane(subsetDict.lookup("plane")());
+                plane cutPlane(subsetDict.lookup("plane"));
 
                 Info<< "Only include feature edges that intersect the plane"
                     << " with normal " << cutPlane.normal()

@@ -512,16 +512,6 @@ public:
     // Special Methods
 
         //- Test \c bool value at specified position,
-        //- always false for out-of-range access. Same as test().
-        //  \note Predicate definition as per bitSet, HashSet
-        template<class TypeT = T>
-        typename std::enable_if<std::is_same<bool, TypeT>::value, bool>::type
-        inline operator()(const label i) const
-        {
-            return (i >= 0 && i < size_ && v_[i]);
-        }
-
-        //- Test \c bool value at specified position,
         //- always false for out-of-range access.
         //  \note Method name compatibility with bitSet, HashSet
         template<class TypeT = T>
