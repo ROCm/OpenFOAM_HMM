@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,7 +64,7 @@ tmp<volScalarField> SpalartAllmarasIDDES<BasicTurbulenceModel>::ft
     const volScalarField& magGradU
 ) const
 {
-    return tanh(pow3(sqr(Ct_)*rd(this->nut_, magGradU)));
+    return tanh(pow3(sqr(Ct_)*this->r(this->nut_, magGradU, this->y_)));
 }
 
 
@@ -74,36 +74,7 @@ tmp<volScalarField> SpalartAllmarasIDDES<BasicTurbulenceModel>::fl
     const volScalarField& magGradU
 ) const
 {
-    return tanh(pow(sqr(Cl_)*rd(this->nu(), magGradU), 10));
-}
-
-
-template<class BasicTurbulenceModel>
-tmp<volScalarField> SpalartAllmarasIDDES<BasicTurbulenceModel>::rd
-(
-    const volScalarField& nur,
-    const volScalarField& magGradU
-) const
-{
-    tmp<volScalarField> tr
-    (
-        min
-        (
-            nur
-           /(
-                max
-                (
-                    magGradU,
-                    dimensionedScalar("SMALL", magGradU.dimensions(), SMALL)
-                )
-               *sqr(this->kappa_*this->y_)
-            ),
-            scalar(10)
-        )
-    );
-    tr.ref().boundaryFieldRef() == 0.0;
-
-    return tr;
+    return tanh(pow(sqr(Cl_)*this->r(this->nu(), magGradU, this->y_), 10));
 }
 
 
@@ -113,7 +84,7 @@ tmp<volScalarField> SpalartAllmarasIDDES<BasicTurbulenceModel>::fdt
     const volScalarField& magGradU
 ) const
 {
-    return 1 - tanh(pow(Cdt1_*rd(this->nut_, magGradU), Cdt2_));
+    return 1 - tanh(pow(Cdt1_*this->r(this->nut_, magGradU, this->y_), Cdt2_));
 }
 
 
@@ -130,7 +101,7 @@ tmp<volScalarField> SpalartAllmarasIDDES<BasicTurbulenceModel>::dTilda
     const volScalarField magGradU(mag(gradU));
     const volScalarField psi(this->psi(chi, fv1));
 
-    const volScalarField& lRAS(this->y_);
+    const volScalarField& lRAS = this->y_;
     const volScalarField lLES(psi*this->CDES_*this->delta());
 
     const volScalarField alpha(this->alpha());

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,8 +47,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SpalartAllmarasIDDES_H
-#define SpalartAllmarasIDDES_H
+#ifndef Foam_SpalartAllmarasIDDES_H
+#define Foam_SpalartAllmarasIDDES_H
 
 #include "SpalartAllmarasDES.H"
 #include "IDDESDelta.H"
@@ -61,7 +61,7 @@ namespace LESModels
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class SpalartAllmarasIDDES Declaration
+                    Class SpalartAllmarasIDDES Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class BasicTurbulenceModel>
@@ -75,14 +75,10 @@ class SpalartAllmarasIDDES
         const IDDESDelta& setDelta() const;
 
         tmp<volScalarField> alpha() const;
-        tmp<volScalarField> ft(const volScalarField& magGradU) const;
-        tmp<volScalarField> fl(const volScalarField& magGradU) const;
 
-        tmp<volScalarField> rd
-        (
-            const volScalarField& nur,
-            const volScalarField& magGradU
-        ) const;
+        tmp<volScalarField> ft(const volScalarField& magGradU) const;
+
+        tmp<volScalarField> fl(const volScalarField& magGradU) const;
 
         //- Delay function
         tmp<volScalarField> fdt(const volScalarField& magGradU) const;
@@ -105,9 +101,10 @@ protected:
             dimensionedScalar Cl_;
             dimensionedScalar Ct_;
 
-        // Fields
 
-            const IDDESDelta& IDDESDelta_;
+        //- IDDES delta
+        const IDDESDelta& IDDESDelta_;
+
 
     // Protected Member Functions
 

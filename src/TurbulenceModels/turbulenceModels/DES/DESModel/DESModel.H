@@ -92,7 +92,7 @@ public:
 
 
     //- Destructor
-    virtual ~DESModel();
+    virtual ~DESModel() = default;
 
 
     // Public Member Functions

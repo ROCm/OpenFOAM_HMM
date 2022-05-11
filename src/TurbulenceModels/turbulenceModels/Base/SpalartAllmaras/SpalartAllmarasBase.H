@@ -25,13 +25,13 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::LESModels::SpalartAllmarasDES
+    Foam::LESModels::SpalartAllmarasBase
 
 Group
     grpDESTurbulence
 
 Description
-    SpalartAllmarasDES DES turbulence model for incompressible and
+    SpalartAllmarasBase DES turbulence model for incompressible and
     compressible flows
 
     Reference:
@@ -42,54 +42,35 @@ Description
         Advances in DNS/LES, 1, 4-8.
     \endverbatim
 
-    Including the low Reynolds number correction documented in
-    \verbatim
-        Spalart, P. R., Deck, S., Shur, M.L., Squires, K.D., Strelets, M.Kh,
-        Travin, A. (2006).
-        A new version of detached-eddy simulation, resistant to ambiguous grid
-        densities.
-        Theor. Comput. Fluid Dyn., 20, 181-195.
-    \endverbatim
-
-Note
-    The default value of the DES constant implemented was calibrated for
-    OpenFOAM using decaying isotropic turbulence and agrees with the value
-    suggested in the reference publication.
-
 SourceFiles
-    SpalartAllmarasDES.C
+    SpalartAllmarasBase.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Foam_SpalartAllmarasDES_H
-#define Foam_SpalartAllmarasDES_H
-
-#include "SpalartAllmarasBase.H"
-#include "DESModel.H"
+#ifndef Foam_SpalartAllmarasBase_H
+#define Foam_SpalartAllmarasBase_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace LESModels
-{
 
 /*---------------------------------------------------------------------------*\
-                        Class SpalartAllmarasDES Declaration
+                     Class SpalartAllmarasBase Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class BasicTurbulenceModel>
-class SpalartAllmarasDES
+template<class BasicEddyViscosityModel>
+class SpalartAllmarasBase
 :
-    public SpalartAllmarasBase<DESModel<BasicTurbulenceModel>>
+    public BasicEddyViscosityModel
 {
     // Private Member Functions
 
         //- No copy construct
-        SpalartAllmarasDES(const SpalartAllmarasDES&) = delete;
+        SpalartAllmarasBase(const SpalartAllmarasBase&) = delete;
 
         //- No copy assignment
-        void operator=(const SpalartAllmarasDES&) = delete;
+        void operator=(const SpalartAllmarasBase&) = delete;
 
 
 protected:
@@ -98,28 +79,68 @@ protected:
 
         // Model constants
 
-            // DES coefficient
-            dimensionedScalar CDES_;
+            dimensionedScalar sigmaNut_;
+            dimensionedScalar kappa_;
 
-            // Low Reynolds number correction
-            Switch lowReCorrection_;
-            dimensionedScalar fwStar_;
+            dimensionedScalar Cb1_;
+            dimensionedScalar Cb2_;
+            dimensionedScalar Cw1_;
+            dimensionedScalar Cw2_;
+            dimensionedScalar Cw3_;
+            dimensionedScalar Cv1_;
+            dimensionedScalar Cs_;
+            dimensionedScalar ck_;
+
+
+            dimensionedScalar Ct3_;
+            dimensionedScalar Ct4_;
+
+
+        // Fields
+
+            volScalarField nuTilda_;
+
+            //- Wall distance
+            //  Note: different to wall distance in parent RASModel
+            //  which is for near-wall cells only
+            const volScalarField& y_;
 
 
     // Protected Member Functions
 
-        //- Shielding function
-        virtual tmp<volScalarField> psi
+        tmp<volScalarField> chi() const;
+
+        tmp<volScalarField> fv1(const volScalarField& chi) const;
+
+        tmp<volScalarField> fv2
         (
             const volScalarField& chi,
             const volScalarField& fv1
         ) const;
 
-        //- LES length scale
-        virtual tmp<volScalarField> lengthScaleLES
+        tmp<volScalarField> ft2(const volScalarField& chi) const;
+
+        tmp<volScalarField> Omega(const volTensorField& gradU) const;
+
+        tmp<volScalarField> r
+        (
+            const volScalarField& nur,
+            const volScalarField& Stilda,
+            const volScalarField& dTilda
+        ) const;
+
+        tmp<volScalarField::Internal> fw
+        (
+            const volScalarField& Stilda,
+            const volScalarField& dTilda
+        ) const;
+
+        virtual tmp<volScalarField> Stilda
         (
             const volScalarField& chi,
-            const volScalarField& fv1
+            const volScalarField& fv1,
+            const volTensorField& gradU,
+            const volScalarField& dTilda
         ) const;
 
         //- Length scale
@@ -128,38 +149,37 @@ protected:
             const volScalarField& chi,
             const volScalarField& fv1,
             const volTensorField& gradU
-        ) const;
+        ) const = 0;
+
+        void correctNut(const volScalarField& fv1);
+        virtual void correctNut();
 
 
 public:
 
-    typedef typename BasicTurbulenceModel::alphaField alphaField;
-    typedef typename BasicTurbulenceModel::rhoField rhoField;
-    typedef typename BasicTurbulenceModel::transportModel transportModel;
-
-
-    //- Runtime type information
-    TypeName("SpalartAllmarasDES");
+    typedef typename BasicEddyViscosityModel::alphaField alphaField;
+    typedef typename BasicEddyViscosityModel::rhoField rhoField;
+    typedef typename BasicEddyViscosityModel::transportModel transportModel;
 
 
     // Constructors
 
         //- Construct from components
-        SpalartAllmarasDES
+        SpalartAllmarasBase
         (
+            const word& type,
             const alphaField& alpha,
             const rhoField& rho,
             const volVectorField& U,
             const surfaceScalarField& alphaRhoPhi,
             const surfaceScalarField& phi,
             const transportModel& transport,
-            const word& propertiesName = turbulenceModel::propertiesName,
-            const word& type = typeName
+            const word& propertiesName = turbulenceModel::propertiesName
         );
 
 
     //- Destructor
-    virtual ~SpalartAllmarasDES() = default;
+    virtual ~SpalartAllmarasBase() = default;
 
 
     // Member Functions
@@ -167,20 +187,36 @@ public:
         //- Re-read model coefficients if they have changed
         virtual bool read();
 
-        //- Return the LES field indicator
-        virtual tmp<volScalarField> LESRegion() const;
+        //- Return the effective diffusivity for nuTilda
+        tmp<volScalarField> DnuTildaEff() const;
+
+        //- Return the (estimated) turbulent kinetic energy
+        virtual tmp<volScalarField> k() const;
+
+        //- Return the (estimated) turbulent kinetic energy dissipation rate
+        virtual tmp<volScalarField> epsilon() const;
+
+        //- Return the (estimated) specific dissipation rate
+        virtual tmp<volScalarField> omega() const;
+
+        tmp<volScalarField> nuTilda() const
+        {
+            return nuTilda_;
+        }
+
+        //- Correct nuTilda and related properties
+        virtual void correct();
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace LESModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "SpalartAllmarasDES.C"
+    #include "SpalartAllmarasBase.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

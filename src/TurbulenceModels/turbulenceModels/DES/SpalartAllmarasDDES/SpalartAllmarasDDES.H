@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,10 +48,10 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SpalartAllmarasDDES_H
-#define SpalartAllmarasDDES_H
+#ifndef Foam_SpalartAllmarasDDES_H
+#define Foam_SpalartAllmarasDDES_H
 
-#include "SpalartAllmarasDES.H"
+#include "SpalartAllmarasBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -71,9 +71,8 @@ class SpalartAllmarasDDES
 {
     // Private Member Functions
 
+        //- Delay function
         tmp<volScalarField> fd(const volScalarField& magGradU) const;
-
-        tmp<volScalarField> rd(const volScalarField& magGradU) const;
 
         //- No copy construct
         SpalartAllmarasDDES(const SpalartAllmarasDDES&) = delete;

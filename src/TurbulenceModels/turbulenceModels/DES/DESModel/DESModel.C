@@ -63,7 +63,7 @@ DESModel<BasicTurbulenceModel>::DESModel
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
 DESModel<BasicTurbulenceModel>::~DESModel()
