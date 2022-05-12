@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,7 +73,7 @@ inline Foam::label Foam::faMesh::nInternalEdges() const noexcept
 
 inline Foam::label Foam::faMesh::nBoundaryEdges() const noexcept
 {
-    return nEdges_ - nInternalEdges_;
+    return (nEdges_ - nInternalEdges_);
 }
 
 
@@ -92,6 +92,12 @@ inline const Foam::pointField& Foam::faMesh::points() const
 inline const Foam::edgeList& Foam::faMesh::edges() const noexcept
 {
     return edges_;
+}
+
+
+inline const Foam::edgeList::subList Foam::faMesh::internalEdges() const
+{
+    return edgeList::subList(edges_, nInternalEdges_);
 }
 
 
@@ -136,6 +142,12 @@ inline Foam::uindirectPrimitivePatch& Foam::faMesh::patch()
         initPatch();
     }
     return *patchPtr_;
+}
+
+
+inline bool Foam::faMesh::hasInternalEdgeLabels() const noexcept
+{
+    return false;
 }
 
 

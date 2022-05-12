@@ -37,6 +37,7 @@ License
 #include "scalarMatrices.H"
 #include "processorFaPatchFields.H"
 #include "emptyFaPatchFields.H"
+#include "triPointRef.H"
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
@@ -100,6 +101,121 @@ static inline vector areaInvDistSqrWeightedNormalDualEdge
             0.5*(leftPoint - basePoint)     // vector to left 1/2 edge
         )
     );
+}
+
+
+// Calculate transform tensor with reference vector (unitAxis1)
+// and direction vector (axis2).
+//
+// This is nearly identical to the meshTools axesRotation
+// with an E3_E1 transformation with the following exceptions:
+//
+// - axis1 (e3 == unitAxis1): is already normalized (unit vector)
+// - axis2 (e1 == dirn): no difference
+// - transformation is row-vectors, not column-vectors
+static inline tensor rotation_e3e1
+(
+    const vector& unitAxis1,
+    vector dirn
+)
+{
+    dirn.removeCollinear(unitAxis1);
+    dirn.normalise();
+
+    // Set row vectors
+    return tensor
+    (
+        dirn,
+        (unitAxis1^dirn),
+        unitAxis1
+    );
+}
+
+
+// Simple area-weighted normal calculation for the specified edge vector
+// and its owner/neighbour face centres (internal edges).
+//
+// Uses four triangles since adjacent faces may be non-planar
+// and/or the edge centre is skewed from the face centres.
+
+/*---------------------------------------------------------------------------*\
+ *          *           |
+ *         /|\          | Triangles (0,1) are on the owner side.
+ *        / | \         |
+ *       /  |  \        | Triangles (2,3) are on the neighbour side.
+ *      /  1|3  \       |
+ * own *----|----* nbr  | Boundary edges are the same, but without a neighbour
+ *      \  0|2  /       |
+ *       \  |  /        |
+ *        \ | /         |
+ *         \|/          |
+ *          *           |
+\*---------------------------------------------------------------------------*/
+
+static inline vector calcEdgeNormalFromFace
+(
+    const linePointRef& edgeVec,
+    const point& ownCentre,
+    const point& neiCentre
+)
+{
+    const scalar magEdge(edgeVec.mag());
+
+    if (magEdge < ROOTVSMALL)
+    {
+        return Zero;
+    }
+
+    const vector edgeCtr = edgeVec.centre();
+
+    vector edgeNorm
+    (
+        // owner
+        triPointRef(edgeCtr, ownCentre, edgeVec.first()).areaNormal()
+      + triPointRef(edgeCtr, edgeVec.last(), ownCentre).areaNormal()
+        // neighbour
+      + triPointRef(edgeCtr, edgeVec.first(), neiCentre).areaNormal()
+      + triPointRef(edgeCtr, neiCentre, edgeVec.last()).areaNormal()
+    );
+
+    // Requires a unit-vector (already tested its mag)
+    edgeNorm.removeCollinear(edgeVec.vec()/magEdge);
+    edgeNorm.normalise();
+
+    // Scale with the original edge length
+    return magEdge*edgeNorm;
+}
+
+
+// As above, but for boundary edgess (no neighbour)
+static inline vector calcEdgeNormalFromFace
+(
+    const linePointRef& edgeVec,
+    const point& ownCentre
+)
+{
+    const scalar magEdge(edgeVec.mag());
+
+    if (magEdge < ROOTVSMALL)
+    {
+        return Zero;
+    }
+
+    const vector edgeCtr = edgeVec.centre();
+
+    vector edgeNorm
+    (
+        // owner
+        triPointRef(edgeCtr, ownCentre, edgeVec.first()).areaNormal()
+      + triPointRef(edgeCtr, edgeVec.last(), ownCentre).areaNormal()
+    );
+
+    // Requires a unit-vector (already tested its mag)
+    edgeNorm.removeCollinear(edgeVec.vec()/magEdge);
+    edgeNorm.normalise();
+
+    // Scale with the original edge length
+    return magEdge*edgeNorm;
 }
 
 } // End namespace Foam
@@ -189,71 +305,187 @@ void Foam::faMesh::calcLe() const
 
     edgeVectorField& Le = *LePtr_;
 
+    const pointField& localPoints = points();
 
-    const pointField& pPoints = points();
-    const edgeList& pEdges = edges();
+    if (faMesh::geometryOrder() < 1)
+    {
+        // Simple (primitive) edge normal calculations.
+        // These are primarly designed to avoid any communication
+        // but are thus necessarily inconsistent across processor boundaries!
+
+        // Reasonable to assume that the volume mesh already has faceCentres
+        // eg, used magSf somewhere.
+        // Can use these instead of triggering our calcAreaCentres().
+
+        WarningInFunction
+            << "Using geometryOrder < 1 : "
+               "simplified edge area-normals for Le() calculation"
+            << endl;
+
+        UIndirectList<vector> fCentres(mesh().faceCentres(), faceLabels());
+
+        // Flat addressing
+        vectorField edgeNormals(nEdges_);
+
+        // Internal (edge normals)
+        for (label edgei = 0; edgei < nInternalEdges_; ++edgei)
+        {
+            edgeNormals[edgei] =
+                calcEdgeNormalFromFace
+                (
+                    edges_[edgei].line(localPoints),
+                    fCentres[owner()[edgei]],
+                    fCentres[neighbour()[edgei]]
+                );
+        }
+
+        // Boundary (edge normals). Like above, but only has owner
+        for (label edgei = nInternalEdges_; edgei < nEdges_; ++edgei)
+        {
+            edgeNormals[edgei] =
+                calcEdgeNormalFromFace
+                (
+                    edges_[edgei].line(localPoints),
+                    fCentres[owner()[edgei]]
+                );
+        }
+
+
+        // Now use these edge normals for calculating Le
+
+        // Internal (edge vector)
+        {
+            vectorField& internalFld = Le.ref();
+            for (label edgei = 0; edgei < nInternalEdges_; ++edgei)
+            {
+                vector& leVector = internalFld[edgei];
+
+                vector edgeVec = edges_[edgei].vec(localPoints);
+                const scalar magEdge(mag(edgeVec));
+
+                if (magEdge < ROOTVSMALL)
+                {
+                    // Too small
+                    leVector = Zero;
+                    continue;
+                }
+
+                const vector edgeCtr = edges_[edgei].centre(localPoints);
+                const vector& edgeNorm = edgeNormals[edgei];
+                const vector& ownCentre = fCentres[owner()[edgei]];
+
+                leVector = magEdge*normalised(edgeVec ^ edgeNorm);
+                leVector *= sign(leVector & (edgeCtr - ownCentre));
+            }
+        }
+
+        // Boundary (edge vector)
+
+        forAll(boundary(), patchi)
+        {
+            const labelUList& bndEdgeFaces = boundary()[patchi].edgeFaces();
+
+            const edgeList::subList bndEdges =
+                boundary()[patchi].patchSlice(edges_);
+
+            vectorField& patchLe = Le.boundaryFieldRef()[patchi];
+
+            forAll(patchLe, bndEdgei)
+            {
+                vector& leVector = patchLe[bndEdgei];
+                const label meshEdgei(boundary()[patchi].start() + bndEdgei);
+
+                vector edgeVec = bndEdges[bndEdgei].vec(localPoints);
+                const scalar magEdge(mag(edgeVec));
+
+                if (magEdge < ROOTVSMALL)
+                {
+                    // Too small
+                    leVector = Zero;
+                    continue;
+                }
+
+                const vector edgeCtr = bndEdges[bndEdgei].centre(localPoints);
+                const vector& edgeNorm = edgeNormals[meshEdgei];
+                const vector& ownCentre = fCentres[bndEdgeFaces[bndEdgei]];
+
+                leVector = magEdge*normalised(edgeVec ^ edgeNorm);
+                leVector *= sign(leVector & (edgeCtr - ownCentre));
+            }
+        }
+
+        // Done
+        return;
+    }
+
+
+    // Longer forms.
+    // Using edgeAreaNormals, which uses pointAreaNormals (communication!)
 
     const edgeVectorField& eCentres = edgeCentres();
     const areaVectorField& fCentres = areaCentres();
-
     const edgeVectorField& edgeNormals = edgeAreaNormals();
 
-    vectorField& leInternal = Le.ref();
-    const vectorField& edgeNormalsInternal = edgeNormals.internalField();
-    const vectorField& fCentresInternal = fCentres.internalField();
-    const vectorField& eCentresInternal = eCentres.internalField();
-    const scalarField& magLeInternal = magLe().internalField();
+    // Internal (edge vector)
 
-    forAll(leInternal, edgeI)
     {
-        leInternal[edgeI] =
-            pEdges[edgeI].vec(pPoints) ^ edgeNormalsInternal[edgeI];
+        vectorField& internalFld = Le.ref();
+        for (label edgei = 0; edgei < nInternalEdges_; ++edgei)
+        {
+            vector& leVector = internalFld[edgei];
 
-        leInternal[edgeI] *=
-          - sign
-            (
-                leInternal[edgeI] &
-                (
-                    fCentresInternal[owner()[edgeI]]
-                  - eCentresInternal[edgeI]
-                )
-            );
+            vector edgeVec = edges_[edgei].vec(localPoints);
+            const scalar magEdge(mag(edgeVec));
 
-        leInternal[edgeI] *=
-            magLeInternal[edgeI]/mag(leInternal[edgeI]);
+            if (magEdge < ROOTVSMALL)
+            {
+                // Too small
+                leVector = Zero;
+                continue;
+            }
+
+            const vector& edgeCtr = eCentres[edgei];
+            const vector& edgeNorm = edgeNormals[edgei];
+            const vector& ownCentre = fCentres[owner()[edgei]];
+
+            leVector = magEdge*normalised(edgeVec ^ edgeNorm);
+            leVector *= sign(leVector & (edgeCtr - ownCentre));
+        }
     }
 
-    forAll(boundary(), patchI)
+    forAll(boundary(), patchi)
     {
-        const labelUList& bndEdgeFaces = boundary()[patchI].edgeFaces();
+        const labelUList& bndEdgeFaces = boundary()[patchi].edgeFaces();
 
         const edgeList::subList bndEdges =
-            boundary()[patchI].patchSlice(pEdges);
+            boundary()[patchi].patchSlice(edges_);
 
         const vectorField& bndEdgeNormals =
-            edgeNormals.boundaryField()[patchI];
+            edgeNormals.boundaryField()[patchi];
 
-        vectorField& patchLe = Le.boundaryFieldRef()[patchI];
-        const vectorField& patchECentres = eCentres.boundaryField()[patchI];
+        vectorField& patchLe = Le.boundaryFieldRef()[patchi];
+        const vectorField& patchECentres = eCentres.boundaryField()[patchi];
 
-        forAll(patchLe, edgeI)
+        forAll(patchLe, bndEdgei)
         {
-            patchLe[edgeI] =
-                bndEdges[edgeI].vec(pPoints) ^ bndEdgeNormals[edgeI];
+            vector& leVector = patchLe[bndEdgei];
 
-            patchLe[edgeI] *=
-              - sign
-                (
-                    patchLe[edgeI]&
-                    (
-                        fCentresInternal[bndEdgeFaces[edgeI]]
-                      - patchECentres[edgeI]
-                    )
-                );
+            vector edgeVec = bndEdges[bndEdgei].vec(localPoints);
+            const scalar magEdge(mag(edgeVec));
 
-            patchLe[edgeI] *=
-                magLe().boundaryField()[patchI][edgeI]
-                /mag(patchLe[edgeI]);
+            if (magEdge < ROOTVSMALL)
+            {
+                // Too small
+                leVector = Zero;
+                continue;
+            }
+
+            const vector& edgeCtr = patchECentres[bndEdgei];
+            const vector& edgeNorm = bndEdgeNormals[bndEdgei];
+            const vector& ownCentre = fCentres[bndEdgeFaces[bndEdgei]];
+
+            leVector = magEdge*normalised(edgeVec ^ edgeNorm);
+            leVector *= sign(leVector & (edgeCtr - ownCentre));
         }
     }
 }
@@ -289,23 +521,30 @@ void Foam::faMesh::calcMagLe() const
 
     const pointField& localPoints = points();
 
-    label edgei = 0;
-    for (const edge& e : patch().internalEdges())
+    // Internal (edge length)
     {
-        magLe.ref()[edgei] = e.mag(localPoints);
-        ++edgei;
+        auto iter = magLe.primitiveFieldRef().begin();
+
+        for (const edge& e : internalEdges())
+        {
+            *iter = e.mag(localPoints);
+            ++iter;
+        }
     }
 
-
-    forAll(boundary(), patchI)
+    // Boundary (edge length)
     {
-        const edgeList::subList patchEdges =
-            boundary()[patchI].patchSlice(edges());
+        auto& bfld = magLe.boundaryFieldRef();
 
-        forAll(patchEdges, edgeI)
+        forAll(boundary(), patchi)
         {
-            magLe.boundaryFieldRef()[patchI][edgeI] =
-                patchEdges[edgeI].mag(localPoints);
+            auto iter = bfld[patchi].begin();
+
+            for (const edge& e : boundary()[patchi].patchSlice(edges_))
+            {
+                *iter = e.mag(localPoints);
+                ++iter;
+            }
         }
     }
 }
@@ -343,21 +582,25 @@ void Foam::faMesh::calcAreaCentres() const
     const faceList& localFaces = faces();
 
     // Internal (face centres)
-    forAll(localFaces, faceI)
+    // Could also obtain from volume mesh faceCentres()
+    forAll(localFaces, facei)
     {
-        centres.ref()[faceI] = localFaces[faceI].centre(localPoints);
+        centres.ref()[facei] = localFaces[facei].centre(localPoints);
     }
 
     // Boundary (edge centres)
-    forAll(boundary(), patchI)
     {
-        const edgeList::subList patchEdges =
-            boundary()[patchI].patchSlice(edges());
+        auto& bfld = centres.boundaryFieldRef();
 
-        forAll(patchEdges, edgeI)
+        forAll(boundary(), patchi)
         {
-            centres.boundaryFieldRef()[patchI][edgeI] =
-                patchEdges[edgeI].centre(localPoints);
+            auto iter = bfld[patchi].begin();
+
+            for (const edge& e : boundary()[patchi].patchSlice(edges_))
+            {
+                *iter = e.centre(localPoints);
+                ++iter;
+            }
         }
     }
 }
@@ -389,28 +632,34 @@ void Foam::faMesh::calcEdgeCentres() const
             dimLength
         );
 
-    edgeVectorField& edgeCentres = *edgeCentresPtr_;
+    edgeVectorField& centres = *edgeCentresPtr_;
 
     const pointField& localPoints = points();
 
-    // Internal edges
-    label edgei = 0;
-    for (const edge& e : patch().internalEdges())
+    // Internal (edge centres)
     {
-        edgeCentres.ref()[edgei] = e.centre(localPoints);
-        ++edgei;
+        auto iter = centres.primitiveFieldRef().begin();
+
+        for (const edge& e : internalEdges())
+        {
+            *iter = e.centre(localPoints);
+            ++iter;
+        }
     }
 
-    // Boundary edges
-    forAll(boundary(), patchI)
+    // Boundary (edge centres)
     {
-        const edgeList::subList patchEdges =
-            boundary()[patchI].patchSlice(edges());
+        auto& bfld = centres.boundaryFieldRef();
 
-        forAll(patchEdges, edgeI)
+        forAll(boundary(), patchi)
         {
-            edgeCentres.boundaryFieldRef()[patchI][edgeI] =
-                patchEdges[edgeI].centre(localPoints);
+            auto iter = bfld[patchi].begin();
+
+            for (const edge& e : boundary()[patchi].patchSlice(edges_))
+            {
+                *iter = e.centre(localPoints);
+                ++iter;
+            }
         }
     }
 }
@@ -446,9 +695,10 @@ void Foam::faMesh::calcS() const
     const pointField& localPoints = points();
     const faceList& localFaces = faces();
 
-    forAll(S, faceI)
+    // Could also obtain from volume mesh faceAreas()
+    forAll(S, facei)
     {
-        S[faceI] = localFaces[faceI].mag(localPoints);
+        S[facei] = localFaces[facei].mag(localPoints);
     }
 }
 
@@ -485,6 +735,7 @@ void Foam::faMesh::calcFaceAreaNormals() const
     const faceList& localFaces = faces();
 
     // Internal (faces)
+    // Could also obtain from volume mesh Sf() + normalise
     vectorField& nInternal = faceNormals.ref();
     forAll(localFaces, faceI)
     {
@@ -493,8 +744,7 @@ void Foam::faMesh::calcFaceAreaNormals() const
 
     // Boundary - copy from edges
 
-    const edgeVectorField::Boundary& edgeNormalsBoundary =
-        edgeAreaNormals().boundaryField();
+    const auto& edgeNormalsBoundary = edgeAreaNormals().boundaryField();
 
     forAll(boundary(), patchI)
     {
@@ -528,46 +778,50 @@ void Foam::faMesh::calcEdgeAreaNormals() const
             *this,
             dimless
         );
-
     edgeVectorField& edgeAreaNormals = *edgeAreaNormalsPtr_;
 
 
-    // Point area normals
+    // Starting from point area normals
     const vectorField& pointNormals = pointAreaNormals();
 
+
+    // Internal edges
     forAll(edgeAreaNormals.internalField(), edgei)
     {
-        const edge& e = edges()[edgei];
+        const edge& e = edges_[edgei];
         const vector edgeVec = e.unitVec(points());
 
-        vector& n = edgeAreaNormals.ref()[edgei];
+        vector& edgeNorm = edgeAreaNormals.ref()[edgei];
 
-        n = (pointNormals[e.first()] + pointNormals[e.second()]);
+        // Average of both ends
+        edgeNorm = (pointNormals[e.first()] + pointNormals[e.second()]);
 
-        n -= edgeVec*(edgeVec & n);
-
-        n.normalise();
+        edgeNorm.removeCollinear(edgeVec);
+        edgeNorm.normalise();
     }
+
+    // Boundary
+    auto& bfld = edgeAreaNormals.boundaryFieldRef();
 
     forAll(boundary(), patchi)
     {
+        auto& pfld = bfld[patchi];
+
         const edgeList::subList patchEdges =
-            boundary()[patchi].patchSlice(edges());
+            boundary()[patchi].patchSlice(edges_);
 
-        vectorField& edgeNorms = edgeAreaNormals.boundaryFieldRef()[patchi];
-
-        forAll(patchEdges, edgei)
+        forAll(patchEdges, bndEdgei)
         {
-            const edge& e = patchEdges[edgei];
+            const edge& e = patchEdges[bndEdgei];
             const vector edgeVec = e.unitVec(points());
 
-            vector& n = edgeNorms[edgei];
+            vector& edgeNorm = pfld[bndEdgei];
 
-            n = (pointNormals[e.first()] + pointNormals[e.second()]);
+            // Average of both ends
+            edgeNorm = (pointNormals[e.first()] + pointNormals[e.second()]);
 
-            n -= edgeVec*(edgeVec & n);
-
-            n.normalise();
+            edgeNorm.removeCollinear(edgeVec);
+            edgeNorm.normalise();
         }
     }
 }
@@ -624,9 +878,14 @@ void Foam::faMesh::calcEdgeTransformTensors() const
             << abort(FatalError);
     }
 
-    edgeTransformTensorsPtr_ = new FieldField<Field, tensor>(nEdges());
-    FieldField<Field, tensor>& edgeTransformTensors =
-        *edgeTransformTensorsPtr_;
+    edgeTransformTensorsPtr_ = new FieldField<Field, tensor>(nEdges_);
+    auto& edgeTransformTensors = *edgeTransformTensorsPtr_;
+
+    // Initialize all transformation tensors
+    for (label edgei = 0; edgei < nEdges_; ++edgei)
+    {
+        edgeTransformTensors.set(edgei, new Field<tensor>(3, tensor::I));
+    }
 
     const areaVectorField& Nf = faceAreaNormals();
     const areaVectorField& Cf = areaCentres();
@@ -635,193 +894,129 @@ void Foam::faMesh::calcEdgeTransformTensors() const
     const edgeVectorField& Ce = edgeCentres();
 
     // Internal edges transformation tensors
-    for (label edgeI=0; edgeI<nInternalEdges(); ++edgeI)
+    for (label edgei = 0; edgei < nInternalEdges_; ++edgei)
     {
-        edgeTransformTensors.set(edgeI, new Field<tensor>(3, I));
+        const label ownFacei = owner()[edgei];
+        const label neiFacei = neighbour()[edgei];
+        auto& tensors = edgeTransformTensors[edgei];
 
-        vector E = Ce.internalField()[edgeI];
+        vector edgeCtr = Ce.internalField()[edgei];
 
         if (skew())
         {
-            E -= skewCorrectionVectors().internalField()[edgeI];
+            edgeCtr -= skewCorrectionVectors().internalField()[edgei];
         }
 
         // Edge transformation tensor
-        vector il = E - Cf.internalField()[owner()[edgeI]];
-
-        il -= Ne.internalField()[edgeI]
-            *(Ne.internalField()[edgeI]&il);
-
-        il /= mag(il);
-
-        vector kl = Ne.internalField()[edgeI];
-        vector jl = kl^il;
-
-        edgeTransformTensors[edgeI][0] =
-            tensor
+        tensors[0] =
+            rotation_e3e1
             (
-                il.x(), il.y(), il.z(),
-                jl.x(), jl.y(), jl.z(),
-                kl.x(), kl.y(), kl.z()
+                Ne.internalField()[edgei],
+                (edgeCtr - Cf.internalField()[ownFacei])
             );
 
         // Owner transformation tensor
-        il = E - Cf.internalField()[owner()[edgeI]];
-
-        il -= Nf.internalField()[owner()[edgeI]]
-            *(Nf.internalField()[owner()[edgeI]]&il);
-
-        il /= mag(il);
-
-        kl = Nf.internalField()[owner()[edgeI]];
-        jl = kl^il;
-
-        edgeTransformTensors[edgeI][1] =
-            tensor
+        tensors[1] =
+            rotation_e3e1
             (
-                il.x(), il.y(), il.z(),
-                jl.x(), jl.y(), jl.z(),
-                kl.x(), kl.y(), kl.z()
+                Nf.internalField()[ownFacei],
+                (edgeCtr - Cf.internalField()[ownFacei])
             );
 
         // Neighbour transformation tensor
-        il = Cf.internalField()[neighbour()[edgeI]] - E;
-
-        il -= Nf.internalField()[neighbour()[edgeI]]
-            *(Nf.internalField()[neighbour()[edgeI]]&il);
-
-        il /= mag(il);
-
-        kl = Nf.internalField()[neighbour()[edgeI]];
-        jl = kl^il;
-
-        edgeTransformTensors[edgeI][2] =
-            tensor
+        tensors[2] =
+            rotation_e3e1
             (
-                il.x(), il.y(), il.z(),
-                jl.x(), jl.y(), jl.z(),
-                kl.x(), kl.y(), kl.z()
+                Nf.internalField()[neiFacei],
+                (Cf.internalField()[neiFacei] - edgeCtr)
             );
     }
 
     // Boundary edges transformation tensors
-    forAll(boundary(), patchI)
+    forAll(boundary(), patchi)
     {
-        if (boundary()[patchI].coupled())
+        const labelUList& edgeFaces = boundary()[patchi].edgeFaces();
+
+        if (boundary()[patchi].coupled())
         {
-            const labelUList& edgeFaces =
-                boundary()[patchI].edgeFaces();
+            vectorField nbrCf(Cf.boundaryField()[patchi].patchNeighbourField());
+            vectorField nbrNf(Nf.boundaryField()[patchi].patchNeighbourField());
 
-            vectorField ngbCf(Cf.boundaryField()[patchI].patchNeighbourField());
-
-            vectorField ngbNf(Nf.boundaryField()[patchI].patchNeighbourField());
-
-            forAll(edgeFaces, edgeI)
+            forAll(edgeFaces, bndEdgei)
             {
-                edgeTransformTensors.set
-                (
-                    boundary()[patchI].start() + edgeI,
-                    new Field<tensor>(3, I)
-                );
+                const label ownFacei = edgeFaces[bndEdgei];
+                const label meshEdgei(boundary()[patchi].start() + bndEdgei);
 
-                vector E = Ce.boundaryField()[patchI][edgeI];
+                auto& tensors = edgeTransformTensors[meshEdgei];
+
+                vector edgeCtr = Ce.boundaryField()[patchi][bndEdgei];
 
                 if (skew())
                 {
-                    E -= skewCorrectionVectors()
-                        .boundaryField()[patchI][edgeI];
+                    edgeCtr -= skewCorrectionVectors()
+                        .boundaryField()[patchi][bndEdgei];
                 }
 
                 // Edge transformation tensor
-                vector il = E - Cf.internalField()[edgeFaces[edgeI]];
-
-                il -= Ne.boundaryField()[patchI][edgeI]
-                   *(Ne.boundaryField()[patchI][edgeI]&il);
-
-                il /= mag(il);
-
-                vector kl = Ne.boundaryField()[patchI][edgeI];
-                vector jl = kl^il;
-
-                edgeTransformTensors[boundary()[patchI].start() + edgeI][0] =
-                    tensor(il, jl, kl);
+                tensors[0] =
+                    rotation_e3e1
+                    (
+                        Ne.boundaryField()[patchi][bndEdgei],
+                        (edgeCtr - Cf.internalField()[ownFacei])
+                    );
 
                 // Owner transformation tensor
-                il = E - Cf.internalField()[edgeFaces[edgeI]];
-
-                il -= Nf.internalField()[edgeFaces[edgeI]]
-                   *(Nf.internalField()[edgeFaces[edgeI]]&il);
-
-                il /= mag(il);
-
-                kl = Nf.internalField()[edgeFaces[edgeI]];
-                jl = kl^il;
-
-                edgeTransformTensors[boundary()[patchI].start() + edgeI][1] =
-                    tensor(il, jl, kl);
+                tensors[1] =
+                    rotation_e3e1
+                    (
+                        Nf.internalField()[ownFacei],
+                        (edgeCtr - Cf.internalField()[ownFacei])
+                    );
 
                 // Neighbour transformation tensor
-                il = ngbCf[edgeI] - E;
-
-                il -= ngbNf[edgeI]*(ngbNf[edgeI]&il);
-
-                il /= mag(il);
-
-                kl = ngbNf[edgeI];
-
-                jl = kl^il;
-
-                edgeTransformTensors[boundary()[patchI].start() + edgeI][2] =
-                    tensor(il, jl, kl);
+                tensors[2] =
+                    rotation_e3e1
+                    (
+                        nbrNf[bndEdgei],
+                        (nbrCf[bndEdgei] - edgeCtr)
+                    );
             }
         }
         else
         {
-            const labelUList& edgeFaces = boundary()[patchI].edgeFaces();
-
-            forAll(edgeFaces, edgeI)
+            forAll(edgeFaces, bndEdgei)
             {
-                edgeTransformTensors.set
-                (
-                    boundary()[patchI].start() + edgeI,
-                    new Field<tensor>(3, I)
-                );
+                const label ownFacei = edgeFaces[bndEdgei];
+                const label meshEdgei(boundary()[patchi].start() + bndEdgei);
 
-                vector E = Ce.boundaryField()[patchI][edgeI];
+                auto& tensors = edgeTransformTensors[meshEdgei];
+
+                vector edgeCtr = Ce.boundaryField()[patchi][bndEdgei];
 
                 if (skew())
                 {
-                    E -= skewCorrectionVectors()
-                        .boundaryField()[patchI][edgeI];
+                    edgeCtr -= skewCorrectionVectors()
+                        .boundaryField()[patchi][bndEdgei];
                 }
 
                 // Edge transformation tensor
-                vector il = E - Cf.internalField()[edgeFaces[edgeI]];
-
-                il -= Ne.boundaryField()[patchI][edgeI]
-                   *(Ne.boundaryField()[patchI][edgeI]&il);
-
-                il /= mag(il);
-
-                vector kl = Ne.boundaryField()[patchI][edgeI];
-                vector jl = kl^il;
-
-                edgeTransformTensors[boundary()[patchI].start() + edgeI][0] =
-                    tensor(il, jl, kl);
+                tensors[0] =
+                    rotation_e3e1
+                    (
+                        Ne.boundaryField()[patchi][bndEdgei],
+                        (edgeCtr - Cf.internalField()[ownFacei])
+                    );
 
                 // Owner transformation tensor
-                il = E - Cf.internalField()[edgeFaces[edgeI]];
+                tensors[1] =
+                    rotation_e3e1
+                    (
+                        Nf.internalField()[ownFacei],
+                        (edgeCtr - Cf.internalField()[ownFacei])
+                    );
 
-                il -= Nf.internalField()[edgeFaces[edgeI]]
-                   *(Nf.internalField()[edgeFaces[edgeI]]&il);
-
-                il /= mag(il);
-
-                kl = Nf.internalField()[edgeFaces[edgeI]];
-                jl = kl^il;
-
-                edgeTransformTensors[boundary()[patchI].start() + edgeI][1] =
-                    tensor(il, jl, kl);
+                // Neighbour transformation tensor
+                tensors[2] = tensor::I;
             }
         }
     }
@@ -882,7 +1077,7 @@ void Foam::faMesh::calcPointAreaNormals(vectorField& result) const
     DebugInFunction
         << "Calculating pointAreaNormals : face dual method" << endl;
 
-    result.resize(nPoints());
+    result.resize_nocopy(nPoints());
     result = Zero;
 
     const pointField& points = patch().localPoints();
@@ -945,7 +1140,7 @@ void Foam::faMesh::calcPointAreaNormals(vectorField& result) const
 
             for (const label pti : patchPoints)
             {
-                result[pti] -= N*(N&result[pti]);
+                result[pti].removeCollinear(N);
             }
 
             // Axis point correction
@@ -1124,17 +1319,13 @@ void Foam::faMesh::calcPointAreaNormals(vectorField& result) const
         forAllConstIters(fpNormals, iter)
         {
             const label pointi = iter.key();
-            vector fpnorm = iter.val();
+            vector fpnorm = normalised(iter.val());
 
-            fpnorm.normalise();
-            result[pointi] -= fpnorm*(fpnorm & result[pointi]);
+            result[pointi].removeCollinear(fpnorm);
         }
     }
 
-    for (vector& n : result)
-    {
-        n.normalise();
-    }
+    result.normalise();
 }
 
 
@@ -1469,7 +1660,7 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit(vectorField& result) const
                 const vector& origin = points[curPoint];
                 const vector axis = normalised(result[curPoint]);
                 vector dir(allPoints[0] - points[curPoint]);
-                dir -= axis*(axis&dir);
+                dir.removeCollinear(axis);
                 dir.normalise();
 
                 const coordinateSystem cs("cs", origin, axis, dir);
@@ -1633,7 +1824,7 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit(vectorField& result) const
                 const vector& origin = points[curPoint];
                 const vector axis = normalised(result[curPoint]);
                 vector dir(allPoints[0] - points[curPoint]);
-                dir -= axis*(axis&dir);
+                dir.removeCollinear(axis);
                 dir.normalise();
 
                 coordinateSystem cs("cs", origin, axis, dir);
@@ -1710,22 +1901,19 @@ Foam::tmp<Foam::edgeScalarField> Foam::faMesh::edgeLengthCorrection() const
     DebugInFunction
         << "Calculating edge length correction" << endl;
 
-    tmp<edgeScalarField> tcorrection
+    auto tcorrection = tmp<edgeScalarField>::New
     (
-        new edgeScalarField
+        IOobject
         (
-            IOobject
-            (
-                "edgeLengthCorrection",
-                mesh().pointsInstance(),
-                meshSubDir,
-                mesh()
-            ),
-            *this,
-            dimless
-        )
+            "edgeLengthCorrection",
+            mesh().pointsInstance(),
+            meshSubDir,
+            mesh()
+        ),
+        *this,
+        dimless
     );
-    edgeScalarField& correction = tcorrection.ref();
+    auto& correction = tcorrection.ref();
 
     const vectorField& pointNormals = pointAreaNormals();
 

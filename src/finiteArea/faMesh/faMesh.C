@@ -337,10 +337,12 @@ Foam::faMesh::faMesh
         *this
     ),
     comm_(Pstream::worldComm),
+    curTimeIndex_(time().timeIndex()),
+
     patchPtr_(nullptr),
     bndConnectPtr_(nullptr),
     lduPtr_(nullptr),
-    curTimeIndex_(time().timeIndex()),
+
     SPtr_(nullptr),
     S0Ptr_(nullptr),
     S00Ptr_(nullptr),
@@ -439,10 +441,12 @@ Foam::faMesh::faMesh
         label(0)
     ),
     comm_(Pstream::worldComm),
+    curTimeIndex_(time().timeIndex()),
+
     patchPtr_(nullptr),
     bndConnectPtr_(nullptr),
     lduPtr_(nullptr),
-    curTimeIndex_(time().timeIndex()),
+
     SPtr_(nullptr),
     S0Ptr_(nullptr),
     S00Ptr_(nullptr),

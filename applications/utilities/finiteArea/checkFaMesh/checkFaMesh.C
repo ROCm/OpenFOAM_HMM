@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,6 +46,8 @@ Original Authors
 #include "edgeFields.H"
 #include "processorFaPatch.H"
 #include "foamVtkIndPatchWriter.H"
+#include "foamVtkLineWriter.H"
+#include "faMeshTools.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -66,11 +68,27 @@ int main(int argc, char *argv[])
         "Write mesh as a vtp (vtk) file for display or debugging"
     );
 
+    argList::addOption
+    (
+        "geometryOrder",
+        "N",
+        "Test different geometry order - experimental!!",
+        true  // Advanced option
+    );
+
     #include "addRegionOption.H"
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createNamedPolyMesh.H"
 
+    int geometryOrder(1);
+    if (args.readIfPresent("geometryOrder", geometryOrder))
+    {
+        Info<< "Setting faMesh::geometryOrder = " << geometryOrder << nl
+            << "(experimental)" << nl << endl;
+
+        faMesh::geometryOrder(geometryOrder);
+    }
 
     // Create
     faMesh aMesh(mesh);

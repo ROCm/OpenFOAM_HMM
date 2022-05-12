@@ -37,8 +37,6 @@ License
 
 void Foam::faMesh::updateMesh(const mapPolyMesh& mpm)
 {
-    DebugInFunction << "Updating mesh" << endl;
-
     // if (!mpm.morphing())
     // {
     //     // No topo change
@@ -48,18 +46,14 @@ void Foam::faMesh::updateMesh(const mapPolyMesh& mpm)
     // Create fa mesh mapper, using the old mesh
     const faMeshMapper mapper(*this, mpm);
 
-
     // Rebuild mesh
-
-    // Cast away const for interface reasons.  HJ, 12/Aug/2011
-    faMesh& m = const_cast<faMesh&>(*this);
-
+    // ~~~~~~~~~~~~
 
     // Clear existing mesh data
     clearOut();
 
     // Set new labels
-    m.faceLabels_ = mapper.areaMap().newFaceLabels();
+    faceLabels_ = mapper.areaMap().newFaceLabels();
 
     const uindirectPrimitivePatch& bp = patch();
 
@@ -121,12 +115,12 @@ void Foam::faMesh::updateMesh(const mapPolyMesh& mpm)
     }
 
     // Set new edges for all patches
-    forAll(m.boundary_, patchI)
+    forAll(boundary_, patchI)
     {
-        m.boundary_[patchI].resetEdges(patchEdges[patchI]);
+        boundary_[patchI].resetEdges(patchEdges[patchI]);
     }
 
-    m.setPrimitiveMeshData();
+    setPrimitiveMeshData();
 
     // Create global mesh data
     if (Pstream::parRun())
@@ -135,10 +129,10 @@ void Foam::faMesh::updateMesh(const mapPolyMesh& mpm)
     }
 
     // Calculate topology for the patches (processor-processor comms etc.)
-    m.boundary_.updateMesh();
+    boundary_.updateMesh();
 
     // Calculate the geometry for the patches (transformation tensors etc.)
-    m.boundary_.calcGeometry();
+    boundary_.calcGeometry();
 
 
     // Map fields
@@ -156,7 +150,7 @@ void Foam::faMesh::updateMesh(const mapPolyMesh& mpm)
 
 void Foam::faMesh::mapFields(const faMeshMapper& mapper) const
 {
-    // Map all the areaFields in the objectRegistry
+    // Map areaFields in the objectRegistry
     MapGeometricFields<scalar, faPatchField, faMeshMapper, areaMesh>(mapper);
     MapGeometricFields<vector, faPatchField, faMeshMapper, areaMesh>(mapper);
     MapGeometricFields<sphericalTensor, faPatchField, faMeshMapper, areaMesh>
@@ -165,7 +159,7 @@ void Foam::faMesh::mapFields(const faMeshMapper& mapper) const
         (mapper);
     MapGeometricFields<tensor, faPatchField, faMeshMapper, areaMesh>(mapper);
 
-    // Map all the edgeFields in the objectRegistry
+    // Map edgeFields in the objectRegistry
     MapGeometricFields<scalar, faePatchField, faMeshMapper, edgeMesh>(mapper);
     MapGeometricFields<vector, faePatchField, faMeshMapper, edgeMesh>(mapper);
     MapGeometricFields<sphericalTensor, faePatchField, faMeshMapper, edgeMesh>
@@ -227,7 +221,6 @@ void Foam::faMesh::mapOldAreas(const faMeshMapper& mapper) const
             }
         }
     }
-
 }
 
 

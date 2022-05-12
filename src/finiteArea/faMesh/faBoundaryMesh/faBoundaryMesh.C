@@ -236,6 +236,22 @@ void Foam::faBoundaryMesh::calcGeometry()
 
 
 Foam::UPtrList<const Foam::labelUList>
+Foam::faBoundaryMesh::edgeLabels() const
+{
+    const faPatchList& patches = *this;
+
+    UPtrList<const labelUList> list(patches.size());
+
+    forAll(list, patchi)
+    {
+        list.set(patchi, &patches[patchi].edgeLabels());
+    }
+
+    return list;
+}
+
+
+Foam::UPtrList<const Foam::labelUList>
 Foam::faBoundaryMesh::edgeFaces() const
 {
     const faPatchList& patches = *this;

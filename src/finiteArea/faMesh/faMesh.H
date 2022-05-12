@@ -209,37 +209,43 @@ class faMesh
         faBoundaryMesh boundary_;
 
 
-        // Primitive mesh data
+    // Primitive mesh data
 
-            //- Edges, addressing into local point list
-            edgeList edges_;
+        //- Edges, addressing into local point list
+        edgeList edges_;
 
-            //- Edge owner
-            labelList edgeOwner_;
+        //- Edge owner
+        labelList edgeOwner_;
 
-            //- Edge neighbour
-            labelList edgeNeighbour_;
-
-
-        // Primitive size data
-
-            //- Total number of points
-            mutable label nPoints_;
-
-            //- Total number of edges
-            mutable label nEdges_;
-
-            //- Number of internal edges
-            mutable label nInternalEdges_;
-
-            //- Number of faces
-            mutable label nFaces_;
+        //- Edge neighbour
+        labelList edgeNeighbour_;
 
 
-        // Communication support
+    // Primitive size data
 
-            //- Communicator used for parallel communication
-            label comm_;
+        //- Total number of points
+        mutable label nPoints_;
+
+        //- Total number of edges
+        mutable label nEdges_;
+
+        //- Number of internal edges
+        mutable label nInternalEdges_;
+
+        //- Number of faces
+        mutable label nFaces_;
+
+
+    // Communication support, updating
+
+        //- Communicator used for parallel communication
+        label comm_;
+
+        //- Current time index for motion
+        //  Note.  The whole mechanism will be replaced once the
+        //  dimensionedField is created and the dimensionedField
+        //  will take care of the old-time levels.
+        mutable label curTimeIndex_;
 
 
     // Demand-driven data
@@ -253,11 +259,8 @@ class faMesh
         //- Ldu addressing data
         mutable faMeshLduAddressing* lduPtr_;
 
-        //- Current time index for motion
-        //  Note.  The whole mechanism will be replaced once the
-        //  dimensionedField is created and the dimensionedField
-        //  will take care of the old-time levels.
-        mutable label curTimeIndex_;
+
+    // Geometric Data
 
         //- Face areas
         mutable DimensionedField<scalar, areaMesh>* SPtr_;
@@ -545,6 +548,22 @@ public:
 
     // Static Functions
 
+        //- Return the current geometry treatment (0: primitive, 1: standard)
+        //  A zero level is with restricted neighbour information
+        static int geometryOrder() noexcept
+        {
+            return geometryOrder_;
+        }
+
+        //- Set the preferred geometry treatment
+        //  \return the previous value
+        static int geometryOrder(const int order) noexcept
+        {
+            int old(geometryOrder_);
+            geometryOrder_ = order;
+            return old;
+        }
+
         //- Read construction from polyMesh if all files are available
         static autoPtr<faMesh> TryNew(const polyMesh& pMesh);
 
@@ -571,73 +590,79 @@ public:
         bool init(const bool doInit);
 
 
-        // Database
+    // Database
 
-            //- Return access to polyMesh
-            inline const polyMesh& mesh() const;
+        //- Return access to polyMesh
+        inline const polyMesh& mesh() const;
 
-            //- Interface to referenced polyMesh (similar to GeoMesh)
-            const polyMesh& operator()() const { return mesh(); }
+        //- Interface to referenced polyMesh (similar to GeoMesh)
+        const polyMesh& operator()() const { return mesh(); }
 
-            //- Return the local mesh directory (dbDir()/meshSubDir)
-            fileName meshDir() const;
+        //- Return the local mesh directory (dbDir()/meshSubDir)
+        fileName meshDir() const;
 
-            //- Return reference to time
-            const Time& time() const;
+        //- Return reference to time
+        const Time& time() const;
 
-            //- Return the current instance directory for points
-            //  Used in the construction of geometric mesh data dependent
-            //  on points
-            const fileName& pointsInstance() const;
+        //- Return the current instance directory for points
+        //  Used in the construction of geometric mesh data dependent
+        //  on points
+        const fileName& pointsInstance() const;
 
-            //- Return the current instance directory for faces
-            const fileName& facesInstance() const;
-
-
-        // Communication support
-
-            //- Return communicator used for parallel communication
-            inline label comm() const noexcept;
-
-            //- Return communicator used for parallel communication
-            inline label& comm() noexcept;
+        //- Return the current instance directory for faces
+        const fileName& facesInstance() const;
 
 
-            // Mesh size parameters
+    // Communication support
 
-                //- Number of local mesh points
-                inline label nPoints() const noexcept;
+        //- Return communicator used for parallel communication
+        inline label comm() const noexcept;
 
-                //- Number of local mesh edges
-                inline label nEdges() const noexcept;
-
-                //- Number of internal faces
-                inline label nInternalEdges() const noexcept;
-
-                //- Number of boundary edges (== nEdges - nInternalEdges)
-                inline label nBoundaryEdges() const noexcept;
-
-                //- Number of patch faces
-                inline label nFaces() const noexcept;
+        //- Return communicator used for parallel communication
+        inline label& comm() noexcept;
 
 
-            // Primitive mesh data
+    // Access: Mesh size parameters
 
-                //- Return local patch points
-                inline const pointField& points() const;
+        //- Number of local mesh points
+        inline label nPoints() const noexcept;
 
-                //- Return local patch edges with reordered boundary
-                inline const edgeList& edges() const noexcept;
+        //- Number of local mesh edges
+        inline label nEdges() const noexcept;
 
-                //- Return local patch faces
-                inline const faceList& faces() const;
+        //- Number of internal faces
+        inline label nInternalEdges() const noexcept;
 
-                //- Edge owner addressing
-                inline const labelList& edgeOwner() const noexcept;
+        //- Number of boundary edges (== nEdges - nInternalEdges)
+        inline label nBoundaryEdges() const noexcept;
 
-                //- Edge neighbour addressing
-                inline const labelList& edgeNeighbour() const noexcept;
+        //- Number of patch faces
+        inline label nFaces() const noexcept;
 
+
+    // Access: Primitive mesh data
+
+        //- Return local points
+        inline const pointField& points() const;
+
+        //- Return local edges with reordered boundary
+        inline const edgeList& edges() const noexcept;
+
+        //- Sub-list of local internal edges
+        inline const edgeList::subList internalEdges() const;
+
+        //- Return local faces
+        inline const faceList& faces() const;
+
+        //- Edge owner addressing
+        inline const labelList& edgeOwner() const noexcept;
+
+        //- Edge neighbour addressing
+        inline const labelList& edgeNeighbour() const noexcept;
+
+        //- True if the internalEdges use an ordering that does not
+        //- correspond 1-to-1 with the patch internalEdges.
+        inline bool hasInternalEdgeLabels() const noexcept;
 
 
         // Access
@@ -649,7 +674,7 @@ public:
             virtual const objectRegistry& thisDb() const;
 
             //- Name function is needed to disambiguate those inherited
-            //  from base classes
+            //- from base classes
             const word& name() const
             {
                 return thisDb().name();
@@ -688,7 +713,7 @@ public:
             }
 
             //- True if given edge label is internal to the mesh
-            bool isInternalEdge(const label edgeIndex) const
+            bool isInternalEdge(const label edgeIndex) const noexcept
             {
                 return (edgeIndex < nInternalEdges_);
             }
@@ -815,6 +840,9 @@ public:
 
             //- Set whether point normals should be corrected for a patch
             boolList& correctPatchPointNormals() const;
+
+
+        // Storage management
 
 
         //- Write mesh

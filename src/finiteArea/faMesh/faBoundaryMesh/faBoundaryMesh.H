@@ -132,6 +132,9 @@ public:
             return mesh_;
         }
 
+        //- Return a list of edgeLabels for each patch
+        UPtrList<const labelUList> edgeLabels() const;
+
         //- Return a list of edgeFaces for each patch
         UPtrList<const labelUList> edgeFaces() const;
 

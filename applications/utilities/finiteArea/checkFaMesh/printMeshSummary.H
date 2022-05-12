@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -20,24 +20,7 @@ Description
     const label nNonProcessor = patches.nNonProcessor();
     const label nPatches = patches.size();
 
-    Info<< "----------------" << nl
-        << "Mesh Information" << nl
-        << "----------------" << nl
-        << "  " << "boundingBox: " << boundBox(aMesh.points()) << nl;
-
-    Info<< "  Number of points: "
-        << returnReduce(aMesh.nPoints(), sumOp<label>()) << nl
-        << "  Number of faces: "
-        << returnReduce(aMesh.nFaces(), sumOp<label>()) << nl;
-
-    Info<< "  Number of edges: "
-        << returnReduce(aMesh.nEdges(), sumOp<label>()) << nl
-        << "  Number of internal edges: "
-        << returnReduce(aMesh.nInternalEdges(), sumOp<label>()) << nl;
-
-
-    label nProcEdges = 0;
-
+    label nLocalProcEdges = 0;
     if (Pstream::parRun())
     {
         for (const faPatch& fap : patches)
@@ -46,22 +29,84 @@ Description
 
             if (cpp)
             {
-                nProcEdges += fap.nEdges();
+                nLocalProcEdges += fap.nEdges();
             }
         }
     }
 
-    const label nBoundEdges = aMesh.nBoundaryEdges() - nProcEdges;
+    const labelList nFaces
+    (
+        UPstream::listGatherValues<label>(aMesh.nFaces())
+    );
+    const labelList nPoints
+    (
+        UPstream::listGatherValues<label>(aMesh.nPoints())
+    );
+    const labelList nEdges
+    (
+        UPstream::listGatherValues<label>(aMesh.nEdges())
+    );
+    const labelList nIntEdges
+    (
+        UPstream::listGatherValues<label>(aMesh.nInternalEdges())
+    );
 
-    Info<< "  Number of boundary edges: "
-        << returnReduce(nBoundEdges - nProcEdges, sumOp<label>()) << nl;
+    // The "real" (non-processor) boundary edges
+    const labelList nBndEdges
+    (
+        UPstream::listGatherValues<label>
+        (
+            aMesh.nBoundaryEdges() - nLocalProcEdges
+        )
+    );
+    const labelList nProcEdges
+    (
+        UPstream::listGatherValues<label>(nLocalProcEdges)
+    );
 
-    if (Pstream::parRun())
+
+    // Format output as
+    //  Number of faces: ...
+    //         per-proc: (...)
+
+    const auto reporter =
+        [&](const char* tag, const labelList& list)
+        {
+            Info<< "  Number of " << tag << ": " << sum(list) << nl;
+            if (Pstream::parRun())
+            {
+                int padding = static_cast<int>
+                (
+                    // strlen("  Number of ") - strlen("per-proc")
+                    (12 - 8)
+                  + strlen(tag)
+                );
+
+                do { Info<< ' '; } while (--padding > 0);
+
+                Info<< "per-proc: " << flatOutput(list) << nl;
+            }
+        };
+
+
+    Info<< "----------------" << nl
+        << "Mesh Information" << nl
+        << "----------------" << nl
+        << "  " << "boundingBox: " << boundBox(aMesh.points()) << nl;
+
+    if (Pstream::master())
     {
-        Info<< "  Number of processor edges: "
-            << returnReduce(nProcEdges, sumOp<label>()) << nl;
-    }
+        reporter("faces", nFaces);
+        reporter("points", nPoints);
+        reporter("edges", nEdges);
+        reporter("internal edges", nIntEdges);
+        reporter("boundary edges", nBndEdges);
 
+        if (Pstream::parRun())
+        {
+            reporter("processor edges", nProcEdges);
+        }
+    }
 
     Info<< "----------------" << nl
         << "Patches" << nl

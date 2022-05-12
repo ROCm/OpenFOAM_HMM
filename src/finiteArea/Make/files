@@ -9,6 +9,10 @@ faMesh/faMeshBoundaryHalo.C
 faMesh/faBoundaryMesh/faBoundaryMesh.C
 faMesh/faBoundaryMesh/faBoundaryMeshEntries.C
 
+faMesh/faMeshSubset/faMeshSubset.C
+faMesh/faMeshTools/faMeshTools.C
+faMesh/faMeshTools/faMeshToolsProcAddr.C
+
 faPatches = faMesh/faPatches
 $(faPatches)/faPatch/faPatch.C
 $(faPatches)/faPatch/faPatchData.C
