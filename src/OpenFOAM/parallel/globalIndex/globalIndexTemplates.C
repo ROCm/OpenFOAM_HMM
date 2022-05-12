@@ -262,6 +262,24 @@ void Foam::globalIndex::gather
 {
     // low-level: no parRun guard
 
+    if (is_contiguous<Type>::value)
+    {
+        // Flatten list (locally) so that we can benefit from using direct
+        // read/write of contiguous data
+
+        gather
+        (
+            off,
+            comm,
+            procIDs,
+            List<Type>(fld),
+            allFld,
+            tag,
+            preferredCommsType
+        );
+        return;
+    }
+
     // Automatically change from nonBlocking to scheduled for
     // non-contiguous data.
     const UPstream::commsTypes commsType =

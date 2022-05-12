@@ -421,7 +421,7 @@ public:
             const Type& localValue,
             List<Type>& allValues,      //! output field (master only)
             const int tag = UPstream::msgType(),
-            const UPstream::commsTypes = UPstream::commsTypes::scheduled
+            const UPstream::commsTypes = UPstream::commsTypes::nonBlocking
         );
 
         //- Collect data in processor order on master (== procIDs[0]).
@@ -449,7 +449,7 @@ public:
             const IndirectListBase<Type, Addr>& fld,
             List<Type>& allFld,         //! output field (master only)
             const int tag = UPstream::msgType(),
-            const UPstream::commsTypes = UPstream::commsTypes::scheduled
+            const UPstream::commsTypes = UPstream::commsTypes::nonBlocking
         );
 
 
