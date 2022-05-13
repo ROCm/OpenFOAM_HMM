@@ -7,6 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
     Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2022 Upstream CFD GmbH
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +29,8 @@ Class
     Foam::DEShybrid
 
 Description
-    Hybrid convection scheme of Travin et al. for hybrid RAS/LES calculations.
+    Improved hybrid convection scheme of Travin et al. for hybrid RAS/LES
+    calculations with enhanced GAM behaviour.
 
     The scheme provides a blend between two convection schemes, based on local
     properties including the wall distance, velocity gradient and eddy
@@ -80,13 +82,13 @@ Description
         div(phi,U)      Gauss DEShybrid
             linear                    // scheme 1
             linearUpwind grad(U)      // scheme 2
-            hmax                      // LES delta name, e.g. 'delta', 'hmax'
-            0.65                      // DES coefficient, typically = 0.65
+            delta                     // LES delta name, e.g. 'delta', 'hmax'
             30                        // Reference velocity scale
             2                         // Reference length scale
             0                         // Minimum sigma limit (0-1)
             1                         // Maximum sigma limit (0-1)
-            1.0e-03;                  // Limiter of B function, typically 1e-03
+            1.0e-03                   // Limiter of B function, typically 1e-03
+            1.0;                      // nut limiter (if > 1, GAM extension is active)
         .
         .
     }
@@ -110,8 +112,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef DEShybrid_H
-#define DEShybrid_H
+#ifndef Foam_DEShybrid_H
+#define Foam_DEShybrid_H
 
 #include "surfaceInterpolationScheme.H"
 #include "surfaceInterpolate.H"
@@ -135,6 +137,9 @@ class DEShybrid
     public surfaceInterpolationScheme<Type>,
     public blendedSchemeBase<Type>
 {
+    typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
+    typedef GeometricField<Type, fvsPatchField, surfaceMesh> SurfaceFieldType;
+
     // Private Data
 
         //- Scheme 1
@@ -145,9 +150,6 @@ class DEShybrid
 
         //- Name of the LES delta field
         word deltaName_;
-
-        //- DES Coefficient
-        scalar CDES_;
 
         //- Reference velocity scale [m/s]
         dimensionedScalar U0_;
@@ -164,10 +166,15 @@ class DEShybrid
         //- Limiter of B function
         scalar OmegaLim_;
 
+        //- Limiter for modified GAM behaviour
+        scalar nutLim_;
+
         //- Scheme constants
         scalar CH1_;
         scalar CH2_;
         scalar CH3_;
+        scalar CDES_;
+        scalar Cs_;
 
         //- No copy construct
         DEShybrid(const DEShybrid&) = delete;
@@ -178,143 +185,7 @@ class DEShybrid
 
     // Private Member Functions
 
-        //- Calculate the blending factor
-        tmp<surfaceScalarField> calcBlendingFactor
-        (
-            const GeometricField<Type, fvPatchField, volMesh>& vf,
-            const volScalarField& nuEff,
-            const volVectorField& U,
-            const volScalarField& delta
-        ) const
-        {
-            tmp<volTensorField> gradU(fvc::grad(U));
-            const volScalarField S(sqrt(2.0)*mag(symm(gradU())));
-            const volScalarField Omega(sqrt(2.0)*mag(skew(gradU())));
-            const dimensionedScalar tau0_ = L0_/U0_;
-
-            const volScalarField B
-            (
-                CH3_*Omega*max(S, Omega)
-               /max(0.5*(sqr(S) + sqr(Omega)), sqr(OmegaLim_/tau0_))
-            );
-
-            const volScalarField K
-            (
-                max(Foam::sqrt(0.5*(sqr(S) + sqr(Omega))), 0.1/tau0_)
-            );
-
-            const volScalarField lTurb
-            (
-                Foam::sqrt
-                (
-                    max
-                    (
-                        nuEff/(pow(0.09, 1.5)*K),
-                        dimensionedScalar("l0", sqr(dimLength), 0)
-                    )
-                )
-            );
-
-            const volScalarField g(tanh(pow4(B)));
-
-            const volScalarField A
-            (
-                CH2_*max
-                (
-                    scalar(0),
-                    CDES_*delta/max(lTurb*g, SMALL*L0_) - 0.5
-                )
-            );
-
-
-            const word factorName(IOobject::scopedName(typeName, "Factor"));
-            const fvMesh& mesh = this->mesh();
-
-            const IOobject factorIO
-            (
-                factorName,
-                mesh.time().timeName(),
-                mesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            );
-
-            if (blendedSchemeBaseName::debug)
-            {
-                auto* factorPtr = mesh.getObjectPtr<volScalarField>(factorName);
-
-                if (!factorPtr)
-                {
-                    factorPtr =
-                        new volScalarField
-                        (
-                            factorIO,
-                            mesh,
-                            dimensionedScalar(dimless, Zero)
-                        );
-
-                    const_cast<fvMesh&>(mesh).objectRegistry::store(factorPtr);
-                }
-
-                auto& factor = *factorPtr;
-
-                factor = max(sigmaMax_*tanh(pow(A, CH1_)), sigmaMin_);
-
-                return tmp<surfaceScalarField>::New
-                (
-                    vf.name() + "BlendingFactor",
-                    fvc::interpolate(factor)
-                );
-            }
-            else
-            {
-                const volScalarField factor
-                (
-                    factorIO,
-                    max(sigmaMax_*tanh(pow(A, CH1_)), sigmaMin_)
-                );
-
-                return tmp<surfaceScalarField>::New
-                (
-                    vf.name() + "BlendingFactor",
-                    fvc::interpolate(factor)
-                );
-            }
-        }
-
-
-public:
-
-    //- Runtime type information
-    TypeName("DEShybrid");
-
-
-    // Constructors
-
-        //- Construct from mesh and Istream.
-        //  The name of the flux field is read from the Istream and looked-up
-        //  from the mesh objectRegistry
-        DEShybrid(const fvMesh& mesh, Istream& is)
-        :
-            surfaceInterpolationScheme<Type>(mesh),
-            tScheme1_
-            (
-                surfaceInterpolationScheme<Type>::New(mesh, is)
-            ),
-            tScheme2_
-            (
-                surfaceInterpolationScheme<Type>::New(mesh, is)
-            ),
-            deltaName_(is),
-            CDES_(readScalar(is)),
-            U0_("U0", dimLength/dimTime, readScalar(is)),
-            L0_("L0", dimLength, readScalar(is)),
-            sigmaMin_(readScalar(is)),
-            sigmaMax_(readScalar(is)),
-            OmegaLim_(readScalar(is)),
-            CH1_(3.0),
-            CH2_(1.0),
-            CH3_(2.0)
+        void checkValues()
         {
             if (U0_.value() <= 0)
             {
@@ -354,6 +225,109 @@ public:
             }
         }
 
+
+        //- Calculate the blending factor
+        tmp<surfaceScalarField> calcBlendingFactor
+        (
+            const VolFieldType& vf,
+            const volScalarField& nut,
+            const volScalarField& nu,
+            const volVectorField& U,
+            const volScalarField& delta
+        ) const
+        {
+            tmp<volTensorField> gradU(fvc::grad(U));
+            const volScalarField S(sqrt(2.0)*mag(symm(gradU())));
+            const volScalarField Omega(sqrt(2.0)*mag(skew(gradU())));
+            const dimensionedScalar tau0_ = L0_/U0_;
+            gradU.clear();
+
+            const volScalarField B
+            (
+                CH3_*Omega*max(S, Omega)
+               /max(0.5*(sqr(S) + sqr(Omega)), sqr(OmegaLim_/tau0_))
+            );
+
+            const volScalarField K
+            (
+                max(Foam::sqrt(0.5*(sqr(S) + sqr(Omega))), 0.1/tau0_)
+            );
+
+            const volScalarField lTurb
+            (
+                Foam::sqrt
+                (
+                    max
+                    (
+                        (max(nut, min(sqr(Cs_*delta)*S, nutLim_*nut)) + nu)
+                       /(pow(0.09, 1.5)*K),
+                        dimensionedScalar(sqr(dimLength), Zero)
+                    )
+                )
+            );
+
+            const volScalarField g(tanh(pow4(B)));
+
+            const volScalarField A
+            (
+                CH2_*max
+                (
+                    scalar(0),
+                    CDES_*delta/max(lTurb*g, SMALL*L0_) - 0.5
+                )
+            );
+
+            const volScalarField factor
+            (
+                IOobject::scopedName(typeName, "Factor"),
+                max(sigmaMax_*tanh(pow(A, CH1_)), sigmaMin_)
+            );
+
+            if (blendedSchemeBaseName::debug)
+            {
+                factor.write();
+            }
+
+            return tmp<surfaceScalarField>::New
+            (
+                vf.name() + "BlendingFactor",
+                fvc::interpolate(factor)
+            );
+        }
+
+
+public:
+
+    //- Runtime type information
+    TypeName("DEShybrid");
+
+
+    // Constructors
+
+        //- Construct from mesh and Istream.
+        //  The name of the flux field is read from the Istream and looked-up
+        //  from the mesh objectRegistry
+        DEShybrid(const fvMesh& mesh, Istream& is)
+        :
+            surfaceInterpolationScheme<Type>(mesh),
+            tScheme1_(surfaceInterpolationScheme<Type>::New(mesh, is)),
+            tScheme2_(surfaceInterpolationScheme<Type>::New(mesh, is)),
+            deltaName_(is),
+            U0_("U0", dimLength/dimTime, readScalar(is)),
+            L0_("L0", dimLength, readScalar(is)),
+            sigmaMin_(readScalar(is)),
+            sigmaMax_(readScalar(is)),
+            OmegaLim_(readScalar(is)),
+            nutLim_(readScalar(is)),
+            CH1_(3.0),
+            CH2_(1.0),
+            CH3_(2.0),
+            CDES_(0.65),
+            Cs_(0.18)
+        {
+            checkValues();
+        }
+
         //- Construct from mesh, faceFlux and Istream
         DEShybrid
         (
@@ -372,52 +346,19 @@ public:
                 surfaceInterpolationScheme<Type>::New(mesh, faceFlux, is)
             ),
             deltaName_(is),
-            CDES_(readScalar(is)),
             U0_("U0", dimLength/dimTime, readScalar(is)),
             L0_("L0", dimLength, readScalar(is)),
             sigmaMin_(readScalar(is)),
             sigmaMax_(readScalar(is)),
             OmegaLim_(readScalar(is)),
+            nutLim_(readScalar(is)),
             CH1_(3.0),
             CH2_(1.0),
-            CH3_(2.0)
+            CH3_(2.0),
+            CDES_(0.65),
+            Cs_(0.18)
         {
-            if (U0_.value() <= 0)
-            {
-                FatalErrorInFunction
-                    << "U0 coefficient must be > 0. "
-                    << "Current value: " << U0_ << exit(FatalError);
-            }
-            if (L0_.value() <= 0)
-            {
-                FatalErrorInFunction
-                    << "L0 coefficient must be > 0. "
-                    << "Current value: " << U0_ << exit(FatalError);
-            }
-            if (sigmaMin_ < 0)
-            {
-                FatalErrorInFunction
-                    << "sigmaMin coefficient must be >= 0. "
-                    << "Current value: " << sigmaMin_ << exit(FatalError);
-            }
-            if (sigmaMax_ < 0)
-            {
-                FatalErrorInFunction
-                    << "sigmaMax coefficient must be >= 0. "
-                    << "Current value: " << sigmaMax_ << exit(FatalError);
-            }
-            if (sigmaMin_ > 1)
-            {
-                FatalErrorInFunction
-                    << "sigmaMin coefficient must be <= 1. "
-                    << "Current value: " << sigmaMin_ << exit(FatalError);
-            }
-            if (sigmaMax_ > 1)
-            {
-                FatalErrorInFunction
-                    << "sigmaMax coefficient must be <= 1. "
-                    << "Current value: " << sigmaMax_ << exit(FatalError);
-            }
+            checkValues();
         }
 
 
@@ -448,7 +389,10 @@ public:
                 const icoModel& model =
                     mesh.lookupObject<icoModel>(icoModel::propertiesName);
 
-                return calcBlendingFactor(vf, model.nuEff(), model.U(), delta);
+                return calcBlendingFactor
+                (
+                    vf, model.nut(), model.nu(), model.U(), delta
+                );
             }
             else if (mesh.foundObject<cmpModel>(cmpModel::propertiesName))
             {
@@ -457,7 +401,7 @@ public:
 
                 return calcBlendingFactor
                 (
-                    vf, model.muEff()/model.rho(), model.U(), delta
+                    vf, model.nut(), model.mu()/model.rho(), model.U(), delta
                 );
             }
 
@@ -471,12 +415,9 @@ public:
 
 
         //- Return the interpolation weighting factors
-        tmp<surfaceScalarField> weights
-        (
-            const GeometricField<Type, fvPatchField, volMesh>& vf
-        ) const
+        tmp<surfaceScalarField> weights(const VolFieldType& vf) const
         {
-            surfaceScalarField bf(blendingFactor(vf));
+            const surfaceScalarField bf(blendingFactor(vf));
 
             return
                 (scalar(1) - bf)*tScheme1_().weights(vf)
@@ -486,11 +427,7 @@ public:
 
         //- Return the face-interpolate of the given cell field
         //  with explicit correction
-        tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
-        interpolate
-        (
-            const GeometricField<Type, fvPatchField, volMesh>& vf
-        ) const
+        tmp<SurfaceFieldType> interpolate(const VolFieldType& vf) const
         {
             surfaceScalarField bf(blendingFactor(vf));
 
@@ -508,14 +445,10 @@ public:
 
 
         //- Return the explicit correction to the face-interpolate
-        //  for the given field
-        virtual tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
-        correction
-        (
-            const GeometricField<Type, fvPatchField, volMesh>& vf
-        ) const
+        //- for the given field
+        virtual tmp<SurfaceFieldType> correction(const VolFieldType& vf) const
         {
-            surfaceScalarField bf(blendingFactor(vf));
+            const surfaceScalarField bf(blendingFactor(vf));
 
             if (tScheme1_().corrected())
             {
@@ -557,3 +490,4 @@ public:
 #endif
 
 // ************************************************************************* //
+
