@@ -104,24 +104,27 @@ tmp<volScalarField> kOmegaSSTIDDES<BasicTurbulenceModel>::dTilda
     const volScalarField expTerm(exp(sqr(alpha)));
 
     tmp<volScalarField> fB = min(2*pow(expTerm, -9.0), scalar(1));
-    tmp<volScalarField> fe1 =
-        2*(pos0(alpha)*pow(expTerm, -11.09) + neg(alpha)*pow(expTerm, -9.0));
-    tmp<volScalarField> fe2 = 1 - max(ft(magGradU), fl(magGradU));
-    tmp<volScalarField> fe = max(fe1 - 1, scalar(0))*fe2;
-
     const volScalarField fdTilda(max(1 - fdt(magGradU), fB));
 
-    // Simplified formulation from Gritskevich et al. paper (2011) where fe = 0
-    // return max
-    // (
-    //     fdTilda*lRAS + (1 - fdTilda)*lLES,
-    //     dimensionedScalar("SMALL", dimLength, SMALL)
-    // );
+    if (fe_)
+    {
+        tmp<volScalarField> fe1 =
+            2*(pos0(alpha)*pow(expTerm, -11.09) + neg(alpha)*pow(expTerm, -9.));
+        tmp<volScalarField> fe2 = 1 - max(ft(magGradU), fl(magGradU));
+        tmp<volScalarField> fe = max(fe1 - 1, scalar(0))*fe2;
 
-    // Original formulation from Shur et al. paper (2008)
+        // Original formulation from Shur et al. paper (2008)
+        return max
+        (
+            fdTilda*(1 + fe)*lRAS + (1 - fdTilda)*lLES,
+            dimensionedScalar("SMALL", dimLength, SMALL)
+        );
+    }
+
+    // Simplified formulation from Gritskevich et al. paper (2011) where fe = 0
     return max
     (
-        fdTilda*(1 + fe)*lRAS + (1 - fdTilda)*lLES,
+        fdTilda*lRAS + (1 - fdTilda)*lLES,
         dimensionedScalar("SMALL", dimLength, SMALL)
     );
 }
@@ -190,6 +193,16 @@ kOmegaSSTIDDES<BasicTurbulenceModel>::kOmegaSSTIDDES
             1.87
         )
     ),
+    fe_
+    (
+        Switch::getOrAddToDict
+        (
+            "fe",
+            this->coeffDict_,
+            true
+        )
+    ),
+
     IDDESDelta_(setDelta())
 {
     if (type == typeName)

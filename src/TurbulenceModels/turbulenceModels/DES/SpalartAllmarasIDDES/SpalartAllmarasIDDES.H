@@ -100,6 +100,7 @@ protected:
             dimensionedScalar Cdt2_;
             dimensionedScalar Cl_;
             dimensionedScalar Ct_;
+            Switch fe_;
 
 
         //- IDDES delta
