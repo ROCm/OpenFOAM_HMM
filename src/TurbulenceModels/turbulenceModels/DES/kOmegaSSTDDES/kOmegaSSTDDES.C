@@ -64,13 +64,12 @@ tmp<volScalarField> kOmegaSSTDDES<BasicTurbulenceModel>::S2
     {
         volScalarField& S2 = tS2.ref();
         const volScalarField CDES(this->CDES(F1));
-        const volScalarField& k = this->k_;
-        const volScalarField& omega = this->omega_;
         const volScalarField Ssigma(this->Ssigma(gradU));
+
         S2 -=
             (
                 fd(mag(gradU))
-               *pos(sqrt(k)/(this->betaStar_*omega) - CDES*this->delta())
+               *pos(this->lengthScaleRAS() - this->lengthScaleLES(CDES))
                *(S2 - sqr(Ssigma))
             );
     }
@@ -86,21 +85,13 @@ tmp<volScalarField> kOmegaSSTDDES<BasicTurbulenceModel>::dTilda
     const volScalarField& CDES
 ) const
 {
-    const volScalarField& k = this->k_;
-    const volScalarField& omega = this->omega_;
-
-    const volScalarField lRAS(sqrt(k)/(this->betaStar_*omega));
-    const volScalarField lLES(CDES*this->delta());
+    const volScalarField lRAS(this->lengthScaleRAS());
+    const volScalarField lLES(this->lengthScaleLES(CDES));
+    const dimensionedScalar l0(dimLength, Zero);
 
     return max
     (
-        lRAS
-      - fd(magGradU)
-       *max
-        (
-            lRAS - lLES,
-            dimensionedScalar(dimLength, Zero)
-        ),
+        lRAS - fd(magGradU)*max(lRAS - lLES, l0),
         dimensionedScalar("small", dimLength, SMALL)
     );
 }
@@ -119,14 +110,12 @@ tmp<volScalarField::Internal> kOmegaSSTDDES<BasicTurbulenceModel>::GbyNu0
     if (useSigma_)
     {
         volScalarField::Internal& GbyNu0 = tGbyNu0.ref();
-        const volScalarField::Internal CDES(this->CDES(F1)()());
-        const volScalarField::Internal& k = this->k_();
-        const volScalarField::Internal& omega = this->omega_();
+        const volScalarField CDES(this->CDES(F1));
 
         GbyNu0 -=
             fd(mag(gradU))()()
-           *pos(sqrt(k)/(this->betaStar_*omega) - CDES*this->delta()())
-           *(GbyNu0 - S2);
+           *pos(this->lengthScaleRAS()()() - this->lengthScaleLES(CDES)()())
+           *(GbyNu0 - S2());
     }
 
     return tGbyNu0;

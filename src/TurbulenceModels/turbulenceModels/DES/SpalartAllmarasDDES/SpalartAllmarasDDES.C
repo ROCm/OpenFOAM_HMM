@@ -99,16 +99,11 @@ tmp<volScalarField> SpalartAllmarasDDES<BasicTurbulenceModel>::dTilda
 {
     const volScalarField& lRAS(this->y_);
     const volScalarField lLES(this->lengthScaleLES(chi, fv1));
+    const dimensionedScalar l0(dimLength, Zero);
 
     return max
     (
-        lRAS
-      - fd(mag(gradU))
-       *max
-        (
-            lRAS - lLES,
-            dimensionedScalar(dimLength, Zero)
-        ),
+        lRAS - fd(mag(gradU))*max(lRAS - lLES, l0),
         dimensionedScalar("small", dimLength, SMALL)
     );
 }

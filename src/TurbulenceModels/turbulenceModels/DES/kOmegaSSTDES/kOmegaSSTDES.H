@@ -169,6 +169,15 @@ public:
         //- Re-read model coefficients if they have changed
         virtual bool read();
 
+        //- RAS length scale
+        virtual tmp<volScalarField> lengthScaleRAS() const;
+
+        //- LES length scale
+        virtual tmp<volScalarField> lengthScaleLES
+        (
+            const volScalarField& CDES
+        ) const;
+
         //- Return the LES field indicator
         virtual tmp<volScalarField> LESRegion() const;
 };

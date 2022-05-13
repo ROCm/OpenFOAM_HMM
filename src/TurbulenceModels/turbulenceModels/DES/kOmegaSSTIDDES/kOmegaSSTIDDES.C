@@ -97,11 +97,8 @@ tmp<volScalarField> kOmegaSSTIDDES<BasicTurbulenceModel>::dTilda
     const volScalarField& CDES
 ) const
 {
-    const volScalarField& k = this->k_;
-    const volScalarField& omega = this->omega_;
-
-    const volScalarField lRAS(sqrt(k)/(this->betaStar_*omega));
-    const volScalarField lLES(CDES*this->delta());
+    const volScalarField lRAS(this->lengthScaleRAS());
+    const volScalarField lLES(this->lengthScaleLES(CDES));
 
     const volScalarField alpha(this->alpha());
     const volScalarField expTerm(exp(sqr(alpha)));
