@@ -73,7 +73,23 @@ tmp<volScalarField> SpalartAllmarasBase<BasicEddyViscosityModel>::ft2
     const volScalarField& chi
 ) const
 {
-    return Ct3_*exp(-Ct4_*sqr(chi));
+    if (ft2_)
+    {
+        return Ct3_*exp(-Ct4_*sqr(chi));
+    }
+
+    return tmp<volScalarField>::New
+    (
+        IOobject
+        (
+            "ft2",
+            this->runTime_.timeName(),
+            this->mesh_,
+            IOobject::NO_READ
+        ),
+        this->mesh_,
+        dimensionedScalar(dimless, Zero)
+    );
 }
 
 
@@ -268,6 +284,15 @@ SpalartAllmarasBase<BasicEddyViscosityModel>::SpalartAllmarasBase
             0.07
         )
     ),
+    ft2_
+    (
+        Switch::getOrAddToDict
+        (
+            "ft2",
+            this->coeffDict_,
+            false
+        )
+    ),
     Ct3_
     (
         dimensioned<scalar>::getOrAddToDict
@@ -302,13 +327,13 @@ SpalartAllmarasBase<BasicEddyViscosityModel>::SpalartAllmarasBase
 
     y_(wallDist::New(this->mesh_).y())
 {
-    if (mag(Ct3_.value()) > SMALL)
+    if (ft2_)
     {
-        Info<< "    ft2 term: active" << nl;
+        Info<< "ft2 term: active" << nl;
     }
     else
     {
-        Info<< "    ft2 term: inactive" << nl;
+        Info<< "ft2 term: inactive" << nl;
     }
 }
 
@@ -333,6 +358,7 @@ bool SpalartAllmarasBase<BasicEddyViscosityModel>::read()
 
         ck_.readIfPresent(this->coeffDict());
 
+        ft2_.readIfPresent("ft2", this->coeffDict());
         Ct3_.readIfPresent(this->coeffDict());
         Ct4_.readIfPresent(this->coeffDict());
 
