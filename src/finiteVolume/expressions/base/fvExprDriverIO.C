@@ -121,7 +121,7 @@ Foam::expressions::fvExprDriver::getTopoSetLabels
         {
             typedef cellSet classType;
 
-            if (classType::typeName != io.headerClassName())
+            if (!io.isHeaderClass<classType>())
             {
                 FatalErrorInFunction
                     << "Error reading " << classType::typeName
@@ -139,7 +139,7 @@ Foam::expressions::fvExprDriver::getTopoSetLabels
         {
             typedef faceSet classType;
 
-            if (classType::typeName != io.headerClassName())
+            if (!io.isHeaderClass<classType>())
             {
                 FatalErrorInFunction
                     << "Error reading " << classType::typeName
@@ -157,7 +157,7 @@ Foam::expressions::fvExprDriver::getTopoSetLabels
         {
             typedef pointSet classType;
 
-            if (classType::typeName != io.headerClassName())
+            if (!io.isHeaderClass<classType>())
             {
                 FatalErrorInFunction
                     << "Error reading " << classType::typeName

@@ -131,7 +131,7 @@ void doCorrectBoundaryConditions
 template<class FieldType>
 bool Foam::functionObjects::fvExpressionField::loadAndStore(const IOobject& io)
 {
-    if (FieldType::typeName == io.headerClassName())
+    if (io.isHeaderClass<FieldType>())
     {
         // Store field on mesh database
         Log << "    Reading " << io.name()

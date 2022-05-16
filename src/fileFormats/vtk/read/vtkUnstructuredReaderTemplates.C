@@ -33,7 +33,7 @@ License
 template<class Type>
 void Foam::vtkUnstructuredReader::printFieldStats(const objectRegistry& obj)
 {
-    const wordList fieldNames(obj.names(Type::typeName));
+    const wordList fieldNames(obj.sortedNames<Type>());
 
     if (fieldNames.size())
     {

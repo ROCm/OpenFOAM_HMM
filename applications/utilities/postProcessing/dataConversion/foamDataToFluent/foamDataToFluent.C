@@ -116,11 +116,7 @@ int main(int argc, char *argv[])
 
 
         // volScalarField
-        for
-        (
-            const word& fieldName
-          : objects.sortedNames(volScalarField::typeName)
-        )
+        for (const word& fieldName : objects.sortedNames<volScalarField>())
         {
             // Lookup field from dictionary and convert field
             label unitNumber;
@@ -140,11 +136,7 @@ int main(int argc, char *argv[])
 
 
         // volVectorField
-        for
-        (
-            const word& fieldName
-          : objects.sortedNames(volVectorField::typeName)
-        )
+        for (const word& fieldName : objects.sortedNames<volVectorField>())
         {
             // Lookup field from dictionary and convert field
             label unitNumber;

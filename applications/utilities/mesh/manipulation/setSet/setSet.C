@@ -153,6 +153,33 @@ void printHelp(Ostream& os)
 }
 
 
+template<class SetType>
+void printSets(Ostream& os, const IOobjectList& objects)
+{
+    label n = 0;
+
+    for (const IOobject& io : objects.sorted<SetType>())
+    {
+        SetType set(io);
+        if (!n++) os << SetType::typeName << "s:" << nl;
+        os  << '\t' << set.name() << "\tsize:" << set.size() << endl;
+    }
+}
+
+
+template<class ZoneType>
+void printZones(Ostream& os, const ZoneMesh<ZoneType, polyMesh>& zones)
+{
+    label n = 0;
+
+    for (const ZoneType& zn : zones)
+    {
+        if (!n++) os << ZoneType::typeName << "s:" << nl;
+        os  << '\t' << zn.name() << "\tsize:" << zn.size() << endl;
+    }
+}
+
+
 void printAllSets(const polyMesh& mesh, Ostream& os)
 {
     IOobjectList objects
@@ -167,64 +194,14 @@ void printAllSets(const polyMesh& mesh, Ostream& os)
         ),
         polyMesh::meshSubDir/"sets"
     );
-    IOobjectList cellSets(objects.lookupClass(cellSet::typeName));
-    if (cellSets.size())
-    {
-        os  << "cellSets:" << endl;
-        forAllConstIters(cellSets, iter)
-        {
-            cellSet set(*iter());
-            os  << '\t' << set.name() << "\tsize:" << set.size() << endl;
-        }
-    }
-    IOobjectList faceSets(objects.lookupClass(faceSet::typeName));
-    if (faceSets.size())
-    {
-        os  << "faceSets:" << endl;
-        forAllConstIters(faceSets, iter)
-        {
-            faceSet set(*iter());
-            os  << '\t' << set.name() << "\tsize:" << set.size() << endl;
-        }
-    }
-    IOobjectList pointSets(objects.lookupClass(pointSet::typeName));
-    if (pointSets.size())
-    {
-        os  << "pointSets:" << endl;
-        forAllConstIters(pointSets, iter)
-        {
-            pointSet set(*iter());
-            os  << '\t' << set.name() << "\tsize:" << set.size() << endl;
-        }
-    }
 
-    const cellZoneMesh& cellZones = mesh.cellZones();
-    if (cellZones.size())
-    {
-        os  << "cellZones:" << endl;
-        for (const cellZone& zone : cellZones)
-        {
-            os  << '\t' << zone.name() << "\tsize:" << zone.size() << endl;
-        }
-    }
-    const faceZoneMesh& faceZones = mesh.faceZones();
-    if (faceZones.size())
-    {
-        os  << "faceZones:" << endl;
-        for (const faceZone& zone : faceZones)
-        {
-            os  << '\t' << zone.name() << "\tsize:" << zone.size() << endl;
-        }
-    }
-    const pointZoneMesh& pointZones = mesh.pointZones();
-    if (pointZones.size())
-    {
-        os  << "pointZones:" << endl;
-        for (const pointZone& zone : pointZones)
-        {
-            os  << '\t' << zone.name() << "\tsize:" << zone.size() << endl;
-        }
-    }
+    printSets<cellSet>(os, objects);
+    printSets<faceSet>(os, objects);
+    printSets<pointSet>(os, objects);
+
+    printZones(os, mesh.cellZones());
+    printZones(os, mesh.faceZones());
+    printZones(os, mesh.pointZones());
 
     os  << endl;
 }

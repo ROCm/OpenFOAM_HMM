@@ -198,11 +198,11 @@ void Foam::fieldToCell::applyToSet
             << "Cannot read field " << fieldName_
             << " from time " << mesh().time().timeName() << endl;
     }
-    // Note: should use volScalarField::typeName instead below
-    //       but that would introduce linkage problems (finiteVolume needs
-    //       meshTools)
     else if ("volScalarField" == fieldObject.headerClassName())
     {
+        // Note: cannot use volScalarField::typeName since that would
+        //    introduce linkage problems (finiteVolume needs meshTools)
+
         IFstream str(typeFilePath<labelIOList>(fieldObject));
 
         // Read as dictionary
@@ -214,6 +214,9 @@ void Foam::fieldToCell::applyToSet
     }
     else if ("volVectorField" == fieldObject.headerClassName())
     {
+        // Note: cannot use volVectorField::typeName since that would
+        //    introduce linkage problems (finiteVolume needs meshTools)
+
         IFstream str(typeFilePath<labelIOList>(fieldObject));
 
         // Read as dictionary

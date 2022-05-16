@@ -167,10 +167,10 @@ void Foam::functionObjects::streamLineBase::initInterpolations
         {
             FatalErrorInFunction
                 << "Cannot find field " << fieldName << nl
-                << "Valid scalar fields are:"
-                << flatOutput(mesh_.names(volScalarField::typeName)) << nl
-                << "Valid vector fields are:"
-                << flatOutput(mesh_.names(volVectorField::typeName))
+                << "Valid scalar fields: "
+                << flatOutput(mesh_.sortedNames<volScalarField>()) << nl
+                << "Valid vector fields: "
+                << flatOutput(mesh_.sortedNames<volVectorField>()) << nl
                 << exit(FatalError);
         }
     }

@@ -65,7 +65,7 @@ class readFieldsHandler
         template<class FieldType>
         bool loadAndStore(const IOobject& io)
         {
-            if (FieldType::typeName == io.headerClassName())
+            if (io.isHeaderClass<FieldType>())
             {
                 // Store field on mesh database
                 Log << "    Reading " << io.name()

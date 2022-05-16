@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -105,14 +105,10 @@ int main(int argc, char *argv[])
         << endl;
 
 
-    IOobjectList pointObjects(objects.lookupClass(pointSet::typeName));
-
-    //Pout<< "pointSets:" << pointObjects.names() << endl;
-
-    forAllConstIters(pointObjects, iter)
+    for (const IOobject& io : objects.sorted<pointSet>())
     {
         // Not in memory. Load it.
-        pointSet set(*iter());
+        pointSet set(io);
         labelList pointLabels(set.sortedToc());
 
         // The original number of zones
@@ -139,16 +135,12 @@ int main(int argc, char *argv[])
     }
 
 
-    IOobjectList faceObjects(objects.lookupClass(faceSet::typeName));
-
     wordHashSet slaveCellSets;
 
-    //Pout<< "faceSets:" << faceObjects.names() << endl;
-
-    forAllConstIters(faceObjects, iter)
+    for (const IOobject& io : objects.sorted<faceSet>())
     {
         // Not in memory. Load it.
-        faceSet set(*iter());
+        faceSet set(io);
         labelList faceLabels(set.sortedToc());
 
         DynamicList<label> addressing(set.size());
@@ -267,16 +259,12 @@ int main(int argc, char *argv[])
 
 
 
-    IOobjectList cellObjects(objects.lookupClass(cellSet::typeName));
-
-    //Pout<< "cellSets:" << cellObjects.names() << endl;
-
-    forAllConstIters(cellObjects, iter)
+    for (const IOobject& io : objects.sorted<cellSet>())
     {
-        if (!slaveCellSets.found(iter.key()))
+        if (!slaveCellSets.found(io.name()))
         {
             // Not in memory. Load it.
-            cellSet set(*iter());
+            cellSet set(io);
             labelList cellLabels(set.sortedToc());
 
             // The original number of zones

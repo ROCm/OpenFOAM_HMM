@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -829,16 +829,16 @@ int main(int argc, char *argv[])
 
             if
             (
-                obj.headerClassName() == volScalarField::typeName
-             || obj.headerClassName() == volVectorField::typeName
-             || obj.headerClassName() == volSphericalTensorField::typeName
-             || obj.headerClassName() == volTensorField::typeName
-             || obj.headerClassName() == volSymmTensorField::typeName
-             || obj.headerClassName() == surfaceScalarField::typeName
-             || obj.headerClassName() == surfaceVectorField::typeName
-             || obj.headerClassName() == surfaceSphericalTensorField::typeName
-             || obj.headerClassName() == surfaceSymmTensorField::typeName
-             || obj.headerClassName() == surfaceTensorField::typeName
+                obj.isHeaderClass<volScalarField>()
+             || obj.isHeaderClass<volVectorField>()
+             || obj.isHeaderClass<volSphericalTensorField>()
+             || obj.isHeaderClass<volTensorField>()
+             || obj.isHeaderClass<volSymmTensorField>()
+             || obj.isHeaderClass<surfaceScalarField>()
+             || obj.isHeaderClass<surfaceVectorField>()
+             || obj.isHeaderClass<surfaceSphericalTensorField>()
+             || obj.isHeaderClass<surfaceSymmTensorField>()
+             || obj.isHeaderClass<surfaceTensorField>()
             )
             {
                 objects.add(objPtr);

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2010-2018 Bernhard Gschaider
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -593,15 +593,15 @@ Foam::expressions::fvExprDriver::topoSetType(const word& setName) const
 {
     IOobject io(topoSet::findIOobject(mesh(), setName));
 
-    if (cellSet::typeName == io.headerClassName())
+    if (io.isHeaderClass<cellSet>())
     {
         return topoSetSource::sourceType::CELLSET_SOURCE;
     }
-    if (faceSet::typeName == io.headerClassName())
+    if (io.isHeaderClass<faceSet>())
     {
         return topoSetSource::sourceType::FACESET_SOURCE;
     }
-    if (pointSet::typeName == io.headerClassName())
+    if (io.isHeaderClass<pointSet>())
     {
         return topoSetSource::sourceType::POINTSET_SOURCE;
     }
