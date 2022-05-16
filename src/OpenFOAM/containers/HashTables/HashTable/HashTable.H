@@ -346,10 +346,17 @@ public:
 
         //- Const access to the hash-table contents in sorted order
         //- (sorted by keys).
+        //  The lifetime of the returned content cannot exceed the parent!
+        UPtrList<const node_type> csorted() const;
+
+        //- Const access to the hash-table contents in sorted order
+        //- (sorted by keys).
+        //  The lifetime of the returned content cannot exceed the parent!
         UPtrList<const node_type> sorted() const;
 
         //- Non-const access to the hash-table contents in sorted order
         //- (sorted by keys).
+        //  The lifetime of the returned content cannot exceed the parent!
         UPtrList<node_type> sorted();
 
 

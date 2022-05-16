@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -96,7 +96,7 @@ Foam::label Foam::IOobjectList::countTypeImpl
     {
         const IOobject* io = iter.val();
 
-        if (io->isHeaderClassName<Type>() && matchName(io->name()))
+        if (io->isHeaderClass<Type>() && matchName(io->name()))
         {
             ++count;
         }
@@ -159,7 +159,7 @@ Foam::wordList Foam::IOobjectList::namesTypeImpl
         const word& key = iter.key();
         const IOobject* io = iter.val();
 
-        if (io->isHeaderClassName<Type>() && matchName(key))
+        if (io->isHeaderClass<Type>() && matchName(key))
         {
             objNames[count] = key;
             ++count;
@@ -174,6 +174,38 @@ Foam::wordList Foam::IOobjectList::namesTypeImpl
     }
 
     return objNames;
+}
+
+
+// Templated implementation for sorted()
+template<class Type, class MatchPredicate>
+Foam::UPtrList<const Foam::IOobject>
+Foam::IOobjectList::objectsTypeImpl
+(
+    const IOobjectList& list,
+    const MatchPredicate& matchName
+)
+{
+    UPtrList<const IOobject> result(list.size());
+
+    label count = 0;
+    forAllConstIters(list, iter)
+    {
+        const word& key = iter.key();
+        const IOobject* io = iter.val();
+
+        if (io->isHeaderClass<Type>() && matchName(key))
+        {
+            result.set(count, io);
+            ++count;
+        }
+    }
+
+    result.resize(count);
+
+    Foam::sort(result, nameOp<IOobject>());  // Sort by object name()
+
+    return result;
 }
 
 
@@ -253,7 +285,7 @@ Foam::IOobjectList Foam::IOobjectList::lookupClassTypeImpl
         const word& key = iter.key();
         const IOobject* io = iter.val();
 
-        if (io->isHeaderClassName<Type>() && matchName(key))
+        if (io->isHeaderClass<Type>() && matchName(key))
         {
             if (IOobject::debug)
             {
@@ -282,7 +314,7 @@ const Foam::IOobject* Foam::IOobjectList::cfindObject
     {
         const IOobject* io = iter.val();
 
-        if (io->isHeaderClassName<Type>())
+        if (io->isHeaderClass<Type>())
         {
             if (IOobject::debug)
             {
@@ -427,6 +459,62 @@ Foam::label Foam::IOobjectList::count
 }
 
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+template<class Type>
+Foam::UPtrList<const Foam::IOobject>
+Foam::IOobjectList::sorted() const
+{
+    return objectsTypeImpl<Type>(*this, predicates::always());
+}
+
+
+template<class Type>
+Foam::UPtrList<const Foam::IOobject>
+Foam::IOobjectList::sorted(const bool syncPar) const
+{
+    UPtrList<const IOobject> list
+    (
+        objectsTypeImpl<Type>(*this, predicates::always())
+    );
+
+    checkObjectOrder(list, syncPar);
+
+    return list;
+}
+
+
+template<class Type, class MatchPredicate>
+Foam::UPtrList<const Foam::IOobject>
+Foam::IOobjectList::sorted
+(
+    const MatchPredicate& matchName
+) const
+{
+    return objectsTypeImpl<Type>(*this, matchName);
+}
+
+
+template<class Type, class MatchPredicate>
+Foam::UPtrList<const Foam::IOobject>
+Foam::IOobjectList::sorted
+(
+    const MatchPredicate& matchName,
+    const bool syncPar
+) const
+{
+    UPtrList<const IOobject> list
+    (
+        objectsTypeImpl<Type>(*this, matchName)
+    );
+
+    checkObjectOrder(list, syncPar);
+
+    return list;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class MatchPredicate>
@@ -446,13 +534,7 @@ Foam::wordList Foam::IOobjectList::names
     const bool syncPar
 ) const
 {
-    wordList objNames
-    (
-        namesImpl(*this, matchClass, predicates::always(), false)
-    );
-
-    checkNames(objNames, syncPar);
-    return objNames;
+    return sortedNames(matchClass, syncPar);
 }
 
 
@@ -475,10 +557,7 @@ Foam::wordList Foam::IOobjectList::names
     const bool syncPar
 ) const
 {
-    wordList objNames(namesImpl(*this, matchClass, matchName, false));
-
-    checkNames(objNames, syncPar);
-    return objNames;
+    return sortedNames(matchClass, matchName, syncPar);
 }
 
 
@@ -492,10 +571,7 @@ Foam::wordList Foam::IOobjectList::names() const
 template<class Type>
 Foam::wordList Foam::IOobjectList::names(const bool syncPar) const
 {
-    wordList objNames(namesTypeImpl<Type>(*this, predicates::always(), false));
-
-    checkNames(objNames, syncPar);
-    return objNames;
+    return sortedNames<Type>(syncPar);
 }
 
 
@@ -516,10 +592,7 @@ Foam::wordList Foam::IOobjectList::names
     const bool syncPar
 ) const
 {
-    wordList objNames(namesTypeImpl<Type>(*this, matchName, false));
-
-    checkNames(objNames, syncPar);
-    return objNames;
+    return sortedNames<Type>(matchName, syncPar);
 }
 
 
@@ -547,7 +620,7 @@ Foam::wordList Foam::IOobjectList::sortedNames
         namesImpl(*this, matchClass, predicates::always(), true)
     );
 
-    checkNames(objNames, syncPar);
+    checkNameOrder(objNames, syncPar);
     return objNames;
 }
 
@@ -562,6 +635,7 @@ Foam::wordList Foam::IOobjectList::sortedNames
     return namesImpl(*this, matchClass, matchName, true);
 }
 
+
 template<class MatchPredicate1, class MatchPredicate2>
 Foam::wordList Foam::IOobjectList::sortedNames
 (
@@ -572,7 +646,7 @@ Foam::wordList Foam::IOobjectList::sortedNames
 {
     wordList objNames(namesImpl(*this, matchClass, matchName, true));
 
-    checkNames(objNames, syncPar);
+    checkNameOrder(objNames, syncPar);
     return objNames;
 }
 
@@ -589,7 +663,7 @@ Foam::wordList Foam::IOobjectList::sortedNames(const bool syncPar) const
 {
     wordList objNames(namesTypeImpl<Type>(*this, predicates::always(), true));
 
-    checkNames(objNames, syncPar);
+    checkNameOrder(objNames, syncPar);
     return objNames;
 }
 
@@ -611,7 +685,10 @@ Foam::wordList Foam::IOobjectList::sortedNames
     const bool syncPar
 ) const
 {
-    return namesTypeImpl<Type>(*this, matchName, true, syncPar);
+    wordList objNames(namesTypeImpl<Type>(*this, matchName, true));
+
+    checkNameOrder(objNames, syncPar);
+    return objNames;
 }
 
 

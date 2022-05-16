@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,8 +40,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef word_H
-#define word_H
+#ifndef Foam_word_H
+#define Foam_word_H
 
 #include "string.H"
 
@@ -241,6 +241,12 @@ struct nameOp
     {
         return obj.name();
     }
+
+    //- Less-compare two objects by their name() method - for sorting
+    bool operator()(const T& a, const T& b) const
+    {
+        return (a.name() < b.name());
+    }
 };
 
 
@@ -251,6 +257,12 @@ struct typeOp
     word operator()(const T& obj) const
     {
         return obj.type();
+    }
+
+    //- Less-compare two objects by their type() method - for sorting
+    bool operator()(const T& a, const T& b) const
+    {
+        return (a.type() < b.type());
     }
 };
 

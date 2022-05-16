@@ -146,20 +146,14 @@ inline unsigned Foam::IOobject::scalarByteSize() const noexcept
 
 // Checks
 
-inline bool Foam::IOobject::hasHeaderClassName() const noexcept
+inline bool Foam::IOobject::hasHeaderClass() const noexcept
 {
     return !headerClassName_.empty();
 }
 
 
-inline bool Foam::IOobject::isHeaderClassName(const word& clsName) const
-{
-    return (clsName == headerClassName_);
-}
-
-
 template<class Type>
-inline bool Foam::IOobject::isHeaderClassName() const
+inline bool Foam::IOobject::isHeaderClass() const
 {
     return (Type::typeName == headerClassName_);
 }

@@ -313,7 +313,7 @@ Foam::polyMesh::polyMesh(const IOobject& io, const bool doInit)
     oldPointsPtr_(nullptr),
     oldCellCentresPtr_(nullptr)
 {
-    if (owner_.hasHeaderClassName())
+    if (owner_.hasHeaderClass())
     {
         initMesh();
     }

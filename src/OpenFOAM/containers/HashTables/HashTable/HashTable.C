@@ -159,20 +159,28 @@ Foam::List<Key> Foam::HashTable<T, Key, Hash>::sortedToc
 
 template<class T, class Key, class Hash>
 Foam::UPtrList<const typename Foam::HashTable<T, Key, Hash>::node_type>
-Foam::HashTable<T, Key, Hash>::sorted() const
+Foam::HashTable<T, Key, Hash>::csorted() const
 {
-    UPtrList<const node_type> list(size_);
+    UPtrList<const node_type> result(size_);
 
     label count = 0;
 
     for (const_iterator iter = cbegin(); iter != cend(); ++iter)
     {
-        list.set(count++, iter.node());
+        result.set(count++, iter.node());
     }
 
-    Foam::sort(list);
+    Foam::sort(result);
 
-    return list;
+    return result;
+}
+
+
+template<class T, class Key, class Hash>
+Foam::UPtrList<const typename Foam::HashTable<T, Key, Hash>::node_type>
+Foam::HashTable<T, Key, Hash>::sorted() const
+{
+    return csorted();
 }
 
 
@@ -180,18 +188,18 @@ template<class T, class Key, class Hash>
 Foam::UPtrList<typename Foam::HashTable<T, Key, Hash>::node_type>
 Foam::HashTable<T, Key, Hash>::sorted()
 {
-    UPtrList<node_type> list(size_);
+    UPtrList<node_type> result(size_);
 
     label count = 0;
 
     for (iterator iter = begin(); iter != end(); ++iter)
     {
-        list.set(count++, iter.node());
+        result.set(count++, iter.node());
     }
 
-    Foam::sort(list);
+    Foam::sort(result);
 
-    return list;
+    return result;
 }
 
 

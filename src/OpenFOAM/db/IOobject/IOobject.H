@@ -125,13 +125,6 @@ public:
 
     // Public Data Types
 
-        //- Enumeration defining the valid states of an IOobject
-        enum objectState : char
-        {
-            GOOD,
-            BAD
-        };
-
         //- Enumeration defining the read options
         enum readOption : char
         {
@@ -146,6 +139,13 @@ public:
         {
             NO_WRITE = 0,
             AUTO_WRITE = 0x10
+        };
+
+        //- Enumeration defining the valid states of an IOobject
+        enum objectState : char
+        {
+            GOOD,
+            BAD
         };
 
         //- Enumeration defining the file checking options
@@ -474,14 +474,15 @@ public:
     // Checks
 
         //- True if headerClassName() is non-empty (after reading)
-        inline bool hasHeaderClassName() const noexcept;
+        inline bool hasHeaderClass() const noexcept;
 
-        //- Test if headerClassName() equals the given class name
-        inline bool isHeaderClassName(const word& clsName) const;
-
-        //- Test if headerClassName() equals Type::typeName
+        //- Check if headerClassName() equals Type::typeName
         template<class Type>
-        inline bool isHeaderClassName() const;
+        inline bool isHeaderClass() const;
+
+        //- Same as isHeaderClass()
+        template<class Type>
+        bool isHeaderClassName() const { return isHeaderClass<Type>(); }
 
 
     // Meta-data
@@ -638,8 +639,7 @@ public:
 
     // Info
 
-        //- Return info proxy.
-        //  Used to print token information to a stream
+        //- Return info proxy, for printing information to a stream
         InfoProxy<IOobject> info() const
         {
             return *this;
@@ -674,7 +674,7 @@ public:
 
 //- Specialization for \c void always returns true (no headerClassName check).
 template<>
-inline bool IOobject::isHeaderClassName<void>() const
+inline bool IOobject::isHeaderClass<void>() const
 {
     return true;
 }

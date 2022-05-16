@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,6 +38,38 @@ Description
 #include "scalarIOList.H"
 
 using namespace Foam;
+
+
+void report(const UPtrList<const IOobject>& objects)
+{
+    Info<< "name/type:" << nl
+        << objects.size() << nl << '(' << nl;
+
+    for (const IOobject& io : objects)
+    {
+        Info<< "  " << io.name() << " : " << io.headerClassName() << nl;
+    }
+
+    Info<< ')' << nl << endl;
+}
+
+
+template<class Type>
+void report(const UPtrList<const IOobject>& objects)
+{
+    Info<< "name/type:" << nl
+        << objects.size() << nl << '(' << nl;
+
+    for (const IOobject& io : objects)
+    {
+        Info<< "  " << io.name() << " : " << io.headerClassName()
+            << (io.isHeaderClass<Type>() ? " is " : " is not ")
+            << Type::typeName << nl;
+    }
+
+    Info<< ')' << nl << endl;
+}
+
 
 void report(const IOobjectList& objects)
 {
@@ -199,7 +231,7 @@ void registryTests(const IOobjectList& objs)
 
 int main(int argc, char *argv[])
 {
-    argList::noParallel();
+    // argList::noParallel();
     argList::addOption
     (
         "filter",
@@ -269,6 +301,15 @@ int main(int argc, char *argv[])
         Info<< "Time: " << runTime.timeName() << nl;
 
         report(objects);
+        report(objects.sorted());
+
+        report(objects.sorted<volScalarField>());
+        report(objects.sorted<volVectorField>());
+
+        // Extra checks
+        report<volScalarField>(objects.sorted<volScalarField>());
+        report<volScalarField>(objects.sorted<volVectorField>());
+
 
         findObjectTest(objects);
 

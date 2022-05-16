@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,31 +34,54 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-bool Foam::IOobjectList::checkNames(wordList& masterNames, const bool syncPar)
+void Foam::IOobjectList::checkObjectOrder
+(
+    const UPtrList<const IOobject>& objs,
+    bool syncPar
+)
 {
-    // Sort for consistent order on all processors.
-    // Even do this for serial runs, for consistent behaviour
-    Foam::sort(masterNames);
-
     if (syncPar && Pstream::parRun())
     {
-        const wordList localNames(masterNames);
+        wordList objectNames(objs.size());
+
+        auto iter = objectNames.begin();
+
+        for (const IOobject& io : objs)
+        {
+            *iter = io.name();   // nameOp<IOobject>()
+            ++iter;
+        }
+
+        checkNameOrder(objectNames, syncPar);
+    }
+}
+
+
+void Foam::IOobjectList::checkNameOrder
+(
+    const wordList& objectNames,
+    bool syncPar
+)
+{
+    if (syncPar && Pstream::parRun())
+    {
+        wordList masterNames;
+        if (Pstream::master())
+        {
+            masterNames = objectNames;
+        }
         Pstream::broadcast(masterNames);
 
-        if (localNames != masterNames)
+        if (objectNames != masterNames)
         {
             FatalErrorInFunction
                 << "Objects not synchronised across processors." << nl
                 << "Master has " << flatOutput(masterNames) << nl
                 << "Processor " << Pstream::myProcNo()
-                << " has " << flatOutput(localNames)
+                << " has " << flatOutput(objectNames) << endl
                 << exit(FatalError);
-
-            return false;
         }
     }
-
-    return true;
 }
 
 
@@ -71,7 +94,7 @@ void Foam::IOobjectList::syncNames(wordList& objNames)
         Pstream::broadcast(objNames);
     }
 
-    // Sort for consistent order on all processors
+    // Consistent order on all processors
     Foam::sort(objNames);
 }
 
@@ -196,7 +219,7 @@ Foam::label Foam::IOobjectList::append(const IOobjectList& other)
                 InfoInFunction << "Copy append " << iter.key() << nl;
             }
 
-            set(iter.key(), new IOobject(*(iter.val())));
+            set(iter.key(), new IOobject(*iter.val()));
             ++count;
         }
     }
@@ -307,6 +330,24 @@ Foam::label Foam::IOobjectList::count(const char* clsName) const
 }
 
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+Foam::UPtrList<const Foam::IOobject>
+Foam::IOobjectList::sorted() const
+{
+    return sorted<void>();
+}
+
+
+Foam::UPtrList<const Foam::IOobject>
+Foam::IOobjectList::sorted(const bool syncPar) const
+{
+    return sorted<void>(syncPar);
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 Foam::wordList Foam::IOobjectList::names() const
 {
     return HashPtrTable<IOobject>::toc();
@@ -315,10 +356,7 @@ Foam::wordList Foam::IOobjectList::names() const
 
 Foam::wordList Foam::IOobjectList::names(const bool syncPar) const
 {
-    wordList objNames(HashPtrTable<IOobject>::toc());
-
-    checkNames(objNames, syncPar);
-    return objNames;
+    return sortedNames(syncPar);
 }
 
 
@@ -336,7 +374,7 @@ Foam::wordList Foam::IOobjectList::names
 ) const
 {
     // No nullptr check - only called with string literals
-    return names(static_cast<word>(clsName), syncPar);
+    return sortedNames(static_cast<word>(clsName), syncPar);
 }
 
 
@@ -352,7 +390,7 @@ Foam::wordList Foam::IOobjectList::sortedNames(const bool syncPar) const
 {
     wordList objNames(HashPtrTable<IOobject>::sortedToc());
 
-    checkNames(objNames, syncPar);
+    checkNameOrder(objNames, syncPar);
     return objNames;
 }
 
@@ -371,7 +409,7 @@ Foam::wordList Foam::IOobjectList::sortedNames
 ) const
 {
     // No nullptr check - only called with string literals
-    return names(static_cast<word>(clsName), syncPar);
+    return sortedNames(static_cast<word>(clsName), syncPar);
 }
 
 
@@ -397,16 +435,14 @@ Foam::wordList Foam::IOobjectList::allNames() const
 }
 
 
-bool Foam::IOobjectList::checkNames(const bool syncPar) const
+void Foam::IOobjectList::checkNames(const bool syncPar) const
 {
     if (syncPar && Pstream::parRun())
     {
-        wordList objNames(HashPtrTable<IOobject>::toc());
+        wordList objNames(HashPtrTable<IOobject>::sortedToc());
 
-        return checkNames(objNames, syncPar);
+        checkNameOrder(objNames, syncPar);
     }
-
-    return true;
 }
 
 

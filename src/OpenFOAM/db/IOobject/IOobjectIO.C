@@ -26,7 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "IOobject.H"
-#include "token.H"
+#include "Ostream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -36,14 +36,13 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const InfoProxy<IOobject>& ip)
     const IOobject& io = ip.t_;
 
     os  << "IOobject: "
-        << io.type() << token::SPACE
-        << io.name()
+        << io.type() << ' ' << io.name()
         << " local: " << io.local()
         << " readOpt: " << static_cast<int>(io.readOpt())
         << " writeOpt: " << static_cast<int>(io.writeOpt())
         << " registerObject: " << io.registerObject()
         << " globalObject: " << io.globalObject()
-        << token::SPACE << io.path() << endl;
+        << ' ' << io.path() << endl;
 
     return os;
 }

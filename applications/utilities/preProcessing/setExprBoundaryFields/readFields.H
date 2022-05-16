@@ -129,7 +129,7 @@ class readFieldsHandler
                 const bool ok =
                 (
                     io.typeHeaderOk<regIOobject>(false) // Preload header info
-                 && io.hasHeaderClassName()             // Extra safety
+                 && io.hasHeaderClass()                 // Extra safety
                  &&
                     (
                         loadField<scalar>(io)

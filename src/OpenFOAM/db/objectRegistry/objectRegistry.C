@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -141,6 +141,27 @@ Foam::label Foam::objectRegistry::count(const char* clsName) const
 {
     // No nullptr check - only called with string literals
     return count(static_cast<word>(clsName));
+}
+
+
+Foam::UPtrList<const Foam::regIOobject>
+Foam::objectRegistry::csorted() const
+{
+    return objectsTypeImpl<const regIOobject>(*this, predicates::always());
+}
+
+
+Foam::UPtrList<const Foam::regIOobject>
+Foam::objectRegistry::sorted() const
+{
+    return objectsTypeImpl<const regIOobject>(*this, predicates::always());
+}
+
+
+Foam::UPtrList<Foam::regIOobject>
+Foam::objectRegistry::sorted()
+{
+    return objectsTypeImpl<regIOobject>(*this, predicates::always());
 }
 
 
@@ -442,7 +463,7 @@ bool Foam::objectRegistry::modified() const
 {
     for (const_iterator iter = cbegin(); iter != cend(); ++iter)
     {
-        if ((*iter)->modified())
+        if (iter.val()->modified())
         {
             return true;
         }
@@ -463,7 +484,7 @@ void Foam::objectRegistry::readModifiedObjects()
                 << iter.key() << endl;
         }
 
-        (*iter)->readIfModified();
+        iter.val()->readIfModified();
     }
 }
 
@@ -487,18 +508,19 @@ bool Foam::objectRegistry::writeObject
     {
         if (objectRegistry::debug)
         {
+            const regIOobject& obj = *iter.val();
+
             Pout<< "objectRegistry::write() : "
                 << name() << " : Considering writing object "
-                << iter.key()
-                << " of type " << (*iter)->type()
-                << " with writeOpt " << static_cast<int>((*iter)->writeOpt())
-                << " to file " << (*iter)->objectPath()
-                << endl;
+                << iter.key() << " of type "
+                << obj.type() << " with writeOpt "
+                << static_cast<int>(obj.writeOpt())
+                << " to file " << obj.objectRelPath() << endl;
         }
 
-        if ((*iter)->writeOpt() != NO_WRITE)
+        if (iter.val()->writeOpt() != NO_WRITE)
         {
-            ok = (*iter)->writeObject(streamOpt, valid) && ok;
+            ok = iter.val()->writeObject(streamOpt, valid) && ok;
         }
     }
 

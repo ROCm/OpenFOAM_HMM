@@ -240,7 +240,7 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
         // Boundary is set so can use initMesh now (uses boundary_ to
         // determine internal and active faces)
 
-        if (owner_.hasHeaderClassName())
+        if (owner_.hasHeaderClass())
         {
             initMesh();
         }

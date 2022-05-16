@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,10 +36,12 @@ Description
 #include "fvCFD.H"
 #include "fvMesh.H"
 #include "volFields.H"
-#include "IOobjectList.H"
 #include "timeSelector.H"
 #include "ReadFields.H"
 #include "IOstreams.H"
+#include "PtrListOps.H"
+#include "IOobjectList.H"
+#include "objectRegistry.H"
 
 using namespace Foam;
 
@@ -113,6 +115,21 @@ void loadFields(fvMesh& mesh, const IOobjectList& objects)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+template<class Type>
+void report(const UPtrList<const Type>& objects)
+{
+    Info<< Type::typeName << " name/type:" << nl
+        << objects.size() << nl << '(' << nl;
+
+    for (const Type& obj : objects)
+    {
+        Info<< "  " << obj.name() << " : " << obj.type() << nl;
+    }
+
+    Info<< ')' << nl << endl;
+}
+
+
 void printRegistry
 (
     Foam::Ostream& os,
@@ -128,8 +145,8 @@ void printRegistry
     Foam::label indent
 )
 {
-    wordList names(obr.sortedNames());
-    wordList regs(obr.sortedNames<objectRegistry>());
+    UPtrList<const regIOobject> objects(obr.sorted());
+    wordList regNames(obr.sortedNames<objectRegistry>());
 
     std::string prefix;
     for (label i=indent; i; --i)
@@ -140,15 +157,17 @@ void printRegistry
     os  << '#' << prefix.c_str() << obr.name()
         << " parent:" << obr.parent().name() << nl;
 
-    os  << ' ' << prefix.c_str() << "objects: " << flatOutput(names) << nl;
-    os  << ' ' << prefix.c_str() << "registries: " << flatOutput(regs) << nl;
+    os  << ' ' << prefix.c_str() << "objects: "
+        << flatOutput(PtrListOps::names(objects)) << nl;
+    os  << ' ' << prefix.c_str() << "registries: "
+        << flatOutput(regNames) << nl;
 
 
-    // Print, but skip expansion of sub-registries for now
-    for (const word& name : names)
+    // Print without expanding sub-registries
+    for (const regIOobject& obj : objects)
     {
-        os  << (regs.found(name) ? '-' : ' ')
-            << prefix.c_str() << name << " => " << obr[name]->type() << nl;
+        os  << (isA<objectRegistry>(obj) ? '-' : ' ')
+            << prefix.c_str() << obj.name() << " => " << obj.type() << nl;
     }
     for (label i=indent; i; --i)
     {
@@ -157,7 +176,7 @@ void printRegistry
     os  << '\n';
 
     // Now descend into the sub-registries
-    for (const word& name : regs)
+    for (const word& name : regNames)
     {
         const objectRegistry& next = obr.lookupObject<objectRegistry>
         (
@@ -251,12 +270,12 @@ void registryTests(const objectRegistry& obr)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//  Main program:
+// Main program:
 
 int main(int argc, char *argv[])
 {
     argList::noBanner();
-    argList::noParallel();
+    //argList::noParallel();
 //    argList::addOption
 //    (
 //        "filter",
@@ -295,6 +314,9 @@ int main(int argc, char *argv[])
         printRegistry(Info, mesh);
 
         registryTests(mesh);
+
+        report(mesh.sorted<const volScalarField>());
+        report(mesh.csorted<volVectorField>());
 
         Info<< nl;
     }

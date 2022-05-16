@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -99,7 +99,7 @@ Foam::label Foam::objectRegistry::countTypeImpl
 
         if
         (
-            (std::is_void<Type>::value || isA<Type>(*obj))
+            (std::is_void<Type>::value || Foam::isA<Type>(*obj))
          && matchName(obj->name())
         )
         {
@@ -164,7 +164,7 @@ Foam::wordList Foam::objectRegistry::namesTypeImpl
 
         if
         (
-            (std::is_void<Type>::value || isA<Type>(*obj))
+            (std::is_void<Type>::value || Foam::isA<Type>(*obj))
          && matchName(obj->name())
         )
         {
@@ -181,6 +181,39 @@ Foam::wordList Foam::objectRegistry::namesTypeImpl
     }
 
     return objNames;
+}
+
+
+// Templated implementation for sorted()
+template<class Type, class MatchPredicate>
+Foam::UPtrList<Type>
+Foam::objectRegistry::objectsTypeImpl
+(
+    const objectRegistry& list,
+    const MatchPredicate& matchName
+)
+{
+    typedef typename std::remove_cv<Type>::type BaseType;
+
+    UPtrList<Type> result(list.size());
+
+    label count = 0;
+    forAllConstIters(list, iter)
+    {
+        const BaseType* ptr = Foam::isA<BaseType>(*iter.val());
+
+        if (ptr && matchName(ptr->name()))
+        {
+            result.set(count, const_cast<BaseType*>(ptr));
+            ++count;
+        }
+    }
+
+    result.resize(count);
+
+    Foam::sort(result, nameOp<Type>());  // Sort by object name()
+
+    return result;
 }
 
 
@@ -243,7 +276,12 @@ Foam::label Foam::objectRegistry::count
         if
         (
             std::is_void<Type>::value
-         || (strict ? isType<Type>(*obj) : bool(isA<Type>(*obj)))
+         ||
+            (
+                strict
+              ? bool(Foam::isType<Type>(*obj))
+              : bool(Foam::isA<Type>(*obj))
+            )
         )
         {
             ++nObjects;
@@ -253,6 +291,66 @@ Foam::label Foam::objectRegistry::count
     return nObjects;
 }
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+template<class Type>
+Foam::UPtrList<const Type>
+Foam::objectRegistry::csorted() const
+{
+    return objectsTypeImpl<const Type>(*this, predicates::always());
+}
+
+
+template<class Type>
+Foam::UPtrList<const Type>
+Foam::objectRegistry::sorted() const
+{
+    return objectsTypeImpl<const Type>(*this, predicates::always());
+}
+
+
+template<class Type>
+Foam::UPtrList<Type>
+Foam::objectRegistry::sorted()
+{
+    return objectsTypeImpl<Type>(*this, predicates::always());
+}
+
+
+template<class Type, class MatchPredicate>
+Foam::UPtrList<const Type>
+Foam::objectRegistry::csorted
+(
+    const MatchPredicate& matchName
+) const
+{
+    return objectsTypeImpl<const Type>(*this, matchName);
+}
+
+
+template<class Type, class MatchPredicate>
+Foam::UPtrList<const Type>
+Foam::objectRegistry::sorted
+(
+    const MatchPredicate& matchName
+) const
+{
+    return objectsTypeImpl<const Type>(*this, matchName);
+}
+
+template<class Type, class MatchPredicate>
+Foam::UPtrList<Type>
+Foam::objectRegistry::sorted
+(
+    const MatchPredicate& matchName
+)
+{
+    return objectsTypeImpl<Type>(*this, matchName);
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class MatchPredicate>
 Foam::wordList Foam::objectRegistry::names
@@ -342,7 +440,12 @@ Foam::HashTable<const Type*> Foam::objectRegistry::lookupClass
     {
         const regIOobject* obj = iter.val();
 
-        if (strict ? isType<Type>(*obj) : bool(isA<Type>(*obj)))
+        if
+        (
+            strict
+          ? bool(Foam::isType<Type>(*obj))
+          : bool(Foam::isA<Type>(*obj))
+        )
         {
             objectsOfClass.insert(obj->name(), dynamic_cast<const Type*>(obj));
         }
@@ -364,7 +467,12 @@ Foam::HashTable<Type*> Foam::objectRegistry::lookupClass
     {
         regIOobject* obj = iter.val();
 
-        if (strict ? isType<Type>(*obj) : bool(isA<Type>(*obj)))
+        if
+        (
+            strict
+          ? bool(Foam::isType<Type>(*obj))
+          : bool(Foam::isA<Type>(*obj))
+        )
         {
             objectsOfClass.insert(obj->name(), dynamic_cast<Type*>(obj));
         }

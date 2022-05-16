@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,11 +36,12 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef objectRegistry_H
-#define objectRegistry_H
+#ifndef Foam_objectRegistry_H
+#define Foam_objectRegistry_H
 
 #include "HashTable.H"
 #include "HashSet.H"
+#include "UPtrList.H"
 #include "regIOobject.H"
 #include "wordRes.H"
 
@@ -130,6 +131,15 @@ class objectRegistry
             const bool doSort
         );
 
+        //- Templated implementation for sorted()
+        //  Called with 'Type' or 'const Type'
+        template<class Type, class MatchPredicate>
+        static UPtrList<Type> objectsTypeImpl
+        (
+            const objectRegistry& list,
+            const MatchPredicate& matchName
+        );
+
 
         //- No copy construct
         objectRegistry(const objectRegistry&) = delete;
@@ -203,6 +213,54 @@ public:
         HashTable<wordHashSet> classes(const MatchPredicate& matchName) const;
 
 
+    // Sorted access
+
+        //- Return sorted list of objects
+        //  The lifetime of the returned content cannot exceed the parent!
+        UPtrList<const regIOobject> csorted() const;
+
+        //- Return sorted list of objects
+        //  The lifetime of the returned content cannot exceed the parent!
+        UPtrList<const regIOobject> sorted() const;
+
+        //- Return sorted list of objects
+        //  The lifetime of the returned content cannot exceed the parent!
+        UPtrList<regIOobject> sorted();
+
+        //- Return sorted list of objects with a class satisfying \c isA\<Type\>
+        //  The lifetime of the returned content cannot exceed the parent!
+        template<class Type>
+        UPtrList<const Type> csorted() const;
+
+        //- Return sorted list of objects with a class satisfying \c isA\<Type\>
+        //  The lifetime of the returned content cannot exceed the parent!
+        template<class Type>
+        UPtrList<const Type> sorted() const;
+
+        //- Return sorted list of objects with a class satisfying \c isA\<Type\>
+        //  The lifetime of the returned content cannot exceed the parent!
+        template<class Type>
+        UPtrList<Type> sorted();
+
+        //- Return sorted list of objects with a class satisfying \c isA\<Type\>
+        //- that also have a matching object name.
+        //  The lifetime of the returned content cannot exceed the parent!
+        template<class Type, class MatchPredicate>
+        UPtrList<const Type> csorted(const MatchPredicate& matchName) const;
+
+        //- Return sorted list of objects with a class satisfying \c isA\<Type\>
+        //- that also have a matching object name.
+        //  The lifetime of the returned content cannot exceed the parent!
+        template<class Type, class MatchPredicate>
+        UPtrList<const Type> sorted(const MatchPredicate& matchName) const;
+
+        //- Return sorted list of objects with a class satisfying \c isA\<Type\>
+        //- that also have a matching object name.
+        //  The lifetime of the returned content cannot exceed the parent!
+        template<class Type, class MatchPredicate>
+        UPtrList<Type> sorted(const MatchPredicate& matchName);
+
+
     // Number of items
 
         //- The number of objects of the given class name
@@ -244,19 +302,19 @@ public:
 
     // Summary of names
 
-        //- The names of all objects
+        //- The unsorted names of all objects
         wordList names() const;
 
-        //- The names of objects with the given class name.
+        //- The unsorted names of objects with the given class name.
         //  \note uses the class type() method
         wordList names(const char* clsName) const;
 
-        //- The names of objects with a matching class name
+        //- The unsorted names of objects with a matching class name
         //  \note uses the class type() method
         template<class MatchPredicate>
         wordList names(const MatchPredicate& matchClass) const;
 
-        //- The names of objects with a matching class name
+        //- The unsorted names of objects with a matching class name
         //- that also have a matching object name.
         //  \note uses the class type() method
         template<class MatchPredicate1, class MatchPredicate2>
@@ -266,13 +324,13 @@ public:
             const MatchPredicate2& matchName
         ) const;
 
-        //- The names of objects with a class satisfying \c isA\<Type\>.
+        //- The unsorted names of objects with a class satisfying \c isA\<Type\>.
         //
         //  \note If \a Type is \c void, no isA check is used (always true).
         template<class Type>
         wordList names() const;
 
-        //- The names of objects with a class satisfying \c isA\<Type\>
+        //- The unsorted names of objects with a class satisfying \c isA\<Type\>
         //- that also have a matching object name.
         //
         //  \note If \a Type is \c void, no isA check is used (always true).
