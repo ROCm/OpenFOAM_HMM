@@ -413,9 +413,14 @@ scalar surfaceNoise::surfaceAverage
                 }
             }
 
-            // TO BE VERIFIED: area-averaged values
-            // areaAverage = sum(allData*surf.magSf())/sum(surf.magSf());
-            areaAverage = sum(allData)/allData.size();
+            if (areaAverage_)
+            {
+                areaAverage = sum(allData*surf.magSf())/sum(surf.magSf());
+            }
+            else
+            {
+                areaAverage = sum(allData)/allData.size();
+            }
         }
         Pstream::broadcast(areaAverage);
 
@@ -423,10 +428,13 @@ scalar surfaceNoise::surfaceAverage
     }
     else
     {
+        if (areaAverage_)
+        {
+            // Note: hard-coded to read mesh from first time index
+            const meshedSurface& surf = readerPtr_->geometry(0);
+            return sum(data*surf.magSf())/sum(surf.magSf());
+        }
 
-        // TO BE VERIFIED: area-averaged values
-        // const meshedSurface& surf = readerPtr_->geometry();
-        // return sum(data*surf.magSf())/sum(surf.magSf());
         return sum(data)/data.size();
     }
 }
