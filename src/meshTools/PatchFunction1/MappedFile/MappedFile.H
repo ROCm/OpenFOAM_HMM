@@ -246,7 +246,7 @@ public:
         // I-O
 
             //- Write coefficient entries in dictionary format
-            void writeEntries(Ostream& os) const;
+            virtual void writeEntries(Ostream& os) const;
 
             //- Write in dictionary format
             virtual void writeData(Ostream& os) const;

@@ -144,7 +144,7 @@ public:
         virtual void writeData(Ostream& os) const;
 
         //- Write coefficient entries in dictionary format
-        void writeEntries(Ostream& os) const;
+        virtual void writeEntries(Ostream& os) const;
 };
 
 
