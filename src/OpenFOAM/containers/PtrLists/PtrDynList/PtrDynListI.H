@@ -74,6 +74,17 @@ inline Foam::PtrDynList<T, SizeMin>::PtrDynList
 
 
 template<class T, int SizeMin>
+inline Foam::PtrDynList<T, SizeMin>::PtrDynList
+(
+    PtrList<T>&& list
+)
+:
+    PtrList<T>(std::move(list)),
+    capacity_(PtrList<T>::size())
+{}
+
+
+template<class T, int SizeMin>
 inline Foam::PtrDynList<T, SizeMin>::PtrDynList(UList<T*>& list)
 :
     PtrList<T>(list),
@@ -195,8 +206,11 @@ inline void Foam::PtrDynList<T, SizeMin>::swap
     PtrDynList<T, AnySizeMin>& other
 )
 {
-    // Cannot compare 'this' for different types, so use cdata()
-    if (this->cdata() == other.cdata())
+    if
+    (
+        static_cast<const PtrList<T>*>(this)
+     == static_cast<const PtrList<T>*>(&other)
+    )
     {
         return;  // Self-swap is a no-op
     }
@@ -269,9 +283,9 @@ inline void Foam::PtrDynList<T, SizeMin>::append(PtrList<T>&& other)
 
     resize(idx + len);
 
-    for (label i=0; i < len; ++i)
+    for (label i = 0; i < len; ++i)
     {
-        set(idx + i, other.release(i));  // moves pointer
+        set(idx + i, other.release(i));  // Take pointer ownership
     }
 
     other.clear();
@@ -285,14 +299,25 @@ inline void Foam::PtrDynList<T, SizeMin>::append
     PtrDynList<T, AnySizeMin>&& other
 )
 {
+    if
+    (
+        static_cast<const PtrList<T>*>(this)
+     == static_cast<const PtrList<T>*>(&other)
+    )
+    {
+        FatalErrorInFunction
+            << "Attempted append to self"
+            << abort(FatalError);
+    }
+
     const label idx = this->size();
     const label len = other.size();
 
     resize(idx + len);
 
-    for (label i=0; i < len; ++i)
+    for (label i = 0; i < len; ++i)
     {
-        set(idx + i, other.release(i));  // moves pointer
+        set(idx + i, other.release(i));  // Take pointer ownership
     }
 
     other.clearStorage();  // Ensure capacity=0
@@ -451,8 +476,11 @@ inline void Foam::PtrDynList<T, SizeMin>::operator=
     const PtrDynList<T, AnySizeMin>& list
 )
 {
-    // Cannot compare 'this' for different types, so use cdata()
-    if (this->cdata() == list.cdata())
+    if
+    (
+        static_cast<const PtrList<T>*>(this)
+     == static_cast<const PtrList<T>*>(&list)
+    )
     {
         return;  // Self-assignment is a no-op
     }
@@ -503,8 +531,11 @@ inline void Foam::PtrDynList<T, SizeMin>::operator=
     PtrDynList<T, AnySizeMin>&& list
 )
 {
-    // Cannot compare 'this' for different types, so use cdata()
-    if (this->cdata() == list.cdata())
+    if
+    (
+        static_cast<const PtrList<T>*>(this)
+     == static_cast<const PtrList<T>*>(&list)
+    )
     {
         return;  // Self-assignment is a no-op
     }

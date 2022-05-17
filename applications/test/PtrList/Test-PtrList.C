@@ -403,7 +403,7 @@ int main(int argc, char *argv[])
         << "list2: " << list2 << endl;
 
     Info<< "indirectly delete some items via setSize :" << endl;
-    list1.setSize(4);
+    list1.resize(4);
 
     Info<< "list1: " << list1 << endl;
 
@@ -446,7 +446,47 @@ int main(int argc, char *argv[])
             << "addresses:" << nl;
         printAddr(Info, list1b);
         printAddr(Info, list1c);
+
+
+        PtrDynList<Scalar> dynlist1d;
+        PtrDynList<Scalar, 5> dynlist1b(list1b.clone());
+        PtrDynList<Scalar, 8> dynlist1c(list1b.clone());
+
+        Info<< "append:" << nl;
+        Info<< "in: " << dynlist1b << nl
+            << "in: " << dynlist1c << nl
+            << "addresses:" << nl;
+        printAddr(Info, dynlist1b);
+        printAddr(Info, dynlist1c);
+
+        dynlist1d.append(std::move(dynlist1b));
+        dynlist1d.append(std::move(dynlist1c));
+
+        Info<< "result:" << nl;
+        print(Info, dynlist1d);
+
+        Info<< "addresses:" << nl;
+        printAddr(Info, dynlist1d);
+
+        PtrList<Scalar> list1d;
+
+        Info<< "append:" << nl;
+        Info<< "in: " << list1b << nl
+            << "in: " << list1c << nl
+            << "addresses:" << nl;
+        printAddr(Info, list1b);
+        printAddr(Info, list1c);
+
+        list1d.append(std::move(list1b));
+        list1d.append(std::move(list1c));
+
+        Info<< "result:" << nl;
+        print(Info, list1d);
+
+        Info<< "addresses:" << nl;
+        printAddr(Info, list1d);
     }
+
 
     PtrList<Scalar> list3(std::move(list1));
     Info<< "Move constructed" << endl;
@@ -473,12 +513,20 @@ int main(int argc, char *argv[])
     Info<< "UPtrList from PtrList" << nl;
 
     UPtrList<Scalar> ulist1(list3);
+    UPtrList<Scalar> ulist1b(list3);
+    UPtrList<Scalar> ulist1c(list3);
 
     Info<< "ulist1: " << ulist1 << nl;
     Info<< "PtrList addresses:";
     printAddr(Info, list3);
     Info<< "UPtrList addresses:";
     printAddr(Info, ulist1);
+    Info<< nl;
+
+    ulist1c.append(std::move(ulist1b));
+
+    Info<< "UPtrList append/append:";
+    printAddr(Info, ulist1c);
     Info<< nl;
 
     {

@@ -93,7 +93,7 @@ inline Foam::UPtrList<T>::UPtrList(UList<T>& list)
 {
     const label len = ptrs_.size();
 
-    for (label i=0; i<len; ++i)
+    for (label i = 0; i < len; ++i)
     {
         ptrs_[i] = &(list[i]);
     }
@@ -196,9 +196,15 @@ inline void Foam::UPtrList<T>::resize(const label newLen)
 template<class T>
 inline void Foam::UPtrList<T>::append(T* ptr)
 {
-    const label idx = this->size();
-    ptrs_.resize(idx + 1);
-    ptrs_[idx] = ptr;
+    ptrs_.append(ptr);
+}
+
+
+template<class T>
+inline void Foam::UPtrList<T>::append(UPtrList<T>&& other)
+{
+    ptrs_.append(other.ptrs_);
+    other.ptrs_.clear();
 }
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -172,6 +172,9 @@ public:
 
         //- Move or clone append a tmp to the end of the list
         inline void append(const tmp<T>& ptr);
+
+        //- Move append another list to the end of this list.
+        inline void append(PtrList<T>&& other);
 
         //- Construct and set an element
         template<class... Args>

@@ -268,6 +268,9 @@ public:
         //- Append an element to the end of the list
         inline void append(T* ptr);
 
+        //- Move append another list to the end of this list.
+        inline void append(UPtrList<T>&& other);
+
         //- Swap content
         inline void swap(UPtrList<T>& list);
 

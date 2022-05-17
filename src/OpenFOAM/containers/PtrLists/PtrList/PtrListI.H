@@ -152,6 +152,30 @@ inline void Foam::PtrList<T>::append(const tmp<T>& ptr)
 
 
 template<class T>
+inline void Foam::PtrList<T>::append(PtrList<T>&& other)
+{
+    if (this == &other)
+    {
+        FatalErrorInFunction
+            << "Attempted append to self"
+            << abort(FatalError);
+    }
+
+    const label idx = this->size();
+    const label len = other.size();
+
+    resize(idx + len);
+
+    for (label i = 0; i < len; ++i)
+    {
+        set(idx + i, other.release(i));  // Take pointer ownership
+    }
+
+    other.clear();
+}
+
+
+template<class T>
 template<class... Args>
 inline Foam::autoPtr<T> Foam::PtrList<T>::emplace
 (
