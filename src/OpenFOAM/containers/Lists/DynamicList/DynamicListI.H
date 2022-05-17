@@ -445,8 +445,11 @@ inline void Foam::DynamicList<T, SizeMin>::swap
     DynamicList<T, AnySizeMin>& other
 )
 {
-    // Cannot compare 'this' for different types, so use cdata()
-    if (this->cdata() == other.cdata())
+    if
+    (
+        static_cast<const List<T>*>(this)
+     == static_cast<const List<T>*>(&other)
+    )
     {
         return;  // Self-swap is a no-op
     }
@@ -477,8 +480,11 @@ Foam::DynamicList<T, SizeMin>::transfer
     DynamicList<T, AnySizeMin>& list
 )
 {
-    // Cannot compare 'this' for different types, so use cdata()
-    if (this->cdata() == list.cdata())
+    if
+    (
+        static_cast<const List<T>*>(this)
+     == static_cast<const List<T>*>(&list)
+    )
     {
         return;  // Self-assignment is a no-op
     }
@@ -808,8 +814,11 @@ inline void Foam::DynamicList<T, SizeMin>::operator=
     const DynamicList<T, AnySizeMin>& list
 )
 {
-    // Cannot compare 'this' for different types, so use cdata()
-    if (this->cdata() == list.cdata())
+    if
+    (
+        static_cast<const List<T>*>(this)
+     == static_cast<const List<T>*>(&list)
+    )
     {
         return;  // Self-assignment is a no-op
     }
@@ -873,8 +882,11 @@ inline void Foam::DynamicList<T, SizeMin>::operator=
     DynamicList<T, AnySizeMin>&& list
 )
 {
-    // Cannot compare 'this' for different types, so use cdata()
-    if (this->cdata() == list.cdata())
+    if
+    (
+        static_cast<const List<T>*>(this)
+     == static_cast<const List<T>*>(&list)
+    )
     {
         return;  // Self-assignment is a no-op
     }

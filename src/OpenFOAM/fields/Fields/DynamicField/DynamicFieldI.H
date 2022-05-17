@@ -486,8 +486,11 @@ inline void Foam::DynamicField<T, SizeMin>::swap
     DynamicField<T, AnySizeMin>& other
 )
 {
-    // Cannot compare 'this' for different types, so use cdata()
-    if (this->cdata() == other.cdata())
+    if
+    (
+        static_cast<const List<T>*>(this)
+     == static_cast<const List<T>*>(&other)
+    )
     {
         return;  // Self-swap is a no-op
     }
@@ -507,11 +510,11 @@ inline void Foam::DynamicField<T, SizeMin>::swap
     DynamicList<T, AnySizeMin>& other
 )
 {
-    auto& self = (*this);
-
-    // ... not yet needed:
-    // Cannot compare 'this' for different types, so use cdata()
-    if (self.cdata() == other.cdata())
+    if
+    (
+        static_cast<const List<T>*>(this)
+     == static_cast<const List<T>*>(&other)
+    )
     {
         return;  // Self-swap is a no-op
     }
@@ -520,10 +523,10 @@ inline void Foam::DynamicField<T, SizeMin>::swap
     UList<T>::swap(other);
 
     // Swap capacity
-    const label oldCap = self.capacity();
+    const label oldCap = this->capacity();
     const label newCap = other.capacity();
 
-    self.setCapacity_unsafe(newCap);
+    this->setCapacity_unsafe(newCap);
     other.setCapacity_unsafe(oldCap);
 }
 
@@ -544,8 +547,11 @@ inline void Foam::DynamicField<T, SizeMin>::transfer
     DynamicList<T, AnySizeMin>& list
 )
 {
-    // Cannot compare 'this' for different types, so use cdata()
-    if (this->cdata() == list.cdata())
+    if
+    (
+        static_cast<const List<T>*>(this)
+     == static_cast<const List<T>*>(&list)
+    )
     {
         return;  // Self-assignment is a no-op
     }
@@ -566,8 +572,11 @@ inline void Foam::DynamicField<T, SizeMin>::transfer
     DynamicField<T, AnySizeMin>& list
 )
 {
-    // Cannot compare 'this' for different types, so use cdata()
-    if (this->cdata() == list.cdata())
+    if
+    (
+        static_cast<const List<T>*>(this)
+     == static_cast<const List<T>*>(&list)
+    )
     {
         return;  // Self-assignment is a no-op
     }
