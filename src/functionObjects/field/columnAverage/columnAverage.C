@@ -174,7 +174,6 @@ bool Foam::functionObjects::columnAverage::write()
 {
     for (const word& fieldName : fieldSet_.selectionNames())
     {
-        const word resultName("columnAverage(" + fieldName + ")");
         const regIOobject* obj =
             obr_.cfindObject<regIOobject>(averageName(fieldName));
 
