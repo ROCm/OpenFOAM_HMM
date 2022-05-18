@@ -40,7 +40,7 @@ Foam::nutUWallFunctionFvPatchScalarField::calcNut() const
 {
     const label patchi = patch().index();
 
-    const turbulenceModel& turbModel = db().lookupObject<turbulenceModel>
+    const auto& turbModel = db().lookupObject<turbulenceModel>
     (
         IOobject::groupName
         (
@@ -48,28 +48,90 @@ Foam::nutUWallFunctionFvPatchScalarField::calcNut() const
             internalField().group()
         )
     );
+
     const fvPatchVectorField& Uw = U(turbModel).boundaryField()[patchi];
     const scalarField magUp(mag(Uw.patchInternalField() - Uw));
+
     const tmp<scalarField> tnuw = turbModel.nu(patchi);
     const scalarField& nuw = tnuw();
+
+    const scalar kappa = wallCoeffs_.kappa();
+    const scalar E = wallCoeffs_.E();
+    const scalar yPlusLam = wallCoeffs_.yPlusLam();
 
     tmp<scalarField> tyPlus = calcYPlus(magUp);
     const scalarField& yPlus = tyPlus();
 
-    tmp<scalarField> tnutw(new scalarField(patch().size(), Zero));
-    scalarField& nutw = tnutw.ref();
+    auto tnutw = tmp<scalarField>::New(patch().size(), Zero);
+    auto& nutw = tnutw.ref();
 
     forAll(yPlus, facei)
     {
         // Viscous sublayer contribution
-        const scalar nutVis = 0.0;
+        const scalar nutVis = 0;
 
         // Inertial sublayer contribution
         const scalar nutLog =
             nuw[facei]
-           *(yPlus[facei]*kappa_/log(max(E_*yPlus[facei], 1 + 1e-4)) - 1.0);
+           *(yPlus[facei]*kappa/log(max(E*yPlus[facei], 1 + 1e-4)) - 1.0);
 
-        nutw[facei] = blend(nutVis, nutLog, yPlus[facei]);
+        switch (blender_)
+        {
+            case blenderType::STEPWISE:
+            {
+                if (yPlus[facei] > yPlusLam)
+                {
+                    nutw[facei] = nutLog;
+                }
+                else
+                {
+                    nutw[facei] = nutVis;
+                }
+                break;
+            }
+
+            case blenderType::MAX:
+            {
+                // (PH:Eq. 27)
+                nutw[facei] = max(nutVis, nutLog);
+                break;
+            }
+
+            case blenderType::BINOMIAL:
+            {
+                // (ME:Eqs. 15-16)
+                nutw[facei] =
+                    pow
+                    (
+                        pow(nutVis, n_) + pow(nutLog, n_),
+                        scalar(1)/n_
+                    );
+                break;
+            }
+
+            case blenderType::EXPONENTIAL:
+            {
+                // (PH:Eq. 31)
+                const scalar Gamma =
+                    0.01*pow4(yPlus[facei])/(1 + 5*yPlus[facei]);
+                const scalar invGamma = scalar(1)/(Gamma + ROOTVSMALL);
+
+                nutw[facei] = nutVis*exp(-Gamma) + nutLog*exp(-invGamma);
+                break;
+            }
+
+            case blenderType::TANH:
+            {
+                // (KAS:Eqs. 33-34)
+                const scalar phiTanh = tanh(pow4(0.1*yPlus[facei]));
+                const scalar b1 = nutVis + nutLog;
+                const scalar b2 =
+                    pow(pow(nutVis, 1.2) + pow(nutLog, 1.2), 1.0/1.2);
+
+                nutw[facei] = phiTanh*b1 + (1 - phiTanh)*b2;
+                break;
+            }
+        }
     }
 
     return tnutw;
@@ -84,7 +146,7 @@ Foam::nutUWallFunctionFvPatchScalarField::calcYPlus
 {
     const label patchi = patch().index();
 
-    const turbulenceModel& turbModel = db().lookupObject<turbulenceModel>
+    const auto& turbModel = db().lookupObject<turbulenceModel>
     (
         IOobject::groupName
         (
@@ -92,18 +154,24 @@ Foam::nutUWallFunctionFvPatchScalarField::calcYPlus
             internalField().group()
         )
     );
+
     const scalarField& y = turbModel.y()[patchi];
+
     const tmp<scalarField> tnuw = turbModel.nu(patchi);
     const scalarField& nuw = tnuw();
 
-    tmp<scalarField> tyPlus(new scalarField(patch().size(), Zero));
-    scalarField& yPlus = tyPlus.ref();
+    const scalar kappa = wallCoeffs_.kappa();
+    const scalar E = wallCoeffs_.E();
+    const scalar yPlusLam = wallCoeffs_.yPlusLam();
+
+    auto tyPlus = tmp<scalarField>::New(patch().size(), Zero);
+    auto& yPlus = tyPlus.ref();
 
     forAll(yPlus, facei)
     {
-        const scalar kappaRe = kappa_*magUp[facei]*y[facei]/nuw[facei];
+        const scalar kappaRe = kappa*magUp[facei]*y[facei]/nuw[facei];
 
-        scalar yp = yPlusLam_;
+        scalar yp = yPlusLam;
         const scalar ryPlusLam = 1.0/yp;
 
         int iter = 0;
@@ -112,14 +180,23 @@ Foam::nutUWallFunctionFvPatchScalarField::calcYPlus
         do
         {
             yPlusLast = yp;
-            yp = (kappaRe + yp)/(1.0 + log(E_*yp));
+            yp = (kappaRe + yp)/(1.0 + log(E*yp));
 
         } while (mag(ryPlusLam*(yp - yPlusLast)) > 0.01 && ++iter < 10 );
 
-        yPlus[facei] = max(0.0, yp);
+        yPlus[facei] = max(scalar(0), yp);
     }
 
     return tyPlus;
+}
+
+
+void Foam::nutUWallFunctionFvPatchScalarField::writeLocalEntries
+(
+    Ostream& os
+) const
+{
+    wallFunctionBlenders::writeEntries(os);
 }
 
 
@@ -131,7 +208,8 @@ Foam::nutUWallFunctionFvPatchScalarField::nutUWallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    nutWallFunctionFvPatchScalarField(p, iF)
+    nutWallFunctionFvPatchScalarField(p, iF),
+    wallFunctionBlenders()
 {}
 
 
@@ -143,7 +221,8 @@ Foam::nutUWallFunctionFvPatchScalarField::nutUWallFunctionFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
-    nutWallFunctionFvPatchScalarField(ptf, p, iF, mapper)
+    nutWallFunctionFvPatchScalarField(ptf, p, iF, mapper),
+    wallFunctionBlenders(ptf)
 {}
 
 
@@ -154,7 +233,8 @@ Foam::nutUWallFunctionFvPatchScalarField::nutUWallFunctionFvPatchScalarField
     const dictionary& dict
 )
 :
-    nutWallFunctionFvPatchScalarField(p, iF, dict)
+    nutWallFunctionFvPatchScalarField(p, iF, dict),
+    wallFunctionBlenders(dict, blenderType::STEPWISE, scalar(4))
 {}
 
 
@@ -163,7 +243,8 @@ Foam::nutUWallFunctionFvPatchScalarField::nutUWallFunctionFvPatchScalarField
     const nutUWallFunctionFvPatchScalarField& sawfpsf
 )
 :
-    nutWallFunctionFvPatchScalarField(sawfpsf)
+    nutWallFunctionFvPatchScalarField(sawfpsf),
+    wallFunctionBlenders(sawfpsf)
 {}
 
 
@@ -173,7 +254,8 @@ Foam::nutUWallFunctionFvPatchScalarField::nutUWallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    nutWallFunctionFvPatchScalarField(sawfpsf, iF)
+    nutWallFunctionFvPatchScalarField(sawfpsf, iF),
+    wallFunctionBlenders(sawfpsf)
 {}
 
 
@@ -205,12 +287,14 @@ Foam::nutUWallFunctionFvPatchScalarField::yPlus() const
     const scalarField magUp(mag(Uw.patchInternalField() - Uw));
     const scalarField magGradUw(mag(Uw.snGrad()));
 
+    const scalar yPlusLam = wallCoeffs_.yPlusLam();
+
     tmp<scalarField> tyPlus = calcYPlus(magUp);
     scalarField& yPlus = tyPlus.ref();
 
     forAll(yPlus, facei)
     {
-        if (yPlusLam_ > yPlus[facei])
+        if (yPlusLam > yPlus[facei])
         {
             // viscous sublayer
             yPlus[facei] =
@@ -227,7 +311,7 @@ void Foam::nutUWallFunctionFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    fvPatchField<scalar>::write(os);
+    nutWallFunctionFvPatchScalarField::write(os);
     writeLocalEntries(os);
     writeEntry("value", os);
 }

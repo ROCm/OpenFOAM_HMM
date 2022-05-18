@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,7 +32,6 @@ License
 #include "volFields.H"
 #include "addToRunTimeSelectionTable.H"
 
-
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 Foam::tmp<Foam::scalarField>
@@ -40,7 +39,7 @@ Foam::nutUTabulatedWallFunctionFvPatchScalarField::calcNut() const
 {
     const label patchi = patch().index();
 
-    const turbulenceModel& turbModel = db().lookupObject<turbulenceModel>
+    const auto& turbModel = db().lookupObject<turbulenceModel>
     (
         IOobject::groupName
         (
@@ -48,10 +47,13 @@ Foam::nutUTabulatedWallFunctionFvPatchScalarField::calcNut() const
             internalField().group()
         )
     );
+
     const scalarField& y = turbModel.y()[patchi];
+
     const fvPatchVectorField& Uw = U(turbModel).boundaryField()[patchi];
     const scalarField magUp(mag(Uw.patchInternalField() - Uw));
     const scalarField magGradU(mag(Uw.snGrad()));
+
     const tmp<scalarField> tnuw = turbModel.nu(patchi);
     const scalarField& nuw = tnuw();
 
@@ -72,8 +74,8 @@ Foam::nutUTabulatedWallFunctionFvPatchScalarField::calcUPlus
     const scalarField& Rey
 ) const
 {
-    tmp<scalarField> tuPlus(new scalarField(patch().size(), Zero));
-    scalarField& uPlus = tuPlus.ref();
+    auto tuPlus = tmp<scalarField>::New(patch().size(), Zero);
+    auto& uPlus = tuPlus.ref();
 
     forAll(uPlus, facei)
     {
@@ -81,6 +83,15 @@ Foam::nutUTabulatedWallFunctionFvPatchScalarField::calcUPlus
     }
 
     return tuPlus;
+}
+
+
+void Foam::nutUTabulatedWallFunctionFvPatchScalarField::writeLocalEntries
+(
+    Ostream& os
+) const
+{
+    os.writeEntry("uPlusTable", uPlusTableName_);
 }
 
 
@@ -184,7 +195,7 @@ Foam::nutUTabulatedWallFunctionFvPatchScalarField::yPlus() const
 {
     const label patchi = patch().index();
 
-    const turbulenceModel& turbModel = db().lookupObject<turbulenceModel>
+    const auto& turbModel = db().lookupObject<turbulenceModel>
     (
         IOobject::groupName
         (
@@ -192,11 +203,15 @@ Foam::nutUTabulatedWallFunctionFvPatchScalarField::yPlus() const
             internalField().group()
         )
     );
+
     const scalarField& y = turbModel.y()[patchi];
+
     const fvPatchVectorField& Uw = U(turbModel).boundaryField()[patchi];
     const scalarField magUp(mag(Uw.patchInternalField() - Uw));
+
     const tmp<scalarField> tnuw = turbModel.nu(patchi);
     const scalarField& nuw = tnuw();
+
     const scalarField Rey(magUp*y/nuw);
 
     return Rey/(calcUPlus(Rey) + ROOTVSMALL);
@@ -208,8 +223,8 @@ void Foam::nutUTabulatedWallFunctionFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    fvPatchField<scalar>::write(os);
-    os.writeEntry("uPlusTable", uPlusTableName_);
+    nutWallFunctionFvPatchScalarField::write(os);
+    writeLocalEntries(os);
     writeEntry("value", os);
 }
 

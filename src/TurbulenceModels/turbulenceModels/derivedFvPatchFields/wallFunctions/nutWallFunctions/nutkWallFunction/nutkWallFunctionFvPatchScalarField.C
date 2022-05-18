@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016, 2019 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,7 +40,7 @@ calcNut() const
 {
     const label patchi = patch().index();
 
-    const turbulenceModel& turbModel = db().lookupObject<turbulenceModel>
+    const auto& turbModel = db().lookupObject<turbulenceModel>
     (
         IOobject::groupName
         (
@@ -50,15 +50,20 @@ calcNut() const
     );
 
     const scalarField& y = turbModel.y()[patchi];
+
     const tmp<volScalarField> tk = turbModel.k();
     const volScalarField& k = tk();
+
     const tmp<scalarField> tnuw = turbModel.nu(patchi);
     const scalarField& nuw = tnuw();
 
-    const scalar Cmu25 = pow025(Cmu_);
+    const scalar Cmu25 = pow025(wallCoeffs_.Cmu());
+    const scalar kappa = wallCoeffs_.kappa();
+    const scalar E = wallCoeffs_.E();
+    const scalar yPlusLam = wallCoeffs_.yPlusLam();
 
-    tmp<scalarField> tnutw(new scalarField(patch().size(), Zero));
-    scalarField& nutw = tnutw.ref();
+    auto tnutw = tmp<scalarField>::New(patch().size(), Zero);
+    auto& nutw = tnutw.ref();
 
     forAll(nutw, facei)
     {
@@ -67,16 +72,80 @@ calcNut() const
         const scalar yPlus = Cmu25*y[facei]*sqrt(k[celli])/nuw[facei];
 
         // Viscous sublayer contribution
-        const scalar nutVis = 0.0;
+        const scalar nutVis = 0;
 
         // Inertial sublayer contribution
         const scalar nutLog =
-            nuw[facei]*(yPlus*kappa_/log(max(E_*yPlus, 1 + 1e-4)) - 1.0);
+            nuw[facei]*(yPlus*kappa/log(max(E*yPlus, 1 + 1e-4)) - 1.0);
 
-        nutw[facei] = blend(nutVis, nutLog, yPlus);
+        switch (blender_)
+        {
+            case blenderType::STEPWISE:
+            {
+                if (yPlus > yPlusLam)
+                {
+                    nutw[facei] = nutLog;
+                }
+                else
+                {
+                    nutw[facei] = nutVis;
+                }
+                break;
+            }
+
+            case blenderType::MAX:
+            {
+                // (PH:Eq. 27)
+                nutw[facei] = max(nutVis, nutLog);
+                break;
+            }
+
+            case blenderType::BINOMIAL:
+            {
+                // (ME:Eqs. 15-16)
+                nutw[facei] =
+                    pow
+                    (
+                        pow(nutVis, n_) + pow(nutLog, n_),
+                        scalar(1)/n_
+                    );
+                break;
+            }
+
+            case blenderType::EXPONENTIAL:
+            {
+                // (PH:Eq. 31)
+                const scalar Gamma = 0.01*pow4(yPlus)/(1 + 5*yPlus);
+                const scalar invGamma = scalar(1)/(Gamma + ROOTVSMALL);
+
+                nutw[facei] = nutVis*exp(-Gamma) + nutLog*exp(-invGamma);
+                break;
+            }
+
+            case blenderType::TANH:
+            {
+                // (KAS:Eqs. 33-34)
+                const scalar phiTanh = tanh(pow4(0.1*yPlus));
+                const scalar b1 = nutVis + nutLog;
+                const scalar b2 =
+                    pow(pow(nutVis, 1.2) + pow(nutLog, 1.2), 1.0/1.2);
+
+                nutw[facei] = phiTanh*b1 + (1 - phiTanh)*b2;
+                break;
+            }
+        }
     }
 
     return tnutw;
+}
+
+
+void Foam::nutkWallFunctionFvPatchScalarField::writeLocalEntries
+(
+    Ostream& os
+) const
+{
+    wallFunctionBlenders::writeEntries(os);
 }
 
 
@@ -88,7 +157,8 @@ Foam::nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    nutWallFunctionFvPatchScalarField(p, iF)
+    nutWallFunctionFvPatchScalarField(p, iF),
+    wallFunctionBlenders()
 {}
 
 
@@ -100,7 +170,8 @@ Foam::nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
-    nutWallFunctionFvPatchScalarField(ptf, p, iF, mapper)
+    nutWallFunctionFvPatchScalarField(ptf, p, iF, mapper),
+    wallFunctionBlenders(ptf)
 {}
 
 
@@ -111,7 +182,8 @@ Foam::nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
     const dictionary& dict
 )
 :
-    nutWallFunctionFvPatchScalarField(p, iF, dict)
+    nutWallFunctionFvPatchScalarField(p, iF, dict),
+    wallFunctionBlenders(dict, blenderType::STEPWISE, scalar(4))
 {}
 
 
@@ -120,7 +192,8 @@ Foam::nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
     const nutkWallFunctionFvPatchScalarField& wfpsf
 )
 :
-    nutWallFunctionFvPatchScalarField(wfpsf)
+    nutWallFunctionFvPatchScalarField(wfpsf),
+    wallFunctionBlenders(wfpsf)
 {}
 
 
@@ -130,7 +203,8 @@ Foam::nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    nutWallFunctionFvPatchScalarField(wfpsf, iF)
+    nutWallFunctionFvPatchScalarField(wfpsf, iF),
+    wallFunctionBlenders(wfpsf)
 {}
 
 
@@ -166,7 +240,8 @@ yPlus() const
     const fvPatchVectorField& Uw = U(turbModel).boundaryField()[patchi];
     const scalarField magGradUw(mag(Uw.snGrad()));
 
-    const scalar Cmu25 = pow025(Cmu_);
+    const scalar Cmu25 = pow025(wallCoeffs_.Cmu());
+    const scalar yPlusLam = wallCoeffs_.yPlusLam();
 
     auto tyPlus = tmp<scalarField>::New(patch().size(), Zero);
     auto& yPlus = tyPlus.ref();
@@ -176,7 +251,7 @@ yPlus() const
         // inertial sublayer
         yPlus[facei] = Cmu25*y[facei]*sqrt(kwc[facei])/nuw[facei];
 
-        if (yPlusLam_ > yPlus[facei])
+        if (yPlusLam > yPlus[facei])
         {
             // viscous sublayer
             yPlus[facei] =
@@ -185,6 +260,17 @@ yPlus() const
     }
 
     return tyPlus;
+}
+
+
+void Foam::nutkWallFunctionFvPatchScalarField::write
+(
+    Ostream& os
+) const
+{
+    nutWallFunctionFvPatchScalarField::write(os);
+    writeLocalEntries(os);
+    writeEntry("value", os);
 }
 
 

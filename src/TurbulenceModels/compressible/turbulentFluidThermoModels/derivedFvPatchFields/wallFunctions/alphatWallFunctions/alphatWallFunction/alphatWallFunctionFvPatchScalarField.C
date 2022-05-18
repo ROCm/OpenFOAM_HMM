@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -110,15 +110,14 @@ void alphatWallFunctionFvPatchScalarField::updateCoeffs()
     const label patchi = patch().index();
 
     // Retrieve turbulence properties from model
-    const compressibleTurbulenceModel& turbModel =
-        db().lookupObject<compressibleTurbulenceModel>
+    const auto& turbModel = db().lookupObject<compressibleTurbulenceModel>
+    (
+        IOobject::groupName
         (
-            IOobject::groupName
-            (
-                compressibleTurbulenceModel::propertiesName,
-                internalField().group()
-            )
-        );
+            compressibleTurbulenceModel::propertiesName,
+            internalField().group()
+        )
+    );
 
     const scalarField& rhow = turbModel.rho().boundaryField()[patchi];
     const tmp<scalarField> tnutw = turbModel.nut(patchi);
@@ -132,7 +131,7 @@ void alphatWallFunctionFvPatchScalarField::updateCoeffs()
 void alphatWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
-    os.writeEntry("Prt", Prt_);
+    os.writeEntryIfDifferent<scalar>("Prt", 0.85, Prt_);
     writeEntry("value", os);
 }
 

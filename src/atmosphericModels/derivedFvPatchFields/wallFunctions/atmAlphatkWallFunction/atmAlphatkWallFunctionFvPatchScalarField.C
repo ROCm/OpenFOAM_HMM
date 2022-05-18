@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2020 ENERCON GmbH
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,9 +41,7 @@ namespace Foam
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 scalar atmAlphatkWallFunctionFvPatchScalarField::tolerance_ = 0.01;
-
 label atmAlphatkWallFunctionFvPatchScalarField::maxIters_ = 10;
-
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
@@ -57,6 +55,29 @@ void atmAlphatkWallFunctionFvPatchScalarField::checkType()
             << " must be wall" << nl
             << "    Current patch type is " << patch().type() << nl << endl
             << abort(FatalError);
+    }
+}
+
+
+void atmAlphatkWallFunctionFvPatchScalarField::writeLocalEntries
+(
+    Ostream& os
+) const
+{
+    os.writeEntryIfDifferent<scalar>("Cmu", 0.09, Cmu_);
+    os.writeEntryIfDifferent<scalar>("kappa", 0.41, kappa_);
+
+    if (Pr_)
+    {
+        Pr_->writeData(os);
+    }
+    if (Prt_)
+    {
+        Prt_->writeData(os);
+    }
+    if (z0_)
+    {
+        z0_->writeData(os);
     }
 }
 
@@ -183,15 +204,14 @@ void atmAlphatkWallFunctionFvPatchScalarField::updateCoeffs()
     const label patchi = patch().index();
 
     // Retrieve turbulence properties from model
-    const auto& turbModel =
-        db().lookupObject<turbulenceModel>
+    const auto& turbModel = db().lookupObject<turbulenceModel>
+    (
+        IOobject::groupName
         (
-            IOobject::groupName
-            (
-                turbulenceModel::propertiesName,
-                internalField().group()
-            )
-        );
+            turbulenceModel::propertiesName,
+            internalField().group()
+        )
+    );
 
     const scalarField& y = turbModel.y()[patchi];
 
@@ -263,8 +283,15 @@ void atmAlphatkWallFunctionFvPatchScalarField::autoMap
 )
 {
     fixedValueFvPatchScalarField::autoMap(m);
-    Prt_->autoMap(m);
-    z0_->autoMap(m);
+
+    if (Prt_)
+    {
+        Prt_->autoMap(m);
+    }
+    if (z0_)
+    {
+        z0_->autoMap(m);
+    }
 }
 
 
@@ -276,22 +303,24 @@ void atmAlphatkWallFunctionFvPatchScalarField::rmap
 {
     fixedValueFvPatchScalarField::rmap(ptf, addr);
 
-    const atmAlphatkWallFunctionFvPatchScalarField& nrwfpsf =
+    const auto& nrwfpsf =
         refCast<const atmAlphatkWallFunctionFvPatchScalarField>(ptf);
 
-    z0_->rmap(nrwfpsf.z0_(), addr);
-    Prt_->rmap(nrwfpsf.Prt_(), addr);
+    if (Prt_)
+    {
+        Prt_->rmap(nrwfpsf.Prt_(), addr);
+    }
+    if (z0_)
+    {
+        z0_->rmap(nrwfpsf.z0_(), addr);
+    }
 }
 
 
 void atmAlphatkWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
-    os.writeEntry("Cmu", Cmu_);
-    os.writeEntry("kappa", kappa_);
-    Pr_->writeData(os);
-    Prt_->writeData(os);
-    z0_->writeData(os);
+    writeLocalEntries(os);
     writeEntry("value", os);
 }
 

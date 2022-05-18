@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016, 2019 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,37 +31,37 @@ Group
     grpWallFunctions
 
 Description
-    This boundary condition provides a wall constraint on the turbulent
-    viscosity, i.e. \c nut, when using wall functions for rough walls,
-    based on the turbulent kinetic energy, i.e. \c k. The condition
-    manipulates the wall roughness parameter, i.e. \c E, to account
+    This boundary condition provides a wall-function for the turbulent
+    viscosity (i.e. \c nut) when using wall functions for rough walls,
+    based on the turbulent kinetic energy (i.e. \c k). The condition
+    manipulates the wall roughness parameter (i.e. \c E) to account
     for roughness effects.
 
     Parameter ranges:
-    - roughness height = sand-grain roughness (0 for smooth walls)
-    - roughness constant = 0.5-1.0
+    - roughness height (i.e. \c Ks)= sand-grain roughness (0 for smooth walls)
+    - roughness constant (i.e. \c Cs) = 0.5-1.0
 
 Usage
     Example of the boundary condition specification:
     \verbatim
     <patchName>
     {
-        // Mandatory entries (unmodifiable)
+        // Mandatory entries
         type            nutkRoughWallFunction;
         Ks              uniform 0;
         Cs              uniform 0.5;
 
-        // Optional (inherited) entries
+        // Inherited entries
         ...
     }
     \endverbatim
 
     where the entries mean:
     \table
-      Property    | Description                       | Type   | Req'd  | Dflt
-      type        | Type name: nutkRoughWallFunction  | word   | yes    | -
-      Ks          | Sand-grain roughness height  | scalarField | yes    | -
-      Cs          | Roughness constant           | scalarField | yes    | -
+      Property    | Description                       | Type   | Reqd  | Dflt
+      type        | Type name: nutkRoughWallFunction  | word   | yes   | -
+      Ks          | Sand-grain roughness height  | scalarField | yes   | -
+      Cs          | Roughness constant           | scalarField | yes   | -
     \endtable
 
     The inherited entries are elaborated in:
@@ -108,6 +108,9 @@ protected:
 
         //- Calculate the turbulent viscosity
         virtual tmp<scalarField> calcNut() const;
+
+        //- Write local wall function variables
+        void writeLocalEntries(Ostream& os) const;
 
 
 public:
@@ -181,22 +184,22 @@ public:
 
     // Member Functions
 
-        // Access functions
+        // Access
 
-            // Return Ks
+            //- Return Ks
             scalarField& Ks()
             {
                 return Ks_;
             }
 
-            // Return Cs
+            //- Return Cs
             scalarField& Cs()
             {
                 return Cs_;
             }
 
 
-        // Mapping functions
+        // Mapping
 
             //- Map (and resize as needed) from self given a mapping object
             virtual void autoMap(const fvPatchFieldMapper&);

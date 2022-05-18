@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -107,7 +107,8 @@ Foam::tmp<Foam::scalarField> Foam::nutLowReWallFunctionFvPatchScalarField::
 yPlus() const
 {
     const label patchi = patch().index();
-    const turbulenceModel& turbModel = db().lookupObject<turbulenceModel>
+
+    const auto& turbModel = db().lookupObject<turbulenceModel>
     (
         IOobject::groupName
         (
@@ -115,6 +116,7 @@ yPlus() const
             internalField().group()
         )
     );
+
     const scalarField& y = turbModel.y()[patchi];
 
     const tmp<scalarField> tnuw = turbModel.nu(patchi);
@@ -126,6 +128,16 @@ yPlus() const
     const scalarField& nuEff = tnuEff();
 
     return y*sqrt(nuEff*mag(Uw.snGrad()))/nuw;
+}
+
+
+void Foam::nutLowReWallFunctionFvPatchScalarField::write
+(
+    Ostream& os
+) const
+{
+    nutWallFunctionFvPatchScalarField::write(os);
+    writeEntry("value", os);
 }
 
 

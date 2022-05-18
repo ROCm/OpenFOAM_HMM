@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,13 +40,30 @@ Usage
     \verbatim
     <patchName>
     {
+        // Mandatory entries
         type            nutkFilmWallFunction;
-        value           uniform 0;
+
+        // Optional entries
+        filmRegion      <word>;
+        B               <scalar>;
+        yPlusCrit       <scalar>;
+
+        // Inherited entries
+        ...
     }
     \endverbatim
 
-See also
-    Foam::nutkWallFunctionFvPatchScalarField
+    where the entries mean:
+    \table
+      Property   | Description                    | Type   | Reqd  | Deflt
+      type       | Type name: alphatFilmWallFunction | word | yes  | -
+      filmRegion | Name of film region   | word | no | surfaceFilmProperties
+      B          | Model coefficient              | scalar | no    | 5.5
+      yPlusCrit  | Critical y+ for transition to turbulence | scalar | no | 11.5
+    \endtable
+
+    The inherited entries are elaborated in:
+      - \link nutkWallFunctionFvPatchScalarField.H \endlink
 
 SourceFiles
     nutkFilmWallFunctionFvPatchScalarField.C
@@ -76,25 +94,28 @@ class nutkFilmWallFunctionFvPatchScalarField
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Name of film region
         word filmRegionName_;
 
-        //- B Coefficient (default = 5.5)
+        //- B Coefficient
         scalar B_;
 
-        //- y+ value for laminar -> turbulent transition (default = 11.05)
+        //- y+ value for laminar -> turbulent transition
         scalar yPlusCrit_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Calculate the turbulence viscosity
         virtual tmp<scalarField> calcNut() const;
 
         //- Calculate the friction velocity
-        virtual tmp<scalarField> calcUTau(const scalarField& magGradU) const;
+        tmp<scalarField> calcUTau(const scalarField& magGradU) const;
+
+        //- Write local wall function variables
+        void writeLocalEntries(Ostream&) const;
 
 
 public:
@@ -121,8 +142,8 @@ public:
         );
 
         //- Construct by mapping given
-        //  nutkFilmWallFunctionFvPatchScalarField
-        //  onto a new patch
+        //- nutkFilmWallFunctionFvPatchScalarField
+        //- onto a new patch
         nutkFilmWallFunctionFvPatchScalarField
         (
             const nutkFilmWallFunctionFvPatchScalarField&,
@@ -166,9 +187,9 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
-        // Evaluation functions
+        // Evaluation
 
             //- Calculate and return the yPlus at the boundary
             virtual tmp<scalarField> yPlus() const;

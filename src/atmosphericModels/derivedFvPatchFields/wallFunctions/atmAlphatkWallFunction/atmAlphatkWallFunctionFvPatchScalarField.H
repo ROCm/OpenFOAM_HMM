@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2020 ENERCON GmbH
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,26 +46,24 @@ Usage
     \verbatim
     <patchName>
     {
-        // Mandatory entries (unmodifiable)
+        // Mandatory entries
         type            atmAlphatkWallFunction;
+        Pr              <Function1<scalar>>;
+        Prt             <PatchFunction1<scalar>>;
+        z0              <PatchFunction1<scalar>>;
 
-        // Mandatory entries (runtime modifiable)
-        Pr              0.90;
-        Prt             uniform 0.85;
-        z0              uniform 0.001;
+        // Optional entries
+        Cmu             <scalar>;
+        kappa           <scalar>;
 
-        // Optional entries (unmodifiable)
-        Cmu             0.09;
-        kappa           0.41;
-
-        // Optional (inherited) entries
+        // Inherited entries
         ...
     }
     \endverbatim
 
     where the entries mean:
     \table
-      Property | Description                       | Type   | Reqd     | Dflt
+      Property | Description                       | Type   | Reqd     | Deflt
       type     | Type name: atmAlphatkWallFunction | word   | yes      | -
       Pr       | Molecular Prandtl number     | Function1<scalar>  | yes | -
       Prt      | Turbulent Prandtl number     | PatchFunction1<scalar> | yes | -
@@ -78,9 +76,6 @@ Usage
       - \link fixedValueFvPatchField.H \endlink
       - \link Function1.H \endlink
       - \link PatchFunction1.H \endlink
-
-See also
-    - Foam::fixedValueFvPatchField
 
 SourceFiles
     atmAlphatkWallFunctionFvPatchScalarField.C
@@ -139,6 +134,9 @@ protected:
 
         //- Check the type of the patch
         virtual void checkType();
+
+        //- Write local wall function variables
+        void writeLocalEntries(Ostream&) const;
 
 
 public:

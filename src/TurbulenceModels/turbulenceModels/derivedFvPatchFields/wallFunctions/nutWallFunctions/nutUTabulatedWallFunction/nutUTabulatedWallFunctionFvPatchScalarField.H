@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,8 +32,8 @@ Group
 
 Description
     This boundary condition provides a wall constraint on the turbulent
-    viscosity, i.e. \c nut, based on velocity, i.e. \c U, for low- and
-    high-Reynolds number turbulence models.
+    viscosity (i.e. \c nut) based on velocity (i.e. \c U), for low- and
+    high-Reynolds number applications.
 
     As input, the user specifies a look-up table of \c u+ as a function of
     near-wall Reynolds number.
@@ -45,27 +45,28 @@ Usage
     \verbatim
     <patchName>
     {
-        // Mandatory entries (unmodifiable)
+        // Mandatory entries
         type            nutTabulatedWallFunction;
         uPlusTable      myUPlusTable;
 
-        // Optional (inherited) entries
+        // Inherited entries
         ...
     }
     \endverbatim
 
     where the entries mean:
     \table
-      Property    | Description                          | Type | Req'd | Dflt
-      type        | Type name: nutUTabulatedWallFunction | word | yes   | -
-      uPlusTable  | u+ as a function of Re table name    | word | yes   | -
+      Property    | Description                          | Type | Reqd | Deflt
+      type        | Type name: nutUTabulatedWallFunction | word | yes  | -
+      uPlusTable  | u+ as a function of Re table name    | word | yes  | -
     \endtable
 
     The inherited entries are elaborated in:
       - \link nutWallFunctionFvPatchScalarField.H \endlink
+      - \link uniformInterpolationTable.H \endlink
 
 Note
-    - The tables are not registered since the same table object may be used for
+  - The tables are not registered since the same table object may be used for
     more than one patch.
 
 SourceFiles
@@ -109,7 +110,10 @@ protected:
         virtual tmp<scalarField> calcNut() const;
 
         //- Calculate wall u+ from table
-        virtual tmp<scalarField> calcUPlus(const scalarField& Rey) const;
+        tmp<scalarField> calcUPlus(const scalarField& Rey) const;
+
+        //- Write local wall function variables
+        void writeLocalEntries(Ostream&) const;
 
 
 public:
@@ -183,7 +187,7 @@ public:
 
     // Member Functions
 
-        // Evaluation functions
+        // Evaluation
 
             //- Calculate and return the yPlus at the boundary
             virtual tmp<scalarField> yPlus() const;

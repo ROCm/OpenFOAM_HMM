@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
     Copyright (C) 2020 ENERCON GmbH
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,23 +78,21 @@ Usage
     \verbatim
     <patchName>
     {
-        // Mandatory entries (unmodifiable)
+        // Mandatory entries
         type            atmNutkWallFunction;
+        z0              <PatchFunction1<scalar>>;
 
-        // Mandatory entries (runtime modifiable)
-        z0              uniform 0.001;
+        // Optional entries
+        boundNut        <bool>;
 
-        // Optional entries (unmodifiable)
-        boundNut        false;
-
-        // Optional (inherited) entries
+        // Inherited entries
         ...
     }
     \endverbatim
 
     where the entries mean:
     \table
-      Property | Description                      | Type   | Reqd    | Dflt
+      Property | Description                      | Type   | Reqd    | Deflt
       type     | Type name: atmNutkWallFunction   | word   | yes     | -
       z0       | Surface roughness length [m] | PatchFunction1<scalar> | yes | -
       boundNut | Flag to zero-bound nut near wall | bool   | no      | false
@@ -107,9 +105,6 @@ Usage
 Note
     - \c boundNut entry is set \c false for backward compatibility reasons.
     - \c nutkAtmRoughWallFunction was renamed to \c atmNutkWallFunction.
-
-See also
-    - Foam::nutkWallFunctionFvPatchField
 
 SourceFiles
     atmNutkWallFunctionFvPatchScalarField.C
@@ -151,6 +146,9 @@ protected:
 
         //- Calculate the turbulent viscosity
         virtual tmp<scalarField> calcNut() const;
+
+        //- Write local wall function variables
+        void writeLocalEntries(Ostream&) const;
 
 
 public:

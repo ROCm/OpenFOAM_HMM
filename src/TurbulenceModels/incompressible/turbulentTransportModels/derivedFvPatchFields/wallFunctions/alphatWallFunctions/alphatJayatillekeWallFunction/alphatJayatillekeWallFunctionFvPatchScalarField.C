@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd
+    Copyright (C) 2017-2022 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,7 +72,7 @@ tmp<scalarField> alphatJayatillekeWallFunctionFvPatchScalarField::yPlus
 
     if (isA<nutWallFunctionFvPatchScalarField>(nut.boundaryField()[patchi]))
     {
-        const nutWallFunctionFvPatchScalarField& nutPf =
+        const auto& nutPf =
             dynamic_cast<const nutWallFunctionFvPatchScalarField&>
             (
                 nut.boundaryField()[patchi]
@@ -107,13 +107,13 @@ scalar alphatJayatillekeWallFunctionFvPatchScalarField::yPlusTherm
     const scalar Prat
 ) const
 {
-    scalar ypt = 11.0;
+    scalar ypt = 11;
 
-    for (int i=0; i<maxIters_; i++)
+    for (int iter = 0; iter < maxIters_; ++iter)
     {
-        scalar f = ypt - (log(E_*ypt)/kappa_ + P)/Prat;
-        scalar df = 1.0 - 1.0/(ypt*kappa_*Prat);
-        scalar yptNew = ypt - f/df;
+        const scalar f = ypt - (log(E_*ypt)/kappa_ + P)/Prat;
+        const scalar df = 1.0 - 1.0/(ypt*kappa_*Prat);
+        const scalar yptNew = ypt - f/df;
 
         if (yptNew < VSMALL)
         {
@@ -230,7 +230,7 @@ void alphatJayatillekeWallFunctionFvPatchScalarField::updateCoeffs()
 
     // Retrieve turbulence properties from model
 
-    const turbulenceModel& turbModel = db().lookupObject<turbulenceModel>
+    const auto& turbModel = db().lookupObject<turbulenceModel>
     (
         IOobject::groupName
         (
@@ -245,7 +245,7 @@ void alphatJayatillekeWallFunctionFvPatchScalarField::updateCoeffs()
     const volScalarField& nu = tnu();
     const scalarField& nuw = nu.boundaryField()[patchi];
 
-    const IOdictionary& transportProperties =
+    const auto& transportProperties =
         db().lookupObject<IOdictionary>("transportProperties");
 
     // Molecular Prandtl number
@@ -258,21 +258,23 @@ void alphatJayatillekeWallFunctionFvPatchScalarField::updateCoeffs()
     scalarField& alphatw = *this;
     forAll(alphatw, facei)
     {
-        scalar yPlus = yPlusp[facei];
+        const scalar yPlus = yPlusp[facei];
 
         // Molecular-to-turbulent Prandtl number ratio
-        scalar Prat = Pr/Prt_;
+        const scalar Prat = Pr/Prt_;
 
         // Thermal sublayer thickness
-        scalar P = Psmooth(Prat);
-        scalar yPlusTherm = this->yPlusTherm(P, Prat);
+        const scalar P = Psmooth(Prat);
+        const scalar yPlusTherm = this->yPlusTherm(P, Prat);
 
         // Update turbulent thermal conductivity
         if (yPlus > yPlusTherm)
         {
-            scalar nu = nuw[facei];
-            scalar kt = nu*(yPlus/(Prt_*(log(E_*yPlus)/kappa_ + P)) - 1/Pr);
-            alphatw[facei] = max(0.0, kt);
+            const scalar nu = nuw[facei];
+            const scalar kt =
+                nu*(yPlus/(Prt_*(log(E_*yPlus)/kappa_ + P)) - 1.0/Pr);
+
+            alphatw[facei] = max(scalar(0), kt);
         }
         else
         {
@@ -288,8 +290,8 @@ void alphatJayatillekeWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
     os.writeEntry("Prt", Prt_);
-    os.writeEntry("kappa", kappa_);
-    os.writeEntry("E", E_);
+    os.writeEntryIfDifferent<scalar>("kappa", 0.41, kappa_);
+    os.writeEntryIfDifferent<scalar>("E", 9.8, E_);
     writeEntry("value", os);
 }
 

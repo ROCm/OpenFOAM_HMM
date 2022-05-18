@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,8 +51,8 @@ tmp<scalarField> nutkFilmWallFunctionFvPatchScalarField::calcUTau
     const scalarField& magGradU
 ) const
 {
-    tmp<scalarField> tuTau(new scalarField(patch().size(), Zero));
-    scalarField& uTau = tuTau.ref();
+    auto tuTau = tmp<scalarField>::New(patch().size(), Zero);
+    auto& uTau = tuTau.ref();
 
     const auto* filmModelPtr = db().time().findObject
         <regionModels::surfaceFilmModels::surfaceFilmRegionModel>
@@ -71,13 +71,13 @@ tmp<scalarField> nutkFilmWallFunctionFvPatchScalarField::calcUTau
 
     const label filmPatchi = filmModel.regionPatchID(patchi);
 
-    tmp<volScalarField> mDotFilm(filmModel.primaryMassTrans());
+    tmp<volScalarField> mDotFilm = filmModel.primaryMassTrans();
     scalarField mDotFilmp = mDotFilm().boundaryField()[filmPatchi];
     filmModel.toPrimary(filmPatchi, mDotFilmp);
 
 
     // Retrieve RAS turbulence model
-    const turbulenceModel& turbModel = db().lookupObject<turbulenceModel>
+    const auto& turbModel = db().lookupObject<turbulenceModel>
     (
         IOobject::groupName
         (
@@ -87,37 +87,41 @@ tmp<scalarField> nutkFilmWallFunctionFvPatchScalarField::calcUTau
     );
 
     const scalarField& y = turbModel.y()[patchi];
+
     const tmp<volScalarField> tk = turbModel.k();
     const volScalarField& k = tk();
+
     const tmp<scalarField> tnuw = turbModel.nu(patchi);
     const scalarField& nuw = tnuw();
 
-    const scalar Cmu25 = pow(Cmu_, 0.25);
+    const scalar Cmu25 = pow025(wallCoeffs_.Cmu());
+    const scalar kappa = wallCoeffs_.kappa();
 
     forAll(uTau, facei)
     {
-        label faceCelli = patch().faceCells()[facei];
+        const label faceCelli = patch().faceCells()[facei];
 
-        scalar ut = Cmu25*sqrt(k[faceCelli]);
+        const scalar ut = Cmu25*sqrt(k[faceCelli]);
 
-        scalar yPlus = y[facei]*ut/nuw[facei];
+        const scalar yPlus = y[facei]*ut/nuw[facei];
 
-        scalar mStar = mDotFilmp[facei]/(y[facei]*ut);
+        const scalar mStar = mDotFilmp[facei]/(y[facei]*ut);
 
-        scalar factor = 0.0;
+        scalar factor = 0;
         if (yPlus > yPlusCrit_)
         {
-            scalar expTerm = exp(min(50.0, B_*mStar));
-            scalar powTerm = pow(yPlus, mStar/kappa_);
+            const scalar expTerm = exp(min(scalar(50), B_*mStar));
+            const scalar powTerm = pow(yPlus, mStar/kappa);
             factor = mStar/(expTerm*powTerm - 1.0 + ROOTVSMALL);
         }
         else
         {
-            scalar expTerm = exp(min(50.0, mStar));
+            const scalar expTerm = exp(min(scalar(50), mStar));
+
             factor = mStar/(expTerm*yPlus - 1.0 + ROOTVSMALL);
         }
 
-        uTau[facei] = sqrt(max(0, magGradU[facei]*ut*factor));
+        uTau[facei] = sqrt(max(scalar(0), magGradU[facei]*ut*factor));
     }
 
     return tuTau;
@@ -128,7 +132,7 @@ tmp<scalarField> nutkFilmWallFunctionFvPatchScalarField::calcNut() const
 {
     const label patchi = patch().index();
 
-    const turbulenceModel& turbModel = db().lookupObject<turbulenceModel>
+    const auto& turbModel = db().lookupObject<turbulenceModel>
     (
         IOobject::groupName
         (
@@ -139,6 +143,7 @@ tmp<scalarField> nutkFilmWallFunctionFvPatchScalarField::calcNut() const
 
     const fvPatchVectorField& Uw = turbModel.U().boundaryField()[patchi];
     const scalarField magGradU(mag(Uw.snGrad()));
+
     const tmp<scalarField> tnuw = turbModel.nu(patchi);
     const scalarField& nuw = tnuw();
 
@@ -147,6 +152,22 @@ tmp<scalarField> nutkFilmWallFunctionFvPatchScalarField::calcNut() const
         scalar(0),
         sqr(calcUTau(magGradU))/(magGradU + ROOTVSMALL) - nuw
     );
+}
+
+
+void nutkFilmWallFunctionFvPatchScalarField::writeLocalEntries
+(
+    Ostream& os
+) const
+{
+    os.writeEntryIfDifferent<word>
+    (
+        "filmRegion",
+        "surfaceFilmProperties",
+        filmRegionName_
+    );
+    os.writeEntryIfDifferent<scalar>("B", 5.5, B_);
+    os.writeEntryIfDifferent<scalar>("yPlusCrit", 11.05, yPlusCrit_);
 }
 
 
@@ -228,7 +249,7 @@ tmp<scalarField> nutkFilmWallFunctionFvPatchScalarField::yPlus() const
 {
     const label patchi = patch().index();
 
-    const turbulenceModel& turbModel = db().lookupObject<turbulenceModel>
+    const auto& turbModel = db().lookupObject<turbulenceModel>
     (
         IOobject::groupName
         (
@@ -238,7 +259,9 @@ tmp<scalarField> nutkFilmWallFunctionFvPatchScalarField::yPlus() const
     );
 
     const scalarField& y = turbModel.y()[patchi];
+
     const fvPatchVectorField& Uw = turbModel.U().boundaryField()[patchi];
+
     const tmp<scalarField> tnuw = turbModel.nu(patchi);
     const scalarField& nuw = tnuw();
 
@@ -248,16 +271,8 @@ tmp<scalarField> nutkFilmWallFunctionFvPatchScalarField::yPlus() const
 
 void nutkFilmWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchField<scalar>::write(os);
-    os.writeEntryIfDifferent<word>
-    (
-        "filmRegion",
-        "surfaceFilmProperties",
-        filmRegionName_
-    );
+    nutWallFunctionFvPatchScalarField::write(os);
     writeLocalEntries(os);
-    os.writeEntry("B", B_);
-    os.writeEntry("yPlusCrit", yPlusCrit_);
     writeEntry("value", os);
 }
 

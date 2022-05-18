@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -168,12 +168,12 @@ void alphatFilmWallFunctionFvPatchScalarField::updateCoeffs()
     // Retrieve phase change mass from surface film model
     const label filmPatchi = filmModel.regionPatchID(patchi);
 
-    tmp<volScalarField> mDotFilm(filmModel.primaryMassTrans());
+    tmp<volScalarField> mDotFilm = filmModel.primaryMassTrans();
     scalarField mDotFilmp = mDotFilm().boundaryField()[filmPatchi];
     filmModel.toPrimary(filmPatchi, mDotFilmp);
 
     // Retrieve RAS turbulence model
-    const turbulenceModel& turbModel = db().lookupObject<turbulenceModel>
+    const auto& turbModel = db().lookupObject<turbulenceModel>
     (
         IOobject::groupName
         (
@@ -183,49 +183,55 @@ void alphatFilmWallFunctionFvPatchScalarField::updateCoeffs()
     );
 
     const scalarField& y = turbModel.y()[patchi];
+
     const scalarField& rhow = turbModel.rho().boundaryField()[patchi];
+
     const tmp<volScalarField> tk = turbModel.k();
     const volScalarField& k = tk();
+
     const tmp<scalarField> tmuw = turbModel.mu(patchi);
     const scalarField& muw = tmuw();
+
     const tmp<scalarField> talpha = turbModel.alpha(patchi);
     const scalarField& alphaw = talpha();
 
-    const scalar Cmu25 = pow(Cmu_, 0.25);
+    const scalar Cmu25 = pow025(Cmu_);
 
     // Populate alphat field values
     scalarField& alphat = *this;
     forAll(alphat, facei)
     {
-        label faceCelli = patch().faceCells()[facei];
+        const label faceCelli = patch().faceCells()[facei];
 
-        scalar uTau = Cmu25*sqrt(k[faceCelli]);
+        const scalar uTau = Cmu25*sqrt(k[faceCelli]);
 
-        scalar yPlus = y[facei]*uTau/(muw[facei]/rhow[facei]);
+        const scalar yPlus = y[facei]*uTau/(muw[facei]/rhow[facei]);
 
-        scalar Pr = muw[facei]/alphaw[facei];
+        const scalar Pr = muw[facei]/alphaw[facei];
 
-        scalar factor = 0.0;
-        scalar mStar = mDotFilmp[facei]/(y[facei]*uTau);
+        scalar factor = 0;
+        const scalar mStar = mDotFilmp[facei]/(y[facei]*uTau);
         if (yPlus > yPlusCrit_)
         {
-            scalar expTerm = exp(min(50.0, yPlusCrit_*mStar*Pr));
-            scalar yPlusRatio = yPlus/yPlusCrit_;
-            scalar powTerm = mStar*Prt_/kappa_;
+            const scalar expTerm = exp(min(scalar(50), yPlusCrit_*mStar*Pr));
+            const scalar yPlusRatio = yPlus/yPlusCrit_;
+            const scalar powTerm = mStar*Prt_/kappa_;
+
             factor =
                 mStar/(expTerm*(pow(yPlusRatio, powTerm)) - 1.0 + ROOTVSMALL);
         }
         else
         {
-            scalar expTerm = exp(min(50.0, yPlus*mStar*Pr));
+            const scalar expTerm = exp(min(scalar(50), yPlus*mStar*Pr));
+
             factor = mStar/(expTerm - 1.0 + ROOTVSMALL);
         }
 
-        scalar dx = patch().deltaCoeffs()[facei];
+        const scalar dx = patch().deltaCoeffs()[facei];
 
-        scalar alphaEff = dx*rhow[facei]*uTau*factor;
+        const scalar alphaEff = dx*rhow[facei]*uTau*factor;
 
-        alphat[facei] = max(alphaEff - alphaw[facei], 0.0);
+        alphat[facei] = max(alphaEff - alphaw[facei], scalar(0));
     }
 
     // Restore tag
@@ -246,11 +252,11 @@ void alphatFilmWallFunctionFvPatchScalarField::write(Ostream& os) const
         "surfaceFilmProperties",
         filmRegionName_
     );
-    os.writeEntry("B", B_);
-    os.writeEntry("yPlusCrit", yPlusCrit_);
-    os.writeEntry("Cmu", Cmu_);
-    os.writeEntry("kappa", kappa_);
-    os.writeEntry("Prt", Prt_);
+    os.writeEntryIfDifferent<scalar>("B", 5.5, B_);
+    os.writeEntryIfDifferent<scalar>("yPlusCrit", 11.05, yPlusCrit_);
+    os.writeEntryIfDifferent<scalar>("Cmu", 0.09, Cmu_);
+    os.writeEntryIfDifferent<scalar>("kappa", 0.41, kappa_);
+    os.writeEntryIfDifferent<scalar>("Prt", 0.85, Prt_);
     writeEntry("value", os);
 }
 

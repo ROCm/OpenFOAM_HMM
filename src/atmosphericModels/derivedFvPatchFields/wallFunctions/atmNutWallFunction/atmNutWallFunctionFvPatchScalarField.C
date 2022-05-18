@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2020 CENER
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,15 +44,15 @@ tmp<scalarField> atmNutWallFunctionFvPatchScalarField::calcNut() const
 {
     const label patchi = patch().index();
 
-    const auto& turbModel =
-        db().lookupObject<turbulenceModel>
+    const auto& turbModel = db().lookupObject<turbulenceModel>
+    (
+        IOobject::groupName
         (
-            IOobject::groupName
-            (
-                turbulenceModel::propertiesName,
-                internalField().group()
-            )
-        );
+            turbulenceModel::propertiesName,
+            internalField().group()
+        )
+    );
+
     const scalarField& y = turbModel.y()[patchi];
 
     const tmp<volScalarField> tk = turbModel.k();
@@ -64,7 +64,8 @@ tmp<scalarField> atmNutWallFunctionFvPatchScalarField::calcNut() const
     auto tnutw = tmp<scalarField>::New(*this);
     auto& nutw = tnutw.ref();
 
-    const scalar Cmu25 = pow025(Cmu_);
+    const scalar Cmu25 = pow025(wallCoeffs_.Cmu());
+    const scalar kappa = wallCoeffs_.kappa();
 
     const fvPatchVectorField& Uw = turbModel.U().boundaryField()[patchi];
     const scalarField magUp(mag(Uw.patchInternalField() - Uw));
@@ -95,7 +96,7 @@ tmp<scalarField> atmNutWallFunctionFvPatchScalarField::calcNut() const
         const scalar Edash = (y[facei] + z0[facei])/(z0[facei] + z0Min_);
 
         // (RH:Eq. 6)
-        const scalar uStarU = magUp[facei]*kappa_/log(max(Edash, 1 + SMALL));
+        const scalar uStarU = magUp[facei]*kappa/log(max(Edash, 1 + SMALL));
 
         // (RH:Eq. 7)
         const scalar uStarK = Cmu25*Foam::sqrt(k[celli]);
@@ -108,6 +109,20 @@ tmp<scalarField> atmNutWallFunctionFvPatchScalarField::calcNut() const
     }
 
     return tnutw;
+}
+
+
+void Foam::atmNutWallFunctionFvPatchScalarField::writeLocalEntries
+(
+    Ostream& os
+) const
+{
+    os.writeEntryIfDifferent<scalar>("z0Min", SMALL, z0Min_);
+
+    if (z0_)
+    {
+        z0_->writeData(os);
+    }
 }
 
 
@@ -191,7 +206,11 @@ void atmNutWallFunctionFvPatchScalarField::autoMap
 )
 {
     nutkWallFunctionFvPatchScalarField::autoMap(m);
-    z0_->autoMap(m);
+
+    if (z0_)
+    {
+        z0_->autoMap(m);
+    }
 }
 
 
@@ -203,19 +222,20 @@ void atmNutWallFunctionFvPatchScalarField::rmap
 {
     nutkWallFunctionFvPatchScalarField::rmap(ptf, addr);
 
-    const atmNutWallFunctionFvPatchScalarField& nrwfpsf =
+    const auto& nrwfpsf =
         refCast<const atmNutWallFunctionFvPatchScalarField>(ptf);
 
-    z0_->rmap(nrwfpsf.z0_(), addr);
+    if (z0_)
+    {
+        z0_->rmap(nrwfpsf.z0_(), addr);
+    }
 }
 
 
 void atmNutWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchField<scalar>::write(os);
-    nutWallFunctionFvPatchScalarField::writeLocalEntries(os);
-    os.writeEntry("z0Min", z0Min_);
-    z0_->writeData(os);
+    nutWallFunctionFvPatchScalarField::write(os);
+    writeLocalEntries(os);
     writeEntry("value", os);
 }
 

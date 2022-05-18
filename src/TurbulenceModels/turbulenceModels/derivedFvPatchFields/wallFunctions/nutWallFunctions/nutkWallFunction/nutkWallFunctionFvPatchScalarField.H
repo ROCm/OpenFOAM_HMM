@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2019 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,35 +31,32 @@ Group
     grpWallFunctions
 
 Description
-    This boundary condition provides a wall constraint on the turbulent
-    viscosity, i.e. \c nut, based on the turbulent kinetic energy,
-    i.e. \c k, for for low- and high-Reynolds number turbulence models.
+    This boundary condition provides a wall function for the turbulent
+    viscosity (i.e. \c nut) based on the turbulent kinetic energy,
+    (i.e. \c k) for for low- and high-Reynolds number applications.
 
 Usage
     Example of the boundary condition specification:
     \verbatim
     <patchName>
     {
-        // Mandatory entries (unmodifiable)
+        // Mandatory entries
         type            nutkWallFunction;
 
-        // Optional (inherited) entries
+        // Inherited entries
         ...
     }
     \endverbatim
 
     where the entries mean:
     \table
-      Property  | Description                   | Type | Req'd  | Dflt
-      type      | Type name: nutkWallFunction   | word | yes    | -
+      Property  | Description                   | Type | Reqd | Deflt
+      type      | Type name: nutkWallFunction   | word | yes  | -
     \endtable
 
     The inherited entries are elaborated in:
       - \link nutWallFunctionFvPatchScalarField.H \endlink
-
-Note
-    - See \link nutWallFunctionFvPatchScalarField.H \endlink for the wall
-    function blending treatments.
+      - \link wallFunctionBlenders.H \endlink
 
 SourceFiles
     nutkWallFunctionFvPatchScalarField.C
@@ -70,6 +67,7 @@ SourceFiles
 #define nutkWallFunctionFvPatchScalarField_H
 
 #include "nutWallFunctionFvPatchScalarField.H"
+#include "wallFunctionBlenders.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -82,7 +80,8 @@ namespace Foam
 
 class nutkWallFunctionFvPatchScalarField
 :
-    public nutWallFunctionFvPatchScalarField
+    public nutWallFunctionFvPatchScalarField,
+    private wallFunctionBlenders
 {
 protected:
 
@@ -90,6 +89,9 @@ protected:
 
         //- Calculate the turbulent viscosity
         virtual tmp<scalarField> calcNut() const;
+
+        //- Write local wall function variables
+        void writeLocalEntries(Ostream&) const;
 
 
 public:
@@ -165,6 +167,12 @@ public:
 
         //- Calculate and return the yPlus at the boundary
         virtual tmp<scalarField> yPlus() const;
+
+
+        // I-O
+
+            //- Write
+            virtual void write(Ostream&) const;
 };
 
 

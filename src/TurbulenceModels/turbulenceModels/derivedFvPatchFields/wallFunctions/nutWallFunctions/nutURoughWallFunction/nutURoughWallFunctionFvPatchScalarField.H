@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,33 +31,33 @@ Group
     grpWallFunctions
 
 Description
-    This boundary condition provides a wall constraint on the turbulent
-    viscosity, i.e. \c nut, based on velocity i.e. \c U, for low- and
-    high-Reynolds number turbulence models for rough walls.
+    This boundary condition provides a wall function on the turbulent
+    viscosity (i.e. \c nut) based on velocity (i.e. \c U) for low- and
+    high-Reynolds number applications for rough walls.
 
 Usage
     Example of the boundary condition specification:
     \verbatim
     <patchName>
     {
-        // Mandatory entries (unmodifiable)
+        // Mandatory entries
         type                nutURoughWallFunction;
         roughnessHeight     1e-5;
         roughnessConstant   0.5;
         roughnessFactor     1;
 
-        // Optional entries (unmodifiable)
+        // Optional entries
         maxIter             10;
         tolerance           0.0001;
 
-        // Optional (inherited) entries
+        // Inherited entries
         ...
     }
     \endverbatim
 
     where the entries mean:
     \table
-      Property  | Description                         | Type | Req'd  | Dflt
+      Property  | Description                         | Type | Reqd   | Deflt
       type      | Type name: nutURoughWallFunction    | word | yes    | -
       roughnessHeight   | Roughness height            | scalar | yes  | -
       roughnessConstant | Roughness constant          | scalar | yes  | -
@@ -121,14 +121,14 @@ class nutURoughWallFunctionFvPatchScalarField
 
     // Protected Member Functions
 
-        //- Calculate yPlus
-        virtual tmp<scalarField> calcYPlus(const scalarField& magUp) const;
-
         //- Calculate the turbulence viscosity
         virtual tmp<scalarField> calcNut() const;
 
+        //- Calculate yPlus
+        tmp<scalarField> calcYPlus(const scalarField& magUp) const;
+
         //- Write local wall function variables
-        virtual void writeLocalEntries(Ostream&) const;
+        void writeLocalEntries(Ostream&) const;
 
 
 public:
@@ -205,44 +205,44 @@ public:
         // Access
 
             //- Return the roughness height
-            scalar roughnessHeight() const
+            scalar roughnessHeight() const noexcept
             {
                 return roughnessHeight_;
             }
 
             //- Return reference to the roughness height to allow adjustment
-            scalar& roughnessHeight()
+            scalar& roughnessHeight() noexcept
             {
                 return roughnessHeight_;
             }
 
             //- Return the roughness constant scale
-            scalar roughnessConstant() const
+            scalar roughnessConstant() const noexcept
             {
                 return roughnessConstant_;
             }
 
             //- Return reference to the roughness constant to allow adjustment
-            scalar& roughnessConstant()
+            scalar& roughnessConstant() noexcept
             {
                 return roughnessConstant_;
             }
 
             //- Return the roughness scale factor
-            scalar roughnessFactor() const
+            scalar roughnessFactor() const noexcept
             {
                 return roughnessFactor_;
             }
 
             //- Return reference to the roughness scale factor to allow
             //- adjustment
-            scalar& roughnessFactor()
+            scalar& roughnessFactor() noexcept
             {
                 return roughnessFactor_;
             }
 
 
-        // Evaluation functions
+        // Evaluation
 
             //- Calculate and return the yPlus at the boundary
             virtual tmp<scalarField> yPlus() const;

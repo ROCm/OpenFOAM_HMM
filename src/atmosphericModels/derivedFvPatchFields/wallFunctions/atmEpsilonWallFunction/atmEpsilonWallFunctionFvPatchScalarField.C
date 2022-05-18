@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2020 ENERCON GmbH
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,8 +45,8 @@ void Foam::atmEpsilonWallFunctionFvPatchScalarField::calculate
 {
     const label patchi = patch.index();
 
-    const nutWallFunctionFvPatchScalarField& nutw =
-        nutWallFunctionFvPatchScalarField::nutw(turbModel, patchi);
+    const tmp<scalarField> tnutw = turbModel.nut(patchi);
+    const scalarField& nutw = tnutw();
 
     const scalarField& y = turbModel.y()[patchi];
 
@@ -60,8 +60,10 @@ void Foam::atmEpsilonWallFunctionFvPatchScalarField::calculate
 
     const scalarField magGradUw(mag(Uw.snGrad()));
 
-    const scalar Cmu25 = pow025(nutw.Cmu());
-    const scalar Cmu75 = pow(nutw.Cmu(), 0.75);
+    const scalar Cmu25 = pow025(wallCoeffs_.Cmu());
+    const scalar Cmu75 = pow(wallCoeffs_.Cmu(), 0.75);
+    const scalar kappa = wallCoeffs_.kappa();
+    const scalar yPlusLam = wallCoeffs_.yPlusLam();
 
     const scalar t = db().time().timeOutputValue();
     const scalarField z0(z0_->value(t));
@@ -92,16 +94,16 @@ void Foam::atmEpsilonWallFunctionFvPatchScalarField::calculate
 
         // (PGVB:Eq. 7, RH:Eq. 8)
         scalar epsilonc =
-            w*Cmu75*pow(k[celli], 1.5)/(nutw.kappa()*(y[facei] + z0[facei]));
+            w*Cmu75*pow(k[celli], 1.5)/(kappa*(y[facei] + z0[facei]));
 
         scalar Gc =
             w
            *(nutw[facei] + nuw[facei])
            *magGradUw[facei]
            *Cmu25*sqrt(k[celli])
-           /(nutw.kappa()*(y[facei] + z0[facei]));
+           /(kappa*(y[facei] + z0[facei]));
 
-        if (lowReCorrection_ && yPlus < nutw.yPlusLam())
+        if (lowReCorrection_ && yPlus < yPlusLam)
         {
             epsilonc = w*2.0*k[celli]*nuw[facei]/sqr(y[facei] + z0[facei]);
             Gc = 0;
@@ -111,6 +113,22 @@ void Foam::atmEpsilonWallFunctionFvPatchScalarField::calculate
 
         G0[celli] += Gc;
     }
+}
+
+
+void Foam::atmEpsilonWallFunctionFvPatchScalarField::writeLocalEntries
+(
+    Ostream& os
+) const
+{
+    os.writeEntryIfDifferent<bool>("lowReCorrection", false, lowReCorrection_);
+
+    if (z0_)
+    {
+        z0_->writeData(os);
+    }
+
+    wallCoeffs_.writeEntries(os);
 }
 
 
@@ -186,7 +204,11 @@ void Foam::atmEpsilonWallFunctionFvPatchScalarField::autoMap
 )
 {
     epsilonWallFunctionFvPatchScalarField::autoMap(m);
-    z0_->autoMap(m);
+
+    if (z0_)
+    {
+        z0_->autoMap(m);
+    }
 }
 
 
@@ -198,10 +220,12 @@ void Foam::atmEpsilonWallFunctionFvPatchScalarField::rmap
 {
     epsilonWallFunctionFvPatchScalarField::rmap(ptf, addr);
 
-    const atmEpsilonWallFunctionFvPatchScalarField& atmpsf =
+    const auto& atmpsf =
         refCast<const atmEpsilonWallFunctionFvPatchScalarField>(ptf);
-
-    z0_->rmap(atmpsf.z0_(), addr);
+    if (z0_)
+    {
+        z0_->rmap(atmpsf.z0_(), addr);
+    }
 }
 
 
@@ -210,8 +234,9 @@ void Foam::atmEpsilonWallFunctionFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    epsilonWallFunctionFvPatchScalarField::write(os);
-    z0_->writeData(os);
+    fvPatchField<scalar>::write(os);
+    writeLocalEntries(os);
+    writeEntry("value", os);
 }
 
 

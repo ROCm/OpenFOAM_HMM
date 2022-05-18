@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016, 2019 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,7 +32,6 @@ License
 #include "volFields.H"
 #include "addToRunTimeSelectionTable.H"
 
-
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 Foam::scalar Foam::nutkRoughWallFunctionFvPatchScalarField::fnRough
@@ -51,10 +50,8 @@ Foam::scalar Foam::nutkRoughWallFunctionFvPatchScalarField::fnRough
             sin(0.4258*(log(KsPlus) - 0.811))
         );
     }
-    else
-    {
-        return (1.0 + Cs*KsPlus);
-    }
+
+    return (1.0 + Cs*KsPlus);
 }
 
 
@@ -63,7 +60,7 @@ calcNut() const
 {
     const label patchi = patch().index();
 
-    const turbulenceModel& turbModel = db().lookupObject<turbulenceModel>
+    const auto& turbModel = db().lookupObject<turbulenceModel>
     (
         IOobject::groupName
         (
@@ -71,16 +68,21 @@ calcNut() const
             internalField().group()
         )
     );
+
     const scalarField& y = turbModel.y()[patchi];
+
     const tmp<volScalarField> tk = turbModel.k();
     const volScalarField& k = tk();
+
     const tmp<scalarField> tnuw = turbModel.nu(patchi);
     const scalarField& nuw = tnuw();
 
-    const scalar Cmu25 = pow025(Cmu_);
+    const scalar Cmu25 = pow025(wallCoeffs_.Cmu());
+    const scalar kappa = wallCoeffs_.kappa();
+    const scalar E = wallCoeffs_.E();
 
-    tmp<scalarField> tnutw(new scalarField(*this));
-    scalarField& nutw = tnutw.ref();
+    auto tnutw = tmp<scalarField>::New(*this);
+    auto& nutw = tnutw.ref();
 
     forAll(nutw, facei)
     {
@@ -90,7 +92,7 @@ calcNut() const
         const scalar yPlus = uStar*y[facei]/nuw[facei];
         const scalar KsPlus = uStar*Ks_[facei]/nuw[facei];
 
-        scalar Edash = E_;
+        scalar Edash = E;
         if (2.25 < KsPlus)
         {
             Edash /= fnRough(KsPlus, Cs_[facei]);
@@ -106,7 +108,7 @@ calcNut() const
                 min
                 (
                     nuw[facei]
-                   *(yPlus*kappa_/log(max(Edash*yPlus, 1+1e-4)) - 1),
+                   *(yPlus*kappa/log(max(Edash*yPlus, 1+1e-4)) - 1),
                     2*limitingNutw
                 ), 0.5*limitingNutw
             );
@@ -122,6 +124,16 @@ calcNut() const
     }
 
     return tnutw;
+}
+
+
+void Foam::nutkRoughWallFunctionFvPatchScalarField::writeLocalEntries
+(
+    Ostream& os
+) const
+{
+    Cs_.writeEntry("Cs", os);
+    Ks_.writeEntry("Ks", os);
 }
 
 
@@ -215,7 +227,7 @@ void Foam::nutkRoughWallFunctionFvPatchScalarField::rmap
 {
     nutkWallFunctionFvPatchScalarField::rmap(ptf, addr);
 
-    const nutkRoughWallFunctionFvPatchScalarField& nrwfpsf =
+    const auto& nrwfpsf =
         refCast<const nutkRoughWallFunctionFvPatchScalarField>(ptf);
 
     Ks_.rmap(nrwfpsf.Ks_, addr);
@@ -228,10 +240,8 @@ void Foam::nutkRoughWallFunctionFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    fvPatchField<scalar>::write(os);
+    nutWallFunctionFvPatchScalarField::write(os);
     writeLocalEntries(os);
-    Cs_.writeEntry("Cs", os);
-    Ks_.writeEntry("Ks", os);
     writeEntry("value", os);
 }
 

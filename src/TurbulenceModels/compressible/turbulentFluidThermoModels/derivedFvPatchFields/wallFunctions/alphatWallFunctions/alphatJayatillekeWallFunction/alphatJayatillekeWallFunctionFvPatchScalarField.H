@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd
+    Copyright (C) 2017-2022 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,27 +35,34 @@ Description
     thermal diffusivity (usually\c alphat) based on the Jayatilleke model.
 
 Usage
-    \table
-        Property     | Description             | Required    | Default value
-        Prt          | turbulent Prandtl number | no         | 0.85
-        kappa        | Von Karman constant     | no          | 0.41
-        E            | model coefficient       | no          | 9.8
-    \endtable
-
     Example of the boundary condition specification:
     \verbatim
     <patchName>
     {
+        // Mandatory entries
         type            alphatJayatillekeWallFunction;
-        Prt             0.85;
-        kappa           0.41;
-        E               9.8;
-        value           uniform 0; // optional value entry
+
+        // Optional entries
+        Prt             <scalar>;
+        kappa           <scalar>;
+        E               <scalar>;
+
+        // Inherited entries
+        ...
     }
     \endverbatim
 
-See also
-    Foam::fixedValueFvPatchField
+    where the entries mean:
+    \table
+      Property  | Description                    | Type   | Reqd  | Deflt
+      type      | Type name: alphatJayatillekeWallFunction | word | yes  | -
+      Prt       | Turbulent Prandtl number       | scalar | no    | 0.85
+      kappa     | von Karman constant            | scalar | no    | 0.41
+      E         | Wall roughness parameter       | scalar | no    | 9.8
+    \endtable
+
+    The inherited entries are elaborated in:
+      - \link fixedValueFvPatchFields.H \endlink
 
 SourceFiles
     alphatJayatillekeWallFunctionFvPatchScalarField.C
@@ -83,7 +90,7 @@ class alphatJayatillekeWallFunctionFvPatchScalarField
 :
     public fixedValueFvPatchScalarField
 {
-    // Private data
+    // Private Data
 
         //- Turbulent Prandtl number
         scalar Prt_;
@@ -148,8 +155,8 @@ public:
         );
 
         //- Construct by mapping given an
-        //  alphatJayatillekeWallFunctionFvPatchScalarField
-        //  onto a new patch
+        //- alphatJayatillekeWallFunctionFvPatchScalarField
+        //- onto a new patch
         alphatJayatillekeWallFunctionFvPatchScalarField
         (
             const alphatJayatillekeWallFunctionFvPatchScalarField&,
@@ -197,9 +204,9 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
-        // Evaluation functions
+        // Evaluation
 
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();

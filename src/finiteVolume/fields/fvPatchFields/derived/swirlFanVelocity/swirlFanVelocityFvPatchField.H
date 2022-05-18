@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,8 +30,8 @@ Group
     grpCoupledBoundaryConditions
 
 Description
-    This boundary condition provides a jump condition for U across a
-    cyclic pressure jump condition and applies a transformation to U.
+    This boundary condition provides a jump condition for \c U across a
+    cyclic pressure jump condition and applies a transformation to \c U.
 
     The U-jump is specified with a swirl component as follows:
     \verbatim
@@ -45,8 +45,8 @@ Description
             rpm    : RPM of the fan
     \endverbatim
 
-    Alternatively an inner and outer radii can be used instead of rEff. The
-    Utan is as follow for r > rInner and r < rOuter
+    Alternatively an inner and outer radii can be used instead of \c rEff.
+    The \c Utan is as follow for \c r > \c rInner and \c r < \c rOuter
     \verbatim
             Utan = deltaP/r/fanEff/(rpm/pi/30.0);
 
@@ -55,7 +55,7 @@ Description
                 r : p - origin, p is the face center
     \endverbatim
 
-    Outside rInner and rOuter, Utan = 0. The input for this mode is:
+    Outside \c rInner and \c rOuter, \c Utan=0. The input for this mode is:
     \verbatim
             useRealRadius   true;
             rInner          0.005;
@@ -65,36 +65,58 @@ Description
     The radial velocity is zero in the present model.
 
 Usage
-    \table
-        Property     | Description             | Required    | Default
-        patchType    | underlying patch type should be \c cyclic| yes |
-        phi          | flux field name         | no          | phi
-        rho          | density field name      | no          | rho
-        p            | pressure field name     | no          | p
-        origin       | fan centre              | no          | calculated
-        rpm          | RPM of the fan          | yes
-        fanEff       | Fan efficiency          | no          | 1
-        rEff         | Effective radius        | no          | 0
-        useRealRadius| Use inner/outer radii   | no          | false
-        rInner       | Inner radius            | no          | 0
-        rOuter       | Outer radius            | no          | 0
-    \endtable
-
     Example of the boundary condition specification:
     \verbatim
     <patchName>
     {
-        cyclicFaces_master
-        {
-            type            swirlFanVelocity;
-            patchType       cyclic;
-            jump            uniform (0 0 0);
-            value           uniform (0 0 0);
-            rpm             1000;
-            rEff            0.01;
-        }
+        // Mandatory entries
+        type            swirlFanVelocity;
+        patchType       cyclic;
+        rpm             <Function1>;
+
+        // Optional entries
+        phi             <word>;
+        p               <word>;
+        rho             <word>;
+        origin          <vector>;
+        fanEff          <scalar>;
+        rEff            <scalar>;
+        rInner          <scalar>;
+        rOuter          <scalar>;
+        useRealRadius   <bool>;
+
+        // Inherited entries
+        ...
     }
     \endverbatim
+
+    where the entries mean:
+    \table
+      Property     | Description                       | Type | Reqd | Deflt
+      type         | Type name: swirlFanVelocity       | word | yes  | -
+      patchType    | Underlying patch type: cyclic     | word | yes  | -
+      rpm          | RPM of the fan      | Function1\<scalar\> | yes | -
+      phi          | Name of flux field                | word | no   | phi
+      rho          | Name of density field             | word | no   | rho
+      p            | Name of pressure field            | word | no   | p
+      origin       | Fan centre               | vector | no   | calculated
+      fanEff       | Fan efficiency                  | scalar | no   | 1
+      rEff         | Effective radius                | scalar | no   | 0
+      rInner       | Inner radius                    | scalar | no   | 0
+      rOuter       | Outer radius                    | scalar | no   | 0
+      useRealRadius| Flag to use inner/outer radii     | bool | no   | false
+    \endtable
+
+    The inherited entries are elaborated in:
+      - \link fixedJumpFvPatchField.H \endlink
+      - \link Function1.H \endlink
+
+Note
+  - Negative \c rpm will reverse the input tangential direction.
+  - This boundary condition needs to be used with a pressure-jump (e.g. fan)
+    condition with a non-zero dp, otherwise no swirl will be applied (dp=0).
+  - Please ensure physical and complementary set-ups for the pressure-jump
+    and \c swirlFanVelocity boundary conditions.
 
 SourceFiles
     swirlFanVelocityFvPatchField.C

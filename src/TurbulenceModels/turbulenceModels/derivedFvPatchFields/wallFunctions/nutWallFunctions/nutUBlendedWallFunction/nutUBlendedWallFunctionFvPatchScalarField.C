@@ -38,7 +38,7 @@ Foam::nutUBlendedWallFunctionFvPatchScalarField::calcNut() const
 {
     const label patchi = patch().index();
 
-    const turbulenceModel& turbModel = db().lookupObject<turbulenceModel>
+    const auto& turbModel = db().lookupObject<turbulenceModel>
     (
         IOobject::groupName
         (
@@ -46,8 +46,10 @@ Foam::nutUBlendedWallFunctionFvPatchScalarField::calcNut() const
             internalField().group()
         )
     );
+
     const fvPatchVectorField& Uw = U(turbModel).boundaryField()[patchi];
     const scalarField magGradU(mag(Uw.snGrad()));
+
     const tmp<scalarField> tnuw = turbModel.nu(patchi);
     const scalarField& nuw = tnuw();
 
@@ -67,7 +69,7 @@ Foam::nutUBlendedWallFunctionFvPatchScalarField::calcUTau
 {
     const label patchi = patch().index();
 
-    const turbulenceModel& turbModel = db().lookupObject<turbulenceModel>
+    const auto& turbModel = db().lookupObject<turbulenceModel>
     (
         IOobject::groupName
         (
@@ -87,10 +89,13 @@ Foam::nutUBlendedWallFunctionFvPatchScalarField::calcUTau
     Up -= n*(n & Up);
     const scalarField magUp(mag(Up));
 
-    tmp<scalarField> tuTaup(new scalarField(patch().size(), Zero));
-    scalarField& uTaup = tuTaup.ref();
+    auto tuTaup = tmp<scalarField>::New(patch().size(), Zero);
+    auto& uTaup = tuTaup.ref();
 
     const scalarField& nutw = *this;
+
+    const scalar kappa = wallCoeffs_.kappa();
+    const scalar E = wallCoeffs_.E();
 
     forAll(uTaup, facei)
     {
@@ -104,7 +109,7 @@ Foam::nutUBlendedWallFunctionFvPatchScalarField::calcUTau
                 const scalar yPlus = y[facei]*ut/nuw[facei];
                 const scalar uTauVis = magUp[facei]/yPlus;
                 const scalar uTauLog =
-                    kappa_*magUp[facei]/log(max(E_*yPlus, 1 + 1e-4));
+                    kappa*magUp[facei]/log(max(E*yPlus, 1 + 1e-4));
 
                 const scalar utNew =
                     pow(pow(uTauVis, n_) + pow(uTauLog, n_), 1.0/n_);
@@ -116,6 +121,15 @@ Foam::nutUBlendedWallFunctionFvPatchScalarField::calcUTau
     }
 
     return tuTaup;
+}
+
+
+void Foam::nutUBlendedWallFunctionFvPatchScalarField::writeLocalEntries
+(
+    Ostream& os
+) const
+{
+    os.writeEntryIfDifferent<scalar>("n", 4.0, n_);
 }
 
 
@@ -190,7 +204,7 @@ Foam::nutUBlendedWallFunctionFvPatchScalarField::yPlus() const
 {
     const label patchi = patch().index();
 
-    const turbulenceModel& turbModel = db().lookupObject<turbulenceModel>
+    const auto& turbModel = db().lookupObject<turbulenceModel>
     (
         IOobject::groupName
         (
@@ -198,9 +212,12 @@ Foam::nutUBlendedWallFunctionFvPatchScalarField::yPlus() const
             internalField().group()
         )
     );
+
     const scalarField& y = turbModel.y()[patchi];
+
     const tmp<scalarField> tnuw = turbModel.nu(patchi);
     const scalarField& nuw = tnuw();
+
     const fvPatchVectorField& Uw = U(turbModel).boundaryField()[patchi];
     const scalarField magGradU(mag(Uw.snGrad()));
 
@@ -213,9 +230,8 @@ void Foam::nutUBlendedWallFunctionFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    fvPatchField<scalar>::write(os);
+    nutWallFunctionFvPatchScalarField::write(os);
     writeLocalEntries(os);
-    os.writeEntry("n", n_);
     writeEntry("value", os);
 }
 

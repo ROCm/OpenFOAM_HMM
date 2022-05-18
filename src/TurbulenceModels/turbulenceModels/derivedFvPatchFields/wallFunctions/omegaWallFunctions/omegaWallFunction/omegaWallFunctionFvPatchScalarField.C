@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016, 2019 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,20 +34,6 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const Foam::Enum
-<
-    Foam::omegaWallFunctionFvPatchScalarField::blendingType
->
-Foam::omegaWallFunctionFvPatchScalarField::blendingTypeNames
-({
-    { blendingType::STEPWISE , "stepwise" },
-    { blendingType::MAX , "max" },
-    { blendingType::BINOMIAL2 , "binomial2" },
-    { blendingType::BINOMIAL , "binomial" },
-    { blendingType::EXPONENTIAL, "exponential" },
-    { blendingType::TANH, "tanh" }
-});
-
 Foam::scalar Foam::omegaWallFunctionFvPatchScalarField::tolerance_ = 1e-5;
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -59,7 +45,7 @@ void Foam::omegaWallFunctionFvPatchScalarField::setMaster()
         return;
     }
 
-    const volScalarField& omega =
+    const auto& omega =
         static_cast<const volScalarField&>(this->internalField());
 
     const volScalarField::Boundary& bf = omega.boundaryField();
@@ -84,7 +70,7 @@ void Foam::omegaWallFunctionFvPatchScalarField::setMaster()
 
 void Foam::omegaWallFunctionFvPatchScalarField::createAveragingWeights()
 {
-    const volScalarField& omega =
+    const auto& omega =
         static_cast<const volScalarField&>(this->internalField());
 
     const volScalarField::Boundary& bf = omega.boundaryField();
@@ -146,12 +132,12 @@ Foam::omegaWallFunctionFvPatchScalarField::omegaPatch
     const label patchi
 )
 {
-    const volScalarField& omega =
+    const auto& omega =
         static_cast<const volScalarField&>(this->internalField());
 
     const volScalarField::Boundary& bf = omega.boundaryField();
 
-    const omegaWallFunctionFvPatchScalarField& opf =
+    const auto& opf =
         refCast<const omegaWallFunctionFvPatchScalarField>(bf[patchi]);
 
     return const_cast<omegaWallFunctionFvPatchScalarField&>(opf);
@@ -202,8 +188,8 @@ void Foam::omegaWallFunctionFvPatchScalarField::calculate
 {
     const label patchi = patch.index();
 
-    const nutWallFunctionFvPatchScalarField& nutw =
-        nutWallFunctionFvPatchScalarField::nutw(turbModel, patchi);
+    const tmp<scalarField> tnutw = turbModel.nut(patchi);
+    const scalarField& nutw = tnutw();
 
     const scalarField& y = turbModel.y()[patchi];
 
@@ -217,7 +203,9 @@ void Foam::omegaWallFunctionFvPatchScalarField::calculate
 
     const scalarField magGradUw(mag(Uw.snGrad()));
 
-    const scalar Cmu25 = pow025(nutw.Cmu());
+    const scalar Cmu25 = pow025(wallCoeffs_.Cmu());
+    const scalar kappa = wallCoeffs_.kappa();
+    const scalar yPlusLam = wallCoeffs_.yPlusLam();
 
     // Set omega and G
     forAll(nutw, facei)
@@ -230,13 +218,13 @@ void Foam::omegaWallFunctionFvPatchScalarField::calculate
         const scalar omegaVis = 6.0*nuw[facei]/(beta1_*sqr(y[facei]));
 
         // Contribution from the inertial sublayer
-        const scalar omegaLog = sqrt(k[celli])/(Cmu25*nutw.kappa()*y[facei]);
+        const scalar omegaLog = sqrt(k[celli])/(Cmu25*kappa*y[facei]);
 
-        switch (blending_)
+        switch (blender_)
         {
-            case blendingType::STEPWISE:
+            case blenderType::STEPWISE:
             {
-                if (yPlus > nutw.yPlusLam())
+                if (yPlus > yPlusLam)
                 {
                     omega0[celli] += w*omegaLog;
                 }
@@ -247,65 +235,69 @@ void Foam::omegaWallFunctionFvPatchScalarField::calculate
                 break;
             }
 
-            case blendingType::MAX:
+            case blenderType::BINOMIAL:
+            {
+                omega0[celli] +=
+                    w*pow
+                    (
+                        pow(omegaVis, n_) + pow(omegaLog, n_),
+                        scalar(1)/n_
+                    );
+                break;
+            }
+
+            case blenderType::MAX:
             {
                 // (PH:Eq. 27)
                 omega0[celli] += max(omegaVis, omegaLog);
                 break;
             }
 
-            case blendingType::BINOMIAL2:
-            {
-                // (ME:Eq. 15)
-                omega0[celli] += w*sqrt(sqr(omegaVis) + sqr(omegaLog));
-                break;
-            }
-
-            case blendingType::BINOMIAL:
-            {
-                omega0[celli] +=
-                    w*pow
-                    (
-                        pow(omegaVis, n_) + pow(omegaLog, n_),
-                        1.0/n_
-                    );
-                break;
-            }
-
-            case blendingType::EXPONENTIAL:
+            case blenderType::EXPONENTIAL:
             {
                 // (PH:Eq. 31)
-                const scalar Gamma = 0.01*pow4(yPlus)/(1.0 + 5.0*yPlus);
-                const scalar invGamma = 1.0/(Gamma + ROOTVSMALL);
+                const scalar Gamma = 0.01*pow4(yPlus)/(1 + 5*yPlus);
+                const scalar invGamma = scalar(1)/(Gamma + ROOTVSMALL);
 
                 omega0[celli] +=
                     w*(omegaVis*exp(-Gamma) + omegaLog*exp(-invGamma));
                 break;
             }
 
-            case blendingType::TANH:
+            case blenderType::TANH:
             {
                 // (KAS:Eqs. 33-34)
-                const scalar phiTanh = tanh(pow4(yPlus/10.0));
-                const scalar omegab1 = omegaVis + omegaLog;
-                const scalar omegab2 =
+                const scalar phiTanh = tanh(pow4(0.1*yPlus));
+                const scalar b1 = omegaVis + omegaLog;
+                const scalar b2 =
                     pow(pow(omegaVis, 1.2) + pow(omegaLog, 1.2), 1.0/1.2);
 
-                omega0[celli] += phiTanh*omegab1 + (1.0 - phiTanh)*omegab2;
+                omega0[celli] += phiTanh*b1 + (1 - phiTanh)*b2;
                 break;
             }
         }
 
-        if (!(blending_ == blendingType::STEPWISE) || yPlus > nutw.yPlusLam())
+        if (!(blender_ == blenderType::STEPWISE) || yPlus > yPlusLam)
         {
             G0[celli] +=
                 w
                *(nutw[facei] + nuw[facei])
                *magGradUw[facei]
                *Cmu25*sqrt(k[celli])
-               /(nutw.kappa()*y[facei]);
+               /(kappa*y[facei]);
         }
     }
+}
+
+
+void Foam::omegaWallFunctionFvPatchScalarField::writeLocalEntries
+(
+    Ostream& os
+) const
+{
+    wallFunctionBlenders::writeEntries(os);
+    os.writeEntryIfDifferent<scalar>("beta1", 0.075, beta1_);
+    wallCoeffs_.writeEntries(os);
 }
 
 
@@ -318,11 +310,11 @@ Foam::omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(p, iF),
-    blending_(blendingType::BINOMIAL2),
-    n_(2.0),
+    wallFunctionBlenders(),
     initialised_(false),
     master_(-1),
     beta1_(0.075),
+    wallCoeffs_(),
     G_(),
     omega_(),
     cornerWeights_()
@@ -338,11 +330,11 @@ Foam::omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(ptf, p, iF, mapper),
-    blending_(ptf.blending_),
-    n_(ptf.n_),
+    wallFunctionBlenders(ptf),
     initialised_(false),
     master_(-1),
     beta1_(ptf.beta1_),
+    wallCoeffs_(ptf.wallCoeffs_),
     G_(),
     omega_(),
     cornerWeights_()
@@ -357,54 +349,15 @@ Foam::omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(p, iF, dict),
-    blending_
-    (
-        blendingTypeNames.getOrDefault
-        (
-            "blending",
-            dict,
-            blendingType::BINOMIAL2
-        )
-    ),
-    n_
-    (
-        dict.getCheckOrDefault<scalar>
-        (
-            "n",
-            2.0,
-            scalarMinMax::ge(0)
-        )
-    ),
+    wallFunctionBlenders(dict, blenderType::BINOMIAL, scalar(2)),
     initialised_(false),
     master_(-1),
     beta1_(dict.getOrDefault<scalar>("beta1", 0.075)),
+    wallCoeffs_(dict),
     G_(),
     omega_(),
     cornerWeights_()
 {
-    // The deprecated 'blended' keyword is superseded by the enum 'blending'
-    if (dict.found("blended"))
-    {
-        IOWarningInFunction(dict)
-            << "Using deprecated 'blended' keyword"
-            << nl << "    Please use either of the below for the same behaviour:"
-            << nl << "    'blending  binomial2;' for 'blended  on;'"
-            << nl << "    'blending  stepwise;'  for 'blended  off;'"
-            << nl << "    OVERWRITING: 'blended' keyword -> 'blending' enum"
-            << endl;
-
-        bool blended = dict.get<bool>("blended");
-
-        if (blended)
-        {
-            blending_ = blendingType::BINOMIAL2;
-        }
-        else
-        {
-            blending_ = blendingType::STEPWISE;
-        }
-    }
-
     // apply zero-gradient condition on start-up
     this->operator==(patchInternalField());
 }
@@ -416,11 +369,11 @@ Foam::omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(owfpsf),
-    blending_(owfpsf.blending_),
-    n_(owfpsf.n_),
+    wallFunctionBlenders(owfpsf),
     initialised_(false),
     master_(-1),
     beta1_(owfpsf.beta1_),
+    wallCoeffs_(owfpsf.wallCoeffs_),
     G_(),
     omega_(),
     cornerWeights_()
@@ -434,11 +387,11 @@ Foam::omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(owfpsf, iF),
-    blending_(owfpsf.blending_),
-    n_(owfpsf.n_),
+    wallFunctionBlenders(owfpsf),
     initialised_(false),
     master_(-1),
     beta1_(owfpsf.beta1_),
+    wallCoeffs_(owfpsf.wallCoeffs_),
     G_(),
     omega_(),
     cornerWeights_()
@@ -492,7 +445,7 @@ void Foam::omegaWallFunctionFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    const turbulenceModel& turbModel = db().lookupObject<turbulenceModel>
+    const auto& turbModel = db().lookupObject<turbulenceModel>
     (
         IOobject::groupName
         (
@@ -540,7 +493,7 @@ void Foam::omegaWallFunctionFvPatchScalarField::updateWeightedCoeffs
         return;
     }
 
-    const turbulenceModel& turbModel = db().lookupObject<turbulenceModel>
+    const auto& turbModel = db().lookupObject<turbulenceModel>
     (
         IOobject::groupName
         (
@@ -651,10 +604,9 @@ void Foam::omegaWallFunctionFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    os.writeEntry("blending", blendingTypeNames[blending_]);
-    os.writeEntry("n", n_);
-    os.writeEntry("beta1", beta1_);
-    fixedValueFvPatchField<scalar>::write(os);
+    fvPatchField<scalar>::write(os);
+    writeLocalEntries(os);
+    writeEntry("value", os);
 }
 
 

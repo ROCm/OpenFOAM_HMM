@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,7 +31,36 @@ Group
     grpTurbulenceBoundaryConditions
 
 Description
-    Set a constant shear stress as tau0 = -nuEff dU/dn.
+    This boundary condition sets a user-defined shear stress
+    constant and uniform across a given patch by using the expression:
+
+    \f[
+        tau_0 = -\nu_{eff} \frac{dU}{dn}
+    \f]
+
+Usage
+    Example of the boundary condition specification:
+    \verbatim
+    <patchName>
+    {
+        // Mandatory entries
+        type             fixedShearStress;
+        tau              <vector>;
+
+        // Inherited entries
+        ...
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property  | Description                      | Type | Reqd | Deflt
+      type      | Type name: fixedShearStress      | word | yes  | -
+      tau       | Shear stress                   | vector | yes  | -
+    \endtable
+
+    The inherited entries are elaborated in:
+      - \link fixedValueFvPatchFields.H \endlink
 
 SourceFiles
     fixedShearStressFvPatchVectorField.C
@@ -56,7 +86,7 @@ class fixedShearStressFvPatchVectorField
 :
     public fixedValueFvPatchVectorField
 {
-    // Private data
+    // Private Data
 
         //- Constant shear stress
         const vector tau0_;
@@ -129,13 +159,18 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
-        //- Update the coefficients associated with the patch field
-        virtual void updateCoeffs();
+        // Evaluation
 
-        //- Write
-        virtual void write(Ostream&) const;
+            //- Update the coefficients associated with the patch field
+            virtual void updateCoeffs();
+
+
+        // I-O
+
+            //- Write
+            virtual void write(Ostream&) const;
 };
 
 

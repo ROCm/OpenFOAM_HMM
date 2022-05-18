@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
     Copyright (C) 2020 ENERCON GmbH
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,15 +45,15 @@ tmp<scalarField> atmNutkWallFunctionFvPatchScalarField::calcNut() const
 {
     const label patchi = patch().index();
 
-    const auto& turbModel =
-        db().lookupObject<turbulenceModel>
+    const auto& turbModel = db().lookupObject<turbulenceModel>
+    (
+        IOobject::groupName
         (
-            IOobject::groupName
-            (
-                turbulenceModel::propertiesName,
-                internalField().group()
-            )
-        );
+            turbulenceModel::propertiesName,
+            internalField().group()
+        )
+    );
+
     const scalarField& y = turbModel.y()[patchi];
 
     const tmp<volScalarField> tk = turbModel.k();
@@ -65,7 +65,8 @@ tmp<scalarField> atmNutkWallFunctionFvPatchScalarField::calcNut() const
     auto tnutw = tmp<scalarField>::New(*this);
     auto& nutw = tnutw.ref();
 
-    const scalar Cmu25 = pow025(Cmu_);
+    const scalar Cmu25 = pow025(wallCoeffs_.Cmu());
+    const scalar kappa = wallCoeffs_.kappa();
 
     const scalar t = db().time().timeOutputValue();
     const scalarField z0(z0_->value(t));
@@ -94,7 +95,7 @@ tmp<scalarField> atmNutkWallFunctionFvPatchScalarField::calcNut() const
         const scalar yPlus = uStar*y[facei]/nuw[facei];
         const scalar Edash = (y[facei] + z0[facei])/z0[facei];
 
-        nutw[facei] = nuw[facei]*(yPlus*kappa_/log(max(Edash, 1 + 1e-4)) - 1);
+        nutw[facei] = nuw[facei]*(yPlus*kappa/log(max(Edash, 1 + 1e-4)) - 1);
     }
 
     if (boundNut_)
@@ -103,6 +104,20 @@ tmp<scalarField> atmNutkWallFunctionFvPatchScalarField::calcNut() const
     }
 
     return tnutw;
+}
+
+
+void Foam::atmNutkWallFunctionFvPatchScalarField::writeLocalEntries
+(
+    Ostream& os
+) const
+{
+    os.writeEntryIfDifferent<bool>("boundNut", false, boundNut_);
+
+    if (z0_)
+    {
+        z0_->writeData(os);
+    }
 }
 
 
@@ -178,7 +193,11 @@ void atmNutkWallFunctionFvPatchScalarField::autoMap
 )
 {
     nutkWallFunctionFvPatchScalarField::autoMap(m);
-    z0_->autoMap(m);
+
+    if (z0_)
+    {
+        z0_->autoMap(m);
+    }
 }
 
 
@@ -190,19 +209,20 @@ void atmNutkWallFunctionFvPatchScalarField::rmap
 {
     nutkWallFunctionFvPatchScalarField::rmap(ptf, addr);
 
-    const atmNutkWallFunctionFvPatchScalarField& nrwfpsf =
+    const auto& nrwfpsf =
         refCast<const atmNutkWallFunctionFvPatchScalarField>(ptf);
 
-    z0_->rmap(nrwfpsf.z0_(), addr);
+    if (z0_)
+    {
+        z0_->rmap(nrwfpsf.z0_(), addr);
+    }
 }
 
 
 void atmNutkWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchField<scalar>::write(os);
-    nutWallFunctionFvPatchScalarField::writeLocalEntries(os);
-    os.writeEntry("boundNut", boundNut_);
-    z0_->writeData(os);
+    nutWallFunctionFvPatchScalarField::write(os);
+    writeLocalEntries(os);
     writeEntry("value", os);
 }
 

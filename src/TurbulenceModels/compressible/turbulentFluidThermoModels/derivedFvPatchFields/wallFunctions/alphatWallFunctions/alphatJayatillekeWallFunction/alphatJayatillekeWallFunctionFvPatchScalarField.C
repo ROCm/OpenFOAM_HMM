@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd
+    Copyright (C) 2017-2022 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,12 +66,13 @@ tmp<scalarField> alphatJayatillekeWallFunctionFvPatchScalarField::yPlus
 ) const
 {
     const label patchi = patch().index();
+
     const tmp<volScalarField> tnut = turbModel.nut();
     const volScalarField& nut = tnut();
 
     if (isA<nutWallFunctionFvPatchScalarField>(nut.boundaryField()[patchi]))
     {
-        const nutWallFunctionFvPatchScalarField& nutPf =
+        const auto& nutPf =
             dynamic_cast<const nutWallFunctionFvPatchScalarField&>
             (
                 nut.boundaryField()[patchi]
@@ -106,13 +107,13 @@ scalar alphatJayatillekeWallFunctionFvPatchScalarField::yPlusTherm
     const scalar Prat
 ) const
 {
-    scalar ypt = 11.0;
+    scalar ypt = 11;
 
-    for (int i=0; i<maxIters_; i++)
+    for (int iter = 0; iter < maxIters_; ++iter)
     {
-        scalar f = ypt - (log(E_*ypt)/kappa_ + P)/Prat;
-        scalar df = 1.0 - 1.0/(ypt*kappa_*Prat);
-        scalar yptNew = ypt - f/df;
+        const scalar f = ypt - (log(E_*ypt)/kappa_ + P)/Prat;
+        const scalar df = 1.0 - 1.0/(ypt*kappa_*Prat);
+        const scalar yptNew = ypt - f/df;
 
         if (yptNew < VSMALL)
         {
@@ -226,15 +227,14 @@ void alphatJayatillekeWallFunctionFvPatchScalarField::updateCoeffs()
     const label patchi = patch().index();
 
     // Retrieve turbulence properties from model
-    const compressible::turbulenceModel& turbModel =
-        db().lookupObject<compressible::turbulenceModel>
+    const auto& turbModel = db().lookupObject<compressible::turbulenceModel>
+    (
+        IOobject::groupName
         (
-            IOobject::groupName
-            (
-                compressible::turbulenceModel::propertiesName,
-                internalField().group()
-            )
-        );
+            compressible::turbulenceModel::propertiesName,
+            internalField().group()
+        )
+    );
 
     const scalarField yPlusp(yPlus(turbModel));
 
@@ -265,42 +265,45 @@ void alphatJayatillekeWallFunctionFvPatchScalarField::updateCoeffs()
     // Populate boundary values
     forAll(alphatw, facei)
     {
-        scalar yPlus = yPlusp[facei];
+        const scalar yPlus = yPlusp[facei];
 
-        scalar uTau = yPlus/y[facei]*(muw[facei]/rhow[facei]);
+        const scalar uTau = yPlus/y[facei]*(muw[facei]/rhow[facei]);
 
         // Molecular Prandtl number
-        scalar Pr = muw[facei]/alphaw[facei];
+        const scalar Pr = muw[facei]/alphaw[facei];
 
         // Molecular-to-turbulent Prandtl number ratio
-        scalar Prat = Pr/Prt_;
+        const scalar Prat = Pr/Prt_;
 
         // Thermal sublayer thickness
-        scalar P = Psmooth(Prat);
-        scalar yPlusTherm = this->yPlusTherm(P, Prat);
+        const scalar P = Psmooth(Prat);
+        const scalar yPlusTherm = this->yPlusTherm(P, Prat);
 
         // Evaluate new effective thermal diffusivity
-        scalar alphaEff = 0.0;
+        scalar alphaEff = 0;
         if (yPlus < yPlusTherm)
         {
-            scalar A = qDot[facei]*rhow[facei]*uTau*y[facei];
-            scalar B = qDot[facei]*Pr*yPlus;
-            scalar C = Pr*0.5*rhow[facei]*uTau*sqr(magUp[facei]);
+            const scalar A = qDot[facei]*rhow[facei]*uTau*y[facei];
+            const scalar B = qDot[facei]*Pr*yPlus;
+            const scalar C = Pr*0.5*rhow[facei]*uTau*sqr(magUp[facei]);
+
             alphaEff = A/(B + C + VSMALL);
         }
         else
         {
-            scalar A = qDot[facei]*rhow[facei]*uTau*y[facei];
-            scalar B = qDot[facei]*Prt_*(1.0/kappa_*log(E_*yPlus) + P);
-            scalar magUc = uTau/kappa_*log(E_*yPlusTherm) - mag(Uw[facei]);
-            scalar C =
+            const scalar A = qDot[facei]*rhow[facei]*uTau*y[facei];
+            const scalar B = qDot[facei]*Prt_*(1.0/kappa_*log(E_*yPlus) + P);
+            const scalar magUc =
+                uTau/kappa_*log(E_*yPlusTherm) - mag(Uw[facei]);
+            const scalar C =
                 0.5*rhow[facei]*uTau
                *(Prt_*sqr(magUp[facei]) + (Pr - Prt_)*sqr(magUc));
+
             alphaEff = A/(B + C + VSMALL);
         }
 
         // Update turbulent thermal diffusivity
-        alphatw[facei] = max(0.0, alphaEff - alphaw[facei]);
+        alphatw[facei] = max(scalar(0), alphaEff - alphaw[facei]);
 
         if (debug)
         {
@@ -324,9 +327,9 @@ void alphatJayatillekeWallFunctionFvPatchScalarField::updateCoeffs()
 void alphatJayatillekeWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
-    os.writeEntry("Prt", Prt_);
-    os.writeEntry("kappa", kappa_);
-    os.writeEntry("E", E_);
+    os.writeEntryIfDifferent<scalar>("Prt", 0.85, Prt_);
+    os.writeEntryIfDifferent<scalar>("kappa", 0.41, kappa_);
+    os.writeEntryIfDifferent<scalar>("E", 9.8, E_);
     writeEntry("value", os);
 }
 

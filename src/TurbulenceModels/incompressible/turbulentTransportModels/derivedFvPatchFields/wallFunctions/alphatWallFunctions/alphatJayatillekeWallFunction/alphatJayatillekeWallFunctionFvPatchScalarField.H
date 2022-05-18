@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd
+    Copyright (C) 2017-2022 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,26 +35,37 @@ Description
     for using wall functions, using the Jayatilleke 'P' function.
 
 Usage
-    \table
-        Property     | Description             | Required    | Default value
-        Prt          | turbulent Prandtl number | no         | 0.85
-        kappa        | Von Karman constant     | no          | 0.41
-        E            | model coefficient       | no          | 9.8
-    \endtable
-
     Example of the boundary condition specification:
     \verbatim
     <patchName>
     {
+        // Mandatory entries
         type            alphatJayatillekeWallFunction;
+
+        // Optional entries
+        Prt             <scalar>;
+        kappa           <scalar>;
+        E               <scalar>;
+
+        // Inherited entries
+        ...
     }
     \endverbatim
 
-Note
-    The units of kinematic turbulent thermal conductivity are [m2/s]
+    where the entries mean:
+    \table
+      Property  | Description                    | Type   | Reqd  | Deflt
+      type      | Type name: alphatJayatillekeWallFunction | word | yes  | -
+      Prt       | Turbulent Prandtl number       | scalar | no    | 0.85
+      kappa     | von Karman constant            | scalar | no    | 0.41
+      E         | Wall roughness parameter       | scalar | no    | 9.8
+    \endtable
 
-See also
-    Foam::fixedValueFvPatchField
+    The inherited entries are elaborated in:
+      - \link fixedValueFvPatchFields.H \endlink
+
+Note
+  - The units of kinematic turbulent thermal conductivity are [m2/s].
 
 SourceFiles
     alphatJayatillekeWallFunctionFvPatchScalarField.C
@@ -84,7 +95,7 @@ class alphatJayatillekeWallFunctionFvPatchScalarField
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Turbulent Prandtl number
         scalar Prt_;
@@ -102,7 +113,7 @@ protected:
             static label maxIters_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Check the type of the patch
         virtual void checkType();
@@ -145,8 +156,8 @@ public:
         );
 
         //- Construct by mapping given
-        //  alphatJayatillekeWallFunctionFvPatchScalarField
-        //  onto a new patch
+        //- alphatJayatillekeWallFunctionFvPatchScalarField
+        //- onto a new patch
         alphatJayatillekeWallFunctionFvPatchScalarField
         (
             const alphatJayatillekeWallFunctionFvPatchScalarField&,
@@ -190,9 +201,9 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
-        // Evaluation functions
+        // Evaluation
 
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();
