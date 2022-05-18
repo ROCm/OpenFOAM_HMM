@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,8 +31,8 @@ Group
     grpFvOptionsSources
 
 Description
-    Heat exchanger source model for compressible flows, in which the heat
-    exchanger is defined as an energy source using a selection of cells.
+    Heat exchanger source model for compressible flows, where the heat
+    exchanger is modelled as an energy source using a selection of cells.
 
     The total heat exchange source is given by:
     \f[
@@ -41,13 +41,13 @@ Description
 
     where:
     \vartable
-        Q_t       | total heat source
-        e(\phi,\dot{m}_2) | effectivenes table
-        \phi      | net mass flux entering heat exchanger [kg/s]
-        \dot{m}_2 | secondary mass flow rate [kg/s]
-        T_1       | primary inlet temperature [K]
-        T_2       | secondary inlet temperature [K]
-        c_p       | specific heat capacity [J/kg/K]
+        Q_t       | Total heat exchange source [J/s]
+        e(\phi,\dot{m}_2) | Effectivenes table [-]
+        \phi      | Net mass flux entering heat exchanger [kg/s]
+        \dot{m}_2 | Secondary flow mass flow rate [kg/s]
+        T_1       | Primary flow inlet temperature [K]
+        T_2       | Secondary flow inlet temperature [K]
+        c_p       | Primary flow specific heat capacity [J/kg/K]
     \endvartable
 
 
@@ -58,11 +58,11 @@ Description
 
     where:
     \vartable
-        Q_c     | source for cell
-        V_c     | volume of the cell [m3]
-        U_c     | local cell velocity [m/s]
-        T_c     | local call temperature [K]
-        T_{ref} | min or max(T) in cell zone depending on the sign of Q_t [K]
+        Q_c     | Source for cell
+        V_c     | Volume of the cell [m3]
+        U_c     | Local cell velocity [m/s]
+        T_c     | Local cell temperature [K]
+        T_{ref} | Min or max(T) in cell zone depending on the sign of Qt [K]
     \endvartable
 
     Sources applied to either of the below, if exist:
@@ -83,63 +83,69 @@ Usage
     \verbatim
     effectivenessHeatExchangerSource1
     {
-        // Mandatory entries (unmodifiable)
-        type                effectivenessHeatExchangerSource;
-
-        // Mandatory entries (runtime modifiable)
+        // Mandatory entries
+        type                     effectivenessHeatExchangerSource;
         faceZone                 <faceZoneName>;
-        secondaryMassFlowRate    1.0;
-        secondaryInletT          336;
-
+        secondaryMassFlowRate    <scalar>;
+        secondaryInletT          <scalar>;
+        file                     "effectivenessTable";
         outOfBounds              clamp;
-        file                     "effTable";
 
-        // Optional entries (runtime modifiable)
-        primaryInletT            293;
-        targetQdot               1500;
-        U                        <Uname>;
-        T                        <Tname>;
-        phi                      <phiName>;
+        // Optional entries
+        U                        <word>;
+        T                        <word>;
+        phi                      <word>;
 
-        // Conditional optional entries (runtime modifiable)
+        // Conditional optional entries
 
-            // when the entry "targetQdot" is present
-            targetQdotCalcInterval  1;
-            targetQdotRelax         1.0;
+            // when the total heat exchange is calculated with primary inlet T
+            primaryInletT           <scalar>;
 
-        // Mandatory/Optional (inherited) entries
+            // when the total heat exchange is calculated with a given target
+            targetQdot              <scalar>;
+            targetQdotCalcInterval  <label>;
+            targetQdotRelax         <scalar>;
+
+            // when secondary outlet temperature is requested
+            secondaryCp             <Function1<scalar>>;
+
+        // Inherited entries
         ...
     }
     \endverbatim
 
     where the entries mean:
     \table
-      Property  | Description                       | Type  | Reqd | Dflt
+      Property  | Description                       | Type  | Reqd | Deflt
       type      | Type name: effectivenessHeatExchangerSource <!--
                 -->                                 | word  | yes  | -
       secondaryMassFlowRate | Secondary flow mass rate [kg/s] <!--
                 -->                                 | scalar | yes | -
-      secondaryInletT | Inlet secondary temperature [K]       <!--
+      secondaryInletT | Secondary flow inlet temperature [K]  <!--
                 -->                                 | scalar | yes | -
-      faceZone  | Name of the faceZone at the heat exchange inlet <!--
+      faceZone  | Name of the faceZone at the heat exchanger inlet <!--
                 -->                                 | word   | yes | -
-      file       | 2D look up table efficiency = function of primary <!--
+      file      | 2D effectiveness table = function of primary    <!--
                 --> and secondary mass flow rates [kg/s] | file | yes | -
-      primaryInletT | Primary air temperature at the heat exchanger inlet <!--
+      primaryInletT | Primary flow temperature at the heat exchanger inlet <!--
                 -->                                 | scalar | no  | -
       targetQdot |  Target heat rejection           | scalar | no  | -
       targetQdotCalcInterval | Target heat rejection calculation interval <!--
                 -->                                 | label  | no  | -
       targetQdotRelax | Target heat rejection temperature <!--
                 --> under-relaxation coefficient    | scalar | no  | -
-      U          | Name of operand velocity field   | word   | no  | U
-      T          | Name of operand temperature field  | word   | no  | T
-      phi        | Name of operand flux field   | word   | no  | phi
+      secondaryCp | Secondary flow specific heat capacity <!--
+                -->                    | Function1\<scalar\> | no  | -
+      U         | Name of operand velocity field    | word   | no  | U
+      T         | Name of operand temperature field | word   | no  | T
+      phi       | Name of operand flux field        | word   | no  | phi
     \endtable
 
     The inherited entries are elaborated in:
-     - \link fvOption.H \endlink
-     - \link cellSetOption.H \endlink
+      - \link fvOption.H \endlink
+      - \link cellSetOption.H \endlink
+      - \link writeFile.H \endlink
+      - \link Function1.H \endlink
 
     The effectiveness table is described in terms of the primary and secondary
     mass flow rates.  For example, the table:
@@ -185,13 +191,15 @@ Usage
     \endverbatim
 
 Note
+  - Primary flow indicates the CFD flow region and
+    secondary flow the non-CFD-model region.
   - The table with name \c file should have the same units as the
-  secondary mass flow rate and kg/s for \c phi.
+    secondary mass flow rate and kg/s for \c phi.
   - \c faceZone is the faces at the inlet of the \c cellZone, it needs to be
-  created with flip map flags. It is used to integrate the net mass flow
-  rate into the heat exchanger.
+    created with flip map flags. It is used to integrate the net mass flow
+    rate into the heat exchanger.
   - \c primaryInletT sets the primary inlet temperature.  If not set, the
-  flux-averaged temperature is used.
+    flux-averaged temperature is used.
 
 SourceFiles
     effectivenessHeatExchangerSource.C
@@ -204,6 +212,8 @@ SourceFiles
 #include "cellSetOption.H"
 #include "autoPtr.H"
 #include "interpolation2DTable.H"
+#include "writeFile.H"
+#include "Function1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -218,71 +228,71 @@ namespace fv
 
 class effectivenessHeatExchangerSource
 :
-    public fv::cellSetOption
+    public fv::cellSetOption,
+    public functionObjects::writeFile
 {
-protected:
+    // Private Data
 
-    // Protected Data
-
-        //- Secondary flow mass rate [kg/s]
-        scalar secondaryMassFlowRate_;
-
-        //- Inlet secondary temperature [K]
-        scalar secondaryInletT_;
-
-        //- Primary air temperature at the heat exchanger inlet [K]
-        scalar primaryInletT_;
-
-        //- Flag to use a user-specified primary inlet temperature
+        //- Flag to use a user-specified primary flow inlet temperature
         bool userPrimaryInletT_;
 
         //- Flag to use target heat rejection
         bool targetQdotActive_;
 
-        //- Target heat rejection
-        scalar targetQdot_;
+        //- Secondary flow specific heat capacity [J/kg/K]
+        autoPtr<Function1<scalar>> secondaryCpPtr_;
+
+        //- 2D effectiveness table = function of primary and secondary
+        //- mass flow rates [kg/s]
+        autoPtr<interpolation2DTable<scalar>> eTable_;
 
         //- Target heat rejection calculation interval
         label targetQdotCalcInterval_;
 
+        //- Secondary flow mass rate [kg/s]
+        scalar secondaryMassFlowRate_;
+
+        //- Secondary flow inlet temperature [K]
+        scalar secondaryInletT_;
+
+        //- Primary flow temperature at the heat exchanger inlet [K]
+        scalar primaryInletT_;
+
+        //- Target heat rejection
+        scalar targetQdot_;
+
         //- Target heat rejection temperature under-relaxation coefficient
         scalar targetQdotRelax_;
 
-        //- 2D look up table efficiency = function of primary and secondary
-        //- mass flow rates [kg/s]
-        autoPtr<interpolation2DTable<scalar>> eTable_;
-
-        //- Name of velocity field; default = U
+        //- Name of operand velocity field
         word UName_;
 
-        //- Name of temperature field; default = T
+        //- Name of operand temperature field
         word TName_;
 
-        //- Name of the flux
+        //- Name of operand flux field
         word phiName_;
 
-        //- Name of the faceZone at the heat exchange inlet
+        //- Name of the faceZone at the heat exchanger inlet
         word faceZoneName_;
 
-         //- Local list of face IDs
+        //- Local list of face IDs
         labelList faceId_;
 
-        //- Local list of patch ID per face
+        //- Local list of patch IDs per face
         labelList facePatchId_;
 
         //- List of +1/-1 representing face flip map (1 use as is, -1 negate)
         labelList faceSign_;
 
 
-private:
-
     // Private Member Functions
 
         //- Initialise heat exchanger source model
         void initialise();
 
-        //- Calculate total area of faceZone across processors
-        void calculateTotalArea(scalar& area);
+        //- Output file header information
+        virtual void writeFileHeader(Ostream& os);
 
 
 public:
@@ -338,7 +348,7 @@ public:
         );
 
 
-        // IO
+        // I-O
 
             //- Read dictionary
             virtual bool read(const dictionary& dict);
