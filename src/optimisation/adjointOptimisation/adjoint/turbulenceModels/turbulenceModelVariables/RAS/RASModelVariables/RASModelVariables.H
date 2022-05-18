@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2019, 2022 PCOpt/NTUA
+    Copyright (C) 2013-2019, 2022 FOSS GP
     Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -175,10 +175,14 @@ public:
         inline const word& TMVar2BaseName() const;
         inline const word& nutBaseName() const;
 
-        //- Bools to idenify which turbulent fields are present
-        inline bool hasTMVar1() const;
-        inline bool hasTMVar2() const;
-        inline bool hasNut() const;
+        //- Bools to identify which turbulent fields are present
+        //  Apart from the distance pointer, all other pointers are
+        //  allocated even if the the corresponding field does not exist.
+        //  Hence, the pointer itself cannot be used to determine the
+        //  existance of the field
+        inline virtual bool hasTMVar1() const;
+        inline virtual bool hasTMVar2() const;
+        inline virtual bool hasNut() const;
         inline bool hasDist() const;
 
         //- Return references to turbulence fields
