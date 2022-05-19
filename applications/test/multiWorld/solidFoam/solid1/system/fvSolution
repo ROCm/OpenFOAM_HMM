@@ -21,33 +21,32 @@ solvers
         solver           PCG;
         preconditioner   DIC;
         tolerance        1e-06;
-        relTol           0.1;
+        relTol           0.0;
     }
-
     hFinal
     {
         $h;
-        tolerance        1e-06;
-        relTol           0;
+        relTol           0.0;
     }
 }
 
 PIMPLE
 {
-    nNonOrthogonalCorrectors 0;
+    nOuterCorrectors            10;
+    nNonOrthogonalCorrectors    0;
 }
 
-SIMPLE
-{
-    nNonOrthogonalCorrectors 0;
-}
+//SIMPLE
+//{
+//    nNonOrthogonalCorrectors    2;
+//}
 
 relaxationFactors
 {
-    equations
-    {
-        h               0.7;
-    }
+//    equations
+//    {
+//        h               0.7;
+//    }
 }
 
 // ************************************************************************* //

@@ -1,10 +1,10 @@
 #!/bin/sh
 cd "${0%/*}" || exit                                # Run from this directory
-. ${WM_PROJECT_DIR:?}/bin/tools/CleanFunctions      # Tutorial clean functions
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
-cleanCase0
-rm -rf constant/solid1/polyMesh
-rm -rf constant/solid2/polyMesh
+restore0Dir
+runApplication -s solid1 blockMesh -region solid1
+runApplication -s solid2 blockMesh -region solid2
 
 #------------------------------------------------------------------------------

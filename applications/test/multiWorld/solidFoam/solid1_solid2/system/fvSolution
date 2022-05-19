@@ -21,7 +21,7 @@ solvers
         solver           PCG;
         preconditioner   DIC;
         tolerance        1e-06;
-        relTol           0.1;
+        relTol           0; //0.1;
     }
 
     hFinal
@@ -35,19 +35,28 @@ solvers
 PIMPLE
 {
     nNonOrthogonalCorrectors 0;
+
+    // Use outer-correctors
+    nOuterCorrectors        5;
+
+    // Use inter-region coupling in final outer-corrector
+    energyCoupling
+    {
+        iterations          5;
+    }
 }
 
-SIMPLE
-{
-    nNonOrthogonalCorrectors 0;
-}
+//SIMPLE
+//{
+//    nNonOrthogonalCorrectors 0;
+//}
 
 relaxationFactors
 {
-    equations
-    {
-        h               0.7;
-    }
+//    equations
+//    {
+//        h               0.7;
+//    }
 }
 
 // ************************************************************************* //

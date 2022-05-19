@@ -15,6 +15,11 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+DebugSwitches
+{
+    compressible::turbulentTemperatureRadCoupledMixed   1;
+}
+
 application     chtMultiRegionFoam;
 
 startFrom       startTime;
@@ -23,14 +28,14 @@ startTime       0;
 
 stopAt          endTime;
 
-endTime         500;
+endTime         10; //500;
 
 deltaT          1;
 
 //writeControl    adjustable;
 //writeInterval   0.1;
 writeControl    timeStep;
-writeInterval   10;
+writeInterval   1;
 
 purgeWrite      0;
 
@@ -53,9 +58,67 @@ runTimeModifiable yes;
 
 //adjustTimeStep  yes;
 
-//functions
-//{
-//    #include "vtkWrite"
-//}
+functions
+{
+    rhoCpT_solid1
+    {
+        // Mandatory entries
+        type            exprField;
+        libs            (fieldFunctionObjects);
+
+        region          solid1;
+        field           rhoCpT_solid1;
+
+        executeControl  timeStep;
+        //writeControl    none;
+
+        // Use expression to define internal energy
+        //expression      "rho*Cp*T";
+        expression      "8000*450*T";
+        dimensions      [ J ];
+    }
+    vol_rhoCpT_solid1
+    {
+        // Mandatory entries (unmodifiable)
+        type            volFieldValue;
+        libs            (fieldFunctionObjects);
+
+        region          solid1;
+        fields          (rhoCpT_solid1);
+        operation       volIntegrate;
+        regionType      all;
+        writeFields     false;
+    }
+
+    rhoCpT_solid2
+    {
+        // Mandatory entries
+        type            exprField;
+        libs            (fieldFunctionObjects);
+
+        region          solid2;
+        field           rhoCpT_solid2;
+
+        executeControl  timeStep;
+        //writeControl    none;
+
+        // Use expression to define internal energy
+        //expression      "rho*Cp*T";
+        expression      "8000*450*T";
+        dimensions      [ J ];
+    }
+    vol_rhoCpT_solid2
+    {
+        // Mandatory entries (unmodifiable)
+        type            volFieldValue;
+        libs            (fieldFunctionObjects);
+
+        region          solid2;
+        fields          (rhoCpT_solid2);
+        operation       volIntegrate;
+        regionType      all;
+        writeFields     false;
+    }
+}
 
 // ************************************************************************* //

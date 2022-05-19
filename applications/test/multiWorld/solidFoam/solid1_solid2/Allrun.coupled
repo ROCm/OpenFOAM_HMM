@@ -5,6 +5,8 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 #- Run in multi-region mode
 ./Allrun.pre
-runApplication $(getApplication)
+foamDictionary 0/solid1/T -entry boundaryField/bottom/useImplicit -add true
+foamDictionary 0/solid2/T -entry boundaryField/top/useImplicit -add true
+runApplication -s coupled $(getApplication)
 
 #------------------------------------------------------------------------------

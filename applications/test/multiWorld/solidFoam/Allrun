@@ -12,4 +12,7 @@ cd "${0%/*}" || exit                                # Run from this directory
 (cd solid2 && runApplication blockMesh)
 mpirun -app mpirun.schema
 
+#- Run in multi-region mode using implicit-coupled chtMultiRegionFoam
+(   cd solid1_solid2 && ./Allrun.coupled )
+
 #------------------------------------------------------------------------------

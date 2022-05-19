@@ -28,8 +28,8 @@ boundaryField
         value           $internalField;
         Tnbr            T;
         kappaMethod     solidThermo;
-        thicknessLayers (1e-2);
-        kappaLayers     (400);
+        //thicknessLayers (1e-2);
+        //kappaLayers     (400);
     }
     top
     {
