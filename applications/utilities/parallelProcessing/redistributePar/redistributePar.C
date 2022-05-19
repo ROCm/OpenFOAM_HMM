@@ -414,7 +414,7 @@ void writeDecomposition
             mesh.time().timeName(),
             mesh,
             IOobject::NO_READ,
-            IOobject::AUTO_WRITE,
+            IOobject::NO_WRITE,
             false                   // do not register
         ),
         mesh,
@@ -422,9 +422,9 @@ void writeDecomposition
         zeroGradientFvPatchScalarField::typeName
     );
 
-    forAll(procCells, cI)
+    forAll(procCells, celli)
     {
-        procCells[cI] = decomp[cI];
+        procCells[celli] = decomp[celli];
     }
 
     procCells.correctBoundaryConditions();

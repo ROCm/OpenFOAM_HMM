@@ -69,7 +69,7 @@ Usage
 #include "faceCoupleInfo.H"
 #include "fvMeshAdder.H"
 #include "polyTopoChange.H"
-#include "extrapolatedCalculatedFvPatchFields.H"
+#include "zeroGradientFvPatchFields.H"
 #include "topoSet.H"
 #include "regionProperties.H"
 #include "fvMeshTools.H"
@@ -399,8 +399,8 @@ void writeDistribution
         << cellDecomposition.objectRelPath()
         << " for use in manual decomposition." << endl;
 
-    // Write as volScalarField for postprocessing. Change time to 0
-    // if was 'constant'
+    // Write as volScalarField for postprocessing.
+    // Change time to 0 if was 'constant'
     {
         const scalar oldTime = runTime.value();
         const label oldIndex = runTime.timeIndex();
@@ -421,8 +421,8 @@ void writeDistribution
                 false
             ),
             masterMesh,
-            dimensionedScalar(dimless, Zero),
-            extrapolatedCalculatedFvPatchScalarField::typeName
+            dimensionedScalar("cellDist", dimless, -1),
+            zeroGradientFvPatchScalarField::typeName
         );
 
         forAll(cellDecomposition, celli)
