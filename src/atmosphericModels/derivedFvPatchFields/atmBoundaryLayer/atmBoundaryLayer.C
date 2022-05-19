@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,7 +42,7 @@ atmBoundaryLayer::atmBoundaryLayer(const Time& time, const polyPatch& pp)
     Cmu_(0.09),
     C1_(0.0),
     C2_(1.0),
-    ppMin_((boundBox(pp.points())).min()),
+    ppMin_((boundBox(pp.localPoints())).min()),
     time_(time),
     patch_(pp),
     flowDir_(nullptr),
@@ -69,7 +69,7 @@ atmBoundaryLayer::atmBoundaryLayer
     Cmu_(dict.getCheckOrDefault<scalar>("Cmu", 0.09, scalarMinMax::ge(SMALL))),
     C1_(dict.getOrDefault("C1", 0.0)),
     C2_(dict.getOrDefault("C2", 1.0)),
-    ppMin_((boundBox(pp.points())).min()),
+    ppMin_((boundBox(pp.localPoints())).min()),
     time_(time),
     patch_(pp),
     flowDir_(Function1<vector>::New("flowDir", dict, &time)),
