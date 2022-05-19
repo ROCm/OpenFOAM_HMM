@@ -14,6 +14,7 @@ $(restraints)/tabulatedAxialAngularSpring/tabulatedAxialAngularSpring.C
 $(restraints)/linearDamper/linearDamper.C
 $(restraints)/sphericalAngularDamper/sphericalAngularDamper.C
 $(restraints)/linearSpringDamper/linearSpringDamper.C
+$(restraints)/softWall/softWall.C
 
 constraints = sixDoFRigidBodyMotion/constraints
 
