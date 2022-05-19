@@ -55,11 +55,14 @@ Foam::basicFvGeometryScheme::basicFvGeometryScheme
 
 void Foam::basicFvGeometryScheme::movePoints()
 {
+    fvGeometryScheme::movePoints();
+
     if (debug)
     {
         Pout<< "basicFvGeometryScheme::movePoints() : "
             << "recalculating primitiveMesh centres" << endl;
     }
+
     // Use lower level to calculate the geometry
     const_cast<fvMesh&>(mesh_).primitiveMesh::updateGeom();
 }
@@ -74,9 +77,8 @@ Foam::tmp<Foam::surfaceScalarField> Foam::basicFvGeometryScheme::weights() const
             << endl;
     }
 
-    tmp<surfaceScalarField> tweights
-    (
-        new surfaceScalarField
+    auto tweights =
+        tmp<surfaceScalarField>::New
         (
             IOobject
             (
@@ -89,9 +91,9 @@ Foam::tmp<Foam::surfaceScalarField> Foam::basicFvGeometryScheme::weights() const
             ),
             mesh_,
             dimless
-        )
-    );
-    surfaceScalarField& weights = tweights.ref();
+        );
+
+    auto& weights = tweights.ref();
     weights.setOriented();
 
     // Set local references to mesh data
@@ -128,7 +130,7 @@ Foam::tmp<Foam::surfaceScalarField> Foam::basicFvGeometryScheme::weights() const
         }
     }
 
-    surfaceScalarField::Boundary& wBf = weights.boundaryFieldRef();
+    auto& wBf = weights.boundaryFieldRef();
 
     forAll(mesh_.boundary(), patchi)
     {
@@ -159,9 +161,8 @@ Foam::basicFvGeometryScheme::deltaCoeffs() const
     // needed to make sure deltaCoeffs are calculated for parallel runs.
     (void)mesh_.weights();
 
-    tmp<surfaceScalarField> tdeltaCoeffs
-    (
-        new surfaceScalarField
+    auto tdeltaCoeffs =
+        tmp<surfaceScalarField>::New
         (
             IOobject
             (
@@ -174,14 +175,14 @@ Foam::basicFvGeometryScheme::deltaCoeffs() const
             ),
             mesh_,
             dimless/dimLength
-        )
-    );
-    surfaceScalarField& deltaCoeffs = tdeltaCoeffs.ref();
+        );
+
+    auto& deltaCoeffs = tdeltaCoeffs.ref();
     deltaCoeffs.setOriented();
 
 
     // Set local references to mesh data
-    const volVectorField& C = mesh_.C();
+    const vectorField& C = mesh_.cellCentres();
     const labelUList& owner = mesh_.owner();
     const labelUList& neighbour = mesh_.neighbour();
 
@@ -190,8 +191,7 @@ Foam::basicFvGeometryScheme::deltaCoeffs() const
         deltaCoeffs[facei] = 1.0/mag(C[neighbour[facei]] - C[owner[facei]]);
     }
 
-    surfaceScalarField::Boundary& deltaCoeffsBf =
-        deltaCoeffs.boundaryFieldRef();
+    auto& deltaCoeffsBf = deltaCoeffs.boundaryFieldRef();
 
     forAll(deltaCoeffsBf, patchi)
     {
@@ -220,9 +220,8 @@ Foam::basicFvGeometryScheme::nonOrthDeltaCoeffs() const
     // needed to make sure deltaCoeffs are calculated for parallel runs.
     weights();
 
-    tmp<surfaceScalarField> tnonOrthDeltaCoeffs
-    (
-        new surfaceScalarField
+    auto tnonOrthDeltaCoeffs =
+        tmp<surfaceScalarField>::New
         (
             IOobject
             (
@@ -235,9 +234,9 @@ Foam::basicFvGeometryScheme::nonOrthDeltaCoeffs() const
             ),
             mesh_,
             dimless/dimLength
-        )
-    );
-    surfaceScalarField& nonOrthDeltaCoeffs = tnonOrthDeltaCoeffs.ref();
+        );
+
+    auto& nonOrthDeltaCoeffs = tnonOrthDeltaCoeffs.ref();
     nonOrthDeltaCoeffs.setOriented();
 
 
@@ -266,8 +265,7 @@ Foam::basicFvGeometryScheme::nonOrthDeltaCoeffs() const
         nonOrthDeltaCoeffs[facei] = 1.0/max(unitArea & delta, 0.05*mag(delta));
     }
 
-    surfaceScalarField::Boundary& nonOrthDeltaCoeffsBf =
-        nonOrthDeltaCoeffs.boundaryFieldRef();
+    auto& nonOrthDeltaCoeffsBf = nonOrthDeltaCoeffs.boundaryFieldRef();
 
     forAll(nonOrthDeltaCoeffsBf, patchi)
     {
@@ -306,9 +304,8 @@ Foam::basicFvGeometryScheme::nonOrthCorrectionVectors() const
             << endl;
     }
 
-    tmp<surfaceVectorField> tnonOrthCorrectionVectors
-    (
-        new surfaceVectorField
+    auto tnonOrthCorrectionVectors =
+        tmp<surfaceVectorField>::New
         (
             IOobject
             (
@@ -321,9 +318,9 @@ Foam::basicFvGeometryScheme::nonOrthCorrectionVectors() const
             ),
             mesh_,
             dimless
-        )
-    );
-    surfaceVectorField& corrVecs = tnonOrthCorrectionVectors.ref();
+        );
+
+    auto& corrVecs = tnonOrthCorrectionVectors.ref();
     corrVecs.setOriented();
 
     // Set local references to mesh data
@@ -337,8 +334,8 @@ Foam::basicFvGeometryScheme::nonOrthCorrectionVectors() const
 
     forAll(owner, facei)
     {
-        vector unitArea = Sf[facei]/magSf[facei];
-        vector delta = C[neighbour[facei]] - C[owner[facei]];
+        vector unitArea(Sf[facei]/magSf[facei]);
+        vector delta(C[neighbour[facei]] - C[owner[facei]]);
 
         corrVecs[facei] = unitArea - delta*NonOrthDeltaCoeffs[facei];
     }
@@ -347,7 +344,7 @@ Foam::basicFvGeometryScheme::nonOrthCorrectionVectors() const
     // and calculated consistently with internal corrections for
     // coupled patches
 
-    surfaceVectorField::Boundary& corrVecsBf = corrVecs.boundaryFieldRef();
+    auto& corrVecsBf = corrVecs.boundaryFieldRef();
 
     forAll(corrVecsBf, patchi)
     {
@@ -361,7 +358,7 @@ Foam::basicFvGeometryScheme::nonOrthCorrectionVectors() const
         }
         else
         {
-            const fvsPatchScalarField& patchNonOrthDeltaCoeffs =
+            const auto& patchNonOrthDeltaCoeffs =
                 NonOrthDeltaCoeffs.boundaryField()[patchi];
 
             const vectorField patchDeltas(mesh_.boundary()[patchi].delta());

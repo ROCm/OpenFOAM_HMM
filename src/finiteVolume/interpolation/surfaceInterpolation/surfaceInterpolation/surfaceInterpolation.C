@@ -48,6 +48,8 @@ namespace Foam
 
 void Foam::surfaceInterpolation::clearOut()
 {
+    // TBD: potential to apply partial clear out only?
+    // Move to fvGeometryScheme?
     weights_.clear();
     deltaCoeffs_.clear();
     nonOrthDeltaCoeffs_.clear();
@@ -161,10 +163,7 @@ bool Foam::surfaceInterpolation::movePoints()
     // Do any primitive geometry calculation
     const_cast<fvGeometryScheme&>(geometry()).movePoints();
 
-    weights_.clear();
-    deltaCoeffs_.clear();
-    nonOrthDeltaCoeffs_.clear();
-    nonOrthCorrectionVectors_.clear();
+    clearOut();
 
     return true;
 }
@@ -179,6 +178,22 @@ void Foam::surfaceInterpolation::updateGeom()
     }
 
     const_cast<fvGeometryScheme&>(geometry()).movePoints();
+
+    clearOut();
+}
+
+
+void Foam::surfaceInterpolation::updateMesh(const mapPolyMesh& mpm)
+{
+    if (debug)
+    {
+        Pout<< "surfaceInterpolation::updateMesh() : "
+            << "Updating geometric properties" << endl;
+    }
+
+    const_cast<fvGeometryScheme&>(geometry()).updateMesh(mpm);
+
+    clearOut();
 }
 
 

@@ -90,18 +90,22 @@ void Foam::fvMesh::updateGeomNotOldVol()
     {
         (void)V();
     }
+
     if (haveSf)
     {
         (void)Sf();
     }
+
     if (haveMagSf)
     {
         (void)magSf();
     }
+
     if (haveCP)
     {
         (void)C();
     }
+
     if (haveCf)
     {
         (void)Cf();
@@ -277,7 +281,7 @@ bool Foam::fvMesh::init(const bool doInit)
         // doing anything with primitiveMesh::cellCentres etc.
         (void)geometry();
 
-        // Intialise my data
+        // Initialise my data
         polyMesh::init(doInit);
     }
 
@@ -285,6 +289,10 @@ bool Foam::fvMesh::init(const bool doInit)
     // and set the storage of V00
     if (fileHandler().isFile(time().timePath()/dbDir()/"V0"))
     {
+        // Set the moving flag early in case the demand-driven geometry
+        // construction checks for it
+        moving(true);
+
         V0Ptr_ = new DimensionedField<scalar, volMesh>
         (
             IOobject
@@ -306,6 +314,10 @@ bool Foam::fvMesh::init(const bool doInit)
     // mesh to be moving
     if (fileHandler().isFile(time().timePath()/dbDir()/"meshPhi"))
     {
+        // Set the moving flag early in case the demand-driven geometry
+        // construction checks for it
+        moving(true);
+
         phiPtr_ = new surfaceScalarField
         (
             IOobject
@@ -339,8 +351,6 @@ bool Foam::fvMesh::init(const bool doInit)
                 V()
             );
         }
-
-        moving(true);
     }
 
     // Assume something changed
@@ -643,7 +653,7 @@ void Foam::fvMesh::removeFvBoundary()
 
 Foam::polyMesh::readUpdateState Foam::fvMesh::readUpdate()
 {
-    DebugInFunction << "Updating fvMesh.  ";
+    DebugInFunction << "Updating fvMesh";
 
     polyMesh::readUpdateState state = polyMesh::readUpdate();
 
@@ -861,7 +871,8 @@ void Foam::fvMesh::mapFields(const mapPolyMesh& meshMap)
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::fvMesh::movePoints(const pointField& p)
+
+void Foam::fvMesh::movePoints(const pointField& p)
 {
     DebugInFunction << endl;
 
@@ -873,12 +884,8 @@ Foam::tmp<Foam::scalarField> Foam::fvMesh::movePoints(const pointField& p)
     }
 
 
-    // Move the polyMesh and set the mesh motion fluxes to the swept-volumes
-
-    scalar rDeltaT = 1.0/time().deltaTValue();
-
-    tmp<scalarField> tsweptVols = polyMesh::movePoints(p);
-    scalarField& sweptVols = tsweptVols.ref();
+    // Move the polyMesh and initialise the mesh motion fluxes field
+    // Note: mesh flux updated by the fvGeometryScheme
 
     if (!phiPtr_)
     {
@@ -895,7 +902,7 @@ Foam::tmp<Foam::scalarField> Foam::fvMesh::movePoints(const pointField& p)
                 false
             ),
             *this,
-            dimVolume/dimTime
+            dimensionedScalar(dimVolume/dimTime, Zero)
         );
     }
     else
@@ -907,19 +914,7 @@ Foam::tmp<Foam::scalarField> Foam::fvMesh::movePoints(const pointField& p)
         }
     }
 
-    surfaceScalarField& phi = *phiPtr_;
-    phi.primitiveFieldRef() =
-        scalarField::subField(sweptVols, nInternalFaces());
-    phi.primitiveFieldRef() *= rDeltaT;
-
-    const fvPatchList& patches = boundary();
-
-    surfaceScalarField::Boundary& phibf = phi.boundaryFieldRef();
-    forAll(patches, patchi)
-    {
-        phibf[patchi] = patches[patchi].patchSlice(sweptVols);
-        phibf[patchi] *= rDeltaT;
-    }
+    polyMesh::movePoints(p);
 
     // Update or delete the local geometric properties as early as possible so
     // they can be used if necessary. These get recreated here instead of
@@ -929,20 +924,21 @@ Foam::tmp<Foam::scalarField> Foam::fvMesh::movePoints(const pointField& p)
     // should use the local geometric properties.
     updateGeomNotOldVol();
 
-
     // Update other local data
     boundary_.movePoints();
-    surfaceInterpolation::movePoints();
+
+    // Clear weights, deltaCoeffs, nonOrthoDeltaCoeffs, nonOrthCorrectionVectors
+    surfaceInterpolation::clearOut();
 
     meshObject::movePoints<fvMesh>(*this);
     meshObject::movePoints<lduMesh>(*this);
-
-    return tsweptVols;
 }
 
 
 void Foam::fvMesh::updateGeom()
 {
+    DebugInFunction << endl;
+
     // Let surfaceInterpolation handle geometry calculation. Note: this does
     // lower levels updateGeom
     surfaceInterpolation::updateGeom();
@@ -1003,7 +999,7 @@ void Foam::fvMesh::updateMesh(const mapPolyMesh& mpm)
     mapFields(mpm);
 
     // Clear the current volume and other geometry factors
-    surfaceInterpolation::clearOut();
+    surfaceInterpolation::updateMesh(mpm);
 
     // Clear any non-updateable addressing
     clearAddressing(true);

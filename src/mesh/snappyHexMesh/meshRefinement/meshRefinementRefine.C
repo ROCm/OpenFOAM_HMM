@@ -2352,6 +2352,10 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::refine
     // Play refinement commands into mesh changer.
     meshCutter_.setRefinement(cellsToRefine, meshMod);
 
+    // Remove any unnecessary fields
+    mesh_.clearOut();
+    mesh_.moving(false);
+
     // Create mesh (no inflation), return map from old to new mesh.
     autoPtr<mapPolyMesh> mapPtr = meshMod.changeMesh(mesh_, false);
     mapPolyMesh& map = *mapPtr;
@@ -2773,6 +2777,10 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::directionalRefine
 
     // Insert mesh refinement into polyTopoChange.
     meshRefiner.setRefinement(cuts, meshMod);
+
+    // Remove any unnecessary fields
+    mesh_.clearOut();
+    mesh_.moving(false);
 
     autoPtr<mapPolyMesh> morphMap = meshMod.changeMesh(mesh_, false);
 

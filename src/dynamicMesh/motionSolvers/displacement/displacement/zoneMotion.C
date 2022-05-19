@@ -98,16 +98,14 @@ Foam::zoneMotion::zoneMotion
     {
         boolList movePts(mesh.nPoints(), false);
 
-        forAll(cellIDs, i)
+        for (label celli : cellIDs)
         {
-            label celli = cellIDs[i];
             const cell& c = mesh.cells()[celli];
-            forAll(c, j)
+            for (label cellFacei : c)
             {
-                const face& f = mesh.faces()[c[j]];
-                forAll(f, k)
+                const face& f = mesh.faces()[cellFacei];
+                for (label pointi : f)
                 {
-                    label pointi = f[k];
                     movePts[pointi] = true;
                 }
             }

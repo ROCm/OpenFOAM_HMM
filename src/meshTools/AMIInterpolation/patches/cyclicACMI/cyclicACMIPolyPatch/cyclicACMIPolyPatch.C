@@ -30,6 +30,7 @@ License
 #include "SubField.H"
 #include "Time.H"
 #include "addToRunTimeSelectionTable.H"
+#include "primitiveMeshTools.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -191,8 +192,7 @@ void Foam::cyclicACMIPolyPatch::scalePatchFaceAreas
     const vectorList& noFaceArea            // nonOverlapPatch.faceAreas()
 )
 {
-    // Primitive patch face areas have been cleared/reset based on the raw
-    // points - need to reset to avoid double-accounting of face areas
+    // Set/scale polyPatch face areas to avoid double-accounting of face areas
 
     const scalar maxTol = scalar(1) - tolerance_;
 
@@ -251,14 +251,31 @@ void Foam::cyclicACMIPolyPatch::scalePatchFaceAreas
             {
                 scalar& sum = weightsSum[i];
 
-                forAll(wghts, j)
+                for (scalar& w : wghts)
                 {
-                    wghts[j] /= sum;
+                    w /= sum;
                 }
                 sum = 1.0;
             }
         }
     }
+
+    const polyMesh& mesh = boundaryMesh().mesh();
+
+    // Recompute the cell volumes adjacent to the patches since the cells with
+    // duplicate faces are only closed after the duplicate faces have been
+    // scaled.
+
+    primitiveMeshTools::updateCellCentresAndVols
+    (
+        mesh,
+        mesh.faceCentres(),
+        mesh.faceAreas(),                       // already scaled
+        uniqueSort(acmipp.faceCells()), // unique cells only
+        mesh.cells(),
+        const_cast<vectorField&>(mesh.cellCentres()),
+        const_cast<scalarField&>(mesh.cellVolumes())
+    );
 }
 
 
@@ -283,22 +300,6 @@ void Foam::cyclicACMIPolyPatch::resetAMI(const UList<point>& points) const
         << endl;
 
     const polyMesh& mesh = boundaryMesh().mesh();
-
-    if (!createAMIFaces_ && mesh.hasCellCentres())
-    {
-        DebugPout
-            << "cyclicACMIPolyPatch::resetAMI : clearing cellCentres"
-            << " for " << name() << " and " << nonOverlapPatch.name() << nl
-            << "The mesh already has cellCentres calculated when"
-            << " resetting ACMI " << name() << "." << nl
-            << "This is a problem since ACMI adapts the face areas"
-            << " (to close cells) so this has" << nl
-            << "to be done before cell centre calculation." << nl
-            << "This can happen if e.g. the cyclicACMI is after"
-            << " any processor patches in the boundary." << endl;
-
-        const_cast<polyMesh&>(mesh).primitiveMesh::clearCellGeom();
-    }
 
     // At this point we want face geometry but not cell geometry since we want
     // correct the face area on duplicate baffles before calculating the cell
@@ -363,6 +364,8 @@ void Foam::cyclicACMIPolyPatch::scalePatchFaceAreas()
 
     if (srcScalePtr_)
     {
+        // Use primitivePatch::faceAreas() to avoid need for additional copy?
+
         // Save overlap geometry for later scaling
         thisSf_ = this->faceAreas();
         thisNoSf_ = nonOverlapPatch.faceAreas();
@@ -370,24 +373,53 @@ void Foam::cyclicACMIPolyPatch::scalePatchFaceAreas()
         nbrNoSf_ = nbrNonOverlapPatch.faceAreas();
     }
 
-    // In-place scale the patch areas
+    // In-place scale the polyPatch face areas
+
+    // Note
+    // - using primitivePatch face areas since these are based on the raw
+    //   point locations (not affected by ACMI scaling)
     scalePatchFaceAreas
     (
         *this,
         srcMask_,       // unscaled mask
-        this->faceAreas(),
-        nonOverlapPatch.faceAreas()
+        this->primitivePatch::faceAreas(),
+        nonOverlapPatch.primitivePatch::faceAreas()
     );
     scalePatchFaceAreas
     (
         nbrPatch,
         tgtMask_,       // unscaled mask
-        nbrPatch.faceAreas(),
-        nbrNonOverlapPatch.faceAreas()
+        nbrPatch.primitivePatch::faceAreas(),
+        nbrNonOverlapPatch.primitivePatch::faceAreas()
     );
 
     // Mark current AMI as up to date with points
     boundaryMesh().mesh().setUpToDatePoints(AMITime_);
+
+    if (debug)
+    {
+        const auto& acmipp = *this;
+        const auto& mesh = boundaryMesh().mesh();
+        const auto& vols = mesh.cellVolumes();
+
+        Info<< "cyclicACMI PP: " << acmipp.name()
+            << " V:" << sum(scalarField(vols, acmipp.faceCells()))
+            << nl
+            << "cyclicACMI N-O PP: " << nonOverlapPatch.name()
+            << " V:" << sum(scalarField(vols, nonOverlapPatch.faceCells()))
+            << nl
+            << "cyclicACMI NBR PP: " << nbrPatch.name()
+            << " V:" << sum(scalarField(vols, nbrPatch.faceCells()))
+            << nl
+            << "cyclicACMI NBR N-O PP: " << nbrNonOverlapPatch.name()
+            << " V:" << sum(scalarField(vols, nbrNonOverlapPatch.faceCells()))
+            << nl
+            << "cyclicACMI PP+N-O AREA: "
+            << sum(faceAreas() + nonOverlapPatch.faceAreas()) << nl
+            << "cyclicACMI NBR PP+N-O AREA: "
+            << sum(nbrPatch.faceAreas() + nbrNonOverlapPatch.faceAreas())
+            << endl;
+    }
 }
 
 
@@ -735,13 +767,13 @@ void Foam::cyclicACMIPolyPatch::newInternalProcFaces
     const scalarField& fMask = srcMask();
 
     // Add new faces as many weights for AMI
-    forAll (addSourceFaces, faceI)
+    forAll(addSourceFaces, faceI)
     {
         if (fMask[faceI] > tolerance_)
         {
             const labelList& nbrFaceIs = addSourceFaces[faceI];
 
-            forAll (nbrFaceIs, j)
+            forAll(nbrFaceIs, j)
             {
                 label nbrFaceI = nbrFaceIs[j];
 
@@ -761,20 +793,21 @@ void Foam::cyclicACMIPolyPatch::newInternalProcFaces
 }
 
 
-Foam::refPtr<Foam::labelListList> Foam::cyclicACMIPolyPatch::mapCollocatedFaces() const
+Foam::refPtr<Foam::labelListList>
+Foam::cyclicACMIPolyPatch::mapCollocatedFaces() const
 {
     const scalarField& fMask = srcMask();
     const labelListList& srcFaces = AMI().srcAddress();
     labelListList dOverFaces;
 
     dOverFaces.setSize(srcFaces.size());
-    forAll (dOverFaces, faceI)
+    forAll(dOverFaces, faceI)
     {
         if (fMask[faceI] > tolerance_)
         {
             dOverFaces[faceI].setSize(srcFaces[faceI].size());
 
-            forAll (dOverFaces[faceI], subFaceI)
+            forAll(dOverFaces[faceI], subFaceI)
             {
                 dOverFaces[faceI][subFaceI] = srcFaces[faceI][subFaceI];
             }

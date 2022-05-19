@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,6 +52,7 @@ namespace Foam
 // Forward Declarations
 class fvMesh;
 class fvGeometryScheme;
+class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
                     Class surfaceInterpolation Declaration
@@ -141,6 +142,9 @@ public:
 
         //- Has weights
         bool hasWeights() const noexcept { return bool(weights_); }
+
+        //- Update mesh for topology changes
+        virtual void updateMesh(const mapPolyMesh& mpm);
 };
 
 

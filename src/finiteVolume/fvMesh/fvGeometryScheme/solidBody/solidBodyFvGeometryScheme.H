@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,112 +24,109 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::points0MotionSolver
+    Foam::solidBodyFvGeometryScheme
 
 Description
-    Virtual base class for displacement motion solvers, where the point
-    motion is relative to a set of fixed points (points0).
+    Geometry calculation scheme that performs geometry updates only in regions
+    where the mesh has changed.
+
+    Example usage in fvSchemes:
+
+    \verbatim
+        geometry
+        {
+            type            solidBody;
+
+            // Optional entries
+
+            // If set to false, update the entire mesh
+            partialUpdate   yes;
+
+            // Cache the motion addressing (changed points, faces, cells etc)
+            cacheMotion     yes;
+        }
+    \endverbatim
+
 
 SourceFiles
-    points0MotionSolver.C
+    solidBodyFvGeometryScheme.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef points0MotionSolver_H
-#define points0MotionSolver_H
+#ifndef solidBodyFvGeometryScheme_H
+#define solidBodyFvGeometryScheme_H
 
-#include "motionSolver.H"
-#include "pointFields.H"
-#include "pointIOField.H"
-#include "zoneMotion.H"
+#include "basicFvGeometryScheme.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-class mapPolyMesh;
-
 /*---------------------------------------------------------------------------*\
-                   Class points0MotionSolver Declaration
+                  Class solidBodyFvGeometryScheme Declaration
 \*---------------------------------------------------------------------------*/
 
-class points0MotionSolver
+class solidBodyFvGeometryScheme
 :
-    public motionSolver,
-    public zoneMotion
+    public basicFvGeometryScheme
 {
-protected:
+    // Private Data
 
-    // Protected data
+        //- Partial update flag
+        bool partialUpdate_;
 
-        //- Starting points
-        pointIOField points0_;
+        //- Cache mesh motion flag
+        bool cacheMotion_;
 
+        //- Flag to indicate that the cache has been initialised
+        bool cacheInitialised_;
 
-private:
+        //- Changed face IDs
+        labelList changedFaceIDs_;
+
+        //- Changed patch IDs
+        labelList changedPatchIDs_;
+
+        //- Changed cell IDs
+        labelList changedCellIDs_;
+
 
     // Private Member Functions
 
+        //- Set the mesh motion data (point, face IDs)
+        void setMeshMotionData();
+
         //- No copy construct
-        points0MotionSolver(const points0MotionSolver&) = delete;
+        solidBodyFvGeometryScheme(const solidBodyFvGeometryScheme&) = delete;
 
         //- No copy assignment
-        void operator=(const points0MotionSolver&) = delete;
+        void operator=(const solidBodyFvGeometryScheme&) = delete;
 
 
 public:
 
     //- Runtime type information
-    TypeName("points0MotionSolver");
+    TypeName("solidBody");
 
 
     // Constructors
 
-        //- Construct from mesh and dictionary
-        points0MotionSolver
-        (
-            const polyMesh&,
-            const IOdictionary&,
-            const word& type
-        );
-
-        //- Construct from mesh and dictionary
-        points0MotionSolver
-        (
-            const polyMesh&,
-            const IOdictionary&,
-            const pointIOField& points0,
-            const word& type
-        );
+        //- Construct from mesh
+        solidBodyFvGeometryScheme(const fvMesh& mesh, const dictionary& dict);
 
 
     //- Destructor
-    virtual ~points0MotionSolver() = default;
+    virtual ~solidBodyFvGeometryScheme() = default;
 
 
     // Member Functions
 
-        //- Return IO object for points0
-        static IOobject points0IO(const polyMesh& mesh);
+        //- Do what is necessary if the mesh has moved
+        virtual void movePoints();
 
-        //- Return reference to the reference field
-        pointField& points0()
-        {
-            return points0_;
-        }
-
-        //- Return reference to the reference field
-        const pointField& points0() const
-        {
-            return points0_;
-        }
-
-        //- Update local data for geometry changes
-        virtual void movePoints(const pointField&);
-
-        //-  Update local data for topology changes
-        virtual void updateMesh(const mapPolyMesh&);
+        //- Update mesh for topology changes
+        virtual void updateMesh(const mapPolyMesh& mpm);
 };
 
 

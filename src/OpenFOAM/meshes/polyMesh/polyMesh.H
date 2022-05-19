@@ -556,8 +556,8 @@ public:
                 return (moving() || topoChanging());
             }
 
-            //- Move points, returns volumes swept by faces in motion
-            virtual tmp<scalarField> movePoints(const pointField&);
+            //- Move points
+            virtual void movePoints(const pointField&);
 
             //- Reset motion
             void resetMotion() const;

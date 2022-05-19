@@ -48,6 +48,7 @@ namespace Foam
 {
 
 // Forward Declarations
+class cell;
 class face;
 class primitiveMesh;
 
@@ -58,6 +59,28 @@ class primitiveMesh;
 class primitiveMeshTools
 {
 public:
+
+    //- Update face centres and areas for the faces in the set faceIDs
+    static void updateFaceCentresAndAreas
+    (
+        const primitiveMesh& mesh,
+        const UList<label>& faceIDs,
+        const pointField& p,
+        vectorField& fCtrs,
+        vectorField& fAreas
+    );
+
+    //- Update cell centres and volumes for the cells in the set cellIDs
+    static void updateCellCentresAndVols
+    (
+        const primitiveMesh& mesh,
+        const vectorField& fCtrs,
+        const vectorField& fAreas,
+        const List<label>& cellIDs,
+        const List<cell>& cells,
+        vectorField& cellCtrs_s,
+        scalarField& cellVols_s
+    );
 
     //- Calculate face centres and areas for specified faces.
     //  Adjusts the lengths of centres and area normals if required.
@@ -117,7 +140,7 @@ public:
         const vectorField& cellCtrs
     );
 
-    //- Generate cell openness and cell ascpect ratio field
+    //- Generate cell openness and cell aspect ratio field
     static void cellClosedness
     (
         const primitiveMesh& mesh,

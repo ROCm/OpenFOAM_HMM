@@ -1135,6 +1135,10 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::doRemoveCells
         meshMod
     );
 
+    // Remove any unnecessary fields
+    mesh_.clearOut();
+    mesh_.moving(false);
+
     // Change the mesh (no inflation)
     autoPtr<mapPolyMesh> mapPtr = meshMod.changeMesh(mesh_, false, true);
     mapPolyMesh& map = *mapPtr;
@@ -1327,6 +1331,10 @@ Foam::label Foam::meshRefinement::splitFacesUndo
         // Insert the mesh changes
         doSplitFaces(splitFaces, splits, meshMod);
 
+        // Remove any unnecessary fields
+        mesh_.clearOut();
+        mesh_.moving(false);
+
         // Change the mesh (no inflation)
         autoPtr<mapPolyMesh> mapPtr = meshMod.changeMesh(mesh_, false, true);
         mapPolyMesh& map = *mapPtr;
@@ -1338,6 +1346,10 @@ Foam::label Foam::meshRefinement::splitFacesUndo
         if (map.hasMotionPoints())
         {
             mesh_.movePoints(map.preMotionPoints());
+        }
+        else
+        {
+            mesh_.clearOut();
         }
 
         // Reset the instance for if in overwrite mode
@@ -1550,6 +1562,10 @@ Foam::label Foam::meshRefinement::splitFacesUndo
         nSplit -= n;
 
 
+        // Remove any unnecessary fields
+        mesh_.clearOut();
+        mesh_.moving(false);
+
         // Change the mesh (no inflation)
         autoPtr<mapPolyMesh> mapPtr = meshMod.changeMesh(mesh_, false, true);
         mapPolyMesh& map = *mapPtr;
@@ -1561,6 +1577,10 @@ Foam::label Foam::meshRefinement::splitFacesUndo
         if (map.hasMotionPoints())
         {
             mesh_.movePoints(map.preMotionPoints());
+        }
+        else
+        {
+            mesh_.clearOut();
         }
 
         // Reset the instance for if in overwrite mode

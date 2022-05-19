@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2012 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "dynamicFvMesh.H"
+#include "profiling.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -174,6 +175,7 @@ bool Foam::dynamicFvMesh::controlledUpdate()
                 << timeControl_.type() << nl;
         }
 
+        addProfiling(mesh, "mesh.update()");
         return this->update();
     }
 

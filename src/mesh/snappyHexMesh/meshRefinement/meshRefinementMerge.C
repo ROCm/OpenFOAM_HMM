@@ -108,6 +108,10 @@ Foam::label Foam::meshRefinement::mergePatchFaces
         // unused points.
         faceCombiner.setRefinement(mergeSets, meshMod);
 
+        // Remove any unnecessary fields
+        mesh_.clearOut();
+        mesh_.moving(false);
+
         // Change the mesh (no inflation)
         autoPtr<mapPolyMesh> mapPtr = meshMod.changeMesh(mesh_, false, true);
         mapPolyMesh& map = *mapPtr;
@@ -196,6 +200,10 @@ Foam::label Foam::meshRefinement::mergePatchFaces
 //        polyTopoChange meshMod(mesh_);
 //
 //        pointRemover.setRefinement(pointCanBeDeleted, meshMod);
+//
+//        // Remove any unnecessary fields
+//        mesh_.clearOut();
+//        mesh_.moving(false);
 //
 //        // Change the mesh (no inflation)
 //        map = meshMod.changeMesh(mesh_, false, true);
@@ -358,6 +366,10 @@ Foam::label Foam::meshRefinement::mergePatchFacesUndo
             labelList(0),                       // faces to store
             labelList(0)                        // cells to store
         );
+
+        // Remove any unnecessary fields
+        mesh_.clearOut();
+        mesh_.moving(false);
 
         // Change the mesh (no inflation)
         autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh_, false, true);
@@ -544,6 +556,10 @@ Foam::label Foam::meshRefinement::mergePatchFacesUndo
                 restoredCells
             );
 
+            // Remove any unnecessary fields
+            mesh_.clearOut();
+            mesh_.moving(false);
+
             // Change the mesh (no inflation)
             autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh_, false, true);
 
@@ -629,6 +645,10 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::doRemovePoints
 
     pointRemover.setRefinement(pointCanBeDeleted, meshMod);
 
+    // Remove any unnecessary fields
+    mesh_.clearOut();
+    mesh_.moving(false);
+
     // Change the mesh (no inflation)
     autoPtr<mapPolyMesh> mapPtr = meshMod.changeMesh(mesh_, false, true);
     mapPolyMesh& map = *mapPtr;
@@ -701,6 +721,10 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::doRestorePoints
         localPoints,
         meshMod
     );
+
+    // Remove any unnecessary fields
+    mesh_.clearOut();
+    mesh_.moving(false);
 
     // Change the mesh (no inflation)
     autoPtr<mapPolyMesh> mapPtr = meshMod.changeMesh(mesh_, false, true);

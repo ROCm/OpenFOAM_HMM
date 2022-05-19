@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,8 +69,16 @@ class fvGeometryScheme
 
 protected:
 
+    // Protected Data
+
         //- Hold reference to mesh
         const fvMesh& mesh_;
+
+
+    // Protected Member Functions
+
+        //- Set the mesh motion flux
+        bool setMeshPhi() const;
 
 
 public:
@@ -127,8 +135,10 @@ public:
         }
 
         //- Update basic geometric properties from provided points
-        virtual void movePoints()
-        {}
+        virtual void movePoints();
+
+        //- Update mesh for topology changes
+        virtual void updateMesh(const mapPolyMesh& mpm);
 
         //- Return linear difference weighting factors
         virtual tmp<surfaceScalarField> weights() const = 0;

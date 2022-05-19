@@ -142,12 +142,6 @@ Foam::points0MotionSolver::points0MotionSolver
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::points0MotionSolver::~points0MotionSolver()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::points0MotionSolver::movePoints(const pointField&)

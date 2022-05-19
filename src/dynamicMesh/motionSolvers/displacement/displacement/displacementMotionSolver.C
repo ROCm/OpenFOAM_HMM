@@ -134,10 +134,4 @@ Foam::displacementMotionSolver::New
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::displacementMotionSolver::~displacementMotionSolver()
-{}
-
-
 // ************************************************************************* //

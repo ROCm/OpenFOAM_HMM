@@ -387,6 +387,9 @@ Foam::highAspectRatioFvGeometryScheme::highAspectRatioFvGeometryScheme
 
 void Foam::highAspectRatioFvGeometryScheme::movePoints()
 {
+    //basicFvGeometryScheme::movePoints();
+    fvGeometryScheme::movePoints();
+
     if (debug)
     {
         Pout<< "highAspectRatioFvGeometryScheme::movePoints() : "

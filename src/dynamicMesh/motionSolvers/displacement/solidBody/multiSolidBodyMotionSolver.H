@@ -92,7 +92,7 @@ public:
 
 
     //- Destructor
-    ~multiSolidBodyMotionSolver();
+    virtual ~multiSolidBodyMotionSolver() = default;
 
 
     // Member Functions

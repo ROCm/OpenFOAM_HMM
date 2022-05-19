@@ -94,7 +94,7 @@ public:
 
 
     //- Destructor
-    ~dynamicMotionSolverFvMesh();
+    virtual ~dynamicMotionSolverFvMesh() = default;
 
 
     // Member Functions

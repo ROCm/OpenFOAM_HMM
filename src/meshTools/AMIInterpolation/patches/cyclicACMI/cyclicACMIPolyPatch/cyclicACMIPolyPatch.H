@@ -106,7 +106,7 @@ private:
             //- Weighting for target mask
             mutable autoPtr<PatchFunction1<scalar>> tgtScalePtr_;
 
-            //- Stored face areas
+            //- Stored raw/non-scaled face areas
             mutable vectorField thisSf_;
             mutable vectorField thisNoSf_;
             mutable vectorField nbrSf_;
