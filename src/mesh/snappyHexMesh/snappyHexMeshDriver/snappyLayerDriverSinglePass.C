@@ -370,9 +370,11 @@ void Foam::snappyLayerDriver::addLayersSinglePass
     {
         // Apply the stored topo changes to the current mesh.
         autoPtr<mapPolyMesh> mapPtr = meshMod.changeMesh(mesh, false);
+
         mapPolyMesh& map = *mapPtr;
 
         // Hack to remove meshPhi - mapped incorrectly. TBD.
+        mesh.moving(false);
         mesh.clearOut();
 
         // Update fields

@@ -4241,6 +4241,17 @@ void Foam::snappyLayerDriver::addLayers
         //?necessary? Update fields
         newMesh.updateMesh(map);
 
+        // Move mesh if in inflation mode
+        if (map.hasMotionPoints())
+        {
+            newMesh.movePoints(map.preMotionPoints());
+        }
+        else
+        {
+            // Delete mesh volumes.
+            newMesh.clearOut();
+        }
+
         newMesh.setInstance(meshRefiner_.timeName());
 
         // Update numbering on addLayer:
@@ -5128,6 +5139,7 @@ void Foam::snappyLayerDriver::addLayers
             mapPolyMesh& map = *mapPtr;
 
             // Hack to remove meshPhi - mapped incorrectly. TBD.
+            mesh.moving(false);
             mesh.clearOut();
 
             // Update fields
