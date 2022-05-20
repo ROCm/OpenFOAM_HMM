@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -159,10 +159,11 @@ reducedKoopmanOperator()
         QRMatrix<RMatrix> QRM
         (
             Qupper_,
-            QRMatrix<RMatrix>::outputTypes::REDUCED_R,
-            QRMatrix<RMatrix>::colPivoting::FALSE
+            QRMatrix<RMatrix>::modes::ECONOMY,
+            QRMatrix<RMatrix>::outputs::ONLY_R
         );
-        Rx = QRM.R();
+        RMatrix& R = QRM.R();
+        Rx.transfer(R);
     }
     Rx.round();
 
@@ -228,14 +229,18 @@ reducedKoopmanOperator()
                 }
             }
 
-            // Apply interim QR decomposition on Rx of receiver subset masters
-            QRMatrix<RMatrix> QRM
-            (
-                Rx,
-                QRMatrix<RMatrix>::outputTypes::REDUCED_R,
-                QRMatrix<RMatrix>::storeMethods::IN_PLACE,
-                QRMatrix<RMatrix>::colPivoting::FALSE
-            );
+            {
+                // Apply interim QR decomposition
+                // on Rx of receiver subset masters
+                QRMatrix<RMatrix> QRM
+                (
+                    Rx,
+                    QRMatrix<RMatrix>::modes::ECONOMY,
+                    QRMatrix<RMatrix>::outputs::ONLY_R
+                );
+                RMatrix& R = QRM.R();
+                Rx.transfer(R);
+            }
             Rx.round();
         }
 
@@ -281,26 +286,23 @@ reducedKoopmanOperator()
             }
 
             Info<< tab << "Computing TSQR" << endl;
-            QRMatrix<RMatrix> QRM
-            (
-                Rx,
-                QRMatrix<RMatrix>::outputTypes::REDUCED_R,
-                QRMatrix<RMatrix>::storeMethods::IN_PLACE,
-                QRMatrix<RMatrix>::colPivoting::FALSE
-            );
+            {
+                QRMatrix<RMatrix> QRM
+                (
+                    Rx,
+                    QRMatrix<RMatrix>::modes::ECONOMY,
+                    QRMatrix<RMatrix>::outputs::ONLY_R
+                );
+                RMatrix& R = QRM.R();
+                Rx.transfer(R);
+            }
             Rx.round();
 
-            // Rx produced by TSQR is unique up to the sign, hence the revert
-            for (scalar& x : Rx)
-            {
-                x *= -1;
-            }
-
             Info<< tab << "Computing RxInv" << endl;
-            RxInv_ = pinv(Rx);
+            RxInv_ = MatrixTools::pinv(Rx);
 
             Info<< tab << "Computing A1" << endl;
-            A1 = RxInv_*RMatrix(pinv(Rx*(G_^Rx)));
+            A1 = RxInv_*RMatrix(MatrixTools::pinv(Rx*(G_^Rx)));
             Rx.clear();
         }
         Pstream::scatter(RxInv_);
@@ -323,10 +325,10 @@ reducedKoopmanOperator()
     else
     {
         Info<< tab << "Computing RxInv" << endl;
-        RxInv_ = pinv(Rx);
+        RxInv_ = MatrixTools::pinv(Rx);
 
         Info<< tab << "Computing A1" << endl;
-        A1 = RxInv_*RMatrix(pinv(Rx*(G_^Rx)));
+        A1 = RxInv_*RMatrix(MatrixTools::pinv(Rx*(G_^Rx)));
         Rx.clear();
 
         Info<< tab << "Computing A2" << endl;
@@ -486,7 +488,7 @@ void Foam::DMDModels::STDMD::amplitudes()
         Info<< tab << "Computing amplitudes" << endl;
 
         amps_.resize(R.m());
-        const RCMatrix pEvecs(pinv(evecs_));
+        const RCMatrix pEvecs(MatrixTools::pinv(evecs_));
 
         // amps_ = pEvecs*R;
         for (label i = 0; i < amps_.size(); ++i)
