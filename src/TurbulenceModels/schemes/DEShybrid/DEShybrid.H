@@ -83,6 +83,7 @@ Description
             linear                    // scheme 1
             linearUpwind grad(U)      // scheme 2
             delta                     // LES delta name, e.g. 'delta', 'hmax'
+            0.65                      // CDES coefficient
             30                        // Reference velocity scale
             2                         // Reference length scale
             0                         // Minimum sigma limit (0-1)
@@ -151,6 +152,9 @@ class DEShybrid
         //- Name of the LES delta field
         word deltaName_;
 
+        //- DES coefficient
+        scalar CDES_;
+
         //- Reference velocity scale [m/s]
         dimensionedScalar U0_;
 
@@ -173,7 +177,6 @@ class DEShybrid
         scalar CH1_;
         scalar CH2_;
         scalar CH3_;
-        scalar CDES_;
         scalar Cs_;
 
         //- No copy construct
@@ -222,6 +225,24 @@ class DEShybrid
                 FatalErrorInFunction
                     << "sigmaMax coefficient must be <= 1. "
                     << "Current value: " << sigmaMax_ << exit(FatalError);
+            }
+
+            if (debug)
+            {
+                Info<< type() << "coefficients:" << nl
+                    << "    delta : " << deltaName_ << nl
+                    << "    CDES : " << CDES_ << nl
+                    << "    U0 : " << U0_ << nl
+                    << "    LO : " << L0_ << nl
+                    << "    sigmaMin : " << sigmaMin_ << nl
+                    << "    sigmaMax : " << sigmaMax_ << nl
+                    << "    OmegaLim : " << OmegaLim_ << nl
+                    << "    nutLim : " << nutLim_ << nl
+                    << "    CH1 : " << CH1_ << nl
+                    << "    CH2 : " << CH2_ << nl
+                    << "    CH3 : " << CH3_ << nl
+                    << "    Cs : " << Cs_ << nl
+                    << endl;
             }
         }
 
@@ -313,16 +334,16 @@ public:
             tScheme1_(surfaceInterpolationScheme<Type>::New(mesh, is)),
             tScheme2_(surfaceInterpolationScheme<Type>::New(mesh, is)),
             deltaName_(is),
+            CDES_(readScalar(is)),
             U0_("U0", dimLength/dimTime, readScalar(is)),
             L0_("L0", dimLength, readScalar(is)),
             sigmaMin_(readScalar(is)),
             sigmaMax_(readScalar(is)),
             OmegaLim_(readScalar(is)),
-            nutLim_(readScalar(is)),
+            nutLim_(readScalarOrDefault(is, scalar(1))),
             CH1_(3.0),
             CH2_(1.0),
             CH3_(2.0),
-            CDES_(0.65),
             Cs_(0.18)
         {
             checkValues();
@@ -346,16 +367,16 @@ public:
                 surfaceInterpolationScheme<Type>::New(mesh, faceFlux, is)
             ),
             deltaName_(is),
+            CDES_(readScalar(is)),
             U0_("U0", dimLength/dimTime, readScalar(is)),
             L0_("L0", dimLength, readScalar(is)),
             sigmaMin_(readScalar(is)),
             sigmaMax_(readScalar(is)),
             OmegaLim_(readScalar(is)),
-            nutLim_(readScalar(is)),
+            nutLim_(readScalarOrDefault(is, scalar(1))),
             CH1_(3.0),
             CH2_(1.0),
             CH3_(2.0),
-            CDES_(0.65),
             Cs_(0.18)
         {
             checkValues();
