@@ -1317,7 +1317,7 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
 
-    word regionName = polyMesh::defaultRegion;
+    word regionName(polyMesh::defaultRegion);
 
     if (args.readIfPresent("region", regionName))
     {

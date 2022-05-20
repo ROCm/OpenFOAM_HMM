@@ -280,10 +280,7 @@ bool Foam::functionObjects::vtkWrite::write()
     label regioni = 0;
     for (const word& regionName : meshes_.sortedToc())
     {
-        const word& regionDir =
-        (
-            regionName == polyMesh::defaultRegion ? word::null : regionName
-        );
+        const word& regionDir = polyMesh::regionName(regionName);
 
         auto& meshProxy = meshSubsets_[regioni];
         auto& vtuMeshCells = vtuMappings_[regioni];

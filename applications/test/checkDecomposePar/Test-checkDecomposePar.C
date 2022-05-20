@@ -89,12 +89,7 @@ int main(int argc, char *argv[])
     forAll(regionNames, regioni)
     {
         const word& regionName = regionNames[regioni];
-        // const word& regionDir =
-        // (
-        //     regionName != polyMesh::defaultRegion
-        //   ? regionName
-        //   : word::null
-        // );
+        // const word& regionDir = polyMesh::regionName(regionName);
 
         Info<< "\n\nDecomposing mesh " << regionName << nl << endl;
         Info<< "Create mesh..." << flush;

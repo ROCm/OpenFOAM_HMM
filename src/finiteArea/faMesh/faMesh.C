@@ -601,6 +601,12 @@ const Foam::objectRegistry& Foam::faMesh::thisDb() const
 }
 
 
+const Foam::word& Foam::faMesh::regionName() const
+{
+    return polyMesh::regionName(thisDb().name());
+}
+
+
 void Foam::faMesh::removeFiles(const fileName& instanceDir) const
 {
     fileName meshFilesPath = thisDb().time().path()/instanceDir/meshDir();

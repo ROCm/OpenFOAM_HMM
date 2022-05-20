@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -256,20 +256,18 @@ int main(int argc, char *argv[])
     #include "createTimeExtruded.H"
 
     // Get optional regionName
-    word regionName;
-    word regionDir;
+    word regionName(polyMesh::defaultRegion);
     if (args.readIfPresent("region", regionName))
     {
-        regionDir = regionName;
         Info<< "Create mesh " << regionName << " for time = "
             << runTimeExtruded.timeName() << nl << endl;
     }
     else
     {
-        regionName = fvMesh::defaultRegion;
         Info<< "Create mesh for time = "
             << runTimeExtruded.timeName() << nl << endl;
     }
+
 
     const IOdictionary dict
     (
@@ -755,7 +753,12 @@ int main(int argc, char *argv[])
 
 
         // Create dummy fvSchemes, fvSolution
-        fvMeshTools::createDummyFvMeshFiles(mesh, regionDir, true);
+        fvMeshTools::createDummyFvMeshFiles
+        (
+            mesh,
+            polyMesh::regionName(regionName),
+            true
+        );
 
         // Create actual mesh from polyTopoChange container
         autoPtr<mapPolyMesh> map = meshMod().makeMesh

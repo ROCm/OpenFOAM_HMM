@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -76,17 +76,11 @@ void Foam::probes::createProbeFiles(const wordList& fieldNames)
         // Put in undecomposed case
         // (Note: gives problems for distributed data running)
 
-        fileName probeSubDir = name();
-        if (mesh_.name() != polyMesh::defaultRegion)
-        {
-            probeSubDir = probeSubDir/mesh_.name();
-        }
-
         fileName probeDir
         (
             mesh_.time().globalPath()
           / functionObject::outputPrefix
-          / probeSubDir
+          / name()/mesh_.regionName()
             // Use startTime as the instance for output files
           / mesh_.time().timeName(mesh_.time().startTime().value())
         );

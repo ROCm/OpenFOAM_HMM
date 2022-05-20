@@ -220,19 +220,21 @@ int main(int argc, char *argv[])
     const fileName rootDirSource = casePath.path();
     const fileName caseDirSource = casePath.name();
 
-    Info<< "Source: " << rootDirSource << " " << caseDirSource << endl;
-    word sourceRegion = polyMesh::defaultRegion;
+    Info<< "Source: " << rootDirSource << ' ' << caseDirSource;
+    word sourceRegion(polyMesh::defaultRegion);
     if (args.readIfPresent("sourceRegion", sourceRegion))
     {
-        Info<< "Source region: " << sourceRegion << endl;
+        Info<< " (region " << sourceRegion << ')';
     }
+    Info<< endl;
 
-    Info<< "Target: " << rootDirTarget << " " << caseDirTarget << endl;
-    word targetRegion = polyMesh::defaultRegion;
+    Info<< "Target: " << rootDirTarget << ' ' << caseDirTarget;
+    word targetRegion(polyMesh::defaultRegion);
     if (args.readIfPresent("targetRegion", targetRegion))
     {
-        Info<< "Target region: " << targetRegion << endl;
+        Info<< " (region " << targetRegion << ')';
     }
+    Info<< endl;
 
     const bool consistent = args.found("consistent");
 

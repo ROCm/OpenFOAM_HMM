@@ -78,14 +78,11 @@ Foam::dictionary Foam::solverTemplate::readFluidFieldTemplates
 {
     Info<< "    Reading fluid field templates";
 
-    if (regionName == word::null)
+    if (!regionName.empty())
     {
-        Info<< endl;
+        Info<< " for region " << regionName;
     }
-    else
-    {
-        Info<< " for region " << regionName << endl;
-    }
+    Info<< endl;
 
     dictionary fieldTemplates = solverDict.subDict("fluidFields");
 

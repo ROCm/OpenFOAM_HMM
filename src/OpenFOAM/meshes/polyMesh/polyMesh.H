@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017, 2020 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,8 +41,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef polyMesh_H
-#define polyMesh_H
+#ifndef Foam_polyMesh_H
+#define Foam_polyMesh_H
 
 #include "objectRegistry.H"
 #include "primitiveMesh.H"
@@ -416,6 +416,15 @@ public:
                 const fileName& instance,
                 const IOobject::writeOption wOpt = IOobject::AUTO_WRITE
             );
+
+
+        // Regions
+
+            //- The mesh region name or word::null if polyMesh::defaultRegion
+            static const word& regionName(const word& region);
+
+            //- The mesh region name or word::null if polyMesh::defaultRegion
+            const word& regionName() const;
 
 
         // Access

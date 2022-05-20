@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -130,7 +130,6 @@ int main(int argc, char *argv[])
     const bool noOuterRegion = args.found("no-outer");
 
     const word regionName(polyMesh::defaultRegion);
-    const word regionPath;
 
 
     // Instance for resulting mesh

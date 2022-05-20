@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -18,10 +18,11 @@ Description
 {
     // Shadows enclosing parameter (dictName)
     const word blockMeshDictName("blockMeshDict");
+    const word& regionDir = polyMesh::regionName(regionName);
 
     const fileName polyMeshPath
     (
-        runTime.path()/meshInstance/regionPath/polyMesh::meshSubDir
+        runTime.path()/meshInstance/regionDir/polyMesh::meshSubDir
     );
 
     if (exists(polyMeshPath))

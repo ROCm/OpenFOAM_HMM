@@ -661,13 +661,10 @@ bool Foam::functionObjects::streamLineBase::writeToFile()
 
         fileName vtkPath
         (
-            time_.globalPath()/functionObject::outputPrefix/"sets"/name()
+            time_.globalPath()/functionObject::outputPrefix/"sets"
+          / name()/mesh_.regionName()
+          / mesh_.time().timeName()
         );
-        if (mesh_.name() != polyMesh::defaultRegion)
-        {
-            vtkPath = vtkPath/mesh_.name();
-        }
-        vtkPath = vtkPath/mesh_.time().timeName();
 
         mkDir(vtkPath);
 

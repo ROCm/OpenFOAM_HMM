@@ -48,8 +48,7 @@ namespace Foam
 
 bool Foam::pointHistory::writeData()
 {
-    const fvMesh& mesh =
-        time_.lookupObject<fvMesh>(polyMesh::defaultRegion);
+    const fvMesh& mesh = time_.lookupObject<fvMesh>(polyMesh::defaultRegion);
 
     vector position(Zero);
 
@@ -98,8 +97,7 @@ Foam::pointHistory::pointHistory
     dict.readIfPresent("region", regionName_);
     dict.readIfPresent("historyPointID", historyPointID_);
 
-    const fvMesh& mesh =
-        time_.lookupObject<fvMesh>(regionName_);
+    const fvMesh& mesh = time_.lookupObject<fvMesh>(regionName_);
 
     const vectorField& points = mesh.points();
 

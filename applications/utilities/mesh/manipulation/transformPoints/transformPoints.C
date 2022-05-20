@@ -369,11 +369,10 @@ int main(int argc, char *argv[])
     forAll(regionNames, regioni)
     {
         const word& regionName = regionNames[regioni];
-        const word& regionDir =
+        const fileName meshDir
         (
-            regionName == polyMesh::defaultRegion ? word::null : regionName
+            polyMesh::regionName(regionName)/polyMesh::meshSubDir
         );
-        const fileName meshDir = regionDir/polyMesh::meshSubDir;
 
         if (regionNames.size() > 1)
         {

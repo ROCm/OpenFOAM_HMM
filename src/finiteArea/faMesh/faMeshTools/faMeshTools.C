@@ -77,8 +77,7 @@ Foam::autoPtr<Foam::faMesh> Foam::faMeshTools::newMesh
 
     const fileName meshSubDir
     (
-        (pMesh.name() == polyMesh::defaultRegion ? word::null : pMesh.name())
-      / faMesh::meshSubDir
+        pMesh.regionName() / faMesh::meshSubDir
     );
 
 
@@ -260,8 +259,7 @@ Foam::autoPtr<Foam::faMesh> Foam::faMeshTools::loadOrCreateMesh
 
     const fileName meshSubDir
     (
-        (pMesh.name() == polyMesh::defaultRegion ? word::null : pMesh.name())
-      / faMesh::meshSubDir
+        pMesh.regionName() / faMesh::meshSubDir
     );
 
 

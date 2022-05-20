@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2018 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,14 +58,11 @@ Foam::fileName Foam::functionObjects::writeFile::baseFileDir() const
       / functionObject::outputPrefix
     );
 
-    // Append mesh name if not default region
-    if (isA<polyMesh>(fileObr_))
+    // Append mesh region name if not default region
+    const auto* meshPtr = isA<polyMesh>(fileObr_);
+    if (meshPtr)
     {
-        const polyMesh& mesh = refCast<const polyMesh>(fileObr_);
-        if (mesh.name() != polyMesh::defaultRegion)
-        {
-            baseDir /= mesh.name();
-        }
+        baseDir /= meshPtr->regionName();
     }
     baseDir.clean();  // Remove unneeded ".."
 

@@ -28,12 +28,7 @@ PtrList<ensightFaMesh> ensightMeshesFa(regionNames.size());
         const fvMesh& mesh = meshes[regioni];
 
         const word& regionName = regionNames[regioni];
-        const word& regionDir =
-        (
-            regionName != polyMesh::defaultRegion
-          ? regionName
-          : word::null
-        );
+        const word& regionDir = polyMesh::regionName(regionName);
 
         fileName ensCasePath(outputDir);
         word ensCaseName(args.globalCaseName());

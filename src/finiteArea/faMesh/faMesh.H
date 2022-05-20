@@ -665,20 +665,26 @@ public:
         inline bool hasInternalEdgeLabels() const noexcept;
 
 
+    // Database
+
+        //- Return true if thisDb() is a valid DB
+        virtual bool hasDb() const;
+
+        //- Return reference to the mesh database
+        virtual const objectRegistry& thisDb() const;
+
+        //- Name function is needed to disambiguate those inherited
+        //- from base classes
+        const word& name() const
+        {
+            return thisDb().name();
+        }
+
+        //- The mesh region name or word::null if polyMesh::defaultRegion
+        const word& regionName() const;
+
+
         // Access
-
-            //- Return true if thisDb() is a valid DB
-            virtual bool hasDb() const;
-
-            //- Return reference to the mesh database
-            virtual const objectRegistry& thisDb() const;
-
-            //- Name function is needed to disambiguate those inherited
-            //- from base classes
-            const word& name() const
-            {
-                return thisDb().name();
-            }
 
             //- Return constant reference to boundary mesh
             inline const faBoundaryMesh& boundary() const noexcept;

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -21,9 +21,7 @@ autoPtr<IOdictionary> meshDictPtr;
 
 {
     fileName dictPath;
-
-    const word& regionDir =
-        (regionName == polyMesh::defaultRegion ? word::null : regionName);
+    const word& regionDir = polyMesh::regionName(regionName);
 
     if (args.readIfPresent("dict", dictPath))
     {
@@ -40,15 +38,17 @@ autoPtr<IOdictionary> meshDictPtr;
         exists
         (
             runTime.path()/runTime.caseConstant()
-            /regionDir/faMesh::meshSubDir/dictName
+          / regionDir/faMesh::meshSubDir/dictName
         )
     )
     {
         // Dictionary present in constant faMesh directory (old-style)
 
         dictPath =
+        (
             runTime.constant()
-            /regionDir/faMesh::meshSubDir/dictName;
+          / regionDir/faMesh::meshSubDir/dictName
+        );
 
         // Warn that constant/faMesh/faMeshDefinition was used
         // instead of system/faMeshDefinition

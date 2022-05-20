@@ -274,7 +274,7 @@ void decomposeUniform
             // Link with relative paths
             string parentPath = string("..")/"..";
 
-            if (regionDir != word::null)
+            if (!regionDir.empty())
             {
                 parentPath = parentPath/"..";
             }
@@ -479,10 +479,7 @@ int main(int argc, char *argv[])
     forAll(regionNames, regioni)
     {
         const word& regionName = regionNames[regioni];
-        const word& regionDir =
-        (
-            regionName == polyMesh::defaultRegion ? word::null : regionName
-        );
+        const word& regionDir = polyMesh::regionName(regionName);
 
         if (args.dryRun())
         {

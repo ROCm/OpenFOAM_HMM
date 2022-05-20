@@ -697,21 +697,16 @@ int main(int argc, char *argv[])
 
         for (const word& regionName : regionNames)
         {
-            const word& regionDir =
-            (
-                regionName == polyMesh::defaultRegion ? word::null : regionName
-            );
+            fileName regionOutDir(outputDir/polyMesh::regionName(regionName));
 
-            fileName regionalDir(outputDir/regionDir);
-
-            if (args.found("overwrite") && Foam::isDir(regionalDir))
+            if (args.found("overwrite") && Foam::isDir(regionOutDir))
             {
                 Info<< "Removing old directory "
-                    << args.relativePath(regionalDir)
+                    << args.relativePath(regionOutDir)
                     << nl << endl;
-                Foam::rmDir(regionalDir);
+                Foam::rmDir(regionOutDir);
             }
-            Foam::mkDir(regionalDir);
+            Foam::mkDir(regionOutDir);
         }
     }
 
@@ -749,11 +744,9 @@ int main(int argc, char *argv[])
         forAll(regionNames, regioni)
         {
             const word& regionName = regionNames[regioni];
-            const word& regionDir =
-            (
-                regionName == polyMesh::defaultRegion ? word::null : regionName
-            );
-            if (regionNames.size() > 1 || !regionDir.empty())
+            const word& regionDir = polyMesh::regionName(regionName);
+
+            if (regionNames.size() > 1)
             {
                 Info<< "region = " << regionName << nl;
             }

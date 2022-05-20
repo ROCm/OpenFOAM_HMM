@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -450,18 +450,11 @@ void writeMesh
     const labelListList& cellProcAddressing
 )
 {
-    const word& regionDir =
-    (
-        mesh.name() == polyMesh::defaultRegion
-      ? word::null
-      : mesh.name()
-    );
-
     const fileName outputDir
     (
         mesh.time().path()
       / mesh.time().timeName()
-      / regionDir
+      / mesh.regionName()
       / polyMesh::meshSubDir
     );
 
@@ -489,18 +482,11 @@ void writeMaps
     const labelUList& boundProcAddressing
 )
 {
-    const word& regionDir =
-    (
-        procMesh.name() == polyMesh::defaultRegion
-      ? word::null
-      : procMesh.name()
-    );
-
     const fileName outputDir
     (
         procMesh.time().caseName()
       / procMesh.facesInstance()
-      / regionDir
+      / procMesh.regionName()
       / polyMesh::meshSubDir
     );
 
@@ -775,18 +761,12 @@ int main(int argc, char *argv[])
         forAll(regionNames, regioni)
         {
             const word& regionName = regionNames[regioni];
-            const word& regionDir =
-            (
-                regionName == polyMesh::defaultRegion
-              ? word::null
-              : regionName
-            );
 
             IOobject facesIO
             (
                 "faces",
                 databases[0].timeName(),
-                regionDir/polyMesh::meshSubDir,
+                polyMesh::regionName(regionName)/polyMesh::meshSubDir,
                 databases[0],
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
@@ -817,12 +797,7 @@ int main(int argc, char *argv[])
         forAll(regionNames, regioni)
         {
             const word& regionName = regionNames[regioni];
-            const word& regionDir =
-            (
-                regionName == polyMesh::defaultRegion
-              ? word::null
-              : regionName
-            );
+            const word& regionDir = polyMesh::regionName(regionName);
 
             if (!hasRegionMesh[regioni])
             {

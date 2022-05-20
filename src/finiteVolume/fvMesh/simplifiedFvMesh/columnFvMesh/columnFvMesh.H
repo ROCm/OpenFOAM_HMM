@@ -73,13 +73,10 @@ class columnFvMeshInfo
 
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Region of existing mesh
         const word regionName_;
-
-        //- Additional prefix for region. Empty if default region
-        const fileName regionPrefix_;
 
         //- Location of existing mesh (if present)
         const word localInstance_;
@@ -110,6 +107,7 @@ protected:
 
             //- Number of patches with at least 1 local face
             label nPatchWithFace_;
+
 
     // Protected Member Functions
 

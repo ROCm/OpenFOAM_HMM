@@ -51,7 +51,7 @@ Foam::simplifiedMeshes::simplifiedDynamicFvMeshBase::New
     (
         "dynamicMeshDict",
         io.time().constant(),
-        (io.name() == polyMesh::defaultRegion ? "" : io.name()),
+        polyMesh::regionName(io.name()),
         io.db(),
         IOobject::MUST_READ_IF_MODIFIED,
         IOobject::NO_WRITE,

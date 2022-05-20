@@ -29,14 +29,11 @@ if (timeDirs.size() && doLagrangian)
         auto& cloudFields = regionCloudFields[regioni];
 
         const word& regionName = regionNames[regioni];
-        const word& regionDir =
-        (
-            regionName != polyMesh::defaultRegion
-          ? regionName
-          : word::null
-        );
 
-        const fileName cloudPrefix(regionDir/cloud::prefix);
+        const fileName cloudPrefix
+        (
+            polyMesh::regionName(regionName)/cloud::prefix
+        );
 
         for (const instant& inst : timeDirs)
         {

@@ -1,30 +1,55 @@
-    Foam::word regionName = Foam::polyMesh::defaultRegion;
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | www.openfoam.com
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+    Copyright (C) 2012 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 
+Description
+    Create a dynamicFvMesh for a specified region, or the defaultRegion
+
+Required Variables
+    - runTime [Time]
+
+Provided Variables
+    - regionName [word]
+    - mesh [dynamicFvMesh], meshPtr
+
+\*---------------------------------------------------------------------------*/
+
+Foam::word regionName(Foam::polyMesh::defaultRegion);
+Foam::autoPtr<Foam::dynamicFvMesh> meshPtr;
+
+{
+    Foam::Info << "Create dynamic mesh";
     if (args.readIfPresent("region", regionName))
     {
-        Foam::Info
-            << "Create mesh " << regionName << " for time = "
-            << runTime.timeName() << Foam::nl << Foam::endl;
+        Foam::Info << ' ' << regionName;
     }
-    else
-    {
-        Foam::Info
-            << "Create mesh for time = "
-            << runTime.timeName() << Foam::nl << Foam::endl;
-    }
+    Foam::Info << " for time = " << runTime.timeName() << Foam::nl;
 
-    autoPtr<dynamicFvMesh> meshPtr
+    meshPtr = dynamicFvMesh::New
     (
-        dynamicFvMesh::New
+        IOobject
         (
-            IOobject
-            (
-                regionName,
-                runTime.timeName(),
-                runTime,
-                IOobject::MUST_READ
-            )
+            regionName,
+            runTime.timeName(),
+            runTime,
+            IOobject::MUST_READ
         )
     );
+}
 
-    dynamicFvMesh& mesh = meshPtr();
+
+dynamicFvMesh& mesh = meshPtr();
+
+Foam::Info << Foam::endl;
+
+
+// ************************************************************************* //

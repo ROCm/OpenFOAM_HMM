@@ -331,7 +331,7 @@ void Foam::conformalVoronoiMesh::writeMesh(const fileName& instance)
 //            (
 //                IOobject
 //                (
-//                    Foam::polyMesh::defaultRegion,
+//                    polyMesh::defaultRegion,
 //                    instance,
 //                    runTime_,
 //                    IOobject::MUST_READ

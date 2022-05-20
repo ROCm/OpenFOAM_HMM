@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -130,11 +130,10 @@ int main(int argc, char *argv[])
     forAll(regionNames, regioni)
     {
         const word& regionName = regionNames[regioni];
-        const word& regionDir =
+        const fileName meshDir
         (
-            regionName == polyMesh::defaultRegion ? word::null : regionName
+            polyMesh::regionName(regionName)/polyMesh::meshSubDir
         );
-        const fileName meshDir = regionDir/polyMesh::meshSubDir;
 
         if (regionNames.size() > 1)
         {

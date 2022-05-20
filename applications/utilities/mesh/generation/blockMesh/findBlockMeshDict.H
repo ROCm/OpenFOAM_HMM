@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -22,6 +22,7 @@ autoPtr<IOdictionary> meshDictPtr;
 
 {
     fileName dictPath;
+    const word& regionDir = polyMesh::regionName(regionName);
 
     if (args.readIfPresent("dict", dictPath))
     {
@@ -37,15 +38,17 @@ autoPtr<IOdictionary> meshDictPtr;
         exists
         (
             runTime.path()/runTime.constant()
-            /regionPath/polyMesh::meshSubDir/dictName
+          / regionDir/polyMesh::meshSubDir/dictName
         )
     )
     {
         // Dictionary present in constant polyMesh directory (old-style)
 
         dictPath =
+        (
             runTime.constant()
-                /regionPath/polyMesh::meshSubDir/dictName;
+          / regionDir/polyMesh::meshSubDir/dictName
+        );
 
 
         // Warn that constant/polyMesh/blockMeshDict was used
@@ -54,14 +57,14 @@ autoPtr<IOdictionary> meshDictPtr;
             << "Using the old blockMeshDict location: "
             << dictPath << nl
             << "    instead of the default location:  "
-            << runTime.system()/regionPath/dictName << nl
+            << runTime.system()/regionDir/dictName << nl
             << endl;
     }
     else
     {
         // Assume dictionary is to be found in the system directory
 
-        dictPath = runTime.system()/regionPath/dictName;
+        dictPath = runTime.system()/regionDir/dictName;
     }
 
     IOobject meshDictIO

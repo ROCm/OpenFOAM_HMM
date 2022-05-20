@@ -88,17 +88,11 @@ Foam::OFstream* Foam::sampledSets::createProbeFile(const word& fieldName)
         // Put in undecomposed case
         // (Note: gives problems for distributed data running)
 
-        fileName probeSubDir = name();
-        if (mesh_.name() != polyMesh::defaultRegion)
-        {
-            probeSubDir = probeSubDir/mesh_.name();
-        }
-
         fileName probeDir
         (
             mesh_.time().globalPath()
           / functionObject::outputPrefix
-          / probeSubDir
+          / name()/mesh_.regionName()
             // Use startTime as the instance for output files
           / mesh_.time().timeName(mesh_.time().startTime().value())
         );
@@ -446,7 +440,8 @@ Foam::sampledSets::sampledSets
     writeAsProbes_(false),
     outputPath_
     (
-        time_.globalPath()/functionObject::outputPrefix/name
+        time_.globalPath()/functionObject::outputPrefix
+      / name/mesh_.regionName()
     ),
     searchEngine_(mesh_),
     samplePointScheme_(),
@@ -459,10 +454,6 @@ Foam::sampledSets::sampledSets
     gatheredSorting_(),
     globalIndices_()
 {
-    if (mesh_.name() != polyMesh::defaultRegion)
-    {
-        outputPath_ /= mesh_.name();
-    }
     outputPath_.clean();  // Remove unneeded ".."
 
     read(dict);
@@ -487,7 +478,8 @@ Foam::sampledSets::sampledSets
     writeAsProbes_(false),
     outputPath_
     (
-        time_.globalPath()/functionObject::outputPrefix/name
+        time_.globalPath()/functionObject::outputPrefix
+      / name/mesh_.regionName()
     ),
     searchEngine_(mesh_),
     samplePointScheme_(),
@@ -500,10 +492,6 @@ Foam::sampledSets::sampledSets
     gatheredSorting_(),
     globalIndices_()
 {
-    if (mesh_.name() != polyMesh::defaultRegion)
-    {
-        outputPath_ /= mesh_.name();
-    }
     outputPath_.clean();  // Remove unneeded ".."
 
     read(dict);

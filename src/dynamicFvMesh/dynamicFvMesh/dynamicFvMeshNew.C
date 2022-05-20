@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,7 +43,7 @@ Foam::autoPtr<Foam::dynamicFvMesh> Foam::dynamicFvMesh::New(const IOobject& io)
     (
         "dynamicMeshDict",
         io.time().constant(),
-        (io.name() == polyMesh::defaultRegion ? "" : io.name()),
+        polyMesh::regionName(io.name()),
         io.db(),
         IOobject::MUST_READ_IF_MODIFIED,
         IOobject::NO_WRITE,
@@ -124,6 +124,14 @@ Foam::autoPtr<Foam::dynamicFvMesh> Foam::dynamicFvMesh::New
     const Time& runTime
 )
 {
+    const IOobject meshIO
+    (
+        polyMesh::defaultRegion,
+        runTime.timeName(),
+        runTime,
+        IOobject::MUST_READ
+    );
+
     if (args.dryRun() || args.found("dry-run-write"))
     {
         Info
@@ -148,32 +156,10 @@ Foam::autoPtr<Foam::dynamicFvMesh> Foam::dynamicFvMesh::New
 
         functionObject::outputPrefix = "postProcessing-dry-run";
 
-        return
-            simplifiedMeshes::simplifiedDynamicFvMeshBase::New
-            (
-                IOobject
-                (
-                    polyMesh::defaultRegion,
-                    runTime.timeName(),
-                    runTime,
-                    IOobject::MUST_READ
-                )
-            );
+        return simplifiedMeshes::simplifiedDynamicFvMeshBase::New(meshIO);
     }
-    else
-    {
-        return
-            New
-            (
-                IOobject
-                (
-                    polyMesh::defaultRegion,
-                    runTime.timeName(),
-                    runTime,
-                    IOobject::MUST_READ
-                )
-            );
-    }
+
+    return New(meshIO);
 }
 
 

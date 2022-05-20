@@ -512,12 +512,7 @@ int main(int argc, char *argv[])
         forAll(regionNames, regioni)
         {
             const word& regionName = regionNames[regioni];
-            const word& regionDir =
-            (
-                regionName != polyMesh::defaultRegion
-              ? regionName
-              : word::null
-            );
+            const word& regionDir = polyMesh::regionName(regionName);
 
             if (regionNames.size() > 1)
             {

@@ -459,8 +459,7 @@ Foam::fvMeshTools::newMesh
 
     const fileName meshSubDir
     (
-        (io.name() == polyMesh::defaultRegion ? word::null : io.name())
-      / polyMesh::meshSubDir
+        polyMesh::regionName(io.name()) / polyMesh::meshSubDir
     );
 
 
@@ -744,8 +743,7 @@ Foam::fvMeshTools::loadOrCreateMesh
 
     const fileName meshSubDir
     (
-        (io.name() == polyMesh::defaultRegion ? word::null : io.name())
-      / polyMesh::meshSubDir
+        polyMesh::regionName(io.name()) / polyMesh::meshSubDir
     );
 
 

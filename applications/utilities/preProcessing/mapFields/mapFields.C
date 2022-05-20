@@ -290,21 +290,21 @@ int main(int argc, char *argv[])
     const fileName rootDirSource = casePath.path().toAbsolute();
     const fileName caseDirSource = casePath.name();
 
-    Info<< "Source: " << rootDirSource << " " << caseDirSource << endl;
-    word sourceRegion = polyMesh::defaultRegion;
-    if (args.found("sourceRegion"))
+    Info<< "Source: " << rootDirSource << ' ' << caseDirSource;
+    word sourceRegion(polyMesh::defaultRegion);
+    if (args.readIfPresent("sourceRegion", sourceRegion))
     {
-        sourceRegion = args["sourceRegion"];
-        Info<< "Source region: " << sourceRegion << endl;
+        Info<< " (region " << sourceRegion << ')';
     }
+    Info<< endl;
 
-    Info<< "Target: " << rootDirTarget << " " << caseDirTarget << endl;
-    word targetRegion = polyMesh::defaultRegion;
-    if (args.found("targetRegion"))
+    Info<< "Target: " << rootDirTarget << ' ' << caseDirTarget;
+    word targetRegion(polyMesh::defaultRegion);
+    if (args.readIfPresent("targetRegion", targetRegion))
     {
-        targetRegion = args["targetRegion"];
-        Info<< "Target region: " << targetRegion << endl;
+        Info<< " (region " << targetRegion << ')';
     }
+    Info<< endl;
 
     const bool parallelSource = args.found("parallelSource");
     const bool parallelTarget = args.found("parallelTarget");

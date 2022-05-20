@@ -87,9 +87,9 @@ void Foam::functionObjects::hydrostaticPressure::calculateAndWrite()
     auto& p = thermo.p();
 
     Info<< "Performing hydrostatic pressure initialisation";
-    if (mesh_.name() != polyMesh::defaultRegion)
+    if (!mesh_.regionName().empty())
     {
-        Info<< "for region " << mesh_.name();
+        Info<< " region=" << mesh_.name();
     }
 
 

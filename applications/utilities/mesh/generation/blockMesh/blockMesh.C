@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -184,15 +184,12 @@ int main(int argc, char *argv[])
     );
 
     word regionName(polyMesh::defaultRegion);
-    word regionPath;
 
     // Check if the region is specified otherwise mesh the default region
     if (args.readIfPresent("region", regionName))
     {
         Info<< nl << "Generating mesh for region " << regionName << endl;
-        regionPath = regionName;
     }
-
 
     // Instance for resulting mesh
     bool useTime = false;

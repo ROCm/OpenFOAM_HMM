@@ -145,7 +145,7 @@ void createFieldFiles
 
         fileName regionPath = "/";
 
-        if (regionName != word::null)
+        if (!regionName.empty())
         {
             regionPath += regionName + '/';
         }
@@ -294,7 +294,7 @@ int main(int argc, char *argv[])
     {
         const word& regionName = solver.regionName(regionI);
 
-        if (regionName == word::null)
+        if (regionName.empty())
         {
             Info<< "Region: " << polyMesh::defaultRegion << " (default)"
                 << endl;

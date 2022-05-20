@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,7 +64,7 @@ bool Foam::simplifiedMeshes::columnFvMeshInfo::setPatchEntries
     (
         "boundary",
         localInstance_,
-        regionPrefix_ + polyMesh::meshSubDir,
+        polyMesh::regionName(regionName_)/polyMesh::meshSubDir,
         runTime,
         IOobject::MUST_READ,
         IOobject::NO_WRITE,
@@ -103,7 +103,7 @@ bool Foam::simplifiedMeshes::columnFvMeshInfo::setPatchEntries
         (
             runTime,
             runTime.timeName(),
-            (regionName_ == polyMesh::defaultRegion ? "" : regionName_)
+            polyMesh::regionName(regionName_)
         );
 
         if (objects.empty())
@@ -209,7 +209,7 @@ void Foam::simplifiedMeshes::columnFvMeshInfo::initialise(const Time& runTime)
         (
             "points",
             localInstance_,
-            regionPrefix_ + polyMesh::meshSubDir,
+            polyMesh::regionName(regionName_)/polyMesh::meshSubDir,
             runTime,
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
@@ -409,17 +409,11 @@ Foam::simplifiedMeshes::columnFvMeshInfo::columnFvMeshInfo
 )
 :
     regionName_(regionName),
-    regionPrefix_
-    (
-        regionName_ == polyMesh::defaultRegion
-      ? ""
-      : regionName_ + '/'
-    ),
     localInstance_
     (
         runTime.findInstance
         (
-            regionPrefix_ + polyMesh::meshSubDir,
+            polyMesh::regionName(regionName_)/polyMesh::meshSubDir,
             "boundary",
             IOobject::READ_IF_PRESENT
         )

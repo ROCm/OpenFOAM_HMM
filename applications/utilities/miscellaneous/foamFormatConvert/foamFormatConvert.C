@@ -297,15 +297,17 @@ int main(int argc, char *argv[])
     IOobject::fileModificationChecking = IOobject::timeStamp;
 
 
-    fileName meshDir = polyMesh::meshSubDir;
-    fileName regionPrefix = "";
-    word regionName = polyMesh::defaultRegion;
+    word regionName(polyMesh::defaultRegion);
     if (args.readIfPresent("region", regionName))
     {
         Info<< "Using region " << regionName << nl << endl;
-        regionPrefix = regionName;
-        meshDir = regionName/polyMesh::meshSubDir;
     }
+
+    const fileName meshDir
+    (
+        polyMesh::regionName(regionName)/polyMesh::meshSubDir
+    );
+
 
     Foam::instantList timeDirs = Foam::timeSelector::select0(runTime, args);
 
@@ -349,7 +351,7 @@ int main(int argc, char *argv[])
         writeMeshObject<pointIOField>
         (
             "internalDelaunayVertices",
-            regionPrefix,
+            polyMesh::regionName(regionName),
             runTime
         );
 
@@ -365,7 +367,12 @@ int main(int argc, char *argv[])
         }
 
         // Get list of objects from the database
-        IOobjectList objects(runTime, runTime.timeName(), regionPrefix);
+        IOobjectList objects
+        (
+            runTime,
+            runTime.timeName(),
+            polyMesh::regionName(regionName)
+        );
 
         forAllConstIters(objects, iter)
         {
@@ -417,7 +424,7 @@ int main(int argc, char *argv[])
             fileHandler().filePath
             (
                 runTime.timePath()
-              / regionPrefix
+              / polyMesh::regionName(regionName)
               / cloud::prefix
             )
         );

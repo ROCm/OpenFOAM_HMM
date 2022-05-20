@@ -52,15 +52,8 @@ License
 
 void Foam::printMeshStats(const polyMesh& mesh, const bool allTopology)
 {
-    if (mesh.name() == Foam::polyMesh::defaultRegion)
-    {
-        Info<< "Mesh stats" << nl;
-    }
-    else
-    {
-        Info<< "Mesh " << mesh.name() << " stats" << nl;
-    }
-    Info<< "    points:           "
+    Info<< "Mesh stats " << mesh.regionName() << nl
+        << "    points:           "
         << returnReduce(mesh.points().size(), sumOp<label>()) << nl;
 
 

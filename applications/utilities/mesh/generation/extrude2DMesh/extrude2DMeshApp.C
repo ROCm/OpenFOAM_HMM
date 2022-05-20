@@ -234,12 +234,12 @@ int main(int argc, char *argv[])
     {
         mesh = autoPtr<polyMesh>::New
         (
-            Foam::IOobject
+            IOobject
             (
-                Foam::polyMesh::defaultRegion,
+                polyMesh::defaultRegion,
                 runTimeExtruded.timeName(),
                 runTimeExtruded,
-                Foam::IOobject::MUST_READ
+                IOobject::MUST_READ
             )
         );
     }

@@ -294,12 +294,7 @@ int main(int argc, char *argv[])
     forAll(regionNames, regioni)
     {
         const word& regionName = regionNames[regioni];
-        const word& regionDir =
-        (
-            regionName != polyMesh::defaultRegion
-          ? regionName
-          : word::null
-        );
+        const word& regionDir = polyMesh::regionName(regionName);
 
         Info<< "\n\nReconstructing fields" << nl
             << "region=" << regionName << nl << endl;
@@ -925,7 +920,7 @@ int main(int argc, char *argv[])
 
             // For the first region of a multi-region case additionally
             // copy the "uniform" directory in the time directory
-            if (regioni == 0 && regionDir != word::null)
+            if (regioni == 0 && !regionDir.empty())
             {
                 fileName uniformDir0
                 (

@@ -44,10 +44,10 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(polyMesh, 0);
-
-    word polyMesh::defaultRegion = "region0";
-    word polyMesh::meshSubDir = "polyMesh";
 }
+
+Foam::word Foam::polyMesh::defaultRegion = "region0";
+Foam::word Foam::polyMesh::meshSubDir = "polyMesh";
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -824,6 +824,14 @@ Foam::polyMesh::~polyMesh()
 }
 
 
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+const Foam::word& Foam::polyMesh::regionName(const word& region)
+{
+    return (region == polyMesh::defaultRegion ? word::null : region);
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 const Foam::fileName& Foam::polyMesh::dbDir() const
@@ -840,6 +848,12 @@ const Foam::fileName& Foam::polyMesh::dbDir() const
 Foam::fileName Foam::polyMesh::meshDir() const
 {
     return dbDir()/meshSubDir;
+}
+
+
+const Foam::word& Foam::polyMesh::regionName() const
+{
+    return polyMesh::regionName(objectRegistry::name());
 }
 
 

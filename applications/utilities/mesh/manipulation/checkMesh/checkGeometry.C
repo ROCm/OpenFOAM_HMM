@@ -1015,10 +1015,8 @@ Foam::label Foam::checkGeometry
 
         const fileName outputDir
         (
-            mesh.time().globalPath()
-           /functionObject::outputPrefix
-           /(mesh.name() == polyMesh::defaultRegion ? word::null : mesh.name())
-           /"checkMesh"
+            mesh.time().globalPath()/functionObject::outputPrefix
+          / mesh.regionName()/"checkMesh"
         );
 
         forAll(pbm, patchi)

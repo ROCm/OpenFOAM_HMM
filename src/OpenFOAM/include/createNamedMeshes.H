@@ -34,11 +34,7 @@ Foam::PtrList<Foam::fvMesh> meshes(regionNames.size());
         const Foam::word& regionName = regionNames[regioni];
 
         Foam::Info<< "Create mesh";
-        if
-        (
-            regionNames.size() > 1
-         || regionName != Foam::polyMesh::defaultRegion
-        )
+        if (regionNames.size() > 1)
         {
             Foam::Info<< ' ' << regionName;
         }
