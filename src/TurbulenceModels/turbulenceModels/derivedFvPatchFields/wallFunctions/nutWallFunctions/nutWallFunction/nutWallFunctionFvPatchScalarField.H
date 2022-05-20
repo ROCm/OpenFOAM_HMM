@@ -179,6 +179,12 @@ public:
         //  yPlus is the first-cell-centre height from boundary in wall units
         virtual tmp<scalarField> yPlus() const = 0;
 
+        //- Return wallFunctionCoefficients
+        inline const wallFunctionCoefficients& wallCoeffs() const noexcept
+        {
+            return wallCoeffs_;
+        }
+
 
         // Evaluation
 
