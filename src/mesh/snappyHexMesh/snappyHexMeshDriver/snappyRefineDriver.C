@@ -2586,6 +2586,9 @@ Foam::label Foam::snappyRefineDriver::directionalSmooth
             );
             baseMesh.movePoints(baseMesh.points()+disp);
 
+            // Reset any moving state
+            baseMesh.moving(false);
+
             if (debug&meshRefinement::MESH)
             {
                 const_cast<Time&>(baseMesh.time())++;
@@ -2744,6 +2747,9 @@ Foam::label Foam::snappyRefineDriver::directionalSmooth
                 point::zero
             );
             baseMesh.movePoints(baseMesh.points()+dispSmooth);
+
+            // Reset any moving state
+            baseMesh.moving(false);
 
             if (debug&meshRefinement::MESH)
             {

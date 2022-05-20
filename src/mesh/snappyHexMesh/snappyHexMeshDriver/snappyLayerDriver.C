@@ -4086,6 +4086,9 @@ void Foam::snappyLayerDriver::addLayers
 
             pp.movePoints(mesh.points());
 
+            // Unset any moving state
+            mesh.moving(false);
+
             // Update patchDisp (since not all might have been honoured)
             patchDisp = oldPatchPos - pp.localPoints();
         }
@@ -4389,6 +4392,9 @@ void Foam::snappyLayerDriver::addLayers
         mesh.movePoints(oldPoints);
         pp.movePoints(mesh.points());
         medialAxisMoverPtr().movePoints(mesh.points());
+
+        // Unset any moving state
+        mesh.moving(false);
 
         // Grow out region of non-extrusion
         for (label i = 0; i < layerParams.nGrow(); i++)

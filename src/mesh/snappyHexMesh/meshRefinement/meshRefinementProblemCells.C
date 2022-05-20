@@ -606,6 +606,10 @@ void Foam::meshRefinement::markFacesOnProblemCells
             const_cast<Time&>(mesh_.time())++;
             pointField oldPoints(mesh_.points());
             mesh_.movePoints(newPoints);
+
+            // Unset any moving state
+            mesh_.moving(false);
+
             Pout<< "Writing newPoints mesh to time " << timeName()
                 << endl;
             write
@@ -615,6 +619,9 @@ void Foam::meshRefinement::markFacesOnProblemCells
                 mesh_.time().path()/"newPoints"
             );
             mesh_.movePoints(oldPoints);
+
+            // Unset any moving state
+            mesh_.moving(false);
         }
     }
 
@@ -1122,6 +1129,9 @@ void Foam::meshRefinement::markFacesOnProblemCellsGeometric
         );
 
         mesh_.movePoints(newPoints);
+
+        // Unset any moving state
+        mesh_.moving(false);
     }
 
 
@@ -1258,6 +1268,9 @@ void Foam::meshRefinement::markFacesOnProblemCellsGeometric
 
     // Restore points.
     mesh_.movePoints(oldPoints);
+
+    // Unset any moving state
+    mesh_.moving(false);
 
 
     Info<< "markFacesOnProblemCellsGeometric : marked "
