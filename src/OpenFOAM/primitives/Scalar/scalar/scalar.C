@@ -40,6 +40,24 @@ Foam::scalar Foam::readScalar(Istream& is)
 }
 
 
+Foam::scalar Foam::readScalarOrDefault(Istream& is, const scalar defaultValue)
+{
+    if (is.good())
+    {
+        token tok(is);
+
+        if (tok.isNumber())
+        {
+            return tok.scalarToken();
+        }
+
+        is.putBack(tok);
+    }
+
+    return defaultValue;
+}
+
+
 Foam::scalar Foam::readRawScalar(Istream& is)
 {
     scalar val(0);
