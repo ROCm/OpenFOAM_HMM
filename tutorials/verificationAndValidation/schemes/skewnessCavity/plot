@@ -224,7 +224,6 @@ rm -f results/*.dat
 
 for group in $groups
 do
-
     groupName="$group"
 
     collect_data "$groupName" ${!group}
@@ -232,7 +231,6 @@ do
     plot_error_stats "$groupName"
 
     plot_mag_error_stats "$groupName"
-
 done
 
 

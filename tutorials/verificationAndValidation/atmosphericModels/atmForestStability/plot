@@ -70,14 +70,14 @@ plot_u_vs_z() {
     shift 2
     setups=$@
 
-    benchmarkFile="$FOAM_TUTORIALS/resources/dataset/atm-Arnqvist-2015/uNorm-zNorm.dat"
+    benchmarkFile="resources/dataset/uNorm-zNorm.dat"
 
     i=0
     for setup in $setups
     do
-        endTime=$(foamDictionary results/$setup/settings/controlDict -entry endTime -value)
+        endTime=$(foamDictionary results/$setup/system/controlDict -disableFunctionEntries -entry endTime -value)
 
-        sampleFile="results/$setup/postProcessing/samples/$endTime/lineZ1_U.xy"
+        sampleFile="results/$setup/postProcessing/sampleU/$endTime/lineZ1_U.xy"
 
         # Store the ground-normal height
         z=($(awk '{ printf "%.16f\n", $1 }' $sampleFile))
@@ -166,14 +166,14 @@ plot_k_vs_z() {
     shift 2
     setups=$@
 
-    benchmarkFile="$FOAM_TUTORIALS/resources/dataset/atm-Arnqvist-2015/kNorm-zNorm.dat"
+    benchmarkFile="resources/dataset/kNorm-zNorm.dat"
 
     i=0
     for setup in $setups
     do
-        endTime=$(foamDictionary results/$setup/settings/controlDict -entry endTime -value)
+        endTime=$(foamDictionary results/$setup/system/controlDict -disableFunctionEntries -entry endTime -value)
 
-        sampleFile="results/$setup/postProcessing/samples/$endTime/lineZ1_ObukhovLength_T_Ustar_k_p_rgh.xy"
+        sampleFile="results/$setup/postProcessing/sampleScalars/$endTime/lineZ1_ObukhovLength_T_Ustar_k_p_rgh.xy"
 
         # Store the ground-normal height profile
         z=($(awk '{ printf "%.16f\n", $1 }' $sampleFile))
@@ -265,9 +265,9 @@ print_Obukhov_length() {
     i=0
     for setup in $setups
     do
-        endTime=$(foamDictionary results/$setup/settings/controlDict -entry endTime -value)
+        endTime=$(foamDictionary results/$setup/system/controlDict -disableFunctionEntries -entry endTime -value)
 
-        sampleFile="results/$setup/postProcessing/samples/$endTime/lineZ1_ObukhovLength_T_Ustar_k_p_rgh.xy"
+        sampleFile="results/$setup/postProcessing/sampleScalars/$endTime/lineZ1_ObukhovLength_T_Ustar_k_p_rgh.xy"
 
         # Store the ground-normal height profile
         z=($(awk '{ printf "%.16f\n", $1 }' $sampleFile))
@@ -299,14 +299,14 @@ plot_alpha_vs_z() {
     shift 2
     setups=$@
 
-    benchmarkFile="$FOAM_TUTORIALS/resources/dataset/atm-Arnqvist-2015/veer-zNorm.dat"
+    benchmarkFile="resources/dataset/veer-zNorm.dat"
 
     i=0
     for setup in $setups
     do
-        endTime=$(foamDictionary results/$setup/settings/controlDict -entry endTime -value)
+        endTime=$(foamDictionary results/$setup/system/controlDict -disableFunctionEntries -entry endTime -value)
 
-        sampleFile="results/$setup/postProcessing/samples/$endTime/lineZ1_U.xy"
+        sampleFile="results/$setup/postProcessing/sampleU/$endTime/lineZ1_U.xy"
 
         # Store the ground-normal height
         z=($(awk '{ printf "%.16f\n", $1 }' $sampleFile))

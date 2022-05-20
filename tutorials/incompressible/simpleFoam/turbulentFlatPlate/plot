@@ -63,7 +63,7 @@ plot_Rex_vs_Cf() {
 
     plot \
         weighardt(x) t "Weighardt"  w lines lc "red" lw 2, \
-        samples u (\$1 - X0)*Uref/nu:(sqrt(\$2*\$2 + \$3*\$3 + \$4*\$4)/(0.5*Uref*Uref)) \
+        samples u (\$1 - x0)*Uref/nu:(sqrt(\$2*\$2 + \$3*\$3 + \$4*\$4)/(0.5*Uref*Uref)) \
             t "$setup y^+ ${yp}" w l lc "black" lw 2
 PLT_REX_VS_CF
 }
@@ -73,19 +73,19 @@ PLT_REX_VS_CF
 
 # Requires gnuplot
 command -v gnuplot >/dev/null || {
-    echo "FOAM FATAL ERROR: gnuplot not found - skipping graph creation" 1>&2
+    echo "gnuplot not found - skipping graph creation" 1>&2
     exit 1
 }
 
 # Requires awk
 command -v awk >/dev/null || {
-    echo "FOAM FATAL ERROR: awk not found - skipping graph creation" 1>&2
+    echo "awk not found - skipping graph creation" 1>&2
     exit 1
 }
 
 # Check "results" directory
 [ -d "results" ] || {
-    echo "FOAM FATAL ERROR: No results directory found - skipping graph creation" 1>&2
+    echo "No results directory found - skipping graph creation" 1>&2
     exit 1
 }
 
@@ -94,26 +94,26 @@ command -v awk >/dev/null || {
 
 for setup in $setups
 do
-
     for yp in $yps
     do
-
         echo ""
         echo "# Plots for the setup and y+: $setup - $yp"
         echo ""
 
-        dirPlots="plots/$setup/$yp"
+        resultsDir="results/$setup/$yp"
+        [ -d "$resultsDir" ] || {
+            echo "No $resultsDir directory found - skipping graph creation" 1>&2
+            continue
+        }
+
+        dirPlots="plots/$setup"
         [ -d "$dirPlots" ] || mkdir -p "$dirPlots"
 
-        # few manipulations
-        resultsDir="results/$setup/$yp"
         Uref=$(foamDictionary $resultsDir/0/U -entry internalField | sed 's/^.*(\s*\([^ ]*\).*/\1/g')
-        nu=$(foamDictionary $resultsDir/settings/transportProperties -entry nu | sed 's|^.*\s\(.*\);|\1|g')
+        nu=$(foamDictionary $resultsDir/constant/transportProperties -entry nu | sed 's|^.*\s\(.*\);|\1|g')
 
         plot_Rex_vs_Cf "$setup" "$yp" "$Uref" "$nu"
-
     done
-
 done
 
 

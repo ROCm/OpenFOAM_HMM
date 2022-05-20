@@ -99,7 +99,9 @@ functions
     }
 
     #includeFunc "turbulenceFields"
-    #includeFunc "samples"
+    #includeFunc "sampleU"
+    #includeFunc "sampleScalars"
+    #includeFunc "sampleR"
 }
 
 

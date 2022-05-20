@@ -148,7 +148,7 @@ plot_yPlus_vs_uPlus() {
     uTau="$4"
 
     # benchmarkFile="$FOAM_TUTORIALS/resources/dataset/planeChannelFlow/ReTau-395/chan395.means"
-    sampleFile="results/$setup/postProcessing/sample/$endTime/y_U.xy"
+    sampleFile="results/$setup/postProcessing/sampleU/$endTime/y_U.xy"
     image="plots/$setup/yPlus_vs_uPlus.png"
 
     gnuplot<<PLT_Y_VS_U
@@ -187,8 +187,8 @@ plot_yPlus_vs_R() {
     uTau="$4"
 
     # benchmarkFile="$FOAM_TUTORIALS/resources/dataset/planeChannelFlow/ReTau-395/chan395.reystress"
-    sampleFile="results/$setup/postProcessing/sample/$endTime/y_turbulenceProperties:R.xy"
-    sampleFileK="results/$setup/postProcessing/sample/$endTime/y_turbulenceProperties:k.xy"
+    sampleFile="results/$setup/postProcessing/sampleR/$endTime/y_turbulenceProperties:R.xy"
+    sampleFileK="results/$setup/postProcessing/sampleK/$endTime/y_turbulenceProperties:k.xy"
     imageUU="plots/$setup/yPlus_vs_Ruu.png"
     imageVV="plots/$setup/yPlus_vs_Rvv.png"
     imageWW="plots/$setup/yPlus_vs_Rww.png"
@@ -346,7 +346,7 @@ plot_yPlus_vs_uPlus_all_setups() {
         tau=$(foamDictionary results/$setup/$endTime/wallShearStress -entry boundaryField.bottom.value -value | sed -n '/(/,/)/p' | sed -e 's/[()]//g;/^\s*$/d' | cut -d' ' -f6)
         uTau=$(awk -v tau="$tau" 'BEGIN { printf "%.16f", sqrt(-1*tau) }')
 
-        sampleFiles[$n]="results/$setup/postProcessing/sample/$endTime/y_U.xy"
+        sampleFiles[$n]="results/$setup/postProcessing/sampleU/$endTime/y_U.xy"
         nus[$n]="$nu"
         uTaus[$n]="$uTau"
         n=$(($n+1))
@@ -401,8 +401,8 @@ plot_yPlus_vs_R_all_setups() {
         tau=$(foamDictionary results/$setup/$endTime/wallShearStress -entry boundaryField.bottom.value -value | sed -n '/(/,/)/p' | sed -e 's/[()]//g;/^\s*$/d' | cut -d' ' -f6)
         uTau=$(awk -v tau="$tau" 'BEGIN { printf "%.16f", sqrt(-1*tau) }')
 
-        sampleFiles[$n]="results/$setup/postProcessing/sample/$endTime/y_turbulenceProperties:R.xy"
-        sampleFilesK[$n]="results/$setup/postProcessing/sample/$endTime/y_turbulenceProperties:k.xy"
+        sampleFiles[$n]="results/$setup/postProcessing/sampleR/$endTime/y_turbulenceProperties:R.xy"
+        sampleFilesK[$n]="results/$setup/postProcessing/sampleK/$endTime/y_turbulenceProperties:k.xy"
         nus[$n]="$nu"
         uTaus[$n]="$uTau"
         n=$(($n+1))
@@ -623,10 +623,14 @@ command -v awk >/dev/null || {
 
 for setup in $setups
 do
-
     echo ""
     echo "# Plots for the setup: $setup"
     echo ""
+
+    [ -d "results/$setup" ] || {
+        echo "No results/$setup directory found - skipping graph creation" 1>&2
+        continue
+    }
 
     dirPlots="plots/$setup"
     [ -d "$dirPlots" ] || mkdir -p "$dirPlots"
@@ -648,7 +652,6 @@ do
     plot_initial_iteration_residuals "$setup"
 
     plot_final_iteration_residuals "$setup"
-
 done
 
 plot_yPlus_vs_uPlus_all_setups $setups

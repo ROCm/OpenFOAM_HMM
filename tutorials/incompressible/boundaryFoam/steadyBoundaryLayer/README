@@ -10,4 +10,4 @@ Usage:
 
 - run test using Allrun script
 - uses foamLog to generate u+ and y+ values
-- postscript (.eps) plot generated using gnuplot, OF_vs_ANALYTICAL.eps
+- plots are generated using gnuplot, and can be found under plots directory

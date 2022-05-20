@@ -18,11 +18,11 @@ plot_t_vs_x() {
 
     setup="$1"
 
-    benchmarkFile="$FOAM_TUTORIALS/resources/dataset/StefanProblem.dat"
+    benchmarkFile="resources/dataset/StefanProblem.dat"
 
-    sampleFile0="results/$setup/postProcessing/interfaceHeight1/1.36"
-    sampleFile="$sampleFile0/positionClean.dat"
-    sed -e 's/[()]//g' "$sampleFile0/position.dat" > "$sampleFile"
+    sampleDir="results/$setup/postProcessing/interfaceHeight1/1.36"
+    sampleFile="$sampleDir/positionClean.dat"
+    sed -e 's/[()]//g' "$sampleDir/position.dat" > "$sampleFile"
     image="plots/$setup/t_vs_x.png"
 
     gnuplot<<EOF
@@ -50,13 +50,13 @@ EOF
 
 # Requires gnuplot
 command -v gnuplot >/dev/null || {
-    echo "FOAM FATAL ERROR: gnuplot not found - skipping graph creation" 1>&2
+    echo "gnuplot not found - skipping graph creation" 1>&2
     exit 1
 }
 
 # Check "results" directory
 [ -d "results" ] || {
-    echo "FOAM FATAL ERROR: No results directory found - skipping graph creation" 1>&2
+    echo "No results directory found - skipping graph creation" 1>&2
     exit 1
 }
 
@@ -65,16 +65,19 @@ command -v gnuplot >/dev/null || {
 
 for setup in $setups
 do
-
     echo ""
     echo "# Plots for the setup: $setup"
     echo ""
+
+    [ -d "results/$setup" ] || {
+        echo "No results/$setup directory found - skipping graph creation" 1>&2
+        continue
+    }
 
     dirPlots="plots/$setup"
     [ -d "$dirPlots" ] || mkdir -p "$dirPlots"
 
     plot_t_vs_x "$setup"
-
 done
 
 

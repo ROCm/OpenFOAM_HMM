@@ -31,7 +31,7 @@ plot_ux_vs_znorm_upstream() {
     endTime="$1"
     zMin="$2"
 
-    benchmarkFile="$FOAM_TUTORIALS/resources/dataset/atm-HargreavesWright-2007/Ux-HW-RH-Fig6a"
+    benchmarkFile="resources/dataset/Ux-HW-RH-Fig6a"
     sampleFile="results/$setup/postProcessing/samples_u/$endTime"
     image="plots/$setup/ux_vs_znorm_upstream.png"
 
@@ -72,7 +72,7 @@ plot_ux_vs_znorm_middle() {
     endTime="$1"
     zMin="$2"
 
-    benchmarkFile="$FOAM_TUTORIALS/resources/dataset/atm-HargreavesWright-2007/Ux-HW-RH-Fig6a"
+    benchmarkFile="resources/dataset/Ux-HW-RH-Fig6a"
     sampleFile="results/$setup/postProcessing/samples_u/$endTime"
     image="plots/$setup/ux_vs_znorm_middle.png"
 
@@ -113,7 +113,7 @@ plot_ux_vs_znorm_downstream() {
     endTime="$1"
     zMin="$2"
 
-    benchmarkFile="$FOAM_TUTORIALS/resources/dataset/atm-HargreavesWright-2007/Ux-HW-RH-Fig6a"
+    benchmarkFile="resources/dataset/Ux-HW-RH-Fig6a"
     sampleFile="results/$setup/postProcessing/samples_u/$endTime"
     image="plots/$setup/ux_vs_znorm_downstream.png"
 
@@ -154,7 +154,7 @@ plot_k_vs_znorm() {
     endTime="$1"
     zMin="$2"
 
-    benchmarkFile="$FOAM_TUTORIALS/resources/dataset/atm-HargreavesWright-2007"
+    benchmarkFile="resources/dataset"
     sampleFile="results/$setup/postProcessing/samples_k/$endTime"
     image="plots/$setup/k_vs_znorm.png"
 
@@ -205,7 +205,7 @@ plot_epsilon_vs_znorm() {
     endTime="$1"
     zMin="$2"
 
-    benchmarkFile="$FOAM_TUTORIALS/resources/dataset/atm-HargreavesWright-2007/epsilon-HW-RH-Fig6c"
+    benchmarkFile="resources/dataset/epsilon-HW-RH-Fig6c"
     sampleFile="results/$setup/postProcessing/samples_epsilon/$endTime"
     image="plots/$setup/epsilon_vs_znorm.png"
 
@@ -299,7 +299,7 @@ plot_nut_vs_znorm() {
     endTime="$1"
     zMin="$2"
 
-    benchmarkFile="$FOAM_TUTORIALS/resources/dataset/atm-HargreavesWright-2007/"
+    benchmarkFile="resources/dataset"
     sampleFile="results/$setup/postProcessing/samples_nut/$endTime"
     image="plots/$setup/nut_vs_znorm.png"
 
@@ -361,16 +361,20 @@ command -v gnuplot >/dev/null || {
 
 for setup in $setups
 do
-
     echo ""
     echo "# Plots for the setup: $setup"
     echo ""
+
+    [ -d "results/$setup" ] || {
+        echo "No results/$setup directory found - skipping graph creation" 1>&2
+        continue
+    }
 
     dirPlots="plots/$setup"
     [ -d "$dirPlots" ] || mkdir -p "$dirPlots"
 
     endTime=$( \
-        foamDictionary results/$setup/settings/controlDict \
+        foamDictionary results/$setup/system/controlDict \
             -disableFunctionEntries -entry endTime -value \
         )
 
@@ -383,32 +387,23 @@ do
 
     if [ -d "results/$setup/postProcessing/samples_k" ]
     then
-
         plot_k_vs_znorm "$endTime" "$zMin"
-
     fi
 
     if [ -d "results/$setup/postProcessing/samples_epsilon" ]
     then
-
         plot_epsilon_vs_znorm "$endTime" "$zMin"
-
     fi
 
     if [ -d "results/$setup/postProcessing/samples_omega" ]
     then
-
         plot_omega_vs_znorm "$endTime" "$zMin"
-
     fi
 
     if [ -d "results/$setup/postProcessing/samples_nut" ]
     then
-
         plot_nut_vs_znorm "$endTime" "$zMin"
-
     fi
-
 done
 
 

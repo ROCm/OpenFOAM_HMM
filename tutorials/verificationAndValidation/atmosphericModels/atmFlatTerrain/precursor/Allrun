@@ -1,68 +1,142 @@
 #!/bin/sh
 cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
-. ${WM_PROJECT_DIR:?}/bin/tools/CleanFunctions      # Tutorial clean functions
 #------------------------------------------------------------------------------
 
 # settings
 
-    # operand setups (only neutral stability)
+    # operand setups
     setups="
     kEpsilon
     kOmegaSST
     kL
     "
 
+    # flag to enable computations
+    run=true
+
     # flag to enable computations in parallel mode
     parallel=true
 
+    # flag to enable to use a common mesh
+    common_mesh=true
+
+    # flag to enable to use a common dynamic code
+    common_dynamic_code=false
+
 
 #------------------------------------------------------------------------------
+
 #######################################
-# Collect results and mesh into a given path
-# and clean the case for the next run
+# Create the given setup
 # Arguments:
-#    $1 = Path to move results
+#    $1 = Path to create the setup
 # Outputs:
 #    Writes info to stdout
 #######################################
-collect() {
+dry_run_setup() {
 
-    [ $# -eq 0 ] && { echo "Usage: $0 dir-model"; exit 1; }
+    [ $# -eq 0 ] && { echo "Usage error: $0"; exit 1; }
 
-    collection="$1"
+    setup="$1"
+    dirSetup="setups/$setup"
+    dirSetupOrig="setups.orig/$setup"
+    dirOrig="$dirSetupOrig/0.orig"
+    dirConstant="$dirSetupOrig/constant"
+    dirSystem="$dirSetupOrig/system"
 
-    dirResult=results/"$collection"
-    dirSettings="$dirResult"/settings
+    printf "\n# Create the setup: %s\n" "$setup"
+
+    if [ ! -d "$dirSetup" ]
+    then
+        mkdir -p "$dirSetup"
+
+        cp -aRfL "setups.orig/common/." "$dirSetup"
+        cp -afL "$dirSetupOrig"/All* "$dirSetup" 2>/dev/null || :
+        [ -d "$dirOrig" ] && cp -aRfL "$dirOrig/." "$dirSetup/0.orig"
+        [ -d "$dirConstant" ] && cp -aRfL "$dirConstant/." "$dirSetup/constant"
+        [ -d "$dirSystem" ] && cp -aRfL "$dirSystem/." "$dirSetup/system"
+    else
+        printf "\n      # Directory %s already exists\n" "$dirSetup"
+        printf "      # Skipping the creation of a new setup\n"
+    fi
+}
+
+
+#######################################
+# Run the given setup
+# Arguments:
+#    $1 = Path to the setup to run
+# Outputs:
+#    Writes info to stdout
+#######################################
+run_setup() {
+
+    [ $# -eq 0 ] && { echo "Usage error: $0"; exit 1; }
+
+    setup="$1"
+    dirSetup="setups/$setup"
+    dirResult="results/$setup"
+
+    dry_run_setup "$setup"
+    [ -d results ] || mkdir -p results
+
+    printf "\n# Run the setup: %s\n\n" "$setup"
 
     if [ ! -d "$dirResult" ]
     then
+        cp -Rf "$dirSetup" "$dirResult"
 
-        echo "      # Collecting results and settings into $dirResult"
+        if [ "$common_mesh" = true ]
+        then
+            if [ -d results/mesh ]
+            then
+                printf "## Copy the common mesh to the setup: %s\n\n" "$setup"
+                cp -Rf results/mesh/polyMesh "$dirResult"/constant/.
+            fi
+        fi
 
-        mkdir -p "$dirResult"
-        mkdir -p "$dirSettings"
+        if [ "$common_dynamic_code" = true ]
+        then
+            if [ -d results/dynamicCode ]
+            then
+                printf "## Copy the common dynamic code to the setup: %s\n\n" "$setup"
+                cp -Rf results/dynamicCode "$dirResult"/.
+            fi
+        fi
 
-        mv -f $(foamListTimes) "$dirResult"
-        [ -d postProcessing ] && mv -f postProcessing "$dirResult"
-        [ -d processor0 ] && mv -f processor* "$dirResult"
-        mv -f log.* "$dirResult"
-        cp -f system/{fv*,controlDict} constant/*Properties "$dirSettings"
-        mv -f 0/ "$dirSettings"
-        [ -d constant ] && mv -f constant "$dirResult"
-        [ -d system ] && mv -f system "$dirResult"
 
-        echo "      # Cleaning up the case"
+        if [ "$parallel" = true ]
+        then
+            ( cd "$dirResult" && ./Allrun-parallel )
+        else
+            ( cd "$dirResult" && ./Allrun )
+        fi
 
-        cleanTimeDirectories
-        cleanAuxiliary
-        cleanPostProcessing
+
+        if [ "$common_mesh" = true ]
+        then
+            if [ ! -d results/mesh ]
+            then
+                printf "\n## Store the mesh of %s as the common mesh\n\n" "$setup"
+                mkdir -p results/mesh
+                cp -Rf "$dirResult"/constant/polyMesh results/mesh/.
+            fi
+        fi
+
+        if [ "$common_dynamic_code" = true ]
+        then
+            if [ ! -d results/dynamicCode ] && [ -d "$dirResult"/dynamicCode ]
+            then
+                printf "\n## Store the dynamic code of %s as the common dynamic code\n\n" "$setup"
+                cp -Rf "$dirResult"/dynamicCode results/.
+            fi
+        fi
+
 
     else
-
-        echo "      # Directory $dirResult already exists"
-        echo "      # Skipping the computation"
-
+        printf "      # Directory %s already exists\n" "$dirResult"
+        printf "      # Skipping the computation of the given setup\n"
     fi
 }
 
@@ -71,57 +145,21 @@ collect() {
 
 for setup in $setups
 do
+    dirSetupOrig="setups.orig/$setup"
 
-    echo ""
-    echo "# Computations for the setup: $setup"
-    echo ""
-
-    dirSetup="setups.orig/$setup"
-
-    if [ ! -d "$dirSetup" ]
+    if [ ! -d "$dirSetupOrig" ]
     then
-        echo "Setup directory: $dirSetup" \
+        echo "Setup directory: $dirSetupOrig" \
              "could not be found - skipping execution" 1>&2
-        exit 1
+        continue
     fi
 
-    cp -rfL "$dirSetup/0.orig" .
-    cp -rfL "$dirSetup/constant" .
-    cp -rfL "$dirSetup/system" .
-    cp -rf 0.orig/ 0/
-
-    if [ ! -d constant/polyMesh ]
+    if [ "$run" = true ]
     then
-
-        runApplication blockMesh
-
-        runApplication renumberMesh -overwrite -constant
-
-        runApplication checkMesh -allTopology -allGeometry -constant
-
-    fi
-
-    if [ "$parallel" = true ]
-    then
-
-        runApplication decomposePar
-
-        runParallel $(getApplication)
-
-        runApplication reconstructPar
-
+        run_setup "$setup"
     else
-
-        runApplication $(getApplication)
-
+        dry_run_setup "$setup"
     fi
-
-    # Scale up all the dimensions of the precursor computational domain
-    # to encapsulate the successor domain, so that mapFields can be used
-    runApplication transformPoints -scale '(10 10 1)' -translate '(0 0 20)'
-
-    collect "$setup"
-
 done
 
 

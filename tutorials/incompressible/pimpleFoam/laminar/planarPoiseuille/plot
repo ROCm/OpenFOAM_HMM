@@ -14,35 +14,19 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 #------------------------------------------------------------------------------
 
-# Requires gnuplot
-command -v gnuplot >/dev/null || {
-    echo "FOAM FATAL ERROR: gnuplot not found - skipping graph creation" 1>&2
-    exit 1
-}
-
-# Check "results" directory
-[ -d "results" ] || {
-    echo "FOAM FATAL ERROR: No results directory found - skipping graph creation" 1>&2
-    exit 1
-}
-
-
-#------------------------------------------------------------------------------
-
 plot_t_vs_Ux() {
 
     setups=$@
 
-    benchmarkFile="WatersKing.dat"
-
     n=0
     for setup in $setups
     do
+        benchmarkFile="results/$setup/WatersKing.dat"
         sampleFiles[$n]="results/$setup/postProcessing/probes/0/Unp"
         n=$(($n+1))
     done
 
-    endTime=$(foamDictionary system/controlDict -entry endTime -value)
+    endTime=$(foamDictionary results/$setup/system/controlDict -entry endTime -value)
     image="plots/planarPoiseuille.png"
 
     gnuplot<<PLT
@@ -67,6 +51,21 @@ plot_t_vs_Ux() {
         for [i=1:words(samples)] word(samples, i) t word(names, i) \
             w linespoints pointinterval 100 lt i pt 6 ps 1.5
 PLT
+}
+
+
+#------------------------------------------------------------------------------
+
+# Requires gnuplot
+command -v gnuplot >/dev/null || {
+    echo "gnuplot not found - skipping graph creation" 1>&2
+    exit 1
+}
+
+# Check "results" directory
+[ -d "results" ] || {
+    echo "No results directory found - skipping graph creation" 1>&2
+    exit 1
 }
 
 
