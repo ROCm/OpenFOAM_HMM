@@ -16,7 +16,7 @@ FoamFile
 
 application     pisoFoam;
 
-startFrom       startTime;
+startFrom       latestTime;
 
 startTime       0;
 
@@ -68,6 +68,7 @@ functions
     #include "FOlog"
     #include "FOmag"
     #include "FOmagSqr"
+    #include "FOmultiFieldValue"
     #include "FOmultiply"
     #include "FOmomentum"
     #include "FOnearWallFields"

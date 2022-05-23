@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,10 +30,9 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Computes a selected operation between multiple \c fieldValue function
-    objects.
+    Computes a selected operation between multiple function objects.
 
-    The operation is applied to all results of each \c fieldValue object.
+    The operation is applied to all results of each object.
 
 Note
     Each object must generate the same number and type of results.
@@ -43,11 +42,9 @@ Usage
     \verbatim
     multiFieldValue1
     {
-        // Mandatory entries (unmodifiable)
-        type    multiFieldValue;
-        libs    (fieldFunctionObjects);
-
-        // Mandatory entries (runtime modifiable)
+        // Mandatory entries
+        type        multiFieldValue;
+        libs        (fieldFunctionObjects);
         operation   average;
 
         // List of fieldValue function objects as dictionaries
@@ -56,10 +53,14 @@ Usage
             region1
             {
                 ...
+                // Optional
+                resultFields        (field1 field2);
             }
             region2
             {
                 ...
+                // Optional
+                resultFields        (field1 field2);
             }
 
             ...
@@ -67,41 +68,41 @@ Usage
             regionN
             {
                 ...
+                // Optional
+                resultFields        (field1 field2);
             }
         }
 
-        // Optional (inherited) entries
+        // Inherited entries
         ...
     }
     \endverbatim
 
     where the entries mean:
     \table
-      Property     | Description                         | Type | Req'd | Dflt
-      type         | Type name: multiFieldValue          | word |  yes  | -
-      libs         | Library name: fieldFunctionObjects  | word |  yes  | -
-      operation    | Operation type to apply to values   | word |  yes  | -
-      functions    | List of fieldValue function objects | dict |  yes  | -
+      Property     | Description                         | Type | Reqd | Deflt
+      type         | Type name: multiFieldValue          | word |  yes | -
+      libs         | Library name: fieldFunctionObjects  | word |  yes | -
+      operation    | Operation type to apply to values   | word |  yes | -
+      functions    | List of function objects            | dict |  yes | -
     \endtable
 
     Options for the \c operation entry:
     \plaintable
-       add           | add
-       subtract      | subtract
-       min           | minimum
-       max           | maximum
-       average       | average
+       sum           | Sum of values
+       add           | Add values (same as sum)
+       subtract      | Subtract values from first entry
+       min           | Minimum value
+       max           | Maximum value
+       average       | Average value
     \endplaintable
 
+    The \c resultFields entry can be used to set the name of the function object
+    result fields to process. If omitted, all available values are employed.
+
     The inherited entries are elaborated in:
-     - \link fieldValue.H \endlink
-
-    Usage by the \c postProcess utility is not available.
-
-See also
-    - Foam::functionObject
-    - Foam::functionObjects::fieldValue
-    - ExtendedCodeGuide::functionObjects::field::multiFieldValue
+      - \link stateFunctionObject.H \endlink
+      - \link writeFile.H \endlink
 
 SourceFiles
     multiFieldValue.C
@@ -114,7 +115,6 @@ SourceFiles
 
 #include "stateFunctionObject.H"
 #include "writeFile.H"
-#include "fieldValue.H"
 #include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -161,8 +161,11 @@ private:
         //- Operation to apply to values
         operationType operation_;
 
-        //- List of fieldValue function objects
-        PtrList<fieldValue> functions_;
+        //- List of function objects
+        PtrList<functionObject> functions_;
+
+        //- List of result fields per function object
+        List<wordList> resultFields_;
 
 
     // Private Member Functions
@@ -183,7 +186,13 @@ protected:
     // Protected Member Functions
 
         //- Output file header information
-        virtual void writeFileHeader(Ostream& os) const;
+        virtual void writeFileHeader
+        (
+            const wordList& foNames,
+            const List<wordList>& entries,
+            const List<wordList>& types,
+            Ostream& os
+        ) const;
 
 
 public:

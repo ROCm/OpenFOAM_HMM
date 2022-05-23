@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,48 +63,36 @@ Foam::functionObjects::fieldValues::multiFieldValue::operationTypeNames_
 
 void Foam::functionObjects::fieldValues::multiFieldValue::writeFileHeader
 (
+    const wordList& foNames,
+    const List<wordList>& entries,
+    const List<wordList>& types,
     Ostream& os
 ) const
 {
-    const wordList& fields0 = functions_[0].fields();
+    const word groupPrefix("Group");
 
-    DynamicList<word> commonFields(fields0.size());
-
-    for (const word& fieldName : fields0)
+    forAll(entries, i)
     {
-        bool common = true;
+        writeCommented(os, groupPrefix + Foam::name(i));
+        os  << nl;
 
-        for (label functioni=1; functioni < functions_.size(); ++functioni)
+        forAll(entries[i], functioni)
         {
-            if (!functions_[functioni].fields().found(fieldName))
-            {
-                common = false;
-                break;
-            }
+            writeCommented
+            (
+                os,
+                "  - " + foNames[functioni] + ":" + entries[i][functioni]
+            );
+            os  << nl;
         }
-
-        if (common)
-        {
-            commonFields.append(fieldName);
-        }
-    }
-
-    forAll(functions_, functioni)
-    {
-        writeHeaderValue
-        (
-            os,
-            "Source" + Foam::name(functioni),
-            functions_[functioni].name()
-        );
     }
 
     writeHeaderValue(os, "Operation", operationTypeNames_[operation_]);
     writeCommented(os, "Time");
 
-    for (const word& fieldName : commonFields)
+    forAll(entries, entryi)
     {
-        os  << tab << fieldName;
+        writeTabbed(os, groupPrefix + Foam::name(entryi));
     }
 
     os  << endl;
@@ -125,10 +113,7 @@ Foam::functionObjects::fieldValues::multiFieldValue::multiFieldValue
     operation_(opSubtract),
     functions_()
 {
-    if (read(dict))
-    {
-        writeFileHeader(file());
-    }
+    read(dict);
 }
 
 
@@ -139,52 +124,73 @@ bool Foam::functionObjects::fieldValues::multiFieldValue::read
     const dictionary& dict
 )
 {
-    if (stateFunctionObject::read(dict) && writeFile::read(dict))
+    if (!stateFunctionObject::read(dict) || !writeFile::read(dict))
     {
-        const dictionary& functionsDict = dict.subDict("functions");
-        functions_.resize(functionsDict.size());
-
-        if (functions_.empty())
-        {
-            WarningInFunction
-                << "No functions specified"
-                << endl;
-            return false;
-        }
-
-        label functioni = 0;
-        for (const entry& dEntry : functionsDict)
-        {
-            if (!dEntry.isDict())
-            {
-                FatalIOErrorInFunction(dict)
-                    << "Functions must be specified in dictionary format"
-                    << exit(FatalIOError);
-            }
-
-            const dictionary& localDict = dEntry.dict();
-
-            functions_.set
-            (
-                functioni,
-                fieldValue::New
-                (
-                    IOobject::scopedName(name(), localDict.dictName()),
-                    time(),
-                    localDict,
-                    false
-                )
-            );
-
-            ++functioni;
-        }
-
-        operation_ = operationTypeNames_.get("operation", dict);
-
-        return true;
+        return false;
     }
 
-    return false;
+    operation_ = operationTypeNames_.get("operation", dict);
+
+    const dictionary& functionsDict = dict.subDict("functions");
+    functions_.resize(functionsDict.size());
+
+    if (functions_.empty())
+    {
+        WarningInFunction
+            << "No functions specified"
+            << endl;
+        return false;
+    }
+
+    resultFields_.resize(functions_.size());
+
+    label functioni = 0;
+    for (const entry& dEntry : functionsDict)
+    {
+        if (!dEntry.isDict())
+        {
+            FatalIOErrorInFunction(dict)
+                << "Functions must be specified in dictionary format"
+                << exit(FatalIOError);
+        }
+
+        const dictionary& localDict = dEntry.dict();
+
+        functions_.set
+        (
+            functioni,
+            functionObject::New
+            (
+                IOobject::scopedName(name(), localDict.dictName()),
+                time(),
+                localDict
+            ).ptr()
+        );
+
+        // Deactivate logging for child function objects
+        //functions_[functioni].log = false;
+
+        // Get result field names; not specified implies all
+        resultFields_[functioni] =
+            localDict.getOrDefault<wordList>("resultFields", wordList());
+
+        Info<< type() << ' ' << name() << ':' << nl;
+        if (resultFields_[functioni].size())
+        {
+            Info<< "    " << functions_[functioni].name()
+                << " " << resultFields_[functioni];
+        }
+        else
+        {
+            Info<< "    " << functions_[functioni].name()
+                << " - using all available entries";
+        }
+        Info<< nl << endl;
+
+        ++functioni;
+    }
+
+    return true;
 }
 
 
@@ -201,19 +207,25 @@ bool Foam::functionObjects::fieldValues::multiFieldValue::write()
     wordList entries0;
     label nEntries = -1;
 
-    wordList names(nFunction);
+    wordList foNames(nFunction);
     List<wordList> entries;
     List<wordList> types;
 
     forAll(functions_, functioni)
     {
         auto& f = functions_[functioni];
-        names[functioni] = f.name();
+        foNames[functioni] = f.name();
 
-        // Note: results are not available until the call to write()
+        // Note: replicating functionObjectList execute() and write()
+        // - results may be written on either
+        f.execute();
         f.write();
 
-        const wordList e(objectResultEntries(f.name()));
+        wordList e = resultFields_[functioni];
+        if (e.empty())
+        {
+            e = objectResultEntries(f.name());
+        }
 
         if (functioni == 0)
         {
@@ -237,54 +249,72 @@ bool Foam::functionObjects::fieldValues::multiFieldValue::write()
                 << "Inconsistent number of result entries" << nl
                 << "    " << f0Name << " entries:" << entries0 << nl
                 << "    " << f.name() << " entries:" << e
-                << abort(FatalError);
+                << exit(FatalError);
         }
 
         forAll(e, entryi)
         {
             entries[entryi][functioni] = e[entryi];
             types[entryi][functioni] = objectResultType(f.name(), e[entryi]);
+
+            if (types[entryi][functioni] == word::null)
+            {
+                FatalErrorInFunction
+                    << "Unable to find function object result" << nl
+                    << "    function object   : " << f.name() << nl
+                    << "    result name       : " << e[entryi] << nl
+                    << "    available results : "
+                        << objectResultEntries(f.name())
+                    << exit(FatalError);
+            }
         }
+    }
+
+    if (!writtenHeader_)
+    {
+        writeFileHeader(foNames, entries, types, file());
+        writtenHeader_ = true;
     }
 
     writeCurrentTime(file());
 
-    forAll(entries, entryi)
+    forAll(entries, i)
     {
-        const wordList& entriesi = entries[entryi];
-        const word& t0 = types[entryi][0];
-        const wordList& typesi = types[entryi];
-        forAll(typesi, functioni)
-        {
-            const word& t = typesi[functioni];
+        const wordList& entryi = entries[i];
+        const word& expectedType = types[i][0];
+        const wordList& foTypes = types[i];
 
-            if (t != t0)
+        forAll(foTypes, functioni)
+        {
+            const word& foType = foTypes[functioni];
+
+            if (foType != expectedType)
             {
                 FatalErrorInFunction
                     << "Inconsistent function result types" << nl
                     << "    " << functions_[0].name()
-                    << " result type:" << t0 << nl
+                    << " result type:" << expectedType << nl
                     << "    " << functions_[functioni].name()
-                    << " result type:" << typesi[functioni]
-                    << abort(FatalError);
+                    << " result type:" << foType
+                    << exit(FatalError);
             }
         }
 
         const bool ok
         (
-            applyOperation<scalar>(t0, names, entriesi)
-         || applyOperation<vector>(t0, names, entriesi)
-         || applyOperation<sphericalTensor>(t0, names, entriesi)
-         || applyOperation<symmTensor>(t0, names, entriesi)
-         || applyOperation<tensor>(t0, names, entriesi)
+            applyOperation<scalar>(expectedType, foNames, entryi)
+         || applyOperation<vector>(expectedType, foNames, entryi)
+         || applyOperation<sphericalTensor>(expectedType, foNames, entryi)
+         || applyOperation<symmTensor>(expectedType, foNames, entryi)
+         || applyOperation<tensor>(expectedType, foNames, entryi)
         );
 
         if (!ok)
         {
             Log << "Operation not applied between functions:" << nl
-                << flatOutput(names, FlatOutput::BareComma{}) << nl
+                << flatOutput(foNames, FlatOutput::BareComma{}) << nl
                 << "with result names:" << nl
-                << flatOutput(entriesi, FlatOutput::BareComma{})
+                << flatOutput(entryi, FlatOutput::BareComma{})
                 << endl;
         }
     }
