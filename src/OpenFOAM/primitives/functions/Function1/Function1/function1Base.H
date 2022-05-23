@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef function1Base_H
-#define function1Base_H
+#ifndef Foam_function1Base_H
+#define Foam_function1Base_H
 
 #include "dictionary.H"
 #include "objectRegistry.H"

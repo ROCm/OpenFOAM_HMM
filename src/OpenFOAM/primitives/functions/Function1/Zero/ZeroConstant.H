@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,6 +78,9 @@ public:
 
     // Generated Methods
 
+        //- Default copy construct
+        ZeroConstant(const ZeroConstant<Type>&) = default;
+
         //- No copy assignment
         void operator=(const ZeroConstant<Type>&) = delete;
 
@@ -99,6 +102,12 @@ public:
             const objectRegistry* obrPtr = nullptr
         );
 
+        //- Construct and return a clone
+        virtual tmp<Function1<Type>> clone() const
+        {
+            return tmp<Function1<Type>>(new ZeroConstant<Type>(*this));
+        }
+
 
     //- Destructor
     virtual ~ZeroConstant() = default;
@@ -110,10 +119,16 @@ public:
         virtual inline bool constant() const { return true; }
 
         //- Return constant value
-        virtual inline Type value(const scalar) const;
+        virtual inline Type value(const scalar) const
+        {
+            return pTraits<Type>::zero;
+        }
 
         //- Integrate between two values
-        virtual inline Type integrate(const scalar x1, const scalar x2) const;
+        virtual inline Type integrate(const scalar x1, const scalar x2) const
+        {
+            return pTraits<Type>::zero;
+        }
 
         //- Write as primitive (inline) format
         virtual void writeData(Ostream& os) const;
@@ -126,8 +141,6 @@ public:
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "ZeroConstantI.H"
 
 #ifdef NoRepository
     #include "ZeroConstant.C"

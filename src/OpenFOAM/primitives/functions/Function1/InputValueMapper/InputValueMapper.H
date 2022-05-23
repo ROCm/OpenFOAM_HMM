@@ -201,6 +201,12 @@ public:
         //- Copy construct
         explicit InputValueMapper(const InputValueMapper<Type>& rhs);
 
+        //- Construct and return a clone
+        virtual tmp<Function1<Type>> clone() const
+        {
+            return tmp<Function1<Type>>(new InputValueMapper<Type>(*this));
+        }
+
 
     //- Destructor
     virtual ~InputValueMapper() = default;

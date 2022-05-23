@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,8 +69,8 @@ public:
 
     // Generated Methods
 
-        //- Copy construct
-        Uniform<Type>(const Uniform&) = default;
+        //- Default copy construct
+        Uniform(const Uniform<Type>&) = default;
 
         //- No copy assignment
         void operator=(const Uniform<Type>&) = delete;
@@ -88,6 +88,12 @@ public:
         :
             Constant<Type>(entryName, dict, obrPtr)
         {}
+
+        //- Construct and return a clone
+        virtual tmp<Function1<Type>> clone() const
+        {
+            return tmp<Function1<Type>>(new Uniform<Type>(*this));
+        }
 };
 
 

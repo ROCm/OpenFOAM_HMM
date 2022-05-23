@@ -133,6 +133,12 @@ public:
         //- Copy construct
         explicit Scale(const Scale<Type>& rhs);
 
+        //- Construct and return a clone
+        virtual tmp<Function1<Type>> clone() const
+        {
+            return tmp<Function1<Type>>(new Scale<Type>(*this));
+        }
+
 
     //- Destructor
     virtual ~Scale() = default;

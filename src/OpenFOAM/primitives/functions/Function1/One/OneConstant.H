@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,6 +69,9 @@ public:
 
     // Generated Methods
 
+        //- Default copy construct
+        OneConstant(const OneConstant<Type>&) = default;
+
         //- No copy assignment
         void operator=(const OneConstant<Type>&) = delete;
 
@@ -107,10 +110,16 @@ public:
         virtual inline bool constant() const { return true; }
 
         //- Return constant value
-        virtual inline Type value(const scalar) const;
+        virtual inline Type value(const scalar) const
+        {
+            return pTraits<Type>::one;
+        }
 
         //- Integrate between two values
-        virtual inline Type integrate(const scalar x1, const scalar x2) const;
+        virtual inline Type integrate(const scalar x1, const scalar x2) const
+        {
+            return (x2 - x1)*pTraits<Type>::one;
+        }
 
         //- Return value as a function of (scalar) independent variable
         virtual tmp<Field<Type>> value(const scalarField& x) const;
@@ -133,8 +142,6 @@ public:
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "OneConstantI.H"
 
 #ifdef NoRepository
     #include "OneConstant.C"

@@ -69,8 +69,8 @@ public:
 
     // Generated Methods
 
-        //- Default copy constructor
-        None(const None<Type>& rhs) = default;
+        //- Default copy construct
+        None(const None<Type>&) = default;
 
         //- No copy assignment
         void operator=(const None<Type>&) = delete;

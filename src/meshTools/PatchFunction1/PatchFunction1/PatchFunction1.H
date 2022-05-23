@@ -43,8 +43,8 @@ SeeAlso
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef PatchFunction1_H
-#define PatchFunction1_H
+#ifndef Foam_PatchFunction1_H
+#define Foam_PatchFunction1_H
 
 #include "patchFunction1Base.H"
 #include "coordinateScaling.H"
