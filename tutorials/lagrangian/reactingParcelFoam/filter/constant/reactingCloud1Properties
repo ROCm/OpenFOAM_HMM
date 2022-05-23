@@ -160,6 +160,13 @@ subModels
 
 cloudFunctions
 {
+    particleZoneInfo1
+    {
+        type            particleZoneInfo;
+        cellZone        leftFluid;
+        writer          vtk;
+    }
+
     patchParticleHistogram1
     {
         type            patchParticleHistogram;
