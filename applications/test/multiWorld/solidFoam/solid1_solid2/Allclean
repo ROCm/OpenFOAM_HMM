@@ -7,4 +7,7 @@ cleanCase0
 rm -rf constant/solid1/polyMesh
 rm -rf constant/solid2/polyMesh
 
+# Restore default dictionaries
+cp system/fvSolution-energyCoupling system/fvSolution
+
 #------------------------------------------------------------------------------

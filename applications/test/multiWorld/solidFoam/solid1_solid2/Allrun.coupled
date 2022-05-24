@@ -7,6 +7,8 @@ cd "${0%/*}" || exit                                # Run from this directory
 ./Allrun.pre
 foamDictionary 0/solid1/T -entry boundaryField/bottom/useImplicit -add true
 foamDictionary 0/solid2/T -entry boundaryField/top/useImplicit -add true
+foamDictionary  -entry PIMPLE/nOuterCorrectors system/fvSolution -remove
+foamDictionary  -entry PIMPLE/energyCoupling system/fvSolution -remove
 runApplication -s coupled $(getApplication)
 
 #------------------------------------------------------------------------------
