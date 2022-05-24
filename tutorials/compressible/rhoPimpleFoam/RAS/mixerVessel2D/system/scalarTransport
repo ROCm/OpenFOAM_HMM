@@ -1,0 +1,45 @@
+// -*- C++ -*-
+
+tracer0
+{
+    type  scalarTransport;
+    libs  (solverFunctionObjects);
+    log   off;
+
+    resetOnStartUp  false;
+    writeControl    writeTime;
+    writeInterval   1;
+    field           tracer0;
+    D               0.001;
+
+    fvOptions
+    {
+        source1
+        {
+            type            scalarSemiImplicitSource;
+
+            volumeMode      specific;
+
+            selectionMode   geometric;
+
+            selection
+            {
+                cylinder
+                {
+                    source  cylinder;
+                    point1  (0.050 0 -1);
+                    point2  (0.050 0  1);
+                    radius  0.01;
+                }
+            }
+
+            injectionRateSuSp
+            {
+                tracer0     (0.01 0);
+            }
+        }
+    }
+}
+
+
+// ************************************************************************* //

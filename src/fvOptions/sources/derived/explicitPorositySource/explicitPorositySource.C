@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2018 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,16 +59,7 @@ Foam::fv::explicitPorositySource::explicitPorositySource
 {
     read(dict);
 
-    porosityPtr_.reset
-    (
-        porosityModel::New
-        (
-            name_,
-            mesh_,
-            coeffs_,
-            cellSetName_
-        ).ptr()
-    );
+    porosityPtr_.reset(porosityModel::New(name_, mesh_, coeffs_, zoneName()));
 }
 
 

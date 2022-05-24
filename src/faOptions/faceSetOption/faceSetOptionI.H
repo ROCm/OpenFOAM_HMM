@@ -66,12 +66,6 @@ inline bool Foam::fa::faceSetOption::useSubMesh() const noexcept
 }
 
 
-inline const Foam::word& Foam::fa::faceSetOption::faceSetName() const noexcept
-{
-    return faceSetName_;
-}
-
-
 inline Foam::scalar Foam::fa::faceSetOption::A() const noexcept
 {
     return A_;

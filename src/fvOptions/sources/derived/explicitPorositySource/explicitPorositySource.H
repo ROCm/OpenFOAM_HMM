@@ -115,8 +115,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef explicitPorositySource_H
-#define explicitPorositySource_H
+#ifndef Foam_explicitPorositySource_H
+#define Foam_explicitPorositySource_H
 
 #include "cellSetOption.H"
 
@@ -177,7 +177,7 @@ public:
     // Member Functions
 
         //- Access to the porosityModel
-        const porosityModel& model() const
+        const porosityModel& model() const noexcept
         {
             return *porosityPtr_;
         }

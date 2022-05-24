@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
     Copyright (C) 2020 ENERCON GmbH
-    Copyright (C) 2018-2021 OpenCFD Ltd
+    Copyright (C) 2018-2022 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,7 @@ License
 
 #include "actuationDiskSource.H"
 #include "geometricOneField.H"
+#include "cellSet.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -118,20 +119,22 @@ void Foam::fv::actuationDiskSource::setMonitorCells(const dictionary& dict)
                 dict.readEntry("upstreamPoint", monitorPoints.first());
             }
 
-            for (const auto& monitorPoint : monitorPoints)
+            for (const point& p : monitorPoints)
             {
-                const label celli = mesh_.findCell(monitorPoint);
-                if (celli >= 0)
+                const label celli = mesh_.findCell(p);
+
+                const bool found = (celli >= 0);
+
+                if (found)
                 {
                     selectedCells.insert(celli);
                 }
 
-                const label globalCelli = returnReduce(celli, maxOp<label>());
-                if (globalCelli < 0)
+                if (!returnReduce(found, orOp<bool>()))
                 {
                     WarningInFunction
-                        << "Unable to find owner cell for point "
-                        << monitorPoint << endl;
+                        << "No owner cell found for point "
+                        << p << endl;
                 }
             }
 
@@ -141,9 +144,9 @@ void Foam::fv::actuationDiskSource::setMonitorCells(const dictionary& dict)
         case monitorMethodType::CELLSET:
         {
             Info<< "    - selecting cells using cellSet "
-                << cellSetName_ << endl;
+                << zoneName() << endl;
 
-            monitorCells_ = cellSet(mesh_, cellSetName_).sortedToc();
+            monitorCells_ = cellSet(mesh_, zoneName()).sortedToc();
             break;
         }
         default:

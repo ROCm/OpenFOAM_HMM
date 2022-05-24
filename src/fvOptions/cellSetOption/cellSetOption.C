@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "cellSetOption.H"
+#include "cellSet.H"
+#include "cellBitSet.H"
+#include "topoSetCellSource.H"
 #include "volFields.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -46,6 +49,7 @@ const Foam::Enum
 >
 Foam::fv::cellSetOption::selectionModeTypeNames_
 ({
+    { selectionModeType::smGeometric, "geometric" },
     { selectionModeType::smPoints, "points" },
     { selectionModeType::smCellSet, "cellSet" },
     { selectionModeType::smCellZone, "cellZone" },
@@ -59,6 +63,11 @@ void Foam::fv::cellSetOption::setSelection(const dictionary& dict)
 {
     switch (selectionMode_)
     {
+        case smGeometric:
+        {
+            geometricSelection_ = dict.subDict("selection");
+            break;
+        }
         case smPoints:
         {
             dict.readEntry("points", points_);
@@ -66,12 +75,12 @@ void Foam::fv::cellSetOption::setSelection(const dictionary& dict)
         }
         case smCellSet:
         {
-            dict.readEntry("cellSet", cellSetName_);
+            dict.readEntry("cellSet", zoneName_);
             break;
         }
         case smCellZone:
         {
-            dict.readEntry("cellZone", cellSetName_);
+            dict.readEntry("cellZone", zoneName_);
             break;
         }
         case smAll:
@@ -95,7 +104,7 @@ void Foam::fv::cellSetOption::setVol()
 {
     // Set volume information
 
-    scalar sumVol = 0.0;
+    scalar sumVol = 0;
     for (const label celli : cells_)
     {
         sumVol += mesh_.V()[celli];
@@ -122,28 +131,62 @@ void Foam::fv::cellSetOption::setCellSelection()
 {
     switch (selectionMode_)
     {
+        case smGeometric:
+        {
+            // Modify bitSet via topoSetCellSource
+            cellBitSet selectedCells(mesh_);
+
+            Info<< indent << "- selecting cells geometrically" << endl;
+
+            for (const entry& dEntry : geometricSelection_)
+            {
+                if (!dEntry.isDict())
+                {
+                    WarningInFunction
+                        << "Ignoring non-dictionary entry "
+                        << dEntry << endl;
+                    continue;
+                }
+
+                const dictionary& spec = dEntry.dict();
+
+                auto source = topoSetCellSource::New
+                (
+                    spec.get<word>("source"),
+                    mesh_,
+                    spec.optionalSubDict("sourceInfo")
+                );
+                // source->verbose(false);
+
+                source->applyToSet(topoSetSource::ADD, selectedCells);
+            }
+
+            // Retrieve bitSet
+            cells_ = selectedCells.addressing().sortedToc();
+            break;
+        }
         case smPoints:
         {
             Info<< indent << "- selecting cells using points" << endl;
 
             labelHashSet selectedCells;
 
-            forAll(points_, i)
+            for (const point& p : points_)
             {
-                label celli = mesh_.findCell(points_[i]);
-                if (celli >= 0)
+                const label celli = mesh_.findCell(p);
+
+                const bool found = (celli >= 0);
+
+                if (found)
                 {
                     selectedCells.insert(celli);
                 }
 
-                label globalCelli = returnReduce(celli, maxOp<label>());
-                if (globalCelli < 0)
+                if (!returnReduce(found, orOp<bool>()))
                 {
                     WarningInFunction
-                        << "Unable to find owner cell for point " << points_[i]
-                        << endl;
+                        << "No owner cell found for point " << p << endl;
                 }
-
             }
 
             cells_ = selectedCells.sortedToc();
@@ -152,26 +195,39 @@ void Foam::fv::cellSetOption::setCellSelection()
         case smCellSet:
         {
             Info<< indent
-                << "- selecting cells using cellSet " << cellSetName_ << endl;
+                << "- selecting cells using cellSet " << zoneName_ << endl;
 
-            cells_ = cellSet(mesh_, cellSetName_).sortedToc();
+            cells_ = cellSet(mesh_, zoneName_).sortedToc();
             break;
         }
         case smCellZone:
         {
             Info<< indent
-                << "- selecting cells using cellZone " << cellSetName_ << endl;
+                << "- selecting cells using cellZone " << zoneName_ << endl;
 
-            label zoneID = mesh_.cellZones().findZoneID(cellSetName_);
-            if (zoneID == -1)
+            // Also handles groups, multiple zones (as wordRe match) ...
+            labelList zoneIDs = mesh_.cellZones().indices(zoneName_);
+
+            if (zoneIDs.empty())
             {
                 FatalErrorInFunction
-                    << "Cannot find cellZone " << cellSetName_ << endl
-                    << "Valid cellZones are " << mesh_.cellZones().names()
+                    << "No matching cellZones: " << zoneName_ << nl
+                    << "Valid zones : "
+                    << flatOutput(mesh_.cellZones().names()) << nl
+                    << "Valid groups: "
+                    << flatOutput(mesh_.cellZones().groupNames())
+                    << nl
                     << exit(FatalError);
             }
 
-            cells_ = mesh_.cellZones()[zoneID];
+            if (zoneIDs.size() == 1)
+            {
+                cells_ = mesh_.cellZones()[zoneIDs.first()];
+            }
+            else
+            {
+                cells_ = mesh_.cellZones().selection(zoneIDs).sortedToc();
+            }
             break;
         }
         case smAll:
@@ -191,6 +247,16 @@ void Foam::fv::cellSetOption::setCellSelection()
                 << exit(FatalError);
         }
     }
+
+    if
+    (
+        smAll != selectionMode_
+     && returnReduce(cells_.empty(), andOp<bool>())
+    )
+    {
+        WarningInFunction
+            << "No cells selected!" << endl;
+    }
 }
 
 
@@ -208,7 +274,9 @@ Foam::fv::cellSetOption::cellSetOption
     timeStart_(-1),
     duration_(0),
     selectionMode_(selectionModeTypeNames_.get("selectionMode", coeffs_)),
-    cellSetName_("none"),
+    zoneName_(),
+    points_(),
+    geometricSelection_(),
     V_(0)
 {
     Info<< incrIndent;
@@ -235,9 +303,13 @@ bool Foam::fv::cellSetOption::isActive()
                 // Force printing of new set volume
                 V_ = -GREAT;
             }
-            else if (selectionMode_ == smPoints)
+            else if
+            (
+                selectionMode_ == smGeometric
+             || selectionMode_ == smPoints
+            )
             {
-                // This is the only geometric selection mode
+                // Geometric selection mode(s)
                 setCellSelection();
             }
 

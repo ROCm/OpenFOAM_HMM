@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,13 +51,31 @@ Usage
             duration          1.4;
 
             // when selectionMode=cellSet
-            cellSet           <cellSetName>;
+            cellSet           <name>;
 
             // when selectionMode=cellZone
-            cellZone          <cellZoneName>;
+            cellZone          <name>;
 
             // when selectionMode=points
             points            (<point1> <point2> ... <pointN>);
+
+            // when selectionMode=geometric
+            selection
+            {
+                box1
+                {
+                    source  box;
+                    min     (-0.1 -0.01 -0.1);
+                    max     (0.1 0.30 0.1);
+                }
+                ball
+                {
+                    source  sphere;
+                    origin  (-0.1 -0.01 -0.1);
+                    radius  0.25;
+                }
+                ...
+            }
 
         // Mandatory/Optional (derived) entries
         ...
@@ -75,18 +93,25 @@ Usage
       cellZone      | Name of operand cellZone           | word  | cndtnl | -
       points        | Set of points in global coordinate <!--
                             --> system              | vectorList | cndtnl | -
+      selection     | Dictionary of geometric selections | dict | cndtnl | -
     \endtable
 
     Options for the \c selectionMode entry:
     \verbatim
       all       | Use all cells in the computational domain
-      cellZone  | Use a given cellZone
-      cellSet   | Use a given cellSet
+      cellZone  | Use specified cellZone
+      cellSet   | Use specified cellSet
       points    | Use cells containing a given set of points
+      geometric | Select cells based on topoSetCellSource
     \endverbatim
 
     The inherited entries are elaborated in:
      - \link fvOption.H \endlink
+
+    The geometric selection uses topoSetCellSource to select cells.
+    The combined cell selections are treated as an OR operation.
+    Any searchableSurface selections must describe a closed volume.
+    Ie, its hasVolumeType() method must be true.
 
 Note
   - Source/sink options are to be added to the right-hand side of equations.
@@ -96,12 +121,12 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cellSetOption_H
-#define cellSetOption_H
+#ifndef Foam_fv_cellSetOption_H
+#define Foam_fv_cellSetOption_H
 
 #include "fvOption.H"
-#include "cellSet.H"
 #include "fvMesh.H"
+#include "dictionary.H"
 #include "Time.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -126,10 +151,11 @@ public:
         //- Enumeration for selection mode types
         enum selectionModeType
         {
-            smAll,
-            smCellSet,
-            smCellZone,
-            smPoints
+            smAll,          //!< "all" cells
+            smCellSet,      //!< "cellSet"
+            smCellZone,     //!< "cellZone"
+            smPoints,       //!< "points"
+            smGeometric     //!< "geometric"
         };
 
         //- List of selection mode type names
@@ -150,10 +176,13 @@ protected:
         selectionModeType selectionMode_;
 
         //- Name of set/zone for "cellSet" and "cellZone" selectionMode
-        word cellSetName_;
+        wordRe zoneName_;
 
         //- List of points for "points" selectionMode
         List<point> points_;
+
+        //- Dictionary entries for "geometric" (topoSetCellSource) selection
+        dictionary geometricSelection_;
 
         //- Set of cells to apply source to
         labelList cells_;
@@ -215,9 +244,9 @@ public:
             //- True if sub-selection should be used
             inline bool useSubMesh() const noexcept;
 
-            //- Return const access to the name of cell set/zone for
-            //- "cellSet" / "cellZone" selection modes
-            inline const word& cellSetName() const noexcept;
+            //- Return const access to the name of cell set/zone
+            //- for "cellSet" / "cellZone" selection modes
+            const wordRe& zoneName() const noexcept { return zoneName_; }
 
             //- Return const access to the total cell volume
             inline scalar V() const noexcept;
@@ -245,6 +274,13 @@ public:
 
             //- Read source dictionary
             virtual bool read(const dictionary& dict);
+
+
+    // Housekeeping
+
+        //- The name of the cell set/zone [as a word]
+        //- for "cellSet" / "cellZone" selection modes)
+        const word& cellSetName() const noexcept { return zoneName_; }
 };
 
 

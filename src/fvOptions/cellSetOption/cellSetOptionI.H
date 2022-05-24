@@ -67,12 +67,6 @@ inline bool Foam::fv::cellSetOption::useSubMesh() const noexcept
 }
 
 
-inline const Foam::word& Foam::fv::cellSetOption::cellSetName() const noexcept
-{
-    return cellSetName_;
-}
-
-
 inline Foam::scalar Foam::fv::cellSetOption::V() const noexcept
 {
     return V_;

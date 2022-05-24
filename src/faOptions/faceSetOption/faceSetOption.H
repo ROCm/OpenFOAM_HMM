@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -81,8 +81,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef faceSetOption_H
-#define faceSetOption_H
+#ifndef Foam_fa_faceSetOption_H
+#define Foam_fa_faceSetOption_H
 
 #include "faOption.H"
 #include "faceSet.H"
@@ -132,8 +132,8 @@ protected:
         //- Face selection mode
         selectionModeType selectionMode_;
 
-        //- Name of "volFaceZone" selection
-        word faceSetName_;
+        //- Name of zone for (volume) "faceZone" selection
+        wordRe zoneName_;
 
         //- Set of faces to apply source to
         labelList faces_;
@@ -195,9 +195,9 @@ public:
             //- True if sub-selection should be used
             inline bool useSubMesh() const noexcept;
 
-            //- Return const access to the name of face set for "faceZone"
-            //- selectionMode
-            inline const word& faceSetName() const noexcept;
+            //- Return const access to the name of (volume) face zone
+            //- for "faceZone" selection mode
+            const wordRe& zoneName() const noexcept { return zoneName_; }
 
             //- Return const access to the total face area
             inline scalar A() const noexcept;

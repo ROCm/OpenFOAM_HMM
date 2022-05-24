@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,7 +62,7 @@ void Foam::fa::faceSetOption::setSelection(const dictionary& dict)
         }
         case smVolFaceZone:
         {
-            dict.readEntry("faceZone", faceSetName_);
+            dict.readEntry("faceZone", zoneName_);
             break;
         }
         default:
@@ -113,41 +113,39 @@ void Foam::fa::faceSetOption::setFaceSelection()
         {
             Info<< indent
                 << "- selecting faces using volume-mesh faceZone "
-                << faceSetName_ << endl;
+                << zoneName_ << nl;
 
-            label zoneID = mesh_.faceZones().findZoneID(faceSetName_);
-            if (zoneID == -1)
+            // Also handles groups, multiple zones (as wordRe match) ...
+            labelList zoneIDs = mesh_.faceZones().indices(zoneName_);
+
+            if (zoneIDs.empty())
             {
                 FatalErrorInFunction
-                    << "Cannot find faceZone " << faceSetName_ << endl
-                    << "Valid faceZones are " << mesh_.faceZones().names()
+                    << "No matching faceZones: " << zoneName_ << nl
+                    << "Valid zones : "
+                    << flatOutput(mesh_.faceZones().names()) << nl
+                    << "Valid groups: "
+                    << flatOutput(mesh_.faceZones().groupNames())
+                    << nl
                     << exit(FatalError);
             }
 
-            const faceZone& addr = mesh_.faceZones()[zoneID];
+            const bitSet isZoneFace(mesh_.faceZones().selection(zoneIDs));
 
-            const bitSet isZoneFace(mesh_.nFaces(), addr);
-
-            // Do we loop over faMesh faces or over faceZone faces?
             const labelUList& faceLabels = regionMesh().faceLabels();
 
-            label n = 0;
+            faces_.resize_nocopy(faceLabels.size());
+
+            label nUsed = 0;
             for (const label facei : faceLabels)
             {
                 if (isZoneFace[facei])
                 {
-                    n++;
+                    faces_[nUsed] = facei;
+                    ++nUsed;
                 }
             }
-            faces_.setSize(n);
-            n = 0;
-            for (const label facei : faceLabels)
-            {
-                if (isZoneFace[facei])
-                {
-                    faces_[n++] = facei;
-                }
-            }
+            faces_.resize(nUsed);
             break;
         }
 
@@ -185,7 +183,7 @@ Foam::fa::faceSetOption::faceSetOption
     timeStart_(-1),
     duration_(0),
     selectionMode_(selectionModeTypeNames_.get("selectionMode", coeffs_)),
-    faceSetName_("none"),
+    zoneName_(),
     A_(0)
 {
     if (isActive())

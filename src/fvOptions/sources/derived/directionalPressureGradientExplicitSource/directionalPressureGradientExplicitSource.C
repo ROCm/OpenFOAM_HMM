@@ -362,7 +362,7 @@ void Foam::fv::directionalPressureGradientExplicitSource::correct
         {
             FatalErrorInFunction
                 << "Did not find  cell " << masterCellI
-                << "in cellZone :" << cellSetName()
+                << "in cellZone :" << zoneName()
                 << exit(FatalError);
         }
     }
