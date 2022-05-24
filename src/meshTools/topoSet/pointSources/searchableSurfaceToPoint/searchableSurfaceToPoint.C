@@ -66,23 +66,32 @@ Foam::topoSetSource::addToUsageTable Foam::searchableSurfaceToPoint::usage_
 );
 
 
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
-Foam::word Foam::searchableSurfaceToPoint::getSurfaceName
+namespace Foam
+{
+
+// Difficult to get a good default name from the dictionary name.
+// It could be
+//     sourceInfo { .. }
+// But even with something like
+//     mySurf.stl { .. }
+// The dictName() method will only return the "stl" ending.
+
+static inline word getSurfaceName
 (
     const dictionary& dict,
-    const word& defaultName
+    word surfaceName
 )
 {
-    // Unfortunately cannot get a good default name from the dictionary name.
-    // It could be
-    //     sourceInfo { .. }
-    // But even with something like
-    //     mySurf.stl { .. }
-    // The dictName() method will only return the "stl" ending.
+    dict.readIfPresent("surfaceName", surfaceName);
 
-    return dict.getOrDefault<word>("surfaceName", defaultName);
+    if (surfaceName.empty()) surfaceName = "surface";  // failsafe
+
+    return surfaceName;
 }
+
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

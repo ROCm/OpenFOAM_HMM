@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -130,9 +130,9 @@ Foam::cylinderToCell::cylinderToCell
     cylinderToCell
     (
         mesh,
-        dict.get<point>("p1"),
-        dict.get<point>("p2"),
-        dict.getCheck<scalar>("radius", scalarMinMax::ge(SMALL)),
+        dict.getCompat<point>("point1", {{"p1", -2112}}),
+        dict.getCompat<point>("point2", {{"p2", -2112}}),
+        dict.getCompat<scalar>("radius", {{"outerRadius", -2112}}),
         dict.getCheckOrDefault<scalar>("innerRadius", 0, scalarMinMax::ge(0))
     )
 {}
@@ -141,7 +141,8 @@ Foam::cylinderToCell::cylinderToCell
 Foam::cylinderToCell::cylinderToCell
 (
     const polyMesh& mesh,
-    Istream& is
+    Istream& is,
+    const bool mandatoryInnerRadius
 )
 :
     topoSetCellSource(mesh),
@@ -149,6 +150,21 @@ Foam::cylinderToCell::cylinderToCell
     point2_(checkIs(is)),
     radius_(readScalar(checkIs(is))),
     innerRadius_(0)
+{
+    if (mandatoryInnerRadius)
+    {
+        innerRadius_ = readScalar(checkIs(is));
+    }
+}
+
+
+Foam::cylinderToCell::cylinderToCell
+(
+    const polyMesh& mesh,
+    Istream& is
+)
+:
+    cylinderToCell(mesh, is, false)
 {}
 
 
@@ -164,13 +180,14 @@ void Foam::cylinderToCell::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Adding cells with centre within cylinder,"
-                << " with p1 = " << point1_ << ", p2 = " << point2_
+            Info<< "    Adding cells with centres within cylinder"
+                << ", with point1 = " << point1_
+                << ", point2 = " << point2_
                 << ", radius = " << radius_;
 
             if (innerRadius_ > 0)
             {
-                Info<< ", innerRadius = " << innerRadius_;
+                Info<< ", inner radius = " << innerRadius_;
             }
 
             Info<< endl;
@@ -182,13 +199,14 @@ void Foam::cylinderToCell::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Removing cells with centre within cylinder,"
-                << " with p1 = " << point1_ << ", p2 = " << point2_
+            Info<< "    Removing cells with centres within cylinder"
+                << ", with point1 = " << point1_
+                << ", point2 = " << point2_
                 << ", radius = " << radius_;
 
             if (innerRadius_ > 0)
             {
-                Info<< ", innerRadius = " << innerRadius_;
+                Info<< ", inner radius = " << innerRadius_;
             }
 
             Info<< endl;

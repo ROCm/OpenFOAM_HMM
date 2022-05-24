@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef faceBoolSet_H
-#define faceBoolSet_H
+#ifndef Foam_faceBoolSet_H
+#define Foam_faceBoolSet_H
 
 #include "topoBoolSet.H"
 
@@ -99,7 +99,6 @@ public:
             const primitiveMesh& mesh,
             const label maxLen
         ) const;
-
 };
 
 

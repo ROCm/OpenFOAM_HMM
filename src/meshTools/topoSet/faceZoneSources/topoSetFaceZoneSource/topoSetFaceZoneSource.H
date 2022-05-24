@@ -38,8 +38,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef topoSetFaceZoneSource_H
-#define topoSetFaceZoneSource_H
+#ifndef Foam_topoSetFaceZoneSource_H
+#define Foam_topoSetFaceZoneSource_H
 
 #include "topoSetSource.H"
 
@@ -95,7 +95,8 @@ public:
         //- Construct from mesh
         explicit topoSetFaceZoneSource(const polyMesh& mesh);
 
-        //- Construct from mesh, use "verbose" entry if present
+        //- Construct from mesh,
+        //- use "verbose" entry if present
         topoSetFaceZoneSource(const polyMesh& mesh, const dictionary& dict);
 
 

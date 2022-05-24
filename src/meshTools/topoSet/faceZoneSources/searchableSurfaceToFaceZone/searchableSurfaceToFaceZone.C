@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,7 +58,6 @@ namespace Foam
         word,
         surface
     );
-
 }
 
 
@@ -71,22 +70,24 @@ Foam::topoSetSource::addToUsageTable Foam::searchableSurfaceToFaceZone::usage_
 );
 
 
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
-Foam::word Foam::searchableSurfaceToFaceZone::getSurfaceName
+namespace Foam
+{
+
+// Difficult to get a good default name from the dictionary name.
+// It could be
+//     sourceInfo { .. }
+// But even with something like
+//     mySurf.stl { .. }
+// The dictName() method will only return the "stl" ending.
+
+static inline word getSurfaceName
 (
     const dictionary& dict,
     const word& defaultName
 )
 {
-    // Unfortunately cannot get a good default name from the dictionary name.
-    // It could be
-    //     sourceInfo { .. }
-    // But even with something like
-    //     mySurf.stl { .. }
-    // The dictName() method will only return the "stl" ending.
-
-
     return
         dict.getOrDefaultCompat<word>
         (
@@ -95,6 +96,8 @@ Foam::word Foam::searchableSurfaceToFaceZone::getSurfaceName
             defaultName
         );
 }
+
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

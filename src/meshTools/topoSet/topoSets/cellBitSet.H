@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cellBitSet_H
-#define cellBitSet_H
+#ifndef Foam_cellBitSet_H
+#define Foam_cellBitSet_H
 
 #include "topoBitSet.H"
 
@@ -102,7 +102,6 @@ public:
             const primitiveMesh& mesh,
             const label maxLen
         ) const;
-
 };
 
 

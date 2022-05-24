@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,8 +28,8 @@ Class
 
 Description
     Keep faces together based on geometric considerations from a
-    searchableSurfaces list.
-    The faces inside of each searchableSurface are to be kept together
+    list of topoSetFaceSource.
+    The faces selected (inside) of each source are to be kept together
     during the decomposition.
 
     \verbatim
@@ -71,14 +71,14 @@ Description
         Property    | Description                           | Required | Default
         type        | geometric                             | yes |
         grow        | Grow cells with partial connectivity  | no  | false
-        geometry    | Dictionary of enclosing volumes       | yes |
+        selection   | Dictionary of geometric selections    | yes |
     \endtable
 
 Note
-    The searchableSurface must describe a closed volume.
+    Any searchableSurface selections must describe a closed volume.
     Ie, its hasVolumeType() method must be true.
 
-    The selection of enclosing volumes is treated as an OR operation.
+    The combined face selections are treated as an OR operation.
 
     The "grow" mode includes an additional check to include cell faces
     for any cell that already has two or more of its faces "unblocked".
@@ -91,8 +91,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef geometricConstraint_H
-#define geometricConstraint_H
+#ifndef Foam_geometricConstraint_H
+#define Foam_geometricConstraint_H
 
 #include "decompositionConstraint.H"
 #include "PtrList.H"
@@ -113,7 +113,7 @@ class geometric
 :
     public decompositionConstraint
 {
-    // Private data
+    // Private Data
 
         //- Face selections as topoSetFaceSource
         PtrList<topoSetFaceSource> sources_;

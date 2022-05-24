@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,18 +83,16 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef searchableSurfaceToFaceZone_H
-#define searchableSurfaceToFaceZone_H
+#ifndef Foam_searchableSurfaceToFaceZone_H
+#define Foam_searchableSurfaceToFaceZone_H
 
 #include "topoSetFaceZoneSource.H"
+#include "searchableSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// Forward Declarations
-class searchableSurface;
 
 /*---------------------------------------------------------------------------*\
                    Class searchableSurfaceToFaceZone Declaration
@@ -113,18 +111,6 @@ class searchableSurfaceToFaceZone
         autoPtr<searchableSurface> surfacePtr_;
 
 
-protected:
-
-    // Protected Member Functions
-
-        //- Retrieve surface name from dictionary entry
-        static word getSurfaceName
-        (
-            const dictionary& dict,
-            const word& defaultName
-        );
-
-
 public:
 
     //- Runtime type information
@@ -140,7 +126,6 @@ public:
             const polyMesh& mesh,
             const dictionary& dict
         );
-
 
         //- Construct from dictionary
         searchableSurfaceToFaceZone

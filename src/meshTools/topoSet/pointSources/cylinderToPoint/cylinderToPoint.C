@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -122,9 +122,9 @@ Foam::cylinderToPoint::cylinderToPoint
     cylinderToPoint
     (
         mesh,
-        dict.get<point>("p1"),
-        dict.get<point>("p2"),
-        dict.getCheck<scalar>("radius", scalarMinMax::ge(0)),
+        dict.getCompat<point>("point1", {{"p1", -2112}}),
+        dict.getCompat<point>("point2", {{"p2", -2112}}),
+        dict.getCompat<scalar>("radius", {{"outerRadius", -2112}}),
         dict.getCheckOrDefault<scalar>("innerRadius", 0, scalarMinMax::ge(0))
     )
 {}
@@ -133,7 +133,8 @@ Foam::cylinderToPoint::cylinderToPoint
 Foam::cylinderToPoint::cylinderToPoint
 (
     const polyMesh& mesh,
-    Istream& is
+    Istream& is,
+    const bool mandatoryInnerRadius
 )
 :
     topoSetPointSource(mesh),
@@ -141,6 +142,21 @@ Foam::cylinderToPoint::cylinderToPoint
     point2_(checkIs(is)),
     radius_(readScalar(checkIs(is))),
     innerRadius_(0)
+{
+    if (mandatoryInnerRadius)
+    {
+        innerRadius_ = readScalar(checkIs(is));
+    }
+}
+
+
+Foam::cylinderToPoint::cylinderToPoint
+(
+    const polyMesh& mesh,
+    Istream& is
+)
+:
+    cylinderToPoint(mesh, is, false)
 {}
 
 
@@ -156,13 +172,14 @@ void Foam::cylinderToPoint::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Adding faces with centre within cylinder,"
-                << " with p1 = " << point1_ << ", p2 = " << point2_
+            Info<< "    Adding points within cylinder"
+                << ", with point1 = " << point1_
+                << ", point2 = " << point2_
                 << ", radius = " << radius_;
 
             if (innerRadius_ > 0)
             {
-                Info<< ", innerRadius = " << innerRadius_;
+                Info<< ", inner radius = " << innerRadius_;
             }
 
             Info<< endl;
@@ -174,13 +191,14 @@ void Foam::cylinderToPoint::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Removing faces with centre within cylinder,"
-                << " with p1 = " << point1_ << ", p2 = " << point2_
+            Info<< "    Removing points within cylinder"
+                << ", with point1 = " << point1_
+                << ", point2 = " << point2_
                 << ", radius = " << radius_;
 
             if (innerRadius_ > 0)
             {
-                Info<< ", innerRadius = " << innerRadius_;
+                Info<< ", inner radius = " << innerRadius_;
             }
 
             Info<< endl;

@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef topoBitSet_H
-#define topoBitSet_H
+#ifndef Foam_topoBitSet_H
+#define Foam_topoBitSet_H
 
 #include "topoSet.H"
 #include "bitSet.H"
@@ -110,13 +110,13 @@ public:
     // Member Functions
 
         //- Return the bitSet
-        const bitSet& addressing() const
+        const bitSet& addressing() const noexcept
         {
             return selected_;
         }
 
         //- Access the bitSet
-        bitSet& addressing()
+        bitSet& addressing() noexcept
         {
             return selected_;
         }

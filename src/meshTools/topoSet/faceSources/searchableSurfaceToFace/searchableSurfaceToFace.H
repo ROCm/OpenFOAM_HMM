@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -86,8 +86,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef searchableSurfaceToFace_H
-#define searchableSurfaceToFace_H
+#ifndef Foam_searchableSurfaceToFace_H
+#define Foam_searchableSurfaceToFace_H
 
 #include "topoSetFaceSource.H"
 #include "searchableSurface.H"
@@ -117,18 +117,6 @@ class searchableSurfaceToFace
     // Private Member Functions
 
         void combine(topoSet& set, const bool add) const;
-
-
-protected:
-
-    // Protected Member Functions
-
-        //- Retrieve surface name from dictionary entry
-        static word getSurfaceName
-        (
-            const dictionary& dict,
-            const word& defaultName
-        );
 
 
 public:

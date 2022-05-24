@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,9 +48,9 @@ Usage
 
         // Mandatory entries
         source         cylinderToPoint;
-        p1             (<p1X> <p1Y> <p1Z>);
-        p2             (<p2X> <p2Y> <p2Z>);
-        radius         <radius1>;
+        point1         (<p1X> <p1Y> <p1Z>);
+        point2         (<p2X> <p2Y> <p2Z>);
+        radius         <radius1>;   // or outerRadius
 
         // Optional entries
         innerRadius    <radius2>;
@@ -59,15 +59,16 @@ Usage
 
     where the entries mean:
     \table
-      Property   | Description                          | Type | Req'd   | Dflt
-      name       | Name of pointSet                     | word |  yes    | -
-      type       | Type name: pointSet                  | word |  yes    | -
-      action     | Action applied on points - see below | word |  yes    | -
-      source     | Source name: cylinderToPoint         | word |  yes    | -
-      p1          | Coordinate of one of the endpoints  | vector |  yes  | -
-      p2          | Coordinate of the other endpoint    | vector |  yes  | -
-      radius      | Cylinder outer radius               | scalar |  yes  | -
-      innerRadius | Cylinder inner radius               | scalar |  no   | 0
+      Property   | Description                            | Type | Req'd | Dflt
+      name       | Name of pointSet                       | word | yes   | -
+      type       | Type name: pointSet                    | word | yes   | -
+      action     | Action applied on points - see below   | word | yes   | -
+      source     | Source name: cylinderToPoint           | word | yes   | -
+      point1 (p1) | Coordinate of the first endpoint      | vector | yes | -
+      point2 (p2) | Coordinate of the second endpoint     | vector | yes | -
+      radius      | Cylinder outer radius                 | scalar | yes | -
+      innerRadius | Cylinder inner radius                 | scalar | no  | 0
+      outerRadius | Alternative spelling for 'radius'     | scalar | no  | -
     \endtable
 
     Options for the \c action entry:
@@ -86,8 +87,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cylinderToPoint_H
-#define cylinderToPoint_H
+#ifndef Foam_cylinderToPoint_H
+#define Foam_cylinderToPoint_H
 
 #include "topoSetPointSource.H"
 
@@ -125,6 +126,18 @@ class cylinderToPoint
     // Private Member Functions
 
         void combine(topoSet& set, const bool add) const;
+
+protected:
+
+    // Constructors
+
+        //- Construct from Istream with mandatory inner radius
+        cylinderToPoint
+        (
+            const polyMesh& mesh,
+            Istream& is,
+            const bool mandatoryInnerRadius
+        );
 
 
 public:

@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef topoBoolSet_H
-#define topoBoolSet_H
+#ifndef Foam_topoBoolSet_H
+#define Foam_topoBoolSet_H
 
 #include "topoSet.H"
 #include "boolList.H"
@@ -110,13 +110,13 @@ public:
     // Member Functions
 
         //- Return the boolList
-        const boolList& addressing() const
+        const boolList& addressing() const noexcept
         {
             return selected_;
         }
 
         //- Access the boolList
-        boolList& addressing()
+        boolList& addressing() noexcept
         {
             return selected_;
         }

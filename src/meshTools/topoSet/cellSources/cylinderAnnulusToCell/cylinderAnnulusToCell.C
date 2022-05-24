@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,39 +70,9 @@ Foam::topoSetSource::addToUsageTable Foam::cylinderAnnulusToCell::usage_
 (
     cylinderAnnulusToCell::typeName,
     "\n    Usage: cylinderAnnulusToCell (p1X p1Y p1Z) (p2X p2Y p2Z)"
-    " outerRadius innerRadius\n\n"
-    "    Select all cells with cell centre within bounding cylinder annulus\n\n"
+    " radius innerRadius\n\n"
+    "    Select cells with centres within bounding cylinder annulus\n\n"
 );
-
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-void Foam::cylinderAnnulusToCell::combine(topoSet& set, const bool add) const
-{
-    const pointField& ctrs = mesh_.cellCentres();
-
-    const vector axis = (point2_ - point1_);
-    const scalar magAxis2 = magSqr(axis);
-    const scalar orad2 = sqr(radius_);
-    const scalar irad2 = innerRadius_ > 0 ? sqr(innerRadius_) : -1;
-
-    // Treat innerRadius == 0 like unspecified innerRadius (always accept)
-
-    forAll(ctrs, elemi)
-    {
-        const vector d = ctrs[elemi] - point1_;
-        const scalar magD = d & axis;
-
-        if ((magD > 0) && (magD < magAxis2))
-        {
-            const scalar d2 = (d & d) - sqr(magD)/magAxis2;
-            if ((d2 < orad2) && (d2 > irad2))
-            {
-                addOrDelete(set, elemi, add);
-            }
-        }
-    }
-}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -116,20 +86,8 @@ Foam::cylinderAnnulusToCell::cylinderAnnulusToCell
     const scalar innerRadius
 )
 :
-    topoSetCellSource(mesh),
-    point1_(point1),
-    point2_(point2),
-    radius_(radius),
-    innerRadius_(innerRadius)
-{
-    if (innerRadius_ > radius_)
-    {
-        FatalErrorInFunction
-            << "inner radius = " << innerRadius_ << " cannot be larger than "
-            << "outer radius = " << radius_
-            << exit(FatalError);
-    }
-}
+    cylinderToCell(mesh, point1, point2, radius, innerRadius)
+{}
 
 
 Foam::cylinderAnnulusToCell::cylinderAnnulusToCell
@@ -138,14 +96,7 @@ Foam::cylinderAnnulusToCell::cylinderAnnulusToCell
     const dictionary& dict
 )
 :
-    cylinderAnnulusToCell
-    (
-        mesh,
-        dict.get<point>("p1"),
-        dict.get<point>("p2"),
-        dict.getCheck<scalar>("outerRadius", scalarMinMax::ge(SMALL)),
-        dict.getCheck<scalar>("innerRadius", scalarMinMax::ge(0))
-    )
+    cylinderToCell(mesh, dict)
 {}
 
 
@@ -155,49 +106,8 @@ Foam::cylinderAnnulusToCell::cylinderAnnulusToCell
     Istream& is
 )
 :
-    topoSetCellSource(mesh),
-    point1_(checkIs(is)),
-    point2_(checkIs(is)),
-    radius_(readScalar(checkIs(is))),
-    innerRadius_(readScalar(checkIs(is)))
+    cylinderToCell(mesh, is, true)  // mandatoryInnerRadius = true
 {}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void Foam::cylinderAnnulusToCell::applyToSet
-(
-    const topoSetSource::setAction action,
-    topoSet& set
-) const
-{
-    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
-    {
-        if (verbose_)
-        {
-            Info<< "    Adding cells with centre within cylinder annulus,"
-                << " with p1 = " << point1_ << ", p2 = " << point2_
-                << ", radius = " << radius_
-                << ", inner radius = " << innerRadius_
-                << endl;
-        }
-
-        combine(set, true);
-    }
-    else if (action == topoSetSource::SUBTRACT)
-    {
-        if (verbose_)
-        {
-            Info<< "    Removing cells with centre within cylinder annulus,"
-                << " with p1 = " << point1_ << ", p2 = " << point2_
-                << ", radius = " << radius_
-                << ", inner radius = " << innerRadius_
-                << endl;
-        }
-
-        combine(set, false);
-    }
-}
 
 
 // ************************************************************************* //

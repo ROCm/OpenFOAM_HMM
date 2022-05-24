@@ -102,25 +102,25 @@ public:
     virtual ~faceZoneSet() = default;
 
 
-    // Member functions
+    // Member Functions
 
-        const labelList& addressing() const
+        const labelList& addressing() const noexcept
         {
             return addressing_;
         }
 
-        labelList& addressing()
+        labelList& addressing() noexcept
         {
             return addressing_;
         }
 
 
-        const boolList& flipMap() const
+        const boolList& flipMap() const noexcept
         {
             return flipMap_;
         }
 
-        boolList& flipMap()
+        boolList& flipMap() noexcept
         {
             return flipMap_;
         }

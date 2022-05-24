@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef pointBitSet_H
-#define pointBitSet_H
+#ifndef Foam_pointBitSet_H
+#define Foam_pointBitSet_H
 
 #include "topoBitSet.H"
 
@@ -99,7 +99,6 @@ public:
             const primitiveMesh& mesh,
             const label maxLen
         ) const;
-
 };
 
 
