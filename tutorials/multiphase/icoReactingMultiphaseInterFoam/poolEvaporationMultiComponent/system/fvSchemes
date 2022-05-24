@@ -10,42 +10,59 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      phaseProperties;
+    object      fvSchemes;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-type    massTransferMultiphaseSystem;
-
-phases  (oxide liquid gas);
-
-liquid
+ddtSchemes
 {
-    type            pureMovingPhaseModel;
+    default         Euler;
 }
 
-oxide
+gradSchemes
 {
-    type            pureMovingPhaseModel;
+    default         Gauss linear;
 }
 
-gas
+divSchemes
 {
-    type            pureMovingPhaseModel;
+    div(rhoPhi,U)           Gauss linearUpwind grad(U);
+    "div\(phi,alpha.*\)"    Gauss vanLeer;
+    "div\(phir,alpha.*\)"   Gauss linear;
+
+    "div\(Yiphir,alpha.*\)" Gauss linear;
+    "div\(phi,.*\.gas.*\)"  Gauss vanLeer;
+
+    div(((rho*nuEff)*dev2(T(grad(U))))) Gauss linear;
+
+    div(phi,T)              Gauss linearUpwind grad(T);
+
+    div(rhoPhi,epsilon)     Gauss upwind;
+    div(rhoPhi,k)           Gauss upwind;
 }
 
-massTransferModel
-(
-    (liquid to oxide)
-    {
-        type                interfaceOxideRate;
-        C                   20;
-        Tsolidus            823.15;
-        Tliquidus           884.15;
-        oxideCrit           1e-3;
-        isoAlpha            0.9;
-        includeVolChange    false;
-   }
-);
+laplacianSchemes
+{
+    default         Gauss linear orthogonal;
+}
+
+interpolationSchemes
+{
+    default         linear;
+}
+
+snGradSchemes
+{
+    default         orthogonal;
+}
+
+fluxRequired
+{
+    default         no;
+    p_rgh             ;
+    Xvapour.gas;
+    "alpha.*";
+}
 
 
 // ************************************************************************* //

@@ -9,43 +9,13 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    object      phaseProperties;
+    class       uniformDimensionedVectorField;
+    object      g;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-type    massTransferMultiphaseSystem;
-
-phases  (oxide liquid gas);
-
-liquid
-{
-    type            pureMovingPhaseModel;
-}
-
-oxide
-{
-    type            pureMovingPhaseModel;
-}
-
-gas
-{
-    type            pureMovingPhaseModel;
-}
-
-massTransferModel
-(
-    (liquid to oxide)
-    {
-        type                interfaceOxideRate;
-        C                   20;
-        Tsolidus            823.15;
-        Tliquidus           884.15;
-        oxideCrit           1e-3;
-        isoAlpha            0.9;
-        includeVolChange    false;
-   }
-);
+dimensions      [0 1 -2 0 0 0 0];
+value           (0 -9.81 0);
 
 
 // ************************************************************************* //

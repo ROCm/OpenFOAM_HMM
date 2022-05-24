@@ -9,43 +9,49 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    object      phaseProperties;
+    class       volScalarField;
+    object      alphat;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-type    massTransferMultiphaseSystem;
+dimensions     [1 -1 -1 0 0 0 0];
 
-phases  (oxide liquid gas);
+internalField   uniform 0;
 
-liquid
+boundaryField
 {
-    type            pureMovingPhaseModel;
-}
-
-oxide
-{
-    type            pureMovingPhaseModel;
-}
-
-gas
-{
-    type            pureMovingPhaseModel;
-}
-
-massTransferModel
-(
-    (liquid to oxide)
+    bottom
     {
-        type                interfaceOxideRate;
-        C                   20;
-        Tsolidus            823.15;
-        Tliquidus           884.15;
-        oxideCrit           1e-3;
-        isoAlpha            0.9;
-        includeVolChange    false;
-   }
-);
+        type            compressible::alphatWallFunction;
+        Prt             0.85;
+        value           $internalField;
+    }
+
+    top
+    {
+        type            calculated;
+        value           $internalField;
+    }
+
+    left
+    {
+        type            compressible::alphatWallFunction;
+        Prt             0.85;
+        value           $internalField;
+    }
+
+    right
+    {
+        type            compressible::alphatWallFunction;
+        Prt             0.85;
+        value           $internalField;
+    }
+
+    frontAndBack
+    {
+        type            empty;
+    }
+}
 
 
 // ************************************************************************* //

@@ -16,35 +16,45 @@ FoamFile
 
 type    massTransferMultiphaseSystem;
 
-phases  (oxide liquid gas);
+phases  (liquid gas);
 
 liquid
 {
     type            pureMovingPhaseModel;
 }
 
-oxide
-{
-    type            pureMovingPhaseModel;
-}
-
 gas
 {
-    type            pureMovingPhaseModel;
+    type            multiComponentMovingPhaseModel;
 }
+
+surfaceTension
+(
+    (gas and liquid)
+    {
+        type            constant;
+        sigma           0.07;
+    }
+);
 
 massTransferModel
 (
-    (liquid to oxide)
+    (liquid to gas)
     {
-        type                interfaceOxideRate;
-        C                   20;
-        Tsolidus            823.15;
-        Tliquidus           884.15;
-        oxideCrit           1e-3;
-        isoAlpha            0.9;
+        type                diffusionGasEvaporation;
+        species             vapour.gas;
+        isoAlpha            0.2;
         includeVolChange    false;
-   }
+        saturationPressure
+        {
+            type    Antoine;
+            A       3.55;
+            B       643;
+            C       -198;
+        }
+        C                   1;
+        Tactivate           0;
+    }
 );
 
 
