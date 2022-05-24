@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -129,7 +129,7 @@ public:
 
     // Constructors
 
-        //- Construct from components
+        //- Construct from components, copy initial field content
         DimensionedField
         (
             const IOobject& io,
@@ -280,6 +280,62 @@ public:
 
         //- Clone
         tmp<DimensionedField<Type, GeoMesh>> clone() const;
+
+
+    // Static Constructors
+
+        //- Return tmp field from name, mesh, dimensions,
+        //- copy of internal field.
+        //  The field is NO_READ, NO_WRITE, unregistered and uses the
+        //  current timeName from the mesh registry
+        static tmp<DimensionedField<Type, GeoMesh>> New
+        (
+            const word& name,
+            const Mesh& mesh,
+            const dimensionSet& ds,
+            const Field<Type>& iField
+        );
+
+        //- Return tmp field from name, mesh, dimensions,
+        //- moved internal field contents.
+        //  The field is NO_READ, NO_WRITE, unregistered and uses the
+        //  current timeName from the mesh registry
+        static tmp<DimensionedField<Type, GeoMesh>> New
+        (
+            const word& name,
+            const Mesh& mesh,
+            const dimensionSet& ds,
+            Field<Type>&& iField
+        );
+
+        //- Return tmp field from name, mesh, dimensions.
+        //  The field is NO_READ, NO_WRITE, unregistered and uses the
+        //  current timeName from the mesh registry
+        static tmp<DimensionedField<Type, GeoMesh>> New
+        (
+            const word& name,
+            const Mesh& mesh,
+            const dimensionSet& ds
+        );
+
+        //- Return tmp field from name, mesh, dimensioned\<Type\>.
+        //  The field is NO_READ, NO_WRITE, unregistered and uses the
+        //  current timeName from the mesh registry
+        static tmp<DimensionedField<Type, GeoMesh>> New
+        (
+            const word& name,
+            const Mesh& mesh,
+            const dimensioned<Type>& dt
+        );
+
+        //- Return renamed tmp field
+        //  The field is NO_READ, NO_WRITE, unregistered and uses the
+        //  current timeName from the mesh registry
+        static tmp<DimensionedField<Type, GeoMesh>> New
+        (
+            const word& newName,
+            const tmp<DimensionedField<Type, GeoMesh>>&
+        );
 
 
     //- Destructor

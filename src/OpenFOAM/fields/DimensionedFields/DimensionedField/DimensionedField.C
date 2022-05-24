@@ -585,6 +585,7 @@ COMPUTED_ASSIGNMENT(scalar, /=)
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "DimensionedFieldIO.C"
+#include "DimensionedFieldNew.C"
 #include "DimensionedFieldFunctions.C"
 
 // ************************************************************************* //
