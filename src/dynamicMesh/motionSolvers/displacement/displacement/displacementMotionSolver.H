@@ -37,8 +37,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef displacementMotionSolver_H
-#define displacementMotionSolver_H
+#ifndef Foam_displacementMotionSolver_H
+#define Foam_displacementMotionSolver_H
 
 #include "points0MotionSolver.H"
 
@@ -57,15 +57,13 @@ class displacementMotionSolver
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Point motion field
         mutable pointVectorField pointDisplacement_;
 
 
-private:
-
-    // Private Member Functions
+    // Protected Member Functions
 
         //- No copy construct
         displacementMotionSolver(const displacementMotionSolver&) = delete;
@@ -139,13 +137,13 @@ public:
     // Member Functions
 
         //- Return reference to the point motion displacement field
-        pointVectorField& pointDisplacement()
+        pointVectorField& pointDisplacement() noexcept
         {
             return pointDisplacement_;
         }
 
         //- Return const reference to the point motion displacement field
-        const pointVectorField& pointDisplacement() const
+        const pointVectorField& pointDisplacement() const noexcept
         {
             return pointDisplacement_;
         }

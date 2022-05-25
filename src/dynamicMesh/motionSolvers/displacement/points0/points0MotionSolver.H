@@ -36,8 +36,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef points0MotionSolver_H
-#define points0MotionSolver_H
+#ifndef Foam_points0MotionSolver_H
+#define Foam_points0MotionSolver_H
 
 #include "motionSolver.H"
 #include "pointFields.H"
@@ -49,6 +49,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -62,15 +63,13 @@ class points0MotionSolver
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Starting points
         pointIOField points0_;
 
 
-private:
-
-    // Private Member Functions
+    // Protected Member Functions
 
         //- No copy construct
         points0MotionSolver(const points0MotionSolver&) = delete;
@@ -114,14 +113,14 @@ public:
         //- Return IO object for points0
         static IOobject points0IO(const polyMesh& mesh);
 
-        //- Return reference to the reference field
-        pointField& points0()
+        //- Return reference to the reference ('0') pointField
+        pointField& points0() noexcept
         {
             return points0_;
         }
 
-        //- Return reference to the reference field
-        const pointField& points0() const
+        //- Return reference to the reference ('0') pointField
+        const pointField& points0() const noexcept
         {
             return points0_;
         }

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,9 +28,10 @@ License
 
 #include "zoneMotion.H"
 #include "syncTools.H"
-#include "cellZoneMesh.H"
+#include "bitSet.H"
 #include "cellSet.H"
-#include "boolList.H"
+#include "cellZoneMesh.H"
+#include "dictionary.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -41,103 +42,101 @@ Foam::zoneMotion::zoneMotion
 )
 :
     pointIDs_(),
-    moveAllCells_(false)
+    moveAllCells_(true)
 {
-    word cellZoneName =
-        dict.getOrDefault<word>("cellZone", "none");
+    // Specified cellSet?
+    word cellSetName;
 
-    word cellSetName =
-        dict.getOrDefault<word>("cellSet", "none");
-
-    if ((cellZoneName != "none") && (cellSetName != "none"))
+    if
+    (
+        dict.readIfPresent("cellSet", cellSetName)
+     && cellSetName == "none"  // Compat: ignore 'none' placeholder
+    )
     {
-        FatalIOErrorInFunction(dict)
-            << "Either cellZone OR cellSet can be supplied, but not both. "
-            << "If neither is supplied, all cells will be included"
-            << exit(FatalIOError);
+        cellSetName.clear();
     }
 
     labelList cellIDs;
-    if (cellZoneName != "none")
+    if (!cellSetName.empty())
     {
-        Info<< "Applying solid body motion to cellZone " << cellZoneName
-            << endl;
+        Info<< "Applying motion to cellSet: " << cellSetName << endl;
 
-        label zoneID = mesh.cellZones().findZoneID(cellZoneName);
+        cellIDs = cellSet(mesh, cellSetName).toc();
+    }
 
-        if (zoneID == -1)
+
+    // Specified cellZone(s) ?
+    wordRe cellZoneName;
+
+    if
+    (
+        dict.readIfPresent("cellZone", cellZoneName)
+     && cellZoneName == "none"  // Compat: ignore 'none' placeholder
+    )
+    {
+        cellZoneName.clear();
+    }
+
+    labelList zoneIDs;
+    if (!cellZoneName.empty())
+    {
+        Info<< "Applying motion to cellZone: " << cellZoneName << endl;
+
+        // Also handles groups, multiple zones (as wordRe match) ...
+        zoneIDs = mesh.cellZones().indices(cellZoneName);
+
+        if (zoneIDs.empty())
         {
-            FatalErrorInFunction
-                << "Unable to find cellZone " << cellZoneName
-                << ".  Valid cellZones are:"
-                << mesh.cellZones().names()
-                << exit(FatalError);
+            FatalIOErrorInFunction(dict)
+                << "No matching cellZones: " << cellZoneName << nl
+                << "    Valid zones : "
+                << flatOutput(mesh.cellZones().names()) << nl
+                << "    Valid groups: "
+                << flatOutput(mesh.cellZones().groupNames())
+                << nl
+                << exit(FatalIOError);
         }
-
-        cellIDs = mesh.cellZones()[zoneID];
     }
 
-    if (cellSetName != "none")
+    if (!cellSetName.empty() || !cellZoneName.empty())
     {
-        Info<< "Applying solid body motion to cellSet " << cellSetName
-            << endl;
+        bitSet movePts(mesh.nPoints());
 
-        cellSet set(mesh, cellSetName);
-
-        cellIDs = set.toc();
-    }
-
-    label nCells = returnReduce(cellIDs.size(), sumOp<label>());
-    moveAllCells_ = (nCells == 0);
-
-    if (moveAllCells_)
-    {
-        Info<< "Applying solid body motion to entire mesh" << endl;
-    }
-    else
-    {
-        boolList movePts(mesh.nPoints(), false);
-
-        for (label celli : cellIDs)
+        // Markup points associated with cell zone(s)
+        for (const label zoneID : zoneIDs)
         {
-            const cell& c = mesh.cells()[celli];
-            for (label cellFacei : c)
+            for (const label celli : mesh.cellZones()[zoneID])
             {
-                const face& f = mesh.faces()[cellFacei];
-                for (label pointi : f)
+                for (const label facei : mesh.cells()[celli])
                 {
-                    movePts[pointi] = true;
+                    movePts.set(mesh.faces()[facei]);
                 }
             }
         }
 
-        syncTools::syncPointList(mesh, movePts, orEqOp<bool>(), false);
-
-        DynamicList<label> ptIDs(mesh.nPoints());
-        forAll(movePts, i)
+        // Markup points associated with cellSet
+        for (const label celli : cellIDs)
         {
-            if (movePts[i])
+            for (const label facei : mesh.cells()[celli])
             {
-                ptIDs.append(i);
+                movePts.set(mesh.faces()[facei]);
             }
         }
 
-        pointIDs_.transfer(ptIDs);
+        syncTools::syncPointList(mesh, movePts, orEqOp<unsigned int>(), 0u);
+
+        pointIDs_ = movePts.sortedToc();
     }
-}
 
 
-// * * * * * * * * * * * * * * * * Members  * * * * * * * * * * * * * * //
+    // No cell points selected (as set or zones) => move all points
 
-const Foam::labelList& Foam::zoneMotion::pointIDs() const
-{
-    return pointIDs_;
-}
+    moveAllCells_ = returnReduce(pointIDs_.empty(), andOp<bool>());
 
-
-bool Foam::zoneMotion::moveAllCells() const
-{
-    return moveAllCells_;
+    if (moveAllCells_)
+    {
+        Info<< "Applying motion to entire mesh" << endl;
+    }
 }
 
 

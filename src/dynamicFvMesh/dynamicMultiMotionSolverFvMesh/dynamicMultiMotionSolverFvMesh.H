@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef dynamicMultiMotionSolverFvMesh_H
-#define dynamicMultiMotionSolverFvMesh_H
+#ifndef Foam_dynamicMultiMotionSolverFvMesh_H
+#define Foam_dynamicMultiMotionSolverFvMesh_H
 
 #include "dynamicFvMesh.H"
 #include "motionSolver.H"
@@ -54,15 +54,12 @@ class dynamicMultiMotionSolverFvMesh
 :
     public dynamicFvMesh
 {
-    // Private data
+    // Private Data
 
         //- The motion control function
         PtrList<motionSolver> motionPtr_;
 
-        //- Specified cellZones
-        labelList zoneIDs_;
-
-        //- Points to move per cellZone
+        //- Points to move, per motion solver
         labelListList pointIDs_;
 
 
@@ -95,7 +92,7 @@ public:
 
 
     //- Destructor
-    ~dynamicMultiMotionSolverFvMesh() = default;
+    virtual ~dynamicMultiMotionSolverFvMesh() = default;
 
 
     // Member Functions

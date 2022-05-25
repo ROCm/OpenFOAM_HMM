@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef multiSolidBodyMotionSolver_H
-#define multiSolidBodyMotionSolver_H
+#ifndef Foam_multiSolidBodyMotionSolver_H
+#define Foam_multiSolidBodyMotionSolver_H
 
 #include "points0MotionSolver.H"
 #include "solidBodyMotionFunction.H"
@@ -54,13 +54,10 @@ class multiSolidBodyMotionSolver
 :
     public points0MotionSolver
 {
-    // Private data
+    // Private Data
 
         //- The motion control function
         PtrList<solidBodyMotionFunction> SBMFs_;
-
-        //- Specified cellZones
-        labelList zoneIDs_;
 
         //- Points to move per cellZone
         labelListList pointIDs_;
@@ -86,8 +83,8 @@ public:
         //- Construct from mesh and dictionary
         multiSolidBodyMotionSolver
         (
-            const polyMesh&,
-            const IOdictionary&
+            const polyMesh& mesh,
+            const IOdictionary& dict
         );
 
 

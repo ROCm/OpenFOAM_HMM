@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -89,9 +89,8 @@ bool Foam::dynamicMultiMotionSolverFvMesh::init(const bool doInit)
     );
     const dictionary& dynamicMeshCoeffs = dynDict.subDict(typeName + "Coeffs");
 
-    zoneIDs_.setSize(dynamicMeshCoeffs.size());
-    motionPtr_.setSize(dynamicMeshCoeffs.size());
-    pointIDs_.setSize(dynamicMeshCoeffs.size());
+    motionPtr_.resize(dynamicMeshCoeffs.size());
+    pointIDs_.resize(dynamicMeshCoeffs.size());
 
     label zonei = 0;
 
@@ -103,20 +102,25 @@ bool Foam::dynamicMultiMotionSolverFvMesh::init(const bool doInit)
         {
             const dictionary& subDict = dEntry.dict();
 
-            const word zoneName(subDict.get<word>("cellZone"));
+            wordRe cellZoneName;
+            subDict.readEntry("cellZone", cellZoneName);
 
-            zoneIDs_[zonei] = cellZones().findZoneID(zoneName);
+            // Also handles groups, multiple zones (as wordRe match) ...
+            labelList zoneIDs = cellZones().indices(cellZoneName);
 
-            if (zoneIDs_[zonei] == -1)
+            if (zoneIDs.empty())
             {
                 FatalIOErrorInFunction(dynamicMeshCoeffs)
-                    << "Cannot find cellZone named " << zoneName
-                    << ". Valid zones are " << cellZones().names()
+                    << "No matching cellZones: " << cellZoneName << nl
+                    << "    Valid zones : "
+                    << flatOutput(cellZones().names()) << nl
+                    << "    Valid groups: "
+                    << flatOutput(cellZones().groupNames())
+                    << nl
                     << exit(FatalIOError);
             }
 
-            IOobject io(dynDict);
-            io.readOpt(IOobject::NO_READ);
+            IOobject io(dynDict, IOobject::NO_READ, IOobject::NO_WRITE);
 
             motionPtr_.set
             (
@@ -129,16 +133,19 @@ bool Foam::dynamicMultiMotionSolverFvMesh::init(const bool doInit)
             );
 
 
-            // Collect points of cell zone.
+            // Markup points associated with cell zone(s)
 
             movePts.reset();
             movePts.resize(nPoints());
 
-            for (const label celli : cellZones()[zoneIDs_[zonei]])
+            for (const label zoneID : zoneIDs)
             {
-                for (const label facei : cells()[celli])
+                for (const label celli : cellZones()[zoneID])
                 {
-                    movePts.set(faces()[facei]);  // set multiple points
+                    for (const label facei : cells()[celli])
+                    {
+                        movePts.set(faces()[facei]);
+                    }
                 }
             }
 
@@ -152,14 +159,14 @@ bool Foam::dynamicMultiMotionSolverFvMesh::init(const bool doInit)
             Info<< "Applying motionSolver " << motionPtr_[zonei].type()
                 << " to "
                 << returnReduce(pointIDs_[zonei].size(), sumOp<label>())
-                << " points of cellZone " << zoneName << endl;
+                << " points of cellZone " << cellZoneName << endl;
 
             ++zonei;
         }
     }
-    zoneIDs_.setSize(zonei);
-    motionPtr_.setSize(zonei);
-    pointIDs_.setSize(zonei);
+
+    motionPtr_.resize(zonei);
+    pointIDs_.resize(zonei);
 
     // Assume changed ...
     return true;
@@ -174,10 +181,11 @@ bool Foam::dynamicMultiMotionSolverFvMesh::update()
 
     forAll(motionPtr_, zonei)
     {
-        tmp<pointField> tnewPoints(motionPtr_[zonei].newPoints());
-        const pointField& newPoints = tnewPoints();
+        const labelList& zonePoints = pointIDs_[zonei];
 
-        for (const label pointi : pointIDs_[zonei])
+        const pointField newPoints(motionPtr_[zonei].newPoints());
+
+        for (const label pointi : zonePoints)
         {
             transformedPts[pointi] = newPoints[pointi];
         }

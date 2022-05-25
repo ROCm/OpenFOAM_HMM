@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,19 +27,33 @@ Class
     Foam::zoneMotion
 
 Description
+    Intermediate class for handling "zonified" motion.
+    Can select motion for the entire mesh, or restrict to a subset
+    of points based on a specified cellSet or cellZone(s).
 
+Usage
+    \verbatim
+    {
+        cellSet     <name>;
+
+        // and/or
+        cellZone    <name or regex>;
+    }
+    \endverbatim
+
+Note
+    The cellZone can be specified as a wordRe and will select by name
+    or group. The special name "none" is treated as ignored.
 
 SourceFiles
     zoneMotion.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef zoneMotion_H
-#define zoneMotion_H
+#ifndef Foam_zoneMotion_H
+#define Foam_zoneMotion_H
 
 #include "labelList.H"
-#include "dictionary.H"
-#include "wordRes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,6 +61,7 @@ namespace Foam
 {
 
 // Forward Declarations
+class dictionary;
 class polyMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -57,43 +72,38 @@ class zoneMotion
 {
      // Private Data
 
-        //- Points to move when cell zone is supplied
+        //- Points to move when cell zones or sets are supplied
         labelList pointIDs_;
 
         //- Flag to indicate whether all cells should move
         bool moveAllCells_;
 
 
-    // Private Member Functions
-
-        //- No copy construct
-        zoneMotion(const zoneMotion&) = delete;
-
-        //- No copy assignment
-        void operator=(const zoneMotion&) = delete;
-
 public:
-
-    // Member functions
-
-        //- Return pointsID
-        const labelList& pointIDs() const;
-
-        //- Return flag
-        bool moveAllCells() const;
 
     // Constructors
 
         //- Construct from dictionary
-        zoneMotion
-        (
-            const dictionary&,
-            const polyMesh&
-        );
+        zoneMotion(const dictionary& dict, const polyMesh& mesh);
 
 
     //- Destructor
     virtual ~zoneMotion() = default;
+
+
+    // Member Functions
+
+        //- The point ids (for cell set/zone subset)
+        const labelList& pointIDs() const noexcept
+        {
+            return pointIDs_;
+        }
+
+        //- Move all cells?
+        bool moveAllCells() const noexcept
+        {
+            return moveAllCells_;
+        }
 };
 
 

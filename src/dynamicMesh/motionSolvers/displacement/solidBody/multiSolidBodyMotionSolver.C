@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,7 +30,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "transformField.H"
 #include "cellZoneMesh.H"
-#include "boolList.H"
+#include "bitSet.H"
 #include "syncTools.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -57,26 +57,33 @@ Foam::multiSolidBodyMotionSolver::multiSolidBodyMotionSolver
 :
     points0MotionSolver(mesh, dict, typeName)
 {
-    zoneIDs_.setSize(coeffDict().size());
-    SBMFs_.setSize(coeffDict().size());
-    pointIDs_.setSize(coeffDict().size());
+    SBMFs_.resize(coeffDict().size());
+    pointIDs_.resize(coeffDict().size());
+
     label zonei = 0;
+
+    bitSet movePts;
 
     for (const entry& dEntry : coeffDict())
     {
         if (dEntry.isDict())
         {
-            const word& zoneName = dEntry.keyword();
+            const keyType& cellZoneName = dEntry.keyword();
+
             const dictionary& subDict = dEntry.dict();
 
-            zoneIDs_[zonei] = mesh.cellZones().findZoneID(zoneName);
+            // Also handles groups, multiple zones (as wordRe match) ...
+            labelList zoneIDs = mesh.cellZones().indices(cellZoneName);
 
-            if (zoneIDs_[zonei] == -1)
+            if (zoneIDs.empty())
             {
                 FatalIOErrorInFunction(coeffDict())
-                    << "Cannot find cellZone named " << zoneName
-                    << ". Valid zones are "
-                    << flatOutput(mesh.cellZones().names())
+                    << "No matching cellZones: " << cellZoneName << nl
+                    << "    Valid zones : "
+                    << flatOutput(mesh.cellZones().names()) << nl
+                    << "    Valid groups: "
+                    << flatOutput(mesh.cellZones().groupNames())
+                    << nl
                     << exit(FatalIOError);
             }
 
@@ -86,50 +93,41 @@ Foam::multiSolidBodyMotionSolver::multiSolidBodyMotionSolver
                 solidBodyMotionFunction::New(subDict, mesh.time())
             );
 
-            // Collect points of cell zone.
-            const cellZone& cz = mesh.cellZones()[zoneIDs_[zonei]];
 
-            boolList movePts(mesh.nPoints(), false);
+            // Markup points associated with cell zone(s)
 
-            forAll(cz, i)
+            movePts.reset();
+            movePts.resize(mesh.nPoints());
+
+            for (const label zoneID : zoneIDs)
             {
-                label celli = cz[i];
-                const cell& c = mesh.cells()[celli];
-                forAll(c, j)
+                for (const label celli : mesh.cellZones()[zoneID])
                 {
-                    const face& f = mesh.faces()[c[j]];
-                    forAll(f, k)
+                    for (const label facei : mesh.cells()[celli])
                     {
-                        label pointi = f[k];
-                        movePts[pointi] = true;
+                        movePts.set(mesh.faces()[facei]);
                     }
                 }
             }
 
-            syncTools::syncPointList(mesh, movePts, orEqOp<bool>(), false);
+            syncTools::syncPointList
+            (
+                mesh, movePts, orEqOp<unsigned int>(), 0u
+            );
 
-            DynamicList<label> ptIDs(mesh.nPoints());
-            forAll(movePts, i)
-            {
-                if (movePts[i])
-                {
-                    ptIDs.append(i);
-                }
-            }
-
-            pointIDs_[zonei].transfer(ptIDs);
+            pointIDs_[zonei] = movePts.sortedToc();
 
             Info<< "Applying solid body motion " << SBMFs_[zonei].type()
                 << " to "
                 << returnReduce(pointIDs_[zonei].size(), sumOp<label>())
-                << " points of cellZone " << zoneName << endl;
+                << " points of cellZone " << cellZoneName << endl;
 
-            zonei++;
+            ++zonei;
         }
     }
-    zoneIDs_.setSize(zonei);
-    SBMFs_.setSize(zonei);
-    pointIDs_.setSize(zonei);
+
+    SBMFs_.resize(zonei);
+    pointIDs_.resize(zonei);
 }
 
 
@@ -137,16 +135,16 @@ Foam::multiSolidBodyMotionSolver::multiSolidBodyMotionSolver
 
 Foam::tmp<Foam::pointField> Foam::multiSolidBodyMotionSolver::curPoints() const
 {
-    tmp<pointField> ttransformedPts(new pointField(mesh().points()));
-    pointField& transformedPts = ttransformedPts.ref();
+    auto ttransformedPts = tmp<pointField>::New(mesh().points());
+    auto& transformedPts = ttransformedPts.ref();
 
-    forAll(zoneIDs_, i)
+    forAll(SBMFs_, zonei)
     {
-        const labelList& zonePoints = pointIDs_[i];
+        const labelList& zonePoints = pointIDs_[zonei];
 
         UIndirectList<point>(transformedPts, zonePoints) = transformPoints
         (
-            SBMFs_[i].transformation(),
+            SBMFs_[zonei].transformation(),
             pointField(points0_, zonePoints)
         );
     }

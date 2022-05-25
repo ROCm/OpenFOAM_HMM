@@ -29,10 +29,6 @@ License
 #include "solidBodyMotionSolver.H"
 #include "addToRunTimeSelectionTable.H"
 #include "transformField.H"
-#include "cellZoneMesh.H"
-#include "cellSet.H"
-#include "boolList.H"
-#include "syncTools.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -57,101 +53,15 @@ Foam::solidBodyMotionSolver::solidBodyMotionSolver
 )
 :
     points0MotionSolver(mesh, dict, typeName),
-    SBMFPtr_(solidBodyMotionFunction::New(coeffDict(), mesh.time())),
-    pointIDs_(),
-    moveAllCells_(false)
-{
-    word cellZoneName =
-        coeffDict().getOrDefault<word>("cellZone", "none");
-
-    word cellSetName =
-        coeffDict().getOrDefault<word>("cellSet", "none");
-
-    if ((cellZoneName != "none") && (cellSetName != "none"))
-    {
-        FatalIOErrorInFunction(coeffDict())
-            << "Either cellZone OR cellSet can be supplied, but not both. "
-            << "If neither is supplied, all cells will be included"
-            << exit(FatalIOError);
-    }
-
-    labelList cellIDs;
-    if (cellZoneName != "none")
-    {
-        Info<< "Applying solid body motion to cellZone " << cellZoneName
-            << endl;
-
-        label zoneID = mesh.cellZones().findZoneID(cellZoneName);
-
-        if (zoneID == -1)
-        {
-            FatalErrorInFunction
-                << "Unable to find cellZone " << cellZoneName
-                << ".  Valid cellZones are:"
-                << mesh.cellZones().names()
-                << exit(FatalError);
-        }
-
-        cellIDs = mesh.cellZones()[zoneID];
-    }
-
-    if (cellSetName != "none")
-    {
-        Info<< "Applying solid body motion to cellSet " << cellSetName
-            << endl;
-
-        cellSet set(mesh, cellSetName);
-
-        cellIDs = set.toc();
-    }
-
-    label nCells = returnReduce(cellIDs.size(), sumOp<label>());
-    moveAllCells_ = nCells == 0;
-
-    if (moveAllCells_)
-    {
-        Info<< "Applying solid body motion to entire mesh" << endl;
-    }
-    else
-    {
-        // collect point IDs of points in cell zone
-
-        boolList movePts(mesh.nPoints(), false);
-
-        for (label celli : cellIDs)
-        {
-            const cell& c = mesh.cells()[celli];
-            for (label cellFacei : c)
-            {
-                const face& f = mesh.faces()[cellFacei];
-                for (label pointi : f)
-                {
-                    movePts[pointi] = true;
-                }
-            }
-        }
-
-        syncTools::syncPointList(mesh, movePts, orEqOp<bool>(), false);
-
-        DynamicList<label> ptIDs(mesh.nPoints());
-        forAll(movePts, i)
-        {
-            if (movePts[i])
-            {
-                ptIDs.append(i);
-            }
-        }
-
-        pointIDs_.transfer(ptIDs);
-    }
-}
+    SBMFPtr_(solidBodyMotionFunction::New(coeffDict(), mesh.time()))
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::pointField> Foam::solidBodyMotionSolver::curPoints() const
 {
-    if (moveAllCells_)
+    if (moveAllCells())
     {
         return transformPoints(SBMFPtr_().transformation(), points0_);
     }
@@ -160,10 +70,10 @@ Foam::tmp<Foam::pointField> Foam::solidBodyMotionSolver::curPoints() const
         auto ttransformedPts = tmp<pointField>::New(mesh().points());
         pointField& transformedPts = ttransformedPts.ref();
 
-        UIndirectList<point>(transformedPts, pointIDs_) = transformPoints
+        UIndirectList<point>(transformedPts, pointIDs()) = transformPoints
         (
             SBMFPtr_().transformation(),
-            pointField(points0_, pointIDs_)
+            pointField(points0_, pointIDs())
         );
 
         return ttransformedPts;

@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef solidBodyMotionSolver_H
-#define solidBodyMotionSolver_H
+#ifndef Foam_solidBodyMotionSolver_H
+#define Foam_solidBodyMotionSolver_H
 
 #include "points0MotionSolver.H"
 #include "solidBodyMotionFunction.H"
@@ -54,16 +54,10 @@ class solidBodyMotionSolver
 :
     public points0MotionSolver
 {
-    // Private data
+    // Private Data
 
         //- The motion control function
         autoPtr<solidBodyMotionFunction> SBMFPtr_;
-
-        //- Points to move when cell zone is supplied
-        labelList pointIDs_;
-
-        //- Flag to indicate whether all cells should move
-        bool moveAllCells_;
 
 
     // Private Member Functions
@@ -86,8 +80,8 @@ public:
         //- Construct from mesh and dictionary
         solidBodyMotionSolver
         (
-            const polyMesh&,
-            const IOdictionary&
+            const polyMesh& mesh,
+            const IOdictionary& dict
         );
 
 

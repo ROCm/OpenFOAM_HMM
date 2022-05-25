@@ -30,7 +30,6 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "motionSolver.H"
 #include "volFields.H"
-#include "zoneMotion.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
