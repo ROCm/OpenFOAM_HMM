@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -91,6 +91,142 @@ void Foam::unzip
         yy.boundaryFieldRef(), yz.boundaryFieldRef(),
         zz.boundaryFieldRef()
     );
+}
+
+
+template<class Cmpt, template<class> class PatchField, class GeoMesh>
+void Foam::zipRows
+(
+    GeometricField<SymmTensor<Cmpt>, PatchField, GeoMesh>& result,
+    const GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& x,
+    const GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& y,
+    const GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& z
+)
+{
+    Foam::zipRows
+    (
+        result.primitiveFieldRef(),
+        x.primitiveField(),
+        y.primitiveField(),
+        z.primitiveField()
+    );
+
+    Foam::zipRows
+    (
+        result.boundaryFieldRef(),
+        x.boundaryField(),
+        y.boundaryField(),
+        z.boundaryField()
+    );
+}
+
+
+template<class Cmpt, template<class> class PatchField, class GeoMesh>
+void Foam::zipCols
+(
+    GeometricField<SymmTensor<Cmpt>, PatchField, GeoMesh>& result,
+    const GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& x,
+    const GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& y,
+    const GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& z
+)
+{
+    Foam::zipCols
+    (
+        result.primitiveFieldRef(),
+        x.primitiveField(),
+        y.primitiveField(),
+        z.primitiveField()
+    );
+
+    Foam::zipCols
+    (
+        result.boundaryFieldRef(),
+        x.boundaryField(),
+        y.boundaryField(),
+        z.boundaryField()
+    );
+}
+
+
+template<class Cmpt, template<class> class PatchField, class GeoMesh>
+void Foam::unzipRows
+(
+    const GeometricField<SymmTensor<Cmpt>, PatchField, GeoMesh>& input,
+    GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& x,
+    GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& y,
+    GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& z
+)
+{
+    Foam::unzipRows
+    (
+        input.primitiveField(),
+        x.primitiveFieldRef(),
+        y.primitiveFieldRef(),
+        z.primitiveFieldRef()
+    );
+
+    Foam::unzipRows
+    (
+        input.boundaryField(),
+        x.boundaryFieldRef(),
+        y.boundaryFieldRef(),
+        z.boundaryFieldRef()
+    );
+}
+
+
+template<class Cmpt, template<class> class PatchField, class GeoMesh>
+void Foam::unzipCols
+(
+    const GeometricField<SymmTensor<Cmpt>, PatchField, GeoMesh>& input,
+    GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& x,
+    GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& y,
+    GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& z
+)
+{
+    Foam::unzipCols
+    (
+        input.primitiveField(),
+        x.primitiveFieldRef(),
+        y.primitiveFieldRef(),
+        z.primitiveFieldRef()
+    );
+
+    Foam::unzipCols
+    (
+        input.boundaryField(),
+        x.boundaryFieldRef(),
+        y.boundaryFieldRef(),
+        z.boundaryFieldRef()
+    );
+}
+
+
+template<class Cmpt, template<class> class PatchField, class GeoMesh>
+void Foam::unzipRow
+(
+    const GeometricField<SymmTensor<Cmpt>, PatchField, GeoMesh>& input,
+    const direction idx,
+    GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& result
+)
+{
+    Foam::unzipRow(input.primitiveField(), idx, result.primitiveFieldRef());
+
+    Foam::unzipRow(input.boundaryField(), idx, result.boundaryFieldRef());
+}
+
+
+template<class Cmpt, template<class> class PatchField, class GeoMesh>
+void Foam::unzipCol
+(
+    const GeometricField<SymmTensor<Cmpt>, PatchField, GeoMesh>& input,
+    const direction idx,
+    GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& result
+)
+{
+    Foam::unzipCol(input.primitiveField(), idx, result.primitiveFieldRef());
+
+    Foam::unzipCol(input.boundaryField(), idx, result.boundaryFieldRef());
 }
 
 

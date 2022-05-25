@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,16 +31,13 @@ Description
     A templated (3 x 3) symmetric tensor of objects of \<T\>, effectively
     containing 6 elements, derived from VectorSpace.
 
-See also
-    Test-SymmTensor.C
-
 SourceFiles
     SymmTensorI.H
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SymmTensor_H
-#define SymmTensor_H
+#ifndef Foam_SymmTensor_H
+#define Foam_SymmTensor_H
 
 #include "contiguous.H"
 #include "Vector.H"
@@ -107,6 +104,15 @@ public:
         //- Construct given SphericalTensor
         inline SymmTensor(const SphericalTensor<Cmpt>&);
 
+        //- Construct given the three row (or column) vectors
+        inline SymmTensor
+        (
+            const Vector<Cmpt>& x,
+            const Vector<Cmpt>& y,
+            const Vector<Cmpt>& z,
+            const bool transposed = false  /* ignored */
+        );
+
         //- Construct given the six components
         inline SymmTensor
         (
@@ -121,36 +127,103 @@ public:
 
     // Member Functions
 
-        // Component access
+    // Component Access
 
-            inline const Cmpt& xx() const;
-            inline const Cmpt& xy() const;
-            inline const Cmpt& xz() const;
-            inline const Cmpt& yx() const;
-            inline const Cmpt& yy() const;
-            inline const Cmpt& yz() const;
-            inline const Cmpt& zx() const;
-            inline const Cmpt& zy() const;
-            inline const Cmpt& zz() const;
+        inline const Cmpt& xx() const;
+        inline const Cmpt& xy() const;
+        inline const Cmpt& xz() const;
+        inline const Cmpt& yx() const;
+        inline const Cmpt& yy() const;
+        inline const Cmpt& yz() const;
+        inline const Cmpt& zx() const;
+        inline const Cmpt& zy() const;
+        inline const Cmpt& zz() const;
 
-            inline Cmpt& xx();
-            inline Cmpt& xy();
-            inline Cmpt& xz();
-            inline Cmpt& yx();
-            inline Cmpt& yy();
-            inline Cmpt& yz();
-            inline Cmpt& zx();
-            inline Cmpt& zy();
-            inline Cmpt& zz();
+        inline Cmpt& xx();
+        inline Cmpt& xy();
+        inline Cmpt& xz();
+        inline Cmpt& yx();
+        inline Cmpt& yy();
+        inline Cmpt& yz();
+        inline Cmpt& zx();
+        inline Cmpt& zy();
+        inline Cmpt& zz();
 
 
-        // Diagonal access and manipulation
+    // Column-vector access
 
-            //- Extract the diagonal as a vector
-            inline Vector<Cmpt> diag() const;
+        //- Extract vector for column 0
+        Vector<Cmpt> cx() const { return this->x(); }
 
-            //- Set values of the diagonal
-            inline void diag(const Vector<Cmpt>& v);
+        //- Extract vector for column 1
+        Vector<Cmpt> cy() const { return this->y(); }
+
+        //- Extract vector for column 2
+        Vector<Cmpt> cz() const { return this->z(); }
+
+        //- Extract vector for given column: compile-time check of index
+        template<direction Idx>
+        Vector<Cmpt> col() const { return this->row<Idx>(); }
+
+        //- Extract vector for given column (0,1,2): runtime check of index
+        Vector<Cmpt> col(const direction c) const { return this->row(c); }
+
+        //- Set values of given column (0,1,2): runtime check of index
+        void col(const direction c, const Vector<Cmpt>& v) { this->row(c, v); }
+
+        //- Set column values
+        void cols
+        (
+            const Vector<Cmpt>& x,
+            const Vector<Cmpt>& y,
+            const Vector<Cmpt>& z
+        )
+        {
+            this->rows(x, y, z);
+        }
+
+
+    // Row-vector access
+
+        //- Extract vector for row 0
+        inline Vector<Cmpt> x() const;
+
+        //- Extract vector for row 1
+        inline Vector<Cmpt> y() const;
+
+        //- Extract vector for row 2
+        inline Vector<Cmpt> z() const;
+
+        //- Extract vector for given row: compile-time check of index
+        template<direction Row>
+        inline Vector<Cmpt> row() const;
+
+        //- Extract vector for given row (0,1,2): runtime check of index
+        inline Vector<Cmpt> row(const direction r) const;
+
+        //- Set values of given row: compile-time check of index
+        template<direction Idx>
+        inline void row(const Vector<Cmpt>& v);
+
+        //- Set values of given row (0,1,2): runtime check of row
+        inline void row(const direction r, const Vector<Cmpt>& v);
+
+        //- Set row values
+        inline void rows
+        (
+            const Vector<Cmpt>& x,
+            const Vector<Cmpt>& y,
+            const Vector<Cmpt>& z
+        );
+
+
+    // Diagonal access and manipulation
+
+        //- Extract the diagonal as a vector
+        inline Vector<Cmpt> diag() const;
+
+        //- Set values of the diagonal
+        inline void diag(const Vector<Cmpt>& v);
 
 
     // Tensor Operations

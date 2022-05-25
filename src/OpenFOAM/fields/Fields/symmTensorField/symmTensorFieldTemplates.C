@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -126,6 +126,128 @@ Foam::zip
 
 
 template<class Cmpt>
+void Foam::zipRows
+(
+    Field<SymmTensor<Cmpt>>& result,
+    const UList<Vector<Cmpt>>& x,
+    const UList<Vector<Cmpt>>& y,
+    const UList<Vector<Cmpt>>& z
+)
+{
+    const label len = result.size();
+
+    #ifdef FULLDEBUG
+    if (len != x.size() || len != y.size() || len != z.size())
+    {
+        FatalErrorInFunction
+            << "Components sizes do not match: " << len << " ("
+            << x.size() << ' ' << y.size() << ' ' << z.size() << ')'
+            << nl
+            << abort(FatalError);
+    }
+    #endif
+
+    for (label i=0; i < len; ++i)
+    {
+        // Like symmTensor::rows() but removed redundancy
+
+        result[i].xx() = x[i].x();
+        result[i].xy() = x[i].y();
+        result[i].xz() = x[i].z();
+
+        result[i].yy() = y[i].y();
+        result[i].yz() = y[i].z();
+
+        result[i].zz() = z[i].z();
+    }
+}
+
+
+template<class Cmpt>
+void Foam::unzipRows
+(
+    const UList<SymmTensor<Cmpt>>& input,
+    Field<Vector<Cmpt>>& x,
+    Field<Vector<Cmpt>>& y,
+    Field<Vector<Cmpt>>& z
+)
+{
+    const label len = input.size();
+
+    #ifdef FULLDEBUG
+    if (len != x.size() || len != y.size() || len != z.size())
+    {
+        FatalErrorInFunction
+            << "Components sizes do not match: " << len << " ("
+            << x.size() << ' ' << y.size() << ' ' << z.size() << ')'
+            << nl
+            << abort(FatalError);
+    }
+    #endif
+
+    for (label i=0; i < len; ++i)
+    {
+        x[i] = input[i].x();
+        y[i] = input[i].y();
+        z[i] = input[i].z();
+    }
+}
+
+
+template<class Cmpt>
+void Foam::unzipRow
+(
+    const UList<SymmTensor<Cmpt>>& input,
+    const direction idx,
+    Field<Vector<Cmpt>>& result
+)
+{
+    const label len = input.size();
+
+    #ifdef FULLDEBUG
+    if (len != result.size())
+    {
+        FatalErrorInFunction
+            << "Components sizes do not match: " << len << " ("
+            << result.size() << ')'
+            << nl
+            << abort(FatalError);
+    }
+    #endif
+
+    switch (idx)
+    {
+        case vector::components::X :
+        {
+            for (label i=0; i < len; ++i)
+            {
+                result[i] = input[i].x();
+            }
+        }
+        break;
+
+        case vector::components::Y :
+        {
+            for (label i=0; i < len; ++i)
+            {
+                result[i] = input[i].y();
+            }
+        }
+        break;
+
+        case vector::components::Z :
+        {
+            for (label i=0; i < len; ++i)
+            {
+                result[i] = input[i].z();
+            }
+        }
+        break;
+    }
+}
+
+
+template<class Cmpt>
 void Foam::unzipDiag
 (
     const UList<SymmTensor<Cmpt>>& input,
@@ -149,6 +271,22 @@ void Foam::unzipDiag
     {
         result[i] = input[i].diag();
     }
+}
+
+
+template<class Cmpt>
+Foam::tmp<Foam::Field<Foam::Vector<Cmpt>>>
+Foam::unzipRow
+(
+    const Field<SymmTensor<Cmpt>>& input,
+    const direction idx
+)
+{
+    auto tresult = tmp<Field<Vector<Cmpt>>>::New(input.size());
+
+    Foam::unzipRow(input, idx, tresult.ref());
+
+    return tresult;
 }
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,9 +23,6 @@ License
 
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
-
-Description
-    Specialisation of FieldField\<T\> for symmTensor.
 
 \*---------------------------------------------------------------------------*/
 
@@ -82,6 +79,100 @@ void Foam::unzip
             /*yx*/ yy[i], yz[i],
             /*zx   zy */  zz[i]
         );
+    }
+}
+
+
+template<template<class> class Field, class Cmpt>
+void Foam::zipRows
+(
+    FieldField<Field, SymmTensor<Cmpt>>& result,
+    const FieldField<Field, Vector<Cmpt>>& x,
+    const FieldField<Field, Vector<Cmpt>>& y,
+    const FieldField<Field, Vector<Cmpt>>& z
+)
+{
+    forAll(result, i)
+    {
+        Foam::zipRows(result[i], x[i], y[i], z[i]);
+    }
+}
+
+
+template<template<class> class Field, class Cmpt>
+void Foam::zipCols
+(
+    FieldField<Field, SymmTensor<Cmpt>>& result,
+    const FieldField<Field, Vector<Cmpt>>& x,
+    const FieldField<Field, Vector<Cmpt>>& y,
+    const FieldField<Field, Vector<Cmpt>>& z
+)
+{
+    forAll(result, i)
+    {
+        Foam::zipCols(result[i], x[i], y[i], z[i]);
+    }
+}
+
+
+template<template<class> class Field, class Cmpt>
+void Foam::unzipRows
+(
+    const FieldField<Field, SymmTensor<Cmpt>>& input,
+    FieldField<Field, Vector<Cmpt>>& x,
+    FieldField<Field, Vector<Cmpt>>& y,
+    FieldField<Field, Vector<Cmpt>>& z
+)
+{
+    forAll(input, i)
+    {
+        Foam::unzipRows(input[i], x[i], y[i], z[i]);
+    }
+}
+
+
+template<template<class> class Field, class Cmpt>
+void Foam::unzipCols
+(
+    const FieldField<Field, SymmTensor<Cmpt>>& input,
+    FieldField<Field, Vector<Cmpt>>& x,
+    FieldField<Field, Vector<Cmpt>>& y,
+    FieldField<Field, Vector<Cmpt>>& z
+)
+{
+    forAll(input, i)
+    {
+        Foam::unzipCols(input[i], x[i], y[i], z[i]);
+    }
+}
+
+
+template<template<class> class Field, class Cmpt>
+void Foam::unzipRow
+(
+    const FieldField<Field, SymmTensor<Cmpt>>& input,
+    const direction idx,
+    FieldField<Field, Vector<Cmpt>>& result
+)
+{
+    forAll(input, i)
+    {
+        Foam::unzipRow(input[i], idx, result[i]);
+    }
+}
+
+
+template<template<class> class Field, class Cmpt>
+void Foam::unzipCol
+(
+    const FieldField<Field, SymmTensor<Cmpt>>& input,
+    const direction idx,
+    FieldField<Field, Vector<Cmpt>>& result
+)
+{
+    forAll(input, i)
+    {
+        Foam::unzipCol(input[i], idx, result[i]);
     }
 }
 

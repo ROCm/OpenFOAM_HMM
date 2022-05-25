@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef symmTensorField_H
-#define symmTensorField_H
+#ifndef Foam_symmTensorField_H
+#define Foam_symmTensorField_H
 
 #include "scalarField.H"
 #include "vectorField.H"
@@ -86,6 +86,76 @@ tmp<Field<SymmTensor<Cmpt>>> zip
 );
 
 
+//- Zip together symmTensor field from row components
+template<class Cmpt>
+void zipRows
+(
+    Field<SymmTensor<Cmpt>>& result,
+    const UList<Vector<Cmpt>>& x,
+    const UList<Vector<Cmpt>>& y,
+    const UList<Vector<Cmpt>>& z
+);
+
+//- Zip together symmTensor field from column components
+template<class Cmpt>
+void zipCols
+(
+    Field<SymmTensor<Cmpt>>& result,
+    const UList<Vector<Cmpt>>& x,
+    const UList<Vector<Cmpt>>& y,
+    const UList<Vector<Cmpt>>& z
+)
+{
+    zipRows(result, x, y, z);
+}
+
+
+//- Extract symmTensor field rows
+template<class Cmpt>
+void unzipRows
+(
+    const UList<SymmTensor<Cmpt>>& input,
+    Field<Vector<Cmpt>>& x,
+    Field<Vector<Cmpt>>& y,
+    Field<Vector<Cmpt>>& z
+);
+
+//- Extract symmTensor field columns
+template<class Cmpt>
+void unzipCols
+(
+    const UList<SymmTensor<Cmpt>>& input,
+    Field<Vector<Cmpt>>& x,
+    Field<Vector<Cmpt>>& y,
+    Field<Vector<Cmpt>>& z
+)
+{
+    unzipRows(input, x, y, z);
+}
+
+
+//- Extract a symmTensor field row (x,y,z) == (0,1,2)
+template<class Cmpt>
+void unzipRow
+(
+    const UList<SymmTensor<Cmpt>>& input,
+    const direction idx,  //!< vector::components
+    Field<Vector<Cmpt>>& result
+);
+
+//- Extract a symmTensor field column (x,y,z) == (0,1,2)
+template<class Cmpt>
+void unzipCol
+(
+    const UList<SymmTensor<Cmpt>>& input,
+    const direction idx,  //!< vector::components
+    Field<Vector<Cmpt>>& result
+)
+{
+    unzipRow(input, idx, result);
+}
+
+
 //- Extract a symmTensor field diagonal
 template<class Cmpt>
 void unzipDiag
@@ -94,7 +164,26 @@ void unzipDiag
     Field<Vector<Cmpt>>& result
 );
 
-//- Extract a  symmTensor field diagonal
+//- Extract a symmTensor field row (x,y,z) == (0,1,2)
+template<class Cmpt>
+tmp<Field<Vector<Cmpt>>> unzipRow
+(
+    const Field<SymmTensor<Cmpt>>& input,
+    const direction idx  //!< vector::components
+);
+
+//- Extract a symmTensor field column (x,y,z) == (0,1,2)
+template<class Cmpt>
+tmp<Field<Vector<Cmpt>>> unzipCol
+(
+    const Field<SymmTensor<Cmpt>>& input,
+    const direction idx  //!< vector::components
+)
+{
+    return unzipRow(input, idx);
+}
+
+//- Extract a symmTensor field diagonal
 template<class Cmpt>
 tmp<Field<Vector<Cmpt>>> unzipDiag
 (

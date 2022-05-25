@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -249,7 +249,7 @@ template<class Cmpt>
 void Foam::unzipRow
 (
     const UList<Tensor<Cmpt>>& input,
-    const vector::components cmpt,
+    const direction idx,
     Field<Vector<Cmpt>>& result
 )
 {
@@ -266,7 +266,7 @@ void Foam::unzipRow
     }
     #endif
 
-    switch (cmpt)
+    switch (idx)
     {
         case vector::components::X :
         {
@@ -302,7 +302,7 @@ template<class Cmpt>
 void Foam::unzipCol
 (
     const UList<Tensor<Cmpt>>& input,
-    const vector::components cmpt,
+    const direction idx,
     Field<Vector<Cmpt>>& result
 )
 {
@@ -319,7 +319,7 @@ void Foam::unzipCol
     }
     #endif
 
-    switch (cmpt)
+    switch (idx)
     {
         case vector::components::X :
         {
@@ -383,12 +383,12 @@ Foam::tmp<Foam::Field<Foam::Vector<Cmpt>>>
 Foam::unzipRow
 (
     const Field<Tensor<Cmpt>>& input,
-    const vector::components cmpt
+    const direction idx
 )
 {
     auto tresult = tmp<Field<Vector<Cmpt>>>::New(input.size());
 
-    Foam::unzipRow(input, cmpt, tresult.ref());
+    Foam::unzipRow(input, idx, tresult.ref());
 
     return tresult;
 }
@@ -399,12 +399,12 @@ Foam::tmp<Foam::Field<Foam::Vector<Cmpt>>>
 Foam::unzipCol
 (
     const Field<Tensor<Cmpt>>& input,
-    const vector::components cmpt
+    const direction idx
 )
 {
     auto tresult = tmp<Field<Vector<Cmpt>>>::New(input.size());
 
-    Foam::unzipCol(input, cmpt, tresult.ref());
+    Foam::unzipCol(input, idx, tresult.ref());
 
     return tresult;
 }

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -317,14 +317,14 @@ inline Foam::Vector<Cmpt> Foam::Tensor<Cmpt>::cz() const
 
 
 template<class Cmpt>
-template<Foam::direction Col>
+template<Foam::direction Idx>
 inline Foam::Vector<Cmpt> Foam::Tensor<Cmpt>::col() const
 {
-    if (Col == 0) return cx();
-    else if (Col == 1) return cy();
-    else if (Col == 2) return cz();
+    if (Idx == 0) return cx();
+    else if (Idx == 1) return cy();
+    else if (Idx == 2) return cz();
 
-    static_assert(Col < 3, "Invalid column access");
+    static_assert(Idx < 3, "Invalid column access");
     return Zero;
 }
 
@@ -337,24 +337,24 @@ inline Foam::Vector<Cmpt> Foam::Tensor<Cmpt>::col(const direction c) const
         case 0: return cx(); break;
         case 1: return cy(); break;
         case 2: return cz(); break;
+        default:
+            FatalErrorInFunction
+                << "Invalid column access " << c << abort(FatalError);
     }
-
-    FatalErrorInFunction
-        << "Invalid column access " << c << abort(FatalError);
 
     return Zero;
 }
 
 
 template<class Cmpt>
-template<Foam::direction Row>
+template<Foam::direction Idx>
 inline Foam::Vector<Cmpt> Foam::Tensor<Cmpt>::row() const
 {
-    if (Row == 0) return x();
-    else if (Row == 1) return y();
-    else if (Row == 2) return z();
+    if (Idx == 0) return x();
+    else if (Idx == 1) return y();
+    else if (Idx == 2) return z();
 
-    static_assert(Row < 3, "Invalid row access");
+    static_assert(Idx < 3, "Invalid row access");
     return Zero;
 }
 
@@ -367,60 +367,60 @@ inline Foam::Vector<Cmpt> Foam::Tensor<Cmpt>::row(const direction r) const
         case 0: return x(); break;
         case 1: return y(); break;
         case 2: return z(); break;
+        default:
+            FatalErrorInFunction
+                << "Invalid row access " << r << abort(FatalError);
     }
-
-    FatalErrorInFunction
-        << "Invalid row access " << r << abort(FatalError);
 
     return Zero;
 }
 
 
 template<class Cmpt>
-template<Foam::direction Col>
+template<Foam::direction Idx>
 inline void Foam::Tensor<Cmpt>::col(const Vector<Cmpt>& v)
 {
-    if (Col == 0)
+    if (Idx == 0)
     {
         this->v_[XX] = v.x();
         this->v_[YX] = v.y();
         this->v_[ZX] = v.z();
     }
-    else if (Col == 1)
+    else if (Idx == 1)
     {
         this->v_[XY] = v.x();
         this->v_[YY] = v.y();
         this->v_[ZY] = v.z();
     }
-    else if (Col == 2)
+    else if (Idx == 2)
     {
         this->v_[XZ] = v.x();
         this->v_[YZ] = v.y();
         this->v_[ZZ] = v.z();
     }
 
-    static_assert(Col < 3, "Invalid column access");
+    static_assert(Idx < 3, "Invalid column access");
 }
 
 
 template<class Cmpt>
-template<Foam::direction Row>
+template<Foam::direction Idx>
 inline void Foam::Tensor<Cmpt>::row(const Vector<Cmpt>& v)
 {
-    if (Row == 0)
+    if (Idx == 0)
     {
         this->v_[XX] = v.x(); this->v_[XY] = v.y(); this->v_[XZ] = v.z();
     }
-    else if (Row == 1)
+    else if (Idx == 1)
     {
         this->v_[YX] = v.x(); this->v_[YY] = v.y(); this->v_[YZ] = v.z();
     }
-    else if (Row == 2)
+    else if (Idx == 2)
     {
         this->v_[ZX] = v.x(); this->v_[ZY] = v.y(); this->v_[ZZ] = v.z();
     }
 
-    static_assert(Row < 3, "Invalid row access");
+    static_assert(Idx < 3, "Invalid row access");
 }
 
 
@@ -453,7 +453,11 @@ inline void Foam::Tensor<Cmpt>::rows
 
 
 template<class Cmpt>
-inline void Foam::Tensor<Cmpt>::col(const direction c, const Vector<Cmpt>& v)
+inline void Foam::Tensor<Cmpt>::col
+(
+    const direction c,
+    const Vector<Cmpt>& v
+)
 {
     switch (c)
     {
@@ -463,13 +467,16 @@ inline void Foam::Tensor<Cmpt>::col(const direction c, const Vector<Cmpt>& v)
         default:
             FatalErrorInFunction
                 << "Invalid column access " << c << abort(FatalError);
-            break;
     }
 }
 
 
 template<class Cmpt>
-inline void Foam::Tensor<Cmpt>::row(const direction r, const Vector<Cmpt>& v)
+inline void Foam::Tensor<Cmpt>::row
+(
+    const direction r,
+    const Vector<Cmpt>& v
+)
 {
     switch (r)
     {
@@ -479,7 +486,6 @@ inline void Foam::Tensor<Cmpt>::row(const direction r, const Vector<Cmpt>& v)
         default:
             FatalErrorInFunction
                 << "Invalid row access " << r << abort(FatalError);
-            break;
     }
 }
 

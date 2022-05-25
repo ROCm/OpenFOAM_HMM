@@ -98,7 +98,7 @@ void Foam::functionObjects::volRegion::calculateCache()
             if (regionIDs_.size() > 1)
             {
                 cellIds_ =
-                    volMesh_.cellZones().selected(regionIDs_).sortedToc();
+                    volMesh_.cellZones().selection(regionIDs_).sortedToc();
             }
             break;
         }
@@ -114,7 +114,7 @@ void Foam::functionObjects::volRegion::calculateCache()
         V_ += volMesh_.V()[celli];
     }
 
-    nCells_ = returnReduce(selected.size(), sumOp<label>();
+    nCells_ = returnReduce(selected.size(), sumOp<label>());
     reduce(V_, sumOp<scalar>());
 
     if (!nCells_)
@@ -167,7 +167,7 @@ Foam::functionObjects::volRegion::volRegion
             regionTypes::vrtAll
         )
     ),
-    regionName_(volMesh_.name());
+    regionName_(volMesh_.name())
 {
     read(dict);
 }

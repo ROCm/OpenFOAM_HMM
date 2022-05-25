@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,16 +30,13 @@ Class
 Description
     A templated (2 x 2) tensor of objects of \<T\> derived from VectorSpace.
 
-See also
-    Test-Tensor2D.C
-
 SourceFiles
     Tensor2DI.H
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Tensor2D_H
-#define Tensor2D_H
+#ifndef Foam_Tensor2D_H
+#define Foam_Tensor2D_H
 
 #include "Vector2D.H"
 #include "SphericalTensor2D.H"
@@ -130,86 +127,78 @@ public:
 
     // Member Functions
 
-        // Component access
+    // Component access
 
-            inline const Cmpt& xx() const;
-            inline const Cmpt& xy() const;
-            inline const Cmpt& yx() const;
-            inline const Cmpt& yy() const;
+        inline const Cmpt& xx() const;
+        inline const Cmpt& xy() const;
+        inline const Cmpt& yx() const;
+        inline const Cmpt& yy() const;
 
-            inline Cmpt& xx();
-            inline Cmpt& xy();
-            inline Cmpt& yx();
-            inline Cmpt& yy();
-
-
-        // Column-vector access.
-
-            //- Extract vector for column 0
-            inline Vector2D<Cmpt> cx() const;
-
-            //- Extract vector for column 1
-            inline Vector2D<Cmpt> cy() const;
-
-            //- Extract vector for given column.
-            //  Compile-time check of column index.
-            template<direction Col>
-            inline Vector2D<Cmpt> col() const;
-
-            //- Extract vector for given column (0,1).
-            //  Runtime check of column index.
-            inline Vector2D<Cmpt> col(const direction c) const;
-
-            //- Set values of given column
-            //  Compile-time check of column index.
-            template<direction Col>
-            inline void col(const Vector2D<Cmpt>& v);
-
-            //- Set values of given column (0,1)
-            //  Runtime check of column index.
-            inline void col(const direction c, const Vector2D<Cmpt>& v);
-
-            //- Set column values
-            inline void cols(const Vector2D<Cmpt>& x, const Vector2D<Cmpt>& y);
+        inline Cmpt& xx();
+        inline Cmpt& xy();
+        inline Cmpt& yx();
+        inline Cmpt& yy();
 
 
-        // Row-vector access.
+    // Column-vector access
 
-            //- Extract vector for row 0
-            inline Vector2D<Cmpt> x() const;
+        //- Extract vector for column 0
+        inline Vector2D<Cmpt> cx() const;
 
-            //- Extract vector for row 1
-            inline Vector2D<Cmpt> y() const;
+        //- Extract vector for column 1
+        inline Vector2D<Cmpt> cy() const;
 
-            //- Extract vector for given row.
-            //  Compile-time check of row index.
-            template<direction Row>
-            inline Vector2D<Cmpt> row() const;
+        //- Extract vector for given column: compile-time check of index
+        template<direction Idx>
+        inline Vector2D<Cmpt> col() const;
 
-            //- Extract vector for given row (0,1)
-            //  Runtime check of row index.
-            inline Vector2D<Cmpt> row(const direction r) const;
+        //- Extract vector for given column (0,1): runtime check of index
+        inline Vector2D<Cmpt> col(const direction c) const;
 
-            //- Set values of given row
-            //  Compile-time check of row index.
-            template<direction Row>
-            inline void row(const Vector2D<Cmpt>& v);
+        //- Set values of given column: compile-time check of index
+        template<direction Idx>
+        inline void col(const Vector2D<Cmpt>& v);
 
-            //- Set values of given row (0,1)
-            //  Runtime check of row index.
-            inline void row(const direction r, const Vector2D<Cmpt>& v);
+        //- Set values of given column (0,1): runtime check of index
+        inline void col(const direction c, const Vector2D<Cmpt>& v);
 
-            //- Set row values
-            inline void rows(const Vector2D<Cmpt>& x, const Vector2D<Cmpt>& y);
+        //- Set column values
+        inline void cols(const Vector2D<Cmpt>& x, const Vector2D<Cmpt>& y);
 
 
-        // Diagonal access and manipulation
+    // Row-vector access
 
-            //- Extract the diagonal as a vector
-            inline Vector2D<Cmpt> diag() const;
+        //- Extract vector for row 0
+        inline Vector2D<Cmpt> x() const;
 
-            //- Set values of the diagonal
-            inline void diag(const Vector2D<Cmpt>& v);
+        //- Extract vector for row 1
+        inline Vector2D<Cmpt> y() const;
+
+        //- Extract vector for given row: compile-time check of index
+        template<direction Idx>
+        inline Vector2D<Cmpt> row() const;
+
+        //- Extract vector for given row (0,1): runtime check of index
+        inline Vector2D<Cmpt> row(const direction r) const;
+
+        //- Set values of given row: compile-time check of index
+        template<direction Idx>
+        inline void row(const Vector2D<Cmpt>& v);
+
+        //- Set values of given row (0,1): compile-time check of index
+        inline void row(const direction r, const Vector2D<Cmpt>& v);
+
+        //- Set row values
+        inline void rows(const Vector2D<Cmpt>& x, const Vector2D<Cmpt>& y);
+
+
+    // Diagonal access and manipulation
+
+        //- Extract the diagonal as a vector
+        inline Vector2D<Cmpt> diag() const;
+
+        //- Set values of the diagonal
+        inline void diag(const Vector2D<Cmpt>& v);
 
 
     // Tensor Operations

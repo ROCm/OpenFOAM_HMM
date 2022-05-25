@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -212,13 +212,13 @@ template<class Cmpt, template<class> class PatchField, class GeoMesh>
 void Foam::unzipRow
 (
     const GeometricField<Tensor<Cmpt>, PatchField, GeoMesh>& input,
-    const vector::components cmpt,
+    const direction idx,
     GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& result
 )
 {
-    Foam::unzipRow(input.primitiveField(), cmpt, result.primitiveFieldRef());
+    Foam::unzipRow(input.primitiveField(), idx, result.primitiveFieldRef());
 
-    Foam::unzipRow(input.boundaryField(), cmpt, result.boundaryFieldRef());
+    Foam::unzipRow(input.boundaryField(), idx, result.boundaryFieldRef());
 }
 
 
@@ -226,13 +226,13 @@ template<class Cmpt, template<class> class PatchField, class GeoMesh>
 void Foam::unzipCol
 (
     const GeometricField<Tensor<Cmpt>, PatchField, GeoMesh>& input,
-    const vector::components cmpt,
+    const direction idx,
     GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& result
 )
 {
-    Foam::unzipCol(input.primitiveField(), cmpt, result.primitiveFieldRef());
+    Foam::unzipCol(input.primitiveField(), idx, result.primitiveFieldRef());
 
-    Foam::unzipCol(input.boundaryField(), cmpt, result.boundaryFieldRef());
+    Foam::unzipCol(input.boundaryField(), idx, result.boundaryFieldRef());
 }
 
 

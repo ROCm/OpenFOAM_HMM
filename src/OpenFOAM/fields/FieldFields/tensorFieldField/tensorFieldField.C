@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,9 +23,6 @@ License
 
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
-
-Description
-    Specialisation of FieldField\<T\> for tensor.
 
 \*---------------------------------------------------------------------------*/
 
@@ -160,13 +157,13 @@ template<template<class> class Field, class Cmpt>
 void Foam::unzipRow
 (
     const FieldField<Field, Tensor<Cmpt>>& input,
-    const vector::components cmpt,
+    const direction idx,
     FieldField<Field, Vector<Cmpt>>& result
 )
 {
     forAll(input, i)
     {
-        Foam::unzipRow(input[i], cmpt, result[i]);
+        Foam::unzipRow(input[i], idx, result[i]);
     }
 }
 
@@ -175,13 +172,13 @@ template<template<class> class Field, class Cmpt>
 void Foam::unzipCol
 (
     const FieldField<Field, Tensor<Cmpt>>& input,
-    const vector::components cmpt,
+    const direction idx,
     FieldField<Field, Vector<Cmpt>>& result
 )
 {
     forAll(input, i)
     {
-        Foam::unzipCol(input[i], cmpt, result[i]);
+        Foam::unzipCol(input[i], idx, result[i]);
     }
 }
 

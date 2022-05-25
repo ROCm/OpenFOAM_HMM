@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef GeometricTensorField_H
-#define GeometricTensorField_H
+#ifndef Foam_GeometricTensorField_H
+#define Foam_GeometricTensorField_H
 
 #include "GeometricSphericalTensorField.H"
 #include "GeometricSymmTensorField.H"
@@ -85,8 +85,7 @@ void unzip
 );
 
 
-
-//- Zip together tensor field field from row components
+//- Zip together tensor field from row components
 template<class Cmpt, template<class> class PatchField, class GeoMesh>
 void zipRows
 (
@@ -106,7 +105,7 @@ void zipCols
     const GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& z
 );
 
-//- Extract tensor field field rows
+//- Extract tensor field rows
 template<class Cmpt, template<class> class PatchField, class GeoMesh>
 void unzipRows
 (
@@ -116,7 +115,7 @@ void unzipRows
     GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& z
 );
 
-//- Extract tensor field field columns
+//- Extract tensor field columns
 template<class Cmpt, template<class> class PatchField, class GeoMesh>
 void unzipCols
 (
@@ -132,7 +131,7 @@ template<class Cmpt, template<class> class PatchField, class GeoMesh>
 void unzipRow
 (
     const GeometricField<Tensor<Cmpt>, PatchField, GeoMesh>& input,
-    const vector::components cmpt,
+    const direction idx,  //!< vector::components
     GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& result
 );
 
@@ -141,7 +140,7 @@ template<class Cmpt, template<class> class PatchField, class GeoMesh>
 void unzipCol
 (
     const GeometricField<Tensor<Cmpt>, PatchField, GeoMesh>& input,
-    const vector::components cmpt,
+    const direction idx,  //!< vector::components
     GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& result
 );
 

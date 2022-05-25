@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef GeometricSymmTensorField_H
-#define GeometricSymmTensorField_H
+#ifndef Foam_GeometricSymmTensorField_H
+#define Foam_GeometricSymmTensorField_H
 
 #include "GeometricField.H"
 #include "DimensionedSymmTensorField.H"
@@ -76,6 +76,67 @@ void unzip
     GeometricField<Cmpt, PatchField, GeoMesh>& yz,
     GeometricField<Cmpt, PatchField, GeoMesh>& zz
 );
+
+
+//- Zip together symmTensor field from row components
+template<class Cmpt, template<class> class PatchField, class GeoMesh>
+void zipRows
+(
+    GeometricField<SymmTensor<Cmpt>, PatchField, GeoMesh>& result,
+    const GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& x,
+    const GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& y,
+    const GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& z
+);
+
+//- Zip together symmTensor field from column components
+template<class Cmpt, template<class> class PatchField, class GeoMesh>
+void zipCols
+(
+    GeometricField<SymmTensor<Cmpt>, PatchField, GeoMesh>& result,
+    const GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& x,
+    const GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& y,
+    const GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& z
+);
+
+//- Extract symmTensor field rows
+template<class Cmpt, template<class> class PatchField, class GeoMesh>
+void unzipRows
+(
+    const GeometricField<SymmTensor<Cmpt>, PatchField, GeoMesh>& input,
+    GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& x,
+    GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& y,
+    GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& z
+);
+
+//- Extract symmTensor field columns
+template<class Cmpt, template<class> class PatchField, class GeoMesh>
+void unzipCols
+(
+    const GeometricField<SymmTensor<Cmpt>, PatchField, GeoMesh>& input,
+    GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& x,
+    GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& y,
+    GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& z
+);
+
+
+//- Extract a symmTensor field row (x,y,z) == (0,1,2)
+template<class Cmpt, template<class> class PatchField, class GeoMesh>
+void unzipRow
+(
+    const GeometricField<SymmTensor<Cmpt>, PatchField, GeoMesh>& input,
+    const direction idx,  //!< vector::components
+    GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& result
+);
+
+//- Extract a symmTensor field column (x,y,z) == (0,1,2)
+template<class Cmpt, template<class> class PatchField, class GeoMesh>
+void unzipCol
+(
+    const GeometricField<SymmTensor<Cmpt>, PatchField, GeoMesh>& input,
+    const direction idx,  //!< vector::components
+    GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& result
+);
+
 
 //- Extract a symmTensor field diagonal
 template<class Cmpt, template<class> class PatchField, class GeoMesh>

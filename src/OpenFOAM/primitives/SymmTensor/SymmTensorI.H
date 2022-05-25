@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,6 +54,19 @@ inline Foam::SymmTensor<Cmpt>::SymmTensor(const SphericalTensor<Cmpt>& st)
     this->v_[XX] = st.ii(); this->v_[XY] = Zero; this->v_[XZ] = Zero;
     this->v_[YY] = st.ii(); this->v_[YZ] = Zero;
     this->v_[ZZ] = st.ii();
+}
+
+
+template<class Cmpt>
+inline Foam::SymmTensor<Cmpt>::SymmTensor
+(
+    const Vector<Cmpt>& x,
+    const Vector<Cmpt>& y,
+    const Vector<Cmpt>& z,
+    const bool transposed  /* ignored */
+)
+{
+    this->rows(x, y, z);
 }
 
 
@@ -187,6 +200,111 @@ template<class Cmpt>
 inline Cmpt& Foam::SymmTensor<Cmpt>::zz()
 {
     return this->v_[ZZ];
+}
+
+
+template<class Cmpt>
+inline Foam::Vector<Cmpt> Foam::SymmTensor<Cmpt>::x() const
+{
+    return Vector<Cmpt>(this->v_[XX], this->v_[XY], this->v_[XZ]);
+}
+
+
+template<class Cmpt>
+inline Foam::Vector<Cmpt> Foam::SymmTensor<Cmpt>::y() const
+{
+    return Vector<Cmpt>(this->v_[XY], this->v_[YY], this->v_[YZ]);
+}
+
+
+template<class Cmpt>
+inline Foam::Vector<Cmpt> Foam::SymmTensor<Cmpt>::z() const
+{
+    return Vector<Cmpt>(this->v_[XZ], this->v_[YZ], this->v_[ZZ]);
+}
+
+
+template<class Cmpt>
+template<Foam::direction Idx>
+inline Foam::Vector<Cmpt> Foam::SymmTensor<Cmpt>::row() const
+{
+    if (Idx == 0) return x();
+    else if (Idx == 1) return y();
+    else if (Idx == 2) return z();
+
+    static_assert(Idx < 3, "Invalid row access");
+    return Zero;
+}
+
+
+template<class Cmpt>
+inline Foam::Vector<Cmpt> Foam::SymmTensor<Cmpt>::row(const direction r) const
+{
+    switch (r)
+    {
+        case 0: return x(); break;
+        case 1: return y(); break;
+        case 2: return z(); break;
+        default:
+            FatalErrorInFunction
+                << "Invalid row access " << r << abort(FatalError);
+    }
+
+    return Zero;
+}
+
+
+template<class Cmpt>
+template<Foam::direction Idx>
+inline void Foam::SymmTensor<Cmpt>::row(const Vector<Cmpt>& v)
+{
+    if (Idx == 0)
+    {
+        this->v_[XX] = v.x(); this->v_[XY] = v.y(); this->v_[XZ] = v.z();
+    }
+    else if (Idx == 1)
+    {
+        this->v_[XY] = v.x(); this->v_[YY] = v.y(); this->v_[YZ] = v.z();
+    }
+    else if (Idx == 2)
+    {
+        this->v_[XZ] = v.x(); this->v_[YZ] = v.y(); this->v_[ZZ] = v.z();
+    }
+
+    static_assert(Idx < 3, "Invalid row access");
+}
+
+
+template<class Cmpt>
+inline void Foam::SymmTensor<Cmpt>::rows
+(
+    const Vector<Cmpt>& x,
+    const Vector<Cmpt>& y,
+    const Vector<Cmpt>& z
+)
+{
+    this->v_[XX] = x.x(); this->v_[XY] = x.y(); this->v_[XZ] = x.z();
+    this->v_[YY] = y.y(); this->v_[YZ] = y.z();
+    this->v_[ZZ] = z.z();
+}
+
+
+template<class Cmpt>
+inline void Foam::SymmTensor<Cmpt>::row
+(
+    const direction r,
+    const Vector<Cmpt>& v
+)
+{
+    switch (r)
+    {
+        case 0: row<0>(v); break;
+        case 1: row<1>(v); break;
+        case 2: row<2>(v); break;
+        default:
+            FatalErrorInFunction
+                << "Invalid row access " << r << abort(FatalError);
+    }
 }
 
 

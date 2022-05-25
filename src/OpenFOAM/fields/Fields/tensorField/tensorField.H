@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef tensorField_H
-#define tensorField_H
+#ifndef Foam_tensorField_H
+#define Foam_tensorField_H
 
 #include "scalarField.H"
 #include "vectorField.H"
@@ -133,7 +133,7 @@ template<class Cmpt>
 void unzipRow
 (
     const UList<Tensor<Cmpt>>& input,
-    const vector::components cmpt,
+    const direction idx,  //!< vector::components
     Field<Vector<Cmpt>>& result
 );
 
@@ -142,7 +142,7 @@ template<class Cmpt>
 void unzipCol
 (
     const UList<Tensor<Cmpt>>& input,
-    const vector::components cmpt,
+    const direction idx,  //!< vector::components
     Field<Vector<Cmpt>>& result
 );
 
@@ -159,7 +159,7 @@ template<class Cmpt>
 tmp<Field<Vector<Cmpt>>> unzipRow
 (
     const Field<Tensor<Cmpt>>& input,
-    const vector::components cmpt
+    const direction idx  //!< vector::components
 );
 
 //- Extract a tensor field column (x,y,z) == (0,1,2)
@@ -167,7 +167,7 @@ template<class Cmpt>
 tmp<Field<Vector<Cmpt>>> unzipCol
 (
     const Field<Tensor<Cmpt>>& input,
-    const vector::components cmpt
+    const direction idx  //!< vector::components
 );
 
 //- Extract a tensor field diagonal

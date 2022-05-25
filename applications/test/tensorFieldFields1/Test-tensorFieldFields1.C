@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,7 @@ Application
 
 \*---------------------------------------------------------------------------*/
 
+#include "symmTensorField.H"
 #include "tensorField.H"
 #include "FieldFields.H"
 #include "Random.H"
@@ -189,11 +190,21 @@ int main(int argc, char *argv[])
         Info<<" =>";
         printFieldField(sf1);
 
+        Info<< nl;
+        for (direction cmpt = 0; cmpt < vector::nComponents; ++cmpt)
+        {
+            unzipRow(sf1, cmpt, slice[0]);
+
+            Info<< "row " << label(cmpt) << ": ";
+            printFieldField(slice[0]);
+        }
+
         unzipDiag(sf1, slice[0]);
 
-        Info<< nl
-            << "diag: ";
-        printFieldField(cmpts[0]);
+        Info<< "diag: ";
+        printFieldField(slice[0]);
+
+        Info<< nl;
 
         unzip
         (
@@ -215,8 +226,8 @@ int main(int argc, char *argv[])
             cmpts[1]
         );
 
-        Info<<"rezip (swapped diag): "
-            <<" => " << sf1 << nl;
+        Info<< "rezip (swapped diag): "
+            << " => " << sf1 << nl;
     }
 
     // sphericalTensorField

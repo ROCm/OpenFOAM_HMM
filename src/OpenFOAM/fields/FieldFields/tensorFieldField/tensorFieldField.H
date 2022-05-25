@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef tensorFieldField_H
-#define tensorFieldField_H
+#ifndef Foam_tensorFieldField_H
+#define Foam_tensorFieldField_H
 
 #include "sphericalTensorFieldField.H"
 #include "symmTensorFieldField.H"
@@ -132,7 +132,7 @@ template<template<class> class Field, class Cmpt>
 void unzipRow
 (
     const FieldField<Field, Tensor<Cmpt>>& input,
-    const vector::components cmpt,
+    const direction idx,  //!< vector::components
     FieldField<Field, Vector<Cmpt>>& result
 );
 
@@ -141,7 +141,7 @@ template<template<class> class Field, class Cmpt>
 void unzipCol
 (
     const FieldField<Field, Tensor<Cmpt>>& input,
-    const vector::components cmpt,
+    const direction idx,  //!< vector::components
     FieldField<Field, Vector<Cmpt>>& result
 );
 

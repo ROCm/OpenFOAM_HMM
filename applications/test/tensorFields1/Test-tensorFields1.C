@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -168,12 +168,24 @@ int main(int argc, char *argv[])
         Info<< sf1 << nl;
         Info<<" => " << tf1 << nl;
 
+        sf1 = symmTensor(1, 2, 3, 4, 5, 6);
+        Info<< nl << "reset: " << sf1 << nl;
+
         FixedList<scalarField, 6> cmpts(scalarField(sf1.size()));
 
-        Info<<" => " << sf1 << nl;
+        for (direction cmpt = 0; cmpt < vector::nComponents; ++cmpt)
+        {
+            Info<< "col/row " << label(cmpt) << ": "
+                << sf1[0].col(cmpt) << ' '
+                << sf1[0].row(cmpt) << nl;
+        }
 
         Info<< nl
-            << "diag: " << unzipDiag(sf1) << nl;
+            << "diag: " << unzipDiag(sf1) << nl
+            << "row 0: " << unzipRow(sf1, vector::X) << nl
+            << "row 1: " << unzipCol(sf1, vector::Y) << nl  // same as row
+            << "row 2: " << unzipRow(sf1, vector::Z) << nl;
+
 
         unzip
         (
@@ -183,7 +195,7 @@ int main(int argc, char *argv[])
             cmpts[5]
         );
 
-        Info<<"unzip:" << nl
+        Info<< "unzip:" << nl
             << "xx : " << cmpts[0] << nl
             << "xy : " << cmpts[1] << nl
             << "xz : " << cmpts[2] << nl
@@ -192,7 +204,7 @@ int main(int argc, char *argv[])
             << "zz : " << cmpts[5] << nl
             << nl;
 
-        // Transposed
+        // Transposed diagonal
         zip
         (
             sf1,
@@ -201,8 +213,8 @@ int main(int argc, char *argv[])
             cmpts[1]
         );
 
-        Info<<"rezip (swapped diag): "
-            <<" => " << sf1 << nl;
+        Info<< "rezip (swapped diag): "
+            << " => " << sf1 << nl;
     }
 
 

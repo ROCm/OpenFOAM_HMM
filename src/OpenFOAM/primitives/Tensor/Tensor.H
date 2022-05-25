@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,9 +30,6 @@ Class
 Description
     A templated (3 x 3) tensor of objects of \<T\> derived from MatrixSpace.
 
-See also
-    Test-Tensor.C
-
 SourceFiles
     TensorI.H
 
@@ -42,8 +39,8 @@ See also
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Tensor_H
-#define Tensor_H
+#ifndef Foam_Tensor_H
+#define Foam_Tensor_H
 
 #include "MatrixSpace.H"
 #include "Vector.H"
@@ -56,7 +53,6 @@ namespace Foam
 
 // Forward Declarations
 template<class Cmpt> class SymmTensor;
-
 
 /*---------------------------------------------------------------------------*\
                            Class Tensor Declaration
@@ -165,112 +161,104 @@ public:
 
     // Member Functions
 
-        // Component access
+    // Component access
 
-            inline const Cmpt& xx() const;
-            inline const Cmpt& xy() const;
-            inline const Cmpt& xz() const;
-            inline const Cmpt& yx() const;
-            inline const Cmpt& yy() const;
-            inline const Cmpt& yz() const;
-            inline const Cmpt& zx() const;
-            inline const Cmpt& zy() const;
-            inline const Cmpt& zz() const;
+        inline const Cmpt& xx() const;
+        inline const Cmpt& xy() const;
+        inline const Cmpt& xz() const;
+        inline const Cmpt& yx() const;
+        inline const Cmpt& yy() const;
+        inline const Cmpt& yz() const;
+        inline const Cmpt& zx() const;
+        inline const Cmpt& zy() const;
+        inline const Cmpt& zz() const;
 
-            inline Cmpt& xx();
-            inline Cmpt& xy();
-            inline Cmpt& xz();
-            inline Cmpt& yx();
-            inline Cmpt& yy();
-            inline Cmpt& yz();
-            inline Cmpt& zx();
-            inline Cmpt& zy();
-            inline Cmpt& zz();
-
-
-        // Column-vector access.
-
-            //- Extract vector for column 0
-            inline Vector<Cmpt> cx() const;
-
-            //- Extract vector for column 1
-            inline Vector<Cmpt> cy() const;
-
-            //- Extract vector for column 2
-            inline Vector<Cmpt> cz() const;
-
-            //- Extract vector for given column.
-            //  Compile-time check of column index.
-            template<direction Col>
-            inline Vector<Cmpt> col() const;
-
-            //- Extract vector for given column (0,1,2).
-            //  Runtime check of column index.
-            inline Vector<Cmpt> col(const direction c) const;
-
-            //- Set values of given column
-            //  Compile-time check of column index.
-            template<direction Col>
-            inline void col(const Vector<Cmpt>& v);
-
-            //- Set values of given column (0,1,2)
-            //  Runtime check of column index.
-            inline void col(const direction c, const Vector<Cmpt>& v);
-
-            //- Set column values
-            inline void cols
-            (
-                const Vector<Cmpt>& x,
-                const Vector<Cmpt>& y,
-                const Vector<Cmpt>& z
-            );
+        inline Cmpt& xx();
+        inline Cmpt& xy();
+        inline Cmpt& xz();
+        inline Cmpt& yx();
+        inline Cmpt& yy();
+        inline Cmpt& yz();
+        inline Cmpt& zx();
+        inline Cmpt& zy();
+        inline Cmpt& zz();
 
 
-        // Row-vector access.
+    // Column-vector access
 
-            //- Extract vector for row 0
-            inline Vector<Cmpt> x() const;
+        //- Extract vector for column 0
+        inline Vector<Cmpt> cx() const;
 
-            //- Extract vector for row 1
-            inline Vector<Cmpt> y() const;
+        //- Extract vector for column 1
+        inline Vector<Cmpt> cy() const;
 
-            //- Extract vector for row 2
-            inline Vector<Cmpt> z() const;
+        //- Extract vector for column 2
+        inline Vector<Cmpt> cz() const;
 
-            //- Extract vector for given row.
-            //  Compile-time check of row index.
-            template<direction Row>
-            inline Vector<Cmpt> row() const;
+        //- Extract vector for given column: compile-time check of index
+        template<direction Idx>
+        inline Vector<Cmpt> col() const;
 
-            //- Extract vector for given row (0,1,2)
-            //  Runtime check of row index.
-            inline Vector<Cmpt> row(const direction r) const;
+        //- Extract vector for given column (0,1,2): runtime check of index
+        inline Vector<Cmpt> col(const direction c) const;
 
-            //- Set values of given row
-            //  Compile-time check of row index.
-            template<direction Row>
-            inline void row(const Vector<Cmpt>& v);
+        //- Set values of given column: compile-time check of index
+        template<direction Idx>
+        inline void col(const Vector<Cmpt>& v);
 
-            //- Set values of given row (0,1,2)
-            //  Runtime check of row index.
-            inline void row(const direction r, const Vector<Cmpt>& v);
+        //- Set values of given column (0,1,2): runtime check of index
+        inline void col(const direction c, const Vector<Cmpt>& v);
 
-            //- Set row values
-            inline void rows
-            (
-                const Vector<Cmpt>& x,
-                const Vector<Cmpt>& y,
-                const Vector<Cmpt>& z
-            );
+        //- Set column values
+        inline void cols
+        (
+            const Vector<Cmpt>& x,
+            const Vector<Cmpt>& y,
+            const Vector<Cmpt>& z
+        );
 
 
-        // Diagonal access and manipulation
+    // Row-vector access
 
-            //- Extract the diagonal as a vector
-            inline Vector<Cmpt> diag() const;
+        //- Extract vector for row 0
+        inline Vector<Cmpt> x() const;
 
-            //- Set values of the diagonal
-            inline void diag(const Vector<Cmpt>& v);
+        //- Extract vector for row 1
+        inline Vector<Cmpt> y() const;
+
+        //- Extract vector for row 2
+        inline Vector<Cmpt> z() const;
+
+        //- Extract vector for given row: compile-time check of index
+        template<direction Idx>
+        inline Vector<Cmpt> row() const;
+
+        //- Extract vector for given row (0,1,2): runtime check of index
+        inline Vector<Cmpt> row(const direction r) const;
+
+        //- Set values of given row: compile-time check of index
+        template<direction Idx>
+        inline void row(const Vector<Cmpt>& v);
+
+        //- Set values of given row (0,1,2): runtime check of row
+        inline void row(const direction r, const Vector<Cmpt>& v);
+
+        //- Set row values
+        inline void rows
+        (
+            const Vector<Cmpt>& x,
+            const Vector<Cmpt>& y,
+            const Vector<Cmpt>& z
+        );
+
+
+    // Diagonal access and manipulation
+
+        //- Extract the diagonal as a vector
+        inline Vector<Cmpt> diag() const;
+
+        //- Set values of the diagonal
+        inline void diag(const Vector<Cmpt>& v);
 
 
     // Tensor Operations
