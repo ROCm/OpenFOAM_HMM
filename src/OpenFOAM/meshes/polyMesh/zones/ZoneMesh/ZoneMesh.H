@@ -159,6 +159,9 @@ public:
         //- A list of the zone names
         wordList names() const;
 
+        //- A list of the zone group names (if any)
+        wordList groupNames() const;
+
         //- A list of zone names satisfying the input matcher
         wordList names(const wordRe& matcher) const;
 

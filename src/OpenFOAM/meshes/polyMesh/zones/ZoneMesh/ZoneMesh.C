@@ -308,6 +308,13 @@ Foam::wordList Foam::ZoneMesh<ZoneType, MeshType>::names() const
 
 
 template<class ZoneType, class MeshType>
+Foam::wordList Foam::ZoneMesh<ZoneType, MeshType>::groupNames() const
+{
+    return this->groupZoneIDs().sortedToc();
+}
+
+
+template<class ZoneType, class MeshType>
 Foam::wordList Foam::ZoneMesh<ZoneType, MeshType>::names
 (
     const wordRe& matcher

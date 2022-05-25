@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -92,7 +92,9 @@ Foam::zone::zone
     const label index
 )
 :
-    zone(name, dict.get<labelList>(labelsName), index)
+    zoneIdentifier(name, dict, index),
+    labelList(dict.get<labelList>(labelsName)),
+    lookupMapPtr_(nullptr)
 {}
 
 
