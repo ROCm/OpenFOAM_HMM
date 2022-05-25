@@ -18,7 +18,8 @@ solvers
 {
     Cs
     {
-        solver          PBiCG;
+        //solver          PBiCG;
+        solver          PBiCGStab;
         preconditioner  DILU;
         minIter         0;
         maxIter         2000;
