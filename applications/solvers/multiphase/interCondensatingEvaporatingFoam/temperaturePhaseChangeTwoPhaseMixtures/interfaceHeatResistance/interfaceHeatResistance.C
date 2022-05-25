@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
     Copyright (C) 2020 Henning Scheufler
 -------------------------------------------------------------------------------
 License
@@ -265,23 +265,13 @@ correct()
     const dimensionedScalar& TSat = thermo.TSat();
     const dimensionedScalar T0(dimTemperature, Zero);
 
-    dimensionedScalar L = mixture_.Hf2() - mixture_.Hf1();
+    const dimensionedScalar L(mag(mixture_.Hf2() - mixture_.Hf1()));
 
     // interface heat resistance
     mDotc_ = interfaceArea_*R_*max(TSat - T, T0)/L;
     mDote_ = interfaceArea_*R_*max(T - TSat, T0)/L;
 
-    // Limiting max condensation
-    forAll(mDotc_, celli)
-    {
-        scalar rhobyDt = mixture_.rho1().value()/mesh_.time().deltaTValue();
-        scalar maxEvap = mixture_.alpha1()[celli]*rhobyDt; // positive
-        scalar maxCond = -mixture_.alpha2()[celli]*rhobyDt; // negative
-        mDotc_[celli] = min(max(mDotc_[celli], maxCond), maxEvap);
-    }
-
     // Calculate the spread sources
-
     dimensionedScalar D
     (
         "D",
