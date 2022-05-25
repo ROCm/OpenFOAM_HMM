@@ -60,8 +60,8 @@ subset
         {
             action  subtract;
             source  cylinder;
-            p1      (125 100 0);
-            p2      (125 100 100);
+            point1  (125 100 0);
+            point2  (125 100 100);
             radius  20;
         }
         outlet

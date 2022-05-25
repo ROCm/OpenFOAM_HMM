@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2112                                 |
-|   \\  /    A nd           | Web:      www.openfoam.com                      |
+|  \\    /   O peration     | Version:  v2206                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -23,35 +23,31 @@ actions
         type    cellSet;
         action  new;
         source  zoneToCell;
-	    zones	(leftSolid);
-
+        zones  (leftSolid);
     }
-     {
+    {
         name    f1;
         type    faceSet;
         action  new;
         source  cellToFace;
         option  all;
-	    sets	(c1);
-
+        sets    (c1);
     }
 
-     {
+    {
         name    c2;
         type    cellSet;
         action  new;
         source  zoneToCell;
-	    zones	(rightFluid);
-
+        zones   (rightFluid);
     }
-     {
+    {
         name    f2;
         type    faceSet;
         action  new;
         source  cellToFace;
         option  all;
-	    sets	(c2);
-
+        sets    (c2);
     }
 );
 

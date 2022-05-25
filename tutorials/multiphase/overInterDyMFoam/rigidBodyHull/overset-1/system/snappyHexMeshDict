@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2112                                 |
+|  \\    /   O peration     | Version:  v2206                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -39,14 +39,14 @@ geometry
 
     BoxRefinement_1
     {
-        type    searchableBox ;
+        type    box;
         min     ( -3.60318 -0.20025 -0.039084 );
         max     ( -3.20311 0.20025 0.395883 );
     }
 
     BoxRefinement_3_hub
     {
-        type    searchableBox ;
+        type    box;
         min     ( -3.54 -0.12  0.010);
         max     ( -3.34  0.12 0.26);
     }

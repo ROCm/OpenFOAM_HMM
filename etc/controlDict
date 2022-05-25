@@ -855,8 +855,6 @@ DebugSwitches
     scalarField         0;
     scaleSimilarity     0;
     scatterModel        0;
-    searchableBox       0;
-    searchableSurface   0;
     sequential          0;
     setUpdater          0;
     sets                0;

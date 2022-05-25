@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2112                                 |
+|  \\    /   O peration     | Version:  v2206                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -23,8 +23,8 @@ actions
         action  new;
         source  cylinderToCell;
 
-        p1      (0.025 1 0.025);
-        p2      (0.025 0.049 0.025);
+        point1  (0.025 1 0.025);
+        point2  (0.025 0.049 0.025);
         radius  0.0015;
     }
 

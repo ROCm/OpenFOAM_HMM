@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2112                                 |
+|  \\    /   O peration     | Version:  v2206                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -46,27 +46,15 @@ cellSet_doc
     }
 
 
-    //- Cells with centre within cylinder or cylinder annulus
+    //- Cells with centres within cylinder or cylinder annulus
     {
         source  cylinderToCell;
-        p1      (0.2 0.2 -10); // start point on cylinder axis
-        p2      (0.2 0.2 0);   // end point on cylinder axis
+        point1  (0.2 0.2 -10); // beg point on cylinder axis
+        point2  (0.2 0.2 0);   // end point on cylinder axis
         radius  5.0;
         // optional
         innerRadius 1.0;
     }
-
-
-    //- Cells with centre within cylinder annulus
-    //  Can also simply use cylinderToCell
-    {
-        source  cylinderAnnulusToCell;
-        p1      (0.2 0.2 -10); // start point on cylinder axis
-        p2      (0.2 0.2 0);   // end point on cylinder axis
-        outerRadius 5.0;
-        innerRadius 1.0;
-    }
-
 
     //- Select based on faceSet
     {
@@ -87,24 +75,19 @@ cellSet_doc
     {
         source  faceZoneToCell;
         zones   (".*Zone");     // Names of faceZones, word or regex
-  // OR zone    ".*Zone";       // Name of faceZone, word or regex
-        option  master;         // master/slave
+        // or
+        zone    ".*Zone";       // Name of faceZone, word or regex
 
-        //- Compat
-        // sourceInfo
-        // {
-        //     name    ".*Zone";
-        //     option  master;
-        // }
+        option  master;         // master/slave
     }
 
 
     //- values of field within certain range
     {
         source  fieldToCell;
-        field       U;      // Note: uses mag(U) since volVectorField
-        min         0.1;
-        max         0.5;
+        field   U;      // Note: uses mag(U) since volVectorField
+        min     0.1;
+        max     0.5;
     }
 
 
@@ -170,13 +153,11 @@ cellSet_doc
     }
 
 
-    //- Select cells with centres within a searchableSurface
+    //- Select cells with centres within a (closed!) searchableSurface
     {
-        source  searchableSurfaceToCell;
-        surfaceType  triSurfaceMesh;  // The surface type
-        surfaceName  blob.obj;        // Name for the IOobject
-        // or
-        surface      triSurfaceMesh;  // Same as surface type
+        source       searchableSurfaceToCell;
+        surfaceType  triSurfaceMesh;  // Type of surface
+        surfaceName  blob.obj;        // Name for surface object
     }
 
 
@@ -192,6 +173,7 @@ cellSet_doc
         source  sphereToCell;
         origin  (0.2 0.2 -10);
         radius  5.0;
+
         // optional
         innerRadius 1.0;
     }
@@ -233,13 +215,8 @@ cellSet_doc
     {
         source  zoneToCell;
         zones   (".*Zone");     // Names of cellZones, word or regex
-  // OR zone    ".*Zone";       // Name of cellZone, word or regex
-
-        //- Compat
-        // sourceInfo
-        // {
-        //     name    ".*Zone";
-        // }
+        // or
+        zone    ".*Zone";       // Name of cellZone, word or regex
     }
 
     //- Cells attached to the outside of the input cellSet
@@ -278,29 +255,18 @@ faceSet_doc
         // or
         set     c0;             // Name of cellSet
 
-        option all;             // All faces of cells
-        //option both;          // Only faces with owner+neighbour in cellSet
+        option  all;            // All faces of cells
+        //option  both;         // Only faces with owner+neighbour in cellSet
     }
 
 
-    //- Faces with centre within cylinder or cylinder annulus
+    //- Faces with centres within cylinder or cylinder annulus
     {
         source  cylinderToFace;
-        p1      (0.2 0.2 -10); // start point on cylinder axis
-        p2      (0.2 0.2 0);   // end point on cylinder axis
+        point1  (0.2 0.2 -10); // beg point on cylinder axis
+        point2  (0.2 0.2 0);   // end point on cylinder axis
         radius  5.0;
         // optional
-        innerRadius 1.0;
-    }
-
-
-    //- Faces with centre within cylinder annulus
-    //  Can also simply use cylinderToCell
-    {
-        source  cylinderAnnulusToFace;
-        p1      (0.2 0.2 -10); // start point on cylinder axis
-        p2      (0.2 0.2 0);   // end point on cylinder axis
-        outerRadius 5.0;
         innerRadius 1.0;
     }
 
@@ -333,12 +299,6 @@ faceSet_doc
         patches ("patch.*");
         // or
         patch   somePatch;
-
-        // Compat
-        sourceInfo
-        {
-            name ".*Wall";      // Name of patch or patch group,
-        }
     }
 
 
@@ -367,11 +327,9 @@ faceSet_doc
     //  (if surface is not closed a warning will be given and surface will
     //   be ignored)
     {
-        source  searchableSurfaceToFace;
-        surfaceType  triSurfaceMesh;  // The surface type
-        surfaceName  blob.obj;        // Name for the IOobject
-        // or
-        surface      triSurfaceMesh;  // Same as surface type
+        source       searchableSurfaceToFace;
+        surfaceType  triSurfaceMesh;  // Type of surface
+        surfaceName  blob.obj;        // Name for surface object
     }
 
 
@@ -412,13 +370,8 @@ faceSet_doc
         source  zoneToFace;
 
         zones   (".*Zone");     // Names of faceZones, word or regex
-  // OR zone    ".*Zone";       // Name of faceZone, word or regex
-
-        // Compat
-        // sourceInfo
-        // {
-        //     name ".*Zone1";
-        // }
+        // or
+        zone    ".*Zone";       // Name of faceZone, word or regex
     }
 }
 
@@ -452,8 +405,8 @@ pointSet_doc
     //- Points within cylinder or cylinder annulus
     {
         source  cylinderToPoint;
-        p1      (0.2 0.2 -10); // start point on cylinder axis
-        p2      (0.2 0.2 0);   // end point on cylinder axis
+        point1  (0.2 0.2 -10); // beg point on cylinder axis
+        point2  (0.2 0.2 0);   // end point on cylinder axis
         radius  5.0;
         // optional
         innerRadius 1.0;
@@ -494,13 +447,11 @@ pointSet_doc
     }
 
 
-    //- Points within a searchableSurface
+    //- Cell centres within a searchableSurface
     {
-        source  searchableSurfaceToCell;
-        surfaceType  triSurfaceMesh;  // The surface type
-        surfaceName  blob.obj;        // Name for the IOobject
-        // or
-        surface      triSurfaceMesh;  // Same as surface type
+        source       searchableSurfaceToCell;
+        surfaceType  triSurfaceMesh;  // Type of surface
+        surfaceName  blob.obj;        // Name for surface object
     }
 
 
@@ -516,8 +467,8 @@ pointSet_doc
 
     //- Select based on surface
     {
-        source  surfaceToPoint;
-        file            "geometry.stl";
+        source  searchableSurfaceToPoint;
+        file    "geometry.stl";
         nearDistance    0.1;    // points near to surface
         includeInside   false;  // points on inside of surface
                                 // (requires closed surface with consistent
@@ -530,13 +481,8 @@ pointSet_doc
     {
         source  zoneToPoint;
         zones   (".*Zone");     // Names of pointZones, word or regex
-  // OR zone    ".*Zone";       // Name of pointZone, word or regex
-
-        //- Compat
-        // sourceInfo
-        // {
-        //     name    ".*Zone";
-        // }
+        // or
+        zone    ".*Zone";       // Name of pointZone, word or regex
     }
 }
 
@@ -576,12 +522,9 @@ faceZoneSet_doc
 
     //- Select based on surface. Orientation from normals on surface
     {
-        source  searchableSurfaceToFaceZone;
-        surfaceType searchableSphere;
-        surfaceName blob.obj;        // Optional name if surface triSurfaceMesh
-
-        // or
-        surface searchableSphere;    // Same as 'surfaceType'
+        source       searchableSurfaceToFaceZone;
+        surfaceType  sphere;          // Type of surface
+        surfaceName  blob.obj;        // Name for surface object
 
         // Parameters for surface
         origin  (0.05 0.05 0.005);

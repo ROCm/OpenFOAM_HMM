@@ -27,7 +27,7 @@ baffles
     {
         //- Select faces and orientation through a searchableSurface
         type        searchableSurface;
-        surface     searchablePlate;
+        surface     plate;
         origin      (0.061 -0.3 -0.3);
         span        (0.0 0.6 0.6);
 

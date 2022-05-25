@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2112                                 |
+|  \\    /   O peration     | Version:  v2206                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -22,7 +22,7 @@ geometry
 {
     BoxRefinement_1
     {
-        type    searchableBox ;
+        type    box;
         min     (-3.8 -0.8 -0.2 );
         max     (3.8 0.8 0.75 );
     }
@@ -36,7 +36,7 @@ castellatedMeshControls
     nCellsBetweenLevels 4;
     maxLoadUnbalance 0.1;
     allowFreeStandingZoneFaces true;
-    resolveFeatureAngle	 30;
+    resolveFeatureAngle  30;
     features
     (
     );

@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2112                                 |
+|  \\    /   O peration     | Version:  v2206                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -92,25 +92,14 @@ actions
     }
 
     {
-        name          cylinderAnnulus1;
-        type          cellSet;
-        action        new;
-        source        cylinderAnnulusToCell;
-        p1            (0.05 0.05 0);
-        p2            (0.05 0.05 0.01);
-        outerRadius   0.06;
-        innerRadius   0.01;
-    }
-
-    {
-        name          cylinder1;
-        type          cellSet;
-        action        new;
-        source        cylinderToCell;
-        p1            (0.05 0.05 0);
-        p2            (0.05 0.05 0.01);
-        radius        0.06;
-        innerRadius   0.01;
+        name        cylinder1;
+        type        cellSet;
+        action      new;
+        source      cylinderToCell;
+        point1      (0.05 0.05 0);
+        point2      (0.05 0.05 0.01);
+        radius      0.06;
+        innerRadius 0.01;
     }
 
     {
@@ -315,25 +304,14 @@ actions
     }
 
     {
-        name          faceCylinderAnnulus1;
-        type          faceSet;
-        action        new;
-        source        cylinderAnnulusToFace;
-        p1            (0.05 0.05 0);
-        p2            (0.05 0.05 0.01);
-        outerRadius   0.06;
-        innerRadius   0.01;
-    }
-
-    {
-        name          faceCylinder1;
-        type          faceSet;
-        action        new;
-        source        cylinderToFace;
-        p1            (0.05 0.05 0);
-        p2            (0.05 0.05 0.01);
-        radius        0.06;
-        innerRadius   0.01;
+        name        faceCylinder1;
+        type        faceSet;
+        action      new;
+        source      cylinderToFace;
+        point1      (0.05 0.05 0);
+        point2      (0.05 0.05 0.01);
+        radius      0.06;
+        innerRadius 0.01;
     }
 
     {
@@ -343,7 +321,6 @@ actions
         source  faceToFace;
         sets
         (
-            faceCylinderAnnulus1
             faceCylinder1
         );
     }
@@ -484,8 +461,8 @@ actions
         type          pointSet;
         action        new;
         source        cylinderToPoint;
-        p1            (0.05 0.05 0);
-        p2            (0.05 0.05 0.01);
+        point1        (0.05 0.05 0);
+        point2        (0.05 0.05 0.01);
         radius        0.06;
         innerRadius   0.01;
     }

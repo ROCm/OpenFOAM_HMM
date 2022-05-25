@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2112                                 |
-|   \\  /    A nd           | Web:      www.openfoam.com                      |
+|  \\    /   O peration     | Version:  v2206                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -23,7 +23,7 @@ actions
         type    cellSet;
         action  new;
         source  zoneToCell;
-	    zones	(bottomAir);
+        zones   (bottomAir);
     }
     {
         name    f1;
@@ -31,7 +31,7 @@ actions
         action  new;
         source  cellToFace;
         option  all;
-	    sets	(c1);
+        sets    (c1);
     }
 
     {
@@ -39,7 +39,7 @@ actions
         type    cellSet;
         action  new;
         source  zoneToCell;
-	    zones	(heater);
+        zones   (heater);
     }
     {
         name    f2;
@@ -47,7 +47,7 @@ actions
         action  new;
         source  cellToFace;
         option  all;
-	    sets	(c2);
+        sets    (c2);
     }
 
     {
@@ -55,7 +55,7 @@ actions
         type    cellSet;
         action  new;
         source  zoneToCell;
-	    zones	(leftSolid);
+        zones   (leftSolid);
     }
     {
         name    f3;
@@ -63,7 +63,7 @@ actions
         action  new;
         source  cellToFace;
         option  all;
-	    sets	(c3);
+        sets    (c3);
     }
 
     {
@@ -71,8 +71,7 @@ actions
         type    cellSet;
         action  new;
         source  zoneToCell;
-	    zones	(rightSolid);
-
+        zones   (rightSolid);
     }
     {
         name    f4;
@@ -80,7 +79,7 @@ actions
         action  new;
         source  cellToFace;
         option  all;
-	    sets	(c4);
+        sets    (c4);
     }
 
     {
@@ -88,7 +87,7 @@ actions
         type    cellSet;
         action  new;
         source  zoneToCell;
-	    zones	(topAir);
+        zones   (topAir);
     }
     {
         name    f5;
@@ -96,8 +95,7 @@ actions
         action  new;
         source  cellToFace;
         option  all;
-	    sets	(c5);
-
+        sets    (c5);
     }
 );
 

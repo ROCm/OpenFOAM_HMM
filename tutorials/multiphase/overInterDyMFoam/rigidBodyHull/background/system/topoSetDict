@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2112                                 |
+|  \\    /   O peration     | Version:  v2206                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -21,10 +21,8 @@ actions
         type    cellSet;
         action  new;
         source  regionsToCell;
-        sourceInfo
-        {
-            insidePoints ((-6 0 0.0));
-        }
+
+        insidePoints ((-6 0 0.0));
     }
 
     {
@@ -32,10 +30,8 @@ actions
         type    cellSet;
         action  new;
         source  cellToCell;
-        sourceInfo
-        {
-            set c0;
-        }
+
+        set     c0;
     }
 
     {
@@ -49,11 +45,9 @@ actions
         type    cellSet;
         action  new;
         source  regionsToCell;
-        sourceInfo
-        {
-            set c1;
-            insidePoints ((-3.4 0.1 0.1));
-        }
+
+        set     c1;
+        insidePoints ((-3.4 0.1 0.1));
     }
 
     {
@@ -61,10 +55,8 @@ actions
         type    cellSet;
         action  delete;
         source  cellToCell;
-        sourceInfo
-        {
-            set c2;
-        }
+
+        set     c2;
     }
 );
 

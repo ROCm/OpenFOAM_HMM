@@ -12,7 +12,7 @@ _planes
     type            patchEdge;
     axis            xyz;
     patches         ( bottom );
-    surfaceType     searchablePlane;
+    surfaceType     plane;
     planeType       pointAndNormal;
     origin          ( 0 0 1.57079632679 );
 }

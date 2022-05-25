@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2112                                 |
-|   \\  /    A nd           | Web:      www.openfoam.com                      |
+|  \\    /   O peration     | Version:  v2206                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -23,25 +23,25 @@ actions
 //         type    cellSet;
 //         action  new;
 //         source  zoneToCell;
-// 	    zones	(domain0);
+//         zones   (domain0);
 //
 //     }
-     {
+    {
         name    c1;
         type    cellSet;
         action  new;
         source  faceZoneToCell;//zoneToCel;
         option  master;
-	    zones	(domain0_to_v_CPU);
+        zones   (domain0_to_v_CPU);
     }
 
-     {
+    {
         name    c1;
         type    cellSet;
         action  add;
         source  faceZoneToCell;//zoneToCel;
         option  slave;
-	    zones	(domain0_to_v_CPU);
+        zones   (domain0_to_v_CPU);
     }
 
 //      {
@@ -49,35 +49,33 @@ actions
 //         type    cellSet;
 //         action  new;
 //         source  zoneToCell;
-// 	    zones	(v_CPU);
+//         zones   (v_CPU);
 //
 //     }
-//      {
+//     {
 //         name    f2;
 //         type    faceSet;
 //         action  new;
 //         source  cellToFace;
 //         option  all;
-// 	    sets	(c2);
-//
+//         sets    (c2);
 //     }
 //
-//      {
+//     {
 //         name    c3;
 //         type    cellSet;
 //         action  new;
 //         source  zoneToCell;
-// 	    zones	(v_fins);
+//         zones   (v_fins);
 //
 //     }
-//      {
+//     {
 //         name    f3;
 //         type    faceSet;
 //         action  new;
 //         source  cellToFace;
 //         option  all;
-// 	    sets	(c3);
-//
+//         sets    (c3);
 //     }
 );
 
