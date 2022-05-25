@@ -20,7 +20,6 @@ fieldValues/fieldValue/fieldValue.C
 fieldValues/fieldValue/fieldValueNew.C
 fieldValues/volFieldValue/volFieldValue.C
 fieldValues/surfaceFieldValue/surfaceFieldValue.C
-fieldValues/multiFieldValue/multiFieldValue.C
 
 heatTransferCoeff/heatTransferCoeff.C
 heatTransferCoeff/heatTransferCoeffModels/heatTransferCoeffModel/heatTransferCoeffModel.C
@@ -30,6 +29,8 @@ heatTransferCoeff/heatTransferCoeffModels/localReferenceTemperature/localReferen
 heatTransferCoeff/heatTransferCoeffModels/ReynoldsAnalogy/ReynoldsAnalogy.C
 
 limitFields/limitFields.C
+
+multiFieldValue/multiFieldValue.C
 
 nearWallFields/nearWallFields.C
 nearWallFields/findCellParticle.C

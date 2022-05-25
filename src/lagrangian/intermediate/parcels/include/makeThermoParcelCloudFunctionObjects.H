@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,6 +36,7 @@ License
 #include "ParticleErosion.H"
 #include "ParticleTracks.H"
 #include "ParticleTrap.H"
+#include "ParticleZoneInfo.H"
 #include "PatchCollisionDensity.H"
 #include "PatchInteractionFields.H"
 #include "PatchPostProcessing.H"
@@ -58,6 +59,7 @@ License
     makeCloudFunctionObjectType(ParticleErosion, CloudType);                   \
     makeCloudFunctionObjectType(ParticleTracks, CloudType);                    \
     makeCloudFunctionObjectType(ParticleTrap, CloudType);                      \
+    makeCloudFunctionObjectType(ParticleZoneInfo, CloudType);                  \
     makeCloudFunctionObjectType(PatchCollisionDensity, CloudType);             \
     makeCloudFunctionObjectType(PatchInteractionFields, CloudType);            \
     makeCloudFunctionObjectType(PatchPostProcessing, CloudType);               \

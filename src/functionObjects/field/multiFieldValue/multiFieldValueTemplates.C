@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,7 +34,7 @@ template<class Type>
 bool Foam::functionObjects::fieldValues::multiFieldValue::applyOperation
 (
     const word& resultType,
-    const wordList& names,
+    const wordList& foNames,
     const wordList& entryNames
 )
 {
@@ -45,10 +45,10 @@ bool Foam::functionObjects::fieldValues::multiFieldValue::applyOperation
 
     Type result = Zero;
 
-    Field<Type> values(names.size());
+    Field<Type> values(foNames.size());
     forAll(values, i)
     {
-        values[i] = this->getObjectResult<Type>(names[i], entryNames[i]);
+        values[i] = this->getObjectResult<Type>(foNames[i], entryNames[i]);
     }
 
     const word& opName = operationTypeNames_[operation_];
