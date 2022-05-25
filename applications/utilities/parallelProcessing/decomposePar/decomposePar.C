@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -150,29 +150,19 @@ Usage
 #include "domainDecomposition.H"
 #include "domainDecompositionDryRun.H"
 
-#include "labelIOField.H"
-#include "labelFieldIOField.H"
-#include "scalarIOField.H"
-#include "scalarFieldIOField.H"
-#include "vectorIOField.H"
-#include "vectorFieldIOField.H"
-#include "sphericalTensorIOField.H"
-#include "sphericalTensorFieldIOField.H"
-#include "symmTensorIOField.H"
-#include "symmTensorFieldIOField.H"
-#include "tensorIOField.H"
-#include "tensorFieldIOField.H"
-#include "pointFields.H"
 #include "regionProperties.H"
 
-#include "readFields.H"
+#include "fieldsDistributor.H"
+
 #include "fvFieldDecomposer.H"
+#include "pointFields.H"
 #include "pointFieldDecomposer.H"
+
 #include "lagrangianFieldDecomposer.H"
 
 #include "emptyFaPatch.H"
-#include "faMeshDecomposition.H"
 #include "faFieldDecomposer.H"
+#include "faMeshDecomposition.H"
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
@@ -838,58 +828,14 @@ int main(int argc, char *argv[])
                 }
 
 
-                // Vol fields
-                // ~~~~~~~~~~
-                PtrList<volScalarField> volScalarFields;
-                PtrList<volVectorField> volVectorFields;
-                PtrList<volSphericalTensorField> volSphTensorFields;
-                PtrList<volSymmTensorField> volSymmTensorFields;
-                PtrList<volTensorField> volTensorFields;
+                // Volume/surface/internal fields
+                // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+                fvFieldDecomposer::fieldsCache volumeFieldCache;
 
                 if (doDecompFields)
                 {
-                    readFields(mesh, objects, volScalarFields, false);
-                    readFields(mesh, objects, volVectorFields, false);
-                    readFields(mesh, objects, volSphTensorFields, false);
-                    readFields(mesh, objects, volSymmTensorFields, false);
-                    readFields(mesh, objects, volTensorFields, false);
-                }
-
-                // Internal fields
-                // ~~~~~~~~~~~~~~~
-                PtrList<DimensionedField<scalar, volMesh>> dimScalarFields;
-                PtrList<DimensionedField<vector, volMesh>> dimVectorFields;
-                PtrList<DimensionedField<sphericalTensor, volMesh>>
-                    dimSphTensorFields;
-                PtrList<DimensionedField<symmTensor, volMesh>>
-                    dimSymmTensorFields;
-                PtrList<DimensionedField<tensor, volMesh>> dimTensorFields;
-
-                if (doDecompFields)
-                {
-                    readFields(mesh, objects, dimScalarFields);
-                    readFields(mesh, objects, dimVectorFields);
-                    readFields(mesh, objects, dimSphTensorFields);
-                    readFields(mesh, objects, dimSymmTensorFields);
-                    readFields(mesh, objects, dimTensorFields);
-                }
-
-                // Surface fields
-                // ~~~~~~~~~~~~~~
-                PtrList<surfaceScalarField> surfaceScalarFields;
-                PtrList<surfaceVectorField> surfaceVectorFields;
-                PtrList<surfaceSphericalTensorField>
-                    surfaceSphTensorFields;
-                PtrList<surfaceSymmTensorField> surfaceSymmTensorFields;
-                PtrList<surfaceTensorField> surfaceTensorFields;
-
-                if (doDecompFields)
-                {
-                    readFields(mesh, objects, surfaceScalarFields, false);
-                    readFields(mesh, objects, surfaceVectorFields, false);
-                    readFields(mesh, objects, surfaceSphTensorFields, false);
-                    readFields(mesh, objects, surfaceSymmTensorFields, false);
-                    readFields(mesh, objects, surfaceTensorFields, false);
+                    volumeFieldCache.readAllFields(mesh, objects);
                 }
 
 
@@ -897,19 +843,11 @@ int main(int argc, char *argv[])
                 // ~~~~~~~~~~~~
                 const pointMesh& pMesh = pointMesh::New(mesh);
 
-                PtrList<pointScalarField> pointScalarFields;
-                PtrList<pointVectorField> pointVectorFields;
-                PtrList<pointSphericalTensorField> pointSphTensorFields;
-                PtrList<pointSymmTensorField> pointSymmTensorFields;
-                PtrList<pointTensorField> pointTensorFields;
+                pointFieldDecomposer::fieldsCache pointFieldCache;
 
                 if (doDecompFields)
                 {
-                    readFields(pMesh, objects, pointScalarFields, false);
-                    readFields(pMesh, objects, pointVectorFields, false);
-                    readFields(pMesh, objects, pointSphTensorFields, false);
-                    readFields(pMesh, objects, pointSymmTensorFields, false);
-                    readFields(pMesh, objects, pointTensorFields, false);
+                    pointFieldCache.readAllFields(pMesh, objects);
                 }
 
 
@@ -938,63 +876,10 @@ int main(int argc, char *argv[])
                     cloudDirs.size()
                 );
 
-                PtrList<PtrList<labelIOField>> lagrangianLabelFields
+                lagrangianFieldDecomposer::fieldsCache lagrangianFieldCache
                 (
                     cloudDirs.size()
                 );
-                PtrList<PtrList<labelFieldCompactIOField>>
-                lagrangianLabelFieldFields
-                (
-                    cloudDirs.size()
-                );
-                PtrList<PtrList<scalarIOField>> lagrangianScalarFields
-                (
-                    cloudDirs.size()
-                );
-                PtrList<PtrList<scalarFieldCompactIOField>>
-                lagrangianScalarFieldFields
-                (
-                    cloudDirs.size()
-                );
-                PtrList<PtrList<vectorIOField>> lagrangianVectorFields
-                (
-                    cloudDirs.size()
-                );
-                PtrList<PtrList<vectorFieldCompactIOField>>
-                lagrangianVectorFieldFields
-                (
-                    cloudDirs.size()
-                );
-                PtrList<PtrList<sphericalTensorIOField>>
-                lagrangianSphTensorFields
-                (
-                    cloudDirs.size()
-                );
-                PtrList<PtrList<sphericalTensorFieldCompactIOField>>
-                lagrangianSphTensorFieldFields
-                (
-                    cloudDirs.size()
-                );
-                PtrList<PtrList<symmTensorIOField>>
-                lagrangianSymmTensorFields
-                (
-                    cloudDirs.size()
-                );
-                PtrList<PtrList<symmTensorFieldCompactIOField>>
-                lagrangianSymmTensorFieldFields
-                (
-                    cloudDirs.size()
-                );
-                PtrList<PtrList<tensorIOField>> lagrangianTensorFields
-                (
-                    cloudDirs.size()
-                );
-                PtrList<PtrList<tensorFieldCompactIOField>>
-                lagrangianTensorFieldFields
-                (
-                    cloudDirs.size()
-                );
-
 
                 label cloudI = 0;
 
@@ -1095,88 +980,10 @@ int main(int argc, char *argv[])
                             false
                         );
 
-                        lagrangianFieldDecomposer::readFields
+                        lagrangianFieldCache.readAllFields
                         (
                             cloudI,
-                            lagrangianObjects,
-                            lagrangianLabelFields
-                        );
-
-                        lagrangianFieldDecomposer::readFieldFields
-                        (
-                            cloudI,
-                            lagrangianObjects,
-                            lagrangianLabelFieldFields
-                        );
-
-                        lagrangianFieldDecomposer::readFields
-                        (
-                            cloudI,
-                            lagrangianObjects,
-                            lagrangianScalarFields
-                        );
-
-                        lagrangianFieldDecomposer::readFieldFields
-                        (
-                            cloudI,
-                            lagrangianObjects,
-                            lagrangianScalarFieldFields
-                        );
-
-                        lagrangianFieldDecomposer::readFields
-                        (
-                            cloudI,
-                            lagrangianObjects,
-                            lagrangianVectorFields
-                        );
-
-                        lagrangianFieldDecomposer::readFieldFields
-                        (
-                            cloudI,
-                            lagrangianObjects,
-                            lagrangianVectorFieldFields
-                        );
-
-                        lagrangianFieldDecomposer::readFields
-                        (
-                            cloudI,
-                            lagrangianObjects,
-                            lagrangianSphTensorFields
-                        );
-
-                        lagrangianFieldDecomposer::readFieldFields
-                        (
-                            cloudI,
-                            lagrangianObjects,
-                            lagrangianSphTensorFieldFields
-                        );
-
-                        lagrangianFieldDecomposer::readFields
-                        (
-                            cloudI,
-                            lagrangianObjects,
-                            lagrangianSymmTensorFields
-                        );
-
-                        lagrangianFieldDecomposer::readFieldFields
-                        (
-                            cloudI,
-                            lagrangianObjects,
-                            lagrangianSymmTensorFieldFields
-                        );
-
-                        lagrangianFieldDecomposer::readFields
-                        (
-                            cloudI,
-                            lagrangianObjects,
-                            lagrangianTensorFields
-                        );
-
-                        lagrangianFieldDecomposer::readFieldFields
-                        (
-                            cloudI,
-                            lagrangianObjects,
-                            lagrangianTensorFieldFields
+                            lagrangianObjects
                         );
 
                         ++cloudI;
@@ -1185,18 +992,7 @@ int main(int argc, char *argv[])
 
                 lagrangianPositions.resize(cloudI);
                 cellParticles.resize(cloudI);
-                lagrangianLabelFields.resize(cloudI);
-                lagrangianLabelFieldFields.resize(cloudI);
-                lagrangianScalarFields.resize(cloudI);
-                lagrangianScalarFieldFields.resize(cloudI);
-                lagrangianVectorFields.resize(cloudI);
-                lagrangianVectorFieldFields.resize(cloudI);
-                lagrangianSphTensorFields.resize(cloudI);
-                lagrangianSphTensorFieldFields.resize(cloudI);
-                lagrangianSymmTensorFields.resize(cloudI);
-                lagrangianSymmTensorFieldFields.resize(cloudI);
-                lagrangianTensorFields.resize(cloudI);
-                lagrangianTensorFieldFields.resize(cloudI);
+                lagrangianFieldCache.resize(cloudI);
 
                 Info<< endl;
 
@@ -1291,35 +1087,11 @@ int main(int argc, char *argv[])
                                 )
                             );
                         }
-                        const fvFieldDecomposer& fieldDecomposer =
-                            fieldDecomposerList[proci];
 
-                        // Vol fields
-                        fieldDecomposer.decomposeFields(volScalarFields);
-                        fieldDecomposer.decomposeFields(volVectorFields);
-                        fieldDecomposer.decomposeFields(volSphTensorFields);
-                        fieldDecomposer.decomposeFields(volSymmTensorFields);
-                        fieldDecomposer.decomposeFields(volTensorFields);
-
-                        // Surface fields
-                        fieldDecomposer.decomposeFields(surfaceScalarFields);
-                        fieldDecomposer.decomposeFields(surfaceVectorFields);
-                        fieldDecomposer.decomposeFields
+                        volumeFieldCache.decomposeAllFields
                         (
-                            surfaceSphTensorFields
+                            fieldDecomposerList[proci]
                         );
-                        fieldDecomposer.decomposeFields
-                        (
-                            surfaceSymmTensorFields
-                        );
-                        fieldDecomposer.decomposeFields(surfaceTensorFields);
-
-                        // internal fields
-                        fieldDecomposer.decomposeFields(dimScalarFields);
-                        fieldDecomposer.decomposeFields(dimVectorFields);
-                        fieldDecomposer.decomposeFields(dimSphTensorFields);
-                        fieldDecomposer.decomposeFields(dimSymmTensorFields);
-                        fieldDecomposer.decomposeFields(dimTensorFields);
 
                         if (times.size() == 1)
                         {
@@ -1330,14 +1102,7 @@ int main(int argc, char *argv[])
 
 
                     // Point fields
-                    if
-                    (
-                        pointScalarFields.size()
-                     || pointVectorFields.size()
-                     || pointSphTensorFields.size()
-                     || pointSymmTensorFields.size()
-                     || pointTensorFields.size()
-                    )
+                    if (!pointFieldCache.empty())
                     {
                         const labelIOList& pointProcAddressing = procAddressing
                         (
@@ -1363,15 +1128,11 @@ int main(int argc, char *argv[])
                                 )
                             );
                         }
-                        const pointFieldDecomposer& pointDecomposer =
-                            pointFieldDecomposerList[proci];
 
-                        pointDecomposer.decomposeFields(pointScalarFields);
-                        pointDecomposer.decomposeFields(pointVectorFields);
-                        pointDecomposer.decomposeFields(pointSphTensorFields);
-                        pointDecomposer.decomposeFields(pointSymmTensorFields);
-                        pointDecomposer.decomposeFields(pointTensorFields);
-
+                        pointFieldCache.decomposeAllFields
+                        (
+                            pointFieldDecomposerList[proci]
+                        );
 
                         if (times.size() == 1)
                         {
@@ -1382,9 +1143,9 @@ int main(int argc, char *argv[])
 
 
                     // If there is lagrangian data write it out
-                    forAll(lagrangianPositions, cloudI)
+                    forAll(lagrangianPositions, cloudi)
                     {
-                        if (lagrangianPositions[cloudI].size())
+                        if (lagrangianPositions[cloudi].size())
                         {
                             lagrangianFieldDecomposer fieldDecomposer
                             (
@@ -1392,74 +1153,18 @@ int main(int argc, char *argv[])
                                 procMesh,
                                 faceProcAddressing,
                                 cellProcAddressing,
-                                cloudDirs[cloudI],
-                                lagrangianPositions[cloudI],
-                                cellParticles[cloudI]
+                                cloudDirs[cloudi],
+                                lagrangianPositions[cloudi],
+                                cellParticles[cloudi]
                             );
 
                             // Lagrangian fields
-                            {
-                                fieldDecomposer.decomposeFields
-                                (
-                                    cloudDirs[cloudI],
-                                    lagrangianLabelFields[cloudI]
-                                );
-                                fieldDecomposer.decomposeFieldFields
-                                (
-                                    cloudDirs[cloudI],
-                                    lagrangianLabelFieldFields[cloudI]
-                                );
-                                fieldDecomposer.decomposeFields
-                                (
-                                    cloudDirs[cloudI],
-                                    lagrangianScalarFields[cloudI]
-                                );
-                                fieldDecomposer.decomposeFieldFields
-                                (
-                                    cloudDirs[cloudI],
-                                    lagrangianScalarFieldFields[cloudI]
-                                );
-                                fieldDecomposer.decomposeFields
-                                (
-                                    cloudDirs[cloudI],
-                                    lagrangianVectorFields[cloudI]
-                                );
-                                fieldDecomposer.decomposeFieldFields
-                                (
-                                    cloudDirs[cloudI],
-                                    lagrangianVectorFieldFields[cloudI]
-                                );
-                                fieldDecomposer.decomposeFields
-                                (
-                                    cloudDirs[cloudI],
-                                    lagrangianSphTensorFields[cloudI]
-                                );
-                                fieldDecomposer.decomposeFieldFields
-                                (
-                                    cloudDirs[cloudI],
-                                    lagrangianSphTensorFieldFields[cloudI]
-                                );
-                                fieldDecomposer.decomposeFields
-                                (
-                                    cloudDirs[cloudI],
-                                    lagrangianSymmTensorFields[cloudI]
-                                );
-                                fieldDecomposer.decomposeFieldFields
-                                (
-                                    cloudDirs[cloudI],
-                                    lagrangianSymmTensorFieldFields[cloudI]
-                                );
-                                fieldDecomposer.decomposeFields
-                                (
-                                    cloudDirs[cloudI],
-                                    lagrangianTensorFields[cloudI]
-                                );
-                                fieldDecomposer.decomposeFieldFields
-                                (
-                                    cloudDirs[cloudI],
-                                    lagrangianTensorFieldFields[cloudI]
-                                );
-                            }
+                            lagrangianFieldCache.decomposeAllFields
+                            (
+                                cloudi,
+                                cloudDirs[cloudi],
+                                fieldDecomposer
+                            );
                         }
                     }
 
@@ -1506,38 +1211,17 @@ int main(int argc, char *argv[])
                     aMesh.writeDecomposition();
 
 
-                    // Area fields
-                    // ~~~~~~~~~~~
-                    PtrList<areaScalarField> areaScalarFields;
-                    PtrList<areaVectorField> areaVectorFields;
-                    PtrList<areaSphericalTensorField> areaSphTensorFields;
-                    PtrList<areaSymmTensorField> areaSymmTensorFields;
-                    PtrList<areaTensorField> areaTensorFields;
+                    // Area/edge fields
+                    // ~~~~~~~~~~~~~~~~
 
-                    // Edge fields (limited number of types)
-                    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                    PtrList<edgeScalarField> edgeScalarFields;
+                    faFieldDecomposer::fieldsCache areaFieldCache;
 
                     if (doDecompFields)
                     {
-                        readFields(aMesh, objects, areaScalarFields);
-                        readFields(aMesh, objects, areaVectorFields);
-                        readFields(aMesh, objects, areaSphTensorFields);
-                        readFields(aMesh, objects, areaSymmTensorFields);
-                        readFields(aMesh, objects, areaTensorFields);
-
-                        readFields(aMesh, objects, edgeScalarFields);
+                        areaFieldCache.readAllFields(aMesh, objects);
                     }
 
-                    const label nAreaFields =
-                    (
-                        areaScalarFields.size()
-                      + areaVectorFields.size()
-                      + areaSphTensorFields.size()
-                      + areaSymmTensorFields.size()
-                      + areaTensorFields.size()
-                      + edgeScalarFields.size()
-                    );
+                    const label nAreaFields = areaFieldCache.size();
 
                     Info<< endl;
                     Info<< "Finite area field transfer: "
@@ -1634,13 +1318,7 @@ int main(int argc, char *argv[])
                             boundaryProcAddressing
                         );
 
-                        fieldDecomposer.decomposeFields(areaScalarFields);
-                        fieldDecomposer.decomposeFields(areaVectorFields);
-                        fieldDecomposer.decomposeFields(areaSphTensorFields);
-                        fieldDecomposer.decomposeFields(areaSymmTensorFields);
-                        fieldDecomposer.decomposeFields(areaTensorFields);
-
-                        fieldDecomposer.decomposeFields(edgeScalarFields);
+                        areaFieldCache.decomposeAllFields(fieldDecomposer);
                     }
                 }
             }

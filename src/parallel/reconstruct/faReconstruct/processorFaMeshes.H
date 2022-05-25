@@ -37,8 +37,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef processorFaMeshes_H
-#define processorFaMeshes_H
+#ifndef Foam_processorFaMeshes_H
+#define Foam_processorFaMeshes_H
 
 #include "PtrList.H"
 #include "faMesh.H"
@@ -57,7 +57,7 @@ namespace Foam
 
 class processorFaMeshes
 {
-    // Private data
+    // Private Data
 
         //- List of processor finite volume meshes
         const UPtrList<fvMesh>& fvMeshes_;
@@ -95,40 +95,44 @@ public:
     // Constructors
 
         //- Construct from components
-        explicit processorFaMeshes(const UPtrList<fvMesh>& processorFvMeshes);
+        explicit processorFaMeshes(const UPtrList<fvMesh>& procFvMeshes);
 
 
     // Member Functions
 
-        const PtrList<faMesh>& meshes() const
+        const PtrList<faMesh>& meshes() const noexcept
         {
             return meshes_;
         }
 
-        PtrList<faMesh>& meshes()
+        PtrList<faMesh>& meshes() noexcept
         {
             return meshes_;
         }
 
-        const PtrList<labelIOList>& pointProcAddressing() const
+        const PtrList<labelIOList>& pointProcAddressing() const noexcept
         {
             return pointProcAddressing_;
         }
 
-        PtrList<labelIOList>& edgeProcAddressing()
+        PtrList<labelIOList>& edgeProcAddressing() noexcept
         {
             return edgeProcAddressing_;
         }
 
-        const PtrList<labelIOList>& faceProcAddressing() const
+        const PtrList<labelIOList>& faceProcAddressing() const noexcept
         {
             return faceProcAddressing_;
         }
 
-        const PtrList<labelIOList>& boundaryProcAddressing() const
+        const PtrList<labelIOList>& boundaryProcAddressing() const noexcept
         {
             return boundaryProcAddressing_;
         }
+
+
+        //- Helper: remove all procAddressing files from mesh instance
+        static void removeFiles(const faMesh& mesh);
 };
 
 

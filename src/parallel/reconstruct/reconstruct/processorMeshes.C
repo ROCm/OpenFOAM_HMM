@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,8 +28,9 @@ License
 
 #include "processorMeshes.H"
 #include "Time.H"
+#include "IndirectList.H"
 #include "primitiveMesh.H"
-#include "topoSet.H"
+#include "OSspecific.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -70,73 +71,33 @@ void Foam::processorMeshes::read()
             )
         );
 
-        pointProcAddressing_.set
+        // Read the addressing information
+
+        IOobject ioAddr
         (
-            proci,
-            new labelIOList
-            (
-                IOobject
-                (
-                    "pointProcAddressing",
-                    meshes_[proci].facesInstance(),
-                    meshes_[proci].meshSubDir,
-                    meshes_[proci],
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE
-                )
-            )
+            "procAddressing",
+            meshes_[proci].facesInstance(),
+            polyMesh::meshSubDir,
+            meshes_[proci].thisDb(),
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
         );
 
-        faceProcAddressing_.set
-        (
-            proci,
-            new labelIOList
-            (
-                IOobject
-                (
-                    "faceProcAddressing",
-                    meshes_[proci].facesInstance(),
-                    meshes_[proci].meshSubDir,
-                    meshes_[proci],
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE
-                )
-            )
-        );
+        // pointProcAddressing (polyMesh)
+        ioAddr.rename("pointProcAddressing");
+        pointProcAddressing_.set(proci, new labelIOList(ioAddr));
 
-        cellProcAddressing_.set
-        (
-            proci,
-            new labelIOList
-            (
-                IOobject
-                (
-                    "cellProcAddressing",
-                    meshes_[proci].facesInstance(),
-                    meshes_[proci].meshSubDir,
-                    meshes_[proci],
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE
-                )
-            )
-        );
+        // faceProcAddressing (polyMesh)
+        ioAddr.rename("faceProcAddressing");
+        faceProcAddressing_.set(proci, new labelIOList(ioAddr));
 
-        boundaryProcAddressing_.set
-        (
-            proci,
-            new labelIOList
-            (
-                IOobject
-                (
-                    "boundaryProcAddressing",
-                    meshes_[proci].facesInstance(),
-                    meshes_[proci].meshSubDir,
-                    meshes_[proci],
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE
-                )
-            )
-        );
+        // cellProcAddressing (polyMesh)
+        ioAddr.rename("cellProcAddressing");
+        cellProcAddressing_.set(proci, new labelIOList(ioAddr));
+
+        // boundaryProcAddressing (polyMesh)
+        ioAddr.rename("boundaryProcAddressing");
+        boundaryProcAddressing_.set(proci, new labelIOList(ioAddr));
     }
 }
 
@@ -163,17 +124,17 @@ Foam::processorMeshes::processorMeshes
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::fvMesh::readUpdateState Foam::processorMeshes::readUpdate()
+Foam::polyMesh::readUpdateState Foam::processorMeshes::readUpdate()
 {
-    fvMesh::readUpdateState stat = fvMesh::UNCHANGED;
+    polyMesh::readUpdateState stat = polyMesh::UNCHANGED;
 
     forAll(databases_, proci)
     {
         // Check if any new meshes need to be read.
-        fvMesh::readUpdateState procStat = meshes_[proci].readUpdate();
+        polyMesh::readUpdateState procStat = meshes_[proci].readUpdate();
 
         /*
-        if (procStat != fvMesh::UNCHANGED)
+        if (procStat != polyMesh::UNCHANGED)
         {
             Info<< "Processor " << proci
                 << " at time " << databases_[proci].timeName()
@@ -183,7 +144,7 @@ Foam::fvMesh::readUpdateState Foam::processorMeshes::readUpdate()
         */
 
         // Combine into overall mesh change status
-        if (stat == fvMesh::UNCHANGED)
+        if (stat == polyMesh::UNCHANGED)
         {
             stat = procStat;
         }
@@ -203,8 +164,8 @@ Foam::fvMesh::readUpdateState Foam::processorMeshes::readUpdate()
 
     if
     (
-        stat == fvMesh::TOPO_CHANGE
-     || stat == fvMesh::TOPO_PATCH_CHANGE
+        stat == polyMesh::TOPO_CHANGE
+     || stat == polyMesh::TOPO_PATCH_CHANGE
     )
     {
         // Reread all meshes and addressing
@@ -231,7 +192,7 @@ void Foam::processorMeshes::reconstructPoints(fvMesh& mesh)
                     "points",
                     meshes_[proci].time().timeName(),
                     polyMesh::meshSubDir,
-                    meshes_[proci],
+                    meshes_[proci].thisDb(),
                     IOobject::MUST_READ,
                     IOobject::NO_WRITE,
                     false
@@ -247,23 +208,19 @@ void Foam::processorMeshes::reconstructPoints(fvMesh& mesh)
     {
         const vectorField& procPoints = procsPoints[proci];
 
-        // Set the cell values in the reconstructed field
+        const labelList& pointProcAddr = pointProcAddressing_[proci];
 
-        const labelList& pointProcAddressingI = pointProcAddressing_[proci];
-
-        if (pointProcAddressingI.size() != procPoints.size())
+        if (pointProcAddr.size() != procPoints.size())
         {
             FatalErrorInFunction
                 << "problem :"
-                << " pointProcAddressingI:" << pointProcAddressingI.size()
+                << " pointProcAddr:" << pointProcAddr.size()
                 << " procPoints:" << procPoints.size()
                 << abort(FatalError);
         }
 
-        forAll(pointProcAddressingI, pointi)
-        {
-            newPoints[pointProcAddressingI[pointi]] = procPoints[pointi];
-        }
+        UIndirectList<point>(newPoints, pointProcAddr) = procPoints;
+        // or: newPoints.rmap(procPoints, pointProcAddr)
     }
 
     mesh.movePoints(newPoints);
@@ -273,59 +230,35 @@ void Foam::processorMeshes::reconstructPoints(fvMesh& mesh)
 
 void Foam::processorMeshes::removeFiles(const polyMesh& mesh)
 {
-    fileName pointPath
+    IOobject ioAddr
     (
-        IOobject
-        (
-            "pointProcAddressing",
-            mesh.facesInstance(),
-            mesh.meshSubDir,
-            mesh
-        ).objectPath()
+        "procAddressing",
+        mesh.facesInstance(),
+        polyMesh::meshSubDir,
+        mesh.thisDb(),
+        IOobject::NO_READ,
+        IOobject::NO_WRITE,
+        false  // not registered
     );
-    if (topoSet::debug) DebugVar(pointPath);
-    rm(pointPath);
 
-    rm
-    (
-        IOobject
-        (
-            "faceProcAddressing",
-            mesh.facesInstance(),
-            mesh.meshSubDir,
-            mesh
-        ).objectPath()
-    );
-    rm
-    (
-        IOobject
-        (
-            "cellProcAddressing",
-            mesh.facesInstance(),
-            mesh.meshSubDir,
-            mesh
-        ).objectPath()
-    );
-    rm
-    (
-        IOobject
-        (
-            "boundaryProcAddressing",
-            mesh.facesInstance(),
-            mesh.meshSubDir,
-            mesh
-        ).objectPath()
-    );
-    rm
-    (
-        IOobject
-        (
-            "procAddressing",
-            mesh.facesInstance(),
-            mesh.meshSubDir,
-            mesh
-        ).objectPath()
-    );
+    // procAddressing
+    rm(ioAddr.objectPath());
+
+    // pointProcAddressing
+    ioAddr.rename("pointProcAddressing");
+    rm(ioAddr.objectPath());
+
+    // faceProcAddressing
+    ioAddr.rename("faceProcAddressing");
+    rm(ioAddr.objectPath());
+
+    // cellProcAddressing
+    ioAddr.rename("cellProcAddressing");
+    rm(ioAddr.objectPath());
+
+    // boundaryProcAddressing
+    ioAddr.rename("boundaryProcAddressing");
+    rm(ioAddr.objectPath());
 }
 
 

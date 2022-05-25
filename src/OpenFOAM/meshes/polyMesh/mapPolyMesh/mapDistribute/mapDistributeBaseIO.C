@@ -36,25 +36,39 @@ namespace Foam
 // The maps (labelListList) are not human-modifiable but if we need to
 // inspect them in ASCII, it is much more convenient if each sub-list
 // is flattened on a single line.
+static Ostream& printMaps(Ostream& os, const labelListList& maps)
+{
+    if (os.format() == IOstream::BINARY || maps.empty())
+    {
+        os  << maps;
+    }
+    else
+    {
+        os  << nl << maps.size() << nl
+            << token::BEGIN_LIST << nl;
+
+        // Compact single-line output for each labelList
+        for (const labelList& map : maps)
+        {
+            map.writeList(os) << nl;
+        }
+        os  << token::END_LIST;
+    }
+
+    return os;
+}
+
+
 static void writeMaps(Ostream& os, const word& key, const labelListList& maps)
 {
-    if (os.format() == IOstream::BINARY)
+    if (os.format() == IOstream::BINARY || maps.empty())
     {
         os.writeEntry(key, maps);
     }
     else
     {
-        os  << indent << key << nl
-            << maps.size() << nl
-            << token::BEGIN_LIST << nl;
-
-        // Single-line output
-        for (const labelList& map : maps)
-        {
-            map.writeList(os) << nl;
-        }
-
-        os  << token::END_LIST << token::END_STATEMENT << nl;
+        os  << indent << key;
+        printMaps(os, maps) << token::END_STATEMENT << nl;
     }
 }
 
@@ -129,7 +143,8 @@ Foam::Istream& Foam::operator>>(Istream& is, mapDistributeBase& map)
 {
     is.fatalCheck(FUNCTION_NAME);
 
-    is  >> map.constructSize_ >> map.subMap_ >> map.constructMap_
+    is  >> map.constructSize_
+        >> map.subMap_ >> map.constructMap_
         >> map.subHasFlip_ >> map.constructHasFlip_
         >> map.comm_;
 
@@ -139,11 +154,14 @@ Foam::Istream& Foam::operator>>(Istream& is, mapDistributeBase& map)
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const mapDistributeBase& map)
 {
-    os  << map.constructSize_ << token::NL
-        << map.subMap_ << token::NL
-        << map.constructMap_ << token::NL
-        << map.subHasFlip_ << token::SPACE << map.constructHasFlip_
-        << token::SPACE << map.comm_ << token::NL;
+    os  << map.constructSize_ << token::NL;
+
+    printMaps(os, map.subMap_) << token::NL;
+    printMaps(os, map.constructMap_) << token::NL;
+
+    os  << map.subHasFlip_ << token::SPACE
+        << map.constructHasFlip_ << token::SPACE
+        << map.comm_ << token::NL;
 
     return os;
 }

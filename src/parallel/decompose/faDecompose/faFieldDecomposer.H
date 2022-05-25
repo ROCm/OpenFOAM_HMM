@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,12 +36,13 @@ Author
 
 SourceFiles
     faFieldDecomposer.C
-    faFieldDecomposerFields.C
+    fvFieldDecomposerCache.C
+    faFieldDecomposerTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef faFieldDecomposer_H
-#define faFieldDecomposer_H
+#ifndef Foam_faFieldDecomposer_H
+#define Foam_faFieldDecomposer_H
 
 #include "faMesh.H"
 #include "faPatchFieldMapper.H"
@@ -62,6 +63,8 @@ class IOobjectList;
 class faFieldDecomposer
 {
 public:
+
+    // Public Classes
 
         //- Patch field decomposer class
         class patchFieldDecomposer
@@ -270,13 +273,17 @@ private:
 
 public:
 
+    // Public Classes
+    class fieldsCache;
+
+
     // Constructors
 
         //- Construct without mappers, added later with reset()
         faFieldDecomposer
         (
             const Foam::zero,
-            const faMesh& procMesh,
+            const faMesh& procMesh,             // Target mesh
             const labelList& edgeAddressing,
             const labelList& faceAddressing,
             const labelList& boundaryAddressing
@@ -285,8 +292,8 @@ public:
         //- Construct from components using information from the complete mesh
         faFieldDecomposer
         (
-            const faMesh& completeMesh,
-            const faMesh& procMesh,
+            const faMesh& completeMesh,         // Source mesh
+            const faMesh& procMesh,             // Target mesh
             const labelList& edgeAddressing,
             const labelList& faceAddressing,
             const labelList& boundaryAddressing
@@ -302,7 +309,7 @@ public:
             const labelUList& edgeNeigbour,
 
             // Addressing for processor mesh
-            const faMesh& procMesh,
+            const faMesh& procMesh,             // Target mesh
             const labelList& edgeAddressing,
             const labelList& faceAddressing,
             const labelList& boundaryAddressing
@@ -358,7 +365,7 @@ public:
 
     // Reading helpers
 
-        //- Read the fields and hold on the pointer list
+        //- Read the fields and store on the pointer list
         template
         <
             class Type,
@@ -373,7 +380,7 @@ public:
             const bool readOldTime
         );
 
-        //- Read fields and hold on the pointer list
+        //- Read fields and store on the pointer list
         template<class Mesh, class GeoField>
         static void readFields
         (
@@ -384,6 +391,70 @@ public:
 };
 
 
+
+/*---------------------------------------------------------------------------*\
+               Class faFieldDecomposer::fieldsCache Declaration
+\*---------------------------------------------------------------------------*/
+
+class faFieldDecomposer::fieldsCache
+{
+    // Private Data
+
+        class privateCache;
+
+        //- All field and field-field types for lagrangian
+        std::unique_ptr<privateCache> cache_;
+
+
+    // Private Member Functions
+
+        //- No copy construct
+        fieldsCache(const fieldsCache&) = delete;
+
+        //- No copy assignment
+        void operator=(const fieldsCache&) = delete;
+
+
+public:
+
+    // Constructors
+
+        //- Default construct
+        fieldsCache();
+
+
+    //- Destructor
+    ~fieldsCache();
+
+
+    // Member Functions
+
+        //- No fields
+        bool empty() const;
+
+        //- Number of fields
+        label size() const;
+
+        //- Clear out
+        void clear();
+
+
+        //- Read all fields given mesh and objects
+        void readAllFields
+        (
+            const faMesh& mesh,
+            const IOobjectList& objects
+        );
+
+        //- Decompose and write all fields
+        void decomposeAllFields
+        (
+            const faFieldDecomposer& decomposer,
+            bool report = false
+        ) const;
+};
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
@@ -391,8 +462,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "faFieldDecomposerFields.C"
-    #include "faFieldDecomposerReadFields.C"
+    #include "faFieldDecomposerTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

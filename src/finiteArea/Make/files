@@ -24,6 +24,9 @@ $(faPatches)/constraint/wedge/wedgeFaPatch.C
 $(faPatches)/constraint/cyclic/cyclicFaPatch.C
 $(faPatches)/constraint/symmetry/symmetryFaPatch.C
 
+distributed/faMeshDistributor.C
+distributed/faMeshDistributorNew.C
+
 ensight = output/ensight
 $(ensight)/ensightFaMesh.C
 

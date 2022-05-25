@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "faFieldDecomposer.H"
+#include "GeometricField.H"
+#include "IOobjectList.H"
 #include "processorFaPatchField.H"
 #include "processorFaePatchField.H"
 
@@ -89,8 +91,8 @@ Foam::faFieldDecomposer::decomposeField
             IOobject
             (
                 field.name(),
-                procMesh_.time().timeName(),
-                procMesh_(),
+                procMesh_.thisDb().time().timeName(),
+                procMesh_.thisDb(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
@@ -200,8 +202,8 @@ Foam::faFieldDecomposer::decomposeField
             IOobject
             (
                 field.name(),
-                procMesh_.time().timeName(),
-                procMesh_(),
+                procMesh_.thisDb().time().timeName(),
+                procMesh_.thisDb(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),

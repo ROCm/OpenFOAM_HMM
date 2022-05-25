@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,50 +25,37 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "dimFieldDecomposer.H"
+#include "parFvFieldDistributor.H"
+#include "volFields.H"
+#include "surfaceFields.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::tmp<Foam::DimensionedField<Type, Foam::volMesh>>
-Foam::dimFieldDecomposer::decomposeField
+void Foam::parFvFieldDistributor::distributeAllFields
 (
-    const DimensionedField<Type, volMesh>& field
+    const IOobjectList& objects,
+    const wordRes& selectedFields
 ) const
 {
-    // Create and map the internal field values
-    Field<Type> mappedField(field, cellAddressing_);
-
-    // Create the field for the processor
-    return
-        tmp<DimensionedField<Type, volMesh>>::New
-        (
-            IOobject
-            (
-                field.name(),
-                procMesh_.time().timeName(),
-                procMesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            procMesh_,
-            field.dimensions(),
-            std::move(mappedField)
-        );
-}
-
-
-template<class GeoField>
-void Foam::dimFieldDecomposer::decomposeFields
-(
-    const PtrList<GeoField>& fields
-) const
-{
-    for (const auto& fld : fields)
+    do
     {
-        decomposeField(fld)().write();
+        #undef  doLocalCode
+        #define doLocalCode(Method)                                           \
+        {                                                                     \
+            this->Method <scalar> (objects, selectedFields);                  \
+            this->Method <vector> (objects, selectedFields);                  \
+            this->Method <sphericalTensor> (objects, selectedFields);         \
+            this->Method <symmTensor> (objects, selectedFields);              \
+            this->Method <tensor> (objects, selectedFields);                  \
+        }
+
+        doLocalCode(distributeInternalFields);
+        doLocalCode(distributeVolumeFields);
+        doLocalCode(distributeSurfaceFields);
+
+        #undef doLocalCode
     }
+    while (false);
 }
 
 

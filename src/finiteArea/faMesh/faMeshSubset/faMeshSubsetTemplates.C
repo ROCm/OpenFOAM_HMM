@@ -144,6 +144,88 @@ Foam::faMeshSubset::interpolate
 }
 
 
+template<class Type>
+Foam::tmp
+<
+    Foam::GeometricField<Type, Foam::faePatchField, Foam::edgeMesh>
+>
+Foam::faMeshSubset::interpolate
+(
+    const GeometricField<Type, faePatchField, edgeMesh>& vf,
+    const faMesh& sMesh
+)
+{
+    // 1. Create the complete field with dummy patch fields
+    PtrList<faePatchField<Type>> patchFields(sMesh.boundary().size());
+
+    forAll(patchFields, patchi)
+    {
+        patchFields.set
+        (
+            patchi,
+            faePatchField<Type>::New
+            (
+                calculatedFaePatchField<Type>::typeName,
+                sMesh.boundary()[patchi],
+                DimensionedField<Type, edgeMesh>::null()
+            )
+        );
+    }
+
+    auto tresult = tmp<GeometricField<Type, faePatchField, edgeMesh>>::New
+    (
+        IOobject
+        (
+            "subset"+vf.name(),
+            sMesh.time().timeName(),
+            sMesh.thisDb(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        sMesh,
+        vf.dimensions(),
+        Field<Type>(),
+        // Field<Type>
+        // (
+        //     vf.primitiveField(),
+        //     SubList<label>(edgeMap, sMesh.nInternalEdges())
+        // ),
+        patchFields
+    );
+    auto& result = tresult.ref();
+    result.oriented() = vf.oriented();
+
+
+    // 2. Change the faePatchFields to the correct type using a mapper
+    //  constructor (with reference to the now correct internal field)
+
+    auto& bf = result.boundaryFieldRef();
+
+    forAll(bf, patchi)
+    {
+        // Construct addressing
+        const faPatch& subPatch = sMesh.boundary()[patchi];
+
+        labelList directAddressing;
+        directFaPatchFieldMapper mapper(directAddressing);
+
+        bf.set
+        (
+            patchi,
+            faePatchField<Type>::New
+            (
+                vf.boundaryField()[patchi],
+                subPatch,
+                result(),
+                mapper
+            )
+        );
+    }
+
+    return tresult;
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
@@ -154,6 +236,26 @@ Foam::tmp
 Foam::faMeshSubset::interpolate
 (
     const GeometricField<Type, faPatchField, areaMesh>& vf,
+    const bool allowUnmapped
+) const
+{
+    if (subMeshPtr_)
+    {
+        return interpolate(vf, *subMeshPtr_);
+    }
+
+    return vf;
+}
+
+
+template<class Type>
+Foam::tmp
+<
+    Foam::GeometricField<Type, Foam::faePatchField, Foam::edgeMesh>
+>
+Foam::faMeshSubset::interpolate
+(
+    const GeometricField<Type, faePatchField, edgeMesh>& vf,
     const bool allowUnmapped
 ) const
 {

@@ -46,6 +46,7 @@ Original Authors
 #include "IOobjectList.H"
 
 #include "areaFields.H"
+#include "edgeFields.H"
 #include "faFieldDecomposer.H"
 #include "faMeshReconstructor.H"
 #include "PtrListOps.H"

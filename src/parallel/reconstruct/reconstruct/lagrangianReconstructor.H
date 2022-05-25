@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,12 +32,12 @@ Description
 
 SourceFiles
     lagrangianReconstructor.C
-    lagrangianReconstructorFields.C
+    lagrangianReconstructorTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef lagrangianReconstructor_H
-#define lagrangianReconstructor_H
+#ifndef Foam_lagrangianReconstructor_H
+#define Foam_lagrangianReconstructor_H
 
 #include "cloud.H"
 #include "polyMesh.H"
@@ -56,7 +56,7 @@ namespace Foam
 
 class lagrangianReconstructor
 {
-    // Private data
+    // Private Data
 
         //- Mesh reference
         const fvMesh& mesh_;
@@ -82,6 +82,12 @@ class lagrangianReconstructor
 
 public:
 
+    // Static Data
+
+        //- Output verbosity when writing
+        static int verbose_;
+
+
     // Constructors
 
         //- Construct from components
@@ -101,7 +107,8 @@ public:
 
         //- Reconstruct a single field for given cloud
         template<class Type>
-        tmp<IOField<Type>> reconstructField
+        tmp<IOField<Type>>
+        reconstructField
         (
             const word& cloudName,
             const word& fieldName
@@ -109,7 +116,8 @@ public:
 
         //- Reconstruct a single field-field for given cloud
         template<class Type>
-        tmp<CompactIOField<Field<Type>, Type>> reconstructFieldField
+        tmp<CompactIOField<Field<Type>, Type>>
+        reconstructFieldField
         (
             const word& cloudName,
             const word& fieldName
@@ -120,8 +128,7 @@ public:
         label reconstructFields
         (
             const word& cloudName,
-            const IOobjectList& objects,
-            const UList<word>& fieldNames
+            const UPtrList<const IOobject>& fieldObjects
         );
 
         //- Reconstruct multiple fields for given cloud
@@ -141,6 +148,14 @@ public:
             const IOobjectList& objects,
             const wordRes& selectedFields = wordRes()
         );
+
+        //- Reconstruct all fields for known cloud field types
+        void reconstructAllFields
+        (
+            const word& cloudName,
+            const IOobjectList& cloudObjs,
+            const wordRes& selectedFields = wordRes()
+        );
 };
 
 
@@ -151,7 +166,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "lagrangianReconstructorFields.C"
+    #include "lagrangianReconstructorTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

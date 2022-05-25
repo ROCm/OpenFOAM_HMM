@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,12 +32,14 @@ Description
 
 SourceFiles
     lagrangianFieldDecomposer.C
-    lagrangianFieldDecomposerFields.C
+    lagrangianFieldDecomposerCache.C
+    lagrangianFieldDecomposerReadFields.C
+    lagrangianFieldDecomposerTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef lagrangianFieldDecomposer_H
-#define lagrangianFieldDecomposer_H
+#ifndef Foam_lagrangianFieldDecomposer_H
+#define Foam_lagrangianFieldDecomposer_H
 
 #include "Cloud.H"
 #include "CompactIOField.H"
@@ -48,6 +51,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class IOobjectList;
 
 /*---------------------------------------------------------------------------*\
@@ -56,7 +60,7 @@ class IOobjectList;
 
 class lagrangianFieldDecomposer
 {
-    // Private data
+    // Private Data
 
         //- Reference to processor mesh
         const polyMesh& procMesh_;
@@ -79,6 +83,10 @@ class lagrangianFieldDecomposer
 
 public:
 
+    // Public Classes
+    class fieldsCache;
+
+
     // Constructors
 
         //- Construct from components
@@ -94,28 +102,28 @@ public:
         );
 
 
-    // Member Functions
+    // Field Reading
 
-        // Read the fields and hold on the pointer list
+        //- Read the fields and store on the pointer list
         template<class Type>
         static void readFields
         (
-            const label cloudI,
+            const label cloudi,
             const IOobjectList& lagrangianObjects,
-            PtrList<PtrList<IOField<Type>>>& lagrangianFields
+            PtrList<PtrList<IOField<Type>>>& cloudFields
         );
 
+        //- Read the field-fields and store on the pointer list
         template<class Type>
         static void readFieldFields
         (
-            const label cloudI,
+            const label cloudi,
             const IOobjectList& lagrangianObjects,
-            PtrList
-            <
-                PtrList<CompactIOField<Field<Type>, Type>>
-            >& lagrangianFields
+            PtrList<PtrList<CompactIOField<Field<Type>, Type>>>& cloudFields
         );
 
+
+    // Member Functions
 
         //- Decompose volume field
         template<class Type>
@@ -149,6 +157,77 @@ public:
 };
 
 
+/*---------------------------------------------------------------------------*\
+           Class lagrangianFieldDecomposer::fieldsCache Declaration
+\*---------------------------------------------------------------------------*/
+
+class lagrangianFieldDecomposer::fieldsCache
+{
+    // Private Data
+
+        class privateCache;
+
+        //- All field and field-field types for lagrangian
+        std::unique_ptr<privateCache> cache_;
+
+
+    // Private Member Functions
+
+        //- No copy construct
+        fieldsCache(const fieldsCache&) = delete;
+
+        //- No copy assignment
+        void operator=(const fieldsCache&) = delete;
+
+
+public:
+
+    // Constructors
+
+        //- Default construct (no clouds)
+        fieldsCache();
+
+        //- Construct for given number of clouds
+        explicit fieldsCache(const label nClouds);
+
+
+    //- Destructor
+    ~fieldsCache();
+
+
+    // Member Functions
+
+        //- No clouds
+        bool empty() const;
+
+        //- Number of clouds
+        label size() const;
+
+        //- Clear out
+        void clear();
+
+        //- Resize for the number of clouds
+        void resize(const label nClouds);
+
+
+        //- Read all fields and field-fields for given cloud and objects
+        void readAllFields
+        (
+            const label cloudi,
+            const IOobjectList& lagrangianObjects
+        );
+
+        //- Decompose and write all fields and field-fields for given cloud
+        void decomposeAllFields
+        (
+            const label cloudi,
+            const fileName& cloudDir,
+            const lagrangianFieldDecomposer& decomposer,
+            bool report = false
+        ) const;
+};
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
@@ -156,7 +235,8 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "lagrangianFieldDecomposerFields.C"
+    #include "lagrangianFieldDecomposerReadFields.C"
+    #include "lagrangianFieldDecomposerTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

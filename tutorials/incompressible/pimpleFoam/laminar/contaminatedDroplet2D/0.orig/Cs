@@ -22,7 +22,7 @@ referenceLevel  0;
 
 boundaryField
 {
-    fontAndBack
+    frontAndBack
     {
         type            empty;
     }

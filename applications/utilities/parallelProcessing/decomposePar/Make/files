@@ -8,6 +8,4 @@ domainDecompositionWrite.C
 domainDecompositionDryRun.C
 domainDecompositionDryRunWrite.C
 
-lagrangianFieldDecomposer.C
-
 EXE = $(FOAM_APPBIN)/decomposePar

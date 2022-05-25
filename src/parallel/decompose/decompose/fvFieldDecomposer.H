@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,12 +32,13 @@ Description
 
 SourceFiles
     fvFieldDecomposer.C
-    fvFieldDecomposerFields.C
+    fvFieldDecomposerCache.C
+    fvFieldDecomposerTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fvFieldDecomposer_H
-#define fvFieldDecomposer_H
+#ifndef Foam_fvFieldDecomposer_H
+#define Foam_fvFieldDecomposer_H
 
 #include "fvMesh.H"
 #include "fvPatchFieldMapper.H"
@@ -48,6 +49,9 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
+class IOobjectList;
+
 /*---------------------------------------------------------------------------*\
                     Class fvFieldDecomposer Declaration
 \*---------------------------------------------------------------------------*/
@@ -55,6 +59,8 @@ namespace Foam
 class fvFieldDecomposer
 {
 public:
+
+    // Public Classes
 
         //- Patch field decomposer class
         class patchFieldDecomposer
@@ -126,7 +132,7 @@ public:
             //- Construct given addressing from complete mesh
             processorVolPatchFieldDecomposer
             (
-                const fvMesh& mesh,
+                const polyMesh& mesh,
                 const labelUList& addressingSlice
             );
 
@@ -232,13 +238,24 @@ private:
         PtrList<scalarField> faceSign_;
 
 
+    // Private Member Functions
+
+        //- No copy construct
+        fvFieldDecomposer(const fvFieldDecomposer&) = delete;
+
+        //- No copy assignment
+        void operator=(const fvFieldDecomposer&) = delete;
+
 public:
 
-    //- No copy construct
-    fvFieldDecomposer(const fvFieldDecomposer&) = delete;
+    // Public Classes
+    class fieldsCache;
 
-    //- No copy assignment
-    void operator=(const fvFieldDecomposer&) = delete;
+
+    // Static Data
+
+        //- Output verbosity when writing
+        static int verbose_;
 
 
     // Constructors
@@ -336,6 +353,69 @@ public:
 };
 
 
+/*---------------------------------------------------------------------------*\
+               Class fvFieldDecomposer::fieldsCache Declaration
+\*---------------------------------------------------------------------------*/
+
+class fvFieldDecomposer::fieldsCache
+{
+    // Private Data
+
+        class privateCache;
+
+        //- All field and field-field types for lagrangian
+        std::unique_ptr<privateCache> cache_;
+
+
+    // Private Member Functions
+
+        //- No copy construct
+        fieldsCache(const fieldsCache&) = delete;
+
+        //- No copy assignment
+        void operator=(const fieldsCache&) = delete;
+
+
+public:
+
+    // Constructors
+
+        //- Default construct
+        fieldsCache();
+
+
+    //- Destructor
+    ~fieldsCache();
+
+
+    // Member Functions
+
+        //- No fields
+        bool empty() const;
+
+        //- Total number of fields
+        label size() const;
+
+        //- Clear out
+        void clear();
+
+
+        //- Read all fields given mesh and objects
+        void readAllFields
+        (
+            const fvMesh& mesh,
+            const IOobjectList& objects
+        );
+
+        //- Decompose and write all fields
+        void decomposeAllFields
+        (
+            const fvFieldDecomposer& decomposer,
+            bool report = false
+        ) const;
+};
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
@@ -343,7 +423,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "fvFieldDecomposerFields.C"
+    #include "fvFieldDecomposerTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

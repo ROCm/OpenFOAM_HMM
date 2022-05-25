@@ -25,11 +25,7 @@ if (doDecompose && Pstream::parRun())
     // Handle area fields
     // ------------------
 
-    PtrList<areaScalarField> areaScalarFields;
-    PtrList<areaVectorField> areaVectorFields;
-    PtrList<areaSphericalTensorField> areaSphTensorFields;
-    PtrList<areaSymmTensorField> areaSymmTensorFields;
-    PtrList<areaTensorField> areaTensorFields;
+    faFieldDecomposer::fieldsCache areaFieldsCache;
 
     const faMesh& fullMesh = reconstructor.mesh();
 
@@ -51,26 +47,7 @@ if (doDecompose && Pstream::parRun())
 
             IOobjectList objects(fullMesh.time(), runTime.timeName());
 
-            faFieldDecomposer::readFields
-            (
-                fullMesh, objects, areaScalarFields
-            );
-            faFieldDecomposer::readFields
-            (
-                fullMesh, objects, areaVectorFields
-            );
-            faFieldDecomposer::readFields
-            (
-                fullMesh, objects, areaSphTensorFields
-            );
-            faFieldDecomposer::readFields
-            (
-                fullMesh, objects, areaSymmTensorFields
-            );
-            faFieldDecomposer::readFields
-            (
-                fullMesh, objects, areaTensorFields
-            );
+            areaFieldsCache.readAllFields(fullMesh, objects);
 
             // Restore old settings
             if (oldHandler)
@@ -81,14 +58,7 @@ if (doDecompose && Pstream::parRun())
         }
     }
 
-    const label nAreaFields =
-    (
-        areaScalarFields.size()
-      + areaVectorFields.size()
-      + areaSphTensorFields.size()
-      + areaSymmTensorFields.size()
-      + areaTensorFields.size()
-    );
+    const label nAreaFields = areaFieldsCache.size();
 
     if (nAreaFields)
     {
@@ -103,41 +73,8 @@ if (doDecompose && Pstream::parRun())
             reconstructor.boundaryProcAddressing()
         );
 
-        if (areaScalarFields.size())
-        {
-            Info<< "  scalars: "
-                << flatOutput(PtrListOps::names(areaScalarFields)) << nl;
-            fieldDecomposer.decomposeFields(areaScalarFields);
-        }
-
-        if (areaVectorFields.size())
-        {
-            Info<< "  vectors: "
-                << flatOutput(PtrListOps::names(areaVectorFields)) << nl;
-            fieldDecomposer.decomposeFields(areaVectorFields);
-        }
-
-        if (areaSphTensorFields.size())
-        {
-            Info<< "  sphTensors: "
-                << flatOutput(PtrListOps::names(areaSphTensorFields)) << nl;
-            fieldDecomposer.decomposeFields(areaSphTensorFields);
-        }
-
-        if (areaSymmTensorFields.size())
-        {
-            Info<< "  symmTensors: "
-                << flatOutput(PtrListOps::names(areaSymmTensorFields)) << nl;
-            fieldDecomposer.decomposeFields(areaSymmTensorFields);
-        }
-
-        if (areaTensorFields.size())
-        {
-            Info<< "  tensors: "
-                << flatOutput(PtrListOps::names(areaTensorFields)) << nl;
-            fieldDecomposer.decomposeFields(areaTensorFields);
-        }
-
+        // Report
+        areaFieldsCache.decomposeAllFields(fieldDecomposer, true);
         Info<< endl;
     }
 }

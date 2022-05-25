@@ -94,7 +94,7 @@ Foam::lagrangianFieldDecomposer::lagrangianFieldDecomposer
         }
     }
 
-    particleIndices_.setSize(pi);
+    particleIndices_.resize(pi);
 
     IOPosition<Cloud<passiveParticle>>(positions_).write();
 }

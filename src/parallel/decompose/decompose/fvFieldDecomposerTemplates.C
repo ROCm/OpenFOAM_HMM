@@ -32,6 +32,8 @@ License
 #include "processorCyclicFvPatchField.H"
 #include "processorCyclicFvsPatchField.H"
 #include "emptyFvPatchFields.H"
+#include "volFields.H"
+#include "surfaceFields.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -52,8 +54,8 @@ Foam::fvFieldDecomposer::decomposeField
             IOobject
             (
                 field.name(),
-                procMesh_.time().timeName(),
-                procMesh_,
+                procMesh_.thisDb().time().timeName(),
+                procMesh_.thisDb(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
                 false
@@ -100,8 +102,8 @@ Foam::fvFieldDecomposer::decomposeField
             IOobject
             (
                 field.name(),
-                procMesh_.time().timeName(),
-                procMesh_,
+                procMesh_.thisDb().time().timeName(),
+                procMesh_.thisDb(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
@@ -118,7 +120,7 @@ Foam::fvFieldDecomposer::decomposeField
     // 2. Change the fvPatchFields to the correct type using a mapper
     //  constructor (with reference to the now correct internal field)
 
-    typename VolFieldType::Boundary& bf = resF.boundaryFieldRef();
+    auto& bf = resF.boundaryFieldRef();
 
     forAll(bf, patchi)
     {
@@ -272,8 +274,8 @@ Foam::fvFieldDecomposer::decomposeField
             IOobject
             (
                 field.name(),
-                procMesh_.time().timeName(),
-                procMesh_,
+                procMesh_.thisDb().time().timeName(),
+                procMesh_.thisDb(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
@@ -289,7 +291,7 @@ Foam::fvFieldDecomposer::decomposeField
     // 2. Change the fvsPatchFields to the correct type using a mapper
     //  constructor (with reference to the now correct internal field)
 
-    typename SurfaceFieldType::Boundary& bf = resF.boundaryFieldRef();
+    auto& bf = resF.boundaryFieldRef();
 
     forAll(boundaryAddressing_, patchi)
     {

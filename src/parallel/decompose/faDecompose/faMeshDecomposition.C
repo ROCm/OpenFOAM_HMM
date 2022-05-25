@@ -47,16 +47,16 @@ void Foam::faMeshDecomposition::distributeFaces()
 
     cpuTime decompositionTime;
 
-    for (label procI = 0; procI < nProcs(); procI++)
+    for (label proci = 0; proci < nProcs(); ++proci)
     {
         Time processorDb
         (
             Time::controlDictName,
             time().rootPath(),
-            time().caseName()/("processor" + Foam::name(procI))
+            time().caseName()/("processor" + Foam::name(proci))
         );
 
-        polyMesh procMesh
+        polyMesh procFvMesh
         (
             IOobject
             (
@@ -65,6 +65,24 @@ void Foam::faMeshDecomposition::distributeFaces()
                 processorDb
             )
         );
+
+        IOobject ioAddr
+        (
+            "procAddressing",
+            "constant",
+            polyMesh::meshSubDir,
+            procFvMesh,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE,
+            false  // not registered
+        );
+
+
+        // faceProcAddressing (polyMesh)
+        ioAddr.rename("faceProcAddressing");
+        labelIOList fvFaceProcAddressing(ioAddr);
+
+        labelHashSet faceProcAddressingHash(2*fvFaceProcAddressing.size());
 
         // If faMesh's fvPatch is a part of the global face zones, faces of that
         // patch will be present on all processors. Because of that, looping
@@ -76,77 +94,31 @@ void Foam::faMeshDecomposition::distributeFaces()
         // Vanja Skuric, 2016-04-21
         if (hasGlobalFaceZones_)
         {
-            labelList faceProcAddressing
-            (
-                labelIOList
-                (
-                    IOobject
-                    (
-                        "faceProcAddressing",
-                        "constant",
-                        procMesh.meshSubDir,
-                        procMesh,
-                        IOobject::MUST_READ,
-                        IOobject::NO_WRITE
-                    )
-                )
-            );
-
-            const label ownerSize =
-            (
-                labelIOList
-                (
-                    IOobject
-                    (
-                        "owner",
-                        "constant",
-                        procMesh.meshSubDir,
-                        procMesh,
-                        IOobject::MUST_READ,
-                        IOobject::NO_WRITE
-                    )
-                )
-            ).size();
-
-            labelHashSet faceProcAddressingHash(ownerSize);
+            // owner (polyMesh)
+            ioAddr.rename("owner");
+            const label ownerSize = labelIOList(ioAddr).size();
 
             for (int i = 0; i < ownerSize; ++i)
             {
-                faceProcAddressingHash.insert(faceProcAddressing[i]);
-            }
-
-            forAll(faceLabels(), faceI)
-            {
-                if (faceProcAddressingHash.found(faceLabels()[faceI] + 1))
-                {
-                    faceToProc_[faceI] = procI;
-                }
+                faceProcAddressingHash.insert(fvFaceProcAddressing[i]);
             }
         }
         else
         {
-            labelHashSet faceProcAddressingHash
+            faceProcAddressingHash.insert
             (
-                labelIOList
-                (
-                    IOobject
-                    (
-                        "faceProcAddressing",
-                        "constant",
-                        procMesh.meshSubDir,
-                        procMesh,
-                        IOobject::MUST_READ,
-                        IOobject::NO_WRITE
-                    )
-                )
+                static_cast<labelList&>(fvFaceProcAddressing)
             );
+        }
 
-            forAll(faceLabels(), faceI)
+        forAll(faceLabels(), facei)
+        {
+            // With +1 for lookup in faceMap with flip encoding
+            const label index = (faceLabels()[facei] + 1);
+
+            if (faceProcAddressingHash.found(index))
             {
-                if (faceProcAddressingHash.found(faceLabels()[faceI] + 1))
-                {
-                    faceToProc_[faceI] = procI;
-                }
+                faceToProc_[facei] = proci;
             }
         }
     }
@@ -276,40 +248,37 @@ void Foam::faMeshDecomposition::decomposeMesh()
             )
         );
 
-        labelIOList fvPointProcAddressing
+        IOobject ioAddr
         (
-            IOobject
-            (
-                "pointProcAddressing",
-                "constant",
-                procFvMesh.meshSubDir,
-                procFvMesh,
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE
-            )
+            "procAddressing",
+            "constant",
+            polyMesh::meshSubDir,
+            procFvMesh,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE,
+            false  // not registered
         );
+
+
+        // pointProcAddressing (polyMesh)
+        ioAddr.rename("pointProcAddressing");
+        labelIOList fvPointProcAddressing(ioAddr);
 
         Map<label> fvFaceProcAddressingHash;
 
         {
-            labelIOList fvFaceProcAddressing
-            (
-                IOobject
-                (
-                    "faceProcAddressing",
-                    "constant",
-                    procFvMesh.meshSubDir,
-                    procFvMesh,
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE
-                )
-            );
+            // faceProcAddressing (polyMesh)
+            ioAddr.rename("faceProcAddressing");
+            labelIOList fvFaceProcAddressing(ioAddr);
 
-            forAll(fvFaceProcAddressing, faceI)
+            fvFaceProcAddressingHash.resize(2*fvFaceProcAddressing.size());
+
+            forAll(fvFaceProcAddressing, facei)
             {
                  fvFaceProcAddressingHash.insert
                  (
-                     fvFaceProcAddressing[faceI], faceI
+                     fvFaceProcAddressing[facei],
+                     facei
                  );
             }
         };
@@ -365,17 +334,16 @@ void Foam::faMeshDecomposition::decomposeMesh()
 
 
         const uindirectPrimitivePatch& procPatch = procMesh.patch();
-        const vectorField& procPoints = procPatch.localPoints();
         const labelList& procMeshPoints = procPatch.meshPoints();
         const edgeList& procEdges = procPatch.edges();
 
         labelList& curPatchPointAddressing = procPatchPointAddressing_[procI];
-        curPatchPointAddressing.setSize(procPoints.size(), -1);
+        curPatchPointAddressing.resize(procMeshPoints.size(), -1);
 
-        forAll(procPoints, pointI)
+        forAll(procMeshPoints, pointi)
         {
-            curPatchPointAddressing[pointI] =
-                map[fvPointProcAddressing[procMeshPoints[pointI]]];
+            curPatchPointAddressing[pointi] =
+                map[fvPointProcAddressing[procMeshPoints[pointi]]];
         }
 
         labelList& curPatchEdgeAddressing = procPatchEdgeAddressing_[procI];
@@ -1154,9 +1122,12 @@ bool Foam::faMeshDecomposition::writeDecomposition()
         sharedPointLookup.insert(globallySharedPoints_[pointi], pointi);
     }
 
+    label maxProcFaces = 0;
+    label totProcFaces = 0;
+    label maxProcEdges = 0;
     label totProcEdges = 0;
     label maxProcPatches = 0;
-    label maxProcEdges = 0;
+    label totProcPatches = 0;
 
     // Write out the meshes
     for (label procI = 0; procI < nProcs(); procI++)
@@ -1193,7 +1164,7 @@ bool Foam::faMeshDecomposition::writeDecomposition()
             (
                 "boundaryProcAddressing",
                 "constant",
-                procFvMesh.meshSubDir,
+                polyMesh::meshSubDir,
                 procFvMesh,
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE
@@ -1286,19 +1257,35 @@ bool Foam::faMeshDecomposition::writeDecomposition()
 
         procMesh.write();
 
-        Info<< endl
-            << "Processor " << procI << nl
-            << "    Number of faces = " << procMesh.nFaces()
-            << endl;
+        // Statistics
+        Info<< nl << "Processor " << procI;
+
+        if (procMesh.nFaces())
+        {
+            Info<< nl << "    ";
+        }
+        else
+        {
+            Info<< ": ";
+        }
+
+        Info<< "Number of faces = " << procMesh.nFaces() << nl;
+
+        if (procMesh.nFaces())
+        {
+            Info<< "    Number of points = " << procMesh.nPoints() << nl;
+        }
+
+        totProcFaces += procMesh.nFaces();
+        maxProcFaces = max(maxProcFaces, procMesh.nFaces());
 
         label nBoundaryEdges = 0;
         label nProcPatches = 0;
         label nProcEdges = 0;
 
-        forAll(procMesh.boundary(), patchi)
+        for (const faPatch& fap : procMesh.boundary())
         {
-            const auto* ppp =
-                isA<processorFaPatch>(procMesh.boundary()[patchi]);
+            const auto* ppp = isA<processorFaPatch>(fap);
 
             if (ppp)
             {
@@ -1306,92 +1293,93 @@ bool Foam::faMeshDecomposition::writeDecomposition()
 
                 Info<< "    Number of edges shared with processor "
                     << procPatch.neighbProcNo() << " = "
-                    << procPatch.size() << endl;
+                    << procPatch.size() << nl;
 
                 nProcEdges += procPatch.size();
                 ++nProcPatches;
             }
             else
             {
-                nBoundaryEdges += procMesh.boundary()[patchi].size();
+                nBoundaryEdges += fap.size();
             }
         }
 
-        Info<< "    Number of processor patches = " << nProcPatches << nl
-            << "    Number of processor edges = " << nProcEdges << nl
-            << "    Number of boundary edges = " << nBoundaryEdges << endl;
+        if (procMesh.nFaces() && (nBoundaryEdges || nProcEdges))
+        {
+            Info<< "    Number of processor patches = " << nProcPatches << nl
+                << "    Number of processor edges = " << nProcEdges << nl
+                << "    Number of boundary edges = " << nBoundaryEdges << nl;
+        }
 
         totProcEdges += nProcEdges;
-        maxProcPatches = max(maxProcPatches, nProcPatches);
+        totProcPatches += nProcPatches;
         maxProcEdges = max(maxProcEdges, nProcEdges);
+        maxProcPatches = max(maxProcPatches, nProcPatches);
 
-        // create and write the addressing information
-        labelIOList pointProcAddressing
-        (
-            IOobject
-            (
-                "pointProcAddressing",
-                "constant",
-                procMesh.meshSubDir,
-                procFvMesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            procPatchPointAddressing_[procI]
-        );
-        pointProcAddressing.write();
+        // Write the addressing information
 
-        labelIOList edgeProcAddressing
+        IOobject ioAddr
         (
-            IOobject
-            (
-                "edgeProcAddressing",
-                "constant",
-                procMesh.meshSubDir,
-                procFvMesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            procEdgeAddressing_[procI]
+            "procAddressing",
+            "constant",
+            faMesh::meshSubDir,
+            procMesh.thisDb(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false  // not registered
         );
-        edgeProcAddressing.write();
 
-        labelIOList faceProcAddressing
-        (
-            IOobject
-            (
-                "faceProcAddressing",
-                "constant",
-                procMesh.meshSubDir,
-                procFvMesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            procFaceAddressing_[procI]
-        );
-        faceProcAddressing.write();
+        // pointProcAddressing
+        ioAddr.rename("pointProcAddressing");
+        IOListRef<label>(ioAddr, procPatchPointAddressing_[procI]).write();
 
-        labelIOList boundaryProcAddressing
-        (
-            IOobject
-            (
-                "boundaryProcAddressing",
-                "constant",
-                procMesh.meshSubDir,
-                procFvMesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            procBoundaryAddressing_[procI]
-        );
-        boundaryProcAddressing.write();
+        // edgeProcAddressing
+        ioAddr.rename("edgeProcAddressing");
+        IOListRef<label>(ioAddr, procEdgeAddressing_[procI]).write();
+
+        // faceProcAddressing
+        ioAddr.rename("faceProcAddressing");
+        IOListRef<label>(ioAddr, procFaceAddressing_[procI]).write();
+
+        // boundaryProcAddressing
+        ioAddr.rename("boundaryProcAddressing");
+        IOListRef<label>(ioAddr, procBoundaryAddressing_[procI]).write();
     }
 
+
+    // Summary stats
     Info<< nl
-        << "Number of processor edges = " << totProcEdges/2 << nl
-        << "Max number of processor patches = " << maxProcPatches << nl
-        << "Max number of faces between processors = " << maxProcEdges
-        << endl;
+        << "Number of processor edges = " << (totProcEdges/2) << nl
+        << "Max number of faces = " << maxProcFaces;
+
+    if (maxProcFaces != totProcFaces)
+    {
+        scalar avgValue = scalar(totProcFaces)/nProcs_;
+
+        Info<< " (" << 100.0*(maxProcFaces-avgValue)/avgValue
+            << "% above average " << avgValue << ')';
+    }
+    Info<< nl;
+
+    Info<< "Max number of processor patches = " << maxProcPatches;
+    if (totProcPatches)
+    {
+        scalar avgValue = scalar(totProcPatches)/nProcs_;
+
+        Info<< " (" << 100.0*(maxProcPatches-avgValue)/avgValue
+            << "% above average " << avgValue << ')';
+    }
+    Info<< nl;
+
+    Info<< "Max number of edges between processors = " << maxProcEdges;
+    if (totProcEdges)
+    {
+        scalar avgValue = scalar(totProcEdges)/nProcs_;
+
+        Info<< " (" << 100.0*(maxProcEdges-avgValue)/avgValue
+            << "% above average " << avgValue << ')';
+    }
+    Info<< nl << endl;
 
     return true;
 }

@@ -186,6 +186,34 @@ protected:
             labelList& compactStart
         );
 
+        //- Synchronize send/recv mask buffers as a 'copy' operation.
+        //  Somewhat similar to Pstream::exchangeContainer
+        //
+        //  The masks must be properly sized by the caller, which avoids
+        //  a needless all-to-all for the sizes and the sizing is already
+        //  given by the maps.
+        static void exchangeMasks
+        (
+            const UList<bitSet>& sendMasks,
+            UList<bitSet>& recvMasks,
+            const int tag,
+            const label comm
+        );
+
+        //- Bi-direction sync of send/recv buffers using bitwise '&='
+        //- combine operation.
+        //
+        //  The masks must be properly sized by the caller, which avoids
+        //  a needless all-to-all for the sizes and the sizing is already
+        //  given by the maps.
+        static void unionCombineMasks
+        (
+            UList<bitSet>& sendMasks,
+            UList<bitSet>& recvMasks,
+            const int tag,
+            const label comm
+        );
+
 
         template<class T, class CombineOp, class NegateOp>
         static void flipAndCombine
@@ -224,6 +252,88 @@ protected:
 private:
 
     // Private Member Functions
+
+        //- Helper for compactData (private: filescope only!)
+        //  Establishes the exact send/recv elements used after masking.
+        //
+        //  \param allowedLocalElems  Permissible local mapped elements
+        //     (true/false). Can be longer/shorter than actual number
+        //     of mapped elements.
+        //  \param allowedRemoteElems  Permissible remote mapped elements
+        //     (true/false). Can be longer/shorter than actual number
+        //     of mapped elements.
+        //  \param[out] sendMasks  Mask of local elements sent to procs.
+        //  \param[out] recvMasks  Mask of remote elements received
+        //      from procs
+        //  \param tag  The message tag
+        void calcCompactDataRequirements
+        (
+            const bitSet& allowedLocalElems,
+            const bitSet& allowedRemoteElems,
+            List<bitSet>& sendMasks,     // [out]
+            List<bitSet>& recvMasks,     // [out]
+            const int tag
+        );
+
+        //- Helper for compactLocalData (private: filescope only!)
+        //  Establishes the exact send/recv elements used after masking.
+        //
+        //  \param allowedLocalElems  Permissible local mapped elements
+        //     (true/false). Can be longer/shorter than actual number
+        //     of mapped elements.
+        //  \param[out] sendMasks  Mask of local elements sent to procs.
+        //  \param[out] recvMasks  Mask of remote elements received by proc.
+        //      from procs
+        //  \param tag  The message tag
+        void calcCompactLocalDataRequirements
+        (
+            const bitSet& allowedLocalElems,
+            List<bitSet>& sendMasks,    // [out]
+            List<bitSet>& recvMasks,    // [out]
+            const int tag
+        );
+
+        //- Helper for compactRemoteData (private: filescope only!)
+        //  Establishes the exact send/recv elements used after masking.
+        //
+        //  \param allowedRemoteElems  Permissible remote mapped elements
+        //     (true/false). Can be longer/shorter than actual number
+        //     of mapped elements.
+        //  \param[out] sendMasks  Mask of local elements sent to procs.
+        //  \param[out] recvMasks  Mask of remote elements received by proc.
+        //  \param tag  The message tag
+        void calcCompactRemoteDataRequirements
+        (
+            const bitSet& allowedRemoteElems,
+            List<bitSet>& sendMasks,    // [out]
+            List<bitSet>& recvMasks,    // [out]
+            const int tag
+        );
+
+        //- Implementation for compact{Local,Remote}Data (private).
+        //  Also renumbers the subMap/constructMap if oldToNew maps
+        //  are notNull().
+        //
+        //  No communication
+        void compactData
+        (
+            const UList<bitSet>& sendMasks,
+            const UList<bitSet>& recvMasks,
+            labelList& oldToNewSub,
+            labelList& oldToNewConstruct,
+            const label localSize = -1
+        );
+
+        //- Wrapper for compactData (private) that supplies oldToNew
+        //- maps for renumbering if doRenumber is true.
+        //  No communication
+        void compactDataImpl
+        (
+            const UList<bitSet>& sendMasks,
+            const UList<bitSet>& recvMasks,
+            const bool doRenumber
+        );
+
 
         //- Helper for renumbering compacted map elements and updating the
         //- supplied old-to-new mapping to account for the visit order of
@@ -509,22 +619,163 @@ public:
 
     // Compaction
 
-        //- Compact all maps and layout.
-        //  Returns compaction maps for subMap and constructMap
-        void compact
+        //- Compact send/receive maps based on selection of
+        //- originating local (send) elements.
+        //  Determines and removes the correspondingly unneeded elements
+        //  in the send/receive maps.
+        //  Only compacts the maps, does not change the local layout.
+        //
+        //  \param allowedLocalElems  Permissible local mapped elements
+        //     (true/false). Can be longer/shorter than actual number
+        //     of mapped elements.
+        //  \param tag  The message tag
+        //  \param doRenumber  Apply oldToNew internally to renumber
+        //     entries (uses renumberMap) and adjust the constructSize
+        //
+        //  \note generally preferable to compact based on remote data
+        //      (ie, the actual receiver)
+        void compactLocalData
         (
-            const boolList& elemIsUsed,
+            const bitSet& allowedLocalElems,
+            const int tag = UPstream::msgType(),
+            const bool doRenumber = false
+        );
+
+        //- Compact send/receive maps based on selection of
+        //- remote (receive) elements.
+        //  Determines and removes the correspondingly unneeded elements
+        //  in the send/receive maps.
+        //  Only compacts the maps, does not change the local layout.
+        //
+        //  \param allowedRemoteElems  Permissible remote mapped elements
+        //     (true/false). Can be longer/shorter than actual number
+        //     of mapped elements.
+        //  \param tag  The message tag
+        //  \param doRenumber  Apply oldToNew internally to renumber
+        //     entries (uses renumberMap) and adjust the constructSize
+        void compactRemoteData
+        (
+            const bitSet& allowedRemoteElems,
+            const int tag = UPstream::msgType(),
+            const bool doRenumber = false
+        );
+
+
+        //- Compact send/receive maps based on selection of
+        //- originating local (send) elements.
+        //- Returns compaction mappings for subMap and constructMap.
+        //
+        //  \param allowedLocalElems  Permissible local mapped elements
+        //     (true/false). Can be longer/shorter than actual number
+        //     of mapped elements.
+        //  \param[out] oldToNewSub  Old-to-new mapping: subMap
+        //     Disabled if labelList::null(),
+        //  \param[out] oldToNewConstruct  Old-to-new mapping: constructMap
+        //     Disabled if labelList::null(),
+        //  \param localSize  The max index for subMap (-1: auto-detect)
+        //  \param tag  The message tag
+        //
+        //  \note Applies oldToNew to renumber entries
+        //     (uses renumberMap) and adjust constructSize
+        //
+        //  \note generally preferable to compact based on remote data
+        //      (ie, the actual receiver)
+        void compactLocalData
+        (
+            const bitSet& allowedLocalElems,
+            labelList& oldToNewSub,
+            labelList& oldToNewConstruct,
+            const label localSize = -1,
             const int tag = UPstream::msgType()
         );
 
-        //- Compact all maps and layout.
-        //  Returns compaction maps for subMap and constructMap
-        void compact
+        //- Compact send/receive maps based on selection of
+        //- remote (receive) elements.
+        //- Returns compaction mappings for subMap and constructMap.
+        //
+        //  \param allowedRemoteElems  Permissible remote mapped elements
+        //     (true/false). Can be longer/shorter than actual number
+        //     of mapped elements.
+        //  \param[out] oldToNewSub  Old-to-new mapping: subMap
+        //     Disabled if labelList::null(),
+        //  \param[out] oldToNewConstruct  Old-to-new mapping: constructMap
+        //     Disabled if labelList::null(),
+        //  \param localSize  The max index for subMap (-1: auto-detect)
+        //  \param tag  The message tag
+        //
+        //  \note Applies oldToNew to renumber entries
+        //     (uses renumberMap) and adjust constructSize
+        void compactRemoteData
         (
-            const boolList& elemIsUsed,
-            const label localSize,            // max index for subMap
+            const bitSet& allowedRemoteElems,
             labelList& oldToNewSub,
             labelList& oldToNewConstruct,
+            const label localSize = -1,
+            const int tag = UPstream::msgType()
+        );
+
+
+        //- Compact send/receive maps based on selection of
+        //- originating local (send) and remote (receive) elements.
+        //
+        //  The resulting compact numbering:
+        //  - \c subMap (and \c oldToNewSub) :
+        //    will follow the original ordering of \c localElements.
+        //  - \c constructMap (and \c oldToNewConstruct) :
+        //    will follow the original ordering of \c remoteElements.
+        //  .
+        //  \warning ill-defined behaviour if \c localElements
+        //  or \c remoteElements contains duplicates.
+        void compactData
+        (
+            const labelUList& localElements,
+            const labelUList& remoteElements,
+            labelList& oldToNewSub,
+            labelList& oldToNewConstruct,
+            const label localSize = -1,
+            const int tag = UPstream::msgType()
+        );
+
+        //- Compact send/receive maps based on selection of
+        //- originating local (send) elements.
+        //
+        //  The resulting compact numbering:
+        //  - \c subMap (and \c oldToNewSub) :
+        //    will follow the original ordering of \c localElements.
+        //  - \c constructMap (and \c oldToNewConstruct) :
+        //    numbered in simple ascending order.
+        //  .
+        //  \warning ill-defined behaviour if \c localElements
+        //  contains duplicates.
+        //
+        //  \note generally preferable to compact based on remote data
+        //      (ie, the actual receiver)
+        void compactLocalData
+        (
+            const labelUList& localElements,
+            labelList& oldToNewSub,
+            labelList& oldToNewConstruct,
+            const label localSize = -1,
+            const int tag = UPstream::msgType()
+        );
+
+        //- Compact send/receive maps based on selection of
+        //- remote (receive) elements.
+        //
+        //  The resulting compact numbering:
+        //  - \c subMap (and \c oldToNewSub) :
+        //    numbered in simple ascending order.
+        //  - \c constructMap (and \c oldToNewConstruct) :
+        //    will follow the original ordering of \c remoteElements.
+        //  .
+        //  \warning ill-defined behaviour if \c remoteElements
+        //  contains duplicates.
+        void compactRemoteData
+        (
+            const labelUList& remoteElements,
+            labelList& oldToNewSub,
+            labelList& oldToNewConstruct,
+            const label localSize = -1,
             const int tag = UPstream::msgType()
         );
 
@@ -745,6 +996,25 @@ public:
         {
             NotImplemented;
         }
+
+        //- OpenFOAM-v2112 and earlier naming for compactRemoteData()
+        //- using boolList.
+        void compact
+        (
+            const boolList& remoteElemUsed,
+            const int tag = UPstream::msgType()
+        );
+
+        //- OpenFOAM-v2112 and earlier naming for compactRemoteData().
+        //- using boolList.
+        void compact
+        (
+            const boolList& remoteElemUsed,
+            const label localSize,
+            labelList& oldToNewSub,
+            labelList& oldToNewConstruct,
+            const int tag = UPstream::msgType()
+        );
 };
 
 

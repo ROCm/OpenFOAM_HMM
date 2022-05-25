@@ -26,7 +26,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "parFvFieldReconstructor.H"
+#include "parFvFieldDistributor.H"
 #include "Time.H"
 #include "PtrList.H"
 #include "fvPatchFields.H"
@@ -44,36 +44,33 @@ License
 
 template<class Type>
 Foam::tmp<Foam::DimensionedField<Type, Foam::volMesh>>
-Foam::parFvFieldReconstructor::reconstructFvVolumeInternalField
+Foam::parFvFieldDistributor::distributeField
 (
     const DimensionedField<Type, volMesh>& fld
 ) const
 {
+    // Create internalField by remote mapping
+
     distributedFieldMapper mapper
     (
         labelUList::null(),
         distMap_.cellMap()
     );
 
-    Field<Type> internalField(fld, mapper);
-
-    // Construct a volField
-    IOobject baseIO
-    (
-        fld.name(),
-        baseMesh_.time().timeName(),
-        fld.local(),
-        baseMesh_,
-        IOobject::NO_READ,
-        IOobject::NO_WRITE
-    );
-
     auto tfield = tmp<DimensionedField<Type, volMesh>>::New
     (
-        baseIO,
-        baseMesh_,
+        IOobject
+        (
+            fld.name(),
+            tgtMesh_.time().timeName(),
+            fld.local(),
+            tgtMesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        tgtMesh_,
         fld.dimensions(),
-        internalField
+        Field<Type>(fld, mapper)
     );
 
     tfield.ref().oriented() = fld.oriented();
@@ -83,97 +80,85 @@ Foam::parFvFieldReconstructor::reconstructFvVolumeInternalField
 
 
 template<class Type>
-Foam::tmp<Foam::DimensionedField<Type, Foam::volMesh>>
-Foam::parFvFieldReconstructor::reconstructFvVolumeInternalField
-(
-    const IOobject& fieldIoObject
-) const
-{
-    // Read the field
-    DimensionedField<Type, volMesh> fld
-    (
-        fieldIoObject,
-        procMesh_
-    );
-
-    // Distribute onto baseMesh
-    return reconstructFvVolumeInternalField(fld);
-}
-
-
-// Reconstruct a field onto the baseMesh
-template<class Type>
 Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
-Foam::parFvFieldReconstructor::reconstructFvVolumeField
+Foam::parFvFieldDistributor::distributeField
 (
     const GeometricField<Type, fvPatchField, volMesh>& fld
 ) const
 {
-    // Create the internalField by remote mapping
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+    // Create internalField by remote mapping
     distributedFieldMapper mapper
     (
         labelUList::null(),
         distMap_.cellMap()
     );
 
-    Field<Type> internalField(fld.internalField(), mapper);
+    DimensionedField<Type, volMesh> internalField
+    (
+        IOobject
+        (
+            fld.name(),
+            tgtMesh_.time().timeName(),
+            fld.local(),
+            tgtMesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        tgtMesh_,
+        fld.dimensions(),
+        Field<Type>(fld.internalField(), mapper)
+    );
+
+    internalField.oriented() = fld.oriented();
 
 
+    // Create patchFields by remote mapping
+    // Note: patchFields still on source mesh, not target mesh
 
-    // Create the patchFields by remote mapping
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Note: patchFields still on mesh, not baseMesh
-
-    PtrList<fvPatchField<Type>> patchFields(fld.mesh().boundary().size());
+    PtrList<fvPatchField<Type>> oldPatchFields(fld.mesh().boundary().size());
 
     const auto& bfld = fld.boundaryField();
 
-    forAll(bfld, patchI)
+    forAll(bfld, patchi)
     {
-        if (patchFaceMaps_.set(patchI))
+        if (patchFaceMaps_.set(patchi))
         {
             // Clone local patch field
-            patchFields.set(patchI, bfld[patchI].clone());
+            oldPatchFields.set(patchi, bfld[patchi].clone());
 
             distributedFvPatchFieldMapper mapper
             (
                 labelUList::null(),
-                patchFaceMaps_[patchI]
+                patchFaceMaps_[patchi]
             );
 
             // Map into local copy
-            patchFields[patchI].autoMap(mapper);
+            oldPatchFields[patchi].autoMap(mapper);
         }
     }
 
 
-    PtrList<fvPatchField<Type>> basePatchFields
-    (
-        baseMesh_.boundary().size()
-    );
-
-    // Clone the patchFields onto the base patches. This is just to reset
+    // Clone the oldPatchFields onto the target patches. This is just to reset
     // the reference to the patch, size and content stay the same.
-    forAll(patchFields, patchI)
-    {
-        if (patchFields.set(patchI))
-        {
-            const fvPatch& basePatch = baseMesh_.boundary()[patchI];
 
-            const fvPatchField<Type>& pfld = patchFields[patchI];
+    PtrList<fvPatchField<Type>> newPatchFields(tgtMesh_.boundary().size());
+
+    forAll(oldPatchFields, patchi)
+    {
+        if (oldPatchFields.set(patchi))
+        {
+            const auto& pfld = oldPatchFields[patchi];
 
             labelList dummyMap(identity(pfld.size()));
             directFvPatchFieldMapper dummyMapper(dummyMap);
 
-            basePatchFields.set
+            newPatchFields.set
             (
-                patchI,
+                patchi,
                 fvPatchField<Type>::New
                 (
                     pfld,
-                    basePatch,
+                    tgtMesh_.boundary()[patchi],
                     DimensionedField<Type, volMesh>::null(),
                     dummyMapper
                 )
@@ -181,162 +166,143 @@ Foam::parFvFieldReconstructor::reconstructFvVolumeField
         }
     }
 
-    // Add some empty patches on remaining patches (tbd.probably processor
-    // patches)
-    forAll(basePatchFields, patchI)
+    // Add some empty patches on remaining patches
+    // (... probably processor patches)
+
+    forAll(newPatchFields, patchi)
     {
-        if (patchI >= patchFields.size() || !patchFields.set(patchI))
+        if (!newPatchFields.set(patchi))
         {
-            basePatchFields.set
+            newPatchFields.set
             (
-                patchI,
+                patchi,
                 fvPatchField<Type>::New
                 (
                     emptyFvPatchField<Type>::typeName,
-                    baseMesh_.boundary()[patchI],
+                    tgtMesh_.boundary()[patchi],
                     DimensionedField<Type, volMesh>::null()
                 )
             );
         }
     }
 
-    // Construct a volField
-    IOobject baseIO
+    // Return geometric field
+
+    return tmp<GeometricField<Type, fvPatchField, volMesh>>::New
     (
-        fld.name(),
-        baseMesh_.time().timeName(),
-        fld.local(),
-        baseMesh_,
-        IOobject::NO_READ,
-        IOobject::NO_WRITE
+        std::move(internalField),
+        newPatchFields
     );
-
-    auto tfield = tmp<GeometricField<Type, fvPatchField, volMesh>>::New
-    (
-        baseIO,
-        baseMesh_,
-        fld.dimensions(),
-        internalField,
-        basePatchFields
-    );
-
-    tfield.ref().oriented()= fld.oriented();
-
-    return tfield;
-}
-
-
-template<class Type>
-Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
-Foam::parFvFieldReconstructor::reconstructFvVolumeField
-(
-    const IOobject& fieldIoObject
-) const
-{
-    // Read the field
-    GeometricField<Type, fvPatchField, volMesh> fld
-    (
-        fieldIoObject,
-        procMesh_
-    );
-
-    // Distribute onto baseMesh
-    return reconstructFvVolumeField(fld);
 }
 
 
 template<class Type>
 Foam::tmp<Foam::GeometricField<Type, Foam::fvsPatchField, Foam::surfaceMesh>>
-Foam::parFvFieldReconstructor::reconstructFvSurfaceField
+Foam::parFvFieldDistributor::distributeField
 (
     const GeometricField<Type, fvsPatchField, surfaceMesh>& fld
 ) const
 {
-    // Create the internalField by remote mapping
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+    // Create internalField by remote mapping
     distributedFieldMapper mapper
     (
         labelUList::null(),
         distMap_.faceMap()
     );
 
-    // Create flat field of internalField + all patch fields
-    Field<Type> flatFld(fld.mesh().nFaces(), Type(Zero));
-    SubList<Type>(flatFld, fld.internalField().size()) = fld.internalField();
-    forAll(fld.boundaryField(), patchI)
-    {
-        const fvsPatchField<Type>& fvp = fld.boundaryField()[patchI];
 
-        SubList<Type>(flatFld, fvp.size(), fvp.patch().start()) = fvp;
+    Field<Type> primitiveField;
+    {
+        // Create flat field of internalField + all patch fields
+        Field<Type> flatFld(fld.mesh().nFaces(), Type(Zero));
+        SubList<Type>(flatFld, fld.internalField().size())
+            = fld.internalField();
+
+        for (const fvsPatchField<Type>& fvp : fld.boundaryField())
+        {
+            SubList<Type>(flatFld, fvp.size(), fvp.patch().start()) = fvp;
+        }
+
+        // Map all faces
+        primitiveField = Field<Type>(flatFld, mapper, fld.oriented()());
+
+        // Trim to internal faces (note: could also have special mapper)
+        primitiveField.resize
+        (
+            min
+            (
+                primitiveField.size(),
+                tgtMesh_.nInternalFaces()
+            )
+        );
     }
 
-    // Map all faces
-    Field<Type> internalField(flatFld, mapper, fld.oriented()());
 
-    // Trim to internal faces (note: could also have special mapper)
-    internalField.setSize
+    DimensionedField<Type, surfaceMesh> internalField
     (
-        min
+        IOobject
         (
-            internalField.size(),
-            baseMesh_.nInternalFaces()
-        )
+            fld.name(),
+            tgtMesh_.time().timeName(),
+            fld.local(),
+            tgtMesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        tgtMesh_,
+        fld.dimensions(),
+        std::move(primitiveField)
     );
 
+    internalField.oriented() = fld.oriented();
 
-    // Create the patchFields by remote mapping
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Note: patchFields still on mesh, not baseMesh
 
-    PtrList<fvsPatchField<Type>> patchFields(fld.mesh().boundary().size());
+    // Create patchFields by remote mapping
+    // Note: patchFields still on source mesh, not target mesh
+
+    PtrList<fvsPatchField<Type>> oldPatchFields(fld.mesh().boundary().size());
 
     const auto& bfld = fld.boundaryField();
 
-    forAll(bfld, patchI)
+    forAll(bfld, patchi)
     {
-        if (patchFaceMaps_.set(patchI))
+        if (patchFaceMaps_.set(patchi))
         {
             // Clone local patch field
-            patchFields.set(patchI, bfld[patchI].clone());
+            oldPatchFields.set(patchi, bfld[patchi].clone());
 
             distributedFvPatchFieldMapper mapper
             (
                 labelUList::null(),
-                patchFaceMaps_[patchI]
+                patchFaceMaps_[patchi]
             );
 
             // Map into local copy
-            patchFields[patchI].autoMap(mapper);
+            oldPatchFields[patchi].autoMap(mapper);
         }
     }
 
 
-    PtrList<fvsPatchField<Type>> basePatchFields
-    (
-        baseMesh_.boundary().size()
-    );
+    PtrList<fvsPatchField<Type>> newPatchFields(tgtMesh_.boundary().size());
 
     // Clone the patchFields onto the base patches. This is just to reset
     // the reference to the patch, size and content stay the same.
-    forAll(patchFields, patchI)
+    forAll(oldPatchFields, patchi)
     {
-        if (patchFields.set(patchI))
+        if (oldPatchFields.set(patchi))
         {
-            const fvPatch& basePatch = baseMesh_.boundary()[patchI];
-
-            const fvsPatchField<Type>& pfld = patchFields[patchI];
+            const fvsPatchField<Type>& pfld = oldPatchFields[patchi];
 
             labelList dummyMap(identity(pfld.size()));
             directFvPatchFieldMapper dummyMapper(dummyMap);
 
-            basePatchFields.set
+            newPatchFields.set
             (
-                patchI,
+                patchi,
                 fvsPatchField<Type>::New
                 (
                     pfld,
-                    basePatch,
+                    tgtMesh_.boundary()[patchi],
                     DimensionedField<Type, surfaceMesh>::null(),
                     dummyMapper
                 )
@@ -344,71 +310,94 @@ Foam::parFvFieldReconstructor::reconstructFvSurfaceField
         }
     }
 
-    // Add some empty patches on remaining patches (tbd.probably processor
-    // patches)
-    forAll(basePatchFields, patchI)
+    // Add some empty patches on remaining patches
+    // (... probably processor patches)
+    forAll(newPatchFields, patchi)
     {
-        if (patchI >= patchFields.size() || !patchFields.set(patchI))
+        if (!newPatchFields.set(patchi))
         {
-            basePatchFields.set
+            newPatchFields.set
             (
-                patchI,
+                patchi,
                 fvsPatchField<Type>::New
                 (
                     emptyFvsPatchField<Type>::typeName,
-                    baseMesh_.boundary()[patchI],
+                    tgtMesh_.boundary()[patchi],
                     DimensionedField<Type, surfaceMesh>::null()
                 )
             );
         }
     }
 
-    // Construct a volField
-    IOobject baseIO
+
+    // Return geometric field
+    return tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>::New
     (
-        fld.name(),
-        baseMesh_.time().timeName(),
-        fld.local(),
-        baseMesh_,
-        IOobject::NO_READ,
-        IOobject::NO_WRITE
+        std::move(internalField),
+        newPatchFields
+    );
+}
+
+
+template<class Type>
+Foam::tmp<Foam::DimensionedField<Type, Foam::volMesh>>
+Foam::parFvFieldDistributor::distributeInternalField
+(
+    const IOobject& fieldObject
+) const
+{
+    // Read field
+    DimensionedField<Type, volMesh> fld
+    (
+        fieldObject,
+        srcMesh_
     );
 
-    auto tfield = tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>::New
+    // Distribute
+    return distributeField(fld);
+}
+
+
+template<class Type>
+Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
+Foam::parFvFieldDistributor::distributeVolumeField
+(
+    const IOobject& fieldObject
+) const
+{
+    // Read field
+    GeometricField<Type, fvPatchField, volMesh> fld
     (
-        baseIO,
-        baseMesh_,
-        fld.dimensions(),
-        internalField,
-        basePatchFields
+        fieldObject,
+        srcMesh_
     );
 
-    tfield.ref().oriented() = fld.oriented();
-
-    return tfield;
+    // Distribute
+    return distributeField(fld);
 }
 
 
 template<class Type>
 Foam::tmp<Foam::GeometricField<Type, Foam::fvsPatchField, Foam::surfaceMesh>>
-Foam::parFvFieldReconstructor::reconstructFvSurfaceField
+Foam::parFvFieldDistributor::distributeSurfaceField
 (
-    const IOobject& fieldIoObject
+    const IOobject& fieldObject
 ) const
 {
-    // Read the field
+    // Read field
     GeometricField<Type, fvsPatchField, surfaceMesh> fld
     (
-        fieldIoObject,
-        procMesh_
+        fieldObject,
+        srcMesh_
     );
 
-    return reconstructFvSurfaceField(fld);
+    // Distribute
+    return distributeField(fld);
 }
 
 
 template<class Type>
-Foam::label Foam::parFvFieldReconstructor::reconstructFvVolumeInternalFields
+Foam::label Foam::parFvFieldDistributor::distributeInternalFields
 (
     const IOobjectList& objects,
     const wordRes& selectedFields
@@ -427,17 +416,25 @@ Foam::label Foam::parFvFieldReconstructor::reconstructFvVolumeInternalFields
     label nFields = 0;
     for (const word& fieldName : fieldNames)
     {
-        if (!nFields++)
+        if ("cellDist" == fieldName)
         {
-            Info<< "    Reconstructing "
-                << fieldType::typeName << "s\n" << nl;
+            // There is an odd chance this is an internal field
+            continue;
         }
-
-        Info<< "        " << fieldName << nl;
+        if (verbose_)
+        {
+            if (!nFields)
+            {
+                Info<< "    Reconstructing "
+                    << fieldType::typeName << "s\n" << nl;
+            }
+            Info<< "        " << fieldName << nl;
+        }
+        ++nFields;
 
         tmp<fieldType> tfld
         (
-            reconstructFvVolumeInternalField<Type>(*(objects[fieldName]))
+            distributeInternalField<Type>(*(objects[fieldName]))
         );
         if (isWriteProc_)
         {
@@ -445,13 +442,13 @@ Foam::label Foam::parFvFieldReconstructor::reconstructFvVolumeInternalFields
         }
     }
 
-    if (nFields) Info<< endl;
+    if (nFields && verbose_) Info<< endl;
     return nFields;
 }
 
 
 template<class Type>
-Foam::label Foam::parFvFieldReconstructor::reconstructFvVolumeFields
+Foam::label Foam::parFvFieldDistributor::distributeVolumeFields
 (
     const IOobjectList& objects,
     const wordRes& selectedFields
@@ -474,16 +471,20 @@ Foam::label Foam::parFvFieldReconstructor::reconstructFvVolumeFields
         {
             continue;
         }
-        if (!nFields++)
+        if (verbose_)
         {
-            Info<< "    Reconstructing "
-                << fieldType::typeName << "s\n" << nl;
+            if (!nFields)
+            {
+                Info<< "    Reconstructing "
+                    << fieldType::typeName << "s\n" << nl;
+            }
+            Info<< "        " << fieldName << nl;
         }
-        Info<< "        " << fieldName << nl;
+        ++nFields;
 
         tmp<fieldType> tfld
         (
-            reconstructFvVolumeField<Type>(*(objects[fieldName]))
+            distributeVolumeField<Type>(*(objects[fieldName]))
         );
         if (isWriteProc_)
         {
@@ -491,13 +492,13 @@ Foam::label Foam::parFvFieldReconstructor::reconstructFvVolumeFields
         }
     }
 
-    if (nFields) Info<< endl;
+    if (nFields && verbose_) Info<< endl;
     return nFields;
 }
 
 
 template<class Type>
-Foam::label Foam::parFvFieldReconstructor::reconstructFvSurfaceFields
+Foam::label Foam::parFvFieldDistributor::distributeSurfaceFields
 (
     const IOobjectList& objects,
     const wordRes& selectedFields
@@ -516,16 +517,20 @@ Foam::label Foam::parFvFieldReconstructor::reconstructFvSurfaceFields
     label nFields = 0;
     for (const word& fieldName : fieldNames)
     {
-        if (!nFields++)
+        if (verbose_)
         {
-            Info<< "    Reconstructing "
-                << fieldType::typeName << "s\n" << nl;
+            if (!nFields)
+            {
+                Info<< "    Reconstructing "
+                    << fieldType::typeName << "s\n" << nl;
+            }
+            Info<< "        " << fieldName << nl;
         }
-        Info<< "        " << fieldName << nl;
+        ++nFields;
 
         tmp<fieldType> tfld
         (
-            reconstructFvSurfaceField<Type>(*(objects[fieldName]))
+            distributeSurfaceField<Type>(*(objects[fieldName]))
         );
         if (isWriteProc_)
         {
@@ -533,7 +538,7 @@ Foam::label Foam::parFvFieldReconstructor::reconstructFvSurfaceFields
         }
     }
 
-    if (nFields) Info<< endl;
+    if (nFields && verbose_) Info<< endl;
     return nFields;
 }
 

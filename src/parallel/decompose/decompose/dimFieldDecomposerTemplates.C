@@ -26,78 +26,42 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "pointFieldDecomposer.H"
-#include "processorPointPatchFields.H"
+#include "dimFieldDecomposer.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::tmp<Foam::GeometricField<Type, Foam::pointPatchField, Foam::pointMesh>>
-Foam::pointFieldDecomposer::decomposeField
+Foam::tmp<Foam::DimensionedField<Type, Foam::volMesh>>
+Foam::dimFieldDecomposer::decomposeField
 (
-    const GeometricField<Type, pointPatchField, pointMesh>& field
+    const DimensionedField<Type, volMesh>& field
 ) const
 {
     // Create and map the internal field values
-    Field<Type> internalField(field.primitiveField(), pointAddressing_);
-
-    // Create a list of pointers for the patchFields
-    PtrList<pointPatchField<Type>> patchFields(boundaryAddressing_.size());
-
-    // Create and map the patch field values
-    forAll(boundaryAddressing_, patchi)
-    {
-        if (patchFieldDecomposerPtrs_.set(patchi))
-        {
-            patchFields.set
-            (
-                patchi,
-                pointPatchField<Type>::New
-                (
-                    field.boundaryField()[boundaryAddressing_[patchi]],
-                    procMesh_.boundary()[patchi],
-                    DimensionedField<Type, pointMesh>::null(),
-                    patchFieldDecomposerPtrs_[patchi]
-                )
-            );
-        }
-        else
-        {
-            patchFields.set
-            (
-                patchi,
-                new processorPointPatchField<Type>
-                (
-                    procMesh_.boundary()[patchi],
-                    DimensionedField<Type, pointMesh>::null()
-                )
-            );
-        }
-    }
+    Field<Type> mappedField(field, cellAddressing_);
 
     // Create the field for the processor
     return
-        tmp<GeometricField<Type, pointPatchField, pointMesh>>::New
+        tmp<DimensionedField<Type, volMesh>>::New
         (
             IOobject
             (
                 field.name(),
-                procMesh_().time().timeName(),
-                procMesh_(),
+                procMesh_.thisDb().time().timeName(),
+                procMesh_.thisDb(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
                 false
             ),
             procMesh_,
             field.dimensions(),
-            internalField,
-            patchFields
+            std::move(mappedField)
         );
 }
 
 
 template<class GeoField>
-void Foam::pointFieldDecomposer::decomposeFields
+void Foam::dimFieldDecomposer::decomposeFields
 (
     const PtrList<GeoField>& fields
 ) const

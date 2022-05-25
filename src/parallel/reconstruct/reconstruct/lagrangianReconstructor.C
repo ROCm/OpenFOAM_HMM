@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018,2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,11 @@ License
 
 #include "lagrangianReconstructor.H"
 #include "passivePositionParticleCloud.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+int Foam::lagrangianReconstructor::verbose_ = 1;
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -139,6 +144,46 @@ Foam::label Foam::lagrangianReconstructor::reconstructPositions
     }
 
     return lagrangianPositions.size();
+}
+
+
+void Foam::lagrangianReconstructor::reconstructAllFields
+(
+    const word& cloudName,
+    const IOobjectList& cloudObjs,
+    const wordRes& selectedFields
+)
+{
+    do
+    {
+        #undef  doLocalCode
+        #define doLocalCode(Type)                                             \
+        {                                                                     \
+            this->reconstructFields<Type>                                     \
+            (                                                                 \
+                cloudName,                                                    \
+                cloudObjs,                                                    \
+                selectedFields                                                \
+            );                                                                \
+                                                                              \
+            this->reconstructFieldFields<Type>                                \
+            (                                                                 \
+                cloudName,                                                    \
+                cloudObjs,                                                    \
+                selectedFields                                                \
+            );                                                                \
+        }
+
+        doLocalCode(label);
+        doLocalCode(scalar);
+        doLocalCode(vector);
+        doLocalCode(sphericalTensor);
+        doLocalCode(symmTensor);
+        doLocalCode(tensor);
+
+        #undef doLocalCode
+    }
+    while (false);
 }
 
 

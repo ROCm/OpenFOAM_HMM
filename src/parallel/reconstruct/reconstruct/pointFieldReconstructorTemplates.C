@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,34 +32,13 @@ License
 
 template<class Type>
 Foam::tmp<Foam::GeometricField<Type, Foam::pointPatchField, Foam::pointMesh>>
-Foam::pointFieldReconstructor::reconstructField(const IOobject& fieldIoObject)
+Foam::pointFieldReconstructor::reconstructField
+(
+    const IOobject& fieldObject,
+    const PtrList<GeometricField<Type, pointPatchField, pointMesh>>& procFields
+) const
 {
-    // Read the field for all the processors
-    PtrList<GeometricField<Type, pointPatchField, pointMesh>> procFields
-    (
-        procMeshes_.size()
-    );
-
-    forAll(procMeshes_, proci)
-    {
-        procFields.set
-        (
-            proci,
-            new GeometricField<Type, pointPatchField, pointMesh>
-            (
-                IOobject
-                (
-                    fieldIoObject.name(),
-                    procMeshes_[proci]().time().timeName(),
-                    procMeshes_[proci](),
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE
-                ),
-                procMeshes_[proci]
-            )
-        );
-    }
-
+    typedef GeometricField<Type, pointPatchField, pointMesh> fieldType;
 
     // Create the internalField
     Field<Type> internalField(mesh_.size());
@@ -70,8 +49,7 @@ Foam::pointFieldReconstructor::reconstructField(const IOobject& fieldIoObject)
 
     forAll(procMeshes_, proci)
     {
-        const GeometricField<Type, pointPatchField, pointMesh>&
-            procField = procFields[proci];
+        const auto& procField = procFields[proci];
 
         // Get processor-to-global addressing for use in rmap
         const labelList& procToGlobalAddr = pointProcAddressing_[proci];
@@ -120,13 +98,13 @@ Foam::pointFieldReconstructor::reconstructField(const IOobject& fieldIoObject)
 
     // Construct and write the field
     // setting the internalField and patchFields
-    return tmp<GeometricField<Type, pointPatchField, pointMesh>>::New
+    return tmp<fieldType>::New
     (
         IOobject
         (
-            fieldIoObject.name(),
-            mesh_().time().timeName(),
-            mesh_(),
+            fieldObject.name(),
+            mesh_.thisDb().time().timeName(),
+            mesh_.thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
@@ -139,39 +117,89 @@ Foam::pointFieldReconstructor::reconstructField(const IOobject& fieldIoObject)
 
 
 template<class Type>
-Foam::label Foam::pointFieldReconstructor::reconstructFields
+Foam::tmp<Foam::GeometricField<Type, Foam::pointPatchField, Foam::pointMesh>>
+Foam::pointFieldReconstructor::reconstructPointField
 (
-    const IOobjectList& objects,
-    const UList<word>& fieldNames
+    const IOobject& fieldObject
+)
+{
+    typedef GeometricField<Type, pointPatchField, pointMesh> fieldType;
+
+    // Read the field for all the processors
+    PtrList<fieldType> procFields(procMeshes_.size());
+
+    forAll(procMeshes_, proci)
+    {
+        procFields.set
+        (
+            proci,
+            new fieldType
+            (
+                IOobject
+                (
+                    fieldObject.name(),
+                    procMeshes_[proci].thisDb().time().timeName(),
+                    procMeshes_[proci].thisDb(),
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE
+                ),
+                procMeshes_[proci]
+            )
+        );
+    }
+
+    return reconstructField
+    (
+        IOobject
+        (
+            fieldObject.name(),
+            mesh_.thisDb().time().timeName(),
+            mesh_.thisDb(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        procFields
+    );
+}
+
+
+template<class Type>
+Foam::label Foam::pointFieldReconstructor::reconstructPointFields
+(
+    const UPtrList<const IOobject>& fieldObjects
 )
 {
     typedef GeometricField<Type, pointPatchField, pointMesh> fieldType;
 
     label nFields = 0;
-    for (const word& fieldName : fieldNames)
-    {
-        const IOobject* io = objects.cfindObject<fieldType>(fieldName);
-        if (io)
-        {
-            if (!nFields++)
-            {
-                Info<< "    Reconstructing "
-                    << fieldType::typeName << "s\n" << nl;
-            }
-            Info<< "        " << fieldName << endl;
 
-            reconstructField<Type>(*io)().write();
+    for (const IOobject& io : fieldObjects)
+    {
+        if (io.isHeaderClass<fieldType>())
+        {
+            if (verbose_)
+            {
+                if (!nFields)
+                {
+                    Info<< "    Reconstructing "
+                        << fieldType::typeName << "s\n" << nl;
+                }
+                Info<< "        " << io.name() << endl;
+            }
+            ++nFields;
+
+            reconstructPointField<Type>(io)().write();
             ++nReconstructed_;
         }
     }
 
-    if (nFields) Info<< endl;
+    if (verbose_ && nFields) Info<< endl;
     return nFields;
 }
 
 
 template<class Type>
-Foam::label Foam::pointFieldReconstructor::reconstructFields
+Foam::label Foam::pointFieldReconstructor::reconstructPointFields
 (
     const IOobjectList& objects,
     const wordRes& selectedFields
@@ -179,34 +207,14 @@ Foam::label Foam::pointFieldReconstructor::reconstructFields
 {
     typedef GeometricField<Type, pointPatchField, pointMesh> fieldType;
 
-    const wordList fieldNames =
+    return reconstructPointFields<Type>
     (
-        selectedFields.empty()
-      ? objects.sortedNames<fieldType>()
-      : objects.sortedNames<fieldType>(selectedFields)
+        (
+            selectedFields.empty()
+          ? objects.sorted<fieldType>()
+          : objects.sorted<fieldType>(selectedFields)
+        )
     );
-
-    return reconstructFields<Type>(objects, fieldNames);
-}
-
-
-template<class Type>
-Foam::label Foam::pointFieldReconstructor::reconstructFields
-(
-    const IOobjectList& objects,
-    const wordHashSet& selectedFields
-)
-{
-    typedef GeometricField<Type, pointPatchField, pointMesh> fieldType;
-
-    const wordList fieldNames =
-    (
-        selectedFields.empty()
-      ? objects.sortedNames<fieldType>()
-      : objects.sortedNames<fieldType>(selectedFields)
-    );
-
-    return reconstructFields<Type>(objects, fieldNames);
 }
 
 

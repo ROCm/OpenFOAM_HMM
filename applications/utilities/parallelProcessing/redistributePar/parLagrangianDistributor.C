@@ -27,12 +27,12 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ListOps.H"
-#include "parLagrangianRedistributor.H"
+#include "parLagrangianDistributor.H"
 #include "passivePositionParticleCloud.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::parLagrangianRedistributor::parLagrangianRedistributor
+Foam::parLagrangianDistributor::parLagrangianDistributor
 (
     const fvMesh& srcMesh,
     const fvMesh& tgtMesh,
@@ -59,7 +59,7 @@ Foam::parLagrangianRedistributor::parLagrangianRedistributor
 
 // Find all clouds (on all processors) and for each cloud all the objects.
 // Result will be synchronised on all processors
-void Foam::parLagrangianRedistributor::findClouds
+void Foam::parLagrangianDistributor::findClouds
 (
     const fvMesh& mesh,
     wordList& cloudNames,
@@ -129,7 +129,7 @@ void Foam::parLagrangianRedistributor::findClouds
 
 
 Foam::autoPtr<Foam::mapDistributeBase>
-Foam::parLagrangianRedistributor::redistributeLagrangianPositions
+Foam::parLagrangianDistributor::distributeLagrangianPositions
 (
     passivePositionParticleCloud& lpi
 ) const
@@ -314,7 +314,7 @@ Foam::parLagrangianRedistributor::redistributeLagrangianPositions
 
 
 Foam::autoPtr<Foam::mapDistributeBase>
-Foam::parLagrangianRedistributor::redistributeLagrangianPositions
+Foam::parLagrangianDistributor::distributeLagrangianPositions
 (
     const word& cloudName
 ) const
@@ -322,7 +322,7 @@ Foam::parLagrangianRedistributor::redistributeLagrangianPositions
     // Load cloud and send particle
     passivePositionParticleCloud lpi(srcMesh_, cloudName, false);
 
-    return redistributeLagrangianPositions(lpi);
+    return distributeLagrangianPositions(lpi);
 }
 
 
