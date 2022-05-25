@@ -46,6 +46,7 @@ License
 #include "NusseltNumber.H"
 #include "HeatTransferCoeff.H"
 #include "ThermoReynoldsNumber.H"
+#include "ParticleDose.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -68,7 +69,8 @@ License
     makeCloudFunctionObjectType(VoidFraction, CloudType);                      \
     makeCloudFunctionObjectType(NusseltNumber, CloudType);                     \
     makeCloudFunctionObjectType(HeatTransferCoeff, CloudType);                 \
-    makeCloudFunctionObjectType(ThermoReynoldsNumber, CloudType);
+    makeCloudFunctionObjectType(ThermoReynoldsNumber, CloudType);              \
+    makeCloudFunctionObjectType(ParticleDose, CloudType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

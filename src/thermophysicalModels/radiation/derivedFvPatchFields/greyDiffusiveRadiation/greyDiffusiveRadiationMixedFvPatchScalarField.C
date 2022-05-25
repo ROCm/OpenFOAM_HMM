@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,7 +49,9 @@ greyDiffusiveRadiationMixedFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(p, iF),
-    TName_("T")
+    TName_("T"),
+    qRadExt_(0),
+    qRadExtDir_(Zero)
 {
     refValue() = 0.0;
     refGrad() = 0.0;
@@ -67,7 +69,9 @@ greyDiffusiveRadiationMixedFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(ptf, p, iF, mapper),
-    TName_(ptf.TName_)
+    TName_(ptf.TName_),
+    qRadExt_(ptf.qRadExt_),
+    qRadExtDir_(ptf.qRadExtDir_)
 {}
 
 
@@ -80,7 +84,9 @@ greyDiffusiveRadiationMixedFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(p, iF),
-    TName_(dict.getOrDefault<word>("T", "T"))
+    TName_(dict.getOrDefault<word>("T", "T")),
+    qRadExt_(dict.getOrDefault<scalar>("qRadExt", 0)),
+    qRadExtDir_(dict.getOrDefault<vector>("qRadExtDir", Zero))
 {
     if (dict.found("refValue"))
     {
@@ -100,7 +106,6 @@ greyDiffusiveRadiationMixedFvPatchScalarField
 
         fvPatchScalarField::operator=(refValue());
     }
-
 }
 
 
@@ -111,7 +116,9 @@ greyDiffusiveRadiationMixedFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(ptf),
-    TName_(ptf.TName_)
+    TName_(ptf.TName_),
+    qRadExt_(ptf.qRadExt_),
+    qRadExtDir_(ptf.qRadExtDir_)
 {}
 
 
@@ -123,7 +130,9 @@ greyDiffusiveRadiationMixedFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(ptf, iF),
-    TName_(ptf.TName_)
+    TName_(ptf.TName_),
+    qRadExt_(ptf.qRadExt_),
+    qRadExtDir_(ptf.qRadExtDir_)
 {}
 
 
@@ -264,6 +273,64 @@ updateCoeffs()
         }
     }
 
+    scalarField Isource(this->size(), 0.0);
+
+    if (qRadExt_ > 0)
+    {
+        if (mag(qRadExtDir_) > 0)
+        {
+            label rayqoId = -1;
+            scalar maxRay = -GREAT;
+
+            // Looking for the ray closest to the Sun direction
+            for (label rayI = 0; rayI < dom.nRay(); ++rayI)
+            {
+                const vector& iD = dom.IRay(rayI).d();
+                const scalar dir = qRadExtDir_ & iD;
+
+                if (dir > maxRay)
+                {
+                    maxRay = dir;
+                    rayqoId = rayI;
+                }
+            }
+
+            if (rayId == rayqoId)
+            {
+                forAll(Isource, faceI)
+                {
+                    Isource[faceI] += qRadExt_/mag(dom.IRay(rayId).dAve());
+                }
+            }
+        }
+        else
+        {
+            forAll(Iw, faceI)
+            {
+                label rayqoId = -1;
+                scalar maxRay = -GREAT;
+
+                // Looking for the ray closest to the Sun direction
+                for (label rayI = 0; rayI < dom.nRay(); ++rayI)
+                {
+                    const vector& iD = dom.IRay(rayI).d();
+                    const scalar dir = -n[faceI] & iD;
+
+                    if (dir > maxRay)
+                    {
+                        maxRay = dir;
+                        rayqoId = rayI;
+                    }
+                }
+
+                if (rayId == rayqoId)
+                {
+                    Isource[faceI] += qRadExt_/mag(dom.IRay(rayId).dAve());
+                }
+            }
+        }
+    }
+
     forAll(Iw, faceI)
     {
         if ((-n[faceI] & myRayId) > 0.0)
@@ -272,7 +339,8 @@ updateCoeffs()
             refGrad()[faceI] = 0.0;
             valueFraction()[faceI] = 1.0;
             refValue()[faceI] =
-                Iexternal[faceI]*transmissivity[faceI]
+                Isource[faceI]
+              + Iexternal[faceI]*transmissivity[faceI]
               + (
                     Ir[faceI]*(scalar(1) - emissivity[faceI])
                   + emissivity[faceI]*physicoChemical::sigma.value()
@@ -308,6 +376,8 @@ void Foam::radiation::greyDiffusiveRadiationMixedFvPatchScalarField::write
 {
     mixedFvPatchScalarField::write(os);
     os.writeEntryIfDifferent<word>("T", "T", TName_);
+    os.writeEntryIfDifferent<scalar>("qRadExt", Zero, qRadExt_);
+    os.writeEntryIfDifferent<vector>("qRadExtDir", Zero, qRadExtDir_);
 }
 
 

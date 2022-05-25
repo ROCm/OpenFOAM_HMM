@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,35 +36,53 @@ Description
     (fvDOM), in which the radiation temperature is retrieved from the
     temperature field boundary condition.
 
-Usage
-    \table
-        Property     | Description             | Required    | Default value
-        T            | temperature field name  | no          | T
-    \endtable
+    An external radiative heat flux can be added using \c qRadExt. If
+    \c qRadExtDir is specified, this ray closest to this direction is used.
+    Otherwise, the face normal is used as direction to set \c qRadExt.
 
+Usage
     Example of the boundary condition specification:
     \verbatim
     <patchName>
     {
+        // Mandatory entries
         type            greyDiffusiveRadiation;
+
+        // Optional entries
         T               T;
-        value           uniform 0;
+        qRadExt         <scalar>;
+        qRadExtDir      <vector>;
+
+        // Inherited entries
+        ...
     }
     \endverbatim
 
+    where the entries mean:
+    \table
+      Property | Description                            | Type  | Reqd | Deflt
+      type     | Type name: greyDiffusiveRadiation      | word  | yes  | -
+      T        | Name of temperature field              | word  | no   | T
+      qRadExt  | Radiative external flux                | scalar | no  | Zero
+      qRadExtDir | Radiative external flux direction    | vector | no  | Zero
+    \endtable
+
+    The inherited entries are elaborated in:
+      - \link mixedFvPatchFields.H \endlink
+
 See also
-    Foam::radiation::radiationModel
-    Foam::radiation::fvDOM
-    Foam::radiationCoupledBase
-    Foam::mixedFvPatchField
+  - Foam::radiation::radiationModel
+  - Foam::radiation::fvDOM
+  - Foam::radiationCoupledBase
+  - Foam::mixedFvPatchField
 
 SourceFiles
     greyDiffusiveRadiationMixedFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef greyDiffusiveRadiationMixedFvPatchScalarField_H
-#define greyDiffusiveRadiationMixedFvPatchScalarField_H
+#ifndef radiation_greyDiffusiveRadiationMixedFvPatchScalarField_H
+#define radiation_greyDiffusiveRadiationMixedFvPatchScalarField_H
 
 #include "mixedFvPatchFields.H"
 
@@ -81,10 +100,17 @@ class greyDiffusiveRadiationMixedFvPatchScalarField
 :
     public mixedFvPatchScalarField
 {
-    // Private data
+    // Private Data
 
         //- Name of temperature field
         word TName_;
+
+        //- External radiative flux
+        scalar qRadExt_;
+
+        //- External radiative flux direction
+        vector qRadExtDir_;
+
 
 public:
 
@@ -110,7 +136,7 @@ public:
         );
 
         //- Construct by mapping given a
-        //  greyDiffusiveRadiationMixedFvPatchScalarField onto a new patch
+        //- greyDiffusiveRadiationMixedFvPatchScalarField onto a new patch
         greyDiffusiveRadiationMixedFvPatchScalarField
         (
             const greyDiffusiveRadiationMixedFvPatchScalarField&,
@@ -154,25 +180,25 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
         // Access
 
             //- Return the temperature field name
-            const word& TName() const
+            const word& TName() const noexcept
             {
                 return TName_;
             }
 
             //- Return reference to the temperature field name to allow
-            //  adjustment
-            word& TName()
+            //- adjustment
+            word& TName() noexcept
             {
                 return TName_;
             }
 
 
-        // Evaluation functions
+        // Evaluation
 
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();
