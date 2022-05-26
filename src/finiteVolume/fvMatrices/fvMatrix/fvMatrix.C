@@ -308,7 +308,7 @@ Foam::scalar Foam::fvMatrix<Type>::checkImplicit(const label fieldI)
 {
     const auto& bpsi = this->psi(fieldI).boundaryField();
 
-    scalar id = -1;
+    word idName;
     forAll (bpsi, patchI)
     {
         if (bpsi[patchI].useImplicit())
@@ -323,14 +323,14 @@ Foam::scalar Foam::fvMatrix<Type>::checkImplicit(const label fieldI)
                     << endl;
             }
 
-            id += Foam::log(scalar(patchI + 2));
+            idName = idName + name(patchI);
             useImplicit_ = true;
         }
     }
 
     if (useImplicit_)
     {
-        lduAssemblyName_ = word("lduAssembly") + name(id);
+        lduAssemblyName_ = word("lduAssembly") + idName;
     }
     return id;
 }
