@@ -73,7 +73,7 @@ Foam::porosityModel::porosityModel
     const word& modelType,
     const fvMesh& mesh,
     const dictionary& dict,
-    const word& cellZoneName
+    const wordRe& cellZoneName
 )
 :
     regIOobject
@@ -115,7 +115,11 @@ Foam::porosityModel::porosityModel
     if (!foundZone && Pstream::master())
     {
         FatalErrorInFunction
-            << "cannot find porous cellZone " << zoneName_
+            << "Cannot find porous cellZone " << zoneName_ << endl
+            << "Valid zones : "
+            << flatOutput(mesh_.cellZones().names()) << nl
+            << "Valid groups: "
+            << flatOutput(mesh_.cellZones().groupNames()) << nl
             << exit(FatalError);
     }
 

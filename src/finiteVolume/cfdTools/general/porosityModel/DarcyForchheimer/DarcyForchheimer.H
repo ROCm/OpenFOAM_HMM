@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,8 +52,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef porosityModels_DarcyForchheimer_H
-#define porosityModels_DarcyForchheimer_H
+#ifndef Foam_porosityModels_DarcyForchheimer_H
+#define Foam_porosityModels_DarcyForchheimer_H
 
 #include "porosityModel.H"
 #include "dimensionedTensor.H"
@@ -72,7 +73,7 @@ class DarcyForchheimer
 :
     public porosityModel
 {
-    // Private data
+    // Private Data
 
         //- Darcy coefficient XYZ components (user-supplied) [1/m2]
         dimensionedVector dXYZ_;
@@ -139,7 +140,7 @@ public:
         const word& modelType,
         const fvMesh& mesh,
         const dictionary& dict,
-        const word& cellZoneName
+        const wordRe& cellZoneName
     );
 
     //- Destructor

@@ -35,7 +35,7 @@ Foam::autoPtr<Foam::porosityModel> Foam::porosityModel::New
     const word& name,
     const fvMesh& mesh,
     const dictionary& dict,
-    const word& cellZoneName
+    const wordRe& cellZoneName
 )
 {
     const word modelType(dict.get<word>("type"));

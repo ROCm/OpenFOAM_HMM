@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,8 +42,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef porosityModels_fixedCoeff_H
-#define porosityModels_fixedCoeff_H
+#ifndef Foam_porosityModels_fixedCoeff_H
+#define Foam_porosityModels_fixedCoeff_H
 
 #include "porosityModel.H"
 #include "dimensionedTensor.H"
@@ -62,7 +63,7 @@ class fixedCoeff
 :
     public porosityModel
 {
-    // Private data
+    // Private Data
 
         //- Alpha coefficient XYZ components (user-supplied) [1/s]
         dimensionedVector alphaXYZ_;
@@ -116,7 +117,7 @@ public:
         const word& modelType,
         const fvMesh& mesh,
         const dictionary& dict,
-        const word& cellZoneName
+        const wordRe& cellZoneName
     );
 
     //- Destructor

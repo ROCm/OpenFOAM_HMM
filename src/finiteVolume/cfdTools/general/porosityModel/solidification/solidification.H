@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,8 +79,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef porosityModels_solidification_H
-#define porosityModels_solidification_H
+#ifndef Foam_porosityModels_solidification_H
+#define Foam_porosityModels_solidification_H
 
 #include "porosityModel.H"
 #include "Function1.H"
@@ -99,7 +100,7 @@ class solidification
 :
     public porosityModel
 {
-    // Private data
+    // Private Data
 
         //- Name of temperature field, default = "T"
         word TName_;
@@ -175,11 +176,11 @@ public:
         const word& modelType,
         const fvMesh& mesh,
         const dictionary& dict,
-        const word& cellZoneName
+        const wordRe& cellZoneName
     );
 
     //- Destructor
-    virtual ~solidification();
+    virtual ~solidification() = default;
 
 
     // Member Functions

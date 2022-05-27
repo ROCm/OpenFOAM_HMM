@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2018 OpenFOAM Foundation
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,8 +36,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef porosityModel_H
-#define porosityModel_H
+#ifndef Foam_porosityModel_H
+#define Foam_porosityModel_H
 
 #include "fvMesh.H"
 #include "dictionary.H"
@@ -59,15 +59,6 @@ class porosityModel
 :
     public regIOobject
 {
-    // Private Member Functions
-
-        //- No copy construct
-        porosityModel(const porosityModel&) = delete;
-
-        //- No copy assignment
-        void operator=(const porosityModel&) = delete;
-
-
 protected:
 
     // Protected Data
@@ -136,6 +127,12 @@ protected:
         //- Return label index
         inline label fieldIndex(const label index) const;
 
+        //- No copy construct
+        porosityModel(const porosityModel&) = delete;
+
+        //- No copy assignment
+        void operator=(const porosityModel&) = delete;
+
 
 public:
 
@@ -153,7 +150,7 @@ public:
             const word& name,
             const fvMesh& mesh,
             const dictionary& dict,
-            const word& cellZoneName
+            const wordRe& cellZoneName
         ),
         (modelName, name, mesh, dict, cellZoneName)
     );
@@ -165,8 +162,9 @@ public:
         const word& modelType,
         const fvMesh& mesh,
         const dictionary& dict,
-        const word& cellZoneName = word::null
+        const wordRe& cellZoneName = wordRe::null
     );
+
 
     //- Return pointer to new porosityModel object created on the freestore
     //  from an Istream
@@ -210,8 +208,9 @@ public:
         const word& name,
         const fvMesh& mesh,
         const dictionary& dict,
-        const word& cellZoneName = word::null
+        const wordRe& cellZoneName = wordRe::null
     );
+
 
     //- Destructor
     virtual ~porosityModel() = default;

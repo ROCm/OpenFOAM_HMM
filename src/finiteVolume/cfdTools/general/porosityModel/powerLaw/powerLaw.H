@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,8 +46,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef porosityModels_powerLaw_H
-#define porosityModels_powerLaw_H
+#ifndef Foam_porosityModels_powerLaw_H
+#define Foam_porosityModels_powerLaw_H
 
 #include "porosityModel.H"
 
@@ -65,7 +66,7 @@ class powerLaw
 :
     public porosityModel
 {
-    // Private data
+    // Private Data
 
         //- C0 coefficient
         scalar C0_;
@@ -117,7 +118,7 @@ public:
         const word& modelType,
         const fvMesh& mesh,
         const dictionary& dict,
-        const word& cellZoneName
+        const wordRe& cellZoneName
     );
 
     //- Destructor
