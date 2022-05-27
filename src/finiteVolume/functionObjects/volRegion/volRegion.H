@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -75,8 +75,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef functionObjects_volRegion_H
-#define functionObjects_volRegion_H
+#ifndef Foam_functionObjects_volRegion_H
+#define Foam_functionObjects_volRegion_H
 
 #include "writeFile.H"
 #include "Enum.H"
@@ -100,35 +100,12 @@ namespace functionObjects
 
 class volRegion
 {
-    // Private Member Data
-
-        const fvMesh& volMesh_;
-
-        //- Flag to indicate whether the volRegion requires updating
-        bool requireUpdate_;
-
-        //- The cell ids, from cellSet
-        labelList cellIds_;
-
-        //- Cached total number of cells selected
-        label nCells_;
-
-        //- Cached total selection volume
-        scalar V_;
-
-
-    // Private Member Functions
-
-        //- Update cellIds, nCells, volume
-        void calculateCache();
-
-
 public:
 
-    // Public data types
+    // Public Data Types
 
         //- Region type enumeration
-        enum regionTypes
+        enum regionTypes : char
         {
             vrtAll = 0,         //!< All cells
             vrtCellSet,         //!< A cellSet
@@ -139,6 +116,35 @@ public:
         static const Enum<regionTypes> regionTypeNames_;
 
 
+private:
+
+    // Private Member Data
+
+        //- Reference to the volume mesh
+        const fvMesh& volMesh_;
+
+        //- The cell ids, from cellSet or multiple cell zones
+        labelList cellIds_;
+
+        //- Region IDs (zone ID, ...)
+        labelList regionIDs_;
+
+        //- Cached total number of cells selected
+        label nCells_;
+
+        //- Cached total selection volume
+        scalar V_;
+
+        //- Flag to indicate whether the volRegion requires updating
+        bool requireUpdate_;
+
+
+    // Private Member Functions
+
+        //- Update cellIds, nCells, volume
+        void calculateCache();
+
+
 protected:
 
     // Protected Data
@@ -147,10 +153,7 @@ protected:
         regionTypes regionType_;
 
         //- Region name (cellSet, cellZone, ...)
-        word regionName_;
-
-        //- Region ID (zone ID, ...)
-        label regionID_;
+        wordRe regionName_;
 
 
     // Protected Member Functions

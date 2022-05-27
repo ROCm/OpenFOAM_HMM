@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,8 +58,8 @@ Foam::functionObjects::volRegion::regionTypeNames_
 
 void Foam::functionObjects::volRegion::calculateCache()
 {
-    regionID_ = -1;
     cellIds_.clear();
+    regionIDs_.clear();
 
     // Update now. Need a valid state for the cellIDs() call
     requireUpdate_ = false;
@@ -82,15 +82,23 @@ void Foam::functionObjects::volRegion::calculateCache()
 
         case vrtCellZone:
         {
-            regionID_ = volMesh_.cellZones().findZoneID(regionName_);
+            regionIDs_ = volMesh_.cellZones().indices(regionName_);
 
-            if (regionID_ < 0)
+            if (regionIDs_.empty())
             {
                 FatalErrorInFunction
-                    << "Unknown cell zone name: " << regionName_
-                    << ". Valid cell zones    : "
-                    << flatOutput(volMesh_.cellZones().names())
+                    << "Unknown cell zone: " << regionName_ << nl
+                    << "    Valid zones : "
+                    << flatOutput(volMesh_.cellZones().names()) << nl
+                    << "    Valid groups: "
+                    << flatOutput(volMesh_.cellZones().groupNames()) << nl
                     << exit(FatalError);
+            }
+
+            if (regionIDs_.size() > 1)
+            {
+                cellIds_ =
+                    volMesh_.cellZones().selected(regionIDs_).sortedToc();
             }
             break;
         }
@@ -100,14 +108,13 @@ void Foam::functionObjects::volRegion::calculateCache()
     // Calculate cache value for nCells() and V()
     const labelList& selected = this->cellIDs();
 
-    nCells_ = selected.size();
     V_ = 0;
     for (const label celli : selected)
     {
         V_ += volMesh_.V()[celli];
     }
 
-    reduce(nCells_, sumOp<label>());
+    nCells_ = returnReduce(selected.size(), sumOp<label>();
     reduce(V_, sumOp<scalar>());
 
     if (!nCells_)
@@ -146,10 +153,11 @@ Foam::functionObjects::volRegion::volRegion
 )
 :
     volMesh_(mesh),
-    requireUpdate_(true),
     cellIds_(),
+    regionIDs_(),
     nCells_(0),
     V_(Zero),
+    requireUpdate_(true),
     regionType_
     (
         regionTypeNames_.getOrDefault
@@ -159,8 +167,7 @@ Foam::functionObjects::volRegion::volRegion
             regionTypes::vrtAll
         )
     ),
-    regionName_(volMesh_.name()),
-    regionID_(-1)
+    regionName_(volMesh_.name());
 {
     read(dict);
 }
@@ -214,12 +221,23 @@ const Foam::labelList& Foam::functionObjects::volRegion::cellIDs() const
     switch (regionType_)
     {
         case vrtCellSet:
+        {
             return cellIds_;
             break;
+        }
 
         case vrtCellZone:
-            return volMesh_.cellZones()[regionID_];
+        {
+            if (regionIDs_.size() == 1)
+            {
+                return volMesh_.cellZones()[regionIDs_.first()];
+            }
+            else
+            {
+                return cellIds_;
+            }
             break;
+        }
 
         default:
             break;
