@@ -121,7 +121,13 @@ subModels
 
 
 cloudFunctions
-{}
+{
+    particleDose1
+    {
+        type            particleDose;
+        GName           G;
+    }
+}
 
 
 // ************************************************************************* //

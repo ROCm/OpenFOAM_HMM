@@ -48,6 +48,7 @@ License
 #include "HeatTransferCoeff.H"
 #include "ThermoReynoldsNumber.H"
 #include "WeberNumberReacting.H"
+#include "ParticleDose.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -71,7 +72,8 @@ License
     makeCloudFunctionObjectType(NusseltNumber, CloudType);                     \
     makeCloudFunctionObjectType(HeatTransferCoeff, CloudType);                 \
     makeCloudFunctionObjectType(ThermoReynoldsNumber, CloudType);              \
-    makeCloudFunctionObjectType(WeberNumberReacting, CloudType);
+    makeCloudFunctionObjectType(WeberNumberReacting, CloudType);               \
+    makeCloudFunctionObjectType(ParticleDose, CloudType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
