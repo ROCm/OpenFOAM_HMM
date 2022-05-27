@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -236,6 +236,14 @@ public:
             Ostream& os,
             const string& property,
             const Type& value
+        ) const;
+
+        //- Write a given value to stream with the space delimiter
+        template<class Type>
+        void writeValue
+        (
+            Ostream& os,
+            const Type& val
         ) const;
 };
 

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,6 +39,20 @@ void Foam::functionObjects::writeFile::writeHeaderValue
     os  << setw(1) << '#' << setw(1) << ' '
         << setf(ios_base::left) << setw(charWidth() - 2) << property.c_str()
         << setw(1) << ':' << setw(1) << ' ' << value << nl;
+}
+
+
+template<class Type>
+void Foam::functionObjects::writeFile::writeValue
+(
+    Ostream& os,
+    const Type& val
+) const
+{
+    for (direction cmpt = 0; cmpt < pTraits<Type>::nComponents; ++cmpt)
+    {
+        os  << ' ' << component(val, cmpt);
+    }
 }
 
 
