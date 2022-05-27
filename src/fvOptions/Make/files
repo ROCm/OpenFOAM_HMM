@@ -5,7 +5,7 @@ interRegionOption/interRegionOption.C
 
 generalSources=sources/general
 $(generalSources)/codedSource/codedFvSources.C
-$(generalSources)/semiImplicitSource/semiImplicitSource.C
+$(generalSources)/semiImplicitSource/semiImplicitSources.C
 
 derivedSources=sources/derived
 $(derivedSources)/acousticDampingSource/acousticDampingSource.C

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,183 +27,278 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "areaFields.H"
-#include "edgeFields.H"
-#include "faMatrix.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace fam
-{
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<faMatrix<Type>>
-Su
+Foam::zeroField
+Foam::fam::Su
 (
-    const GeometricField<Type, faPatchField, areaMesh>& su,
-    const GeometricField<Type, faPatchField, areaMesh>& vf
+    const Foam::zero,
+    const GeometricField<Type, faPatchField, areaMesh>& fld
 )
 {
-    const faMesh& mesh = vf.mesh();
-
-    tmp<faMatrix<Type>> tfam
-    (
-        new faMatrix<Type>
-        (
-            vf,
-            dimArea*su.dimensions()
-        )
-    );
-    faMatrix<Type>& fam = tfam.ref();
-
-    fam.source() -= mesh.S()*su.internalField();
-
-    return tfam;
+    return zeroField();
 }
 
+
 template<class Type>
-tmp<faMatrix<Type>>
-Su
+Foam::tmp<Foam::faMatrix<Type>>
+Foam::fam::Su
+(
+    const dimensioned<Type>& su,
+    const GeometricField<Type, faPatchField, areaMesh>& fld
+)
+{
+    auto tmat = tmp<faMatrix<Type>>::New
+    (
+        fld,
+        dimArea*su.dimensions()
+    );
+    auto& mat = tmat.ref();
+    const auto& domain = fld.mesh().S();
+
+    if (magSqr(su.value()) > VSMALL)
+    {
+        mat.source() -= domain*su.value();
+    }
+
+    return tmat;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::faMatrix<Type>>
+Foam::fam::Su
+(
+    const DimensionedField<Type, areaMesh>& su,
+    const GeometricField<Type, faPatchField, areaMesh>& fld
+)
+{
+    auto tmat = tmp<faMatrix<Type>>::New
+    (
+        fld,
+        dimArea*su.dimensions()
+    );
+    auto& mat = tmat.ref();
+    const auto& domain = fld.mesh().S();
+
+    mat.source() -= domain*su.field();
+
+    return tmat;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::faMatrix<Type>>
+Foam::fam::Su
+(
+    const tmp<DimensionedField<Type, areaMesh>>& tsu,
+    const GeometricField<Type, faPatchField, areaMesh>& fld
+)
+{
+    tmp<faMatrix<Type>> tmat = fam::Su(tsu(), fld);
+    tsu.clear();
+    return tmat;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::faMatrix<Type>>
+Foam::fam::Su
 (
     const tmp<GeometricField<Type, faPatchField, areaMesh>>& tsu,
-    const GeometricField<Type, faPatchField, areaMesh>& vf
+    const GeometricField<Type, faPatchField, areaMesh>& fld
 )
 {
-    tmp<faMatrix<Type>> tfam = fam::Su(tsu(), vf);
+    tmp<faMatrix<Type>> tmat = fam::Su(tsu(), fld);
     tsu.clear();
-    return tfam;
+    return tmat;
 }
 
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 template<class Type>
-tmp<faMatrix<Type>>
-Sp
+Foam::zeroField
+Foam::fam::Sp
 (
-    const areaScalarField& sp,
-    const GeometricField<Type, faPatchField, areaMesh>& vf
+    const Foam::zero,
+    const GeometricField<Type, faPatchField, areaMesh>& fld
 )
 {
-    const faMesh& mesh = vf.mesh();
-
-    tmp<faMatrix<Type>> tfam
-    (
-        new faMatrix<Type>
-        (
-            vf,
-            dimArea*sp.dimensions()*vf.dimensions()
-        )
-    );
-    faMatrix<Type>& fam = tfam.ref();
-
-    fam.diag() += mesh.S()*sp.internalField();
-
-    return tfam;
-}
-
-template<class Type>
-tmp<faMatrix<Type>>
-Sp
-(
-    const tmp<areaScalarField>& tsp,
-    const GeometricField<Type, faPatchField, areaMesh>& vf
-)
-{
-    tmp<faMatrix<Type>> tfam = fam::Sp(tsp(), vf);
-    tsp.clear();
-    return tfam;
+    return zeroField();
 }
 
 
 template<class Type>
-tmp<faMatrix<Type>>
-Sp
+Foam::tmp<Foam::faMatrix<Type>>
+Foam::fam::Sp
 (
     const dimensionedScalar& sp,
-    const GeometricField<Type, faPatchField, areaMesh>& vf
+    const GeometricField<Type, faPatchField, areaMesh>& fld
 )
 {
-    const faMesh& mesh = vf.mesh();
-
-    tmp<faMatrix<Type>> tfam
+    auto tmat = tmp<faMatrix<Type>>::New
     (
-        new faMatrix<Type>
-        (
-            vf,
-            dimArea*sp.dimensions()*vf.dimensions()
-        )
+        fld,
+        dimArea*sp.dimensions()*fld.dimensions()
     );
-    faMatrix<Type>& fam = tfam.ref();
+    auto& mat = tmat.ref();
+    const auto& domain = fld.mesh().S();
 
-    fam.diag() += mesh.S()*sp.value();
+    if (mag(sp.value()) > ROOTVSMALL)
+    {
+        mat.diag() += domain*sp.value();
+    }
 
-    return tfam;
+    return tmat;
 }
 
 
 template<class Type>
-tmp<faMatrix<Type>>
-SuSp
+Foam::tmp<Foam::faMatrix<Type>>
+Foam::fam::Sp
 (
-    const areaScalarField& sp,
-    const GeometricField<Type, faPatchField, areaMesh>& vf
+    const DimensionedField<scalar, areaMesh>& sp,
+    const GeometricField<Type, faPatchField, areaMesh>& fld
 )
 {
-    const faMesh& mesh = vf.mesh();
-
-    tmp<faMatrix<Type>> tfam
+    auto tmat = tmp<faMatrix<Type>>::New
     (
-        new faMatrix<Type>
-        (
-            vf,
-            dimArea*sp.dimensions()*vf.dimensions()
-        )
+        fld,
+        dimArea*sp.dimensions()*fld.dimensions()
     );
-    faMatrix<Type>& fam = tfam.ref();
+    auto& mat = tmat.ref();
+    const auto& domain = fld.mesh().S();
 
-   fam.diag() +=
-        mesh.S()*max
-        (
-            sp.internalField(),
-            dimensionedScalar("0", sp.dimensions(), Zero)
-        );
+    mat.diag() += domain*sp.field();
 
-    fam.source() -=
-        mesh.S()*min
-        (
-            sp.internalField(),
-            dimensionedScalar("0", sp.dimensions(), Zero)
-        )
-        *vf.internalField();
-
-    return tfam;
+    return tmat;
 }
 
+
 template<class Type>
-tmp<faMatrix<Type>>
-SuSp
+Foam::tmp<Foam::faMatrix<Type>>
+Foam::fam::Sp
+(
+    const tmp<DimensionedField<scalar, areaMesh>>& tsp,
+    const GeometricField<Type, faPatchField, areaMesh>& fld
+)
+{
+    tmp<faMatrix<Type>> tmat = fam::Sp(tsp(), fld);
+    tsp.clear();
+    return tmat;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::faMatrix<Type>>
+Foam::fam::Sp
 (
     const tmp<areaScalarField>& tsp,
-    const GeometricField<Type, faPatchField, areaMesh>& vf
+    const GeometricField<Type, faPatchField, areaMesh>& fld
 )
 {
-    tmp<faMatrix<Type>> tfam = fam::SuSp(tsp(), vf);
+    tmp<faMatrix<Type>> tmat = fam::Sp(tsp(), fld);
     tsp.clear();
-    return tfam;
+    return tmat;
 }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace fam
+template<class Type>
+Foam::zeroField
+Foam::fam::SuSp
+(
+    const Foam::zero,
+    const GeometricField<Type, faPatchField, areaMesh>& fld
+)
+{
+    return zeroField();
+}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
+template<class Type>
+Foam::tmp<Foam::faMatrix<Type>>
+Foam::fam::SuSp
+(
+    const dimensionedScalar& susp,
+    const GeometricField<Type, faPatchField, areaMesh>& fld
+)
+{
+    auto tmat = tmp<faMatrix<Type>>::New
+    (
+        fld,
+        dimArea*susp.dimensions()*fld.dimensions()
+    );
+    auto& mat = tmat.ref();
+    const auto& domain = fld.mesh().S();
+
+    if (susp.value() > ROOTVSMALL)
+    {
+        mat.diag() += domain*susp.value();
+    }
+    else if (susp.value() < -ROOTVSMALL)
+    {
+        mat.source() -= domain*susp.value()*fld.primitiveField();
+    }
+
+    return tmat;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::faMatrix<Type>>
+Foam::fam::SuSp
+(
+    const DimensionedField<scalar, areaMesh>& susp,
+    const GeometricField<Type, faPatchField, areaMesh>& fld
+)
+{
+    auto tmat = tmp<faMatrix<Type>>::New
+    (
+        fld,
+        dimArea*susp.dimensions()*fld.dimensions()
+    );
+    auto& mat = tmat.ref();
+    const auto& domain = fld.mesh().S();
+
+    mat.diag() += domain*max(susp.field(), scalar(0));
+
+    mat.source() -= domain*min(susp.field(), scalar(0))*fld.primitiveField();
+
+    return tmat;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::faMatrix<Type>>
+Foam::fam::SuSp
+(
+    const tmp<DimensionedField<scalar, areaMesh>>& tsusp,
+    const GeometricField<Type, faPatchField, areaMesh>& fld
+)
+{
+    tmp<faMatrix<Type>> tmat = fam::SuSp(tsusp(), fld);
+    tsusp.clear();
+    return tmat;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::faMatrix<Type>>
+Foam::fam::SuSp
+(
+    const tmp<areaScalarField>& tsusp,
+    const GeometricField<Type, faPatchField, areaMesh>& fld
+)
+{
+    tmp<faMatrix<Type>> tmat = fam::SuSp(tsusp(), fld);
+    tsusp.clear();
+    return tmat;
+}
+
 
 // ************************************************************************* //

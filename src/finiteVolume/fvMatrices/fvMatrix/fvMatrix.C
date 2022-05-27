@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -339,7 +339,6 @@ bool Foam::fvMatrix<Type>::checkImplicit(const label fieldi)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-
 template<class Type>
 Foam::fvMatrix<Type>::fvMatrix
 (
@@ -350,7 +349,7 @@ Foam::fvMatrix<Type>::fvMatrix
     lduMatrix(psi.mesh()),
     psi_(psi),
     useImplicit_(false),
-    lduAssemblyName_(word::null),
+    lduAssemblyName_(),
     nMatrix_(0),
     dimensions_(ds),
     source_(psi.size(), Zero),
@@ -368,26 +367,18 @@ Foam::fvMatrix<Type>::fvMatrix
         internalCoeffs_.set
         (
             patchi,
-            new Field<Type>
-            (
-                psi.mesh().boundary()[patchi].size(),
-                Zero
-            )
+            new Field<Type>(psi.mesh().boundary()[patchi].size(), Zero)
         );
 
         boundaryCoeffs_.set
         (
             patchi,
-            new Field<Type>
-            (
-                psi.mesh().boundary()[patchi].size(),
-                Zero
-            )
+            new Field<Type>(psi.mesh().boundary()[patchi].size(), Zero)
         );
     }
 
     auto& psiRef = this->psi(0);
-    label currentStatePsi = psiRef.eventNo();
+    const label currentStatePsi = psiRef.eventNo();
     psiRef.boundaryFieldRef().updateCoeffs();
     psiRef.eventNo() = currentStatePsi;
 }
@@ -396,7 +387,6 @@ Foam::fvMatrix<Type>::fvMatrix
 template<class Type>
 Foam::fvMatrix<Type>::fvMatrix(const fvMatrix<Type>& fvm)
 :
-    refCount(),
     lduMatrix(fvm),
     psi_(fvm.psi_),
     useImplicit_(fvm.useImplicit_),
@@ -423,113 +413,40 @@ Foam::fvMatrix<Type>::fvMatrix(const fvMatrix<Type>& fvm)
 
 
 template<class Type>
-Foam::fvMatrix<Type>::fvMatrix(const tmp<fvMatrix<Type>>& tfvm)
+Foam::fvMatrix<Type>::fvMatrix(const tmp<fvMatrix<Type>>& tmat)
 :
-    lduMatrix
-    (
-        const_cast<fvMatrix<Type>&>(tfvm()),
-        tfvm.isTmp()
-    ),
-    psi_(tfvm().psi_),
-    useImplicit_(tfvm().useImplicit_),
-    lduAssemblyName_(tfvm().lduAssemblyName_),
-    nMatrix_(tfvm().nMatrix_),
-    dimensions_(tfvm().dimensions_),
-    source_
-    (
-        const_cast<fvMatrix<Type>&>(tfvm()).source_,
-        tfvm.isTmp()
-    ),
-    internalCoeffs_
-    (
-        const_cast<fvMatrix<Type>&>(tfvm()).internalCoeffs_,
-        tfvm.isTmp()
-    ),
-    boundaryCoeffs_
-    (
-        const_cast<fvMatrix<Type>&>(tfvm()).boundaryCoeffs_,
-        tfvm.isTmp()
-    ),
+    lduMatrix(tmat.constCast(), tmat.movable()),
+    psi_(tmat().psi_),
+    useImplicit_(tmat().useImplicit_),
+    lduAssemblyName_(tmat().lduAssemblyName_),
+    nMatrix_(tmat().nMatrix_),
+    dimensions_(tmat().dimensions_),
+    source_(tmat.constCast().source_, tmat.movable()),
+    internalCoeffs_(tmat.constCast().internalCoeffs_, tmat.movable()),
+    boundaryCoeffs_(tmat.constCast().boundaryCoeffs_, tmat.movable()),
     faceFluxCorrectionPtr_(nullptr)
 {
     DebugInFunction
-        << "Copying fvMatrix<Type> for field " << psi_.name() << endl;
+        << "Copy/move fvMatrix<Type> for field " << psi_.name() << endl;
 
-    if (tfvm().faceFluxCorrectionPtr_)
+    if (tmat().faceFluxCorrectionPtr_)
     {
-        if (tfvm.isTmp())
+        if (tmat.movable())
         {
-            faceFluxCorrectionPtr_ = tfvm().faceFluxCorrectionPtr_;
-            tfvm().faceFluxCorrectionPtr_ = nullptr;
+            faceFluxCorrectionPtr_ = tmat().faceFluxCorrectionPtr_;
+            tmat().faceFluxCorrectionPtr_ = nullptr;
         }
         else
         {
             faceFluxCorrectionPtr_ =
                 new GeometricField<Type, fvsPatchField, surfaceMesh>
                 (
-                    *(tfvm().faceFluxCorrectionPtr_)
+                    *(tmat().faceFluxCorrectionPtr_)
                 );
         }
     }
 
-    tfvm.clear();
-}
-
-
-template<class Type>
-Foam::fvMatrix<Type>::fvMatrix
-(
-    const GeometricField<Type, fvPatchField, volMesh>& psi,
-    Istream& is
-)
-:
-    lduMatrix(psi.mesh()),
-    psi_(psi),
-    useImplicit_(false),
-    lduAssemblyName_(word::null),
-    nMatrix_(0),
-    dimensions_(is),
-    source_(is),
-    internalCoeffs_(psi.mesh().boundary().size()),
-    boundaryCoeffs_(psi.mesh().boundary().size()),
-    faceFluxCorrectionPtr_(nullptr)
-{
-
-    DebugInFunction
-        << "Constructing fvMatrix<Type> for field " << psi_.name() << endl;
-
-    checkImplicit();
-
-    // Initialise coupling coefficients
-    forAll(psi.mesh().boundary(), patchi)
-    {
-        internalCoeffs_.set
-        (
-            patchi,
-            new Field<Type>
-            (
-                psi.mesh().boundary()[patchi].size(),
-                Zero
-            )
-        );
-
-        boundaryCoeffs_.set
-        (
-            patchi,
-            new Field<Type>
-            (
-                psi.mesh().boundary()[patchi].size(),
-                Zero
-            )
-        );
-    }
-}
-
-
-template<class Type>
-Foam::tmp<Foam::fvMatrix<Type>> Foam::fvMatrix<Type>::clone() const
-{
-    return tmp<fvMatrix<Type>>::New(*this);
+    tmat.clear();
 }
 
 
@@ -769,21 +686,13 @@ void Foam::fvMatrix<Type>::setBounAndInterCoeffs()
                 internalCoeffs_.set
                 (
                     interfaceI,
-                    new Field<Type>
-                    (
-                        psi.mesh().boundary()[patchi].size(),
-                        Zero
-                    )
+                    new Field<Type>(psi.mesh().boundary()[patchi].size(), Zero)
                 );
 
                 boundaryCoeffs_.set
                 (
                     interfaceI,
-                    new Field<Type>
-                    (
-                        psi.mesh().boundary()[patchi].size(),
-                        Zero
-                    )
+                    new Field<Type>(psi.mesh().boundary()[patchi].size(), Zero)
                 );
                 interfaceI++;
             }
@@ -1882,18 +1791,12 @@ void Foam::fvMatrix<Type>::operator-=
 
 
 template<class Type>
-void Foam::fvMatrix<Type>::operator+=
-(
-    const zero&
-)
+void Foam::fvMatrix<Type>::operator+=(const Foam::zero)
 {}
 
 
 template<class Type>
-void Foam::fvMatrix<Type>::operator-=
-(
-    const zero&
-)
+void Foam::fvMatrix<Type>::operator-=(const Foam::zero)
 {}
 
 
@@ -1930,22 +1833,22 @@ void Foam::fvMatrix<Type>::operator*=
 template<class Type>
 void Foam::fvMatrix<Type>::operator*=
 (
-    const tmp<volScalarField::Internal>& tdsf
+    const tmp<volScalarField::Internal>& tfld
 )
 {
-    operator*=(tdsf());
-    tdsf.clear();
+    operator*=(tfld());
+    tfld.clear();
 }
 
 
 template<class Type>
 void Foam::fvMatrix<Type>::operator*=
 (
-    const tmp<volScalarField>& tvsf
+    const tmp<volScalarField>& tfld
 )
 {
-    operator*=(tvsf());
-    tvsf.clear();
+    operator*=(tfld());
+    tfld.clear();
 }
 
 
@@ -1973,34 +1876,32 @@ void Foam::fvMatrix<Type>::operator*=
 template<class Type>
 void Foam::checkMethod
 (
-    const fvMatrix<Type>& fvm1,
-    const fvMatrix<Type>& fvm2,
+    const fvMatrix<Type>& mat1,
+    const fvMatrix<Type>& mat2,
     const char* op
 )
 {
-    if (&fvm1.psi() != &fvm2.psi())
+    if (&mat1.psi() != &mat2.psi())
     {
         FatalErrorInFunction
-            << "incompatible fields for operation "
-            << endl << "    "
-            << "[" << fvm1.psi().name() << "] "
+            << "Incompatible fields for operation\n    "
+            << "[" << mat1.psi().name() << "] "
             << op
-            << " [" << fvm2.psi().name() << "]"
+            << " [" << mat2.psi().name() << "]"
             << abort(FatalError);
     }
 
     if
     (
         dimensionSet::checking()
-     && fvm1.dimensions() != fvm2.dimensions()
+     && mat1.dimensions() != mat2.dimensions()
     )
     {
         FatalErrorInFunction
-            << "incompatible dimensions for operation "
-            << endl << "    "
-            << "[" << fvm1.psi().name() << fvm1.dimensions()/dimVolume << " ] "
+            << "Incompatible dimensions for operation\n    "
+            << "[" << mat1.psi().name() << mat1.dimensions()/dimVolume << " ] "
             << op
-            << " [" << fvm2.psi().name() << fvm2.dimensions()/dimVolume << " ]"
+            << " [" << mat2.psi().name() << mat2.dimensions()/dimVolume << " ]"
             << abort(FatalError);
     }
 }
@@ -2009,22 +1910,22 @@ void Foam::checkMethod
 template<class Type>
 void Foam::checkMethod
 (
-    const fvMatrix<Type>& fvm,
-    const DimensionedField<Type, volMesh>& df,
+    const fvMatrix<Type>& mat,
+    const DimensionedField<Type, volMesh>& fld,
     const char* op
 )
 {
     if
     (
         dimensionSet::checking()
-     && fvm.dimensions()/dimVolume != df.dimensions()
+     && mat.dimensions()/dimVolume != fld.dimensions()
     )
     {
         FatalErrorInFunction
-            << endl << "    "
-            << "[" << fvm.psi().name() << fvm.dimensions()/dimVolume << " ] "
+            << "Incompatible dimensions for operation\n    "
+            << "[" << mat.psi().name() << mat.dimensions()/dimVolume << " ] "
             << op
-            << " [" << df.name() << df.dimensions() << " ]"
+            << " [" << fld.name() << fld.dimensions() << " ]"
             << abort(FatalError);
     }
 }
@@ -2033,7 +1934,7 @@ void Foam::checkMethod
 template<class Type>
 void Foam::checkMethod
 (
-    const fvMatrix<Type>& fvm,
+    const fvMatrix<Type>& mat,
     const dimensioned<Type>& dt,
     const char* op
 )
@@ -2041,13 +1942,12 @@ void Foam::checkMethod
     if
     (
         dimensionSet::checking()
-     && fvm.dimensions()/dimVolume != dt.dimensions()
+     && mat.dimensions()/dimVolume != dt.dimensions()
     )
     {
         FatalErrorInFunction
-            << "incompatible dimensions for operation "
-            << endl << "    "
-            << "[" << fvm.psi().name() << fvm.dimensions()/dimVolume << " ] "
+            << "Incompatible dimensions for operation\n    "
+            << "[" << mat.psi().name() << mat.dimensions()/dimVolume << " ] "
             << op
             << " [" << dt.name() << dt.dimensions() << " ]"
             << abort(FatalError);
@@ -2068,14 +1968,13 @@ Foam::SolverPerformance<Type> Foam::solve
 template<class Type>
 Foam::SolverPerformance<Type> Foam::solve
 (
-    const tmp<fvMatrix<Type>>& tfvm,
+    const tmp<fvMatrix<Type>>& tmat,
     const dictionary& solverControls
 )
 {
-    SolverPerformance<Type> solverPerf =
-        const_cast<fvMatrix<Type>&>(tfvm()).solve(solverControls);
+    SolverPerformance<Type> solverPerf(tmat.constCast().solve(solverControls));
 
-    tfvm.clear();
+    tmat.clear();
 
     return solverPerf;
 }
@@ -2088,12 +1987,11 @@ Foam::SolverPerformance<Type> Foam::solve(fvMatrix<Type>& fvm)
 }
 
 template<class Type>
-Foam::SolverPerformance<Type> Foam::solve(const tmp<fvMatrix<Type>>& tfvm)
+Foam::SolverPerformance<Type> Foam::solve(const tmp<fvMatrix<Type>>& tmat)
 {
-    SolverPerformance<Type> solverPerf =
-        const_cast<fvMatrix<Type>&>(tfvm()).solve();
+    SolverPerformance<Type> solverPerf(tmat.constCast().solve());
 
-    tfvm.clear();
+    tmat.clear();
 
     return solverPerf;
 }
@@ -2289,7 +2187,7 @@ template<class Type>
 Foam::tmp<Foam::fvMatrix<Type>> Foam::operator==
 (
     const fvMatrix<Type>& A,
-    const zero&
+    const Foam::zero
 )
 {
     return A;
@@ -2300,7 +2198,7 @@ template<class Type>
 Foam::tmp<Foam::fvMatrix<Type>> Foam::operator==
 (
     const tmp<fvMatrix<Type>>& tA,
-    const zero&
+    const Foam::zero
 )
 {
     return tA;

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -200,26 +200,18 @@ Foam::faMatrix<Type>::faMatrix
         << endl;
 
     // Initialise coupling coefficients
-    forAll(psi.mesh().boundary(), patchI)
+    forAll(psi.mesh().boundary(), patchi)
     {
         internalCoeffs_.set
         (
-            patchI,
-            new Field<Type>
-            (
-                psi.mesh().boundary()[patchI].size(),
-                Zero
-            )
+            patchi,
+            new Field<Type>(psi.mesh().boundary()[patchi].size(), Zero)
         );
 
         boundaryCoeffs_.set
         (
-            patchI,
-            new Field<Type>
-            (
-                psi.mesh().boundary()[patchI].size(),
-                Zero
-            )
+            patchi,
+            new Field<Type>(psi.mesh().boundary()[patchi].size(), Zero)
         );
     }
 
@@ -236,7 +228,6 @@ Foam::faMatrix<Type>::faMatrix
 template<class Type>
 Foam::faMatrix<Type>::faMatrix(const faMatrix<Type>& fam)
 :
-    refCount(),
     lduMatrix(fam),
     psi_(fam.psi_),
     dimensions_(fam.dimensions_),
@@ -246,74 +237,55 @@ Foam::faMatrix<Type>::faMatrix(const faMatrix<Type>& fam)
     faceFluxCorrectionPtr_(nullptr)
 {
     DebugInFunction
-        << "copying faMatrix<Type> for field " << psi_.name()
-        << endl;
+        << "Copying faMatrix<Type> for field " << psi_.name() << endl;
 
     if (fam.faceFluxCorrectionPtr_)
     {
-        faceFluxCorrectionPtr_ = new
-        GeometricField<Type, faePatchField, edgeMesh>
-        (
-            *(fam.faceFluxCorrectionPtr_)
-        );
+        faceFluxCorrectionPtr_ =
+            new GeometricField<Type, faePatchField, edgeMesh>
+            (
+                *(fam.faceFluxCorrectionPtr_)
+            );
     }
 }
 
 
 template<class Type>
-Foam::faMatrix<Type>::faMatrix
-(
-    const GeometricField<Type, faPatchField, areaMesh>& psi,
-    Istream& is
-)
+Foam::faMatrix<Type>::faMatrix(const tmp<faMatrix<Type>>& tmat)
 :
-    lduMatrix(psi.mesh()),
-    psi_(psi),
-    dimensions_(is),
-    source_(is),
-    internalCoeffs_(psi.mesh().boundary().size()),
-    boundaryCoeffs_(psi.mesh().boundary().size()),
+    lduMatrix(tmat.constCast(), tmat.movable()),
+    psi_(tmat().psi_),
+    dimensions_(tmat().dimensions_),
+    source_(tmat.constCast().source_, tmat.movable()),
+    internalCoeffs_(tmat.constCast().internalCoeffs_, tmat.movable()),
+    boundaryCoeffs_(tmat.constCast().boundaryCoeffs_, tmat.movable()),
     faceFluxCorrectionPtr_(nullptr)
 {
     DebugInFunction
-        << "constructing faMatrix<Type> for field " << psi_.name()
-        << endl;
+        << "Copy/Move faMatrix<Type> for field " << psi_.name() << endl;
 
-    // Initialise coupling coefficients
-    forAll(psi.mesh().boundary(), patchI)
+    if (tmat().faceFluxCorrectionPtr_)
     {
-        internalCoeffs_.set
-        (
-            patchI,
-            new Field<Type>
-            (
-                psi.mesh().boundary()[patchI].size(),
-                Zero
-            )
-        );
-
-        boundaryCoeffs_.set
-        (
-            patchI,
-            new Field<Type>
-            (
-                psi.mesh().boundary()[patchI].size(),
-                Zero
-            )
-        );
+        if (tmat.movable())
+        {
+            faceFluxCorrectionPtr_ = tmat().faceFluxCorrectionPtr_;
+            tmat().faceFluxCorrectionPtr_ = nullptr;
+        }
+        else
+        {
+            faceFluxCorrectionPtr_ =
+                new GeometricField<Type, faePatchField, edgeMesh>
+                (
+                    *(tmat().faceFluxCorrectionPtr_)
+                );
+        }
     }
-}
 
-
-template<class Type>
-Foam::tmp<Foam::faMatrix<Type>> Foam::faMatrix<Type>::clone() const
-{
-    return tmp<faMatrix<Type>>::New(*this);
+    tmat.clear();
 }
 
 
 // * * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * * * //
-
 
 template<class Type>
 Foam::faMatrix<Type>::~faMatrix()
@@ -601,7 +573,7 @@ void Foam::faMatrix<Type>::relax(const scalar alpha)
     }
 
     // Finally add the relaxation contribution to the source.
-    S += (D - D0)*psi_.internalField();
+    S += (D - D0)*psi_.primitiveField();
 }
 
 
@@ -690,7 +662,7 @@ Foam::faMatrix<Type>::H() const
         Hphi.primitiveFieldRef().replace(cmpt, boundaryDiagCmpt*psiCmpt);
     }
 
-    Hphi.primitiveFieldRef() += lduMatrix::H(psi_.internalField()) + source_;
+    Hphi.primitiveFieldRef() += lduMatrix::H(psi_.primitiveField()) + source_;
     addBoundarySource(Hphi.primitiveFieldRef());
 
     Hphi.primitiveFieldRef() /= psi_.mesh().S();
@@ -908,11 +880,22 @@ void Foam::faMatrix<Type>::operator-=(const tmp<faMatrix<Type>>& tfamv)
 template<class Type>
 void Foam::faMatrix<Type>::operator+=
 (
-    const GeometricField<Type, faPatchField, areaMesh>& su
+    const DimensionedField<Type, areaMesh>& su
 )
 {
     checkMethod(*this, su, "+=");
-    source() -= su.mesh().S()*su.internalField();
+    source() -= su.mesh().S()*su.field();
+}
+
+
+template<class Type>
+void Foam::faMatrix<Type>::operator+=
+(
+    const tmp<DimensionedField<Type, areaMesh>>& tsu
+)
+{
+    operator+=(tsu());
+    tsu.clear();
 }
 
 
@@ -930,11 +913,22 @@ void Foam::faMatrix<Type>::operator+=
 template<class Type>
 void Foam::faMatrix<Type>::operator-=
 (
-    const GeometricField<Type, faPatchField, areaMesh>& su
+    const DimensionedField<Type, areaMesh>& su
 )
 {
     checkMethod(*this, su, "-=");
-    source() += su.mesh().S()*su.internalField();
+    source() += su.mesh().S()*su.field();
+}
+
+
+template<class Type>
+void Foam::faMatrix<Type>::operator-=
+(
+    const tmp<DimensionedField<Type, areaMesh>>& tsu
+)
+{
+    operator-=(tsu());
+    tsu.clear();
 }
 
 
@@ -955,7 +949,7 @@ void Foam::faMatrix<Type>::operator+=
     const dimensioned<Type>& su
 )
 {
-    source() -= su.mesh().S()*su;
+    source() -= psi().mesh().S()*su;
 }
 
 
@@ -965,25 +959,38 @@ void Foam::faMatrix<Type>::operator-=
     const dimensioned<Type>& su
 )
 {
-    source() += su.mesh().S()*su;
+    source() += psi().mesh().S()*su;
 }
+
+
+template<class Type>
+void Foam::faMatrix<Type>::operator+=(const Foam::zero)
+{}
+
+
+template<class Type>
+void Foam::faMatrix<Type>::operator-=(const Foam::zero)
+{}
 
 
 template<class Type>
 void Foam::faMatrix<Type>::operator*=
 (
-    const areaScalarField& vsf
+    const areaScalarField::Internal& dsf
 )
 {
-    dimensions_ *= vsf.dimensions();
-    lduMatrix::operator*=(vsf.internalField());
-    source_ *= vsf.internalField();
+    dimensions_ *= dsf.dimensions();
+    lduMatrix::operator*=(dsf.field());
+    source_ *= dsf.field();
 
-    forAll(boundaryCoeffs_, patchI)
+    forAll(boundaryCoeffs_, patchi)
     {
-        const scalarField psf(vsf.boundaryField()[patchI].patchInternalField());
-        internalCoeffs_[patchI] *= psf;
-        boundaryCoeffs_[patchI] *= psf;
+        const scalarField pisf
+        (
+            dsf.mesh().boundary()[patchi].patchInternalField(dsf.field())
+        );
+        internalCoeffs_[patchi] *= pisf;
+        boundaryCoeffs_[patchi] *= pisf;
     }
 
     if (faceFluxCorrectionPtr_)
@@ -998,11 +1005,22 @@ void Foam::faMatrix<Type>::operator*=
 template<class Type>
 void Foam::faMatrix<Type>::operator*=
 (
-    const tmp<areaScalarField>& tvsf
+    const tmp<areaScalarField::Internal>& tfld
 )
 {
-    operator*=(tvsf());
-    tvsf.clear();
+    operator*=(tfld());
+    tfld.clear();
+}
+
+
+template<class Type>
+void Foam::faMatrix<Type>::operator*=
+(
+    const tmp<areaScalarField>& tfld
+)
+{
+    operator*=(tfld());
+    tfld.clear();
 }
 
 
@@ -1030,34 +1048,32 @@ void Foam::faMatrix<Type>::operator*=
 template<class Type>
 void Foam::checkMethod
 (
-    const faMatrix<Type>& fam1,
-    const faMatrix<Type>& fam2,
+    const faMatrix<Type>& mat1,
+    const faMatrix<Type>& mat2,
     const char* op
 )
 {
-    if (&fam1.psi() != &fam2.psi())
+    if (&mat1.psi() != &mat2.psi())
     {
         FatalErrorInFunction
-            << "incompatible fields for operation "
-            << endl << "    "
-            << "[" << fam1.psi().name() << "] "
+            << "Incompatible fields for operation\n    "
+            << "[" << mat1.psi().name() << "] "
             << op
-            << " [" << fam2.psi().name() << "]"
+            << " [" << mat2.psi().name() << "]"
             << abort(FatalError);
     }
 
     if
     (
         dimensionSet::checking()
-     && fam1.dimensions() != fam2.dimensions()
+     && mat1.dimensions() != mat2.dimensions()
     )
     {
         FatalErrorInFunction
-            << "incompatible dimensions for operation "
-            << endl << "    "
-            << "[" << fam1.psi().name() << fam1.dimensions()/dimArea << " ] "
+            << "Incompatible dimensions for operation\n    "
+            << "[" << mat1.psi().name() << mat1.dimensions()/dimArea << " ] "
             << op
-            << " [" << fam2.psi().name() << fam2.dimensions()/dimArea << " ]"
+            << " [" << mat2.psi().name() << mat2.dimensions()/dimArea << " ]"
             << abort(FatalError);
     }
 }
@@ -1066,23 +1082,22 @@ void Foam::checkMethod
 template<class Type>
 void Foam::checkMethod
 (
-    const faMatrix<Type>& fam,
-    const GeometricField<Type, faPatchField, areaMesh>& vf,
+    const faMatrix<Type>& mat,
+    const DimensionedField<Type, areaMesh>& fld,
     const char* op
 )
 {
     if
     (
         dimensionSet::checking()
-     && fam.dimensions()/dimArea != vf.dimensions()
+     && mat.dimensions()/dimArea != fld.dimensions()
     )
     {
         FatalErrorInFunction
-            <<  "incompatible dimensions for operation "
-            << endl << "    "
-            << "[" << fam.psi().name() << fam.dimensions()/dimArea << " ] "
+            <<  "Incompatible dimensions for operation\n    "
+            << "[" << mat.psi().name() << mat.dimensions()/dimArea << " ] "
             << op
-            << " [" << vf.name() << vf.dimensions() << " ]"
+            << " [" << fld.name() << fld.dimensions() << " ]"
             << abort(FatalError);
     }
 }
@@ -1091,7 +1106,7 @@ void Foam::checkMethod
 template<class Type>
 void Foam::checkMethod
 (
-    const faMatrix<Type>& fam,
+    const faMatrix<Type>& mat,
     const dimensioned<Type>& dt,
     const char* op
 )
@@ -1099,13 +1114,12 @@ void Foam::checkMethod
     if
     (
         dimensionSet::checking()
-     && fam.dimensions()/dimArea != dt.dimensions()
+     && mat.dimensions()/dimArea != dt.dimensions()
     )
     {
         FatalErrorInFunction
-            << "incompatible dimensions for operation "
-            << endl << "    "
-            << "[" << fam.psi().name() << fam.dimensions()/dimArea << " ] "
+            << "Incompatible dimensions for operation\n    "
+            << "[" << mat.psi().name() << mat.dimensions()/dimArea << " ] "
             << op
             << " [" << dt.name() << dt.dimensions() << " ]"
             << abort(FatalError);
@@ -1117,7 +1131,7 @@ template<class Type>
 Foam::SolverPerformance<Type> Foam::solve
 (
     faMatrix<Type>& fam,
-    Istream& solverControls
+    const dictionary& solverControls
 )
 {
     return fam.solve(solverControls);
@@ -1127,14 +1141,14 @@ Foam::SolverPerformance<Type> Foam::solve
 template<class Type>
 Foam::SolverPerformance<Type> Foam::solve
 (
-    const tmp<faMatrix<Type>>& tfam,
-    Istream& solverControls
+    const tmp<faMatrix<Type>>& tmat,
+    const dictionary& solverControls
 )
 {
-    SolverPerformance<Type> solverPerf =
-        const_cast<faMatrix<Type>&>(tfam()).solve(solverControls);
+    SolverPerformance<Type> solverPerf(tmat.constCast().solve(solverControls));
 
-    tfam.clear();
+    tmat.clear();
+
     return solverPerf;
 }
 
@@ -1147,12 +1161,12 @@ Foam::SolverPerformance<Type> Foam::solve(faMatrix<Type>& fam)
 
 
 template<class Type>
-Foam::SolverPerformance<Type> Foam::solve(const tmp<faMatrix<Type>>& tfam)
+Foam::SolverPerformance<Type> Foam::solve(const tmp<faMatrix<Type>>& tmat)
 {
-    SolverPerformance<Type> solverPerf =
-        const_cast<faMatrix<Type>&>(tfam()).solve();
+    SolverPerformance<Type> solverPerf(tmat.constCast().solve());
 
-    tfam.clear();
+    tmat.clear();
+
     return solverPerf;
 }
 
@@ -1350,12 +1364,12 @@ template<class Type>
 Foam::tmp<Foam::faMatrix<Type>> Foam::operator+
 (
     const faMatrix<Type>& A,
-    const GeometricField<Type, faPatchField, areaMesh>& su
+    const DimensionedField<Type, areaMesh>& su
 )
 {
     checkMethod(A, su, "+");
-    tmp<faMatrix<Type>> tC(new faMatrix<Type>(A));
-    tC.ref().source() -= su.mesh().S()*su.internalField();
+    auto tC(A.clone());
+    tC.ref().source() -= su.mesh().S()*su.field();
     return tC;
 }
 
@@ -1363,13 +1377,14 @@ Foam::tmp<Foam::faMatrix<Type>> Foam::operator+
 template<class Type>
 Foam::tmp<Foam::faMatrix<Type>> Foam::operator+
 (
-    const tmp<faMatrix<Type>>& tA,
-    const GeometricField<Type, faPatchField, areaMesh>& su
+    const faMatrix<Type>& A,
+    const tmp<DimensionedField<Type, areaMesh>>& tsu
 )
 {
-    checkMethod(tA(), su, "+");
-    tmp<faMatrix<Type>> tC(tA.ptr());
-    tC.ref().source() -= su.mesh().S()*su.internalField();
+    checkMethod(A, tsu(), "+");
+    auto tC(A.clone());
+    tC.ref().source() -= tsu().mesh().S()*tsu().field();
+    tsu.clear();
     return tC;
 }
 
@@ -1382,8 +1397,37 @@ Foam::tmp<Foam::faMatrix<Type>> Foam::operator+
 )
 {
     checkMethod(A, tsu(), "+");
-    tmp<faMatrix<Type>> tC(new faMatrix<Type>(A));
-    tC.ref().source() -= tsu().mesh().S()*tsu().internalField();
+    auto tC(A.clone());
+    tC.ref().source() -= tsu().mesh().S()*tsu().primitiveField();
+    tsu.clear();
+    return tC;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::faMatrix<Type>> Foam::operator+
+(
+    const tmp<faMatrix<Type>>& tA,
+    const DimensionedField<Type, areaMesh>& su
+)
+{
+    checkMethod(tA(), su, "+");
+    tmp<faMatrix<Type>> tC(tA.ptr());
+    tC.ref().source() -= su.mesh().S()*su.field();
+    return tC;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::faMatrix<Type>> Foam::operator+
+(
+    const tmp<faMatrix<Type>>& tA,
+    const tmp<DimensionedField<Type, areaMesh>>& tsu
+)
+{
+    checkMethod(tA(), tsu(), "+");
+    tmp<faMatrix<Type>> tC(tA.ptr());
+    tC.ref().source() -= tsu().mesh().S()*tsu().field();
     tsu.clear();
     return tC;
 }
@@ -1398,7 +1442,7 @@ Foam::tmp<Foam::faMatrix<Type>> Foam::operator+
 {
     checkMethod(tA(), tsu(), "+");
     tmp<faMatrix<Type>> tC(tA.ptr());
-    tC.ref().source() -= tsu().mesh().S()*tsu().internalField();
+    tC.ref().source() -= tsu().mesh().S()*tsu().primitiveField();
     tsu.clear();
     return tC;
 }
@@ -1407,13 +1451,13 @@ Foam::tmp<Foam::faMatrix<Type>> Foam::operator+
 template<class Type>
 Foam::tmp<Foam::faMatrix<Type>> Foam::operator+
 (
-    const GeometricField<Type, faPatchField, areaMesh>& su,
+    const DimensionedField<Type, areaMesh>& su,
     const faMatrix<Type>& A
 )
 {
     checkMethod(A, su, "+");
-    tmp<faMatrix<Type>> tC(new faMatrix<Type>(A));
-    tC.ref().source() -= su.mesh().S()*su.internalField();
+    auto tC(A.clone());
+    tC.ref().source() -= su.mesh().S()*su.field();
     return tC;
 }
 
@@ -1421,13 +1465,14 @@ Foam::tmp<Foam::faMatrix<Type>> Foam::operator+
 template<class Type>
 Foam::tmp<Foam::faMatrix<Type>> Foam::operator+
 (
-    const GeometricField<Type, faPatchField, areaMesh>& su,
-    const tmp<faMatrix<Type>>& tA
+    const tmp<DimensionedField<Type, areaMesh>>& tsu,
+    const faMatrix<Type>& A
 )
 {
-    checkMethod(tA(), su, "+");
-    tmp<faMatrix<Type>> tC(tA.ptr());
-    tC.ref().source() -= su.mesh().S()*su.internalField();
+    checkMethod(A, tsu(), "+");
+    auto tC(A.clone());
+    tC.ref().source() -= tsu().mesh().S()*tsu().field();
+    tsu.clear();
     return tC;
 }
 
@@ -1440,8 +1485,37 @@ Foam::tmp<Foam::faMatrix<Type>> Foam::operator+
 )
 {
     checkMethod(A, tsu(), "+");
-    tmp<faMatrix<Type>> tC(new faMatrix<Type>(A));
-    tC.ref().source() -= tsu().mesh().S()*tsu().internalField();
+    auto tC(A.clone());
+    tC.ref().source() -= tsu().mesh().S()*tsu().primitiveField();
+    tsu.clear();
+    return tC;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::faMatrix<Type>> Foam::operator+
+(
+    const DimensionedField<Type, areaMesh>& su,
+    const tmp<faMatrix<Type>>& tA
+)
+{
+    checkMethod(tA(), su, "+");
+    tmp<faMatrix<Type>> tC(tA.ptr());
+    tC.ref().source() -= su.mesh().S()*su.field();
+    return tC;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::faMatrix<Type>> Foam::operator+
+(
+    const tmp<DimensionedField<Type, areaMesh>>& tsu,
+    const tmp<faMatrix<Type>>& tA
+)
+{
+    checkMethod(tA(), tsu(), "+");
+    tmp<faMatrix<Type>> tC(tA.ptr());
+    tC.ref().source() -= tsu().mesh().S()*tsu().field();
     tsu.clear();
     return tC;
 }
@@ -1456,7 +1530,7 @@ Foam::tmp<Foam::faMatrix<Type>> Foam::operator+
 {
     checkMethod(tA(), tsu(), "+");
     tmp<faMatrix<Type>> tC(tA.ptr());
-    tC.ref().source() -= tsu().mesh().S()*tsu().internalField();
+    tC.ref().source() -= tsu().mesh().S()*tsu().primitiveField();
     tsu.clear();
     return tC;
 }
@@ -1466,12 +1540,12 @@ template<class Type>
 Foam::tmp<Foam::faMatrix<Type>> Foam::operator-
 (
     const faMatrix<Type>& A,
-    const GeometricField<Type, faPatchField, areaMesh>& su
+    const DimensionedField<Type, areaMesh>& su
 )
 {
     checkMethod(A, su, "-");
-    tmp<faMatrix<Type>> tC(new faMatrix<Type>(A));
-    tC.ref().source() += su.mesh().S()*su.internalField();
+    auto tC(A.clone());
+    tC.ref().source() += su.mesh().S()*su.field();
     return tC;
 }
 
@@ -1479,13 +1553,14 @@ Foam::tmp<Foam::faMatrix<Type>> Foam::operator-
 template<class Type>
 Foam::tmp<Foam::faMatrix<Type>> Foam::operator-
 (
-    const tmp<faMatrix<Type>>& tA,
-    const GeometricField<Type, faPatchField, areaMesh>& su
+    const faMatrix<Type>& A,
+    const tmp<DimensionedField<Type, areaMesh>>& tsu
 )
 {
-    checkMethod(tA(), su, "-");
-    tmp<faMatrix<Type>> tC(tA.ptr());
-    tC.ref().source() += su.mesh().S()*su.internalField();
+    checkMethod(A, tsu(), "-");
+    auto tC(A.clone());
+    tC.ref().source() += tsu().mesh().S()*tsu().field();
+    tsu.clear();
     return tC;
 }
 
@@ -1498,8 +1573,37 @@ Foam::tmp<Foam::faMatrix<Type>> Foam::operator-
 )
 {
     checkMethod(A, tsu(), "-");
-    tmp<faMatrix<Type>> tC(new faMatrix<Type>(A));
-    tC.ref().source() += tsu().mesh().S()*tsu().internalField();
+    auto tC(A.clone());
+    tC.ref().source() += tsu().mesh().S()*tsu().primitiveField();
+    tsu.clear();
+    return tC;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::faMatrix<Type>> Foam::operator-
+(
+    const tmp<faMatrix<Type>>& tA,
+    const DimensionedField<Type, areaMesh>& su
+)
+{
+    checkMethod(tA(), su, "-");
+    tmp<faMatrix<Type>> tC(tA.ptr());
+    tC.ref().source() += su.mesh().S()*su.field();
+    return tC;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::faMatrix<Type>> Foam::operator-
+(
+    const tmp<faMatrix<Type>>& tA,
+    const tmp<DimensionedField<Type, areaMesh>>& tsu
+)
+{
+    checkMethod(tA(), tsu(), "-");
+    tmp<faMatrix<Type>> tC(tA.ptr());
+    tC.ref().source() += tsu().mesh().S()*tsu().field();
     tsu.clear();
     return tC;
 }
@@ -1514,7 +1618,7 @@ Foam::tmp<Foam::faMatrix<Type>> Foam::operator-
 {
     checkMethod(tA(), tsu(), "-");
     tmp<faMatrix<Type>> tC(tA.ptr());
-    tC.ref().source() += tsu().mesh().S()*tsu().internalField();
+    tC.ref().source() += tsu().mesh().S()*tsu().primitiveField();
     tsu.clear();
     return tC;
 }
@@ -1523,14 +1627,14 @@ Foam::tmp<Foam::faMatrix<Type>> Foam::operator-
 template<class Type>
 Foam::tmp<Foam::faMatrix<Type>> Foam::operator-
 (
-    const GeometricField<Type, faPatchField, areaMesh>& su,
+    const DimensionedField<Type, areaMesh>& su,
     const faMatrix<Type>& A
 )
 {
     checkMethod(A, su, "-");
-    tmp<faMatrix<Type>> tC(new faMatrix<Type>(A));
+    auto tC(A.clone());
     tC.ref().negate();
-    tC.ref().source() -= su.mesh().S()*su.internalField();
+    tC.ref().source() -= su.mesh().S()*su.field();
     return tC;
 }
 
@@ -1538,14 +1642,15 @@ Foam::tmp<Foam::faMatrix<Type>> Foam::operator-
 template<class Type>
 Foam::tmp<Foam::faMatrix<Type>> Foam::operator-
 (
-    const GeometricField<Type, faPatchField, areaMesh>& su,
-    const tmp<faMatrix<Type>>& tA
+    const tmp<DimensionedField<Type, areaMesh>>& tsu,
+    const faMatrix<Type>& A
 )
 {
-    checkMethod(tA(), su, "-");
-    tmp<faMatrix<Type>> tC(tA.ptr());
+    checkMethod(A, tsu(), "-");
+    auto tC(A.clone());
     tC.ref().negate();
-    tC.ref().source() -= su.mesh().S()*su.internalField();
+    tC.ref().source() -= tsu().mesh().S()*tsu().field();
+    tsu.clear();
     return tC;
 }
 
@@ -1558,9 +1663,40 @@ Foam::tmp<Foam::faMatrix<Type>> Foam::operator-
 )
 {
     checkMethod(A, tsu(), "-");
-    tmp<faMatrix<Type>> tC(new faMatrix<Type>(A));
+    auto tC(A.clone());
     tC.ref().negate();
-    tC.ref().source() -= tsu().mesh().S()*tsu().internalField();
+    tC.ref().source() -= tsu().mesh().S()*tsu().primitiveField();
+    tsu.clear();
+    return tC;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::faMatrix<Type>> Foam::operator-
+(
+    const DimensionedField<Type, areaMesh>& su,
+    const tmp<faMatrix<Type>>& tA
+)
+{
+    checkMethod(tA(), su, "-");
+    tmp<faMatrix<Type>> tC(tA.ptr());
+    tC.ref().negate();
+    tC.ref().source() -= su.mesh().S()*su.field();
+    return tC;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::faMatrix<Type>> Foam::operator-
+(
+    const tmp<DimensionedField<Type, areaMesh>>& tsu,
+    const tmp<faMatrix<Type>>& tA
+)
+{
+    checkMethod(tA(), tsu(), "-");
+    tmp<faMatrix<Type>> tC(tA.ptr());
+    tC.ref().negate();
+    tC.ref().source() -= tsu().mesh().S()*tsu().field();
     tsu.clear();
     return tC;
 }
@@ -1576,7 +1712,7 @@ Foam::tmp<Foam::faMatrix<Type>> Foam::operator-
     checkMethod(tA(), tsu(), "-");
     tmp<faMatrix<Type>> tC(tA.ptr());
     tC.ref().negate();
-    tC.ref().source() -= tsu().mesh().S()*tsu().internalField();
+    tC.ref().source() -= tsu().mesh().S()*tsu().primitiveField();
     tsu.clear();
     return tC;
 }
@@ -1590,7 +1726,7 @@ Foam::tmp<Foam::faMatrix<Type>> Foam::operator+
 )
 {
     checkMethod(A, su, "+");
-    tmp<faMatrix<Type>> tC(new faMatrix<Type>(A));
+    auto tC(A.clone());
     tC.ref().source() -= su.value()*A.psi().mesh().S();
     return tC;
 }
@@ -1618,7 +1754,7 @@ Foam::tmp<Foam::faMatrix<Type>> Foam::operator+
 )
 {
     checkMethod(A, su, "+");
-    tmp<faMatrix<Type>> tC(new faMatrix<Type>(A));
+    auto tC(A.clone());
     tC.ref().source() -= su.value()*A.psi().mesh().S();
     return tC;
 }
@@ -1646,7 +1782,7 @@ Foam::tmp<Foam::faMatrix<Type>> Foam::operator-
 )
 {
     checkMethod(A, su, "-");
-    tmp<faMatrix<Type>> tC(new faMatrix<Type>(A));
+    auto tC(A.clone());
     tC.ref().source() += su.value()*tC().psi().mesh().S();
     return tC;
 }
@@ -1674,7 +1810,7 @@ Foam::tmp<Foam::faMatrix<Type>> Foam::operator-
 )
 {
     checkMethod(A, su, "-");
-    tmp<faMatrix<Type>> tC(new faMatrix<Type>(A));
+    auto tC(A.clone());
     tC.ref().negate();
     tC.ref().source() -= su.value()*A.psi().mesh().S();
     return tC;
@@ -1700,12 +1836,12 @@ template<class Type>
 Foam::tmp<Foam::faMatrix<Type>> Foam::operator==
 (
     const faMatrix<Type>& A,
-    const GeometricField<Type, faPatchField, areaMesh>& su
+    const DimensionedField<Type, areaMesh>& su
 )
 {
     checkMethod(A, su, "==");
-    tmp<faMatrix<Type>> tC(new faMatrix<Type>(A));
-    tC.ref().source() += su.mesh().S()*su.internalField();
+    auto tC(A.clone());
+    tC.ref().source() += su.mesh().S()*su.field();
     return tC;
 }
 
@@ -1713,13 +1849,14 @@ Foam::tmp<Foam::faMatrix<Type>> Foam::operator==
 template<class Type>
 Foam::tmp<Foam::faMatrix<Type>> Foam::operator==
 (
-    const tmp<faMatrix<Type>>& tA,
-    const GeometricField<Type, faPatchField, areaMesh>& su
+    const faMatrix<Type>& A,
+    const tmp<DimensionedField<Type, areaMesh>>& tsu
 )
 {
-    checkMethod(tA(), su, "==");
-    tmp<faMatrix<Type>> tC(tA.ptr());
-    tC.ref().source() += su.mesh().S()*su.internalField();
+    checkMethod(A, tsu(), "==");
+    auto tC(A.clone());
+    tC.ref().source() += tsu().mesh().S()*tsu().field();
+    tsu.clear();
     return tC;
 }
 
@@ -1732,8 +1869,37 @@ Foam::tmp<Foam::faMatrix<Type>> Foam::operator==
 )
 {
     checkMethod(A, tsu(), "==");
-    tmp<faMatrix<Type>> tC(new faMatrix<Type>(A));
-    tC.ref().source() += tsu().mesh().S()*tsu().internalField();
+    auto tC(A.clone());
+    tC.ref().source() += tsu().mesh().S()*tsu().primitiveField();
+    tsu.clear();
+    return tC;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::faMatrix<Type>> Foam::operator==
+(
+    const tmp<faMatrix<Type>>& tA,
+    const DimensionedField<Type, areaMesh>& su
+)
+{
+    checkMethod(tA(), su, "==");
+    tmp<faMatrix<Type>> tC(tA.ptr());
+    tC.ref().source() += su.mesh().S()*su.field();
+    return tC;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::faMatrix<Type>> Foam::operator==
+(
+    const tmp<faMatrix<Type>>& tA,
+    const tmp<DimensionedField<Type, areaMesh>>& tsu
+)
+{
+    checkMethod(tA(), tsu(), "==");
+    tmp<faMatrix<Type>> tC(tA.ptr());
+    tC.ref().source() += tsu().mesh().S()*tsu().field();
     tsu.clear();
     return tC;
 }
@@ -1748,7 +1914,7 @@ Foam::tmp<Foam::faMatrix<Type>> Foam::operator==
 {
     checkMethod(tA(), tsu(), "==");
     tmp<faMatrix<Type>> tC(tA.ptr());
-    tC.ref().source() += tsu().mesh().S()*tsu().internalField();
+    tC.ref().source() += tsu().mesh().S()*tsu().primitiveField();
     tsu.clear();
     return tC;
 }
@@ -1762,7 +1928,7 @@ Foam::tmp<Foam::faMatrix<Type>> Foam::operator==
 )
 {
     checkMethod(A, su, "==");
-    tmp<faMatrix<Type>> tC(new faMatrix<Type>(A));
+    auto tC(A.clone());
     tC.ref().source() += A.psi().mesh().S()*su.value();
     return tC;
 }
@@ -1783,14 +1949,49 @@ Foam::tmp<Foam::faMatrix<Type>> Foam::operator==
 
 
 template<class Type>
+Foam::tmp<Foam::faMatrix<Type>> Foam::operator==
+(
+    const faMatrix<Type>& A,
+    const Foam::zero
+)
+{
+    return A;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::faMatrix<Type>> Foam::operator==
+(
+    const tmp<faMatrix<Type>>& tA,
+    const Foam::zero
+)
+{
+    return tA;
+}
+
+
+template<class Type>
 Foam::tmp<Foam::faMatrix<Type>> Foam::operator*
 (
-    const areaScalarField& vsf,
+    const areaScalarField::Internal& dsf,
     const faMatrix<Type>& A
 )
 {
-    tmp<faMatrix<Type>> tC(new faMatrix<Type>(A));
-    tC.ref() *= vsf;
+    auto tC(A.clone());
+    tC.ref() *= dsf;
+    return tC;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::faMatrix<Type>> Foam::operator*
+(
+    const tmp<areaScalarField::Internal>& tdsf,
+    const faMatrix<Type>& A
+)
+{
+    auto tC(A.clone());
+    tC.ref() *= tdsf;
     return tC;
 }
 
@@ -1802,7 +2003,7 @@ Foam::tmp<Foam::faMatrix<Type>> Foam::operator*
     const faMatrix<Type>& A
 )
 {
-    tmp<faMatrix<Type>> tC(new faMatrix<Type>(A));
+    auto tC(A.clone());
     tC.ref() *= tvsf;
     return tC;
 }
@@ -1811,12 +2012,25 @@ Foam::tmp<Foam::faMatrix<Type>> Foam::operator*
 template<class Type>
 Foam::tmp<Foam::faMatrix<Type>> Foam::operator*
 (
-    const areaScalarField& vsf,
+    const areaScalarField::Internal& dsf,
     const tmp<faMatrix<Type>>& tA
 )
 {
     tmp<faMatrix<Type>> tC(tA.ptr());
-    tC.ref() *= vsf;
+    tC.ref() *= dsf;
+    return tC;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::faMatrix<Type>> Foam::operator*
+(
+    const tmp<areaScalarField::Internal>& tdsf,
+    const tmp<faMatrix<Type>>& tA
+)
+{
+    tmp<faMatrix<Type>> tC(tA.ptr());
+    tC.ref() *= tdsf;
     return tC;
 }
 
@@ -1841,7 +2055,7 @@ Foam::tmp<Foam::faMatrix<Type>> Foam::operator*
     const faMatrix<Type>& A
 )
 {
-    tmp<faMatrix<Type>> tC(new faMatrix<Type>(A));
+    auto tC(A.clone());
     tC.ref() *= ds;
     return tC;
 }

@@ -28,8 +28,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fvMatricesFwd_H
-#define fvMatricesFwd_H
+#ifndef Foam_fvMatricesFwd_H
+#define Foam_fvMatricesFwd_H
 
 #include "fieldTypes.H"
 
@@ -40,8 +40,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class Type>
-class fvMatrix;
+template<class Type> class fvMatrix;
 
 typedef fvMatrix<scalar> fvScalarMatrix;
 typedef fvMatrix<vector> fvVectorMatrix;

@@ -28,8 +28,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef faMatricesFwd_H
-#define faMatricesFwd_H
+#ifndef Foam_faMatricesFwd_H
+#define Foam_faMatricesFwd_H
 
 #include "fieldTypes.H"
 

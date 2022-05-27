@@ -34,8 +34,8 @@ SourceFile
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef faOptionList_H
-#define faOptionList_H
+#ifndef Foam_faOptionList_H
+#define Foam_faOptionList_H
 
 #include "faOption.H"
 #include "PtrList.H"
@@ -46,9 +46,11 @@ SourceFile
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Forward Declarations
 namespace Foam
 {
+
+// Forward Declarations
+
 namespace fa
 {
     class optionList;

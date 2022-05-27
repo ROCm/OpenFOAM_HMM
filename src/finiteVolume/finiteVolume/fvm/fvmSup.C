@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,71 +27,15 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "volFields.H"
-#include "surfaceFields.H"
-#include "fvMatrix.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::tmp<Foam::fvMatrix<Type>>
-Foam::fvm::Su
-(
-    const DimensionedField<Type, volMesh>& su,
-    const GeometricField<Type, fvPatchField, volMesh>& vf
-)
-{
-    const fvMesh& mesh = vf.mesh();
-
-    tmp<fvMatrix<Type>> tfvm
-    (
-        new fvMatrix<Type>
-        (
-            vf,
-            dimVol*su.dimensions()
-        )
-    );
-    fvMatrix<Type>& fvm = tfvm.ref();
-
-    fvm.source() -= mesh.V()*su.field();
-
-    return tfvm;
-}
-
-
-template<class Type>
-Foam::tmp<Foam::fvMatrix<Type>>
-Foam::fvm::Su
-(
-    const tmp<DimensionedField<Type, volMesh>>& tsu,
-    const GeometricField<Type, fvPatchField, volMesh>& vf
-)
-{
-    tmp<fvMatrix<Type>> tfvm = fvm::Su(tsu(), vf);
-    tsu.clear();
-    return tfvm;
-}
-
-
-template<class Type>
-Foam::tmp<Foam::fvMatrix<Type>>
-Foam::fvm::Su
-(
-    const tmp<GeometricField<Type, fvPatchField, volMesh>>& tsu,
-    const GeometricField<Type, fvPatchField, volMesh>& vf
-)
-{
-    tmp<fvMatrix<Type>> tfvm = fvm::Su(tsu(), vf);
-    tsu.clear();
-    return tfvm;
-}
-
 
 template<class Type>
 Foam::zeroField
 Foam::fvm::Su
 (
-    const zero&,
-    const GeometricField<Type, fvPatchField, volMesh>& vf
+    const Foam::zero,
+    const GeometricField<Type, fvPatchField, volMesh>& fld
 )
 {
     return zeroField();
@@ -99,89 +44,86 @@ Foam::fvm::Su
 
 template<class Type>
 Foam::tmp<Foam::fvMatrix<Type>>
-Foam::fvm::Sp
+Foam::fvm::Su
 (
-    const volScalarField::Internal& sp,
-    const GeometricField<Type, fvPatchField, volMesh>& vf
+    const dimensioned<Type>& su,
+    const GeometricField<Type, fvPatchField, volMesh>& fld
 )
 {
-    const fvMesh& mesh = vf.mesh();
-
-    tmp<fvMatrix<Type>> tfvm
+    auto tmat = tmp<fvMatrix<Type>>::New
     (
-        new fvMatrix<Type>
-        (
-            vf,
-            dimVol*sp.dimensions()*vf.dimensions()
-        )
+        fld,
+        dimVol*su.dimensions()
     );
-    fvMatrix<Type>& fvm = tfvm.ref();
+    auto& mat = tmat.ref();
+    const auto& domain = fld.mesh().V();
 
-    fvm.diag() += mesh.V()*sp.field();
+    if (magSqr(su.value()) > VSMALL)
+    {
+        mat.source() -= domain*su.value();
+    }
 
-    return tfvm;
+    return tmat;
 }
 
 
 template<class Type>
 Foam::tmp<Foam::fvMatrix<Type>>
-Foam::fvm::Sp
+Foam::fvm::Su
 (
-    const tmp<volScalarField::Internal>& tsp,
-    const GeometricField<Type, fvPatchField, volMesh>& vf
+    const DimensionedField<Type, volMesh>& su,
+    const GeometricField<Type, fvPatchField, volMesh>& fld
 )
 {
-    tmp<fvMatrix<Type>> tfvm = fvm::Sp(tsp(), vf);
-    tsp.clear();
-    return tfvm;
-}
-
-
-template<class Type>
-Foam::tmp<Foam::fvMatrix<Type>>
-Foam::fvm::Sp
-(
-    const tmp<volScalarField>& tsp,
-    const GeometricField<Type, fvPatchField, volMesh>& vf
-)
-{
-    tmp<fvMatrix<Type>> tfvm = fvm::Sp(tsp(), vf);
-    tsp.clear();
-    return tfvm;
-}
-
-
-template<class Type>
-Foam::tmp<Foam::fvMatrix<Type>>
-Foam::fvm::Sp
-(
-    const dimensionedScalar& sp,
-    const GeometricField<Type, fvPatchField, volMesh>& vf
-)
-{
-    const fvMesh& mesh = vf.mesh();
-
-    tmp<fvMatrix<Type>> tfvm
+    auto tmat = tmp<fvMatrix<Type>>::New
     (
-        new fvMatrix<Type>
-        (
-            vf,
-            dimVol*sp.dimensions()*vf.dimensions()
-        )
+        fld,
+        dimVol*su.dimensions()
     );
-    fvMatrix<Type>& fvm = tfvm.ref();
+    auto& mat = tmat.ref();
+    const auto& domain = fld.mesh().V();
 
-    fvm.diag() += mesh.V()*sp.value();
+    mat.source() -= domain*su.field();
 
-    return tfvm;
+    return tmat;
 }
 
+
+template<class Type>
+Foam::tmp<Foam::fvMatrix<Type>>
+Foam::fvm::Su
+(
+    const tmp<DimensionedField<Type, volMesh>>& tsu,
+    const GeometricField<Type, fvPatchField, volMesh>& fld
+)
+{
+    tmp<fvMatrix<Type>> tmat = fvm::Su(tsu(), fld);
+    tsu.clear();
+    return tmat;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::fvMatrix<Type>>
+Foam::fvm::Su
+(
+    const tmp<GeometricField<Type, fvPatchField, volMesh>>& tsu,
+    const GeometricField<Type, fvPatchField, volMesh>& fld
+)
+{
+    tmp<fvMatrix<Type>> tmat = fvm::Su(tsu(), fld);
+    tsu.clear();
+    return tmat;
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
 Foam::zeroField
 Foam::fvm::Sp
 (
-    const zero&,
+    const Foam::zero,
     const GeometricField<Type, fvPatchField, volMesh>&
 )
 {
@@ -191,30 +133,90 @@ Foam::fvm::Sp
 
 template<class Type>
 Foam::tmp<Foam::fvMatrix<Type>>
-Foam::fvm::SuSp
+Foam::fvm::Sp
 (
-    const volScalarField::Internal& susp,
-    const GeometricField<Type, fvPatchField, volMesh>& vf
+    const dimensionedScalar& sp,
+    const GeometricField<Type, fvPatchField, volMesh>& fld
 )
 {
-    const fvMesh& mesh = vf.mesh();
-
-    tmp<fvMatrix<Type>> tfvm
+    auto tmat = tmp<fvMatrix<Type>>::New
     (
-        new fvMatrix<Type>
-        (
-            vf,
-            dimVol*susp.dimensions()*vf.dimensions()
-        )
+        fld,
+        dimVol*sp.dimensions()*fld.dimensions()
     );
-    fvMatrix<Type>& fvm = tfvm.ref();
+    auto& mat = tmat.ref();
+    const auto& domain = fld.mesh().V();
 
-    fvm.diag() += mesh.V()*max(susp.field(), scalar(0));
+    if (mag(sp.value()) > ROOTVSMALL)
+    {
+        mat.diag() += domain*sp.value();
+    }
 
-    fvm.source() -= mesh.V()*min(susp.field(), scalar(0))
-        *vf.primitiveField();
+    return tmat;
+}
 
-    return tfvm;
+
+template<class Type>
+Foam::tmp<Foam::fvMatrix<Type>>
+Foam::fvm::Sp
+(
+    const DimensionedField<scalar, volMesh>& sp,
+    const GeometricField<Type, fvPatchField, volMesh>& fld
+)
+{
+    auto tmat = tmp<fvMatrix<Type>>::New
+    (
+        fld,
+        dimVol*sp.dimensions()*fld.dimensions()
+    );
+    auto& mat = tmat.ref();
+    const auto& domain = fld.mesh().V();
+
+    mat.diag() += domain*sp.field();
+
+    return tmat;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::fvMatrix<Type>>
+Foam::fvm::Sp
+(
+    const tmp<DimensionedField<scalar, volMesh>>& tsp,
+    const GeometricField<Type, fvPatchField, volMesh>& fld
+)
+{
+    tmp<fvMatrix<Type>> tmat = fvm::Sp(tsp(), fld);
+    tsp.clear();
+    return tmat;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::fvMatrix<Type>>
+Foam::fvm::Sp
+(
+    const tmp<volScalarField>& tsp,
+    const GeometricField<Type, fvPatchField, volMesh>& fld
+)
+{
+    tmp<fvMatrix<Type>> tmat = fvm::Sp(tsp(), fld);
+    tsp.clear();
+    return tmat;
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+template<class Type>
+Foam::zeroField
+Foam::fvm::SuSp
+(
+    const Foam::zero,
+    const GeometricField<Type, fvPatchField, volMesh>& fld
+)
+{
+    return zeroField();
 }
 
 
@@ -222,13 +224,66 @@ template<class Type>
 Foam::tmp<Foam::fvMatrix<Type>>
 Foam::fvm::SuSp
 (
-    const tmp<volScalarField::Internal>& tsusp,
-    const GeometricField<Type, fvPatchField, volMesh>& vf
+    const dimensionedScalar& susp,
+    const GeometricField<Type, fvPatchField, volMesh>& fld
 )
 {
-    tmp<fvMatrix<Type>> tfvm = fvm::SuSp(tsusp(), vf);
+    auto tmat = tmp<fvMatrix<Type>>::New
+    (
+        fld,
+        dimVol*susp.dimensions()*fld.dimensions()
+    );
+    auto& mat = tmat.ref();
+    const auto& domain = fld.mesh().V();
+
+    if (susp.value() > ROOTVSMALL)
+    {
+        mat.diag() += domain*susp.value();
+    }
+    else if (susp.value() < -ROOTVSMALL)
+    {
+        mat.source() -= domain*susp.value()*fld.primitiveField();
+    }
+
+    return tmat;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::fvMatrix<Type>>
+Foam::fvm::SuSp
+(
+    const DimensionedField<scalar, volMesh>& susp,
+    const GeometricField<Type, fvPatchField, volMesh>& fld
+)
+{
+    auto tmat = tmp<fvMatrix<Type>>::New
+    (
+        fld,
+        dimVol*susp.dimensions()*fld.dimensions()
+    );
+    auto& mat = tmat.ref();
+    const auto& domain = fld.mesh().V();
+
+    mat.diag() += domain*max(susp.field(), scalar(0));
+
+    mat.source() -= domain*min(susp.field(), scalar(0))*fld.primitiveField();
+
+    return tmat;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::fvMatrix<Type>>
+Foam::fvm::SuSp
+(
+    const tmp<DimensionedField<scalar, volMesh>>& tsusp,
+    const GeometricField<Type, fvPatchField, volMesh>& fld
+)
+{
+    tmp<fvMatrix<Type>> tmat = fvm::SuSp(tsusp(), fld);
     tsusp.clear();
-    return tfvm;
+    return tmat;
 }
 
 
@@ -237,24 +292,12 @@ Foam::tmp<Foam::fvMatrix<Type>>
 Foam::fvm::SuSp
 (
     const tmp<volScalarField>& tsusp,
-    const GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& fld
 )
 {
-    tmp<fvMatrix<Type>> tfvm = fvm::SuSp(tsusp(), vf);
+    tmp<fvMatrix<Type>> tmat = fvm::SuSp(tsusp(), fld);
     tsusp.clear();
-    return tfvm;
-}
-
-
-template<class Type>
-Foam::zeroField
-Foam::fvm::SuSp
-(
-    const zero&,
-    const GeometricField<Type, fvPatchField, volMesh>& vf
-)
-{
-    return zeroField();
+    return tmat;
 }
 
 

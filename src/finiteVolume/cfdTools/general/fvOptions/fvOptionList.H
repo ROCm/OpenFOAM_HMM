@@ -37,8 +37,8 @@ SourceFile
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fvOptionList_H
-#define fvOptionList_H
+#ifndef Foam_fvOptionList_H
+#define Foam_fvOptionList_H
 
 #include "fvOption.H"
 #include "PtrList.H"
@@ -51,7 +51,7 @@ SourceFile
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward Declarations
 
 namespace fv
 {
@@ -73,7 +73,7 @@ class optionList
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Reference to the mesh database
         const fvMesh& mesh_;

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,6 +31,7 @@ License
 #include "fvMatrices.H"
 #include "fvmSup.H"
 #include "Constant.H"
+#include "Tuple2.H"
 
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
 
@@ -46,25 +47,35 @@ Foam::fv::SemiImplicitSource<Type>::volumeModeTypeNames_
 });
 
 
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-void Foam::fv::SemiImplicitSource<Type>::setFieldData(const dictionary& dict)
+void Foam::fv::SemiImplicitSource<Type>::setFieldInjectionRates
+(
+    const dictionary& dict
+)
 {
     label count = dict.size();
 
-    fieldNames_.resize(count);
-    Su_.resize(fieldNames_.size());
-    Sp_.resize(fieldNames_.size());
+    fieldNames_.resize_nocopy(count);
+
+    Su_.resize(count);
+    Sp_.resize(count);
 
     fv::option::resetApplied();
 
     count = 0;
     for (const entry& dEntry : dict)
     {
-        fieldNames_[count] = dEntry.keyword();
+        const word& fieldName = dEntry.keyword();
 
-        if (!dEntry.isDict())
+        if (dEntry.isDict())
+        {
+            const dictionary& subdict = dEntry.dict();
+            Su_.set(count, Function1<Type>::New("Su", subdict, &mesh_));
+            Sp_.set(count, Function1<scalar>::New("Sp", subdict, &mesh_));
+        }
+        else
         {
             Tuple2<Type, scalar> injectionRate;
             dEntry.readEntry(injectionRate);
@@ -88,20 +99,9 @@ void Foam::fv::SemiImplicitSource<Type>::setFieldData(const dictionary& dict)
                 )
             );
         }
-        else
-        {
-            const dictionary& Sdict = dEntry.dict();
-            Su_.set(count, Function1<Type>::New("Su", Sdict, &mesh_));
-            Sp_.set(count, Function1<scalar>::New("Sp", Sdict, &mesh_));
-        }
 
+        fieldNames_[count] = fieldName;
         ++count;
-    }
-
-    // Set volume normalisation
-    if (volumeMode_ == vmAbsolute)
-    {
-        VDash_ = V_;
     }
 }
 
@@ -119,7 +119,7 @@ Foam::fv::SemiImplicitSource<Type>::SemiImplicitSource
 :
     fv::cellSetOption(name, modelType, dict, mesh),
     volumeMode_(vmAbsolute),
-    VDash_(1.0)
+    VDash_(1)
 {
     read(dict);
 }
@@ -134,51 +134,7 @@ void Foam::fv::SemiImplicitSource<Type>::addSup
     const label fieldi
 )
 {
-    if (debug)
-    {
-        Info<< "SemiImplicitSource<" << pTraits<Type>::typeName
-            << ">::addSup for source " << name_ << endl;
-    }
-
-    const GeometricField<Type, fvPatchField, volMesh>& psi = eqn.psi();
-
-    typename GeometricField<Type, fvPatchField, volMesh>::Internal Su
-    (
-        IOobject
-        (
-            name_ + fieldNames_[fieldi] + "Su",
-            mesh_.time().timeName(),
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh_,
-        dimensioned<Type>(eqn.dimensions()/dimVolume, Zero),
-        false
-    );
-
-    const scalar tmVal = mesh_.time().timeOutputValue();
-
-    UIndirectList<Type>(Su, cells_) = Su_[fieldi].value(tmVal)/VDash_;
-
-    volScalarField::Internal Sp
-    (
-        IOobject
-        (
-            name_ + fieldNames_[fieldi] + "Sp",
-            mesh_.time().timeName(),
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh_,
-        dimensioned<scalar>(Su.dimensions()/psi.dimensions(), Zero),
-        false
-    );
-
-    UIndirectList<scalar>(Sp, cells_) = Sp_[fieldi].value(tmVal)/VDash_;
-
-    eqn += Su + fvm::SuSp(Sp, psi);
+    return this->addSup(volScalarField::null(), eqn, fieldi);
 }
 
 
@@ -196,17 +152,102 @@ void Foam::fv::SemiImplicitSource<Type>::addSup
             << ">::addSup for source " << name_ << endl;
     }
 
-    return this->addSup(eqn, fieldi);
+    const GeometricField<Type, fvPatchField, volMesh>& psi = eqn.psi();
+
+    const word& fieldName = fieldNames_[fieldi];
+
+    const scalar tmVal = mesh_.time().timeOutputValue();
+
+    const dimensionSet SuDims(eqn.dimensions()/dimVolume);
+    const dimensionSet SpDims(SuDims/psi.dimensions());
+
+
+    // Explicit source
+    {
+        const dimensioned<Type> SuValue
+        (
+            "Su",
+            SuDims,
+            Su_[fieldi].value(tmVal)/VDash_
+        );
+
+        if (mag(SuValue.value()) <= ROOTVSMALL)
+        {
+            // No-op
+        }
+        else if (this->useSubMesh())
+        {
+            auto tsu = DimensionedField<Type, volMesh>::New
+            (
+                name_ + fieldName + "Su",
+                mesh_,
+                dimensioned<Type>(SuDims, Zero)
+            );
+            UIndirectList<Type>(tsu.ref(), cells_) = SuValue.value();
+
+            eqn += tsu;
+        }
+        else
+        {
+            eqn += SuValue;
+        }
+    }
+
+
+    // Implicit source
+    {
+        const dimensioned<scalar> SpValue
+        (
+            "Sp",
+            SpDims,
+            Sp_[fieldi].value(tmVal)/VDash_
+        );
+
+        if (mag(SpValue.value()) <= ROOTVSMALL)
+        {
+            // No-op
+        }
+        else if (this->useSubMesh())
+        {
+            auto tsp = DimensionedField<scalar, volMesh>::New
+            (
+                name_ + fieldName + "Sp",
+                mesh_,
+                dimensioned<scalar>(SpDims, Zero)
+            );
+            UIndirectList<scalar>(tsp.ref(), cells_) = SpValue.value();
+
+            eqn += fvm::SuSp(tsp, psi);
+        }
+        else
+        {
+            eqn += fvm::SuSp(SpValue, psi);
+        }
+    }
 }
 
 
 template<class Type>
 bool Foam::fv::SemiImplicitSource<Type>::read(const dictionary& dict)
 {
+    VDash_ = 1;
+
     if (fv::cellSetOption::read(dict))
     {
         volumeMode_ = volumeModeTypeNames_.get("volumeMode", coeffs_);
-        setFieldData(coeffs_.subDict("injectionRateSuSp"));
+
+        // Set volume normalisation
+        if (volumeMode_ == vmAbsolute)
+        {
+            VDash_ = V_;
+        }
+
+        {
+            setFieldInjectionRates
+            (
+                coeffs_.subDict("injectionRateSuSp", keyType::LITERAL)
+            );
+        }
 
         return true;
     }

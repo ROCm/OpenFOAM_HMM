@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -113,10 +113,9 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SemiImplicitSource_H
-#define SemiImplicitSource_H
+#ifndef Foam_SemiImplicitSource_H
+#define Foam_SemiImplicitSource_H
 
-#include "Tuple2.H"
 #include "cellSetOption.H"
 #include "Enum.H"
 #include "Function1.H"
@@ -128,16 +127,11 @@ namespace Foam
 namespace fv
 {
 
-// Forward declarations
+// Forward Declarations
 template<class Type> class SemiImplicitSource;
 
 template<class Type>
-Ostream& operator<<
-(
-    Ostream&,
-    const SemiImplicitSource<Type>&
-);
-
+Ostream& operator<<(Ostream&, const SemiImplicitSource<Type>&);
 
 /*---------------------------------------------------------------------------*\
                      Class SemiImplicitSource Declaration
@@ -163,9 +157,9 @@ public:
         static const Enum<volumeModeType> volumeModeTypeNames_;
 
 
-protected:
+private:
 
-    // Protected Data
+    // Private Data
 
         //- Volume mode
         volumeModeType volumeMode_;
@@ -173,15 +167,17 @@ protected:
         //- Volume normalisation
         scalar VDash_;
 
-        //- Source field values
+        //- Explicit source contributions
         PtrList<Function1<Type>> Su_;
+
+        //- Linearised implicit contributions
         PtrList<Function1<scalar>> Sp_;
 
 
-    // Protected Functions
+    // Private Member Functions
 
-        //- Set the local field data
-        void setFieldData(const dictionary& dict);
+        //- Set the source coefficients from "injectionRateSuSp"
+        void setFieldInjectionRates(const dictionary& dict);
 
 
 public:
@@ -204,40 +200,46 @@ public:
 
     // Member Functions
 
-        // Access
+    // Access
 
-            //- Return const access to the volume mode
-            inline const volumeModeType& volumeMode() const;
-
-
-        // Edit
-
-            //- Return access to the volume mode
-            inline volumeModeType& volumeMode();
+        //- The volume mode
+        volumeModeType volumeMode() const noexcept
+        {
+            return volumeMode_;
+        }
 
 
-        // Evaluation
+    // Edit
 
-            //- Add explicit contribution to equation
-            virtual void addSup
-            (
-                fvMatrix<Type>& eqn,
-                const label fieldi
-            );
-
-            //- Add explicit contribution to compressible equation
-            virtual void addSup
-            (
-                const volScalarField& rho,
-                fvMatrix<Type>& eqn,
-                const label fieldi
-            );
+        //- Modifiable access to the volume mode
+        volumeModeType& volumeMode() noexcept
+        {
+            return volumeMode_;
+        }
 
 
-        // IO
+    // Evaluation
 
-            //- Read source dictionary
-            virtual bool read(const dictionary& dict);
+        //- Add explicit contribution to incompressible equation
+        virtual void addSup
+        (
+            fvMatrix<Type>& eqn,
+            const label fieldi
+        );
+
+        //- Add explicit contribution to compressible equation
+        virtual void addSup
+        (
+            const volScalarField& rho,
+            fvMatrix<Type>& eqn,
+            const label fieldi
+        );
+
+
+    // IO
+
+        //- Read source dictionary
+        virtual bool read(const dictionary& dict);
 };
 
 
@@ -251,10 +253,6 @@ public:
 #ifdef NoRepository
     #include "SemiImplicitSource.C"
 #endif
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "SemiImplicitSourceI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

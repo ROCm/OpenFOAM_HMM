@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,18 +28,19 @@ InNamespace
     Foam::fam
 
 Description
-    Calculate the matrix for implicit and explicit sources.
+    Calculate the finiteArea matrix for implicit and explicit sources.
 
 SourceFiles
     famSup.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef famSup_H
-#define famSup_H
+#ifndef Foam_famSup_H
+#define Foam_famSup_H
 
 #include "areaFieldsFwd.H"
 #include "faMatrix.H"
+#include "zeroField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,17 +48,40 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Namespace fam functions Declaration
+                            Namespace fam Functions
 \*---------------------------------------------------------------------------*/
 
 namespace fam
 {
    // Explicit source
 
+        //- A no-op source
+        template<class Type>
+        zeroField Su
+        (
+            const Foam::zero,
+            const GeometricField<Type, faPatchField, areaMesh>&
+        );
+
+        //- A uniform source (no-op for small values)
         template<class Type>
         tmp<faMatrix<Type>> Su
         (
-            const GeometricField<Type, faPatchField, areaMesh>&,
+            const dimensioned<Type>& su,
+            const GeometricField<Type, faPatchField, areaMesh>&
+        );
+
+        template<class Type>
+        tmp<faMatrix<Type>> Su
+        (
+            const DimensionedField<Type, areaMesh>& su,
+            const GeometricField<Type, faPatchField, areaMesh>&
+        );
+
+        template<class Type>
+        tmp<faMatrix<Type>> Su
+        (
+            const tmp<DimensionedField<Type, areaMesh>>&,
             const GeometricField<Type, faPatchField, areaMesh>&
         );
 
@@ -70,35 +95,73 @@ namespace fam
 
     // Implicit source
 
+        //- A no-op source
+        template<class Type>
+        zeroField Sp
+        (
+            const Foam::zero,
+            const GeometricField<Type, faPatchField, areaMesh>&
+        );
+
+        //- A uniform source (no-op for small values)
         template<class Type>
         tmp<faMatrix<Type>> Sp
         (
-            const areaScalarField&,
+            const dimensionedScalar& sp,
             const GeometricField<Type, faPatchField, areaMesh>&
         );
 
         template<class Type>
         tmp<faMatrix<Type>> Sp
         (
-            const tmp<areaScalarField>&,
+            const DimensionedField<scalar, areaMesh>& sp,
             const GeometricField<Type, faPatchField, areaMesh>&
         );
-
 
         template<class Type>
         tmp<faMatrix<Type>> Sp
         (
-            const dimensionedScalar&,
+            const tmp<DimensionedField<scalar, areaMesh>>&,
+            const GeometricField<Type, faPatchField, areaMesh>&
+        );
+
+        template<class Type>
+        tmp<faMatrix<Type>> Sp
+        (
+            const tmp<GeometricField<scalar, faPatchField, areaMesh>>&,
             const GeometricField<Type, faPatchField, areaMesh>&
         );
 
 
     // Implicit/Explicit source depending on sign of coefficient
 
+        //- A no-op source
+        template<class Type>
+        zeroField SuSp
+        (
+            const Foam::zero,
+            const GeometricField<Type, faPatchField, areaMesh>&
+        );
+
+        //- A uniform source (no-op for small values)
         template<class Type>
         tmp<faMatrix<Type>> SuSp
         (
-            const areaScalarField&,
+            const dimensionedScalar& susp,
+            const GeometricField<Type, faPatchField, areaMesh>&
+        );
+
+        template<class Type>
+        tmp<faMatrix<Type>> SuSp
+        (
+            const DimensionedField<scalar, areaMesh>& susp,
+            const GeometricField<Type, faPatchField, areaMesh>&
+        );
+
+        template<class Type>
+        tmp<faMatrix<Type>> SuSp
+        (
+            const tmp<DimensionedField<scalar, areaMesh>>&,
             const GeometricField<Type, faPatchField, areaMesh>&
         );
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,8 +40,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fvMatrix_H
-#define fvMatrix_H
+#ifndef Foam_fvMatrix_H
+#define Foam_fvMatrix_H
 
 #include "volFields.H"
 #include "surfaceFields.H"
@@ -110,7 +110,6 @@ tmp<GeometricField<Type, fvPatchField, volMesh>> operator&
 );
 
 
-
 /*---------------------------------------------------------------------------*\
                            Class fvMatrix Declaration
 \*---------------------------------------------------------------------------*/
@@ -125,7 +124,7 @@ public:
 
     // Public Types
 
-        //- Field type for psi
+        //- The geometric field type for psi
         typedef
             GeometricField<Type, fvPatchField, volMesh>
             psiFieldType;
@@ -134,6 +133,10 @@ public:
         typedef
             GeometricField<Type, fvsPatchField, surfaceMesh>
             faceFluxFieldType;
+
+        /// //- The internal field type for the psi field
+        /// typedef DimensionedField<Type, volMesh> Internal;
+
 
 private:
 
@@ -286,6 +289,7 @@ public:
     };
 
 
+    // Runtime information
     ClassName("fvMatrix");
 
 
@@ -304,15 +308,23 @@ public:
         //- Copy/move construct from tmp<fvMatrix<Type>>
         fvMatrix(const tmp<fvMatrix<Type>>&);
 
-        //- Construct from Istream given field to solve for
+        //- Deprecated(2022-05) - construct with dimensionSet instead
+        //  \deprecated(2022-05) - construct with dimensionSet instead
+        FOAM_DEPRECATED_FOR(2022-05, "Construct with dimensionSet")
         fvMatrix
         (
             const GeometricField<Type, fvPatchField, volMesh>& psi,
             Istream& is
-        );
+        )
+        :
+            fvMatrix<Type>(psi, dimensionSet(is))
+        {}
 
-        //- Clone
-        tmp<fvMatrix<Type>> clone() const;
+        //- Construct and return a clone
+        tmp<fvMatrix<Type>> clone() const
+        {
+            return tmp<fvMatrix<Type>>::New(*this);
+        }
 
 
     //- Destructor
@@ -439,45 +451,45 @@ public:
                 }
 
 
-            const dimensionSet& dimensions() const
+            const dimensionSet& dimensions() const noexcept
             {
                 return dimensions_;
             }
 
-            Field<Type>& source()
+            Field<Type>& source() noexcept
             {
                 return source_;
             }
 
-            const Field<Type>& source() const
+            const Field<Type>& source() const noexcept
             {
                 return source_;
             }
 
             //- fvBoundary scalar field containing pseudo-matrix coeffs
             //- for internal cells
-            const FieldField<Field, Type>& internalCoeffs() const
+            const FieldField<Field, Type>& internalCoeffs() const noexcept
             {
                 return internalCoeffs_;
             }
 
             //- fvBoundary scalar field containing pseudo-matrix coeffs
             //- for internal cells
-            FieldField<Field, Type>& internalCoeffs()
+            FieldField<Field, Type>& internalCoeffs() noexcept
             {
                 return internalCoeffs_;
             }
 
             //- fvBoundary scalar field containing pseudo-matrix coeffs
             //- for boundary cells
-            const FieldField<Field, Type>& boundaryCoeffs() const
+            const FieldField<Field, Type>& boundaryCoeffs() const noexcept
             {
                 return boundaryCoeffs_;
             }
 
             //- fvBoundary scalar field containing pseudo-matrix coeffs
             //- for boundary cells
-            FieldField<Field, Type>& boundaryCoeffs()
+            FieldField<Field, Type>& boundaryCoeffs() noexcept
             {
                 return boundaryCoeffs_;
             }
@@ -639,6 +651,7 @@ public:
         void operator=(const fvMatrix<Type>&);
         void operator=(const tmp<fvMatrix<Type>>&);
 
+        //- Inplace negate
         void negate();
 
         void operator+=(const fvMatrix<Type>&);
@@ -647,27 +660,15 @@ public:
         void operator-=(const fvMatrix<Type>&);
         void operator-=(const tmp<fvMatrix<Type>>&);
 
-        void operator+=
-        (
-            const DimensionedField<Type, volMesh>&
-        );
-        void operator+=
-        (
-            const tmp<DimensionedField<Type, volMesh>>&
-        );
+        void operator+=(const DimensionedField<Type, volMesh>&);
+        void operator+=(const tmp<DimensionedField<Type, volMesh>>&);
         void operator+=
         (
             const tmp<GeometricField<Type, fvPatchField, volMesh>>&
         );
 
-        void operator-=
-        (
-            const DimensionedField<Type, volMesh>&
-        );
-        void operator-=
-        (
-            const tmp<DimensionedField<Type, volMesh>>&
-        );
+        void operator-=(const DimensionedField<Type, volMesh>&);
+        void operator-=(const tmp<DimensionedField<Type, volMesh>>&);
         void operator-=
         (
             const tmp<GeometricField<Type, fvPatchField, volMesh>>&
@@ -676,8 +677,8 @@ public:
         void operator+=(const dimensioned<Type>&);
         void operator-=(const dimensioned<Type>&);
 
-        void operator+=(const zero&);
-        void operator-=(const zero&);
+        void operator+=(const Foam::zero);
+        void operator-=(const Foam::zero);
 
         void operator*=(const volScalarField::Internal&);
         void operator*=(const tmp<volScalarField::Internal>&);
@@ -888,23 +889,25 @@ template<class Type>
 tmp<fvMatrix<Type>> operator==
 (
     const fvMatrix<Type>&,
-    const zero&
+    const Foam::zero
 );
 
 template<class Type>
 tmp<fvMatrix<Type>> operator==
 (
     const tmp<fvMatrix<Type>>&,
-    const zero&
+    const Foam::zero
 );
 
 
+//- Unary negation
 template<class Type>
 tmp<fvMatrix<Type>> operator-
 (
     const fvMatrix<Type>&
 );
 
+//- Unary negation
 template<class Type>
 tmp<fvMatrix<Type>> operator-
 (
