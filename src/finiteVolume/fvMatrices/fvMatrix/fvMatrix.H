@@ -219,7 +219,8 @@ protected:
         // Implicit helper functions
 
             //- Name the implicit assembly addressing
-            scalar checkImplicit(const label fieldI = 0);
+            //  \return true if assembly is used
+            bool checkImplicit(const label fieldi = 0);
 
 
         // Matrix completion functionality

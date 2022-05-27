@@ -126,7 +126,7 @@ void Foam::fvMatrix<Type>::addBoundaryDiag
     const direction solveCmpt
 ) const
 {
-    for (label fieldi = 0; fieldi < nMatrices(); fieldi++)
+    for (label fieldi = 0; fieldi < nMatrices(); ++fieldi)
     {
         const auto& bpsi = this->psi(fieldi).boundaryField();
 
@@ -304,26 +304,26 @@ void Foam::fvMatrix<Type>::setValuesFromList
 
 
 template<class Type>
-Foam::scalar Foam::fvMatrix<Type>::checkImplicit(const label fieldI)
+bool Foam::fvMatrix<Type>::checkImplicit(const label fieldi)
 {
-    const auto& bpsi = this->psi(fieldI).boundaryField();
+    const auto& bpsi = this->psi(fieldi).boundaryField();
 
     word idName;
-    forAll (bpsi, patchI)
+    forAll(bpsi, patchi)
     {
-        if (bpsi[patchI].useImplicit())
+        if (bpsi[patchi].useImplicit())
         {
             if (debug)
             {
                 Pout<< "fvMatrix<Type>::checkImplicit "
-                    << " field:" << this->psi(fieldI).name()
+                    << " field:" << this->psi(fieldi).name()
                     << " on mesh:"
-                    << this->psi(fieldI).mesh().name()
-                    << " patch:" << bpsi[patchI].patch().name()
+                    << this->psi(fieldi).mesh().name()
+                    << " patch:" << bpsi[patchi].patch().name()
                     << endl;
             }
 
-            idName = idName + name(patchI);
+            idName += Foam::name(patchi);
             useImplicit_ = true;
         }
     }
@@ -332,7 +332,8 @@ Foam::scalar Foam::fvMatrix<Type>::checkImplicit(const label fieldI)
     {
         lduAssemblyName_ = word("lduAssembly") + idName;
     }
-    return id;
+
+    return !idName.empty();
 }
 
 
@@ -1167,15 +1168,14 @@ void Foam::fvMatrix<Type>::addFvMatrix(fvMatrix& matrix)
 
     for (label fieldi = 0; fieldi < nMatrices(); fieldi++)
     {
-        scalar id = checkImplicit(fieldi);
-        if (id > 0)
+        if (checkImplicit(fieldi))
         {
             break;
         }
     }
 
-    internalCoeffs_.setSize(0);
-    boundaryCoeffs_.setSize(0);
+    internalCoeffs_.clear();
+    boundaryCoeffs_.clear();
 }
 
 
