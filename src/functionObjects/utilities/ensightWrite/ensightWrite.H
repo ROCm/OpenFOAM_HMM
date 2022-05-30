@@ -123,6 +123,7 @@ See also
     Foam::functionObjects::vtkWrite
     Foam::functionObjects::fvMeshFunctionObject
     Foam::functionObjects::timeControl
+    Foam::cellBitSet::select
 
 SourceFiles
     ensightWrite.C
@@ -148,7 +149,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class dictionary;
 
 namespace functionObjects

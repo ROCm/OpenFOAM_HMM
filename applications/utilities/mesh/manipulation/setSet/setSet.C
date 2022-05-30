@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -344,29 +344,39 @@ bool doCommand
         topoSetSource::setAction action =
             topoSetSource::actionNames[actionName];
 
+        switch (action)
+        {
+            case topoSetSource::REMOVE :
+            {
+                removeSet(mesh, setType, setName);
+                break;
+            }
 
-        IOobject::readOption r;
+            case topoSetSource::NEW :
+            case topoSetSource::CLEAR :
+            {
+                currentSetPtr = topoSet::New(setType, mesh, setName, typSize);
+                break;
+            }
 
-        if (action == topoSetSource::REMOVE)
-        {
-            removeSet(mesh, setType, setName);
-        }
-        else if
-        (
-            (action == topoSetSource::NEW)
-         || (action == topoSetSource::CLEAR)
-        )
-        {
-            r = IOobject::NO_READ;
-            currentSetPtr = topoSet::New(setType, mesh, setName, typSize);
-        }
-        else
-        {
-            r = IOobject::MUST_READ;
-            currentSetPtr = topoSet::New(setType, mesh, setName, r);
-            topoSet& currentSet = currentSetPtr();
-            // Presize it according to current mesh data.
-            currentSet.resize(max(currentSet.size(), typSize));
+            case topoSetSource::IGNORE :
+                // Nothing to do
+                break;
+
+            default:
+            {
+                currentSetPtr = topoSet::New
+                (
+                    setType,
+                    mesh,
+                    setName,
+                    IOobject::MUST_READ
+                );
+
+                topoSet& currentSet = currentSetPtr();
+                // Presize it according to current mesh data.
+                currentSet.resize(max(currentSet.size(), typSize));
+            }
         }
 
         if (currentSetPtr)
@@ -380,23 +390,26 @@ bool doCommand
 
             switch (action)
             {
-                case topoSetSource::CLEAR:
+                case topoSetSource::CLEAR :
                 {
                     // Already handled above by not reading
                     break;
                 }
-                case topoSetSource::INVERT:
+
+                case topoSetSource::INVERT :
                 {
                     currentSet.invert(currentSet.maxSize(mesh));
                     break;
                 }
-                case topoSetSource::LIST:
+
+                case topoSetSource::LIST :
                 {
                     currentSet.writeDebug(Pout, mesh, 100);
                     Pout<< endl;
                     break;
                 }
-                case topoSetSource::SUBSET:
+
+                case topoSetSource::SUBSET :
                 {
                     if (is >> sourceType)
                     {
@@ -430,6 +443,7 @@ bool doCommand
                     }
                     break;
                 }
+
                 default:
                 {
                     if (is >> sourceType)
@@ -448,7 +462,6 @@ bool doCommand
                     }
                 }
             }
-
 
             if (action != topoSetSource::LIST)
             {

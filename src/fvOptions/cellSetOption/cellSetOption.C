@@ -29,7 +29,6 @@ License
 #include "cellSetOption.H"
 #include "cellSet.H"
 #include "cellBitSet.H"
-#include "topoSetCellSource.H"
 #include "volFields.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -133,36 +132,16 @@ void Foam::fv::cellSetOption::setCellSelection()
     {
         case smGeometric:
         {
-            // Modify bitSet via topoSetCellSource
-            cellBitSet selectedCells(mesh_);
-
             Info<< indent << "- selecting cells geometrically" << endl;
 
-            for (const entry& dEntry : geometricSelection_)
-            {
-                if (!dEntry.isDict())
-                {
-                    WarningInFunction
-                        << "Ignoring non-dictionary entry "
-                        << dEntry << endl;
-                    continue;
-                }
+            bitSet selectedCells
+            (
+                // verbosity = true
+                cellBitSet::select(mesh_, geometricSelection_, true)
+            );
 
-                const dictionary& spec = dEntry.dict();
-
-                auto source = topoSetCellSource::New
-                (
-                    spec.get<word>("source"),
-                    mesh_,
-                    spec.optionalSubDict("sourceInfo")
-                );
-                // source->verbose(false);
-
-                source->applyToSet(topoSetSource::ADD, selectedCells);
-            }
-
-            // Retrieve bitSet
-            cells_ = selectedCells.addressing().sortedToc();
+            // From bitSet -> labels
+            cells_ = selectedCells.sortedToc();
             break;
         }
         case smPoints:

@@ -144,15 +144,6 @@ namespace Foam
 } // End namespace Foam
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::Detail::parcelSelection::parcelSelection()
-:
-    parcelSelect_(),
-    parcelAddr_()
-{}
-
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 bool Foam::Detail::parcelSelection::calculateFilter

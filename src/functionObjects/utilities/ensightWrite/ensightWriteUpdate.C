@@ -28,23 +28,6 @@ License
 #include "ensightWrite.H"
 #include "dictionary.H"
 #include "cellBitSet.H"
-#include "topoSetCellSource.H"
-
-// * * * * * * * * * * * * * * Local Data Members  * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    // A limited selection of actions
-    const Enum<topoSetSource::setAction> actionNames
-    ({
-        { topoSetSource::NEW, "use" },  // Reuse NEW for "use" action name
-        { topoSetSource::ADD, "add" },
-        { topoSetSource::SUBTRACT, "subtract" },
-        { topoSetSource::SUBSET, "subset" },
-        { topoSetSource::INVERT, "invert" },
-    });
-}
-
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -58,74 +41,12 @@ bool Foam::functionObjects::ensightWrite::updateSubset
         return false;
     }
 
-    const fvMesh& mesh = subsetter.baseMesh();
+    bitSet selectedCells
+    (
+        cellBitSet::select(subsetter.baseMesh(), selection_)
+    );
 
-    // Start with all cells unselected
-    cellBitSet cellsToSelect(mesh, false);
-
-    // Execute all actions
-    for (const entry& dEntry : selection_)
-    {
-        if (!dEntry.isDict())
-        {
-            WarningInFunction
-                << "Ignoring non-dictionary entry "
-                << dEntry << endl;
-            continue;
-        }
-
-        const dictionary& dict = dEntry.dict();
-
-        const auto action = actionNames.get("action", dict);
-
-        // Handle manually
-        if (action == topoSetSource::INVERT)
-        {
-            cellsToSelect.invert(mesh.nCells());
-            continue;
-        }
-
-        auto source = topoSetCellSource::New
-        (
-            dict.get<word>("source"),
-            mesh,
-            dict.optionalSubDict("sourceInfo")
-        );
-        source->verbose(false);
-
-        switch (action)
-        {
-            case topoSetSource::NEW:  // "use"
-            case topoSetSource::ADD:
-            case topoSetSource::SUBTRACT:
-                if (topoSetSource::NEW == action)
-                {
-                    // "use": only use this selection (clear + ADD)
-                    // NEW is handled like ADD in applyToSet()
-                    cellsToSelect.reset();
-                }
-                source->applyToSet(action, cellsToSelect);
-                break;
-
-            case topoSetSource::SUBSET:
-            {
-                cellBitSet other(mesh, false);
-                source->applyToSet(topoSetSource::NEW, other);
-
-                cellsToSelect.subset(other);
-            }
-            break;
-
-            default:
-                // Should already have been caught
-                WarningInFunction
-                    << "Ignoring unhandled action '"
-                    << actionNames[action] << "'" << endl;
-                break;
-        }
-    }
-
-    subsetter.reset(cellsToSelect.addressing());
+    subsetter.reset(selectedCells);
 
     return true;
 }

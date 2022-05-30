@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,8 +38,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef topoSetSource_H
-#define topoSetSource_H
+#ifndef Foam_topoSetSource_H
+#define Foam_topoSetSource_H
 
 #include "pointField.H"
 #include "labelList.H"
@@ -97,13 +97,13 @@ public:
             POINTZONESOURCE = POINTZONE_SOURCE, // Compat (2019-11)
         };
 
-        //- Enumeration defining the valid actions
+        //- Enumeration defining various actions
         enum setAction
         {
             // Fundamental actions
             ADD,                //!< Add elements to current set
-            NEW,                //!< Create a new set and ADD elements to it
             SUBTRACT,           //!< Subtract elements from current set
+            NEW,                //!< Create a new set and ADD elements to it
 
             // Derived/intrinsic actions
             SUBSET,             //!< Union of elements with current set
@@ -112,11 +112,20 @@ public:
             REMOVE,             //!< Remove the set (from the file system)
             LIST,               //!< Print contents of the set
 
+            IGNORE,             //!< "ignore" no-op action
             DELETE = SUBTRACT,  //!< \deprecated(2018-10) Alias for SUBTRACT
         };
 
-        //- The setActions text representations
+        //- The setActions enum text.
+        //- Names: "new", add", "subtract", "subset", "invert",
+        //- "clear", "remove", "list", "ignore"
         static const Enum<setAction> actionNames;
+
+        //- The setAction enum text when combining selections.
+        //- Names: "use", "add", "subtract", "subset", "invert", "ignore"
+        //
+        //  \note The "use" is like "new" (start from empty + ADD)
+        static const Enum<setAction> combineNames;
 
 
 protected:

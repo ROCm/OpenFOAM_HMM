@@ -64,12 +64,14 @@ Usage
             {
                 box1
                 {
+                    action  use;
                     source  box;
                     min     (-0.1 -0.01 -0.1);
                     max     (0.1 0.30 0.1);
                 }
                 ball
                 {
+                    action  add;
                     source  sphere;
                     origin  (-0.1 -0.01 -0.1);
                     radius  0.25;
@@ -102,19 +104,21 @@ Usage
       cellZone  | Use specified cellZone
       cellSet   | Use specified cellSet
       points    | Use cells containing a given set of points
-      geometric | Select cells based on topoSetCellSource
+      geometric | Select cells based on topoSetCellSource actions
     \endverbatim
 
     The inherited entries are elaborated in:
      - \link fvOption.H \endlink
 
     The geometric selection uses topoSetCellSource to select cells.
-    The combined cell selections are treated as an OR operation.
     Any searchableSurface selections must describe a closed volume.
     Ie, its hasVolumeType() method must be true.
 
 Note
   - Source/sink options are to be added to the right-hand side of equations.
+
+See also
+    Foam::cellBitSet::select
 
 SourceFiles
     cellSetOption.C

@@ -179,7 +179,7 @@ public:
 
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- The filtered parcel addressing. Eg, for the current cloud.
         dictionary parcelSelect_;
@@ -202,13 +202,12 @@ public:
 
     // Constructors
 
-        //- Construct null
-        parcelSelection();
+        //- Default construct
+        parcelSelection() = default;
 
 
     //- Destructor
     virtual ~parcelSelection() = default;
-
 };
 
 

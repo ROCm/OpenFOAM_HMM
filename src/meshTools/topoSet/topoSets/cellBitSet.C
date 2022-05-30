@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,7 +26,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "cellBitSet.H"
+#include "dictionary.H"
 #include "polyMesh.H"
+#include "topoSetCellSource.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -86,6 +88,100 @@ void Foam::cellBitSet::writeDebug
 ) const
 {
     topoSet::writeDebug(os, mesh.cellCentres(), maxLen);
+}
+
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+Foam::bitSet Foam::cellBitSet::select
+(
+    const polyMesh& mesh,
+    const dictionary& dict,
+    const bool verbosity
+)
+{
+    // Start with all cells unselected
+    cellBitSet result(mesh);
+
+    // Execute all actions
+    for (const entry& dEntry : dict)
+    {
+        if (!dEntry.isDict())
+        {
+            WarningInFunction
+                << "Ignoring non-dictionary entry "
+                << dEntry << endl;
+            continue;
+        }
+
+        const dictionary& dict = dEntry.dict();
+
+        const auto action = topoSetSource::combineNames.get("action", dict);
+
+        // These ones we do directly
+        switch (action)
+        {
+            case topoSetSource::INVERT :
+            {
+                result.invert(mesh.nCells());
+                continue;  // Handled
+                break;
+            }
+
+            case topoSetSource::IGNORE :
+                continue;  // Nothing to do
+                break;
+
+            default:
+                break;
+        }
+
+        auto source = topoSetCellSource::New
+        (
+            dict.get<word>("source"),
+            mesh,
+            dict.optionalSubDict("sourceInfo")
+        );
+        source->verbose(verbosity);
+
+        switch (action)
+        {
+            case topoSetSource::NEW :  // ie, "use"
+            case topoSetSource::ADD :
+            case topoSetSource::SUBTRACT :
+            {
+                if (topoSetSource::NEW == action)
+                {
+                    // "use": only use this selection (CLEAR + ADD)
+                    // NEW is handled like ADD in applyToSet()
+                    result.reset();
+                }
+                source->applyToSet(action, result);
+
+                break;
+            }
+
+            case topoSetSource::SUBSET :
+            {
+                cellBitSet other(mesh);
+                source->applyToSet(topoSetSource::NEW, other);
+
+                result.subset(other);
+
+                break;
+            }
+
+            default:
+                // Should already have been caught
+                WarningInFunction
+                    << "Ignoring unhandled action: "
+                    << topoSetSource::combineNames[action] << endl;
+        }
+    }
+
+    bitSet addr(std::move(result.addressing()));
+
+    return addr;
 }
 
 

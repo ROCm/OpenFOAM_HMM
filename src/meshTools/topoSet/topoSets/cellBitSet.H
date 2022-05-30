@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,6 +30,43 @@ Description
     A special purpose topoSet with the cell labels stored as a bitSet.
     It does not correspond to a cellSet either (no associated IOobject).
 
+    The cellBitSet::select method is embedded in function objects
+    such as Foam::functionObjects::ensightWrite with actions like the
+    following:
+
+    \verbatim
+    selection
+    {
+        box
+        {
+            action  use;
+            source  box;
+            box     (-0.1 -0.01 -0.1) (0.1 0.30 0.1);
+        }
+        dome
+        {
+            action  add;
+            shape   sphere;
+            origin  (-0.1 -0.01 -0.1);
+            radius  0.25;
+        }
+        centre
+        {
+            action  subtract;
+            source  sphere;
+            origin  (-0.1 -0.01 -0.1);
+            radius  0.1;
+        }
+        blob
+        {
+            action  add;
+            source  surface;
+            surface triSurfaceMesh;
+            name    blob.stl;
+        }
+    }
+    \endverbatim
+
 SourceFiles
     cellBitSet.C
 
@@ -44,6 +81,9 @@ SourceFiles
 
 namespace Foam
 {
+
+// Forward Declarations
+class dictionary;
 
 /*---------------------------------------------------------------------------*\
                            Class cellBitSet Declaration
@@ -76,6 +116,18 @@ public:
 
     //- Destructor
     virtual ~cellBitSet() = default;
+
+
+    // Static Functions
+
+        //- Return a cell selection according to the dictionary
+        //- specification of actions.
+        static bitSet select
+        (
+            const polyMesh& mesh,
+            const dictionary& dict,
+            const bool verbosity = false
+        );
 
 
     // Member Functions

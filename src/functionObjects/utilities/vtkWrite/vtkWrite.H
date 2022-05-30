@@ -124,6 +124,7 @@ See also
     Foam::functionObjects::ensightWrite
     Foam::functionObjects::fvMeshFunctionObject
     Foam::functionObjects::timeControl
+    Foam::cellBitSet::select
 
 SourceFiles
     vtkWrite.C

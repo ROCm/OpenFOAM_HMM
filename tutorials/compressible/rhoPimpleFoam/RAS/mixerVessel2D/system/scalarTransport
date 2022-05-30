@@ -26,6 +26,7 @@ tracer0
             {
                 cylinder
                 {
+                    action  use;
                     source  cylinder;
                     point1  (0.050 0 -1);
                     point2  (0.050 0  1);

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,13 +53,29 @@ Foam::topoSetSource::actionNames
 ({
     { setAction::ADD, "add" },
     { setAction::SUBTRACT, "subtract" },
+    { setAction::NEW, "new" },
     { setAction::SUBSET, "subset" },
     { setAction::INVERT, "invert" },
     { setAction::CLEAR, "clear" },
-    { setAction::NEW, "new" },
     { setAction::REMOVE, "remove" },
     { setAction::LIST, "list" },
+    { setAction::IGNORE, "ignore" },
     { setAction::SUBTRACT, "delete" },   // Compat (1806)
+});
+
+
+const Foam::Enum
+<
+    Foam::topoSetSource::setAction
+>
+Foam::topoSetSource::combineNames
+({
+    { setAction::NEW, "use" },   // "use" specified selection
+    { setAction::ADD, "add" },
+    { setAction::SUBTRACT, "subtract" },
+    { setAction::SUBSET, "subset" },
+    { setAction::INVERT, "invert" },
+    { setAction::IGNORE, "ignore" },
 });
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -263,43 +263,52 @@ int main(int argc, char *argv[])
                 topoSetSource::actionNames.get("action", dict);
 
             autoPtr<topoSet> currentSet;
-            if
-            (
-                action == topoSetSource::NEW
-             || action == topoSetSource::CLEAR
-            )
-            {
-                currentSet = topoSet::New(setType, mesh, setName, 16384);
-                Info<< "Created " << currentSet().type() << ' '
-                    << setName << endl;
-            }
-            else if (action == topoSetSource::REMOVE)
-            {
-                //?
-            }
-            else
-            {
-                currentSet = topoSet::New
-                (
-                    setType,
-                    mesh,
-                    setName,
-                    IOobject::MUST_READ
-                );
-                Info<< "Read set " << currentSet().type() << ' '
-                    << setName << " with size "
-                    << returnReduce(currentSet().size(), sumOp<label>())
-                    << endl;
-            }
 
+            switch (action)
+            {
+                case topoSetSource::NEW :
+                case topoSetSource::CLEAR :
+                {
+                    currentSet = topoSet::New(setType, mesh, setName, 16384);
+                    Info<< "Created "
+                        << currentSet().type() << ' ' << setName << endl;
+                    break;
+                }
+
+                case topoSetSource::IGNORE :
+                    continue;  // Nothing to do
+                    break;
+
+                case topoSetSource::REMOVE :
+                    // Nothing to load
+                    break;
+
+                default:
+                {
+                    // Load set
+                    currentSet = topoSet::New
+                    (
+                        setType,
+                        mesh,
+                        setName,
+                        IOobject::MUST_READ
+                    );
+
+                    Info<< "Read set "
+                        << currentSet().type() << ' ' << setName
+                        << " size:"
+                        << returnReduce(currentSet().size(), sumOp<label>())
+                        << endl;
+                }
+            }
 
             // Handle special actions (clear, invert) locally,
             // the other actions through sources.
             switch (action)
             {
-                case topoSetSource::NEW:
-                case topoSetSource::ADD:
-                case topoSetSource::SUBTRACT:
+                case topoSetSource::NEW :
+                case topoSetSource::ADD :
+                case topoSetSource::SUBTRACT :
                 {
                     const word sourceType(dict.get<word>("source"));
 
@@ -321,10 +330,10 @@ int main(int argc, char *argv[])
                             << currentSet().objectPath() << endl;
                     }
                     fileHandler().flush();
+                    break;
                 }
-                break;
 
-                case topoSetSource::SUBSET:
+                case topoSetSource::SUBSET :
                 {
                     const word sourceType(dict.get<word>("source"));
 
@@ -362,10 +371,12 @@ int main(int argc, char *argv[])
                             << currentSet().objectPath() << endl;
                     }
                     fileHandler().flush();
-                }
-                break;
 
-                case topoSetSource::CLEAR:
+                    break;
+                }
+
+                case topoSetSource::CLEAR :
+                {
                     Info<< "    Clearing " << currentSet().type() << endl;
                     currentSet().clear();
                     if (!currentSet().write())
@@ -375,9 +386,12 @@ int main(int argc, char *argv[])
                             << currentSet().objectPath() << endl;
                     }
                     fileHandler().flush();
-                break;
 
-                case topoSetSource::INVERT:
+                    break;
+                }
+
+                case topoSetSource::INVERT :
+                {
                     Info<< "    Inverting " << currentSet().type() << endl;
                     currentSet().invert(currentSet().maxSize(mesh));
                     if (!currentSet().write())
@@ -387,17 +401,22 @@ int main(int argc, char *argv[])
                             << currentSet().objectPath() << endl;
                     }
                     fileHandler().flush();
-                break;
 
-                case topoSetSource::REMOVE:
+                    break;
+                }
+
+                case topoSetSource::REMOVE :
+                {
                     Info<< "    Removing set" << endl;
                     removeSet(mesh, setType, setName);
-                break;
+
+                    break;
+                }
 
                 default:
                     WarningInFunction
-                        << "Unhandled action " << action << endl;
-                break;
+                        << "Unhandled action: "
+                        << topoSetSource::actionNames[action] << endl;
             }
 
             if (currentSet)
