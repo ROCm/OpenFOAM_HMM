@@ -53,7 +53,7 @@ functions
     sTransport
     {
         type            energyTransport;
-        libs             (solverFunctionObjects);
+        libs            (solverFunctionObjects);
 
         enabled         true;
         writeControl    writeTime;

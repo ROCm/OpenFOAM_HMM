@@ -100,8 +100,8 @@ functions
 
                 viscousDissipationCoeffs
                 {
-                    fields          (T);
-                    rho             rho; //rho Field
+                    fields      (T);
+                    rho         rho;
                 }
             }
         }

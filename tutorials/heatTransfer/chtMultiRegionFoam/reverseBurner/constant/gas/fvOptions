@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2112                                 |
+|  \\    /   O peration     | Version:  v2206                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -24,11 +24,11 @@ options
         duration        0.3;
         selectionMode   cellSet;
         cellSet         ignition;
-        volumeMode      specific;
 
-        injectionRateSuSp
+        volumeMode      specific;
+        sources
         {
-            h          (2e7 0); // kg/m/s^3
+            h           (2e7 0);  // kg/m/s^3
         }
     }
 }

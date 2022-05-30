@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2112                                 |
+|  \\    /   O peration     | Version:  v2206                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -34,9 +34,9 @@ options
         $injector1;
 
         volumeMode      absolute;
-        injectionRateSuSp
+        sources
         {
-            thermo:rho.air     (1e-3 0); // kg/s
+            thermo:rho.air      (1e-3 0);  // kg/s
         }
     }
 
@@ -47,9 +47,9 @@ options
         $injector1;
 
         volumeMode      absolute;
-        injectionRateSuSp
+        sources
         {
-            U.air           ((0 -1e-2 0) 0); // kg*m/s^2
+            U.air       ((0 -1e-2 0) 0);  // kg*m/s^2
         }
     }
 
@@ -60,9 +60,9 @@ options
         $injector1;
 
         volumeMode      absolute;
-        injectionRateSuSp
+        sources
         {
-            e.air      (500 0); // kg*m^2/s^3
+            e.air       (500 0);  // kg*m^2/s^3
         }
     }
 }

@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2112                                 |
+|  \\    /   O peration     | Version:  v2206                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -19,7 +19,7 @@ pressureGradient
     type                vectorSemiImplicitSource;
     selectionMode       all;
     volumeMode          specific;
-    injectionRateSuSp
+    sources
     {
         U ((0 1.978046e-03 0) 0);
     }
@@ -27,46 +27,34 @@ pressureGradient
 
 atmCoriolisUSource1
 {
-    type               atmCoriolisUSource;
-    atmCoriolisUSourceCoeffs
-    {
-        selectionMode   all;
-        Omega           (0 0 5.65156e-5);
-    }
+    type            atmCoriolisUSource;
+    selectionMode   all;
+    Omega           (0 0 5.65156e-5);
 }
 
 atmAmbientTurbSource1
 {
-    type                atmAmbientTurbSource;
-    atmAmbientTurbSourceCoeffs
-    {
-        selectionMode   all;
-        kAmb            1.0e-04;
-        epsilonAmb      7.208e-08;
-    }
+    type            atmAmbientTurbSource;
+    selectionMode   all;
+    kAmb            1.0e-04;
+    epsilonAmb      7.208e-08;
 }
 
 atmBuoyancyTurbSource1
 {
-    type                atmBuoyancyTurbSource;
-    atmBuoyancyTurbSourceCoeffs
-    {
-        selectionMode   all;
-        rho             rho;
-        Lmax            41.0;
-        beta            3.3e-03;
-    }
+    type            atmBuoyancyTurbSource;
+    selectionMode   all;
+    rho             rho;
+    Lmax            41.0;
+    beta            3.3e-03;
 }
 
 atmLengthScaleTurbSource1
 {
-    type                atmLengthScaleTurbSource;
-    atmLengthScaleTurbSourceCoeffs
-    {
-        selectionMode   all;
-        Lmax            41.0;
-        n               3.0;
-    }
+    type            atmLengthScaleTurbSource;
+    selectionMode   all;
+    Lmax            41.0;
+    n               3.0;
 }
 
 

@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2112                                 |
+|  \\    /   O peration     | Version:  v2206                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -20,17 +20,15 @@ v_CPU_AbsoluteEnergySource
     type            scalarSemiImplicitSource;
     active          true;
 
-    scalarSemiImplicitSourceCoeffs
-    {
-        selectionMode   cellZone;
-        cellZone        v_CPU;
-        volumeMode      absolute;
+    selectionMode   cellZone;
+    cellZone        v_CPU;
+    volumeMode      absolute;
 
-        injectionRateSuSp
-        {
-            h           ( 100 0 );
-        }
+    sources
+    {
+        h           ( 100 0 );
     }
 }
+
 
 // ************************************************************************* //

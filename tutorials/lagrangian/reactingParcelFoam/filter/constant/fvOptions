@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2112                                 |
+|  \\    /   O peration     | Version:  v2206                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -44,14 +44,16 @@ massSource1
 
     timeStart       0.2;
     duration        2.0;
+    volumeMode      absolute;
+
     selectionMode   points;
+
     points
     (
         (2.75 0.5 0)
     );
 
-    volumeMode      absolute;
-    injectionRateSuSp
+    sources
     {
         rho         (1e-4 0); // kg/s
         H2O         (1e-4 0); // kg/s
@@ -65,14 +67,16 @@ momentumSource1
 
     timeStart       0.2;
     duration        2.0;
+    volumeMode      absolute;
+
     selectionMode   points;
+
     points
     (
         (2.75 0.5 0)
     );
 
-    volumeMode      absolute;
-    injectionRateSuSp
+    sources
     {
         U           ((0 0.005 0) 0);
     }
@@ -85,14 +89,17 @@ energySource1
 
     timeStart       0.2;
     duration        2.0;
+
+    volumeMode      absolute;
+
     selectionMode   points;
+
     points
     (
         (2.75 0.5 0)
     );
 
-    volumeMode      absolute;
-    injectionRateSuSp
+    sources
     {
         h           (10 0);
     }
