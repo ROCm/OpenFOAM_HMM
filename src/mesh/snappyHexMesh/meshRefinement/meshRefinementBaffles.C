@@ -2961,7 +2961,8 @@ void Foam::meshRefinement::zonify
         // Add to unnamedRegion1, unnamedRegion2
         if (unnamedMapPtr.valid())
         {
-            Info<< "Detected and closed leak path from "
+            WarningInFunction
+                << "Detected and closed leak path from "
                 << locationsInMesh << " to " << locationsOutsideMesh
                 << endl;
 
@@ -3065,7 +3066,9 @@ void Foam::meshRefinement::zonify
             // Add to namedSurfaceRegion, posOrientation
             if (namedMapPtr.valid())
             {
-                Info<< "Detected and closed leak path from "
+                WarningInFunction
+                    << "Detected and closed leak path"
+                    << " through zoned surfaces from "
                     << locationsInMesh << " to " << locationsOutsideMesh
                     << endl;
 
