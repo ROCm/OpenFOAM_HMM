@@ -28,25 +28,6 @@ License
 #include "PlessisMasliyahDragForce.H"
 #include "volFields.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::scalar Foam::PlessisMasliyahDragForce<CloudType>::CdRe
-(
-    const scalar Re
-) const
-{
-    if (Re > 1000.0)
-    {
-        return 0.44*Re;
-    }
-    else
-    {
-        return 24.0*(1.0 + 0.15*pow(Re, 0.687));
-    }
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
@@ -85,13 +66,6 @@ Foam::PlessisMasliyahDragForce<CloudType>::PlessisMasliyahDragForce
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::PlessisMasliyahDragForce<CloudType>::~PlessisMasliyahDragForce()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
@@ -105,11 +79,11 @@ Foam::forceSuSp Foam::PlessisMasliyahDragForce<CloudType>::calcCoupled
     const scalar muc
 ) const
 {
-    scalar alphac(alphac_[p.cell()]);
+    const scalar alphac = alphac_[p.cell()];
 
-    scalar cbrtAlphap(cbrt(1.0 - alphac));
+    const scalar cbrtAlphap = cbrt(1.0 - alphac);
 
-    scalar A =
+    const scalar A =
         26.8*pow3(alphac)
        /(
             sqr(cbrtAlphap)
@@ -118,9 +92,8 @@ Foam::forceSuSp Foam::PlessisMasliyahDragForce<CloudType>::calcCoupled
           + SMALL
         );
 
-    scalar B =
-        sqr(alphac)
-       /sqr(1.0 - sqr(cbrtAlphap));
+    // (P:Eq. 36)
+    const scalar B = sqr(alphac)/sqr(1.0 - sqr(cbrtAlphap));
 
     return forceSuSp
     (

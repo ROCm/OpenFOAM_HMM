@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,14 +33,13 @@ License
 template<class CloudType>
 Foam::scalar Foam::SphereDragForce<CloudType>::CdRe(const scalar Re) const
 {
+    // (AOB:Eq. 35)
     if (Re > 1000.0)
     {
         return 0.424*Re;
     }
-    else
-    {
-        return 24.0*(1.0 + 1.0/6.0*pow(Re, 2.0/3.0));
-    }
+
+    return 24.0*(1.0 + (1.0/6.0)*pow(Re, 2.0/3.0));
 }
 
 
@@ -67,13 +67,6 @@ Foam::SphereDragForce<CloudType>::SphereDragForce
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::SphereDragForce<CloudType>::~SphereDragForce()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
@@ -87,11 +80,8 @@ Foam::forceSuSp Foam::SphereDragForce<CloudType>::calcCoupled
     const scalar muc
 ) const
 {
-    forceSuSp value(Zero);
-
-    value.Sp() = mass*0.75*muc*CdRe(Re)/(p.rho()*sqr(p.d()));
-
-    return value;
+    // (AOB:Eq. 34)
+    return forceSuSp(Zero, mass*0.75*muc*CdRe(Re)/(p.rho()*sqr(p.d())));
 }
 
 
