@@ -50,54 +50,157 @@ Foam::fv::SemiImplicitSource<Type>::volumeModeTypeNames_
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-void Foam::fv::SemiImplicitSource<Type>::setFieldInjectionRates
+void Foam::fv::SemiImplicitSource<Type>::setFieldCoeffs
 (
-    const dictionary& dict
+    const dictionary& dict,
+    const word& keyExplicit,
+    const word& keyImplicit
 )
 {
     label count = dict.size();
 
     fieldNames_.resize_nocopy(count);
 
-    Su_.resize(count);
-    Sp_.resize(count);
+    Su_.clear();
+    Sp_.clear();
+    Su_.resize(2*count);
+    Sp_.resize(2*count);
+
+    driverSu_.clear();
+    driverSp_.clear();
+    driverSu_.resize(2*count);
+    driverSp_.resize(2*count);
+
+    valueExprSu_.clear();
+    valueExprSp_.clear();
+    valueExprSu_.resize(2*count);
+    valueExprSp_.resize(2*count);
 
     fv::option::resetApplied();
 
+    word modelType;
+    Tuple2<Type, scalar> sourceRates;
+
     count = 0;
+
     for (const entry& dEntry : dict)
     {
         const word& fieldName = dEntry.keyword();
+        bool ok = false;
 
         if (dEntry.isDict())
         {
-            const dictionary& subdict = dEntry.dict();
-            Su_.set(count, Function1<Type>::New("Su", subdict, &mesh_));
-            Sp_.set(count, Function1<scalar>::New("Sp", subdict, &mesh_));
+            const dictionary& subDict = dEntry.dict();
+
+            const entry* eptr;
+
+            if
+            (
+                (eptr = subDict.findEntry(keyExplicit, keyType::LITERAL))
+             != nullptr
+            )
+            {
+                ok = true;
+
+                if
+                (
+                    eptr->isDict()
+                 && eptr->dict().readEntry("type", modelType, keyType::LITERAL)
+                 && (modelType == "exprField")
+                )
+                {
+                    const dictionary& exprDict = eptr->dict();
+
+                    valueExprSu_.emplace_set(fieldName);
+                    valueExprSu_[fieldName].readEntry("expression", exprDict);
+
+                    driverSu_.set
+                    (
+                        fieldName,
+                        new expressions::volumeExprDriver(mesh_, exprDict)
+                    );
+                }
+                else
+                {
+                    Su_.set
+                    (
+                        fieldName,
+                        Function1<Type>::New(keyExplicit, subDict, &mesh_)
+                    );
+                }
+            }
+
+            if
+            (
+                (eptr = subDict.findEntry(keyImplicit, keyType::LITERAL))
+             != nullptr
+            )
+            {
+                ok = true;
+
+                if
+                (
+                    eptr->isDict()
+                 && eptr->dict().readEntry("type", modelType, keyType::LITERAL)
+                 && (modelType == "exprField")
+                )
+                {
+                    const dictionary& exprDict = eptr->dict();
+
+                    valueExprSp_.emplace_set(fieldName);
+                    valueExprSp_[fieldName].readEntry("expression", exprDict);
+
+                    driverSp_.set
+                    (
+                        fieldName,
+                        new expressions::volumeExprDriver(mesh_, exprDict)
+                    );
+                }
+                else
+                {
+                    Sp_.set
+                    (
+                        fieldName,
+                        Function1<scalar>::New(keyImplicit, subDict, &mesh_)
+                    );
+                }
+            }
         }
         else
         {
-            Tuple2<Type, scalar> injectionRate;
-            dEntry.readEntry(injectionRate);
+            // Non-dictionary form
+
+            dEntry.readEntry(sourceRates);
+
+            ok = true;
 
             Su_.set
             (
-                count,
+                fieldName,
                 new Function1Types::Constant<Type>
                 (
-                    "Su",
-                    injectionRate.first()
+                    keyExplicit,
+                    sourceRates.first()
                 )
             );
             Sp_.set
             (
-                count,
+                fieldName,
                 new Function1Types::Constant<scalar>
                 (
-                    "Sp",
-                    injectionRate.second()
+                    keyImplicit,
+                    sourceRates.second()
                 )
             );
+        }
+
+        if (!ok)
+        {
+            FatalIOErrorInFunction(dict)
+                << "Require at least one of "
+                << keyExplicit << '/' << keyImplicit << " entries for "
+                << "field: " << fieldName << endl
+                << exit(FatalIOError);
         }
 
         fieldNames_[count] = fieldName;
@@ -154,6 +257,7 @@ void Foam::fv::SemiImplicitSource<Type>::addSup
 
     const GeometricField<Type, fvPatchField, volMesh>& psi = eqn.psi();
 
+    // Note: field name may deviate from psi name
     const word& fieldName = fieldNames_[fieldi];
 
     const scalar tmVal = mesh_.time().timeOutputValue();
@@ -161,67 +265,254 @@ void Foam::fv::SemiImplicitSource<Type>::addSup
     const dimensionSet SuDims(eqn.dimensions()/dimVolume);
     const dimensionSet SpDims(SuDims/psi.dimensions());
 
-
     // Explicit source
     {
-        const dimensioned<Type> SuValue
-        (
-            "Su",
-            SuDims,
-            Su_[fieldi].value(tmVal)/VDash_
-        );
+        const auto iter1 = valueExprSu_.cfind(fieldName);
+        const auto iter2 = Su_.cfind(fieldName);
 
-        if (mag(SuValue.value()) <= ROOTVSMALL)
+        tmp<DimensionedField<Type, volMesh>> tsu;
+
+        if (iter1.found())
         {
-            // No-op
-        }
-        else if (this->useSubMesh())
-        {
-            auto tsu = DimensionedField<Type, volMesh>::New
+            const auto& valueExpr = iter1.val();
+
+            typedef
+                GeometricField<Type, fvPatchField, volMesh>
+                ExprResultType;
+
+            if (debug)
+            {
+                Info<< "Explicit expression source:" << nl
+                    << ">>>>" << nl
+                    << valueExpr.c_str() << nl
+                    << "<<<<" << nl;
+            }
+
+            auto& driver = *(driverSu_[fieldName]);
+
+            driver.clearVariables();
+
+            if (notNull(rho))
+            {
+                driver.addContextObject("rho", &rho);
+            }
+
+            // Switch dimension checking off
+            const bool oldDimChecking = dimensionSet::checking(false);
+
+            driver.parse(valueExpr);
+
+            // Restore dimension checking
+            dimensionSet::checking(oldDimChecking);
+
+            const ExprResultType* ptr = driver.isResultType<ExprResultType>();
+
+            if (!ptr)
+            {
+                FatalErrorInFunction
+                    << "Expression for Su " << fieldName
+                    << " evaluated to <" << driver.resultType()
+                    << "> but expected <" << ExprResultType::typeName
+                    << ">" << endl
+                    << exit(FatalError);
+            }
+            else if (ptr->size() != mesh_.nCells())
+            {
+                FatalErrorInFunction
+                    << "Expression for Su " << fieldName
+                    << " evaluated to " << ptr->size()
+                    << " instead of " << mesh_.nCells() << " values" << endl
+                    << exit(FatalError);
+            }
+
+            if (notNull(rho))
+            {
+                driver.removeContextObject(&rho);
+            }
+
+            const Field<Type>& exprFld = ptr->primitiveField();
+
+            tsu = DimensionedField<Type, volMesh>::New
             (
                 name_ + fieldName + "Su",
                 mesh_,
                 dimensioned<Type>(SuDims, Zero)
             );
-            UIndirectList<Type>(tsu.ref(), cells_) = SuValue.value();
 
-            eqn += tsu;
+            if (this->useSubMesh())
+            {
+                for (const label celli : cells_)
+                {
+                    tsu.ref()[celli] = exprFld[celli]/VDash_;
+                }
+            }
+            else
+            {
+                tsu.ref().field() = exprFld;
+
+                if (!equal(VDash_, 1))
+                {
+                    tsu.ref().field() /= VDash_;
+                }
+            }
         }
-        else
+        else if (iter2.found() && iter2.val()->good())
         {
-            eqn += SuValue;
+            const dimensioned<Type> SuValue
+            (
+                "Su",
+                SuDims,
+                iter2.val()->value(tmVal)/VDash_
+            );
+
+            if (mag(SuValue.value()) <= ROOTVSMALL)
+            {
+                // No-op
+            }
+            else if (this->useSubMesh())
+            {
+                tsu = DimensionedField<Type, volMesh>::New
+                (
+                    name_ + fieldName + "Su",
+                    mesh_,
+                    dimensioned<Type>(SuDims, Zero)
+                );
+                UIndirectList<Type>(tsu.ref(), cells_) = SuValue.value();
+            }
+            else
+            {
+                eqn += SuValue;
+            }
+        }
+
+        if (tsu.valid())
+        {
+            eqn += tsu;
         }
     }
 
 
     // Implicit source
     {
-        const dimensioned<scalar> SpValue
-        (
-            "Sp",
-            SpDims,
-            Sp_[fieldi].value(tmVal)/VDash_
-        );
+        const auto iter1 = valueExprSp_.cfind(fieldName);
+        const auto iter2 = Sp_.cfind(fieldName);
 
-        if (mag(SpValue.value()) <= ROOTVSMALL)
+        tmp<DimensionedField<scalar, volMesh>> tsp;
+
+        if (iter1.found())
         {
-            // No-op
-        }
-        else if (this->useSubMesh())
-        {
-            auto tsp = DimensionedField<scalar, volMesh>::New
+            const auto& valueExpr = iter1.val();
+
+            typedef volScalarField ExprResultType;
+
+            if (debug)
+            {
+                Info<< "Implicit expression source:" << nl
+                    << ">>>>" << nl
+                    << valueExpr.c_str() << nl
+                    << "<<<<" << nl;
+            }
+
+            auto& driver = *(driverSp_[fieldName]);
+
+            driver.clearVariables();
+
+            if (notNull(rho))
+            {
+                driver.addContextObject("rho", &rho);
+            }
+
+            // Switch dimension checking off
+            const bool oldDimChecking = dimensionSet::checking(false);
+
+            driver.parse(valueExpr);
+
+            // Restore dimension checking
+            dimensionSet::checking(oldDimChecking);
+
+            const ExprResultType* ptr = driver.isResultType<ExprResultType>();
+
+            if (!ptr)
+            {
+                FatalErrorInFunction
+                    << "Expression for Sp " << fieldName
+                    << " evaluated to <" << driver.resultType()
+                    << "> but expected <" << ExprResultType::typeName
+                    << ">" << endl
+                    << exit(FatalError);
+            }
+            else if (ptr->size() != mesh_.nCells())
+            {
+                FatalErrorInFunction
+                    << "Expression for Sp " << fieldName
+                    << " evaluated to " << ptr->size()
+                    << " instead of " << mesh_.nCells() << " values" << endl
+                    << exit(FatalError);
+            }
+
+            if (notNull(rho))
+            {
+                driver.removeContextObject(&rho);
+            }
+
+            const Field<scalar>& exprFld = ptr->primitiveField();
+
+            tsp = DimensionedField<scalar, volMesh>::New
             (
                 name_ + fieldName + "Sp",
                 mesh_,
                 dimensioned<scalar>(SpDims, Zero)
             );
-            UIndirectList<scalar>(tsp.ref(), cells_) = SpValue.value();
 
-            eqn += fvm::SuSp(tsp, psi);
+            if (this->useSubMesh())
+            {
+                for (const label celli : cells_)
+                {
+                    tsp.ref()[celli] = exprFld[celli]/VDash_;
+                }
+            }
+            else
+            {
+                tsp.ref().field() = exprFld;
+
+                if (!equal(VDash_, 1))
+                {
+                    tsp.ref().field() /= VDash_;
+                }
+            }
         }
-        else
+        else if (iter2.found() && iter2.val()->good())
         {
-            eqn += fvm::SuSp(SpValue, psi);
+            const dimensioned<scalar> SpValue
+            (
+                "Sp",
+                SpDims,
+                iter2.val()->value(tmVal)/VDash_
+            );
+
+            if (mag(SpValue.value()) <= ROOTVSMALL)
+            {
+                // No-op
+            }
+            else if (this->useSubMesh())
+            {
+                tsp = DimensionedField<scalar, volMesh>::New
+                (
+                    name_ + fieldName + "Sp",
+                    mesh_,
+                    dimensioned<scalar>(SpDims, Zero)
+                );
+                UIndirectList<scalar>(tsp.ref(), cells_) = SpValue.value();
+            }
+            else
+            {
+                eqn += fvm::SuSp(SpValue, psi);
+            }
+        }
+
+        if (tsp.valid())
+        {
+            eqn += fvm::SuSp(tsp, psi);
         }
     }
 }
@@ -242,10 +533,26 @@ bool Foam::fv::SemiImplicitSource<Type>::read(const dictionary& dict)
             VDash_ = V_;
         }
 
+        // Compatibility (2112 and earlier)
+        const dictionary* injectDict =
+            coeffs_.findDict("injectionRateSuSp", keyType::LITERAL);
+
+        if (injectDict)
         {
-            setFieldInjectionRates
+            setFieldCoeffs
             (
-                coeffs_.subDict("injectionRateSuSp", keyType::LITERAL)
+                *injectDict,
+                "Su",  // Su = explicit
+                "Sp"   // Sp = implicit
+            );
+        }
+        else
+        {
+            setFieldCoeffs
+            (
+                coeffs_.subDict("sources", keyType::LITERAL),
+                "explicit",
+                "implicit"
             );
         }
 

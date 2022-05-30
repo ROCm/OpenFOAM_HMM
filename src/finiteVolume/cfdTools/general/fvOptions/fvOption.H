@@ -68,14 +68,13 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fvOption_H
-#define fvOption_H
+#ifndef Foam_fvOption_H
+#define Foam_fvOption_H
 
 #include "fvMatricesFwd.H"
 #include "primitiveFieldsFwd.H"
 #include "volFieldsFwd.H"
 #include "dictionary.H"
-#include "Switch.H"
 #include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -83,6 +82,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class fvMesh;
 
 namespace fv

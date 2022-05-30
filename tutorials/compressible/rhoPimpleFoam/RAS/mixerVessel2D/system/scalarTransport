@@ -33,9 +33,50 @@ tracer0
                 }
             }
 
-            injectionRateSuSp
+            sources
             {
-                tracer0     (0.01 0);
+                tracer0
+                {
+                    explicit constant 0.01;
+                }
+            }
+        }
+
+        source2
+        {
+            type            scalarSemiImplicitSource;
+
+            volumeMode      specific;
+
+            selectionMode   all;
+
+            sources
+            {
+                tracer0
+                {
+                    explicit
+                    {
+                        type       exprField;
+
+                        functions<scalar>
+                        {
+                            square
+                            {
+                                type square;
+                                scale 0.0025;
+                                level 0.0025;
+                                frequency 10;
+                            }
+                        }
+
+                        expression
+                        #{
+                            (hypot(pos().x() + 0.025, pos().y()) < 0.01)
+                          ? fn:square(time())
+                          : 0
+                        #};
+                    }
+                }
             }
         }
     }

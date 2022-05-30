@@ -47,7 +47,7 @@ namespace Foam
 
 void Foam::fv::option::resetApplied()
 {
-    applied_.resize(fieldNames_.size());
+    applied_.resize_nocopy(fieldNames_.size());
     applied_ = false;
 }
 

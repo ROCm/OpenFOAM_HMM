@@ -33,7 +33,7 @@ Group
 Description
     Applies semi-implicit source within a specified region for \c Type,
     where \c \<Type\>=Scalar/Vector/SphericalTensor/SymmTensor/Tensor.
-    The injection rate coefficients are specified
+    The source rate coefficients are specified
     as pairs of Su-Sp coefficients, i.e.:
 
     \f[
@@ -57,27 +57,49 @@ Usage
 
         // Mandatory entries (runtime modifiable)
         volumeMode          <volumeModeType>;
-        injectionRateSuSp
+
+        // Specification of sources (OpenFOAM-2206 and newer)
+        sources
         {
+            // Specified as explicit(Su)/implicit(Sp) tuple:
             k           (30.7 0);
             epsilon     (1.5  0);
 
-            // The injectionRate can also be specified as a Function1
-            // by having dictionaries for the field entries instead
+            // Specified as Function1 or exprField
             k
             {
                 // Time-ramp from 0 to 30.7 at time 5
-                Su table
-                (
-                    (0 0.0)
-                    (5 30.7)
-                );
-                Sp      0.0;
+                explicit table ((0 0) (5 30.7));
+                implicit none;
             }
             epsilon
             {
-                Su      1.5;
-                Sp      0.0;
+                explicit
+                {
+                    type        exprField:
+                    expression  "(mag(pos()) < 0.1) ? 1.5 : 0";
+                }
+            }
+        }
+
+        // Traditional specification of sources (OpenFOAM-2112 and older)
+        injectionRateSuSp
+        {
+            // Specified as explicit(Su)/implicit(Sp) tuple:
+            k           (30.7 0);
+            epsilon     (1.5  0);
+
+            // Specified as Function1
+            k
+            {
+                // Time-ramp from 0 to 30.7 at time 5
+                Su  table ((0 0) (5 30.7));
+                Sp  0;
+            }
+            epsilon
+            {
+                Su  1.5;
+                Sp  0;
             }
         }
 
@@ -92,7 +114,8 @@ Usage
       type       | Type name: \<Type\>SemiImplicitSource <!--
                 -->                                     | word | yes  | -
       volumeMode | Volume mode type                     | word | yes  | -
-      injectionRateSuSp | Injection rate settings  | dictionary | yes | -
+      sources    | Explicit/implicit sources            | dict | cndtnl | -
+      injectionRateSuSp | Explicit/implicit sources     | dict | cndtnl | -
     \endtable
 
     The inherited entries are elaborated in:
@@ -104,6 +127,14 @@ Usage
       absolute  | Values are given as \<quantity\>
       specific  | Values are given as \<quantity\>/m3
     \endverbatim
+
+Note
+    Missing explicit/implicit, Su/Sp entries are equivalent to constant values
+    of zero. However, at one entry must be supplied for the source terms.
+
+Note
+    To use the \c exprField (expression fields) handling, the \em sources
+    dictionary form must be used.
 
 See also
   - Foam::fvOption
@@ -119,6 +150,8 @@ SourceFiles
 #include "cellSetOption.H"
 #include "Enum.H"
 #include "Function1.H"
+#include "HashPtrTable.H"
+#include "volumeExprDriver.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -126,12 +159,6 @@ namespace Foam
 {
 namespace fv
 {
-
-// Forward Declarations
-template<class Type> class SemiImplicitSource;
-
-template<class Type>
-Ostream& operator<<(Ostream&, const SemiImplicitSource<Type>&);
 
 /*---------------------------------------------------------------------------*\
                      Class SemiImplicitSource Declaration
@@ -168,16 +195,34 @@ private:
         scalar VDash_;
 
         //- Explicit source contributions
-        PtrList<Function1<Type>> Su_;
+        HashPtrTable<Function1<Type>> Su_;
 
         //- Linearised implicit contributions
-        PtrList<Function1<scalar>> Sp_;
+        HashPtrTable<Function1<scalar>> Sp_;
+
+        //- Expression to evaluate for explicit source contribution
+        HashTable<expressions::exprString> valueExprSu_;
+
+        //- Expression to evaluate for linearised implicit contribution
+        HashTable<expressions::exprString> valueExprSp_;
+
+        //- Expression driver for explicit sources
+        HashPtrTable<expressions::volumeExprDriver> driverSu_;
+
+        //- Expression driver for implicit sources
+        HashPtrTable<expressions::volumeExprDriver> driverSp_;
 
 
     // Private Member Functions
 
-        //- Set the source coefficients from "injectionRateSuSp"
-        void setFieldInjectionRates(const dictionary& dict);
+        //- Set the source coefficients from "sources" (explicit/implicit)
+        //- or from "injectionRateSuSp" (Su/Sp)
+        void setFieldCoeffs
+        (
+            const dictionary& dict,
+            const word& keyExplicit,
+            const word& keyImplicit
+        );
 
 
 public:

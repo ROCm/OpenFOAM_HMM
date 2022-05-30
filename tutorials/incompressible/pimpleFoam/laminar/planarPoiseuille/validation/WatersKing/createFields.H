@@ -49,10 +49,24 @@ IOdictionary fvOptions
         IOobject::NO_WRITE
     )
 );
-const dictionary& gradPDict =
-    fvOptions.subDict("momentumSource").subDict("injectionRateSuSp");
-const scalar K =
-    gradPDict.get<Tuple2<vector, scalar>>("U").first().x();
+
+scalar K(0);
+
+// Get x() component from U source
+{
+    const dictionary& momSource = fvOptions.subDict("momentumSource");
+
+    if (momSource.findDict("sources"))
+    {
+        K = momSource.subDict("sources")
+            .get<Tuple2<vector, scalar>>("U").first().x();
+    }
+    else
+    {
+        K = momSource.subDict("injectionRateSuSp")
+            .get<Tuple2<vector, scalar>>("U").first().x();
+    }
+}
 
 dictionary probes(IFstream(runTime.system()/"probes")());
 const point location = pointField(probes.lookup("probeLocations"))[0];

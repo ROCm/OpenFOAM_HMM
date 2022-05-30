@@ -44,7 +44,7 @@ namespace Foam
 
 void Foam::fa::option::resetApplied()
 {
-    applied_.resize(fieldNames_.size());
+    applied_.resize_nocopy(fieldNames_.size());
     applied_ = false;
 }
 
@@ -91,7 +91,7 @@ Foam::autoPtr<Foam::fa::option> Foam::fa::option::New
     Info<< indent
         << "Selecting finite area options type " << modelType << endl;
 
-    const_cast<Time&>(patch.boundaryMesh().mesh().time()).libs().open
+    patch.boundaryMesh().mesh().time().libs().open
     (
         coeffs,
         "libs",
@@ -102,15 +102,16 @@ Foam::autoPtr<Foam::fa::option> Foam::fa::option::New
 
     if (!ctorPtr)
     {
-        FatalErrorInFunction
-            << "Unknown faOption model type "
-            << modelType << nl << nl
-            << "Valid faOption types are:" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalIOErrorInLookup
+        (
+            coeffs,
+            "faOption",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalIOError);
     }
 
-    return autoPtr<option>(ctorPtr(name, modelType, coeffs, patch));
+    return autoPtr<fa::option>(ctorPtr(name, modelType, coeffs, patch));
 }
 
 

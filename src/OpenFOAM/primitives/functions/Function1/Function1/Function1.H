@@ -243,6 +243,9 @@ public:
         //- Is value constant (i.e. independent of x)
         virtual bool constant() const { return false; }
 
+        //- Can function be evaluated?
+        virtual bool good() const { return true; }
+
 
     // Evaluation
 

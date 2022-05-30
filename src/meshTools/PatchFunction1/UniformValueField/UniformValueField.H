@@ -130,7 +130,13 @@ public:
         //- Is value constant (i.e. independent of x)
         virtual inline bool constant() const
         {
-            return uniformValuePtr_ && uniformValuePtr_->constant();
+            return (uniformValuePtr_ && uniformValuePtr_->constant());
+        }
+
+        //- Can function be evaluated?
+        virtual inline bool good() const
+        {
+            return (uniformValuePtr_ && uniformValuePtr_->good());
         }
 
         //- Is value uniform (i.e. independent of coordinate)

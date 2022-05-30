@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -217,6 +217,9 @@ public:
 
         //- Is value constant (i.e. independent of x)
         virtual bool constant() const { return false; }
+
+        //- Can function be evaluated?
+        virtual bool good() const { return true; }
 
         //- Is value uniform (i.e. independent of coordinate)
         virtual bool uniform() const = 0;

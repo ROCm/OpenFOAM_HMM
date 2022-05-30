@@ -100,14 +100,12 @@ Usage
                     type            scalarSemiImplicitSource;
                     enabled         true;
 
-                    scalarSemiImplicitSourceCoeffs
+                    selectionMode   all;
+                    volumeMode      specific;
+
+                    sources
                     {
-                        selectionMode   all;
-                        volumeMode      specific;
-                        injectionRateSuSp
-                        {
-                            s           (1 0);
-                        }
+                        s           (1 0);
                     }
                 }
             }

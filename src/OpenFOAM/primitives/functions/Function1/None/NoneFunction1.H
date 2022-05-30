@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,8 +34,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Function1Types_None_H
-#define Function1Types_None_H
+#ifndef Foam_Function1Types_None_H
+#define Foam_Function1Types_None_H
 
 #include "Function1.H"
 
@@ -101,6 +101,9 @@ public:
 
         //- Value is independent of x
         virtual inline bool constant() const { return true; }
+
+        //- Function cannot be evaluated
+        virtual inline bool good() const { return false; }
 
         //- Placeholder: generates an error if called
         virtual Type value(const scalar x) const;

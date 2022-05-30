@@ -72,8 +72,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef faOption_H
-#define faOption_H
+#ifndef Foam_faOption_H
+#define Foam_faOption_H
 
 #include "faMatricesFwd.H"
 #include "areaFieldsFwd.H"
@@ -263,7 +263,7 @@ public:
             //- Return dictionary
             inline const dictionary& coeffs() const noexcept;
 
-            //- Return const access to the source active flag
+            //- True if source is active
             inline bool active() const noexcept;
 
             //- Set the applied flag to true for field index fieldi
