@@ -871,7 +871,6 @@ void Foam::fvMesh::mapFields(const mapPolyMesh& meshMap)
 }
 
 
-
 void Foam::fvMesh::movePoints(const pointField& p)
 {
     DebugInFunction << endl;
@@ -889,6 +888,8 @@ void Foam::fvMesh::movePoints(const pointField& p)
 
     if (!phiPtr_)
     {
+        DebugInFunction<< "Creating initial meshPhi field" << endl;
+
         // Create mesh motion flux
         phiPtr_ = new surfaceScalarField
         (
@@ -910,6 +911,7 @@ void Foam::fvMesh::movePoints(const pointField& p)
         // Grab old time mesh motion fluxes if the time has been incremented
         if (phiPtr_->timeIndex() != time().timeIndex())
         {
+            DebugInFunction<< "Accessing old-time meshPhi field" << endl;
             phiPtr_->oldTime();
         }
     }
@@ -990,7 +992,27 @@ void Foam::fvMesh::updateMesh(const mapPolyMesh& mpm)
 
 
     // Clear mesh motion flux (note: could instead save & map like volumes)
-    deleteDemandDrivenData(phiPtr_);
+    if (phiPtr_)
+    {
+        // Mesh moving and topology change. Recreate meshPhi
+        deleteDemandDrivenData(phiPtr_);
+
+        // Create mesh motion flux
+        phiPtr_ = new surfaceScalarField
+        (
+            IOobject
+            (
+                "meshPhi",
+                this->time().timeName(),
+                *this,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            *this,
+            dimensionedScalar(dimVolume/dimTime, Zero)
+        );
+    }
 
     // Clear the sliced fields
     clearGeomNotOldVol();
