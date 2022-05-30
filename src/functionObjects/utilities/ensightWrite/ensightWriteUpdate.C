@@ -138,24 +138,20 @@ bool Foam::functionObjects::ensightWrite::update()
         return false;
     }
 
-    // This is heavy-handed, but with a bounding-box limited sub-mesh,
-    // we don't readily know if the updates affect the subsetted mesh.
-
-    // if (meshSubset_.hasSubMesh())
-    // {
-    //     ensMesh_.clear();
-    //     meshSubset_.clear();
-    // }
-    // else if (ensMesh_)
-    // {
-    //     ensMesh_->expire();
-    // }
-
-    meshSubset_.clear();
+    // Even if selection doesn't nominally change, a new subMesh is built.
+    // Must update the reference for ensightMesh
+    if (meshSubset_.hasSubMesh())
+    {
+        ensMesh_.clear();
+        meshSubset_.clear();
+    }
+    // Probably not needed...
+    /// else if (ensMesh_)
+    /// {
+    ///     ensMesh_->expire();
+    /// }
 
     updateSubset(meshSubset_);
-
-    meshState_ = polyMesh::UNCHANGED;
 
     if (!ensMesh_)
     {
@@ -166,6 +162,7 @@ bool Foam::functionObjects::ensightWrite::update()
         ensMesh_->correct();
     }
 
+    meshState_ = polyMesh::UNCHANGED;
     return true;
 }
 
