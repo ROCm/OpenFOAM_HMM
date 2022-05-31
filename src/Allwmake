@@ -30,7 +30,7 @@ OpenFOAM/Alltouch -check 2>/dev/null
 OSspecific/"${WM_OSTYPE:-POSIX}"/Allwmake $targetType $*
 
 case "$WM_COMPILER" in
-(Mingw* | Nvidia*)
+(Mingw*)
     # Pstream/OpenFOAM cyclic dependency
     # 1st pass: link as Pstream as single .o object
     WM_MPLIB=dummy Pstream/Allwmake libo
