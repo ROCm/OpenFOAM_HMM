@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,29 +28,36 @@ Class
     Foam::QRMatrix
 
 Description
-    QRMatrix (i.e. QR decomposition, QR factorisation or orthogonal-triangular
-    decomposition) decomposes a scalar/complex matrix \c A into the following
-    matrix product:
+    \c QRMatrix computes QR decomposition of a given
+    scalar/complex matrix \c A into the following:
 
     \verbatim
-        A = Q*R,
+        A = Q R
+    \endverbatim
+
+    or in case of QR decomposition with column pivoting:
+
+    \verbatim
+        A P = Q R
     \endverbatim
 
     where
-     \c Q is a unitary similarity matrix,
-     \c R is an upper triangular matrix.
+    \vartable
+        Q | Unitary/orthogonal matrix
+        R | Upper triangular matrix
+        P | Permutation matrix
+    \endvartable
 
-    Reference:
+    References:
     \verbatim
-        QR decomposition:
-            mathworld.wolfram.com/QRDecomposition.html (Retrieved:17-06-19)
-            w.wiki/52X (Retrieved: 17-06-19)
-
-        QR decomposition with Householder reflector (tag:M):
-            Monahan, J. F. (2011).
-            Numerical methods of statistics.
-            Cambridge: Cambridge University Press.
-            DOI:10.1017/CBO9780511977176
+        TNT implementation:
+            Pozo, R. (1997).
+            Template Numerical Toolkit for linear algebra:
+            High performance programming with C++
+            and the Standard Template Library.
+            The International Journal of Supercomputer Applications
+            and High Performance Computing, 11(3), 251-263.
+            DOI:10.1177/109434209701100307
 
         QR decomposition with column pivoting (tag:QSB):
             Quintana-Ortí, G., Sun, X., & Bischof, C. H. (1998).
@@ -75,54 +82,47 @@ Description
             A new method for computing Moore–Penrose inverse matrices.
             Journal of Computational and applied Mathematics, 228(1), 412-417.
             DOI:10.1016/j.cam.2008.10.008
-
-        Operands of QR decomposition:
-            mathworld.wolfram.com/UnitaryMatrix.html (Retrieved:13-06-19)
-            mathworld.wolfram.com/UpperTriangularMatrix.html (Retrieved:16-06-19)
-            mathworld.wolfram.com/PermutationMatrix.html (Retrieved:20-06-19)
-
-        Back substitution:
-            mathworld.wolfram.com/GaussianElimination.html (Retrieved:15-06-19)
     \endverbatim
 
 Usage
-    Input types:
-     - \c A can be a \c SquareMatrix<Type> or \c RectangularMatrix<Type>
 
-    Output types:
-     - \c Q is always of the type of the matrix \c A
-     - \c R is always of the type of the matrix \c A
+    \heading Input:
+    \vartable
+        A | RectangularMatrix<Type> or SquareMatrix<Type>
+    \endvartable
 
-    Options for the output forms of \c QRMatrix (for an (m-by-n) input matrix
-    \c A with k = min(m, n)):
-     - outputTypes::FULL_R:     computes only \c R                   (m-by-n)
-     - outputTypes::FULL_QR:    computes both \c R and \c Q          (m-by-m)
-     - outputTypes::REDUCED_R:  computes only reduced \c R           (k-by-n)
+    \heading Options for the decomposition mode:
+    \vartable
+        modes::FULL     | compute full-size decomposition
+        modes::ECONOMY  | compute economy-size decomposition
+    \endvartable
 
-    Options where to store \c R:
-     - storeMethods::IN_PLACE:        replaces input matrix content with \c R
-     - storeMethods::OUT_OF_PLACE:    creates new object of \c R
+    \heading Options for the output types:
+    \vartable
+        outputs::ONLY\_Q     | compute only Q
+        outputs::ONLY\_R     | compute only R
+        outputs::BOTH\_QR    | compute both Q and R
+    \endvartable
 
-    Options for the computation of column pivoting:
-     - colPivoting::FALSE:            switches off column pivoting
-     - colPivoting::TRUE:             switches on column pivoting
+    \heading Options for the column pivoting:
+    \vartable
+        pivoting::FALSE     | switch off column pivoting
+        pivoting::TRUE      | switch on column pivoting
+    \endvartable
 
-    Direct solution of linear systems A x = b is possible by solve() alongside
-    the following limitations:
-     - \c A         = a scalar square matrix
-     - output type  = outputTypes::FULL_QR
-     - store method = storeMethods::IN_PLACE
+    \heading Output:
+    \vartable
+        Q | m-by-m (FULL) or m-by-k (ECONOMY) with k = min(m,n)
+        R | m-by-n (FULL) or k-by-n (ECONOMY) with k = min(m,n)
+        p | n-element label list
+        P | n-by-n permutation matrix
+    \endvartable
 
 Notes
-    - QR decomposition is not unique if \c R is not positive diagonal \c R.
-    - The option combination:
-      - outputTypes::REDUCED_R
-      - storeMethods::IN_PLACE
-      will not modify the rows of input matrix \c A after its nth row.
-    - Both FULL_R and REDUCED_R QR decompositions execute the same number of
-      operations. Yet REDUCED_R QR decomposition returns only the first n rows
-      of \c R if m > n for an input m-by-n matrix \c A.
-    - For m <= n, FULL_R and REDUCED_R will produce the same matrices.
+    - \c QRMatrix involves modified implementations of the public-domain
+    library \c TNT, which is available at https://math.nist.gov/tnt/index.html.
+    - \c Q and \c R are always of the same type of the matrix \c A.
+    - \c Type can be \c scalar or \c complex.
 
 See also
     Test-QRMatrix.C
@@ -133,12 +133,11 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef QRMatrix_H
-#define QRMatrix_H
+#ifndef Foam_QRMatrix_H
+#define Foam_QRMatrix_H
 
 #include "RectangularMatrix.H"
 #include "SquareMatrix.H"
-#include "complex.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -146,39 +145,38 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                            Class QRMatrix Declaration
+                          Class QRMatrix Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class MatrixType>
 class QRMatrix
 {
-
 public:
 
     typedef typename MatrixType::cmptType cmptType;
     typedef SquareMatrix<cmptType> SMatrix;
     typedef RectangularMatrix<cmptType> RMatrix;
 
-    //- Options for the output matrix forms of QRMatrix
-    enum outputTypes : uint8_t
+    //- Options for the decomposition mode
+    enum modes : uint8_t
     {
-        FULL_R = 1,         //!< computes only \c R
-        FULL_QR = 2,        //!< computes both \c R and \c Q
-        REDUCED_R = 3       //!< computes only reduced \c R
+        FULL = 1,         //!< compute full-size decomposition
+        ECONOMY = 2,      //!< compute economy-size decomposition
     };
 
-    //- Options where to store R
-    enum storeMethods : uint8_t
+    //- Options for the output types
+    enum outputs : uint8_t
     {
-        IN_PLACE = 1,       //!< replaces input matrix content with \c R
-        OUT_OF_PLACE = 2    //!< creates new object of \c R
+        ONLY_Q = 1,      //!< compute only Q
+        ONLY_R = 2,      //!< compute only R
+        BOTH_QR = 3      //!< compute both Q and R
     };
 
-    //- Options for the computation of column pivoting
-    enum colPivoting : bool
+    //- Options for the column pivoting
+    enum pivoting : bool
     {
-        FALSE = false,      //!< switches off column pivoting
-        TRUE  = true        //!< switches on column pivoting
+        FALSE = false,      //!< switch off column pivoting
+        TRUE  = true        //!< switch on column pivoting
     };
 
 
@@ -186,53 +184,50 @@ private:
 
     // Private Data
 
-        //- Selected option for the output matrix forms of QRMatrix
-        outputTypes outputType_;
+        //- Decomposition mode
+        const modes mode_;
 
-        //- Selected option where to store R
-        const storeMethods storeMethod_;
+        //- Output type
+        const outputs output_;
 
-        //- Selected option for the computation of column pivoting
-        const colPivoting colPivot_;
+        //- Output shape factor based on the decomposition mode
+        const label sz_;
 
-        //- Unitary similarity matrix
+        //- Unitary/orthogonal matrix
         MatrixType Q_;
 
         //- Upper triangular matrix
         MatrixType R_;
 
         //- Permutation list (if column-pivoting is on)
-        labelList P_;
+        labelList p_;
 
 
     // Private Member Functions
 
-        //- Compute the QR decomposition without the column pivoting
-        void qr
-        (
-            MatrixType& A
-        );
+    // Evaluation
 
-        //- Compute the QR decomposition with the column pivoting
-        //  (QSB:Fig. 1)
-        void qrPivot
-        (
-            MatrixType& A
-        );
+        //- Calculate output shape factor based on the decomposition mode
+        label calcShapeFactor(const MatrixType& A) const;
 
-        //- Compute output matrices in selected forms
-        //- using Householder reflectors
-        //  (M:Section 4)
-        inline void applyHouseholder
-        (
-            MatrixType& A,
-            const RMatrix& reflector,
-            const label k = 0
-        );
+        //- Compute QR decomposition
+        void decompose(MatrixType& AT);
 
-        //- Solve the linear system with the Field argument x initialized to
-        //- the appropriate transformed source (e.g. Q.T()*source)
-        //- and return the solution in x
+        //- Compute QR decomposition with column pivoting
+        void decompose(MatrixType& AT, const bool pivot);
+
+        //- Calculate Q
+        void calcQ(const MatrixType& AT);
+
+        //- Calculate R
+        void calcR(const MatrixType& AT, const List<cmptType>& diag);
+
+
+    // Linear system solution
+
+        //- Solve the linear system with the Field argument x
+        //- initialized to the appropriate transformed source
+        //- (e.g. Q.T()*source) and return the solution in x
         template<template<typename> class ListContainer>
         void solvex(ListContainer<cmptType>& x) const;
 
@@ -246,33 +241,11 @@ private:
         ) const;
 
 
-protected:
+        //- No copy construct
+        QRMatrix(const QRMatrix&) = delete;
 
-    // Protected Member Functions
-
-        //- Compute Householder reflector on a given matrix column, u
-        //  (M:Eq.6.814)
-        inline RMatrix householderReflector
-        (
-            RMatrix u
-        );
-
-        //- Apply (in-place) Householder reflectors from the left side: u*A
-        inline void applyLeftReflector
-        (
-            MatrixType& A,
-            const RMatrix& reflector,
-            const label k = 0,
-            const label k1 = 0
-        );
-
-        //- Apply (in-place) Householder reflectors from the right side: (u*A)*u
-        inline void applyRightReflector
-        (
-            MatrixType& A,
-            const RMatrix& reflector,
-            const label k = 0
-        );
+        //- No copy assignment
+        QRMatrix& operator=(const QRMatrix&) = delete;
 
 
 public:
@@ -280,65 +253,66 @@ public:
     // Constructors
 
         //- Construct null
-        QRMatrix();
+        QRMatrix() = delete;
 
-        //- Construct QRMatrix without performing the decomposition
-        QRMatrix
+        //- Construct with a matrix and perform QR decomposition
+        explicit QRMatrix
         (
-            const outputTypes outputType,
-            const storeMethods storeMethod = storeMethods::OUT_OF_PLACE,
-            const colPivoting colPivot = colPivoting::FALSE
+            const modes mode,
+            const outputs output,
+            const bool pivoting,
+            MatrixType& A
         );
 
-        //- Construct QRMatrix and perform the QR decomposition
-        QRMatrix
-        (
-            MatrixType& A,
-            const outputTypes outputType,
-            const storeMethods storeMethod = storeMethods::OUT_OF_PLACE,
-            const colPivoting colPivot = colPivoting::FALSE
-        );
-
-        //- Construct QRMatrix and perform the QR decomposition
-        QRMatrix
+        //- Construct with a const matrix and perform QR decomposition
+        explicit QRMatrix
         (
             const MatrixType& A,
-            const outputTypes outputType,
-            const colPivoting colPivot = colPivoting::FALSE
+            const modes mode,
+            const outputs output = outputs::BOTH_QR,
+            const bool pivoting = false
         );
 
 
     // Member Functions
 
-        // Information
+    // Access
 
-        //- Return the unitary similarity matrix
-        //  Includes implicit round-to-zero as mutable operation
-        inline const MatrixType& Q() const;
+        //- Return const reference to Q
+        const MatrixType& Q() const noexcept
+        {
+            return Q_;
+        }
 
-        //- Return the upper triangular matrix
-        inline const MatrixType& R() const;
+        //- Return reference to Q
+        MatrixType& Q() noexcept
+        {
+            return Q_;
+        }
 
-        //- Return the permutation order (P) as a list
-        inline const labelList& orderP() const;
+        //- Return const reference to R
+        const MatrixType& R() const noexcept
+        {
+            return R_;
+        }
+
+        //- Return reference to R
+        MatrixType& R() noexcept
+        {
+            return R_;
+        }
+
+        //- Return const reference to p
+        const labelList& p() const noexcept
+        {
+            return p_;
+        }
 
         //- Create and return the permutation matrix
         inline SMatrix P() const;
 
 
-        // Algorithm
-
-        //- Compute QR decomposition according to constructor settings
-        void decompose
-        (
-            MatrixType& A
-        );
-
-        //- Compute QR decomposition according to constructor settings
-        void decompose
-        (
-            const MatrixType& A
-        );
+    // Linear system solution
 
         //- Solve the linear system with the given source
         //- and return the solution in the argument x
@@ -372,41 +346,39 @@ public:
             const IndirectListBase<cmptType, Addr>& source
         ) const;
 
-        //- Return the inverse of (Q*R), so that solving x = (Q*R).inv()*source
-        SMatrix inv() const;
-
-        //- Solve a row-echelon-form linear system starting from the bottom
-        //  Back substitution: Ax = b where:
-        //  A = Non-singular upper-triangular square matrix (m-by-m)
-        //  x = Solution (m-by-p)
-        //  b = Source (m-by-p)
-        RMatrix backSubstitution
+        //- Solve a row-echelon-form linear system (Ax = b)
+        //- starting from the bottom by back substitution
+        //  A = R: Non-singular upper-triangular square matrix (m-by-m)
+        //  b: Source (m-by-p)
+        //  x: Solution (m-by-p)
+        RMatrix solve
         (
-            const SMatrix& A,
             const RMatrix& b
         );
+
+        //- Return the inverse of (Q*R), solving x = (Q*R).inv()*source
+        SMatrix inv() const;
 };
 
+namespace MatrixTools
+{
 
 // * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
 
-//- (Out-of-place) Moore-Penrose inverse of singular/non-singular
-//- square/rectangular scalar/complex matrices
-//  (KPP:p. 9834; KP:p. 648)
-//  The tolerance (i.e. tol) to ensure the R1 matrix full-rank is given as 1e-13
-//  in the original paper (KPP:p. 9834).  Nonetheless, the tolerance = 1e-5
-//  given by (TA; mentioned in (KPP:p. 9832)) was observed to be more robust
-//  for the tested scenarios.
+//- Moore-Penrose inverse of singular/non-singular square/rectangular
+//- scalar/complex matrices (KPP:p. 9834; KP:p. 648)
+//  The tolerance to ensure the R1 matrix full-rank is set to 1e-5
+//  by (TA; mentioned in (KPP:p. 9832)) in contrast to 1e-13 (KPP:p. 9834).
 template<class MatrixType>
 MatrixType pinv
 (
     const MatrixType& A,
-    const scalar tol = 1e-5
+    scalar tol = 1e-5
 );
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace MatrixTools
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

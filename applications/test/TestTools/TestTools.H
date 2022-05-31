@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,6 +35,7 @@ using namespace Foam;
 #include "complex.H"
 #include "Matrix.H"
 #include "Random.H"
+#include <chrono>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,6 +45,27 @@ unsigned nTest_ = 0;
 
 // Total number of failed unit tests
 unsigned nFail_ = 0;
+
+
+// Return the absolute tolerance value for bitwise comparisons of floatScalars
+floatScalar getTol(floatScalar)
+{
+    return 1e-2;
+}
+
+
+// Return the absolute tolerance value for bitwise comparisons of doubleScalars
+doubleScalar getTol(doubleScalar)
+{
+    return 1e-10;
+}
+
+
+// Return the absolute tolerance value for bitwise comparisons of doubleScalars
+doubleScalar getTol(complex)
+{
+    return 1e-10;
+}
 
 
 // Create a non-complex random Matrix.
@@ -174,10 +196,14 @@ typename std::enable_if
     const Type& x,
     const Type& y,
     const scalar absTol = 0,    //<! useful for cmps near zero
-    const scalar relTol = 1e-8  //<! are values the same within 8 decimals
+    const scalar relTol = 1e-8, //<! are values the same within 8 decimals
+    const bool verbose = false
 )
 {
-    Info<< msg << x << "?=" << y << endl;
+    if (verbose)
+    {
+        Info<< msg << x << "?=" << y << endl;
+    }
 
     unsigned nFail = 0;
 
@@ -212,10 +238,14 @@ typename std::enable_if
     const Type& x,
     const Type& y,
     const scalar absTol = 0,
-    const scalar relTol = 1e-8
+    const scalar relTol = 1e-8,
+    const bool verbose = false
 )
 {
-    Info<< msg << x << "?=" << y << endl;
+    if (verbose)
+    {
+        Info<< msg << x << "?=" << y << endl;
+    }
 
     unsigned nFail = 0;
 
@@ -253,10 +283,14 @@ typename std::enable_if
     const Type1& x,
     const Type2& y,
     const scalar absTol = 0,
-    const scalar relTol = 1e-8
+    const scalar relTol = 1e-8,
+    const bool verbose = false
 )
 {
-    Info<< msg << x << "?=" << y << endl;
+    if (verbose)
+    {
+        Info<< msg << x << "?=" << y << endl;
+    }
 
     unsigned nFail = 0;
 
@@ -284,10 +318,14 @@ void cmp
 (
     const word& msg,
     const bool x,
-    const bool y
+    const bool y,
+    const bool verbose = false
 )
 {
-    Info<< msg << x << "?=" << y << endl;
+    if (verbose)
+    {
+        Info<< msg << x << "?=" << y << endl;
+    }
 
     unsigned nFail = 0;
 
@@ -303,6 +341,41 @@ void cmp
         ++nFail_;
     }
     ++nTest_;
+}
+
+
+// Print OpenFOAM matrix in NumPy format
+template<class MatrixType>
+void InfoNumPyFormat
+(
+    const MatrixType& mat,
+    const word objName
+)
+{
+    Info<< objName << ": " << mat.m() << "x" << mat.n() << nl;
+    for (label m = 0; m < mat.m(); ++m)
+    {
+        Info<< "[";
+        for (label n = 0; n < mat.n(); ++n)
+        {
+            if (n == mat.n() - 1)
+            {
+                Info<< mat(m,n);
+            }
+            else
+            {
+                Info<< mat(m,n) << ",";
+            }
+        }
+        if (m == mat.m() - 1)
+        {
+            Info << "]" << nl;
+        }
+        else
+        {
+            Info << "]," << nl;
+        }
+    }
 }
 
 

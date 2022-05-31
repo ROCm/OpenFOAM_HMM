@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -170,6 +170,16 @@ Foam::RectangularMatrix<Type>::clone() const
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+template<class Type>
+inline void Foam::RectangularMatrix<Type>::operator=
+(
+    RectangularMatrix<Type>&& mat
+)
+{
+    this->transfer(mat);
+}
+
 
 template<class Type>
 inline void Foam::RectangularMatrix<Type>::operator=(const Foam::zero)
