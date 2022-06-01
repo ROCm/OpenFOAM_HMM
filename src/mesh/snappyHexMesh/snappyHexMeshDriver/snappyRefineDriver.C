@@ -1824,6 +1824,7 @@ void Foam::snappyRefineDriver::removeInsideCells
         );
     }
 
+
     // Fix any additional (e.g. locationsOutsideMesh). Note: probably not
     // necessary.
     meshRefiner_.splitMesh
@@ -1835,6 +1836,7 @@ void Foam::snappyRefineDriver::removeInsideCells
         refineParams.locationsInMesh(),
         refineParams.zonesInMesh(),
         refineParams.locationsOutsideMesh(),
+        !refineParams.useLeakClosure(),
         setFormatter_
     );
 
@@ -2822,6 +2824,7 @@ void Foam::snappyRefineDriver::baffleAndSplitMesh
         refineParams.locationsInMesh(),
         refineParams.zonesInMesh(),
         refineParams.locationsOutsideMesh(),
+        !refineParams.useLeakClosure(),
         setFormatter_
     );
 
@@ -2886,6 +2889,7 @@ void Foam::snappyRefineDriver::zonify
             refineParams.locationsInMesh(),
             refineParams.zonesInMesh(),
             refineParams.locationsOutsideMesh(),
+            !refineParams.useLeakClosure(),
             setFormatter_,
             zonesToFaceZone
         );
@@ -2958,6 +2962,7 @@ void Foam::snappyRefineDriver::splitAndMergeBaffles
         refineParams.locationsInMesh(),
         refineParams.zonesInMesh(),
         refineParams.locationsOutsideMesh(),
+        !refineParams.useLeakClosure(),
         setFormatter_
     );
 

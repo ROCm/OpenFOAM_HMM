@@ -225,6 +225,11 @@ castellatedMeshControls
             //- Optional removal of cells in thin gaps. Start removing cells
             //  if at refinement level 10 we're detecting thin gaps.
             //blockLevel 10;
+
+            //- Optional early detection of connections between inside and
+            //  outside locations. Default is only after all refinement has
+            //  been done.
+            //leakLevel 10;
         }
     }
 
@@ -481,6 +486,9 @@ castellatedMeshControls
     //minCellFraction 0.001;
     // Optional: same but in absolute number of cells. Default is 0.
     //nMinCells 100;
+
+    // Optional: disable of automatic leak closure and exit immediately
+    //useLeakClosure false;
 }
 
 // Settings for the snapping.

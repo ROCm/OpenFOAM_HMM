@@ -586,6 +586,7 @@ private:
                 const pointField& locationsInMesh,
                 const wordList& regionsInMesh,
                 const pointField& locationsOutsideMesh,
+                const bool exitIfLeakPath,
                 const refPtr<coordSetWriter>& leakPathFormatter,
 
                 const labelList& neiLevel,
@@ -845,6 +846,7 @@ private:
                 const pointField& locationsInMesh,
                 const wordList& zonesInMesh,
                 const pointField& locationsOutsideMesh,
+                const bool exitIfLeakPath,
                 const refPtr<coordSetWriter>& leakPathFormatter,
 
                 labelList& cellToZone,
@@ -1302,6 +1304,7 @@ public:
                 const pointField& locationsInMesh,
                 const wordList& regionsInMesh,
                 const pointField& locationsOutsideMesh,
+                const bool exitIfLeakPath,
                 const refPtr<coordSetWriter>& leakPathFormatter
             );
 
@@ -1333,6 +1336,7 @@ public:
                 const pointField& locationsInMesh,
                 const wordList& regionsInMesh,
                 const pointField& locationsOutsideMesh,
+                const bool exitIfLeakPath,
                 const refPtr<coordSetWriter>& leakPathFormatter
             );
 
@@ -1435,6 +1439,7 @@ public:
                 const pointField& locationsInMesh,
                 const wordList& regionsInMesh,
                 const pointField& locationsOutsideMesh,
+                const bool exitIfLeakPath,
                 const refPtr<coordSetWriter>& leakPathFormatter,
                 wordPairHashTable& zonesToFaceZone
             );

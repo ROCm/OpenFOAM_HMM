@@ -292,6 +292,7 @@ void Foam::meshRefinement::getBafflePatches
     const pointField& locationsInMesh,
     const wordList& zonesInMesh,
     const pointField& locationsOutsideMesh,
+    const bool exitIfLeakPath,
     const refPtr<coordSetWriter>& leakPathFormatter,
     const labelList& neiLevel,
     const pointField& neiCc,
@@ -326,6 +327,7 @@ void Foam::meshRefinement::getBafflePatches
             locationsInMesh,
             zonesInMesh,
             locationsOutsideMesh,
+            exitIfLeakPath,
             leakPathFormatter,
 
             cellToZone,
@@ -2848,6 +2850,7 @@ void Foam::meshRefinement::zonify
     const pointField& locationsInMesh,
     const wordList& zonesInMesh,
     const pointField& locationsOutsideMesh,
+    const bool exitIfLeakPath,
     const refPtr<coordSetWriter>& leakPathFormatter,
 
     labelList& cellToZone,
@@ -2961,11 +2964,6 @@ void Foam::meshRefinement::zonify
         // Add to unnamedRegion1, unnamedRegion2
         if (unnamedMapPtr.valid())
         {
-            WarningInFunction
-                << "Detected and closed leak path from "
-                << locationsInMesh << " to " << locationsOutsideMesh
-                << endl;
-
             // Dump leak path
             if (leakPathFormatter)
             {
@@ -2984,6 +2982,23 @@ void Foam::meshRefinement::zonify
                 );
                 Info<< "Dumped leak path to " << fName << endl;
             }
+
+            auto& err =
+            (
+                exitIfLeakPath
+              ? FatalErrorInFunction
+              : WarningInFunction
+            );
+
+            err << "Locations in mesh " << locationsInMesh
+                << " connect to one of the locations outside mesh "
+                << locationsOutsideMesh << endl;
+
+            if (exitIfLeakPath)
+            {
+                FatalError << exit(FatalError);
+            }
+
 
             labelList packedRegion1
             (
@@ -3034,96 +3049,119 @@ void Foam::meshRefinement::zonify
             posOrientation
         );
 
-        if (locationsOutsideMesh.size())
-        {
-            namedFaces = ListOps::findIndices
-            (
-                namedSurfaceRegion,
-                [](const label x){return x != -1;}
-            );
+        // Ideally we'd like to close 'cellZone' surfaces. The problem is
+        // that we don't (easily) know which locationsInMesh should be inside
+        // the surface and which aren't. With 'insidePoint' definition of
+        // cellZone we have a location inside the cellZone but how do we
+        // know where the locationsInMesh are? Are they inside the cellZone
+        // as well? Only with the 'locationsInMesh' notation where we specify
+        // the cellZone and the seedpoint could we make sure that we cannot
+        // walk from one to the other.
+        // For now disable hole closure on cellZones
 
-            const globalIndex globalNamedFaces(namedFaces.size());
-
-            namedMapPtr = holeToFace::calcClosure
-            (
-                mesh_,
-                allLocations,
-                namedFaces,
-                globalNamedFaces,
-                true,                   // allow erosion
-
-                namedClosureFaces,
-                namedToClosure
-            );
-
-            if (debug)
-            {
-                Pout<< "meshRefinement::zonify : found faceZone closure faces:"
-                    << namedClosureFaces.size()
-                    << "  map:" << namedMapPtr.valid() << endl;
-            }
-
-            // Add to namedSurfaceRegion, posOrientation
-            if (namedMapPtr.valid())
-            {
-                WarningInFunction
-                    << "Detected and closed leak path"
-                    << " through zoned surfaces from "
-                    << locationsInMesh << " to " << locationsOutsideMesh
-                    << endl;
-
-                // Dump leak path
-                if (leakPathFormatter)
-                {
-                    boolList blockedFace(mesh_.nFaces(), false);
-                    UIndirectList<bool>(blockedFace, unnamedFaces) = true;
-                    UIndirectList<bool>(blockedFace, namedFaces) = true;
-                    const fileName fName
-                    (
-                        writeLeakPath
-                        (
-                            mesh_,
-                            locationsInMesh,
-                            locationsOutsideMesh,
-                            blockedFace,
-                            leakPathFormatter.constCast()
-                        )
-                    );
-                    Info<< "Dumped leak path to " << fName << endl;
-                }
-
-                labelList packedSurfaceRegion
-                (
-                    UIndirectList<label>(namedSurfaceRegion, namedFaces)
-                );
-                namedMapPtr->distribute(packedSurfaceRegion);
-                boolList packedOrientation(posOrientation.size());
-                forAll(namedFaces, i)
-                {
-                    const label facei = namedFaces[i];
-                    packedOrientation[i] = posOrientation[facei];
-                }
-                namedMapPtr->distribute(packedOrientation);
-                forAll(namedClosureFaces, i)
-                {
-                    const label sloti = namedToClosure[i];
-                    if (sloti != -1)
-                    {
-                        const label facei = namedClosureFaces[i];
-                        const label regioni = namedSurfaceRegion[facei];
-                        const label slotRegioni = packedSurfaceRegion[sloti];
-                        const bool orient = posOrientation[facei];
-                        const bool slotOrient = packedOrientation[sloti];
-
-                        if (slotRegioni != regioni || slotOrient != orient)
-                        {
-                            namedSurfaceRegion[facei] = slotRegioni;
-                            posOrientation[facei] = slotOrient;
-                        }
-                    }
-                }
-            }
-        }
+        //if (locationsOutsideMesh.size())
+        //{
+        //    namedFaces = ListOps::findIndices
+        //    (
+        //        namedSurfaceRegion,
+        //        [](const label x){return x != -1;}
+        //    );
+        //
+        //    {
+        //        OBJstream str(mesh_.time().timePath()/"namedFaces.obj");
+        //        Pout<< "Writing " << namedFaces.size() << " zone faces to "
+        //            << str.name() << endl;
+        //        str.write
+        //        (
+        //            UIndirectList<face>(mesh_.faces(), namedFaces)(),
+        //            mesh_.points()
+        //        );
+        //    }
+        //
+        //
+        //    const globalIndex globalNamedFaces(namedFaces.size());
+        //
+        //    namedMapPtr = holeToFace::calcClosure
+        //    (
+        //        mesh_,
+        //        allLocations,
+        //        namedFaces,             // or also unnamedFaces?
+        //        globalNamedFaces,
+        //        true,                   // allow erosion
+        //
+        //        namedClosureFaces,
+        //        namedToClosure
+        //    );
+        //
+        //    if (debug)
+        //    {
+        //        Pout<< "meshRefinement::zonify :"
+        //            << " found faceZone closure faces:"
+        //            << namedClosureFaces.size()
+        //            << "  map:" << namedMapPtr.valid() << endl;
+        //    }
+        //
+        //    // Add to namedSurfaceRegion, posOrientation
+        //    if (namedMapPtr.valid())
+        //    {
+        //        WarningInFunction
+        //            << "Detected and closed leak path"
+        //            << " through zoned surfaces from "
+        //            << locationsInMesh << " to " << locationsOutsideMesh
+        //            << endl;
+        //
+        //        // Dump leak path
+        //        if (leakPathFormatter)
+        //        {
+        //            boolList blockedFace(mesh_.nFaces(), false);
+        //            UIndirectList<bool>(blockedFace, unnamedFaces) = true;
+        //            UIndirectList<bool>(blockedFace, namedFaces) = true;
+        //            const fileName fName
+        //            (
+        //                writeLeakPath
+        //                (
+        //                    mesh_,
+        //                    locationsInMesh,
+        //                    locationsOutsideMesh,
+        //                    blockedFace,
+        //                    leakPathFormatter.constCast()
+        //                )
+        //            );
+        //            Info<< "Dumped leak path to " << fName << endl;
+        //        }
+        //
+        //        labelList packedSurfaceRegion
+        //        (
+        //            UIndirectList<label>(namedSurfaceRegion, namedFaces)
+        //        );
+        //        namedMapPtr->distribute(packedSurfaceRegion);
+        //        boolList packedOrientation(posOrientation.size());
+        //        forAll(namedFaces, i)
+        //        {
+        //            const label facei = namedFaces[i];
+        //            packedOrientation[i] = posOrientation[facei];
+        //        }
+        //        namedMapPtr->distribute(packedOrientation);
+        //        forAll(namedClosureFaces, i)
+        //        {
+        //            const label sloti = namedToClosure[i];
+        //            if (sloti != -1)
+        //            {
+        //                const label facei = namedClosureFaces[i];
+        //                const label regioni = namedSurfaceRegion[facei];
+        //                const label slotRegioni = packedSurfaceRegion[sloti];
+        //                const bool orient = posOrientation[facei];
+        //                const bool slotOrient = packedOrientation[sloti];
+        //
+        //                if (slotRegioni != regioni || slotOrient != orient)
+        //                {
+        //                    namedSurfaceRegion[facei] = slotRegioni;
+        //                    posOrientation[facei] = slotOrient;
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
     }
 
 
@@ -4505,6 +4543,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
     const pointField& locationsInMesh,
     const wordList& zonesInMesh,
     const pointField& locationsOutsideMesh,
+    const bool exitIfLeakPath,
     const refPtr<coordSetWriter>& leakPathFormatter
 )
 {
@@ -4532,6 +4571,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
         locationsInMesh,
         zonesInMesh,
         locationsOutsideMesh,
+        exitIfLeakPath,
         refPtr<coordSetWriter>(nullptr),
 
         neiLevel,
@@ -4606,6 +4646,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
                 locationsInMesh,
                 zonesInMesh,
                 locationsOutsideMesh,
+                exitIfLeakPath,
                 refPtr<coordSetWriter>(nullptr),
 
                 neiLevel,
@@ -4781,11 +4822,13 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMesh
     const pointField& locationsInMesh,
     const wordList& zonesInMesh,
     const pointField& locationsOutsideMesh,
+    const bool exitIfLeakPath,
     const refPtr<coordSetWriter>& leakPathFormatter
 )
 {
     // Determine patches to put intersections into
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
     // Swap neighbouring cell centres and cell level
     labelList neiLevel(mesh_.nBoundaryFaces());
@@ -4802,6 +4845,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMesh
         locationsInMesh,
         zonesInMesh,
         locationsOutsideMesh,
+        exitIfLeakPath,
         leakPathFormatter,
 
         neiLevel,
@@ -5269,6 +5313,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::removeLimitShells
         locationsInMesh,
         zonesInMesh,
         locationsOutsideMesh,
+        false,                      // do not exit. Use leak-closure instead.
         refPtr<coordSetWriter>(nullptr),
 
         neiLevel,
@@ -5579,6 +5624,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
     const pointField& locationsInMesh,
     const wordList& zonesInMesh,
     const pointField& locationsOutsideMesh,
+    const bool exitIfLeakPath,
     const refPtr<coordSetWriter>& leakPathFormatter,
     wordPairHashTable& zonesToFaceZone
 )
@@ -5660,6 +5706,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
             locationsInMesh,
             zonesInMesh,
             locationsOutsideMesh,
+            exitIfLeakPath,
             leakPathFormatter,
 
             cellToZone,

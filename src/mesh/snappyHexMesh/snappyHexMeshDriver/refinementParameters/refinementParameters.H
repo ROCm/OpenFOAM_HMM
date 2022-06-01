@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2020,2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -86,6 +86,9 @@ class refinementParameters
 
             //- Areas to keep
             pointField locationsInMesh_;
+
+            //- How to handle connections between inside and outside points
+            const bool useLeakClosure_;
 
             //- Region for location
             wordList zonesInMesh_;
@@ -193,6 +196,16 @@ public:
             const pointField& locationsOutsideMesh() const
             {
                 return locationsOutsideMesh_;
+            }
+
+            //- Whether to attempt to close any 'leak' between
+            //  locationsInsideMesh and locationsOutsideMesh or exit with
+            //  error. Default is true.
+            //  (see also refinementSurfaces::leakLevel to force surfaces to
+            //  be checked for leaks early-on in the refinement)
+            bool useLeakClosure() const
+            {
+                return useLeakClosure_;
             }
 
             //- Are zone faces allowed only inbetween different cell zones

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2020,2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -74,6 +74,7 @@ Foam::refinementParameters::refinementParameters
             pointField(0)
         )
     ),
+    useLeakClosure_(dict.getOrDefault<bool>("useLeakClosure", true)),
     faceZoneControls_(dict.subOrEmptyDict("faceZoneControls")),
     allowFreeStandingZoneFaces_
     (
