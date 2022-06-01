@@ -305,7 +305,8 @@ void Foam::fv::SemiImplicitSource<Type>::addSup
             // Restore dimension checking
             dimensionSet::checking(oldDimChecking);
 
-            const ExprResultType* ptr = driver.isResultType<ExprResultType>();
+            const ExprResultType* ptr =
+                driver.template isResultType<ExprResultType>();
 
             if (!ptr)
             {
@@ -430,7 +431,8 @@ void Foam::fv::SemiImplicitSource<Type>::addSup
             // Restore dimension checking
             dimensionSet::checking(oldDimChecking);
 
-            const ExprResultType* ptr = driver.isResultType<ExprResultType>();
+            const ExprResultType* ptr =
+                driver.template isResultType<ExprResultType>();
 
             if (!ptr)
             {
