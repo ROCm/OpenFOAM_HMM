@@ -34,29 +34,31 @@ License
 
 namespace Foam
 {
-    namespace coordinateRotations
-    {
-        defineTypeName(axes);
+namespace coordinateRotations
+{
 
-        // Standard short name
-        addNamedToRunTimeSelectionTable
-        (
-            coordinateRotation,
-            axes,
-            dictionary,
-            axes
-        );
+    defineTypeName(axes);
 
-        // Longer name - Compat 1806
-        addNamedToRunTimeSelectionTable
-        (
-            coordinateRotation,
-            axes,
-            dictionary,
-            axesRotation
-        );
-    }
-}
+    // Standard short name
+    addNamedToRunTimeSelectionTable
+    (
+        coordinateRotation,
+        axes,
+        dictionary,
+        axes
+    );
+
+    // Longer name - Compat 1806
+    addNamedToRunTimeSelectionTable
+    (
+        coordinateRotation,
+        axes,
+        dictionary,
+        axesRotation
+    );
+
+} // End namespace coordinateRotations
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //

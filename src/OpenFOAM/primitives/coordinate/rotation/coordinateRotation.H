@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,8 +58,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef coordinateRotation_H
-#define coordinateRotation_H
+#ifndef Foam_coordinateRotation_H
+#define Foam_coordinateRotation_H
 
 #include "autoPtr.H"
 #include "vector.H"

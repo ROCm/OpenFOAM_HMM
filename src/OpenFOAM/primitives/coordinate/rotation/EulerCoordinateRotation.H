@@ -47,19 +47,24 @@ Description
 
     \heading Dictionary entries
     \table
-        Property    | Description                           | Required | Default
-        type        | Type name: euler (or EulerRotation)   | yes   |
-        angles      | The z-x-z rotation angles             | yes   |
-        degrees     | Angles are in degrees                 | no    | true
+        Property    | Description                           | Reqd | Default
+        type        | Type name: euler (or EulerRotation)   | yes  |
+        angles      | Rotation angles (usually z-x-z order) | yes  |
+        degrees     | Angles are in degrees                 | no   | true
+        order       | Rotation order                        | no   | zxz
     \endtable
+
+Note
+    The rotation order is usually z-x-z, but can also be something like
+    "rollPitchYaw" etc.
 
 SourceFiles
     EulerCoordinateRotation.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef coordinateRotations_euler_H
-#define coordinateRotations_euler_H
+#ifndef Foam_coordinateRotations_euler_H
+#define Foam_coordinateRotations_euler_H
 
 #include "coordinateRotation.H"
 #include "quaternion.H"
@@ -139,11 +144,11 @@ public:
 
     // Static Member Functions
 
-        //- The rotation tensor calculated for the intrinsic Euler
+        //- Rotation tensor calculated for the intrinsic Euler
         //- angles in z-x-z order
         static tensor rotation(const vector& angles, bool degrees=false);
 
-        //- The rotation tensor calculated for given angles and order
+        //- Rotation tensor calculated for given order and angles
         static tensor rotation
         (
             const eulerOrder order,

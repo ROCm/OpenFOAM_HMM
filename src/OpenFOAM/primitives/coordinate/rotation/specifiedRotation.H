@@ -43,8 +43,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef coordinateRotations_specified_H
-#define coordinateRotations_specified_H
+#ifndef Foam_coordinateRotations_specified_H
+#define Foam_coordinateRotations_specified_H
 
 #include "coordinateRotation.H"
 

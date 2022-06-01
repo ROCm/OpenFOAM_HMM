@@ -33,17 +33,19 @@ License
 
 namespace Foam
 {
-    namespace coordinateRotations
-    {
-        defineTypeName(identity);
-        addToRunTimeSelectionTable
-        (
-            coordinateRotation,
-            identity,
-            dictionary
-        );
-    }
-}
+namespace coordinateRotations
+{
+
+    defineTypeName(identity);
+    addToRunTimeSelectionTable
+    (
+        coordinateRotation,
+        identity,
+        dictionary
+    );
+
+} // End namespace coordinateRotations
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

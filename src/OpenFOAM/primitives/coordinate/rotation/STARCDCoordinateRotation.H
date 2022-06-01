@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,8 +57,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef coordinateRotations_starcd_H
-#define coordinateRotations_starcd_H
+#ifndef Foam_coordinateRotations_starcd_H
+#define Foam_coordinateRotations_starcd_H
 
 #include "coordinateRotation.H"
 
@@ -124,7 +124,7 @@ public:
 
     // Static Member Functions
 
-        //- The rotation tensor calculated for the specified STARCD angles
+        //- Rotation tensor calculated for the specified STARCD angles
         //- interpreted as rotate-Z, rotate-X, rotate-Y
         static tensor rotation(const vector& angles, bool degrees);
 
@@ -142,7 +142,6 @@ public:
 
         //- Write dictionary entry
         virtual void writeEntry(const word& keyword, Ostream& os) const;
-
 };
 
 

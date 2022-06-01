@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,36 +27,38 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "STARCDCoordinateRotation.H"
-#include "unitConversion.H"
+#include "EulerCoordinateRotation.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    namespace coordinateRotations
-    {
-        defineTypeName(starcd);
+namespace coordinateRotations
+{
 
-        // Standard short name
-        addNamedToRunTimeSelectionTable
-        (
-            coordinateRotation,
-            starcd,
-            dictionary,
-            starcd
-        );
+    defineTypeName(starcd);
 
-        // Longer name - Compat 1806
-        addNamedToRunTimeSelectionTable
-        (
-            coordinateRotation,
-            starcd,
-            dictionary,
-            STARCDRotation
-        );
-    }
-}
+    // Standard short name
+    addNamedToRunTimeSelectionTable
+    (
+        coordinateRotation,
+        starcd,
+        dictionary,
+        starcd
+    );
+
+    // Longer name - Compat 1806
+    addNamedToRunTimeSelectionTable
+    (
+        coordinateRotation,
+        starcd,
+        dictionary,
+        STARCDRotation
+    );
+
+} // End namespace coordinateRotation
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
@@ -67,28 +69,7 @@ Foam::tensor Foam::coordinateRotations::starcd::rotation
     bool degrees
 )
 {
-    scalar z = angles.component(vector::X);    // 1. Rotate about Z
-    scalar x = angles.component(vector::Y);    // 2. Rotate about X
-    scalar y = angles.component(vector::Z);    // 3. Rotate about Y
-
-    if (degrees)
-    {
-        x *= degToRad();
-        y *= degToRad();
-        z *= degToRad();
-    }
-
-    const scalar cx = cos(x);  const scalar sx = sin(x);
-    const scalar cy = cos(y);  const scalar sy = sin(y);
-    const scalar cz = cos(z);  const scalar sz = sin(z);
-
-    return
-        tensor
-        (
-            cy*cz - sx*sy*sz, -cx*sz,  sx*cy*sz + sy*cz,
-            cy*sz + sx*sy*cz,  cx*cz,  sy*sz - sx*cy*cz,
-            -cx*sy,            sx,     cx*cy
-        );
+    return euler::rotation(euler::eulerOrder::ZXY, angles, degrees);
 }
 
 

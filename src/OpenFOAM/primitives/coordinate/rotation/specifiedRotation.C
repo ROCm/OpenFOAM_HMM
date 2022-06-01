@@ -39,8 +39,8 @@ namespace coordinateRotations
 defineTypeName(specified);
 //FUTURE addToRunTimeSelectionTable(coordinateRotation, specified, dictionary);
 
-}
-}
+} // End namespace coordinateRotations
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

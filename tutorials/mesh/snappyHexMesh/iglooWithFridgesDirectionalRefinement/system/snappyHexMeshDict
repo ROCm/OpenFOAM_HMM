@@ -60,9 +60,9 @@ geometry
                 {
                     type    cartesian;
                     origin  (2 2 0);
-                    coordinateRotation
+                    rotation
                     {
-                        type    axesRotation;
+                        type    axes;
                         e1      (1 0 0);
                         e3      (0 0 1);
                     }

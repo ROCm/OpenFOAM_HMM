@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,17 +35,19 @@ License
 
 namespace Foam
 {
-    namespace coordinateRotations
-    {
-        defineTypeName(axisAngle);
-        addToRunTimeSelectionTable
-        (
-            coordinateRotation,
-            axisAngle,
-            dictionary
-        );
-    }
-}
+namespace coordinateRotations
+{
+
+    defineTypeName(axisAngle);
+    addToRunTimeSelectionTable
+    (
+        coordinateRotation,
+        axisAngle,
+        dictionary
+    );
+
+} // End namespace coordinateRotation
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -74,6 +76,20 @@ Foam::tensor Foam::coordinateRotations::axisAngle::rotation
     }
 
     return quaternion(axis, (degrees ? degToRad(angle) : angle)).R();
+}
+
+
+Foam::tensor Foam::coordinateRotations::axisAngle::rotation
+(
+    const vector::components axis,
+    const scalar angle,
+    bool degrees
+)
+{
+    vector rotAxis(Zero);
+    rotAxis[axis] = 1;
+
+    return axisAngle::rotation(rotAxis, angle, degrees);
 }
 
 

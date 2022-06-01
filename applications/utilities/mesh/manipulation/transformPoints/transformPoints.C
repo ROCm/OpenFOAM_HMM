@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,6 +52,15 @@ Usage
 
     -rotate-angle (vector angle)
         Rotate angle degrees about vector axis.
+
+    -rotate-x angle
+        Rotate (degrees) about x-axis.
+
+    -rotate-y angle
+        Rotate (degrees) about y-axis.
+
+    -rotate-z angle
+        Rotate (degrees) about z-axis.
 
      or -yawPitchRoll (yawdegrees pitchdegrees rolldegrees)
      or -rollPitchYaw (rolldegrees pitchdegrees yawdegrees)
@@ -277,8 +286,23 @@ int main(int argc, char *argv[])
     argList::addOption
     (
         "rotate-angle",
-        "(vector scalar)",
+        "(vector angle)",
         "Rotate <angle> degrees about <vector> - eg, '((1 0 0) 45)'"
+    );
+    argList::addOption
+    (
+        "rotate-x", "deg",
+        "Rotate (degrees) about x-axis"
+    );
+    argList::addOption
+    (
+        "rotate-y", "deg",
+        "Rotate (degrees) about y-axis"
+    );
+    argList::addOption
+    (
+        "rotate-z", "deg",
+        "Rotate (degrees) about z-axis"
     );
     argList::addOption
     (
@@ -316,15 +340,18 @@ int main(int argc, char *argv[])
     // Verify that an operation has been specified
     {
         const List<word> operationNames
-        {
+        ({
             "recentre",
             "translate",
             "rotate",
             "rotate-angle",
+            "rotate-x",
+            "rotate-y",
+            "rotate-z",
             "rollPitchYaw",
             "yawPitchRoll",
             "scale"
-        };
+        });
 
         if (!args.count(operationNames))
         {
@@ -424,6 +451,12 @@ int main(int argc, char *argv[])
             points -= origin;
         }
 
+
+        // Get a rotation specification
+
+        tensor rot(Zero);
+        bool useRotation(false);
+
         if (args.found("rotate"))
         {
             Pair<vector> n1n2
@@ -433,15 +466,8 @@ int main(int argc, char *argv[])
             n1n2[0].normalise();
             n1n2[1].normalise();
 
-            const tensor rot(rotationTensor(n1n2[0], n1n2[1]));
-
-            Info<< "Rotating points by " << rot << endl;
-            points = transform(rot, points);
-
-            if (doRotateFields)
-            {
-                rotateFields(regionName, runTime, rot);
-            }
+            rot = rotationTensor(n1n2[0], n1n2[1]);
+            useRotation = true;
         }
         else if (args.found("rotate-angle"))
         {
@@ -457,15 +483,35 @@ int main(int argc, char *argv[])
                 << "    about " << axis << nl
                 << "    angle " << angle << nl;
 
-            const tensor rot(axisAngle::rotation(axis, angle, true));
+            rot = axisAngle::rotation(axis, angle, true);
+            useRotation = true;
+        }
+        else if (args.found("rotate-x"))
+        {
+            const scalar angle = args.get<scalar>("rotate-x");
 
-            Info<< "Rotating points by " << rot << endl;
-            points = transform(rot, points);
+            Info<< "Rotating points about x-axis: " << angle << nl;
 
-            if (doRotateFields)
-            {
-                rotateFields(regionName, runTime, rot);
-            }
+            rot = axisAngle::rotation(vector::X, angle, true);
+            useRotation = true;
+        }
+        else if (args.found("rotate-y"))
+        {
+            const scalar angle = args.get<scalar>("rotate-y");
+
+            Info<< "Rotating points about y-axis: " << angle << nl;
+
+            rot = axisAngle::rotation(vector::Y, angle, true);
+            useRotation = true;
+        }
+        else if (args.found("rotate-z"))
+        {
+            const scalar angle = args.get<scalar>("rotate-z");
+
+            Info<< "Rotating points about z-axis: " << angle << nl;
+
+            rot = axisAngle::rotation(vector::Z, angle, true);
+            useRotation = true;
         }
         else if (args.readIfPresent("rollPitchYaw", v))
         {
@@ -474,15 +520,8 @@ int main(int argc, char *argv[])
                 << "    pitch " << v.y() << nl
                 << "    yaw   " << v.z() << nl;
 
-            const tensor rot(euler::rotation(euler::eulerOrder::XYZ, v, true));
-
-            Info<< "Rotating points by " << rot << endl;
-            points = transform(rot, points);
-
-            if (doRotateFields)
-            {
-                rotateFields(regionName, runTime, rot);
-            }
+            rot = euler::rotation(euler::eulerOrder::ROLL_PITCH_YAW, v, true);
+            useRotation = true;
         }
         else if (args.readIfPresent("yawPitchRoll", v))
         {
@@ -491,10 +530,14 @@ int main(int argc, char *argv[])
                 << "    pitch " << v.y() << nl
                 << "    roll  " << v.z() << nl;
 
-            const tensor rot(euler::rotation(euler::eulerOrder::ZYX, v, true));
+            rot = euler::rotation(euler::eulerOrder::YAW_PITCH_ROLL, v, true);
+            useRotation = true;
+        }
 
+        if (useRotation)
+        {
             Info<< "Rotating points by " << rot << endl;
-            points = transform(rot, points);
+            transform(points, rot, points);
 
             if (doRotateFields)
             {

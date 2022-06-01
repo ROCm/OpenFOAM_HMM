@@ -10,7 +10,7 @@ runApplication blockMesh
 runApplication mergeMeshes . ../cylinderMesh -overwrite
 
 ## Make it a bit smaller to keep it laminar
-#runApplication transformPoints -scale '(0.001 0.001 0.001)'
+#runApplication transformPoints -scale 0.001
 
 # Select cellSets for the different zones
 runApplication topoSet

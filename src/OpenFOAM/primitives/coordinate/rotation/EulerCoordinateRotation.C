@@ -34,29 +34,31 @@ License
 
 namespace Foam
 {
-    namespace coordinateRotations
-    {
-        defineTypeName(euler);
+namespace coordinateRotations
+{
 
-        // Standard short name
-        addNamedToRunTimeSelectionTable
-        (
-            coordinateRotation,
-            euler,
-            dictionary,
-            euler
-        );
+    defineTypeName(euler);
 
-        // Longer name - Compat 1806
-        addNamedToRunTimeSelectionTable
-        (
-            coordinateRotation,
-            euler,
-            dictionary,
-            EulerRotation
-        );
-    }
-}
+    // Standard short name
+    addNamedToRunTimeSelectionTable
+    (
+        coordinateRotation,
+        euler,
+        dictionary,
+        euler
+    );
+
+    // Longer name - Compat 1806
+    addNamedToRunTimeSelectionTable
+    (
+        coordinateRotation,
+        euler,
+        dictionary,
+        EulerRotation
+    );
+
+} // End namespace coordinateRotations
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
@@ -68,9 +70,9 @@ Foam::tensor Foam::coordinateRotations::euler::rotation
     bool degrees
 )
 {
-    scalar angle1(angles.component(vector::X)); // Rotation #1
-    scalar angle2(angles.component(vector::Y)); // Rotation #2
-    scalar angle3(angles.component(vector::Z)); // Rotation #3
+    scalar angle1(angles.x());  // Rotation #1
+    scalar angle2(angles.y());  // Rotation #2
+    scalar angle3(angles.z());  // Rotation #3
 
     if (degrees)
     {
@@ -156,7 +158,7 @@ Foam::tensor Foam::coordinateRotations::euler::rotation
         }
 
 
-            // Tait-Bryan angles
+        // Tait-Bryan angles
 
         case eulerOrder::XZY:  // X1-Z2-Y3 rotation
         {
@@ -228,10 +230,9 @@ Foam::tensor Foam::coordinateRotations::euler::rotation
             FatalErrorInFunction
                 << "Unknown euler rotation order "
                 << int(order) << abort(FatalError);
-            break;
     }
 
-    return tensor::I;
+    return sphericalTensor::I;  // identity rotation
 }
 
 
@@ -321,7 +322,7 @@ void Foam::coordinateRotations::euler::clear()
 
 Foam::tensor Foam::coordinateRotations::euler::R() const
 {
-    return euler::rotation(angles_, degrees_);
+    return euler::rotation(order_, angles_, degrees_);
 }
 
 

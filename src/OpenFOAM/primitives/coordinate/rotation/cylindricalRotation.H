@@ -34,10 +34,10 @@ Description
 
     \heading Dictionary entries
     \table
-        Property    | Description                           | Required | Default
-        type        | Type name: cylindrical                | yes   |
-        axis        | The z-axis                            | yes   |
-        e3          | Alias for 'axis'                      | no    |
+        Property    | Description                           | Reqd | Default
+        type        | Type name: cylindrical                | yes  |
+        axis        | The z-axis                            | yes  |
+        e3          | Alias for 'axis'                      | no   |
     \endtable
 
 SourceFiles
@@ -45,8 +45,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef coordinateRotations_cylindrical_H
-#define coordinateRotations_cylindrical_H
+#ifndef Foam_coordinateRotations_cylindrical_H
+#define Foam_coordinateRotations_cylindrical_H
 
 #include "axesRotation.H"
 

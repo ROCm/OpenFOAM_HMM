@@ -61,8 +61,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef coordinateRotations_axes_H
-#define coordinateRotations_axes_H
+#ifndef Foam_coordinateRotations_axes_H
+#define Foam_coordinateRotations_axes_H
 
 #include "coordinateRotation.H"
 

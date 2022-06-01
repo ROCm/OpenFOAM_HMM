@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,23 +41,23 @@ Description
 
     \heading Dictionary entries
     \table
-        Property    | Description                           | Required | Default
-        type        | Type name: axisAngle                  | yes   |
-        axis        | Axis of rotation (vector)             | yes   |
-        angle       | Rotation angle                        | yes   |
-        degrees     | The angle is in degrees               | no    | true
+        Property    | Description                           | Reqd | Default
+        type        | Type name: axisAngle                  | yes  |
+        axis        | Axis of rotation (vector)             | yes  |
+        angle       | Rotation angle                        | yes  |
+        degrees     | The angle is in degrees               | no   | true
     \endtable
 
 Note
-    The rotation axis will be normalized internally.
+    The rotation axis is normalized internally.
 
 SourceFiles
     axisAngleRotation.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef coordinateRotations_axisAngle_H
-#define coordinateRotations_axisAngle_H
+#ifndef Foam_coordinateRotations_axisAngle_H
+#define Foam_coordinateRotations_axisAngle_H
 
 #include "coordinateRotation.H"
 
@@ -136,6 +136,14 @@ public:
         static tensor rotation
         (
             const vector& axis,
+            const scalar angle,
+            bool degrees=false
+        );
+
+        //- Rotation tensor calculated for given axis and angle
+        static tensor rotation
+        (
+            const vector::components axis,
             const scalar angle,
             bool degrees=false
         );

@@ -97,8 +97,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef coordinateSystem_H
-#define coordinateSystem_H
+#ifndef Foam_coordinateSystem_H
+#define Foam_coordinateSystem_H
 
 #include "vector.H"
 #include "point.H"

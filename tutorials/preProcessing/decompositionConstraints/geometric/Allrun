@@ -9,7 +9,7 @@ mkdir -p constant/triSurface
 runApplication surfaceTransformPoints \
     -translate '(0 0 5)' \
     -origin '(0 0 5)' \
-    -rotate-angle '((1 0 0) 45)' \
+    -rotate-x 45 \
     "$FOAM_TUTORIALS"/resources/geometry/blob.stl.gz \
     constant/triSurface/blob.obj
 

@@ -32,17 +32,19 @@ License
 
 namespace Foam
 {
-    namespace coordinateRotations
-    {
-        defineTypeName(cylindrical);
-        addToRunTimeSelectionTable
-        (
-            coordinateRotation,
-            cylindrical,
-            dictionary
-        );
-    }
-}
+namespace coordinateRotations
+{
+
+    defineTypeName(cylindrical);
+    addToRunTimeSelectionTable
+    (
+        coordinateRotation,
+        cylindrical,
+        dictionary
+    );
+
+} // End namespace coordinateRotations
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //

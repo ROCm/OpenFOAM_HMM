@@ -38,8 +38,8 @@ Description
 
     \heading Dictionary entries
     \table
-        Property    | Description                           | Required | Default
-        type        | Type name: none                       | yes      |
+        Property    | Description                           | Reqd | Default
+        type        | Type name: none                       | yes  |
     \endtable
 
 SourceFiles
@@ -47,8 +47,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef coordinateRotations_identity_H
-#define coordinateRotations_identity_H
+#ifndef Foam_coordinateRotations_identity_H
+#define Foam_coordinateRotations_identity_H
 
 #include "coordinateRotation.H"
 
