@@ -238,7 +238,7 @@ Foam::radiation::greyMeanAbsorptionEmission::aCont(const label bandI) const
                     invWt += mixture.Y(s)[celli]/mixture.W(s);
                 }
 
-                label index = mixture.species()[iter.key()];
+                const label index = mixture.species().find(iter.key());
                 scalar Xk = mixture.Y(index)[celli]/(mixture.W(index)*invWt);
 
                 Xipi = Xk*paToAtm(p[celli]);

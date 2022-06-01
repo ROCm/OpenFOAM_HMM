@@ -53,13 +53,13 @@ inline Foam::LangmuirHinshelwoodReactionRate::LangmuirHinshelwoodReactionRate
 
 inline Foam::LangmuirHinshelwoodReactionRate::LangmuirHinshelwoodReactionRate
 (
-    const speciesTable& st,
+    const speciesTable& species,
     const dictionary& dict
 )
 :
-    co_(st["CO"]),
-    c3h6_(st["C3H6"]),
-    no_(st["NO"])
+    co_(species.find("CO")),
+    c3h6_(species.find("C3H6")),
+    no_(species.find("NO"))
 {
     // read (A, Ta) pairs
     FixedList<Tuple2<scalar, scalar>, n_> coeffs(dict.lookup("coeffs"));

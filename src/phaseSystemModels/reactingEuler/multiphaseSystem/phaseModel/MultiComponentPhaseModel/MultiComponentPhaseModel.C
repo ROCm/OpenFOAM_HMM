@@ -63,14 +63,14 @@ Foam::MultiComponentPhaseModel<BasePhaseModel>::MultiComponentPhaseModel
     ),
     inertIndex_(-1)
 {
-    const word inertSpecie
+    word inertSpecie;
+    if
     (
-        this->thermo_->getOrDefault("inertSpecie", word::null)
-    );
-
-    if (inertSpecie != word::null)
+        this->thermo_->readIfPresent("inertSpecie", inertSpecie)
+     && !inertSpecie.empty()
+    )
     {
-        inertIndex_ = this->thermo_->composition().species()[inertSpecie];
+        inertIndex_ = this->thermo_->composition().species().find(inertSpecie);
     }
 
     PtrList<volScalarField>& Y = this->thermo_->composition().Y();

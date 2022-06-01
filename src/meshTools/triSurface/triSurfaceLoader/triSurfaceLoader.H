@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,20 +39,20 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef triSurfaceLoader_H
-#define triSurfaceLoader_H
+#ifndef Foam_triSurfaceLoader_H
+#define Foam_triSurfaceLoader_H
 
 #include "triSurface.H"
 #include "wordRes.H"
 #include "Enum.H"
-#include "hashedWordList.H"
+#include "wordList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class triSurfaceLoader;
 class Time;
 
@@ -79,16 +79,16 @@ public:
 
 private:
 
-    // Private data
+    // Private Data
 
         //- The directory to load from (eg, case/constant/triSurface)
         fileName directory_;
 
         //- All available files
-        hashedWordList available_;
+        wordList available_;
 
         //- Selected files
-        hashedWordList selected_;
+        wordList selected_;
 
 
     // Private Member Functions
@@ -119,19 +119,19 @@ public:
       // Access
 
         //- The directory being used
-        inline const fileName& directory() const
+        const fileName& directory() const noexcept
         {
             return directory_;
         }
 
         //- The list of available files
-        inline const hashedWordList& available() const
+        const wordList& available() const noexcept
         {
             return available_;
         }
 
         //- The list of selected files
-        inline const hashedWordList& selected() const
+        const wordList& selected() const noexcept
         {
             return selected_;
         }
@@ -163,7 +163,6 @@ public:
             const enum loadingOption opt = loadingOption::OFFSET_REGION,
             const scalar scaleFactor = -1
         ) const;
-
 };
 
 

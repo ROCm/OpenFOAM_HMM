@@ -75,8 +75,8 @@ NonRandomTwoLiquid
     species1Name_ = this->speciesNames_[0];
     species2Name_ = this->speciesNames_[1];
 
-    species1Index_ = this->thermo_.composition().species()[species1Name_];
-    species2Index_ = this->thermo_.composition().species()[species2Name_];
+    species1Index_ = this->thermo_.composition().species().find(species1Name_);
+    species2Index_ = this->thermo_.composition().species().find(species2Name_);
 
     alpha12_.read("alpha", dict.subDict(species1Name_));
     alpha21_.read("alpha", dict.subDict(species2Name_));

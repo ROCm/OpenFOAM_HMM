@@ -74,7 +74,7 @@ MultiComponentPhaseModel
 
     species_ = thermoPtr_->composition().species();
 
-    inertIndex_ = species_[thermoPtr_().template get<word>("inertSpecie")];
+    inertIndex_ = species_.find(thermoPtr_().template get<word>("inertSpecie"));
 
     X_.setSize(thermoPtr_->composition().species().size());
 

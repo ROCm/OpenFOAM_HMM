@@ -224,7 +224,7 @@ Foam::Reaction<ReactionThermo>::specieCoeffs::specieCoeffs
         }
 
         // Lookup specie name: -1 if not found
-        index = species[specieName];
+        index = species.find(specieName);
 
         if (failUnknownSpecie && index < 0)
         {

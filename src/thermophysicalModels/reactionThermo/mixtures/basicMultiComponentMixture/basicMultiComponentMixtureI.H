@@ -99,7 +99,7 @@ inline Foam::volScalarField& Foam::basicMultiComponentMixture::Y
     const word& specieName
 )
 {
-    return Y_[species_[specieName]];
+    return Y_[species_.find(specieName)];
 }
 
 
@@ -108,7 +108,7 @@ inline const Foam::volScalarField& Foam::basicMultiComponentMixture::Y
     const word& specieName
 ) const
 {
-    return Y_[species_[specieName]];
+    return Y_[species_.find(specieName)];
 }
 
 

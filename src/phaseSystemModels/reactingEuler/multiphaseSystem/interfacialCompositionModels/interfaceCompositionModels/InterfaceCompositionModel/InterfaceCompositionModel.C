@@ -46,10 +46,7 @@ Foam::InterfaceCompositionModel<Thermo, OtherThermo>::getLocalThermo
     return
         globalThermo.getLocalThermo
         (
-            globalThermo.species()
-            [
-                speciesName
-            ]
+            globalThermo.species().find(speciesName)
         );
 }
 
@@ -109,7 +106,7 @@ Foam::InterfaceCompositionModel<Thermo, OtherThermo>::dY
         Yf(speciesName, Tf)
       - thermo_.composition().Y()
         [
-            thermo_.composition().species()[speciesName]
+            thermo_.composition().species().find(speciesName)
         ];
 }
 

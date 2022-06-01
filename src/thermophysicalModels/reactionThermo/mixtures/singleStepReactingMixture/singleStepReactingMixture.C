@@ -60,7 +60,7 @@ void Foam::singleStepReactingMixture<ThermoType>::calculateqFuel()
 template<class ThermoType>
 void Foam::singleStepReactingMixture<ThermoType>::massAndAirStoichRatios()
 {
-    const label O2Index = this->species()["O2"];
+    const label O2Index = this->species().find("O2");
     const scalar Wu = this->speciesData()[fuelIndex_].W();
 
     stoicRatio_ =
@@ -136,7 +136,7 @@ void Foam::singleStepReactingMixture<ThermoType>::fresCorrect()
 {
     const Reaction<ThermoType>& reaction = this->operator[](0);
 
-    const label O2Index = this->species()["O2"];
+    const label O2Index = this->species().find("O2");
     const volScalarField& YFuel = this->Y()[fuelIndex_];
     const volScalarField& YO2 = this->Y()[O2Index];
 
@@ -204,8 +204,8 @@ Foam::singleStepReactingMixture<ThermoType>::singleStepReactingMixture
     specieStoichCoeffs_(this->species_.size(), Zero),
     Yprod0_(this->species_.size(), Zero),
     fres_(Yprod0_.size()),
-    inertIndex_(this->species()[thermoDict.get<word>("inertSpecie")]),
-    fuelIndex_(this->species()[thermoDict.get<word>("fuel")]),
+    inertIndex_(this->species().find(thermoDict.get<word>("inertSpecie"))),
+    fuelIndex_(this->species().find(thermoDict.get<word>("fuel"))),
     specieProd_(Yprod0_.size(), 1)
 {
     if (this->size() == 1)

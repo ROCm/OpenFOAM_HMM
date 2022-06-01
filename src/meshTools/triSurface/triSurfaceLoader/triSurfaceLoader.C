@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -88,7 +88,7 @@ Foam::label Foam::triSurfaceLoader::readDir()
             names.insert(f.name());
         }
     }
-    available_ = names.sortedToc();     // Also hashes the names
+    available_ = names.sortedToc();
 
     return available_.size();
 }
@@ -105,7 +105,8 @@ Foam::label Foam::triSurfaceLoader::select(const word& name)
 {
     if (available_.found(name))
     {
-        selected_ = wordList{name};  // hashedWordList::operator[] is hidden!
+        selected_.resize(1);
+        selected_.first() = name;
     }
     else
     {
@@ -118,30 +119,25 @@ Foam::label Foam::triSurfaceLoader::select(const word& name)
 
 Foam::label Foam::triSurfaceLoader::select(const wordRe& mat)
 {
-    DynamicList<label> foundIds(available_.size());
-
     if (mat.isPattern())
     {
-        foundIds = findStrings(mat, available_);
-        sort(foundIds);
+        labelList foundIds = findStrings(mat, available_);
+        Foam::sort(foundIds);
+        selected_ = wordList(available_, foundIds);
+    }
+    else if (available_.found(static_cast<const word&>(mat)))
+    {
+        selected_.resize(1);
+        selected_.first() = mat;
     }
     else
     {
-        const word& plain = mat;
-        if (available_.found(plain))
-        {
-            foundIds.append(available_[plain]);
-        }
-        else
-        {
-            FatalErrorInFunction
-                << "Specified the surfaces " << mat << nl
-                << "  - but could not find it"
-                << exit(FatalError);
-        }
+        FatalErrorInFunction
+            << "Specified the surfaces " << mat << nl
+            << "  - but could not find it"
+            << exit(FatalError);
     }
 
-    selected_ = wordList(available_, foundIds);
     return selected_.size();
 }
 
@@ -158,7 +154,7 @@ Foam::label Foam::triSurfaceLoader::select(const UList<wordRe>& matcher)
     DynamicList<label> foundIds(available_.size());
     labelHashSet hashedFound(2*available_.size());
 
-    DynamicList<word>  missing(matcher.size());
+    DynamicList<word> missing(matcher.size());
     wordHashSet hashedMissing(2*matcher.size());
 
     // Exact matches must exist
@@ -167,7 +163,7 @@ Foam::label Foam::triSurfaceLoader::select(const UList<wordRe>& matcher)
         if (mat.isPattern())
         {
             labelList indices = findStrings(mat, available_);
-            sort(indices);
+            Foam::sort(indices);
 
             for (const label idx : indices)
             {
@@ -180,9 +176,10 @@ Foam::label Foam::triSurfaceLoader::select(const UList<wordRe>& matcher)
         else
         {
             const word& plain = mat;
-            if (available_.found(plain))
+            const label idx = available_.find(plain);
+
+            if (idx >= 0)
             {
-                const label idx = available_[plain];
                 if (hashedFound.insert(idx))
                 {
                     foundIds.append(idx);
@@ -240,7 +237,7 @@ Foam::autoPtr<Foam::triSurface> Foam::triSurfaceLoader::load
 
             if (surf.patches().size())
             {
-                surf.patches().setSize(1);
+                surf.patches().resize(1);
             }
             else
             {

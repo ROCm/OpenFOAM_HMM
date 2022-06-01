@@ -47,10 +47,7 @@ Foam::InterfaceCompositionModel<Thermo, OtherThermo>::getLocalThermo
     return
         globalThermo.getLocalThermo
         (
-            globalThermo.species()
-            [
-                speciesName
-            ]
+            globalThermo.species().find(speciesName)
         );
 }
 

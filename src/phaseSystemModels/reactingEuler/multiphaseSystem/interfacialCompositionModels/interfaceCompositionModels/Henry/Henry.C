@@ -84,10 +84,10 @@ Foam::interfaceCompositionModels::Henry<Thermo, OtherThermo>::Yf
     const volScalarField& Tf
 ) const
 {
-    if (this->speciesNames_.found(speciesName))
-    {
-        const label index = this->speciesNames_[speciesName];
+    const label index = this->speciesNames_.find(speciesName);
 
+    if (index >= 0)
+    {
         return
             k_[index]
            *this->otherThermo_.composition().Y(speciesName)

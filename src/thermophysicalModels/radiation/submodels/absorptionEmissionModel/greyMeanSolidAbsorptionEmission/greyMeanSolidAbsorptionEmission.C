@@ -73,7 +73,7 @@ greyMeanSolidAbsorptionEmission::X(const word specie) const
         }
     }
     const scalarField& Yj = mixture_.Y(specie);
-    const label mySpecieI = mixture_.species()[specie];
+    const label mySpecieI = mixture_.species().find(specie);
     forAll(Xj, iCell)
     {
         Xj[iCell] = Yj[iCell]/mixture_.rho(mySpecieI, p[iCell], T[iCell]);
@@ -166,7 +166,7 @@ calc(const label propertyId) const
     {
         if (mixture_.contains(iter.key()))
         {
-            a += solidData_[iter()][propertyId]*X(iter.key());
+            a += solidData_[iter.val()][propertyId]*X(iter.key());
         }
     }
 

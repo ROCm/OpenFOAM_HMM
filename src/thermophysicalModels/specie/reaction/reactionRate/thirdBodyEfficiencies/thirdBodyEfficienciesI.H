@@ -41,7 +41,7 @@ inline Foam::thirdBodyEfficiencies::thirdBodyEfficiencies
     if (size() != species_.size())
     {
         FatalErrorInFunction
-            << "number of efficiencies = " << size()
+            << "Number of efficiencies = " << size()
             << " is not equal to the number of species " << species_.size()
             << exit(FatalError);
     }
@@ -63,14 +63,24 @@ inline Foam::thirdBodyEfficiencies::thirdBodyEfficiencies
         if (coeffs.size() != species_.size())
         {
             FatalIOErrorInFunction(dict)
-                << "number of efficiencies = " << coeffs.size()
-                << " is not equat to the number of species " << species_.size()
+                << "Number of efficiencies = " << coeffs.size()
+                << " is not equal to the number of species " << species_.size()
                 << exit(FatalIOError);
         }
 
-        forAll(coeffs, i)
+        for (const auto& coeff : coeffs)
         {
-            operator[](species[coeffs[i].first()]) = coeffs[i].second();
+            const label idx = species.find(coeff.first());
+
+            if (idx < 0)
+            {
+                FatalIOErrorInFunction(dict)
+                    << "No such species: " << coeffs.first()
+                    << ", available: " << flatOutput(species) << endl
+                    << exit(FatalIOError);
+            }
+
+            operator[](idx) = coeff.second();
         }
     }
     else

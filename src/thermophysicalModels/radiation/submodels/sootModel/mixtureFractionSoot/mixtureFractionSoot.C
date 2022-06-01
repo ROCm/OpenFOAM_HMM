@@ -133,7 +133,7 @@ Foam::radiation::mixtureFractionSoot<ThermoType>::mixtureFractionSoot
         mappingFieldName_ = mixture_.Y(index).name();
     }
 
-    const label mapFieldIndex = mixture_.species()[mappingFieldName_];
+    const label mapFieldIndex = mixture_.species().find(mappingFieldName_);
 
     mapFieldMax_ = mixture_.Yprod0()[mapFieldIndex];
 

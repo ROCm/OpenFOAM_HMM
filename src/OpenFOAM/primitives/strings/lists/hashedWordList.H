@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,8 +37,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef hashedWordList_H
-#define hashedWordList_H
+#ifndef Foam_hashedWordList_H
+#define Foam_hashedWordList_H
 
 #include "wordList.H"
 #include "HashTable.H"
@@ -68,10 +68,10 @@ public:
         //- Default construct an empty list
         hashedWordList() = default;
 
-        //- Copy construct.
+        //- Copy construct
         inline hashedWordList(const hashedWordList& list);
 
-        //- Move construct.
+        //- Move construct
         inline hashedWordList(hashedWordList&& list);
 
         //- Copy construct from list of words
@@ -95,16 +95,8 @@ public:
             const HashTable<AnyType, word, AnyHash>& tbl
         );
 
-        //- Construct from number and list of words,
-        //  optionally eliminating duplicates
-        hashedWordList(const label len, const char** array, bool unique=false);
-
-        //- Construct from a nullptr-terminated list of words,
-        //- optionally eliminating duplicates
-        hashedWordList(const char** array, bool unique=false);
-
         //- Construct from Istream
-        inline hashedWordList(Istream& is);
+        inline explicit hashedWordList(Istream& is);
 
 
     // Member Functions
@@ -112,12 +104,13 @@ public:
         //- Clear the list, i.e. set size to zero.
         inline void clear();
 
-        //- Append an element at the end of the list,
-        //- optionally avoid append if it would be a duplicate entry
-        inline void append(const word& name, bool unique=false);
+        //- Append an element if not already in the list.
+        FOAM_DEPRECATED_FOR(2022-05, "appendUniq method")
+        inline void append(const word& val);
 
-        //- Search hashed values for the specified name
-        inline bool found(const word& name) const;
+        //- Append an element if not already in the list.
+        //  \return the change in list length
+        inline label appendUniq(const word& val);
 
         //- Return the hash of words/indices for inspection
         inline const HashTable<label>& lookup() const;
@@ -143,8 +136,18 @@ public:
         //- and rehash the indices
         void uniq();
 
-        //- Sort the list and rehash the indices
+        //- Inplace sort list and rehash the indices
         inline void sort();
+
+
+    // Search
+
+        //- Find index of the value (searches the hash).
+        //  \return position in list or -1 if not found.
+        inline label find(const word& val) const;
+
+        //- True if the value if found in the list (searches the hash).
+        inline bool found(const word& val) const;
 
 
     // Member Operators
@@ -153,12 +156,13 @@ public:
         //  Fatal for out of range values.
         inline const word& operator[](const label index) const;
 
-        //- Return index corresponding to specified name, or -1 on failure
-        inline label operator[](const word& name) const;
+        //- Find index of the value (searches the hash) - same as find().
+        //  \return position in list or -1 if not found.
+        inline label operator[](const word& val) const;
 
-        //- Check hashed values for the specified name - same as found.
+        //- Check hashed values for the specified name - same as found().
         //  Can be used as a unary predicate.
-        inline bool operator()(const word& name) const;
+        inline bool operator()(const word& val) const;
 
 
     // Assignment
@@ -184,10 +188,7 @@ public:
         //- Deprecated(2019-01) Is the specified name found in the list?
         //  \deprecated(2019-01) - use found() method
         FOAM_DEPRECATED_FOR(2019-01, "found() method")
-        bool contains(const word& name) const
-        {
-            return this->found(name);
-        }
+        bool contains(const word& val) const { return this->found(val); }
 };
 
 

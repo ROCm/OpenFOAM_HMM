@@ -130,7 +130,7 @@ Foam::combustionModels::laminar<ReactionThermo>::R(volScalarField& Y) const
     if (this->active())
     {
         const label specieI =
-            this->thermo().composition().species()[Y.member()];
+            this->thermo().composition().species().find(Y.member());
 
         Su += this->chemistryPtr_->RR(specieI);
     }

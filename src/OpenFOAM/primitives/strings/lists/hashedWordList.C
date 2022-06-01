@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,44 +26,18 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "hashedWordList.H"
-#include "CStringList.H"
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::hashedWordList::hashedWordList
-(
-    const label len,
-    const char** array,
-    bool unique
-)
-:
-    wordList(len)
-{
-    for (label i=0; i < len; ++i)
-    {
-        wordList::operator[](i) = array[i];
-    }
-
-    rehash(unique);
-}
-
-
-Foam::hashedWordList::hashedWordList(const char** array, bool unique)
-:
-    hashedWordList(CStringList::count(array), array, unique)
-{}
-
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::hashedWordList::rehash() const
 {
-    lookup_.clear();
-
     const wordUList& list = *this;
     const label len = list.size();
 
-    for (label i=0; i < len; ++i)
+    lookup_.clear();
+    lookup_.resize(2*len);
+
+    for (label i = 0; i < len; ++i)
     {
         lookup_.insert(list[i], i);
     }
@@ -72,13 +46,15 @@ void Foam::hashedWordList::rehash() const
 
 void Foam::hashedWordList::uniq()
 {
-    lookup_.clear();
-
     wordList& list = *this;
     const label len = list.size();
 
+    lookup_.clear();
+    lookup_.resize(2*len);
+
     label count = 0;
-    for (label i=0; i < len; ++i)
+
+    for (label i = 0; i < len; ++i)
     {
         word& item = list[i];
 

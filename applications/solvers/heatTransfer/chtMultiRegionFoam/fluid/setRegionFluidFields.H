@@ -12,15 +12,15 @@
     if (Y.size())
     {
         const word inertSpecie(thermo.get<word>("inertSpecie"));
-        if (!composition.species().found(inertSpecie))
+        inertIndex = composition.species().find(inertSpecie);
+        if (inertIndex < 0)
         {
             FatalIOErrorIn(args.executable().c_str(), thermo)
                 << "Inert specie " << inertSpecie
                 << " not found in available species "
-                << composition.species()
+                << flatOutput(composition.species())
                 << exit(FatalIOError);
         }
-        inertIndex = composition.species()[inertSpecie];
     }
 
     volScalarField& rho = rhoFluid[i];

@@ -80,8 +80,8 @@ diffusionMulticomponent<ReactionThermo, ThermoType>::init()
         const List<specieCoeffs>& lhs = reactions_[k].lhs();
         const List<specieCoeffs>& rhs = reactions_[k].rhs();
 
-        const label fuelIndex = species[fuelNames_[k]];
-        const label oxidantIndex = species[oxidantNames_[k]];
+        const label fuelIndex = species.find(fuelNames_[k]);
+        const label oxidantIndex = species.find(oxidantNames_[k]);
 
         const scalar Wu = specieThermo_[fuelIndex].W();
         const scalar Wox = specieThermo_[oxidantIndex].W();
@@ -216,7 +216,7 @@ diffusionMulticomponent<ReactionThermo, ThermoType>::correct()
             volScalarField& Rijl = RijlPtr[k];
 
             // Obtain individual reaction rates for each reaction
-            const label fuelIndex = species[fuelNames_[k]];
+            const label fuelIndex = species.find(fuelNames_[k]);
 
             if (laminarIgn_)
             {
@@ -247,8 +247,8 @@ diffusionMulticomponent<ReactionThermo, ThermoType>::correct()
 
         for (label k=0; k < nReactions; k++)
         {
-            const label fuelIndex = species[fuelNames_[k]];
-            const label oxidantIndex = species[oxidantNames_[k]];
+            const label fuelIndex = species.find(fuelNames_[k]);
+            const label oxidantIndex = species.find(oxidantNames_[k]);
 
             const volScalarField& Yfuel =
                 this->thermo().composition().Y(fuelIndex);
@@ -381,7 +381,7 @@ Foam::combustionModels::diffusionMulticomponent<ReactionThermo, ThermoType>::R
     if (this->active())
     {
         const label specieI =
-            this->thermo().composition().species()[Y.member()];
+            this->thermo().composition().species().find(Y.member());
 
         Su += this->chemistryPtr_->RR(specieI);
     }

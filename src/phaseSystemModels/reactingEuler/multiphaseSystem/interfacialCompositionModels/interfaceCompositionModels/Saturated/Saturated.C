@@ -58,7 +58,7 @@ Foam::interfaceCompositionModels::Saturated<Thermo, OtherThermo>::Saturated
     saturatedName_(this->speciesNames_[0]),
     saturatedIndex_
     (
-        this->thermo_.composition().species()[saturatedName_]
+        this->thermo_.composition().species().find(saturatedName_)
     ),
     saturationModel_
     (
@@ -112,7 +112,7 @@ Foam::interfaceCompositionModels::Saturated<Thermo, OtherThermo>::Yf
     {
         const label speciesIndex
         (
-            this->thermo_.composition().species()[speciesName]
+            this->thermo_.composition().species().find(speciesName)
         );
 
         return
@@ -139,7 +139,7 @@ Foam::interfaceCompositionModels::Saturated<Thermo, OtherThermo>::YfPrime
     {
         const label speciesIndex
         (
-            this->thermo_.composition().species()[speciesName]
+            this->thermo_.composition().species().find(speciesName)
         );
 
         return

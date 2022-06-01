@@ -106,7 +106,7 @@ tmp<fvScalarMatrix> singleStepCombustion<ReactionThermo, ThermoType>::R
 ) const
 {
     const label specieI =
-        this->thermo().composition().species()[Y.member()];
+        this->thermo().composition().species().find(Y.member());
 
     volScalarField wSpecie
     (

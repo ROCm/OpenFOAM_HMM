@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -76,17 +76,9 @@ inline Foam::hashedWordList::hashedWordList
     const HashTable<AnyType, word, AnyHash>& tbl
 )
 :
-    wordList(tbl.size())
+    wordList(tbl.sortedToc())
 {
-    wordList& list = *this;
-
-    label count = 0;
-    for (auto iter = tbl.cbegin(); iter != tbl.cend(); ++iter)
-    {
-        list[count++] = iter.key();
-    }
-
-    this->sort();
+    rehash();
 }
 
 
@@ -105,13 +97,24 @@ inline void Foam::hashedWordList::clear()
 }
 
 
-inline void Foam::hashedWordList::append(const word& name, bool unique)
+inline void Foam::hashedWordList::append(const word& val)
 {
-    // name is either unique or we don't care about duplicates
-    if (lookup_.insert(name, size()) || !unique)
+    if (lookup_.insert(val, size()))
     {
-        wordList::append(name);
+        wordList::append(val);
     }
+}
+
+
+inline Foam::label Foam::hashedWordList::appendUniq(const word& val)
+{
+    if (lookup_.insert(val, size()))
+    {
+        wordList::append(val);
+        return 1;  // Increased list length by one
+    }
+
+    return 0;  // No change
 }
 
 
@@ -130,17 +133,15 @@ Foam::hashedWordList::lookup() const
 }
 
 
-// TBD (2019-01-07) - overload find() for consistency?
-//
-// inline Foam::label Foam::hashedWordList::find(const word& name) const
-// {
-//     return lookup().lookup(name, -1);  // -1 = not found or not hashed
-// }
-
-
-inline bool Foam::hashedWordList::found(const word& name) const
+inline Foam::label Foam::hashedWordList::find(const word& val) const
 {
-    return lookup().found(name);
+    return lookup().lookup(val, -1);  // -1 = not found or not hashed
+}
+
+
+inline bool Foam::hashedWordList::found(const word& val) const
+{
+    return lookup().found(val);
 }
 
 
@@ -201,15 +202,15 @@ inline const Foam::word& Foam::hashedWordList::operator[]
 }
 
 
-inline Foam::label Foam::hashedWordList::operator[](const word& name) const
+inline Foam::label Foam::hashedWordList::operator[](const word& val) const
 {
-    return lookup_.lookup(name, -1);  // -1 = not found or not hashed
+    return lookup_.lookup(val, -1);  // -1 = not found or not hashed
 }
 
 
-inline bool Foam::hashedWordList::operator()(const word& name) const
+inline bool Foam::hashedWordList::operator()(const word& val) const
 {
-    return lookup_.found(name);
+    return lookup_.found(val);
 }
 
 

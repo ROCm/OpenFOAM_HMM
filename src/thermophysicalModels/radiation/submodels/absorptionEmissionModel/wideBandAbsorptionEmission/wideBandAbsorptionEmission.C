@@ -249,7 +249,7 @@ Foam::radiation::wideBandAbsorptionEmission::aCont(const label bandi) const
                     invWt += mixture.Y(s)[celli]/mixture.W(s);
                 }
 
-                const label index = mixture.species()[iter.key()];
+                const label index = mixture.species().find(iter.key());
 
                 const scalar Xk =
                     mixture.Y(index)[celli]/(mixture.W(index)*invWt);
