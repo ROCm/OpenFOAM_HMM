@@ -128,7 +128,10 @@ void Foam::displacementMethod::update()
     mesh_.movePoints(tnewPoints());
     scalar timeAft = mesh_.time().elapsedCpuTime();
     Info<< "Mesh movement took " << timeAft - timeBef << " seconds" << endl;
-    mesh_.moving(false);
+    if (!mesh_.steady())
+    {
+        mesh_.moving(false);
+    }
 }
 
 
