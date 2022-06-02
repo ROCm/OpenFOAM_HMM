@@ -234,13 +234,14 @@ void Foam::patchSeedSet::calcSamples
         subset.setSize(myMaxPoints);
 
         // Subset patchFaces
-        patchFaces = labelUIndList(patchFaces, subset)();
 
         if (debug)
         {
-            Pout<< "In random mode : selected " << patchFaces.size()
+            Pout<< "In random mode : selected " << subset.size()
                 << " faces out of " << patchFaces.size() << endl;
         }
+
+        patchFaces = labelUIndList(patchFaces, subset)();
     }
 
 
