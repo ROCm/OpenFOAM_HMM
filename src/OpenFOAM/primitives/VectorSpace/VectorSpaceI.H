@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -837,12 +837,11 @@ inline bool operator==
     const VectorSpace<Form, Cmpt, Ncmpts>& vs2
 )
 {
-    bool eq = true;
     for (direction i=0; i<Ncmpts; ++i)
     {
-        if (!(eq &= (equal(vs1.v_[i], vs2.v_[i])))) break;
+        if (!equal(vs1.v_[i], vs2.v_[i])) return false;
     }
-    return eq;
+    return true;
 }
 
 
@@ -864,12 +863,11 @@ inline bool operator>
     const VectorSpace<Form, Cmpt, Ncmpts>& vs2
 )
 {
-    bool gt = true;
     for (direction i=0; i<Ncmpts; ++i)
     {
-        if (!(gt &= vs1.v_[i] > vs2.v_[i])) break;
+        if (!(vs1.v_[i] > vs2.v_[i])) return false;
     }
-    return gt;
+    return true;
 }
 
 
@@ -880,12 +878,11 @@ inline bool operator<
     const VectorSpace<Form, Cmpt, Ncmpts>& vs2
 )
 {
-    bool lt = true;
     for (direction i=0; i<Ncmpts; ++i)
     {
-        if (!(lt &= vs1.v_[i] < vs2.v_[i])) break;
+        if (!(vs1.v_[i] < vs2.v_[i])) return false;
     }
-    return lt;
+    return true;
 }
 
 

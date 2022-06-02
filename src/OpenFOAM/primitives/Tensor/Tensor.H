@@ -261,6 +261,12 @@ public:
         inline void diag(const Vector<Cmpt>& v);
 
 
+    // Characteristics
+
+        //- Is identity tensor?
+        inline bool is_identity(const scalar tol = ROOTVSMALL) const;
+
+
     // Tensor Operations
 
         //- Return non-Hermitian transpose

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -71,13 +71,8 @@ symmTensor2D makeRandomContainer(Random& rnd)
 // Do ++nFail_ if values of two objects are not equal within a given tolerance.
 // The function is converted from PEP-485.
 template<class Type>
-typename std::enable_if
-<
-    std::is_same<floatScalar, Type>::value ||
-    std::is_same<doubleScalar, Type>::value ||
-    std::is_same<complex, Type>::value,
-    void
->::type cmp
+typename std::enable_if<pTraits<Type>::rank == 0, void>::type
+cmp
 (
     const word& msg,
     const Type& x,
@@ -109,13 +104,8 @@ typename std::enable_if
 // Do ++nFail_ if two components are not equal within a given tolerance.
 // The function is converted from PEP-485
 template<class Type>
-typename std::enable_if
-<
-    !std::is_same<floatScalar, Type>::value &&
-    !std::is_same<doubleScalar, Type>::value &&
-    !std::is_same<complex, Type>::value,
-    void
->::type cmp
+typename std::enable_if<pTraits<Type>::rank != 0, void>::type
+cmp
 (
     const word& msg,
     const Type& x,
@@ -128,7 +118,7 @@ typename std::enable_if
 
     unsigned nFail = 0;
 
-    for (label i = 0; i < pTraits<Type>::nComponents; ++i)
+    for (direction i = 0; i < pTraits<Type>::nComponents; ++i)
     {
         if (max(absTol, relTol*max(mag(x[i]), mag(y[i]))) < mag(x[i] - y[i]))
         {

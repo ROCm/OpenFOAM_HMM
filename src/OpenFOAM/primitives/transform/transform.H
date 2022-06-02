@@ -32,8 +32,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef transform_H
-#define transform_H
+#ifndef Foam_transform_H
+#define Foam_transform_H
 
 #include "tensor.H"
 #include "mathematicalConstants.H"
@@ -82,7 +82,7 @@ inline tensor rotationTensor
 
 
 //- Rotational transformation tensor about the x-axis by omega radians
-inline tensor Rx(const scalar& omega)
+inline tensor Rx(const scalar omega)
 {
     const scalar s = sin(omega);
     const scalar c = cos(omega);
@@ -96,7 +96,7 @@ inline tensor Rx(const scalar& omega)
 
 
 //- Rotational transformation tensor about the y-axis by omega radians
-inline tensor Ry(const scalar& omega)
+inline tensor Ry(const scalar omega)
 {
     const scalar s = sin(omega);
     const scalar c = cos(omega);
@@ -110,7 +110,7 @@ inline tensor Ry(const scalar& omega)
 
 
 //- Rotational transformation tensor about the z-axis by omega radians
-inline tensor Rz(const scalar& omega)
+inline tensor Rz(const scalar omega)
 {
     const scalar s = sin(omega);
     const scalar c = cos(omega);

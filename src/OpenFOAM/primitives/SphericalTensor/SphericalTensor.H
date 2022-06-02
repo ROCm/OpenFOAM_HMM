@@ -39,8 +39,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SphericalTensor_H
-#define SphericalTensor_H
+#ifndef Foam_SphericalTensor_H
+#define Foam_SphericalTensor_H
 
 #include "contiguous.H"
 #include "VectorSpace.H"
@@ -117,11 +117,13 @@ public:
 
     // Member Functions
 
-        // Access
+    // Access
 
-            inline const Cmpt& ii() const;
-            inline Cmpt& ii();
+        inline const Cmpt& ii() const;
+        inline Cmpt& ii();
 
+
+    // Tensor Operations
 
         //- Return non-Hermitian transpose (no-op)
         inline const SphericalTensor<Cmpt>& T() const;

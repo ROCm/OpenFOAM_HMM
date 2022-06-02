@@ -25,6 +25,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
+
 #include <type_traits>
 
 #include "SymmTensor.H"
@@ -501,6 +502,21 @@ template<class Cmpt>
 inline void Foam::Tensor<Cmpt>::diag(const Vector<Cmpt>& v)
 {
     this->v_[XX] = v.x(); this->v_[YY] = v.y(); this->v_[ZZ] = v.z();
+}
+
+
+template<class Cmpt>
+inline bool Foam::Tensor<Cmpt>::is_identity(const scalar tol) const
+{
+    return
+    (
+        mag(xx() - pTraits<Cmpt>::one) < tol
+     && mag(yy() - pTraits<Cmpt>::one) < tol
+     && mag(zz() - pTraits<Cmpt>::one) < tol
+     && mag(xy()) < tol && mag(xz()) < tol
+     && mag(yx()) < tol && mag(yz()) < tol
+     && mag(zx()) < tol && mag(zy()) < tol
+    );
 }
 
 

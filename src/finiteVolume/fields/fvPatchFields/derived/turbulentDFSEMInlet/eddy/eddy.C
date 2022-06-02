@@ -37,6 +37,7 @@ Foam::label Foam::eddy::Gamma2Values[] = {1, 2, 3, 4, 5, 6, 7, 8};
 Foam::UList<Foam::label> Foam::eddy::Gamma2(&Gamma2Values[0], 8);
 int Foam::eddy::debug = 0;
 
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 bool Foam::eddy::setScales
@@ -287,7 +288,10 @@ Foam::label Foam::eddy::writeSurfaceOBJ
 
     const vector& s = sigma_;
 
-    const vector axisDir = tensor::I.vectorComponent(dir1_);
+    // Unit vector
+    vector axisDir(Zero);
+    axisDir[dir1_] = 1;
+
     const label dir2 = (dir1_ + 1) % 3;
     const label dir3 = (dir1_ + 2) % 3;
 

@@ -96,7 +96,7 @@ class eddy
         //- Model coefficient c1
         scalar c1_;
 
-        //- Index of streamwise direction
+        //- Index of streamwise direction (0,1,2)
         label dir1_;
 
 
@@ -177,8 +177,8 @@ public:
             //- Return the eddy position
             inline point position(const vector& n) const;
 
-            //- Return the index of the streamwise direction
-            inline label dir1() const;
+            //- Return the index of the streamwise direction (0,1,2)
+            label dir1() const noexcept { return dir1_; }
 
             //- Return random vector of -1 and 1's
             inline vector epsilon(Random& rndGen) const;

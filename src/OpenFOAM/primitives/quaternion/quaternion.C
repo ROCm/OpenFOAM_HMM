@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,6 +53,10 @@ Foam::quaternion::eulerOrderNames
     { eulerOrder::YZX, "yzx" },
     { eulerOrder::ZYX, "zyx" },
     { eulerOrder::ZXY, "zxy" },
+
+    // Aliases
+    { eulerOrder::XYZ, "rollPitchYaw" },
+    { eulerOrder::ZYX, "yawPitchRoll" },
 });
 
 

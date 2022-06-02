@@ -39,7 +39,6 @@ SourceFiles
 #ifndef Foam_SymmTensor_H
 #define Foam_SymmTensor_H
 
-#include "contiguous.H"
 #include "Vector.H"
 #include "SphericalTensor.H"
 

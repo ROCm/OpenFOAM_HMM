@@ -107,10 +107,15 @@ public:
             XZX, XYX, YXY, YZY, ZYZ, ZXZ,
 
             // Tait-Bryan angles
-            XZY, XYZ, YXZ, YZX, ZYX, ZXY
+            XZY, XYZ, YXZ, YZX, ZYX, ZXY,
+
+            // Aliases
+            ROLL_PITCH_YAW = XYZ,
+            YAW_PITCH_ROLL = ZYX,
         };
 
-        //- The names for Euler-angle rotation order
+        //- The names for Euler-angle and Tait-Bryan angles,
+        //- including "rollPitchYaw" and "yawPitchRoll" aliases
         static const Enum<eulerOrder> eulerOrderNames;
 
 

@@ -52,9 +52,6 @@ namespace Foam
 
 typedef SphericalTensor<label> labelSphericalTensor;
 
-//- Identity labelTensor
-static const labelSphericalTensor labelI(1);
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

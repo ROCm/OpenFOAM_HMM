@@ -39,8 +39,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef DiagTensor_H
-#define DiagTensor_H
+#ifndef Foam_DiagTensor_H
+#define Foam_DiagTensor_H
 
 #include "Tensor.H"
 
@@ -106,15 +106,15 @@ public:
 
     // Member Functions
 
-        // Access
+    // Access
 
-            inline const Cmpt& xx() const;
-            inline const Cmpt& yy() const;
-            inline const Cmpt& zz() const;
+        inline const Cmpt& xx() const;
+        inline const Cmpt& yy() const;
+        inline const Cmpt& zz() const;
 
-            inline Cmpt& xx();
-            inline Cmpt& yy();
-            inline Cmpt& zz();
+        inline Cmpt& xx();
+        inline Cmpt& yy();
+        inline Cmpt& zz();
 };
 
 

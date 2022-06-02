@@ -51,7 +51,6 @@ class Identity
 :
     public SphericalTensor<Cmpt>
 {
-
 public:
 
     //- Construct initializing the SphericalTensor to 1
@@ -73,19 +72,19 @@ public:
     };
 
     //- Return the identity in the dual space
-    inline dual operator*()
+    dual operator*()
     {
         return dual();
     }
 
     //- Return 1 for label
-    inline explicit operator label() const
+    explicit operator label() const noexcept
     {
         return 1;
     }
 
     //- Return 1 for scalar
-    inline explicit operator scalar() const
+    explicit operator scalar() const noexcept
     {
         return 1;
     }

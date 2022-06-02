@@ -77,5 +77,13 @@ const Foam::labelTensor Foam::labelTensor::vsType::rootMin
     labelTensor::uniform(-sqrt(scalar(labelMax)))
 );
 
+template<>
+const Foam::labelTensor Foam::labelTensor::I
+(
+    1, 0, 0,
+    0, 1, 0,
+    0, 0, 1
+);
+
 
 // ************************************************************************* //
