@@ -5,6 +5,6 @@ cc          = clang$(COMPILER_VERSION)
 cARCH       =
 cDBUG       =
 cOPT        = -O2
-cWARN       = -Wall $(FOAM_EXTRA_CFLAGS)
+cWARN       = -Wall
 
 #------------------------------------------------------------------------------

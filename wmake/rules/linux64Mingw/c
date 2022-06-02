@@ -8,7 +8,9 @@ cc          = x86_64-w64-mingw32-gcc
 # Compile option is non-mandatory, but must be non-empty
 sinclude $(RULES)/c$(WM_COMPILE_OPTION)
 
-cFLAGS      = $(cARCH) $(GFLAGS) $(cWARN) $(cOPT) $(cDBUG) $(LIB_HEADER_DIRS)
+cFLAGS      = \
+    $(cARCH) $(GFLAGS) $(cWARN) $(cOPT) $(cDBUG) \
+    $(FOAM_EXTRA_CFLAGS) $(LIB_HEADER_DIRS)
 
 ctoo        = $(WM_SCHEDULER) $(cc) $(cFLAGS) -c $< -o $@
 

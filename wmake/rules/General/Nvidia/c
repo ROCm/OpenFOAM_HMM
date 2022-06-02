@@ -8,6 +8,6 @@ cc          = nvc$(COMPILER_VERSION)
 cARCH       =
 cDBUG       =
 cOPT        = -O2
-cWARN       = $(FOAM_EXTRA_CFLAGS)
+cWARN       =
 
 #------------------------------------------------------------------------------

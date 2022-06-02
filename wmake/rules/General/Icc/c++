@@ -10,16 +10,13 @@ c++DBUG     =
 c++OPT      = -O2
 ptFLAGS     = -DNoRepository
 
-# - Standard warnings
-# - Less restrictive warnings (may be needed for flex++, CGAL, etc.).
-
 c++WARN     = \
     -Wall -Wextra \
     -Wnon-virtual-dtor -Wno-unused-parameter -Wno-invalid-offsetof \
     -Wno-unknown-pragmas \
-    -diag-disable 327,654,1125,1292,2289,2304,11062,11074,11076 \
-    $(FOAM_EXTRA_CXXFLAGS)
+    -diag-disable 327,654,1125,1292,2289,2304,11062,11074,11076
 
+# Less restrictive warnings (eg, for flex++, CGAL, etc.)
 c++LESSWARN = \
     -diag-disable 1224,2026,2305
 

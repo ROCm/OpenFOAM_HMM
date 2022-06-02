@@ -10,15 +10,12 @@ c++DBUG     =
 c++OPT      = -O2
 ptFLAGS     = -DNoRepository
 
-# - Standard warnings
-# - Less restrictive warnings (may be needed for flex++, CGAL, etc.)
-
 c++WARN     = \
     -Wall -Wextra \
     --diag_suppress=111,128,177,185,612,998,1098 \
-    --display_error_number \
-    $(FOAM_EXTRA_CXXFLAGS)
+    --display_error_number
 
+# Less restrictive warnings (eg, for flex++, CGAL, etc.)
 c++LESSWARN =
 
 # Warnings

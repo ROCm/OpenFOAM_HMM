@@ -7,7 +7,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2017-2021 OpenCFD Ltd.
+#     Copyright (C) 2017-2022 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -69,8 +69,9 @@ HELP_HEAD
 if [ -n "$1" ]
 then
 cat<<HELP_FULL
-  -debug            Define c++DBUG='-DFULLDEBUG -g' as override
-  -build-root=PATH  Specify FOAM_BUILDROOT for compilation intermediates
+  -debug            Add '-DFULLDEBUG -g' flags
+  -debug-O[0123]    Add '-DFULLDEBUG -g' flags and optimization level
+  -build-root=PATH      Specify FOAM_BUILDROOT for compilation intermediates
   -module-prefix=PATH   Specify FOAM_MODULE_PREFIX as absolute/relative path
   -module-prefix=TYPE   Specify FOAM_MODULE_PREFIX as predefined type
                         (u,user | g,group | o,openfoam)
@@ -249,8 +250,13 @@ do
             optQuiet=true
             export WM_QUIET=true
             ;;
+
         -debug)
-            optDebug=true
+            optDebug="-g"
+            ;;
+
+        -debug-O[0123])
+            optDebug="-g -${1##*-}"
             ;;
 
         -build-root=*)
@@ -484,8 +490,8 @@ unset exitCode
 
 if [ -n "$optDebug" ]
 then
-    # Convey -debug via FOAM_EXTRA_CXXFLAGS
-    optDebug="-DFULLDEBUG -g"
+    # Add -debug values into FOAM_EXTRA_CXXFLAGS
+    optDebug="-DFULLDEBUG $optDebug"
     oldFlags="$FOAM_EXTRA_CXXFLAGS"
 
     case "$oldFlags" in

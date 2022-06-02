@@ -10,7 +10,9 @@ CC          = x86_64-w64-mingw32-g++ -std=gnu++14
 
 include $(RULES)/c++$(WM_COMPILE_OPTION)
 
-c++FLAGS    = $(c++ARCH) $(GFLAGS) $(c++WARN) $(c++OPT) $(c++DBUG) $(ptFLAGS) $(LIB_HEADER_DIRS)
+c++FLAGS    = \
+    $(c++ARCH) $(GFLAGS) $(c++WARN) $(c++OPT) $(c++DBUG) $(ptFLAGS) \
+    $(FOAM_EXTRA_CXXFLAGS) $(LIB_HEADER_DIRS)
 
 Ctoo        = $(WM_SCHEDULER) $(CC) $(c++FLAGS) -c $< -o $@
 cctoo       = $(Ctoo)

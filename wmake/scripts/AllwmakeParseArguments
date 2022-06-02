@@ -171,8 +171,8 @@ do
         continue    # Argument handled, remove it
         ;;
 
-    -debug)
-        optDebug="-debug"
+    -debug | -debug-O[0123])
+        optDebug="$arg"
         continue    # Argument handled, remove it
         ;;
 

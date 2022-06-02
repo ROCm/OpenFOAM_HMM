@@ -13,15 +13,12 @@ c++DBUG     =
 c++OPT      = -O2
 ptFLAGS     = -DNoRepository -ftemplate-depth-100
 
-# - Standard warnings
-# - Less restrictive warnings (may be needed for flex++, CGAL, etc.)
-
 c++WARN     = \
     -Wall -Wextra -Wold-style-cast \
     -Wnon-virtual-dtor -Wno-unused-parameter -Wno-invalid-offsetof \
-    -Wno-attributes -Wno-unknown-pragmas \
-    $(FOAM_EXTRA_CXXFLAGS)
+    -Wno-attributes -Wno-unknown-pragmas
 
+# Less restrictive warnings (eg, for flex++, CGAL, etc.)
 c++LESSWARN = \
     -Wno-old-style-cast -Wno-unused-local-typedefs -Wno-array-bounds \
     -Wno-deprecated-declarations \
