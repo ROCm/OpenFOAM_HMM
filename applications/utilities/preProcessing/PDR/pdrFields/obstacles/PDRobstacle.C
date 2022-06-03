@@ -629,12 +629,10 @@ void Foam::PDRobstacle::generateVtk
 {
     label pieceId = 0;
 
-    meshedSurf::emptySurface dummy;
-
     vtk::surfaceWriter surfWriter
     (
-        dummy.points(),
-        dummy.faces(),
+        pointField::null(),
+        faceList::null(),
         // vtk::formatType::INLINE_ASCII,
         (outputDir / "Obstacles"),
         false  // serial only

@@ -124,9 +124,6 @@ class isoSurfacePoint
 
         // Point synchronisation
 
-            //- Does tensor differ (to within mergeTolerance) from identity
-            bool noTransform(const tensor& tt) const;
-
             //- Per face whether is collocated
             static bitSet collocatedFaces(const coupledPolyPatch& cpp);
 

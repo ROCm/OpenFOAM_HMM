@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -147,41 +147,21 @@ bool Foam::blockMesh::readPointTransforms(const dictionary& dict)
 {
     transformType_ = transformTypes::NO_TRANSFORM;
 
+    const dictionary* dictptr;
+
     // Optional cartesian coordinate system transform, since JUL-2021
-    if (const dictionary* dictptr = dict.findDict("transform"))
+    if ((dictptr = dict.findDict("transform", keyType::LITERAL)) != nullptr)
     {
         transform_ = coordSystem::cartesian(*dictptr);
 
-        constexpr scalar tol = VSMALL;
-
-        // Check for non-zero origin
-        const vector& o = transform_.origin();
-        if
-        (
-            (mag(o.x()) > tol)
-         || (mag(o.y()) > tol)
-         || (mag(o.z()) > tol)
-        )
+        // Non-zero origin?
+        if (magSqr(transform_.origin()) > ROOTVSMALL)
         {
             transformType_ |= transformTypes::TRANSLATION;
         }
 
-        // Check for non-identity rotation
-        const tensor& r = transform_.R();
-        if
-        (
-            (mag(r.xx() - 1) > tol)
-         || (mag(r.xy()) > tol)
-         || (mag(r.xz()) > tol)
-
-         || (mag(r.yx()) > tol)
-         || (mag(r.yy() - 1) > tol)
-         || (mag(r.yz()) > tol)
-
-         || (mag(r.zx()) > tol)
-         || (mag(r.zy()) > tol)
-         || (mag(r.zz() - 1) > tol)
-        )
+        // Non-identity rotation?
+        if (!transform_.R().is_identity(ROOTVSMALL))
         {
             transformType_ |= transformTypes::ROTATION;
         }

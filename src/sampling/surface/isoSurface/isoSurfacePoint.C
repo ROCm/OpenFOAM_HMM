@@ -105,21 +105,6 @@ static bool isCollocatedPatch(const coupledPolyPatch& pp)
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-bool Foam::isoSurfacePoint::noTransform(const tensor& tt) const
-{
-    return
-        (mag(tt.xx()-1) < mergeDistance_)
-     && (mag(tt.yy()-1) < mergeDistance_)
-     && (mag(tt.zz()-1) < mergeDistance_)
-     && (mag(tt.xy()) < mergeDistance_)
-     && (mag(tt.xz()) < mergeDistance_)
-     && (mag(tt.yx()) < mergeDistance_)
-     && (mag(tt.yz()) < mergeDistance_)
-     && (mag(tt.zx()) < mergeDistance_)
-     && (mag(tt.zy()) < mergeDistance_);
-}
-
-
 Foam::bitSet Foam::isoSurfacePoint::collocatedFaces
 (
     const coupledPolyPatch& pp
