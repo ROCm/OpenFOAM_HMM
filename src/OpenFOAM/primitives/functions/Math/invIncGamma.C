@@ -35,6 +35,8 @@ Description
 #include "MathFunctions.H"
 #include "mathematicalConstants.H"
 #include "error.H"
+#include <cmath>
+#include <limits>
 
 using namespace Foam::constant::mathematical;
 

@@ -79,7 +79,7 @@ void Foam::functionObjects::nearWallFields::calcAddressing()
         const vectorField nf(patch.nf());
         const vectorField faceCellCentres(patch.patch().faceCellCentres());
         const labelUList& faceCells = patch.patch().faceCells();
-        const vectorField::subField& faceCentres = patch.patch().faceCentres();
+        const vectorField::subField faceCentres = patch.patch().faceCentres();
 
         forAll(patch, patchFacei)
         {

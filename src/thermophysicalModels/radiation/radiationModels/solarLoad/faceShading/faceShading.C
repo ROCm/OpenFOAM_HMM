@@ -155,7 +155,7 @@ void Foam::faceShading::calculate()
     forAll(patches, patchI)
     {
         const polyPatch& pp = patches[patchI];
-        const pointField& cf = pp.faceCentres();
+        const vectorField::subField cf = pp.faceCentres();
 
         if (!pp.coupled() && !isA<cyclicAMIPolyPatch>(pp))
         {

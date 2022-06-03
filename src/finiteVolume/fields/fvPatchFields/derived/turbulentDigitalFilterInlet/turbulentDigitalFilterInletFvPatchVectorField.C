@@ -161,38 +161,38 @@ Foam::turbulentDigitalFilterInletFvPatchVectorField::indexPairs()
 
 void Foam::turbulentDigitalFilterInletFvPatchVectorField::checkR() const
 {
-    const vectorField& faceCentres = this->patch().patch().faceCentres();
+    label badFacei = -1;
 
     forAll(R_, facei)
     {
         if (R_[facei].xx() <= 0)
         {
+            badFacei = facei;
             FatalErrorInFunction
                 << "Reynolds stress tensor component Rxx cannot be negative"
-                << " or zero, where Rxx = " << R_[facei].xx()
-                << " at the face centre = " << faceCentres[facei]
-                << exit(FatalError);
+                << " or zero, where Rxx = " << R_[facei].xx();
+            break;
         }
 
         if (R_[facei].yy() < 0 || R_[facei].zz() < 0)
         {
+            badFacei = facei;
             FatalErrorInFunction
                 << "Reynolds stress tensor components Ryy or Rzz cannot be"
                 << " negative where Ryy = " << R_[facei].yy()
-                << ", and Rzz = " << R_[facei].zz()
-                << " at the face centre = " << faceCentres[facei]
-                << exit(FatalError);
+                << ", and Rzz = " << R_[facei].zz();
+            break;
         }
 
         const scalar x0 = R_[facei].xx()*R_[facei].yy() - sqr(R_[facei].xy());
 
         if (x0 <= 0)
         {
+            badFacei = facei;
             FatalErrorInFunction
                 << "Reynolds stress tensor component group, Rxx*Ryy - Rxy^2"
-                << " cannot be negative or zero"
-                << " at the face centre = " << faceCentres[facei]
-                << exit(FatalError);
+                << " cannot be negative or zero";
+            break;
         }
 
         const scalar x1 = R_[facei].zz() - sqr(R_[facei].xz())/R_[facei].xx();
@@ -202,13 +202,21 @@ void Foam::turbulentDigitalFilterInletFvPatchVectorField::checkR() const
 
         if (x3 < 0)
         {
+            badFacei = facei;
             FatalErrorInFunction
                 << "Reynolds stress tensor component group, "
                 << "Rzz - Rxz^2/Rxx - (Ryz - Rxy*Rxz/(Rxx*(Rxx*Ryy - Rxy^2)))^2"
-                << " cannot be negative at the face centre = "
-                << faceCentres[facei]
-                << exit(FatalError);
+                << " cannot be negative";
+            break;
         }
+    }
+
+    if (badFacei >= 0)
+    {
+        FatalError
+            << " at the face centre = "
+            << this->patch().patch().faceCentres()[badFacei]
+            << exit(FatalError);
     }
 
     Info<< "  # Reynolds stress tensor on patch is consistent #" << endl;
