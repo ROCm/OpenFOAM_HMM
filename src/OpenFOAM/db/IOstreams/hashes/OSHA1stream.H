@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,8 +32,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef OSHA1stream_H
-#define OSHA1stream_H
+#ifndef Foam_OSHA1stream_H
+#define Foam_OSHA1stream_H
 
 #include "OSstream.H"
 #include "SHA1.H"
@@ -63,10 +63,17 @@ class osha1stream
 
     protected:
 
+        //- Handle overflow
+        virtual int overflow(int c = EOF)
+        {
+            if (c != EOF) sha1_.append(c);
+            return c;
+        }
+
         //- Put sequence of characters
         virtual std::streamsize xsputn(const char* s, std::streamsize n)
         {
-            sha1_.append(s, n);
+            if (n) sha1_.append(s, n);
             return n;
         }
 
@@ -76,7 +83,7 @@ class osha1stream
         sha1buf() = default;
 
         //- Full access to the sha1
-        inline SHA1& sha1()
+        SHA1& sha1() noexcept
         {
             return sha1_;
         }
@@ -108,7 +115,7 @@ public:
         }
 
         //- Full access to the sha1
-        SHA1& sha1()
+        SHA1& sha1() noexcept
         {
             return buf_.sha1();
         }
@@ -146,7 +153,7 @@ public:
     // Member Functions
 
         //- Full access to the sha1
-        SHA1& sha1()
+        SHA1& sha1() noexcept
         {
             return stream_.sha1();
         }

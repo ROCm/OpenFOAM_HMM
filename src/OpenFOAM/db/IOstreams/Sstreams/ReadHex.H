@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ReadHex_H
-#define ReadHex_H
+#ifndef Foam_ReadHex_H
+#define Foam_ReadHex_H
 
 #include "ISstream.H"
 
@@ -44,7 +44,7 @@ SourceFiles
 namespace Foam
 {
 
-//- Read a hex label from an input stream
+//- Read a hex integer from an input stream
 template<class T>
 T ReadHex(ISstream& is);
 

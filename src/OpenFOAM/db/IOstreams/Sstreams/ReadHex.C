@@ -36,10 +36,11 @@ Description
 template<class T>
 T Foam::ReadHex(ISstream& is)
 {
-    // Takes into account that 'a' (or 'A') is 10
-    static const int alphaOffset = toupper('A') - 10;
-    // Takes into account that '0' is 0
-    static const int zeroOffset = int('0');
+    // The char '0' == 0
+    static constexpr int offsetZero = int('0');
+
+    // The char 'A' (or 'a') == 10
+    static constexpr int offsetAlpha = int('A') - 10;
 
     char c = 0;
 
@@ -63,11 +64,11 @@ T Foam::ReadHex(ISstream& is)
 
         if (isdigit(c))
         {
-            result += int(c) - zeroOffset;
+            result += int(c) - offsetZero;
         }
         else
         {
-            result += toupper(c) - alphaOffset;
+            result += toupper(c) - offsetAlpha;
         }
     } while (is.get(c));
 

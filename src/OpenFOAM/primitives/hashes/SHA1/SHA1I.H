@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,8 +25,6 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
-
-#include "SHA1.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -52,31 +50,34 @@ inline Foam::SHA1::SHA1(const std::string& str)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline Foam::SHA1& Foam::SHA1::append(const char* data, size_t len)
+inline void Foam::SHA1::append(char c)
 {
-    processBytes(data, len);
-    return *this;
+    processBytes(&c, 1);
 }
 
 
-inline Foam::SHA1& Foam::SHA1::append(const char* str)
+inline void Foam::SHA1::append(const char* data, size_t len)
+{
+    processBytes(data, len);
+}
+
+
+inline void Foam::SHA1::append(const char* str)
 {
     if (str && *str)
     {
         processBytes(str, std::char_traits<char>::length(str));
     }
-    return *this;
 }
 
 
-inline Foam::SHA1& Foam::SHA1::append(const std::string& str)
+inline void Foam::SHA1::append(const std::string& str)
 {
     processBytes(str.data(), str.length());
-    return *this;
 }
 
 
-inline Foam::SHA1& Foam::SHA1::append
+inline void Foam::SHA1::append
 (
     const std::string& str,
     size_t pos,
@@ -92,8 +93,6 @@ inline Foam::SHA1& Foam::SHA1::append
 
         processBytes(str.data() + pos, len);
     }
-
-    return *this;
 }
 
 
@@ -175,15 +174,15 @@ inline bool Foam::SHA1::operator!=(const SHA1Digest& rhs) const
 }
 
 
-inline bool Foam::SHA1::operator!=(const std::string& rhs) const
+inline bool Foam::SHA1::operator!=(const std::string& hexdigits) const
 {
-    return !this->operator==(rhs);
+    return !this->operator==(hexdigits);
 }
 
 
-inline bool Foam::SHA1::operator!=(const char* rhs) const
+inline bool Foam::SHA1::operator!=(const char* hexdigits) const
 {
-    return !this->operator==(rhs);
+    return !this->operator==(hexdigits);
 }
 
 

@@ -38,8 +38,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SHA1Digest_H
-#define SHA1Digest_H
+#ifndef Foam_SHA1Digest_H
+#define Foam_SHA1Digest_H
 
 #include <array>
 #include <string>
@@ -74,12 +74,14 @@ class SHA1Digest
             return dig_.data();
         }
 
+        //- Byte-wise compare digest contents
+        bool isEqual(const char* hexdigits, std::size_t len) const;
+
         // Permit SHA1 to calculate the digest
         friend class SHA1;
 
 
 public:
-
 
     // Static Data Members
 
@@ -89,7 +91,7 @@ public:
 
     // Constructors
 
-        //- Construct a zero digest
+        //- Default construct a zero digest
         SHA1Digest();
 
         //- Read construct a digest
@@ -120,7 +122,7 @@ public:
     // Member Operators
 
         //- Equality operator
-        bool operator==(const SHA1Digest&) const;
+        bool operator==(const SHA1Digest& rhs) const;
 
         //- Compare to (40-byte) text representation (eg, from sha1sum)
         //  An %empty string is equivalent to
@@ -136,7 +138,7 @@ public:
 
 
         //- Inequality operator
-        bool operator!=(const SHA1Digest&) const;
+        bool operator!=(const SHA1Digest& rhs) const;
 
         //- Inequality operator
         bool operator!=(const std::string& hexdigits) const;
@@ -149,7 +151,7 @@ public:
 // IOstream Operators
 
 //- Read (40-byte) text representation (ignoring leading '_' prefix)
-Istream& operator>>(Istream&is , SHA1Digest& dig);
+Istream& operator>>(Istream& is, SHA1Digest& dig);
 
 //- Write (40-byte) text representation, unquoted and without prefix
 Ostream& operator<<(Ostream& os, const SHA1Digest& dig);

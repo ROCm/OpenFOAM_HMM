@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,8 +42,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SHA1_H
-#define SHA1_H
+#ifndef Foam_SHA1_H
+#define Foam_SHA1_H
 
 #include <string>
 #include <cstdint>
@@ -98,13 +98,13 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         inline SHA1();
 
-        //- Construct null and append initial string
+        //- Default construct and append initial string content
         inline explicit SHA1(const char* str);
 
-        //- Construct null and append initial std::string
+        //- Default construct and append initial string content
         inline explicit SHA1(const std::string& str);
 
 
@@ -113,17 +113,20 @@ public:
         //- Reset the hashed data before appending more
         void clear() noexcept;
 
-        //- Append data for processing
-        inline SHA1& append(const char* str);
-
-        //- Append data for processing
-        inline SHA1& append(const char* data, size_t len);
+        //- Append single character
+        inline void append(char c);
 
         //- Append string for processing
-        inline SHA1& append(const std::string& str);
+        inline void append(const char* str);
+
+        //- Append data for processing
+        inline void append(const char* data, size_t len);
+
+        //- Append string for processing
+        inline void append(const std::string& str);
 
         //- Append substring for processing
-        inline SHA1& append
+        inline void append
         (
             const std::string& str,
             size_t pos,
