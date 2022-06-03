@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,8 +42,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SHA1_H
-#define SHA1_H
+#ifndef Foam_SHA1_H
+#define Foam_SHA1_H
 
 #include <string>
 #include <cstdint>
@@ -112,6 +112,9 @@ public:
 
         //- Reset the hashed data before appending more
         void clear() noexcept;
+
+        //- Append single character
+        inline void append(char c);
 
         //- Append data for processing
         inline SHA1& append(const char* str);

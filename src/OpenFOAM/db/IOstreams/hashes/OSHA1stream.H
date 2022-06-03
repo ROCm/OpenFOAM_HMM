@@ -32,8 +32,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef OSHA1stream_H
-#define OSHA1stream_H
+#ifndef Foam_OSHA1stream_H
+#define Foam_OSHA1stream_H
 
 #include "OSstream.H"
 #include "SHA1.H"
@@ -63,10 +63,17 @@ class osha1stream
 
     protected:
 
+        //- Handle overflow
+        virtual int overflow(int c = EOF)
+        {
+            if (c != EOF) sha1_.append(c);
+            return c;
+        }
+
         //- Put sequence of characters
         virtual std::streamsize xsputn(const char* s, std::streamsize n)
         {
-            sha1_.append(s, n);
+            if (n) sha1_.append(s, n);
             return n;
         }
 
