@@ -92,7 +92,7 @@ bool setCellFieldType
 
         fieldType field(fieldHeader, mesh, false);
 
-        const Type& value = pTraits<Type>(fieldValueStream);
+        const Type value = pTraits<Type>(fieldValueStream);
 
         if (selectedCells.size() == field.size())
         {
@@ -244,7 +244,7 @@ bool setFaceFieldType
 
         fieldType field(fieldHeader, mesh);
 
-        const Type& value = pTraits<Type>(fieldValueStream);
+        const Type value = pTraits<Type>(fieldValueStream);
 
         // Create flat list of selected faces and their value.
         Field<Type> allBoundaryValues(mesh.nBoundaryFaces());

@@ -28,6 +28,8 @@ License
 #include "MathFunctions.H"
 #include "mathematicalConstants.H"
 #include "error.H"
+#include <cmath>
+#include <limits>
 
 // * * * * * * * * * * * * * * * Global Functions * * * * * * * * * * * * * * //
 

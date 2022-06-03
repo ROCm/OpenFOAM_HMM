@@ -36,6 +36,7 @@ Description
 #include "mathematicalConstants.H"
 #include "error.H"
 #include <cmath>
+#include <limits>
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 

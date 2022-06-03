@@ -136,7 +136,7 @@ void Foam::faceReflecting::initialise(const dictionary& coeffs)
     forAll(patches, patchI)
     {
         const polyPatch& pp = patches[patchI];
-        const pointField& cf = pp.faceCentres();
+        const vectorField::subField cf = pp.faceCentres();
 
         if (!pp.coupled() && !isA<cyclicAMIPolyPatch>(pp))
         {

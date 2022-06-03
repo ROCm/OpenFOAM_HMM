@@ -294,6 +294,7 @@ void Foam::SprayParcel<ParcelType>::calcBreakup
         // Add child parcel as copy of parent
         SprayParcel<ParcelType>* child = new SprayParcel<ParcelType>(*this);
         child->origId() = this->getNewParticleID();
+        child->origProc() = Pstream::myProcNo();
         child->d() = dChild;
         child->d0() = dChild;
         const scalar massChild = child->mass();

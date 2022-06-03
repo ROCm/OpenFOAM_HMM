@@ -166,7 +166,7 @@ atmAlphatkWallFunctionFvPatchScalarField
     fixedValueFvPatchScalarField(wfpsf),
     Cmu_(wfpsf.Cmu_),
     kappa_(wfpsf.kappa_),
-    Pr_(wfpsf.Pr_),
+    Pr_(wfpsf.Pr_.clone()),
     Prt_(wfpsf.Prt_.clone(this->patch().patch())),
     z0_(wfpsf.z0_.clone(this->patch().patch()))
 {
@@ -184,7 +184,7 @@ atmAlphatkWallFunctionFvPatchScalarField
     fixedValueFvPatchScalarField(wfpsf, iF),
     Cmu_(wfpsf.Cmu_),
     kappa_(wfpsf.kappa_),
-    Pr_(wfpsf.Pr_),
+    Pr_(wfpsf.Pr_.clone()),
     Prt_(wfpsf.Prt_.clone(this->patch().patch())),
     z0_(wfpsf.z0_.clone(this->patch().patch()))
 {

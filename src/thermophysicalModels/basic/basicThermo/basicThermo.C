@@ -436,7 +436,15 @@ Foam::autoPtr<Foam::basicThermo> Foam::basicThermo::New
 
 Foam::basicThermo::~basicThermo()
 {
-    db().checkOut("p");
+    if (pOwner_)
+    {
+        db().checkOut(p_.name());
+    }
+
+    if (TOwner_)
+    {
+        db().checkOut(T_.name());
+    }
 }
 
 

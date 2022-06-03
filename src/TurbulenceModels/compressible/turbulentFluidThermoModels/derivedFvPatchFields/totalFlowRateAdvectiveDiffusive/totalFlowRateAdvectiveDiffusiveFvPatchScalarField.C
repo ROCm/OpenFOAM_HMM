@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2020,2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -135,7 +135,7 @@ void Foam::totalFlowRateAdvectiveDiffusiveFvPatchScalarField::autoMap
     const fvPatchFieldMapper& m
 )
 {
-    scalarField::autoMap(m);
+    mixedFvPatchField<scalar>::autoMap(m);
 }
 
 

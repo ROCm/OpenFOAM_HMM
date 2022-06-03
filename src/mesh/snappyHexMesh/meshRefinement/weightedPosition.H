@@ -37,7 +37,7 @@ Description
     Typical use might be to e.g. average face centres to points on a patch
 
     const labelListList& pointFaces = pp.pointFaces();
-    const pointField& faceCentres = pp.faceCentres();
+    const vectorField::subField faceCentres = pp.faceCentres();
 
     Field<weightedPosition> avgBoundary(pointFaces.size());
 

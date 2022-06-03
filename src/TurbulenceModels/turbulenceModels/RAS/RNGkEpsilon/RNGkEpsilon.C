@@ -264,6 +264,7 @@ void RNGkEpsilon<BasicTurbulenceModel>::correct()
     tmp<volTensorField> tgradU = fvc::grad(U);
     const volScalarField::Internal GbyNu
     (
+        this->type() + ":GbyNu",
         tgradU().v() && dev(twoSymm(tgradU().v()))
     );
     tgradU.clear();
