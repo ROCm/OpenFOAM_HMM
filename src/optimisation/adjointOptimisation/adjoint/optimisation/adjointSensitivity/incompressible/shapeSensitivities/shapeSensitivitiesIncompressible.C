@@ -105,7 +105,7 @@ tmp<boundaryVectorField> shapeSensitivities::dvdbMult() const
     const singlePhaseTransportModel& lamTransp = primalVars_.laminarTransport();
     volScalarField nuEff(lamTransp.nu() + turbVars->nutRef());
     tmp<volTensorField> tgradUa = fvc::grad(Ua);
-    const volTensorField::Boundary& gradUabf = tgradUa.ref().boundaryField();
+    const volTensorField::Boundary& gradUabf = tgradUa.cref().boundaryField();
 
     for (const label patchI : sensitivityPatchIDs_)
     {

@@ -513,7 +513,7 @@ void sensitivitySurfacePoints::accumulateIntegrand(const scalar dt)
     {
         tmp<volTensorField> tgradUa = fvc::grad(Ua);
         const volTensorField::Boundary& gradUabf =
-            tgradUa.ref().boundaryField();
+            tgradUa.cref().boundaryField();
         for (const label patchI : sensitivityPatchIDs_)
         {
             const fvPatch& patch = mesh_.boundary()[patchI];
