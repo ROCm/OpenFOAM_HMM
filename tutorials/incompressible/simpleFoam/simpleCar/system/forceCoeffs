@@ -27,13 +27,27 @@ forceCoeffs1
     lRef            4;          // Wheelbase length
     Aref            1;          // Estimated
     porosity        on;
+}
+
+
+binField1
+{
+    type                    binField;
+    libs                    (fieldFunctionObjects);
+    binModel                singleDirectionUniformBin;
+    fields                  (forceCoeff);
+    patches                 (body);
+    decomposePatchValues    yes;
+    CofR                    ${..forceCoeffs1.CofR};
+    cellZones               (porousZone);
 
     binData
     {
-        nBin            20;          // output data into 20 bins
-        direction       (1 0 0);     // bin direction
-        cumulative      yes;
+        nBin        20;          // output data into 20 bins
+        direction   (1 0 0);     // bin direction
+        cumulative  yes;
     }
+    writeControl            writeTime;
 }
 
 
