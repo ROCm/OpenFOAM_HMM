@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2112                                 |
+|  \\    /   O peration     | Version:  v2206                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -23,13 +23,25 @@ boundaryField
     inlet
     {
         type            turbulentDigitalFilterInlet;
-        n               ( 64 70 );
+        n               ( 70 64 );
         L
         (
-            0.78035508 0.31085352 0.342261 0.1728125 0.171875
-            0.22459375 0.172787596 0.171889998 0.224578995
+            0.04446467692 0.01771245128 0.01950205128
+            0.172787596   0.171889998   0.224578995
+            0.1728125     0.171875      0.22459375
         );
-        Ubulk           17.55;
+        mean
+        {
+            type        mappedFile;
+            mapMethod   nearest;
+            fieldTable  UMean;
+        }
+        R
+        {
+            type        mappedFile;
+            mapMethod   nearest;
+            fieldTable  UR;
+        }
         value           $internalField;
     }
 

@@ -361,8 +361,16 @@ public:
 
     // Member Functions
 
-        //- Return true if input Reynold stresses are valid
-        static bool checkStresses(const symmTensorField& Rf);
+        //- Check if input Reynolds stresses are valid
+        //  Realizability conditions (tag:S):
+        //      Schumann, U. (1977).
+        //      Realizability of Reynolds‐stress turbulence models.
+        //      The Physics of Fluids, 20(5), 721-725.
+        //      DOI:10.1063/1.861942
+        static void checkStresses(const symmTensorField& R);
+
+        //- Check if input Reynolds stresses are valid
+        static void checkStresses(const scalarField& R);
 
 
         // Mapping

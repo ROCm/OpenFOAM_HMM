@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2112                                 |
+|  \\    /   O peration     | Version:  v2206                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -22,7 +22,7 @@ startTime       0;
 
 stopAt          endTime;
 
-endTime         10; // 180;
+endTime         180;
 
 deltaT          2e-3;
 
@@ -70,53 +70,44 @@ functions
         type                coded;
         libs                (utilityFunctionObjects);
         name                Cf;
+        timeStart           $/timeStart;
         writeControl        writeTime;
 
         codeExecute
         #{
-            static autoPtr<volScalarField> Cf;
-            if
-            (
-                mesh().time().timeIndex() == 1
-                ||
-                mesh().time().startTimeIndex() == mesh().time().timeIndex() - 1
-            )
+            auto* CfPtr =
+                mesh().getObjectPtr<volScalarField>("Cf");
+
+            if (!CfPtr)
             {
                 Info<< "Create skin-friction coefficient field" << nl;
-                Cf.set
+                CfPtr = new volScalarField
                 (
-                    new volScalarField
+                    IOobject
                     (
-                        IOobject
-                        (
-                            "Cf",
-                            mesh().time().timeName(),
-                            mesh(),
-                            IOobject::NO_READ,
-                            IOobject::AUTO_WRITE
-                        ),
+                        "Cf",
+                        mesh().time().timeName(),
                         mesh(),
-                        dimless
-                    )
+                        IOobject::NO_READ,
+                        IOobject::AUTO_WRITE
+                    ),
+                    mesh(),
+                    dimless
                 );
+
+                regIOobject::store(CfPtr);
             }
 
-            if
-            (
-                mesh().time().timeIndex() != 1
-             && mesh().time().timeIndex() > 3 // 60 // = timeStart
-            )
-            {
-                Info<< "Computing skin-friction coefficient field" << endl;
+            auto& Cf = *CfPtr;
 
-                const auto& tau =
-                    mesh().lookupObject<volVectorField>("wallShearStress");
-                auto& Cf = mesh().lookupObjectRef<volScalarField>("Cf");
+            Info<< "Computing skin-friction coefficient field\n" << endl;
 
-                const dimensionedScalar Ubulk(dimVelocity, 17.55);
+            const auto& tau =
+                mesh().lookupObject<volVectorField>("wallShearStress");
 
-                Cf = mag(tau.component(0))/(0.5*sqr(Ubulk));
-            }
+            const dimensionedScalar Ubulk(dimVelocity, 17.55);
+
+            Cf = mag(tau.component(0))/(0.5*sqr(Ubulk));
         #};
     }
 

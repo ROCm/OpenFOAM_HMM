@@ -4,7 +4,7 @@ type            columnAverage;
 libs            (fieldFunctionObjects);
 
 patches         ( left );
-fields          ( UPrime2Mean UMean );
+fields          ( UPrime2Mean UMean TPrime2Mean TMean );
 
 executeControl  onEnd;
 writeControl    onEnd;

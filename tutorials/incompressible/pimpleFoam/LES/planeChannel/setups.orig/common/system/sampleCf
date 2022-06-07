@@ -2,7 +2,7 @@
 
 type                sets;
 libs                (sampling);
-interpolationScheme cellPatchConstrained;
+interpolationScheme cellPoint;
 setFormat           raw;
 
 fields              ( CfMean );
