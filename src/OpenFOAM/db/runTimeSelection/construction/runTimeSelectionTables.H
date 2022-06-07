@@ -147,7 +147,7 @@ Description
                         std::cerr                                              \
                             << "Using [v" << alt.second << "] '" << k          \
                             << "' instead of '" << alt.first                   \
-                            << " in runtime selection table: "                 \
+                            << "' in selection table: "                        \
                             << #baseType << '\n' << std::endl;                 \
                         ::Foam::error::warnAboutAge("lookup", alt.second);     \
                     }                                                          \

@@ -33,8 +33,8 @@ Note
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef addToRunTimeSelectionTable_H
-#define addToRunTimeSelectionTable_H
+#ifndef Foam_addToRunTimeSelectionTable_H
+#define Foam_addToRunTimeSelectionTable_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

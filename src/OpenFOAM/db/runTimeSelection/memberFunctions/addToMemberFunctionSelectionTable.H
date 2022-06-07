@@ -36,8 +36,8 @@ Note
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef addToMemberFunctionSelectionTable_H
-#define addToMemberFunctionSelectionTable_H
+#ifndef Foam_addToMemberFunctionSelectionTable_H
+#define Foam_addToMemberFunctionSelectionTable_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

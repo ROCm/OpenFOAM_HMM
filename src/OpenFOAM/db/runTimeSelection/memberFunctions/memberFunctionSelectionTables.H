@@ -32,8 +32,8 @@ Note
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef memberFunctionSelectionTables_H
-#define memberFunctionSelectionTables_H
+#ifndef Foam_memberFunctionSelectionTables_H
+#define Foam_memberFunctionSelectionTables_H
 
 #include "runTimeSelectionTables.H"
 
