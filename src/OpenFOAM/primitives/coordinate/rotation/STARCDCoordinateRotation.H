@@ -46,11 +46,14 @@ Description
 
     \heading Dictionary entries
     \table
-        Property    | Description                           | Required | Default
-        type        | Type name: starcd (or STARCDRotation) | yes   |
-        angles      | The z-x-y rotation angles             | yes   |
-        degrees     | Angles are in degrees                 | no    | true
+        Property    | Description                           | Reqd | Default
+        type        | Type name: starcd                     | yes  |
+        angles      | The z-x-y rotation angles             | yes  |
+        degrees     | Angles are in degrees                 | no   | true
     \endtable
+
+Note
+    Also accepts "STARCDRotation" (OpenFOAM-v1806) for the type.
 
 SourceFiles
     STARCDCoordinateRotation.C

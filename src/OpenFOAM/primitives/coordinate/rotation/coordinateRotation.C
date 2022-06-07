@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "coordinateRotation.H"
+#include "axesRotation.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -45,7 +46,7 @@ Foam::vector Foam::coordinateRotation::findOrthogonal(const vector& axis)
     direction maxCmpt = 0;
     scalar maxVal = mag(axis[maxCmpt]);
 
-    for (direction cmpt=1; cmpt < vector::nComponents; ++cmpt)
+    for (direction cmpt = 1; cmpt < vector::nComponents; ++cmpt)
     {
         const scalar val = mag(axis[cmpt]);
 
@@ -69,10 +70,14 @@ Foam::vector Foam::coordinateRotation::findOrthogonal(const vector& axis)
 
 Foam::autoPtr<Foam::coordinateRotation> Foam::coordinateRotation::New
 (
+    word modelType,
     const dictionary& dict
 )
 {
-    const word modelType(dict.get<word>("type"));
+    if (modelType.empty())
+    {
+        modelType = coordinateRotations::axes::typeName_();
+    }
 
     auto* ctorPtr = dictionaryConstructorTable(modelType);
 
@@ -81,13 +86,22 @@ Foam::autoPtr<Foam::coordinateRotation> Foam::coordinateRotation::New
         FatalIOErrorInLookup
         (
             dict,
-            "coordinateRotation",
+            "rotation",
             modelType,
             *dictionaryConstructorTablePtr_
         ) << exit(FatalIOError);
     }
 
     return autoPtr<coordinateRotation>(ctorPtr(dict));
+}
+
+
+Foam::autoPtr<Foam::coordinateRotation> Foam::coordinateRotation::New
+(
+    const dictionary& dict
+)
+{
+    return coordinateRotation::New(dict.get<word>("type"), dict);
 }
 
 

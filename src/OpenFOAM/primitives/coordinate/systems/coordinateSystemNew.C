@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,28 +30,34 @@ License
 #include "cartesianCS.H"
 #include "indirectCS.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
+namespace Foam
+{
 
-//- Handle a 'coordinateSystem' sub-dictionary
+// Handle a 'coordinateSystem' sub-dictionary
 // In 1806 and earlier, this was handled (rather poorly) in the
 // coordinateSystem constructor itself.
-const Foam::dictionary* Foam::coordinateSystem::subDictCompat
+static const dictionary* subDictCompat
 (
+    const word& entryName,
     const dictionary* dictPtr
 )
 {
-    if (dictPtr)
+    if (entryName.empty() || !dictPtr)
     {
-        // Non-recursive, no pattern matching in the search
-        const auto finder =
-            dictPtr->csearch(coordinateSystem::typeName_(), keyType::LITERAL);
+        return nullptr;
+    }
 
+    const auto finder = dictPtr->csearch(entryName, keyType::LITERAL);
+
+    if (finder.good())
+    {
         if (finder.isDict())
         {
             return finder.dictPtr();
         }
-        else if (finder.found())
+        else
         {
             const word csName(finder.ref().stream());
 
@@ -60,7 +66,7 @@ const Foam::dictionary* Foam::coordinateSystem::subDictCompat
             {
                 std::cerr
                     << "--> FOAM IOWarning :" << nl
-                    << "    Ignoring 'coordinateSystem' as a keyword."
+                    << "    Ignoring '" << entryName << "' as a keyword."
                     " Perhaps you meant this instead?" << nl
                     << '{' << nl
                     << "    type " << coordSystem::indirect::typeName_()
@@ -76,6 +82,8 @@ const Foam::dictionary* Foam::coordinateSystem::subDictCompat
 
     return dictPtr;
 }
+
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -162,8 +170,8 @@ Foam::autoPtr<Foam::coordinateSystem> Foam::coordinateSystem::New
     }
     else
     {
-        // Use 'coordinateSystem' subDict if present
-        dictPtr = coordinateSystem::subDictCompat(dictPtr);
+        // Fallback: 'coordinateSystem' subDict if present
+        dictPtr = subDictCompat(coordinateSystem::typeName_(), dictPtr);
     }
 
     word modelType = dictPtr->getOrDefault<word>
@@ -190,8 +198,8 @@ Foam::autoPtr<Foam::coordinateSystem> Foam::coordinateSystem::New
     }
     else
     {
-        // Use 'coordinateSystem' subDict if present
-        dictPtr = coordinateSystem::subDictCompat(dictPtr);
+        // Fallback: 'coordinateSystem' subDict if present
+        dictPtr = subDictCompat(coordinateSystem::typeName_(), dictPtr);
     }
 
     const word modelType = dictPtr->getOrDefault<word>

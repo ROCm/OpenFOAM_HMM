@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2112                                 |
+|  \\    /   O peration     | Version:  v2206                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -26,15 +26,12 @@ coeffs
     transform
     {
         origin      (-0.15 0.15 0);
-        rotation
-        {
-            type    axisAngle;
-            axis    (0 0 1);
-            angle   44.5;
+        rotation    axisAngle;
+        // Or disabled
+        //rotation    none;
 
-            // Or disabled
-            //type    none;
-        }
+        axis    (0 0 1);
+        angle   44.5;
     }
 }
 

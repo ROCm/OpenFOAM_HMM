@@ -68,15 +68,9 @@ class indirect
         const coordinateSystem* backend_;
 
 
-    // Private Member Functions
-
-        //- Construct null is disallowed
-        indirect() = delete;
-
-
 protected:
 
-        // Protected Member Functions
+    // Protected Member Functions
 
         //- Convert from local coordinate system to the global Cartesian system
         //- with optional translation for the origin
@@ -131,6 +125,9 @@ public:
 
     // Constructors
 
+        //- Default construct is disallowed
+        indirect() = delete;
+
         //- Copy construct
         indirect(const indirect& csys);
 
@@ -156,15 +153,9 @@ public:
 
     // Member Functions
 
-    // Access
+    // Characteristics
 
-        //- Reference to the underlying coordinate system
-        virtual const coordinateSystem& cs() const
-        {
-            return *backend_;
-        }
-
-        //- Is the coordinate system valid?
+        //- Is coordinate system valid?
         virtual bool valid() const
         {
             return backend_ && backend_->valid();
@@ -174,6 +165,21 @@ public:
         virtual bool uniform() const
         {
             return backend_->uniform();
+        }
+
+
+    // Access
+
+        //- Reference to the underlying coordinate system
+        virtual const coordinateSystem& cs() const
+        {
+            return *backend_;
+        }
+
+        //- Return origin
+        virtual const point& origin() const
+        {
+            return backend_->origin();
         }
 
         //- The rotation specification
@@ -192,12 +198,6 @@ public:
         virtual const string& note() const
         {
             return backend_->note();
-        }
-
-        //- Return origin
-        virtual const point& origin() const
-        {
-            return backend_->origin();
         }
 
         //- Return const reference to the rotation tensor

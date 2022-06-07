@@ -41,8 +41,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cartesianCS_H
-#define cartesianCS_H
+#ifndef Foam_cartesianCS_H
+#define Foam_cartesianCS_H
 
 #include "coordinateSystem.H"
 

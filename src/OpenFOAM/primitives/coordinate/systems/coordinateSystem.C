@@ -74,23 +74,25 @@ void Foam::coordinateSystem::assign(const dictionary& dict)
     note_.clear();
     dict.readIfPresent("note", note_);
 
-    // Non-recursive, no pattern search for "rotation"
-    // or "coordinateRotation" (older) sub-dictionary.
-    // Don't warn about older naming for now (OCT-2018)
-
     const auto finder = dict.csearchCompat
     (
-        "rotation", {{"coordinateRotation", -1806}},
+        "rotation", {{"coordinateRotation", 1806}},
         keyType::LITERAL
     );
 
-    if (finder.isDict())
+    if (finder.good())
     {
-        spec_ = coordinateRotation::New(finder.dict());
-    }
-    else if (finder.good() && (finder->stream().peek().isWord("none")))
-    {
-        spec_.reset(new coordinateRotations::identity());
+        if (finder.isDict())
+        {
+            // Use the sub-dict, which is expected to contain "type"
+            spec_ = coordinateRotation::New(finder.dict());
+        }
+        else
+        {
+            // Use current dict. Type specified by "rotation" entry itself.
+            const word rotationType(finder->get<word>());
+            spec_.reset(coordinateRotation::New(rotationType, dict));
+        }
     }
     else
     {
@@ -106,7 +108,7 @@ void Foam::coordinateSystem::assign(const dictionary& dict)
 
 Foam::coordinateSystem::coordinateSystem(std::nullptr_t)
 :
-    spec_(),
+    spec_(nullptr),
     origin_(Zero),
     rot_(sphericalTensor::I),
     name_(),
@@ -258,8 +260,10 @@ Foam::coordinateSystem::coordinateSystem
 
 Foam::coordinateSystem::coordinateSystem(const dictionary& dict)
 :
-    coordinateSystem(word::null, dict)
-{}
+    coordinateSystem(nullptr)
+{
+    assign(dict);
+}
 
 
 Foam::coordinateSystem::coordinateSystem

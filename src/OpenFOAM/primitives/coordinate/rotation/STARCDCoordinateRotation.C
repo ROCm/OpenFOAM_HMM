@@ -48,13 +48,15 @@ namespace coordinateRotations
         starcd
     );
 
-    // Longer name - Compat 1806
-    addNamedToRunTimeSelectionTable
+    // Long name - Compat 1806
+    addAliasToRunTimeSelectionTable
     (
         coordinateRotation,
         starcd,
         dictionary,
-        STARCDRotation
+        starcd,
+        STARCDRotation,
+        1806
     );
 
 } // End namespace coordinateRotation

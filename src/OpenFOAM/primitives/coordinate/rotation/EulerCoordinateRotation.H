@@ -48,7 +48,7 @@ Description
     \heading Dictionary entries
     \table
         Property    | Description                           | Reqd | Default
-        type        | Type name: euler (or EulerRotation)   | yes  |
+        type        | Type name: euler                      | yes  |
         angles      | Rotation angles (usually z-x-z order) | yes  |
         degrees     | Angles are in degrees                 | no   | true
         order       | Rotation order                        | no   | zxz
@@ -57,6 +57,7 @@ Description
 Note
     The rotation order is usually z-x-z, but can also be something like
     "rollPitchYaw" etc.
+    Also accepts "EulerRotation" (OpenFOAM-v1806) for the type.
 
 SourceFiles
     EulerCoordinateRotation.C

@@ -48,13 +48,15 @@ namespace coordinateRotations
         euler
     );
 
-    // Longer name - Compat 1806
-    addNamedToRunTimeSelectionTable
+    // Long name - Compat 1806
+    addAliasToRunTimeSelectionTable
     (
         coordinateRotation,
         euler,
         dictionary,
-        EulerRotation
+        euler,
+        EulerRotation,
+        1806
     );
 
 } // End namespace coordinateRotations

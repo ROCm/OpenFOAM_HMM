@@ -43,8 +43,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cylindricalCS_H
-#define cylindricalCS_H
+#ifndef Foam_cylindricalCS_H
+#define Foam_cylindricalCS_H
 
 #include "coordinateSystem.H"
 

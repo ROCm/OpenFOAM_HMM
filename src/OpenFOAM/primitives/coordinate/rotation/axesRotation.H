@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,17 +44,18 @@ Description
 
     \heading Dictionary entries
     \table
-        Property    | Description                       | Required  | Default
-        type        | type name: axes (previously axesRotation)     | yes   |
-        e1          | local x-axis                      | partly    |
-        e2          | local y-axis                      | partly    |
-        e3          | local z-axis                      | partly    |
+        Property    | Description                           | Reqd  | Default
+        type        | Type name: axes                       | yes   |
+        e1          | local x-axis                          | partly |
+        e2          | local y-axis                          | partly |
+        e3          | local z-axis                          | partly |
     \endtable
 
 Note
     It is also possible to specify in terms of \c axis and \c direction.
     For cylindrical coordinates, the \c axis would correspond to the
     \a z-axis and the \c direction to the \a r-axis.
+    Also accepts "axesRotation" (OpenFOAM-v1806) for the type.
 
 SourceFiles
     axesRotation.C

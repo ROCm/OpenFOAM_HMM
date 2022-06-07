@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2112                                 |
+|  \\    /   O peration     | Version:  v2206                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -174,24 +174,16 @@ surfaces
     interpolatedPlane
     {
         type            plane;    // always triangulated
+        basePoint       (0 0 0);
+        normalVector    (0.1 0.1 1);
+        interpolate     true;
 
         // Make plane relative to the coordinateSystem (Cartesian)
         coordinateSystem
         {
             origin      (0.0501 0.0501 0.005);
-
-            // Add a coordinate rotation
-            // (required, so here one that doesn't change anything)
-            coordinateRotation
-            {
-                type    axesRotation;
-                e1      (1 0 0);
-                e2      (0 1 0);
-            }
+            rotation    none;
         }
-        basePoint       (0 0 0);
-        normalVector    (0.1 0.1 1);
-        interpolate     true;
     }
 
     walls_constant

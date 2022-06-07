@@ -52,7 +52,8 @@ Description
     }
     \endverbatim
 
-    The same, but in more verbose format:
+    However, a more verbose format with rotation provided as a dictionary entry
+    is possible:
     \verbatim
     coordinateSystem
     {
@@ -67,8 +68,19 @@ Description
     }
     \endverbatim
 
-    For an identity rotation, can use a slightly more compact format:
+    It also also possible to use the compact (single-dictionary) form
+    and specific a different type of rotation:
     \verbatim
+    coordinateSystem
+    {
+        type        cartesian;
+        origin      (0 0 0);
+        rotation    euler;
+        angles      (90 0 0);
+    }
+    \endverbatim
+
+    This last form can be particularly readable for an identity rotation:
     coordinateSystem
     {
         type        cartesian;
@@ -132,12 +144,6 @@ class indirect;
 
 class coordinateSystem
 {
-    // Private Member Functions
-
-        //- Use 'coordinateSystem' sub-dictionary if present
-        static const dictionary* subDictCompat(const dictionary* dictPtr);
-
-
 protected:
 
     //- Friendship with indirect for dispatching to its underlying system
@@ -434,9 +440,9 @@ public:
 
     // Member Functions
 
-    // Access
+    // Characteristics
 
-        //- Considered valid if it has a specification
+        //- Consider valid if it has a specification
         virtual bool valid() const
         {
             return bool(spec_);
@@ -446,6 +452,15 @@ public:
         virtual bool uniform() const
         {
             return true;
+        }
+
+
+    // Access
+
+        //- Return origin
+        virtual const point& origin() const
+        {
+            return origin_;
         }
 
         //- The rotation specification
@@ -464,12 +479,6 @@ public:
         virtual const string& note() const
         {
             return note_;
-        }
-
-        //- Return origin
-        virtual const point& origin() const
-        {
-            return origin_;
         }
 
         //- Return const reference to the rotation tensor

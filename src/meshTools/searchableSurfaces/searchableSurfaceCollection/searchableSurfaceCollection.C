@@ -207,23 +207,33 @@ Foam::searchableSurfaceCollection::searchableSurfaceCollection
             sDict.readEntry("scale", scale_[surfI]);
 
             const dictionary& coordDict = sDict.subDict("transform");
-            if (coordDict.found("coordinateSystem"))
-            {
-                // Backwards compatibility: use coordinateSystem subdictionary
-                transform_.set
+
+            const dictionary* compatDict =
+                coordDict.findDict
                 (
-                    surfI,
-                    new coordSystem::cartesian(coordDict, "coordinateSystem")
+                    coordinateSystem::typeName_(),
+                    keyType::LITERAL
                 );
+
+            if (compatDict)
+            {
+                // Deprecated form
+                if (error::master())
+                {
+                    std::cerr
+                        << "--> FOAM IOWarning :" << nl
+                        << "    Found [v1806] '"
+                        << coordinateSystem::typeName_()
+                        << "' entry within transform dictionary" << nl
+                        << std::endl;
+                    error::warnAboutAge("sub-dictionary", 1806);
+                }
+
+                transform_.set(surfI, new coordSystem::cartesian(*compatDict));
             }
             else
             {
-                // New form: directly set from dictionary
-                transform_.set
-                (
-                    surfI,
-                    new coordSystem::cartesian(sDict, "transform")
-                );
+                transform_.set(surfI, new coordSystem::cartesian(coordDict));
             }
 
             const word subGeomName(sDict.get<word>("surface"));

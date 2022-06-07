@@ -114,7 +114,16 @@ public:
 
     // Selectors
 
-        //- Select constructed from dictionary
+        //- Select construct the specified coordinate rotation type
+        //
+        //  An empty modelType will be treated as "axes" (eg, e1/e3)
+        static autoPtr<coordinateRotation> New
+        (
+            word modelType,
+            const dictionary& dict
+        );
+
+        //- Select construct from dictionary (requires the "type" entry)
         static autoPtr<coordinateRotation> New(const dictionary& dict);
 
 

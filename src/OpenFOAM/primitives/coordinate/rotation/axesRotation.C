@@ -48,13 +48,15 @@ namespace coordinateRotations
         axes
     );
 
-    // Longer name - Compat 1806
-    addNamedToRunTimeSelectionTable
+    // Long name - Compat 1806
+    addAliasToRunTimeSelectionTable
     (
         coordinateRotation,
         axes,
         dictionary,
-        axesRotation
+        axes,
+        axesRotation,
+        1806
     );
 
 } // End namespace coordinateRotations
