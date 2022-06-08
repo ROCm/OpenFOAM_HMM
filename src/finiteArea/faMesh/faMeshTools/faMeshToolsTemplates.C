@@ -42,35 +42,35 @@ Foam::tmp<Foam::Field<Type>> Foam::faMeshTools::flattenEdgeField
     auto& result = tresult.ref();
 
     // Internal field
-    result.slice(0, fld.size()) = fld;
+    result.slice(0, fld.size()) = fld.primitiveField();
 
-    if (primitiveOrdering)
+    label start = fld.size();
+
+    // Boundary fields
+    forAll(fld.boundaryField(), patchi)
     {
-        // Boundary field in primitive patch order
+        const labelList& edgeLabels = mesh.boundary()[patchi].edgeLabels();
+        const label len = edgeLabels.size();
+        const auto& pfld = fld.boundaryField()[patchi];
 
-        forAll(fld.boundaryField(), patchi)
+        // Only assign when field size matches underlying patch size
+        // ie, skip 'empty' patches etc
+
+        if (len == pfld.size())
         {
-            UIndirectList<Type>
-            (
-                result,
-                mesh.boundary()[patchi].edgeLabels()
-            ) = fld.boundaryField()[patchi];
+            if (primitiveOrdering)
+            {
+                // In primitive patch order
+                UIndirectList<Type>(result, edgeLabels) = pfld;
+            }
+            else
+            {
+                // In sub-list (slice) order
+                result.slice(start, len) = pfld;
+            }
         }
-    }
-    else
-    {
-        // Boundary field in sub-list (slice) order
 
-        label start = fld.size();
-
-        forAll(fld.boundaryField(), patchi)
-        {
-            const label len = mesh.boundary()[patchi].size();
-
-            result.slice(start, len) = fld.boundaryField()[patchi];
-
-            start += len;
-        }
+        start += len;
     }
 
     return tresult;

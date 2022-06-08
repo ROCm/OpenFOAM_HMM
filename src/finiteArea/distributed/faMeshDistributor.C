@@ -118,52 +118,83 @@ Foam::faMeshDistributor::faMeshDistributor
         Pout<< "Create from nFaces:" << srcMesh.faceLabels().size()
             << " to:" << tgtMesh.faceLabels().size() << endl;
 
-        vectorField oldFaceCentres(srcMesh_.areaCentres());
-        vectorField newFaceCentres(tgtMesh_.areaCentres());
-
-        // volume: cells, area: faces
-        distMap_.distributeCellData(oldFaceCentres);
-        vectorField diff(newFaceCentres - oldFaceCentres);
-
-        Pout<< "diff faces: " << diff << endl;
-
-        vectorField oldEdgeCentres
-        (
-            faMeshTools::flattenEdgeField(srcMesh_.edgeCentres())
-        );
-        vectorField newEdgeCentres
-        (
-            faMeshTools::flattenEdgeField(tgtMesh_.edgeCentres())
-        );
-
-        Pout<< "distributed edges: " << oldEdgeCentres.size() << " from "
-            << srcMesh.nEdges() << " to " << tgtMesh.nEdges() << endl;
-
-        // volume: faces, area: edges
-        distMap_.distributeFaceData(oldEdgeCentres);
-
-        diff = (newEdgeCentres - oldEdgeCentres);
-
-        Pout<< "diff edges: " << diff << endl;
-
-        Info<< "Patch edge maps" << endl;
-        forAll(patchEdgeMaps_, patchi)
+        // Check face centres
         {
-            if (patchEdgeMaps_.set(patchi))
+            vectorField oldFaceCentres(srcMesh_.areaCentres());
+            vectorField newFaceCentres(tgtMesh_.areaCentres());
+
+            // volume: cells, area: faces
+            distMap_.distributeCellData(oldFaceCentres);
+
+            vectorField diff(newFaceCentres - oldFaceCentres);
+
+            if (!diff.empty() && !diff.uniform())
             {
-                Pout<< "patch " << patchi << " : "
-                    << patchEdgeMaps_[patchi].info() << endl;
+                forAll(oldFaceCentres, facei)
+                {
+                    if (oldFaceCentres[facei] != newFaceCentres[facei])
+                    {
+                        Pout<< "face: " << facei
+                            << ' ' << oldFaceCentres[facei]
+                            << " vs "  << newFaceCentres[facei]
+                            << endl;
+                    }
+                }
             }
         }
 
-        Info<< nl << "Detailed patch maps" << endl;
-
-        forAll(patchEdgeMaps_, patchi)
+        // Check edge centres
         {
-            if (patchEdgeMaps_.set(patchi))
+            vectorField oldEdgeCentres
+            (
+                faMeshTools::flattenEdgeField(srcMesh_.edgeCentres())
+            );
+            vectorField newEdgeCentres
+            (
+                faMeshTools::flattenEdgeField(tgtMesh_.edgeCentres())
+            );
+
+            Pout<< "distributed edges: " << oldEdgeCentres.size() << " from "
+                << srcMesh.nEdges() << " to " << tgtMesh.nEdges() << endl;
+
+            // volume: faces, area: edges
+            distMap_.distributeFaceData(oldEdgeCentres);
+
+            vectorField diff(newEdgeCentres - oldEdgeCentres);
+
+            if (!diff.empty() && !diff.uniform())
             {
-                Info<< "patch " << patchi << " : "
-                    << patchEdgeMaps_[patchi] << endl;
+                forAll(oldEdgeCentres, edgei)
+                {
+                    if (oldEdgeCentres[edgei] != newEdgeCentres[edgei])
+                    {
+                        Pout<< "edge: " << edgei
+                            << ' ' << oldEdgeCentres[edgei]
+                            << " vs "  << newEdgeCentres[edgei]
+                            << endl;
+                    }
+                }
+            }
+
+            Info<< "Patch edge maps" << endl;
+            forAll(patchEdgeMaps_, patchi)
+            {
+                if (patchEdgeMaps_.set(patchi))
+                {
+                    Pout<< "patch " << patchi << " : "
+                        << patchEdgeMaps_[patchi].info() << endl;
+                }
+            }
+
+            Info<< nl << "Detailed patch maps" << endl;
+
+            forAll(patchEdgeMaps_, patchi)
+            {
+                if (patchEdgeMaps_.set(patchi))
+                {
+                    Info<< "patch " << patchi << " : "
+                        << patchEdgeMaps_[patchi] << endl;
+                }
             }
         }
     }

@@ -31,12 +31,12 @@ License
 #include "areaFields.H"
 #include "edgeFields.H"
 #include "fac.H"
-#include "processorFaPatch.H"
-#include "wedgeFaPatch.H"
 #include "cartesianCS.H"
 #include "scalarMatrices.H"
+#include "processorFaPatch.H"
 #include "processorFaPatchFields.H"
 #include "emptyFaPatchFields.H"
+#include "wedgeFaPatch.H"
 #include "triPointRef.H"
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //

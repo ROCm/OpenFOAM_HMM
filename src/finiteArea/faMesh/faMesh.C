@@ -37,6 +37,7 @@ License
 #include "areaFields.H"
 #include "edgeFields.H"
 #include "faMeshLduAddressing.H"
+#include "processorFaPatch.H"
 #include "wedgeFaPatch.H"
 #include "faPatchData.H"
 
@@ -282,6 +283,13 @@ bool Foam::faMesh::init(const bool doInit)
 
     // Calculate the geometry for the patches (transformation tensors etc.)
     boundary_.calcGeometry();
+
+    // Ensure area information is properly synchronised
+    if (Pstream::parRun())
+    {
+        const_cast<areaVectorField&>(areaCentres()).boundaryFieldRef()
+            .evaluateCoupled<processorFaPatch>();
+    }
 
     return false;
 }
