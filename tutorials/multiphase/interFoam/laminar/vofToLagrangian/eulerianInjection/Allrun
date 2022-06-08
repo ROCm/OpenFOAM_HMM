@@ -24,4 +24,6 @@ runParallel setFields
 
 runParallel $(getApplication)
 
+runApplication reconstructPar
+
 #------------------------------------------------------------------------------
