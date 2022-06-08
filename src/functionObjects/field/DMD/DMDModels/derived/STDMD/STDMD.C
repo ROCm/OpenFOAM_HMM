@@ -64,7 +64,7 @@ Foam::scalar Foam::DMDModels::STDMD::L2norm(const RMatrix& z) const
     if (z.n() != 1)
     {
         FatalErrorInFunction
-            << "  # Input matrix is not a column vector. #"
+            << "Input matrix is not a column vector."
             << exit(FatalError);
     }
     #endif
@@ -82,13 +82,34 @@ Foam::RectangularMatrix<Foam::scalar> Foam::DMDModels::STDMD::orthonormalise
     RMatrix ez
 ) const
 {
-    RMatrix dz(Q_.n(), 1, Zero);
+    List<scalar> dz(Q_.n());
+    const label sz0 = ez.m();
+    const label sz1 = dz.size();
 
     for (label i = 0; i < nGramSchmidt_; ++i)
     {
-        dz = Q_ & ez;
-        reduce(dz, sumOp<RMatrix>());
-        ez -= Q_*dz;
+        // dz = Q_ & ez;
+        dz = Zero;
+        for (label i = 0; i < sz0; ++i)
+        {
+            for (label j = 0; j < sz1; ++j)
+            {
+                dz[j] += Q_(i,j)*ez(i,0);
+            }
+        }
+
+        reduce(dz, sumOp<List<scalar>>());
+
+        // ez -= Q_*dz;
+        for (label i = 0; i < sz0; ++i)
+        {
+            scalar t = 0;
+            for (label j = 0; j < sz1; ++j)
+            {
+                t += Q_(i,j)*dz[j];
+            }
+            ez(i,0) -= t;
+        }
     }
 
     return ez;
@@ -106,6 +127,34 @@ void Foam::DMDModels::STDMD::expand(const RMatrix& ez, const scalar ezNorm)
 
     // Stack a row (Zero) and column (Zero) to "G"
     G_.resize(G_.m() + 1);
+}
+
+
+void Foam::DMDModels::STDMD::updateG(const RMatrix& z)
+{
+    List<scalar> zTilde(Q_.n(), Zero);
+    const label sz0 = z.m();
+    const label sz1 = zTilde.size();
+
+    // zTilde = Q_ & z;
+    for (label i = 0; i < sz0; ++i)
+    {
+        for (label j = 0; j < sz1; ++j)
+        {
+            zTilde[j] += Q_(i,j)*z(i,0);
+        }
+    }
+
+    reduce(zTilde, sumOp<List<scalar>>());
+
+    // G_ += SMatrix(zTilde^zTilde);
+    for (label i = 0; i < G_.m(); ++i)
+    {
+        for (label j = 0; j < G_.n(); ++j)
+        {
+            G_(i, j) += zTilde[i]*zTilde[j];
+        }
+    }
 }
 
 
@@ -234,9 +283,10 @@ reducedKoopmanOperator()
                 // on Rx of receiver subset masters
                 QRMatrix<RMatrix> QRM
                 (
-                    Rx,
                     QRMatrix<RMatrix>::modes::ECONOMY,
-                    QRMatrix<RMatrix>::outputs::ONLY_R
+                    QRMatrix<RMatrix>::outputs::ONLY_R,
+                    QRMatrix<RMatrix>::pivoting::FALSE,
+                    Rx
                 );
                 RMatrix& R = QRM.R();
                 Rx.transfer(R);
@@ -257,6 +307,7 @@ reducedKoopmanOperator()
         }
 
         pBufs.finishedSends();
+
 
         // Receive interim Rx by the master, and apply final operations
         if (Pstream::master())
@@ -289,9 +340,10 @@ reducedKoopmanOperator()
             {
                 QRMatrix<RMatrix> QRM
                 (
-                    Rx,
                     QRMatrix<RMatrix>::modes::ECONOMY,
-                    QRMatrix<RMatrix>::outputs::ONLY_R
+                    QRMatrix<RMatrix>::outputs::ONLY_R,
+                    QRMatrix<RMatrix>::pivoting::FALSE,
+                    Rx
                 );
                 RMatrix& R = QRM.R();
                 Rx.transfer(R);
@@ -410,8 +462,6 @@ bool Foam::DMDModels::STDMD::eigendecomposition(SMatrix& Atilde)
     Pstream::scatter(evals_);
     Pstream::scatter(evecs_);
 
-    Atilde.clear();
-
     return true;
 }
 
@@ -460,7 +510,7 @@ void Foam::DMDModels::STDMD::frequencies()
 
 void Foam::DMDModels::STDMD::amplitudes()
 {
-    const IOField<scalar> snapshot0
+    IOField<scalar> snapshot0
     (
         IOobject
         (
@@ -473,29 +523,47 @@ void Foam::DMDModels::STDMD::amplitudes()
         )
     );
 
-    RMatrix snapshot(1, 1, Zero);
-    if (!empty_)
-    {
-        snapshot.resize(Qupper_.m(), 1);
-        std::copy(snapshot0.cbegin(), snapshot0.cend(), snapshot.begin());
-    }
+    // RxInv^T*(Qupper^T*snapshot0)
+    // tmp = (Qupper^T*snapshot0)
+    List<scalar> tmp(Qupper_.n(), Zero);
+    const label sz0 = snapshot0.size();
+    const label sz1 = tmp.size();
 
-    RMatrix R((RxInv_.T()^Qupper_)*snapshot);
-    reduce(R, sumOp<RMatrix>());
+    for (label i = 0; i < sz0; ++i)
+    {
+        for (label j = 0; j < sz1; ++j)
+        {
+            tmp[j] += Qupper_(i,j)*snapshot0[i];
+        }
+    }
+    snapshot0.clear();
+
+    // R = RxInv^T*tmp
+    List<scalar> R(Qupper_.n(), Zero);
+    for (label i = 0; i < sz1; ++i)
+    {
+        for (label j = 0; j < R.size(); ++j)
+        {
+            R[j] += RxInv_(i,j)*tmp[i];
+        }
+    }
+    tmp.clear();
+
+    reduce(R, sumOp<List<scalar>>());
 
     if (Pstream::master())
     {
         Info<< tab << "Computing amplitudes" << endl;
 
-        amps_.resize(R.m());
+        amps_.resize(R.size());
         const RCMatrix pEvecs(MatrixTools::pinv(evecs_));
 
         // amps_ = pEvecs*R;
         for (label i = 0; i < amps_.size(); ++i)
         {
-            for (label j = 0; j < R.m(); ++j)
+            for (label j = 0; j < R.size(); ++j)
             {
-                amps_[i] += pEvecs(i, j)*R(j, 0);
+                amps_[i] += pEvecs(i,j)*R[j];
             }
         }
     }
@@ -541,7 +609,7 @@ void Foam::DMDModels::STDMD::magnitudes()
                 std::iota(w.begin(), w.end(), 1);
                 w = sin(twoPi/step_*(w - 1 - 0.25*step_))*pr + pr;
 
-                forAll(amps_, i)
+                forAll(mags_, i)
                 {
                     mags_[i] = sorter(w, amps_[i], evals_[i], modeNorm);
                 }
@@ -554,9 +622,9 @@ void Foam::DMDModels::STDMD::magnitudes()
                 Info<< "weighted amplitude scaling method" << endl;
 
                 const scalar modeNorm = 1;
-                const List<scalar> w(step_, 1.0);
+                const List<scalar> w(step_, 1);
 
-                forAll(amps_, i)
+                forAll(mags_, i)
                 {
                     mags_[i] = sorter(w, amps_[i], evals_[i], modeNorm);
                 }
@@ -596,7 +664,7 @@ Foam::scalar Foam::DMDModels::STDMD::sorter
     // Omit eigenvalues with very large or very small mags
     if (!(mag(eigenvalue) < GREAT && mag(eigenvalue) > VSMALL))
     {
-        Info<< "  Returning zero magnitude for mag(eigenvalue) = "
+        Info<< "    Returning zero magnitude for mag(eigenvalue) = "
             << mag(eigenvalue) << endl;
 
         return 0;
@@ -605,7 +673,7 @@ Foam::scalar Foam::DMDModels::STDMD::sorter
     // Omit eigenvalue-STDMD step combinations that pose a risk of overflow
     if (mag(eigenvalue)*step_ > sortLimiter_)
     {
-        Info<< "  Returning zero magnitude for"
+        Info<< "    Returning zero magnitude for"
             << " mag(eigenvalue) = " << mag(eigenvalue)
             << " current index = " << step_
             << " sortLimiter = " << sortLimiter_
@@ -634,6 +702,8 @@ bool Foam::DMDModels::STDMD::dynamics()
     {
         return false;
     }
+
+    Atilde.clear();
 
     frequencies();
 
@@ -714,7 +784,7 @@ void Foam::DMDModels::STDMD::filter()
 {
     Info<< tab << "Filtering objects of dynamics" << endl;
 
-    // Filter objects according to iMags
+    // Filter objects according to magsi
     filterIndexed(evals_, magsi_);
     filterIndexed(evecs_, magsi_);
     filterIndexed(freqs_, magsi_);
@@ -764,8 +834,15 @@ Foam::DMDModels::STDMD::STDMD
     amps_(Zero),
     mags_(Zero),
     magsi_(Zero),
+    patches_
+    (
+        dict.getOrDefault<wordRes>
+        (
+            "patches",
+            dict.found("patch") ? wordRes(1,dict.get<word>("patch")) : wordRes()
+        )
+    ),
     fieldName_(dict.get<word>("field")),
-    patch_(dict.getOrDefault<word>("patch", word::null)),
     timeName0_(),
     minBasis_(0),
     minEval_(0),
@@ -854,17 +931,17 @@ bool Foam::DMDModels::STDMD::read(const dictionary& dict)
         );
 
     Info<< tab << "Settings are read for:" << nl
-        << "    field: " << fieldName_ << nl
-        << "    modeSorter: " << modeSorterTypeNames[modeSorter_] << nl
-        << "    nModes: " << nModes_ << nl
-        << "    maxRank: " << maxRank_ << nl
-        << "    nGramSchmidt: " << nGramSchmidt_ << nl
-        << "    fMin: " << fMin_ << nl
-        << "    fMax: " << fMax_ << nl
-        << "    minBasis: " << minBasis_ << nl
-        << "    minEVal: " << minEval_ << nl
-        << "    sortLimiter: " << sortLimiter_ << nl
-        << "    nAgglomerationProcs: " << nAgglomerationProcs_ << nl
+        << tab << "    field: " << fieldName_ << nl
+        << tab << "    modeSorter: " << modeSorterTypeNames[modeSorter_] << nl
+        << tab << "    nModes: " << nModes_ << nl
+        << tab << "    maxRank: " << maxRank_ << nl
+        << tab << "    nGramSchmidt: " << nGramSchmidt_ << nl
+        << tab << "    fMin: " << fMin_ << nl
+        << tab << "    fMax: " << fMax_ << nl
+        << tab << "    minBasis: " << minBasis_ << nl
+        << tab << "    minEVal: " << minEval_ << nl
+        << tab << "    sortLimiter: " << sortLimiter_ << nl
+        << tab << "    nAgglomerationProcs: " << nAgglomerationProcs_ << nl
         << endl;
 
     return true;
@@ -903,7 +980,12 @@ bool Foam::DMDModels::STDMD::initialise(const RMatrix& z)
                 nSnap
             );
 
-            std::copy(z.cbegin(), z.cbegin() + nSnap, snapshot0.begin());
+            std::copy
+            (
+                z.cbegin(),
+                z.cbegin() + nSnap,
+                snapshot0.begin()
+            );
 
             const IOstreamOption streamOpt
             (
@@ -945,12 +1027,7 @@ bool Foam::DMDModels::STDMD::update(const RMatrix& z)
     }
 
     // Update "G" before the potential orthonormal basis compression
-    {
-        RMatrix zTilde(Q_ & z);
-        reduce(zTilde, sumOp<RMatrix>());
-
-        G_ += SMatrix(zTilde^zTilde);
-    }
+    updateG(z);
 
     // Compress the orthonormal basis if required
     if (Q_.n() >= maxRank_)
@@ -987,7 +1064,7 @@ bool Foam::DMDModels::STDMD::fit()
 
         filter();
 
-        writeToFile(word("filteredDynamics"));
+        writeToFile(word("filtered_dynamics"));
     }
 
     step_ = 0;

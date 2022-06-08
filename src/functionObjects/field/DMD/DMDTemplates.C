@@ -38,11 +38,11 @@ bool Foam::functionObjects::DMD::getSnapshot()
 
     if (foundObject<VolFieldType>(fieldName_))
     {
-        return getSnapshotField<VolFieldType>();
+        return storeSnapshot<VolFieldType>();
     }
     else if (foundObject<SurfaceFieldType>(fieldName_))
     {
-        return getSnapshotField<SurfaceFieldType>();
+        return storeSnapshot<SurfaceFieldType>();
     }
 
     return false;
@@ -50,7 +50,7 @@ bool Foam::functionObjects::DMD::getSnapshot()
 
 
 template<class GeoFieldType>
-bool Foam::functionObjects::DMD::getSnapshotField()
+bool Foam::functionObjects::DMD::storeSnapshot()
 {
     if (step_ == 0)
     {
@@ -73,39 +73,69 @@ bool Foam::functionObjects::DMD::getSnapshotField()
 
     const GeoFieldType& field = lookupObject<GeoFieldType>(fieldName_);
 
-    if (patch_.empty())
+    label rowi = nSnap_;
+    if (patches_.empty())
     {
         const label nField = field.size();
 
         for (direction dir = 0; dir < nComps; ++dir)
         {
-            z_.subColumn(0, nSnap_ + dir*nField, nField) = field.component(dir);
+            z_.subColumn(0, rowi, nField) = field.component(dir);
+            rowi += nField;
         }
     }
     else
     {
-        const label patchi = mesh_.boundaryMesh().findPatchID(patch_);
+        const labelList patchis
+        (
+            mesh_.boundaryMesh().patchSet(patches_).sortedToc()
+        );
 
-        if (patchi < 0)
+        for (const label patchi : patchis)
         {
-            FatalErrorInFunction
-                << "Cannot find patch " << patch_
-                << exit(FatalError);
-        }
+            const typename GeoFieldType::Boundary& bf = field.boundaryField();
 
-        const typename GeoFieldType::Boundary& bf = field.boundaryField();
+            const Field<typename GeoFieldType::value_type>& pbf = bf[patchi];
 
-        const Field<typename GeoFieldType::value_type>& pbf = bf[patchi];
+            const label nField = pbf.size();
 
-        const label nField = pbf.size();
-
-        for (direction dir = 0; dir < nComps; ++dir)
-        {
-            z_.subColumn(0, nSnap_ + dir*nField, nField) = pbf.component(dir);
+            if (nField > 0)
+            {
+                for (direction dir = 0; dir < nComps; ++dir)
+                {
+                    z_.subColumn(0, rowi, nField) = pbf.component(dir);
+                    rowi += nField;
+                }
+            }
         }
     }
 
     return true;
+}
+
+
+template<class Type>
+bool Foam::functionObjects::DMD::nComponents
+(
+    const word& fieldName,
+    label& nComps
+) const
+{
+    typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
+    typedef GeometricField<Type, fvsPatchField, surfaceMesh> SurfaceFieldType;
+
+    if (mesh_.foundObject<VolFieldType>(fieldName))
+    {
+        nComps = pTraits<typename VolFieldType::value_type>::nComponents;
+        return true;
+    }
+    else if (mesh_.foundObject<SurfaceFieldType>(fieldName))
+    {
+        nComps = pTraits<typename SurfaceFieldType::value_type>::nComponents;
+        return true;
+    }
+
+    return false;
 }
 
 

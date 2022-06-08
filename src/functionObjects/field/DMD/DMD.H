@@ -69,7 +69,7 @@ Description
     Output files:
     \verbatim
       dynamics_<field>.dat            | Dynamics data for each mode
-      filteredDynamics_<field>.dat    | Filtered dynamics data for each mode
+      filtered_dynamics_<field>.dat   | Filtered dynamics data for each mode
     \endverbatim
 
     wherein for each mode, the following quantities are output into files:
@@ -87,16 +87,21 @@ Usage
     \verbatim
     DMD1
     {
-        // Mandatory entries (unmodifiable)
+        // Mandatory entries
         type                DMD;
         libs                (fieldFunctionObjects);
         DMDModel            <DMDModel>;
-        field               <inputField>;
+        field               <word>;
 
-        // Optional entries (unmodifiable)
-        patch               <patchName>;
+        // Optional entries
 
-        // Mandatory/Optional (inherited) entries
+            // Option-1
+            patch               <word>;
+
+            // Option-2
+            patches             (<wordRes>);
+
+        // Inherited entries
         ...
     }
     \endverbatim
@@ -109,6 +114,7 @@ Usage
       DMDModel     | Name of specified DMD model        | word | yes  | -
       field        | Name of operand field              | word | yes  | -
       patch        | Name of operand patch              | word | no   | null
+      patches      | Names of operand patches        | wordRes | no   | null
     \endtable
 
     Options for the \c DMDModel entry:
@@ -173,17 +179,19 @@ class DMD
         //- Dynamic mode decomposition model
         autoPtr<DMDModel> DMDModelPtr_;
 
-        //- Snapshot matrix (effectively a column vector)
+        //- Augmented snapshot matrix (effectively a column vector)
         //  Upper half = current-time snapshot slot
         //  Lower half = previous-time snapshot slot
         //  A snapshot is an input dataset to be processed per execution step
+        //  A single snapshot is usually referred to as the snapshot of a single
+        //  time step, an augmented snapshot is constructed of two snapshots
         RMatrix z_;
+
+        //- Names of operand patches
+        const wordRes patches_;
 
         //- Name of operand field
         const word fieldName_;
-
-        //- Name of operand patch
-        const word patch_;
 
         //- Number of elements in a snapshot
         label nSnap_;
@@ -195,7 +203,7 @@ class DMD
 
     // Private Member Functions
 
-        // Process
+        // Evaluation
 
             //- Initialise snapshot at the first-execution step
             //  Initialisation at the ctor or read level is not possible
@@ -210,11 +218,22 @@ class DMD
             template<class Type>
             bool getSnapshot();
 
-            //- Get operand field based on its geometric field type
+            //- Store operand field based on its geometric
+            //- field type after few manipulations
             //  Move previous-time field into previous-time slot in snapshot
             //  copy new current-time field into current-time slot in snapshot
             template<class GeoFieldType>
-            bool getSnapshotField();
+            bool storeSnapshot();
+
+
+        // Access
+
+            //- Return number of components of the base type of a given field
+            label nComponents(const word& fieldName) const;
+
+            //- Get the number of components of the base type of a given field
+            template<class Type>
+            bool nComponents(const word& fieldName, label& nComps) const;
 
 
 public:

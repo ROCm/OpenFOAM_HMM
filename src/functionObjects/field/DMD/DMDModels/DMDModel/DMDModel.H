@@ -149,7 +149,7 @@ public:
 
     // Member Functions
 
-        // Process
+        // Evaluation
 
             //- Initialise model data members with a given snapshot
             virtual bool initialise(const RMatrix& snapshot) = 0;
@@ -169,17 +169,7 @@ public:
             }
 
 
-        // Access
-
-            //- Return number of components of the base type of a given field
-            label nComponents(const word& fieldName) const;
-
-            //- Get the number of components of the base type of a given field
-            template<class Type>
-            bool nComponents(const word& fieldName, label& nComps) const;
-
-
-        // IO
+        // I-O
 
             //- Read model settings
             virtual bool read(const dictionary& dict) = 0;
@@ -189,12 +179,6 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "DMDModelTemplates.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

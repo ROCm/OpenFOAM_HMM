@@ -92,13 +92,10 @@ Usage
     \verbatim
     DMD1
     {
-        // Mandatory/Optional entries
-        ...
-
-        // Mandatory entries (unmodifiable)
+        // Mandatory entries
         DMDModel            STDMD;
 
-        // Conditional mandatory entries (runtime modifiable)
+        // Conditional mandatory entries
 
             // Option-1
             interval            5.5;
@@ -106,7 +103,7 @@ Usage
             // Option-2
             executeInterval     10;
 
-        // Optional entries (runtime modifiable)
+        // Optional entries
         modeSorter          kiewat;
         nGramSchmidt        5;
         maxRank             50;
@@ -115,12 +112,12 @@ Usage
         fMax                1000000000;
         nAgglomerationProcs 20;
 
-        // Optional entries (runtime modifiable, yet not recommended)
+        // Optional entries (not recommended to change)
         minBasis            0.00000001;
         minEVal             0.00000001;
         sortLimiter         500.0;
 
-        // Mandatory/Optional (inherited) entries
+        // Inherited entries
         ...
     }
     \endverbatim
@@ -278,11 +275,11 @@ class STDMD
         //- Indices of 'mags'
         List<label> magsi_;
 
+        //- Names of operand patches
+        const wordRes patches_;
+
         //- Name of operand field
         const word fieldName_;
-
-        //- Name of operand patch
-        const word patch_;
 
         //- First-processed snapshot required by the mode-sorting
         //- algorithms at the final output computations (K:p. 43)
@@ -335,7 +332,7 @@ class STDMD
 
     // Private Member Functions
 
-        // Process
+        // Evaluation
 
             //- Return (parallel) L2-norm of a given column vector
             scalar L2norm(const RMatrix& z) const;
@@ -349,11 +346,11 @@ class STDMD
             //- to 'G' if '(ezNorm/zNorm > minBasis)'
             void expand(const RMatrix& ez, const scalar ezNorm);
 
+            //- Update 'G' before the potential orthonormal basis compression
+            void updateG(const RMatrix& z);
+
             //- Compress orthonormal basis for 'Q' and 'G' if '(Q.n()>maxRank)'
             void compress();
-
-
-        // Evaluation
 
             //- Return reduced Koopman operator 'Atilde' (K:Eq. 78)
             //  Also fills 'RxInv'.
@@ -414,7 +411,8 @@ class STDMD
                 GeoFieldType& modeRe,
                 GeoFieldType& modeIm,
                 const RMatrix& primitiveMode,
-                const label i
+                const label magi,
+                const label rowi = 0
             );
 
             //- Compute a mode for a given non-scalar-based input field
@@ -428,11 +426,12 @@ class STDMD
                 GeoFieldType& modeRe,
                 GeoFieldType& modeIm,
                 const RMatrix& primitiveMode,
-                const label i
+                const label magi,
+                const label rowi = 0
             );
 
 
-        // IO
+        // I-O
 
             //- Write objects of dynamics
             void writeToFile(const word& fileName) const;

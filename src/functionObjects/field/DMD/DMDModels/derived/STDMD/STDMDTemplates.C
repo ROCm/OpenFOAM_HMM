@@ -43,7 +43,7 @@ void Foam::DMDModels::STDMD::filterIndexed
 
     // Copy if frequency of element is within [a, b]
     label j = 0;
-    for (const auto& i : indices)
+    for (const label i : indices)
     {
         lstWithin[j] = lst[i];
         ++j;
@@ -64,7 +64,7 @@ void Foam::DMDModels::STDMD::filterIndexed
 
     // Copy if frequency of element is within [a, b]
     label j = 0;
-    for (const auto& i : indices)
+    for (const label i : indices)
     {
         matWithin.subColumn(j) = mat.subColumn(i);
         ++j;
@@ -109,7 +109,7 @@ bool Foam::DMDModels::STDMD::calcModes()
     RxInv_.clear();
 
     label modei = 0;
-    for (const label i : magsi_)
+    for (const label magi : magsi_)
     {
         GeoFieldType modeRe
         (
@@ -147,21 +147,30 @@ bool Foam::DMDModels::STDMD::calcModes()
 
         if (modeRe.size() != 0 && !empty_)
         {
-            if (patch_.empty())
+            if (patches_.empty())
             {
-                auto& inModeRe = modeRe.primitiveFieldRef();
-                auto& inModeIm = modeIm.primitiveFieldRef();
+                auto& re = modeRe.primitiveFieldRef();
+                auto& im = modeIm.primitiveFieldRef();
 
-                calcMode(inModeRe, inModeIm, primitiveMode, i);
+                calcMode(re, im, primitiveMode, magi);
             }
             else
             {
-                const label patchi = mesh_.boundaryMesh().findPatchID(patch_);
+                label rowi = 0;
+                const labelList patchis
+                (
+                    mesh_.boundaryMesh().patchSet(patches_).sortedToc()
+                );
 
-                auto& bfModeRe = modeRe.boundaryFieldRef()[patchi];
-                auto& bfModeIm = modeIm.boundaryFieldRef()[patchi];
+                for (const label patchi : patchis)
+                {
+                    auto& re = modeRe.boundaryFieldRef()[patchi];
+                    auto& im = modeIm.boundaryFieldRef()[patchi];
 
-                calcMode(bfModeRe, bfModeIm, primitiveMode, i);
+                    calcMode(re, im, primitiveMode, magi, rowi);
+
+                    rowi += re.size()*pTraits<Type>::nComponents;
+                }
             }
         }
 
@@ -184,21 +193,22 @@ typename std::enable_if
     GeoFieldType& modeRe,
     GeoFieldType& modeIm,
     const RMatrix& primitiveMode,
-    const label i
+    const label magi,
+    const label rowi
 )
 {
-    const label fieldSize = modeRe.size();
+    const label szfld = modeRe.size();
 
-    for (label p = 0; p < primitiveMode.m(); ++p)
+    for (label i = rowi; i < szfld + rowi; ++i)
     {
         complex mode(Zero);
-        for (label q = 0; q < evecs_.m(); ++q)
+        for (label j = 0; j < evecs_.m(); ++j)
         {
-            mode += primitiveMode(p, q)*evecs_(q, i);
+            mode += primitiveMode(i, j)*evecs_(j, magi);
         }
-        label p1 = p%fieldSize;
-        modeRe[p1] = mode.real();
-        modeIm[p1] = mode.imag();
+        const label k = (i-rowi)%szfld;
+        modeRe[k] = mode.real();
+        modeIm[k] = mode.imag();
     }
 }
 
@@ -213,22 +223,25 @@ typename std::enable_if
     GeoFieldType& modeRe,
     GeoFieldType& modeIm,
     const RMatrix& primitiveMode,
-    const label i
+    const label magi,
+    const label rowi
 )
 {
-    const label fieldSize = modeRe.size();
+    const label szfld = modeRe.size();
+    const label szfldcmps =
+        szfld*pTraits<typename GeoFieldType::value_type>::nComponents;
 
-    for (label p = 0; p < primitiveMode.m(); ++p)
+    for (label i = rowi; i < szfldcmps + rowi; ++i)
     {
         complex mode(Zero);
-        for (label q = 0; q < evecs_.m(); ++q)
+        for (label j = 0; j < evecs_.m(); ++j)
         {
-            mode += primitiveMode(p, q)*evecs_(q, i);
+            mode += primitiveMode(i, j)*evecs_(j, magi);
         }
-        label p1 = p%fieldSize;
-        label p2 = p/fieldSize;
-        modeRe[p1][p2] = mode.real();
-        modeIm[p1][p2] = mode.imag();
+        const label k = (i-rowi)%szfld;
+        const label m = (i-rowi)/szfld;
+        modeRe[k][m] = mode.real();
+        modeIm[k][m] = mode.imag();
     }
 }
 
