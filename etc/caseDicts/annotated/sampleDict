@@ -151,12 +151,8 @@ sets
 
 
 // Surface sampling definition
-//
-// 1] patches are not triangulated by default
-// 2] planes are always triangulated
-// 3] iso-surfaces are always triangulated
 surfaces
-(
+{
     constantPlane
     {
         type            plane;    // always triangulated
@@ -262,15 +258,11 @@ surfaces
 
     triangleCut
     {
-        // Cutingplane using iso surface
-        type            cuttingPlane;
-        planeType       pointAndNormal;
-        pointAndNormalDict
-        {
-            basePoint       (0.4 0 0.4);
-            normalVector    (1 0.2 0.2);
-        }
-        interpolate     true;
+        // Cutting plane : using iso surface
+        type        cuttingPlane;
+        point       (0.4 0 0.4);
+        normal      (1 0.2 0.2);
+        interpolate true;
 
         //zone            ABC;          // Optional: zone only
         //exposedPatchName fixedWalls;  // Optional: zone only
@@ -310,7 +302,7 @@ surfaces
                                     // boundaryFaces (nearest boundary face)
         interpolate true;
     }
-);
+}
 
 
 // *********************************************************************** //

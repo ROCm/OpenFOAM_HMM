@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "dictionary.H"
 #include "plane.H"
 #include "tensor.H"
 
@@ -141,7 +142,7 @@ Foam::plane::plane
 }
 
 
-Foam::plane::plane(const scalarList& coeffs)
+Foam::plane::plane(const UList<scalar>& coeffs)
 {
     calcFromCoeffs
     (
@@ -178,9 +179,28 @@ Foam::plane::plane(const dictionary& dict)
     normal_(Zero),
     origin_(Zero)
 {
-    const word planeType(dict.get<word>("planeType"));
+    word planeType;
+    dict.readIfPresent("planeType", planeType);
 
-    if (planeType == "planeEquation")
+    if (planeType.empty())
+    {
+        const dictionary& coeffs = dict.optionalSubDict("pointAndNormalDict");
+
+        origin_ = coeffs.get<point>("point");
+        normal_ = coeffs.get<point>("normal");
+
+        makeUnitNormal("point/normal");
+    }
+    else if (planeType == "pointAndNormal")
+    {
+        const dictionary& coeffs = dict.subDict("pointAndNormalDict");
+
+        origin_ = coeffs.getCompat<point>("point", {{"basePoint", 1612}});
+        normal_ = coeffs.getCompat<point>("normal", {{"normalVector", 1612}});
+
+        makeUnitNormal("point/normal");
+    }
+    else if (planeType == "planeEquation")
     {
         const dictionary& subDict = dict.subDict("planeEquationDict");
 
@@ -190,7 +210,7 @@ Foam::plane::plane(const dictionary& dict)
             subDict.get<scalar>("b"),
             subDict.get<scalar>("c"),
             subDict.get<scalar>("d"),
-            "planeEquationDict"  // caller name for makeUnitNormal
+            "planeEquation"  // caller name for makeUnitNormal
         );
     }
     else if (planeType == "embeddedPoints")
@@ -202,18 +222,8 @@ Foam::plane::plane(const dictionary& dict)
             subDict.get<point>("point1"),
             subDict.get<point>("point2"),
             subDict.get<point>("point3"),
-            "embeddedPointsDict"  // caller name for makeUnitNormal
+            "embeddedPoints"  // caller name for makeUnitNormal
         );
-
-    }
-    else if (planeType == "pointAndNormal")
-    {
-        const dictionary& subDict = dict.subDict("pointAndNormalDict");
-
-        origin_ = subDict.getCompat<point>("point", {{"basePoint", 1612}});
-        normal_ = subDict.getCompat<point>("normal", {{"normalVector", 1612}});
-
-        makeUnitNormal("pointAndNormalDict");
     }
     else
     {
@@ -238,7 +248,7 @@ Foam::plane::plane(Istream& is)
 
 Foam::FixedList<Foam::scalar, 4> Foam::plane::planeCoeffs() const
 {
-    FixedList<scalar, 4> coeffs(4);
+    FixedList<scalar, 4> coeffs;
 
     const scalar magX = mag(normal_.x());
     const scalar magY = mag(normal_.y());

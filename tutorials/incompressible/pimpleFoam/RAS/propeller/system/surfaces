@@ -21,14 +21,10 @@ surfaces
     {
         zNormal
         {
-            type            cuttingPlane;
-            planeType       pointAndNormal;
-            pointAndNormalDict
-            {
-                point   (0 0 0);
-                normal  (0 0 1);
-            }
-            interpolate     true;
+            type        cuttingPlane;
+            point       (0 0 0);
+            normal      (0 0 1);
+            interpolate true;
         }
 
         isoQ

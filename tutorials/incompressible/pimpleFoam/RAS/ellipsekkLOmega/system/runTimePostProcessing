@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2112                                 |
+|  \\    /   O peration     | Version:  v2206                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -132,16 +132,10 @@ postPro1
             // Same colours and scaling as surface
             ${_surface};
 
-            type            plane;
-            planeType       pointAndNormal;
-
-            pointAndNormalDict
-            {
-                point   (0 0 0);
-                normal  (1 0 0);
-            }
-
-            offsets         (0.1 0.2 0.3 0.4 0.5);
+            type    plane;
+            point   (0 0 0);
+            normal  (1 0 0);
+            offsets (0.1 0.2 0.3 0.4 0.5);
 
             colourMap       coolToWarm;
         }

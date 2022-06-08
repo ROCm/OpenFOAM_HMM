@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,25 +36,19 @@ inline Foam::plane::plane()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline const Foam::vector& Foam::plane::normal() const
+inline const Foam::vector& Foam::plane::normal() const noexcept
 {
     return normal_;
 }
 
 
-inline const Foam::point& Foam::plane::origin() const
+inline const Foam::point& Foam::plane::origin() const noexcept
 {
     return origin_;
 }
 
 
-inline Foam::point& Foam::plane::origin()
-{
-    return origin_;
-}
-
-
-inline const Foam::point& Foam::plane::refPoint() const
+inline Foam::point& Foam::plane::origin() noexcept
 {
     return origin_;
 }

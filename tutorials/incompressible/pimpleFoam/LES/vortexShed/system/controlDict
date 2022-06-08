@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2112                                 |
+|  \\    /   O peration     | Version:  v2206                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -136,14 +136,9 @@ functions
         {
             zNormal
             {
-                type            cuttingPlane;
-                planeType       pointAndNormal;
-                pointAndNormalDict
-                {
-                    point           (0 0 -0.01);
-                    normal          (0 0 1);
-                }
-                interpolate     false;
+                type        cuttingPlane;
+                point       (0 0 -0.01);
+                normal      (0 0 1);
             }
         }
     }

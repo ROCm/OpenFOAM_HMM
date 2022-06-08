@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,14 +31,16 @@ Description
     Geometric class that creates a 3D plane and can return the intersection
     point between a line and the plane.
 
-    Construction from a dictionary is driven by the \c planeType
+    Construction from a dictionary is driven by the \c planeType.
+    If \c planeType is missing, \c pointAndNormal is used and the
+    \c pointAndNormalDict becomes optional.
 
     For \c planeType as \c pointAndNormal :
     \verbatim
     pointAndNormalDict
     {
-        point   <point>;   // or basePoint
-        normal  <vector>;  // or normalVector
+        point   <point>;   // basePoint (1612 and earlier)
+        normal  <vector>;  // normalVector (1612 and earlier)
     }
     \endverbatim
 
@@ -66,22 +68,25 @@ Description
     \endverbatim
 
 SourceFiles
+    planeI.H
     plane.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef plane_H
-#define plane_H
+#ifndef Foam_plane_H
+#define Foam_plane_H
 
 #include "point.H"
 #include "scalarList.H"
-#include "dictionary.H"
 #include "line.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+// Forward Declarations
+class dictionary;
 
 /*---------------------------------------------------------------------------*\
                             Class plane Declaration
@@ -115,12 +120,12 @@ public:
             dir_(dir)
         {}
 
-        const point& refPoint() const
+        const point& refPoint() const noexcept
         {
             return pt_;
         }
 
-        const vector& dir() const
+        const vector& dir() const noexcept
         {
             return dir_;
         }
@@ -199,7 +204,7 @@ public:
 
         //- Construct from coefficients for the plane equation:
         //- ax + by + cz + d = 0
-        explicit plane(const scalarList& coeffs);
+        explicit plane(const UList<scalar>& coeffs);
 
         //- Construct from coefficients for the plane equation:
         //- ax + by + cz + d = 0
@@ -215,16 +220,13 @@ public:
     // Member Functions
 
         //- The plane unit normal
-        inline const vector& normal() const;
+        inline const vector& normal() const noexcept;
 
         //- The plane base point
-        inline const point& origin() const;
+        inline const point& origin() const noexcept;
 
         //- The plane base point, for modification
-        inline point& origin();
-
-        //- The plane base point (same as origin)
-        inline const point& refPoint() const;
+        inline point& origin() noexcept;
 
         //- Flip the plane by reversing the normal
         inline void flip();
@@ -292,16 +294,22 @@ public:
 
         //- Write to dictionary
         void writeDict(Ostream& os) const;
+
+
+    // Housekeeping
+
+        //- The plane base point (same as origin)
+        const point& refPoint() const noexcept { return origin_; }
 };
 
 
-// IOstream Operators
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 //- Write plane normal, origin
 Ostream& operator<<(Ostream& os, const plane& pln);
 
 
-// Global Operators
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
 //- Test for equality of origin and normal
 inline bool operator==(const plane& a, const plane& b);

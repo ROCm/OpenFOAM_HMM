@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2112                                 |
+|  \\    /   O peration     | Version:  v2206                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -25,15 +25,9 @@ planes
 
     _plane
     {
-        type        plane; //cuttingPlane;
-        planeType   pointAndNormal;
-        interpolate false;
-
-        pointAndNormalDict
-        {
-            point   (0 0 0);
-            normal  (1 0 0);
-        }
+        type    plane; //cuttingPlane;
+        point   (0 0 0);
+        normal  (1 0 0);
     }
 
     surfaces
@@ -41,19 +35,13 @@ planes
         plane0
         {
             ${_plane}
-            pointAndNormalDict
-            {
-                point   (0 0 0);
-            }
+            point   (0 0 0);
         }
 
         plane1
         {
             ${_plane}
-            pointAndNormalDict
-            {
-                point   (-0.1 0 0);
-            }
+            point   (-0.1 0 0);
         }
     }
 

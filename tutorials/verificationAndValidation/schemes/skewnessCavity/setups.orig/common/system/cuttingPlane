@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2112                                 |
+|  \\    /   O peration     | Version:  v2206                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -15,19 +15,14 @@ cuttingPlaneError
     interpolationScheme cell;
 
     surfaces
-    (
+    {
         zNormal
         {
-            type            cuttingPlane;
-            planeType       pointAndNormal;
-            pointAndNormalDict
-            {
-                point       (0 0.05 -0.05);
-                normal      (0 0 1);
-            }
-            interpolate     no;
+            type    cuttingPlane;
+            point   (0 0.05 -0.05);
+            normal  (0 0 1);
         }
-    );
+    }
 }
 
 
@@ -40,19 +35,14 @@ cuttingPlaneMagError
     interpolationScheme cell;
 
     surfaces
-    (
+    {
         zNormal
         {
-            type            cuttingPlane;
-            planeType       pointAndNormal;
-            pointAndNormalDict
-            {
-                point       (0 0.05 -0.05);
-                normal      (0 0 1);
-            }
-            interpolate     no;
+            type    cuttingPlane;
+            point   (0 0.05 -0.05);
+            normal  (0 0 1);
         }
-    );
+    }
 }
 
 

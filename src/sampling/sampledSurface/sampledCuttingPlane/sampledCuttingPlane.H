@@ -40,12 +40,9 @@ Usage
     {
         surface1
         {
-            type        cuttingPlane;
-            planeType   pointAndNormal;
-            pointAndNormalDict
-            {
-                ...
-            }
+            type    cuttingPlane;
+            point   ...;
+            normal  ...;
         }
     }
     \endverbatim
@@ -54,7 +51,7 @@ Usage
     \table
         Property | Description                              | Required | Default
         type     | cuttingPlane                             | yes |
-        planeType | plane description (pointAndNormal etc)  | yes |
+        planeType | Plane description (pointAndNormal etc)  | no  |
         offsets   | Offsets of the origin in the normal direction | no | (0)
         isoMethod | Iso-algorithm (cell/topo/point)         | no  | topo
         bounds   | limit with bounding box                  | no  |

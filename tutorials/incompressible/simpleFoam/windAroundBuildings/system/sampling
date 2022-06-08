@@ -20,7 +20,6 @@ planes
     _plane
     {
         type            cuttingPlane;
-        planeType       pointAndNormal;
         interpolate     false;
     }
 
@@ -29,32 +28,23 @@ planes
         plane0
         {
             ${_plane}
-            pointAndNormalDict
-            {
-                point   (100 100 50);
-                normal  (1 -1 0);
-            }
+            point       (100 100 50);
+            normal      (1 -1 0);
             enabled     false;
         }
 
         plane1
         {
             ${_plane}
-            pointAndNormalDict
-            {
-                point   (100 100 50);
-                normal  (1 1 0);
-            }
+            point       (100 100 50);
+            normal      (1 1 0);
         }
 
         plane2
         {
             ${_plane}
-            pointAndNormalDict
-            {
-                point   (200 100 50);
-                normal  (1 0 0);
-            }
+            point       (200 100 50);
+            normal      (1 0 0);
         }
     };
 

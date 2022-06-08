@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2112                                 |
+|  \\    /   O peration     | Version:  v2206                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -61,12 +61,14 @@ functions
         writeControl    writeTime;
         writeInterval   1;
         surfaceFormat   raw;
+
         fields
         (
             alpha.water
         );
+
         surfaces
-        (
+        {
             freeSurface
             {
                 type        isoSurfaceCell;
@@ -93,7 +95,7 @@ functions
                 interpolate false;
                 regularise  false;
             }
-        );
+        }
     }
 }
 

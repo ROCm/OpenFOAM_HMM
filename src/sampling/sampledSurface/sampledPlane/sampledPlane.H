@@ -41,11 +41,8 @@ Usage
         surface1
         {
             type        plane;
-            planeType   pointAndNormal;
-            pointAndNormalDict
-            {
-                ...
-            }
+            point       ...;
+            normal      ...;
         }
     }
     \endverbatim
@@ -54,7 +51,7 @@ Usage
     \table
         Property | Description                             | Required | Default
         type     | plane                                   | yes      |
-        planeType | plane description (pointAndNormal etc) | yes      |
+        planeType | Plane description (pointAndNormal etc) | no       |
         triangulate | triangulate faces                    | no       | true
         bounds   | limit with bounding box                 | no       |
         zone     | limit to cell zone (name or regex)      | no       |
