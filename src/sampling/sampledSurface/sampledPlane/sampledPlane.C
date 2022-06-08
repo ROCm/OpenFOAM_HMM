@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,6 +49,65 @@ namespace Foam
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+Foam::plane Foam::sampledPlane::definePlane
+(
+    const polyMesh& mesh,
+    const dictionary& dict
+)
+{
+    plane pln(dict);
+
+    bool adjust = false;
+    const dictionary* dictptr = nullptr;
+    coordSystem::cartesian cs;
+
+    if (dict.found(coordinateSystem::typeName_(), keyType::LITERAL))
+    {
+        // Create with registry to allow lookup from globally defined
+        // coordinate systems?
+
+        auto csPtr =
+            coordinateSystem::New(mesh, dict, coordinateSystem::typeName_());
+
+        if (csPtr)
+        {
+            adjust = true;
+            cs = csPtr();
+        }
+    }
+    else if
+    (
+        (dictptr = dict.findDict("transform", keyType::LITERAL)) != nullptr
+    )
+    {
+        adjust = true;
+        cs = coordSystem::cartesian(*dictptr);
+    }
+
+
+    // Make plane relative to the Cartesian coordinate system
+    if (adjust)
+    {
+        const point  orig = cs.globalPosition(pln.origin());
+        const vector norm = cs.globalVector(pln.normal());
+
+        DebugInfo
+            << "plane "
+            << " origin:" << pln.origin()
+            << " normal:" << pln.normal()
+            << " =>"
+            << " origin:" << orig
+            << " normal:" << norm
+            << endl;
+
+        // Reassign the plane
+        pln = plane(orig, norm);
+    }
+
+    return pln;
+}
+
 
 Foam::bitSet Foam::sampledPlane::cellSelection(const bool warn) const
 {
@@ -105,7 +164,7 @@ Foam::sampledPlane::sampledPlane
 )
 :
     sampledSurface(name, mesh, dict),
-    cuttingPlane(plane(dict)),
+    cuttingPlane(definePlane(mesh, dict)),
     zoneNames_(),
     bounds_(dict.getOrDefault("bounds", boundBox::invertedBox)),
     triangulate_(dict.getOrDefault("triangulate", true)),
@@ -116,31 +175,6 @@ Foam::sampledPlane::sampledPlane
         zoneNames_.resize(1);
         dict.readEntry("zone", zoneNames_.first());
     }
-
-
-    // Make plane relative to the coordinateSystem (Cartesian)
-    // allow lookup from global coordinate systems
-    if (dict.found(coordinateSystem::typeName_()))
-    {
-        coordSystem::cartesian cs
-        (
-            coordinateSystem::New(mesh, dict, coordinateSystem::typeName_())
-        );
-        plane& pln = planeDesc();
-
-        const point  orig = cs.globalPosition(pln.origin());
-        const vector norm = cs.globalVector(pln.normal());
-
-        DebugInfo
-            << "plane " << name << " :"
-            << " origin:" << origin()
-            << " normal:" << normal()
-            << " defined within a local coordinateSystem" << endl;
-
-        // Reassign the plane
-        pln = plane(orig, norm);
-    }
-
 
     if (debug)
     {

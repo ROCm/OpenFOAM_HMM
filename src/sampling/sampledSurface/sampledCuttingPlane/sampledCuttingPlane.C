@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,6 +31,7 @@ License
 #include "fvMesh.H"
 #include "volFields.H"
 #include "volPointInterpolation.H"
+#include "cartesianCS.H"
 #include "addToRunTimeSelectionTable.H"
 #include "PtrList.H"
 
@@ -50,6 +51,64 @@ namespace Foam
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+Foam::plane Foam::sampledCuttingPlane::definePlane
+(
+    const polyMesh& mesh,
+    const dictionary& dict
+)
+{
+    plane pln(dict);
+
+    bool adjust = false;
+    const dictionary* dictptr = nullptr;
+    coordSystem::cartesian cs;
+
+    if (dict.found(coordinateSystem::typeName_(), keyType::LITERAL))
+    {
+        // Create with registry to allow lookup from globally defined
+        // coordinate systems?
+
+        auto csPtr =
+            coordinateSystem::New(mesh, dict, coordinateSystem::typeName_());
+
+        if (csPtr)
+        {
+            adjust = true;
+            cs = csPtr();
+        }
+    }
+    else if
+    (
+        (dictptr = dict.findDict("transform", keyType::LITERAL)) != nullptr
+    )
+    {
+        adjust = true;
+        cs = coordSystem::cartesian(*dictptr);
+    }
+
+
+    // Make plane relative to the Cartesian coordinate system
+    if (adjust)
+    {
+        const point  orig = cs.globalPosition(pln.origin());
+        const vector norm = cs.globalVector(pln.normal());
+
+        DebugInfo
+            << "plane "
+            << " origin:" << pln.origin()
+            << " normal:" << pln.normal()
+            << " =>"
+            << " origin:" << orig << " normal:" << norm
+            << endl;
+
+        // Reassign the plane
+        pln = plane(orig, norm);
+    }
+
+    return pln;
+}
+
 
 void Foam::sampledCuttingPlane::checkBoundsIntersection
 (
@@ -512,7 +571,7 @@ Foam::sampledCuttingPlane::sampledCuttingPlane
 )
 :
     sampledSurface(name, mesh, dict),
-    plane_(dict),
+    plane_(definePlane(mesh, dict)),
     offsets_(),
     isoParams_
     (

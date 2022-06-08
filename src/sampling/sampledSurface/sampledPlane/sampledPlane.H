@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,14 +49,15 @@ Usage
 
     Where the sub-entries comprise:
     \table
-        Property | Description                             | Required | Default
-        type     | plane                                   | yes      |
-        planeType | Plane description (pointAndNormal etc) | no       |
-        triangulate | triangulate faces                    | no       | true
-        bounds   | limit with bounding box                 | no       |
-        zone     | limit to cell zone (name or regex)      | no       |
-        zones    | limit to cell zones (names, regexs)     | no       |
-        coordinateSystem | define plane within given coordinate system | no |
+        Property | Description                              | Reqd | Default
+        type     | plane                                    | yes  |
+        planeType | Plane description (pointAndNormal etc)  | no   |
+        triangulate | triangulate faces                     | no   | true
+        bounds   | limit with bounding box                  | no   |
+        zone     | limit to cell zone (name or regex)       | no   |
+        zones    | limit to cell zones (names, regexs)      | no   |
+        coordinateSystem | define plane within given cartesian system | no |
+        transform | define plane within given cartesian system | no |
     \endtable
 
 SeeAlso
@@ -73,8 +74,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef sampledPlane_H
-#define sampledPlane_H
+#ifndef Foam_sampledPlane_H
+#define Foam_sampledPlane_H
 
 #include "sampledSurface.H"
 #include "cuttingPlane.H"
@@ -109,6 +110,10 @@ class sampledPlane
 
 
     // Private Member Functions
+
+        //- Define plane from dictionary entry and apply any coordinate
+        //- transformations
+        static plane definePlane(const polyMesh& mesh, const dictionary& dict);
 
         //- Define cell selection from zones and bounding box.
         //  Optionally check and warn if the plane does not intersect

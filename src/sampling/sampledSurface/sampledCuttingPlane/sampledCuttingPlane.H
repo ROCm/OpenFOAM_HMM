@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,6 +60,8 @@ Usage
         exposedPatchName | name for zone subset             | optional |
         regularise | Face simplification (enum or bool)     | no  | true
         mergeTol | tolerance for merging points             | no  | 1e-6
+        coordinateSystem | define plane within given cartesian system | no |
+        transform | define plane within given cartesian system | no |
     \endtable
 
 Note
@@ -73,8 +75,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef sampledCuttingPlane_H
-#define sampledCuttingPlane_H
+#ifndef Foam_sampledCuttingPlane_H
+#define Foam_sampledCuttingPlane_H
 
 #include "sampledSurface.H"
 #include "plane.H"
@@ -152,6 +154,10 @@ class sampledCuttingPlane
 
 
     // Private Member Functions
+
+        //- Define plane from dictionary entry and apply any coordinate
+        //- transformations
+        static plane definePlane(const polyMesh& mesh, const dictionary& dict);
 
         //- Check and warn if bounding box does not intersect mesh or plane
         void checkBoundsIntersection

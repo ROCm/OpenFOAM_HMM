@@ -107,6 +107,10 @@ public:
         //- Read construct from IOobject
         explicit coordinateSystems(const IOobject& io);
 
+        //- Read construct "coordinateSystems" from "constant"
+        //- using given registry
+        explicit coordinateSystems(const objectRegistry& obr);
+
         //- Construct from IOobject and PtrList content
         coordinateSystems
         (

@@ -116,6 +116,22 @@ Foam::coordinateSystems::coordinateSystems(const IOobject& io)
 }
 
 
+Foam::coordinateSystems::coordinateSystems(const objectRegistry& obr)
+:
+    coordinateSystems
+    (
+        IOobject
+        (
+            typeName,
+            obr.time().constant(),
+            obr,
+            IOobject::READ_IF_PRESENT,
+            IOobject::NO_WRITE
+        )
+    )
+{}
+
+
 Foam::coordinateSystems::coordinateSystems
 (
     const IOobject& io,
@@ -162,20 +178,7 @@ const Foam::coordinateSystems& Foam::coordinateSystems::New
     }
 
     // Read construct from registry
-    return obr.store
-    (
-        new coordinateSystems
-        (
-            IOobject
-            (
-                typeName,
-                obr.time().constant(),
-                obr,
-                IOobject::READ_IF_PRESENT,
-                IOobject::NO_WRITE
-            )
-        )
-    );
+    return obr.store(new coordinateSystems(obr));
 }
 
 
