@@ -32,13 +32,14 @@ Description
 
     The formatOptions for nastran:
     \table
-        Property | Description                              | Required | Default
-        fields   | field pairs for PLOAD2/PLOAD4            | yes   |
-        format   | short / long / free                      | no    | long
-        scale    | output geometry scaling                  | no    | 1
+        Property    | Description                           | Reqd | Default
+        fields      | Field pairs for PLOAD2/PLOAD4         | yes |
+        format      | Nastran format (short/long/free)      | no  | long
+        scale       | Output geometry scaling               | no  | 1
+        transform   | Output coordinate transform           | no  |
         fieldLevel  | Subtract field level before scaling   | no  | empty dict
         fieldScale  | Output field scaling                  | no  | empty dict
-        commonGeometry | use separate geometry files        | no    | false
+        commonGeometry | use separate geometry files        | no  | false
     \endtable
 
     For example,
@@ -143,9 +144,6 @@ private:
 
         //- Use common geometry file
         bool commonGeometry_;
-
-        //- Output geometry scaling
-        const scalar geometryScale_;
 
         //- Separator (used for free format)
         word separator_;

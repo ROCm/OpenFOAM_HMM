@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,6 +36,8 @@ Description
         format      | ascii or binary format                | no  | binary
         legacy      | Legacy VTK output                     | no  | false
         precision   | Write precision in ascii         | no | same as IOstream
+        scale       | Output geometry scaling               | no  | 1
+        transform   | Output coordinate transform           | no  |
         fieldLevel  | Subtract field level before scaling   | no  | empty dict
         fieldScale  | Output field scaling                  | no  | empty dict
         normal      | Write face area-normal in output      | no  | false

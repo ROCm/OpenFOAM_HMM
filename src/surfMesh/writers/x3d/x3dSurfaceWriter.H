@@ -32,9 +32,11 @@ Description
     The formatOptions for x3d:
     \table
         Property    | Description                           | Required | Default
-        compression | Use file compression                  | no  | false
         range       | The min/max range for colour table    | no  | automatic
         colourMap   | The colour map for rendering          | no  | coolToWarm
+        compression | Use file compression                  | no  | false
+        scale       | Output geometry scaling               | no  | 1
+        transform   | Output coordinate transform           | no  |
         fieldLevel  | Subtract field level before scaling   | no  | empty dict
         fieldScale  | Output field scaling                  | no  | empty dict
     \endtable

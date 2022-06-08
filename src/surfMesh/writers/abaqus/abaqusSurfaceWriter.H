@@ -31,11 +31,12 @@ Description
 
     The formatOptions for abaqus:
     \table
-        Property   | Description                            | Required | Default
-        scale      | output geometry scaling                | no  | 1
+        Property    | Description                           | Reqd | Default
+        scale       | Output geometry scaling               | no  | 1
+        transform   | Output coordinate transform           | no  |
         fieldLevel  | Subtract field level before scaling   | no  | empty dict
         fieldScale  | Output field scaling                  | no  | empty dict
-        noGeometry | Suppress geometry output (beta feature) | no  | false
+        noGeometry  | Suppress geometry output (beta feature) | no  | false
     \endtable
 
     For example,
@@ -111,9 +112,6 @@ class abaqusWriter
     public surfaceWriter
 {
     // Private Data
-
-        //- Output geometry scaling
-        const scalar geometryScale_;
 
         //- BETA feature
         bool noGeometry_;

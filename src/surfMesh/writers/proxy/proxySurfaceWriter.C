@@ -125,7 +125,8 @@ Foam::fileName Foam::surfaceWriters::proxyWriter::write()
         Info<< "Writing geometry to " << outputFile << endl;
     }
 
-    const meshedSurf& surf = surface();
+    // const meshedSurf& surf = surface();
+    const meshedSurfRef& surf = adjustSurface();
 
     if (Pstream::master() || !parallel_)
     {

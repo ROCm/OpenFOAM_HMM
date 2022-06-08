@@ -103,6 +103,28 @@ inline Foam::scalar Foam::surfaceWriter::mergeDim(const scalar dist) noexcept
 }
 
 
+inline Foam::scalar Foam::surfaceWriter::scale() const noexcept
+{
+    return geometryScale_;
+}
+
+
+inline Foam::scalar Foam::surfaceWriter::scale(const scalar factor) noexcept
+{
+    // This is probably not yet needed -> adjustedSurf_.clear();
+    scalar old(geometryScale_);
+    geometryScale_ = factor;
+    return old;
+}
+
+
+inline const Foam::coordSystem::cartesian&
+Foam::surfaceWriter::transform() const noexcept
+{
+    return geometryTransform_;
+}
+
+
 inline bool Foam::surfaceWriter::hasTime() const
 {
     return currTime_.name().size();

@@ -34,8 +34,9 @@ Description
     \table
         Property    | Description                           | Required | Default
         compression | Use file compression                  | no  | false
-        precision   | Write precision in ascii              | no  | same as IOstream
+        precision   | Write precision in ascii          | no  | same as IOstream
         scale       | Output geometry scaling               | no  | 1
+        transform   | Output coordinate transform           | no  |
         fieldLevel  | Subtract field level before scaling   | no  | empty dict
         fieldScale  | Output field scaling                  | no  | empty dict
         normal      | Write face area normal in output      | no  | false
@@ -115,9 +116,6 @@ class rawWriter
 
         //- Output face area normal
         const bool writeNormal_;
-
-        //- Output geometry scaling
-        const scalar geometryScale_;
 
 
     // Private Member Functions

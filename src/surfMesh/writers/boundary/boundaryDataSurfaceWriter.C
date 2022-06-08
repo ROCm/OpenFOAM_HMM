@@ -169,7 +169,8 @@ Foam::fileName Foam::surfaceWriters::boundaryDataWriter::write()
     // Dummy Time to use as objectRegistry
     autoPtr<Time> dummyTimePtr(Time::New(argList::envGlobalPath()));
 
-    const meshedSurf& surf = surface();
+    // const meshedSurf& surf = surface();
+    const meshedSurfRef& surf = adjustSurface();
 
     if (Pstream::master() || !parallel_)
     {
@@ -230,7 +231,8 @@ Foam::fileName Foam::surfaceWriters::boundaryDataWriter::writeTemplate
     // Dummy Time to use as objectRegistry
     autoPtr<Time> dummyTimePtr(Time::New(argList::envGlobalPath()));
 
-    const meshedSurf& surf = surface();
+    // const meshedSurf& surf = surface();
+    const meshedSurfRef& surf = adjustSurface();
 
     if (Pstream::master() || !parallel_)
     {

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -150,7 +150,7 @@ void Foam::surfaceWriters::abaqusWriter::writeGeometry
         << "** Points" << nl
         << "**" << nl;
 
-    fileFormats::ABAQUSCore::writePoints(os, points, geometryScale_);
+    fileFormats::ABAQUSCore::writePoints(os, points);
 
 
     // Write faces, with on-the-fly decomposition (triangulation)
@@ -237,7 +237,6 @@ void Foam::surfaceWriters::abaqusWriter::writeGeometry
 Foam::surfaceWriters::abaqusWriter::abaqusWriter()
 :
     surfaceWriter(),
-    geometryScale_(1),
     noGeometry_(false),
     outputLayout_(outputLayoutType::BY_FIELD)
 {}
@@ -249,7 +248,6 @@ Foam::surfaceWriters::abaqusWriter::abaqusWriter
 )
 :
     surfaceWriter(options),
-    geometryScale_(options.getOrDefault<scalar>("scale", 1)),
     noGeometry_(options.getOrDefault("noGeometry", false)),
     outputLayout_(outputLayoutType::BY_FIELD)
 {}
@@ -328,7 +326,8 @@ Foam::fileName Foam::surfaceWriters::abaqusWriter::write()
     }
 
 
-    const meshedSurf& surf = surface();
+    // const meshedSurf& surf = surface();
+    const meshedSurfRef& surf = adjustSurface();
 
     if (Pstream::master() || !parallel_)
     {

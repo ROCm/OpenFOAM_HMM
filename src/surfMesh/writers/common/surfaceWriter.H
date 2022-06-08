@@ -57,16 +57,28 @@ Description
             {
                 "p.*"   0.01;   // [Pa] -> [mbar]
             }
+
+            scale   1000;  // [m] -> [mm]
+            transform
+            {
+                origin  (0 0 0);
+                rotation axisAngle;
+                axis    (1 0 0);
+                angle   45;
+            }
+
         }
     }
     \endverbatim
 
   Format options:
     \table
-        Property | Description                              | Required | Default
-        verbose  | Additional output verbosity              | no  | no
-        fieldLevel | Subtract field level before scaling    | no  | empty dict
-        fieldScale | Output field scaling                   | no  | empty dict
+        Property    | Description                           | Reqd | Default
+        verbose     | Additional output verbosity           | no  | no
+        scale       | Output geometry scaling               | no  | 1
+        transform   | Output coordinate transform           | no  |
+        fieldLevel  | Subtract field level before scaling   | no  | empty dict
+        fieldScale  | Output field scaling                  | no  | empty dict
     \endtable
 
 Note
@@ -83,10 +95,10 @@ SourceFiles
 #ifndef Foam_surfaceWriter_H
 #define Foam_surfaceWriter_H
 
-#include <functional>
 #include "typeInfo.H"
 #include "autoPtr.H"
 #include "tmp.H"
+#include "cartesianCS.H"
 #include "Field.H"
 #include "fileName.H"
 #include "instant.H"
@@ -118,22 +130,30 @@ class surfaceWriter
 {
 protected:
 
-   // Static Data Members
+    // Private Data
 
-        //- Placeholder
-        static const meshedSurf::emptySurface emptySurface_;
+        //- Reference to surface or surface components
+        meshedSurfRef surf_;
 
+        //- Surface after merging (parallel)
+        mutable mergedSurf mergedSurf_;
+
+        //- The surface after point coordinate transforms and scaling
+        mutable meshedSurfRef adjustedSurf_;
+
+        //- Dimension for merging
+        scalar mergeDim_;
+
+        //- Output geometry scaling after rotate/translate
+        scalar geometryScale_;
+
+        //- Local coordinate system transformation
+        coordSystem::cartesian geometryTransform_;
+
+
+protected:
 
     // Protected Data
-
-        //- Reference to a surface
-        std::reference_wrapper<const meshedSurf> surf_;
-
-        //- Reference to raw surface components
-        meshedSurfRef surfComp_;
-
-        //- Use raw surface components instead of surface reference
-        bool useComponents_;
 
         //- The topology/surface is up-to-date?
         mutable bool upToDate_;
@@ -155,12 +175,6 @@ protected:
 
         //- The number of fields
         label nFields_;
-
-        //- Dimension for merging
-        scalar mergeDim_;
-
-        //- Merging information and the resulting merged surface (parallel)
-        mutable mergedSurf merged_;
 
         //- The current time value/name
         instant currTime_;
@@ -184,10 +198,14 @@ protected:
         //- or simply mark the surface as being up-to-date
         virtual bool merge() const;
 
-        //- Merge surfaces (if not upToDate) and return merged or
-        //- the regular surface
+        //- Merge surfaces (if not upToDate) and return merged (parallel)
+        //- or regular surface (non-parallel)
         const meshedSurf& surface() const;
 
+        //- Merge surfaces (if not upToDate) and return merged (parallel)
+        //- or regular surface (non-parallel)
+        //- and apply any coordinate system changes and/or output scaling.
+        const meshedSurfRef& adjustSurface() const;
 
         //- Gather (merge) fields with renumbering and shrinking for point data
         template<class Type>
@@ -432,6 +450,16 @@ public:
         //- Change the point merge dimension (metre)
         //  \return old value
         inline scalar mergeDim(const scalar dist) noexcept;
+
+        //- The current value of the geometry scaling
+        inline scalar scale() const noexcept;
+
+        //- Change the geometry scaling
+        //  \return old value
+        inline scalar scale(const scalar factor) noexcept;
+
+        //- The current (cartesian) coordinate system transformation
+        inline const coordSystem::cartesian& transform() const noexcept;
 
 
     // Time

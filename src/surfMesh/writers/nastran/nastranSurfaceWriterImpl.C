@@ -232,7 +232,8 @@ Foam::fileName Foam::surfaceWriters::nastranWriter::writeTemplate
     }
 
 
-    const meshedSurf& surf = surface();
+    // const meshedSurf& surf = surface();
+    const meshedSurfRef& surf = adjustSurface();
 
     if (Pstream::master() || !parallel_)
     {

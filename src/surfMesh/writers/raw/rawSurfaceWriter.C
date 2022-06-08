@@ -61,8 +61,7 @@ Foam::surfaceWriters::rawWriter::rawWriter()
     surfaceWriter(),
     streamOpt_(),
     precision_(IOstream::defaultPrecision()),
-    writeNormal_(false),
-    geometryScale_(1)
+    writeNormal_(false)
 {}
 
 
@@ -81,8 +80,7 @@ Foam::surfaceWriters::rawWriter::rawWriter
     (
         options.getOrDefault("precision", IOstream::defaultPrecision())
     ),
-    writeNormal_(options.getOrDefault("normal", false)),
-    geometryScale_(options.getOrDefault<scalar>("scale", 1))
+    writeNormal_(options.getOrDefault("normal", false))
 {}
 
 
@@ -137,7 +135,8 @@ Foam::fileName Foam::surfaceWriters::rawWriter::write()
     }
 
 
-    const meshedSurf& surf = surface();
+    // const meshedSurf& surf = surface();
+    const meshedSurfRef& surf = adjustSurface();
 
     if (Pstream::master() || !parallel_)
     {
@@ -167,11 +166,11 @@ Foam::fileName Foam::surfaceWriters::rawWriter::write()
         // Write faces centres (optionally faceArea normals)
         for (const face& f : faces)
         {
-            writePoint(os, f.centre(points)*geometryScale_);
+            writePoint(os, f.centre(points));
             if (withFaceNormal)
             {
                 os << ' ';
-                writePoint(os, f.areaNormal(points)*geometryScale_);
+                writePoint(os, f.areaNormal(points));
             }
             os << nl;
         }
