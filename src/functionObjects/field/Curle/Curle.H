@@ -75,17 +75,17 @@ Usage
         c0              330;
 
 
-        // Input - either points or surface
+        // Input - either point or surface
 
-        input           points;
+        input           point;
         observerPositions ((0 0 0)(1 0 0));
 
         //input           surface;
         //surface         "inputSurface.obj"
 
 
-        // Output - either points or surface
-        output          points;
+        // Output - either point or surface
+        output          point;
 
         //output          surface;
         //surfaceType     ensight;

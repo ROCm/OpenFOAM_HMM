@@ -72,16 +72,19 @@ command -v gnuplot >/dev/null || {
 
 for setup in $setups
 do
-
     echo ""
     echo "# Plots for the setup: $setup"
     echo ""
+
+    [ -d "results/$setup" ] || {
+        echo "No results/$setup directory found - skipping graph creation" 1>&2
+        continue
+    }
 
     dirPlots="plots/$setup"
     [ -d "$dirPlots" ] || mkdir -p "$dirPlots"
 
     plot_yPlus_vs_uPlus "$setup"
-
 done
 
 

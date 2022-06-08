@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,6 +38,7 @@ Description
 #include "specie.H"
 #include "rhoConst.H"
 #include "icoPolynomial.H"
+#include "icoTabulated.H"
 #include "hConstThermo.H"
 #include "hPolynomialThermo.H"
 #include "hPowerThermo.H"
@@ -136,6 +138,19 @@ namespace Foam
                 sensibleEnthalpy
             >
         > hTabulatedPolyIcoSolidThermoPhysics;
+
+    typedef
+        tabulatedSolidTransport
+        <
+            species::thermo
+            <
+                hTabulatedThermo
+                <
+                    icoTabulated<specie>
+                >,
+                sensibleEnthalpy
+            >
+        > hTabulatedIcoTabulatedSolidThermoPhysics;
 }
 
 

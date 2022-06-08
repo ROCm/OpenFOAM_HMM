@@ -122,44 +122,39 @@ PLT_X_CP
 
 # Requires gnuplot
 command -v gnuplot >/dev/null || {
-    echo "FOAM FATAL ERROR: gnuplot not found - skipping graph creation" 1>&2
+    echo "gnuplot not found - skipping graph creation" 1>&2
     exit 1
 }
 
 # Requires awk
 command -v awk >/dev/null || {
-    echo "FOAM FATAL ERROR: awk not found - skipping graph creation" 1>&2
+    echo "awk not found - skipping graph creation" 1>&2
     exit 1
 }
 
 # Check "results" directory
 [ -d "results" ] || {
-    echo "FOAM FATAL ERROR: No results directory found - skipping graph creation" 1>&2
+    echo "No results directory found - skipping graph creation" 1>&2
     exit 1
 }
 
 
 #------------------------------------------------------------------------------
 
-if notTest "$@"
-then
+dirPlots="plots"
+[ -d "$dirPlots" ] || mkdir -p "$dirPlots"
 
-    dirPlots="plots/$setup"
-    [ -d "$dirPlots" ] || mkdir -p "$dirPlots"
+echo ""
+echo "# Plots for the skin friction coefficient"
+echo ""
 
-    echo ""
-    echo "# Plots for the skin friction coefficient"
-    echo ""
+plot_x_vs_Cf "$Uref" $setups
 
-    plot_x_vs_Cf "$Uref" $setups
+echo ""
+echo "# Plots for the pressure coefficient"
+echo ""
 
-    echo ""
-    echo "# Plots for the pressure coefficient"
-    echo ""
-
-    plot_x_vs_Cp "$Uref" $setups
-
-fi
+plot_x_vs_Cp "$Uref" $setups
 
 
 # ------------------------------------------------------------------------------
