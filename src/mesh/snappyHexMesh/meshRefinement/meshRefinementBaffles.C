@@ -4005,8 +4005,10 @@ Foam::label Foam::meshRefinement::markPatchZones
         {
             const label seedFaceI = globalFaces.toLocal(globalSeed);
 
-            // Set face
             edgeTopoDistanceData<label>& faceInfo = allFaceInfo[seedFaceI];
+
+            // Set face
+            faceInfo = edgeTopoDistanceData<label>(0, currentZoneI);
 
             // .. and seed its edges
             const labelList& fEdges = patch.faceEdges()[seedFaceI];
