@@ -5,12 +5,12 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 runApplication blockMesh
 
-runApplication decomposePar -decomposeParDict system/decomposeParDict-2
+runApplication decomposePar -decomposeParDict system/decomposeParDict.2
 
-runParallel -s scotch -np 5 redistributePar \
-    -decomposeParDict system/decomposeParDict-5
+runParallel -s scotch -decomposeParDict system/decomposeParDict.5 \
+    redistributePar
 
-runParallel -np 5 Test-mapDistributePolyMesh \
-    -decomposeParDict system/decomposeParDict-5
+runParallel -decomposeParDict system/decomposeParDict.5 \
+    Test-mapDistributePolyMesh
 
 # -----------------------------------------------------------------------------

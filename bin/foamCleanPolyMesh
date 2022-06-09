@@ -7,22 +7,10 @@
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
+#     Copyright (C) 2022 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM.
-#
-#     OpenFOAM is free software: you can redistribute it and/or modify it
-#     under the terms of the GNU General Public License as published by
-#     the Free Software Foundation, either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-#     for more details.
-#
-#     You should have received a copy of the GNU General Public License
-#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
 #     foamCleanPolyMesh
@@ -76,34 +64,33 @@ do
     esac
 done
 
+meshDir=polyMesh
 if [ -n "$regionName" ]
 then
-    meshDir=$regionName/polyMesh
-else
-    meshDir=polyMesh
+    meshDir="$regionName/$meshDir"
 fi
 
 # If -case was specified: insist upon 'constant/polyMesh'
 if [ -n "$caseDir" ]
 then
-    if [ -d constant/$meshDir ]
+    if [ -d constant/"$meshDir" ]
     then
         # Use constant/polyMesh
-        meshDir=constant/$meshDir
+        meshDir=constant/"$meshDir"
     else
        echo "Error: no 'constant/$meshDir' in $caseDir" 1>&2
        exit 1
     fi
 else
-    if [ -d constant/$meshDir ]
+    if [ -d constant/"$meshDir" ]
     then
         # Use constant/polyMesh
-        meshDir=constant/$meshDir
-    elif [ -d $meshDir ]
+        meshDir=constant/"$meshDir"
+    elif [ -d "$meshDir" ]
     then
         # Likely already in constant/ - do not adjust anything
         :
-    elif [ "${PWD##*/}" = polyMesh -a -z "$regionName" ]
+    elif [ "${PWD##*/}" = polyMesh ] && [ -z "$regionName" ]
     then
         # Apparently already within polyMesh/
         meshDir=.
@@ -135,7 +122,7 @@ for i in \
     surfaceIndex \
 ;
 do
-    rm -rf $meshDir/$i $meshDir/$i.gz
+    rm -rf "$meshDir/$i" "$meshDir/$i.gz"
 done
 
 #------------------------------------------------------------------------------

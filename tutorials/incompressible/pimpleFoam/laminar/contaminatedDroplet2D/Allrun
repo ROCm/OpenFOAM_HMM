@@ -11,7 +11,7 @@ fi
 
 restore0Dir
 
-m4 < ./system/blockMeshDict.m4 > ./system/blockMeshDict
+m4 system/blockMeshDict.m4 > system/blockMeshDict
 
 runApplication blockMesh
 

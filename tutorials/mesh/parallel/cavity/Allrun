@@ -7,7 +7,7 @@ restore0Dir
 
 runApplication blockMesh
 
-decompDict5="-decomposeParDict system/decomposeParDict-5"
+decompDict5="-decomposeParDict system/decomposeParDict.5"
 
 # redistributePar to do decomposition
 runParallel -s decompose redistributePar -decompose

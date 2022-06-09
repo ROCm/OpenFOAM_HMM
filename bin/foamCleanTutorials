@@ -20,7 +20,7 @@
 #     using Allclean, Allwclean (when present) or regular cleanCase.
 #
 #------------------------------------------------------------------------------
-. ${WM_PROJECT_DIR:?}/bin/tools/CleanFunctions  # Tutorial clean functions
+. "${WM_PROJECT_DIR:?}"/bin/tools/CleanFunctions    # Tutorial clean functions
 
 thisScript="$0"
 if [ "/${thisScript#/}" != "$thisScript" ]

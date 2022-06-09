@@ -6,7 +6,7 @@ cd "${0%/*}" || exit                                # Run from this directory
 cleanCase
 
 # Restore default dictionaries
-cp system/decomposeParDict-2 system/decomposeParDict
+cp system/decomposeParDict.2 system/decomposeParDict
 cp system/controlDict-startTime system/controlDict
 
 # -----------------------------------------------------------------------------

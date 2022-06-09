@@ -7,7 +7,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2018-2021 OpenCFD Ltd.
+#     Copyright (C) 2018-2022 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -24,7 +24,7 @@
 #     When this is detected, the case will be skipped.
 #
 #------------------------------------------------------------------------------
-. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions    # Tutorial run functions
+. "${WM_PROJECT_DIR:?}"/bin/tools/RunFunctions      # Tutorial run functions
 
 # Normally use standard "make"
 make="make"
@@ -44,11 +44,12 @@ options:
   -serial       Prefer Allrun-serial if available
   -parallel     Prefer Allrun-parallel if available
   -test         Prefer Alltest script, pass -test argument to scripts
-  -self         Avoid initial Allrun, Alltest scripts
+  -self         Avoid initial Allrun / Alltest scripts
                 (prevent infinite recursion)
   -help         Print the usage
 
-Recursively run Allrun/Alltest (or blockMesh + application)
+Recursively run Alltest / Allrun / Allrun-parallel / Allrun-serial
+(or simply blockMesh + application)
 starting from the current directory or the specified -case directory.
 
 Equivalent options:
@@ -74,7 +75,7 @@ die()
 #------------------------------------------------------------------------------
 
 # Parse options
-unset passArgs runTests runType skipSelf
+unset passArgs runTest runType skipSelf
 
 while [ "$#" -gt 0 ]
 do
@@ -95,7 +96,7 @@ do
 
     -test)
         passArgs="-test"
-        runTests=true
+        runTest=true
         ;;
 
     ## long-option (internal dispatch form)
@@ -139,30 +140,34 @@ done
 if [ -z "$skipSelf" ]
 then
     # Use specialized script(s)
-    if [ "$runTests" = true ] && [ -f Alltest ]
+    if [ -n "$runTest" ] && [ -f ./Alltest ]
     then
         ./Alltest $passArgs $*
         exit "$?"
-    elif [ -f Allrun-optional ]
+    elif [ -f ./Allrun-optional ]
     then
         echo "Skipped optional case $PWD"
         exit 0
-    fi
-
-    # Prefer -serial or -parallel when available?
-    if [ -n "$runType" ]
+    elif [ -n "$runType" ]
     then
-        if [ -f ./"Allrun-${runType}" ]
+        # Prefer -serial or -parallel when available?
+        allRun="Allrun-$runType"
+        if [ -f ./"$allRun" ]
         then
-            ./"Allrun-${runType}" $passArgs $*
+            ./"$allRun" $passArgs $*
             exit "$?"
         fi
     fi
-    if [ -f ./Allrun ]
-    then
-        ./Allrun $passArgs $*
-        exit "$?"
-    fi
+
+    # Otherwise use Allrun or Allrun-parallel or Allrun-serial
+    for allRun in Allrun Allrun-parallel Allrun-serial
+    do
+        if [ -f ./"$allRun" ]
+        then
+            ./"$allRun" $passArgs $*
+            exit "$?"
+        fi
+    done
 fi
 
 

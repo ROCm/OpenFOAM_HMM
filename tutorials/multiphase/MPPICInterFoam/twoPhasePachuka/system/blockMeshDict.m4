@@ -8,7 +8,7 @@
 FoamFile
 {
     version     2.0;
-    format      ascii;
+    `format'      ascii;
     class       dictionary;
     object      blockMeshDict;
 }
@@ -16,8 +16,8 @@ FoamFile
 
 scale   0.001;
 
-changecom(//)changequote([,])
-define(calc, [esyscmd(perl -e 'printf ($1)')])
+changecom(//)changequote([,]) dnl>
+define(calc, [esyscmd(perl -e 'printf ($1)')]) dnl>
 define(VCOUNT, 0)
 define(vlabel, [[// ]Vertex $1 = VCOUNT define($1, VCOUNT)define([VCOUNT], incr(VCOUNT))])
 
@@ -931,3 +931,5 @@ boundary
         );
     }
 );
+
+// ************************************************************************* //

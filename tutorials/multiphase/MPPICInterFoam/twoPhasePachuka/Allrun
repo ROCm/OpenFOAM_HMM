@@ -5,8 +5,8 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 restore0Dir
 
-# Create the underlying block mesh
-m4 system/pachuka.m4 > system/blockMeshDict
+# Create the mesh
+m4 system/blockMeshDict.m4 > system/blockMeshDict
 runApplication blockMesh
 
 # Create faceSet for burner inlet and faceZone for coupled wall

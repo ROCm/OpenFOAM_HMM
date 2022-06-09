@@ -5,8 +5,6 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 cleanCase0
 
-cleanFaMesh
-
 (cd makeWave && wclean)
 
 rm -rf history

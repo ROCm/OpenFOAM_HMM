@@ -6,7 +6,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2015-2021 OpenCFD Ltd.
+#     Copyright (C) 2015-2022 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -105,6 +105,54 @@ cleanPostProcessing()
 }
 
 
+cleanFaMesh()
+{
+    if [ -e constant/faMesh ]
+    then
+        if [ -e constant/faMesh/faMeshDefinition ]
+        then
+            # Old constant/faMesh location for faMeshDefinition still in use:
+            # - warn but don't remove anything
+            echo
+            echo "Warning: not removing constant/faMesh/"
+            echo "    It contains a 'faMeshDefinition' file"
+            echo "    Relocate the file(s) to system/ to avoid this warning"
+            echo
+        else
+            # Can remove constant/faMesh/ entirely (no faMeshDefinition)
+            rm -rf constant/faMesh
+        fi
+    fi
+}
+
+
+cleanPolyMesh()
+{
+    if [ -e constant/polyMesh ]
+    then
+        if [ -e constant/polyMesh/blockMeshDict ] \
+        || [ -e constant/polyMesh/blockMeshDict.m4 ]
+        then
+            # Old constant/polyMesh location for blockMeshDict still in use:
+            # - warn but don't remove anything
+            echo
+            echo "Warning: not removing constant/polyMesh/"
+            echo "    It contains a 'blockMeshDict' or 'blockMeshDict.m4' file"
+            echo "    Relocate the file(s) to system/ to avoid this warning"
+            echo
+        else
+            # Can remove constant/polyMesh/ entirely (no blockMeshDict)
+            rm -rf constant/polyMesh
+        fi
+    fi
+
+    if [ -e system/blockMeshDict.m4 ]
+    then
+        rm -f system/blockMeshDict
+    fi
+}
+
+
 cleanCase()
 {
     cleanTimeDirectories
@@ -114,6 +162,10 @@ cleanCase()
     cleanOptimisation
     cleanPostProcessing
 
+    cleanFaMesh
+    cleanPolyMesh
+    cleanSnappyFiles
+
     rm -rf processor*
     rm -rf TDAC
     rm -rf probes*
@@ -122,14 +174,14 @@ cleanCase()
     rm -rf sets
     rm -rf system/machines
 
-    # Possible blockMesh output
-    rm -f blockTopology.vtu blockFaces.vtp blockTopology.obj blockCentres.obj
+    # Debug output (blockMesh, decomposePar)
+    rm -f \
+        blockTopology.vtu blockFaces.vtp blockTopology.obj blockCentres.obj \
+        cellDist.vtu \
+        0/cellDist
 
     # From mpirunDebug
-    rm -f gdbCommands  mpirun.schema
-
-    cleanSnappyFiles
-    rm -f 0/cellDist
+    rm -f gdbCommands mpirun.schema
 
     (
         cd constant 2>/dev/null || exit 0
@@ -138,33 +190,7 @@ cleanCase()
           cellDecomposition cellToRegion cellLevel* pointLevel* \
           tetDualMesh \
           ;
-
-        # Old constant/polyMesh location for blockMeshDict still in use?
-        # - emit a gentle warning
-        if [ -e polyMesh/blockMeshDict.m4 ]
-        then
-            rm -f polyMesh/blockMeshDict
-            echo
-            echo "Warning: not removing constant/polyMesh/"
-            echo "    It contains a 'blockMeshDict.m4' file."
-            echo "    Relocate the file to system/ to avoid this warning"
-            echo
-        elif [ -e polyMesh/blockMeshDict ]
-        then
-            echo
-            echo "Warning: not removing constant/polyMesh/"
-            echo "    It contains a 'blockMeshDict' file."
-            echo "    Relocate the file to system/ to avoid this warning"
-        else
-            # Remove polyMesh entirely if there is no blockMeshDict
-            rm -rf polyMesh
-        fi
     )
-
-    if [ -e system/blockMeshDict.m4 ]
-    then
-        rm -f system/blockMeshDict
-    fi
 }
 
 
@@ -192,29 +218,6 @@ cleanSamples()
 cleanUcomponents()
 {
     rm -rf 0/Ux 0/Uy 0/Uz
-}
-
-
-cleanFaMesh()
-{
-    (
-        cd constant 2>/dev/null || exit 0
-
-        # Old constant/polyMesh location for blockMeshDict still in use?
-        # - emit a gentle warning
-        if [ -e faMesh/faMeshDefinition ]
-        then
-            rm -f faMesh/faceLabels* faMesh/faBoundary*
-            echo
-            echo "Warning: not removing the constant/faMesh/ directory"
-            echo "    It contains a 'faMeshDefinition' file"
-            echo "    Relocate the file to system/ to avoid this warning"
-            echo
-        else
-            # Remove faMesh/ entirely if there is no faMeshDefinition
-            rm -rf faMesh
-        fi
-    )
 }
 
 
