@@ -10,4 +10,7 @@ cd "${0%/*}" || exit                                # Run from this directory
 runApplication decomposePar
 runParallel $(getApplication)
 
+runApplication reconstructParMesh
+runApplication reconstructPar
+
 #------------------------------------------------------------------------------

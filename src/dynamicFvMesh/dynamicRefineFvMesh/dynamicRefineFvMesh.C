@@ -458,6 +458,12 @@ Foam::dynamicRefineFvMesh::refine
 
     // Create mesh (with inflation), return map from old to new mesh.
     //autoPtr<mapPolyMesh> map = meshMod.changeMesh(*this, true);
+
+    // Clear moving flag. This is currently required since geometry calculation
+    // might get triggered when doing processor patches.
+    // (TBD: should be in changeMesh if no inflation?)
+    moving(false);
+    // Create mesh (no inflation), return map from old to new mesh.
     autoPtr<mapPolyMesh> map = meshMod.changeMesh(*this, false);
 
     Info<< "Refined from "
@@ -575,6 +581,12 @@ Foam::dynamicRefineFvMesh::unrefine
 
     // Change mesh and generate map.
     //autoPtr<mapPolyMesh> map = meshMod.changeMesh(*this, true);
+
+    // Clear moving flag. This is currently required since geometry calculation
+    // might get triggered when doing processor patches.
+    // (TBD: should be in changeMesh if no inflation?)
+    moving(false);
+    // Create mesh (no inflation), return map from old to new mesh.
     autoPtr<mapPolyMesh> map = meshMod.changeMesh(*this, false);
 
     Info<< "Unrefined from "
@@ -1475,6 +1487,7 @@ bool Foam::dynamicRefineFvMesh::updateTopology()
 bool Foam::dynamicRefineFvMesh::update()
 {
     bool hasChanged = updateTopology();
+    // Do any mesh motion (resets mesh.moving() if it does any mesh motion)
     hasChanged = dynamicMotionSolverListFvMesh::update() && hasChanged;
 
     return hasChanged;
