@@ -487,8 +487,8 @@ castellatedMeshControls
     // Optional: same but in absolute number of cells. Default is 0.
     //nMinCells 100;
 
-    // Optional: disable of automatic leak closure and exit immediately
-    //useLeakClosure false;
+    // Optional: enable automatic leak closure (default is exit immediately)
+    //useLeakClosure true;
 }
 
 // Settings for the snapping.

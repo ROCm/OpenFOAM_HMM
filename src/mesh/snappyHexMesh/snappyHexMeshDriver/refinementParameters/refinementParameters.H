@@ -199,8 +199,8 @@ public:
             }
 
             //- Whether to attempt to close any 'leak' between
-            //  locationsInsideMesh and locationsOutsideMesh or exit with
-            //  error. Default is true.
+            //  locationsInsideMesh and locationsOutsideMesh. Default is
+            //  false (dump path and exit with error)
             //  (see also refinementSurfaces::leakLevel to force surfaces to
             //  be checked for leaks early-on in the refinement)
             bool useLeakClosure() const

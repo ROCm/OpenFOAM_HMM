@@ -74,7 +74,7 @@ Foam::refinementParameters::refinementParameters
             pointField(0)
         )
     ),
-    useLeakClosure_(dict.getOrDefault<bool>("useLeakClosure", true)),
+    useLeakClosure_(dict.getOrDefault<bool>("useLeakClosure", false)),
     faceZoneControls_(dict.subOrEmptyDict("faceZoneControls")),
     allowFreeStandingZoneFaces_
     (
