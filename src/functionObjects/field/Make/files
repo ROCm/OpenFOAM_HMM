@@ -1,5 +1,11 @@
 AMIWeights/AMIWeights.C
 
+binField/binField.C
+binField/binModels/binModel/binModel.C
+binField/binModels/binModel/binModelNew.C
+binField/binModels/uniformBin/uniformBin.C
+binField/binModels/singleDirectionUniformBin/singleDirectionUniformBin.C
+
 columnAverage/columnAverage.C
 
 continuityError/continuityError.C

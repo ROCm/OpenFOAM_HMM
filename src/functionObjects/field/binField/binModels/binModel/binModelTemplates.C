@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,33 +25,77 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-void Foam::functionObjects::writeFile::writeHeaderValue
+bool Foam::binModel::decomposePatchValues
 (
-    Ostream& os,
-    const string& property,
-    const Type& value
+    List<List<Type>>& data,
+    const label bini,
+    const Type& v,
+    const vector& n
 ) const
 {
-    os  << setw(1) << '#' << setw(1) << ' '
-        << setf(ios_base::left) << setw(charWidth() - 2) << property.c_str()
-        << setw(1) << ':' << setw(1) << ' ' << value << nl;
+    return decomposePatchValues_;
 }
 
 
 template<class Type>
-void Foam::functionObjects::writeFile::writeValue
+Foam::string Foam::binModel::writeComponents(const word& stem) const
+{
+    if (pTraits<Type>::nComponents == 1)
+    {
+        return stem;
+    }
+
+    string result = "";
+    for (label cmpt = 0; cmpt < pTraits<Type>::nComponents; ++cmpt)
+    {
+        if (cmpt) result += " ";
+        result += stem + "_" + word(pTraits<Type>::componentNames[cmpt]);
+    }
+    return result;
+};
+
+
+template<class Type>
+void Foam::binModel::writeBinnedData
 (
-    Ostream& os,
-    const Type& val
+    List<List<Type>>& data,
+    Ostream& os
 ) const
 {
-    for (direction cmpt = 0; cmpt < pTraits<Type>::nComponents; ++cmpt)
+    if (cumulative_)
     {
-        os  << ' ' << component(val, cmpt);
+        for (auto& datai : data)
+        {
+            for (label bini = 1; bini < nBin_; ++bini)
+            {
+                datai[bini] += datai[bini-1];
+            }
+        }
     }
+
+    writeCurrentTime(os);
+
+    for (label bini = 0; bini < nBin_; ++bini)
+    {
+        Type total = Zero;
+
+        for (label i = 0; i < data.size(); ++i)
+        {
+            total += data[i][bini];
+        }
+
+        writeValue(os, total);
+
+        for (label i = 0; i < data.size(); ++i)
+        {
+            writeValue(os, data[i][bini]);
+        }
+    }
+
+    os  << endl;
 }
 
 

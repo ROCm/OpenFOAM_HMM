@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -560,8 +560,8 @@ void Foam::functionObjects::propellerInfo::writePropellerPerformance()
     // Update n_
     setRotationalSpeed();
 
-    const vector sumForce(sum(force_[0]) + sum(force_[1]) + sum(force_[2]));
-    const vector sumMoment(sum(moment_[0]) + sum(moment_[1]) + sum(moment_[2]));
+    const vector sumForce = forceEff();
+    const vector sumMoment = momentEff();
 
     const scalar diameter = 2*radius_;
     const scalar URef = URefPtr_->value(time_.timeOutputValue());
@@ -866,7 +866,7 @@ bool Foam::functionObjects::propellerInfo::read(const dictionary& dict)
 
 bool Foam::functionObjects::propellerInfo::execute()
 {
-    calcForcesMoment();
+    calcForcesMoments();
 
     createFiles();
 

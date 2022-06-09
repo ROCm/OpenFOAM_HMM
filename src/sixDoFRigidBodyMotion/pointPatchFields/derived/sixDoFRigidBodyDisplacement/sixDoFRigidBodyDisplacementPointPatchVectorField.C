@@ -221,7 +221,7 @@ void sixDoFRigidBodyDisplacementPointPatchVectorField::updateCoeffs()
 
     functionObjects::forces f("forces", db(), forcesDict);
 
-    f.calcForcesMoment();
+    f.calcForcesMoments();
 
     // Get the forces on the patch faces at the current positions
 
