@@ -37,7 +37,7 @@ inline Foam::label Foam::nonUniformTable::index
 ) const
 {
     scalar nd = 0;
-    if (T > Trange_.min() || T < Trange_.max())
+    if (T > Trange_.min() && T < Trange_.max())
     {
         nd = (T - Trange_.min())/deltaT_;
     }
