@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017, 2020 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -344,6 +344,18 @@ protected:
         //- Overridable function to handle the particle hitting a wallPatch
         template<class TrackCloudType>
         void hitWallPatch(TrackCloudType&, trackingData&);
+
+
+        //- Dispatch function for boundary face interaction. Calls one of
+        //  the above (hitWedgePatch, hitCyclicPatch etc) depending on the
+        //  patch type
+        template<class TrackCloudType>
+        void hitBoundaryFace
+        (
+            const vector& direction,
+            TrackCloudType& cloud,
+            trackingData& td
+        );
 
 
 public:

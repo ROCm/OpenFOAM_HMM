@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2017, 2020 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2011-2017,2020 OpenFOAM Foundation
+    Copyright (C) 2016-2020,2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -291,7 +291,7 @@ void Foam::particle::writeObjects(const CloudType& c, objectRegistry& obr)
 
 
 template<class TrackCloudType>
-void Foam::particle::hitFace
+void Foam::particle::hitBoundaryFace
 (
     const vector& displacement,
     TrackCloudType& cloud,
@@ -303,6 +303,58 @@ void Foam::particle::hitFace
     typename TrackCloudType::particleType::trackingData& ttd =
         static_cast<typename TrackCloudType::particleType::trackingData&>(td);
 
+    if (!p.hitPatch(cloud, ttd))
+    {
+        const polyPatch& patch = mesh_.boundaryMesh()[p.patch()];
+
+        if (isA<wedgePolyPatch>(patch))
+        {
+            p.hitWedgePatch(cloud, ttd);
+        }
+        else if (isA<symmetryPlanePolyPatch>(patch))
+        {
+            p.hitSymmetryPlanePatch(cloud, ttd);
+        }
+        else if (isA<symmetryPolyPatch>(patch))
+        {
+            p.hitSymmetryPatch(cloud, ttd);
+        }
+        else if (isA<cyclicPolyPatch>(patch))
+        {
+            p.hitCyclicPatch(cloud, ttd);
+        }
+        else if (isA<cyclicACMIPolyPatch>(patch))
+        {
+            p.hitCyclicACMIPatch(cloud, ttd, displacement);
+        }
+        else if (isA<cyclicAMIPolyPatch>(patch))
+        {
+            p.hitCyclicAMIPatch(cloud, ttd, displacement);
+        }
+        else if (isA<processorPolyPatch>(patch))
+        {
+            p.hitProcessorPatch(cloud, ttd);
+        }
+        else if (isA<wallPolyPatch>(patch))
+        {
+            p.hitWallPatch(cloud, ttd);
+        }
+        else
+        {
+            td.keepParticle = false;
+        }
+    }
+}
+
+
+template<class TrackCloudType>
+void Foam::particle::hitFace
+(
+    const vector& displacement,
+    TrackCloudType& cloud,
+    trackingData& td
+)
+{
     if (!onFace())
     {
         return;
@@ -313,49 +365,11 @@ void Foam::particle::hitFace
     }
     else if (onBoundaryFace())
     {
+        // If on duplicate baffle (e.g. cyclicACMI) change to lowest numbered
+        // patch ('masterpatch')
         changeToMasterPatch();
 
-        if (!p.hitPatch(cloud, ttd))
-        {
-            const polyPatch& patch = mesh_.boundaryMesh()[p.patch()];
-
-            if (isA<wedgePolyPatch>(patch))
-            {
-                p.hitWedgePatch(cloud, ttd);
-            }
-            else if (isA<symmetryPlanePolyPatch>(patch))
-            {
-                p.hitSymmetryPlanePatch(cloud, ttd);
-            }
-            else if (isA<symmetryPolyPatch>(patch))
-            {
-                p.hitSymmetryPatch(cloud, ttd);
-            }
-            else if (isA<cyclicPolyPatch>(patch))
-            {
-                p.hitCyclicPatch(cloud, ttd);
-            }
-            else if (isA<cyclicACMIPolyPatch>(patch))
-            {
-                p.hitCyclicACMIPatch(cloud, ttd, displacement);
-            }
-            else if (isA<cyclicAMIPolyPatch>(patch))
-            {
-                p.hitCyclicAMIPatch(cloud, ttd, displacement);
-            }
-            else if (isA<processorPolyPatch>(patch))
-            {
-                p.hitProcessorPatch(cloud, ttd);
-            }
-            else if (isA<wallPolyPatch>(patch))
-            {
-                p.hitWallPatch(cloud, ttd);
-            }
-            else
-            {
-                td.keepParticle = false;
-            }
-        }
+        hitBoundaryFace(displacement, cloud, td);
     }
 }
 
@@ -591,7 +605,9 @@ void Foam::particle::hitCyclicACMIPatch
         // Move to the face associated with the non-overlap patch and redo the
         // face interaction.
         tetFacei_ = facei_ = cpp.nonOverlapPatch().start() + localFacei;
-        hitFace(displacement, cloud, td);
+        // Bypass all the changeToMasterPatch logic so as not to change
+        // the patch back to cyclicACMI
+        hitBoundaryFace(displacement, cloud, td);
     }
 }
 
