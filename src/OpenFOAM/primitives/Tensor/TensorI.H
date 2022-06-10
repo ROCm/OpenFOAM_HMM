@@ -1065,6 +1065,10 @@ operator&(const Tensor<Cmpt>& t1, const SymmTensor<Cmpt>& st2)
 
 //- Inner-product of a Tensor and a Vector
 template<class Cmpt>
+#if defined(__GNUC__) && !defined(__clang__)
+// Workaround for gcc (11+) that fails to handle tensor dot vector
+__attribute__((optimize("no-tree-vectorize")))
+#endif
 inline typename innerProduct<Tensor<Cmpt>, Vector<Cmpt>>::type
 operator&(const Tensor<Cmpt>& t, const Vector<Cmpt>& v)
 {
