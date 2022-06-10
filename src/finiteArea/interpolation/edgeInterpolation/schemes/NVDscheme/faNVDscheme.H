@@ -46,8 +46,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef faNVDscheme_H
-#define faNVDscheme_H
+#ifndef Foam_faNVDscheme_H
+#define Foam_faNVDscheme_H
 
 #include "edgeInterpolationScheme.H"
 
@@ -66,17 +66,13 @@ class faNVDscheme
     public edgeInterpolationScheme<Type>,
     public NVDweight
 {
-
 protected:
 
-    // Protected data
+    // Protected Data
 
         const edgeScalarField& edgeFlux_;
 
-
-private:
-
-    // Private Member Functions
+    // Protected Member Functions
 
         //- No copy construct
         faNVDscheme(const faNVDscheme&) = delete;

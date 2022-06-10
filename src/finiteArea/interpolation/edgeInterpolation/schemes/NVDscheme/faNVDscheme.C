@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -94,20 +95,18 @@ Foam::tmp<Foam::edgeScalarField> Foam::faNVDscheme<Type,NVDweight>::weights
 
     forAll(weights, edge)
     {
-        vector d(Zero);
+        vector d(c[neighbour[edge]] - c[owner[edge]]);
 
         if (edgeFlux_[edge] > 0)
         {
-            d = c[neighbour[edge]] - c[owner[edge]];
-            d -= n[owner[edge]]*(n[owner[edge]]&d);
-            d /= mag(d)/mesh.edgeInterpolation::lPN().internalField()[edge];
+            d.removeCollinear(n[owner[edge]]);
         }
         else
         {
-            d = c[neighbour[edge]] - c[owner[edge]];
-            d -= n[neighbour[edge]]*(n[neighbour[edge]]&d);
-            d /= mag(d)/mesh.edgeInterpolation::lPN().internalField()[edge];
+            d.removeCollinear(n[neighbour[edge]]);
         }
+        d.normalise();
+        d *= mesh.edgeInterpolation::lPN().internalField()[edge];
 
         weights[edge] =
             this->weight
@@ -177,20 +176,18 @@ Foam::tmp<Foam::edgeScalarField> Foam::faNVDscheme<Type,NVDweight>::weights
 
             forAll(pWeights, edgeI)
             {
-                vector d(Zero);
+                vector d(CN[edgeI] - CP[edgeI]);
 
                 if (pEdgeFlux[edgeI] > 0)
                 {
-                    d = CN[edgeI] - CP[edgeI];
-                    d -= nP[edgeI]*(nP[edgeI]&d);
-                    d /= mag(d)/pLPN[edgeI];
+                    d.removeCollinear(nP[edgeI]);
                 }
                 else
                 {
-                    d = CN[edgeI] - CP[edgeI];
-                    d -= nN[edgeI]*(nN[edgeI]&d);
-                    d /= mag(d)/pLPN[edgeI];
+                    d.removeCollinear(nN[edgeI]);
                 }
+                d.normalise();
+                d *= pLPN[edgeI];
 
                 pWeights[edgeI] =
                     this->weight

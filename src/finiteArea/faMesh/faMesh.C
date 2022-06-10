@@ -284,11 +284,17 @@ bool Foam::faMesh::init(const bool doInit)
     // Calculate the geometry for the patches (transformation tensors etc.)
     boundary_.calcGeometry();
 
-    // Ensure area information is properly synchronised
+    // Ensure processor/processor information is properly synchronised
     if (Pstream::parRun())
     {
         const_cast<areaVectorField&>(areaCentres()).boundaryFieldRef()
             .evaluateCoupled<processorFaPatch>();
+
+        // This roughly corresponds to what OpenFOAM-v2112 (and earlier) had,
+        // but should nominally be unnecessary.
+        //
+        /// const_cast<areaVectorField&>(faceAreaNormals()).boundaryFieldRef()
+        ///     .evaluateCoupled<processorFaPatch>();
     }
 
     return false;
