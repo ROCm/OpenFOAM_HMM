@@ -116,6 +116,9 @@ protected:
         //- Adjoint turbulence model variable 2
         autoPtr<volScalarField> adjointTMVariable2Ptr_;
 
+        //- Base names of the adjoint fields
+        wordList adjointTMVariablesBaseNames_;
+
         //- Adjoint turbulence model variable 1, mean value
         autoPtr<volScalarField> adjointTMVariable1MeanPtr_;
 
@@ -257,6 +260,10 @@ public:
 
         //- Return non-constant autoPtr to adjoint turbulence model variable 2
         autoPtr<volScalarField>& getAdjointTMVariable2InstPtr();
+
+        //- Return reference to the adjoint turbulence model variables base
+        //- names
+        const wordList& getAdjointTMVariablesBaseNames();
 
         //- Return the effective stress tensor including the laminar stress
         virtual tmp<volSymmTensorField> devReff() const = 0;

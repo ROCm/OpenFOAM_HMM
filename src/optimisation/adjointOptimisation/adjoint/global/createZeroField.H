@@ -88,13 +88,30 @@ createZeroBoundaryPtr
     typedef typename GeometricField<Type, fvPatchField, volMesh>::Boundary
         Boundary;
 
+    // Make sure that the patchFields to be generated will be of type
+    // calculated, even if they are of constraint type
+    // Necessary to avoid unexpected behaviour when computing sensitivities
+    // on symmetry patches (not a good practice either way)
+    const fvBoundaryMesh& bm = mesh.boundary();
+    wordList actualPatchTypes(bm.size(), word::null);
+    forAll(actualPatchTypes, pI)
+    {
+        auto patchTypeCstrIter =
+            fvPatchField<Type>::patchConstructorTablePtr_->cfind(bm[pI].type());
+        if (patchTypeCstrIter.found())
+        {
+            actualPatchTypes[pI] = bm[pI].type();
+        }
+    }
+
     autoPtr<Boundary> bPtr
     (
         new Boundary
         (
             mesh.boundary(),
             mesh.V()*pTraits<Type>::zero,  // Dummy internal field,
-            calculatedFvPatchField<Type>::typeName
+            wordList(bm.size(), calculatedFvPatchField<Type>::typeName),
+            actualPatchTypes
         )
     );
 

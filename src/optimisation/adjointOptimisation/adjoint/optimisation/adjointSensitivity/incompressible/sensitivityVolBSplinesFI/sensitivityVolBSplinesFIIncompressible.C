@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2020 PCOpt/NTUA
-    Copyright (C) 2013-2020 FOSS GP
+    Copyright (C) 2007-2021 PCOpt/NTUA
+    Copyright (C) 2013-2021 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -56,19 +56,10 @@ sensitivityVolBSplinesFI::sensitivityVolBSplinesFI
 (
     const fvMesh& mesh,
     const dictionary& dict,
-    incompressibleVars& primalVars,
-    incompressibleAdjointVars& adjointVars,
-    objectiveManager& objectiveManager
+    incompressibleAdjointSolver& adjointSolver
 )
 :
-    FIBase
-    (
-        mesh,
-        dict,
-        primalVars,
-        adjointVars,
-        objectiveManager
-    ),
+    FIBase(mesh, dict, adjointSolver),
     volBSplinesBase_
     (
         const_cast<volBSplinesBase&>(volBSplinesBase::New(mesh))
@@ -106,6 +97,13 @@ sensitivityVolBSplinesFI::sensitivityVolBSplinesFI
 
 void sensitivityVolBSplinesFI::assembleSensitivities()
 {
+    /*
+    addProfiling
+    (
+        sensitivityVolBSplinesFI,
+        "sensitivityVolBSplinesFI::assembleSensitivities"
+    );
+    */
     read();
 
     // Interpolation engine
@@ -156,8 +154,10 @@ void sensitivityVolBSplinesFI::assembleSensitivities()
             label globalCP = passedCPs + cpI;
 
             // Parameterization info
-            tmp<pointTensorField> dxdbI(boxes[iNURB].getDxDb(cpI));
-            tmp<volTensorField> tvolDxDbI(volPointInter.interpolate(dxdbI));
+            tmp<volTensorField> tvolDxDbI
+            (
+                volPointInter.interpolate(boxes[iNURB].getDxDb(cpI))
+            );
             const volTensorField& volDxDbI = tvolDxDbI();
 
             // Chain rule used to get dx/db at cells
@@ -167,53 +167,47 @@ void sensitivityVolBSplinesFI::assembleSensitivities()
             volTensorField& volDxDbI = tvolDxDbI.ref();
             */
 
-            // Gradient of parameterization info
-            volVectorField temp
-            (
-                IOobject
+            const tensorField& gradDxDbMultInt = gradDxDbMult_.primitiveField();
+            for (label idir = 0; idir < pTraits<vector>::nComponents; ++idir)
+            {
+                // Gradient of parameterization info
+                auto ttemp =
+                    tmp<volVectorField>::New
+                    (
+                        IOobject
+                        (
+                            "dxdb",
+                            mesh_.time().timeName(),
+                            mesh_,
+                            IOobject::NO_READ,
+                            IOobject::NO_WRITE
+                        ),
+                        mesh_,
+                        dimensionedVector(dimless, Zero)
+                    );
+                volVectorField& temp = ttemp.ref();
+                unzipCol(volDxDbI, vector::components(idir), temp);
+
+                volTensorField gradDxDb(fvc::grad(temp));
+                // Volume integral terms
+                flowSens_[globalCP].component(idir) = gSum
                 (
-                    "dxdb",
-                    mesh_.time().timeName(),
-                    mesh_,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                ),
-                mesh_,
-                vector::zero
-            );
+                    (gradDxDbMultInt && gradDxDb.primitiveField())
+                   *mesh_.V()
+                );
 
-            temp.replace(0, volDxDbI.component(0));
-            temp.replace(1, volDxDbI.component(3));
-            temp.replace(2, volDxDbI.component(6));
-            volTensorField gradDxDb1(fvc::grad(temp));
-
-            temp.replace(0, volDxDbI.component(1));
-            temp.replace(1, volDxDbI.component(4));
-            temp.replace(2, volDxDbI.component(7));
-            volTensorField gradDxDb2(fvc::grad(temp));
-
-            temp.replace(0, volDxDbI.component(2));
-            temp.replace(1, volDxDbI.component(5));
-            temp.replace(2, volDxDbI.component(8));
-            volTensorField gradDxDb3(fvc::grad(temp));
-
-
-            // Volume integral terms
-            flowSens_[globalCP].x() = gSum
-            (
-                (gradDxDbMult_.primitiveField() && gradDxDb1.primitiveField())
-               *mesh_.V()
-            );
-            flowSens_[globalCP].y() = gSum
-            (
-                (gradDxDbMult_.primitiveField() && gradDxDb2.primitiveField())
-               *mesh_.V()
-            );
-            flowSens_[globalCP].z() = gSum
-            (
-                (gradDxDbMult_.primitiveField() && gradDxDb3.primitiveField())
-               *mesh_.V()
-            );
+                if (includeDistance_)
+                {
+                    const tensorField& distSensInt =
+                        distanceSensPtr().primitiveField();
+                    distanceSens_[globalCP].component(idir) =
+                        gSum
+                        (
+                            (distSensInt && gradDxDb.primitiveField())
+                            *mesh_.V()
+                        );
+                }
+            }
 
             // Contribution from objective function term from
             // delta( n dS ) / delta b and
@@ -242,28 +236,6 @@ void sensitivityVolBSplinesFI::assembleSensitivities()
                    *fvc::div(T(volDxDbI))().primitiveField()
                    *mesh_.V()
                 );
-
-            // Distance dependent term
-            if (includeDistance_)
-            {
-                const tensorField& distSensInt =
-                    distanceSensPtr().primitiveField();
-                distanceSens_[globalCP].x() =
-                    gSum
-                    (
-                        (distSensInt && gradDxDb1.primitiveField())*mesh_.V()
-                    );
-                distanceSens_[globalCP].y() =
-                    gSum
-                    (
-                        (distSensInt && gradDxDb2.primitiveField())*mesh_.V()
-                    );
-                distanceSens_[globalCP].z() =
-                    gSum
-                    (
-                        (distSensInt && gradDxDb3.primitiveField()) *mesh_.V()
-                    );
-            }
 
             // Terms from fvOptions
             optionsSens_[globalCP] +=
@@ -312,6 +284,8 @@ void sensitivityVolBSplinesFI::assembleSensitivities()
     volBSplinesBase_.boundControlPointMovement(dxdbDirectSens_);
     volBSplinesBase_.boundControlPointMovement(optionsSens_);
     volBSplinesBase_.boundControlPointMovement(bcSens_);
+
+  //profiling::writeNow();
 }
 
 

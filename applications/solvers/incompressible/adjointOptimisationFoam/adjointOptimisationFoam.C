@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2021 PCOpt/NTUA
+    Copyright (C) 2013-2021 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -71,9 +71,6 @@ int main(int argc, char *argv[])
 
         // Solve all adjoint equations
         om.solveAdjointEquations();
-
-        // Compute all sensitivities
-        om.computeSensitivities();
     }
 
     Info<< "End\n" << endl;

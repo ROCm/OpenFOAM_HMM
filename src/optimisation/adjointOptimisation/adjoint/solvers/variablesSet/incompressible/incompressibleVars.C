@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2021 PCOpt/NTUA
+    Copyright (C) 2013-2021 FOSS GP
     Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -376,81 +376,6 @@ surfaceScalarField& incompressibleVars::phi()
     {
         return phiPtr_();
     }
-}
-
-
-const volScalarField& incompressibleVars::pInst() const
-{
-    return pPtr_();
-}
-
-
-volScalarField& incompressibleVars::pInst()
-{
-    return pPtr_();
-}
-
-
-const volVectorField& incompressibleVars::UInst() const
-{
-    return UPtr_();
-}
-
-
-volVectorField& incompressibleVars::UInst()
-{
-    return UPtr_();
-}
-
-
-const surfaceScalarField& incompressibleVars::phiInst() const
-{
-    return phiPtr_();
-}
-
-
-surfaceScalarField& incompressibleVars::phiInst()
-{
-    return phiPtr_();
-}
-
-
-const singlePhaseTransportModel& incompressibleVars::laminarTransport() const
-{
-    return laminarTransportPtr_();
-}
-
-
-singlePhaseTransportModel& incompressibleVars::laminarTransport()
-{
-    return laminarTransportPtr_();
-}
-
-
-const autoPtr<incompressible::turbulenceModel>&
-incompressibleVars::turbulence() const
-{
-    return turbulence_;
-}
-
-
-autoPtr<incompressible::turbulenceModel>& incompressibleVars::turbulence()
-{
-    return turbulence_;
-}
-
-
-const autoPtr<incompressible::RASModelVariables>&
-incompressibleVars::RASModelVariables() const
-{
-    return RASModelVariables_;
-}
-
-
-autoPtr<incompressible::RASModelVariables>&
-incompressibleVars::RASModelVariables()
-{
-    return RASModelVariables_;
 }
 
 

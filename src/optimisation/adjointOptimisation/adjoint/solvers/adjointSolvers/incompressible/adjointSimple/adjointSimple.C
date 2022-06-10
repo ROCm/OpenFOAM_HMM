@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2020 PCOpt/NTUA
-    Copyright (C) 2013-2020 FOSS GP
+    Copyright (C) 2007-2021 PCOpt/NTUA
+    Copyright (C) 2013-2021 FOSS GP
     Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -146,11 +146,22 @@ Foam::adjointSimple::adjointSimple
             (
                 mesh,
                 optDict.subDict("optimisation").subDict("sensitivities"),
-                primalVars_,
-                adjointVars_,
-                objectiveManagerPtr_()
+                *this
             ).ptr()
         );
+        // Read stored sensitivities, if they exist
+        // Need to know the size of the sensitivity field, retrieved after the
+        // allocation of the corresponding object
+        if (dictionary::found("sensitivities"))
+        {
+            sensitivities_ =
+                tmp<scalarField>::New
+                (
+                    "sensitivities",
+                    *this,
+                    adjointSensitivity_().getSensitivities().size()
+                );
+        }
     }
 }
 
@@ -195,6 +206,7 @@ void Foam::adjointSimple::preIter()
 
 void Foam::adjointSimple::mainIter()
 {
+    addProfiling(adjointSimple, "adjointSimple::mainIter");
     // Grab primal references
     const surfaceScalarField& phi = primalVars_.phi();
     // Grab adjoint references
@@ -329,6 +341,7 @@ void Foam::adjointSimple::postIter()
 
 void Foam::adjointSimple::solve()
 {
+    addProfiling(adjointSimple, "adjointSimple::solve");
     if (active_)
     {
         preLoop();
@@ -336,6 +349,7 @@ void Foam::adjointSimple::solve()
         {
             solveIter();
         }
+        postLoop();
     }
 }
 
@@ -363,7 +377,7 @@ void Foam::adjointSimple::computeObjectiveSensitivities()
         {
             sensitivities_.reset(new scalarField(sens.size(), Zero));
         }
-        *sensitivities_ = sens;
+        sensitivities_.ref() = sens;
     }
     else
     {
@@ -433,8 +447,7 @@ void Foam::adjointSimple::updatePrimalBasedQuantities()
 bool Foam::adjointSimple::writeData(Ostream& os) const
 {
     os.writeEntry("averageIter", solverControl_().averageIter());
-
-    return true;
+    return adjointSolver::writeData(os);
 }
 
 

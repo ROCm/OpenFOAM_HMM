@@ -55,19 +55,10 @@ sensitivityBezier::sensitivityBezier
 (
     const fvMesh& mesh,
     const dictionary& dict,
-    incompressibleVars& primalVars,
-    incompressibleAdjointVars& adjointVars,
-    objectiveManager& objectiveManager
+    incompressibleAdjointSolver& adjointSolver
 )
 :
-    SIBase
-    (
-        mesh,
-        dict,
-        primalVars,
-        adjointVars,
-        objectiveManager
-    ),
+    SIBase(mesh, dict, adjointSolver),
     //Bezier_(mesh, dict), // AJH Read locally?
     Bezier_(mesh, mesh.lookupObject<IOdictionary>("optimisationDict")),
     sens_(Bezier_.nBezier(), Zero),

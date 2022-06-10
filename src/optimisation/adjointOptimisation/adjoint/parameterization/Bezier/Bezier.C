@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2019, 2022 PCOpt/NTUA
+    Copyright (C) 2013-2019, 2022 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -236,9 +236,7 @@ tmp<vectorField> Bezier::dndbBasedSensitivities
     const label patchStart = ppatch.start();
     const tensorField& dxdbInt = dxidXj_[cpI].primitiveField();
     vectorField dxdbDir(dxdbInt.size(), Zero);
-    dxdbDir.replace(0, dxdbInt.component(3*idir));
-    dxdbDir.replace(1, dxdbInt.component(3*idir + 1));
-    dxdbDir.replace(2, dxdbInt.component(3*idir + 2));
+    unzipRow(dxdbInt, vector::components(idir), dxdbDir);
 
     // Loop over patch faces
     forAll(patch, fI)

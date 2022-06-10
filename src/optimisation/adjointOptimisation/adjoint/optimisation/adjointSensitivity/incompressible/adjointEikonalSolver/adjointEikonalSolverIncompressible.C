@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2020 PCOpt/NTUA
-    Copyright (C) 2013-2020 FOSS GP
+    Copyright (C) 2007-2021 PCOpt/NTUA
+    Copyright (C) 2013-2021 FOSS GP
     Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -67,6 +67,11 @@ void adjointEikonalSolver::read()
     nEikonalIters_ = dict_.getOrDefault<label>("iters", 1000);
     tolerance_ = dict_.getOrDefault<scalar>("tolerance", 1e-6);
     epsilon_ = dict_.getOrDefault<scalar>("epsilon", 0.1);
+    const scalar defaultEps =
+        mesh_.schemesDict().subDict("wallDist").
+            subOrEmptyDict("advectionDiffusionCoeffs").
+                getOrDefault<scalar>("epsilon", 0.1);
+    epsilon_ = dict_.getOrDefault<scalar>("epsilon", defaultEps);
 }
 
 

@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2020 PCOpt/NTUA
-    Copyright (C) 2013-2020 FOSS GP
+    Copyright (C) 2007-2021 PCOpt/NTUA
+    Copyright (C) 2013-2021 FOSS GP
     Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -79,19 +79,10 @@ FIBase::FIBase
 (
     const fvMesh& mesh,
     const dictionary& dict,
-    incompressibleVars& primalVars,
-    incompressibleAdjointVars& adjointVars,
-    objectiveManager& objectiveManager
+    incompressibleAdjointSolver& adjointSolver
 )
 :
-    shapeSensitivities
-    (
-        mesh,
-        dict,
-        primalVars,
-        adjointVars,
-        objectiveManager
-    ),
+    shapeSensitivities(mesh, dict, adjointSolver),
     gradDxDbMult_
     (
         IOobject
@@ -142,8 +133,11 @@ void FIBase::accumulateIntegrand(const scalar dt)
     PtrList<objective>& functions(objectiveManager_.getObjectiveFunctions());
     for (objective& func : functions)
     {
-        divDxDbMult_ +=
-            func.weight()*func.divDxDbMultiplier().primitiveField()*dt;
+        if (func.hasDivDxDbMult())
+        {
+            divDxDbMult_ +=
+                func.weight()*func.divDxDbMultiplier().primitiveField()*dt;
+        }
     }
 
     // Terms from fvOptions
@@ -163,7 +157,6 @@ void FIBase::accumulateIntegrand(const scalar dt)
 
     // Accumulate sensitivities due to boundary conditions
     accumulateBCSensitivityIntegrand(dt);
-
 }
 
 

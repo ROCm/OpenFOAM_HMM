@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2020 PCOpt/NTUA
-    Copyright (C) 2013-2020 FOSS GP
+    Copyright (C) 2007-2021 PCOpt/NTUA
+    Copyright (C) 2013-2021 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -97,6 +97,11 @@ void Foam::adjointOutletVelocityFluxFvPatchVectorField::manipulateMatrix
     fvMatrix<vector>& matrix
 )
 {
+    addProfiling
+    (
+        adjointOutletVelocityFluxFvPatchVectorField,
+        "adjointOutletVelocityFluxFvPatchVectorField::manipulateMatrix"
+    );
     vectorField& source = matrix.source();
     const vectorField& Sf = patch().Sf();
     const labelList& faceCells = patch().faceCells();

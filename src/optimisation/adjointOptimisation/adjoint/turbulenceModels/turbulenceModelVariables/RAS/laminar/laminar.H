@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2019, 2022 PCOpt/NTUA
+    Copyright (C) 2013-2019, 2022 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -77,6 +77,23 @@ public:
 
     //- Destructor
     virtual ~laminar() = default;
+
+
+    // Member Functions
+
+        // Bools to identify which turbulent fields are present
+        inline virtual bool hasTMVar1() const
+        {
+            return false;
+        }
+        inline virtual bool hasTMVar2() const
+        {
+            return false;
+        }
+        inline virtual bool hasNut() const
+        {
+            return false;
+        }
 };
 
 

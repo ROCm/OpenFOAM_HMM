@@ -127,9 +127,6 @@ protected:
         //- NURBS surfaces G1 continuity
         autoPtr<vectorField3> bEdgeContribution_;
 
-        //- For use with discrete-like sensitivities
-        autoPtr<boundaryTensorField> bdJdStressPtr_;
-
         // Contribution to volume-based sensitivities from volume-based
         // objective functions
         //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -298,9 +295,6 @@ public:
             const label edgeI
         );
 
-        //- Objective partial deriv wrt stress tensor
-        const fvPatchTensorField& boundarydJdStress(const label);
-
         //- Contribution to surface sensitivities for all patches
         const boundaryVectorField& boundarydJdb();
 
@@ -318,9 +312,6 @@ public:
 
         //- Multiplier located at patch boundary edges
         const vectorField3& boundaryEdgeMultiplier();
-
-        //- Objective partial deriv wrt stress tensor
-        const boundaryTensorField& boundarydJdStress();
 
         //- Multiplier of grad( delta(x)/delta b) for volume-based sensitivities
         const volScalarField& divDxDbMultiplier();
@@ -361,10 +352,6 @@ public:
 
         //- Update boundary edge contributions
         virtual void update_boundaryEdgeContribution()
-        {}
-
-        //- Update dJ/dStress field
-        virtual void update_dJdStressMultiplier()
         {}
 
         //- Update div( dx/db multiplier). Volume-based sensitivity term
@@ -415,7 +402,6 @@ public:
         inline bool hasdxdbMult() const;
         inline bool hasdxdbDirectMult() const;
         inline bool hasBoundaryEdgeContribution() const;
-        inline bool hasBoundarydJdStress() const;
         inline bool hasDivDxDbMult() const;
         inline bool hasGradDxDbMult() const;
 

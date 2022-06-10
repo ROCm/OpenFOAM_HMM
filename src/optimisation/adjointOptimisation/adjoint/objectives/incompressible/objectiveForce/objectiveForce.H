@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2020 PCOpt/NTUA
-    Copyright (C) 2013-2020 FOSS GP
+    Copyright (C) 2007-2020, 2022 PCOpt/NTUA
+    Copyright (C) 2013-2020, 2022 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -70,10 +70,6 @@ protected:
         scalar rhoInf_;
         scalar UInf_;
 
-        autoPtr<volVectorField> stressXPtr_;
-        autoPtr<volVectorField> stressYPtr_;
-        autoPtr<volVectorField> stressZPtr_;
-
 
 public:
 
@@ -111,8 +107,11 @@ public:
         //- Update delta(x)/delta b multiplier
         void update_dxdbMultiplier();
 
-        //- Update dJ/dStress multiplier
-        void update_dJdStressMultiplier();
+        //- Update dJ/dnut multiplier
+        void update_boundarydJdnut();
+
+        //- Update dJ/dGradU multiplier
+        void update_boundarydJdGradU();
 
         //- Return denominator, without density
         virtual scalar denom() const;

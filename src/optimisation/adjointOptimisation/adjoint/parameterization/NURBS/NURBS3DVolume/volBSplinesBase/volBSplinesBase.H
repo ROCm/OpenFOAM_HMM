@@ -144,7 +144,10 @@ public:
         );
 
         //- Bound control points movement
-        void boundControlPointMovement(vectorField& controlPointsMovement);
+        void boundControlPointMovement
+        (
+            vectorField& controlPointsMovement
+        ) const;
 
         //- Move control points. No effect on mesh
         void moveControlPoints(const vectorField& controlPointsMovement);

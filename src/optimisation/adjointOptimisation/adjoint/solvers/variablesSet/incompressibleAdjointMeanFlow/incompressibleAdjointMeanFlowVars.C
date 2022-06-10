@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2021 PCOpt/NTUA
+    Copyright (C) 2013-2021 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -219,42 +219,6 @@ surfaceScalarField& incompressibleAdjointMeanFlowVars::phia()
     {
         return phiaPtr_();
     }
-}
-
-
-const volScalarField& incompressibleAdjointMeanFlowVars::paInst() const
-{
-    return paPtr_();
-}
-
-
-volScalarField& incompressibleAdjointMeanFlowVars::paInst()
-{
-    return paPtr_();
-}
-
-
-const volVectorField& incompressibleAdjointMeanFlowVars::UaInst() const
-{
-    return UaPtr_();
-}
-
-
-volVectorField& incompressibleAdjointMeanFlowVars::UaInst()
-{
-    return UaPtr_();
-}
-
-
-const surfaceScalarField& incompressibleAdjointMeanFlowVars::phiaInst() const
-{
-    return phiaPtr_();
-}
-
-
-surfaceScalarField& incompressibleAdjointMeanFlowVars::phiaInst()
-{
-    return phiaPtr_();
 }
 
 

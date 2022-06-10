@@ -168,6 +168,26 @@ public:
             virtual void updatePrimalBasedQuantities();
 
 
+        // Sensitivity related functions
+
+            //- Compute the multiplier for grad(dxdb)
+            //  Used in shape sensitivity derivatives, computed with the FI
+            //  and E-SI approaches
+            virtual tmp<volTensorField> computeGradDxDbMultiplier();
+
+            //- Terms to be added to the sensitivity map, depending
+            //- on the adjoint solver
+            //  The typical terms associated with the typical incompressible
+            //  flow equations are included in the sensitivity classes.
+            //  This is to be used whenever additional physics is added
+            virtual void additionalSensitivityMapTerms
+            (
+                boundaryVectorField& sensitivityMap,
+                const labelHashSet& patchIDs,
+                const scalar dt
+            );
+
+
         // IO
 
             //- In case of multi-point runs with turbulent flows,

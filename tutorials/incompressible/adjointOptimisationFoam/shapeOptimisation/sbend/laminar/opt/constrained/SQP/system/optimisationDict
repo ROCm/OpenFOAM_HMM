@@ -49,7 +49,6 @@ adjointManagers
                 active                 true;
                 type                   incompressible;
                 solver                 adjointSimple;
-                useSolverNameForFields true;
 
                 // manage objectives
                 //------------------
@@ -91,7 +90,6 @@ adjointManagers
                 active                 true;
                 type                   incompressible;
                 solver                 adjointSimple;
-                useSolverNameForFields true;
                 isConstraint           true;
                 // manage objectives
                 //------------------

@@ -139,6 +139,8 @@ public:
         tmp<scalarField> energySource();
         tmp<scalarField> adjointTMVariable1Source();
         tmp<scalarField> adjointTMVariable2Source();
+        tmp<scalarField> dJdnut();
+        tmp<tensorField> dJdGradU();
 
         tmp<scalarField> momentumDiffusion();
         tmp<scalarField> laminarDiffusivity();

@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2020 PCOpt/NTUA
-    Copyright (C) 2013-2020 FOSS GP
+    Copyright (C) 2007-2022 PCOpt/NTUA
+    Copyright (C) 2013-2022 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -66,6 +66,9 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declaration
+class incompressibleAdjointSolver;
+
 namespace incompressible
 {
 
@@ -82,7 +85,8 @@ protected:
     // Protected data
 
         scalarField derivatives_;
-        incompressibleVars& primalVars_;
+        incompressibleAdjointSolver& adjointSolver_;
+        const incompressibleVars& primalVars_;
         incompressibleAdjointVars& adjointVars_;
         objectiveManager& objectiveManager_;
 
@@ -114,16 +118,12 @@ public:
             (
                 const fvMesh& mesh,
                 const dictionary& dict,
-                incompressibleVars& primalVars,
-                incompressibleAdjointVars& adjointVars,
-                objectiveManager& objectiveManager
+                incompressibleAdjointSolver& adjointSolver
             ),
             (
                 mesh,
                 dict,
-                primalVars,
-                adjointVars,
-                objectiveManager
+                adjointSolver
             )
         );
 
@@ -135,9 +135,7 @@ public:
         (
             const fvMesh& mesh,
             const dictionary& dict,
-            incompressibleVars& primalVars,
-            incompressibleAdjointVars& adjointVars,
-            objectiveManager& objectiveManager
+            incompressibleAdjointSolver& adjointSolver
         );
 
     // Selectors
@@ -147,9 +145,7 @@ public:
         (
             const fvMesh& mesh,
             const dictionary& dict,
-            incompressibleVars& primalVars,
-            incompressibleAdjointVars& adjointVars,
-            objectiveManager& objectiveManager
+            incompressibleAdjointSolver& adjointSolver
         );
 
 
@@ -159,37 +155,55 @@ public:
 
     // Member Functions
 
-       //- Accumulate sensitivity integrands
-       //  Corresponds to the flow and adjoint part of the sensitivities
-       virtual void accumulateIntegrand(const scalar dt) = 0;
+        //- Get primal variables
+        inline const incompressibleVars& primalVars() const
+        {
+            return primalVars_;
+        }
 
-       //- Assemble sensitivities
-       //  Adds the geometric part of the sensitivities
-       virtual void assembleSensitivities() = 0;
+        //- Get adjoint variables
+        inline const incompressibleAdjointVars& adjointVars() const
+        {
+            return adjointVars_;
+        }
 
-       //- Calculates and returns sensitivity fields.
-       //  Used with optimisation libraries
-       virtual const scalarField& calculateSensitivities();
+        //- Get adjoint solver
+        inline const incompressibleAdjointSolver& adjointSolver() const
+        {
+            return adjointSolver_;
+        }
 
-       //- Returns the sensitivity fields
-       //  Assumes it has already been updated/computed
-       const scalarField& getSensitivities() const;
+        //- Accumulate sensitivity integrands
+        //  Corresponds to the flow and adjoint part of the sensitivities
+        virtual void accumulateIntegrand(const scalar dt) = 0;
 
-       //- Zero sensitivity fields and their constituents
-       virtual void clearSensitivities();
+        //- Assemble sensitivities
+        //  Adds the geometric part of the sensitivities
+        virtual void assembleSensitivities() = 0;
 
-       //- Write sensitivity fields.
-       //  If valid, copies boundaryFields to volFields and writes them.
-       //  Virtual to be reimplemented by control points-based methods
-       //  (Bezier, RBF) which do not need to write fields
-       virtual void write(const word& baseName = word::null);
+        //- Calculates and returns sensitivity fields.
+        //  Used with optimisation libraries
+        virtual const scalarField& calculateSensitivities();
 
-       //- Compute the volTensorField multiplying grad(dxdb) for
-       //- the volume-based approach to compute shape sensitivity derivatives
-       tmp<volTensorField> computeGradDxDbMultiplier();
+        //- Returns the sensitivity fields
+        //  Assumes it has already been updated/computed
+        const scalarField& getSensitivities() const;
 
-       //- Compute source term for adjoint mesh movement equation
-       tmp<volVectorField> adjointMeshMovementSource();
+        //- Zero sensitivity fields and their constituents
+        virtual void clearSensitivities();
+
+        //- Write sensitivity fields.
+        //  If valid, copies boundaryFields to volFields and writes them.
+        //  Virtual to be reimplemented by control points-based methods
+        //  (Bezier, RBF) which do not need to write fields
+        virtual void write(const word& baseName = word::null);
+
+        //- Compute the volTensorField multiplying grad(dxdb) for
+        //- the volume-based approach to compute shape sensitivity derivatives
+        tmp<volTensorField> computeGradDxDbMultiplier();
+
+        //- Compute source term for adjoint mesh movement equation
+        tmp<volVectorField> adjointMeshMovementSource();
 };
 
 

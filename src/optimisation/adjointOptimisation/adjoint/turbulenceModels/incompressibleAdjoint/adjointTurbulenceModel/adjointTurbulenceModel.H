@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2021 PCOpt/NTUA
+    Copyright (C) 2013-2021 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -181,6 +181,23 @@ public:
                     lamTrans.nu()() + turbVars().nutRef()
                 );
             //return primalVars_.turbulence()().nuEff();
+        }
+
+        //- Return the effective viscosity on a given patch
+        virtual tmp<scalarField> nuEff(const label patchI) const
+        {
+            // Go through RASModelVariables::nutRef in order to obtain
+            // the mean field, if present
+            const singlePhaseTransportModel& lamTrans =
+                primalVars_.laminarTransport();
+            const autoPtr<incompressible::RASModelVariables>&
+                turbVars = primalVars_.RASModelVariables();
+
+            return
+                (
+                    lamTrans.nu()().boundaryField()[patchI]
+                  + turbVars().nutRef().boundaryField()[patchI]
+                );
         }
 
         //- Return the effective stress tensor including the laminar stress

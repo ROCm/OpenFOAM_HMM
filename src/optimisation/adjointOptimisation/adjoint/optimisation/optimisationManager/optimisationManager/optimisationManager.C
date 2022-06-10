@@ -61,13 +61,19 @@ Foam::optimisationManager::optimisationManager(fvMesh& mesh)
     managerType_(get<word>("optimisationManager")),
     optType_(nullptr)
 {
-    const dictionary& primalSolversDict = subDict("primalSolvers");
+    dictionary& primalSolversDict = subDict("primalSolvers");
     const wordList& primalSolverNames = primalSolversDict.toc();
 
     // Construct primal solvers
     primalSolvers_.setSize(primalSolverNames.size());
     forAll(primalSolvers_, solveri)
     {
+        dictionary& solverDict =
+            primalSolversDict.subDict(primalSolverNames[solveri]);
+        if (primalSolvers_.size() > 1)
+        {
+            solverDict.add<bool>("useSolverNameForFields", true);
+        }
         primalSolvers_.set
         (
             solveri,
@@ -75,7 +81,7 @@ Foam::optimisationManager::optimisationManager(fvMesh& mesh)
             (
                 mesh,
                 managerType_,
-                primalSolversDict.subDict(primalSolverNames[solveri])
+                solverDict
             )
         );
     }
@@ -86,6 +92,7 @@ Foam::optimisationManager::optimisationManager(fvMesh& mesh)
     adjointSolverManagers_.setSize(adjointManagerNames.size());
 
     label nAdjointSolvers(0);
+    bool overrideUseSolverName(adjointSolverManagers_.size() > 1);
     forAll(adjointSolverManagers_, manageri)
     {
         adjointSolverManagers_.set
@@ -95,7 +102,8 @@ Foam::optimisationManager::optimisationManager(fvMesh& mesh)
             (
                 mesh,
                 managerType_,
-                adjointManagersDict.subDict(adjointManagerNames[manageri])
+                adjointManagersDict.subDict(adjointManagerNames[manageri]),
+                overrideUseSolverName
             )
         );
         nAdjointSolvers += adjointSolverManagers_[manageri].nAdjointSolvers();

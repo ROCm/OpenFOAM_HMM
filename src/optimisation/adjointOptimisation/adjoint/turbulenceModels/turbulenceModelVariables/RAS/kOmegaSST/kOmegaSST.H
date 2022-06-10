@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2019, 2022 PCOpt/NTUA
+    Copyright (C) 2013-2019, 2022 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -59,6 +59,21 @@ class kOmegaSST
     public RASModelVariables
 {
 
+protected:
+
+    // Protected data
+
+        //- Average of the production term
+        //  Avaraged separetely due the bi-zonal treatment next to the wall
+        autoPtr<volScalarField::Internal> GMean_;
+
+
+    // Protected Member functions
+
+        virtual void allocateMeanFields();
+        tmp<volScalarField::Internal> computeG();
+
+
 public:
 
     //- Runtime type information
@@ -80,6 +95,26 @@ public:
 
 
     // Member Functions
+
+        //- Return the turbulence production term
+        virtual tmp<volScalarField::Internal> G();
+
+        //- Compute mean fields on the fly
+        virtual void computeMeanFields();
+
+        // Bools to identify which turbulent fields are present
+        inline virtual bool hasTMVar1() const
+        {
+            return true;
+        }
+        inline virtual bool hasTMVar2() const
+        {
+            return true;
+        }
+        inline virtual bool hasNut() const
+        {
+            return true;
+        }
 
         //- Correct boundary conditions of turbulent fields
         virtual void correctBoundaryConditions

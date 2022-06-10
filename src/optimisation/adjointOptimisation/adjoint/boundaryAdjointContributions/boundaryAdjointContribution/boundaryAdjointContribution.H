@@ -138,6 +138,8 @@ public:
         virtual tmp<vectorField> normalVelocitySource() = 0;
         virtual tmp<scalarField> adjointTMVariable1Source();
         virtual tmp<scalarField> adjointTMVariable2Source();
+        virtual tmp<scalarField> dJdnut();
+        virtual tmp<tensorField> dJdGradU();
         virtual tmp<scalarField> energySource() = 0;
 
         virtual tmp<scalarField> momentumDiffusion() = 0;

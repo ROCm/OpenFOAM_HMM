@@ -47,7 +47,7 @@ defineTypeNameAndDebug(shapeSensitivities, 0);
 void shapeSensitivities::accumulateDirectSensitivityIntegrand(const scalar dt)
 {
     // Accumulate direct sensitivities
-    PtrList<objective>& functions(objectiveManager_.getObjectiveFunctions());
+    PtrList<objective>& functions = objectiveManager_.getObjectiveFunctions();
     for (const label patchI : sensitivityPatchIDs_)
     {
         const scalarField magSfDt(mesh_.boundary()[patchI].magSf()*dt);
@@ -65,7 +65,9 @@ void shapeSensitivities::accumulateDirectSensitivityIntegrand(const scalar dt)
 
 void shapeSensitivities::accumulateBCSensitivityIntegrand(const scalar dt)
 {
-    auto& UaBoundary = adjointVars_.Ua().boundaryFieldRef();
+    // Avoid updating the event number to keep consistency with cases caching
+    // gradUa
+    auto& UaBoundary = adjointVars_.Ua().boundaryFieldRef(false);
     tmp<boundaryVectorField> DvDbMult(dvdbMult());
 
     // Accumulate sensitivities due to boundary conditions
@@ -102,7 +104,8 @@ tmp<boundaryVectorField> shapeSensitivities::dvdbMult() const
        turbVars = primalVars_.RASModelVariables();
     const singlePhaseTransportModel& lamTransp = primalVars_.laminarTransport();
     volScalarField nuEff(lamTransp.nu() + turbVars->nutRef());
-    volTensorField gradUa(fvc::grad(Ua));
+    tmp<volTensorField> tgradUa = fvc::grad(Ua);
+    const volTensorField::Boundary& gradUabf = tgradUa.cref().boundaryField();
 
     for (const label patchI : sensitivityPatchIDs_)
     {
@@ -115,7 +118,7 @@ tmp<boundaryVectorField> shapeSensitivities::dvdbMult() const
                 nuEff.boundaryField()[patchI]
               * (
                     Ua.boundaryField()[patchI].snGrad()
-                  + (gradUa.boundaryField()[patchI] & nf)
+                  + (gradUabf[patchI] & nf)
                 )
             )
           - (nf*pa.boundaryField()[patchI])
@@ -132,19 +135,10 @@ shapeSensitivities::shapeSensitivities
 (
     const fvMesh& mesh,
     const dictionary& dict,
-    incompressibleVars& primalVars,
-    incompressibleAdjointVars& adjointVars,
-    objectiveManager& objectiveManager
+    incompressibleAdjointSolver& adjointSolver
 )
 :
-    adjointSensitivity
-    (
-        mesh,
-        dict,
-        primalVars,
-        adjointVars,
-        objectiveManager
-    ),
+    adjointSensitivity(mesh, dict, adjointSolver),
     shapeSensitivitiesBase(mesh, dict),
     dSfdbMult_(createZeroBoundaryPtr<vector>(mesh_)),
     dnfdbMult_(createZeroBoundaryPtr<vector>(mesh_)),

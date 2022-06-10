@@ -118,9 +118,7 @@ public:
         (
             const fvMesh& mesh,
             const dictionary& dict,
-            incompressibleVars& primalVars,
-            incompressibleAdjointVars& adjointVars,
-            objectiveManager& objectiveManager
+            incompressibleAdjointSolver& adjointSolver
         );
 
 

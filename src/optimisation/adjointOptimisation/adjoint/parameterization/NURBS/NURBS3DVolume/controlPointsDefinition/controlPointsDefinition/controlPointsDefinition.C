@@ -62,9 +62,7 @@ void Foam::controlPointsDefinition::transformControlPoints
     vector scale(dict.get<vector>("scale"));
 
     // Scale box
-    cps_.replace(0, cps_.component(0)*scale.x());
-    cps_.replace(1, cps_.component(1)*scale.y());
-    cps_.replace(2, cps_.component(2)*scale.z());
+    cps_ = cmptMultiply(cps_, scale);
 
     // Rotation matrices
     tensor Rx

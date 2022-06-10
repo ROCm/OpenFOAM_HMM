@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2021 PCOpt/NTUA
+    Copyright (C) 2013-2021 FOSS GP
     Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -108,17 +108,15 @@ tmp<volScalarField> adjointSpalartAllmaras::r
     const volScalarField& Stilda
 ) const
 {
-    tmp<volScalarField> tr
-    (
-        new volScalarField
+    auto tr =
+        tmp<volScalarField>::New
         (
             min
             (
                 nuTilda()/(max(Stilda, minStilda_)*sqr(kappa_*y_)),
                 scalar(10)
             )
-        )
-    );
+        );
     tr.ref().boundaryFieldRef() == Zero;
 
     return tr;
@@ -138,10 +136,9 @@ tmp<volScalarField> adjointSpalartAllmaras::fw
 
 tmp<volScalarField> adjointSpalartAllmaras::DnuTildaEff() const
 {
-    return tmp<volScalarField>
-    (
-        new volScalarField("DnuTildaEff", (nuTilda() + this->nu())/sigmaNut_)
-    );
+    return
+        tmp<volScalarField>::New
+            ("DnuTildaEff", (nuTilda() + this->nu())/sigmaNut_);
 }
 
 
@@ -166,7 +163,7 @@ tmp<volScalarField> adjointSpalartAllmaras::dFv1_dChi
 {
     volScalarField chi3(pow3(chi));
 
-    return 3.0*pow3(Cv1_)*sqr(chi/(chi3+pow3(Cv1_)));
+    return 3.0*pow3(Cv1_)*sqr(chi/(chi3 + pow3(Cv1_)));
 }
 
 
@@ -246,8 +243,8 @@ tmp<volScalarField> adjointSpalartAllmaras::dr_dStilda
 {
     tmp<volScalarField> tdrdStilda
     (
-        - nuTilda()/sqr(max(Stilda, minStilda_)*kappa_*y_)
-        *(scalar(10) - r_)/(scalar(10) - r_ + SMALL)
+      - nuTilda()/sqr(max(Stilda, minStilda_)*kappa_*y_)
+       *(scalar(10) - r_)/(scalar(10) - r_ + SMALL)
     );
     tdrdStilda.ref().boundaryFieldRef() == Zero;
 
@@ -262,8 +259,8 @@ tmp<volScalarField> adjointSpalartAllmaras::dr_dDelta
 {
     tmp<volScalarField> tdrdDelta
     (
-        -2.*nuTilda()/(max(Stilda, minStilda_)*sqr(kappa_*y_)*y_)
-        *(scalar(10) - r_)/(scalar(10) - r_ + SMALL)
+      - 2.*nuTilda()/(max(Stilda, minStilda_)*sqr(kappa_*y_)*y_)
+       *(scalar(10) - r_)/(scalar(10) - r_ + SMALL)
     );
     tdrdDelta.ref().boundaryFieldRef() == Zero;
 
@@ -281,9 +278,10 @@ tmp<volScalarField> adjointSpalartAllmaras::dfw_dr
     dimensionedScalar pow6Cw3 = pow6(Cw3_);
     volScalarField pow6g(pow6(g));
 
-    return  pow6Cw3/(pow6g + pow6Cw3)
-           *pow((1.0 + pow6Cw3)/(pow6g + pow6Cw3), 1.0/6.0)
-           *(1.0 + Cw2_*(6.0*pow5(r_) - 1.0));
+    return
+        pow6Cw3/(pow6g + pow6Cw3)
+       *pow((1.0 + pow6Cw3)/(pow6g + pow6Cw3), 1.0/6.0)
+       *(1.0 + Cw2_*(6.0*pow5(r_) - 1.0));
 }
 
 
@@ -361,9 +359,9 @@ tmp<volVectorField> adjointSpalartAllmaras::conservativeMomentumSource()
         const fvPatch& patch = mesh_.boundary()[pI];
         if(!isA<coupledFvPatch>(patch))
         {
-            vectorField nf(patch.nf());
+            tmp<vectorField> tnf = patch.nf();
             adjMomentumBCSourcePtr_()[pI] =
-                (nf & momentumSourceMult_.boundaryField()[pI])
+                (tnf & momentumSourceMult_.boundaryField()[pI])
                *nuaTilda().boundaryField()[pI];
         }
     }
@@ -675,6 +673,8 @@ adjointSpalartAllmaras::adjointSpalartAllmaras
     gradNuTilda_(fvc::grad(nuTilda())),
     minStilda_("SMALL", Stilda_.dimensions(), SMALL)
 {
+    adjointTMVariablesBaseNames_.setSize(1);
+    adjointTMVariablesBaseNames_[0] = "nuaTilda";
     // Read nuaTilda field and reset pointer to the first
     // adjoint turbulence model variable
     variablesSet::setField
@@ -743,6 +743,8 @@ tmp<fvVectorMatrix> adjointSpalartAllmaras::divDevReff(volVectorField& Ua) const
 
 tmp<volVectorField> adjointSpalartAllmaras::adjointMeanFlowSource()
 {
+    addProfiling
+        (adjointSpalartAllmaras, "adjointSpalartAllmaras::addMomentumSource");
     // cm formulation
     //return (- nuTilda()*fvc::grad(nuaTilda() - conservativeMomentumSource());
 
@@ -772,7 +774,7 @@ tmp<scalarField> adjointSpalartAllmaras::diffusionCoeffVar1(label patchI) const
 
     diffCoeff =
         (nuTilda().boundaryField()[patchI] + nu()().boundaryField()[patchI])
-        /sigmaNut_.value();
+       /sigmaNut_.value();
 
     return tdiffCoeff;
 }
@@ -794,14 +796,13 @@ const boundaryVectorField& adjointSpalartAllmaras::wallShapeSensitivities()
     {
         const fvPatch& patch = mesh_.boundary()[patchI];
 
-        tmp<vectorField> tnf(patch.nf());
-        const vectorField& nf = tnf();
+        tmp<vectorField> tnf = patch.nf();
         if (isA<wallFvPatch>(patch) && patch.size() != 0)
         {
             wallShapeSens[patchI] =
               - nuaTilda().boundaryField()[patchI].snGrad()
-              * diffusionCoeffVar1(patchI)()
-              * nuTilda().boundaryField()[patchI].snGrad() * nf;
+               *diffusionCoeffVar1(patchI)
+               *nuTilda().boundaryField()[patchI].snGrad()*tnf;
         }
     }
 
@@ -816,11 +817,10 @@ const boundaryVectorField& adjointSpalartAllmaras::wallFloCoSensitivities()
     forAll(mesh_.boundary(), patchI)
     {
         tmp<vectorField> tnf = mesh_.boundary()[patchI].nf();
-        const vectorField& nf = tnf();
 
         wallFloCoSens[patchI] =
             nuaTilda().boundaryField()[patchI]
-          * nuTilda().boundaryField()[patchI] * nf;
+           *nuTilda().boundaryField()[patchI]*tnf;
     }
 
     return wallFloCoSens;
@@ -846,18 +846,15 @@ tmp<volScalarField> adjointSpalartAllmaras::distanceSensitivities()
     volScalarField dfw_dDelta
         (this->dfw_dDelta(Stilda_, dfw_dr, dStilda_dDelta));
 
-
-    tmp<volScalarField> tadjointEikonalSource
-    (
-        new volScalarField
+    auto tadjointEikonalSource =
+        tmp<volScalarField>::New
         (
             "adjointEikonalSource" + type(),
             (
-                - Cb1_*nuTilda()*dStilda_dDelta
-                + Cw1_*sqr(nuTilda()/y_)*(dfw_dDelta - 2.*fw_/y_)
+              - Cb1_*nuTilda()*dStilda_dDelta
+              + Cw1_*sqr(nuTilda()/y_)*(dfw_dDelta - 2.*fw_/y_)
             )*nuaTilda()
-        )
-    );
+        );
     volScalarField& adjointEikonalSource = tadjointEikonalSource.ref();
 
     // if wall functions are used, add appropriate source terms
@@ -881,8 +878,8 @@ tmp<volScalarField> adjointSpalartAllmaras::distanceSensitivities()
         {
             const scalar kappa_(0.41);
             const scalar E_(9.8);
-            const tmp<vectorField> tnf(patch.nf());
-            const vectorField& nf = tnf();
+            tmp<vectorField> tnf = patch.nf();
+            const vectorField& nf = tnf.ref();
             const scalarField& magSf = patch.magSf();
 
             const fvPatchVectorField& Up = U.boundaryField()[patchi];
@@ -934,8 +931,8 @@ tmp<volScalarField> adjointSpalartAllmaras::distanceSensitivities()
                 label cellI = faceCells[faceI];
                 adjointEikonalSource[cellI] -=
                     2.*( rt[faceI] + Uap_t[faceI] )
-                  * vtau[faceI]*Cwf_d[faceI]*magSf[faceI]
-                  / V[cellI]; // Divide with cell volume since the term
+                   *vtau[faceI]*Cwf_d[faceI]*magSf[faceI]
+                   /V[cellI]; // Divide with cell volume since the term
                               // will be used as a source term in the
                               // adjoint eikonal equation
             }
@@ -950,9 +947,13 @@ tmp<volTensorField> adjointSpalartAllmaras::FISensitivityTerm()
 {
     const volVectorField& U  = primalVars_.U();
 
-    volTensorField gradU(fvc::grad(U));
-    volVectorField gradNuTilda(fvc::grad(nuTilda()));
-    volVectorField gradNuaTilda(fvc::grad(nuaTilda()));
+    tmp<volTensorField> tgradU = fvc::grad(U);
+    const volTensorField& gradU = tgradU.cref();
+    tmp<volVectorField> tgradNuTilda = fvc::grad(nuTilda());
+    volVectorField& gradNuTilda = tgradNuTilda.ref();
+    tmp<volVectorField> tgradNuaTilda = fvc::grad(nuaTilda());
+    volVectorField::Boundary& gradNuaTildab =
+        tgradNuaTilda.ref().boundaryFieldRef();
 
     // Explicitly correct the boundary gradient to get rid of
     // the tangential component
@@ -961,7 +962,7 @@ tmp<volTensorField> adjointSpalartAllmaras::FISensitivityTerm()
         const fvPatch& patch = mesh_.boundary()[patchI];
         if (isA<wallFvPatch>(patch))
         {
-            tmp<vectorField> tnf(patch.nf());
+            tmp<vectorField> tnf = patch.nf();
             const vectorField& nf = tnf();
             // gradU:: can cause problems in zeroGradient patches for U
             // and zero fixedValue for nuTilda.
@@ -969,9 +970,9 @@ tmp<volTensorField> adjointSpalartAllmaras::FISensitivityTerm()
             //gradU.boundaryField()[patchI] =
             //  nf * U_.boundaryField()[patchI].snGrad();
             gradNuTilda.boundaryFieldRef()[patchI]  =
-                nf * nuTilda().boundaryField()[patchI].snGrad();
-            gradNuaTilda.boundaryFieldRef()[patchI] =
-                nf * nuaTilda().boundaryField()[patchI].snGrad();
+                nf*nuTilda().boundaryField()[patchI].snGrad();
+            gradNuaTildab[patchI] =
+                nf*nuaTilda().boundaryField()[patchI].snGrad();
         }
     }
 
@@ -985,6 +986,7 @@ tmp<volTensorField> adjointSpalartAllmaras::FISensitivityTerm()
         )
        /(Omega + dimensionedScalar("SMALL", Omega.dimensions(), SMALL))
     );
+    tgradU.clear();
 
     volScalarField chi(this->chi());
     volScalarField fv1(this->fv1(chi));
@@ -995,29 +997,24 @@ tmp<volTensorField> adjointSpalartAllmaras::FISensitivityTerm()
     volScalarField dfw_dOmega
         (this->dfw_dOmega(Stilda_, dfw_dr, dStilda_dOmega));
 
-    // Assemply of the return field
-    tmp<volTensorField> tvolSensTerm
-    (
-        new volTensorField
+    return
+        tmp<volTensorField>::New
         (
             "volSensTerm",
             // jk, cm formulation for the TM model convection
-            - (nuaTilda() * (U * gradNuTilda))
+          - (nuaTilda()*(U*gradNuTilda))
             // jk, symmetric in theory
-            + nuaTilda()*fvc::grad(DnuTildaEff() * gradNuTilda)().T()
+          + nuaTilda()*fvc::grad(DnuTildaEff()*gradNuTilda)().T()
             // jk
-            - DnuTildaEff() * (gradNuaTilda * gradNuTilda)
+          - DnuTildaEff()*(tgradNuaTilda*gradNuTilda)
             // symmetric
-            + 2.*nuaTilda()*Cb2_/sigmaNut_ * (gradNuTilda * gradNuTilda)
-            + (
-                - Cb1_*nuTilda()*dStilda_dOmega
-                + Cw1_*sqr(nuTilda()/y_)*dfw_dOmega
-              )
-            * nuaTilda() * deltaOmega // jk
-         )
-    );
-
-    return tvolSensTerm;
+          + 2.*nuaTilda()*Cb2_/sigmaNut_*(gradNuTilda*gradNuTilda)
+          + (
+              - Cb1_*nuTilda()*dStilda_dOmega
+              + Cw1_*sqr(nuTilda()/y_)*dfw_dOmega
+            )
+           *nuaTilda()*deltaOmega // jk
+        );
 }
 
 
@@ -1029,6 +1026,8 @@ void adjointSpalartAllmaras::nullify()
 
 void adjointSpalartAllmaras::correct()
 {
+    addProfiling
+        (adjointSpalartAllmaras, "adjointSpalartAllmaras::correct");
     if (!adjointTurbulence_)
     {
         return;
@@ -1044,7 +1043,7 @@ void adjointSpalartAllmaras::correct()
     volScalarField gradNua(gradNuTilda_ & fvc::grad(nuaTilda()));
     volScalarField gradUaR
     (
-        2.0*fvc::grad(Ua,"adjointProductionUa") && symmAdjointProductionU_
+        2.0*fvc::grad(Ua) && symmAdjointProductionU_
     );
 
     dimensionedScalar oneOverSigmaNut = 1./sigmaNut_;

@@ -251,7 +251,7 @@ Foam::scalar Foam::volBSplinesBase::computeMaxBoundaryDisplacement
 void Foam::volBSplinesBase::boundControlPointMovement
 (
     vectorField& controlPointsMovement
-)
+) const
 {
     label pastControlPoints(0);
     forAll(volume_, iNURB)
@@ -315,8 +315,7 @@ void Foam::volBSplinesBase::writeControlPoints() const
 {
     for (const NURBS3DVolume& box : volume_)
     {
-        box.writeCps("cpsBsplines"+mesh_.time().timeName());
-        box.writeCpsInDict();
+        box.writeCps("cpsBsplines" + mesh_.time().timeName());
     }
 }
 

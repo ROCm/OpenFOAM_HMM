@@ -43,7 +43,8 @@ Foam::adjointSolverManager::adjointSolverManager
 (
     fvMesh& mesh,
     const word& managerType,
-    const dictionary& dict
+    const dictionary& dict,
+    bool overrideUseSolverName
 )
 :
     regIOobject
@@ -70,7 +71,8 @@ Foam::adjointSolverManager::adjointSolverManager
         dict.getOrDefault<scalar>("operatingPointWeight", 1)
     )
 {
-    const dictionary& adjointSolversDict = dict.subDict("adjointSolvers");
+    dictionary& adjointSolversDict =
+        const_cast<dictionary&>(dict.subDict("adjointSolvers"));
 
     const wordList adjSolverNames = adjointSolversDict.toc();
     adjointSolvers_.setSize(adjSolverNames.size());
@@ -80,6 +82,12 @@ Foam::adjointSolverManager::adjointSolverManager
     label nConstraints(0);
     forAll(adjSolverNames, namei)
     {
+        dictionary& solverDict =
+            adjointSolversDict.subDict(adjSolverNames[namei]);
+        if (overrideUseSolverName || adjointSolvers_.size() > 1)
+        {
+            solverDict.add<bool>("useSolverNameForFields", true);
+        }
         adjointSolvers_.set
         (
             namei,
@@ -87,7 +95,7 @@ Foam::adjointSolverManager::adjointSolverManager
             (
                 mesh_,
                 managerType,
-                adjointSolversDict.subDict(adjSolverNames[namei]),
+                solverDict,
                 primalSolverName_
             )
         );

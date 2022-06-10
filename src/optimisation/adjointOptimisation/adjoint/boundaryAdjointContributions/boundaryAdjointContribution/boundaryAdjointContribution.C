@@ -103,6 +103,18 @@ tmp<scalarField> boundaryAdjointContribution::adjointTMVariable2Source()
 }
 
 
+tmp<scalarField> boundaryAdjointContribution::dJdnut()
+{
+    return tmp<scalarField>::New(patch_.size(), Zero);
+}
+
+
+tmp<tensorField> boundaryAdjointContribution::dJdGradU()
+{
+    return tmp<tensorField>::New(patch_.size(), Zero);
+}
+
+
 tmp<scalarField> boundaryAdjointContribution::TMVariable1Diffusion()
 {
     return tmp<scalarField>::New(patch_.size(), Zero);
