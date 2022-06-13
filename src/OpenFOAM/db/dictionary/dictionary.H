@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,8 +85,8 @@ SeeAlso
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef dictionary_H
-#define dictionary_H
+#ifndef Foam_dictionary_H
+#define Foam_dictionary_H
 
 #include <type_traits>
 #include "entry.H"
@@ -337,6 +337,7 @@ private:
         //  The heuristic tries successively longer top-level entries
         //  until there is a suitable match.
         //
+        //  \param keyword the keyword to search for
         //  \param matchOpt the search mode
         const_searcher csearchDotScoped
         (
@@ -351,6 +352,7 @@ private:
         //  ambiguity between separator and content.
         //  No possibility or need for recursion.
         //
+        //  \param keyword the keyword to search for
         //  \param matchOpt the search mode. Recursive is ignored.
         const_searcher csearchSlashScoped
         (
@@ -509,7 +511,8 @@ public:
 
         //- Search for an entry (const access) with the given keyword.
         //
-        //  \param matchOpt the default search is non-recursive with patterns
+        //  \param keyword the keyword to search for
+        //  \param matchOpt search mode (default: non-recursive with patterns)
         //
         //  \return True if entry was found
         inline bool found
@@ -520,7 +523,8 @@ public:
 
         //- Find for an entry (non-const access) with the given keyword.
         //
-        //  \param matchOpt the search mode
+        //  \param keyword the keyword to search for
+        //  \param matchOpt search mode (default: non-recursive with patterns)
         //
         //  \return the entry pointer found or a nullptr.
         inline entry* findEntry
@@ -531,7 +535,8 @@ public:
 
         //- Find an entry (const access) with the given keyword.
         //
-        //  \param matchOpt the default search is non-recursive with patterns
+        //  \param keyword the keyword to search for
+        //  \param matchOpt search mode (default: non-recursive with patterns)
         //
         //  \return the entry pointer found or a nullptr.
         inline const entry* findEntry
@@ -545,7 +550,8 @@ public:
         //  Special handling for an absolute anchor (^) at start of the keyword
         //  and for '..' to ascend into the parent dictionaries.
         //
-        //  \param matchOpt the default search is non-recursive with patterns
+        //  \param keyword the keyword to search for
+        //  \param matchOpt search mode (default: non-recursive with patterns)
         //
         //  \return the entry pointer found or a nullptr.
         inline const entry* findScoped
@@ -557,7 +563,10 @@ public:
         //- Find and return a sub-dictionary pointer if present
         //  (and a sub-dictionary) otherwise return nullptr.
         //
-        //  \param matchOpt the default search is non-recursive with patterns
+        //  \param keyword the keyword to search for
+        //  \param matchOpt search mode (default: non-recursive with patterns)
+        //
+        //  \return pointer to sub-dictionary found or a nullptr.
         inline dictionary* findDict
         (
             const word& keyword,
@@ -567,7 +576,10 @@ public:
         //- Find and return a sub-dictionary pointer if present
         //  (and a sub-dictionary) otherwise return nullptr.
         //
-        //  \param matchOpt the default search is non-recursive with patterns
+        //  \param keyword the keyword to search for
+        //  \param matchOpt search mode (default: non-recursive with patterns)
+        //
+        //  \return pointer to sub-dictionary found or a nullptr.
         inline const dictionary* findDict
         (
             const word& keyword,
@@ -576,7 +588,8 @@ public:
 
         //- Search for an entry (const access) with the given keyword.
         //
-        //  \param matchOpt the default search is non-recursive with patterns
+        //  \param keyword the keyword to search for
+        //  \param matchOpt search mode
         //
         //  \return return an entry if present, otherwise FatalIOError.
         const entry& lookupEntry
@@ -588,7 +601,10 @@ public:
         //- Find and return an entry data stream.
         //- FatalIOError if not found, or not a stream
         //
-        //  \param matchOpt the default search is non-recursive with patterns
+        //  \param keyword the keyword to search for
+        //  \param matchOpt search mode (default: non-recursive with patterns)
+        //
+        //  \return entry stream or FatalIOError
         ITstream& lookup
         (
             const word& keyword,
@@ -598,7 +614,8 @@ public:
         //- Find and return a T.
         //- FatalIOError if not found, or if the number of tokens is incorrect.
         //
-        //  \param matchOpt the default search is non-recursive with patterns
+        //  \param keyword the keyword to search for
+        //  \param matchOpt search mode (default: non-recursive with patterns)
         template<class T>
         T get
         (
@@ -609,7 +626,9 @@ public:
         //- Find and return a T, or return the given default value.
         //- FatalIOError if it is found and the number of tokens is incorrect.
         //
-        //  \param matchOpt the default search is non-recursive with patterns
+        //  \param keyword the keyword to search for
+        //  \param deflt the default value to use
+        //  \param matchOpt search mode (default: non-recursive with patterns)
         template<class T>
         T getOrDefault
         (
@@ -622,7 +641,9 @@ public:
         //- and add it to dictionary.
         //- FatalIOError if it is found and the number of tokens is incorrect.
         //
-        //  \param matchOpt the default search is non-recursive with patterns
+        //  \param keyword the keyword to search for
+        //  \param deflt the default value to use
+        //  \param matchOpt search mode (default: non-recursive with patterns)
         template<class T>
         T getOrAdd
         (
@@ -635,8 +656,9 @@ public:
         //- FatalIOError if it is found and the number of tokens is incorrect,
         //- or it is mandatory and not found.
         //
+        //  \param keyword the keyword to search for
         //  \param val the value to read into
-        //  \param matchOpt the default search is non-recursive with patterns
+        //  \param matchOpt search mode (default: non-recursive with patterns)
         //  \param mandatory the keyword is mandatory (default: true)
         //
         //  \return true if the entry was found.
@@ -651,10 +673,10 @@ public:
 
         //- Find an entry if present, and assign to T val.
         //- FatalIOError if it is found and the number of tokens is incorrect.
-        //  Default search: non-recursive with patterns.
         //
+        //  \param keyword the keyword to search for
         //  \param val the value to read into
-        //  \param matchOpt the default search is non-recursive with patterns
+        //  \param matchOpt search mode (default: non-recursive with patterns)
         //
         //  \return true if the entry was found.
         template<class T>
@@ -668,8 +690,9 @@ public:
         //- Find and return a T with additional checking
         //- FatalIOError if not found, or if the number of tokens is incorrect.
         //
+        //  \param keyword the keyword to search for
         //  \param pred the value check predicate
-        //  \param matchOpt the default search is non-recursive with patterns
+        //  \param matchOpt search mode (default: non-recursive with patterns)
         template<class T, class Predicate>
         T getCheck
         (
@@ -681,8 +704,10 @@ public:
         //- Find and return a T, or return the given default value.
         //- FatalIOError if it is found and the number of tokens is incorrect.
         //
+        //  \param keyword the keyword to search for
+        //  \param deflt the default value to use
         //  \param pred the value check predicate
-        //  \param matchOpt the default search is non-recursive with patterns
+        //  \param matchOpt search mode (default: non-recursive with patterns)
         template<class T, class Predicate>
         T getCheckOrDefault
         (
@@ -696,8 +721,10 @@ public:
         //- and add it to dictionary.
         //- FatalIOError if it is found and the number of tokens is incorrect.
         //
+        //  \param keyword the keyword to search for
+        //  \param deflt the default value to use
         //  \param pred the value check predicate
-        //  \param matchOpt the default search is non-recursive with patterns
+        //  \param matchOpt search mode (default: non-recursive with patterns)
         template<class T, class Predicate>
         T getCheckOrAdd
         (
@@ -711,10 +738,11 @@ public:
         //- FatalIOError if it is found and the number of tokens is incorrect,
         //- or it is mandatory and not found.
         //
+        //  \param keyword the keyword to search for
         //  \param val the value to read into
         //  \param pred the value check predicate
-        //  \param matchOpt the default search is non-recursive with patterns
-        //  \param mandatory the keyword is mandatory
+        //  \param matchOpt search mode (default: non-recursive with patterns)
+        //  \param mandatory the keyword is mandatory (default: true)
         //
         //  \return true if the entry was found.
         template<class T, class Predicate>
@@ -729,11 +757,11 @@ public:
 
         //- Find an entry if present, and assign to T val.
         //- FatalIOError if it is found and the number of tokens is incorrect.
-        //  Default search: non-recursive with patterns.
         //
+        //  \param keyword the keyword to search for
         //  \param val the value to read into
         //  \param pred the value check predicate
-        //  \param matchOpt the default search is non-recursive with patterns
+        //  \param matchOpt search mode (default: non-recursive with patterns)
         //
         //  \return true if the entry was found.
         template<class T, class Predicate>
@@ -747,7 +775,8 @@ public:
 
         //- Check if entry is found and is a sub-dictionary.
         //
-        //  \param matchOpt the default search is non-recursive with patterns
+        //  \param keyword the keyword to search for
+        //  \param matchOpt search mode (default: non-recursive with patterns)
         //
         //  \return true if the entry was found.
         inline bool isDict
@@ -759,7 +788,8 @@ public:
         //- Find and return a sub-dictionary.
         //  Fatal if the entry does not exist or is not a sub-dictionary.
         //
-        //  \param matchOpt the default search is non-recursive with patterns
+        //  \param keyword the keyword to search for
+        //  \param matchOpt search mode (default: non-recursive with patterns)
         const dictionary& subDict
         (
             const word& keyword,
@@ -769,7 +799,8 @@ public:
         //- Find and return a sub-dictionary for manipulation.
         //  Fatal if the entry does not exist or is not a sub-dictionary.
         //
-        //  \param matchOpt the default search is non-recursive with patterns
+        //  \param keyword the keyword to search for
+        //  \param matchOpt search mode (default: non-recursive with patterns)
         dictionary& subDict
         (
             const word& keyword,
@@ -779,7 +810,8 @@ public:
         //- Find and return a sub-dictionary for manipulation.
         //  Fatal if the entry exist and is not a sub-dictionary.
         //
-        //  \param matchOpt the default search is non-recursive with patterns
+        //  \param keyword the keyword to search for
+        //  \param matchOpt search mode (default: non-recursive with patterns)
         dictionary& subDictOrAdd
         (
             const word& keyword,
@@ -790,7 +822,8 @@ public:
         //- an empty dictionary.
         //  Warn if the entry exists but is not a sub-dictionary.
         //
-        //  \param matchOpt the default search is non-recursive with patterns
+        //  \param keyword the keyword to search for
+        //  \param matchOpt search mode (default: non-recursive with patterns)
         //  \param mandatory the keyword is mandatory (default: false)
         dictionary subOrEmptyDict
         (
@@ -802,7 +835,8 @@ public:
         //- Find and return a sub-dictionary, otherwise return this dictionary.
         //  Warn if the entry exists but is not a sub-dictionary.
         //
-        //  Search type: non-recursive with patterns.
+        //  \param keyword the keyword to search for
+        //  \param matchOpt search mode (default: non-recursive with patterns)
         const dictionary& optionalSubDict
         (
             const word& keyword,
@@ -842,15 +876,20 @@ public:
         );
 
         //- Add a new entry.
+        //
+        //  \param entryPtr the entry to add
         //  \param mergeEntry dictionaries are interwoven and primitive
-        //         entries are overwritten
+        //         entries are overwritten (default: false)
+        //
         //  \return pointer to inserted entry, or place of merging
         //   or nullptr on failure
         entry* add(entry* entryPtr, bool mergeEntry=false);
 
         //- Add an entry.
+        //
+        //  \param e the entry to add
         //  \param mergeEntry dictionaries are interwoven and primitive
-        //         entries are overwritten
+        //         entries are overwritten (default: false)
         //  \return pointer to inserted entry, or place of merging
         //   or nullptr on failure
         entry* add(const entry& e, bool mergeEntry=false);
@@ -969,36 +1008,33 @@ public:
     // Searching
 
         //- Search dictionary for given keyword
-        //  Default search: non-recursive with patterns.
         //
-        //  \param recursive search parent dictionaries
-        //  \param patternMatch use regular expressions
+        //  \param keyword the keyword to search for
+        //  \param matchOpt search mode (default: non-recursive with patterns)
         const_searcher csearch
         (
             const word& keyword,
-            enum keyType::option = keyType::REGEX
+            enum keyType::option matchOpt = keyType::REGEX
         ) const;
 
         //- Search dictionary for given keyword
-        //  Default search: non-recursive with patterns.
         //
-        //  \param recursive search parent dictionaries
-        //  \param patternMatch use regular expressions
+        //  \param keyword the keyword to search for
+        //  \param matchOpt search mode (default: non-recursive with patterns)
         const_searcher search
         (
             const word& keyword,
-            enum keyType::option = keyType::REGEX
+            enum keyType::option matchOpt = keyType::REGEX
         ) const;
 
         //- Search dictionary for given keyword
-        //  Default search: non-recursive with patterns.
         //
-        //  \param recursive search parent dictionaries
-        //  \param patternMatch use regular expressions
+        //  \param keyword the keyword to search for
+        //  \param matchOpt search mode (default: non-recursive with patterns)
         searcher search
         (
             const word& keyword,
-            enum keyType::option = keyType::REGEX
+            enum keyType::option matchOpt = keyType::REGEX
         );
 
         //- Search using scoping.
@@ -1022,32 +1058,32 @@ public:
         //  Since a slash is not a valid keyword character, there is no
         //  ambiguity between separator and content.
         //
-        //  \param recursive search parent dictionaries
-        //  \param patternMatch use regular expressions
+        //  \param keyword the keyword to search for
+        //  \param matchOpt search mode
         const_searcher csearchScoped
         (
             const word& keyword,
-            enum keyType::option
+            enum keyType::option matchOpt
         ) const;
 
         //- Search using dot or slash scoping.
         //
-        //  \param recursive search parent dictionaries
-        //  \param patternMatch use regular expressions
+        //  \param keyword the keyword to search for
+        //  \param matchOpt search mode
         const_searcher searchScoped
         (
             const word& keyword,
-            enum keyType::option
+            enum keyType::option matchOpt
         ) const;
 
         //- Search using dot or slash scoping.
         //
-        //  \param recursive search parent dictionaries
-        //  \param patternMatch use regular expressions
+        //  \param keyword the keyword to search for
+        //  \param matchOpt search mode
         searcher searchScoped
         (
             const word& keyword,
-            enum keyType::option
+            enum keyType::option matchOpt
         );
 
         //- Locate a sub-dictionary using slash-scoping
@@ -1070,123 +1106,118 @@ public:
     // Compatibility helpers
 
         //- Search dictionary for given keyword and any compatibility names
-        //  Default search: non-recursive with patterns.
         //
+        //  \param keyword the keyword to search for
         //  \param compat list of old compatibility keywords and the last
         //      OpenFOAM version for which they were used.
         //      Old version 1600=OpenFOAM-v3.0, 240=OpenFOAM-2.4.x,
         //      170=OpenFOAM-1.7.x,...
-        //
-        //  \param recursive search parent dictionaries
-        //  \param patternMatch use regular expressions
+        //  \param matchOpt search mode (default: non-recursive with patterns)
         const_searcher csearchCompat
         (
             const word& keyword,
             std::initializer_list<std::pair<const char*,int>> compat,
-            enum keyType::option = keyType::REGEX
+            enum keyType::option matchOpt = keyType::REGEX
         ) const;
 
         //- Search dictionary for given keyword and any compatibility names
-        //  Default search: non-recursive with patterns.
         //
+        //  \param keyword the keyword to search for
         //  \param compat list of old compatibility keywords and the last
         //      OpenFOAM version for which they were used.
-        //  \param recursive search parent dictionaries
-        //  \param patternMatch use regular expressions
+        //  \param matchOpt search mode (default: non-recursive with patterns)
         bool foundCompat
         (
             const word& keyword,
             std::initializer_list<std::pair<const char*,int>> compat,
-            enum keyType::option = keyType::REGEX
+            enum keyType::option matchOpt = keyType::REGEX
         ) const;
 
         //- Find and return an entry pointer if present, or return a nullptr,
         //- using any compatibility names if needed.
         //
+        //  \param keyword the keyword to search for
         //  \param compat list of old compatibility keywords and the last
         //      OpenFOAM version for which they were used.
-        //  \param recursive search parent dictionaries
-        //  \param patternMatch use regular expressions
+        //  \param matchOpt search mode
         const entry* findCompat
         (
             const word& keyword,
             std::initializer_list<std::pair<const char*,int>> compat,
-            enum keyType::option
+            enum keyType::option matchOpt
         ) const;
 
         //- Find and return an entry if present, otherwise FatalIOError,
         //- using any compatibility names if needed.
         //
+        //  \param keyword the keyword to search for
         //  \param compat list of old compatibility keywords and the last
         //      OpenFOAM version for which they were used.
-        //  \param recursive search parent dictionaries
-        //  \param patternMatch use regular expressions
+        //  \param matchOpt search mode
         const entry& lookupEntryCompat
         (
             const word& keyword,
             std::initializer_list<std::pair<const char*,int>> compat,
-            enum keyType::option
+            enum keyType::option matchOpt
         ) const;
 
         //- Find and return an entry data stream,
         //- using any compatibility names if needed.
-        //  Default search: non-recursive with patterns.
         //
+        //  \param keyword the keyword to search for
         //  \param compat list of old compatibility keywords and the last
         //      OpenFOAM version for which they were used.
-        //  \param recursive search parent dictionaries
-        //  \param patternMatch use regular expressions
+        //  \param matchOpt search mode (default: non-recursive with patterns)
         ITstream& lookupCompat
         (
             const word& keyword,
             std::initializer_list<std::pair<const char*,int>> compat,
-            enum keyType::option = keyType::REGEX
+            enum keyType::option matchOpt = keyType::REGEX
         ) const;
 
         //- Find and return a T
         //- using any compatibility names if needed.
         //- FatalIOError if not found, or if there are excess tokens.
-        //  Default search: non-recursive with patterns.
         //
+        //  \param keyword the keyword to search for
         //  \param compat list of old compatibility keywords and the last
         //      OpenFOAM version for which they were used.
-        //  \param recursive search parent dictionaries
-        //  \param patternMatch use regular expressions
+        //  \param matchOpt search mode (default: non-recursive with patterns)
         template<class T>
         T getCompat
         (
             const word& keyword,
             std::initializer_list<std::pair<const char*,int>> compat,
-            enum keyType::option = keyType::REGEX
+            enum keyType::option matchOpt = keyType::REGEX
         ) const;
 
         //- Find and return a T, or return the given default value
         //- using any compatibility names if needed.
-        //  Default search: non-recursive with patterns.
         //
+        //  \param keyword the keyword to search for
         //  \param compat list of old compatibility keywords and the last
         //      OpenFOAM version for which they were used.
-        //  \param recursive search parent dictionaries
-        //  \param patternMatch use regular expressions
+        //  \param deflt the default value to use
+        //  \param matchOpt search mode (default: non-recursive with patterns)
         template<class T>
         T getOrDefaultCompat
         (
             const word& keyword,
             std::initializer_list<std::pair<const char*,int>> compat,
             const T& deflt,
-            enum keyType::option = keyType::REGEX
+            enum keyType::option matchOpt = keyType::REGEX
         ) const;
 
         //- Find entry and assign to T val
         //- using any compatibility names if needed.
         //- FatalIOError if there are excess tokens.
-        //  Default search: non-recursive with patterns.
         //
+        //  \param keyword the keyword to search for
         //  \param compat list of old compatibility keywords and the last
         //      OpenFOAM version for which they were used.
         //  \param val the value to read
-        //  \param recursive search parent dictionaries
-        //  \param patternMatch use regular expressions
+        //  \param matchOpt search mode (default: non-recursive with patterns)
+        //  \param mandatory the keyword is mandatory (default: true)
         //
         //  \return true if the entry was found.
         template<class T>
@@ -1195,20 +1226,19 @@ public:
             const word& keyword,
             std::initializer_list<std::pair<const char*,int>> compat,
             T& val,
-            enum keyType::option = keyType::REGEX,
+            enum keyType::option matchOpt = keyType::REGEX,
             bool mandatory = true
         ) const;
 
         //- Find an entry if present, and assign to T val
         //- using any compatibility names if needed.
         //- FatalIOError if it is found and there are excess tokens.
-        //  Default search: non-recursive with patterns.
         //
+        //  \param keyword the keyword to search for
         //  \param compat list of old compatibility keywords and the last
         //      OpenFOAM version for which they were used.
         //  \param val the value to read
-        //  \param recursive search parent dictionaries
-        //  \param patternMatch use regular expressions
+        //  \param matchOpt search mode (default: non-recursive with patterns)
         //
         //  \return true if the entry was found.
         template<class T>
@@ -1217,7 +1247,7 @@ public:
             const word& keyword,
             std::initializer_list<std::pair<const char*,int>> compat,
             T& val,
-            enum keyType::option = keyType::REGEX
+            enum keyType::option matchOpt = keyType::REGEX
         ) const;
 
 
@@ -1253,7 +1283,9 @@ public:
         //- Find and return a T, or return the given default value.
         //- FatalIOError if it is found and the number of tokens is incorrect.
         //
-        //  \param matchOpt the default search is non-recursive with patterns
+        //  \param keyword the keyword to search for
+        //  \param deflt the default value to use
+        //  \param matchOpt search mode (default: non-recursive with patterns)
         template<class T>
         T lookupOrDefault
         (
@@ -1270,7 +1302,9 @@ public:
         //- and add it to dictionary.
         //- FatalIOError if it is found and the number of tokens is incorrect.
         //
-        //  \param matchOpt the default search is non-recursive with patterns
+        //  \param keyword the keyword to search for
+        //  \param deflt the default value to use
+        //  \param matchOpt search mode (default: non-recursive with patterns)
         template<class T>
         T lookupOrAddDefault
         (
@@ -1284,13 +1318,14 @@ public:
 
         //- Find and return a T, or return the given default value
         //- using any compatibility names if needed.
-        //  Default search: non-recursive with patterns.
         //
+        //  \param keyword the keyword to search for
         //  \param compat list of old compatibility keywords and the last
         //      OpenFOAM version for which they were used.
-        //  \param recursive search parent dictionaries
-        //  \param patternMatch use regular expressions
+        //  \param deflt the default value to use
+        //  \param matchOpt search mode (default: non-recursive with patterns)
         template<class T>
+        FOAM_DEPRECATED_FOR(2019-05, "getOrDefaultCompat() method")
         T lookupOrDefaultCompat
         (
             const word& keyword,
