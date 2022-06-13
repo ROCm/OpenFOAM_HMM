@@ -32,6 +32,7 @@ License
 
 namespace Foam
 {
+
 struct particleInfoCombineOp
 {
     void operator()(particleInfo& p1, const particleInfo& p2) const
@@ -69,13 +70,9 @@ struct particleInfoCombineOp
         }
     }
 };
-} // End namespace Foam
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::Field<Type> getData
+Field<Type> getData
 (
     const Foam::UList<Foam::particleInfo>& data,
     Type Foam::particleInfo::* field
@@ -91,42 +88,22 @@ Foam::Field<Type> getData
     return result;
 }
 
+} // End namespace Foam
 
-template<class Type>
-Foam::Field<Type> getParData
-(
-    const Foam::List<Foam::List<Foam::particleInfo>>& parData,
-    Type Foam::particleInfo::* field
-)
-{
-    DynamicField<Type> result;
 
-    for (const auto& particles : parData)
-    {
-        for (const auto& p : particles)
-        {
-            if (p.origID != -1)
-            {
-                result.append(p.*field);
-            }
-        }
-    }
-
-    return std::move(result);
-}
-
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class CloudType>
 void Foam::ParticleZoneInfo<CloudType>::writeWriter
 (
-    const DynamicList<particleInfo>& data
+    const UList<particleInfo>& data
 )
 {
     coordSet coords
     (
         "zoneParticles",
         "xyz",
-        getData(data_, &particleInfo::position),
+        getData(data, &particleInfo::position),
         scalarList(data.size(), Zero)
     );
 
@@ -136,44 +113,6 @@ void Foam::ParticleZoneInfo<CloudType>::writeWriter
 #undef  writeLocal
 #define writeLocal(field)                                                      \
     writerPtr_->write(#field, getData(data, &particleInfo::field));
-
-    writeLocal(origID);
-    writeLocal(origProc);
-    writeLocal(time0);
-    writeLocal(age);
-    writeLocal(d0);
-    writeLocal(d);
-    writeLocal(mass0);
-    writeLocal(mass);
-#undef  writeLocal
-
-    writerPtr_->endTime();
-    writerPtr_->close();
-}
-
-
-template<class CloudType>
-void Foam::ParticleZoneInfo<CloudType>::writeWriter
-(
-    const List<List<particleInfo>>& procData
-)
-{
-    vectorField points(getParData(procData, &particleInfo::position));
-
-    coordSet coords
-    (
-        "zoneParticles",
-        "xyz",
-        std::move(points),
-        scalarList(points.size(), Zero)
-    );
-
-    writerPtr_->open(coords, this->baseTimeDir() / "zoneParticles");
-    writerPtr_->beginTime(this->owner().time());
-
-#undef  writeLocal
-#define writeLocal(field)                                                      \
-    writerPtr_->write(#field, getParData(procData, &particleInfo::field));
 
     writeLocal(origID);
     writeLocal(origProc);
@@ -250,8 +189,7 @@ Foam::ParticleZoneInfo<CloudType>::ParticleZoneInfo
     (
         owner,
         this->localPath(),
-        typeName,
-        this->coeffDict()
+        typeName
     ),
     cellZoneName_(this->coeffDict().getWord("cellZone")),
     cellZoneId_(-1),
@@ -269,6 +207,8 @@ Foam::ParticleZoneInfo<CloudType>::ParticleZoneInfo
       : nullptr
     )
 {
+    writeFile::read(this->coeffDict());
+
     const auto& cellZones = owner.mesh().cellZones();
 
     cellZoneId_ = cellZones.findZoneID(cellZoneName_);
@@ -282,6 +222,33 @@ Foam::ParticleZoneInfo<CloudType>::ParticleZoneInfo
 
     Info<< "        Processing cellZone" << cellZoneName_ << " with id "
         << cellZoneId_ << endl;
+
+    if (Pstream::master())
+    {
+        // Data was reduced on write
+        labelList maxIDs;
+
+        if (this->getModelProperty("maxIDs", maxIDs))
+        {
+            if (maxIDs.size() == Pstream::nProcs())
+            {
+                maxIDs_ = maxIDs;
+                this->getModelProperty("data", data_);
+
+                Info<< "        Restarting with " << data_.size()
+                    << " particles" << endl;
+            }
+            else
+            {
+                WarningInFunction
+                    << "Case restarted with a different number of processors."
+                    << " Restarting particle statistics." << endl;
+
+                // TODO
+                // - use Cloud for base storage instead of local particle list?
+            }
+        }
+    }
 }
 
 
@@ -391,48 +358,66 @@ void Foam::ParticleZoneInfo<CloudType>::write()
         // Find number of particles per proc
         labelList allMaxIDs(maxIDs_);
         Pstream::listCombineGather(allMaxIDs, maxEqOp<label>());
-        Pstream::scatterList(allMaxIDs);
+        Pstream::broadcast(allMaxIDs);
 
-        List<List<particleInfo>> procParticles(Pstream::nProcs());
-        forAll(procParticles, proci)
+        // Combine into single list
+        label n = returnReduce(data_.size(), sumOp<label>());
+        DynamicList<particleInfo> globalParticles(n);
         {
-            procParticles[proci].resize(allMaxIDs[proci] + 1);
-        }
+            List<List<particleInfo>> procParticles(Pstream::nProcs());
+            forAll(procParticles, proci)
+            {
+                procParticles[proci].resize(allMaxIDs[proci] + 1);
+            }
 
-        // Insert into bins for accumulation
-        for (const auto& d : data_)
-        {
-            procParticles[d.origProc][d.origID] = d;
-        }
+            // Insert into bins for accumulation
+            for (const auto& d : data_)
+            {
+                procParticles[d.origProc][d.origID] = d;
+            }
 
-        for (auto& particles : procParticles)
-        {
-            Pstream::listCombineGather(particles, particleInfoCombineOp());
+            for (auto& particles : procParticles)
+            {
+                Pstream::listCombineGather(particles, particleInfoCombineOp());
+                for (const auto& p : particles)
+                {
+                    if (p.origID != -1)
+                    {
+                        globalParticles.append(p);
+                    }
+                }
+            }
         }
 
         if (Pstream::master())
         {
-            writeWriter(procParticles);
+            writeWriter(globalParticles);
 
             auto& os = osPtr();
             writeFileHeader(os);
 
             label nData = 0;
-            for (const auto& particles : procParticles)
+
+            for (const auto& p : globalParticles)
             {
-                for (const auto& p : particles)
+                if (p.origID != -1)
                 {
-                    if (p.origID != -1)
-                    {
-                        os << p << endl;
-                        ++nData;
-                    }
+                    os << p << endl;
+                    ++nData;
                 }
             }
 
             Info<< "    Number of particles             = " << nData << nl
                 << "    Written data to " << os.name() << endl;
 
+            this->setModelProperty("data", globalParticles);
+            this->setModelProperty("maxIDs", allMaxIDs);
+        }
+        else
+        {
+            // Data only present on master
+            this->setModelProperty("data", List<particleInfo>());
+            this->setModelProperty("maxIDs", labelList());
         }
     }
     else
@@ -449,6 +434,9 @@ void Foam::ParticleZoneInfo<CloudType>::write()
 
         Info<< "    Number of particles             = " << data_.size() << nl
             << "    Written data to " << os.name() << endl;
+
+        this->setModelProperty("data", data_);
+        this->setModelProperty("maxIDs", maxIDs_);
     }
 
     Info<< endl;

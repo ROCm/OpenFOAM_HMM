@@ -249,11 +249,8 @@ class ParticleZoneInfo
         //- Returns -1 if not found
         label getParticleID(const particleInfo& p) const;
 
-        //- Write fields using writerPtr_ for serial runs
-        void writeWriter(const DynamicList<particleInfo>& data);
-
-        //- Write fields using writerPtr_ for parallel runs
-        void writeWriter(const List<List<particleInfo>>& procData);
+        //- Write fields using writerPtr_
+        void writeWriter(const UList<particleInfo>& data);
 
 
 public:
