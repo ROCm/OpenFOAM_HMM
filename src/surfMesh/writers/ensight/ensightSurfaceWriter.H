@@ -45,7 +45,9 @@ Description
     \table
         Property | Description                              | Required | Default
         format   | ascii/binary                             | no  | ascii
-        collateTimes | use common geometry for times        | no  | true
+        collateTimes | Use common geometry for times        | no  | true
+        scale       | Output geometry scaling               | no  | 1
+        transform   | Output coordinate transform           | no  |
         fieldLevel  | Subtract field level before scaling   | no  | empty dict
         fieldScale  | Output field scaling                  | no  | empty dict
     \endtable

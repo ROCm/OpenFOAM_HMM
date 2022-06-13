@@ -92,9 +92,9 @@ plane
     libs    (sampling);
 
     writeControl    writeTime;
+    fields          ( cellZoneID U );
 
     surfaceFormat   vtk;
-    fields          ( cellZoneID U );
 
     surfaces
     {
@@ -104,6 +104,25 @@ plane
             point       (0 0 0);
             normal      (0 0 1);
             interpolate false;
+
+            surfaceFormat   ensight;
+
+            formatOptions
+            {
+                ensight
+                {
+                    scale 2;  // Some arbitrary scaling
+
+                    // Align with global x-axis, translate by arbitrary amount
+                    transform
+                    {
+                        origin  (0.05 -0.05 0);
+                        rotation axisAngle;
+                        axis    (0 0 1);
+                        angle   -45;
+                    }
+                }
+            }
         }
 
         slices
@@ -121,6 +140,23 @@ plane
                 rotation axisAngle;
                 axis    (0 0 1);
                 angle   45;
+            }
+
+            formatOptions
+            {
+                vtk
+                {
+                    scale 2;  // Some arbitrary scaling
+
+                    // Align with global x-axis, translate by arbitrary amount
+                    transform
+                    {
+                        origin  (0.05 0 0);
+                        rotation axisAngle;
+                        axis    (0 0 1);
+                        angle   -45;
+                    }
+                }
             }
         }
     }

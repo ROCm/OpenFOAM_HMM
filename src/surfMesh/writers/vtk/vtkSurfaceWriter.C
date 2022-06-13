@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -212,7 +212,8 @@ Foam::fileName Foam::surfaceWriters::vtkWriter::write()
         Info<< "Writing geometry to " << outputFile << endl;
     }
 
-    const meshedSurf& surf = surface();
+    // const meshedSurf& surf = surface();
+    const meshedSurfRef& surf = adjustSurface();
 
     if (!writer_ && (Pstream::master() || !parallel_))
     {

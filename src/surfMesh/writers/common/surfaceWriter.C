@@ -31,6 +31,8 @@ License
 
 #include "Time.H"
 #include "globalIndex.H"
+#include "coordinateRotation.H"
+#include "transformField.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -43,8 +45,6 @@ namespace Foam
 }
 
 Foam::scalar Foam::surfaceWriter::defaultMergeDim = 1e-8;
-
-const Foam::meshedSurf::emptySurface Foam::surfaceWriter::emptySurface_;
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
@@ -139,9 +139,12 @@ Foam::surfaceWriter::New
 
 Foam::surfaceWriter::surfaceWriter()
 :
-    surf_(std::cref<meshedSurf>(emptySurface_)),
-    surfComp_(),
-    useComponents_(false),
+    surf_(),
+    mergedSurf_(),
+    adjustedSurf_(),
+    mergeDim_(defaultMergeDim),
+    geometryScale_(1),
+    geometryTransform_(),
     upToDate_(false),
     wroteGeom_(false),
     parallel_(true),
@@ -149,8 +152,6 @@ Foam::surfaceWriter::surfaceWriter()
     isPointData_(false),
     verbose_(false),
     nFields_(0),
-    mergeDim_(defaultMergeDim),
-    merged_(),
     currTime_(),
     outputPath_(),
     fieldLevel_(),
@@ -165,6 +166,20 @@ Foam::surfaceWriter::surfaceWriter(const dictionary& options)
     surfaceWriter()
 {
     options.readIfPresent("verbose", verbose_);
+
+    geometryScale_ = 1;
+    geometryTransform_.clear();
+
+    options.readIfPresent("scale", geometryScale_);
+
+    const dictionary* dictptr;
+
+    // Optional cartesian coordinate system transform
+    if ((dictptr = options.findDict("transform", keyType::LITERAL))!= nullptr)
+    {
+        geometryTransform_ = coordSystem::cartesian(*dictptr);
+    }
+
     fieldLevel_ = options.subOrEmptyDict("fieldLevel");
     fieldScale_ = options.subOrEmptyDict("fieldScale");
 }
@@ -294,9 +309,7 @@ void Foam::surfaceWriter::clear()
 {
     close();
     expire();
-    useComponents_ = false;
-    surf_ = std::cref<meshedSurf>(emptySurface_);
-    surfComp_.clear();
+    surf_.clear();
 }
 
 
@@ -307,9 +320,7 @@ void Foam::surfaceWriter::setSurface
 )
 {
     expire();
-    useComponents_ = false;
-    surf_ = std::cref<meshedSurf>(surf);
-    surfComp_.clear();
+    surf_.reset(surf);
     parallel_ = (parallel && Pstream::parRun());
 }
 
@@ -322,9 +333,7 @@ void Foam::surfaceWriter::setSurface
 )
 {
     expire();
-    useComponents_ = true;
-    surf_ = std::cref<meshedSurf>(emptySurface_);
-    surfComp_.reset(points, faces);
+    surf_.reset(points, faces);
     parallel_ = (parallel && Pstream::parRun());
 }
 
@@ -366,7 +375,8 @@ bool Foam::surfaceWriter::expire()
 
     upToDate_ = false;
     wroteGeom_ = false;
-    merged_.clear();
+    adjustedSurf_.clear();
+    mergedSurf_.clear();
 
     // Field count (nFields_) is a different type of accounting
     // and is unaffected by geometry changes
@@ -377,18 +387,13 @@ bool Foam::surfaceWriter::expire()
 
 bool Foam::surfaceWriter::hasSurface() const
 {
-    return (useComponents_ || (&emptySurface_ != &(surf_.get())));
+    return surf_.valid();
 }
 
 
 bool Foam::surfaceWriter::empty() const
 {
-    const bool value =
-    (
-        useComponents_
-      ? surfComp_.faces().empty()
-      : surf_.get().faces().empty()
-    );
+    const bool value = surf_.faces().empty();
 
     return (parallel_ ? returnReduce(value, andOp<bool>()) : value);
 }
@@ -396,12 +401,7 @@ bool Foam::surfaceWriter::empty() const
 
 Foam::label Foam::surfaceWriter::size() const
 {
-    const label value =
-    (
-        useComponents_
-      ? surfComp_.faces().size()
-      : surf_.get().faces().size()
-    );
+    const label value = surf_.faces().size();
 
     return (parallel_ ? returnReduce(value, sumOp<label>()) : value);
 }
@@ -422,17 +422,20 @@ bool Foam::surfaceWriter::merge() const
 {
     bool changed = false;
 
-    if (parallel_ && Pstream::parRun() && !upToDate_)
+    if (!upToDate_)
     {
-        if (useComponents_)
+        adjustedSurf_.clear();
+
+        if (parallel_ && Pstream::parRun())
         {
-            changed = merged_.merge(surfComp_, mergeDim_);
+            changed = mergedSurf_.merge(surf_, mergeDim_);
         }
         else
         {
-            changed = merged_.merge(surf_.get(), mergeDim_);
+            mergedSurf_.clear();
         }
     }
+
     upToDate_ = true;
 
     if (changed)
@@ -450,17 +453,45 @@ const Foam::meshedSurf& Foam::surfaceWriter::surface() const
 
     if (parallel_ && Pstream::parRun())
     {
-        return merged_;
+        return mergedSurf_;
     }
 
-    if (useComponents_)
+    return surf_;
+}
+
+
+const Foam::meshedSurfRef& Foam::surfaceWriter::adjustSurface() const
+{
+    if (!upToDate_)
     {
-        return surfComp_;
+        adjustedSurf_.clear();
     }
-    else
+
+    if (!adjustedSurf_.valid())
     {
-        return surf_.get();
+        adjustedSurf_.reset(surface());
+
+        if
+        (
+            geometryTransform_.valid()
+         &&
+            (
+                (magSqr(geometryTransform_.origin()) > ROOTVSMALL)
+             || !geometryTransform_.R().is_identity()
+            )
+        )
+        {
+            // Forward transform
+            adjustedSurf_.movePoints
+            (
+                geometryTransform_.globalPosition(adjustedSurf_.points0())
+            );
+        }
+
+        adjustedSurf_.scalePoints(geometryScale_);
     }
+
+    return adjustedSurf_;
 }
 
 
@@ -488,11 +519,11 @@ Foam::tmp<Foam::Field<Type>> Foam::surfaceWriter::mergeFieldTemplate
         (
             Pstream::master()
          && this->isPointData()
-         && merged_.pointsMap().size()
+         && mergedSurf_.pointsMap().size()
         )
         {
-            inplaceReorder(merged_.pointsMap(), allFld);
-            allFld.resize(merged_.points().size());
+            inplaceReorder(mergedSurf_.pointsMap(), allFld);
+            allFld.resize(mergedSurf_.points().size());
         }
 
         return tfield;
@@ -576,6 +607,28 @@ Foam::tmp<Foam::Field<Type>> Foam::surfaceWriter::adjustFieldTemplate
 
             // Apply scaling
             tadjusted.ref() *= value;
+        }
+
+        // Rotate fields (vector and non-spherical tensors)
+        if
+        (
+            (pTraits<Type>::rank != 0 && pTraits<Type>::nComponents > 1)
+         && geometryTransform_.valid()
+         && !geometryTransform_.R().is_identity()
+        )
+        {
+            if (!tadjusted)
+            {
+                // Steal or clone
+                tadjusted.reset(tfield.ptr());
+            }
+
+            Foam::transform
+            (
+                tadjusted.ref(),
+                geometryTransform_.R(),
+                tadjusted()
+            );
         }
     }
 

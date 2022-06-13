@@ -214,7 +214,8 @@ Foam::fileName Foam::surfaceWriters::x3dWriter::write()
         Info<< "Writing geometry to " << outputFile << endl;
     }
 
-    const meshedSurf& surf = surface();
+    // const meshedSurf& surf = surface();
+    const meshedSurfRef& surf = adjustSurface();
 
     if (Pstream::master() || !parallel_)
     {
@@ -278,7 +279,8 @@ Foam::fileName Foam::surfaceWriters::x3dWriter::writeTemplate
     }
 
 
-    const meshedSurf& surf = surface();
+    // const meshedSurf& surf = surface();
+    const meshedSurfRef& surf = adjustSurface();
 
     if (Pstream::master() || !parallel_)
     {

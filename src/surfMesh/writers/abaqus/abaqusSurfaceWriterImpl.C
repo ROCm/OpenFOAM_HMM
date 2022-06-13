@@ -126,7 +126,8 @@ Foam::fileName Foam::surfaceWriters::abaqusWriter::writeTemplate
     }
 
 
-    const meshedSurf& surf = surface();
+    // const meshedSurf& surf = surface();
+    const meshedSurfRef& surf = adjustSurface();
 
     if (Pstream::master() || !parallel_)
     {

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,7 +51,9 @@ Note
     \table
         Property | Description                              | Required | Default
         format   | ascii/binary                             | no  | ascii
-        compression | File compression                      | no  | false
+        compression | Use file compression                  | no  | false
+        scale       | Output geometry scaling               | no  | 1
+        transform   | Output coordinate transform           | no  |
     \endtable
 
 SourceFiles

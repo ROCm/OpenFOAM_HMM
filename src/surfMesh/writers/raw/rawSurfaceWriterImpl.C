@@ -114,7 +114,8 @@ Foam::fileName Foam::surfaceWriters::rawWriter::writeTemplate
         Info<< " to " << outputFile << endl;
     }
 
-    const meshedSurf& surf = surface();
+    // const meshedSurf& surf = surface();
+    const meshedSurfRef& surf = adjustSurface();
 
     if (Pstream::master() || !parallel_)
     {
@@ -159,7 +160,7 @@ Foam::fileName Foam::surfaceWriters::rawWriter::writeTemplate
             // Node values
             forAll(values, elemi)
             {
-                writePoint(os, points[elemi]*geometryScale_);
+                writePoint(os, points[elemi]);
                 writeData(os, values[elemi]);
                 os << nl;
             }
@@ -171,12 +172,12 @@ Foam::fileName Foam::surfaceWriters::rawWriter::writeTemplate
             {
                 const face& f = faces[elemi];
 
-                writePoint(os, f.centre(points)*geometryScale_);
+                writePoint(os, f.centre(points));
                 writeData(os,  values[elemi]);
                 if (withFaceNormal)
                 {
                     os << ' ';
-                    writePoint(os, f.areaNormal(points)*geometryScale_);
+                    writePoint(os, f.areaNormal(points));
                 }
                 os << nl;
             }

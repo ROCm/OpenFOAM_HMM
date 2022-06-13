@@ -119,7 +119,8 @@ Foam::fileName Foam::surfaceWriters::foamWriter::write()
     }
 
 
-    const meshedSurf& surf = surface();
+    // const meshedSurf& surf = surface();
+    const meshedSurfRef& surf = adjustSurface();
 
     if (Pstream::master() || !parallel_)
     {

@@ -59,7 +59,8 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeUncollated()
     }
 
 
-    const meshedSurf& surf = surface();
+    // const meshedSurf& surf = surface();
+    const meshedSurfRef& surf = adjustSurface();
 
     if (Pstream::master() || !parallel_)
     {
@@ -159,7 +160,8 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeUncollated
         Info<< endl;
     }
 
-    const meshedSurf& surf = surface();
+    // const meshedSurf& surf = surface();
+    const meshedSurfRef& surf = adjustSurface();
 
     if (Pstream::master() || !parallel_)
     {
