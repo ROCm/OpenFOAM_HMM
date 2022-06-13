@@ -1,6 +1,5 @@
 #!/bin/sh
 cd "${0%/*}" || exit                                # Run from this directory
-. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
 ( cd flange && ./Allclean )
@@ -13,5 +12,6 @@ cd "${0%/*}" || exit                                # Run from this directory
 ( cd motorBike_leakDetection && ./Allclean )
 ( cd opposite_walls && ./Allclean )
 ( cd airfoilWithLayers && ./Allclean )
+( cd sphere_gapClosure && ./Allclean )
 
 #------------------------------------------------------------------------------

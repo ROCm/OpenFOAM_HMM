@@ -12,6 +12,7 @@ cd "${0%/*}" || exit                                # Run from this directory
 ( cd motorBike_leakDetection && ./Allrun )
 ( cd opposite_walls && ./Allrun )
 ( cd airfoilWithLayers && ./Allrun )
+( cd sphere_gapClosure && ./Allrun )
 
 exit 0
 
