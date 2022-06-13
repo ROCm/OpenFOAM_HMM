@@ -82,7 +82,7 @@ void Foam::subModelBase::setBaseProperty
 
 
 template<class Type>
-void Foam::subModelBase::getModelProperty
+bool Foam::subModelBase::getModelProperty
 (
     const word& entryName,
     Type& value
@@ -94,13 +94,15 @@ void Foam::subModelBase::getModelProperty
 
         if (inLine() && baseDict.found(modelName_))
         {
-            baseDict.subDict(modelName_).readIfPresent(entryName, value);
+            return baseDict.subDict(modelName_).readIfPresent(entryName, value);
         }
         else if (baseDict.found(modelType_))
         {
-            baseDict.subDict(modelType_).readIfPresent(entryName, value);
+            return baseDict.subDict(modelType_).readIfPresent(entryName, value);
         }
     }
+
+    return false;
 }
 
 

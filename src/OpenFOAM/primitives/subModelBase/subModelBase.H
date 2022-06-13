@@ -193,8 +193,9 @@ public:
                 ) const;
 
                 //- Retrieve generic property from the sub-model
+                //  Return true if found
                 template<class Type>
-                void getModelProperty(const word& entryName, Type& value) const;
+                bool getModelProperty(const word& entryName, Type& value) const;
 
                 //- Retrieve generic property from the sub-model
                 template<class Type>
