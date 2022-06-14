@@ -9,6 +9,7 @@ cd "${0%/*}" || exit                                # Run from this directory
     setups="
     EBRSM
     kOmegaSST
+    EBRSM.setTurbulenceFields
     "
 
     # flag to enable computations
