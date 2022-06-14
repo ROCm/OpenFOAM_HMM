@@ -1,6 +1,6 @@
 #!/bin/sh
 cd "${0%/*}" || exit                            # Run from this directory
-. ${WM_PROJECT_DIR:?}/bin/tools/LogFunctions    # Tutorial log-file functions
+. "${WM_PROJECT_DIR:?}"/bin/tools/LogFunctions  # Tutorial log-file functions
 #------------------------------------------------------------------------------
 
 echo "--------"
@@ -10,7 +10,7 @@ buildDir="${WM_PROJECT_DIR}/build/${WM_OPTIONS}/${PWD##*/}"
 if [ -d "$buildDir" ]
 then
     echo "Removing old build directory: $buildDir" 1>&2
-    rm -rf $buildDir
+    rm -rf -- "$buildDir"
 fi
 
 removeLogs
