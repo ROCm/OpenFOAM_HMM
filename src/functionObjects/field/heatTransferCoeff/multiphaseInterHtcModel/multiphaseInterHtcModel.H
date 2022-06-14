@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,18 +24,19 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::reactingEulerHtcModel
+    Foam::functionObjects::multiphaseInterHtcModel
 
 Description
-    A heat transfer coefficient for reactingEuler solvers
+    A heat transfer coefficient for multiphase inter solvers
+    (i.e. icoReactingMultiphaseFoam).
 
 SourceFiles
-    reactingEulerHtcModel.C
+    multiphaseInterHtcModel.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef reactingEulerHtcModel_H
-#define reactingEulerHtcModel_H
+#ifndef Foam_functionObjects_multiphaseInterHtcModel_H
+#define Foam_functionObjects_multiphaseInterHtcModel_H
 
 #include "HashSet.H"
 #include "volFields.H"
@@ -51,10 +52,10 @@ namespace functionObjects
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class reactingEulerHtcModel Declaration
+                   Class multiphaseInterHtcModel Declaration
 \*---------------------------------------------------------------------------*/
 
-class reactingEulerHtcModel
+class multiphaseInterHtcModel
 :
     public fieldExpression
 {
@@ -76,22 +77,22 @@ protected:
         tmp<FieldField<Field, scalar>> q() const;
 
         //- No copy construct
-        reactingEulerHtcModel(const reactingEulerHtcModel&) = delete;
+        multiphaseInterHtcModel(const multiphaseInterHtcModel&) = delete;
 
         //- No copy assignment
-        void operator=(const reactingEulerHtcModel&) = delete;
+        void operator=(const multiphaseInterHtcModel&) = delete;
 
 
 public:
 
     //- Runtime type information
-    TypeName("reactingEulerHtcModel");
+    TypeName("multiphaseInterHtcModel");
 
 
     // Constructors
 
         //- Construct from components
-        reactingEulerHtcModel
+        multiphaseInterHtcModel
         (
             const word& name,
             const Time& runTime,
@@ -100,7 +101,7 @@ public:
 
 
     //- Destructor
-    virtual ~reactingEulerHtcModel() = default;
+    virtual ~multiphaseInterHtcModel() = default;
 
 
     // Member Functions
@@ -108,7 +109,6 @@ public:
         //- Read the heatTransferCoeff data
         virtual bool read(const dictionary& dict);
 };
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -174,7 +174,7 @@ private:
 public:
 
     //- Runtime type information
-    TypeName("alphaContactAngle");
+    TypeName("reactingMultiphaseEuler::alphaContactAngle");
 
 
     // Constructors

@@ -9,6 +9,7 @@ wmake $targetType forces
 wmake $targetType initialisation
 wmake $targetType utilities
 wmake $targetType solvers
+wmake $targetType phaseSystems
 
 ./randomProcesses/Allwmake $targetType
 

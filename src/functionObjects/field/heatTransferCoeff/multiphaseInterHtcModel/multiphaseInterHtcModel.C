@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,8 +25,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "reactingEulerHtcModel.H"
-#include "phaseSystem.H"
+#include "multiphaseInterHtcModel.H"
+#include "multiphaseInterSystem.H"
 #include "addToRunTimeSelectionTable.H"
 #include "dictionary.H"
 
@@ -36,11 +36,11 @@ namespace Foam
 {
 namespace functionObjects
 {
-    defineTypeNameAndDebug(reactingEulerHtcModel, 0);
+    defineTypeNameAndDebug(multiphaseInterHtcModel, 0);
     addToRunTimeSelectionTable
     (
         functionObject,
-        reactingEulerHtcModel,
+        multiphaseInterHtcModel,
         dictionary
     );
 }
@@ -50,12 +50,11 @@ namespace functionObjects
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 Foam::tmp<Foam::FieldField<Foam::Field, Foam::scalar>>
-Foam::functionObjects::reactingEulerHtcModel::q() const
+Foam::functionObjects::multiphaseInterHtcModel::q() const
 {
     const fvMesh& mesh = htcModelPtr_->mesh();
 
-    const volScalarField& T =
-        mesh.lookupObject<volScalarField>(htcModelPtr_->TName());
+    const auto& T = mesh.lookupObject<volScalarField>(htcModelPtr_->TName());
 
     const volScalarField::Boundary& Tbf = T.boundaryField();
 
@@ -68,7 +67,7 @@ Foam::functionObjects::reactingEulerHtcModel::q() const
     }
 
     const auto* fluidPtr =
-        mesh.cfindObject<phaseSystem>("phaseProperties");
+        mesh.cfindObject<multiphaseInterSystem>("phaseProperties");
 
     if (!fluidPtr)
     {
@@ -77,24 +76,16 @@ Foam::functionObjects::reactingEulerHtcModel::q() const
             << exit(FatalError);
     }
 
-    const phaseSystem& fluid = *fluidPtr;
+    const multiphaseInterSystem& fluid = *fluidPtr;
 
     for (const label patchi : htcModelPtr_->patchSet())
     {
-        for (const phaseModel& phase : fluid.phases())
-        {
-            const fvPatchScalarField& alpha = phase.boundaryField()[patchi];
-            const volScalarField& he = phase.thermo().he();
-            const volScalarField::Boundary& hebf = he.boundaryField();
-
-            q[patchi] +=
-                alpha*phase.alphaEff(patchi)()*hebf[patchi].snGrad();
-        }
+        q[patchi] += fluid.kappaEff(patchi)()*Tbf[patchi].snGrad();
     }
 
     // Add radiative heat flux contribution if present
 
-    const volScalarField* qrPtr =
+    const auto* qrPtr =
         mesh.cfindObject<volScalarField>(htcModelPtr_->qrName());
 
     if (qrPtr)
@@ -110,9 +101,10 @@ Foam::functionObjects::reactingEulerHtcModel::q() const
     return tq;
 }
 
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-bool Foam::functionObjects::reactingEulerHtcModel::calc()
+bool Foam::functionObjects::multiphaseInterHtcModel::calc()
 {
     auto& htc =
         htcModelPtr_->mesh().lookupObjectRef<volScalarField>(resultName_);
@@ -125,7 +117,7 @@ bool Foam::functionObjects::reactingEulerHtcModel::calc()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::functionObjects::reactingEulerHtcModel::reactingEulerHtcModel
+Foam::functionObjects::multiphaseInterHtcModel::multiphaseInterHtcModel
 (
     const word& name,
     const Time& runTime,
@@ -139,7 +131,7 @@ Foam::functionObjects::reactingEulerHtcModel::reactingEulerHtcModel
 
     setResultName(typeName, "htc:" + htcModelPtr_->type());
 
-    volScalarField* htcPtr =
+    auto* htcPtr =
         new volScalarField
         (
             IOobject
@@ -160,18 +152,21 @@ Foam::functionObjects::reactingEulerHtcModel::reactingEulerHtcModel
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::functionObjects::reactingEulerHtcModel::read(const dictionary& dict)
+bool Foam::functionObjects::multiphaseInterHtcModel::read
+(
+    const dictionary& dict
+)
 {
-    if (fieldExpression::read(dict))
+    if (!fieldExpression::read(dict))
     {
-        htcModelPtr_ = heatTransferCoeffModel::New(dict, mesh_, fieldName_);
-
-        htcModelPtr_->read(dict);
-
-        return true;
+        return false;
     }
 
-    return false;
+    htcModelPtr_ = heatTransferCoeffModel::New(dict, mesh_, fieldName_);
+
+    htcModelPtr_->read(dict);
+
+    return true;
 }
 
 
