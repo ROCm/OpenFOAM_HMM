@@ -26,6 +26,7 @@ EXE_LIBS = \
     -lengine \
     -lturbulenceModels \
     -lcompressibleTurbulenceModels \
+    -lthermoTools \
     -lcompressibleTransportModels \
     -lfluidThermophysicalModels \
     -lreactionThermophysicalModels \

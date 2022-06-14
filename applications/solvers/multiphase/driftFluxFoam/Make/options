@@ -22,4 +22,5 @@ EXE_LIBS = \
     -ldriftFluxTransportModels \
     -ldriftFluxRelativeVelocityModels \
     -lturbulenceModels \
-    -lcompressibleTurbulenceModels
+    -lcompressibleTurbulenceModels \
+    -lthermoTools

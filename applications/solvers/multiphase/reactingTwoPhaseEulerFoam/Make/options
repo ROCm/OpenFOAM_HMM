@@ -20,4 +20,5 @@ EXE_LIBS = \
     -lsampling \
     -lreactingMultiphaseSystem \
     -lreactingTwoPhaseSystem \
-    -ltwoPhaseReactingTurbulenceModels
+    -ltwoPhaseReactingTurbulenceModels \
+    -lthermoTools

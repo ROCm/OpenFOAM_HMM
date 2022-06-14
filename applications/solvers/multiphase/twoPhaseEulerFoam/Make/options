@@ -23,6 +23,7 @@ EXE_LIBS = \
     -lspecie \
     -lturbulenceModels \
     -lcompressibleTurbulenceModels \
+    -lthermoTools \
     -lincompressibleTransportModels \
     -lcompressibleTwoPhaseSystem \
     -lphaseCompressibleTurbulenceModels

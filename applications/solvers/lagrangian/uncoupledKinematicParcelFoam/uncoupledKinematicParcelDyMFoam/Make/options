@@ -32,6 +32,7 @@ EXE_LIBS = \
     -lradiationModels \
     -lturbulenceModels \
     -lcompressibleTurbulenceModels \
+    -lthermoTools \
     -lregionModels \
     -lsurfaceFilmModels \
     -ldynamicMesh \

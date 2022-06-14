@@ -30,6 +30,7 @@ EXE_LIBS = \
     -lspecie \
     -lturbulenceModels \
     -lcompressibleTurbulenceModels \
+    -lthermoTools \
     -lradiationModels \
     -lfvOptions \
     -lfaOptions \

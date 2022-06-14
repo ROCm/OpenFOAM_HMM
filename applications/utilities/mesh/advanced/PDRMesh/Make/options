@@ -10,5 +10,6 @@ EXE_LIBS = \
     -ldynamicMesh \
     -lturbulenceModels \
     -lcompressibleTurbulenceModels \
+    -lthermoTools \
     -lcompressibleTransportModels \
     -lfluidThermophysicalModels

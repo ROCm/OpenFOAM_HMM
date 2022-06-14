@@ -23,4 +23,5 @@ EXE_LIBS = \
     -lfluidThermophysicalModels \
     -lsolidThermo \
     -lradiationModels \
-    -lspecie
+    -lspecie \
+    -lthermoTools

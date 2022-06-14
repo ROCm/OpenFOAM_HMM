@@ -34,6 +34,7 @@ EXE_LIBS = \
     -lsampling \
     -lturbulenceModels \
     -lcompressibleTurbulenceModels \
+    -lthermoTools \
     -lspecie \
     -lcompressibleTransportModels \
     -lfluidThermophysicalModels \

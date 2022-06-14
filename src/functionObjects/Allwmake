@@ -7,7 +7,6 @@ cd "${0%/*}" || exit                                # Run from this directory
 wmake $targetType field
 wmake $targetType forces
 wmake $targetType initialisation
-wmake $targetType lagrangian
 wmake $targetType utilities
 wmake $targetType solvers
 

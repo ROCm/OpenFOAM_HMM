@@ -37,6 +37,7 @@ EXE_LIBS = \
     -lcombustionModels \
     -lturbulenceModels \
     -lcompressibleTurbulenceModels \
+    -lthermoTools \
     -lradiationModels \
     -lregionModels \
     -lregionFaModels

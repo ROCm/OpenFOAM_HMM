@@ -3,9 +3,9 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/wmake/scripts/AllwmakeParseArguments
 #------------------------------------------------------------------------------
 
+reactingEuler/Allwmake $targetType $*
 multiphaseInter/Allwmake $targetType $*
 multiphaseEuler/Allwmake $targetType $*
-reactingEuler/Allwmake $targetType $*
 twoPhaseEuler/Allwmake $targetType $*
 twoPhaseInter/Allwmake $targetType $*
 

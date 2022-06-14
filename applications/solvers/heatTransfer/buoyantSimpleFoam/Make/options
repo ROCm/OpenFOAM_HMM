@@ -20,5 +20,6 @@ EXE_LIBS = \
     -lradiationModels \
     -lturbulenceModels \
     -lcompressibleTurbulenceModels \
+    -lthermoTools \
     -latmosphericModels \
     -lregionFaModels
