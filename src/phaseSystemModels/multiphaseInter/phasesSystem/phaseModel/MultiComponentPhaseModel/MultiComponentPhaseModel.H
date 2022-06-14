@@ -73,6 +73,12 @@ protected:
         //- Ptr list of volumetric fractions for species
         PtrList<volScalarField> X_;
 
+        //- Add diffusion transport on Yi's Eq
+        bool addDiffusion_;
+
+        //- Schmidt number
+        scalar Sct_;
+
 
     // Protected functions
 

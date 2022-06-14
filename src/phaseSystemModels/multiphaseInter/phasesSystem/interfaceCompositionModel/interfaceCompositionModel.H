@@ -43,6 +43,7 @@ SourceFiles
 #include "dictionary.H"
 #include "Enum.H"
 #include "runTimeSelectionTables.H"
+#include "multiphaseInterSystem.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -152,6 +153,9 @@ public:
         //- The phase pair
         const phasePair& pair() const;
 
+        //- Return the multiphaseInterSystem this interface belongs to
+        const multiphaseInterSystem& fluid() const;
+
         //- Interface mass fraction
         virtual tmp<volScalarField> Yf
         (
@@ -166,10 +170,16 @@ public:
             const volScalarField& Tf
         ) const = 0;
 
-        //- Mass diffusivity
-        virtual tmp<volScalarField> D
+        //- Specie mass diffusivity for pure mixture
+        virtual tmp<volScalarField> Dfrom
         (
             const word& speciesName
+        ) const = 0;
+
+        //- Specie mass diffusivity for specie in a multicomponent
+        virtual tmp<volScalarField> Dto
+        (
+             const word& speciesName
         ) const = 0;
 
         //- Latent heat (delta Hc)

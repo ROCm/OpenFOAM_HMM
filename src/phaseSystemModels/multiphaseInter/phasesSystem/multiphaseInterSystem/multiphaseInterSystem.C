@@ -1269,6 +1269,39 @@ Foam::multiphaseInterSystem::nearInterface() const
 }
 
 
+Foam::tmp<Foam::volVectorField> Foam::multiphaseInterSystem::nVolHatfv
+(
+    const volScalarField& alpha1,
+    const volScalarField& alpha2
+) const
+{
+    const volScalarField alpha1m
+    (
+        min(max(alpha1, scalar(0)), scalar(1))
+    );
+
+    const volScalarField alpha2m
+    (
+        min(max(alpha2, scalar(0)), scalar(1))
+    );
+
+    const volVectorField gradAlphaf
+    (
+        alpha2m*(fvc::grad(alpha1m))
+      - alpha1m*(fvc::grad(alpha2m))
+    );
+
+    const dimensionedScalar deltaN
+    (
+        "deltaN",
+        1e-8/cbrt(average(mesh_.V()))
+    );
+
+    // Face unit interface normal
+    return gradAlphaf/(mag(gradAlphaf) + deltaN);
+}
+
+
 Foam::tmp<Foam::surfaceVectorField> Foam::multiphaseInterSystem::nHatfv
 (
     const volScalarField& alpha1,
@@ -1276,10 +1309,20 @@ Foam::tmp<Foam::surfaceVectorField> Foam::multiphaseInterSystem::nHatfv
 ) const
 {
 
+    const volScalarField alpha1b
+    (
+        min(max(alpha1, scalar(0)), scalar(1))
+    );
+
+    const volScalarField alpha2b
+    (
+        min(max(alpha2, scalar(0)), scalar(1))
+    );
+
     surfaceVectorField gradAlphaf
     (
-        fvc::interpolate(alpha2)*fvc::interpolate(fvc::grad(alpha1))
-      - fvc::interpolate(alpha1)*fvc::interpolate(fvc::grad(alpha2))
+        fvc::interpolate(alpha2b)*fvc::interpolate(fvc::grad(alpha1b))
+      - fvc::interpolate(alpha1b)*fvc::interpolate(fvc::grad(alpha2b))
     );
 
     const dimensionedScalar deltaN

@@ -684,14 +684,19 @@ public:
             const volScalarField& alpha2
         ) const;
 
-
-        //- Interface normal volume vector
-        tmp<surfaceScalarField> nHatf
+        //- Interface normal volField vector
+        tmp<volVectorField> nVolHatfv
         (
             const volScalarField& alpha1,
             const volScalarField& alpha2
         ) const;
 
+        //- Interface normal surface vector
+        tmp<surfaceScalarField> nHatf
+        (
+            const volScalarField& alpha1,
+            const volScalarField& alpha2
+        ) const;
 
         //- Interface curvature
         tmp<volScalarField> K
@@ -699,7 +704,6 @@ public:
             const volScalarField& alpha1,
             const volScalarField& alpha2
         ) const;
-
 
         //- Near Interface of alpha1 and alpha2
         tmp<volScalarField> nearInterface

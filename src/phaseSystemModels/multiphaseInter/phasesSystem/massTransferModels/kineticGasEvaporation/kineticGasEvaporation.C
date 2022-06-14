@@ -62,49 +62,6 @@ void Foam::meltingEvaporationModels::kineticGasEvaporation<Thermo, OtherThermo>
                 mag(cutCell.faceArea())/mesh.V()[celli];
         }
     }
-
-    for (const polyPatch& pp : mesh.boundaryMesh())
-    {
-        if (isA<wallPolyPatch>(pp))
-        {
-            forAll(pp.faceCells(), faceI)
-            {
-                const label pCelli = pp.faceCells()[faceI];
-                bool interface(false);
-                if
-                (
-                     sign(C_.value()) > 0
-                 && (T[pCelli] - Tactivate_.value()) > 0
-                )
-                {
-                    interface = true;
-                }
-
-                if
-                (
-                    sign(C_.value()) < 0
-                 && (T[pCelli] - Tactivate_.value()) < 0
-                )
-                {
-                    interface = true;
-                }
-
-                if
-                (
-                    interface
-                 &&
-                    (
-                        alpha[pCelli] < 2*isoAlpha_
-                     && alpha[pCelli] > 0.5*isoAlpha_
-                    )
-                )
-                {
-                    interfaceArea_[pCelli] =
-                        mag(pp.faceAreas()[faceI])/mesh.V()[pCelli];
-                }
-            }
-        }
-    }
 }
 
 
