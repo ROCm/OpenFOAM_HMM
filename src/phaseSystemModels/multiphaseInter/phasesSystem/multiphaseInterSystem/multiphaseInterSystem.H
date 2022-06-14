@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,17 +24,17 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::phaseSystem
+    Foam::multiphaseInterSystem
 
 Description
 
 SourceFiles
-    phaseSystem.C
+    multiphaseInterSystem.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef phaseSystem_H
-#define phaseSystem_H
+#ifndef multiphaseInterSystem_H
+#define multiphaseInterSystem_H
 
 #include "basicThermo.H"
 
@@ -47,6 +47,8 @@ SourceFiles
 #include "fvMatricesFwd.H"
 #include "compressibleTransportModel.H"
 #include "localMin.H"
+
+#include "compressibleTurbulenceModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -61,10 +63,10 @@ class surfaceTensionModel;
 class porousModel;
 
 /*---------------------------------------------------------------------------*\
-                         Class phaseSystem Declaration
+                    Class multiphaseInterSystem Declaration
 \*---------------------------------------------------------------------------*/
 
-class phaseSystem
+class multiphaseInterSystem
 :
     public basicThermo,
     public compressibleTransportModel
@@ -81,7 +83,7 @@ public:
             phasePairTable;
 
 
-        typedef HashTable<autoPtr<phaseModel>> phaseModelTable;
+        typedef HashTable<autoPtr<multiphaseInter::phaseModel>> phaseModelTable;
 
 
         typedef HashTable<volScalarField::Internal> SuSpTable;
@@ -145,6 +147,9 @@ protected:
         //- Turbulent Prandt number
         dimensionedScalar Prt_;
 
+        //- Turbulence model
+        compressibleTurbulenceModel* turb_;
+
 
         // Sub Models
 
@@ -162,7 +167,7 @@ protected:
         void calcMu();
 
         //- Generate the phases
-        HashTable<autoPtr<phaseModel>> generatePhaseModels
+        HashTable<autoPtr<multiphaseInter::phaseModel>> generatePhaseModels
         (
             const wordList& names
         ) const;
@@ -170,7 +175,7 @@ protected:
         //- Generate the mixture flux
         tmp<surfaceScalarField> generatePhi
         (
-            const HashTable<autoPtr<phaseModel>>& phaseModels
+            const HashTable<autoPtr<multiphaseInter::phaseModel>>& phaseModels
         ) const;
 
         //- Generate pairs
@@ -252,7 +257,7 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("phaseSystem");
+    TypeName("multiphaseInterSystem");
 
     //- Default name of the phase properties dictionary
     static const word phasePropertiesName;
@@ -261,12 +266,14 @@ public:
     // Constructors
 
         //- Construct from fvMesh
-        phaseSystem(const fvMesh& mesh);
+        multiphaseInterSystem(const fvMesh& mesh);
 
 
     //- Destructor
-    virtual ~phaseSystem();
+    virtual ~multiphaseInterSystem();
 
+
+    // Member Functions
 
     // Energy related thermo functionaliy functions
 
@@ -484,6 +491,47 @@ public:
         virtual tmp<scalarField> nu(const label patchi) const;
 
 
+    // Turbulence
+
+        //- Set turbulence model
+        void setTurbulence(compressibleTurbulenceModel& turb)
+        {
+            turb_ = &turb;
+        }
+
+        //- Return pointer to turbulence model
+        compressibleTurbulenceModel* turbulence() const
+        {
+            return turb_;
+        }
+
+        //- Return the turbulent dynamic viscosity
+        tmp<volScalarField> mut() const;
+
+        //- Return the effective dynamic viscosity
+        tmp<volScalarField> muEff() const;
+
+        //- Return the turbulent kinematic viscosity
+        tmp<volScalarField> nut() const;
+
+        //- Return the effective kinematic viscosity
+        tmp<volScalarField> nuEff() const;
+
+        //- Effective thermal turbulent diffusivity for temperature
+        //  of mixture [J/m/s/K]
+        tmp<volScalarField> kappaEff() const;
+
+        //- Effective thermal turbulent diffusivity for temperature
+        //  of mixture for patch [J/m/s/K]
+        tmp<scalarField> kappaEff(const label patchi) const;
+
+        //- Effective thermal turbulent diffusivity of mixture [kg/m/s]
+        tmp<volScalarField> alphaEff() const;
+
+        //- Effective thermal turbulent diffusivity of mixture [kg/m/s]
+        tmp<scalarField> alphaEff(const label patchi) const;
+
+
     // Phase fluxes
 
         //- Constant access to the total flux
@@ -547,7 +595,7 @@ public:
         //- Calculate mass transfer for species
         virtual void massSpeciesTransfer
         (
-            const phaseModel& phase,
+            const multiphaseInter::phaseModel& phase,
             volScalarField::Internal& Su,
             volScalarField::Internal& Sp,
             const word speciesName
@@ -605,8 +653,8 @@ public:
         template <class modelType>
         const modelType& lookupSubModel
         (
-            const phaseModel& from,
-            const phaseModel& to
+            const multiphaseInter::phaseModel& from,
+            const multiphaseInter::phaseModel& to
         ) const;
 
 
@@ -672,7 +720,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "phaseSystemTemplates.H"
+#   include "multiphaseInterSystemTemplates.H"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

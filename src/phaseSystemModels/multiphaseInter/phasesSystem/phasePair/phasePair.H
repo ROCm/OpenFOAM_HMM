@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,10 +58,10 @@ class phasePair
     // Private data
 
         //- Phase 1
-        const phaseModel& phase1_;
+        const multiphaseInter::phaseModel& phase1_;
 
         //- Phase 2
-        const phaseModel& phase2_;
+        const multiphaseInter::phaseModel& phase2_;
 
 
 public:
@@ -71,8 +71,8 @@ public:
         //- Construct from two phases
         phasePair
         (
-            const phaseModel& phase1,
-            const phaseModel& phase2,
+            const multiphaseInter::phaseModel& phase1,
+            const multiphaseInter::phaseModel& phase2,
             const bool ordered = false
         );
 
@@ -84,10 +84,10 @@ public:
     // Member Functions
 
         //- From phase
-        virtual const phaseModel& from() const;
+        virtual const multiphaseInter::phaseModel& from() const;
 
         //- To phase
-        virtual const phaseModel& to() const;
+        virtual const multiphaseInter::phaseModel& to() const;
 
         //- Pair name
         virtual word name() const;
@@ -96,10 +96,10 @@ public:
         // Access
 
             // Phase 1
-            inline const phaseModel& phase1() const;
+            inline const multiphaseInter::phaseModel& phase1() const;
 
             // Phase 2
-            inline const phaseModel& phase2() const;
+            inline const multiphaseInter::phaseModel& phase2() const;
 };
 
 

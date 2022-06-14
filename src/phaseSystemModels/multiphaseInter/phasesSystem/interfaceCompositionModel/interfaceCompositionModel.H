@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,8 +50,13 @@ namespace Foam
 {
 
 // Forward Declarations
-class phaseModel;
 class phasePair;
+
+namespace multiphaseInter
+{
+
+// Forward Declarations
+class phaseModel;
 
 /*---------------------------------------------------------------------------*\
                   Class interfaceCompositionModel Declaration
@@ -212,6 +217,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+} // End multiphaseInter
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

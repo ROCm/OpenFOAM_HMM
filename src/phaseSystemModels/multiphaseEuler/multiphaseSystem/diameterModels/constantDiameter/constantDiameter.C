@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +33,8 @@ License
 
 namespace Foam
 {
+namespace multiphaseEuler
+{
 namespace diameterModels
 {
     defineTypeNameAndDebug(constant, 0);
@@ -44,11 +47,12 @@ namespace diameterModels
     );
 }
 }
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::diameterModels::constant::constant
+Foam::multiphaseEuler::diameterModels::constant::constant
 (
     const dictionary& dict,
     const phaseModel& phase
@@ -61,7 +65,8 @@ Foam::diameterModels::constant::constant
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::diameterModels::constant::d() const
+Foam::tmp<Foam::volScalarField>
+Foam::multiphaseEuler::diameterModels::constant::d() const
 {
     return tmp<Foam::volScalarField>
     (

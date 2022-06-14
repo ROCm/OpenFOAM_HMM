@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,10 +34,10 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef MassTransferPhaseSystem_H
-#define MassTransferPhaseSystem_H
+#ifndef Foam_multiphaseInter_MassTransferPhaseSystem_H
+#define Foam_multiphaseInter_MassTransferPhaseSystem_H
 
-#include "phaseSystem.H"
+#include "multiphaseInterSystem.H"
 #include "HashPtrTable.H"
 #include "interfaceCompositionModel.H"
 
@@ -45,6 +45,8 @@ SourceFiles
 
 namespace Foam
 {
+
+using namespace multiphaseInter;
 
 /*---------------------------------------------------------------------------*\
                  Class MassTransferPhaseSystem Declaration
@@ -144,7 +146,7 @@ public:
         //- Calculate mass transfer for species
         virtual void massSpeciesTransfer
         (
-            const phaseModel& phase,
+            const Foam::phaseModel& phase,
             volScalarField::Internal& Su,
             volScalarField::Internal& Sp,
             const word speciesName

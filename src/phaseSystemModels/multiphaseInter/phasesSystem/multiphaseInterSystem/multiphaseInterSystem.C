@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "phaseSystem.H"
+#include "multiphaseInterSystem.H"
 #include "surfaceTensionModel.H"
 #include "porousModel.H"
 
@@ -46,23 +46,27 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(phaseSystem, 0);
+    defineTypeNameAndDebug(multiphaseInterSystem, 0);
 }
 
 /* * * * * * * * * * * * * * * private static data * * * * * * * * * * * * * */
 
-const Foam::word Foam::phaseSystem::phasePropertiesName("phaseProperties");
+const Foam::word
+Foam::multiphaseInterSystem::phasePropertiesName("phaseProperties");
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void Foam::phaseSystem::calcMu()
+void Foam::multiphaseInterSystem::calcMu()
 {
     mu_ = mu()();
 }
 
 
-Foam::phaseSystem::phaseModelTable
-Foam::phaseSystem::generatePhaseModels(const wordList& phaseNames) const
+Foam::multiphaseInterSystem::phaseModelTable
+Foam::multiphaseInterSystem::generatePhaseModels
+(
+    const wordList& phaseNames
+) const
 {
     phaseModelTable phaseModels;
 
@@ -71,7 +75,7 @@ Foam::phaseSystem::generatePhaseModels(const wordList& phaseNames) const
         phaseModels.insert
         (
             phaseName,
-            phaseModel::New
+            multiphaseInter::phaseModel::New
             (
                 *this,
                 phaseName
@@ -83,7 +87,7 @@ Foam::phaseSystem::generatePhaseModels(const wordList& phaseNames) const
 }
 
 
-Foam::tmp<Foam::surfaceScalarField> Foam::phaseSystem::generatePhi
+Foam::tmp<Foam::surfaceScalarField> Foam::multiphaseInterSystem::generatePhi
 (
     const phaseModelTable& phaseModels
 ) const
@@ -105,7 +109,7 @@ Foam::tmp<Foam::surfaceScalarField> Foam::phaseSystem::generatePhi
 }
 
 
-void Foam::phaseSystem::generatePairs(const dictTable& modelDicts)
+void Foam::multiphaseInterSystem::generatePairs(const dictTable& modelDicts)
 {
     forAllConstIters(modelDicts, iter)
     {
@@ -152,7 +156,7 @@ void Foam::phaseSystem::generatePairs(const dictTable& modelDicts)
 }
 
 
-void Foam::phaseSystem::generatePairsTable()
+void Foam::multiphaseInterSystem::generatePairsTable()
 {
     forAllConstIters(phaseModels_, phaseIter1)
     {
@@ -201,7 +205,7 @@ void Foam::phaseSystem::generatePairsTable()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::phaseSystem::phaseSystem
+Foam::multiphaseInterSystem::multiphaseInterSystem
 (
     const fvMesh& mesh
 )
@@ -288,13 +292,13 @@ Foam::phaseSystem::phaseSystem
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::phaseSystem::~phaseSystem()
+Foam::multiphaseInterSystem::~multiphaseInterSystem()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::phaseSystem::he
+Foam::tmp<Foam::volScalarField> Foam::multiphaseInterSystem::he
 (
     const volScalarField& p,
     const volScalarField& T
@@ -305,7 +309,7 @@ Foam::tmp<Foam::volScalarField> Foam::phaseSystem::he
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::phaseSystem::he
+Foam::tmp<Foam::scalarField> Foam::multiphaseInterSystem::he
 (
     const scalarField& p,
     const scalarField& T,
@@ -317,7 +321,7 @@ Foam::tmp<Foam::scalarField> Foam::phaseSystem::he
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::phaseSystem::he
+Foam::tmp<Foam::scalarField> Foam::multiphaseInterSystem::he
 (
     const scalarField& p,
     const scalarField& T,
@@ -329,7 +333,7 @@ Foam::tmp<Foam::scalarField> Foam::phaseSystem::he
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phaseSystem::hc() const
+Foam::tmp<Foam::volScalarField> Foam::multiphaseInterSystem::hc() const
 {
     auto iter = phaseModels_.cbegin();
 
@@ -347,7 +351,7 @@ Foam::tmp<Foam::volScalarField> Foam::phaseSystem::hc() const
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::phaseSystem::THE
+Foam::tmp<Foam::scalarField> Foam::multiphaseInterSystem::THE
 (
     const scalarField& e,
     const scalarField& p,
@@ -360,7 +364,7 @@ Foam::tmp<Foam::scalarField> Foam::phaseSystem::THE
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::phaseSystem::THE
+Foam::tmp<Foam::scalarField> Foam::multiphaseInterSystem::THE
 (
     const scalarField& e,
     const scalarField& p,
@@ -373,7 +377,7 @@ Foam::tmp<Foam::scalarField> Foam::phaseSystem::THE
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phaseSystem::rho() const
+Foam::tmp<Foam::volScalarField> Foam::multiphaseInterSystem::rho() const
 {
     auto iter = phaseModels_.cbegin();
 
@@ -391,7 +395,10 @@ Foam::tmp<Foam::volScalarField> Foam::phaseSystem::rho() const
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::phaseSystem::rho(const label patchI) const
+Foam::tmp<Foam::scalarField> Foam::multiphaseInterSystem::rho
+(
+    const label patchI
+) const
 {
     auto iter = phaseModels_.cbegin();
 
@@ -414,7 +421,7 @@ Foam::tmp<Foam::scalarField> Foam::phaseSystem::rho(const label patchI) const
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phaseSystem::Cp() const
+Foam::tmp<Foam::volScalarField> Foam::multiphaseInterSystem::Cp() const
 {
     auto iter = phaseModels_.cbegin();
 
@@ -432,7 +439,7 @@ Foam::tmp<Foam::volScalarField> Foam::phaseSystem::Cp() const
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::phaseSystem::Cp
+Foam::tmp<Foam::scalarField> Foam::multiphaseInterSystem::Cp
 (
     const scalarField& p,
     const scalarField& T,
@@ -455,7 +462,7 @@ Foam::tmp<Foam::scalarField> Foam::phaseSystem::Cp
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phaseSystem::Cv() const
+Foam::tmp<Foam::volScalarField> Foam::multiphaseInterSystem::Cv() const
 {
     auto iter = phaseModels_.cbegin();
 
@@ -473,7 +480,7 @@ Foam::tmp<Foam::volScalarField> Foam::phaseSystem::Cv() const
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::phaseSystem::Cv
+Foam::tmp<Foam::scalarField> Foam::multiphaseInterSystem::Cv
 (
     const scalarField& p,
     const scalarField& T,
@@ -496,7 +503,7 @@ Foam::tmp<Foam::scalarField> Foam::phaseSystem::Cv
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::phaseSystem::rhoEoS
+Foam::tmp<Foam::scalarField> Foam::multiphaseInterSystem::rhoEoS
 (
     const scalarField& p,
     const scalarField& T,
@@ -508,7 +515,7 @@ Foam::tmp<Foam::scalarField> Foam::phaseSystem::rhoEoS
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phaseSystem::gamma() const
+Foam::tmp<Foam::volScalarField> Foam::multiphaseInterSystem::gamma() const
 {
     auto iter = phaseModels_.cbegin();
 
@@ -532,7 +539,7 @@ Foam::tmp<Foam::volScalarField> Foam::phaseSystem::gamma() const
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::phaseSystem::gamma
+Foam::tmp<Foam::scalarField> Foam::multiphaseInterSystem::gamma
 (
     const scalarField& p,
     const scalarField& T,
@@ -546,7 +553,7 @@ Foam::tmp<Foam::scalarField> Foam::phaseSystem::gamma
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phaseSystem::Cpv() const
+Foam::tmp<Foam::volScalarField> Foam::multiphaseInterSystem::Cpv() const
 {
     auto iter = phaseModels_.cbegin();
 
@@ -564,7 +571,7 @@ Foam::tmp<Foam::volScalarField> Foam::phaseSystem::Cpv() const
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::phaseSystem::Cpv
+Foam::tmp<Foam::scalarField> Foam::multiphaseInterSystem::Cpv
 (
     const scalarField& p,
     const scalarField& T,
@@ -587,7 +594,7 @@ Foam::tmp<Foam::scalarField> Foam::phaseSystem::Cpv
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phaseSystem::CpByCpv() const
+Foam::tmp<Foam::volScalarField> Foam::multiphaseInterSystem::CpByCpv() const
 {
     auto iter = phaseModels_.cbegin();
 
@@ -605,7 +612,7 @@ Foam::tmp<Foam::volScalarField> Foam::phaseSystem::CpByCpv() const
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::phaseSystem::CpByCpv
+Foam::tmp<Foam::scalarField> Foam::multiphaseInterSystem::CpByCpv
 (
     const scalarField& p,
     const scalarField& T,
@@ -633,14 +640,14 @@ Foam::tmp<Foam::scalarField> Foam::phaseSystem::CpByCpv
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phaseSystem::W() const
+Foam::tmp<Foam::volScalarField> Foam::multiphaseInterSystem::W() const
 {
     NotImplemented;
     return nullptr;
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phaseSystem::kappa() const
+Foam::tmp<Foam::volScalarField> Foam::multiphaseInterSystem::kappa() const
 {
     auto iter = phaseModels_.cbegin();
 
@@ -658,7 +665,10 @@ Foam::tmp<Foam::volScalarField> Foam::phaseSystem::kappa() const
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::phaseSystem::kappa(const label patchI) const
+Foam::tmp<Foam::scalarField> Foam::multiphaseInterSystem::kappa
+(
+    const label patchI
+) const
 {
     auto iter = phaseModels_.cbegin();
 
@@ -681,7 +691,7 @@ Foam::tmp<Foam::scalarField> Foam::phaseSystem::kappa(const label patchI) const
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phaseSystem::alphahe() const
+Foam::tmp<Foam::volScalarField> Foam::multiphaseInterSystem::alphahe() const
 {
     phaseModelTable::const_iterator phaseModelIter = phaseModels_.begin();
 
@@ -699,7 +709,7 @@ Foam::tmp<Foam::volScalarField> Foam::phaseSystem::alphahe() const
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::phaseSystem::alphahe
+Foam::tmp<Foam::scalarField> Foam::multiphaseInterSystem::alphahe
 (
     const label patchi
 ) const
@@ -723,7 +733,7 @@ Foam::tmp<Foam::scalarField> Foam::phaseSystem::alphahe
 }
 
 
-Foam::tmp<Foam::volScalarField>Foam::phaseSystem::kappaEff
+Foam::tmp<Foam::volScalarField>Foam::multiphaseInterSystem::kappaEff
 (
     const volScalarField& kappat
 ) const
@@ -734,7 +744,7 @@ Foam::tmp<Foam::volScalarField>Foam::phaseSystem::kappaEff
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::phaseSystem::kappaEff
+Foam::tmp<Foam::scalarField> Foam::multiphaseInterSystem::kappaEff
 (
     const scalarField& kappat,
     const label patchI
@@ -744,7 +754,7 @@ Foam::tmp<Foam::scalarField> Foam::phaseSystem::kappaEff
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phaseSystem::alphaEff
+Foam::tmp<Foam::volScalarField> Foam::multiphaseInterSystem::alphaEff
 (
     const volScalarField& alphat
 ) const
@@ -767,7 +777,7 @@ Foam::tmp<Foam::volScalarField> Foam::phaseSystem::alphaEff
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::phaseSystem::alphaEff
+Foam::tmp<Foam::scalarField> Foam::multiphaseInterSystem::alphaEff
 (
     const scalarField& alphat,
     const label patchI
@@ -796,13 +806,13 @@ Foam::tmp<Foam::scalarField> Foam::phaseSystem::alphaEff
 }
 
 
-const Foam::dimensionedScalar& Foam::phaseSystem::Prt() const
+const Foam::dimensionedScalar& Foam::multiphaseInterSystem::Prt() const
 {
     return Prt_;
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phaseSystem::mu() const
+Foam::tmp<Foam::volScalarField> Foam::multiphaseInterSystem::mu() const
 {
     auto iter = phaseModels_.cbegin();
 
@@ -820,7 +830,10 @@ Foam::tmp<Foam::volScalarField> Foam::phaseSystem::mu() const
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::phaseSystem::mu(const label patchI) const
+Foam::tmp<Foam::scalarField> Foam::multiphaseInterSystem::mu
+(
+    const label patchI
+) const
 {
     auto iter = phaseModels_.cbegin();
 
@@ -843,7 +856,7 @@ Foam::tmp<Foam::scalarField> Foam::phaseSystem::mu(const label patchI) const
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phaseSystem::nu() const
+Foam::tmp<Foam::volScalarField> Foam::multiphaseInterSystem::nu() const
 {
     auto iter = phaseModels_.cbegin();
 
@@ -861,7 +874,10 @@ Foam::tmp<Foam::volScalarField> Foam::phaseSystem::nu() const
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::phaseSystem::nu(const label patchI) const
+Foam::tmp<Foam::scalarField> Foam::multiphaseInterSystem::nu
+(
+    const label patchI
+) const
 {
     auto iter = phaseModels_.cbegin();
 
@@ -884,31 +900,82 @@ Foam::tmp<Foam::scalarField> Foam::phaseSystem::nu(const label patchI) const
 }
 
 
-const Foam::surfaceScalarField& Foam::phaseSystem::phi() const
+Foam::tmp<Foam::volScalarField> Foam::multiphaseInterSystem::mut() const
+{
+    return turb_->mut();
+}
+
+
+Foam::tmp<Foam::volScalarField> Foam::multiphaseInterSystem::muEff() const
+{
+    return turb_->muEff();
+}
+
+
+Foam::tmp<Foam::volScalarField> Foam::multiphaseInterSystem::nut() const
+{
+    return turb_->nut();
+}
+
+
+Foam::tmp<Foam::volScalarField> Foam::multiphaseInterSystem::nuEff() const
+{
+    return turb_->nuEff();
+}
+
+
+Foam::tmp<Foam::volScalarField> Foam::multiphaseInterSystem::kappaEff() const
+{
+    return(this->kappa() + this->Cp()*turb_->mut()/Prt_);
+}
+
+
+Foam::tmp<Foam::scalarField>
+Foam::multiphaseInterSystem::kappaEff(const label patchi) const
+{
+    tmp<scalarField> tCp(this->Cp()().boundaryField()[patchi]);
+    return this->kappa(patchi) + tCp()*turb_->mut(patchi)/Prt_.value();
+}
+
+
+Foam::tmp<Foam::volScalarField> Foam::multiphaseInterSystem::alphaEff() const
+{
+    return this->alpha() + turb_->mut()/Prt_;
+}
+
+
+Foam::tmp<Foam::scalarField>
+Foam::multiphaseInterSystem::alphaEff(const label patchi) const
+{
+    return (this->alpha(patchi) + turb_->mut(patchi))/Prt_.value();
+}
+
+
+const Foam::surfaceScalarField& Foam::multiphaseInterSystem::phi() const
 {
     return phi_;
 }
 
 
-Foam::surfaceScalarField& Foam::phaseSystem::phi()
+Foam::surfaceScalarField& Foam::multiphaseInterSystem::phi()
 {
     return phi_;
 }
 
 
-const Foam::surfaceScalarField& Foam::phaseSystem::rhoPhi() const
+const Foam::surfaceScalarField& Foam::multiphaseInterSystem::rhoPhi() const
 {
     return rhoPhi_;
 }
 
 
-Foam::surfaceScalarField& Foam::phaseSystem::rhoPhi()
+Foam::surfaceScalarField& Foam::multiphaseInterSystem::rhoPhi()
 {
     return rhoPhi_;
 }
 
 
-void Foam::phaseSystem::correct()
+void Foam::multiphaseInterSystem::correct()
 {
     forAllIters(phaseModels_, iter)
     {
@@ -919,7 +986,7 @@ void Foam::phaseSystem::correct()
 }
 
 
-void Foam::phaseSystem::correctTurbulence()
+void Foam::multiphaseInterSystem::correctTurbulence()
 {
     forAllIters(phaseModels_, iter)
     {
@@ -928,32 +995,35 @@ void Foam::phaseSystem::correctTurbulence()
 }
 
 
-const Foam::phaseSystem::phaseModelTable& Foam::phaseSystem::phases() const
+const Foam::multiphaseInterSystem::phaseModelTable&
+Foam::multiphaseInterSystem::phases() const
 {
     return phaseModels_;
 }
 
 
-Foam::phaseSystem::phaseModelTable& Foam::phaseSystem::phases()
+Foam::multiphaseInterSystem::phaseModelTable&
+Foam::multiphaseInterSystem::phases()
 {
     return phaseModels_;
 }
 
 
-const Foam::phaseSystem::phasePairTable&
-Foam::phaseSystem::totalPhasePairs() const
+const Foam::multiphaseInterSystem::phasePairTable&
+Foam::multiphaseInterSystem::totalPhasePairs() const
 {
     return totalPhasePairs_;
 }
 
 
-Foam::phaseSystem::phasePairTable& Foam::phaseSystem::totalPhasePairs()
+Foam::multiphaseInterSystem::phasePairTable&
+Foam::multiphaseInterSystem::totalPhasePairs()
 {
     return totalPhasePairs_;
 }
 
 
-bool Foam::phaseSystem::incompressible() const
+bool Foam::multiphaseInterSystem::incompressible() const
 {
     forAllConstIters(phaseModels_, iter)
     {
@@ -967,13 +1037,13 @@ bool Foam::phaseSystem::incompressible() const
 }
 
 
-bool Foam::phaseSystem::incompressible(const word phaseName) const
+bool Foam::multiphaseInterSystem::incompressible(const word phaseName) const
 {
     return phaseModels_[phaseName]->thermo().incompressible();
 }
 
 
-bool Foam::phaseSystem::isochoric() const
+bool Foam::multiphaseInterSystem::isochoric() const
 {
     forAllConstIters(phaseModels_, iter)
     {
@@ -987,14 +1057,14 @@ bool Foam::phaseSystem::isochoric() const
 }
 
 
-const Foam::fvMesh& Foam::phaseSystem::mesh() const
+const Foam::fvMesh& Foam::multiphaseInterSystem::mesh() const
 {
     return mesh_;
 }
 
 
 Foam::tmp<Foam::surfaceScalarField>
-Foam::phaseSystem::surfaceTensionForce() const
+Foam::multiphaseInterSystem::surfaceTensionForce() const
 {
     auto tstf = tmp<surfaceScalarField>::New
     (
@@ -1044,7 +1114,7 @@ Foam::phaseSystem::surfaceTensionForce() const
 }
 
 
-Foam::tmp<Foam::volVectorField> Foam::phaseSystem::U() const
+Foam::tmp<Foam::volVectorField> Foam::multiphaseInterSystem::U() const
 {
     auto tstf = tmp<volVectorField>::New
     (
@@ -1070,13 +1140,13 @@ Foam::tmp<Foam::volVectorField> Foam::phaseSystem::U() const
 
 
 Foam::tmp<Foam::volScalarField>
-Foam::phaseSystem::surfaceTensionCoeff(const phasePairKey& key) const
+Foam::multiphaseInterSystem::surfaceTensionCoeff(const phasePairKey& key) const
 {
     return surfaceTensionModels_[key]->sigma();
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phaseSystem::coeffs
+Foam::tmp<Foam::volScalarField> Foam::multiphaseInterSystem::coeffs
 (
     const word& key
 ) const
@@ -1085,14 +1155,14 @@ Foam::tmp<Foam::volScalarField> Foam::phaseSystem::coeffs
 }
 
 
-void Foam::phaseSystem::addInterfacePorosity(fvVectorMatrix& UEqn)
+void Foam::multiphaseInterSystem::addInterfacePorosity(fvVectorMatrix& UEqn)
 {
     const scalarField& Vc = mesh_.V();
     scalarField& Udiag = UEqn.diag();
 
     forAllConstIters(phaseModels_, iteri)
     {
-        const phaseModel& phasei = iteri()();
+        const multiphaseInter::phaseModel& phasei = iteri()();
 
         auto iterk = iteri;
 
@@ -1100,7 +1170,7 @@ void Foam::phaseSystem::addInterfacePorosity(fvVectorMatrix& UEqn)
         {
             if (iteri()().name() != iterk()().name())
             {
-                const phaseModel& phasek = iterk()();
+                const multiphaseInter::phaseModel& phasek = iterk()();
 
                 // Phase i and k
                 const phasePairKey keyik
@@ -1123,7 +1193,7 @@ void Foam::phaseSystem::addInterfacePorosity(fvVectorMatrix& UEqn)
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phaseSystem::K
+Foam::tmp<Foam::volScalarField> Foam::multiphaseInterSystem::K
 (
     const volScalarField& alpha1,
     const volScalarField& alpha2
@@ -1136,7 +1206,7 @@ Foam::tmp<Foam::volScalarField> Foam::phaseSystem::K
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phaseSystem::nearInterface
+Foam::tmp<Foam::volScalarField> Foam::multiphaseInterSystem::nearInterface
 (
     const volScalarField& alpha1,
     const volScalarField& alpha2
@@ -1150,7 +1220,8 @@ Foam::tmp<Foam::volScalarField> Foam::phaseSystem::nearInterface
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phaseSystem::nearInterface() const
+Foam::tmp<Foam::volScalarField>
+Foam::multiphaseInterSystem::nearInterface() const
 {
     auto tnearInt = tmp<volScalarField>::New
     (
@@ -1188,7 +1259,7 @@ Foam::tmp<Foam::volScalarField> Foam::phaseSystem::nearInterface() const
 }
 
 
-Foam::tmp<Foam::surfaceVectorField> Foam::phaseSystem::nHatfv
+Foam::tmp<Foam::surfaceVectorField> Foam::multiphaseInterSystem::nHatfv
 (
     const volScalarField& alpha1,
     const volScalarField& alpha2
@@ -1212,7 +1283,7 @@ Foam::tmp<Foam::surfaceVectorField> Foam::phaseSystem::nHatfv
 }
 
 
-Foam::tmp<Foam::surfaceScalarField> Foam::phaseSystem::nHatf
+Foam::tmp<Foam::surfaceScalarField> Foam::multiphaseInterSystem::nHatf
 (
     const volScalarField& alpha1,
     const volScalarField& alpha2
@@ -1223,7 +1294,7 @@ Foam::tmp<Foam::surfaceScalarField> Foam::phaseSystem::nHatf
 }
 
 
-bool Foam::phaseSystem::read()
+bool Foam::multiphaseInterSystem::read()
 {
     if (regIOobject::read())
     {

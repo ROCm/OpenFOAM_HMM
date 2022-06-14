@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,7 @@ License
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class modelType>
-void Foam::phaseSystem::createSubModels
+void Foam::multiphaseInterSystem::createSubModels
 (
     const dictTable& modelDicts,
     HashTable
@@ -57,7 +57,7 @@ void Foam::phaseSystem::createSubModels
 
 
 template<class modelType>
-void Foam::phaseSystem::createSubModels
+void Foam::multiphaseInterSystem::createSubModels
 (
     const dictTable& modelDicts,
     const fvMesh& mesh,
@@ -87,7 +87,7 @@ void Foam::phaseSystem::createSubModels
 
 
 template<class modelType>
-void Foam::phaseSystem::generatePairsAndSubModels
+void Foam::multiphaseInterSystem::generatePairsAndSubModels
 (
     const word& modelName,
     HashTable
@@ -107,7 +107,7 @@ void Foam::phaseSystem::generatePairsAndSubModels
 
 
 template<class modelType>
-void Foam::phaseSystem::generatePairsAndSubModels
+void Foam::multiphaseInterSystem::generatePairsAndSubModels
 (
     const word& modelName,
     const fvMesh& mesh,
@@ -128,7 +128,7 @@ void Foam::phaseSystem::generatePairsAndSubModels
 
 
 template<class modelType>
-void Foam::phaseSystem::generatePairsAndSubModels
+void Foam::multiphaseInterSystem::generatePairsAndSubModels
 (
     const word& modelName,
     HashTable
@@ -176,7 +176,10 @@ void Foam::phaseSystem::generatePairsAndSubModels
 
 
 template <class modelType>
-const modelType& Foam::phaseSystem::lookupSubModel(const phasePair& key) const
+const modelType& Foam::multiphaseInterSystem::lookupSubModel
+(
+    const phasePair& key
+) const
 {
     return
         mesh().lookupObject<modelType>
@@ -187,10 +190,10 @@ const modelType& Foam::phaseSystem::lookupSubModel(const phasePair& key) const
 
 
 template <class modelType>
-const modelType& Foam::phaseSystem::lookupSubModel
+const modelType& Foam::multiphaseInterSystem::lookupSubModel
 (
-    const phaseModel& from,
-    const phaseModel& to
+    const multiphaseInter::phaseModel& from,
+    const multiphaseInter::phaseModel& to
 ) const
 {
     return lookupSubModel<modelType>(orderedPhasePair(from, to));

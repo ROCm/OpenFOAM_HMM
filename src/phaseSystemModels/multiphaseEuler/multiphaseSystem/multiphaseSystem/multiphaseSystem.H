@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,8 +42,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef multiphaseSystem_H
-#define multiphaseSystem_H
+#ifndef Foam_multiphaseEuler_multiphaseSystem_H
+#define Foam_multiphaseEuler_multiphaseSystem_H
 
 #include "incompressible/transportModel/transportModel.H"
 #include "IOdictionary.H"
@@ -121,8 +121,11 @@ public:
     };
 
 
-    typedef HashPtrTable<dragModel, interfacePair, interfacePair::symmHash>
-        dragModelTable;
+    typedef
+        HashPtrTable
+        <
+            multiphaseEuler::dragModel, interfacePair, interfacePair::symmHash
+        > dragModelTable;
 
     typedef HashPtrTable<volScalarField, interfacePair, interfacePair::symmHash>
         dragCoeffFields;

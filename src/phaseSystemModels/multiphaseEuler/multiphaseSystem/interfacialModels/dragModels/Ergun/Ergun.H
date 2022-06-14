@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,7 +25,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::dragModels::Ergun
+    Foam::multiphaseEuler::dragModels::Ergun
 
 Description
     H, Enwald, E. Peirano, A-E Almstedt
@@ -37,14 +38,16 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Ergun_H
-#define Ergun_H
+#ifndef Foam_multiphaseEuler_dragModels_Ergun_H
+#define Foam_multiphaseEuler_dragModels_Ergun_H
 
 #include "dragModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
+{
+namespace multiphaseEuler
 {
 namespace dragModels
 {
@@ -88,6 +91,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace dragModels
+} // End namespace multiphaseEuler
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

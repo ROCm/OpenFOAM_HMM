@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2012 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,7 +25,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::heatTransferModels::RanzMarshall
+    Foam::multiphaseEuler::heatTransferModels::RanzMarshall
 
 Description
 
@@ -33,14 +34,16 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef RanzMarshall_H
-#define RanzMarshall_H
+#ifndef Foam_multiphaseEuler_heatTransferModels_RanzMarshall_H
+#define Foam_multiphaseEuler_heatTransferModels_RanzMarshall_H
 
 #include "heatTransferModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
+{
+namespace multiphaseEuler
 {
 namespace heatTransferModels
 {
@@ -85,6 +88,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace heatTransferModels
+} // End namespace multiphaseEuler
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

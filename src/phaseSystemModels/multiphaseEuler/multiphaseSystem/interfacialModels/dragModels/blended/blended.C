@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,6 +33,8 @@ License
 
 namespace Foam
 {
+namespace multiphaseEuler
+{
 namespace dragModels
 {
     defineTypeNameAndDebug(blended, 0);
@@ -45,11 +47,12 @@ namespace dragModels
     );
 }
 }
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::dragModels::blended::blended
+Foam::multiphaseEuler::dragModels::blended::blended
 (
     const dictionary& interfaceDict,
     const phaseModel& phase1,
@@ -64,7 +67,7 @@ Foam::dragModels::blended::blended
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::dragModels::blended::K
+Foam::tmp<Foam::volScalarField> Foam::multiphaseEuler::dragModels::blended::K
 (
     const volScalarField& Ur
 ) const

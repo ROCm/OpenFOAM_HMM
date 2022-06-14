@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2019 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -394,10 +394,20 @@ void Foam::multiphaseSystem::correctContactAngle
 
     forAll(boundary, patchi)
     {
-        if (isA<alphaContactAngleFvPatchScalarField>(gbf[patchi]))
+        if
+        (
+            isA<reactingMultiphaseEuler::alphaContactAngleFvPatchScalarField>
+            (
+                gbf[patchi]
+            )
+        )
         {
-            const alphaContactAngleFvPatchScalarField& acap =
-                refCast<const alphaContactAngleFvPatchScalarField>(gbf[patchi]);
+            const auto& acap =
+                refCast
+                <
+                    const reactingMultiphaseEuler::
+                        alphaContactAngleFvPatchScalarField
+                >(gbf[patchi]);
 
             vectorField& nHatPatch = nHatb[patchi];
 
@@ -407,8 +417,8 @@ void Foam::multiphaseSystem::correctContactAngle
                /mesh_.magSf().boundaryField()[patchi]
             );
 
-            alphaContactAngleFvPatchScalarField::thetaPropsTable::
-                const_iterator tp =
+            reactingMultiphaseEuler::alphaContactAngleFvPatchScalarField::
+                thetaPropsTable::const_iterator tp =
                     acap.thetaProps()
                    .find(phasePairKey(phase1.name(), phase2.name()));
 

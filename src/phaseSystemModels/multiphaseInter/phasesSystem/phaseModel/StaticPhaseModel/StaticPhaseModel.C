@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +27,7 @@ License
 
 #include "StaticPhaseModel.H"
 
-#include "phaseSystem.H"
+#include "multiphaseInterSystem.H"
 
 #include "fvcDdt.H"
 #include "fvcDiv.H"
@@ -39,7 +39,7 @@ License
 template<class BasePhaseModel>
 Foam::StaticPhaseModel<BasePhaseModel>::StaticPhaseModel
 (
-    const phaseSystem& fluid,
+    const multiphaseInterSystem& fluid,
     const word& phaseName
 )
 :
@@ -49,7 +49,7 @@ Foam::StaticPhaseModel<BasePhaseModel>::StaticPhaseModel
     (
         IOobject
         (
-            IOobject::groupName("phi", phaseModel::name()),
+            IOobject::groupName("phi", multiphaseInter::phaseModel::name()),
             fluid.mesh().time().timeName(),
             fluid.mesh()
         ),
@@ -60,7 +60,11 @@ Foam::StaticPhaseModel<BasePhaseModel>::StaticPhaseModel
     (
         IOobject
         (
-            IOobject::groupName("alphaPhi", phaseModel::name()),
+            IOobject::groupName
+            (
+                "alphaPhi",
+                multiphaseInter::phaseModel::name()
+            ),
             fluid.mesh().time().timeName(),
             fluid.mesh()
         ),
@@ -87,7 +91,7 @@ Foam::StaticPhaseModel<BasePhaseModel>::phi() const
     (
         IOobject
         (
-            IOobject::groupName("phi", phaseModel::name()),
+            IOobject::groupName("phi", multiphaseInter::phaseModel::name()),
             U_.mesh().time().timeName(),
             U_.mesh()
         ),
@@ -110,19 +114,20 @@ template<class BasePhaseModel>
 Foam::tmp<Foam::surfaceScalarField>
 Foam::StaticPhaseModel<BasePhaseModel>::alphaPhi() const
 {
-    return tmp<surfaceScalarField>
+    return tmp<surfaceScalarField>::New
     (
-        new surfaceScalarField
+        IOobject
         (
-            IOobject
+            IOobject::groupName
             (
-                IOobject::groupName("alphaPhi", phaseModel::name()),
-                U_.mesh().time().timeName(),
-                U_.mesh()
+                "alphaPhi",
+                multiphaseInter::phaseModel::name()
             ),
-            U_.mesh(),
-            dimensionedScalar(dimensionSet(0, 3, -1, 0, 0), Zero)
-        )
+            U_.mesh().time().timeName(),
+            U_.mesh()
+        ),
+        U_.mesh(),
+        dimensionedScalar(dimensionSet(0, 3, -1, 0, 0), Zero)
     );
 }
 
@@ -140,19 +145,16 @@ template<class BasePhaseModel>
 Foam::tmp<Foam::volVectorField>
 Foam::StaticPhaseModel<BasePhaseModel>::U() const
 {
-    return tmp<volVectorField>
+    return tmp<volVectorField>::New
     (
-        new volVectorField
+        IOobject
         (
-            IOobject
-            (
-                IOobject::groupName("U", phaseModel::name()),
-                U_.mesh().time().timeName(),
-                U_.mesh()
-            ),
-            U_.mesh(),
-            dimensionedVector(dimVelocity, Zero)
-        )
+            IOobject::groupName("U", multiphaseInter::phaseModel::name()),
+            U_.mesh().time().timeName(),
+            U_.mesh()
+        ),
+        U_.mesh(),
+        dimensionedVector(dimVelocity, Zero)
     );
 }
 

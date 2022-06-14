@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2012 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +33,8 @@ License
 
 namespace Foam
 {
+namespace multiphaseEuler
+{
 namespace dragModels
 {
     defineTypeNameAndDebug(Gibilaro, 0);
@@ -44,11 +47,12 @@ namespace dragModels
     );
 }
 }
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::dragModels::Gibilaro::Gibilaro
+Foam::multiphaseEuler::dragModels::Gibilaro::Gibilaro
 (
     const dictionary& interfaceDict,
     const phaseModel& phase1,
@@ -61,13 +65,13 @@ Foam::dragModels::Gibilaro::Gibilaro
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::dragModels::Gibilaro::~Gibilaro()
+Foam::multiphaseEuler::dragModels::Gibilaro::~Gibilaro()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::dragModels::Gibilaro::K
+Foam::tmp<Foam::volScalarField> Foam::multiphaseEuler::dragModels::Gibilaro::K
 (
     const volScalarField& Ur
 ) const

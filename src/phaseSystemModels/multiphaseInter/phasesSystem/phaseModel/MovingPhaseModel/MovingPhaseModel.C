@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +27,7 @@ License
 
 #include "MovingPhaseModel.H"
 
-#include "phaseSystem.H"
+#include "multiphaseInterSystem.H"
 
 #include "fixedValueFvPatchFields.H"
 #include "slipFvPatchFields.H"
@@ -46,7 +46,7 @@ License
 template<class BasePhaseModel>
 Foam::MovingPhaseModel<BasePhaseModel>::MovingPhaseModel
 (
-    const phaseSystem& fluid,
+    const multiphaseInterSystem& fluid,
     const word& phaseName
 )
 :
@@ -57,7 +57,11 @@ Foam::MovingPhaseModel<BasePhaseModel>::MovingPhaseModel
     (
         IOobject
         (
-            IOobject::groupName("alphaPhi", phaseModel::name()),
+            IOobject::groupName
+            (
+                "alphaPhi",
+                multiphaseInter::phaseModel::name()
+            ),
             fluid.mesh().time().timeName(),
             fluid.mesh()
         ),
@@ -124,7 +128,7 @@ diffNo() const
     (
         IOobject
         (
-            IOobject::groupName("diffNo", phaseModel::name()),
+            IOobject::groupName("diffNo", multiphaseInter::phaseModel::name()),
             U_.mesh().time().timeName(),
             U_.mesh()
         ),

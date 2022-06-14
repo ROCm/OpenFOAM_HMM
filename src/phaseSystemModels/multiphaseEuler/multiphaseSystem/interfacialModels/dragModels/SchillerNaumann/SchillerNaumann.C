@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +33,8 @@ License
 
 namespace Foam
 {
+namespace multiphaseEuler
+{
 namespace dragModels
 {
     defineTypeNameAndDebug(SchillerNaumann, 0);
@@ -44,11 +47,12 @@ namespace dragModels
     );
 }
 }
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::dragModels::SchillerNaumann::SchillerNaumann
+Foam::multiphaseEuler::dragModels::SchillerNaumann::SchillerNaumann
 (
     const dictionary& interfaceDict,
     const phaseModel& phase1,
@@ -61,13 +65,14 @@ Foam::dragModels::SchillerNaumann::SchillerNaumann
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::dragModels::SchillerNaumann::~SchillerNaumann()
+Foam::multiphaseEuler::dragModels::SchillerNaumann::~SchillerNaumann()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::dragModels::SchillerNaumann::K
+Foam::tmp<Foam::volScalarField>
+Foam::multiphaseEuler::dragModels::SchillerNaumann::K
 (
     const volScalarField& Ur
 ) const

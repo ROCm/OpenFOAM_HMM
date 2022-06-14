@@ -69,8 +69,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef alphaContactAngleFvPatchScalarField_H
-#define alphaContactAngleFvPatchScalarField_H
+#ifndef Foam_reactingMultiphaseEuler_alphaContactAngleFvPatchScalarField_H
+#define Foam_reactingMultiphaseEuler_alphaContactAngleFvPatchScalarField_H
 
 #include "zeroGradientFvPatchFields.H"
 #include "multiphaseSystem.H"
@@ -78,6 +78,8 @@ SourceFiles
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
+{
+namespace reactingMultiphaseEuler
 {
 
 /*---------------------------------------------------------------------------*\
@@ -246,6 +248,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace reactingMultiphaseEuler
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,8 +32,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef phaseModel_H
-#define phaseModel_H
+#ifndef Foam_multiphaseEuler_phaseModel_H
+#define Foam_multiphaseEuler_phaseModel_H
 
 #include "dictionary.H"
 #include "dictionaryEntry.H"
@@ -45,8 +46,11 @@ SourceFiles
 namespace Foam
 {
 
+namespace multiphaseEuler
+{
 // Forward declarations
 class diameterModel;
+}
 
 /*---------------------------------------------------------------------------*\
                            Class phaseModel Declaration
@@ -88,7 +92,7 @@ class phaseModel
         autoPtr<surfaceScalarField> phiPtr_;
 
         //- Diameter model
-        autoPtr<diameterModel> dPtr_;
+        autoPtr<multiphaseEuler::diameterModel> dPtr_;
 
 
 public:

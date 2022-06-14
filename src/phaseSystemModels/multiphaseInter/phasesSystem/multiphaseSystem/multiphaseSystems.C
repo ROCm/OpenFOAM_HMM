@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +27,7 @@ License
 
 #include "addToRunTimeSelectionTable.H"
 
-#include "phaseSystem.H"
+#include "multiphaseInterSystem.H"
 #include "multiphaseSystem.H"
 #include "MassTransferPhaseSystem.H"
 
@@ -36,7 +36,8 @@ License
 namespace Foam
 {
     typedef
-        MassTransferPhaseSystem<multiphaseSystem> massTransferMultiphaseSystem;
+        MassTransferPhaseSystem
+        <multiphaseInter::multiphaseSystem> massTransferMultiphaseSystem;
 
     addNamedToRunTimeSelectionTable
     (

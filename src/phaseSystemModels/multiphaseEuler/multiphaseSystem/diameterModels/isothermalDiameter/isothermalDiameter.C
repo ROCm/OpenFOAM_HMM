@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +33,8 @@ License
 
 namespace Foam
 {
+namespace multiphaseEuler
+{
 namespace diameterModels
 {
     defineTypeNameAndDebug(isothermal, 0);
@@ -44,11 +47,12 @@ namespace diameterModels
     );
 }
 }
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::diameterModels::isothermal::isothermal
+Foam::multiphaseEuler::diameterModels::isothermal::isothermal
 (
     const dictionary& dict,
     const phaseModel& phase
@@ -62,7 +66,8 @@ Foam::diameterModels::isothermal::isothermal
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::diameterModels::isothermal::d() const
+Foam::tmp<Foam::volScalarField>
+Foam::multiphaseEuler::diameterModels::isothermal::d() const
 {
     const volScalarField& p = phase_.U().db().lookupObject<volScalarField>
     (

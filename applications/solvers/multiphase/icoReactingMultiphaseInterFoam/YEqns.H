@@ -1,5 +1,5 @@
 {
-    for (phaseModel& phase : fluid.phases())
+    for (multiphaseInter::phaseModel& phase : fluid.phases())
     {
         PtrList<volScalarField>& Y = phase.Y();
 

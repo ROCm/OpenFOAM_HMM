@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +32,8 @@ License
 #include "multiComponentMixture.H"
 #include "rhoThermo.H"
 #include "zeroGradientFvPatchFields.H"
+
+using namespace Foam::multiphaseInter;
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 

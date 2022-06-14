@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,7 +37,7 @@ SourceFiles
 #ifndef multiphaseSystem_H
 #define multiphaseSystem_H
 
-#include "phaseSystem.H"
+#include "multiphaseInterSystem.H"
 #include "UPtrList.H"
 #include "phasePairKey.H"
 
@@ -45,14 +45,15 @@ SourceFiles
 
 namespace Foam
 {
-
+namespace multiphaseInter
+{
 /*---------------------------------------------------------------------------*\
                       Class multiphaseSystem Declaration
 \*---------------------------------------------------------------------------*/
 
 class multiphaseSystem
 :
-    public phaseSystem
+    public multiphaseInterSystem
 {
 protected:
 
@@ -170,6 +171,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+} // End namespace multiphaseInter
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

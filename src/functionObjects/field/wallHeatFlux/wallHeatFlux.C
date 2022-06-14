@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,6 +34,7 @@ License
 #include "wallPolyPatch.H"
 #include "turbulentFluidThermoModel.H"
 #include "addToRunTimeSelectionTable.H"
+#include "multiphaseInterSystem.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -235,6 +236,19 @@ bool Foam::functionObjects::wallHeatFlux::execute()
             lookupObject<solidThermo>(solidThermo::dictName);
 
         calcHeatFlux(thermo.alpha(), thermo.he(), wallHeatFlux);
+    }
+    else if
+    (
+        foundObject<multiphaseInterSystem>
+            (multiphaseInterSystem::phasePropertiesName)
+    )
+    {
+        const auto& thermo = lookupObject<multiphaseInterSystem>
+        (
+            multiphaseInterSystem::phasePropertiesName
+        );
+
+        calcHeatFlux(thermo.kappaEff()(), thermo.T(), wallHeatFlux);
     }
     else
     {

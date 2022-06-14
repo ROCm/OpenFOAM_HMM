@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,8 +33,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef phaseModel_H
-#define phaseModel_H
+#ifndef Foam_multiphaseInter_phaseModel_H
+#define Foam_multiphaseInter_phaseModel_H
 
 #include "dictionary.H"
 #include "dimensionedScalar.H"
@@ -50,8 +50,10 @@ namespace Foam
 {
 
 // Forward Declarations
-class phaseSystem;
+class multiphaseInterSystem;
 
+namespace multiphaseInter
+{
 /*---------------------------------------------------------------------------*\
                          Class phaseModel Declaration
 \*---------------------------------------------------------------------------*/
@@ -62,8 +64,8 @@ class phaseModel
 {
     // Private Data
 
-        //- Reference to the phaseSystem to which this phase belongs
-        const phaseSystem& fluid_;
+        //- Reference to the multiphaseInterSystem to which this phase belongs
+        const multiphaseInterSystem& fluid_;
 
         //- Name of phase
         word name_;
@@ -79,9 +81,9 @@ public:
     (
         autoPtr,
         phaseModel,
-        phaseSystem,
+        multiphaseInterSystem,
         (
-            const phaseSystem& fluid,
+            const multiphaseInterSystem& fluid,
             const word& phaseName
         ),
         (fluid, phaseName)
@@ -90,8 +92,8 @@ public:
 
     // Constructors
 
-        //- Construct from phaseSystem and phaseName
-        phaseModel(const phaseSystem& fluid, const word& phaseName);
+        //- Construct from multiphaseInterSystem and phaseName
+        phaseModel(const multiphaseInterSystem& fluid, const word& phaseName);
 
 
     //- Destructor
@@ -102,7 +104,7 @@ public:
 
         static autoPtr<phaseModel> New
         (
-            const phaseSystem& fluid,
+            const multiphaseInterSystem& fluid,
             const word& phaseName
         );
 
@@ -116,7 +118,7 @@ public:
         }
 
         //- Return the system to which this phase belongs
-        const phaseSystem& fluid() const;
+        const multiphaseInterSystem& fluid() const;
 
         //- Correct phase thermo
         virtual void correct();
@@ -325,6 +327,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace multiphaseInter
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

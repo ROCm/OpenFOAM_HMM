@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,8 +27,7 @@ License
 
 #include "MultiComponentPhaseModel.H"
 
-#include "phaseSystem.H"
-#include "multiphaseSystem.H"
+#include "multiphaseInterSystem.H"
 #include "fvmDdt.H"
 #include "fvmDiv.H"
 #include "fvmSup.H"
@@ -47,7 +46,7 @@ template<class BasePhaseModel, class phaseThermo>
 Foam::MultiComponentPhaseModel<BasePhaseModel, phaseThermo>::
 MultiComponentPhaseModel
 (
-    const phaseSystem& fluid,
+    const multiphaseInterSystem& fluid,
     const word& phaseName
 )
 :
@@ -221,7 +220,10 @@ void Foam::MultiComponentPhaseModel<BasePhaseModel, phaseThermo>::solveYi
 
     surfaceScalarField phir(0.0*phi);
 
-    forAllConstIter(phaseSystem::phaseModelTable,this->fluid().phases(),iter2)
+    forAllConstIter
+    (
+        multiphaseInterSystem::phaseModelTable,this->fluid().phases(),iter2
+    )
     {
         const volScalarField& alpha2 = iter2()();
         if (&alpha2 == &alpha1)
@@ -272,7 +274,9 @@ void Foam::MultiComponentPhaseModel<BasePhaseModel, phaseThermo>::solveYi
 
             forAllConstIter
             (
-                phaseSystem::phaseModelTable, this->fluid().phases(), iter2
+                multiphaseInterSystem::phaseModelTable,
+                this->fluid().phases(),
+                iter2
             )
             {
                 //const volScalarField& alpha2 = iter2()().oldTime();

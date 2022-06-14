@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,7 +42,7 @@ makePhaseTypes
 (
     MovingPhaseModel,
     PurePhaseModel,
-    phaseModel,
+    multiphaseInter::phaseModel,
     rhoThermo,
     pureMovingPhaseModel // Name of the phase type
 );
@@ -51,7 +51,7 @@ makePhaseTypes
 (
     StaticPhaseModel,
     PurePhaseModel,
-    phaseModel,
+    multiphaseInter::phaseModel,
     rhoThermo,
     pureStaticPhaseModel
 );
@@ -60,7 +60,7 @@ makePhaseTypes
 (
     StaticPhaseModel,
     PurePhaseModel,
-    phaseModel,
+    multiphaseInter::phaseModel,
     solidThermo,
     pureStaticSolidPhaseModel
 );
@@ -69,7 +69,7 @@ makePhaseTypes
 (
     MovingPhaseModel,
     MultiComponentPhaseModel,
-    phaseModel,
+    multiphaseInter::phaseModel,
     rhoReactionThermo,
     multiComponentMovingPhaseModel
 );

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2018 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,6 +34,8 @@ License
 
 namespace Foam
 {
+namespace reactingMultiphaseEuler
+{
 namespace surfaceTensionModels
 {
     defineTypeNameAndDebug(constantSurfaceTensionCoefficient, 0);
@@ -44,12 +47,12 @@ namespace surfaceTensionModels
     );
 }
 }
-
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::surfaceTensionModels::constantSurfaceTensionCoefficient::
-constantSurfaceTensionCoefficient
+Foam::reactingMultiphaseEuler::surfaceTensionModels::
+constantSurfaceTensionCoefficient::constantSurfaceTensionCoefficient
 (
     const dictionary& dict,
     const phasePair& pair,
@@ -63,15 +66,16 @@ constantSurfaceTensionCoefficient
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::surfaceTensionModels::constantSurfaceTensionCoefficient::
-~constantSurfaceTensionCoefficient()
+Foam::reactingMultiphaseEuler::surfaceTensionModels::
+constantSurfaceTensionCoefficient::~constantSurfaceTensionCoefficient()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::volScalarField>
-Foam::surfaceTensionModels::constantSurfaceTensionCoefficient::sigma() const
+Foam::reactingMultiphaseEuler::surfaceTensionModels::
+constantSurfaceTensionCoefficient::sigma() const
 {
     const fvMesh& mesh(this->pair_.phase1().mesh());
 
