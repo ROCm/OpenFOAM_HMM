@@ -6,7 +6,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2016 OpenFOAM Foundation
-#     Copyright (C) 2016-2021 OpenCFD Ltd.
+#     Copyright (C) 2016-2022 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -25,6 +25,10 @@
 #
 #     I_MPI_CC, I_MPI_CXX environment variables may be defined for the
 #     Intel mpicc/mpicxx wrappers
+#
+# Caveat
+#     Not all compiler versions listed here are necessarily currently tested,
+#     but can generally be expected to work.
 #
 #------------------------------------------------------------------------------
 
@@ -69,6 +73,15 @@ case ThirdParty:
     case Gcc:
         set gcc_version="$default_gcc_version"
         breaksw
+    case Gcc121*:
+        set gcc_version=gcc-12.1.0
+        breaksw
+    case Gcc113*:
+        set gcc_version=gcc-11.3.0
+        breaksw
+    case Gcc112*:
+        set gcc_version=gcc-11.2.0
+        breaksw
     case Gcc111*:
         set gcc_version=gcc-11.1.1
         breaksw
@@ -81,6 +94,12 @@ case ThirdParty:
     case Gcc101*:
         set gcc_version=gcc-10.1.0
         breaksw
+    case Gcc95*:
+        set gcc_version=gcc-9.5.0
+        breaksw
+    case Gcc94*:
+        set gcc_version=gcc-9.4.0
+        breaksw
     case Gcc93*:
         set gcc_version=gcc-9.3.0
         breaksw
@@ -89,6 +108,9 @@ case ThirdParty:
         breaksw
     case Gcc91*:
         set gcc_version=gcc-9.1.0
+        breaksw
+    case Gcc85*:
+        set gcc_version=gcc-8.5.0
         breaksw
     case Gcc84*:
         set gcc_version=gcc-8.4.0
@@ -159,8 +181,14 @@ case ThirdParty:
     case Clang:
         set clang_version="$default_clang_version"
         breaksw
+    case Clang140*:
+        set clang_version=llvm-14.0.5
+        breaksw
+    case Clang130*:
+        set clang_version=llvm-13.0.1
+        breaksw
     case Clang120*:
-        set clang_version=llvm-12.0.0
+        set clang_version=llvm-12.0.1
         breaksw
     case Clang111*:
         set clang_version=llvm-11.1.0

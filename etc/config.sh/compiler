@@ -6,7 +6,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2016-2021 OpenCFD Ltd.
+#     Copyright (C) 2016-2022 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -25,6 +25,10 @@
 #
 #     I_MPI_CC, I_MPI_CXX environment variables may be defined for the
 #     Intel mpicc/mpicxx wrappers
+#
+# Caveat
+#     Not all compiler versions listed here are necessarily currently tested,
+#     but can generally be expected to work.
 #
 #------------------------------------------------------------------------------
 
@@ -70,13 +74,19 @@ ThirdParty)
 
     case "$WM_COMPILER" in
     Gcc)    gcc_version="$default_gcc_version" ;;
+    Gcc121*) gcc_version=gcc-12.1.0 ;;
+    Gcc113*) gcc_version=gcc-11.3.0 ;;
+    Gcc112*) gcc_version=gcc-11.2.0 ;;
     Gcc111*) gcc_version=gcc-11.1.1 ;;
     Gcc103*) gcc_version=gcc-10.3.0 ;;
     Gcc102*) gcc_version=gcc-10.2.0 ;;
     Gcc101*) gcc_version=gcc-10.1.0 ;;
+    Gcc95*) gcc_version=gcc-9.5.0 ;;
+    Gcc94*) gcc_version=gcc-9.4.0 ;;
     Gcc93*) gcc_version=gcc-9.3.0 ;;
     Gcc92*) gcc_version=gcc-9.2.0 ;;
     Gcc91*) gcc_version=gcc-9.1.0 ;;
+    Gcc85*) gcc_version=gcc-8.5.0 ;;
     Gcc84*) gcc_version=gcc-8.4.0 ;;
     Gcc83*) gcc_version=gcc-8.3.0 ;;
     Gcc82*) gcc_version=gcc-8.2.0 ;;
@@ -101,7 +111,9 @@ ThirdParty)
     Gcc48*) gcc_version=gcc-4.8.5 ;;
 
     Clang)    clang_version="$default_clang_version" ;;
-    Clang120*) clang_version=llvm-12.0.0 ;;
+    Clang140*) clang_version=llvm-14.0.5 ;;
+    Clang130*) clang_version=llvm-13.0.1 ;;
+    Clang120*) clang_version=llvm-12.0.1 ;;
     Clang111*) clang_version=llvm-11.1.0 ;;
     Clang110*) clang_version=llvm-11.0.1 ;;
     Clang100*) clang_version=llvm-10.0.1 ;;
