@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2020,2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -267,7 +267,7 @@ void Foam::cyclicAMIFvPatch::movePoints()
     // src = src + mapped(tgt) and tgt = tgt + mapped(src)?
 
     const fvMesh& mesh = boundaryMesh().mesh();
-    surfaceScalarField& meshPhi = const_cast<fvMesh&>(mesh).setPhi();
+    surfaceScalarField& meshPhi = const_cast<fvMesh&>(mesh).setPhi().ref();
     surfaceScalarField::Boundary& meshPhiBf = meshPhi.boundaryFieldRef();
 
     if (cyclicAMIPolyPatch_.owner())

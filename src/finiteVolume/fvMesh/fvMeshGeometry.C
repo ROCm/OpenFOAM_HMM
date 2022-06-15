@@ -415,16 +415,19 @@ const Foam::surfaceScalarField& Foam::fvMesh::phi() const
 }
 
 
-Foam::surfaceScalarField& Foam::fvMesh::setPhi()
+Foam::refPtr<Foam::surfaceScalarField> Foam::fvMesh::setPhi()
 {
     if (!phiPtr_)
     {
-        FatalErrorInFunction
-            << "mesh flux field does not exist, is the mesh actually moving?"
-            << abort(FatalError);
+        return nullptr;
     }
-
-    return *phiPtr_;
+    else
+    {
+        // Return non-const reference
+        refPtr<surfaceScalarField> p;
+        p.ref(*phiPtr_);
+        return p;
+    }
 }
 
 

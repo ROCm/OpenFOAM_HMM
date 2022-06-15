@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019,2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -345,7 +345,7 @@ void Foam::cyclicACMIFvPatch::movePoints()
         const labelListList& newTgtAddr = AMI().tgtAddress();
 
         const fvMesh& mesh = boundaryMesh().mesh();
-        surfaceScalarField& meshPhi = const_cast<fvMesh&>(mesh).setPhi();
+        surfaceScalarField& meshPhi = const_cast<fvMesh&>(mesh).setPhi().ref();
         surfaceScalarField::Boundary& meshPhiBf = meshPhi.boundaryFieldRef();
 
         // Note: phip and phiNonOverlap will be different sizes if new faces

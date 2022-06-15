@@ -639,8 +639,13 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::repatch
     // shared points (see mergeSharedPoints below). So temporarily points
     // and edges do not match!
 
+    // TBD: temporarily unset mesh moving to avoid problems in meshflux
+    //      mapping. To be investigated.
+    const bool oldMoving = mesh_.moving(false);
     autoPtr<mapPolyMesh> mapPtr = meshMod.changeMesh(mesh_, false, true);
+    mesh_.moving(oldMoving);
     mapPolyMesh& map = *mapPtr;
+
 
     // Update fields. No inflation, parallel sync.
     mesh_.updateMesh(map);
@@ -766,7 +771,12 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::mergeSharedPoints
     fvMeshAdder::mergePoints(mesh_, pointToMaster, meshMod);
 
     // Change the mesh (no inflation). Note: parallel comms allowed.
+
+    // TBD: temporarily unset mesh moving to avoid problems in meshflux
+    //      mapping. To be investigated.
+    const bool oldMoving = mesh_.moving(false);
     autoPtr<mapPolyMesh> mapPtr = meshMod.changeMesh(mesh_, false, true);
+    mesh_.moving(oldMoving);
     mapPolyMesh& map = *mapPtr;
 
     // Update fields. No inflation, parallel sync.
@@ -1402,7 +1412,12 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::doRemoveCells
     saveInternalFields(tFlds);
 
     // Change the mesh. No inflation. Note: no parallel comms allowed.
+
+    // TBD: temporarily unset mesh moving to avoid problems in meshflux
+    //      mapping. To be investigated.
+    const bool oldMoving = mesh_.moving(false);
     autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh_, false, false);
+    mesh_.moving(oldMoving);
 
     // Update fields
     mesh_.updateMesh(map());
@@ -2825,6 +2840,10 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
     const label nOldInternalFaces = mesh_.nInternalFaces();
     const labelList oldFaceOwner(mesh_.faceOwner());
 
+    // TBD: temporarily unset mesh moving to avoid problems in meshflux
+    //      mapping. To be investigated.
+    const bool oldMoving = mesh_.moving(false);
+
     fvMeshAdder::add
     (
         Pstream::myProcNo(),    // index of mesh to modify (== mesh_)
@@ -2841,6 +2860,9 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
         constructFaceMap,
         constructPointMap
     );
+
+    mesh_.moving(oldMoving);
+
 
     if (debug)
     {

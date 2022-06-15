@@ -482,8 +482,8 @@ public:
             //- these fvPatches.
             void removeFvBoundary();
 
-            //- Return cell face motion fluxes
-            surfaceScalarField& setPhi();
+            //- Return cell face motion fluxes (or null)
+            refPtr<surfaceScalarField> setPhi();
 
             //- Return old-time cell volumes
             DimensionedField<scalar, volMesh>& setV0();

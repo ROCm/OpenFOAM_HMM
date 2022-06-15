@@ -220,40 +220,45 @@ void Foam::solidBodyFvGeometryScheme::movePoints()
 
         const polyBoundaryMesh& pbm = mesh_.boundaryMesh();
         const faceList& faces = mesh_.faces();
-        const scalar rdt = 1.0/mesh_.time().deltaTValue();
 
-        // Set the mesh flux
-        auto& meshPhi = const_cast<fvMesh&>(mesh_).setPhi();
-        auto& meshPhii = meshPhi.primitiveFieldRef();
-        auto& meshPhiBf = meshPhi.boundaryFieldRef();
-
-        //meshPhi == dimensionedScalar(dimVolume/dimTime, Zero);
-        meshPhii = Zero;
-        meshPhiBf == Zero;
-
-        forAll(changedFaceIDs_, i)
+        auto tmeshPhi(const_cast<fvMesh&>(mesh_).setPhi());
+        if (tmeshPhi)
         {
-            const face& f = faces[changedFaceIDs_[i]];
+            const scalar rdt = 1.0/mesh_.time().deltaTValue();
 
-            if (changedPatchIDs_[i] == -1)
-            {
-                const label facei = changedFaceIDs_[i];
-                meshPhii[facei] = f.sweptVol(oldPoints, currPoints)*rdt;
-            }
-            else
-            {
-                const label patchi = changedPatchIDs_[i];
-                const polyPatch& pp = pbm[patchi];
+            // Set the mesh flux
+            auto& meshPhi = tmeshPhi.ref();
+            auto& meshPhii = meshPhi.primitiveFieldRef();
+            auto& meshPhiBf = meshPhi.boundaryFieldRef();
 
-                if (isA<emptyPolyPatch>(pp))
+            //meshPhi == dimensionedScalar(dimVolume/dimTime, Zero);
+            meshPhii = Zero;
+            meshPhiBf == Zero;
+
+            forAll(changedFaceIDs_, i)
+            {
+                const face& f = faces[changedFaceIDs_[i]];
+
+                if (changedPatchIDs_[i] == -1)
                 {
-                    continue;
+                    const label facei = changedFaceIDs_[i];
+                    meshPhii[facei] = f.sweptVol(oldPoints, currPoints)*rdt;
                 }
+                else
+                {
+                    const label patchi = changedPatchIDs_[i];
+                    const polyPatch& pp = pbm[patchi];
 
-                const label patchFacei = changedFaceIDs_[i] - pp.start();
+                    if (isA<emptyPolyPatch>(pp))
+                    {
+                        continue;
+                    }
 
-                meshPhiBf[patchi][patchFacei] =
-                    f.sweptVol(oldPoints, currPoints)*rdt;
+                    const label patchFacei = changedFaceIDs_[i] - pp.start();
+
+                    meshPhiBf[patchi][patchFacei] =
+                        f.sweptVol(oldPoints, currPoints)*rdt;
+                }
             }
         }
 
