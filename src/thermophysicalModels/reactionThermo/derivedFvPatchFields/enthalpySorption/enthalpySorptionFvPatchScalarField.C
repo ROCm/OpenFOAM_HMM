@@ -237,14 +237,14 @@ patchSource() const
 
         const basicSpecieMixture& composition = thermo.composition();
 
-        const label speicesId =
+        const label speciesId =
             thermo.composition().species()[speciesName_];
 
         scalarField hsp(this->patch().size(), 0);
 
         forAll(pp, facei)
         {
-            hsp[facei] = composition.Hs(speicesId, pp[facei], Tp[facei]);
+            hsp[facei] = composition.Hs(speciesId, pp[facei], Tp[facei]);
         }
 
         dhdt += hsp*massb;

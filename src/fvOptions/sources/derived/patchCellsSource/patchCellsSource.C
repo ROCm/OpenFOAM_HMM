@@ -26,9 +26,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "patchCellsSource.H"
+#include "boundarySourcePatch.H"
 #include "fvMatrices.H"
 #include "addToRunTimeSelectionTable.H"
-#include "boundarySourcePatch.H"
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
@@ -54,46 +54,46 @@ Foam::fv::patchCellsSource::patchCellsSource
 :
     fv::option(sourceName, modelType, dict, mesh),
     curTimeIndex_(-1),
-    UName_(coeffs_.getOrDefault<word>("U", "none")),
-    hName_(coeffs_.getOrDefault<word>("he", "none")),
-    speciesName_(coeffs_.getOrDefault<word>("species", "none"))
+    isEnergySource_(false)
 {
-    label nFields = 0;
-    if (UName_ != "none")
-    {
-        nFields++;
-    }
-    if (hName_ != "none")
-    {
-        nFields++;
-    }
-    if (speciesName_ != "none")
-    {
-        nFields++;
-    }
-
-    if (nFields > 1)
-    {
-        FatalErrorInFunction
-            << "patchCellsSource : "
-            << " cannot be used for more than one field."
-            << exit(FatalError);
-    }
-
     fieldNames_.resize(1);
-    if (speciesName_ != "none")
+
+    label nFields = 0;
+
+    if
+    (
+        coeffs_.readIfPresent("U", fieldNames_[0])
+     && fieldNames_[0] != "none"
+    )
     {
-        fieldNames_[0] = speciesName_;
+        ++nFields;
     }
 
-    if (UName_ != "none")
+    if
+    (
+        coeffs_.readIfPresent("he", fieldNames_[0])
+     && fieldNames_[0] != "none"
+    )
     {
-        fieldNames_[0] = UName_;
+        isEnergySource_ = true;
+        ++nFields;
     }
 
-    if (hName_ != "none")
+    if
+    (
+        coeffs_.readIfPresent("species", fieldNames_[0])
+     && fieldNames_[0] != "none"
+    )
     {
-        fieldNames_[0] = hName_;
+        ++nFields;
+    }
+
+    if (nFields != 1)
+    {
+        FatalIOErrorInFunction(coeffs_)
+            << "Must be specified for one field (U | he | species), but "
+            << nFields << " fields were specified!" << endl
+            << exit(FatalIOError);
     }
 
     fv::option::resetApplied();
@@ -109,75 +109,56 @@ void Foam::fv::patchCellsSource::addSup
     const label fieldi
 )
 {
+    if (curTimeIndex_ == mesh_.time().timeIndex())
+    {
+        return;
+    }
+    curTimeIndex_ = mesh_.time().timeIndex();
+
     if (debug)
     {
         Info<< type() << ": applying source to " << eqn.psi().name() << endl;
     }
 
-    if (curTimeIndex_ == mesh_.time().timeIndex())
-    {
-        return;
-    }
-
-    volScalarField* psiPtr;
-
-    // If source applied to he, we need to loop over T for BC's
-    if (hName_ != "none")
-    {
-        psiPtr = mesh_.getObjectPtr<volScalarField>("T");
-    }
-    else
-    {
-        auto* psi =
-            mesh_.getObjectPtr<volScalarField>(eqn.psi().name());
-
-        psiPtr = psi;
-    }
-
-    const volScalarField::Boundary& psib = psiPtr->boundaryField();
-
-    volScalarField mDot
+    auto tsu = DimensionedField<scalar, volMesh>::New
     (
-        IOobject
-        (
-            "mDot",
-            mesh_.time().timeName(),
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
+        name_ + eqn.psi().name() + "Su",
         mesh_,
         dimensionedScalar(eqn.dimensions()/dimVolume, Zero)
     );
 
+    // If source applied to he, we need to loop over T for BC's
+    const volScalarField& psi =
+    (
+        isEnergySource_
+      ? mesh_.lookupObject<volScalarField>("T")
+      : mesh_.lookupObject<volScalarField>(eqn.psi().name())
+    );
+    const auto& psib = psi.boundaryField();
+
     forAll(psib, patchi)
     {
-        if (isA<boundarySourcePatch>(psib[patchi]))
+        const auto* bpatchPtr = isA<boundarySourcePatch>(psib[patchi]);
+
+        if (bpatchPtr)
         {
-            const boundarySourcePatch& pp =
-                refCast<const boundarySourcePatch>(psib[patchi]);
+            tmp<scalarField> tsbnd = bpatchPtr->patchSource();
+            const auto& sbnd = tsbnd.cref();
 
-            const labelUList& fc = mesh_.boundary()[patchi].faceCells();
-
-            tmp<scalarField> tsb = pp.patchSource();
-            const scalarField& sb = tsb.cref();
-
-            forAll(fc, facei)
-            {
-                const label celli = fc[facei];
-                mDot[celli] += sb[facei];
-            }
+            UIndirectList<scalar>
+            (
+                tsu.ref().field(),
+                mesh_.boundary()[patchi].faceCells()
+            ) = sbnd;
         }
     }
-    eqn += mDot;
-
-    curTimeIndex_ = mesh_.time().timeIndex();
 
     if (debug)
     {
-         Info<< " Field source rate min/max : "
-             << gMin(mDot) << " / " << gMax(mDot) << endl;
+         Info<< "Field source rate min/max : " << gMinMax(tsu()) << endl;
     }
+
+    eqn += tsu;
 }
 
 

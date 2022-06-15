@@ -289,7 +289,7 @@ void Foam::pressurePIDControlInletVelocityFvPatchVectorField::updateCoeffs()
     else
     {
         WarningInFunction
-            << "The pressure field name, \"pName\", is \"" << pName_ << "\", "
+            << "The pressure field name, 'p' is \"" << pName_ << "\", "
             << "but a field of that name was not found. The inlet velocity "
             << "will be set to an analytical value calculated from the "
             << "specified pressure drop. No PID control will be done and "

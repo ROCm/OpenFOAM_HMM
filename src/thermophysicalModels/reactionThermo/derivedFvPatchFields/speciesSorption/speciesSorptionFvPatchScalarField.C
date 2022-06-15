@@ -58,8 +58,8 @@ Foam::speciesSorptionFvPatchScalarField::kinematicModelTypeNames
 Foam::tmp<Foam::scalarField>
 Foam::speciesSorptionFvPatchScalarField::calcMoleFractions() const
 {
-    auto tMole = tmp<scalarField>::New(patch().size(), 0);
-    scalarField& Mole = tMole.ref();
+    auto tMole = tmp<scalarField>::New(patch().size(), Zero);
+    auto& Mole = tMole.ref();
 
     if (db().foundObject<rhoReactionThermo>(basicThermo::dictName))
     {
@@ -74,16 +74,16 @@ Foam::speciesSorptionFvPatchScalarField::calcMoleFractions() const
 
         const labelUList& faceCells = patch().faceCells();
 
-        const label speicesId =
+        const label speciesId =
             thermo.composition().species()[this->internalField().name()];
 
         const dimensionedScalar Wi
         (
             dimMass/dimMoles,
-            thermo.composition().W(speicesId)
+            thermo.composition().W(speciesId)
         );
 
-        const volScalarField X(W*Y[speicesId]/Wi);
+        const volScalarField X(W*Y[speciesId]/Wi);
 
         forAll(faceCells, i)
         {
@@ -309,10 +309,10 @@ patchSource() const
         basicThermo::dictName
     );
 
-    const label speicesId =
+    const label speciesId =
         thermo.composition().species()[this->internalField().name()];
 
-    const scalar Wi(thermo.composition().W(speicesId));
+    const scalar Wi(thermo.composition().W(speciesId));
 
     const scalar t = db().time().timeOutputValue();
 

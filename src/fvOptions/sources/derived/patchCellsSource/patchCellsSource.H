@@ -42,7 +42,7 @@ Usage
         // Mandatory entries
         type        patchCellsSource;
 
-        // Optional entries
+        // Optional entries (one only!)
         U           <word>;
         he          <word>;
         species     <word>;
@@ -56,13 +56,13 @@ Usage
     \table
       Property  | Description                       | Type   | Reqd | Deflt
       type      | Type name: patchCellsSource       | word   | yes  | -
-      U         | Name of operand velocity field    | word   | no   | none
-      he        | Name of operand energy field      | word   | no   | none
-      species   | Name of operand species field     | word   | no   | none
+      U         | Name of operand velocity field    | word   | choice | -
+      he        | Name of operand energy field      | word   | choice | -
+      species   | Name of operand species field     | word   | choice | -
     \endtable
 
     The inherited entries are elaborated in:
-      - \link cellSetOption.H \endlink
+      - \link fvOption.H \endlink
 
 SourceFiles
     patchCellsSource.C
@@ -96,14 +96,8 @@ class patchCellsSource
         //- Current time index (used for updating)
         label curTimeIndex_;
 
-        //- Name of operand velocity field
-        word UName_;
-
-        //- Name of operand energy field
-        word hName_;
-
-        //- Name of operand species field
-        word speciesName_;
+        //- Special handling energy field
+        bool isEnergySource_;
 
 
 public:
@@ -136,7 +130,8 @@ public:
 
     // Member Functions
 
-        //- Add explicit contribution to compressible enthalpy equation
+        //- Add explicit contribution to compressible
+        //- (momentum, enthalpy, species) equation
         virtual void addSup
         (
             const volScalarField& rho,

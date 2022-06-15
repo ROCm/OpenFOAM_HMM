@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,7 +90,7 @@ bool Foam::fv::buoyancyEnergy::read(const dictionary& dict)
 {
     if (fv::option::read(dict))
     {
-        coeffs_.readIfPresent("UName", UName_);
+        coeffs_.readIfPresent("U", UName_);
 
         return true;
     }
