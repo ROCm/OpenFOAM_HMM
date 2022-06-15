@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd
+    Copyright (C) 2016-2020,2022 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -95,6 +95,10 @@ Foam::dynamicMotionSolverTopoFvMesh::~dynamicMotionSolverTopoFvMesh()
 
 bool Foam::dynamicMotionSolverTopoFvMesh::update()
 {
+    // Clear moving flag. This is currently required since geometry calculation
+    // might get triggered when doing processor patches.
+    // (TBD: should be in changeMesh if no inflation?)
+    moving(false);
     // Do mesh changes (not using inflation - points added directly into mesh)
     autoPtr<mapPolyMesh> topoChangeMap = topoChanger_.changeMesh(false);
 
