@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,7 +68,7 @@ public:
 
     // Constructors
 
-        //- Construct from components
+        //- Construct from components (known location)
         passivePositionParticle
         (
             const polyMesh& mesh,
@@ -83,16 +83,18 @@ public:
         {}
 
 
-        //- Construct from a position and a cell.
-        //  Searches for the rest of the required topology.
+        //- Construct from components (supplied location)
         passivePositionParticle
         (
             const polyMesh& mesh,
-            const vector& position,
-            const label celli = -1
+            const barycentric& coordinates,
+            const label celli,
+            const label tetFacei,
+            const label tetPti,
+            const vector& position
         )
         :
-            particle(mesh, position, celli),
+            particle(mesh, coordinates, celli, tetFacei, tetPti),
             location_(position)
         {}
 
@@ -167,6 +169,34 @@ public:
             inline const point& location() const
             {
                 return location_;
+            }
+
+            //- Write the particle position and cell id
+            virtual void writePosition(Ostream& os) const
+            {
+                // Use cached location() instead of calculated position()
+                if (os.format() == IOstream::ASCII)
+                {
+                    os  << location() << token::SPACE << cell();
+                }
+                else
+                {
+                    positionsCompat1706 p;
+
+                    const size_t s =
+                    (
+                        offsetof(positionsCompat1706, facei)
+                      - offsetof(positionsCompat1706, position)
+                    );
+
+                    p.position = location();
+                    p.celli = cell();
+
+                    os.write(reinterpret_cast<const char*>(&p.position), s);
+                }
+
+                // Check state of Ostream
+                os.check(FUNCTION_NAME);
             }
 };
 

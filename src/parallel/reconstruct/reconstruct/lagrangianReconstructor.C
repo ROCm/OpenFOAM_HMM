@@ -116,14 +116,30 @@ Foam::label Foam::lagrangianReconstructor::reconstructPositions
             }
             else
             {
-                // No valid coordinates. Use built-in locating from cell -1
+                // No valid coordinates. Two choices:
+                // - assume reconstructed mesh contains the position so do
+                //   a locate with the (reconstructed) mesh
+                // - preserve -1 as cell id, maintain the read location
                 lagrangianPositions.append
                 (
+
+                    //- Option 1: locate on reconstructed mesh
+                    //new passivePositionParticle
+                    //(
+                    //    mesh_,
+                    //    ppi.location(),
+                    //    mappedCell
+                    //)
+
+                    //- Option 2: maintain read location
                     new passivePositionParticle
                     (
                         mesh_,
-                        ppi.location(),
-                        mappedCell
+                        Zero,   // position
+                        -1,     // celli
+                        -1,     // tetFacei
+                        -1,     // tetPti
+                        ppi.location()
                     )
                 );
             }
