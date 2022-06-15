@@ -4,7 +4,7 @@
 // Maximum length for dynamicList
 const label maxDynListLength
 (
-    viewFactorDict.getOrDefault<label>("maxDynListLength", 100000)
+    viewFactorDict.getOrDefault<label>("maxDynListLength", 1000000)
 );
 
 for (const int proci : Pstream::allProcs())
@@ -47,7 +47,7 @@ for (const int proci : Pstream::allProcs())
                     const vector& remA = remoteArea[j];
                     const label& remAgg = remoteAgg[j];
 
-                    const vector& d = remFc - fc;
+                    const vector d(remFc - fc);
 
                     if (((d & fA) < 0.) && ((d & remA) > 0))
                     {

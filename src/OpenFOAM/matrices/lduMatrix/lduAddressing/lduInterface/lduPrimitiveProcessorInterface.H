@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,11 +78,6 @@ class lduPrimitiveProcessorInterface
 
     // Private Member Functions
 
-        //- No copy construct
-        lduPrimitiveProcessorInterface
-        (
-            const lduPrimitiveProcessorInterface&
-        ) = delete;
 
         //- No copy assignment
         void operator=(const lduPrimitiveProcessorInterface&) = delete;
@@ -107,6 +102,11 @@ public:
             const label comm = UPstream::worldComm
         );
 
+        //- Copy constructor
+        lduPrimitiveProcessorInterface
+        (
+            const lduPrimitiveProcessorInterface&
+        );
 
     //- Destructor
     virtual ~lduPrimitiveProcessorInterface() = default;

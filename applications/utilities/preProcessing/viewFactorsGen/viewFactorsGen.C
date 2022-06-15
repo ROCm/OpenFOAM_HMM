@@ -408,7 +408,7 @@ int main(int argc, char *argv[])
                 List<point> availablePoints
                 (
                     upp.faceCentres().size()
-                + upp.localPoints().size()
+                  + upp.localPoints().size()
                 );
 
                 SubList<point>
@@ -862,21 +862,6 @@ int main(int argc, char *argv[])
     );
     IOglobalFaceFaces.write();
 
-
-    labelListIOList IOvisibleFaceFaces
-    (
-        IOobject
-        (
-            "visibleFaceFaces",
-            mesh.facesInstance(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        ),
-        std::move(visibleFaceFaces)
-    );
-    IOvisibleFaceFaces.write();
 
     IOmapDistribute IOmapDist
     (
