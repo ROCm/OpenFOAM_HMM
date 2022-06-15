@@ -2,7 +2,7 @@
 #-----------------------------------------------------------------------------#
 # =========                 |                                                 #
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           #
-#  \\    /   O peration     | Version:  v2112                                 #
+#  \\    /   O peration     | Version:  v2206                                 #
 #   \\  /    A nd           | Website:  www.openfoam.com                      #
 #    \\/     M anipulation  |                                                 #
 #-----------------------------------------------------------------------------#
@@ -26,6 +26,7 @@ nz=2
 
 tmpSetSet='patchify.setSet'
 rm -f patchify.setSet
+trap 'echo "Removing $tmpSetSet" 1>&2; rm -f $tmpSetSet' EXIT TERM INT
 
 
 initialiseFaceSet()

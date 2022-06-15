@@ -24,6 +24,4 @@ USE_ARC=false runApplication -s spline extrudeMesh
 mkdir -p 2
 runApplication -s spline checkMesh -writeAllFields -time 2
 
-paraFoam -touch -vtk
-
 #------------------------------------------------------------------------------

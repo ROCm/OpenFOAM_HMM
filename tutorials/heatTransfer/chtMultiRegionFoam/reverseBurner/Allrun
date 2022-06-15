@@ -11,9 +11,6 @@ runApplication splitMeshRegions -cellZonesOnly -overwrite
 
 runApplication topoSet -region gas
 
-paraFoam -region gas -touch
-paraFoam -region solid -touch
-
 runApplication decomposePar -allRegions
 
 runParallel $(getApplication)

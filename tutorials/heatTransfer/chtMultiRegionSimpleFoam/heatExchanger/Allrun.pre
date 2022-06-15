@@ -19,10 +19,6 @@ runApplication -s air.2 \
 
 rm -rf constant/air/polyMesh/sets
 
-# Create dummy files for post-processing
-paraFoam -touch -region porous
-paraFoam -touch -region air
-
 # Set initial fields
 restore0Dir
 

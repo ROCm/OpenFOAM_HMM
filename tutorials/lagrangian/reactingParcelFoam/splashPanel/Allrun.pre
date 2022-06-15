@@ -29,7 +29,4 @@ runApplication -s createWallFilmRegionPatches \
 
 runApplication createPatch -region wallFilmRegion -overwrite
 
-paraFoam -touch
-paraFoam -touch -region wallFilmRegion
-
 #------------------------------------------------------------------------------

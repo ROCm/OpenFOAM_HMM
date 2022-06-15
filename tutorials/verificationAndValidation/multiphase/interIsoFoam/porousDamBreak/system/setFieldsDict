@@ -40,7 +40,7 @@ regions
             volScalarFieldValue alpha.water 1
         );
     }
-   boxToCell
+    boxToCell
     {
         box (0.30 0 -1) (0.59 0.3 1);
 

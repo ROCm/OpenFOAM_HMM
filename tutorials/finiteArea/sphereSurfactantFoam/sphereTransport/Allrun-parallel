@@ -20,7 +20,7 @@ runParallel $(getApplication) $fileHandler
 
 if [ "$convertVTK" = true ]
 then
-    runParallel foamToVTK $fileHandler -finite-area -no-internal -no-boundary
+    runParallel foamToVTK $fileHandler -no-internal -no-boundary
 fi
 
 case "$reconstruct" in

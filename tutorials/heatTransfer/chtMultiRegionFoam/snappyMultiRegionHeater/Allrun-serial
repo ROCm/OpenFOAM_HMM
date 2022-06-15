@@ -35,8 +35,4 @@ done
 # Run on single processor
 runApplication $(getApplication)
 
-echo
-echo "Use paraFoam -touch-all to create files for paraview post-processing"
-echo
-
 #------------------------------------------------------------------------------

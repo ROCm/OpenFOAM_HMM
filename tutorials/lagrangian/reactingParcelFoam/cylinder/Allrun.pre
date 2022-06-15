@@ -11,7 +11,4 @@ runApplication topoSet
 
 runApplication extrudeToRegionMesh -overwrite
 
-paraFoam -touch
-paraFoam -touch -region wallFilmRegion
-
 #------------------------------------------------------------------------------

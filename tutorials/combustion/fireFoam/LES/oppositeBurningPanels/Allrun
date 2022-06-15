@@ -34,8 +34,4 @@ runApplication -s fields \
 
 runParallel $(getApplication)
 
-paraFoam -touch
-paraFoam -touch -region panelRegion
-
-
 #------------------------------------------------------------------------------

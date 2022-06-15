@@ -27,8 +27,6 @@ done
 runApplication createBaffles -region rightFluid -overwrite
 
 echo
-echo "Use paraFoam -touch-all to create files for paraview post-processing"
-echo
 echo "End"
 
 #------------------------------------------------------------------------------

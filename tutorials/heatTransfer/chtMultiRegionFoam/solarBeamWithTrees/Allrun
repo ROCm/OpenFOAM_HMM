@@ -3,15 +3,8 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
-# Setup case
 ./Allrun.pre
 
-#-- Run on single processor
-
 runApplication $(getApplication)
-
-echo
-echo "Use paraFoam -touch-all to create files for paraview post-processing"
-echo
 
 #------------------------------------------------------------------------------

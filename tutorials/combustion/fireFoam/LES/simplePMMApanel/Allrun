@@ -13,6 +13,4 @@ runApplication extrudeToRegionMesh -overwrite
 
 runApplication $(getApplication)
 
-paraFoam -touchAll
-
 #------------------------------------------------------------------------------

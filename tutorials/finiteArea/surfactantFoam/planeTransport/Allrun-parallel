@@ -18,7 +18,7 @@ runParallel $decompDict makeFaMesh $fileHandler
 
 runParallel $decompDict $(getApplication) $fileHandler
 
-runParallel $decompDict foamToEnsight -finite-area
+runParallel $decompDict foamToEnsight
 
 case "$reconstruct" in
     (true)      runApplication reconstructPar $fileHandler ;;

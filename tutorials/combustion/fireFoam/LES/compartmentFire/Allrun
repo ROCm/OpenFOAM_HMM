@@ -20,9 +20,6 @@ runApplication -s panelRegion decomposePar -region panelRegion
 
 runParallel $(getApplication)
 
-paraFoam -touch
-paraFoam -touch -region panelRegion
-
 if notTest "$@"
 then
     (cd validation && ./plot)

@@ -33,6 +33,4 @@ runApplication -s filmRegion createPatch -region filmRegion -overwrite
 # Run
 runApplication $(getApplication)
 
-paraFoam -touchAll
-
 #------------------------------------------------------------------------------
