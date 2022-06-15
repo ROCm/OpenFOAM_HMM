@@ -84,7 +84,7 @@ volBSplinesBase::volBSplinesBase
                     true
                 )
             );
-            volume_[iBox].write();
+            volume_[iBox].writeParamCoordinates();
             iBox++;
         }
     }

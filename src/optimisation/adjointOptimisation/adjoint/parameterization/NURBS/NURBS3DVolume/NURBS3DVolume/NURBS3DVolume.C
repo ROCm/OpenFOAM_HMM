@@ -1832,7 +1832,7 @@ void Foam::NURBS3DVolume::writeCps
 }
 
 
-void Foam::NURBS3DVolume::write() const
+void Foam::NURBS3DVolume::writeParamCoordinates() const
 {
     parametricCoordinatesPtr_().write();
 }

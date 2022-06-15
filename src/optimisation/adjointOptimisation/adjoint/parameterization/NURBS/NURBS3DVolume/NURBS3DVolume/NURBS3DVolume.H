@@ -495,7 +495,7 @@ public:
             ) const;
 
             //- Write parametric coordinates
-            void write() const;
+            void writeParamCoordinates() const;
 
             //- Write the control points to support restart
             virtual bool writeData(Ostream& os) const;
