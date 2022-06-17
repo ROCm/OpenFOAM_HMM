@@ -122,7 +122,6 @@ makeDecorator(SquareSpace,'[',']', ' ');
 //
 //  \endcode
 //
-// \noop
 template<class Container, class Delimiters>
 class OutputAdaptor
 {

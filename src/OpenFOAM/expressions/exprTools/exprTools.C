@@ -38,7 +38,7 @@ Note
 namespace Foam
 {
 
-//! \cond file-scope
+//! \cond file_scope
 
 // Maximum depth for recursive variable names
 static constexpr label maxRecursionDepth_ = 100;

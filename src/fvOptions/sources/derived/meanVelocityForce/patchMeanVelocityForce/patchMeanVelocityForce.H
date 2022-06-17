@@ -53,6 +53,7 @@ Usage
         // Mandatory/Optional (inherited) entries
         ...
     }
+    \endverbatim
 
     where the entries mean:
     \table

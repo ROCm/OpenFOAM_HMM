@@ -98,12 +98,10 @@ protected:
         //- Contribution to field sensitivity derivatives
         //  Topology optimisation or other variants with
         //  as many design variables as the mesh cells
-        //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
         autoPtr<volScalarField> dJdbPtr_;
 
         // Contribution to surface sensitivity derivatives
-        //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         //- Term from material derivative
         autoPtr<boundaryVectorField> bdJdbPtr_;
@@ -129,7 +127,7 @@ protected:
 
         // Contribution to volume-based sensitivities from volume-based
         // objective functions
-        //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         //- Multiplier of d(Volume)/db
         autoPtr<volScalarField> divDxDbMultPtr_;

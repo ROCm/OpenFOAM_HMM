@@ -653,7 +653,7 @@ void NURBS3DSurface::buildSurface()
          << "\nuNCPs: "   << uNCPs   << "\nvNCPs: "   << vNCPs
          << "\nNURBSSurface:\nCPs: " << CPs
          << endl;
-//*/
+*/
     vectorField& field = *this;
     field = vector::zero;
 
@@ -800,7 +800,7 @@ void NURBS3DSurface::makeEquidistant
     Info<< "Making points equidistant is physical space on surface "
          << name_
          << endl;
-//*/
+*/
     // Equidistant spacing in u along v isoLines.
     for (label vI = 0; vI<nVPts_; vI++)
     {
@@ -1295,7 +1295,7 @@ List<scalarList> NURBS3DSurface::genEquidistant
     Info<< "Generating points equidistant in physical space on surface "
         << name_
         << endl;
-//*/
+*/
     // Preset U and V with uniform values.
     List<scalarList> UV(NPARAMS, scalarList(0));
 
@@ -2151,7 +2151,7 @@ void NURBS3DSurface::write(const word fileName)
 
             curveFileBases << endl;
         }
-//*/
+*/
     }
 }
 
@@ -2208,7 +2208,7 @@ void NURBS3DSurface::write(const fileName dirName, const fileName fileName)
 
             curveFileBases << endl;
         }
-//*/
+*/
     }
 }
 
@@ -2273,7 +2273,7 @@ void NURBS3DSurface::writeWParses(const word fileName)
 
             curveFileBases << endl;
         }
-//*/
+*/
     }
 }
 

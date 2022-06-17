@@ -96,7 +96,7 @@ registerOptSwitch
 );
 
 
-//! \cond file-scope
+//! \cond file_scope
 namespace Foam
 {
     // Register re-reader

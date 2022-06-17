@@ -34,7 +34,7 @@ License
 namespace Foam
 {
 
-//! \cond file-scope
+//! \cond file_scope
 //  Write list as single or multiple entries - see exprTools::getList()
 static void writeList
 (

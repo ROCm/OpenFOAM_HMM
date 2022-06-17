@@ -45,7 +45,7 @@ dictionary* dimensionSystemsPtr_(nullptr);
 HashTable<dimensionedScalar>* unitSetPtr_(nullptr);
 dimensionSets* writeUnitSetPtr_(nullptr);
 
-//! \cond file-scope
+//! \cond file_scope
 
 // Helper class to
 //   register re-reader

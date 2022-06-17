@@ -36,7 +36,7 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//! \cond internal-use
+//! \cond internal_use
 // internal use only - skip doxygen documentation
 namespace Foam
 {

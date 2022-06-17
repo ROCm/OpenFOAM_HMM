@@ -39,7 +39,7 @@ defineTypeNameAndDebug(ccm, 0);
 
 // * * * * * * * * * * * * * * Static Functions  * * * * * * * * * * * * * * //
 
-// \cond file-scope
+// \cond file_scope
 // Return the string corresponding to the error
 static const char* errorMsg(CCMIOError err)
 {

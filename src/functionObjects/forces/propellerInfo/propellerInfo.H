@@ -38,18 +38,18 @@ Description
       - Torque coefficient, 10*Kq
       - Advance coefficient, J
       - Open water efficiency, etaO
-      - Written to postProcessing/<name>/<time>/propellerPerformance.dat
+      - Written to postProcessing/\<name\>/\<time\>/propellerPerformance.dat
 
     Controlled by writeControl:
     - Wake field text file
       - Wake: 1 - UzMean/URef
       - Velocity in cylindrical coordinates at xyz locations
-      - Written to postProcessing/<name>/<time>/wake.dat
+      - Written to postProcessing/\<name\>/\<time\>/wake.dat
     - Axial wake field text file
       - 1 - Uz/URef at r/R and angle
-      - Written to postProcessing/<name>/<time>/axialWake.dat
+      - Written to postProcessing/\<name\>/\<time\>/axialWake.dat
     - Velocity surface
-      - Written to postProcessing/<name>/surfaces/time>/disk.<fileType>
+      - Written to postProcessing/\<name\>/surfaces/\<time\>/disk.<fileType>
 
 Usage
     Example of function object specification:
