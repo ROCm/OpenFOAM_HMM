@@ -173,7 +173,7 @@ SourceFiles
 #include "fvMeshFunctionObject.H"
 #include "writeFile.H"
 #include "coordinateSystem.H"
-#include "volFields.H"
+#include "volFieldsFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -197,12 +197,6 @@ protected:
     // Protected Data
 
         // Fields
-
-            //- Forces
-            volVectorField force_;
-
-            //- Moments
-            volVectorField moment_;
 
             //- Sum of patch pressure forces
             vector sumPatchForcesP_;
@@ -281,12 +275,17 @@ protected:
             const word& e1Name = word::null
         );
 
+        //- Return access to the force field
+        volVectorField& force();
+
+        //- Return access to the moment field
+        volVectorField& moment();
+
         //- Initialise containers and fields
         void initialise();
 
         //- Reset containers and fields
         void reset();
-
 
     // Evaluation
 

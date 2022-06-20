@@ -61,13 +61,69 @@ void Foam::functionObjects::forceCoeffs::initialise()
 }
 
 
+Foam::volVectorField& Foam::functionObjects::forceCoeffs::forceCoeff()
+{
+    auto* coeffPtr =
+        mesh_.getObjectPtr<volVectorField>(scopedName("forceCoeff"));
+
+    if (!coeffPtr)
+    {
+        coeffPtr = new volVectorField
+        (
+            IOobject
+            (
+                scopedName("forceCoeff"),
+                time_.timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh_,
+            dimensionedVector(dimless, Zero)
+        );
+
+        mesh_.objectRegistry::store(coeffPtr);
+    }
+
+    return *coeffPtr;
+}
+
+
+Foam::volVectorField& Foam::functionObjects::forceCoeffs::momentCoeff()
+{
+    auto* coeffPtr =
+        mesh_.getObjectPtr<volVectorField>(scopedName("momentCoeff"));
+
+    if (!coeffPtr)
+    {
+        coeffPtr = new volVectorField
+        (
+            IOobject
+            (
+                scopedName("momentCoeff"),
+                time_.timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh_,
+            dimensionedVector(dimless, Zero)
+        );
+
+        mesh_.objectRegistry::store(coeffPtr);
+    }
+
+    return *coeffPtr;
+}
+
+
 void Foam::functionObjects::forceCoeffs::reset()
 {
     Cf_.reset();
     Cm_.reset();
 
-    forceCoeff_ == dimensionedVector(dimless, Zero);
-    momentCoeff_ == dimensionedVector(dimless, Zero);
+    forceCoeff() == dimensionedVector(dimless, Zero);
+    momentCoeff() == dimensionedVector(dimless, Zero);
 }
 
 
@@ -111,7 +167,7 @@ void Foam::functionObjects::forceCoeffs::calcForceCoeffs()
     const auto& coordSys = coordSysPtr_();
 
     // Calculate force coefficients
-    forceCoeff_ = forceScaling*force_;
+    forceCoeff() = forceScaling*force();
 
     Cf_.reset
     (
@@ -135,7 +191,7 @@ void Foam::functionObjects::forceCoeffs::calcMomentCoeffs()
     const auto& coordSys = coordSysPtr_();
 
     // Calculate moment coefficients
-    momentCoeff_ = momentScaling*moment_;
+    momentCoeff() = momentScaling*moment();
 
     Cm_.reset
     (
@@ -225,32 +281,6 @@ Foam::functionObjects::forceCoeffs::forceCoeffs
     forces(name, runTime, dict, false),
     Cf_(),
     Cm_(),
-    forceCoeff_
-    (
-        IOobject
-        (
-            "forceCoeff", // scopedName() is not available at ctor level
-            mesh_.time().timeName(),
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh_,
-        dimensionedVector(dimless, Zero)
-    ),
-    momentCoeff_
-    (
-        IOobject
-        (
-            "momentCoeff",
-            mesh_.time().timeName(),
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh_,
-        dimensionedVector(dimless, Zero)
-    ),
     coeffFilePtr_(),
     magUInf_(Zero),
     lRef_(Zero),
@@ -342,9 +372,6 @@ bool Foam::functionObjects::forceCoeffs::read(const dictionary& dict)
         }
     }
 
-    forceCoeff_.rename(scopedName("forceCoeff"));
-    momentCoeff_.rename(scopedName("momentCoeff"));
-
     Info<< endl;
 
     return true;
@@ -421,8 +448,8 @@ bool Foam::functionObjects::forceCoeffs::write()
 
     if (writeFields_)
     {
-        forceCoeff_.write();
-        momentCoeff_.write();
+        forceCoeff().write();
+        momentCoeff().write();
     }
 
     Log << endl;

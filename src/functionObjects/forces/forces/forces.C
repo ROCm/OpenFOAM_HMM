@@ -91,6 +91,60 @@ void Foam::functionObjects::forces::setCoordinateSystem
 }
 
 
+Foam::volVectorField& Foam::functionObjects::forces::force()
+{
+    auto* forcePtr = mesh_.getObjectPtr<volVectorField>(scopedName("force"));
+
+    if (!forcePtr)
+    {
+        forcePtr = new volVectorField
+        (
+            IOobject
+            (
+                scopedName("force"),
+                time_.timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh_,
+            dimensionedVector(dimForce, Zero)
+        );
+
+        mesh_.objectRegistry::store(forcePtr);
+    }
+
+    return *forcePtr;
+}
+
+
+Foam::volVectorField& Foam::functionObjects::forces::moment()
+{
+    auto* momentPtr = mesh_.getObjectPtr<volVectorField>(scopedName("moment"));
+
+    if (!momentPtr)
+    {
+        momentPtr = new volVectorField
+        (
+            IOobject
+            (
+                scopedName("moment"),
+                time_.timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh_,
+            dimensionedVector(dimForce*dimLength, Zero)
+        );
+
+        mesh_.objectRegistry::store(momentPtr);
+    }
+
+    return *momentPtr;
+}
+
+
 void Foam::functionObjects::forces::initialise()
 {
     if (initialised_)
@@ -143,8 +197,10 @@ void Foam::functionObjects::forces::reset()
     sumInternalForces_ = Zero;
     sumInternalMoments_ = Zero;
 
-    force_ == dimensionedVector(force_.dimensions(), Zero);
-    moment_ == dimensionedVector(moment_.dimensions(), Zero);
+    auto& force = this->force();
+    auto& moment = this->moment();
+    force == dimensionedVector(force.dimensions(), Zero);
+    moment == dimensionedVector(moment.dimensions(), Zero);
 }
 
 
@@ -291,14 +347,14 @@ void Foam::functionObjects::forces::addToPatchFields
 {
     sumPatchForcesP_ += sum(fP);
     sumPatchForcesV_ += sum(fV);
-    force_.boundaryFieldRef()[patchi] += fP + fV;
+    force().boundaryFieldRef()[patchi] += fP + fV;
 
     const vectorField mP(Md^fP);
     const vectorField mV(Md^fV);
 
     sumPatchMomentsP_ += sum(mP);
     sumPatchMomentsV_ += sum(mV);
-    moment_.boundaryFieldRef()[patchi] += mP + mV;
+    moment().boundaryFieldRef()[patchi] += mP + mV;
 }
 
 
@@ -309,16 +365,19 @@ void Foam::functionObjects::forces::addToInternalField
     const vectorField& f
 )
 {
+    auto& force = this->force();
+    auto& moment = this->moment();
+
     forAll(cellIDs, i)
     {
         const label celli = cellIDs[i];
 
         sumInternalForces_ += f[i];
-        force_[celli] += f[i];
+        force[celli] += f[i];
 
         const vector m(Md[i]^f[i]);
         sumInternalMoments_ += m;
-        moment_[celli] = m;
+        moment[celli] = m;
     }
 }
 
@@ -449,32 +508,6 @@ Foam::functionObjects::forces::forces
 :
     fvMeshFunctionObject(name, runTime, dict),
     writeFile(mesh_, name),
-    force_
-    (
-        IOobject
-        (
-            "force", // scopedName() is not available at ctor level
-            time_.timeName(),
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh_,
-        dimensionedVector(dimForce, Zero)
-    ),
-    moment_
-    (
-        IOobject
-        (
-            "moment",
-            time_.timeName(),
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh_,
-        dimensionedVector(dimForce*dimLength, Zero)
-    ),
     sumPatchForcesP_(Zero),
     sumPatchForcesV_(Zero),
     sumPatchMomentsP_(Zero),
@@ -515,32 +548,6 @@ Foam::functionObjects::forces::forces
 :
     fvMeshFunctionObject(name, obr, dict),
     writeFile(mesh_, name),
-    force_
-    (
-        IOobject
-        (
-            "force",
-            time_.timeName(),
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh_,
-        dimensionedVector(dimForce, Zero)
-    ),
-    moment_
-    (
-        IOobject
-        (
-            "moment",
-            time_.timeName(),
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh_,
-        dimensionedVector(dimForce*dimLength, Zero)
-    ),
     sumPatchForcesP_(Zero),
     sumPatchForcesV_(Zero),
     sumPatchMomentsP_(Zero),
@@ -645,8 +652,6 @@ bool Foam::functionObjects::forces::read(const dictionary& dict)
         Info<< "    Fields will be written" << endl;
     }
 
-    force_.rename(scopedName("force"));
-    moment_.rename(scopedName("moment"));
 
     return true;
 }
@@ -823,8 +828,8 @@ bool Foam::functionObjects::forces::write()
     {
         Log << "    writing force and moment fields." << endl;
 
-        force_.write();
-        moment_.write();
+        force().write();
+        moment().write();
     }
 
     Log << endl;

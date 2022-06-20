@@ -431,12 +431,6 @@ private:
         //- Moment components
         forceComponents Cm_;
 
-        //- Force coefficient field
-        volVectorField forceCoeff_;
-
-        //- Moment coefficient field
-        volVectorField momentCoeff_;
-
         //- Operand force and moment coefficients
         HashTable<coeffDesc> coeffs_;
 
@@ -469,6 +463,13 @@ protected:
 
         //- Initialise containers and fields
         void initialise();
+
+        //- Return access to the force coefficients field
+        volVectorField& forceCoeff();
+
+        //- Return access to the moment coefficients field
+        volVectorField& momentCoeff();
+
 
         //- Reset containers and fields
         void reset();
