@@ -147,6 +147,9 @@ public:
 
         //- Read from dictionary
         virtual bool read();
+
+        //- Return the shielding function
+        virtual tmp<volScalarField> fd() const;
 };
 
 

@@ -166,6 +166,25 @@ tmp<volScalarField> DESModel<BasicTurbulenceModel>::Ssigma
 }
 
 
+template<class BasicTurbulenceModel>
+tmp<volScalarField> DESModel<BasicTurbulenceModel>::fd() const
+{
+    return tmp<volScalarField>::New
+    (
+        IOobject
+        (
+            "fd",
+            this->mesh_.time().timeName(),
+            this->mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        this->mesh_,
+        dimensionedScalar(dimless, Zero)
+    );
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace LESModels

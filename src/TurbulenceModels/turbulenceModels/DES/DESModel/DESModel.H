@@ -120,7 +120,10 @@ public:
 
         //- Return modified strain rate
         //  Note: uses Ctrans_ coefficient
-        tmp<volScalarField> Ssigma(const volTensorField& gradU) const;
+        virtual tmp<volScalarField> Ssigma(const volTensorField& gradU) const;
+
+        //- Return the shielding function
+        virtual tmp<volScalarField> fd() const;
 };
 
 

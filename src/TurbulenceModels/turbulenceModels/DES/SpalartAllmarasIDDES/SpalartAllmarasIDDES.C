@@ -236,6 +236,17 @@ bool SpalartAllmarasIDDES<BasicTurbulenceModel>::read()
 }
 
 
+template<class BasicTurbulenceModel>
+tmp<volScalarField> SpalartAllmarasIDDES<BasicTurbulenceModel>::fd() const
+{
+    const volScalarField alpha(this->alpha());
+    const volScalarField expTerm(exp(sqr(alpha)));
+
+    tmp<volScalarField> fB = min(2*pow(expTerm, -9.0), scalar(1));
+    return max(1 - fdt(mag(fvc::grad(this->U_))), fB);
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace LESModels

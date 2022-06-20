@@ -189,6 +189,13 @@ bool SpalartAllmarasDDES<BasicTurbulenceModel>::read()
 }
 
 
+template<class BasicTurbulenceModel>
+tmp<volScalarField> SpalartAllmarasDDES<BasicTurbulenceModel>::fd() const
+{
+    return fd(mag(fvc::grad(this->U_)));
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace LESModels

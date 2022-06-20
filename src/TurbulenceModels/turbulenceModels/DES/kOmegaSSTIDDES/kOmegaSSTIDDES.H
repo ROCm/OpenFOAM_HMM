@@ -149,6 +149,9 @@ public:
 
         //- Re-read model coefficients if they have changed
         virtual bool read();
+
+        //- Return the shielding function
+        virtual tmp<volScalarField> fd() const;
 };
 
 
