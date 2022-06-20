@@ -107,10 +107,10 @@ namespace Foam
 template<class T> class CircularBuffer;
 
 template<class T>
-Istream& operator>>(Istream& is, CircularBuffer<T>& list);
+Istream& operator>>(Istream& is, CircularBuffer<T>& rhs);
 
 template<class T>
-Ostream& operator<<(Ostream& os, const CircularBuffer<T>& list);
+Ostream& operator<<(Ostream& os, const CircularBuffer<T>& rhs);
 
 
 /*---------------------------------------------------------------------------*\
@@ -125,10 +125,10 @@ class CircularBuffer
         //- The allocated buffer storage
         List<T> storage_;
 
-        //- The first readable element
+        //- The first addressable element
         label begin_;
 
-        //- One past last writable element
+        //- One past last addressable element
         label end_;
 
 
@@ -374,11 +374,11 @@ public:
         //- Print information
         Ostream& info(Ostream& os) const;
 
-        //- Write List, with line-breaks in ASCII when length exceeds shortLen.
-        //  Using '0' suppresses line-breaks entirely.
+        //- Read buffer contents from Istream.
         Istream& readList(Istream& is);
 
-        //- Write List, with line-breaks in ASCII when length exceeds shortLen.
+        //- Write buffer contents with line-breaks in ASCII
+        //- when length exceeds shortLen.
         //  Using '0' suppresses line-breaks entirely.
         Ostream& writeList(Ostream& os, const label shortLen=0) const;
 
@@ -480,19 +480,20 @@ public:
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-//- Read List contents from Istream
+//- Read buffer contents from Istream
 template<class T>
-Istream& operator>>(Istream& is, CircularBuffer<T>& list)
+Istream& operator>>(Istream& is, CircularBuffer<T>& rhs)
 {
-    return list.readList(is);
+    return rhs.readList(is);
 }
 
 
-//- Write List to Ostream, as per UList::writeList() with default length.
+//- Write buffer contents to Ostream,
+//- as per CircularBuffer::writeList() with default length.
 template<class T>
-Ostream& operator<<(Ostream& os, const CircularBuffer<T>& list)
+Ostream& operator<<(Ostream& os, const CircularBuffer<T>& rhs)
 {
-    return list.writeList(os);
+    return rhs.writeList(os);
 }
 
 

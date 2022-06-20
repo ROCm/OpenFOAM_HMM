@@ -31,7 +31,7 @@ Description
     Base class of a source for a \c topoSet.
 
     Implementer must modify the given set (see \c applyToSet) according to
-    its function and the \c setAction (one of add/delete/new).
+    its function and the \c setAction (one of ADD/SUBTRACT/NEW).
 
 SourceFiles
     topoSetSource.C
