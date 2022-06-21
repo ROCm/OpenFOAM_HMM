@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,7 +25,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::dragModels::SyamlalOBrien
+    Foam::multiphaseEuler::dragModels::SyamlalOBrien
 
 Description
     Syamlal, M., Rogers, W. and O'Brien, T. J. (1993) MFIX documentation,
@@ -36,14 +37,16 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SyamlalOBrien_H
-#define SyamlalOBrien_H
+#ifndef Foam_multiphaseEuler_dragModels_SyamlalOBrien_H
+#define Foam_multiphaseEuler_dragModels_SyamlalOBrien_H
 
 #include "dragModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
+{
+namespace multiphaseEuler
 {
 namespace dragModels
 {
@@ -87,6 +90,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace dragModels
+} // End namespace multiphaseEuler
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

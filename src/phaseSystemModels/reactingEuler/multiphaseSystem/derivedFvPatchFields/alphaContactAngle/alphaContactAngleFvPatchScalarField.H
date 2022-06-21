@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,8 +69,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef alphaContactAngleFvPatchScalarField_H
-#define alphaContactAngleFvPatchScalarField_H
+#ifndef Foam_reactingMultiphaseEuler_alphaContactAngleFvPatchScalarField_H
+#define Foam_reactingMultiphaseEuler_alphaContactAngleFvPatchScalarField_H
 
 #include "zeroGradientFvPatchFields.H"
 #include "multiphaseSystem.H"
@@ -78,6 +78,8 @@ SourceFiles
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
+{
+namespace reactingMultiphaseEuler
 {
 
 /*---------------------------------------------------------------------------*\
@@ -172,7 +174,7 @@ private:
 public:
 
     //- Runtime type information
-    TypeName("alphaContactAngle");
+    TypeName("reactingMultiphaseEuler::alphaContactAngle");
 
 
     // Constructors
@@ -246,6 +248,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace reactingMultiphaseEuler
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

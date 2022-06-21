@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,8 +33,8 @@ License
 
 Foam::phasePair::phasePair
 (
-    const phaseModel& phase1,
-    const phaseModel& phase2,
+    const multiphaseInter::phaseModel& phase1,
+    const multiphaseInter::phaseModel& phase2,
     const bool ordered
 )
 :
@@ -46,7 +46,7 @@ Foam::phasePair::phasePair
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-const Foam::phaseModel& Foam::phasePair::from() const
+const Foam::multiphaseInter::phaseModel& Foam::phasePair::from() const
 {
     FatalErrorInFunction
         << "Requested from phase from an unordered pair."
@@ -56,7 +56,7 @@ const Foam::phaseModel& Foam::phasePair::from() const
 }
 
 
-const Foam::phaseModel& Foam::phasePair::to() const
+const Foam::multiphaseInter::phaseModel& Foam::phasePair::to() const
 {
     FatalErrorInFunction
         << "Requested to phase from an unordered pair."

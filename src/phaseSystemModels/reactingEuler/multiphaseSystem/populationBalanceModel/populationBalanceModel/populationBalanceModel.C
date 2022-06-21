@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2019 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1209,7 +1209,7 @@ Foam::diameterModels::populationBalanceModel::sigmaWithContinuousPhase
 ) const
 {
     return
-        fluid_.lookupSubModel<surfaceTensionModel>
+        fluid_.lookupSubModel<reactingMultiphaseEuler::surfaceTensionModel>
         (
             phasePair(dispersedPhase, continuousPhase_)
         ).sigma();

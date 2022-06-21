@@ -156,15 +156,6 @@ $(massTransfer)/massTransferModel/massTransferModel.C
 $(massTransfer)/Frossling/Frossling.C
 $(massTransfer)/sphericalMassTransfer/sphericalMassTransfer.C
 
-saturation = interfacialCompositionModels/saturationModels
-$(saturation)/saturationModel/saturationModel.C
-$(saturation)/Antoine/Antoine.C
-$(saturation)/AntoineExtended/AntoineExtended.C
-$(saturation)/ArdenBuck/ArdenBuck.C
-$(saturation)/polynomial/polynomial.C
-$(saturation)/function1/function1.C
-$(saturation)/constantSaturationConditions/constantSaturationConditions.C
-
 surfaceTension = interfacialCompositionModels/surfaceTensionModels
 $(surfaceTension)/surfaceTensionModel/surfaceTensionModel.C
 $(surfaceTension)/constantSurfaceTensionCoefficient/constantSurfaceTensionCoefficient.C

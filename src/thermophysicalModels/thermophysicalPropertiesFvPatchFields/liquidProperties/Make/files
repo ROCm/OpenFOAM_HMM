@@ -1,4 +1,0 @@
-humidityTemperatureCoupledMixed/humidityTemperatureCoupledMixedFvPatchScalarField.C
-
-
-LIB = $(FOAM_LIBBIN)/libliquidPropertiesFvPatchFields

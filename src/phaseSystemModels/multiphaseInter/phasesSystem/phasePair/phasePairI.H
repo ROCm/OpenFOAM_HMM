@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,13 +27,13 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline const Foam::phaseModel& Foam::phasePair::phase1() const
+inline const Foam::multiphaseInter::phaseModel& Foam::phasePair::phase1() const
 {
     return phase1_;
 }
 
 
-inline const Foam::phaseModel& Foam::phasePair::phase2() const
+inline const Foam::multiphaseInter::phaseModel& Foam::phasePair::phase2() const
 {
     return phase2_;
 }

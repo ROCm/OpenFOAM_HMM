@@ -36,6 +36,7 @@ EXE_LIBS = \
     -linterfaceProperties \
     -lturbulenceModels \
     -lcompressibleTurbulenceModels \
+    -lthermoTools \
     -lVoFphaseCompressibleTurbulenceModels \
     -lSLGThermo \
     -lsurfaceFilmModels \

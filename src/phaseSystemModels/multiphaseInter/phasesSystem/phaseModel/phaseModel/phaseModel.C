@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,21 +26,24 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "phaseModel.H"
-#include "phaseSystem.H"
+#include "multiphaseInterSystem.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace multiphaseInter
+{
     defineTypeNameAndDebug(phaseModel, 0);
-    defineRunTimeSelectionTable(phaseModel, phaseSystem);
+    defineRunTimeSelectionTable(phaseModel, multiphaseInterSystem);
+}
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::phaseModel::phaseModel
+Foam::multiphaseInter::phaseModel::phaseModel
 (
-    const phaseSystem& fluid,
+    const multiphaseInterSystem& fluid,
     const word& phaseName
 )
 :
@@ -64,10 +67,10 @@ Foam::phaseModel::phaseModel
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::phaseModel>
-Foam::phaseModel::New
+Foam::autoPtr<Foam::multiphaseInter::phaseModel>
+Foam::multiphaseInter::phaseModel::New
 (
-    const phaseSystem& fluid,
+    const multiphaseInterSystem& fluid,
     const word& phaseName
 )
 {
@@ -78,7 +81,7 @@ Foam::phaseModel::New
     Info<< "Selecting phaseModel for "
         << phaseName << ": " << modelType << endl;
 
-    auto* ctorPtr = phaseSystemConstructorTable(modelType);
+    auto* ctorPtr = multiphaseInterSystemConstructorTable(modelType);
 
     if (!ctorPtr)
     {
@@ -87,7 +90,7 @@ Foam::phaseModel::New
             dict,
             "phaseModel",
             modelType,
-            *phaseSystemConstructorTablePtr_
+            *multiphaseInterSystemConstructorTablePtr_
         ) << exit(FatalIOError);
     }
 
@@ -97,49 +100,51 @@ Foam::phaseModel::New
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::phaseSystem& Foam::phaseModel::fluid() const
+const Foam::multiphaseInterSystem&
+Foam::multiphaseInter::phaseModel::fluid() const
 {
     return fluid_;
 }
 
 
-void Foam::phaseModel::correct()
+void Foam::multiphaseInter::phaseModel::correct()
 {
     thermo().correct();
 }
 
 
-void Foam::phaseModel::correctTurbulence()
+void Foam::multiphaseInter::phaseModel::correctTurbulence()
 {
     // do nothing
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phaseModel::rho() const
+Foam::tmp<Foam::volScalarField> Foam::multiphaseInter::phaseModel::rho() const
 {
     return thermo().rho();
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::phaseModel::rho(const label patchI) const
+Foam::tmp<Foam::scalarField>
+Foam::multiphaseInter::phaseModel::rho(const label patchI) const
 {
      return thermo().rho(patchI);
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phaseModel::hc() const
+Foam::tmp<Foam::volScalarField> Foam::multiphaseInter::phaseModel::hc() const
 {
      return thermo().hc();
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phaseModel::Cp() const
+Foam::tmp<Foam::volScalarField> Foam::multiphaseInter::phaseModel::Cp() const
 {
      return thermo().Cp();
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::phaseModel::Cp
+Foam::tmp<Foam::scalarField> Foam::multiphaseInter::phaseModel::Cp
 (
     const scalarField& p,
     const scalarField& T,
@@ -150,13 +155,13 @@ Foam::tmp<Foam::scalarField> Foam::phaseModel::Cp
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phaseModel::Cv() const
+Foam::tmp<Foam::volScalarField> Foam::multiphaseInter::phaseModel::Cv() const
 {
     return thermo().Cv();
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::phaseModel::Cv
+Foam::tmp<Foam::scalarField> Foam::multiphaseInter::phaseModel::Cv
 (
     const scalarField& p,
     const scalarField& T,
@@ -167,13 +172,13 @@ Foam::tmp<Foam::scalarField> Foam::phaseModel::Cv
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phaseModel::gamma() const
+Foam::tmp<Foam::volScalarField> Foam::multiphaseInter::phaseModel::gamma() const
 {
     return thermo().gamma();
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::phaseModel::gamma
+Foam::tmp<Foam::scalarField> Foam::multiphaseInter::phaseModel::gamma
 (
     const scalarField& p,
     const scalarField& T,
@@ -184,13 +189,13 @@ Foam::tmp<Foam::scalarField> Foam::phaseModel::gamma
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phaseModel::Cpv() const
+Foam::tmp<Foam::volScalarField> Foam::multiphaseInter::phaseModel::Cpv() const
 {
     return thermo().Cpv();
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::phaseModel::Cpv
+Foam::tmp<Foam::scalarField> Foam::multiphaseInter::phaseModel::Cpv
 (
     const scalarField& p,
     const scalarField& T,
@@ -201,13 +206,13 @@ Foam::tmp<Foam::scalarField> Foam::phaseModel::Cpv
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phaseModel::CpByCpv() const
+Foam::tmp<Foam::volScalarField> Foam::multiphaseInter::phaseModel::CpByCpv() const
 {
      return thermo().CpByCpv();
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::phaseModel::CpByCpv
+Foam::tmp<Foam::scalarField> Foam::multiphaseInter::phaseModel::CpByCpv
 (
     const scalarField& p,
     const scalarField& T,
@@ -218,43 +223,47 @@ Foam::tmp<Foam::scalarField> Foam::phaseModel::CpByCpv
 }
 
 
-const Foam::volScalarField& Foam::phaseModel::alpha() const
+const Foam::volScalarField& Foam::multiphaseInter::phaseModel::alpha() const
 {
     return thermo().alpha();
 }
 
 
-const Foam::scalarField& Foam::phaseModel::alpha(const label patchI) const
+const Foam::scalarField&
+Foam::multiphaseInter::phaseModel::alpha(const label patchI) const
 {
     return thermo().alpha(patchI);
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phaseModel::kappa() const
+Foam::tmp<Foam::volScalarField> Foam::multiphaseInter::phaseModel::kappa() const
 {
     return thermo().kappa();
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::phaseModel::kappa(const label patchI) const
+Foam::tmp<Foam::scalarField>
+Foam::multiphaseInter::phaseModel::kappa(const label patchI) const
 {
     return thermo().kappa(patchI);
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phaseModel::alphahe() const
+Foam::tmp<Foam::volScalarField>
+Foam::multiphaseInter::phaseModel::alphahe() const
 {
     return thermo().alphahe();
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::phaseModel::alphahe(const label patchI) const
+Foam::tmp<Foam::scalarField>
+Foam::multiphaseInter::phaseModel::alphahe(const label patchI) const
 {
     return thermo().alphahe(patchI);
 }
 
 
-Foam::tmp<Foam::volScalarField>Foam::phaseModel::kappaEff
+Foam::tmp<Foam::volScalarField>Foam::multiphaseInter::phaseModel::kappaEff
 (
     const volScalarField& kappat
 ) const
@@ -265,7 +274,7 @@ Foam::tmp<Foam::volScalarField>Foam::phaseModel::kappaEff
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::phaseModel::kappaEff
+Foam::tmp<Foam::scalarField> Foam::multiphaseInter::phaseModel::kappaEff
 (
     const scalarField& kappat,
     const label patchI
@@ -275,7 +284,7 @@ Foam::tmp<Foam::scalarField> Foam::phaseModel::kappaEff
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phaseModel::alphaEff
+Foam::tmp<Foam::volScalarField> Foam::multiphaseInter::phaseModel::alphaEff
 (
     const volScalarField& alphat
 ) const
@@ -284,7 +293,7 @@ Foam::tmp<Foam::volScalarField> Foam::phaseModel::alphaEff
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::phaseModel::alphaEff
+Foam::tmp<Foam::scalarField> Foam::multiphaseInter::phaseModel::alphaEff
 (
     const scalarField& alphat,
     const label patchI
@@ -294,31 +303,33 @@ Foam::tmp<Foam::scalarField> Foam::phaseModel::alphaEff
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phaseModel::mu() const
+Foam::tmp<Foam::volScalarField> Foam::multiphaseInter::phaseModel::mu() const
 {
     return thermo().mu();
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::phaseModel::mu(const label patchi) const
+Foam::tmp<Foam::scalarField>
+Foam::multiphaseInter::phaseModel::mu(const label patchi) const
 {
     return thermo().mu(patchi);
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phaseModel::nu() const
+Foam::tmp<Foam::volScalarField> Foam::multiphaseInter::phaseModel::nu() const
 {
     return thermo().nu();
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::phaseModel::nu(const label patchi) const
+Foam::tmp<Foam::scalarField>
+Foam::multiphaseInter::phaseModel::nu(const label patchi) const
 {
     return thermo().nu(patchi);
 }
 
 
-bool Foam::phaseModel::read()
+bool Foam::multiphaseInter::phaseModel::read()
 {
     return true;
 }

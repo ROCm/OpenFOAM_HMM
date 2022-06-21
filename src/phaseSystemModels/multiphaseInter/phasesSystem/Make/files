@@ -5,7 +5,7 @@ phasePair/phasePair.C
 phasePair/phasePairKey.C
 phasePair/orderedPhasePair.C
 
-phaseSystem/phaseSystem.C
+multiphaseInterSystem/multiphaseInterSystem.C
 
 multiphaseSystem/multiphaseSystem.C
 multiphaseSystem/multiphaseSystemNew.C

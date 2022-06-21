@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2018 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -170,7 +170,8 @@ Foam::tmp<Foam::volScalarField> Foam::phasePair::EoH2() const
 Foam::tmp<Foam::volScalarField> Foam::phasePair::sigma() const
 {
     return
-        phase1().fluid().lookupSubModel<surfaceTensionModel>
+        phase1().fluid().
+            lookupSubModel<reactingMultiphaseEuler::surfaceTensionModel>
         (
             phasePair(phase1(), phase2())
         ).sigma();

@@ -7,4 +7,6 @@ EXE_LIBS = \
     -lfiniteVolume \
     -lmeshTools \
     -ldynamicMesh \
-    -lfieldFunctionObjects
+    -lfieldFunctionObjects \
+    -lincompressibleMultiphaseSystems \
+    -lreactingMultiphaseSystem

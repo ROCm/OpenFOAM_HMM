@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2012 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,14 +32,17 @@ License
 
 namespace Foam
 {
+namespace multiphaseEuler
+{
     defineTypeNameAndDebug(heatTransferModel, 0);
     defineRunTimeSelectionTable(heatTransferModel, dictionary);
+}
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::heatTransferModel::heatTransferModel
+Foam::multiphaseEuler::heatTransferModel::heatTransferModel
 (
     const dictionary& dict,
     const volScalarField& alpha1,
@@ -56,7 +59,8 @@ Foam::heatTransferModel::heatTransferModel
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::heatTransferModel> Foam::heatTransferModel::New
+Foam::autoPtr<Foam::multiphaseEuler::heatTransferModel>
+Foam::multiphaseEuler::heatTransferModel::New
 (
     const dictionary& dict,
     const volScalarField& alpha1,

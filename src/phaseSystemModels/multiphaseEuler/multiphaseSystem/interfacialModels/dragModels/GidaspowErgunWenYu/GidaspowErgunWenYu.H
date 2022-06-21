@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,7 +25,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::dragModels::GidaspowErgunWenYu
+    Foam::multiphaseEuler::dragModels::GidaspowErgunWenYu
 
 Description
     D. Gidaspow, Multiphase flow and fluidization,
@@ -35,14 +36,16 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef GidaspowErgunWenYu_H
-#define GidaspowErgunWenYu_H
+#ifndef Foam_multiphaseEuler_dragModels_GidaspowErgunWenYu_H
+#define Foam_multiphaseEuler_dragModels_GidaspowErgunWenYu_H
 
 #include "dragModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
+{
+namespace multiphaseEuler
 {
 namespace dragModels
 {
@@ -86,6 +89,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace dragModels
+} // End namespace multiphaseEuler
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

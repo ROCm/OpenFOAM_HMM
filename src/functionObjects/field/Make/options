@@ -21,7 +21,9 @@ EXE_INC = \
     -I$(LIB_SRC)/thermophysicalModels/chemistryModel/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/reactionThermo/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/specie/lnInclude \
-    -I$(LIB_SRC)/fvAgglomerationMethods/pairPatchAgglomeration/lnInclude
+    -I$(LIB_SRC)/fvAgglomerationMethods/pairPatchAgglomeration/lnInclude \
+    -I$(LIB_SRC)/phaseSystemModels/multiphaseInter/phasesSystem/lnInclude \
+    -I$(LIB_SRC)/phaseSystemModels/reactingEuler/multiphaseSystem/lnInclude
 
 LIB_LIBS = \
     -lfiniteVolume \
@@ -43,4 +45,6 @@ LIB_LIBS = \
     -lturbulenceModelSchemes \
     -lchemistryModel \
     -lreactionThermophysicalModels \
-    -lpairPatchAgglomeration
+    -lpairPatchAgglomeration \
+    -lincompressibleMultiphaseSystems \
+    -lreactingMultiphaseSystem

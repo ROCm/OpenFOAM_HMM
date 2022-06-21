@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::diameterModel
+    Foam::multiphaseEuler::diameterModel
 
 Description
     Abstract base-class for dispersed-phase particle diameter models.
@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef diameterModel_H
-#define diameterModel_H
+#ifndef Foam_multiphaseEuler_diameterModel_H
+#define Foam_multiphaseEuler_diameterModel_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,6 +45,8 @@ SourceFiles
 #include "runTimeSelectionTables.H"
 
 namespace Foam
+{
+namespace multiphaseEuler
 {
 
 /*---------------------------------------------------------------------------*\
@@ -115,6 +117,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+} // End namespace multiphaseEuler
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

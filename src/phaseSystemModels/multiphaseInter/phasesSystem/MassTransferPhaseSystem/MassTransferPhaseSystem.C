@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +32,8 @@ License
 #include "fvMatrix.H"
 #include "volFields.H"
 #include "fundamentalConstants.H"
+
+using namespace Foam::multiphaseInter;
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -119,7 +121,7 @@ Foam::MassTransferPhaseSystem<BasePhaseSystem>::calculateL
 
         const word species(speciesName.substr(0, speciesName.find('.')));
 
-        L += pos(dmdtNetki)*interfacePtr->L(species, T);
+        L -= pos(dmdtNetki)*interfacePtr->L(species, T);
     }
 
     return tL;
@@ -238,7 +240,7 @@ Foam::MassTransferPhaseSystem<BasePhaseSystem>::heatTransfer
 
                     if (KSp.valid())
                     {
-                        Sp -= KSp.ref();
+                        Sp += KSp.ref();
                     }
 
                     tmp<volScalarField> KSu =
@@ -246,13 +248,13 @@ Foam::MassTransferPhaseSystem<BasePhaseSystem>::heatTransfer
 
                     if (KSu.valid())
                     {
-                        Su -= KSu.ref();
+                        Su += KSu.ref();
                     }
 
                     // If linearization is not provided used full explicit
                     if (!KSp.valid() && !KSu.valid())
                     {
-                        Su -= *dmdt_[keyik];
+                        Su += *dmdt_[keyik];
                     }
                 }
 

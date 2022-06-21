@@ -16,8 +16,6 @@ FoamFile
 
 #include "solverControls"
 
-libs            (liquidPropertiesFvPatchFields);
-
 application     chtMultiRegionFoam;
 
 startFrom       startTime;

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,8 +31,8 @@ License
 
 Foam::orderedPhasePair::orderedPhasePair
 (
-    const phaseModel& from,
-    const phaseModel& to
+    const multiphaseInter::phaseModel& from,
+    const multiphaseInter::phaseModel& to
 )
 :
     phasePair(from, to, true)
@@ -41,13 +41,13 @@ Foam::orderedPhasePair::orderedPhasePair
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-const Foam::phaseModel& Foam::orderedPhasePair::from() const
+const Foam::multiphaseInter::phaseModel& Foam::orderedPhasePair::from() const
 {
     return phase1();
 }
 
 
-const Foam::phaseModel& Foam::orderedPhasePair::to() const
+const Foam::multiphaseInter::phaseModel& Foam::orderedPhasePair::to() const
 {
     return phase2();
 }

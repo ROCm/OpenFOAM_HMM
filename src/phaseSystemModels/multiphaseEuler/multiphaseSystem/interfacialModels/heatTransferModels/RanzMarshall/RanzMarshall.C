@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2012 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +33,8 @@ License
 
 namespace Foam
 {
+namespace multiphaseEuler
+{
 namespace heatTransferModels
 {
     defineTypeNameAndDebug(RanzMarshall, 0);
@@ -44,11 +47,12 @@ namespace heatTransferModels
     );
 }
 }
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::heatTransferModels::RanzMarshall::RanzMarshall
+Foam::multiphaseEuler::heatTransferModels::RanzMarshall::RanzMarshall
 (
     const dictionary& interfaceDict,
     const volScalarField& alpha1,
@@ -62,13 +66,14 @@ Foam::heatTransferModels::RanzMarshall::RanzMarshall
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::heatTransferModels::RanzMarshall::~RanzMarshall()
+Foam::multiphaseEuler::heatTransferModels::RanzMarshall::~RanzMarshall()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::heatTransferModels::RanzMarshall::K
+Foam::tmp<Foam::volScalarField>
+Foam::multiphaseEuler::heatTransferModels::RanzMarshall::K
 (
     const volScalarField& Ur
 ) const

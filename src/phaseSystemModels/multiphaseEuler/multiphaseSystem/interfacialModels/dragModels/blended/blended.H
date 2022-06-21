@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::dragModels::blended
+    Foam::multiphaseEuler::dragModels::blended
 
 Description
     Blends two drag models based on the phase fractions to handle
@@ -36,14 +36,16 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef blended_H
-#define blended_H
+#ifndef Foam_multiphaseEuler_dragModels_blended_H
+#define Foam_multiphaseEuler_dragModels_blended_H
 
 #include "dragModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
+{
+namespace multiphaseEuler
 {
 namespace dragModels
 {
@@ -93,6 +95,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace dragModels
+} // End namespace multiphaseEuler
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

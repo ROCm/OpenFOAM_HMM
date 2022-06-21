@@ -36,6 +36,7 @@ EXE_LIBS = \
     -lmeshTools \
     -lturbulenceModels \
     -lcompressibleTurbulenceModels \
+    -lthermoTools \
     -llagrangian \
     -llagrangianIntermediate \
     -llagrangianTurbulence \

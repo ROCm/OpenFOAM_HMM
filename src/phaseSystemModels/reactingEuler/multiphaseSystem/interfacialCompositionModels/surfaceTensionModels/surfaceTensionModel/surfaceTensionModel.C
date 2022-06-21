@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2018 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,16 +33,20 @@ License
 
 namespace Foam
 {
+namespace reactingMultiphaseEuler
+{
     defineTypeNameAndDebug(surfaceTensionModel, 0);
     defineRunTimeSelectionTable(surfaceTensionModel, dictionary);
 }
+}
 
-const Foam::dimensionSet Foam::surfaceTensionModel::dimSigma(1, 0, -2, 0, 0);
+const Foam::dimensionSet
+Foam::reactingMultiphaseEuler::surfaceTensionModel::dimSigma(1, 0, -2, 0, 0);
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::surfaceTensionModel::surfaceTensionModel
+Foam::reactingMultiphaseEuler::surfaceTensionModel::surfaceTensionModel
 (
     const dictionary& dict,
     const phasePair& pair,
@@ -67,8 +71,8 @@ Foam::surfaceTensionModel::surfaceTensionModel
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::surfaceTensionModel>
-Foam::surfaceTensionModel::New
+Foam::autoPtr<Foam::reactingMultiphaseEuler::surfaceTensionModel>
+Foam::reactingMultiphaseEuler::surfaceTensionModel::New
 (
     const dictionary& dict,
     const phasePair& pair
@@ -98,7 +102,7 @@ Foam::surfaceTensionModel::New
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::surfaceTensionModel::writeData(Ostream& os) const
+bool Foam::reactingMultiphaseEuler::surfaceTensionModel::writeData(Ostream& os) const
 {
     return os.good();
 }

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,6 +43,7 @@ SourceFiles
 #include "dictionary.H"
 #include "Enum.H"
 #include "runTimeSelectionTables.H"
+#include "multiphaseInterSystem.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,8 +51,13 @@ namespace Foam
 {
 
 // Forward Declarations
-class phaseModel;
 class phasePair;
+
+namespace multiphaseInter
+{
+
+// Forward Declarations
+class phaseModel;
 
 /*---------------------------------------------------------------------------*\
                   Class interfaceCompositionModel Declaration
@@ -147,6 +153,9 @@ public:
         //- The phase pair
         const phasePair& pair() const;
 
+        //- Return the multiphaseInterSystem this interface belongs to
+        const multiphaseInterSystem& fluid() const;
+
         //- Interface mass fraction
         virtual tmp<volScalarField> Yf
         (
@@ -161,10 +170,16 @@ public:
             const volScalarField& Tf
         ) const = 0;
 
-        //- Mass diffusivity
-        virtual tmp<volScalarField> D
+        //- Specie mass diffusivity for pure mixture
+        virtual tmp<volScalarField> Dfrom
         (
             const word& speciesName
+        ) const = 0;
+
+        //- Specie mass diffusivity for specie in a multicomponent
+        virtual tmp<volScalarField> Dto
+        (
+             const word& speciesName
         ) const = 0;
 
         //- Latent heat (delta Hc)
@@ -212,6 +227,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+} // End multiphaseInter
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

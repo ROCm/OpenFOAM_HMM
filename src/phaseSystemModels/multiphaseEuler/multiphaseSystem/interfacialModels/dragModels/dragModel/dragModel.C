@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,14 +32,17 @@ License
 
 namespace Foam
 {
+namespace multiphaseEuler
+{
     defineTypeNameAndDebug(dragModel, 0);
     defineRunTimeSelectionTable(dragModel, dictionary);
+}
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::dragModel::dragModel
+Foam::multiphaseEuler::dragModel::dragModel
 (
     const dictionary& dict,
     const phaseModel& phase1,
@@ -56,7 +59,8 @@ Foam::dragModel::dragModel
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::dragModel> Foam::dragModel::New
+Foam::autoPtr<Foam::multiphaseEuler::dragModel>
+Foam::multiphaseEuler::dragModel::New
 (
     const dictionary& dict,
     const phaseModel& phase1,

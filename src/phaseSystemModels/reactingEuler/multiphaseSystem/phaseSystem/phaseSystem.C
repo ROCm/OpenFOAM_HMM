@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2018 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -326,9 +326,13 @@ Foam::phaseSystem::sigma(const phasePairKey& key) const
     {
         return volScalarField::New
         (
-            surfaceTensionModel::typeName + ":sigma",
+            reactingMultiphaseEuler::surfaceTensionModel::typeName + ":sigma",
             this->mesh_,
-            dimensionedScalar("zero", surfaceTensionModel::dimSigma, 0)
+            dimensionedScalar
+            (
+                reactingMultiphaseEuler::surfaceTensionModel::dimSigma,
+                0
+            )
         );
     }
 }

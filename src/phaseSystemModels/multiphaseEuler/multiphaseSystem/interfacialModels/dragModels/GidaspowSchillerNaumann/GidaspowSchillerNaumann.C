@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +33,8 @@ License
 
 namespace Foam
 {
+namespace multiphaseEuler
+{
 namespace dragModels
 {
     defineTypeNameAndDebug(GidaspowSchillerNaumann, 0);
@@ -44,11 +47,13 @@ namespace dragModels
     );
 }
 }
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::dragModels::GidaspowSchillerNaumann::GidaspowSchillerNaumann
+Foam::multiphaseEuler::dragModels::GidaspowSchillerNaumann::
+GidaspowSchillerNaumann
 (
     const dictionary& interfaceDict,
     const phaseModel& phase1,
@@ -61,13 +66,15 @@ Foam::dragModels::GidaspowSchillerNaumann::GidaspowSchillerNaumann
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::dragModels::GidaspowSchillerNaumann::~GidaspowSchillerNaumann()
+Foam::multiphaseEuler::dragModels::GidaspowSchillerNaumann::
+~GidaspowSchillerNaumann()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::dragModels::GidaspowSchillerNaumann::K
+Foam::tmp<Foam::volScalarField>
+Foam::multiphaseEuler::dragModels::GidaspowSchillerNaumann::K
 (
     const volScalarField& Ur
 ) const

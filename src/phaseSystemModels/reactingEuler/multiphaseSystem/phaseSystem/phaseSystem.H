@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2019 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,9 +61,12 @@ namespace Foam
 
 class blendingMethod;
 template<class modelType> class BlendedInterfacialModel;
-class surfaceTensionModel;
 class aspectRatioModel;
 
+namespace reactingMultiphaseEuler
+{
+    class surfaceTensionModel;
+}
 /*---------------------------------------------------------------------------*\
                          Class phaseSystem Declaration
 \*---------------------------------------------------------------------------*/
@@ -104,7 +108,7 @@ protected:
         typedef
             HashTable
             <
-                autoPtr<surfaceTensionModel>,
+                autoPtr<reactingMultiphaseEuler::surfaceTensionModel>,
                 phasePairKey,
                 phasePairKey::hash
             >

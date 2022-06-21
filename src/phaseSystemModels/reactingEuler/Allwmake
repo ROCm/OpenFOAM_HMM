@@ -5,8 +5,9 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 # echo "making ${PWD##*/}"
 
+wmake $targetType saturationModels
+
 wmake $targetType multiphaseSystem
-wmake $targetType functionObjects
 
 wmake $targetType twoPhaseSystem
 wmake $targetType twoPhaseCompressibleTurbulenceModels

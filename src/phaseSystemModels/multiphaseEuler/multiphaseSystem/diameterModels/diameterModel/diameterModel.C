@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,14 +32,17 @@ License
 
 namespace Foam
 {
+namespace multiphaseEuler
+{
     defineTypeNameAndDebug(diameterModel, 0);
     defineRunTimeSelectionTable(diameterModel, dictionary);
+}
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::diameterModel::diameterModel
+Foam::multiphaseEuler::diameterModel::diameterModel
 (
     const dictionary& dict,
     const phaseModel& phase
@@ -52,7 +55,8 @@ Foam::diameterModel::diameterModel
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::diameterModel> Foam::diameterModel::New
+Foam::autoPtr<Foam::multiphaseEuler::diameterModel>
+Foam::multiphaseEuler::diameterModel::New
 (
     const dictionary& dict,
     const phaseModel& phase

@@ -22,4 +22,5 @@ LIB_LIBS = \
     -linterfaceProperties \
     -lturbulenceModels \
     -lcompressibleTurbulenceModels \
+    -lthermoTools \
     -lincompressibleTransportModels

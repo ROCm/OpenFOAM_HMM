@@ -71,6 +71,28 @@ functions
             dmdt.liquidToGas
         );
     }
+    htc
+    {
+        type            multiphaseInterHtcModel;
+        libs            (fieldFunctionObjects);
+
+        field           T;
+        writeControl    outputTime;
+        writeInterval   1;
+        htcModel        fixedReferenceTemperature;
+        patches         (bottom);
+        TRef            373;
+    }
+
+    wallHeatFlux
+    {
+        type            wallHeatFlux;
+        libs            (fieldFunctionObjects);
+
+        patches         (bottom);
+        writeControl    outputTime;
+        writeInterval   1;
+    }
 }
 
 

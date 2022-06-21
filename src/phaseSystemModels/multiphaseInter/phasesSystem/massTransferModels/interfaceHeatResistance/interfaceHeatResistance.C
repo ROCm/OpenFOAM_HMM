@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2020 Henning Scheufler
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -223,7 +223,7 @@ Foam::meltingEvaporationModels::interfaceHeatResistance<Thermo, OtherThermo>
     auto tempOpen = fullSpeciesName.find('.');
     const word speciesName(fullSpeciesName.substr(0, tempOpen));
 
-    tmp<volScalarField> L = this->L(speciesName, T);
+    tmp<volScalarField> L = mag(this->L(speciesName, T));
 
     htc_ = R_/L();
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -251,10 +251,22 @@ void Foam::multiphaseSystem::correctContactAngle
 
     forAll(boundary, patchi)
     {
-        if (isA<alphaContactAngleFvPatchScalarField>(gbf[patchi]))
+        if
+        (
+            isA<multiphaseEuler::alphaContactAngleFvPatchScalarField>
+            (
+                gbf[patchi]
+            )
+        )
         {
-            const alphaContactAngleFvPatchScalarField& acap =
-                refCast<const alphaContactAngleFvPatchScalarField>(gbf[patchi]);
+            const auto& acap =
+                refCast
+                <
+                    const multiphaseEuler::alphaContactAngleFvPatchScalarField
+                >
+                (
+                    gbf[patchi]
+                );
 
             vectorField& nHatPatch = nHatb[patchi];
 
@@ -414,7 +426,7 @@ Foam::multiphaseSystem::multiphaseSystem
         dragModels_.set
         (
             iter.key(),
-            dragModel::New
+            multiphaseEuler::dragModel::New
             (
                 iter(),
                 *phases_.lookup(iter.key().first()),
@@ -645,7 +657,7 @@ Foam::multiphaseSystem::dragCoeffs() const
 
     forAllConstIters(dragModels_, iter)
     {
-        const dragModel& dm = *iter();
+        const multiphaseEuler::dragModel& dm = *iter();
 
         volScalarField* Kptr =
             (

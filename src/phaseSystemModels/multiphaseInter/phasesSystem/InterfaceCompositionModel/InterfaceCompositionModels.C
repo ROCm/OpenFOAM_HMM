@@ -52,6 +52,7 @@ License
 #include "Lee.H"
 #include "interfaceHeatResistance.H"
 #include "interfaceOxideRate.H"
+#include "diffusionGasEvaporation.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -725,6 +726,39 @@ namespace Foam
             rhoThermo,
             pureMixture,
             constRhoHThermoPhysics
+        );
+
+
+    // diffusionGasEvaporation model definitions
+
+        // From pure liquid (rhoConst) to a multi-component gas incomp phase
+        makeInterfaceContSpecieMixtureType
+        (
+            diffusionGasEvaporation,
+            heRhoThermo,
+            rhoThermo,
+            pureMixture,
+            constRhoHThermoPhysics,
+            heRhoThermo,
+            rhoReactionThermo,
+            multiComponentMixture,
+            constIncompressibleGasHThermoPhysics
+        );
+
+
+        // From pure liquid (BoussinesqFluid) to a multi-component gas incomp
+        // phase
+        makeInterfaceContSpecieMixtureType
+        (
+            diffusionGasEvaporation,
+            heRhoThermo,
+            rhoThermo,
+            pureMixture,
+            BoussinesqFluidEThermoPhysics,
+            heRhoThermo,
+            rhoReactionThermo,
+            multiComponentMixture,
+            constIncompressibleGasHThermoPhysics
         );
 }
 

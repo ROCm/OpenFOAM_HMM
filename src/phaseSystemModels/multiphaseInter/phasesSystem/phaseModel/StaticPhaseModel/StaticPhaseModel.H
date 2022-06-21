@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -71,7 +71,7 @@ public:
 
         StaticPhaseModel
         (
-            const phaseSystem& fluid,
+            const multiphaseInterSystem& fluid,
             const word& phaseName
         );
 

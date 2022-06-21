@@ -39,7 +39,7 @@ mixture
     thermodynamics
     {
         Cp              381;
-        Hf              8.016e4;//[J/Kg];
+        Hf              0; //[J/Kg];
     }
     transport
     {

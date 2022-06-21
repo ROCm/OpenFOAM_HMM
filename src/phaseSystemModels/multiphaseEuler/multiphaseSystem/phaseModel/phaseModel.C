@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -188,7 +189,7 @@ Foam::phaseModel::phaseModel
         );
     }
 
-    dPtr_ = diameterModel::New
+    dPtr_ = multiphaseEuler::diameterModel::New
     (
         phaseDict_,
         *this

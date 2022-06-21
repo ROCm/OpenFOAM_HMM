@@ -19,5 +19,6 @@ EXE_LIBS = \
     -lspecie \
     -lturbulenceModels \
     -lcompressibleTurbulenceModels \
+    -lthermoTools \
     -latmosphericModels \
     -lregionFaModels

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,8 +27,7 @@ License
 
 #include "MultiComponentPhaseModel.H"
 
-#include "phaseSystem.H"
-#include "multiphaseSystem.H"
+#include "multiphaseInterSystem.H"
 #include "fvmDdt.H"
 #include "fvmDiv.H"
 #include "fvmSup.H"
@@ -47,13 +46,14 @@ template<class BasePhaseModel, class phaseThermo>
 Foam::MultiComponentPhaseModel<BasePhaseModel, phaseThermo>::
 MultiComponentPhaseModel
 (
-    const phaseSystem& fluid,
+    const multiphaseInterSystem& fluid,
     const word& phaseName
 )
 :
     BasePhaseModel(fluid, phaseName),
     species_(),
-    inertIndex_(-1)
+    inertIndex_(-1),
+    addDiffusion_(false)
 {
     thermoPtr_.reset
     (
@@ -75,6 +75,11 @@ MultiComponentPhaseModel
     species_ = thermoPtr_->composition().species();
 
     inertIndex_ = species_.find(thermoPtr_().template get<word>("inertSpecie"));
+
+    addDiffusion_ =
+        thermoPtr_().template getOrDefault<bool>("addDiffusion", false);
+
+    Sct_ = thermoPtr_().template getOrDefault<scalar>("Sct", 1.0);
 
     X_.setSize(thermoPtr_->composition().species().size());
 
@@ -221,7 +226,10 @@ void Foam::MultiComponentPhaseModel<BasePhaseModel, phaseThermo>::solveYi
 
     surfaceScalarField phir(0.0*phi);
 
-    forAllConstIter(phaseSystem::phaseModelTable,this->fluid().phases(),iter2)
+    forAllConstIter
+    (
+        multiphaseInterSystem::phaseModelTable,this->fluid().phases(),iter2
+    )
     {
         const volScalarField& alpha2 = iter2()();
         if (&alpha2 == &alpha1)
@@ -272,7 +280,9 @@ void Foam::MultiComponentPhaseModel<BasePhaseModel, phaseThermo>::solveYi
 
             forAllConstIter
             (
-                phaseSystem::phaseModelTable, this->fluid().phases(), iter2
+                multiphaseInterSystem::phaseModelTable,
+                this->fluid().phases(),
+                iter2
             )
             {
                 //const volScalarField& alpha2 = iter2()().oldTime();
@@ -396,6 +406,23 @@ void Foam::MultiComponentPhaseModel<BasePhaseModel, phaseThermo>::solveYi
                     zeroField()
                 );
             }
+
+            if (addDiffusion_)
+            {
+                const volScalarField& alpha = *this;
+                fvScalarMatrix YiDiffEqn
+                (
+                    fvm::ddt(Yi) - fvc::ddt(Yi)
+                  - fvm::laplacian
+                    (
+                        alpha*this->fluid().turbulence()->nut()/Sct_,
+                        Yi
+                    )
+                );
+
+                YiDiffEqn.solve(mesh.solver("diffusion" + Yi.name()));
+            }
+
             Yt += Yi;
         }
     }

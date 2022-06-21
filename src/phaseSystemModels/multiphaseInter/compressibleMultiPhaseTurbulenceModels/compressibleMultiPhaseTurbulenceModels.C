@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd
+    Copyright (C) 2017-2022 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,6 +36,8 @@ License
 #include "laminarModel.H"
 #include "RASModel.H"
 #include "LESModel.H"
+
+using namespace Foam::multiphaseInter;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

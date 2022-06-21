@@ -90,16 +90,13 @@ wmake $targetType combustionModels
 
 wmakeLnInclude -u regionFaModels
 wmakeLnInclude -u faOptions
-regionModels/Allwmake $targetType $*
+
+wmakeLnInclude -u overset
+wmake $targetType overset
 
 wmake $targetType fvOptions
-wmake $targetType faOptions
+
 wmake $targetType fvMotionSolver
-wmake $targetType regionFaModels
-
-lagrangian/Allwmake $targetType $*
-
-wmake $targetType overset
 
 # snappyHexMesh uses overset voxelMesh
 mesh/Allwmake $targetType $*
@@ -111,15 +108,25 @@ wmake $targetType engine
 
 conversion/Allwmake $targetType $*
 
-functionObjects/Allwmake $targetType $*
 phaseSystemModels/Allwmake $targetType $*
+functionObjects/Allwmake $targetType $*
+
+wmake $targetType thermoTools
+
+regionModels/Allwmake $targetType $*
+
+wmake $targetType faOptions
+wmake $targetType regionFaModels
+
+lagrangian/Allwmake $targetType $*
+wmake $targetType functionObjects/lagrangian
+
 
 wmake $targetType lumpedPointMotion
 wmake $targetType sixDoFRigidBodyMotion
 wmake $targetType sixDoFRigidBodyState
 wmake $targetType rigidBodyDynamics
 wmake $targetType rigidBodyMeshMotion
-wmake $targetType semiPermeableBaffle
 wmake $targetType atmosphericModels
 wmake $targetType optimisation/adjointOptimisation/adjoint
 
@@ -127,10 +134,6 @@ wmake $targetType optimisation/adjointOptimisation/adjoint
 # interfaceTracking libs
 dynamicFaMesh/Allwmake $targetType $*
 
-
-# Needs access to Turbulence
-
-wmake $targetType thermophysicalModels/thermophysicalPropertiesFvPatchFields/liquidProperties
 
 #------------------------------------------------------------------------------
 

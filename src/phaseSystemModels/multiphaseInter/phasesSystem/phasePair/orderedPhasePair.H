@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,8 +58,8 @@ public:
         //- Construct from two phases and gravity
         orderedPhasePair
         (
-            const phaseModel& from,
-            const phaseModel& to
+            const multiphaseInter::phaseModel& from,
+            const multiphaseInter::phaseModel& to
         );
 
 
@@ -70,10 +70,10 @@ public:
     // Member Functions
 
         //- Dispersed phase
-        virtual const phaseModel& from() const;
+        virtual const multiphaseInter::phaseModel& from() const;
 
         //- Continuous phase
-        virtual const phaseModel& to() const;
+        virtual const multiphaseInter::phaseModel& to() const;
 
         //- Pair name
         virtual word name() const;
