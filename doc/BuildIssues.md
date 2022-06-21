@@ -1,4 +1,4 @@
-## Known Build Issues (v2012, v2106, v2112)
+## Known Build Issues (v2206, v2112, v2106, v2012)
 
 ### Windows cross-compilation
 
@@ -188,4 +188,4 @@ and attempt to install a `paraview~qt` version instead.
 [wiki-config]: https://develop.openfoam.com/Development/openfoam/-/wikis/configuring
 
 ---
-Copyright 2019-2021 OpenCFD Ltd
+Copyright 2019-2022 OpenCFD Ltd

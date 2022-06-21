@@ -49,7 +49,7 @@
 
 <!--
   Providing details of your set-up can help us identify any issues, e.g.
-  OpenFOAM version : v2112|v2106|v2012|v2006|v1912|v1906 etc
+  OpenFOAM version : v2206|v2112|v2106|v2012|v2006 etc
   Operating system : ubuntu|openSUSE|centos etc
   Hardware info    : any info that may help?
   Compiler         : gcc|intel|clang etc
