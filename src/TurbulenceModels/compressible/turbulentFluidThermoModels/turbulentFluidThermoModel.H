@@ -42,8 +42,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef turbulentFluidThermoModel_H
-#define turbulentFluidThermoModel_H
+#ifndef Foam_turbulentFluidThermoModel_H
+#define Foam_turbulentFluidThermoModel_H
 
 #include "CompressibleTurbulenceModel.H"
 #include "ThermalDiffusivity.H"

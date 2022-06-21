@@ -198,8 +198,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef functionObject_H
-#define functionObject_H
+#ifndef Foam_functionObject_H
+#define Foam_functionObject_H
 
 #include "typeInfo.H"
 #include "autoPtr.H"

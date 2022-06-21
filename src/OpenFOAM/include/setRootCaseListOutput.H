@@ -19,7 +19,7 @@
         listOptions = true;
     }
 
-    #ifdef fvPatchField_H
+    #ifdef Foam_fvPatchField_H
     if (args.found("listScalarBCs"))
     {
         Info<< "scalarBCs"
@@ -39,7 +39,7 @@
     }
     #endif
 
-    #ifdef functionObject_H
+    #ifdef Foam_functionObject_H
     if (args.found("listFunctionObjects"))
     {
         Info<< "functionObjects"
@@ -49,7 +49,7 @@
     }
     #endif
 
-    #ifdef fvOption_H
+    #ifdef Foam_fvOption_H
     if (args.found("listFvOptions"))
     {
         Info<< "fvOptions"
@@ -59,13 +59,13 @@
     }
     #endif
 
-    #ifdef turbulentTransportModel_H
+    #if defined(Foam_turbulentTransportModel_H)
     if (args.found("listTurbulenceModels"))
     {
-        Info<< "Turbulence models"
+        Info<< "Turbulence models" << nl
             << incompressible::turbulenceModel::
                dictionaryConstructorTablePtr_->sortedToc()
-            << endl;
+            << nl << endl;
 
         Info<< "RAS models"
             << incompressible::RASModel::
@@ -78,13 +78,13 @@
             << endl;
         listOptions = true;
     }
-    #elif defined(turbulentFluidThermoModel_H)
+    #elif defined(Foam_turbulentFluidThermoModel_H)
     if (args.found("listTurbulenceModels"))
     {
-        Info<< "Turbulence models"
+        Info<< "Turbulence models" << nl
             << compressible::turbulenceModel::
                dictionaryConstructorTablePtr_->sortedToc()
-            << endl;
+            << nl << endl;
 
         Info<< "RAS models"
             << compressible::RASModel::

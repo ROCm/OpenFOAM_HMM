@@ -42,8 +42,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef turbulentTransportModel_H
-#define turbulentTransportModel_H
+#ifndef Foam_turbulentTransportModel_H
+#define Foam_turbulentTransportModel_H
 
 #include "IncompressibleTurbulenceModel.H"
 #include "laminarModel.H"

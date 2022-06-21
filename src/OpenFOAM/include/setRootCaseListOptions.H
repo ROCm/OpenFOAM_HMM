@@ -25,7 +25,7 @@ argList::addBoolOption
     true // advanced
 );
 
-#ifdef fvPatchField_H
+#ifdef Foam_fvPatchField_H
 argList::addBoolOption
 (
     "listScalarBCs",
@@ -40,7 +40,7 @@ argList::addBoolOption
 );
 #endif
 
-#ifdef functionObject_H
+#ifdef Foam_functionObject_H
 argList::addBoolOption
 (
     "listFunctionObjects",
@@ -49,7 +49,7 @@ argList::addBoolOption
 );
 #endif
 
-#ifdef fvOption_H
+#ifdef Foam_fvOption_H
 argList::addBoolOption
 (
     "listFvOptions",
@@ -58,7 +58,7 @@ argList::addBoolOption
 );
 #endif
 
-#if defined(turbulentTransportModel_H) || defined(turbulentFluidThermoModel_H)
+#if defined(Foam_turbulentTransportModel_H) || defined(Foam_turbulentFluidThermoModel_H)
 argList::addBoolOption
 (
     "listTurbulenceModels",
