@@ -174,8 +174,6 @@ Foam::label Foam::parLagrangianDistributor::distributeFieldFields
         )
     );
 
-    const bool verbose_ = true;
-
     label nFields = 0;
     for (const word& objectName : fieldNames)
     {
@@ -263,8 +261,6 @@ Foam::label Foam::parLagrangianDistributor::readFields
         )
     );
 
-    const bool verbose_ = true;
-
     label nFields = 0;
     for (const word& objectName : fieldNames)
     {
@@ -312,8 +308,6 @@ Foam::label Foam::parLagrangianDistributor::distributeStoredFields
     (
         cloud.lookupClass<Container>()
     );
-
-    const bool verbose_ = true;
 
     label nFields = 0;
     forAllIters(fields, iter)

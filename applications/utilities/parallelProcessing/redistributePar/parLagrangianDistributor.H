@@ -91,6 +91,10 @@ class parLagrangianDistributor
 
 public:
 
+    //- Output verbosity when writing
+    static int verbose_;
+
+
     // Constructors
 
         //- Construct from components

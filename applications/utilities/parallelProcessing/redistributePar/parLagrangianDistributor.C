@@ -30,6 +30,11 @@ License
 #include "parLagrangianDistributor.H"
 #include "passivePositionParticleCloud.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+int Foam::parLagrangianDistributor::verbose_ = 1;
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::parLagrangianDistributor::parLagrangianDistributor

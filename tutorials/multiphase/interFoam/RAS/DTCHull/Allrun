@@ -29,12 +29,14 @@ restore0Dir
 
 runApplication setFields
 
-runApplication decomposePar
+# runApplication decomposePar
+runParallel -s decompose redistributePar -decompose
 
 runParallel renumberMesh -overwrite
 
 runParallel $(getApplication)
 
-runApplication reconstructPar
+# runApplication reconstructPar
+runParallel -s reconstruct redistributePar -reconstruct
 
 #------------------------------------------------------------------------------

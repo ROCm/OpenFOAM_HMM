@@ -1087,13 +1087,11 @@ int main(int argc, char *argv[])
       : fileHandler()
     );
 
-
-
     // Make sure to call findTimes on all processors to force caching of
     // time directories
     (void)fileHandler().findTimes(args.path(), "constant");
 
-
+    // Need this line since we don't include "setRootCase.H"
     #include "foamDlOpenLibs.H"
 
     const bool reconstruct = args.found("reconstruct");
@@ -1109,6 +1107,7 @@ int main(int argc, char *argv[])
     if (optVerbose)
     {
         // Report on output
+        faMeshDistributor::verbose_ = 1;
         parPointFieldDistributor::verbose_ = 1;
     }
 
