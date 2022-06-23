@@ -194,7 +194,17 @@ public:
 
         //- Construct from IOobject or as zero-sized mesh
         //  Boundary is added using addFvPatches() member function
-        fvMesh(const IOobject& io, const zero, bool syncPar=true);
+        fvMesh(const IOobject& io, const Foam::zero, bool syncPar=true);
+
+        //- Construct as copy (for dictionaries) and zero-sized components.
+        //  Boundary is added using addFvPatches() member function
+        fvMesh
+        (
+            const IOobject& io,
+            const fvMesh& baseMesh,
+            const Foam::zero,
+            const bool syncPar = true
+        );
 
         //- Construct from components without boundary.
         //  Boundary is added using addFvPatches() member function
@@ -219,8 +229,8 @@ public:
             const bool syncPar = true
         );
 
-        //- Construct as copy (for dictionaries) and components without
-        //  boundary. Boundary is added using addFvPatches() member function
+        //- Copy construct (for dictionaries) with components, without boundary.
+        //  Boundary is added using addFvPatches() member function
         fvMesh
         (
             const IOobject& io,
@@ -232,9 +242,8 @@ public:
             const bool syncPar = true
         );
 
-        //- Construct as copy (for dictionaries) without boundary from cells
-        //  rather than owner/neighbour. Boundary is added using addFvPatches()
-        //  member function
+        //- Copy construct (for dictionaries) with cells, without boundary.
+        //  Boundary is added using addFvPatches() member function
         fvMesh
         (
             const IOobject& io,

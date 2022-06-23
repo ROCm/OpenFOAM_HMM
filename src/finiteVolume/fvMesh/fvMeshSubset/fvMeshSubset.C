@@ -535,10 +535,11 @@ void Foam::fvMeshSubset::reset(const Foam::zero)
                 baseMesh_.name(),
                 baseMesh_.time().timeName(),
                 baseMesh_.time(),
-                IOobject::READ_IF_PRESENT,  // Read fv* if present
+                IOobject::NO_READ,      // Do not read any dictionaries
                 IOobject::NO_WRITE
             ),
-            Foam::zero{}                    // zero-sized
+            baseMesh_,                  // Get dictionaries from base mesh
+            Foam::zero{}                // zero-sized
             // Uses syncPar (bounds) - should generally be OK
         )
     );
@@ -1001,13 +1002,13 @@ void Foam::fvMeshSubset::reset
     (
         IOobject
         (
-            baseMesh().name(),
-            baseMesh().time().timeName(),
-            baseMesh().time(),
-            IOobject::NO_READ,      // do not read any dictionaries
+            baseMesh_.name(),
+            baseMesh_.time().timeName(),
+            baseMesh_.time(),
+            IOobject::NO_READ,          // Do not read any dictionaries
             IOobject::NO_WRITE
         ),
-        baseMesh(),                 // get dictionaries from base mesh
+        baseMesh_,                      // Get dictionaries from base mesh
         std::move(newPoints),
         std::move(newFaces),
         std::move(newCells),

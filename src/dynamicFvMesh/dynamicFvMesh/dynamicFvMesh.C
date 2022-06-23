@@ -105,11 +105,11 @@ bool Foam::dynamicFvMesh::init(const bool doInit)
 Foam::dynamicFvMesh::dynamicFvMesh
 (
     const IOobject& io,
-    const zero,
-    const bool syncPar
+    const Foam::zero,
+    bool syncPar
 )
 :
-    fvMesh(io, Zero, syncPar),
+    fvMesh(io, Foam::zero{}, syncPar),
     timeControl_(io.time(), "update")
 {
     readDict();

@@ -307,6 +307,12 @@ Foam::faMesh::faMesh(const polyMesh& pMesh, const Foam::zero)
 {}
 
 
+Foam::faMesh::faMesh(const faMesh& baseMesh, const Foam::zero)
+:
+    faMesh(baseMesh, labelList())
+{}
+
+
 Foam::faMesh::faMesh
 (
     const polyMesh& pMesh,
@@ -427,6 +433,85 @@ Foam::faMesh::faMesh
     edgeInterpolation(*this),
     faSolution(mesh(), io.readOpt()),
     data(mesh()),   // Always NO_READ, NO_WRITE
+    faceLabels_
+    (
+        IOobject
+        (
+            "faceLabels",
+            mesh().facesInstance(),
+            faMesh::meshSubDir,
+            mesh(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        std::move(faceLabels)
+    ),
+    boundary_
+    (
+        IOobject
+        (
+            "faBoundary",
+            mesh().facesInstance(),
+            faMesh::meshSubDir,
+            mesh(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        *this,
+        label(0)
+    ),
+    comm_(Pstream::worldComm),
+    curTimeIndex_(time().timeIndex()),
+
+    patchPtr_(nullptr),
+    bndConnectPtr_(nullptr),
+    lduPtr_(nullptr),
+
+    SPtr_(nullptr),
+    S0Ptr_(nullptr),
+    S00Ptr_(nullptr),
+    patchStartsPtr_(nullptr),
+    LePtr_(nullptr),
+    magLePtr_(nullptr),
+    centresPtr_(nullptr),
+    edgeCentresPtr_(nullptr),
+    faceAreaNormalsPtr_(nullptr),
+    edgeAreaNormalsPtr_(nullptr),
+    pointAreaNormalsPtr_(nullptr),
+    faceCurvaturesPtr_(nullptr),
+    edgeTransformTensorsPtr_(nullptr),
+    correctPatchPointNormalsPtr_(nullptr),
+    globalMeshDataPtr_(nullptr),
+
+    haloMapPtr_(nullptr),
+    haloFaceCentresPtr_(nullptr),
+    haloFaceNormalsPtr_(nullptr)
+{}
+
+
+Foam::faMesh::faMesh
+(
+    const faMesh& baseMesh,
+    labelList&& faceLabels
+)
+:
+    MeshObject<polyMesh, Foam::UpdateableMeshObject, faMesh>(baseMesh.mesh()),
+    faSchemes
+    (
+        mesh(),
+        static_cast<const faSchemes&>(baseMesh)
+    ),
+    edgeInterpolation(*this),
+    faSolution
+    (
+        mesh(),
+        static_cast<const faSolution&>(baseMesh)
+    ),
+    data
+    (
+        mesh(),
+        static_cast<const data&>(baseMesh)
+    ),
     faceLabels_
     (
         IOobject

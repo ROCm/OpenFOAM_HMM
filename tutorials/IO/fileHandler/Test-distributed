@@ -3,6 +3,8 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
+# ./Allclean
+
 if isTest "$@"
 then
     # Reset the controlDict
@@ -44,7 +46,7 @@ CASE_ROOTS
 
 #export FOAM_ABORT=true
 
-runParallel redistributePar -decompose -case test-distribute/machineA/testcase
+runParallel -s decompose redistributePar -decompose -case test-distribute/machineA/testcase
 
 runParallel checkMesh -case test-distribute/machineA/testcase
 

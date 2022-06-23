@@ -103,19 +103,7 @@ void Foam::faMeshSubset::reset(const Foam::zero)
     // Create zero-sized subMesh
     subMeshPtr_.reset
     (
-        new faMesh
-        (
-            baseMesh_.mesh(),   // The polyMesh
-            // IOobject
-            // (
-            //     baseMesh_.name(),
-            //     baseMesh_.time().timeName(),
-            //     baseMesh_.time(),
-            //     IOobject::READ_IF_PRESENT,  // Read fa* if present
-            //     IOobject::NO_WRITE
-            // ),
-            Foam::zero{}                    // zero-sized
-        )
+        new faMesh(baseMesh_, Foam::zero{})
     );
     auto& newSubMesh = subMeshPtr_();
 

@@ -514,6 +514,16 @@ public:
         //  Boundary is added using addFaPatches() member function
         faMesh(const polyMesh& pMesh, const Foam::zero);
 
+        //- Construct as copy (for dictionaries) and zero-sized
+        //- without boundary, using IOobject properties from polyMesh.
+        //  Boundary is added using addFaPatches() member function
+        faMesh(const faMesh& baseMesh, const Foam::zero);
+
+        //- Construct as copy (for dictionaries) and faceLabels
+        //- without boundary, using IOobject properties from polyMesh.
+        //  Boundary is added using addFaPatches() member function
+        faMesh(const faMesh& baseMesh, labelList&& faceLabels);
+
         //- Construct from components (face labels) without boundary,
         //- using IOobject properties from polyMesh.
         //  Boundary is added using addFaPatches() member function.

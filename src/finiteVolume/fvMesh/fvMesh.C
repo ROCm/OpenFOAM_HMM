@@ -434,9 +434,30 @@ Foam::fvMesh::fvMesh
 }
 
 
-Foam::fvMesh::fvMesh(const IOobject& io, const zero, const bool syncPar)
+Foam::fvMesh::fvMesh(const IOobject& io, const Foam::zero, const bool syncPar)
 :
     fvMesh(io, pointField(), faceList(), labelList(), labelList(), syncPar)
+{}
+
+
+Foam::fvMesh::fvMesh
+(
+    const IOobject& io,
+    const fvMesh& baseMesh,
+    const Foam::zero,
+    const bool syncPar
+)
+:
+    fvMesh
+    (
+        io,
+        baseMesh,
+        pointField(),
+        faceList(),
+        labelList(),  // owner
+        labelList(),  // neighbour
+        syncPar
+    )
 {}
 
 

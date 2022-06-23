@@ -115,12 +115,12 @@ public:
 
     // Constructors
 
-        //- Construct from an IOobject
+        //- Construct from IOobject
         explicit dynamicFvMesh(const IOobject& io, const bool doInit=true);
 
-        //- Construct from components without boundary.
+        //- Construct from IOobject or as zero-sized mesh
         //  Boundary is added using addFvPatches() member function
-        dynamicFvMesh(const IOobject& io, const zero, const bool syncPar=true);
+        dynamicFvMesh(const IOobject& io, const Foam::zero, bool syncPar=true);
 
         //- Construct from components without boundary.
         //  Boundary is added using addFvPatches() member function

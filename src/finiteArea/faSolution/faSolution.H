@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -116,6 +116,14 @@ public:
         )
         :
             solution(obr, "faSolution", fallback)
+        {}
+
+        //- Construct for objectRegistry with the
+        //- default dictionary name ("faSolution") and optional contents.
+        //  Uses the readOption from the registry.
+        faSolution(const objectRegistry& obr, const dictionary& dict)
+        :
+            solution(obr, "faSolution", &dict)
         {}
 };
 
