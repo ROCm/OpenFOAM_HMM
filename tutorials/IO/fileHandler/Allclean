@@ -5,7 +5,7 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 cleanCase0
 
-rm -rf machineA
-rm -rf machineB
+rm -rf machine*
+rm -rf test-*
 
 #------------------------------------------------------------------------------

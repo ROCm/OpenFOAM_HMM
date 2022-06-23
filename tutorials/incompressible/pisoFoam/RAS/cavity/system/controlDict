@@ -68,6 +68,7 @@ functions
     #include "FOs/FOlog"
     #include "FOs/FOmag"
     #include "FOs/FOmagSqr"
+    #include "FOs/FOmultiFieldValue"
     #include "FOs/FOmultiply"
     #include "FOs/FOmomentum"
     #include "FOs/FOnearWallFields"

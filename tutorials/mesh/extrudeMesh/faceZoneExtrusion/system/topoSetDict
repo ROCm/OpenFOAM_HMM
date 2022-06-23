@@ -27,7 +27,7 @@ actions
     {
         name    f0;
         type    faceSet;
-        action  delete;
+        action  subtract;
         source  boundaryToFace;
     }
 
