@@ -76,9 +76,13 @@ void Foam::parFaFieldDistributorCache::read
     // Missing an area mesh somewhere?
     if (areaMeshOnProc.found(false))
     {
+        const bool oldParRun = Pstream::parRun(false);
+
         // A zero-sized mesh with boundaries.
         // This is used to create zero-sized fields.
         subsetterPtr.reset(new faMeshSubset(mesh, zero{}));
+
+        Pstream::parRun(oldParRun);
 
         // Deregister from polyMesh ...
         auto& obr = const_cast<objectRegistry&>

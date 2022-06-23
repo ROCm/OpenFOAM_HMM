@@ -631,9 +631,13 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
         // Missing a volume mesh somewhere?
         if (volMeshOnProc.found(false))
         {
+            const bool oldParRun = Pstream::parRun(false);
+
             // A zero-sized mesh with boundaries.
             // This is used to create zero-sized fields.
             subsetterPtr.reset(new fvMeshSubset(mesh, zero{}));
+
+            Pstream::parRun(oldParRun);
         }
 
 
