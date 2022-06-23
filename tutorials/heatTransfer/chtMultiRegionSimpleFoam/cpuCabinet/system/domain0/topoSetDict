@@ -17,6 +17,15 @@ FoamFile
 
 actions
 (
+    // Remove existing cellZone (from splitMeshRegions; contains all cells)
+    // so we don't have any cells in multiple cellZones (gives complaints
+    // in e.g. reconstructParMesh)
+    {
+        name            domain0;
+        type            cellZoneSet;
+        action          remove;
+    }
+
     {
         name            v_MRF_set;
         type            cellSet;
