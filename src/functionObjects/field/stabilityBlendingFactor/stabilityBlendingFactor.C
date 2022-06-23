@@ -50,6 +50,37 @@ namespace functionObjects
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+Foam::volScalarField&
+Foam::functionObjects::stabilityBlendingFactor::indicator()
+{
+    const word fldName = "blendedIndicator" + fieldName_;
+
+    auto* fldPtr = mesh_.getObjectPtr<volScalarField>(fldName);
+
+    if (!fldPtr)
+    {
+        fldPtr = new volScalarField
+        (
+            IOobject
+            (
+                "blendedIndicator" + fieldName_,
+                time_.timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh_,
+            dimensionedScalar(dimless, Zero),
+            zeroGradientFvPatchScalarField::typeName
+        );
+
+        mesh_.objectRegistry::store(fldPtr);
+    }
+
+    return *fldPtr;
+}
+
+
 void Foam::functionObjects::stabilityBlendingFactor::calcStats
 (
     label& nCellsScheme1,
@@ -57,21 +88,31 @@ void Foam::functionObjects::stabilityBlendingFactor::calcStats
     label& nCellsBlended
 ) const
 {
-    forAll(indicator_, celli)
-    {
-        scalar i = indicator_[celli];
+    const auto* indicatorPtr =
+        mesh_.cfindObject<volScalarField>("blendedIndicator" + fieldName_);
 
+    if (!indicatorPtr)
+    {
+        FatalErrorInFunction
+            << "Indicator field not set"
+            << abort(FatalError);
+    }
+
+    const auto& indicator = *indicatorPtr;
+
+    for (const scalar i : indicator)
+    {
         if (i < tolerance_)
         {
-            nCellsScheme2++;
+            ++nCellsScheme2;
         }
         else if (i > (1 - tolerance_))
         {
-            nCellsScheme1++;
+            ++nCellsScheme1;
         }
         else
         {
-            nCellsBlended++;
+            ++nCellsBlended;
         }
     }
 
@@ -106,13 +147,15 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
 {
     const auto* residualPtr = mesh_.findObject<IOField<scalar>>(residualName_);
 
+    auto& indicator = this->indicator();
+
     if (residuals_)
     {
         if (!residualPtr)
         {
              WarningInFunction
                 << "Could not find residual field : " << residualName_
-                << ". The residual mode won't be " << nl
+                << ". The residual mode will not be " << nl
                 << "    considered for the blended field in the stability "
                 << "blending factor. " << nl
                 << "    Please add the corresponding 'solverInfo'"
@@ -155,9 +198,9 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
                 )
             );
 
-            forAll(indicator_, i)
+            forAll(indicator, i)
             {
-                indicator_[i] = indicatorResidual[i];
+                indicator[i] = indicatorResidual[i];
             }
         }
     }
@@ -170,26 +213,26 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
         if (maxNonOrthogonality_ >= minNonOrthogonality_)
         {
             FatalErrorInFunction
-                << "    minNonOrthogonality should be larger than "
+                << "minNonOrthogonality should be larger than "
                 << "maxNonOrthogonality."
                 << exit(FatalError);
         }
 
-        indicator_ =
-        max
-        (
-            indicator_,
-            min
+        indicator =
+            max
             (
-                max
+                indicator,
+                min
                 (
-                    scalar(0),
-                    (*nonOrthPtr - maxNonOrthogonality_)
-                  / (minNonOrthogonality_ - maxNonOrthogonality_)
-                ),
-                scalar(1)
-            )
-        );
+                    max
+                    (
+                        scalar(0),
+                        (*nonOrthPtr - maxNonOrthogonality_)
+                      / (minNonOrthogonality_ - maxNonOrthogonality_)
+                    ),
+                    scalar(1)
+                )
+            );
 
         if (first)
         {
@@ -198,33 +241,32 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
         }
     }
 
-    const volScalarField* skewnessPtr =
-        mesh_.findObject<volScalarField>(skewnessName_);
+    const auto* skewnessPtr = mesh_.cfindObject<volScalarField>(skewnessName_);
 
     if (skewness_)
     {
         if (maxSkewness_ >= minSkewness_)
         {
             FatalErrorInFunction
-                << "    minSkewness should be larger than maxSkewness."
+                << "minSkewness should be larger than maxSkewness."
                 << exit(FatalError);
         }
 
-        indicator_ =
-        max
-        (
-            indicator_,
-            min
+        indicator =
+            max
             (
-                max
+                indicator,
+                min
                 (
-                    scalar(0),
-                    (*skewnessPtr - maxSkewness_)
-                  / (minSkewness_ - maxSkewness_)
-                ),
-                scalar(1)
-            )
-        );
+                    max
+                    (
+                        scalar(0),
+                        (*skewnessPtr - maxSkewness_)
+                      / (minSkewness_ - maxSkewness_)
+                    ),
+                    scalar(1)
+                )
+            );
 
         if (first)
         {
@@ -233,22 +275,22 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
         }
     }
 
-    const volScalarField* faceWeightsPtr =
-        mesh_.findObject<volScalarField>(faceWeightName_);
+    const auto* faceWeightsPtr =
+        mesh_.cfindObject<volScalarField>(faceWeightName_);
 
     if (faceWeight_)
     {
         if (maxFaceWeight_ >= minFaceWeight_)
         {
             FatalErrorInFunction
-                << "    minFaceWeight should be larger than maxFaceWeight."
+                << "minFaceWeight should be larger than maxFaceWeight."
                 << exit(FatalError);
         }
 
-        indicator_ =
+        indicator =
             max
             (
-                indicator_,
+                indicator,
                 min
                 (
                     max
@@ -274,7 +316,7 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
         if (maxGradCc_ >= minGradCc_)
         {
             FatalErrorInFunction
-                << "    minGradCc should be larger than maxGradCc."
+                << "minGradCc should be larger than maxGradCc."
                 << exit(FatalError);
         }
 
@@ -322,10 +364,10 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
                 << endl;
         }
 
-        indicator_ =
+        indicator =
             max
             (
-                indicator_,
+                indicator,
                 min
                 (
                     max
@@ -340,15 +382,14 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
     }
 
 
-    const volVectorField* UNamePtr =
-        mesh_.findObject<volVectorField>(UName_);
+    const auto* UNamePtr = mesh_.findObject<volVectorField>(UName_);
 
     if (Co_)
     {
         if (Co1_ >= Co2_)
         {
             FatalErrorInFunction
-                << "    Co2 should be larger than Co1."
+                << "Co2 should be larger than Co1."
                 << exit(FatalError);
         }
 
@@ -372,10 +413,10 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
         Co.primitiveFieldRef() =
             mesh_.time().deltaT()*mag(*UNamePtr)/cbrt(mesh_.V());
 
-        indicator_ =
+        indicator =
             max
             (
-                indicator_,
+                indicator,
                 min(max(scalar(0), (Co - Co1_)/(Co2_ - Co1_)), scalar(1))
             );
 
@@ -406,15 +447,14 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
         << endl;
     }
 
-    indicator_.correctBoundaryConditions();
-    indicator_.min(1.0);
-    indicator_.max(0.0);
+    indicator.correctBoundaryConditions();
+    indicator.min(1.0);
+    indicator.max(0.0);
 
     // Update the blended surface field
-    surfaceScalarField& surBlended =
-        mesh_.lookupObjectRef<surfaceScalarField>(resultName_);
+    auto& surBlended = mesh_.lookupObjectRef<surfaceScalarField>(resultName_);
 
-    surBlended = fvc::interpolate(indicator_);
+    surBlended = fvc::interpolate(indicator);
 
     return true;
 }
@@ -431,20 +471,6 @@ Foam::functionObjects::stabilityBlendingFactor::stabilityBlendingFactor
 :
     fieldExpression(name, runTime, dict),
     writeFile(obr_, name, typeName, dict),
-    indicator_
-    (
-        IOobject
-        (
-            "blendedIndicator" + fieldName_,
-            time_.timeName(),
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh_,
-        dimensionedScalar(dimless, Zero),
-        zeroGradientFvPatchScalarField::typeName
-    ),
     nonOrthogonality_(dict.getOrDefault<Switch>("switchNonOrtho", false)),
     gradCc_(dict.getOrDefault<Switch>("switchGradCc", false)),
     residuals_(dict.getOrDefault<Switch>("switchResiduals", false)),
@@ -522,104 +548,93 @@ Foam::functionObjects::stabilityBlendingFactor::stabilityBlendingFactor
     );
     store(resultName_, faceBlendedPtr);
 
-    const volScalarField* nonOrthPtr =
+    const auto* nonOrthPtr =
         mesh_.findObject<volScalarField>(nonOrthogonalityName_);
 
-    if (nonOrthogonality_)
+    if (nonOrthogonality_ && !nonOrthPtr)
     {
-        if (!nonOrthPtr)
-        {
-            IOobject fieldHeader
-            (
-                nonOrthogonalityName_,
-                mesh_.time().constant(),
-                mesh_,
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE
-            );
+        IOobject fieldHeader
+        (
+            nonOrthogonalityName_,
+            mesh_.time().constant(),
+            mesh_,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        );
 
-            if (fieldHeader.typeHeaderOk<volScalarField>(true, true, false))
-            {
-                volScalarField* vfPtr(new volScalarField(fieldHeader, mesh_));
-                mesh_.objectRegistry::store(vfPtr);
-            }
-            else
-            {
-                FatalErrorInFunction
-                    << "    Field : " << nonOrthogonalityName_ << " not found."
-                    << " The function object will not be used"
-                    << exit(FatalError);
-            }
+        if (fieldHeader.typeHeaderOk<volScalarField>(true, true, false))
+        {
+            volScalarField* vfPtr = new volScalarField(fieldHeader, mesh_);
+            mesh_.objectRegistry::store(vfPtr);
+        }
+        else
+        {
+            FatalErrorInFunction
+                << "Field : " << nonOrthogonalityName_ << " not found."
+                << " The function object will not be used"
+                << exit(FatalError);
         }
     }
 
 
-    const volScalarField* faceWeightsPtr =
+    const auto* faceWeightsPtr =
         mesh_.findObject<volScalarField>(faceWeightName_);
 
-    if (faceWeight_)
+    if (faceWeight_ && !faceWeightsPtr)
     {
-        if (!faceWeightsPtr)
-        {
-            IOobject fieldHeader
-            (
-                faceWeightName_,
-                mesh_.time().constant(),
-                mesh_,
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE
-            );
+        IOobject fieldHeader
+        (
+            faceWeightName_,
+            mesh_.time().constant(),
+            mesh_,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        );
 
-            if (fieldHeader.typeHeaderOk<volScalarField>(true, true, false))
-            {
-                volScalarField* vfPtr(new volScalarField(fieldHeader, mesh_));
-                mesh_.objectRegistry::store(vfPtr);
-            }
-            else
-            {
-                FatalErrorInFunction
-                    << "    Field : " << faceWeightName_ << " not found."
-                    << " The function object will not be used"
-                    << exit(FatalError);
-            }
+        if (fieldHeader.typeHeaderOk<volScalarField>(true, true, false))
+        {
+            volScalarField* vfPtr = new volScalarField(fieldHeader, mesh_);
+            mesh_.objectRegistry::store(vfPtr);
+        }
+        else
+        {
+            FatalErrorInFunction
+                << "Field : " << faceWeightName_ << " not found."
+                << " The function object will not be used"
+                << exit(FatalError);
         }
     }
 
-    const volScalarField* skewnessPtr =
-        mesh_.findObject<volScalarField>(skewnessName_);
+    const auto* skewnessPtr = mesh_.findObject<volScalarField>(skewnessName_);
 
-    if (skewness_)
+    if (skewness_ && !skewnessPtr)
     {
-        if (!skewnessPtr)
-        {
-            IOobject fieldHeader
-            (
-                skewnessName_,
-                mesh_.time().constant(),
-                mesh_,
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE
-            );
+        IOobject fieldHeader
+        (
+            skewnessName_,
+            mesh_.time().constant(),
+            mesh_,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        );
 
-            if (fieldHeader.typeHeaderOk<volScalarField>(true, true, false))
-            {
-                volScalarField* vfPtr(new volScalarField(fieldHeader, mesh_));
-                mesh_.objectRegistry::store(vfPtr);
-            }
-            else
-            {
-                FatalErrorInFunction
-                    << "    Field : " << skewnessName_ << " not found."
-                    << " The function object will not be used"
-                    << exit(FatalError);
-            }
+        if (fieldHeader.typeHeaderOk<volScalarField>(true, true, false))
+        {
+            volScalarField* vfPtr(new volScalarField(fieldHeader, mesh_));
+            mesh_.objectRegistry::store(vfPtr);
+        }
+        else
+        {
+            FatalErrorInFunction
+                << "Field : " << skewnessName_ << " not found."
+                << " The function object will not be used"
+                << exit(FatalError);
         }
     }
 
     if (log)
     {
-        indicator_.writeOpt(IOobject::AUTO_WRITE);
-
+        indicator().writeOpt(IOobject::AUTO_WRITE);
     }
 
     if (writeToFile_)

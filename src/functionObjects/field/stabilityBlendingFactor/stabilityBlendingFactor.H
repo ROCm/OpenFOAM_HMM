@@ -340,9 +340,6 @@ class stabilityBlendingFactor
 {
     // Private Member Data
 
-        //- Cell based blended indicator
-        volScalarField indicator_;
-
         // Switches
 
             //- Switch for non-orthogonality
@@ -442,6 +439,9 @@ class stabilityBlendingFactor
 
         //- Init fields
         bool init(bool first);
+
+        //- Return access to the indicator field
+        volScalarField& indicator();
 
         //- Calculate statistics
         void calcStats(label&, label&, label&) const ;
