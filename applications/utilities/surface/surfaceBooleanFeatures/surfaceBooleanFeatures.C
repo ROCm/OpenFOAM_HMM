@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,9 +66,9 @@ Description
 
     \endverbatim
 
-    When the operation is performed - for union, all of the edges generates where
-    one surfaces cuts another are all "internal" for union, and "external" for
-    intersection, (B - A) and (A - B).
+    When the operation is performed - for union, all of the edges generated
+    where one surfaces cuts another are all "internal" for union,
+    and "external" for intersection, (B - A) and (A - B).
     This has been assumed, formal (dis)proof is invited.
 
 \*---------------------------------------------------------------------------*/
@@ -895,11 +895,12 @@ void calcEdgeCutsCGAL
     {
         // See which edges of 1 intersect 2
         {
-            Info<< "Constructing CGAL surface ..." << endl;
+            Info<< "Intersect surface 1 edges with surface 2:" << nl;
+            Info<< "    constructing CGAL surface ..." << endl;
             Polyhedron p;
             PolyhedronReader(surf2, p);
 
-            Info<< "Constructing CGAL tree ..." << endl;
+            Info<< "    constructing CGAL tree ..." << endl;
             const Tree tree(p.facets_begin(), p.facets_end(), p);
 
             edgeIntersectionsCGAL
@@ -912,11 +913,12 @@ void calcEdgeCutsCGAL
         }
         // See which edges of 2 intersect 1
         {
-            Info<< "Constructing CGAL surface ..." << endl;
+            Info<< "Intersect surface 2 edges with surface 1:" << nl;
+            Info<< "    constructing CGAL surface ..." << endl;
             Polyhedron p;
             PolyhedronReader(surf1, p);
 
-            Info<< "Constructing CGAL tree ..." << endl;
+            Info<< "    constructing CGAL tree ..." << endl;
             const Tree tree(p.facets_begin(), p.facets_end(), p);
 
             edgeIntersectionsCGAL
@@ -927,6 +929,7 @@ void calcEdgeCutsCGAL
                 edgeCuts2
             );
         }
+        Info<< endl;
     }
     else
     {
@@ -1181,7 +1184,6 @@ void calcEdgeCutsBitsCGAL
         }
     }
 }
-
 
 #endif // NO_CGAL
 
@@ -1528,8 +1530,13 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "Generates the extendedFeatureEdgeMesh for the interface created by"
+        "Generates a extendedFeatureEdgeMesh for the interface created by"
         " a boolean operation on two surfaces."
+        #ifndef NO_CGAL
+        " [Compiled with CGAL]"
+        #else
+        " [Compiled without CGAL]"
+        #endif
     );
 
     argList::noParallel();
@@ -1563,6 +1570,16 @@ int main(int argc, char *argv[])
     (
         "perturb",
         "Perturb surface points to escape degenerate intersections"
+    );
+
+    argList::addBoolOption
+    (
+        "no-cgal",
+        #ifndef NO_CGAL
+        "Do not use CGAL algorithms"
+        #else
+        "Ignored, compiled without CGAL"
+        #endif
     );
 
     argList::addBoolOption
@@ -1674,28 +1691,31 @@ int main(int argc, char *argv[])
     }
 
 
-#ifdef NO_CGAL
-    // Calculate the points where the edges are cut by the other surface
-    calcEdgeCuts
-    (
-        surf1,
-        surf2,
-        args.found("perturb"),
-        edgeCuts1,
-        edgeCuts2
-    );
-#else
-    //calcEdgeCutsCGAL
-    calcEdgeCutsBitsCGAL
-    (
-        surf1,
-        surf2,
-        args.found("perturb"),
-        edgeCuts1,
-        edgeCuts2
-    );
+    // Calculate where edges are cut by the other surface
+#ifndef NO_CGAL
+    if (!args.found("no-cgal"))
+    {
+        calcEdgeCutsBitsCGAL
+        (
+            surf1,
+            surf2,
+            args.found("perturb"),
+            edgeCuts1,
+            edgeCuts2
+        );
+    }
+    else
 #endif // NO_CGAL
-
+    {
+        calcEdgeCuts
+        (
+            surf1,
+            surf2,
+            args.found("perturb"),
+            edgeCuts1,
+            edgeCuts2
+        );
+    }
 
     const fileName sFeatFileName
     (
@@ -1773,6 +1793,9 @@ int main(int argc, char *argv[])
     const extendedFeatureEdgeMesh& feMesh = feMeshPtr();
 
     feMesh.writeStats(Info);
+    Info<< nl << "Writing extendedFeatureEdgeMesh to "
+        << feMesh.objectRelPath() << nl
+        << endl;
     feMesh.write();
     feMesh.writeObj(feMesh.path()/sFeatFileName);
 
@@ -1783,9 +1806,9 @@ int main(int argc, char *argv[])
             IOobject
             (
                 sFeatFileName + ".eMesh",   // name
-                runTime.constant(),                         // instance
+                runTime.constant(),         // instance
                 triSurfaceMesh::meshSubDir,
-                runTime,                                    // registry
+                runTime,                    // registry
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
                 false
@@ -1795,12 +1818,12 @@ int main(int argc, char *argv[])
         );
 
         Info<< nl << "Writing featureEdgeMesh to "
-            << bfeMesh.objectPath() << endl;
+            << bfeMesh.objectRelPath() << endl;
 
         bfeMesh.regIOobject::write();
     }
 
-    Info << "End\n" << endl;
+    Info << nl << "End\n" << endl;
 
     return 0;
 }
