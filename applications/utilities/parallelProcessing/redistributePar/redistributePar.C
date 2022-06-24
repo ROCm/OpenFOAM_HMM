@@ -147,7 +147,7 @@ void createTimeDirs(const fileName& path)
             //Pout<< "Time:" << t << nl
             //    << "    raw       :" << timePath << nl
             //    << endl;
-            mkDir(timePath);
+            Foam::mkDir(timePath);
         }
     }
 
@@ -1141,18 +1141,13 @@ int main(int argc, char *argv[])
         Info<< "Reconstructing case (like reconstructParMesh)" << nl << endl;
     }
 
-
-    if (decompose || reconstruct)
+    if ((decompose || reconstruct) && !overwrite)
     {
-        if (!overwrite)
-        {
-            WarningInFunction
-                << "Working in decompose or reconstruction mode automatically"
-                << " implies -overwrite" << nl << endl;
-            overwrite = true;
-        }
+        overwrite = true;
+        WarningInFunction
+            << "Working in -decompose or -reconstruct mode:"
+               " automatically implies -overwrite" << nl << endl;
     }
-
 
     if (!Pstream::parRun())
     {
@@ -1162,7 +1157,7 @@ int main(int argc, char *argv[])
     }
 
 
-    if (!isDir(args.rootPath()))
+    if (!Foam::isDir(args.rootPath()))
     {
         FatalErrorInFunction
             << ": cannot open root directory " << args.rootPath()
@@ -1188,7 +1183,7 @@ int main(int argc, char *argv[])
     // want to delay constructing runTime until we've synced all time
     // directories...
     const fileName procDir(fileHandler().filePath(args.path()));
-    if (isDir(procDir))
+    if (Foam::isDir(procDir))
     {
         if (decompose)
         {
@@ -2446,7 +2441,7 @@ int main(int argc, char *argv[])
                         // Remove dummy mesh created by loadOrCreateMesh
                         const bool oldParRun = Pstream::parRun(false);
                         mesh.removeFiles();
-                        rmDir(mesh.objectRegistry::objectPath());
+                        Foam::rmDir(mesh.objectRegistry::objectPath());
                         Pstream::parRun(oldParRun);  // Restore parallel state
                     }
                 }

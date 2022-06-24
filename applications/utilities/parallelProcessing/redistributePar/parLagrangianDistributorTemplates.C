@@ -84,15 +84,32 @@ Foam::label Foam::parLagrangianDistributor::distributeFields
         )
     );
 
+
+    bool reconstruct = false;
+
     label nFields = 0;
     for (const word& objectName : fieldNames)
     {
         if (!nFields)
         {
-            Info<< "    Distributing lagrangian "
-                << fieldType::typeName << "s\n" << endl;
+            // Performing an all-to-one (reconstruct)?
+            reconstruct = returnReduce
+            (
+                (!map.constructSize() || Pstream::master()),
+                andOp<bool>()
+            );
         }
-        Info<< "        " <<  objectName << endl;
+
+        if (verbose_)
+        {
+            if (!nFields)
+            {
+                Info<< "    Distributing lagrangian "
+                    << fieldType::typeName << "s\n" << nl;
+            }
+            Info<< "        " <<  objectName << nl;
+        }
+        ++nFields;
 
         // Read if present
         IOField<Type> field
@@ -128,7 +145,7 @@ Foam::label Foam::parLagrangianDistributor::distributeFields
         {
             IOField<Type>(fieldIO, std::move(field)).write();
         }
-        else
+        else if (!reconstruct)
         {
             // When running with -overwrite it should also delete the old
             // files. Below works but is not optimal.
@@ -138,6 +155,7 @@ Foam::label Foam::parLagrangianDistributor::distributeFields
         }
     }
 
+    if (nFields && verbose_) Info<< endl;
     return nFields;
 }
 
@@ -174,9 +192,21 @@ Foam::label Foam::parLagrangianDistributor::distributeFieldFields
         )
     );
 
+    bool reconstruct = false;
+
     label nFields = 0;
     for (const word& objectName : fieldNames)
     {
+        if (!nFields)
+        {
+            // Performing an all-to-one (reconstruct)?
+            reconstruct = returnReduce
+            (
+                (!map.constructSize() || Pstream::master()),
+                andOp<bool>()
+            );
+        }
+
         if (verbose_)
         {
             if (!nFields)
@@ -227,7 +257,7 @@ Foam::label Foam::parLagrangianDistributor::distributeFieldFields
                 std::move(field)
             ).write();
         }
-        else
+        else if (!reconstruct)
         {
             // When running with -overwrite it should also delete the old
             // files. Below works but is not optimal.
@@ -309,19 +339,31 @@ Foam::label Foam::parLagrangianDistributor::distributeStoredFields
         cloud.lookupClass<Container>()
     );
 
+    bool reconstruct = false;
+
     label nFields = 0;
     forAllIters(fields, iter)
     {
         Container& field = *(iter.val());
+
+        if (!nFields)
+        {
+            // Performing an all-to-one (reconstruct)?
+            reconstruct = returnReduce
+            (
+                (!map.constructSize() || Pstream::master()),
+                andOp<bool>()
+            );
+        }
 
         if (verbose_)
         {
             if (!nFields)
             {
                 Info<< "    Distributing lagrangian "
-                    << Container::typeName << "s\n" << endl;
+                    << Container::typeName << "s\n" << nl;
             }
-            Info<< "        " <<  field.name() << endl;
+            Info<< "        " <<  field.name() << nl;
         }
         ++nFields;
 
@@ -342,7 +384,7 @@ Foam::label Foam::parLagrangianDistributor::distributeStoredFields
         {
             Container(fieldIO, std::move(field)).write();
         }
-        else
+        else if (!reconstruct)
         {
             // When running with -overwrite it should also delete the old
             // files. Below works but is not optimal.
