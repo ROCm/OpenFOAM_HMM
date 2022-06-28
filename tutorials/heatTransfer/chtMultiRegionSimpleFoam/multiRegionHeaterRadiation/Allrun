@@ -9,11 +9,11 @@ cd "${0%/*}" || exit                                # Run from this directory
 #-- Run on single processor
 
 # Agglomerate patch faces
-for region in bottomAir topAir
-do
-    runApplication -s "$region" \
-        faceAgglomerate -region "$region" -dict constant/viewFactorsDict
-done
+#for region in bottomAir topAir
+#do
+#    runApplication -s "$region" \
+#        faceAgglomerate -region "$region" -dict constant/viewFactorsDict
+#done
 
 # Generate view factors
 for region in bottomAir topAir
