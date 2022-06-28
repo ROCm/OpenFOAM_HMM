@@ -10,38 +10,17 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      dynamicMeshDict;
+    object      decomposeParDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dynamicFvMesh   dynamicMotionSolverFvMesh;
+numberOfSubdomains 4;
 
-motionSolver    solidBody;
+method          hierarchical;
 
-solidBodyMotionFunction multiMotion;
-
-oscillation
+coeffs
 {
-    solidBodyMotionFunction oscillatingLinearMotion;
-    oscillatingLinearMotionCoeffs
-    {
-        amplitude     (0.1 0 0);
-        omega         18.8945578;
-
-        phaseShift    0.01;
-        verticalShift (0.05 0 0);
-    }
-}
-
-rotation
-{
-    solidBodyMotionFunction  rotatingMotion;
-    rotatingMotionCoeffs
-    {
-        origin        (0 0.02 0);
-        axis          (0 0 1);
-        omega         18.8945578;
-    }
+    n           ( 2 2 1 );
 }
 
 
