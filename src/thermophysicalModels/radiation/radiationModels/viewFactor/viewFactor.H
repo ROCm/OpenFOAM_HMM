@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -107,7 +107,7 @@ protected:
         autoPtr<IOmapDistribute> map_;
 
         //- Coarse mesh
-        singleCellFvMesh coarseMesh_;
+        autoPtr<singleCellFvMesh> coarseMesh_;
 
         //- Net radiative heat flux [W/m2]
         volScalarField qr_;

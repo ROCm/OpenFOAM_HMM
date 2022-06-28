@@ -57,7 +57,36 @@ const Foam::word Foam::radiation::viewFactor::viewFactorWalls
 
 void Foam::radiation::viewFactor::initialise()
 {
-    const polyBoundaryMesh& coarsePatches = coarseMesh_.boundaryMesh();
+    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+
+    if (!finalAgglom_.typeHeaderOk<labelListIOList>())
+    {
+        finalAgglom_.setSize(patches.size());
+        for (label patchi=0;  patchi < patches.size(); patchi++)
+        {
+            finalAgglom_[patchi] = identity(patches[patchi].size());
+        }
+    }
+
+    coarseMesh_.reset
+    (
+        new singleCellFvMesh
+        (
+            IOobject
+            (
+                "coarse:" + mesh_.name(),
+                mesh_.polyMesh::instance(),
+                mesh_.time(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            mesh_,
+            finalAgglom_
+        )
+    );
+
+    const polyBoundaryMesh& coarsePatches = coarseMesh_->boundaryMesh();
 
     selectedPatches_ = mesh_.boundaryMesh().indices(viewFactorWalls);
 
@@ -81,6 +110,8 @@ void Foam::radiation::viewFactor::initialise()
         << "Total number of clusters : " << totalNCoarseFaces_ << endl;
 
     useDirect_ = coeffs_.getOrDefault<bool>("useDirectSolver", true);
+
+
 
     map_.reset
     (
@@ -512,26 +543,26 @@ Foam::radiation::viewFactor::viewFactor(const volScalarField& T)
             "finalAgglom",
             mesh_.facesInstance(),
             mesh_,
-            IOobject::MUST_READ,
+            IOobject::READ_IF_PRESENT,
             IOobject::NO_WRITE,
             false
         )
     ),
     map_(),
-    coarseMesh_
-    (
-        IOobject
-        (
-            "coarse:" + mesh_.name(),
-            mesh_.polyMesh::instance(),
-            mesh_.time(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        ),
-        mesh_,
-        finalAgglom_
-    ),
+    coarseMesh_(),
+//     (
+//         IOobject
+//         (
+//             "coarse:" + mesh_.name(),
+//             mesh_.polyMesh::instance(),
+//             mesh_.time(),
+//             IOobject::NO_READ,
+//             IOobject::NO_WRITE,
+//             false
+//         ),
+//         mesh_,
+//         finalAgglom_
+//     ),
     qr_
     (
         IOobject
@@ -575,26 +606,26 @@ Foam::radiation::viewFactor::viewFactor
             "finalAgglom",
             mesh_.facesInstance(),
             mesh_,
-            IOobject::MUST_READ,
+            IOobject::READ_IF_PRESENT,
             IOobject::NO_WRITE,
             false
         )
     ),
     map_(),
-    coarseMesh_
-    (
-        IOobject
-        (
-            "coarse:" + mesh_.name(),
-            mesh_.polyMesh::instance(),
-            mesh_.time(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        ),
-        mesh_,
-        finalAgglom_
-    ),
+    coarseMesh_(),
+//     (
+//         IOobject
+//         (
+//             "coarse:" + mesh_.name(),
+//             mesh_.polyMesh::instance(),
+//             mesh_.time(),
+//             IOobject::NO_READ,
+//             IOobject::NO_WRITE,
+//             false
+//         ),
+//         mesh_,
+//         finalAgglom_
+//     ),
     qr_
     (
         IOobject
@@ -721,10 +752,10 @@ void Foam::radiation::viewFactor::calculate()
             const tmp<scalarField> tHoi = qrp.qro(bandI);
             const scalarField& Hoi = tHoi();
 
-            const polyPatch& pp = coarseMesh_.boundaryMesh()[patchID];
+            const polyPatch& pp = coarseMesh_->boundaryMesh()[patchID];
 
             const labelList& coarsePatchFace =
-                coarseMesh_.patchFaceMap()[patchID];
+                coarseMesh_->patchFaceMap()[patchID];
 
             scalarList T4ave(pp.size(), 0.0);
             scalarList Eave(pp.size(), 0.0);
@@ -1046,7 +1077,7 @@ void Foam::radiation::viewFactor::calculate()
     label globCoarseId = 0;
     for (const label patchID : selectedPatches_)
     {
-        const polyPatch& pp = coarseMesh_.boundaryMesh()[patchID];
+        const polyPatch& pp = coarseMesh_->boundaryMesh()[patchID];
 
         if (pp.size() > 0)
         {
@@ -1058,7 +1089,7 @@ void Foam::radiation::viewFactor::calculate()
             labelListList coarseToFine(invertOneToMany(nAgglom, agglom));
 
             const labelList& coarsePatchFace =
-                coarseMesh_.patchFaceMap()[patchID];
+                coarseMesh_->patchFaceMap()[patchID];
 
             //scalar heatFlux = 0.0;
             forAll(coarseToFine, coarseI)
