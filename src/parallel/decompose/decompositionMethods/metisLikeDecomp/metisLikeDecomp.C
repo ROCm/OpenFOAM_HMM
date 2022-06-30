@@ -94,7 +94,7 @@ Foam::label Foam::metisLikeDecomp::decomposeGeneral
             }
             else
             {
-                IPstream::read
+                UIPstream::read
                 (
                     commsType,
                     proci,
@@ -118,7 +118,7 @@ Foam::label Foam::metisLikeDecomp::decomposeGeneral
         {
             SubList<label> procSlot(xadj, numCells);
 
-            OPstream::write
+            UOPstream::write
             (
                 commsType,
                 UPstream::masterNo(),

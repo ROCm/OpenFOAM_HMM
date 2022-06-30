@@ -606,7 +606,7 @@ void syncPoints
                 pointField nbrPatchInfo(procPatch.nPoints());
                 {
                     // We do not know the number of points on the other side
-                    // so cannot use Pstream::read.
+                    // so cannot use UIPstream::read
                     IPstream fromNbr
                     (
                         Pstream::commsTypes::blocking,

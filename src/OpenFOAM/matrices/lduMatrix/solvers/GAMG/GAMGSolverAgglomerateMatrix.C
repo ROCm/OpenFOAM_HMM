@@ -318,7 +318,7 @@ void Foam::GAMGSolver::gatherMatrices
         {
             label otherI = proci-1;
 
-            IPstream fromSlave
+            IPstream fromProc
             (
                 Pstream::commsTypes::scheduled,
                 procIDs[proci],
@@ -327,14 +327,14 @@ void Foam::GAMGSolver::gatherMatrices
                 meshComm
             );
 
-            otherMats.set(otherI, new lduMatrix(dummyMesh, fromSlave));
+            otherMats.set(otherI, new lduMatrix(dummyMesh, fromProc));
 
             // Receive number of/valid interfaces
             boolList& procTransforms = otherTransforms[otherI];
             List<label>& procRanks = otherRanks[otherI];
 
-            fromSlave >> procTransforms;
-            fromSlave >> procRanks;
+            fromProc >> procTransforms;
+            fromProc >> procRanks;
 
             // Size coefficients
             otherBouCoeffs.set
@@ -354,12 +354,12 @@ void Foam::GAMGSolver::gatherMatrices
                     otherBouCoeffs[otherI].set
                     (
                         intI,
-                        new scalarField(fromSlave)
+                        new scalarField(fromProc)
                     );
                     otherIntCoeffs[otherI].set
                     (
                         intI,
-                        new scalarField(fromSlave)
+                        new scalarField(fromProc)
                     );
                 }
             }

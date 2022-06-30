@@ -1177,7 +1177,7 @@ void Foam::faMesh::calcPointAreaNormals(vectorField& result) const
             );
 
             {
-                OPstream::write
+                UOPstream::write
                 (
                     Pstream::commsTypes::blocking,
                     procPatch.neighbProcNo(),
@@ -1190,7 +1190,7 @@ void Foam::faMesh::calcPointAreaNormals(vectorField& result) const
             patchPointNormals.resize(nbrPatchPoints.size());
 
             {
-                IPstream::read
+                UIPstream::read
                 (
                     Pstream::commsTypes::blocking,
                     procPatch.neighbProcNo(),

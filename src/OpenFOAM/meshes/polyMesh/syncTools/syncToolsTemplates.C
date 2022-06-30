@@ -1029,7 +1029,7 @@ void Foam::syncTools::syncBoundaryFaceList
                         pp.start()-boundaryOffset
                     );
 
-                    IPstream::read
+                    UIPstream::read
                     (
                         Pstream::commsTypes::nonBlocking,
                         procPatch.neighbProcNo(),
@@ -1055,7 +1055,7 @@ void Foam::syncTools::syncBoundaryFaceList
                         pp.start()-boundaryOffset
                     );
 
-                    OPstream::write
+                    UOPstream::write
                     (
                         Pstream::commsTypes::nonBlocking,
                         procPatch.neighbProcNo(),
@@ -1261,7 +1261,7 @@ void Foam::syncTools::syncFaceList
                 recvInfos.set(patchi, new PackedList<Width>(patchSize));
                 PackedList<Width>& recvInfo = recvInfos[patchi];
 
-                IPstream::read
+                UIPstream::read
                 (
                     Pstream::commsTypes::nonBlocking,
                     procPatch.neighbProcNo(),
@@ -1296,7 +1296,7 @@ void Foam::syncTools::syncFaceList
                 );
                 PackedList<Width>& sendInfo = sendInfos[patchi];
 
-                OPstream::write
+                UOPstream::write
                 (
                     Pstream::commsTypes::nonBlocking,
                     procPatch.neighbProcNo(),

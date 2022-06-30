@@ -506,7 +506,7 @@ void Foam::processorFvPatchField<Type>::initInterfaceMatrixUpdate
 
         receiveBuf_.setSize(sendBuf_.size());
         outstandingRecvRequest_ = UPstream::nRequests();
-        IPstream::read
+        UIPstream::read
         (
             Pstream::commsTypes::nonBlocking,
             procPatch_.neighbProcNo(),
@@ -517,7 +517,7 @@ void Foam::processorFvPatchField<Type>::initInterfaceMatrixUpdate
         );
 
         outstandingSendRequest_ = UPstream::nRequests();
-        OPstream::write
+        UOPstream::write
         (
             Pstream::commsTypes::nonBlocking,
             procPatch_.neighbProcNo(),

@@ -100,7 +100,7 @@ void Foam::globalIndex::gatherValues
         {
             if (is_contiguous<Type>::value)
             {
-                IPstream::read
+                UIPstream::read
                 (
                     commsType,
                     procIDs[i],
@@ -123,7 +123,7 @@ void Foam::globalIndex::gatherValues
 
         if (is_contiguous<Type>::value)
         {
-            OPstream::write
+            UOPstream::write
             (
                 commsType,
                 procIDs[0],
@@ -198,7 +198,7 @@ void Foam::globalIndex::gather
             }
             else if (is_contiguous<Type>::value)
             {
-                IPstream::read
+                UIPstream::read
                 (
                     commsType,
                     procIDs[i],
@@ -223,7 +223,7 @@ void Foam::globalIndex::gather
         }
         else if (is_contiguous<Type>::value)
         {
-            OPstream::write
+            UOPstream::write
             (
                 commsType,
                 procIDs[0],
@@ -889,7 +889,7 @@ void Foam::globalIndex::scatter
             }
             else if (is_contiguous<Type>::value)
             {
-                OPstream::write
+                UOPstream::write
                 (
                     commsType,
                     procIDs[i],
@@ -926,7 +926,7 @@ void Foam::globalIndex::scatter
         }
         else if (is_contiguous<Type>::value)
         {
-            IPstream::read
+            UIPstream::read
             (
                 commsType,
                 procIDs[0],

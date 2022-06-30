@@ -119,7 +119,7 @@ void Foam::processorCyclicPointPatchField<Type>::initSwapAddSeparated
         if (commsType == Pstream::commsTypes::nonBlocking)
         {
             receiveBuf_.setSize(pf.size());
-            IPstream::read
+            UIPstream::read
             (
                 commsType,
                 procPatch_.neighbProcNo(),
@@ -129,7 +129,7 @@ void Foam::processorCyclicPointPatchField<Type>::initSwapAddSeparated
                 procPatch_.comm()
             );
         }
-        OPstream::write
+        UOPstream::write
         (
             commsType,
             procPatch_.neighbProcNo(),
@@ -155,7 +155,7 @@ void Foam::processorCyclicPointPatchField<Type>::swapAddSeparated
         if (commsType != Pstream::commsTypes::nonBlocking)
         {
             receiveBuf_.setSize(this->size());
-            IPstream::read
+            UIPstream::read
             (
                 commsType,
                 procPatch_.neighbProcNo(),

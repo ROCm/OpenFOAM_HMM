@@ -85,11 +85,11 @@ void Foam::functionObjects::dataCloud::writeListParallel
         Field<Type> recvField;
 
         // Receive and write
-        for (const int slave : Pstream::subProcs())
+        for (const int proci : Pstream::subProcs())
         {
-            IPstream fromSlave(Pstream::commsTypes::blocking, slave);
+            IPstream fromProc(Pstream::commsTypes::blocking, proci);
 
-            fromSlave >> recvPoints >> recvField;
+            fromProc >> recvPoints >> recvField;
 
             writeList(os, recvPoints, recvField);
         }
@@ -142,11 +142,11 @@ void Foam::functionObjects::dataCloud::writeListParallel
         Field<Type> recvField;
 
         // Receive and write
-        for (const int slave : Pstream::subProcs())
+        for (const int proci : Pstream::subProcs())
         {
-            IPstream fromSlave(Pstream::commsTypes::blocking, slave);
+            IPstream fromProc(Pstream::commsTypes::blocking, proci);
 
-            fromSlave >> recvPoints >> recvField;
+            fromProc >> recvPoints >> recvField;
 
             writeList(os, recvPoints, recvField);
         }

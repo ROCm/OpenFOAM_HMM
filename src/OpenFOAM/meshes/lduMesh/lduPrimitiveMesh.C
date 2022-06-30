@@ -1092,15 +1092,15 @@ void Foam::lduPrimitiveMesh::gather
 
     if (Pstream::myProcNo(comm) == procIDs[0])
     {
+        // Master.
         otherMeshes.setSize(procIDs.size()-1);
 
-        // Slave meshes
         for (label i = 1; i < procIDs.size(); ++i)
         {
             //Pout<< "on master :"
-            //    << " receiving from slave " << procIDs[i] << endl;
+            //    << " receiving from proc " << procIDs[i] << endl;
 
-            IPstream fromSlave
+            IPstream fromProc
             (
                 Pstream::commsTypes::scheduled,
                 procIDs[i],
@@ -1109,10 +1109,10 @@ void Foam::lduPrimitiveMesh::gather
                 comm
             );
 
-            label nCells = readLabel(fromSlave);
-            labelList lowerAddr(fromSlave);
-            labelList upperAddr(fromSlave);
-            boolList validInterface(fromSlave);
+            label nCells = readLabel(fromProc);
+            labelList lowerAddr(fromProc);
+            labelList upperAddr(fromProc);
+            boolList validInterface(fromProc);
 
 
             // Construct mesh without interfaces
@@ -1135,7 +1135,7 @@ void Foam::lduPrimitiveMesh::gather
             {
                 if (validInterface[intI])
                 {
-                    word coupleType(fromSlave);
+                    word coupleType(fromProc);
 
                     newInterfaces.set
                     (
@@ -1145,7 +1145,7 @@ void Foam::lduPrimitiveMesh::gather
                             coupleType,
                             intI,
                             otherMeshes[i-1].rawInterfaces(),
-                            fromSlave
+                            fromProc
                         ).ptr()
                     );
                 }

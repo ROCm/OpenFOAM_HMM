@@ -86,7 +86,7 @@ Foam::LUscalarMatrix::LUscalarMatrix
 
         if (Pstream::master(comm_))
         {
-            for (const int slave : Pstream::subProcs(comm_))
+            for (const int proci : Pstream::subProcs(comm_))
             {
                 lduMatrices.set
                 (
@@ -96,7 +96,7 @@ Foam::LUscalarMatrix::LUscalarMatrix
                         IPstream
                         (
                             Pstream::commsTypes::scheduled,
-                            slave,
+                            proci,
                             0,          // bufSize
                             Pstream::msgType(),
                             comm_

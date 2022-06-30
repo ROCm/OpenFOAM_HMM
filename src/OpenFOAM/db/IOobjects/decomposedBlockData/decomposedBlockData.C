@@ -789,7 +789,7 @@ bool Foam::decomposedBlockData::writeBlocks
             for (label proci = 1; proci < nProcs; ++proci)
             {
                 elems.resize(recvSizes[proci]);
-                IPstream::read
+                UIPstream::read
                 (
                     UPstream::commsTypes::scheduled,
                     proci,

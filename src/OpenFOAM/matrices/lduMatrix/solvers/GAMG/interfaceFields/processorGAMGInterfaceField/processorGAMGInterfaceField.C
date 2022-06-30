@@ -110,7 +110,7 @@ void Foam::processorGAMGInterfaceField::initInterfaceMatrixUpdate
         // Fast path.
         scalarReceiveBuf_.setSize(scalarSendBuf_.size());
         outstandingRecvRequest_ = UPstream::nRequests();
-        IPstream::read
+        UIPstream::read
         (
             Pstream::commsTypes::nonBlocking,
             procInterface_.neighbProcNo(),
@@ -121,7 +121,7 @@ void Foam::processorGAMGInterfaceField::initInterfaceMatrixUpdate
         );
 
         outstandingSendRequest_ = UPstream::nRequests();
-        OPstream::write
+        UOPstream::write
         (
             Pstream::commsTypes::nonBlocking,
             procInterface_.neighbProcNo(),

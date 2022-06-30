@@ -158,7 +158,7 @@ void Foam::mapDistributeBase::exchangeMasks
         {
             if (proci != myRank && recvMasks[proci].size())
             {
-                IPstream::read
+                UIPstream::read
                 (
                     UPstream::commsTypes::nonBlocking,
                     proci,
@@ -174,7 +174,7 @@ void Foam::mapDistributeBase::exchangeMasks
         {
             if (proci != myRank && sendMasks[proci].size())
             {
-                OPstream::write
+                UOPstream::write
                 (
                     UPstream::commsTypes::nonBlocking,
                     proci,
