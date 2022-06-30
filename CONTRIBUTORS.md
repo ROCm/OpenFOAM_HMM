@@ -5,6 +5,8 @@ It is likely incomplete...
 
 ## Contributors (alphabetical by surname)
 
+- Tetsuo Aoyagi
+- Akira Azami
 - William Bainbridge
 - Gabriel Barajas
 - Kutalmis Bercin
@@ -19,6 +21,7 @@ It is likely incomplete...
 - Bernhard Gschaider
 - Andrew Heather
 - David Hill
+- Yoshiaki Inoue
 - Mattijs Janssens
 - Andrew Jackson
 - Hrvoje Jasak
