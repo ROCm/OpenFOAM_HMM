@@ -124,8 +124,6 @@ using namespace Foam;
 using namespace Foam::constant;
 using namespace Foam::constant::mathematical;
 
-//using namespace pbrt;
-
 triSurface triangulate
 (
     const polyBoundaryMesh& bMesh,
@@ -193,61 +191,44 @@ triSurface triangulate
         rawSurface.localPoints()
     );
 
-    // Combine the triSurfaces across all processors
-    if (Pstream::parRun())
+
+    globalIndex globalFaceIdx(surface.size(), globalIndex::gatherOnly());
+    globalIndex globalPointIdx
+    (
+        surface.points().size(), globalIndex::gatherOnly()
+    );
+
+    List<labelledTri> globalSurfaceTris(globalFaceIdx.gather(surface));
+    pointField globalSurfacePoints(globalPointIdx.gather(surface.points()));
+
+    //label offset = 0;
+    for (const label proci : globalPointIdx.allProcs())
     {
-        List<List<labelledTri>> surfaceProcTris(Pstream::nProcs());
-        List<pointField> surfaceProcPoints(Pstream::nProcs());
+        const label offset = globalPointIdx.localStart(proci);
 
-        surfaceProcTris[Pstream::myProcNo()] = surface;
-        surfaceProcPoints[Pstream::myProcNo()] = surface.points();
-
-        Pstream::gatherList(surfaceProcTris);
-        Pstream::scatterList(surfaceProcTris);
-        Pstream::gatherList(surfaceProcPoints);
-        Pstream::scatterList(surfaceProcPoints);
-
-        label nTris = 0;
-        forAll(surfaceProcTris, i)
+        if (offset)
         {
-            nTris += surfaceProcTris[i].size();
-        }
-
-        List<labelledTri> globalSurfaceTris(nTris);
-        label trii = 0;
-        label offset = 0;
-        forAll(surfaceProcTris, i)
-        {
-            forAll(surfaceProcTris[i], j)
+            for
+            (
+                labelledTri& tri
+             :  globalSurfaceTris.slice(globalFaceIdx.range(proci))
+            )
             {
-                globalSurfaceTris[trii] = surfaceProcTris[i][j];
-                globalSurfaceTris[trii][0] += offset;
-                globalSurfaceTris[trii][1] += offset;
-                globalSurfaceTris[trii][2] += offset;
-                trii++;
-            }
-            offset += surfaceProcPoints[i].size();
-        }
-
-        label nPoints = 0;
-        forAll(surfaceProcPoints, i)
-        {
-            nPoints += surfaceProcPoints[i].size();
-        }
-
-        pointField globalSurfacePoints(nPoints);
-
-        label pointi = 0;
-        forAll(surfaceProcPoints, i)
-        {
-            forAll(surfaceProcPoints[i], j)
-            {
-                globalSurfacePoints[pointi++] = surfaceProcPoints[i][j];
+                tri[0] += offset;
+                tri[1] += offset;
+                tri[2] += offset;
             }
         }
-
-        surface = triSurface(globalSurfaceTris, globalSurfacePoints);
     }
+
+    surface =
+        triSurface
+        (
+            std::move(globalSurfaceTris),
+            std::move(globalSurfacePoints)
+        );
+
+    Pstream::broadcast(surface);
 
     // Add patch names to surface
     surface.patches().setSize(newPatchI);
@@ -857,21 +838,21 @@ int main(int argc, char *argv[])
 
     GaussPoints[2].setSize(3);
     GaussPoints[2][0] =  0;
-    GaussPoints[2][1] =  0.774597;
-    GaussPoints[2][2] = -0.774597;
+    GaussPoints[2][1] =  std::sqrt(3/5);
+    GaussPoints[2][2] = -std::sqrt(3/5);
 
     GaussPoints[3].setSize(4);
-    GaussPoints[3][0] =  0.339981;
-    GaussPoints[3][1] = -0.339981;
-    GaussPoints[3][2] = 0.861136;
-    GaussPoints[3][3] = -0.861136;
+    GaussPoints[3][0] = std::sqrt(3.0/7.0 - (2.0/7.0)*std::sqrt(6/5));
+    GaussPoints[3][1] = -GaussPoints[3][0];
+    GaussPoints[3][2] = std::sqrt(3.0/7.0 + (2.0/7.0)*std::sqrt(6/5));
+    GaussPoints[3][3] = -GaussPoints[3][2];
 
     GaussPoints[4].setSize(5);
     GaussPoints[4][0] =  0;
-    GaussPoints[4][1] = 0.538469;
-    GaussPoints[4][2] = -0.538469;
-    GaussPoints[4][3] = 0.90618;
-    GaussPoints[4][4] = -0.90618;
+    GaussPoints[4][1] = (1.0/3.0)*std::sqrt(5.0 - 2.0*std::sqrt(10/7));
+    GaussPoints[4][2] = -GaussPoints[4][1];
+    GaussPoints[4][3] = (1.0/3.0)*std::sqrt(5.0 + 2.0*std::sqrt(10/7));
+    GaussPoints[4][4] = -GaussPoints[4][3];
 
 
     List<scalarList> GaussWeights(5);
@@ -883,24 +864,24 @@ int main(int argc, char *argv[])
     GaussWeights[1][1] =  1;
 
     GaussWeights[2].setSize(3);
-    GaussWeights[2][0] =  0.888889;
-    GaussWeights[2][1] =  0.555556;
-    GaussWeights[2][2] =  0.555556;
+    GaussWeights[2][0] =  8.0/9.0;
+    GaussWeights[2][1] =  5.0/9.0;
+    GaussWeights[2][2] =  5.0/9.0;
 
     GaussWeights[3].setSize(4);
-    GaussWeights[3][0] =  0.652145;
-    GaussWeights[3][1] =  0.652145;
-    GaussWeights[3][2] =  0.347855;
-    GaussWeights[3][3] =  0.347855;
+    GaussWeights[3][0] =  (18.0 + std::sqrt(30))/36.0;
+    GaussWeights[3][1] =  (18.0 + std::sqrt(30))/36.0;
+    GaussWeights[3][2] =  (18.0 - std::sqrt(30))/36.0;
+    GaussWeights[3][3] =  (18.0 - std::sqrt(30))/36.0;
 
     GaussWeights[4].setSize(5);
-    GaussWeights[4][0] =  0.568889;
-    GaussWeights[4][1] =  0.478629;
-    GaussWeights[4][2] =  0.478629;
-    GaussWeights[4][3] =  0.236927;
-    GaussWeights[4][4] =  0.236927;
+    GaussWeights[4][0] =  128.0/225.0;
+    GaussWeights[4][1] =  (322.0 + 13.0*std::sqrt(70))/900.0;
+    GaussWeights[4][2] =  (322.0 + 13.0*std::sqrt(70))/900.0;
+    GaussWeights[4][3] =  (322.0 - 13.0*std::sqrt(70))/900.0;
+    GaussWeights[4][4] =  (322.0 - 13.0*std::sqrt(70))/900.0;
 
-    label maxQuadOrder = 5;
+    const label maxQuadOrder = 5;
 
     if (mesh.nSolutionD() == 3)
     {

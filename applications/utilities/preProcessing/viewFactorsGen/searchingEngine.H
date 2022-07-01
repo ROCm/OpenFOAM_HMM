@@ -47,7 +47,7 @@ distributedTriSurfaceMesh surfacesMesh
         "triSurface",           // instance
         runTime,                // registry
         IOobject::NO_READ,
-        IOobject::AUTO_WRITE
+        IOobject::NO_WRITE
     ),
     localSurface,
     dict
