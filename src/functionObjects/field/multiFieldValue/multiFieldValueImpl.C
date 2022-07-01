@@ -28,6 +28,28 @@ License
 
 #include "FlatOutput.H"
 
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+//- Return magnitude of a given value unless the given Type is scalar
+template<class Type>
+static inline scalar MagOp(const Type& val)
+{
+    return Foam::mag(val);
+}
+
+//- Return self if a given Type is scalar
+template<>
+inline scalar MagOp<scalar>(const scalar& val)
+{
+    return val;
+}
+
+} // End namespace Foam
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
@@ -67,6 +89,24 @@ bool Foam::functionObjects::fieldValues::multiFieldValue::applyOperation
             for (label i = 1; i < values.size(); ++i)
             {
                 result -= values[i];
+            }
+            break;
+        }
+        case opDivide:
+        {
+            result = values[0];
+            for (label i = 1; i < values.size(); ++i)
+            {
+                result /= stabilise(MagOp(values[i]), SMALL);
+            }
+            break;
+        }
+        case opCmptDivide:
+        {
+            result = values[0];
+            for (label i = 1; i < values.size(); ++i)
+            {
+                result = cmptDivide(result, stabilise(values[i], SMALL));
             }
             break;
         }

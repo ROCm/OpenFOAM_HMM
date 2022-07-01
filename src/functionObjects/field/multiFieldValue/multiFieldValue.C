@@ -53,10 +53,18 @@ Foam::functionObjects::fieldValues::multiFieldValue::operationTypeNames_
     { operationType::opSum, "sum" },
     { operationType::opAdd, "add" },
     { operationType::opSubtract, "subtract" },
+    { operationType::opDivide, "divide" },
+    { operationType::opCmptDivide, "cmptDivide" },
     { operationType::opMin, "min" },
     { operationType::opMax, "max" },
     { operationType::opAverage, "average" },
 });
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Implementation
+#include "multiFieldValueImpl.C"
 
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //

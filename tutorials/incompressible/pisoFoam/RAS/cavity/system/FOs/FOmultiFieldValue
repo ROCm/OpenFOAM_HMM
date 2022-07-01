@@ -126,4 +126,18 @@ multiFieldValue_average
 }
 
 
+multiFieldValue_divide
+{
+    ${multiFieldValue_add}
+    operation    divide;
+}
+
+
+multiFieldValue_cmptDivide
+{
+    ${multiFieldValue_add}
+    operation    cmptDivide;
+}
+
+
 // ************************************************************************* //
