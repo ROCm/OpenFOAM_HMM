@@ -38,8 +38,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef solidParticle_H
-#define solidParticle_H
+#ifndef Foam_solidParticle_H
+#define Foam_solidParticle_H
 
 #include "particle.H"
 #include "IOstream.H"
@@ -53,11 +53,10 @@ namespace Foam
 {
 
 // Forward Declarations
-class solidParticleCloud;
 class solidParticle;
+class solidParticleCloud;
 
 Ostream& operator<<(Ostream&, const solidParticle&);
-
 
 /*---------------------------------------------------------------------------*\
                            Class solidParticle Declaration
@@ -99,25 +98,41 @@ public:
 
         // Constructors
 
-            inline trackingData
+            trackingData
             (
-                const solidParticleCloud& spc,
+                const solidParticleCloud& cld,
                 const interpolationCellPoint<scalar>& rhoInterp,
                 const interpolationCellPoint<vector>& UInterp,
                 const interpolationCellPoint<scalar>& nuInterp,
                 const vector& g
-            );
+            )
+            :
+                particle::trackingData(cld),
+                rhoInterp_(rhoInterp),
+                UInterp_(UInterp),
+                nuInterp_(nuInterp),
+                g_(g)
+            {}
 
 
-        // Member functions
+        // Member Functions
 
-            inline const interpolationCellPoint<scalar>& rhoInterp() const;
+            const interpolationCellPoint<scalar>& nuInterp() const noexcept
+            {
+                return nuInterp_;
+            }
 
-            inline const interpolationCellPoint<vector>& UInterp() const;
+            const interpolationCellPoint<vector>& UInterp() const noexcept
+            {
+                return UInterp_;
+            }
 
-            inline const interpolationCellPoint<scalar>& nuInterp() const;
+            const interpolationCellPoint<scalar>& rhoInterp() const noexcept
+            {
+                return rhoInterp_;
+            }
 
-            inline const vector& g() const;
+            const vector& g() const noexcept { return g_; }
     };
 
 
@@ -132,15 +147,20 @@ public:
         //- Construct from a position and a cell
         //  Searches for the rest of the required topology.
         //  Other properties are zero initialised.
-        inline solidParticle
+        solidParticle
         (
             const polyMesh& mesh,
             const vector& position,
             const label celli = -1
-        );
+        )
+        :
+            particle(mesh, position, celli),
+            d_(0),
+            U_(Zero)
+        {}
 
         //- Construct from components
-        inline solidParticle
+        solidParticle
         (
             const polyMesh& mesh,
             const barycentric& coordinates,
@@ -149,7 +169,12 @@ public:
             const label tetPti,
             const scalar d,
             const vector& U
-        );
+        )
+        :
+            particle(mesh, coordinates, celli, tetFacei, tetPti),
+            d_(d),
+            U_(U)
+        {}
 
         //- Construct from Istream
         solidParticle
@@ -187,19 +212,19 @@ public:
 
     // Member Functions
 
-        // Access
+    // Access
 
-            //- Return diameter
-            inline scalar d() const;
+        //- Return diameter
+        scalar d() const noexcept { return d_; }
 
-            //- Return velocity
-            inline const vector& U() const;
+        //- Return velocity
+        const vector& U() const noexcept { return U_; }
 
 
-        // Tracking
+    // Tracking
 
-            //- Move
-            bool move(solidParticleCloud&, trackingData&, const scalar);
+        //- Move
+        bool move(solidParticleCloud&, trackingData&, const scalar);
 
 
         // Patch interactions
@@ -246,10 +271,6 @@ template<> struct is_contiguous<solidParticle> : std::true_type {};
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "solidParticleI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

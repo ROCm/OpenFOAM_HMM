@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef passivePositionParticle_H
-#define passivePositionParticle_H
+#ifndef Foam_passivePositionParticle_H
+#define Foam_passivePositionParticle_H
 
 #include "passiveParticle.H"
 
@@ -130,7 +130,9 @@ public:
         };
 
 
-        const point& cachedPosition() const
+    // Member Functions
+
+        const point& cachedPosition() const noexcept
         {
             return cachedPosition_;
         }

@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef streamLineParticle_H
-#define streamLineParticle_H
+#ifndef Foam_streamLineParticle_H
+#define Foam_streamLineParticle_H
 
 #include "particle.H"
 #include "autoPtr.H"
@@ -48,8 +48,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
-
+// Forward Declarations
 class streamLineParticle;
 class streamLineParticleCloud;
 

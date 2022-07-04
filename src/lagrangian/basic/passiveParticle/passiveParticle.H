@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef passiveParticle_H
-#define passiveParticle_H
+#ifndef Foam_passiveParticle_H
+#define Foam_passiveParticle_H
 
 #include "particle.H"
 #include "IOstream.H"
@@ -55,7 +55,6 @@ class passiveParticle
 :
     public particle
 {
-
 public:
 
     // Constructors

@@ -36,8 +36,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef trackedParticle_H
-#define trackedParticle_H
+#ifndef Foam_trackedParticle_H
+#define Foam_trackedParticle_H
 
 #include "bitSet.H"
 #include "particle.H"
@@ -64,7 +64,7 @@ class trackedParticle
 :
     public particle
 {
-    // Private data
+    // Private Data
 
         //- Start point to track from
         point start_;
@@ -141,8 +141,8 @@ public:
             const label k
         );
 
-        //- Construct from a position and a cell, searching for the rest of the
-        //  required topology
+        //- Construct from a position and a cell,
+        //- searching for the rest of the required topology
         trackedParticle
         (
             const polyMesh& mesh,
@@ -193,52 +193,28 @@ public:
     // Member Functions
 
         //- Point to track from
-        point& start()
-        {
-            return start_;
-        }
+        point& start() noexcept { return start_; }
 
         //- Point to track to
-        point& end()
-        {
-            return end_;
-        }
+        point& end() noexcept { return end_; }
 
         //- Transported label
-        label i() const
-        {
-            return i_;
-        }
+        label i() const noexcept { return i_; }
 
         //- Transported label
-        label& i()
-        {
-            return i_;
-        }
+        label& i() noexcept { return i_; }
 
         //- Transported label
-        label j() const
-        {
-            return j_;
-        }
+        label j() const noexcept { return j_; }
 
         //- Transported label
-        label& j()
-        {
-            return j_;
-        }
+        label& j() noexcept { return j_; }
 
         //- Transported label
-        label k() const
-        {
-            return k_;
-        }
+        label k() const noexcept { return k_; }
 
         //- Transported label
-        label& k()
-        {
-            return k_;
-        }
+        label& k() noexcept { return k_; }
 
 
 

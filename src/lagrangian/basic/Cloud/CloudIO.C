@@ -155,7 +155,7 @@ void Foam::Cloud<ParticleType>::initCloud(const bool checkClass)
     // Ask for the tetBasePtIs to trigger all processors to build
     // them, otherwise, if some processors have no particles then
     // there is a comms mismatch.
-    polyMesh_.tetBasePtIs();
+    (void)polyMesh_.tetBasePtIs();
 }
 
 
@@ -177,8 +177,8 @@ Foam::Cloud<ParticleType>::Cloud
 {
     checkPatches();
 
-    polyMesh_.tetBasePtIs();
-    polyMesh_.oldCellCentres();
+    (void)polyMesh_.tetBasePtIs();
+    (void)polyMesh_.oldCellCentres();
 
     initCloud(checkClass);
 }

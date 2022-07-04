@@ -31,31 +31,11 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::particle::stationaryTetGeometry
-(
-    vector& centre,
-    vector& base,
-    vector& vertex1,
-    vector& vertex2
-) const
-{
-    const triFace triIs(currentTetIndices().faceTriIs(mesh_));
-    const vectorField& ccs = mesh_.cellCentres();
-    const pointField& pts = mesh_.points();
-
-    centre = ccs[celli_];
-    base = pts[triIs[0]];
-    vertex1 = pts[triIs[1]];
-    vertex2 = pts[triIs[2]];
-}
-
-
 inline Foam::barycentricTensor Foam::particle::stationaryTetTransform() const
 {
-    vector centre, base, vertex1, vertex2;
-    stationaryTetGeometry(centre, base, vertex1, vertex2);
+    const tetPointRef tet = currentTetIndices().tet(mesh_);
 
-    return barycentricTensor(centre, base, vertex1, vertex2);
+    return barycentricTensor(tet.a(), tet.b(), tet.c(), tet.d());
 }
 
 
@@ -247,10 +227,8 @@ inline Foam::Pair<Foam::scalar> Foam::particle::stepFractionSpan() const
 
         return Pair<scalar>(tFrac, dtFrac);
     }
-    else
-    {
-        return Pair<scalar>(0, 1);
-    }
+
+    return Pair<scalar>(0, 1);
 }
 
 
@@ -274,10 +252,8 @@ inline Foam::barycentricTensor Foam::particle::currentTetTransform() const
     {
         return movingTetTransform(0)[0];
     }
-    else
-    {
-        return stationaryTetTransform();
-    }
+
+    return stationaryTetTransform();
 }
 
 
@@ -354,10 +330,7 @@ void Foam::particle::patchData(vector& n, vector& U) const
     }
     else
     {
-        vector centre, base, vertex1, vertex2;
-        stationaryTetGeometry(centre, base, vertex1, vertex2);
-
-        n = triPointRef(base, vertex1, vertex2).unitNormal();
+        n = currentTetIndices().faceTri(mesh_).unitNormal();
 
         U = Zero;
     }

@@ -36,8 +36,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef wallBoundedStreamLineParticle_H
-#define wallBoundedStreamLineParticle_H
+#ifndef Foam_wallBoundedStreamLineParticle_H
+#define Foam_wallBoundedStreamLineParticle_H
 
 #include "wallBoundedParticle.H"
 #include "autoPtr.H"
@@ -50,12 +50,9 @@ SourceFiles
 namespace Foam
 {
 
-class wallBoundedStreamLineParticleCloud;
-
-
-// Forward declaration of friend functions and operators
-
+// Forward Declarations
 class wallBoundedStreamLineParticle;
+class wallBoundedStreamLineParticleCloud;
 
 Ostream& operator<<(Ostream&, const wallBoundedStreamLineParticle&);
 
@@ -68,7 +65,6 @@ class wallBoundedStreamLineParticle
 :
     public wallBoundedParticle
 {
-
 public:
 
     //- Class used to pass tracking data to the trackToEdge function
@@ -76,9 +72,7 @@ public:
     :
         public wallBoundedParticle::trackingData
     {
-
     public:
-
 
         const PtrList<interpolation<scalar>>& vsInterp_;
         const PtrList<interpolation<vector>>& vvInterp_;
@@ -92,7 +86,7 @@ public:
 
         // Constructors
 
-            template <class TrackCloudType>
+            template<class TrackCloudType>
             trackingData
             (
                 TrackCloudType& cloud,
@@ -107,11 +101,7 @@ public:
                 List<DynamicList<vectorList>>& allVectors
             )
             :
-                wallBoundedParticle::trackingData
-                (
-                    cloud,
-                    isWallPatch
-                ),
+                wallBoundedParticle::trackingData(cloud, isWallPatch),
                 vsInterp_(vsInterp),
                 vvInterp_(vvInterp),
                 UIndex_(UIndex),
@@ -128,7 +118,7 @@ public:
 
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Track with +U or -U
         bool trackForward_;

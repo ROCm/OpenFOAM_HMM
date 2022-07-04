@@ -37,8 +37,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef wallBoundedParticle_H
-#define wallBoundedParticle_H
+#ifndef Foam_wallBoundedParticle_H
+#define Foam_wallBoundedParticle_H
 
 #include "particle.H"
 #include "autoPtr.H"
@@ -49,8 +49,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
-
+// Forward Declarations
 class wallBoundedParticle;
 
 Ostream& operator<<(Ostream&, const wallBoundedParticle&);
@@ -72,15 +71,14 @@ public:
     :
         public particle::trackingData
     {
-
     public:
 
         const bitSet& isWallPatch_;
 
         // Constructors
 
-            template <class TrackCloudType>
-            inline trackingData
+            template<class TrackCloudType>
+            trackingData
             (
                 const TrackCloudType& cloud,
                 const bitSet& isWallPatch
@@ -94,7 +92,7 @@ public:
 
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Particle position is updated locally as opposed to via track
         //  functions of the base Foam::particle class
@@ -212,19 +210,13 @@ public:
 
     // Member Functions
 
-        // Access
+    // Access
 
-            //- -1 or label of mesh edge
-            inline label meshEdgeStart() const
-            {
-                return meshEdgeStart_;
-            }
+        //- The mesh edge label or -1
+        label meshEdgeStart() const noexcept { return meshEdgeStart_; }
 
-            //- -1 or diagonal edge
-            inline label diagEdge() const
-            {
-                return diagEdge_;
-            }
+        //- The diagonal edge label or -1
+        label diagEdge() const noexcept { return diagEdge_; }
 
 
         // Track

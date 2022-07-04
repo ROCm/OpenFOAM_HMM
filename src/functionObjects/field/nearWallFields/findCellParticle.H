@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef findCellParticle_H
-#define findCellParticle_H
+#ifndef Foam_findCellParticle_H
+#define Foam_findCellParticle_H
 
 #include "particle.H"
 #include "autoPtr.H"
@@ -102,17 +102,11 @@ public:
             {}
 
 
-        // Member functions
+        // Member Functions
 
-            labelListList& cellToData()
-            {
-                return cellToData_;
-            }
+            labelListList& cellToData() noexcept { return cellToData_; }
 
-            List<List<point>>& cellToEnd()
-            {
-                return cellToEnd_;
-            }
+            List<List<point>>& cellToEnd() noexcept { return cellToEnd_; }
     };
 
 
@@ -130,8 +124,8 @@ public:
             const label data
         );
 
-        //- Construct from a position and a cell, searching for the rest of the
-        //  required topology
+        //- Construct from a position and a cell,
+        //- searching for the rest of the required topology
         findCellParticle
         (
             const polyMesh& mesh,
@@ -182,40 +176,22 @@ public:
     // Member Functions
 
         //- Point to track from
-        const point& start() const
-        {
-            return start_;
-        }
+        const point& start() const noexcept { return start_; }
 
         //- Point to track from
-        point& start()
-        {
-            return start_;
-        }
+        point& start() noexcept { return start_; }
 
         //- Point to track to
-        const point& end() const
-        {
-            return end_;
-        }
+        const point& end() const noexcept { return end_; }
 
         //- Point to track to
-        point& end()
-        {
-            return end_;
-        }
+        point& end() noexcept { return end_; }
 
         //- Transported label
-        label data() const
-        {
-            return data_;
-        }
+        label data() const noexcept { return data_; }
 
         //- Transported label
-        label& data()
-        {
-            return data_;
-        }
+        label& data() noexcept { return data_; }
 
 
         // Tracking

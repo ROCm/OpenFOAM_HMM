@@ -41,8 +41,8 @@ SeeAlso
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef injectedParticle_H
-#define injectedParticle_H
+#ifndef Foam_injectedParticle_H
+#define Foam_injectedParticle_H
 
 #include "particle.H"
 #include "IOstream.H"
@@ -53,7 +53,7 @@ SeeAlso
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class injectedParticle;
 Ostream& operator<<(Ostream&, const injectedParticle&);
 
@@ -67,7 +67,7 @@ class injectedParticle
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         // Particle properties
 
@@ -184,37 +184,37 @@ public:
 
     // Member Functions
 
-        // Access
+    // Access
 
-            //- Return const access to the tag
-            inline label tag() const;
+        //- Return const access to the tag
+        label tag() const noexcept { return tag_; }
 
-            //- Return const access to the start of injection
-            inline scalar soi() const;
+        //- Return const access to the start of injection
+        scalar soi() const noexcept { return soi_; }
 
-            //- Return const access to diameter
-            inline scalar d() const;
+        //- Return const access to diameter
+        scalar d() const noexcept { return d_; }
 
-            //- Return const access to velocity
-            inline const vector& U() const;
-
-
-        // Edit
-
-            //- Return the tag
-            inline label& tag();
-
-            //- Return the start of injection
-            inline scalar& soi();
-
-            //- Return access to diameter
-            inline scalar& d();
-
-            //- Return access to velocity
-            inline vector& U();
+        //- Return const access to velocity
+        const vector& U() const noexcept { return U_; }
 
 
-        // I-O
+    // Edit
+
+        //- Return the tag
+        label& tag() noexcept { return tag_; }
+
+        //- Return the start of injection
+        scalar& soi() noexcept { return soi_; }
+
+        //- Return access to diameter
+        scalar& d() noexcept { return d_; }
+
+        //- Return access to velocity
+        vector& U() noexcept { return U_; }
+
+
+    // I-O
 
             //- Read fields
             static void readFields(Cloud<injectedParticle>& c);

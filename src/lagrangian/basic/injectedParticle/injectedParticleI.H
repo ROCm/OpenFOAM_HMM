@@ -25,7 +25,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 inline Foam::injectedParticle::injectedParticle
@@ -62,54 +61,6 @@ inline Foam::injectedParticle::injectedParticle
     d_(d),
     U_(U)
 {}
-
-
-inline Foam::label Foam::injectedParticle::tag() const
-{
-    return tag_;
-}
-
-
-inline Foam::scalar Foam::injectedParticle::soi() const
-{
-    return soi_;
-}
-
-
-inline Foam::scalar Foam::injectedParticle::d() const
-{
-    return d_;
-}
-
-
-inline const Foam::vector& Foam::injectedParticle::U() const
-{
-    return U_;
-}
-
-
-inline Foam::label& Foam::injectedParticle::tag()
-{
-    return tag_;
-}
-
-
-inline Foam::scalar& Foam::injectedParticle::soi()
-{
-    return soi_;
-}
-
-
-inline Foam::scalar& Foam::injectedParticle::d()
-{
-    return d_;
-}
-
-
-inline Foam::vector& Foam::injectedParticle::U()
-{
-    return U_;
-}
 
 
 // ************************************************************************* //

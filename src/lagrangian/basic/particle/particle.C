@@ -276,10 +276,9 @@ void Foam::particle::changeFace(const label tetTriI)
     // Find the face in the same cell that shares the edge, and the
     // corresponding tetrahedra point
     tetPti_ = -1;
-    forAll(mesh_.cells()[celli_], cellFaceI)
+    for (const label newFaceI : mesh_.cells()[celli_])
     {
-        const label newFaceI = mesh_.cells()[celli_][cellFaceI];
-        const class face& newFace = mesh_.faces()[newFaceI];
+        const Foam::face& newFace = mesh_.faces()[newFaceI];
         const label newOwner = mesh_.faceOwner()[newFaceI];
 
         // Exclude the current face
@@ -374,10 +373,9 @@ void Foam::particle::changeToMasterPatch()
 {
     label thisPatch = patch();
 
-    forAll(mesh_.cells()[celli_], cellFaceI)
+    for (const label otherFaceI : mesh_.cells()[celli_])
     {
         // Skip the current face and any internal faces
-        const label otherFaceI = mesh_.cells()[celli_][cellFaceI];
         if (facei_ == otherFaceI || mesh_.isInternalFace(otherFaceI))
         {
             continue;
@@ -386,8 +384,8 @@ void Foam::particle::changeToMasterPatch()
         // Compare the two faces. If they are the same, chose the one with the
         // lower patch index. In the case of an ACMI-wall pair, this will be
         // the ACMI, which is what we want.
-        const class face& thisFace = mesh_.faces()[facei_];
-        const class face& otherFace = mesh_.faces()[otherFaceI];
+        const Foam::face& thisFace = mesh_.faces()[facei_];
+        const Foam::face& otherFace = mesh_.faces()[otherFaceI];
         if (face::compare(thisFace, otherFace) != 0)
         {
             const label otherPatch =
@@ -442,12 +440,12 @@ void Foam::particle::locate
     // Loop all cell tets to find the one containing the position. Track
     // through each tet from the cell centre. If a tet contains the position
     // then the track will end with a single trackToTri.
-    const class cell& c = mesh_.cells()[celli_];
+    const Foam::cell& c = mesh_.cells()[celli_];
     scalar minF = VGREAT;
     label minTetFacei = -1, minTetPti = -1;
     forAll(c, cellTetFacei)
     {
-        const class face& f = mesh_.faces()[c[cellTetFacei]];
+        const Foam::face& f = mesh_.faces()[c[cellTetFacei]];
         for (label tetPti = 1; tetPti < f.size() - 1; ++tetPti)
         {
             coordinates_ = barycentric(1, 0, 0, 0);
@@ -735,10 +733,7 @@ Foam::scalar Foam::particle::trackToStationaryTri
 
     if (debug)
     {
-        vector o, b, v1, v2;
-        stationaryTetGeometry(o, b, v1, v2);
-        Pout<< "Tet points o=" << o << ", b=" << b
-            << ", v1=" << v1 << ", v2=" << v2 << endl
+        Pout<< "Tet points: " << currentTetIndices().tet(mesh_) << endl
             << "Tet determinant = " << detA << endl
             << "Start local coordinates = " << y0 << endl;
     }
