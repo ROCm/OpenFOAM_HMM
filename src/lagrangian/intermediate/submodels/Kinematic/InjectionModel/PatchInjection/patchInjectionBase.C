@@ -29,7 +29,7 @@ License
 #include "polyMesh.H"
 #include "SubField.H"
 #include "Random.H"
-#include "triPointRef.H"
+#include "triangle.H"
 #include "volFields.H"
 #include "polyMeshTetDecomposition.H"
 

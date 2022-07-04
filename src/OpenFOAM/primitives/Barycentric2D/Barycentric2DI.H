@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,6 +47,17 @@ inline Foam::Barycentric2D<Cmpt>::Barycentric2D
     this->v_[B] = vb;
     this->v_[C] = vc;
 }
+
+
+template<class Cmpt>
+inline Foam::Barycentric2D<Cmpt>::Barycentric2D
+(
+    const Cmpt& va,
+    const Cmpt& vb
+)
+:
+    Barycentric2D<Cmpt>(va, vb, (pTraits<Cmpt>::one - va - vb))
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -93,6 +104,20 @@ inline Cmpt& Foam::Barycentric2D<Cmpt>::c()
 }
 
 
+// * * * * * * * * * * * * * * * Member Operations * * * * * * * * * * * * * //
+
+template<class Cmpt>
+inline Cmpt Foam::Barycentric2D<Cmpt>::inner
+(
+    const Barycentric2D<Cmpt>& b2
+) const
+{
+    const Barycentric2D<Cmpt>& b1 = *this;
+
+    return (b1.a()*b2.a() + b1.b()*b2.b() + b1.c()*b2.c());
+}
+
+
 template<class Cmpt>
 inline bool Foam::Barycentric2D<Cmpt>::outside() const
 {
@@ -114,7 +139,7 @@ inline Cmpt operator&
     const Barycentric2D<Cmpt>& b2
 )
 {
-    return b1.a()*b2.a() + b1.b()*b2.b() + b1.c()*b2.c();
+    return b1.inner(b2);
 }
 
 

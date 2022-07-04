@@ -33,13 +33,13 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cut_H
-#define cut_H
+#ifndef Foam_cut_H
+#define Foam_cut_H
 
 #include "plane.H"
 #include "FixedList.H"
-#include "tetPointRef.H"
-#include "triPointRef.H"
+#include "tetrahedron.H"
+#include "triangle.H"
 #include "zero.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -27,11 +27,11 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "triangleFuncs.H"
+#include "triangle.H"
 #include "pointField.H"
 #include "treeBoundBox.H"
 #include "SortableList.H"
 #include "boolList.H"
-#include "triPointRef.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 

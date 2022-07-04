@@ -39,8 +39,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef VectorSpace_H
-#define VectorSpace_H
+#ifndef Foam_VectorSpace_H
+#define Foam_VectorSpace_H
 
 #include "direction.H"
 #include "scalar.H"

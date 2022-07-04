@@ -27,9 +27,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "primitiveMeshGeometry.H"
-#include "pyramidPointFaceRef.H"
+#include "pyramid.H"
 #include "unitConversion.H"
-#include "triPointRef.H"
+#include "triangle.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -30,7 +30,7 @@ Class
 Description
     Templated 3D Vector derived from VectorSpace adding construction from
     3 components, element access using x(), y() and z() member functions and
-    the inner-product (dot-product) and cross product operators.
+    the inner-product (dot-product) and cross-product operators.
 
     A centre() member function which returns the Vector for which it is called
     is defined so that point which is a typedef to Vector\<scalar\> behaves as
@@ -130,6 +130,15 @@ public:
         //- Access to the vector z component
         inline Cmpt& z();
 
+
+    // Vector Operations
+
+        //- Return \c this (for point which is a typedef to Vector\<scalar\>)
+        inline const Vector<Cmpt>& centre
+        (
+            const Foam::UList<Vector<Cmpt>>&  /* (unused) */
+        ) const noexcept;
+
         //- Inplace normalise the vector by its magnitude
         //  For small magnitudes (less than ROOTVSMALL) set to zero.
         //  Will not be particularly useful for a vector of labels
@@ -139,12 +148,11 @@ public:
         //- unit vector.
         inline Vector<Cmpt>& removeCollinear(const Vector<Cmpt>& unitVec);
 
+        //- Scalar-product of \c this with another Vector.
+        inline Cmpt inner(const Vector<Cmpt>& v2) const;
 
-        //- Return *this (used for point which is a typedef to Vector<scalar>.
-        inline const Vector<Cmpt>& centre
-        (
-            const Foam::UList<Vector<Cmpt>>&  /* (unused) */
-        ) const;
+        //- Cross-product of \c this with another Vector.
+        inline Vector<Cmpt> cross(const Vector<Cmpt>& v2) const;
 };
 
 

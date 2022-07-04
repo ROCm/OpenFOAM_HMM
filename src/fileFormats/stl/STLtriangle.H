@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,9 +35,10 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef STLtriangle_H
-#define STLtriangle_H
+#ifndef Foam_STLtriangle_H
+#define Foam_STLtriangle_H
 
+#include <cstdint>
 #include "STLpoint.H"
 #include "Istream.H"
 #include "Ostream.H"
@@ -60,7 +61,7 @@ class STLtriangle
     // Typedefs
 
     //- Attribute is 16-bit
-    typedef unsigned short STLattrib;
+    typedef uint16_t STLattrib;
 
     // Private data
     // NB: The order of the members (1 normal, 3 points, 1 attribute) is
@@ -78,8 +79,8 @@ public:
 
     // Constructors
 
-        //- Construct null
-        inline STLtriangle();
+        //- Default construct
+        STLtriangle() = default;
 
         //- Construct from components
         inline STLtriangle
@@ -88,7 +89,7 @@ public:
             const STLpoint& a,
             const STLpoint& b,
             const STLpoint& c,
-            unsigned short attrib
+            uint16_t attrib
         );
 
         //- Construct from istream (read binary)
@@ -99,11 +100,11 @@ public:
 
         // Access
 
-            inline const STLpoint& normal() const;
-            inline const STLpoint& a() const;
-            inline const STLpoint& b() const;
-            inline const STLpoint& c() const;
-            inline unsigned short attrib() const;
+            const STLpoint& normal() const noexcept { return normal_; }
+            const STLpoint& a() const noexcept { return a_; }
+            const STLpoint& b() const noexcept { return b_; }
+            const STLpoint& c() const noexcept { return c_; }
+            uint16_t attrib() const noexcept { return attrib_; }
 
 
         // Read

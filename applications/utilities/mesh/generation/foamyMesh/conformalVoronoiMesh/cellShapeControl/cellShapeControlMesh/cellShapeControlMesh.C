@@ -31,7 +31,7 @@ License
 #include "pointIOField.H"
 #include "scalarIOField.H"
 #include "triadIOField.H"
-#include "tetPointRef.H"
+#include "tetrahedron.H"
 #include "plane.H"
 #include "transform.H"
 #include "meshTools.H"

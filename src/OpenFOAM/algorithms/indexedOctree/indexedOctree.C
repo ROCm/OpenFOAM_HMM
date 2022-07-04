@@ -27,7 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "indexedOctree.H"
-#include "linePointRef.H"
+#include "line.H"
 #include "OFstream.H"
 #include "ListOps.H"
 #include "memInfo.H"

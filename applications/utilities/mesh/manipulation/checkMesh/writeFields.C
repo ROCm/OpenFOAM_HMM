@@ -4,7 +4,7 @@
 #include "polyMeshTools.H"
 #include "zeroGradientFvPatchFields.H"
 #include "syncTools.H"
-#include "tetPointRef.H"
+#include "tetrahedron.H"
 #include "regionSplit.H"
 #include "wallDist.H"
 #include "cellAspectRatio.H"

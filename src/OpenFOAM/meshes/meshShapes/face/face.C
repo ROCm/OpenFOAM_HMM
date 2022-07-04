@@ -28,7 +28,7 @@ License
 
 #include "face.H"
 #include "triFace.H"
-#include "triPointRef.H"
+#include "triangle.H"
 #include "mathematicalConstants.H"
 #include "Circulator.H"
 #include <algorithm>

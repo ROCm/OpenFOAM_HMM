@@ -27,7 +27,6 @@ License
 
 #include "FreeStream.H"
 #include "constants.H"
-#include "triPointRef.H"
 #include "tetIndices.H"
 
 using namespace Foam::constant::mathematical;

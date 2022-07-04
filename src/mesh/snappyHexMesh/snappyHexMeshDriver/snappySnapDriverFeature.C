@@ -41,7 +41,7 @@ License
 #include "indexedOctree.H"
 #include "snapParameters.H"
 #include "PatchTools.H"
-#include "pyramidPointFaceRef.H"
+#include "pyramid.H"
 #include "localPointRegion.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //

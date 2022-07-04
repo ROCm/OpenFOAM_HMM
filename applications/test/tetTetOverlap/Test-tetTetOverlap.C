@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +32,7 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "tetPointRef.H"
+#include "tetrahedron.H"
 #include "OFstream.H"
 #include "meshTools.H"
 #include "cut.H"
@@ -44,12 +45,12 @@ void writeOBJ
 (
     Ostream& os,
     label& vertI,
-    const FixedList<point, 4>& tet
+    const tetPoints& tet
 )
 {
-    forAll(tet, fp)
+    for (const point& p : tet)
     {
-        meshTools::writeOBJ(os, tet[fp]);
+        meshTools::writeOBJ(os, p);
     }
     os  << "l " << vertI+1 << ' ' << vertI+2 << nl
         << "l " << vertI+1 << ' ' << vertI+3 << nl
@@ -61,33 +62,27 @@ void writeOBJ
 }
 
 
-tetPointRef makeTetPointRef(const FixedList<point, 4>& p)
-{
-    return tetPointRef(p[0], p[1], p[2], p[3]);
-}
-
-
 int main(int argc, char *argv[])
 {
     // Tets to test
-    FixedList<point, 4> tetA
-    ({
+    tetPoints tetA
+    (
         point(0, 0, 0),
         point(1, 0, 0),
         point(1, 1, 0),
         point(1, 1, 1)
-    });
-    FixedList<point, 4> tetB
-    ({
+    );
+    tetPoints tetB
+    (
         point(0.1, 0.1, 0.1),
         point(1.1, 0.1, 0.1),
         point(1.1, 1.1, 0.1),
         point(1.1, 1.1, 1.1)
-    });
+    );
 
 
     // Do intersection
-    typedef DynamicList<FixedList<point, 4>> tetList;
+    typedef DynamicList<tetPoints> tetList;
     tetList tetsIn1, tetsIn2, tetsOut;
     cut::appendOp<tetList> tetOpIn1(tetsIn1);
     cut::appendOp<tetList> tetOpIn2(tetsIn2);
@@ -155,25 +150,25 @@ int main(int argc, char *argv[])
 
 
     // Check the volumes
-    Info<< "Vol A: " << makeTetPointRef(tetA).mag() << endl;
+    Info<< "Vol A: " << tetA.tet().mag() << endl;
 
     scalar volIn = 0;
-    forAll(tetsIn, i)
+    for (const auto& t : tetsIn)
     {
-        volIn += makeTetPointRef(tetsIn[i]).mag();
+        volIn += t.tet().mag();
     }
     Info<< "Vol A inside B: " << volIn << endl;
 
     scalar volOut = 0;
-    forAll(tetsOut, i)
+    for (const auto& t : tetsOut)
     {
-        volOut += makeTetPointRef(tetsOut[i]).mag();
+        volOut += t.tet().mag();
     }
     Info<< "Vol A outside B: " << volOut << endl;
 
     Info<< "Sum inside and outside: " << volIn + volOut << endl;
 
-    if (mag(volIn + volOut - makeTetPointRef(tetA).mag()) > SMALL)
+    if (mag(volIn + volOut - tetA.tet().mag()) > SMALL)
     {
         FatalErrorInFunction
             << "Tet volumes do not sum up to input tet."

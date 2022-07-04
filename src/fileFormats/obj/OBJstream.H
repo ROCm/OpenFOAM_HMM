@@ -35,14 +35,14 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef OBJstream_H
-#define OBJstream_H
+#ifndef Foam_OBJstream_H
+#define Foam_OBJstream_H
 
 #include "OFstream.H"
 #include "point.H"
 #include "edge.H"
 #include "face.H"
-#include "triPointRef.H"
+#include "triangle.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

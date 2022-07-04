@@ -35,11 +35,11 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef treeDataEdge_H
-#define treeDataEdge_H
+#ifndef Foam_treeDataEdge_H
+#define Foam_treeDataEdge_H
 
 #include "treeBoundBoxList.H"
-#include "linePointRef.H"
+#include "line.H"
 #include "volumeType.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -47,7 +47,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 template<class Type> class indexedOctree;
 
 /*---------------------------------------------------------------------------*\

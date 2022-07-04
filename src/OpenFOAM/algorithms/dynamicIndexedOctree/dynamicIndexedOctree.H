@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef dynamicIndexedOctree_H
-#define dynamicIndexedOctree_H
+#ifndef Foam_dynamicIndexedOctree_H
+#define Foam_dynamicIndexedOctree_H
 
 #include "treeBoundBox.H"
 #include "pointIndexHit.H"
@@ -54,7 +54,7 @@ namespace Foam
 
 typedef DynamicList<autoPtr<DynamicList<label>>> contentListList;
 
-// Forward declaration of classes
+// Forward Declarations
 template<class Type> class dynamicIndexedOctree;
 
 template<class Type> Ostream& operator<<

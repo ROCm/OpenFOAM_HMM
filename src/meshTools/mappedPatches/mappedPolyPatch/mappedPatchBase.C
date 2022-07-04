@@ -42,7 +42,7 @@ License
 #include "Time.H"
 #include "mapDistribute.H"
 #include "SubField.H"
-#include "triPointRef.H"
+#include "triangle.H"
 #include "syncTools.H"
 #include "treeDataCell.H"
 #include "DynamicField.H"

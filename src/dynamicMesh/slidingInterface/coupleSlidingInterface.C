@@ -33,7 +33,7 @@ License
 #include "enrichedPatch.H"
 #include "DynamicList.H"
 #include "pointHit.H"
-#include "triPointRef.H"
+#include "triangle.H"
 #include "plane.H"
 #include "polyTopoChanger.H"
 #include "polyAddPoint.H"

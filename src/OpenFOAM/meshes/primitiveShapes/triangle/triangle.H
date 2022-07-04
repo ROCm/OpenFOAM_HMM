@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,18 +35,20 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef triangle_H
-#define triangle_H
+#ifndef Foam_triangle_H
+#define Foam_triangle_H
 
 #include "intersection.H"
+#include "point.H"
 #include "vector.H"
 #include "tensor.H"
 #include "pointHit.H"
 #include "Random.H"
 #include "FixedList.H"
 #include "UList.H"
-#include "linePointRef.H"
+#include "line.H"
 #include "barycentric2D.H"
+#include "treeBoundBox.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,7 +57,6 @@ namespace Foam
 
 // Forward Declarations
 class plane;
-class triPoints;
 
 template<class Point, class PointRef> class triangle;
 
@@ -70,6 +71,73 @@ inline Ostream& operator<<(Ostream&, const triangle<Point, PointRef>&);
 
 //- A triangle using referred points
 typedef triangle<point, const point&> triPointRef;
+
+
+/*---------------------------------------------------------------------------*\
+                          Class triPoints Declaration
+\*---------------------------------------------------------------------------*/
+
+//- Triangle point storage. Default constructable (triangle is not)
+class triPoints
+:
+    public FixedList<point, 3>
+{
+public:
+
+    // Generated Methods
+
+        //- Default construct
+        triPoints() = default;
+
+
+    // Constructors
+
+        //- Construct from three points
+        inline triPoints(const point& p0, const point& p1, const point& p2);
+
+        //- Construct from point references
+        inline explicit triPoints(const triPointRef& pts);
+
+        //- Construct from three points
+        inline triPoints(const FixedList<point, 3>& pts);
+
+        //- Copy construct from subset of points
+        inline triPoints
+        (
+            const UList<point>& points,
+            const FixedList<label, 3>& indices
+        );
+
+
+    // Member Functions
+
+        //- The first vertex
+        const point& a() const { return operator[](0); }
+
+        //- The second vertex
+        const point& b() const { return operator[](1); }
+
+        //- The third vertex
+        const point& c() const { return operator[](2); }
+
+        //- The first vertex
+        point& a() { return operator[](0); }
+
+        //- The second vertex
+        point& b() { return operator[](1); }
+
+        //- The third vertex
+        point& c() { return operator[](2); }
+
+        //- Return as triangle reference
+        inline triPointRef tri() const;
+
+        //- Flip triangle orientation by swapping second and third vertices
+        inline void flip();
+
+        //- The bounding box for the tetrahedron
+        inline treeBoundBox bounds() const;
+};
 
 
 /*---------------------------------------------------------------------------*\
@@ -90,7 +158,7 @@ public:
         //- with another triangle
         typedef FixedList<triPoints, 27> triIntersectionList;
 
-        //- The proximity classifications
+        //- Proximity classifications
         enum proxType
         {
             NONE = 0,   //!< Unknown proximity
@@ -99,10 +167,10 @@ public:
         };
 
 
-    // Public classes
+    // Public Classes
 
-        // Classes for use in sliceWithPlane. What to do with decomposition
-        // of triangle.
+        // Classes for use in sliceWithPlane.
+        // What to do with decomposition of triangle.
 
             //- Dummy
             class dummyOp
@@ -169,10 +237,10 @@ public:
     // Constructors
 
         //- Construct from three points
-        inline triangle(const Point& a, const Point& b, const Point& c);
+        inline triangle(const Point& p0, const Point& p1, const Point& p2);
 
         //- Construct from three points
-        inline triangle(const FixedList<Point, 3>& tri);
+        inline triangle(const FixedList<Point, 3>& pts);
 
         //- Construct from three points in the list of points
         //  The indices could be from triFace etc.
@@ -188,16 +256,16 @@ public:
 
     // Member Functions
 
-        // Access
+    // Access
 
-            //- Return first vertex
-            inline const Point& a() const;
+        //- The first vertex
+        const Point& a() const noexcept { return a_; }
 
-            //- Return second vertex
-            inline const Point& b() const;
+        //- The second vertex
+        const Point& b() const noexcept { return b_; }
 
-            //- Return third vertex
-            inline const Point& c() const;
+        //- The third vertex
+        const Point& c() const noexcept { return c_; }
 
 
         // Properties
@@ -245,7 +313,7 @@ public:
             ) const;
 
             //- Return a random point on the triangle from a uniform
-            //  distribution
+            //- distribution
             inline Point randomPoint(Random& rndGen) const;
 
             //- Calculate the point from the given barycentric coordinates.

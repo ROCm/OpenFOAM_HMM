@@ -32,7 +32,7 @@ License
 #include "stringIOList.H"
 #include "cellModel.H"
 #include "vectorIOField.H"
-#include "triPointRef.H"
+#include "triangle.H"
 #include "stringOps.H"
 
 /* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */

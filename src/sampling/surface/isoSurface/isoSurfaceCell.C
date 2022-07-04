@@ -36,7 +36,7 @@ License
 #include "triSurface.H"
 #include "triSurfaceTools.H"
 #include "Time.H"
-#include "triPoints.H"
+#include "triangle.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

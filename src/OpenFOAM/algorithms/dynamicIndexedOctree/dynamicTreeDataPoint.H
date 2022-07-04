@@ -39,12 +39,12 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef dynamicTreeDataPoint_H
-#define dynamicTreeDataPoint_H
+#ifndef Foam_dynamicTreeDataPoint_H
+#define Foam_dynamicTreeDataPoint_H
 
 #include "pointField.H"
 #include "treeBoundBox.H"
-#include "linePointRef.H"
+#include "line.H"
 #include "volumeType.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -52,7 +52,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 template<class Type> class dynamicIndexedOctree;
 
 /*---------------------------------------------------------------------------*\

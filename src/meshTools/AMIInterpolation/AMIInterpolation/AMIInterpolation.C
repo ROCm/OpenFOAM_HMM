@@ -31,7 +31,7 @@ License
 #include "mapDistribute.H"
 #include "flipOp.H"
 #include "profiling.H"
-#include "triPointRef.H"
+#include "triangle.H"
 #include "OFstream.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //

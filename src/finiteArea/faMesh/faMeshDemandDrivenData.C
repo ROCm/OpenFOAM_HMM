@@ -37,7 +37,7 @@ License
 #include "processorFaPatchFields.H"
 #include "emptyFaPatchFields.H"
 #include "wedgeFaPatch.H"
-#include "triPointRef.H"
+#include "triangle.H"
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 

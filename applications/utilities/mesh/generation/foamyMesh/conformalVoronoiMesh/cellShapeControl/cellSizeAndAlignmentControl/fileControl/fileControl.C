@@ -27,7 +27,6 @@ License
 
 #include "fileControl.H"
 #include "addToRunTimeSelectionTable.H"
-#include "tetPointRef.H"
 #include "scalarList.H"
 #include "vectorTools.H"
 #include "pointIOField.H"
@@ -48,9 +47,6 @@ addToRunTimeSelectionTable
 );
 
 }
-
-
-// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

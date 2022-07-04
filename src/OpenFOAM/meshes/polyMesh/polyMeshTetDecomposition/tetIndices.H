@@ -59,8 +59,8 @@ SourceFiles
 #define Foam_tetIndices_H
 
 #include "label.H"
-#include "tetPointRef.H"
-#include "triPointRef.H"
+#include "tetrahedron.H"
+#include "triangle.H"
 #include "polyMesh.H"
 #include "triFace.H"
 #include "face.H"
@@ -75,7 +75,6 @@ class tetIndices;
 
 Istream& operator>>(Istream&, tetIndices&);
 Ostream& operator<<(Ostream&, const tetIndices&);
-
 
 /*---------------------------------------------------------------------------*\
                          Class tetIndices Declaration
@@ -149,34 +148,48 @@ public:
         label& tetPt() noexcept { return tetPti_; }
 
 
-    // Searching
+    // Mesh-related
 
-        //- Return the indices corresponding to the tri on the face for
-        //  this tet. The normal of the tri points out of the cell
+        //- The indices corresponding to the tri on the face for this tet.
+        //- The normal of the tri points out of the cell.
         inline triFace faceTriIs
         (
             const polyMesh& mesh,
             const bool warn = true
         ) const;
 
-        //- Return the local indices corresponding to the tri on the face
-        //- for this tet. The normal of the tri points out of the cell
+        //- Local indices corresponding to the tri on the face for this tet.
+        //- The normal of the tri points out of the cell.
         inline triFace triIs
         (
             const polyMesh& mesh,
             const bool warn = true
         ) const;
 
-        //- Return the geometry corresponding to this tet
+
+        //- The tet geometry for this tet,
+        //- where point0 is the cell centre.
         inline tetPointRef tet(const polyMesh& mesh) const;
 
-        //- Return the geometry corresponding to the tri on the face for
-        //- this tet. The normal of the tri points out of the cell
+        //- The tet geometry for this tet (using old positions),
+        //- where point0 is the cell centre.
+        inline tetPointRef oldTet(const polyMesh& mesh) const;
+
+        //- The triangle geometry for the face for this tet.
+        //- The normal of the tri points out of the cell
         inline triPointRef faceTri(const polyMesh& mesh) const;
 
-        //- Return the geometry corresponding to the tri on the face for
-        //- this tet using the old positions
+        //- The triangle geometry for the face for this tet
+        //- (using old positions)
         inline triPointRef oldFaceTri(const polyMesh& mesh) const;
+
+        //- The x/y/z position for given barycentric coordinates
+        //- (where point0 is the cell centre).
+        inline point barycentricToPoint
+        (
+            const polyMesh& mesh,
+            const barycentric& bary
+        ) const;
 
 
     // Other

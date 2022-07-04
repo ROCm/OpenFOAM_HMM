@@ -29,7 +29,7 @@ License
 #include "primitiveMeshTools.H"
 #include "primitiveMesh.H"
 #include "syncTools.H"
-#include "pyramidPointFaceRef.H"
+#include "pyramid.H"
 #include "PrecisionAdaptor.H"
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //

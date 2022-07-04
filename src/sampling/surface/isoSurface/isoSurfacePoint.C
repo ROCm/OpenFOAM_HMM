@@ -32,7 +32,7 @@ License
 #include "volFields.H"
 #include "triSurfaceTools.H"
 #include "triSurface.H"
-#include "triPoints.H"
+#include "triangle.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

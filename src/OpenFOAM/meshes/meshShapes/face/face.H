@@ -43,8 +43,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef face_H
-#define face_H
+#ifndef Foam_face_H
+#define Foam_face_H
 
 #include "pointField.H"
 #include "labelList.H"
@@ -435,6 +435,12 @@ public:
         static bool sameVertices(const face& a, const face& b);
 
 
+    // Member Operators
+
+        //- Increment (offset) vertices by given amount
+        inline void operator+=(const label vertexOffset);
+
+
     // Hashing
 
         //- The symmetric hash value for face.
@@ -494,19 +500,11 @@ template<> struct Hash<face> : face::hasher {};
 template<>
 struct offsetOp<face>
 {
-    inline face operator()
-    (
-        const face& x,
-        const label offset
-    ) const
+    face operator()(const face& x, const label offset) const
     {
-        face result(x.size());
-
-        forAll(x, i)
-        {
-            result[i] = x[i] + offset;
-        }
-        return result;
+        face f(x);
+        f += offset;
+        return f;
     }
 };
 

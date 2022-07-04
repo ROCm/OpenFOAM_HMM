@@ -36,16 +36,16 @@ inline Foam::tetCell::tetCell()
 
 inline Foam::tetCell::tetCell
 (
-    const label a,
-    const label b,
-    const label c,
-    const label d
+    const label p0,
+    const label p1,
+    const label p2,
+    const label p3
 )
 {
-    operator[](0) = a;
-    operator[](1) = b;
-    operator[](2) = c;
-    operator[](3) = d;
+    operator[](0) = p0;
+    operator[](1) = p1;
+    operator[](2) = p2;
+    operator[](3) = p3;
 }
 
 

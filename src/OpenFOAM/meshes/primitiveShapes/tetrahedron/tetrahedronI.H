@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,24 +28,76 @@ License
 
 #include "triangle.H"
 #include "IOstreams.H"
-#include "tetPoints.H"
 #include "plane.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+inline Foam::tetPoints::tetPoints
+(
+    const point& p0,
+    const point& p1,
+    const point& p2,
+    const point& p3
+)
+{
+    operator[](0) = p0;
+    operator[](1) = p1;
+    operator[](2) = p2;
+    operator[](3) = p3;
+}
+
+
+inline Foam::tetPoints::tetPoints(const tetPointRef& pts)
+{
+    operator[](0) = pts.a();
+    operator[](1) = pts.b();
+    operator[](2) = pts.c();
+    operator[](3) = pts.d();
+}
+
+
+inline Foam::tetPoints::tetPoints(const FixedList<point, 4>& pts)
+:
+    FixedList<point, 4>(pts)
+{}
+
+
+inline Foam::tetPoints::tetPoints
+(
+    const UList<point>& points,
+    const FixedList<label, 4>& indices
+)
+:
+    FixedList<point, 4>(points, indices)
+{}
+
+
 template<class Point, class PointRef>
 inline Foam::tetrahedron<Point, PointRef>::tetrahedron
 (
-    const Point& a,
-    const Point& b,
-    const Point& c,
-    const Point& d
+    const Point& p0,
+    const Point& p1,
+    const Point& p2,
+    const Point& p3
 )
 :
-    a_(a),
-    b_(b),
-    c_(c),
-    d_(d)
+    a_(p0),
+    b_(p1),
+    c_(p2),
+    d_(p3)
+{}
+
+
+template<class Point, class PointRef>
+inline Foam::tetrahedron<Point, PointRef>::tetrahedron
+(
+    const FixedList<Point, 4>& pts
+)
+:
+    a_(pts[0]),
+    b_(pts[1]),
+    c_(pts[2]),
+    d_(pts[3])
 {}
 
 
@@ -72,33 +124,31 @@ inline Foam::tetrahedron<Point, PointRef>::tetrahedron(Istream& is)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class Point, class PointRef>
-inline const Point& Foam::tetrahedron<Point, PointRef>::a() const
+inline Foam::tetPointRef Foam::tetPoints::tet() const
 {
-    return a_;
+    return tetPointRef(a(), b(), c(), d());
 }
 
 
-template<class Point, class PointRef>
-inline const Point& Foam::tetrahedron<Point, PointRef>::b() const
+inline void Foam::tetPoints::flip()
 {
-    return b_;
+    // swap pt2 <-> pt3
+    point t(c());
+    c() = d();
+    d() = t;
 }
 
 
-template<class Point, class PointRef>
-inline const Point& Foam::tetrahedron<Point, PointRef>::c() const
+inline Foam::treeBoundBox Foam::tetPoints::bounds() const
 {
-    return c_;
+    treeBoundBox bb;
+    bb.add(static_cast<const FixedList<point, 4>&>(*this));
+    return bb;
 }
 
 
-template<class Point, class PointRef>
-inline const Point& Foam::tetrahedron<Point, PointRef>::d() const
-{
-    return d_;
-}
-
+// Warning. Ordering of faces needs to be the same for a tetrahedron class,
+// tetrahedron cell shape model and a tetCell
 
 template<class Point, class PointRef>
 inline Foam::triPointRef Foam::tetrahedron<Point, PointRef>::tri
@@ -257,7 +307,7 @@ inline Point Foam::tetrahedron<Point, PointRef>::barycentricToPoint
     const barycentric& bary
 ) const
 {
-    return bary[0]*a_ + bary[1]*b_ + bary[2]*c_ + bary[3]*d_;
+    return Point(bary.a()*a_ + bary.b()*b_ + bary.c()*c_ + bary.d()*d_);
 }
 
 
@@ -310,7 +360,7 @@ inline Foam::scalar Foam::tetrahedron<Point, PointRef>::pointToBarycentric
     bary[0] = res.x();
     bary[1] = res.y();
     bary[2] = res.z();
-    bary[3] = 1 - cmptSum(res);
+    bary[3] = 1 - bary[0] - bary[1] - bary[2];
 
     return detT;
 }
@@ -334,63 +384,83 @@ inline Foam::pointHit Foam::tetrahedron<Point, PointRef>::nearestPoint
 
     bool inside = true;
 
-    if (((p - b_) & Sa()) >= 0)
+    // Side a
     {
-        // p is outside halfspace plane of tri
-        pointHit info = triangle<Point, PointRef>(b_, c_, d_).nearestPoint(p);
+        const triangle<Point, PointRef> tria(b_, c_, d_);
 
-        inside = false;
-
-        if (info.distance() < minOutsideDistance)
+        if (((p - b_) & tria.areaNormal()) >= 0)
         {
-            closestPt = info.rawPoint();
+            // p is outside halfspace plane of tri
+            pointHit info = tria.nearestPoint(p);
 
-            minOutsideDistance = info.distance();
+            inside = false;
+
+            if (info.distance() < minOutsideDistance)
+            {
+                closestPt = info.rawPoint();
+
+                minOutsideDistance = info.distance();
+            }
         }
     }
 
-    if (((p - a_) & Sb()) >= 0)
+    // Side b
     {
-        // p is outside halfspace plane of tri
-        pointHit info = triangle<Point, PointRef>(a_, d_, c_).nearestPoint(p);
+        const triangle<Point, PointRef> tria(a_, d_, c_);
 
-        inside = false;
-
-        if (info.distance() < minOutsideDistance)
+        if (((p - a_) & tria.areaNormal()) >= 0)
         {
-            closestPt = info.rawPoint();
+            // p is outside halfspace plane of tri
+            pointHit info = tria.nearestPoint(p);
 
-            minOutsideDistance = info.distance();
+            inside = false;
+
+            if (info.distance() < minOutsideDistance)
+            {
+                closestPt = info.rawPoint();
+
+                minOutsideDistance = info.distance();
+            }
         }
     }
 
-    if (((p - a_) & Sc()) >= 0)
+    // Side c
     {
-        // p is outside halfspace plane of tri
-        pointHit info = triangle<Point, PointRef>(a_, b_, d_).nearestPoint(p);
+        const triangle<Point, PointRef> tria(a_, b_, d_);
 
-        inside = false;
-
-        if (info.distance() < minOutsideDistance)
+        if (((p - a_) & tria.areaNormal()) >= 0)
         {
-            closestPt = info.rawPoint();
+            // p is outside halfspace plane of tri
+            pointHit info = tria.nearestPoint(p);
 
-            minOutsideDistance = info.distance();
+            inside = false;
+
+            if (info.distance() < minOutsideDistance)
+            {
+                closestPt = info.rawPoint();
+
+                minOutsideDistance = info.distance();
+            }
         }
     }
 
-    if (((p - a_) & Sd()) >= 0)
+    // Side c
     {
-        // p is outside halfspace plane of tri
-        pointHit info = triangle<Point, PointRef>(a_, c_, b_).nearestPoint(p);
+        const triangle<Point, PointRef> tria(a_, c_, b_);
 
-        inside = false;
-
-        if (info.distance() < minOutsideDistance)
+        if (((p - a_) & tria.areaNormal()) >= 0)
         {
-            closestPt = info.rawPoint();
+            // p is outside halfspace plane of tri
+            pointHit info = tria.nearestPoint(p);
 
-            minOutsideDistance = info.distance();
+            inside = false;
+
+            if (info.distance() < minOutsideDistance)
+            {
+                closestPt = info.rawPoint();
+
+                minOutsideDistance = info.distance();
+            }
         }
     }
 
@@ -412,7 +482,7 @@ inline Foam::pointHit Foam::tetrahedron<Point, PointRef>::nearestPoint
 
 
 template<class Point, class PointRef>
-bool Foam::tetrahedron<Point, PointRef>::inside(const point& pt) const
+bool Foam::tetrahedron<Point, PointRef>::inside(const point& p) const
 {
     // For robustness, assuming that the point is in the tet unless
     // "definitively" shown otherwise by obtaining a positive dot
@@ -429,55 +499,41 @@ bool Foam::tetrahedron<Point, PointRef>::inside(const point& pt) const
     // planeBase[2] = tetBasePt = b_
     // planeBase[3] = tetBasePt = b_
 
-    vector n = Zero;
-
+    // Side a
     {
-        // 0, a
-        const point& basePt = b_;
+        const triangle<Point, PointRef> tria(b_, c_, d_);
 
-        n = Sa();
-        n /= (Foam::mag(n) + VSMALL);
-
-        if (((pt - basePt) & n) > SMALL)
+        if (((p - b_) & tria.unitNormal()) > SMALL)
         {
             return false;
         }
     }
 
+    // Side b
     {
-        // 1, b
-        const point& basePt = c_;
+        const triangle<Point, PointRef> tria(a_, d_, c_);
 
-        n = Sb();
-        n /= (Foam::mag(n) + VSMALL);
-
-        if (((pt - basePt) & n) > SMALL)
+        if (((p - a_) & tria.unitNormal()) > SMALL)
         {
             return false;
         }
     }
 
+    // Side c
     {
-        // 2, c
-        const point& basePt = b_;
+        const triangle<Point, PointRef> tria(a_, b_, d_);
 
-        n = Sc();
-        n /= (Foam::mag(n) + VSMALL);
-
-        if (((pt - basePt) & n) > SMALL)
+        if (((p - a_) & tria.unitNormal()) > SMALL)
         {
             return false;
         }
     }
 
+    // Side d
     {
-        // 3, d
-        const point& basePt = b_;
+        const triangle<Point, PointRef> tria(a_, c_, b_);
 
-        n = Sd();
-        n /= (Foam::mag(n) + VSMALL);
-
-        if (((pt - basePt) & n) > SMALL)
+        if (((p - a_) & tria.unitNormal()) > SMALL)
         {
             return false;
         }
@@ -1055,6 +1111,7 @@ inline Foam::Ostream& Foam::operator<<
     const tetrahedron<Point, PointRef>& t
 )
 {
+    // Format like FixedList
     os  << nl
         << token::BEGIN_LIST
         << t.a_ << token::SPACE

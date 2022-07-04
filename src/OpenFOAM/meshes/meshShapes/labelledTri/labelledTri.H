@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef labelledTri_H
-#define labelledTri_H
+#ifndef Foam_labelledTri_H
+#define Foam_labelledTri_H
 
 #include "triFace.H"
 #include "ListListOps.H"
@@ -91,9 +91,9 @@ public:
         //- and optional region index (0 if unspecified)
         inline labelledTri
         (
-            const label a,
-            const label b,
-            const label c,
+            const label p0,
+            const label p1,
+            const label p2,
             const label region = 0
         );
 
@@ -179,13 +179,9 @@ struct offsetOp<labelledTri>
 {
     labelledTri operator()(const labelledTri& x, const label offset) const
     {
-        labelledTri result(x);
-
-        forAll(x, xi)
-        {
-            result[xi] = x[xi] + offset;
-        }
-        return result;
+        labelledTri f(x);
+        f += offset;
+        return f;
     }
 };
 

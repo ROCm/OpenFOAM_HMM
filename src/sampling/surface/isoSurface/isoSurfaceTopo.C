@@ -31,7 +31,6 @@ License
 #include "volFields.H"
 #include "edgeHashes.H"
 #include "tetCell.H"
-#include "tetPointRef.H"
 #include "DynamicField.H"
 #include "syncTools.H"
 #include "indirectPrimitivePatch.H"

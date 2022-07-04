@@ -44,7 +44,7 @@ SourceFiles
 #include "FixedList.H"
 #include "plane.H"
 #include "face.H"
-#include "triPoints.H"
+#include "triangle.H"
 #include "Enum.H"
 #include "searchableSurface.H"
 

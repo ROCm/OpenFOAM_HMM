@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,6 +49,18 @@ inline Foam::Barycentric<Cmpt>::Barycentric
     this->v_[C] = vc;
     this->v_[D] = vd;
 }
+
+
+template<class Cmpt>
+inline Foam::Barycentric<Cmpt>::Barycentric
+(
+    const Cmpt& va,
+    const Cmpt& vb,
+    const Cmpt& vc
+)
+:
+    Barycentric<Cmpt>(va, vb, vc, (pTraits<Cmpt>::one - va - vb - vc))
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -108,6 +121,17 @@ inline Cmpt& Foam::Barycentric<Cmpt>::d()
 }
 
 
+// * * * * * * * * * * * * * * * Member Operations * * * * * * * * * * * * * //
+
+template<class Cmpt>
+inline Cmpt Foam::Barycentric<Cmpt>::inner(const Barycentric<Cmpt>& b2) const
+{
+    const Barycentric<Cmpt>& b1 = *this;
+
+    return (b1.a()*b2.a() + b1.b()*b2.b() + b1.c()*b2.c() + b1.d()*b2.d());
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -118,7 +142,7 @@ namespace Foam
 template<class Cmpt>
 inline Cmpt operator&(const Barycentric<Cmpt>& b1, const Barycentric<Cmpt>& b2)
 {
-    return b1.a()*b2.a() + b1.b()*b2.b() + b1.c()*b2.c() + b1.d()*b2.d();
+    return b1.inner(b2);
 }
 
 

@@ -28,7 +28,6 @@ License
 
 #include "IOstreams.H"
 #include "face.H"
-#include "triPointRef.H"
 #include <algorithm>  // For std::swap
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
@@ -68,16 +67,11 @@ inline Foam::triFace::triFace()
 {}
 
 
-inline Foam::triFace::triFace
-(
-    const label a,
-    const label b,
-    const label c
-)
+inline Foam::triFace::triFace(const label p0, const label p1, const label p2)
 {
-    operator[](0) = a;
-    operator[](1) = b;
-    operator[](2) = c;
+    operator[](0) = p0;
+    operator[](1) = p1;
+    operator[](2) = p2;
 }
 
 
@@ -473,6 +467,19 @@ inline int Foam::triFace::edgeDirection(const Foam::edge& e) const
     }
 
     return 0;  // Not found
+}
+
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+inline void Foam::triFace::operator+=(const label vertexOffset)
+{
+    if (vertexOffset)
+    {
+        (*this)[0] += vertexOffset;
+        (*this)[1] += vertexOffset;
+        (*this)[2] += vertexOffset;
+    }
 }
 
 

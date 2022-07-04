@@ -57,9 +57,9 @@ inline Foam::triFace Foam::tetIndices::faceTriIs
     const bool warn
 ) const
 {
-    const Foam::face& f = mesh.faces()[face()];
+    const Foam::face& f = mesh.faces()[facei_];
 
-    label faceBasePtI = mesh.tetBasePtIs()[face()];
+    label faceBasePtI = mesh.tetBasePtIs()[facei_];
 
     if (faceBasePtI < 0)
     {
@@ -67,24 +67,25 @@ inline Foam::triFace Foam::tetIndices::faceTriIs
 
         if (warn && nWarnings_ < maxNWarnings)
         {
-            ++nWarnings_;
             WarningInFunction
-                << "No base point for face " << face() << ", " << f
+                << "No base point for face " << facei_ << ", " << f
                 << ", produces a valid tet decomposition." << endl;
-            if (nWarnings_ == maxNWarnings)
+
+            if (++nWarnings_ == maxNWarnings)
             {
                 Warning
-                    << "Suppressing any further warnings." << endl;
+                    << "Suppressing further warnings." << endl;
             }
         }
     }
 
-    label facePtI = (tetPti_ + faceBasePtI) % f.size();
-    label faceOtherPtI = f.fcIndex(facePtI);
+    const label facePtI = (tetPti_ + faceBasePtI) % f.size();
+    const label faceOtherPtI = f.fcIndex(facePtI);
 
-    if (mesh.faceOwner()[face()] != cell())
+    if (mesh.faceOwner()[facei_] != celli_)
     {
-        std::swap(facePtI, faceOtherPtI);
+        // Neighbour: return flipped face
+        return triFace(f[faceBasePtI], f[faceOtherPtI], f[facePtI]);
     }
 
     return triFace(f[faceBasePtI], f[facePtI], f[faceOtherPtI]);
@@ -97,9 +98,9 @@ inline Foam::triFace Foam::tetIndices::triIs
     const bool warn
 ) const
 {
-    const Foam::face& f = mesh.faces()[face()];
+    const Foam::face& f = mesh.faces()[facei_];
 
-    label faceBasePtI = mesh.tetBasePtIs()[face()];
+    label faceBasePtI = mesh.tetBasePtIs()[facei_];
 
     if (faceBasePtI < 0)
     {
@@ -107,24 +108,25 @@ inline Foam::triFace Foam::tetIndices::triIs
 
         if (warn && nWarnings_ < maxNWarnings)
         {
-            ++nWarnings_;
             WarningInFunction
-                << "No base point for face " << face() << ", " << f
+                << "No base point for face " << facei_ << ", " << f
                 << ", produces a valid tet decomposition." << endl;
-            if (nWarnings_ == maxNWarnings)
+
+            if (++nWarnings_ == maxNWarnings)
             {
                 Warning
-                    << "Suppressing any further warnings." << endl;
+                    << "Suppressing further warnings." << endl;
             }
         }
     }
 
-    label facePtI = (tetPti_ + faceBasePtI) % f.size();
-    label faceOtherPtI = f.fcIndex(facePtI);
+    const label facePtI = (tetPti_ + faceBasePtI) % f.size();
+    const label faceOtherPtI = f.fcIndex(facePtI);
 
-    if (mesh.faceOwner()[face()] != cell())
+    if (mesh.faceOwner()[facei_] != celli_)
     {
-        std::swap(facePtI, faceOtherPtI);
+        // Neighbour: return flipped face
+        return triFace(faceBasePtI, faceOtherPtI, facePtI);
     }
 
     return triFace(faceBasePtI, facePtI, faceOtherPtI);
@@ -133,30 +135,60 @@ inline Foam::triFace Foam::tetIndices::triIs
 
 inline Foam::tetPointRef Foam::tetIndices::tet(const polyMesh& mesh) const
 {
-    const pointField& meshPoints = mesh.points();
+    const pointField& pts = mesh.points();
     const triFace tri = faceTriIs(mesh);
 
     return tetPointRef
     (
-        mesh.cellCentres()[cell()],
-        meshPoints[tri[0]],
-        meshPoints[tri[1]],
-        meshPoints[tri[2]]
+        mesh.cellCentres()[celli_],
+        pts[tri[0]],
+        pts[tri[1]],
+        pts[tri[2]]
+    );
+}
+
+
+inline Foam::tetPointRef Foam::tetIndices::oldTet(const polyMesh& mesh) const
+{
+    const pointField& pts = mesh.oldPoints();
+    const triFace tri = faceTriIs(mesh);
+
+    return tetPointRef
+    (
+        mesh.oldCellCentres()[celli_],
+        pts[tri[0]],
+        pts[tri[1]],
+        pts[tri[2]]
+    );
+}
+
+
+inline Foam::point Foam::tetIndices::barycentricToPoint
+(
+    const polyMesh& mesh,
+    const barycentric& bary
+) const
+{
+    const pointField& pts = mesh.points();
+    const triFace tri = faceTriIs(mesh);
+
+    const point& a = mesh.cellCentres()[celli_];
+    const point& b = pts[tri[0]];
+    const point& c = pts[tri[1]];
+    const point& d = pts[tri[2]];
+
+    return point
+    (
+        (bary.a()*a.x() + bary.b()*b.x() + bary.c()*c.x() + bary.d()*d.x()),
+        (bary.a()*a.y() + bary.b()*b.y() + bary.c()*c.y() + bary.d()*d.y()),
+        (bary.a()*a.z() + bary.b()*b.z() + bary.c()*c.z() + bary.d()*d.z())
     );
 }
 
 
 inline Foam::triPointRef Foam::tetIndices::faceTri(const polyMesh& mesh) const
 {
-    const pointField& meshPoints = mesh.points();
-    const triFace tri = faceTriIs(mesh);
-
-    return triPointRef
-    (
-        meshPoints[tri[0]],
-        meshPoints[tri[1]],
-        meshPoints[tri[2]]
-    );
+    return faceTriIs(mesh).tri(mesh.points());
 }
 
 
@@ -165,15 +197,7 @@ inline Foam::triPointRef Foam::tetIndices::oldFaceTri
     const polyMesh& mesh
 ) const
 {
-    const pointField& meshOldPoints = mesh.oldPoints();
-    const triFace tri = faceTriIs(mesh);
-
-    return triPointRef
-    (
-        meshOldPoints[tri[0]],
-        meshOldPoints[tri[1]],
-        meshOldPoints[tri[2]]
-    );
+    return faceTriIs(mesh).tri(mesh.oldPoints());
 }
 
 

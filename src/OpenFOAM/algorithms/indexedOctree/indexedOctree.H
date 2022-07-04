@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef indexedOctree_H
-#define indexedOctree_H
+#ifndef Foam_indexedOctree_H
+#define Foam_indexedOctree_H
 
 #include "treeBoundBox.H"
 #include "pointIndexHit.H"
@@ -51,7 +51,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 template<class Type> class indexedOctree;
 template<class Type> Ostream& operator<<(Ostream&, const indexedOctree<Type>&);
 class Istream;

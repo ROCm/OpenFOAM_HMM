@@ -26,7 +26,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "tetrahedron.H"
-#include "triPointRef.H"
 #include "scalarField.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

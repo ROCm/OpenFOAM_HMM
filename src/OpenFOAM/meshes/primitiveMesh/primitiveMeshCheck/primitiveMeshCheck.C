@@ -27,7 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "primitiveMesh.H"
-#include "pyramidPointFaceRef.H"
+#include "pyramid.H"
 #include "ListOps.H"
 #include "unitConversion.H"
 #include "SortableList.H"

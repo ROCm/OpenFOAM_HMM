@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,8 +36,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Barycentric2D_H
-#define Barycentric2D_H
+#ifndef Foam_Barycentric2D_H
+#define Foam_Barycentric2D_H
 
 #include "contiguous.H"
 #include "VectorSpace.H"
@@ -86,33 +86,31 @@ public:
         inline Barycentric2D(const Foam::zero);
 
         //- Construct from components
-        inline Barycentric2D
-        (
-            const Cmpt& va,
-            const Cmpt& vb,
-            const Cmpt& vc
-        );
+        inline Barycentric2D(const Cmpt& va, const Cmpt& vb, const Cmpt& vc);
+
+        //- Construct from two components, calculating third component
+        inline Barycentric2D(const Cmpt& va, const Cmpt& vb);
 
 
     // Member Functions
 
-    // Access
+    // Component access
 
         inline const Cmpt& a() const;
         inline const Cmpt& b() const;
         inline const Cmpt& c() const;
-
-
-    // Edit
 
         inline Cmpt& a();
         inline Cmpt& b();
         inline Cmpt& c();
 
 
-    // Tests
+    // Operations, Tests
 
-        //- True if any coordinates are negative
+        //- Scalar-product of \c this with another Barycentric2D.
+        inline Cmpt inner(const Barycentric2D<Cmpt>& b2) const;
+
+        //- True if any coordinate is negative
         inline bool outside() const;
 };
 

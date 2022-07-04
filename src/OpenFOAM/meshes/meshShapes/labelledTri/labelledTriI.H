@@ -77,13 +77,13 @@ inline Foam::labelledTri::labelledTri
 
 inline Foam::labelledTri::labelledTri
 (
-    const label a,
-    const label b,
-    const label c,
+    const label p0,
+    const label p1,
+    const label p2,
     const label region
 )
 :
-    triFace(a, b, c),
+    triFace(p0, p1, p2),
     index_(region)
 {}
 

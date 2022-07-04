@@ -28,7 +28,7 @@ License
 
 #include "polyMeshTools.H"
 #include "syncTools.H"
-#include "pyramidPointFaceRef.H"
+#include "pyramid.H"
 #include "primitiveMeshTools.H"
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //

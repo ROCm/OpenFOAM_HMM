@@ -28,8 +28,8 @@ License
 
 #include "polyMeshGeometry.H"
 #include "polyMeshTetDecomposition.H"
-#include "pyramidPointFaceRef.H"
-#include "tetPointRef.H"
+#include "pyramid.H"
+#include "tetrahedron.H"
 #include "syncTools.H"
 #include "unitConversion.H"
 #include "primitiveMeshTools.H"

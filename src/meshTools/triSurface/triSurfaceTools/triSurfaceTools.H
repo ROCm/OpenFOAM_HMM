@@ -61,7 +61,7 @@ SourceFiles
 #include "FixedList.H"
 #include "Pair.H"
 #include "vector2D.H"
-#include "triPointRef.H"
+#include "triangle.H"
 #include "surfaceLocation.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -69,7 +69,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class boundBox;
 class edge;
 class labelledTri;

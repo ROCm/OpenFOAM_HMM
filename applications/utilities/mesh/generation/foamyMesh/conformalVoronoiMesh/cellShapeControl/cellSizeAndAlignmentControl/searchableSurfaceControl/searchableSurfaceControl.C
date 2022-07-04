@@ -31,7 +31,6 @@ License
 #include "cellSizeFunction.H"
 #include "triSurfaceMesh.H"
 #include "searchableBox.H"
-#include "tetPointRef.H"
 #include "vectorTools.H"
 #include "quaternion.H"
 

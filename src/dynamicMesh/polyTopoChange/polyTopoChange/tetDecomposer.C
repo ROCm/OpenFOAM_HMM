@@ -34,7 +34,7 @@ License
 #include "OFstream.H"
 #include "edgeHashes.H"
 #include "syncTools.H"
-#include "triPointRef.H"
+#include "triangle.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

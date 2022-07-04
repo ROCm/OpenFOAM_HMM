@@ -40,15 +40,15 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef tetCell_H
-#define tetCell_H
+#ifndef Foam_tetCell_H
+#define Foam_tetCell_H
 
 #include "FixedList.H"
 #include "triFace.H"
 #include "faceList.H"
 #include "edgeList.H"
 #include "pointField.H"
-#include "tetPointRef.H"
+#include "tetrahedron.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -85,10 +85,10 @@ public:
         //- Construct from four point labels
         inline tetCell
         (
-            const label a,
-            const label b,
-            const label c,
-            const label d
+            const label p0,
+            const label p1,
+            const label p2,
+            const label p3
         );
 
         //- Construct from an initializer list of four point labels

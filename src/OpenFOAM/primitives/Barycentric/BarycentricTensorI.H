@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -88,6 +89,90 @@ inline Foam::BarycentricTensor<Cmpt>::BarycentricTensor
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Cmpt>
+inline const Cmpt& Foam::BarycentricTensor<Cmpt>::xa() const
+{
+    return this->v_[XA];
+}
+
+
+template<class Cmpt>
+inline const Cmpt& Foam::BarycentricTensor<Cmpt>::xb() const
+{
+    return this->v_[XB];
+}
+
+
+template<class Cmpt>
+inline const Cmpt& Foam::BarycentricTensor<Cmpt>::xc() const
+{
+    return this->v_[XC];
+}
+
+
+template<class Cmpt>
+inline const Cmpt& Foam::BarycentricTensor<Cmpt>::xd() const
+{
+    return this->v_[XD];
+}
+
+
+template<class Cmpt>
+inline const Cmpt& Foam::BarycentricTensor<Cmpt>::ya() const
+{
+    return this->v_[YA];
+}
+
+
+template<class Cmpt>
+inline const Cmpt& Foam::BarycentricTensor<Cmpt>::yb() const
+{
+    return this->v_[YB];
+}
+
+
+template<class Cmpt>
+inline const Cmpt& Foam::BarycentricTensor<Cmpt>::yc() const
+{
+    return this->v_[YC];
+}
+
+
+template<class Cmpt>
+inline const Cmpt& Foam::BarycentricTensor<Cmpt>::yd() const
+{
+    return this->v_[YD];
+}
+
+
+template<class Cmpt>
+inline const Cmpt& Foam::BarycentricTensor<Cmpt>::za() const
+{
+    return this->v_[ZA];
+}
+
+
+template<class Cmpt>
+inline const Cmpt& Foam::BarycentricTensor<Cmpt>::zb() const
+{
+    return this->v_[ZB];
+}
+
+
+template<class Cmpt>
+inline const Cmpt& Foam::BarycentricTensor<Cmpt>::zc() const
+{
+    return this->v_[ZC];
+}
+
+
+template<class Cmpt>
+inline const Cmpt& Foam::BarycentricTensor<Cmpt>::zd() const
+{
+    return this->v_[ZD];
+}
+
+
+template<class Cmpt>
 inline Foam::Barycentric<Cmpt> Foam::BarycentricTensor<Cmpt>::x() const
 {
     return
@@ -157,6 +242,26 @@ inline Foam::Vector<Cmpt> Foam::BarycentricTensor<Cmpt>::d() const
 }
 
 
+// NB: same workaround for gcc (11+) failure on (tensor dot vector)
+// - not sure it will indeed be required here as well.
+template<class Cmpt>
+#if defined(__GNUC__) && !defined(__clang__)
+__attribute__((optimize("no-tree-vectorize")))
+#endif
+inline Foam::Vector<Cmpt>
+Foam::BarycentricTensor<Cmpt>::inner(const Barycentric<Cmpt>& bry) const
+{
+    const BarycentricTensor<Cmpt>& t = *this;
+
+    return Vector<Cmpt>
+    (
+        (bry.a()*t.xa() + bry.b()*t.xb() + bry.c()*t.xc() + bry.d()*t.xd()),
+        (bry.a()*t.ya() + bry.b()*t.yb() + bry.c()*t.yc() + bry.d()*t.yd()),
+        (bry.a()*t.za() + bry.b()*t.zb() + bry.c()*t.zc() + bry.d()*t.zd())
+    );
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -164,17 +269,20 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
+// Transform Barycentric coordinates to Vector
 template<class Cmpt>
 inline Vector<Cmpt> operator&
 (
-    const BarycentricTensor<Cmpt>& T,
+    const BarycentricTensor<Cmpt>& t,
     const Barycentric<Cmpt>& b
 )
 {
-    return Vector<Cmpt>(T.x() & b, T.y() & b, T.z() & b);
+    return t.inner(b);
 }
 
 
+// Transform Vector to Barycentric coordinates.
+// Caution: the tensor must be inverse one (see particle.C)
 template<class Cmpt>
 inline Barycentric<Cmpt> operator&
 (

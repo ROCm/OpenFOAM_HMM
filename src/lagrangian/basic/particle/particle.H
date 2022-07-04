@@ -32,8 +32,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef particle_H
-#define particle_H
+#ifndef Foam_particle_H
+#define Foam_particle_H
 
 #include "vector.H"
 #include "barycentric.H"
@@ -43,7 +43,6 @@ Description
 #include "pointField.H"
 #include "faceList.H"
 #include "OFstream.H"
-#include "tetPointRef.H"
 #include "FixedList.H"
 #include "polyMeshTetDecomposition.H"
 #include "particleMacros.H"

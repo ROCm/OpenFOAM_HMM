@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,34 +28,70 @@ License
 
 #include "IOstreams.H"
 #include "pointHit.H"
-#include "triPoints.H"
 #include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * * * Constructors * * * * * * * * * * * * * * //
 
-template<class Point, class PointRef>
-inline Foam::triangle<Point, PointRef>::triangle
+inline Foam::triPoints::triPoints
 (
-    const Point& a,
-    const Point& b,
-    const Point& c
+    const point& p0,
+    const point& p1,
+    const point& p2
+)
+{
+    operator[](0) = p0;
+    operator[](1) = p1;
+    operator[](2) = p2;
+}
+
+
+inline Foam::triPoints::triPoints(const triPointRef& pts)
+{
+    operator[](0) = pts.a();
+    operator[](1) = pts.b();
+    operator[](2) = pts.c();
+}
+
+
+inline Foam::triPoints::triPoints(const FixedList<point, 3>& pts)
+:
+    FixedList<point, 3>(pts)
+{}
+
+
+inline Foam::triPoints::triPoints
+(
+    const UList<point>& points,
+    const FixedList<label, 3>& indices
 )
 :
-    a_(a),
-    b_(b),
-    c_(c)
+    FixedList<point, 3>(points, indices)
 {}
 
 
 template<class Point, class PointRef>
 inline Foam::triangle<Point, PointRef>::triangle
 (
-    const FixedList<Point, 3>& tri
+    const Point& p0,
+    const Point& p1,
+    const Point& p2
 )
 :
-    a_(tri[0]),
-    b_(tri[1]),
-    c_(tri[2])
+    a_(p0),
+    b_(p1),
+    c_(p2)
+{}
+
+
+template<class Point, class PointRef>
+inline Foam::triangle<Point, PointRef>::triangle
+(
+    const FixedList<Point, 3>& pts
+)
+:
+    a_(pts[0]),
+    b_(pts[1]),
+    c_(pts[2])
 {}
 
 
@@ -72,7 +108,6 @@ inline Foam::triangle<Point, PointRef>::triangle
 {}
 
 
-
 template<class Point, class PointRef>
 inline Foam::triangle<Point, PointRef>::triangle(Istream& is)
 {
@@ -82,22 +117,26 @@ inline Foam::triangle<Point, PointRef>::triangle(Istream& is)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class Point, class PointRef>
-inline const Point& Foam::triangle<Point, PointRef>::a() const
+inline Foam::triPointRef Foam::triPoints::tri() const
 {
-    return a_;
+    return triPointRef(a(), b(), c());
 }
 
-template<class Point, class PointRef>
-inline const Point& Foam::triangle<Point, PointRef>::b() const
+
+inline void Foam::triPoints::flip()
 {
-    return b_;
+    // swap pt1 <-> pt2
+    point t(b());
+    b() = c();
+    c() = t;
 }
 
-template<class Point, class PointRef>
-inline const Point& Foam::triangle<Point, PointRef>::c() const
+
+inline Foam::treeBoundBox Foam::triPoints::bounds() const
 {
-    return c_;
+    treeBoundBox bb;
+    bb.add(static_cast<const FixedList<point, 3>&>(*this));
+    return bb;
 }
 
 
@@ -916,6 +955,7 @@ inline Foam::Ostream& Foam::operator<<
     const triangle<Point, PointRef>& t
 )
 {
+    // Format like FixedList
     os  << nl
         << token::BEGIN_LIST
         << t.a_ << token::SPACE

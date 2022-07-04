@@ -61,40 +61,6 @@ inline Foam::line<Point, PointRef>::line(Istream& is)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Point, class PointRef>
-inline PointRef Foam::line<Point, PointRef>::first() const noexcept
-{
-    return a_;
-}
-
-
-template<class Point, class PointRef>
-inline PointRef Foam::line<Point, PointRef>::second() const noexcept
-{
-    return b_;
-}
-
-
-template<class Point, class PointRef>
-inline PointRef Foam::line<Point, PointRef>::last() const noexcept
-{
-    return b_;
-}
-
-
-template<class Point, class PointRef>
-inline PointRef Foam::line<Point, PointRef>::start() const noexcept
-{
-    return first();
-}
-
-template<class Point, class PointRef>
-inline PointRef Foam::line<Point, PointRef>::end() const noexcept
-{
-    return second();
-}
-
-
-template<class Point, class PointRef>
 inline Point Foam::line<Point, PointRef>::centre() const
 {
     return 0.5*(a_ + b_);

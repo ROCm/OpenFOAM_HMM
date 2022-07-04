@@ -35,12 +35,13 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef line_H
-#define line_H
+#ifndef Foam_line_H
+#define Foam_line_H
 
+#include "point.H"
+#include "point2D.H"
 #include "vector.H"
 #include "PointHit.H"
-#include "point2D.H"
 #include "FixedList.H"
 #include "UList.H"
 
@@ -58,6 +59,12 @@ inline Istream& operator>>(Istream& is, line<Point, PointRef>& l);
 
 template<class Point, class PointRef>
 inline Ostream& operator<<(Ostream& os, const line<Point, PointRef>& l);
+
+
+// Common Typedefs
+
+//- A line using referred points
+typedef line<point, const point&> linePointRef;
 
 
 /*---------------------------------------------------------------------------*\
@@ -100,19 +107,19 @@ public:
     // Access
 
         //- Return first point
-        inline PointRef first() const noexcept;
+        inline PointRef first() const noexcept { return a_; }
 
         //- Return second (last) point
-        inline PointRef second() const noexcept;
+        inline PointRef second() const noexcept { return b_; }
 
         //- Return last (second) point
-        inline PointRef last() const noexcept;
+        inline PointRef last() const noexcept { return b_; }
 
-        //- Return first point
-        inline PointRef start() const noexcept;
+        //- Return start (first) point
+        inline PointRef start() const noexcept { return a_; }
 
-        //- Return second (last) point
-        inline PointRef end() const noexcept;
+        //- Return end (second) point
+        inline PointRef end() const noexcept { return b_; }
 
 
     // Properties

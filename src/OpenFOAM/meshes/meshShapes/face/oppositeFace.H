@@ -30,13 +30,10 @@ Description
     Class containing opposite face for a prismatic cell with addressing
     and a possibility of failure.
 
-SourceFiles
-    oppositeFace.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef oppositeFace_H
-#define oppositeFace_H
+#ifndef Foam_oppositeFace_H
+#define Foam_oppositeFace_H
 
 #include "face.H"
 
@@ -53,7 +50,7 @@ class oppositeFace
 :
     public face
 {
-    // Private data
+    // Private Data
 
         //- Master face index
         const label masterIndex_;
@@ -84,19 +81,19 @@ public:
     // Member Functions
 
         //- Master face index
-        inline label masterIndex() const
+        label masterIndex() const noexcept
         {
             return masterIndex_;
         }
 
-        //- Slave face index
-        inline label oppositeIndex() const
+        //- Opposite face index
+        label oppositeIndex() const noexcept
         {
             return oppositeIndex_;
         }
 
         //- Does the opposite face exist?
-        inline bool found() const
+        bool found() const noexcept
         {
             return oppositeIndex_ >= 0;
         }

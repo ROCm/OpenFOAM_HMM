@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef triangleFuncs_H
-#define triangleFuncs_H
+#ifndef Foam_triangleFuncs_H
+#define Foam_triangleFuncs_H
 
 #include "pointField.H"
 

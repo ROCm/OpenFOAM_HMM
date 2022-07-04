@@ -113,7 +113,7 @@ template<class Cmpt>
 inline const Foam::Vector<Cmpt>& Foam::Vector<Cmpt>::centre
 (
     const Foam::UList<Vector<Cmpt>>&
-) const
+) const noexcept
 {
     return *this;
 }
@@ -146,6 +146,32 @@ Foam::Vector<Cmpt>::removeCollinear(const Vector<Cmpt>& unitVec)
 }
 
 
+// * * * * * * * * * * * * * * * Member Operations * * * * * * * * * * * * * //
+
+template<class Cmpt>
+inline Cmpt Foam::Vector<Cmpt>::inner(const Vector<Cmpt>& v2) const
+{
+    const Vector<Cmpt>& v1 = *this;
+
+    return (v1.x()*v2.x() + v1.y()*v2.y() + v1.z()*v2.z());
+}
+
+
+template<class Cmpt>
+inline Foam::Vector<Cmpt>
+Foam::Vector<Cmpt>::cross(const Vector<Cmpt>& v2) const
+{
+    const Vector<Cmpt>& v1 = *this;
+
+    return Vector<Cmpt>
+    (
+        (v1.y()*v2.z() - v1.z()*v2.y()),
+        (v1.z()*v2.x() - v1.x()*v2.z()),
+        (v1.x()*v2.y() - v1.y()*v2.x())
+    );
+}
+
+
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
 namespace Foam
@@ -153,8 +179,9 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//- Dummy innerProduct for scalar to allow the construction of vtables for
-//  virtual member functions involving the inner-products of fields
+//- Dummy innerProduct for scalar
+//  Allows the construction of vtables for virtual member functions
+//  involving the inner-products of fields
 //  for which a "NotImplemented" specialization for scalar is provided.
 template<class Cmpt>
 class innerProduct<Vector<Cmpt>, scalar>
@@ -166,22 +193,16 @@ public:
 
 
 template<class Cmpt>
-inline typename innerProduct<Vector<Cmpt>, Vector<Cmpt>>::type
-operator&(const Vector<Cmpt>& v1, const Vector<Cmpt>& v2)
+inline Cmpt operator&(const Vector<Cmpt>& v1, const Vector<Cmpt>& v2)
 {
-    return Cmpt(v1.x()*v2.x() + v1.y()*v2.y() + v1.z()*v2.z());
+    return v1.inner(v2);
 }
 
 
 template<class Cmpt>
 inline Vector<Cmpt> operator^(const Vector<Cmpt>& v1, const Vector<Cmpt>& v2)
 {
-    return Vector<Cmpt>
-    (
-        (v1.y()*v2.z() - v1.z()*v2.y()),
-        (v1.z()*v2.x() - v1.x()*v2.z()),
-        (v1.x()*v2.y() - v1.y()*v2.x())
-    );
+    return v1.cross(v2);
 }
 
 

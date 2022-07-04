@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,13 +26,9 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "triPointRef.H"
+#include "triangle.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-inline Foam::STLtriangle::STLtriangle()
-{}
-
 
 inline Foam::STLtriangle::STLtriangle
 (
@@ -40,7 +36,7 @@ inline Foam::STLtriangle::STLtriangle
     const STLpoint& a,
     const STLpoint& b,
     const STLpoint& c,
-    unsigned short attrib
+    uint16_t attrib
 )
 :
     normal_(normal),
@@ -58,36 +54,6 @@ inline Foam::STLtriangle::STLtriangle(std::istream& is)
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-inline const Foam::STLpoint& Foam::STLtriangle::normal() const
-{
-    return normal_;
-}
-
-
-inline const Foam::STLpoint& Foam::STLtriangle::a() const
-{
-    return a_;
-}
-
-
-inline const Foam::STLpoint& Foam::STLtriangle::b() const
-{
-    return b_;
-}
-
-
-inline const Foam::STLpoint& Foam::STLtriangle::c() const
-{
-    return c_;
-}
-
-
-inline unsigned short Foam::STLtriangle::attrib() const
-{
-    return attrib_;
-}
-
 
 inline void Foam::STLtriangle::read(std::istream& is)
 {

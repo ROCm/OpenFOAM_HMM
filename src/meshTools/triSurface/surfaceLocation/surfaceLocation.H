@@ -49,7 +49,7 @@ SourceFiles
 #define surfaceLocation_H
 
 #include "pointIndexHit.H"
-#include "triPointRef.H"
+#include "triangle.H"
 #include "InfoProxy.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

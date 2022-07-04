@@ -27,7 +27,7 @@ License
 
 #include "face.H"
 #include "pointHit.H"
-#include "triPointRef.H"
+#include "triangle.H"
 #include "line.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

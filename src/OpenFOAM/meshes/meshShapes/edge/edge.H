@@ -45,11 +45,11 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef edge_H
-#define edge_H
+#ifndef Foam_edge_H
+#define Foam_edge_H
 
 #include "labelPair.H"
-#include "linePointRef.H"
+#include "line.H"
 #include "pointField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

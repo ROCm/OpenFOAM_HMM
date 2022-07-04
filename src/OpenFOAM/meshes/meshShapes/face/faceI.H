@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -187,6 +187,20 @@ inline Foam::label Foam::face::prevLabel(const label i) const
 inline Foam::label Foam::face::nTriangles() const
 {
     return size() - 2;
+}
+
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+inline void Foam::face::operator+=(const label vertexOffset)
+{
+    if (vertexOffset)
+    {
+        for (label& vrt : static_cast<labelList&>(*this))
+        {
+            vrt += vertexOffset;
+        }
+    }
 }
 
 

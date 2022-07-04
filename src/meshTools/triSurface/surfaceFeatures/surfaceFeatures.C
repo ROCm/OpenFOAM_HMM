@@ -32,7 +32,6 @@ License
 #include "treeDataEdge.H"
 #include "treeDataPoint.H"
 #include "meshTools.H"
-#include "linePointRef.H"
 #include "Fstream.H"
 #include "unitConversion.H"
 #include "edgeHashes.H"

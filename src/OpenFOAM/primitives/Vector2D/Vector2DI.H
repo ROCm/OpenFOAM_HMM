@@ -125,8 +125,7 @@ namespace Foam
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
 template<class Cmpt>
-inline typename innerProduct<Vector2D<Cmpt>, Vector2D<Cmpt>>::type
-operator&(const Vector2D<Cmpt>& v1, const Vector2D<Cmpt>& v2)
+inline Cmpt operator&(const Vector2D<Cmpt>& v1, const Vector2D<Cmpt>& v2)
 {
     return Cmpt(v1.x()*v2.x() + v1.y()*v2.y());
 }

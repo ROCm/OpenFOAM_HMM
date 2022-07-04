@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,17 +39,17 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef tetrahedron_H
-#define tetrahedron_H
+#ifndef Foam_tetrahedron_H
+#define Foam_tetrahedron_H
 
 #include "point.H"
-#include "primitiveFieldsFwd.H"
 #include "pointHit.H"
+#include "primitiveFieldsFwd.H"
 #include "Random.H"
 #include "FixedList.H"
 #include "UList.H"
-#include "triPointRef.H"
-#include "boundBox.H"
+#include "triangle.H"
+#include "treeBoundBox.H"
 #include "barycentric.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -59,28 +59,103 @@ namespace Foam
 
 // Forward Declarations
 class plane;
-class tetPoints;
 
 template<class Point, class PointRef> class tetrahedron;
 
 template<class Point, class PointRef>
-inline Istream& operator>>
-(
-    Istream&,
-    tetrahedron<Point, PointRef>&
-);
+inline Istream& operator>>(Istream&, tetrahedron<Point, PointRef>&);
 
 template<class Point, class PointRef>
-inline Ostream& operator<<
-(
-    Ostream&,
-    const tetrahedron<Point, PointRef>&
-);
+inline Ostream& operator<<(Ostream&, const tetrahedron<Point, PointRef>&);
 
+
+// Common Typedefs
+
+//- A tetrahedron using referred points
 typedef tetrahedron<point, const point&> tetPointRef;
 
+
 /*---------------------------------------------------------------------------*\
-                           class tetrahedron Declaration
+                         Class tetPoints Declaration
+\*---------------------------------------------------------------------------*/
+
+//- Tet point storage. Default constructable (tetrahedron is not)
+class tetPoints
+:
+    public FixedList<point, 4>
+{
+public:
+
+    // Generated Methods
+
+        //- Default construct
+        tetPoints() = default;
+
+
+    // Constructors
+
+        //- Construct from four points
+        inline tetPoints
+        (
+            const point& p0,
+            const point& p1,
+            const point& p2,
+            const point& p3
+        );
+
+        //- Construct from point references
+        inline explicit tetPoints(const tetPointRef& pts);
+
+        //- Construct from four points
+        inline tetPoints(const FixedList<point, 4>& pts);
+
+        //- Copy construct from subset of points
+        inline tetPoints
+        (
+            const UList<point>& points,
+            const FixedList<label, 4>& indices
+        );
+
+
+    // Member Functions
+
+        //- The first vertex
+        const point& a() const { return operator[](0); }
+
+        //- The second vertex
+        const point& b() const { return operator[](1); }
+
+        //- The third vertex
+        const point& c() const { return operator[](2); }
+
+        //- The fourth vertex
+        const point& d() const { return operator[](3); }
+
+        //- The first vertex
+        point& a() { return operator[](0); }
+
+        //- The second vertex
+        point& b() { return operator[](1); }
+
+        //- The third vertex
+        point& c() { return operator[](2); }
+
+        //- The fourth vertex
+        point& d() { return operator[](3); }
+
+        //- Return as tetrahedron reference
+        inline tetPointRef tet() const;
+
+        //- Invert tetrahedron by swapping third and fourth vertices
+        inline void flip();
+
+        //- The bounding box for the tetrahedron
+        inline treeBoundBox bounds() const;
+};
+
+
+/*---------------------------------------------------------------------------*\
+                         Class tetrahedron Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Point, class PointRef>
@@ -88,7 +163,10 @@ class tetrahedron
 {
 public:
 
-    // Public typedefs
+    // Public Typedefs
+
+        //- The point type
+        typedef Point point_type;
 
         //- Storage type for tets originating from intersecting tets.
         //  (can possibly be smaller than 200)
@@ -130,9 +208,12 @@ public:
 
 private:
 
-    // Private data
+    // Private Data
 
         PointRef a_, b_, c_, d_;
+
+
+    // Private Member Functions
 
         inline static point planeIntersection
         (
@@ -161,7 +242,7 @@ private:
 
 public:
 
-    // Member constants
+    // Member Constants
 
         enum
         {
@@ -172,14 +253,17 @@ public:
 
     // Constructors
 
-        //- Construct from points
+        //- Construct from four points
         inline tetrahedron
         (
-            const Point& a,
-            const Point& b,
-            const Point& c,
-            const Point& d
+            const Point& p0,
+            const Point& p1,
+            const Point& p2,
+            const Point& p3
         );
+
+        //- Construct from four points
+        inline tetrahedron(const FixedList<Point, 4>& pts);
 
         //- Construct from four points in the list of points
         inline tetrahedron
@@ -189,24 +273,27 @@ public:
         );
 
         //- Construct from Istream
-        inline tetrahedron(Istream&);
+        inline explicit tetrahedron(Istream&);
 
 
     // Member Functions
 
-        // Access
+    // Access
 
-            //- Return vertices
-            inline const Point& a() const;
+        //- Return vertex a
+        const Point& a() const noexcept { return a_; }
 
-            inline const Point& b() const;
+        //- Return vertex b
+        const Point& b() const noexcept { return b_; }
 
-            inline const Point& c() const;
+        //- Return vertex c
+        const Point& c() const noexcept { return c_; }
 
-            inline const Point& d() const;
+        //- Return vertex d
+        const Point& d() const noexcept { return d_; }
 
-            //- Return i-th face
-            inline triPointRef tri(const label facei) const;
+        //- Return i-th face
+        inline triPointRef tri(const label facei) const;
 
 
         // Properties
@@ -236,12 +323,12 @@ public:
             inline scalar circumRadius() const;
 
             //- Return quality: Ratio of tetrahedron and circum-sphere
-            //  volume, scaled so that a regular tetrahedron has a
-            //  quality of 1
+            //- volume, scaled so that a regular tetrahedron has a
+            //- quality of 1
             inline scalar quality() const;
 
             //- Return a random point in the tetrahedron from a
-            //  uniform distribution
+            //- uniform distribution
             inline Point randomPoint(Random& rndGen) const;
 
             //- Calculate the point from the given barycentric coordinates.

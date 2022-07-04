@@ -39,13 +39,12 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef polyMeshTetDecomposition_H
-#define polyMeshTetDecomposition_H
+#ifndef Foam_polyMeshTetDecomposition_H
+#define Foam_polyMeshTetDecomposition_H
 
 #include "polyMesh.H"
 #include "coupledPolyPatch.H"
 #include "syncTools.H"
-#include "tetPointRef.H"
 #include "tetIndices.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -54,7 +53,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                Class polyMeshTetDecomposition Declaration
+                  Class polyMeshTetDecomposition Declaration
 \*---------------------------------------------------------------------------*/
 
 class polyMeshTetDecomposition

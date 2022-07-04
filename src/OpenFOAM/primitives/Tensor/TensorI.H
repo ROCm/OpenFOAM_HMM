@@ -1069,7 +1069,7 @@ template<class Cmpt>
 // Workaround for gcc (11+) that fails to handle tensor dot vector
 __attribute__((optimize("no-tree-vectorize")))
 #endif
-inline typename innerProduct<Tensor<Cmpt>, Vector<Cmpt>>::type
+inline Vector<Cmpt>
 operator&(const Tensor<Cmpt>& t, const Vector<Cmpt>& v)
 {
     return Vector<Cmpt>
@@ -1083,7 +1083,7 @@ operator&(const Tensor<Cmpt>& t, const Vector<Cmpt>& v)
 
 //- Inner-product of a Vector and a Tensor
 template<class Cmpt>
-inline typename innerProduct<Vector<Cmpt>, Tensor<Cmpt>>::type
+inline Vector<Cmpt>
 operator&(const Vector<Cmpt>& v, const Tensor<Cmpt>& t)
 {
     return Vector<Cmpt>

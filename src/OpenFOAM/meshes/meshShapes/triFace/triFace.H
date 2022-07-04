@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,7 +48,7 @@ SourceFiles
 #include "pointHit.H"
 #include "intersection.H"
 #include "pointField.H"
-#include "triPointRef.H"
+#include "triangle.H"
 #include "ListListOps.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -79,12 +79,7 @@ public:
         inline triFace();
 
         //- Construct from three point labels
-        inline triFace
-        (
-            const label a,
-            const label b,
-            const label c
-        );
+        inline triFace(const label p0, const label p1, const label p2);
 
         //- Construct from an initializer list of three point labels
         inline explicit triFace(std::initializer_list<label> list);
@@ -321,6 +316,12 @@ public:
         static inline int compare(const triFace& a, const triFace& b);
 
 
+    // Member Operators
+
+        //- Increment (offset) vertices by given amount
+        inline void operator+=(const label vertexOffset);
+
+
     // Hashing
 
         //- The (commutative) hash value for triFace
@@ -377,19 +378,11 @@ template<> struct Hash<triFace> : triFace::hasher {};
 template<>
 struct offsetOp<triFace>
 {
-    inline triFace operator()
-    (
-        const triFace& x,
-        const label offset
-    ) const
+    triFace operator()(const triFace& x, const label offset) const
     {
-        triFace result;
-
-        forAll(x, i)
-        {
-            result[i] = x[i] + offset;
-        }
-        return result;
+        triFace f(x);
+        f += offset;
+        return f;
     }
 };
 
