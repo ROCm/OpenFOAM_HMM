@@ -97,13 +97,6 @@ Foam::fileName Foam::coordSetWriters::ensightWriter::writeUncollated
             mkDir(outputFile.path());
         }
 
-        OFstream osCase(outputFile, IOstream::ASCII);
-
-        // Format options
-        osCase.setf(ios_base::left);
-        osCase.setf(ios_base::scientific, ios_base::floatfield);
-        osCase.precision(5);
-
         // Two-argument form for path-name to avoid validating base-dir
         ensightGeoFile osGeom
         (
@@ -118,36 +111,46 @@ Foam::fileName Foam::coordSetWriters::ensightWriter::writeUncollated
             writeFormat_
         );
 
-        osCase
-            << "FORMAT" << nl
-            << "type: ensight gold" << nl
-            << nl
-            << "GEOMETRY" << nl
-            << "model:  1   " << osGeom.name().name() << nl
-            << nl
-            << "VARIABLE" << nl
-            << ensightPTraits<Type>::typeName
-            <<
-            (
-                true  // this->isPointData()
-              ? " per node:    1  "  // time-set 1
-              : " per element: 1  "  // time-set 1
-            )
-            << setw(15) << varName << ' '
-            << baseName.c_str() << ".********." << varName << nl;
-
-        osCase
-            << nl
-            << "TIME" << nl;
-
-        ensightCase::printTimeset(osCase, 1, timeValue);
-        osCase << "# end" << nl;
-
-
         writeGeometry(osGeom, elemOutput);
 
         // Write field (serial only)
         writeTrackField<Type>(osField, fieldPtrs);
+
+
+        // Update case file
+        {
+            OFstream osCase(outputFile, IOstream::ASCII);
+
+            // Format options
+            osCase.setf(ios_base::left);
+            osCase.setf(ios_base::scientific, ios_base::floatfield);
+            osCase.precision(5);
+
+            osCase
+                << "FORMAT" << nl
+                << "type: ensight gold" << nl
+                << nl
+                << "GEOMETRY" << nl
+                << "model:  1   " << osGeom.name().name() << nl
+                << nl
+                << "VARIABLE" << nl
+                << ensightPTraits<Type>::typeName
+                <<
+                (
+                    true  // this->isPointData()
+                  ? " per node:    1  "  // time-set 1
+                  : " per element: 1  "  // time-set 1
+                )
+                << setw(15) << varName << ' '
+                << baseName.c_str() << ".********." << varName << nl;
+
+            osCase
+                << nl
+                << "TIME" << nl;
+
+            ensightCase::printTimeset(osCase, 1, timeValue);
+            osCase << "# end" << nl;
+        }
     }
 
     wroteGeom_ = true;

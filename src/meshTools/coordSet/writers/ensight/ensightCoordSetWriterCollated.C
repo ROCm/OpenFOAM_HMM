@@ -122,7 +122,53 @@ Foam::fileName Foam::coordSetWriters::ensightWriter::writeCollated
         );
 
 
-        // Do case file
+        // Location for data (and possibly the geometry as well)
+        fileName dataDir = baseDir/"data"/word::printf(fmt, timeIndex);
+
+        // As per mkdir -p "data/00000000"
+        mkDir(dataDir);
+
+
+        const fileName geomFile(baseDir/geometryName);
+
+        if (!exists(geomFile))
+        {
+            if (verbose_)
+            {
+                Info<< "Writing geometry to " << geomFile.name() << endl;
+            }
+
+            // Two-argument form for path-name to avoid validating base-dir
+            ensightGeoFile osGeom
+            (
+                geomFile.path(),
+                geomFile.name(),
+                writeFormat_
+            );
+
+            writeGeometry(osGeom, elemOutput);
+        }
+
+
+        // Write field
+        ensightFile osField
+        (
+            dataDir,
+            varName,
+            writeFormat_
+        );
+
+        if (verbose_)
+        {
+            Info<< "Writing field file to " << osField.name() << endl;
+        }
+
+
+        // Write field (serial only)
+        writeTrackField<Type>(osField, fieldPtrs);
+
+
+        // Update case file
         if (stateChanged)
         {
             OFstream osCase(outputFile, IOstream::ASCII);
@@ -215,53 +261,6 @@ Foam::fileName Foam::coordSetWriters::ensightWriter::writeCollated
 
             osCase << "# end" << nl;
         }
-
-
-        // Location for data (and possibly the geometry as well)
-        fileName dataDir = baseDir/"data"/word::printf(fmt, timeIndex);
-
-        // As per mkdir -p "data/00000000"
-        mkDir(dataDir);
-
-
-        const fileName geomFile(baseDir/geometryName);
-
-        if (!exists(geomFile))
-        {
-            if (verbose_)
-            {
-                Info<< "Writing geometry to " << geomFile.name() << endl;
-            }
-
-            // Two-argument form for path-name to avoid validating base-dir
-            ensightGeoFile osGeom
-            (
-                geomFile.path(),
-                geomFile.name(),
-                writeFormat_
-            );
-
-            writeGeometry(osGeom, elemOutput);
-        }
-
-
-        // Write field
-        ensightFile osField
-        (
-            dataDir,
-            varName,
-            writeFormat_
-        );
-
-        if (verbose_)
-        {
-            Info<< "Writing field file to " << osField.name() << endl;
-        }
-
-
-        // Write field (serial only)
-        writeTrackField<Type>(osField, fieldPtrs);
-
 
         // Timestamp in the directory for future reference
         {
