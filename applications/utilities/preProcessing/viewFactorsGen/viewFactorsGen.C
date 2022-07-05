@@ -838,20 +838,20 @@ int main(int argc, char *argv[])
 
     GaussPoints[2].setSize(3);
     GaussPoints[2][0] =  0;
-    GaussPoints[2][1] =  std::sqrt(3/5);
-    GaussPoints[2][2] = -std::sqrt(3/5);
+    GaussPoints[2][1] =  std::sqrt(3.0/5.0);
+    GaussPoints[2][2] = -std::sqrt(3.0/5.0);
 
     GaussPoints[3].setSize(4);
-    GaussPoints[3][0] = std::sqrt(3.0/7.0 - (2.0/7.0)*std::sqrt(6/5));
+    GaussPoints[3][0] = std::sqrt(3.0/7.0 - (2.0/7.0)*std::sqrt(6.0/5.0));
     GaussPoints[3][1] = -GaussPoints[3][0];
-    GaussPoints[3][2] = std::sqrt(3.0/7.0 + (2.0/7.0)*std::sqrt(6/5));
+    GaussPoints[3][2] = std::sqrt(3.0/7.0 + (2.0/7.0)*std::sqrt(6.0/5.0));
     GaussPoints[3][3] = -GaussPoints[3][2];
 
     GaussPoints[4].setSize(5);
     GaussPoints[4][0] =  0;
-    GaussPoints[4][1] = (1.0/3.0)*std::sqrt(5.0 - 2.0*std::sqrt(10/7));
+    GaussPoints[4][1] = (1.0/3.0)*std::sqrt(5.0 - 2.0*std::sqrt(10.0/7.0));
     GaussPoints[4][2] = -GaussPoints[4][1];
-    GaussPoints[4][3] = (1.0/3.0)*std::sqrt(5.0 + 2.0*std::sqrt(10/7));
+    GaussPoints[4][3] = (1.0/3.0)*std::sqrt(5.0 + 2.0*std::sqrt(10.0/7.0));
     GaussPoints[4][4] = -GaussPoints[4][3];
 
 
