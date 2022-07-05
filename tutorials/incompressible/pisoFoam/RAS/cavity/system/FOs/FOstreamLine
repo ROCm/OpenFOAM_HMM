@@ -32,9 +32,6 @@ streamLine1
     nSubCycle       1;
     interpolationScheme cellPoint;
 
-    // Deprecated
-    // trackForward    true;
-
     // Optional (inherited) entries
     region          region0;
     enabled         true;

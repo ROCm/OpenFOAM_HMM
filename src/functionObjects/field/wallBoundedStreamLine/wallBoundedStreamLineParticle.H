@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -74,9 +74,11 @@ public:
     {
     public:
 
+        // Public Data
+
         const PtrList<interpolation<scalar>>& vsInterp_;
         const PtrList<interpolation<vector>>& vvInterp_;
-        const label UIndex_;
+        const interpolation<vector>& UInterp_;
         const scalar trackLength_;
 
         DynamicList<vectorList>& allPositions_;
@@ -92,7 +94,7 @@ public:
                 TrackCloudType& cloud,
                 const PtrList<interpolation<scalar>>& vsInterp,
                 const PtrList<interpolation<vector>>& vvInterp,
-                const label UIndex,
+                const interpolation<vector>& UInterp,
                 const scalar trackLength,
                 const bitSet& isWallPatch,
 
@@ -104,7 +106,7 @@ public:
                 wallBoundedParticle::trackingData(cloud, isWallPatch),
                 vsInterp_(vsInterp),
                 vvInterp_(vvInterp),
-                UIndex_(UIndex),
+                UInterp_(UInterp),
                 trackLength_(trackLength),
 
                 allPositions_(allPositions),

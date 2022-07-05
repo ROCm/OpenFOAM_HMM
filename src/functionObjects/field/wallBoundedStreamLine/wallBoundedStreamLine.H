@@ -52,13 +52,15 @@ Usage
         type            wallBoundedStreamLine;
         libs            (fieldFunctionObjects);
 
-        // Mandatory entries (runtime modifiable)
-        U               <fieldTrack>;
-        fields          (<fieldTrack> <field1> ... <fieldN>);
-        setFormat       vtk;
-        direction       bidirectional;
-        lifeTime        10000;
+        // Optional entries
+        U               <velocity-name>;
+        direction       forward;
         cloud           particleTracks;
+
+        // Mandatory entries (runtime modifiable)
+        fields          (<field1> ... <fieldN>);
+        setFormat       vtk;
+        lifeTime        10000;
         seedSampleSet
         {
             type        patchSeed;
@@ -89,17 +91,17 @@ Usage
       U            | Name of tracking velocity field       | word |  yes  | -
       fields       | Names of operand fields to sample     | wordList | yes | -
       setFormat    | Type of output data                   | word |  yes  | -
-      direction    | Direction to track                    | vector | yes | -
+      direction    | Direction (enum) to track             | word |  no   | forward
       lifetime     | Maximum number of particle tracking steps | label | yes | -
-      cloud        | Name of cloud                         | word |  yes  | -
-      seedSampleSet| Name of seeding method (see below)    | word |  yes  | -
-      bounds       | Bounding box to trim tracks    | vector | no | invertedBox
+      cloud        | Cloud name to use for streamlines     | word |  no  | typeName
+      seedSampleSet| Seeding description (see below)       | dict |  yes  | -
+      bounds       | Bounding box to trim tracks    | vector pair | no | -
       trackLength  | Tracking segment length              | scalar | no | VGREAT
       nSubCycle    | Number of tracking steps per cell    | label  | no | 1
       interpolationScheme | Interp. scheme for sample   | word | no | cellPoint
     \endtable
 
-    Options for the \c seedSampleSet entry:
+    Example types for the \c seedSampleSet sub-dict:
     \verbatim
       uniform   | uniform particle seeding
       cloud     | cloud of points
@@ -120,9 +122,9 @@ Usage
 
     Options for the \c direction entry:
     \verbatim
-        bidirectional
         forward
         backward
+        bidirectional
     \endverbatim
 
     The inherited entries are elaborated in:
@@ -144,8 +146,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef functionObjects_wallBoundedStreamLine_H
-#define functionObjects_wallBoundedStreamLine_H
+#ifndef Foam_functionObjects_wallBoundedStreamLine_H
+#define Foam_functionObjects_wallBoundedStreamLine_H
 
 #include "streamLineBase.H"
 
@@ -153,7 +155,6 @@ SourceFiles
 
 namespace Foam
 {
-
 namespace functionObjects
 {
 
@@ -163,7 +164,7 @@ namespace functionObjects
 
 class wallBoundedStreamLine
 :
-    public streamLineBase
+    public functionObjects::streamLineBase
 {
 protected:
 

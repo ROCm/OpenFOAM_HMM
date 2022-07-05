@@ -75,9 +75,9 @@ public:
         //- Enumeration defining the track direction
         enum trackDirType : char
         {
-            FORWARD,
-            BACKWARD,
-            BIDIRECTIONAL
+            FORWARD,            //!< Use "forward" tracking
+            BACKWARD,           //!< Use "backward" tracking
+            BIDIRECTIONAL,      //!< Use "bidirectional" tracking
         };
 
         //- Names for the trackDir
@@ -104,7 +104,7 @@ protected:
         //- Interpolation scheme to use
         word interpolationScheme_;
 
-        //- Whether to use +u or -u or both
+        //- Whether to use +U, -U or both
         trackDirType trackDir_;
 
         //- Maximum lifetime (= number of cells) of particle
@@ -129,7 +129,7 @@ protected:
         wordList vectorNames_;
 
 
-    // Demand driven
+    // Demand Driven
 
         //- File writer for tracks data
         mutable autoPtr<coordSetWriter> trackWriterPtr_;
@@ -159,14 +159,13 @@ protected:
         //- Construct patch out of all wall patch faces
         autoPtr<indirectPrimitivePatch> wallPatch() const;
 
-        //- Initialise fields, interpolators and track storage
-        void initInterpolations
+        //- Initialise interpolators and track storage
+        //  Return velocity interpolator: standalone or part of vector
+        //  interpolators
+        refPtr<interpolation<vector>> initInterpolations
         (
             const label nSeeds,
-            label& UIndex,
-            PtrList<volScalarField>& vsFlds,
             PtrList<interpolation<scalar>>& vsInterp,
-            PtrList<volVectorField>& vvFlds,
             PtrList<interpolation<vector>>& vvInterp
         );
 

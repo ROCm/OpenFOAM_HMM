@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,8 +28,8 @@ Class
     Foam::streamLineParticle
 
 Description
-    Particle class that samples fields as it passes through. Used in streamline
-    calculation.
+    Particle class that samples fields as it passes through.
+    Used in streamline calculation.
 
 SourceFiles
     streamLineParticle.C
@@ -70,23 +71,17 @@ public:
     {
     public:
 
-        // Public data
+        // Public Data
 
-            const PtrList<interpolation<scalar>>& vsInterp_;
+        const PtrList<interpolation<scalar>>& vsInterp_;
+        const PtrList<interpolation<vector>>& vvInterp_;
+        const interpolation<vector>& UInterp_;
+        const label nSubCycle_;
+        const scalar trackLength_;
 
-            const PtrList<interpolation<vector>>& vvInterp_;
-
-            const label UIndex_;
-
-            const label nSubCycle_;
-
-            const scalar trackLength_;
-
-            DynamicList<vectorList>& allPositions_;
-
-            List<DynamicList<scalarList>>& allScalars_;
-
-            List<DynamicList<vectorList>>& allVectors_;
+        DynamicList<vectorList>& allPositions_;
+        List<DynamicList<scalarList>>& allScalars_;
+        List<DynamicList<vectorList>>& allVectors_;
 
 
         // Constructors
@@ -97,7 +92,7 @@ public:
                 streamLineParticleCloud& cloud,
                 const PtrList<interpolation<scalar>>& vsInterp,
                 const PtrList<interpolation<vector>>& vvInterp,
-                const label UIndex,
+                const interpolation<vector>& UInterp,
                 const label nSubCycle,
                 const scalar trackLength,
                 DynamicList<List<point>>& allPositions,
@@ -108,7 +103,7 @@ public:
                 particle::trackingData(cloud),
                 vsInterp_(vsInterp),
                 vvInterp_(vvInterp),
-                UIndex_(UIndex),
+                UInterp_(UInterp),
                 nSubCycle_(nSubCycle),
                 trackLength_(trackLength),
                 allPositions_(allPositions),
@@ -120,7 +115,7 @@ public:
 
 private:
 
-    // Private data
+    // Private Data
 
         //- Whether particle transports with +U or -U
         bool trackForward_;
@@ -140,13 +135,12 @@ private:
 
     // Private Member Functions
 
-        //- Interpolate all quantities; return interpolated velocity.
+        //- Interpolate quantities; return interpolated velocity.
         vector interpolateFields
         (
-            const trackingData&,
-            const point&,
-            const label celli,
-            const label facei
+            const trackingData& td,
+            const barycentric& tetCoords,
+            const tetIndices& tetIs
         );
 
 
@@ -157,7 +151,7 @@ public:
         //- Construct from components
         streamLineParticle
         (
-            const polyMesh& c,
+            const polyMesh& mesh,
             const vector& position,
             const label celli,
             const bool trackForward,
@@ -167,7 +161,7 @@ public:
         //- Construct from Istream
         streamLineParticle
         (
-            const polyMesh& c,
+            const polyMesh& mesh,
             Istream& is,
             bool readFields = true,
             bool newFormat = true

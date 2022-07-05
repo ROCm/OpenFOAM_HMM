@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,48 +35,67 @@ License
 Foam::vector Foam::streamLineParticle::interpolateFields
 (
     const trackingData& td,
-    const point& position,
-    const label celli,
-    const label facei
+    const barycentric& tetCoords,
+    const tetIndices& tetIs
 )
 {
-    if (celli == -1)
+    if (tetIs.cell() < 0)
     {
         FatalErrorInFunction
-            << "Cell:" << celli << abort(FatalError);
+            << "Invalid cell (-1)" << abort(FatalError);
     }
 
-    sampledScalars_.setSize(td.vsInterp_.size());
-    forAll(td.vsInterp_, scalari)
+    const point position
+    (
+        tetIs.barycentricToPoint(this->mesh(), tetCoords)
+    );
+
+    bool foundU = false;
+    vector U(Zero);
+
+    // If current position is different
+    if
+    (
+        sampledPositions_.empty()
+     || magSqr(sampledPositions_.last() - position) > Foam::sqr(SMALL)
+    )
     {
-        sampledScalars_[scalari].append
-        (
-            td.vsInterp_[scalari].interpolate
+        // Store new location
+        sampledPositions_.append(position);
+
+        // Scalar fields
+        sampledScalars_.resize(td.vsInterp_.size());
+        forAll(td.vsInterp_, i)
+        {
+            sampledScalars_[i].append
             (
-                position,
-                celli,
-                facei
-            )
-        );
+                td.vsInterp_[i].interpolate(tetCoords, tetIs, tetIs.face())
+            );
+        }
+
+        // Vector fields
+        sampledVectors_.resize(td.vvInterp_.size());
+        forAll(td.vvInterp_, i)
+        {
+            sampledVectors_[i].append
+            (
+                td.vvInterp_[i].interpolate(tetCoords, tetIs, tetIs.face())
+            );
+
+            if (td.vvInterp_.get(i) == &(td.UInterp_))
+            {
+                foundU = true;
+                U = sampledVectors_[i].last();
+            }
+        }
     }
 
-    sampledVectors_.setSize(td.vvInterp_.size());
-    forAll(td.vvInterp_, vectori)
+    if (!foundU)
     {
-        sampledVectors_[vectori].append
-        (
-            td.vvInterp_[vectori].interpolate
-            (
-                position,
-                celli,
-                facei
-            )
-        );
+        U = td.UInterp_.interpolate(tetCoords, tetIs, tetIs.face());
     }
 
-    const DynamicList<vector>& U = sampledVectors_[td.UIndex_];
-
-    return U.last();
+    return U;
 }
 
 
@@ -116,12 +135,12 @@ Foam::streamLineParticle::streamLineParticle
             >> sampledPositions_ >> sampledScalars
             >> sampledVectors;
 
-        sampledScalars_.setSize(sampledScalars.size());
+        sampledScalars_.resize(sampledScalars.size());
         forAll(sampledScalars, i)
         {
             sampledScalars_[i].transfer(sampledScalars[i]);
         }
-        sampledVectors_.setSize(sampledVectors.size());
+        sampledVectors_.resize(sampledVectors.size());
         forAll(sampledVectors, i)
         {
             sampledVectors_[i].transfer(sampledVectors[i]);
@@ -162,6 +181,7 @@ bool Foam::streamLineParticle::move
 
     while (td.keepParticle && !td.switchProcessor && lifeTime_ > 0)
     {
+        // Set the lagrangian time-step
         scalar dt = maxDt;
 
         // Cross cell in steps:
@@ -171,22 +191,22 @@ bool Foam::streamLineParticle::move
         {
             --lifeTime_;
 
-            // Store current position and sampled velocity.
-            sampledPositions_.append(position());
-            vector U = interpolateFields(td, position(), cell(), face());
+            // Store current position, return sampled velocity
+            vector U =
+                interpolateFields(td, coordinates(), currentTetIndices());
 
-            if (!trackForward_)
-            {
-                U = -U;
-            }
-
-            scalar magU = mag(U);
+            const scalar magU = mag(U);
 
             if (magU < SMALL)
             {
                 // Stagnant particle. Might as well stop
                 lifeTime_ = 0;
                 break;
+            }
+
+            if (!trackForward_)
+            {
+                U = -U;
             }
 
             U /= magU;
@@ -240,8 +260,7 @@ bool Foam::streamLineParticle::move
         else
         {
             // Normal exit. Store last position and fields
-            sampledPositions_.append(position());
-            interpolateFields(td, position(), cell(), face());
+            (void)interpolateFields(td, coordinates(), currentTetIndices());
 
             if (debug)
             {
@@ -252,21 +271,20 @@ bool Foam::streamLineParticle::move
         }
 
         // Transfer particle data into trackingData.
-        td.allPositions_.append(vectorList());
-        vectorList& top = td.allPositions_.last();
-        top.transfer(sampledPositions_);
+        {
+            td.allPositions_.append(vectorList());
+            td.allPositions_.last().transfer(sampledPositions_);
+        }
 
         forAll(sampledScalars_, i)
         {
             td.allScalars_[i].append(scalarList());
-            scalarList& top = td.allScalars_[i].last();
-            top.transfer(sampledScalars_[i]);
+            td.allScalars_[i].last().transfer(sampledScalars_[i]);
         }
         forAll(sampledVectors_, i)
         {
             td.allVectors_[i].append(vectorList());
-            vectorList& top = td.allVectors_[i].last();
-            top.transfer(sampledVectors_[i]);
+            td.allVectors_[i].last().transfer(sampledVectors_[i]);
         }
     }
 
@@ -406,6 +424,7 @@ void Foam::streamLineParticle::writeFields(const Cloud<streamLineParticle>& c)
     particle::writeFields(c);
 
     const label np = c.size();
+    const bool valid = c.size();
 
     IOField<label> lifeTime
     (
@@ -426,8 +445,8 @@ void Foam::streamLineParticle::writeFields(const Cloud<streamLineParticle>& c)
         ++i;
     }
 
-    lifeTime.write(np > 0);
-    sampledPositions.write(np > 0);
+    lifeTime.write(valid);
+    sampledPositions.write(valid);
 }
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,51 +39,55 @@ Foam::vector Foam::wallBoundedStreamLineParticle::interpolateFields
     const label facei
 )
 {
-    if (celli == -1)
+    if (celli < 0)
     {
         FatalErrorInFunction
-            << "Cell:" << celli << abort(FatalError);
+            << "Invalid cell (-1)" << abort(FatalError);
     }
 
-    const vector U =
-        td.vvInterp_[td.UIndex_].interpolate(position, celli, facei);
+    bool foundU = false;
+    vector U(Zero);
 
-    // Check if at different position
+    // If current position is different
     if
     (
-       !sampledPositions_.size()
+        sampledPositions_.empty()
      || magSqr(sampledPositions_.last() - position) > Foam::sqr(SMALL)
     )
     {
-        // Store the location
+        // Store new location
         sampledPositions_.append(position);
 
-        // Store the scalar fields
-        sampledScalars_.setSize(td.vsInterp_.size());
-        forAll(td.vsInterp_, scalari)
+        // Scalar fields
+        sampledScalars_.resize(td.vsInterp_.size());
+        forAll(td.vsInterp_, i)
         {
-            sampledScalars_[scalari].append
+            sampledScalars_[i].append
             (
-                td.vsInterp_[scalari].interpolate(position, celli, facei)
+                td.vsInterp_[i].interpolate(position, celli, facei)
             );
         }
 
-        // Store the vector fields
-        sampledVectors_.setSize(td.vvInterp_.size());
-        forAll(td.vvInterp_, vectori)
+        // Vector fields
+        sampledVectors_.resize(td.vvInterp_.size());
+        forAll(td.vvInterp_, i)
         {
-            vector positionU;
-            if (vectori == td.UIndex_)
+            sampledVectors_[i].append
+            (
+                td.vvInterp_[i].interpolate(position, celli, facei)
+            );
+
+            if (td.vvInterp_.get(i) == &(td.UInterp_))
             {
-                positionU = U;
+                foundU = true;
+                U = sampledVectors_[i].last();
             }
-            else
-            {
-                positionU =
-                    td.vvInterp_[vectori].interpolate(position, celli, facei);
-            }
-            sampledVectors_[vectori].append(positionU);
         }
+    }
+
+    if (!foundU)
+    {
+        U = td.UInterp_.interpolate(position, celli, facei);
     }
 
     return U;
@@ -97,12 +101,7 @@ Foam::vector Foam::wallBoundedStreamLineParticle::sample
 {
     vector U = interpolateFields(td, localPosition_, cell(), face());
 
-    if (!trackForward_)
-    {
-        U = -U;
-    }
-
-    scalar magU = mag(U);
+    const scalar magU = mag(U);
 
     if (magU < SMALL)
     {
@@ -110,10 +109,13 @@ Foam::vector Foam::wallBoundedStreamLineParticle::sample
         lifeTime_ = 0;
         return vector::zero;
     }
-    else
+
+    if (!trackForward_)
     {
-        return U/magU;
+        U = -U;
     }
+
+    return U/magU;
 }
 
 
@@ -165,12 +167,12 @@ Foam::wallBoundedStreamLineParticle::wallBoundedStreamLineParticle
         is  >> trackForward_ >> lifeTime_
             >> sampledPositions_ >> sampledScalars >> sampledVectors;
 
-        sampledScalars_.setSize(sampledScalars.size());
+        sampledScalars_.resize(sampledScalars.size());
         forAll(sampledScalars, i)
         {
             sampledScalars_[i].transfer(sampledScalars[i]);
         }
-        sampledVectors_.setSize(sampledVectors.size());
+        sampledVectors_.resize(sampledVectors.size());
         forAll(sampledVectors, i)
         {
             sampledVectors_[i].transfer(sampledVectors[i]);

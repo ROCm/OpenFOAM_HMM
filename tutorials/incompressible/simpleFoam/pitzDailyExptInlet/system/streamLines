@@ -2,12 +2,11 @@
 
 streamLines
 {
-    type  streamLine;
+    type    streamLine;
+    libs    (fieldFunctionObjects);
 
-    libs  (fieldFunctionObjects);
-
-    // Time control etc
-    ${_visualization};
+    writeControl    writeTime;
+    // writeInterval 10;
 
     setFormat   vtk;
 
@@ -15,7 +14,7 @@ streamLines
     direction   forward;
 
     // Fields to sample
-    fields      (p U);
+    fields      (p k U);
 
     // Steps particles can travel before being removed
     lifeTime    10000;
@@ -30,12 +29,11 @@ streamLines
     seedSampleSet
     {
         type        uniform;
-        axis        x;  //distance;
 
-        // Note: tracks slightly offset so as not to be on a face
-        start       (0 -20 15);
-        end         (0 150 15);
-        nPoints     40;
+        axis        x;  //distance;
+        start       (-0.0205 0.001  0.00001);
+        end         (-0.0205 0.0251 0.00001);
+        nPoints     10;
     }
 }
 

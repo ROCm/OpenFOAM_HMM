@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -92,22 +92,14 @@ void Foam::functionObjects::streamLine::track()
 
     Log << "    seeded " << nSeeds << " particles" << endl;
 
-    // Read or lookup fields
-    PtrList<volScalarField> vsFlds;
+    // Field interpolators
+    // Velocity interpolator
     PtrList<interpolation<scalar>> vsInterp;
-    PtrList<volVectorField> vvFlds;
     PtrList<interpolation<vector>> vvInterp;
 
-    label UIndex = -1;
-
-    initInterpolations
+    refPtr<interpolation<vector>> UInterp
     (
-        nSeeds,
-        UIndex,
-        vsFlds,
-        vsInterp,
-        vvFlds,
-        vvInterp
+        initInterpolations(nSeeds, vsInterp, vvInterp)
     );
 
     // Additional particle info
@@ -116,7 +108,7 @@ void Foam::functionObjects::streamLine::track()
         particles,
         vsInterp,
         vvInterp,
-        UIndex,         // index of U in vvInterp
+        UInterp.cref(), // velocity interpolator (possibly within vvInterp)
         nSubCycle_,     // automatic track control:step through cells in steps?
         trackLength_,   // fixed track length
 
@@ -173,7 +165,6 @@ bool Foam::functionObjects::streamLine::read(const dictionary& dict)
         {
             trackLength_ = VGREAT;
             nSubCycle_ = max(nSubCycle_, 1);
-
 
             Info<< "    automatic track length specified through"
                 << " number of sub cycles : " << nSubCycle_ << nl

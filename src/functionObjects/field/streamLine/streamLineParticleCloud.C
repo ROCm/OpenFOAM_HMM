@@ -34,6 +34,7 @@ namespace Foam
     defineTemplateTypeNameAndDebug(Cloud<streamLineParticle>, 0);
 }
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::streamLineParticleCloud::streamLineParticleCloud
