@@ -255,10 +255,17 @@ Foam::label Foam::UPstream::procNo
 }
 
 
+//LG1 AMD
 template<>
+#ifdef USE_HIP
+__host__ __device__ 
+#endif
 Foam::UPstream::commsStruct&
 Foam::UList<Foam::UPstream::commsStruct>::operator[](const label procID)
 {
+
+    #ifndef  __HIP_DEVICE_COMPILE__
+
     UPstream::commsStruct& t = v_[procID];
 
     if (t.allBelow().size() + t.allNotBelow().size() + 1 != size())
@@ -352,15 +359,27 @@ Foam::UList<Foam::UPstream::commsStruct>::operator[](const label procID)
         }
         t = UPstream::commsStruct(size(), procID, above, below, allBelow);
     }
+
     return t;
+    //#else
+    //return 0;
+    #endif 
 }
 
+//LG1 AMD
 
 template<>
+#ifdef USE_HIP
+__host__  __device__
+#endif
 const Foam::UPstream::commsStruct&
 Foam::UList<Foam::UPstream::commsStruct>::operator[](const label procID) const
 {
+    #ifndef __HIP_DEVICE_COMPILE__
     return const_cast<UList<UPstream::commsStruct>&>(*this).operator[](procID);
+    //#else
+    //return NULL;
+    #endif
 }
 
 

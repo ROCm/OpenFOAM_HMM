@@ -180,7 +180,7 @@ int main(int argc, char *argv[])
                     maxIds.resize(origProc+1, -1);
                 }
 
-                maxIds[origProc] = max(maxIds[origProc], origId);
+                maxIds[origProc] = Foam::max(maxIds[origProc], origId);
             }
         }
 

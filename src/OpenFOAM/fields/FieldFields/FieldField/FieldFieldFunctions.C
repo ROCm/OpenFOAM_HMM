@@ -32,6 +32,27 @@ License
 #define TEMPLATE template<template<class> class Field, class Type>
 #include "FieldFieldFunctionsM.C"
 
+  #ifndef OMP_UNIFIED_MEMORY_REQUIRED
+  #pragma omp requires unified_shared_memory
+  #define OMP_UNIFIED_MEMORY_REQUIRED
+  #endif 
+
+#ifdef USE_HIP 
+#include <hip/hip_runtime.h>
+
+template<template<class> class Field, class Type>
+__global__
+static void  FieldFieldFunctions_mag_A(Foam::FieldField<Field, typename Foam::typeOfMag<Type>::type>& sf,
+                                       const Foam::FieldField<Field, Type>& f, Foam::label N){
+    Foam::label i_start = threadIdx.x+blockIdx.x*blockDim.x;
+    Foam::label i_shift = blockDim.x*gridDim.x;
+    
+    for (Foam::label i = i_start; i < N; i+=i_shift)
+        Foam::mag(sf[i],f[i]);
+}
+#endif
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -47,7 +68,13 @@ void component
     const direction d
 )
 {
+    //printf("in component, line=%d\n",__LINE__);
+
+    //LG2 could not compile/link with the openmp pragmas ... 
     forAll(sf, i)
+    //label sf_sz = sf.size();
+    //#pragma omp target teams distribute parallel for if(target:sf_sz > 2000)
+    //for (label i=0; i < sf_sz; ++i)
     {
         component(sf[i], f[i], d);
     }
@@ -57,7 +84,10 @@ void component
 template<template<class> class Field, class Type>
 void T(FieldField<Field, Type>& f1, const FieldField<Field, Type>& f2)
 {
-    forAll(f1, i)
+    //forAll(f1, i)
+    label f1_sz = f1.size();
+    #pragma omp target teams distribute parallel for if(target:f1_sz > 2000)
+    for (label i=0; i < f1_sz; ++i)
     {
         T(f1[i], f2[i]);
     }
@@ -71,6 +101,7 @@ void pow
     const FieldField<Field, Type>& vf
 )
 {
+    printf("in pow, line=%d\n",__LINE__);
     forAll(f, i)
     {
         pow(f[i], vf[i]);
@@ -122,7 +153,10 @@ void sqr
     const FieldField<Field, Type>& vf
 )
 {
-    forAll(f, i)
+    //forAll(f, i)
+    label f_sz = f.size();
+    #pragma omp target teams distribute parallel for if(target:f_sz > 2000)
+    for (label i=0; i < f_sz; ++i)
     {
         sqr(f[i], vf[i]);
     }
@@ -165,7 +199,10 @@ void magSqr
     const FieldField<Field, Type>& f
 )
 {
-    forAll(sf, i)
+    label sf_sz = sf.size();
+    //forAll(sf, i)
+    #pragma omp target teams distribute parallel for if(target:sf_sz>2000)
+    for(label i = 0; i < sf_sz; ++i) 
     {
         magSqr(sf[i], f[i]);
     }
@@ -203,6 +240,7 @@ magSqr(const tmp<FieldField<Field, Type>>& tf)
 }
 
 
+
 template<template<class> class Field, class Type>
 void mag
 (
@@ -210,10 +248,26 @@ void mag
     const FieldField<Field, Type>& f
 )
 {
-    forAll(sf, i)
-    {
-        mag(sf[i], f[i]);
-    }
+    #ifdef USE_HIP
+        hipLaunchKernelGGL(HIP_KERNEL_NAME(FieldFieldFunctions_mag_A<Field, Type>),(sf.size() + 255)/256, 256, 0,0,
+                           sf, f,  sf.size() );
+        hipDeviceSynchronize();
+    #else
+     
+      #if 0
+    
+        forAll(sf, i)
+        {
+            mag(sf[i], f[i]);
+        }
+      #else
+        const label sf_size = sf.size();
+        #pragma omp target teams distribute parallel for if(target:sf_size>2000)
+        for (label i = 0; i < sf_size; ++i)  
+           mag(sf[i], f[i]);
+
+      #endif
+    #endif
 }
 
 template<template<class> class Field, class Type>
@@ -255,6 +309,7 @@ void cmptMax
     const FieldField<Field, Type>& f
 )
 {
+    printf("in cmptMax, line=%d\n",__LINE__);
     forAll(cf, i)
     {
         cmptMax(cf[i], f[i]);
@@ -304,6 +359,7 @@ void cmptMin
     const FieldField<Field, Type>& f
 )
 {
+    printf("in cmptMin, line=%d\n",__LINE__);
     forAll(cf, i)
     {
         cmptMin(cf[i], f[i]);
@@ -353,6 +409,7 @@ void cmptAv
     const FieldField<Field, Type>& f
 )
 {
+    printf("in cmptAv, line=%d\n",__LINE__);
     forAll(cf, i)
     {
         cmptAv(cf[i], f[i]);
@@ -402,6 +459,7 @@ void cmptMag
     const FieldField<Field, Type>& f
 )
 {
+    printf("in cmptMag, line=%d\n",__LINE__);
     forAll(cf, i)
     {
         cmptMag(cf[i], f[i]);
@@ -450,7 +508,7 @@ template<template<class> class Field, class Type>
 Type max(const FieldField<Field, Type>& f)
 {
     Type result = pTraits<Type>::min;
-
+    printf("in max, line=%d\n",__LINE__);
     forAll(f, i)
     {
         if (f[i].size())
@@ -470,8 +528,12 @@ template<template<class> class Field, class Type>
 Type min(const FieldField<Field, Type>& f)
 {
     Type result = pTraits<Type>::max;
+    //printf("in min, line=%d\n",__LINE__);
 
-    forAll(f, i)
+    //forAll(f, i)
+    label f_sz = f.size();
+    #pragma omp target teams distribute parallel for reduction(min:result) map(tofrom:result) if(target:f_sz > 2000) 
+    for (label i = 0; i < f_sz; ++i)
     {
         if (f[i].size())
         {
@@ -489,7 +551,7 @@ template<template<class> class Field, class Type>
 Type sum(const FieldField<Field, Type>& f)
 {
     Type Sum = Zero;
-
+    printf("in sum, line=%d\n",__LINE__);
     forAll(f, i)
     {
         Sum += sum(f[i]);
@@ -506,6 +568,9 @@ typename typeOfMag<Type>::type sumMag(const FieldField<Field, Type>& f)
     typedef typename typeOfMag<Type>::type magType;
 
     magType result = Zero;
+    
+    
+    printf("in sumMag, line=%d\n",__LINE__);
 
     forAll(f, i)
     {
@@ -523,6 +588,8 @@ Type average(const FieldField<Field, Type>& f)
     if (f.size())
     {
         label n = 0;
+
+       printf("in average, line=%d\n",__LINE__);
 
         forAll(f, i)
         {
@@ -550,6 +617,7 @@ template<template<class> class Field, class Type>
 MinMax<Type> minMax(const FieldField<Field, Type>& f)
 {
     MinMax<Type> result;
+    printf("in minMax, line=%d\n",__LINE__);
 
     forAll(f, i)
     {
@@ -565,6 +633,8 @@ template<template<class> class Field, class Type>
 scalarMinMax minMaxMag(const FieldField<Field, Type>& f)
 {
     scalarMinMax result;
+
+    printf("in minMaxMag, line=%d\n",__LINE__);
 
     forAll(f, i)
     {
@@ -604,7 +674,7 @@ template<template<class> class Field, class Type>
 Type gAverage(const FieldField<Field, Type>& f)
 {
     label n = 0;
-
+    printf("in gAverage, line=%d\n",__LINE__);
     forAll(f, i)
     {
         n += f[i].size();
@@ -675,7 +745,9 @@ void opFunc                                                                    \
     const FieldField<Field2, Type2>& f2                                        \
 )                                                                              \
 {                                                                              \
-    forAll(f, i)                                                               \
+    /*forAll(f, i) */                                                          \
+    _Pragma("omp target teams distribute parallel for if(target:f.size()>2000)")   \
+    for (label i=0; i < f.size(); ++i)                                         \
     {                                                                          \
         opFunc(f[i], f1[i], f2[i]);                                            \
     }                                                                          \
@@ -811,7 +883,9 @@ void opFunc                                                                    \
     const VectorSpace<Form,Cmpt,nCmpt>& vs                                     \
 )                                                                              \
 {                                                                              \
-    forAll(f, i)                                                               \
+    /*forAll(f, i)*/                                                           \
+    _Pragma("omp target teams distribute parallel for if(target:f.size()>2000)") \
+    for (label i=0; i < f.size(); ++i)                                         \
     {                                                                          \
         opFunc(f[i], f1[i], vs);                                               \
     }                                                                          \
@@ -881,7 +955,9 @@ void opFunc                                                                    \
     const FieldField<Field, Type>& f1                                          \
 )                                                                              \
 {                                                                              \
-    forAll(f, i)                                                               \
+    /*forAll(f, i)*/                                                           \
+    _Pragma("omp target teams distribute parallel for if(target:f.size()>2000)")  \
+    for (label i=0; i < f.size(); ++i)                                         \
     {                                                                          \
         opFunc(f[i], vs, f1[i]);                                               \
     }                                                                          \
@@ -927,7 +1003,7 @@ operator op                                                                    \
 )                                                                              \
 {                                                                              \
     typedef typename product<Form, Type>::type productType;                    \
-    tmp<FieldField<Field, productType>> tres                                   \
+    tmp<FieldField<Field, productType>> tres                                    \
     (                                                                          \
         reuseTmpFieldField<Field, productType, Type>::New(tf1)                 \
     );                                                                         \

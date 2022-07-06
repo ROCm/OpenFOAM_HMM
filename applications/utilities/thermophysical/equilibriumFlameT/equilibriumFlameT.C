@@ -196,12 +196,12 @@ int main(int argc, char *argv[])
         // Number of moles of species for one mole of fuel
         scalar o2 = (1.0/equiv)*stoicO2;
         scalar n2 = (0.79/0.21)*o2;
-        scalar fres = max(1.0 - 1.0/equiv, 0.0);
+        scalar fres = Foam::max(1.0 - 1.0/equiv, 0.0);
         scalar fburnt = 1.0 - fres;
 
         // Initial guess for number of moles of product species
         // ignoring product dissociation
-        scalar oresInit = max(1.0/equiv - 1.0, 0.0)*stoicO2;
+        scalar oresInit = Foam::max(1.0/equiv - 1.0, 0.0)*stoicO2;
         scalar co2Init = fburnt*stoicCO2;
         scalar h2oInit = fburnt*stoicH2O;
 
@@ -231,18 +231,18 @@ int main(int argc, char *argv[])
             if (j > 0)
             {
                 co = co2*
-                    min
+                    Foam::min
                     (
                         CO2BreakUp.Kn(P, equilibriumFlameTemperature, N)
-                       /::sqrt(max(ores, 0.001)),
+                       /::sqrt(Foam::max(ores, 0.001)),
                         1.0
                     );
 
                 h2 = h2o*
-                    min
+                    Foam::min
                     (
                         H2OBreakUp.Kn(P, equilibriumFlameTemperature, N)
-                       /::sqrt(max(ores, 0.001)),
+                       /::sqrt(Foam::max(ores, 0.001)),
                         1.0
                     );
 

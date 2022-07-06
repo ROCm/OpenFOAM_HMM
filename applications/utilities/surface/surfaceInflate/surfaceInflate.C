@@ -275,7 +275,7 @@ label detectIntersectionPoints
 
     // 1. Extrusion offset vectors intersecting new surface location
     {
-        scalar tol = max(tolerance, 10*s.tolerance());
+        scalar tol = Foam::max(tolerance, 10*s.tolerance());
 
         // Collect all the edge vectors. Slightly shorten the edges to prevent
         // finding lots of intersections. The fast triangle intersection routine
@@ -295,7 +295,7 @@ label detectIntersectionPoints
             &&  !localFaces[hits[pointI].index()].found(pointI)
             )
             {
-                scale[pointI] = max(0.0, scale[pointI]-0.2);
+                scale[pointI] = Foam::max(0.0, scale[pointI]-0.2);
 
                 isPointOnHitEdge.set(pointI);
                 nHits++;
@@ -328,7 +328,7 @@ label detectIntersectionPoints
                         << pt
                         << endl;
 
-                    scale[e[0]] = max(0.0, scale[e[0]]-0.2);
+                    scale[e[0]] = Foam::max(0.0, scale[e[0]]-0.2);
                     nHits++;
                 }
                 if (isPointOnHitEdge.set(e[1]))
@@ -340,7 +340,7 @@ label detectIntersectionPoints
                         << pt
                         << endl;
 
-                    scale[e[1]] = max(0.0, scale[e[1]]-0.2);
+                    scale[e[1]] = Foam::max(0.0, scale[e[1]]-0.2);
                     nHits++;
                 }
             }
@@ -416,7 +416,7 @@ void minSmooth
         const edge& e = edges[edgeI];
         scalar w = mag(points[mp[e[0]]]-points[mp[e[1]]]);
 
-        edgeWeights[edgeI] = 1.0/(max(w, SMALL));
+        edgeWeights[edgeI] = 1.0/(Foam::max(w, SMALL));
     }
 
     tmp<scalarField> tavgFld = avg(s, fld, edgeWeights);
@@ -427,7 +427,7 @@ void minSmooth
     {
         if (isAffectedPoint.test(pointI))
         {
-            newFld[pointI] = min
+            newFld[pointI] = Foam::min
             (
                 fld[pointI],
                 0.5*fld[pointI] + 0.5*avgFld[pointI]

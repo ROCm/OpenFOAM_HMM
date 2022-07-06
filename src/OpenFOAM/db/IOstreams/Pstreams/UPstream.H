@@ -731,10 +731,16 @@ Ostream& operator<<(Ostream&, const UPstream::commsStruct&);
 
 // Template specialisation for access of commsStruct
 template<>
+#ifdef USE_HIP
+__host__ __device__
+#endif
 UPstream::commsStruct&
 UList<UPstream::commsStruct>::operator[](const label procID);
 
 template<>
+#ifdef USE_HIP
+__host__ __device__
+#endif
 const UPstream::commsStruct&
 UList<UPstream::commsStruct>::operator[](const label procID) const;
 

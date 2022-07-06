@@ -305,7 +305,10 @@ inline Scalar minMod(const Scalar s1, const Scalar s2)
     return (mag(s1) < mag(s2)) ? s1: s2;
 }
 
-
+//LG1 AMD
+#ifdef USE_HIP
+__host__ __device__ 
+#endif
 inline Scalar magSqr(const Scalar s)
 {
     return s*s;

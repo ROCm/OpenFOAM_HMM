@@ -29,6 +29,10 @@ License
 #include "fvMesh.H"
 #include "extrapolatedCalculatedFvPatchFields.H"
 
+#ifdef USE_ROCTX
+#include <roctx.h>
+#endif
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -48,6 +52,10 @@ void surfaceIntegrate
     const GeometricField<Type, fvsPatchField, surfaceMesh>& ssf
 )
 {
+    #ifdef USE_ROCTX
+    roctxRangePush("fvc::surfaceIntegrate_A");
+    #endif
+
     const fvMesh& mesh = ssf.mesh();
 
     const labelUList& owner = mesh.owner();
@@ -75,6 +83,10 @@ void surfaceIntegrate
     }
 
     ivf /= mesh.Vsc();
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 }
 
 
@@ -85,6 +97,10 @@ surfaceIntegrate
     const GeometricField<Type, fvsPatchField, surfaceMesh>& ssf
 )
 {
+    #ifdef USE_ROCTX
+    roctxRangePush("fvc::surfaceIntegrate_B");
+    #endif
+
     const fvMesh& mesh = ssf.mesh();
 
     tmp<GeometricField<Type, fvPatchField, volMesh>> tvf
@@ -108,6 +124,10 @@ surfaceIntegrate
 
     surfaceIntegrate(vf.primitiveFieldRef(), ssf);
     vf.correctBoundaryConditions();
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 
     return tvf;
 }
@@ -136,6 +156,10 @@ surfaceSum
     const GeometricField<Type, fvsPatchField, surfaceMesh>& ssf
 )
 {
+    #ifdef USE_ROCTX
+    roctxRangePush("fvc::surfaceSum");
+    #endif
+
     const fvMesh& mesh = ssf.mesh();
 
     tmp<GeometricField<Type, fvPatchField, volMesh>> tvf
@@ -180,6 +204,10 @@ surfaceSum
     }
 
     vf.correctBoundaryConditions();
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 
     return tvf;
 }

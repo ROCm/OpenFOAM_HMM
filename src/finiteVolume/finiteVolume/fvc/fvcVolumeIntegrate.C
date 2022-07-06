@@ -29,6 +29,10 @@ License
 #include "fvMesh.H"
 #include "Field.H"
 
+#ifdef USE_ROCTX
+#include <roctx.h>
+#endif
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -48,6 +52,7 @@ volumeIntegrate
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
+    printf("in volumeIntegrate line = %d\n", __LINE__);
     return vf.mesh().V()*vf.primitiveField();
 }
 
@@ -59,8 +64,17 @@ volumeIntegrate
     const tmp<GeometricField<Type, fvPatchField, volMesh>>& tvf
 )
 {
+    #ifdef USE_ROCTX
+    roctxRangePush("fvc::volumeIntegrate_B");
+    #endif
+
     tmp<Field<Type>> tvivf = tvf().mesh().V()*tvf().primitiveField();
     tvf.clear();
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
     return tvivf;
 }
 
@@ -68,6 +82,7 @@ volumeIntegrate
 template<class Type>
 tmp<Field<Type>> volumeIntegrate(const DimensionedField<Type, volMesh>& df)
 {
+    printf("in volumeIntegrate line = %d\n", __LINE__);
     return df.mesh().V()*df.field();
 }
 
@@ -76,8 +91,17 @@ template<class Type>
 tmp<Field<Type>>
 volumeIntegrate(const tmp<DimensionedField<Type, volMesh>>& tdf)
 {
+    #ifdef USE_ROCTX
+    roctxRangePush("fvc::volumeIntegrate_D");
+    #endif
+
     tmp<Field<Type>> tdidf = tdf().mesh().V()*tdf().field();
     tdf.clear();
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
     return tdidf;
 }
 
@@ -89,6 +113,7 @@ domainIntegrate
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
+    printf("in domainIntegrate line = %d\n", __LINE__);
     return dimensioned<Type>
     (
         "domainIntegrate(" + vf.name() + ')',
@@ -104,8 +129,17 @@ dimensioned<Type> domainIntegrate
     const tmp<GeometricField<Type, fvPatchField, volMesh>>& tvf
 )
 {
+    #ifdef USE_ROCTX
+    roctxRangePush("fvc::domainIntegrate_B");
+    #endif
+
     dimensioned<Type> integral = domainIntegrate(tvf());
     tvf.clear();
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
     return integral;
 }
 
@@ -116,6 +150,7 @@ dimensioned<Type> domainIntegrate
     const DimensionedField<Type, volMesh>& df
 )
 {
+    printf("in domainIntegrate line = %d\n", __LINE__);
     return dimensioned<Type>
     (
         "domainIntegrate(" + df.name() + ')',
@@ -131,8 +166,17 @@ dimensioned<Type> domainIntegrate
     const tmp<DimensionedField<Type, volMesh>>& tdf
 )
 {
+    #ifdef USE_ROCTX
+    roctxRangePush("fvc::domainIntegrate_D");
+    #endif
+
     dimensioned<Type> integral = domainIntegrate(tdf());
     tdf.clear();
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
     return integral;
 }
 

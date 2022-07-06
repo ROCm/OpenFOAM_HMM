@@ -36,13 +36,13 @@ Description
 if (adjustTimeStep)
 {
     const scalar maxDeltaTFact =
-        min(maxCo/(CoNum + SMALL), maxCo/(surfaceFilm.CourantNumber() + SMALL));
+        Foam::min(maxCo/(CoNum + SMALL), maxCo/(surfaceFilm.CourantNumber() + SMALL));
     const scalar deltaTFact =
-        min(min(maxDeltaTFact, 1.0 + 0.1*maxDeltaTFact), 1.2);
+        Foam::min(Foam::min(maxDeltaTFact, 1.0 + 0.1*maxDeltaTFact), 1.2);
 
     runTime.setDeltaT
     (
-        min
+        Foam::min
         (
             deltaTFact*runTime.deltaTValue(),
             maxDeltaT

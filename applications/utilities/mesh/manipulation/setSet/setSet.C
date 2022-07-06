@@ -320,10 +320,10 @@ bool doCommand
     const globalMeshData& parData = mesh.globalData();
 
     label typSize =
-        max
+        Foam::max
         (
             parData.nTotalCells(),
-            max
+            Foam::max
             (
                 parData.nTotalFaces(),
                 parData.nTotalPoints()

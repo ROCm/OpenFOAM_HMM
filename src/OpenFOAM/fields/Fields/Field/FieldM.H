@@ -87,7 +87,11 @@ void checkFields
 
 #else
 
+//LG1 AMD
 template<class Type1, class Type2>
+#ifdef USE_HIP
+__host__ __device__ 
+#endif
 void checkFields
 (
     const UList<Type1>&,

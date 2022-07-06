@@ -110,7 +110,11 @@ tmp<Field<typename typeOfMag<Type>::type>>
 magSqr(const tmp<Field<Type>>& tf);
 
 
+
 template<class Type>
+#ifdef USE_HIP	
+__host__ __device__
+#endif
 void mag
 (
     Field<typename typeOfMag<Type>::type>& res,

@@ -28,6 +28,18 @@ License
 
 #include "GAMGSolver.H"
 
+  #ifndef OMP_UNIFIED_MEMORY_REQUIRED
+  #pragma omp requires unified_shared_memory
+  #define OMP_UNIFIED_MEMORY_REQUIRED
+  #endif
+
+
+
+#ifdef USE_ROCTX
+#include <roctx.h>
+#endif
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::GAMGSolver::interpolate
@@ -40,6 +52,13 @@ void Foam::GAMGSolver::interpolate
     const direction cmpt
 ) const
 {
+
+printf("in GAMGSolver::interpolate\n");
+    #ifdef USE_ROCTX
+    roctxRangePush("GAMGSolver::interpolate");
+    #endif
+
+
     solveScalar* __restrict__ psiPtr = psi.begin();
 
     const label* const __restrict__ uPtr = m.lduAddr().upperAddr().begin();
@@ -48,7 +67,7 @@ void Foam::GAMGSolver::interpolate
     const scalar* const __restrict__ diagPtr = m.diag().begin();
     const scalar* const __restrict__ upperPtr = m.upper().begin();
     const scalar* const __restrict__ lowerPtr = m.lower().begin();
-
+    
     Apsi = 0;
     solveScalar* __restrict__ ApsiPtr = Apsi.begin();
 
@@ -87,6 +106,11 @@ void Foam::GAMGSolver::interpolate
     {
         psiPtr[celli] = -ApsiPtr[celli]/(diagPtr[celli]);
     }
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
 }
 
 

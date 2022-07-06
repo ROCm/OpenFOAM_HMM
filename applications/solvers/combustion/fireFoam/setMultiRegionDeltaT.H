@@ -54,9 +54,9 @@ if (adjustTimeStep)
 
     runTime.setDeltaT
     (
-        min
+        Foam::min
         (
-            dt0*min(min(TFactorFluid, min(TFactorFilm, TFactorSolid)), 1.2),
+            dt0*Foam::min(Foam::min(TFactorFluid, Foam::min(TFactorFilm, TFactorSolid)), 1.2),
             maxDeltaT
         )
     );

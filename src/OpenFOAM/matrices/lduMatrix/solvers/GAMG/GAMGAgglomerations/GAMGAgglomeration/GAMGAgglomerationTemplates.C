@@ -40,8 +40,7 @@ void Foam::GAMGAgglomeration::restrictField
 ) const
 {
     cf = Zero;
-
-    forAll(ff, i)
+    forAll(ff, i) // macro: for (label i = 0; i < ff.size(); ++i) 
     {
         cf[fineToCoarse[i]] += ff[i];
     }
@@ -161,14 +160,20 @@ void Foam::GAMGAgglomeration::prolongField
             Pstream::commsTypes::nonBlocking    //Pstream::commsTypes::scheduled
         );
 
-        forAll(fineToCoarse, i)
+        
+
+        #pragma omp target teams distribute parallel for if(target:fineToCoarse.size() > 2000)
+        for (label i = 0; i < fineToCoarse.size(); ++i)
+        //forAll(fineToCoarse, i)
         {
             ff[i] = allCf[fineToCoarse[i]];
         }
     }
     else
     {
-        forAll(fineToCoarse, i)
+	#pragma omp target teams distribute parallel for if(target:fineToCoarse.size() > 2000)
+        for (label i = 0; i < fineToCoarse.size(); ++i)
+        //forAll(fineToCoarse, i)
         {
             ff[i] = cf[fineToCoarse[i]];
         }

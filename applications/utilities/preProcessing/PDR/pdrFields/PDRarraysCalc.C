@@ -1056,7 +1056,7 @@ void calc_drag_etc
     const scalar expon =
     (
         br > 0.0
-      ? min(max((surr_br / br - 0.25) * 4.0 / 3.0, scalar(0)), scalar(1))
+      ? Foam::min(Foam::max((surr_br / br - 0.25) * 4.0 / 3.0, scalar(0)), scalar(1))
       : 0.0
     );
 
@@ -1114,16 +1114,16 @@ void Foam::PDRarrays::blockageSummary() const
                 totVolBlock += v_block(ijk) * pdrBlock.V(ijk);
                 totArea += surf(ijk);
 
-                totCount += max(0, obs_count(ijk));
+                totCount += Foam::max(0, obs_count(ijk));
 
-                totDrag.x() += max(0, drag_s(ijk).xx());
-                totDrag.y() += max(0, drag_s(ijk).yy());
-                totDrag.z() += max(0, drag_s(ijk).zz());
+                totDrag.x() += Foam::max(0, drag_s(ijk).xx());
+                totDrag.y() += Foam::max(0, drag_s(ijk).yy());
+                totDrag.z() += Foam::max(0, drag_s(ijk).zz());
 
                 for (direction cmpt=0; cmpt < vector::nComponents; ++cmpt)
                 {
-                    totBlock[cmpt] += max(0, area_block_s(ijk)[cmpt]);
-                    totBlock[cmpt] += max(0, area_block_r(ijk)[cmpt]);
+                    totBlock[cmpt] += Foam::max(0, area_block_s(ijk)[cmpt]);
+                    totBlock[cmpt] += Foam::max(0, area_block_r(ijk)[cmpt]);
                 }
             }
         }

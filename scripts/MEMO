@@ -1,0 +1,71 @@
+cd ThirdParty-v2106
+source ../OpenFOAM-v2106/etc/bashrc
+export PATH=$PATH:~/LEOPOLD/OPENMP_COMPILER_UVM/rocm-afar001-274/llvm/bin
+./Allclean
+./Allwmake      -l -q  # with log file creating 
+cd ..
+cd OpenFOAM-v2106/
+./Allwmake -l -q   # will rebuild 3rd party libs if not built already
+
+
+foamInstallationTest   # will test if OpenFOAM was installed properly
+
+test with Lid driven cavity
+cd /work/LEOPOLD/OpenFOAM/HPC_Benchmark/Lid_driven_cavity-3d/S
+
+directories: 0 - unitial fields
+             constant - this is where the mesh is stored
+             systems - files that control simulation
+
+             system/controlDict -  parameters of simulations , handy and to change endTime , can be changed while the simulation is running 
+
+system/fvSolution.old   - ORIGINAL SOLUTION . when simulation is running it is l;ooking for a file system/fvSolution
+
+system/fvSolution.fixedNORM - does not use PETSc . rename to system/fvSolution . 
+
+example 
+  p
+       {
+           solver          PCG;   <-- for pressure use PCG
+           preconditioner  DIC;   <--  for preconditioner 
+           tolerance       1e-04; 
+           relTol          0;
+           maxIter         3000;
+       }
+
+  hint :  instead of PCG write some garbage and simulaiton will fail and list available  options , same for preconditioner
+
+
+ to run a test type:
+  inside /work/LEOPOLD/OpenFOAM/HPC_Benchmark/Lid_driven_cavity-3d/S 
+  type icoFoam and hit enter
+for distributed memory use for example:      mpirun -np 4 icoFoam -parallel 
+
+hint  icoFoam --help 
+will print out the usage 
+
+
+changing compiler:
+cd /work/LEOPOLD/OpenFOAM/OpenFOAM-v2106
+vi etc/bashrc
+
+change :
+  # [WM_COMPILER] - Compiler:
+   # = Gcc | Clang | Icc | Icx | Cray | Amd | Arm | Pgi | Fujitsu |
+   #   Gcc<digits> | Clang<digits>
+   export WM_COMPILER=Gcc  <--  change to clang
+
+
+ls wmake/rules/   
+this has settings for different compilers , consider modifying wmake/rules/linux64Clang/c++Opt
+
+
+added printf in
+/work/LEOPOLD/OpenFOAM/OpenFOAM-v2112/src/OpenFOAM/matrices/lduMatrix/solvers/PCG
+
+
+
+############################
+GAMG:
+lnInclude/GAMGSolverInterpolate.C
+

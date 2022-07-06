@@ -181,8 +181,11 @@ magSqr(const tmp<Field<Type>>& tf)
     return tres;
 }
 
-
+//LG1 AMD
 template<class Type>
+#ifdef USE_HIP
+__host__  __device__
+#endif
 void mag
 (
     Field<typename typeOfMag<Type>::type>& res,
@@ -467,6 +470,7 @@ template<class Type>
 typename scalarProduct<Type, Type>::type
 sumProd(const UList<Type>& f1, const UList<Type>& f2)
 {
+
     typedef typename scalarProduct<Type, Type>::type prodType;
 
     prodType result = Zero;

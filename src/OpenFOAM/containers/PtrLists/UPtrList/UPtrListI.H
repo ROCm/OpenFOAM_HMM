@@ -230,11 +230,16 @@ inline void Foam::UPtrList<T>::checkNonNull() const
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
+//LG1 AMD
 template<class T>
+#ifdef USE_HIP
+__host__ __device__ __attribute__((always_inline)) 
+#endif	
 inline const T& Foam::UPtrList<T>::operator[](const label i) const
 {
     const T* ptr = ptrs_[i];
 
+    #if !defined(USE_HIP) && !defined(USE_OMP)
     if (!ptr)
     {
         FatalErrorInFunction
@@ -242,16 +247,22 @@ inline const T& Foam::UPtrList<T>::operator[](const label i) const
             << " in range [0," << size() << ")\n"
             << abort(FatalError);
     }
+    #endif
 
     return *ptr;
 }
 
 
+//LG1 AMD
 template<class T>
+#ifdef USE_HIP
+__host__  __device__ __attribute__((always_inline)) 
+#endif
 inline T& Foam::UPtrList<T>::operator[](const label i)
 {
     T* ptr = ptrs_[i];
 
+    #if !defined(USE_HIP) && !defined(USE_OMP) 
     if (!ptr)
     {
         FatalErrorInFunction
@@ -259,6 +270,7 @@ inline T& Foam::UPtrList<T>::operator[](const label i)
             << " in range [0," << size() << ")\n"
             << abort(FatalError);
     }
+    #endif
 
     return *ptr;
 }

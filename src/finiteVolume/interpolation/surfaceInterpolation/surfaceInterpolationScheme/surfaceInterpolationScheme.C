@@ -32,6 +32,10 @@ License
 #include "geometricOneField.H"
 #include "coupledFvPatchField.H"
 
+#ifdef USE_ROCTX
+#include <roctx.h>
+#endif
+
 // * * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * //
 
 template<class Type>
@@ -129,6 +133,11 @@ Foam::surfaceInterpolationScheme<Type>::interpolate
     const tmp<surfaceScalarField>& tys
 )
 {
+
+    #ifdef USE_ROCTX
+    roctxRangePush("surfaceInterpolationScheme_A");
+    #endif
+
     if (surfaceInterpolation::debug)
     {
         InfoInFunction
@@ -198,6 +207,10 @@ Foam::surfaceInterpolationScheme<Type>::interpolate
     tlambdas.clear();
     tys.clear();
 
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
     return tsf;
 }
 
@@ -220,6 +233,11 @@ Foam::surfaceInterpolationScheme<Type>::dotInterpolate
     const tmp<surfaceScalarField>& tlambdas
 )
 {
+
+    #ifdef USE_ROCTX
+    roctxRangePush("surfaceInterpolationScheme_B");
+    #endif
+
     if (surfaceInterpolation::debug)
     {
         InfoInFunction
@@ -297,6 +315,11 @@ Foam::surfaceInterpolationScheme<Type>::dotInterpolate
 
 //    tsf.ref().oriented() = Sf.oriented();
 
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
     return tsf;
 }
 
@@ -329,6 +352,11 @@ Foam::surfaceInterpolationScheme<Type>::dotInterpolate
     const GeometricField<Type, fvPatchField, volMesh>& vf
 ) const
 {
+
+    #ifdef USE_ROCTX
+    roctxRangePush("surfaceInterpolationScheme_C");
+    #endif
+
     if (surfaceInterpolation::debug)
     {
         InfoInFunction
@@ -356,6 +384,10 @@ Foam::surfaceInterpolationScheme<Type>::dotInterpolate
         tsf.ref() += Sf & correction(vf);
     }
 
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
     return tsf;
 }
 
@@ -376,6 +408,11 @@ Foam::surfaceInterpolationScheme<Type>::dotInterpolate
     const tmp<GeometricField<Type, fvPatchField, volMesh>>& tvf
 ) const
 {
+
+    #ifdef USE_ROCTX
+    roctxRangePush("surfaceInterpolationScheme_D");
+    #endif
+
     tmp
     <
         GeometricField
@@ -387,6 +424,11 @@ Foam::surfaceInterpolationScheme<Type>::dotInterpolate
     > tSfDotinterpVf = dotInterpolate(Sf, tvf());
 
     tvf.clear();
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
     return tSfDotinterpVf;
 }
 
@@ -398,6 +440,11 @@ Foam::surfaceInterpolationScheme<Type>::interpolate
     const GeometricField<Type, fvPatchField, volMesh>& vf
 ) const
 {
+
+    #ifdef USE_ROCTX
+    roctxRangePush("surfaceInterpolationScheme_E");
+    #endif
+
     if (surfaceInterpolation::debug)
     {
         InfoInFunction
@@ -416,6 +463,10 @@ Foam::surfaceInterpolationScheme<Type>::interpolate
         tsf.ref() += correction(vf);
     }
 
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
     return tsf;
 }
 
@@ -427,9 +478,18 @@ Foam::surfaceInterpolationScheme<Type>::interpolate
     const tmp<GeometricField<Type, fvPatchField, volMesh>>& tvf
 ) const
 {
+    #ifdef USE_ROCTX
+    roctxRangePush("surfaceInterpolationScheme_F");
+    #endif
+
     tmp<GeometricField<Type, fvsPatchField, surfaceMesh>> tinterpVf
         = interpolate(tvf());
     tvf.clear();
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
     return tinterpVf;
 }
 

@@ -30,6 +30,29 @@ License
 #include "SubField.H"
 #include "PrecisionAdaptor.H"
 
+  #ifndef OMP_UNIFIED_MEMORY_REQUIRED
+  #pragma omp requires unified_shared_memory
+  #define OMP_UNIFIED_MEMORY_REQUIRED
+  #endif
+
+#ifdef USE_ROCTX
+#include <roctx.h>
+#endif
+
+
+#ifdef USE_HIP 
+#include <hip/hip_runtime.h>
+__global__
+static void  GAMGSolver_Vcycle_kernel_A(Foam::solveScalar* __restrict__ psi, 
+                                      const Foam::solveScalar* __restrict__ finestCorrection, Foam::label psi_size){
+    Foam::label i_start = threadIdx.x+blockIdx.x*blockDim.x;
+    Foam::label i_shift = blockDim.x*gridDim.x;
+    for (Foam::label i = i_start; i < psi_size; i+=i_shift)
+        psi[i] += finestCorrection[i];
+}
+#endif
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::solverPerformance Foam::GAMGSolver::solve
@@ -39,6 +62,13 @@ Foam::solverPerformance Foam::GAMGSolver::solve
     const direction cmpt
 ) const
 {
+
+    printf("in GAMGSolver::solve\n");
+
+    #ifdef USE_ROCTX
+    roctxRangePush("GAMGSolver::solve");
+    #endif
+
     PrecisionAdaptor<solveScalar, scalar> tpsi(psi_s);
     solveScalarField& psi = tpsi.ref();
 
@@ -49,7 +79,16 @@ Foam::solverPerformance Foam::GAMGSolver::solve
 
     // Calculate A.psi used to calculate the initial residual
     solveScalarField Apsi(psi.size());
+
+    #ifdef USE_ROCTX
+    roctxRangePush("matrix_.Amul");
+    
+    #endif
     matrix_.Amul(Apsi, psi, interfaceBouCoeffs_, interfaces_, cmpt);
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
 
     // Create the storage for the finestCorrection which may be used as a
     // temporary in normFactor
@@ -134,7 +173,14 @@ Foam::solverPerformance Foam::GAMGSolver::solve
             );
 
             // Calculate finest level residual field
+            #ifdef USE_ROCTX
+            roctxRangePush("matrix_.Amul");
+            #endif
             matrix_.Amul(Apsi, psi, interfaceBouCoeffs_, interfaces_, cmpt);
+            #ifdef USE_ROCTX
+            roctxRangePop();
+            #endif
+            
             finestResidual = tsource();
             finestResidual -= Apsi;
 
@@ -165,6 +211,10 @@ Foam::solverPerformance Foam::GAMGSolver::solve
         false
     );
 
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
     return solverPerf;
 }
 
@@ -186,6 +236,13 @@ void Foam::GAMGSolver::Vcycle
     const direction cmpt
 ) const
 {
+
+    printf("in GAMGSolver::Vcycle\n");
+
+    #ifdef USE_ROCTX
+    roctxRangePush("GAMGSolver::Vcycle");
+    #endif
+
     //debug = 2;
 
     const label coarsestLevel = matrixLevels_.size() - 1;
@@ -210,18 +267,23 @@ void Foam::GAMGSolver::Vcycle
             {
                 coarseCorrFields[leveli] = 0.0;
 
+                #ifdef USE_ROCTX
+                roctxRangePush("GAMGSolver::Vcycle:smoother_scalarSmooth");
+                #endif
                 smoothers[leveli + 1].scalarSmooth
                 (
                     coarseCorrFields[leveli],
                     coarseSources[leveli],  //coarseSource,
                     cmpt,
-                    min
+                    Foam::min
                     (
                         nPreSweeps_ +  preSweepsLevelMultiplier_*leveli,
                         maxPreSweeps_
                     )
                 );
-
+                #ifdef USE_ROCTX
+                roctxRangePop();
+                #endif
                 solveScalarField::subField ACf
                 (
                     scratch1,
@@ -232,6 +294,9 @@ void Foam::GAMGSolver::Vcycle
                 // but not on the coarsest level because it evaluates to 1
                 if (scaleCorrection_ && leveli < coarsestLevel - 1)
                 {
+                    #ifdef USE_ROCTX
+                    roctxRangePush("GAMGSolver::Vcycle:scale");
+                    #endif
                     scale
                     (
                         coarseCorrFields[leveli],
@@ -245,9 +310,15 @@ void Foam::GAMGSolver::Vcycle
                         coarseSources[leveli],
                         cmpt
                     );
+                    #ifdef USE_ROCTX
+                    roctxRangePop();
+                    #endif
                 }
 
                 // Correct the residual with the new solution
+                #ifdef USE_ROCTX
+                roctxRangePush("GAMGSolver::Vcycle:mat_Levels_Amul");
+                #endif
                 matrixLevels_[leveli].Amul
                 (
                     const_cast<solveScalarField&>
@@ -259,10 +330,15 @@ void Foam::GAMGSolver::Vcycle
                     interfaceLevels_[leveli],
                     cmpt
                 );
+                #ifdef USE_ROCTX
+                roctxRangePop();
+                #endif
 
                 coarseSources[leveli] -= ACf;
             }
-
+            #ifdef USE_ROCTX
+            roctxRangePush("GAMGSolver::Vcycle:restrictField");
+            #endif
             // Residual is equal to source
             agglomeration_.restrictField
             (
@@ -271,6 +347,9 @@ void Foam::GAMGSolver::Vcycle
                 leveli + 1,
                 true
             );
+            #ifdef USE_ROCTX
+            roctxRangePop();
+            #endif
         }
     }
 
@@ -283,11 +362,17 @@ void Foam::GAMGSolver::Vcycle
     // Solve Coarsest level with either an iterative or direct solver
     if (coarseCorrFields.set(coarsestLevel))
     {
+        #ifdef USE_ROCTX
+        roctxRangePush("GAMGSolver::Vcycle:solveCoarsestLevel");
+        #endif
         solveCoarsestLevel
         (
             coarseCorrFields[coarsestLevel],
             coarseSources[coarsestLevel]
         );
+        #ifdef USE_ROCTX
+        roctxRangePop();
+        #endif   
     }
 
     if ((log_ >= 2) || (debug >= 2))
@@ -320,6 +405,10 @@ void Foam::GAMGSolver::Vcycle
                 preSmoothedCoarseCorrField = coarseCorrFields[leveli];
             }
 
+
+            #ifdef USE_ROCTX
+            roctxRangePush("GAMGSolver::Vcycle:prolongField");
+            #endif
             agglomeration_.prolongField
             (
                 coarseCorrFields[leveli],
@@ -331,7 +420,9 @@ void Foam::GAMGSolver::Vcycle
                 leveli + 1,
                 true
             );
-
+            #ifdef USE_ROCTX
+            roctxRangePop();
+            #endif
 
             // Create A.psi for this coarse level as a sub-field of Apsi
             solveScalarField::subField ACf
@@ -347,6 +438,11 @@ void Foam::GAMGSolver::Vcycle
 
             if (interpolateCorrection_) //&& leveli < coarsestLevel - 2)
             {
+
+                #ifdef USE_ROCTX
+                roctxRangePush("GAMGSolver::Vcycle:interpolate");
+                #endif
+
                 if (coarseCorrFields.set(leveli+1))
                 {
                     interpolate
@@ -373,10 +469,16 @@ void Foam::GAMGSolver::Vcycle
                         cmpt
                     );
                 }
+                #ifdef USE_ROCTX
+                roctxRangePop();
+                #endif
             }
 
             // Scale coarse-grid correction field
             // but not on the coarsest level because it evaluates to 1
+            #ifdef USE_ROCTX
+            roctxRangePush("GAMGSolver::Vcycle:scale-coarse");
+            #endif
             if
             (
                 scaleCorrection_
@@ -394,28 +496,38 @@ void Foam::GAMGSolver::Vcycle
                     cmpt
                 );
             }
-
+            #ifdef USE_ROCTX
+            roctxRangePop();
+            #endif
             // Only add the preSmoothedCoarseCorrField if pre-smoothing is
             // used
             if (nPreSweeps_)
             {
                 coarseCorrFields[leveli] += preSmoothedCoarseCorrField;
             }
-
+            #ifdef USE_ROCTX
+            roctxRangePush("GAMGSolver::Vcycle:smoother_scalarSmooth");
+            #endif
             smoothers[leveli + 1].scalarSmooth
             (
                 coarseCorrFields[leveli],
                 coarseSources[leveli],  //coarseSource,
                 cmpt,
-                min
+                Foam::min
                 (
                     nPostSweeps_ + postSweepsLevelMultiplier_*leveli,
                     maxPostSweeps_
                 )
             );
+            #ifdef USE_ROCTX
+            roctxRangePop();
+            #endif
         }
     }
 
+    #ifdef USE_ROCTX
+    roctxRangePush("GAMGSolver::Vcycle:prolongField");
+    #endif
     // Prolong the finest level correction
     agglomeration_.prolongField
     (
@@ -424,9 +536,15 @@ void Foam::GAMGSolver::Vcycle
         0,
         true
     );
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 
     if (interpolateCorrection_)
     {
+        #ifdef USE_ROCTX
+        roctxRangePush("GAMGSolver::Vcycle:interpolateCorrection");
+        #endif        
         interpolate
         (
             finestCorrection,
@@ -438,10 +556,16 @@ void Foam::GAMGSolver::Vcycle
             coarseCorrFields[0],
             cmpt
         );
+        #ifdef USE_ROCTX
+        roctxRangePop();
+        #endif
     }
 
     if (scaleCorrection_)
     {
+        #ifdef USE_ROCTX
+        roctxRangePush("GAMGSolver::Vcycle:scaleCorrection");
+        #endif
         // Scale the finest level correction
         scale
         (
@@ -453,13 +577,32 @@ void Foam::GAMGSolver::Vcycle
             finestResidual,
             cmpt
         );
+        #ifdef USE_ROCTX
+        roctxRangePop();
+        #endif
     }
 
-    forAll(psi, i)
-    {
+    #ifdef USE_HIP   //LG2  PROBLEM HERE
+
+       solveScalar* __restrict__ psiPtr = psi.begin();
+       const solveScalar* __restrict__ finestCorrectionPtr = finestCorrection.begin();
+
+        hipLaunchKernelGGL(HIP_KERNEL_NAME(GAMGSolver_Vcycle_kernel_A),(psi.size() + 255)/256, 256, 0,0,
+                           psiPtr, finestCorrectionPtr, (label) psi.size() );
+        hipDeviceSynchronize();
+    #else
+      #pragma omp target teams distribute parallel for if(target:psi.size()>100)
+      for (label i = 0; i < psi.size(); ++i)
+      //forAll(psi, i)
+      {
         psi[i] += finestCorrection[i];
-    }
+      }
+    #endif
 
+
+    #ifdef USE_ROCTX
+    roctxRangePush("GAMGSolver::Vcycle:smoother_scalarSmooth");
+    #endif
     smoothers[0].smooth
     (
         psi,
@@ -467,6 +610,15 @@ void Foam::GAMGSolver::Vcycle
         cmpt,
         nFinestSweeps_
     );
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
 }
 
 
@@ -515,7 +667,7 @@ void Foam::GAMGSolver::initVcycle
 
             label nCoarseCells = mat.diag().size();
 
-            maxSize = max(maxSize, nCoarseCells);
+            maxSize = Foam::max(maxSize, nCoarseCells);
 
             coarseCorrFields.set(leveli, new solveScalarField(nCoarseCells));
 

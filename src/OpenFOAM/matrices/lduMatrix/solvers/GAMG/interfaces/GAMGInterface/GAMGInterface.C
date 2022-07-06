@@ -28,6 +28,7 @@ License
 
 #include "GAMGInterface.H"
 
+
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam

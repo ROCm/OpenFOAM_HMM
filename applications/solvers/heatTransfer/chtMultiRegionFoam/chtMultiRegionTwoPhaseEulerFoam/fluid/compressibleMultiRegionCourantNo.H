@@ -18,13 +18,13 @@
             const surfaceScalarField& phi2 =
                 phaseSystemFluid[regioni].phase2().phiRef();
 
-            sumPhi = max
+            sumPhi = Foam::max
             (
                 sumPhi,
                 fvc::surfaceSum(mag(phi1))().primitiveField()
             );
 
-            sumPhi = max
+            sumPhi = Foam::max
             (
                 sumPhi,
                 fvc::surfaceSum(mag(phi2))().primitiveField()
@@ -43,7 +43,7 @@
               / fluidRegions[regioni].V().field()
             )*runTime.deltaTValue(),
 
-            CoNum = max(UrCoNum, CoNum);
+            CoNum = Foam::max(UrCoNum, CoNum);
         }
     }
 

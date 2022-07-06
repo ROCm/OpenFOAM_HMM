@@ -31,6 +31,10 @@ License
 #include "divScheme.H"
 #include "convectionScheme.H"
 
+#ifdef USE_ROCTX
+#include <roctx.h>
+#endif
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -68,8 +72,17 @@ div
     const tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>& tssf
 )
 {
+    #ifdef USE_ROCTX
+    roctxRangePush("fvc::div_B");
+    #endif
+
     tmp<GeometricField<Type, fvPatchField, volMesh>> Div(fvc::div(tssf()));
     tssf.clear();
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+    
     return Div;
 }
 
@@ -109,12 +122,20 @@ div
     const word& name
 )
 {
+    #ifdef USE_ROCTX
+    roctxRangePush("fvc::div_E");
+    #endif
     typedef typename innerProduct<vector, Type>::type DivType;
     tmp<GeometricField<DivType, fvPatchField, volMesh>> Div
     (
         fvc::div(tvvf(), name)
     );
     tvvf.clear();
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
+
     return Div;
 }
 
@@ -148,9 +169,16 @@ div
     const tmp<GeometricField<Type, fvPatchField, volMesh>>& tvvf
 )
 {
+    #ifdef USE_ROCTX
+    roctxRangePush("fvc::div_G");
+    #endif
     typedef typename innerProduct<vector, Type>::type DivType;
     tmp<GeometricField<DivType, fvPatchField, volMesh>> Div(fvc::div(tvvf()));
     tvvf.clear();
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
     return Div;
 }
 
@@ -182,11 +210,20 @@ div
     const word& name
 )
 {
+    #ifdef USE_ROCTX
+    roctxRangePush("fvc::div_I");
+    #endif
+
     tmp<GeometricField<Type, fvPatchField, volMesh>> Div
     (
         fvc::div(tflux(), vf, name)
     );
     tflux.clear();
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
     return Div;
 }
 
@@ -200,11 +237,20 @@ div
     const word& name
 )
 {
+    #ifdef USE_ROCTX
+    roctxRangePush("fvc::div_J");
+    #endif
+
     tmp<GeometricField<Type, fvPatchField, volMesh>> Div
     (
         fvc::div(flux, tvf(), name)
     );
     tvf.clear();
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
     return Div;
 }
 
@@ -218,12 +264,21 @@ div
     const word& name
 )
 {
+    #ifdef USE_ROCTX
+    roctxRangePush("fvc::div_K");
+    #endif
+
     tmp<GeometricField<Type, fvPatchField, volMesh>> Div
     (
         fvc::div(tflux(), tvf(), name)
     );
     tflux.clear();
     tvf.clear();
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
     return Div;
 }
 
@@ -251,11 +306,21 @@ div
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
+    #ifdef USE_ROCTX
+    roctxRangePush("fvc::div_M");
+    #endif
+
     tmp<GeometricField<Type, fvPatchField, volMesh>> Div
     (
         fvc::div(tflux(), vf)
     );
     tflux.clear();
+    
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
+
     return Div;
 }
 
@@ -268,11 +333,21 @@ div
     const tmp<GeometricField<Type, fvPatchField, volMesh>>& tvf
 )
 {
+    #ifdef USE_ROCTX
+    roctxRangePush("fvc::div_N");
+    #endif
+
     tmp<GeometricField<Type, fvPatchField, volMesh>> Div
     (
         fvc::div(flux, tvf())
     );
     tvf.clear();
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
+
     return Div;
 }
 
@@ -285,12 +360,21 @@ div
     const tmp<GeometricField<Type, fvPatchField, volMesh>>& tvf
 )
 {
+    #ifdef USE_ROCTX
+    roctxRangePush("fvc::div_O");
+    #endif
+
     tmp<GeometricField<Type, fvPatchField, volMesh>> Div
     (
         fvc::div(tflux(), tvf())
     );
     tflux.clear();
     tvf.clear();
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
     return Div;
 }
 

@@ -282,6 +282,9 @@ namespace Foam
 {
     // Template specialization for bool
     template<>
+    #ifdef USE_HIP
+    __host__ __device__
+    #endif
     inline const bool& Foam::UList<bool>::operator[](const label i) const
     {
         // Lazy evaluation - return false for out-of-range
@@ -296,6 +299,9 @@ namespace Foam
 
 
 template<class T>
+#ifdef USE_HIP
+__host__ __device__
+#endif
 inline T& Foam::UList<T>::operator[](const label i)
 {
     #ifdef FULLDEBUG
@@ -306,6 +312,9 @@ inline T& Foam::UList<T>::operator[](const label i)
 
 
 template<class T>
+#ifdef USE_HIP
+__host__ __device__
+#endif
 inline const T& Foam::UList<T>::operator[](const label i) const
 {
     #ifdef FULLDEBUG
@@ -323,15 +332,22 @@ inline Foam::UList<T>::operator const Foam::List<T>&() const
 
 
 // * * * * * * * * * * * * * * STL Member Functions  * * * * * * * * * * * * //
-
+//LG1 AMD
 template<class T>
+#ifdef USE_HIP
+__host__ __device__ 
+#endif
 inline typename Foam::UList<T>::iterator
 Foam::UList<T>::begin() noexcept
 {
     return v_;
 }
 
+//LG1 AMD
 template<class T>
+#ifdef USE_HIP
+__host__ __device__ 
+#endif
 inline typename Foam::UList<T>::const_iterator
 Foam::UList<T>::begin() const noexcept
 {
@@ -417,6 +433,9 @@ inline void Foam::UList<T>::setAddressableSize(const label n) noexcept
 
 
 template<class T>
+#ifdef USE_HIP
+__host__ __device__
+#endif
 inline Foam::label Foam::UList<T>::size() const noexcept
 {
     return size_;

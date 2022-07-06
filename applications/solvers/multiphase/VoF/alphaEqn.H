@@ -214,7 +214,7 @@
                 phiCN,
                 alphaPhi10,
                 Sp,
-                (Su + divU*min(alpha1(), scalar(1)))(),
+                (Su + divU*Foam::min(alpha1(), scalar(1)))(),
                 oneField(),
                 zeroField()
             );

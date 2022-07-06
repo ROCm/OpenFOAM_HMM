@@ -89,6 +89,9 @@ void Foam::GAMGPreconditioner::precondition
     const direction cmpt
 ) const
 {
+
+    printf("in GAMGPreconditioner::precondition\n");
+
     wA = 0.0;
     solveScalarField AwA(wA.size());
     solveScalarField finestCorrection(wA.size());

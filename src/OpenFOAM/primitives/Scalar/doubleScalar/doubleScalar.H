@@ -71,7 +71,9 @@ constexpr doubleScalar doubleScalarROOTVSMALL = 1.0e-150;
 #define ScalarROOTVSMALL doubleScalarROOTVSMALL
 #define ScalarRead readDouble
 
-
+#ifdef USE_HIP
+__host__ __device__ 
+#endif
 inline Scalar mag(const Scalar s)
 {
     return ::fabs(s);

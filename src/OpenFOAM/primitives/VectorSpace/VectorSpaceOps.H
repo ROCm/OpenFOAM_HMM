@@ -52,7 +52,11 @@ struct VectorSpaceOps
         VectorSpaceOps<N, I+1>::eqOpS(vs, s, eo);
     }
 
+    //LG1 AMD
     template<class S, class V, class EqOp>
+    #ifdef USE_HIP
+	__host__ __device__ 
+	#endif
     static inline void SeqOp(S& s, const V& vs, EqOp eo)
     {
         eo(s, vs.v_[I]);
@@ -98,6 +102,9 @@ struct VectorSpaceOps<N, N>
     static inline void eqOpS(V&, const S&, EqOp) {}
 
     template<class S, class V, class EqOp>
+    #ifdef USE_HIP
+	__host__ __device__ 
+    #endif
     static inline void SeqOp(S&, const V&, EqOp) {}
 
     template<class V1, class V2, class EqOp>

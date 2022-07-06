@@ -971,7 +971,7 @@ int main(int argc, char *argv[])
                         for
                         (
                             label addedI=next;
-                            addedI<min(proci+step, nProcs);
+                            addedI<Foam::min(proci+step, nProcs);
                             addedI++
                         )
                         {

@@ -106,7 +106,11 @@ tmp<FieldField<Field, typename typeOfMag<Type>::type>>
 magSqr(const tmp<FieldField<Field, Type>>& tf);
 
 
+//LG1 AMD
 template<template<class> class Field, class Type>
+#ifdef USE_HIP
+__host__ __device__ 
+#endif
 void mag
 (
     FieldField<Field, typename typeOfMag<Type>::type>& res,

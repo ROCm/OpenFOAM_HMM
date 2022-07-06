@@ -29,6 +29,7 @@ License
 #include "GaussSeidelSmoother.H"
 #include "PrecisionAdaptor.H"
 
+
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
@@ -142,6 +143,8 @@ void Foam::GaussSeidelSmoother::smooth
         label fStart;
         label fEnd = ownStartPtr[0];
 
+       
+        
         for (label celli=0; celli<nCells; celli++)
         {
             // Start and end of this row

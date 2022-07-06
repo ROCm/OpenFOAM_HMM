@@ -603,11 +603,11 @@ scalar block_cylinder_overlap
 
                     over.x() = a_centre - 0.5 * a_lblk;
                     over.y() = b_centre - 0.5 * b_lblk;
-                    over.z() = max(blk1.z(), cyl2.z());
+                    over.z() = Foam::max(blk1.z(), cyl2.z());
 
                     over.span.x() = a_lblk;
                     over.span.y() = b_lblk;
-                    over.span.z() = min(max1.z(), cyl2.z() + cyl2.len()) - over.z();
+                    over.span.z() = Foam::min(max1.z(), cyl2.z() + cyl2.len()) - over.z();
                     assert(over.x() > -200.0);
                     assert(over.x() < 2000.0);
                 }
@@ -668,11 +668,11 @@ scalar block_cylinder_overlap
 
                     over.z() = a_centre - a_lblk * 0.5;
                     over.x() = b_centre - b_lblk * 0.5;
-                    over.y() = max(blk1.y(), cyl2.y());
+                    over.y() = Foam::max(blk1.y(), cyl2.y());
 
                     over.span.z() = a_lblk;
                     over.span.x() = b_lblk;
-                    over.span.y() = min(max1.y(), cyl2.y() + cyl2.len()) - over.y();
+                    over.span.y() = Foam::min(max1.y(), cyl2.y() + cyl2.len()) - over.y();
                 }
                 break;
 
@@ -734,11 +734,11 @@ scalar block_cylinder_overlap
 
                     over.y() = a_centre - a_lblk * 0.5;
                     over.z() = b_centre - b_lblk * 0.5;
-                    over.x() = max(blk1.x(), cyl2.x());
+                    over.x() = Foam::max(blk1.x(), cyl2.x());
 
                     over.span.y() = a_lblk;
                     over.span.z() = b_lblk;
-                    over.span.x() = min(max1.x(), cyl2.x() + cyl2.len()) - over.x();
+                    over.span.x() = Foam::min(max1.x(), cyl2.x() + cyl2.len()) - over.x();
                 }
                 break;
             }

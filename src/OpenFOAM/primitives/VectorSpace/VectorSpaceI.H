@@ -461,6 +461,9 @@ inline typename powProduct<Form, 2>::type pow
 
 
 template<class Form, class Cmpt, direction Ncmpts>
+#ifdef USE_HIP
+__host__ __device__
+#endif
 inline scalar magSqr
 (
     const VectorSpace<Form, Cmpt, Ncmpts>& vs
@@ -473,6 +476,9 @@ inline scalar magSqr
 
 
 template<class Form, class Cmpt, direction Ncmpts>
+#ifdef USE_HIP
+__host__ __device__
+#endif
 inline scalar mag
 (
     const VectorSpace<Form, Cmpt, Ncmpts>& vs

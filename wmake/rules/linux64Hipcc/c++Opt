@@ -1,0 +1,11 @@
+c++DBUG     =
+c++OPT      = -O3  -std=c++17 --amdgpu-target=gfx90a:xnack+ -I /opt/rocm-5.0.2/roctracer/include -DUSE_ROCTX  -DUSE_HIP  #-DUSE_OMP -DUSE_ROCTX -target x86_64-pc-linux-gnu -fopenmp -fopenmp-targets=amdgcn-amd-amdhsa -Xopenmp-target=amdgcn-amd-amdhsa -march=gfx90a:xnack+  -Wno-conditional-type-mismatch  -D__HIP_PLATFORM_AMD__ 
+LINKLIBSO  += /opt/rocm-5.0.2/lib/libroctx64.so  #/work/lgrinber/OPENMP_COMPILER_UVM/rocm-5.2.0-9846/lib/libroctx64.so 
+
+
+#c++OPT      = -O3  -std=c++17  -I  /opt/rocm-5.0.2/roctracer/include   #-DUSE_OMP  -target x86_64-pc-linux-gnu -fopenmp -fopenmp-targets=amdgcn-amd-amdhsa -Xopenmp-target=amdgcn-amd-amdhsa -march=gfx90a:xnack+  -Wno-conditional-type-mismatch  -D__HIP_PLATFORM_AMD__ #/work/lgrinber/OPENMP_COMPILER_UVM/rocm-5.2.0-9846/roctracer/include
+#LINKLIBSO  += /opt/rocm-5.0.2/lib/libroctx64.so  #/work/lgrinber/OPENMP_COMPILER_UVM/rocm-5.2.0-9846/lib/libroctx64.so 
+
+
+#c++OPT      = -O3 -std=c++17  -mxnack -I  /work/lgrinber/OPENMP_COMPILER_UVM/aomp_15.0-1/include -I /work/lgrinber/OPENMP_COMPILER_UVM/aomp_15.0-1/roctracer/include   -DUSE_OMP  -target x86_64-pc-linux-gnu -fopenmp -fopenmp-targets=amdgcn-amd-amdhsa -Xopenmp-target=amdgcn-amd-amdhsa -march=gfx90a  -Wno-conditional-type-mismatch  -D__HIP_PLATFORM_AMD__ 
+#LINKLIBSO  += /work/lgrinber/OPENMP_COMPILER_UVM/aomp_15.0-1/lib/libroctx64.so 

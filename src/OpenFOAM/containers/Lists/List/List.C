@@ -34,6 +34,15 @@ License
 #include "contiguous.H"
 #include <utility>
 
+#include <stdlib.h>  //LG1 AMD
+
+//LG using OpenMP offloading and HMM
+//#include <omp.h>
+//#ifndef OMP_UNIFIED_MEMORY_REQUIRED
+//#pragma omp requires unified_shared_memory
+//#define OMP_UNIFIED_MEMORY_REQUIRED
+//#endif
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class T>
@@ -47,9 +56,19 @@ void Foam::List<T>::doResize(const label len)
     if (len > 0)
     {
         // With sign-check to avoid spurious -Walloc-size-larger-than
-        T* nv = new T[len];
+        
+        size_t alignement = 16;
+        size_t bytes_needed = sizeof(T)*len;
+        if (bytes_needed > 2*100){ //LG1 AMD
+           alignement = 256;       //LG1 AMD        
+        }
+        T* nv = new (std::align_val_t( alignement)) T[len]; //LG1 AMD
+        //if (bytes_needed > 2*128){   //LG1 AMD
+        //   #pragma omp target enter data map(to:nv[0:len]) //LG1 AMD
+       // } //LG1 AMD
 
-        const label overlap = min(this->size_, len);
+
+        const label overlap = Foam::min(this->size_, len);
 
         if (overlap)
         {

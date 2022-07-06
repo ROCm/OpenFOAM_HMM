@@ -29,6 +29,11 @@ License
 #include "gaussGrad.H"
 #include "extrapolatedCalculatedFvPatchField.H"
 
+
+#ifdef USE_ROCTX
+#include <roctx.h>
+#endif
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
@@ -47,6 +52,12 @@ Foam::fv::gaussGrad<Type>::gradf
     const word& name
 )
 {
+    #ifdef USE_ROCTX
+    roctxRangePush("fv::gaussGrad_A");
+    #endif
+
+
+
     typedef typename outerProduct<vector, Type>::type GradType;
     typedef GeometricField<GradType, fvPatchField, volMesh> GradFieldType;
 
@@ -105,6 +116,11 @@ Foam::fv::gaussGrad<Type>::gradf
 
     gGrad.correctBoundaryConditions();
 
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
     return tgGrad;
 }
 
@@ -125,6 +141,12 @@ Foam::fv::gaussGrad<Type>::calcGrad
     const word& name
 ) const
 {
+
+    #ifdef USE_ROCTX
+    roctxRangePush("fv::gaussGrad_B");
+    #endif
+
+    
     typedef typename outerProduct<vector, Type>::type GradType;
     typedef GeometricField<GradType, fvPatchField, volMesh> GradFieldType;
 
@@ -135,6 +157,10 @@ Foam::fv::gaussGrad<Type>::calcGrad
     GradFieldType& gGrad = tgGrad.ref();
 
     correctBoundaryConditions(vsf, gGrad);
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 
     return tgGrad;
 }
@@ -150,6 +176,10 @@ void Foam::fv::gaussGrad<Type>::correctBoundaryConditions
     >& gGrad
 )
 {
+    #ifdef USE_ROCTX
+    roctxRangePush("fv::gaussGrad_C");
+    #endif
+    
     auto& gGradbf = gGrad.boundaryFieldRef();
 
     forAll(vsf.boundaryField(), patchi)
@@ -169,6 +199,11 @@ void Foam::fv::gaussGrad<Type>::correctBoundaryConditions
             );
         }
      }
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
 }
 
 

@@ -1,6 +1,6 @@
 SUFFIXES += .c
 
-cc          = clang$(COMPILER_VERSION)
+cc          = clang$(COMPILER_VERSION) -fuse-ld=ld
 
 cARCH       =
 cDBUG       =

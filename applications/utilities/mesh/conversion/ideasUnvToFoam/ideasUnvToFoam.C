@@ -269,7 +269,7 @@ void readCells
     label maxUnvPoint = 0;
     forAll(unvPointID, pointi)
     {
-        maxUnvPoint = max(maxUnvPoint, unvPointID[pointi]);
+        maxUnvPoint = Foam::max(maxUnvPoint, unvPointID[pointi]);
     }
     labelList unvToFoam(invert(maxUnvPoint+1, unvPointID));
 
@@ -784,7 +784,7 @@ int main(int argc, char *argv[])
     label maxUnvPoint = 0;
     forAll(unvPointID, pointi)
     {
-        maxUnvPoint = max(maxUnvPoint, unvPointID[pointi]);
+        maxUnvPoint = Foam::max(maxUnvPoint, unvPointID[pointi]);
     }
     labelList unvToFoam(invert(maxUnvPoint+1, unvPointID));
 
@@ -1281,7 +1281,7 @@ int main(int argc, char *argv[])
     }
 
     // Set the precision of the points data to 10
-    IOstream::defaultPrecision(max(10u, IOstream::defaultPrecision()));
+    IOstream::defaultPrecision(Foam::max(10u, IOstream::defaultPrecision()));
 
     mesh.write();
 

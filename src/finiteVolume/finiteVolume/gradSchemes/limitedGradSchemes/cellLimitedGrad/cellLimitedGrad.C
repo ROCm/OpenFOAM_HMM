@@ -29,6 +29,17 @@ License
 #include "cellLimitedGrad.H"
 #include "gaussGrad.H"
 
+#ifdef USE_ROCTX
+#include <roctx.h>
+#endif
+
+
+
+  #ifndef OMP_UNIFIED_MEMORY_REQUIRED
+  #pragma omp requires unified_shared_memory
+  #define OMP_UNIFIED_MEMORY_REQUIRED
+  #endif 
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type, class Limiter>
@@ -38,7 +49,16 @@ void Foam::fv::cellLimitedGrad<Type, Limiter>::limitGradient
     Field<vector>& gIf
 ) const
 {
+    #ifdef USE_ROCTX
+    roctxRangePush("fv::cellLimitedGrad_A");
+    #endif
+
     gIf *= limiter;
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
 }
 
 
@@ -49,6 +69,11 @@ void Foam::fv::cellLimitedGrad<Type, Limiter>::limitGradient
     Field<tensor>& gIf
 ) const
 {
+    #ifdef USE_ROCTX
+    roctxRangePush("fv::cellLimitedGrad_B");
+    #endif
+
+
     forAll(gIf, celli)
     {
         gIf[celli] = tensor
@@ -58,6 +83,9 @@ void Foam::fv::cellLimitedGrad<Type, Limiter>::limitGradient
             cmptMultiply(limiter[celli], gIf[celli].z())
         );
     }
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 }
 
 
@@ -77,6 +105,11 @@ Foam::fv::cellLimitedGrad<Type, Limiter>::calcGrad
     const word& name
 ) const
 {
+
+    #ifdef USE_ROCTX
+    roctxRangePush("fv::cellLimitedGrad_C");
+    #endif
+
     const fvMesh& mesh = vsf.mesh();
 
     tmp
@@ -106,7 +139,13 @@ Foam::fv::cellLimitedGrad<Type, Limiter>::calcGrad
     Field<Type> maxVsf(vsf.primitiveField());
     Field<Type> minVsf(vsf.primitiveField());
 
+    #if 1
     forAll(owner, facei)
+    #else
+    //LG1 AMD: make sure we do not have any race conditions  
+    #pragma omp target teams distribute parallel for
+    for (label facei = 0; facei < owner.size(); ++facei)
+    #endif
     {
         const label own = owner[facei];
         const label nei = neighbour[facei];
@@ -114,17 +153,24 @@ Foam::fv::cellLimitedGrad<Type, Limiter>::calcGrad
         const Type& vsfOwn = vsf[own];
         const Type& vsfNei = vsf[nei];
 
-        maxVsf[own] = max(maxVsf[own], vsfNei);
-        minVsf[own] = min(minVsf[own], vsfNei);
+        maxVsf[own] = Foam::max(maxVsf[own], vsfNei);
+        minVsf[own] = Foam::min(minVsf[own], vsfNei);
 
-        maxVsf[nei] = max(maxVsf[nei], vsfOwn);
-        minVsf[nei] = min(minVsf[nei], vsfOwn);
+        maxVsf[nei] = Foam::max(maxVsf[nei], vsfOwn);
+        minVsf[nei] = Foam::min(minVsf[nei], vsfOwn);
     }
 
 
     const auto& bsf = vsf.boundaryField();
 
+    //printf(" bsf.size()=%d\n",bsf.size());
+    #if 1
     forAll(bsf, patchi)
+    #else
+    //LG2 AMD problem with creating target region here - need investigation
+    #pragma omp target teams distribute 
+    for (label patchi=0; patchi < bsf.size(); ++patchi)
+    #endif
     {
         const fvPatchField<Type>& psf = bsf[patchi];
         const labelUList& pOwner = mesh.boundary()[patchi].faceCells();
@@ -133,18 +179,30 @@ Foam::fv::cellLimitedGrad<Type, Limiter>::calcGrad
         {
             const Field<Type> psfNei(psf.patchNeighbourField());
 
+            //printf("patchi=%d :  pOwner.size()=%d\n",patchi,pOwner.size());
+            #if 1
             forAll(pOwner, pFacei)
+            #else
+            #pragma omp target teams distribute parallel for
+            for (label pFacei=0; pFacei < pOwner.size(); ++pFacei)            
+            #endif 
             {
                 const label own = pOwner[pFacei];
                 const Type& vsfNei = psfNei[pFacei];
 
+                //atomic MAX/MIN should solve the race condition issue 
                 maxVsf[own] = max(maxVsf[own], vsfNei);
                 minVsf[own] = min(minVsf[own], vsfNei);
             }
         }
         else
         {
+            #if 1
             forAll(pOwner, pFacei)
+            #else
+            #pragma omp target teams distribute parallel for
+            for (label pFacei=0; pFacei < pOwner.size(); ++pFacei)            
+            #endif             
             {
                 const label own = pOwner[pFacei];
                 const Type& vsfNei = psf[pFacei];
@@ -170,7 +228,13 @@ Foam::fv::cellLimitedGrad<Type, Limiter>::calcGrad
     // Note: the limiter is not permitted to be > 1
     Field<Type> limiter(vsf.primitiveField().size(), pTraits<Type>::one);
 
+    #if 1
     forAll(owner, facei)
+    #else
+    //LG2 AMD race conditions in parallel implementation ?
+    #pragma omp target teams distribute parallel for
+    for (label facei=0; facei < owner.size(); ++facei)    
+    #endif
     {
         const label own = owner[facei];
         const label nei = neighbour[facei];
@@ -224,6 +288,10 @@ Foam::fv::cellLimitedGrad<Type, Limiter>::calcGrad
     limitGradient(limiter, g);
     g.correctBoundaryConditions();
     gaussGrad<Type>::correctBoundaryConditions(vsf, g);
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 
     return tGrad;
 }

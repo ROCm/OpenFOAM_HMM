@@ -10,7 +10,7 @@
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
-
+   
     OpenFOAM is free software: you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -29,11 +29,99 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
+
 #include "scalarField.H"
 #include "unitConversion.H"
 
 #define TEMPLATE
 #include "FieldFunctionsM.C"
+
+#ifdef USE_OMP
+#include <omp.h>
+#endif
+
+#ifndef OMP_UNIFIED_MEMORY_REQUIRED
+#pragma omp requires unified_shared_memory
+#define OMP_UNIFIED_MEMORY_REQUIRED
+#endif
+
+
+#ifdef USE_HIP
+#include <hip/hip_runtime.h>
+
+__global__ 
+static void scalarField_kernel_A_float( const float * __restrict__ f1,  const float * __restrict__ f2, Foam::label N, float *result){
+
+  Foam::label i_start = threadIdx.x+blockIdx.x*blockDim.x;
+  Foam::label i_shift = blockDim.x*gridDim.x;
+  __shared__  float s_sum[16];//1024/WARP_SIZE
+
+  float sum = 0.0;
+
+    for (Foam::label i=i_start; i<N; i+=i_shift){
+        sum += f1[i]*f2[i];
+    }
+
+    //reduce within a warp; assume warp size id 64
+    for (int i = 32; i > 0 ; i = i/2){
+      sum += __shfl_down(sum,i);
+    }
+    //reduce across warps of the same threadblock
+    if (threadIdx.x%64 == 0) 
+      s_sum[threadIdx.x/64] = sum;
+
+    __syncthreads();
+    if (threadIdx.x==0){
+      for (int i = 1; i < blockDim.x/64; ++i)
+        sum += s_sum[i];
+       atomicAdd(&result[0],sum);
+    }
+    /*
+    //reduce across all warps 
+    if (threadIdx.x%64 == 0){
+        atomicAdd(&result[0],sum);
+    }
+    */
+
+}
+
+__global__ 
+static void scalarField_kernel_A_double( const double * __restrict__ f1,  const double * __restrict__ f2, Foam::label N, double *result){
+
+  Foam::label i_start = threadIdx.x+blockIdx.x*blockDim.x;
+  Foam::label i_shift = blockDim.x*gridDim.x;
+
+  double sum = 0.0;
+  __shared__  double s_sum[16];//1024/WARP_SIZE
+
+    for (Foam::label i=i_start; i<N; i+=i_shift){
+        sum += f1[i]*f2[i];
+    }
+
+    //reduce within a warp; assume warp size id 64
+    for (int i = 32; i > 0 ; i = i/2){
+      sum += __shfl_down(sum,i);
+    }
+
+    //reduce across warps of the same threadblock
+    if (threadIdx.x%64 == 0) 
+      s_sum[threadIdx.x/64] = sum;
+
+    __syncthreads();
+    if (threadIdx.x==0){
+      for (int i = 1; i < blockDim.x/64; ++i)
+        sum += s_sum[i];
+       atomicAdd(&result[0],sum);
+    }
+    /*
+    //reduce across all warps 
+    if (threadIdx.x%64 == 0){
+        atomicAdd(&result[0],sum);
+    }
+    */
+}
+#endif
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -98,11 +186,29 @@ float sumProd(const UList<float>& f1, const UList<float>& f2)
     float result = 0.0;
     if (f1.size() && (f1.size() == f2.size()))
     {
+        #if 0 //LG1
         TFOR_ALL_S_OP_F_OP_F(float, result, +=, float, f1, *, float, f2)
+        #else
+        label f1_sz = f1.size();
+
+        #ifdef USE_HIP
+          const float *f1ptr = &f1[0];
+          const float *f2ptr = &f2[0];
+          float *result_ptr = new float[1];
+          result_ptr[0] = 0.0;
+          hipLaunchKernelGGL(HIP_KERNEL_NAME(scalarField_kernel_A_float), (f1_sz + 1023)/1024, 1024, 0,0, f1ptr,  f2ptr, f1_sz, result_ptr);
+          hipDeviceSynchronize();
+          result = result_ptr[0];
+          delete[] result_ptr;
+        #else 
+          #pragma omp target teams distribute parallel for reduction(+:result) map(tofrom:result)  //if(target:f1_sz>200)
+          for (label i = 0; i < f1_sz; ++i)
+              result += f1[i]*f2[i];
+          #endif  
+        #endif  
     }
     return result;
 }
-
 
 template<>
 double sumProd(const UList<double>& f1, const UList<double>& f2)
@@ -110,7 +216,29 @@ double sumProd(const UList<double>& f1, const UList<double>& f2)
     double result = 0.0;
     if (f1.size() && (f1.size() == f2.size()))
     {
+        
+        #if 0 //LG1
         TFOR_ALL_S_OP_F_OP_F(double, result, +=, double, f1, *, double, f2)
+        
+        #else
+        label f1_sz = f1.size();
+
+        #ifdef USE_HIP
+          const double *f1ptr = &f1[0];
+          const double *f2ptr = &f2[0];
+          double *result_ptr = new double[1];
+          result_ptr[0] = 0.0;
+          hipLaunchKernelGGL(HIP_KERNEL_NAME(scalarField_kernel_A_double), (f1_sz + 1023)/1024, 1024, 0,0, f1ptr,  f2ptr, f1_sz, result_ptr);
+          hipDeviceSynchronize();
+          result = result_ptr[0];
+          delete[] result_ptr;
+        #else 
+          #pragma omp target  teams distribute parallel for reduction(+:result) map(tofrom:result) //if(target:f1_sz>200)
+          for (label i = 0; i < f1_sz; ++i)
+              result += f1[i]*f2[i];
+          #endif
+        #endif
+
     }
     return result;
 }

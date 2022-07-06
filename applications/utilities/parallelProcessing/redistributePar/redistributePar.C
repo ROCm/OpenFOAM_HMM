@@ -334,11 +334,11 @@ void printMeshData(const polyMesh& mesh)
                 << nBndFaces-nProcFaces << endl;
         }
 
-        maxProcCells = max(maxProcCells, nLocalCells);
+        maxProcCells = Foam::max(maxProcCells, nLocalCells);
         totProcFaces += nProcFaces;
         totProcPatches += nei.size();
-        maxProcFaces = max(maxProcFaces, nProcFaces);
-        maxProcPatches = max(maxProcPatches, nei.size());
+        maxProcFaces = Foam::max(maxProcFaces, nProcFaces);
+        maxProcPatches = Foam::max(maxProcPatches, nei.size());
     }
 
     // Summary stats

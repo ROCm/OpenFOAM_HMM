@@ -301,11 +301,19 @@ public:
 
     // Member Operators
 
+//LG1 AMD
         //- Return const reference to the element
+        #ifdef USE_HIP
+        __host__ __device__  
+        #endif	
         inline const T& operator[](const label i) const;
 
+//LG1 AMD
         //- Return reference to the element
-        inline T& operator[](const label i);
+        #ifdef USE_HIP
+        __host__ __device__  
+	#endif
+	inline T& operator[](const label i);
 
         //- Return const pointer to the element - same as get().
         inline const T* operator()(const label i) const;

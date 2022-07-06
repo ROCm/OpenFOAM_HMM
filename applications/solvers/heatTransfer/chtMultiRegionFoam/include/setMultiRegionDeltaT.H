@@ -49,17 +49,17 @@ if (adjustTimeStep)
     scalar maxDeltaTSolid = maxDi/(DiNum + SMALL);
 
     scalar deltaTFluid =
-        min
+        Foam::min
         (
-            min(maxDeltaTFluid, 1.0 + 0.1*maxDeltaTFluid),
+            Foam::min(maxDeltaTFluid, 1.0 + 0.1*maxDeltaTFluid),
             1.2
         );
 
     runTime.setDeltaT
     (
-        min
+        Foam::min
         (
-            min(deltaTFluid, maxDeltaTSolid)*runTime.deltaT().value(),
+            Foam::min(deltaTFluid, maxDeltaTSolid)*runTime.deltaT().value(),
             maxDeltaT
         )
     );
