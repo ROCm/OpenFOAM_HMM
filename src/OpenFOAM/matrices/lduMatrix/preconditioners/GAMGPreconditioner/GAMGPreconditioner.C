@@ -67,12 +67,6 @@ Foam::GAMGPreconditioner::GAMGPreconditioner
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::GAMGPreconditioner::~GAMGPreconditioner()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::GAMGPreconditioner::readControls()
@@ -89,7 +83,7 @@ void Foam::GAMGPreconditioner::precondition
     const direction cmpt
 ) const
 {
-    wA = 0.0;
+    wA = Zero;
     solveScalarField AwA(wA.size());
     solveScalarField finestCorrection(wA.size());
     solveScalarField finestResidual(rA_ss);

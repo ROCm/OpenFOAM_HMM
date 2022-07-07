@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef lduPrimitiveMesh_H
-#define lduPrimitiveMesh_H
+#ifndef Foam_lduPrimitiveMesh_H
+#define Foam_lduPrimitiveMesh_H
 
 #include "lduMesh.H"
 #include "labelList.H"
@@ -55,7 +55,7 @@ class lduPrimitiveMesh
     public lduMesh,
     public lduAddressing
 {
-    // Private data
+    // Private Data
 
         //- Lower addressing
         labelList lowerAddr_;

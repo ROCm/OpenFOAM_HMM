@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,6 +54,7 @@ SourceFiles
 #define Foam_LduMatrix_H
 
 #include "lduMesh.H"
+#include "lduMatrix.H"
 #include "Field.H"
 #include "FieldField.H"
 #include "LduInterfaceFieldPtrsList.H"
@@ -69,8 +70,7 @@ namespace Foam
 
 // Forward Declarations
 
-template<class Type, class DType, class LUType>
-class LduMatrix;
+template<class Type, class DType, class LUType> class LduMatrix;
 
 template<class Type, class DType, class LUType>
 Ostream& operator<<
@@ -119,16 +119,13 @@ public:
 
         // Protected Data
 
-            //- Default maximum number of iterations in the solver
-            static const label defaultMaxIter_ = 1000;
-
             word fieldName_;
             const LduMatrix<Type, DType, LUType>& matrix_;
 
-            //- Dictionary of controls
+            //- Dictionary of solution controls
             dictionary controlDict_;
 
-            //- Level of verbosity in the solver output statements
+            //- Verbosity level for solver output statements
             int log_;
 
             //- Minimum number of iterations in the solver
@@ -136,6 +133,9 @@ public:
 
             //- Maximum number of iterations in the solver
             label maxIter_;
+
+            //- The matrix normalisation type
+            lduMatrix::normTypes normType_;
 
             //- Final convergence tolerance
             Type tolerance_;
@@ -146,7 +146,7 @@ public:
 
         // Protected Member Functions
 
-            //- Read the control parameters from the controlDict_
+            //- Read the control parameters from controlDict_
             virtual void readControls();
 
 
@@ -206,6 +206,7 @@ public:
 
         // Constructors
 
+            //- Construct for given field name, matrix and controls
             solver
             (
                 const word& fieldName,
@@ -225,9 +226,8 @@ public:
             );
 
 
-        // Destructor
-
-            virtual ~solver() = default;
+        //- Destructor
+        virtual ~solver() = default;
 
 
         // Member Functions
@@ -244,21 +244,33 @@ public:
 
 
             //- Read and reset the solver parameters from the given dictionary
-            virtual void read(const dictionary& solverDict);
+            virtual void read(const dictionary&);
 
             virtual SolverPerformance<Type> solve
             (
                 Field<Type>& psi
             ) const = 0;
 
+            //- Return the matrix norm using the specified norm method
+            Type normFactor
+            (
+                const Field<Type>& psi,
+                const Field<Type>& Apsi,
+                Field<Type>& tmpField,
+                const lduMatrix::normTypes normType
+            ) const;
+
             //- Return the matrix norm used to normalise the residual for the
-            //  stopping criterion
+            //- stopping criterion
             Type normFactor
             (
                 const Field<Type>& psi,
                 const Field<Type>& Apsi,
                 Field<Type>& tmpField
-            ) const;
+            ) const
+            {
+                return this->normFactor(psi, Apsi, tmpField, normType_);
+            }
     };
 
 
@@ -314,6 +326,7 @@ public:
 
         // Constructors
 
+            //- Construct for given field name and matrix
             smoother
             (
                 const word& fieldName,
@@ -332,9 +345,8 @@ public:
             );
 
 
-        // Destructor
-
-            virtual ~smoother() = default;
+        //- Destructor
+        virtual ~smoother() = default;
 
 
         // Member Functions
@@ -405,10 +417,8 @@ public:
 
         // Constructors
 
-            preconditioner
-            (
-                const solver& sol
-            )
+            //- Construct for given solver
+            preconditioner(const solver& sol)
             :
                 solver_(sol)
             {}
@@ -424,16 +434,15 @@ public:
             );
 
 
-        // Destructor
-
-            virtual ~preconditioner() = default;
+        //- Destructor
+        virtual ~preconditioner() = default;
 
 
         // Member functions
 
             //- Read and reset the preconditioner parameters
-            //  from the given dictionary
-            virtual void read(const dictionary& preconditionerDict)
+            //- from the given dictionary
+            virtual void read(const dictionary&)
             {}
 
             //- Return wA the preconditioned form of residual rA
@@ -444,7 +453,7 @@ public:
             ) const = 0;
 
             //- Return wT the transpose-matrix preconditioned form of
-            //  residual rT.
+            //- residual rT.
             //  This is only required for preconditioning asymmetric matrices.
             virtual void preconditionT
             (
@@ -480,17 +489,16 @@ public:
         LduMatrix(const lduMesh&, Istream&);
 
 
-    // Destructor
+    //- Destructor
+    ~LduMatrix();
 
-        ~LduMatrix();
 
-
-    // Member functions
+    // Member Functions
 
         // Access to addressing
 
             //- Return the LDU mesh from which the addressing is obtained
-            const lduMesh& mesh() const
+            const lduMesh& mesh() const noexcept
             {
                 return lduMesh_;
             }
@@ -554,43 +562,43 @@ public:
             }
 
 
-            bool hasDiag() const
+            bool hasDiag() const noexcept
             {
                 return (diagPtr_);
             }
 
-            bool hasUpper() const
+            bool hasUpper() const noexcept
             {
                 return (upperPtr_);
             }
 
-            bool hasLower() const
+            bool hasLower() const noexcept
             {
                 return (lowerPtr_);
             }
 
-            bool hasSource() const
+            bool hasSource() const noexcept
             {
                 return (sourcePtr_);
             }
 
-            bool diagonal() const
+            bool diagonal() const noexcept
             {
                 return (diagPtr_ && !lowerPtr_ && !upperPtr_);
             }
 
-            bool symmetric() const
+            bool symmetric() const noexcept
             {
                 return (diagPtr_ && (!lowerPtr_ && upperPtr_));
             }
 
-            bool asymmetric() const
+            bool asymmetric() const noexcept
             {
                 return (diagPtr_ && lowerPtr_ && upperPtr_);
             }
 
 
-        // operations
+        // Operations
 
             void sumDiag();
             void negSumDiag();
@@ -640,7 +648,7 @@ public:
             tmp<Field<Type>> faceH(const tmp<Field<Type>>&) const;
 
 
-    // Member operators
+    // Member Operators
 
         void operator=(const LduMatrix<Type, DType, LUType>&);
 
@@ -653,7 +661,7 @@ public:
         void operator*=(scalar);
 
 
-    // Ostream operator
+    // Ostream Operator
 
         friend Ostream& operator<< <Type, DType, LUType>
         (

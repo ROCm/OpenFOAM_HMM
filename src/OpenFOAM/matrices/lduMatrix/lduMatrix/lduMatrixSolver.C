@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -152,6 +152,14 @@ Foam::lduMatrix::solver::solver
     interfaceIntCoeffs_(interfaceIntCoeffs),
     interfaces_(interfaces),
     controlDict_(solverControls),
+
+    log_(1),
+    minIter_(0),
+    maxIter_(lduMatrix::defaultMaxIter),
+    normType_(lduMatrix::normTypes::DEFAULT_NORM),
+    tolerance_(lduMatrix::defaultTolerance),
+    relTol_(Zero),
+
     profiling_("lduMatrix::solver." + fieldName)
 {
     readControls();
@@ -162,11 +170,19 @@ Foam::lduMatrix::solver::solver
 
 void Foam::lduMatrix::solver::readControls()
 {
-    log_ = controlDict_.getOrDefault<int>("log", 1);
-    minIter_ = controlDict_.getOrDefault<label>("minIter", 0);
-    maxIter_ = controlDict_.getOrDefault<label>("maxIter", defaultMaxIter_);
-    tolerance_ = controlDict_.getOrDefault<scalar>("tolerance", 1e-6);
-    relTol_ = controlDict_.getOrDefault<scalar>("relTol", 0);
+    log_ = 1;
+    minIter_ = 0;
+    maxIter_ = lduMatrix::defaultMaxIter;
+    normType_ = lduMatrix::normTypes::DEFAULT_NORM;
+    tolerance_ = lduMatrix::defaultTolerance;
+    relTol_ = 0;
+
+    controlDict_.readIfPresent("log", log_);
+    lduMatrix::normTypesNames_.readIfPresent("norm", controlDict_, normType_);
+    controlDict_.readIfPresent("minIter", minIter_);
+    controlDict_.readIfPresent("maxIter", maxIter_);
+    controlDict_.readIfPresent("tolerance", tolerance_);
+    controlDict_.readIfPresent("relTol", relTol_);
 }
 
 
@@ -199,24 +215,40 @@ Foam::solveScalarField::cmptType Foam::lduMatrix::solver::normFactor
     const solveScalarField& psi,
     const solveScalarField& source,
     const solveScalarField& Apsi,
-    solveScalarField& tmpField
+    solveScalarField& tmpField,
+    const lduMatrix::normTypes normType
 ) const
 {
-    // --- Calculate A dot reference value of psi
-    matrix_.sumA(tmpField, interfaceBouCoeffs_, interfaces_);
+    switch (normType)
+    {
+        case lduMatrix::normTypes::NO_NORM :
+        {
+            break;
+        }
 
-    tmpField *= gAverage(psi, matrix_.mesh().comm());
+        case lduMatrix::normTypes::DEFAULT_NORM :
+        case lduMatrix::normTypes::L1_SCALED_NORM :
+        {
+            // --- Calculate A dot reference value of psi
+            matrix_.sumA(tmpField, interfaceBouCoeffs_, interfaces_);
 
-    return
-        gSum
-        (
-            (mag(Apsi - tmpField) + mag(source - tmpField))(),
-            matrix_.mesh().comm()
-        )
-      + solverPerformance::small_;
+            tmpField *= gAverage(psi, matrix_.mesh().comm());
 
-    // At convergence this simpler method is equivalent to the above
-    // return 2*gSumMag(source) + solverPerformance::small_;
+            return
+                gSum
+                (
+                    (mag(Apsi - tmpField) + mag(source - tmpField))(),
+                    matrix_.mesh().comm()
+                ) + solverPerformance::small_;
+
+            // Equivalent at convergence:
+            // return 2*gSumMag(source) + solverPerformance::small_;
+            break;
+        }
+    }
+
+    // Fall-through: no norm
+    return solveScalarField::cmptType(1);
 }
 
 

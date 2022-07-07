@@ -51,6 +51,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class GAMGAgglomeration;
 class lduMesh;
 class lduPrimitiveMesh;
@@ -63,7 +64,7 @@ class procFacesGAMGProcAgglomeration
 :
     public GAMGProcAgglomeration
 {
-    // Private data
+    // Private Data
 
         //- When to processor agglomerate
         const label nAgglomeratingCells_;
@@ -121,9 +122,8 @@ public:
 
     // Member Functions
 
-       //- Modify agglomeration. Return true if modified
+        //- Modify agglomeration. Return true if modified
         virtual bool agglomerate();
-
 };
 
 

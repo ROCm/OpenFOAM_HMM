@@ -37,25 +37,6 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(lduPrimitiveMesh, 0);
-
-    //- Less operator for pairs of \<processor\>\<index\>
-    class procLess
-    {
-        const labelPairList& list_;
-
-    public:
-
-        procLess(const labelPairList& list)
-        :
-            list_(list)
-        {}
-
-        bool operator()(const label a, const label b)
-        {
-            return list_[a].first() < list_[b].first();
-        }
-    };
-
 }
 
 

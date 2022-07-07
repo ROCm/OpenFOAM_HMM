@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -224,11 +224,13 @@ Foam::solverPerformance Foam::PBiCG::solve
     }
 
     // Recommend PBiCGStab if PBiCG fails to converge
-    if (solverPerf.nIterations() > max(defaultMaxIter_, maxIter_))
+    const label upperMaxIters = max(maxIter_, lduMatrix::defaultMaxIter);
+
+    if (solverPerf.nIterations() > upperMaxIters)
     {
         FatalErrorInFunction
-            << "PBiCG has failed to converge within the maximum number"
-               " of iterations " << max(defaultMaxIter_, maxIter_) << nl
+            << "PBiCG has failed to converge within the maximum iterations: "
+            << upperMaxIters << nl
             << "    Please try the more robust PBiCGStab solver."
             << exit(FatalError);
     }

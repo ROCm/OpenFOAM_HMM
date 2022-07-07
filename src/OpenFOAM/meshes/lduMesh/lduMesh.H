@@ -33,8 +33,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef lduMesh_H
-#define lduMesh_H
+#ifndef Foam_lduMesh_H
+#define Foam_lduMesh_H
 
 #include "lduAddressing.H"
 #include "lduInterfacePtrsList.H"
@@ -46,11 +46,8 @@ Description
 namespace Foam
 {
 
+// Forward Declarations
 class objectRegistry;
-
-
-// Forward declaration of friend functions and operators
-
 class lduMesh;
 
 Ostream& operator<<(Ostream&, const InfoProxy<lduMesh>&);
@@ -62,14 +59,11 @@ Ostream& operator<<(Ostream&, const InfoProxy<lduMesh>&);
 
 class lduMesh
 {
-
 public:
 
     //- Runtime type information
     TypeName("lduMesh");
 
-
-    // Constructors
 
     //- Destructor
     virtual ~lduMesh() = default;
@@ -114,7 +108,7 @@ public:
             }
 
 
-    // Ostream operator
+    // Ostream Operator
 
         friend Ostream& operator<<(Ostream&, const InfoProxy<lduMesh>&);
 };

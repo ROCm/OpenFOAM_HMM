@@ -37,8 +37,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef diagonalSolver_H
-#define diagonalSolver_H
+#ifndef Foam_diagonalSolver_H
+#define Foam_diagonalSolver_H
 
 #include "lduMatrix.H"
 
@@ -55,7 +55,9 @@ class diagonalSolver
 :
     public lduMatrix::solver
 {
-    // Private Member Functions
+public:
+
+    // Generated Methods
 
         //- No copy construct
         diagonalSolver(const diagonalSolver&) = delete;
@@ -63,8 +65,6 @@ class diagonalSolver
         //- No copy assignment
         void operator=(const diagonalSolver&) = delete;
 
-
-public:
 
     //- Runtime type information
     TypeName("diagonal");
