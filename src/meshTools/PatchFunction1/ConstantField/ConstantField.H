@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,9 +29,17 @@ Class
 Description
     Templated function that returns a constant value.
 
-    Usage - for entry \<entryName\> returning the value <value>:
+    Usage - for entry \<entryName\> returning the value \<value\>:
     \verbatim
-        <entryName>    constant  <value>
+        <entryName>    constant  <value>;
+    \endverbatim
+    or
+    \verbatim
+        <entryName>
+        {
+            type    constant;
+            value   <value>;
+        }
     \endverbatim
 
 SourceFiles
@@ -39,8 +47,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef PatchFunction1Types_ConstantField_H
-#define PatchFunction1Types_ConstantField_H
+#ifndef Foam_PatchFunction1Types_ConstantField_H
+#define Foam_PatchFunction1Types_ConstantField_H
 
 #include "PatchFunction1.H"
 
@@ -77,8 +85,9 @@ class ConstantField
         //- Helper to read value from dictionary entry
         static Field<Type> getValue
         (
-            const entry* eptr,  // primitiveEntry
-            const dictionary& dict,  // For error context
+            const word& entryName,
+            const entry* eptr,  // primitive or dictionary entry
+            const dictionary& dict,  // For error context or for content
             const label len,
             bool& isUniform,
             Type& uniformValue
