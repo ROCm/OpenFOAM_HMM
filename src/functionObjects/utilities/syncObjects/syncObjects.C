@@ -75,13 +75,13 @@ void Foam::functionObjects::syncObjects::sync()
             << " root:" << root_ << endl;
     }
 
-    const label oldWarnComm = UPstream::warnComm;
-    UPstream::warnComm = 0;
-
     if (!Pstream::parRun())
     {
         return;
     }
+
+    const label oldWarnComm = UPstream::warnComm;
+    UPstream::warnComm = 0;
 
 
     // Send my data to all other processors
