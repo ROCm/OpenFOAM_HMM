@@ -32,13 +32,11 @@ License
 template<class Type>
 Foam::lduCalculatedProcessorField<Type>::lduCalculatedProcessorField
 (
-    const lduInterface& interface,
-    const Field<Type>& iF
+    const lduInterface& interface
 )
 :
     LduInterfaceField<Type>(interface),
     procInterface_(refCast<const lduPrimitiveProcessorInterface>(interface)),
-    field_(iF),
     sendBuf_(procInterface_.faceCells().size()),
     receiveBuf_(procInterface_.faceCells().size()),
     scalarSendBuf_(procInterface_.faceCells().size()),
@@ -56,7 +54,6 @@ Foam::lduCalculatedProcessorField<Type>::lduCalculatedProcessorField
 :
     LduInterfaceField<Type>(refCast<const lduInterface>(ptf)),
     procInterface_(ptf.procInterface_),
-    field_(ptf.field_),
     sendBuf_(procInterface_.faceCells().size()),
     receiveBuf_(procInterface_.faceCells().size()),
     scalarSendBuf_(procInterface_.faceCells().size()),

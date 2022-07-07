@@ -894,8 +894,7 @@ void Foam::radiation::viewFactor::calculate()
                     i,
                     new lduCalculatedProcessorField<scalar>
                     (
-                        lduPtr_().interfaces()[i],
-                        qrBandI_[bandI]
+                        lduPtr_().interfaces()[i]
                     )
                 );
             }

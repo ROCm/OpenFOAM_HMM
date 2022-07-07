@@ -30,8 +30,7 @@ Group
     grpGenericBoundaryConditions
 
 Description
-    A lduProcessorField type bypassing coupledFvPatchField and holding
-    a reference to the Field<Type>.
+    A lduProcessorField type bypassing coupledFvPatchField
 
     Used to add updateInterfaceMatrix capabilities to a lduMatrix
     which is fully uncoupled from the fvMesh.
@@ -72,8 +71,6 @@ protected:
         //- Local reference cast into the interface
          const lduPrimitiveProcessorInterface& procInterface_;
 
-        //- Local Field
-         const Field<Type>& field_;
 
         // Sending and receiving
 
@@ -118,8 +115,8 @@ public:
         //- Construct from patch and internal field
         lduCalculatedProcessorField
         (
-            const lduInterface& interface,
-            const Field<Type>&
+            const lduInterface& interface
+            //const Field<Type>&
         );
 
         //- Construct as copy
