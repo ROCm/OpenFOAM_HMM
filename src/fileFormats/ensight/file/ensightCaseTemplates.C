@@ -90,7 +90,7 @@ Foam::ensightCase::newCloudData
     const word& name
 ) const
 {
-    autoPtr<Foam::ensightFile> output;
+    autoPtr<ensightFile> output;
 
     if (Pstream::master())
     {

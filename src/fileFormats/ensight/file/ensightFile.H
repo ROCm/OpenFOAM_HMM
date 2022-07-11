@@ -101,7 +101,7 @@ public:
     // Constructors
 
         //- Construct from pathName.
-        //  The entire pathName is checked for valid ensight naming.
+        //  The entire pathName is adjusted for valid ensight file naming.
         explicit ensightFile
         (
             const fileName& pathname,
@@ -109,7 +109,7 @@ public:
         );
 
         //- Construct from path and name.
-        //  Only the name portion is checked for valid ensight naming.
+        //  Only the name portion is adjusted for valid ensight file naming.
         ensightFile
         (
             const fileName& path,

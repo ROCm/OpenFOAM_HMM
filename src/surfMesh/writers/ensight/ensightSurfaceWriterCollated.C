@@ -69,7 +69,7 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeCollated
     // - SURF1/data/00000000/VAR2
 
     // Names "data" and "geometry" as per ensightCase:
-    const char* fmt  = "%08d";
+    const int maskWidth = 8;
     const char* mask = "data/********/";
 
 
@@ -125,12 +125,17 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeCollated
         // or just the masking part for moving geometries.
         const fileName geometryName
         (
-            "data"/word::printf(fmt, geomIndex)/ensightCase::geometryName
+            "data"
+          / ensightCase::padded(maskWidth, geomIndex)
+          / ensightCase::geometryName
         );
 
 
         // Location for data (and possibly the geometry as well)
-        fileName dataDir = baseDir/"data"/word::printf(fmt, timeIndex);
+        const fileName dataDir
+        (
+            baseDir/"data"/ensightCase::padded(maskWidth, timeIndex)
+        );
 
         // As per mkdir -p "data/00000000"
         mkDir(dataDir);
@@ -253,7 +258,7 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeCollated
                       : " per element: 1  "  // time-set 1
                     )
                     << setw(15) << varName << ' '
-                    << mask << varName << nl;
+                    << mask << ensight::FileName(varName).c_str() << nl;
             }
 
             osCase

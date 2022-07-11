@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,11 +61,13 @@ inline bool Foam::ensight::FileName::valid(char c)
 
 inline void Foam::ensight::FileName::stripInvalid()
 {
-    string::stripInvalid<FileName>(*this);
+    string::stripInvalid<ensight::FileName>(*this);
 
     // Avoid characters that upset Windows or others
     string::replaceAny(":<>[]", '_');
+    removeRepeated('_');
 
+    // Minor cleanup of fileName
     removeRepeated('/');
     removeEnd('/');
 

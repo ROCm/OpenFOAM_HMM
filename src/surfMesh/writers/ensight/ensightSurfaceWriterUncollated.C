@@ -224,7 +224,8 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeUncollated
                   : " per element: 1  "  // time-set 1
                 )
                 << setw(15) << varName << ' '
-                << baseName.c_str() << ".********." << varName << nl;
+                << baseName.c_str() << ".********."
+                << ensight::FileName(varName).c_str() << nl;
 
             osCase
                 << nl

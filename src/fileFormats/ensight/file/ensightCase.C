@@ -31,6 +31,8 @@ License
 #include "cloud.H"
 #include "IOmanip.H"
 #include "OSstream.H"
+#include <iomanip>
+#include <sstream>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -39,6 +41,20 @@ const char* Foam::ensightCase::geometryName = "geometry";
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+Foam::word Foam::ensightCase::padded(const int nwidth, const label value)
+{
+    if (nwidth < 1)
+    {
+        return Foam::name(value);
+    }
+
+    std::ostringstream oss;
+    oss << std::setfill('0') << std::setw(nwidth) << value;
+
+    return word(oss.str(), false);  // stripping=false
+}
+
 
 void Foam::ensightCase::printTimeset
 (
@@ -456,6 +472,7 @@ Foam::ensightCase::createDataFile
     {
         // The data/ITER subdirectory must exist
         // Note that data/ITER is indeed a valid ensight::FileName
+
         const fileName outdir = dataDir()/padded(timeIndex_);
         mkDir(outdir);
 
@@ -698,9 +715,9 @@ void Foam::ensightCase::write() const
 
 
     // Field variables (always use timeset 1)
-    const wordList varNames(variables_.sortedToc());
+    // NB: The output file name is stricter than the variable name
 
-    for (const word& varName : varNames)
+    for (const word& varName : variables_.sortedToc())
     {
         const string& ensType = variables_[varName];
 
@@ -713,7 +730,7 @@ void Foam::ensightCase::write() const
               : " per element: 1  "  // time-set 1
             )
             << setw(15) << varName << ' '
-            << (dataMask/varName).c_str() << nl;
+            << (dataMask/ensight::FileName(varName)).c_str() << nl;
     }
 
 
@@ -721,6 +738,7 @@ void Foam::ensightCase::write() const
     // Write
     // as -> "data/********/lagrangian/<cloudName>/positions"
     // or -> "lagrangian/<cloudName>/********/positions"
+    // NB: The output file name is stricter than the variable name
 
     label cloudNo = 0;
     for (const word& cloudName : cloudNames)
@@ -744,8 +762,7 @@ void Foam::ensightCase::write() const
                 << word::printf("measured node: %-5d", tsCloud) // width 20
                 << setw(15)
                 << ("c" + Foam::name(cloudNo) + varName).c_str() << ' '
-                << (masked/varName).c_str()
-                << nl;
+                << (masked/ensight::FileName(varName)).c_str() << nl;
         }
 
         ++cloudNo;

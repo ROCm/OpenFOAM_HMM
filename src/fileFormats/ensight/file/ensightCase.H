@@ -226,6 +226,12 @@ public:
     ~ensightCase() = default;
 
 
+    // Static Functions
+
+        //- Stringified zero-padded integer value
+        static word padded(const int nwidth, const label value);
+
+
     // Member Functions
 
     // Access
