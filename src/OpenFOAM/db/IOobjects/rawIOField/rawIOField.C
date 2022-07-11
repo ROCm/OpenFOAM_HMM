@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,6 +34,7 @@ template<class Type>
 Foam::rawIOField<Type>::rawIOField(const IOobject& io, const bool readAverage)
 :
     regIOobject(io),
+    hasAverage_(false),
     average_(Zero)
 {
     // Check for MUST_READ_IF_MODIFIED
@@ -61,14 +62,12 @@ Foam::rawIOField<Type>::rawIOField(const IOobject& io, const bool readAverage)
             {
                 haveFile = true;
 
-                ISstream& is = isPtr();
+                auto& is = *isPtr;
 
                 const token firstToken(is);
 
                 headerOk = is.good() && firstToken.isWord("FoamFile");
             }
-
-            isPtr.clear();
 
             if (debug)
             {
@@ -90,33 +89,36 @@ Foam::rawIOField<Type>::rawIOField(const IOobject& io, const bool readAverage)
                 is  >> static_cast<Field<Type>&>(*this);
                 if (readAverage)
                 {
-                    average_ = pTraits<Type>(is);
+                    hasAverage_ = true;
+                    is >> average_;
                 }
                 close();
             }
         }
         else if (haveFile)
         {
-            // Failed reading - fall back to IFstream
+            // Failed reading header - fall back to IFstream
             autoPtr<ISstream> isPtr(fileHandler().NewIFstream(io.objectPath()));
 
-            if (!isPtr || !isPtr->good())
+            if (isPtr && isPtr->good())
             {
+                auto& is = *isPtr;
+
+                is  >> static_cast<Field<Type>&>(*this);
+                if (readAverage)
+                {
+                    hasAverage_ = true;
+                    is >> average_;
+                }
+            }
+            else
+            {
+                // Error if missing and MUST_READ or MUST_READ_IF_MODIFIED
                 if (io.readOpt() != IOobject::READ_IF_PRESENT)
                 {
                     FatalIOErrorInFunction(*isPtr)
                         << "Trying to read raw field" << endl
                         << exit(FatalIOError);
-                }
-            }
-            else
-            {
-                ISstream& is = isPtr();
-
-                is  >> static_cast<Field<Type>&>(*this);
-                if (readAverage)
-                {
-                    average_ = pTraits<Type>(is);
                 }
             }
         }
@@ -133,10 +135,18 @@ Foam::rawIOField<Type>::rawIOField(const IOobject& io, const bool readAverage)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
+void Foam::rawIOField<Type>::setAverage(const Type& val)
+{
+    hasAverage_ = true;
+    average_ = val;
+}
+
+
+template<class Type>
 bool Foam::rawIOField<Type>::writeData(Ostream& os) const
 {
     os  << static_cast<const Field<Type>&>(*this);
-    if (average_ != pTraits<Type>::zero)
+    if (hasAverage_)
     {
         os << token::NL << average_;
     }

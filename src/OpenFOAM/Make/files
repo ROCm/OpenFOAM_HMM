@@ -339,9 +339,8 @@ $(IOdictionary)/IOdictionary.C
 db/IOobjects/IOMap/IOMaps.C
 db/IOobjects/decomposedBlockData/decomposedBlockData.C
 db/IOobjects/decomposedBlockData/decomposedBlockDataHeader.C
+db/IOobjects/rawIOField/rawIOFields.C
 db/IOobjects/GlobalIOField/GlobalIOFields.C
-
-
 db/IOobjects/GlobalIOList/globalIOLists.C
 
 

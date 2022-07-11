@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef rawIOField_H
-#define rawIOField_H
+#ifndef Foam_rawIOField_H
+#define Foam_rawIOField_H
 
 #include "IOField.H"
 
@@ -57,7 +57,10 @@ class rawIOField
 {
     // Private Data
 
-        //- The average of the field (Zero if not used)
+        //- Has an average value
+        bool hasAverage_;
+
+        //- The average for the field (zero if not used)
         Type average_;
 
 
@@ -72,7 +75,7 @@ public:
         rawIOField(const rawIOField&) = default;
 
         //- Construct from IOobject
-        explicit rawIOField(const IOobject& io, const bool readAverage);
+        explicit rawIOField(const IOobject& io, const bool readAverage=false);
 
 
     //- Destructor
@@ -81,10 +84,20 @@ public:
 
     // Member Functions
 
-        const Type& average() const
+        //- Has an average value
+        bool hasAverage() const noexcept
+        {
+            return hasAverage_;
+        }
+
+        //- The average value (if any)
+        const Type& average() const noexcept
         {
             return average_;
         }
+
+        //- Set an average value
+        void setAverage(const Type& val);
 
         bool writeData(Ostream& os) const;
 

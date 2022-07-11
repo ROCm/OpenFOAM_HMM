@@ -6,7 +6,7 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2018-2020 OpenCFD Ltd.
+#     Copyright (C) 2018-2022 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -65,7 +65,7 @@ die()
     echo "Error encountered:"
     while [ "$#" -ge 1 ]; do echo "    $1"; shift; done
     echo
-    echo "See '${Script##*/} -help' for usage"
+    echo "See '${0##*/} -help' for usage"
     echo
     exit 1
 }
@@ -73,7 +73,7 @@ die()
 
 #------------------------------------------------------------------------------
 
-optSyntax=sh
+optSyntax="sh"
 unset verboseOutput
 
 # Parse options
