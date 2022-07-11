@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,43 +44,38 @@ namespace Foam
 }
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 Foam::coordSystem::cartesian
 Foam::pointToPointPlanarInterpolation::calcCoordinateSystem
 (
     const pointField& points
-) const
+)
 {
     if (points.size() < 3)
     {
         FatalErrorInFunction
-            << "Only " << points.size() << " provided." << nl
-            << "Need at least three non-colinear points"
-            << " to be able to interpolate."
+            << "Need at least 3 non-collinear points for planar interpolation,"
+            << " but only had " << points.size() << " points" << nl
             << exit(FatalError);
     }
 
     const point& p0 = points[0];
 
     // Find furthest away point
-    vector e1;
     label index1 = -1;
-    scalar maxDist = ROOTVSMALL;
+    scalar maxDistSqr = ROOTVSMALL;
 
-    for (label i = 1; i < points.size(); i++)
+    for (label i = 1; i < points.size(); ++i)
     {
-        const vector d = points[i] - p0;
-        scalar magD = mag(d);
+        const scalar mag2 = magSqr(points[i] - p0);
 
-        if (magD > maxDist)
+        if (maxDistSqr < mag2)
         {
-            e1 = d/magD;
+            maxDistSqr = mag2;
             index1 = i;
-            maxDist = magD;
         }
     }
-
     if (index1 == -1)
     {
         FatalErrorInFunction
@@ -89,26 +84,24 @@ Foam::pointToPointPlanarInterpolation::calcCoordinateSystem
             << exit(FatalError);
     }
 
+    const vector e1(normalised(points[index1] - p0));
 
-    // Find point that is furthest away from line p0-p1
-    const point& p1 = points[index1];
-
+    // Find point that is furthest perpendicular distance from the p0-p1 line
     label index2 = -1;
-    maxDist = ROOTVSMALL;
+    maxDistSqr = ROOTVSMALL;
     for (label i = 1; i < points.size(); i++)
     {
         if (i != index1)
         {
-            const point& p2 = points[i];
-            vector e2(p2 - p0);
+            vector e2(points[i] - p0);
             e2.removeCollinear(e1);
 
-            scalar magE2 = mag(e2);
+            const scalar mag2 = magSqr(e2);
 
-            if (magE2 > maxDist)
+            if (maxDistSqr < mag2)
             {
+                maxDistSqr = mag2;
                 index2 = i;
-                maxDist = magE2;
             }
         }
     }
@@ -116,7 +109,7 @@ Foam::pointToPointPlanarInterpolation::calcCoordinateSystem
     {
         FatalErrorInFunction
             << "Cannot find points that define a plane with a valid normal."
-            << nl << "Have so far points " << p0 << " and " << p1
+            << nl << "Have so far points " << p0 << " and " << points[index1]
             << ". Are all your points on a single line instead of a plane?"
             << exit(FatalError);
     }
@@ -124,8 +117,8 @@ Foam::pointToPointPlanarInterpolation::calcCoordinateSystem
     const vector n = normalised(e1 ^ (points[index2]-p0));
 
     DebugInFunction
-        << " Used points " << p0 << ' ' << points[index1]
-        << ' ' << points[index2]
+        << " Used points "
+        << p0 << ' ' << points[index1] << ' ' << points[index2]
         << " to define coordinate system with normal " << n << endl;
 
     return coordSystem::cartesian
@@ -136,6 +129,8 @@ Foam::pointToPointPlanarInterpolation::calcCoordinateSystem
     );
 }
 
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::pointToPointPlanarInterpolation::calcWeights
 (
@@ -162,8 +157,8 @@ void Foam::pointToPointPlanarInterpolation::calcWeights
                 << " centre" << exit(FatalError);
         }
 
-        nearestVertex_.setSize(destPoints.size());
-        nearestVertexWeight_.setSize(destPoints.size());
+        nearestVertex_.resize(destPoints.size());
+        nearestVertexWeight_.resize(destPoints.size());
         forAll(nearestVertex_, i)
         {
             nearestVertex_[i][0] = destToSource[i];
@@ -353,35 +348,20 @@ Foam::pointToPointPlanarInterpolation::pointToPointPlanarInterpolation
     const bool nearestOnly,
     const coordinateSystem& referenceCS,
     const label sourceSize,
-    const List<FixedList<label, 3>>& nearestVertex,
-    const List<FixedList<scalar, 3>>& nearestVertexWeight
+    List<FixedList<label, 3>>&& nearestVertex,
+    List<FixedList<scalar, 3>>&& nearestVertexWeight
 )
 :
     perturb_(perturb),
     nearestOnly_(nearestOnly),
     referenceCS_(referenceCS),
     nPoints_(sourceSize),
-    nearestVertex_(nearestVertex),
-    nearestVertexWeight_(nearestVertexWeight)
+    nearestVertex_(std::move(nearestVertex)),
+    nearestVertexWeight_(std::move(nearestVertexWeight))
 {}
 
 
-Foam::autoPtr<Foam::pointToPointPlanarInterpolation>
-Foam::pointToPointPlanarInterpolation::clone() const
-{
-    return autoPtr<pointToPointPlanarInterpolation>::New
-    (
-        perturb_,
-        nearestOnly_,
-        referenceCS_,
-        nPoints_,
-        nearestVertex_,
-        nearestVertexWeight_
-    );
-}
-
-
-// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 Foam::wordList Foam::pointToPointPlanarInterpolation::timeNames
 (

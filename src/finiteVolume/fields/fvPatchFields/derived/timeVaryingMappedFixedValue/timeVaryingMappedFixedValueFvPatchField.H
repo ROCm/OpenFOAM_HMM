@@ -37,7 +37,7 @@ Description
       - points             : pointField of locations
       - \<time\>/\<field\> : field of values at time \<time\>
 
-    The default mode of operation (mapMethod planarInterpolation) is to project
+    The default mode of operation (mapMethod = planar) is to project
     the points onto a plane (constructed from the first three points) and
     construct a 2D triangulation and finds for the face centres the triangle it
     is in and the weights to the 3 vertices.
@@ -50,12 +50,12 @@ Description
 Usage
     \table
         Property     | Description                      | Required | Default
-        setAverage   | Use average value                | no    | false
+        setAverage   | Use average value                | no | false
         perturb      | Perturb points for regular geometries | no | 1e-5
-        points       | Name of points file              | no    | points
+        points       | Name of points file              | no | points
         fieldTable   | Alternative field name to sample | no | this field name
-        mapMethod    | Type of mapping              | no | planarInterpolation
-        offset       | Offset to mapped values      | no | Zero
+        mapMethod    | Type of mapping                  | no | planar
+        offset       | Offset to mapped values          | no | Zero
     \endtable
 
     \verbatim
@@ -74,8 +74,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef timeVaryingMappedFixedValueFvPatchField_H
-#define timeVaryingMappedFixedValueFvPatchField_H
+#ifndef Foam_timeVaryingMappedFixedValueFvPatchField_H
+#define Foam_timeVaryingMappedFixedValueFvPatchField_H
 
 #include "fixedValueFvPatchFields.H"
 #include "MappedFile.H"
@@ -94,7 +94,7 @@ class timeVaryingMappedFixedValueFvPatchField
 :
     public fixedValueFvPatchField<Type>
 {
-    // Private data
+    // Private Data
 
         autoPtr<PatchFunction1Types::MappedFile<Type>> uniformValue_;
 

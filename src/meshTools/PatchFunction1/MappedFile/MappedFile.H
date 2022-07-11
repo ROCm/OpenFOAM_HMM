@@ -38,8 +38,7 @@ Description
     Options:
     \table
       Property  | Description                       | Type  | Reqd | Deflt
-      mapMethod | Mapping method                    | word  | no   <!--
-                -->                                 | planarInterpolation
+      mapMethod | Mapping method                    | word  | no   | planar
       offset    | Time-varying offset values to interpolated data  <!--
                 -->                    | Function1\<Type\>  | no   | -
       fieldTable | Name of field data table         | word  | no   | field-name
@@ -51,8 +50,8 @@ Description
 
     Options for the \c mapMethod entry:
     \verbatim
-      nearest               | Use nearest points only (avoids triangulation)
-      planarInterpolation   | Interpolation using 2D Delaunay triangulation
+      nearest     | Use nearest points only (avoids triangulation)
+      planar      | Interpolation using 2D Delaunay triangulation
     \endverbatim
 
 SourceFiles
@@ -60,8 +59,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef PatchFunction1Types_MappedFile_H
-#define PatchFunction1Types_MappedFile_H
+#ifndef Foam_PatchFunction1Types_MappedFile_H
+#define Foam_PatchFunction1Types_MappedFile_H
 
 #include "PatchFunction1.H"
 #include "Function1.H"
@@ -91,41 +90,41 @@ class MappedFile
         //- If true adjust the mapped field to maintain average value
         bool setAverage_;
 
-        //- Name of the field data table, defaults to the name of the field
-        word fieldTableName_;
-
         //- Fraction of perturbation (fraction of bounding box) to add
         scalar perturb_;
 
-        //- Name of points file; default = "points"
+        //- Name of the field data table, defaults to the name of the field
+        word fieldTableName_;
+
+        //- Name of points file (default: "points")
         word pointsName_;
 
-        //- Interpolation scheme to use
+        //- Interpolation scheme to use (default is empty == "planar")
         word mapMethod_;
 
-        //- 2D interpolation (for 'planarInterpolation' mapMethod)
+        //- 2D interpolation (for 'planar' mapMethod)
         mutable autoPtr<pointToPointPlanarInterpolation> mapperPtr_;
 
         //- List of boundaryData time directories
         mutable instantList sampleTimes_;
 
-        //- Current starting index in sampleTimes
-        mutable label startSampleTime_;
-
-        //- Interpolated values from startSampleTime
-        mutable Field<Type> startSampledValues_;
-
-        //- If setAverage: starting average value
-        mutable Type startAverage_;
+        //- Current start index in sampleTimes
+        mutable label begSampleIndex_;
 
         //- Current end index in sampleTimes
-        mutable label endSampleTime_;
+        mutable label endSampleIndex_;
 
-        //- Interpolated values from endSampleTime
-        mutable Field<Type> endSampledValues_;
+        //- Current average value at begSampleIndex (if setAverage)
+        mutable Type begAverage_;
 
-        //- If setAverage: end average value
+        //- Current average value at endSampleIndex (if setAverage)
         mutable Type endAverage_;
+
+        //- Current interpolated values at begSampleIndex
+        mutable Field<Type> begSampledValues_;
+
+        //- Current interpolated values at endSampleIndex
+        mutable Field<Type> endSampledValues_;
 
         //- Time varying offset values to interpolated data
         autoPtr<Function1<Type>> offset_;
@@ -133,6 +132,10 @@ class MappedFile
 
     // Private Member Functions
 
+        //- Update start (0) or end (1) interpolated data
+        void updateSampledValues(const int whichEnd) const;
+
+        //- Find boundary data between time 't' and interpolate
         void checkTable(const scalar t) const;
 
 public:
