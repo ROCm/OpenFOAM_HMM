@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -581,8 +581,15 @@ void Foam::edgeInterpolation::makeSkewCorrectionVectors() const
         const vector& S = points[edges[edgeI].start()];
         vector e = edges[edgeI].vec(points);
 
-        scalar alpha =
-            -(((N - P)^(S - P))&((N - P)^e ))/(((N - P)^e)&((N - P)^e));
+        const scalar beta = magSqr((N - P)^e);
+
+        if (beta < ROOTVSMALL)
+        {
+            // Too small - skew correction remains zero
+            continue;
+        }
+
+        const scalar alpha = -(((N - P)^(S - P))&((N - P)^e))/beta;
 
         vector E(S + alpha*e);
 
@@ -614,9 +621,15 @@ void Foam::edgeInterpolation::makeSkewCorrectionVectors() const
                 const vector& S = points[patchEdges[edgeI].start()];
                 vector e = patchEdges[edgeI].vec(points);
 
-                scalar alpha =
-                  - (((N - P)^(S - P))&((N - P)^e))
-                   /(((N - P)^e)&((N - P)^e));
+                const scalar beta = magSqr((N - P)^e);
+
+                if (beta < ROOTVSMALL)
+                {
+                    // Too small - skew correction remains zero
+                    continue;
+                }
+
+                const scalar alpha = -(((N - P)^(S - P))&((N - P)^e))/beta;
 
                 vector E(S + alpha*e);
 
