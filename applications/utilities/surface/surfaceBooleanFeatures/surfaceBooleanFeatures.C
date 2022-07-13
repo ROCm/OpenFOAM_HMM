@@ -81,7 +81,6 @@ Description
 #include "triSurfaceSearch.H"
 #include "triSurfaceMesh.H"
 #include "OFstream.H"
-#include "OBJstream.H"
 #include "booleanSurface.H"
 #include "edgeIntersections.H"
 #include "meshTools.H"

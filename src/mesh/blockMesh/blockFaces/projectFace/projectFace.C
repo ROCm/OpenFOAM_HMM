@@ -233,7 +233,7 @@ void Foam::blockFaces::projectFace::project
                     const point& hitPt = hits[i].hitPoint();
                     if (debugStr)
                     {
-                        debugStr().write(linePointRef(points[i], hitPt));
+                        debugStr().writeLine(points[i], hitPt);
                     }
                     points[i] = hitPt;
                 }
@@ -304,7 +304,7 @@ void Foam::blockFaces::projectFace::project
             forAll(points, i)
             {
                 const point predicted(points[i] + residual[i]);
-                debugStr().write(linePointRef(points[i], predicted));
+                debugStr().writeLine(points[i], predicted);
             }
         }
 
@@ -356,7 +356,7 @@ void Foam::blockFaces::projectFace::project
             forAll(points, i)
             {
                 const point predicted(points[i] + residual[i]);
-                debugStr().write(linePointRef(points[i], predicted));
+                debugStr().writeLine(points[i], predicted);
             }
         }
 

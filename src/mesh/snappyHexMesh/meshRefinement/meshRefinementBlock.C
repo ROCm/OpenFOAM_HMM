@@ -828,8 +828,8 @@ Foam::label Foam::meshRefinement::markProximityRefinementWave
                     //        max(smallGapDistance[celli], maxDist);
                     //
                     //
-                    //    str.write(linePointRef(cc, origin[i]));
-                    //    str.write(linePointRef(cc, origin[j]));
+                    //    str.writeLine(cc, origin[i]);
+                    //    str.writeLine(cc, origin[j]);
                     //
                     //    nMulti++;
                     //}

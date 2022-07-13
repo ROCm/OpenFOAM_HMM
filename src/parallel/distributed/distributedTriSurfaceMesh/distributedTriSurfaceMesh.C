@@ -4979,13 +4979,10 @@ void Foam::distributedTriSurfaceMesh::distribute
                /searchableSurface::name() + "_after.obj"
             );
             Info<< "Writing local bounding box to " << str.name() << endl;
-            const List<treeBoundBox>& myBbs = procBb_[Pstream::myProcNo()];
-            for (const treeBoundBox& bb : myBbs)
             {
-                pointField pts(bb.points());
-                for (const edge& e : treeBoundBox::edges)
+                for (const treeBoundBox& bb : procBb_[Pstream::myProcNo()])
                 {
-                    str.write(linePointRef(pts[e[0]], pts[e[1]]));
+                    str.write(bb, true);  // lines
                 }
             }
         }
@@ -5001,11 +4998,7 @@ void Foam::distributedTriSurfaceMesh::distribute
             {
                 for (const treeBoundBox& bb : myBbs)
                 {
-                    pointField pts(bb.points());
-                    for (const edge& e : treeBoundBox::edges)
-                    {
-                        str.write(linePointRef(pts[e[0]], pts[e[1]]));
-                    }
+                    str.write(bb, true);  // lines
                 }
             }
         }

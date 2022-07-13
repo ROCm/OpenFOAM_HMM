@@ -195,8 +195,8 @@ void Foam::pointToPointPlanarInterpolation::calcWeights
 
             forAll(destPoints, i)
             {
-                label v0 = nearestVertex_[i][0];
-                str.write(linePointRef(destPoints[i], sourcePoints[v0]));
+                const label v0 = nearestVertex_[i][0];
+                str.writeLine(destPoints[i], sourcePoints[v0]);
             }
         }
     }
@@ -245,10 +245,7 @@ void Foam::pointToPointPlanarInterpolation::calcWeights
             Pout<< "pointToPointPlanarInterpolation::calcWeights :"
                 << " Dumping face centres to " << str.name() << endl;
 
-            forAll(localFaceCentres, i)
-            {
-                str.write(localFaceCentres[i]);
-            }
+            str.write(localFaceCentres);
         }
 
         // Determine interpolation onto face centres.
@@ -275,9 +272,9 @@ void Foam::pointToPointPlanarInterpolation::calcWeights
 
             forAll(destPoints, i)
             {
-                label v0 = nearestVertex_[i][0];
-                label v1 = nearestVertex_[i][1];
-                label v2 = nearestVertex_[i][2];
+                const label v0 = nearestVertex_[i][0];
+                const label v1 = nearestVertex_[i][1];
+                const label v2 = nearestVertex_[i][2];
 
                 Pout<< "For location " << destPoints[i]
                     << " 2d:" << localFaceCentres[i]
@@ -286,21 +283,21 @@ void Foam::pointToPointPlanarInterpolation::calcWeights
                     << " at:" << sourcePoints[v0]
                     << " weight:" << nearestVertexWeight_[i][0] << nl;
 
-                str.write(linePointRef(destPoints[i], sourcePoints[v0]));
+                str.writeLine(destPoints[i], sourcePoints[v0]);
 
                 if (v1 != -1)
                 {
                     Pout<< "    " << v1
                         << " at:" << sourcePoints[v1]
                         << " weight:" << nearestVertexWeight_[i][1] << nl;
-                    str.write(linePointRef(destPoints[i], sourcePoints[v1]));
+                    str.writeLine(destPoints[i], sourcePoints[v1]);
                 }
                 if (v2 != -1)
                 {
                     Pout<< "    " << v2
                         << " at:" << sourcePoints[v2]
                         << " weight:" << nearestVertexWeight_[i][2] << nl;
-                    str.write(linePointRef(destPoints[i], sourcePoints[v2]));
+                    str.writeLine(destPoints[i], sourcePoints[v2]);
                 }
 
                 Pout<< endl;

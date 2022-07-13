@@ -40,7 +40,6 @@ License
 #include "mapDistributePolyMesh.H"
 #include "Cloud.H"
 //#include "globalIndex.H"
-#include "OBJstream.H"
 #include "cellSet.H"
 #include "treeDataCell.H"
 
@@ -1797,22 +1796,8 @@ Foam::label Foam::meshRefinement::markProximityRefinement
         end.clear();
         minLevel.clear();
 
+
         //// Extract per cell information on the surface with the highest max
-        //OBJstream str
-        //(
-        //    mesh_.time().path()
-        //  / "findAllIntersections_"
-        //  + mesh_.time().timeName()
-        //  + ".obj"
-        //);
-        //// All intersections
-        //OBJstream str2
-        //(
-        //    mesh_.time().path()
-        //  / "findAllIntersections2_"
-        //  + mesh_.time().timeName()
-        //  + ".obj"
-        //);
 
         forAll(testFaces, i)
         {

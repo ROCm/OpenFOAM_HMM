@@ -1395,10 +1395,7 @@ void Foam::conformalVoronoiMesh::writePointPairs
 
         if (ptPairs_.isPointPair(vA, vB))
         {
-            os.write
-            (
-                linePointRef(topoint(vA->point()), topoint(vB->point()))
-            );
+            os.writeLine(topoint(vA->point()), topoint(vB->point()));
         }
     }
 }

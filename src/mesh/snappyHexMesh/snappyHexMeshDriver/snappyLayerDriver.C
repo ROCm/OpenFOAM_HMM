@@ -89,7 +89,7 @@ void Foam::snappyLayerDriver::dumpDisplacement
     forAll(patchDisp, patchPointi)
     {
         const point& pt = pp.localPoints()[patchPointi];
-        dispStr.write(linePointRef(pt, pt + patchDisp[patchPointi]));
+        dispStr.writeLine(pt, pt + patchDisp[patchPointi]);
     }
 
 
@@ -101,7 +101,7 @@ void Foam::snappyLayerDriver::dumpDisplacement
         if (extrudeStatus[patchPointi] != EXTRUDE)
         {
             const point& pt = pp.localPoints()[patchPointi];
-            illStr.write(linePointRef(pt, pt + patchDisp[patchPointi]));
+            illStr.writeLine(pt, pt + patchDisp[patchPointi]);
         }
     }
 }
@@ -797,9 +797,7 @@ void Foam::snappyLayerDriver::handleFeatureAngle
 
                     if (str)
                     {
-                        const point& p0 = pp.localPoints()[e[0]];
-                        const point& p1 = pp.localPoints()[e[1]];
-                        str().write(linePointRef(p0, p1));
+                        str().write(e, pp.localPoints());
                     }
                 }
             }
@@ -3572,7 +3570,7 @@ void Foam::snappyLayerDriver::dupFaceZonePoints
 
                 if (newMasteri != pointi)
                 {
-                    str.write(linePointRef(p[pointi], p[newMasteri]));
+                    str.writeLine(p[pointi], p[newMasteri]);
                 }
             }
         }
@@ -3626,7 +3624,7 @@ void Foam::snappyLayerDriver::mergeFaceZonePoints
                 {
                     const point& pt = mesh.points()[pointi];
                     const point& otherPt = mesh.points()[otherPointi];
-                    str.write(linePointRef(pt, otherPt));
+                    str.writeLine(pt, otherPt);
                 }
             }
         }

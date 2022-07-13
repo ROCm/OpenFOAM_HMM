@@ -1900,7 +1900,7 @@ void Foam::extendedEdgeMesh::writeObj(const fileName& prefix) const
         Info<< "Writing " << concaveStart_
             << " convex feature points to " << convexFtPtStr.name() << endl;
 
-        for(label i = 0; i < concaveStart_; i++)
+        for (label i = 0; i < concaveStart_; i++)
         {
             convexFtPtStr.write(points()[i]);
         }
@@ -1912,7 +1912,7 @@ void Foam::extendedEdgeMesh::writeObj(const fileName& prefix) const
             << " concave feature points to "
             << concaveFtPtStr.name() << endl;
 
-        for(label i = concaveStart_; i < mixedStart_; i++)
+        for (label i = concaveStart_; i < mixedStart_; i++)
         {
             concaveFtPtStr.write(points()[i]);
         }
@@ -1923,7 +1923,7 @@ void Foam::extendedEdgeMesh::writeObj(const fileName& prefix) const
         Info<< "Writing " << nonFeatureStart_-mixedStart_
             << " mixed feature points to " << mixedFtPtStr.name() << endl;
 
-        for(label i = mixedStart_; i < nonFeatureStart_; i++)
+        for (label i = mixedStart_; i < nonFeatureStart_; i++)
         {
             mixedFtPtStr.write(points()[i]);
         }
@@ -1936,18 +1936,14 @@ void Foam::extendedEdgeMesh::writeObj(const fileName& prefix) const
             << " mixed feature point structure to "
             << mixedFtPtStructureStr.name() << endl;
 
-        for(label i = mixedStart_; i < nonFeatureStart_; i++)
+        for (label i = mixedStart_; i < nonFeatureStart_; i++)
         {
             const labelList& ptEds = pointEdges()[i];
 
-            forAll(ptEds, j)
+            for (const label edgei : ptEds)
             {
-                const edge& e = edges()[ptEds[j]];
-                mixedFtPtStructureStr.write
-                (
-                    linePointRef(points()[e[0]],
-                    points()[e[1]])
-                );
+                const edge& e = edges()[edgei];
+                mixedFtPtStructureStr.write(e, points());
             }
         }
     }
@@ -1960,7 +1956,7 @@ void Foam::extendedEdgeMesh::writeObj(const fileName& prefix) const
         for (label i = externalStart_; i < internalStart_; i++)
         {
             const edge& e = edges()[i];
-            externalStr.write(linePointRef(points()[e[0]], points()[e[1]]));
+            externalStr.write(e, points());
         }
     }
 
@@ -1972,7 +1968,7 @@ void Foam::extendedEdgeMesh::writeObj(const fileName& prefix) const
         for (label i = internalStart_; i < flatStart_; i++)
         {
             const edge& e = edges()[i];
-            internalStr.write(linePointRef(points()[e[0]], points()[e[1]]));
+            internalStr.write(e, points());
         }
     }
 
@@ -1984,7 +1980,7 @@ void Foam::extendedEdgeMesh::writeObj(const fileName& prefix) const
         for (label i = flatStart_; i < openStart_; i++)
         {
             const edge& e = edges()[i];
-            flatStr.write(linePointRef(points()[e[0]], points()[e[1]]));
+            flatStr.write(e, points());
         }
     }
 
@@ -1996,7 +1992,7 @@ void Foam::extendedEdgeMesh::writeObj(const fileName& prefix) const
         for (label i = openStart_; i < multipleStart_; i++)
         {
             const edge& e = edges()[i];
-            openStr.write(linePointRef(points()[e[0]], points()[e[1]]));
+            openStr.write(e, points());
         }
     }
 
@@ -2008,7 +2004,7 @@ void Foam::extendedEdgeMesh::writeObj(const fileName& prefix) const
         for (label i = multipleStart_; i < edges().size(); i++)
         {
             const edge& e = edges()[i];
-            multipleStr.write(linePointRef(points()[e[0]], points()[e[1]]));
+            multipleStr.write(e, points());
         }
     }
 
@@ -2017,10 +2013,10 @@ void Foam::extendedEdgeMesh::writeObj(const fileName& prefix) const
         Info<< "Writing " << regionEdges_.size()
             << " region edges to " << regionStr.name() << endl;
 
-        forAll(regionEdges_, i)
+        for (const label edgei : regionEdges_)
         {
-            const edge& e = edges()[regionEdges_[i]];
-            regionStr.write(linePointRef(points()[e[0]], points()[e[1]]));
+            const edge& e = edges()[edgei];
+            regionStr.write(e, points());
         }
     }
 
@@ -2034,9 +2030,10 @@ void Foam::extendedEdgeMesh::writeObj(const fileName& prefix) const
             const vector& eVec = edgeDirections_[i];
             const edge& e = edges()[i];
 
-            edgeDirsStr.write
+            edgeDirsStr.writeLine
             (
-                linePointRef(points()[e.start()], eVec + points()[e.start()])
+                points()[e.start()],
+                points()[e.start()] + eVec
             );
         }
     }

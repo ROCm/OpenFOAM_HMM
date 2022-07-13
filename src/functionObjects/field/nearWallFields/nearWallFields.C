@@ -168,7 +168,7 @@ void Foam::functionObjects::nearWallFields::calcAddressing()
 
         for (const findCellParticle& tp : cloud)
         {
-            str.write(linePointRef(tp.position(), tp.end()));
+            str.writeLine(tp.position(), tp.end());
         }
     }
 
@@ -232,7 +232,7 @@ void Foam::functionObjects::nearWallFields::calcAddressing()
                 const labelList& cData = cellToWalls_[celli];
                 forAll(cData, i)
                 {
-                    str.write(linePointRef(ends[i], start[cData[i]]));
+                    str.writeLine(ends[i], start[cData[i]]);
                 }
             }
         }

@@ -196,7 +196,7 @@ Foam::blockEdges::projectCurveEdge::position(const scalarList& lambdas) const
             {
                 forAll(points, i)
                 {
-                    debugStr().write(linePointRef(start[i], points[i]));
+                    debugStr().writeLine(start[i], points[i]);
                 }
             }
         }
@@ -257,7 +257,7 @@ Foam::blockEdges::projectCurveEdge::position(const scalarList& lambdas) const
             forAll(points, i)
             {
                 const point predicted(points[i] + residual[i]);
-                debugStr().write(linePointRef(points[i], predicted));
+                debugStr().writeLine(points[i], predicted);
             }
         }
 

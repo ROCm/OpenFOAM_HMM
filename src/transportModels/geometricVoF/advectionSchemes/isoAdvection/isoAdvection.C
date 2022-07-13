@@ -695,20 +695,15 @@ void Foam::isoAdvection::writeIsoFaces
             Info<< nl << "isoAdvection: writing iso faces to file: "
                 << os.name() << nl << endl;
 
-            face f;
-            forAll(allProcFaces, proci)
+            for
+            (
+                const DynamicList<List<point>>& procFacePts
+              : allProcFaces
+            )
             {
-                const DynamicList<List<point>>& procFacePts =
-                    allProcFaces[proci];
-
                 for (const List<point>& facePts : procFacePts)
                 {
-                    if (facePts.size() != f.size())
-                    {
-                        f = face(identity(facePts.size()));
-                    }
-
-                    os.write(f, facePts, false);
+                    os.writeFace(facePts, false);
                 }
             }
         }
@@ -720,15 +715,9 @@ void Foam::isoAdvection::writeIsoFaces
         Info<< nl << "isoAdvection: writing iso faces to file: "
             << os.name() << nl << endl;
 
-        face f;
         for (const List<point>& facePts : faces)
         {
-            if (facePts.size() != f.size())
-            {
-                f = face(identity(facePts.size()));
-            }
-
-            os.write(f, facePts, false);
+            os.writeFace(facePts, false);
         }
     }
 }

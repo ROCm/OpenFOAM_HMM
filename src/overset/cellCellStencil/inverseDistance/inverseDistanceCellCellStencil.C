@@ -2168,7 +2168,7 @@ bool Foam::cellCellStencils::inverseDistance::update()
                 forAll(slots, i)
                 {
                     const point& donorCc = cc[slots[i]];
-                    str.write(linePointRef(accCc, 0.1*accCc+0.9*donorCc));
+                    str.writeLine(accCc, 0.1*accCc+0.9*donorCc);
                 }
             }
         }
@@ -2264,7 +2264,7 @@ bool Foam::cellCellStencils::inverseDistance::update()
                 forAll(slots, i)
                 {
                     const point& donorCc = cc[slots[i]];
-                    str.write(linePointRef(accCc, 0.1*accCc+0.9*donorCc));
+                    str.writeLine(accCc, 0.1*accCc+0.9*donorCc);
                 }
             }
         }

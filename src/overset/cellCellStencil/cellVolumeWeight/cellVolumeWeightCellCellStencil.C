@@ -1251,7 +1251,7 @@ bool Foam::cellCellStencils::cellVolumeWeight::update()
                 const point& donorCc = cc[slots[i]];
                 const point& accCc = mesh_.cellCentres()[cellI];
 
-                str.write(linePointRef(accCc, 0.1*accCc+0.9*donorCc));
+                str.writeLine(accCc, 0.1*accCc+0.9*donorCc);
             }
         }
     }

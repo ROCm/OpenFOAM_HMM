@@ -189,12 +189,12 @@ bool Foam::patchDistMethods::exact::correct
     if (debug)
     {
         OBJstream str(mesh_.time().timePath()/"wallPoint.obj");
-        Info<< type() << ": dumping nearest wall point to " << str.name()
-            << endl;
-        forAll(mesh_.cellCentres(), cellI)
+        Info<< type() << ": dumping nearest wall point to "
+            << str.name() << endl;
+        forAll(mesh_.cellCentres(), celli)
         {
-            const point& cc = mesh_.cellCentres()[cellI];
-            str.write(linePointRef(cc, info[cellI].hitPoint()));
+            const point& cc = mesh_.cellCentres()[celli];
+            str.writeLine(cc, info[celli].hitPoint());
         }
     }
 

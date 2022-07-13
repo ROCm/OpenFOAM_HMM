@@ -1687,7 +1687,7 @@ void Foam::conformalVoronoiMesh::move()
                     )
                 )
                 {
-                    multipleIntersections.write(linePointRef(ptA, ptB));
+                    multipleIntersections.writeLine(ptA, ptB);
                 }
             }
         }

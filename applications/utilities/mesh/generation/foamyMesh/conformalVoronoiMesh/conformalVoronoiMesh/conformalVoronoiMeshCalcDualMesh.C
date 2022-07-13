@@ -1433,18 +1433,15 @@ void Foam::conformalVoronoiMesh::indexDualVertices
 //                         && (mag(snapDir & norm[0]) > 0.5)
 //                        )
 //                        {
-//                            snapping1.write
+//                            snapping1.writeLine
 //                            (
-//                                linePointRef(dual, nearestPointOnTet)
+//                                dual,
+//                                nearestPointOnTet
 //                            );
-//
-//                            snapping2.write
+//                            snapping2.writeLine
 //                            (
-//                                linePointRef
-//                                (
-//                                    nearestPointOnTet,
-//                                    hitInfo.hitPoint()
-//                                )
+//                                nearestPointOnTet,
+//                                hitInfo.hitPoint()
 //                            );
 //
 //                            pts[cit->cellIndex()] = hitInfo.hitPoint();
@@ -1764,9 +1761,10 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
 
                     if ((*vcit)->real())
                     {
-                        featurePointDualsStr.write
+                        featurePointDualsStr.writeLine
                         (
-                            linePointRef(topoint(vit->point()), (*vcit)->dual())
+                            topoint(vit->point()),
+                            (*vcit)->dual()
                         );
                     }
                 }
@@ -1867,7 +1865,7 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
                         << " " << vc2->dual()
                         << endl;
 
-                    startCellStr.write(linePointRef(vc1->dual(), vc2->dual()));
+                    startCellStr.writeLine(vc1->dual(), vc2->dual());
 
                     // Get patch by getting face between cells and the two
                     // points on the face that are not the feature vertex

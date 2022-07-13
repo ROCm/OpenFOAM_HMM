@@ -35,36 +35,36 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(edgeSurface, 0);
 
-// file-scope
-// Write points in obj format
-static void writeObjPoints(const UList<point>& pts, Ostream& os)
+    defineTypeNameAndDebug(edgeSurface, 0);
+
+} // End namespace Foam
+
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
 {
-    forAll(pts, i)
-    {
-        const point& pt = pts[i];
-        os << "v " << pt.x() << ' ' << pt.y() << ' ' << pt.z() << nl;
-    }
-}
-
 
 // Write whole pointField and selected edges to stream
-void writeObjEdges
+static void writeObjEdges
 (
     const UList<point>& points,
     const edgeList& edges,
-    const labelList& edgeLabels,
+    const labelUList& edgeLabels,
     Ostream& os
 )
 {
-    writeObjPoints(points, os);
-
-    forAll(edgeLabels, i)
+    for (const point& p : points)
     {
-        const edge& e = edges[edgeLabels[i]];
+        os << "v " << p.x() << ' ' << p.y() << ' ' << p.z() << nl;
+    }
 
-        os << "l " << e.start()+1 << ' ' << e.end()+1 << endl;
+    for (const label edgei : edgeLabels)
+    {
+        const edge& e = edges[edgei];
+
+        os << "l " << e.start()+1 << ' ' << e.end()+1 << nl;
     }
 }
 

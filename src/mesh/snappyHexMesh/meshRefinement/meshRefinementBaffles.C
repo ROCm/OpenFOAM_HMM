@@ -261,12 +261,9 @@ void Foam::meshRefinement::getIntersections
         {
             if (str)
             {
-                str().write(linePointRef(start[i], hit1[i].rawPoint()));
-                str().write
-                (
-                    linePointRef(hit1[i].rawPoint(), hit2[i].rawPoint())
-                );
-                str().write(linePointRef(hit2[i].rawPoint(), end[i]));
+                str().writeLine(start[i], hit1[i].rawPoint());
+                str().writeLine(hit1[i].rawPoint(), hit2[i].rawPoint());
+                str().writeLine(hit2[i].rawPoint(), end[i]);
             }
 
             // Pick up the patches

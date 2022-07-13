@@ -1397,26 +1397,20 @@ void extrudeGeometricProperties
         {
             Pout<< "Model     :" << faceCentres[facei] << endl
                 << "regionMesh:" << regionMesh.faceCentres()[facei] << endl;
-            faceStr.write
+            faceStr.writeLine
             (
-                linePointRef
-                (
-                    faceCentres[facei],
-                    regionMesh.faceCentres()[facei]
-                )
+                faceCentres[facei],
+                regionMesh.faceCentres()[facei]
             );
         }
         forAll(cellCentres, celli)
         {
             Pout<< "Model     :" << cellCentres[celli] << endl
                 << "regionMesh:" << regionMesh.cellCentres()[celli] << endl;
-            cellStr.write
+            cellStr.writeLine
             (
-                linePointRef
-                (
-                    cellCentres[celli],
-                    regionMesh.cellCentres()[celli]
-                )
+                cellCentres[celli],
+                regionMesh.cellCentres()[celli]
             );
         }
     }

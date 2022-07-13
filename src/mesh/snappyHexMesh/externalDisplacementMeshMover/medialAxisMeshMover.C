@@ -1558,19 +1558,12 @@ void Foam::medialAxisMeshMover::calculateDisplacement
                 if (str)
                 {
                     const point& pt = mesh().points()[pointI];
-                    str().write(linePointRef(pt, pt+patchDisp[patchPointI]));
+                    str().writeLine(pt, pt+patchDisp[patchPointI]);
                 }
                 if (medialVecStr)
                 {
                     const point& pt = mesh().points()[pointI];
-                    medialVecStr().write
-                    (
-                        linePointRef
-                        (
-                            pt,
-                            medialVec_[pointI]
-                        )
-                    );
+                    medialVecStr().writeLine(pt, medialVec_[pointI]);
                 }
             }
         }

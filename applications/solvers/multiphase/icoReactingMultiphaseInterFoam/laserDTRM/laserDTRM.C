@@ -699,7 +699,7 @@ void Foam::radiation::laserDTRM::calculate()
 
             for (label pointi = 0; pointi < lines.size(); pointi += 2)
             {
-                os.write(linePointRef(lines[pointi], lines[pointi+1]));
+                os.writeLine(lines[pointi], lines[pointi+1]);
             }
         }
 

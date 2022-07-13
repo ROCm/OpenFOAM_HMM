@@ -44,6 +44,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class OBJstream;
 
 /*---------------------------------------------------------------------------*\

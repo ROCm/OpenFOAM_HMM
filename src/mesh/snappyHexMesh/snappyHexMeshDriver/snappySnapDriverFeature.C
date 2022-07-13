@@ -1255,11 +1255,11 @@ void Foam::snappySnapDriver::featureAttractionUsingReconstruction
 
             if (feStr && patchConstraints[pointi].first() == 2)
             {
-                feStr().write(linePointRef(pt, pt+patchAttraction[pointi]));
+                feStr().writeLine(pt, pt+patchAttraction[pointi]);
             }
             else if (fpStr && patchConstraints[pointi].first() == 3)
             {
-                fpStr().write(linePointRef(pt, pt+patchAttraction[pointi]));
+                fpStr().writeLine(pt, pt+patchAttraction[pointi]);
             }
         }
     }
@@ -2516,9 +2516,10 @@ void Foam::snappySnapDriver::determineFeatures
                             // Dump
                             if (featureEdgeStr)
                             {
-                                featureEdgeStr().write
+                                featureEdgeStr().writeLine
                                 (
-                                    linePointRef(pt, info.hitPoint())
+                                    pt,
+                                    info.hitPoint()
                                 );
                             }
                         }
@@ -2526,9 +2527,10 @@ void Foam::snappySnapDriver::determineFeatures
                         {
                             if (missedEdgeStr)
                             {
-                                missedEdgeStr().write
+                                missedEdgeStr().writeLine
                                 (
-                                    linePointRef(pt, multiPatchPt.hitPoint())
+                                    pt,
+                                    multiPatchPt.hitPoint()
                                 );
                             }
                         }
@@ -2582,10 +2584,7 @@ void Foam::snappySnapDriver::determineFeatures
                             // Debug: dump missed feature point
                             if (missedMP0Str && !nearInfo.second().hit())
                             {
-                                missedMP0Str().write
-                                (
-                                    linePointRef(pt, estimatedPt)
-                                );
+                                missedMP0Str().writeLine(pt, estimatedPt);
                             }
                         }
                         else
@@ -2647,10 +2646,7 @@ void Foam::snappySnapDriver::determineFeatures
                             // Debug: dump missed feature point
                             if (missedMP1Str && !nearInfo.second().hit())
                             {
-                                missedMP1Str().write
-                                (
-                                    linePointRef(pt, estimatedPt)
-                                );
+                                missedMP1Str().writeLine(pt, estimatedPt);
                             }
                         }
                     }
@@ -2689,10 +2685,7 @@ void Foam::snappySnapDriver::determineFeatures
                      && patchConstraints[pointi].first() == 3
                     )
                     {
-                        featurePointStr().write
-                        (
-                            linePointRef(pt, info.hitPoint())
-                        );
+                        featurePointStr().writeLine(pt, info.hitPoint());
                     }
                     else if
                     (
@@ -2700,20 +2693,14 @@ void Foam::snappySnapDriver::determineFeatures
                      && patchConstraints[pointi].first() == 2
                     )
                     {
-                        featureEdgeStr().write
-                        (
-                            linePointRef(pt, info.hitPoint())
-                        );
+                        featureEdgeStr().writeLine(pt, info.hitPoint());
                     }
                 }
                 else
                 {
                     if (missedEdgeStr)
                     {
-                        missedEdgeStr().write
-                        (
-                            linePointRef(pt, estimatedPt)
-                        );
+                        missedEdgeStr().writeLine(pt, estimatedPt);
                     }
                 }
             }
@@ -2806,10 +2793,7 @@ void Foam::snappySnapDriver::determineFeatures
                 const pointIndexHit& info = nearInfo.second();
                 if (featurePointStr && info.hit())
                 {
-                    featurePointStr().write
-                    (
-                        linePointRef(pt, info.hitPoint())
-                    );
+                    featurePointStr().writeLine(pt, info.hitPoint());
                 }
             }
         }
@@ -2931,9 +2915,7 @@ void Foam::snappySnapDriver::determineBaffleFeatures
 
             if (baffleEdgeStr)
             {
-                const point& p0 = pp.localPoints()[e[0]];
-                const point& p1 = pp.localPoints()[e[1]];
-                baffleEdgeStr().write(linePointRef(p0, p1));
+                baffleEdgeStr().write(e, pp.localPoints());
             }
         }
     }
@@ -3640,11 +3622,11 @@ void Foam::snappySnapDriver::featureAttractionUsingFeatureEdges
 
             if (patchConstraints[pointi].first() == 2)
             {
-                featureEdgeStr.write(linePointRef(pt, pt+attr));
+                featureEdgeStr.writeLine(pt, pt+attr);
             }
             else if (patchConstraints[pointi].first() == 3)
             {
-                featurePointStr.write(linePointRef(pt, pt+attr));
+                featurePointStr.writeLine(pt, pt+attr);
             }
         }
     }
@@ -3827,10 +3809,7 @@ void Foam::snappySnapDriver::preventFaceSqueeze
 
                     if (strPtr)
                     {
-                        strPtr().write
-                        (
-                            linePointRef(pt, pt+patchAttraction[pointi])
-                        );
+                        strPtr().writeLine(pt, pt+patchAttraction[pointi]);
                     }
                 }
             }

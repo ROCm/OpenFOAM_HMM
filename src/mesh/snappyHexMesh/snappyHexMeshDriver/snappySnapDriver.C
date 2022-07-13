@@ -1300,11 +1300,11 @@ void Foam::snappySnapDriver::detectNearSurfaces
     //        {
     //            if (hit1[i].hit())
     //            {
-    //                str.write(linePointRef(start[i], hit1[i].hitPoint()));
+    //                str.writeLine(start[i], hit1[i].hitPoint());
     //            }
     //            if (hit2[i].hit())
     //            {
-    //                str.write(linePointRef(start[i], hit2[i].hitPoint()));
+    //                str.writeLine(start[i], hit2[i].hitPoint());
     //            }
     //        }
     //    }
@@ -1403,7 +1403,7 @@ void Foam::snappySnapDriver::detectNearSurfaces
     //
     //            if (isCoplanar)
     //            {
-    //                str.write(linePointRef(surfPointA, surfPointB));
+    //                str.writeLine(surfPointA, surfPointB);
     //            }
     //        }
     //    }
@@ -1550,7 +1550,7 @@ void Foam::snappySnapDriver::detectNearSurfaces
                     if (gapStr)
                     {
                         const point& intPt = hit2[pointi].hitPoint();
-                        gapStr().write(linePointRef(pt, intPt));
+                        gapStr().writeLine(pt, intPt);
                     }
 
                     // Choose hit2 : nearest to end point (so inside the domain)
@@ -1692,7 +1692,7 @@ void Foam::snappySnapDriver::detectNearSurfaces
                             if (gapStr)
                             {
                                 const point& intPt = hit2[i].hitPoint();
-                                gapStr().write(linePointRef(pt, intPt));
+                                gapStr().writeLine(pt, intPt);
                             }
 
                             disp[pointi] = hit2[i].hitPoint()-pt;

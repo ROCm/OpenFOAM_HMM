@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020,2022 OpenCFD Ltd
+    Copyright (C) 2016-2022 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -115,17 +115,10 @@ bool Foam::dynamicMotionSolverTopoFvMesh::update()
         if (debug)
         {
             OBJstream osOld("oldPts_" + time().timeName() + ".obj");
-            const pointField& oldPts = oldPoints();
-            forAll(oldPts, i)
-            {
-                osOld.write(oldPts[i]);
-            }
+            osOld.write(oldPoints());
 
             OBJstream osNew("newPts_" + time().timeName() + ".obj");
-            forAll(points(), i)
-            {
-                osNew.write(points()[i]);
-            }
+            osNew.write(points());
         }
     }
     else

@@ -801,7 +801,7 @@ void Foam::averageNeighbourFvGeometryScheme::movePoints()
                 forAll(cellCentres, celli)
                 {
                     const point& cc = cellCentres[celli];
-                    osPtr().write(linePointRef(cc-correction[celli], cc));
+                    osPtr().writeLine(cc-correction[celli], cc);
                 }
 
                 const scalarField magCorrection(mag(correction));
@@ -871,7 +871,7 @@ void Foam::averageNeighbourFvGeometryScheme::movePoints()
             {
                 const point& oldCc = mesh_.cellCentres()[celli];
                 const point& newCc = cellCentres[celli];
-                str.write(linePointRef(oldCc, newCc));
+                str.writeLine(oldCc, newCc);
             }
         }
         if (debug)
@@ -885,7 +885,7 @@ void Foam::averageNeighbourFvGeometryScheme::movePoints()
             {
                 const point& oldFc = mesh_.faceCentres()[facei];
                 const point& newFc = faceCentres[facei];
-                str.write(linePointRef(oldFc, newFc));
+                str.writeLine(oldFc, newFc);
             }
         }
 

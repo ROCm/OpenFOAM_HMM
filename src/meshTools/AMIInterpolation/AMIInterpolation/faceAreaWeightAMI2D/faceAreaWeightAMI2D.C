@@ -27,7 +27,6 @@ License
 
 #include "faceAreaWeightAMI2D.H"
 #include "profiling.H"
-#include "OBJstream.H"
 #include "addToRunTimeSelectionTable.H"
 #include "triangle2D.H"
 

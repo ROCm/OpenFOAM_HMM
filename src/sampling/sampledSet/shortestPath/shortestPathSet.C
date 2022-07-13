@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1064,10 +1064,7 @@ void Foam::shortestPathSet::genSamples
                    /"isLeakCell" + Foam::name(iter) + ".obj"
                 );
                 Pout<< "Writing new isLeakCell to " << str.name() << endl;
-                forAll(leakCcs, i)
-                {
-                    str.write(leakCcs[i]);
-                }
+                str.write(leakCcs);
             }
             if (debug & 2)
             {
@@ -1090,13 +1087,10 @@ void Foam::shortestPathSet::genSamples
                         << " distance:" << samplingCurveDist[samplei]
                         << endl;
 
-                    str.write
+                    str.writeLine
                     (
-                        linePointRef
-                        (
-                            samplingPts[samplei-1],
-                            samplingPts[samplei]
-                        )
+                        samplingPts[samplei-1],
+                        samplingPts[samplei]
                     );
                 }
             }
@@ -1121,9 +1115,9 @@ void Foam::shortestPathSet::genSamples
             fm,
             dimensionedScalar(dimless, Zero)
         );
-        forAll(isLeakCell, celli)
+        for (const label celli : isLeakCell)
         {
-            fld[celli] = isLeakCell[celli];
+            fld[celli] = scalar(1);
         }
         fld.correctBoundaryConditions();
         fld.write();
@@ -1193,8 +1187,8 @@ void Foam::shortestPathSet::genSamples
             {
                 str.write(mesh.points()[pointi]);
             }
-            Pout<< "Writing " << str.nVertices() << " points to " << str.name()
-                << endl;
+            Pout<< "Writing " << str.nVertices()
+                << " points to " << str.name() << endl;
         }
     }
 
@@ -1266,8 +1260,8 @@ void Foam::shortestPathSet::genSamples
         mkDir(mesh.time().timePath());
         OBJstream str(mesh.time().timePath()/"isLeakFace.obj");
         str.write(leakFaces, mesh.points(), false);
-        Pout<< "Writing " << leakFaces.size() << " faces to " << str.name()
-            << endl;
+        Pout<< "Writing " << leakFaces.size()
+            << " faces to " << str.name() << endl;
     }
 
 

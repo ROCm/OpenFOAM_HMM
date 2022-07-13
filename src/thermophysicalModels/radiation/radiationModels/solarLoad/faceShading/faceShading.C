@@ -54,9 +54,9 @@ void Foam::faceShading::writeRays
 
     Pout<< "Dumping rays to " << os.name() << endl;
 
-    forAll(myFc, faceI)
+    forAll(myFc, facei)
     {
-        os.write(linePointRef(myFc[faceI], endCf[faceI]));
+        os.writeLine(myFc[facei], endCf[facei]);
     }
 }
 
