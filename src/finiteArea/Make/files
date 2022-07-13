@@ -130,6 +130,7 @@ $(limitedGradSchemes)/edgeLimitedFaGrad/edgeLimitedFaGrads.C
 
 lnGradSchemes = finiteArea/lnGradSchemes
 $(lnGradSchemes)/lnGradScheme/lnGradSchemes.C
+$(lnGradSchemes)/uncorrectedLnGrad/uncorrectedLnGrads.C
 $(lnGradSchemes)/correctedLnGrad/correctedLnGrads.C
 $(lnGradSchemes)/limitedLnGrad/limitedLnGrads.C
 $(lnGradSchemes)/fourthLnGrad/fourthLnGrads.C
