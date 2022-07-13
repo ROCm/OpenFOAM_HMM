@@ -108,11 +108,11 @@ public:
         //- Names for the normTypes
         static const Enum<normTypes> normTypesNames_;
 
-        //- Default maximum number of iterations for solvers
-        static constexpr label defaultMaxIter = 1000;
+        //- Default maximum number of iterations for solvers (1000)
+        static constexpr const label defaultMaxIter = 1000;
 
-        //- Default (absolute) tolerance
-        static constexpr scalar defaultTolerance = 1e-6;
+        //- Default (absolute) tolerance (1e-6)
+        static const scalar defaultTolerance;
 
 
     //- Abstract base-class for lduMatrix solvers

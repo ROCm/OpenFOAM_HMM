@@ -41,6 +41,8 @@ namespace Foam
 }
 
 
+const Foam::scalar Foam::lduMatrix::defaultTolerance = 1e-6;
+
 const Foam::Enum
 <
     Foam::lduMatrix::normTypes
