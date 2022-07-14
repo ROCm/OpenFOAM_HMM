@@ -60,19 +60,13 @@ class ensightFile
         static bool allowUndef_;
 
         //- Value to represent undef in results (default: 1e+37, floatVGREAT)
-        static scalar undefValue_;
-
-        //- The '*' mask appropriate for subDir
-        static string mask_;
-
-        //- The printf format for zero-padded subdirectory numbers
-        static string dirFmt_;
+        static float undefValue_;
 
 
     // Private Member Functions
 
-        //- Initialize by setting the ASCII output formatting
-        void initialize();
+        //- Initialize sets the ASCII output formatting
+        void init();
 
         //- No copy construct
         ensightFile(const ensightFile&) = delete;
@@ -82,6 +76,12 @@ class ensightFile
 
 
 public:
+
+    // Public Data Types
+
+        //- Ensight uses \c float not \d double for floating-point
+        typedef float floatType;
+
 
     // Static Data Members
 
@@ -100,8 +100,8 @@ public:
 
     // Constructors
 
-        //- Construct from pathName.
-        //  The entire pathName is adjusted for valid ensight file naming.
+        //- Construct from path-name.
+        //  The path-name is adjusted for valid ensight file naming.
         explicit ensightFile
         (
             const fileName& pathname,
@@ -127,31 +127,18 @@ public:
     // Access
 
         //- Return setting for whether 'undef' values are allowed in results
-        static bool allowUndef();
-
-        //- The '*' mask appropriate for subDir
-        static string mask();
-
-        //- Consistent zero-padded numbers for subdirectories
-        static string subDir(const label);
-
-        //- Set width of subDir and mask. Default width is 8 digits.
-        //  Max width is 31 digits.
-        static void subDirWidth(const label);
-
-        //- Return current width of subDir and mask.
-        static label subDirWidth();
+        static bool allowUndef() noexcept;
 
 
     // Edit
 
         //- Enable/disable use of \c undef keyword and value
-        static bool allowUndef(bool enabled);
+        static bool allowUndef(bool on) noexcept;
 
         //- Assign the value to represent undef in the results
         //  Returns the previous value
         //  NB: do not use values larger than floatScalarVGREAT
-        static scalar undefValue(const scalar value);
+        static float undefValue(float value) noexcept;
 
 
     // Output
@@ -209,10 +196,10 @@ public:
         Ostream& write(const label value, const label fieldWidth);
 
         //- Write floating-point as "%12.5e" or as binary
-        virtual Ostream& write(const floatScalar val);
+        virtual Ostream& write(const float val);
 
-        //- Write floating-point as "%12.5e" or as binary
-        virtual Ostream& write(const doubleScalar val);
+        //- Write floating-point as "%12.5e" or as binary (narrowed to float)
+        virtual Ostream& write(const double val);
 
         //- Add carriage return to ascii stream
         void newline();
@@ -252,11 +239,11 @@ public:
     // Other Methods
 
         //- Check for any NaN in the field
-        static bool isUndef(const UList<scalar>& field);
+        static bool hasUndef(const UList<scalar>& field);
 
         //- Check for any NaN in the field
         template<class Addr>
-        static bool isUndef(const IndirectListBase<scalar, Addr>& field);
+        static bool hasUndef(const IndirectListBase<scalar, Addr>& field);
 };
 
 

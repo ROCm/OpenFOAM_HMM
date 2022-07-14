@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,7 @@ License
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 template<class Addr>
-bool Foam::ensightFile::isUndef(const IndirectListBase<scalar, Addr>& field)
+bool Foam::ensightFile::hasUndef(const IndirectListBase<scalar, Addr>& field)
 {
     for (const scalar val : field)
     {

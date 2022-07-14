@@ -44,7 +44,7 @@ void Foam::ensightCells::writePolysConnectivity
     const bool parallel
 )
 {
-    constexpr ensightCells::elemType etype(ensightCells::NFACED);
+    constexpr ensightCells::elemType etype(ensightCells::elemType::NFACED);
 
     const label nTotal = part.total(etype);
     const labelUList& addr = part.cellIds(etype);
@@ -201,7 +201,7 @@ void Foam::ensightCells::writeShapeConnectivity
     const bool parallel
 )
 {
-    if (etype == ensightCells::NFACED)
+    if (etype == ensightCells::elemType::NFACED)
     {
         FatalErrorInFunction
             << "Called for ensight NFACED cell. Programming error\n"
@@ -303,7 +303,7 @@ void Foam::ensightCells::write
     {
         const auto etype = ensightCells::elemType(typei);
 
-        if (etype == ensightCells::NFACED)
+        if (etype == ensightCells::elemType::NFACED)
         {
             writePolysConnectivity
             (

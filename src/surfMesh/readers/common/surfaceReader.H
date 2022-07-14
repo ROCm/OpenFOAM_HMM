@@ -27,15 +27,15 @@ Class
     Foam::surfaceReader
 
 Description
-    Base class for surface readers
+    Abstract base class for surface readers with fields.
 
 SourceFiles
     surfaceReader.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef surfaceReader_H
-#define surfaceReader_H
+#ifndef Foam_surfaceReader_H
+#define Foam_surfaceReader_H
 
 #include "typeInfo.H"
 #include "autoPtr.H"
@@ -64,6 +64,7 @@ public:
     //- Runtime type information
     TypeName("surfaceReader");
 
+
     // Declare run-time constructor selection table
 
         declareRunTimeSelectionTable
@@ -91,7 +92,7 @@ public:
     // Constructors
 
         //- Construct from fileName
-        surfaceReader(const fileName& fName);
+        explicit surfaceReader(const fileName& fName);
 
 
     //- Destructor

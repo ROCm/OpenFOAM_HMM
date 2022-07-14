@@ -36,57 +36,14 @@ License
 
 bool Foam::ensightFile::allowUndef_ = false;
 
-Foam::scalar Foam::ensightFile::undefValue_ = Foam::floatScalarVGREAT;
-
-// Default is width 8
-Foam::string Foam::ensightFile::mask_   = "********";
-Foam::string Foam::ensightFile::dirFmt_ = "%08d";
+float Foam::ensightFile::undefValue_ = Foam::floatScalarVGREAT;
 
 const char* const Foam::ensightFile::coordinates = "coordinates";
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-Foam::string Foam::ensightFile::mask()
-{
-    return mask_;
-}
-
-
-Foam::string Foam::ensightFile::subDir(const label n)
-{
-    char buf[32];
-
-    sprintf(buf, dirFmt_.c_str(), n);
-    return buf;
-}
-
-
-void Foam::ensightFile::subDirWidth(const label n)
-{
-    // enforce max limit to avoid buffer overflow in subDir()
-    if (n < 1 || n > 31)
-    {
-        return;
-    }
-
-    // appropriate printf format
-    std::ostringstream oss;
-    oss << "%0" << n << "d";
-    dirFmt_ = oss.str();
-
-    // set mask accordingly
-    mask_.resize(n, '*');
-}
-
-
-Foam::label Foam::ensightFile::subDirWidth()
-{
-    return mask_.size();
-}
-
-
-bool Foam::ensightFile::isUndef(const UList<scalar>& field)
+bool Foam::ensightFile::hasUndef(const UList<scalar>& field)
 {
     for (const scalar& val : field)
     {
@@ -102,13 +59,13 @@ bool Foam::ensightFile::isUndef(const UList<scalar>& field)
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::ensightFile::initialize()
+void Foam::ensightFile::init()
 {
-    // ascii formatting specs
+    // The ASCII formatting specs for ensight files
     setf
     (
-        ios_base::scientific,
-        ios_base::floatfield
+        std::ios_base::scientific,
+        std::ios_base::floatfield
     );
     precision(5);
 }
@@ -124,7 +81,7 @@ Foam::ensightFile::ensightFile
 :
     OFstream(ensight::FileName(pathname), fmt)
 {
-    initialize();
+    init();
 }
 
 
@@ -137,36 +94,44 @@ Foam::ensightFile::ensightFile
 :
     OFstream(path/ensight::FileName(name), fmt)
 {
-    initialize();
+    init();
 }
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-bool Foam::ensightFile::allowUndef()
+bool Foam::ensightFile::allowUndef() noexcept
 {
     return allowUndef_;
 }
 
 
-bool Foam::ensightFile::allowUndef(bool enabled)
+// float Foam::ensightFile::undefValue() noexcept
+// {
+//     return undefValue_;
+// }
+
+
+bool Foam::ensightFile::allowUndef(bool on) noexcept
 {
     bool old = allowUndef_;
-    allowUndef_ = enabled;
+    allowUndef_ = on;
     return old;
 }
 
 
-Foam::scalar Foam::ensightFile::undefValue(const scalar value)
+float Foam::ensightFile::undefValue(float value) noexcept
 {
     // enable its use too
     allowUndef_ = true;
 
-    scalar old = undefValue_;
+    float old = undefValue_;
     undefValue_ = value;
     return old;
 }
 
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::ensightFile::writeString(const char* str)
 {
@@ -253,14 +218,14 @@ Foam::Ostream& Foam::ensightFile::write(const int64_t val)
 }
 
 
-Foam::Ostream& Foam::ensightFile::write(const floatScalar val)
+Foam::Ostream& Foam::ensightFile::write(const float val)
 {
     if (format() == IOstreamOption::BINARY)
     {
         write
         (
             reinterpret_cast<const char *>(&val),
-            sizeof(floatScalar)
+            sizeof(float)
         );
     }
     else
@@ -273,7 +238,7 @@ Foam::Ostream& Foam::ensightFile::write(const floatScalar val)
 }
 
 
-Foam::Ostream& Foam::ensightFile::write(const doubleScalar val)
+Foam::Ostream& Foam::ensightFile::write(const double val)
 {
     float fvalue(narrowFloat(val));
 

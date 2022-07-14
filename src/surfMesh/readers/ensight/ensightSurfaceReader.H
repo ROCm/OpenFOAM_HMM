@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,15 +31,16 @@ Description
 
 SourceFiles
     ensightSurfaceReader.C
+    ensightSurfaceReaderTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ensightSurfaceReader_H
-#define ensightSurfaceReader_H
+#ifndef Foam_ensightSurfaceReader_H
+#define Foam_ensightSurfaceReader_H
 
 #include "surfaceReader.H"
+#include "ensightFaces.H"
 #include "ensightReadFile.H"
-#include "StringStream.H"
 #include "Pair.H"
 #include "Tuple2.H"
 
@@ -58,7 +59,7 @@ class ensightSurfaceReader
 {
 protected:
 
-    // Protected Data
+    // Data Types
 
         //- Handling of node/element id types (off, assign, ignore, given)
         enum idTypes : unsigned char
@@ -68,8 +69,15 @@ protected:
             GIVEN = 2       //!< Use "given" values (not supported)
         };
 
+
+        //- Tuple of face type (tria3, quad4, nsided) and count
+        typedef Tuple2<ensightFaces::elemType, label> faceInfoTuple;
+
+
+    // Protected Data
+
         //- Format flag
-        IOstreamOption::streamFormat streamFormat_;
+        IOstreamOption::streamFormat readFormat_;
 
         //- Base directory
         fileName baseDir_;
@@ -98,19 +106,20 @@ protected:
         //- Pointer to the surface
         autoPtr<meshedSurface> surfPtr_;
 
-        List<Tuple2<string, label>> schema_;
+        //- List of face-type/count tuples
+        List<faceInfoTuple> faceTypeInfo_;
 
 
-    // Protected Member Functions
+    // Private Member Functions
 
         //- Helper function to skip forward n steps in stream
         void skip(const label n, Istream& is) const;
 
         //- Helper function to read an ascii line from file
-        void readLine(IFstream& is, string& buffer) const;
+        void readLine(ISstream& is, string& buffer) const;
 
         //- Read and check a section header
-        void debugSection(const word& expected, IFstream& is) const;
+        void debugSection(const word& expected, ISstream& is) const;
 
         //- Replace the '*' mask chars with a 0 padded string.
         static fileName replaceMask
@@ -124,16 +133,11 @@ protected:
         Pair<idTypes> readGeometryHeader(ensightReadFile& is) const;
 
         //- Read the case file
-        void readCase(IFstream& is);
+        void readCase(ISstream& is);
 
         //- Helper function to return Type after skipping n tokens
         template<class Type>
-        void readFromLine
-        (
-            const label nSkip,
-            IStringStream& is,
-            Type& value
-        ) const;
+        void readFromLine(const label nSkip, Istream& is, Type& value) const;
 
         //- Helper function to return Type after skipping n tokens
         template<class Type>
@@ -188,7 +192,7 @@ public:
             const scalar& refValue = pTraits<scalar>::zero
         ) const;
 
-        //- Return a scalar field at a given time
+        //- Return a vector field at a given time
         virtual tmp<Field<vector>> field
         (
             const label timeIndex,
@@ -233,6 +237,7 @@ public:
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 
 #endif
 

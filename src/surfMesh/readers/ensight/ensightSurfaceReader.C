@@ -26,6 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ensightSurfaceReader.H"
+#include "ensightCase.H"
 #include "stringOps.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -84,7 +85,7 @@ void Foam::ensightSurfaceReader::skip(const label n, Istream& is) const
 }
 
 
-void Foam::ensightSurfaceReader::readLine(IFstream& is, string& line) const
+void Foam::ensightSurfaceReader::readLine(ISstream& is, string& line) const
 {
     do
     {
@@ -105,7 +106,7 @@ void Foam::ensightSurfaceReader::readLine(IFstream& is, string& line) const
 void Foam::ensightSurfaceReader::debugSection
 (
     const word& expected,
-    IFstream& is
+    ISstream& is
 ) const
 {
     string actual;
@@ -139,11 +140,8 @@ Foam::fileName Foam::ensightSurfaceReader::replaceMask
 
     if (nMask)
     {
-        std::ostringstream oss;
-        oss << std::setfill('0') << std::setw(nMask) << timeIndex;
-
         const std::string maskStr(nMask, '*');
-        const std::string indexStr = oss.str();
+        const Foam::word  indexStr(ensightCase::padded(nMask, timeIndex));
         result.replace(maskStr, indexStr);
     }
 
@@ -229,7 +227,7 @@ Foam::ensightSurfaceReader::readGeometryHeader(ensightReadFile& is) const
 }
 
 
-void Foam::ensightSurfaceReader::readCase(IFstream& is)
+void Foam::ensightSurfaceReader::readCase(ISstream& is)
 {
     DebugInFunction << endl;
 
@@ -324,7 +322,7 @@ void Foam::ensightSurfaceReader::readCase(IFstream& is)
 
     // Read the time values
     readLine(is, buffer); // time values:
-    timeValues_.setSize(nTimeSteps_);
+    timeValues_.resize_nocopy(nTimeSteps_);
     for (label i = 0; i < nTimeSteps_; ++i)
     {
         scalar t(readScalar(is));
@@ -342,7 +340,7 @@ void Foam::ensightSurfaceReader::readCase(IFstream& is)
 Foam::ensightSurfaceReader::ensightSurfaceReader(const fileName& fName)
 :
     surfaceReader(fName),
-    streamFormat_(IOstreamOption::ASCII),
+    readFormat_(IOstreamOption::ASCII),  // Placeholder value
     baseDir_(fName.path()),
     meshFileName_(),
     fieldNames_(),
@@ -369,66 +367,16 @@ const Foam::meshedSurface& Foam::ensightSurfaceReader::geometry
 
     if (!surfPtr_)
     {
-        fileName meshInstance(replaceMask(meshFileName_, timeIndex));
-        IFstream isBinary(baseDir_/meshInstance, IOstreamOption::BINARY);
+        // Auto-detect ascii/binary format
+        ensightReadFile is(baseDir_/replaceMask(meshFileName_, timeIndex));
 
-        if (!isBinary.good())
-        {
-            FatalErrorInFunction
-                << "Cannot read file " << isBinary.name()
-                << exit(FatalError);
-        }
-
-        streamFormat_ = IOstreamOption::BINARY;
-        {
-            istream& iss = isBinary.stdStream();
-
-            // Binary string is *exactly* 80 characters
-            string buf(size_t(80), '\0');
-            iss.read(&buf[0], 80);
-
-            if (!iss)
-            {
-                // Truncated?
-                buf.erase(iss.gcount());
-            }
-
-            // Truncate at the first embedded '\0'
-            const auto endp = buf.find('\0');
-            if (endp != std::string::npos)
-            {
-                buf.erase(endp);
-            }
-
-            // Contains "C Binary" ?
-            if
-            (
-                (buf.find("binary") == std::string::npos)
-             && (buf.find("Binary") == std::string::npos)
-            )
-            {
-                streamFormat_ = IOstreamOption::ASCII;
-            }
-        }
-
-        if (debug)
-        {
-            Info<< "stream format: ";
-            if (streamFormat_ == IOstreamOption::ASCII)
-            {
-                Info<< "ascii" << endl;
-            }
-            else
-            {
-                Info<< "binary" << endl;
-            }
-        }
-
-
-        ensightReadFile is(baseDir_/meshInstance, streamFormat_);
+        // Format detected from the geometry
+        readFormat_ = is.format();
 
         DebugInfo
-            << "File: " << is.name() << nl;
+            << "File: " << is.name()
+            << " format: "
+            << IOstreamOption::formatNames[readFormat_] << endl;
 
         Pair<idTypes> idHandling = readGeometryHeader(is);
 
@@ -460,19 +408,23 @@ const Foam::meshedSurface& Foam::ensightSurfaceReader::geometry
         pointField points(nPoints);
         for (direction cmpt = 0; cmpt < vector::nComponents; ++cmpt)
         {
-            for (point& pt : points)
+            for (point& p : points)
             {
-                is.read(pt[cmpt]);
+                is.read(p[cmpt]);
             }
         }
 
 
-        // Read faces - may be a mix of tris, quads and polys
-        DynamicList<face> faces(ceil(nPoints/3));
-        DynamicList<Tuple2<string, label>> schema(faces.size());
+        // Read faces - may be a mix of tria3, quad4, nsided
+        DynamicList<face> dynFaces(nPoints/3);
+        DynamicList<faceInfoTuple> faceTypeInfo(16);
+
         string faceType;
+        label faceCount = 0;
+
         while (is.good()) // (is.peek() != EOF)
         {
+            // The element type
             is.read(faceType);
 
             if (!is.good())
@@ -480,15 +432,22 @@ const Foam::meshedSurface& Foam::ensightSurfaceReader::geometry
                 break;
             }
 
-            label nFace = 0;
-
-            if (faceType == "tria3")
+            if
+            (
+                faceType
+             == ensightFaces::elemNames[ensightFaces::elemType::TRIA3]
+            )
             {
-                is.read(nFace);
+                is.read(faceCount);
+
+                faceTypeInfo.append
+                (
+                    faceInfoTuple(ensightFaces::elemType::TRIA3, faceCount)
+                );
 
                 DebugInfo
                     << "faceType <" << faceType.c_str() << "> count: "
-                    << nFace << nl;
+                    << faceCount << nl;
 
                 if
                 (
@@ -497,30 +456,39 @@ const Foam::meshedSurface& Foam::ensightSurfaceReader::geometry
                 )
                 {
                     DebugInfo
-                        << "Ignore " << nFace << " element ids" << nl;
+                        << "Ignore " << faceCount << " element ids" << nl;
 
                     // Read and discard labels
-                    discard<label>(nFace, is);
+                    discard<label>(faceCount, is);
                 }
 
-                face f(3);
-                for (label facei = 0; facei < nFace; ++facei)
+                for (label facei = 0; facei < faceCount; ++facei)
                 {
+                    face f(3);
                     for (label& fp : f)
                     {
                         is.read(fp);
                     }
 
-                    faces.append(f);
+                    dynFaces.append(std::move(f));
                 }
             }
-            else if (faceType == "quad4")
+            else if
+            (
+                faceType
+             == ensightFaces::elemNames[ensightFaces::elemType::QUAD4]
+            )
             {
-                is.read(nFace);
+                is.read(faceCount);
+
+                faceTypeInfo.append
+                (
+                    faceInfoTuple(ensightFaces::elemType::QUAD4, faceCount)
+                );
 
                 DebugInfo
                     << "faceType <" << faceType.c_str() << "> count: "
-                    << nFace << nl;
+                    << faceCount << nl;
 
                 if
                 (
@@ -529,30 +497,39 @@ const Foam::meshedSurface& Foam::ensightSurfaceReader::geometry
                 )
                 {
                     DebugInfo
-                        << "Ignore " << nFace << " element ids" << nl;
+                        << "Ignore " << faceCount << " element ids" << nl;
 
                     // Read and discard labels
-                    discard<label>(nFace, is);
+                    discard<label>(faceCount, is);
                 }
 
-                face f(4);
-                for (label facei = 0; facei < nFace; ++facei)
+                for (label facei = 0; facei < faceCount; ++facei)
                 {
+                    face f(4);
                     for (label& fp : f)
                     {
                         is.read(fp);
                     }
 
-                    faces.append(f);
+                    dynFaces.append(std::move(f));
                 }
             }
-            else if (faceType == "nsided")
+            else if
+            (
+                faceType
+             == ensightFaces::elemNames[ensightFaces::elemType::NSIDED]
+            )
             {
-                is.read(nFace);
+                is.read(faceCount);
+
+                faceTypeInfo.append
+                (
+                    faceInfoTuple(ensightFaces::elemType::NSIDED, faceCount)
+                );
 
                 DebugInfo
                     << "faceType <" << faceType.c_str() << "> count: "
-                    << nFace << nl;
+                    << faceCount << nl;
 
                 if
                 (
@@ -561,18 +538,18 @@ const Foam::meshedSurface& Foam::ensightSurfaceReader::geometry
                 )
                 {
                     DebugInfo
-                        << "Ignore " << nFace << " element ids" << nl;
+                        << "Ignore " << faceCount << " element ids" << nl;
 
                     // Read and discard labels
-                    discard<label>(nFace, is);
+                    discard<label>(faceCount, is);
                 }
 
-                labelList np(nFace);
-                for (label facei = 0; facei < nFace; ++facei)
+                labelList np(faceCount);
+                for (label facei = 0; facei < faceCount; ++facei)
                 {
                     is.read(np[facei]);
                 }
-                for (label facei = 0; facei < nFace; ++facei)
+                for (label facei = 0; facei < faceCount; ++facei)
                 {
                     face f(np[facei]);
                     for (label& fp : f)
@@ -580,7 +557,7 @@ const Foam::meshedSurface& Foam::ensightSurfaceReader::geometry
                         is.read(fp);
                     }
 
-                    faces.append(f);
+                    dynFaces.append(std::move(f));
                 }
             }
             else
@@ -594,21 +571,21 @@ const Foam::meshedSurface& Foam::ensightSurfaceReader::geometry
                 }
                 break;
             }
-            schema.append(Tuple2<string, label>(faceType, nFace));
         }
 
-        schema_.transfer(schema);
+        faceTypeInfo_.transfer(faceTypeInfo);
+        faceList faces(std::move(dynFaces));
 
         DebugInfo
             << "read nFaces: " << faces.size() << nl
-            << "file schema: " << schema_ << nl;
+            << "file schema: " << faceTypeInfo_ << nl;
 
         // Convert from 1-based Ensight addressing to 0-based OF addressing
         for (face& f : faces)
         {
-            for (label& pointi : f)
+            for (label& fp : f)
             {
-                --pointi;
+                --fp;
             }
         }
 

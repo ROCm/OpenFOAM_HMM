@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,8 +32,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ensightReadFile_H
-#define ensightReadFile_H
+#ifndef Foam_ensightReadFile_H
+#define Foam_ensightReadFile_H
 
 #include "IFstream.H"
 #include "IOstream.H"
@@ -51,7 +51,9 @@ class ensightReadFile
 :
     public IFstream
 {
-    // Private Member Functions
+public:
+
+    // Generated Methods
 
         //- No copy construct
         ensightReadFile(const ensightReadFile&) = delete;
@@ -60,15 +62,16 @@ class ensightReadFile
         void operator=(const ensightReadFile&) = delete;
 
 
-public:
-
     // Constructors
 
-        //- Construct from pathname. Default format is binary.
-        explicit ensightReadFile
+        //- Construct from pathname, auto-detect the format
+        explicit ensightReadFile(const fileName& pathname);
+
+        //- Construct from pathname, use the specified (ascii/binary) format
+        ensightReadFile
         (
             const fileName& pathname,
-            IOstreamOption::streamFormat fmt = IOstreamOption::BINARY
+            IOstreamOption::streamFormat fmt
         );
 
 
@@ -76,7 +79,17 @@ public:
     ~ensightReadFile() = default;
 
 
-    // Output
+    // Static Functions
+
+        //- Detect if the file is \em binary by testing for initial
+        //- "(C|Fortran) Binary"
+        static IOstreamOption::streamFormat detectBinaryHeader
+        (
+            const fileName& pathname
+        );
+
+
+    // Read Functions
 
         //- Inherit read from Istream
         using Istream::read;

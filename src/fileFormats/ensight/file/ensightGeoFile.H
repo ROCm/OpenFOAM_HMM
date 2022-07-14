@@ -52,8 +52,8 @@ class ensightGeoFile
 {
     // Private Member Functions
 
-        //- Initialize by outputting header information
-        void initialize();
+        //- Initialize outputs the header information
+        void init();
 
         //- No copy construct
         ensightGeoFile(const ensightGeoFile&) = delete;
@@ -75,8 +75,8 @@ public:
 
     // Constructors
 
-        //- Construct from pathName.
-        //  The entire pathName is checked for valid ensight naming.
+        //- Construct from path-name.
+        //  The path-name is adjusted for valid ensight file naming.
         explicit ensightGeoFile
         (
             const fileName& pathname,
@@ -84,7 +84,7 @@ public:
         );
 
         //- Construct from path and name.
-        //  Only the name portion is checked for valid ensight naming.
+        //  Only the name portion is adjusted for valid ensight file naming.
         ensightGeoFile
         (
             const fileName& path,

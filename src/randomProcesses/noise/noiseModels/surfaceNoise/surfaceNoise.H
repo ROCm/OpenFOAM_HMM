@@ -105,8 +105,8 @@ SeeAlso
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef noiseModels_surfaceNoise_H
-#define noiseModels_surfaceNoise_H
+#ifndef Foam_noiseModels_surfaceNoise_H
+#define Foam_noiseModels_surfaceNoise_H
 
 #include "noiseModel.H"
 #include "labelList.H"
@@ -117,7 +117,7 @@ SeeAlso
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class surfaceReader;
 class surfaceWriter;
 
@@ -132,7 +132,6 @@ class surfaceNoise
 :
     public noiseModel
 {
-
 protected:
 
     // Protected Data
@@ -215,8 +214,9 @@ public:
     //- Runtime type information
     TypeName("surfaceNoise");
 
+
     //- Constructor
-    surfaceNoise(const dictionary& dict, const bool readFields = true);
+    explicit surfaceNoise(const dictionary& dict, const bool readFields=true);
 
     //- Destructor
     virtual ~surfaceNoise() = default;

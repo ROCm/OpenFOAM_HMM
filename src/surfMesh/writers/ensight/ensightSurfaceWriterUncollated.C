@@ -195,7 +195,8 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeUncollated
         part.write(osGeom); // serial
 
         // Write field (serial)
-        osField.writeKeyword(ensightPTraits<Type>::typeName);
+        osField.write(ensightPTraits<Type>::typeName);
+        osField.newline();
         part.writeData(osField, tfield(), this->isPointData());
 
 

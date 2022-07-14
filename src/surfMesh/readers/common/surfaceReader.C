@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,6 +42,31 @@ Foam::surfaceReader::surfaceReader(const fileName& fName)
 :
     fileName_(fName)
 {}
+
+
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
+
+Foam::autoPtr<Foam::surfaceReader>
+Foam::surfaceReader::New
+(
+    const word& readerType,
+    const fileName& fName
+)
+{
+    auto* ctorPtr = fileNameConstructorTable(readerType);
+
+    if (!ctorPtr)
+    {
+        FatalErrorInLookup
+        (
+            "reader",
+            readerType,
+            *fileNameConstructorTablePtr_
+        ) << exit(FatalError);
+    }
+
+    return autoPtr<surfaceReader>(ctorPtr(fName));
+}
 
 
 // ************************************************************************* //

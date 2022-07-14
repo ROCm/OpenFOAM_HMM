@@ -35,8 +35,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ensightPTraits_H
-#define ensightPTraits_H
+#ifndef Foam_ensightPTraits_H
+#define Foam_ensightPTraits_H
 
 #include "fieldTypes.H"
 #include "direction.H"
@@ -57,49 +57,32 @@ struct ensightPTraits
     static const char* const typeName;
 
     //- Ordering table: return OpenFOAM component given Ensight component
-    //  This is used for the symmTensor ordering: Ensight requires
-    //  xx yy zz xy xz yz
+    //  Primarily used for remapping of symmTensor.
+    //  OpenFOAM uses (XX, XY, XZ, YY, YZ, ZZ) order,
+    //  Ensight uses (XX, YY, ZZ, XY, YZ, XZ) order (like VTK).
     static const direction componentOrder[];
 };
 
 
 // Specializations
 
-template<>
-const char* const ensightPTraits<label>::typeName;
+template<> const char* const ensightPTraits<label>::typeName;
+template<> const direction ensightPTraits<label>::componentOrder[];
 
-template<>
-const direction ensightPTraits<label>::componentOrder[];
+template<> const char* const ensightPTraits<scalar>::typeName;
+template<> const direction ensightPTraits<scalar>::componentOrder[];
 
-template<>
-const char* const ensightPTraits<scalar>::typeName;
+template<> const char* const ensightPTraits<vector>::typeName;
+template<> const direction ensightPTraits<vector>::componentOrder[];
 
-template<>
-const direction ensightPTraits<scalar>::componentOrder[];
+template<> const char* const ensightPTraits<sphericalTensor>::typeName;
+template<> const direction ensightPTraits<sphericalTensor>::componentOrder[];
 
-template<>
-const char* const ensightPTraits<vector>::typeName;
+template<> const char* const ensightPTraits<symmTensor>::typeName;
+template<> const direction ensightPTraits<symmTensor>::componentOrder[];
 
-template<>
-const direction ensightPTraits<vector>::componentOrder[];
-
-template<>
-const char* const ensightPTraits<sphericalTensor>::typeName;
-
-template<>
-const direction ensightPTraits<sphericalTensor>::componentOrder[];
-
-template<>
-const char* const ensightPTraits<symmTensor>::typeName;
-
-template<>
-const direction ensightPTraits<symmTensor>::componentOrder[];
-
-template<>
-const char* const ensightPTraits<tensor>::typeName;
-
-template<>
-const direction ensightPTraits<tensor>::componentOrder[];
+template<> const char* const ensightPTraits<tensor>::typeName;
+template<> const direction ensightPTraits<tensor>::componentOrder[];
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

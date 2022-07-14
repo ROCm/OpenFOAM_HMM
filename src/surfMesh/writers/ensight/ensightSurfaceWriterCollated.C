@@ -182,7 +182,8 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeCollated
         }
 
         // Write field (serial only)
-        osField.writeKeyword(ensightPTraits<Type>::typeName);
+        osField.write(ensightPTraits<Type>::typeName);
+        osField.newline();
         part.writeData(osField, tfield(), this->isPointData());
 
 

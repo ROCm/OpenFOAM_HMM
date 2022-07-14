@@ -43,7 +43,6 @@ Foam::ensightCase::newData
     if (Pstream::master())
     {
         const ensight::VarName varName(name);
-
         output = createDataFile(varName);
 
         // Description

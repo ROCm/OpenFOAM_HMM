@@ -57,6 +57,11 @@ triSurface/fields/triSurfaceFields.C
 triSurface/patches/surfacePatch.C
 
 
+readers = readers
+
+$(readers)/common/surfaceReader.C
+$(readers)/ensight/ensightSurfaceReader.C
+
 writers = writers
 
 $(writers)/common/surfaceWriter.C

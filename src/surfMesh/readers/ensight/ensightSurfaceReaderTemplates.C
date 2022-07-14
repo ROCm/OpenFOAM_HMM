@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,8 +25,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include <iomanip>
-#include <sstream>
+#include "UIListStream.H"
+#include "ensightPTraits.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -34,7 +34,7 @@ template<class Type>
 void Foam::ensightSurfaceReader::readFromLine
 (
     const label nSkip,
-    IStringStream& is,
+    Istream& is,
     Type& value
 ) const
 {
@@ -52,7 +52,7 @@ void Foam::ensightSurfaceReader::readFromLine
     Type& value
 ) const
 {
-    IStringStream is(buffer);
+    UIListStream is(buffer.data(), buffer.length());
 
     readFromLine(nSkip, is, value);
 }
@@ -67,11 +67,15 @@ Foam::tmp<Foam::Field<Type>> Foam::ensightSurfaceReader::readField
 {
     DebugInFunction << endl;
 
-    const word& fieldName(fieldNames_[fieldIndex]);
+    const word& fieldName = fieldNames_[fieldIndex];
     const label fileIndex = timeStartIndex_ + timeIndex*timeIncrement_;
 
-    fileName fieldFileName(replaceMask(fieldFileNames_[fieldIndex], fileIndex));
-    ensightReadFile is(baseDir_/fieldFileName, streamFormat_);
+    // Use previously detected ascii/binary format
+    ensightReadFile is
+    (
+        baseDir_/replaceMask(fieldFileNames_[fieldIndex], fileIndex),
+        readFormat_
+    );
 
     if (!is.good())
     {
@@ -82,22 +86,28 @@ Foam::tmp<Foam::Field<Type>> Foam::ensightSurfaceReader::readField
     }
 
     // Check that data type is as expected
+    // (assumes OpenFOAM generated the data set)
     string primitiveType;
     is.read(primitiveType);
 
-
     DebugInfo << "primitiveType: " << primitiveType << endl;
 
-    if (primitiveType != pTraits<Type>::typeName)
+    if
+    (
+        primitiveType != ensightPTraits<Type>::typeName
+     && primitiveType != pTraits<Type>::typeName
+    )
     {
         IOWarningInFunction(is)
-            << "Expected '" << pTraits<Type>::typeName
-            << "' values but found type " << primitiveType << nl
-            << "    This may be okay, but could also indicate an error"
-            << nl << nl;
+            << "Expected <" << ensightPTraits<Type>::typeName
+            << "> values for <" << pTraits<Type>::typeName
+            << "> but found " << primitiveType << nl
+            << "    This may be okay, but could indicate an error" << nl << nl;
     }
 
-    scalar value;
+    auto tfield = tmp<Field<Type>>::New(surfPtr_->nFaces(), Zero);
+    auto& field = tfield.ref();
+
     string strValue;
     label iValue;
 
@@ -105,50 +115,48 @@ Foam::tmp<Foam::Field<Type>> Foam::ensightSurfaceReader::readField
     is.read(strValue);
     is.read(iValue);
 
-    // Allocate storage for data as a list per component
-    List<DynamicList<scalar>> values(pTraits<Type>::nComponents);
-    label n = surfPtr_->size();
-    forAll(values, cmptI)
-    {
-        values[cmptI].setCapacity(n);
-    }
+    label begFace = 0;
 
-    // Read data file using schema generated while reading the surface
-    forAll(schema_, i)
+    // Loop through different element types when reading the field values
+    for (const faceInfoTuple& facesInfo : faceTypeInfo_)
     {
+        // [faceType, faceCount]
+        const label endFace = begFace + facesInfo.second();
+
         DebugInfo
-            << "Reading face type "
-            << schema_[i].first() << " data" << endl;
+            << "Reading <" << pTraits<Type>::typeName << "> face type "
+            << ensightFaces::elemNames[facesInfo.first()]
+            << " data:" << facesInfo.second() << endl;
 
-        const label nFace = schema_[i].second();
-
-        if (nFace != 0)
+        if (begFace < endFace)
         {
+            // The element type, optionally with 'undef'
             is.read(strValue);
 
-            for
-            (
-                direction cmptI=0;
-                cmptI < pTraits<Type>::nComponents;
-                ++cmptI
-            )
+            if (strValue.find("undef") != std::string::npos)
             {
-                for (label faceI = 0; faceI < nFace; ++faceI)
+                // Skip undef entry
+                scalar value;
+                is.read(value);
+            }
+
+            // Ensight fields are written component-wise
+            // (can be in different order than OpenFOAM uses)
+
+            for (direction d = 0; d < pTraits<Type>::nComponents; ++d)
+            {
+                const direction cmpt = ensightPTraits<Type>::componentOrder[d];
+
+                for (label facei = begFace; facei < endFace; ++facei)
                 {
+                    scalar value;
                     is.read(value);
-                    values[cmptI].append(value);
+                    setComponent(field[facei], cmpt) = value;
                 }
             }
+
+            begFace = endFace;
         }
-    }
-
-    auto tfield = tmp<Field<Type>>::New(n, Zero);
-    auto& field = tfield.ref();
-
-    for (direction cmpti=0; cmpti < pTraits<Type>::nComponents; ++cmpti)
-    {
-        field.replace(cmpti, values[cmpti]);
-        values[cmpti].clear();
     }
 
     return tfield;

@@ -27,7 +27,68 @@ License
 
 #include "ensightReadFile.H"
 
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+Foam::IOstreamOption::streamFormat
+Foam::ensightReadFile::detectBinaryHeader(const fileName& pathname)
+{
+    IOstreamOption::streamFormat fmt(IOstreamOption::BINARY);
+
+    // Detect BINARY vs ASCII by testing for initial "(C|Fortran) Binary"
+    {
+        IFstream is(pathname, IOstreamOption::BINARY);
+
+        if (!is.good())
+        {
+            FatalErrorInFunction
+                << "Cannot read file " << is.name() << nl
+                << exit(FatalError);
+        }
+
+        istream& iss = is.stdStream();
+
+        // Binary string is *exactly* 80 characters
+        std::string buf(size_t(80), '\0');
+        iss.read(&buf[0], 80);
+
+        if (!iss)
+        {
+            // Truncated?
+            buf.erase(iss.gcount());
+        }
+
+        // Truncate at the first embedded '\0'
+        const auto endp = buf.find('\0');
+        if (endp != std::string::npos)
+        {
+            buf.erase(endp);
+        }
+
+        // Contains "C Binary" ?
+        if
+        (
+            (buf.find("Binary") == std::string::npos)
+         || (buf.find("binary") == std::string::npos)
+        )
+        {
+            fmt = IOstreamOption::ASCII;
+        }
+    }
+
+    return fmt;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::ensightReadFile::ensightReadFile
+(
+    const fileName& pathname
+)
+:
+    IFstream(pathname, ensightReadFile::detectBinaryHeader(pathname))
+{}
+
 
 Foam::ensightReadFile::ensightReadFile
 (

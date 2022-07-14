@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -186,22 +186,22 @@ void Foam::ensightCells::classifyImpl
     {
         const cellModel& model = shapes[id].model();
 
-        elemType etype(NFACED);
+        elemType etype(elemType::NFACED);
         if (model == tet)
         {
-            etype = TETRA4;
+            etype = elemType::TETRA4;
         }
         else if (model == pyr)
         {
-            etype = PYRAMID5;
+            etype = elemType::PYRAMID5;
         }
         else if (model == prism)
         {
-            etype = PENTA6;
+            etype = elemType::PENTA6;
         }
         else if (model == hex)
         {
-            etype = HEXA8;
+            etype = elemType::HEXA8;
         }
 
         ++sizes_[etype];
@@ -217,22 +217,22 @@ void Foam::ensightCells::classifyImpl
     {
         const cellModel& model = shapes[id].model();
 
-        elemType etype(NFACED);
+        elemType etype(elemType::NFACED);
         if (model == tet)
         {
-            etype = TETRA4;
+            etype = elemType::TETRA4;
         }
         else if (model == pyr)
         {
-            etype = PYRAMID5;
+            etype = elemType::PYRAMID5;
         }
         else if (model == prism)
         {
-            etype = PENTA6;
+            etype = elemType::PENTA6;
         }
         else if (model == hex)
         {
-            etype = HEXA8;
+            etype = elemType::HEXA8;
         }
 
         add(etype, id);

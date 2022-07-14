@@ -54,12 +54,6 @@ sampledSurface/sampledSurface/sampledSurfaceRegister.C
 sampledSurface/sampledSurfaces/sampledSurfaces.C
 sampledSurface/thresholdCellFaces/sampledThresholdCellFaces.C
 
-readers = sampledSurface/readers
-
-$(readers)/surfaceReader.C
-$(readers)/surfaceReaderNew.C
-$(readers)/ensight/ensightSurfaceReader.C
-
 graphField/writePatchGraph.C
 graphField/writeCellGraph.C
 graphField/makeGraph.C

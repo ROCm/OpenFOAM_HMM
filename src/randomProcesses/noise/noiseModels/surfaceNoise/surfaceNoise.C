@@ -59,7 +59,7 @@ void surfaceNoise::initialise(const fileName& fName)
         readerPtr_ = surfaceReader::New(readerType_, fName);
 
         // Find the index of the pressure data
-        const List<word> fieldNames(readerPtr_->fieldNames(0));
+        const wordList fieldNames(readerPtr_->fieldNames(0));
         pIndex_ = fieldNames.find(pName_);
         if (pIndex_ == -1)
         {
@@ -109,7 +109,7 @@ void surfaceNoise::initialise(const fileName& fName)
         // Read the surface geometry
         // Note: hard-coded to read mesh from first time index
         const meshedSurface& surf = readerPtr_->geometry(0);
-        nFace_ = surf.size();
+        nFace_ = surf.nFaces();
     }
 
     Pstream::broadcasts

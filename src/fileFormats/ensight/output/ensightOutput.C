@@ -400,7 +400,7 @@ void Foam::ensightOutput::writeFaceConnectivity
         os.newline();
     }
 
-    if (etype == ensightFaces::NSIDED)
+    if (etype == ensightFaces::elemType::NSIDED)
     {
         // Face sizes (number of points per face)
 
@@ -492,7 +492,7 @@ void Foam::ensightOutput::writeFaceConnectivity
         os.newline();
     }
 
-    if (etype == ensightFaces::NSIDED)
+    if (etype == ensightFaces::elemType::NSIDED)
     {
         // Face sizes (number of points per face)
 

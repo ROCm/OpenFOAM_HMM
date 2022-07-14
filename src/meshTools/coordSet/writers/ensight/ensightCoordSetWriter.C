@@ -62,7 +62,9 @@ static void writeTrackField
 )
 {
     // Write field (serial only)
-    os.writeKeyword(ensightPTraits<Type>::typeName);
+    os.write(ensightPTraits<Type>::typeName);
+    os.newline();
+
     forAll(fieldPtrs, tracki)
     {
         // Write as point data
