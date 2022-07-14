@@ -131,7 +131,7 @@ inline T& Foam::Pair<T>::second() noexcept
 
 
 template<class T>
-inline const T& Foam::Pair<T>::other(const T& a) const
+inline const T& Foam::Pair<T>::other(const T& val) const
 {
     if (first() == second())
     {
@@ -139,15 +139,15 @@ inline const T& Foam::Pair<T>::other(const T& a) const
             << "Call to other only valid for Pair with differing elements:"
             << *this << abort(FatalError);
     }
-    else if (a == first())
+    else if (val == first())
     {
         return second();
     }
-    else if (a != second())
+    else if (val != second())
     {
         FatalErrorInFunction
             << "Pair " << *this
-            << " does not contain " << a << abort(FatalError);
+            << " does not contain " << val << abort(FatalError);
     }
 
     return first();

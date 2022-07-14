@@ -92,29 +92,6 @@ inline Foam::edge::edge(Istream& is)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline Foam::label Foam::edge::start() const
-{
-    return first();
-}
-
-inline Foam::label& Foam::edge::start()
-{
-    return first();
-}
-
-
-inline Foam::label Foam::edge::end() const
-{
-    return second();
-}
-
-
-inline Foam::label& Foam::edge::end()
-{
-    return second();
-}
-
-
 inline Foam::label Foam::edge::minVertex() const
 {
     return (first() < second() ? first() : second());

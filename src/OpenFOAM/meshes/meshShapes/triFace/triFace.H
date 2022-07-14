@@ -102,16 +102,35 @@ public:
 
     // Access
 
-        //- Return first vertex label
+        //- The first vertex
+        label a() const { return operator[](0); }
+
+        //- The second vertex
+        label b() const { return operator[](1); }
+
+        //- The third vertex
+        label c() const { return operator[](2); }
+
+        //- The first vertex
+        label& a() { return operator[](0); }
+
+        //- The second vertex
+        label& b() { return operator[](1); }
+
+        //- The third vertex
+        label& c() { return operator[](2); }
+
+
+        //- The first vertex label
         using FixedList<label, 3>::first;
 
-        //- Return last (third) vertex label
+        //- The last (third) vertex label
         using FixedList<label, 3>::last;
 
-        //- Return second vertex label
+        //- The second vertex label
         label& second() { return operator[](1); }
 
-        //- Return second vertex label
+        //- The second vertex label
         label second() const { return operator[](1); }
 
 

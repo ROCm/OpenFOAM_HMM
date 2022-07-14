@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,6 +43,7 @@ SourceFiles
 #include "vector.H"
 #include "PointHit.H"
 #include "FixedList.H"
+#include "Pair.H"
 #include "UList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -65,6 +66,55 @@ inline Ostream& operator<<(Ostream& os, const line<Point, PointRef>& l);
 
 //- A line using referred points
 typedef line<point, const point&> linePointRef;
+
+
+/*---------------------------------------------------------------------------*\
+                         Class linePoints Declaration
+\*---------------------------------------------------------------------------*/
+
+//- Line point storage. Default constructable (line is not)
+class linePoints
+:
+    public Pair<point>
+{
+public:
+
+    // Generated Methods
+
+        //- Default construct
+        linePoints() = default;
+
+        //- Inherit constructors
+        using Pair<point>::Pair;
+
+
+    // Constructors
+
+        //- Construct from point references
+        inline explicit linePoints(const linePointRef& pts);
+
+        //- Copy construct from subset of points
+        inline linePoints
+        (
+            const UList<point>& points,
+            const FixedList<label, 2>& indices
+        );
+
+
+    // Member Functions
+
+        //- The first vertex
+        const point& a() const { return Pair<point>::first(); }
+
+        //- The second vertex
+        const point& b() const { return Pair<point>::second(); }
+
+        //- The first vertex
+        point& a() { return Pair<point>::first(); }
+
+        //- The second vertex
+        point& b() { return Pair<point>::second(); }
+};
 
 
 /*---------------------------------------------------------------------------*\
@@ -106,20 +156,26 @@ public:
 
     // Access
 
-        //- Return first point
-        inline PointRef first() const noexcept { return a_; }
+        //- The first point
+        PointRef a() const noexcept { return a_; }
 
-        //- Return second (last) point
-        inline PointRef second() const noexcept { return b_; }
+        //- The second point
+        PointRef b() const noexcept { return b_; }
 
-        //- Return last (second) point
-        inline PointRef last() const noexcept { return b_; }
+        //- The first point
+        PointRef first() const noexcept { return a_; }
 
-        //- Return start (first) point
-        inline PointRef start() const noexcept { return a_; }
+        //- The second (last) point
+        PointRef second() const noexcept { return b_; }
 
-        //- Return end (second) point
-        inline PointRef end() const noexcept { return b_; }
+        //- The last (second) point
+        PointRef last() const noexcept { return b_; }
+
+        //- The start (first) point
+        PointRef start() const noexcept { return a_; }
+
+        //- The end (second) point
+        PointRef end() const noexcept { return b_; }
 
 
     // Properties
@@ -151,19 +207,10 @@ public:
         ) const;
 
 
-    // IOstream operators
+    // IOstream Operators
 
-        friend Istream& operator>> <Point, PointRef>
-        (
-            Istream& is,
-            line& l
-        );
-
-        friend Ostream& operator<< <Point, PointRef>
-        (
-            Ostream& os,
-            const line& l
-        );
+        friend Istream& operator>> <Point, PointRef>(Istream&, line&);
+        friend Ostream& operator<< <Point, PointRef>(Ostream&, const line&);
 };
 
 

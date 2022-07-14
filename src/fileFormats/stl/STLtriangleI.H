@@ -33,16 +33,16 @@ License
 inline Foam::STLtriangle::STLtriangle
 (
     const STLpoint& normal,
-    const STLpoint& a,
-    const STLpoint& b,
-    const STLpoint& c,
+    const STLpoint& p0,
+    const STLpoint& p1,
+    const STLpoint& p2,
     uint16_t attrib
 )
 :
     normal_(normal),
-    a_(a),
-    b_(b),
-    c_(c),
+    a_(p0),
+    b_(p1),
+    c_(p2),
     attrib_(attrib)
 {}
 
@@ -88,17 +88,17 @@ inline void Foam::STLtriangle::write
 (
     Ostream& os,
     const vector& norm,
-    const point& pt0,
-    const point& pt1,
-    const point& pt2
+    const point& p0,
+    const point& p1,
+    const point& p2
 )
 {
     os  << " facet normal "
         << norm.x() << ' ' << norm.y() << ' ' << norm.z() << nl
         << "  outer loop" << nl
-        << "   vertex " << pt0.x() << ' ' << pt0.y() << ' ' << pt0.z() << nl
-        << "   vertex " << pt1.x() << ' ' << pt1.y() << ' ' << pt1.z() << nl
-        << "   vertex " << pt2.x() << ' ' << pt2.y() << ' ' << pt2.z() << nl
+        << "   vertex " << p0.x() << ' ' << p0.y() << ' ' << p0.z() << nl
+        << "   vertex " << p1.x() << ' ' << p1.y() << ' ' << p1.z() << nl
+        << "   vertex " << p2.x() << ' ' << p2.y() << ' ' << p2.z() << nl
         << "  endloop" << nl
         << " endfacet" << nl;
 }
@@ -107,15 +107,15 @@ inline void Foam::STLtriangle::write
 inline void Foam::STLtriangle::write
 (
     Ostream& os,
-    const point& pt0,
-    const point& pt1,
-    const point& pt2
+    const point& p0,
+    const point& p1,
+    const point& p2
 )
 {
     // Calculate the normal ourselves
-    const vector norm = triPointRef(pt0, pt1, pt2).unitNormal();
+    const vector norm = triPointRef(p0, p1, p2).unitNormal();
 
-    write(os, norm, pt0, pt1, pt2);
+    write(os, norm, p0, p1, p2);
 }
 
 
@@ -123,11 +123,11 @@ inline void Foam::STLtriangle::write
 
 inline Foam::Ostream& Foam::operator<<(Ostream& os, const STLtriangle& tri)
 {
-    os  << tri.normal_ << token::SPACE
-        << tri.a_ << token::SPACE
-        << tri.b_ << token::SPACE
-        << tri.c_ << token::SPACE
-        << tri.attrib_;
+    os  << tri.normal() << token::SPACE
+        << tri.a() << token::SPACE
+        << tri.b() << token::SPACE
+        << tri.c() << token::SPACE
+        << tri.attrib();
 
     return os;
 }

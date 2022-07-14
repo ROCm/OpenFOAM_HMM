@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -82,8 +82,7 @@ int main(int argc, char *argv[])
 
     Info<< nl << "hash-like functionality" << nl;
 
-    // doesn't work e4 = -1;
-    e4.start() = e4.end() = -1;
+    e4.clear();
 
     printInfo(e4);
     for (label i : {2, -1, 2, 1, 4, 1, 2, 3})
@@ -93,24 +92,24 @@ int main(int argc, char *argv[])
         printInfo(e4);
     }
 
-    e4.start() = e4.end() = -1;
+    e4.clear();
     Info<< "insert from list\n";
     labelHashSet newIndices({2, -1, 2, 1, 4, 1, 2, 3});
     e4.insert(newIndices.toc());
     printInfo(e4);
 
-    e4.start() = e4.end() = -1;
+    e4.clear();
     Info<< "insert from list\n";
     e4.insert({0, 5, 2, -1, 2, 1, 4, 1, 2, 3});
     printInfo(e4);
 
     FixedList<label, 8> otherIndices{12, 2, -1, 1, 4, 1, 2, 3};
-    e4.start() = e4.end() = -1;
+    e4.clear();
     Info<< "insert from list: " << otherIndices << nl;
     e4.insert(otherIndices);
     printInfo(e4);
 
-    e4.start() = e4.end();
+    e4.a() = e4.b();
     Info<< "erase from list: " << otherIndices << nl;
     Info<< "removed " << e4.erase(otherIndices) << " values" << nl;
     printInfo(e4);

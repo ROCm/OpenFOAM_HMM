@@ -86,9 +86,9 @@ public:
         inline STLtriangle
         (
             const STLpoint& normal,
-            const STLpoint& a,
-            const STLpoint& b,
-            const STLpoint& c,
+            const STLpoint& p0,
+            const STLpoint& p1,
+            const STLpoint& p2,
             uint16_t attrib
         );
 
@@ -127,18 +127,18 @@ public:
             (
                 Ostream& os,
                 const vector& norm,
-                const point& pt0,
-                const point& pt1,
-                const point& pt2
+                const point& p0,
+                const point& p1,
+                const point& p2
             );
 
             //- Write components to Ostream (ASCII), calculating the normal
             inline static void write
             (
                 Ostream& os,
-                const point& pt0,
-                const point& pt1,
-                const point& pt2
+                const point& p0,
+                const point& p1,
+                const point& p2
             );
 
 

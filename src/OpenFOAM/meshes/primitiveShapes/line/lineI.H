@@ -31,6 +31,22 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+inline Foam::linePoints::linePoints(const linePointRef& pts)
+:
+    Pair<point>(pts.a(), pts.b())
+{}
+
+
+inline Foam::linePoints::linePoints
+(
+    const UList<point>& points,
+    const FixedList<label, 2>& indices
+)
+:
+    Pair<point>(points[indices.first()], points[indices.last()])
+{}
+
+
 template<class Point, class PointRef>
 inline Foam::line<Point, PointRef>::line(const Point& from, const Point& to)
 :
@@ -46,8 +62,8 @@ inline Foam::line<Point, PointRef>::line
     const FixedList<label, 2>& indices
 )
 :
-    a_(points[indices[0]]),
-    b_(points[indices[1]])
+    a_(points[indices.first()]),
+    b_(points[indices.last()])
 {}
 
 

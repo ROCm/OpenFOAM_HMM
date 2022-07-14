@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -107,27 +107,40 @@ public:
 
     // Access
 
-        //- Return first vertex label
+        //- The first vertex
+        label a() const { return labelPair::first(); }
+
+        //- The second vertex
+        label b() const { return labelPair::second(); }
+
+        //- The first vertex
+        label& a() { return labelPair::first(); }
+
+        //- The second vertex
+        label& b() { return labelPair::second(); }
+
+
+        //- The first vertex label
         using labelPair::first;
 
-        //- Return last (second) vertex label
-        using labelPair::last;
-
-        //- Return second (last) vertex label
+        //- The second (last) vertex label
         using labelPair::second;
 
+        //- The last (second) vertex label
+        using labelPair::last;
 
-        //- Return start (first) vertex label
-        inline label start() const;
+        //- The start (first) vertex label
+        label start() const { return labelPair::first(); }
 
-        //- Return start (first) vertex label
-        inline label& start();
+        //- The end (last/second) vertex label
+        label end() const { return labelPair::second(); }
 
-        //- Return end (last/second) vertex label
-        inline label end() const;
+        //- The start (first) vertex label
+        label& start() { return labelPair::first(); }
 
-        //- Return end (last/second) vertex label
-        inline label& end();
+        //- The end (last/second) vertex label
+        label& end() { return labelPair::second(); }
+
 
         //- Return reverse edge as copy.
         //  No special handling of negative point labels.
