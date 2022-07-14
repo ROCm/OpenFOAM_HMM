@@ -42,7 +42,7 @@ interpolationSchemes
     default         linear;
 }
 
-snGradSchemes
+lnGradSchemes
 {
     default             corrected;
 }
