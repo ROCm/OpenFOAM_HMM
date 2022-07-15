@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2011 OpenFOAM Foundation
     Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -32,7 +32,7 @@ Description
     Uses Foam::Time when formatting the name.
 
 SourceFiles
-    instants.C
+    instant.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -46,6 +46,10 @@ SourceFiles
 
 namespace Foam
 {
+
+// Forward Declarations
+template<class T> class Pair;
+template<class T> class UList;
 
 /*---------------------------------------------------------------------------*\
                            Class instant Declaration
@@ -94,6 +98,26 @@ public:
 
         //- Move construct from timeName, parsing timeName for a value
         explicit instant(word&& timeName);
+
+
+    // Helper Functions (for searching)
+
+        //- Find and return index of given start time (linear search)
+        static label findStart
+        (
+            const UList<instant>& times,
+            const scalar timeVal
+        );
+
+        //- Find lower/upper indices for given time value in list of instances
+        //- (linear search) continuing \em after the given start index.
+        //  \returns the range indices or (-1,-1) if unsuccessful.
+        static Pair<label> findRange
+        (
+            const UList<instant>& times,
+            const scalar timeVal,
+            const label start = -1
+        );
 };
 
 

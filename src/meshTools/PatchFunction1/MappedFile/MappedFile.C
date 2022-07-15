@@ -307,20 +307,15 @@ void Foam::PatchFunction1Types::MappedFile<Type>::checkTable
     }
 
 
-    // Find current time in sampleTimes
-    label lo = -1;
-    label hi = -1;
-
-    bool foundTime = mapperPtr_().findTime
+    // Find range of current time indices in sampleTimes
+    Pair<label> timeIndices = instant::findRange
     (
         sampleTimes_,
-        startSampleTime_,
         t,  //mesh.time().value(),
-        lo,
-        hi
+        startSampleTime_
     );
 
-    if (!foundTime)
+    if (timeIndices.first() < 0)
     {
         FatalErrorInFunction
             << "Cannot find starting sampling values for index "
@@ -337,9 +332,9 @@ void Foam::PatchFunction1Types::MappedFile<Type>::checkTable
 
     // Update sampled data fields.
 
-    if (lo != startSampleTime_)
+    if (startSampleTime_ != timeIndices.first())
     {
-        startSampleTime_ = lo;
+        startSampleTime_ = timeIndices.first();
 
         if (startSampleTime_ == endSampleTime_)
         {
@@ -357,12 +352,14 @@ void Foam::PatchFunction1Types::MappedFile<Type>::checkTable
         }
         else
         {
+            const word& sampleTimeName = sampleTimes_[startSampleTime_].name();
+
             if (debug)
             {
                 Pout<< "checkTable : Reading startValues from "
                     << "boundaryData"
                       /this->patch_.name()
-                      /sampleTimes_[lo].name()
+                      /sampleTimeName
                       /fieldTableName_
                     << endl;
             }
@@ -375,7 +372,7 @@ void Foam::PatchFunction1Types::MappedFile<Type>::checkTable
                /mesh.dbDir()            // region
                /"boundaryData"
                /this->patch_.name()
-               /sampleTimes_[startSampleTime_].name()
+               /sampleTimeName
                /fieldTableName_
             );
 
@@ -408,9 +405,9 @@ void Foam::PatchFunction1Types::MappedFile<Type>::checkTable
         }
     }
 
-    if (hi != endSampleTime_)
+    if (endSampleTime_ != timeIndices.second())
     {
-        endSampleTime_ = hi;
+        endSampleTime_ = timeIndices.second();
 
         if (endSampleTime_ == -1)
         {
@@ -423,12 +420,14 @@ void Foam::PatchFunction1Types::MappedFile<Type>::checkTable
         }
         else
         {
+            const word& sampleTimeName = sampleTimes_[endSampleTime_].name();
+
             if (debug)
             {
                 Pout<< "checkTable : Reading endValues from "
                     << "boundaryData"
                       /this->patch_.name()
-                      /sampleTimes_[endSampleTime_].name()
+                      /sampleTimeName
                     << endl;
             }
 
@@ -440,7 +439,7 @@ void Foam::PatchFunction1Types::MappedFile<Type>::checkTable
                /mesh.dbDir()            // region
                /"boundaryData"
                /this->patch_.name()
-               /sampleTimes_[endSampleTime_].name()
+               /sampleTimeName
                /fieldTableName_
             );
 

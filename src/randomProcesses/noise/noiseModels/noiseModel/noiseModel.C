@@ -239,26 +239,6 @@ bool Foam::noiseModel::validateBounds(const scalarList& p) const
 }
 
 
-Foam::label Foam::noiseModel::findStartTimeIndex
-(
-    const instantList& allTimes,
-    const scalar startTime
-) const
-{
-    forAll(allTimes, timeI)
-    {
-        const instant& i = allTimes[timeI];
-
-        if (i.value() >= startTime)
-        {
-            return timeI;
-        }
-    }
-
-    return 0;
-}
-
-
 Foam::fileName Foam::noiseModel::baseFileDir(const label dataseti) const
 {
     return

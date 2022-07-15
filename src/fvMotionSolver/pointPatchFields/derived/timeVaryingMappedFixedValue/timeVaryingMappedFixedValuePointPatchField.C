@@ -337,20 +337,15 @@ void Foam::timeVaryingMappedFixedValuePointPatchField<Type>::checkTable()
         }
     }
 
-    // Find current time in sampleTimes
-    label lo = -1;
-    label hi = -1;
-
-    bool foundTime = mapperPtr_().findTime
+    // Find range of current time indices in sampleTimes
+    Pair<label> timeIndices = instant::findRange
     (
         sampleTimes_,
-        startSampleTime_,
         time.value(),
-        lo,
-        hi
+        startSampleTime_
     );
 
-    if (!foundTime)
+    if (timeIndices.first() < 0)
     {
         FatalErrorInFunction
             << "Cannot find starting sampling values for current time "
@@ -367,9 +362,9 @@ void Foam::timeVaryingMappedFixedValuePointPatchField<Type>::checkTable()
 
     // Update sampled data fields.
 
-    if (lo != startSampleTime_)
+    if (startSampleTime_ != timeIndices.first())
     {
-        startSampleTime_ = lo;
+        startSampleTime_ = timeIndices.first();
 
         if (startSampleTime_ == endSampleTime_)
         {
@@ -387,12 +382,14 @@ void Foam::timeVaryingMappedFixedValuePointPatchField<Type>::checkTable()
         }
         else
         {
+            const word& sampleTimeName = sampleTimes_[startSampleTime_].name();
+
             if (debug)
             {
                 Pout<< "checkTable : Reading startValues from "
                     <<   "boundaryData"
                         /this->patch().name()
-                        /sampleTimes_[lo].name()
+                        /sampleTimeName
                     << endl;
             }
 
@@ -402,7 +399,7 @@ void Foam::timeVaryingMappedFixedValuePointPatchField<Type>::checkTable()
                 time.caseConstant()
                /"boundaryData"
                /this->patch().name()
-               /sampleTimes_[startSampleTime_].name()
+               /sampleTimeName
                /fieldTableName_
             );
 
@@ -435,9 +432,9 @@ void Foam::timeVaryingMappedFixedValuePointPatchField<Type>::checkTable()
         }
     }
 
-    if (hi != endSampleTime_)
+    if (endSampleTime_ != timeIndices.second())
     {
-        endSampleTime_ = hi;
+        endSampleTime_ = timeIndices.second();
 
         if (endSampleTime_ == -1)
         {
@@ -450,12 +447,14 @@ void Foam::timeVaryingMappedFixedValuePointPatchField<Type>::checkTable()
         }
         else
         {
+            const word& sampleTimeName = sampleTimes_[endSampleTime_].name();
+
             if (debug)
             {
                 Pout<< "checkTable : Reading endValues from "
                     <<   "boundaryData"
                         /this->patch().name()
-                        /sampleTimes_[endSampleTime_].name()
+                        /sampleTimeName
                     << endl;
             }
 
@@ -465,7 +464,7 @@ void Foam::timeVaryingMappedFixedValuePointPatchField<Type>::checkTable()
                 time.caseConstant()
                /"boundaryData"
                /this->patch().name()
-               /sampleTimes_[endSampleTime_].name()
+               /sampleTimeName
                /fieldTableName_
             );
 

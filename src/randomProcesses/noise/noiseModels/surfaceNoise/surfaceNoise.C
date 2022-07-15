@@ -50,6 +50,7 @@ void surfaceNoise::initialise(const fileName& fName)
 {
     Info<< "Reading data file " << fName << endl;
 
+    instantList allTimes;
     label nAvailableTimes = 0;
 
     // All reading performed on the master processor only
@@ -75,8 +76,8 @@ void surfaceNoise::initialise(const fileName& fName)
         //   the heavy lifting
 
         // Set the time range
-        const instantList allTimes = readerPtr_->times();
-        startTimeIndex_ = findStartTimeIndex(allTimes, startTime_);
+        allTimes = readerPtr_->times();
+        startTimeIndex_ = instant::findStart(allTimes, startTime_);
 
         // Determine the windowing
         nAvailableTimes = allTimes.size() - startTimeIndex_;
@@ -97,8 +98,6 @@ void surfaceNoise::initialise(const fileName& fName)
     if (Pstream::master())
     {
         // Restrict times
-        const instantList allTimes = readerPtr_->times();
-
         times_.setSize(nRequiredTimes);
         forAll(times_, timeI)
         {

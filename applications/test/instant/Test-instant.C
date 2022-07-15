@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,10 +30,30 @@ Description
 
 #include "argList.H"
 #include "instant.H"
+#include "Pair.H"
 #include "fileNameInstant.H"
 #include "DynamicList.H"
 
 using namespace Foam;
+
+template<class T>
+Ostream& printInstant(const UList<T>& times, const label i)
+{
+    if (i >= 0 && i < times.size())
+    {
+        Info<< " (" << times[i] << ")";
+    }
+    return Info;
+}
+
+template<class T>
+Ostream& printInstant(const UList<T>& times, const Pair<label>& range)
+{
+    printInstant(times, range.first());
+    printInstant(times, range.second());
+    return Info;
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Main program:
@@ -48,6 +68,7 @@ int main(int argc, char *argv[])
     times.append({300.456, "def"});
     times.append({454.456, "xyz"});
     times.append({10, "ten"});
+    times.append({15, "fifteen"});
 
     {
         word timeName("twenty");
@@ -61,6 +82,19 @@ int main(int argc, char *argv[])
     sort(times);
     Info<< "Sorted:" << times << nl;
 
+    for (const scalar val : { -0.5, 5.0, 18.0, 25.0, 450.0, 480.0 })
+    {
+        label start = instant::findStart(times, val);
+        Pair<label> range = instant::findRange(times, val);
+
+        Info<< nl
+            << "time:" << val << nl;
+        Info<< "    start:" << start;
+        printInstant(times, start) << nl;
+
+        Info<< "    range:" << range;
+        printInstant(times, range) << nl;
+    }
 
     DynamicList<fileNameInstant> files;
     files.append(fileNameInstant{});

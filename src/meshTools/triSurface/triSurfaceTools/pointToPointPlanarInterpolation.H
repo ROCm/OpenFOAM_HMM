@@ -175,16 +175,6 @@ public:
         //- Helper: extract words of times
         static wordList timeNames(const instantList&);
 
-        //- Helper: find time. Return true if successful.
-        static bool findTime
-        (
-            const instantList& times,
-            const label startSampleTime,
-            const scalar timeVal,
-            label& lo,
-            label& hi
-        );
-
         //- Interpolate from field on source points to dest points
         template<class Type>
         tmp<Field<Type>> interpolate(const Field<Type>& sourceFld) const;

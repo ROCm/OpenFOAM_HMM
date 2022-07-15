@@ -239,11 +239,15 @@ protected:
         bool validateBounds(const scalarList& p) const;
 
         //- Find and return start time index
-        label findStartTimeIndex
+        FOAM_DEPRECATED_FOR(2022-07, "instant::findStart() static method")
+        static label findStartTimeIndex
         (
             const instantList& allTimes,
             const scalar startTime
-        ) const;
+        )
+        {
+            return instant::findStart(allTimes, startTime);
+        }
 
         //- Return the base output directory
         fileName baseFileDir(const label dataseti) const;

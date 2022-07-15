@@ -116,28 +116,17 @@ public:
     // Member Functions
 
         //- The value (const access)
-        scalar value() const noexcept
-        {
-            return val_;
-        }
+        scalar value() const noexcept { return val_; }
 
         //- The value (non-const access)
-        scalar& value() noexcept
-        {
-            return val_;
-        }
+        scalar& value() noexcept { return val_; }
 
         //- The name/key (const access)
-        const T& name() const noexcept
-        {
-            return key_;
-        }
+        const T& name() const noexcept { return key_; }
 
         //- The name/key (non-const access)
-        T& name() noexcept
-        {
-            return key_;
-        }
+        T& name() noexcept { return key_; }
+
 
         //- True if values are equal (includes SMALL for rounding)
         bool equal(scalar val) const noexcept
