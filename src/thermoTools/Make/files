@@ -20,5 +20,6 @@ $(BCs)/lumpedMassWallTemperature/lumpedMassWallTemperatureFvPatchScalarField.C
 
 $(BCs)/wallFunctions/alphatWallFunctions/alphatWallFunction/alphatWallFunctionFvPatchScalarField.C
 $(BCs)/wallFunctions/alphatWallFunctions/alphatJayatillekeWallFunction/alphatJayatillekeWallFunctionFvPatchScalarField.C
+$(BCs)/wallFunctions/sorptionWallFunction/sorptionWallFunctionFvPatchScalarField.C
 
 LIB = $(FOAM_LIBBIN)/libthermoTools
