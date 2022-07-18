@@ -142,7 +142,7 @@ Foam::fileName Foam::surfaceWriters::rawWriter::write()
     {
         const pointField& points = surf.points();
         const faceList& faces = surf.faces();
-        const bool withFaceNormal = writeNormal_; // Even for point data?
+        const bool withFaceNormal = (writeNormal_ && !this->isPointData());
 
         if (!isDir(outputFile.path()))
         {
