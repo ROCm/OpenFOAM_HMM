@@ -253,7 +253,7 @@ void Foam::functionObjects::momentumError::calcMomentError()
 
         fvMesh& subMesh = zoneSubSetPtr_->subsetter().subMesh();
 
-        subMesh.fvSchemes::readOpt() = mesh_.fvSchemes::readOpt();
+        subMesh.fvSchemes::readOpt(mesh_.fvSchemes::readOpt());
         subMesh.fvSchemes::read();
 
         auto& momentErrMap =

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,7 +64,7 @@ Foam::molecule::molecule
 {
     if (readFields)
     {
-        if (is.format() == IOstream::ASCII)
+        if (is.format() == IOstreamOption::ASCII)
         {
             is  >> Q_
                 >> v_
@@ -271,7 +271,7 @@ void Foam::molecule::writeFields(const Cloud<molecule>& mC)
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const molecule& mol)
 {
-    if (os.format() == IOstream::ASCII)
+    if (os.format() == IOstreamOption::ASCII)
     {
         os  << token::SPACE << static_cast<const particle&>(mol)
             << token::SPACE << mol.Q_

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -487,7 +487,7 @@ bool Foam::AABBTree<Type>::overlaps(const boundBox& bbIn) const
 template<class Type>
 Foam::Ostream& Foam::operator<<(Ostream& os, const AABBTree<Type>& tree)
 {
-    if (os.format() == IOstream::ASCII)
+    if (os.format() == IOstreamOption::ASCII)
     {
         os  << tree.maxLevel_ << token::SPACE
             << tree.minLeafSize_ << token::SPACE
@@ -514,7 +514,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const AABBTree<Type>& tree)
 template<class Type>
 Foam::Istream& Foam::operator>>(Istream& is, AABBTree<Type>& tree)
 {
-    if (is.format() == IOstream::ASCII)
+    if (is.format() == IOstreamOption::ASCII)
     {
         is  >> tree.maxLevel_
             >> tree.minLeafSize_;

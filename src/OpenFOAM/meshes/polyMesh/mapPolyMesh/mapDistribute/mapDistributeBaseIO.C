@@ -38,7 +38,7 @@ namespace Foam
 // is flattened on a single line.
 static Ostream& printMaps(Ostream& os, const labelListList& maps)
 {
-    if (os.format() == IOstream::BINARY || maps.empty())
+    if (os.format() == IOstreamOption::BINARY || maps.empty())
     {
         os  << maps;
     }
@@ -61,7 +61,7 @@ static Ostream& printMaps(Ostream& os, const labelListList& maps)
 
 static void writeMaps(Ostream& os, const word& key, const labelListList& maps)
 {
-    if (os.format() == IOstream::BINARY || maps.empty())
+    if (os.format() == IOstreamOption::BINARY || maps.empty())
     {
         os.writeEntry(key, maps);
     }

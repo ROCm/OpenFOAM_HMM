@@ -543,10 +543,10 @@ Foam::ensightCase::ensightCase
 (
     const fileName& ensightDir,
     const word& caseName,
-    const IOstreamOption::streamFormat format
+    const IOstreamOption::streamFormat fmt
 )
 :
-    options_(new options(format)),
+    options_(new options(fmt)),
     os_(nullptr),
     ensightDir_(ensightDir),
     caseName_(caseName + ".case"),

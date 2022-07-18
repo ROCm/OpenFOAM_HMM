@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -767,7 +767,7 @@ int main(int argc, char *argv[])
             ctrl.streamOpt.format(runTime.writeFormat());
             if (args.found("ascii"))
             {
-                ctrl.streamOpt.format(IOstream::ASCII);
+                ctrl.streamOpt.format(IOstreamOption::ASCII);
             }
 
             expressions::exprString valueExpr_
@@ -838,7 +838,7 @@ int main(int argc, char *argv[])
                 ctrl.streamOpt.format(runTime.writeFormat());
                 if (args.found("ascii"))
                 {
-                    ctrl.streamOpt.format(IOstream::ASCII);
+                    ctrl.streamOpt.format(IOstreamOption::ASCII);
                 }
 
                 if (ctrl.createNew && ctrl.keepPatches)

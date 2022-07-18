@@ -173,7 +173,7 @@ public:
         //  Uses cached location() instead of calculated position()
         virtual void writePosition(Ostream& os) const
         {
-            if (os.format() == IOstream::ASCII)
+            if (os.format() == IOstreamOption::ASCII)
             {
                 os  << location() << token::SPACE << cell();
             }

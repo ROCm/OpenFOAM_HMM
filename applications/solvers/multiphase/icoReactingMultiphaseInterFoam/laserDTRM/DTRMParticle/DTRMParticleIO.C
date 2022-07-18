@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,7 +59,7 @@ Foam::DTRMParticle::DTRMParticle
 {
     if (readFields)
     {
-        if (is.format() == IOstream::ASCII)
+        if (is.format() == IOstreamOption::ASCII)
         {
             is >> p0_ >> p1_ >> I0_ >> I_ >> dA_ >> transmissiveId_;
         }
@@ -115,7 +115,7 @@ void Foam::DTRMParticle::writeProperties
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const DTRMParticle& p)
 {
-    if (os.format() == IOstream::ASCII)
+    if (os.format() == IOstreamOption::ASCII)
     {
         os  << static_cast<const particle&>(p)
             << token::SPACE << p.p0_

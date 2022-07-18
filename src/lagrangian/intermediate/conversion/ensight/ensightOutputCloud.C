@@ -135,7 +135,7 @@ bool Foam::ensightOutput::writeCloudPositions
     if (Pstream::master())
     {
         ensightFile& os = output();
-        const bool isBinaryOutput = (os.format() == IOstream::BINARY);
+        const bool isBinaryOutput = (os.format() == IOstreamOption::BINARY);
 
         label parcelId = 0;
 

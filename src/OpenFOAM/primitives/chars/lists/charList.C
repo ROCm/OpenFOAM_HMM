@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -84,7 +84,7 @@ Istream& List<char>::readList(Istream& is)
 
         if (len)
         {
-            const auto oldFmt = is.format(IOstream::BINARY);
+            const auto oldFmt = is.format(IOstreamOption::BINARY);
 
             // read(...) includes surrounding start/end delimiters
             is.read(list.data(), std::streamsize(len));

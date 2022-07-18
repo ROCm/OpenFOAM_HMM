@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -334,7 +334,7 @@ int main(int argc, char *argv[])
 
         DynamicList<char> buf;
 
-        OListStream os(std::move(buf), IOstream::BINARY);
+        OListStream os(std::move(buf), IOstreamOption::BINARY);
         os << srcList;
 
         os.swap(buf); // Recover buffer
@@ -342,7 +342,7 @@ int main(int argc, char *argv[])
         // Read back
         List<scalar> dstList;
 
-        UIListStream is(buf, IOstream::BINARY);
+        UIListStream is(buf, IOstreamOption::BINARY);
         is.setScalarByteSize(sizeof(otherType));
 
         Info<< "Stream scalar-size ("

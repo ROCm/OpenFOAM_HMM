@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -100,7 +100,7 @@ void Foam::meshReader::writeInterfaces(const objectRegistry& registry) const
     ioObj.writeHeader(os);
 
     os << interfaces_;
-    ioObj.writeEndDivider(os);
+    IOobject::writeEndDivider(os);
 }
 
 

@@ -459,7 +459,7 @@ Foam::Time::Time
     writeOnce_(false),
     sigWriteNow_(*this, true),
     sigStopAtWriteNow_(*this, true),
-    writeStreamOption_(IOstream::ASCII),
+    writeStreamOption_(IOstreamOption::ASCII),
     graphFormat_("raw"),
     runTimeModifiable_(false),
     functionObjects_(*this, false)
@@ -525,7 +525,7 @@ Foam::Time::Time
     writeOnce_(false),
     sigWriteNow_(*this, true),
     sigStopAtWriteNow_(*this, true),
-    writeStreamOption_(IOstream::ASCII),
+    writeStreamOption_(IOstreamOption::ASCII),
     graphFormat_("raw"),
     runTimeModifiable_(false),
     functionObjects_(*this, false)
@@ -619,7 +619,7 @@ Foam::Time::Time
     writeOnce_(false),
     sigWriteNow_(*this, true),
     sigStopAtWriteNow_(*this, true),
-    writeStreamOption_(IOstream::ASCII),
+    writeStreamOption_(IOstreamOption::ASCII),
     graphFormat_("raw"),
     runTimeModifiable_(false),
     functionObjects_(*this, false)
@@ -693,7 +693,7 @@ Foam::Time::Time
     purgeWrite_(0),
     subCycling_(0),
     writeOnce_(false),
-    writeStreamOption_(IOstream::ASCII),
+    writeStreamOption_(IOstreamOption::ASCII),
     graphFormat_("raw"),
     runTimeModifiable_(false),
     functionObjects_(*this, false)

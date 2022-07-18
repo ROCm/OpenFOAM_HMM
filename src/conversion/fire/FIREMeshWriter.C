@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,17 +38,21 @@ bool Foam::fileFormats::FIREMeshWriter::compress       = false;
 bool Foam::fileFormats::FIREMeshWriter::prefixBoundary = true;
 
 
-//! \cond fileScope
-//- Output newline in ascii mode, no-op in binary mode
-inline static void newline(Foam::OSstream& os)
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace
 {
-    if (os.format() == Foam::IOstream::ASCII)
+
+// Output newline in ascii mode, no-op in binary mode
+inline void newline(Foam::OSstream& os)
+{
+    if (os.format() == Foam::IOstreamOption::ASCII)
     {
         os  << Foam::endl;
     }
 }
 
-//! \endcond
+} // End anonymous namespace
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -316,9 +320,15 @@ bool Foam::fileFormats::FIREMeshWriter::write(const fileName& meshName) const
         new OFstream
         (
             filename,
-            (useBinary   ? IOstream::BINARY : IOstream::ASCII),
-            IOstream::currentVersion,
-            (useCompress ? IOstream::COMPRESSED : IOstream::UNCOMPRESSED)
+            (
+                useBinary
+              ? IOstreamOption::BINARY : IOstreamOption::ASCII
+            ),
+            IOstreamOption::currentVersion,
+            (
+                useCompress
+              ? IOstreamOption::COMPRESSED : IOstreamOption::UNCOMPRESSED
+            )
         )
     );
 

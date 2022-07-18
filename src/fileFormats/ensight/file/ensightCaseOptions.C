@@ -29,9 +29,9 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::ensightCase::options::options(IOstreamOption::streamFormat format)
+Foam::ensightCase::options::options(IOstreamOption::streamFormat fmt)
 :
-    format_(format),
+    format_(fmt),
     overwrite_(false),
     nodeValues_(false),
     separateCloud_(false),

@@ -166,7 +166,7 @@ void Foam::coordSetWriters::ensightWriter::writeGeometry
 Foam::coordSetWriters::ensightWriter::ensightWriter()
 :
     coordSetWriter(),
-    writeFormat_(IOstream::ASCII),
+    writeFormat_(IOstreamOption::ASCII),
     collateTimes_(true),
     caching_("fieldsDict")  // Historic name
 {}
@@ -177,7 +177,7 @@ Foam::coordSetWriters::ensightWriter::ensightWriter(const dictionary& options)
     coordSetWriter(options),
     writeFormat_
     (
-        IOstreamOption::formatEnum("format", options, IOstream::ASCII)
+        IOstreamOption::formatEnum("format", options, IOstreamOption::ASCII)
     ),
     collateTimes_(options.getOrDefault("collateTimes", true)),
     caching_("fieldsDict")  // Historic name

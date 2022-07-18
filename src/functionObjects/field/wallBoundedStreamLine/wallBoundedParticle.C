@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -438,7 +438,7 @@ Foam::wallBoundedParticle::wallBoundedParticle
 {
     if (readFields)
     {
-        if (is.format() == IOstream::ASCII)
+        if (is.format() == IOstreamOption::ASCII)
         {
             is  >> localPosition_ >> meshEdgeStart_ >> diagEdge_;
         }
@@ -484,7 +484,7 @@ Foam::Ostream& Foam::operator<<
     const wallBoundedParticle& p
 )
 {
-    if (os.format() == IOstream::ASCII)
+    if (os.format() == IOstreamOption::ASCII)
     {
         os  << static_cast<const particle&>(p)
         << token::SPACE << p.localPosition_

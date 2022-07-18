@@ -663,7 +663,11 @@ int main(int argc, char *argv[])
         Info<< "Merge tolerance : " << mergeTol << nl
             << "Write tolerance : " << writeTol << endl;
 
-        if (runTime.writeFormat() == IOstream::ASCII && mergeTol < writeTol)
+        if
+        (
+            runTime.writeFormat() == IOstreamOption::ASCII
+         && mergeTol < writeTol
+        )
         {
             FatalErrorInFunction
                 << "Your current settings specify ASCII writing with "

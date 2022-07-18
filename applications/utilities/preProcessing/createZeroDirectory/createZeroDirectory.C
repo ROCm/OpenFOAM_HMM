@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -199,7 +199,7 @@ void createFieldFiles
 
         fieldOut.regIOobject::writeObject
         (
-            IOstreamOption(IOstream::ASCII),
+            IOstreamOption(IOstreamOption::ASCII),
             true
         );
     }

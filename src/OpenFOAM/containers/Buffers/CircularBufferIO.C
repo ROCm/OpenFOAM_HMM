@@ -167,7 +167,7 @@ Foam::Ostream& Foam::CircularBuffer<T>::writeList
     }
     #endif
 
-    if (os.format() == IOstream::BINARY && is_contiguous<T>::value)
+    if (os.format() == IOstreamOption::BINARY && is_contiguous<T>::value)
     {
         // Binary and contiguous
 

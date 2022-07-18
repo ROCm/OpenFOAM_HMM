@@ -38,7 +38,7 @@ Foam::GlobalIOList<Type>::GlobalIOList(const IOobject& io)
     // Check for MUST_READ_IF_MODIFIED
     warnNoRereading<GlobalIOList<Type>>();
 
-    readHeaderOk(IOstream::BINARY, typeName);
+    readHeaderOk(IOstreamOption::BINARY, typeName);
 }
 
 
@@ -50,7 +50,7 @@ Foam::GlobalIOList<Type>::GlobalIOList(const IOobject& io, Foam::zero)
     // Check for MUST_READ_IF_MODIFIED
     warnNoRereading<GlobalIOList<Type>>();
 
-    readHeaderOk(IOstream::BINARY, typeName);
+    readHeaderOk(IOstreamOption::BINARY, typeName);
 }
 
 
@@ -62,7 +62,7 @@ Foam::GlobalIOList<Type>::GlobalIOList(const IOobject& io, const label len)
     // Check for MUST_READ_IF_MODIFIED
     warnNoRereading<GlobalIOList<Type>>();
 
-    if (!readHeaderOk(IOstream::BINARY, typeName))
+    if (!readHeaderOk(IOstreamOption::BINARY, typeName))
     {
         List<Type>::resize(len);
     }
@@ -81,7 +81,7 @@ Foam::GlobalIOList<Type>::GlobalIOList
     // Check for MUST_READ_IF_MODIFIED
     warnNoRereading<GlobalIOList<Type>>();
 
-    if (!readHeaderOk(IOstream::BINARY, typeName))
+    if (!readHeaderOk(IOstreamOption::BINARY, typeName))
     {
         List<Type>::operator=(content);
     }
@@ -102,7 +102,7 @@ Foam::GlobalIOList<Type>::GlobalIOList
 
     List<Type>::transfer(content);
 
-    readHeaderOk(IOstream::BINARY, typeName);
+    readHeaderOk(IOstreamOption::BINARY, typeName);
 }
 
 

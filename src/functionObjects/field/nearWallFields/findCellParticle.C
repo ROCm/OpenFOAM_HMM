@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -76,7 +76,7 @@ Foam::findCellParticle::findCellParticle
 {
     if (readFields)
     {
-        if (is.format() == IOstream::ASCII)
+        if (is.format() == IOstreamOption::ASCII)
         {
             is >> start_ >> end_ >> data_;
         }
@@ -238,7 +238,7 @@ void Foam::findCellParticle::hitWallPatch
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const findCellParticle& p)
 {
-    if (os.format() == IOstream::ASCII)
+    if (os.format() == IOstreamOption::ASCII)
     {
         os  << static_cast<const particle&>(p)
             << token::SPACE << p.start_

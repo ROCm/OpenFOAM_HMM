@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -283,7 +283,7 @@ bool Foam::rigidBodyMeshMotionSolver::writeObject
 ) const
 {
     // Force ASCII writing
-    streamOpt.format(IOstream::ASCII);
+    streamOpt.format(IOstreamOption::ASCII);
 
     IOdictionary dict
     (

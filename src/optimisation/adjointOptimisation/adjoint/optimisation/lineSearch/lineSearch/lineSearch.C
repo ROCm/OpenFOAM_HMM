@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -206,7 +206,7 @@ Foam::lineSearch& Foam::lineSearch::operator++()
     lineSearchDict_.add<label>("iter", iter_, true);
     lineSearchDict_.regIOobject::writeObject
     (
-        IOstreamOption(IOstream::ASCII),
+        IOstreamOption(IOstreamOption::ASCII),
         true
     );
 

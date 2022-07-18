@@ -239,7 +239,7 @@ inline UIntType repeat_value(unsigned val)
 template<class UIntType>
 inline Ostream& print(Ostream& os, UIntType value, char off='0', char on='1')
 {
-    if (os.format() == IOstream::BINARY)
+    if (os.format() == IOstreamOption::BINARY)
     {
         // Perhaps not the most sensible, but the only thing we currently have.
         os << label(value);

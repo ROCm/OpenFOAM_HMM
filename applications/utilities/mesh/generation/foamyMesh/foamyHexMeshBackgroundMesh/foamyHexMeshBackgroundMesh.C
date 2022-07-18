@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,7 +73,7 @@ scalar getMergeDistance
     Info<< "Merge tolerance : " << mergeTol << nl
         << "Write tolerance : " << writeTol << endl;
 
-    if (runTime.writeFormat() == IOstream::ASCII && mergeTol < writeTol)
+    if (runTime.writeFormat() == IOstreamOption::ASCII && mergeTol < writeTol)
     {
         FatalErrorInFunction
             << "Your current settings specify ASCII writing with "

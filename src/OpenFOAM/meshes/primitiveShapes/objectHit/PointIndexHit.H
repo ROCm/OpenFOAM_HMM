@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -256,7 +256,7 @@ public:
 
         friend Ostream& operator<<(Ostream& os, const PointIndexHit& pHit)
         {
-            if (os.format() == IOstream::ASCII)
+            if (os.format() == IOstreamOption::ASCII)
             {
                 os  << pHit.hit_ << token::SPACE
                     << pHit.point_ << token::SPACE
@@ -278,7 +278,7 @@ public:
 
         friend Istream& operator>>(Istream& is, PointIndexHit& pHit)
         {
-            if (is.format() == IOstream::ASCII)
+            if (is.format() == IOstreamOption::ASCII)
             {
                 is >> pHit.hit_ >> pHit.point_ >> pHit.index_;
             }

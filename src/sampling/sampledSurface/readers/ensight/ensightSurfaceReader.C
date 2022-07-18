@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -342,7 +342,7 @@ void Foam::ensightSurfaceReader::readCase(IFstream& is)
 Foam::ensightSurfaceReader::ensightSurfaceReader(const fileName& fName)
 :
     surfaceReader(fName),
-    streamFormat_(IOstream::ASCII),
+    streamFormat_(IOstreamOption::ASCII),
     baseDir_(fName.path()),
     meshFileName_(),
     fieldNames_(),
@@ -370,7 +370,7 @@ const Foam::meshedSurface& Foam::ensightSurfaceReader::geometry
     if (!surfPtr_)
     {
         fileName meshInstance(replaceMask(meshFileName_, timeIndex));
-        IFstream isBinary(baseDir_/meshInstance, IOstream::BINARY);
+        IFstream isBinary(baseDir_/meshInstance, IOstreamOption::BINARY);
 
         if (!isBinary.good())
         {
@@ -379,7 +379,7 @@ const Foam::meshedSurface& Foam::ensightSurfaceReader::geometry
                 << exit(FatalError);
         }
 
-        streamFormat_ = IOstream::BINARY;
+        streamFormat_ = IOstreamOption::BINARY;
         {
             istream& iss = isBinary.stdStream();
 
@@ -407,14 +407,14 @@ const Foam::meshedSurface& Foam::ensightSurfaceReader::geometry
              && (buf.find("Binary") == std::string::npos)
             )
             {
-                streamFormat_ = IOstream::ASCII;
+                streamFormat_ = IOstreamOption::ASCII;
             }
         }
 
         if (debug)
         {
             Info<< "stream format: ";
-            if (streamFormat_ == IOstream::ASCII)
+            if (streamFormat_ == IOstreamOption::ASCII)
             {
                 Info<< "ascii" << endl;
             }

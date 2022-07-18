@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2019,2022 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,7 +83,7 @@ void Foam::particle::readData
 {
     if (newFormat)
     {
-        if (is.format() == IOstream::ASCII)
+        if (is.format() == IOstreamOption::ASCII)
         {
             is  >> coordinates_ >> celli_ >> tetFacei_ >> tetPti_;
             if (readFields)
@@ -128,7 +128,7 @@ void Foam::particle::readData
     {
         positionsCompat1706 p;
 
-        if (is.format() == IOstream::ASCII)
+        if (is.format() == IOstreamOption::ASCII)
         {
             is >> p.position >> p.celli;
 
@@ -244,7 +244,7 @@ void Foam::particle::writeProperties
 
 void Foam::particle::writeCoordinates(Ostream& os) const
 {
-    if (os.format() == IOstream::ASCII)
+    if (os.format() == IOstreamOption::ASCII)
     {
         os  << coordinates_
             << token::SPACE << celli_
@@ -263,7 +263,7 @@ void Foam::particle::writeCoordinates(Ostream& os) const
 
 void Foam::particle::writePosition(Ostream& os) const
 {
-    if (os.format() == IOstream::ASCII)
+    if (os.format() == IOstreamOption::ASCII)
     {
         os  << position() << token::SPACE << celli_;
     }
@@ -290,7 +290,7 @@ void Foam::particle::writePosition(Ostream& os) const
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const particle& p)
 {
-    if (os.format() == IOstream::ASCII)
+    if (os.format() == IOstreamOption::ASCII)
     {
         os  << p.coordinates_
             << token::SPACE << p.celli_

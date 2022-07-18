@@ -146,7 +146,7 @@ int main(int argc, char *argv[])
     {
         Info<<"Writing output to " << binaryOutput << endl;
 
-        OFstream os(binaryOutput, IOstream::BINARY);
+        OFstream os(binaryOutput, IOstreamOption::BINARY);
 
         os.writeEntry("idl1", idl1);
         os.writeEntry("idl2", idl2);

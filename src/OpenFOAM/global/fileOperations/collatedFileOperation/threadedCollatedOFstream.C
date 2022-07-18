@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,7 +58,7 @@ Foam::threadedCollatedOFstream::~threadedCollatedOFstream()
         decomposedBlockData::typeName,
         pathName_,
         str(),
-        IOstreamOption(IOstream::BINARY, version(), compression_),
+        IOstreamOption(IOstreamOption::BINARY, version(), compression_),
         false,  // append=false
         useThread_,
         headerEntries_

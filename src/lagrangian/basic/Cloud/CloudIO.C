@@ -121,7 +121,7 @@ void Foam::Cloud<ParticleType>::writeCloudUniformProperties() const
 
     uniformPropsDict.writeObject
     (
-        IOstreamOption(IOstream::ASCII, time().writeCompression()),
+        IOstreamOption(IOstreamOption::ASCII, time().writeCompression()),
         true
     );
 }

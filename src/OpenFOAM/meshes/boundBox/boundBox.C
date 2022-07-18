@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -280,7 +280,7 @@ Foam::point Foam::boundBox::nearest(const point& pt) const
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const boundBox& bb)
 {
-    if (os.format() == IOstream::ASCII)
+    if (os.format() == IOstreamOption::ASCII)
     {
         os << bb.min_ << token::SPACE << bb.max_;
     }
@@ -300,7 +300,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const boundBox& bb)
 
 Foam::Istream& Foam::operator>>(Istream& is, boundBox& bb)
 {
-    if (is.format() == IOstream::ASCII)
+    if (is.format() == IOstreamOption::ASCII)
     {
         is >> bb.min_ >> bb.max_;
     }

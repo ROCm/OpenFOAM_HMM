@@ -119,10 +119,10 @@ void Foam::ensightFile::initialize()
 Foam::ensightFile::ensightFile
 (
     const fileName& pathname,
-    IOstreamOption::streamFormat format
+    IOstreamOption::streamFormat fmt
 )
 :
-    OFstream(ensight::FileName(pathname), format)
+    OFstream(ensight::FileName(pathname), fmt)
 {
     initialize();
 }
@@ -132,10 +132,10 @@ Foam::ensightFile::ensightFile
 (
     const fileName& path,
     const fileName& name,
-    IOstreamOption::streamFormat format
+    IOstreamOption::streamFormat fmt
 )
 :
-    OFstream(path/ensight::FileName(name), format)
+    OFstream(path/ensight::FileName(name), fmt)
 {
     initialize();
 }

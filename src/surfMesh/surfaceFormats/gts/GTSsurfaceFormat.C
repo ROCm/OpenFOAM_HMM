@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -255,7 +255,7 @@ void Foam::fileFormats::GTSsurfaceFormat<Face>::write
 )
 {
     // ASCII only, allow output compression
-    streamOpt.format(IOstream::ASCII);
+    streamOpt.format(IOstreamOption::ASCII);
 
     const UList<point>& pointLst = surf.points();
     const UList<Face>& faceLst = surf.surfFaces();
@@ -347,7 +347,7 @@ void Foam::fileFormats::GTSsurfaceFormat<Face>::write
 )
 {
     // ASCII only, allow output compression
-    streamOpt.format(IOstream::ASCII);
+    streamOpt.format(IOstreamOption::ASCII);
 
     const UList<point>& pointLst = surf.points();
     const UList<Face>& faceLst = surf.surfFaces();

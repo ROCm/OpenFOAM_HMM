@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,8 +32,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef IOmanip_H
-#define IOmanip_H
+#ifndef Foam_IOmanip_H
+#define Foam_IOmanip_H
 
 #include "Istream.H"
 #include "Ostream.H"
@@ -178,21 +178,21 @@ inline Omanip<char> setfill(char fillch)
 }
 
 
-inline Omanip<IOstream::streamFormat> setformat
+inline Omanip<IOstreamOption::streamFormat> setformat
 (
-    const IOstream::streamFormat fmt
+    const IOstreamOption::streamFormat fmt
 )
 {
-    return Omanip<IOstream::streamFormat>(&IOstream::format, fmt);
+    return Omanip<IOstreamOption::streamFormat>(&IOstreamOption::format, fmt);
 }
 
 
-inline Omanip<IOstream::versionNumber> setversion
+inline Omanip<IOstreamOption::versionNumber> setversion
 (
-    const IOstream::versionNumber ver
+    const IOstreamOption::versionNumber ver
 )
 {
-    return Omanip<IOstream::versionNumber>(&IOstream::version, ver);
+    return Omanip<IOstreamOption::versionNumber>(&IOstreamOption::version, ver);
 }
 
 

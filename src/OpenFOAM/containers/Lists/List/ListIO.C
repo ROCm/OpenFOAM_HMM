@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -80,7 +80,7 @@ Foam::Istream& Foam::List<T>::readList(Istream& is)
         // Resize to actual length read
         list.resize(len);
 
-        if (is.format() == IOstream::BINARY && is_contiguous<T>::value)
+        if (is.format() == IOstreamOption::BINARY && is_contiguous<T>::value)
         {
             // Binary and contiguous
 

@@ -199,7 +199,7 @@ bool Foam::CompactIOField<T, BaseType>::writeObject
     const bool valid
 ) const
 {
-    if (streamOpt.format() == IOstream::ASCII)
+    if (streamOpt.format() == IOstreamOption::ASCII)
     {
         // Change type to be non-compact format type
         const word oldTypeName(typeName);
@@ -282,8 +282,8 @@ Foam::Ostream& Foam::operator<<
     const Foam::CompactIOField<T, BaseType>& L
 )
 {
-    // Keep ascii writing same.
-    if (os.format() == IOstream::ASCII)
+    // Keep ASCII writing same
+    if (os.format() == IOstreamOption::ASCII)
     {
         os << static_cast<const Field<T>&>(L);
     }

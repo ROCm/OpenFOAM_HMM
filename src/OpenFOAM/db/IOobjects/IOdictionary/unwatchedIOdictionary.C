@@ -62,7 +62,7 @@ Foam::unwatchedIOdictionary::unwatchedIOdictionary
 :
     baseIOdictionary(io, fallback)
 {
-    if (!readHeaderOk(IOstream::ASCII, wantedType) && fallback)
+    if (!readHeaderOk(IOstreamOption::ASCII, wantedType) && fallback)
     {
         dictionary::operator=(*fallback);
     }

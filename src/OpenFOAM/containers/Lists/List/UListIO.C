@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,7 +47,7 @@ void Foam::UList<T>::writeEntry(Ostream& os) const
     {
         os << *this;
     }
-    else if (os.format() == IOstream::ASCII)
+    else if (os.format() == IOstreamOption::ASCII)
     {
         // Zero-sized ASCII - Write size and delimiters
         os  << 0 << token::BEGIN_LIST << token::END_LIST;
@@ -85,7 +85,7 @@ Foam::Ostream& Foam::UList<T>::writeList
 
     const label len = list.size();
 
-    if (os.format() == IOstream::BINARY && is_contiguous<T>::value)
+    if (os.format() == IOstreamOption::BINARY && is_contiguous<T>::value)
     {
         // Binary and contiguous
 
@@ -211,7 +211,7 @@ Foam::Istream& Foam::UList<T>::readList(Istream& is)
                 << exit(FatalIOError);
         }
 
-        if (is.format() == IOstream::BINARY && is_contiguous<T>::value)
+        if (is.format() == IOstreamOption::BINARY && is_contiguous<T>::value)
         {
             // Binary and contiguous
 

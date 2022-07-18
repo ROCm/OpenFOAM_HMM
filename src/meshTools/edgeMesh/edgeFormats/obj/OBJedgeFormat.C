@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -231,7 +231,7 @@ void Foam::fileFormats::OBJedgeFormat::write
 )
 {
     // ASCII only, allow output compression
-    streamOpt.format(IOstream::ASCII);
+    streamOpt.format(IOstreamOption::ASCII);
 
     const pointField& pointLst = mesh.points();
     const edgeList& edgeLst = mesh.edges();

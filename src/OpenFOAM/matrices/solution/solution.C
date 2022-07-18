@@ -49,31 +49,35 @@ static const Foam::List<Foam::word> subDictNames
 
 void Foam::solution::read(const dictionary& dict)
 {
-    if (dict.found("cache"))
+    const dictionary* dictptr;
+
+    if ((dictptr = dict.findDict("cache")) != nullptr)
     {
-        cache_ = dict.subDict("cache");
+        cache_ = *dictptr;
         caching_ = cache_.getOrDefault("active", true);
     }
 
-    if (dict.found("relaxationFactors"))
+    if ((dictptr = dict.findDict("relaxationFactors")) != nullptr)
     {
-        const dictionary& relaxDict = dict.subDict("relaxationFactors");
+        const dictionary& relaxDict = *dictptr;
 
-        if (relaxDict.found("fields") || relaxDict.found("equations"))
+        bool needsCompat = true;
+
+        if ((dictptr = relaxDict.findDict("fields")) != nullptr)
         {
-            if (relaxDict.found("fields"))
-            {
-                fieldRelaxDict_ = relaxDict.subDict("fields");
-                fieldRelaxCache_.clear();
-            }
-
-            if (relaxDict.found("equations"))
-            {
-                eqnRelaxDict_ = relaxDict.subDict("equations");
-                eqnRelaxCache_.clear();
-            }
+            needsCompat = false;
+            fieldRelaxDict_ = *dictptr;
+            fieldRelaxCache_.clear();
         }
-        else
+
+        if ((dictptr = relaxDict.findDict("equations")) != nullptr)
+        {
+            needsCompat = false;
+            eqnRelaxDict_ = *dictptr;
+            eqnRelaxCache_.clear();
+        }
+
+        if (needsCompat)
         {
             // backwards compatibility
             fieldRelaxDict_.clear();
@@ -130,9 +134,9 @@ void Foam::solution::read(const dictionary& dict)
             << "equations: " << eqnRelaxDict_ << endl;
     }
 
-    if (dict.found("solvers"))
+    if ((dictptr = dict.findDict("solvers")) != nullptr)
     {
-        solvers_ = dict.subDict("solvers");
+        solvers_ = *dictptr;
         upgradeSolverDict(solvers_);
     }
 }
@@ -173,7 +177,7 @@ Foam::solution::solution
      || (readOpt() == IOobject::READ_IF_PRESENT && headerOk())
     )
     {
-        readOpt() = IOobject::MUST_READ_IF_MODIFIED;
+        readOpt(IOobject::MUST_READ_IF_MODIFIED);
         addWatch();
     }
 

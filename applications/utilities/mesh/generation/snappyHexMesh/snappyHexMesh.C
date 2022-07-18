@@ -616,7 +616,7 @@ scalar getMergeDistance
         << endl;
 
     // check writing tolerance
-    if (mesh.time().writeFormat() == IOstream::ASCII && !dryRun)
+    if (mesh.time().writeFormat() == IOstreamOption::ASCII && !dryRun)
     {
         const scalar writeTol = std::pow
         (

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -81,7 +81,7 @@ Foam::Istream& Foam::PackedList<Width>::readList(Istream& is)
         // Set list length to that read
         list.resize(len);
 
-        if (is.format() == IOstream::BINARY)
+        if (is.format() == IOstreamOption::BINARY)
         {
             // Binary (always contiguous)
 
@@ -184,7 +184,7 @@ Foam::Ostream& Foam::PackedList<Width>::writeList
     const PackedList<Width>& list = *this;
     const label len = list.size();
 
-    if (os.format() == IOstream::BINARY)
+    if (os.format() == IOstreamOption::BINARY)
     {
         // Binary (always contiguous)
 

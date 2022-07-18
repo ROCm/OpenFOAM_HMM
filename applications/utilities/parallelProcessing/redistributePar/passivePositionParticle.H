@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -159,7 +159,7 @@ public:
             p.origProc = ppi.origProc();
             p.origId = ppi.origId();
 
-            if (os.format() == IOstream::ASCII)
+            if (os.format() == IOstreamOption::ASCII)
             {
                 os  << p.position
                     << token::SPACE << p.celli

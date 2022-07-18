@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -376,7 +376,7 @@ void Foam::fileFormats::FIREMeshReader::addPatches(polyMesh& mesh) const
 
 bool Foam::fileFormats::FIREMeshReader::readGeometry(const scalar scaleFactor)
 {
-    IOstreamOption::streamFormat fmt = IOstream::ASCII;
+    IOstreamOption::streamFormat fmt = IOstreamOption::ASCII;
 
     const word ext(geometryFile_.ext());
 
@@ -387,11 +387,11 @@ bool Foam::fileFormats::FIREMeshReader::readGeometry(const scalar scaleFactor)
         FIRECore::fileExt3d fireFileType = FIRECore::file3dExtensions[ext];
         if (fireFileType == FIRECore::POLY_ASCII)
         {
-            fmt = IOstream::ASCII;
+            fmt = IOstreamOption::ASCII;
         }
         else if (fireFileType == FIRECore::POLY_BINARY)
         {
-            fmt = IOstream::BINARY;
+            fmt = IOstreamOption::BINARY;
         }
         else
         {

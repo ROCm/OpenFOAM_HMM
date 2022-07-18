@@ -73,8 +73,8 @@ void Foam::PatchParticleHistogram<CloudType>::write()
             OFstream patchOutFile
             (
                 this->writeTimeDir()/patchName + ".post",
-                IOstream::ASCII,
-                IOstream::currentVersion,
+                IOstreamOption::ASCII,
+                IOstreamOption::currentVersion,
                 mesh.time().writeCompression()
             );
 

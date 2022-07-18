@@ -152,7 +152,7 @@ void Foam::surfaceWriters::boundaryDataWriter::serialWriteGeometry
 
     if (header_)
     {
-        iopts.writeEndDivider(osGeom);
+        IOobject::writeEndDivider(osGeom);
     }
 }
 
@@ -274,19 +274,19 @@ Foam::fileName Foam::surfaceWriters::boundaryDataWriter::writeTemplate
             );
             iofld.note() = (this->isPointData() ? "point data" : "face data");
 
-            OFstream osField(iofld.objectPath(), streamOpt_);
+            OFstream os(iofld.objectPath(), streamOpt_);
 
             if (header_)
             {
-                iofld.writeHeader(osField);
+                iofld.writeHeader(os);
             }
 
             // Just like writeData, but without copying beforehand
-            osField << tfield();
+            os << tfield();
 
             if (header_)
             {
-                iofld.writeEndDivider(osField);
+                IOobject::writeEndDivider(os);
             }
         }
     }

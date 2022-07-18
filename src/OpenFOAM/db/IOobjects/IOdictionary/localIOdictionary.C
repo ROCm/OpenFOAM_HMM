@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2017 OpenFOAM Foundation
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,7 +59,7 @@ Foam::localIOdictionary::localIOdictionary
 :
     baseIOdictionary(io, fallback)
 {
-    if (!readHeaderOk(IOstream::ASCII, wantedType) && fallback)
+    if (!readHeaderOk(IOstreamOption::ASCII, wantedType) && fallback)
     {
         dictionary::operator=(*fallback);
     }

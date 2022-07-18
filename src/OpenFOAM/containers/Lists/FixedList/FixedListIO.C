@@ -40,7 +40,7 @@ void Foam::FixedList<T, N>::writeEntry(Ostream& os) const
     if (token::compound::isCompound(tag))
     {
         os  << tag << token::SPACE;
-        if (os.format() == IOstream::BINARY && is_contiguous<T>::value)
+        if (os.format() == IOstreamOption::BINARY && is_contiguous<T>::value)
         {
             // Need the size too so that List<Type>::readList parses correctly
             os << static_cast<label>(N);
@@ -90,7 +90,7 @@ Foam::Ostream& Foam::FixedList<T, N>::writeList
     // small and we prefer a consistent appearance.
     // Eg, FixedList<T,2> or Pair<T> as "(-1 -1)", never as "2{-1}"
 
-    if (os.format() == IOstream::BINARY && is_contiguous<T>::value)
+    if (os.format() == IOstreamOption::BINARY && is_contiguous<T>::value)
     {
         // Binary and contiguous. Size is always non-zero
 
@@ -158,7 +158,7 @@ Foam::Istream& Foam::FixedList<T, N>::readList
 
     is.fatalCheck(FUNCTION_NAME);
 
-    if (is.format() == IOstream::BINARY && is_contiguous<T>::value)
+    if (is.format() == IOstreamOption::BINARY && is_contiguous<T>::value)
     {
         // Binary and contiguous. Length is non-zero
 

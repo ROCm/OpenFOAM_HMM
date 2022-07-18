@@ -390,7 +390,7 @@ int main(int argc, char *argv[])
 
             summary.writeHeader(os);
             summary.writeData(os);
-            summary.writeEndDivider(os);
+            IOobject::writeEndDivider(os);
 
             Info<< "Wrote to " << outputName << nl << endl;
         }

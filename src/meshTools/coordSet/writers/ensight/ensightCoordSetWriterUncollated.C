@@ -118,7 +118,7 @@ Foam::fileName Foam::coordSetWriters::ensightWriter::writeUncollated
 
         // Update case file
         {
-            OFstream osCase(outputFile, IOstream::ASCII);
+            OFstream osCase(outputFile, IOstreamOption::ASCII);
 
             // Format options
             osCase.setf(ios_base::left);

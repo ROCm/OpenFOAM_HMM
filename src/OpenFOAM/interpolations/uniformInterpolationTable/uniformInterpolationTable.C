@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -235,7 +235,7 @@ void Foam::uniformInterpolationTable<Type>::write() const
 
     dict.regIOobject::writeObject
     (
-        IOstreamOption(IOstream::ASCII, dict.time().writeCompression()),
+        IOstreamOption(IOstreamOption::ASCII, dict.time().writeCompression()),
         true
     );
 }

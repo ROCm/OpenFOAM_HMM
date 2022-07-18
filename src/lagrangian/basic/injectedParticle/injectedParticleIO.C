@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,7 +67,7 @@ Foam::injectedParticle::injectedParticle
         // particle position on this mesh
         position_ = particle::position();
 
-        if (is.format() == IOstream::ASCII)
+        if (is.format() == IOstreamOption::ASCII)
         {
             is  >> tag_ >> soi_ >> d_ >> U_;
         }
@@ -256,7 +256,7 @@ void Foam::injectedParticle::writeObjects
 
 void Foam::injectedParticle::writePosition(Ostream& os) const
 {
-    if (os.format() == IOstream::ASCII)
+    if (os.format() == IOstreamOption::ASCII)
     {
         os  << position_ << token::SPACE << cell();
     }
@@ -290,7 +290,7 @@ Foam::Ostream& Foam::operator<<
 {
     // Note: not writing local position_ - defer to base particle class
 
-    if (os.format() == IOstream::ASCII)
+    if (os.format() == IOstreamOption::ASCII)
     {
         os  << static_cast<const particle&>(p)
             << token::SPACE << p.tag()

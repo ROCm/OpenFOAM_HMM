@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,7 +41,7 @@ Foam::UniformDimensionedField<Type>::UniformDimensionedField
     dimensioned<Type>(dt)
 {
     // Read value
-    readHeaderOk(IOstream::BINARY, typeName);
+    readHeaderOk(IOstreamOption::BINARY, typeName);
 }
 
 
@@ -68,7 +69,7 @@ Foam::UniformDimensionedField<Type>::UniformDimensionedField
     addWatch();
 
     // Read unless NO_READ
-    readHeaderOk(IOstream::BINARY, typeName);
+    readHeaderOk(IOstreamOption::BINARY, typeName);
 }
 
 

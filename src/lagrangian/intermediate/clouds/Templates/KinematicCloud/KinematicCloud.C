@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -290,7 +290,7 @@ void Foam::KinematicCloud<CloudType>::postEvolve
         (
             IOstreamOption
             (
-                IOstream::ASCII,
+                IOstreamOption::ASCII,
                 this->db().time().writeCompression()
             ),
             true

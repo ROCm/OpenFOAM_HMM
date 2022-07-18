@@ -5059,7 +5059,7 @@ bool Foam::distributedTriSurfaceMesh::writeObject
     }
 
     // Dictionary needs to be written in ascii - binary output not supported.
-    streamOpt.format(IOstream::ASCII);
+    streamOpt.format(IOstreamOption::ASCII);
     bool ok = dict_.writeObject(streamOpt, true);
 
     if (debug)

@@ -105,7 +105,7 @@ public:
         explicit ensightFile
         (
             const fileName& pathname,
-            IOstreamOption::streamFormat format = IOstreamOption::BINARY
+            IOstreamOption::streamFormat fmt = IOstreamOption::BINARY
         );
 
         //- Construct from path and name.
@@ -114,7 +114,7 @@ public:
         (
             const fileName& path,
             const fileName& name,
-            IOstreamOption::streamFormat format = IOstreamOption::BINARY
+            IOstreamOption::streamFormat fmt = IOstreamOption::BINARY
         );
 
 

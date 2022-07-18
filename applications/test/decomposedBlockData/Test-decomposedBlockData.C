@@ -78,8 +78,8 @@ int main(int argc, char *argv[])
     OFstream os
     (
         objPath,
-        IOstream::BINARY,
-        IOstream::currentVersion,
+        IOstreamOption::BINARY,
+        IOstreamOption::currentVersion,
         runTime.writeCompression()
     );
     if (!os.good())

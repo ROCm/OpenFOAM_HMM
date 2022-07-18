@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,7 +84,7 @@ Foam::refineCell::refineCell(Istream& is)
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const refineCell& r)
 {
-    if (os.format() == IOstream::ASCII)
+    if (os.format() == IOstreamOption::ASCII)
     {
         os << r.cellNo() << token::SPACE << r.direction();
     }

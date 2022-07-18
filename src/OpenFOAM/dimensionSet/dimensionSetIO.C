@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -679,7 +679,7 @@ Foam::Ostream& Foam::dimensionSet::write
 
     os << token::BEGIN_SQR;
 
-    if (writeUnits.valid() && os.format() == IOstream::ASCII)
+    if (writeUnits.valid() && os.format() == IOstreamOption::ASCII)
     {
         scalarField exponents(dimensionSet::nDimensions);
         for (int d=0; d < dimensionSet::nDimensions; ++d)

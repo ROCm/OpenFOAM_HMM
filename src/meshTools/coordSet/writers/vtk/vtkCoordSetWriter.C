@@ -84,8 +84,8 @@ Foam::coordSetWriters::vtkWriter::vtkWriter(const dictionary& options)
     vtk::outputOptions opts(vtk::formatType::INLINE_BASE64);
     opts.ascii
     (
-        IOstream::ASCII
-     == IOstream::formatEnum("format", options, IOstream::BINARY)
+        IOstreamOption::ASCII
+     == IOstreamOption::formatEnum("format", options, IOstreamOption::BINARY)
     );
 
     opts.legacy(options.getOrDefault("legacy", false));

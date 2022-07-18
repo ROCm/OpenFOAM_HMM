@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -226,7 +226,8 @@ bool Foam::regIOobject::read()
 
     // Note: IOstream::binary flag is for all the processor comms. (Only for
     //       dictionaries should it be ascii)
-    bool ok = fileHandler().read(*this, masterOnly, IOstream::BINARY, type());
+    bool ok =
+        fileHandler().read(*this, masterOnly, IOstreamOption::BINARY, type());
 
     if (oldWatchFiles.size())
     {

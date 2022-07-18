@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,7 +36,7 @@ Foam::Ostream& Foam::operator<<
     const wallNormalInfo& rhs
 )
 {
-    if (os.format() == IOstream::ASCII)
+    if (os.format() == IOstreamOption::ASCII)
     {
         os << rhs.normal();
     }
@@ -60,7 +60,7 @@ Foam::Istream& Foam::operator>>
     wallNormalInfo& rhs
 )
 {
-    if (is.format() == IOstream::ASCII)
+    if (is.format() == IOstreamOption::ASCII)
     {
         is >> rhs.normal_;
     }

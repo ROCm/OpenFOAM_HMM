@@ -814,7 +814,7 @@ void Foam::PDRblock::writeBlockMeshDict(const IOobject& io) const
     // Just like writeData, but without copying beforehand
     this->blockMeshDict(os);
 
-    iodict.writeEndDivider(os);
+    IOobject::writeEndDivider(os);
 }
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2018 Bernhard Gschaider
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -587,7 +587,7 @@ void Foam::expressions::exprResult::writeDict
     const bool subDict
 ) const
 {
-    // const auto oldFmt = os.format(IOstream::ASCII);
+    // const auto oldFmt = os.format(IOstreamOption::ASCII);
 
     DebugInFunction
         << Foam::name(this) << nl
@@ -631,7 +631,7 @@ void Foam::expressions::exprResult::writeField
     const word& keyword
 ) const
 {
-    // const auto oldFmt = os.format(IOstream::ASCII);
+    // const auto oldFmt = os.format(IOstreamOption::ASCII);
 
     DebugInFunction
         << Foam::name(this) << nl
@@ -662,7 +662,7 @@ void Foam::expressions::exprResult::writeValue
     Ostream& os
 ) const
 {
-    // const auto oldFmt = os.format(IOstream::ASCII);
+    // const auto oldFmt = os.format(IOstreamOption::ASCII);
 
     DebugInFunction
         << Foam::name(this) << nl

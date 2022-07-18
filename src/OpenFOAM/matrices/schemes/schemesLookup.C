@@ -147,7 +147,7 @@ Foam::schemesLookup::schemesLookup
      || (readOpt() == IOobject::READ_IF_PRESENT && headerOk())
     )
     {
-        readOpt() = IOobject::MUST_READ_IF_MODIFIED;
+        readOpt(IOobject::MUST_READ_IF_MODIFIED);
         addWatch();
     }
 

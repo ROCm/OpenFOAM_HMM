@@ -218,7 +218,7 @@ public:
         (
             const fileName& ensightDir,
             const word& caseName,
-            const IOstreamOption::streamFormat format = IOstreamOption::BINARY
+            const IOstreamOption::streamFormat fmt = IOstreamOption::BINARY
         );
 
 
@@ -415,7 +415,7 @@ public:
     // Constructors
 
         //- Construct with the specified format (default is binary)
-        options(IOstreamOption::streamFormat format = IOstreamOption::BINARY);
+        options(IOstreamOption::streamFormat fmt = IOstreamOption::BINARY);
 
 
     // Member Functions

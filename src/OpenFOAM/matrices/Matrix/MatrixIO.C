@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,7 +70,7 @@ bool Foam::Matrix<Form, Type>::readMatrix(Istream& is)
         // The total size
         const label len = size();
 
-        if (is.format() == IOstream::BINARY && is_contiguous<Type>::value)
+        if (is.format() == IOstreamOption::BINARY && is_contiguous<Type>::value)
         {
             // Binary and contiguous
 
@@ -154,7 +154,7 @@ Foam::Ostream& Foam::Matrix<Form, Type>::writeMatrix
     // Rows, columns size
     os  << mat.nRows() << token::SPACE << mat.nCols();
 
-    if (os.format() == IOstream::BINARY && is_contiguous<Type>::value)
+    if (os.format() == IOstreamOption::BINARY && is_contiguous<Type>::value)
     {
         // Binary and contiguous
 

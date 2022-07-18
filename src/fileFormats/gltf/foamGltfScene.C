@@ -183,7 +183,7 @@ void Foam::glTF::scene::write(Ostream& os)
 
     // Write binary file
     // Note: using stdStream
-    OFstream bin(binFile, IOstream::BINARY);
+    OFstream bin(binFile, IOstreamOption::BINARY);
     auto& osbin = bin.stdStream();
 
     label totalBytes = 0;

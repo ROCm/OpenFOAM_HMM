@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2012-2018 Bernhard Gschaider <bgschaid@hfd-research.com>
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2012-2018 Bernhard Gschaider
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -163,7 +163,7 @@ bool Foam::expressions::exprResultGlobals::Delete(const objectRegistry& obr)
 bool Foam::expressions::exprResultGlobals::writeData(Ostream& os) const
 {
     // Enforce ASCII to avoid any potential binary issues
-    const auto oldFmt = os.format(IOstream::ASCII);
+    const auto oldFmt = os.format(IOstreamOption::ASCII);
 
     os << variables_;
 
@@ -176,7 +176,7 @@ bool Foam::expressions::exprResultGlobals::writeData(Ostream& os) const
 bool Foam::expressions::exprResultGlobals::readData(Istream& is)
 {
     // Enforce ASCII to avoid any potential binary issues
-    const auto oldFmt = is.format(IOstream::ASCII);
+    const auto oldFmt = is.format(IOstreamOption::ASCII);
 
     is >> variables_;
 

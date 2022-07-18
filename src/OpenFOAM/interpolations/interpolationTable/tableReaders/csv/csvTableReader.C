@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,7 +47,7 @@ Foam::labelList Foam::csvTableReader<Type>::getComponentColumns
     labelList cols;
 
     ITstream& is = dict.lookupCompat(name, compat);
-    is.format(IOstream::ASCII);
+    is.format(IOstreamOption::ASCII);
     is >> cols;
     dict.checkITstream(is, name);
 
@@ -225,7 +225,7 @@ void Foam::csvTableReader<Type>::write(Ostream& os) const
     os.writeEntry("refColumn", refColumn_);
 
     // Force writing labelList in ASCII
-    const auto oldFmt = os.format(IOstream::ASCII);
+    const auto oldFmt = os.format(IOstreamOption::ASCII);
     os.writeEntry("componentColumns", componentColumns_);
     os.format(oldFmt);
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -221,7 +221,8 @@ bool Foam::fileOperations::collatedFileOperation::appendObject
     OFstream os
     (
         pathName,
-        IOstreamOption(IOstream::BINARY, streamOpt.version()),  // UNCOMPRESSED
+        // UNCOMPRESSED
+        IOstreamOption(IOstreamOption::BINARY, streamOpt.version()),
         !isMaster  // append slaves
     );
 

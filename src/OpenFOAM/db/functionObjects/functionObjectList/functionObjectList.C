@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -778,7 +778,7 @@ bool Foam::functionObjectList::execute()
 
         propsDictPtr_->writeObject
         (
-            IOstreamOption(IOstream::ASCII, time_.writeCompression()),
+            IOstreamOption(IOstreamOption::ASCII, time_.writeCompression()),
             true
         );
 

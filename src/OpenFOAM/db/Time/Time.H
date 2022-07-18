@@ -385,19 +385,19 @@ public:
             }
 
             //- The write stream format
-            IOstream::streamFormat writeFormat() const
+            IOstreamOption::streamFormat writeFormat() const
             {
                 return writeStreamOption_.format();
             }
 
             //- The write stream compression
-            IOstream::compressionType writeCompression() const
+            IOstreamOption::compressionType writeCompression() const
             {
                 return writeStreamOption_.compression();
             }
 
             //- The write stream version
-            IOstream::versionNumber writeVersion() const
+            IOstreamOption::versionNumber writeVersion() const
             {
                 return writeStreamOption_.version();
             }

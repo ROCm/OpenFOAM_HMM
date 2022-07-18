@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -250,7 +250,7 @@ void Foam::fileFormats::ABAQUSsurfaceFormat<Face>::write
 )
 {
     // ASCII only, allow output compression
-    streamOpt.format(IOstream::ASCII);
+    streamOpt.format(IOstreamOption::ASCII);
 
     const UList<point>& pointLst = surf.points();
     const UList<Face>&  faceLst  = surf.surfFaces();

@@ -325,7 +325,7 @@ bool Foam::coordinateSystems::writeObject
     // Force ASCII, uncompressed
     return regIOobject::writeObject
     (
-        IOstreamOption(IOstream::ASCII),
+        IOstreamOption(IOstreamOption::ASCII),
         valid
     );
 }

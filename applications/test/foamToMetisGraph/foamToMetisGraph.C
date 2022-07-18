@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
     // No. of Nodes = nCells
     // No. of Edges connecting Nodes = nInternalFaces
 
-    OFstream os(args.caseName() + ".graph", IOstream::ASCII);
+    OFstream os(args.caseName() + ".graph", IOstreamOption::ASCII);
 
     os  << "%% metis graph file, of an OpenFOAM mesh %%" << nl
         << "%% nCells=" << mesh.nCells()

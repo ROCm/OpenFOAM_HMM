@@ -56,10 +56,10 @@ void Foam::ensightGeoFile::initialize()
 Foam::ensightGeoFile::ensightGeoFile
 (
     const fileName& pathname,
-    IOstreamOption::streamFormat format
+    IOstreamOption::streamFormat fmt
 )
 :
-    ensightFile(pathname, format)
+    ensightFile(pathname, fmt)
 {
     initialize();
 }
@@ -69,10 +69,10 @@ Foam::ensightGeoFile::ensightGeoFile
 (
     const fileName& path,
     const fileName& name,
-    IOstreamOption::streamFormat format
+    IOstreamOption::streamFormat fmt
 )
 :
-    ensightFile(path, name, format)
+    ensightFile(path, name, fmt)
 {
     initialize();
 }

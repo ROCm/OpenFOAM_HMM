@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -207,7 +207,7 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeAscii
     IOstreamOption::compressionType comp
 )
 {
-    OFstream os(filename, IOstreamOption(IOstream::ASCII, comp));
+    OFstream os(filename, IOstreamOption(IOstreamOption::ASCII, comp));
     if (!os.good())
     {
         FatalErrorInFunction
@@ -312,7 +312,7 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeAscii
     // A single zone - we can skip sorting
     if (surf.zoneToc().size() == 1)
     {
-        OFstream os(filename, IOstreamOption(IOstream::ASCII, comp));
+        OFstream os(filename, IOstreamOption(IOstreamOption::ASCII, comp));
         if (!os.good())
         {
             FatalErrorInFunction
@@ -396,7 +396,7 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::write
 {
     if
     (
-        streamOpt.format() == IOstream::BINARY
+        streamOpt.format() == IOstreamOption::BINARY
         // Detected "stlb" extension?
      || STLCore::isBinaryName(filename, STLCore::UNKNOWN)
     )
@@ -441,7 +441,7 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::write
 {
     if
     (
-        streamOpt.format() == IOstream::BINARY
+        streamOpt.format() == IOstreamOption::BINARY
         // Detected "stlb" extension?
      || STLCore::isBinaryName(filename, STLCore::UNKNOWN)
     )

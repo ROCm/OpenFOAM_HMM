@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
             "normalisedGradP",
             tmagGradP()/max(tmagGradP())
         );
-        normalisedGradP.writeOpt() = IOobject::AUTO_WRITE;
+        normalisedGradP.writeOpt(IOobject::AUTO_WRITE);
         tmagGradP.clear();
 
         ++runTime;
