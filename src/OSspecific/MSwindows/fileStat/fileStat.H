@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,8 +40,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fileStat_H
-#define fileStat_H
+#ifndef Foam_fileStat_H
+#define Foam_fileStat_H
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -54,7 +54,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class fileStat;
 
 Istream& operator>>(Istream& is, fileStat& fs);
@@ -67,7 +67,7 @@ Ostream& operator<<(Ostream& os, const fileStat& fs);
 
 class fileStat
 {
-    // Private data
+    // Private Data
 
         struct stat status_;
 
@@ -78,7 +78,7 @@ public:
 
     // Constructors
 
-        //- Empty constructor
+        //- Default construct
         fileStat();
 
         //- Construct from components.
@@ -89,7 +89,7 @@ public:
         //  \param maxTime The timeout value.
         //
         //  \note An empty filename is a no-op.
-        fileStat
+        explicit fileStat
         (
             const char* fName,
             const bool followLink = true,
@@ -104,7 +104,7 @@ public:
         //  \param maxTime The timeout value.
         //
         //  \note An empty filename is a no-op.
-        fileStat
+        explicit fileStat
         (
             const fileName& fName,
             const bool followLink = true,
@@ -119,27 +119,33 @@ public:
 
     // Access
 
-        //- Raw status
-        const struct stat& status() const
-        {
-            return status_;
-        }
-
-        //- Was file-stat successful?
-        bool valid() const
+        //- True if file-stat was successful
+        bool valid() const noexcept
         {
             return valid_;
         }
 
-        //- Size in bytes. Zero for an invalid file-stat.
+        //- True if file-stat was successful
+        explicit operator bool() const noexcept
+        {
+            return valid_;
+        }
+
+        //- The raw status
+        const struct stat& status() const noexcept
+        {
+            return status_;
+        }
+
+        //- Size in bytes, 0 for an invalid file-stat.
         label size() const;
 
-        //- Return the modification time in seconds.
-        //  Zero for an invalid file-stat.
+        //- The modification time in seconds,
+        //- 0 for an invalid file-stat.
         time_t modTime() const;
 
-        //- Return the modification time in seconds (nanosecond resolution)
-        //  Zero for an invalid file-stat.
+        //- The modification time in seconds (nanosecond resolution),
+        //- 0 for an invalid file-stat.
         double dmodTime() const;
 
 

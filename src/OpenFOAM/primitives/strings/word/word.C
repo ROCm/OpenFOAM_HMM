@@ -165,7 +165,10 @@ Foam::word Foam::operator&(const word& a, const word& b)
 Foam::word Foam::name(const void* ptr)
 {
     std::ostringstream buf;
-    buf << "0x" << std::hex << uintptr_t(ptr);
+    buf.setf(std::ios_base::hex, std::ios_base::basefield);
+
+    buf << "0x";  // Same as setf(std::ios::showbase)
+    buf << uintptr_t(ptr);
 
     return word(buf.str(), false);  // Needs no stripping
 }

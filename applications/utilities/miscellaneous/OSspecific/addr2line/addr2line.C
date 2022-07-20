@@ -43,7 +43,7 @@ Description
 static void usage();
 static void version();
 static std::string getLine(const std::string&, const std::string&);
-static std::string pOpen(const std::string&, int line=0);
+static std::string pipeOpen(const std::string& cmd, const int lineNum = 0);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -132,51 +132,50 @@ void version()
 }
 
 
-std::string pOpen(const std::string& cmd, int line)
+// Read up to and including lineNum from the piped command
+// Return the final line read
+std::string pipeOpen(const std::string& cmd, int lineNum)
 {
-    std::string res;
+    std::string str;
 
-    FILE* cmdPipe = popen(cmd.c_str(), "r");
-    if (!cmdPipe) return res;
+    FILE* handle = popen(cmd.c_str(), "r");
+    if (!handle) return str;
 
     char* buf = nullptr;
+    size_t len = 0;
+    ssize_t nread;
 
-    // Read line number of lines
-    for (int cnt = 0; cnt <= line; ++cnt)
+    // Read lineNum number of lines
+    for
+    (
+        int cnt = 0;
+        cnt <= lineNum && (nread = ::getline(&buf, &len, handle)) >= 0;
+        ++cnt
+    )
     {
-        size_t linecap = 0;
-        ssize_t linelen = ::getline(&buf, &linecap, cmdPipe);
-
-        if (linelen < 0)
+        if (cnt == lineNum)
         {
-            break;
-        }
+            // Retain the last line, trimming trailing newline
+            str.assign(buf);
 
-        if (cnt == line)
-        {
-            res = std::string(buf);
-
-            // Trim trailing newline
-            if (res.size())
+            if (str.size())
             {
-                res.resize(res.size()-1);
+                str.resize(str.size()-1);
             }
-            break;
         }
     }
 
-    if (buf) free(buf);
+    free(buf);
+    pclose(handle);
 
-    pclose(cmdPipe);
-
-    return res;
+    return str;
 }
 
 
 std::string getLine(const std::string& filename, const std::string& addr)
 {
     std::string line =
-        pOpen
+        pipeOpen
         (
             "echo 'image lookup -va " + addr
           + "'"
