@@ -3,6 +3,7 @@ include $(GENERAL_RULES)/cgal
 EXE_INC = \
     -Wno-old-style-cast \
     ${CGAL_INC} \
+    -DCGAL_HEADER_ONLY \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/surfMesh/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
@@ -10,7 +11,7 @@ EXE_INC = \
 
 
 EXE_LIBS = \
-    ${CGAL_LIBS} \
+    /* ${CGAL_LIBS} */ \
     -lfiniteVolume \
     -lsurfMesh \
     -lmeshTools \
