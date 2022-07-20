@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,19 +31,21 @@ void Foam::mappedPatchBase::distribute(List<Type>& lst) const
 {
     const label myComm = getCommunicator();  // Get or create
     const label oldWarnComm(Pstream::warnComm);
-    Pstream::warnComm = myComm;
 
     switch (mode_)
     {
         case NEARESTPATCHFACEAMI:
         {
             const label oldWorldComm(Pstream::worldComm);
+            const auto& interp = AMI();
+
+            Pstream::warnComm = myComm;
             Pstream::worldComm = myComm;
 
             if (sameWorld())
             {
                 // lst is the other side's values
-                lst = AMI().interpolateToSource(Field<Type>(std::move(lst)));
+                lst = interp.interpolateToSource(Field<Type>(std::move(lst)));
             }
             else
             {
@@ -58,9 +60,9 @@ void Foam::mappedPatchBase::distribute(List<Type>& lst) const
 
                     tmp<Field<Type>> tmasterFld
                     (
-                        AMI().interpolateToSource(Field<Type>(0))
+                        interp.interpolateToSource(Field<Type>(0))
                     );
-                    (void)AMI().interpolateToTarget
+                    (void)interp.interpolateToTarget
                     (
                         Field<Type>(std::move(lst))
                     );
@@ -71,13 +73,13 @@ void Foam::mappedPatchBase::distribute(List<Type>& lst) const
                 }
                 else
                 {
-                    (void)AMI().interpolateToSource
+                    (void)interp.interpolateToSource
                     (
                         Field<Type>(std::move(lst))
                     );
                     tmp<Field<Type>> tmasterFld
                     (
-                        AMI().interpolateToTarget(Field<Type>(0))
+                        interp.interpolateToTarget(Field<Type>(0))
                     );
 
                     // We've received in our interpolateToTarget the
@@ -86,15 +88,18 @@ void Foam::mappedPatchBase::distribute(List<Type>& lst) const
                 }
             }
             Pstream::worldComm = oldWorldComm;
+            Pstream::warnComm = oldWarnComm;
             break;
         }
         default:
         {
-            map().distribute(lst);
+            const auto& m = map();
+
+            Pstream::warnComm = m.comm();
+            m.distribute(lst);
+            Pstream::warnComm = oldWarnComm;
         }
     }
-
-    Pstream::warnComm = oldWarnComm;
 }
 
 
@@ -107,28 +112,35 @@ void Foam::mappedPatchBase::distribute
 {
     const label myComm = getCommunicator();  // Get or create
     const label oldWarnComm(Pstream::warnComm);
-    Pstream::warnComm = myComm;
 
     switch (mode_)
     {
         case NEARESTPATCHFACEAMI:
         {
             const label oldWorldComm(Pstream::worldComm);
+            const auto& interp = AMI();
+            Pstream::warnComm = myComm;
             Pstream::worldComm = myComm;
-            lst = AMI().interpolateToSource(Field<Type>(std::move(lst)), cop);
+            lst = interp.interpolateToSource(Field<Type>(std::move(lst)), cop);
             Pstream::worldComm = oldWorldComm;
+            Pstream::warnComm = oldWarnComm;
             break;
         }
         default:
         {
+            // Force early construction of parallel data
+            (void)patch_.boundaryMesh().mesh().tetBasePtIs();
+            const auto& m = map();
+
+            Pstream::warnComm = myComm;
             mapDistributeBase::distribute
             (
                 Pstream::defaultCommsType,
-                map().schedule(),
-                map().constructSize(),
-                map().subMap(),
+                m.schedule(),
+                m.constructSize(),
+                m.subMap(),
                 false,
-                map().constructMap(),
+                m.constructMap(),
                 false,
                 lst,
                 Type(Zero),
@@ -137,10 +149,9 @@ void Foam::mappedPatchBase::distribute
                 UPstream::msgType(),
                 myComm
             );
+            Pstream::warnComm = oldWarnComm;
         }
     }
-
-    Pstream::warnComm = oldWarnComm;
 }
 
 
@@ -149,26 +160,32 @@ void Foam::mappedPatchBase::reverseDistribute(List<Type>& lst) const
 {
     const label myComm = getCommunicator();  // Get or create
     const label oldWarnComm(Pstream::warnComm);
-    Pstream::warnComm = myComm;
 
     switch (mode_)
     {
         case NEARESTPATCHFACEAMI:
         {
             const label oldWorldComm(Pstream::worldComm);
+            const auto& interp = AMI();
+            Pstream::warnComm = myComm;
             Pstream::worldComm = myComm;
-            lst = AMI().interpolateToTarget(Field<Type>(std::move(lst)));
+            lst = interp.interpolateToTarget(Field<Type>(std::move(lst)));
             Pstream::worldComm = oldWorldComm;
+            Pstream::warnComm = oldWarnComm;
             break;
         }
         default:
         {
-            map().reverseDistribute(sampleSize(), lst);
+            // Force early construction of parallel data
+            (void)patch_.boundaryMesh().mesh().tetBasePtIs();
+            const auto& m = map();
+
+            Pstream::warnComm = m.comm();
+            m.reverseDistribute(sampleSize(), lst);
+            Pstream::warnComm = oldWarnComm;
             break;
         }
     }
-
-    Pstream::warnComm = oldWarnComm;
 }
 
 
@@ -181,29 +198,34 @@ void Foam::mappedPatchBase::reverseDistribute
 {
     const label myComm = getCommunicator();  // Get or create
     const label oldWarnComm(Pstream::warnComm);
-    Pstream::warnComm = myComm;
 
     switch (mode_)
     {
         case NEARESTPATCHFACEAMI:
         {
             const label oldWorldComm(Pstream::worldComm);
+            const auto& interp = AMI();
+            Pstream::warnComm = myComm;
             Pstream::worldComm = myComm;
-            lst = AMI().interpolateToTarget(Field<Type>(std::move(lst)), cop);
+            lst = interp.interpolateToTarget(Field<Type>(std::move(lst)), cop);
             Pstream::worldComm = oldWorldComm;
+            Pstream::warnComm = oldWarnComm;
             break;
         }
         default:
         {
-            label cSize = sampleSize();
+            (void)patch_.boundaryMesh().mesh().tetBasePtIs();
+            const auto& m = map();
+            const label cSize = sampleSize();
+            Pstream::warnComm = myComm;
             mapDistributeBase::distribute
             (
                 Pstream::defaultCommsType,
-                map().schedule(),
+                m.schedule(),
                 cSize,
-                map().constructMap(),
+                m.constructMap(),
                 false,
-                map().subMap(),
+                m.subMap(),
                 false,
                 lst,
                 Type(Zero),
@@ -212,11 +234,10 @@ void Foam::mappedPatchBase::reverseDistribute
                 UPstream::msgType(),
                 myComm
             );
+            Pstream::warnComm = oldWarnComm;
             break;
         }
     }
-
-    Pstream::warnComm = oldWarnComm;
 }
 
 

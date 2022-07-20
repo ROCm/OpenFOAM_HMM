@@ -733,6 +733,12 @@ void Foam::mappedPatchBase::calcMapping() const
 
     DebugInFunction << nl;
 
+
+    // Early construction of tetBasePtIs since does parallel
+    // communication which might conflict with inter-world communicator
+    // (for multi-world operation)
+    (void)patch_.boundaryMesh().mesh().tetBasePtIs();
+
     const label myComm = getCommunicator();  // Get or create
 
     //// Make sure if running in database that there is a syncObjects FO
@@ -1095,6 +1101,9 @@ void Foam::mappedPatchBase::calcAMI() const
 
     const label myComm = getCommunicator();  // Get or create
 
+    // Pre-calculate surface (if any)
+    const auto& surf = surfPtr();
+
     const label oldWorldComm(Pstream::worldComm);
     const label oldWarnComm(Pstream::warnComm);
 
@@ -1136,7 +1145,7 @@ void Foam::mappedPatchBase::calcAMI() const
         Pstream::worldComm = myComm;
         Pstream::warnComm = Pstream::worldComm;
 
-        AMIPtr_->calculate(patch_, nbrPatch0, surfPtr());
+        AMIPtr_->calculate(patch_, nbrPatch0, surf);
 
         Pstream::warnComm = oldWarnComm;
         Pstream::worldComm = oldWorldComm;
@@ -1160,14 +1169,14 @@ void Foam::mappedPatchBase::calcAMI() const
             // Construct/apply AMI interpolation to determine addressing
             // and weights. Have patch_ for src faces, 0 faces for the
             // target side
-            AMIPtr_->calculate(patch_, dummyPatch, surfPtr());
+            AMIPtr_->calculate(patch_, dummyPatch, surf);
         }
         else
         {
             // Construct/apply AMI interpolation to determine addressing
             // and weights. Have 0 faces for src side, patch_ for the tgt
             // side
-            AMIPtr_->calculate(dummyPatch, patch_, surfPtr());
+            AMIPtr_->calculate(dummyPatch, patch_, surf);
         }
         // Now the AMI addressing/weights will be from src side (on masterWorld
         // processors) to tgt side (on other processors)
