@@ -32,25 +32,18 @@ License
 
 namespace Foam
 {
-    defineTemplate2TypeNameAndDebug(volScalarField::Internal, 0);
-    defineTemplate2TypeNameAndDebug(volVectorField::Internal, 0);
-    defineTemplate2TypeNameAndDebug
-    (
-        volSphericalTensorField::Internal,
-        0
-    );
-    defineTemplate2TypeNameAndDebug
-    (
-        volSymmTensorField::Internal,
-        0
-    );
-    defineTemplate2TypeNameAndDebug(volTensorField::Internal, 0);
 
-    defineTemplateTypeNameAndDebug(volScalarField, 0);
-    defineTemplateTypeNameAndDebug(volVectorField, 0);
-    defineTemplateTypeNameAndDebug(volSphericalTensorField, 0);
-    defineTemplateTypeNameAndDebug(volSymmTensorField, 0);
-    defineTemplateTypeNameAndDebug(volTensorField, 0);
+defineTemplateTypeNameAndDebug(volScalarField::Internal, 0);
+defineTemplateTypeNameAndDebug(volVectorField::Internal, 0);
+defineTemplateTypeNameAndDebug(volSphericalTensorField::Internal, 0);
+defineTemplateTypeNameAndDebug(volSymmTensorField::Internal, 0);
+defineTemplateTypeNameAndDebug(volTensorField::Internal, 0);
+
+defineTemplateTypeNameAndDebug(volScalarField, 0);
+defineTemplateTypeNameAndDebug(volVectorField, 0);
+defineTemplateTypeNameAndDebug(volSphericalTensorField, 0);
+defineTemplateTypeNameAndDebug(volSymmTensorField, 0);
+defineTemplateTypeNameAndDebug(volTensorField, 0);
 
 } // End namespace Foam
 

@@ -53,8 +53,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef typeInfo_H
-#define typeInfo_H
+#ifndef Foam_typeInfo_H
+#define Foam_typeInfo_H
 
 #include "error.H"
 #include "className.H"

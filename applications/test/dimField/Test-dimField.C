@@ -42,7 +42,7 @@ namespace Foam
     // Something like an internal state field. Probably only dimensionless
     typedef DimensionedField<uint8_t, volMesh> dimUint8Field;
 
-    defineTemplate2TypeNameAndDebug(dimUint8Field, 0);
+    defineTemplateTypeNameAndDebug(dimUint8Field, 0);
 
 } // End namespace Foam
 #endif

@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef simpleRegIOobject_H
-#define simpleRegIOobject_H
+#ifndef Foam_simpleRegIOobject_H
+#define Foam_simpleRegIOobject_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

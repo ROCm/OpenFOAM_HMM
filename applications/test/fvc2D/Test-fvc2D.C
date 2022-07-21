@@ -39,7 +39,7 @@ namespace Foam
 {
     typedef GeometricField<vector2D, fvPatchField, volMesh> volVector2DField;
 
-    defineTemplate2TypeNameAndDebug(volVector2DField::Internal, 0);
+    defineTemplateTypeNameAndDebug(volVector2DField::Internal, 0);
     defineTemplateTypeNameAndDebug(volVector2DField, 0);
 
     typedef fvPatchField<vector2D> fvPatchVector2DField;

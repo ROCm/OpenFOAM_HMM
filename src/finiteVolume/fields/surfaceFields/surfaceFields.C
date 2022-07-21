@@ -28,47 +28,22 @@ License
 
 #include "surfaceFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTemplate2TypeNameAndDebug
-(
-    surfaceScalarField::Internal,
-    0
-);
-defineTemplate2TypeNameAndDebug
-(
-    surfaceVectorField::Internal,
-    0
-);
-defineTemplate2TypeNameAndDebug
-(
-    surfaceSphericalTensorField::Internal,
-    0
-);
-defineTemplate2TypeNameAndDebug
-(
-    surfaceSymmTensorField::Internal,
-    0
-);
-defineTemplate2TypeNameAndDebug
-(
-    surfaceTensorField::Internal,
-    0
-);
-
+defineTemplateTypeNameAndDebug(surfaceScalarField::Internal, 0);
+defineTemplateTypeNameAndDebug(surfaceVectorField::Internal, 0);
+defineTemplateTypeNameAndDebug(surfaceSphericalTensorField::Internal, 0);
+defineTemplateTypeNameAndDebug(surfaceSymmTensorField::Internal, 0);
+defineTemplateTypeNameAndDebug(surfaceTensorField::Internal, 0);
 
 defineTemplateTypeNameAndDebug(surfaceScalarField, 0);
 defineTemplateTypeNameAndDebug(surfaceVectorField, 0);
 defineTemplateTypeNameAndDebug(surfaceSphericalTensorField, 0);
 defineTemplateTypeNameAndDebug(surfaceSymmTensorField, 0);
 defineTemplateTypeNameAndDebug(surfaceTensorField, 0);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
 

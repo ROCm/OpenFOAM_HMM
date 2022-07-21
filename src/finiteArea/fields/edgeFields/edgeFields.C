@@ -28,27 +28,22 @@ License
 #include "faMesh.H"
 #include "edgeFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTemplate2TypeNameAndDebug(edgeScalarField::Internal, 0);
-defineTemplate2TypeNameAndDebug(edgeVectorField::Internal, 0);
-defineTemplate2TypeNameAndDebug(edgeSphericalTensorField::Internal, 0);
-defineTemplate2TypeNameAndDebug(edgeSymmTensorField::Internal, 0);
-defineTemplate2TypeNameAndDebug(edgeTensorField::Internal, 0);
+defineTemplateTypeNameAndDebug(edgeScalarField::Internal, 0);
+defineTemplateTypeNameAndDebug(edgeVectorField::Internal, 0);
+defineTemplateTypeNameAndDebug(edgeSphericalTensorField::Internal, 0);
+defineTemplateTypeNameAndDebug(edgeSymmTensorField::Internal, 0);
+defineTemplateTypeNameAndDebug(edgeTensorField::Internal, 0);
 
 defineTemplateTypeNameAndDebug(edgeScalarField, 0);
 defineTemplateTypeNameAndDebug(edgeVectorField, 0);
 defineTemplateTypeNameAndDebug(edgeSphericalTensorField, 0);
 defineTemplateTypeNameAndDebug(edgeSymmTensorField, 0);
 defineTemplateTypeNameAndDebug(edgeTensorField, 0);
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
 
