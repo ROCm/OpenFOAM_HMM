@@ -38,8 +38,7 @@ Description
 
 #include "DiagonalMatrix.H"
 #include "RectangularMatrix.H"
-#include "floatScalar.H"
-#include "doubleScalar.H"
+#include "scalar.H"
 #include "complex.H"
 #include "TestTools.H"
 

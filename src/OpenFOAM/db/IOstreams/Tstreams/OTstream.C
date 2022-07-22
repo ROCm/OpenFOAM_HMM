@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -125,7 +125,7 @@ Foam::Ostream& Foam::OTstream::write(const int64_t val)
 }
 
 
-Foam::Ostream& Foam::OTstream::write(const floatScalar val)
+Foam::Ostream& Foam::OTstream::write(const float val)
 {
     append(token(val)); // tokenType::FLOAT
 
@@ -133,7 +133,7 @@ Foam::Ostream& Foam::OTstream::write(const floatScalar val)
 }
 
 
-Foam::Ostream& Foam::OTstream::write(const doubleScalar val)
+Foam::Ostream& Foam::OTstream::write(const double val)
 {
     append(token(val)); // tokenType::DOUBLE
 

@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef floatScalar_H
-#define floatScalar_H
+#ifndef Foam_floatScalar_H
+#define Foam_floatScalar_H
 
 #include "scalarFwd.H"
 #include "doubleFloat.H"

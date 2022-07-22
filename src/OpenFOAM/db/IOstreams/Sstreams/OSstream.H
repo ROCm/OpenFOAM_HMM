@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,8 +36,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef OSstream_H
-#define OSstream_H
+#ifndef Foam_OSstream_H
+#define Foam_OSstream_H
 
 #include "Ostream.H"
 #include "fileName.H"
@@ -155,11 +155,11 @@ public:
             //- Write int64_t
             virtual Ostream& write(const int64_t val);
 
-            //- Write floatScalar
-            virtual Ostream& write(const floatScalar val);
+            //- Write float
+            virtual Ostream& write(const float val);
 
-            //- Write doubleScalar
-            virtual Ostream& write(const doubleScalar val);
+            //- Write double
+            virtual Ostream& write(const double val);
 
             //- Write binary block
             virtual Ostream& write(const char* data, std::streamsize count);

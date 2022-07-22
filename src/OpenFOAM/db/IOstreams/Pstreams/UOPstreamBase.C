@@ -304,7 +304,7 @@ Foam::Ostream& Foam::UOPstreamBase::write(const int64_t val)
 }
 
 
-Foam::Ostream& Foam::UOPstreamBase::write(const floatScalar val)
+Foam::Ostream& Foam::UOPstreamBase::write(const float val)
 {
     putChar(token::tokenType::FLOAT);
     writeToBuffer(val);
@@ -312,7 +312,7 @@ Foam::Ostream& Foam::UOPstreamBase::write(const floatScalar val)
 }
 
 
-Foam::Ostream& Foam::UOPstreamBase::write(const doubleScalar val)
+Foam::Ostream& Foam::UOPstreamBase::write(const double val)
 {
     putChar(token::tokenType::DOUBLE);
     writeToBuffer(val);

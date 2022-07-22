@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2012 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,8 +36,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ISstream_H
-#define ISstream_H
+#ifndef Foam_ISstream_H
+#define Foam_ISstream_H
 
 #include "Istream.H"
 #include "fileName.H"
@@ -183,11 +183,11 @@ public:
             //- Read a label
             virtual Istream& read(label& val);
 
-            //- Read a floatScalar
-            virtual Istream& read(floatScalar& val);
+            //- Read a float
+            virtual Istream& read(float& val);
 
-            //- Read a doubleScalar
-            virtual Istream& read(doubleScalar& val);
+            //- Read a double
+            virtual Istream& read(double& val);
 
             //- Read binary block
             virtual Istream& read(char* buf, std::streamsize count);

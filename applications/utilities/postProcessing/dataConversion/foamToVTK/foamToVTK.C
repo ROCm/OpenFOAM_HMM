@@ -232,13 +232,13 @@ vtk::outputOptions getOutputOptions(const argList& args)
 
         if (!args.found("ascii"))
         {
-            if (sizeof(floatScalar) != 4 || sizeof(label) != 4)
+            if (sizeof(float) != 4 || sizeof(label) != 4)
             {
                 opts.ascii(true);
 
                 WarningInFunction
                     << "Using ASCII rather than legacy binary VTK format since "
-                    << "floatScalar and/or label are not 4 bytes in size."
+                    << "float and/or label are not 4 bytes in size."
                     << nl << endl;
             }
             else

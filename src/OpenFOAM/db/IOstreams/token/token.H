@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -307,8 +307,8 @@ private:
         int flagVal;   // bitmask - stored as int, not enum
         punctuationToken punctuationVal;
         label labelVal;
-        floatScalar floatVal;
-        doubleScalar doubleVal;
+        float floatVal;
+        double doubleVal;
 
         // Pointers
         word* wordPtr;
@@ -365,10 +365,10 @@ public:
         inline explicit token(const label val, label lineNum=0) noexcept;
 
         //- Construct float token
-        inline explicit token(const floatScalar val, label lineNum=0) noexcept;
+        inline explicit token(const float val, label lineNum=0) noexcept;
 
         //- Construct double token
-        inline explicit token(const doubleScalar val, label lineNum=0) noexcept;
+        inline explicit token(const double val, label lineNum=0) noexcept;
 
         //- Copy construct word token
         inline explicit token(const word& w, label lineNum=0);
@@ -531,11 +531,11 @@ public:
 
         //- Return float value.
         //  Report FatalIOError and return \b 0 if token is not FLOAT
-        inline floatScalar floatToken() const;
+        inline float floatToken() const;
 
         //- Return double value.
         //  Report FatalIOError and return \b 0 if token is not DOUBLE
-        inline doubleScalar doubleToken() const;
+        inline double doubleToken() const;
 
         //- Return float or double value.
         //  Report FatalIOError and return \b 0 if token is not a
@@ -607,10 +607,10 @@ public:
         inline void operator=(const label val);
 
         //- Copy assign from float
-        inline void operator=(const floatScalar val);
+        inline void operator=(const float val);
 
         //- Copy assign from double
-        inline void operator=(const doubleScalar val);
+        inline void operator=(const double val);
 
         //- Copy assign from word content
         inline void operator=(const word& w);
@@ -636,8 +636,8 @@ public:
         inline bool operator==(const token& tok) const;
         inline bool operator==(const punctuationToken p) const noexcept;
         inline bool operator==(const label val) const noexcept;
-        inline bool operator==(const floatScalar val) const noexcept;
-        inline bool operator==(const doubleScalar val) const noexcept;
+        inline bool operator==(const float val) const noexcept;
+        inline bool operator==(const double val) const noexcept;
         inline bool operator==(const std::string& s) const;
 
 
@@ -646,8 +646,8 @@ public:
         inline bool operator!=(const token& tok) const;
         inline bool operator!=(const punctuationToken p) const noexcept;
         inline bool operator!=(const label val) const noexcept;
-        inline bool operator!=(const floatScalar val) const noexcept;
-        inline bool operator!=(const doubleScalar val) const noexcept;
+        inline bool operator!=(const float val) const noexcept;
+        inline bool operator!=(const double val) const noexcept;
         inline bool operator!=(const std::string& s) const;
 
 
@@ -677,11 +677,11 @@ public:
 
         //- Return float value.
         //  \deprecated(2020-01) - floatToken()
-        floatScalar floatScalarToken() const { return floatToken(); }
+        float floatScalarToken() const { return floatToken(); }
 
         //- Return double value.
         //  \deprecated(2020-01) - doubleToken()
-        doubleScalar doubleScalarToken() const { return doubleToken(); }
+        double doubleScalarToken() const { return doubleToken(); }
 
         //- Deprecated(2017-11) transfer word pointer to the token
         //  \deprecated(2017-11) - use move assign from word

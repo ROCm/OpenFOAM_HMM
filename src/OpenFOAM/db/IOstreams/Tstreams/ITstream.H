@@ -304,11 +304,11 @@ public:
             //- Read a label
             virtual Istream& read(label&);
 
-            //- Read a floatScalar
-            virtual Istream& read(floatScalar&);
+            //- Read a float
+            virtual Istream& read(float&);
 
-            //- Read a doubleScalar
-            virtual Istream& read(doubleScalar&);
+            //- Read a double
+            virtual Istream& read(double&);
 
             //- Read binary block
             //  \note Not implemented

@@ -28,14 +28,13 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-using namespace Foam;
-
-#include "floatScalar.H"
-#include "doubleScalar.H"
+#include "scalar.H"
 #include "complex.H"
 #include "Matrix.H"
 #include "Random.H"
 #include <chrono>
+
+using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

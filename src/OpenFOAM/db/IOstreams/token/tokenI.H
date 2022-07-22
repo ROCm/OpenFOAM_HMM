@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -174,7 +174,7 @@ inline Foam::token::token(const label val, label lineNum) noexcept
 }
 
 
-inline Foam::token::token(const floatScalar val, label lineNum) noexcept
+inline Foam::token::token(const float val, label lineNum) noexcept
 :
     data_(),
     type_(tokenType::FLOAT),
@@ -184,7 +184,7 @@ inline Foam::token::token(const floatScalar val, label lineNum) noexcept
 }
 
 
-inline Foam::token::token(const doubleScalar val, label lineNum) noexcept
+inline Foam::token::token(const double val, label lineNum) noexcept
 :
     data_(),
     type_(tokenType::DOUBLE),
@@ -528,7 +528,7 @@ inline bool Foam::token::isFloat() const noexcept
 }
 
 
-inline Foam::floatScalar Foam::token::floatToken() const
+inline float Foam::token::floatToken() const
 {
     if (type_ == tokenType::FLOAT)
     {
@@ -546,7 +546,7 @@ inline bool Foam::token::isDouble() const noexcept
 }
 
 
-inline Foam::doubleScalar Foam::token::doubleToken() const
+inline double Foam::token::doubleToken() const
 {
     if (type_ == tokenType::DOUBLE)
     {
@@ -817,7 +817,7 @@ inline void Foam::token::operator=(const label val)
 }
 
 
-inline void Foam::token::operator=(const floatScalar val)
+inline void Foam::token::operator=(const float val)
 {
     reset();
     type_ = tokenType::FLOAT;
@@ -825,7 +825,7 @@ inline void Foam::token::operator=(const floatScalar val)
 }
 
 
-inline void Foam::token::operator=(const doubleScalar val)
+inline void Foam::token::operator=(const double val)
 {
     reset();
     type_ = tokenType::DOUBLE;
@@ -955,7 +955,7 @@ inline bool Foam::token::operator==(const label val) const noexcept
 }
 
 
-inline bool Foam::token::operator==(const floatScalar val) const noexcept
+inline bool Foam::token::operator==(const float val) const noexcept
 {
     return
     (
@@ -965,7 +965,7 @@ inline bool Foam::token::operator==(const floatScalar val) const noexcept
 }
 
 
-inline bool Foam::token::operator==(const doubleScalar val) const noexcept
+inline bool Foam::token::operator==(const double val) const noexcept
 {
     return
     (
@@ -993,13 +993,13 @@ inline bool Foam::token::operator!=(const label val) const noexcept
 }
 
 
-inline bool Foam::token::operator!=(const floatScalar val) const noexcept
+inline bool Foam::token::operator!=(const float val) const noexcept
 {
     return !operator==(val);
 }
 
 
-inline bool Foam::token::operator!=(const doubleScalar val) const noexcept
+inline bool Foam::token::operator!=(const double val) const noexcept
 {
     return !operator==(val);
 }

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -196,7 +196,7 @@ Foam::Ostream& Foam::OSstream::write(const int64_t val)
 }
 
 
-Foam::Ostream& Foam::OSstream::write(const floatScalar val)
+Foam::Ostream& Foam::OSstream::write(const float val)
 {
     os_ << val;
     setState(os_.rdstate());
@@ -204,7 +204,7 @@ Foam::Ostream& Foam::OSstream::write(const floatScalar val)
 }
 
 
-Foam::Ostream& Foam::OSstream::write(const doubleScalar val)
+Foam::Ostream& Foam::OSstream::write(const double val)
 {
     os_ << val;
     setState(os_.rdstate());

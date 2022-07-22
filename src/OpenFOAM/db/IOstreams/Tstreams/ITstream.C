@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -530,14 +530,14 @@ Foam::Istream& Foam::ITstream::read(label&)
 }
 
 
-Foam::Istream& Foam::ITstream::read(floatScalar&)
+Foam::Istream& Foam::ITstream::read(float&)
 {
     NotImplemented;
     return *this;
 }
 
 
-Foam::Istream& Foam::ITstream::read(doubleScalar&)
+Foam::Istream& Foam::ITstream::read(double&)
 {
     NotImplemented;
     return *this;

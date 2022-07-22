@@ -173,11 +173,11 @@ public:
             //- Write int64_t as a label
             virtual Ostream& write(const int64_t val);
 
-            //- Write floatScalar
-            virtual Ostream& write(const floatScalar val);
+            //- Write float
+            virtual Ostream& write(const float val);
 
-            //- Write doubleScalar
-            virtual Ostream& write(const doubleScalar val);
+            //- Write double
+            virtual Ostream& write(const double val);
 
             //- Write binary block with 8-byte alignment.
             virtual Ostream& write(const char* data, std::streamsize count);

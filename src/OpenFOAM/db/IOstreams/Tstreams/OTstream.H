@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,8 +38,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef OTstream_H
-#define OTstream_H
+#ifndef Foam_OTstream_H
+#define Foam_OTstream_H
 
 #include "token.H"
 #include "Ostream.H"
@@ -146,11 +146,11 @@ public:
         //- Write int64_t as a label
         virtual Ostream& write(const int64_t val);
 
-        //- Write floatScalar
-        virtual Ostream& write(const floatScalar val);
+        //- Write float
+        virtual Ostream& write(const float val);
 
-        //- Write doubleScalar
-        virtual Ostream& write(const doubleScalar val);
+        //- Write double
+        virtual Ostream& write(const double val);
 
         //- Write binary block with 8-byte alignment.
         virtual Ostream& write(const char* data, std::streamsize count);

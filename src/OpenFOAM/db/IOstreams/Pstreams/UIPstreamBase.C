@@ -359,7 +359,7 @@ Foam::Istream& Foam::UIPstreamBase::read(token& t)
         // Float
         case token::tokenType::FLOAT :
         {
-            floatScalar val;
+            float val;
             if (read(val))
             {
                 t = val;
@@ -374,7 +374,7 @@ Foam::Istream& Foam::UIPstreamBase::read(token& t)
         // Double
         case token::tokenType::DOUBLE :
         {
-            doubleScalar val;
+            double val;
             if (read(val))
             {
                 t = val;
@@ -432,14 +432,14 @@ Foam::Istream& Foam::UIPstreamBase::read(label& val)
 }
 
 
-Foam::Istream& Foam::UIPstreamBase::read(floatScalar& val)
+Foam::Istream& Foam::UIPstreamBase::read(float& val)
 {
     readFromBuffer(val);
     return *this;
 }
 
 
-Foam::Istream& Foam::UIPstreamBase::read(doubleScalar& val)
+Foam::Istream& Foam::UIPstreamBase::read(double& val)
 {
     readFromBuffer(val);
     return *this;

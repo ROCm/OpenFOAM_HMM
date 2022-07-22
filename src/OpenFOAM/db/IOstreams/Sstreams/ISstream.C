@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1001,7 +1001,7 @@ Foam::Istream& Foam::ISstream::read(label& val)
 }
 
 
-Foam::Istream& Foam::ISstream::read(floatScalar& val)
+Foam::Istream& Foam::ISstream::read(float& val)
 {
     is_ >> val;
     setState(is_.rdstate());
@@ -1009,7 +1009,7 @@ Foam::Istream& Foam::ISstream::read(floatScalar& val)
 }
 
 
-Foam::Istream& Foam::ISstream::read(doubleScalar& val)
+Foam::Istream& Foam::ISstream::read(double& val)
 {
     is_ >> val;
     setState(is_.rdstate());
