@@ -219,7 +219,7 @@ void Foam::radiation::viewFactor::initialise()
         labelList upper(rays_.size(), -1);
         labelList lower(rays_.size(), -1);
 
-        const edgeList& raysLst = rays_.sortedToc();
+        const edgeList raysLst(rays_.sortedToc());
         label rayI = 0;
         for (const auto& e : raysLst)
         {
@@ -441,8 +441,8 @@ void Foam::radiation::viewFactor::initialise()
             totalDelta /= myF.size();
             reduce(totalDelta, sumOp<scalar>());
             reduce(maxDelta, maxOp<scalar>());
-            Info << "Smoothng average delta : " << totalDelta << endl;
-            Info << "Smoothng maximum delta : " << maxDelta << nl << endl;
+            Info << "Smoothing average delta : " << totalDelta << endl;
+            Info << "Smoothing maximum delta : " << maxDelta << nl << endl;
         }
     }
 
@@ -853,7 +853,7 @@ void Foam::radiation::viewFactor::calculate()
             // Local matrix coefficients
             if (!constEmissivity_ || iterCounter_ == 0)
             {
-                const edgeList& raysLst = rays_.sortedToc();
+                const edgeList raysLst(rays_.sortedToc());
 
                 label rayI = 0;
                 for (const auto& e : raysLst)

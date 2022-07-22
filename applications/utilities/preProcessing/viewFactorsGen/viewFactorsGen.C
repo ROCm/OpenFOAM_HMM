@@ -40,7 +40,7 @@ Description
 
     The input from viewFactorsDict are:
 
-        tolGaussQuad              0.1;      // GaussQuad  error
+        GaussQuadTol              0.1;      // GaussQuad  error
         distTol                   8;        // R/Average(rm)
         alpha                     0.22;     // Use for common edges for 2LI
 
@@ -80,7 +80,6 @@ Description
 
 #include "indirectPrimitivePatch.H"
 #include "DynamicField.H"
-//#include "unitConversion.H"
 
 #include "scalarMatrices.H"
 #include "labelListIOList.H"
@@ -442,8 +441,8 @@ int main(int argc, char *argv[])
 
     const label debug = viewFactorDict.getOrDefault<label>("debug", 0);
 
-    const scalar tolGaussQuad =
-        viewFactorDict.getOrDefault<scalar>("tolGaussQuad", 0.01);
+    const scalar GaussQuadTol =
+        viewFactorDict.getOrDefault<scalar>("GaussQuadTol", 0.01);
 
     const scalar distTol =
          viewFactorDict.getOrDefault<scalar>("distTol", 8);
@@ -1050,7 +1049,7 @@ int main(int argc, char *argv[])
 
                         if
                         (
-                            (mag(err) < tolGaussQuad && gi > 0)
+                            (mag(err) < GaussQuadTol && gi > 0)
                          || gi == maxQuadOrder-1
                         )
                         {
