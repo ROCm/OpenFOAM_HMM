@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -110,14 +110,14 @@ void Foam::fa::externalHeatFluxSource::addSup
             false
         );
 
-        auto tQ = new areaScalarField
+        auto tQ = tmp<areaScalarField>::New
         (
             io,
             regionMesh(),
             dimensionedScalar("q", dimPower/sqr(dimLength), 0),
             zeroGradientFaPatchScalarField::typeName
         );
-        areaScalarField& Q = *tQ;
+        areaScalarField& Q = tQ.ref();
 
         switch (mode_)
         {
