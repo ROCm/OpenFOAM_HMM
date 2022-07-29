@@ -45,7 +45,8 @@ Foam::subModelBase::subModelBase(dictionary& properties)
     dict_(),
     baseName_(),
     modelType_(),
-    coeffDict_()
+    coeffDict_(),
+    log(properties.getOrDefault<bool>("log", true))
 {}
 
 
@@ -63,7 +64,8 @@ Foam::subModelBase::subModelBase
     dict_(dict),
     baseName_(baseName),
     modelType_(modelType),
-    coeffDict_(dict.subDict(modelType + dictExt))
+    coeffDict_(dict.subDict(modelType + dictExt)),
+    log(coeffDict_.getOrDefault<bool>("log", true))
 {}
 
 
@@ -81,7 +83,8 @@ Foam::subModelBase::subModelBase
     dict_(dict),
     baseName_(baseName),
     modelType_(modelType),
-    coeffDict_(dict)
+    coeffDict_(dict),
+    log(coeffDict_.getOrDefault<bool>("log", true))
 {}
 
 
@@ -92,13 +95,8 @@ Foam::subModelBase::subModelBase(const subModelBase& smb)
     dict_(smb.dict_),
     baseName_(smb.baseName_),
     modelType_(smb.modelType_),
-    coeffDict_(smb.coeffDict_)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::subModelBase::~subModelBase()
+    coeffDict_(smb.coeffDict_),
+    log(coeffDict_.getOrDefault<bool>("log", true))
 {}
 
 
@@ -145,6 +143,7 @@ bool Foam::subModelBase::defaultCoeffs(const bool printMsg) const
     bool def = coeffDict_.getOrDefault("defaultCoeffs", false);
     if (printMsg && def)
     {
+        // Note: not using Log<< for output
         Info<< incrIndent;
         Info<< indent << "Employing default coefficients" << endl;
         Info<< decrIndent;
