@@ -144,7 +144,7 @@ private:
         bool resetOnWrite_;
 
         //- Flag to indicate whether data should be written to file
-        bool log_;
+        bool logToFile_;
 
         //- List of points
         Field<point> points_;

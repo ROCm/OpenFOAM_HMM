@@ -44,7 +44,7 @@ void Foam::FacePostProcessing<CloudType>::makeLogFile
 )
 {
     // Create the output file if not already created
-    if (log_)
+    if (logToFile_)
     {
         DebugInfo << "Creating output file." << endl;
 
@@ -256,7 +256,7 @@ Foam::FacePostProcessing<CloudType>::FacePostProcessing
     faceZoneIDs_(),
     surfaceFormat_(this->coeffDict().getWord("surfaceFormat")),
     resetOnWrite_(this->coeffDict().getBool("resetOnWrite")),
-    log_(this->coeffDict().getBool("log")),
+    logToFile_(this->coeffDict().getBool("log")),
     totalTime_(0.0),
     mass_(),
     massTotal_(),
@@ -337,7 +337,7 @@ Foam::FacePostProcessing<CloudType>::FacePostProcessing
     faceZoneIDs_(pff.faceZoneIDs_),
     surfaceFormat_(pff.surfaceFormat_),
     resetOnWrite_(pff.resetOnWrite_),
-    log_(pff.log_),
+    logToFile_(pff.logToFile_),
     totalTime_(pff.totalTime_),
     mass_(pff.mass_),
     massTotal_(pff.massTotal_),
