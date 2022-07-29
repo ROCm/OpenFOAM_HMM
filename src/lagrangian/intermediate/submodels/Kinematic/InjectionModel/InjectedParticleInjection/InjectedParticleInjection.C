@@ -364,9 +364,9 @@ bool Foam::InjectedParticleInjection<CloudType>::validInjection
 
 
 template<class CloudType>
-void Foam::InjectedParticleInjection<CloudType>::info(Ostream& os)
+void Foam::InjectedParticleInjection<CloudType>::info()
 {
-    InjectionModel<CloudType>::info(os);
+    InjectionModel<CloudType>::info();
 
     if (this->writeTime())
     {

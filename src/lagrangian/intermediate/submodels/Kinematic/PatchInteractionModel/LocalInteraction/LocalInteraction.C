@@ -341,9 +341,9 @@ bool Foam::LocalInteraction<CloudType>::correct
 
 
 template<class CloudType>
-void Foam::LocalInteraction<CloudType>::info(Ostream& os)
+void Foam::LocalInteraction<CloudType>::info()
 {
-    PatchInteractionModel<CloudType>::info(os);
+    PatchInteractionModel<CloudType>::info();
 
     // retrieve any stored data
     labelListList npe0(patchData_.size());
@@ -411,7 +411,7 @@ void Foam::LocalInteraction<CloudType>::info(Ostream& os)
             {
                 const word& patchName = patchData_[patchi].patchName();
 
-                os  << "    Parcel fate: patch " <<  patchName
+                Log_<< "    Parcel fate: patch " <<  patchName
                     << " (number, mass)" << nl
                     << "      - escape  (injector " << indexToInjector[indexi]
                     << " )  = " << npe[patchi][indexi]
@@ -428,7 +428,7 @@ void Foam::LocalInteraction<CloudType>::info(Ostream& os)
         {
             const word& patchName = patchData_[patchi].patchName();
 
-            os  << "    Parcel fate: patch " << patchName
+            Log_<< "    Parcel fate: patch " << patchName
                 << " (number, mass)" << nl
                 << "      - escape                      = "
                 << npe[patchi][0] << ", " << mpe[patchi][0] << nl

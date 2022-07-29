@@ -46,10 +46,7 @@ void Foam::FacePostProcessing<CloudType>::makeLogFile
     // Create the output file if not already created
     if (log_)
     {
-        if (debug)
-        {
-            Info<< "Creating output file." << endl;
-        }
+        DebugInfo << "Creating output file." << endl;
 
         if (Pstream::master())
         {
@@ -102,7 +99,7 @@ void Foam::FacePostProcessing<CloudType>::write()
 
     const label proci = Pstream::myProcNo();
 
-    Info<< type() << " output:" << nl;
+    Log_<< type() << " output:" << nl;
 
     List<scalarField> zoneMassTotal(mass_.size());
     List<scalarField> zoneMassFlowRate(massFlowRate_.size());
@@ -130,7 +127,7 @@ void Foam::FacePostProcessing<CloudType>::write()
             );
         const scalar sumMassFlowRate = sum(zoneMassFlowRate[zoneI]);
 
-        Info<< "    " << zoneName
+        Log_<< "    " << zoneName
             << ": total mass = " << sumMassTotal
             << "; average mass flow rate = " << sumMassFlowRate
             << nl;
@@ -143,7 +140,7 @@ void Foam::FacePostProcessing<CloudType>::write()
         }
     }
 
-    Info<< endl;
+    Log_<< endl;
 
 
     if (surfaceFormat_ != "none")

@@ -47,10 +47,7 @@ void Foam::ParticleCollector<CloudType>::makeLogFile
     // Create the output file if not already created
     if (log_)
     {
-        if (debug)
-        {
-            Info<< "Creating output file" << endl;
-        }
+        DebugInfo<< "Creating output file" << endl;
 
         if (Pstream::master())
         {
@@ -419,7 +416,7 @@ void Foam::ParticleCollector<CloudType>::write()
         massTotal_[facei] += mass_[facei];
     }
 
-    Info<< type() << " output:" << nl;
+    Log_<< type() << " output:" << nl;
 
     Field<scalar> faceMassTotal(mass_.size(), Zero);
     this->getModelProperty("massTotal", faceMassTotal);
@@ -452,7 +449,7 @@ void Foam::ParticleCollector<CloudType>::write()
         }
     }
 
-    Info<< "    sum(total mass) = " << sumTotalMass << nl
+    Log_<< "    sum(total mass) = " << sumTotalMass << nl
         << "    sum(average mass flow rate) = " << sumAverageMFR << nl
         << endl;
 

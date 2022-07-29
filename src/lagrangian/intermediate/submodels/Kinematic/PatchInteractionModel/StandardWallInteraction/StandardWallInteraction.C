@@ -257,9 +257,9 @@ bool Foam::StandardWallInteraction<CloudType>::correct
 
 
 template<class CloudType>
-void Foam::StandardWallInteraction<CloudType>::info(Ostream& os)
+void Foam::StandardWallInteraction<CloudType>::info()
 {
-    PatchInteractionModel<CloudType>::info(os);
+    PatchInteractionModel<CloudType>::info();
 
     labelListList npe0(nEscape_.size());
     scalarListList mpe0(nEscape_.size());
@@ -326,7 +326,7 @@ void Foam::StandardWallInteraction<CloudType>::info(Ostream& os)
             {
                 const word& patchName = mesh_.boundary()[patchi].name() ;
 
-                os  << "    Parcel fate: patch " <<  patchName
+                Log_<< "    Parcel fate: patch " <<  patchName
                     << " (number, mass)" << nl
                     << "      - escape  (injector " << indexToInjector[indexi]
                     << ")  = " << npe[patchi][indexi]
@@ -349,7 +349,7 @@ void Foam::StandardWallInteraction<CloudType>::info(Ostream& os)
         {
             const word& patchName = mesh_.boundary()[patchi].name();
 
-            os  << "    Parcel fate: patch (number, mass) "
+            Log_<< "    Parcel fate: patch (number, mass) "
                 << patchName << nl
                 << "      - escape                      = "
                 << npe[patchi][0] << ", " << mpe[patchi][0] << nl

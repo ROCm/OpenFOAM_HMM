@@ -208,7 +208,7 @@ void  Foam::CollidingCloud<CloudType>::motion
 
     if (nSubCycles > 1)
     {
-        Info<< "    " << nSubCycles << " move-collide subCycles" << endl;
+        Log_<< "    " << nSubCycles << " move-collide subCycles" << endl;
 
         subCycleTime moveCollideSubCycle
         (
@@ -238,7 +238,7 @@ void Foam::CollidingCloud<CloudType>::info()
     scalar rotationalKineticEnergy = rotationalKineticEnergyOfSystem();
     reduce(rotationalKineticEnergy, sumOp<scalar>());
 
-    Info<< "    Rotational kinetic energy       = "
+    Log_<< "    Rotational kinetic energy       = "
         << rotationalKineticEnergy << nl;
 }
 

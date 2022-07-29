@@ -484,7 +484,7 @@ void Foam::ThermoCloud<CloudType>::info()
 {
     CloudType::info();
 
-    Info<< "    Temperature min/max             = " << Tmin() << ", " << Tmax()
+    Log_<< "    Temperature min/max             = " << Tmin() << ", " << Tmax()
         << endl;
 }
 

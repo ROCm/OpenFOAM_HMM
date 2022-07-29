@@ -164,8 +164,8 @@ public:
         //- Number of progress variable
         virtual label nF() const;
 
-        //- Write injection info to stream
-        virtual void info(Ostream& os);
+        //- Write injection info
+        virtual void info();
 };
 
 

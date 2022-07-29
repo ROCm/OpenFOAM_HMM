@@ -275,9 +275,9 @@ void Foam::ThermoSurfaceFilm<CloudType>::setParcelProperties
 
 
 template<class CloudType>
-void Foam::ThermoSurfaceFilm<CloudType>::info(Ostream& os)
+void Foam::ThermoSurfaceFilm<CloudType>::info()
 {
-    KinematicSurfaceFilm<CloudType>::info(os);
+    KinematicSurfaceFilm<CloudType>::info();
 }
 
 

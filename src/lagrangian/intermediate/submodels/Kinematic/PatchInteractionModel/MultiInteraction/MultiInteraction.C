@@ -187,12 +187,14 @@ void Foam::MultiInteraction<CloudType>::postEvolve()
 
 
 template<class CloudType>
-void Foam::MultiInteraction<CloudType>::info(Ostream& os)
+void Foam::MultiInteraction<CloudType>::info()
 {
+    PatchInteractionModel<CloudType>::info();
+
     for (auto& m : models_)
     {
-        Info<< "Patch interaction model " << m.type() << ':' << endl;
-        m.info(os);
+        Log_<< "Patch interaction model " << m.type() << ':' << endl;
+        m.info();
     }
 }
 

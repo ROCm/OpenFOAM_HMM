@@ -287,8 +287,8 @@ void Foam::ReactingMultiphaseCloud<CloudType>::info()
 {
     CloudType::info();
 
-    this->devolatilisation().info(Info);
-    this->surfaceReaction().info(Info);
+    this->devolatilisation().info();
+    this->surfaceReaction().info();
 }
 
 
