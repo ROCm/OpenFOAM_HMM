@@ -662,8 +662,8 @@ int main(int argc, char *argv[])
                 // Read dictionary
                 // Note: disable class type checking so we can load field
                 Info<< "Loading dictionary " << fieldName << endl;
-                const word oldTypeName = IOdictionary::typeName;
-                const_cast<word&>(IOdictionary::typeName) = word::null;
+                const word oldTypeName = localIOdictionary::typeName;
+                const_cast<word&>(localIOdictionary::typeName) = word::null;
 
                 IOobject fieldHeader
                 (
@@ -675,11 +675,15 @@ int main(int argc, char *argv[])
                     false
                 );
 
-                if (fieldHeader.typeHeaderOk<IOdictionary>(false))
+                if (fieldHeader.typeHeaderOk<localIOdictionary>(false))
                 {
-                    IOdictionary fieldDict(fieldHeader);
+                    //IOdictionary fieldDict(fieldHeader);
+                    //- dictionaries to-be-changed are either boundary
+                    //  or field dictionary. Both are processor-local.
+                    localIOdictionary fieldDict(fieldHeader);
 
-                    const_cast<word&>(IOdictionary::typeName) = oldTypeName;
+                    const_cast<word&>(localIOdictionary::typeName) =
+                        oldTypeName;
 
                     // Fake type back to what was in field
                     const_cast<word&>(fieldDict.type()) =
