@@ -104,7 +104,7 @@ bool Foam::binModels::singleDirectionUniformBin::processField
         return false;
     }
 
-    if (Pstream::master() && !writtenHeader_)
+    if (writeToFile() && !writtenHeader_)
     {
         writeFileHeader<Type>(filePtrs_[fieldi]);
     }
@@ -183,7 +183,7 @@ bool Foam::binModels::singleDirectionUniformBin::processField
         }
     }
 
-    if (Pstream::master())
+    if (writeToFile())
     {
         writeBinnedData(data, filePtrs_[fieldi]);
     }

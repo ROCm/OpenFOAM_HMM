@@ -98,7 +98,7 @@ bool Foam::binModels::uniformBin::processField(const label fieldi)
         return false;
     }
 
-    if (Pstream::master() && !writtenHeader_)
+    if (writeToFile() && !writtenHeader_)
     {
         writeFileHeader<Type>(filePtrs_[fieldi]);
     }
@@ -166,7 +166,7 @@ bool Foam::binModels::uniformBin::processField(const label fieldi)
         }
     }
 
-    if (Pstream::master())
+    if (writeToFile())
     {
         writeBinnedData(data, filePtrs_[fieldi]);
     }

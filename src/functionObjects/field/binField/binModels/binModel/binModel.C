@@ -148,6 +148,11 @@ Foam::binModel::binModel
 
 bool Foam::binModel::read(const dictionary& dict)
 {
+    if (!functionObjects::writeFile::read(dict))
+    {
+        return false;
+    }
+
     patchSet_ = mesh_.boundaryMesh().patchSet(dict.get<wordRes>("patches"));
     fieldNames_ = dict.get<wordHashSet>("fields").sortedToc();
 
