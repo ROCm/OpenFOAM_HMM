@@ -185,12 +185,12 @@ Usage
       CmRoll  | Roll-moment coefficient
       CmPitch | Pitch-moment coefficient
       CmYaw   | Yaw-moment coefficient
-      Cdf     | Front-axle drag coefficient
-      Csf     | Front-axle side-force coefficient
-      Clf     | Front-axle lift coefficient
-      Cdr     | Rear-axle drag coefficient
-      Csr     | Rear-axle side-force coefficient
-      Clr     | Rear-axle lift coefficient
+      Cd(f)   | Front-axle drag coefficient
+      Cs(f)   | Front-axle side-force coefficient
+      Cl(f)   | Front-axle lift coefficient
+      Cd(r)   | Rear-axle drag coefficient
+      Cs(r)   | Rear-axle side-force coefficient
+      Cl(r)   | Rear-axle lift coefficient
     \endverbatim
 
     The inherited entries are elaborated in:

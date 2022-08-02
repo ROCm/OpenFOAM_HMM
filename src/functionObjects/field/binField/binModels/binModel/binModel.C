@@ -180,7 +180,7 @@ bool Foam::binModel::read(const dictionary& dict)
         cellZoneIDs_.transfer(zoneIDs);
     }
 
-    decomposePatchValues_ = dict.get<bool>("decomposePatchValues");
+    decomposePatchValues_ = dict.getOrDefault("decomposePatchValues", false);
 
     filePtrs_.setSize(fieldNames_.size());
     forAll(filePtrs_, i)
