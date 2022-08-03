@@ -152,7 +152,7 @@ void Foam::PrintTable<KeyType, DataType>::print
 
         os  << endl;
 
-        const List<KeyType>& sortedTable = combinedTable.sortedToc();
+        const List<KeyType> sortedTable(combinedTable.sortedToc());
 
         forAll(sortedTable, keyI)
         {
