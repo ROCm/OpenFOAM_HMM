@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +33,15 @@ Description
     Properties to aid interFoam:
     -# Correct the alpha boundary condition for dynamic contact angle.
     -# Calculate interface curvature.
+
+    References:
+    \verbatim
+        Smoother algorithm for interface curvatures (tag:YK):
+            Yamamoto, T. & Komarov, S. V. (2022).
+            Evaluation on different volume of fluid methods in
+            unstructured solver under the optimized condition. Preprint.
+            DOI:10.13140/RG.2.2.17223.37281
+    \endverbatim
 
 SourceFiles
     interfaceProperties.C
@@ -61,6 +71,9 @@ class interfaceProperties
 
         //- Keep a reference to the transportProperties dictionary
         const dictionary& transportPropertiesDict_;
+
+        //- Number of iterations to smooth interfacial curvatures
+        int nAlphaSmoothCurvature_;
 
         //- Compression coefficient
         scalar cAlpha_;
