@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,6 +37,8 @@ License
 #include "volumeType.H"
 // For dictionary::get wrapper
 #include "meshRefinement.H"
+
+#include "OBJstream.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -194,14 +196,13 @@ Foam::refinementSurfaces::refinementSurfaces
     labelList globalMaxLevel(surfI, Zero);
     labelList globalLevelIncr(surfI, Zero);
 
-    FixedList<label, 3> nullGapLevel;
-    nullGapLevel[0] = 0;
-    nullGapLevel[1] = 0;
-    nullGapLevel[2] = 0;
-
+    const FixedList<label, 3> nullGapLevel({0, 0, 0});
     List<FixedList<label, 3>> globalGapLevel(surfI);
     List<volumeType> globalGapMode(surfI);
     boolList globalGapSelf(surfI);
+
+    const FixedList<label, 4> nullCurvLevel({0, 0, 0, -1});
+    List<FixedList<label, 4>> globalCurvLevel(surfI);
 
     scalarField globalAngle(surfI, -GREAT);
     PtrList<dictionary> globalPatchInfo(surfI);
@@ -216,6 +217,7 @@ Foam::refinementSurfaces::refinementSurfaces
     List<Map<FixedList<label, 3>>> regionGapLevel(surfI);
     List<Map<volumeType>> regionGapMode(surfI);
     List<Map<bool>> regionGapSelf(surfI);
+    List<Map<FixedList<label, 4>>> regionCurvLevel(surfI);
     List<Map<scalar>> regionAngle(surfI);
     List<Map<autoPtr<dictionary>>> regionPatchInfo(surfI);
     List<Map<label>> regionBlockLevel(surfI);
@@ -306,6 +308,19 @@ Foam::refinementSurfaces::refinementSurfaces
 
             globalGapSelf[surfI] =
                 dict.getOrDefault<bool>("gapSelf", true);
+
+            globalCurvLevel[surfI] = nullCurvLevel;
+            if (dict.readIfPresent("curvatureLevel", globalCurvLevel[surfI]))
+            {
+                if (globalCurvLevel[surfI][0] <= 0)
+                {
+                    FatalIOErrorInFunction(dict)
+                        << "Illegal curvatureLevel specification for surface "
+                        << names_[surfI]
+                        << " : curvatureLevel:" << globalCurvLevel[surfI]
+                        << exit(FatalIOError);
+                }
+            }
 
             const searchableSurface& surface = allGeometry_[surfaces_[surfI]];
 
@@ -435,6 +450,20 @@ Foam::refinementSurfaces::refinementSurfaces
                             )
                         );
 
+                        FixedList<label, 4> curvSpec(nullCurvLevel);
+                        if (regionDict.readIfPresent("curvatureLevel", curvSpec))
+                        {
+                            if (curvSpec[0] <= 0)
+                            {
+                                FatalIOErrorInFunction(dict)
+                                    << "Illegal curvatureLevel specification for surface "
+                                    << names_[surfI]
+                                    << " : curvatureLevel:" << curvSpec
+                                    << exit(FatalIOError);
+                            }
+                        }
+                        regionCurvLevel[surfI].insert(regionI, curvSpec);
+
                         if (regionDict.found("perpendicularAngle"))
                         {
                             regionAngle[surfI].insert
@@ -505,6 +534,8 @@ Foam::refinementSurfaces::refinementSurfaces
     extendedGapMode_ = volumeType::UNKNOWN;
     selfProximity_.setSize(nRegions);
     selfProximity_ = true;
+    extendedCurvatureLevel_.setSize(nRegions);
+    extendedCurvatureLevel_ = nullCurvLevel;
     perpendicularAngle_.setSize(nRegions);
     perpendicularAngle_ = -GREAT;
     patchInfo_.setSize(nRegions);
@@ -531,6 +562,8 @@ Foam::refinementSurfaces::refinementSurfaces
             extendedGapLevel_[globalRegionI] = globalGapLevel[surfI];
             extendedGapMode_[globalRegionI] = globalGapMode[surfI];
             selfProximity_[globalRegionI] = globalGapSelf[surfI];
+            extendedCurvatureLevel_[globalRegionI] =
+                globalCurvLevel[surfI];
             perpendicularAngle_[globalRegionI] = globalAngle[surfI];
             if (globalPatchInfo.set(surfI))
             {
@@ -560,6 +593,8 @@ Foam::refinementSurfaces::refinementSurfaces
                 regionGapMode[surfI][iter.key()];
             selfProximity_[globalRegionI] =
                 regionGapSelf[surfI][iter.key()];
+            extendedCurvatureLevel_[globalRegionI] =
+                regionCurvLevel[surfI][iter.key()];
         }
         forAllConstIters(regionAngle[surfI], iter)
         {
@@ -713,6 +748,26 @@ Foam::labelList Foam::refinementSurfaces::maxGapLevel() const
 }
 
 
+Foam::labelList Foam::refinementSurfaces::maxCurvatureLevel() const
+{
+    labelList surfaceMax(surfaces_.size(), Zero);
+
+    forAll(surfaces_, surfI)
+    {
+        const wordList& regionNames = allGeometry_[surfaces_[surfI]].regions();
+
+        forAll(regionNames, regionI)
+        {
+            label globalI = globalRegion(surfI, regionI);
+            const FixedList<label, 4>& gapInfo =
+                extendedCurvatureLevel_[globalI];
+            surfaceMax[surfI] = max(surfaceMax[surfI], gapInfo[2]);
+        }
+    }
+    return surfaceMax;
+}
+
+
 // Precalculate the refinement level for every element of the searchable
 // surface.
 void Foam::refinementSurfaces::setMinLevelFields(const shellSurfaces& shells)
@@ -763,13 +818,15 @@ void Foam::refinementSurfaces::setMinLevelFields(const shellSurfaces& shells)
 
             // In case of triangulated surfaces only cache value if triangle
             // centre and vertices are in same shell
-            if (isA<triSurface>(geom))
+            const auto* tsPtr = isA<const triSurface>(geom);
+
+            if (tsPtr)
             {
                 label nUncached = 0;
 
                 // Check if points differing from ctr level
 
-                const triSurface& ts = refCast<const triSurface>(geom);
+                const triSurface& ts = *tsPtr;
                 const pointField& points = ts.points();
 
                 // Determine minimum expected level to avoid having to
@@ -837,6 +894,312 @@ void Foam::refinementSurfaces::setMinLevelFields(const shellSurfaces& shells)
                     minLevelField[i] = max(minLevelField[i], shellLevel[i]);
                 }
             }
+
+            // Store minLevelField on surface
+            const_cast<searchableSurface&>(geom).setField(minLevelField);
+        }
+    }
+}
+
+
+// Precalculate the refinement level for every element of the searchable
+// surface.
+void Foam::refinementSurfaces::setCurvatureMinLevelFields
+(
+    const scalar cosAngle,
+    const scalar level0EdgeLength
+)
+{
+    const labelList maxCurvLevel(maxCurvatureLevel());
+
+
+    forAll(surfaces_, surfI)
+    {
+        // Check if there is a specification of the extended curvature
+        if (maxCurvLevel[surfI] <= 0)
+        {
+            continue;
+        } 
+
+        const searchableSurface& geom = allGeometry_[surfaces_[surfI]];
+
+        const auto* tsPtr = isA<const triSurface>(geom);
+
+        // Cache the refinement level (max of surface level and shell level)
+        // on a per-element basis. Only makes sense if there are lots of
+        // elements. Possibly should have 'enough' elements to have fine
+        // enough resolution but for now just make sure we don't catch e.g.
+        // searchableBox (size=6)
+        if (tsPtr)
+        {
+            // Representative local coordinates and bounding sphere
+            pointField ctrs;
+            scalarField radiusSqr;
+            geom.boundingSpheres(ctrs, radiusSqr);
+
+            labelList minLevelField(ctrs.size(), Zero);
+            //labelList surfMin(ctrs.size(), Zero);
+            labelList surfMax(ctrs.size(), Zero);
+            labelList nCurvCells(ctrs.size(), Zero);
+            labelList curvIgnore(ctrs.size(), -1);
+            {
+                // Get the element index in a roundabout way. Problem is e.g.
+                // distributed surface where local indices differ from global
+                // ones (needed for getRegion call)
+                List<pointIndexHit> info;
+                geom.findNearest(ctrs, radiusSqr, info);
+
+                // Get per element the region
+                labelList region;
+                geom.getRegion(info, region);
+
+                // See if a cached level field available (from e.g. shells)
+                labelList cachedField;
+                geom.getField(info, cachedField);
+
+                // From the region get the surface-wise refinement level
+                forAll(minLevelField, i)
+                {
+                    if (info[i].hit()) //Note: should not be necessary
+                    {
+                        const label globali = globalRegion(surfI, region[i]);
+                        curvIgnore[i] = extendedCurvatureLevel_[globali][3];
+                        nCurvCells[i] = extendedCurvatureLevel_[globali][0];
+                        //surfMin[i] = extendedCurvatureLevel_[globali][1];
+                        surfMax[i] = extendedCurvatureLevel_[globali][2];
+
+                        minLevelField[i] = minLevel(surfI, region[i]);
+                        if (cachedField.size() > i)
+                        {
+                            minLevelField[i] =
+                                max(minLevelField[i], cachedField[i]);
+                        }
+                    }
+                }
+            }
+
+            // Calculate per-triangle curvature. This is the max of the
+            // measured point-based curvature + some constraints.
+            scalarField cellCurv(ctrs.size(), Zero);
+            {
+                // Walk surface and detect sharp features. Returns maximum
+                // curvature (per surface point. Note: returns per point, not
+                // per localpoint)
+                const auto& ts = *tsPtr;
+                auto tcurv(triSurfaceTools::curvatures(ts));
+                auto& curv = tcurv.ref();
+
+                // Reset curvature on sharp edges (and neighbours since
+                // curvature uses extended stencil)
+                {
+                    const auto& edgeFaces = ts.edgeFaces();
+                    const auto& edges = ts.edges();
+                    const auto& points = ts.points();
+                    const auto& mp = ts.meshPoints();
+
+                    bitSet isOnSharpEdge(points.size());
+                    forAll(edgeFaces, edgei)
+                    {
+                        const auto& eFaces = edgeFaces[edgei];
+                        const edge meshE(mp, edges[edgei]);
+
+                        if (eFaces.size() == 2)
+                        {
+                            const auto& f0 = ts[eFaces[0]];
+                            const auto& f1 = ts[eFaces[1]];
+
+                            const vector n0 = f0.unitNormal(points);
+
+                            const int dir0 = f0.edgeDirection(meshE);
+                            const int dir1 = f1.edgeDirection(meshE);
+                            vector n1 = f1.unitNormal(points);
+                            if (dir0 == dir1)
+                            {
+                                // Flip since use edge in same direction
+                                // (should not be the case for 'proper'
+                                //  surfaces)
+                                n1 = -n1;
+                            }
+
+                            if ((n0&n1) < cosAngle)
+                            {
+                                isOnSharpEdge.set(meshE[0]);
+                                isOnSharpEdge.set(meshE[1]);
+                            }
+                        }
+                    }
+
+                    // Extend by one layer
+                    {
+                        bitSet oldOnSharpEdge(isOnSharpEdge);
+                        isOnSharpEdge = false;
+                        for (const auto& f : ts)
+                        {
+                            for (const label pointi : f)
+                            {
+                                if (oldOnSharpEdge[pointi])
+                                {
+                                    // Mark all points on triangle
+                                    isOnSharpEdge.set(f);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+
+                    // Unmark curvature
+                    autoPtr<OBJstream> str;
+                    //if (debug)
+                    //{
+                    //    str.reset
+                    //    (
+                    //        new OBJstream
+                    //        (
+                    //            "sharpEdgePoints_"
+                    //          + geom.name()
+                    //          + ".obj"
+                    //        )
+                    //    );
+                    //    Info<< "Writing sharp edge points to "
+                    //        << str().name() << endl;
+                    //}
+
+                    for (const label pointi : isOnSharpEdge)
+                    {
+                        // Reset measured point-based curvature
+                        curv[pointi] = 0.0;
+                        if (str)
+                        {
+                            str().write(points[pointi]);
+                        }
+                    }
+                }
+
+                // Reset curvature on -almost- sharp edges.
+                // This resets the point-based curvature if the edge
+                // is considered to be a sharp edge based on its actual
+                // curvature. This is only used if the 'ignore' level is
+                // given.
+                {
+                    // Pass 1: accumulate constraints on the points - get
+                    //         the minimum of curvature constraints on the
+                    //         connected triangles. Looks at user-specified
+                    //         min curvature - does not use actual measured
+                    //         curvature
+                    scalarField pointMinCurv(ts.nPoints(), VGREAT);
+
+                    forAll(ts, i)
+                    {
+                        // Is ignore level given for surface
+                        const label level = curvIgnore[i];
+                        if (level >= 0)
+                        {
+                            // Convert to (inv) size
+                            const scalar length = level0EdgeLength/(2<<level);
+                            const scalar invLength = 1.0/length;
+                            for (const label pointi : ts[i])
+                            {
+                                if
+                                (
+                                    invLength < pointMinCurv[pointi]
+                                 && curv[pointi] > SMALL
+                                )
+                                {
+                                    //Pout<< "** at location:"
+                                    //    << ts.points()[pointi]
+                                    //    << " measured curv:" << curv[pointi]
+                                    //    << " radius:" << 1.0/curv[pointi]
+                                    //    << " ignore level:" << level
+                                    //    << " ignore radius:" << length
+                                    //    << " resetting minCurv to "
+                                    //    << invLength
+                                    //    << endl;
+                                }
+
+                                pointMinCurv[pointi] =
+                                    min(pointMinCurv[pointi], invLength);
+                            }
+                        }
+                    }
+
+                    // Clip curvature (should do nothing for most points unless
+                    // ignore-level is triggered)
+                    forAll(pointMinCurv, pointi)
+                    {
+                        if (pointMinCurv[pointi] < curv[pointi])
+                        {
+                            //Pout<< "** at location:" << ts.points()[pointi]
+                            //    << " measured curv:" << curv[pointi]
+                            //    << " radius:" << 1.0/curv[pointi]
+                            //    << " cellLimit:" << pointMinCurv[pointi]
+                            //    << endl;
+
+                            // Set up to ignore point
+                            //curv[pointi] = pointMinCurv[pointi];
+                            curv[pointi] = 0.0;
+                        }
+                    }
+                }
+
+
+                forAll(ts, i)
+                {
+                    const auto& f = ts[i];
+                    // Take max curvature (= min radius of curvature)
+                    cellCurv[i] = max(curv[f[0]], max(curv[f[1]], curv[f[2]]));
+                }
+            }
+
+
+            //if(debug)
+            //{
+            //    const scalar maxCurv = gMax(cellCurv);
+            //    if (maxCurv > SMALL)
+            //    {
+            //        const scalar r = scalar(1.0)/maxCurv;
+            //
+            //        Pout<< "For geometry " << geom.name()
+            //            << " have curvature max " << maxCurv
+            //            << " which equates to radius:" << r
+            //            << " which equates to refinement level "
+            //            << log2(level0EdgeLength/r)
+            //            << endl;
+            //    }
+            //}
+
+            forAll(cellCurv, i)
+            {
+                if (cellCurv[i] > SMALL && nCurvCells[i] > 0)
+                {
+                    //- ?If locally have a cached field override the
+                    //  surface-based level ignore any curvature?
+                    //if (minLevelField[i] > surfMin[i])
+                    //{
+                    //    // Ignore curvature
+                    //}
+                    //else
+                    //if (surfMin[i] == surfMax[i])
+                    //{
+                    //    // Ignore curvature. Bypass calculation below.
+                    //}
+                    //else
+                    {
+                        // Re-work the curvature into a radius and into a
+                        // number of cells
+                        const scalar r = scalar(1.0)/cellCurv[i];
+                        const scalar level =
+                            log2(nCurvCells[i]*level0EdgeLength/r);
+                        const label l = round(level);
+
+                        if (l > minLevelField[i] && l <= surfMax[i])
+                        {
+                            minLevelField[i] = l;
+                        }
+                    }
+                }
+            }
+
 
             // Store minLevelField on surface
             const_cast<searchableSurface&>(geom).setField(minLevelField);
