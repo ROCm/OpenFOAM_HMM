@@ -1,22 +1,34 @@
+// All rays expressed as start face (local) index end end face (global)
+// Pre-size by assuming a certain percentage is visible.
+
+
+if (Pstream::master())
+{
+    Info<< "\nShooting rays using distributedTriSurfaceMesh (no CGAL support)"
+        << endl;
+}
+
+
+
 // Maximum length for dynamicList
 const label maxDynListLength
 (
-    viewFactorDict.getOrDefault<label>("maxDynListLength", 1000000000)
+    viewFactorDict.getOrDefault<label>("maxDynListLength", 1000000)
 );
 
 for (const int proci : Pstream::allProcs())
 {
-    std::vector<Point> start;
-    start.reserve(coarseMesh.nFaces());
+    // Shoot rays from me to proci. Note that even if processor has
+    // 0 faces we still need to call findLine to keep calls synced.
 
-    std::vector<Point> end(start.size());
-    end.reserve(start.size());
-
+    DynamicField<point> start(coarseMesh.nFaces());
+    DynamicField<point> end(start.size());
     DynamicList<label> startIndex(start.size());
     DynamicList<label> endIndex(start.size());
 
     DynamicList<label> startAgg(start.size());
     DynamicList<label> endAgg(start.size());
+
 
     const pointField& myFc = remoteCoarseCf[Pstream::myProcNo()];
     const vectorField& myArea = remoteCoarseSf[Pstream::myProcNo()];
@@ -46,31 +58,15 @@ for (const int proci : Pstream::allProcs())
 
                     const vector d(remFc - fc);
 
-
-                    const vector nd = d/mag(d);
-                    const vector nfA = fA/mag(fA);
-                    const vector nremA = remA/mag(remA);
-
-                    if (((nd & nfA) < 0) && ((nd & nremA) > 0))
+                    if (((d & fA) < 0.) && ((d & remA) > 0))
                     {
-                        vector direction(d[0], d[1], d[2]);
-                        vector s(fc[0], fc[1], fc[2]);
-                        vector rayEnd(s + (1-intTol)*direction);
-                        end.push_back(Point(rayEnd[0], rayEnd[1], rayEnd[2]));
-
-                        s += vector(intTol*d[0], intTol*d[1], intTol*d[2]);
-
-                        start.push_back(Point(s[0], s[1], s[2]));
+                        start.append(fc + 0.001*d);
                         startIndex.append(i);
-                        if (useAgglomeration)
-                        {
-                            startAgg.append(globalNumbering.toGlobal(proci, fAgg));
-                            endAgg.append(globalNumbering.toGlobal(proci, remAgg));
-                        }
-
+                        startAgg.append(globalNumbering.toGlobal(proci, fAgg));
+                        end.append(fc + 0.999*d);
                         label globalI = globalNumbering.toGlobal(proci, j);
                         endIndex.append(globalI);
-
+                        endAgg.append(globalNumbering.toGlobal(proci, remAgg));
                         if (startIndex.size() > maxDynListLength)
                         {
                             FatalErrorInFunction
@@ -89,33 +85,98 @@ for (const int proci : Pstream::allProcs())
             }
         }
 
-    } while (i < myFc.size());
+    } while (returnReduce(i < myFc.size(), orOp<bool>()));
 
-    label totalRays(startIndex.size());
-    reduce(totalRays, sumOp<scalar>());
+    List<pointIndexHit> hitInfo(startIndex.size());
+    surfacesMesh.findLine(start, end, hitInfo);
 
-    if (debug)
+    // Return hit global agglo index
+    labelList aggHitIndex;
+    surfacesMesh.getField(hitInfo, aggHitIndex);
+
+    DynamicList<label> dRayIs;
+
+    // Collect the rays which have no obstacle in between rayStartFace
+    // and rayEndFace. If the ray hit itself, it gets stored in dRayIs
+    forAll(hitInfo, rayI)
     {
-        Pout<< "Number of rays :" << totalRays << endl;
-    }
-
-    for (unsigned long rayI = 0; rayI < start.size(); ++rayI)
-    {
-        Segment ray(start[rayI], end[rayI]);
-        Segment_intersection intersects = tree.any_intersection(ray);
-
-        if (!intersects)
+        if (!hitInfo[rayI].hit())
         {
             rayStartFace.append(startIndex[rayI]);
             rayEndFace.append(endIndex[rayI]);
         }
+        else if (aggHitIndex[rayI] == startAgg[rayI])
+        {
+            dRayIs.append(rayI);
+        }
     }
+
     start.clear();
 
-    if (debug)
+
+    // Continue rays which hit themself. If they hit the target
+    // agglomeration are added to rayStartFace and rayEndFace
+
+    bool firstLoop = true;
+    DynamicField<point> startHitItself;
+    DynamicField<point> endHitItself;
+    label iter = 0;
+
+    do
     {
-        Pout << "hits : " <<  rayStartFace.size()<< endl;
-    }
+        labelField rayIs;
+        rayIs.transfer(dRayIs);
+        dRayIs.clear();
+        forAll(rayIs, rayI)
+        {
+            const label rayID = rayIs[rayI];
+            label hitIndex = -1;
+
+            if (firstLoop)
+            {
+                hitIndex = rayIs[rayI];
+            }
+            else
+            {
+                hitIndex = rayI;
+            }
+
+            if (hitInfo[hitIndex].hit())
+            {
+                if (aggHitIndex[hitIndex] == startAgg[rayID])
+                {
+                    const vector& endP = end[rayID];
+                    const vector& startP = hitInfo[hitIndex].hitPoint();
+                    const vector& d = endP - startP;
+
+                    startHitItself.append(startP + 0.01*d);
+                    endHitItself.append(startP + 1.01*d);
+
+                    dRayIs.append(rayID);
+                }
+                else if (aggHitIndex[hitIndex] == endAgg[rayID])
+                {
+                    rayStartFace.append(startIndex[rayID]);
+                    rayEndFace.append(endIndex[rayID]);
+                }
+
+            }
+        }
+
+        hitInfo.clear();
+        hitInfo.resize(dRayIs.size());
+
+        surfacesMesh.findLine(startHitItself, endHitItself, hitInfo);
+
+        surfacesMesh.getField(hitInfo, aggHitIndex);
+
+
+        endHitItself.clear();
+        startHitItself.clear();
+        firstLoop = false;
+        iter ++;
+
+    } while (returnReduce(hitInfo.size(), orOp<bool>()) > 0 && iter < 10);
 
     startIndex.clear();
     end.clear();

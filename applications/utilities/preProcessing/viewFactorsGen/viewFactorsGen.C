@@ -4,7 +4,7 @@
    \\    /   O peration     |
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
-// -------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
     Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
@@ -25,7 +25,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    viewFactorsGenExt
+    viewFactorsGen
 
 Group
     grpPreProcessingUtilities
@@ -33,7 +33,7 @@ Group
 Description
     This view factors generation application uses a combined approach of
     double area integral (2AI) and double linear integral (2LI). 2AI is used
-    when the two surfaces are 'far' apart and 2LI whenre they are 'close'.
+    when the two surfaces are 'far' apart and 2LI when they are 'close'.
     2LI is integrated along edges using Gaussian quadrature.
     The distance between faces is calculating a ratio between averaged areas
     and the distance between face centres.
@@ -57,8 +57,8 @@ Description
         dumpRays                dumps rays
 
 
-    In order to specify the participants patches in the VF calculation the
-    keywaord viewFactorWall should be added to the boundary file.
+    The participating patches in the VF calculation have to be in the
+    'viewFactorWall' patch group (in the polyMesh/boundary file), e.g.
 
     floor
     {
@@ -67,6 +67,9 @@ Description
         nFaces          100;
         startFace       3100;
     }
+
+    Compile with -DNO_CGAL only if no CGAL present - CGAL AABB tree performs
+    better than the built-in octree.
 
 \*---------------------------------------------------------------------------*/
 
@@ -181,15 +184,13 @@ triSurface triangulate
     //triSurfaceToAgglom.resize(localTriFaceI-1);
 
     triangles.shrink();
+    triSurface surface(triangles, mesh.points());
+    surface.compactPoints();
 
-    triSurface rawSurface(triangles, mesh.points());
 
-    triSurface surface
-    (
-        rawSurface.localFaces(),
-        rawSurface.localPoints()
-    );
+#ifndef NO_CGAL
 
+    // CGAL : every processor has whole surface
 
     globalIndex globalFaceIdx(surface.size(), globalIndex::gatherOnly());
     globalIndex globalPointIdx
@@ -228,6 +229,7 @@ triSurface triangulate
         );
 
     Pstream::broadcast(surface);
+#endif
 
     // Add patch names to surface
     surface.patches().setSize(newPatchI);
@@ -337,6 +339,7 @@ void insertMatrixElements
     }
 }
 
+
 scalar GaussQuad
 (
 
@@ -403,6 +406,8 @@ scalar GaussQuad
     }
     return dIntFij;
 }
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
@@ -643,7 +648,13 @@ int main(int argc, char *argv[])
 
     // Set up searching engine for obstacles
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#ifdef NO_CGAL
+    // Using octree
     #include "searchingEngine.H"
+#else
+    // Using CGAL aabbtree (faster, more robust)
+    #include "searchingEngine_CGAL.H"
+#endif
 
     // Determine rays between coarse face centres
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -653,7 +664,13 @@ int main(int argc, char *argv[])
 
     // Return rayStartFace in local index and rayEndFace in global index
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#ifdef NO_CGAL
+    // Using octree, distributedTriSurfaceMesh
     #include "shootRays.H"
+#else
+    // Using CGAL aabbtree (faster, more robust)
+    #include "shootRays_CGAL.H"
+#endif
 
     // Calculate number of visible faces from local index
     labelList nVisibleFaceFaces(nCoarseFaces, Zero);
@@ -1135,7 +1152,7 @@ int main(int argc, char *argv[])
 
                 forAll(coarseToFine, coarseI)
                 {
-                    scalar FiSum = sum(F2LI[compactI]);
+                    const scalar FiSum = sum(F2LI[compactI]);
 
                     const label coarseFaceID = coarsePatchFace[coarseI];
                     const labelList& fineFaces = coarseToFine[coarseFaceID];
