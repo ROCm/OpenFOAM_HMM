@@ -183,6 +183,11 @@ bool Foam::binModels::singleDirectionUniformBin::processField
         }
     }
 
+    for (auto& binList : data)
+    {
+        reduce(binList, sumOp<List<Type>>());
+    }
+
     if (writeToFile())
     {
         writeBinnedData(data, filePtrs_[fieldi]);
