@@ -471,12 +471,37 @@ private:
                 label& nRefine
             ) const;
 
+            //- Refine cells containing triangles with high refinement level
+            //  (currently due to high curvature or being inside shell with
+            //   high level)
+            label markSurfaceFieldRefinement
+            (
+                const label nAllowRefine,
+                const labelList& neiLevel,
+                const pointField& neiCc,
+
+                labelList& refineCell,
+                label& nRefine
+            ) const;
+
             //- Helper: count number of normals1 that are in normals2
             label countMatches
             (
                 const List<point>& normals1,
                 const List<point>& normals2,
                 const scalar tol = 1e-6
+            ) const;
+
+            //- Detect if two intersection points are high curvature (w.r.t.
+            //  lengthscale
+            bool highCurvature
+            (
+                const scalar minCosAngle,
+                const scalar lengthScale,
+                const point& p0,
+                const vector& n0,
+                const point& p1,
+                const vector& n1
             ) const;
 
             //- Mark cells for surface curvature based refinement. Marks if

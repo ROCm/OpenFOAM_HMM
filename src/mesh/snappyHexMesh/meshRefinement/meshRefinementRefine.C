@@ -1109,6 +1109,71 @@ Foam::label Foam::meshRefinement::countMatches
 }
 
 
+//XXXXXX
+//bool Foam::meshRefinement::highCurvature
+//(
+//    const scalar minCosAngle,
+//    const point& p0,
+//    const vector& n0,
+//    const point& p1,
+//    const vector& n1
+//) const
+//{
+//    return ((n0&n1) < minCosAngle);
+//}
+bool Foam::meshRefinement::highCurvature
+(
+    const scalar minCosAngle,
+    const scalar lengthScale,
+    const point& p0,
+    const vector& n0,
+    const point& p1,
+    const vector& n1
+) const
+{
+    const scalar cosAngle = (n0&n1);
+
+    if (cosAngle < minCosAngle)
+    {
+        // Sharp feature, independent of intersection points
+        return true;
+    }
+    else if (cosAngle > 1-1e-6)
+    {
+        // Co-planar
+        return false;
+    }
+    else
+    {
+        // Calculate radius of curvature
+
+        vector axis(n0 ^ n1);
+        const plane pl0(p0, (n0 ^ axis));
+        const scalar r1 = pl0.normalIntersect(p1, n1);
+
+        //const point radiusPoint(p1+r1*n1);
+        //DebugVar(radiusPoint);
+        const plane pl1(p1, (n1 ^ axis));
+        const scalar r0 = pl1.normalIntersect(p0, n0);
+
+        //const point radiusPoint(p0+r0*n0);
+        //DebugVar(radiusPoint);
+        //- Take average radius. Bit ad hoc
+        const scalar radius = 0.5*(mag(r1)+mag(r0));
+
+        if (radius < lengthScale)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+}
+//XXXXX
+
+
 // Mark cells for surface curvature based refinement.
 Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
 (
@@ -1187,9 +1252,12 @@ Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
     // Test for all intersections (with surfaces of higher max level than
     // minLevel) and cache per cell the interesting inter
     labelListList cellSurfLevels(mesh_.nCells());
+    List<pointList> cellSurfLocations(mesh_.nCells());
     List<vectorList> cellSurfNormals(mesh_.nCells());
 
     {
+        // Per segment the intersection point of the surfaces
+        List<pointList> surfaceLocation;
         // Per segment the normals of the surfaces
         List<vectorList> surfaceNormal;
         // Per segment the list of levels of the surfaces
@@ -1205,6 +1273,7 @@ Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
             labelList(surfaces_.maxLevel().size(), 0),  // min level
             surfaces_.maxLevel(),
 
+            surfaceLocation,
             surfaceNormal,
             surfaceLevel
         );
@@ -1216,12 +1285,14 @@ Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
         labelList visitOrder;
         forAll(surfaceNormal, pointI)
         {
+            pointList& pLocations = surfaceLocation[pointI];
             vectorList& pNormals = surfaceNormal[pointI];
             labelList& pLevel = surfaceLevel[pointI];
 
-            sortedOrder(pNormals, visitOrder, normalLess(pNormals));
+            sortedOrder(pNormals, visitOrder, normalLess(pLocations));
 
-            pNormals = List<point>(pNormals, visitOrder);
+            pLocations = List<point>(pLocations, visitOrder);
+            pNormals = List<vector>(pNormals, visitOrder);
             pLevel = labelUIndList(pLevel, visitOrder);
         }
 
@@ -1236,6 +1307,7 @@ Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
             label faceI = testFaces[i];
             label own = mesh_.faceOwner()[faceI];
 
+            const pointList& fPoints = surfaceLocation[i];
             const vectorList& fNormals = surfaceNormal[i];
             const labelList& fLevels = surfaceLevel[i];
 
@@ -1244,6 +1316,7 @@ Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
                 if (fLevels[hitI] > cellLevel[own])
                 {
                     cellSurfLevels[own].append(fLevels[hitI]);
+                    cellSurfLocations[own].append(fPoints[hitI]);
                     cellSurfNormals[own].append(fNormals[hitI]);
                 }
 
@@ -1253,6 +1326,7 @@ Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
                     if (fLevels[hitI] > cellLevel[nei])
                     {
                         cellSurfLevels[nei].append(fLevels[hitI]);
+                        cellSurfLocations[nei].append(fPoints[hitI]);
                         cellSurfNormals[nei].append(fNormals[hitI]);
                     }
                 }
@@ -1266,7 +1340,7 @@ Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
     if (debug)
     {
         label nSet = 0;
-        label nNormals = 9;
+        label nNormals = 0;
         forAll(cellSurfNormals, cellI)
         {
             const vectorList& normals = cellSurfNormals[cellI];
@@ -1296,21 +1370,38 @@ Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
     for
     (
         label cellI = 0;
-        !reachedLimit && cellI < cellSurfNormals.size();
+        !reachedLimit && cellI < cellSurfLocations.size();
         cellI++
     )
     {
+        const pointList& points = cellSurfLocations[cellI];
         const vectorList& normals = cellSurfNormals[cellI];
         const labelList& levels = cellSurfLevels[cellI];
+
+        // Current cell size
+        const scalar cellSize =
+            meshCutter_.level0EdgeLength()/pow(2.0, cellLevel[cellI]);
 
         // n^2 comparison of all normals in a cell
         for (label i = 0; !reachedLimit && i < normals.size(); i++)
         {
             for (label j = i+1; !reachedLimit && j < normals.size(); j++)
             {
-                if ((normals[i] & normals[j]) < curvature)
+                //if ((normals[i] & normals[j]) < curvature)
+                if
+                (
+                    highCurvature
+                    (
+                        curvature,
+                        cellSize,
+                        points[i],
+                        normals[i],
+                        points[j],
+                        normals[j]
+                    )
+                )
                 {
-                    label maxLevel = max(levels[i], levels[j]);
+                    const label maxLevel = max(levels[i], levels[j]);
 
                     if (cellLevel[cellI] < maxLevel)
                     {
@@ -1358,8 +1449,10 @@ Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
         label own = mesh_.faceOwner()[faceI];
         label nei = mesh_.faceNeighbour()[faceI];
 
+        const pointList& ownPoints = cellSurfLocations[own];
         const vectorList& ownNormals = cellSurfNormals[own];
         const labelList& ownLevels = cellSurfLevels[own];
+        const pointList& neiPoints = cellSurfLocations[nei];
         const vectorList& neiNormals = cellSurfNormals[nei];
         const labelList& neiLevels = cellSurfLevels[nei];
 
@@ -1379,13 +1472,30 @@ Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
 
         if (!ownIsSubset && !neiIsSubset)
         {
+            // Current average cell size. Is min? max? average?
+            const scalar cellSize =
+                meshCutter_.level0EdgeLength()
+              / pow(2.0, min(cellLevel[own], cellLevel[nei]));
+
             // n^2 comparison of between ownNormals and neiNormals
             for (label i = 0; !reachedLimit &&  i < ownNormals.size(); i++)
             {
                 for (label j = 0; !reachedLimit && j < neiNormals.size(); j++)
                 {
                     // Have valid data on both sides. Check curvature.
-                    if ((ownNormals[i] & neiNormals[j]) < curvature)
+                    //if ((ownNormals[i] & neiNormals[j]) < curvature)
+                    if
+                    (
+                        highCurvature
+                        (
+                            curvature,
+                            cellSize,
+                            ownPoints[i],
+                            ownNormals[i],
+                            neiPoints[j],
+                            neiNormals[j]
+                        )
+                    )
                     {
                         // See which side to refine.
                         if (cellLevel[own] < ownLevels[i])
@@ -1441,7 +1551,11 @@ Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
     }
 
 
-    // Send over surface normal to neighbour cell.
+    // Send over surface point/normal to neighbour cell.
+//    labelListList neiSurfaceLevel;
+//    syncTools::swapBoundaryCellList(mesh_, cellSurfLevels, neiSurfaceLevel);
+    List<vectorList> neiSurfacePoints;
+    syncTools::swapBoundaryCellList(mesh_, cellSurfLocations, neiSurfacePoints);
     List<vectorList> neiSurfaceNormals;
     syncTools::swapBoundaryCellList(mesh_, cellSurfNormals, neiSurfaceNormals);
 
@@ -1456,9 +1570,13 @@ Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
         label own = mesh_.faceOwner()[faceI];
         label bFaceI = faceI - mesh_.nInternalFaces();
 
+        const pointList& ownPoints = cellSurfLocations[own];
         const vectorList& ownNormals = cellSurfNormals[own];
         const labelList& ownLevels = cellSurfLevels[own];
+
+        const pointList& neiPoints = neiSurfacePoints[bFaceI];
         const vectorList& neiNormals = neiSurfaceNormals[bFaceI];
+        //const labelList& neiLevels = neiSurfaceLevel[bFacei];
 
         // Special case: owner normals set is a subset of the neighbour
         // normals. Do not do curvature refinement since other cell's normals
@@ -1475,13 +1593,30 @@ Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
 
         if (!ownIsSubset && !neiIsSubset)
         {
+            // Current average cell size. Is min? max? average?
+            const scalar cellSize =
+                meshCutter_.level0EdgeLength()
+              / pow(2.0, min(cellLevel[own], neiLevel[bFaceI]));
+
             // n^2 comparison of between ownNormals and neiNormals
             for (label i = 0; !reachedLimit &&  i < ownNormals.size(); i++)
             {
                 for (label j = 0; !reachedLimit && j < neiNormals.size(); j++)
                 {
                     // Have valid data on both sides. Check curvature.
-                    if ((ownNormals[i] & neiNormals[j]) < curvature)
+                    //if ((ownNormals[i] & neiNormals[j]) < curvature)
+                    if
+                    (
+                        highCurvature
+                        (
+                            curvature,
+                            cellSize,
+                            ownPoints[i],
+                            ownNormals[i],
+                            neiPoints[j],
+                            neiNormals[j]
+                        )
+                    )
                     {
                         if (cellLevel[own] < ownLevels[i])
                         {
@@ -2205,25 +2340,46 @@ Foam::labelList Foam::meshRefinement::refineCandidates
         // Refinement based on features smaller than cell size
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        if
-        (
-            smallFeatureRefinement
-         && (planarCos >= -1 && planarCos <= 1)
-         && max(shells_.maxGapLevel()) > 0
-        )
+        if (smallFeatureRefinement)
         {
-            label nGap = markSmallFeatureRefinement
+            label nGap = 0;
+            if
             (
-                planarCos,
-                nAllowRefine,
-                neiLevel,
-                neiCc,
+                planarCos >= -1
+             && planarCos <= 1
+             && max(shells_.maxGapLevel()) > 0
+            )
+            {
+                nGap = markSmallFeatureRefinement
+                (
+                    planarCos,
+                    nAllowRefine,
+                    neiLevel,
+                    neiCc,
 
-                refineCell,
-                nRefine
-            );
+                    refineCell,
+                    nRefine
+                );
+            }
             Info<< "Marked for refinement due to close opposite surfaces       "
                 << ": " << nGap << " cells."  << endl;
+
+            label nCurv = 0;
+            if (max(surfaces_.maxCurvatureLevel()) > 0)
+            {
+                nCurv = markSurfaceFieldRefinement
+                (
+                    nAllowRefine,
+                    neiLevel,
+                    neiCc,
+
+                    refineCell,
+                    nRefine
+                );
+                Info<< "Marked for refinement"
+                    << " due to curvature                     "
+                    << ": " << nCurv << " cells."  << endl;
+            }
         }
 
 

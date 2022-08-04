@@ -1833,4 +1833,120 @@ Foam::label Foam::meshRefinement::markSmallFeatureRefinement
 }
 
 
+////XXXXXXXX
+Foam::label Foam::meshRefinement::markSurfaceFieldRefinement
+(
+    const label nAllowRefine,
+    const labelList& neiLevel,
+    const pointField& neiCc,
+
+    labelList& refineCell,
+    label& nRefine
+) const
+{
+    const labelList& cellLevel = meshCutter_.cellLevel();
+    const labelList& surfaceIndices = surfaces_.surfaces();
+
+    label oldNRefine = nRefine;
+
+    //- Force calculation of tetBasePt
+    (void)mesh_.tetBasePtIs();
+    (void)mesh_.cellTree();
+    const indexedOctree<treeDataCell>& tree = mesh_.cellTree();
+
+
+    forAll(surfaceIndices, surfI)
+    {
+        label geomI = surfaceIndices[surfI];
+        const searchableSurface& geom = surfaces_.geometry()[geomI];
+
+        // Get the element index in a roundabout way. Problem is e.g.
+        // distributed surface where local indices differ from global
+        // ones (needed for getRegion call)
+
+        pointField ctrs;
+        labelList region;
+        labelList minLevelField;
+        {
+            // Representative local coordinates and bounding sphere
+            scalarField radiusSqr;
+            geom.boundingSpheres(ctrs, radiusSqr);
+
+            List<pointIndexHit> info;
+            geom.findNearest(ctrs, radiusSqr, info);
+
+            forAll(info, i)
+            {
+                if (!info[i].hit())
+                {
+                    FatalErrorInFunction
+                        << "fc:" << ctrs[i]
+                        << " radius:" << radiusSqr[i]
+                        << exit(FatalError);
+                }
+            }
+
+            geom.getRegion(info, region);
+            geom.getField(info, minLevelField);
+        }
+
+        if (minLevelField.size() != geom.size())
+        {
+            Pout<< "** no minLevelField" << endl;
+            continue;
+        }
+
+
+        label nOldRefine = 0;
+
+        forAll(ctrs, i)
+        {
+            label cellI = -1;
+            if (tree.nodes().size() && tree.bb().contains(ctrs[i]))
+            {
+                cellI = tree.findInside(ctrs[i]);
+            }
+
+            if
+            (
+                cellI != -1
+             && refineCell[cellI] == -1
+             && minLevelField[i] > cellLevel[cellI]
+            )
+            {
+                if
+                (
+                   !markForRefine
+                    (
+                        surfI,
+                        nAllowRefine,
+                        refineCell[cellI],
+                        nRefine
+                    )
+                )
+                {
+                    break;
+                }
+            }
+        }
+
+        Info<< "For surface " << geom.name() << " found "
+            << returnReduce(nRefine-nOldRefine, sumOp<label>())
+            << " cells containing cached refinement field" << endl;
+
+        if
+        (
+            returnReduce(nRefine, sumOp<label>())
+          > returnReduce(nAllowRefine, sumOp<label>())
+        )
+        {
+            Info<< "Reached refinement limit." << endl;
+        }
+    }
+
+    return returnReduce(nRefine-oldNRefine, sumOp<label>());
+}
+////XXXXXXXXX
+
+
 // ************************************************************************* //

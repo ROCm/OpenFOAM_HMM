@@ -1342,6 +1342,17 @@ int main(int argc, char *argv[])
     const snapParameters snapParams(snapDict, dryRun);
 
 
+    Info<< "Setting refinement level of surface to be consistent"
+        << " with curvature." << endl;
+    surfaces.setCurvatureMinLevelFields
+    (
+        refineParams.curvature(),
+        meshRefiner.meshCutter().level0EdgeLength()
+    );
+    Info<< "Checked curvature refinement in = "
+        << mesh.time().cpuTimeIncrement() << " s" << nl << endl;
+
+
 
     // Add all the cellZones and faceZones
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

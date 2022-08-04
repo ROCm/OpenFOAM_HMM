@@ -230,10 +230,16 @@ Foam::label Foam::snappyRefineDriver::smallFeatureRefine
     label iter = 0;
 
     // See if any surface has an extendedGapLevel
-    labelList surfaceMaxLevel(meshRefiner_.surfaces().maxGapLevel());
-    labelList shellMaxLevel(meshRefiner_.shells().maxGapLevel());
+    const labelList surfaceMaxLevel(meshRefiner_.surfaces().maxGapLevel());
+    const labelList shellMaxLevel(meshRefiner_.shells().maxGapLevel());
+    const labelList curvMaxLevel(meshRefiner_.surfaces().maxCurvatureLevel());
 
-    if (max(surfaceMaxLevel) == 0 && max(shellMaxLevel) == 0)
+    if
+    (
+        max(surfaceMaxLevel) == 0
+     && max(shellMaxLevel) == 0
+     && max(curvMaxLevel) == 0
+    )
     {
         return iter;
     }
@@ -3382,6 +3388,7 @@ void Foam::snappyRefineDriver::doRefine
     (
         max(meshRefiner_.surfaces().maxGapLevel()) > 0
      || max(meshRefiner_.shells().maxGapLevel()) > 0
+     || max(meshRefiner_.surfaces().maxCurvatureLevel()) > 0
     )
     {
         // In case we use automatic gap level refinement do some pre-refinement

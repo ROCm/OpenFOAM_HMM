@@ -110,6 +110,9 @@ class refinementSurfaces
         //  (in gap refinement)
         boolList selfProximity_;
 
+        //- From global region number to curvature specification
+        List<FixedList<label, 4>> extendedCurvatureLevel_;
+
         //- From global region number to perpendicular angle
         scalarField perpendicularAngle_;
 
@@ -263,6 +266,19 @@ public:
                 return selfProximity_;
             }
 
+            //- From global region number to specification of curvature
+            //  refinement: 4 labels specifying
+            //  - minimum wanted number of cells in the curvature radius
+            //  - ?minimum cell level when to start trying to detect gaps
+            //  - maximum cell level to refine to (so do not detect curvature if
+            //    celllevel >= maximum level)
+            //  - minimum radius to ignore (expressed as refinement level).
+            //    This can be used to ignore feature-edges. Set to -1 to ignore.
+            const List<FixedList<label, 4>>& extendedCurvatureLevel() const
+            {
+                return extendedCurvatureLevel_;
+            }
+
             //- From global region number to perpendicular angle
             const scalarField& perpendicularAngle() const
             {
@@ -307,10 +323,21 @@ public:
             //- Per surface the maximum extendedGapLevel over all its regions
             labelList maxGapLevel() const;
 
-            //- Calculate minLevelFields
+            //- Per surface the maximum curvatureLevel over all its regions
+            labelList maxCurvatureLevel() const;
+
+            //- Calculate minLevelFields according to both surface- and
+            //  shell-based levels
             void setMinLevelFields
             (
                 const shellSurfaces& shells
+            );
+
+            //- Update minLevelFields according to (triSurface-only) curvature
+            void setCurvatureMinLevelFields
+            (
+                const scalar cosAngle,
+                const scalar level0EdgeLength
             );
 
             ////- Helper: count number of triangles per region
