@@ -1,6 +1,15 @@
 // All rays expressed as start face (local) index end end face (global)
 // Pre-size by assuming a certain percentage is visible.
 
+
+if (Pstream::master())
+{
+    Info<< "\nShooting rays using distributedTriSurfaceMesh (no CGAL support)"
+        << endl;
+}
+
+
+
 // Maximum length for dynamicList
 const label maxDynListLength
 (
