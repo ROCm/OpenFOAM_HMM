@@ -373,7 +373,12 @@ Foam::refinementSurfaces::refinementSurfaces
                                 "level",
                                 dryRun_,
                                 keyType::REGEX,
-                                labelPair(0, 0)
+                                //labelPair(0, 0)
+                                labelPair
+                                (
+                                    globalMinLevel[surfI],
+                                    globalMaxLevel[surfI]
+                                )
                             )
                         );
 
@@ -413,7 +418,7 @@ Foam::refinementSurfaces::refinementSurfaces
                             regionDict.getOrDefault
                             (
                                 "gapLevel",
-                                nullGapLevel
+                                globalGapLevel[surfI]   //nullGapLevel
                             )
                         );
                         regionGapLevel[surfI].insert(regionI, gapSpec);
@@ -421,7 +426,7 @@ Foam::refinementSurfaces::refinementSurfaces
                         (
                             "gapMode",
                             regionDict,
-                            volumeType::MIXED
+                            globalGapMode[surfI]   //volumeType::MIXED
                         );
                         regionGapMode[surfI].insert(regionI, gapModeSpec);
                         if
@@ -446,23 +451,28 @@ Foam::refinementSurfaces::refinementSurfaces
                             regionDict.getOrDefault<bool>
                             (
                                 "gapSelf",
-                                true
+                                globalGapSelf[surfI]    //true
                             )
                         );
 
+                        // Start off with the per-surface level
                         FixedList<label, 4> curvSpec(nullCurvLevel);
-                        if (regionDict.readIfPresent("curvatureLevel", curvSpec))
+                        if
+                        (
+                            regionDict.readIfPresent("curvatureLevel", curvSpec)
+                        )
                         {
                             if (curvSpec[0] <= 0)
                             {
                                 FatalIOErrorInFunction(dict)
-                                    << "Illegal curvatureLevel specification for surface "
+                                    << "Illegal curvatureLevel"
+                                    << " specification for surface "
                                     << names_[surfI]
                                     << " : curvatureLevel:" << curvSpec
                                     << exit(FatalIOError);
                             }
+                            regionCurvLevel[surfI].insert(regionI, curvSpec);
                         }
-                        regionCurvLevel[surfI].insert(regionI, curvSpec);
 
                         if (regionDict.found("perpendicularAngle"))
                         {
@@ -562,8 +572,7 @@ Foam::refinementSurfaces::refinementSurfaces
             extendedGapLevel_[globalRegionI] = globalGapLevel[surfI];
             extendedGapMode_[globalRegionI] = globalGapMode[surfI];
             selfProximity_[globalRegionI] = globalGapSelf[surfI];
-            extendedCurvatureLevel_[globalRegionI] =
-                globalCurvLevel[surfI];
+            extendedCurvatureLevel_[globalRegionI] = globalCurvLevel[surfI];
             perpendicularAngle_[globalRegionI] = globalAngle[surfI];
             if (globalPatchInfo.set(surfI))
             {
@@ -587,19 +596,29 @@ Foam::refinementSurfaces::refinementSurfaces
             gapLevel_[globalRegionI] =
                 maxLevel_[globalRegionI]
               + regionLevelIncr[surfI][iter.key()];
+        }
+
+        forAllConstIters(regionGapLevel[surfI], iter)
+        {
+            const label globalRegionI = regionOffset_[surfI] + iter.key();
+
             extendedGapLevel_[globalRegionI] =
                 regionGapLevel[surfI][iter.key()];
             extendedGapMode_[globalRegionI] =
                 regionGapMode[surfI][iter.key()];
             selfProximity_[globalRegionI] =
                 regionGapSelf[surfI][iter.key()];
-            extendedCurvatureLevel_[globalRegionI] =
-                regionCurvLevel[surfI][iter.key()];
         }
+
+        forAllConstIters(regionCurvLevel[surfI], iter)
+        {
+            const label globalRegionI = regionOffset_[surfI] + iter.key();
+            extendedCurvatureLevel_[globalRegionI] = iter.val();
+        }
+
         forAllConstIters(regionAngle[surfI], iter)
         {
             const label globalRegionI = regionOffset_[surfI] + iter.key();
-
             perpendicularAngle_[globalRegionI] = iter.val();
         }
 
