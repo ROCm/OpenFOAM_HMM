@@ -72,6 +72,9 @@ oversetInterpolation
         (500 500 500)
         (500 500 500)
     );
+
+    holeLayers          6;
+    useLayer            3;
 }
 
 oversetInterpolationSuppressed

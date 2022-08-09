@@ -87,24 +87,6 @@ functions
              (0.0009999 0.0015 0.003)
         );
     }
-
-    alphaVol
-    {
-        libs            (utilityFunctionObjects);
-        type            coded;
-        name            alphaVolume;
-        writeControl    timeStep;
-        writeInterval   10;
-
-        codeWrite
-        #{
-            const auto& alpha =
-                mesh().lookupObject<volScalarField>("alpha.water");
-
-            Info<< "Alpha volume = " << alpha.weightedAverage(mesh().Vsc())
-                << endl;
-        #};
-    }
 }
 
 

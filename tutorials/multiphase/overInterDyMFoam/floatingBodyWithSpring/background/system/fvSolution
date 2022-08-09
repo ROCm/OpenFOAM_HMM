@@ -80,12 +80,6 @@ PIMPLE
     nCorrectors         3;
     nNonOrthogonalCorrectors 0;
 
-    ddtCorr                    yes;
-    correctPhi                 no;
-    checkMeshCourantNo         no;
-
-    moveMeshOuterCorrectors no;
-    turbOnFinalIterOnly no;
     oversetAdjustPhi    no;
 }
 
