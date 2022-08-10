@@ -6,6 +6,8 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2015 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022 Upstream CFD GmbH
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,15 +61,111 @@ DESModel<BasicTurbulenceModel>::DESModel
         phi,
         transport,
         propertiesName
-    )
-{}
+    ),
+    Ctrans_(dimless, Zero)
+{
+    // Note: Ctrans is model-specific and initialised in derived classes
+}
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
-DESModel<BasicTurbulenceModel>::~DESModel()
-{}
+bool DESModel<BasicTurbulenceModel>::read()
+{
+    if (LESeddyViscosity<BasicTurbulenceModel>::read())
+    {
+        Ctrans_.readIfPresent(this->coeffDict());
+
+        return true;
+    }
+
+    return false;
+}
+
+
+template<class BasicTurbulenceModel>
+tmp<volScalarField> DESModel<BasicTurbulenceModel>::Ssigma
+(
+    const volTensorField& gradU,
+    const dimensionedScalar& coeff
+)
+{
+    const volTensorField G(gradU.T() & gradU);
+
+    // Tensor invariants
+    const volScalarField I1(tr(G));
+    const volScalarField I2(0.5*(sqr(tr(G)) - tr(G & G)));
+    const volScalarField I3(det(G));
+
+    const volScalarField alpha1
+    (
+        max
+        (
+            sqr(I1)/9.0 - I2/3.0,
+            dimensionedScalar("SMALL", dimless/pow4(dimTime), SMALL)
+        )
+    );
+
+    const volScalarField alpha2
+    (
+        pow3
+        (
+            min
+            (
+                I1,
+                dimensionedScalar("GREAT", dimless/sqr(dimTime), GREAT)
+            )
+        )/27.0
+      - I1*I2/6.0 + I3/2.0
+    );
+
+    const dimensionedScalar eps0("SMALL", dimless, SMALL);
+    const volScalarField alpha3
+    (
+        1.0/3.0
+       *acos
+        (
+            max
+            (
+                scalar(-1) + eps0,
+                min(scalar(1) - eps0, alpha2/pow(alpha1, 3.0/2.0))
+            )
+        )
+    );
+
+    const dimensionedScalar sig0("SMALL", dimless/sqr(dimTime), SMALL);
+    const scalar piBy3 = constant::mathematical::pi/3.0;
+    const volScalarField sigma1
+    (
+        sqrt(max(I1/3.0 + 2.0*sqrt(alpha1)*cos(alpha3), sig0))
+    );
+    const volScalarField sigma2
+    (
+        sqrt(max(I1/3.0 - 2.0*sqrt(alpha1)*cos(piBy3 + alpha3), sig0))
+    );
+    const volScalarField sigma3
+    (
+        sqrt(max(I1/3.0 - 2.0*sqrt(alpha1)*cos(piBy3 - alpha3), sig0))
+    );
+
+    return
+        coeff
+       *sigma3
+       *(sigma1 - sigma2)
+       *(sigma2 - sigma3)
+       /max(sqr(sigma1), sig0);
+}
+
+
+template<class BasicTurbulenceModel>
+tmp<volScalarField> DESModel<BasicTurbulenceModel>::Ssigma
+(
+    const volTensorField& gradU
+) const
+{
+    return Ssigma(gradU, Ctrans_);
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

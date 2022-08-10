@@ -6,7 +6,8 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2015 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016, 2022 OpenCFD Ltd.
+    Copyright (C) 2022 Upstream CFD GmbH
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,6 +70,13 @@ private:
         void operator=(const DESModel&) = delete;
 
 
+protected:
+
+    // Protected Data
+
+        dimensionedScalar Ctrans_;
+
+
 public:
 
     typedef typename BasicTurbulenceModel::alphaField alphaField;
@@ -97,8 +105,22 @@ public:
 
     // Public Member Functions
 
+        //- Re-read model coefficients if they have changed
+        virtual bool read();
+
         //- Return the LES field indicator
         virtual tmp<volScalarField> LESRegion() const = 0;
+
+        //- Return modified strain rate
+        static tmp<volScalarField> Ssigma
+        (
+            const volTensorField& gradU,
+            const dimensionedScalar& coeff
+        );
+
+        //- Return modified strain rate
+        //  Note: uses Ctrans_ coefficient
+        tmp<volScalarField> Ssigma(const volTensorField& gradU) const;
 };
 
 
