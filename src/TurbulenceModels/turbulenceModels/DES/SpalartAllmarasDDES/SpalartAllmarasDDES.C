@@ -7,6 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
     Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2022 Upstream CFD GmbH
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,6 +51,43 @@ tmp<volScalarField> SpalartAllmarasDDES<BasicTurbulenceModel>::fd
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+template<class BasicTurbulenceModel>
+tmp<volScalarField> SpalartAllmarasDDES<BasicTurbulenceModel>::Stilda
+(
+    const volScalarField& chi,
+    const volScalarField& fv1,
+    const volTensorField& gradU,
+    const volScalarField& dTilda
+) const
+{
+    tmp<volScalarField> St =
+        SpalartAllmarasBase<DESModel<BasicTurbulenceModel>>::Stilda
+        (
+            chi,
+            fv1,
+            gradU,
+            dTilda
+        );
+
+    if (useSigma_)
+    {
+        const volScalarField& lRAS(this->y_);
+        const volScalarField lLES(this->lengthScaleLES(chi, fv1));
+        const volScalarField Omega(this->Omega(gradU));
+        const volScalarField Ssigma(this->Ssigma(gradU));
+
+        return
+            max
+            (
+                St - fd(mag(gradU))*pos(lRAS - lLES)*(Omega - Ssigma),
+                this->Cs_*Omega
+            );
+    }
+
+    return St;
+}
+
 
 template<class BasicTurbulenceModel>
 tmp<volScalarField> SpalartAllmarasDDES<BasicTurbulenceModel>::dTilda
@@ -103,14 +141,30 @@ SpalartAllmarasDDES<BasicTurbulenceModel>::SpalartAllmarasDDES
         type
     ),
 
+    useSigma_
+    (
+        Switch::getOrAddToDict
+        (
+            "useSigma",
+            this->coeffDict_,
+            false
+        )
+    ),
     Cd1_
     (
-        dimensioned<scalar>::getOrAddToDict
-        (
-            "Cd1",
-            this->coeffDict_,
-            8
-        )
+        useSigma_ ?
+            dimensioned<scalar>::getOrAddToDict
+            (
+                "Cd1Sigma",
+                this->coeffDict_,
+                10
+            )
+          : dimensioned<scalar>::getOrAddToDict
+            (
+                "Cd1",
+                this->coeffDict_,
+                8
+            )
     ),
     Cd2_
     (
@@ -136,6 +190,7 @@ bool SpalartAllmarasDDES<BasicTurbulenceModel>::read()
 {
     if (SpalartAllmarasDES<BasicTurbulenceModel>::read())
     {
+        useSigma_.readIfPresent("useSigma", this->coeffDict());
         Cd1_.readIfPresent(this->coeffDict());
         Cd2_.readIfPresent(this->coeffDict());
 

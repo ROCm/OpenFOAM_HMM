@@ -7,6 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
     Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2022 Upstream CFD GmbH
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -166,6 +167,10 @@ SpalartAllmarasDES<BasicTurbulenceModel>::SpalartAllmarasDES
         )
     )
 {
+    // Note: Ctrans coeff is model specific; for S-A = 67.7
+    this->Ctrans_ =
+        dimensioned<scalar>::getOrAddToDict("Ctrans", this->coeffDict_, 67.7);
+
     if (type == typeName)
     {
         this->printCoeffs(type);
