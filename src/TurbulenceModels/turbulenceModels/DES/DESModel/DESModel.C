@@ -91,36 +91,35 @@ tmp<volScalarField> DESModel<BasicTurbulenceModel>::Ssigma
     const dimensionedScalar& coeff
 )
 {
-    const volTensorField G(gradU.T() & gradU);
+    // Limiter
+    const dimensionedScalar eps0("eps0", dimless, SMALL);
+    const dimensionedScalar eps2("eps2", dimless/sqr(dimTime), SMALL);
+    const dimensionedScalar eps4("eps4", dimless/pow4(dimTime), SMALL);
+    const dimensionedScalar max2("max2", dimless/sqr(dimTime), GREAT);
+    const dimensionedTensor maxTen2
+    (
+        "maxTen2",
+        dimless/sqr(dimTime),
+        tensor::max
+    );
+    const dimensionedTensor minTen2
+    (
+        "minTen2",
+        dimless/sqr(dimTime),
+        tensor::min
+    );
+
+    const volTensorField G(max(min(gradU.T() & gradU, maxTen2), minTen2));
 
     // Tensor invariants
     const volScalarField I1(tr(G));
-    const volScalarField I2(0.5*(sqr(tr(G)) - tr(G & G)));
+    const volScalarField I2(0.5*(sqr(I1) - tr(G & G)));
     const volScalarField I3(det(G));
 
-    const volScalarField alpha1
-    (
-        max
-        (
-            sqr(I1)/9.0 - I2/3.0,
-            dimensionedScalar("SMALL", dimless/pow4(dimTime), SMALL)
-        )
-    );
+    const volScalarField alpha1(max(sqr(I1)/9.0 - I2/3.0, eps4));
 
-    const volScalarField alpha2
-    (
-        pow3
-        (
-            min
-            (
-                I1,
-                dimensionedScalar("GREAT", dimless/sqr(dimTime), GREAT)
-            )
-        )/27.0
-      - I1*I2/6.0 + I3/2.0
-    );
+    const volScalarField alpha2(pow3(min(I1, max2))/27.0 - I1*I2/6.0 + I3/2.0);
 
-    const dimensionedScalar eps0("SMALL", dimless, SMALL);
     const volScalarField alpha3
     (
         1.0/3.0
@@ -134,19 +133,18 @@ tmp<volScalarField> DESModel<BasicTurbulenceModel>::Ssigma
         )
     );
 
-    const dimensionedScalar sig0("SMALL", dimless/sqr(dimTime), SMALL);
     const scalar piBy3 = constant::mathematical::pi/3.0;
     const volScalarField sigma1
     (
-        sqrt(max(I1/3.0 + 2.0*sqrt(alpha1)*cos(alpha3), sig0))
+        sqrt(max(I1/3.0 + 2.0*sqrt(alpha1)*cos(alpha3), eps2))
     );
     const volScalarField sigma2
     (
-        sqrt(max(I1/3.0 - 2.0*sqrt(alpha1)*cos(piBy3 + alpha3), sig0))
+        sqrt(max(I1/3.0 - 2.0*sqrt(alpha1)*cos(piBy3 + alpha3), eps2))
     );
     const volScalarField sigma3
     (
-        sqrt(max(I1/3.0 - 2.0*sqrt(alpha1)*cos(piBy3 - alpha3), sig0))
+        sqrt(max(I1/3.0 - 2.0*sqrt(alpha1)*cos(piBy3 - alpha3), eps2))
     );
 
     return
@@ -154,7 +152,7 @@ tmp<volScalarField> DESModel<BasicTurbulenceModel>::Ssigma
        *sigma3
        *(sigma1 - sigma2)
        *(sigma2 - sigma3)
-       /max(sqr(sigma1), sig0);
+       /max(sqr(sigma1), eps2);
 }
 
 
