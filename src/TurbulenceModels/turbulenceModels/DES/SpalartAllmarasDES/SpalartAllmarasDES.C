@@ -96,6 +96,46 @@ tmp<volScalarField> SpalartAllmarasDES<BasicTurbulenceModel>::lengthScaleLES
 
 
 template<class BasicTurbulenceModel>
+tmp<volScalarField> SpalartAllmarasDES<BasicTurbulenceModel>::Stilda
+(
+    const volScalarField& chi,
+    const volScalarField& fv1,
+    const volTensorField& gradU,
+    const volScalarField& dTilda
+) const
+{
+    if (useSigma_)
+    {
+        const volScalarField& lRAS = this->y_;
+        const volScalarField fv2(this->fv2(chi, fv1));
+        const volScalarField lLES(this->lengthScaleLES(chi, fv1));
+        const volScalarField Omega(this->Omega(gradU));
+        const volScalarField Ssigma(this->Ssigma(gradU));
+        const volScalarField SsigmaDES
+        (
+            pos(dTilda - lRAS)*Omega + (scalar(1) - pos(dTilda - lRAS))*Ssigma
+        );
+
+        return
+            max
+            (
+                SsigmaDES + fv2*this->nuTilda_/sqr(this->kappa_*dTilda),
+                this->Cs_*SsigmaDES
+            );
+    }
+
+    return
+        SpalartAllmarasBase<DESModel<BasicTurbulenceModel>>::Stilda
+        (
+            chi,
+            fv1,
+            gradU,
+            dTilda
+        );
+}
+
+
+template<class BasicTurbulenceModel>
 tmp<volScalarField> SpalartAllmarasDES<BasicTurbulenceModel>::dTilda
 (
     const volScalarField& chi,
@@ -139,6 +179,15 @@ SpalartAllmarasDES<BasicTurbulenceModel>::SpalartAllmarasDES
         propertiesName
     ),
 
+    useSigma_
+    (
+        Switch::getOrAddToDict
+        (
+            "useSigma",
+            this->coeffDict_,
+            false
+        )
+    ),
     CDES_
     (
         dimensioned<scalar>::getOrAddToDict
@@ -190,6 +239,7 @@ bool SpalartAllmarasDES<BasicTurbulenceModel>::read()
 {
     if (SpalartAllmarasBase<DESModel<BasicTurbulenceModel>>::read())
     {
+        useSigma_.readIfPresent("useSigma", this->coeffDict());
         CDES_.readIfPresent(this->coeffDict());
         lowReCorrection_.readIfPresent("lowReCorrection", this->coeffDict());
         fwStar_.readIfPresent(this->coeffDict());

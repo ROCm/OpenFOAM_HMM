@@ -61,7 +61,27 @@ tmp<volScalarField> SpalartAllmarasDDES<BasicTurbulenceModel>::Stilda
     const volScalarField& dTilda
 ) const
 {
-    tmp<volScalarField> St =
+    if (this->useSigma_)
+    {
+        const volScalarField& lRAS(this->y_);
+        const volScalarField fv2(this->fv2(chi, fv1));
+        const volScalarField lLES(this->lengthScaleLES(chi, fv1));
+        const volScalarField Omega(this->Omega(gradU));
+        const volScalarField Ssigma(this->Ssigma(gradU));
+        const volScalarField SsigmaDES
+        (
+            Omega - fd(mag(gradU))*pos(lRAS - lLES)*(Omega - Ssigma)
+        );
+
+        return
+            max
+            (
+                SsigmaDES + fv2*this->nuTilda_/sqr(this->kappa_*dTilda),
+                this->Cs_*SsigmaDES
+            );
+    }
+
+    return
         SpalartAllmarasBase<DESModel<BasicTurbulenceModel>>::Stilda
         (
             chi,
@@ -69,23 +89,6 @@ tmp<volScalarField> SpalartAllmarasDDES<BasicTurbulenceModel>::Stilda
             gradU,
             dTilda
         );
-
-    if (useSigma_)
-    {
-        const volScalarField& lRAS(this->y_);
-        const volScalarField lLES(this->lengthScaleLES(chi, fv1));
-        const volScalarField Omega(this->Omega(gradU));
-        const volScalarField Ssigma(this->Ssigma(gradU));
-
-        return
-            max
-            (
-                St - fd(mag(gradU))*pos(lRAS - lLES)*(Omega - Ssigma),
-                this->Cs_*Omega
-            );
-    }
-
-    return St;
 }
 
 
@@ -136,18 +139,9 @@ SpalartAllmarasDDES<BasicTurbulenceModel>::SpalartAllmarasDDES
         type
     ),
 
-    useSigma_
-    (
-        Switch::getOrAddToDict
-        (
-            "useSigma",
-            this->coeffDict_,
-            false
-        )
-    ),
     Cd1_
     (
-        useSigma_ ?
+        this->useSigma_ ?
             dimensioned<scalar>::getOrAddToDict
             (
                 "Cd1Sigma",
@@ -185,7 +179,6 @@ bool SpalartAllmarasDDES<BasicTurbulenceModel>::read()
 {
     if (SpalartAllmarasDES<BasicTurbulenceModel>::read())
     {
-        useSigma_.readIfPresent("useSigma", this->coeffDict());
         Cd1_.readIfPresent(this->coeffDict());
         Cd2_.readIfPresent(this->coeffDict());
 

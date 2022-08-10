@@ -76,6 +76,33 @@ tmp<volScalarField> kOmegaSSTDES<BasicTurbulenceModel>::r
 
 
 template<class BasicTurbulenceModel>
+tmp<volScalarField> kOmegaSSTDES<BasicTurbulenceModel>::S2
+(
+    const volScalarField& F1,
+    const volTensorField& gradU
+) const
+{
+    tmp<volScalarField> tS2 =
+        kOmegaSSTBase<DESModel<BasicTurbulenceModel>>::S2(F1, gradU);
+
+    if (this->useSigma_)
+    {
+        volScalarField& S2 = tS2.ref();
+        const volScalarField CDES(this->CDES(F1));
+        const volScalarField dTilda(this->dTilda(mag(gradU), CDES));
+        const volScalarField lengthScaleRAS(this->lengthScaleRAS());
+        const volScalarField Ssigma(this->Ssigma(gradU));
+
+        S2 =
+            pos(dTilda - lengthScaleRAS)*S2
+          + (scalar(1) - pos(dTilda - lengthScaleRAS))*sqr(Ssigma);
+    }
+
+    return tS2;
+}
+
+
+template<class BasicTurbulenceModel>
 tmp<volScalarField> kOmegaSSTDES<BasicTurbulenceModel>::dTilda
 (
     const volScalarField& magGradU,
@@ -95,6 +122,24 @@ tmp<volScalarField::Internal> kOmegaSSTDES<BasicTurbulenceModel>::epsilonByk
 {
     volScalarField CDES(this->CDES(F1));
     return sqrt(this->k_())/dTilda(mag(gradU), CDES)()();
+}
+
+
+template<class BasicTurbulenceModel>
+tmp<volScalarField::Internal> kOmegaSSTDES<BasicTurbulenceModel>::GbyNu0
+(
+    const volTensorField& gradU,
+    const volScalarField& F1,
+    const volScalarField& S2
+) const
+{
+    if (this->useSigma_)
+    {
+        return S2();
+    }
+
+    return
+        kOmegaSSTBase<DESModel<BasicTurbulenceModel>>::GbyNu0(gradU, F1, S2);
 }
 
 
@@ -137,6 +182,15 @@ kOmegaSSTDES<BasicTurbulenceModel>::kOmegaSSTDES
         propertiesName
     ),
 
+    useSigma_
+    (
+        Switch::getOrAddToDict
+        (
+            "useSigma",
+            this->coeffDict_,
+            false
+        )
+    ),
     kappa_
     (
         dimensioned<scalar>::getOrAddToDict
@@ -188,6 +242,7 @@ bool kOmegaSSTDES<BasicTurbulenceModel>::read()
 {
     if (kOmegaSSTBase<DESModel<BasicTurbulenceModel>>::read())
     {
+        useSigma_.readIfPresent("useSigma", this->coeffDict());
         kappa_.readIfPresent(this->coeffDict());
         CDESkom_.readIfPresent(this->coeffDict());
         CDESkeps_.readIfPresent(this->coeffDict());

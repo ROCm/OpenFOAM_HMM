@@ -86,9 +86,14 @@ protected:
 
     // Protected data
 
+        //- Switch to activate grey-area enhanced sigma-(D)DES
+        Switch useSigma_;
+
         // Model coefficients
 
             dimensionedScalar kappa_;
+
+	    //- DES coefficients
             dimensionedScalar CDESkom_;
             dimensionedScalar CDESkeps_;
 
@@ -110,6 +115,13 @@ protected:
             const volScalarField& magGradU
         ) const;
 
+        //- Return square of strain rate
+        virtual tmp<volScalarField> S2
+        (
+            const volScalarField& F1,
+            const volTensorField& gradU
+        ) const;
+
         //- Length scale
         virtual tmp<volScalarField> dTilda
         (
@@ -122,6 +134,14 @@ protected:
         (
             const volScalarField& F1,
             const volTensorField& gradU
+        ) const;
+
+        //- Return (G/nu)_0
+        virtual tmp<volScalarField::Internal> GbyNu0
+        (
+            const volTensorField& gradU,
+            const volScalarField& F1,
+            const volScalarField& S2
         ) const;
 
         //- Return G/nu

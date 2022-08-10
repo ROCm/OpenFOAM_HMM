@@ -96,6 +96,9 @@ protected:
 
     // Protected data
 
+        //- Switch to activate grey-area enhanced sigma-(D)DES
+        Switch useSigma_;
+
         // Model constants
 
             // DES coefficient
@@ -108,7 +111,7 @@ protected:
 
     // Protected Member Functions
 
-        //- Shielding function
+        //- Low Reynolds number correction function
         virtual tmp<volScalarField> psi
         (
             const volScalarField& chi,
@@ -120,6 +123,15 @@ protected:
         (
             const volScalarField& chi,
             const volScalarField& fv1
+        ) const;
+
+        //- Production term
+        virtual tmp<volScalarField> Stilda
+        (
+            const volScalarField& chi,
+            const volScalarField& fv1,
+            const volTensorField& gradU,
+            const volScalarField& dTilda
         ) const;
 
         //- Length scale

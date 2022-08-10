@@ -72,7 +72,7 @@ class SpalartAllmarasDDES
 {
     // Private Member Functions
 
-        //- Delay function
+        //- Shielding function
         tmp<volScalarField> fd(const volScalarField& magGradU) const;
 
         //- No copy construct
@@ -86,9 +86,6 @@ protected:
 
     // Protected data
 
-        //- Switch to activate grey-area enhanced sigma-DDES
-        Switch useSigma_;
-
         // Model coefficients
 
             dimensionedScalar Cd1_;
@@ -97,6 +94,7 @@ protected:
 
     // Protected Member Functions
 
+        //- Production term
         virtual tmp<volScalarField> Stilda
         (
             const volScalarField& chi,

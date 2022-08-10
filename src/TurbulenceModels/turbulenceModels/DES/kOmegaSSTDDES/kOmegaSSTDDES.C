@@ -58,20 +58,18 @@ tmp<volScalarField> kOmegaSSTDDES<BasicTurbulenceModel>::S2
 ) const
 {
     tmp<volScalarField> tS2 =
-        this->kOmegaSSTDES<BasicTurbulenceModel>::S2(F1, gradU);
+        kOmegaSSTBase<DESModel<BasicTurbulenceModel>>::S2(F1, gradU);
 
-    if (useSigma_)
+    if (this->useSigma_)
     {
         volScalarField& S2 = tS2.ref();
         const volScalarField CDES(this->CDES(F1));
         const volScalarField Ssigma(this->Ssigma(gradU));
 
         S2 -=
-            (
-                fd(mag(gradU))
-               *pos(this->lengthScaleRAS() - this->lengthScaleLES(CDES))
-               *(S2 - sqr(Ssigma))
-            );
+            fd(mag(gradU))
+           *pos(this->lengthScaleRAS() - this->lengthScaleLES(CDES))
+           *(S2 - sqr(Ssigma));
     }
 
     return tS2;
@@ -104,21 +102,13 @@ tmp<volScalarField::Internal> kOmegaSSTDDES<BasicTurbulenceModel>::GbyNu0
     const volScalarField& S2
 ) const
 {
-    tmp<volScalarField::Internal> tGbyNu0 =
-        this->kOmegaSSTDES<BasicTurbulenceModel>::GbyNu0(gradU, F1, S2);
-
-    if (useSigma_)
+    if (this->useSigma_)
     {
-        volScalarField::Internal& GbyNu0 = tGbyNu0.ref();
-        const volScalarField CDES(this->CDES(F1));
-
-        GbyNu0 -=
-            fd(mag(gradU))()()
-           *pos(this->lengthScaleRAS()()() - this->lengthScaleLES(CDES)()())
-           *(GbyNu0 - S2());
+        return S2();
     }
 
-    return tGbyNu0;
+    return
+        kOmegaSSTBase<DESModel<BasicTurbulenceModel>>::GbyNu0(gradU, F1, S2);
 }
 
 
@@ -161,18 +151,9 @@ kOmegaSSTDDES<BasicTurbulenceModel>::kOmegaSSTDDES
         type
     ),
 
-    useSigma_
-    (
-        Switch::getOrAddToDict
-        (
-            "useSigma",
-            this->coeffDict_,
-            false
-        )
-    ),
     Cd1_
     (
-        useSigma_ ?
+        this->useSigma_ ?
             dimensioned<scalar>::getOrAddToDict
             (
                 "Cd1Sigma",

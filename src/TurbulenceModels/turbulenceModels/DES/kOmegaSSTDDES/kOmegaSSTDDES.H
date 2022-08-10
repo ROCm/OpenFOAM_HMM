@@ -70,6 +70,7 @@ class kOmegaSSTDDES
 {
     // Private Member Functions
 
+        //- Shielding function
         tmp<volScalarField> fd(const volScalarField& magGradU) const;
 
         //- No copy construct
@@ -82,9 +83,6 @@ class kOmegaSSTDDES
 protected:
 
     // Protected data
-
-        //- Switch to activate grey-area enhanced sigma-DDES
-        Switch useSigma_;
 
         // Model coefficients
 
