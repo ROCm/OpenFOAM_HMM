@@ -6,7 +6,8 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
+    Copyright (C) 2022 Upstream CFD GmbH
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -271,6 +272,14 @@ protected:
         (
             const volScalarField& F1,
             const volTensorField& gradU
+        ) const;
+
+        //- Return (G/nu)_0
+        virtual tmp<volScalarField::Internal> GbyNu0
+        (
+            const volTensorField& gradU,
+            const volScalarField& F1,
+            const volScalarField& S2
         ) const;
 
         //- Return G/nu

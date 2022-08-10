@@ -6,7 +6,8 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2022 Upstream CFD GmbH
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -161,6 +162,22 @@ tmp<volScalarField::Internal> kOmegaSSTBase<BasicEddyViscosityModel>::epsilonByk
 ) const
 {
     return betaStar_*omega_();
+}
+
+
+template<class BasicEddyViscosityModel>
+tmp<volScalarField::Internal> kOmegaSSTBase<BasicEddyViscosityModel>::GbyNu0
+(
+    const volTensorField& gradU,
+    const volScalarField& F1,
+    const volScalarField& S2
+) const
+{
+    return tmp<volScalarField::Internal>::New
+    (
+        IOobject::scopedName(this->type(), "GbyNu"),
+        gradU() && dev(twoSymm(gradU()))
+    );
 }
 
 
@@ -510,13 +527,8 @@ void kOmegaSSTBase<BasicEddyViscosityModel>::correct()
 
     tmp<volTensorField> tgradU = fvc::grad(U);
     volScalarField S2(this->S2(F1, tgradU()));
-    volScalarField::Internal GbyNu0
-    (
-        this->type() + ":GbyNu",
-        (tgradU() && dev(twoSymm(tgradU())))
-    );
+    volScalarField::Internal GbyNu0(this->GbyNu0(tgradU(), F1, S2));
     volScalarField::Internal G(this->GName(), nut*GbyNu0);
-    tgradU.clear();
 
     // Update omega and G at the wall
     omega_.boundaryFieldRef().updateCoeffs();

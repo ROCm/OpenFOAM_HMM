@@ -6,7 +6,8 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2022 Upstream CFD GmbH
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -167,6 +168,10 @@ kOmegaSSTDES<BasicTurbulenceModel>::kOmegaSSTDES
         )
     )
 {
+    // Note: Ctrans coeff is model specific; for k-w = 60
+    this->Ctrans_ =
+        dimensioned<scalar>::getOrAddToDict("Ctrans", this->coeffDict_, 60.0);
+
     if (type == typeName)
     {
         this->printCoeffs(type);
