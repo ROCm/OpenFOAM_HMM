@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2020,2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -96,7 +96,15 @@ int main(int argc, char *argv[])
 
     label nCoarseFaces = 0;
 
-    for (const entry& dEntry : agglomDict)
+
+    const auto& patchesDict =
+        agglomDict.optionalSubDict
+        (
+            "patchAgglomeration",
+            keyType::LITERAL
+        );
+
+    for (const entry& dEntry : patchesDict)
     {
         labelList patchids = boundary.indices(dEntry.keyword());
 
@@ -112,7 +120,7 @@ int main(int argc, char *argv[])
                 (
                     pp.localFaces(),
                     pp.localPoints(),
-                    agglomDict.subDict(pp.name())
+                    dEntry.dict()
                 );
 
                 agglomObject.agglomerate();
