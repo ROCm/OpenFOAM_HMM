@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,7 +61,53 @@ Foam::oversetGAMGInterface::oversetGAMGInterface
         index,
         coarseInterfaces
     )
-{}
+{
+    // Problem:
+    // - we only want the oversetGAMGInterfaceField
+    // - but this needs a oversetGAMGInterface of at least size 1
+    //   (since faceRestrictAddressing cannot have -1 or so in it - it
+    //    can only have >= 0 i.e. we cannot agglomerate into nothing)
+    // - note that the end result is not used - the (current) corresponding
+    //   oversetGAMGInterfaceField has dummy updateInterfaceMatrix.
+
+    // Construct face agglomeration from cell agglomeration. Code same as
+    // in e.g. cyclicAMIGAMGInterface.
+    {
+        // From coarse face to cell
+        DynamicList<label> dynFaceCells(localRestrictAddressing.size());
+
+        // From face to coarse face
+        DynamicList<label> dynFaceRestrictAddressing
+        (
+            localRestrictAddressing.size()
+        );
+
+        Map<label> masterToCoarseFace(localRestrictAddressing.size());
+
+        for (const label curMaster : localRestrictAddressing)
+        {
+            const auto iter = masterToCoarseFace.cfind(curMaster);
+
+            if (iter.found())
+            {
+                // Already have coarse face
+                dynFaceRestrictAddressing.append(iter.val());
+            }
+            else
+            {
+                // New coarse face
+                const label coarseI = dynFaceCells.size();
+
+                dynFaceRestrictAddressing.append(coarseI);
+                dynFaceCells.append(curMaster);
+                masterToCoarseFace.insert(curMaster, coarseI);
+            }
+        }
+
+        faceCells_.transfer(dynFaceCells);
+        faceRestrictAddressing_.transfer(dynFaceRestrictAddressing);
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

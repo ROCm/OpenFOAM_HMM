@@ -18,10 +18,18 @@ solvers
 {
     T
     {
-        solver          PBiCGStab;
-        preconditioner  DILU;
         tolerance       1e-10;
         relTol          0;
+
+        solver          PBiCGStab;
+        preconditioner  DILU;
+
+        //// Note: GAMG not supported with massCorrection switched on
+        //solver          GAMG;
+        //smoother        GaussSeidel;
+        //nCellsInCoarsestLevel   1;
+        //// Important: overset adds faces so use matrix-based agglomerator
+        //agglomerator        algebraicPair;
     }
 
     cellDisplacement
