@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,13 +72,13 @@ protected:
 
         // Hole cell controls
 
-            //- Set hole cell value
+            //- Flag to set hole cell values
             const bool setHoleCellValue_;
 
-            //- Correct mass
-            const bool massCorrection_;
+            //- Flag to correct fluxes
+            const bool fluxCorrection_;
 
-            //- Interpolate hole cell value (from nearby non-hole cell)
+            //- Flag to interpolate hole cell values (from nearby non-hole cell)
             const bool interpolateHoleCellValue_;
 
             //- Hole cell value
@@ -172,7 +172,7 @@ public:
             //  to have been called before
             void adjustPsi
             (
-                Field<scalar>& psi,
+                solveScalarField& psi,
                 const lduAddressing& lduAddr,
                 solveScalarField& result
             ) const;

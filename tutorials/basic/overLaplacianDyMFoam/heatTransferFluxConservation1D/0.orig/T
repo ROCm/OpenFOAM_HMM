@@ -30,7 +30,7 @@ boundaryField
     free
     {
         type            overset;
-        massCorrection  true;
+        fluxCorrection  true;
         value           uniform 300;
     }
 

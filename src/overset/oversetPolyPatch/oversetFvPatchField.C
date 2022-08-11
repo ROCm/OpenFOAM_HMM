@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,7 +43,7 @@ Foam::oversetFvPatchField<Type>::oversetFvPatchField
     coupledFvPatchField<Type>(p, iF),
     oversetPatch_(refCast<const oversetFvPatch>(p)),
     setHoleCellValue_(false),
-    massCorrection_(false),
+    fluxCorrection_(false),
     interpolateHoleCellValue_(false),
     holeCellValue_(pTraits<Type>::min),
     fringeUpperCoeffs_(),
@@ -65,7 +65,7 @@ Foam::oversetFvPatchField<Type>::oversetFvPatchField
     coupledFvPatchField<Type>(ptf, p, iF, mapper),
     oversetPatch_(refCast<const oversetFvPatch>(p)),
     setHoleCellValue_(ptf.setHoleCellValue_),
-    massCorrection_(ptf.massCorrection_),
+    fluxCorrection_(ptf.fluxCorrection_),
     interpolateHoleCellValue_(ptf.interpolateHoleCellValue_),
     holeCellValue_(ptf.holeCellValue_),
     fringeUpperCoeffs_(ptf.fringeUpperCoeffs_),
@@ -86,7 +86,15 @@ Foam::oversetFvPatchField<Type>::oversetFvPatchField
     coupledFvPatchField<Type>(p, iF, dict, false),
     oversetPatch_(refCast<const oversetFvPatch>(p, dict)),
     setHoleCellValue_(dict.getOrDefault("setHoleCellValue", false)),
-    massCorrection_(dict.getOrDefault("massCorrection", false)),
+    fluxCorrection_
+    (
+        dict.getOrDefaultCompat
+        (
+            "fluxCorrection",
+            {{"massCorrection", 2206}},
+            false
+        )
+    ),
     interpolateHoleCellValue_
     (
         dict.getOrDefault("interpolateHoleCellValue", false)
@@ -125,7 +133,7 @@ Foam::oversetFvPatchField<Type>::oversetFvPatchField
     coupledFvPatchField<Type>(ptf),
     oversetPatch_(ptf.oversetPatch_),
     setHoleCellValue_(ptf.setHoleCellValue_),
-    massCorrection_(ptf.massCorrection_),
+    fluxCorrection_(ptf.fluxCorrection_),
     interpolateHoleCellValue_(ptf.interpolateHoleCellValue_),
     holeCellValue_(ptf.holeCellValue_),
     fringeUpperCoeffs_(ptf.fringeUpperCoeffs_),
@@ -145,7 +153,7 @@ Foam::oversetFvPatchField<Type>::oversetFvPatchField
     coupledFvPatchField<Type>(ptf, iF),
     oversetPatch_(ptf.oversetPatch_),
     setHoleCellValue_(ptf.setHoleCellValue_),
-    massCorrection_(ptf.massCorrection_),
+    fluxCorrection_(ptf.fluxCorrection_),
     interpolateHoleCellValue_(ptf.interpolateHoleCellValue_),
     holeCellValue_(ptf.holeCellValue_),
     fringeUpperCoeffs_(ptf.fringeUpperCoeffs_),
@@ -411,7 +419,7 @@ void Foam::oversetFvPatchField<Type>::fringeFlux
 template<class Type>
 void Foam::oversetFvPatchField<Type>::adjustPsi
 (
-    Field<scalar>& psi,
+    solveScalarField& psi,
     const lduAddressing& lduAddr,
     solveScalarField& result
 ) const
@@ -769,7 +777,7 @@ void Foam::oversetFvPatchField<Type>::manipulateMatrix
 
     if (ovp.master())
     {
-        if (massCorrection_ || (debug & 2))
+        if (fluxCorrection_ || (debug & 2))
         {
             storeFringeCoefficients(matrix);
         }
@@ -1030,9 +1038,9 @@ void Foam::oversetFvPatchField<Type>::updateInterfaceMatrix
     const Pstream::commsTypes commsType
 ) const
 {
-    scalarField& psi = const_cast<scalarField&>(psiInternal);
+    auto& psi = const_cast<solveScalarField&>(psiInternal);
 
-    if (massCorrection_ && this->oversetPatch_.master())
+    if (fluxCorrection_ && this->oversetPatch_.master())
     {
         adjustPsi(psi, lduAddr, result);
     }
@@ -1057,14 +1065,14 @@ void Foam::oversetFvPatchField<Type>::write(Ostream& os) const
     }
     os.writeEntryIfDifferent
     (
-        "massCorrection",
+        "fluxCorrection",
         false,
-        massCorrection_
+        fluxCorrection_
     );
     os.writeEntryIfDifferent
     (
         "zone",
-        -1,
+        label(-1),
         zoneId_
     );
 }

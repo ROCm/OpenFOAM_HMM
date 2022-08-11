@@ -24,7 +24,7 @@ solvers
         solver          PBiCGStab;
         preconditioner  DILU;
 
-        //// Note: GAMG not supported with massCorrection switched on
+        //// Note: GAMG not supported with fluxCorrection switched on
         //solver          GAMG;
         //smoother        GaussSeidel;
         //nCellsInCoarsestLevel   1;
