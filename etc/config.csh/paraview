@@ -69,6 +69,13 @@ set archDir="$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER"
 eval `$WM_PROJECT_DIR/bin/foamCleanPath -csh-path "$ParaView_DIR $archDir/ParaView- $archDir/qt-"`
 eval `$WM_PROJECT_DIR/bin/foamCleanPath -csh-lib "$ParaView_DIR $archDir/ParaView- $archDir/qt-"`
 
+# Darwin
+switch ("$WM_ARCH")
+case darwin*:
+    setenv DYLD_LIBRARY_PATH "${FOAM_LD_LIBRARY_PATH}"
+    breaksw
+endsw
+
 # Evaluate command-line parameters for ParaView
 while ( $#argv > 0 )
     switch ($argv[1])
@@ -206,10 +213,11 @@ default:
         if ( "$pv_libdirs" != "" ) then
             switch ("$WM_ARCH")
             case darwin*:
-                setenv DYLD_LIBRARY_PATH "${pv_libdirs}:$DYLD_LIBRARY_PATH"
+                setenv FOAM_LD_LIBRARY_PATH "${pv_libdirs}:${FOAM_LD_LIBRARY_PATH}"
+                setenv DYLD_LIBRARY_PATH "${FOAM_LD_LIBRARY_PATH}"
                 breaksw
             default:
-                setenv LD_LIBRARY_PATH "${pv_libdirs}:$LD_LIBRARY_PATH"
+                setenv LD_LIBRARY_PATH "${pv_libdirs}:${LD_LIBRARY_PATH}"
                 breaksw
             endsw
         endif

@@ -49,8 +49,8 @@ then
     foamClean="$WM_PROJECT_DIR/bin/foamCleanPath"
     if [ -x "$foamClean" ]
     then
-        cleaned=$($foamClean "$PATH" "$foamOldDirs") && PATH="$cleaned"
-        cleaned=$($foamClean "$LD_LIBRARY_PATH" "$foamOldDirs") \
+        cleaned=$($foamClean -env=PATH "$foamOldDirs") && PATH="$cleaned"
+        cleaned=$($foamClean -env=LD_LIBRARY_PATH "$foamOldDirs") \
             && LD_LIBRARY_PATH="$cleaned"
     fi
 

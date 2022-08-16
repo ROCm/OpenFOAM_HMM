@@ -6,7 +6,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2017-2021 OpenCFD Ltd.
+#     Copyright (C) 2017-2022 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -31,7 +31,7 @@
 #     _foamEtc       : resolve etc files (silent or verbose)
 #     _foamAddPath   : prepend to PATH
 #     _foamAddMan    : prepend to MANPATH
-#     _foamAddLib    : prepend to [DY]LD_LIBRARY_PATH
+#     _foamAddLib    : prepend to {DY,FOAM_}LD_LIBRARY_PATH
 #     _foamAddLibAuto: prepend to lib64/lib resolved name
 #
 #------------------------------------------------------------------------------
@@ -56,7 +56,7 @@ then
          foamVar_name="$1"
          shift
          eval "$($foamClean -sh-env="$foamVar_name" "$@")"
-         unset "foamVar_name"
+         unset foamVar_name
     }
 
     # Echo values to stderr when FOAM_VERBOSE is on, no-op otherwise
@@ -94,14 +94,18 @@ then
         _foamAddLib()
         {
             case "$1" in (/?*)
-                export DYLD_LIBRARY_PATH="${1}${DYLD_LIBRARY_PATH:+:}${DYLD_LIBRARY_PATH}" ;;
+            if [ -e "$1" ]
+            then
+                export FOAM_LD_LIBRARY_PATH="${1}${FOAM_LD_LIBRARY_PATH:+:}${FOAM_LD_LIBRARY_PATH}"
+                export DYLD_LIBRARY_PATH="$FOAM_LD_LIBRARY_PATH"
+            fi
             esac
         }
     else
         _foamAddLib()
         {
             case "$1" in (/?*)
-                export LD_LIBRARY_PATH="${1}${LD_LIBRARY_PATH:+:}${LD_LIBRARY_PATH}" ;;
+                export LD_LIBRARY_PATH="${1}${LD_LIBRARY_PATH:+:}${LD_LIBRARY_PATH}"
             esac
         }
     fi

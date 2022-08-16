@@ -5,7 +5,7 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2018-2020 OpenCFD Ltd.
+#     Copyright (C) 2018-2022 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -46,10 +46,10 @@ alias _foamAddMan  'setenv MANPATH \!*\:${MANPATH}'
 
 # Special treatment for Darwin
 # - DYLD_LIBRARY_PATH instead of LD_LIBRARY_PATH
-if ("${_foam_uname_s}" == "Darwin") then
-    alias _foamAddLib  'setenv DYLD_LIBRARY_PATH \!*\:${DYLD_LIBRARY_PATH}'
+if ("${_foam_uname_s}" == 'Darwin') then
+    alias _foamAddLib 'if (-e \!*) setenv DYLD_LIBRARY_PATH \!*\:${DYLD_LIBRARY_PATH}; if (-e \!*) setenv FOAM_LD_LIBRARY_PATH \!*\:${FOAM_LD_LIBRARY_PATH}'
 else
-    alias _foamAddLib  'setenv LD_LIBRARY_PATH \!*\:${LD_LIBRARY_PATH}'
+    alias _foamAddLib 'setenv LD_LIBRARY_PATH \!*\:${LD_LIBRARY_PATH}'
 endif
 
 # Prefix to LD_LIBRARY_PATH with additional checking

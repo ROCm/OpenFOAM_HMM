@@ -148,16 +148,21 @@ endif
 # Clean standard environment variables (PATH, MANPATH, [DY]LD_LIBRARY_PATH)
 # - avoid local variables shadowing setenv variables
 
-unset PATH MANPATH LD_LIBRARY_PATH DYLD_LIBRARY_PATH
+unset PATH MANPATH LD_LIBRARY_PATH DYLD_LIBRARY_PATH FOAM_LD_LIBRARY_PATH
 if (! $?MANPATH ) setenv MANPATH
-if (! $?LD_LIBRARY_PATH ) setenv LD_LIBRARY_PATH
-if ("${_foam_uname_s}" == "Darwin" ) then
+if ("${_foam_uname_s}" == 'Darwin') then
     if (! $?DYLD_LIBRARY_PATH ) setenv DYLD_LIBRARY_PATH
+    if (! $?FOAM_LD_LIBRARY_PATH ) setenv FOAM_LD_LIBRARY_PATH
+else
+    if (! $?LD_LIBRARY_PATH ) setenv LD_LIBRARY_PATH
 endif
 
 _foamClean PATH "$foamOldDirs"
 _foamClean MANPATH "$foamOldDirs"
 _foamClean -lib "$foamOldDirs"
+if ("${_foam_uname_s}" == 'Darwin') then
+    setenv DYLD_LIBRARY_PATH "${FOAM_LD_LIBRARY_PATH}"
+endif
 
 
 #------------------------------------------------------------------------------
@@ -213,6 +218,9 @@ endif
 _foamClean PATH
 _foamClean MANPATH
 _foamClean -lib
+if ("${_foam_uname_s}" == 'Darwin') then
+   setenv DYLD_LIBRARY_PATH "${FOAM_LD_LIBRARY_PATH}"
+endif
 
 # Add trailing ':' for system manpages
 if ( $?MANPATH ) then
@@ -224,8 +232,8 @@ if ($?LD_LIBRARY_PATH) then
 endif
 
 # Darwin
-if ($?DYLD_LIBRARY_PATH) then
-    if ("${DYLD_LIBRARY_PATH}" == "") unsetenv DYLD_LIBRARY_PATH
+if ($?FOAM_LD_LIBRARY_PATH) then
+    if ("${FOAM_LD_LIBRARY_PATH}" == "") unsetenv DYLD_LIBRARY_PATH FOAM_LD_LIBRARY_PATH
 endif
 
 

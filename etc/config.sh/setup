@@ -5,7 +5,7 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2018-2021 OpenCFD Ltd.
+#     Copyright (C) 2018-2022 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -178,12 +178,23 @@ else
 fi
 
 
-# Clean standard environment variables
+# Clean standard environment variables (PATH, MANPATH, [DY]LD_LIBRARY_PATH)
 
-export PATH MANPATH LD_LIBRARY_PATH
+export PATH MANPATH
+if [ "${_foam_uname_s}" = Darwin ]
+then
+    export DYLD_LIBRARY_PATH FOAM_LD_LIBRARY_PATH
+else
+    export LD_LIBRARY_PATH
+fi
+
 _foamClean PATH "$foamOldDirs"
 _foamClean MANPATH "$foamOldDirs"
 _foamClean -lib "$foamOldDirs"
+if [ "${_foam_uname_s}" = Darwin ]
+then
+    export DYLD_LIBRARY_PATH="$FOAM_LD_LIBRARY_PATH"
+fi
 
 #------------------------------------------------------------------------------
 # Base setup (OpenFOAM compilation), MPI and third-party packages
@@ -237,11 +248,21 @@ fi
 #------------------------------------------------------------------------------
 
 # Remove duplicates from environment paths
-export PATH MANPATH LD_LIBRARY_PATH
+export PATH MANPATH
+if [ "${_foam_uname_s}" = Darwin ]
+then
+    export DYLD_LIBRARY_PATH FOAM_LD_LIBRARY_PATH
+else
+    export LD_LIBRARY_PATH
+fi
 
 _foamClean PATH
 _foamClean MANPATH
 _foamClean -lib
+if [ "${_foam_uname_s}" = Darwin ]
+then
+    export DYLD_LIBRARY_PATH="$FOAM_LD_LIBRARY_PATH"
+fi
 
 # Add trailing ':' for system manpages
 if [ -n "$MANPATH" ]

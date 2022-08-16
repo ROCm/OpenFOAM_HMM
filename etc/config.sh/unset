@@ -6,7 +6,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2016-2021 OpenCFD Ltd.
+#     Copyright (C) 2016-2022 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -164,7 +164,9 @@ then
     eval "$($foamClean -sh-env=PATH $foamOldDirs)"
     eval "$($foamClean -sh-env=MANPATH $foamOldDirs)"
     eval "$($foamClean -sh-env=LD_LIBRARY_PATH $foamOldDirs)"
-    eval "$($foamClean -sh-env=DYLD_LIBRARY_PATH $foamOldDirs)"
+    # Darwin
+    eval "$($foamClean -sh-env=FOAM_LD_LIBRARY_PATH $foamOldDirs)"
+    export DYLD_LIBRARY_PATH="$FOAM_LD_LIBRARY_PATH"
 fi
 
 [ -n "$MANPATH" ] || unset MANPATH
@@ -172,7 +174,7 @@ fi
 [ -n "$DYLD_LIBRARY_PATH" ] || unset DYLD_LIBRARY_PATH
 
 # Remove any shadow env variables
-unset FOAM_DYLD_LIBRARY_PATH
+unset FOAM_DYLD_LIBRARY_PATH FOAM_LD_LIBRARY_PATH
 
 #------------------------------------------------------------------------------
 # Cleanup aliases and functions
