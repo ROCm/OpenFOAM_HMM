@@ -144,6 +144,7 @@ Foam::surfaceWriter::surfaceWriter()
     adjustedSurf_(),
     mergeDim_(defaultMergeDim),
     geometryScale_(1),
+    geometryCentre_(Zero),
     geometryTransform_(),
     upToDate_(false),
     wroteGeom_(false),
@@ -168,6 +169,7 @@ Foam::surfaceWriter::surfaceWriter(const dictionary& options)
     options.readIfPresent("verbose", verbose_);
 
     geometryScale_ = 1;
+    geometryCentre_ = Zero;
     geometryTransform_.clear();
 
     options.readIfPresent("scale", geometryScale_);
@@ -175,8 +177,9 @@ Foam::surfaceWriter::surfaceWriter(const dictionary& options)
     const dictionary* dictptr;
 
     // Optional cartesian coordinate system transform
-    if ((dictptr = options.findDict("transform", keyType::LITERAL))!= nullptr)
+    if ((dictptr = options.findDict("transform", keyType::LITERAL)) != nullptr)
     {
+        dictptr->readIfPresent("rotationCentre", geometryCentre_);
         geometryTransform_ = coordSystem::cartesian(*dictptr);
     }
 
@@ -471,23 +474,43 @@ const Foam::meshedSurfRef& Foam::surfaceWriter::adjustSurface() const
     {
         adjustedSurf_.reset(surface());
 
-        if
-        (
-            geometryTransform_.valid()
-         &&
-            (
-                (magSqr(geometryTransform_.origin()) > ROOTVSMALL)
-             || !geometryTransform_.R().is_identity()
-            )
-        )
+        tmp<pointField> tpts;
+
+        if (geometryTransform_.valid())
         {
-            // Forward transform
-            adjustedSurf_.movePoints
-            (
-                geometryTransform_.globalPosition(adjustedSurf_.points0())
-            );
+            if (!geometryTransform_.R().is_identity())
+            {
+                if (magSqr(geometryCentre_) > ROOTVSMALL)
+                {
+                    // Set centre of rotation,
+                    // followed by forward transform (local -> global)
+                    tpts =
+                        geometryTransform_.globalPosition
+                        (
+                            adjustedSurf_.points0() - geometryCentre_
+                        );
+
+                    // Unset centre of rotation
+                    tpts.ref() += geometryCentre_;
+                }
+                else
+                {
+                    // Forward transform (local -> global)
+                    tpts =
+                        geometryTransform_.globalPosition
+                        (
+                            adjustedSurf_.points0()
+                        );
+                }
+            }
+            else if (magSqr(geometryTransform_.origin()) > ROOTVSMALL)
+            {
+                // Translate only (local -> global)
+                tpts = (adjustedSurf_.points0() + geometryTransform_.origin());
+            }
         }
 
+        adjustedSurf_.movePoints(tpts);
         adjustedSurf_.scalePoints(geometryScale_);
     }
 

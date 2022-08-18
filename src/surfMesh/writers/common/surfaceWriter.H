@@ -62,11 +62,11 @@ Description
             transform
             {
                 origin  (0 0 0);
+                rotationCentre  (0 0 0);
                 rotation axisAngle;
                 axis    (1 0 0);
                 angle   45;
             }
-
         }
     }
     \endverbatim
@@ -82,6 +82,10 @@ Description
     \endtable
 
 Note
+    The \c transform sub-dictionary also supports a \c rotationCentre
+    keyword which applies \em untranslate by that amount prior to the rotation,
+    and subsequently followed by a \em translate.
+
     For surface formats that require geometry in a separate file,
     it is the responsibility of the implementation (not the caller)
     to ensure that this occurs.
@@ -146,6 +150,9 @@ protected:
 
         //- Output geometry scaling after rotate/translate
         scalar geometryScale_;
+
+        //- The centre of rotation (untranslate, translate)
+        point geometryCentre_;
 
         //- Local coordinate system transformation
         coordSystem::cartesian geometryTransform_;

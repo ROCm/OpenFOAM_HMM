@@ -111,6 +111,21 @@ debug
             isoValue    1e5;
             regularise  true;
             interpolate true;
+
+            formatOptions
+            {
+                ensight
+                {
+                    transform
+                    {
+                        origin  (0 0 0);
+                        rotationCentre  (0.025 0 0);
+                        rotation axisAngle;
+                        axis    (0 1 0);
+                        angle   90;
+                    }
+                }
+            }
         }
 
         // Top channel
