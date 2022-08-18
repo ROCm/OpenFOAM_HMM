@@ -188,15 +188,18 @@ int main(int argc, char *argv[])
     );
     argList::addBoolOption
     (
-        "auto-origin",
-        "Use bounding box centre as origin for rotations"
+        "auto-centre",
+        "Use bounding box centre as centre for rotations"
     );
     argList::addOption
     (
-        "origin",
+        "centre",
         "point",
-        "Use specified <point> as origin for rotations"
+        "Use specified <point> as centre for rotations"
     );
+    argList::addOptionCompat("auto-centre", {"auto-origin", 2206});
+    argList::addOptionCompat("centre", {"origin", 2206});
+
     argList::addOption
     (
         "rotate",
@@ -352,18 +355,18 @@ int main(int argc, char *argv[])
         points += v;
     }
 
-    vector origin;
-    bool useOrigin = args.readIfPresent("origin", origin);
-    if (args.found("auto-origin") && !useOrigin)
+    vector rotationCentre;
+    bool useRotationCentre = args.readIfPresent("centre", rotationCentre);
+    if (args.found("auto-centre") && !useRotationCentre)
     {
-        useOrigin = true;
-        origin = boundBox(points).centre();
+        useRotationCentre = true;
+        rotationCentre = boundBox(points).centre();
     }
 
-    if (useOrigin)
+    if (useRotationCentre)
     {
-        Info<< "Set origin for rotations to " << origin << endl;
-        points -= origin;
+        Info<< "Set centre of rotation to " << rotationCentre << endl;
+        points -= rotationCentre;
     }
 
 
@@ -455,14 +458,14 @@ int main(int argc, char *argv[])
         transform(points, rot, points);
     }
 
+    if (useRotationCentre)
+    {
+        Info<< "Unset centre of rotation from " << rotationCentre << endl;
+        points += rotationCentre;
+    }
+
     // Output scaling
     applyScaling(points, getScalingOpt("write-scale", args));
-
-    if (useOrigin)
-    {
-        Info<< "Unset origin for rotations from " << origin << endl;
-        points += origin;
-    }
 
     surf1.movePoints(points);
     surf1.write(exportName, writeFileType);
