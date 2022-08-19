@@ -6,7 +6,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2018-2020 OpenCFD Ltd.
+#     Copyright (C) 2018-2022 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -47,16 +47,31 @@ WM_SCRIPTS      = $(WM_DIR)/scripts
 # Causes all derived files to be remade if any are changed or missing
 #------------------------------------------------------------------------------
 
+# Process 'Make/{files,options}' via cpp, but undefine linux,unix,... to avoid
+# inadvertent replacements (Eg, leave /usr/lib/x86_64-linux-gnu/... intact)
+define PREFILTER_MAKE_OPTIONS
+    @$(CPP) -Ulinux -Uunix $(GFLAGS) $1 | sed -e 's@   *@ @g' > $2
+endef
+
+
 all : $(OPTIONS) $(SFILES) $(VARS)
 
+# Make/options
+# ~~~~~~~~~~~~
 $(OPTIONS) : $(MAKE_DIR)/options
-	@$(CPP) $(GFLAGS) $(MAKE_DIR)/options | sed -e 's@   *@ @g' > $(OPTIONS)
+	$(call PREFILTER_MAKE_OPTIONS,$<,${OPTIONS})
 ifneq (,$(findstring windows,$(WM_OSTYPE)))
 	@$(WM_SCRIPTS)/wmakeWindowsDlOpenLibs $(OPTIONS) >> $(OPTIONS)
 endif
+	# Ensure final line is followed by newline. Extra comment for safety.
+	@echo >> $(OPTIONS)
+	@echo "# options" >> $(OPTIONS)
 
+
+# Make/files
+# ~~~~~~~~~~
 $(SFILES): $(MAKE_DIR)/files
-	@$(CPP) $(GFLAGS) $(MAKE_DIR)/files | sed -e 's@   *@ @g' > $(FILES)
+	$(call PREFILTER_MAKE_OPTIONS,$<,${FILES})
 	# Extracted macro definitions.
 	@sed -n -e '/=/p' $(FILES) > $(VARS)
 	@echo "SOURCE = \\" > $(SFILES)
@@ -64,7 +79,7 @@ $(SFILES): $(MAKE_DIR)/files
 	@sed -e '/=/d; /^#/d; /^[ \t]*$$/d' -e 's@[ \t]*$$@ \\@' $(FILES) >> $(SFILES)
 	@rm -f $(FILES)
 	# Ensure final line is followed by newline. Extra comment for safety.
-	@echo "" >> $(SFILES)
+	@echo >> $(SFILES)
 	@echo "# sources" >> $(SFILES)
 
 
