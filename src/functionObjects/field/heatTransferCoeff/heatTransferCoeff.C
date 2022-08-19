@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,7 +26,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "heatTransferCoeff.H"
-#include "dictionary.H"
 #include "heatTransferCoeffModel.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -41,7 +40,8 @@ namespace functionObjects
 }
 }
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 bool Foam::functionObjects::heatTransferCoeff::calc()
 {
@@ -67,7 +67,7 @@ Foam::functionObjects::heatTransferCoeff::heatTransferCoeff
     fieldExpression(name, runTime, dict),
     L_(1),
     kappa_(1),
-    htcModelPtr_(nullptr)
+    htcModelPtr_(heatTransferCoeffModel::New(dict, mesh_, fieldName_))
 {
     read(dict);
 
@@ -96,7 +96,7 @@ Foam::functionObjects::heatTransferCoeff::heatTransferCoeff
 
 bool Foam::functionObjects::heatTransferCoeff::read(const dictionary& dict)
 {
-    if (!fieldExpression::read(dict))
+    if (!fieldExpression::read(dict) || !htcModelPtr_->read(dict))
     {
         return false;
     }
@@ -104,9 +104,6 @@ bool Foam::functionObjects::heatTransferCoeff::read(const dictionary& dict)
     L_ = dict.getCheckOrDefault<scalar>("L", 1, scalarMinMax::ge(0));
     kappa_ =
         dict.getCheckOrDefault<scalar>("kappa", 1, scalarMinMax::ge(SMALL));
-    htcModelPtr_ = heatTransferCoeffModel::New(dict, mesh_, fieldName_);
-
-    htcModelPtr_->read(dict);
 
     return true;
 }

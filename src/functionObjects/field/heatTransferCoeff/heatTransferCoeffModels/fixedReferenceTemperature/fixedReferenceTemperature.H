@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,18 +30,18 @@ Description
     Heat transfer coefficient calculation
     that employs a fixed reference temperature.
 
-    The heat transfer coefficient is specified by:
+    The heat transfer coefficient is calculated by:
 
     \f[
-        h = \frac{q}{T_{ref} - T_w}
+        h = \frac{q}{T_{ref} - T_p}
     \f]
 
     where
     \vartable
-      h       | Convective heat transfer coefficient of the flow  [W/(m2 K)]
-      q       | Heat flux                                         [W/m2]
-      T_{ref} | Reference temperature of surrounding fluid        [K]
-      T_w     | Patch temperature                                 [K]
+      h       | Heat transfer coefficient                         [W/m^2/K]
+      q       | Heat flux                                         [W/m^2]
+      T_{ref} | User-specified reference temperature              [K]
+      T_p     | Patch temperature field                           [K]
     \endvartable
 
 Usage
@@ -49,26 +49,21 @@ Usage
     \verbatim
     heatTransferCoeff1
     {
-        // Mandatory and other optional entries
+        // Inherited entries
         ...
-        htcModel        fixedReferenceTemperature;
 
-        // Conditional mandatory entries (runtime modifiable)
-        Tref            0;
+        // Mandatory entries
+        htcModel        fixedReferenceTemperature;
+        Tref            <scalar>;
     }
     \endverbatim
 
     where the entries mean:
     \table
-      Property  | Description                            | Type | Reqd | Dflt
+      Property  | Description                            | Type | Reqd | Deflt
       type      | Model name: fixedReferenceTemperature  | word | yes  | -
-      Tref      | Reference temperature of surrounding fluid | scalar | yes | -
+      Tref      | User-specied reference temperature   | scalar | yes  | -
     \endtable
-
-See also
-  - Foam::heatTransferCoeffModel
-  - Foam::heatTransferCoeffModels::localReferenceTemperature
-  - Foam::heatTransferCoeffModels::ReynoldsAnalogy
 
 SourceFiles
     fixedReferenceTemperature.C
@@ -99,7 +94,7 @@ protected:
 
     // Protected Data
 
-        //- Reference temperature
+        //- Reference temperature [K]
         scalar TRef_;
 
 

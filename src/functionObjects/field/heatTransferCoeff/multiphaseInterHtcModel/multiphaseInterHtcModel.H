@@ -28,7 +28,56 @@ Class
 
 Description
     A heat transfer coefficient for multiphase inter solvers
-    (i.e. icoReactingMultiphaseFoam).
+    (e.g. icoReactingMultiphaseFoam).
+
+Usage
+    Minimal example by using \c system/controlDict.functions:
+    \verbatim
+    multiphaseInterHtcModel1
+    {
+        // Mandatory entries
+        type        multiphaseInterHtcModel;
+        libs        (fieldFunctionObjects);
+
+        field       <word>;
+        patches     (<wordRes>);
+        htcModel    <word>;
+
+        // Optional entries
+        qr          <word>;
+
+        // Conditional entries based on selected <htcModel>
+        ...
+
+        // Inherited entries
+        ...
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property    | Description                        | Type | Reqd | Deflt
+      type        | Type name: multiphaseInterHtcModel | word | yes  | -
+      libs        | Library name: fieldFunctionObjects | word | yes  | -
+      field       | Name of operand field              | word | yes  | -
+      patches     | Names of operand patches        | wordRes | yes  | -
+      htcModel    | Heat transfer coefficient model <!--
+                -->                        - see below | word | yes  | -
+      qr          | Name of radiative heat flux field  | word | no   | qr
+    \endtable
+
+    The inherited entries are elaborated in:
+      - \link functionObject.H \endlink
+      - \link fieldExpression.H \endlink
+      - \link heatTransferCoeffModel.H \endlink
+
+    Options for the \c htcModel entry:
+    \verbatim
+      ReynoldsAnalogy           | Reynold's analogy
+      localReferenceTemperature | Local reference temperature
+      fixedReferenceTemperature | Fixed reference temperature
+      faceZoneReferenceTemperature | Face-zone reference temperature
+    \endverbatim
 
 SourceFiles
     multiphaseInterHtcModel.C
@@ -38,16 +87,16 @@ SourceFiles
 #ifndef Foam_functionObjects_multiphaseInterHtcModel_H
 #define Foam_functionObjects_multiphaseInterHtcModel_H
 
-#include "HashSet.H"
-#include "volFields.H"
 #include "fieldExpression.H"
-#include "runTimeSelectionTables.H"
-#include "heatTransferCoeffModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+// Forward Declarations
+class heatTransferCoeffModel;
+
 namespace functionObjects
 {
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,8 +30,12 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Computes the heat transfer coefficient [W/(m2 K)]
+    Computes the heat transfer coefficient [W/(m^2 K)]
     as a \c volScalarField for a given set of patches.
+
+    The heat transfer coefficient is definition dependent;
+    therefore, different coefficient values could be
+    obtained based on different definitions.
 
     Optionally, the Nusselt number (i.e. the ratio of convective
     to conductive heat transfer at a boundary in a fluid) can be output:
@@ -43,7 +47,7 @@ Description
     where
     \vartable
       Nu | Nusselt number
-      h  | Convective heat transfer coefficient of the flow
+      h  | Heat transfer coefficient
       L  | Characteristic length that defines the scale of the physical system
       \kappa | Thermal conductivity of the fluid
     \endvartable
@@ -53,7 +57,7 @@ Description
       Operand           | Type           | Location
       input             | -              | -
       output file       | -              | -
-      output field      | volScalarField | $FOAM_CASE/\<time\>/\<outField\>
+      output field      | volScalarField | \<time\>/\<outField\>
     \endtable
 
 Usage
@@ -61,39 +65,37 @@ Usage
     \verbatim
     heatTransferCoeff1
     {
-        // Mandatory entries (unmodifiable)
+        // Mandatory entries
         type        heatTransferCoeff;
         libs        (fieldFunctionObjects);
 
-        // Mandatory (inherited) entries (runtime modifiable)
-        field       <field>;
-        patches     (<patch1> <patch2> ... <patchN>);
-        htcModel    <htcModel>;
+        field       <word>;
+        patches     (<wordRes>);
+        htcModel    <word>;
 
-        // Optional entries (runtime modifable)
-        qr          <qrName>;
-        L           1.0;
-        kappa       1.0;
+        // Optional entries
+        qr          <word>;
+        L           <scalar>;
+        kappa       <scalar>;
 
-        // Conditional mandatory and optional
-        // entries based on selected <htcModel> (runtime modifiable)
+        // Conditional entries based on selected <htcModel>
         ...
 
-        // Optional (inherited) entries
+        // Inherited entries
         ...
     }
     \endverbatim
 
     where the entries mean:
     \table
-      Property    | Description                        | Type | Reqd | Dflt
+      Property    | Description                        | Type | Reqd | Deflt
       type        | Type name: heatTransferCoeff       | word | yes  | -
       libs        | Library name: fieldFunctionObjects | word | yes  | -
-      field       | Name of the operand field          | word | yes  | -
+      field       | Name of operand field              | word | yes  | -
       patches     | Names of operand patches        | wordRes | yes  | -
       htcModel    | Heat transfer coefficient model <!--
                 -->                        - see below | word | yes  | -
-      qr          | Name of radiative heat flux        | word | no   | qr
+      qr          | Name of radiative heat flux field  | word | no   | qr
       L           | Characteristic length that defines <!--
                 --> the scale of the physical system | scalar | no   | 1
       kappa       | Thermal conductivity of fluid    | scalar | no   | 1
@@ -108,18 +110,9 @@ Usage
     \verbatim
       ReynoldsAnalogy           | Reynold's analogy
       localReferenceTemperature | Local reference temperature
-      fixedReferenceTemperature | Specified reference temperature
+      fixedReferenceTemperature | Fixed reference temperature
+      faceZoneReferenceTemperature | Face-zone reference temperature
     \endverbatim
-
-    Usage by the \c postProcess utility is not available.
-
-See also
-  - Foam::functionObject
-  - Foam::functionObjects::fieldExpression
-  - Foam::heatTransferCoeffModels::fixedReferenceTemperature
-  - Foam::heatTransferCoeffModels::localReferenceTemperature
-  - Foam::heatTransferCoeffModels::ReynoldsAnalogy
-  - ExtendedCodeGuide::functionObjects::field::heatTransferCoeff
 
 SourceFiles
     heatTransferCoeff.C
@@ -177,11 +170,7 @@ public:
 
     // Constructors
 
-        //- No default construct
-        heatTransferCoeff() = delete;
-
-        //- Construct for given objectRegistry and dictionary.
-        //  Allow the possibility to load fields from files
+        //- Construct from Time and dictionary
         heatTransferCoeff
         (
             const word& name,
@@ -202,7 +191,7 @@ public:
 
     // Member Functions
 
-        //- Read the heatTransferCoeff data
+        //- Read the top-level dictionary
         virtual bool read(const dictionary& dict);
 };
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,6 +45,28 @@ namespace heatTransferCoeffModels
 }
 
 
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+void Foam::heatTransferCoeffModels::localReferenceTemperature::htc
+(
+    volScalarField& htc,
+    const FieldField<Field, scalar>& q
+)
+{
+    const auto& T = mesh_.lookupObject<volScalarField>(TName_);
+    const volScalarField::Boundary& Tbf = T.boundaryField();
+    const scalar eps = ROOTVSMALL;
+
+    volScalarField::Boundary& htcBf = htc.boundaryFieldRef();
+
+    for (const label patchi : patchSet_)
+    {
+        tmp<scalarField> tTc = Tbf[patchi].patchInternalField();
+        htcBf[patchi] = q[patchi]/(tTc - Tbf[patchi] + eps);
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::heatTransferCoeffModels::localReferenceTemperature::
@@ -69,26 +91,6 @@ bool Foam::heatTransferCoeffModels::localReferenceTemperature::read
 )
 {
     return heatTransferCoeffModel::read(dict);
-}
-
-
-void Foam::heatTransferCoeffModels::localReferenceTemperature::htc
-(
-    volScalarField& htc,
-    const FieldField<Field, scalar>& q
-)
-{
-    const auto& T = mesh_.lookupObject<volScalarField>(TName_);
-    const volScalarField::Boundary& Tbf = T.boundaryField();
-    const scalar eps = ROOTVSMALL;
-
-    volScalarField::Boundary& htcBf = htc.boundaryFieldRef();
-
-    for (const label patchi : patchSet_)
-    {
-        const scalarField Tc(Tbf[patchi].patchInternalField());
-        htcBf[patchi] = q[patchi]/(Tc - Tbf[patchi] + eps);
-    }
 }
 
 
