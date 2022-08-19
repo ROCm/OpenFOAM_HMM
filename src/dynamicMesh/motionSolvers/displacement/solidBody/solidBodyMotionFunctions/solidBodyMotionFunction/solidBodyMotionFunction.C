@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,16 +41,18 @@ namespace Foam
 
 Foam::solidBodyMotionFunction::solidBodyMotionFunction
 (
-    const dictionary& SBMFCoeffs,
+    const dictionary& dict,
     const Time& runTime
 )
 :
     SBMFCoeffs_
     (
-        SBMFCoeffs.optionalSubDict
+        dict.found("solidBodyMotionFunction")
+      ? dict.optionalSubDict
         (
-            SBMFCoeffs.get<word>("solidBodyMotionFunction") + "Coeffs"
+            dict.get<word>("solidBodyMotionFunction") + "Coeffs"
         )
+      : dict
     ),
     time_(runTime)
 {}
@@ -57,9 +60,9 @@ Foam::solidBodyMotionFunction::solidBodyMotionFunction
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-bool Foam::solidBodyMotionFunction::read(const dictionary& SBMFCoeffs)
+bool Foam::solidBodyMotionFunction::read(const dictionary& dict)
 {
-    SBMFCoeffs_ = SBMFCoeffs.optionalSubDict(type() + "Coeffs");
+    SBMFCoeffs_ = dict.optionalSubDict(type() + "Coeffs");
 
     return true;
 }

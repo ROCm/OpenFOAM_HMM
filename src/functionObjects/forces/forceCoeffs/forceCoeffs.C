@@ -171,8 +171,8 @@ void Foam::functionObjects::forceCoeffs::calcForceCoeffs()
 
     Cf_.reset
     (
-        forceScaling.value()*coordSys.localVector(sumPatchForcesV_),
         forceScaling.value()*coordSys.localVector(sumPatchForcesP_),
+        forceScaling.value()*coordSys.localVector(sumPatchForcesV_),
         forceScaling.value()*coordSys.localVector(sumInternalForces_)
     );
 }
