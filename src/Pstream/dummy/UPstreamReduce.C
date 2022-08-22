@@ -30,7 +30,14 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Specialisations for bool
+// Special reductions for bool
+
+void Foam::UPstream::reduceAnd(bool& value, const label comm)
+{}
+
+void Foam::UPstream::reduceOr(bool& value, const label comm)
+{}
+
 
 void Foam::reduce
 (
@@ -53,7 +60,7 @@ void Foam::reduce
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Specialisations for common reduction types
+// Common reductions
 
 #undef  Pstream_CommonReductions
 #define Pstream_CommonReductions(Native)                                      \
@@ -96,31 +103,14 @@ void Foam::reduce                                                             \
 {}
 
 
-Pstream_CommonReductions(int32_t);
-Pstream_CommonReductions(int64_t);
-Pstream_CommonReductions(uint32_t);
-Pstream_CommonReductions(uint64_t);
-Pstream_CommonReductions(float);
-Pstream_CommonReductions(double);
-
-#undef Pstream_CommonReductions
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Specialisations for floating-point types
+// Floating-point reductions
 
 #undef  Pstream_FloatReductions
 #define Pstream_FloatReductions(Native)                                       \
                                                                               \
-void Foam::sumReduce                                                          \
-(                                                                             \
-    Native& value,                                                            \
-    label& count,                                                             \
-    const int tag,                                                            \
-    const label comm                                                          \
-)                                                                             \
-{}                                                                            \
+Pstream_CommonReductions(Native);                                             \
                                                                               \
 void Foam::reduce                                                             \
 (                                                                             \
@@ -141,12 +131,32 @@ void Foam::reduce                                                             \
     const label comm,                                                         \
     label& requestID                                                          \
 )                                                                             \
+{}                                                                            \
+                                                                              \
+void Foam::sumReduce                                                          \
+(                                                                             \
+    Native& value,                                                            \
+    label& count,                                                             \
+    const int tag,                                                            \
+    const label comm                                                          \
+)                                                                             \
 {}
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+Pstream_CommonReductions(int32_t);
+Pstream_CommonReductions(int64_t);
+Pstream_CommonReductions(uint32_t);
+Pstream_CommonReductions(uint64_t);
 
 Pstream_FloatReductions(float);
 Pstream_FloatReductions(double);
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#undef Pstream_CommonReductions
 #undef Pstream_FloatReductions
 
 

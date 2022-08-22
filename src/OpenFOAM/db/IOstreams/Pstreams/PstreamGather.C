@@ -220,7 +220,7 @@ void Foam::Pstream::scatter(T& value, const int tag, const label comm)
     #ifndef Foam_Pstream_scatter_nobroadcast
     Pstream::broadcast(value, comm);
     #else
-    scatter(UPstream::whichCommunication(comm), value, tag, comm);
+    Pstream::scatter(UPstream::whichCommunication(comm), value, tag, comm);
     #endif
 }
 

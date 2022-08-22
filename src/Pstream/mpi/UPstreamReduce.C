@@ -34,7 +34,19 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Specialisations for bool
+// Special reductions for bool
+
+void Foam::UPstream::reduceAnd(bool& value, const label comm)
+{
+    PstreamDetail::allReduce(&value, 1, MPI_C_BOOL, MPI_LAND, comm);
+}
+
+
+void Foam::UPstream::reduceOr(bool& value, const label comm)
+{
+    PstreamDetail::allReduce(&value, 1, MPI_C_BOOL, MPI_LOR, comm);
+}
+
 
 void Foam::reduce
 (
@@ -44,8 +56,6 @@ void Foam::reduce
     const label comm
 )
 {
-    // This can also work:
-    // PstreamDetail::allReduce(&value, 1, MPI_BYTE, MPI_BAND, comm);
     PstreamDetail::allReduce(&value, 1, MPI_C_BOOL, MPI_LAND, comm);
 }
 
@@ -58,15 +68,13 @@ void Foam::reduce
     const label comm
 )
 {
-    // This can also work:
-    // PstreamDetail::allReduce(&value, 1, MPI_BYTE, MPI_BOR, comm);
     PstreamDetail::allReduce(&value, 1, MPI_C_BOOL, MPI_LOR, comm);
 }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Specialisations for common reduction types
+// Common reductions
 
 #undef  Pstream_CommonReductions
 #define Pstream_CommonReductions(Native, TaggedType)                          \
@@ -126,49 +134,17 @@ void Foam::reduce                                                             \
     (                                                                         \
         values, size, TaggedType, MPI_SUM, comm                               \
     );                                                                        \
-}                                                                             \
-
-
-Pstream_CommonReductions(int32_t, MPI_INT32_T);
-Pstream_CommonReductions(int64_t, MPI_INT64_T);
-Pstream_CommonReductions(uint32_t, MPI_UINT32_T);
-Pstream_CommonReductions(uint64_t, MPI_UINT64_T);
-Pstream_CommonReductions(float,   MPI_FLOAT);
-Pstream_CommonReductions(double,  MPI_DOUBLE);
-
-#undef Pstream_CommonReductions
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Specialisations for floating-point types
+// Floating-point reductions
 
 #undef  Pstream_FloatReductions
 #define Pstream_FloatReductions(Native, TaggedType)                           \
                                                                               \
-void Foam::sumReduce                                                          \
-(                                                                             \
-    Native& value,                                                            \
-    label& count,                                                             \
-    const int tag,  /* (unused) */                                            \
-    const label comm                                                          \
-)                                                                             \
-{                                                                             \
-    if (UPstream::parRun())                                                   \
-    {                                                                         \
-        Native values[2];                                                     \
-        values[0] = value;                                                    \
-        values[1] = static_cast<Native>(count);                               \
-                                                                              \
-        PstreamDetail::allReduce<Native>                                      \
-        (                                                                     \
-            values, 2, TaggedType, MPI_SUM, comm                              \
-        );                                                                    \
-                                                                              \
-        value = values[0];                                                    \
-        count = static_cast<label>(values[1]);                                \
-    }                                                                         \
-}                                                                             \
+Pstream_CommonReductions(Native, TaggedType);                                 \
                                                                               \
 void Foam::reduce                                                             \
 (                                                                             \
@@ -199,12 +175,47 @@ void Foam::reduce                                                             \
     (                                                                         \
         values, size, TaggedType, MPI_SUM, comm, &requestID                   \
     );                                                                        \
+}                                                                             \
+                                                                              \
+void Foam::sumReduce                                                          \
+(                                                                             \
+    Native& value,                                                            \
+    label& count,                                                             \
+    const int tag,  /* (unused) */                                            \
+    const label comm                                                          \
+)                                                                             \
+{                                                                             \
+    if (UPstream::parRun() && UPstream::nProcs(comm) > 1)                     \
+    {                                                                         \
+        Native values[2];                                                     \
+        values[0] = static_cast<Native>(count);                               \
+        values[1] = value;                                                    \
+                                                                              \
+        PstreamDetail::allReduce<Native>                                      \
+        (                                                                     \
+            values, 2, TaggedType, MPI_SUM, comm                              \
+        );                                                                    \
+                                                                              \
+        count = static_cast<label>(values[0]);                                \
+        value = values[1];                                                    \
+    }                                                                         \
 }
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+Pstream_CommonReductions(int32_t, MPI_INT32_T);
+Pstream_CommonReductions(int64_t, MPI_INT64_T);
+Pstream_CommonReductions(uint32_t, MPI_UINT32_T);
+Pstream_CommonReductions(uint64_t, MPI_UINT64_T);
 
 Pstream_FloatReductions(float, MPI_FLOAT);
 Pstream_FloatReductions(double, MPI_DOUBLE);
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#undef Pstream_CommonReductions
 #undef Pstream_FloatReductions
 
 

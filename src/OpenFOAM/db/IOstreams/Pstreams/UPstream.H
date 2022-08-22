@@ -712,6 +712,23 @@ public:
         );
 
 
+    // Logical reductions
+
+        //- Logical (and) reduction (cf. MPI AllReduce)
+        static void reduceAnd
+        (
+            bool& value,
+            const label communicator = worldComm
+        );
+
+        //- Logical (or) reduction (cf. MPI AllReduce)
+        static void reduceOr
+        (
+            bool& value,
+            const label communicator = worldComm
+        );
+
+
     // Housekeeping
 
         //- Process index of first sub-process
