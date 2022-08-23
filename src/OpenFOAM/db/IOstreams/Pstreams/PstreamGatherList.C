@@ -253,7 +253,7 @@ void Foam::Pstream::scatterList
                 {
                     fromAbove >> values[leafID];
 
-                    if (debug)
+                    if (debug & 2)
                     {
                         Pout<< " received through "
                             << myComm.above() << " data for:" << leafID
@@ -304,7 +304,7 @@ void Foam::Pstream::scatterList
                 {
                     toBelow << values[leafID];
 
-                    if (debug)
+                    if (debug & 2)
                     {
                         Pout<< " sent through "
                             << belowID << " data for:" << leafID
@@ -338,20 +338,6 @@ void Foam::Pstream::scatterList
 )
 {
     Pstream::scatterList(UPstream::whichCommunication(comm), values, tag, comm);
-}
-
-
-template<class T>
-void Foam::Pstream::allGatherList
-(
-    const List<UPstream::commsStruct>& comms,
-    List<T>& values,
-    const int tag,
-    const label comm
-)
-{
-    Pstream::gatherList(comms, values, tag, comm);
-    Pstream::scatterList(comms, values, tag, comm);
 }
 
 

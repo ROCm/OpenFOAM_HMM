@@ -255,13 +255,19 @@ void Foam::Pstream::combineScatter
     #ifndef Foam_Pstream_scatter_nobroadcast
     Pstream::broadcast(value, comm);
     #else
-    combineScatter(UPstream::whichCommunication(comm), value, tag, comm);
+    Pstream::combineScatter
+    (
+        UPstream::whichCommunication(comm),
+        value,
+        tag,
+        comm
+    );
     #endif
 }
 
 
 template<class T, class CombineOp>
-void Foam::Pstream::combineAllGather
+void Foam::Pstream::combineReduce
 (
     const List<UPstream::commsStruct>& comms,
     T& value,
@@ -276,7 +282,7 @@ void Foam::Pstream::combineAllGather
 
 
 template<class T, class CombineOp>
-void Foam::Pstream::combineAllGather
+void Foam::Pstream::combineReduce
 (
     T& value,
     const CombineOp& cop,
@@ -526,22 +532,7 @@ void Foam::Pstream::listCombineScatter
 
 
 template<class T, class CombineOp>
-void Foam::Pstream::listCombineAllGather
-(
-    const List<UPstream::commsStruct>& comms,
-    List<T>& values,
-    const CombineOp& cop,
-    const int tag,
-    const label comm
-)
-{
-    Pstream::listCombineGather(comms, values, cop, tag, comm);
-    Pstream::broadcast(values, comm);
-}
-
-
-template<class T, class CombineOp>
-void Foam::Pstream::listCombineAllGather
+void Foam::Pstream::listCombineReduce
 (
     List<T>& values,
     const CombineOp& cop,
@@ -747,22 +738,7 @@ void Foam::Pstream::mapCombineScatter
 
 
 template<class Container, class CombineOp>
-void Foam::Pstream::mapCombineAllGather
-(
-    const List<UPstream::commsStruct>& comms,
-    Container& values,
-    const CombineOp& cop,
-    const int tag,
-    const label comm
-)
-{
-    Pstream::mapCombineGather(comms, values, cop, tag, comm);
-    Pstream::broadcast(values, comm);
-}
-
-
-template<class Container, class CombineOp>
-void Foam::Pstream::mapCombineAllGather
+void Foam::Pstream::mapCombineReduce
 (
     Container& values,
     const CombineOp& cop,
