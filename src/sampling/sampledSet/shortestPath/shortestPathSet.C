@@ -264,7 +264,7 @@ void Foam::shortestPathSet::sync
             celli,
             Tuple2<point, bool>(origin, findMinDistance)
         );
-        Pstream::combineAllGather
+        Pstream::combineReduce
         (
             searchData,
             [](ProcData& x, const ProcData& y)

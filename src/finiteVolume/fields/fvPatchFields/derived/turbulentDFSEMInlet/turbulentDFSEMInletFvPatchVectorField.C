@@ -164,7 +164,7 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::initialisePatch()
     sumTriMagSf_ = Zero;
     sumTriMagSf_[Pstream::myProcNo() + 1] = sum(triMagSf);
 
-    Pstream::listCombineAllGather(sumTriMagSf_, maxEqOp<scalar>());
+    Pstream::listCombineReduce(sumTriMagSf_, maxEqOp<scalar>());
 
     for (label i = 1; i < triMagSf.size(); ++i)
     {

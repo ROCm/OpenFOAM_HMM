@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -196,7 +196,7 @@ Foam::procFacesGAMGProcAgglomeration::processorAgglomeration
         fineToCoarse = labelUIndList(oldToNew, fineToCoarse)();
     }
 
-    Pstream::scatter(fineToCoarse, Pstream::msgType(), mesh.comm());
+    Pstream::broadcast(fineToCoarse, mesh.comm());
     UPstream::freeCommunicator(singleCellMeshComm);
 
     return tfineToCoarse;

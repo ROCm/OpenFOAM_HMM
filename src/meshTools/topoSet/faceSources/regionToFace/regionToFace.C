@@ -176,7 +176,7 @@ void Foam::regionToFace::combine(topoSet& set, const bool add) const
     }
 
     // Globally reduce
-    Pstream::combineAllGather(ni, mappedPatchBase::nearestEqOp());
+    Pstream::combineReduce(ni, mappedPatchBase::nearestEqOp());
 
     if (verbose_)
     {

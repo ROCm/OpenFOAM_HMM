@@ -27,7 +27,6 @@ License
 
 #include "parProfiling.H"
 #include "addToRunTimeSelectionTable.H"
-#include "UPstream.H"
 #include "Pstream.H"
 #include "PstreamReduceOps.H"
 #include "profilingPstream.H"

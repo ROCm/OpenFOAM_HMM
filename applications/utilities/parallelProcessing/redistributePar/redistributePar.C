@@ -132,7 +132,7 @@ void createTimeDirs(const fileName& path)
         //Pstream::parRun(oldParRun);  // Restore parallel state
         masterTimeDirs = localTimeDirs;
     }
-    Pstream::scatter(masterTimeDirs);
+    Pstream::broadcast(masterTimeDirs);
     //DebugVar(masterTimeDirs);
     //DebugVar(localTimeDirs);
 
@@ -1168,7 +1168,7 @@ int main(int argc, char *argv[])
     bool nfs = true;
     {
         List<fileName> roots(1, args.rootPath());
-        Pstream::combineAllGather(roots, ListOps::uniqueEqOp<fileName>());
+        Pstream::combineReduce(roots, ListOps::uniqueEqOp<fileName>());
         nfs = (roots.size() == 1);
     }
 
@@ -1203,7 +1203,7 @@ int main(int argc, char *argv[])
         }
     }
     // If master changed to decompose mode make sure all nodes know about it
-    Pstream::scatter(decompose);
+    Pstream::broadcast(decompose);
 
 
     // If running distributed we have problem of new processors not finding
@@ -1288,7 +1288,7 @@ int main(int argc, char *argv[])
         // use the times list from the master processor
         // and select a subset based on the command-line options
         instantList timeDirs = timeSelector::select(runTime.times(), args);
-        Pstream::scatter(timeDirs);
+        Pstream::broadcast(timeDirs);
 
         if (timeDirs.empty())
         {
@@ -2067,7 +2067,7 @@ int main(int argc, char *argv[])
                 args
             )[0].value();
         }
-        Pstream::scatter(masterTime);
+        Pstream::broadcast(masterTime);
         Info<< "Setting time to that of master or undecomposed case : "
             << masterTime << endl;
         runTime.setTime(masterTime, 0);

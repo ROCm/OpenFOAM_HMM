@@ -202,7 +202,7 @@ void Foam::ParSortableList<Type>::sort()
 
         getPivots(sortedPivots, pivots);
     }
-    Pstream::scatter(pivots);
+    Pstream::broadcast(pivots);
 
     if (debug)
     {

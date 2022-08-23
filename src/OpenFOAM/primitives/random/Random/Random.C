@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -143,14 +143,14 @@ Foam::label Foam::Random::position(const label& start, const label& end)
 template<>
 Foam::scalar Foam::Random::globalSample01()
 {
-    scalar value(-GREAT);
+    scalar value(0);
 
     if (Pstream::master())
     {
         value = scalar01();
     }
 
-    Pstream::scatter(value);
+    Pstream::broadcast(value);
 
     return value;
 }
@@ -159,14 +159,14 @@ Foam::scalar Foam::Random::globalSample01()
 template<>
 Foam::label Foam::Random::globalSample01()
 {
-    label value(labelMin);
+    label value(0);
 
     if (Pstream::master())
     {
         value = round(scalar01());
     }
 
-    Pstream::scatter(value);
+    Pstream::broadcast(value);
 
     return value;
 }
@@ -175,14 +175,14 @@ Foam::label Foam::Random::globalSample01()
 template<>
 Foam::scalar Foam::Random::globalGaussNormal()
 {
-    scalar value(-GREAT);
+    scalar value(0);
 
     if (Pstream::master())
     {
         value = GaussNormal<scalar>();
     }
 
-    Pstream::scatter(value);
+    Pstream::broadcast(value);
 
     return value;
 }
@@ -191,14 +191,14 @@ Foam::scalar Foam::Random::globalGaussNormal()
 template<>
 Foam::label Foam::Random::globalGaussNormal()
 {
-    label value(labelMin);
+    label value(0);
 
     if (Pstream::master())
     {
         value = GaussNormal<label>();
     }
 
-    Pstream::scatter(value);
+    Pstream::broadcast(value);
 
     return value;
 }
@@ -211,14 +211,14 @@ Foam::scalar Foam::Random::globalPosition
     const scalar& end
 )
 {
-    scalar value(-GREAT);
+    scalar value(0);
 
     if (Pstream::master())
     {
         value = position<scalar>(start, end);
     }
 
-    Pstream::scatter(value);
+    Pstream::broadcast(value);
 
     return value;
 }
@@ -231,14 +231,14 @@ Foam::label Foam::Random::globalPosition
     const label& end
 )
 {
-    label value(labelMin);
+    label value(0);
 
     if (Pstream::master())
     {
         value = position<label>(start, end);
     }
 
-    Pstream::scatter(value);
+    Pstream::broadcast(value);
 
     return value;
 }

@@ -70,7 +70,7 @@ bool writeTopoSet
     const topoSet& set,
     const vtk::outputOptions opts,
     const fileName& file,
-    bool parallel = Pstream::parRun()
+    bool parallel = UPstream::parRun()
 );
 
 
@@ -83,7 +83,7 @@ bool writeFaceSet
     const faceSet& set,
     const vtk::outputOptions opts,
     const fileName& file,
-    bool parallel = Pstream::parRun()
+    bool parallel = UPstream::parRun()
 );
 
 
@@ -96,7 +96,7 @@ bool writeCellSetFaces
     const cellSet& set,
     const vtk::outputOptions opts,
     const fileName& file,
-    bool parallel = Pstream::parRun()
+    bool parallel = UPstream::parRun()
 );
 
 
@@ -109,7 +109,7 @@ bool writePointSet
     const pointSet& set,
     const vtk::outputOptions opts,
     const fileName& file,
-    bool parallel = Pstream::parRun()
+    bool parallel = UPstream::parRun()
 );
 
 

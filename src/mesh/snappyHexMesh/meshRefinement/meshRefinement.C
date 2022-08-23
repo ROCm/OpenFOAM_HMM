@@ -1973,7 +1973,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
             labelList nProcCells(distributor.countCells(distribution));
             Pout<< "Wanted distribution:" << nProcCells << endl;
 
-            Pstream::listCombineAllGather(nProcCells, plusEqOp<label>());
+            Pstream::listCombineReduce(nProcCells, plusEqOp<label>());
 
             Pout<< "Wanted resulting decomposition:" << endl;
             forAll(nProcCells, proci)

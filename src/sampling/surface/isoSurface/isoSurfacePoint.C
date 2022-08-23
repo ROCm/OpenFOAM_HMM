@@ -262,7 +262,7 @@ void Foam::isoSurfacePoint::syncUnseparatedPoints
         }
 
         // Globally consistent
-        Pstream::listCombineAllGather(sharedPts, minEqOp<point>());
+        Pstream::listCombineReduce(sharedPts, minEqOp<point>());
 
         // Now we will all have the same information. Merge it back with
         // my local information.

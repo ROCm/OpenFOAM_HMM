@@ -729,7 +729,7 @@ Foam::label Foam::conformalVoronoiMesh::synchroniseSurfaceTrees
         }
     }
 
-    Pstream::listCombineAllGather(hits, plusEqOp<labelHashSet>());
+    Pstream::listCombineReduce(hits, plusEqOp<labelHashSet>());
 
     forAll(surfaceHits, eI)
     {
@@ -816,7 +816,7 @@ Foam::label Foam::conformalVoronoiMesh::synchroniseEdgeTrees
         }
     }
 
-    Pstream::listCombineAllGather(hits, plusEqOp<labelHashSet>());
+    Pstream::listCombineReduce(hits, plusEqOp<labelHashSet>());
 
     forAll(featureEdgeHits, eI)
     {

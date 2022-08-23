@@ -217,7 +217,7 @@ void Foam::planeToFaceZone::combine(faceZoneSet& fzSet, const bool add) const
                     regionRegions[regioni].unset(regioni);
                 }
             }
-            Pstream::listCombineAllGather(regionRegions, bitOrEqOp<bitSet>());
+            Pstream::listCombineReduce(regionRegions, bitOrEqOp<bitSet>());
 
             // Collapse the region connections into a map between each region
             // and the lowest numbered region that it connects to
@@ -258,7 +258,7 @@ void Foam::planeToFaceZone::combine(faceZoneSet& fzSet, const bool add) const
             {
                 ++ regionNFaces[regioni];
             }
-            Pstream::listCombineAllGather(regionNFaces, plusEqOp<label>());
+            Pstream::listCombineReduce(regionNFaces, plusEqOp<label>());
 
             Info<< "    Found " << nRegions << " contiguous regions with "
                 << regionNFaces << " faces" << endl;

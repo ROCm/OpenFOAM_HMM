@@ -188,8 +188,8 @@ void Foam::DMDModels::STDMD::compress()
             q.subColumn(i) = EVecs.subColumn(permutation[i]);
         }
     }
-    Pstream::scatter(G_);
-    Pstream::scatter(q);
+    Pstream::broadcast(G_);
+    Pstream::broadcast(q);
 
     // Update "Q"
     Q_ = Q_*q;
@@ -357,8 +357,8 @@ reducedKoopmanOperator()
             A1 = RxInv_*RMatrix(MatrixTools::pinv(Rx*(G_^Rx)));
             Rx.clear();
         }
-        Pstream::scatter(RxInv_);
-        Pstream::scatter(A1);
+        Pstream::broadcast(RxInv_);
+        Pstream::broadcast(A1);
 
         Info<< tab << "Computing A2" << endl;
         SMatrix A2(Qupper_ & Qlower_);
@@ -452,15 +452,15 @@ bool Foam::DMDModels::STDMD::eigendecomposition(SMatrix& Atilde)
             evals_ = cp;
         }
     }
-    Pstream::scatter(fail);
+    Pstream::broadcast(fail);
 
     if (fail)
     {
         return false;
     }
 
-    Pstream::scatter(evals_);
-    Pstream::scatter(evecs_);
+    Pstream::broadcast(evals_);
+    Pstream::broadcast(evecs_);
 
     return true;
 }
@@ -503,8 +503,8 @@ void Foam::DMDModels::STDMD::frequencies()
             it = std::find_if(std::next(it), freqs_.cend(), margin);
         }
     }
-    Pstream::scatter(freqs_);
-    Pstream::scatter(freqsi_);
+    Pstream::broadcast(freqs_);
+    Pstream::broadcast(freqsi_);
 }
 
 
@@ -567,7 +567,7 @@ void Foam::DMDModels::STDMD::amplitudes()
             }
         }
     }
-    Pstream::scatter(amps_);
+    Pstream::broadcast(amps_);
 }
 
 
@@ -648,8 +648,8 @@ void Foam::DMDModels::STDMD::magnitudes()
 
         std::sort(magsi_.begin(), magsi_.end(), descend);
     }
-    Pstream::scatter(mags_);
-    Pstream::scatter(magsi_);
+    Pstream::broadcast(mags_);
+    Pstream::broadcast(magsi_);
 }
 
 

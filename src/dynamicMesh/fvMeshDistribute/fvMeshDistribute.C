@@ -216,7 +216,7 @@ Foam::wordList Foam::fvMeshDistribute::mergeWordList(const wordList& procNames)
             }
         }
     }
-    Pstream::scatter(mergedNames);
+    Pstream::broadcast(mergedNames);
 
     return mergedNames;
 }

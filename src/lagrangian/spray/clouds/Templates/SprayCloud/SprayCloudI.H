@@ -181,7 +181,7 @@ inline Foam::scalar Foam::SprayCloud<CloudType>::penetration
         }
     }
 
-    Pstream::scatter(distance);
+    Pstream::broadcast(distance);
 
     return distance;
 }

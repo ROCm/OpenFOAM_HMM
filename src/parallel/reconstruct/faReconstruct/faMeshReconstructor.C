@@ -101,7 +101,7 @@ void Foam::faMeshReconstructor::calcAddressing
               ? 0
               : singlePatchFaceLabels_.first()
             );
-            Pstream::scatter(patchFirstMeshfacei);
+            Pstream::broadcast(patchFirstMeshfacei);
 
             for (label& facei : faFaceProcAddr_)
             {
@@ -169,7 +169,7 @@ void Foam::faMeshReconstructor::calcAddressing
     }
 
     // Broadcast the same information everywhere
-    Pstream::scatter(singlePatchFaceLabels_);
+    Pstream::broadcast(singlePatchFaceLabels_);
 
 
     // ------------------
@@ -283,7 +283,7 @@ void Foam::faMeshReconstructor::calcAddressing
                 mpm[mp[i]] = i;
             }
         }
-        Pstream::scatter(mpm);
+        Pstream::broadcast(mpm);
 
         // Rewrite pointToGlobal according to the correct point order
         for (label& pointi : pointToGlobal)
@@ -299,8 +299,8 @@ void Foam::faMeshReconstructor::calcAddressing
     }
 
     // Broadcast the same information everywhere
-    Pstream::scatter(singlePatchFaces_);
-    Pstream::scatter(singlePatchPoints_);
+    Pstream::broadcast(singlePatchFaces_);
+    Pstream::broadcast(singlePatchPoints_);
 
     // Now have enough global information to determine global edge mappings
 
@@ -383,13 +383,8 @@ void Foam::faMeshReconstructor::calcAddressing
         // OR patchEdgeLabels =
         // UIndirectList<label>(faEdgeProcAddr_, fap.edgeLabels());
 
-
-        // Collect from all processors
-        Pstream::combineAllGather
-        (
-            patchEdgeLabels,
-            ListOps::appendEqOp<label>()
-        );
+        // Combine from all processors
+        Pstream::combineReduce(patchEdgeLabels, ListOps::appendEqOp<label>());
 
         // Sorted order will be the original non-decomposed order
         Foam::sort(patchEdgeLabels);

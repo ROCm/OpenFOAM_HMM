@@ -51,14 +51,9 @@ Foam::wordList Foam::parLagrangianDistributor::filterObjects
       : objects.names<Container>(selectedFields)
     );
 
-    // Parallel synchronise
-    // - Combine names from all processors
-
-    Pstream::combineGather(fieldNames, ListOps::uniqueEqOp<word>());
-    Pstream::broadcast(fieldNames);
-
-    // Sort for consistent order on all processors
-    Foam::sort(fieldNames);
+    // Parallel synchronise - combine names from all processors
+    Pstream::combineReduce(fieldNames, ListOps::uniqueEqOp<word>());
+    Foam::sort(fieldNames);  // Consistent order
 
     return fieldNames;
 }

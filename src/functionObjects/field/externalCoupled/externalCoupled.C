@@ -430,7 +430,7 @@ void Foam::functionObjects::externalCoupled::initCoupling()
                  || isFile(dir/"patchFaces");
             }
 
-            Pstream::scatter(geomExists);
+            Pstream::broadcast(geomExists);
 
             if (!geomExists)
             {

@@ -1118,7 +1118,7 @@ void Foam::cellCellStencils::inverseDistance::findHoles
     {
         // Synchronise region status on processors
         // (could instead swap status through processor patches)
-        Pstream::listCombineAllGather(regionType, maxEqOp<label>());
+        Pstream::listCombineReduce(regionType, maxEqOp<label>());
 
         DebugInfo<< FUNCTION_NAME << " : Gathered region type" << endl;
 
@@ -1722,7 +1722,7 @@ bool Foam::cellCellStencils::inverseDistance::update()
     {
         nCellsPerZone[zoneID[cellI]]++;
     }
-    Pstream::listCombineAllGather(nCellsPerZone, plusEqOp<label>());
+    Pstream::listCombineReduce(nCellsPerZone, plusEqOp<label>());
 
     const boundBox& allBb(mesh_.bounds());
 

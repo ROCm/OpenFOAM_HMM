@@ -416,10 +416,12 @@ void extractSurface
 
     // Allocate zone/patch for all patches
     HashTable<label> compactZoneID(1024);
-    forAllConstIters(patchSize, iter)
+    if (Pstream::master())
     {
-        label sz = compactZoneID.size();
-        compactZoneID.insert(iter.key(), sz);
+        forAllConstIters(patchSize, iter)
+        {
+            compactZoneID.insert(iter.key(), compactZoneID.size());
+        }
     }
     Pstream::broadcast(compactZoneID);
 
@@ -431,7 +433,7 @@ void extractSurface
         label patchi = bMesh.findPatchID(iter.key());
         if (patchi != -1)
         {
-            patchToCompactZone[patchi] = iter();
+            patchToCompactZone[patchi] = iter.val();
         }
     }
 

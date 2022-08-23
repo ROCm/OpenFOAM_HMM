@@ -46,11 +46,9 @@ if (doLagrangian)
     if (Pstream::parRun())
     {
         // Synchronise cloud names
-        Pstream::combineGather(cloudNames, ListOps::uniqueEqOp<word>());
-        Pstream::broadcast(cloudNames);
+        Pstream::combineReduce(cloudNames, ListOps::uniqueEqOp<word>());
     }
-    // Consistent order
-    Foam::sort(cloudNames);
+    Foam::sort(cloudNames);  // Consistent order
 
     for (const word& cloudName : cloudNames)
     {

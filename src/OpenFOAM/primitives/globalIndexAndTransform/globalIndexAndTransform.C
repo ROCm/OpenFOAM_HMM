@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -269,7 +269,7 @@ void Foam::globalIndexAndTransform::determineTransforms()
     }
 
     transforms_.transfer(localTransforms);
-    Pstream::scatter(transforms_);
+    Pstream::broadcast(transforms_);
 }
 
 

@@ -714,7 +714,7 @@ void syncPoints
         }
 
         // Combine - globally consistent
-        Pstream::listCombineAllGather(sharedPts, cop);
+        Pstream::listCombineReduce(sharedPts, cop);
 
         // Now we will all have the same information. Merge it back with
         // my local information.

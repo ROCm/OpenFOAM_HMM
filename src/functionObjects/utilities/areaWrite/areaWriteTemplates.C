@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,16 +73,12 @@ void Foam::areaWrite::performAction
     {
         fieldNames = areaMesh.thisDb().names<GeoField>(fieldSelection_);
 
-        // With syncPar
+        // Synchronize names
         if (Pstream::parRun())
         {
-            // Synchronize names
-            Pstream::combineGather(fieldNames, ListOps::uniqueEqOp<word>());
-            Pstream::broadcast(fieldNames);
+            Pstream::combineReduce(fieldNames, ListOps::uniqueEqOp<word>());
         }
-
-        // Sort for consistent order on all processors
-        Foam::sort(fieldNames);
+        Foam::sort(fieldNames);  // Consistent order
     }
 
     for (const word& fieldName : fieldNames)

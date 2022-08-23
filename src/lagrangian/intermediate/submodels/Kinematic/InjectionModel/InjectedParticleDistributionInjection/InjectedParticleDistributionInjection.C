@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,8 +62,7 @@ void Foam::InjectedParticleDistributionInjection<CloudType>::initialise()
     {
         List<List<label>> procTag(Pstream::nProcs());
         procTag[Pstream::myProcNo()].transfer(tag);
-        Pstream::gatherList(procTag);
-        Pstream::scatterList(procTag);
+        Pstream::allGatherList(procTag);
         tag =
             ListListOps::combine<List<label>>
             (
@@ -72,8 +71,7 @@ void Foam::InjectedParticleDistributionInjection<CloudType>::initialise()
 
         List<List<point>> procPosition(Pstream::nProcs());
         procPosition[Pstream::myProcNo()].transfer(position);
-        Pstream::gatherList(procPosition);
-        Pstream::scatterList(procPosition);
+        Pstream::allGatherList(procPosition);
         position =
             ListListOps::combine<List<point>>
             (
@@ -82,8 +80,7 @@ void Foam::InjectedParticleDistributionInjection<CloudType>::initialise()
 
         List<List<vector>> procU(Pstream::nProcs());
         procU[Pstream::myProcNo()].transfer(U);
-        Pstream::gatherList(procU);
-        Pstream::scatterList(procU);
+        Pstream::allGatherList(procU);
         U =
             ListListOps::combine<List<vector>>
             (
@@ -92,8 +89,7 @@ void Foam::InjectedParticleDistributionInjection<CloudType>::initialise()
 
         List<List<scalar>> procSOI(Pstream::nProcs());
         procSOI[Pstream::myProcNo()].transfer(soi);
-        Pstream::gatherList(procSOI);
-        Pstream::scatterList(procSOI);
+        Pstream::allGatherList(procSOI);
         soi =
             ListListOps::combine<List<scalar>>
             (
@@ -102,8 +98,7 @@ void Foam::InjectedParticleDistributionInjection<CloudType>::initialise()
 
         List<List<scalar>> procD(Pstream::nProcs());
         procD[Pstream::myProcNo()].transfer(d);
-        Pstream::gatherList(procD);
-        Pstream::scatterList(procD);
+        Pstream::allGatherList(procD);
         d =
             ListListOps::combine<List<scalar>>
             (

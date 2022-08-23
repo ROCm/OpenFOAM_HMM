@@ -196,7 +196,7 @@ Foam::IOobjectList Foam::sampledSets::preCheckFields(unsigned request)
 
     // Parallel consistency (no-op in serial)
     // Probably not needed...
-    /// Pstream::mapCombineAllGather(selected, HashSetOps::plusEqOp<word>());
+    /// Pstream::mapCombineReduce(selected, HashSetOps::plusEqOp<word>());
 
 
     DynamicList<label> missed(fieldSelection_.size());

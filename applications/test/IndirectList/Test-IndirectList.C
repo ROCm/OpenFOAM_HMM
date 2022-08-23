@@ -182,7 +182,7 @@ int main(int argc, char *argv[])
 
         // MPI barrier
         bool barrier = true;
-        Pstream::scatter(barrier);
+        Pstream::broadcast(barrier);
     }
 
 

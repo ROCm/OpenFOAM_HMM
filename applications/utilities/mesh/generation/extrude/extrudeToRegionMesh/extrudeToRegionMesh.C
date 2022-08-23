@@ -661,8 +661,8 @@ void countExtrudePatches
     }
     // Synchronise decision. Actual numbers are not important, just make
     // sure that they're > 0 on all processors.
-    Pstream::listCombineAllGather(zoneSidePatch, plusEqOp<label>());
-    Pstream::listCombineAllGather(zoneZonePatch, plusEqOp<label>());
+    Pstream::listCombineReduce(zoneSidePatch, plusEqOp<label>());
+    Pstream::listCombineReduce(zoneZonePatch, plusEqOp<label>());
 }
 
 
@@ -1848,7 +1848,7 @@ int main(int argc, char *argv[])
     const primitiveFacePatch extrudePatch(std::move(zoneFaces), mesh.points());
 
 
-    Pstream::listCombineAllGather(isInternal, orEqOp<bool>());
+    Pstream::listCombineReduce(isInternal, orEqOp<bool>());
 
     // Check zone either all internal or all external faces
     checkZoneInside(mesh, zoneNames, zoneID, extrudeMeshFaces, isInternal);
@@ -2309,7 +2309,7 @@ int main(int argc, char *argv[])
         }
 
         // Reduce
-        Pstream::mapCombineAllGather(globalSum, plusEqOp<point>());
+        Pstream::mapCombineReduce(globalSum, plusEqOp<point>());
 
         forAll(localToGlobalRegion, localRegionI)
         {

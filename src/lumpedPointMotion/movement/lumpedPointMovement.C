@@ -880,7 +880,7 @@ Foam::List<Foam::scalar> Foam::lumpedPointMovement::areas
         }
     }
 
-    Pstream::listCombineAllGather(zoneAreas, plusEqOp<scalar>());
+    Pstream::listCombineReduce(zoneAreas, plusEqOp<scalar>());
 
     return zoneAreas;
 }
@@ -1008,8 +1008,8 @@ bool Foam::lumpedPointMovement::forcesAndMoments
         Info<<"No pressure field" << endl;
     }
 
-    Pstream::listCombineAllGather(forces, plusEqOp<vector>());
-    Pstream::listCombineAllGather(moments, plusEqOp<vector>());
+    Pstream::listCombineReduce(forces, plusEqOp<vector>());
+    Pstream::listCombineReduce(moments, plusEqOp<vector>());
 
     return true;
 }

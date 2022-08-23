@@ -267,7 +267,7 @@ bool Foam::areaWrite::write()
         }
 
         // Parallel consistency (no-op in serial)
-        Pstream::mapCombineAllGather(selected, HashSetOps::plusEqOp<word>());
+        Pstream::mapCombineReduce(selected, HashSetOps::plusEqOp<word>());
 
         missed.clear();
 

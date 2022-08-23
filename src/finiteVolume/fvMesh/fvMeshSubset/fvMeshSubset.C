@@ -1042,7 +1042,7 @@ void Foam::fvMeshSubset::reset
         // Get patch sizes (up to nextPatchID).
         // Note that up to nextPatchID the globalPatchMap is an identity so
         // no need to index through that.
-        Pstream::listCombineAllGather(globalPatchSizes, plusEqOp<label>());
+        Pstream::listCombineReduce(globalPatchSizes, plusEqOp<label>());
 
         // Now all processors have all the patchnames.
         // Decide: if all processors have the same patch names and size is zero
