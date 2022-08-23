@@ -351,7 +351,7 @@ Foam::fvMeshSubset::interpolate
                 {
                     Type val = vf.internalField()[baseFacei];
 
-                    if (cellMap[fc[i]] == own[baseFacei] || !vf.oriented()())
+                    if (cellMap[fc[i]] == own[baseFacei] || !vf.is_oriented())
                     {
                         pfld[i] = val;
                     }

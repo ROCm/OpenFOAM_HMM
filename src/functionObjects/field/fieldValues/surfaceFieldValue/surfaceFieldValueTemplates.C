@@ -598,10 +598,10 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::filterField
     if (debug)
     {
         Pout<< "field " << field.name() << " oriented: "
-            << field.oriented()() << endl;
+            << field.is_oriented() << endl;
     }
 
-    if (field.oriented()())
+    if (field.is_oriented())
     {
         forAll(values, i)
         {

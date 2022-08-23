@@ -142,8 +142,7 @@ void Foam::fvsPatchField<Type>::check(const fvsPatchField<Type>& ptf) const
 template<class Type>
 void Foam::fvsPatchField<Type>::autoMap(const fvPatchFieldMapper& m)
 {
-    const bool oriented = internalField_.oriented()();
-    Field<Type>::autoMap(m, oriented);
+    Field<Type>::autoMap(m, internalField_.is_oriented());
 }
 
 

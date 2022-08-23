@@ -50,36 +50,18 @@ bool Foam::orientedType::checkType
 (
     const orientedType& ot1,
     const orientedType& ot2
-)
+) noexcept
 {
     return
     (
-        (ot1.oriented() == UNKNOWN)
-     || (ot2.oriented() == UNKNOWN)
-     || (ot1.oriented() == ot2.oriented())
+        (ot1.oriented() == ot2.oriented())
+     || (ot1.oriented() == orientedType::UNKNOWN)
+     || (ot2.oriented() == orientedType::UNKNOWN)
     );
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::orientedType::orientedType() noexcept
-:
-    oriented_(UNKNOWN)
-{}
-
-
-Foam::orientedType::orientedType(const orientedType& ot) noexcept
-:
-    oriented_(ot.oriented_)
-{}
-
-
-Foam::orientedType::orientedType(const bool isOriented) noexcept
-:
-    oriented_(isOriented ? ORIENTED : UNORIENTED)
-{}
-
 
 Foam::orientedType::orientedType(Istream& is)
 :
@@ -90,24 +72,6 @@ Foam::orientedType::orientedType(Istream& is)
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-Foam::orientedType::orientedOption& Foam::orientedType::oriented() noexcept
-{
-    return oriented_;
-}
-
-
-Foam::orientedType::orientedOption Foam::orientedType::oriented() const noexcept
-{
-    return oriented_;
-}
-
-
-void Foam::orientedType::setOriented(const bool on) noexcept
-{
-    oriented_ = on ? ORIENTED : UNORIENTED;
-}
-
 
 void Foam::orientedType::read(const dictionary& dict)
 {
@@ -135,13 +99,6 @@ bool Foam::orientedType::writeEntry(Ostream& os) const
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-void Foam::orientedType::operator=(const orientedType& ot)
-{
-    // Oriented state is inherited on assignment
-    oriented_ = ot.oriented();
-}
-
 
 void Foam::orientedType::operator+=(const orientedType& ot)
 {
@@ -183,29 +140,13 @@ void Foam::orientedType::operator-=(const orientedType& ot)
 
 void Foam::orientedType::operator*=(const orientedType& ot)
 {
-    const orientedType& ot1 = *this;
-    if (ot1() ^ ot())
-    {
-        oriented_ = ORIENTED;
-    }
-    else
-    {
-        oriented_ = UNORIENTED;
-    }
+    setOriented(is_oriented() != ot.is_oriented());
 }
 
 
 void Foam::orientedType::operator/=(const orientedType& ot)
 {
-    const orientedType& ot1 = *this;
-    if (ot1() ^ ot())
-    {
-        oriented_ = ORIENTED;
-    }
-    else
-    {
-        oriented_ = UNORIENTED;
-    }
+    setOriented(is_oriented() != ot.is_oriented());
 }
 
 
@@ -218,12 +159,6 @@ void Foam::orientedType::operator*=(const scalar s)
 void Foam::orientedType::operator/=(const scalar s)
 {
     // No change to oriented_ flag
-}
-
-
-bool Foam::orientedType::operator()() const noexcept
-{
-    return oriented_ == ORIENTED;
 }
 
 
@@ -492,8 +427,7 @@ Foam::orientedType Foam::operator+
             << abort(FatalError);
     }
 
-    // Note use of () operators to convert to boolean op
-    return orientedType(ot1() || ot2());
+    return orientedType(ot1.is_oriented() || ot2.is_oriented());
 }
 
 
@@ -518,8 +452,7 @@ Foam::orientedType Foam::operator-
             << abort(FatalError);
     }
 
-    // Note use of () operators to convert to boolean op
-    return orientedType(ot1() || ot2());
+    return orientedType(ot1.is_oriented() || ot2.is_oriented());
 }
 
 
@@ -561,8 +494,7 @@ Foam::orientedType Foam::operator^
     const orientedType& ot2
 )
 {
-    // Note use of () operators to convert to boolean op
-    return orientedType(ot1() ^ ot2());
+    return orientedType(ot1.is_oriented() != ot2.is_oriented());
 }
 
 

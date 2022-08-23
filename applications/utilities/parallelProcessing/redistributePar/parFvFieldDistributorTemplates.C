@@ -224,7 +224,7 @@ Foam::parFvFieldDistributor::distributeField
         }
 
         // Map all faces
-        primitiveField = Field<Type>(flatFld, mapper, fld.oriented()());
+        primitiveField = Field<Type>(flatFld, mapper, fld.is_oriented());
 
         // Trim to internal faces (note: could also have special mapper)
         primitiveField.resize

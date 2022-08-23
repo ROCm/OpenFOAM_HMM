@@ -360,13 +360,16 @@ public:
         inline dimensionSet& dimensions() noexcept;
 
         //- Return oriented type
-        inline const orientedType& oriented() const noexcept;
+        inline orientedType oriented() const noexcept;
 
         //- Return non-const access to the oriented type
         inline orientedType& oriented() noexcept;
 
-        //- Set the oriented flag
-        inline void setOriented(const bool oriented = true) noexcept;
+        //- True if field is ORIENTED
+        inline bool is_oriented() const noexcept;
+
+        //- Set the oriented flag: on/off
+        inline void setOriented(bool on = true) noexcept;
 
         //- Return const-reference to the field values
         inline const Field<Type>& field() const noexcept;

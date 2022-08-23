@@ -47,25 +47,25 @@ inline bool Foam::TimePaths::processorCase(bool isProcessorCase) noexcept
 }
 
 
-inline const Foam::fileName& Foam::TimePaths::rootPath() const
+inline const Foam::fileName& Foam::TimePaths::rootPath() const noexcept
 {
     return rootPath_;
 }
 
 
-inline const Foam::fileName& Foam::TimePaths::globalCaseName() const
+inline const Foam::fileName& Foam::TimePaths::globalCaseName() const noexcept
 {
     return globalCaseName_;
 }
 
 
-inline const Foam::fileName& Foam::TimePaths::caseName() const
+inline const Foam::fileName& Foam::TimePaths::caseName() const noexcept
 {
     return case_;
 }
 
 
-inline Foam::fileName& Foam::TimePaths::caseName()
+inline Foam::fileName& Foam::TimePaths::caseName() noexcept
 {
     return case_;
 }
@@ -93,13 +93,13 @@ inline Foam::fileName Foam::TimePaths::relativePath
 }
 
 
-inline const Foam::word& Foam::TimePaths::constant() const
+inline const Foam::word& Foam::TimePaths::constant() const noexcept
 {
     return constant_;
 }
 
 
-inline const Foam::word& Foam::TimePaths::system() const
+inline const Foam::word& Foam::TimePaths::system() const noexcept
 {
     return system_;
 }

@@ -264,7 +264,7 @@ void Foam::controlMeshRefinement::initialMeshPopulation
         const cellSizeAndAlignmentControl& controlFunction =
             controlFunctions[fI];
 
-        const Switch& forceInsertion =
+        const Switch forceInsertion =
             controlFunction.forceInitialPointInsertion();
 
         Info<< "Inserting points from " << controlFunction.name()
@@ -450,7 +450,7 @@ void Foam::controlMeshRefinement::initialMeshPopulation
         const cellSizeAndAlignmentControl& controlFunction =
             controlFunctions[fI];
 
-        const Switch& forceInsertion =
+        const Switch forceInsertion =
             controlFunction.forceInitialPointInsertion();
 
         Info<< "Inserting points from " << controlFunction.name()

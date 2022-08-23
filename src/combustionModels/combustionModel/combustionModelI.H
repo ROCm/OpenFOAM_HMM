@@ -52,7 +52,7 @@ inline Foam::tmp<Foam::surfaceScalarField> Foam::combustionModel::phi() const
 }
 
 
-inline const Foam::Switch& Foam::combustionModel::active() const
+inline Foam::Switch Foam::combustionModel::active() const noexcept
 {
     return active_;
 }

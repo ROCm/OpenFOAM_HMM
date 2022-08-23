@@ -282,7 +282,7 @@ void Foam::fvMeshDistribute::mapExposedFaces
     forAllIters(flds, iter)
     {
         fldType& fld = *iter();
-        const bool oriented = fld.oriented()();
+        const bool oriented = fld.is_oriented();
 
         typename fldType::Boundary& bfld = fld.boundaryFieldRef();
 

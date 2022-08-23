@@ -61,7 +61,7 @@ Foam::DimensionedField<Type, GeoMesh>::dimensions() noexcept
 
 
 template<class Type, class GeoMesh>
-inline const Foam::orientedType&
+inline Foam::orientedType
 Foam::DimensionedField<Type, GeoMesh>::oriented() const noexcept
 {
     return oriented_;
@@ -77,12 +77,16 @@ Foam::DimensionedField<Type, GeoMesh>::oriented() noexcept
 
 
 template<class Type, class GeoMesh>
-inline void Foam::DimensionedField<Type, GeoMesh>::setOriented
-(
-    const bool oriented
-) noexcept
+inline bool Foam::DimensionedField<Type, GeoMesh>::is_oriented() const noexcept
 {
-    oriented_.setOriented(oriented);
+    return oriented_.is_oriented();
+}
+
+
+template<class Type, class GeoMesh>
+inline void Foam::DimensionedField<Type, GeoMesh>::setOriented(bool on) noexcept
+{
+    oriented_.setOriented(on);
 }
 
 

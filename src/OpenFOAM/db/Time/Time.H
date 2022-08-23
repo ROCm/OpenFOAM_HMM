@@ -379,37 +379,37 @@ public:
             }
 
             //- The write stream option (format, compression, version)
-            IOstreamOption writeStreamOption() const
+            IOstreamOption writeStreamOption() const noexcept
             {
                 return writeStreamOption_;
             }
 
             //- The write stream format
-            IOstreamOption::streamFormat writeFormat() const
+            IOstreamOption::streamFormat writeFormat() const noexcept
             {
                 return writeStreamOption_.format();
             }
 
             //- The write stream compression
-            IOstreamOption::compressionType writeCompression() const
+            IOstreamOption::compressionType writeCompression() const noexcept
             {
                 return writeStreamOption_.compression();
             }
 
             //- The write stream version
-            IOstreamOption::versionNumber writeVersion() const
+            IOstreamOption::versionNumber writeVersion() const noexcept
             {
                 return writeStreamOption_.version();
             }
 
             //- Default graph format
-            const word& graphFormat() const
+            const word& graphFormat() const noexcept
             {
                 return graphFormat_;
             }
 
             //- Supports re-reading
-            const Switch& runTimeModifiable() const
+            Switch runTimeModifiable() const noexcept
             {
                 return runTimeModifiable_;
             }
@@ -508,7 +508,7 @@ public:
             }
 
             //- Mutable access to the loaded dynamic libraries
-            dlLibraryTable& libs() const
+            dlLibraryTable& libs() const noexcept
             {
                 return libs_;
             }
@@ -518,7 +518,7 @@ public:
             //- sub-cycles.
             //  The interpretation of non-zero values is dependent on the
             //  routine.
-            label subCycling() const
+            label subCycling() const noexcept
             {
                 return subCycling_;
             }

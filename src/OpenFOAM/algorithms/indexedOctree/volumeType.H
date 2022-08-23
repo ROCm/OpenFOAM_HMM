@@ -36,8 +36,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef volumeType_H
-#define volumeType_H
+#ifndef Foam_volumeType_H
+#define Foam_volumeType_H
 
 #include "contiguous.H"
 #include "Enum.H"
@@ -89,14 +89,14 @@ public:
 
     // Constructors
 
-        //- Construct null as UNKNOWN state
-        volumeType()
+        //- Default construct as \c UNKNOWN state
+        constexpr volumeType() noexcept
         :
             t_(UNKNOWN)
         {}
 
-        //- Construct from enumeration
-        volumeType(type t)
+        //- Implicit construct from enumeration
+        volumeType(type t) noexcept
         :
             t_(t)
         {}
@@ -123,7 +123,7 @@ public:
         const word& str() const;
 
 
-    // IOstream operators
+    // IOstream Operators
 
         friend Istream& operator>>(Istream& is, volumeType& vt);
         friend Ostream& operator<<(Ostream& os, const volumeType& vt);
