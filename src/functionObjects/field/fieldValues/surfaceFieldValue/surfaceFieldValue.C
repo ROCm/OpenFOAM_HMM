@@ -156,7 +156,7 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::setFaceZoneFaces()
 
     // Could also check this
     #if 0
-    if (!returnReduce(bool(numFaces), orOp<bool>()))
+    if (!returnReduceOr(numFaces))
     {
         WarningInFunction
             << type() << ' ' << name() << ": "
@@ -314,7 +314,7 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::setPatchFaces()
 
     // Could also check this
     #if 0
-    if (!returnReduce(bool(numFaces), orOp<bool>()))
+    if (!returnReduceOr(numFaces))
     {
         WarningInFunction
             << type() << ' ' << name() << ": "
@@ -807,7 +807,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::weightingFactor
     // scalar * unit-normal
 
     // Can skip this check - already used canWeight()
-    /// if (returnReduce(weightField.empty(), andOp<bool>()))
+    /// if (returnReduceAnd(weightField.empty()))
     /// {
     ///     // No weight field - revert to unweighted form?
     ///     return tmp<scalarField>::New(Sf.size(), scalar(1));
@@ -835,7 +835,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::areaWeightingFactor
     // scalar * Area
 
     // Can skip this check - already used canWeight()
-    /// if (returnReduce(weightField.empty(), andOp<bool>()))
+    /// if (returnReduceAnd(weightField.empty()))
     /// {
     ///     // No weight field - revert to unweighted form
     ///     return mag(Sf);
@@ -862,7 +862,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::weightingFactor
     // vector (dot) unit-normal
 
     // Can skip this check - already used canWeight()
-    /// if (returnReduce(weightField.empty(), andOp<bool>()))
+    /// if (returnReduceAnd(weightField.empty()))
     /// {
     ///     // No weight field - revert to unweighted form
     ///     return tmp<scalarField>::New(Sf.size(), scalar(1));
@@ -903,7 +903,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::areaWeightingFactor
     // vector (dot) Area
 
     // Can skip this check - already used canWeight()
-    /// if (returnReduce(weightField.empty(), andOp<bool>()))
+    /// if (returnReduceAnd(weightField.empty()))
     /// {
     ///     // No weight field - revert to unweighted form
     ///     return mag(Sf);
@@ -1297,7 +1297,7 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::write()
 
 
     // Process the fields
-    if (returnReduce(!vectorWeights.empty(), orOp<bool>()))
+    if (returnReduceOr(!vectorWeights.empty()))
     {
         if (scalarWeights.size())
         {

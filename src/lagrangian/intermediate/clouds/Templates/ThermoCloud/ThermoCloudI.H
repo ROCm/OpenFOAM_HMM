@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -384,7 +384,7 @@ inline Foam::scalar Foam::ThermoCloud<CloudType>::Tmax() const
         nonEmpty = true;
     }
 
-    if (returnReduce(nonEmpty, orOp<bool>()))
+    if (returnReduceOr(nonEmpty))
     {
         return returnReduce(val, maxOp<scalar>());
     }
@@ -405,7 +405,7 @@ inline Foam::scalar Foam::ThermoCloud<CloudType>::Tmin() const
         nonEmpty = true;
     }
 
-    if (returnReduce(nonEmpty, orOp<bool>()))
+    if (returnReduceOr(nonEmpty))
     {
         return returnReduce(val, minOp<scalar>());
     }

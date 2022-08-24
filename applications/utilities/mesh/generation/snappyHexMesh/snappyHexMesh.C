@@ -665,7 +665,7 @@ void removeZeroSizedPatches(fvMesh& mesh)
             if
             (
                 isA<coupledPolyPatch>(pp)
-             || returnReduce(pp.size(), sumOp<label>())
+             || returnReduceOr(pp.size())
             )
             {
                 // Coupled (and unknown size) or uncoupled and used
@@ -1891,11 +1891,8 @@ int main(int argc, char *argv[])
         );
 
         // Use the maxLocalCells from the refinement parameters
-        bool preBalance = returnReduce
-        (
-            (mesh.nCells() >= refineParams.maxLocalCells()),
-            orOp<bool>()
-        );
+        const bool preBalance =
+            returnReduceOr(mesh.nCells() >= refineParams.maxLocalCells());
 
 
         if (!overwrite && !debugLevel)

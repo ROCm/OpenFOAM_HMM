@@ -88,11 +88,8 @@ Foam::label Foam::parLagrangianDistributor::distributeFields
         if (!nFields)
         {
             // Performing an all-to-one (reconstruct)?
-            reconstruct = returnReduce
-            (
-                (!map.constructSize() || Pstream::master()),
-                andOp<bool>()
-            );
+            reconstruct =
+                returnReduceAnd(!map.constructSize() || Pstream::master());
         }
 
         if (verbose_)
@@ -195,11 +192,8 @@ Foam::label Foam::parLagrangianDistributor::distributeFieldFields
         if (!nFields)
         {
             // Performing an all-to-one (reconstruct)?
-            reconstruct = returnReduce
-            (
-                (!map.constructSize() || Pstream::master()),
-                andOp<bool>()
-            );
+            reconstruct =
+                returnReduceAnd(!map.constructSize() || Pstream::master());
         }
 
         if (verbose_)
@@ -344,11 +338,8 @@ Foam::label Foam::parLagrangianDistributor::distributeStoredFields
         if (!nFields)
         {
             // Performing an all-to-one (reconstruct)?
-            reconstruct = returnReduce
-            (
-                (!map.constructSize() || Pstream::master()),
-                andOp<bool>()
-            );
+            reconstruct =
+                returnReduceAnd(!map.constructSize() || Pstream::master());
         }
 
         if (verbose_)

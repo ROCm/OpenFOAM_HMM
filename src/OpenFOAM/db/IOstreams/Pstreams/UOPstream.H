@@ -327,7 +327,7 @@ public:
         //  \return True on success
         static bool write
         (
-            const commsTypes commsType,
+            const UPstream::commsTypes commsType,
             const int toProcNo,
             const char* buf,
             const std::streamsize bufSize,

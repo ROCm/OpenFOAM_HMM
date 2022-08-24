@@ -206,9 +206,7 @@ void Foam::AMIInterpolation::normaliseWeights
 
     if (output)
     {
-        const label nFace = returnReduce(wght.size(), sumOp<label>());
-
-        if (nFace)
+        if (returnReduceOr(wght.size()))
         {
             Info<< indent
                 << "AMI: Patch " << patchName

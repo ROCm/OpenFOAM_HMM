@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -231,9 +231,8 @@ void Foam::decompositionConstraints::preserveBaffles::apply
 
     if (decompositionConstraint::debug & 2)
     {
-        reduce(nChanged, sumOp<label>());
-        Info<< type() << " : changed decomposition on " << nChanged
-            << " cells" << endl;
+        Info<< type() << " : changed decomposition on "
+            << returnReduce(nChanged, sumOp<label>()) << " cells" << endl;
     }
 }
 

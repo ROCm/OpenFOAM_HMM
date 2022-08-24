@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,9 +72,10 @@ faceCells::faceCells
             zeroATCcells_.append(zoneCells);
         }
     }
-    label size = zeroATCcells_.size();
-    reduce(size, sumOp<label>());
-    Info<< "Setting limiter on " << size << " cells" << nl << endl;
+
+    Info<< "Setting limiter on "
+        << returnReduce(zeroATCcells_.size(), sumOp<label>())
+        << " cells" << nl << endl;
 }
 
 

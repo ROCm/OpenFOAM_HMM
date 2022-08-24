@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -165,7 +165,7 @@ Foam::faMesh::getBoundaryEdgeConnections() const
             }
         }
 
-        if ((nBadEdges = returnReduce(badEdges.size(), sumOp<label>())) > 0)
+        if ((nBadEdges = returnReduce(badEdges.size(), sumOp<label>())) != 0)
         {
             edgeList dumpEdges(patch().edges(), badEdges.sortedToc());
 
@@ -263,7 +263,7 @@ Foam::faMesh::getBoundaryEdgeConnections() const
             }
         }
 
-        if ((nBadEdges = returnReduce(badEdges.size(), sumOp<label>())) > 0)
+        if ((nBadEdges = returnReduce(badEdges.size(), sumOp<label>())) != 0)
         {
             FatalErrorInFunction
                 << "Had " << nBadEdges
@@ -502,7 +502,7 @@ Foam::faMesh::getBoundaryEdgeConnections() const
         }
     }
 
-    if ((nBadEdges = returnReduce(badEdges.size(), sumOp<label>())) > 0)
+    if ((nBadEdges = returnReduce(badEdges.size(), sumOp<label>())) != 0)
     {
         FatalErrorInFunction
             << "Had " << nBadEdges << " coupled boundary edges"
@@ -623,7 +623,7 @@ Foam::faMesh::getBoundaryEdgeConnections() const
     }
 
     // Verbose report of missing edges
-    if ((nBadEdges = returnReduce(badEdges.size(), sumOp<label>())) > 0)
+    if ((nBadEdges = returnReduce(badEdges.size(), sumOp<label>())) != 0)
     {
         edgeList dumpEdges(patch().edges(), badEdges.sortedToc());
 

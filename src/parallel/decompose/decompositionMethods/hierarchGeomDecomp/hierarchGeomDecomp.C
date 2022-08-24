@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -182,7 +182,7 @@ bool Foam::hierarchGeomDecomp::findBinary
         // Safeguard if same as previous.
         bool hasNotChanged = (mag(midValue-midValuePrev) < SMALL);
 
-        if (returnReduce(hasNotChanged, andOp<bool>()))
+        if (returnReduceAnd(hasNotChanged))
         {
             if (debug)
             {
@@ -268,7 +268,7 @@ bool Foam::hierarchGeomDecomp::findBinary
         // Safeguard if same as previous.
         bool hasNotChanged = (mag(midValue-midValuePrev) < SMALL);
 
-        if (returnReduce(hasNotChanged, andOp<bool>()))
+        if (returnReduceAnd(hasNotChanged))
         {
             if (debug)
             {

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2014-2021 OpenCFD Ltd.
+    Copyright (C) 2014-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -473,7 +473,6 @@ void Foam::dynamicOversetFvMesh::writeAgglomeration
         label coarseSize = max(addr)+1;
 
         Info<< "Level : " << level << endl
-            << returnReduce(addr.size(), sumOp<label>()) << endl
             << "    current size      : "
             << returnReduce(addr.size(), sumOp<label>()) << endl
             << "    agglomerated size : "

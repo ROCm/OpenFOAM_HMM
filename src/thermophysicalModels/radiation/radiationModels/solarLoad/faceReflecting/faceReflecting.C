@@ -375,7 +375,7 @@ void Foam::faceReflecting::calculate()
             }
         }
 
-    }while (returnReduce(i < Cfs_->size(), orOp<bool>()));
+    } while (returnReduceOr(i < Cfs_->size()));
 
     List<pointIndexHit> hitInfo(startIndex.size());
 

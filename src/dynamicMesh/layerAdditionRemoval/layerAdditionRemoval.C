@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -75,11 +75,13 @@ void Foam::layerAdditionRemoval::checkDefinition()
             << abort(FatalError);
     }
 
-    label nFaces = topoChanger().mesh().faceZones()[faceZoneID_.index()].size();
-
-    reduce(nFaces, sumOp<label>());
-
-    if (nFaces == 0)
+    if
+    (
+        returnReduceAnd
+        (
+            topoChanger().mesh().faceZones()[faceZoneID_.index()].empty()
+        )
+    )
     {
         FatalErrorInFunction
             << "Face extrusion zone contains no faces. "

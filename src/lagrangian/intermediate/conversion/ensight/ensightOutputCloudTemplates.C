@@ -73,7 +73,7 @@ bool Foam::ensightOutput::writeCloudField
     ensightFile& os
 )
 {
-    if (returnReduce(field.empty(), andOp<bool>()))
+    if (returnReduceAnd(field.empty()))
     {
         return false;
     }

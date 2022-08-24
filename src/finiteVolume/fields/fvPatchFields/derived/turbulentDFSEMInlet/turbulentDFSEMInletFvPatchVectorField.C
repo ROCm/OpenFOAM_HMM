@@ -190,8 +190,10 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::initialisePatch()
     patchBounds_.inflate(0.1);
 
     // Determine if all eddies spawned from a single processor
-    singleProc_ = patch.size() == returnReduce(patch.size(), sumOp<label>());
-    reduce(singleProc_, orOp<bool>());
+    singleProc_ = returnReduceOr
+    (
+        patch.size() == returnReduce(patch.size(), sumOp<label>())
+    );
 }
 
 
@@ -1031,8 +1033,8 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::updateCoeffs()
         {
             Info<< "Magnitude of bulk velocity: " << UBulk << endl;
 
-            label n = eddies_.size();
-            Info<< "Number of eddies: " << returnReduce(n, sumOp<label>())
+            Info<< "Number of eddies: "
+                << returnReduce(eddies_.size(), sumOp<label>())
                 << endl;
 
             Info<< "Patch:" << patch().patch().name()

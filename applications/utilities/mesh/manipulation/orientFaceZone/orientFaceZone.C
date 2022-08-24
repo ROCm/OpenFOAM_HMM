@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -272,7 +273,7 @@ int main(int argc, char *argv[])
         }
 
 
-        if (returnReduce(changedEdges.size(), sumOp<label>()) == 0)
+        if (returnReduceAnd(changedEdges.empty()))
         {
             break;
         }

@@ -538,8 +538,11 @@ int main(int argc, char *argv[])
 
         // Add any patches.
 
-        label nAdded = nPatches - mesh.boundaryMesh().size();
-        reduce(nAdded, sumOp<label>());
+        const label nAdded = returnReduce
+        (
+            nPatches - mesh.boundaryMesh().size(),
+            sumOp<label>()
+        );
 
         Info<< "Adding overall " << nAdded << " processor patches." << endl;
 
@@ -946,9 +949,8 @@ int main(int argc, char *argv[])
 
         // Put all modifications into meshMod
         bool anyChange = collapser.setRefinement(allPointInfo, meshMod);
-        reduce(anyChange, orOp<bool>());
 
-        if (anyChange)
+        if (returnReduceOr(anyChange))
         {
             // Construct new mesh from polyTopoChange.
             autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, false);
@@ -1118,8 +1120,7 @@ int main(int argc, char *argv[])
     processorMeshes::removeFiles(mesh);
 
     // Need writing cellSet
-    label nAdded = returnReduce(addedCellsSet.size(), sumOp<label>());
-    if (nAdded > 0)
+    if (returnReduceOr(addedCellsSet.size()))
     {
         cellSet addedCells(mesh, "addedCells", addedCellsSet);
         Info<< "Writing added cells to cellSet " << addedCells.name()

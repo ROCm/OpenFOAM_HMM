@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2014-2019 OpenCFD Ltd.
+    Copyright (C) 2014-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -189,15 +189,13 @@ Foam::tmp<Foam::scalarField> Foam::dynamicOversetFvMesh::normalisation
         }
     }
 
-    reduce(nZeroDiag, sumOp<label>());
-
     if (debug)
     {
         Pout<< "For field " << m.psi().name() << " have zero diagonals for "
-            << nZeroDiag << " cells" << endl;
+            << returnReduce(nZeroDiag, sumOp<label>()) << " cells" << endl;
     }
 
-    if (nZeroDiag > 0)
+    if (returnReduceOr(nZeroDiag))
     {
         // Walk out the norm across hole cells
 
@@ -293,8 +291,7 @@ Foam::tmp<Foam::scalarField> Foam::dynamicOversetFvMesh::normalisation
                 }
             }
 
-            reduce(nChanged, sumOp<label>());
-            if (nChanged == 0)
+            if (!returnReduceOr(nChanged))
             {
                 break;
             }

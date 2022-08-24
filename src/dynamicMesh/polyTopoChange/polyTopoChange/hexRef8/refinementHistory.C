@@ -490,8 +490,8 @@ void Foam::refinementHistory::add
 
     if (refinementHistory::debug)
     {
-        reduce(nUnblocked, sumOp<label>());
-        Info<< type() << " : unblocked " << nUnblocked << " faces" << endl;
+        Info<< type() << " : unblocked "
+            << returnReduce(nUnblocked, sumOp<label>()) << " faces" << endl;
     }
 
     syncTools::syncFaceList(mesh, blockedFace, andEqOp<bool>());
@@ -550,9 +550,8 @@ void Foam::refinementHistory::apply
 
     if (refinementHistory::debug)
     {
-        reduce(nChanged, sumOp<label>());
-        Info<< type() << " : changed decomposition on " << nChanged
-            << " cells" << endl;
+        Info<< type() << " : changed decomposition on "
+            << returnReduce(nChanged, sumOp<label>()) << " cells" << endl;
     }
 }
 
@@ -572,7 +571,7 @@ Foam::refinementHistory::refinementHistory(const IOobject& io)
     // When running in redistributePar + READ_IF_PRESENT it can happen
     // that some processors do have refinementHistory and some don't so
     // test for active has to be outside of above condition.
-    active_ = (returnReduce(visibleCells_.size(), sumOp<label>()) > 0);
+    active_ = returnReduceOr(visibleCells_.size());
 
     if (debug)
     {
@@ -645,7 +644,7 @@ Foam::refinementHistory::refinementHistory
         }
     }
 
-    active_ = (returnReduce(visibleCells_.size(), sumOp<label>()) > 0);
+    active_ = returnReduceOr(visibleCells_.size());
 
 
     // Check indices.
@@ -843,7 +842,7 @@ Foam::refinementHistory::refinementHistory(const IOobject& io, Istream& is)
     freeSplitCells_(),
     visibleCells_(is)
 {
-    active_ = (returnReduce(visibleCells_.size(), sumOp<label>()) > 0);
+    active_ = returnReduceOr(visibleCells_.size());
 
     // Check indices.
     checkIndices();
@@ -1673,7 +1672,7 @@ bool Foam::refinementHistory::read()
     bool ok = readData(readStream(typeName));
     close();
 
-    active_ = (returnReduce(visibleCells_.size(), sumOp<label>()) > 0);
+    active_ = returnReduceOr(visibleCells_.size());
 
     return ok;
 }

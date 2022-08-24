@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,7 +57,7 @@ bool Foam::pairPatchAgglomeration::continueAgglomerating
 
     return
     (
-        returnReduce(nLocal > nFacesInCoarsestLevel_, orOp<bool>())
+        returnReduceOr(nLocal > nFacesInCoarsestLevel_)
      || nGlobal > nGlobalFacesInCoarsestLevel_
     )
     && nGlobal != nGlobalOld;

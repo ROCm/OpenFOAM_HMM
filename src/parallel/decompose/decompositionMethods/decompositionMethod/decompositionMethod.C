@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -869,7 +869,7 @@ Foam::labelList Foam::decompositionMethod::decompose
 ) const
 {
     // Any weights specified?
-    const bool hasWeights = returnReduce(!cellWeights.empty(), orOp<bool>());
+    const bool hasWeights = returnReduceOr(cellWeights.size());
 
     if (hasWeights && cellWeights.size() != mesh.nCells())
     {
@@ -881,10 +881,9 @@ Foam::labelList Foam::decompositionMethod::decompose
 
     // Any faces not blocked?
     const bool hasUnblocked =
-        returnReduce
+        returnReduceOr
         (
-            (!blockedFace.empty() && !BitOps::all(blockedFace)),
-            orOp<bool>()
+            !blockedFace.empty() && !BitOps::all(blockedFace)
         );
 
 

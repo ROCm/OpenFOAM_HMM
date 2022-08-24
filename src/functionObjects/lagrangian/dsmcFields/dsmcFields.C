@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -157,7 +157,7 @@ bool Foam::functionObjects::dsmcFields::write()
                 Member##Ptr = obr_.cfindObject<FieldType>(fldName);            \
             }                                                                  \
                                                                                \
-            if (returnReduce(!Member##Ptr, orOp<bool>()))                      \
+            if (returnReduceOr(!Member##Ptr))                                  \
             {                                                                  \
                 Log << type() << ' ' << name() << " : no " << Name             \
                     << " field found - not calculating\n";                     \

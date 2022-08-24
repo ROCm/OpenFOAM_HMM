@@ -212,7 +212,7 @@ void Foam::fv::limitTemperature::correct(volScalarField& he)
     }
 
 
-    if (returnReduce(changedValues, orOp<bool>()))
+    if (returnReduceOr(changedValues))
     {
         // We've changed internal values so give
         // boundary conditions opportunity to correct

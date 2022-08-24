@@ -3782,7 +3782,7 @@ void Foam::distributedTriSurfaceMesh::findLineAll
 
 
     label iter = 0;
-    while (returnReduce(e0.size(), sumOp<label>()) > 0)
+    while (returnReduceOr(e0.size()))
     {
         findLine
         (
@@ -4131,11 +4131,7 @@ void Foam::distributedTriSurfaceMesh::getVolumeType
         // status, all others will return UNKNOWN. Make INSIDE/OUTSIDE win.
         outsideVolType_ = volumeType
         (
-            returnReduce
-            (
-                label(outsideVolTypes[0]),
-                maxOp<label>()
-            )
+            returnReduce(int(outsideVolTypes[0]), maxOp<int>())
         );
 
         if (debug)

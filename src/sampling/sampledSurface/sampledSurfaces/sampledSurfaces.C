@@ -562,10 +562,9 @@ bool Foam::sampledSurfaces::performAction(unsigned request)
 
                 if
                 (
-                    returnReduce
+                    returnReduceAnd
                     (
-                        !ListOps::found(ids, lessOp1<label>(0)),
-                        andOp<bool>()
+                        !ListOps::found(ids, lessOp1<label>(0))
                     )
                 )
                 {

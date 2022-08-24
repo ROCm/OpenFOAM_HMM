@@ -497,8 +497,8 @@ bool Foam::shortestPathSet::genSingleLeakPath
                 << " Skipped route detection." << endl;
         }
     }
-    reduce(targetFound, orOp<bool>());
-    if (!targetFound)
+
+    if (!returnReduceOr(targetFound))
     {
         //Pout<< "now :"
         //    << " nLeakCell:"
@@ -638,7 +638,7 @@ bool Foam::shortestPathSet::genSingleLeakPath
 
         // Situation 1: we found the destination cell (do nothing),
         // frontCellI is -1 on all processors
-        if (returnReduce(frontCellI == -1, andOp<bool>()))
+        if (returnReduceAnd(frontCellI == -1))
         {
             //Pout<< "now :"
             //    << " nLeakCell:"

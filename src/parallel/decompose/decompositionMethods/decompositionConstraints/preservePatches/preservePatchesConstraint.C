@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2016 OpenFOAM Foundation
-    Copyright (C) 2018,2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -125,8 +125,8 @@ void Foam::decompositionConstraints::preservePatches::add
 
     if (decompositionConstraint::debug & 2)
     {
-        reduce(nUnblocked, sumOp<label>());
-        Info<< type() << " : unblocked " << nUnblocked << " faces" << endl;
+        Info<< type() << " : unblocked "
+            << returnReduce(nUnblocked, sumOp<label>()) << " faces" << endl;
     }
 
     syncTools::syncFaceList(mesh, blockedFace, andEqOp<bool>());
@@ -152,7 +152,7 @@ void Foam::decompositionConstraints::preservePatches::apply
     // Synchronise decomposition on patchIDs
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    label nChanged;
+    label nChanged = 0;
 
     do
     {
@@ -184,15 +184,13 @@ void Foam::decompositionConstraints::preservePatches::apply
             }
         }
 
-        reduce(nChanged, sumOp<label>());
-
         if (decompositionConstraint::debug & 2)
         {
-            Info<< type() << " : changed decomposition on " << nChanged
-                << " cells" << endl;
+            Info<< type() << " : changed decomposition on "
+                << returnReduce(nChanged, sumOp<label>()) << " cells" << endl;
         }
 
-    } while (nChanged > 0);
+    } while (returnReduceOr(nChanged));
 }
 
 

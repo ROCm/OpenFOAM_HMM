@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -431,7 +431,7 @@ void Foam::distanceSurface::filterRegionProximity
 
     // If filtering with region proximity results in zero faces,
     // revert to face-only proximity filter
-    if (returnReduce(acceptFaces.none(), andOp<bool>()))
+    if (returnReduceAnd(acceptFaces.none()))
     {
         acceptFaces.reset();
         prune = false;

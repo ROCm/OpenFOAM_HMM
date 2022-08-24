@@ -353,8 +353,8 @@ void Foam::meshRefinement::updateIntersections(const labelList& changedFaces)
     bitSet isMasterFace(syncTools::getMasterFaces(mesh_));
 
     {
-        label nMasterFaces = isMasterFace.count();
-        reduce(nMasterFaces, sumOp<label>());
+        const label nMasterFaces =
+            returnReduce(isMasterFace.count(), sumOp<label>());
 
         label nChangedFaces = 0;
         forAll(changedFaces, i)
@@ -423,9 +423,7 @@ void Foam::meshRefinement::updateIntersections(const labelList& changedFaces)
     // case in general since same vectors but just to make sure.
     syncTools::syncFaceList(mesh_, surfaceIndex_, maxEqOp<label>());
 
-    label nHits = countHits();
-    label nTotHits = returnReduce(nHits, sumOp<label>());
-
+    label nTotHits = returnReduce(countHits(), sumOp<label>());
 
     if (!dryRun_)
     {
@@ -2780,7 +2778,8 @@ Foam::label Foam::meshRefinement::findCell
     (void)mesh.tetBasePtIs();
 
     label celli = mesh.findCell(p, findCellMode);
-    if (returnReduce(celli, maxOp<label>()) == -1)
+
+    if (returnReduceAnd(celli < 0))
     {
         // See if we can perturb a bit
         celli = mesh.findCell(p+perturbVec, findCellMode);

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,7 +70,7 @@ int Foam::functionObjects::zeroGradient::apply
 
     const VolFieldType& input = lookupObject<VolFieldType>(inputName);
 
-    if (!returnReduce(accept(input), orOp<bool>()))
+    if (!returnReduceOr(accept(input)))
     {
         state = -1;
         return state;

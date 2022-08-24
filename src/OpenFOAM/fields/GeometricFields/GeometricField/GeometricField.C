@@ -1077,18 +1077,16 @@ bool Foam::GeometricField<Type, PatchField, GeoMesh>::needReference() const
 
     bool needRef = true;
 
-    forAll(boundaryField_, patchi)
+    for (const auto& pf : boundaryField_)
     {
-        if (boundaryField_[patchi].fixesValue())
+        if (pf.fixesValue())
         {
             needRef = false;
             break;
         }
     }
 
-    reduce(needRef, andOp<bool>());
-
-    return needRef;
+    return returnReduceAnd(needRef);
 }
 
 

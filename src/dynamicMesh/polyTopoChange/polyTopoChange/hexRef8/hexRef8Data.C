@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,7 +45,7 @@ Foam::hexRef8Data::hexRef8Data(const IOobject& io)
         IOobject rio(io, "cellLevel");
 
         // haveFile
-        if (returnReduce(rio.typeHeaderOk<Type>(true), orOp<bool>()))
+        if (returnReduceOr(rio.typeHeaderOk<Type>(true)))
         {
             Info<< "Reading hexRef8 data : " << rio.name() << endl;
             cellLevelPtr_.reset(new Type(rio));
@@ -56,7 +56,7 @@ Foam::hexRef8Data::hexRef8Data(const IOobject& io)
         IOobject rio(io, "pointLevel");
 
         // haveFile
-        if (returnReduce(rio.typeHeaderOk<Type>(true), orOp<bool>()))
+        if (returnReduceOr(rio.typeHeaderOk<Type>(true)))
         {
             Info<< "Reading hexRef8 data : " << rio.name() << endl;
             pointLevelPtr_.reset(new Type(rio));
@@ -67,7 +67,7 @@ Foam::hexRef8Data::hexRef8Data(const IOobject& io)
         IOobject rio(io, "level0Edge");
 
         // haveFile
-        if (returnReduce(rio.typeHeaderOk<Type>(true), orOp<bool>()))
+        if (returnReduceOr(rio.typeHeaderOk<Type>(true)))
         {
             Info<< "Reading hexRef8 data : " << rio.name() << endl;
             level0EdgePtr_.reset(new Type(rio));
@@ -78,7 +78,7 @@ Foam::hexRef8Data::hexRef8Data(const IOobject& io)
         IOobject rio(io, "refinementHistory");
 
         // haveFile
-        if (returnReduce(rio.typeHeaderOk<Type>(true), orOp<bool>()))
+        if (returnReduceOr(rio.typeHeaderOk<Type>(true)))
         {
             Info<< "Reading hexRef8 data : " << rio.name() << endl;
             refHistoryPtr_.reset(new Type(rio));
@@ -237,7 +237,7 @@ void Foam::hexRef8Data::sync(const IOobject& io)
 {
     const polyMesh& mesh = dynamic_cast<const polyMesh&>(io.db());
 
-    bool hasCellLevel = returnReduce(bool(cellLevelPtr_), orOp<bool>());
+    bool hasCellLevel = returnReduceOr(bool(cellLevelPtr_));
     if (hasCellLevel && !cellLevelPtr_)
     {
         IOobject rio(io, "cellLevel");
@@ -248,7 +248,7 @@ void Foam::hexRef8Data::sync(const IOobject& io)
         );
     }
 
-    bool hasPointLevel = returnReduce(bool(pointLevelPtr_), orOp<bool>());
+    bool hasPointLevel = returnReduceOr(bool(pointLevelPtr_));
     if (hasPointLevel && !pointLevelPtr_)
     {
         IOobject rio(io, "pointLevel");
@@ -259,7 +259,7 @@ void Foam::hexRef8Data::sync(const IOobject& io)
         );
     }
 
-    bool hasLevel0Edge = returnReduce(bool(level0EdgePtr_), orOp<bool>());
+    bool hasLevel0Edge = returnReduceOr(bool(level0EdgePtr_));
     if (hasLevel0Edge)
     {
         // Get master length
@@ -280,7 +280,7 @@ void Foam::hexRef8Data::sync(const IOobject& io)
         }
     }
 
-    bool hasHistory = returnReduce(bool(refHistoryPtr_), orOp<bool>());
+    bool hasHistory = returnReduceOr(bool(refHistoryPtr_));
     if (hasHistory && !refHistoryPtr_)
     {
         IOobject rio(io, "refinementHistory");

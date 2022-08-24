@@ -688,7 +688,7 @@ bool Foam::vtk::patchMeshWriter::writeNeighIDs()
     this->endDataArray();
 
     // MPI barrier
-    return parallel_ ? returnReduce(good, orOp<bool>()) : good;
+    return parallel_ ? returnReduceOr(good) : good;
 }
 
 

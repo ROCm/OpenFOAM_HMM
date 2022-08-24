@@ -381,9 +381,7 @@ void Foam::meshToMesh::normaliseWeights
     scalarListList& wght
 ) const
 {
-    const label nCell = returnReduce(wght.size(), sumOp<label>());
-
-    if (nCell > 0)
+    if (returnReduceOr(wght.size()))
     {
         forAll(wght, celli)
         {

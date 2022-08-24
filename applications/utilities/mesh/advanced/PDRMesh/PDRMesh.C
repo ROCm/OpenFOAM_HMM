@@ -585,7 +585,7 @@ void createBaffles
 // Wrapper around find patch. Also makes sure same patch in parallel.
 label findPatch(const polyBoundaryMesh& patches, const word& patchName)
 {
-    label patchi = patches.findPatchID(patchName);
+    const label patchi = patches.findPatchID(patchName);
 
     if (patchi == -1)
     {
@@ -597,16 +597,15 @@ label findPatch(const polyBoundaryMesh& patches, const word& patchName)
 
     // Check same patch for all procs
     {
-        label newPatch = patchi;
-        reduce(newPatch, minOp<label>());
+        const label newPatchi = returnReduce(patchi, minOp<label>());
 
-        if (newPatch != patchi)
+        if (newPatchi != patchi)
         {
             FatalErrorInFunction
                 << "Patch " << patchName
                 << " should have the same patch index on all processors." << nl
                 << "On my processor it has index " << patchi
-                << " ; on some other processor it has index " << newPatch
+                << " ; on some other processor it has index " << newPatchi
                 << exit(FatalError);
         }
     }

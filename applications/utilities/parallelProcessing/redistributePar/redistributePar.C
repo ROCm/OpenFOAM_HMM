@@ -1547,7 +1547,7 @@ int main(int argc, char *argv[])
                 if
                 (
                     !volMeshHaveUndecomposed
-                 || !returnReduce(haveVolAddressing, andOp<bool>())
+                 || !returnReduceAnd(haveVolAddressing)
                 )
                 {
                     Info<< "No undecomposed mesh. Creating from: "
@@ -1615,7 +1615,7 @@ int main(int argc, char *argv[])
                  &&
                     (
                         !areaMeshHaveUndecomposed
-                     || !returnReduce(haveAreaAddressing, andOp<bool>())
+                     || !returnReduceAnd(haveAreaAddressing)
                     )
                 )
                 {

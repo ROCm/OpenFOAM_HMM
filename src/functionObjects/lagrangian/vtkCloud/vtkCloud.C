@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -131,7 +131,7 @@ bool Foam::functionObjects::vtkCloud::writeCloud
     }
 
     applyFilter_ = calculateFilter(obrTmp, log);
-    reduce(applyFilter_, orOp<bool>());
+    Pstream::reduceOr(applyFilter_);
 
 
     // Number of parcels (locally)

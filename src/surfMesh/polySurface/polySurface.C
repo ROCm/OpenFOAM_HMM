@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,7 +43,7 @@ const Foam::word Foam::polySurface::pointDataName("PointData");
 
 void Foam::polySurface::calculateZoneIds(const UList<surfZone>& zones)
 {
-    if (returnReduce(zones.empty(), andOp<bool>()))
+    if (returnReduceAnd(zones.empty()))
     {
         zoneIds_.clear();
         return;

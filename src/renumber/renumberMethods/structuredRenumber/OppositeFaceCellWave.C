@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -246,11 +247,7 @@ Foam::label Foam::OppositeFaceCellWave<Type, TrackingData>::faceToCell()
     }
 
     // Sum changedCells over all procs
-    label totNChanged = this->changedCells_.size();
-
-    reduce(totNChanged, sumOp<label>());
-
-    return totNChanged;
+    return returnReduce(this->changedCells_.size(), sumOp<label>());
 }
 
 
@@ -321,12 +318,8 @@ Foam::label Foam::OppositeFaceCellWave<Type, TrackingData>::cellToFace()
             << endl;
     }
 
-    // Sum nChangedFaces over all procs
-    label totNChanged = this->changedFaces_.size();
-
-    reduce(totNChanged, sumOp<label>());
-
-    return totNChanged;
+    // Sum changedFaces over all procs
+    return returnReduce(this->changedFaces_.size(), sumOp<label>());
 }
 
 

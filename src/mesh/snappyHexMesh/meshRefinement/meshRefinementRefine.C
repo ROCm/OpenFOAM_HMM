@@ -608,7 +608,7 @@ void Foam::meshRefinement::markFeatureCellLevel
             Pout<< "Remaining particles " << cloud.size() << endl;
         }
 
-        if (returnReduce(cloud.size(), sumOp<label>()) == 0)
+        if (!returnReduceOr(cloud.size()))
         {
             break;
         }

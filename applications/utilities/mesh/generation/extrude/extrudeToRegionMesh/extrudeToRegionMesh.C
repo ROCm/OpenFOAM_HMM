@@ -345,7 +345,7 @@ void deleteEmptyPatches(fvMesh& mesh)
             else
             {
                 // Common patch.
-                if (returnReduce(patches[patchi].empty(), andOp<bool>()))
+                if (returnReduceAnd(patches[patchi].empty()))
                 {
                     Pout<< "Deleting patch " << patchi
                         << " name:" << patches[patchi].name()

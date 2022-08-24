@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -900,7 +900,7 @@ Foam::FaceCellWave<Type, TrackingData>::FaceCellWave
     hasCyclicPatches_(hasPatch<cyclicPolyPatch>()),
     hasCyclicAMIPatches_
     (
-        returnReduce(hasPatch<cyclicAMIPolyPatch>(), orOp<bool>())
+        returnReduceOr(hasPatch<cyclicAMIPolyPatch>())
     ),
     nEvals_(0),
     nUnvisitedCells_(mesh_.nCells()),
@@ -948,7 +948,7 @@ Foam::FaceCellWave<Type, TrackingData>::FaceCellWave
     hasCyclicPatches_(hasPatch<cyclicPolyPatch>()),
     hasCyclicAMIPatches_
     (
-        returnReduce(hasPatch<cyclicAMIPolyPatch>(), orOp<bool>())
+        returnReduceOr(hasPatch<cyclicAMIPolyPatch>())
     ),
     nEvals_(0),
     nUnvisitedCells_(mesh_.nCells()),
@@ -1015,7 +1015,7 @@ Foam::FaceCellWave<Type, TrackingData>::FaceCellWave
     hasCyclicAMIPatches_
     (
         handleCyclicAMI
-     && returnReduce(hasPatch<cyclicAMIPolyPatch>(), orOp<bool>())
+     && returnReduceOr(hasPatch<cyclicAMIPolyPatch>())
     ),
     nEvals_(0),
     nUnvisitedCells_(mesh_.nCells()),

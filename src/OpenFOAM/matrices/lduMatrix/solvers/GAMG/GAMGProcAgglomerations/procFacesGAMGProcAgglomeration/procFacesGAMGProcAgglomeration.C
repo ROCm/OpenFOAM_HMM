@@ -208,9 +208,9 @@ bool Foam::procFacesGAMGProcAgglomeration::doProcessorAgglomeration
     const lduMesh& mesh
 ) const
 {
-    // Check the need for further agglomeration on all processors
+    // Check the need for further agglomeration on any processors
     bool doAgg = mesh.lduAddr().size() < nAgglomeratingCells_;
-    mesh.reduce(doAgg, orOp<bool>());
+    UPstream::reduceOr(doAgg, mesh.comm());
     return doAgg;
 }
 

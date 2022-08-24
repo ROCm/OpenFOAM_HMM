@@ -221,7 +221,7 @@ Foam::label Foam::ptscotchDecomp::decompose
 
     // Check for externally provided cellweights and if so initialise weights
 
-    bool hasWeights = returnReduce(!cWeights.empty(), orOp<bool>());
+    bool hasWeights = returnReduceOr(cWeights.size());
 
     const scalar minWeights = hasWeights ? gMin(cWeights) : scalar(1);
 

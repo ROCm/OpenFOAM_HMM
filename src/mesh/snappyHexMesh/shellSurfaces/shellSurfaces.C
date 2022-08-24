@@ -186,7 +186,7 @@ void Foam::shellSurfaces::orient()
         }
     }
 
-    if (returnReduce(hasSurface, orOp<bool>()))
+    if (returnReduceOr(hasSurface))
     {
         const point outsidePt = overallBb.max() + overallBb.span();
 

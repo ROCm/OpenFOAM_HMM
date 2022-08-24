@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -595,12 +595,8 @@ Foam::label Foam::PointEdgeWave<Type, TrackingData>::handleCollocatedPoints()
         }
     }
 
-    // Sum nChangedPoints over all procs
-    label totNChanged = nChangedPoints_;
-
-    reduce(totNChanged, sumOp<label>());
-
-    return totNChanged;
+    // Sum changedPoints over all procs
+    return returnReduce(nChangedPoints_, sumOp<label>());
 }
 
 
@@ -827,12 +823,8 @@ Foam::label Foam::PointEdgeWave<Type, TrackingData>::edgeToPoint()
     //    Pout<< "Changed points            : " << nChangedPoints_ << endl;
     //}
 
-    // Sum nChangedPoints over all procs
-    label totNChanged = nChangedPoints_;
-
-    reduce(totNChanged, sumOp<label>());
-
-    return totNChanged;
+    // Sum changedPoints over all procs
+    return returnReduce(nChangedPoints_, sumOp<label>());
 }
 
 
@@ -895,12 +887,8 @@ Foam::label Foam::PointEdgeWave<Type, TrackingData>::pointToEdge()
     //    Pout<< "Changed edges             : " << nChangedEdges_ << endl;
     //}
 
-    // Sum nChangedPoints over all procs
-    label totNChanged = nChangedEdges_;
-
-    reduce(totNChanged, sumOp<label>());
-
-    return totNChanged;
+    // Sum changedEdges over all procs
+    return returnReduce(nChangedEdges_, sumOp<label>());
 }
 
 

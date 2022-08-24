@@ -4991,7 +4991,7 @@ void Foam::hexRef8::checkRefinementLevels
     //        }
     //    }
     //
-    //    if (returnReduce(nHanging, sumOp<label>()) > 0)
+    //    if (returnReduceOr(nHanging))
     //    {
     //        FatalErrorInFunction
     //            << "Detected a point used by two edges only (hanging point)"

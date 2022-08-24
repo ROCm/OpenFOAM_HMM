@@ -180,7 +180,7 @@ void Foam::fv::cellSetOption::setCellSelection()
                     selectedCells.insert(celli);
                 }
 
-                if (!returnReduce(found, orOp<bool>()))
+                if (!returnReduceOr(found))
                 {
                     WarningInFunction
                         << "No owner cell found for point " << p << endl;

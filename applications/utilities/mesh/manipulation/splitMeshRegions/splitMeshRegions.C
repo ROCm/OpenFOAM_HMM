@@ -847,7 +847,7 @@ void createAndWriteRegion
 
         if (!isA<processorPolyPatch>(pp))
         {
-            if (returnReduce(pp.size(), sumOp<label>()) > 0)
+            if (returnReduceOr(pp.size()))
             {
                 oldToNew[patchi] = newI;
                 if (!addedPatches.found(patchi))

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2010-2018 Bernhard Gschaider
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -309,8 +309,7 @@ bool Foam::expressions::exprDriver::isLocalVariable
         // Do size checking if requested
         if (good && expectedSize >= 0)
         {
-            good = (var.size() == expectedSize);
-            reduce(good, andOp<bool>());
+            good = returnReduceAnd(var.size() == expectedSize);
 
             if (debug && !good)
             {

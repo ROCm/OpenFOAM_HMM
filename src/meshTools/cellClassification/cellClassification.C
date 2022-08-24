@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -288,12 +288,12 @@ void Foam::cellClassification::markCells
         // Use linear search for points.
         label celli = queryMesh.findCell(outsidePts[outsidePtI], -1, false);
 
-        if (returnReduce(celli, maxOp<label>()) == -1)
+        if (returnReduceAnd(celli < 0))
         {
             FatalErrorInFunction
                 << "outsidePoint " << outsidePts[outsidePtI]
-                << " is not inside any cell"
-                << nl << "It might be on a face or outside the geometry"
+                << " is not inside any cell" << nl
+                << "It might be on a face or outside the geometry"
                 << exit(FatalError);
         }
 

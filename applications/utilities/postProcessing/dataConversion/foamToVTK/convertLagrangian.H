@@ -64,7 +64,7 @@ if (doLagrangian)
             isCloud = true;
         }
 
-        if (!returnReduce(isCloud, orOp<bool>()))
+        if (!returnReduceOr(isCloud))
         {
             continue;
         }
@@ -76,7 +76,7 @@ if (doLagrangian)
         );
 
         // Are there cloud fields (globally)?
-        if (returnReduce(cloudObjs.empty(), andOp<bool>()))
+        if (returnReduceAnd(cloudObjs.empty()))
         {
             continue;
         }

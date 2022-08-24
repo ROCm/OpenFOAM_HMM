@@ -688,7 +688,7 @@ bool Foam::cellCellStencils::trackingInverseDistance::update()
                 allPatchTypes
             );
 
-            //if (returnReduce(ok, andOp<bool>()))
+            //if (returnReduceAnd(ok))
             if (ok)
             {
                 break;
@@ -1115,18 +1115,15 @@ bool Foam::cellCellStencils::trackingInverseDistance::update()
                 nLocal++;
             }
         }
-        reduce(nLocal, sumOp<label>());
-        reduce(nMixed, sumOp<label>());
-        reduce(nRemote, sumOp<label>());
 
         Info<< "Overset analysis : nCells : "
             << returnReduce(cellTypes_.size(), sumOp<label>()) << nl
             << incrIndent
             << indent << "calculated   : " << nCells[CALCULATED] << nl
             << indent << "interpolated : " << nCells[INTERPOLATED]
-            << " (interpolated from local:" << nLocal
-            << "  mixed local/remote:" << nMixed
-            << "  remote:" << nRemote << ")" << nl
+            << " (from local:" << returnReduce(nLocal, sumOp<label>())
+            << "  mixed local/remote:" << returnReduce(nMixed, sumOp<label>())
+            << "  remote:" << returnReduce(nRemote, sumOp<label>()) << ")" << nl
             << indent << "hole         : " << nCells[HOLE] << nl
             << decrIndent << endl;
     }

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -99,14 +99,7 @@ Foam::label Foam::vtk::lagrangianWriter::writeFields
         );
 
         // Check global existence to avoid any errors
-        const bool ok =
-            returnReduce
-            (
-                io.typeHeaderOk<IOField<Type>>(false),
-                orOp<bool>()
-            );
-
-        if (!ok)
+        if (!returnReduceOr(io.typeHeaderOk<IOField<Type>>(false)))
         {
             continue;
         }

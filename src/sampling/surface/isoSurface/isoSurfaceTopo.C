@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2019 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1587,7 +1587,7 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
                     << " faces on " << nEdgeRemove << " open edges" << endl;
             }
 
-            if (returnReduce(faceSelection.none(), andOp<bool>()))
+            if (returnReduceAnd(faceSelection.none()))
             {
                 break;
             }

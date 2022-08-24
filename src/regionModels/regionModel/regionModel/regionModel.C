@@ -114,7 +114,7 @@ void Foam::regionModels::regionModel::initialise()
     primaryPatchIDs_.transfer(primaryPatchIDs);
     intCoupledPatchIDs_.transfer(intCoupledPatchIDs);
 
-    if (returnReduce(nBoundaryFaces, sumOp<label>()) == 0)
+    if (!returnReduceOr(nBoundaryFaces))
     {
         WarningInFunction
             << "Region model has no mapped boundary conditions - transfer "

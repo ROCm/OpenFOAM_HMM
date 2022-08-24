@@ -103,8 +103,7 @@ void Foam::radiation::viewFactor::initialise()
             << nLocalCoarseFaces_ << endl;
     }
 
-    totalNCoarseFaces_ = nLocalCoarseFaces_;
-    reduce(totalNCoarseFaces_, sumOp<label>());
+    totalNCoarseFaces_ = returnReduce(nLocalCoarseFaces_, sumOp<label>());
 
     DebugInFunction
         << "Total number of clusters : " << totalNCoarseFaces_ << endl;

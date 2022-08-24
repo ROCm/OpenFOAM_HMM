@@ -401,7 +401,7 @@ bool Foam::surfaceWriter::empty() const
 {
     const bool value = surf_.faces().empty();
 
-    return (parallel_ ? returnReduce(value, andOp<bool>()) : value);
+    return (parallel_ ? returnReduceAnd(value) : value);
 }
 
 

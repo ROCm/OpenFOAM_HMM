@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 Wikki Ltd
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -287,8 +287,8 @@ Foam::faPatchList Foam::faMesh::createPatchList
         patchDefsUsed.insert(bestPatchDefi);
     }
 
-    // Remove undefPatchIndex if not actually needed
-    if (!returnReduce(patchDefsUsed.found(undefPatchIndex), orOp<bool>()))
+    // Remove undefPatchIndex if not actually needed anywhere
+    if (!returnReduceOr(patchDefsUsed.found(undefPatchIndex)))
     {
         faPatchDefs.remove(undefPatchIndex);
     }
@@ -330,7 +330,7 @@ Foam::faPatchList Foam::faMesh::createPatchList
             }
         }
 
-        if ((nBadEdges = returnReduce(badEdges.size(), sumOp<label>())) > 0)
+        if ((nBadEdges = returnReduce(badEdges.size(), sumOp<label>())) != 0)
         {
             // Report directly as Info, not InfoInFunction
             // since it can also be an expected result when

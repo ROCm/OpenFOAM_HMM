@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -167,7 +167,7 @@ void Foam::haloToCell::combine(topoSet& set, const bool add) const
         }
 
         // Could have early exit, but needs to be parallel-synchronized
-        // if (returnReduce(updates.none(), andOp<bool>()))
+        // if (returnReduceAnd(updates.none()))
         // {
         //     break;
         // }
