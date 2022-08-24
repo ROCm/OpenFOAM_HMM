@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -107,21 +107,30 @@ void Foam::simpleObjectRegistry::setNamedValue
 
     if (eq != std::string::npos)
     {
-        std::string strval(name.substr(eq+1));
+        string strval(name.substr(eq+1));
         name.erase(eq);  // Truncate the name
 
-        float fvalue(val);
+        // Treat 'name=' like 'name' (ie, default value)
+        if (strval.length())
+        {
+            float fvalue(0);
 
-        if (Foam::readInt(strval, val))
-        {
-            tok = static_cast<label>(val);
+            if (Foam::readInt(strval, val))
+            {
+                // Parses as int
+                tok = static_cast<label>(val);
+            }
+            else if (Foam::readFloat(strval, fvalue))
+            {
+                // Parses as float
+                tok = fvalue;
+            }
+            else
+            {
+                // Accept 'name=string' for named enums,
+                tok = std::move(strval);
+            }
         }
-        else if (Foam::readFloat(strval, fvalue))
-        {
-            tok = fvalue;
-        }
-        // Treat 'name=' like 'name' (ie, no value parameter)
-        // silently ignore 'name=junk', but could warn
     }
 
 
