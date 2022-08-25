@@ -120,8 +120,7 @@ SourceFiles
 #include "surfaceInterpolate.H"
 #include "fvcGrad.H"
 #include "blendedSchemeBase.H"
-#include "turbulentTransportModel.H"
-#include "turbulentFluidThermoModel.H"
+#include "turbulenceModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -393,36 +392,24 @@ public:
         {
             const fvMesh& mesh = this->mesh();
 
-            typedef compressible::turbulenceModel cmpModel;
-            typedef incompressible::turbulenceModel icoModel;
+            // Retrieve LES delta from the mesh database
+            const auto& delta =
+                mesh.lookupObject<const volScalarField>(deltaName_);
 
-            // Lookup the LES delta from the mesh database
-            const volScalarField& delta = this->mesh().template
-                 lookupObject<const volScalarField>(deltaName_);
+            // Retrieve turbulence model from the mesh database
+            const auto* modelPtr =
+                mesh.cfindObject<turbulenceModel>
+                (
+                    turbulenceModel::propertiesName
+                );
 
-            // Could avoid the compressible/incompressible case by looking
-            // up all fields from the database - but retrieving from model
-            // ensures consistent fields are being employed e.g. for multiphase
-            // where group name is used
-
-            if (mesh.foundObject<icoModel>(icoModel::propertiesName))
+            if (modelPtr)
             {
-                const icoModel& model =
-                    mesh.lookupObject<icoModel>(icoModel::propertiesName);
+                const auto& model = *modelPtr;
 
                 return calcBlendingFactor
                 (
                     vf, model.nut(), model.nu(), model.U(), delta
-                );
-            }
-            else if (mesh.foundObject<cmpModel>(cmpModel::propertiesName))
-            {
-                const cmpModel& model =
-                    mesh.lookupObject<cmpModel>(cmpModel::propertiesName);
-
-                return calcBlendingFactor
-                (
-                    vf, model.nut(), model.mu()/model.rho(), model.U(), delta
                 );
             }
 
