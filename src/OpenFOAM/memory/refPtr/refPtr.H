@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -89,44 +89,18 @@ public:
     typedef Foam::refCount::zero refCount;
 
 
-    // Factory Methods
-
-        //- Construct refPtr of T with forwarding arguments
-        //  \param args list of arguments with which an instance of T
-        //      will be constructed.
-        //
-        //  \note Similar to std::make_shared, but the overload for
-        //      array types is not disabled.
-        template<class... Args>
-        inline static refPtr<T> New(Args&&... args);
-
-        //- Construct refPtr from derived type with forwarding arguments
-        //  \param args list of arguments with which an instance of U
-        //      will be constructed.
-        //
-        //  \note Similar to New but for derived types
-        template<class U, class... Args>
-        inline static refPtr<T> NewFrom(Args&&... args);
-
-
     // Constructors
 
         //- Construct with no managed pointer.
         inline constexpr refPtr() noexcept;
 
-        //- Construct with no managed pointer (literal nullptr).
+        //- Implicit construct from literal nullptr: no managed pointer
         inline constexpr refPtr(std::nullptr_t) noexcept;
 
         //- Construct, taking ownership of the pointer.
         inline explicit constexpr refPtr(T* p) noexcept;
 
-        //- Move construct from autoPtr, transferring ownership.
-        inline explicit refPtr(autoPtr<T>&& ptr) noexcept;
-
-        //- Move construct from unique_ptr, transferring ownership.
-        inline explicit refPtr(std::unique_ptr<T>&& ptr) noexcept;
-
-        //- Construct for a const reference to an object.
+        //- Implicit construct for a const reference to an object.
         inline constexpr refPtr(const T& obj) noexcept;
 
         //- Move construct, transferring ownership.
@@ -138,12 +112,58 @@ public:
         //- Copy/move construct. Optionally reusing pointer.
         inline refPtr(const refPtr<T>& rhs, bool reuse);
 
+        //- Move construct from unique_ptr, transferring ownership.
+        inline explicit refPtr(std::unique_ptr<T>&& rhs) noexcept;
+
+        //- No copy construct from autoPtr,
+        //- also avoids implicit cast to object or pointer
+        refPtr(const autoPtr<T>&) = delete;
+
+        //- Move construct from autoPtr, transferring ownership.
+        inline explicit refPtr(autoPtr<T>&& rhs) noexcept;
+
+        //- Reference tmp contents or transfer ownership if requested/possible
+        inline refPtr(const tmp<T>& rhs, bool reuse);
+
+        //- Reference the tmp contents
+        inline explicit refPtr(const tmp<T>& rhs);
+
+        //- Move construct from tmp, transfer ownership if possible.
+        inline explicit refPtr(tmp<T>&& rhs);
+
 
     //- Destructor: deletes managed pointer
-    inline ~refPtr();
+    inline ~refPtr() noexcept;
 
 
-    // Member Functions
+    // Factory Methods
+
+        //- Construct refPtr with forwarding arguments
+        //  \param args list of arguments with which an instance of T
+        //      will be constructed.
+        //
+        //  \note Similar to std::make_shared, but the overload for
+        //      array types is not disabled.
+        template<class... Args>
+        static refPtr<T> New(Args&&... args)
+        {
+            return refPtr<T>(new T(std::forward<Args>(args)...));
+        }
+
+        //- Construct refPtr from derived type with forwarding arguments
+        //  \param args list of arguments with which an instance of U
+        //      will be constructed.
+        //
+        //  \note Similar to New but for derived types.
+        //  Future check std::enable_if + std::is_convertible ?
+        template<class U, class... Args>
+        static refPtr<T> NewFrom(Args&&... args)
+        {
+            return refPtr<T>(new U(std::forward<Args>(args)...));
+        }
+
+
+    // Static Member Functions
 
         //- The type-name, constructed from type-name of T
         inline static word typeName();
@@ -207,12 +227,14 @@ public:
         //- delete object and set pointer to nullptr
         inline void clear() const noexcept;
 
+        //- Delete managed pointer and set to new given pointer
+        inline void reset(T* p = nullptr) noexcept;
 
         //- Clear existing and transfer ownership.
         inline void reset(refPtr<T>&& other) noexcept;
 
-        //- Delete managed pointer and set to new given pointer
-        inline void reset(T* p = nullptr) noexcept;
+        //- No reset from autoPtr reference (potentially confusing)
+        void reset(const autoPtr<T>&) = delete;
 
         //- Clear existing and transfer ownership from autoPtr.
         void reset(autoPtr<T>&& other) noexcept { reset(other.release()); }
@@ -220,6 +242,8 @@ public:
         //- Clear existing and transfer ownership from unique_ptr
         void reset(std::unique_ptr<T>&& other) { reset(other.release()); }
 
+        //- Reference tmp contents or transfer pointer ownership if possible
+        inline void reset(tmp<T>& rhs, bool reuse);
 
         //- Clear existing and set (const) reference from other
         inline void cref(const refPtr<T>& other) noexcept;
@@ -231,6 +255,11 @@ public:
         //  The pointer can be null, which is handled like a clear().
         inline void cref(const T* p) noexcept;
 
+        //- Avoid inadvertent casting (to object or pointer)
+        void cref(const autoPtr<T>&) = delete;
+
+        //- Avoid inadvertent casting (to object)
+        void cref(const tmp<T>&) = delete;
 
         //- Clear existing and set (non-const) reference
         inline void ref(T& obj) noexcept;
@@ -239,6 +268,11 @@ public:
         //  The pointer can be null, which is handled like a clear().
         inline void ref(T* p) noexcept;
 
+        //- Avoid inadvertent casting (to object or pointer)
+        void ref(const autoPtr<T>&) = delete;
+
+        //- Avoid inadvertent casting (object)
+        void ref(const tmp<T>&) = delete;
 
         //- Swaps the managed object with other.
         inline void swap(refPtr<T>& other) noexcept;
@@ -277,19 +311,34 @@ public:
 
     // Assignment
 
-        //- Transfer ownership of the managed pointer.
+        //- Transfer ownership of managed pointer.
         //  Fatal for a null managed pointer or if the object is const.
         inline void operator=(const refPtr<T>& other);
 
         //- Clear existing and transfer ownership.
-        inline void operator=(refPtr<T>&& other) noexcept;
+        void operator=(refPtr<T>&& other) noexcept { reset(std::move(other)); }
 
-        //- Take ownership of the pointer.
-        //  Fatal for a null pointer
-        inline void operator=(T* p);
+        //- No copy assignment from plain pointer (uncontrolled access)
+        void operator=(T* p) = delete;
 
         //- Reset via assignment from literal nullptr
-        inline void operator=(std::nullptr_t) noexcept;
+        void operator=(std::nullptr_t) noexcept { reset(nullptr); }
+
+        //- No copy assignment from autoPtr (can have unintended behaviour)
+        void operator=(const autoPtr<T>&) = delete;
+
+        //- Transfer ownership by move assignment from autoPtr.
+        void operator=(autoPtr<T>&& other) noexcept { reset(other.release()); }
+
+        //- Transfer ownership by move assignment from unique_ptr
+        void operator=(std::unique_ptr<T>&& other) { reset(other.release()); }
+
+        //- No copy assignment from tmp
+        void operator=(const tmp<T>&) = delete;
+
+        //- Move construct, transferring pointer ownership if possible.
+        inline void operator=(tmp<T>&& other);
+
 
         //- Conversion to tmp, releases pointer or shallow-copies reference
         inline operator tmp<T>();
@@ -312,8 +361,7 @@ public:
 
 // Global Functions
 
-//- Specialized Swap algorithm for refPtr.
-//  Swaps the pointers and types of lhs and rhs. Calls \c lhs.swap(rhs)
+//- Specializes the Swap algorithm for refPtr (swaps pointers and types).
 template<class T>
 void Swap(refPtr<T>& lhs, refPtr<T>& rhs)
 {

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,71 +29,6 @@ License
 #include "error.H"
 #include <typeinfo>
 
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
-
-template<class T>
-template<class... Args>
-inline Foam::autoPtr<T> Foam::autoPtr<T>::New(Args&&... args)
-{
-    return autoPtr<T>(new T(std::forward<Args>(args)...));
-}
-
-
-template<class T>
-template<class U, class... Args>
-inline Foam::autoPtr<T> Foam::autoPtr<T>::NewFrom(Args&&... args)
-{
-    return autoPtr<T>(new U(std::forward<Args>(args)...));
-}
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template<class T>
-inline constexpr Foam::autoPtr<T>::autoPtr() noexcept
-:
-    ptr_(nullptr)
-{}
-
-
-template<class T>
-inline constexpr Foam::autoPtr<T>::autoPtr(std::nullptr_t) noexcept
-:
-    ptr_(nullptr)
-{}
-
-
-template<class T>
-inline Foam::autoPtr<T>::autoPtr(T* p) noexcept
-:
-    ptr_(p)
-{}
-
-
-template<class T>
-inline Foam::autoPtr<T>::autoPtr(autoPtr<T>&& ap) noexcept
-:
-    ptr_(ap.release())
-{}
-
-
-template<class T>
-template<class U>
-inline Foam::autoPtr<T>::autoPtr(autoPtr<U>&& ap)
-:
-    ptr_(ap.release())
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class T>
-inline Foam::autoPtr<T>::~autoPtr() noexcept
-{
-    reset(nullptr);
-}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
@@ -108,7 +43,7 @@ inline T* Foam::autoPtr<T>::release() noexcept
 template<class T>
 inline void Foam::autoPtr<T>::reset(T* p) noexcept
 {
-    if (ptr_) delete ptr_;
+    delete ptr_;
     ptr_ = p;
 }
 
@@ -116,11 +51,13 @@ inline void Foam::autoPtr<T>::reset(T* p) noexcept
 template<class T>
 inline void Foam::autoPtr<T>::reset(autoPtr<T>&& other) noexcept
 {
-    if (&other != this)
+    // Could also make Fatal with FULLDEBUG
+    if (&other == this)
     {
-        // Ignore self-assignment
-        reset(other.release());
+        return;  // No self-assignment
     }
+
+    reset(other.release());
 }
 
 
@@ -201,36 +138,6 @@ template<class T>
 inline const T& Foam::autoPtr<T>::operator()() const
 {
     return operator*();
-}
-
-
-template<class T>
-inline void Foam::autoPtr<T>::operator=(autoPtr<T>&& ap) noexcept
-{
-    if (this != &ap)
-    {
-        // Ignore self-assignment
-        reset(ap.release());
-    }
-}
-
-
-template<class T>
-template<class U>
-inline void Foam::autoPtr<T>::operator=(autoPtr<U>&& ap) noexcept
-{
-    if (this != &ap)
-    {
-        // Ignore self-assignment
-        reset(ap.release());
-    }
-}
-
-
-template<class T>
-inline void Foam::autoPtr<T>::operator=(std::nullptr_t) noexcept
-{
-    reset(nullptr);
 }
 
 

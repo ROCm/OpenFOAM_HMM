@@ -1184,7 +1184,7 @@ int main(int argc, char *argv[])
                         false
                     );
 
-                    masterMeshPtr = fvMeshes[0];
+                    masterMeshPtr.cref(fvMeshes[0]);
                 }
 
 

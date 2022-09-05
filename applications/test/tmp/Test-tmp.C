@@ -19,6 +19,9 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "primitiveFields.H"
+#include "autoPtr.H"
+#include "refPtr.H"
+#include "tmp.H"
 #include "Switch.H"
 
 using namespace Foam;
@@ -124,6 +127,28 @@ int main()
         Info<< nl << "const-ref from pointer: " << name(ptr.get()) << nl;
         tfld2.cref(ptr.get());
         printInfo(tfld2);
+    }
+
+    {
+        auto tptr1 = refPtr<labelField>::New(2, Zero);
+        auto aptr1 = autoPtr<labelField>::New(2, Zero);
+
+        // Deleted: tmp<labelField> tfld1(aptr1);
+        // tmp<labelField> tfld1(std::move(aptr1));
+        // tmp<labelField> tfld1(std::move(tptr1));
+        tmp<labelField> tfld1;
+        //tfld1.cref(tptr1);
+        //tfld1.cref(aptr1);
+
+        // refPtr<labelField> tfld1(std::move(tptr1));
+        // refPtr<labelField> tfld1(tptr1);
+
+        // tfld1 = std::move(aptr1);
+
+        // tfld1 = std::move(tptr1);
+        // Does not compile: tfld1.ref(tptr1);
+        // Deleted: tfld1.cref(tptr1);
+        // Deleted: tfld1.ref(aptr1);
     }
 
     Info<< "\nEnd" << endl;

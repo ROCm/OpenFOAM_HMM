@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,14 +48,17 @@ See also
 #ifndef Foam_tmp_H
 #define Foam_tmp_H
 
+#include "autoPtr.H"
 #include "refCount.H"
 #include "word.H"
-#include "stdFoam.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+// Forward Declarations
+template<class T> class refPtr;
 
 /*---------------------------------------------------------------------------*\
                              Class tmp Declaration
@@ -103,38 +106,18 @@ public:
     typedef Foam::refCount refCount;
 
 
-    // Factory Methods
-
-        //- Construct tmp of T with forwarding arguments
-        //  \param args list of arguments with which an instance of T
-        //      will be constructed.
-        //
-        //  \note Similar to std::make_shared, but the overload for
-        //      array types is not disabled.
-        template<class... Args>
-        inline static tmp<T> New(Args&&... args);
-
-        //- Construct tmp from derived type with forwarding arguments
-        //  \param args list of arguments with which an instance of U
-        //      will be constructed.
-        //
-        //  \note Similar to New but for derived types
-        template<class U, class... Args>
-        inline static tmp<T> NewFrom(Args&&... args);
-
-
     // Constructors
 
         //- Construct with no managed pointer.
         inline constexpr tmp() noexcept;
 
-        //- Construct with no managed pointer (literal nullptr).
+        //- Implicit construct from literal nullptr: no managed pointer
         inline constexpr tmp(std::nullptr_t) noexcept;
 
         //- Construct, taking ownership of the pointer.
         inline explicit tmp(T* p);
 
-        //- Construct for a const reference to an object.
+        //- Implicit construct for a const reference to an object.
         inline constexpr tmp(const T& obj) noexcept;
 
         //- Move construct, transferring ownership.
@@ -153,12 +136,50 @@ public:
         //- Copy/move construct. Optionally reusing ref-counted pointer.
         inline tmp(const tmp<T>& rhs, bool reuse);
 
+        //- No copy construct from autoPtr,
+        //- also avoids implicit cast to object or pointer
+        tmp(const autoPtr<T>&) = delete;
+
+        //- No copy construct from refPtr,
+        //- also avoids implicit cast to object
+        tmp(const refPtr<T>&) = delete;
+
+        //- Move construct from autoPtr, transferring ownership.
+        inline explicit tmp(autoPtr<T>&& rhs) noexcept;
+
 
     //- Destructor: deletes managed pointer when the ref-count is 0
-    inline ~tmp();
+    inline ~tmp() noexcept;
 
 
-    // Member Functions
+    // Factory Methods
+
+        //- Construct tmp with forwarding arguments
+        //  \param args list of arguments with which an instance of T
+        //      will be constructed.
+        //
+        //  \note Similar to std::make_shared, but the overload for
+        //      array types is not disabled.
+        template<class... Args>
+        static tmp<T> New(Args&&... args)
+        {
+            return tmp<T>(new T(std::forward<Args>(args)...));
+        }
+
+        //- Construct tmp from derived type with forwarding arguments
+        //  \param args list of arguments with which an instance of U
+        //      will be constructed.
+        //
+        //  \note Similar to New but for derived types.
+        //  Future check std::enable_if + std::is_convertible ?
+        template<class U, class... Args>
+        static tmp<T> NewFrom(Args&&... args)
+        {
+            return tmp<T>(new U(std::forward<Args>(args)...));
+        }
+
+
+    // Static Member Functions
 
         //- The type-name, constructed from type-name of T
         inline static word typeName();
@@ -212,13 +233,17 @@ public:
         //- delete object and set pointer to nullptr
         inline void clear() const noexcept;
 
-
         //- Clear existing and transfer ownership.
         inline void reset(tmp<T>&& other) noexcept;
 
         //- Delete managed temporary object and set to new given pointer
         inline void reset(T* p = nullptr) noexcept;
 
+        //- Avoid inadvertent casting (to object or pointer)
+        void reset(const autoPtr<T>&) = delete;
+
+        //- Avoid inadvertent casting (to object)
+        void reset(const refPtr<T>&) = delete;
 
         //- Clear existing and set (const) reference from other
         inline void cref(const tmp<T>& other) noexcept;
@@ -230,6 +255,11 @@ public:
         //  The pointer can be null, which is handled like a clear().
         inline void cref(const T* p) noexcept;
 
+        //- Avoid inadvertent casting (to object or pointer)
+        void cref(const autoPtr<T>&) = delete;
+
+        //- Avoid inadvertent casting (to object)
+        void cref(const refPtr<T>&) = delete;
 
         //- Clear existing and set to (non-const) reference
         inline void ref(T& obj) noexcept;
@@ -238,6 +268,11 @@ public:
         //  The pointer can be null, which is handled like a clear().
         inline void ref(T* p) noexcept;
 
+        //- Avoid inadvertent casting (to object or pointer)
+        void ref(const autoPtr<T>&) = delete;
+
+        //- Avoid inadvertent casting (to object)
+        void ref(const refPtr<T>&) = delete;
 
         //- Swaps the managed object with other.
         inline void swap(tmp<T>& other) noexcept;
@@ -284,7 +319,7 @@ public:
         inline void operator=(T* p);
 
         //- Reset via assignment from literal nullptr
-        inline void operator=(std::nullptr_t) noexcept;
+        void operator=(std::nullptr_t) noexcept { reset(nullptr); }
 
 
     // Housekeeping
@@ -307,8 +342,7 @@ public:
 
 // Global Functions
 
-//- Specialized Swap algorithm for tmp.
-//  Swaps the pointers and types of lhs and rhs. Calls \c lhs.swap(rhs)
+//- Specializes the Swap algorithm for tmp (swaps pointers and types).
 template<class T>
 void Swap(tmp<T>& lhs, tmp<T>& rhs)
 {

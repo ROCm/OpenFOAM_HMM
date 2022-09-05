@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,23 +34,7 @@ License
 template<class T>
 inline Foam::word Foam::refPtr<T>::typeName()
 {
-    return "refPtr<" + word(typeid(T).name()) + '>';
-}
-
-
-template<class T>
-template<class... Args>
-inline Foam::refPtr<T> Foam::refPtr<T>::New(Args&&... args)
-{
-    return refPtr<T>(new T(std::forward<Args>(args)...));
-}
-
-
-template<class T>
-template<class U, class... Args>
-inline Foam::refPtr<T> Foam::refPtr<T>::NewFrom(Args&&... args)
-{
-    return refPtr<T>(new U(std::forward<Args>(args)...));
+    return Foam::word("refPtr<" + std::string(typeid(T).name()) + '>', false);
 }
 
 
@@ -80,19 +64,6 @@ inline constexpr Foam::refPtr<T>::refPtr(T* p) noexcept
 {}
 
 
-template<class T>
-inline Foam::refPtr<T>::refPtr(autoPtr<T>&& rhs) noexcept
-:
-    refPtr<T>(rhs.release())
-{}
-
-
-template<class T>
-inline Foam::refPtr<T>::refPtr(std::unique_ptr<T>&& rhs) noexcept
-:
-    refPtr<T>(rhs.release())
-{}
-
 
 template<class T>
 inline constexpr Foam::refPtr<T>::refPtr(const T& obj) noexcept
@@ -119,7 +90,7 @@ inline Foam::refPtr<T>::refPtr(const refPtr<T>& rhs)
     ptr_(rhs.ptr_),
     type_(rhs.type_)
 {
-    if (type_ == PTR)
+    if (is_pointer())
     {
         if (ptr_)
         {
@@ -128,7 +99,7 @@ inline Foam::refPtr<T>::refPtr(const refPtr<T>& rhs)
         else
         {
             FatalErrorInFunction
-                << "Attempted copy of a deallocated "
+                << "Attempted copy/move of a deallocated "
                 << this->typeName()
                 << abort(FatalError);
         }
@@ -142,14 +113,14 @@ inline Foam::refPtr<T>::refPtr(const refPtr<T>& rhs, bool reuse)
     ptr_(rhs.ptr_),
     type_(rhs.type_)
 {
-    if (type_ == PTR)
+    if (is_pointer())
     {
         if (ptr_)
         {
             if (reuse)
             {
                 rhs.ptr_ = nullptr;
-                // Note: rhs.type_ already set as PTR
+                rhs.type_ = PTR;
             }
             else
             {
@@ -159,7 +130,7 @@ inline Foam::refPtr<T>::refPtr(const refPtr<T>& rhs, bool reuse)
         else
         {
             FatalErrorInFunction
-                << "Attempted copy of a deallocated "
+                << "Attempted copy/move of a deallocated "
                 << this->typeName()
                 << abort(FatalError);
         }
@@ -167,10 +138,51 @@ inline Foam::refPtr<T>::refPtr(const refPtr<T>& rhs, bool reuse)
 }
 
 
+template<class T>
+inline Foam::refPtr<T>::refPtr(std::unique_ptr<T>&& rhs) noexcept
+:
+    refPtr<T>(rhs.release())
+{}
+
+
+template<class T>
+inline Foam::refPtr<T>::refPtr(autoPtr<T>&& rhs) noexcept
+:
+    refPtr<T>(rhs.release())
+{}
+
+
+template<class T>
+inline Foam::refPtr<T>::refPtr(const tmp<T>& rhs, bool reuse)
+:
+    refPtr<T>()
+{
+    reset(const_cast<tmp<T>&>(rhs), reuse);
+}
+
+
+template<class T>
+inline Foam::refPtr<T>::refPtr(const tmp<T>& rhs)
+:
+    refPtr<T>()
+{
+    reset(const_cast<tmp<T>&>(rhs), false);
+}
+
+
+template<class T>
+inline Foam::refPtr<T>::refPtr(tmp<T>&& rhs)
+:
+    refPtr<T>()
+{
+    reset(const_cast<tmp<T>&>(rhs), true);
+}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class T>
-inline Foam::refPtr<T>::~refPtr()
+inline Foam::refPtr<T>::~refPtr() noexcept
 {
     clear();
 }
@@ -181,14 +193,14 @@ inline Foam::refPtr<T>::~refPtr()
 template<class T>
 inline bool Foam::refPtr<T>::movable() const noexcept
 {
-    return (type_ == PTR && ptr_);
+    return (is_pointer() && ptr_);
 }
 
 
 template<class T>
 inline const T& Foam::refPtr<T>::cref() const
 {
-    if (type_ == PTR && !ptr_)
+    if (is_pointer() && !ptr_)
     {
         FatalErrorInFunction
             << this->typeName() << " deallocated"
@@ -209,7 +221,7 @@ inline T& Foam::refPtr<T>::ref() const
             << this->typeName()
             << abort(FatalError);
     }
-    else if (type_ == PTR && !ptr_)
+    else if (is_pointer() && !ptr_)
     {
         FatalErrorInFunction
             << this->typeName() << " deallocated"
@@ -245,7 +257,7 @@ inline Foam::refPtr<T> Foam::refPtr<T>::shallowClone() const noexcept
 template<class T>
 inline T* Foam::refPtr<T>::release() noexcept
 {
-    if (type_ == PTR)
+    if (is_pointer())
     {
         T* p = ptr_;
         ptr_ = nullptr;
@@ -266,7 +278,7 @@ inline T* Foam::refPtr<T>::ptr() const
             << abort(FatalError);
     }
 
-    if (type_ == PTR)
+    if (is_pointer())
     {
         // Release pointer
         T* p = ptr_;
@@ -282,7 +294,7 @@ inline T* Foam::refPtr<T>::ptr() const
 template<class T>
 inline void Foam::refPtr<T>::clear() const noexcept
 {
-    if (type_ == PTR && ptr_)
+    if (is_pointer())
     {
         delete ptr_;
         ptr_ = nullptr;
@@ -302,9 +314,10 @@ inline void Foam::refPtr<T>::reset(T* p) noexcept
 template<class T>
 inline void Foam::refPtr<T>::reset(refPtr<T>&& other) noexcept
 {
+    // Could also make Fatal with FULLDEBUG
     if (&other == this)
     {
-        return;  // Self-assignment is a no-op
+        return;  // No self-assignment
     }
 
     clear();
@@ -317,11 +330,39 @@ inline void Foam::refPtr<T>::reset(refPtr<T>&& other) noexcept
 
 
 template<class T>
+inline void Foam::refPtr<T>::reset(tmp<T>& other, bool reuse)
+{
+    if (other.get())
+    {
+        if (reuse && other.is_pointer())
+        {
+            // Acquire pointer.
+            // Fatal if pointer is not unique (avoids potential leaks)
+            reset(other.ptr());
+        }
+        else if (other.is_const())
+        {
+            cref(other.get());
+        }
+        else
+        {
+            ref(other.get());
+        }
+    }
+    else
+    {
+        clear();
+    }
+}
+
+
+template<class T>
 inline void Foam::refPtr<T>::cref(const refPtr<T>& other) noexcept
 {
+    // Could also make Fatal with FULLDEBUG
     if (&other == this)
     {
-        return;  // Self-assignment is a no-op
+        return;  // No self-assignment
     }
 
     clear();
@@ -455,18 +496,21 @@ inline T* Foam::refPtr<T>::operator->()
 template<class T>
 inline void Foam::refPtr<T>::operator=(const refPtr<T>& other)
 {
+    // Could also make Fatal with FULLDEBUG
     if (&other == this)
     {
-        return;  // Self-assignment is a no-op
+        return;  // No self-assignment
     }
 
     clear();
 
-    if (other.type_ == PTR)
+    if (other.is_pointer())
     {
         ptr_ = other.ptr_;
         type_ = PTR;
+
         other.ptr_ = nullptr;
+        other.type_ = PTR;
 
         if (!ptr_)
         {
@@ -487,48 +531,16 @@ inline void Foam::refPtr<T>::operator=(const refPtr<T>& other)
 
 
 template<class T>
-inline void Foam::refPtr<T>::operator=(refPtr<T>&& other) noexcept
+inline void Foam::refPtr<T>::operator=(tmp<T>&& other)
 {
-    if (&other == this)
-    {
-        return;  // Self-assignment is a no-op
-    }
-
-    clear();
-    ptr_ = other.ptr_;
-    type_ = other.type_;
-
-    other.ptr_ = nullptr;
-    other.type_ = PTR;
-}
-
-
-template<class T>
-inline void Foam::refPtr<T>::operator=(T* p)
-{
-    if (!p)
-    {
-        FatalErrorInFunction
-            << "Attempted copy of a deallocated "
-            << this->typeName()
-            << abort(FatalError);
-    }
-
-    reset(p);
-}
-
-
-template<class T>
-inline void Foam::refPtr<T>::operator=(std::nullptr_t) noexcept
-{
-    reset(nullptr);
+    reset(other, true);  // reuse
 }
 
 
 template<class T>
 inline Foam::refPtr<T>::operator tmp<T>()
 {
-    if (type_ == PTR)
+    if (is_pointer())
     {
         return tmp<T>(ptr());
     }

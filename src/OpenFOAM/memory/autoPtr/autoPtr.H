@@ -41,6 +41,9 @@ Note
 SourceFiles
     autoPtrI.H
 
+See also
+    Foam::refPtr
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef Foam_autoPtr_H
@@ -80,62 +83,92 @@ public:
         typedef T* pointer;
 
 
+    // Constructors
+
+        //- Construct with no managed pointer.
+        constexpr autoPtr() noexcept
+        :
+            ptr_(nullptr)
+        {}
+
+        //- Implicit construct from literal nullptr: no managed pointer
+        constexpr autoPtr(std::nullptr_t) noexcept
+        :
+            ptr_(nullptr)
+        {}
+
+        //- Construct, taking ownership of the pointer.
+        explicit autoPtr(T* p) noexcept
+        :
+            ptr_(p)
+        {}
+
+        //- Move construct, transferring ownership.
+        autoPtr(autoPtr<T>&& rhs) noexcept
+        :
+            ptr_(rhs.release())
+        {}
+
+        //- Move construct, transferring ownership from derived type.
+        //  U must be derivable from T
+        //  \note Future check std::enable_if + std::is_convertible ?
+        template<class U>
+        explicit autoPtr(autoPtr<U>&& rhs)
+        :
+            ptr_(rhs.release())
+        {}
+
+        //- Move construct from unique_ptr, transferring ownership.
+        explicit autoPtr(std::unique_ptr<T>&& rhs) noexcept
+        :
+            ptr_(rhs.release())
+        {}
+
+        //- A move construct disguised as a copy construct (transfers ownership)
+        //  \remark This should ideally be deleted - pending cleanup of code
+        //      currently relying on this behaviour.
+        #ifdef Foam_autoPtr_copyConstruct
+        autoPtr(const autoPtr<T>& rhs) noexcept
+        :
+            ptr_(const_cast<autoPtr<T>&>(rhs).release())
+        {}
+        #else
+        autoPtr(const autoPtr<T>&) = delete;
+        #endif
+
+
+    //- Destructor: deletes managed pointer
+    ~autoPtr() noexcept
+    {
+        delete ptr_;
+    }
+
+
     // Factory Methods
 
-        //- Construct autoPtr of T with forwarding arguments
+        //- Construct autoPtr with forwarding arguments
         //  \param args list of arguments with which an instance of T
         //      will be constructed.
         //
         //  \note Similar to std::make_unique, but the overload for
         //      array types is not disabled.
         template<class... Args>
-        inline static autoPtr<T> New(Args&&... args);
+        static autoPtr<T> New(Args&&... args)
+        {
+            return autoPtr<T>(new T(std::forward<Args>(args)...));
+        }
 
         //- Construct autoPtr from derived type with forwarding arguments
         //  \param args list of arguments with which an instance of U
         //      will be constructed.
         //
         //  \note Similar to New but for derived types.
-        //  Future check for std::is_base_of ?
+        //  Future check std::enable_if + std::is_convertible ?
         template<class U, class... Args>
-        inline static autoPtr<T> NewFrom(Args&&... args);
-
-
-    // Constructors
-
-        //- Construct with no managed pointer.
-        inline constexpr autoPtr() noexcept;
-
-        //- Construct with no managed pointer (literal nullptr).
-        inline constexpr autoPtr(std::nullptr_t) noexcept;
-
-        //- Construct, taking ownership of the pointer.
-        inline explicit autoPtr(T* p) noexcept;
-
-        //- Move construct, transferring ownership.
-        inline autoPtr(autoPtr<T>&& ap) noexcept;
-
-        //- Move construct, transferring ownership from derived type.
-        //  U must be derivable from T
-        //  \note Future check for std::is_base_of ?
-        template<class U>
-        inline explicit autoPtr(autoPtr<U>&& ap);
-
-        //- A move construct disguised as a copy construct (transfers ownership)
-        //  \remark This should ideally be deleted - pending cleanup of code
-        //      currently relying on this behaviour.
-        #ifdef Foam_autoPtr_copyConstruct
-        autoPtr(const autoPtr<T>& ap) noexcept
-        :
-            ptr_(const_cast<autoPtr<T>&>(ap).release())
-        {}
-        #else
-        autoPtr(const autoPtr<T>& ap) = delete;
-        #endif
-
-
-    //- Deletes the managed pointer
-    inline ~autoPtr() noexcept;
+        static autoPtr<T> NewFrom(Args&&... args)
+        {
+            return autoPtr<T>(new U(std::forward<Args>(args)...));
+        }
 
 
     // Member Functions
@@ -176,13 +209,12 @@ public:
         //  \remark Method naming consistent with Foam::tmp
         void clear() noexcept { reset(nullptr); }
 
+        //- Delete managed object and set to new given pointer
+        inline void reset(T* p = nullptr) noexcept;
 
         //- Delete managed object and set to new given pointer
         //  \remark Same as move assign, but better for code documentation
         inline void reset(autoPtr<T>&& other) noexcept;
-
-        //- Delete managed object and set to new given pointer
-        inline void reset(T* p = nullptr) noexcept;
 
         //- Swaps the managed object with other autoPtr.
         inline void swap(autoPtr<T>& other) noexcept;
@@ -252,19 +284,26 @@ public:
         //- No copy assignment from plain pointer (uncontrolled access)
         void operator=(T* p) = delete;
 
-        //- Transfer object ownership from parameter
-        inline void operator=(autoPtr<T>&& ap) noexcept;
-
-        //- Transfer object ownership from parameter
-        template<class U>
-        inline void operator=(autoPtr<U>&& ap) noexcept;
-
         //- No move assignment disguised as a copy assignment
         //  \deprecated(2018-02) can have unintended behaviour
-        void operator=(const autoPtr<T>& ap) = delete;
+        void operator=(const autoPtr<T>&) = delete;
+
+        //- Transfer object ownership from parameter
+        void operator=(autoPtr<T>&& other) noexcept { reset(std::move(other)); }
+
+        //- Transfer object ownership from parameter
+        //  \note Future check std::enable_if + std::is_convertible ?
+        template<class U>
+        void operator=(autoPtr<U>&& other) noexcept
+        {
+            reset(other.release());
+        }
+
+        //- Transfer ownership by move assignment from unique_ptr
+        void operator=(std::unique_ptr<T>&& other) { reset(other.release()); }
 
         //- Reset via assignment from literal nullptr
-        inline void operator=(std::nullptr_t) noexcept;
+        void operator=(std::nullptr_t) noexcept { reset(nullptr); }
 
 
     // Housekeeping
@@ -294,8 +333,7 @@ public:
 
 // Global Functions
 
-//- Specializes the Swap algorithm for autoPtr.
-//  Swaps the pointers of lhs and rhs. Calls \c lhs.swap(rhs)
+//- Specializes the Swap algorithm for autoPtr (swaps pointers).
 template<class T>
 void Swap(autoPtr<T>& lhs, autoPtr<T>& rhs)
 {

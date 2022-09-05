@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +27,6 @@ License
 
 // #define Foam_autoPtr_deprecate_setMethod
 
-#include <memory>
 #include "autoPtr.H"
 #include "labelList.H"
 #include "ListOps.H"
@@ -75,6 +74,14 @@ autoPtr<T> testNullReturn2()
 
     return p;
 }
+
+
+template<class T>
+struct DerivedList : public List<T>
+{
+    // Inherit constructors
+    using List<T>::List;
+};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -252,6 +259,16 @@ int main(int argc, char *argv[])
 
         // Good this does not compile:
         // autoPtr<labelList> ptr2 = testNullReturn2<labelList>();
+    }
+
+    {
+        auto input1 = autoPtr<DerivedList<label>>::New(label(10), 1);
+        auto input2 = autoPtr<DerivedList<scalar>>::New(label(10), 1.0);
+
+        autoPtr<labelList> ptr1(std::move(input1));
+
+        // Does not compile: ptr1 = std::move(input2);
+        // Does not compile: ptr1 = autoPtr<List<scalar>>::New(label(10), 2);
     }
 
 
