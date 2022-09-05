@@ -74,7 +74,6 @@ SourceFiles
 
 #include "timeFunctionObject.H"
 #include "Tuple2.H"
-#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

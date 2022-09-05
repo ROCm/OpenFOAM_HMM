@@ -77,7 +77,7 @@ void Foam::functionObjects::timeActivatedFileUpdate::updateFile()
 
         if (Pstream::master() || time_.distributed())
         {
-            // Slaves do not copy if running non-distributed
+            // Copy on master only for non-distributed
             fileName tmpFile(fileToUpdate_ + Foam::name(pid()));
             Foam::cp(srcFile, tmpFile);
             Foam::mv(tmpFile, fileToUpdate_);
@@ -98,7 +98,7 @@ Foam::functionObjects::timeActivatedFileUpdate::timeActivatedFileUpdate
 )
 :
     timeFunctionObject(name, runTime),
-    fileToUpdate_("unknown-fileToUpdate"),
+    fileToUpdate_(),
     timeVsFile_(),
     lastIndex_(-1),
     modified_(false)
@@ -122,26 +122,33 @@ bool Foam::functionObjects::timeActivatedFileUpdate::read
     lastIndex_ = -1;
     fileToUpdate_.expand();
 
-    Info<< type() << " " << name() << " output:" << nl
-        << "    time vs file list:" << endl;
-
-    forAll(timeVsFile_, i)
+    if (fileToUpdate_.empty() || timeVsFile_.empty())
     {
-        timeVsFile_[i].second().expand();
-        const fileName& srcFile = timeVsFile_[i].second();
+        FatalIOErrorInFunction(dict)
+            << "Bad entries for fileToUpdate and/or timeVsFile" << endl
+            << exit(FatalIOError);
+    }
+
+    Info<< type() << " " << name() << " output:" << nl
+        << "    time vs file list:" << nl;
+
+    for (auto& tuple : timeVsFile_)
+    {
+        fileName& srcFile = tuple.second();
+        srcFile.expand();
 
         // Report case-relative path for information
-        Info<< "    " << timeVsFile_[i].first() << tab
-            << time_.relativePath(srcFile, true) << endl;
+        Info<< "    " << tuple.first() << tab
+            << time_.relativePath(srcFile, true) << nl;
 
         if (Pstream::master() || time_.distributed())
         {
             if (!Foam::isFile(srcFile))
             {
                 // Report full path on error
-                FatalErrorInFunction
+                FatalIOErrorInFunction(dict)
                     << "File not found: " << srcFile << endl
-                    << exit(FatalError);
+                    << exit(FatalIOError);
             }
         }
     }
