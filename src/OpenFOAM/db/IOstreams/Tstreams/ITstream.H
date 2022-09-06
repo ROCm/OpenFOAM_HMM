@@ -101,20 +101,20 @@ public:
             IOstreamOption streamOpt = IOstreamOption()
         );
 
-        //- Copy construct from tokens, with given name
-        ITstream
+        //- Copy construct from tokens, optionally with given name
+        explicit ITstream
         (
-            const string& name,
             const UList<token>& tokens,
-            IOstreamOption streamOpt = IOstreamOption()
+            IOstreamOption streamOpt = IOstreamOption(),
+            const string& name = "input"
         );
 
-        //- Move construct from tokens, with given name
-        ITstream
+        //- Move construct from tokens, optionally with given name
+        explicit ITstream
         (
-            const string& name,
             List<token>&& tokens,
-            IOstreamOption streamOpt = IOstreamOption()
+            IOstreamOption streamOpt = IOstreamOption(),
+            const string& name = "input"
         );
 
         //- Construct token list by parsing the input character sequence
@@ -143,6 +143,31 @@ public:
             IOstreamOption streamOpt = IOstreamOption(),
             const string& name = "input"
         );
+
+
+    // Additional constructors
+
+        //- Copy construct from tokens, with given name
+        ITstream
+        (
+            const string& name,
+            const UList<token>& tokens,
+            IOstreamOption streamOpt = IOstreamOption()
+        )
+        :
+            ITstream(tokens, streamOpt, name)
+        {}
+
+        //- Move construct from tokens, with given name
+        ITstream
+        (
+            const string& name,
+            List<token>&& tokens,
+            IOstreamOption streamOpt = IOstreamOption()
+        )
+        :
+            ITstream(std::move(tokens), streamOpt, name)
+        {}
 
 
     //- Destructor

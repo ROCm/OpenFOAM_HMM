@@ -210,9 +210,9 @@ Foam::ITstream::ITstream
 
 Foam::ITstream::ITstream
 (
-    const string& name,
     const UList<token>& tokens,
-    IOstreamOption streamOpt
+    IOstreamOption streamOpt,
+    const string& name
 )
 :
     Istream(streamOpt.format(), streamOpt.version()),
@@ -227,9 +227,9 @@ Foam::ITstream::ITstream
 
 Foam::ITstream::ITstream
 (
-    const string& name,
     List<token>&& tokens,
-    IOstreamOption streamOpt
+    IOstreamOption streamOpt,
+    const string& name
 )
 :
     Istream(streamOpt.format(), streamOpt.version()),

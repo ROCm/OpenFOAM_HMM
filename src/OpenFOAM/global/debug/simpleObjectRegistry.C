@@ -64,7 +64,7 @@ void Foam::simpleObjectRegistry::setValues
                 IStringStream is(os.str());
 
                 // Or alternatively?
-                // ITstream is(name, dEntry.dict().tokens());
+                // ITstream is(dEntry.dict().tokens());
 
                 for (simpleRegIOobject* obj : objects)
                 {
@@ -129,10 +129,10 @@ void Foam::simpleObjectRegistry::setNamedValue
 
     if (objPtr)
     {
-        // The generic interface requires an Istream.
-        ITstream is("", tokenList(Foam::one{}, tok));
-
         Log << name.c_str() << '=' << tok << nl;
+
+        // The generic interface requires an Istream.
+        ITstream is(tokenList(Foam::one{}, std::move(tok)));
 
         const List<simpleRegIOobject*>& objects = *objPtr;
 

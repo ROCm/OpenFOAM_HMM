@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -104,7 +104,7 @@ void readList
 {
     OTstream os;
     os << input;
-    ITstream is("input", os.tokens());
+    ITstream is(os.tokens());
 
     is >> output;
 }
@@ -118,7 +118,7 @@ void readList
 {
     OTstream os;
     os << input;
-    ITstream is("input", os.tokens());
+    ITstream is(os.tokens());
 
     is >> output;
 }
