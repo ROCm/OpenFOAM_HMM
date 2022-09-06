@@ -35,65 +35,58 @@ Description
 
     Operands:
     \table
-      Operand        | Type              | Location
-      input          | volScalarField    | $FOAM_CASE/\<time\>/\<inpField\>
-      output file    | dat  | $FOAM_CASE/postProcessing/\<FO\>/\<time\>/\<file\>
-      output field   | -                 | -
+      Operand        | Type           | Location
+      input          | volScalarField | \<time\>/\<inpField\>
+      output file    | dat            | postProcessing/\<FO\>/\<time\>/histogram
+      output field   | -              | -
     \endtable
 
-    The set written contains two columns, the first the volume averaged values,
-    the second the raw bin count.
+    The data written contains four columns (from left to right):
+    - time
+    - mid-point of histogram bin
+    - histogram counts - number of samples in each bin
+    - volume-weighted histogram values
 
 Usage
     Minimal example by using \c system/controlDict.functions:
     \verbatim
     histogram1
     {
-        // Mandatory entries (unmodifiable)
-        type        histogram;
-        libs        (fieldFunctionObjects);
+        // Mandatory entries
+        type            histogram;
+        libs            (fieldFunctionObjects);
+        field           <word>;
+        model           <word>;
 
-        // Mandatory (inherited) entries (runtime modifiable)
-        field       p;
-        nBins       100;
-        setFormat   gnuplot;
+        // Conditional entries
 
-        // Optional entries (runtime modifiable)
-        max         5;
-        min        -5;
+            // Option-1: when model == equalBinWidth
 
-        // Optional (inherited) entries
+            // Option-2: when model == unequalBinWidth
+
+        // Inherited entries
         ...
     }
     \endverbatim
 
     where the entries mean:
     \table
-      Property     | Description                        | Type | Req'd | Dflt
-      type         | Type name: histogram               | word |  yes  | -
-      libs         | Library name: fieldFunctionObjects | word |  yes  | -
-      field        | Name of operand field              | word |  yes  | -
-      nBins        | Number of histogram bins           | label | yes  | -
-      setFormat    | Output format                      | word |  yes  | -
-      max          | Maximum value sampled       | scalar | no  | fieldMax
-      min          | minimum value sampled       | scalar | no  | 0.0
+      Property     | Description                        | Type | Reqd | Deflt
+      type         | Type name: histogram               | word | yes  | -
+      libs         | Library name: fieldFunctionObjects | word | yes  | -
+      field        | Name of operand field              | word | yes  | -
+      model        | Name of the histogram model        | word | yes  | -
     \endtable
 
+    Options for the \c model entry:
+    \verbatim
+      equalBinWidth    | Use equal-bin width
+      unequalBinWidth  | Use unequal-bin widths
+    \endverbatim
+
     The inherited entries are elaborated in:
-     - \link functionObject.H \endlink
-     - \link writeFile.H \endlink
-
-    Usage by the \c postProcess utility is not available.
-
-Note
-    If \c max is not provided it will use the field's min and max as the bin
-    extremes. If \c max is provided but not \c min it will use 0.
-
-See also
-    - Foam::functionObject
-    - Foam::functionObjects::fvMeshFunctionObject
-    - Foam::functionObjects::writeFile
-    - ExtendedCodeGuide::functionObjects::field::histogram
+      - \link functionObject.H \endlink
+      - \link writeFile.H \endlink
 
 SourceFiles
     histogram.C
@@ -104,41 +97,30 @@ SourceFiles
 #define Foam_functionObjects_histogram_H
 
 #include "fvMeshFunctionObject.H"
-#include "writeFile.H"
-#include "coordSetWriter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+// Forward Declarations
+class histogramModel;
+
 namespace functionObjects
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class histogram Declaration
+                        Class histogram Declaration
 \*---------------------------------------------------------------------------*/
 
 class histogram
 :
-    public functionObjects::fvMeshFunctionObject,
-    public functionObjects::writeFile
+    public fvMeshFunctionObject
 {
     // Private Data
 
-        //- Number of bins
-        label nBins_;
-
-        //- Name of field
-        word fieldName_;
-
-        //- Maximum value
-        scalar max_;
-
-        //- Minimum value
-        scalar min_;
-
-        //- Output formatter to write
-        mutable autoPtr<coordSetWriter> setWriterPtr_;
+        //- Histogram model
+        autoPtr<histogramModel> histogramModelPtr_;
 
 
 public:
@@ -170,8 +152,8 @@ public:
 
     // Member Functions
 
-        //- Read the histogram data
-        virtual bool read(const dictionary&);
+        //- Read the top-level dictionary
+        virtual bool read(const dictionary& dict);
 
         //- Execute (effectively no-op)
         virtual bool execute();

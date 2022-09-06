@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,74 +23,39 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+
 \*---------------------------------------------------------------------------*/
 
-#include "histogram.H"
 #include "histogramModel.H"
-#include "addToRunTimeSelectionTable.H"
+#include "fvMesh.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-namespace functionObjects
-{
-    defineTypeNameAndDebug(histogram, 0);
-    addToRunTimeSelectionTable(functionObject, histogram, dictionary);
-}
-}
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::functionObjects::histogram::histogram
+Foam::autoPtr<Foam::histogramModel> Foam::histogramModel::New
 (
     const word& name,
-    const Time& runTime,
+    const fvMesh& mesh,
     const dictionary& dict
 )
-:
-    fvMeshFunctionObject(name, runTime, dict),
-    histogramModelPtr_(nullptr)
 {
-    read(dict);
-}
+    const word modelType(dict.get<word>("model"));
 
+    Info<< "    Selecting model: " << modelType << nl << endl;
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-bool Foam::functionObjects::histogram::read(const dictionary& dict)
-{
-    if (!fvMeshFunctionObject::read(dict))
+    if (!ctorPtr)
     {
-        return false;
+        FatalIOErrorInLookup
+        (
+            dict,
+            "histogramModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalIOError);
     }
 
-    Info<< type() << " " << name() << ":" << endl;
-
-    histogramModelPtr_.reset(histogramModel::New(name(), mesh_, dict));
-
-    return true;
-}
-
-
-bool Foam::functionObjects::histogram::execute()
-{
-    return true;
-}
-
-
-bool Foam::functionObjects::histogram::write()
-{
-    Log << type() << " " << name() << " write:" << endl;
-
-    if (!histogramModelPtr_->write(log))
-    {
-        return false;
-    }
-    Log << endl;
-
-    return true;
+    return autoPtr<histogramModel>(ctorPtr(name, mesh, dict));
 }
 
 
