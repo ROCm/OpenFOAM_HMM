@@ -1,9 +1,11 @@
 #------------------------------------------------------------------------------
 include $(GENERAL_RULES)/Clang/c++
 
-c++ARCH     = -m64 -pthread
+c++ARCH    := -m64 -pthread
 
-include $(DEFAULT_RULES)/c++$(WM_COMPILE_OPTION)
+ifneq (,$(WM_COMPILE_OPTION))
+    sinclude $(DEFAULT_RULES)/c++$(WM_COMPILE_OPTION)
+endif
 
 c++FLAGS    = \
     $(c++ARCH) $(GFLAGS) $(c++WARN) $(c++OPT) $(c++DBUG) $(ptFLAGS) \

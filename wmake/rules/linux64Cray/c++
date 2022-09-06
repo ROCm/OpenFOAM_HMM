@@ -1,14 +1,14 @@
 #------------------------------------------------------------------------------
-# Cray compiler - a gcc variant/wrapper
-# presumably new enough to support c++14
+# Cray compiler - gcc variant/wrapper. New enough to support c++14
 #------------------------------------------------------------------------------
 include $(GENERAL_RULES)/Gcc/c++
 
-CC          = CC -std=c++14
+CC         := CC -std=c++14
+c++ARCH    := -m64 -pthread
 
-c++ARCH     = -m64 -pthread
-
-include $(DEFAULT_RULES)/c++$(WM_COMPILE_OPTION)
+ifneq (,$(WM_COMPILE_OPTION))
+    sinclude $(DEFAULT_RULES)/c++$(WM_COMPILE_OPTION)
+endif
 
 c++FLAGS    = \
     $(c++ARCH) $(GFLAGS) $(c++WARN) $(c++OPT) $(c++DBUG) $(ptFLAGS) \

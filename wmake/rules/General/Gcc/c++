@@ -4,14 +4,14 @@
 #
 # NOTE if your system gcc is new enough can simply use c++14 too.
 #------------------------------------------------------------------------------
-SUFFIXES += .C .cc .cpp .cxx
+SUFFIXES   += .C .cc .cpp .cxx
 
-CC          = g++$(COMPILER_VERSION) -std=c++11
+CC         := g++$(COMPILER_VERSION) -std=c++11
 
-c++ARCH     =
-c++DBUG     =
-c++OPT      = -O2
-ptFLAGS     = -DNoRepository -ftemplate-depth-100
+c++ARCH    :=
+c++DBUG    :=
+c++OPT     := -O2
+ptFLAGS    := -DNoRepository -ftemplate-depth-100
 
 c++WARN     = \
     -Wall -Wextra -Wold-style-cast \
@@ -23,5 +23,8 @@ c++LESSWARN = \
     -Wno-old-style-cast -Wno-unused-local-typedefs -Wno-array-bounds \
     -Wno-deprecated-declarations \
     -fpermissive
+
+# Tuning
+sinclude $(GENERAL_RULES)/common/c++$(WM_COMPILE_OPTION)
 
 #------------------------------------------------------------------------------

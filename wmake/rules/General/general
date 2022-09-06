@@ -34,7 +34,7 @@ endif
 
 # Default compilation is 'Opt' - never permit an empty value
 ifeq (,$(WM_COMPILE_OPTION))
-    WM_COMPILE_OPTION = Opt
+    WM_COMPILE_OPTION := Opt
 endif
 
 # Older macro for (shell) branching

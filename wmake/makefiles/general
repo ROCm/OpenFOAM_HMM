@@ -93,8 +93,8 @@ EXE     = $(WM_PROJECT).out
 # Standalone executable (default which is to be overridden)
 SEXE    = a.out
 
-#DEBUG $(info "EXE_SO  = ${EXE_SO}")
-#DEBUG $(info "EXT_EXE = ${EXT_EXE}")
+#DEBUG: $(info "EXE_SO  = $(EXE_SO)")
+#DEBUG: $(info "EXT_EXE = $(EXT_EXE)")
 
 
 #------------------------------------------------------------------------------

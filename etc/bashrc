@@ -79,7 +79,7 @@ export WM_PRECISION_OPTION=DP
 export WM_LABEL_SIZE=32
 
 # [WM_COMPILE_OPTION] - Optimised(default), debug, profiling, other:
-# = Opt | Debug | Prof
+# = Opt | Dbg | Debug | Prof
 export WM_COMPILE_OPTION=Opt
 
 # [WM_COMPILE_CONTROL] - additional control for compiler rules

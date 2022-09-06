@@ -1,14 +1,14 @@
 #------------------------------------------------------------------------------
-# Intel compiler is new enough to support c++14
+# Intel compiler
 #------------------------------------------------------------------------------
-SUFFIXES += .C .cc .cpp .cxx
+SUFFIXES   += .C .cc .cpp .cxx
 
-CC          = icpx$(COMPILER_VERSION) -std=c++14
+CC         := icpx$(COMPILER_VERSION) -std=c++14
 
-c++ARCH     =
-c++DBUG     =
-c++OPT      = -O2
-ptFLAGS     = -DNoRepository
+c++ARCH    :=
+c++DBUG    :=
+c++OPT     := -O2
+ptFLAGS    := -DNoRepository
 
 c++WARN     = \
     -Wall -Wextra \
@@ -20,5 +20,8 @@ c++WARN     = \
 # Less restrictive warnings (eg, for flex++, CGAL, etc.)
 c++LESSWARN = \
     -diag-disable 1224,2026,2305
+
+# Tuning
+sinclude $(GENERAL_RULES)/common/c++$(WM_COMPILE_OPTION)
 
 #------------------------------------------------------------------------------

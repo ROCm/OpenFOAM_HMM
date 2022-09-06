@@ -1,13 +1,16 @@
 #------------------------------------------------------------------------------
-# Nvidia compilers
+# Nvidia compiler
 #------------------------------------------------------------------------------
-SUFFIXES += .c
+SUFFIXES   += .c
 
-cc          = nvc$(COMPILER_VERSION)
+cc         := nvc$(COMPILER_VERSION)
 
-cARCH       =
-cDBUG       =
-cOPT        = -O2
-cWARN       =
+cARCH      :=
+cDBUG      :=
+cOPT       := -O2
+cWARN      :=
+
+# Tuning
+sinclude $(GENERAL_RULES)/common/c$(WM_COMPILE_OPTION)
 
 #------------------------------------------------------------------------------

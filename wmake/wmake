@@ -69,8 +69,8 @@ HELP_HEAD
 if [ -n "$1" ]
 then
 cat<<HELP_FULL
-  -debug            Add '-DFULLDEBUG -g' flags
-  -debug-O[0123]    Add '-DFULLDEBUG -g' flags and optimization level
+  -debug            Add '-g -DFULLDEBUG' flags
+  -debug-O[g0123]   Add '-g -DFULLDEBUG' flags and optimization level
   -build-root=PATH      Specify FOAM_BUILDROOT for compilation intermediates
   -module-prefix=PATH   Specify FOAM_MODULE_PREFIX as absolute/relative path
   -module-prefix=TYPE   Specify FOAM_MODULE_PREFIX as predefined type
@@ -255,7 +255,7 @@ do
             optDebug="-g"
             ;;
 
-        -debug-O[0123])
+        -debug-O[g0123])
             optDebug="-g -${1##*-}"
             ;;
 
@@ -490,16 +490,14 @@ unset exitCode
 
 if [ -n "$optDebug" ]
 then
-    # Add -debug values into FOAM_EXTRA_CXXFLAGS
-    optDebug="-DFULLDEBUG $optDebug"
-    oldFlags="$FOAM_EXTRA_CXXFLAGS"
-
-    case "$oldFlags" in
+    # Add -debug value and -DFULLDEBUG into FOAM_EXTRA_CXXFLAGS
+    optDebug="${FOAM_EXTRA_CXXFLAGS:+ }$optDebug -DFULLDEBUG"
+    case "$FOAM_EXTRA_CXXFLAGS" in
     (*-DFULLDEBUG*)
-        # Already there
+        # Appears to have already been added
     ;;
     (*)
-        export FOAM_EXTRA_CXXFLAGS="$oldFlags${oldFlags:+ }$optDebug"
+        export FOAM_EXTRA_CXXFLAGS="${FOAM_EXTRA_CXXFLAGS}${optDebug}"
     ;;
     esac
 fi

@@ -1,10 +1,13 @@
 #----------------------------*- makefile-gmake -*------------------------------
 
 # The dependency generation program
+# 1. wmkdepend  : Ragel-based
+# 2. wmkdep     : Flex-based (slower, ulimit problem)
+# 3. makeDepend : cpp -M (for testing only)
 
-WMKDEP  := $(WMAKE_BIN)/wmkdepend    # 1. Ragel-based
-# WMKDEP  := $(WMAKE_BIN)/wmkdep       # 2. Flex-based (slower, ulimit problem)
-# WMKDEP  := $(WM_SCRIPTS)/makeDepend  # 3. cpp -M (for testing only)
+WMKDEP  := $(WMAKE_BIN)/wmkdepend
+# WMKDEP  := $(WMAKE_BIN)/wmkdep
+# WMKDEP  := $(WM_SCRIPTS)/makeDepend
 
 WMKDEP_FLAGS := -eWM_PROJECT_DIR -eWM_THIRD_PARTY_DIR
 

@@ -1,14 +1,14 @@
 #------------------------------------------------------------------------------
-# Nvidia compilers
+# Nvidia compiler
 #------------------------------------------------------------------------------
-SUFFIXES += .C .cc .cpp .cxx
+SUFFIXES   += .C .cc .cpp .cxx
 
-CC          = nvc++$(COMPILER_VERSION) -std=c++14
+CC         := nvc++$(COMPILER_VERSION) -std=c++14
 
-c++ARCH     =
-c++DBUG     =
-c++OPT      = -O2
-ptFLAGS     = -DNoRepository
+c++ARCH    :=
+c++DBUG    :=
+c++OPT     := -O2
+ptFLAGS    := -DNoRepository
 
 c++WARN     = \
     -Wall -Wextra \
@@ -18,6 +18,10 @@ c++WARN     = \
 # Less restrictive warnings (eg, for flex++, CGAL, etc.)
 c++LESSWARN =
 
+# Tuning
+sinclude $(GENERAL_RULES)/common/c++$(WM_COMPILE_OPTION)
+
+#------------------------------------------------------------------------------
 # Warnings
 # --------
 # Run with --display_error_number to get numbers

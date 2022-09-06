@@ -79,7 +79,7 @@ setenv WM_PRECISION_OPTION DP
 setenv WM_LABEL_SIZE 32
 
 # [WM_COMPILE_OPTION] - Optimised(default), debug, profiling, other:
-# = Opt | Debug | Prof
+# = Opt | Dbg | Debug | Prof
 setenv WM_COMPILE_OPTION Opt
 
 # [WM_COMPILE_CONTROL] - additional control for compiler rules

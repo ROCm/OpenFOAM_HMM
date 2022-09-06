@@ -1,12 +1,14 @@
 #------------------------------------------------------------------------------
-SUFFIXES += .C .cc .cpp .cxx
+# clang compiler
+#------------------------------------------------------------------------------
+SUFFIXES   += .C .cc .cpp .cxx
 
-CC          = clang++$(COMPILER_VERSION) -std=c++14
+CC         := clang++$(COMPILER_VERSION) -std=c++14
 
-c++ARCH     =
-c++DBUG     =
-c++OPT      = -O2
-ptFLAGS     = -DNoRepository -ftemplate-depth-100
+c++ARCH    :=
+c++DBUG    :=
+c++OPT     := -O2
+ptFLAGS    := -DNoRepository -ftemplate-depth-100
 
 c++WARN     = \
     -Wall -Wextra -Wold-style-cast \
@@ -25,5 +27,8 @@ c++LESSWARN = \
     -Wno-deprecated-copy-with-user-provided-copy \
     -Wno-tautological-overlap-compare \
     -Wno-#pragma-messages
+
+# Tuning
+sinclude $(GENERAL_RULES)/common/c++$(WM_COMPILE_OPTION)
 
 #------------------------------------------------------------------------------
