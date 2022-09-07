@@ -6,8 +6,8 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
     Copyright (C) 2022 Upstream CFD GmbH
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -153,8 +153,8 @@ kOmegaSSTDDES<BasicTurbulenceModel>::kOmegaSSTDDES
 
     Cd1_
     (
-        this->useSigma_ ?
-            dimensioned<scalar>::getOrAddToDict
+        this->useSigma_
+          ? dimensioned<scalar>::getOrAddToDict
             (
                 "Cd1Sigma",
                 this->coeffDict_,

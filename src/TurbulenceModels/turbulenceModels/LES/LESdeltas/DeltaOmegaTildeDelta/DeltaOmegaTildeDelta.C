@@ -50,7 +50,8 @@ void Foam::LESModels::DeltaOmegaTildeDelta::calcDelta()
     const fvMesh& mesh = turbulenceModel_.mesh();
 
     const volVectorField& U0 = turbulenceModel_.U();
-    const volVectorField vorticity(fvc::curl(U0));
+    tmp<volVectorField> tvorticity = fvc::curl(U0);
+    const volVectorField& vorticity = tvorticity.cref();
     const volVectorField nvecvort
     (
         vorticity
@@ -58,10 +59,11 @@ void Foam::LESModels::DeltaOmegaTildeDelta::calcDelta()
             max
             (
                 mag(vorticity),
-                dimensionedScalar("SMALL", dimless/dimTime, SMALL)
+                dimensionedScalar(dimless/dimTime, SMALL)
             )
         )
     );
+    tvorticity.clear();
 
     const cellList& cells = mesh.cells();
     const vectorField& cellCentres = mesh.cellCentres();
@@ -73,12 +75,12 @@ void Foam::LESModels::DeltaOmegaTildeDelta::calcDelta()
         const point& cc = cellCentres[celli];
         const vector& nv = nvecvort[celli];
 
-        scalar deltaMaxTmp = 0.0;
+        scalar deltaMaxTmp = 0;
 
         for (const label facei : cFaces)
         {
             const point& fc = faceCentres[facei];
-            scalar tmp = 2.0*mag(nv ^ (fc - cc));
+            const scalar tmp = 2.0*mag(nv ^ (fc - cc));
 
             if (tmp > deltaMaxTmp)
             {
@@ -171,7 +173,7 @@ Foam::LESModels::DeltaOmegaTildeDelta::DeltaOmegaTildeDelta
 
 void Foam::LESModels::DeltaOmegaTildeDelta::read(const dictionary& dict)
 {
-    const dictionary& coeffsDict(dict.optionalSubDict(type() + "Coeffs"));
+    const dictionary& coeffsDict = dict.optionalSubDict(type() + "Coeffs");
 
     coeffsDict.readIfPresent<scalar>("deltaCoeff", deltaCoeff_);
     coeffsDict.readIfPresent<bool>("requireUpdate", requireUpdate_);

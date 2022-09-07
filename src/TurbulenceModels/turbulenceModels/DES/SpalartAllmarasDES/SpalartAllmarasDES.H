@@ -32,7 +32,7 @@ Group
 
 Description
     SpalartAllmarasDES DES turbulence model for incompressible and
-    compressible flows
+    compressible flows.
 
     Reference:
     \verbatim
@@ -44,11 +44,12 @@ Description
 
     Including the low Reynolds number correction documented in
     \verbatim
-        Spalart, P. R., Deck, S., Shur, M.L., Squires, K.D., Strelets, M.Kh,
-        Travin, A. (2006).
-        A new version of detached-eddy simulation, resistant to ambiguous grid
-        densities.
-        Theor. Comput. Fluid Dyn., 20, 181-195.
+        Spalart, P. R., Deck, S., Shur, M. L., Squires,
+        K. D., Strelets, M. K., & Travin, A. (2006).
+        A new version of detached-eddy simulation,
+        resistant to ambiguous grid densities.
+        Theoretical and computational fluid dynamics, 20(3), 181-195.
+        DOI:10.1007/s00162-006-0015-0
     \endverbatim
 
 Note
@@ -94,38 +95,38 @@ class SpalartAllmarasDES
 
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Switch to activate grey-area enhanced sigma-(D)DES
         Switch useSigma_;
 
         // Model constants
 
-            // DES coefficient
+            //- DES coefficient
             dimensionedScalar CDES_;
 
-            // Low Reynolds number correction
+            //- Flag for low Reynolds number correction
             Switch lowReCorrection_;
             dimensionedScalar fwStar_;
 
 
     // Protected Member Functions
 
-        //- Low Reynolds number correction function
+        //- Return the low Reynolds number correction function
         virtual tmp<volScalarField> psi
         (
             const volScalarField& chi,
             const volScalarField& fv1
         ) const;
 
-        //- LES length scale
+        //- Return the LES length scale
         virtual tmp<volScalarField> lengthScaleLES
         (
             const volScalarField& chi,
             const volScalarField& fv1
         ) const;
 
-        //- Production term
+        //- Return the production term
         virtual tmp<volScalarField> Stilda
         (
             const volScalarField& chi,
@@ -134,7 +135,7 @@ protected:
             const volScalarField& dTilda
         ) const;
 
-        //- Length scale
+        //- Return the length scale
         virtual tmp<volScalarField> dTilda
         (
             const volScalarField& chi,

@@ -31,15 +31,16 @@ Group
     grpDESTurbulence
 
 Description
-    SpalartAllmaras IDDES turbulence model for incompressible and compressible
-    flows
+    SpalartAllmaras IDDES turbulence model
+    for incompressible and compressible flows.
 
     Reference:
     \verbatim
         Shur, M. L., Spalart, P. R., Strelets, M. K., & Travin, A. K. (2008).
-        A hybrid RANS-LES approach with delayed-DES and wall-modelled LES
-        capabilities.
-        International Journal of Heat and Fluid Flow, 29(6), 1638-1649.
+        A hybrid RANS-LES approach with delayed-DES
+        and wall-modelled LES capabilities.
+        International journal of heat and fluid flow, 29(6), 1638-1649.
+        DOI:10.1016/j.ijheatfluidflow.2008.07.001
     \endverbatim
 
 SourceFiles
@@ -92,7 +93,7 @@ class SpalartAllmarasIDDES
 
 protected:
 
-    // Protected data
+    // Protected Data
 
         // Model coefficients
 
@@ -109,7 +110,7 @@ protected:
 
     // Protected Member Functions
 
-        //- Length scale
+        //- Return the length scale
         virtual tmp<volScalarField> dTilda
         (
             const volScalarField& chi,

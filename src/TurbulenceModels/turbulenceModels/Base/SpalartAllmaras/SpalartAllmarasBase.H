@@ -31,15 +31,33 @@ Group
     grpDESTurbulence
 
 Description
-    SpalartAllmarasBase DES turbulence model for incompressible and
-    compressible flows
+    Base class to handle various characteristics for \c SpalartAllmaras based
+    LES/DES turbulence models for incompressible and compressible flows.
 
-    Reference:
+    References:
     \verbatim
-        Spalart, P. R., Jou, W. H., Strelets, M., & Allmaras, S. R. (1997).
-        Comments on the feasibility of LES for wings, and on a hybrid
-        RANS/LES approach.
-        Advances in DNS/LES, 1, 4-8.
+        Standard model:
+            Spalart, P.R., & Allmaras, S.R. (1994).
+            A one-equation turbulence model for aerodynamic flows.
+            La Recherche Aerospatiale, 1, 5-21.
+
+        Standard model:
+            Spalart, P. R., Jou, W. H., Strelets, M., & Allmaras, S. R. (1997).
+            Comments on the feasibility of LES for wings, and on a hybrid
+            RANS/LES approach.
+            Advances in DNS/LES, 1, 4-8.
+
+        Estimation expression for k and epsilon (tag:B), Eq. 4.50:
+            Bourgoin, A. (2019).
+            Bathymetry induced turbulence modelling the
+            Alderney Race site: regional approach with TELEMAC-LES.
+            Normandie Université.
+
+        Estimation expressions for omega (tag:P):
+            Pope, S. B. (2000).
+            Turbulent flows.
+            Cambridge, UK: Cambridge Univ. Press
+            DOI:10.1017/CBO9780511840531
     \endverbatim
 
 SourceFiles
@@ -56,7 +74,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class SpalartAllmarasBase Declaration
+                    Class SpalartAllmarasBase Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class BasicEddyViscosityModel>
@@ -75,7 +93,7 @@ class SpalartAllmarasBase
 
 protected:
 
-    // Protected data
+    // Protected Data
 
         // Model constants
 
@@ -98,6 +116,7 @@ protected:
 
         // Fields
 
+            //- Modified kinematic viscosity [m^2/s]
             volScalarField nuTilda_;
 
             //- Wall distance
@@ -199,6 +218,7 @@ public:
         //- Return the (estimated) specific dissipation rate
         virtual tmp<volScalarField> omega() const;
 
+        //- Return the modified kinematic viscosity
         tmp<volScalarField> nuTilda() const
         {
             return nuTilda_;

@@ -6,8 +6,8 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2015 OpenFOAM Foundation
-    Copyright (C) 2016, 2022 OpenCFD Ltd.
     Copyright (C) 2022 Upstream CFD GmbH
+    Copyright (C) 2016, 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,9 +58,6 @@ class DESModel
     public DESModelBase,
     public LESeddyViscosity<BasicTurbulenceModel>
 {
-
-private:
-
     // Private Member Functions
 
         //- No copy construct
@@ -74,6 +71,7 @@ protected:
 
     // Protected Data
 
+        //- Model-specific transition constant
         dimensionedScalar Ctrans_;
 
 

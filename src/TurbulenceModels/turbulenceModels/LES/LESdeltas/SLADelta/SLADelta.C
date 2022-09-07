@@ -93,7 +93,8 @@ tmp<scalarField> sumNeighbours
     return tscaling;
 }
 
-}
+} // End namespace Foam
+
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -101,31 +102,36 @@ namespace Foam
 {
 namespace LESModels
 {
-    defineTypeNameAndDebug(DeltaSLA, 0);
-    addToRunTimeSelectionTable(LESdelta, DeltaSLA, dictionary);
+    defineTypeNameAndDebug(SLADelta, 0);
+    addToRunTimeSelectionTable(LESdelta, SLADelta, dictionary);
 }
 }
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::LESModels::DeltaSLA::calcDelta()
+void Foam::LESModels::SLADelta::calcDelta()
 {
     const fvMesh& mesh = turbulenceModel_.mesh();
 
-    const volVectorField& U0 = turbulenceModel_.U();
-    const volVectorField vorticity(fvc::curl(U0));
-    const volSymmTensorField S(symm(fvc::grad(U0)));
-    const volScalarField magGradU(mag(fvc::grad(U0)));
-
     tmp<volScalarField> tnut = turbulenceModel_.nut();
-    const auto& nut = tnut();
-    tmp<volScalarField> tnu = turbulenceModel_.nu();
-    const auto& nu = tnu();
+    const volScalarField& nut = tnut.cref();
 
-    // Vortex tilting measure, VTM
-    const dimensionedScalar nuMin("SMALL", nu.dimensions(), SMALL);
-    const dimensionedScalar eps("SMALL", dimless/pow3(dimTime), SMALL);
+    tmp<volScalarField> tnu = turbulenceModel_.nu();
+    const volScalarField& nu = tnu.cref();
+
+    // Calculate vortex tilting measure, VTM
+    const volVectorField& U0 = turbulenceModel_.U();
+
+    tmp<volVectorField> tvorticity = fvc::curl(U0);
+    const volVectorField& vorticity = tvorticity.cref();
+
+    tmp<volSymmTensorField> tS = symm(fvc::grad(U0));
+    const volSymmTensorField& S = tS.cref();
+
+    const dimensionedScalar nuMin(nu.dimensions(), SMALL);
+    const dimensionedScalar eps(dimless/pow3(dimTime), SMALL);
+
     volScalarField vtm
     (
         max(scalar(1), 0.2*nu/max(nut, nuMin))
@@ -133,38 +139,45 @@ void Foam::LESModels::DeltaSLA::calcDelta()
        /max(magSqr(vorticity)*sqrt(3*magSqr(S) - sqr(tr(S))), eps)
     );
     vtm.correctBoundaryConditions();
+    tS.clear();
+
+    const dimensionedScalar vortMin(dimless/dimTime, SMALL);
+    const volVectorField nVecVort(vorticity/(max(mag(vorticity), vortMin)));
+    tvorticity.clear();
 
 
-    // Averaged VTM
-
+    // Calculate averaged VTM
     volScalarField vtmAve("vtmAve", vtm);
-    tmp<scalarField> weights = sumNeighbours(vtm, vtmAve);
+    tmp<scalarField> tweights = sumNeighbours(vtm, vtmAve);
 
     // Add cell centre values
     vtmAve += vtm;
 
     // Weights normalisation (add 1 for cell centres)
-    vtmAve.primitiveFieldRef() /= weights + 1;
+    vtmAve.primitiveFieldRef() /= tweights + 1;
 
 
-    // Compute DDES shielding function
+    // Calculate DDES shielding function, fd
     const volScalarField& y = wallDist::New(mesh).y();
-    const dimensionedScalar Ueps("eps", magGradU.dimensions(), SMALL);
-    const dimensionedScalar nuEps("eps", nu.dimensions(), ROOTSMALL);
-    const volScalarField rd
-    (
+
+    const dimensionedScalar magGradUeps(dimless/dimTime, SMALL);
+    const dimensionedScalar nuEps(nu.dimensions(), ROOTSMALL);
+
+    tmp<volScalarField> tmagGradU = mag(fvc::grad(U0));
+
+    tmp<volScalarField> trd =
         min
         (
-            (nut + nu)/(max(magGradU, Ueps)*sqr(kappa_*y) + nuEps),
+            (nut + nu)/(max(tmagGradU, magGradUeps)*sqr(kappa_*y) + nuEps),
             scalar(10)
-        )
-    );
-    const volScalarField fd(1.0 - tanh(pow(Cd1_*rd, Cd2_)));
+        );
+    tnut.clear();
+    tnu.clear();
+
+    const volScalarField fd(1.0 - tanh(pow(Cd1_*trd, Cd2_)));
+
 
     // Assemble delta
-    const dimensionedScalar vortMin("SMALL", dimless/dimTime, SMALL);
-    const volVectorField nVecVort(vorticity/(max(mag(vorticity), vortMin)));
-
     const cellList& cells = mesh.cells();
     const vectorField& cellCentres = mesh.cellCentres();
     const vectorField& faceCentres = mesh.faceCentres();
@@ -175,12 +188,12 @@ void Foam::LESModels::DeltaSLA::calcDelta()
         const point& cc = cellCentres[celli];
         const vector& nv = nVecVort[celli];
 
-        scalar deltaMaxTmp = 0.0;
+        scalar deltaMaxTmp = 0;
 
         for (const label facei : cFaces)
         {
             const point& fc = faceCentres[facei];
-            scalar tmp = 2.0*mag(nv ^ (fc - cc));
+            const scalar tmp = 2.0*mag(nv ^ (fc - cc));
 
             if (tmp > deltaMaxTmp)
             {
@@ -208,7 +221,7 @@ void Foam::LESModels::DeltaSLA::calcDelta()
         delta_[celli] = deltaCoeff_*deltaMaxTmp*FKH;
     }
 
-    label nD = mesh.nGeometricD();
+    const label nD = mesh.nGeometricD();
 
     if (nD == 2)
     {
@@ -229,7 +242,7 @@ void Foam::LESModels::DeltaSLA::calcDelta()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::LESModels::DeltaSLA::DeltaSLA
+Foam::LESModels::SLADelta::SLADelta
 (
     const word& name,
     const turbulenceModel& turbulence,
@@ -240,7 +253,7 @@ Foam::LESModels::DeltaSLA::DeltaSLA
     hmaxPtr_(nullptr),
     deltaCoeff_
     (
-        dict.optionalSubDict(type() + "Coeffs").lookupOrDefault<scalar>
+        dict.optionalSubDict(type() + "Coeffs").getOrDefault<scalar>
         (
             "deltaCoeff",
             1.035
@@ -353,12 +366,20 @@ Foam::LESModels::DeltaSLA::DeltaSLA
             )
         );
     }
+
+    if (mag(a2_ - a1_) < SMALL)
+    {
+        FatalIOErrorInFunction(dict)
+            << "Model coefficients a1 = " << a1_
+            << ", and a2 = " << a2_ << " cannot be equal."
+            << abort(FatalIOError);
+    }
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::LESModels::DeltaSLA::read(const dictionary& dict)
+void Foam::LESModels::SLADelta::read(const dictionary& dict)
 {
     const dictionary& coeffsDict(dict.optionalSubDict(type() + "Coeffs"));
 
@@ -377,7 +398,7 @@ void Foam::LESModels::DeltaSLA::read(const dictionary& dict)
 }
 
 
-void Foam::LESModels::DeltaSLA::correct()
+void Foam::LESModels::SLADelta::correct()
 {
     if (turbulenceModel_.mesh().changing() && requireUpdate_)
     {

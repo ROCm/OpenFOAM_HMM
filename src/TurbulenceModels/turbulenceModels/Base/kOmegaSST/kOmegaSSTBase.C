@@ -6,8 +6,8 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
     Copyright (C) 2022 Upstream CFD GmbH
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,7 +48,7 @@ tmp<volScalarField> kOmegaSSTBase<BasicEddyViscosityModel>::F1
     tmp<volScalarField> CDkOmegaPlus = max
     (
         CDkOmega,
-        dimensionedScalar("1.0e-10", dimless/sqr(dimTime), 1.0e-10)
+        dimensionedScalar(dimless/sqr(dimTime), 1.0e-10)
     );
 
     tmp<volScalarField> arg1 = min
@@ -406,6 +406,7 @@ kOmegaSSTBase<BasicEddyViscosityModel>::kOmegaSSTBase
         ),
         this->mesh_
     ),
+
     decayControl_
     (
         Switch::getOrAddToDict
@@ -515,18 +516,21 @@ void kOmegaSSTBase<BasicEddyViscosityModel>::correct()
 
     BasicEddyViscosityModel::correct();
 
-    volScalarField::Internal divU(fvc::div(fvc::absolute(this->phi(), U)));
+    const volScalarField::Internal divU
+    (
+        fvc::div(fvc::absolute(this->phi(), U))
+    );
 
-    volScalarField CDkOmega
+    const volScalarField CDkOmega
     (
         (2*alphaOmega2_)*(fvc::grad(k_) & fvc::grad(omega_))/omega_
     );
 
-    volScalarField F1(this->F1(CDkOmega));
-    volScalarField F23(this->F23());
+    const volScalarField F1(this->F1(CDkOmega));
+    const volScalarField F23(this->F23());
 
     tmp<volTensorField> tgradU = fvc::grad(U);
-    volScalarField S2(this->S2(F1, tgradU()));
+    const volScalarField S2(this->S2(F1, tgradU()));
     volScalarField::Internal GbyNu0(this->GbyNu0(tgradU(), F1, S2));
     volScalarField::Internal G(this->GName(), nut*GbyNu0);
 
@@ -534,8 +538,8 @@ void kOmegaSSTBase<BasicEddyViscosityModel>::correct()
     omega_.boundaryFieldRef().updateCoeffs();
 
     {
-        volScalarField::Internal gamma(this->gamma(F1));
-        volScalarField::Internal beta(this->beta(F1));
+        const volScalarField::Internal gamma(this->gamma(F1));
+        const volScalarField::Internal beta(this->beta(F1));
 
         GbyNu0 = GbyNu(GbyNu0, F23(), S2());
 
@@ -568,28 +572,30 @@ void kOmegaSSTBase<BasicEddyViscosityModel>::correct()
         bound(omega_, this->omegaMin_);
     }
 
-    // Turbulent kinetic energy equation
-    tmp<fvScalarMatrix> kEqn
-    (
-        fvm::ddt(alpha, rho, k_)
-      + fvm::div(alphaRhoPhi, k_)
-      - fvm::laplacian(alpha*rho*DkEff(F1), k_)
-     ==
-        alpha()*rho()*Pk(G)
-      - fvm::SuSp((2.0/3.0)*alpha()*rho()*divU, k_)
-      - fvm::Sp(alpha()*rho()*epsilonByk(F1, tgradU()), k_)
-      + alpha()*rho()*betaStar_*omegaInf_*kInf_
-      + kSource()
-      + fvOptions(alpha, rho, k_)
-    );
+    {
+        // Turbulent kinetic energy equation
+        tmp<fvScalarMatrix> kEqn
+        (
+            fvm::ddt(alpha, rho, k_)
+          + fvm::div(alphaRhoPhi, k_)
+          - fvm::laplacian(alpha*rho*DkEff(F1), k_)
+         ==
+            alpha()*rho()*Pk(G)
+          - fvm::SuSp((2.0/3.0)*alpha()*rho()*divU, k_)
+          - fvm::Sp(alpha()*rho()*epsilonByk(F1, tgradU()), k_)
+          + alpha()*rho()*betaStar_*omegaInf_*kInf_
+          + kSource()
+          + fvOptions(alpha, rho, k_)
+        );
 
-    tgradU.clear();
+        tgradU.clear();
 
-    kEqn.ref().relax();
-    fvOptions.constrain(kEqn.ref());
-    solve(kEqn);
-    fvOptions.correct(k_);
-    bound(k_, this->kMin_);
+        kEqn.ref().relax();
+        fvOptions.constrain(kEqn.ref());
+        solve(kEqn);
+        fvOptions.correct(k_);
+        bound(k_, this->kMin_);
+    }
 
     correctNut(S2);
 }

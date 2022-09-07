@@ -6,8 +6,8 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2015 OpenFOAM Foundation
-    Copyright (C) 2022 OpenCFD Ltd.
     Copyright (C) 2022 Upstream CFD GmbH
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -92,19 +92,17 @@ tmp<volScalarField> DESModel<BasicTurbulenceModel>::Ssigma
 )
 {
     // Limiter
-    const dimensionedScalar eps0("eps0", dimless, SMALL);
-    const dimensionedScalar eps2("eps2", dimless/sqr(dimTime), SMALL);
-    const dimensionedScalar eps4("eps4", dimless/pow4(dimTime), SMALL);
-    const dimensionedScalar max2("max2", dimless/sqr(dimTime), GREAT);
+    const dimensionedScalar eps0(dimless, SMALL);
+    const dimensionedScalar eps2(dimless/sqr(dimTime), SMALL);
+    const dimensionedScalar eps4(dimless/pow4(dimTime), SMALL);
+    const dimensionedScalar max2(dimless/sqr(dimTime), GREAT);
     const dimensionedTensor maxTen2
     (
-        "maxTen2",
         dimless/sqr(dimTime),
         tensor::max
     );
     const dimensionedTensor minTen2
     (
-        "minTen2",
         dimless/sqr(dimTime),
         tensor::min
     );
@@ -114,11 +112,12 @@ tmp<volScalarField> DESModel<BasicTurbulenceModel>::Ssigma
     // Tensor invariants
     const volScalarField I1(tr(G));
     const volScalarField I2(0.5*(sqr(I1) - tr(G & G)));
-    const volScalarField I3(det(G));
+    tmp<volScalarField> tI3 = det(G);
 
     const volScalarField alpha1(max(sqr(I1)/9.0 - I2/3.0, eps4));
 
-    const volScalarField alpha2(pow3(min(I1, max2))/27.0 - I1*I2/6.0 + I3/2.0);
+    tmp<volScalarField> talpha2 =
+        pow3(min(I1, max2))/27.0 - I1*I2/6.0 + 0.5*tI3;
 
     const volScalarField alpha3
     (
@@ -128,7 +127,7 @@ tmp<volScalarField> DESModel<BasicTurbulenceModel>::Ssigma
             max
             (
                 scalar(-1) + eps0,
-                min(scalar(1) - eps0, alpha2/pow(alpha1, 3.0/2.0))
+                min(scalar(1) - eps0, talpha2/pow(alpha1, 3.0/2.0))
             )
         )
     );

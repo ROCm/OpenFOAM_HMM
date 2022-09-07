@@ -35,10 +35,11 @@ Description
 
     Reference:
     \verbatim
-        Nicoud, F., Toda, H., Cabrit, O., Bose, S., & Lee, J. (2011).
-        Using singular values to build a subgrid-scale model for large
-        eddy simulations.
-        Physics of Fluids, 23(8), 5106, 2011.
+        Nicoud, F., Toda, H. B., Cabrit, O., Bose, S., & Lee, J. (2011).
+        Using singular values to build a subgrid-scale
+        model for large eddy simulations.
+        Physics of fluids, 23(8), 085106.
+        DOI:10.1063/1.3623274
     \endverbatim
 
     The default model coefficients correspond to the following:
@@ -93,7 +94,7 @@ class sigma
 
 protected:
 
-    // Protected data
+    // Protected Data
 
         dimensionedScalar Ck_;
         dimensionedScalar Cw_;

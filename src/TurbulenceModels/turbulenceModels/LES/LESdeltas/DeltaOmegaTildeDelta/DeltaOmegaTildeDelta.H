@@ -25,7 +25,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::DeltaOmegaTildeDelta
+    Foam::LESModels::DeltaOmegaTildeDelta
 
 Description
     Delta formulation that accounts for the orientation of the vorticity
@@ -37,9 +37,10 @@ Description
     Reference:
     \verbatim
         Shur, M. L., Spalart, P. R., Strelets, M. K., & Travin, A. K. (2015).
-        An enhanced version of DES with rapid transition from RANS to LES in
-        separated flows.
-        Flow, Turbulence and Combustion, 95, 709-737, 2015.
+        An enhanced version of DES with rapid transition
+        from RANS to LES in separated flows.
+        Flow, turbulence and combustion, 95(4), 709-737.
+        DOI:10.1007/s10494-015-9618-0
     \endverbatim
 
 SourceFiles
@@ -67,7 +68,7 @@ class DeltaOmegaTildeDelta
 :
     public LESdelta
 {
-    // Private data
+    // Private Data
 
         //- Run-time selectable delta for hmax
         //  Defaults to the maxDeltaxyz model if not supplied
@@ -82,14 +83,14 @@ class DeltaOmegaTildeDelta
 
     // Private Member Functions
 
+        //- Calculate the delta values
+        void calcDelta();
+
         //- No copy construct
         DeltaOmegaTildeDelta(const DeltaOmegaTildeDelta&) = delete;
 
         //- No copy assignment
         void operator=(const DeltaOmegaTildeDelta&) = delete;
-
-        //- Calculate the delta values
-        void calcDelta();
 
 
 public:

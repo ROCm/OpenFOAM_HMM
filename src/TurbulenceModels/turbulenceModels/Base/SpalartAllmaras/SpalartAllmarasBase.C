@@ -85,7 +85,8 @@ tmp<volScalarField> SpalartAllmarasBase<BasicEddyViscosityModel>::ft2
             "ft2",
             this->runTime_.timeName(),
             this->mesh_,
-            IOobject::NO_READ
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
         ),
         this->mesh_,
         dimensionedScalar(dimless, Zero)
@@ -111,7 +112,7 @@ tmp<volScalarField> SpalartAllmarasBase<BasicEddyViscosityModel>::r
     const volScalarField& dTilda
 ) const
 {
-    const dimensionedScalar eps("SMALL", Stilda.dimensions(), SMALL);
+    const dimensionedScalar eps(Stilda.dimensions(), SMALL);
 
     tmp<volScalarField> tr =
         min(nur/(max(Stilda, eps)*sqr(kappa_*dTilda)), scalar(10));
@@ -346,7 +347,7 @@ bool SpalartAllmarasBase<BasicEddyViscosityModel>::read()
     if (BasicEddyViscosityModel::read())
     {
         sigmaNut_.readIfPresent(this->coeffDict());
-        kappa_.readIfPresent(*this);
+        kappa_.readIfPresent(this->coeffDict());
 
         Cb1_.readIfPresent(this->coeffDict());
         Cb2_.readIfPresent(this->coeffDict());
@@ -355,14 +356,13 @@ bool SpalartAllmarasBase<BasicEddyViscosityModel>::read()
         Cw3_.readIfPresent(this->coeffDict());
         Cv1_.readIfPresent(this->coeffDict());
         Cs_.readIfPresent(this->coeffDict());
-
         ck_.readIfPresent(this->coeffDict());
 
         ft2_.readIfPresent("ft2", this->coeffDict());
         Ct3_.readIfPresent(this->coeffDict());
         Ct4_.readIfPresent(this->coeffDict());
 
-        if (mag(Ct3_.value()) > SMALL)
+        if (ft2_)
         {
             Info<< "    ft2 term: active" << nl;
         }
@@ -444,47 +444,49 @@ void SpalartAllmarasBase<BasicEddyViscosityModel>::correct()
         return;
     }
 
-    // Local references
-    const alphaField& alpha = this->alpha_;
-    const rhoField& rho = this->rho_;
-    const surfaceScalarField& alphaRhoPhi = this->alphaRhoPhi_;
-    const volVectorField& U = this->U_;
-    fv::options& fvOptions(fv::options::New(this->mesh_));
+    {
+        // Local references
+        const alphaField& alpha = this->alpha_;
+        const rhoField& rho = this->rho_;
+        const surfaceScalarField& alphaRhoPhi = this->alphaRhoPhi_;
+        const volVectorField& U = this->U_;
+        fv::options& fvOptions(fv::options::New(this->mesh_));
 
-    BasicEddyViscosityModel::correct();
+        BasicEddyViscosityModel::correct();
 
-    const volScalarField chi(this->chi());
-    const volScalarField fv1(this->fv1(chi));
-    const volScalarField ft2(this->ft2(chi));
+        const volScalarField chi(this->chi());
+        const volScalarField fv1(this->fv1(chi));
+        const volScalarField ft2(this->ft2(chi));
 
-    tmp<volTensorField> tgradU = fvc::grad(U);
-    volScalarField dTilda(this->dTilda(chi, fv1, tgradU()));
-    volScalarField Stilda(this->Stilda(chi, fv1, tgradU(), dTilda));
-    tgradU.clear();
+        tmp<volTensorField> tgradU = fvc::grad(U);
+        volScalarField dTilda(this->dTilda(chi, fv1, tgradU()));
+        volScalarField Stilda(this->Stilda(chi, fv1, tgradU(), dTilda));
+        tgradU.clear();
 
-    tmp<fvScalarMatrix> nuTildaEqn
-    (
-        fvm::ddt(alpha, rho, nuTilda_)
-      + fvm::div(alphaRhoPhi, nuTilda_)
-      - fvm::laplacian(alpha*rho*DnuTildaEff(), nuTilda_)
-      - Cb2_/sigmaNut_*alpha()*rho()*magSqr(fvc::grad(nuTilda_)()())
-     ==
-        Cb1_*alpha()*rho()*Stilda()*nuTilda_()*(scalar(1) - ft2())
-      - fvm::Sp
+        tmp<fvScalarMatrix> nuTildaEqn
         (
-            (Cw1_*fw(Stilda, dTilda) - Cb1_/sqr(kappa_)*ft2())
-           *alpha()*rho()*nuTilda_()/sqr(dTilda()),
-            nuTilda_
-        )
-      + fvOptions(alpha, rho, nuTilda_)
-    );
+            fvm::ddt(alpha, rho, nuTilda_)
+          + fvm::div(alphaRhoPhi, nuTilda_)
+          - fvm::laplacian(alpha*rho*DnuTildaEff(), nuTilda_)
+          - Cb2_/sigmaNut_*alpha()*rho()*magSqr(fvc::grad(nuTilda_)()())
+         ==
+            Cb1_*alpha()*rho()*Stilda()*nuTilda_()*(scalar(1) - ft2())
+          - fvm::Sp
+            (
+                (Cw1_*fw(Stilda, dTilda) - Cb1_/sqr(kappa_)*ft2())
+               *alpha()*rho()*nuTilda_()/sqr(dTilda()),
+                nuTilda_
+            )
+          + fvOptions(alpha, rho, nuTilda_)
+        );
 
-    nuTildaEqn.ref().relax();
-    fvOptions.constrain(nuTildaEqn.ref());
-    solve(nuTildaEqn);
-    fvOptions.correct(nuTilda_);
-    bound(nuTilda_, dimensionedScalar(nuTilda_.dimensions(), Zero));
-    nuTilda_.correctBoundaryConditions();
+        nuTildaEqn.ref().relax();
+        fvOptions.constrain(nuTildaEqn.ref());
+        solve(nuTildaEqn);
+        fvOptions.correct(nuTilda_);
+        bound(nuTilda_, dimensionedScalar(nuTilda_.dimensions(), Zero));
+        nuTilda_.correctBoundaryConditions();
+    }
 
     correctNut();
 }

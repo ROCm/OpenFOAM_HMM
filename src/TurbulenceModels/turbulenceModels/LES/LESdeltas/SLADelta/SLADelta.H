@@ -25,7 +25,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::LESModels::DeltaSLA
+    Foam::LESModels::SLADelta
 
 Description
     Delta formulation that accounts for the orientation of the vorticity vector
@@ -36,9 +36,10 @@ Description
     Reference:
     \verbatim
         Shur, M. L., Spalart, P. R., Strelets, M. K., & Travin, A. K. (2015).
-        An enhanced version of DES with rapid transition from RANS to LES in
-        separated flows.
-        Flow, Turbulence and Combustion, 95, 709–737, 2015.
+        An enhanced version of DES with rapid transition
+        from RANS to LES in separated flows.
+        Flow, turbulence and combustion, 95(4), 709-737.
+        DOI:10.1007/s10494-015-9618-0
     \endverbatim
 
 SourceFiles
@@ -46,8 +47,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef LESModels_DeltaSLADelta_H
-#define LESModels_DeltaSLADelta_H
+#ifndef LESModels_SLADelta_H
+#define LESModels_SLADelta_H
 
 #include "LESdelta.H"
 
@@ -59,14 +60,14 @@ namespace LESModels
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class DeltaSLA Declaration
+                          Class SLADelta Declaration
 \*---------------------------------------------------------------------------*/
 
-class DeltaSLA
+class SLADelta
 :
     public LESdelta
 {
-    // Private data
+    // Private Data
 
         //- Run-time selectable delta for hmax
         //  Defaults to the maxDeltaxyz model if not supplied
@@ -89,14 +90,14 @@ class DeltaSLA
 
     // Private Member Functions
 
-        //- No copy construct
-        DeltaSLA(const DeltaSLA&) = delete;
-
-        //- No copy assignment
-        void operator=(const DeltaSLA&) = delete;
-
         // Calculate the delta values
         void calcDelta();
+
+        //- No copy construct
+        SLADelta(const SLADelta&) = delete;
+
+        //- No copy assignment
+        void operator=(const SLADelta&) = delete;
 
 
 public:
@@ -108,7 +109,7 @@ public:
     // Constructors
 
         //- Construct from name, turbulenceModel and IOdictionary
-        DeltaSLA
+        SLADelta
         (
             const word& name,
             const turbulenceModel& turbulence,
@@ -117,7 +118,7 @@ public:
 
 
     //- Destructor
-    virtual ~DeltaSLA() = default;
+    virtual ~SLADelta() = default;
 
 
     // Member Functions

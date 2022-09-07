@@ -31,13 +31,13 @@ Group
     grpDESTurbulence
 
 Description
-    k-omega-SST DES turbulence model for incompressible and compressible flows
+    k-omega-SST DES turbulence model for incompressible and compressible flows.
 
     Reference:
     \verbatim
-        Strelets, M. (2001)
-        Detached Eddy Simulation of Massively Separated Flows,
-        39th AIAA Aerospace Sciences Meeting and Exhibit, Reno, NV
+        Strelets, M. (2001).
+        Detached Eddy Simulation of Massively Separated Flows.
+        39th AIAA Aerospace Sciences Meeting and Exhibit, Reno, NV.
     \endverbatim
 
 Note
@@ -51,8 +51,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef kOmegaSSTDES_H
-#define kOmegaSSTDES_H
+#ifndef Foam_kOmegaSSTDES_H
+#define Foam_kOmegaSSTDES_H
 
 #include "DESModel.H"
 #include "kOmegaSSTBase.H"
@@ -65,7 +65,7 @@ namespace LESModels
 {
 
 /*---------------------------------------------------------------------------*\
-                        class kOmegaSSTDES Declaration
+                        Class kOmegaSSTDES Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class BasicTurbulenceModel>
@@ -84,7 +84,7 @@ class kOmegaSSTDES
 
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Switch to activate grey-area enhanced sigma-(D)DES
         Switch useSigma_;
@@ -122,7 +122,7 @@ protected:
             const volTensorField& gradU
         ) const;
 
-        //- Length scale
+        //- Return length scale
         virtual tmp<volScalarField> dTilda
         (
             const volScalarField& magGradU,

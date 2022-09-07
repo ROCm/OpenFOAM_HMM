@@ -52,18 +52,6 @@ Description
             Spalart-Allmaras One-Equation Model without ft2 Term (SA-noft2).
             https://turbmodels.larc.nasa.gov/spalart.html#sanoft2
             (Retrieved:12-01-2021).
-
-        Estimation expression for k and epsilon (tag:B), Eq. 4.50:
-            Bourgoin, A. (2019).
-            Bathymetry induced turbulence modelling the
-            Alderney Race site: regional approach with TELEMAC-LES.
-            Normandie Université.
-
-        Estimation expressions for omega (tag:P):
-            Pope, S. B. (2000).
-            Turbulent flows.
-            Cambridge, UK: Cambridge Univ. Press
-            DOI:10.1017/CBO9780511840531
     \endverbatim
 
 Usage
@@ -146,7 +134,7 @@ protected:
 
     // Protected Member Functions
 
-        //- Length scale
+        //- Return the length scale
         virtual tmp<volScalarField> dTilda
         (
             const volScalarField& chi,

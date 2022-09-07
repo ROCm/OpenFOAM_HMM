@@ -6,8 +6,8 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2022 OpenCFD Ltd.
     Copyright (C) 2022 Upstream CFD GmbH
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -142,7 +142,7 @@ class kOmegaSSTBase
 
 protected:
 
-    // Protected data
+    // Protected Data
 
         // Model coefficients
 
@@ -175,7 +175,10 @@ protected:
             //  which is for near-wall cells only
             const volScalarField& y_;
 
+            //- Turbulent kinetic energy field [m^2/s^2]
             volScalarField k_;
+
+            //- Specific dissipation rate field [1/s]
             volScalarField omega_;
 
 
@@ -189,6 +192,7 @@ protected:
 
     // Protected Member Functions
 
+        //- Set decay control with kInf and omegaInf
         void setDecayControl(const dictionary& dict);
 
         virtual tmp<volScalarField> F1(const volScalarField& CDkOmega) const;
@@ -196,6 +200,7 @@ protected:
         virtual tmp<volScalarField> F3() const;
         virtual tmp<volScalarField> F23() const;
 
+        //- Return the blended field
         tmp<volScalarField> blend
         (
             const volScalarField& F1,
@@ -206,6 +211,7 @@ protected:
             return F1*(psi1 - psi2) + psi2;
         }
 
+        //- Return the internal blended field
         tmp<volScalarField::Internal> blend
         (
             const volScalarField::Internal& F1,

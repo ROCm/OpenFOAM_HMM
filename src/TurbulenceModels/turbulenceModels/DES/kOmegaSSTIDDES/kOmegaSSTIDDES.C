@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -117,7 +117,7 @@ tmp<volScalarField> kOmegaSSTIDDES<BasicTurbulenceModel>::dTilda
         return max
         (
             fdTilda*(1 + fe)*lRAS + (1 - fdTilda)*lLES,
-            dimensionedScalar("SMALL", dimLength, SMALL)
+            dimensionedScalar(dimLength, SMALL)
         );
     }
 
@@ -125,7 +125,7 @@ tmp<volScalarField> kOmegaSSTIDDES<BasicTurbulenceModel>::dTilda
     return max
     (
         fdTilda*lRAS + (1 - fdTilda)*lLES,
-        dimensionedScalar("SMALL", dimLength, SMALL)
+        dimensionedScalar(dimLength, SMALL)
     );
 }
 

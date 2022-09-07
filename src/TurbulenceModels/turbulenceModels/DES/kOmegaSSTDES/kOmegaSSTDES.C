@@ -6,8 +6,8 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
     Copyright (C) 2022 Upstream CFD GmbH
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,7 +63,7 @@ tmp<volScalarField> kOmegaSSTDES<BasicTurbulenceModel>::r
     const volScalarField& magGradU
 ) const
 {
-    const dimensionedScalar eps("SMALL", magGradU.dimensions(), SMALL);
+    const dimensionedScalar eps(magGradU.dimensions(), SMALL);
 
     tmp<volScalarField> tr =
         min(nur/(max(magGradU, eps)*sqr(this->kappa_*this->y_)), scalar(10));
@@ -71,7 +71,6 @@ tmp<volScalarField> kOmegaSSTDES<BasicTurbulenceModel>::r
     tr.ref().boundaryFieldRef() == 0;
 
     return tr;
-
 }
 
 

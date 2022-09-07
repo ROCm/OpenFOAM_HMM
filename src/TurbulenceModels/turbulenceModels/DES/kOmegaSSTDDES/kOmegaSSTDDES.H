@@ -6,8 +6,8 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2019, 2022 OpenCFD Ltd.
     Copyright (C) 2022 Upstream CFD GmbH
+    Copyright (C) 2019, 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,14 +32,16 @@ Group
     grpDESTurbulence
 
 Description
-    k-omega-SST DDES turbulence model for incompressible and compressible flows
+    k-omega-SST DDES turbulence model for incompressible and compressible flows.
 
     Reference:
     \verbatim
-        Gritskevich, M.S., Garbaruk, A.V., Schuetze, J., Menter, F.R. (2011)
-        Development of DDES and IDDES Formulations for the k-omega
-        Shear Stress Transport Model, Flow, Turbulence and Combustion,
-        pp. 1-19
+        Gritskevich, M. S., Garbaruk, A. V.,
+        Schütze, J., & Menter, F. R. (2012).
+        Development of DDES and IDDES formulations for
+        the k-ω shear stress transport model.
+        Flow, turbulence and combustion, 88(3), 431-449.
+        DOI:10.1007/s10494-011-9378-4
     \endverbatim
 
 SourceFiles
@@ -70,7 +72,7 @@ class kOmegaSSTDDES
 {
     // Private Member Functions
 
-        //- Shielding function
+        //- Return the shielding function field
         tmp<volScalarField> fd(const volScalarField& magGradU) const;
 
         //- No copy construct
@@ -82,7 +84,7 @@ class kOmegaSSTDDES
 
 protected:
 
-    // Protected data
+    // Protected Data
 
         // Model coefficients
 

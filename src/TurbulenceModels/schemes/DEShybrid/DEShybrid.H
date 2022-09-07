@@ -30,7 +30,7 @@ Class
 
 Description
     Improved hybrid convection scheme of Travin et al. for hybrid RAS/LES
-    calculations with enhanced GAM behaviour.
+    calculations with enhanced Grey Area Mitigation (GAM) behaviour.
 
     The scheme provides a blend between two convection schemes, based on local
     properties including the wall distance, velocity gradient and eddy
@@ -55,25 +55,26 @@ Description
 
     First published in:
     \verbatim
-        A. Travin, M. Shur, M. Strelets, P. Spalart (2000).
-        Physical and numerical upgrades in the detached-eddy simulation of
-        complex turbulent flows.
-        In Proceedings of the 412th Euromech Colloquium on LES and Complex
-        Transition and Turbulent Flows, Munich, Germany
+        Travin, A., Shur, M., Strelets, M., & Spalart, P. R. (2000).
+        Physical and numerical upgrades in the detached-eddy
+        simulation of complex turbulent flows.
+        In LES of Complex Transitional and Turbulent Flows.
+        Proceedings of the Euromech Colloquium 412. Munich, Germany
     \endverbatim
 
-    Original publication contained a typo for C_H3 constant. Corrected version
-    with minor changes for 2 lower limiters published in:
+    Original publication contained a typo for \c C_H3 constant.
+    Corrected version with minor changes for 2 lower limiters published in:
     \verbatim
-        P. Spalart, M. Shur, M. Strelets, A. Travin (2012).
-        Sensitivity of Landing-Gear Noise Predictions by Large-Eddy
-        Simulation to Numerics and Resolution.
-        AIAA Paper 2012-1174, 50th AIAA Aerospace Sciences Meeting,
-        Nashville / TN, Jan. 2012
+        Spalart, P., Shur, M., Strelets, M., & Travin, A. (2012).
+        Sensitivity of landing-gear noise predictions by large-eddy
+        simulation to numerics and resolution.
+        In 50th AIAA Aerospace Sciences Meeting Including the
+        New Horizons Forum and Aerospace Exposition. Nashville, US.
+        DOI:10.2514/6.2012-1174
     \endverbatim
 
-    Example of the DEShybrid scheme specification using linear within the LES
-    region and linearUpwind within the RAS region:
+    Example of the \c DEShybrid scheme specification using \c linear
+    within the LES region and \c linearUpwind within the RAS region:
     \verbatim
     divSchemes
     {
@@ -100,12 +101,12 @@ Notes
     be used in the detached/vortex shedding regions.
   - Scheme 2 should be an upwind/deferred correction/TVD scheme which will
     be used in the free-stream/Euler/boundary layer regions.
-  - the scheme is compiled into a separate library, and not available to
+  - The scheme is compiled into a separate library, and not available to
     solvers by default.  In order to use the scheme, add the library as a
     run-time loaded library in the \$FOAM\_CASE/system/controlDict
     dictionary, e.g.:
     \verbatim
-        libs ("libturbulenceModelSchemes.so");
+        libs (turbulenceModelSchemes);
     \endverbatim
 
 SourceFiles
@@ -187,6 +188,7 @@ class DEShybrid
 
     // Private Member Functions
 
+        //- Check the scheme coefficients
         void checkValues()
         {
             if (U0_.value() <= 0)
@@ -231,8 +233,8 @@ class DEShybrid
                 Info<< type() << "coefficients:" << nl
                     << "    delta : " << deltaName_ << nl
                     << "    CDES : " << CDES_ << nl
-                    << "    U0 : " << U0_ << nl
-                    << "    LO : " << L0_ << nl
+                    << "    U0 : " << U0_.value() << nl
+                    << "    L0 : " << L0_.value() << nl
                     << "    sigmaMin : " << sigmaMin_ << nl
                     << "    sigmaMax : " << sigmaMax_ << nl
                     << "    OmegaLim : " << OmegaLim_ << nl
@@ -256,63 +258,95 @@ class DEShybrid
             const volScalarField& delta
         ) const
         {
-            tmp<volTensorField> gradU(fvc::grad(U));
-            const volScalarField S(sqrt(2.0)*mag(symm(gradU())));
-            const volScalarField Omega(sqrt(2.0)*mag(skew(gradU())));
+            tmp<volTensorField> tgradU = fvc::grad(U);
+            const volTensorField& gradU = tgradU.cref();
+            const volScalarField S(sqrt(2.0)*mag(symm(gradU)));
+            const volScalarField Omega(sqrt(2.0)*mag(skew(tgradU)));
             const dimensionedScalar tau0_ = L0_/U0_;
-            gradU.clear();
 
-            const volScalarField B
-            (
+            tmp<volScalarField> tB =
                 CH3_*Omega*max(S, Omega)
-               /max(0.5*(sqr(S) + sqr(Omega)), sqr(OmegaLim_/tau0_))
-            );
+               /max(0.5*(sqr(S) + sqr(Omega)), sqr(OmegaLim_/tau0_));
 
-            const volScalarField K
-            (
-                max(Foam::sqrt(0.5*(sqr(S) + sqr(Omega))), 0.1/tau0_)
-            );
+            tmp<volScalarField> tg = tanh(pow4(tB));
 
-            const volScalarField lTurb
-            (
+            tmp<volScalarField> tK =
+                max(Foam::sqrt(0.5*(sqr(S) + sqr(Omega))), 0.1/tau0_);
+
+            tmp<volScalarField> tlTurb =
                 Foam::sqrt
                 (
                     max
                     (
                         (max(nut, min(sqr(Cs_*delta)*S, nutLim_*nut)) + nu)
-                       /(pow(0.09, 1.5)*K),
+                       /(pow(0.09, 1.5)*tK),
                         dimensionedScalar(sqr(dimLength), Zero)
                     )
-                )
-            );
-
-            const volScalarField g(tanh(pow4(B)));
+                );
 
             const volScalarField A
             (
                 CH2_*max
                 (
                     scalar(0),
-                    CDES_*delta/max(lTurb*g, SMALL*L0_) - 0.5
+                    CDES_*delta/max(tlTurb*tg, SMALL*L0_) - 0.5
                 )
             );
 
-            const volScalarField factor
+
+            const word factorName(IOobject::scopedName(typeName, "Factor"));
+            const fvMesh& mesh = this->mesh();
+
+            const IOobject factorIO
             (
-                IOobject::scopedName(typeName, "Factor"),
-                max(sigmaMax_*tanh(pow(A, CH1_)), sigmaMin_)
+                factorName,
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
             );
 
             if (blendedSchemeBaseName::debug)
             {
-                factor.write();
-            }
+                auto* factorPtr = mesh.getObjectPtr<volScalarField>(factorName);
 
-            return tmp<surfaceScalarField>::New
-            (
-                vf.name() + "BlendingFactor",
-                fvc::interpolate(factor)
-            );
+                if (!factorPtr)
+                {
+                    factorPtr =
+                        new volScalarField
+                        (
+                            factorIO,
+                            mesh,
+                            dimensionedScalar(dimless, Zero)
+                        );
+
+                    const_cast<fvMesh&>(mesh).objectRegistry::store(factorPtr);
+                }
+
+                auto& factor = *factorPtr;
+
+                factor = max(sigmaMax_*tanh(pow(A, CH1_)), sigmaMin_);
+
+                return tmp<surfaceScalarField>::New
+                (
+                    vf.name() + "BlendingFactor",
+                    fvc::interpolate(factor)
+                );
+            }
+            else
+            {
+                const volScalarField factor
+                (
+                    factorIO,
+                    max(sigmaMax_*tanh(pow(A, CH1_)), sigmaMin_)
+                );
+
+                return tmp<surfaceScalarField>::New
+                (
+                    vf.name() + "BlendingFactor",
+                    fvc::interpolate(factor)
+                );
+            }
         }
 
 
@@ -434,10 +468,10 @@ public:
 
 
         //- Return the face-interpolate of the given cell field
-        //  with explicit correction
+        //- with explicit correction
         tmp<SurfaceFieldType> interpolate(const VolFieldType& vf) const
         {
-            surfaceScalarField bf(blendingFactor(vf));
+            const surfaceScalarField bf(blendingFactor(vf));
 
             return
                 (scalar(1) - bf)*tScheme1_().interpolate(vf)
@@ -498,4 +532,3 @@ public:
 #endif
 
 // ************************************************************************* //
-
