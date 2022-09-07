@@ -151,7 +151,7 @@ Foam::label Foam::factorial(label n)
     };
 
     #ifdef FULLDEBUG
-    if (n > 12 && n < 0)
+    if (n < 0 || n > 12)
     {
         FatalErrorInFunction
             << "n value out of range"

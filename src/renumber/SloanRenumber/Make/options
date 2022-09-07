@@ -1,5 +1,5 @@
 EXE_INC = \
-    ${c++LESSWARN} \
+    $(c++LESSWARN) \
     -I$(BOOST_INC_DIR) \
     -I$(LIB_SRC)/meshTools/lnInclude \
     -I$(LIB_SRC)/parallel/decompose/decompositionMethods/lnInclude \
