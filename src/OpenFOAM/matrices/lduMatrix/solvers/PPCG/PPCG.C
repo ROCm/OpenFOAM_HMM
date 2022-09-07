@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2019-2020 Mattijs Janssens
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -170,7 +170,7 @@ Foam::solverPerformance Foam::PPCG::scalarSolveCG
     )
     {
         // Make sure gamma,delta are available
-        if (Pstream::parRun())
+        if (Pstream::parRun() && outstandingRequest != -1)
         {
             Pstream::waitRequest(outstandingRequest);
             outstandingRequest = -1;
@@ -246,6 +246,12 @@ Foam::solverPerformance Foam::PPCG::scalarSolveCG
 
         // --- Calculate A*m
         matrix_.Amul(n, m, interfaceBouCoeffs_, interfaces_, cmpt);
+    }
+
+    // Cleanup any outstanding requests
+    if (Pstream::parRun() && outstandingRequest != -1)
+    {
+        Pstream::waitRequest(outstandingRequest);
     }
 
     return solverPerf;

@@ -93,7 +93,7 @@ Foam::faMeshDistributor::distributeField
 
     forAll(bfld, patchi)
     {
-        if (patchEdgeMaps_.set(patchi))
+        if (patchEdgeMaps_.test(patchi))
         {
             // Clone local patch field
 
@@ -203,7 +203,7 @@ Foam::faMeshDistributor::distributeField
 
     forAll(bfld, patchi)
     {
-        if (patchEdgeMaps_.set(patchi))
+        if (patchEdgeMaps_.test(patchi))
         {
             // Clone local patch field
 

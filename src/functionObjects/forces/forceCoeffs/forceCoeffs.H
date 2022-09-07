@@ -318,7 +318,7 @@ public:
     };
 
 
-    // Coefficients description
+    //- Coefficients description
     struct coeffDesc
     {
         enum splitType
@@ -364,6 +364,12 @@ public:
         const word rearName() const noexcept
         {
             return name_ + "(r)";
+        }
+
+        //- Print description
+        void print(Ostream& os) const
+        {
+            os  << desc_.c_str() << ": " << name_;
         }
 
         //- Return force/moment components based on the specified split type
@@ -546,18 +552,25 @@ public:
         virtual bool write();
 };
 
+} // End namespace functionObjects
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Ostream& operator<<(Ostream& os, const forceCoeffs::coeffDesc& coeff)
+// Output operator
+inline Ostream& operator<<
+(
+    Ostream& os,
+    const functionObjects::forceCoeffs::coeffDesc& coeff
+)
 {
-    os  << coeff.desc_.c_str() << ": " << coeff.name_;
-
+    coeff.print(os);
     return os;
 }
 
 
-} // End namespace functionObjects
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

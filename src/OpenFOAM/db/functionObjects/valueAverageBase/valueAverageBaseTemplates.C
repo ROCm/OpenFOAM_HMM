@@ -117,8 +117,8 @@ bool Foam::functionObjects::valueAverageBase::calc
             auto timeIter = windowTimes.cbegin();
             auto valueIter = windowValues.cbegin();
 
-            meanValue = pTraits<Type2>::zero;
-            Type valueOld(pTraits<Type2>::zero);
+            meanValue = Zero;
+            Type2 valueOld(Zero);
 
             for
             (
