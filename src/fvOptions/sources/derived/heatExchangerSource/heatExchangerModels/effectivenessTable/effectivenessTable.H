@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2013-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,18 +24,15 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::fv::effectivenessHeatExchangerSource
-
-Group
-    grpFvOptionsSources
+    Foam::heatExchangerModels::effectivenessTable
 
 Description
-    Heat exchanger source model for compressible flows, where the heat
-    exchanger is modelled as an energy source using a selection of cells.
+    A heat exchanger model where heat exchange
+    is calculated via an effectiveness table.
 
     The total heat exchange source is given by:
     \f[
-        Q_t = e(\phi, \dot{m}_2) (T_2 - T_1) \phi c_p
+        Q_t = e(\phi, \dot{m}_2) (T_2 - T_1) \phi C_p
     \f]
 
     where:
@@ -47,9 +43,8 @@ Description
         \dot{m}_2 | Secondary flow mass flow rate [kg/s]
         T_1       | Primary flow inlet temperature [K]
         T_2       | Secondary flow inlet temperature [K]
-        c_p       | Primary flow specific heat capacity [J/kg/K]
+        C_p       | Primary flow specific heat capacity [J/kg/K]
     \endvartable
-
 
     The distribution inside the heat exchanger is given by:
     \f[
@@ -59,42 +54,26 @@ Description
     where:
     \vartable
         Q_c     | Source for cell
-        V_c     | Volume of the cell [m3]
+        V_c     | Volume of the cell [m^3]
         U_c     | Local cell velocity [m/s]
         T_c     | Local cell temperature [K]
         T_{ref} | Min or max(T) in cell zone depending on the sign of Qt [K]
     \endvartable
 
-    Sources applied to either of the below, if exist:
-    \verbatim
-      e         | Internal energy                            [m2/s2]
-      h         | Enthalphy                                  [m2/s2]
-    \endverbatim
-
-    Required fields:
-    \verbatim
-      T         | Temperature                                [K]
-      U         | Velocity                                   [m/s]
-      phi       | Mass flux                                  [kg/s]
-    \endverbatim
-
 Usage
     Minimal example by using \c constant/fvOptions:
     \verbatim
-    effectivenessHeatExchangerSource1
+    <name>
     {
+        // Inherited entries
+        ...
+
         // Mandatory entries
-        type                     effectivenessHeatExchangerSource;
-        faceZone                 <faceZoneName>;
+        model                    effectivenessTable;
         secondaryMassFlowRate    <scalar>;
         secondaryInletT          <scalar>;
-        file                     "effectivenessTable";
-        outOfBounds              clamp;
-
-        // Optional entries
-        U                        <word>;
-        T                        <word>;
-        phi                      <word>;
+        file                     "<word>";
+        outOfBounds              <word>;
 
         // Conditional optional entries
 
@@ -108,23 +87,17 @@ Usage
 
             // when secondary outlet temperature is requested
             secondaryCp             <Function1<scalar>>;
-
-        // Inherited entries
-        ...
     }
     \endverbatim
 
     where the entries mean:
     \table
       Property  | Description                       | Type  | Reqd | Deflt
-      type      | Type name: effectivenessHeatExchangerSource <!--
-                -->                                 | word  | yes  | -
-      secondaryMassFlowRate | Secondary flow mass rate [kg/s] <!--
+      model     | Model name:effectivenessTable     | word  | yes  | -
+      secondaryMassFlowRate | Secondary flow mass rate [kg/s]     <!--
                 -->                                 | scalar | yes | -
-      secondaryInletT | Secondary flow inlet temperature [K]  <!--
+      secondaryInletT | Secondary flow inlet temperature [K]      <!--
                 -->                                 | scalar | yes | -
-      faceZone  | Name of the faceZone at the heat exchanger inlet <!--
-                -->                                 | word   | yes | -
       file      | 2D effectiveness table = function of primary    <!--
                 --> and secondary mass flow rates [kg/s] | file | yes | -
       primaryInletT | Primary flow temperature at the heat exchanger inlet <!--
@@ -136,16 +109,11 @@ Usage
                 --> under-relaxation coefficient    | scalar | no  | -
       secondaryCp | Secondary flow specific heat capacity <!--
                 -->                    | Function1\<scalar\> | no  | -
-      U         | Name of operand velocity field    | word   | no  | U
-      T         | Name of operand temperature field | word   | no  | T
-      phi       | Name of operand flux field        | word   | no  | phi
     \endtable
 
     The inherited entries are elaborated in:
-      - \link fvOption.H \endlink
-      - \link cellSetOption.H \endlink
-      - \link writeFile.H \endlink
-      - \link Function1.H \endlink
+      - \link heatExchangerSource.H \endlink
+      - \link interpolation2DTable.H \endlink
 
     The effectiveness table is described in terms of the primary and secondary
     mass flow rates.  For example, the table:
@@ -202,34 +170,31 @@ Note
     flux-averaged temperature is used.
 
 SourceFiles
-    effectivenessHeatExchangerSource.C
+    effectivenessTable.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fv_effectivenessHeatExchangerSource_H
-#define fv_effectivenessHeatExchangerSource_H
+#ifndef Foam_heatExchangerModels_effectivenessTable_H
+#define Foam_heatExchangerModels_effectivenessTable_H
 
-#include "cellSetOption.H"
-#include "autoPtr.H"
+#include "heatExchangerModel.H"
 #include "interpolation2DTable.H"
-#include "writeFile.H"
 #include "Function1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace fv
+namespace heatExchangerModels
 {
 
 /*---------------------------------------------------------------------------*\
-              Class effectivenessHeatExchangerSource Declaration
+                              Class effectivenessTable Declaration
 \*---------------------------------------------------------------------------*/
 
-class effectivenessHeatExchangerSource
+class effectivenessTable
 :
-    public fv::cellSetOption,
-    public functionObjects::writeFile
+    public heatExchangerModel
 {
     // Private Data
 
@@ -264,100 +229,78 @@ class effectivenessHeatExchangerSource
         //- Target heat rejection temperature under-relaxation coefficient
         scalar targetQdotRelax_;
 
-        //- Name of operand velocity field
-        word UName_;
+        //- Net mass flux [kg/s]
+        scalar sumPhi_;
 
-        //- Name of operand temperature field
-        word TName_;
+        //- Total heat exchange [W]
+        scalar Qt_;
 
-        //- Name of operand flux field
-        word phiName_;
+        //- Reference temperature [K]
+        scalar Tref_;
 
-        //- Name of the faceZone at the heat exchanger inlet
-        word faceZoneName_;
-
-        //- Local list of face IDs
-        labelList faceId_;
-
-        //- Local list of patch IDs per face
-        labelList facePatchId_;
-
-        //- List of +1/-1 representing face flip map (1 use as is, -1 negate)
-        labelList faceSign_;
+        //- Effectiveness of the heat exchanger [-]
+        scalar effectiveness_;
 
 
     // Private Member Functions
 
-        //- Initialise heat exchanger source model
-        void initialise();
+    // I-O
 
-        //- Output file header information
-        virtual void writeFileHeader(Ostream& os);
+        //- Write file header information
+        void writeFileHeader(Ostream& os) const;
 
 
 public:
 
     //- Runtime type information
-    TypeName("effectivenessHeatExchangerSource");
+    TypeName("effectivenessTable");
 
 
     // Constructors
 
         //- Construct from components
-        effectivenessHeatExchangerSource
+        effectivenessTable
         (
+            const fvMesh& mesh,
             const word& name,
-            const word& modelType,
-            const dictionary& dict,
-            const fvMesh& mesh
+            const dictionary& coeffs
         );
 
         //- No copy construct
-        effectivenessHeatExchangerSource
-        (
-            const effectivenessHeatExchangerSource&
-        ) = delete;
+        effectivenessTable(const effectivenessTable&) = delete;
 
         //- No copy assignment
-        void operator=(const effectivenessHeatExchangerSource&) = delete;
+        void operator=(const effectivenessTable&) = delete;
 
 
     //- Destructor
-    virtual ~effectivenessHeatExchangerSource() = default;
+    virtual ~effectivenessTable() = default;
 
 
     // Member Functions
 
-        //- Add explicit/implicit contribution to momentum equation
-        virtual void addSup
-        (
-            fvMatrix<scalar>& eqn,
-            const label fieldi
-        )
-        {
-            NotImplemented;
-        }
+    // Evaluation
 
-        //- Add explicit/implicit contribution
-        //- to compressible momentum equation
-        virtual void addSup
-        (
-            const volScalarField& rho,
-            fvMatrix<scalar>& eqn,
-            const label fieldi
-        );
+        //- Initialise data members of the model
+        virtual void initialise();
+
+        //- Return energy density per unit length [J/m3/m]
+        virtual tmp<scalarField> energyDensity(const labelList& cells);
 
 
-        // I-O
+    // I-O
 
-            //- Read dictionary
-            virtual bool read(const dictionary& dict);
+        //- Read top-level dictionary
+        virtual bool read(const dictionary& dict);
+
+        //- Write data to stream and files
+        virtual void write(const bool log);
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace fv
+} // End namespace heatExchangerModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

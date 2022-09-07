@@ -13,7 +13,6 @@ $(derivedSources)/actuationDiskSource/actuationDiskSource.C
 $(derivedSources)/buoyancyEnergy/buoyancyEnergy.C
 $(derivedSources)/buoyancyForce/buoyancyForce.C
 $(derivedSources)/directionalPressureGradientExplicitSource/directionalPressureGradientExplicitSource.C
-$(derivedSources)/effectivenessHeatExchangerSource/effectivenessHeatExchangerSource.C
 $(derivedSources)/explicitPorositySource/explicitPorositySource.C
 $(derivedSources)/jouleHeatingSource/jouleHeatingSource.C
 $(derivedSources)/meanVelocityForce/meanVelocityForce.C
@@ -37,6 +36,12 @@ $(derivedSources)/tabulatedAccelerationSource/tabulated6DoFAcceleration/tabulate
 $(derivedSources)/viscousDissipation/viscousDissipation.C
 $(derivedSources)/buoyancyTurbSource/buoyancyTurbSource.C
 $(derivedSources)/patchCellsSource/patchCellsSource.C
+
+$(derivedSources)/heatExchangerSource/heatExchangerSource.C
+$(derivedSources)/heatExchangerSource/heatExchangerModels/heatExchangerModel/heatExchangerModel.C
+$(derivedSources)/heatExchangerSource/heatExchangerModels/heatExchangerModel/heatExchangerModelNew.C
+$(derivedSources)/heatExchangerSource/heatExchangerModels/effectivenessTable/effectivenessTable.C
+$(derivedSources)/heatExchangerSource/heatExchangerModels/referenceTemperature/referenceTemperature.C
 
 interRegion = sources/interRegion
 $(interRegion)/interRegionHeatTransfer/interRegionHeatTransferModel/interRegionHeatTransferModel.C
