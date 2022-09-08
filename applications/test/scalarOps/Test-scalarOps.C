@@ -126,6 +126,9 @@ int main(int argc, char *argv[])
     testDivide<vector>(vectors);
 
 
+    //(void) compareOp<vector>()(vector::zero, vector::one);
+
+
     Info<< "\nEnd\n" << endl;
 
     return 0;

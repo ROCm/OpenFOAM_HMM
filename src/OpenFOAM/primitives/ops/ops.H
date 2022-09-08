@@ -37,6 +37,8 @@ Description
 #ifndef Foam_ops_H
 #define Foam_ops_H
 
+#include "stdFoam.H"    // For FOAM_NODISCARD
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -73,21 +75,21 @@ EqOp(plusEq, x += y)
 EqOp(minusEq, x -= y)
 EqOp(multiplyEq, x *= y)
 EqOp(divideEq, x /= y)
-EqOp(eqSqr, x = sqr(y))
 EqOp(eqMag, x = mag(y))
+EqOp(eqSqr, x = sqr(y))
 EqOp(eqMagSqr, x = magSqr(y))
 EqOp(plusEqMagSqr, x += magSqr(y))
-EqOp(maxEq, x = max(x, y))
 EqOp(minEq, x = min(x, y))
+EqOp(maxEq, x = max(x, y))
 EqOp(minMagSqrEq, x = (magSqr(x) <= magSqr(y) ? x : y))
 EqOp(maxMagSqrEq, x = (magSqr(x) >= magSqr(y) ? x : y))
 
 EqOp(andEq, x = (x && y))
 EqOp(orEq,  x = (x || y))
 EqOp(xorEq, x = (x != y))
-EqOp(bitAndEq, x = (x & y))
-EqOp(bitOrEq,  x = (x | y))
-EqOp(bitXorEq, x = (x ^ y))
+EqOp(bitAndEq, x &= y)
+EqOp(bitOrEq,  x |= y)
+EqOp(bitXorEq, x ^= y)
 
 EqOp(eqMinus, x = -y)
 
@@ -98,13 +100,6 @@ EqOp(nopEq, (void)x)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Warning about unused result
-#if __GNUC__
-#define WARNRETURN __attribute__((warn_unused_result))
-#else
-#define WARNRETURN
-#endif
-
 // Operation taking two parameters, returning the first type.
 // Neither parameter is altered.
 //     Eg, plusOp for (x + y)
@@ -114,7 +109,7 @@ EqOp(nopEq, (void)x)
     template<class T, class T1, class T2>                                      \
     struct opName##Op3                                                         \
     {                                                                          \
-        T operator()(const T1& x, const T2& y) const WARNRETURN                \
+        FOAM_NODISCARD T operator()(const T1& x, const T2& y) const            \
         {                                                                      \
             return op;                                                         \
         }                                                                      \
@@ -123,7 +118,7 @@ EqOp(nopEq, (void)x)
     template<class T1, class T2>                                               \
     struct opName##Op2                                                         \
     {                                                                          \
-        T1 operator()(const T1& x, const T2& y) const WARNRETURN               \
+        FOAM_NODISCARD T1 operator()(const T1& x, const T2& y) const           \
         {                                                                      \
             return op;                                                         \
         }                                                                      \
@@ -132,7 +127,7 @@ EqOp(nopEq, (void)x)
     template<class T>                                                          \
     struct opName##Op                                                          \
     {                                                                          \
-        T operator()(const T& x, const T& y) const WARNRETURN                  \
+        FOAM_NODISCARD T operator()(const T& x, const T& y) const              \
         {                                                                      \
             return op;                                                         \
         }                                                                      \
@@ -146,7 +141,7 @@ EqOp(nopEq, (void)x)
     template<class T1, class T2>                                               \
     struct opName##Op2                                                         \
     {                                                                          \
-        bool operator()(const T1& x, const T2& y) const WARNRETURN             \
+        FOAM_NODISCARD bool operator()(const T1& x, const T2& y) const         \
         {                                                                      \
             return op;                                                         \
         }                                                                      \
@@ -155,7 +150,7 @@ EqOp(nopEq, (void)x)
     template<class T>                                                          \
     struct opName##Op                                                          \
     {                                                                          \
-        bool operator()(const T& x, const T& y) const WARNRETURN               \
+        FOAM_NODISCARD bool operator()(const T& x, const T& y) const           \
         {                                                                      \
             return op;                                                         \
         }                                                                      \
@@ -174,7 +169,7 @@ EqOp(nopEq, (void)x)
                                                                                \
         opName##Op1(const T& v) : value(v) {}                                  \
                                                                                \
-        bool operator()(const T& x) const WARNRETURN                           \
+        FOAM_NODISCARD bool operator()(const T& x) const                       \
         {                                                                      \
             return op;                                                         \
         }                                                                      \
@@ -220,8 +215,8 @@ Op(cmptMultiply, cmptMultiply(x, y))
 Op(cmptPow, cmptPow(x, y))
 Op(cmptDivide, cmptDivide(x, y))
 Op(stabilise, stabilise(x, y))
-Op(max, max(x, y))
 Op(min, min(x, y))
+Op(max, max(x, y))
 Op(minMagSqr, (magSqr(x) <= magSqr(y) ? x : y))
 Op(maxMagSqr, (magSqr(x) >= magSqr(y) ? x : y))
 Op(minMod, minMod(x, y))
@@ -267,7 +262,7 @@ WeightedOp(multiply, (weight*y))
 template<class T>
 struct compareOp
 {
-    int operator()(const T& a, const T& b) const WARNRETURN
+    FOAM_NODISCARD int operator()(const T& a, const T& b) const
     {
         return (a < b) ? -1 : (b < a) ? 1 : 0;
     }
@@ -282,10 +277,6 @@ template<class T> struct getNameOp : nameOp<T> {};
 //  \deprecated(2020-11) use typeOp
 template<class T> struct getTypeOp : typeOp<T> {};
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#undef WARNRETURN
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -52,6 +52,15 @@ Description
 # define FOAM_DEPRECATED_FOR(since, replacement)
 #endif
 
+// Compile-time warning about unused result
+// FUTURE: check __has_cpp_attribute(nodiscard) and define with [[nodiscard]]
+#if defined(__GNUC__)
+# define FOAM_NODISCARD __attribute__((warn_unused_result))
+#else
+# define FOAM_NODISCARD
+#endif
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 //- Namespace for OpenFOAM
