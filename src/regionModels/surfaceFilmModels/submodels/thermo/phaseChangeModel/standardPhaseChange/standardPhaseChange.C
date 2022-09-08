@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -82,7 +82,7 @@ standardPhaseChange::standardPhaseChange
     deltaMin_(coeffDict_.get<scalar>("deltaMin")),
     L_(coeffDict_.get<scalar>("L")),
     TbFactor_(coeffDict_.getOrDefault<scalar>("TbFactor", 1.1)),
-    YInfZero_(coeffDict_.getOrDefault<Switch>("YInfZero", false))
+    YInfZero_(coeffDict_.getOrDefault("YInfZero", false))
 {}
 
 
@@ -95,7 +95,7 @@ void standardPhaseChange::correctModel
     scalarField& availableMass,
     scalarField& dMass,
     scalarField& dEnergy,
-    YInfType YInf
+    const YInfType& YInf
 )
 {
     const thermoSingleLayer& film = filmType<thermoSingleLayer>();

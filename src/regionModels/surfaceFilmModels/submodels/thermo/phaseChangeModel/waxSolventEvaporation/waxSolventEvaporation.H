@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef waxSolventEvaporation_H
-#define waxSolventEvaporation_H
+#ifndef Foam_waxSolventEvaporation_H
+#define Foam_waxSolventEvaporation_H
 
 #include "phaseChangeModel.H"
 #include "uniformDimensionedFields.H"
@@ -58,18 +58,9 @@ class waxSolventEvaporation
 :
     public phaseChangeModel
 {
-    // Private member functions
-
-        //- No copy construct
-        waxSolventEvaporation(const waxSolventEvaporation&) = delete;
-
-        //- No copy assignment
-        void operator=(const waxSolventEvaporation&) = delete;
-
-
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Molecular weight of wax [kg/kmol]
         uniformDimensionedScalarField Wwax_;
@@ -100,7 +91,7 @@ protected:
         autoPtr<Function1<scalar>> activityCoeff_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Return Sherwood number as a function of Reynolds and Schmidt numbers
         scalar Sh(const scalar Re, const scalar Sc) const;
@@ -112,8 +103,14 @@ protected:
             scalarField& availableMass,
             scalarField& dMass,
             scalarField& dEnergy,
-            YInfType YInf
+            const YInfType& YInf
         );
+
+        //- No copy construct
+        waxSolventEvaporation(const waxSolventEvaporation&) = delete;
+
+        //- No copy assignment
+        void operator=(const waxSolventEvaporation&) = delete;
 
 
 public:

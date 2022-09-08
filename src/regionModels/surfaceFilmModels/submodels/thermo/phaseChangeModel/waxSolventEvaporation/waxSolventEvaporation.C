@@ -153,7 +153,7 @@ void waxSolventEvaporation::correctModel
     scalarField& availableMass,
     scalarField& dMass,
     scalarField& dEnergy,
-    YInfType YInf
+    const YInfType& YInf
 )
 {
     const thermoSingleLayer& film = filmType<thermoSingleLayer>();

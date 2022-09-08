@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef standardPhaseChange_H
-#define standardPhaseChange_H
+#ifndef Foam_standardPhaseChange_H
+#define Foam_standardPhaseChange_H
 
 #include "phaseChangeModel.H"
 
@@ -58,7 +58,7 @@ class standardPhaseChange
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Minimum film height for model to be active
         const scalar deltaMin_;
@@ -71,7 +71,7 @@ protected:
         const scalar TbFactor_;
 
         //- Switch to treat YInf as zero
-        Switch YInfZero_;
+        bool YInfZero_;
 
 
     // Protected member functions
@@ -86,7 +86,7 @@ protected:
             scalarField& availableMass,
             scalarField& dMass,
             scalarField& dEnergy,
-            YInfType YInf
+            const YInfType& YInf
         );
 
         //- No copy construct
