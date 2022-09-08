@@ -7,7 +7,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -112,6 +112,8 @@ bool optVerbose = false;
 //- The top-level source file being processed
 std::string sourceFile;
 
+//- The output stream
+FILE* output = stdout;
 
 //- All file opening and writing
 namespace Files
@@ -185,7 +187,7 @@ namespace Files
     }
 
 
-    //- Open a file for reading and emit its qualified name to stdout.
+    //- Open a file for reading and emit its qualified name to output.
     //
     //  Uses env substitutions at the beginning of the path
     //
@@ -215,13 +217,13 @@ namespace Files
                 )
                 {
                     fname += entry.len;  // Now positioned after the '/'
-                    fputs(entry.name.c_str(), stdout);
+                    fputs(entry.name.c_str(), output);
                     break;
                 }
             }
 
-            fputs(fname, stdout);
-            fputs(" \\\n", stdout);
+            fputs(fname, output);
+            fputs(" \\\n", output);
         }
         else if (errno == EMFILE)
         {
@@ -314,14 +316,14 @@ namespace Files
 // Can use 'variable p xxx;' etc to change these names
 
 
-#line 318 "wmkdepend.cc"
+#line 320 "wmkdepend.cc"
 static const int wmkdep_start = 21;
 static const int wmkdep_error = 0;
 
 static const int wmkdep_en_main = 21;
 
 
-#line 344 "wmkdepend.rl"
+#line 346 "wmkdepend.rl"
 
 
 
@@ -362,7 +364,7 @@ void processFile(std::string fileName)
 
     // Initialize FSM variables
     
-#line 366 "wmkdepend.cc"
+#line 368 "wmkdepend.cc"
 	{
 	cs = wmkdep_start;
 	ts = 0;
@@ -370,7 +372,7 @@ void processFile(std::string fileName)
 	act = 0;
 	}
 
-#line 383 "wmkdepend.rl"
+#line 385 "wmkdepend.rl"
    /* ^^^ FSM initialization here ^^^ */;
 
     // Local token start
@@ -415,7 +417,7 @@ void processFile(std::string fileName)
         }
 
         
-#line 419 "wmkdepend.cc"
+#line 421 "wmkdepend.cc"
 	{
 	if ( p == pe )
 		goto _test_eof;
@@ -434,35 +436,35 @@ tr0:
 	}
 	goto st21;
 tr2:
-#line 342 "wmkdepend.rl"
+#line 344 "wmkdepend.rl"
 	{te = p+1;}
 	goto st21;
 tr17:
-#line 342 "wmkdepend.rl"
+#line 344 "wmkdepend.rl"
 	{{p = ((te))-1;}}
 	goto st21;
 tr21:
-#line 337 "wmkdepend.rl"
-	{te = p+1;}
-	goto st21;
-tr29:
-#line 340 "wmkdepend.rl"
-	{te = p+1;}
-	goto st21;
-tr31:
 #line 339 "wmkdepend.rl"
 	{te = p+1;}
 	goto st21;
+tr29:
+#line 342 "wmkdepend.rl"
+	{te = p+1;}
+	goto st21;
+tr31:
+#line 341 "wmkdepend.rl"
+	{te = p+1;}
+	goto st21;
 tr36:
-#line 334 "wmkdepend.rl"
+#line 336 "wmkdepend.rl"
 	{te = p;p--;}
 	goto st21;
 tr37:
-#line 342 "wmkdepend.rl"
+#line 344 "wmkdepend.rl"
 	{te = p;p--;}
 	goto st21;
 tr38:
-#line 340 "wmkdepend.rl"
+#line 342 "wmkdepend.rl"
 	{te = p;p--;}
 	goto st21;
 st21:
@@ -475,7 +477,7 @@ st21:
 case 21:
 #line 1 "NONE"
 	{ts = p;}
-#line 479 "wmkdepend.cc"
+#line 481 "wmkdepend.cc"
 	switch( (*p) ) {
 		case 10: goto st23;
 		case 11: goto tr34;
@@ -496,14 +498,14 @@ case 1:
 tr32:
 #line 1 "NONE"
 	{te = p+1;}
-#line 334 "wmkdepend.rl"
+#line 336 "wmkdepend.rl"
 	{act = 1;}
 	goto st22;
 st22:
 	if ( ++p == pe )
 		goto _test_eof22;
 case 22:
-#line 507 "wmkdepend.cc"
+#line 509 "wmkdepend.cc"
 	switch( (*p) ) {
 		case 10: goto st23;
 		case 11: goto tr34;
@@ -525,14 +527,14 @@ case 23:
 tr34:
 #line 1 "NONE"
 	{te = p+1;}
-#line 334 "wmkdepend.rl"
+#line 336 "wmkdepend.rl"
 	{act = 1;}
 	goto st24;
 st24:
 	if ( ++p == pe )
 		goto _test_eof24;
 case 24:
-#line 536 "wmkdepend.cc"
+#line 538 "wmkdepend.cc"
 	switch( (*p) ) {
 		case 10: goto st23;
 		case 32: goto tr34;
@@ -630,14 +632,14 @@ case 10:
 	}
 	goto tr12;
 tr12:
-#line 318 "wmkdepend.rl"
+#line 320 "wmkdepend.rl"
 	{ tok = p;  /* Local token start */ }
 	goto st11;
 st11:
 	if ( ++p == pe )
 		goto _test_eof11;
 case 11:
-#line 641 "wmkdepend.cc"
+#line 643 "wmkdepend.cc"
 	switch( (*p) ) {
 		case 10: goto tr15;
 		case 34: goto tr16;
@@ -646,7 +648,7 @@ case 11:
 tr13:
 #line 1 "NONE"
 	{te = p+1;}
-#line 318 "wmkdepend.rl"
+#line 320 "wmkdepend.rl"
 	{ tok = p;  /* Local token start */ }
 	goto st25;
 tr15:
@@ -657,7 +659,7 @@ st25:
 	if ( ++p == pe )
 		goto _test_eof25;
 case 25:
-#line 661 "wmkdepend.cc"
+#line 663 "wmkdepend.cc"
 	if ( (*p) == 34 )
 		goto tr19;
 	goto st12;
@@ -669,7 +671,7 @@ case 12:
 		goto tr19;
 	goto st12;
 tr19:
-#line 320 "wmkdepend.rl"
+#line 322 "wmkdepend.rl"
 	{
         processFile(tok, p);
         tok = nullptr;          /* Done with buffer */
@@ -679,12 +681,12 @@ st13:
 	if ( ++p == pe )
 		goto _test_eof13;
 case 13:
-#line 683 "wmkdepend.cc"
+#line 685 "wmkdepend.cc"
 	if ( (*p) == 10 )
 		goto tr21;
 	goto st13;
 tr16:
-#line 320 "wmkdepend.rl"
+#line 322 "wmkdepend.rl"
 	{
         processFile(tok, p);
         tok = nullptr;          /* Done with buffer */
@@ -694,7 +696,7 @@ st14:
 	if ( ++p == pe )
 		goto _test_eof14;
 case 14:
-#line 698 "wmkdepend.cc"
+#line 700 "wmkdepend.cc"
 	if ( (*p) == 10 )
 		goto tr21;
 	goto st14;
@@ -725,7 +727,7 @@ st26:
 	if ( ++p == pe )
 		goto _test_eof26;
 case 26:
-#line 729 "wmkdepend.cc"
+#line 731 "wmkdepend.cc"
 	if ( (*p) == 42 )
 		goto st18;
 	goto st17;
@@ -758,14 +760,14 @@ case 19:
 tr30:
 #line 1 "NONE"
 	{te = p+1;}
-#line 340 "wmkdepend.rl"
+#line 342 "wmkdepend.rl"
 	{act = 4;}
 	goto st27;
 st27:
 	if ( ++p == pe )
 		goto _test_eof27;
 case 27:
-#line 769 "wmkdepend.cc"
+#line 771 "wmkdepend.cc"
 	if ( (*p) == 10 )
 		goto tr2;
 	goto st1;
@@ -840,7 +842,7 @@ cs = 0;
 	_out: {}
 	}
 
-#line 426 "wmkdepend.rl"
+#line 428 "wmkdepend.rl"
        /* ^^^ FSM execution here ^^^ */;
 
         if (0 == cs)
@@ -877,9 +879,11 @@ cs = 0;
             pending = 0;
         }
     }
-    fclose(infile);
+    ::fclose(infile);
 }
 
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 int main(int argc, char* argv[])
 {
@@ -927,7 +931,7 @@ int main(int argc, char* argv[])
 
     // Verify that input file has an extension
     {
-        auto dot = sourceFile.find_last_of("./");
+        const auto dot = sourceFile.find_last_of("./");
         if (dot == std::string::npos || sourceFile[dot] != '.')
         {
             std::cerr
@@ -979,22 +983,39 @@ int main(int argc, char* argv[])
         }
     }
 
-    if (outputFile.size() && !freopen(outputFile.c_str(), "w", stdout))
+
+    // Output to an intermediate file
+    std::string outputTmp;
+    if (outputFile.length())
     {
-        std::cerr
-            << EXENAME ": could not open file '"
-            << outputFile << "' for output: " << strerror(errno) << "\n";
-        return 1;
+        outputTmp = outputFile + ".part";
+
+        output = ::fopen(outputTmp.c_str(), "w");
+
+        if (!output)
+        {
+            std::cerr
+                << EXENAME ": could not open file '"
+                << outputTmp << "' for output: " << strerror(errno) << '\n';
+            return 1;
+        }
     }
 
-    fputs("$(OBJECTS_DIR)/", stdout);
-    fputs(sourceFile.c_str(), stdout);
-    fputs(".dep: \\\n", stdout);
+    fputs("$(OBJECTS_DIR)/", output);
+    fputs(sourceFile.c_str(), output);
+    fputs(".dep: \\\n", output);
 
     processFile(sourceFile);
 
-    fputs("\n#END\n", stdout);
-    fflush(stdout);
+    fputs("\n#END\n", output);
+    fflush(output);
+
+    // Atomic move of intermediate file to final output file
+    if (outputFile.length())
+    {
+        ::fclose(output);
+        ::rename(outputTmp.c_str(), outputFile.c_str());
+    }
 
     return 0;
 }
