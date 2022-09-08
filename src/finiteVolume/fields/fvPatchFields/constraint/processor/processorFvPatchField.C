@@ -283,7 +283,7 @@ void Foam::processorFvPatchField<Type>::evaluate
             if
             (
                 outstandingRecvRequest_ >= 0
-             && outstandingRecvRequest_ < Pstream::nRequests()
+             && outstandingRecvRequest_ < UPstream::nRequests()
             )
             {
                 UPstream::waitRequest(outstandingRecvRequest_);
@@ -416,7 +416,7 @@ void Foam::processorFvPatchField<Type>::updateInterfaceMatrix
         if
         (
             outstandingRecvRequest_ >= 0
-         && outstandingRecvRequest_ < Pstream::nRequests()
+         && outstandingRecvRequest_ < UPstream::nRequests()
         )
         {
             UPstream::waitRequest(outstandingRecvRequest_);
@@ -565,7 +565,7 @@ void Foam::processorFvPatchField<Type>::updateInterfaceMatrix
         if
         (
             outstandingRecvRequest_ >= 0
-         && outstandingRecvRequest_ < Pstream::nRequests()
+         && outstandingRecvRequest_ < UPstream::nRequests()
         )
         {
             UPstream::waitRequest(outstandingRecvRequest_);
@@ -606,11 +606,10 @@ bool Foam::processorFvPatchField<Type>::ready() const
     if
     (
         outstandingSendRequest_ >= 0
-     && outstandingSendRequest_ < Pstream::nRequests()
+     && outstandingSendRequest_ < UPstream::nRequests()
     )
     {
-        bool finished = UPstream::finishedRequest(outstandingSendRequest_);
-        if (!finished)
+        if (!UPstream::finishedRequest(outstandingSendRequest_))
         {
             return false;
         }
@@ -620,11 +619,10 @@ bool Foam::processorFvPatchField<Type>::ready() const
     if
     (
         outstandingRecvRequest_ >= 0
-     && outstandingRecvRequest_ < Pstream::nRequests()
+     && outstandingRecvRequest_ < UPstream::nRequests()
     )
     {
-        bool finished = UPstream::finishedRequest(outstandingRecvRequest_);
-        if (!finished)
+        if (!UPstream::finishedRequest(outstandingRecvRequest_))
         {
             return false;
         }

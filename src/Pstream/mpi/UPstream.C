@@ -609,23 +609,28 @@ void Foam::UPstream::freePstreamCommunicator(const label communicator)
 }
 
 
-Foam::label Foam::UPstream::nRequests()
+Foam::label Foam::UPstream::nRequests() noexcept
 {
     return PstreamGlobals::outstandingRequests_.size();
 }
 
 
-void Foam::UPstream::resetRequests(const label i)
+void Foam::UPstream::resetRequests(const label n)
 {
-    if (i < PstreamGlobals::outstandingRequests_.size())
+    if (n >= 0 && n < PstreamGlobals::outstandingRequests_.size())
     {
-        PstreamGlobals::outstandingRequests_.setSize(i);
+        PstreamGlobals::outstandingRequests_.resize(n);
     }
 }
 
 
 void Foam::UPstream::waitRequests(const label start)
 {
+    if (!UPstream::parRun())
+    {
+        return;  // No-op for non-parallel
+    }
+
     if (UPstream::debug)
     {
         Pout<< "UPstream::waitRequests : starting wait for "
@@ -672,6 +677,11 @@ void Foam::UPstream::waitRequests(const label start)
 
 void Foam::UPstream::waitRequest(const label i)
 {
+    if (!UPstream::parRun())
+    {
+        return;  // No-op for non-parallel
+    }
+
     if (debug)
     {
         Pout<< "UPstream::waitRequest : starting wait for request:" << i
@@ -717,13 +727,18 @@ void Foam::UPstream::waitRequest(const label i)
 
 bool Foam::UPstream::finishedRequest(const label i)
 {
+    if (!UPstream::parRun())
+    {
+        return true;  // No-op for non-parallel
+    }
+
     if (debug)
     {
         Pout<< "UPstream::finishedRequest : checking request:" << i
             << endl;
     }
 
-    if (i >= PstreamGlobals::outstandingRequests_.size())
+    if (i < 0 || i >= PstreamGlobals::outstandingRequests_.size())
     {
         FatalErrorInFunction
             << "There are " << PstreamGlobals::outstandingRequests_.size()

@@ -171,7 +171,7 @@ void Foam::calculatedProcessorGAMGInterfaceField::updateInterfaceMatrix
         if
         (
             outstandingRecvRequest_ >= 0
-         && outstandingRecvRequest_ < Pstream::nRequests()
+         && outstandingRecvRequest_ < UPstream::nRequests()
         )
         {
             UPstream::waitRequest(outstandingRecvRequest_);

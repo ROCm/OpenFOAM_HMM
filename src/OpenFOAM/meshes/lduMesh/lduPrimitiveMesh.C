@@ -129,10 +129,8 @@ Foam::labelListList Foam::lduPrimitiveMesh::globalCellCells
             }
         }
 
-        if (Pstream::parRun())
-        {
-            Pstream::waitRequests();
-        }
+        // Wait for all
+        UPstream::waitRequests();
 
         forAll(interfaces, inti)
         {

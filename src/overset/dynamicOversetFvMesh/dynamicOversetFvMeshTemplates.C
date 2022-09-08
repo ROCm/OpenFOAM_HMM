@@ -119,22 +119,19 @@ void Foam::dynamicOversetFvMesh::correctBoundaryConditions
     const bool typeOnly
 )
 {
+    const UPstream::commsTypes commsType = UPstream::defaultCommsType;
     const label startOfRequests = UPstream::nRequests();
 
     forAll(bfld, patchi)
     {
         if (typeOnly == (isA<PatchType>(bfld[patchi]) != nullptr))
         {
-            bfld[patchi].initEvaluate(UPstream::defaultCommsType);
+            bfld[patchi].initEvaluate(commsType);
         }
     }
 
     // Wait for outstanding requests
-    if
-    (
-        UPstream::parRun()
-     && UPstream::defaultCommsType == UPstream::commsTypes::nonBlocking
-    )
+    if (commsType == UPstream::commsTypes::nonBlocking)
     {
         UPstream::waitRequests(startOfRequests);
     }
@@ -143,7 +140,7 @@ void Foam::dynamicOversetFvMesh::correctBoundaryConditions
     {
         if (typeOnly == (isA<PatchType>(bfld[patchi]) != nullptr))
         {
-            bfld[patchi].evaluate(UPstream::defaultCommsType);
+            bfld[patchi].evaluate(commsType);
         }
     }
 }
@@ -903,6 +900,7 @@ void Foam::dynamicOversetFvMesh::correctCoupledBoundaryConditions(GeoField& fld)
 {
     typename GeoField::Boundary& bfld = fld.boundaryFieldRef();
 
+    const UPstream::commsTypes commsType = UPstream::defaultCommsType;
     const label startOfRequests = UPstream::nRequests();
 
     forAll(bfld, patchi)
@@ -910,16 +908,12 @@ void Foam::dynamicOversetFvMesh::correctCoupledBoundaryConditions(GeoField& fld)
         if (bfld[patchi].coupled())
         {
             //Pout<< "initEval of " << bfld[patchi].patch().name() << endl;
-            bfld[patchi].initEvaluate(Pstream::defaultCommsType);
+            bfld[patchi].initEvaluate(commsType);
         }
     }
 
     // Wait for outstanding requests
-    if
-    (
-        UPstream::parRun()
-     && UPstream::defaultCommsType == UPstream::commsTypes::nonBlocking
-    )
+    if (commsType == UPstream::commsTypes::nonBlocking)
     {
         UPstream::waitRequests(startOfRequests);
     }
@@ -929,7 +923,7 @@ void Foam::dynamicOversetFvMesh::correctCoupledBoundaryConditions(GeoField& fld)
         if (bfld[patchi].coupled())
         {
             //Pout<< "eval of " << bfld[patchi].patch().name() << endl;
-            bfld[patchi].evaluate(Pstream::defaultCommsType);
+            bfld[patchi].evaluate(commsType);
         }
     }
 }

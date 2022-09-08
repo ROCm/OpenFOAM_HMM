@@ -87,13 +87,13 @@ void Foam::UPstream::freePstreamCommunicator(const label)
 {}
 
 
-Foam::label Foam::UPstream::nRequests()
+Foam::label Foam::UPstream::nRequests() noexcept
 {
     return 0;
 }
 
 
-void Foam::UPstream::resetRequests(const label i)
+void Foam::UPstream::resetRequests(const label n)
 {}
 
 
@@ -107,8 +107,7 @@ void Foam::UPstream::waitRequest(const label i)
 
 bool Foam::UPstream::finishedRequest(const label i)
 {
-    NotImplemented;
-    return false;
+    return true;
 }
 
 

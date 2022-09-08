@@ -40,10 +40,12 @@ void Foam::LduMatrix<Type, DType, LUType>::initMatrixInterfaces
     Field<Type>& result
 ) const
 {
+    const UPstream::commsTypes commsType = UPstream::defaultCommsType;
+
     if
     (
-        Pstream::defaultCommsType == Pstream::commsTypes::blocking
-     || Pstream::defaultCommsType == Pstream::commsTypes::nonBlocking
+        commsType == UPstream::commsTypes::blocking
+     || commsType == UPstream::commsTypes::nonBlocking
     )
     {
         forAll(interfaces_, interfacei)
@@ -59,12 +61,12 @@ void Foam::LduMatrix<Type, DType, LUType>::initMatrixInterfaces
                     psiif,
                     interfaceCoeffs[interfacei],
                     //Amultiplier<Type, LUType>(interfaceCoeffs[interfacei]),
-                    Pstream::defaultCommsType
+                    commsType
                 );
             }
         }
     }
-    else if (Pstream::defaultCommsType == Pstream::commsTypes::scheduled)
+    else if (commsType == UPstream::commsTypes::scheduled)
     {
         const lduSchedule& patchSchedule = this->patchSchedule();
 
@@ -88,7 +90,7 @@ void Foam::LduMatrix<Type, DType, LUType>::initMatrixInterfaces
                     psiif,
                     interfaceCoeffs[interfacei],
                     //Amultiplier<Type, LUType>(interfaceCoeffs[interfacei]),
-                    Pstream::commsTypes::blocking
+                    UPstream::commsTypes::blocking
                 );
             }
         }
@@ -97,7 +99,7 @@ void Foam::LduMatrix<Type, DType, LUType>::initMatrixInterfaces
     {
         FatalErrorInFunction
             << "Unsupported communications type "
-            << Pstream::commsTypeNames[Pstream::defaultCommsType]
+            << UPstream::commsTypeNames[commsType]
             << exit(FatalError);
     }
 }
@@ -112,17 +114,18 @@ void Foam::LduMatrix<Type, DType, LUType>::updateMatrixInterfaces
     Field<Type>& result
 ) const
 {
+    const UPstream::commsTypes commsType = UPstream::defaultCommsType;
+
     if
     (
-        Pstream::defaultCommsType == Pstream::commsTypes::blocking
-     || Pstream::defaultCommsType == Pstream::commsTypes::nonBlocking
+        commsType == UPstream::commsTypes::blocking
+     || commsType == UPstream::commsTypes::nonBlocking
     )
     {
         // Block until all sends/receives have been finished
-        if (Pstream::defaultCommsType == Pstream::commsTypes::nonBlocking)
+        if (commsType == UPstream::commsTypes::nonBlocking)
         {
-            IPstream::waitRequests();
-            OPstream::waitRequests();
+            UPstream::waitRequests();
         }
 
         forAll(interfaces_, interfacei)
@@ -138,12 +141,12 @@ void Foam::LduMatrix<Type, DType, LUType>::updateMatrixInterfaces
                     psiif,
                     interfaceCoeffs[interfacei],
                     //Amultiplier<Type, LUType>(interfaceCoeffs[interfacei]),
-                    Pstream::defaultCommsType
+                    commsType
                 );
             }
         }
     }
-    else if (Pstream::defaultCommsType == Pstream::commsTypes::scheduled)
+    else if (commsType == UPstream::commsTypes::scheduled)
     {
         const lduSchedule& patchSchedule = this->patchSchedule();
 
@@ -165,7 +168,7 @@ void Foam::LduMatrix<Type, DType, LUType>::updateMatrixInterfaces
                         psiif,
                         interfaceCoeffs[interfacei],
                       //Amultiplier<Type, LUType>(interfaceCoeffs[interfacei]),
-                        Pstream::commsTypes::scheduled
+                        commsType
                     );
                 }
                 else
@@ -179,7 +182,7 @@ void Foam::LduMatrix<Type, DType, LUType>::updateMatrixInterfaces
                         psiif,
                         interfaceCoeffs[interfacei],
                       //Amultiplier<Type, LUType>(interfaceCoeffs[interfacei]),
-                        Pstream::commsTypes::scheduled
+                        commsType
                     );
                 }
             }
@@ -214,7 +217,7 @@ void Foam::LduMatrix<Type, DType, LUType>::updateMatrixInterfaces
     {
         FatalErrorInFunction
             << "Unsupported communications type "
-            << Pstream::commsTypeNames[Pstream::defaultCommsType]
+            << UPstream::commsTypeNames[commsType]
             << exit(FatalError);
     }
 }

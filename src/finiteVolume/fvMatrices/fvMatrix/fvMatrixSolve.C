@@ -190,7 +190,7 @@ Foam::SolverPerformance<Type> Foam::fvMatrix<Type>::solveSegregated
             PrecisionAdaptor<solveScalar, scalar> sourceCmpt_ss(sourceCmpt);
             ConstPrecisionAdaptor<solveScalar, scalar> psiCmpt_ss(psiCmpt);
 
-            const label startRequest = Pstream::nRequests();
+            const label startRequest = UPstream::nRequests();
 
             initMatrixInterfaces
             (

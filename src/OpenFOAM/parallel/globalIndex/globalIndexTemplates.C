@@ -142,7 +142,7 @@ void Foam::globalIndex::gatherValues
 
     if (commsType == UPstream::commsTypes::nonBlocking)
     {
-        // Wait for all to finish
+        // Wait for outstanding requests
         UPstream::waitRequests(startOfRequests);
     }
 }
@@ -242,7 +242,7 @@ void Foam::globalIndex::gather
 
     if (commsType == UPstream::commsTypes::nonBlocking)
     {
-        // Wait for all to finish
+        // Wait for outstanding requests
         UPstream::waitRequests(startOfRequests);
     }
 }
@@ -338,7 +338,7 @@ void Foam::globalIndex::gather
 
     if (commsType == UPstream::commsTypes::nonBlocking)
     {
-        // Wait for all to finish
+        // Wait for outstanding requests
         UPstream::waitRequests(startOfRequests);
     }
 }
@@ -945,7 +945,7 @@ void Foam::globalIndex::scatter
 
     if (commsType == UPstream::commsTypes::nonBlocking)
     {
-        // Wait for all to finish
+        // Wait for outstanding requests
         UPstream::waitRequests(startOfRequests);
     }
 }

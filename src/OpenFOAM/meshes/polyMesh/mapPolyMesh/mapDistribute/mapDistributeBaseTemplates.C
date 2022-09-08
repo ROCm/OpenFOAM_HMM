@@ -584,8 +584,7 @@ void Foam::mapDistributeBase::distribute
             }
 
 
-            // Wait for all to finish
-
+            // Wait for outstanding requests
             Pstream::waitRequests(nOutstanding);
 
 
@@ -1044,8 +1043,7 @@ void Foam::mapDistributeBase::distribute
             }
 
 
-            // Wait for all to finish
-
+            // Wait for outstanding requests
             Pstream::waitRequests(nOutstanding);
 
 

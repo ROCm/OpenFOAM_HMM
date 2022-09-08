@@ -142,7 +142,7 @@ void Foam::nonBlockingGaussSeidelSmoother::smooth
     {
         bPrime = source;
 
-        const label startRequest = Pstream::nRequests();
+        const label startRequest = UPstream::nRequests();
 
         matrix_.initMatrixInterfaces
         (

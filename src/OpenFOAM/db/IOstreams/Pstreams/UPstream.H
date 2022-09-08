@@ -396,19 +396,22 @@ public:
 
         // Non-blocking comms
 
-            //- Get number of outstanding requests
-            static label nRequests();
+            //- Number of outstanding requests
+            static label nRequests() noexcept;
 
-            //- Truncate number of outstanding requests
-            static void resetRequests(const label sz);
+            //- Truncate outstanding requests to given length
+            static void resetRequests(const label n);
 
             //- Wait until all requests (from start onwards) have finished.
+            //  A no-op if parRun() == false
             static void waitRequests(const label start = 0);
 
             //- Wait until request i has finished.
+            //  A no-op if parRun() == false
             static void waitRequest(const label i);
 
             //- Non-blocking comms: has request i finished?
+            //  A no-op and returns true if parRun() == false
             static bool finishedRequest(const label i);
 
             static int allocateTag(const char*);

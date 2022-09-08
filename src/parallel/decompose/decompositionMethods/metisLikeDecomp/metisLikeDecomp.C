@@ -130,9 +130,9 @@ Foam::label Foam::metisLikeDecomp::decomposeGeneral
         }
     }
 
+    // Wait for outstanding requests
     if (commsType == UPstream::commsTypes::nonBlocking)
     {
-        // Wait for all to finish
         UPstream::waitRequests(startOfRequests);
     }
 

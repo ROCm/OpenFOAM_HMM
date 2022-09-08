@@ -52,7 +52,7 @@ void Foam::GAMGSolver::interpolate
     Apsi = 0;
     solveScalar* __restrict__ ApsiPtr = Apsi.begin();
 
-    const label startRequest = Pstream::nRequests();
+    const label startRequest = UPstream::nRequests();
 
     m.initMatrixInterfaces
     (

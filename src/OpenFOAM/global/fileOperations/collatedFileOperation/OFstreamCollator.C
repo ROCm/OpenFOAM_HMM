@@ -440,7 +440,7 @@ bool Foam::OFstreamCollator::write
         // Gather all data onto master. Is done in local communicator since
         // not in write thread. Note that we do not store in contiguous
         // buffer since that would limit to 2G chars.
-        const label startOfRequests = Pstream::nRequests();
+        const label startOfRequests = UPstream::nRequests();
         if (Pstream::master(localComm_))
         {
             for (label proci = 1; proci < slaveData.size(); proci++)
@@ -479,7 +479,7 @@ bool Foam::OFstreamCollator::write
                     << Foam::abort(FatalError);
             }
         }
-        Pstream::waitRequests(startOfRequests);
+        UPstream::waitRequests(startOfRequests);
 
         {
             std::lock_guard<std::mutex> guard(mutex_);

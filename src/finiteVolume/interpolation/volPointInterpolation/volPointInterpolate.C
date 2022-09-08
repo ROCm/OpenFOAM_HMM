@@ -108,6 +108,7 @@ void Foam::volPointInterpolation::addSeparated
     }
 
     // Wait for outstanding requests
+    // (commsType == UPstream::commsTypes::nonBlocking)
     UPstream::waitRequests(startOfRequests);
 
     forAll(pfbf, patchi)

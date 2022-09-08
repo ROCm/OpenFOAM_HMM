@@ -170,9 +170,9 @@ Foam::solverPerformance Foam::PPCG::scalarSolveCG
     )
     {
         // Make sure gamma,delta are available
-        if (Pstream::parRun() && outstandingRequest != -1)
+        if (outstandingRequest != -1)
         {
-            Pstream::waitRequest(outstandingRequest);
+            UPstream::waitRequest(outstandingRequest);
             outstandingRequest = -1;
         }
 
@@ -249,9 +249,9 @@ Foam::solverPerformance Foam::PPCG::scalarSolveCG
     }
 
     // Cleanup any outstanding requests
-    if (Pstream::parRun() && outstandingRequest != -1)
+    if (outstandingRequest != -1)
     {
-        Pstream::waitRequest(outstandingRequest);
+        UPstream::waitRequest(outstandingRequest);
     }
 
     return solverPerf;

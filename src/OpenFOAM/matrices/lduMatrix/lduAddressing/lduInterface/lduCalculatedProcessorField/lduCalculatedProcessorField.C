@@ -71,7 +71,7 @@ bool Foam::lduCalculatedProcessorField<Type>::ready() const
     if
     (
         this->outstandingSendRequest_ >= 0
-     && this->outstandingSendRequest_ < Pstream::nRequests()
+     && this->outstandingSendRequest_ < UPstream::nRequests()
     )
     {
         if (!UPstream::finishedRequest(this->outstandingSendRequest_))
@@ -84,7 +84,7 @@ bool Foam::lduCalculatedProcessorField<Type>::ready() const
     if
     (
         this->outstandingRecvRequest_ >= 0
-     && this->outstandingRecvRequest_ < Pstream::nRequests()
+     && this->outstandingRecvRequest_ < UPstream::nRequests()
     )
     {
         if (!UPstream::finishedRequest(this->outstandingRecvRequest_))
@@ -210,7 +210,7 @@ void Foam::lduCalculatedProcessorField<Type>::updateInterfaceMatrix
     if
     (
         outstandingRecvRequest_ >= 0
-     && outstandingRecvRequest_ < Pstream::nRequests()
+     && outstandingRecvRequest_ < UPstream::nRequests()
     )
     {
         UPstream::waitRequest(outstandingRecvRequest_);

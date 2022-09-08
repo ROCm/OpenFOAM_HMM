@@ -55,7 +55,7 @@ void do_exchangeBuf
     const bool wait
 )
 {
-    const label startOfRequests = Pstream::nRequests();
+    const label startOfRequests = UPstream::nRequests();
 
     // Set up receives
     // ~~~~~~~~~~~~~~~
@@ -132,7 +132,7 @@ void do_exchangeContainer
     const bool wait
 )
 {
-    const label startOfRequests = Pstream::nRequests();
+    const label startOfRequests = UPstream::nRequests();
 
     // Set up receives
     // ~~~~~~~~~~~~~~~

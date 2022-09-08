@@ -38,7 +38,8 @@ void Foam::functionObjects::mapFields::evaluateConstraintTypes
 {
     auto& fldBf = fld.boundaryFieldRef();
 
-    const UPstream::commsTypes commsType(UPstream::defaultCommsType);
+    const UPstream::commsTypes commsType = UPstream::defaultCommsType;
+    const label startOfRequests = UPstream::nRequests();
 
     if
     (
@@ -46,8 +47,6 @@ void Foam::functionObjects::mapFields::evaluateConstraintTypes
      || commsType == UPstream::commsTypes::nonBlocking
     )
     {
-        const label startOfRequests = UPstream::nRequests();
-
         forAll(fldBf, patchi)
         {
             fvPatchField<Type>& tgtField = fldBf[patchi];
@@ -63,11 +62,7 @@ void Foam::functionObjects::mapFields::evaluateConstraintTypes
         }
 
         // Wait for outstanding requests
-        if
-        (
-            UPstream::parRun()
-         && commsType == UPstream::commsTypes::nonBlocking
-        )
+        if (commsType == UPstream::commsTypes::nonBlocking)
         {
             UPstream::waitRequests(startOfRequests);
         }

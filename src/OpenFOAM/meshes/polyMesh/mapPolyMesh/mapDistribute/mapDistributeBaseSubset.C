@@ -186,8 +186,8 @@ void Foam::mapDistributeBase::exchangeMasks
             }
         }
 
-        // Wait for all to finish
-        Pstream::waitRequests(startOfRequests);
+        // Wait for outstanding requests
+        UPstream::waitRequests(startOfRequests);
     }
 
     // Receiving myself is just a copy
