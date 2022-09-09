@@ -68,7 +68,7 @@ Foam::ensightReadFile::detectBinaryHeader(const fileName& pathname)
         if
         (
             (buf.find("Binary") == std::string::npos)
-         || (buf.find("binary") == std::string::npos)
+         && (buf.find("binary") == std::string::npos)
         )
         {
             fmt = IOstreamOption::ASCII;
