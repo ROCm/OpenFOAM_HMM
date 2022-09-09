@@ -277,6 +277,46 @@ void Foam::faMesh::calcPatchStarts() const
 }
 
 
+void Foam::faMesh::calcWhichPatchFaces() const
+{
+    // Usually need both together
+    if (polyPatchFacesPtr_ || polyPatchIdsPtr_)
+    {
+        FatalErrorInFunction
+            << "Already allocated polyPatchFaces/polyPatchIds"
+            << abort(FatalError);
+    }
+
+    const polyBoundaryMesh& pbm = mesh().boundaryMesh();
+
+    polyPatchFacesPtr_.reset
+    (
+        new List<labelPair>(pbm.whichPatchFace(faceLabels_))
+    );
+
+    labelHashSet ids;
+
+    // Extract patch ids from (patch, facei) tuples
+    for (const labelPair& tup : *polyPatchFacesPtr_)
+    {
+        ids.insert(tup.first());
+    }
+
+    ids.erase(-1);  // Without internal faces (patchi == -1)
+
+    // parSync
+    Foam::reduce
+    (
+        ids,
+        bitOrOp<labelHashSet>(),
+        UPstream::msgType(),
+        this->comm()
+    );
+
+    polyPatchIdsPtr_.reset(new labelList(ids.sortedToc()));
+}
+
+
 void Foam::faMesh::calcLe() const
 {
     DebugInFunction

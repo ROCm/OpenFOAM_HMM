@@ -42,11 +42,12 @@ Author
 #ifndef Foam_faBoundaryMesh_H
 #define Foam_faBoundaryMesh_H
 
+#include "regIOobject.H"
 #include "faPatch.H"
+#include "labelPair.H"
 #include "lduInterfacePtrsList.H"
 #include "wordList.H"
 #include "pointField.H"
-#include "regIOobject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

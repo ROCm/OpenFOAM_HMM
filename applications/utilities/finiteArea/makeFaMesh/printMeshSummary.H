@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -36,11 +36,16 @@ Description
     {
         const faPatch& p = patches[patchi];
 
-         Info<< "  " << "patch " << p.index()
-             << " (size: " << returnReduce(p.size(), sumOp<label>())
-             << ") name: " << p.name()
-             << nl;
+        // Report physical size (nEdges) not virtual size
+        Info<< "  " << "patch " << p.index()
+            << " (size: " << returnReduce(p.nEdges(), sumOp<label>())
+            << ") name: " << p.name()
+            << nl;
     }
+
+    Info<< "----------------" << nl
+        << "Used polyPatches: " << flatOutput(aMesh.whichPolyPatches()) << nl;
+
 
     // Geometry information
     Info<< nl;

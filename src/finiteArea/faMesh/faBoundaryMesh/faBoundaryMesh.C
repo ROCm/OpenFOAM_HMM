@@ -609,32 +609,30 @@ Foam::label Foam::faBoundaryMesh::findPatchID
 
 Foam::label Foam::faBoundaryMesh::whichPatch(const label edgeIndex) const
 {
-    // Find out which patch the current face belongs to by comparing label
-    // with patch start labels.
-    // If the face is internal, return -1;
-    // if it is off the end of the list, abort
     if (edgeIndex < mesh().nInternalEdges())
     {
+        // Internal edge
         return -1;
     }
     else if (edgeIndex >= mesh().nEdges())
     {
+        // Bounds error: abort
         FatalErrorInFunction
             << "Edge " << edgeIndex
             << " out of bounds. Number of geometric edges " << mesh().nEdges()
             << abort(FatalError);
+
+        return -1;
     }
+
+    // Find patch that the edgeIndex belongs to.
 
     forAll(*this, patchi)
     {
         label start = mesh_.patchStarts()[patchi];
         label size = operator[](patchi).faPatch::size();
 
-        if
-        (
-            edgeIndex >= start
-         && edgeIndex < start + size
-        )
+        if (edgeIndex >= start && edgeIndex < start + size)
         {
             return patchi;
         }
@@ -642,7 +640,7 @@ Foam::label Foam::faBoundaryMesh::whichPatch(const label edgeIndex) const
 
     // If not in any of above, it's trouble!
     FatalErrorInFunction
-        << "error in patch search algorithm"
+        << "Error in patch search algorithm"
         << abort(FatalError);
 
     return -1;

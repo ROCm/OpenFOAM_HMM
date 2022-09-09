@@ -145,6 +145,32 @@ inline Foam::uindirectPrimitivePatch& Foam::faMesh::patch()
 }
 
 
+inline Foam::label Foam::faMesh::whichFace(const label meshFacei) const
+{
+    return faceLabels_.find(meshFacei);
+}
+
+
+inline const Foam::labelList& Foam::faMesh::whichPolyPatches() const
+{
+    if (!polyPatchFacesPtr_ || !polyPatchIdsPtr_)
+    {
+        calcWhichPatchFaces();
+    }
+    return *polyPatchIdsPtr_;
+}
+
+
+inline const Foam::List<Foam::labelPair>& Foam::faMesh::whichPatchFaces() const
+{
+    if (!polyPatchFacesPtr_ || !polyPatchIdsPtr_)
+    {
+        calcWhichPatchFaces();
+    }
+    return *polyPatchFacesPtr_;
+}
+
+
 inline bool Foam::faMesh::hasInternalEdgeLabels() const noexcept
 {
     return false;

@@ -253,6 +253,12 @@ class faMesh
         //- Primitive patch
         mutable std::unique_ptr<uindirectPrimitivePatch> patchPtr_;
 
+        //- List of poly patch/patch-face for faceLabels
+        mutable std::unique_ptr<List<labelPair>> polyPatchFacesPtr_;
+
+        //- List of polyPatch ids used by the area mesh
+        mutable std::unique_ptr<labelList> polyPatchIdsPtr_;
+
         //- List of proc/mesh-face for boundary edge neighbours
         mutable std::unique_ptr<List<labelPair>> bndConnectPtr_;
 
@@ -367,6 +373,10 @@ class faMesh
 
             //- Calculate patch starts in the edge list
             void calcPatchStarts() const;
+
+            //- Calculate which polyPatches, polyPatch/local-face
+            //- are related to the areaMesh
+            void calcWhichPatchFaces() const;
 
             //- Calculate edge lengths
             //  Triggers communication via calcEdgeAreaNormals
@@ -702,6 +712,14 @@ public:
             //- Return the underlying polyMesh face labels
             inline const labelList& faceLabels() const noexcept;
 
+            //- The area-face corresponding to the mesh-face, -1 if not found
+            inline label whichFace(const label meshFacei) const;
+
+            //- The polyPatches related to the areaMesh, in sorted order
+            inline const labelList& whichPolyPatches() const;
+
+            //- The polyPatch/local-face for each faceLabels()
+            inline const List<labelPair>& whichPatchFaces() const;
 
             //- Return parallel info
             const faGlobalMeshData& globalData() const;
@@ -760,6 +778,12 @@ public:
 
             //- Face normals of boundary halo neighbours for specified patch
             tmp<vectorField> haloFaceNormals(const label patchi) const;
+
+
+    // Interfacing
+
+        //- The volume (owner) cells associated with the area-mesh
+        labelList faceCells() const;
 
 
     // Storage management

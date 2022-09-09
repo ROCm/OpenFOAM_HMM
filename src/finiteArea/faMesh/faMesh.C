@@ -221,6 +221,8 @@ void Foam::faMesh::clearGeomNotAreas() const
 
     clearHalo();
     patchPtr_.reset(nullptr);
+    polyPatchFacesPtr_.reset(nullptr);
+    polyPatchIdsPtr_.reset(nullptr);
     bndConnectPtr_.reset(nullptr);
     deleteDemandDrivenData(SPtr_);
     deleteDemandDrivenData(patchStartsPtr_);
@@ -360,6 +362,8 @@ Foam::faMesh::faMesh
     curTimeIndex_(time().timeIndex()),
 
     patchPtr_(nullptr),
+    polyPatchFacesPtr_(nullptr),
+    polyPatchIdsPtr_(nullptr),
     bndConnectPtr_(nullptr),
     lduPtr_(nullptr),
 
@@ -464,6 +468,8 @@ Foam::faMesh::faMesh
     curTimeIndex_(time().timeIndex()),
 
     patchPtr_(nullptr),
+    polyPatchFacesPtr_(nullptr),
+    polyPatchIdsPtr_(nullptr),
     bndConnectPtr_(nullptr),
     lduPtr_(nullptr),
 
@@ -543,6 +549,8 @@ Foam::faMesh::faMesh
     curTimeIndex_(time().timeIndex()),
 
     patchPtr_(nullptr),
+    polyPatchFacesPtr_(nullptr),
+    polyPatchIdsPtr_(nullptr),
     bndConnectPtr_(nullptr),
     lduPtr_(nullptr),
 
@@ -703,6 +711,22 @@ const Foam::objectRegistry& Foam::faMesh::thisDb() const
 const Foam::word& Foam::faMesh::regionName() const
 {
     return polyMesh::regionName(thisDb().name());
+}
+
+
+Foam::labelList Foam::faMesh::faceCells() const
+{
+    const labelList& faceOwner = this->mesh().faceOwner();
+
+    labelList list(faceLabels_);
+
+    for (label& val : list)
+    {
+        // Transcribe from faceId to cellId (owner)
+        val = faceOwner[val];
+    }
+
+    return list;
 }
 
 
