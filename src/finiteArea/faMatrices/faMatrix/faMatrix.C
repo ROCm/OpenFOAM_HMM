@@ -2074,6 +2074,127 @@ Foam::tmp<Foam::faMatrix<Type>> Foam::operator*
 }
 
 
+template<class Type>
+Foam::tmp<Foam::GeometricField<Type, Foam::faPatchField, Foam::areaMesh>>
+Foam::operator&
+(
+    const faMatrix<Type>& M,
+    const DimensionedField<Type, areaMesh>& psi
+)
+{
+    auto tMphi = tmp<GeometricField<Type, faPatchField, areaMesh>>::New
+    (
+        IOobject
+        (
+            "M&" + psi.name(),
+            psi.instance(),
+            psi.mesh().mesh(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        psi.mesh(),
+        M.dimensions()/dimArea
+    );
+    auto& Mphi = tMphi.ref();
+
+    // Loop over field components
+    if (M.hasDiag())
+    {
+        for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
+        {
+            scalarField psiCmpt(psi.field().component(cmpt));
+            scalarField boundaryDiagCmpt(M.diag());
+            M.addBoundaryDiag(boundaryDiagCmpt, cmpt);
+            Mphi.primitiveFieldRef().replace(cmpt, -boundaryDiagCmpt*psiCmpt);
+        }
+    }
+    else
+    {
+        Mphi.primitiveFieldRef() = Zero;
+    }
+
+    Mphi.primitiveFieldRef() += M.lduMatrix::H(psi.field()) + M.source();
+    M.addBoundarySource(Mphi.primitiveFieldRef());
+
+    Mphi.primitiveFieldRef() /= -psi.mesh().S();
+    Mphi.correctBoundaryConditions();
+
+    return tMphi;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::GeometricField<Type, Foam::faPatchField, Foam::areaMesh>>
+Foam::operator&
+(
+    const faMatrix<Type>& M,
+    const tmp<DimensionedField<Type, areaMesh>>& tpsi
+)
+{
+    tmp<GeometricField<Type, faPatchField, areaMesh>> tMpsi = M & tpsi();
+    tpsi.clear();
+    return tMpsi;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::GeometricField<Type, Foam::faPatchField, Foam::areaMesh>>
+Foam::operator&
+(
+    const faMatrix<Type>& M,
+    const tmp<GeometricField<Type, faPatchField, areaMesh>>& tpsi
+)
+{
+    tmp<GeometricField<Type, faPatchField, areaMesh>> tMpsi = M & tpsi();
+    tpsi.clear();
+    return tMpsi;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::GeometricField<Type, Foam::faPatchField, Foam::areaMesh>>
+Foam::operator&
+(
+    const tmp<faMatrix<Type>>& tM,
+    const DimensionedField<Type, areaMesh>& psi
+)
+{
+    tmp<GeometricField<Type, faPatchField, areaMesh>> tMpsi = tM() & psi;
+    tM.clear();
+    return tMpsi;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::GeometricField<Type, Foam::faPatchField, Foam::areaMesh>>
+Foam::operator&
+(
+    const tmp<faMatrix<Type>>& tM,
+    const tmp<DimensionedField<Type, areaMesh>>& tpsi
+)
+{
+    tmp<GeometricField<Type, faPatchField, areaMesh>> tMpsi = tM() & tpsi();
+    tM.clear();
+    tpsi.clear();
+    return tMpsi;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::GeometricField<Type, Foam::faPatchField, Foam::areaMesh>>
+Foam::operator&
+(
+    const tmp<faMatrix<Type>>& tM,
+    const tmp<GeometricField<Type, faPatchField, areaMesh>>& tpsi
+)
+{
+    tmp<GeometricField<Type, faPatchField, areaMesh>> tMpsi = tM() & tpsi();
+    tM.clear();
+    tpsi.clear();
+    return tMpsi;
+}
+
+
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 template<class Type>
