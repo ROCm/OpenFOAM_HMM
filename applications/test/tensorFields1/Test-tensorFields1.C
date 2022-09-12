@@ -34,21 +34,29 @@ Application
 
 using namespace Foam;
 
-vectorField randomVectorField(label size)
+template<class Type>
+tmp<Field<Type>> randomField(Random& rnd, label dim)
 {
-    Random rnd;
+    auto tfld = tmp<Field<Type>>::New(dim);
+    auto& fld = tfld.ref();
 
-    vectorField vf(size);
-
-    forAll(vf, i)
+    for (Type& val : fld)
     {
-        for (direction cmpt=0; cmpt < vector::nComponents; ++cmpt)
+        for (direction cmpt=0; cmpt < pTraits<Type>::nComponents; ++cmpt)
         {
-            vf[i][cmpt] = rnd.position<label>(0, 100);
+            setComponent(val, cmpt) = rnd.position<label>(0, 100);
         }
     }
 
-    return vf;
+    return tfld;
+}
+
+
+template<class Type>
+tmp<Field<Type>> randomField(label dim)
+{
+    Random rnd;
+    return randomField<Type>(rnd, dim);
 }
 
 
@@ -251,7 +259,7 @@ int main(int argc, char *argv[])
     {
         Info<< nl << "vectorField" << nl;
 
-        vectorField vf1(randomVectorField(4));
+        vectorField vf1(randomField<vector>(4));
         FixedList<scalarField, 3> cmpts(scalarField(vf1.size()));
 
         Info<< nl

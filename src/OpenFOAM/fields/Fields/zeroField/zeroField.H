@@ -36,11 +36,11 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef zeroField_H
-#define zeroField_H
+#ifndef Foam_zeroField_H
+#define Foam_zeroField_H
 
 #include "zero.H"
-#include "scalar.H"
+#include "scalarFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

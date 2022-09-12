@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    Test-tensorFieldFields1
+    Test-FieldFields2
 
 \*---------------------------------------------------------------------------*/
 
@@ -73,21 +73,29 @@ void allocComponents
 }
 
 
-vectorField randomVectorField(label size)
+template<class Type>
+tmp<Field<Type>> randomField(Random& rnd, label dim)
 {
-    Random rnd;
+    auto tfld = tmp<Field<Type>>::New(dim);
+    auto& fld = tfld.ref();
 
-    vectorField vf(size);
-
-    forAll(vf, i)
+    for (Type& val : fld)
     {
-        for (direction cmpt=0; cmpt < vector::nComponents; ++cmpt)
+        for (direction cmpt=0; cmpt < pTraits<Type>::nComponents; ++cmpt)
         {
-            vf[i][cmpt] = rnd.position<label>(0, 100);
+            setComponent(val, cmpt) = rnd.position<label>(0, 100);
         }
     }
 
-    return vf;
+    return tfld;
+}
+
+
+template<class Type>
+tmp<Field<Type>> randomField(label dim)
+{
+    Random rnd;
+    return randomField<Type>(rnd, dim);
 }
 
 
@@ -191,7 +199,7 @@ int main(int argc, char *argv[])
         printFieldField(sf1);
 
         Info<< nl;
-        for (direction cmpt = 0; cmpt < vector::nComponents; ++cmpt)
+        for (direction cmpt = 0; cmpt < pTraits<vector>::nComponents; ++cmpt)
         {
             unzipRow(sf1, cmpt, slice[0]);
 
@@ -253,8 +261,9 @@ int main(int argc, char *argv[])
     {
         Info<< nl << "vectorField" << nl;
 
+        Random rnd;
         FieldField<Field, vector> vf1(1);
-        vf1.set(0, new vectorField(randomVectorField(4)));
+        vf1.set(0, randomField<vector>(rnd, 4));
 
         FixedList<FieldField<Field, scalar>, 3> cmpts;
         allocComponents(cmpts, 4);

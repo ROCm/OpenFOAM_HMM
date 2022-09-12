@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,10 +37,11 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef oneFieldField_H
-#define oneFieldField_H
+#ifndef Foam_oneFieldField_H
+#define Foam_oneFieldField_H
 
 #include "oneField.H"
+#include "Pair.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -65,9 +66,16 @@ public:
 
     // Member Operators
 
+        //- Return the field
         oneField operator[](const label) const noexcept
         {
             return oneField{};
+        }
+
+        //- Return the field element
+        one operator[](const labelPair&) const noexcept
+        {
+            return one{};
         }
 };
 

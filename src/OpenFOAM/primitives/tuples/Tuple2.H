@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,13 +37,12 @@ See also
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Tuple2_H
-#define Tuple2_H
+#ifndef Foam_Tuple2_H
+#define Foam_Tuple2_H
 
 #include "Istream.H"
 #include "Ostream.H"
 #include "Pair.H"
-#include <utility>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -79,79 +78,60 @@ public:
         Tuple2() = default;
 
         //- Copy construct from components
-        inline Tuple2(const T1& f, const T2& s)
+        Tuple2(const T1& f, const T2& s)
         :
             f_(f),
             s_(s)
         {}
 
         //- Move construct from components
-        inline Tuple2(T1&& f, T2&& s)
+        Tuple2(T1&& f, T2&& s)
         :
             f_(std::move(f)),
             s_(std::move(s))
         {}
 
         //- Copy construct from std::pair
-        inline Tuple2(const std::pair<T1,T2>& vals)
+        Tuple2(const std::pair<T1,T2>& vals)
         :
             f_(vals.first),
             s_(vals.second)
         {}
 
         //- Move construct from std::pair
-        inline Tuple2(std::pair<T1,T2>&& vals)
+        Tuple2(std::pair<T1,T2>&& vals)
         :
             f_(std::move(vals.first)),
             s_(std::move(vals.second))
         {}
 
         //- Construct from Istream
-        inline explicit Tuple2(Istream& is)
+        explicit Tuple2(Istream& is)
         {
-            is >> *this;
+            is.readBegin("Tuple2");
+            is >> f_ >> s_;
+            is.readEnd("Tuple2");
+            is.check(FUNCTION_NAME);
         }
 
 
     // Member Functions
 
         //- Return first
-        inline const T1& first() const noexcept
-        {
-            return f_;
-        }
+        const T1& first() const noexcept { return f_; }
 
         //- Return first
-        inline T1& first() noexcept
-        {
-            return f_;
-        }
+        T1& first() noexcept { return f_; }
 
         //- Return second
-        inline const T2& second() const noexcept
-        {
-            return s_;
-        }
+        const T2& second() const noexcept { return s_; }
 
         //- Return second
-        inline T2& second() noexcept
-        {
-            return s_;
-        }
+        T2& second() noexcept { return s_; }
 };
 
 
 // * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
-
-//- Hashing for Tuple2 data
-template<class T1, class T2>
-struct Hash<Tuple2<T1, T2>>
-{
-    unsigned operator()(const Tuple2<T1, T2>& obj, unsigned seed=0) const
-    {
-        return Hash<T2>()(obj.second(), Hash<T1>()(obj.first(), seed));
-    }
-};
 
 //- Hashing for std::pair data
 template<class T1, class T2>
@@ -160,6 +140,17 @@ struct Hash<std::pair<T1, T2>>
     unsigned operator()(const std::pair<T1, T2>& obj, unsigned seed=0) const
     {
         return Hash<T2>()(obj.second, Hash<T1>()(obj.first, seed));
+    }
+};
+
+
+//- Hashing for Tuple2 data
+template<class T1, class T2>
+struct Hash<Tuple2<T1, T2>>
+{
+    unsigned operator()(const Tuple2<T1, T2>& obj, unsigned seed=0) const
+    {
+        return Hash<T2>()(obj.second(), Hash<T1>()(obj.first(), seed));
     }
 };
 
@@ -300,7 +291,20 @@ struct maxFirstEqOp
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-//- Read Tuple2 from Istream, discarding contents of existing Tuple2.
+//- Read std::pair from Istream
+template<class T1, class T2>
+inline Istream& operator>>(Istream& is, std::pair<T1,T2>& t)
+{
+    is.readBegin("pair");
+    is >> t.first >> t.second;
+    is.readEnd("pair");
+
+    is.check(FUNCTION_NAME);
+    return is;
+}
+
+
+//- Read Tuple2 from Istream
 template<class T1, class T2>
 inline Istream& operator>>(Istream& is, Tuple2<T1,T2>& t)
 {
@@ -313,16 +317,14 @@ inline Istream& operator>>(Istream& is, Tuple2<T1,T2>& t)
 }
 
 
-//- Read std::pair from Istream
+//- Write std::pair to Ostream.
 template<class T1, class T2>
-inline Istream& operator>>(Istream& is, std::pair<T1,T2>& t)
+inline Ostream& operator<<(Ostream& os, const std::pair<T1,T2>& t)
 {
-    is.readBegin("std::pair");
-    is >> t.first >> t.second;
-    is.readEnd("std::pair");
-
-    is.check(FUNCTION_NAME);
-    return is;
+    os  << token::BEGIN_LIST
+        << t.first << token::SPACE << t.second
+        << token::END_LIST;
+    return os;
 }
 
 
@@ -333,19 +335,6 @@ inline Ostream& operator<<(Ostream& os, const Tuple2<T1,T2>& t)
     os  << token::BEGIN_LIST
         << t.first() << token::SPACE << t.second()
         << token::END_LIST;
-
-    return os;
-}
-
-
-//- Write std::pair to Ostream.
-template<class T1, class T2>
-inline Ostream& operator<<(Ostream& os, const std::pair<T1,T2>& t)
-{
-    os  << token::BEGIN_LIST
-        << t.first << token::SPACE << t.second
-        << token::END_LIST;
-
     return os;
 }
 

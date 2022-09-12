@@ -298,6 +298,20 @@ tmp<FieldField<Field, Type>> FieldField<Field, Type>::T() const
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<template<class> class Field, class Type>
+const Type& FieldField<Field, Type>::operator[](const labelPair& index) const
+{
+    return this->operator[](index.first())[index.second()];
+}
+
+
+template<template<class> class Field, class Type>
+Type& FieldField<Field, Type>::operator[](const labelPair& index)
+{
+    return this->operator[](index.first())[index.second()];
+}
+
+
+template<template<class> class Field, class Type>
 void FieldField<Field, Type>::operator=(const FieldField<Field, Type>& ff)
 {
     if (this == &ff)
@@ -352,6 +366,16 @@ void FieldField<Field, Type>::operator=(const Type& val)
     forAll(*this, i)
     {
         this->operator[](i) = val;
+    }
+}
+
+
+template<template<class> class Field, class Type>
+void FieldField<Field, Type>::operator=(const Foam::zero)
+{
+    forAll(*this, i)
+    {
+        this->operator[](i) = Foam::zero{};
     }
 }
 

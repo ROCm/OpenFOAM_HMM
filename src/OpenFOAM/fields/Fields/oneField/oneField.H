@@ -36,11 +36,11 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef oneField_H
-#define oneField_H
+#ifndef Foam_oneField_H
+#define Foam_oneField_H
 
 #include "one.H"
-#include "scalar.H"
+#include "scalarFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

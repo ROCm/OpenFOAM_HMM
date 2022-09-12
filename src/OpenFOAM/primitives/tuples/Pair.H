@@ -39,8 +39,8 @@ See also
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Pair_H
-#define Pair_H
+#ifndef Foam_Pair_H
+#define Foam_Pair_H
 
 #include "FixedList.H"
 #include "Istream.H"
