@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2020,2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -158,9 +158,27 @@ const
     const face& f = mesh_.faces()[facei];
     const label fp0 = max(0, mesh_.tetBasePtIs()[facei]);
 
+    // Work out triangle index on this face. Assume 'fan' triangulation starting
+    // from fp0. E.g. 6 vertices on face -> 4 triangles. First and last triangle
+    // use consecutive vertices
+    //
+    //    fp    | triangle | vertices
+    //    ------|----------|---------
+    //    fp0   |  0       | fp0,fp0+1,fp0+2
+    //    fp0+1 |  0       |  ,,
+    //    fp0+2 |  1       | fp0,fp0+2,fp0+3
+    //    fp0+3 |  2       | fp0,fp0+3,fp0+4
+    //    fp0+4 |  3       | fp0,fp0+4,fp0+3
+    //    fp0+5 |  3       |  ,,
+
+
     // Work out triangle index on this face
     label thisTrii;
     if (fp == fp0)
+    {
+        thisTrii = 0;
+    }
+    else if (fp == f.fcIndex(fp0))
     {
         thisTrii = 0;
     }
@@ -168,9 +186,14 @@ const
     {
         thisTrii = f.size()-3;
     }
+    else if (fp < fp0)
+    {
+        const label fpB = fp+f.size();
+        thisTrii = (fpB-fp0-1);
+    }
     else
     {
-        thisTrii = (fp-fp0-1) % (f.size()-2);
+        thisTrii = (fp-fp0-1);
     }
     return thisTrii;
 }
