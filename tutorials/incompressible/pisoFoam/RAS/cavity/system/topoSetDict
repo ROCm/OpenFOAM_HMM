@@ -304,6 +304,15 @@ actions
     }
 
     {
+        name    faceCell1c;
+        type    faceSet;
+        action  new;
+        source  cellToFace;
+        option  outside;
+        set     cylinder1;
+    }
+
+    {
         name        faceCylinder1;
         type        faceSet;
         action      new;

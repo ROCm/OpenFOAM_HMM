@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,8 +33,8 @@ Description
     Operands:
     \table
       Operand   | Type       | Location
-      input     | cellSet(s) | $FOAM_CASE/constant/polyMesh/sets/\<set\>
-      output    | faceSet    | $FOAM_CASE/constant/polyMesh/sets/\<set\>
+      input     | cellSet(s) | constant/polyMesh/sets/\<set\>
+      output    | faceSet    | constant/polyMesh/sets/\<set\>
     \endtable
 
 Usage
@@ -68,7 +68,7 @@ Usage
 
     where the entries mean:
     \table
-      Property   | Description                         | Type | Req'd | Dflt
+      Property   | Description                         | Type |  Reqd | Deflt
       name       | Name of faceSet                     | word |  yes  | -
       type       | Type name: faceSet                  | word |  yes  | -
       action     | Action applied on faces - see below | word |  yes  | -
@@ -87,18 +87,20 @@ Usage
     \verbatim
       all     | All faces of cells in the cellSet
       both    | Faces where both neighbours are in the cellSet
+      outside | Faces with only one neighbour in the cellSet
     \endverbatim
 
     Options for the conditional mandatory entries:
     \verbatim
-      Entry    | Description                    | Type     | Req'd  | Dflt
-      sets     | Names of input cellSets        | wordList | cond'l | -
-      set      | Name of input cellSet          | word     | cond'l | -
+      Entry    | Description                    | Type     | Reqd   | Deflt
+      sets     | Names of input cellSets        | wordList | choice | -
+      set      | Name of input cellSet          | word     | choice | -
     \endverbatim
 
 Note
-    The order of precedence among the conditional mandatory entries from the
+  - The order of precedence among the conditional mandatory entries from the
     highest to the lowest is \c sets, and \c set.
+  - The \c outside option applies to the cellSets individually.
 
 See also
     - Foam::topoSetSource
@@ -109,8 +111,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cellToFace_H
-#define cellToFace_H
+#ifndef Foam_cellToFace_H
+#define Foam_cellToFace_H
 
 #include "topoSetFaceSource.H"
 #include "Enum.H"
@@ -121,7 +123,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class cellToFace Declaration
+                        Class cellToFace Declaration
 \*---------------------------------------------------------------------------*/
 
 class cellToFace
@@ -133,7 +135,8 @@ public:
         enum cellAction
         {
             ALL,
-            BOTH
+            BOTH,
+            OUTSIDE
         };
 
 
