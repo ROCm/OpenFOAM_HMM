@@ -440,6 +440,15 @@ actions
     // }
 
     {
+        name    cellToFaceZone1;
+        type    faceZoneSet;
+        action  new;
+        source  cellToFaceZone;
+        set     cylinder1;
+        flip    true;
+    }
+
+    {
         name    pointBox1;
         type    pointSet;
         action  new;
