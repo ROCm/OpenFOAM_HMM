@@ -193,7 +193,7 @@ void Foam::fvMeshAdder::MapVolField
                 const polyPatch& oldPatch =
                     fldToAdd.mesh().boundaryMesh()[patchi];
 
-                if (!bfld(newPatchi))
+                if (!bfld.set(newPatchi))
                 {
                     // First occurrence of newPatchi. Map from existing
                     // patchField
@@ -503,7 +503,7 @@ void Foam::fvMeshAdder::MapSurfaceField
                 const polyPatch& oldPatch =
                     fldToAdd.mesh().boundaryMesh()[patchi];
 
-                if (!bfld(newPatchi))
+                if (!bfld.set(newPatchi))
                 {
                     // First occurrence of newPatchi. Map from existing
                     // patchField

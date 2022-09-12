@@ -100,23 +100,10 @@ public:
 
     // Member Functions
 
-    // Access
+    // Sizing
 
         //- Size of the underlying storage.
         inline label capacity() const noexcept;
-
-        //- Return const pointer to element (can be nullptr),
-        //- with bounds checking.
-        //  The return value can be tested as a bool.
-        const T* get(const label i) const { return this->test(i); }
-
-        //- Return const pointer to element (if set) or nullptr,
-        //- with bounds checking.
-        //  The return value can be tested as a bool.
-        const T* set(const label i) const { return this->test(i); }
-
-
-    // Sizing
 
         //- Reserve allocation space for at least this size.
         inline void reserve(const label len);
@@ -164,13 +151,10 @@ public:
         inline void append(T* ptr);
 
         //- Move append an element to the end of the list
-        inline void append(autoPtr<T>& ptr);
+        inline void append(std::unique_ptr<T>&& ptr);
 
         //- Move append an element to the end of the list
         inline void append(autoPtr<T>&& ptr);
-
-        //- Move append an element to the end of the list
-        inline void append(std::unique_ptr<T>&& ptr);
 
         //- Move or clone append a tmp to the end of the list
         inline void append(const refPtr<T>& ptr);
@@ -192,22 +176,24 @@ public:
         template<class... Args>
         inline autoPtr<T> emplace(const label i, Args&&... args);
 
-        //- Set element to given pointer and return old element (can be null)
+        //- Set element to given pointer and return old element (can be null).
+        //- Auto-sizes list as required.
         inline autoPtr<T> set(const label i, T* ptr);
 
-        //- Set element to given autoPtr and return old element
-        inline autoPtr<T> set(const label i, autoPtr<T>& ptr);
-
-        //- Set element to given autoPtr and return old element
-        inline autoPtr<T> set(const label i, autoPtr<T>&& ptr);
-
         //- Set element to given pointer and return old element
+        //- Auto-sizes list as required.
         inline autoPtr<T> set(const label i, std::unique_ptr<T>&& ptr);
 
+        //- Set element to given autoPtr and return old element
+        //- Auto-sizes list as required.
+        inline autoPtr<T> set(const label i, autoPtr<T>&& ptr);
+
         //- Set element to given refPtr and return old element
+        //- Auto-sizes list as required.
         inline autoPtr<T> set(const label i, const refPtr<T>& ptr);
 
         //- Set element to given tmp and return old element
+        //- Auto-sizes list as required.
         inline autoPtr<T> set(const label i, const tmp<T>& ptr);
 
         //- Reorder elements. Reordering must be unique (ie, shuffle).
@@ -235,6 +221,21 @@ public:
         //- Move assignment with different sizing parameters
         template<int AnySizeMin>
         inline void operator=(PtrDynList<T, AnySizeMin>&& list);
+
+
+    // Housekeeping
+
+        //- Move append an element to the end of the list
+        void append(autoPtr<T>& ptr)
+        {
+            this->append(std::move(ptr));
+        }
+
+        //- Set element to given autoPtr and return old element
+        autoPtr<T> set(const label i, autoPtr<T>& ptr)
+        {
+            return this->set(i, std::move(ptr));
+        }
 };
 
 

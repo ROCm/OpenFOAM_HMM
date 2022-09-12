@@ -314,7 +314,7 @@ void Foam::lduPrimitiveMeshAssembly::update
                         interfaces().set
                         (
                             globalPatchId,
-                            interfacesLst(patchI)
+                            interfacesLst.get(patchI)
                         );
                     }
                 }

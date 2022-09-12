@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -117,7 +117,7 @@ inline void Foam::PtrList<T>::append(T* ptr)
 
 
 template<class T>
-inline void Foam::PtrList<T>::append(autoPtr<T>& ptr)
+inline void Foam::PtrList<T>::append(std::unique_ptr<T>&& ptr)
 {
     UPtrList<T>::append(ptr.release());
 }
@@ -131,23 +131,16 @@ inline void Foam::PtrList<T>::append(autoPtr<T>&& ptr)
 
 
 template<class T>
-inline void Foam::PtrList<T>::append(std::unique_ptr<T>&& ptr)
-{
-    UPtrList<T>::append(ptr.release());
-}
-
-
-template<class T>
 inline void Foam::PtrList<T>::append(const refPtr<T>& ptr)
 {
-    UPtrList<T>::append(ptr.ptr());
+    UPtrList<T>::append(ptr.ptr());  // release or clone
 }
 
 
 template<class T>
 inline void Foam::PtrList<T>::append(const tmp<T>& ptr)
 {
-    UPtrList<T>::append(ptr.ptr());
+    UPtrList<T>::append(ptr.ptr());  // release or clone
 }
 
 
@@ -202,7 +195,7 @@ template<class T>
 inline Foam::autoPtr<T> Foam::PtrList<T>::set
 (
     const label i,
-    autoPtr<T>& ptr
+    std::unique_ptr<T>&& ptr
 )
 {
     return set(i, ptr.release());
@@ -224,21 +217,10 @@ template<class T>
 inline Foam::autoPtr<T> Foam::PtrList<T>::set
 (
     const label i,
-    std::unique_ptr<T>&& ptr
-)
-{
-    return set(i, ptr.release());
-}
-
-
-template<class T>
-inline Foam::autoPtr<T> Foam::PtrList<T>::set
-(
-    const label i,
     const refPtr<T>& ptr
 )
 {
-    return set(i, ptr.ptr());
+    return set(i, ptr.ptr());  // release or clone
 }
 
 
@@ -249,7 +231,7 @@ inline Foam::autoPtr<T> Foam::PtrList<T>::set
     const tmp<T>& ptr
 )
 {
-    return set(i, ptr.ptr());
+    return set(i, ptr.ptr());  // release or clone
 }
 
 

@@ -124,16 +124,36 @@ inline const T* Foam::UPtrList<T>::test(const label i) const
 
 
 template<class T>
-inline T* Foam::UPtrList<T>::get(const label i)
+inline const T* Foam::UPtrList<T>::get(const label i) const
 {
-    return ptrs_[i];
+    return (i >= 0 && i < ptrs_.size()) ? ptrs_[i] : nullptr;
 }
 
 
 template<class T>
-inline const T* Foam::UPtrList<T>::get(const label i) const
+inline T* Foam::UPtrList<T>::get(const label i)
 {
-    return ptrs_[i];
+    return (i >= 0 && i < ptrs_.size()) ? ptrs_[i] : nullptr;
+}
+
+
+template<class T>
+inline const T* Foam::UPtrList<T>::set(const label i) const
+{
+    return (i >= 0 && i < ptrs_.size()) ? ptrs_[i] : nullptr;
+}
+
+
+template<class T>
+inline T* Foam::UPtrList<T>::set(const label i, T* ptr)
+{
+    T* old = ptrs_[i];
+    if (old == ptr)
+    {
+        return nullptr;  // Content did not change
+    }
+    ptrs_[i] = ptr;
+    return old;
 }
 
 
@@ -209,19 +229,6 @@ inline void Foam::UPtrList<T>::append(UPtrList<T>&& other)
 
 
 template<class T>
-inline T* Foam::UPtrList<T>::set(const label i, T* ptr)
-{
-    T* old = ptrs_[i];
-    if (old == ptr)
-    {
-        return nullptr;  // Content did not change
-    }
-    ptrs_[i] = ptr;
-    return old;
-}
-
-
-template<class T>
 inline void Foam::UPtrList<T>::checkNonNull() const
 {
     ptrs_.checkNonNull();
@@ -261,13 +268,6 @@ inline T& Foam::UPtrList<T>::operator[](const label i)
     }
 
     return *ptr;
-}
-
-
-template<class T>
-inline const T* Foam::UPtrList<T>::operator()(const label i) const
-{
-    return ptrs_[i];
 }
 
 

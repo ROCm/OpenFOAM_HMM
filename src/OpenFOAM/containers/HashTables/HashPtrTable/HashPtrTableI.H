@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "autoPtr.H"
+#include "refPtr.H"
+#include "tmp.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -39,8 +41,22 @@ inline Foam::HashPtrTable<T, Key, Hash>::HashPtrTable(const label size)
 // * * * * * * * * * * * * * * * Member Functions * * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>
+inline const T* Foam::HashPtrTable<T, Key, Hash>::test(const Key& key) const
+{
+    // Like lookup() with a nullptr
+    const const_iterator iter(this->cfind(key));
+    if (iter.good())
+    {
+        return iter.val();
+    }
+    return nullptr;
+}
+
+
+template<class T, class Key, class Hash>
 inline const T* Foam::HashPtrTable<T, Key, Hash>::get(const Key& key) const
 {
+    // Like lookup() with a nullptr
     const const_iterator iter(this->cfind(key));
     if (iter.good())
     {
@@ -83,7 +99,7 @@ template<class T, class Key, class Hash>
 inline bool Foam::HashPtrTable<T, Key, Hash>::insert
 (
     const Key& key,
-    autoPtr<T>& ptr
+    std::unique_ptr<T>&& ptr
 )
 {
     if (parent_type::insert(key, ptr.get()))
@@ -101,23 +117,6 @@ inline bool Foam::HashPtrTable<T, Key, Hash>::insert
 (
     const Key& key,
     autoPtr<T>&& ptr
-)
-{
-    if (parent_type::insert(key, ptr.get()))
-    {
-        ptr.release(); // Now owned by HashPtrTable
-        return true;
-    }
-
-    return false;
-}
-
-
-template<class T, class Key, class Hash>
-inline bool Foam::HashPtrTable<T, Key, Hash>::insert
-(
-    const Key& key,
-    std::unique_ptr<T>&& ptr
 )
 {
     if (parent_type::insert(key, ptr.get()))
@@ -154,7 +153,7 @@ template<class T, class Key, class Hash>
 inline bool Foam::HashPtrTable<T, Key, Hash>::set
 (
     const Key& key,
-    autoPtr<T>& ptr
+    std::unique_ptr<T>&& ptr
 )
 {
     return this->set(key, ptr.release());
@@ -176,10 +175,21 @@ template<class T, class Key, class Hash>
 inline bool Foam::HashPtrTable<T, Key, Hash>::set
 (
     const Key& key,
-    std::unique_ptr<T>&& ptr
+    const refPtr<T>& ptr
 )
 {
-    return this->set(key, ptr.release());
+    return this->set(key, ptr.ptr());  // release or clone
+}
+
+
+template<class T, class Key, class Hash>
+inline bool Foam::HashPtrTable<T, Key, Hash>::set
+(
+    const Key& key,
+    const tmp<T>& ptr
+)
+{
+    return this->set(key, ptr.ptr());  // release or clone
 }
 
 

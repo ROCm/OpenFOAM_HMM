@@ -245,12 +245,8 @@ Foam::coordinateSystems::cfind(const word& name) const
             << name << '=' << index << endl;
     }
 
-    if (index < 0)
-    {
-        return nullptr;
-    }
-
-    return this->operator()(index);
+    // Return nullptr if not found
+    return PtrList<coordinateSystem>::test(index);
 }
 
 

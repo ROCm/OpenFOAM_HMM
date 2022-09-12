@@ -234,19 +234,20 @@ public:
         //  The return value can be tested as a bool.
         inline const T* test(const label i) const;
 
+        //- Return const pointer to element (can be nullptr),
+        //- or nullptr for out-of-range access (ie, \em with bounds checking).
+        //  The return value can be tested as a bool.
+        inline const T* get(const label i) const;
+
         //- Return pointer to element (can be nullptr),
-        //- \em without bounds checking.
+        //- or nullptr for out-of-range access (ie, \em with bounds checking).
         //  The return value can be tested as a bool.
         inline T* get(const label i);
 
         //- Return const pointer to element (can be nullptr),
-        //- \em without bounds checking.
-        inline const T* get(const label i) const;
-
-        //- Return const pointer to element (can be nullptr),
-        //- \em without bounds checking - same as get().
+        //- or nullptr for out-of-range access (ie, \em with bounds checking).
         //  The return value can be tested as a bool.
-        const T* set(const label i) const { return this->get(i); }
+        inline const T* set(const label i) const;
 
 
     // Edit
@@ -307,8 +308,10 @@ public:
         //- Return reference to the element
         inline T& operator[](const label i);
 
-        //- Return const pointer to the element - same as get().
-        inline const T* operator()(const label i) const;
+        //- Deprecated(2022-09) - same as get()
+        //  \deprecated(2022-09) - use get(), set() or test() methods
+        FOAM_DEPRECATED_FOR(2022-09, "get(), set() or test() methods")
+        const T* operator()(const label i) const { return this->get(i); }
 
         //- Copy assignment (shallow copies addresses)
         inline void operator=(const UPtrList<T>& list);

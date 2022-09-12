@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,8 +38,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef HashPtrTable_H
-#define HashPtrTable_H
+#ifndef Foam_HashPtrTable_H
+#define Foam_HashPtrTable_H
 
 #include "HashTable.H"
 #include <memory>
@@ -50,8 +50,9 @@ namespace Foam
 {
 
 // Forward Declarations
-
 template<class T> class autoPtr;
+template<class T> class refPtr;
+template<class T> class tmp;
 template<class T, class Key, class Hash> class HashPtrTable;
 
 template<class T, class Key, class Hash>
@@ -123,8 +124,12 @@ public:
 
     // Access
 
-        //- Return const pointer associated with given entry,
-        //- returning a nullptr if the key does not exist in the table.
+        //- Return const pointer associated with given entry or a nullptr
+        //- if the key does not exist in the table.
+        inline const T* test(const Key& key) const;
+
+        //- Return const pointer associated with given entry or a nullptr
+        //- if the key does not exist in the table.
         inline const T* get(const Key& key) const;
 
 
@@ -211,31 +216,43 @@ public:
         inline bool insert(const Key&, T*) = delete;
 
         //- Insert a new entry, not overwriting existing entries.
-        //
-        //  \return True if the entry inserted (not previously in table)
-        inline bool insert(const Key& key, autoPtr<T>& ptr);
-
-        //- Insert a new entry, not overwriting existing entries.
-        //
-        //  \return True if the entry inserted (not previously in table)
-        inline bool insert(const Key& key, autoPtr<T>&& ptr);
-
-        //- Insert a new entry, not overwriting existing entries.
-        //
         //  \return True if the entry inserted (not previously in table)
         inline bool insert(const Key& key, std::unique_ptr<T>&& ptr);
 
-        //- Assign a new entry, overwriting existing entries.
+        //- Insert a new entry, not overwriting existing entries.
+        //  \return True if the entry inserted (not previously in table)
+        inline bool insert(const Key& key, autoPtr<T>&& ptr);
+
+        //- Assign a new entry, overwrites existing
         inline bool set(const Key& key, T* ptr);
 
-        //- Assign a new entry, overwriting existing entries.
-        inline bool set(const Key& key, autoPtr<T>& ptr);
+        //- Assign a new entry, overwrites existing
+        inline bool set(const Key& key, std::unique_ptr<T>&& ptr);
 
-        //- Assign a new entry, overwriting existing entries.
+        //- Assign a new entry, overwrites existing
         inline bool set(const Key& key, autoPtr<T>&& ptr);
 
-        //- Assign a new entry, overwriting existing entries.
-        inline bool set(const Key& key, std::unique_ptr<T>&& ptr);
+        //- Assign a new entry from refPtr (move or clone), overwrites existing
+        inline bool set(const Key& key, const refPtr<T>& ptr);
+
+        //- Assign a new entry from tmp (move or clone), overwrites existing
+        inline bool set(const Key& key, const tmp<T>& ptr);
+
+
+    // Housekeeping
+
+        //- Insert a new entry, not overwriting existing entries.
+        //  \return True if the entry inserted (not previously in table)
+        bool insert(const Key& key, autoPtr<T>& ptr)
+        {
+            return this->insert(key, std::move(ptr));
+        }
+
+        //- Assign a new entry, overwrites existing
+        bool set(const Key& key, autoPtr<T>& ptr)
+        {
+            return this->set(key, std::move(ptr));
+        }
 };
 
 

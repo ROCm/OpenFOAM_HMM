@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -76,13 +76,8 @@ Foam::liquidMixtureProperties::liquidMixtureProperties
 )
 :
     components_(lm.components_),
-    properties_(lm.properties_.size())
-{
-    forAll(properties_, i)
-    {
-        properties_.set(i, lm.properties_(i)->clone());
-    }
-}
+    properties_(lm.properties_.clone())
+{}
 
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //

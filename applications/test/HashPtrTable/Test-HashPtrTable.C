@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +31,10 @@ Description
 #include <memory>
 #include <iostream>
 #include "autoPtr.H"
-#include "HashPtrTable.H"
+#include "refPtr.H"
+#include "tmp.H"
+#include "PtrMap.H"
+#include "primitiveFields.H"
 
 using namespace Foam;
 
@@ -249,6 +252,42 @@ int main()
 
         Info<< "Table: " << tbl << nl;
     }
+
+    {
+        PtrMap<scalarField> fields;
+
+        {
+            const label patchi = 2;
+
+            scalarField fld1(patchi, 5.0);
+            scalarField fld2(patchi, 8.0);
+
+            // assign from tmp<>
+            fields.set( patchi, (fld1 * fld2));
+        }
+
+        {
+            const label patchi = 3;
+
+            scalarField fld1(patchi, 6.0);
+
+            // From tmp (clone)
+            fields.set(patchi, tmp<scalarField>(fld1));
+        }
+
+        {
+            const label patchi = 4;
+
+            // From refPtr
+            fields.set(patchi, refPtr<scalarField>::New(patchi, 10.0));
+        }
+
+        Info<< nl
+            << "PtrMap:" << nl
+            << fields << endl;
+    }
+
+    Info<< "\nEnd" << nl;
 
     return 0;
 }

@@ -70,9 +70,10 @@ Foam::pointFieldReconstructor::reconstructField
             // check if the boundary patch is not a processor patch
             if (curBPatch >= 0)
             {
-                if (!patchFields(curBPatch))
+                if (!patchFields.set(curBPatch))
                 {
-                    patchFields.set(
+                    patchFields.set
+                    (
                         curBPatch,
                         pointPatchField<Type>::New
                         (

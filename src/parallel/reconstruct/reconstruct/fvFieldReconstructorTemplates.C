@@ -116,7 +116,7 @@ Foam::fvFieldReconstructor::reconstructField
             {
                 // Regular patch. Fast looping
 
-                if (!patchFields(curBPatch))
+                if (!patchFields.set(curBPatch))
                 {
                     patchFields.set
                     (
@@ -184,7 +184,7 @@ Foam::fvFieldReconstructor::reconstructField
                     {
                         label curBPatch = mesh_.boundaryMesh().whichPatch(curF);
 
-                        if (!patchFields(curBPatch))
+                        if (!patchFields.set(curBPatch))
                         {
                             patchFields.set
                             (
@@ -217,7 +217,7 @@ Foam::fvFieldReconstructor::reconstructField
         if
         (
             isType<emptyFvPatch>(mesh_.boundary()[patchi])
-         && !patchFields(patchi)
+         && !patchFields.set(patchi)
         )
         {
             patchFields.set
@@ -314,7 +314,7 @@ Foam::fvFieldReconstructor::reconstructField
             {
                 // Regular patch. Fast looping
 
-                if (!patchFields(curBPatch))
+                if (!patchFields.set(curBPatch))
                 {
                     patchFields.set
                     (
@@ -370,7 +370,7 @@ Foam::fvFieldReconstructor::reconstructField
                             label curBPatch =
                                 mesh_.boundaryMesh().whichPatch(curF);
 
-                            if (!patchFields(curBPatch))
+                            if (!patchFields.set(curBPatch))
                             {
                                 patchFields.set
                                 (
@@ -410,7 +410,7 @@ Foam::fvFieldReconstructor::reconstructField
         if
         (
             isType<emptyFvPatch>(mesh_.boundary()[patchi])
-         && !patchFields(patchi)
+         && !patchFields.set(patchi)
         )
         {
             patchFields.set

@@ -178,9 +178,9 @@ public:
 
         //- Same as found() - return true if key exists in the set.
         //  Method name compatibility with bitSet and boolList.
-        bool test(const Key& key) const noexcept
+        bool test(const Key& key) const
         {
-            return found(key);
+            return this->found(key);
         }
 
 

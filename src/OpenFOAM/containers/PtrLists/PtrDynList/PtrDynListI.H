@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -241,7 +241,7 @@ inline void Foam::PtrDynList<T, SizeMin>::append(T* ptr)
 
 
 template<class T, int SizeMin>
-inline void Foam::PtrDynList<T, SizeMin>::append(autoPtr<T>& ptr)
+inline void Foam::PtrDynList<T, SizeMin>::append(std::unique_ptr<T>&& ptr)
 {
     this->append(ptr.release());
 }
@@ -255,23 +255,16 @@ inline void Foam::PtrDynList<T, SizeMin>::append(autoPtr<T>&& ptr)
 
 
 template<class T, int SizeMin>
-inline void Foam::PtrDynList<T, SizeMin>::append(std::unique_ptr<T>&& ptr)
-{
-    this->append(ptr.release());
-}
-
-
-template<class T, int SizeMin>
 inline void Foam::PtrDynList<T, SizeMin>::append(const refPtr<T>& ptr)
 {
-    this->append(ptr.ptr());
+    this->append(ptr.ptr());  // release or clone
 }
 
 
 template<class T, int SizeMin>
 inline void Foam::PtrDynList<T, SizeMin>::append(const tmp<T>& ptr)
 {
-    this->append(ptr.ptr());
+    this->append(ptr.ptr());  // release or clone
 }
 
 
@@ -375,7 +368,7 @@ template<class T, int SizeMin>
 inline Foam::autoPtr<T> Foam::PtrDynList<T, SizeMin>::set
 (
     const label i,
-    autoPtr<T>& ptr
+    std::unique_ptr<T>&& ptr
 )
 {
     return this->set(i, ptr.release());
@@ -397,21 +390,11 @@ template<class T, int SizeMin>
 inline Foam::autoPtr<T> Foam::PtrDynList<T, SizeMin>::set
 (
     const label i,
-    std::unique_ptr<T>&& ptr
-)
-{
-    return this->set(i, ptr.release());
-}
-
-
-template<class T, int SizeMin>
-inline Foam::autoPtr<T> Foam::PtrDynList<T, SizeMin>::set
-(
-    const label i,
     const refPtr<T>& ptr
 )
 {
-    return this->set(i, ptr.ptr());
+    return this->set(i, ptr.ptr());  // release or clone
+
 }
 
 
@@ -422,7 +405,7 @@ inline Foam::autoPtr<T> Foam::PtrDynList<T, SizeMin>::set
     const tmp<T>& ptr
 )
 {
-    return this->set(i, ptr.ptr());
+    return this->set(i, ptr.ptr());  // release or clone
 }
 
 

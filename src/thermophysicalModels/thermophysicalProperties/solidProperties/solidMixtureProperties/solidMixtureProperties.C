@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,13 +66,8 @@ Foam::solidMixtureProperties::solidMixtureProperties
 )
 :
     components_(s.components_),
-    properties_(s.properties_.size())
-{
-    forAll(properties_, i)
-    {
-        properties_.set(i, s.properties_(i)->clone());
-    }
-}
+    properties_(s.properties_.clone())
+{}
 
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //

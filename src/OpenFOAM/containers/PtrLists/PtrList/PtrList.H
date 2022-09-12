@@ -120,7 +120,7 @@ public:
         PtrList(Istream& is);
 
 
-    //- Destructor
+    //- Destructor. Frees all pointers
     ~PtrList();
 
 
@@ -134,9 +134,9 @@ public:
     // Access
 
         //- Return const pointer to element (can be nullptr),
-        //- without bounds checking - same as get().
+        //- or nullptr for out-of-range access (ie, \em with bounds checking).
         //  The return value can be tested as a bool.
-        const T* set(const label i) const { return this->get(i); }
+        const T* set(const label i) const { return UPtrList<T>::set(i); }
 
 
     // Edit
@@ -159,13 +159,10 @@ public:
         inline void append(T* ptr);
 
         //- Move append an element to the end of the list
-        inline void append(autoPtr<T>& ptr);
+        inline void append(std::unique_ptr<T>&& ptr);
 
         //- Move append an element to the end of the list
         inline void append(autoPtr<T>&& ptr);
-
-        //- Move append an element to the end of the list
-        inline void append(std::unique_ptr<T>&& ptr);
 
         //- Move or clone append a refPtr to the end of the list
         inline void append(const refPtr<T>& ptr);
@@ -184,14 +181,11 @@ public:
         //  No-op if the new pointer value is identical to the current content.
         inline autoPtr<T> set(const label i, T* ptr);
 
-        //- Set element to given autoPtr and return old element
-        inline autoPtr<T> set(const label i, autoPtr<T>& ptr);
+        //- Set element to given unique_ptr and return old element
+        inline autoPtr<T> set(const label i, std::unique_ptr<T>&& ptr);
 
         //- Set element to given autoPtr and return old element
         inline autoPtr<T> set(const label i, autoPtr<T>&& ptr);
-
-        //- Set element to given unique_ptr and return old element
-        inline autoPtr<T> set(const label i, std::unique_ptr<T>&& ptr);
 
         //- Set element to given refPtr and return old element
         inline autoPtr<T> set(const label i, const refPtr<T>& ptr);
@@ -222,6 +216,21 @@ public:
 
         //- Read from Istream, discarding contents of existing list
         friend Istream& operator>> <T>(Istream& is, PtrList<T>& list);
+
+
+    // Housekeeping
+
+        //- Move append an element to the end of the list
+        void append(autoPtr<T>& ptr)
+        {
+            this->append(std::move(ptr));
+        }
+
+        //- Set element to given autoPtr and return old element
+        autoPtr<T> set(const label i, autoPtr<T>& ptr)
+        {
+            return this->set(i, std::move(ptr));
+        }
 };
 
 
