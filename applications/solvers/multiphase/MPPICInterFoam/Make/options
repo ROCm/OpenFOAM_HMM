@@ -42,4 +42,5 @@ EXE_LIBS = \
     -lregionModels \
     -lregionFaModels \
     -lsurfaceFilmModels \
+    -lfiniteArea \
     -lcompressibleTwoPhaseMixtureTurbulenceModels

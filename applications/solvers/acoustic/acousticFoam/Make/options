@@ -11,4 +11,5 @@ EXE_LIBS = \
     -lfvOptions \
     -lmeshTools \
     -lsampling \
-    -lregionFaModels
+    -lregionFaModels \
+    -lfiniteArea

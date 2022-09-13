@@ -36,5 +36,5 @@ EXE_LIBS = \
     -lfaOptions \
     -lregionModels \
     -lsampling \
-    -lregionFaModels
-
+    -lregionFaModels \
+    -lfiniteArea

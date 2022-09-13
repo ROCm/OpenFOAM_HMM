@@ -21,4 +21,5 @@ EXE_LIBS = \
     -lcompressibleTurbulenceModels \
     -lthermoTools \
     -latmosphericModels \
-    -lregionFaModels
+    -lregionFaModels \
+    -lfiniteArea
