@@ -31,6 +31,7 @@ License
 #include "boundaryRadiationProperties.H"
 #include "cyclicAMIPolyPatch.H"
 #include "volFields.H"
+#include "surfaceFields.H"
 #include "distributedTriSurfaceMesh.H"
 #include "OBJstream.H"
 
@@ -43,152 +44,64 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::faceShading::writeRays
-(
-    const fileName& fName,
-    const DynamicField<point>& endCf,
-    const pointField& myFc
-)
-{
-    OBJstream os(fName);
-
-    Pout<< "Dumping rays to " << os.name() << endl;
-
-    forAll(myFc, facei)
-    {
-        os.writeLine(myFc[facei], endCf[facei]);
-    }
-}
-
-
-Foam::triSurface Foam::faceShading::triangulate
-(
-    const labelHashSet& includePatches,
-    const List<labelHashSet>& includeAllFacesPerPatch
-)
-{
-    const polyBoundaryMesh& bMesh = mesh_.boundaryMesh();
-
-    // Storage for surfaceMesh. Size estimate.
-    DynamicList<labelledTri> triangles(mesh_.nBoundaryFaces());
-
-    label newPatchI = 0;
-
-    for (const label patchI : includePatches)
-    {
-        const polyPatch& patch = bMesh[patchI];
-        const pointField& points = patch.points();
-
-        label nTriTotal = 0;
-
-        if (includeAllFacesPerPatch[patchI].size())
-        {
-            for (const label patchFaceI : includeAllFacesPerPatch[patchI])
-            {
-                const face& f = patch[patchFaceI];
-
-                faceList triFaces(f.nTriangles(points));
-
-                label nTri = 0;
-
-                f.triangles(points, nTri, triFaces);
-
-                for (const face& f : triFaces)
-                {
-                    triangles.append
-                    (
-                        labelledTri(f[0], f[1], f[2], newPatchI)
-                    );
-                    nTriTotal++;
-                }
-            }
-            newPatchI++;
-        }
-    }
-
-    triangles.shrink();
-
-    // Create globally numbered tri surface
-    triSurface rawSurface(triangles, mesh_.points());
-
-    // Create locally numbered tri surface
-    triSurface surface
-    (
-        rawSurface.localFaces(),
-        rawSurface.localPoints()
-    );
-
-    // Add patch names to surface
-    surface.patches().setSize(newPatchI);
-
-    newPatchI = 0;
-
-    for (const label patchI : includePatches)
-    {
-        const polyPatch& patch = bMesh[patchI];
-
-        if (includeAllFacesPerPatch[patchI].size())
-        {
-            surface.patches()[newPatchI].name() = patch.name();
-            surface.patches()[newPatchI].geometricType() = patch.type();
-
-            newPatchI++;
-        }
-    }
-
-    return surface;
-}
-
-
 void Foam::faceShading::calculate()
 {
-    const radiation::boundaryRadiationProperties& boundaryRadiation =
-        radiation::boundaryRadiationProperties::New(mesh_);
+    const auto& pbm = mesh_.boundaryMesh();
 
-    label nFaces = 0;          //total number of direct hit faces
+    const bitSet isOpaqueFace
+    (
+        selectOpaqueFaces
+        (
+            radiation::boundaryRadiationProperties::New(mesh_),
+            patchIDs_,
+            zoneIDs_
+        )
+    );
 
-    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+    // Find faces potentially hit by solar rays
+    //  - correct normal
+    //  - transmissivity 0
+    labelList hitFacesIds;
+    bitSet hitFacesFlips;
+    selectFaces
+    (
+        true,   // use normal to do first filtering
+        isOpaqueFace,
+        patchIDs_,
+        zoneIDs_,
 
-    DynamicList<point> dynCf(nFaces);
-    DynamicList<label> dynFacesI;
-
-    forAll(patches, patchI)
-    {
-        const polyPatch& pp = patches[patchI];
-        const vectorField::subField cf = pp.faceCentres();
-
-        if (!pp.coupled() && !isA<cyclicAMIPolyPatch>(pp))
-        {
-            const tmp<scalarField> tt =
-                boundaryRadiation.transmissivity(patchI);
-            const scalarField& t = tt();
-            const vectorField& n = pp.faceNormals();
-
-            forAll(n, faceI)
-            {
-                const vector nf(n[faceI]);
-                if (((direction_ & nf) > 0) && (t[faceI] == 0.0))
-                {
-                    dynFacesI.append(faceI + pp.start());
-                    dynCf.append(cf[faceI]);
-                    nFaces++;
-                }
-            }
-        }
-    }
+        hitFacesIds,
+        hitFacesFlips
+    );
 
     Info<< "Number of 'potential' direct hits : "
-        << returnReduce(nFaces, sumOp<label>()) << endl;
+        << returnReduce(hitFacesIds.size(), sumOp<label>()) << endl;
 
-    labelList hitFacesIds(nFaces);
-    hitFacesIds.transfer(dynFacesI);
-
-    pointField Cfs(hitFacesIds.size());
-    Cfs.transfer(dynCf);
 
     // * * * * * * * * * * * * * * *
     // Create distributedTriSurfaceMesh
     Random rndGen(653213);
+
+    // Find potential obstructions. Include all faces that might potentially
+    // block (so ignore normal)
+    labelList blockingFacesIds;
+    bitSet blockingFacesFlips;
+    selectFaces
+    (
+        false,   // use normal to do first filtering
+        isOpaqueFace,
+        patchIDs_,
+        zoneIDs_,
+
+        blockingFacesIds,
+        blockingFacesFlips
+    );
+
+    const triSurface localSurface = triangulate
+    (
+        blockingFacesIds,
+        blockingFacesFlips
+    );
 
     // Determine mesh bounding boxes:
     List<treeBoundBox> meshBb
@@ -209,36 +122,6 @@ void Foam::faceShading::calculate()
         ]
     );
     dict.add("mergeDistance", SMALL);
-
-    labelHashSet includePatches;
-    List<labelHashSet> includeAllFacesPerPatch(patches.size());
-
-    forAll(patches, patchI)
-    {
-        const polyPatch& pp = patches[patchI];
-        if (!pp.coupled() && !isA<cyclicAMIPolyPatch>(pp))
-        {
-            includePatches.insert(patchI);
-
-            const tmp<scalarField> tt =
-                boundaryRadiation.transmissivity(patchI);
-            const scalarField& tau = tt();
-
-            forAll(pp, faceI)
-            {
-                if (tau[faceI] == 0.0)
-                {
-                    includeAllFacesPerPatch[patchI].insert(faceI);
-                }
-            }
-        }
-    }
-
-    triSurface localSurface = triangulate
-    (
-        includePatches,
-        includeAllFacesPerPatch
-    );
 
     distributedTriSurfaceMesh surfacesMesh
     (
@@ -264,36 +147,28 @@ void Foam::faceShading::calculate()
         returnReduce(5.0*mesh_.bounds().mag(), maxOp<scalar>());
 
     // Calculate index of faces which have a direct hit (local)
-    DynamicList<label> rayStartFace(nFaces + 0.01*nFaces);
 
     // Shoot Rays
     // * * * * * * * * * * * * * * * *
     {
 
-        DynamicField<point> start(nFaces);
+        DynamicField<point> start(hitFacesIds.size());
         DynamicField<point> end(start.size());
         DynamicList<label> startIndex(start.size());
 
-        label i = 0;
-        do
+        const pointField& faceCentres = mesh_.faceCentres();
+
+        const vector d(direction_*maxBounding);
+
+        forAll(hitFacesIds, i)
         {
-            for (; i < Cfs.size(); i++)
-            {
-                const point& fc = Cfs[i];
+            const label facei = hitFacesIds[i];
+            const point& fc = faceCentres[facei];
 
-                const label myFaceId = hitFacesIds[i];
-
-                const vector d(direction_*maxBounding);
-
-                start.append(fc - 0.001*d);
-
-                startIndex.append(myFaceId);
-
-                end.append(fc - d);
-
-            }
-
-        } while (returnReduceOr(i < Cfs.size()));
+            start.append(fc - 0.001*d);
+            startIndex.append(facei);
+            end.append(fc - d);
+        }
 
         List<pointIndexHit> hitInfo(startIndex.size());
         surfacesMesh.findLine(start, end, hitInfo);
@@ -301,11 +176,23 @@ void Foam::faceShading::calculate()
         // Collect the rays which has 'only one not wall' obstacle between
         // start and end.
         // If the ray hit itself get stored in dRayIs
+
+        label nVisible = 0;
         forAll(hitInfo, rayI)
         {
             if (!hitInfo[rayI].hit())
             {
-                rayStartFace.append(startIndex[rayI]);
+                nVisible++;
+            }
+        }
+        rayStartFaces_.setSize(nVisible);
+        nVisible = 0;
+
+        forAll(hitInfo, rayI)
+        {
+            if (!hitInfo[rayI].hit())
+            {
+                rayStartFaces_[nVisible++] = startIndex[rayI];
             }
         }
 
@@ -325,36 +212,39 @@ void Foam::faceShading::calculate()
         end.clear();
     }
 
-    rayStartFaces_.transfer(rayStartFace);
-
     if (debug)
     {
-        tmp<volScalarField> thitFaces
+        auto thitFaces = tmp<surfaceScalarField>::New
         (
-            new volScalarField
+            IOobject
             (
-                IOobject
-                (
-                    "hitFaces",
-                    mesh_.time().timeName(),
-                    mesh_,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                ),
+                "hitFaces",
+                mesh_.time().timeName(),
                 mesh_,
-                dimensionedScalar(dimless, Zero)
-            )
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            mesh_,
+            dimensionedScalar(dimless, Zero)
         );
 
-        volScalarField& hitFaces = thitFaces.ref();
-        volScalarField::Boundary& hitFacesBf = hitFaces.boundaryFieldRef();
+        surfaceScalarField& hitFaces = thitFaces.ref();
+        surfaceScalarField::Boundary& hitFacesBf = hitFaces.boundaryFieldRef();
 
         hitFacesBf = 0.0;
-        for (const label faceI : rayStartFaces_)
+        for (const label facei : rayStartFaces_)
         {
-            label patchID = patches.whichPatch(faceI);
-            const polyPatch& pp = patches[patchID];
-            hitFacesBf[patchID][faceI - pp.start()] = 1.0;
+            const label patchID = pbm.whichPatch(facei);
+            if (patchID == -1)
+            {
+                hitFaces[facei] = 1.0;
+            }
+            else
+            {
+                const polyPatch& pp = pbm[patchID];
+                hitFacesBf[patchID][facei - pp.start()] = 1.0;
+            }
         }
         hitFaces.write();
     }
@@ -364,28 +254,290 @@ void Foam::faceShading::calculate()
 }
 
 
+Foam::triSurface Foam::faceShading::triangulate
+(
+    const labelUList& faceIDs,
+    const bitSet& flipMap
+) const
+{
+    if (faceIDs.size() != flipMap.size())
+    {
+        FatalErrorInFunction << "Size problem :"
+            << "faceIDs:" << faceIDs.size()
+            << "flipMap:" << flipMap.size()
+            << exit(FatalError);
+    }
+
+    const auto& points = mesh_.points();
+    const auto& faces = mesh_.faces();
+    const auto& bMesh = mesh_.boundaryMesh();
+    const auto& fzs = mesh_.faceZones();
+
+    // Patching of surface:
+    // - non-processor patches
+    // - faceZones
+    // Note: check for faceZones on boundary? Who has priority?
+    geometricSurfacePatchList surfPatches(bMesh.nNonProcessor()+fzs.size());
+    labelList patchID(mesh_.nFaces(), -1);
+    {
+        label newPatchi = 0;
+        for (label patchi = 0; patchi < bMesh.nNonProcessor(); ++patchi)
+        {
+            const auto& pp = bMesh[patchi];
+
+            surfPatches[newPatchi] = geometricSurfacePatch
+            (
+                pp.name(),
+                newPatchi,
+                pp.type()
+            );
+            SubList<label>
+            (
+                patchID,
+                pp.size(),
+                pp.start()
+            ) = newPatchi;
+
+            newPatchi++;
+        }
+        for (const auto& fz : fzs)
+        {
+            surfPatches[newPatchi] = geometricSurfacePatch
+            (
+                fz.name(),
+                newPatchi,
+                fz.type()
+            );
+            UIndirectList<label>(patchID, fz) = newPatchi;
+
+            newPatchi++;
+        }
+    }
+
+
+    // Storage for surfaceMesh. Size estimate.
+    DynamicList<labelledTri> triangles(2*faceIDs.size());
+
+    // Work array
+    faceList triFaces;
+
+    forAll(faceIDs, i)
+    {
+        const label facei = faceIDs[i];
+        const bool flip = flipMap[i];
+        const label patchi = patchID[facei];
+        const face& f = faces[facei];
+
+        // Triangulate face
+        triFaces.setSize(f.nTriangles(points));
+        label nTri = 0;
+        f.triangles(points, nTri, triFaces);
+
+        for (const face& f : triFaces)
+        {
+            if (!flip)
+            {
+                triangles.append(labelledTri(f[0], f[1], f[2], patchi));
+            }
+            else
+            {
+                triangles.append(labelledTri(f[0], f[2], f[1], patchi));
+            }
+        }
+    }
+
+    triangles.shrink();
+
+    // Create globally numbered tri surface
+    triSurface rawSurface(triangles, mesh_.points());
+
+    // Create locally numbered tri surface
+    triSurface surface
+    (
+        rawSurface.localFaces(),
+        rawSurface.localPoints()
+    );
+
+    // Add patch names to surface
+    surface.patches().transfer(surfPatches);
+
+    return surface;
+}
+
+
+Foam::bitSet Foam::faceShading::selectOpaqueFaces
+(
+    const radiation::boundaryRadiationProperties& boundaryRadiation,
+    const labelUList& patchIDs,
+    const labelUList& zoneIDs
+) const
+{
+    const auto& pbm = mesh_.boundaryMesh();
+
+    bitSet isOpaqueFace(mesh_.nFaces(), false);
+
+    // Check selected patches
+    for (const label patchi : patchIDs)
+    {
+        const auto& pp = pbm[patchi];
+        tmp<scalarField> tt = boundaryRadiation.transmissivity(patchi);
+        const scalarField& t = tt.cref();
+
+        forAll(t, i)
+        {
+            isOpaqueFace[i + pp.start()] = (t[i] == 0.0);
+        }
+    }
+
+    // Check selected faceZones
+    const auto& fzs = mesh_.faceZones();
+
+    for (const label zonei : zoneIDs)
+    {
+        const auto& fz = fzs[zonei];
+
+        //- Note: slice mesh face centres preferentially
+        tmp<scalarField> tt = boundaryRadiation.zoneTransmissivity
+        (
+            zonei,
+            fz
+        );
+        const scalarField& t = tt.cref();
+
+        forAll(t, i)
+        {
+            isOpaqueFace[fz[i]] = (t[i] == 0.0);
+        }
+    }
+
+    return isOpaqueFace;
+}
+
+
+void Foam::faceShading::selectFaces
+(
+    const bool useNormal,
+    const bitSet& isCandidateFace,
+    const labelUList& patchIDs,
+    const labelUList& zoneIDs,
+
+    labelList& faceIDs,
+    bitSet& flipMap
+) const
+{
+    const auto& pbm = mesh_.boundaryMesh();
+
+    bitSet isSelected(mesh_.nFaces());
+    DynamicList<label> dynFaces(mesh_.nBoundaryFaces());
+    bitSet isFaceFlipped(mesh_.nFaces());
+
+    // Add patches
+    for (const label patchi : patchIDs)
+    {
+        const auto& pp = pbm[patchi];
+        const vectorField& n = pp.faceNormals();
+
+        forAll(n, i)
+        {
+            const label meshFacei = i + pp.start();
+            if
+            (
+                isCandidateFace[meshFacei]
+             && (
+                    !useNormal
+                 || ((direction_ & n[i]) > 0)
+                )
+            )
+            {
+                isSelected.set(meshFacei);
+                isFaceFlipped[meshFacei] = false;
+                dynFaces.append(meshFacei);
+            }
+        }
+    }
+
+
+    // Add faceZones
+    const auto& fzs = mesh_.faceZones();
+
+    for (const label zonei : zoneIDs)
+    {
+        const auto& fz = fzs[zonei];
+        const primitiveFacePatch& pp = fz();
+        const vectorField& n = pp.faceNormals();
+
+        forAll(n, i)
+        {
+            const label meshFacei = fz[i];
+
+            if
+            (
+                !isSelected[meshFacei]
+             && isCandidateFace[meshFacei]
+             && (
+                    !useNormal
+                 || ((direction_ & n[i]) > 0)
+                )
+            )
+            {
+                isSelected.set(meshFacei);
+                dynFaces.append(meshFacei);
+                isFaceFlipped[meshFacei] = fz.flipMap()[i];
+            }
+        }
+    }
+    faceIDs = std::move(dynFaces);
+    flipMap = bitSet(isFaceFlipped, faceIDs);
+}
+
+
+void Foam::faceShading::writeRays
+(
+    const fileName& fName,
+    const DynamicField<point>& endCf,
+    const pointField& myFc
+)
+{
+    OBJstream os(fName);
+
+    Pout<< "Dumping rays to " << os.name() << endl;
+
+    forAll(myFc, facei)
+    {
+        os.writeLine(myFc[facei], endCf[facei]);
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::faceShading::faceShading
 (
     const fvMesh& mesh,
-    const vector dir,
-    const labelList& hitFaceList
+    const vector& dir
 )
 :
     mesh_(mesh),
+    patchIDs_(nonCoupledPatches(mesh)),
+    zoneIDs_(0),
     direction_(dir),
-    rayStartFaces_(hitFaceList)
-{}
+    rayStartFaces_(0)
+{
+    calculate();
+}
 
 
 Foam::faceShading::faceShading
 (
     const fvMesh& mesh,
-    const vector dir
+    const labelList& patchIDs,
+    const labelList& zoneIDs,
+    const vector& dir
 )
 :
     mesh_(mesh),
+    patchIDs_(patchIDs),
+    zoneIDs_(zoneIDs),
     direction_(dir),
     rayStartFaces_(0)
 {
@@ -394,6 +546,23 @@ Foam::faceShading::faceShading
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::labelList Foam::faceShading::nonCoupledPatches(const polyMesh& mesh)
+{
+    const auto& pbm = mesh.boundaryMesh();
+
+    DynamicList<label> ncPatches;
+    forAll(pbm, patchi)
+    {
+        const polyPatch& pp = pbm[patchi];
+        if (!pp.coupled() && !isA<cyclicAMIPolyPatch>(pp))
+        {
+            ncPatches.append(patchi);
+        }
+    }
+    return ncPatches;
+}
+
 
 void Foam::faceShading::correct()
 {

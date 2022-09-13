@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,11 +63,15 @@ class boundaryRadiationProperties
         boundaryRadiationProperties
     >
 {
-    // Private data
+    // Private Data
 
-        //- Ptr list of boundaryRadiationProperties
-        List<autoPtr<boundaryRadiationPropertiesPatch>>
+        //- Per patch the boundaryRadiationProperties
+        PtrList<boundaryRadiationPropertiesPatch>
             radBoundaryPropertiesPtrList_;
+
+        //- Per (face)zone the boundaryRadiationProperties
+        PtrList<boundaryRadiationPropertiesPatch>
+            radZonePropertiesPtrList_;
 
 
 public:
@@ -83,6 +87,22 @@ public:
 
 
     // Member Functions
+
+        //- Return identifiers of face zones activated for boundary radiation
+        const labelList faceZoneIds() const
+        {
+            DynamicList<label> ncZones;
+
+            forAll(radZonePropertiesPtrList_, i)
+            {
+                if (radZonePropertiesPtrList_.test(i))
+                {
+                    ncZones.append(i);
+                }
+            }
+
+            return ncZones;
+        }
 
         //- Access boundary emissivity on patch
         tmp<scalarField> emissivity
@@ -140,6 +160,20 @@ public:
             vector incomingDirection = Zero,
             scalar T = 0
         ) const;
+
+        // Specialisations for faceZones
+
+            //- Access transmissivity on set of (internal) faces. Zone name only
+            //  used to lookup the properties in boundaryRadiationProperties
+            tmp<scalarField> zoneTransmissivity
+            (
+                const label zoneI,
+                const labelUList& faceIDs,  // internal faces
+                const label bandI = 0,
+                vector incomingDirection = Zero,
+                scalar T = 0
+            ) const;
+
 
         //- Access boundary diffuse reflectivity on patch
         tmp<scalarField> diffReflectivity

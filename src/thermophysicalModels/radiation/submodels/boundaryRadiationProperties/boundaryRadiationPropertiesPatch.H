@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,9 +56,7 @@ namespace radiation
 
 class boundaryRadiationPropertiesPatch
 {
-private:
-
-    // Private data
+    // Private Data
 
         //- Dictionary
         const dictionary dict_;
@@ -67,7 +65,7 @@ private:
         const polyPatch& patch_;
 
 
-    // Private functions
+    // Private Member Functions
 
         //- Return nbr patch index
         label nbrPatchIndex() const;
@@ -128,7 +126,7 @@ public:
         virtual ~boundaryRadiationPropertiesPatch() = default;
 
 
-    // Member functions
+    // Member Functions
 
         //- Return absorptionEmissionModel
         const wallAbsorptionEmissionModel& absorptionEmission() const;

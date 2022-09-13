@@ -115,8 +115,30 @@ bool Foam::radiation::solarLoad::updateHitFaces()
 {
     if (!hitFaces_)
     {
-         hitFaces_.reset(new faceShading(mesh_, solarCalc_.direction()));
-         return true;
+        const boundaryRadiationProperties& boundaryRadiation =
+            boundaryRadiationProperties::New(mesh_);
+
+        const labelList activeFaceZoneIds(boundaryRadiation.faceZoneIds());
+
+        if (!activeFaceZoneIds.size())
+        {
+            hitFaces_.reset(new faceShading(mesh_, solarCalc_.direction()));
+        }
+        else
+        {
+            hitFaces_.reset
+            (
+                new faceShading
+                (
+                    mesh_,
+                    faceShading::nonCoupledPatches(mesh_),
+                    activeFaceZoneIds,
+                    solarCalc_.direction()
+                )
+            );
+        }
+
+        return true;
     }
     else
     {
@@ -194,12 +216,20 @@ void Foam::radiation::solarLoad::updateDirectHitRadiation
 
         forAll(hitFacesId, i)
         {
-            const label faceI = hitFacesId[i];
-            const label patchID = patches.whichPatch(faceI);
+            const label facei = hitFacesId[i];
+            const label patchID = patches.whichPatch(facei);
+
+            if (patchID == -1)
+            {
+                continue;
+            }
+
             const polyPatch& pp = patches[patchID];
-            const label localFaceI = faceI - pp.start();
-            const vector qPrim =
-                solarCalc_.directSolarRad()*solarCalc_.direction();
+            const label localFaceI = facei - pp.start();
+            const vector qPrim
+            (
+                solarCalc_.directSolarRad()*solarCalc_.direction()
+            );
 
             const vectorField& n = pp.faceNormals();
 
@@ -253,13 +283,13 @@ void Foam::radiation::solarLoad::updateSkyDiffusiveRadiation
                 const vectorField n = pp.faceNormals();
                 const labelList& cellIds = pp.faceCells();
 
-                forAll(n, faceI)
+                forAll(n, facei)
                 {
-                    const scalar cosEpsilon(verticalDir_ & -n[faceI]);
+                    const scalar cosEpsilon(verticalDir_ & -n[facei]);
 
                     scalar Ed(0.0);
                     scalar Er(0.0);
-                    const scalar cosTheta(solarCalc_.direction() & -n[faceI]);
+                    const scalar cosTheta(solarCalc_.direction() & -n[facei]);
 
                     {
                         // Above the horizon
@@ -296,15 +326,15 @@ void Foam::radiation::solarLoad::updateSkyDiffusiveRadiation
                           * (1.0 - cosEpsilon)/2.0;
                     }
 
-                    const label cellI = cellIds[faceI];
+                    const label cellI = cellIds[facei];
                     if (includeMappedPatchBasePatches[patchID])
                     {
                         for (label bandI = 0; bandI < nBands_; ++bandI)
                         {
-                            qrBf[patchID][faceI] +=
+                            qrBf[patchID][facei] +=
                                 (Ed + Er)
                               * spectralDistribution_[bandI]
-                              * absorptivity_[patchID][bandI]()[faceI];
+                              * absorptivity_[patchID][bandI]()[facei];
                         }
                     }
                     else
@@ -314,8 +344,8 @@ void Foam::radiation::solarLoad::updateSkyDiffusiveRadiation
                             Ru_[cellI] +=
                                 (Ed + Er)
                               * spectralDistribution_[bandI]
-                              * absorptivity_[patchID][bandI]()[faceI]
-                              * sf[faceI]/V[cellI];
+                              * absorptivity_[patchID][bandI]()[facei]
+                              * sf[facei]/V[cellI];
                         }
                     }
                 }
@@ -332,17 +362,17 @@ void Foam::radiation::solarLoad::updateSkyDiffusiveRadiation
                 const scalarField& sf = mesh_.magSf().boundaryField()[patchID];
 
                 const labelList& cellIds = pp.faceCells();
-                forAll(pp, faceI)
+                forAll(pp, facei)
                 {
-                    const label cellI = cellIds[faceI];
+                    const label cellI = cellIds[facei];
                     if (includeMappedPatchBasePatches[patchID])
                     {
                         for (label bandI = 0; bandI < nBands_; ++bandI)
                         {
-                            qrBf[patchID][faceI] +=
+                            qrBf[patchID][facei] +=
                                 solarCalc_.diffuseSolarRad()
                               * spectralDistribution_[bandI]
-                              * absorptivity_[patchID][bandI]()[faceI];
+                              * absorptivity_[patchID][bandI]()[facei];
                         }
                     }
                     else
@@ -352,9 +382,9 @@ void Foam::radiation::solarLoad::updateSkyDiffusiveRadiation
                             Ru_[cellI] +=
                                 (
                                     spectralDistribution_[bandI]
-                                  * absorptivity_[patchID][bandI]()[faceI]
+                                  * absorptivity_[patchID][bandI]()[facei]
                                   * solarCalc_.diffuseSolarRad()
-                                )*sf[faceI]/V[cellI];
+                                )*sf[facei]/V[cellI];
                         }
                     }
                 }
@@ -423,6 +453,8 @@ void Foam::radiation::solarLoad::initialise(const dictionary& coeffs)
     coeffs.readIfPresent("wallCoupled", wallCoupled_);
     coeffs.readIfPresent("updateAbsorptivity", updateAbsorptivity_);
     coeffs.readEntry("useReflectedRays", useReflectedRays_);
+
+    (void) updateHitFaces();
 }
 
 /*
@@ -543,15 +575,15 @@ void Foam::radiation::solarLoad::calculateQdiff
             scalar fullArea = 0.0;
             forAll(fineFaces, j)
             {
-                label faceI = fineFaces[j];
-                label globalFaceI = faceI + pp.start();
+                label facei = fineFaces[j];
+                label globalFaceI = facei + pp.start();
 
                 if (hitFacesId.found(globalFaceI))
                 {
-                    fullArea += sf[faceI];
+                    fullArea += sf[facei];
                 }
-                Eave[coarseI] += (e[faceI]*sf[faceI])/fineArea;
-                Tave[coarseI] += (pow4(Tf[faceI])*sf[faceI])/fineArea;
+                Eave[coarseI] += (e[facei]*sf[facei])/fineArea;
+                Tave[coarseI] += (pow4(Tf[facei])*sf[facei])/fineArea;
             }
             localCoarsePartialArea[compactI++] = fullArea/fineArea;
         }
@@ -635,8 +667,8 @@ void Foam::radiation::solarLoad::calculateQdiff
             scalar aAve = 0.0;
             forAll(fineFaces, j)
             {
-                label faceI = fineFaces[j];
-                aAve += (a[faceI]*sf[faceI])/fineArea;
+                label facei = fineFaces[j];
+                aAve += (a[facei]*sf[facei])/fineArea;
             }
 
             const scalarList& vf = FmyProc[locaFaceI];
@@ -689,8 +721,8 @@ void Foam::radiation::solarLoad::calculateQdiff
                 const labelList& fineFaces = coarseToFine_[i][coarseFaceID];
                 forAll(fineFaces, k)
                 {
-                    label faceI = fineFaces[k];
-                    qrp[faceI] = localqDiffusive[compactId];
+                    label facei = fineFaces[k];
+                    qrp[facei] = localqDiffusive[compactId];
                 }
                 compactId ++;
             }
@@ -713,10 +745,10 @@ void Foam::radiation::solarLoad::calculateQdiff
             const polyPatch& pp = patches[patchID];
             const labelList& cellIds = pp.faceCells();
             const scalarField& sf = mesh_.magSf().boundaryField()[patchID];
-            forAll(pp, faceI)
+            forAll(pp, facei)
             {
-                const label cellI = cellIds[faceI];
-                Ru_[cellI] += qSecond[faceI]*sf[faceI]/V[cellI];
+                const label cellI = cellIds[facei];
+                Ru_[cellI] += qSecond[facei]*sf[facei]/V[cellI];
             }
         }
     }
@@ -879,7 +911,7 @@ void Foam::radiation::solarLoad::calculate()
     const bool timeDependentLoad =
         solarCalc_.sunLoadModel() == solarCalculator::mSunLoadTimeDependent;
 
-    if (facesChanged || timeDependentLoad)
+    if (firstIter_ || facesChanged || timeDependentLoad)
     {
         // Reset Ru
         Ru_ = dimensionedScalar("Ru", dimMass/dimLength/pow3(dimTime), Zero);

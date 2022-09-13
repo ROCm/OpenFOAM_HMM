@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,7 @@ Class
     Foam::faceShading
 
 Description
+    Helper class to calculate visible faces for global, sun-like illumination.
 
     faceShading uses the transmissivity value in the boundaryRadiationProperties
     in order to evaluate which faces are "hit" by the "direction" vector.
@@ -41,19 +42,18 @@ SourceFiles
 #ifndef faceShading_H
 #define faceShading_H
 
-#include "fvMesh.H"
-#include "Time.H"
-#include "meshTools.H"
+#include "boundaryRadiationProperties.H"
 #include "DynamicField.H"
-#include "labelIOList.H"
-#include "wallPolyPatch.H"
-#include "triSurfaceTools.H"
-
+#include "triSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+// Forward Declarations
+class fvMesh;
+class polyMesh;
 
 /*---------------------------------------------------------------------------*\
                            Class faceShading Declaration
@@ -61,10 +61,16 @@ namespace Foam
 
 class faceShading
 {
-    // Private data
+    // Private Data
 
         //- Reference to mesh
         const fvMesh& mesh_;
+
+        //- Patches to check for visibility
+        const labelList patchIDs_;
+
+        //- FaceZones to check for visibility
+        const labelList zoneIDs_;
 
         //- Direction
         vector direction_;
@@ -73,18 +79,42 @@ class faceShading
         labelList rayStartFaces_;
 
 
-    // Private members
+    // Private Member Functions
 
         //- Calculate ray start faces
         void calculate();
 
-
-        //- Construct a triSurface from patches and faces on global local index
+        //- Construct a triSurface from selected faces on patches or faceZones.
+        //  Resulting surface has regioning with mesh patches first, faceZones
+        //  second.
         triSurface triangulate
         (
-            const labelHashSet& includePatches,
-            const List<labelHashSet>& includeAllFaces
-        );
+            const labelUList& faceIDs,
+            const bitSet& flipMap
+        ) const;
+
+        //- Find opaque faces by looking at the radiation properties.
+        bitSet selectOpaqueFaces
+        (
+            const radiation::boundaryRadiationProperties& boundaryRadiation,
+            const labelUList& patchIDs,
+            const labelUList& zoneIDs
+        ) const;
+
+        //- Pick up candidate faces that might be blocking visibility for
+        //  other faces:
+        //  - if transmissivity is 0
+        //  - (optional) if pointing wrong way
+        void selectFaces
+        (
+            const bool useNormal,
+            const bitSet& isCandidateFace,
+            const labelUList& patchIDs,
+            const labelUList& zoneIDs,
+
+            labelList& faceIDs,
+            bitSet& flipMap
+        ) const;
 
         //- Write rays
         void writeRays
@@ -109,19 +139,25 @@ public:
 
     // Constructors
 
-        //- Construct from components
+        //- Helper: return all uncoupled patches
+        static labelList nonCoupledPatches(const polyMesh& mesh);
+
+        //- Construct from mesh and vector to 'sun'. All uncoupled patches
+        //  are checked for visibility. faceZones are ignored.
         faceShading
         (
             const fvMesh& mesh,
-            const vector dir,
-            const labelList& hitFaceList
+            const vector& dir
         );
 
-        //- Construct from mesh and vector
+        //- Construct from mesh and vector to 'sun' and selected patches
+        //  and faceZones.
         faceShading
         (
             const fvMesh& mesh,
-            const vector
+            const labelList& patchIDs,
+            const labelList& zoneIDs,
+            const vector& dir
         );
 
 
@@ -133,7 +169,7 @@ public:
 
         // Access
 
-            //- const access to direction
+            //- Const access to direction
             const vector direction() const
             {
                 return direction_;
@@ -145,7 +181,7 @@ public:
                 return direction_;
             }
 
-            //- Access to rayStartFaces
+            //- Const access to rayStartFaces
             const labelList& rayStartFaces() const
             {
                 return rayStartFaces_;
