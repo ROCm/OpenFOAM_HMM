@@ -1062,7 +1062,12 @@ int main(int argc, char *argv[])
                             }
                         }
 
-                        scalar err = (F2LIij-oldEToeInt)/F2LIij;
+                        const scalar err
+                        (
+                            mag(F2LIij) > ROOTVSMALL
+                          ? (F2LIij-oldEToeInt)/F2LIij
+                          : 0
+                        );
 
                         if
                         (
