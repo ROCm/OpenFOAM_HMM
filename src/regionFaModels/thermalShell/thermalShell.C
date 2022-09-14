@@ -77,13 +77,11 @@ tmp<areaScalarField> thermalShell::qr()
 
     if (!qrName_.empty() && qrName_ != "none")
     {
-        auto& aqr = taqr.ref();
-
-        const auto& qr = primaryMesh().lookupObject<volScalarField>(qrName_);
-
-        const volScalarField::Boundary& vqr = qr.boundaryField();
-
-        aqr.primitiveFieldRef() = vsm().mapToSurface<scalar>(vqr);
+        vsm().mapToSurface<scalar>
+        (
+            primaryMesh().lookupObject<volScalarField>(qrName_),
+            taqr.ref().primitiveFieldRef()
+        );
     }
 
     return taqr;
@@ -126,11 +124,11 @@ void thermalShell::solveEnergy()
 thermalShell::thermalShell
 (
     const word& modelType,
-    const fvPatch& patch,
+    const fvMesh& mesh,
     const dictionary& dict
 )
 :
-    thermalShellModel(modelType, patch, dict),
+    thermalShellModel(modelType, mesh, dict),
     nNonOrthCorr_(1),
     thermo_(dict.subDict("thermo")),
     qs_

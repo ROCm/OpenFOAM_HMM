@@ -99,4 +99,20 @@ Foam::regionModels::regionFaModel::solution() const
 }
 
 
+inline const Foam::labelList&
+Foam::regionModels::regionFaModel::primaryPatchIDs() const
+{
+    return regionMesh().whichPolyPatches();
+}
+
+
+inline bool Foam::regionModels::regionFaModel::isRegionPatch
+(
+    const label patchi
+) const
+{
+    return primaryPatchIDs().found(patchi);
+}
+
+
 // ************************************************************************* //

@@ -48,20 +48,20 @@ defineRunTimeSelectionTable(vibrationShellModel, dictionary);
 vibrationShellModel::vibrationShellModel
 (
     const word& modelType,
-    const fvPatch& p,
+    const fvMesh& mesh,
     const dictionary& dict
 )
 :
-    regionFaModel(p, "vibratingShell", modelType, dict, true),
+    regionFaModel(mesh, "vibratingShell", modelType, dict, true),
     pName_(dict.get<word>("p")),
-    pa_(p.boundaryMesh().mesh().lookupObject<volScalarField>(pName_)),
+    pa_(mesh.lookupObject<volScalarField>(pName_)),
     w_
     (
         IOobject
         (
             "ws_" + regionName_,
-            p.boundaryMesh().mesh().time().timeName(),
-            p.boundaryMesh().mesh(),
+            primaryMesh().time().timeName(),
+            primaryMesh(),
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
@@ -72,18 +72,18 @@ vibrationShellModel::vibrationShellModel
         IOobject
         (
             "as_" + regionName_,
-            p.boundaryMesh().mesh().time().timeName(),
-            p.boundaryMesh().mesh(),
+            primaryMesh().time().timeName(),
+            primaryMesh(),
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
         regionMesh(),
         dimensionedScalar(dimAcceleration, Zero)
     ),
-    faOptions_(Foam::fa::options::New(primaryMesh())),
+    faOptions_(Foam::fa::options::New(mesh)),
     solid_(dict.subDict("solid"))
 {
-    if (!faOptions_.optionList::size())
+    if (faOptions_.optionList::empty())
     {
         Info << "No finite area options present" << endl;
     }

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -86,11 +86,11 @@ void liquidFilmModel::correctThermoFields()
 liquidFilmModel::liquidFilmModel
 (
     const word& modelType,
-    const fvPatch& patch,
+    const fvMesh& mesh,
     const dictionary& dict
 )
 :
-    liquidFilmBase(modelType, patch, dict),
+    liquidFilmBase(modelType, mesh, dict),
 
     thermo_(dict.subDict("thermo")),
 
@@ -245,10 +245,8 @@ liquidFilmModel::liquidFilmModel
 
     forces_(*this, dict)
 {
-
-    if (dict.found("T0"))
+    if (dict.readIfPresent("T0", Tref_))
     {
-        Tref_ = dict.get<scalar>("T0");
         Tf_ = dimensionedScalar("T0", dimTemperature, dict);
     }
     correctThermoFields();
@@ -316,22 +314,19 @@ void liquidFilmModel::preEvolveRegion()
     liquidFilmBase::preEvolveRegion();
 
 
-
     cloudMassTrans_ == dimensionedScalar(dimMass, Zero);
     cloudDiameterTrans_ == dimensionedScalar(dimLength, Zero);
 
     const scalar deltaT = primaryMesh().time().deltaTValue();
     const scalarField rAreaDeltaT(scalar(1)/deltaT/regionMesh().S().field());
 
-    // Map the total mass, mom and pnSource from particles
-    rhoSp_.primitiveFieldRef() =
-        vsm().mapToSurface(massSource_.boundaryField()[patchID()]);
-    // [kg.m/s]
-    USp_.primitiveFieldRef() =
-        vsm().mapToSurface(momentumSource_.boundaryField()[patchID()]);
+    // Map the total mass, mom [kg.m/s] and pnSource from particles
 
-    pnSp_.primitiveFieldRef() =
-        vsm().mapToSurface(pnSource_.boundaryField()[patchID()]);
+    vsm().mapToSurface(massSource_, rhoSp_.primitiveFieldRef());
+
+    vsm().mapToSurface(momentumSource_, USp_.primitiveFieldRef());
+
+    vsm().mapToSurface(pnSource_, pnSp_.primitiveFieldRef());
 
 
     // Calculate rate per area
@@ -355,7 +350,13 @@ void liquidFilmModel::postEvolveRegion()
 
 void liquidFilmModel::info()
 {
-    Info<< "\nSurface film: " << type() << " on patch: " << patchID() << endl;
+    Info<< "\nSurface film: " << type() << " on patch: ";
+
+    for (const label patchi : this->primaryPatchIDs())
+    {
+        Info<< ' ' << patchi;
+    }
+    Info<< endl;
 
     const DimensionedField<scalar, areaMesh>& sf = regionMesh().S();
 

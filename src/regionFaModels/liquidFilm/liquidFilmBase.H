@@ -164,10 +164,10 @@ public:
              dictionary,
              (
                 const word& modelType,
-                const fvPatch& patch,
+                const fvMesh& mesh,
                 const dictionary& dict
              ),
-             (modelType, patch, dict)
+             (modelType, mesh, dict)
          );
 
 
@@ -178,7 +178,7 @@ public:
         liquidFilmBase
         (
             const word& modelType,
-            const fvPatch& patch,
+            const fvMesh& mesh,
             const dictionary& dict
         );
 
@@ -194,7 +194,7 @@ public:
         //- Return a reference to the selected model using dictionary
         static autoPtr<liquidFilmBase> New
         (
-            const fvPatch& patch,
+            const fvMesh& mesh,
             const dictionary& dict
         );
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,8 +42,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef KinematicSurfaceFilm_H
-#define KinematicSurfaceFilm_H
+#ifndef Foam_KinematicSurfaceFilm_H
+#define Foam_KinematicSurfaceFilm_H
 
 #include "SurfaceFilmModel.H"
 #include "UPtrList.H"
@@ -54,17 +54,13 @@ SourceFiles
 namespace Foam
 {
 
-//Forward declaration of classes
+// Forward Declarations
 namespace regionModels
 {
     namespace surfaceFilmModels
     {
         class surfaceFilmRegionModel;
     }
-}
-
-namespace regionModels
-{
     namespace areaSurfaceFilmModels
     {
         class liquidFilmBase;
@@ -87,9 +83,9 @@ public:
         //- Options for the interaction types
         enum interactionType
         {
-            itAbsorb,
-            itBounce,
-            itSplashBai
+            itAbsorb,       //!< "absorb"
+            itBounce,       //!< "bounce"
+            itSplashBai     //!< "splashBai"
         };
 
         //- Names for interactionType
@@ -107,7 +103,7 @@ public:
 
 protected:
 
-    // Protected Data
+    // Data Types
 
         //- Convenience typedef to the cloud's parcel type
         typedef typename CloudType::parcelType parcelType;
@@ -117,6 +113,9 @@ protected:
 
         typedef typename
             regionModels::surfaceFilmModels::surfaceFilmRegionModel regionFilm;
+
+
+    // Protected Data
 
         //- Reference to the cloud random number generator
         Random& rndGen_;
@@ -202,11 +201,7 @@ protected:
         // Injection from sheet (ejection) helper functions
 
             //- Cache the film fields in preparation for injection
-            virtual void cacheFilmFields
-            (
-                const label primaryPatchi,
-                const areaFilm&
-            );
+            virtual void cacheFilmFields(const areaFilm& film);
 
             //- Cache the film fields in preparation for injection
             virtual void cacheFilmFields

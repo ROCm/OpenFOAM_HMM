@@ -29,6 +29,7 @@ License
 #include "gravityMeshObject.H"
 #include "turbulentTransportModel.H"
 #include "turbulentFluidThermoModel.H"
+#include "PtrMap.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -220,21 +221,51 @@ tmp<faVectorMatrix> filmTurbulenceModel::primaryRegionFriction
         {
             tmp<volSymmTensorField> tdevRhoReff = devRhoReff();
 
+            const surfaceVectorField::Boundary& Sfb
+                = film_.primaryMesh().Sf().boundaryField();
+
             const volSymmTensorField::Boundary& devRhoReffb
                 = tdevRhoReff().boundaryField();
 
-            const label patchi = film_.patchID();
+            // The polyPatch/local-face for each of the faceLabels
+            const List<labelPair>& patchFaces
+                = film_.regionMesh().whichPatchFaces();
 
-            const surfaceVectorField::Boundary& Sfb =
-                film_.primaryMesh().Sf().boundaryField();
+            // All referenced polyPatches (== primaryPatchIDs())
+            const labelList& patchIds
+                = film_.regionMesh().whichPolyPatches();
 
-            vectorField fT(Sfb[patchi] & devRhoReffb[patchi]);
+            // Values per patch
+            PtrMap<vectorField> patchFields(2*patchIds.size());
+
+            for (const label patchi : patchIds)
+            {
+                patchFields.set
+                (
+                    patchi,
+                    Sfb[patchi] & devRhoReffb[patchi]
+                );
+            }
+
+            vectorField afT(patchFaces.size(), Zero);
 
             const vectorField& nHat =
                 film_.regionMesh().faceAreaNormals().internalField();
 
-            // Substract normal component
-            fT -= nHat*(fT & nHat);
+            forAll(patchFaces, i)
+            {
+                const label patchi = patchFaces[i].first();
+                const label facei = patchFaces[i].second();
+
+                const auto* pfld = patchFields.get(patchi);
+
+                if (pfld)
+                {
+                    afT[i] = (*pfld)[facei];
+                    // Subtract normal component
+                    afT[i].removeCollinear(nHat[i]);
+                }
+            }
 
             auto taForce = tmp<areaVectorField>::New
             (
@@ -248,9 +279,6 @@ tmp<faVectorMatrix> filmTurbulenceModel::primaryRegionFriction
                 dimensionedVector(sqr(dimVelocity), Zero)
             );
             vectorField& aForce = taForce.ref().primitiveFieldRef();
-
-            // Map ft to surface
-            const vectorField afT(film_.vsm().mapToSurface(fT));
 
             const DimensionedField<scalar, areaMesh>& magSf =
                 film_.regionMesh().S();

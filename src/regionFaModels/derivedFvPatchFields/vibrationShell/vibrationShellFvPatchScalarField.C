@@ -115,7 +115,7 @@ vibrationShellFvPatchScalarField::vibrationShellFvPatchScalarField
 
     if (!baffle_)
     {
-        baffle_.reset(baffleType::New(p, dict_));
+        baffle_.reset(baffleType::New(p.boundaryMesh().mesh(), dict_));
     }
 }
 
@@ -141,19 +141,23 @@ void vibrationShellFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    baffle_->evolve();
-
     const auto& transportProperties =
         db().lookupObject<IOdictionary>("transportProperties");
 
     dimensionedScalar rho("rho", dimDensity, transportProperties);
 
-    const areaScalarField aRho(rho*baffle_->a());
+    baffle_->evolve();
 
-    baffle_->vsm().mapToField(aRho, this->refGrad());
+    // rho * acceleration
 
-    this->refValue() = Zero;
-    this->valueFraction() = Zero;
+    refGrad() = Zero;  // safety (for any unmapped values)
+
+    baffle_->vsm().mapToVolumePatch(baffle_->a(), refGrad(), patch().index());
+
+    refGrad() *= rho.value();
+
+    refValue() = Zero;
+    valueFraction() = Zero;
 
     mixedFvPatchField<scalar>::updateCoeffs();
 }

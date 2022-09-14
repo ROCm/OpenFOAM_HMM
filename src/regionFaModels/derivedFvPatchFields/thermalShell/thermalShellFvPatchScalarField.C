@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -96,7 +96,7 @@ thermalShellFvPatchScalarField::thermalShellFvPatchScalarField
 {
     if (!baffle_)
     {
-        baffle_.reset(baffleType::New(p, dict_));
+        baffle_.reset(baffleType::New(p.boundaryMesh().mesh(), dict_));
     }
 }
 
@@ -124,13 +124,9 @@ void thermalShellFvPatchScalarField::updateCoeffs()
 
     baffle_->evolve();
 
-    volScalarField::Boundary& vfb =
-        db().lookupObjectRef<volScalarField>
-        (
-            this->internalField().name()
-        ).boundaryFieldRef();
+    scalarField& pfld = *this;
 
-    baffle_->vsm().mapToVolume(baffle_->T(), vfb);
+    baffle_->vsm().mapToVolumePatch(baffle_->T(), pfld, patch().index());
 
     fixedValueFvPatchField<scalar>::updateCoeffs();
 }

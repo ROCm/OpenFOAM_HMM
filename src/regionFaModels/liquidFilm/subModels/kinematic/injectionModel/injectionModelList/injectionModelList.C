@@ -101,21 +101,91 @@ void injectionModelList::correct
     volScalarField& diameterToInject
 )
 {
-    const label patchi = film().patchID();
-
     // Correct models that accumulate mass and diameter transfers
-    forAll(*this, i)
+    PtrList<injectionModel>& models = *this;
+    const labelList& patchIds = film().primaryPatchIDs();
+
+    if (models.empty() || patchIds.empty())
     {
-        injectionModel& im = operator[](i);
-        im.correct
-        (
-            availableMass,
-            massToInject.boundaryFieldRef()[patchi],
-            diameterToInject.boundaryFieldRef()[patchi]
-        );
+        // Nothing to do
+        return;
     }
 
-    massInjected_ += gSum(massToInject.boundaryField()[patchi]);
+    const label patchi = patchIds[0];
+
+    if
+    (
+        patchIds.size() == 1
+     &&
+        (
+            film().regionMesh().nFaces()
+         == massToInject.boundaryField()[patchi].size()
+        )
+    )
+    {
+        // All faces of a single patch.
+        //- Can write directly into boundary fiels
+
+        for (injectionModel& im : models)
+        {
+            im.correct
+            (
+                availableMass,
+                massToInject.boundaryFieldRef()[patchi],
+                diameterToInject.boundaryFieldRef()[patchi]
+            );
+        }
+
+        massInjected_ += gSum(massToInject.boundaryField()[patchi]);
+    }
+    else
+    {
+        // Multiple patches, or a subset of faces
+        // - probably needs intermediate variables
+
+        // The polyPatch/local-face for each of the faceLabels
+        const List<labelPair>& patchFaces
+            = film().regionMesh().whichPatchFaces();
+
+        if (patchFaces.size() != availableMass.size())
+        {
+            FatalErrorInFunction
+                << "film has " << patchFaces.size()
+                << " faces, but availableMass has " << availableMass.size()
+                << " entries"
+                << abort(FatalError);
+        }
+
+        scalarField massToInjectTmp(availableMass.size(), Zero);
+        scalarField diameterToInjectTmp(availableMass.size(), Zero);
+
+        for (injectionModel& im : models)
+        {
+            im.correct
+            (
+                availableMass,
+                massToInjectTmp,
+                diameterToInjectTmp
+            );
+        }
+
+        massInjected_ += gSum(massToInjectTmp);
+
+        // Transcribe to boundary patches
+        forAll(patchFaces, i)
+        {
+            const labelPair& patchAndFace = patchFaces[i];
+
+            if (patchAndFace.first() >= 0)
+            {
+                massToInject.boundaryFieldRef()[patchAndFace]
+                    = massToInjectTmp[i];
+
+                diameterToInject.boundaryFieldRef()[patchAndFace]
+                    = diameterToInjectTmp[i];
+            }
+        }
+    }
 }
 
 
@@ -126,21 +196,10 @@ void injectionModelList::info(Ostream& os)
     scalar injectedMass = 0;
     scalar patchInjectedMasses = 0;
 
-    forAll(*this, i)
+    for (const injectionModel& im : *this)
     {
-        const injectionModel& im = operator[](i);
         injectedMass += im.injectedMassTotal();
         im.patchInjectedMassTotals(patchInjectedMasses);
-    }
-
-    os  << indent << "injected mass      = " << injectedMass << nl;
-
-    const label patchi = film().patchID();
-
-    if (mag(patchInjectedMasses) > VSMALL)
-    {
-        os  << indent << indent << "from patch " << pbm[patchi].name()
-            << " = " << patchInjectedMasses << nl;
     }
 
     scalar mass0(Zero);
@@ -149,8 +208,27 @@ void injectionModelList::info(Ostream& os)
     scalar mass(massInjected_);
     mass += mass0;
 
-    Info<< indent << "  - patch: " << pbm[patchi].name() << "  "
-        << mass << endl;
+    os  << indent << "injected mass      = " << injectedMass << nl;
+
+    if (mag(patchInjectedMasses) > VSMALL)
+    {
+        os  << indent << indent << "from patch ";
+
+        for (const label patchi : film().primaryPatchIDs())
+        {
+            os  << ' ' << pbm[patchi].name();
+        }
+        os  << " = " << patchInjectedMasses << nl;
+    }
+
+    {
+        Info<< indent << "  - patch:";
+        for (const label patchi : film().primaryPatchIDs())
+        {
+            os  << ' ' << pbm[patchi].name();
+        }
+        os  << "  " << mass << endl;
+    }
 
     if (film().primaryMesh().time().writeTime())
     {

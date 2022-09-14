@@ -38,7 +38,7 @@ namespace regionModels
 
 autoPtr<thermalShellModel> thermalShellModel::New
 (
-    const fvPatch& p,
+    const fvMesh& mesh,
     const dictionary& dict
 )
 {
@@ -58,7 +58,7 @@ autoPtr<thermalShellModel> thermalShellModel::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<thermalShellModel>(ctorPtr(modelType, p, dict));
+    return autoPtr<thermalShellModel>(ctorPtr(modelType, mesh, dict));
 }
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,8 +42,8 @@ Foam::ThermoSurfaceFilm<CloudType>::ThermoSurfaceFilm
     (
         owner.db().objectRegistry::template lookupObject<SLGThermo>("SLGThermo")
     ),
-    TFilmPatch_(0),
-    CpFilmPatch_(0)
+    TFilmPatch_(),
+    CpFilmPatch_()
 {}
 
 
@@ -71,133 +71,152 @@ bool Foam::ThermoSurfaceFilm<CloudType>::transferParcel
 )
 {
     const label patchi = pp.index();
+    const label meshFacei = p.face();
+    const label facei = pp.whichFace(meshFacei);
 
     this->initFilmModels();
 
-    bool bInteraction(false);
-
     // Check the singleLayer film models
-    if (this->filmModel_)
+    if (this->filmModel_ && this->filmModel_->isRegionPatch(patchi))
     {
-        if (this->filmModel_->isRegionPatch(patchi))
+        auto& film = *(this->filmModel_);
+
+        switch (this->interactionType_)
         {
-            const label facei = pp.whichFace(p.face());
-
-            switch (this->interactionType_)
+            case KinematicSurfaceFilm<CloudType>::itBounce:
             {
-                case KinematicSurfaceFilm<CloudType>::itBounce:
-                {
-                    this->bounceInteraction(p, pp, facei, keepParticle);
+                this->bounceInteraction(p, pp, facei, keepParticle);
 
-                    break;
-                }
-                case KinematicSurfaceFilm<CloudType>::itAbsorb:
-                {
-                    const scalar m = p.nParticle()*p.mass();
-
-                    this->absorbInteraction //<regionFilm>
-                        (*(this->filmModel_), p, pp, facei, m, keepParticle);
-
-                    break;
-                }
-                case KinematicSurfaceFilm<CloudType>::itSplashBai:
-                {
-                    // Local pressure
-                    const scalar pc = thermo_.thermo().p()[p.cell()];
-                    const liquidProperties& liq = thermo_.liquids().properties()[0];
-                    const scalar sigma = liq.sigma(pc, p.T());
-                    const scalar mu = liq.mu(pc, p.T());
-
-                    bool dry = this->deltaFilmPatch_[patchi][facei] < this->deltaWet_;
-
-                    if (dry)
-                    {
-                        this->drySplashInteraction //<CloudType, regionFilm>
-                            (*(this->filmModel_), sigma, mu, p, pp, facei, keepParticle);
-                    }
-                    else
-                    {
-                        this->wetSplashInteraction //<regionFilm>
-                            (*(this->filmModel_), sigma, mu, p, pp, facei, keepParticle);
-                    }
-
-                    break;
-                }
-                default:
-                {
-                    FatalErrorInFunction
-                        << "Unknown interaction type enumeration"
-                        << abort(FatalError);
-                }
+                break;
             }
 
-            // Transfer parcel/parcel interactions complete
-            bInteraction = true;
+            case KinematicSurfaceFilm<CloudType>::itAbsorb:
+            {
+                const scalar m = p.nParticle()*p.mass();
+
+                this->absorbInteraction //<regionFilm>
+                    (film, p, pp, facei, m, keepParticle);
+
+                break;
+            }
+
+            case KinematicSurfaceFilm<CloudType>::itSplashBai:
+            {
+                // Local pressure
+                const scalar pc = thermo_.thermo().p()[p.cell()];
+                const liquidProperties& liq = thermo_.liquids().properties()[0];
+                const scalar sigma = liq.sigma(pc, p.T());
+                const scalar mu = liq.mu(pc, p.T());
+
+                const bool dry
+                (
+                    this->deltaFilmPatch_[patchi][facei] < this->deltaWet_
+                );
+
+                if (dry)
+                {
+                    this->drySplashInteraction //<CloudType, regionFilm>
+                        (film, sigma, mu, p, pp, facei, keepParticle);
+                }
+                else
+                {
+                    this->wetSplashInteraction //<regionFilm>
+                        (film, sigma, mu, p, pp, facei, keepParticle);
+                }
+
+                break;
+            }
+
+            default:
+            {
+                FatalErrorInFunction
+                    << "Unknown interaction type enumeration"
+                    << abort(FatalError);
+            }
         }
+
+        // Transfer parcel/parcel interactions complete
+        return true;
     }
 
+
+    // Check the area film models
     for (areaFilm& film : this->areaFilms_)
     {
-        if (patchi == film.patchID())
+        const label filmFacei
+        (
+            film.isRegionPatch(patchi)
+          ? film.regionMesh().whichFace(meshFacei)
+          : -1
+        );
+
+        if (filmFacei < 0)
         {
-            const label facei = pp.whichFace(p.face());
-
-            switch (this->interactionType_)
-            {
-                // It only supports absorp model
-                case KinematicSurfaceFilm<CloudType>::itAbsorb:
-                {
-                    const scalar m = p.nParticle()*p.mass();
-
-                    this->absorbInteraction //<areaFilm>
-                    (
-                        film, p, pp, facei, m, keepParticle
-                    );
-                    break;
-                }
-                case KinematicSurfaceFilm<CloudType>::itBounce:
-                {
-                    this->bounceInteraction(p, pp, facei, keepParticle);
-
-                    break;
-                }
-                case KinematicSurfaceFilm<CloudType>::itSplashBai:
-                {
-                    // Local pressure
-                    const scalar pc = thermo_.thermo().p()[p.cell()];
-                    const liquidProperties& liq = thermo_.liquids().properties()[0];
-                    const scalar sigma = liq.sigma(pc, p.T());
-                    const scalar mu = liq.mu(pc, p.T());
-
-                    bool dry = film.h()[facei] < this->deltaWet_;
-
-                    if (dry)
-                    {
-                        this->drySplashInteraction //<areaFilm>
-                            (film, sigma, mu, p, pp, facei, keepParticle);
-                    }
-                    else
-                    {
-                        this->wetSplashInteraction //<areaFilm>
-                            (film, sigma, mu, p, pp, facei, keepParticle);
-                    }
-
-                    break;
-                }
-                default:
-                {
-                    FatalErrorInFunction
-                        << "Unknown interaction type enumeration"
-                        << abort(FatalError);
-                }
-            }
-            // Transfer parcel/parcel interactions complete
-            bInteraction = true;
+            // Film model does not include this patch face
+            continue;
         }
+
+        switch (this->interactionType_)
+        {
+            case KinematicSurfaceFilm<CloudType>::itBounce:
+            {
+                this->bounceInteraction(p, pp, facei, keepParticle);
+
+                break;
+            }
+
+            case KinematicSurfaceFilm<CloudType>::itAbsorb:
+            {
+                const scalar m = p.nParticle()*p.mass();
+
+                this->absorbInteraction //<areaFilm>
+                (
+                    film, p, pp, facei, m, keepParticle
+                );
+                break;
+            }
+
+            case KinematicSurfaceFilm<CloudType>::itSplashBai:
+            {
+                // Local pressure
+                const scalar pc = thermo_.thermo().p()[p.cell()];
+                const liquidProperties& liq = thermo_.liquids().properties()[0];
+                const scalar sigma = liq.sigma(pc, p.T());
+                const scalar mu = liq.mu(pc, p.T());
+
+                const bool dry
+                (
+                    film.h()[filmFacei] < this->deltaWet_
+                );
+
+                if (dry)
+                {
+                    this->drySplashInteraction //<areaFilm>
+                        (film, sigma, mu, p, pp, facei, keepParticle);
+                }
+                else
+                {
+                    this->wetSplashInteraction //<areaFilm>
+                        (film, sigma, mu, p, pp, facei, keepParticle);
+                }
+
+                break;
+            }
+
+            default:
+            {
+                FatalErrorInFunction
+                    << "Unknown interaction type enumeration"
+                    << abort(FatalError);
+            }
+        }
+
+        // Transfer parcel/parcel interactions complete
+        return true;
     }
 
-    // Parcel not interacting with film
-    return bInteraction;
+    // Parcel did not interact with film
+    return false;
 }
 
 
@@ -227,21 +246,16 @@ void Foam::ThermoSurfaceFilm<CloudType>::cacheFilmFields
 template<class CloudType>
 void Foam::ThermoSurfaceFilm<CloudType>::cacheFilmFields
 (
-    const label filmPatchi,
-    const areaFilm& filmModel
+    const regionModels::areaSurfaceFilmModels::liquidFilmBase& film
 )
 {
-    KinematicSurfaceFilm<CloudType>::cacheFilmFields
-    (
-        filmPatchi,
-        filmModel
-    );
-    const volSurfaceMapping& map = filmModel.region().vsm();
+    KinematicSurfaceFilm<CloudType>::cacheFilmFields(film);
 
-    TFilmPatch_.setSize(filmModel.Tf().size(), Zero);
-    map.mapToField(filmModel.Tf(), TFilmPatch_);
-    CpFilmPatch_.setSize(filmModel.Tf().size(), Zero);
-    map.mapToField(filmModel.Cp(), CpFilmPatch_);
+    // Direct copy (one-to-one mapping)
+    TFilmPatch_ = film.Tf().primitiveField();
+
+    // Direct copy (one-to-one mapping)
+    TFilmPatch_ = film.Cp().primitiveField();
 }
 
 

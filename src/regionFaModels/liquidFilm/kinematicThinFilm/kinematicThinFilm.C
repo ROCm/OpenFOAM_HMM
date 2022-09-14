@@ -49,11 +49,11 @@ addToRunTimeSelectionTable(liquidFilmBase, kinematicThinFilm, dictionary);
 kinematicThinFilm::kinematicThinFilm
 (
     const word& modelType,
-    const fvPatch& patch,
+    const fvMesh& mesh,
     const dictionary& dict
 )
 :
-    liquidFilmModel(modelType, patch, dict)
+    liquidFilmModel(modelType, mesh, dict)
 {}
 
 

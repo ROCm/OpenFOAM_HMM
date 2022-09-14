@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -132,10 +132,10 @@ public:
              dictionary,
              (
                 const word& modelType,
-                const fvPatch& patch,
+                const fvMesh& mesh,
                 const dictionary& dict
              ),
-             (modelType, patch, dict)
+             (modelType, mesh, dict)
          );
 
 
@@ -145,7 +145,7 @@ public:
         vibrationShellModel
         (
             const word& modelType,
-            const fvPatch& patch,
+            const fvMesh& mesh,
             const dictionary& dict
         );
 
@@ -161,7 +161,7 @@ public:
         //- Return a reference to the selected model using dictionary
         static autoPtr<vibrationShellModel> New
         (
-            const fvPatch& patch,
+            const fvMesh& mesh,
             const dictionary& dict
         );
 

@@ -48,20 +48,20 @@ defineRunTimeSelectionTable(thermalShellModel, dictionary);
 thermalShellModel::thermalShellModel
 (
     const word& modelType,
-    const fvPatch& p,
+    const fvMesh& mesh,
     const dictionary& dict
 )
 :
-    regionFaModel(p, "thermalShell", modelType, dict, true),
+    regionFaModel(mesh, "thermalShell", modelType, dict, true),
     TName_(dict.get<word>("T")),
-    Tp_(p.boundaryMesh().mesh().lookupObject<volScalarField>(TName_)),
+    Tp_(mesh.lookupObject<volScalarField>(TName_)),
     T_
     (
         IOobject
         (
             "Ts_" + regionName_,
-            p.boundaryMesh().mesh().time().timeName(),
-            p.boundaryMesh().mesh(),
+            primaryMesh().time().timeName(),
+            primaryMesh(),
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
@@ -69,7 +69,7 @@ thermalShellModel::thermalShellModel
     ),
     faOptions_(Foam::fa::options::New(primaryMesh()))
 {
-    if (!faOptions_.optionList::size())
+    if (faOptions_.optionList::empty())
     {
         Info << "No finite area options present" << endl;
     }

@@ -138,11 +138,11 @@ void KirchhoffShell::solveDisplacement()
 KirchhoffShell::KirchhoffShell
 (
     const word& modelType,
-    const fvPatch& patch,
+    const fvMesh& mesh,
     const dictionary& dict
 )
 :
-    vibrationShellModel(modelType, patch, dict),
+    vibrationShellModel(modelType, mesh, dict),
     f0_("f0", dimless, dict),
     f1_("f1", inv(dimTime), dict),
     f2_("f2", dimTime, dict),

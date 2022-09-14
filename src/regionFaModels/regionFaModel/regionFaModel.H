@@ -109,9 +109,6 @@ protected:
         //- Reference to the primary mesh database
         const fvMesh& primaryMesh_;
 
-        //- Reference to fvPatch
-        const fvPatch& patch_;
-
         //- Reference to the time database
         const Time& time_;
 
@@ -154,7 +151,7 @@ public:
         //- Construct from mesh and name and dict
         regionFaModel
         (
-            const fvPatch& patch,
+            const fvMesh& mesh,
             const word& regionType,
             const word& modelName,
             const dictionary& dict,
@@ -212,8 +209,11 @@ public:
 
     // Addressing
 
-        //- The patch ID on the primary region coupled to this region
-        label patchID() const { return patch_.index(); }
+        //- List of patch IDs on the primary region coupled to this region
+        inline const labelList& primaryPatchIDs() const;
+
+        //- True if patchi on the primary region is coupled to this region
+        inline bool isRegionPatch(const label patchi) const;
 
 
     // Helper Functions

@@ -40,7 +40,7 @@ namespace areaSurfaceFilmModels
 
 autoPtr<liquidFilmBase> liquidFilmBase::New
 (
-    const fvPatch& p,
+    const fvMesh& mesh,
     const dictionary& dict
 )
 {
@@ -59,7 +59,7 @@ autoPtr<liquidFilmBase> liquidFilmBase::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<liquidFilmBase>(ctorPtr(modelType, p, dict));
+    return autoPtr<liquidFilmBase>(ctorPtr(modelType, mesh, dict));
 }
 
 

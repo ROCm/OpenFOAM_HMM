@@ -38,7 +38,7 @@ namespace regionModels
 
 autoPtr<vibrationShellModel> vibrationShellModel::New
 (
-    const fvPatch& p,
+    const fvMesh& mesh,
     const dictionary& dict
 )
 {
@@ -57,7 +57,7 @@ autoPtr<vibrationShellModel> vibrationShellModel::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<vibrationShellModel>(ctorPtr(modelType, p, dict));
+    return autoPtr<vibrationShellModel>(ctorPtr(modelType, mesh, dict));
 }
 
 

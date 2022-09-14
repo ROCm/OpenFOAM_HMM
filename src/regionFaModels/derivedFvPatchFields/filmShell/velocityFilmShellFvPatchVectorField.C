@@ -121,7 +121,7 @@ velocityFilmShellFvPatchVectorField::velocityFilmShellFvPatchVectorField
 
     if (!baffle_)
     {
-        baffle_.reset(baffleType::New(p, dict_));
+        baffle_.reset(baffleType::New(p.boundaryMesh().mesh(), dict_));
     }
 }
 
@@ -155,13 +155,9 @@ void velocityFilmShellFvPatchVectorField::updateCoeffs()
     {
         baffle_->evolve();
 
-        volVectorField::Boundary& vfb =
-            db().lookupObjectRef<volVectorField>
-            (
-                this->internalField().name()
-            ).boundaryFieldRef();
+        vectorField& pfld = *this;
 
-        baffle_->vsm().mapToVolume(baffle_->Us(), vfb);
+        baffle_->vsm().mapToVolumePatch(baffle_->Us(), pfld, patch().index());
 
         refGrad() = Zero;
         valueFraction() = 1;
@@ -172,8 +168,9 @@ void velocityFilmShellFvPatchVectorField::updateCoeffs()
         }
         else
         {
-            refValue() = vfb[patch().index()];
+            refValue() = pfld;
         }
+
         curTimeIndex_ = this->db().time().timeIndex();
     }
 
