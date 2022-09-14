@@ -564,7 +564,10 @@ snapControls
         //  multiRegionFeatureSnap) have the other points follow these points
         //  instead of having their own independent movement, i.e. have snapping
         //  to multi-region edges/points take priority. This might aid snapping
-        //  to sharp edges that are also region edges. The default is false.
+        //  to sharp edges that are also region edges. The default is false
+        //  since it might also introduce problems - at morphing the patching
+        //  might still be wrong so points get 'released' instead of behaving
+        //  as any other point.
         //releasePoints true;
         //- Walk along feature edges, adding missing ones. Default is true.
         //stringFeatures false;
