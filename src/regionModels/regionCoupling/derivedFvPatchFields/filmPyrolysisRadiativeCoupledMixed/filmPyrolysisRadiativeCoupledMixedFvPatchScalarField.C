@@ -108,14 +108,7 @@ filmPyrolysisRadiativeCoupledMixedFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(p, iF),
-    temperatureCoupledBase
-    (
-        patch(),
-        "undefined",
-        "undefined",
-        "undefined-K",
-        "undefined-alpha"
-    ),
+    temperatureCoupledBase(patch()),  // default method (fluidThermo)
     filmRegionName_("surfaceFilmProperties"),
     pyrolysisRegionName_("pyrolysisProperties"),
     TnbrName_("undefined-Tnbr"),

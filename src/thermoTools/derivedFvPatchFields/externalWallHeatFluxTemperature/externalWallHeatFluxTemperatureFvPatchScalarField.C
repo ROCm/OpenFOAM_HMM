@@ -58,14 +58,7 @@ externalWallHeatFluxTemperatureFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(p, iF),
-    temperatureCoupledBase
-    (
-        patch(),
-        "undefined",
-        "undefined",
-        "undefined-K",
-        "undefined-alpha"
-    ),
+    temperatureCoupledBase(patch()),  // default method (fluidThermo)
     mode_(fixedHeatFlux),
     Q_(nullptr),
     q_(nullptr),
