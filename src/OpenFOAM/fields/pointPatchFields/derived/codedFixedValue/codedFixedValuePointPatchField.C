@@ -165,7 +165,7 @@ Foam::codedFixedValuePointPatchField<Type>::codedFixedValuePointPatchField
     const bool valueRequired
 )
 :
-    parent_bctype(p, iF, dict, valueRequired),
+    parent_bctype(p, iF, dict, false),
     codedBase(),
     dict_
     (
@@ -185,6 +185,15 @@ Foam::codedFixedValuePointPatchField<Type>::codedFixedValuePointPatchField
     redirectPatchFieldPtr_(nullptr)
 {
     updateLibrary(name_);
+
+    // Note: 'value' is used even with valueRequired = false ! This is
+    // inconsistent with fixedValueFvPatchField behaviour.
+
+    if (!dict.found("value")) // Q: check for valueRequired?
+    {
+        // Evaluate to assign a value
+        this->evaluate(Pstream::commsTypes::blocking);
+    }
 }
 
 

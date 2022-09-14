@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -164,7 +164,7 @@ Foam::codedFixedValueFvPatchField<Type>::codedFixedValueFvPatchField
     const dictionary& dict
 )
 :
-    parent_bctype(p, iF, dict),
+    parent_bctype(p, iF, dict, dict.found("value")),  // Note: optional 'value'
     codedBase(),
     dict_
     (
@@ -184,6 +184,14 @@ Foam::codedFixedValueFvPatchField<Type>::codedFixedValueFvPatchField
     redirectPatchFieldPtr_(nullptr)
 {
     updateLibrary(name_);
+
+    if (!dict.found("value"))
+    {
+        // Assign dummy value to get redirectPatchField not fail
+        this->operator==(this->patchInternalField());
+
+        this->evaluate(Pstream::commsTypes::blocking);
+    }
 }
 
 
