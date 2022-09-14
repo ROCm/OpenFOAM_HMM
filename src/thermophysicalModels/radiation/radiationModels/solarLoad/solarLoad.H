@@ -155,9 +155,6 @@ class solarLoad
         //- Primary solar radiative heat flux per band [W/m2]
         PtrList<volScalarField> qprimaryRad_;
 
-        //- Vertical direction (default is g vector)
-        vector verticalDir_;
-
         //- Number of bands
         label nBands_;
 
