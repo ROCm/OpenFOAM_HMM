@@ -414,12 +414,21 @@ public:
 
         // Evaluation
 
+            //- Extract internal field next to patch using edgeFaces mapping
+            template<class Type>
+            inline void patchInternalField
+            (
+                const UList<Type>& f,
+                const labelUList& edgeFaces,
+                Field<Type>& pfld
+            ) const;
+
             //- Return given internal field next to patch as patch field
             template<class Type>
             tmp<Field<Type>> patchInternalField(const UList<Type>&) const;
 
             //- Return given internal field next to patch as patch field
-            //  providing addressing
+            //- using provided addressing
             template<class Type>
             tmp<Foam::Field<Type>> patchInternalField
             (
@@ -427,24 +436,28 @@ public:
                 const labelUList& edgeFaces
             ) const;
 
-            //- Return the corresponding patchField of the named field
-            template<class GeometricField, class Type>
+            //- Extract internal field next to patch as patch field
+            template<class Type>
+            void patchInternalField(const UList<Type>&, Field<Type>&) const;
+
+            //- Return the patch field of the GeometricField
+            //- corresponding to this patch.
+            template<class GeometricField, class AnyType = bool>
             const typename GeometricField::Patch& patchField
             (
-                const GeometricField&
+                const GeometricField& gf
             ) const;
 
-            //- Lookup and return the patchField of the named field from the
-            //- local objectRegistry.
+            //- Lookup the named field from the local registry and
+            //- return the patch field corresponding to this patch.
             //  N.B.  The dummy pointer arguments are used if this function is
             //  instantiated within a templated function to avoid a bug in gcc.
-            //  See inletOutletFvPatchField.C and outletInletFvPatchField.C
-            template<class GeometricField, class Type>
+            template<class GeometricField, class AnyType = bool>
             const typename GeometricField::Patch& lookupPatchField
             (
                 const word& name,
                 const GeometricField* = nullptr,
-                const Type* = nullptr
+                const AnyType* = nullptr
             ) const;
 
 

@@ -28,6 +28,7 @@ License
 
 #include "fvBoundaryMesh.H"
 #include "fvMesh.H"
+#include "PtrListOps.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -98,6 +99,8 @@ Foam::label Foam::fvBoundaryMesh::findPatchID(const word& patchName) const
     {
         return -1;
     }
+
+    // OR: return PtrListOps::firstMatching(*this, patchName);
 
     const fvPatchList& patches = *this;
 

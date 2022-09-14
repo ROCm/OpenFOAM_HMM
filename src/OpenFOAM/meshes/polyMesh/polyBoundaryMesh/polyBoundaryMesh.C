@@ -586,6 +586,12 @@ Foam::List<Foam::labelRange> Foam::polyBoundaryMesh::patchRanges() const
 }
 
 
+Foam::wordList Foam::polyBoundaryMesh::groupNames() const
+{
+    return this->groupPatchIDs().sortedToc();
+}
+
+
 Foam::label Foam::polyBoundaryMesh::start() const noexcept
 {
     return mesh_.nInternalFaces();
@@ -787,26 +793,29 @@ Foam::label Foam::polyBoundaryMesh::findPatchID
 }
 
 
-Foam::label Foam::polyBoundaryMesh::whichPatch(const label faceIndex) const
+Foam::labelPair
+Foam::polyBoundaryMesh::whichPatchFace(const label faceIndex) const
 {
-    // Find out which patch the current face belongs to by comparing label
-    // with patch start labels.
-    // If the face is internal, return -1;
-    // if it is off the end of the list, abort
     if (faceIndex < mesh().nInternalFaces())
     {
-        return -1;
+        // Internal face: return (-1, meshFace)
+        return labelPair(-1, faceIndex);
     }
     else if (faceIndex >= mesh().nFaces())
     {
+        // Bounds error: abort
         FatalErrorInFunction
             << "Face " << faceIndex
             << " out of bounds. Number of geometric faces " << mesh().nFaces()
             << abort(FatalError);
+
+        return labelPair(-1, faceIndex);
     }
 
 
     // Patches are ordered, use binary search
+    // Find out which patch index and local patch face the specified
+    // mesh face belongs to by comparing label with patch start labels.
 
     const polyPatchList& patches = *this;
 
@@ -831,10 +840,23 @@ Foam::label Foam::polyBoundaryMesh::whichPatch(const label faceIndex) const
             << " total number of faces:" << mesh().nFaces()
             << abort(FatalError);
 
-        return -1;
+        return labelPair(-1, faceIndex);
     }
 
-    return patchi;
+    // (patch, local face index)
+    return labelPair(patchi, faceIndex - patches[patchi].start());
+}
+
+
+Foam::labelPairList
+Foam::polyBoundaryMesh::whichPatchFace(const labelUList& faceIndices) const
+{
+    labelPairList output(faceIndices.size());
+    forAll(faceIndices, i)
+    {
+        output[i] = whichPatchFace(faceIndices[i]);
+    }
+    return output;
 }
 
 

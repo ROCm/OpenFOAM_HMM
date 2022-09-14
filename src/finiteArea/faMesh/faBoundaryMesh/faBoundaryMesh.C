@@ -421,6 +421,12 @@ Foam::List<Foam::labelRange> Foam::faBoundaryMesh::patchRanges() const
 }
 
 
+Foam::wordList Foam::faBoundaryMesh::groupNames() const
+{
+    return this->groupPatchIDs().sortedToc();
+}
+
+
 Foam::label Foam::faBoundaryMesh::start() const
 {
     return mesh_.nInternalEdges();

@@ -160,6 +160,9 @@ public:
         //- Return a list of patch ranges
         List<labelRange> patchRanges() const;
 
+        //- A list of the group names (if any)
+        wordList groupNames() const;
+
         //- The start label of the edges in the faMesh edges list
         //  Same as mesh.nInternalEdges()
         label start() const;

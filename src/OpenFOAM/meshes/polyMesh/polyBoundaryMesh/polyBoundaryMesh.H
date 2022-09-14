@@ -190,6 +190,9 @@ public:
         //- Return a list of patch ranges
         List<labelRange> patchRanges() const;
 
+        //- A list of the group names (if any)
+        wordList groupNames() const;
+
         //- The start label of boundary faces in the polyMesh face list
         //  Same as polyMesh::nInternalFaces()
         label start() const noexcept;
@@ -242,8 +245,18 @@ public:
         template<class Type>
         labelHashSet findPatchIDs() const;
 
-        //- Return patch index for a given face label
-        label whichPatch(const label faceIndex) const;
+        //- Lookup mesh face index and return (patchi, patchFacei) tuple
+        //- or (-1, meshFacei) for internal faces
+        labelPair whichPatchFace(const label faceIndex) const;
+
+        //- Lookup mesh face indices and return (patchi, patchFacei) tuples
+        labelPairList whichPatchFace(const labelUList& faceIndices) const;
+
+        //- Return patch index for a given mesh face index
+        label whichPatch(const label faceIndex) const
+        {
+            return whichPatchFace(faceIndex).first();
+        }
 
         //- Per boundary face label the patch index
         const labelList& patchID() const;
