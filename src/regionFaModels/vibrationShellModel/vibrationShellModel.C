@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -80,7 +80,7 @@ vibrationShellModel::vibrationShellModel
         regionMesh(),
         dimensionedScalar(dimAcceleration, Zero)
     ),
-    faOptions_(Foam::fa::options::New(p)),
+    faOptions_(Foam::fa::options::New(primaryMesh())),
     solid_(dict.subDict("solid"))
 {
     if (!faOptions_.optionList::size())

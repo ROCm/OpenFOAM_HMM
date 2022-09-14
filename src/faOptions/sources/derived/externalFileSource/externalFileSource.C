@@ -50,10 +50,10 @@ Foam::fa::externalFileSource::externalFileSource
     const word& sourceName,
     const word& modelType,
     const dictionary& dict,
-    const fvPatch& p
+    const fvMesh& m
 )
 :
-    fa::faceSetOption(sourceName, modelType, dict, p),
+    fa::faceSetOption(sourceName, modelType, dict, m),
     fieldName_(dict.get<word>("fieldName")),
     tableName_(dict.get<word>("tableName")),
     pExt_
@@ -71,17 +71,7 @@ Foam::fa::externalFileSource::externalFileSource
         dimensionedScalar(dimPressure, Zero)
     ),
     curTimeIndex_(-1),
-    mapping_
-    (
-        new PatchFunction1Types::MappedFile<scalar>
-        (
-            p.patch(),
-            "uniformValue",
-            dict,
-            tableName_,          // field table name
-            true                 // face values
-        )
-    )
+    mapping_()
 {
     fieldNames_.resize(1, fieldName_);
 
@@ -95,9 +85,22 @@ Foam::fa::externalFileSource::externalFileSource
 
 void Foam::fa::externalFileSource::updateMapping()
 {
+    // Set up mapped values per patch
     const scalar t = mesh().time().value();
 
-    pExt_.field() = mapping_->value(t);
+    PtrList<scalarField> patchValues(mapping_.size());
+
+    forAll(mapping_, patchi)
+    {
+        const auto* map = mapping_.get(patchi);
+
+        if (map)
+        {
+            patchValues.set(patchi, map->value(t));
+        }
+    }
+
+    vsm().mapToSurface<scalar>(patchValues, pExt_.field());
 
     // Zero pressure for non-mapped faces
     faceSetOption::subsetFilter(pExt_.field());
@@ -133,6 +136,34 @@ bool Foam::fa::externalFileSource::read(const dictionary& dict)
 {
     if (fa::option::read(dict))
     {
+        // Set up mapping (per-patch) for referenced polyPatches (sorted order)
+        // - size is maxPolyPatch+1
+
+        const labelList& patches = regionMesh().whichPolyPatches();
+
+        mapping_.clear();
+        mapping_.resize(patches.empty() ? 0 : (patches.last()+1));
+
+        for (const label patchi : patches)
+        {
+            const polyPatch& p = mesh_.boundaryMesh()[patchi];
+
+            mapping_.set
+            (
+                patchi,
+                (
+                    new PatchFunction1Types::MappedFile<scalar>
+                    (
+                        p,
+                        "uniformValue",
+                        dict,
+                        tableName_,     // field table name
+                        true            // face values
+                    )
+                )
+            );
+        }
+
         return true;
     }
 

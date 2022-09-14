@@ -193,7 +193,7 @@ public:
             const word& sourceName,
             const word& modelType,
             const dictionary& dict,
-            const fvPatch& patch
+            const fvMesh& mesh
         );
 
         //- No copy construct

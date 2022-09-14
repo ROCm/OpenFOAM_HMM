@@ -39,12 +39,6 @@ inline const Foam::fvMesh& Foam::fa::option::mesh() const noexcept
 }
 
 
-inline const Foam::fvPatch& Foam::fa::option::patch() const noexcept
-{
-    return patch_;
-}
-
-
 inline const Foam::dictionary& Foam::fa::option::coeffs() const noexcept
 {
     return coeffs_;

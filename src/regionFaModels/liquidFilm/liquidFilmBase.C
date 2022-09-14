@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -233,7 +233,7 @@ liquidFilmBase::liquidFilmBase
 
     addedMassTotal_(0),
 
-    faOptions_(Foam::fa::options::New(p))
+    faOptions_(Foam::fa::options::New(primaryMesh()))
 {
     const areaVectorField& ns = regionMesh().faceAreaNormals();
 

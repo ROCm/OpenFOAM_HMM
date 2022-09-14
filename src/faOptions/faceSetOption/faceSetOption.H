@@ -188,7 +188,7 @@ public:
             const word& name,
             const word& modelType,
             const dictionary& dict,
-            const fvPatch& patch
+            const fvMesh& mesh
         );
 
 

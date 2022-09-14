@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,13 +56,12 @@ Foam::fa::option::option
     const word& name,
     const word& modelType,
     const dictionary& dict,
-    const fvPatch& patch
+    const fvMesh& mesh
 )
 :
     name_(name),
     modelType_(modelType),
-    mesh_(patch.boundaryMesh().mesh()),
-    patch_(patch),
+    mesh_(mesh),
     dict_(dict),
     coeffs_(dict.optionalSubDict(modelType + "Coeffs")),
     fieldNames_(),
@@ -83,7 +82,7 @@ Foam::autoPtr<Foam::fa::option> Foam::fa::option::New
 (
     const word& name,
     const dictionary& coeffs,
-    const fvPatch& patch
+    const fvMesh& mesh
 )
 {
     const word modelType(coeffs.get<word>("type"));
@@ -91,7 +90,7 @@ Foam::autoPtr<Foam::fa::option> Foam::fa::option::New
     Info<< indent
         << "Selecting finite area options type " << modelType << endl;
 
-    patch.boundaryMesh().mesh().time().libs().open
+    mesh.time().libs().open
     (
         coeffs,
         "libs",
@@ -111,7 +110,7 @@ Foam::autoPtr<Foam::fa::option> Foam::fa::option::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<fa::option>(ctorPtr(name, modelType, coeffs, patch));
+    return autoPtr<fa::option>(ctorPtr(name, modelType, coeffs, mesh));
 }
 
 

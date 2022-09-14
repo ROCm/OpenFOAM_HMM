@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,8 +72,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Foam_faOption_H
-#define Foam_faOption_H
+#ifndef Foam_fa_option_H
+#define Foam_fa_option_H
 
 #include "faMatricesFwd.H"
 #include "areaFieldsFwd.H"
@@ -113,9 +113,6 @@ protected:
 
         //- Reference to the mesh database
         const fvMesh& mesh_;
-
-        //- Reference to the patch
-        const fvPatch& patch_;
 
         //- Top level source dictionary
         dictionary dict_;
@@ -174,9 +171,9 @@ public:
                 const word& name,
                 const word& modelType,
                 const dictionary& dict,
-                const fvPatch& patch
+                const fvMesh& mesh
             ),
-            (name, modelType, dict, patch)
+            (name, modelType, dict, mesh)
         );
 
 
@@ -188,7 +185,7 @@ public:
             const word& name,
             const word& modelType,
             const dictionary& dict,
-            const fvPatch& patch
+            const fvMesh& mesh
         );
 
         //- Return clone
@@ -202,8 +199,8 @@ public:
         //- on the freestore from an Istream
         class iNew
         {
-            //- Reference to the patch
-            const fvPatch& patch_;
+            //- Reference to the mesh
+            const fvMesh& mesh_;
 
             //- Name
             const word& name_;
@@ -212,11 +209,11 @@ public:
 
             iNew
             (
-                const fvPatch& patch,
+                const fvMesh& mesh,
                 const word& name
             )
             :
-                patch_(patch),
+                mesh_(mesh),
                 name_(name)
             {}
 
@@ -226,7 +223,7 @@ public:
 
                 return autoPtr<option>
                 (
-                    option::New(name_, dict, patch_)
+                    option::New(name_, dict, mesh_)
                 );
             }
         };
@@ -239,7 +236,7 @@ public:
         (
             const word& name,
             const dictionary& dict,
-            const fvPatch& patch
+            const fvMesh& mesh
         );
 
 
@@ -256,9 +253,6 @@ public:
 
             //- Return const access to the mesh database
             inline const fvMesh& mesh() const noexcept;
-
-            //- Return const access to fvPatch
-            inline const fvPatch& patch() const noexcept;
 
             //- Return dictionary
             inline const dictionary& coeffs() const noexcept;

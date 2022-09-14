@@ -51,18 +51,18 @@ Foam::fa::contactHeatFluxSource::contactHeatFluxSource
     const word& sourceName,
     const word& modelType,
     const dictionary& dict,
-    const fvPatch& patch
+    const fvMesh& mesh
 )
 :
-    fa::faceSetOption(sourceName, modelType, dict, patch),
-    temperatureCoupledBase(patch, dict),
+    fa::faceSetOption(sourceName, modelType, dict, mesh),
     TName_(dict.getOrDefault<word>("T", "T")),
     TprimaryName_(dict.get<word>("Tprimary")),
-    Tp_(mesh().lookupObject<volScalarField>(TprimaryName_)),
+    Tprimary_(mesh_.lookupObject<volScalarField>(TprimaryName_)),
     thicknessLayers_(),
     kappaLayers_(),
     contactRes_(0),
-    curTimeIndex_(-1)
+    curTimeIndex_(-1),
+    coupling_()
 {
     fieldNames_.resize(1, TName_);
 
@@ -85,11 +85,30 @@ Foam::fa::contactHeatFluxSource::htc() const
     );
     auto& htc = thtc.ref();
 
-    htc.field() =
-        temperatureCoupledBase::kappa
-        (
-            vsm().mapInternalToSurface<scalar>(Tp_)()
-        )*patch().deltaCoeffs();
+    // Set up values per coupled patch
+
+    PtrList<scalarField> patchValues(coupling_.size());
+
+    forAll(coupling_, patchi)
+    {
+        const auto* tempCoupled = coupling_.get(patchi);
+
+        if (tempCoupled)
+        {
+            const fvPatch& p = tempCoupled->patch();
+
+            patchValues.set
+            (
+                patchi,
+                (
+                    tempCoupled->kappa(p.patchInternalField(Tprimary_))
+                  * p.deltaCoeffs()
+                )
+            );
+        }
+    }
+
+    vsm().mapToSurface<scalar>(patchValues, htc.field());
 
     if (contactRes_ != 0)
     {
@@ -129,8 +148,7 @@ void Foam::fa::contactHeatFluxSource::addSup
                 dimensionedScalar(dimTemperature, Zero)
             );
 
-            Twall.ref().field() =
-                this->vsm().mapInternalToSurface<scalar>(Tp_);
+            vsm().mapInternalToSurface<scalar>(Tprimary_, Twall.ref().field());
 
             eqn += -fam::Sp(htcw(), eqn.psi()) + htcw()*Twall;
 
@@ -163,6 +181,26 @@ bool Foam::fa::contactHeatFluxSource::read(const dictionary& dict)
             {
                 contactRes_ = scalar(1)/contactRes_;
             }
+        }
+
+
+        // Set up coupling (per-patch) for referenced polyPatches (sorted order)
+        // - size is maxPolyPatch+1
+
+        const labelList& patches = regionMesh().whichPolyPatches();
+
+        coupling_.clear();
+        coupling_.resize(patches.empty() ? 0 : (patches.last()+1));
+
+        for (const label patchi : patches)
+        {
+            const fvPatch& p = mesh_.boundary()[patchi];
+
+            coupling_.set
+            (
+                patchi,
+                new temperatureCoupling(p, dict)
+            );
         }
 
         return true;

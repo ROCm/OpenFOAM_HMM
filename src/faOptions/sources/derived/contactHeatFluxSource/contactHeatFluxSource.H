@@ -81,6 +81,7 @@ SourceFiles
 
 #include "faOption.H"
 #include "Function1.H"
+#include "PtrList.H"
 #include "areaFields.H"
 #include "faceSetOption.H"
 #include "temperatureCoupledBase.H"
@@ -98,9 +99,31 @@ namespace fa
 
 class contactHeatFluxSource
 :
-    public fa::faceSetOption,
-    public temperatureCoupledBase
+    public fa::faceSetOption
 {
+    // Private Classes
+
+         //- Wrapper to make non-abstract
+         struct temperatureCoupling : public Foam::temperatureCoupledBase
+         {
+             // Inherit constructors
+             using temperatureCoupledBase::temperatureCoupledBase;
+
+             //- The fvPatch
+             const fvPatch& patch() const noexcept { return patch_; }
+
+             // Dummy implementations
+
+             //- Map (and resize as needed) from self given a mapping object
+             virtual void autoMap(const fvPatchFieldMapper&)
+             {}
+
+             // Dummy implementation
+             virtual void rmap(const fvPatchField<scalar>&, const labelList&)
+             {}
+        };
+
+
     // Private Data
 
         //- Name of temperature field
@@ -110,7 +133,7 @@ class contactHeatFluxSource
         word TprimaryName_;
 
         //- Primary region temperature
-        const volScalarField& Tp_;
+        const volScalarField& Tprimary_;
 
         //- Thickness of layers
         scalarList thicknessLayers_;
@@ -123,6 +146,9 @@ class contactHeatFluxSource
 
         //- Current time index (used for updating)
         label curTimeIndex_;
+
+        //- Contact coupling (per-patch)
+        PtrList<temperatureCoupling> coupling_;
 
 
     // Private Member Functions
@@ -145,7 +171,7 @@ public:
             const word& sourceName,
             const word& modelType,
             const dictionary& dict,
-            const fvPatch& patch
+            const fvMesh& mesh
         );
 
         //- No copy construct
@@ -160,28 +186,6 @@ public:
 
 
     // Member Functions
-
-        // Mapping functions
-
-            //- Map (and resize as needed) from self given a mapping object
-            virtual void autoMap
-            (
-                const fvPatchFieldMapper& mapper
-            )
-            {
-                temperatureCoupledBase::autoMap(mapper);
-            }
-
-            //- Reverse map the given fvPatchField onto this fvPatchField
-            virtual void rmap
-            (
-                const fvPatchField<scalar>& fld,
-                const labelList& map
-            )
-            {
-                temperatureCoupledBase::rmap(fld, map);
-            }
-
 
         // Evaluation
 

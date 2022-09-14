@@ -65,10 +65,10 @@ Foam::fa::externalHeatFluxSource::externalHeatFluxSource
     const word& sourceName,
     const word& modelType,
     const dictionary& dict,
-    const fvPatch& patch
+    const fvMesh& m
 )
 :
-    fa::faceSetOption(sourceName, modelType, dict, patch),
+    fa::faceSetOption(sourceName, modelType, dict, m),
     mode_(operationModeNames.get("mode", dict)),
     TName_(dict.getOrDefault<word>("T", "T")),
     Q_(nullptr),

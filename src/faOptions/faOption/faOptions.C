@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 ------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -91,18 +91,16 @@ Foam::IOobject Foam::fa::options::createIOobject
 
 Foam::fa::options::options
 (
-    const fvPatch& p
+    const fvMesh& mesh
 )
 :
-    IOdictionary(createIOobject(p.boundaryMesh().mesh())),
-    optionList(p, *this)
+    IOdictionary(createIOobject(mesh)),
+    optionList(mesh, *this)
 {}
 
 
-Foam::fa::options& Foam::fa::options::New(const fvPatch& p)
+Foam::fa::options& Foam::fa::options::New(const fvMesh& mesh)
 {
-    const fvMesh& mesh = p.boundaryMesh().mesh();
-
     options* ptr = mesh.thisDb().getObjectPtr<options>(typeName);
 
     if (!ptr)
@@ -111,7 +109,7 @@ Foam::fa::options& Foam::fa::options::New(const fvPatch& p)
             << "Constructing " << typeName
             << " for region " << mesh.name() << endl;
 
-        ptr = new options(p);
+        ptr = new options(mesh);
         regIOobject::store(ptr);
     }
 

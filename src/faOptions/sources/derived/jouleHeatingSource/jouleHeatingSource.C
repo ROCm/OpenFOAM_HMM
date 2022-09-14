@@ -49,10 +49,10 @@ Foam::fa::jouleHeatingSource::jouleHeatingSource
     const word& sourceName,
     const word& modelType,
     const dictionary& dict,
-    const fvPatch& patch
+    const fvMesh& m
 )
 :
-    fa::faceSetOption(sourceName, modelType, dict, patch),
+    fa::faceSetOption(sourceName, modelType, dict, m),
     TName_(dict.getOrDefault<word>("T", "T")),
     V_
     (
