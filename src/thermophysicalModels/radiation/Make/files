@@ -12,6 +12,7 @@ radiationModels/opaqueSolid/opaqueSolid.C
 radiationModels/solarLoad/solarLoad.C
 radiationModels/solarLoad/faceShading/faceShading.C
 radiationModels/solarLoad/faceReflecting/faceReflecting.C
+radiationModels/solarLoad/solarLoadBase.C
 
 /* Scatter model */
 submodels/scatterModel/scatterModel/scatterModel.C

@@ -760,6 +760,7 @@ void Foam::radiation::solarLoad::calculateQdiff
 Foam::radiation::solarLoad::solarLoad(const volScalarField& T)
 :
     radiationModel(typeName, T),
+    solarLoadBase(mesh_),
     solarCalc_(coeffs_, mesh_),
     dict_(coeffs_),
     qr_
@@ -814,6 +815,7 @@ Foam::radiation::solarLoad::solarLoad
 )
 :
     radiationModel(typeName, dict, T),
+    solarLoadBase(mesh_),
     solarCalc_(dict, mesh_),
     dict_(dict),
     qr_
@@ -982,6 +984,20 @@ Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh>>
 Foam::radiation::solarLoad::Ru() const
 {
     return Ru_;
+}
+
+
+const Foam::solarCalculator&
+Foam::radiation::solarLoad::solarCalculatorRef() const
+{
+    return solarCalc_;
+}
+
+
+const Foam::faceShading&
+Foam::radiation::solarLoad::faceShadingRef() const
+{
+    return hitFaces_();
 }
 
 
