@@ -42,8 +42,8 @@ Description
     Required fields:
     \verbatim
       U                | Velocity                               [m/s]
-      plantCd          | Plant canopy drag coefficient          [-]
-      leafAreaDensity  | Leaf area density                      [1/m]
+      Cd               | Plant canopy drag coefficient          [-]
+      LAD              | Leaf area density                      [1/m]
     \endverbatim
 
     References:
@@ -124,10 +124,10 @@ class atmPlantCanopyUSource
         // Fields
 
             //- Plant canopy drag coefficient field [-]
-            volScalarField plantCd_;
+            volScalarField Cd_;
 
             //- Leaf area density field [1/m]
-            volScalarField leafAreaDensity_;
+            volScalarField LAD_;
 
 
 public:

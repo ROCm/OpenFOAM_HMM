@@ -54,11 +54,11 @@ Foam::fv::atmPlantCanopyUSource::atmPlantCanopyUSource
 :
     fv::cellSetOption(sourceName, modelType, dict, mesh),
     rhoName_(coeffs_.getOrDefault<word>("rho", "rho")),
-    plantCd_
+    Cd_
     (
         IOobject
         (
-            "plantCd",
+            "Cd",
             mesh.time().timeName(),
             mesh,
             IOobject::MUST_READ,
@@ -66,11 +66,11 @@ Foam::fv::atmPlantCanopyUSource::atmPlantCanopyUSource
         ),
         mesh
     ),
-    leafAreaDensity_
+    LAD_
     (
         IOobject
         (
-            "leafAreaDensity",
+            "LAD",
             mesh.time().timeName(),
             mesh,
             IOobject::MUST_READ,
@@ -100,7 +100,7 @@ void Foam::fv::atmPlantCanopyUSource::addSup
     if (V_ > VSMALL)
     {
         // (SP:Eq. 42)
-        eqn -= fvm::Sp(plantCd_*leafAreaDensity_*mag(U), U);
+        eqn -= fvm::Sp(Cd_*LAD_*mag(U), U);
     }
 }
 
@@ -116,7 +116,7 @@ void Foam::fv::atmPlantCanopyUSource::addSup
 
     if (V_ > VSMALL)
     {
-        eqn -= fvm::Sp(rho*plantCd_*leafAreaDensity_*mag(U), U);
+        eqn -= fvm::Sp(rho*Cd_*LAD_*mag(U), U);
     }
 }
 
@@ -133,7 +133,7 @@ void Foam::fv::atmPlantCanopyUSource::addSup
 
     if (V_ > VSMALL)
     {
-        eqn -= fvm::Sp(alpha*rho*plantCd_*leafAreaDensity_*mag(U), U);
+        eqn -= fvm::Sp(alpha*rho*Cd_*LAD_*mag(U), U);
     }
 }
 

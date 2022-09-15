@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -104,8 +104,8 @@ Usage
     \heading Input fields (optional)
     \plaintable
         canopyHeight    | Canopy height                     [m]
-        plantCd         | Plant canopy drag coefficient     [-]
-        leafAreaDensity | Leaf area density                 [1/m]
+        Cd              | Plant canopy drag coefficient     [-]
+        LAD             | Leaf area density                 [1/m]
         Rt              | Turbulent Richardson number       [-]
         L               | Characteristic length scale       [m]
     \endplaintable

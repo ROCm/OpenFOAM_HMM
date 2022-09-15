@@ -50,7 +50,7 @@ Foam::fv::atmPlantCanopyTurbSource::calcPlantCanopyTerm
 ) const
 {
     // (SP:Eq. 42)
-    return 12.0*Foam::sqrt(Cmu_)*plantCd_()*leafAreaDensity_()*mag(U);
+    return 12.0*Foam::sqrt(Cmu_)*Cd_()*LAD_()*mag(U);
 }
 
 
@@ -70,11 +70,11 @@ Foam::fv::atmPlantCanopyTurbSource::atmPlantCanopyTurbSource
     Cmu_(Zero),
     C1_(Zero),
     C2_(Zero),
-    plantCd_
+    Cd_
     (
         IOobject
         (
-            "plantCd",
+            "Cd",
             mesh.time().timeName(),
             mesh,
             IOobject::MUST_READ,
@@ -82,11 +82,11 @@ Foam::fv::atmPlantCanopyTurbSource::atmPlantCanopyTurbSource
         ),
         mesh
     ),
-    leafAreaDensity_
+    LAD_
     (
         IOobject
         (
-            "leafAreaDensity",
+            "LAD",
             mesh.time().timeName(),
             mesh,
             IOobject::MUST_READ,

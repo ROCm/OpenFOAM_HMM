@@ -67,10 +67,8 @@ tmp<volScalarField> kL<BasicTurbulenceModel>::nutPrime() const
 template<class BasicTurbulenceModel>
 tmp<volScalarField> kL<BasicTurbulenceModel>::epsilonCanopy() const
 {
-    const auto* CdPtr =
-        this->mesh_.template findObject<volScalarField>("plantCd");
-    const auto* LADPtr =
-        this->mesh_.template findObject<volScalarField>("leafAreaDensity");
+    const auto* CdPtr = this->mesh_.template findObject<volScalarField>("Cd");
+    const auto* LADPtr = this->mesh_.template findObject<volScalarField>("LAD");
     const volVectorField& U = this->U_;
 
     if (CdPtr && LADPtr)
