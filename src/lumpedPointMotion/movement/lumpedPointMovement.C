@@ -848,7 +848,7 @@ Foam::List<Foam::scalar> Foam::lumpedPointMovement::areas
     // fvMesh and has pressure field
     if (isA<fvMesh>(pmesh))
     {
-        const fvMesh& mesh = dynamicCast<const fvMesh>(pmesh);
+        const auto& mesh = refCast<const fvMesh>(pmesh);
 
         // Face areas (on patches)
         const surfaceVectorField::Boundary& patchSf =
@@ -931,7 +931,7 @@ bool Foam::lumpedPointMovement::forcesAndMoments
     // fvMesh and has pressure field
     if (isA<fvMesh>(pmesh) && pPtr)
     {
-        const fvMesh& mesh = dynamicCast<const fvMesh>(pmesh);
+        const auto& mesh = refCast<const fvMesh>(pmesh);
         const volScalarField& p = *pPtr;
 
         // Face centres (on patches)

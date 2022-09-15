@@ -47,7 +47,7 @@ Foam::exprValuePointPatchField<Type>::exprValuePointPatchField
     (
         fvPatch::lookupPatch
         (
-            dynamicCast<const facePointPatch>(this->patch()).patch()
+            refCast<const facePointPatch>(this->patch()).patch()
         )
     )
 {}
@@ -69,7 +69,7 @@ Foam::exprValuePointPatchField<Type>::exprValuePointPatchField
     (
         fvPatch::lookupPatch
         (
-            dynamicCast<const facePointPatch>(this->patch()).patch()
+            refCast<const facePointPatch>(this->patch()).patch()
         ),
         rhs.driver_,
         dict_
@@ -110,7 +110,7 @@ Foam::exprValuePointPatchField<Type>::exprValuePointPatchField
     (
         fvPatch::lookupPatch
         (
-            dynamicCast<const facePointPatch>(this->patch()).patch()
+            refCast<const facePointPatch>(this->patch()).patch()
         ),
         dict_
     )
@@ -164,7 +164,7 @@ Foam::exprValuePointPatchField<Type>::exprValuePointPatchField
     (
         fvPatch::lookupPatch
         (
-            dynamicCast<const facePointPatch>(this->patch()).patch()
+            refCast<const facePointPatch>(this->patch()).patch()
         ),
         rhs.driver_,
         dict_
@@ -185,7 +185,7 @@ Foam::exprValuePointPatchField<Type>::exprValuePointPatchField
     (
         fvPatch::lookupPatch
         (
-            dynamicCast<const facePointPatch>(this->patch()).patch()
+            refCast<const facePointPatch>(this->patch()).patch()
         ),
         rhs.driver_,
         dict_

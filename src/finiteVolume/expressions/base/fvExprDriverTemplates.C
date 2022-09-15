@@ -576,7 +576,7 @@ bool Foam::expressions::fvExprDriver::updateSet
     const label oldSize = setPtr->size();
 
     bool updated = false;
-    const auto& mesh = dynamicCast<const polyMesh>(setPtr->db());
+    const auto& mesh = refCast<const polyMesh>(setPtr->db());
 
     if (debug)
     {

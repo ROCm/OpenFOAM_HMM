@@ -411,7 +411,7 @@ combineSurfaceGeometry
 {
     if (stObject == regionType_)
     {
-        const polySurface& s = dynamicCast<const polySurface>(obr());
+        const auto& s = refCast<const polySurface>(obr());
 
         if (Pstream::parRun())
         {
@@ -471,7 +471,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::totalArea() const
 
     if (stObject == regionType_)
     {
-        const polySurface& s = dynamicCast<const polySurface>(obr());
+        const auto& s = refCast<const polySurface>(obr());
 
         totalArea = gSum(s.magSf());
     }
@@ -536,7 +536,7 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::update()
         }
         case stObject:
         {
-            const polySurface& s = dynamicCast<const polySurface>(obr());
+            const auto& s = refCast<const polySurface>(obr());
             nFaces_ = returnReduce(s.size(), sumOp<label>());
             break;
         }
@@ -1206,7 +1206,7 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::write()
     {
         if (stObject == regionType_)
         {
-            const polySurface& s = dynamicCast<const polySurface>(obr());
+            const auto& s = refCast<const polySurface>(obr());
             Sf = s.Sf();
         }
         else if (sampledPtr_)

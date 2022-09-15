@@ -246,8 +246,7 @@ static inline std::string entryToString
         else
         {
             // Fail for non-primitiveEntry
-            const primitiveEntry& pe =
-                dynamicCast<const primitiveEntry>(*eptr);
+            const auto& pe = dynamicCast<const primitiveEntry>(*eptr);
 
             if (pe.size() == 1 && pe[0].isStringType())
             {

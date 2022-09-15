@@ -967,7 +967,7 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
 
     if (debug && isA<fvMesh>(mesh))
     {
-        const auto& fvmesh = dynamicCast<const fvMesh>(mesh);
+        const auto& fvmesh = refCast<const fvMesh>(mesh);
 
         volScalarField debugField
         (

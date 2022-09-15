@@ -88,7 +88,7 @@ label writeVolFields
 {
     typedef VolumeField<Type> FieldType;
 
-    const fvMesh& mesh = dynamicCast<const fvMesh>(ensMesh.mesh());
+    const auto& mesh = refCast<const fvMesh>(ensMesh.mesh());
 
     label count = 0;
 
