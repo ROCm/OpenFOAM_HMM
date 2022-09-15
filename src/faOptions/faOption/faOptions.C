@@ -103,26 +103,19 @@ Foam::fa::options& Foam::fa::options::New(const fvPatch& p)
 {
     const fvMesh& mesh = p.boundaryMesh().mesh();
 
-    if (mesh.thisDb().foundObject<options>(typeName))
-    {
-        return const_cast<options&>
-        (
-            mesh.lookupObject<options>(typeName)
-        );
-    }
-    else
-    {
-        if (debug)
-        {
-            InfoInFunction
-                << "Constructing " << typeName
-                << " for region " << mesh.name() << endl;
-        }
+    options* ptr = mesh.thisDb().getObjectPtr<options>(typeName);
 
-        options* objectPtr = new options(p);
-        regIOobject::store(objectPtr);
-        return *objectPtr;
+    if (!ptr)
+    {
+        DebugInFunction
+            << "Constructing " << typeName
+            << " for region " << mesh.name() << endl;
+
+        ptr = new options(p);
+        regIOobject::store(ptr);
     }
+
+    return *ptr;
 }
 
 
@@ -133,10 +126,8 @@ bool Foam::fa::options::read()
         optionList::read(*this);
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

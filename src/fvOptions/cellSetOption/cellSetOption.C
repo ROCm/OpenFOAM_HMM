@@ -48,11 +48,11 @@ const Foam::Enum
 >
 Foam::fv::cellSetOption::selectionModeTypeNames_
 ({
+    { selectionModeType::smAll, "all" },
     { selectionModeType::smGeometric, "geometric" },
     { selectionModeType::smPoints, "points" },
     { selectionModeType::smCellSet, "cellSet" },
     { selectionModeType::smCellZone, "cellZone" },
-    { selectionModeType::smAll, "all" },
 });
 
 
@@ -60,8 +60,14 @@ Foam::fv::cellSetOption::selectionModeTypeNames_
 
 void Foam::fv::cellSetOption::setSelection(const dictionary& dict)
 {
+    selectionNames_.clear();
+
     switch (selectionMode_)
     {
+        case smAll:
+        {
+            break;
+        }
         case smGeometric:
         {
             geometricSelection_ = dict.subDict("selection");
@@ -74,16 +80,21 @@ void Foam::fv::cellSetOption::setSelection(const dictionary& dict)
         }
         case smCellSet:
         {
-            dict.readEntry("cellSet", zoneName_);
+            selectionNames_.resize(1);
+            dict.readEntry("cellSet", selectionNames_.first());
             break;
         }
         case smCellZone:
         {
-            dict.readEntry("cellZone", zoneName_);
-            break;
-        }
-        case smAll:
-        {
+            if
+            (
+                !dict.readIfPresent("cellZones", selectionNames_)
+             || selectionNames_.empty()
+            )
+            {
+                selectionNames_.resize(1);
+                dict.readEntry("cellZone", selectionNames_.first());
+            }
             break;
         }
         default:
@@ -110,14 +121,15 @@ void Foam::fv::cellSetOption::setVol()
     }
     reduce(sumVol, sumOp<scalar>());
 
-    const scalar VOld = V_;
+    const scalar old(V_);
     V_ = sumVol;
 
-    // Convert both volumes to representation using current writeprecision
-    word VOldName(Time::timeName(VOld, IOstream::defaultPrecision()));
-    word VName(Time::timeName(V_, IOstream::defaultPrecision()));
-
-    if (VName != VOldName)
+    // Compare volume values, stringified using current write precision
+    if
+    (
+        Time::timeName(old, IOstream::defaultPrecision())
+     != Time::timeName(V_, IOstream::defaultPrecision())
+    )
     {
         Info<< indent
             << "- selected " << returnReduce(cells_.size(), sumOp<label>())
@@ -130,6 +142,13 @@ void Foam::fv::cellSetOption::setCellSelection()
 {
     switch (selectionMode_)
     {
+        case smAll:
+        {
+            Info<< indent << "- selecting all cells" << endl;
+
+            cells_ = identity(mesh_.nCells());
+            break;
+        }
         case smGeometric:
         {
             Info<< indent << "- selecting cells geometrically" << endl;
@@ -174,46 +193,45 @@ void Foam::fv::cellSetOption::setCellSelection()
         case smCellSet:
         {
             Info<< indent
-                << "- selecting cells using cellSet " << zoneName_ << endl;
+                << "- selecting cells using cellSet "
+                << zoneName() << endl;
 
-            cells_ = cellSet(mesh_, zoneName_).sortedToc();
+            cells_ = cellSet(mesh_, zoneName()).sortedToc();
             break;
         }
         case smCellZone:
         {
             Info<< indent
-                << "- selecting cells using cellZone " << zoneName_ << endl;
+                << "- selecting cells using cellZones "
+                << flatOutput(selectionNames_) << nl;
 
-            // Also handles groups, multiple zones (as wordRe match) ...
-            labelList zoneIDs = mesh_.cellZones().indices(zoneName_);
+            const auto& zones = mesh_.cellZones();
+
+            // Also handles groups, multiple zones etc ...
+            labelList zoneIDs = zones.indices(selectionNames_);
 
             if (zoneIDs.empty())
             {
                 FatalErrorInFunction
-                    << "No matching cellZones: " << zoneName_ << nl
+                    << "No matching cellZones: "
+                    << flatOutput(selectionNames_) << nl
                     << "Valid zones : "
-                    << flatOutput(mesh_.cellZones().names()) << nl
+                    << flatOutput(zones.names()) << nl
                     << "Valid groups: "
-                    << flatOutput(mesh_.cellZones().groupNames())
+                    << flatOutput(zones.groupNames())
                     << nl
                     << exit(FatalError);
             }
 
             if (zoneIDs.size() == 1)
             {
-                cells_ = mesh_.cellZones()[zoneIDs.first()];
+                cells_ = zones[zoneIDs.first()];
+                // TBD: Foam::sort(cells_);
             }
             else
             {
-                cells_ = mesh_.cellZones().selection(zoneIDs).sortedToc();
+                cells_ = zones.selection(zoneIDs).sortedToc();
             }
-            break;
-        }
-        case smAll:
-        {
-            Info<< indent << "- selecting all cells" << endl;
-
-            cells_ = identity(mesh_.nCells());
             break;
         }
         default:
@@ -227,11 +245,7 @@ void Foam::fv::cellSetOption::setCellSelection()
         }
     }
 
-    if
-    (
-        smAll != selectionMode_
-     && returnReduce(cells_.empty(), andOp<bool>())
-    )
+    if (smAll != selectionMode_ && returnReduceAnd(cells_.empty()))
     {
         WarningInFunction
             << "No cells selected!" << endl;
@@ -253,7 +267,7 @@ Foam::fv::cellSetOption::cellSetOption
     timeStart_(-1),
     duration_(0),
     selectionMode_(selectionModeTypeNames_.get("selectionMode", coeffs_)),
-    zoneName_(),
+    selectionNames_(),
     points_(),
     geometricSelection_(),
     V_(0)
@@ -307,6 +321,8 @@ bool Foam::fv::cellSetOption::read(const dictionary& dict)
 {
     if (fv::option::read(dict))
     {
+        timeStart_ = -1;
+
         if (coeffs_.readIfPresent("timeStart", timeStart_))
         {
             coeffs_.readEntry("duration", duration_);

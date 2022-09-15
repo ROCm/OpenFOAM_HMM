@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,6 +24,25 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+template<class Type>
+inline void Foam::fa::faceSetOption::subsetFilter(List<Type>& field) const
+{
+    if (selectionMode_ != selectionModeType::smAll)
+    {
+        List<Type> filtered(field.size(), Zero);
+
+        for (const label facei : faces_)
+        {
+            filtered[facei] = field[facei];
+        }
+
+        field.swap(filtered);
+    }
+}
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -57,6 +76,19 @@ inline Foam::fa::faceSetOption::selectionModeType
 Foam::fa::faceSetOption::selectionMode() const noexcept
 {
     return selectionMode_;
+}
+
+
+inline const Foam::wordRes&
+Foam::fa::faceSetOption::selectionNames() const noexcept
+{
+    return selectionNames_;
+}
+
+
+inline const Foam::wordRe& Foam::fa::faceSetOption::zoneName() const
+{
+    return (selectionNames_.empty() ? wordRe::null : selectionNames_.first());
 }
 
 

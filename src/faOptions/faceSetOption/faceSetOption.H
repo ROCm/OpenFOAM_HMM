@@ -39,18 +39,23 @@ Usage
         ...
 
         // Mandatory entries (unmodifiable)
-        selectionMode     all;
+        selectionMode   all;
 
         // Optional entries (runtime modifiable)
-        timeStart         1.0;
+        timeStart       1.0;
 
         // Conditional mandatory entries (runtime modifiable)
 
-            // when timeStart entry is present
-            duration          1.4;
+        // when timeStart entry is present
+        duration        1.4;
 
-            // when selectionMode=volFaceZone
-            faceZone          <faceZoneName>;
+        // when selectionMode=faceZone
+        faceZones       (<name> ...);
+        //or: faceZone  <name>;
+
+        // when selectionMode=patch
+        patches         (<name> ...)
+        //or: patch     <name>;
     }
     \endverbatim
 
@@ -61,13 +66,21 @@ Usage
       timeStart     | Start time of faOption             | scalar | no  | -1
       duration      | Duration of faOption execution <!--
                           --> starting from timeStart    | scalar | cndtnl | 0
-      faceZone      | Name of operand faceZone           | word  | cndtnl | -
+      faceSet       | Name of operand faceSet            | word   | cndtnl | -
+      faceZone      | Name of operand faceZone(s)        | wordRe | cndtnl | -
+      faceZones     | Names of operand faceZones         | wordRes| cndtnl | -
+      patch         | Name of operand poly patch(s)      | wordRe | cndtnl | -
+      patches       | Names of operand poly patches      | wordRes| cndtnl | -
     \endtable
 
     Options for the \c selectionMode entry:
     \verbatim
       all       | Use all faces in the computational domain
-      faceZone  | Use a given faceZone
+      faceSet   | Use subset corresponding to specified (volume) faceSet
+      faceZones | Use subset corresponding to specified (volume) faceZones
+      faceZone  | Use subset corresponding to specified (volume) faceZones
+      patch     | Use subset corresponding of specified volume patches
+      patches   | Use subset corresponding of specified volume patches
     \endverbatim
 
     The inherited entries are elaborated in:
@@ -78,6 +91,7 @@ Note
 
 SourceFiles
     faceSetOption.C
+    faceSetOptionI.H
 
 \*---------------------------------------------------------------------------*/
 
@@ -111,8 +125,10 @@ public:
         //- Enumeration for selection mode types
         enum selectionModeType
         {
-            smAll,
-            smVolFaceZone
+            smAll,          //!< "all" finite-area faces
+            smFaceSet,      //!< "faceSet" : subset with (volume) face set
+            smFaceZone,     //!< "faceZone" : subset with (volume) zone faces
+            smPatch,        //!< "patch" : subset with (volume) patches
         };
 
         //- List of selection mode type names
@@ -132,8 +148,8 @@ protected:
         //- Face selection mode
         selectionModeType selectionMode_;
 
-        //- Name of zone for (volume) "faceZone" selection
-        wordRe zoneName_;
+        //- Face selection names (for set, zone or patch selections)
+        wordRes selectionNames_;
 
         //- Set of faces to apply source to
         labelList faces_;
@@ -152,6 +168,10 @@ protected:
 
         //- Recalculate the area
         void setArea();
+
+        //- Zero all non-selected locations within field
+        template<class Type>
+        inline void subsetFilter(List<Type>& field) const;
 
 
 public:
@@ -189,20 +209,23 @@ public:
             //- Return true if within time limits
             inline bool inTimeLimits(const scalar timeValue) const;
 
-            //- Return const access to the face selection mode
-            inline selectionModeType selectionMode() const noexcept;
-
             //- True if sub-selection should be used
             inline bool useSubMesh() const noexcept;
 
-            //- Return const access to the name of (volume) face zone
-            //- for "faceZone" selection mode
-            const wordRe& zoneName() const noexcept { return zoneName_; }
+            //- Return the face selection mode
+            inline selectionModeType selectionMode() const noexcept;
+
+            //- Return const access to the selection names
+            //- (set, zone or patch selection)
+            inline const wordRes& selectionNames() const noexcept;
+
+            //- Return const access to the first set/zone/patch name
+            inline const wordRe& zoneName() const;
 
             //- Return const access to the total face area
             inline scalar A() const noexcept;
 
-            //- Return const access to the face selection
+            //- Return const access to the local finite-area face selection
             inline const labelList& faces() const noexcept;
 
 

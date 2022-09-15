@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,13 +64,14 @@ Foam::fa::externalFileSource::externalFileSource
             mesh_.time().timeName(),
             mesh_,
             IOobject::NO_READ,
-            IOobject::NO_WRITE
+            IOobject::NO_WRITE,
+            false  // Do not register
         ),
         regionMesh(),
-        dimensionedScalar("pExt", dimPressure, Zero),
-        zeroGradientFaPatchScalarField::typeName
+        dimensionedScalar(dimPressure, Zero)
     ),
-    value_
+    curTimeIndex_(-1),
+    mapping_
     (
         new PatchFunction1Types::MappedFile<scalar>
         (
@@ -80,8 +81,7 @@ Foam::fa::externalFileSource::externalFileSource
             tableName_,          // field table name
             true                 // face values
         )
-    ),
-    curTimeIndex_(-1)
+    )
 {
     fieldNames_.resize(1, fieldName_);
 
@@ -93,6 +93,17 @@ Foam::fa::externalFileSource::externalFileSource
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+void Foam::fa::externalFileSource::updateMapping()
+{
+    const scalar t = mesh().time().value();
+
+    pExt_.field() = mapping_->value(t);
+
+    // Zero pressure for non-mapped faces
+    faceSetOption::subsetFilter(pExt_.field());
+}
+
+
 void Foam::fa::externalFileSource::addSup
 (
     const areaScalarField& solidMass,
@@ -100,16 +111,18 @@ void Foam::fa::externalFileSource::addSup
     const label fieldi
 )
 {
-    const scalar t = mesh().time().value();
-
-    if (isActive() && t > timeStart() && t < (timeStart() + duration()))
+    if (isActive())
     {
-        DebugInfo<< name() << ": applying source to " << eqn.psi().name()<<endl;
+        DebugInfo
+            << name() << ": applying source to "
+            << eqn.psi().name() << endl;
 
         if (curTimeIndex_ != mesh().time().timeIndex())
         {
-            pExt_.field() = value_->value(t);
-            eqn += pExt_/solidMass;
+            updateMapping();
+
+            eqn += pExt_/solidMass.internalField();
+
             curTimeIndex_ = mesh().time().timeIndex();
         }
     }

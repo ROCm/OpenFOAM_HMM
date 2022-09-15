@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +31,7 @@ Group
 
 Description
     Applies sources on a specified field within a specified region
-    by using an external table file for compressible flows.
+    by using an external table file.
 
 Usage
     Minimal example by using \c constant/faOptions:
@@ -68,8 +68,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fa_externalFileSource_H
-#define fa_externalFileSource_H
+#ifndef Foam_fa_externalFileSource_H
+#define Foam_fa_externalFileSource_H
 
 #include "faOption.H"
 #include "areaFields.H"
@@ -100,13 +100,19 @@ class externalFileSource
         word tableName_;
 
         //- External pressure field
-        areaScalarField pExt_;
-
-        //- Mapped data from file
-        autoPtr<PatchFunction1Types::MappedFile<scalar>> value_;
+        DimensionedField<scalar, areaMesh> pExt_;
 
         //- Current time index (used for updating)
         label curTimeIndex_;
+
+        //- Mapped data from file
+        autoPtr<PatchFunction1Types::MappedFile<scalar>> mapping_;
+
+
+    // Private Member Functions
+
+        //- Update the pExt_ mapping
+        void updateMapping();
 
 
 public:

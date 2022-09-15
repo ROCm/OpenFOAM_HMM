@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -76,8 +76,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fa_contactHeatFluxSource_H
-#define fa_contactHeatFluxSource_H
+#ifndef Foam_fa_contactHeatFluxSource_H
+#define Foam_fa_contactHeatFluxSource_H
 
 #include "faOption.H"
 #include "Function1.H"
@@ -112,9 +112,6 @@ class contactHeatFluxSource
         //- Primary region temperature
         const volScalarField& Tp_;
 
-        //- Temperature - wall [K]
-        areaScalarField Tw1_;
-
         //- Thickness of layers
         scalarList thicknessLayers_;
 
@@ -130,8 +127,8 @@ class contactHeatFluxSource
 
     // Private Member Functions
 
-        //- Return htc from the primary region
-        tmp<areaScalarField> htc() const;
+        //- Return htc [W/m2/K] coupling to the primary region
+        tmp<DimensionedField<scalar, areaMesh>> htc() const;
 
 
 public:

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,8 +59,8 @@ Foam::fa::jouleHeatingSource::jouleHeatingSource
         IOobject
         (
             typeName + ":V_" + regionName_,
-            mesh().time().timeName(),
-            mesh(),
+            regionMesh().thisDb().time().timeName(),
+            regionMesh().thisDb(),
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
@@ -105,8 +105,9 @@ void Foam::fa::jouleHeatingSource::addSup
 {
     if (isActive())
     {
-        DebugInfo<< name() << ": applying source to " << eqn.psi().name()
-                 << endl;
+        DebugInfo
+            << name() << ": applying source to "
+            << eqn.psi().name() << endl;
 
         if (curTimeIndex_ != mesh().time().timeIndex())
         {
@@ -142,6 +143,14 @@ void Foam::fa::jouleHeatingSource::addSup
         // Add the Joule heating contribution
         areaVectorField gradV("gradV", fac::grad(V_));
 
+        if (debug > 1 && mesh().time().outputTime())
+        {
+            areaScalarField qgradV("gradVSource", (gradV & gradV));
+            qgradV.write();
+        }
+
+        tmp<areaScalarField> tsource;
+
         if (anisotropicElectricalConductivity_)
         {
             const auto& sigma =
@@ -150,7 +159,7 @@ void Foam::fa::jouleHeatingSource::addSup
                     typeName + ":sigma_" + regionName_
                 );
 
-            eqn += (h*sigma & gradV) & gradV;
+            tsource = (h*sigma & gradV) & gradV;
         }
         else
         {
@@ -160,14 +169,13 @@ void Foam::fa::jouleHeatingSource::addSup
                     typeName + ":sigma_" + regionName_
                 );
 
-            eqn += (h*sigma*gradV) & gradV;
-
-            if (mesh().time().outputTime() && debug)
-            {
-                areaScalarField qgradV("gradVSource", (gradV & gradV));
-                qgradV.write();
-            }
+            tsource = (h*sigma*gradV) & gradV;
         }
+
+        // Apply subMesh filter
+        faceSetOption::subsetFilter(tsource.ref().primitiveFieldRef());
+
+        eqn += tsource;
     }
 }
 

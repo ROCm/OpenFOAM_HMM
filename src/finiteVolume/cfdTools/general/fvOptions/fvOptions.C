@@ -102,23 +102,19 @@ Foam::fv::options::options
 
 Foam::fv::options& Foam::fv::options::New(const fvMesh& mesh)
 {
-    if (mesh.thisDb().foundObject<options>(typeName))
-    {
-        return const_cast<options&>
-        (
-            mesh.lookupObject<options>(typeName)
-        );
-    }
-    else
+    options* ptr = mesh.thisDb().getObjectPtr<options>(typeName);
+
+    if (!ptr)
     {
         DebugInFunction
             << "Constructing " << typeName
             << " for region " << mesh.name() << nl;
 
-        options* objectPtr = new options(mesh);
-        regIOobject::store(objectPtr);
-        return *objectPtr;
+        ptr = new options(mesh);
+        regIOobject::store(ptr);
     }
+
+    return *ptr;
 }
 
 

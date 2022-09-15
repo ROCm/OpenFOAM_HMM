@@ -65,8 +65,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef limitVelocity_H
-#define limitVelocity_H
+#ifndef Foam_fa_limitVelocity_H
+#define Foam_fa_limitVelocity_H
 
 #include "faceSetOption.H"
 
@@ -83,7 +83,7 @@ namespace fa
 
 class limitVelocity
 :
-    public faceSetOption
+    public fa::faceSetOption
 {
 protected:
 
@@ -94,17 +94,6 @@ protected:
 
         //- Maximum velocity magnitude
         scalar max_;
-
-
-private:
-
-    // Private Member Functions
-
-        //- No copy construct
-        limitVelocity(const limitVelocity&) = delete;
-
-        //- No copy assignment
-        void operator=(const limitVelocity&) = delete;
 
 
 public:
@@ -123,6 +112,12 @@ public:
             const dictionary& dict,
             const fvPatch& patch
         );
+
+        //- No copy construct
+        limitVelocity(const limitVelocity&) = delete;
+
+        //- No copy assignment
+        void operator=(const limitVelocity&) = delete;
 
 
     //- Destructor

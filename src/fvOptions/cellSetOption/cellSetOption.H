@@ -56,6 +56,8 @@ Usage
             // when selectionMode=cellZone
             cellZone          <name>;
 
+            //OR: cellZones   (<name> ...);
+
             // when selectionMode=points
             points            (<point1> <point2> ... <pointN>);
 
@@ -92,7 +94,8 @@ Usage
       duration      | Duration of fvOption execution <!--
                           --> starting from timeStart    | scalar | cndtnl | 0
       cellSet       | Name of operand cellSet            | word  | cndtnl | -
-      cellZone      | Name of operand cellZone           | word  | cndtnl | -
+      cellZone      | Name of operand cellZone           | wordRe | cndtnl | -
+      cellZones     | Name of operand cellZones          | wordRes  | cndtnl | -
       points        | Set of points in global coordinate <!--
                             --> system              | vectorList | cndtnl | -
       selection     | Dictionary of geometric selections | dict | cndtnl | -
@@ -179,8 +182,8 @@ protected:
         //- Cell selection mode
         selectionModeType selectionMode_;
 
-        //- Name of set/zone for "cellSet" and "cellZone" selectionMode
-        wordRe zoneName_;
+        //- Face selection names (for set or zone selections)
+        wordRes selectionNames_;
 
         //- List of points for "points" selectionMode
         List<point> points_;
@@ -242,15 +245,18 @@ public:
             //- True if within time limits
             inline bool inTimeLimits(const scalar timeValue) const;
 
-            //- Return the cell selection mode
-            inline selectionModeType selectionMode() const noexcept;
-
             //- True if sub-selection should be used
             inline bool useSubMesh() const noexcept;
 
-            //- Return const access to the name of cell set/zone
-            //- for "cellSet" / "cellZone" selection modes
-            const wordRe& zoneName() const noexcept { return zoneName_; }
+            //- Return the cell selection mode
+            inline selectionModeType selectionMode() const noexcept;
+
+            //- Return const access to the selection names
+            //- (set or zone selection)
+            inline const wordRes& selectionNames() const noexcept;
+
+            //- Return const access to the first set/zone name
+            inline const wordRe& zoneName() const;
 
             //- Return const access to the total cell volume
             inline scalar V() const noexcept;
@@ -284,7 +290,7 @@ public:
 
         //- The name of the cell set/zone [as a word]
         //- for "cellSet" / "cellZone" selection modes)
-        const word& cellSetName() const noexcept { return zoneName_; }
+        const word& cellSetName() const { return zoneName(); }
 };
 
 
