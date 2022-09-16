@@ -336,27 +336,6 @@ public:
             Field<Type>& dest,
             const label destPatchi
         ) const;
-
-
-    // Deprecated (to be removed)
-
-        //- Map vol Field to surface Field
-        template<class Type>
-        tmp<Field<Type>> mapToSurface(const Field<Type>&) const;
-
-        //- Map surface field to field
-        //  Assumes Field faces in the same order as Boundary
-        template<class Type>
-        void mapToField
-        (
-            const GeometricField<Type, faPatchField, areaMesh>& af,
-            Field<Type>&
-        ) const;
-
-        //- Map surface field to volume field
-        //  Assumes Field faces in the same order as Boundary
-        template<class Type>
-        void mapToField(const Field<Type>& af, Field<Type>&) const;
 };
 
 
