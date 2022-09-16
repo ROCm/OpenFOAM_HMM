@@ -145,8 +145,7 @@ Foam::regionModels::regionFaModel::regionFaModel
     coeffs_(dict.subOrEmptyDict(modelName + "Coeffs")),
     outputPropertiesPtr_(nullptr),
     vsmPtr_(nullptr),
-    patchID_(patch.index()),
-    regionName_(dict.lookup("region"))
+    regionName_(dict.get<word>("region"))
 {
     constructMeshObjects();
     initialise();
@@ -200,5 +199,6 @@ Foam::scalar Foam::regionModels::regionFaModel::CourantNumber() const
 {
     return 0;
 }
+
 
 // ************************************************************************* //

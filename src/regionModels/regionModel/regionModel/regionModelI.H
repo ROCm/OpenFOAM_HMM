@@ -30,37 +30,6 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-inline const Foam::fvMesh&
-Foam::regionModels::regionModel::primaryMesh() const
-{
-    return primaryMesh_;
-}
-
-
-inline const Foam::Time& Foam::regionModels::regionModel::time() const
-{
-    return time_;
-}
-
-
-inline Foam::Switch Foam::regionModels::regionModel::active() const
-{
-    return active_;
-}
-
-
-inline Foam::Switch Foam::regionModels::regionModel::infoOutput() const
-{
-    return infoOutput_;
-}
-
-
-inline const Foam::word& Foam::regionModels::regionModel::modelName() const
-{
-    return modelName_;
-}
-
-
 inline const Foam::fvMesh& Foam::regionModels::regionModel::regionMesh() const
 {
     const fvMesh* regionPtr = time_.getObjectPtr<fvMesh>(regionName_);
@@ -86,12 +55,6 @@ inline Foam::fvMesh& Foam::regionModels::regionModel::regionMesh()
     }
 
     return *regionPtr;
-}
-
-
-inline const Foam::dictionary& Foam::regionModels::regionModel::coeffs() const
-{
-    return coeffs_;
 }
 
 
@@ -130,20 +93,26 @@ Foam::regionModels::regionModel::outputProperties()
 }
 
 
+inline const Foam::labelList&
+Foam::regionModels::regionModel::primaryPatchIDs() const noexcept
+{
+    return primaryPatchIDs_;
+}
+
+
+inline const Foam::labelList&
+Foam::regionModels::regionModel::intCoupledPatchIDs() const noexcept
+{
+    return intCoupledPatchIDs_;
+}
+
+
 inline bool Foam::regionModels::regionModel::isCoupledPatch
 (
     const label regionPatchi
 ) const
 {
-    forAll(intCoupledPatchIDs_, i)
-    {
-        if (intCoupledPatchIDs_[i] == regionPatchi)
-        {
-            return true;
-        }
-    }
-
-    return false;
+    return intCoupledPatchIDs_.found(regionPatchi);
 }
 
 
@@ -152,46 +121,18 @@ inline bool Foam::regionModels::regionModel::isRegionPatch
     const label primaryPatchi
 ) const
 {
-    forAll(primaryPatchIDs_, i)
-    {
-        if (primaryPatchIDs_[i] == primaryPatchi)
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-
-inline const Foam::labelList&
-Foam::regionModels::regionModel::primaryPatchIDs() const
-{
-    return primaryPatchIDs_;
-}
-
-
-inline const Foam::labelList&
-Foam::regionModels::regionModel::intCoupledPatchIDs() const
-{
-    return intCoupledPatchIDs_;
+    return primaryPatchIDs_.found(primaryPatchi);
 }
 
 
 inline Foam::label Foam::regionModels::regionModel::regionPatchID
 (
-    const label primaryPatchID
+    const label primaryPatchi
 ) const
 {
-    forAll(primaryPatchIDs_, i)
-    {
-        if (primaryPatchIDs_[i] == primaryPatchID)
-        {
-            return intCoupledPatchIDs_[i];
-        }
-    }
+    const label i = primaryPatchIDs_.find(primaryPatchi);
 
-    return -1;
+    return (i >= 0 ? intCoupledPatchIDs_[i] : -1);
 }
 
 

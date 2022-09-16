@@ -79,21 +79,6 @@ void Foam::fa::optionList::checkApplied() const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::fa::optionList::optionList
-(
-    const fvPatch& p,
-    const dictionary& dict
-)
-:
-    PtrList<fa::option>(),
-    mesh_(p.boundaryMesh().mesh()),
-    patch_(p),
-    checkTimeIndex_(mesh_.time().startTimeIndex() + 2)
-{
-    reset(optionsDict(dict));
-}
-
-
 Foam::fa::optionList::optionList(const fvPatch& p)
 :
     PtrList<fa::option>(),
@@ -101,6 +86,14 @@ Foam::fa::optionList::optionList(const fvPatch& p)
     patch_(p),
     checkTimeIndex_(mesh_.time().startTimeIndex() + 2)
 {}
+
+
+Foam::fa::optionList::optionList(const fvPatch& p, const dictionary& dict)
+:
+    Foam::fa::optionList(p)
+{
+    reset(optionsDict(dict));
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

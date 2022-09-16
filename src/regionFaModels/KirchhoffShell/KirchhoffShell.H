@@ -61,8 +61,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef KirchhoffShell_H
-#define KirchhoffShell_H
+#ifndef Foam_regionModels_KirchhoffShell_H
+#define Foam_regionModels_KirchhoffShell_H
 
 #include "volFieldsFwd.H"
 #include "vibrationShellModel.H"

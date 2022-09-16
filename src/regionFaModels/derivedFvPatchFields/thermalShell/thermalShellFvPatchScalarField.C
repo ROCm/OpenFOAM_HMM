@@ -45,7 +45,7 @@ thermalShellFvPatchScalarField::thermalShellFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(p, iF),
-    baffle_(),
+    baffle_(nullptr),
     dict_()
 {}
 
@@ -65,7 +65,7 @@ thermalShellFvPatchScalarField::thermalShellFvPatchScalarField
         iF,
         mapper
     ),
-    baffle_(),
+    baffle_(nullptr),
     dict_(ptf.dict_)
 {}
 
@@ -78,7 +78,7 @@ thermalShellFvPatchScalarField::thermalShellFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(p, iF, dict),
-    baffle_(),
+    baffle_(nullptr),
     dict_
     (
         // Copy dictionary, but without "heavy" data chunks
@@ -94,11 +94,9 @@ thermalShellFvPatchScalarField::thermalShellFvPatchScalarField
         )
     )
 {
-    typedef regionModels::thermalShellModel baffle;
-
     if (!baffle_)
     {
-        baffle_.reset(baffle::New(p, dict).ptr());
+        baffle_.reset(baffleType::New(p, dict_));
     }
 }
 
@@ -110,7 +108,7 @@ thermalShellFvPatchScalarField::thermalShellFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(ptf, iF),
-    baffle_(),
+    baffle_(nullptr),
     dict_(ptf.dict_)
 {}
 

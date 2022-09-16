@@ -214,7 +214,7 @@ KirchhoffShell::KirchhoffShell
     ),
     w00_
     (
-         IOobject
+        IOobject
         (
             "w00_" + regionName_,
             primaryMesh().time().timeName(),
@@ -227,7 +227,7 @@ KirchhoffShell::KirchhoffShell
     ),
     laplaceW0_
     (
-         IOobject
+        IOobject
         (
             "laplaceW0_" + regionName_,
             primaryMesh().time().timeName(),
@@ -240,7 +240,7 @@ KirchhoffShell::KirchhoffShell
     ),
     laplace2W0_
     (
-         IOobject
+        IOobject
         (
             "laplace2W0_" + regionName_,
             primaryMesh().time().timeName(),

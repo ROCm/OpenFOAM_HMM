@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,7 +37,9 @@ namespace areaSurfaceFilmModels
 template<class FilmType>
 const FilmType& filmSubModelBase::filmType() const
 {
-    if (!isA<FilmType>(filmModel_))
+    const auto* filmPtr = isA<FilmType>(filmModel_);
+
+    if (!filmPtr)
     {
         FatalErrorInFunction
             << "Model " << this->modelType() << " requested film type "
@@ -45,7 +47,7 @@ const FilmType& filmSubModelBase::filmType() const
             << abort(FatalError);
     }
 
-    return refCast<const FilmType>(filmModel_);
+    return *filmPtr;
 }
 
 

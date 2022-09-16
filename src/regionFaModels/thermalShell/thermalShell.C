@@ -75,11 +75,11 @@ tmp<areaScalarField> thermalShell::qr()
             dimensionedScalar(dimPower/dimArea, Zero)
         );
 
-    if (qrName_ != "none")
+    if (!qrName_.empty() && qrName_ != "none")
     {
         auto& aqr = taqr.ref();
 
-        const auto qr = primaryMesh().lookupObject<volScalarField>(qrName_);
+        const auto& qr = primaryMesh().lookupObject<volScalarField>(qrName_);
 
         const volScalarField::Boundary& vqr = qr.boundaryField();
 

@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef liquidFilmBase_H
-#define liquidFilmBase_H
+#ifndef Foam_liquidFilmBase_H
+#define Foam_liquidFilmBase_H
 
 #include "runTimeSelectionTables.H"
 #include "autoPtr.H"
@@ -111,7 +111,7 @@ protected:
             //- Film pressure
             areaScalarField pf_;
 
-             //- Primary region pressure
+            //- Primary region pressure
             areaScalarField ppf_;
 
             //- Film momentum flux
@@ -289,7 +289,7 @@ public:
 
         // Thermo variables
 
-             //- Access const reference mu
+            //- Access const reference mu
             virtual const areaScalarField& mu() const = 0;
 
             //- Access const reference rho

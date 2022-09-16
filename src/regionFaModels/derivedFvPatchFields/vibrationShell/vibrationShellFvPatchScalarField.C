@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,8 +26,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "vibrationShellFvPatchScalarField.H"
-#include "addToRunTimeSelectionTable.H"
 #include "dictionaryContent.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -43,11 +43,11 @@ vibrationShellFvPatchScalarField::vibrationShellFvPatchScalarField
 )
 :
     mixedFvPatchField<scalar>(p, iF),
-    baffle_(),
+    baffle_(nullptr),
     dict_()
 {
-    refValue() = 0;
-    refGrad() = 0;
+    refValue() = Zero;
+    refGrad() = Zero;
     valueFraction() = 1;
 }
 
@@ -67,7 +67,7 @@ vibrationShellFvPatchScalarField::vibrationShellFvPatchScalarField
         iF,
         mapper
     ),
-    baffle_(),
+    baffle_(nullptr),
     dict_(ptf.dict_)
 {}
 
@@ -80,7 +80,7 @@ vibrationShellFvPatchScalarField::vibrationShellFvPatchScalarField
 )
 :
     mixedFvPatchField<scalar>(p, iF),
-    baffle_(),
+    baffle_(nullptr),
     dict_
     (
         // Copy dictionary, but without "heavy" data chunks
@@ -109,13 +109,13 @@ vibrationShellFvPatchScalarField::vibrationShellFvPatchScalarField
     {
         // Start from user entered data. Assume fixedValue.
         refValue() = *this;
-        refGrad() = 0;
+        refGrad() = Zero;
         valueFraction() = 1;
     }
 
     if (!baffle_)
     {
-        baffle_.reset(regionModels::vibrationShellModel::New(p, dict).ptr());
+        baffle_.reset(baffleType::New(p, dict_));
     }
 }
 
@@ -127,7 +127,7 @@ vibrationShellFvPatchScalarField::vibrationShellFvPatchScalarField
 )
 :
     mixedFvPatchField<scalar>(ptf, iF),
-    baffle_(),
+    baffle_(nullptr),
     dict_(ptf.dict_)
 {}
 

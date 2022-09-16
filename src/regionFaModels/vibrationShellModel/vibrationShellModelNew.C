@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,12 +48,13 @@ autoPtr<vibrationShellModel> vibrationShellModel::New
 
     if (!ctorPtr)
     {
-        FatalErrorInFunction
-            << "Unknown vibrationShellModel type "
-            << modelType << nl << nl
-            << "Valid vibrationShellModel types :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalIOErrorInLookup
+        (
+            dict,
+            "vibrationShellModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<vibrationShellModel>(ctorPtr(modelType, p, dict));

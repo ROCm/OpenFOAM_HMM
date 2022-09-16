@@ -65,8 +65,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef thermalShellModel_H
-#define thermalShellModel_H
+#ifndef Foam_regionModels_thermalShellModel_H
+#define Foam_regionModels_thermalShellModel_H
 
 #include "runTimeSelectionTables.H"
 #include "autoPtr.H"
@@ -103,7 +103,7 @@ protected:
         //- Shell temperature
         areaScalarField T_;
 
-        //- Pointer to faOptions
+        //- Reference to faOptions
         Foam::fa::options& faOptions_;
 
 

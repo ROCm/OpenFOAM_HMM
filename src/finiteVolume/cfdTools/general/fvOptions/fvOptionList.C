@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -81,22 +81,20 @@ void Foam::fv::optionList::checkApplied() const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::fv::optionList::optionList(const fvMesh& mesh, const dictionary& dict)
-:
-    PtrList<fv::option>(),
-    mesh_(mesh),
-    checkTimeIndex_(mesh_.time().startTimeIndex() + 2)
-{
-    reset(optionsDict(dict));
-}
-
-
 Foam::fv::optionList::optionList(const fvMesh& mesh)
 :
     PtrList<fv::option>(),
     mesh_(mesh),
     checkTimeIndex_(mesh_.time().startTimeIndex() + 2)
 {}
+
+
+Foam::fv::optionList::optionList(const fvMesh& mesh, const dictionary& dict)
+:
+    Foam::fv::optionList(mesh)
+{
+    reset(optionsDict(dict));
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

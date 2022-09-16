@@ -71,8 +71,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef thermalShell_H
-#define thermalShell_H
+#ifndef Foam_regionModels_thermalShell_H
+#define Foam_regionModels_thermalShell_H
 
 #include "volFieldsFwd.H"
 #include "thermalShellModel.H"

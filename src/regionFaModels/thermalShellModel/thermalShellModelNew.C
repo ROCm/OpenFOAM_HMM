@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,12 +49,13 @@ autoPtr<thermalShellModel> thermalShellModel::New
 
     if (!ctorPtr)
     {
-        FatalErrorInFunction
-            << "Unknown thermalShellModel type "
-            << modelType << nl << nl
-            << "Valid thermalShellModel types :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalIOErrorInLookup
+        (
+            dict,
+            "thermalShellModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<thermalShellModel>(ctorPtr(modelType, p, dict));

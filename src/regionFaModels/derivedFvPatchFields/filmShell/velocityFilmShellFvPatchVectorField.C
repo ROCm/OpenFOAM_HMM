@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "velocityFilmShellFvPatchVectorField.H"
+#include "dictionaryContent.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -42,13 +43,13 @@ velocityFilmShellFvPatchVectorField::velocityFilmShellFvPatchVectorField
 )
 :
     mixedFvPatchField<vector>(p, iF),
-    baffle_(),
-    dict_(dictionary::null),
+    baffle_(nullptr),
+    dict_(),
     curTimeIndex_(-1),
     zeroWallVelocity_(true)
 {
-    refValue() = 0;
-    refGrad() = 0;
+    refValue() = Zero;
+    refGrad() = Zero;
     valueFraction() = 1;
 }
 
@@ -68,7 +69,7 @@ velocityFilmShellFvPatchVectorField::velocityFilmShellFvPatchVectorField
         iF,
         mapper
     ),
-    baffle_(),
+    baffle_(nullptr),
     dict_(ptf.dict_),
     curTimeIndex_(-1),
     zeroWallVelocity_(true)
@@ -84,13 +85,24 @@ velocityFilmShellFvPatchVectorField::velocityFilmShellFvPatchVectorField
 :
     mixedFvPatchField<vector>(p, iF),
     baffle_(nullptr),
-    dict_(dict),
+    dict_
+    (
+        // Copy dictionary, but without "heavy" data chunks
+        dictionaryContent::copyDict
+        (
+            dict,
+            wordRes(),  // allow
+            wordRes     // deny
+            ({
+                "type",  // redundant
+                "value", "refValue", "refGradient", "valueFraction"
+            })
+        )
+    ),
     curTimeIndex_(-1),
     zeroWallVelocity_(dict.getOrDefault<bool>("zeroWallVelocity", true))
 {
     fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
-
-    typedef regionModels::areaSurfaceFilmModels::liquidFilmBase baffle;
 
     if (dict.found("refValue"))
     {
@@ -103,13 +115,13 @@ velocityFilmShellFvPatchVectorField::velocityFilmShellFvPatchVectorField
     {
         // Start from user entered data. Assume fixedValue.
         refValue() = *this;
-        refGrad() = vector::zero;
+        refGrad() = Zero;
         valueFraction() = 1;
     }
 
     if (!baffle_)
     {
-        baffle_.reset(baffle::New(p, dict).ptr());
+        baffle_.reset(baffleType::New(p, dict_));
     }
 }
 
@@ -121,7 +133,7 @@ velocityFilmShellFvPatchVectorField::velocityFilmShellFvPatchVectorField
 )
 :
     mixedFvPatchField<vector>(ptf, iF),
-    baffle_(),
+    baffle_(nullptr),
     dict_(ptf.dict_),
     curTimeIndex_(-1),
     zeroWallVelocity_(true)
@@ -172,13 +184,6 @@ void velocityFilmShellFvPatchVectorField::updateCoeffs()
 void velocityFilmShellFvPatchVectorField::write(Ostream& os) const
 {
     mixedFvPatchField<vector>::write(os);
-
-    // Remove value and type already written by mixedFvPatchField
-    dict_.remove("value");
-    dict_.remove("type");
-    dict_.remove("refValue");
-    dict_.remove("refGradient");
-    dict_.remove("valueFraction");
     dict_.write(os, false);
 }
 

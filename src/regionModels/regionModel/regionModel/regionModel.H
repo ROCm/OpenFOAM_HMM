@@ -62,7 +62,6 @@ class regionModel
 :
     public IOdictionary
 {
-
 private:
 
     // Private Member Functions
@@ -132,7 +131,7 @@ protected:
                 interRegionAMI_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Read control parameters from dictionary
         virtual bool read();
@@ -187,65 +186,64 @@ public:
 
     // Member Functions
 
-        // Access
+    // Access
 
-            //- Return the reference to the primary mesh database
-            inline const fvMesh& primaryMesh() const;
+        //- Return the reference to the primary mesh database
+        const fvMesh& primaryMesh() const noexcept { return primaryMesh_; }
 
-            //- Return the reference to the time database
-            inline const Time& time() const;
+        //- Return the reference to the time database
+        const Time& time() const noexcept { return time_; }
 
-            //- Return the active flag
-            inline Switch active() const;
+        //- Return the active flag
+        Switch active() const noexcept { return active_; }
 
-            //- Return the information flag
-            inline Switch infoOutput() const;
+        //- Return the information flag
+        Switch infoOutput() const noexcept { return infoOutput_; }
 
-            //- Return the model name
-            inline const word& modelName() const;
+        //- Return the model name
+        const word& modelName() const noexcept { return modelName_; }
 
-            //- Return the region mesh database
-            inline const fvMesh& regionMesh() const;
+        //- Return the region mesh database
+        inline const fvMesh& regionMesh() const;
 
-            //- Return the region mesh database for manipulation
-            inline fvMesh& regionMesh();
+        //- Return the region mesh database for manipulation
+        inline fvMesh& regionMesh();
 
-            //- Return the model coefficients dictionary
-            inline const dictionary& coeffs() const;
+        //- Return the model coefficients dictionary
+        const dictionary& coeffs() const noexcept { return coeffs_; }
 
-            //- Return the solution dictionary
-            inline const dictionary& solution() const;
+        //- Return the solution dictionary
+        inline const dictionary& solution() const;
 
-            //- Return const access to the output properties dictionary
-            inline const IOdictionary& outputProperties() const;
+        //- Return const access to the output properties dictionary
+        inline const IOdictionary& outputProperties() const;
 
-            //- Return output properties dictionary
-            inline IOdictionary& outputProperties();
-
-
-            // Addressing
-
-                //- Return true if patchi on the local region is a coupled
-                //  patch to the primary region
-                inline bool isCoupledPatch(const label regionPatchi) const;
-
-                //- Return true if patchi on the primary region is a coupled
-                //  patch to the local region
-                inline bool isRegionPatch(const label primaryPatchi) const;
-
-                //- Return the list of patch IDs on the primary region coupled
-                //  to this region
-                inline const labelList& primaryPatchIDs() const;
-
-                //- Return the list of patch IDs internally coupled with the
-                //  primary region
-                inline const labelList& intCoupledPatchIDs() const;
-
-                //- Return region ID corresponding to primaryPatchID
-                inline label regionPatchID(const label primaryPatchID) const;
+        //- Return output properties dictionary
+        inline IOdictionary& outputProperties();
 
 
-        // Helper
+
+    // Addressing
+
+        //- List of patch IDs on the primary region coupled to this region
+        inline const labelList& primaryPatchIDs() const noexcept;
+
+        //- List of patch IDs internally coupled with the primary region
+        inline const labelList& intCoupledPatchIDs() const noexcept;
+
+        //- True if patchi on the local region is a coupled
+        //- patch to the primary region
+        inline bool isCoupledPatch(const label regionPatchi) const;
+
+        //- True if patchi on the primary region is a coupled
+        //- patch to the local region
+        inline bool isRegionPatch(const label primaryPatchi) const;
+
+        //- Return region ID corresponding to primaryPatch ID
+        inline label regionPatchID(const label primaryPatchi) const;
+
+
+    // Helper Functions
 
             //- Return the coupled patch ID paired with coupled patch
             //  regionPatchi
@@ -322,25 +320,25 @@ public:
             ) const;
 
 
-        // Evolution
+    // Evolution
 
-            //- Main driver routing to evolve the region - calls other evolves
-            virtual void evolve();
+        //- Main driver routing to evolve the region - calls other evolves
+        virtual void evolve();
 
-            //- Pre-evolve region
-            virtual void preEvolveRegion();
+        //- Pre-evolve region
+        virtual void preEvolveRegion();
 
-            //- Evolve the region
-            virtual void evolveRegion();
+        //- Evolve the region
+        virtual void evolveRegion();
 
-            //- Post-evolve region
-            virtual void postEvolveRegion();
+        //- Post-evolve region
+        virtual void postEvolveRegion();
 
 
-        // I-O
+    // I-O
 
-            //- Provide some feedback
-            virtual void info();
+        //- Provide some feedback
+        virtual void info();
 };
 
 

@@ -51,7 +51,7 @@ void liquidFilmModel::correctThermoFields()
 {
     scalarField X(thermo_.size(), 1);
 
-    forAll (rho_, faceI)
+    forAll(rho_, faceI)
     {
         rho_[faceI] = thermo_.rho(pRef_, Tf_[faceI], X);
         mu_[faceI] = thermo_.mu(pRef_, Tf_[faceI], X);
@@ -59,7 +59,7 @@ void liquidFilmModel::correctThermoFields()
         Cp_[faceI] = thermo_.Cp(pRef_, Tf_[faceI], X);
     }
 
-    forAll (regionMesh().boundary(), patchI)
+    forAll(regionMesh().boundary(), patchI)
     {
         const scalarField& patchTf = Tf_.boundaryFieldRef()[patchI];
 

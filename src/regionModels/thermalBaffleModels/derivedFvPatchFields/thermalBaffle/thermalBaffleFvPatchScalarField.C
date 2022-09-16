@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd
+    Copyright (C) 2020-2022 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,7 +49,7 @@ thermalBaffleFvPatchScalarField::thermalBaffleFvPatchScalarField
     turbulentTemperatureRadCoupledMixedFvPatchScalarField(p, iF),
     owner_(false),
     internal_(true),
-    baffle_(),
+    baffle_(nullptr),
     dict_(),
     extrudeMeshPtr_()
 {}
@@ -72,7 +72,7 @@ thermalBaffleFvPatchScalarField::thermalBaffleFvPatchScalarField
     ),
     owner_(ptf.owner_),
     internal_(ptf.internal_),
-    baffle_(),
+    baffle_(nullptr),
     dict_(ptf.dict_),
     extrudeMeshPtr_()
 {}
@@ -88,14 +88,12 @@ thermalBaffleFvPatchScalarField::thermalBaffleFvPatchScalarField
     turbulentTemperatureRadCoupledMixedFvPatchScalarField(p, iF, dict),
     owner_(false),
     internal_(true),
-    baffle_(),
+    baffle_(nullptr),
     dict_(dict),
     extrudeMeshPtr_()
 {
 
     const fvMesh& thisMesh = patch().boundaryMesh().mesh();
-
-    typedef regionModels::thermalBaffleModels::thermalBaffleModel baffle;
 
     word regionName("none");
     dict_.readIfPresent("region", regionName);
@@ -115,7 +113,7 @@ thermalBaffleFvPatchScalarField::thermalBaffleFvPatchScalarField
             createPatchMesh();
         }
 
-        baffle_.reset(baffle::New(thisMesh, dict).ptr());
+        baffle_.reset(baffleType::New(thisMesh, dict));
         owner_ = true;
         baffle_->rename(baffleName);
     }
@@ -131,7 +129,7 @@ thermalBaffleFvPatchScalarField::thermalBaffleFvPatchScalarField
     turbulentTemperatureRadCoupledMixedFvPatchScalarField(ptf, iF),
     owner_(ptf.owner_),
     internal_(ptf.internal_),
-    baffle_(),
+    baffle_(nullptr),
     dict_(ptf.dict_),
     extrudeMeshPtr_()
 {}
