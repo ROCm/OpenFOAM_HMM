@@ -91,12 +91,11 @@ Foam::fvsPatchField<Type>::fvsPatchField
 {
     if (valueRequired)
     {
-        if (dict.found("value"))
+        const auto* eptr = dict.findEntry("value", keyType::LITERAL);
+
+        if (eptr)
         {
-            fvsPatchField<Type>::operator=
-            (
-                Field<Type>("value", dict, p.size())
-            );
+            Field<Type>::assign(*eptr, p.size());
         }
         else
         {

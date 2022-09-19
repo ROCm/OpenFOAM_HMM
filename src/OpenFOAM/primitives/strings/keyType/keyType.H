@@ -40,8 +40,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef keyType_H
-#define keyType_H
+#ifndef Foam_keyType_H
+#define Foam_keyType_H
 
 #include "word.H"
 #include "wordRe.H"

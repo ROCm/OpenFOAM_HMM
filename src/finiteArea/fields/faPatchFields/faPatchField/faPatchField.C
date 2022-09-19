@@ -98,16 +98,15 @@ Foam::faPatchField<Type>::faPatchField
 
     /// if (valueRequired) - not yet needed. Already a lazy evaluation
 
-    if (dict.found("value"))
+    const auto* eptr = dict.findEntry("value", keyType::LITERAL);
+
+    if (eptr)
     {
-        faPatchField<Type>::operator=
-        (
-            Field<Type>("value", dict, p.size())
-        );
+        Field<Type>::assign(*eptr, p.size());
     }
     else
     {
-        faPatchField<Type>::operator=(pTraits<Type>::zero);
+        Field<Type>::operator=(Zero);
     }
 }
 

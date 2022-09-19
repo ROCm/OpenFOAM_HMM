@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,12 +55,11 @@ Foam::valuePointPatchField<Type>::valuePointPatchField
     pointPatchField<Type>(p, iF, dict),
     Field<Type>(p.size())
 {
-    if (dict.found("value"))
+    const auto* eptr = dict.findEntry("value", keyType::LITERAL);
+
+    if (eptr)
     {
-        Field<Type>::operator=
-        (
-            Field<Type>("value", dict, p.size())
-        );
+        Field<Type>::assign(*eptr, p.size());
     }
     else if (!valueRequired)
     {

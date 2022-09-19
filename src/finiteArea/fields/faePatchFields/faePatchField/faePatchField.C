@@ -84,16 +84,15 @@ Foam::faePatchField<Type>::faePatchField
     patch_(p),
     internalField_(iF)
 {
-    if (dict.found("value"))
+    const auto* eptr = dict.findEntry("value", keyType::LITERAL);
+
+    if (eptr)
     {
-        faePatchField<Type>::operator=
-        (
-            Field<Type>("value", dict, p.size())
-        );
+        Field<Type>::assign(*eptr, p.size());
     }
     else
     {
-        faePatchField<Type>::operator=(pTraits<Type>::zero);
+        Field<Type>::operator=(Zero);
     }
 }
 
