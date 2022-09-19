@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,35 +40,35 @@ addNamedToRunTimeSelectionTable
 (
     pointPatchScalarField,
     slipPointPatchScalarField,
-    pointPatch,
+    patch,
     overset
 );
 addNamedToRunTimeSelectionTable
 (
     pointPatchVectorField,
     slipPointPatchVectorField,
-    pointPatch,
+    patch,
     overset
 );
 addNamedToRunTimeSelectionTable
 (
     pointPatchSphericalTensorField,
     slipPointPatchSphericalTensorField,
-    pointPatch,
+    patch,
     overset
 );
 addNamedToRunTimeSelectionTable
 (
     pointPatchSymmTensorField,
     slipPointPatchSymmTensorField,
-    pointPatch,
+    patch,
     overset
 );
 addNamedToRunTimeSelectionTable
 (
     pointPatchTensorField,
     slipPointPatchTensorField,
-    pointPatch,
+    patch,
     overset
 );
 

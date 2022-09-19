@@ -111,7 +111,7 @@ Foam::faPatch::faPatch
     pointLabelsPtr_(nullptr),
     pointEdgesPtr_(nullptr)
 {
-    if (!patchType.empty() && constraintType(patchType))
+    if (constraintType(patchType))
     {
         inGroups().appendUniq(patchType);
     }
@@ -135,7 +135,7 @@ Foam::faPatch::faPatch
     pointLabelsPtr_(nullptr),
     pointEdgesPtr_(nullptr)
 {
-    if (!patchType.empty() && constraintType(patchType))
+    if (constraintType(patchType))
     {
         inGroups().appendUniq(patchType);
     }

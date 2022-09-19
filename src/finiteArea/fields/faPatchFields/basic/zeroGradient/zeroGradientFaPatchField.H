@@ -57,7 +57,6 @@ class zeroGradientFaPatchField
 :
     public faPatchField<Type>
 {
-
 public:
 
     //- Runtime type information
@@ -124,10 +123,6 @@ public:
                 new zeroGradientFaPatchField<Type>(*this, iF)
             );
         }
-
-
-    //- Destructor
-    virtual ~zeroGradientFaPatchField<Type>() = default;
 
 
     // Member functions

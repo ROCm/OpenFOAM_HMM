@@ -37,13 +37,6 @@ namespace Foam
 
 #define makeFaPatchField(faPatchTypeField)                                    \
                                                                               \
-defineNamedTemplateTypeNameAndDebug(faPatchTypeField, 0);                     \
-template<>                                                                    \
-int                                                                           \
-faPatchTypeField::disallowGenericFaPatchField                                 \
-(                                                                             \
-    debug::debugSwitch("disallowGenericFaPatchField", 0)                      \
-);                                                                            \
 defineTemplateRunTimeSelectionTable(faPatchTypeField, patch);                 \
 defineTemplateRunTimeSelectionTable(faPatchTypeField, patchMapper);           \
 defineTemplateRunTimeSelectionTable(faPatchTypeField, dictionary);

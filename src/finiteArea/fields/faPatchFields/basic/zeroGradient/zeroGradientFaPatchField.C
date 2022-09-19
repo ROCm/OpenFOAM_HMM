@@ -28,6 +28,15 @@ License
 #include "zeroGradientFaPatchField.H"
 #include "faPatchFieldMapper.H"
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+template<class Type>
+const Foam::word& Foam::faPatchField<Type>::zeroGradientType()
+{
+    return Foam::zeroGradientFaPatchField<Type>::typeName;
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>

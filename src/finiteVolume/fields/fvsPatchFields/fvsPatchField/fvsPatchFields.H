@@ -30,8 +30,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fvsPatchFields_H
-#define fvsPatchFields_H
+#ifndef Foam_fvsPatchFields_H
+#define Foam_fvsPatchFields_H
 
 #include "fvsPatchField.H"
 #include "fvsPatchFieldsFwd.H"

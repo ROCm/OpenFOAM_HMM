@@ -25,8 +25,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef pointPatchFieldsFwd_H
-#define pointPatchFieldsFwd_H
+#ifndef Foam_pointPatchFieldsFwd_H
+#define Foam_pointPatchFieldsFwd_H
 
 #include "fieldTypes.H"
 

@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef zeroGradientPointPatchField_H
-#define zeroGradientPointPatchField_H
+#ifndef Foam_zeroGradientPointPatchField_H
+#define Foam_zeroGradientPointPatchField_H
 
 #include "pointPatchField.H"
 
@@ -53,7 +53,6 @@ class zeroGradientPointPatchField
 :
     public pointPatchField<Type>
 {
-
 public:
 
     //- Runtime type information

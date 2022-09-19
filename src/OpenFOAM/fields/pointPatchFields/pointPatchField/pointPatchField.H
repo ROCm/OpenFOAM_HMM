@@ -55,7 +55,6 @@ namespace Foam
 {
 
 // Forward Declarations
-
 class objectRegistry;
 class dictionary;
 class pointPatchFieldMapper;
@@ -67,6 +66,116 @@ template<class Type> class calculatedPointPatchField;
 template<class Type>
 Ostream& operator<<(Ostream&, const pointPatchField<Type>&);
 
+/*---------------------------------------------------------------------------*\
+                     Class pointPatchFieldBase Declaration
+\*---------------------------------------------------------------------------*/
+
+//- Template invariant parts for pointPatchField
+class pointPatchFieldBase
+{
+    // Private Data
+
+        //- Reference to patch
+        const pointPatch& patch_;
+
+        //- Update index used so that updateCoeffs is called only once during
+        //- the construction of the matrix
+        bool updated_;
+
+        //- Optional patch type
+        //  Used to allow specified boundary conditions to be applied
+        //  to constraint patches by providing the constraint
+        //  patch type as 'patchType'
+        word patchType_;
+
+
+protected:
+
+    // Protected Member Functions
+
+        //- Read dictionary entries.
+        //  Useful when initially constructed without a dictionary
+        virtual void readDict(const dictionary& dict);
+
+        //- Set updated state
+        void setUpdated(bool state) noexcept
+        {
+            updated_ = state;
+        }
+
+
+public:
+
+    //- Debug switch to disallow the use of generic pointPatchField
+    static int disallowGenericPatchField;
+
+    //- Runtime type information
+    TypeName("pointPatchField");
+
+
+    // Constructors
+
+        //- Construct from patch
+        explicit pointPatchFieldBase(const pointPatch& p);
+
+        //- Construct from patch and patch type
+        pointPatchFieldBase(const pointPatch& p, const word& patchType);
+
+        //- Construct from patch and dictionary
+        pointPatchFieldBase(const pointPatch& p, const dictionary& dict);
+
+        //- Copy construct with new patch
+        pointPatchFieldBase(const pointPatchFieldBase&, const pointPatch& p);
+
+        //- Copy construct
+        pointPatchFieldBase(const pointPatchFieldBase&);
+
+
+    //- Destructor
+    virtual ~pointPatchFieldBase() = default;
+
+
+    // Member Functions
+
+    // Access
+
+        //- The associated objectRegistry
+        const objectRegistry& db() const;
+
+        //- Return the patch
+        const pointPatch& patch() const noexcept
+        {
+            return patch_;
+        }
+
+        //- The optional patch type
+        const word& patchType() const noexcept
+        {
+            return patchType_;
+        }
+
+        //- The optional patch type
+        word& patchType() noexcept
+        {
+            return patchType_;
+        }
+
+
+    // Solution
+
+        //- True if the boundary condition has already been updated
+        bool updated() const noexcept
+        {
+            return updated_;
+        }
+
+
+    // Check
+
+        //- Check that patches are identical
+        void checkPatch(const pointPatchFieldBase& rhs) const;
+};
+
 
 /*---------------------------------------------------------------------------*\
                        Class pointPatchField Declaration
@@ -74,23 +183,13 @@ Ostream& operator<<(Ostream&, const pointPatchField<Type>&);
 
 template<class Type>
 class pointPatchField
+:
+    public pointPatchFieldBase
 {
     // Private Data
 
-        //- Reference to patch
-        const pointPatch& patch_;
-
         //- Reference to internal field
         const DimensionedField<Type, pointMesh>& internalField_;
-
-        //- Update index used so that updateCoeffs is called only once during
-        //  the construction of the matrix
-        bool updated_;
-
-        //- Optional patch type, used to allow specified boundary conditions
-        //  to be applied to constraint patches by providing the constraint
-        //  patch type as 'patchType'
-        word patchType_;
 
 
 public:
@@ -108,20 +207,13 @@ public:
     typedef calculatedPointPatchField<Type> Calculated;
 
 
-    //- Runtime type information
-    TypeName("pointPatchField");
-
-    //- Debug switch to disallow the use of genericPointPatchField
-    static int disallowGenericPointPatchField;
-
-
     // Declare run-time constructor selection tables
 
         declareRunTimeSelectionTable
         (
             autoPtr,
             pointPatchField,
-            pointPatch,
+            patch,
             (
                 const pointPatch& p,
                 const DimensionedField<Type, pointMesh>& iF
@@ -186,15 +278,15 @@ public:
         //- Construct as copy
         pointPatchField(const pointPatchField<Type>&);
 
-        //- Construct and return a clone
-        virtual autoPtr<pointPatchField<Type>> clone() const = 0;
-
         //- Construct as copy setting internal field reference
         pointPatchField
         (
             const pointPatchField<Type>&,
             const DimensionedField<Type, pointMesh>&
         );
+
+        //- Construct and return a clone
+        virtual autoPtr<pointPatchField<Type>> clone() const = 0;
 
         //- Construct and return a clone setting internal field reference
         virtual autoPtr<pointPatchField<Type>> clone
@@ -257,69 +349,58 @@ public:
 
 
     //- Destructor
-    virtual ~pointPatchField<Type>() = default;
+    virtual ~pointPatchField() = default;
 
 
-    // Member functions
+    // Member Functions
 
-        // Access
+        //- The type name for calculated patch fields
+        static const word& calculatedType();
 
-            //- Return local objectRegistry
-            const objectRegistry& db() const;
+        //- The type name for zeroGradient patch fields
+        static const word& zeroGradientType();
 
-            //- Return size
-            label size() const
-            {
-                return patch().size();
-            }
 
-            //- Return patch
-            const pointPatch& patch() const
-            {
-                return patch_;
-            }
+        // Attributes
 
-            //- Return dimensioned internal field reference
-            const DimensionedField<Type, pointMesh>&
-            internalField() const
-            {
-                return internalField_;
-            }
-
-            //- Return internal field reference
-            const Field<Type>& primitiveField() const
-            {
-                return internalField_;
-            }
-
-            //- Optional patch type
-            const word& patchType() const
-            {
-                return patchType_;
-            }
-
-            //- Optional patch type
-            word& patchType()
-            {
-                return patchType_;
-            }
-
-            //- Return true if this patch field fixes a value
+            //- True if this patch field fixes a value
             virtual bool fixesValue() const
             {
                 return false;
             }
 
-            //- Return true if this patch field is coupled
+            //- True if this patch field is coupled
             virtual bool coupled() const
             {
                 return false;
             }
 
-            //- Return true if the boundary condition has already been updated
-            bool updated() const
+            //- The constraint type this pointPatchField implements.
+            virtual const word& constraintType() const
             {
-                return updated_;
+                return word::null;
+            }
+
+
+        // Access
+
+            //- Return the patch size
+            label size() const
+            {
+                return patch().size();
+            }
+
+            //- Return dimensioned internal field reference
+            const DimensionedField<Type, pointMesh>& internalField()
+            const noexcept
+            {
+                return internalField_;
+            }
+
+            //- Return internal field reference
+            const Field<Type>& primitiveField() const noexcept
+            {
+                return internalField_;
             }
 
             //- Return field created from appropriate internal field values
@@ -380,17 +461,8 @@ public:
                 const Field<Type1>& pF
             ) const;
 
-            //- Return the type of the calculated form of pointPatchField
-            static const word& calculatedType();
 
-            //- Return the constraint type this pointPatchField implements.
-            virtual const word& constraintType() const
-            {
-                return word::null;
-            }
-
-
-        // Mapping functions
+        // Mapping Functions
 
             //- Map (and resize as needed) from self given a mapping object
             virtual void autoMap
@@ -408,14 +480,11 @@ public:
             {}
 
 
-        // Evaluation functions
+        // Evaluation Functions
 
             //- Update the coefficients associated with the patch field
             //  Sets Updated to true
-            virtual void updateCoeffs()
-            {
-                updated_ = true;
-            }
+            virtual void updateCoeffs();
 
             //- Initialise evaluation of the patch field (do nothing)
             virtual void initEvaluate
@@ -470,7 +539,7 @@ public:
             virtual void operator==(const Type&){}
 
 
-    // Ostream operator
+    // Ostream Operator
 
         friend Ostream& operator<< <Type>
         (
@@ -513,15 +582,19 @@ const pointPatchField<Type>& operator+
 #ifdef NoRepository
     #include "pointPatchField.C"
     #include "calculatedPointPatchField.H"
+    #include "zeroGradientPointPatchField.H"
 #endif
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Runtime selection macros
 
 #define addToPointPatchFieldRunTimeSelection(PatchTypeField, typePatchTypeField) \
     addToRunTimeSelectionTable                                                 \
     (                                                                          \
         PatchTypeField,                                                        \
         typePatchTypeField,                                                    \
-        pointPatch                                                             \
+        patch                                                                  \
     );                                                                         \
     addToRunTimeSelectionTable                                                 \
     (                                                                          \
@@ -574,7 +647,7 @@ const pointPatchField<Type>& operator+
     (                                                                          \
         pointPatchTensorField,                                                 \
         type##PointPatchTensorField                                            \
-);
+    );
 
 
 #define makePointPatchFieldsTypeName(type)                                     \

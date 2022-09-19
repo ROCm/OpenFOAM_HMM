@@ -37,6 +37,7 @@ $(faMeshMapper)/faEdgeMapper.C
 $(faMeshMapper)/faPatchMapper.C
 
 faPatchFields = fields/faPatchFields
+$(faPatchFields)/faPatchField/faPatchFieldBase.C
 $(faPatchFields)/faPatchField/faPatchFields.C
 
 basicFaPatchFields = $(faPatchFields)/basic
@@ -68,6 +69,7 @@ $(derivedFaPatchFields)/timeVaryingUniformFixedValue/timeVaryingUniformFixedValu
 $(derivedFaPatchFields)/clampedPlate/clampedPlateFaPatchFields.C
 
 faePatchFields = fields/faePatchFields
+$(faePatchFields)/faePatchField/faePatchFieldBase.C
 $(faePatchFields)/faePatchField/faePatchFields.C
 
 basicFaePatchFields = $(faePatchFields)/basic

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,10 +39,8 @@ Foam::pointPatchField<Type>::pointPatchField
     const DimensionedField<Type, pointMesh>& iF
 )
 :
-    patch_(p),
-    internalField_(iF),
-    updated_(false),
-    patchType_()
+    pointPatchFieldBase(p),
+    internalField_(iF)
 {}
 
 
@@ -54,13 +52,9 @@ Foam::pointPatchField<Type>::pointPatchField
     const dictionary& dict
 )
 :
-    patch_(p),
-    internalField_(iF),
-    updated_(false),
-    patchType_()
-{
-    dict.readIfPresent("patchType", patchType_, keyType::LITERAL);
-}
+    pointPatchFieldBase(p, dict),
+    internalField_(iF)
+{}
 
 
 template<class Type>
@@ -72,10 +66,8 @@ Foam::pointPatchField<Type>::pointPatchField
     const pointPatchFieldMapper&
 )
 :
-    patch_(p),
-    internalField_(iF),
-    updated_(false),
-    patchType_(ptf.patchType_)
+    pointPatchFieldBase(ptf, p),
+    internalField_(iF)
 {}
 
 
@@ -85,10 +77,8 @@ Foam::pointPatchField<Type>::pointPatchField
     const pointPatchField<Type>& ptf
 )
 :
-    patch_(ptf.patch_),
-    internalField_(ptf.internalField_),
-    updated_(false),
-    patchType_(ptf.patchType_)
+    pointPatchFieldBase(ptf),
+    internalField_(ptf.internalField_)
 {}
 
 
@@ -99,30 +89,21 @@ Foam::pointPatchField<Type>::pointPatchField
     const DimensionedField<Type, pointMesh>& iF
 )
 :
-    patch_(ptf.patch_),
-    internalField_(iF),
-    updated_(false),
-    patchType_(ptf.patchType_)
+    pointPatchFieldBase(ptf),
+    internalField_(iF)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-const Foam::objectRegistry& Foam::pointPatchField<Type>::db() const
-{
-    return patch_.boundaryMesh().mesh()();
-}
-
-
-template<class Type>
 void Foam::pointPatchField<Type>::write(Ostream& os) const
 {
     os.writeEntry("type", type());
 
-    if (!patchType_.empty())
+    if (!patchType().empty())
     {
-        os.writeEntry("patchType", patchType_);
+        os.writeEntry("patchType", patchType());
     }
 }
 
@@ -294,14 +275,21 @@ void Foam::pointPatchField<Type>::setInInternalField
 
 
 template<class Type>
+void Foam::pointPatchField<Type>::updateCoeffs()
+{
+    pointPatchFieldBase::setUpdated(true);
+}
+
+
+template<class Type>
 void Foam::pointPatchField<Type>::evaluate(const Pstream::commsTypes)
 {
-    if (!updated_)
+    if (!updated())
     {
         updateCoeffs();
     }
 
-    updated_ = false;
+    pointPatchFieldBase::setUpdated(false);
 }
 
 

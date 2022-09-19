@@ -776,6 +776,7 @@ $(Fields)/fieldTypes.C
 
 
 pointPatchFields = fields/pointPatchFields
+$(pointPatchFields)/pointPatchField/pointPatchFieldBase.C
 $(pointPatchFields)/pointPatchField/pointPatchFields.C
 
 basicPointPatchFields = $(pointPatchFields)/basic

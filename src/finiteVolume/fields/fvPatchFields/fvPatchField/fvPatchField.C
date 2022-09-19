@@ -41,13 +41,9 @@ Foam::fvPatchField<Type>::fvPatchField
     const DimensionedField<Type, volMesh>& iF
 )
 :
+    fvPatchFieldBase(p),
     Field<Type>(p.size()),
-    patch_(p),
-    internalField_(iF),
-    updated_(false),
-    manipulatedMatrix_(false),
-    useImplicit_(false),
-    patchType_()
+    internalField_(iF)
 {}
 
 
@@ -59,13 +55,9 @@ Foam::fvPatchField<Type>::fvPatchField
     const Type& value
 )
 :
+    fvPatchFieldBase(p),
     Field<Type>(p.size(), value),
-    patch_(p),
-    internalField_(iF),
-    updated_(false),
-    manipulatedMatrix_(false),
-    useImplicit_(false),
-    patchType_()
+    internalField_(iF)
 {}
 
 
@@ -77,13 +69,9 @@ Foam::fvPatchField<Type>::fvPatchField
     const word& patchType
 )
 :
+    fvPatchFieldBase(p, patchType),
     Field<Type>(p.size()),
-    patch_(p),
-    internalField_(iF),
-    updated_(false),
-    manipulatedMatrix_(false),
-    useImplicit_(false),
-    patchType_(patchType)
+    internalField_(iF)
 {}
 
 
@@ -95,13 +83,9 @@ Foam::fvPatchField<Type>::fvPatchField
     const Field<Type>& f
 )
 :
+    fvPatchFieldBase(p),
     Field<Type>(f),
-    patch_(p),
-    internalField_(iF),
-    updated_(false),
-    manipulatedMatrix_(false),
-    useImplicit_(false),
-    patchType_()
+    internalField_(iF)
 {}
 
 
@@ -114,17 +98,10 @@ Foam::fvPatchField<Type>::fvPatchField
     const bool valueRequired
 )
 :
+    fvPatchFieldBase(p, dict),
     Field<Type>(p.size()),
-    patch_(p),
-    internalField_(iF),
-    updated_(false),
-    manipulatedMatrix_(false),
-    useImplicit_(false),
-    patchType_()
+    internalField_(iF)
 {
-    dict.readIfPresent("useImplicit", useImplicit_, keyType::LITERAL);
-    dict.readIfPresent("patchType", patchType_, keyType::LITERAL);
-
     if (valueRequired)
     {
         const auto* eptr = dict.findEntry("value", keyType::LITERAL);
@@ -153,13 +130,9 @@ Foam::fvPatchField<Type>::fvPatchField
     const fvPatchFieldMapper& mapper
 )
 :
+    fvPatchFieldBase(ptf, p),
     Field<Type>(p.size()),
-    patch_(p),
-    internalField_(iF),
-    updated_(false),
-    manipulatedMatrix_(false),
-    useImplicit_(ptf.useImplicit_),
-    patchType_(ptf.patchType_)
+    internalField_(iF)
 {
     // For unmapped faces set to internal field value (zero-gradient)
     if (notNull(iF) && mapper.hasUnmapped())
@@ -176,13 +149,9 @@ Foam::fvPatchField<Type>::fvPatchField
     const fvPatchField<Type>& ptf
 )
 :
+    fvPatchFieldBase(ptf),
     Field<Type>(ptf),
-    patch_(ptf.patch_),
-    internalField_(ptf.internalField_),
-    updated_(false),
-    manipulatedMatrix_(false),
-    useImplicit_(ptf.useImplicit_),
-    patchType_(ptf.patchType_)
+    internalField_(ptf.internalField_)
 {}
 
 
@@ -193,41 +162,25 @@ Foam::fvPatchField<Type>::fvPatchField
     const DimensionedField<Type, volMesh>& iF
 )
 :
+    fvPatchFieldBase(ptf),
     Field<Type>(ptf),
-    patch_(ptf.patch_),
-    internalField_(iF),
-    updated_(false),
-    manipulatedMatrix_(false),
-    useImplicit_(ptf.useImplicit_),
-    patchType_(ptf.patchType_)
+    internalField_(iF)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-const Foam::objectRegistry& Foam::fvPatchField<Type>::db() const
+void Foam::fvPatchField<Type>::check(const fvPatchField<Type>& rhs) const
 {
-    return patch_.boundaryMesh().mesh();
-}
-
-
-template<class Type>
-void Foam::fvPatchField<Type>::check(const fvPatchField<Type>& ptf) const
-{
-    if (&patch_ != &(ptf.patch_))
-    {
-        FatalErrorInFunction
-            << "different patches for fvPatchField<Type>s"
-            << abort(FatalError);
-    }
+    fvPatchFieldBase::checkPatch(rhs);
 }
 
 
 template<class Type>
 Foam::tmp<Foam::Field<Type>> Foam::fvPatchField<Type>::snGrad() const
 {
-    return patch_.deltaCoeffs()*(*this - patchInternalField());
+    return patch().deltaCoeffs()*(*this - patchInternalField());
 }
 
 
@@ -235,14 +188,14 @@ template<class Type>
 Foam::tmp<Foam::Field<Type>>
 Foam::fvPatchField<Type>::patchInternalField() const
 {
-    return patch_.patchInternalField(internalField_);
+    return patch().patchInternalField(internalField_);
 }
 
 
 template<class Type>
 void Foam::fvPatchField<Type>::patchInternalField(Field<Type>& pif) const
 {
-    patch_.patchInternalField(internalField_, pif);
+    patch().patchInternalField(internalField_, pif);
 }
 
 
@@ -323,7 +276,7 @@ void Foam::fvPatchField<Type>::rmap
 template<class Type>
 void Foam::fvPatchField<Type>::updateCoeffs()
 {
-    updated_ = true;
+    fvPatchFieldBase::setUpdated(true);
 }
 
 
@@ -331,11 +284,11 @@ template<class Type>
 void Foam::fvPatchField<Type>::updateWeightedCoeffs(const scalarField& weights)
 {
     // Default behaviour ignores the weights
-    if (!updated_)
+    if (!updated())
     {
         updateCoeffs();
 
-        updated_ = true;
+        fvPatchFieldBase::setUpdated(true);
     }
 }
 
@@ -343,20 +296,20 @@ void Foam::fvPatchField<Type>::updateWeightedCoeffs(const scalarField& weights)
 template<class Type>
 void Foam::fvPatchField<Type>::evaluate(const Pstream::commsTypes)
 {
-    if (!updated_)
+    if (!updated())
     {
         updateCoeffs();
     }
 
-    updated_ = false;
-    manipulatedMatrix_ = false;
+    fvPatchFieldBase::setUpdated(false);
+    fvPatchFieldBase::setManipulated(false);
 }
 
 
 template<class Type>
 void Foam::fvPatchField<Type>::manipulateMatrix(fvMatrix<Type>& matrix)
 {
-    manipulatedMatrix_ = true;
+    fvPatchFieldBase::setManipulated(true);
 }
 
 
@@ -367,7 +320,7 @@ void Foam::fvPatchField<Type>::manipulateMatrix
     const scalarField& weights
 )
 {
-    manipulatedMatrix_ = true;
+    fvPatchFieldBase::setManipulated(true);
 }
 
 
@@ -379,7 +332,7 @@ void Foam::fvPatchField<Type>::manipulateMatrix
     const direction cmp
 )
 {
-    manipulatedMatrix_ = true;
+    fvPatchFieldBase::setManipulated(true);
 }
 
 
@@ -388,14 +341,13 @@ void Foam::fvPatchField<Type>::write(Ostream& os) const
 {
     os.writeEntry("type", type());
 
-    if (useImplicit_)
+    if (!patchType().empty())
+    {
+        os.writeEntry("patchType", patchType());
+    }
+    if (useImplicit())
     {
         os.writeEntry("useImplicit", "true");
-    }
-
-    if (!patchType_.empty())
-    {
-        os.writeEntry("patchType", patchType_);
     }
 }
 
@@ -418,7 +370,7 @@ void Foam::fvPatchField<Type>::operator=
     const fvPatchField<Type>& ptf
 )
 {
-    check(ptf);
+    fvPatchFieldBase::checkPatch(ptf);
     Field<Type>::operator=(ptf);
 }
 
@@ -429,7 +381,7 @@ void Foam::fvPatchField<Type>::operator+=
     const fvPatchField<Type>& ptf
 )
 {
-    check(ptf);
+    fvPatchFieldBase::checkPatch(ptf);
     Field<Type>::operator+=(ptf);
 }
 
@@ -440,7 +392,7 @@ void Foam::fvPatchField<Type>::operator-=
     const fvPatchField<Type>& ptf
 )
 {
-    check(ptf);
+    fvPatchFieldBase::checkPatch(ptf);
     Field<Type>::operator-=(ptf);
 }
 
@@ -451,13 +403,7 @@ void Foam::fvPatchField<Type>::operator*=
     const fvPatchField<scalar>& ptf
 )
 {
-    if (&patch_ != &ptf.patch())
-    {
-        FatalErrorInFunction
-            << "incompatible patches for patch fields"
-            << abort(FatalError);
-    }
-
+    fvPatchFieldBase::checkPatch(ptf);
     Field<Type>::operator*=(ptf);
 }
 
@@ -468,12 +414,7 @@ void Foam::fvPatchField<Type>::operator/=
     const fvPatchField<scalar>& ptf
 )
 {
-    if (&patch_ != &ptf.patch())
-    {
-        FatalErrorInFunction
-            << abort(FatalError);
-    }
-
+    fvPatchFieldBase::checkPatch(ptf);
     Field<Type>::operator/=(ptf);
 }
 

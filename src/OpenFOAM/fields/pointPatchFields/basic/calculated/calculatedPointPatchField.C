@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,7 +33,7 @@ License
 template<class Type>
 const Foam::word& Foam::pointPatchField<Type>::calculatedType()
 {
-    return calculatedPointPatchField<Type>::typeName;
+    return Foam::calculatedPointPatchField<Type>::typeName;
 }
 
 
@@ -94,7 +94,7 @@ Foam::pointPatchField<Type>::NewCalculatedType
     const pointPatchField<Type2>& pf
 )
 {
-    auto* patchTypeCtor = pointPatchConstructorTable(pf.patch().type());
+    auto* patchTypeCtor = patchConstructorTable(pf.patch().type());
 
     if (patchTypeCtor)
     {

@@ -102,7 +102,7 @@ Foam::tmp<Foam::fvsPatchField<Type>> Foam::fvsPatchField<Type>::New
 
     if (!ctorPtr)
     {
-        if (!disallowGenericFvsPatchField)
+        if (!fvsPatchFieldBase::disallowGenericPatchField)
         {
             ctorPtr = dictionaryConstructorTable("generic");
         }

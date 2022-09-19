@@ -28,6 +28,16 @@ License
 #include "zeroGradientFvPatchField.H"
 #include "fvPatchFieldMapper.H"
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+template<class Type>
+const Foam::word& Foam::fvPatchField<Type>::zeroGradientType()
+{
+    return zeroGradientFvPatchField<Type>::typeName;
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>

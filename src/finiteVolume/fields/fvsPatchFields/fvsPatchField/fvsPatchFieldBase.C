@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,64 +25,77 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "zeroGradientPointPatchField.H"
+#include "fvsPatchField.H"
+#include "dictionary.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-template<class Type>
-const Foam::word& Foam::pointPatchField<Type>::zeroGradientType()
+namespace Foam
 {
-    return Foam::zeroGradientPointPatchField<Type>::typeName;
+    defineTypeNameAndDebug(fvsPatchFieldBase, 0);
 }
+
+int Foam::fvsPatchFieldBase::disallowGenericPatchField
+(
+    Foam::debug::debugSwitch("disallowGenericFvsPatchField", 0)
+);
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::fvsPatchFieldBase::fvsPatchFieldBase(const fvPatch& p)
+:
+    patch_(p)
+{}
+
+
+Foam::fvsPatchFieldBase::fvsPatchFieldBase
+(
+    const fvPatch& p,
+    const dictionary& dict
+)
+:
+    patch_(p)
+{}
+
+
+Foam::fvsPatchFieldBase::fvsPatchFieldBase
+(
+    const fvsPatchFieldBase& rhs,
+    const fvPatch& p
+)
+:
+    patch_(p)
+{}
+
+
+Foam::fvsPatchFieldBase::fvsPatchFieldBase(const fvsPatchFieldBase& rhs)
+:
+    patch_(rhs.patch_)
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::zeroGradientPointPatchField<Type>::zeroGradientPointPatchField
-(
-    const pointPatch& p,
-    const DimensionedField<Type, pointMesh>& iF
-)
-:
-    pointPatchField<Type>(p, iF)
+void Foam::fvsPatchFieldBase::readDict(const dictionary& dict)
 {}
 
 
-template<class Type>
-Foam::zeroGradientPointPatchField<Type>::zeroGradientPointPatchField
-(
-    const pointPatch& p,
-    const DimensionedField<Type, pointMesh>& iF,
-    const dictionary& dict
-)
-:
-    pointPatchField<Type>(p, iF, dict)
-{}
+const Foam::objectRegistry& Foam::fvsPatchFieldBase::db() const
+{
+    return patch_.boundaryMesh().mesh();
+}
 
 
-template<class Type>
-Foam::zeroGradientPointPatchField<Type>::zeroGradientPointPatchField
-(
-    const zeroGradientPointPatchField<Type>& ptf,
-    const pointPatch& p,
-    const DimensionedField<Type, pointMesh>& iF,
-    const pointPatchFieldMapper& mapper
-)
-:
-    pointPatchField<Type>(ptf, p, iF, mapper)
-{}
-
-
-template<class Type>
-Foam::zeroGradientPointPatchField<Type>::zeroGradientPointPatchField
-(
-    const zeroGradientPointPatchField<Type>& ptf,
-    const DimensionedField<Type, pointMesh>& iF
-)
-:
-    pointPatchField<Type>(ptf, iF)
-{}
+void Foam::fvsPatchFieldBase::checkPatch(const fvsPatchFieldBase& rhs) const
+{
+    if (&patch_ != &(rhs.patch_))
+    {
+        FatalErrorInFunction
+            << "Different patches for fvsPatchField"
+            << abort(FatalError);
+    }
+}
 
 
 // ************************************************************************* //

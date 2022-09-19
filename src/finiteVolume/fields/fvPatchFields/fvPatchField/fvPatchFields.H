@@ -25,8 +25,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fvPatchFields_H
-#define fvPatchFields_H
+#ifndef Foam_fvPatchFields_H
+#define Foam_fvPatchFields_H
 
 #include "fvPatchField.H"
 #include "fvPatchFieldsFwd.H"

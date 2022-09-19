@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,8 +38,8 @@ Foam::faePatchField<Type>::faePatchField
     const DimensionedField<Type, edgeMesh>& iF
 )
 :
+    faePatchFieldBase(p),
     Field<Type>(p.size()),
-    patch_(p),
     internalField_(iF)
 {}
 
@@ -51,8 +52,8 @@ Foam::faePatchField<Type>::faePatchField
     const Field<Type>& f
 )
 :
+    faePatchFieldBase(p),
     Field<Type>(f),
-    patch_(p),
     internalField_(iF)
 {}
 
@@ -66,8 +67,8 @@ Foam::faePatchField<Type>::faePatchField
     const faPatchFieldMapper& mapper
 )
 :
+    faePatchFieldBase(ptf, p),
     Field<Type>(ptf, mapper),
-    patch_(p),
     internalField_(iF)
 {}
 
@@ -80,8 +81,8 @@ Foam::faePatchField<Type>::faePatchField
     const dictionary& dict
 )
 :
+    faePatchFieldBase(p, dict),
     Field<Type>(p.size()),
-    patch_(p),
     internalField_(iF)
 {
     const auto* eptr = dict.findEntry("value", keyType::LITERAL);
@@ -103,8 +104,8 @@ Foam::faePatchField<Type>::faePatchField
     const faePatchField<Type>& ptf
 )
 :
+    faePatchFieldBase(ptf),
     Field<Type>(ptf),
-    patch_(ptf.patch_),
     internalField_(ptf.internalField_)
 {}
 
@@ -116,8 +117,8 @@ Foam::faePatchField<Type>::faePatchField
     const DimensionedField<Type, edgeMesh>& iF
 )
 :
+    faePatchFieldBase(ptf),
     Field<Type>(ptf),
-    patch_(ptf.patch_),
     internalField_(iF)
 {}
 
@@ -133,14 +134,9 @@ const Foam::objectRegistry& Foam::faePatchField<Type>::db() const
 
 
 template<class Type>
-void Foam::faePatchField<Type>::check(const faePatchField<Type>& ptf) const
+void Foam::faePatchField<Type>::check(const faePatchField<Type>& rhs) const
 {
-    if (&patch_ != &(ptf.patch_))
-    {
-        FatalErrorInFunction
-            << "different patches for faePatchField<Type>s"
-            << abort(FatalError);
-    }
+    faePatchFieldBase::checkPatch(rhs);
 }
 
 
@@ -170,9 +166,9 @@ void Foam::faePatchField<Type>::write(Ostream& os) const
 {
     os.writeEntry("type", type());
 
-    // if (!patchType_.empty())
+    // if (!patchType().empty())
     // {
-    //     os.writeEntry("patchType", patchType_);
+    //     os.writeEntry("patchType", patchType());
     // }
 }
 
@@ -195,7 +191,7 @@ void Foam::faePatchField<Type>::operator=
     const faePatchField<Type>& ptf
 )
 {
-    check(ptf);
+    faePatchFieldBase::checkPatch(ptf);
     Field<Type>::operator=(ptf);
 }
 
@@ -206,7 +202,7 @@ void Foam::faePatchField<Type>::operator+=
     const faePatchField<Type>& ptf
 )
 {
-    check(ptf);
+    faePatchFieldBase::checkPatch(ptf);
     Field<Type>::operator+=(ptf);
 }
 
@@ -217,7 +213,7 @@ void Foam::faePatchField<Type>::operator-=
     const faePatchField<Type>& ptf
 )
 {
-    check(ptf);
+    faePatchFieldBase::checkPatch(ptf);
     Field<Type>::operator-=(ptf);
 }
 
@@ -228,13 +224,7 @@ void Foam::faePatchField<Type>::operator*=
     const faePatchField<scalar>& ptf
 )
 {
-    if (&patch_ != &ptf.patch())
-    {
-        FatalErrorInFunction
-            << "incompatible patches for patch fields"
-            << abort(FatalError);
-    }
-
+    faePatchFieldBase::checkPatch(ptf);
     Field<Type>::operator*=(ptf);
 }
 
@@ -245,13 +235,7 @@ void Foam::faePatchField<Type>::operator/=
     const faePatchField<scalar>& ptf
 )
 {
-    if (&patch_ != &ptf.patch())
-    {
-        FatalErrorInFunction
-            << "    incompatible patches for patch fields"
-            << abort(FatalError);
-    }
-
+    faePatchFieldBase::checkPatch(ptf);
     Field<Type>::operator/=(ptf);
 }
 

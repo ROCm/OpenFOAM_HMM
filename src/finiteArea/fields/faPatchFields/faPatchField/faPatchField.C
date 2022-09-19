@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,11 +38,9 @@ Foam::faPatchField<Type>::faPatchField
     const DimensionedField<Type, areaMesh>& iF
 )
 :
+    faPatchFieldBase(p),
     Field<Type>(p.size()),
-    patch_(p),
-    internalField_(iF),
-    updated_(false),
-    patchType_()
+    internalField_(iF)
 {}
 
 
@@ -54,11 +52,9 @@ Foam::faPatchField<Type>::faPatchField
     const Field<Type>& f
 )
 :
+    faPatchFieldBase(p),
     Field<Type>(f),
-    patch_(p),
-    internalField_(iF),
-    updated_(false),
-    patchType_()
+    internalField_(iF)
 {}
 
 
@@ -71,11 +67,9 @@ Foam::faPatchField<Type>::faPatchField
     const faPatchFieldMapper& mapper
 )
 :
+    faPatchFieldBase(ptf, p),
     Field<Type>(ptf, mapper),
-    patch_(p),
-    internalField_(iF),
-    updated_(false),
-    patchType_()
+    internalField_(iF)
 {}
 
 
@@ -88,14 +82,10 @@ Foam::faPatchField<Type>::faPatchField
     const bool valueRequired
 )
 :
+    faPatchFieldBase(p, dict),
     Field<Type>(p.size()),
-    patch_(p),
-    internalField_(iF),
-    updated_(false),
-    patchType_()
+    internalField_(iF)
 {
-    dict.readIfPresent("patchType", patchType_, keyType::LITERAL);
-
     /// if (valueRequired) - not yet needed. Already a lazy evaluation
 
     const auto* eptr = dict.findEntry("value", keyType::LITERAL);
@@ -117,11 +107,9 @@ Foam::faPatchField<Type>::faPatchField
     const faPatchField<Type>& ptf
 )
 :
+    faPatchFieldBase(ptf),
     Field<Type>(ptf),
-    patch_(ptf.patch_),
-    internalField_(ptf.internalField_),
-    updated_(false),
-    patchType_(ptf.patchType_)
+    internalField_(ptf.internalField_)
 {}
 
 
@@ -132,11 +120,9 @@ Foam::faPatchField<Type>::faPatchField
     const DimensionedField<Type, areaMesh>& iF
 )
 :
+    faPatchFieldBase(ptf),
     Field<Type>(ptf),
-    patch_(ptf.patch_),
-    internalField_(iF),
-    updated_(false),
-    patchType_(ptf.patchType_)
+    internalField_(iF)
 {}
 
 
@@ -151,21 +137,16 @@ const Foam::objectRegistry& Foam::faPatchField<Type>::db() const
 
 
 template<class Type>
-void Foam::faPatchField<Type>::check(const faPatchField<Type>& ptf) const
+void Foam::faPatchField<Type>::check(const faPatchField<Type>& rhs) const
 {
-    if (&patch_ != &(ptf.patch_))
-    {
-        FatalErrorInFunction
-            << "different patches for faPatchField<Type>s"
-            << abort(FatalError);
-    }
+    faPatchFieldBase::checkPatch(rhs);
 }
 
 
 template<class Type>
 Foam::tmp<Foam::Field<Type>> Foam::faPatchField<Type>::snGrad() const
 {
-    return (*this - patchInternalField())*patch_.deltaCoeffs();
+    return (*this - patchInternalField())*patch().deltaCoeffs();
 }
 
 
@@ -173,7 +154,7 @@ template<class Type>
 Foam::tmp<Foam::Field<Type>>
 Foam::faPatchField<Type>::patchInternalField() const
 {
-    return patch_.patchInternalField(internalField_);
+    return patch().patchInternalField(internalField_);
 }
 
 
@@ -196,14 +177,21 @@ void Foam::faPatchField<Type>::rmap
 
 
 template<class Type>
+void Foam::faPatchField<Type>::updateCoeffs()
+{
+    faPatchFieldBase::setUpdated(true);
+}
+
+
+template<class Type>
 void Foam::faPatchField<Type>::evaluate(const Pstream::commsTypes)
 {
-    if (!updated_)
+    if (!updated())
     {
         updateCoeffs();
     }
 
-    updated_ = false;
+    faPatchFieldBase::setUpdated(false);
 }
 
 
@@ -212,9 +200,9 @@ void Foam::faPatchField<Type>::write(Ostream& os) const
 {
     os.writeEntry("type", type());
 
-    if (!patchType_.empty())
+    if (!patchType().empty())
     {
-        os.writeEntry("patchType", patchType_);
+        os.writeEntry("patchType", patchType());
     }
 }
 
@@ -237,7 +225,7 @@ void Foam::faPatchField<Type>::operator=
     const faPatchField<Type>& ptf
 )
 {
-    check(ptf);
+    faPatchFieldBase::checkPatch(ptf);
     Field<Type>::operator=(ptf);
 }
 
@@ -248,7 +236,7 @@ void Foam::faPatchField<Type>::operator+=
     const faPatchField<Type>& ptf
 )
 {
-    check(ptf);
+    faPatchFieldBase::checkPatch(ptf);
     Field<Type>::operator+=(ptf);
 }
 
@@ -259,7 +247,7 @@ void Foam::faPatchField<Type>::operator-=
     const faPatchField<Type>& ptf
 )
 {
-    check(ptf);
+    faPatchFieldBase::checkPatch(ptf);
     Field<Type>::operator-=(ptf);
 }
 
@@ -270,13 +258,7 @@ void Foam::faPatchField<Type>::operator*=
     const faPatchField<scalar>& ptf
 )
 {
-    if (&patch_ != &ptf.patch())
-    {
-        FatalErrorInFunction
-            << "incompatible patches for patch fields"
-            << abort(FatalError);
-    }
-
+    faPatchFieldBase::checkPatch(ptf);
     Field<Type>::operator*=(ptf);
 }
 
@@ -287,13 +269,7 @@ void Foam::faPatchField<Type>::operator/=
     const faPatchField<scalar>& ptf
 )
 {
-    if (&patch_ != &ptf.patch())
-    {
-        FatalErrorInFunction
-            << "    incompatible patches for patch fields"
-            << abort(FatalError);
-    }
-
+    faPatchFieldBase::checkPatch(ptf);
     Field<Type>::operator/=(ptf);
 }
 

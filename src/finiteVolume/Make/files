@@ -121,6 +121,7 @@ functionObjects/fieldSelections/volFieldSelection/volFieldSelection.C
 functionObjects/fieldSelections/solverFieldSelection/solverFieldSelection.C
 
 fvPatchFields = fields/fvPatchFields
+$(fvPatchFields)/fvPatchField/fvPatchFieldBase.C
 $(fvPatchFields)/fvPatchField/fvPatchFields.C
 
 basicFvPatchFields = $(fvPatchFields)/basic
@@ -254,6 +255,7 @@ $(derivedFvPatchFields)/mappedField/Sampled/makeSampledPatchFunction1s.C
 $(derivedFvPatchFields)/mappedField/mappedMixedFieldFvPatchField/mappedMixedFieldFvPatchFields.C
 
 fvsPatchFields = fields/fvsPatchFields
+$(fvsPatchFields)/fvsPatchField/fvsPatchFieldBase.C
 $(fvsPatchFields)/fvsPatchField/fvsPatchFields.C
 
 basicFvsPatchFields = $(fvsPatchFields)/basic

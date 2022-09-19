@@ -36,13 +36,7 @@ namespace Foam
 
 #define makePointPatchField(pointPatchTypeField)                               \
                                                                                \
-defineNamedTemplateTypeNameAndDebug(pointPatchTypeField, 0);                   \
-template<>                                                                     \
-int pointPatchTypeField::disallowGenericPointPatchField                        \
-(                                                                              \
-    debug::debugSwitch("disallowGenericPointPatchField", 0)                    \
-);                                                                             \
-defineTemplateRunTimeSelectionTable(pointPatchTypeField, pointPatch);          \
+defineTemplateRunTimeSelectionTable(pointPatchTypeField, patch);               \
 defineTemplateRunTimeSelectionTable(pointPatchTypeField, patchMapper);         \
 defineTemplateRunTimeSelectionTable(pointPatchTypeField, dictionary);
 

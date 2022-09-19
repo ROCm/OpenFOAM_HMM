@@ -264,7 +264,7 @@ public:
     // Static Member Functions
 
         //- Return true if the given type is a constraint type
-        static bool constraintType(const word& pt);
+        static bool constraintType(const word& patchType);
 
         //- Return a list of all the constraint patch types
         static wordList constraintTypes();

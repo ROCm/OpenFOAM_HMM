@@ -91,7 +91,7 @@ relVelocity
             "relVelocity",
             mesh(),
             dimensionedVector(dimVelocity, Zero),
-            "zeroGradient"
+            fvPatchVectorField::zeroGradientType()
         );
         auto& relVel = trelVel.ref();
         auto& relVelField = relVel.primitiveFieldRef();

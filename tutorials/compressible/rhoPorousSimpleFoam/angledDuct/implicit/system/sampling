@@ -41,7 +41,7 @@ cellZoneID
                             fieldName,
                             mesh,
                             dimless,
-                            zeroGradientFvPatchField<scalar>::typeName
+                            fvPatchScalarField::zeroGradientType()
                         )
                     );
 
