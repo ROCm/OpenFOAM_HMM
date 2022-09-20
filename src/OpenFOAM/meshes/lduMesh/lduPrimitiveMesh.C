@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019,2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -324,7 +324,31 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
     lowerAddr_(l, reuse),
     upperAddr_(u, reuse),
     comm_(comm)
-{}
+{
+    if (debug && lowerAddr_.size())
+    {
+        if (max(lowerAddr_) >= nCells || min(lowerAddr_) < 0)
+        {
+            FatalErrorInFunction << "Illegal lower addressing."
+                << " nCells:" << nCells
+                << " max(lower):" << max(lowerAddr_)
+                << " min(lower):" << min(lowerAddr_)
+                << exit(FatalError);
+        }
+    }
+    if (debug && upperAddr_.size())
+    {
+        if (max(upperAddr_) >= nCells || min(upperAddr_) < 0)
+        {
+            FatalErrorInFunction << "Illegal upper addressing."
+                << " nCells:" << nCells
+                << " max(upper):" << max(upperAddr_)
+                << " min(upper):" << min(upperAddr_)
+                << exit(FatalError);
+        }
+    }
+}
+
 
 void Foam::lduPrimitiveMesh::addInterfaces
 (
@@ -374,6 +398,30 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
     patchSchedule_(ps),
     comm_(comm)
 {
+    if (debug && lowerAddr_.size())
+    {
+        if (max(lowerAddr_) >= nCells || min(lowerAddr_) < 0)
+        {
+            FatalErrorInFunction << "Illegal lower addressing."
+                << " nCells:" << nCells
+                << " max(lower):" << max(lowerAddr_)
+                << " min(lower):" << min(lowerAddr_)
+                << exit(FatalError);
+        }
+    }
+    if (debug && upperAddr_.size())
+    {
+        if (max(upperAddr_) >= nCells || min(upperAddr_) < 0)
+        {
+            FatalErrorInFunction << "Illegal upper addressing."
+                << " nCells:" << nCells
+                << " max(upper):" << max(upperAddr_)
+                << " min(upper):" << min(upperAddr_)
+                << exit(FatalError);
+        }
+    }
+
+
     primitiveInterfaces_.transfer(primitiveInterfaces);
 
     // Create interfaces

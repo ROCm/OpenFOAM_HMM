@@ -401,7 +401,7 @@ void Foam::radiation::viewFactor::initialise()
         (
             new lduPrimitiveMesh
             (
-                rays_.size(),
+                globalFaceFaces_().size(),    //rays_.size(),
                 lower,
                 upper,
                 allInterfacesPtr,
