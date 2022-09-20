@@ -9,35 +9,33 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    object      p_rgh;
+    class       dictionary;
+    object      createPatchDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [1 -1 -2 0 0 0 0];
+pointSync false;
 
-internalField   uniform 1e5;
-
-boundaryField
-{
-    "floor.*"
+// Patches to create.
+patches
+(
     {
-        type            fixedFluxPressure;
-        value           $internalField;
-    }
+        // Name of new patch
+        name filmWalls2;
 
-    "ceiling.*"
-    {
-        type            fixedFluxPressure;
-        value           $internalField;
-    }
+        // Type of new patch
+        patchInfo
+        {
+            type patch;
+        }
 
-    "fixedWall.*"
-    {
-        type            fixedFluxPressure;
-        value           $internalField;
+        // How to construct: either from 'patches' or 'set'
+        constructFrom set;
+
+        // If constructFrom = set : name of faceSet
+        set f0;
     }
-}
+);
 
 
 // ************************************************************************* //

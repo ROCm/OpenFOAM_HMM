@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2206                                 |
+|  \\    /   O peration     | Version:  v2212                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -14,7 +14,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-polyMeshPatches ( ceiling );
+polyMeshPatches ( "ceiling.*" );
 
 boundary
 {
@@ -43,5 +43,10 @@ boundary
     }
 }
 
+// defaultPatch
+// {
+//     type patch;
+//     name side;
+// }
 
 // ************************************************************************** //

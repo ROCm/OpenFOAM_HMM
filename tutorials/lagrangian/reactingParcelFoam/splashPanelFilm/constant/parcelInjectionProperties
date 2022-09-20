@@ -9,35 +9,15 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    object      p_rgh;
+    class       dictionary;
+    object      parcelInjectionProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [1 -1 -2 0 0 0 0];
-
-internalField   uniform 1e5;
-
-boundaryField
-{
-    "floor.*"
-    {
-        type            fixedFluxPressure;
-        value           $internalField;
-    }
-
-    "ceiling.*"
-    {
-        type            fixedFluxPressure;
-        value           $internalField;
-    }
-
-    "fixedWall.*"
-    {
-        type            fixedFluxPressure;
-        value           $internalField;
-    }
-}
+// (x y z) (u v w) d rho mDot T cp (Y0..Y2) (Yg0..YgN) (Yl0..YlN) (Ys0..YsN)
+(
+    (0.050 0.025 0.09) (0 0 -5) 0.001 1000 0.002 300 4200 (0 1 0) () (1) ()
+);
 
 
 // ************************************************************************* //

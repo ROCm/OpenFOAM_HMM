@@ -10,32 +10,26 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    object      p_rgh;
+    object      O2;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [1 -1 -2 0 0 0 0];
+dimensions      [0 0 0 0 0 0 0];
 
-internalField   uniform 1e5;
+internalField   uniform 0.21;
 
 boundaryField
 {
-    "floor.*"
+    sides
     {
-        type            fixedFluxPressure;
+        type            inletOutlet;
+        inletValue      $internalField;
         value           $internalField;
     }
 
-    "ceiling.*"
+    "(film|wallFilm).*"
     {
-        type            fixedFluxPressure;
-        value           $internalField;
-    }
-
-    "fixedWall.*"
-    {
-        type            fixedFluxPressure;
-        value           $internalField;
+        type            zeroGradient;
     }
 }
 

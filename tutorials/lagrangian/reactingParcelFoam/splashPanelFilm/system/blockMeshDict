@@ -9,35 +9,68 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    object      p_rgh;
+    class       dictionary;
+    object      blockMeshDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [1 -1 -2 0 0 0 0];
+scale   0.1;
 
-internalField   uniform 1e5;
+vertices
+(
+    //back
+    ( 0   0   0)
+    ( 1   0   0)
+    ( 0  0.5  0)
+    ( 1  0.5  0)
 
-boundaryField
-{
-    "floor.*"
+    // front
+    ( 0   0   1)
+    ( 1   0   1)
+    ( 0  0.5  1)
+    ( 1  0.5  1)
+);
+
+blocks
+(
+    hex (0 1 3 2 4 5 7 6 ) (20 10 20) simpleGrading (1 1 1)
+);
+
+edges
+(
+);
+
+boundary
+(
+    sides
     {
-        type            fixedFluxPressure;
-        value           $internalField;
+        type patch;
+        faces
+        (
+            (1 5 7 3)
+            (4 5 7 6)
+            (4 0 2 6)
+            (7 3 2 6)
+            (0 4 5 1)
+        );
     }
-
-    "ceiling.*"
+    filmWalls
     {
-        type            fixedFluxPressure;
-        value           $internalField;
+        type wall;
+        faces
+        (
+            (0 1 3 2)
+        );
     }
-
-    "fixedWall.*"
+    filmWalls2
     {
-        type            fixedFluxPressure;
-        value           $internalField;
+        type  wall;
+        faces ();
     }
-}
+);
 
+mergePatchPairs
+(
+);
 
 // ************************************************************************* //

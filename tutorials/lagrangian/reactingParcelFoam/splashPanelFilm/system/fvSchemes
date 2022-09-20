@@ -10,40 +10,48 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      faOptions;
+    object      fvSchemes;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-topSide
+ddtSchemes
 {
-    type            externalHeatFluxSource;
-    active          true;
-    region          ceilingShell;
-    selectionMode   all;
-
-    mode            coefficient;
-    T               Ts_ceilingShell;
-    Ta              constant 290;
-    h               10;
-
+    default         Euler;
 }
 
-// contactHeatFluxSource is the coupling of the shell-2D and the 3D mesh
-contactHeatFlux
+gradSchemes
 {
-    type            contactHeatFluxSource;
-    active          true;
-    region          ceilingShell;
-    selectionMode   all;
+    default         Gauss linear;
+    grad(p)         Gauss linear;
+}
 
-    T               Ts_ceilingShell;
-    Tprimary        T;
+divSchemes
+{
+    default         none;
+    div(phi,U)      Gauss upwind;
+    div(phi,K)      Gauss upwind;
+    div(phi,h)      Gauss upwind;
+    div(phi,k)      Gauss upwind;
+    div(phi,epsilon) Gauss upwind;
+    div(U)          Gauss linear;
+    div(((rho*nuEff)*dev2(T(grad(U))))) Gauss linear;
+    div(phi,Yi_h)  Gauss upwind;
+}
 
-    kappaMethod     fluidThermo;
+laplacianSchemes
+{
+    default         Gauss linear uncorrected;
+}
 
-    thicknessLayers (0.001);
-    kappaLayers     (0.02);
+interpolationSchemes
+{
+    default         linear;
+}
+
+snGradSchemes
+{
+    default         uncorrected;
 }
 
 
-//************************************************************************** //
+// ************************************************************************* //

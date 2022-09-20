@@ -9,35 +9,30 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    object      p_rgh;
+    class       dictionary;
+    object      topoSetDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [1 -1 -2 0 0 0 0];
-
-internalField   uniform 1e5;
-
-boundaryField
-{
-    "floor.*"
+actions
+(
     {
-        type            fixedFluxPressure;
-        value           $internalField;
+        name    f0;
+        type    faceSet;
+        action  new;
+        source  patchToFace;
+        patches (filmWalls);
     }
 
-    "ceiling.*"
     {
-        type            fixedFluxPressure;
-        value           $internalField;
+        name    f0;
+        type    faceSet;
+        action  subset;
+        source  boxToFace;
+        min     (0.05 -100 -100);
+        max     (100 100 100);
     }
-
-    "fixedWall.*"
-    {
-        type            fixedFluxPressure;
-        value           $internalField;
-    }
-}
+);
 
 
 // ************************************************************************* //

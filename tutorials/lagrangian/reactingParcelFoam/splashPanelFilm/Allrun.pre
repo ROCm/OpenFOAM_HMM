@@ -11,6 +11,6 @@ runApplication createPatch -overwrite
 
 runApplication makeFaMesh
 
-runApplication $(getApplication)
+restore0Dir
 
 #------------------------------------------------------------------------------

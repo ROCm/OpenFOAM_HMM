@@ -9,35 +9,46 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    object      p_rgh;
+    class       dictionary;
+    object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [1 -1 -2 0 0 0 0];
+application     reactingParcelFoam;
 
-internalField   uniform 1e5;
+startFrom       latestTime;
 
-boundaryField
-{
-    "floor.*"
-    {
-        type            fixedFluxPressure;
-        value           $internalField;
-    }
+startTime       0;
 
-    "ceiling.*"
-    {
-        type            fixedFluxPressure;
-        value           $internalField;
-    }
+stopAt          endTime;
 
-    "fixedWall.*"
-    {
-        type            fixedFluxPressure;
-        value           $internalField;
-    }
-}
+endTime         1;
+
+deltaT          1e-04;
+
+writeControl    adjustable;
+
+writeInterval   0.01;
+
+purgeWrite      0;
+
+writeFormat     ascii;
+
+writePrecision  10;
+
+writeCompression off;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable yes;
+
+adjustTimeStep  yes;
+
+maxCo           0.3;
+
+maxDeltaT       1e-03;
 
 
 // ************************************************************************* //

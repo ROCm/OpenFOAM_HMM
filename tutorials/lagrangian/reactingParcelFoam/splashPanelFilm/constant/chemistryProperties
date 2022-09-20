@@ -9,35 +9,19 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    object      p_rgh;
+    class       dictionary;
+    object      chemistryProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [1 -1 -2 0 0 0 0];
-
-internalField   uniform 1e5;
-
-boundaryField
+chemistryType
 {
-    "floor.*"
-    {
-        type            fixedFluxPressure;
-        value           $internalField;
-    }
-
-    "ceiling.*"
-    {
-        type            fixedFluxPressure;
-        value           $internalField;
-    }
-
-    "fixedWall.*"
-    {
-        type            fixedFluxPressure;
-        value           $internalField;
-    }
+    solver            noChemistrySolver;
 }
+
+chemistry       off;
+
+initialChemicalTimeStep 1e-07;
 
 
 // ************************************************************************* //

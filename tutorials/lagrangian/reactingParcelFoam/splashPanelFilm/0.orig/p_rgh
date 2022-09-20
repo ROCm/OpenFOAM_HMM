@@ -16,27 +16,22 @@ FoamFile
 
 dimensions      [1 -1 -2 0 0 0 0];
 
-internalField   uniform 1e5;
+internalField   uniform 100000;
 
 boundaryField
 {
-    "floor.*"
+    sides
     {
-        type            fixedFluxPressure;
-        value           $internalField;
+        type            totalPressure;
+        p0              $internalField;
     }
 
-    "ceiling.*"
+    "(film|wallFilm).*"
     {
         type            fixedFluxPressure;
-        value           $internalField;
     }
 
-    "fixedWall.*"
-    {
-        type            fixedFluxPressure;
-        value           $internalField;
-    }
+    #includeEtc "caseDicts/setConstraintTypes"
 }
 
 

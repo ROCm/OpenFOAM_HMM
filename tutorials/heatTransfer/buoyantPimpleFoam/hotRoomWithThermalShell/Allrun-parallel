@@ -5,6 +5,10 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 runApplication blockMesh
 
+runApplication topoSet
+
+runApplication createPatch -overwrite
+
 runParallel -s decompose redistributePar -decompose
 
 runParallel makeFaMesh

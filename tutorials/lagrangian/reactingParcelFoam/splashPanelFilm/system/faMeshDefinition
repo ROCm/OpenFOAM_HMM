@@ -9,33 +9,19 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    object      p_rgh;
+    class       dictionary;
+    object      faMeshDefinition;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [1 -1 -2 0 0 0 0];
+polyMeshPatches  ( "film.*" "wallFilm.*" );
 
-internalField   uniform 1e5;
-
-boundaryField
+boundary
 {
-    "floor.*"
+    sides
     {
-        type            fixedFluxPressure;
-        value           $internalField;
-    }
-
-    "ceiling.*"
-    {
-        type            fixedFluxPressure;
-        value           $internalField;
-    }
-
-    "fixedWall.*"
-    {
-        type            fixedFluxPressure;
-        value           $internalField;
+        type patch;
+        neighbourPolyPatch  sides;
     }
 }
 
