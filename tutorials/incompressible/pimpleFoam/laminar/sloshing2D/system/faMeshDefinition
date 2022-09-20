@@ -20,19 +20,19 @@ boundary
 {
     left
     {
-        type                patch;
+        type patch;
         neighbourPolyPatch  left;
     }
 
     right
     {
-        type                patch;
+        type patch;
         neighbourPolyPatch  right;
     }
 
     frontAndBack
     {
-        type                empty;
+        type empty;
         neighbourPolyPatch  frontAndBack;
     }
 }

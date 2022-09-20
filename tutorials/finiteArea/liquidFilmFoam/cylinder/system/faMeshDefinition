@@ -14,37 +14,37 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-polyMeshPatches  ( film );
+polyMeshPatches ( film );
 
 boundary
 {
     inlet
     {
-        type                patch;
+        type patch;
         neighbourPolyPatch  inlet;
     }
 
     outlet
     {
-        type                patch;
+        type patch;
         neighbourPolyPatch  outlet;
     }
 
     side
     {
-        type                patch;
+        type patch;
         neighbourPolyPatch  side;
     }
 
     symmetry
     {
-        type                symmetry;
+        type symmetry;
         neighbourPolyPatch  symmetry;
     }
 
     cylinder
     {
-        type                patch;
+        type patch;
         neighbourPolyPatch  cylinder;
     }
 }
@@ -52,8 +52,8 @@ boundary
 
 defaultPatch
 {
-    name    empty;
-    type    empty;
+    name empty;
+    type empty;
 }
 
 

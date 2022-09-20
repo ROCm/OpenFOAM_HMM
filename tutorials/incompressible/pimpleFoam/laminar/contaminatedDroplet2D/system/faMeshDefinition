@@ -14,13 +14,13 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-polyMeshPatches  ( freeSurface );
+polyMeshPatches ( freeSurface );
 
 boundary
 {
     frontAndBack
     {
-        type                empty;
+        type empty;
         neighbourPolyPatch  frontAndBack;
     }
 }

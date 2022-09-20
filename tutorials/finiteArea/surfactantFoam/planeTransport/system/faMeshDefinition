@@ -14,7 +14,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-polyMeshPatches  ( "top.*" );
+polyMeshPatches ( "top.*" );
 
 boundary
 {

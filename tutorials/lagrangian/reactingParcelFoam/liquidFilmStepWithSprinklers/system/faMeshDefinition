@@ -10,33 +10,32 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant/faMesh";
     object      faMeshDefinition;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-polyMeshPatches  1( base );
+polyMeshPatches ( base );
 
 boundary
 {
     inlet
     {
-        type                patch;
-        ownerPolyPatch      base;
+        type patch;
+        //ownerPolyPatch      base;
         neighbourPolyPatch  inlet;
     }
 
     outlet
     {
-        type                patch;
-        ownerPolyPatch      base;
+        type patch;
+        //ownerPolyPatch      base;
         neighbourPolyPatch  outlet;
     }
 
     sides
     {
-        type                patch;
-        ownerPolyPatch      base;
+        type patch;
+        //ownerPolyPatch      base;
         neighbourPolyPatch  sides;
     }
 }

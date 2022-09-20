@@ -14,35 +14,31 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-polyMeshPatches             (ceiling);
+polyMeshPatches ( ceiling );
 
 boundary
 {
     side1
     {
-        type                patch;
-        ownerPolyPatch      ceiling;
+        type patch;
         neighbourPolyPatch  fixedWall1;
     }
 
     side2
     {
-        type                patch;
-        ownerPolyPatch      ceiling;
+        type patch;
         neighbourPolyPatch  fixedWall2;
     }
 
     side3
     {
-        type                patch;
-        ownerPolyPatch      ceiling;
+        type patch;
         neighbourPolyPatch  fixedWall3;
     }
 
     side4
     {
-        type                patch;
-        ownerPolyPatch      ceiling;
+        type patch;
         neighbourPolyPatch  fixedWall4;
     }
 }

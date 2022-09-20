@@ -14,13 +14,13 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-polyMeshPatches  ( window );
+polyMeshPatches ( window );
 
 boundary
 {
     sealing
     {
-        type                patch;
+        type patch;
         neighbourPolyPatch  fixedWall;
     }
 }

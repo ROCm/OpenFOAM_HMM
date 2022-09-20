@@ -14,42 +14,42 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-polyMeshPatches  ( film );
+polyMeshPatches ( film );
 
 boundary
 {
     inlet
     {
-        type                patch;
-        ownerPolyPatch      film;
+        type patch;
+        //ownerPolyPatch      film;
         neighbourPolyPatch  inlet;
     }
 
     outlet
     {
-        type                patch;
-        ownerPolyPatch      film;
+        type patch;
+        //ownerPolyPatch      film;
         neighbourPolyPatch  outlet;
     }
 
     side
     {
-        type                patch;
-        ownerPolyPatch      film;
+        type patch;
+        //ownerPolyPatch      film;
         neighbourPolyPatch  side;
     }
 
     symmetry
     {
-        type                patch;
-        ownerPolyPatch      film;
+        type patch;
+        //ownerPolyPatch      film;
         neighbourPolyPatch  bottom;
     }
 
     cylinder
     {
-        type                patch;
-        ownerPolyPatch      film;
+        type patch;
+        //ownerPolyPatch      film;
         neighbourPolyPatch  cylinder;
     }
 }
