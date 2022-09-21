@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020,2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -343,6 +343,16 @@ public:
                 labelHashSet* setPtr
             );
 
+            //- Small edges. Optionally collects points of small edges
+            static bool checkEdgeLength
+            (
+                const bool report,
+                const scalar minEdgeLength,
+                const polyMesh& mesh,
+                const labelList& checkFaces,
+                labelHashSet* pointSetPtr
+            );
+
 
         // Checking of selected faces with local geometry. Uses above static
         // functions. Parallel aware.
@@ -445,6 +455,14 @@ public:
                 const labelList& checkFaces,
                 const labelList& affectedCells,
                 labelHashSet* setPtr
+            ) const;
+
+            bool checkEdgeLength
+            (
+                const bool report,
+                const scalar minEdgeLength,
+                const labelList& checkFaces,
+                labelHashSet* pointSetPtr
             ) const;
 };
 

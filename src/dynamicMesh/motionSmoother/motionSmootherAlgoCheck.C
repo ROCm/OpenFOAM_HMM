@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020,2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,7 @@ License
 #include "motionSmootherAlgo.H"
 #include "polyMeshGeometry.H"
 #include "IOmanip.H"
+#include "pointSet.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -126,6 +127,13 @@ bool Foam::motionSmootherAlgo::checkMesh
     const scalar minDet
     (
         get<scalar>(dict, "minDeterminant", dryRun, keyType::REGEX_RECURSIVE)
+    );
+    const scalar minEdgeLength
+    (
+        dict.getOrDefault<scalar>
+        (
+            "minEdgeLength", -1, keyType::REGEX_RECURSIVE
+        )
     );
 
 
@@ -452,6 +460,40 @@ bool Foam::motionSmootherAlgo::checkMesh
         nWrongFaces = nNewWrongFaces;
     }
 
+    if (minEdgeLength >= 0)
+    {
+        pointSet edgePoints(mesh, "smallEdgePoints", mesh.nPoints()/1000);
+        polyMeshGeometry::checkEdgeLength
+        (
+            report,
+            minEdgeLength,
+            mesh,
+            checkFaces,
+            &edgePoints
+        );
+
+        const auto& pointFaces = mesh.pointFaces();
+
+        label nNewWrongFaces = 0;
+        for (const label pointi : edgePoints)
+        {
+            const auto& pFaces = pointFaces[pointi];
+            for (const label facei : pFaces)
+            {
+                if (wrongFaces.insert(facei))
+                {
+                    nNewWrongFaces++;
+                }
+            }
+        }
+
+        Info<< "    faces with edge length < "
+            << setw(5) << minEdgeLength << "                         : "
+            << returnReduce(nNewWrongFaces, sumOp<label>()) << endl;
+
+        nWrongFaces = returnReduce(wrongFaces.size(), sumOp<label>());
+    }
+
     //Pout.setf(ios_base::right);
 
     return nWrongFaces > 0;
@@ -539,11 +581,23 @@ bool Foam::motionSmootherAlgo::checkMesh
     );
     const scalar maxIntSkew
     (
-        get<scalar>(dict, "maxInternalSkewness", dryRun, keyType::REGEX_RECURSIVE)
+        get<scalar>
+        (
+            dict,
+            "maxInternalSkewness",
+            dryRun,
+            keyType::REGEX_RECURSIVE
+        )
     );
     const scalar maxBounSkew
     (
-        get<scalar>(dict, "maxBoundarySkewness", dryRun, keyType::REGEX_RECURSIVE)
+        get<scalar>
+        (
+            dict,
+            "maxBoundarySkewness",
+            dryRun,
+            keyType::REGEX_RECURSIVE
+        )
     );
     const scalar minWeight
     (
@@ -571,6 +625,13 @@ bool Foam::motionSmootherAlgo::checkMesh
     const scalar minDet
     (
         get<scalar>(dict, "minDeterminant", dryRun, keyType::REGEX_RECURSIVE)
+    );
+    const scalar minEdgeLength
+    (
+        dict.getOrDefault<scalar>
+        (
+            "minEdgeLength", -1, keyType::REGEX_RECURSIVE
+        )
     );
 
     if (dryRun)
@@ -863,6 +924,44 @@ bool Foam::motionSmootherAlgo::checkMesh
             << nNewWrongFaces-nWrongFaces << endl;
 
         nWrongFaces = nNewWrongFaces;
+    }
+
+    if (minEdgeLength >= 0)
+    {
+        pointSet edgePoints
+        (
+            meshGeom.mesh(),
+            "smallEdgePoints",
+            meshGeom.mesh().nPoints()/1000
+        );
+        meshGeom.checkEdgeLength
+        (
+            report,
+            minEdgeLength,
+            checkFaces,
+            &edgePoints
+        );
+
+        const auto& pointFaces = meshGeom.mesh().pointFaces();
+
+        label nNewWrongFaces = 0;
+        for (const label pointi : edgePoints)
+        {
+            const auto& pFaces = pointFaces[pointi];
+            for (const label facei : pFaces)
+            {
+                if (wrongFaces.insert(facei))
+                {
+                    nNewWrongFaces++;
+                }
+            }
+        }
+
+        Info<< "    faces with edge length < "
+            << setw(5) << minEdgeLength << "                         : "
+            << returnReduce(nNewWrongFaces, sumOp<label>()) << endl;
+
+        nWrongFaces = returnReduce(wrongFaces.size(), sumOp<label>());
     }
 
     //Pout.setf(ios_base::right);
