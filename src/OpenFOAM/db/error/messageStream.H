@@ -50,8 +50,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef messageStream_H
-#define messageStream_H
+#ifndef Foam_messageStream_H
+#define Foam_messageStream_H
 
 #include "label.H"
 #include "string.H"

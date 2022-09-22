@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,8 +46,8 @@ int main(int argc, char *argv[])
     profiling::disable(); // No profiling output
     argList::noBanner();
     argList::noParallel();
+    argList::noFunctionObjects();
     argList::removeOption("case");
-    argList::removeOption("noFunctionObjects");
     argList::addBoolOption("no-close", "Skip dlclose");
     argList::addBoolOption("quiet", "Disable verbosity");
 

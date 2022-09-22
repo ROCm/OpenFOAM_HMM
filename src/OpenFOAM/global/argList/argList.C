@@ -82,8 +82,14 @@ Foam::argList::initValidTables::initValidTables()
     (
         "lib",
         "name",
-        "Additional library or library list to load"
-        " (can be used multiple times)",
+        "Additional library or library list to load."
+        " (Can be used multiple times)",
+        true  // advanced option
+    );
+    argList::addBoolOption
+    (
+        "no-libs",
+        "Disable use of the controlDict 'libs' entry",
         true  // advanced option
     );
 
@@ -483,8 +489,8 @@ void Foam::argList::noFunctionObjects(bool addWithOption)
         argList::addBoolOption
         (
             "withFunctionObjects",
-            "Execute functionObjects",
-            true  // advanced option
+            "Execute functionObjects"
+            // An advanced option, but seldom used so expose it more
         );
     }
 }
@@ -1752,6 +1758,32 @@ Foam::argList::~argList()
 
     // Delete file handler to flush any remaining IO
     Foam::fileHandler(nullptr);
+}
+
+
+// * * * * * * * * * * * * * * * Capabilities  * * * * * * * * * * * * * * * //
+
+bool Foam::argList::allowFunctionObjects() const
+{
+    if (validOptions.found("withFunctionObjects"))
+    {
+        // '-withFunctionObjects' is available and explicitly enabled
+        return options_.found("withFunctionObjects");
+    }
+    else if (validOptions.found("noFunctionObjects"))
+    {
+        // '-noFunctionObjects' is available and not explicitly disabled
+        return !options_.found("noFunctionObjects");
+    }
+
+    // Disallow functions if there is no way to enable/disable them
+    return false;
+}
+
+
+bool Foam::argList::allowLibs() const
+{
+    return !options_.found("no-libs");
 }
 
 

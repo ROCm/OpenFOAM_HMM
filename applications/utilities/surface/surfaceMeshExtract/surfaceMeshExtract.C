@@ -120,7 +120,6 @@ int main(int argc, char *argv[])
 
     // Less frequently used - reduce some clutter
     argList::setAdvanced("decomposeParDict");
-    argList::setAdvanced("noFunctionObjects");
 
     argList::addArgument("output", "The output surface file");
 

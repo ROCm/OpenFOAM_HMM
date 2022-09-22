@@ -731,7 +731,9 @@ int main(int argc, char *argv[])
             (
                 Time::controlDictName,
                 args.rootPath(),
-                args.caseName()/("processor" + Foam::name(proci))
+                args.caseName()/("processor" + Foam::name(proci)),
+                args.allowFunctionObjects(),
+                args.allowLibs()
             )
         );
     }

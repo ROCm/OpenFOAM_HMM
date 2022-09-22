@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -261,7 +261,7 @@ Foam::OSstream& Foam::messageStream::operator()
         functionName,
         sourceFileName,
         sourceFileLineNumber,
-        ioStream.name(),
+        ioStream.relativeName(),
         ioStream.lineNumber(),
         -1  // No known endLineNumber
     );

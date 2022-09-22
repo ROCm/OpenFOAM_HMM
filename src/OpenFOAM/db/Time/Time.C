@@ -535,25 +535,15 @@ Foam::Time::Time
     // * '-withFunctionObjects' exists and used = enable
     // * '-noFunctionObjects' exists and used = disable
     // * default: no functions if there is no way to enable/disable them
-    if
-    (
-        argList::validOptions.found("withFunctionObjects")
-      ? args.found("withFunctionObjects")
-      : argList::validOptions.found("noFunctionObjects")
-      ? !args.found("noFunctionObjects")
-      : false
-    )
+    if (enableFunctionObjects && args.allowFunctionObjects())
     {
-        if (enableFunctionObjects)
-        {
-            functionObjects_.on();
-        }
+        functionObjects_.on();
     }
 
     // Libraries
     //
     // * enable by default unless '-no-libs' option was used
-    if (enableLibs && !args.found("no-libs"))
+    if (enableLibs && args.allowLibs())
     {
         libs_.open("libs", controlDict_);
     }

@@ -56,6 +56,7 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    // Normally without functionObjects, with -withFunctionObjects to enable
     argList::noFunctionObjects(true);
 
     // No -constant, no special treatment for 0/

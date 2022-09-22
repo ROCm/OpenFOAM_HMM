@@ -494,6 +494,7 @@ void evaluate
 
 int main(int argc, char *argv[])
 {
+    // Normally without functionObjects, with -withFunctionObjects to enable
     argList::noFunctionObjects(true);
 
     // No -constant, no special treatment for 0/
@@ -741,7 +742,7 @@ int main(int argc, char *argv[])
             );
         }
 
-        if (args.found("withFunctionObjects"))
+        if (args.allowFunctionObjects())
         {
             runTime.functionObjects().start();
         }
