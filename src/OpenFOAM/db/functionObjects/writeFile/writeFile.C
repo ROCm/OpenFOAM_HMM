@@ -76,7 +76,35 @@ Foam::fileName Foam::functionObjects::writeFile::baseTimeDir() const
 }
 
 
-Foam::autoPtr<Foam::OFstream> Foam::functionObjects::writeFile::createFile
+Foam::autoPtr<Foam::OFstream> Foam::functionObjects::writeFile::newFile
+(
+    const fileName& fName
+) const
+{
+    autoPtr<OFstream> osPtr;
+
+    if (Pstream::master() && writeToFile_)
+    {
+        fileName outputDir(baseFileDir()/prefix_/fName.path());
+
+        mkDir(outputDir);
+
+        osPtr.reset(new OFstream(outputDir/(fName.name() + ".dat")));
+
+        if (!osPtr->good())
+        {
+            FatalIOErrorInFunction(osPtr()) << "Cannot open file"
+                << exit(FatalIOError);
+        }
+
+        initStream(osPtr());
+    }
+
+    return osPtr;
+}
+
+
+Foam::autoPtr<Foam::OFstream> Foam::functionObjects::writeFile::newFileAtTime
 (
     const word& name,
     scalar timeValue
@@ -121,12 +149,13 @@ Foam::autoPtr<Foam::OFstream> Foam::functionObjects::writeFile::createFile
 }
 
 
-Foam::autoPtr<Foam::OFstream> Foam::functionObjects::writeFile::createFile
+Foam::autoPtr<Foam::OFstream>
+Foam::functionObjects::writeFile::newFileAtStartTime
 (
     const word& name
 ) const
 {
-    return createFile(name, startTime_);
+    return newFileAtTime(name, startTime_);
 
 }
 
@@ -134,7 +163,7 @@ Foam::autoPtr<Foam::OFstream> Foam::functionObjects::writeFile::createFile
 void Foam::functionObjects::writeFile::resetFile(const word& fileName)
 {
     fileName_ = fileName;
-    filePtr_ = createFile(fileName_);
+    filePtr_ = newFileAtStartTime(fileName_);
 }
 
 
@@ -200,7 +229,7 @@ Foam::functionObjects::writeFile::writeFile
 
     if (writeToFile_)
     {
-        filePtr_ = createFile(fileName_);
+        filePtr_ = newFileAtStartTime(fileName_);
     }
 }
 

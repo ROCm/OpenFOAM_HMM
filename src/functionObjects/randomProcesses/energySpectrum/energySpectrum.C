@@ -105,7 +105,7 @@ void Foam::functionObjects::energySpectrum::calcAndWriteSpectrum
     E /= kappaNorm;
 
     Log << "Writing spectrum" << endl;
-    autoPtr<OFstream> osPtr = createFile(name(), time_.value());
+    autoPtr<OFstream> osPtr = newFileAtTime(name(), time_.value());
     OFstream& os = osPtr.ref();
     writeFileHeader(os);
 

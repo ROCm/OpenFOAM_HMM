@@ -137,15 +137,19 @@ protected:
         //- Return the base directory for the current time value
         fileName baseTimeDir() const;
 
+        //- Return autoPtr to a new file using file name
+        //  Note: no check for if the file already exists
+        virtual autoPtr<OFstream> newFile(const fileName& fName) const;
+
         //- Return autoPtr to a new file for a given time
-        virtual autoPtr<OFstream> createFile
+        virtual autoPtr<OFstream> newFileAtTime
         (
             const word& name,
             scalar timeValue
         ) const;
 
         //- Return autoPtr to a new file using the simulation start time
-        virtual autoPtr<OFstream> createFile
+        virtual autoPtr<OFstream> newFileAtStartTime
         (
             const word& name
         ) const;
@@ -159,6 +163,35 @@ protected:
 
         //- No copy assignment
         void operator=(const writeFile&) = delete;
+
+
+    // Housekeeping
+
+        //- Deprecated(2022-09) Return autoPtr to a new file for a given time
+        //
+        //  \deprecated(2022-09) - use newFileAtTime function
+        FOAM_DEPRECATED_FOR(2022-09, "newFileAtTime function")
+        virtual autoPtr<OFstream> createFile
+        (
+            const word& name,
+            scalar timeValue
+        ) const
+        {
+            return newFileAtTime(name, timeValue);
+        }
+
+        //- Deprecated(2022-09) Return autoPtr to a new file
+        //- using the simulation start time
+        //
+        //  \deprecated(2022-09) - use newFileAtStartTime function
+        FOAM_DEPRECATED_FOR(2022-09, "newFileAtStartTime function")
+        virtual autoPtr<OFstream> createFile
+        (
+            const word& name
+        ) const
+        {
+            return newFileAtStartTime(name);
+        }
 
 
 public:

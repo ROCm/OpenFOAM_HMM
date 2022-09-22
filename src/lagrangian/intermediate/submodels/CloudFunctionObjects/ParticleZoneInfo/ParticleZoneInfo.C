@@ -351,7 +351,11 @@ template<class CloudType>
 void Foam::ParticleZoneInfo<CloudType>::write()
 {
     autoPtr<OFstream> osPtr =
-        this->createFile("particles", this->owner().time().timeOutputValue());
+        this->newFileAtTime
+        (
+            "particles",
+            this->owner().time().timeOutputValue()
+        );
 
     if (Pstream::parRun())
     {

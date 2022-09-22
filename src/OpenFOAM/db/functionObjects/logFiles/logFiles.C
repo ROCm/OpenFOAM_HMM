@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,7 +43,7 @@ void Foam::functionObjects::logFiles::createFiles()
         {
             if (!filePtrs_.set(i))
             {
-                filePtrs_.set(i, createFile(names_[i]));
+                filePtrs_.set(i, newFileAtStartTime(names_[i]));
 
                 initStream(filePtrs_[i]);
             }

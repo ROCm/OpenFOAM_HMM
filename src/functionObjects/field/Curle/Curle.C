@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -135,7 +135,7 @@ bool Foam::functionObjects::Curle::read(const dictionary& dict)
                 rawFilePtrs_.set
                 (
                     filei,
-                    createFile("observer" + Foam::name(filei))
+                    newFileAtStartTime("observer" + Foam::name(filei))
                 );
 
                 if (rawFilePtrs_.set(filei))

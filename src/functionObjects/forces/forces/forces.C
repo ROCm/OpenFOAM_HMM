@@ -386,13 +386,13 @@ void Foam::functionObjects::forces::createIntegratedDataFiles()
 {
     if (!forceFilePtr_.valid())
     {
-        forceFilePtr_ = createFile("force");
+        forceFilePtr_ = newFileAtStartTime("force");
         writeIntegratedDataFileHeader("Force", forceFilePtr_());
     }
 
     if (!momentFilePtr_.valid())
     {
-        momentFilePtr_ = createFile("moment");
+        momentFilePtr_ = newFileAtStartTime("moment");
         writeIntegratedDataFileHeader("Moment", momentFilePtr_());
     }
 }

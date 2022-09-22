@@ -181,7 +181,8 @@ void Foam::functionObjects::propellerInfo::createFiles()
 
     if (writePropellerPerformance_ && !propellerPerformanceFilePtr_)
     {
-        propellerPerformanceFilePtr_ = createFile("propellerPerformance");
+        propellerPerformanceFilePtr_ =
+            newFileAtStartTime("propellerPerformance");
         auto& os = propellerPerformanceFilePtr_();
 
         writeHeader(os, "Propeller performance");
@@ -203,8 +204,9 @@ void Foam::functionObjects::propellerInfo::createFiles()
 
     if (writeWakeFields_)
     {
-        if (!wakeFilePtr_) wakeFilePtr_ = createFile("wake");
-        if (!axialWakeFilePtr_) axialWakeFilePtr_ = createFile("axialWake");
+        if (!wakeFilePtr_) wakeFilePtr_ = newFileAtStartTime("wake");
+        if (!axialWakeFilePtr_) axialWakeFilePtr_ =
+            newFileAtStartTime("axialWake");
     }
 }
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -209,7 +209,7 @@ Foam::FaceInteraction<CloudType>::FaceInteraction
                 filePtrs_.set
                 (
                     nZone,
-                    this->createFile(modelName + '_' + zoneName)
+                    this->newFileAtStartTime(modelName + '_' + zoneName)
                 );
 
                 writeHeaderValue(filePtrs_[nZone], "Source", type());
