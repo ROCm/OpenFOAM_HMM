@@ -29,7 +29,6 @@ License
 #include "surfaceReader.H"
 #include "surfaceWriter.H"
 #include "argList.H"
-#include "graph.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -441,9 +440,15 @@ scalar surfaceNoise::surfaceAverage
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-surfaceNoise::surfaceNoise(const dictionary& dict, const bool readFields)
+surfaceNoise::surfaceNoise
+(
+    const dictionary& dict,
+    const objectRegistry& obr,
+    const word& name,
+    const bool readFields
+)
 :
-    noiseModel(dict, false),
+    noiseModel(dict, obr, name, false),
     inputFileNames_(),
     pName_("p"),
     pIndex_(0),
@@ -648,7 +653,7 @@ void surfaceNoise::calculate()
 
         const word fNameBase = fName.nameLessExt();
 
-        // Output directory for graphs
+        // Output directory
         fileName outDirBase(baseFileDir(filei)/fNameBase);
 
         const scalar deltaf = 1.0/(deltaT_*win.nSamples());
@@ -663,8 +668,28 @@ void surfaceNoise::calculate()
                 << endl;
         }
 
+        // Common output information
+        // Note: hard-coded to read mesh from first time index
+        scalar surfArea = 0;
+        label surfSize = 0;
+        if (Pstream::master())
+        {
+            const meshedSurface& surf = readerPtr_->geometry(0);
+            surfArea = sum(surf.magSf());
+            surfSize = surf.size();
+        }
+        Pstream::broadcast(surfArea);
+        Pstream::broadcast(surfSize);
+        List<Tuple2<string, token>> commonInfo =
+            {
+                {"Area average", token(word(Switch::name(areaAverage_)))},
+                {"Area sum", token(surfArea)},
+                {"Number of faces", token(surfSize)}
+            };
+
         {
             fileName outDir(outDirBase/"fft");
+            fileName outSurfDir(filePath(outDir));
 
             // Determine frequency range of interest
             // Note: frequencies have fixed interval, and are in the range
@@ -693,7 +718,7 @@ void surfaceNoise::calculate()
 
                     PrmsfAve[i] = writeSurfaceData
                     (
-                        outDir,
+                        outSurfDir,
                         fNameBase,
                         "Prmsf",
                         freq1[freqI],
@@ -704,7 +729,7 @@ void surfaceNoise::calculate()
 
                     PSDfAve[i] = writeSurfaceData
                     (
-                        outDir,
+                        outSurfDir,
                         fNameBase,
                         "PSDf",
                         freq1[freqI],
@@ -714,7 +739,7 @@ void surfaceNoise::calculate()
                     );
                     writeSurfaceData
                     (
-                        outDir,
+                        outSurfDir,
                         fNameBase,
                         "PSD",
                         freq1[freqI],
@@ -724,7 +749,7 @@ void surfaceNoise::calculate()
                     );
                     writeSurfaceData
                     (
-                        outDir,
+                        outSurfDir,
                         fNameBase,
                         "SPL",
                         freq1[freqI],
@@ -737,65 +762,60 @@ void surfaceNoise::calculate()
 
             if (Pstream::master())
             {
-                graph Prmsfg
-                (
-                    "Average Prms(f)",
-                    "f [Hz]",
-                    "P(f) [Pa]",
-                    fOut,
-                    PrmsfAve
-                );
-                Prmsfg.write
-                (
-                    outDir,
-                    graph::wordify(Prmsfg.title()),
-                    graphFormat_
-                );
+                {
+                    auto filePtr = newFile(outDir/"Average_Prms_f");
+                    auto& os = filePtr();
 
-                graph PSDfg
-                (
-                    "Average PSD_f(f)",
-                    "f [Hz]",
-                    "PSD(f) [PaPa_Hz]",
-                    fOut,
-                    PSDfAve
-                );
-                PSDfg.write
-                (
-                    outDir,
-                    graph::wordify(PSDfg.title()),
-                    graphFormat_
-                );
+                    Info<< "    Writing " << os.name() << endl;
 
-                graph PSDg
-                (
-                    "Average PSD_dB_Hz(f)",
-                    "f [Hz]",
-                    "PSD(f) [dB_Hz]",
-                    fOut,
-                    PSD(PSDfAve)
-                );
-                PSDg.write
-                (
-                    outDir,
-                    graph::wordify(PSDg.title()),
-                    graphFormat_
-                );
+                    writeFileHeader(os, "f [Hz]", "P(f) [Pa]", commonInfo);
+                    writeFreqDataToFile(os, fOut, PrmsfAve);
+                }
+                {
+                    auto filePtr = newFile(outDir/"Average_PSD_f_f");
+                    auto& os = filePtr();
 
-                graph SPLg
-                (
-                    "Average SPL_dB(f)",
-                    "f [Hz]",
-                    "SPL(f) [dB]",
-                    fOut,
-                    SPL(PSDfAve*deltaf, fOut)
-                );
-                SPLg.write
-                (
-                    outDir,
-                    graph::wordify(SPLg.title()),
-                    graphFormat_
-                );
+                    Info<< "    Writing " << os.name() << endl;
+
+                    writeFileHeader
+                    (
+                        os,
+                        "f [Hz]",
+                        "PSD(f) [PaPa_Hz]",
+                        commonInfo
+                    );
+                    writeFreqDataToFile(os, fOut, PSDfAve);
+                }
+                {
+                    auto filePtr = newFile(outDir/"Average_PSD_dB_Hz_f");
+                    auto& os = filePtr();
+
+                    Info<< "    Writing " << os.name() << endl;
+
+                    writeFileHeader
+                    (
+                        os,
+                        "f [Hz]",
+                        "PSD(f) [dB_Hz]",
+                        commonInfo
+                    );
+                    writeFreqDataToFile(os, fOut, PSD(PSDfAve));
+                }
+                {
+                    auto filePtr = newFile(outDir/"Average_SPL_dB_f");
+                    auto& os = filePtr();
+
+                    Info<< "    Writing " << os.name() << endl;
+
+                    writeFileHeader
+                    (
+                        os,
+                        "f [Hz]",
+                        "SPL(f) [dB]",
+                        commonInfo
+                    );
+                    writeFreqDataToFile(os, fOut, SPL(PSDfAve*deltaf, fOut));
+                }
             }
         }
 
@@ -803,6 +823,7 @@ void surfaceNoise::calculate()
         Info<< "Writing one-third octave surface data" << endl;
         {
             fileName outDir(outDirBase/"oneThirdOctave");
+            fileName outSurfDir(filePath(outDir));
 
             scalarField PSDfAve(surfPrms13f.size(), Zero);
             scalarField Prms13fAve(surfPrms13f.size(), Zero);
@@ -811,7 +832,7 @@ void surfaceNoise::calculate()
             {
                 writeSurfaceData
                 (
-                    outDir,
+                    outSurfDir,
                     fNameBase,
                     "SPL13",
                     octave13FreqCentre[i],
@@ -826,19 +847,23 @@ void surfaceNoise::calculate()
 
             if (Pstream::master())
             {
-                graph SPL13g
+                auto filePtr = newFile(outDir/"Average_SPL13_dB_fm");
+                auto& os = filePtr();
+
+                Info<< "    Writing " << os.name() << endl;
+
+                writeFileHeader
                 (
-                    "Average SPL13_dB(fm)",
+                    os,
                     "fm [Hz]",
                     "SPL(fm) [dB]",
+                    commonInfo
+                );
+                writeFreqDataToFile
+                (
+                    os,
                     octave13FreqCentre,
                     SPL(Prms13fAve, octave13FreqCentre)
-                );
-                SPL13g.write
-                (
-                    outDir,
-                    graph::wordify(SPL13g.title()),
-                    graphFormat_
                 );
             }
         }

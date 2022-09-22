@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,7 +64,6 @@ Description
         outputPrefix | Prefix applied to output files| no        | ''
         SPLweighting | Weighting: dBA, dBB, dBC, DBD | no        | none
         dBRef        | Reference for dB calculation  | no        | 2e-5
-        graphFormat  | Graph format                  | no        | raw
         writePrmsf   | Write Prmsf data              | no        | yes
         writeSPL     | Write SPL data                | no        | yes
         writePSD     | Write PSD data                | no        | yes
@@ -80,13 +79,14 @@ SourceFiles
 #ifndef noiseModel_H
 #define noiseModel_H
 
+#include "writeFile.H"
 #include "dictionary.H"
 #include "scalarList.H"
 #include "instantList.H"
 #include "windowModel.H"
 #include "Enum.H"
+#include "Tuple2.H"
 #include "runTimeSelectionTables.H"
-#include "graph.H"
 #include <fftw3.h>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -99,6 +99,8 @@ namespace Foam
 \*---------------------------------------------------------------------------*/
 
 class noiseModel
+:
+    public functionObjects::writeFile
 {
 public:
 
@@ -172,9 +174,6 @@ protected:
 
         //- Window model
         autoPtr<windowModel> windowModelPtr_;
-
-        //- Graph format
-        word graphFormat_;
 
         //- Weighting
         weightingType SPLweighting_;
@@ -251,6 +250,23 @@ protected:
 
         //- Return the base output directory
         fileName baseFileDir(const label dataseti) const;
+
+        //- Write output file header
+        void writeFileHeader
+        (
+            Ostream& os,
+            const string& x,
+            const string& y,
+            const List<Tuple2<string, token>>& headerValues = {}
+        ) const;
+
+        // Write frequency-based data to file
+        void writeFreqDataToFile
+        (
+            Ostream& os,
+            const scalarField& f,
+            const scalarField& fx
+        ) const;
 
         //- Create a field of equally spaced frequencies for the current set of
         //- data - assumes a constant time step
@@ -334,16 +350,27 @@ public:
         noiseModel,
         dictionary,
         (
-            const dictionary& dict
+            const dictionary& dict,
+            const objectRegistry& obr
         ),
-        (dict)
+        (dict, obr)
     );
 
     //- Selector
-    static autoPtr<noiseModel> New(const dictionary& dict);
+    static autoPtr<noiseModel> New
+    (
+        const dictionary& dict,
+        const objectRegistry& obr
+    );
 
     //- Constructor
-    noiseModel(const dictionary& dict, const bool readFields = true);
+    noiseModel
+    (
+        const dictionary& dict,
+        const objectRegistry& obr,
+        const word& name,
+        const bool readFields = true
+    );
 
     //- Destructor
     virtual ~noiseModel() = default;

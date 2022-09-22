@@ -76,6 +76,15 @@ Foam::fileName Foam::functionObjects::writeFile::baseTimeDir() const
 }
 
 
+Foam::fileName Foam::functionObjects::writeFile::filePath
+(
+    const fileName& fName
+) const
+{
+    return baseFileDir()/prefix_/fName;
+}
+
+
 Foam::autoPtr<Foam::OFstream> Foam::functionObjects::writeFile::newFile
 (
     const fileName& fName
@@ -85,7 +94,7 @@ Foam::autoPtr<Foam::OFstream> Foam::functionObjects::writeFile::newFile
 
     if (Pstream::master() && writeToFile_)
     {
-        fileName outputDir(baseFileDir()/prefix_/fName.path());
+        fileName outputDir(filePath(fName).path());
 
         mkDir(outputDir);
 

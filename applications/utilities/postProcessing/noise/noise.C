@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
 
     IOdictionary dict(dictIO);
 
-    autoPtr<noiseModel> model(noiseModel::New(dict));
+    autoPtr<noiseModel> model(noiseModel::New(dict, runTime));
     model->calculate();
 
     Info<< nl << "End\n" << endl;

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -243,13 +243,55 @@ Foam::fileName Foam::noiseModel::baseFileDir(const label dataseti) const
 {
     return
     (
-        argList::envGlobalPath()
-      / functionObject::outputPrefix
-      / "noise"
-      / outputPrefix_
+        outputPrefix_
       / type()
       / ("input" + Foam::name(dataseti))
     );
+}
+
+
+void Foam::noiseModel::writeFileHeader
+(
+    Ostream& os,
+    const string& x,
+    const string& y,
+    const List<Tuple2<string, token>>& headerValues
+) const
+{
+    writeHeader(os, x + " vs " + y);
+    writeHeaderValue(os, "Lower frequency", fLower_);
+    writeHeaderValue(os, "Upper frequency", fUpper_);
+    writeHeaderValue(os, "Window model", windowModelPtr_->type());
+    writeHeaderValue(os, "Window number", windowModelPtr_->nWindow());
+    writeHeaderValue(os, "Window samples", windowModelPtr_->nSamples());
+    writeHeaderValue(os, "Window overlap %", windowModelPtr_->overlapPercent());
+    writeHeaderValue(os, "dBRef", dBRef_);
+
+    for (const auto& hv : headerValues)
+    {
+        writeHeaderValue(os, hv.first(), hv.second());
+    }
+
+    writeCommented(os, x.substr(0, x.find(' ')));
+    writeTabbed(os, y.substr(0, y.find(' ')));
+    os  << nl;
+}
+
+
+void Foam::noiseModel::writeFreqDataToFile
+(
+    Ostream& os,
+    const scalarField& f,
+    const scalarField& fx
+) const
+{
+    forAll(f, i)
+    {
+        if (f[i] >= fLower_ && f[i] <= fUpper_)
+        {
+            os  << f[i] << tab << fx[i] << nl;
+        }
+    }
 }
 
 
@@ -563,8 +605,15 @@ Foam::scalar Foam::noiseModel::gainD(const scalar f) const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::noiseModel::noiseModel(const dictionary& dict, const bool readFields)
+Foam::noiseModel::noiseModel
+(
+    const dictionary& dict,
+    const objectRegistry& obr,
+    const word& name,
+    const bool readFields
+)
 :
+    functionObjects::writeFile(obr, "noise"),
     dict_(dict),
     rhoRef_(1),
     nSamples_(65536),
@@ -572,7 +621,6 @@ Foam::noiseModel::noiseModel(const dictionary& dict, const bool readFields)
     fUpper_(10000),
     startTime_(0),
     windowModelPtr_(),
-    graphFormat_("raw"),
     SPLweighting_(weightingType::none),
     dBRef_(2e-5),
     minPressure_(-0.5*VGREAT),
@@ -603,12 +651,16 @@ Foam::noiseModel::noiseModel(const dictionary& dict, const bool readFields)
 
 bool Foam::noiseModel::read(const dictionary& dict)
 {
+    if (!functionObjects::writeFile::read(dict))
+    {
+        return false;
+    }
+
     dict.readIfPresent("rhoRef", rhoRef_);
     dict.readIfPresent("N", nSamples_);
     dict.readIfPresent("fl", fLower_);
     dict.readIfPresent("fu", fUpper_);
     dict.readIfPresent("startTime", startTime_);
-    dict.readIfPresent("graphFormat", graphFormat_);
     dict.readIfPresent("minPressure", minPressure_);
     dict.readIfPresent("maxPressure", maxPressure_);
     dict.readIfPresent("outputPrefix", outputPrefix_);

@@ -137,6 +137,9 @@ protected:
         //- Return the base directory for the current time value
         fileName baseTimeDir() const;
 
+        //- Return the full path for the supplied file name
+        fileName filePath(const fileName& fName) const;
+
         //- Return autoPtr to a new file using file name
         //  Note: no check for if the file already exists
         virtual autoPtr<OFstream> newFile(const fileName& fName) const;

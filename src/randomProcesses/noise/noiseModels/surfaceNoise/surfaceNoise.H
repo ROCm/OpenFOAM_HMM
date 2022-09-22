@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -216,7 +216,13 @@ public:
 
 
     //- Constructor
-    explicit surfaceNoise(const dictionary& dict, const bool readFields=true);
+    surfaceNoise
+    (
+        const dictionary& dict,
+        const objectRegistry& obr,
+        const word& name = typeName,
+        const bool readFields = true
+    );
 
     //- Destructor
     virtual ~surfaceNoise() = default;
