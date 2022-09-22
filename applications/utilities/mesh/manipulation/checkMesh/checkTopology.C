@@ -40,6 +40,7 @@ License
 #include "vtkSurfaceWriter.H"
 #include "checkTools.H"
 #include "treeBoundBox.H"
+#include "syncTools.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,25 +49,113 @@ void Foam::checkPatch
 (
     const bool allGeometry,
     const word& name,
+    const polyMesh& mesh,
     const PatchType& pp,
+    const labelList& meshFaces,
+    const labelList& meshEdges,
     pointSet& points
 )
 {
+    typedef typename PatchType::surfaceTopo TopoType;
+
+    const label globalSize = returnReduce(pp.size(), sumOp<label>());
+
     Info<< "    "
         << setw(20) << name
-        << setw(9) << returnReduce(pp.size(), sumOp<label>())
+        << setw(9) << globalSize
         << setw(9) << returnReduce(pp.nPoints(), sumOp<label>());
 
-    if (!Pstream::parRun())
+    if (globalSize == 0)
     {
-        typedef typename PatchType::surfaceTopo TopoType;
+        Info<< setw(34) << "ok (empty)";
+    }
+    else if (Pstream::parRun())
+    {
+        // Parallel - use mesh edges
+        // - no check for point-pinch
+        // - no check for consistent orientation (if that is posible to
+        //   check?)
+
+        // (see addPatchCellLayer::globalEdgeFaces)
+        // From mesh edge to global face labels. Non-empty sublists only for
+        // pp edges.
+        labelListList globalEdgeFaces(mesh.nEdges());
+
+        const labelListList& edgeFaces = pp.edgeFaces();
+
+        // Global numbering
+        const globalIndex globalFaces(mesh.nFaces());
+
+        forAll(edgeFaces, edgei)
+        {
+            label meshEdgei = meshEdges[edgei];
+            const labelList& eFaces = edgeFaces[edgei];
+
+            // Store face and processor as unique tag.
+            labelList& globalEFaces = globalEdgeFaces[meshEdgei];
+            globalEFaces.setSize(eFaces.size());
+            forAll(eFaces, i)
+            {
+                globalEFaces[i] = globalFaces.toGlobal(meshFaces[eFaces[i]]);
+            }
+            //Pout<< "At edge:" << meshEdgei
+            //    << " ctr:" << mesh.edges()[meshEdgei].centre(mesh.points())
+            //    << " have eFaces:" << globalEdgeFaces[meshEdgei]
+            //    << endl;
+        }
+
+        //DebugVar(globalEdgeFaces);
+
+
+        // Synchronise across coupled edges.
+        syncTools::syncEdgeList
+        (
+            mesh,
+            globalEdgeFaces,
+            ListOps::uniqueEqOp<label>(),
+            labelList()             // null value
+        );
+
+        //DebugVar(globalEdgeFaces);
+        
+        label labelTyp = TopoType::MANIFOLD;
+        forAll(meshEdges, edgei)
+        {
+            const label meshEdgei = meshEdges[edgei];
+            const labelList& globalEFaces = globalEdgeFaces[meshEdgei];
+            if (globalEFaces.size() == 1)
+            {
+                //points.insert(mesh.edges()[meshEdgei]);
+                labelTyp = max(labelTyp, TopoType::OPEN);
+            }
+            else if (globalEFaces.size() == 0 || globalEFaces.size() > 2)
+            {
+                points.insert(mesh.edges()[meshEdgei]);
+                labelTyp = max(labelTyp, TopoType::ILLEGAL);
+            }
+        }
+        reduce(labelTyp, maxOp<label>());
+
+        if (labelTyp == TopoType::MANIFOLD)
+        {
+            Info<< setw(34) << "ok (closed singly connected)";
+        }
+        else if (labelTyp == TopoType::OPEN)
+        {
+            Info<< setw(34)
+                << "ok (non-closed singly connected)";
+        }
+        else
+        {
+            Info<< setw(34)
+                << "multiply connected (shared edge)";
+        }
+    }
+    else
+    {
         TopoType pTyp = pp.surfaceType();
 
-        if (pp.empty())
-        {
-            Info<< setw(34) << "ok (empty)";
-        }
-        else if (pTyp == TopoType::MANIFOLD)
+        if (pTyp == TopoType::MANIFOLD)
         {
             if (pp.checkPointManifold(true, &points))
             {
@@ -549,15 +638,8 @@ Foam::label Foam::checkTopology
     );
 
     {
-        if (!Pstream::parRun())
-        {
-            Info<< "\nChecking patch topology for multiply connected"
+        Info<< "\nChecking patch topology for multiply connected"
                 << " surfaces..." << endl;
-        }
-        else
-        {
-            Info<< "\nChecking basic patch addressing..." << endl;
-        }
 
         const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
@@ -566,11 +648,8 @@ Foam::label Foam::checkTopology
         Info<< "    "
             << setw(20) << "Patch"
             << setw(9) << "Faces"
-            << setw(9) << "Points";
-        if (!Pstream::parRun())
-        {
-            Info<< setw(34) << "Surface topology";
-        }
+            << setw(9) << "Points"
+            << "Surface topology";
         if (allGeometry)
         {
             Info<< " Bounding box";
@@ -583,7 +662,16 @@ Foam::label Foam::checkTopology
 
             if (!isA<processorPolyPatch>(pp))
             {
-                checkPatch(allGeometry, pp.name(), pp, points);
+                checkPatch
+                (
+                    allGeometry,
+                    pp.name(),
+                    mesh,
+                    pp,
+                    identity(pp.size(), pp.start()),
+                    pp.meshEdges(),
+                    points
+                );
                 Info<< endl;
             }
         }
@@ -592,15 +680,8 @@ Foam::label Foam::checkTopology
     }
 
     {
-        if (!Pstream::parRun())
-        {
-            Info<< "\nChecking faceZone topology for multiply connected"
-                << " surfaces..." << endl;
-        }
-        else
-        {
-            Info<< "\nChecking basic faceZone addressing..." << endl;
-        }
+        Info<< "\nChecking faceZone topology for multiply connected"
+            << " surfaces..." << endl;
 
         Pout.setf(ios_base::left);
 
@@ -611,12 +692,8 @@ Foam::label Foam::checkTopology
             Info<< "    "
                 << setw(20) << "FaceZone"
                 << setw(9) << "Faces"
-                << setw(9) << "Points";
-
-            if (!Pstream::parRun())
-            {
-                Info<< setw(34) << "Surface topology";
-            }
+                << setw(9) << "Points"
+                << setw(34) << "Surface topology";
             if (allGeometry)
             {
                 Info<< " Bounding box";
@@ -625,7 +702,16 @@ Foam::label Foam::checkTopology
 
             for (const faceZone& fz : faceZones)
             {
-                checkPatch(allGeometry, fz.name(), fz(), points);
+                checkPatch
+                (
+                    allGeometry,
+                    fz.name(),
+                    mesh,
+                    fz(),           // patch
+                    fz,             // mesh face labels
+                    fz.meshEdges(), // mesh edge labels
+                    points
+                );
                 Info<< endl;
             }
         }

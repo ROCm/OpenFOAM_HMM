@@ -1,4 +1,4 @@
-#include "label.H"
+#include "labelList.H"
 #include "autoPtr.H"
 
 namespace Foam
@@ -14,7 +14,10 @@ namespace Foam
     (
         const bool allGeometry,
         const word& name,
+        const polyMesh& mesh,
         const PatchType& pp,
+        const labelList& meshFaces,
+        const labelList& meshEdges,
         pointSet& points
     );
 
