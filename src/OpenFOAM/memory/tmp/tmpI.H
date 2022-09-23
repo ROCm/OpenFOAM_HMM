@@ -235,13 +235,6 @@ inline T& Foam::tmp<T>::ref() const
 
 
 template<class T>
-inline T& Foam::tmp<T>::constCast() const
-{
-    return const_cast<T&>(cref());
-}
-
-
-template<class T>
 inline T* Foam::tmp<T>::ptr() const
 {
     if (!ptr_)

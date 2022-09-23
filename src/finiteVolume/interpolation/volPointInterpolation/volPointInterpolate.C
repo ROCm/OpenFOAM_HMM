@@ -89,7 +89,7 @@ void Foam::volPointInterpolation::addSeparated
         Pout<< "volPointInterpolation::addSeparated" << endl;
     }
 
-    auto& pfi = pf.ref();
+    auto& pfi = pf.internalFieldRef();
     auto& pfbf = pf.boundaryFieldRef();
 
     const label startOfRequests = UPstream::nRequests();

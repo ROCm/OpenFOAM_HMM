@@ -37,12 +37,11 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef geometricZeroField_H
-#define geometricZeroField_H
+#ifndef Foam_geometricZeroField_H
+#define Foam_geometricZeroField_H
 
 #include "zeroFieldField.H"
 #include "dimensionSet.H"
-#include "scalar.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -95,9 +94,9 @@ public:
             return Internal{};
         }
 
-        Internal primitiveField() const noexcept
+        zeroField primitiveField() const noexcept
         {
-            return Internal{};
+            return zeroField{};
         }
 
         Boundary boundaryField() const noexcept

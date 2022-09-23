@@ -221,7 +221,7 @@ public:
         //- Return non-const reference to the object or to the contents
         //- of a (non-null) managed pointer, with an additional const_cast.
         //  Fatal for a null pointer.
-        inline T& constCast() const;
+        T& constCast() const { return const_cast<T&>(cref()); }
 
 
     // Edit

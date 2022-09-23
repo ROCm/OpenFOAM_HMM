@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,7 +38,7 @@ Foam::DimensionedField<Type, GeoMesh>::null()
 
 template<class Type, class GeoMesh>
 inline const typename GeoMesh::Mesh&
-Foam::DimensionedField<Type, GeoMesh>::mesh() const
+Foam::DimensionedField<Type, GeoMesh>::mesh() const noexcept
 {
     return mesh_;
 }
@@ -46,14 +46,15 @@ Foam::DimensionedField<Type, GeoMesh>::mesh() const
 
 template<class Type, class GeoMesh>
 inline const Foam::dimensionSet&
-Foam::DimensionedField<Type, GeoMesh>::dimensions() const
+Foam::DimensionedField<Type, GeoMesh>::dimensions() const noexcept
 {
     return dimensions_;
 }
 
 
 template<class Type, class GeoMesh>
-inline Foam::dimensionSet& Foam::DimensionedField<Type, GeoMesh>::dimensions()
+inline Foam::dimensionSet&
+Foam::DimensionedField<Type, GeoMesh>::dimensions() noexcept
 {
     return dimensions_;
 }
@@ -87,7 +88,7 @@ inline void Foam::DimensionedField<Type, GeoMesh>::setOriented
 
 template<class Type, class GeoMesh>
 inline const Foam::Field<Type>&
-Foam::DimensionedField<Type, GeoMesh>::field() const
+Foam::DimensionedField<Type, GeoMesh>::field() const noexcept
 {
     return *this;
 }
@@ -95,7 +96,7 @@ Foam::DimensionedField<Type, GeoMesh>::field() const
 
 template<class Type, class GeoMesh>
 inline Foam::Field<Type>&
-Foam::DimensionedField<Type, GeoMesh>::field()
+Foam::DimensionedField<Type, GeoMesh>::field() noexcept
 {
     return *this;
 }

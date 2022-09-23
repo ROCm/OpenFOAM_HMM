@@ -92,7 +92,7 @@ Foam::fv::skewCorrectedSnGrad<Type>::fullGradCorrection
         mesh,
         dimensionedVector(dimLength, Zero)
     );
-    vectorField& kPI = kP.ref().field();
+    vectorField& kPI = kP.primitiveFieldRef();
 
     surfaceVectorField kN
     (
@@ -107,7 +107,7 @@ Foam::fv::skewCorrectedSnGrad<Type>::fullGradCorrection
         mesh,
         dimensionedVector(dimLength, Zero)
     );
-    vectorField& kNI = kN.ref().field();
+    vectorField& kNI = kN.primitiveFieldRef();
 
     kPI = Cf - vectorField(C, owner);
     kPI -= Sf*(Sf&kPI)/sqr(magSf);
@@ -164,7 +164,7 @@ Foam::fv::skewCorrectedSnGrad<Type>::fullGradCorrection
 
         // Skewness and non-rothogonal correction
         {
-            ssf.ref().field().replace
+            ssf.primitiveFieldRef().replace
             (
                 cmpt,
                 (

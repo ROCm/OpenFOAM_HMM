@@ -873,7 +873,7 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::~GeometricField()
 template<class Type, template<class> class PatchField, class GeoMesh>
 typename
 Foam::GeometricField<Type, PatchField, GeoMesh>::Internal&
-Foam::GeometricField<Type, PatchField, GeoMesh>::ref
+Foam::GeometricField<Type, PatchField, GeoMesh>::internalFieldRef
 (
     const bool updateAccessTime
 )
@@ -1346,7 +1346,7 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::operator=
 
     // Only assign field contents not ID
 
-    ref() = gf();
+    internalFieldRef() = gf.internalField();
     boundaryFieldRef() = gf.boundaryField();
 }
 
@@ -1393,7 +1393,7 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::operator=
     const dimensioned<Type>& dt
 )
 {
-    ref() = dt;
+    internalFieldRef() = dt;
     boundaryFieldRef() = dt.value();
 }
 
@@ -1410,7 +1410,7 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::operator==
 
     // Only assign field contents not ID
 
-    ref() = gf();
+    internalFieldRef() = gf.internalField();
     boundaryFieldRef() == gf.boundaryField();
 
     tgf.clear();
@@ -1423,7 +1423,7 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::operator==
     const dimensioned<Type>& dt
 )
 {
-    ref() = dt;
+    internalFieldRef() = dt;
     boundaryFieldRef() == dt.value();
 }
 
@@ -1438,7 +1438,7 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::operator op              \
 {                                                                              \
     checkField(*this, gf, #op);                                                \
                                                                                \
-    ref() op gf();                                                             \
+    internalFieldRef() op gf.internalField();                                  \
     boundaryFieldRef() op gf.boundaryField();                                  \
 }                                                                              \
                                                                                \
@@ -1458,7 +1458,7 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::operator op              \
     const dimensioned<TYPE>& dt                                                \
 )                                                                              \
 {                                                                              \
-    ref() op dt;                                                               \
+    internalFieldRef() op dt;                                                  \
     boundaryFieldRef() op dt.value();                                          \
 }
 
@@ -1479,7 +1479,7 @@ Foam::Ostream& Foam::operator<<
     const GeometricField<Type, PatchField, GeoMesh>& gf
 )
 {
-    gf().writeData(os, "internalField");
+    gf.internalField().writeData(os, "internalField");
     os  << nl;
     gf.boundaryField().writeEntry("boundaryField", os);
 

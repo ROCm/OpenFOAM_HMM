@@ -233,13 +233,6 @@ inline T& Foam::refPtr<T>::ref() const
 
 
 template<class T>
-inline T& Foam::refPtr<T>::constCast() const
-{
-    return const_cast<T&>(cref());
-}
-
-
-template<class T>
 inline Foam::refPtr<T> Foam::refPtr<T>::shallowClone() const noexcept
 {
     refPtr<T> dup;

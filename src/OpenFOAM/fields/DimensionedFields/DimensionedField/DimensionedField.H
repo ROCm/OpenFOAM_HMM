@@ -89,7 +89,7 @@ public:
         //- Type of the field from which this DimensionedField is derived
         typedef Field<Type> FieldType;
 
-        //- Component type of the elements of the field
+        //- Component type of the field elements
         typedef typename Field<Type>::cmptType cmptType;
 
 
@@ -351,13 +351,13 @@ public:
         );
 
         //- Return mesh
-        inline const Mesh& mesh() const;
+        inline const Mesh& mesh() const noexcept;
 
         //- Return dimensions
-        inline const dimensionSet& dimensions() const;
+        inline const dimensionSet& dimensions() const noexcept;
 
         //- Return non-const access to dimensions
-        inline dimensionSet& dimensions();
+        inline dimensionSet& dimensions() noexcept;
 
         //- Return oriented type
         inline const orientedType& oriented() const noexcept;
@@ -368,11 +368,11 @@ public:
         //- Set the oriented flag
         inline void setOriented(const bool oriented = true) noexcept;
 
-        //- Return field
-        inline const Field<Type>& field() const;
+        //- Return const-reference to the field values
+        inline const Field<Type>& field() const noexcept;
 
-        //- Return field
-        inline Field<Type>& field();
+        //- Return reference to the field values
+        inline Field<Type>& field() noexcept;
 
         //- Return a component field of the field
         tmp<DimensionedField<cmptType, GeoMesh>> component

@@ -113,10 +113,14 @@ void MapGeometricFields
             }
 
             // Map the internal field
-            MapInternalField<Type, MeshMapper, GeoMesh>()(field.ref(), mapper);
+            MapInternalField<Type, MeshMapper, GeoMesh>()
+            (
+                field.internalFieldRef(),
+                mapper
+            );
 
             // Map the patch fields
-            typename FieldType::Boundary& bfield = field.boundaryFieldRef();
+            auto& bfield = field.boundaryFieldRef();
 
             forAll(bfield, patchi)
             {
