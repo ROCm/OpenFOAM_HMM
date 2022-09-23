@@ -107,21 +107,6 @@ inline Foam::point Foam::faceAreaIntersect::planeIntersection
 }
 
 
-inline Foam::scalar Foam::faceAreaIntersect::triArea(const triPoints& t) const
-{
-    return mag(0.5*((t[1] - t[0])^(t[2] - t[0])));
-}
-
-
-inline Foam::vector Foam::faceAreaIntersect::triCentroid
-(
-    const triPoints& t
-) const
-{
-    return (t[0] + t[1] + t[2])/3;
-}
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 Foam::scalar& Foam::faceAreaIntersect::tolerance()

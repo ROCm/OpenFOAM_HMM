@@ -399,14 +399,14 @@ public:
             return UIndirectList<T>(internalValues, faceCells());
         }
 
-        //- Slice list to patch
+        //- Slice List to patch, using the number of patch faces
         template<class T>
         const typename List<T>::subList patchSlice(const UList<T>& l) const
         {
             return typename List<T>::subList(l, this->size(), start_);
         }
 
-        //- Slice Field to patch
+        //- Slice Field to patch, using the number of patch faces
         template<class T>
         const typename Field<T>::subField patchSlice(const Field<T>& l) const
         {
@@ -449,9 +449,9 @@ public:
         // Other patch operations
 
             //- Return label of face in patch from global face label
-            inline label whichFace(const label l) const
+            label whichFace(const label facei) const noexcept
             {
-                return l - start_;
+                return facei - start_;
             }
 
 

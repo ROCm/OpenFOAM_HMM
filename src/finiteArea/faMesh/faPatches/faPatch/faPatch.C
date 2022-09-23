@@ -462,10 +462,7 @@ Foam::tmp<Foam::vectorField> Foam::faPatch::edgeNormals() const
 {
     auto tedgeNorm = tmp<vectorField>::New(edgeLengths());
 
-    for (vector& n : tedgeNorm.ref())
-    {
-        n.normalise();
-    }
+    tedgeNorm.ref().normalise();
 
     return tedgeNorm;
 }
@@ -473,27 +470,15 @@ Foam::tmp<Foam::vectorField> Foam::faPatch::edgeNormals() const
 
 Foam::tmp<Foam::vectorField> Foam::faPatch::edgeFaceCentres() const
 {
-    auto tfc = tmp<vectorField>::New(size());
-    auto& fc = tfc.ref();
-
-    // get reference to global face centres
-    const vectorField& gfc =
-        boundaryMesh().mesh().areaCentres().internalField();
-
-    const labelUList& faceLabels = edgeFaces();
-
-    forAll(faceLabels, edgeI)
-    {
-        fc[edgeI] = gfc[faceLabels[edgeI]];
-    }
-
-    return tfc;
+    return patchInternalField(boundaryMesh().mesh().areaCentres());
 }
 
 
 Foam::tmp<Foam::vectorField> Foam::faPatch::delta() const
 {
-    return edgeNormals()*(edgeNormals() & (edgeCentres() - edgeFaceCentres()));
+    // Use patch-normal delta for all non-coupled BCs
+    const vectorField nHat(edgeNormals());
+    return nHat*(nHat & (edgeCentres() - edgeFaceCentres()));
 }
 
 

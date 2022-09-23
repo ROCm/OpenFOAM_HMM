@@ -28,6 +28,7 @@ License
 #include "highAspectRatioFvGeometryScheme.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fvMesh.H"
+#include "triangle.H"
 #include "syncTools.H"
 #include "cellAspectRatio.H"
 #include "emptyPolyPatch.H"
@@ -259,7 +260,7 @@ void Foam::highAspectRatioFvGeometryScheme::makeAverageCentres
 
         if (nPoints == 3)
         {
-            faceCentres[facei] = (1.0/3.0)*(p[f[0]] + p[f[1]] + p[f[2]]);
+            faceCentres[facei] = triPointRef::centre(p[f[0]], p[f[1]], p[f[2]]);
         }
         else
         {

@@ -180,31 +180,34 @@ inline Foam::triPointRef Foam::triFace::tri(const UList<point>& points) const
 
 inline Foam::point Foam::triFace::centre(const UList<point>& points) const
 {
-    return (1.0/3.0)*
+    return triPointRef::centre
     (
-        points[operator[](0)]
-      + points[operator[](1)]
-      + points[operator[](2)]
+        points[operator[](0)],
+        points[operator[](1)],
+        points[operator[](2)]
     );
 }
 
 
 inline Foam::vector Foam::triFace::areaNormal(const UList<point>& points) const
 {
-    // As per triPointRef(...).areaNormal()
-    return 0.5*
+    return triPointRef::areaNormal
     (
-        (points[operator[](1)] - points[operator[](0)])
-       ^(points[operator[](2)] - points[operator[](0)])
+        points[operator[](0)],
+        points[operator[](1)],
+        points[operator[](2)]
     );
 }
 
 
 inline Foam::vector Foam::triFace::unitNormal(const UList<point>& points) const
 {
-    const vector n(areaNormal(points));
-    const scalar s(Foam::mag(n));
-    return s < ROOTVSMALL ? Zero : n/s;
+    return triPointRef::unitNormal
+    (
+        points[operator[](0)],
+        points[operator[](1)],
+        points[operator[](2)]
+    );
 }
 
 

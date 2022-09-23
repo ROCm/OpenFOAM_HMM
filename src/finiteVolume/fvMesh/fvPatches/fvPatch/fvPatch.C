@@ -125,20 +125,7 @@ const Foam::vectorField& Foam::fvPatch::Cf() const
 
 Foam::tmp<Foam::vectorField> Foam::fvPatch::Cn() const
 {
-    auto tcc = tmp<vectorField>::New(size());
-    auto& cc = tcc.ref();
-
-    const labelUList& faceCells = this->faceCells();
-
-    // get reference to global cell centres
-    const vectorField& gcc = boundaryMesh().mesh().cellCentres();
-
-    forAll(faceCells, facei)
-    {
-        cc[facei] = gcc[faceCells[facei]];
-    }
-
-    return tcc;
+    return patchInternalField(boundaryMesh().mesh().cellCentres());
 }
 
 

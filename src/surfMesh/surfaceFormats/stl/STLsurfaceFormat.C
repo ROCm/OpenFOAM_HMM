@@ -42,7 +42,7 @@ inline void Foam::fileFormats::STLsurfaceFormat<Face>::writeShell
 {
     // Calculate the normal ourselves, for flexibility and speed
     const vector norm =
-        triPointRef(pts[f[0]], pts[f[1]], pts[f[2]]).unitNormal();
+        triPointRef::unitNormal(pts[f[0]], pts[f[1]], pts[f[2]]);
 
     // simple triangulation about f[0].
     // better triangulation should have been done before
@@ -76,7 +76,7 @@ inline void Foam::fileFormats::STLsurfaceFormat<Face>::writeShell
 {
     // Calculate the normal ourselves, for flexibility and speed
     const vector norm =
-        triPointRef(pts[f[0]], pts[f[1]], pts[f[2]]).unitNormal();
+        triPointRef::unitNormal(pts[f[0]], pts[f[1]], pts[f[2]]);
 
     // simple triangulation about f[0].
     // better triangulation should have been done before

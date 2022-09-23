@@ -129,11 +129,26 @@ public:
         //- The third vertex
         point& c() { return operator[](2); }
 
+        //- Flip triangle orientation by swapping second and third vertices
+        inline void flip();
+
         //- Return as triangle reference
         inline triPointRef tri() const;
 
-        //- Flip triangle orientation by swapping second and third vertices
-        inline void flip();
+
+    // Properties
+
+        //- Return centre (centroid)
+        inline point centre() const;
+
+        //- The area normal - with magnitude equal to area of triangle
+        inline vector areaNormal() const;
+
+        //- Return unit normal
+        inline vector unitNormal() const;
+
+        //- The magnitude of the triangle area
+        inline scalar mag() const;
 
         //- The bounding box for the tetrahedron
         inline treeBoundBox bounds() const;
@@ -268,6 +283,35 @@ public:
         const Point& c() const noexcept { return c_; }
 
 
+    // Triangle properties (static calculations)
+
+        //- The centre (centroid) of three points
+        inline static Point centre
+        (
+            const Point& p0,
+            const Point& p1,
+            const Point& p2
+        );
+
+        //- The area normal for a triangle defined by three points
+        //- (right-hand rule). Magnitude equal to area of the triangle
+        inline static vector areaNormal
+        (
+            const Point& p0,
+            const Point& p1,
+            const Point& p2
+        );
+
+        //- The unit normal for a triangle defined by three points
+        //- (right-hand rule).
+        inline static vector unitNormal
+        (
+            const Point& p0,
+            const Point& p1,
+            const Point& p2
+        );
+
+
         // Properties
 
             //- Return centre (centroid)
@@ -287,7 +331,7 @@ public:
                 return areaNormal();
             }
 
-            //- Return scalar magnitude
+            //- The magnitude of the triangle area
             inline scalar mag() const;
 
             //- Return circum-centre

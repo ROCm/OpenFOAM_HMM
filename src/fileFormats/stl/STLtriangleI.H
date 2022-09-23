@@ -113,7 +113,7 @@ inline void Foam::STLtriangle::write
 )
 {
     // Calculate the normal ourselves
-    const vector norm = triPointRef(p0, p1, p2).unitNormal();
+    const vector norm = triPointRef::unitNormal(p0, p1, p2);
 
     write(os, norm, p0, p1, p2);
 }

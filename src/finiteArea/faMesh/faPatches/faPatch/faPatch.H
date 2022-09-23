@@ -308,23 +308,30 @@ public:
         //- Patch start in edge list
         label start() const;
 
-        //- Patch size is the number of edge labels
+        //- Patch size is the number of edge labels, but can be overloaded
         virtual label size() const
         {
             return labelList::size();
         }
 
         //- Return label of edge in patch from global edge label
-        inline label whichEdge(const label l) const
+        label whichEdge(const label edgei) const
         {
-            return l - start();
+            return edgei - start();
         }
 
-        //- Slice list to patch
+        //- Slice List to patch, using the virtual patch size
         template<class T>
         typename List<T>::subList patchSlice(const List<T>& l) const
         {
             return typename List<T>::subList(l, size(), start());
+        }
+
+        //- Slice List to patch, using the number of patch edges
+        template<class T>
+        typename List<T>::subList patchRawSlice(const List<T>& l) const
+        {
+            return typename List<T>::subList(l, nEdges(), start());
         }
 
 

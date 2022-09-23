@@ -93,7 +93,7 @@ inline Foam::vector2D Foam::triangle2D::centre() const
 {
     const triangle2D& tri = *this;
 
-    return (1/3.0)*(tri[0] + tri[1] + tri[2]);
+    return (1.0/3.0)*(tri[0] + tri[1] + tri[2]);
 }
 
 

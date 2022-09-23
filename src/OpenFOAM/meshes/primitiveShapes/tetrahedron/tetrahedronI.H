@@ -186,28 +186,28 @@ inline Foam::triPointRef Foam::tetrahedron<Point, PointRef>::tri
 template<class Point, class PointRef>
 inline Foam::vector Foam::tetrahedron<Point, PointRef>::Sa() const
 {
-    return triangle<Point, PointRef>(b_, c_, d_).areaNormal();
+    return triangle<Point, PointRef>::areaNormal(b_, c_, d_);
 }
 
 
 template<class Point, class PointRef>
 inline Foam::vector Foam::tetrahedron<Point, PointRef>::Sb() const
 {
-    return triangle<Point, PointRef>(a_, d_, c_).areaNormal();
+    return triangle<Point, PointRef>::areaNormal(a_, d_, c_);
 }
 
 
 template<class Point, class PointRef>
 inline Foam::vector Foam::tetrahedron<Point, PointRef>::Sc() const
 {
-    return triangle<Point, PointRef>(a_, b_, d_).areaNormal();
+    return triangle<Point, PointRef>::areaNormal(a_, b_, d_);
 }
 
 
 template<class Point, class PointRef>
 inline Foam::vector Foam::tetrahedron<Point, PointRef>::Sd() const
 {
-    return triangle<Point, PointRef>(a_, c_, b_).areaNormal();
+    return triangle<Point, PointRef>::areaNormal(a_, c_, b_);
 }
 
 

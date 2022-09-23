@@ -165,7 +165,7 @@ public:
     // Access
 
             //- Return the polyPatch
-            const polyPatch& patch() const
+            const polyPatch& patch() const noexcept
             {
                 return polyPatch_;
             }
@@ -201,22 +201,37 @@ public:
             static wordList constraintTypes();
 
             //- Return the index of this patch in the fvBoundaryMesh
-            label index() const
+            label index() const noexcept
             {
                 return polyPatch_.index();
             }
 
             //- Return boundaryMesh reference
-            const fvBoundaryMesh& boundaryMesh() const
+            const fvBoundaryMesh& boundaryMesh() const noexcept
             {
                 return boundaryMesh_;
             }
 
-            //- Slice list to patch
+            //- Slice List to patch, using the virtual patch size
             template<class T>
             const typename List<T>::subList patchSlice(const List<T>& l) const
             {
                 return typename List<T>::subList(l, size(), start());
+            }
+
+            //- Slice List to patch, using the underlying polyPatch information
+            template<class T>
+            const typename List<T>::subList patchRawSlice
+            (
+                const List<T>& l
+            ) const
+            {
+                return typename List<T>::subList
+                (
+                    l,
+                    polyPatch_.size(),
+                    polyPatch_.start()
+                );
             }
 
             //- Return faceCells

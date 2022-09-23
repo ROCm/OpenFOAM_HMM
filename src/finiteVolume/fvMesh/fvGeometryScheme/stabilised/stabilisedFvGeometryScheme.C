@@ -31,6 +31,7 @@ License
 #include "fvMesh.H"
 #include "PrecisionAdaptor.H"
 #include "primitiveMeshTools.H"
+#include "triangle.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -67,8 +68,8 @@ void Foam::stabilisedFvGeometryScheme::makeFaceCentresAndAreas
         // and to avoid round-off error-related problems
         if (nPoints == 3)
         {
-            fCtrs[facei] = (1.0/3.0)*(p[f[0]] + p[f[1]] + p[f[2]]);
-            fAreas[facei] = 0.5*((p[f[1]] - p[f[0]])^(p[f[2]] - p[f[0]]));
+            fCtrs[facei] = triPointRef::centre(p[f[0]], p[f[1]], p[f[2]]);
+            fAreas[facei] = triPointRef::areaNormal(p[f[0]], p[f[1]], p[f[2]]);
         }
 
         // For more complex faces, decompose into triangles

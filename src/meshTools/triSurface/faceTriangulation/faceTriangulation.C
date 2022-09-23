@@ -28,7 +28,6 @@ License
 #include "faceTriangulation.H"
 #include "plane.H"
 
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 const Foam::scalar Foam::faceTriangulation::edgeRelTol = 1e-6;
@@ -160,9 +159,9 @@ bool Foam::faceTriangulation::triangleContainsPoint
     const point& pt
 )
 {
-    const scalar area01Pt = triPointRef(p0, p1, pt).areaNormal() & n;
-    const scalar area12Pt = triPointRef(p1, p2, pt).areaNormal() & n;
-    const scalar area20Pt = triPointRef(p2, p0, pt).areaNormal() & n;
+    const scalar area01Pt = triPointRef::areaNormal(p0, p1, pt) & n;
+    const scalar area12Pt = triPointRef::areaNormal(p1, p2, pt) & n;
+    const scalar area20Pt = triPointRef::areaNormal(p2, p0, pt) & n;
 
     if ((area01Pt > 0) && (area12Pt > 0) && (area20Pt > 0))
     {

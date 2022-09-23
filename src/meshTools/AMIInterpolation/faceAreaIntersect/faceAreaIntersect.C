@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -240,7 +240,7 @@ void Foam::faceAreaIntersect::triangleIntersect
     // Cut source triangle with all inward pointing faces of target triangle
     // - triangles in workTris1 are inside target triangle
 
-    const scalar srcArea(triArea(src));
+    const scalar srcArea(src.mag());
     if (srcArea < ROOTVSMALL)
     {
         return;
@@ -363,11 +363,11 @@ void Foam::faceAreaIntersect::triangleIntersect
                 for (label i = 0; i < nWorkTris1; ++i)
                 {
                     // Area of intersection
-                    const scalar currArea = triArea(workTris1[i]);
+                    const scalar currArea = workTris1[i].mag();
                     area += currArea;
 
                     // Area-weighted centroid of intersection
-                    centroid += currArea*triCentroid(workTris1[i]);
+                    centroid += currArea*workTris1[i].centre();
 
                     if (cacheTriangulation_)
                     {

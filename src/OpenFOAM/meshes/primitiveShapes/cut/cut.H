@@ -168,7 +168,7 @@ public:
         //- Operate on a triangle
         result operator()(const FixedList<point, 3>& p) const
         {
-            return result(triPointRef(p[0], p[1], p[2]).areaNormal());
+            return result(triPointRef::areaNormal(p[0], p[1], p[2]));
         }
 };
 

@@ -117,6 +117,85 @@ inline Foam::triangle<Point, PointRef>::triangle(Istream& is)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+template<class Point, class PointRef>
+inline Point Foam::triangle<Point, PointRef>::centre
+(
+    const Point& p0,
+    const Point& p1,
+    const Point& p2
+)
+{
+    return (1.0/3.0)*(p0 + p1 + p2);
+}
+
+
+template<class Point, class PointRef>
+inline Point Foam::triangle<Point, PointRef>::centre() const
+{
+    return (1.0/3.0)*(a_ + b_ + c_);
+}
+
+
+inline Foam::point Foam::triPoints::centre() const
+{
+    return triPointRef::centre(a(), b(), c());
+}
+
+
+template<class Point, class PointRef>
+inline Foam::vector Foam::triangle<Point, PointRef>::areaNormal
+(
+    const Point& p0,
+    const Point& p1,
+    const Point& p2
+)
+{
+    return 0.5*((p1 - p0)^(p2 - p0));
+}
+
+
+template<class Point, class PointRef>
+inline Foam::vector Foam::triangle<Point, PointRef>::areaNormal() const
+{
+    return 0.5*((b_ - a_)^(c_ - a_));
+}
+
+
+inline Foam::vector Foam::triPoints::areaNormal() const
+{
+    return triPointRef::areaNormal(a(), b(), c());
+}
+
+
+template<class Point, class PointRef>
+inline Foam::vector Foam::triangle<Point, PointRef>::unitNormal
+(
+    const Point& p0,
+    const Point& p1,
+    const Point& p2
+)
+{
+    const vector n(areaNormal(p0, p1, p2));
+    const scalar s(::Foam::mag(n));
+    return s < ROOTVSMALL ? Zero : n/s;
+}
+
+
+template<class Point, class PointRef>
+inline Foam::vector Foam::triangle<Point, PointRef>::unitNormal() const
+{
+    return triPointRef::unitNormal(a_, b_, c_);
+}
+
+
+inline Foam::vector Foam::triPoints::unitNormal() const
+{
+    return triPointRef::unitNormal(a(), b(), c());
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
 inline Foam::triPointRef Foam::triPoints::tri() const
 {
     return triPointRef(a(), b(), c());
@@ -140,26 +219,9 @@ inline Foam::treeBoundBox Foam::triPoints::bounds() const
 }
 
 
-template<class Point, class PointRef>
-inline Point Foam::triangle<Point, PointRef>::centre() const
+inline Foam::scalar Foam::triPoints::mag() const
 {
-    return (1.0/3.0)*(a_ + b_ + c_);
-}
-
-
-template<class Point, class PointRef>
-inline Foam::vector Foam::triangle<Point, PointRef>::areaNormal() const
-{
-    return 0.5*((b_ - a_)^(c_ - a_));
-}
-
-
-template<class Point, class PointRef>
-inline Foam::vector Foam::triangle<Point, PointRef>::unitNormal() const
-{
-    const vector n(areaNormal());
-    const scalar s(Foam::mag(n));
-    return s < ROOTVSMALL ? Zero : n/s;
+    return ::Foam::mag(areaNormal());
 }
 
 

@@ -58,8 +58,11 @@ void Foam::primitiveMeshGeometry::updateFaceCentresAndAreas
         // and to avoid round-off error-related problems
         if (nPoints == 3)
         {
-            faceCentres_[facei] = (1.0/3.0)*(p[f[0]] + p[f[1]] + p[f[2]]);
-            faceAreas_[facei] = 0.5*((p[f[1]] - p[f[0]])^(p[f[2]] - p[f[0]]));
+            faceCentres_[facei] =
+                triPointRef::centre(p[f[0]], p[f[1]], p[f[2]]);
+
+            faceAreas_[facei] =
+                triPointRef::areaNormal(p[f[0]], p[f[1]], p[f[2]]);
         }
         else
         {
@@ -1004,12 +1007,12 @@ bool Foam::primitiveMeshGeometry::checkFaceTwist
             {
                 const vector triArea
                 (
-                    triPointRef
+                    triPointRef::areaNormal
                     (
                         p[f[fpI]],
                         p[f.nextLabel(fpI)],
                         fc
-                    ).areaNormal()
+                    )
                 );
 
                 const scalar magTri = mag(triArea);

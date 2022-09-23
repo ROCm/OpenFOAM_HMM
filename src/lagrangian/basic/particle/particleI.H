@@ -315,7 +315,7 @@ void Foam::particle::patchData(vector& n, vector& U) const
         Pair<vector> centre, base, vertex1, vertex2;
         movingTetGeometry(1, centre, base, vertex1, vertex2);
 
-        n = triPointRef(base[0], vertex1[0], vertex2[0]).unitNormal();
+        n = triPointRef::unitNormal(base[0], vertex1[0], vertex2[0]);
 
         // Interpolate the motion of the three face vertices to the current
         // coordinates
