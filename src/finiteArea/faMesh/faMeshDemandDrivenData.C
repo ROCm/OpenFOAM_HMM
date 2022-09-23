@@ -70,7 +70,7 @@ static inline vector areaInvDistSqrWeightedNormal
 {
     const scalar s(2*magSqr(a)*magSqr(b));
 
-    return s < VSMALL ? Zero : (a ^ b) / s;
+    return s < ROOTVSMALL ? Zero : (a ^ b) / s;
 }
 
 
@@ -104,90 +104,45 @@ static inline vector areaInvDistSqrWeightedNormalDualEdge
 }
 
 
-// Simple area-weighted normal calculation for the specified edge vector
-// and its owner/neighbour face centres (internal edges).
-//
-// Uses four triangles since adjacent faces may be non-planar
-// and/or the edge centre is skewed from the face centres.
+// Weighted area normal for the face triangle (around base-point)
+// to the edge points and the centre point.
+// Used for example for area-weighted edge normals
+// ---------------------------------------------------------------------------
+//         own          |
+//          *           | Don't bother trying to split the triangle into
+//         /.\          | sub-triangles. Planar anyhow and skew weighting
+//        / . \         | is less relevant here.
+//       /  .  \        |
+//      /   .   \       | Note: need negative for neighbour side orientation.
+//  e0 *----:----* e1   |
+// ---------------------------------------------------------------------------
 
-/*---------------------------------------------------------------------------*\
- *          *           |
- *         /|\          | Triangles (0,1) are on the owner side.
- *        / | \         |
- *       /  |  \        | Triangles (2,3) are on the neighbour side.
- *      /  1|3  \       |
- * own *----|----* nbr  | Boundary edges are the same, but without a neighbour
- *      \  0|2  /       |
- *       \  |  /        |
- *        \ | /         |
- *         \|/          |
- *          *           |
-\*---------------------------------------------------------------------------*/
-
-static inline vector calcEdgeNormalFromFace
+static inline vector areaInvDistSqrWeightedNormalFaceTriangle
 (
-    const linePointRef& edgeVec,
-    const point& ownCentre,
-    const point& neiCentre
+    const linePointRef& edgeLine,
+    const point& faceCentre
 )
 {
-    const scalar magEdge(edgeVec.mag());
-
-    if (magEdge < ROOTVSMALL)
-    {
-        return Zero;
-    }
-
-    const vector edgeCtr = edgeVec.centre();
-
-    vector edgeNorm
+    return
     (
-        // owner
-        triPointRef(edgeCtr, ownCentre, edgeVec.first()).areaNormal()
-      + triPointRef(edgeCtr, edgeVec.last(), ownCentre).areaNormal()
-        // neighbour
-      + triPointRef(edgeCtr, edgeVec.first(), neiCentre).areaNormal()
-      + triPointRef(edgeCtr, neiCentre, edgeVec.last()).areaNormal()
+        areaInvDistSqrWeightedNormal
+        (
+            (edgeLine.a() - faceCentre),  // From centre to right edge
+            (edgeLine.b() - faceCentre)   // From centre to left edge
+        )
     );
-
-    // Requires a unit-vector (already tested its mag)
-    edgeNorm.removeCollinear(edgeVec.vec()/magEdge);
-    edgeNorm.normalise();
-
-    // Scale with the original edge length
-    return magEdge*edgeNorm;
 }
 
 
-// As above, but for boundary edgess (no neighbour)
-static inline vector calcEdgeNormalFromFace
+// Simple area normal calculation for specified edge vector and face centre
+// The face centre comes last since it is less accurate
+static inline vector areaNormalFaceTriangle
 (
-    const linePointRef& edgeVec,
-    const point& ownCentre
+    const linePointRef& edgeLine,
+    const point& faceCentre
 )
 {
-    const scalar magEdge(edgeVec.mag());
-
-    if (magEdge < ROOTVSMALL)
-    {
-        return Zero;
-    }
-
-    const vector edgeCtr = edgeVec.centre();
-
-    vector edgeNorm
-    (
-        // owner
-        triPointRef(edgeCtr, ownCentre, edgeVec.first()).areaNormal()
-      + triPointRef(edgeCtr, edgeVec.last(), ownCentre).areaNormal()
-    );
-
-    // Requires a unit-vector (already tested its mag)
-    edgeNorm.removeCollinear(edgeVec.vec()/magEdge);
-    edgeNorm.normalise();
-
-    // Scale with the original edge length
-    return magEdge*edgeNorm;
+    return triPointRef::areaNormal(edgeLine.a(), edgeLine.b(), faceCentre);
 }
 
 } // End namespace Foam
@@ -393,13 +348,16 @@ Foam::tmp<Foam::vectorField> Foam::faMesh::calcRawEdgeNormals(int order) const
     const pointField& localPoints = points();
 
 
+    if (order < 0)
     {
+        // geometryOrder (-1): no communication
+
         // Simple (primitive) edge normal calculations.
         // These are primarly designed to avoid any communication
         // but are thus necessarily inconsistent across processor boundaries!
 
         WarningInFunction
-            << "Using geometryOrder < 1 : "
+            << "Using geometryOrder < 0 : "
                "simplified edge area-normals, without processor connectivity"
             << endl;
 
@@ -409,12 +367,19 @@ Foam::tmp<Foam::vectorField> Foam::faMesh::calcRawEdgeNormals(int order) const
             const linePointRef edgeLine(edges_[edgei].line(localPoints));
 
             edgeNormals[edgei] =
-                calcEdgeNormalFromFace
+            (
+                areaNormalFaceTriangle
                 (
                     edgeLine,
-                    fCentres[edgeOwner()[edgei]],
+                    fCentres[edgeOwner()[edgei]]
+                )
+                // NB: reversed sign (edge orientation flipped for neighbour)
+              - areaNormalFaceTriangle
+                (
+                    edgeLine,
                     fCentres[edgeNeighbour()[edgei]]
-                );
+                )
+            );
         }
 
         // Boundary (edge normals) - like about but only has owner
@@ -423,11 +388,200 @@ Foam::tmp<Foam::vectorField> Foam::faMesh::calcRawEdgeNormals(int order) const
             const linePointRef edgeLine(edges_[edgei].line(localPoints));
 
             edgeNormals[edgei] =
-                calcEdgeNormalFromFace
+            (
+                areaNormalFaceTriangle
                 (
                     edgeLine,
                     fCentres[edgeOwner()[edgei]]
+                )
+            );
+        }
+    }
+    else
+    {
+        // geometryOrder (0) - no communication
+        // otherwise with communication
+
+        if (order < 1)
+        {
+            WarningInFunction
+                << "Using geometryOrder == 0 : "
+                   "weighted edge normals, without processor connectivity"
+                << endl;
+        }
+
+        // Internal (edge normals)
+        // - area-weighted contributions from owner/neighbour
+        for (label edgei = 0; edgei < nInternalEdges_; ++edgei)
+        {
+            const linePointRef edgeLine(edges_[edgei].line(localPoints));
+
+            edgeNormals[edgei] =
+            (
+                areaInvDistSqrWeightedNormalFaceTriangle
+                (
+                    edgeLine,
+                    fCentres[edgeOwner()[edgei]]
+                )
+                // NB: reversed sign (edge orientation flipped for neighbour)
+              - areaInvDistSqrWeightedNormalFaceTriangle
+                (
+                    edgeLine,
+                    fCentres[edgeNeighbour()[edgei]]
+                )
+            );
+        }
+
+        // Boundary (edge normals). Like above, but only has owner
+        for (label edgei = nInternalEdges_; edgei < nEdges_; ++edgei)
+        {
+            const linePointRef edgeLine(edges_[edgei].line(localPoints));
+
+            edgeNormals[edgei] =
+            (
+                areaInvDistSqrWeightedNormalFaceTriangle
+                (
+                    edgeLine,
+                    fCentres[edgeOwner()[edgei]]
+                )
+            );
+        }
+    }
+
+
+    // Boundary edge corrections
+    bitSet nbrBoundaryAdjust;
+
+    // Processor-processor first (for convenience)
+    if (order >= 1)
+    {
+        const label startOfRequests = UPstream::nRequests();
+
+        forAll(boundary(), patchi)
+        {
+            const faPatch& fap = boundary()[patchi];
+
+            const auto* fapp = isA<processorFaPatch>(fap);
+
+            if (fapp)
+            {
+                if (UPstream::parRun())
+                {
+                    // Send accumulated weighted edge normals
+                    fapp->send<vector>
+                    (
+                        UPstream::commsTypes::nonBlocking,
+                        fap.patchSlice(edgeNormals)
+                    );
+                }
+            }
+            else if (isA<wedgeFaPatch>(fap))
+            {
+                // Correct wedge edges
+                const auto& wedgePatch = refCast<const wedgeFaPatch>(fap);
+
+                const vector wedgeNorm
+                (
+                    transform
+                    (
+                        wedgePatch.edgeT(),
+                        wedgePatch.centreNormal()
+                    ).normalise()
                 );
+
+                for (vector& edgeNorm : fap.patchSlice(edgeNormals))
+                {
+                    edgeNorm.removeCollinear(wedgeNorm);
+                }
+            }
+            // TBD:
+            /// else if (isA<emptyFaPatch>(fap))
+            /// {
+            ///     // Ignore this boundary
+            /// }
+            else if (correctPatchPointNormals(patchi) && !fap.coupled())
+            {
+                // Neighbour correction requested
+                nbrBoundaryAdjust.set(patchi);
+            }
+        }
+
+        // Wait for outstanding requests
+        // (commsType == UPstream::commsTypes::nonBlocking)
+        UPstream::waitRequests(startOfRequests);
+
+        // Receive values
+        if (UPstream::parRun())
+        {
+            for (const faPatch& fap : boundary())
+            {
+                const auto* fapp = isA<processorFaPatch>(fap);
+
+                if (fapp)
+                {
+                    // Receive weighted edge normals
+                    vectorField::subList edgeNorms
+                        = fap.patchSlice(edgeNormals);
+
+                    vectorField nbrNorms(edgeNorms.size());
+
+                    fapp->receive<vector>
+                    (
+                        UPstream::commsTypes::nonBlocking,
+                        nbrNorms
+                    );
+
+                    forAll(edgeNorms, patchEdgei)
+                    {
+                        edgeNorms[patchEdgei] += nbrNorms[patchEdgei];
+                    }
+                }
+            }
+        }
+    }
+
+
+    // Apply boundary edge corrections
+
+    if (order >= 1 && returnReduceOr(nbrBoundaryAdjust.any()))
+    {
+        DebugInFunction
+            << "Apply " << nbrBoundaryAdjust.count()
+            << " boundary neighbour corrections" << nl;
+
+        // Collect face normals, per boundary edge
+
+        (void)this->haloFaceNormals();
+
+        for (const label patchi : nbrBoundaryAdjust)
+        {
+            const faPatch& fap = boundary()[patchi];
+
+            if (fap.ngbPolyPatchIndex() < 0)
+            {
+                FatalErrorInFunction
+                    << "Neighbour polyPatch index is not defined "
+                    << "for faPatch " << fap.name()
+                    << abort(FatalError);
+            }
+
+            // Apply the correction
+
+            // Note from Zeljko Tukovic:
+            //
+            // This posibility is used for free-surface tracking
+            // calculations to enforce 90 deg contact angle between
+            // finite-area mesh and neighbouring polyPatch. It is very
+            // important for curvature calculation to have correct normal
+            // at contact line points.
+
+            vectorField::subList edgeNorms = fap.patchSlice(edgeNormals);
+            vectorField nbrNorms(this->haloFaceNormals(patchi));
+
+            forAll(edgeNorms, patchEdgei)
+            {
+                edgeNorms[patchEdgei].removeCollinear(nbrNorms[patchEdgei]);
+            }
         }
     }
 
@@ -470,6 +624,7 @@ void Foam::faMesh::calcLe() const
             ),
             *this,
             dimLength
+            // -> calculatedType()
         );
 
     edgeVectorField& Le = *LePtr_;
@@ -481,7 +636,7 @@ void Foam::faMesh::calcLe() const
     const pointField& localPoints = points();
 
 
-    if (faMesh::geometryOrder() < 1)
+    if (faMesh::geometryOrder() < 2)
     {
         // The edge normals with flat boundary addressing
         // (which _may_ use communication)
@@ -505,10 +660,10 @@ void Foam::faMesh::calcLe() const
             );
         }
 
-
         // Copy internal field
         Le.primitiveFieldRef() =
             vectorField::subList(leVectors, nInternalEdges_);
+
 
         // Transcribe boundary field
         auto& bfld = Le.boundaryFieldRef();
@@ -518,9 +673,6 @@ void Foam::faMesh::calcLe() const
             const faPatch& fap = boundary()[patchi];
             bfld[patchi] = fap.patchRawSlice(leVectors);
         }
-
-        // Done
-        return;
     }
     else
     {
@@ -653,6 +805,7 @@ void Foam::faMesh::calcFaceCentres() const
             ),
             *this,
             dimLength
+            // -> calculatedType()
         );
 
     areaVectorField& centres = *faceCentresPtr_;
@@ -725,10 +878,12 @@ void Foam::faMesh::calcEdgeCentres() const
             ),
             *this,
             dimLength
+            // -> calculatedType()
         );
 
     edgeVectorField& centres = *edgeCentresPtr_;
 
+    // Need local points
     const pointField& localPoints = points();
 
 
@@ -917,47 +1072,83 @@ void Foam::faMesh::calcEdgeAreaNormals() const
     edgeVectorField& edgeAreaNormals = *edgeAreaNormalsPtr_;
 
 
+    if (faMesh::geometryOrder() == 1)
+    {
+        // The edge normals with flat boundary addressing
+        // (uses communication)
+
+        vectorField edgeNormals
+        (
+            calcRawEdgeNormals(faMesh::geometryOrder())
+        );
+
+        // Copy internal internal field
+        edgeAreaNormals.primitiveFieldRef()
+            = vectorField::subList(edgeNormals, nInternalEdges_);
+
+        // Transcribe boundary field
+        auto& bfld = edgeAreaNormals.boundaryFieldRef();
+
+        forAll(boundary(), patchi)
+        {
+            const faPatch& fap = boundary()[patchi];
+            bfld[patchi] = fap.patchSlice(edgeNormals);
+        }
+
+        return;
+    }
+
+
+    // This is the original approach using an average of the
+    // point normals.  May be removed in the future (2022-09)
+
     // Starting from point area normals
     const vectorField& pointNormals = pointAreaNormals();
 
+    // Also need local points
+    const pointField& localPoints = points();
 
     // Internal edges
-    forAll(edgeAreaNormals.internalField(), edgei)
     {
-        const edge& e = edges_[edgei];
-        const vector edgeVec = e.unitVec(points());
+        auto& fld = edgeAreaNormals.primitiveFieldRef();
 
-        vector& edgeNorm = edgeAreaNormals.ref()[edgei];
+        forAll(fld, edgei)
+        {
+            const edge& e = edges_[edgei];
+            const linePointRef edgeLine(e.line(localPoints));
 
-        // Average of both ends
-        edgeNorm = (pointNormals[e.first()] + pointNormals[e.second()]);
+            // Average of both ends
+            fld[edgei] = (pointNormals[e.first()] + pointNormals[e.second()]);
 
-        edgeNorm.removeCollinear(edgeVec);
-        edgeNorm.normalise();
+            fld[edgei].removeCollinear(edgeLine.unitVec());
+            fld[edgei].normalise();
+        }
     }
 
     // Boundary
-    auto& bfld = edgeAreaNormals.boundaryFieldRef();
-
-    forAll(boundary(), patchi)
     {
-        auto& pfld = bfld[patchi];
+        auto& bfld = edgeAreaNormals.boundaryFieldRef();
 
-        const edgeList::subList patchEdges =
-            boundary()[patchi].patchSlice(edges_);
-
-        forAll(patchEdges, bndEdgei)
+        forAll(boundary(), patchi)
         {
-            const edge& e = patchEdges[bndEdgei];
-            const vector edgeVec = e.unitVec(points());
+            const faPatch& fap = boundary()[patchi];
 
-            vector& edgeNorm = pfld[bndEdgei];
+            auto& pfld = bfld[patchi];
 
-            // Average of both ends
-            edgeNorm = (pointNormals[e.first()] + pointNormals[e.second()]);
+            const edgeList::subList bndEdges = fap.patchSlice(edges_);
 
-            edgeNorm.removeCollinear(edgeVec);
-            edgeNorm.normalise();
+            forAll(bndEdges, patchEdgei)
+            {
+                const edge& e = bndEdges[patchEdgei];
+                const linePointRef edgeLine(e.line(localPoints));
+
+                // Average of both ends
+                pfld[patchEdgei] =
+                    (pointNormals[e.first()] + pointNormals[e.second()]);
+
+                pfld[patchEdgei].removeCollinear(edgeLine.unitVec());
+                pfld[patchEdgei].normalise();
+            }
         }
     }
 }
