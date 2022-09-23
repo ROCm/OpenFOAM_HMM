@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +27,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "PtrList.H"
-#include "SLList.H"
 #include "Istream.H"
 #include "INew.H"
 
@@ -97,11 +96,10 @@ void Foam::PtrList<T>::readIstream(Istream& is, const INew& inew)
     }
     else if (tok.isPunctuation(token::BEGIN_LIST))
     {
-        // "(...)" : read as SLList and transfer contents
-        // This would be more efficient (fewer allocations, lower overhead)
-        // using a DynamicList, but then we have circular dependencies
+        // "(...)" : read like a DynamicList
 
-        SLList<T*> slList;
+        // The length read
+        label len = 0;
 
         is >> tok;
         while (!tok.isPunctuation(token::END_LIST))
@@ -115,18 +113,25 @@ void Foam::PtrList<T>::readIstream(Istream& is, const INew& inew)
                     << exit(FatalIOError);
             }
 
-            slList.append(inew(is).ptr());
+            if (!len)
+            {
+                // Initial reserved size (avoid unnecessary doubling)
+                resize(64);
+            }
+            else if (len == this->size())
+            {
+                resize(2*len);
+            }
+
+            T* p = inew(is).ptr();
+            set(len, p);
+            ++len;
+
             is >> tok;
         }
 
-        resize(slList.size());
-
-        // A list of pointers - can simply shallow copy them
-        label i = 0;
-        for (T* ptr : slList)
-        {
-            set(i++, ptr);
-        }
+        // Set list length to that read
+        resize(len);
     }
     else
     {

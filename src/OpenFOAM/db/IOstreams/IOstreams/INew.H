@@ -31,8 +31,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef INew_H
-#define INew_H
+#ifndef Foam_INew_H
+#define Foam_INew_H
 
 #include "autoPtr.H"
 
@@ -41,7 +41,8 @@ Description
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
+class dictionary;
 class Istream;
 
 /*---------------------------------------------------------------------------*\
@@ -53,9 +54,8 @@ class INew
 {
 public:
 
-    //- Construct null
-    INew()
-    {}
+    //- Default construct
+    INew() = default;
 
     //- New from Istream
     autoPtr<T> operator()(Istream& is) const

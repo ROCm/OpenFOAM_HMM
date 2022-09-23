@@ -609,6 +609,14 @@ public:
             //- Add mesh zones
             void addZones
             (
+                PtrList<pointZone>&& pz,
+                PtrList<faceZone>&& fz,
+                PtrList<cellZone>&& cz
+            );
+
+            //- Add mesh zones
+            void addZones
+            (
                 const List<pointZone*>& pz,
                 const List<faceZone*>& fz,
                 const List<cellZone*>& cz

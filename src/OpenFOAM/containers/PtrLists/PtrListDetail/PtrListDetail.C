@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,13 +90,7 @@ void Foam::Detail::PtrListDetail<T>::free()
 
     for (label i=0; i<len; ++i)
     {
-        T* ptr = ptrs[i];
-
-        if (ptr)
-        {
-            delete ptr;
-        }
-
+        delete ptrs[i];
         ptrs[i] = nullptr;
     }
 }

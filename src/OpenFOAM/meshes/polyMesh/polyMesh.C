@@ -1011,57 +1011,39 @@ void Foam::polyMesh::addPatches
 
 void Foam::polyMesh::addZones
 (
-    const List<pointZone*>& pz,
-    const List<faceZone*>& fz,
-    const List<cellZone*>& cz
+    PtrList<pointZone>&& pz,
+    PtrList<faceZone>&& fz,
+    PtrList<cellZone>&& cz
 )
 {
-    if (pointZones().size() || faceZones().size() || cellZones().size())
+    if (pointZones_.size() || faceZones_.size() || cellZones_.size())
     {
         FatalErrorInFunction
             << "point, face or cell zone already exists"
             << abort(FatalError);
     }
 
-    // Point zones
+    // Point zones - take ownership of the pointers
     if (pz.size())
     {
-        pointZones_.setSize(pz.size());
-
-        // Copy the zone pointers
-        forAll(pz, pI)
-        {
-            pointZones_.set(pI, pz[pI]);
-        }
-
+        pointZones_.clear();
+        pointZones_.transfer(pz);
         pointZones_.writeOpt(IOobject::AUTO_WRITE);
     }
 
-    // Face zones
+    // Face zones - take ownership of the pointers
     if (fz.size())
     {
-        faceZones_.setSize(fz.size());
-
-        // Copy the zone pointers
-        forAll(fz, fI)
-        {
-            faceZones_.set(fI, fz[fI]);
-        }
-
+        faceZones_.clear();
+        faceZones_.transfer(fz);
         faceZones_.writeOpt(IOobject::AUTO_WRITE);
     }
 
-    // Cell zones
+    // Cell zones - take ownership of the pointers
     if (cz.size())
     {
-        cellZones_.setSize(cz.size());
-
-        // Copy the zone pointers
-        forAll(cz, cI)
-        {
-            cellZones_.set(cI, cz[cI]);
-        }
-
+        cellZones_.clear();
+        cellZones_.transfer(cz);
         cellZones_.writeOpt(IOobject::AUTO_WRITE);
     }
 }
@@ -1077,6 +1059,23 @@ void Foam::polyMesh::addPatches
     polyPatchList plist(const_cast<List<polyPatch*>&>(p));
 
     addPatches(plist, validBoundary);
+}
+
+
+void Foam::polyMesh::addZones
+(
+    const List<pointZone*>& pz,
+    const List<faceZone*>& fz,
+    const List<cellZone*>& cz
+)
+{
+    // Acquire ownership of the pointers
+    addZones
+    (
+        PtrList<pointZone>(const_cast<List<pointZone*>&>(pz)),
+        PtrList<faceZone>(const_cast<List<faceZone*>&>(fz)),
+        PtrList<cellZone>(const_cast<List<cellZone*>&>(cz))
+    );
 }
 
 
