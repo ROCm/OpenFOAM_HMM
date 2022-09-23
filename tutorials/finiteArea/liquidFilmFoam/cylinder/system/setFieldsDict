@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2206                                 |
+|  \\    /   O peration     | Version:  v2212                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -16,20 +16,19 @@ FoamFile
 
 defaultFieldValues
 (
-    volScalarFieldValue alpha.air 1
-    volScalarFieldValue alpha.particles 0
-    // areaScalarFieldValue h 1e-3
+    areaScalarFieldValue h 0.00014
 );
 
 regions
 (
-    boxToCell
+    clipPlaneToFace
     {
-        box (0 0 -0.1) (0.15 0.5 0.1);
+        point  (0 0 0);
+        normal (1 0 0);
+
         fieldValues
         (
-            volScalarFieldValue alpha.air 0.45
-            volScalarFieldValue alpha.particles 0.55
+            areaScalarFieldValue h 0.00015
         );
     }
 );

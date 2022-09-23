@@ -163,6 +163,7 @@ $(cellSources)/topoSetCellSource/topoSetCellSource.C
 $(cellSources)/boundaryToCell/boundaryToCell.C
 $(cellSources)/boxToCell/boxToCell.C
 $(cellSources)/cellToCell/cellToCell.C
+$(cellSources)/clipPlaneToCell/clipPlaneToCell.C
 $(cellSources)/cylinderAnnulusToCell/cylinderAnnulusToCell.C
 $(cellSources)/cylinderToCell/cylinderToCell.C
 $(cellSources)/faceToCell/faceToCell.C
@@ -188,6 +189,7 @@ $(faceSources)/topoSetFaceSource/topoSetFaceSource.C
 $(faceSources)/boundaryToFace/boundaryToFace.C
 $(faceSources)/boxToFace/boxToFace.C
 $(faceSources)/cellToFace/cellToFace.C
+$(faceSources)/clipPlaneToFace/clipPlaneToFace.C
 $(faceSources)/cylinderAnnulusToFace/cylinderAnnulusToFace.C
 $(faceSources)/cylinderToFace/cylinderToFace.C
 $(faceSources)/faceToFace/faceToFace.C
@@ -205,6 +207,7 @@ pointSources = topoSet/pointSources
 $(pointSources)/topoSetPointSource/topoSetPointSource.C
 $(pointSources)/boxToPoint/boxToPoint.C
 $(pointSources)/cellToPoint/cellToPoint.C
+$(pointSources)/clipPlaneToPoint/clipPlaneToPoint.C
 $(pointSources)/cylinderToPoint/cylinderToPoint.C
 $(pointSources)/faceToPoint/faceToPoint.C
 $(pointSources)/labelToPoint/labelToPoint.C

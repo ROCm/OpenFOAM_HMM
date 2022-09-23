@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,214 +38,311 @@ Description
 #include "argList.H"
 #include "Time.H"
 #include "fvMesh.H"
+#include "faMesh.H"
 #include "topoSetSource.H"
 #include "cellSet.H"
 #include "faceSet.H"
 #include "volFields.H"
+#include "areaFields.H"
 
 using namespace Foam;
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+//- Simple tuple of field type and name (read from stream)
+class fieldDescription
+{
+    word type_;
+    word name_;
+
+public:
+
+    const word& type() const noexcept { return type_; }
+    const word& name() const noexcept { return name_; }
+
+    explicit fieldDescription(Istream& is)
+    {
+        is >> type_;
+        is >> name_;
+
+        // Eg, read as "volScalarFieldValue", but change to "volScalarField"
+        if (type_.ends_with("Value"))
+        {
+            type_.erase(type_.size()-5);
+        }
+    }
+};
+
+
+// Consume unused field information
+template<class Type>
+bool consumeUnusedType(const fieldDescription& fieldDesc, Istream& is)
+{
+    typedef GeometricField<Type, faPatchField, areaMesh> fieldType1;
+    typedef GeometricField<Type, fvPatchField, volMesh>  fieldType2;
+    //? typedef GeometricField<Type, faePatchField, areaMesh> fieldType3;
+    //? typedef GeometricField<Type, fvsPatchField, volMesh>  fieldType4;
+
+    if
+    (
+        fieldDesc.type() == fieldType1::typeName
+     || fieldDesc.type() == fieldType2::typeName
+    )
+    {
+        (void) pTraits<Type>(is);
+        return true;
+    }
+
+    return false;
+}
+
+
+// Consume unused field information
+static bool consumeUnused(const fieldDescription& fieldDesc, Istream& is)
+{
+    return
+    (
+        consumeUnusedType<scalar>(fieldDesc, is)
+     || consumeUnusedType<vector>(fieldDesc, is)
+     || consumeUnusedType<sphericalTensor>(fieldDesc, is)
+     || consumeUnusedType<symmTensor>(fieldDesc, is)
+     || consumeUnusedType<tensor>(fieldDesc, is)
+    );
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Setting volume fields
 template<class Type>
 bool setCellFieldType
 (
-    const word& fieldTypeDesc,
+    const fieldDescription& fieldDesc,
     const fvMesh& mesh,
     const labelList& selectedCells,
-    Istream& fieldValueStream
+    Istream& is
 )
 {
     typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
 
-    if (fieldTypeDesc != fieldType::typeName + "Value")
+    if (fieldDesc.type() != fieldType::typeName)
     {
         return false;
     }
 
-    word fieldName(fieldValueStream);
+    // Get value from stream
+    const Type fieldValue = pTraits<Type>(is);
+
 
     // Check the current time directory
     IOobject fieldHeader
     (
-        fieldName,
-        mesh.time().timeName(),
-        mesh,
+        fieldDesc.name(),
+        mesh.thisDb().time().timeName(),
+        mesh.thisDb(),
         IOobject::MUST_READ
     );
 
-    // Check the "constant" directory
-    if (!fieldHeader.typeHeaderOk<fieldType>(true))
+    bool found = fieldHeader.typeHeaderOk<fieldType>(true);
+
+    if (!found)
     {
+        // Fallback to "constant" directory
         fieldHeader = IOobject
         (
-            fieldName,
-            mesh.time().constant(),
-            mesh,
+            fieldDesc.name(),
+            mesh.thisDb().time().constant(),
+            mesh.thisDb(),
             IOobject::MUST_READ
         );
+        found = fieldHeader.typeHeaderOk<fieldType>(true);
     }
 
-    // Check field exists
-    if (fieldHeader.typeHeaderOk<fieldType>(true))
+    // Field exists
+    if (found)
     {
-        Info<< "    Setting internal values of "
+        Info<< "    - set internal values of "
             << fieldHeader.headerClassName()
-            << " " << fieldName << endl;
+            << ": " << fieldDesc.name()
+            << " = " << fieldValue << endl;
 
         fieldType field(fieldHeader, mesh, false);
 
-        const Type value = pTraits<Type>(fieldValueStream);
-
-        if (selectedCells.size() == field.size())
+        if (isNull(selectedCells) || selectedCells.size() == field.size())
         {
-            field.primitiveFieldRef() = value;
+            field.primitiveFieldRef() = fieldValue;
         }
         else
         {
-            forAll(selectedCells, celli)
+            for (const label celli : selectedCells)
             {
-                field[selectedCells[celli]] = value;
+                field[celli] = fieldValue;
             }
         }
 
-        typename GeometricField<Type, fvPatchField, volMesh>::
-            Boundary& fieldBf = field.boundaryFieldRef();
-
-        forAll(field.boundaryField(), patchi)
+        // Make boundary fields consistent - treat like zeroGradient
+        for (auto& pfld : field.boundaryFieldRef())
         {
-            fieldBf[patchi] = fieldBf[patchi].patchInternalField();
+            pfld = pfld.patchInternalField();
         }
 
         if (!field.write())
         {
             FatalErrorInFunction
-              << "Failed writing field " << fieldName << endl;
+                << "Failed writing field " << field.name() << endl;
         }
     }
     else
     {
-        WarningInFunction
-          << "Field " << fieldName << " not found" << endl;
-
-        // Consume value
-        (void)pTraits<Type>(fieldValueStream);
+        Warning
+            << "Field " << fieldDesc.name() << " not found" << endl;
     }
 
     return true;
 }
 
 
-class setCellField
-{
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-public:
-
-    setCellField()
-    {}
-
-    autoPtr<setCellField> clone() const
-    {
-        return autoPtr<setCellField>::New();
-    }
-
-    class iNew
-    {
-        const fvMesh& mesh_;
-        const labelList& selectedCells_;
-
-    public:
-
-        iNew(const fvMesh& mesh, const labelList& selectedCells)
-        :
-            mesh_(mesh),
-            selectedCells_(selectedCells)
-        {}
-
-        iNew(const fvMesh& mesh, labelList&& selectedCells)
-        :
-            mesh_(mesh),
-            selectedCells_(std::move(selectedCells))
-        {}
-
-        autoPtr<setCellField> operator()(Istream& fieldValues) const
-        {
-            word fieldType(fieldValues);
-
-            if
-            (
-               !(
-                    setCellFieldType<scalar>
-                        (fieldType, mesh_, selectedCells_, fieldValues)
-                 || setCellFieldType<vector>
-                        (fieldType, mesh_, selectedCells_, fieldValues)
-                 || setCellFieldType<sphericalTensor>
-                        (fieldType, mesh_, selectedCells_, fieldValues)
-                 || setCellFieldType<symmTensor>
-                        (fieldType, mesh_, selectedCells_, fieldValues)
-                 || setCellFieldType<tensor>
-                        (fieldType, mesh_, selectedCells_, fieldValues)
-                )
-            )
-            {
-                WarningInFunction
-                    << "field type " << fieldType << " not currently supported"
-                    << endl;
-            }
-
-            return autoPtr<setCellField>::New();
-        }
-    };
-};
-
-
+// Setting finite-area face fields
 template<class Type>
-bool setFaceFieldType
+bool setAreaFieldType
 (
-    const word& fieldTypeDesc,
-    const fvMesh& mesh,
+    const fieldDescription& fieldDesc,
+    const faMesh& mesh,
     const labelList& selectedFaces,
-    Istream& fieldValueStream
+    Istream& is
 )
 {
-    typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
+    typedef GeometricField<Type, faPatchField, areaMesh> fieldType;
 
-    if (fieldTypeDesc != fieldType::typeName + "Value")
+    if (fieldDesc.type() != fieldType::typeName)
     {
         return false;
     }
 
-    word fieldName(fieldValueStream);
+    // Get value from stream
+    const Type fieldValue = pTraits<Type>(is);
+
 
     // Check the current time directory
     IOobject fieldHeader
     (
-        fieldName,
-        mesh.time().timeName(),
-        mesh,
+        fieldDesc.name(),
+        mesh.thisDb().time().timeName(),
+        mesh.thisDb(),
         IOobject::MUST_READ
     );
 
-    // Check the "constant" directory
-    if (!fieldHeader.typeHeaderOk<fieldType>(true))
+    bool found = fieldHeader.typeHeaderOk<fieldType>(true);
+
+    if (!found)
     {
+        // Fallback to "constant" directory
         fieldHeader = IOobject
         (
-            fieldName,
-            mesh.time().constant(),
-            mesh,
+            fieldDesc.name(),
+            mesh.thisDb().time().constant(),
+            mesh.thisDb(),
             IOobject::MUST_READ
         );
+        found = fieldHeader.typeHeaderOk<fieldType>(true);
     }
 
-    // Check field exists
-    if (fieldHeader.typeHeaderOk<fieldType>(true))
+    // Field exists
+    if (found)
     {
-        Info<< "    Setting patchField values of "
+        Info<< "    - set internal values of "
             << fieldHeader.headerClassName()
-            << " " << fieldName << endl;
+            << ": " << fieldDesc.name()
+            << " = " << fieldValue << endl;
 
         fieldType field(fieldHeader, mesh);
 
-        const Type value = pTraits<Type>(fieldValueStream);
+        if (isNull(selectedFaces) || selectedFaces.size() == field.size())
+        {
+            field.primitiveFieldRef() = fieldValue;
+        }
+        else
+        {
+            for (const label facei : selectedFaces)
+            {
+                field[facei] = fieldValue;
+            }
+        }
+
+        if (!field.write())
+        {
+            FatalErrorInFunction
+                << "Failed writing field " << field.name() << endl;
+        }
+    }
+    else
+    {
+        Warning
+            << "Field " << fieldDesc.name() << " not found" << endl;
+    }
+
+    return true;
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Setting volume boundary fields
+template<class Type>
+bool setFaceFieldType
+(
+    const fieldDescription& fieldDesc,
+    const fvMesh& mesh,
+    const labelList& selectedFaces,
+    Istream& is
+)
+{
+    typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
+
+    if (fieldDesc.type() != fieldType::typeName)
+    {
+        return false;
+    }
+
+    // Get value from stream
+    const Type fieldValue = pTraits<Type>(is);
+
+
+    // Check the current time directory
+    IOobject fieldHeader
+    (
+        fieldDesc.name(),
+        mesh.thisDb().time().timeName(),
+        mesh.thisDb(),
+        IOobject::MUST_READ
+    );
+
+    bool found = fieldHeader.typeHeaderOk<fieldType>(true);
+
+    if (!found)
+    {
+        // Fallback to "constant" directory
+        fieldHeader = IOobject
+        (
+            fieldDesc.name(),
+            mesh.thisDb().time().constant(),
+            mesh.thisDb(),
+            IOobject::MUST_READ
+        );
+        found = fieldHeader.typeHeaderOk<fieldType>(true);
+    }
+
+    // Field exists
+    if (found)
+    {
+        Info<< "    - set boundary values of "
+            << fieldHeader.headerClassName()
+            << ": " << fieldDesc.name()
+            << " = " << fieldValue << endl;
+
+        fieldType field(fieldHeader, mesh);
 
         // Create flat list of selected faces and their value.
         Field<Type> allBoundaryValues(mesh.nBoundaryFaces());
@@ -260,34 +358,47 @@ bool setFaceFieldType
         }
 
         // Override
-        bool hasWarned = false;
+        unsigned hasWarned = 0;
         labelList nChanged
         (
             returnReduce(field.boundaryField().size(), maxOp<label>()),
-            0
+            Zero
         );
-        forAll(selectedFaces, i)
+
+        for (const label facei : selectedFaces)
         {
-            label facei = selectedFaces[i];
-            if (mesh.isInternalFace(facei))
+            const label bFacei = facei-mesh.nInternalFaces();
+
+            if (bFacei < 0)
             {
-                if (!hasWarned)
+                if (!(hasWarned & 1))
                 {
-                    hasWarned = true;
+                    hasWarned |= 1;
                     WarningInFunction
                         << "Ignoring internal face " << facei
                         << ". Suppressing further warnings." << endl;
                 }
             }
+            else if (bFacei >= mesh.nBoundaryFaces())
+            {
+                if (!(hasWarned & 2))
+                {
+                    hasWarned |= 2;
+                    WarningInFunction
+                        << "Ignoring out-of-range face " << facei
+                        << ". Suppressing further warnings." << endl;
+                }
+            }
             else
             {
-                label bFacei = facei-mesh.nInternalFaces();
-                allBoundaryValues[bFacei] = value;
-                nChanged[mesh.boundaryMesh().patchID()[bFacei]]++;
+                label patchi = mesh.boundaryMesh().patchID()[bFacei];
+
+                allBoundaryValues[bFacei] = fieldValue;
+                ++nChanged[patchi];
             }
         }
 
-        Pstream::listCombineAllGather(nChanged, plusEqOp<label>());
+        Pstream::listCombineReduce(nChanged, plusEqOp<label>());
 
         auto& fieldBf = field.boundaryFieldRef();
 
@@ -299,6 +410,7 @@ bool setFaceFieldType
                 Info<< "    On patch "
                     << field.boundaryField()[patchi].patch().name()
                     << " set " << nChanged[patchi] << " values" << endl;
+
                 fieldBf[patchi] == SubField<Type>
                 (
                     allBoundaryValues,
@@ -312,84 +424,221 @@ bool setFaceFieldType
         if (!field.write())
         {
             FatalErrorInFunction
-                << "Failed writing field " << field.name() << exit(FatalError);
+                << "Failed writing field " << field.name() << endl;
         }
     }
     else
     {
-        WarningInFunction
-          << "Field " << fieldName << " not found" << endl;
-
-        // Consume value
-        (void)pTraits<Type>(fieldValueStream);
+        Warning
+            << "Field " << fieldDesc.name() << " not found" << endl;
     }
 
     return true;
 }
 
 
-class setFaceField
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Dispatcher for setting volume fields
+struct setCellField
 {
+    autoPtr<setCellField> clone() const { return nullptr; }  // placeholder
 
-public:
-
-    setFaceField()
-    {}
-
-    autoPtr<setFaceField> clone() const
+    static bool apply
+    (
+        const fieldDescription& fieldDesc,
+        const fvMesh& m,
+        const labelList& selectedCells,
+        Istream& is
+    )
     {
-        return autoPtr<setFaceField>::New();
+        return
+        (
+            setCellFieldType<scalar>(fieldDesc, m, selectedCells, is)
+         || setCellFieldType<vector>(fieldDesc, m, selectedCells, is)
+         || setCellFieldType<sphericalTensor>(fieldDesc, m, selectedCells, is)
+         || setCellFieldType<symmTensor>(fieldDesc, m, selectedCells, is)
+         || setCellFieldType<tensor>(fieldDesc, m, selectedCells, is)
+        );
     }
 
     class iNew
     {
         const fvMesh& mesh_;
-        const labelList& selectedFaces_;
+        const labelList& selected_;
+
+    public:
+
+        iNew(const fvMesh& mesh, const labelList& selectedCells)
+        :
+            mesh_(mesh),
+            selected_(selectedCells)
+        {}
+
+        autoPtr<setCellField> operator()(Istream& is) const
+        {
+            const fieldDescription fieldDesc(is);
+
+            bool ok = setCellField::apply(fieldDesc, mesh_, selected_, is);
+
+            if (!ok)
+            {
+                ok = consumeUnused(fieldDesc, is);
+
+                if (ok)
+                {
+                    // Not meant for us
+                    Info<< "Skip " << fieldDesc.type()
+                        << " for finite-volume" << nl;
+                }
+                else
+                {
+                    WarningInFunction
+                        << "Unsupported field type: "
+                        << fieldDesc.type() << endl;
+                }
+            }
+
+            return nullptr;  // Irrelevant return value
+        }
+    };
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Dispatcher for setting volume boundary fields
+struct setFaceField
+{
+    autoPtr<setFaceField> clone() const { return nullptr; }  // placeholder
+
+    static bool apply
+    (
+        const fieldDescription& fieldDesc,
+        const fvMesh& m,
+        const labelList& selectedFaces,
+        Istream& is
+    )
+    {
+        return
+        (
+            setFaceFieldType<scalar>(fieldDesc, m, selectedFaces, is)
+         || setFaceFieldType<vector>(fieldDesc, m, selectedFaces, is)
+         || setFaceFieldType<sphericalTensor>(fieldDesc, m, selectedFaces, is)
+         || setFaceFieldType<symmTensor>(fieldDesc, m, selectedFaces, is)
+         || setFaceFieldType<tensor>(fieldDesc, m, selectedFaces, is)
+        );
+    }
+
+    class iNew
+    {
+        const fvMesh& mesh_;
+        const labelList& selected_;
 
     public:
 
         iNew(const fvMesh& mesh, const labelList& selectedFaces)
         :
             mesh_(mesh),
-            selectedFaces_(selectedFaces)
+            selected_(selectedFaces)
         {}
 
-        iNew(const fvMesh& mesh, labelList&& selectedFaces)
-        :
-            mesh_(mesh),
-            selectedFaces_(std::move(selectedFaces))
-        {}
-
-        autoPtr<setFaceField> operator()(Istream& fieldValues) const
+        autoPtr<setFaceField> operator()(Istream& is) const
         {
-            word fieldType(fieldValues);
+            const fieldDescription fieldDesc(is);
 
-            if
-            (
-               !(
-                    setFaceFieldType<scalar>
-                        (fieldType, mesh_, selectedFaces_, fieldValues)
-                 || setFaceFieldType<vector>
-                        (fieldType, mesh_, selectedFaces_, fieldValues)
-                 || setFaceFieldType<sphericalTensor>
-                        (fieldType, mesh_, selectedFaces_, fieldValues)
-                 || setFaceFieldType<symmTensor>
-                        (fieldType, mesh_, selectedFaces_, fieldValues)
-                 || setFaceFieldType<tensor>
-                        (fieldType, mesh_, selectedFaces_, fieldValues)
-                )
-            )
+            bool ok = setFaceField::apply(fieldDesc, mesh_, selected_, is);
+
+            if (!ok)
             {
-                WarningInFunction
-                    << "field type " << fieldType << " not currently supported"
-                    << endl;
+                ok = consumeUnused(fieldDesc, is);
+
+                if (ok)
+                {
+                    // Not meant for us
+                    Info<< "Skip " << fieldDesc.type()
+                        << " for finite-volume" << nl;
+                }
+                else
+                {
+                    WarningInFunction
+                        << "Unsupported field type: "
+                        << fieldDesc.type() << endl;
+                }
             }
 
-            return autoPtr<setFaceField>::New();
+            return nullptr;  // Irrelevant return value
         }
     };
 };
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Dispatcher for setting area face fields
+struct setAreaField
+{
+    autoPtr<setAreaField> clone() const { return nullptr; }  // placeholder
+
+    static bool apply
+    (
+        const fieldDescription& fieldDesc,
+        const faMesh& m,
+        const labelList& selectedFaces,
+        Istream& is
+    )
+    {
+        return
+        (
+            setAreaFieldType<scalar>(fieldDesc, m, selectedFaces, is)
+         || setAreaFieldType<vector>(fieldDesc, m, selectedFaces, is)
+         || setAreaFieldType<sphericalTensor>(fieldDesc, m, selectedFaces, is)
+         || setAreaFieldType<symmTensor>(fieldDesc, m, selectedFaces, is)
+         || setAreaFieldType<tensor>(fieldDesc, m, selectedFaces, is)
+        );
+    }
+
+    class iNew
+    {
+        const faMesh& mesh_;
+        const labelList& selected_;
+
+    public:
+
+        iNew(const faMesh& mesh, const labelList& selectedFaces)
+        :
+            mesh_(mesh),
+            selected_(selectedFaces)
+        {}
+
+        autoPtr<setAreaField> operator()(Istream& is) const
+        {
+            const fieldDescription fieldDesc(is);
+
+            bool ok = setAreaField::apply(fieldDesc, mesh_, selected_, is);
+
+            if (!ok)
+            {
+                ok = consumeUnused(fieldDesc, is);
+
+                if (ok)
+                {
+                    // Not meant for us
+                    Info<< "Skip " << fieldDesc.type()
+                        << " for finite-volume" << nl;
+                }
+                else
+                {
+                    WarningInFunction
+                        << "Unsupported field type: "
+                        << fieldDesc.type() << endl;
+                }
+            }
+
+            return nullptr;  // Irrelevant return value
+        }
+    };
+};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -403,10 +652,27 @@ int main(int argc, char *argv[])
 
     argList::addOption("dict", "file", "Alternative setFieldsDict");
 
+    argList::addBoolOption
+    (
+        "no-finite-area",
+        "Suppress handling of finite-area mesh/fields"
+    );
+
     #include "addRegionOption.H"
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createNamedMesh.H"
+
+    autoPtr<faMesh> faMeshPtr;
+
+    if (!args.found("no-finite-area"))
+    {
+        faMeshPtr = faMesh::TryNew(mesh);
+    }
+    if (faMeshPtr)
+    {
+        Info<< "Detected finite-area mesh" << nl;
+    }
 
     const word dictName("setFieldsDict");
     #include "setSystemMeshDictionaryIO.H"
@@ -415,70 +681,144 @@ int main(int argc, char *argv[])
 
     IOdictionary setFieldsDict(dictIO);
 
-    if (setFieldsDict.found("defaultFieldValues"))
+
+    // Note.
+    // The PtrList + iNew mechanism is used to trigger the callbacks
+    // and perform the desired actions. The contents of the PtrList
+    // itself are actually irrelevant.
+
+
+    // Default field values
     {
-        Info<< "Setting field default values" << endl;
-        PtrList<setCellField> defaultFieldValues
-        (
-            setFieldsDict.lookup("defaultFieldValues"),
-            setCellField::iNew(mesh, labelList(mesh.nCells()))
-        );
-        Info<< endl;
+        const entry* eptr =
+            setFieldsDict.findEntry("defaultFieldValues", keyType::LITERAL);
+
+        if (eptr)
+        {
+            ITstream& is = eptr->stream();
+
+            Info<< "Setting volume field default values" << endl;
+
+            PtrList<setCellField> defaultFieldValues
+            (
+                is,
+                setCellField::iNew(mesh, labelList::null())
+            );
+
+            if (faMeshPtr)
+            {
+                const faMesh& areaMesh = faMeshPtr();
+                is.rewind();
+
+                Info<< "Setting area field default values" << endl;
+
+                PtrList<setAreaField> defaultFieldValues
+                (
+                    is,
+                    setAreaField::iNew(areaMesh, labelList::null())
+                );
+            }
+            Info<< endl;
+        }
     }
 
 
-    Info<< "Setting field region values" << endl;
+    Info<< "Setting field region values" << nl << endl;
 
     PtrList<entry> regions(setFieldsDict.lookup("regions"));
 
-    forAll(regions, regionI)
+    for (const entry& region : regions)
     {
-        const entry& region = regions[regionI];
-
         autoPtr<topoSetSource> source =
             topoSetSource::New(region.keyword(), mesh, region.dict());
 
         if (source().setType() == topoSetSource::CELLSET_SOURCE)
         {
-            cellSet selectedCellSet
+            cellSet subset
             (
                 mesh,
                 "cellSet",
                 mesh.nCells()/10+1  // Reasonable size estimate.
             );
 
-            source->applyToSet
-            (
-                topoSetSource::NEW,
-                selectedCellSet
-            );
+            source->applyToSet(topoSetSource::NEW, subset);
+
+            labelList selectedCells(subset.sortedToc());
+
+            Info<< "    Selected "
+                << returnReduce(selectedCells.size(), sumOp<label>())
+                << '/'
+                << returnReduce(mesh.nCells(), sumOp<label>())
+                << " cells" << nl;
+
+            ITstream& is = region.dict().lookup("fieldValues");
 
             PtrList<setCellField> fieldValues
             (
-                region.dict().lookup("fieldValues"),
-                setCellField::iNew(mesh, selectedCellSet.sortedToc())
+                is,
+                setCellField::iNew(mesh, selectedCells)
             );
         }
         else if (source().setType() == topoSetSource::FACESET_SOURCE)
         {
-            faceSet selectedFaceSet
+            faceSet subset
             (
                 mesh,
                 "faceSet",
                 mesh.nBoundaryFaces()/10+1
             );
 
-            source->applyToSet
-            (
-                topoSetSource::NEW,
-                selectedFaceSet
-            );
+            source->applyToSet(topoSetSource::NEW, subset);
+
+            labelList selectedFaces(subset.sortedToc());
+
+            Info<< "    Selected " << selectedFaces.size()
+                << " faces" << nl;
+
+            ITstream& is = region.dict().lookup("fieldValues");
 
             PtrList<setFaceField> fieldValues
             (
-                region.dict().lookup("fieldValues"),
-                setFaceField::iNew(mesh, selectedFaceSet.sortedToc())
+                is,
+                setFaceField::iNew(mesh, selectedFaces)
             );
+
+            if (faMeshPtr)
+            {
+                const faMesh& areaMesh = faMeshPtr();
+
+                const labelUList& faceLabels = areaMesh.faceLabels();
+
+                // Transcribe from mesh faces to finite-area addressing
+                labelList areaFaces(faceLabels.size());
+
+                label nUsed = 0;
+                forAll(faceLabels, facei)
+                {
+                    const label meshFacei = faceLabels[facei];
+
+                    if (subset.test(meshFacei))
+                    {
+                        areaFaces[nUsed] = facei;
+                        ++nUsed;
+                    }
+                }
+                areaFaces.resize(nUsed);
+
+                Info<< "    Selected "
+                    << returnReduce(areaFaces.size(), sumOp<label>())
+                    << '/'
+                    << returnReduce(faceLabels.size(), sumOp<label>())
+                    << " area faces" << nl;
+
+                is.rewind();
+
+                PtrList<setAreaField> fieldValues
+                (
+                    is,
+                    setAreaField::iNew(areaMesh, areaFaces)
+                );
+            }
         }
     }
 

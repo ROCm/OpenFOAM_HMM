@@ -11,6 +11,8 @@ runApplication decomposePar -no-finite-area
 
 runParallel makeFaMesh
 
+runParallel setFields
+
 runParallel $(getApplication)
 
 #------------------------------------------------------------------------------
