@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -77,7 +77,7 @@ Foam::extrudePatchMesh::extrudePatchMesh
     const fvPatch& p,
     const dictionary& dict,
     const word& regionName,
-    const List<polyPatch*>& regionPatches
+    polyPatchList& regionPatches
 )
 :
     extrudePatchMesh(regionName, mesh, p, dict)
@@ -91,23 +91,33 @@ Foam::extrudePatchMesh::extrudePatchMesh
     const fvMesh& mesh,
     const fvPatch& p,
     const dictionary& dict,
+    const word& regionName,
+    const List<polyPatch*>& regionPatches
+)
+:
+    extrudePatchMesh(regionName, mesh, p, dict)
+{
+    // Acquire ownership of the pointers
+    polyPatchList plist(const_cast<List<polyPatch*>&>(regionPatches));
+
+    extrudeMesh(plist);
+}
+
+
+Foam::extrudePatchMesh::extrudePatchMesh
+(
+    const fvMesh& mesh,
+    const fvPatch& p,
+    const dictionary& dict,
     const word& regionName
 )
 :
     extrudePatchMesh(regionName, mesh, p, dict)
 {
-    List<polyPatch*> regionPatches(3);
+    polyPatchList regionPatches(3);
+    List<dictionary> dicts(regionPatches.size());
     List<word> patchNames(regionPatches.size());
     List<word> patchTypes(regionPatches.size());
-    PtrList<dictionary> dicts(regionPatches.size());
-
-    forAll(dicts, patchi)
-    {
-        if (!dicts.set(patchi))
-        {
-            dicts.set(patchi, new dictionary());
-        }
-    }
 
     dicts[bottomPatchID] = dict_.subDict("bottomCoeffs");
     dicts[sidePatchID] = dict_.subDict("sideCoeffs");
@@ -125,22 +135,26 @@ Foam::extrudePatchMesh::extrudePatchMesh
         patchDict.set("nFaces", 0);
         patchDict.set("startFace", 0);
 
-        regionPatches[patchi] = polyPatch::New
+        regionPatches.set
+        (
+            patchi,
+            polyPatch::New
             (
                 patchNames[patchi],
                 patchDict,
                 patchi,
                 mesh.boundaryMesh()
-            ).ptr();
+            )
+        );
     }
 
     extrudeMesh(regionPatches);
 }
 
 
-void Foam::extrudePatchMesh::extrudeMesh(const List<polyPatch*>& regionPatches)
+void Foam::extrudePatchMesh::extrudeMesh(polyPatchList& regionPatches)
 {
-    if (this->boundaryMesh().size() == 0)
+    if (this->boundaryMesh().empty())
     {
         const bool columnCells = dict_.get<bool>("columnCells");
 

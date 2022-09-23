@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -80,34 +81,40 @@ void Foam::attachPolyTopoChanger::attach(const bool removeEmptyPatches)
         // Re-do the boundary patches, removing the ones with zero size
         const polyBoundaryMesh& oldPatches = mesh_.boundaryMesh();
 
-        List<polyPatch*> newPatches(oldPatches.size());
+        polyPatchList newPatches(oldPatches.size());
         label nNewPatches = 0;
 
         forAll(oldPatches, patchi)
         {
-            if (oldPatches[patchi].size())
-            {
-                newPatches[nNewPatches] = oldPatches[patchi].clone
-                (
-                    mesh_.boundaryMesh(),
-                    nNewPatches,
-                    oldPatches[patchi].size(),
-                    oldPatches[patchi].start()
-                ).ptr();
+            const word& patchName = oldPatches[patchi].name();
 
-                nNewPatches++;
+            if (returnReduceOr(oldPatches[patchi].size()))
+            {
+                newPatches.set
+                (
+                    nNewPatches,
+                    oldPatches[patchi].clone
+                    (
+                        mesh_.boundaryMesh(),
+                        nNewPatches,
+                        oldPatches[patchi].size(),
+                        oldPatches[patchi].start()
+                    )
+                );
+
+                ++nNewPatches;
             }
             else
             {
                 if (debug)
                 {
                     Pout<< "Removing zero-sized patch " << patchi
-                        << " named " << oldPatches[patchi].name() << endl;
+                        << " named " << patchName << endl;
                 }
             }
         }
 
-        newPatches.setSize(nNewPatches);
+        newPatches.resize(nNewPatches);
 
         mesh_.removeBoundary();
         mesh_.addPatches(newPatches);

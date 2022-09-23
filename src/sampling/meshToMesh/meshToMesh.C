@@ -495,15 +495,19 @@ void Foam::meshToMesh::calculate(const word& methodName, const bool normalise)
         );
 
         // create some dummy patch info
-        List<polyPatch*> patches(1);
-        patches[0] = new polyPatch
+        polyPatchList patches(1);
+        patches.set
         (
-            "defaultFaces",
-            newTgt.nBoundaryFaces(),
-            newTgt.nInternalFaces(),
             0,
-            newTgt.boundaryMesh(),
-            word::null
+            new polyPatch
+            (
+                "defaultFaces",
+                newTgt.nBoundaryFaces(),
+                newTgt.nInternalFaces(),
+                0,
+                newTgt.boundaryMesh(),
+                word::null
+            )
         );
 
         newTgt.addPatches(patches);

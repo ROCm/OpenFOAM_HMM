@@ -109,8 +109,10 @@ Foam::autoPtr<Foam::polyMesh> Foam::meshReader::mesh
     );
     polyMesh& mesh = *meshPtr;
 
+    polyPatchList newPatches(polyBoundaryPatches(mesh));
+
     // Adding patches also checks the mesh
-    mesh.addPatches(polyBoundaryPatches(mesh));
+    mesh.addPatches(newPatches);
 
     warnDuplicates("boundaries", mesh.boundaryMesh().names());
 

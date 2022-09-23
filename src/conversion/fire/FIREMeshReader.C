@@ -342,8 +342,8 @@ void Foam::fileFormats::FIREMeshReader::reorganize()
 
 void Foam::fileFormats::FIREMeshReader::addPatches(polyMesh& mesh) const
 {
-    // create patches
-    List<polyPatch*> newPatches(patchSizes_.size());
+    // Create patches
+    polyPatchList newPatches(patchSizes_.size());
 
     label meshFaceI = nInternalFaces_;
 
@@ -355,14 +355,18 @@ void Foam::fileFormats::FIREMeshReader::addPatches(polyMesh& mesh) const
             << endl;
 
         // don't know anything better - just make it a wall
-        newPatches[patchI] = new polyPatch
+        newPatches.set
         (
-            patchNames_[patchI],
-            patchSizes_[patchI],
-            meshFaceI,
             patchI,
-            mesh.boundaryMesh(),
-            word::null
+            new polyPatch
+            (
+                patchNames_[patchI],
+                patchSizes_[patchI],
+                meshFaceI,
+                patchI,
+                mesh.boundaryMesh(),
+                word::null
+            )
         );
 
         meshFaceI += patchSizes_[patchI];

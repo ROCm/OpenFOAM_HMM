@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -404,20 +404,24 @@ Foam::mirrorFvMesh::mirrorFvMesh
     fvMesh& pMesh = mirrorMeshPtr_();
 
     // Add the boundary patches
-    List<polyPatch*> p(newPatchSizes.size());
+    polyPatchList newPatches(newPatchSizes.size());
 
-    forAll(p, patchi)
+    forAll(newPatches, patchi)
     {
-        p[patchi] = boundaryMesh()[patchi].clone
+        newPatches.set
         (
-            pMesh.boundaryMesh(),
             patchi,
-            newPatchSizes[patchi],
-            newPatchStarts[patchi]
-        ).ptr();
+            boundaryMesh()[patchi].clone
+            (
+                pMesh.boundaryMesh(),
+                patchi,
+                newPatchSizes[patchi],
+                newPatchStarts[patchi]
+            )
+        );
     }
 
-    pMesh.addPatches(p);
+    pMesh.addPatches(newPatches);
 }
 
 

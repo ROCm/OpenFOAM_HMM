@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -136,9 +136,11 @@ void Foam::mergePolyMesh::sortProcessorPatches()
 
     const polyBoundaryMesh& oldPatches = boundaryMesh();
 
-    DynamicList<polyPatch*> newPatches(oldPatches.size());
+    polyPatchList newPatches(oldPatches.size());
 
     labelList oldToSorted(oldPatches.size());
+
+    label nPatches = 0;
 
     forAll(oldPatches, patchi)
     {
@@ -146,36 +148,43 @@ void Foam::mergePolyMesh::sortProcessorPatches()
 
         if (!isA<processorPolyPatch>(pp))
         {
-            oldToSorted[patchi] = newPatches.size();
-            newPatches.append
+            newPatches.set
             (
+                nPatches,
                 pp.clone
                 (
                     oldPatches,
-                    oldToSorted[patchi],
+                    nPatches,
                     0,
                     nInternalFaces()
-                ).ptr()
+                )
             );
+
+            oldToSorted[patchi] = nPatches;
+            ++nPatches;
         }
     }
+
     forAll(oldPatches, patchi)
     {
         const polyPatch& pp = oldPatches[patchi];
 
         if (isA<processorPolyPatch>(pp))
         {
-            oldToSorted[patchi] = newPatches.size();
-            newPatches.append
+            newPatches.set
             (
+                nPatches,
                 pp.clone
                 (
                     oldPatches,
                     oldToSorted[patchi],
                     0,
                     nInternalFaces()
-                ).ptr()
+                )
             );
+
+            oldToSorted[patchi] = nPatches;
+            ++nPatches;
         }
     }
 
@@ -461,7 +470,7 @@ void Foam::mergePolyMesh::merge()
     {
         Info<< "Copying old patches" << endl;
 
-        List<polyPatch*> newPatches(patchNames_.size());
+        polyPatchList newPatches(patchNames_.size());
 
         const polyBoundaryMesh& oldPatches = boundaryMesh();
 
@@ -470,7 +479,11 @@ void Foam::mergePolyMesh::merge()
 
         for (patchi = 0; patchi < oldPatches.size(); patchi++)
         {
-            newPatches[patchi] = oldPatches[patchi].clone(oldPatches).ptr();
+            newPatches.set
+            (
+                patchi,
+                oldPatches[patchi].clone(oldPatches)
+            );
         }
 
         Info<< "Adding new patches. " << endl;
@@ -487,15 +500,18 @@ void Foam::mergePolyMesh::merge()
             dict.set("nFaces", 0);
             dict.set("startFace", endOfLastPatch);
 
-            newPatches[patchi] =
+            newPatches.set
             (
-                polyPatch::New
+                patchi,
                 (
-                    patchNames_[patchi],
-                    dict,
-                    patchi,
-                    oldPatches
-                ).ptr()
+                    polyPatch::New
+                    (
+                        patchNames_[patchi],
+                        dict,
+                        patchi,
+                        oldPatches
+                    )
+                )
             );
         }
 

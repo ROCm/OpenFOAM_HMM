@@ -1149,7 +1149,7 @@ void Foam::boundaryMesh::patchify
     // zero faces (repatched later on). Exception is coupled patches which
     // keep their size.
 
-    List<polyPatch*> newPatchPtrList(nNewPatches);
+    polyPatchList newPatches(nNewPatches);
 
     label meshFacei = newMesh.nInternalFaces();
 
@@ -1174,15 +1174,19 @@ void Foam::boundaryMesh::patchify
                     << " type:" << bp.physicalType() << endl;
             }
 
-            newPatchPtrList[newPatchi] = polyPatch::New
+            newPatches.set
             (
-                bp.physicalType(),
-                bp.name(),
-                facesToBeDone,
-                meshFacei,
                 newPatchi,
-                newMesh.boundaryMesh()
-            ).ptr();
+                polyPatch::New
+                (
+                    bp.physicalType(),
+                    bp.name(),
+                    facesToBeDone,
+                    meshFacei,
+                    newPatchi,
+                    newMesh.boundaryMesh()
+                )
+            );
 
             meshFacei += facesToBeDone;
 
@@ -1200,13 +1204,17 @@ void Foam::boundaryMesh::patchify
                     << oldPatch.name() << endl;
             }
 
-            newPatchPtrList[newPatchi] = oldPatch.clone
+            newPatches.set
             (
-                newMesh.boundaryMesh(),
                 newPatchi,
-                facesToBeDone,
-                meshFacei
-            ).ptr();
+                oldPatch.clone
+                (
+                    newMesh.boundaryMesh(),
+                    newPatchi,
+                    facesToBeDone,
+                    meshFacei
+                )
+            );
 
             meshFacei += facesToBeDone;
 
@@ -1220,9 +1228,9 @@ void Foam::boundaryMesh::patchify
     {
         Pout<< "Patchify : new polyPatch list:" << endl;
 
-        forAll(newPatchPtrList, patchi)
+        forAll(newPatches, patchi)
         {
-            const polyPatch& newPatch = *newPatchPtrList[patchi];
+            const polyPatch& newPatch = newPatches[patchi];
 
             if (debug)
             {
@@ -1237,13 +1245,13 @@ void Foam::boundaryMesh::patchify
 
     // Actually add new list of patches
     repatchPolyTopoChanger polyMeshRepatcher(newMesh);
-    polyMeshRepatcher.changePatches(newPatchPtrList);
+    polyMeshRepatcher.changePatches(newPatches);
 
 
     // Pass2:
     // Change patch type for face
 
-    if (newPatchPtrList.size())
+    if (newPatches.size())
     {
         List<DynamicList<label>> patchFaces(nNewPatches);
 

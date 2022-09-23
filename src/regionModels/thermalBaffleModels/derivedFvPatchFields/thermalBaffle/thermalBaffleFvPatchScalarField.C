@@ -143,10 +143,10 @@ void thermalBaffleFvPatchScalarField::createPatchMesh()
 
     const word regionName(dict_.get<word>("region"));
 
-    List<polyPatch*> regionPatches(3);
+    polyPatchList regionPatches(3);
+    List<dictionary> dicts(regionPatches.size());
     List<word> patchNames(regionPatches.size());
     List<word> patchTypes(regionPatches.size());
-    List<dictionary> dicts(regionPatches.size());
 
     patchNames[bottomPatchID] = word("bottom");
     patchNames[sidePatchID] = word("side");
@@ -172,8 +172,7 @@ void thermalBaffleFvPatchScalarField::createPatchMesh()
         patchTypes[sidePatchID] = polyPatch::typeName;
     }
 
-    const mappedPatchBase& mpp =
-        refCast<const mappedPatchBase>(patch().patch(), dict_);
+    const auto& mpp = refCast<const mappedPatchBase>(patch().patch(), dict_);
 
     const word coupleGroup(mpp.coupleGroup());
 
@@ -202,18 +201,22 @@ void thermalBaffleFvPatchScalarField::createPatchMesh()
 
     forAll(regionPatches, patchi)
     {
-        dictionary&  patchDict = dicts[patchi];
+        dictionary& patchDict = dicts[patchi];
         patchDict.set("nFaces", 0);
         patchDict.set("startFace", 0);
 
-        regionPatches[patchi] = polyPatch::New
+        regionPatches.set
         (
-            patchTypes[patchi],
-            patchNames[patchi],
-            dicts[patchi],
             patchi,
-            thisMesh.boundaryMesh()
-        ).ptr();
+            polyPatch::New
+            (
+                patchTypes[patchi],
+                patchNames[patchi],
+                dicts[patchi],
+                patchi,
+                thisMesh.boundaryMesh()
+            )
+        );
     }
 
     extrudeMeshPtr_.reset

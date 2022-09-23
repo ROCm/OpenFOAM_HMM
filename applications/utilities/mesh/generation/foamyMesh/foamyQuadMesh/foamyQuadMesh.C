@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -167,28 +167,32 @@ int main(int argc, char *argv[])
     );
 
     Info<< "Constructing patches." << endl;
-    List<polyPatch*> patches(poly2DMesh.patchNames().size());
-    label countPatches = 0;
+    polyPatchList newPatches(poly2DMesh.patchNames().size());
+    label nPatches = 0;
 
-    forAll(patches, patchi)
+    forAll(newPatches, patchi)
     {
         if (poly2DMesh.patchSizes()[patchi] != 0)
         {
-            patches[countPatches] = new polyPatch
+            newPatches.set
             (
-                poly2DMesh.patchNames()[patchi],
-                poly2DMesh.patchSizes()[patchi],
-                poly2DMesh.patchStarts()[patchi],
-                countPatches,
-                pMesh.boundaryMesh(),
-                word::null
+                nPatches,
+                new polyPatch
+                (
+                    poly2DMesh.patchNames()[patchi],
+                    poly2DMesh.patchSizes()[patchi],
+                    poly2DMesh.patchStarts()[patchi],
+                    nPatches,
+                    pMesh.boundaryMesh(),
+                    word::null
+                )
             );
 
-            countPatches++;
+            ++nPatches;
         }
     }
-    patches.setSize(countPatches);
-    pMesh.addPatches(patches);
+    newPatches.resize(nPatches);
+    pMesh.addPatches(newPatches);
 
     if (extrude)
     {

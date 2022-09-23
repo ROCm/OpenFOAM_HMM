@@ -49,8 +49,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef meshReader_H
-#define meshReader_H
+#ifndef Foam_meshReader_H
+#define Foam_meshReader_H
 
 #include "polyMesh.H"
 #include "HashTable.H"
@@ -179,7 +179,7 @@ private:
         void createPolyBoundary();
 
         //- Add polyhedral boundary
-        List<polyPatch*> polyBoundaryPatches(const polyMesh&);
+        polyPatchList polyBoundaryPatches(const polyMesh&);
 
         //- Clear extra storage before creation of the mesh to remove
         //  a memory peak

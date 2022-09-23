@@ -226,14 +226,18 @@ int main(int argc, char *argv[])
     // Add the boundary patches
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
-    List<polyPatch*> p(patches.size());
+    polyPatchList newPatches(patches.size());
 
-    forAll(p, patchi)
+    forAll(newPatches, patchi)
     {
-        p[patchi] = patches[patchi].clone(fMesh.boundaryMesh()).ptr();
+        newPatches.set
+        (
+            patchi,
+            patches[patchi].clone(fMesh.boundaryMesh())
+        );
     }
 
-    fMesh.addFvPatches(p);
+    fMesh.addFvPatches(newPatches);
 
 
     // Refinement level

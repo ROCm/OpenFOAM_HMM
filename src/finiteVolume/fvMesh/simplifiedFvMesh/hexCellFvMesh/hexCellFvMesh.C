@@ -83,16 +83,20 @@ Foam::simplifiedMeshes::hexCellFvMesh::hexCellFvMesh
         labelList()
     )
 {
-    List<polyPatch*> patches(1);
+    polyPatchList patches(1);
 
-    patches[0] = new emptyPolyPatch
+    patches.set
     (
-        "boundary",
-        6,
         0,
-        0,
-        boundaryMesh(),
-        emptyPolyPatch::typeName
+        new emptyPolyPatch
+        (
+            "boundary",
+            6,
+            0,
+            0,
+            boundaryMesh(),
+            emptyPolyPatch::typeName
+        )
     );
 
     addFvPatches(patches);

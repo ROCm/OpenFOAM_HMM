@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,8 +37,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef repatchPolyTopoChanger_H
-#define repatchPolyTopoChanger_H
+#ifndef Foam_repatchPolyTopoChanger_H
+#define Foam_repatchPolyTopoChanger_H
 
 #include "polyMesh.H"
 #include "polyTopoChange.H"
@@ -60,7 +60,7 @@ class repatchPolyTopoChanger
         polyMesh& mesh_;
 
         //- Topological change to accumulated all mesh changes
-        unique_ptr<polyTopoChange> meshModPtr_;
+        std::unique_ptr<polyTopoChange> meshModPtr_;
 
 
     // Private Member Functions
@@ -90,10 +90,13 @@ public:
     // Member Functions
 
         //- Change patches.
+        void changePatches(polyPatchList& patches);
+
+        //- Change patches.
         void changePatches(const List<polyPatch*>& patches);
 
-        //- Change patch ID for a boundary face. Note: patchID should be in new
-        //  numbering.
+        //- Change patch ID for a boundary face.
+        //- Note: patchID should be in new numbering.
         void changePatchID
         (
             const label faceID,

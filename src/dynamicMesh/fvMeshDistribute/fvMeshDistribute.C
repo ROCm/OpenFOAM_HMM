@@ -1796,17 +1796,21 @@ Foam::autoPtr<Foam::fvMesh> Foam::fvMeshDistribute::receiveMesh
     );
     fvMesh& domainMesh = *domainMeshPtr;
 
-    List<polyPatch*> patches(patchEntries.size());
+    polyPatchList patches(patchEntries.size());
 
     forAll(patchEntries, patchi)
     {
-        patches[patchi] = polyPatch::New
+        patches.set
         (
-            patchEntries[patchi].keyword(),
-            patchEntries[patchi].dict(),
             patchi,
-            domainMesh.boundaryMesh()
-        ).ptr();
+            polyPatch::New
+            (
+                patchEntries[patchi].keyword(),
+                patchEntries[patchi].dict(),
+                patchi,
+                domainMesh.boundaryMesh()
+            )
+        );
     }
     // Add patches; no parallel comms
     domainMesh.addFvPatches(patches, false);

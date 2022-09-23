@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -205,34 +205,43 @@ label addPatch(polyMesh& mesh, const word& patchName)
     {
         const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
-        List<polyPatch*> newPatches(patches.size() + 1);
+        polyPatchList newPatches(patches.size() + 1);
+
+        label nPatches = 0;
 
         // Add empty patch as 0th entry (Note: only since subsetMesh wants this)
         patchi = 0;
-
-        newPatches[patchi] =
-            new emptyPolyPatch
-            (
-                Foam::word(patchName),
-                0,
-                mesh.nInternalFaces(),
-                patchi,
-                patches,
-                emptyPolyPatch::typeName
-            );
-
-        forAll(patches, i)
         {
-            const polyPatch& pp = patches[i];
+            newPatches.set
+            (
+                nPatches,
+                new emptyPolyPatch
+                (
+                    patchName,
+                    0,
+                    mesh.nInternalFaces(),
+                    nPatches,
+                    patches,
+                    emptyPolyPatch::typeName
+                )
+            );
+            ++nPatches;
+        }
 
-            newPatches[i+1] =
+        for (const polyPatch& pp : patches)
+        {
+            newPatches.set
+            (
+                nPatches,
                 pp.clone
                 (
                     patches,
-                    i+1,
+                    nPatches,
                     pp.size(),
                     pp.start()
-                ).ptr();
+                )
+            );
+            ++nPatches;
         }
 
         mesh.removeBoundary();

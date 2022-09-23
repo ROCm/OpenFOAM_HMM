@@ -1678,7 +1678,7 @@ int main(int argc, char *argv[])
     label defaultPatchID = mesh.boundaryMesh().findPatchID(defaultFacesName);
     if (mesh.boundaryMesh()[defaultPatchID].size() == 0)
     {
-        List<polyPatch*> newPatchPtrList((mesh.boundaryMesh().size() - 1));
+        polyPatchList newPatches((mesh.boundaryMesh().size() - 1));
         label newPatchi = 0;
         forAll(mesh.boundaryMesh(), patchi)
         {
@@ -1686,18 +1686,21 @@ int main(int argc, char *argv[])
             {
                 const polyPatch& patch = mesh.boundaryMesh()[patchi];
 
-                newPatchPtrList[newPatchi] = patch.clone
+                newPatches.set
                 (
-                    mesh.boundaryMesh(),
                     newPatchi,
-                    patch.size(),
-                    patch.start()
-                ).ptr();
-
-                newPatchi++;
+                    patch.clone
+                    (
+                        mesh.boundaryMesh(),
+                        newPatchi,
+                        patch.size(),
+                        patch.start()
+                    )
+                );
+                ++newPatchi;
             }
         }
-        repatcher.changePatches(newPatchPtrList);
+        repatcher.changePatches(newPatches);
     }
 
     // Set the precision of the points data to 10
