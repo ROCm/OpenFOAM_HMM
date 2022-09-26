@@ -104,34 +104,6 @@ static inline vector areaInvDistSqrWeightedNormalDualEdge
 }
 
 
-// Calculate transform tensor with reference vector (unitAxis1)
-// and direction vector (axis2).
-//
-// This is nearly identical to the meshTools axesRotation
-// with an E3_E1 transformation with the following exceptions:
-//
-// - axis1 (e3 == unitAxis1): is already normalized (unit vector)
-// - axis2 (e1 == dirn): no difference
-// - transformation is row-vectors, not column-vectors
-static inline tensor rotation_e3e1
-(
-    const vector& unitAxis1,
-    vector dirn
-)
-{
-    dirn.removeCollinear(unitAxis1);
-    dirn.normalise();
-
-    // Set row vectors
-    return tensor
-    (
-        dirn,
-        (unitAxis1^dirn),
-        unitAxis1
-    );
-}
-
-
 // Simple area-weighted normal calculation for the specified edge vector
 // and its owner/neighbour face centres (internal edges).
 //
@@ -221,6 +193,43 @@ static inline vector calcEdgeNormalFromFace
 } // End namespace Foam
 
 
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// Calculate transform tensor with reference vector (unitAxis1)
+// and direction vector (axis2).
+//
+// This is nearly identical to the meshTools axesRotation
+// with an E3_E1 transformation with the following exceptions:
+//
+// - axis1 (e3 == unitAxis1): is already normalized (unit vector)
+// - axis2 (e1 == dirn): no difference
+// - transformation is row-vectors, not column-vectors
+static inline tensor rotation_e3e1
+(
+    const vector& unitAxis1,
+    vector dirn
+)
+{
+    dirn.removeCollinear(unitAxis1);
+    dirn.normalise();
+
+    // Set row vectors
+    return tensor
+    (
+        dirn,
+        (unitAxis1^dirn),
+        unitAxis1
+    );
+}
+
+} // End namespace Foam
+
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
 namespace Foam
 {
 
@@ -269,7 +278,7 @@ void Foam::faMesh::calcPatchStarts() const
     if (patchStartsPtr_)
     {
         FatalErrorInFunction
-            << "patchStartsPtr_ already allocated"
+            << "patchStarts already allocated"
             << abort(FatalError);
     }
 
@@ -317,6 +326,126 @@ void Foam::faMesh::calcWhichPatchFaces() const
 }
 
 
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+//- Calculate the 'Le' vector from faceCentre to edge centre
+//  using the edge normal to correct for curvature
+//
+//  Normalise and rescaled to the edge length
+static inline vector calcLeVector
+(
+    const point& faceCentre,
+    const linePointRef& edgeLine,
+    const vector& edgeNormal   // (unit or area normal)
+)
+{
+    const vector centreToEdge(edgeLine.centre() - faceCentre);
+
+    vector leVector(edgeLine.vec() ^ edgeNormal);
+
+    scalar s(mag(leVector));
+
+    if (s < ROOTVSMALL)
+    {
+        // The calculated edgeNormal somehow degenerate and thus a
+        // bad cross-product?
+        // Revert to basic centre -> edge
+
+        leVector = centreToEdge;
+        leVector.removeCollinear(edgeLine.unitVec());
+        s = mag(leVector);
+
+        if (s < ROOTVSMALL)
+        {
+            // Unlikely that this should happen
+            return Zero;
+        }
+
+        leVector *= edgeLine.mag()/s;
+    }
+    else
+    {
+        // The additional orientation is probably unnecessary
+        leVector *= edgeLine.mag()/s * sign(leVector & centreToEdge);
+    }
+
+    return leVector;
+}
+
+} // End namespace Foam
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::tmp<Foam::vectorField> Foam::faMesh::calcRawEdgeNormals(int order) const
+{
+    // Return edge normals with flat boundary addressing
+    auto tedgeNormals = tmp<vectorField>::New(nEdges_);
+    auto& edgeNormals = tedgeNormals.ref();
+
+    // Need face centres
+    const areaVectorField& fCentres = areaCentres();
+
+    // Also need local points
+    const pointField& localPoints = points();
+
+
+    {
+        // Simple (primitive) edge normal calculations.
+        // These are primarly designed to avoid any communication
+        // but are thus necessarily inconsistent across processor boundaries!
+
+        WarningInFunction
+            << "Using geometryOrder < 1 : "
+               "simplified edge area-normals, without processor connectivity"
+            << endl;
+
+        // Internal (edge normals) - contributions from owner/neighbour
+        for (label edgei = 0; edgei < nInternalEdges_; ++edgei)
+        {
+            const linePointRef edgeLine(edges_[edgei].line(localPoints));
+
+            edgeNormals[edgei] =
+                calcEdgeNormalFromFace
+                (
+                    edgeLine,
+                    fCentres[edgeOwner()[edgei]],
+                    fCentres[edgeNeighbour()[edgei]]
+                );
+        }
+
+        // Boundary (edge normals) - like about but only has owner
+        for (label edgei = nInternalEdges_; edgei < nEdges_; ++edgei)
+        {
+            const linePointRef edgeLine(edges_[edgei].line(localPoints));
+
+            edgeNormals[edgei] =
+                calcEdgeNormalFromFace
+                (
+                    edgeLine,
+                    fCentres[edgeOwner()[edgei]]
+                );
+        }
+    }
+
+
+    // Remove collinear components and normalise
+
+    forAll(edgeNormals, edgei)
+    {
+        const linePointRef edgeLine(edges_[edgei].line(localPoints));
+
+        edgeNormals[edgei].removeCollinear(edgeLine.unitVec());
+        edgeNormals[edgei].normalise();
+    }
+
+    return tedgeNormals;
+}
+
+
 void Foam::faMesh::calcLe() const
 {
     DebugInFunction
@@ -345,187 +474,97 @@ void Foam::faMesh::calcLe() const
 
     edgeVectorField& Le = *LePtr_;
 
+    // Need face centres
+    const areaVectorField& fCentres = areaCentres();
+
+    // Also need local points
     const pointField& localPoints = points();
+
 
     if (faMesh::geometryOrder() < 1)
     {
-        // Simple (primitive) edge normal calculations.
-        // These are primarly designed to avoid any communication
-        // but are thus necessarily inconsistent across processor boundaries!
+        // The edge normals with flat boundary addressing
+        // (which _may_ use communication)
+        vectorField edgeNormals
+        (
+            calcRawEdgeNormals(faMesh::geometryOrder())
+        );
 
-        // Reasonable to assume that the volume mesh already has faceCentres
-        // eg, used magSf somewhere.
-        // Can use these instead of triggering our calcAreaCentres().
 
-        WarningInFunction
-            << "Using geometryOrder < 1 : "
-               "simplified edge area-normals for Le() calculation"
-            << endl;
+        // Calculate the Le vectors.
+        // Can do inplace (overwrite with the edgeNormals)
 
-        UIndirectList<vector> fCentres(mesh().faceCentres(), faceLabels());
-
-        // Flat addressing
-        vectorField edgeNormals(nEdges_);
-
-        // Internal (edge normals)
-        for (label edgei = 0; edgei < nInternalEdges_; ++edgei)
+        vectorField& leVectors = edgeNormals;
+        forAll(leVectors, edgei)
         {
-            edgeNormals[edgei] =
-                calcEdgeNormalFromFace
-                (
-                    edges_[edgei].line(localPoints),
-                    fCentres[owner()[edgei]],
-                    fCentres[neighbour()[edgei]]
-                );
-        }
-
-        // Boundary (edge normals). Like above, but only has owner
-        for (label edgei = nInternalEdges_; edgei < nEdges_; ++edgei)
-        {
-            edgeNormals[edgei] =
-                calcEdgeNormalFromFace
-                (
-                    edges_[edgei].line(localPoints),
-                    fCentres[owner()[edgei]]
-                );
+            leVectors[edgei] = calcLeVector
+            (
+                fCentres[edgeOwner()[edgei]],
+                edges_[edgei].line(localPoints),
+                edgeNormals[edgei]
+            );
         }
 
 
-        // Now use these edge normals for calculating Le
+        // Copy internal field
+        Le.primitiveFieldRef() =
+            vectorField::subList(leVectors, nInternalEdges_);
 
-        // Internal (edge vector)
-        {
-            vectorField& internalFld = Le.ref();
-            for (label edgei = 0; edgei < nInternalEdges_; ++edgei)
-            {
-                vector& leVector = internalFld[edgei];
-
-                vector edgeVec = edges_[edgei].vec(localPoints);
-                const scalar magEdge(mag(edgeVec));
-
-                if (magEdge < ROOTVSMALL)
-                {
-                    // Too small
-                    leVector = Zero;
-                    continue;
-                }
-
-                const vector edgeCtr = edges_[edgei].centre(localPoints);
-                const vector& edgeNorm = edgeNormals[edgei];
-                const vector& ownCentre = fCentres[owner()[edgei]];
-
-                leVector = magEdge*normalised(edgeVec ^ edgeNorm);
-                leVector *= sign(leVector & (edgeCtr - ownCentre));
-            }
-        }
-
-        // Boundary (edge vector)
+        // Transcribe boundary field
+        auto& bfld = Le.boundaryFieldRef();
 
         forAll(boundary(), patchi)
         {
-            const labelUList& bndEdgeFaces = boundary()[patchi].edgeFaces();
-
-            const edgeList::subList bndEdges =
-                boundary()[patchi].patchSlice(edges_);
-
-            vectorField& patchLe = Le.boundaryFieldRef()[patchi];
-
-            forAll(patchLe, bndEdgei)
-            {
-                vector& leVector = patchLe[bndEdgei];
-                const label meshEdgei(boundary()[patchi].start() + bndEdgei);
-
-                vector edgeVec = bndEdges[bndEdgei].vec(localPoints);
-                const scalar magEdge(mag(edgeVec));
-
-                if (magEdge < ROOTVSMALL)
-                {
-                    // Too small
-                    leVector = Zero;
-                    continue;
-                }
-
-                const vector edgeCtr = bndEdges[bndEdgei].centre(localPoints);
-                const vector& edgeNorm = edgeNormals[meshEdgei];
-                const vector& ownCentre = fCentres[bndEdgeFaces[bndEdgei]];
-
-                leVector = magEdge*normalised(edgeVec ^ edgeNorm);
-                leVector *= sign(leVector & (edgeCtr - ownCentre));
-            }
+            const faPatch& fap = boundary()[patchi];
+            bfld[patchi] = fap.patchRawSlice(leVectors);
         }
 
         // Done
         return;
     }
-
-
-    // Longer forms.
-    // Using edgeAreaNormals, which uses pointAreaNormals (communication!)
-
-    const edgeVectorField& eCentres = edgeCentres();
-    const areaVectorField& fCentres = areaCentres();
-    const edgeVectorField& edgeNormals = edgeAreaNormals();
-
-    // Internal (edge vector)
-
+    else
     {
-        vectorField& internalFld = Le.ref();
-        for (label edgei = 0; edgei < nInternalEdges_; ++edgei)
+        // Using edgeAreaNormals,
+        // which _may_ use pointAreaNormals (communication!)
+
+        const edgeVectorField& edgeNormals = edgeAreaNormals();
+
+        // Internal (edge vector)
         {
-            vector& leVector = internalFld[edgei];
-
-            vector edgeVec = edges_[edgei].vec(localPoints);
-            const scalar magEdge(mag(edgeVec));
-
-            if (magEdge < ROOTVSMALL)
+            vectorField& fld = Le.primitiveFieldRef();
+            for (label edgei = 0; edgei < nInternalEdges_; ++edgei)
             {
-                // Too small
-                leVector = Zero;
-                continue;
+                fld[edgei] = calcLeVector
+                (
+                    fCentres[edgeOwner()[edgei]],
+                    edges_[edgei].line(localPoints),
+                    edgeNormals[edgei]
+                );
             }
-
-            const vector& edgeCtr = eCentres[edgei];
-            const vector& edgeNorm = edgeNormals[edgei];
-            const vector& ownCentre = fCentres[owner()[edgei]];
-
-            leVector = magEdge*normalised(edgeVec ^ edgeNorm);
-            leVector *= sign(leVector & (edgeCtr - ownCentre));
         }
-    }
 
-    forAll(boundary(), patchi)
-    {
-        const labelUList& bndEdgeFaces = boundary()[patchi].edgeFaces();
-
-        const edgeList::subList bndEdges =
-            boundary()[patchi].patchSlice(edges_);
-
-        const vectorField& bndEdgeNormals =
-            edgeNormals.boundaryField()[patchi];
-
-        vectorField& patchLe = Le.boundaryFieldRef()[patchi];
-        const vectorField& patchECentres = eCentres.boundaryField()[patchi];
-
-        forAll(patchLe, bndEdgei)
+        // Boundary (edge vector)
+        forAll(boundary(), patchi)
         {
-            vector& leVector = patchLe[bndEdgei];
+            const faPatch& fap = boundary()[patchi];
+            vectorField& pfld = Le.boundaryFieldRef()[patchi];
 
-            vector edgeVec = bndEdges[bndEdgei].vec(localPoints);
-            const scalar magEdge(mag(edgeVec));
+            const vectorField& bndEdgeNormals =
+                edgeNormals.boundaryField()[patchi];
 
-            if (magEdge < ROOTVSMALL)
+            label edgei = fap.start();
+
+            forAll(pfld, patchEdgei)
             {
-                // Too small
-                leVector = Zero;
-                continue;
+                pfld[patchEdgei] = calcLeVector
+                (
+                    fCentres[edgeOwner()[edgei]],
+                    edges_[edgei].line(localPoints),
+                    bndEdgeNormals[patchEdgei]
+                );
+
+                ++edgei;
             }
-
-            const vector& edgeCtr = patchECentres[bndEdgei];
-            const vector& edgeNorm = bndEdgeNormals[bndEdgei];
-            const vector& ownCentre = fCentres[bndEdgeFaces[bndEdgei]];
-
-            leVector = magEdge*normalised(edgeVec ^ edgeNorm);
-            leVector *= sign(leVector & (edgeCtr - ownCentre));
         }
     }
 }
@@ -539,7 +578,7 @@ void Foam::faMesh::calcMagLe() const
     if (magLePtr_)
     {
         FatalErrorInFunction
-            << "magLePtr_ already allocated"
+            << "magLe() already allocated"
             << abort(FatalError);
     }
 
@@ -590,19 +629,19 @@ void Foam::faMesh::calcMagLe() const
 }
 
 
-void Foam::faMesh::calcAreaCentres() const
+void Foam::faMesh::calcFaceCentres() const
 {
     DebugInFunction
         << "Calculating face centres" << endl;
 
-    if (centresPtr_)
+    if (faceCentresPtr_)
     {
         FatalErrorInFunction
-            << "centresPtr_ already allocated"
+            << "areaCentres already allocated"
             << abort(FatalError);
     }
 
-    centresPtr_ =
+    faceCentresPtr_ =
         new areaVectorField
         (
             IOobject
@@ -616,16 +655,32 @@ void Foam::faMesh::calcAreaCentres() const
             dimLength
         );
 
-    areaVectorField& centres = *centresPtr_;
+    areaVectorField& centres = *faceCentresPtr_;
 
+    // Need local points
     const pointField& localPoints = points();
-    const faceList& localFaces = faces();
+
 
     // Internal (face centres)
-    // Could also obtain from volume mesh faceCentres()
-    forAll(localFaces, facei)
     {
-        centres.ref()[facei] = localFaces[facei].centre(localPoints);
+        if (mesh().hasFaceCentres())
+        {
+            // The volume mesh has faceCentres, can reuse them
+
+            centres.primitiveFieldRef()
+                = UIndirectList<vector>(mesh().faceCentres(), faceLabels());
+        }
+        else
+        {
+            // Calculate manually
+            auto iter = centres.primitiveFieldRef().begin();
+
+            for (const face& f : faces())
+            {
+                *iter = f.centre(localPoints);
+                ++iter;
+            }
+        }
     }
 
     // Boundary (edge centres)
@@ -654,7 +709,7 @@ void Foam::faMesh::calcEdgeCentres() const
     if (edgeCentresPtr_)
     {
         FatalErrorInFunction
-            << "edgeCentresPtr_ already allocated"
+            << "edgeCentres already allocated"
             << abort(FatalError);
     }
 
@@ -675,6 +730,7 @@ void Foam::faMesh::calcEdgeCentres() const
     edgeVectorField& centres = *edgeCentresPtr_;
 
     const pointField& localPoints = points();
+
 
     // Internal (edge centres)
     {
@@ -713,7 +769,7 @@ void Foam::faMesh::calcS() const
     if (SPtr_)
     {
         FatalErrorInFunction
-            << "SPtr_ already allocated"
+            << "S() already allocated"
             << abort(FatalError);
     }
 
@@ -730,15 +786,35 @@ void Foam::faMesh::calcS() const
         *this,
         dimArea
     );
-    auto& S = *SPtr_;
+    auto& areas = *SPtr_;
 
-    const pointField& localPoints = points();
-    const faceList& localFaces = faces();
 
-    // Could also obtain from volume mesh faceAreas()
-    forAll(S, facei)
+    // No access to fvMesh::magSf(), only polyMesh::faceAreas()
+    if (mesh().hasFaceAreas())
     {
-        S[facei] = localFaces[facei].mag(localPoints);
+        // The volume mesh has faceAreas, can reuse them
+        UIndirectList<vector> meshFaceAreas(mesh().faceAreas(), faceLabels());
+
+        auto& fld = areas.field();
+
+        forAll(fld, facei)
+        {
+            fld[facei] = Foam::mag(meshFaceAreas[facei]);
+        }
+    }
+    else
+    {
+        // Calculate manually
+
+        const pointField& localPoints = points();
+
+        auto iter = areas.field().begin();
+
+        for (const face& f : faces())
+        {
+            *iter = f.mag(localPoints);
+            ++iter;
+        }
     }
 }
 
@@ -751,7 +827,7 @@ void Foam::faMesh::calcFaceAreaNormals() const
     if (faceAreaNormalsPtr_)
     {
         FatalErrorInFunction
-            << "faceAreaNormalsPtr_ already allocated"
+            << "faceAreaNormals already allocated"
             << abort(FatalError);
     }
 
@@ -772,23 +848,43 @@ void Foam::faMesh::calcFaceAreaNormals() const
     areaVectorField& faceNormals = *faceAreaNormalsPtr_;
 
     const pointField& localPoints = points();
-    const faceList& localFaces = faces();
 
-    // Internal (faces)
-    // Could also obtain from volume mesh Sf() + normalise
-    vectorField& nInternal = faceNormals.ref();
-    forAll(localFaces, faceI)
+    // Internal
     {
-        nInternal[faceI] = localFaces[faceI].unitNormal(localPoints);
+        auto& fld = faceNormals.primitiveFieldRef();
+
+        if (mesh().hasFaceAreas())
+        {
+            // The volume mesh has faceAreas, can reuse them
+            fld = UIndirectList<vector>(mesh().faceAreas(), faceLabels());
+        }
+        else
+        {
+            // Calculate manually
+
+            auto iter = fld.begin();
+
+            for (const face& f : faces())
+            {
+                *iter = f.areaNormal(localPoints);
+                ++iter;
+            }
+        }
+
+        // Make unit normals
+        fld.normalise();
     }
 
+
     // Boundary - copy from edges
-
-    const auto& edgeNormalsBoundary = edgeAreaNormals().boundaryField();
-
-    forAll(boundary(), patchI)
     {
-        faceNormals.boundaryFieldRef()[patchI] = edgeNormalsBoundary[patchI];
+        const auto& edgeNormalsBoundary = edgeAreaNormals().boundaryField();
+
+        forAll(boundary(), patchi)
+        {
+            faceNormals.boundaryFieldRef()[patchi]
+                = edgeNormalsBoundary[patchi];
+        }
     }
 }
 
@@ -1131,9 +1227,9 @@ void Foam::faMesh::calcPointAreaNormals(vectorField& result) const
         const label nVerts(f.size());
 
         point centrePoint(Zero);
-        for (label i = 0; i < nVerts; ++i)
+        for (const label fp : f)
         {
-            centrePoint += points[f[i]];
+            centrePoint += points[fp];
         }
         centrePoint /= nVerts;
 
@@ -1153,9 +1249,8 @@ void Foam::faMesh::calcPointAreaNormals(vectorField& result) const
     }
 
 
-    // Handle the boundary edges
-
-    bitSet nbrBoundaryAdjust(boundary().size(), true);
+    // Boundary edge corrections
+    bitSet nbrBoundaryAdjust;
 
     forAll(boundary(), patchi)
     {
@@ -1193,14 +1288,10 @@ void Foam::faMesh::calcPointAreaNormals(vectorField& result) const
                       &result[wedgePatch.axisPoint()]
                     );
             }
-
-            // Handled
-            nbrBoundaryAdjust.unset(patchi);
         }
         else if (Pstream::parRun() && isA<processorFaPatch>(fap))
         {
             // Correct processor patch points
-
             const auto& procPatch = refCast<const processorFaPatch>(fap);
 
             const labelList& patchPoints = procPatch.pointLabels();
@@ -1244,25 +1335,16 @@ void Foam::faMesh::calcPointAreaNormals(vectorField& result) const
                 result[patchPoints[pti]] +=
                     patchPointNormals[nbrPatchPoints[pti]];
             }
-
-            // Handled
-            nbrBoundaryAdjust.unset(patchi);
-        }
-        else if (fap.coupled())
-        {
-            // Coupled - no further action for neighbour side
-            nbrBoundaryAdjust.unset(patchi);
         }
         // TBD:
         /// else if (isA<emptyFaPatch>(fap))
         /// {
         ///     // Ignore this boundary
-        ///     nbrBoundaryAdjust.unset(patchi);
         /// }
-        else if (!correctPatchPointNormals(patchi))
+        else if (correctPatchPointNormals(patchi) && !fap.coupled())
         {
-            // No corrections
-            nbrBoundaryAdjust.unset(patchi);
+            // Neighbour correction requested
+            nbrBoundaryAdjust.set(patchi);
         }
     }
 
@@ -1289,7 +1371,7 @@ void Foam::faMesh::calcPointAreaNormals(vectorField& result) const
             gpNormals[addr[i]] += spNormals[i];
         }
 
-        Pstream::combineAllGather(gpNormals, plusEqOp<vectorField>());
+        Pstream::combineReduce(gpNormals, plusEqOp<vectorField>());
 
         // Extract local data
         forAll(addr, i)
@@ -1304,14 +1386,11 @@ void Foam::faMesh::calcPointAreaNormals(vectorField& result) const
     }
 
 
-    if (returnReduce(nbrBoundaryAdjust.any(), orOp<bool>()))
+    if (returnReduceOr(nbrBoundaryAdjust.any()))
     {
-        if (debug)
-        {
-            PoutInFunction
-                << "Apply " << nbrBoundaryAdjust.count()
-                << " boundary neighbour corrections" << nl;
-        }
+        DebugInFunction
+            << "Apply " << nbrBoundaryAdjust.count()
+            << " boundary neighbour corrections" << nl;
 
         // Apply boundary points correction
 
@@ -1324,7 +1403,6 @@ void Foam::faMesh::calcPointAreaNormals(vectorField& result) const
         for (const label patchi : nbrBoundaryAdjust)
         {
             const faPatch& fap = boundary()[patchi];
-            const labelList& edgeLabels = fap.edgeLabels();
 
             if (fap.ngbPolyPatchIndex() < 0)
             {
@@ -1334,7 +1412,8 @@ void Foam::faMesh::calcPointAreaNormals(vectorField& result) const
                     << abort(FatalError);
             }
 
-            for (const label edgei : edgeLabels)
+            // NB: haloFaceNormals uses primitivePatch edge indexing
+            for (const label edgei : fap.edgeLabels())
             {
                 const edge& e = patch().edges()[edgei];
 
@@ -1359,9 +1438,7 @@ void Foam::faMesh::calcPointAreaNormals(vectorField& result) const
         forAllConstIters(fpNormals, iter)
         {
             const label pointi = iter.key();
-            vector fpnorm = normalised(iter.val());
-
-            result[pointi].removeCollinear(fpnorm);
+            result[pointi].removeCollinear(normalised(iter.val()));
         }
     }
 
@@ -1957,39 +2034,48 @@ Foam::tmp<Foam::edgeScalarField> Foam::faMesh::edgeLengthCorrection() const
 
     const vectorField& pointNormals = pointAreaNormals();
 
-    forAll(correction.internalField(), edgeI)
+    const auto angleCorrection =
+        [](const vector& a, const vector& b) -> scalar
+        {
+            return Foam::cos(0.5*Foam::asin(Foam::mag(a ^ b)));
+        };
+
+
+    // Internal
     {
-        scalar sinAlpha = mag
-        (
-            pointNormals[edges()[edgeI].start()]^
-            pointNormals[edges()[edgeI].end()]
-        );
+        auto& fld = correction.primitiveFieldRef();
 
-        scalar alpha = asin(sinAlpha);
-
-        correction.ref()[edgeI] = cos(0.5*alpha);
+        forAll(fld, edgei)
+        {
+            fld[edgei] = angleCorrection
+            (
+                pointNormals[edges_[edgei].start()],
+                pointNormals[edges_[edgei].end()]
+            );
+        }
     }
 
-
-    forAll(boundary(), patchI)
+    // Boundary
     {
-        const edgeList::subList patchEdges
-        (
-             boundary()[patchI].patchSlice(edges())
-        );
+        auto& bfld = correction.boundaryFieldRef();
 
-        forAll(patchEdges, edgeI)
+        forAll(boundary(), patchi)
         {
-            scalar sinAlpha =
-                mag
+            const faPatch& fap = boundary()[patchi];
+            scalarField& pfld = bfld[patchi];
+
+            label edgei = fap.start();
+
+            forAll(pfld, patchEdgei)
+            {
+                pfld[patchEdgei] = angleCorrection
                 (
-                    pointNormals[patchEdges[edgeI].start()]
-                  ^ pointNormals[patchEdges[edgeI].end()]
+                    pointNormals[edges_[edgei].start()],
+                    pointNormals[edges_[edgei].end()]
                 );
 
-            scalar alpha = asin(sinAlpha);
-
-            correction.boundaryFieldRef()[patchI][edgeI] = cos(0.5*alpha);
+                ++edgei;
+            }
         }
     }
 
