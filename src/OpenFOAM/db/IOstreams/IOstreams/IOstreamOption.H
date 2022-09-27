@@ -28,13 +28,12 @@ Class
     Foam::IOstreamOption
 
 Description
-    The IOstreamOption is a simple container for options an IOstream
-    can normally have.
+    A simple container for options an IOstream can normally have.
 
     The format (ASCII | BINARY) is typically controlled by enumerated
     names (ascii, binary).
 
-    The compression  (UNCOMPRESSED | COMPRESSED) is typically controlled
+    The compression (UNCOMPRESSED | COMPRESSED) is typically controlled
     by switch values (true/false, on/off, ...).
 
 SourceFiles
@@ -284,10 +283,7 @@ public:
     // Member Functions
 
         //- Get the current stream format
-        streamFormat format() const noexcept
-        {
-            return format_;
-        }
+        streamFormat format() const noexcept { return format_; }
 
         //- Set the stream format
         //  \return the previous value
@@ -310,10 +306,7 @@ public:
         }
 
         //- Get the stream compression
-        compressionType compression() const noexcept
-        {
-            return compression_;
-        }
+        compressionType compression() const noexcept { return compression_; }
 
         //- Set the stream compression
         //  \return the previous value
@@ -336,10 +329,7 @@ public:
         }
 
         //- Get the stream version
-        versionNumber version() const noexcept
-        {
-            return version_;
-        }
+        versionNumber version() const noexcept { return version_; }
 
         //- Set the stream version
         //  \return the previous value

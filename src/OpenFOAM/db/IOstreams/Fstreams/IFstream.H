@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef IFstream_H
-#define IFstream_H
+#ifndef Foam_IFstream_H
+#define Foam_IFstream_H
 
 #include "ISstream.H"
 #include "className.H"
@@ -75,11 +75,10 @@ public:
         IFstream
         (
             const fileName& pathname,
-            IOstreamOption::streamFormat fmt,
-            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
+            IOstreamOption::streamFormat fmt
         )
         :
-            IFstream(pathname, IOstreamOption(fmt, ver))
+            IFstream(pathname, IOstreamOption(fmt))
         {}
 
 

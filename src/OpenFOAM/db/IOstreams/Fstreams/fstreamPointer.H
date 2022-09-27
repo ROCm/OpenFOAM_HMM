@@ -53,8 +53,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fstreamPointer_H
-#define fstreamPointer_H
+#ifndef Foam_fstreamPointer_H
+#define Foam_fstreamPointer_H
 
 #include "IOstreamOption.H"
 #include "fileName.H"

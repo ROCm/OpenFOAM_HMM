@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef threadedCollatedOFstream_H
-#define threadedCollatedOFstream_H
+#ifndef Foam_threadedCollatedOFstream_H
+#define Foam_threadedCollatedOFstream_H
 
 #include "dictionary.H"
 #include "StringStream.H"
@@ -94,32 +94,6 @@ public:
 
         //- Define the header entries for the data block(s)
         void setHeaderEntries(const dictionary& dict);
-
-
-    // Additional constructors and methods (as per v2012 and earlier)
-    #ifdef Foam_IOstream_extras
-
-        //- Construct and set stream status
-        threadedCollatedOFstream
-        (
-            OFstreamCollator& writer,
-            const fileName& pathname,
-            IOstreamOption::streamFormat fmt,
-            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion,
-            IOstreamOption::compressionType cmp = IOstreamOption::UNCOMPRESSED,
-            const bool useThread = true
-        )
-        :
-            threadedCollatedOFstream
-            (
-                writer,
-                pathname,
-                IOstreamOption(fmt, ver, cmp),
-                useThread
-            )
-        {}
-
-    #endif /* Foam_IOstream_extras */
 };
 
 

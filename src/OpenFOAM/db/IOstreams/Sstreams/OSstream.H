@@ -91,7 +91,19 @@ public:
             std::ostream& os,
             const string& streamName,
             IOstreamOption::streamFormat fmt,
-            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion,
+            IOstreamOption::compressionType cmp = IOstreamOption::UNCOMPRESSED
+        )
+        :
+            OSstream(os, streamName, IOstreamOption(fmt, cmp))
+        {}
+
+        //- Construct wrapper around std::ostream, set stream status
+        OSstream
+        (
+            std::ostream& os,
+            const string& streamName,
+            IOstreamOption::streamFormat fmt,
+            IOstreamOption::versionNumber ver,
             IOstreamOption::compressionType cmp = IOstreamOption::UNCOMPRESSED
         )
         :

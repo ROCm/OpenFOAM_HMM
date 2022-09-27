@@ -157,7 +157,7 @@ Foam::UIPstreamBase::UIPstreamBase
 )
 :
     UPstream(commsType),
-    Istream(fmt, IOstreamOption::currentVersion),
+    Istream(fmt),
     fromProcNo_(fromProcNo),
     recvBuf_(receiveBuf),
     recvBufPos_(receiveBufPosition),
@@ -178,7 +178,7 @@ Foam::UIPstreamBase::UIPstreamBase
 )
 :
     UPstream(buffers.commsType()),
-    Istream(buffers.format(), IOstreamOption::currentVersion),
+    Istream(buffers.format()),
     fromProcNo_(fromProcNo),
     recvBuf_(buffers.recvBuf_[fromProcNo]),
     recvBufPos_(buffers.recvBufPos_[fromProcNo]),

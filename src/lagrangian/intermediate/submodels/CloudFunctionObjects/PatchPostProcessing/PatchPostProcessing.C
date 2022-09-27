@@ -72,7 +72,6 @@ void Foam::PatchPostProcessing<CloudType>::write()
             (
                 this->writeTimeDir()/patchName + ".post",
                 IOstreamOption::ASCII,
-                IOstreamOption::currentVersion,
                 mesh.time().writeCompression()
             );
 

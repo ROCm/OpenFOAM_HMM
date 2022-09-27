@@ -93,7 +93,19 @@ public:
             std::istream& is,
             const string& streamName,
             IOstreamOption::streamFormat fmt,
-            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion,
+            IOstreamOption::compressionType cmp = IOstreamOption::UNCOMPRESSED
+        )
+        :
+            ISstream(is, streamName, IOstreamOption(fmt, cmp))
+        {}
+
+        //- Construct wrapper around std::istream, set stream status
+        ISstream
+        (
+            std::istream& is,
+            const string& streamName,
+            IOstreamOption::streamFormat fmt,
+            IOstreamOption::versionNumber ver,
             IOstreamOption::compressionType cmp = IOstreamOption::UNCOMPRESSED
         )
         :

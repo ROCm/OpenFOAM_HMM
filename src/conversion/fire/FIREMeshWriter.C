@@ -255,8 +255,15 @@ Foam::fileFormats::FIREMeshWriter::FIREMeshWriter
 
 bool Foam::fileFormats::FIREMeshWriter::write(const fileName& meshName) const
 {
-    bool useBinary   = binary;
-    bool useCompress = compress;
+    IOstreamOption streamOpt;
+    if (binary)
+    {
+        streamOpt.format(IOstreamOption::BINARY);
+    }
+    if (compress)
+    {
+        streamOpt.compression(IOstreamOption::COMPRESSED);
+    }
 
     fileName baseName(meshName);
     if (baseName.empty())
@@ -281,25 +288,38 @@ bool Foam::fileFormats::FIREMeshWriter::write(const fileName& meshName) const
         if (FIRECore::file3dExtensions.found(ext))
         {
             FIRECore::fileExt3d fireFileType = FIRECore::file3dExtensions[ext];
+
             if (fireFileType == FIRECore::fileExt3d::POLY_ASCII)
             {
-                useBinary   = false;
-                useCompress = false;
+                streamOpt = IOstreamOption
+                (
+                    IOstreamOption::ASCII,
+                    IOstreamOption::UNCOMPRESSED
+                );
             }
             else if (fireFileType == FIRECore::fileExt3d::POLY_BINARY)
             {
-                useBinary   = true;
-                useCompress = false;
+                streamOpt = IOstreamOption
+                (
+                    IOstreamOption::BINARY,
+                    IOstreamOption::UNCOMPRESSED
+                );
             }
             else if (fireFileType == FIRECore::fileExt3d::POLY_ASCII_Z)
             {
-                useBinary   = false;
-                useCompress = true;
+                streamOpt = IOstreamOption
+                (
+                    IOstreamOption::ASCII,
+                    IOstreamOption::COMPRESSED
+                );
             }
             else if (fireFileType == FIRECore::fileExt3d::POLY_BINARY_Z)
             {
-                useBinary   = true;
-                useCompress = true;
+                streamOpt = IOstreamOption
+                (
+                    IOstreamOption::BINARY,
+                    IOstreamOption::COMPRESSED
+                );
             }
         }
 
@@ -312,30 +332,19 @@ bool Foam::fileFormats::FIREMeshWriter::write(const fileName& meshName) const
     const fileName filename = FIRECore::fireFileName
     (
         baseName,
-        useBinary ? FIRECore::POLY_BINARY : FIRECore::POLY_ASCII
-    );
-
-    autoPtr<OFstream> osPtr
-    (
-        new OFstream
         (
-            filename,
-            (
-                useBinary
-              ? IOstreamOption::BINARY : IOstreamOption::ASCII
-            ),
-            IOstreamOption::currentVersion,
-            (
-                useCompress
-              ? IOstreamOption::COMPRESSED : IOstreamOption::UNCOMPRESSED
-            )
+            streamOpt.format() == IOstreamOption::BINARY
+          ? FIRECore::POLY_BINARY
+          : FIRECore::POLY_ASCII
         )
     );
+
+    autoPtr<OFstream> osPtr(new OFstream(filename, streamOpt));
 
     if (osPtr->good())
     {
         Info<< "Writing output to ";
-        if (useCompress)
+        if (streamOpt.compression() == IOstreamOption::COMPRESSED)
         {
             // output .fpmaz instead of .fpma
             Info<< '"' << osPtr().name().c_str() << "z\"" << endl;
@@ -350,7 +359,7 @@ bool Foam::fileFormats::FIREMeshWriter::write(const fileName& meshName) const
 
         osPtr.clear();    // implicitly close the file
 
-        if (useCompress)
+        if (streamOpt.compression() == IOstreamOption::COMPRESSED)
         {
             // rename .fpma.gz -> .fpmaz
             // The '.gz' is automatically added by OFstream in compression mode

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -79,8 +79,8 @@ See Also
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef UOListStream_H
-#define UOListStream_H
+#ifndef Foam_UOListStream_H
+#define Foam_UOListStream_H
 
 #include "DynamicList.H"
 #include "FixedList.H"
@@ -262,11 +262,10 @@ public:
         (
             char* buffer,
             size_t nbytes,
-            IOstreamOption::streamFormat fmt,
-            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
+            IOstreamOption::streamFormat fmt
         )
         :
-            UOListStream(buffer, nbytes, IOstreamOption(fmt, ver))
+            UOListStream(buffer, nbytes, IOstreamOption(fmt))
         {}
 
         //- Construct using data area from a List and number of bytes
@@ -274,22 +273,20 @@ public:
         (
             UList<char>& buffer,
             size_t nbytes,
-            IOstreamOption::streamFormat fmt,
-            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
+            IOstreamOption::streamFormat fmt
         )
         :
-            UOListStream(buffer.data(), nbytes, IOstreamOption(fmt, ver))
+            UOListStream(buffer.data(), nbytes, IOstreamOption(fmt))
         {}
 
         //- Construct using data area from a List and its inherent storage size
         UOListStream
         (
             UList<char>& buffer,
-            IOstreamOption::streamFormat fmt,
-            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
+            IOstreamOption::streamFormat fmt
         )
         :
-            UOListStream(buffer.data(), buffer.size(), IOstreamOption(fmt, ver))
+            UOListStream(buffer.data(), buffer.size(), IOstreamOption(fmt))
         {}
 
         //- Construct using data area from a FixedList
@@ -297,11 +294,10 @@ public:
         UOListStream
         (
             FixedList<char, N>& buffer,
-            IOstreamOption::streamFormat fmt,
-            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
+            IOstreamOption::streamFormat fmt
         )
         :
-            UOListStream(buffer.data(), N, IOstreamOption(fmt, ver))
+            UOListStream(buffer.data(), N, IOstreamOption(fmt))
         {}
 
         //- Construct using data area from a DynamicList and its capacity
@@ -309,11 +305,10 @@ public:
         UOListStream
         (
             DynamicList<char,SizeMin>& buf,
-            IOstreamOption::streamFormat fmt,
-            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
+            IOstreamOption::streamFormat fmt
         )
         :
-            UOListStream(buf.data(), buf.capacity(), IOstreamOption(fmt, ver))
+            UOListStream(buf.data(), buf.capacity(), IOstreamOption(fmt))
         {}
 
     #endif /* Foam_IOstream_extras */

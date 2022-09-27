@@ -392,11 +392,10 @@ public:
         (
             const string& name,
             const UList<token>& tokens,
-            IOstreamOption::streamFormat fmt,
-            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
+            IOstreamOption::streamFormat fmt
         )
         :
-            ITstream(name, tokens, IOstreamOption(fmt, ver))
+            ITstream(name, tokens, IOstreamOption(fmt))
         {}
 
         //- Construct from components, transferring the tokens
@@ -404,11 +403,10 @@ public:
         (
             const string& name,
             List<token>&& tokens,
-            IOstreamOption::streamFormat fmt,
-            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
+            IOstreamOption::streamFormat fmt
         )
         :
-            ITstream(name, std::move(tokens), IOstreamOption(fmt, ver))
+            ITstream(name, std::move(tokens), IOstreamOption(fmt))
         {}
 
     #endif /* Foam_IOstream_extras */

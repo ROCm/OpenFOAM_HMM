@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef StringStream_H
-#define StringStream_H
+#ifndef Foam_StringStream_H
+#define Foam_StringStream_H
 
 #include "ISstream.H"
 #include "OSstream.H"
@@ -152,7 +152,7 @@ public:
         IStringStream(const IStringStream& str)
         :
             allocator_type(str.str()),
-            ISstream(stream_, str.name(), str.format(), str.version())
+            ISstream(stream_, str.name(), static_cast<IOstreamOption>(str))
         {}
 
 
@@ -183,36 +183,30 @@ public:
     // Additional constructors and methods (as per v2012 and earlier)
     #ifdef Foam_IOstream_extras
 
-        //- Default construct
-        explicit IStringStream
-        (
-            IOstreamOption::streamFormat fmt,
-            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
-        )
+        //- Construct empty with given format
+        explicit IStringStream(IOstreamOption::streamFormat fmt)
         :
-            IStringStream(IOstreamOption(fmt, ver))
+            IStringStream(IOstreamOption(fmt))
         {}
 
-        //- Construct from std::string
+        //- Construct from std::string with given format
         IStringStream
         (
             const std::string& s,
-            IOstreamOption::streamFormat fmt,
-            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
+            IOstreamOption::streamFormat fmt
         )
         :
-            IStringStream(s, IOstreamOption(fmt, ver))
+            IStringStream(s, IOstreamOption(fmt))
         {}
 
-        //- Construct from char*
+        //- Construct from char* with given format
         IStringStream
         (
             const char* s,
-            IOstreamOption::streamFormat fmt,
-            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
+            IOstreamOption::streamFormat fmt
         )
         :
-            IStringStream(s, IOstreamOption(fmt, ver))
+            IStringStream(s, IOstreamOption(fmt))
         {}
 
     #endif /* Foam_IOstream_extras */
@@ -249,7 +243,7 @@ public:
         OStringStream(const OStringStream& str)
         :
             allocator_type(str.str()),
-            OSstream(stream_, str.name(), str.format(), str.version())
+            OSstream(stream_, str.name(), static_cast<IOstreamOption>(str))
         {}
 
 
@@ -276,14 +270,10 @@ public:
     // Older style, without stream option (including 2012 release)
     #ifdef Foam_IOstream_extras
 
-        //- Default construct
-        explicit OStringStream
-        (
-            IOstreamOption::streamFormat fmt,
-            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
-        )
+        //- Construct empty with given format
+        explicit OStringStream(IOstreamOption::streamFormat fmt)
         :
-            OStringStream(IOstreamOption(fmt, ver))
+            OStringStream(IOstreamOption(fmt))
         {}
 
     #endif /* Foam_IOstream_extras */

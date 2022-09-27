@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef OFstream_H
-#define OFstream_H
+#ifndef Foam_OFstream_H
+#define Foam_OFstream_H
 
 #include "OSstream.H"
 #include "className.H"
@@ -76,17 +76,16 @@ public:
             const bool append = false
         );
 
-        //- Construct from pathname, format (version, compression)
+        //- Construct from pathname, format (uncompressed), optional append
         OFstream
         (
             const fileName& pathname,
             IOstreamOption::streamFormat fmt,
-            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion,
             IOstreamOption::compressionType cmp = IOstreamOption::UNCOMPRESSED,
             const bool append = false
         )
         :
-            OFstream(pathname, IOstreamOption(fmt, ver, cmp), append)
+            OFstream(pathname, IOstreamOption(fmt, cmp), append)
         {}
 
 
@@ -117,6 +116,25 @@ public:
 
         //- Print stream description
         void print(Ostream& os) const;
+
+
+    // Additional constructors and methods
+    #ifdef Foam_IOstream_extras
+
+        //- Construct from pathname, format (version, compression)
+        OFstream
+        (
+            const fileName& pathname,
+            IOstreamOption::streamFormat fmt,
+            IOstreamOption::versionNumber ver,
+            IOstreamOption::compressionType cmp = IOstreamOption::UNCOMPRESSED,
+            const bool append = false
+        )
+        :
+            OFstream(pathname, IOstreamOption(fmt, ver, cmp), append)
+        {}
+
+    #endif /* Foam_IOstream_extras */
 };
 
 

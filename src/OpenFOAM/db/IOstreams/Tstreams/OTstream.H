@@ -66,7 +66,7 @@ public:
         //- Default construct, set stream status
         explicit OTstream(IOstreamOption streamOpt = IOstreamOption())
         :
-            Ostream(streamOpt.format(), streamOpt.version()),
+            Ostream(IOstreamOption(streamOpt.format(), streamOpt.version())),
             DynamicList<token>()
         {
             setOpened();
@@ -76,7 +76,7 @@ public:
         //- Copy construct
         OTstream(const OTstream& os)
         :
-            Ostream(os.format(), os.version()),
+            Ostream(static_cast<IOstreamOption>(os)),
             DynamicList<token>(os.tokens())
         {
             setOpened();
@@ -86,7 +86,7 @@ public:
         //- Move construct
         OTstream(OTstream&& os)
         :
-            Ostream(os.format(), os.version()),
+            Ostream(static_cast<IOstreamOption>(os)),
             DynamicList<token>(std::move(os.tokens()))
         {
             setOpened();
@@ -259,14 +259,10 @@ public:
     // Additional constructors and methods (as per v2012 and earlier)
     #ifdef Foam_IOstream_extras
 
-        //- Construct empty with format, version
-        explicit OTstream
-        (
-            IOstreamOption::streamFormat fmt,
-            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
-        )
+        //- Construct empty with format
+        explicit OTstream(IOstreamOption::streamFormat fmt)
         :
-            OTstream(IOstreamOption(fmt, ver))
+            OTstream(IOstreamOption(fmt))
         {}
 
     #endif /* Foam_IOstream_extras */

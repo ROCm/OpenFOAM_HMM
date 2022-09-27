@@ -143,7 +143,7 @@ Foam::UOPstreamBase::UOPstreamBase
 )
 :
     UPstream(commsType),
-    Ostream(fmt, IOstreamOption::currentVersion),
+    Ostream(fmt),
     toProcNo_(toProcNo),
     sendBuf_(sendBuf),
     tag_(tag),
@@ -158,7 +158,7 @@ Foam::UOPstreamBase::UOPstreamBase
 Foam::UOPstreamBase::UOPstreamBase(const int toProcNo, PstreamBuffers& buffers)
 :
     UPstream(buffers.commsType()),
-    Ostream(buffers.format(), IOstreamOption::currentVersion),
+    Ostream(buffers.format()),
     toProcNo_(toProcNo),
     sendBuf_(buffers.sendBuf_[toProcNo]),
     tag_(buffers.tag()),

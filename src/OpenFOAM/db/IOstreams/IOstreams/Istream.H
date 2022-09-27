@@ -104,15 +104,14 @@ public:
             putBackAvail_(false)
         {}
 
-        //- Construct with format, version (compression)
+        //- Construct with format (uncompressed)
         explicit Istream
         (
             IOstreamOption::streamFormat fmt,
-            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion,
             IOstreamOption::compressionType cmp = IOstreamOption::UNCOMPRESSED
         )
         :
-            Istream(IOstreamOption(fmt, ver, cmp))
+            Istream(IOstreamOption(fmt, cmp))
         {}
 
 

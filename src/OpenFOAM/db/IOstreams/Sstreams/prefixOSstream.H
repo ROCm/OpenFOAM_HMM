@@ -80,19 +80,6 @@ public:
             IOstreamOption streamOpt = IOstreamOption()
         );
 
-        //- Construct and set stream status
-        prefixOSstream
-        (
-            std::ostream& os,
-            const string& streamName,
-            IOstreamOption::streamFormat fmt,
-            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion,
-            IOstreamOption::compressionType cmp = IOstreamOption::UNCOMPRESSED
-        )
-        :
-            prefixOSstream(os, streamName, IOstreamOption(fmt, ver, cmp))
-        {}
-
 
     // Member Functions
 

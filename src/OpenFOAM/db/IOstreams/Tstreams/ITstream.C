@@ -187,7 +187,7 @@ Foam::ITstream::ITstream
     const string& name
 )
 :
-    Istream(streamOpt.format(), streamOpt.version()),
+    Istream(IOstreamOption(streamOpt.format(), streamOpt.version())),
     tokenList(),
     name_(name),
     tokenIndex_(0)
@@ -215,7 +215,7 @@ Foam::ITstream::ITstream
     const string& name
 )
 :
-    Istream(streamOpt.format(), streamOpt.version()),
+    Istream(IOstreamOption(streamOpt.format(), streamOpt.version())),
     tokenList(tokens),
     name_(name),
     tokenIndex_(0)
@@ -232,7 +232,7 @@ Foam::ITstream::ITstream
     const string& name
 )
 :
-    Istream(streamOpt.format(), streamOpt.version()),
+    Istream(IOstreamOption(streamOpt.format(), streamOpt.version())),
     tokenList(std::move(tokens)),
     name_(name),
     tokenIndex_(0)

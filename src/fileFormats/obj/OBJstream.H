@@ -80,23 +80,22 @@ public:
 
     // Constructors
 
-        //- Construct from pathname
+        //- Construct from pathname (ASCII, uncompressed)
         explicit OBJstream
         (
             const fileName& pathname,
             IOstreamOption streamOpt = IOstreamOption()
         );
 
-        //- Construct from pathname
+        //- Construct from pathname, format (uncompressed)
         OBJstream
         (
             const fileName& pathname,
             IOstreamOption::streamFormat fmt,
-            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion,
             IOstreamOption::compressionType cmp = IOstreamOption::UNCOMPRESSED
         )
         :
-            OBJstream(pathname, IOstreamOption(fmt, ver, cmp))
+            OBJstream(pathname, IOstreamOption(fmt, cmp))
         {}
 
 

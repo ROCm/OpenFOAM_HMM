@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef masterOFstream_H
-#define masterOFstream_H
+#ifndef Foam_masterOFstream_H
+#define Foam_masterOFstream_H
 
 #include "StringStream.H"
 
@@ -94,26 +94,6 @@ public:
             const bool append = false,
             const bool valid = true
         );
-
-        //- Construct from pathname, version and set stream status
-        masterOFstream
-        (
-            const fileName& pathname,
-            IOstreamOption::streamFormat fmt,
-            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion,
-            IOstreamOption::compressionType cmp = IOstreamOption::UNCOMPRESSED,
-            const bool append = false,
-            const bool valid = true
-        )
-        :
-            masterOFstream
-            (
-                pathname,
-                IOstreamOption(fmt, ver, cmp),
-                append,
-                valid
-            )
-        {}
 
 
     //- Destructor - commits buffered information to file
