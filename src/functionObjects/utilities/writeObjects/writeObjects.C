@@ -55,8 +55,8 @@ const Foam::Enum
 >
 Foam::functionObjects::writeObjects::writeOptionNames_
 ({
-    { writeOption::AUTO_WRITE, "autoWrite" },
     { writeOption::NO_WRITE, "noWrite" },
+    { writeOption::AUTO_WRITE, "autoWrite" },
     { writeOption::ANY_WRITE, "anyWrite" },
 });
 
@@ -173,16 +173,7 @@ bool Foam::functionObjects::writeObjects::write()
 
         switch (writeOption_)
         {
-            case AUTO_WRITE:
-            {
-                if (obj.writeOpt() != IOobject::AUTO_WRITE)
-                {
-                    continue;
-                }
-
-                break;
-            }
-            case NO_WRITE:
+            case writeOption::NO_WRITE:
             {
                 if (obj.writeOpt() != IOobject::NO_WRITE)
                 {
@@ -191,7 +182,16 @@ bool Foam::functionObjects::writeObjects::write()
 
                 break;
             }
-            case ANY_WRITE:
+            case writeOption::AUTO_WRITE:
+            {
+                if (obj.writeOpt() != IOobject::AUTO_WRITE)
+                {
+                    continue;
+                }
+
+                break;
+            }
+            case writeOption::ANY_WRITE:
             {
                 break;
             }

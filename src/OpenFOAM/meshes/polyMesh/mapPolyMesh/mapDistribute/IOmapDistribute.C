@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2015 OpenFOAM Foundation
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,14 +40,7 @@ namespace Foam
 
 bool Foam::IOmapDistribute::readContents()
 {
-    if
-    (
-        (
-            readOpt() == IOobject::MUST_READ
-         || readOpt() == IOobject::MUST_READ_IF_MODIFIED
-        )
-     || (readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
+    if (isReadRequired() || (isReadOptional() && headerOk()))
     {
         readStream(typeName) >> *this;
         close();

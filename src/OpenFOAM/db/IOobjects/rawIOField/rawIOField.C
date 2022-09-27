@@ -40,15 +40,10 @@ Foam::rawIOField<Type>::rawIOField(const IOobject& io, const bool readAverage)
     // Check for MUST_READ_IF_MODIFIED
     warnNoRereading<rawIOField<Type>>();
 
-    if
-    (
-        io.readOpt() == IOobject::MUST_READ
-     || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
-     || io.readOpt() == IOobject::READ_IF_PRESENT
-    )
+    if (io.isReadRequired() || io.isReadOptional())
     {
         bool haveFile = false;
-        bool headerOk = false;
+        bool haveHeader = false;
 
         // Replacement of regIOobject::headerok() since that one complains
         // if there is no header. TBD - Move up to headerOk()/fileHandler.
@@ -66,19 +61,19 @@ Foam::rawIOField<Type>::rawIOField(const IOobject& io, const bool readAverage)
 
                 const token firstToken(is);
 
-                headerOk = is.good() && firstToken.isWord("FoamFile");
+                haveHeader = is.good() && firstToken.isWord("FoamFile");
             }
 
             if (debug)
             {
                 Pout<< "rawIOField : object:" << io.name()
                     << " haveFile:" << haveFile
-                    << " headerOk:" << headerOk << endl;
+                    << " haveHeader:" << haveHeader << endl;
             }
         }
 
 
-        if (headerOk)
+        if (haveHeader)
         {
             // Read but don't fail upon wrong class. Could extend by providing
             // wanted typeName. Tbd.
@@ -113,8 +108,8 @@ Foam::rawIOField<Type>::rawIOField(const IOobject& io, const bool readAverage)
             }
             else
             {
-                // Error if missing and MUST_READ or MUST_READ_IF_MODIFIED
-                if (io.readOpt() != IOobject::READ_IF_PRESENT)
+                // Error if required but missing
+                if (io.isReadRequired())
                 {
                     FatalIOErrorInFunction(*isPtr)
                         << "Trying to read raw field" << endl

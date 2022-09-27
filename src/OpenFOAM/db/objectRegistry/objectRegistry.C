@@ -518,7 +518,7 @@ bool Foam::objectRegistry::writeObject
                 << " to file " << obj.objectRelPath() << endl;
         }
 
-        if (iter.val()->writeOpt() != NO_WRITE)
+        if (iter.val()->writeOpt() != IOobjectOption::NO_WRITE)
         {
             ok = iter.val()->writeObject(streamOpt, valid) && ok;
         }

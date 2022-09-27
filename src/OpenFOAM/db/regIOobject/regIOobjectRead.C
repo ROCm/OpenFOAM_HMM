@@ -54,7 +54,7 @@ bool Foam::regIOobject::readHeaderOk
 
     // Check if header is ok for READ_IF_PRESENT
     bool isHeaderOk = false;
-    if (readOpt() == IOobject::READ_IF_PRESENT)
+    if (isReadOptional())
     {
         if (masterOnly)
         {
@@ -70,14 +70,7 @@ bool Foam::regIOobject::readHeaderOk
         }
     }
 
-    if
-    (
-        (
-            readOpt() == IOobject::MUST_READ
-         || readOpt() == IOobject::MUST_READ_IF_MODIFIED
-        )
-     || isHeaderOk
-    )
+    if (isReadRequired() || isHeaderOk)
     {
         return fileHandler().read(*this, masterOnly, fmt, typeName);
     }
@@ -90,7 +83,7 @@ bool Foam::regIOobject::readHeaderOk
 
 void Foam::regIOobject::readStream(const bool valid)
 {
-    if (readOpt() == NO_READ)
+    if (readOpt() == IOobject::NO_READ)
     {
         FatalErrorInFunction
             << "NO_READ specified for read-constructor of object " << name()

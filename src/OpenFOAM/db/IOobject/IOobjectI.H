@@ -58,6 +58,98 @@ inline Foam::word Foam::IOobject::scopedName
 }
 
 
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+inline Foam::IOobject::IOobject
+(
+    const word& name,
+    const fileName& instance,
+    const objectRegistry& registry,
+    IOobjectOption::readOption rOpt,
+    IOobjectOption::writeOption wOpt,
+    bool registerObject,
+    bool globalObject
+)
+:
+    IOobject
+    (
+        name,
+        instance,
+        registry,
+        IOobjectOption(rOpt, wOpt, registerObject, globalObject)
+    )
+{}
+
+
+inline Foam::IOobject::IOobject
+(
+    const word& name,
+    const fileName& instance,
+    const fileName& local,
+    const objectRegistry& registry,
+    IOobjectOption::readOption rOpt,
+    IOobjectOption::writeOption wOpt,
+    bool registerObject,
+    bool globalObject
+)
+:
+    IOobject
+    (
+        name,
+        instance,
+        local,
+        registry,
+        IOobjectOption(rOpt, wOpt, registerObject, globalObject)
+    )
+{}
+
+
+inline Foam::IOobject::IOobject
+(
+    const fileName& path,
+    const objectRegistry& registry,
+    IOobjectOption::readOption rOpt,
+    IOobjectOption::writeOption wOpt,
+    bool registerObject,
+    bool globalObject
+)
+:
+    IOobject
+    (
+        path,
+        registry,
+        IOobjectOption(rOpt, wOpt, registerObject, globalObject)
+    )
+{}
+
+
+inline Foam::IOobject::IOobject
+(
+    const IOobject& io,
+    const word& name,
+    const fileName& local
+)
+:
+    IOobject(io, name)
+{
+    local_ = local;
+}
+
+
+inline Foam::IOobject::IOobject
+(
+    const IOobject& io,
+    IOobjectOption::readOption rOpt,
+    IOobjectOption::writeOption wOpt
+)
+:
+    IOobject(io)
+{
+    readOpt(rOpt);
+    writeOpt(wOpt);
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 // General access
@@ -104,34 +196,6 @@ inline Foam::string& Foam::IOobject::note() noexcept
 }
 
 
-inline bool Foam::IOobject::registerObject() const noexcept
-{
-    return registerObject_;
-}
-
-
-inline bool Foam::IOobject::registerObject(bool on) noexcept
-{
-    bool old(registerObject_);
-    registerObject_ = on;
-    return old;
-}
-
-
-inline bool Foam::IOobject::globalObject() const noexcept
-{
-    return globalObject_;
-}
-
-
-inline bool Foam::IOobject::globalObject(bool on) noexcept
-{
-    bool old(globalObject_);
-    globalObject_ = on;
-    return old;
-}
-
-
 inline unsigned Foam::IOobject::labelByteSize() const noexcept
 {
     return static_cast<unsigned>(sizeofLabel_);
@@ -156,38 +220,6 @@ template<class Type>
 inline bool Foam::IOobject::isHeaderClass() const
 {
     return (Type::typeName == headerClassName_);
-}
-
-
-// Read/write options
-
-inline Foam::IOobject::readOption Foam::IOobject::readOpt() const noexcept
-{
-    return rOpt_;
-}
-
-
-inline Foam::IOobject::readOption
-Foam::IOobject::readOpt(readOption opt) noexcept
-{
-    readOption old(rOpt_);
-    rOpt_ = opt;
-    return old;
-}
-
-
-inline Foam::IOobject::writeOption Foam::IOobject::writeOpt() const noexcept
-{
-    return wOpt_;
-}
-
-
-inline Foam::IOobject::writeOption
-Foam::IOobject::writeOpt(writeOption opt) noexcept
-{
-    writeOption old(wOpt_);
-    wOpt_ = opt;
-    return old;
 }
 
 

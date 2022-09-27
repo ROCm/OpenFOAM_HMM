@@ -90,7 +90,7 @@ void writeAndRead
     const IOobject& io,
     const label sz,
     const word& writeType,
-    const IOobject::readOption rOpt,
+    IOobjectOption::readOption rOpt,
     const word& readType
 )
 {
@@ -208,7 +208,8 @@ int main(int argc, char *argv[])
         runTime.timeName(),
         mesh,
         IOobject::NO_READ,
-        IOobject::NO_WRITE
+        IOobject::NO_WRITE,
+        IOobject::NO_REGISTER
     );
 
     {
@@ -243,9 +244,7 @@ int main(int argc, char *argv[])
             args.executable(),
             "constant",
             runTime,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER  // implicit convert to IOobjectOption
         );
 
         labelList ints(identity(200));

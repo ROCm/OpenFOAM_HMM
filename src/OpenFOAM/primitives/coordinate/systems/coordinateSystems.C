@@ -88,14 +88,7 @@ void Foam::coordinateSystems::readFromStream(const bool valid)
 
 bool Foam::coordinateSystems::readContents()
 {
-    if
-    (
-        (
-            readOpt() == IOobject::MUST_READ
-         || readOpt() == IOobject::MUST_READ_IF_MODIFIED
-        )
-     || (readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
+    if (isReadRequired() || (isReadOptional() && headerOk()))
     {
         readFromStream();
         return true;

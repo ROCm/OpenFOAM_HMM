@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,12 +31,12 @@ Description
     Like faceSet but -reads data from faceZone -updates faceZone when writing.
 
 SourceFiles
-    faceZone.C
+    faceZoneSet.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef faceZoneSet_H
-#define faceZoneSet_H
+#ifndef Foam_faceZoneSet_H
+#define Foam_faceZoneSet_H
 
 #include "faceSet.H"
 
@@ -75,8 +75,8 @@ public:
         (
             const polyMesh& mesh,
             const word& name,
-            readOption r=MUST_READ,
-            writeOption w=NO_WRITE
+            IOobjectOption::readOption rOpt = IOobjectOption::MUST_READ,
+            IOobjectOption::writeOption wOpt = IOobjectOption::NO_WRITE
         );
 
         //- Construct with initial size for labelHashSet
@@ -85,7 +85,7 @@ public:
             const polyMesh& mesh,
             const word& name,
             const label size,
-            writeOption w=NO_WRITE
+            IOobjectOption::writeOption wOpt = IOobjectOption::NO_WRITE
         );
 
         //- Copy construct from existing set
@@ -94,7 +94,7 @@ public:
             const polyMesh& mesh,
             const word& name,
             const topoSet& set,
-            writeOption w=NO_WRITE
+            IOobjectOption::writeOption wOpt = IOobjectOption::NO_WRITE
         );
 
 

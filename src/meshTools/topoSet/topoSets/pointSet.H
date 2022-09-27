@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef pointSet_H
-#define pointSet_H
+#ifndef Foam_pointSet_H
+#define Foam_pointSet_H
 
 #include "topoSet.H"
 
@@ -62,15 +62,15 @@ public:
     // Constructors
 
         //- Construct from IOobject
-        explicit pointSet(const IOobject& obj);
+        explicit pointSet(const IOobject& io);
 
         //- Construct from objectRegistry and name
         pointSet
         (
             const polyMesh& mesh,
             const word& name,
-            readOption r=MUST_READ,
-            writeOption w=NO_WRITE
+            IOobjectOption::readOption rOpt = IOobjectOption::MUST_READ,
+            IOobjectOption::writeOption wOpt = IOobjectOption::NO_WRITE
         );
 
         //- Construct empty with initial size for labelHashSet
@@ -79,7 +79,7 @@ public:
             const polyMesh& mesh,
             const word& name,
             const label size,
-            writeOption w=NO_WRITE
+            IOobjectOption::writeOption wOpt = IOobjectOption::NO_WRITE
         );
 
         //- Construct from existing set
@@ -88,7 +88,7 @@ public:
             const polyMesh& mesh,
             const word& name,
             const topoSet& set,
-            writeOption w=NO_WRITE
+            IOobjectOption::writeOption wOpt = IOobjectOption::NO_WRITE
         );
 
         //- Construct (no-read) with copy of labelHashSet
@@ -97,7 +97,7 @@ public:
             const polyMesh& mesh,
             const word& name,
             const labelHashSet& labels,
-            writeOption w=NO_WRITE
+            IOobjectOption::writeOption wOpt = IOobjectOption::NO_WRITE
         );
 
         //- Construct (no-read) with moving labelHashSet
@@ -106,7 +106,7 @@ public:
             const polyMesh& mesh,
             const word& name,
             labelHashSet&& labels,
-            writeOption w=NO_WRITE
+            IOobjectOption::writeOption wOpt = IOobjectOption::NO_WRITE
         );
 
         //- Construct (no-read) with copy of labels
@@ -115,7 +115,7 @@ public:
             const polyMesh& mesh,
             const word& name,
             const labelUList& labels,
-            writeOption w=NO_WRITE
+            IOobjectOption::writeOption wOpt = IOobjectOption::NO_WRITE
         );
 
 

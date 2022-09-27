@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,9 +47,9 @@ addToRunTimeSelectionTable(topoSet, cellSet, set);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::cellSet::cellSet(const IOobject& obj)
+Foam::cellSet::cellSet(const IOobject& io)
 :
-    topoSet(obj, typeName)
+    topoSet(io, typeName)
 {}
 
 
@@ -57,11 +57,11 @@ Foam::cellSet::cellSet
 (
     const polyMesh& mesh,
     const word& name,
-    readOption r,
-    writeOption w
+    IOobjectOption::readOption rOpt,
+    IOobjectOption::writeOption wOpt
 )
 :
-    topoSet(mesh, typeName, name, r, w)
+    topoSet(mesh, typeName, name, rOpt, wOpt)
 {
     // Make sure set within valid range
     check(mesh.nCells());
@@ -73,10 +73,10 @@ Foam::cellSet::cellSet
     const polyMesh& mesh,
     const word& name,
     const label size,
-    writeOption w
+    IOobjectOption::writeOption wOpt
 )
 :
-    topoSet(mesh, name, size, w)
+    topoSet(mesh, name, size, wOpt)
 {}
 
 
@@ -85,10 +85,10 @@ Foam::cellSet::cellSet
     const polyMesh& mesh,
     const word& name,
     const topoSet& set,
-    writeOption w
+    IOobjectOption::writeOption wOpt
 )
 :
-    topoSet(mesh, name, set, w)
+    topoSet(mesh, name, set, wOpt)
 {}
 
 
@@ -97,10 +97,10 @@ Foam::cellSet::cellSet
     const polyMesh& mesh,
     const word& name,
     const labelHashSet& labels,
-    writeOption w
+    IOobjectOption::writeOption wOpt
 )
 :
-    topoSet(mesh, name, labels, w)
+    topoSet(mesh, name, labels, wOpt)
 {}
 
 
@@ -109,10 +109,10 @@ Foam::cellSet::cellSet
     const polyMesh& mesh,
     const word& name,
     labelHashSet&& labels,
-    writeOption w
+    IOobjectOption::writeOption wOpt
 )
 :
-    topoSet(mesh, name, std::move(labels), w)
+    topoSet(mesh, name, std::move(labels), wOpt)
 {}
 
 
@@ -121,10 +121,10 @@ Foam::cellSet::cellSet
     const polyMesh& mesh,
     const word& name,
     const labelUList& labels,
-    writeOption w
+    IOobjectOption::writeOption wOpt
 )
 :
-    topoSet(mesh, name, labels, w)
+    topoSet(mesh, name, labels, wOpt)
 {}
 
 
@@ -133,13 +133,13 @@ Foam::cellSet::cellSet
 (
     const Time& runTime,
     const word& name,
-    readOption r,
-    writeOption w
+    IOobjectOption::readOption rOpt,
+    IOobjectOption::writeOption wOpt
 )
 :
     topoSet
     (
-        findIOobject(runTime, name, r, w),
+        findIOobject(runTime, name, rOpt, wOpt),
         typeName
     )
 {}
@@ -150,12 +150,12 @@ Foam::cellSet::cellSet
     const Time& runTime,
     const word& name,
     const label size,
-    writeOption w
+    IOobjectOption::writeOption wOpt
 )
 :
     topoSet
     (
-        findIOobject(runTime, name, IOobject::NO_READ, w),
+        findIOobject(runTime, name, IOobject::NO_READ, wOpt),
         size
     )
 {}
@@ -166,12 +166,12 @@ Foam::cellSet::cellSet
     const Time& runTime,
     const word& name,
     const labelHashSet& labels,
-    writeOption w
+    IOobjectOption::writeOption wOpt
 )
 :
     topoSet
     (
-        findIOobject(runTime, name, IOobject::NO_READ, w),
+        findIOobject(runTime, name, IOobject::NO_READ, wOpt),
         labels
     )
 {}

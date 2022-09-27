@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -80,11 +80,7 @@ bool Foam::IOobject::readHeader(dictionary& headerDict, Istream& is)
     // Check Istream not already bad
     if (!is.good())
     {
-        if
-        (
-            rOpt_ == IOobject::MUST_READ
-         || rOpt_ == IOobject::MUST_READ_IF_MODIFIED
-        )
+        if (isReadRequired())
         {
             FatalIOErrorInFunction(is)
                 << " stream not open for reading essential object from file "
@@ -140,11 +136,7 @@ bool Foam::IOobject::readHeader(dictionary& headerDict, Istream& is)
 
     if (objState_ == objectState::BAD)
     {
-        if
-        (
-            rOpt_ == IOobject::MUST_READ
-         || rOpt_ == IOobject::MUST_READ_IF_MODIFIED
-        )
+        if (isReadRequired())
         {
             FatalIOErrorInFunction(is)
                 << " stream failure while reading header"

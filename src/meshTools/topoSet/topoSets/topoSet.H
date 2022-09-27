@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,8 +36,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef topoSet_H
-#define topoSet_H
+#ifndef Foam_topoSet_H
+#define Foam_topoSet_H
 
 #include "HashSet.H"
 #include "regIOobject.H"
@@ -128,8 +128,8 @@ public:
         (
             const polyMesh& mesh,
             const word& name,
-            readOption r=MUST_READ,
-            writeOption w=NO_WRITE
+            IOobjectOption::readOption rOpt = IOobjectOption::MUST_READ,
+            IOobjectOption::writeOption wOpt = IOobjectOption::NO_WRITE
         );
 
         //- Find IOobject in the polyMesh/sets (used as constructor helper)
@@ -137,8 +137,8 @@ public:
         (
             const Time& runTime,
             const word& name,
-            readOption r=MUST_READ,
-            writeOption w=NO_WRITE
+            IOobjectOption::readOption rOpt = IOobjectOption::MUST_READ,
+            IOobjectOption::writeOption wOpt = IOobjectOption::NO_WRITE
         );
 
 
@@ -153,10 +153,10 @@ public:
             (
                 const polyMesh& mesh,
                 const word& name,
-                readOption r,
-                writeOption w
+                IOobjectOption::readOption rOpt,
+                IOobjectOption::writeOption wOpt
             ),
-            (mesh, name, r, w)
+            (mesh, name, rOpt, wOpt)
         );
 
         // For the constructor from size
@@ -169,9 +169,9 @@ public:
                 const polyMesh& mesh,
                 const word& name,
                 const label size,
-                writeOption w
+                IOobjectOption::writeOption wOpt
             ),
-            (mesh, name, size, w)
+            (mesh, name, size, wOpt)
         );
 
         // For the constructor as copy
@@ -184,9 +184,9 @@ public:
                 const polyMesh& mesh,
                 const word& name,
                 const topoSet& set,
-                writeOption w
+                IOobjectOption::writeOption wOpt
             ),
-            (mesh, name, set, w)
+            (mesh, name, set, wOpt)
         );
 
 
@@ -194,7 +194,7 @@ public:
 
         //- Construct from IOobject as explicitly passed type.
         //  Can't use typeName info here since subclasses not yet instantiated
-        topoSet(const IOobject& obj, const word& wantedType);
+        topoSet(const IOobject& io, const word& wantedType);
 
         //- Construct from polyMesh and name.
         //  Searches for a polyMesh/sets directory but not beyond the
@@ -204,8 +204,8 @@ public:
             const polyMesh& mesh,
             const word& wantedType,
             const word& name,
-            readOption r=MUST_READ,
-            writeOption w=NO_WRITE
+            IOobjectOption::readOption rOpt = IOobjectOption::MUST_READ,
+            IOobjectOption::writeOption wOpt = IOobjectOption::NO_WRITE
         );
 
         //- Construct empty from additional size of labelHashSet.
@@ -216,7 +216,7 @@ public:
             const polyMesh& mesh,
             const word& name,
             const label size,
-            writeOption w=NO_WRITE
+            IOobjectOption::writeOption wOpt = IOobjectOption::NO_WRITE
         );
 
         //- Construct (no-read) with copy of labelHashSet
@@ -227,7 +227,7 @@ public:
             const polyMesh& mesh,
             const word& name,
             const labelHashSet& labels,
-            writeOption w=NO_WRITE
+            IOobjectOption::writeOption wOpt = IOobjectOption::NO_WRITE
         );
 
         //- Construct (no-read) with moving labelHashSet
@@ -238,7 +238,7 @@ public:
             const polyMesh& mesh,
             const word& name,
             labelHashSet&& labels,
-            writeOption w=NO_WRITE
+            IOobjectOption::writeOption wOpt = IOobjectOption::NO_WRITE
         );
 
         //- Construct (no-read) with copy of labels
@@ -249,7 +249,7 @@ public:
             const polyMesh& mesh,
             const word& name,
             const labelUList& labels,
-            writeOption w=NO_WRITE
+            IOobjectOption::writeOption wOpt = IOobjectOption::NO_WRITE
         );
 
         //- Construct empty from IOobject and HashSet size.
@@ -278,8 +278,8 @@ public:
             const word& setType,
             const polyMesh& mesh,
             const word& name,
-            readOption r=MUST_READ,
-            writeOption w=NO_WRITE
+            IOobjectOption::readOption rOpt = IOobjectOption::MUST_READ,
+            IOobjectOption::writeOption wOpt = IOobjectOption::NO_WRITE
         );
 
         //- Return a pointer to a new toposet of given size
@@ -289,7 +289,7 @@ public:
             const polyMesh& mesh,
             const word& name,
             const label size,
-            writeOption w=NO_WRITE
+            IOobjectOption::writeOption wOpt = IOobjectOption::NO_WRITE
         );
 
         //- Return a pointer to a new toposet as copy of another toposet
@@ -299,7 +299,7 @@ public:
             const polyMesh& mesh,
             const word& name,
             const topoSet& set,
-            writeOption w=NO_WRITE
+            IOobjectOption::writeOption wOpt = IOobjectOption::NO_WRITE
         );
 
 

@@ -155,12 +155,7 @@ void Foam::ZoneMesh<ZoneType, MeshType>::calcGroupIDs() const
 template<class ZoneType, class MeshType>
 bool Foam::ZoneMesh<ZoneType, MeshType>::readContents()
 {
-    if
-    (
-        readOpt() == IOobject::MUST_READ
-     || readOpt() == IOobject::MUST_READ_IF_MODIFIED
-     || (readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
+    if (isReadRequired() || (isReadOptional() && headerOk()))
     {
         // Warn for MUST_READ_IF_MODIFIED
         warnNoRereading<ZoneMesh<ZoneType, MeshType>>();

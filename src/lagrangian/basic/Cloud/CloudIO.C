@@ -190,7 +190,7 @@ template<class ParticleType>
 Foam::IOobject Foam::Cloud<ParticleType>::fieldIOobject
 (
     const word& fieldName,
-    const IOobject::readOption r
+    IOobjectOption::readOption rOpt
 ) const
 {
     return IOobject
@@ -198,7 +198,7 @@ Foam::IOobject Foam::Cloud<ParticleType>::fieldIOobject
         fieldName,
         time().timeName(),
         *this,
-        r,
+        rOpt,
         IOobject::NO_WRITE,
         false
     );

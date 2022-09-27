@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,12 +60,7 @@ void Foam::DimensionedField<Type, GeoMesh>::readIfPresent
     const word& fieldDictEntry
 )
 {
-    if
-    (
-        (this->readOpt() == IOobject::READ_IF_PRESENT && this->headerOk())
-     || this->readOpt() == IOobject::MUST_READ
-     || this->readOpt() == IOobject::MUST_READ_IF_MODIFIED
-    )
+    if (this->isReadRequired() || (this->isReadOptional() && this->headerOk()))
     {
         readField(dictionary(readStream(typeName)), fieldDictEntry);
     }

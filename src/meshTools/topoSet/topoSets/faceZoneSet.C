@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,8 +66,8 @@ Foam::faceZoneSet::faceZoneSet
 (
     const polyMesh& mesh,
     const word& name,
-    readOption r,
-    writeOption w
+    IOobjectOption::readOption rOpt,
+    IOobjectOption::writeOption wOpt
 )
 :
     faceSet(mesh, name, 1024),  // do not read faceSet
@@ -80,9 +80,8 @@ Foam::faceZoneSet::faceZoneSet
 
     if
     (
-        (r == IOobject::MUST_READ)
-     || (r == IOobject::MUST_READ_IF_MODIFIED)
-     || (r == IOobject::READ_IF_PRESENT && zoneID != -1)
+         IOobjectOption::isReadRequired(rOpt)
+     || (IOobjectOption::isReadOptional(rOpt) && zoneID != -1)
     )
     {
         const faceZone& fz = faceZones[zoneID];
@@ -101,10 +100,10 @@ Foam::faceZoneSet::faceZoneSet
     const polyMesh& mesh,
     const word& name,
     const label size,
-    writeOption w
+    IOobjectOption::writeOption wOpt
 )
 :
-    faceSet(mesh, name, size, w),
+    faceSet(mesh, name, size, wOpt),
     mesh_(mesh),
     addressing_(),
     flipMap_()
@@ -118,10 +117,10 @@ Foam::faceZoneSet::faceZoneSet
     const polyMesh& mesh,
     const word& name,
     const topoSet& set,
-    writeOption w
+    IOobjectOption::writeOption wOpt
 )
 :
-    faceSet(mesh, name, set.size(), w),
+    faceSet(mesh, name, set.size(), wOpt),
     mesh_(mesh),
     addressing_(refCast<const faceZoneSet>(set).addressing()),
     flipMap_(refCast<const faceZoneSet>(set).flipMap())

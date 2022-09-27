@@ -111,13 +111,8 @@ bool Foam::polyBoundaryMesh::readContents(const bool allowReadIfPresent)
 {
     if
     (
-        this->readOpt() == IOobject::MUST_READ
-     || this->readOpt() == IOobject::MUST_READ_IF_MODIFIED
-     ||
-        (
-            allowReadIfPresent
-         && (this->readOpt() == IOobject::READ_IF_PRESENT && this->headerOk())
-        )
+        this->isReadRequired()
+     || (allowReadIfPresent && this->isReadOptional() && this->headerOk())
     )
     {
         // Warn for MUST_READ_IF_MODIFIED

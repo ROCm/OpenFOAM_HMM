@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,12 +43,7 @@ Foam::featureEdgeMesh::featureEdgeMesh(const IOobject& io)
     regIOobject(io),
     edgeMesh()
 {
-    if
-    (
-        io.readOpt() == IOobject::MUST_READ
-     || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
+    if (isReadRequired() || (isReadOptional() && headerOk()))
     {
         readStream(typeName) >> *this;
         close();

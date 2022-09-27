@@ -35,7 +35,7 @@ License
 void Foam::polyMesh::setInstance
 (
     const fileName& inst,
-    const IOobject::writeOption wOpt
+    const IOobjectOption::writeOption wOpt
 )
 {
     DebugInFunction << "Resetting file instance to " << inst << endl;

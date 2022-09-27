@@ -414,7 +414,7 @@ public:
             void setInstance
             (
                 const fileName& instance,
-                const IOobject::writeOption wOpt = IOobject::AUTO_WRITE
+                const IOobjectOption::writeOption wOpt = IOobject::AUTO_WRITE
             );
 
 

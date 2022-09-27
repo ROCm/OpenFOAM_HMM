@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef polyBoundaryMeshEntries_H
-#define polyBoundaryMeshEntries_H
+#ifndef Foam_polyBoundaryMeshEntries_H
+#define Foam_polyBoundaryMeshEntries_H
 
 #include "regIOobject.H"
 #include "PtrList.H"
@@ -69,14 +69,7 @@ public:
             regIOobject(io),
             PtrList<entry>()
         {
-            if
-            (
-                (
-                    io.readOpt() == IOobject::MUST_READ
-                 || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
-                )
-             || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-            )
+            if (isReadRequired() || (isReadOptional() && headerOk()))
             {
                 readStream(typeName) >> *this;
             }

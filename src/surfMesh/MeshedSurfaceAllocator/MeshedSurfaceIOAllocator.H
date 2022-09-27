@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef MeshedSurfaceIOAllocator_H
-#define MeshedSurfaceIOAllocator_H
+#ifndef Foam_MeshedSurfaceIOAllocator_H
+#define Foam_MeshedSurfaceIOAllocator_H
 
 #include "pointIOField.H"
 #include "faceIOList.H"
@@ -110,7 +110,7 @@ public:
         void setInstance(const fileName& inst);
 
         //- Adjust the write option for all components
-        void setWriteOption(IOobject::writeOption wOpt);
+        void setWriteOption(IOobjectOption::writeOption wOpt);
 
 
     // Access

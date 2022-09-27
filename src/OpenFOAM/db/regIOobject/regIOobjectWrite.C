@@ -141,16 +141,4 @@ bool Foam::regIOobject::write(const bool valid) const
 }
 
 
-bool Foam::regIOobject::writeObject
-(
-    IOstreamOption::streamFormat fmt,
-    IOstreamOption::versionNumber ver,
-    IOstreamOption::compressionType cmp,
-    const bool valid
-) const
-{
-    return writeObject(IOstreamOption(fmt, ver, cmp), valid);
-}
-
-
 // ************************************************************************* //

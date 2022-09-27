@@ -147,7 +147,7 @@ void Foam::solution::read(const dictionary& dict)
 Foam::solution::solution
 (
     const objectRegistry& obr,
-    const IOobject::readOption rOpt,
+    IOobjectOption::readOption rOpt,
     const fileName& dictName,
     const dictionary* fallback
 )
@@ -174,7 +174,7 @@ Foam::solution::solution
     if
     (
         readOpt() == IOobject::MUST_READ
-     || (readOpt() == IOobject::READ_IF_PRESENT && headerOk())
+     || (isReadOptional() && headerOk())
     )
     {
         readOpt(IOobject::MUST_READ_IF_MODIFIED);

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,8 +38,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef surfMesh_H
-#define surfMesh_H
+#ifndef Foam_surfMesh_H
+#define Foam_surfMesh_H
 
 #include "surfaceRegistry.H"
 #include "MeshedSurfaceIOAllocator.H"
@@ -206,11 +206,11 @@ public:
         void setInstance
         (
             const fileName& inst,
-            IOobject::writeOption wOpt = IOobject::AUTO_WRITE
+            IOobjectOption::writeOption wOpt = IOobjectOption::AUTO_WRITE
         );
 
         //- Adjust the write option for all components
-        void setWriteOption(IOobject::writeOption wOpt);
+        void setWriteOption(IOobjectOption::writeOption wOpt);
 
 
     // Access

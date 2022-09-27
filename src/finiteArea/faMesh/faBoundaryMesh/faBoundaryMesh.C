@@ -106,13 +106,8 @@ bool Foam::faBoundaryMesh::readContents(const bool allowReadIfPresent)
 {
     if
     (
-        readOpt() == IOobject::MUST_READ
-     || readOpt() == IOobject::MUST_READ_IF_MODIFIED
-     ||
-        (
-            allowReadIfPresent
-         && (readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-        )
+        isReadRequired()
+     || (allowReadIfPresent && isReadOptional() && headerOk())
     )
     {
         // Warn for MUST_READ_IF_MODIFIED

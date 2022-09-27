@@ -61,6 +61,23 @@ void Foam::CompactIOField<T, BaseType>::readFromStream(const bool valid)
 }
 
 
+template<class T, class BaseType>
+bool Foam::CompactIOField<T, BaseType>::readContents()
+{
+    if
+    (
+        readOpt() == IOobject::MUST_READ
+     || (isReadOptional() && headerOk())
+    )
+    {
+        readFromStream();
+        return true;
+    }
+
+    return false;
+}
+
+
 // * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * //
 
 template<class T, class BaseType>
@@ -68,14 +85,7 @@ Foam::CompactIOField<T, BaseType>::CompactIOField(const IOobject& io)
 :
     regIOobject(io)
 {
-    if
-    (
-        io.readOpt() == IOobject::MUST_READ
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
-    {
-        readFromStream();
-    }
+    readContents();
 }
 
 
@@ -88,11 +98,11 @@ Foam::CompactIOField<T, BaseType>::CompactIOField
 :
     regIOobject(io)
 {
-    if (io.readOpt() == IOobject::MUST_READ)
+    if (readOpt() == IOobject::MUST_READ)
     {
         readFromStream(valid);
     }
-    else if (io.readOpt() == IOobject::READ_IF_PRESENT)
+    else if (isReadOptional())
     {
         bool haveFile = headerOk();
         readFromStream(valid && haveFile);
@@ -109,14 +119,7 @@ Foam::CompactIOField<T, BaseType>::CompactIOField
 :
     regIOobject(io)
 {
-    if
-    (
-        io.readOpt() == IOobject::MUST_READ
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
-    {
-        readFromStream();
-    }
+    readContents();
 }
 
 
@@ -129,15 +132,7 @@ Foam::CompactIOField<T, BaseType>::CompactIOField
 :
     regIOobject(io)
 {
-    if
-    (
-        io.readOpt() == IOobject::MUST_READ
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
-    {
-        readFromStream();
-    }
-    else
+    if (!readContents())
     {
         Field<T>::resize(len);
     }
@@ -153,15 +148,7 @@ Foam::CompactIOField<T, BaseType>::CompactIOField
 :
     regIOobject(io)
 {
-    if
-    (
-        io.readOpt() == IOobject::MUST_READ
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
-    {
-        readFromStream();
-    }
-    else
+    if (!readContents())
     {
         Field<T>::operator=(content);
     }
@@ -179,14 +166,7 @@ Foam::CompactIOField<T, BaseType>::CompactIOField
 {
     Field<T>::transfer(content);
 
-    if
-    (
-        io.readOpt() == IOobject::MUST_READ
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
-    {
-        readFromStream();
-    }
+    readContents();
 }
 
 

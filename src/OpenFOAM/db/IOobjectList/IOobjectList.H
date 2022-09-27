@@ -182,8 +182,8 @@ public:
             const objectRegistry& db,
             const fileName& instance,
             const fileName& local = "",
-            IOobject::readOption rOpt = IOobject::MUST_READ,
-            IOobject::writeOption wOpt = IOobject::NO_WRITE,
+            IOobjectOption::readOption rOpt = IOobjectOption::MUST_READ,
+            IOobjectOption::writeOption wOpt = IOobjectOption::NO_WRITE,
             bool registerObject = true
         );
 

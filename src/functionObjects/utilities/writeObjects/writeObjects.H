@@ -83,8 +83,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef functionObjects_writeObjects_H
-#define functionObjects_writeObjects_H
+#ifndef Foam_functionObjects_writeObjects_H
+#define Foam_functionObjects_writeObjects_H
 
 #include "functionObject.H"
 #include "wordRes.H"
@@ -111,14 +111,14 @@ class writeObjects
 {
 public:
 
-    // Public data types
+    // Public Data Types
 
-        //- Re-enumeration defining the write options, based on the original
-        //  ones at IOobject::writeOption
+        //- Re-enumeration defining the write options,
+        //- Naming based on the IOobjectOption::writeOption
         enum writeOption
         {
-            AUTO_WRITE,
             NO_WRITE,
+            AUTO_WRITE,
             ANY_WRITE
         };
 
@@ -126,7 +126,7 @@ public:
 
 private:
 
-    // Private data
+    // Private Data
 
         //- Reference to registry
         const objectRegistry& obr_;

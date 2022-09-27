@@ -96,7 +96,7 @@ public:
         polyTopoChanger(const IOobject& io, polyMesh& mesh);
 
         //- Read construct for given polyMesh and read-option
-        polyTopoChanger(polyMesh& mesh, const IOobject::readOption rOpt);
+        polyTopoChanger(polyMesh& mesh, IOobjectOption::readOption rOpt);
 
         //- Read construct for given polyMesh.
         //  Uses read-option READ_IF_PRESENT

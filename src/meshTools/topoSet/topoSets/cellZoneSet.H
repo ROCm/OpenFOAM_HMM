@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,12 +31,12 @@ Description
     Like cellSet but -reads data from cellZone -updates cellZone when writing.
 
 SourceFiles
-    cellZone.C
+    cellZoneSet.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cellZoneSet_H
-#define cellZoneSet_H
+#ifndef Foam_cellZoneSet_H
+#define Foam_cellZoneSet_H
 
 #include "cellSet.H"
 
@@ -72,8 +72,8 @@ public:
         (
             const polyMesh& mesh,
             const word& name,
-            readOption r=MUST_READ,
-            writeOption w=NO_WRITE
+            IOobjectOption::readOption rOpt = IOobjectOption::MUST_READ,
+            IOobjectOption::writeOption wOpt = IOobjectOption::NO_WRITE
         );
 
         //- Construct from initial size for labelHashSet
@@ -82,7 +82,7 @@ public:
             const polyMesh& mesh,
             const word& name,
             const label size,
-            writeOption w=NO_WRITE
+            IOobjectOption::writeOption wOpt = IOobjectOption::NO_WRITE
         );
 
         //- Copy construct from existing set
@@ -91,7 +91,7 @@ public:
             const polyMesh& mesh,
             const word& name,
             const topoSet& set,
-            writeOption w=NO_WRITE
+            IOobjectOption::writeOption wOpt = IOobjectOption::NO_WRITE
         );
 
 

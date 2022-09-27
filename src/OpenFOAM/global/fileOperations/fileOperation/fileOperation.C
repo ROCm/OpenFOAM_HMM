@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1025,11 +1025,7 @@ Foam::IOobject Foam::fileOperation::findInstance
     }
 
     // Handling failures afterwards
-    const bool exitIfMissing
-    (
-        startIO.readOpt() == IOobject::MUST_READ
-     || startIO.readOpt() == IOobject::MUST_READ_IF_MODIFIED
-    );
+    const bool exitIfMissing = startIO.isReadRequired();
 
     enum failureCodes { FAILED_STOPINST = 1, FAILED_CONSTINST = 2 };
     int failed(0);

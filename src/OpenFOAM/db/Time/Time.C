@@ -787,7 +787,7 @@ Foam::word Foam::Time::findInstance
 (
     const fileName& dir,
     const word& name,
-    const IOobject::readOption rOpt,
+    IOobjectOption::readOption rOpt,
     const word& stopInstance
 ) const
 {

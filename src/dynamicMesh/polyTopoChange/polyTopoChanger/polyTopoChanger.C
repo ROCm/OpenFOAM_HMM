@@ -44,12 +44,7 @@ namespace Foam
 
 bool Foam::polyTopoChanger::readContents()
 {
-    if
-    (
-        readOpt() == IOobject::MUST_READ
-     || readOpt() == IOobject::MUST_READ_IF_MODIFIED
-     || (readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
+    if (isReadRequired() || (isReadOptional() && headerOk()))
     {
         PtrList<polyMeshModifier>& modifiers = *this;
 
@@ -105,7 +100,7 @@ Foam::polyTopoChanger::polyTopoChanger
 Foam::polyTopoChanger::polyTopoChanger
 (
     polyMesh& mesh,
-    const IOobject::readOption rOpt
+    IOobjectOption::readOption rOpt
 
 )
 :
@@ -137,7 +132,7 @@ Foam::polyTopoChanger::polyTopoChanger
 
 Foam::polyTopoChanger::polyTopoChanger(polyMesh& mesh)
 :
-    polyTopoChanger(mesh, IOobject::readOption::READ_IF_PRESENT)
+    polyTopoChanger(mesh, IOobjectOption::READ_IF_PRESENT)
 {}
 
 

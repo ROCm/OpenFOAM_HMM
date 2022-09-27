@@ -50,8 +50,8 @@ void Foam::CompactIOList<T, BaseType>::readFromStream()
     {
         FatalIOErrorInFunction(is)
             << "unexpected class name " << headerClassName()
-            << " expected " << typeName << " or " << IOList<T>::typeName
-            << endl
+            << " expected " << typeName
+            << " or " << IOList<T>::typeName << endl
             << "    while reading object " << name()
             << exit(FatalIOError);
     }
@@ -64,7 +64,7 @@ bool Foam::CompactIOList<T, BaseType>::readContents()
     if
     (
         readOpt() == IOobject::MUST_READ
-     || (readOpt() == IOobject::READ_IF_PRESENT && headerOk())
+     || (isReadOptional() && headerOk())
     )
     {
         readFromStream();

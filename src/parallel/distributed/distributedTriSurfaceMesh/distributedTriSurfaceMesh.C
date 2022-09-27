@@ -2626,12 +2626,7 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh(const IOobject& io)
             searchableSurface::local(),
             searchableSurface::db(),
             (
-                (
-                        searchableSurface::readOpt()
-                     == IOobject::MUST_READ
-                 ||     searchableSurface::readOpt()
-                     == IOobject::MUST_READ_IF_MODIFIED
-                )
+                searchableSurface::isReadRequired()
               ? IOobject::READ_IF_PRESENT
               : searchableSurface::readOpt()
             ),
@@ -2739,12 +2734,7 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh
             searchableSurface::local(),
             searchableSurface::db(),
             (
-                (
-                        searchableSurface::readOpt()
-                     == IOobject::MUST_READ
-                 ||     searchableSurface::readOpt()
-                     == IOobject::MUST_READ_IF_MODIFIED
-                )
+                searchableSurface::isReadRequired()
               ? IOobject::READ_IF_PRESENT
               : searchableSurface::readOpt()
             ),

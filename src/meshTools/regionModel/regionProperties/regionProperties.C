@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,7 +41,7 @@ Foam::regionProperties::regionProperties(const Time& runTime)
 Foam::regionProperties::regionProperties
 (
     const Time& runTime,
-    IOobject::readOption rOpt
+    IOobjectOption::readOption rOpt
 )
 {
     HashTable<wordList>& props = *this;
@@ -54,15 +54,11 @@ Foam::regionProperties::regionProperties
             runTime.time().constant(),
             runTime.db(),
             rOpt,
-            IOobject::NO_WRITE
+            IOobjectOption::NO_WRITE
         )
     );
 
-    if
-    (
-        (rOpt == IOobject::MUST_READ || rOpt == IOobject::MUST_READ_IF_MODIFIED)
-     || iodict.size()
-    )
+    if (IOobject::isReadRequired(rOpt) || iodict.size())
     {
         iodict.readEntry("regions", props);
     }

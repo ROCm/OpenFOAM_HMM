@@ -99,11 +99,7 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::readFields()
 template<class Type, template<class> class PatchField, class GeoMesh>
 bool Foam::GeometricField<Type, PatchField, GeoMesh>::readIfPresent()
 {
-    if
-    (
-        this->readOpt() == IOobject::MUST_READ
-     || this->readOpt() == IOobject::MUST_READ_IF_MODIFIED
-    )
+    if (this->isReadRequired())
     {
         WarningInFunction
             << "read option IOobject::MUST_READ or MUST_READ_IF_MODIFIED"
@@ -112,7 +108,7 @@ bool Foam::GeometricField<Type, PatchField, GeoMesh>::readIfPresent()
     }
     else if
     (
-        this->readOpt() == IOobject::READ_IF_PRESENT
+        this->isReadOptional()
      && this->template typeHeaderOk<GeometricField<Type, PatchField, GeoMesh>>
         (
             true

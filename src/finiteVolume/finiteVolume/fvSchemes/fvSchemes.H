@@ -74,7 +74,7 @@ public:
         fvSchemes
         (
             const objectRegistry& obr,
-            const IOobject::readOption rOpt,
+            IOobjectOption::readOption rOpt,
             const word& dictName,
             const dictionary* fallback = nullptr
         )
@@ -99,7 +99,7 @@ public:
         fvSchemes
         (
             const objectRegistry& obr,
-            const IOobject::readOption rOpt,
+            IOobjectOption::readOption rOpt,
             const dictionary* fallback = nullptr
         )
         :

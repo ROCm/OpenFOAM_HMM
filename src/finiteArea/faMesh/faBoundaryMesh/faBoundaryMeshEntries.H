@@ -69,14 +69,7 @@ public:
             regIOobject(io),
             PtrList<entry>()
         {
-            if
-            (
-                (
-                    io.readOpt() == IOobject::MUST_READ
-                 || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
-                )
-             || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-            )
+            if (isReadRequired() || (isReadOptional() && headerOk()))
             {
                 readStream(typeName) >> *this;
             }

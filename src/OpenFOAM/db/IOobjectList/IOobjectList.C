@@ -130,8 +130,8 @@ Foam::IOobjectList::IOobjectList
     const objectRegistry& db,
     const fileName& instance,
     const fileName& local,
-    IOobject::readOption rOpt,
-    IOobject::writeOption wOpt,
+    IOobjectOption::readOption rOpt,
+    IOobjectOption::writeOption wOpt,
     bool registerObject
 )
 :

@@ -45,12 +45,7 @@ namespace Foam
 
 bool Foam::refinementHistory::readContents()
 {
-    if
-    (
-        readOpt() == IOobject::MUST_READ
-     || readOpt() == IOobject::MUST_READ_IF_MODIFIED
-     || (readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
+    if (isReadRequired() || (isReadOptional() && headerOk()))
     {
         readStream(typeName) >> *this;
         close();
@@ -740,16 +735,11 @@ Foam::refinementHistory::refinementHistory
     regIOobject(io),
     active_(false)
 {
-    if
-    (
-        io.readOpt() == IOobject::MUST_READ
-     || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
+    if (io.readOpt() != IOobject::NO_READ)
     {
         WarningInFunction
-            << "read option IOobject::MUST_READ, READ_IF_PRESENT or "
-            << "MUST_READ_IF_MODIFIED"
+            << "read option IOobject::MUST_READ or READ_IF_PRESENT "
+            << "or MUST_READ_IF_MODIFIED"
             << " suggests that a read constructor would be more appropriate."
             << endl;
     }

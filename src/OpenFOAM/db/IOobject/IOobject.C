@@ -312,24 +312,19 @@ Foam::IOobject::IOobject
     const word& name,
     const fileName& instance,
     const objectRegistry& registry,
-    readOption rOpt,
-    writeOption wOpt,
-    bool registerObject,
-    bool globalObject
+    IOobjectOption ioOpt
 )
 :
+    IOobjectOption(ioOpt),
+    objState_(objectState::GOOD),
+    sizeofLabel_(static_cast<unsigned char>(sizeof(label))),
+    sizeofScalar_(static_cast<unsigned char>(sizeof(scalar))),
+
     name_(name),
     headerClassName_(typeName),
     note_(),
     instance_(instance),
     local_(),
-    rOpt_(rOpt),
-    wOpt_(wOpt),
-    registerObject_(registerObject),
-    globalObject_(globalObject),
-    objState_(objectState::GOOD),
-    sizeofLabel_(static_cast<unsigned char>(sizeof(label))),
-    sizeofScalar_(static_cast<unsigned char>(sizeof(scalar))),
 
     db_(registry)
 {
@@ -337,8 +332,7 @@ Foam::IOobject::IOobject
     {
         InfoInFunction
             << "Constructing IOobject called " << name_
-            << " of type " << headerClassName_
-            << endl;
+            << " of type " << headerClassName_ << endl;
     }
 }
 
@@ -349,24 +343,19 @@ Foam::IOobject::IOobject
     const fileName& instance,
     const fileName& local,
     const objectRegistry& registry,
-    readOption rOpt,
-    writeOption wOpt,
-    bool registerObject,
-    bool globalObject
+    IOobjectOption ioOpt
 )
 :
+    IOobjectOption(ioOpt),
+    objState_(objectState::GOOD),
+    sizeofLabel_(static_cast<unsigned char>(sizeof(label))),
+    sizeofScalar_(static_cast<unsigned char>(sizeof(scalar))),
+
     name_(name),
     headerClassName_(typeName),
     note_(),
     instance_(instance),
     local_(local),
-    rOpt_(rOpt),
-    wOpt_(wOpt),
-    registerObject_(registerObject),
-    globalObject_(globalObject),
-    objState_(objectState::GOOD),
-    sizeofLabel_(static_cast<unsigned char>(sizeof(label))),
-    sizeofScalar_(static_cast<unsigned char>(sizeof(scalar))),
 
     db_(registry)
 {
@@ -374,8 +363,7 @@ Foam::IOobject::IOobject
     {
         InfoInFunction
             << "Constructing IOobject called " << name_
-            << " of type " << headerClassName_
-            << endl;
+            << " of type " << headerClassName_ << endl;
     }
 }
 
@@ -384,24 +372,19 @@ Foam::IOobject::IOobject
 (
     const fileName& path,
     const objectRegistry& registry,
-    readOption rOpt,
-    writeOption wOpt,
-    bool registerObject,
-    bool globalObject
+    IOobjectOption ioOpt
 )
 :
+    IOobjectOption(ioOpt),
+    objState_(objectState::GOOD),
+    sizeofLabel_(static_cast<unsigned char>(sizeof(label))),
+    sizeofScalar_(static_cast<unsigned char>(sizeof(scalar))),
+
     name_(),
     headerClassName_(typeName),
     note_(),
     instance_(),
     local_(),
-    rOpt_(rOpt),
-    wOpt_(wOpt),
-    registerObject_(registerObject),
-    globalObject_(globalObject),
-    objState_(objectState::GOOD),
-    sizeofLabel_(static_cast<unsigned char>(sizeof(label))),
-    sizeofScalar_(static_cast<unsigned char>(sizeof(scalar))),
 
     db_(registry)
 {
@@ -416,8 +399,7 @@ Foam::IOobject::IOobject
     {
         InfoInFunction
             << "Constructing IOobject called " << name_
-            << " of type " << headerClassName_
-            << endl;
+            << " of type " << headerClassName_ << endl;
     }
 }
 
@@ -428,18 +410,16 @@ Foam::IOobject::IOobject
     const objectRegistry& registry
 )
 :
+    IOobjectOption(static_cast<IOobjectOption>(io)),
+    objState_(io.objState_),
+    sizeofLabel_(io.sizeofLabel_),
+    sizeofScalar_(io.sizeofScalar_),
+
     name_(io.name_),
     headerClassName_(io.headerClassName_),
     note_(io.note_),
     instance_(io.instance_),
     local_(io.local_),
-    rOpt_(io.rOpt_),
-    wOpt_(io.wOpt_),
-    registerObject_(io.registerObject_),
-    globalObject_(io.globalObject_),
-    objState_(io.objState_),
-    sizeofLabel_(io.sizeofLabel_),
-    sizeofScalar_(io.sizeofScalar_),
 
     db_(registry)
 {}
@@ -451,48 +431,19 @@ Foam::IOobject::IOobject
     const word& name
 )
 :
+    IOobjectOption(static_cast<IOobjectOption>(io)),
+    objState_(io.objState_),
+    sizeofLabel_(io.sizeofLabel_),
+    sizeofScalar_(io.sizeofScalar_),
+
     name_(name),
     headerClassName_(io.headerClassName_),
     note_(io.note_),
     instance_(io.instance_),
     local_(io.local_),
-    rOpt_(io.rOpt_),
-    wOpt_(io.wOpt_),
-    registerObject_(io.registerObject_),
-    globalObject_(io.globalObject_),
-    objState_(io.objState_),
-    sizeofLabel_(io.sizeofLabel_),
-    sizeofScalar_(io.sizeofScalar_),
 
     db_(io.db_)
 {}
-
-
-Foam::IOobject::IOobject
-(
-    const IOobject& io,
-    const word& name,
-    const fileName& local
-)
-:
-    IOobject(io, name)
-{
-    local_ = local;
-}
-
-
-Foam::IOobject::IOobject
-(
-    const IOobject& io,
-    readOption rOpt,
-    writeOption wOpt
-)
-:
-    IOobject(io)
-{
-    rOpt_ = rOpt;
-    wOpt_ = wOpt;
-}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -623,17 +574,20 @@ void Foam::IOobject::setBad(const string& s)
 
 void Foam::IOobject::operator=(const IOobject& io)
 {
+    readOpt(io.readOpt());
+    writeOpt(io.writeOpt());
+    // No change to registerObject
+    globalObject(io.globalObject());
+
+    objState_ = io.objState_;
+    sizeofLabel_ = io.sizeofLabel_;
+    sizeofScalar_ = io.sizeofScalar_;
+
     name_ = io.name_;
     headerClassName_ = io.headerClassName_;
     note_ = io.note_;
     instance_ = io.instance_;
     local_ = io.local_;
-    rOpt_ = io.rOpt_;
-    wOpt_ = io.wOpt_;
-    globalObject_ = io.globalObject_;
-    objState_ = io.objState_;
-    sizeofLabel_ = io.sizeofLabel_;
-    sizeofScalar_ = io.sizeofScalar_;
 }
 
 

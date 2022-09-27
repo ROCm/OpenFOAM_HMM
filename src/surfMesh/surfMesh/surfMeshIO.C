@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,7 +34,7 @@ License
 void Foam::surfMesh::setInstance
 (
     const fileName& inst,
-    IOobject::writeOption wOpt
+    IOobjectOption::writeOption wOpt
 )
 {
     DebugInFunction << "Resetting file instance to " << inst << endl;
@@ -47,7 +47,7 @@ void Foam::surfMesh::setInstance
 }
 
 
-void Foam::surfMesh::setWriteOption(IOobject::writeOption wOpt)
+void Foam::surfMesh::setWriteOption(IOobjectOption::writeOption wOpt)
 {
     writeOpt(wOpt);
     Allocator::setWriteOption(wOpt);

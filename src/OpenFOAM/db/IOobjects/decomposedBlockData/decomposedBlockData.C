@@ -86,7 +86,7 @@ Foam::decomposedBlockData::decomposedBlockData
     contentData_()
 {
     // Temporary warning
-    if (io.readOpt() == IOobject::MUST_READ_IF_MODIFIED)
+    if (readOpt() == IOobject::MUST_READ_IF_MODIFIED)
     {
         WarningInFunction
             << "decomposedBlockData " << name()
@@ -94,14 +94,7 @@ Foam::decomposedBlockData::decomposedBlockData
             " but decomposedBlockData does not support automatic rereading."
             << endl;
     }
-    if
-    (
-        (
-            io.readOpt() == IOobject::MUST_READ
-         || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
-        )
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
+    if (isReadRequired() || (isReadOptional() && headerOk()))
     {
         read();
     }

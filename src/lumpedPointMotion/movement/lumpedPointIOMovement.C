@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -82,15 +82,9 @@ Foam::lumpedPointIOMovement::lumpedPointIOMovement
     lumpedPointMovement(),
     regIOobject(io)
 {
-    bool ok =
-    (
-        readOpt() == IOobject::MUST_READ
-     || readOpt() == IOobject::MUST_READ_IF_MODIFIED
-    );
-
-    if (ok)
+    if (isReadRequired())
     {
-        ok = readData(readStream(typeName));
+        bool ok = readData(readStream(typeName));
         close();
 
         if (ok)

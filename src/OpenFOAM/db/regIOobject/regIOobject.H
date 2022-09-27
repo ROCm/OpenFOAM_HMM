@@ -377,9 +377,12 @@ public:
         (
             IOstreamOption::streamFormat fmt,
             IOstreamOption::versionNumber ver,
-            IOstreamOption::compressionType comp,
+            IOstreamOption::compressionType cmp,
             const bool valid
-        ) const;
+        ) const
+        {
+            return writeObject(IOstreamOption(fmt, ver, cmp), valid);
+        }
 };
 
 

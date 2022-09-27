@@ -433,7 +433,7 @@ public:
             (
                 const fileName& dir,
                 const word& name = word::null,
-                const IOobject::readOption rOpt = IOobject::MUST_READ,
+                IOobjectOption::readOption rOpt = IOobjectOption::MUST_READ,
                 const word& stopInstance = word::null
             ) const;
 

@@ -1485,11 +1485,7 @@ Foam::fileOperations::masterUncollatedFileOperation::findInstance
 
 
     // Handling failures afterwards
-    const bool exitIfMissing
-    (
-        startIO.readOpt() == IOobject::MUST_READ
-     || startIO.readOpt() == IOobject::MUST_READ_IF_MODIFIED
-    );
+    const bool exitIfMissing = startIO.isReadRequired();
 
     enum failureCodes { FAILED_STOPINST = 1, FAILED_CONSTINST = 2 };
     int failed(0);
