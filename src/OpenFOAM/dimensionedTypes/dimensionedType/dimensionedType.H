@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -283,22 +283,22 @@ public:
     // Member Functions
 
         //- Return const reference to name.
-        const word& name() const;
+        const word& name() const noexcept { return name_; }
 
         //- Return non-const reference to name.
-        word& name();
+        word& name() noexcept { return name_; }
 
         //- Return const reference to dimensions.
-        const dimensionSet& dimensions() const;
+        const dimensionSet& dimensions() const noexcept { return dimensions_; }
 
         //- Return non-const reference to dimensions.
-        dimensionSet& dimensions();
+        dimensionSet& dimensions() noexcept { return dimensions_; }
 
         //- Return const reference to value.
-        const Type& value() const;
+        const Type& value() const noexcept { return value_; }
 
         //- Return non-const reference to value.
-        Type& value();
+        Type& value() noexcept { return value_; }
 
         //- Return a component as a dimensioned<cmptType>
         dimensioned<cmptType> component(const direction d) const;

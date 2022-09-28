@@ -403,48 +403,6 @@ Foam::dimensioned<Type> Foam::dimensioned<Type>::getOrAddToDict
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-const Foam::word& Foam::dimensioned<Type>::name() const
-{
-    return name_;
-}
-
-
-template<class Type>
-Foam::word& Foam::dimensioned<Type>::name()
-{
-    return name_;
-}
-
-
-template<class Type>
-const Foam::dimensionSet& Foam::dimensioned<Type>::dimensions() const
-{
-    return dimensions_;
-}
-
-
-template<class Type>
-Foam::dimensionSet& Foam::dimensioned<Type>::dimensions()
-{
-    return dimensions_;
-}
-
-
-template<class Type>
-const Type& Foam::dimensioned<Type>::value() const
-{
-    return value_;
-}
-
-
-template<class Type>
-Type& Foam::dimensioned<Type>::value()
-{
-    return value_;
-}
-
-
-template<class Type>
 Foam::dimensioned<typename Foam::dimensioned<Type>::cmptType>
 Foam::dimensioned<Type>::component
 (

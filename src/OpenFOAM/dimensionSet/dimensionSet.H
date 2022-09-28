@@ -50,8 +50,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef dimensionSet_H
-#define dimensionSet_H
+#ifndef Foam_dimensionSet_H
+#define Foam_dimensionSet_H
 
 #include "bool.H"
 #include "dimensionedScalarFwd.H"
@@ -187,7 +187,7 @@ public:
 
         //- Turn dimension checking on/off.
         //  \return the previous value
-        static bool checking(const bool on) noexcept
+        static bool checking(bool on) noexcept
         {
             bool old(debug);
             debug = static_cast<int>(on);
@@ -233,14 +233,6 @@ public:
             const bool mandatory = true
         );
 
-        //- Construct from dictionary entry (usually "dimensions")
-        dimensionSet
-        (
-            const dictionary& dict,
-            const word& entryName,  //!< Lookup key. LITERAL (not REGEX)
-            const bool mandatory = true
-        );
-
         //- Construct and return a clone
         autoPtr<dimensionSet> clone() const
         {
@@ -283,7 +275,8 @@ public:
             const bool mandatory = true //!< The entry is mandatory
         );
 
-        //- Read using provided units. Used only in initial parsing
+        //- Read using provided units, return scaling in multiplier.
+        //- Used only in initial parsing
         Istream& read
         (
             Istream& is,
@@ -291,7 +284,7 @@ public:
             const dictionary&
         );
 
-        //- Read using provided units
+        //- Read using provided units, return scaling in multiplier
         Istream& read
         (
             Istream& is,
@@ -299,27 +292,23 @@ public:
             const HashTable<dimensionedScalar>&
         );
 
-        //- Read using system units
+        //- Read using system units, return scaling in multiplier
         Istream& read
         (
             Istream& is,
             scalar& multiplier
         );
 
-        //- Write using provided units
+        //- Write using provided write units, return scaling in multiplier
         Ostream& write
         (
             Ostream& os,
             scalar& multiplier,
-            const dimensionSets&
+            const dimensionSets& writeUnits
         ) const;
 
-        //- Write using system units
-        Ostream& write
-        (
-            Ostream& os,
-            scalar& multiplier
-        ) const;
+        //- Write using system units, return scaling in multiplier
+        Ostream& write(Ostream& os, scalar& multiplier) const;
 
 
     // Member Operators

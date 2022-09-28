@@ -43,20 +43,7 @@ Foam::dimensionSet::dimensionSet
 :
     exponents_(Zero)
 {
-    this->readEntry(entryName, dict, mandatory);
-}
-
-
-Foam::dimensionSet::dimensionSet
-(
-    const dictionary& dict,
-    const word& entryName,
-    const bool mandatory
-)
-:
-    exponents_(Zero)
-{
-    this->readEntry(entryName, dict, mandatory);
+    readEntry(entryName, dict, mandatory);
 }
 
 
