@@ -186,15 +186,8 @@ bool Foam::ensightOutput::Detail::writeFieldComponents
 
     // Preliminary checks
     {
-        bool hasField = !fld.empty();
-
-        if (parallel)
-        {
-            reduce(hasField, orOp<bool>());
-        }
-
         // No field
-        if (!hasField) return false;
+        if (parallel ? returnReduceAnd(fld.empty()) : fld.empty()) return false;
     }
 
 
@@ -225,15 +218,8 @@ bool Foam::ensightOutput::Detail::writeFaceSubField
         // No geometry
         if (parallel ? !part.total() : !part.size()) return false;
 
-        bool hasField = !fld.empty();
-
-        if (parallel)
-        {
-            reduce(hasField, orOp<bool>());
-        }
-
         // No field
-        if (!hasField) return false;
+        if (parallel ? returnReduceAnd(fld.empty()) : fld.empty()) return false;
     }
 
 
@@ -275,22 +261,15 @@ bool Foam::ensightOutput::Detail::writeFaceLocalField
         // No geometry
         if (parallel ? !part.total() : !part.size()) return false;
 
-        bool hasField = !fld.empty();
-
-        if (parallel)
-        {
-            reduce(hasField, orOp<bool>());
-        }
-
         // No field
-        if (!hasField) return false;
+        if (parallel ? returnReduceAnd(fld.empty()) : fld.empty()) return false;
     }
 
     bool validAddressing = (part.size() == part.faceOrder().size());
 
     if (parallel)
     {
-        reduce(validAddressing, orOp<bool>());
+        Pstream::reduceOr(validAddressing);
     }
 
     if (!validAddressing)
@@ -341,15 +320,8 @@ bool Foam::ensightOutput::writeField
         // No geometry
         if (parallel ? !part.total() : !part.size()) return false;
 
-        bool hasField = !fld.empty();
-
-        if (parallel)
-        {
-            reduce(hasField, orOp<bool>());
-        }
-
         // No field
-        if (!hasField) return false;
+        if (parallel ? returnReduceAnd(fld.empty()) : fld.empty()) return false;
     }
 
 
@@ -391,15 +363,8 @@ bool Foam::ensightOutput::writeField
         // No geometry
         if (parallel ? !part.total() : !part.size()) return false;
 
-        bool hasField = !fld.empty();
-
-        if (parallel)
-        {
-            reduce(hasField, orOp<bool>());
-        }
-
         // No field
-        if (!hasField) return false;
+        if (parallel ? returnReduceAnd(fld.empty()) : fld.empty()) return false;
     }
 
 

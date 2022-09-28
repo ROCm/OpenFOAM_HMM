@@ -600,7 +600,7 @@ bool Foam::vtk::fileWriter::writeProcIDs(const label nValues)
     this->endDataArray();
 
     // MPI barrier
-    return parallel_ ? returnReduce(good, orOp<bool>()) : good;
+    return parallel_ ? returnReduceOr(good) : good;
 }
 
 

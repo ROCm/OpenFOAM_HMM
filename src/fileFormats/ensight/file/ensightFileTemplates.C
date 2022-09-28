@@ -47,7 +47,7 @@ bool Foam::ensightFile::hasUndef(const IndirectListBase<scalar, Addr>& field)
 template<class Addr>
 void Foam::ensightFile::writeLabels(const IndirectListBase<label, Addr>& list)
 {
-    for (const scalar val : list)
+    for (const label val : list)
     {
         write(val);
         newline();

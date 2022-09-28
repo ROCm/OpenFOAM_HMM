@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -212,7 +212,7 @@ void Foam::ensightMesh::correct()
         const word& zoneName = czNames[zoneId];
         const cellZone& zn = mesh_.cellZones()[zoneId];
 
-        if (returnReduce(!zn.empty(), orOp<bool>()))
+        if (returnReduceOr(!zn.empty()))
         {
             // Ensure full mesh coverage
             cellSelection.resize(mesh_.nCells());
@@ -264,7 +264,7 @@ void Foam::ensightMesh::correct()
             // Unzoned cells - flip selection from zoned to unzoned
             cellSelection.flip();
 
-            if (returnReduce(cellSelection.any(), orOp<bool>()))
+            if (returnReduceOr(cellSelection.any()))
             {
                 ensightCells& part = cellZoneParts_(internalZone);
 
@@ -295,7 +295,7 @@ void Foam::ensightMesh::correct()
 
     // Face exclusion based on cellZones
 
-    if (returnReduce(!cellSelection.empty(), orOp<bool>()))
+    if (returnReduceOr(!cellSelection.empty()))
     {
         // Ensure full mesh coverage
         excludeFace.resize(mesh_.nFaces());

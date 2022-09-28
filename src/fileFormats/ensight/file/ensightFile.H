@@ -214,24 +214,26 @@ public:
         void beginParticleCoordinates(const label nparticles);
 
         //- Write a list of integers
-        //  With carriage return after each value (ascii stream)
+        //  Adds newline after each value (ascii stream)
         void writeLabels(const UList<label>& list);
 
         //- Write a list of integers
-        //  With carriage return after each value (ascii stream)
+        //  Adds newline after each value (ascii stream)
         template<class Addr>
         void writeLabels(const IndirectListBase<label, Addr>& list);
 
         //- Write a list of integers as float values
-        //  With carriage return after each value (ascii stream)
+        //  Adds newline after each value (ascii stream)
         void writeList(const UList<label>& field);
 
-        //- Write a list of floats as "%12.5e" or as binary
-        //  With carriage return after each value (ascii stream)
+        //- Write a list of floating-point as "%12.5e" or as binary
+        //- (double is narrowed to float).
+        //  Adds newline after each value (ascii stream)
         void writeList(const UList<scalar>& field);
 
         //- Write an indirect list of scalars as "%12.5e" or as binary
-        //  With carriage return after each value (ascii stream)
+        //- (double is narrowed to float)
+        //  Adds newline after each value (ascii stream)
         template<class Addr>
         void writeList(const IndirectListBase<scalar, Addr>& field);
 
