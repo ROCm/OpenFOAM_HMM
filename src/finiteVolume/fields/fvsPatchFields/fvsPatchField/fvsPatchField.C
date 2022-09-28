@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -91,11 +91,11 @@ Foam::fvsPatchField<Type>::fvsPatchField
 {
     if (valueRequired)
     {
-        const auto* eptr = dict.findEntry("value", keyType::LITERAL);
+        const auto* hasValue = dict.findEntry("value", keyType::LITERAL);
 
-        if (eptr)
+        if (hasValue)
         {
-            Field<Type>::assign(*eptr, p.size());
+            Field<Type>::assign(*hasValue, p.size());
         }
         else
         {

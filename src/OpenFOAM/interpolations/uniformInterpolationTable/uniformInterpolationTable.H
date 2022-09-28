@@ -139,10 +139,10 @@ public:
             inline scalar dx() const;
 
             //- Return the log10(x) flag
-            inline const Switch& log10() const;
+            inline Switch log10() const noexcept;
 
             //- Return the bound flag
-            inline const Switch& bound() const;
+            inline Switch bound() const noexcept;
 
 
         // Edit
@@ -154,10 +154,10 @@ public:
             inline scalar& dx();
 
             //- Return the log10(x) flag
-            inline Switch& log10();
+            inline Switch& log10() noexcept;
 
             //- Return the bound flag
-            inline Switch& bound();
+            inline Switch& bound() noexcept;
 
 
         // Evaluation

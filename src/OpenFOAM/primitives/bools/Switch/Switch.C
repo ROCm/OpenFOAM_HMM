@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -364,7 +364,7 @@ Foam::Istream& Foam::operator>>(Istream& is, Switch& sw)
 }
 
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const Switch& sw)
+Foam::Ostream& Foam::operator<<(Ostream& os, const Switch sw)
 {
     os << sw.c_str();
     return os;

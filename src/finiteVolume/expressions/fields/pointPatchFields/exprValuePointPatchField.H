@@ -41,8 +41,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef exprValuePointPatchField_H
-#define exprValuePointPatchField_H
+#ifndef Foam_exprValuePointPatchField_H
+#define Foam_exprValuePointPatchField_H
 
 #include "valuePointPatchField.H"
 #include "patchExprFieldBase.H"

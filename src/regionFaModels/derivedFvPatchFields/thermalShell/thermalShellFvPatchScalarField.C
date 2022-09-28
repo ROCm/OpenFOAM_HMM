@@ -85,8 +85,8 @@ thermalShellFvPatchScalarField::thermalShellFvPatchScalarField
         dictionaryContent::copyDict
         (
             dict,
-            wordRes(),  // allow
-            wordRes     // deny
+            wordList(),  // allow
+            wordList     // deny
             ({
                 "type",  // redundant
                 "value"

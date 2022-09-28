@@ -85,11 +85,11 @@ Foam::faePatchField<Type>::faePatchField
     Field<Type>(p.size()),
     internalField_(iF)
 {
-    const auto* eptr = dict.findEntry("value", keyType::LITERAL);
+    const auto* hasValue = dict.findEntry("value", keyType::LITERAL);
 
-    if (eptr)
+    if (hasValue)
     {
-        Field<Type>::assign(*eptr, p.size());
+        Field<Type>::assign(*hasValue, p.size());
     }
     else
     {

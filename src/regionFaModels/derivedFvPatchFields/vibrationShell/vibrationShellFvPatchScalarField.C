@@ -87,8 +87,8 @@ vibrationShellFvPatchScalarField::vibrationShellFvPatchScalarField
         dictionaryContent::copyDict
         (
             dict,
-            wordRes(),  // allow
-            wordRes     // deny
+            wordList(),  // allow
+            wordList     // deny
             ({
                 "type",  // redundant
                 "value", "refValue", "refGradient", "valueFraction"

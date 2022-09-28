@@ -254,8 +254,11 @@ Foam::expressions::exprResult::exprResult
 {
     DebugInFunction << nl;
 
-    if (dict.found("value"))
+    const auto* hasValue = dict.findEntry("value", keyType::LITERAL);
+
+    if (hasValue)
     {
+        const auto& valueEntry = *hasValue;
         const bool uniform = isUniform_;
 
         const label len =
@@ -268,12 +271,12 @@ Foam::expressions::exprResult::exprResult
         const bool ok =
         (
             // Just use <scalar> for <label>?
-            readChecked<scalar>("value", dict, len, uniform)
-         || readChecked<vector>("value", dict, len, uniform)
-         || readChecked<tensor>("value", dict, len, uniform)
-         || readChecked<symmTensor>("value", dict, len, uniform)
-         || readChecked<sphericalTensor>("value", dict, len, uniform)
-         || readChecked<bool>("value", dict, len, uniform)
+            readChecked<scalar>(valueEntry, len, uniform)
+         || readChecked<vector>(valueEntry, len, uniform)
+         || readChecked<tensor>(valueEntry, len, uniform)
+         || readChecked<symmTensor>(valueEntry, len, uniform)
+         || readChecked<sphericalTensor>(valueEntry, len, uniform)
+         || readChecked<bool>(valueEntry, len, uniform)
         );
 
         if (!ok)

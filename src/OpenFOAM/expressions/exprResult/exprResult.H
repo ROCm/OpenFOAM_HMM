@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2018 Bernhard Gschaider
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,8 +54,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef expressions_exprResult_H
-#define expressions_exprResult_H
+#ifndef Foam_expressions_exprResult_H
+#define Foam_expressions_exprResult_H
 
 #include "exprTraits.H"
 #include "dimensionedType.H"
@@ -156,13 +156,12 @@ class exprResult
         //- Dispatch to type-checked pointer deletion
         void uglyDelete();
 
-        //- Type-checked creation of field from dictionary
+        //- Type-checked creation of field from dictionary (primitive) entry
         //  \return True if the type check was satisfied
         template<class Type>
         inline bool readChecked
         (
-            const word& key,
-            const dictionary& dict,
+            const entry& e,
             const label len,
             const bool uniform
         );

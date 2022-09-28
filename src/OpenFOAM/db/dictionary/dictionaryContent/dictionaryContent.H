@@ -32,10 +32,11 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef dictionaryContent_H
-#define dictionaryContent_H
+#ifndef Foam_dictionaryContent_H
+#define Foam_dictionaryContent_H
 
 #include "dictionary.H"
+#include "wordList.H"
 #include "wordRes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

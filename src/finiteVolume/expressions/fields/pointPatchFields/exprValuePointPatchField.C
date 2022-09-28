@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2010-2018 Bernhard Gschaider
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,7 +85,7 @@ Foam::exprValuePointPatchField<Type>::exprValuePointPatchField
     const dictionary& dict
 )
 :
-    parent_bctype(p, iF),
+    parent_bctype(p, iF),  // bypass dictionary constructor
     expressions::patchExprFieldBase
     (
         dict,
@@ -123,23 +123,20 @@ Foam::exprValuePointPatchField<Type>::exprValuePointPatchField
             << exit(FatalIOError);
     }
 
-
     driver_.readDict(dict_);
 
-    if (dict.found("value"))
+    const auto* hasValue = dict.findEntry("value", keyType::LITERAL);
+
+    if (hasValue)
     {
-        Field<Type>::operator=
-        (
-            Field<Type>("value", dict, p.size())
-        );
+        Field<Type>::assign(*hasValue, p.size());
     }
     else
     {
-        WarningInFunction
-            << "No value defined for "
-            << this->internalField().name()
-            << " on " << this->patch().name()
-            << endl;
+        // Note: valuePointPatchField defaults to Zero
+        // but internalField might be better
+
+        Field<Type>::operator=(Zero);
     }
 
     if (this->evalOnConstruct_)

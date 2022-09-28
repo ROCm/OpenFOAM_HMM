@@ -87,7 +87,7 @@ Foam::exprMixedFvPatchField<Type>::exprMixedFvPatchField
     const dictionary& dict
 )
 :
-    parent_bctype(p, iF),
+    parent_bctype(p, iF), // bypass dictionary constructor
     expressions::patchExprFieldBase
     (
         dict,
@@ -160,27 +160,32 @@ Foam::exprMixedFvPatchField<Type>::exprMixedFvPatchField
         }
     }
 
-
     driver_.readDict(dict_);
 
     // Similar to fvPatchField constructor, which we have bypassed
     dict.readIfPresent("patchType", this->patchType(), keyType::LITERAL);
 
-    bool needsRefValue = true;
-    if (dict.found("refValue"))
+
+    const auto* hasValue = dict.findEntry("value", keyType::LITERAL);
+    const auto* hasRefValue = dict.findEntry("refValue", keyType::LITERAL);
+
+    const auto* hasRefGradient
+        = dict.findEntry("refGradient", keyType::LITERAL);
+
+    const auto* hasValueFraction
+        = dict.findEntry("valueFraction", keyType::LITERAL);
+
+
+    if (hasRefValue)
     {
-        needsRefValue = false;
-        this->refValue() = Field<Type>("refValue", dict, p.size());
+        this->refValue().assign(*hasRefValue, p.size());
     }
 
-    if (dict.found("value"))
+    if (hasValue)
     {
-        fvPatchField<Type>::operator=
-        (
-            Field<Type>("value", dict, p.size())
-        );
+        Field<Type>::assign(*hasValue, p.size());
 
-        if (needsRefValue)
+        if (!hasRefValue)
         {
             // Ensure refValue has a sensible value for the "update" below
             this->refValue() = static_cast<const Field<Type>&>(*this);
@@ -188,7 +193,7 @@ Foam::exprMixedFvPatchField<Type>::exprMixedFvPatchField
     }
     else
     {
-        if (needsRefValue)
+        if (!hasRefValue)
         {
             this->refValue() = this->patchInternalField();
         }
@@ -204,18 +209,18 @@ Foam::exprMixedFvPatchField<Type>::exprMixedFvPatchField
     }
 
 
-    if (dict.found("refGradient"))
+    if (hasRefGradient)
     {
-        this->refGrad() = Field<Type>("refGradient", dict, p.size());
+        this->refGrad().assign(*hasRefGradient, p.size());
     }
     else
     {
         this->refGrad() = Zero;
     }
 
-    if (dict.found("valueFraction"))
+    if (hasValueFraction)
     {
-        this->valueFraction() = Field<scalar>("valueFraction", dict, p.size());
+        this->valueFraction().assign(*hasValueFraction, p.size());
     }
     else
     {

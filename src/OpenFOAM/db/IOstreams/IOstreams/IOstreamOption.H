@@ -42,8 +42,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef IOstreamOption_H
-#define IOstreamOption_H
+#ifndef Foam_IOstreamOption_H
+#define Foam_IOstreamOption_H
 
 #include "word.H"
 

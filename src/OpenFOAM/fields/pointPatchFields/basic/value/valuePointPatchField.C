@@ -55,11 +55,11 @@ Foam::valuePointPatchField<Type>::valuePointPatchField
     pointPatchField<Type>(p, iF, dict),
     Field<Type>(p.size())
 {
-    const auto* eptr = dict.findEntry("value", keyType::LITERAL);
+    const auto* hasValue = dict.findEntry("value", keyType::LITERAL);
 
-    if (eptr)
+    if (hasValue)
     {
-        Field<Type>::assign(*eptr, p.size());
+        Field<Type>::assign(*hasValue, p.size());
     }
     else if (!valueRequired)
     {
