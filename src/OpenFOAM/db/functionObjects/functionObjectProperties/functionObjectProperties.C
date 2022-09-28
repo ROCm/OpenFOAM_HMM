@@ -137,10 +137,11 @@ bool Foam::functionObjects::properties::getObjectDict
     if (found(objectName))
     {
         const dictionary& baseDict = subDict(objectName);
+        const dictionary* subDictPtr = baseDict.findDict(objectName);
 
-        if (baseDict.found(entryName) && baseDict.isDict(entryName))
+        if (subDictPtr)
         {
-            dict = baseDict.subDict(entryName);
+            dict = *subDictPtr;
             return true;
         }
     }

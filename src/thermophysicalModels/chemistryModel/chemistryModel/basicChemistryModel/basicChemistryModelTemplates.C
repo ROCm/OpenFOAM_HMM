@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,7 +50,9 @@ Foam::autoPtr<ChemistryModel> Foam::basicChemistryModel::New
         )
     );
 
-    if (!chemistryDict.isDict("chemistryType"))
+    const dictionary* subDictPtr = chemistryDict.findDict("chemistryType");
+
+    if (!subDictPtr)
     {
         FatalErrorInFunction
             << "Template parameter based chemistry solver selection is no "
@@ -64,8 +66,7 @@ Foam::autoPtr<ChemistryModel> Foam::basicChemistryModel::New
             << endl << "    }" << exit(FatalError);
     }
 
-    const dictionary& chemistryTypeDict =
-        chemistryDict.subDict("chemistryType");
+    const dictionary& chemistryTypeDict = *subDictPtr;
 
     const word solverName
     (

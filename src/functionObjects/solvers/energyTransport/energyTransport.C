@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -252,7 +252,9 @@ Foam::functionObjects::energyTransport::energyTransport
         {
             const word& key = iter().keyword();
 
-            if (!multiphaseThermo_.isDict(key))
+            const dictionary* subDictPtr = multiphaseThermo_.findDict(key);
+
+            if (!subDictPtr)
             {
                 FatalErrorInFunction
                     << "Found non-dictionary entry " << iter()
@@ -260,7 +262,7 @@ Foam::functionObjects::energyTransport::energyTransport
                     << exit(FatalError);
             }
 
-            const dictionary& dict = multiphaseThermo_.subDict(key);
+            const dictionary& dict = *subDictPtr;
 
             phaseNames_[phasei] = key;
 

@@ -50,12 +50,16 @@ Foam::liquidMixtureProperties::liquidMixtureProperties
 
     forAll(components_, i)
     {
-        if (dict.isDict(components_[i]))
+        // Handle sub-dictionary or primitive entry
+
+        const dictionary* subDictPtr = dict.findDict(components_[i]);
+
+        if (subDictPtr)
         {
             properties_.set
             (
                 i,
-                liquidProperties::New(dict.subDict(components_[i]))
+                liquidProperties::New(*subDictPtr)
             );
         }
         else

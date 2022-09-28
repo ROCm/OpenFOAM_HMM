@@ -40,12 +40,16 @@ Foam::solidMixtureProperties::solidMixtureProperties(const dictionary& dict)
 
     forAll(components_, i)
     {
-        if (dict.isDict(components_[i]))
+        // Handle sub-dictionary or primitive entry
+
+        const dictionary* subDictPtr = dict.findDict(components_[i]);
+
+        if (subDictPtr)
         {
             properties_.set
             (
                 i,
-                solidProperties::New(dict.subDict(components_[i]))
+                solidProperties::New(*subDictPtr)
             );
         }
         else

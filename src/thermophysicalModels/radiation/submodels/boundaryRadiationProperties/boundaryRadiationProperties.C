@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -81,9 +81,11 @@ Foam::radiation::boundaryRadiationProperties::boundaryRadiationProperties
         {
             const polyPatch& pp = mesh.boundaryMesh()[patchi];
 
-            if (radiationDict.isDict(pp.name()))
+            const dictionary* subDictPtr = radiationDict.findDict(pp.name());
+
+            if (subDictPtr)
             {
-                const dictionary& dict = radiationDict.subDict(pp.name());
+                const dictionary& dict = *subDictPtr;
 
                 radBoundaryPropertiesPtrList_[patchi].reset
                 (

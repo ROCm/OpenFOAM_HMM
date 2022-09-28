@@ -64,31 +64,26 @@ volBSplinesBase::volBSplinesBase
             )
         ).subDict("volumetricBSplinesMotionSolverCoeffs")
     );
-    // Read box names and allocate size
-    wordList controlBoxes(NURBSdict.toc());
-    volume_.setSize(controlBoxes.size());
 
     // Populate NURBS volumes
+    volume_.resize(NURBSdict.size());
+
     label iBox(0);
-    for (const word& boxName : controlBoxes)
+
+    for (const entry& dEntry : NURBSdict)
     {
-        if (NURBSdict.isDict(boxName))
+        if (dEntry.isDict())
         {
             volume_.set
             (
                 iBox,
-                NURBS3DVolume::New
-                (
-                    NURBSdict.subDict(boxName),
-                    mesh,
-                    true
-                )
+                NURBS3DVolume::New(dEntry.dict(), mesh, true)
             );
             volume_[iBox].writeParamCoordinates();
             iBox++;
         }
     }
-    volume_.setSize(iBox);
+    volume_.resize(iBox);
 
     // Determine active design variables
     activeDesignVariables_.setSize(3*getTotalControlPointsNumber(), -1);

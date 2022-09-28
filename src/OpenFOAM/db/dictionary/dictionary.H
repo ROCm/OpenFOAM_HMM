@@ -1278,6 +1278,30 @@ public:
         friend Ostream& operator<<(Ostream& os, const dictionary& dict);
 
 
+    // Shortcuts - when a templated classes also inherits from a dictionary
+
+        #undef defineDictionaryGetter
+        #define defineDictionaryGetter(Func, Type)                            \
+            /*! \brief Same as get\<Type\>(const word&, keyType::option) */   \
+            Type Func                                                         \
+            (                                                                 \
+                const word& keyword,                                          \
+                enum keyType::option matchOpt = keyType::REGEX                \
+            ) const                                                           \
+            {                                                                 \
+                return get<Type>(keyword, matchOpt);                          \
+            }
+
+        defineDictionaryGetter(getBool, bool);
+        defineDictionaryGetter(getLabel, label);
+        defineDictionaryGetter(getScalar, scalar);
+        defineDictionaryGetter(getString, string);
+        defineDictionaryGetter(getWord, word);
+        defineDictionaryGetter(getFileName, fileName);
+
+        #undef defineDictionaryGetter
+
+
     // Housekeeping
 
         //- Find and return a T, or return the given default value.
@@ -1316,29 +1340,7 @@ public:
             return getOrAdd<T>(keyword, deflt, matchOpt);
         }
 
-        //- Find and return a T, or return the given default value
-        //- using any compatibility names if needed.
-        //
-        //  \param keyword the keyword to search for
-        //  \param compat list of old compatibility keywords and the last
-        //      OpenFOAM version for which they were used.
-        //  \param deflt the default value to use
-        //  \param matchOpt search mode (default: non-recursive with patterns)
-        template<class T>
-        FOAM_DEPRECATED_FOR(2019-05, "getOrDefaultCompat() method")
-        T lookupOrDefaultCompat
-        (
-            const word& keyword,
-            std::initializer_list<std::pair<const char*,int>> compat,
-            const T& deflt,
-            enum keyType::option matchOpt = keyType::REGEX
-        ) const
-        {
-            return getOrDefaultCompat<T>(keyword, compat, deflt, matchOpt);
-        }
-
-        //- Deprecated(2018-07) find and return an entry data stream
-        //
+        //- Deprecated(2018-07) - use lookup() method
         //  \deprecated(2018-07) - use lookup() method
         FOAM_DEPRECATED_FOR(2018-07, "lookup() method")
         ITstream& operator[](const word& keyword) const
@@ -1360,7 +1362,7 @@ public:
         }
 
         //- Deprecated(2018-10)
-        //  \deprecated(2018-10) - use keyType::option version
+        //  \deprecated(2018-10) - use findEntry() method
         FOAM_DEPRECATED_FOR(2018-10, "findEntry(keyType::option)")
         entry* lookupEntryPtr
         (
@@ -1373,7 +1375,7 @@ public:
         }
 
         //- Deprecated(2018-10)
-        //  \deprecated(2018-10) - use keyType::option version
+        //  \deprecated(2018-10) - use findEntry() method
         FOAM_DEPRECATED_FOR(2018-10, "findEntry(keyType::option)")
         const entry* lookupEntryPtr
         (
@@ -1386,7 +1388,7 @@ public:
         }
 
         //- Deprecated(2018-10)
-        //  \deprecated(2018-10) - use keyType::option version
+        //  \deprecated(2018-10) - use findScoped() method
         FOAM_DEPRECATED_FOR(2018-10, "findScoped(keyType::option)")
         const entry* lookupScopedEntryPtr
         (
@@ -1527,30 +1529,6 @@ public:
             return get<T>(keyword, matchOpt(recursive, patternMatch));
         }
         #endif
-
-
-    // Shortcuts - when a templated classes also inherits from a dictionary
-
-        #undef defineDictionaryGetter
-        #define defineDictionaryGetter(Func, Type)                            \
-            /*! \brief Same as get\<Type\>(const word&, keyType::option) */   \
-            Type Func                                                         \
-            (                                                                 \
-                const word& keyword,                                          \
-                enum keyType::option matchOpt = keyType::REGEX                \
-            ) const                                                           \
-            {                                                                 \
-                return get<Type>(keyword, matchOpt);                          \
-            }
-
-        defineDictionaryGetter(getBool, bool);
-        defineDictionaryGetter(getLabel, label);
-        defineDictionaryGetter(getScalar, scalar);
-        defineDictionaryGetter(getString, string);
-        defineDictionaryGetter(getWord, word);
-        defineDictionaryGetter(getFileName, fileName);
-
-        #undef defineDictionaryGetter
 };
 
 
