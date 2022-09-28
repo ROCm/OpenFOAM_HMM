@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,15 +39,13 @@ Foam::Function1Types::Function1Expression<Type>::Function1Expression
 :
     Function1<Type>(entryName, dict, obrPtr),
     dict_(dict),  // Deep copy
-    valueExpr_(),
-    driver_(1, dict_)
+    valueExpr_("expression", dict_),
+    driver_(1, dict_)  // size=1
 {
     if (dict.getOrDefault("debug", false))
     {
         debug |= 1;
     }
-
-    valueExpr_.readEntry("expression", dict_);
 
     // Basic sanity
     if (valueExpr_.empty())
@@ -70,7 +68,7 @@ Foam::Function1Types::Function1Expression<Type>::Function1Expression
     Function1<Type>(rhs),
     dict_(rhs.dict_),  // Deep copy
     valueExpr_(rhs.valueExpr_),
-    driver_(1, rhs.driver_, dict_)
+    driver_(1, rhs.driver_, dict_)  // size=1
 {}
 
 

@@ -300,8 +300,8 @@ bool Foam::expressions::exprDriver::readDict
 {
     dict.readIfPresent("debug.driver", debug);
 
-    // Regular variables
-    variableStrings_ = readVariableStrings(dict);
+    // Regular variables (optional)
+    variableStrings_ = readVariableStrings(dict, "variables", false);
 
     // Create Function1s from dictionary content
     resetFunctions(dict);

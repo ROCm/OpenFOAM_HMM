@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -77,7 +77,7 @@ Foam::expressions::exprDriver::readExpression
     const dictionary& dict
 )
 {
-    return expressions::exprString(dict.get<string>(name), dict);
+    return expressions::exprString(name, dict);
 }
 
 
@@ -87,7 +87,7 @@ Foam::expressions::exprDriver::readExpression
     const word& name
 )
 {
-    return readExpression(name, dict());
+    return expressions::exprString(name, dict());
 }
 
 
@@ -99,7 +99,7 @@ Foam::expressions::exprDriver::readVariableStrings
     bool mandatory
 )
 {
-    return exprTools::getList(dict, keyword, mandatory);
+    return exprTools::getList(keyword, dict, mandatory);
 }
 
 
@@ -109,7 +109,7 @@ Foam::label Foam::expressions::exprDriver::setVariableStrings
     bool mandatory
 )
 {
-    variableStrings_ = readVariableStrings(dict, "variable", mandatory);
+    variableStrings_ = readVariableStrings(dict, "variables", mandatory);
 
     return variableStrings_.size();
 }

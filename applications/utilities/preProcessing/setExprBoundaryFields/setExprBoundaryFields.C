@@ -232,15 +232,7 @@ int main(int argc, char *argv[])
 
                 dictionary& patchDict = boundaryFieldDict.subDict(patchName);
 
-                auto valueExpr_
-                (
-                    expressions::exprString::getEntry
-                    (
-                        "expression",
-                        currDict,
-                        true  // strip comments
-                    )
-                );
+                expressions::exprString valueExpr_("expression", currDict);
 
                 Info<< "Set boundaryField/" << patchName << '/'
                     << targetName << nl

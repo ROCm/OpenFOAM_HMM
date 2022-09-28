@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2018 Bernhard Gschaider <bgschaid@hfd-research.com>
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -82,7 +82,7 @@ Foam::expressions::exprResultStored::exprResultStored
 :
     expressions::exprResult(dict.subOrEmptyDict("value")),
     name_(dict.get<word>("name")),
-    startExpr_(dict.get<string>("initialValue"), dict)
+    startExpr_("initialValue", dict)
 {}
 
 

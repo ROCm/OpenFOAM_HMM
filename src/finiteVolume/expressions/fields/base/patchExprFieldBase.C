@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 Bernhard Gschaider
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,29 +51,42 @@ void Foam::expressions::patchExprFieldBase::readExpressions
     gradExpr_.clear();
     fracExpr_.clear();
 
-    string exprValue, exprGrad, exprFrac;
-    bool evalValue = false, evalGrad = false, evalFrac = false;
-
     if (expectedTypes::VALUE_TYPE == expectedType)
     {
         // Mandatory
-        evalValue = dict.readEntry("valueExpr", exprValue, keyType::LITERAL);
+        valueExpr_.readEntry("valueExpr", dict);
     }
     else if (expectedTypes::GRADIENT_TYPE == expectedType)
     {
         // Mandatory
-        evalGrad = dict.readEntry("gradientExpr", exprGrad, keyType::LITERAL);
+        gradExpr_.readEntry("gradientExpr", dict);
     }
     else
     {
         // MIXED_TYPE
-        evalValue =
-            dict.readIfPresent("valueExpr", exprValue, keyType::LITERAL);
+        const bool evalValue = valueExpr_.readIfPresent("valueExpr", dict);
+        const bool evalGrad = gradExpr_.readIfPresent("gradientExpr", dict);
 
-        evalGrad =
-            dict.readIfPresent("gradientExpr", exprGrad, keyType::LITERAL);
+        // Expect a fraction as well
+        // - but allow it to be optional and defer treatment to inherited BC
 
-        if (!evalValue && !evalGrad)
+        if (evalValue && evalGrad)
+        {
+            if
+            (
+                fracExpr_.readIfPresent("fractionExpr", dict)
+             && !fracExpr_.empty()
+            )
+            {
+                // Add function call wrapping for point data,
+                // but not for 0/1 (handled as shortcuts later)
+                if (wantPointData && fracExpr_ != "0" && fracExpr_ != "1")
+                {
+                    fracExpr_ = "toPoint(" + fracExpr_ + ")";
+                }
+            }
+        }
+        else
         {
             FatalIOErrorInFunction(dict)
                 << "Entries 'valueExpr' and 'gradientExpr' "
@@ -93,45 +106,6 @@ void Foam::expressions::patchExprFieldBase::readExpressions
                 Info<< "Mixed with no gradientExpr" << nl;
             }
         }
-    }
-
-
-    // When both value/gradient specified (ie, mixed) expect a fraction
-    // - if missing, defer treatment to inherited BC
-
-    if (evalValue && evalGrad && dict.readIfPresent("fractionExpr", exprFrac))
-    {
-        stringOps::inplaceTrim(exprFrac);
-
-        if (exprFrac == "0" || exprFrac == "1")
-        {
-            // Special cases, handled with more efficiency
-            fracExpr_ = exprFrac;
-        }
-        else if (!exprFrac.empty())
-        {
-            evalFrac = true;
-            if (wantPointData)
-            {
-                exprFrac = "toPoint(" + exprFrac + ")";
-            }
-        }
-    }
-
-
-    // Expansions
-
-    if (evalValue)
-    {
-        valueExpr_ = expressions::exprString(exprValue, dict);
-    }
-    if (evalGrad)
-    {
-        gradExpr_ = expressions::exprString(exprGrad, dict);
-    }
-    if (evalFrac)
-    {
-        fracExpr_ = expressions::exprString(exprFrac, dict);
     }
 }
 

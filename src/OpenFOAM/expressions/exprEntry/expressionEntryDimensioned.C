@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Original code Copyright (C) 2014-2018 Bernhard Gschaider
+    Copyright (C) 2014-2018 Bernhard Gschaider
     Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License

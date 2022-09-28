@@ -377,7 +377,7 @@ bool Foam::functionObjects::fvExpressionField::read(const dictionary& dict)
         case actionType::opModify:
         {
             // Optional <fieldMask> for modify
-            maskExpr_.readEntry("fieldMask", dict, false);
+            maskExpr_.readIfPresent("fieldMask", dict);
             [[fallthrough]];
         }
         case actionType::opNew:

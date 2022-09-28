@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Original code Copyright (C) 2012-2018 Bernhard Gschaider
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2012-2018 Bernhard Gschaider
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,13 +33,13 @@ License
 inline Foam::expressions::exprString::exprString
 (
     const std::string& s,
-    bool doValidate
+    bool doCheck
 )
 :
     string(s)
 {
     #ifdef FULLDEBUG
-    if (doValidate)
+    if (doCheck)
     {
         (void)valid();
     }
@@ -50,13 +50,13 @@ inline Foam::expressions::exprString::exprString
 inline Foam::expressions::exprString::exprString
 (
     std::string&& s,
-    bool doValidate
+    bool doCheck
 )
 :
     string(std::move(s))
 {
     #ifdef FULLDEBUG
-    if (doValidate)
+    if (doCheck)
     {
         (void)valid();
     }
@@ -67,13 +67,13 @@ inline Foam::expressions::exprString::exprString
 inline Foam::expressions::exprString::exprString
 (
     const char* s,
-    bool doValidate
+    bool doCheck
 )
 :
     string(s)
 {
     #ifdef FULLDEBUG
-    if (doValidate)
+    if (doCheck)
     {
         (void)valid();
     }
@@ -83,27 +83,19 @@ inline Foam::expressions::exprString::exprString
 
 inline Foam::expressions::exprString::exprString
 (
-    const std::string& str,
+    const word& entryName,
     const dictionary& dict,
-    const bool removeComments
+    const bool mandatory
 )
-:
-    string(str)
 {
-    expand(dict, removeComments);
-}
-
-
-inline Foam::expressions::exprString::exprString
-(
-    std::string&& str,
-    const dictionary& dict,
-    const bool removeComments
-)
-:
-    string(std::move(str))
-{
-    expand(dict, removeComments);
+    if (mandatory)
+    {
+        readEntry(entryName, dict);
+    }
+    else
+    {
+        readIfPresent(entryName, dict);
+    }
 }
 
 
@@ -117,6 +109,64 @@ inline Foam::expressions::exprString::exprString
     string(is)
 {
     expand(dict, removeComments);
+}
+
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+inline Foam::expressions::exprString
+Foam::expressions::exprString::toExpr(const std::string& str)
+{
+    exprString expr;
+
+    expr.string::operator=(str);
+
+    return expr;
+}
+
+
+inline Foam::expressions::exprString
+Foam::expressions::exprString::toExpr(std::string&& str)
+{
+    exprString expr;
+
+    expr.string::operator=(std::move(str));
+
+    return expr;
+}
+
+
+inline Foam::expressions::exprString
+Foam::expressions::exprString::toExpr
+(
+    const std::string& str,
+    const dictionary& dict,
+    const bool stripComments
+)
+{
+    // Copy - no validate
+    exprString expr(str, false);
+
+    expr.expand(dict, stripComments);
+
+    return expr;
+}
+
+
+inline Foam::expressions::exprString
+Foam::expressions::exprString::toExpr
+(
+    std::string&& str,
+    const dictionary& dict,
+    const bool stripComments
+)
+{
+    // Move - no validate
+    exprString expr(std::move(str), false);
+
+    expr.expand(dict, stripComments);
+
+    return expr;
 }
 
 
@@ -139,25 +189,13 @@ inline bool Foam::expressions::exprString::valid() const
 }
 
 
-inline Foam::expressions::exprString
-Foam::expressions::exprString::toExpr(const std::string& str)
+inline bool Foam::expressions::exprString::readIfPresent
+(
+    const word& key,
+    const dictionary& dict
+)
 {
-    exprString expr;
-
-    expr.string::operator=(str);
-
-    return expr;
-}
-
-
-inline Foam::expressions::exprString
-Foam::expressions::exprString::toExpr(std::string&& str)
-{
-    exprString expr;
-
-    expr.string::operator=(std::move(str));
-
-    return expr;
+    return readEntry(key, dict, false);  // non-mandatory
 }
 
 

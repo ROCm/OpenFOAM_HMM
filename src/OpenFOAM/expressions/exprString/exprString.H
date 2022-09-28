@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2018 Bernhard Gschaider
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,8 +40,8 @@ SeeAlso
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef expressions_exprString_H
-#define expressions_exprString_H
+#ifndef Foam_expressions_exprString_H
+#define Foam_expressions_exprString_H
 
 #include "string.H"
 #include "dictionary.H"
@@ -75,34 +75,26 @@ public:
         exprString(exprString&& rhs) = default;
 
         //- Copy construct from std::string
-        inline explicit exprString(const std::string& s, bool doValidate=true);
+        inline explicit exprString(const std::string& s, bool doCheck=true);
 
         //- Move construct from std::string
-        inline explicit exprString(std::string&& s, bool doValidate=true);
+        inline explicit exprString(std::string&& s, bool doCheck=true);
 
         //- Construct as copy of character array
-        inline explicit exprString(const char* s, bool doValidate=true);
+        inline explicit exprString(const char* s, bool doCheck=true);
 
-        //- Copy construct and expand with dictionary variables,
-        //- and strip C/C++ comments from the input
+        //- Construct from dictionary entry lookup.
+        //- Expands dictionary variables and strips and strips any
+        //- embedded C/C++ comments
         inline exprString
         (
-            const std::string& str,
+            const word& entryName,  //!< Lookup key. LITERAL (not REGEX)
             const dictionary& dict,
-            const bool stripComments = true
+            const bool mandatory = true
         );
 
-        //- Move construct and expand with dictionary variables,
-        //- and strip C/C++ comments from the input
-        inline exprString
-        (
-            std::string&& str,
-            const dictionary& dict,
-            const bool stripComments = true
-        );
-
-        //- Construct from Istream and expand with dictionary variables,
-        //- and strip C/C++ comments from the input
+        //- Construct from Istream with dictionary context for expanding
+        //- dictionary variables. Strips any embedded C/C++ comments
         inline exprString
         (
             Istream& is,
@@ -117,8 +109,38 @@ public:
 
     // Static Member Functions
 
+        //- Copy convert string to exprString.
+        //  No expansions, know what you are doing.
+        inline static exprString toExpr(const std::string& str);
+
+        //- Move convert string to exprString.
+        //  No expansions, know what you are doing.
+        inline static exprString toExpr(std::string&& str);
+
+        //- Copy convert string to exprString with dictionary expansions,
+        //- stripping any embedded C/C++ comments
+        //
+        // \sa inplaceExpand() for expansion details
+        static exprString toExpr
+        (
+            const std::string& str,
+            const dictionary& dict,
+            const bool stripComments = true
+        );
+
+        //- Move convert string to exprString with dictionary expansions,
+        //- stripping any embedded C/C++ comments
+        //
+        // \sa inplaceExpand() for expansion details
+        static exprString toExpr
+        (
+            std::string&& str,
+            const dictionary& dict,
+            const bool stripComments = true
+        );
+
         //- Inplace expansion with dictionary variables,
-        //- and strip C/C++ comments from the input.
+        //- and strip any embedded C/C++ comments
         //
         // \par Expansion behaviour
         // - alternatives = True
@@ -133,34 +155,6 @@ public:
             const bool stripComments = true
         );
 
-        //- Get and expand expression with dictionary entries,
-        //- optionally strip C/C++ comments from the input.
-        // Expansion behaviour as per inplaceExpand
-        static exprString getEntry
-        (
-            const word& keyword,  //!< Lookup key. Uses LITERAL (not REGEX)
-            const dictionary& dict,
-            const bool stripComments = true
-        );
-
-        //- Get and expand expression with dictionary entries,
-        //- optionally strip C/C++ comments from the input.
-        // Expansion behaviour as per inplaceExpand
-        static exprString getOptional
-        (
-            const word& keyword,  //!< Lookup key. Uses LITERAL (not REGEX)
-            const dictionary& dict,
-            const bool stripComments = true
-        );
-
-        //- Copy convert string to exprString.
-        //  No expansions, know what you are doing.
-        inline static exprString toExpr(const std::string& str);
-
-        //- Move convert string to exprString.
-        //  No expansions, know what you are doing.
-        inline static exprString toExpr(std::string&& str);
-
 
     // Member Functions
 
@@ -168,20 +162,28 @@ public:
         inline bool valid() const;
 
         //- Inplace expansion with dictionary variables,
-        //- and strip C/C++ comments from the input
+        //- and strip any embedded C/C++ comments.
+        //  \sa inplaceExpand() for expansion details
         void expand(const dictionary& dict, const bool stripComments = true);
 
         //- Inplace trim leading and trailing whitespace
         void trim();
 
         //- Read/expand entry with dictionary variables,
-        //- and strip C/C++ comments from the input
+        //- and strip any embedded C/C++ comments from the input
         bool readEntry
         (
             const word& keyword,  //!< Lookup key. Uses LITERAL (not REGEX)
             const dictionary& dict,
-            bool mandatory = true,
-            const bool stripComments = true
+            bool mandatory = true
+        );
+
+        //- Read/expand optional entry with dictionary variables,
+        //- and strip any embedded C/C++ comments from the input
+        inline bool readIfPresent
+        (
+            const word& keyword,  //!< Lookup key. Uses LITERAL (not REGEX)
+            const dictionary& dict
         );
 
 
@@ -206,7 +208,7 @@ public:
     // Write
 
         //- Dictionary entry for expression string, normally suppressing
-        //- empty strings. Generally used verbatim output (readability)
+        //- empty strings. Generally uses verbatim output (readability)
         //  \return true if entry was written
         bool writeEntry
         (

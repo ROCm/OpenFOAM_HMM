@@ -560,7 +560,6 @@ int main(int argc, char *argv[])
         " (command-line operation)",
         true // Advanced option
     );
-    argList::addOptionCompat("dimensions", {"dimension", 2012});
 
     argList::addBoolOption
     (
@@ -771,11 +770,7 @@ int main(int argc, char *argv[])
                 ctrl.streamOpt.format(IOstreamOption::ASCII);
             }
 
-            expressions::exprString valueExpr_
-            (
-                args["expression"],
-                dictionary::null
-            );
+            expressions::exprString valueExpr_(args["expression"]);
 
             expressions::exprString maskExpr_;
             args.readIfPresent("field-mask", maskExpr_);
@@ -860,14 +855,7 @@ int main(int argc, char *argv[])
 
                 const word fieldName(dict.get<word>("field"));
 
-                auto valueExpr_
-                (
-                    expressions::exprString::getEntry
-                    (
-                        "expression",
-                        dict
-                    )
-                );
+                expressions::exprString valueExpr_("expression", dict);
 
                 expressions::exprString maskExpr_;
                 {
@@ -884,18 +872,11 @@ int main(int argc, char *argv[])
                     }
                 }
 
+                // Optional: "dimensions"
                 dimensionSet dims;
+                if (dims.readEntry("dimensions", dict, false))
                 {
-                    const entry* dimPtr = dict.findCompat
-                    (
-                        "dimensions", {{"dimension", 2012}},
-                        keyType::LITERAL
-                    );
-                    if (dimPtr)
-                    {
-                        dimPtr->stream() >> dims;
-                    }
-                    ctrl.hasDimensions = bool(dimPtr);
+                    ctrl.hasDimensions = true;
                 }
 
                 if (args.verbose() && !timei)

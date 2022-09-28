@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef exprTools_H
-#define exprTools_H
+#ifndef Foam_exprTools_H
+#define Foam_exprTools_H
 
 #include "exprOps.H"
 #include "exprString.H"
@@ -93,8 +93,8 @@ string toString(ITstream& is);
 //  \endcode
 List<expressions::exprString> getList
 (
-    const dictionary& dict,
     const word& keyword,
+    const dictionary& dict,
     bool mandatory = true,
     label recursionDepth = 0
 );
