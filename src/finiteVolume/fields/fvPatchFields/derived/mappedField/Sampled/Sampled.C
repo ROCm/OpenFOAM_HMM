@@ -320,7 +320,7 @@ Foam::PatchFunction1Types::Sampled<Type>::integrate
 ) const
 {
     NotImplemented;
-    return tmp<Field<Type>>(nullptr);
+    return nullptr;
 }
 
 

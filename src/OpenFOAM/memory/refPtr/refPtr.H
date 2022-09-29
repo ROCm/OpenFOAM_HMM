@@ -175,10 +175,13 @@ public:
         bool good() const noexcept { return bool(ptr_); }
 
         //- If the stored/referenced content is const
-        bool is_const() const noexcept { return type_ == CREF; }
+        bool is_const() const noexcept { return (type_ == CREF); }
 
         //- True if this is a managed pointer (not a reference)
-        bool is_pointer() const noexcept { return type_ == PTR; }
+        bool is_pointer() const noexcept { return (type_ == PTR); }
+
+        //- True if this is a reference (not a pointer)
+        bool is_reference() const noexcept { return (type_ != PTR); }
 
         //- True if this is a non-null managed pointer
         inline bool movable() const noexcept;

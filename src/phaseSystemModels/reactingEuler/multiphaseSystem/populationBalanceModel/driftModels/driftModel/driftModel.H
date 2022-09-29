@@ -114,7 +114,7 @@ public:
         autoPtr<driftModel> clone() const
         {
             NotImplemented;
-            return autoPtr<driftModel>(nullptr);
+            return nullptr;
         }
 
 

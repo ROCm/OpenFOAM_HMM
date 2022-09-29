@@ -79,7 +79,7 @@ Foam::IsothermalPhaseModel<BasePhaseModel>::heEqn()
         << "Cannot construct an energy equation for an isothermal phase"
         << exit(FatalError);
 
-    return tmp<fvScalarMatrix>();
+    return nullptr;
 }
 
 

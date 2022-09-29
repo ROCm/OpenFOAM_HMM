@@ -114,7 +114,7 @@ public:
         autoPtr<coalescenceModel> clone() const
         {
             NotImplemented;
-            return autoPtr<coalescenceModel>(nullptr);
+            return nullptr;
         }
 
 

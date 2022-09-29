@@ -66,7 +66,7 @@ Foam::PurePhaseModel<BasePhaseModel>::YiEqn(volScalarField& Yi)
         << "Cannot construct a species fraction equation for a pure phase"
         << exit(FatalError);
 
-    return tmp<fvScalarMatrix>();
+    return nullptr;
 }
 
 

@@ -122,7 +122,7 @@ Foam::StationaryPhaseModel<BasePhaseModel>::UEqn()
         << "Cannot construct a momentum equation for a stationary phase"
         << exit(FatalError);
 
-    return tmp<fvVectorMatrix>();
+    return nullptr;
 }
 
 
@@ -134,7 +134,7 @@ Foam::StationaryPhaseModel<BasePhaseModel>::UfEqn()
         << "Cannot construct a momentum equation for a stationary phase"
         << exit(FatalError);
 
-    return tmp<fvVectorMatrix>();
+    return nullptr;
 }
 
 
@@ -270,7 +270,7 @@ template<class BasePhaseModel>
 Foam::tmp<Foam::volScalarField>
 Foam::StationaryPhaseModel<BasePhaseModel>::divU() const
 {
-    return tmp<volScalarField>();
+    return nullptr;
 }
 
 

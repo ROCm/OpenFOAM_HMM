@@ -1240,7 +1240,7 @@ Foam::autoPtr<Foam::mapDistribute> Foam::holeToFace::calcClosure
     if (returnReduce(closureFaces.size(), sumOp<label>()) == 0)
     {
         closureToBlocked.clear();
-        return autoPtr<mapDistribute>(nullptr);
+        return nullptr;
     }
 
 

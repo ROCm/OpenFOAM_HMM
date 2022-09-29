@@ -114,7 +114,7 @@ public:
         autoPtr<nucleationModel> clone() const
         {
             NotImplemented;
-            return autoPtr<nucleationModel>(nullptr);
+            return nullptr;
         }
 
 
