@@ -35,7 +35,7 @@
                 (
                     solidRegions[i],
                     thermos[i],
-                    coordinateSystem::typeName_()
+                    coordinateSystem::typeName
                 )
             );
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,12 +45,6 @@ const Foam::coordSystem::cartesian Foam::coordSystem::cartesian::null;
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::coordSystem::cartesian::cartesian()
-:
-    coordinateSystem()
-{}
-
 
 Foam::coordSystem::cartesian::cartesian(const coordinateSystem& csys)
 :
@@ -111,24 +105,19 @@ Foam::coordSystem::cartesian::cartesian
 
 Foam::coordSystem::cartesian::cartesian
 (
-    const word& name,
-    const dictionary& dict
+    const dictionary& dict,
+    IOobjectOption::readOption readOrigin
 )
 :
-    coordinateSystem(name, dict)
-{}
-
-
-Foam::coordSystem::cartesian::cartesian(const dictionary& dict)
-:
-    coordinateSystem(dict)
+    coordinateSystem(dict, readOrigin)
 {}
 
 
 Foam::coordSystem::cartesian::cartesian
 (
     const dictionary& dict,
-    const word& dictName
+    const word& dictName,
+    IOobjectOption::readOption readOrigin
 )
 :
     coordinateSystem(dict, dictName)

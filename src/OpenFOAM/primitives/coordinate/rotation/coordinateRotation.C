@@ -68,15 +68,19 @@ Foam::vector Foam::coordinateRotation::findOrthogonal(const vector& axis)
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::coordinateRotation> Foam::coordinateRotation::New
+Foam::autoPtr<Foam::coordinateRotation>
+Foam::coordinateRotation::New
 (
-    word modelType,
+    const word& modelType,
     const dictionary& dict
 )
 {
+    // Direct dispatch
+    // - treat missing modelType as 'axes' (eg, e1/e3 specification)
+
     if (modelType.empty())
     {
-        modelType = coordinateRotations::axes::typeName_();
+        return autoPtr<coordinateRotation>(new coordinateRotations::axes(dict));
     }
 
     auto* ctorPtr = dictionaryConstructorTable(modelType);
@@ -96,7 +100,8 @@ Foam::autoPtr<Foam::coordinateRotation> Foam::coordinateRotation::New
 }
 
 
-Foam::autoPtr<Foam::coordinateRotation> Foam::coordinateRotation::New
+Foam::autoPtr<Foam::coordinateRotation>
+Foam::coordinateRotation::New
 (
     const dictionary& dict
 )

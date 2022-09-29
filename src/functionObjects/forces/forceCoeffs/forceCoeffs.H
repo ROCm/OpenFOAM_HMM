@@ -107,27 +107,23 @@ Usage
             // Cartesian coordinate system specification when evaluating
             // force and moment coefficients, either of the below
 
-            // Option-1, i.e. the centre of rotation
-            // by inherently using e3=(0 0 1) and e1=(1 0 0)
-            CofR                (0 0 0); // Centre of rotation
-            dragDir             (1 0 0);
-            liftDir             (0 0 1);
+            // Define the centre of rotation
+            // with implicit directions e1=(1 0 0) and e3=(0 0 1)
+            CofR            (0 0 0); // Centre of rotation
 
-            // Option-2, i.e. local coordinate system specification
-            origin              (0 0 0);
-            e1                  (1 0 0);
-            e3                  (0 0 1); // (e1, e2) or (e2, e3) or (e3, e1)
+            // Define local coordinate system by origin + axes
+            origin          (0 0 0);
+            e1              (1 0 0);
+            e3              (0 0 1); // (e1, e2) or (e2, e3) or (e3, e1)
 
-            // Option-3, i.e. general coordinate system specification
+            // General coordinate system specification (always cartesian)
             coordinateSystem
             {
-                type            cartesian;
-                origin          (0 0 0);
+                origin      (0 0 0);
                 rotation
                 {
-                    type        axes;
-                    e3          (0 0 1);
-                    e1          (1 0 0); // (e1, e2) or (e2, e3) or (e3, e1)
+                    type    ...;
+                    ...
                 }
             }
 
@@ -220,6 +216,8 @@ Note
       pitchAxis    | Pitch axis            | e2    | (0 1 0)
       yawAxis      | Yaw axis              | e3    | (0 0 1)
     \endtable
+
+  - If a \c coordinateSystem entry exists, it is taken in favour of \c CofR.
 
 SourceFiles
     forceCoeffs.C

@@ -105,6 +105,7 @@ Description
 SourceFiles
     coordinateSystem.C
     coordinateSystemNew.C
+    coordinateSystemTemplates.C
     coordinateSystemTransform.C
 
 \*---------------------------------------------------------------------------*/
@@ -144,6 +145,59 @@ class indirect;
 
 class coordinateSystem
 {
+    // Private Member Functions
+
+        //- Select construct specified coordinate system type
+        //
+        //  \param modelType Eg, cartesian, cylindrical, indirect
+        //      An empty modelType will be treated as "cartesian".
+        //  \param dict The specifications
+        //  \param readOrigin The preferred handling for reading 'origin'
+        //  \param obrPtr Optional reference to an objectRegistry
+        //         (for indirect entries).
+        static autoPtr<coordinateSystem> New
+        (
+            const word& modelType,
+            const dictionary& dict,
+            IOobjectOption::readOption readOrigin,
+            const objectRegistry* obrPtr
+        );
+
+        //- Select constructed from dictionary
+        //
+        //  \param dict The top-level dictionary contents
+        //  \param dictName The sub-dictionary name to use for the
+        //      coordinate system specifications. An empty name invokes
+        //      an implicit search for a "coordinateSystem" sub-dictionary
+        //      which is convenient and provides compatibility with previous
+        //      versions (1806 and earlier).
+        //  \param readOrigin The preferred handling for reading 'origin'
+        //  \param obrPtr The objectRegistry for lookup of indirect entries.
+        static autoPtr<coordinateSystem> New
+        (
+            const dictionary& dict,
+            const word& dictName,
+            IOobjectOption::readOption readOrigin,
+            const objectRegistry* obrPtr
+        );
+
+        //- Optional select construct from dictionary
+        //
+        //  \param dict The top-level dictionary to search
+        //  \param dictName The sub-dictionary name to select.
+        //     Return nullptr if it does not exist.
+        //  \param obrPtr The objectRegistry for lookup of indirect entries.
+        //
+        //  Since the specifications are isolated within a sub-dictionary,
+        //  the 'origin' entry is treated as optional
+        static autoPtr<coordinateSystem> NewIfPresent
+        (
+            const dictionary& dict,
+            const word& dictName,
+            const objectRegistry* obrPtr
+        );
+
+
 protected:
 
     //- Friendship with indirect for dispatching to its underlying system
@@ -246,9 +300,13 @@ protected:
             bool translate
         ) const;
 
-
-        //- Assign from dictionary content
-        void assign(const dictionary& dict);
+        //- Assign from dictionary content with specified read handling
+        //- of the 'origin' entry
+        void assign
+        (
+            const dictionary& dict,
+            IOobjectOption::readOption readOrigin = IOobjectOption::MUST_READ
+        );
 
 
     // Constructors
@@ -264,7 +322,7 @@ public:
     TypeName("coordinateSystem");
 
         //- Helper for construction of coordinateSystem PtrList
-        //  The Istream contains a word followed by a dictionary
+        //  The Istream contains a word followed by a dictionary.
         struct iNew
         {
             autoPtr<coordinateSystem> operator()(Istream& is) const
@@ -324,7 +382,7 @@ public:
             const coordinateRotation& crot
         );
 
-        //- Construct from origin and 2 axes
+        //- Construct named from origin and 2 axes
         coordinateSystem
         (
             const word& name,
@@ -333,16 +391,31 @@ public:
             const vector& dirn
         );
 
-        //- Construct from dictionary with a given name
-        coordinateSystem(const word& name, const dictionary& dict);
-
-        //- Construct from dictionary without a name
-        explicit coordinateSystem(const dictionary& dict);
-
-        //- Construct from dictionary with optional subDict lookup.
+        //- Construct from dictionary with optional
+        //- read handling for the 'origin' entry (default: MUST_READ).
         //
-        //  \param dictName If non-empty, the sub-dictionary to use.
-        coordinateSystem(const dictionary& dict, const word& dictName);
+        //  \note The readOrigin is downgraded to READ_IF_PRESENT
+        //  if the dictionary itself is "coordinateSystem"
+        explicit coordinateSystem
+        (
+            const dictionary& dict,
+            IOobjectOption::readOption readOrigin = IOobjectOption::MUST_READ
+        );
+
+        //- Construct from dictionary with optional subDict lookup and optional
+        //- read handling for the 'origin' entry (default: MUST_READ).
+        //
+        //  \param dictName If non-empty, mandatory sub-dictionary to use.
+        //
+        //  \note The readOrigin is downgraded to READ_IF_PRESENT
+        //  if the dictionary itself is "coordinateSystem"
+        //  or if a sub-dictionary is being used
+        coordinateSystem
+        (
+            const dictionary& dict,
+            const word& dictName,
+            IOobjectOption::readOption readOrigin = IOobjectOption::MUST_READ
+        );
 
 
     //- Return clone
@@ -359,9 +432,10 @@ public:
         coordinateSystem,
         dictionary,
         (
-            const dictionary& dict
+            const dictionary& dict,
+            IOobjectOption::readOption readOrigin
         ),
-        (dict)
+        (dict, readOrigin)
     );
 
     // Declare run-time constructor selection table
@@ -372,9 +446,10 @@ public:
         registry,
         (
             const objectRegistry& obr,
-            const dictionary& dict
+            const dictionary& dict,
+            IOobjectOption::readOption readOrigin
         ),
-        (obr, dict)
+        (obr, dict, readOrigin)
     );
 
 
@@ -386,9 +461,10 @@ public:
         //  An empty modelType will be treated as "cartesian"
         static autoPtr<coordinateSystem> New
         (
-            word modelType,
+            const word& modelType,
             const objectRegistry& obr,
-            const dictionary& dict
+            const dictionary& dict,
+            IOobjectOption::readOption readOrigin = IOobjectOption::MUST_READ
         );
 
         //- Select construct the specified coordinate system type
@@ -396,8 +472,9 @@ public:
         //  An empty modelType will be treated as "cartesian"
         static autoPtr<coordinateSystem> New
         (
-            word modelType,
-            const dictionary& dict
+            const word& modelType,
+            const dictionary& dict,
+            IOobjectOption::readOption readOrigin = IOobjectOption::MUST_READ
         );
 
         //- Select construct from dictionary with reference to objectRegistry
@@ -413,7 +490,8 @@ public:
         (
             const objectRegistry& obr,
             const dictionary& dict,
-            const word& dictName = ""
+            const word& dictName = word::null,
+            IOobjectOption::readOption readOrigin = IOobjectOption::MUST_READ
         );
 
         //- Select constructed from dictionary
@@ -426,12 +504,50 @@ public:
         static autoPtr<coordinateSystem> New
         (
             const dictionary& dict,
-            const word& dictName = ""
+            const word& dictName = word::null,
+            IOobjectOption::readOption readOrigin = IOobjectOption::MUST_READ
         );
 
         //- Select constructed from Istream
         //  Expects a name/dictionary as input
-        static autoPtr<coordinateSystem> New(Istream& is);
+        static autoPtr<coordinateSystem> New
+        (
+            Istream& is,
+            IOobjectOption::readOption readOrigin = IOobjectOption::MUST_READ
+        );
+
+
+        //- Optional select construct from dictionary, with registry reference
+        //
+        //  \param obr The objectRegistry (for lookup of indirect entries)
+        //  \param dict The top-level dictionary to search
+        //  \param dictName The sub-dictionary name to select the
+        //     for coordinate system specification
+        //     (default is 'coordinateSystem').
+        //
+        //  Since the specifications are isolated within a sub-dictionary,
+        //  the 'origin' entry is treated as optional
+        static autoPtr<coordinateSystem> NewIfPresent
+        (
+            const objectRegistry& obr,
+            const dictionary& dict,
+            const word& dictName = coordinateSystem::typeName
+        );
+
+        //- Optional select construct from dictionary
+        //
+        //  \param dict The top-level dictionary to search
+        //  \param dictName The sub-dictionary name to select the
+        //     for coordinate system specification
+        //     (default is 'coordinateSystem').
+        //
+        //  Since the specifications are isolated within a sub-dictionary,
+        //  the 'origin' entry is treated as optional
+        static autoPtr<coordinateSystem> NewIfPresent
+        (
+            const dictionary& dict,
+            const word& dictName = coordinateSystem::typeName
+        );
 
 
     //- Destructor

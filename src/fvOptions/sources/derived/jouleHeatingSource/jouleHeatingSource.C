@@ -221,7 +221,7 @@ bool Foam::fv::jouleHeatingSource::read(const dictionary& dict)
                 (
                     mesh_,
                     coeffs_,
-                    coordinateSystem::typeName_()
+                    coordinateSystem::typeName
                 );
         }
         else

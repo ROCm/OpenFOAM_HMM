@@ -59,11 +59,11 @@ void basicTests(const coordinateSystem& cs)
 {
     cs.writeEntry(cs.name(), Info);
 
-    if (const auto* cartptr = isA<coordSystem::cartesian>(cs))
+    if ((const auto* cartptr = isA<coordSystem::cartesian>(cs)) != nullptr)
     {
-        if (!cartptr->active())
+        if (!cartptr->valid())
         {
-            Info<< "inactive cartesian = " << (*cartptr)
+            Info<< "invalid cartesian = " << (*cartptr)
                 << " with: " << (*cartptr).R() << nl;
         }
     }
@@ -106,7 +106,7 @@ void doTest(const dictionary& dict)
 
     try
     {
-        auto cs1ptr = coordinateSystem::New(dict, "");
+        auto cs1ptr = coordinateSystem::New(dict, word::null);
         coordinateSystem& cs1 = *cs1ptr;
         cs1.rename(dict.dictName());
 

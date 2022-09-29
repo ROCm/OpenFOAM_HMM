@@ -206,35 +206,12 @@ Foam::searchableSurfaceCollection::searchableSurfaceCollection
 
             sDict.readEntry("scale", scale_[surfI]);
 
-            const dictionary& coordDict = sDict.subDict("transform");
-
-            const dictionary* compatDict =
-                coordDict.findDict
-                (
-                    coordinateSystem::typeName_(),
-                    keyType::LITERAL
-                );
-
-            if (compatDict)
-            {
-                // Deprecated form
-                if (error::master())
-                {
-                    std::cerr
-                        << "--> FOAM IOWarning :" << nl
-                        << "    Found [v1806] '"
-                        << coordinateSystem::typeName_()
-                        << "' entry within transform dictionary" << nl
-                        << std::endl;
-                    error::warnAboutAge("sub-dictionary", 1806);
-                }
-
-                transform_.set(surfI, new coordSystem::cartesian(*compatDict));
-            }
-            else
-            {
-                transform_.set(surfI, new coordSystem::cartesian(coordDict));
-            }
+            // Mandatory 'transform' sub-dictionary
+            transform_.set
+            (
+                surfI,
+                new coordSystem::cartesian(sDict, "transform")
+            );
 
             const word subGeomName(sDict.get<word>("surface"));
             //Pout<< "Trying to find " << subGeomName << endl;

@@ -96,7 +96,7 @@ Foam::porosityModel::porosityModel
     cellZoneIDs_(),
     csysPtr_
     (
-        coordinateSystem::New(mesh, coeffs_, coordinateSystem::typeName_())
+        coordinateSystem::New(mesh, coeffs_, coordinateSystem::typeName)
     )
 {
     if (zoneName_.empty())

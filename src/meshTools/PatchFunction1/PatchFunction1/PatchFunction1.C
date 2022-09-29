@@ -113,12 +113,7 @@ template<class Type>
 Foam::tmp<Foam::pointField>
 Foam::PatchFunction1<Type>::localPosition(const pointField& globalPos) const
 {
-    if (!coordSys_.active())
-    {
-        return globalPos;
-    }
-
-    return coordSys_.coordSys()().localPosition(globalPos);
+    return coordSys_.localPosition(globalPos);
 }
 
 

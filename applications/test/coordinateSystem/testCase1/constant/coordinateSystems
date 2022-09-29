@@ -51,11 +51,8 @@ cs4
 {
     type    cylindrical;
     origin  (0 3 5);
-    rotation
-    {
-        type    euler;
-        angles  (90 0 0);
-    }
+    rotation euler;
+    angles  (90 0 0);
 }
 
 cyl
@@ -75,10 +72,7 @@ cyl
 ident
 {
     origin  (0 0 0);
-    rotation
-    {
-        type    none;
-    }
+    rotation none;
 }
 
 )

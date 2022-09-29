@@ -72,7 +72,8 @@ Foam::coordSystem::indirect::indirect
 Foam::coordSystem::indirect::indirect
 (
     const objectRegistry& obr,
-    const dictionary& dict
+    const dictionary& dict,
+    IOobjectOption::readOption /* (unused) */
 )
 :
     indirect(obr, dict.get<word>("name"))
@@ -83,13 +84,13 @@ Foam::coordSystem::indirect::indirect
 
 void Foam::coordSystem::indirect::write(Ostream& os) const
 {
-    writeEntry(coordinateSystem::typeName_(), os);
+    writeEntry(coordinateSystem::typeName, os);
 }
 
 
 void Foam::coordSystem::indirect::writeEntry(Ostream& os) const
 {
-    writeEntry(coordinateSystem::typeName_(), os);
+    writeEntry(coordinateSystem::typeName, os);
 }
 
 

@@ -50,12 +50,12 @@ const Foam::coordSystem::cylindrical Foam::coordSystem::cylindrical::null;
 namespace Foam
 {
 
-// Issue warning if 'degrees' keyword was specified and true.
+// Issue warning if 'degrees' keyword was specified
 // Compatibility change after 1806.
 
 static inline void warnCompatDegrees(const Foam::dictionary& dict)
 {
-    if (error::master())
+    if (dict.found("degrees", keyType::LITERAL) && error::master())
     {
         std::cerr
             << "--> FOAM IOWarning :" << nl
@@ -83,12 +83,6 @@ static inline vector toCartesian(const vector& v)
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::coordSystem::cylindrical::cylindrical()
-:
-    coordinateSystem()
-{}
-
 
 Foam::coordSystem::cylindrical::cylindrical(const coordinateSystem& csys)
 :
@@ -175,46 +169,30 @@ Foam::coordSystem::cylindrical::cylindrical
 
 Foam::coordSystem::cylindrical::cylindrical
 (
-    const word& name,
-    const dictionary& dict
+    const dictionary& dict,
+    IOobjectOption::readOption readOrigin
 )
 :
-    coordinateSystem(name, dict)
+    coordinateSystem(dict, readOrigin)
 {
-    if (dict.getOrDefault("degrees", false))
-    {
-        warnCompatDegrees(dict);
-    }
-}
-
-
-Foam::coordSystem::cylindrical::cylindrical(const dictionary& dict)
-:
-    coordinateSystem(dict)
-{
-    if (dict.getOrDefault("degrees", false))
-    {
-        warnCompatDegrees(dict);
-    }
+    warnCompatDegrees(dict);
 }
 
 
 Foam::coordSystem::cylindrical::cylindrical
 (
     const dictionary& dict,
-    const word& dictName
+    const word& dictName,
+    IOobjectOption::readOption readOrigin
 )
 :
-    coordinateSystem(dict, dictName)
+    coordinateSystem(dict, dictName, readOrigin)
 {
-    const dictionary* dictPtr =
-    (
-        dictName.size()
-      ? &(dict.subDict(dictName))
-      : &(dict)
-    );
-
-    if (dictPtr->getOrDefault("degrees", false))
+    if (dictName.size())
+    {
+        warnCompatDegrees(dict.subDict(dictName));
+    }
+    else
     {
         warnCompatDegrees(dict);
     }
@@ -329,7 +307,6 @@ Foam::tmp<Foam::vectorField> Foam::coordSystem::cylindrical::globalToLocal
 
     return tresult;
 }
-
 
 
 // ************************************************************************* //

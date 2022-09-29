@@ -26,7 +26,7 @@ rot_x90
 rot_x90_axesRotation
 {
     origin  (0 0 0);
-    coordinateRotation
+    rotation
     {
         type    axesRotation;
         e1      (1 0 0);
@@ -37,7 +37,7 @@ rot_x90_axesRotation
 rot_x90_axisAngle
 {
     origin  (0 0 0);
-    coordinateRotation
+    rotation
     {
         type    axisAngle;
         axis    (1 0 0);        // non-unit also OK
@@ -48,7 +48,7 @@ rot_x90_axisAngle
 rot_x90_euler
 {
     origin  (0 0 0);
-    coordinateRotation
+    rotation
     {
         type    euler;
         angles  (0 90 0);      // z-x'-z''
@@ -61,7 +61,7 @@ rot_x90_euler
 rot_z45_axesRotation
 {
     origin  (0 0 0);
-    coordinateRotation
+    rotation
     {
         type    axesRotation;
         e1      (1 1 0);
@@ -72,7 +72,7 @@ rot_z45_axesRotation
 rot_z45_axisAngle
 {
     origin  (0 0 0);
-    coordinateRotation
+    rotation
     {
         type    axisAngle;
         axis    (0 0 10);       // non-unit also OK
@@ -83,7 +83,7 @@ rot_z45_axisAngle
 rot_z45_euler
 {
     origin  (0 0 0);
-    coordinateRotation
+    rotation
     {
         type    euler;
         angles  (45 0 0);      // z-x'-z''
@@ -93,7 +93,7 @@ rot_z45_euler
 rot_z45_starcd
 {
     origin  (0 0 0);
-    coordinateRotation
+    rotation
     {
         type    starcd;
         angles  (45 0 0);      // z-x'-y''
@@ -106,7 +106,7 @@ rot_z45_starcd
 rot_zm45_axesRotation
 {
     origin  (0 0 0);
-    coordinateRotation
+    rotation
     {
         type    axesRotation;
         e1      (1 -1 0);
@@ -117,7 +117,7 @@ rot_zm45_axesRotation
 rot_zm45_axisAngle
 {
     origin  (0 0 0);
-    coordinateRotation
+    rotation
     {
         type    axisAngle;
         axis    (0 0 10);       // non-unit also OK
@@ -128,7 +128,7 @@ rot_zm45_axisAngle
 rot_zm45_euler
 {
     origin  (0 0 0);
-    coordinateRotation
+    rotation
     {
         type    euler;
         angles  (-45 0 0);      // z-x'-z''
@@ -141,7 +141,7 @@ rot_zm45_euler
 null_axesRotation
 {
     origin  (0 0 0);
-    coordinateRotation
+    rotation
     {
         type    axesRotation;
         e1      (1 0 0);
@@ -152,7 +152,7 @@ null_axesRotation
 null_axisAngle0
 {
     origin  (0 0 0);
-    coordinateRotation
+    rotation
     {
         type    axisAngle;
         axis    (0 0 0);       // non-unit also OK
@@ -163,7 +163,7 @@ null_axisAngle0
 null_axisAngle1
 {
     origin  (0 0 0);
-    coordinateRotation
+    rotation
     {
         type    axisAngle;
         axis    (1 1 1);       // non-unit also OK
@@ -174,7 +174,7 @@ null_axisAngle1
 null_euler
 {
     origin  (0 0 0);
-    coordinateRotation
+    rotation
     {
         type    euler;
         angles  (0 0 0);      // z-x'-z''

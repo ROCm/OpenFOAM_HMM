@@ -48,28 +48,47 @@ Foam::coordinateSystem Foam::coordinateSystem::dummy_(nullptr);
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
-namespace Foam
+namespace
 {
-    //- Is it cartesian?
-    //  For output, can treat the base class as Cartesian too,
-    //  since it defaults to cartesian on input.
-    static inline bool isCartesian(const word& modelType)
-    {
-        return
-        (
-            modelType == coordinateSystem::typeName_()
-         || modelType == coordSystem::cartesian::typeName_()
-        );
-    }
 
-} // End namespace Foam
+//- Can we ignore the 'type' on output?
+//  For output, can treat the base class as Cartesian too,
+//  since it defaults to cartesian on input.
+inline bool ignoreOutputCoordType(const std::string& modelType)
+{
+    return
+    (
+        modelType.empty()
+     || modelType == Foam::coordSystem::cartesian::typeName
+     || modelType == Foam::coordinateSystem::typeName
+    );
+}
+
+} // End anonymous namespace
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void Foam::coordinateSystem::assign(const dictionary& dict)
+void Foam::coordinateSystem::assign
+(
+    const dictionary& dict,
+    IOobjectOption::readOption readOrigin
+)
 {
-    dict.readEntry("origin", origin_);
+    origin_ = Zero;
+
+    // The 'origin' is optional if using "coordinateSystem" dictionary itself
+    if
+    (
+        IOobjectOption::isReadRequired(readOrigin)
+     && (dict.dictName() == coordinateSystem::typeName)
+    )
+    {
+        readOrigin = IOobjectOption::READ_IF_PRESENT;
+    }
+
+    dict.readEntry("origin", origin_, keyType::LITERAL, readOrigin);
+
 
     note_.clear();
     dict.readIfPresent("note", note_);
@@ -89,7 +108,8 @@ void Foam::coordinateSystem::assign(const dictionary& dict)
         }
         else
         {
-            // Use current dict. Type specified by "rotation" entry itself.
+            // Type specified by "rotation" primitive entry, with the balance
+            // of the rotation specified within the current dictionary too
             const word rotationType(finder->get<word>());
             spec_.reset(coordinateRotation::New(rotationType, dict));
         }
@@ -244,43 +264,37 @@ Foam::coordinateSystem::coordinateSystem
 
 Foam::coordinateSystem::coordinateSystem
 (
-    const word& name,
-    const dictionary& dict
+    const dictionary& dict,
+    IOobjectOption::readOption readOrigin
 )
-:
-    spec_(nullptr),
-    origin_(Zero),
-    rot_(sphericalTensor::I),
-    name_(name),
-    note_()
-{
-    assign(dict);
-}
-
-
-Foam::coordinateSystem::coordinateSystem(const dictionary& dict)
 :
     coordinateSystem(nullptr)
 {
-    assign(dict);
+    assign(dict, readOrigin);
 }
 
 
 Foam::coordinateSystem::coordinateSystem
 (
     const dictionary& dict,
-    const word& dictName
+    const word& dictName,
+    IOobjectOption::readOption readOrigin
 )
 :
     coordinateSystem(nullptr)
 {
     if (dictName.size())
     {
-        assign(dict.subDict(dictName));
+        // Allow 'origin' to be optional if reading from a sub-dict
+        if (IOobjectOption::isReadRequired(readOrigin))
+        {
+            readOrigin = IOobjectOption::READ_IF_PRESENT;
+        }
+        assign(dict.subDict(dictName), readOrigin);
     }
     else
     {
-        assign(dict);
+        assign(dict, readOrigin);
     }
 }
 
@@ -419,8 +433,8 @@ void Foam::coordinateSystem::write(Ostream& os) const
         return;
     }
 
-    // Suppress output of type for Cartesian
-    if (!isCartesian(type()))
+    // Suppress output of type for 'cartesian', 'coordinateSystem', ...
+    if (!ignoreOutputCoordType(type()))
     {
         os << type() << ' ';
     }
@@ -432,7 +446,7 @@ void Foam::coordinateSystem::write(Ostream& os) const
 
 void Foam::coordinateSystem::writeEntry(Ostream& os) const
 {
-    writeEntry(coordinateSystem::typeName_(), os);
+    writeEntry(coordinateSystem::typeName, os);
 }
 
 
@@ -449,8 +463,8 @@ void Foam::coordinateSystem::writeEntry(const word& keyword, Ostream& os) const
     {
         os.beginBlock(keyword);
 
-        // Suppress output of type for Cartesian
-        if (!isCartesian(type()))
+        // Suppress output of type for 'cartesian', 'coordinateSystem', ...
+        if (!ignoreOutputCoordType(type()))
         {
             os.writeEntry<word>("type", type());
         }

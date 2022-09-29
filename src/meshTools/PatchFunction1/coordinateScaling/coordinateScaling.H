@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,8 +37,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef coordinateScaling_H
-#define coordinateScaling_H
+#ifndef Foam_coordinateScaling_H
+#define Foam_coordinateScaling_H
 
 #include "coordinateSystem.H"
 #include "Function1.H"
@@ -58,7 +58,7 @@ class coordinateScaling
     // Private Data
 
         //- Local coordinate system
-        const autoPtr<coordinateSystem> coordSys_;
+        autoPtr<coordinateSystem> coordSys_;
 
         //- In local coordinate system component-wise scaling
         PtrList<Function1<Type>> scale_;
@@ -97,7 +97,7 @@ public:
     // Member Functions
 
         //- Has any scaling or coordinate transformation
-        bool active() const
+        bool active() const noexcept
         {
             return active_;
         }
@@ -107,6 +107,10 @@ public:
         {
             return coordSys_;
         }
+
+        //- Convert to local coordinates,
+        //- pass-through if no coordinate system is active
+        tmp<pointField> localPosition(const pointField& globalPos) const;
 
         //- Evaluate
         virtual tmp<Field<Type>> transform

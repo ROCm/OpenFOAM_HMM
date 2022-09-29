@@ -174,13 +174,16 @@ Foam::surfaceWriter::surfaceWriter(const dictionary& options)
 
     options.readIfPresent("scale", geometryScale_);
 
-    const dictionary* dictptr;
-
     // Optional cartesian coordinate system transform
-    if ((dictptr = options.findDict("transform", keyType::LITERAL)) != nullptr)
+    const auto* dictptr = options.findDict("transform", keyType::LITERAL);
+
+    if (dictptr)
     {
         dictptr->readIfPresent("rotationCentre", geometryCentre_);
-        geometryTransform_ = coordSystem::cartesian(*dictptr);
+
+        // 'origin' (READ_IF_PRESENT)
+        geometryTransform_ =
+            coordSystem::cartesian(*dictptr, IOobjectOption::READ_IF_PRESENT);
     }
 
     fieldLevel_ = options.subOrEmptyDict("fieldLevel");

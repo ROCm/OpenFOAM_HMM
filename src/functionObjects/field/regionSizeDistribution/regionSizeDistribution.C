@@ -396,19 +396,12 @@ bool Foam::functionObjects::regionSizeDistribution::read(const dictionary& dict)
         dict.subOrEmptyDict("formatOptions").optionalSubDict(setFormat)
     );
 
-    if (dict.found(coordinateSystem::typeName_()))
-    {
-        csysPtr_.reset
-        (
-            coordinateSystem::New(obr_, dict, coordinateSystem::typeName_())
-        );
+    csysPtr_ = coordinateSystem::NewIfPresent(obr_, dict);
 
+    if (csysPtr_)
+    {
         Info<< "Transforming all vectorFields with coordinate system "
             << csysPtr_->name() << endl;
-    }
-    else
-    {
-        csysPtr_.clear();
     }
 
     if (isoPlanes_)

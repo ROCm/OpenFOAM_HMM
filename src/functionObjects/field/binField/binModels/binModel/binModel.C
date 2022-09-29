@@ -77,40 +77,27 @@ void Foam::binModel::setCoordinateSystem
     const word& e1Name
 )
 {
-    coordSysPtr_.clear();
+    point origin(Zero);
 
-    if (dict.found(coordinateSystem::typeName_()))
+    coordSysPtr_ = coordinateSystem::NewIfPresent(dict);
+
+    if (coordSysPtr_)
     {
-        coordSysPtr_ =
-            coordinateSystem::New
-            (
-                mesh_,
-                dict,
-                coordinateSystem::typeName_()
-            );
-
         Info<< "Setting co-ordinate system:" << nl
             << "    - type          : " << coordSysPtr_->name() << nl
             << "    - origin        : " << coordSysPtr_->origin() << nl
             << "    - e3            : " << coordSysPtr_->e3() << nl
             << "    - e1            : " << coordSysPtr_->e1() << endl;
     }
-    else if (dict.found("CofR"))
+    else if (dict.readIfPresent("CofR", origin))
     {
-        const vector origin(dict.get<point>("CofR"));
-
         const vector e3
         (
-            e3Name == word::null
-          ? vector(0, 0, 1)
-          : dict.get<vector>(e3Name)
+            e3Name.empty() ? vector(0, 0, 1) : dict.get<vector>(e3Name)
         );
-
         const vector e1
         (
-            e1Name == word::null
-          ? vector(1, 0, 0)
-          : dict.get<vector>(e1Name)
+            e1Name.empty() ? vector(1, 0, 0) : dict.get<vector>(e1Name)
         );
 
         coordSysPtr_.reset(new coordSystem::cartesian(origin, e3, e1));

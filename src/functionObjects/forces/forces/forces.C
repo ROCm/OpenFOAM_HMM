@@ -55,38 +55,34 @@ void Foam::functionObjects::forces::setCoordinateSystem
     const word& e1Name
 )
 {
-    coordSysPtr_.clear();
-
     point origin(Zero);
-    if (dict.readIfPresent<point>("CofR", origin))
+
+    // With objectRegistry for access to indirect (global) coordinate systems
+    coordSysPtr_ = coordinateSystem::NewIfPresent(obr_, dict);
+
+    if (coordSysPtr_)
     {
-        const vector e3 = e3Name == word::null ?
-            vector(0, 0, 1) : dict.get<vector>(e3Name);
-        const vector e1 = e1Name == word::null ?
-            vector(1, 0, 0) : dict.get<vector>(e1Name);
+        // Report ...
+    }
+    else if (dict.readIfPresent("CofR", origin))
+    {
+        const vector e3
+        (
+            e3Name.empty() ? vector(0, 0, 1) : dict.get<vector>(e3Name)
+        );
+        const vector e1
+        (
+            e1Name.empty() ? vector(1, 0, 0) : dict.get<vector>(e1Name)
+        );
 
         coordSysPtr_.reset(new coordSystem::cartesian(origin, e3, e1));
     }
     else
     {
-        // The 'coordinateSystem' sub-dictionary is optional,
-        // but enforce use of a cartesian system if not found.
+        // No 'coordinateSystem' or 'CofR'
+        // - enforce a cartesian system
 
-        if (dict.found(coordinateSystem::typeName_()))
-        {
-            // New() for access to indirect (global) coordinate system
-            coordSysPtr_ =
-                coordinateSystem::New
-                (
-                    obr_,
-                    dict,
-                    coordinateSystem::typeName_()
-                );
-        }
-        else
-        {
-            coordSysPtr_.reset(new coordSystem::cartesian(dict));
-        }
+        coordSysPtr_.reset(new coordSystem::cartesian(dict));
     }
 }
 

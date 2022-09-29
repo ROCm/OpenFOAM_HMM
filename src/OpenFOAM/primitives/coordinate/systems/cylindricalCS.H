@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -114,8 +114,8 @@ public:
 
     // Constructors
 
-        //- Default construct. This is an identity coordinate system
-        cylindrical();
+        //- Default construct. Identity coordinate system.
+        cylindrical() = default;
 
         //- Copy construct
         cylindrical(const cylindrical& csys) = default;
@@ -141,7 +141,7 @@ public:
         //- Construct from origin and single axis
         cylindrical(const point& origin, const vector& axis);
 
-        //- Construct from origin and single axis
+        //- Construct named from origin and single axis
         cylindrical(const word& name, const point& origin, const vector& axis);
 
         //- Construct from origin and two axes
@@ -152,7 +152,7 @@ public:
             const vector& dirn
         );
 
-        //- Construct from origin and two axes
+        //- Construct named from origin and two axes
         cylindrical
         (
             const word& name,
@@ -161,16 +161,32 @@ public:
             const vector& dirn
         );
 
-        //- Construct from dictionary with a given name
-        cylindrical(const word& name, const dictionary& dict);
-
-        //- Construct from dictionary without a name
-        explicit cylindrical(const dictionary& dict);
-
-        //- Construct from dictionary with optional subDict lookup.
+        //- Construct from dictionary with optional
+        //- read handling for the 'origin' entry (default: MUST_READ).
         //
-        //  \param dictName If non-empty, the sub-dictionary to use.
-        cylindrical(const dictionary& dict, const word& dictName);
+        //  \note The readOrigin is downgraded to READ_IF_PRESENT
+        //  if the dictionary itself is "coordinateSystem"
+        explicit cylindrical
+        (
+            const dictionary& dict,
+            IOobjectOption::readOption readOrigin = IOobjectOption::MUST_READ
+        );
+
+        //- Construct from dictionary with optional subDict lookup and optional
+        //- read handling for the 'origin' entry (default: MUST_READ).
+        //
+        //  \param dictName If non-empty, mandatory sub-dictionary to use.
+        //
+        //  \note The readOrigin is downgraded to READ_IF_PRESENT
+        //  if the dictionary itself is "coordinateSystem"
+        //  or if a sub-dictionary is being used
+        cylindrical
+        (
+            const dictionary& dict,
+            const word& dictName,
+            IOobjectOption::readOption readOrigin = IOobjectOption::MUST_READ
+        );
+
 
         //- Return clone
         virtual autoPtr<coordinateSystem> clone() const

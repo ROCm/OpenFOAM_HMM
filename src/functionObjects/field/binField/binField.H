@@ -68,22 +68,21 @@ Usage
 
         // Conditional optional entries
 
-            // Option-1, i.e. general coordinate system specification
+            // General coordinate system specification
             coordinateSystem
             {
-                type            cartesian;
-                origin          (0 0 0);
+                type        cartesian;
+                origin      (0 0 0);
                 rotation
                 {
-                    type        axes;
-                    e3          (0 0 1);
-                    e1          (1 0 0); // (e1, e2) or (e2, e3) or (e3, e1)
+                    type        ...
+                    ...
                 }
             }
 
-            // Option-2, i.e. the centre of rotation
-            // by inherently using e3=(0 0 1) and e1=(1 0 0)
-            CofR                (0 0 0);
+            // Define the centre of rotation
+            // with implicit directions e1=(1 0 0) and e3=(0 0 1)
+            CofR            (0 0 0);
 
         // Inherited entries
         ...
@@ -102,7 +101,7 @@ Usage
       decomposePatchValues | Flag to output normal and tangential      <!--
                 --> components                          | bool   | no   | false
       cellZones | Names of operand cell zones          | wordRes | no   | -
-      coordinateSystem | Coordinate system specifier      | dict | cndtnl | -
+      coordinateSystem | Coordinate system specifier    | dict | cndtnl | -
       CofR    | Centre of rotation                      | vector | cndtnl | -
     \endtable
 
@@ -116,6 +115,9 @@ Usage
       - \link fvMeshFunctionObject.H \endlink
       - \link writeFile.H \endlink
       - \link coordinateSystem.H \endlink
+
+Note
+  - If a \c coordinateSystem entry exists, it is taken in favour of \c CofR.
 
 SourceFiles
     binField.C

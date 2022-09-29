@@ -60,7 +60,7 @@ fieldCoordinateSystemTransform
     fieldSet_(mesh_),
     csysPtr_
     (
-        coordinateSystem::New(mesh_, dict, coordinateSystem::typeName_())
+        coordinateSystem::New(mesh_, dict, coordinateSystem::typeName)
     )
 {
     read(dict);

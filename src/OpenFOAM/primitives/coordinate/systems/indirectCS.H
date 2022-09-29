@@ -42,8 +42,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef indirectCS_H
-#define indirectCS_H
+#ifndef Foam_indirectCS_H
+#define Foam_indirectCS_H
 
 #include "coordinateSystem.H"
 
@@ -137,8 +137,14 @@ public:
         //- Construct from global lookup
         indirect(const objectRegistry& obr, const word& name);
 
-        //- Construct from global lookup
-        indirect(const objectRegistry& obr, const dictionary& dict);
+        //- Construct from global lookup.
+        //  The readOrigin is unused.
+        indirect
+        (
+            const objectRegistry& obr,
+            const dictionary& dict,
+            IOobjectOption::readOption readOrigin = IOobjectOption::NO_READ
+        );
 
         //- Return clone
         virtual autoPtr<coordinateSystem> clone() const

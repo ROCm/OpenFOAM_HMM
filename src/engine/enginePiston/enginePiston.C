@@ -61,7 +61,7 @@ Foam::enginePiston::enginePiston
     patchID_(dict.lookup("patch"), mesh.boundaryMesh()),
     csysPtr_
     (
-        coordinateSystem::New(mesh_, dict, coordinateSystem::typeName_())
+        coordinateSystem::New(mesh_, dict, coordinateSystem::typeName)
     ),
     minLayer_(dict.get<scalar>("minLayer")),
     maxLayer_(dict.get<scalar>("maxLayer"))

@@ -273,11 +273,13 @@ Foam::mixerFvMesh::mixerFvMesh
     rpm_(motionDict_.get<scalar>("rpm")),
     movingPointsMaskPtr_(nullptr)
 {
-    if (motionDict_.found(coordinateSystem::typeName_()))
+    // New() for access to indirect (global) coordSystem.
+
+    auto csysPtr = coordinateSystem::NewIfPresent(*this, dict);
+
+    if (csysPtr)
     {
-        // New() for access to indirect (global) coordSystem.
-        static_cast<coordinateSystem&>(csys_) =
-            *coordinateSystem::New(*this, motionDict_);
+        static_cast<coordinateSystem&>(csys_) = csysPtr();
     }
     else
     {

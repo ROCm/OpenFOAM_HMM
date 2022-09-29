@@ -56,17 +56,7 @@ Foam::turbulence::IntegralScaleBox<Type>::calcCoordinateSystem
     const dictionary& dict
 ) const
 {
-    if (dict.found(coordinateSystem::typeName_()))
-    {
-        return coordinateSystem::New
-        (
-            p_.patch().boundaryMesh().mesh(),
-            dict,
-            coordinateSystem::typeName_()
-        );
-    }
-
-    return nullptr;
+    return coordinateSystem::NewIfPresent(dict);
 }
 
 

@@ -62,27 +62,24 @@ Foam::plane Foam::sampledPlane::definePlane
     const dictionary* dictptr = nullptr;
     coordSystem::cartesian cs;
 
-    if (dict.found(coordinateSystem::typeName_(), keyType::LITERAL))
+    // Create with registry to allow lookup from globally defined
+    // coordinate systems.
+
+    auto csPtr = coordinateSystem::NewIfPresent(mesh, dict);
+
+    if (csPtr)
     {
-        // Create with registry to allow lookup from globally defined
-        // coordinate systems?
-
-        auto csPtr =
-            coordinateSystem::New(mesh, dict, coordinateSystem::typeName_());
-
-        if (csPtr)
-        {
-            adjust = true;
-            cs = csPtr();
-        }
+        adjust = true;
+        cs = csPtr();
     }
     else if
     (
         (dictptr = dict.findDict("transform", keyType::LITERAL)) != nullptr
     )
     {
+        // 'origin' (READ_IF_PRESENT)
         adjust = true;
-        cs = coordSystem::cartesian(*dictptr);
+        cs = coordSystem::cartesian(*dictptr, IOobjectOption::READ_IF_PRESENT);
     }
 
 
