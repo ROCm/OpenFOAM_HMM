@@ -1038,13 +1038,17 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::read
             }
         }
 
-        // Mandatory if we didn't pick up a value from selectionNames_
+        // The "name" entry
+        // - mandatory if we didn't pick up a value from selectionNames_
         dict.readEntry
         (
             "name",
             regionName_,
             keyType::LITERAL,
-            regionName_.empty()
+            (
+                regionName_.empty()
+              ? IOobjectOption::MUST_READ : IOobjectOption::READ_IF_PRESENT
+            )
         );
 
         // Ensure there is always content for selectionNames_

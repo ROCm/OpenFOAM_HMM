@@ -53,12 +53,13 @@ Foam::PatchFunction1<Type>::New
             << "For " << entryName << " with dictionary entries: "
             << flatOutput(coeffs->toc()) << nl;
 
+        // The "type" entry - mandatory, no fallback type provided
         coeffs->readEntry
         (
             "type",
             modelType,
-            keyType::LITERAL
-            // "type" entry is mandatory, there is no 'redirect'
+            keyType::LITERAL,
+            IOobjectOption::MUST_READ
         );
     }
     else if (eptr)

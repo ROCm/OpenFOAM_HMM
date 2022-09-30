@@ -151,13 +151,13 @@ T Foam::dictionary::getOrDefault
     enum keyType::option matchOpt
 ) const
 {
-    const const_searcher finder(csearch(keyword, matchOpt));
+    const entry* eptr = csearch(keyword, matchOpt).ptr();
 
-    if (finder.good())
+    if (eptr)
     {
         T val;
 
-        ITstream& is = finder.ptr()->stream();
+        ITstream& is = eptr->stream();
         is >> val;
 
         checkITstream(is, keyword);
@@ -181,13 +181,13 @@ T Foam::dictionary::getOrAdd
     enum keyType::option matchOpt
 )
 {
-    const const_searcher finder(csearch(keyword, matchOpt));
+    const entry* eptr = csearch(keyword, matchOpt).ptr();
 
-    if (finder.good())
+    if (eptr)
     {
         T val;
 
-        ITstream& is = finder.ptr()->stream();
+        ITstream& is = eptr->stream();
         is >> val;
 
         checkITstream(is, keyword);
@@ -223,13 +223,13 @@ T Foam::dictionary::getCheckOrDefault
     }
     #endif
 
-    const const_searcher finder(csearch(keyword, matchOpt));
+    const entry* eptr = csearch(keyword, matchOpt).ptr();
 
-    if (finder.good())
+    if (eptr)
     {
         T val;
 
-        ITstream& is = finder.ptr()->stream();
+        ITstream& is = eptr->stream();
         is >> val;
 
         checkITstream(is, keyword);
@@ -269,13 +269,13 @@ T Foam::dictionary::getCheckOrAdd
     }
     #endif
 
-    const const_searcher finder(csearch(keyword, matchOpt));
+    const entry* eptr = csearch(keyword, matchOpt).ptr();
 
-    if (finder.good())
+    if (eptr)
     {
         T val;
 
-        ITstream& is = finder.ptr()->stream();
+        ITstream& is = eptr->stream();
         is >> val;
 
         checkITstream(is, keyword);
@@ -303,21 +303,26 @@ bool Foam::dictionary::readEntry
     const word& keyword,
     T& val,
     enum keyType::option matchOpt,
-    bool mandatory
+    IOobjectOption::readOption readOpt
 ) const
 {
-    const const_searcher finder(csearch(keyword, matchOpt));
-
-    if (finder.good())
+    if (readOpt == IOobjectOption::NO_READ)
     {
-        ITstream& is = finder.ptr()->stream();
+        return false;
+    }
+
+    const entry* eptr = csearch(keyword, matchOpt).ptr();
+
+    if (eptr)
+    {
+        ITstream& is = eptr->stream();
         is >> val;
 
         checkITstream(is, keyword);
 
         return true;
     }
-    else if (mandatory)
+    else if (IOobjectOption::isReadRequired(readOpt))
     {
         FatalIOErrorInFunction(*this)
             << "Entry '" << keyword << "' not found in dictionary "
@@ -336,14 +341,19 @@ bool Foam::dictionary::readCheck
     T& val,
     const Predicate& pred,
     enum keyType::option matchOpt,
-    bool mandatory
+    IOobjectOption::readOption readOpt
 ) const
 {
-    const const_searcher finder(csearch(keyword, matchOpt));
-
-    if (finder.good())
+    if (readOpt == IOobjectOption::NO_READ)
     {
-        ITstream& is = finder.ptr()->stream();
+        return false;
+    }
+
+    const entry* eptr = csearch(keyword, matchOpt).ptr();
+
+    if (eptr)
+    {
+        ITstream& is = eptr->stream();
         is >> val;
 
         checkITstream(is, keyword);
@@ -355,7 +365,7 @@ bool Foam::dictionary::readCheck
 
         return true;
     }
-    else if (mandatory)
+    else if (IOobjectOption::isReadRequired(readOpt))
     {
         FatalIOErrorInFunction(*this)
             << "Entry '" << keyword << "' not found in dictionary "
@@ -374,21 +384,26 @@ bool Foam::dictionary::readCompat
     std::initializer_list<std::pair<const char*,int>> compat,
     T& val,
     enum keyType::option matchOpt,
-    bool mandatory
+    IOobjectOption::readOption readOpt
 ) const
 {
-    const const_searcher finder(csearchCompat(keyword, compat, matchOpt));
-
-    if (finder.good())
+    if (readOpt == IOobjectOption::NO_READ)
     {
-        ITstream& is = finder.ptr()->stream();
+        return false;
+    }
+
+    const entry* eptr = csearchCompat(keyword, compat, matchOpt).ptr();
+
+    if (eptr)
+    {
+        ITstream& is = eptr->stream();
         is >> val;
 
         checkITstream(is, keyword);
 
         return true;
     }
-    else if (mandatory)
+    else if (IOobjectOption::isReadRequired(readOpt))
     {
         FatalIOErrorInFunction(*this)
             << "Entry '" << keyword << "' not found in dictionary "
@@ -408,8 +423,14 @@ bool Foam::dictionary::readIfPresent
     enum keyType::option matchOpt
 ) const
 {
-    // Read is non-mandatory
-    return readEntry<T>(keyword, val, matchOpt, false);
+    // Reading is optional
+    return readEntry<T>
+    (
+        keyword,
+        val,
+        matchOpt,
+        IOobjectOption::READ_IF_PRESENT
+    );
 }
 
 
@@ -422,8 +443,15 @@ bool Foam::dictionary::readCheckIfPresent
     enum keyType::option matchOpt
 ) const
 {
-    // Read is non-mandatory
-    return readCheck<T, Predicate>(keyword, val, pred, matchOpt, false);
+    // Reading is optional
+    return readCheck<T, Predicate>
+    (
+        keyword,
+        val,
+        pred,
+        matchOpt,
+        IOobjectOption::READ_IF_PRESENT
+    );
 }
 
 
@@ -436,13 +464,13 @@ T Foam::dictionary::getOrDefaultCompat
     enum keyType::option matchOpt
 ) const
 {
-    const const_searcher finder(csearchCompat(keyword, compat, matchOpt));
+    const entry* eptr = csearchCompat(keyword, compat, matchOpt).ptr();
 
-    if (finder.good())
+    if (eptr)
     {
         T val;
 
-        ITstream& is = finder.ptr()->stream();
+        ITstream& is = eptr->stream();
         is >> val;
 
         checkITstream(is, keyword);
@@ -467,8 +495,15 @@ bool Foam::dictionary::readIfPresentCompat
     enum keyType::option matchOpt
 ) const
 {
-    // Read is non-mandatory
-    return readCompat<T>(keyword, compat, val, matchOpt, false);
+    // Reading is optional
+    return readCompat<T>
+    (
+        keyword,
+        compat,
+        val,
+        matchOpt,
+        IOobjectOption::READ_IF_PRESENT
+    );
 }
 
 

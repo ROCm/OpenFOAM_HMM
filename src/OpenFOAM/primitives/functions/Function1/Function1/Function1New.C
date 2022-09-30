@@ -54,12 +54,16 @@ Foam::Function1<Type>::New
             << "For " << entryName << " with dictionary entries: "
             << flatOutput(coeffs->toc()) << nl;
 
+        // The "type" entry - mandatory if no redirectType provided
         coeffs->readEntry
         (
             "type",
             modelType,
             keyType::LITERAL,
-            modelType.empty()  // "type" entry is mandatory if no 'redirect'
+            (
+                modelType.empty()
+              ? IOobjectOption::MUST_READ : IOobjectOption::READ_IF_PRESENT
+            )
         );
 
         // Fallthrough

@@ -175,7 +175,7 @@ public:
         (
             const word& keyword,  //!< Lookup key. Uses LITERAL (not REGEX)
             const dictionary& dict,
-            bool mandatory = true
+            IOobjectOption::readOption readOpt = IOobjectOption::MUST_READ
         );
 
         //- Read/expand optional entry with dictionary variables,

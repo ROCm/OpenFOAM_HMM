@@ -1373,12 +1373,17 @@ void Foam::argList::parse
 
                 if (dictStream && dictStream->good())
                 {
+                    // Get numberOfSubdomains if it exists.
+                    // - mandatory when running with distributed roots
+
+                    IOobjectOption::readOption nDomainsReadOpt
+                        = IOobjectOption::READ_IF_PRESENT;
+
                     dictionary decompDict(*dictStream);
-                    bool nDomainsMandatory = false;
 
                     if (decompDict.getOrDefault("distributed", false))
                     {
-                        nDomainsMandatory = true;
+                        nDomainsReadOpt = IOobjectOption::MUST_READ;
                         runControl_.distributed(true);
                         decompDict.readEntry("roots", roots);
 
@@ -1390,14 +1395,12 @@ void Foam::argList::parse
                         }
                     }
 
-                    // Get numberOfSubdomains if it exists.
-                    // - mandatory when running with distributed roots
                     decompDict.readEntry
                     (
                         "numberOfSubdomains",
                         dictNProcs,
                         keyType::LITERAL,
-                        nDomainsMandatory
+                        nDomainsReadOpt
                     );
                 }
                 else

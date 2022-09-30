@@ -74,10 +74,10 @@ bool Foam::expressions::exprString::readEntry
 (
     const word& keyword,
     const dictionary& dict,
-    bool mandatory
+    IOobjectOption::readOption readOpt
 )
 {
-    const bool ok = dict.readEntry(keyword, *this, keyType::LITERAL, mandatory);
+    const bool ok = dict.readEntry(keyword, *this, keyType::LITERAL, readOpt);
 
     if (ok && !empty())
     {

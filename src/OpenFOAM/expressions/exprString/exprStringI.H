@@ -195,7 +195,7 @@ inline bool Foam::expressions::exprString::readIfPresent
     const dictionary& dict
 )
 {
-    return readEntry(key, dict, false);  // non-mandatory
+    return readEntry(key, dict, IOobjectOption::READ_IF_PRESENT);
 }
 
 

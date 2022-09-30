@@ -148,26 +148,15 @@ void Foam::medialAxisMeshMover::update(const dictionary& coeffDict)
         )
     );
 
-    // Note: parameter name changed
-    // "minMedianAxisAngle" -> "minMedialAxisAngle" (DEC-2013)
-    // but not previously reported.
-    scalar minMedialAxisAngle(Zero);
-    if
+    const scalar minMedialAxisAngle
     (
-       !coeffDict.readCompat
+        meshRefinement::get<scalar>
         (
+            coeffDict,
             "minMedialAxisAngle",
-            {{ "minMedianAxisAngle", 1712 }},
-            minMedialAxisAngle,
-            keyType::REGEX,
-            !dryRun_
+            dryRun_
         )
-    )
-    {
-        FatalIOError
-            << "Entry '" << "minMedialAxisAngle"
-            << "' not found in dictionary " << coeffDict.name() << endl;
-    }
+    );
 
     const scalar minMedialAxisAngleCos(Foam::cos(degToRad(minMedialAxisAngle)));
 
