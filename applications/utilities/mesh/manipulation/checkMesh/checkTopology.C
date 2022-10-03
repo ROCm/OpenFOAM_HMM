@@ -104,9 +104,6 @@ void Foam::checkPatch
             //    << endl;
         }
 
-        //DebugVar(globalEdgeFaces);
-
-
         // Synchronise across coupled edges.
         syncTools::syncEdgeList
         (
@@ -116,7 +113,6 @@ void Foam::checkPatch
             labelList()             // null value
         );
 
-        //DebugVar(globalEdgeFaces);
         
         label labelTyp = TopoType::MANIFOLD;
         forAll(meshEdges, edgei)
@@ -197,6 +193,35 @@ void Foam::checkPatch
             Info<< ' ' << bb;
         }
     }
+}
+
+
+template<class Zone>
+Foam::label Foam::checkZones
+(
+    const polyMesh& mesh,
+    const ZoneMesh<Zone, polyMesh>& zones,
+    topoSet& set
+)
+{
+    labelList zoneID(set.maxSize(mesh), -1);
+    for (const auto& zone : zones)
+    {
+        for (const label elem : zone)
+        {
+            if
+            (
+                zoneID[elem] != -1
+             && zoneID[elem] != zone.index()
+            )
+            {
+                set.insert(elem);
+            }
+            zoneID[elem] = zone.index();
+        }
+    }
+
+    return returnReduce(set.size(), sumOp<label>());
 }
 
 
@@ -714,6 +739,25 @@ Foam::label Foam::checkTopology
                 );
                 Info<< endl;
             }
+
+            // Check for duplicates
+            if (allTopology)
+            {
+                faceSet mzFaces(mesh, "multiZoneFaces", mesh.nFaces()/100);
+                const label nMulti = checkZones(mesh, faceZones, mzFaces);
+                if (nMulti)
+                {
+                    Info<< "  <<Writing " << nMulti
+                        << " faces that are in multiple zones"
+                        << " to set " << mzFaces.name() << endl;
+                    mzFaces.instance() = mesh.pointsInstance();
+                    mzFaces.write();
+                    if (surfWriter && surfWriter->enabled())
+                    {
+                        mergeAndWrite(*surfWriter, mzFaces);
+                    }
+                }
+            }
         }
         else
         {
@@ -791,12 +835,91 @@ Foam::label Foam::checkTopology
                     << returnReduce(v, sumOp<scalar>())
                     << ' ' << bb << endl;
             }
+
+
+            // Check for duplicates
+            if (allTopology)
+            {
+                cellSet mzCells(mesh, "multiZoneCells", mesh.nCells()/100);
+                const label nMulti = checkZones(mesh, cellZones, mzCells);
+                if (nMulti)
+                {
+                    Info<< "  <<Writing " << nMulti
+                        << " cells that are in multiple zones"
+                        << " to set " << mzCells.name() << endl;
+                    mzCells.instance() = mesh.pointsInstance();
+                    mzCells.write();
+                    if (surfWriter && surfWriter->enabled())
+                    {
+                        mergeAndWrite(*surfWriter, mzCells);
+                    }
+                }
+            }
         }
         else
         {
             Info<< "    No cellZones found."<<endl;
         }
     }
+
+
+    {
+        Info<< "\nChecking basic pointZone addressing..." << endl;
+
+        Pout.setf(ios_base::left);
+
+        const pointZoneMesh& pointZones = mesh.pointZones();
+
+        if (pointZones.size())
+        {
+            Info<< "    "
+                << setw(20) << "PointZone"
+                << setw(8) << "Points"
+                << "BoundingBox" << endl;
+
+            for (const auto& zone : pointZones)
+            {
+                boundBox bb;
+                for (const label pointi : zone)
+                {
+                    bb.add(mesh.points()[pointi]);
+                }
+
+                bb.reduce();  // Global min/max
+
+                Info<< "    "
+                    << setw(20) << zone.name()
+                    << setw(8)
+                    << returnReduce(zone.size(), sumOp<label>())
+                    << bb << endl;
+            }
+
+
+            // Check for duplicates
+            if (allTopology)
+            {
+                pointSet mzPoints(mesh, "multiZonePoints", mesh.nPoints()/100);
+                const label nMulti = checkZones(mesh, pointZones, mzPoints);
+                if (nMulti)
+                {
+                    Info<< "  <<Writing " << nMulti
+                        << " points that are in multiple zones"
+                        << " to set " << mzPoints.name() << endl;
+                    mzPoints.instance() = mesh.pointsInstance();
+                    mzPoints.write();
+                    if (setWriter && setWriter->enabled())
+                    {
+                        mergeAndWrite(*setWriter, mzPoints);
+                    }
+                }
+            }
+        }
+        else
+        {
+            Info<< "    No pointZones found."<<endl;
+        }
+    }
+
 
     // Force creation of all addressing if requested.
     // Errors will be reported as required
