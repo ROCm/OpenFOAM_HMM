@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2020,2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,46 +65,6 @@ uniformInterpolatedDisplacementPointPatchVectorField
     fieldName_(dict.lookup("field")),
     interpolationScheme_(dict.lookup("interpolationScheme"))
 {
-    const pointMesh& pMesh = this->internalField().mesh();
-
-    // Read time values
-    instantList allTimes = Time::findTimes(pMesh().time().path());
-
-    // Only keep those that contain the field
-    DynamicList<word> names(allTimes.size());
-    DynamicList<scalar> values(allTimes.size());
-
-    for (const instant& inst : allTimes)
-    {
-        IOobject io
-        (
-            fieldName_,
-            inst.name(),
-            pMesh(),
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE,
-            false
-        );
-        if (io.typeHeaderOk<pointVectorField>(false))
-        {
-            names.append(inst.name());
-            values.append(inst.value());
-        }
-    }
-    timeNames_.transfer(names);
-    timeVals_.transfer(values);
-
-    Info<< type() << " : found " << fieldName_ << " for times "
-        << timeNames_ << endl;
-
-    if (timeNames_.size() < 1)
-    {
-        FatalErrorInFunction
-            << "Did not find any times with " << fieldName_
-            << exit(FatalError);
-    }
-
-
     if (!dict.found("value"))
     {
         updateCoeffs();
@@ -157,6 +117,46 @@ void uniformInterpolatedDisplacementPointPatchVectorField::updateCoeffs()
 
     if (!interpolatorPtr_)
     {
+        const pointMesh& pMesh = this->internalField().mesh();
+
+        // Read time values
+        const instantList allTimes = Time::findTimes(pMesh().time().path());
+
+        // Only keep those that contain the field
+        DynamicList<word> names(allTimes.size());
+        DynamicList<scalar> values(allTimes.size());
+
+        for (const instant& inst : allTimes)
+        {
+            IOobject io
+            (
+                fieldName_,
+                inst.name(),
+                pMesh(),
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE,
+                false
+            );
+            if (io.typeHeaderOk<pointVectorField>(false))
+            {
+                names.append(inst.name());
+                values.append(inst.value());
+            }
+        }
+        timeNames_.transfer(names);
+        timeVals_.transfer(values);
+
+        Info<< type() << " : found " << fieldName_ << " for times "
+            << timeNames_ << endl;
+
+        if (timeNames_.size() < 1)
+        {
+            FatalErrorInFunction
+                << "Did not find any times with " << fieldName_
+                << exit(FatalError);
+        }
+
+
         interpolatorPtr_ = interpolationWeights::New
         (
             interpolationScheme_,
