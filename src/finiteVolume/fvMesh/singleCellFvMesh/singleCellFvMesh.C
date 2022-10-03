@@ -53,6 +53,15 @@ void Foam::singleCellFvMesh::agglomerateMesh
         const polyPatch& pp = oldPatches[patchi];
         if (pp.size() > 0)
         {
+            if (agglom[patchi].size() != pp.size())
+            {
+                FatalErrorInFunction
+                    << "agglomeration on patch " << patchi
+                    << " (size " << pp.size()
+                    << ") is of size " << agglom[patchi].size()
+                    << exit(FatalError);
+            }
+
             nAgglom[patchi] = max(agglom[patchi])+1;
 
             forAll(pp, i)
@@ -229,6 +238,7 @@ void Foam::singleCellFvMesh::agglomerateMesh
         patchSizes[patchi] = coarseI-patchStarts[patchi];
     }
 
+    //patchFaces.setSize(coarseI);
     //Pout<< "patchStarts:" << patchStarts << endl;
     //Pout<< "patchSizes:" << patchSizes << endl;
 
@@ -398,7 +408,8 @@ void Foam::singleCellFvMesh::agglomerateMesh
 Foam::singleCellFvMesh::singleCellFvMesh
 (
     const IOobject& io,
-    const fvMesh& mesh
+    const fvMesh& mesh,
+    const bool doInit
 )
 :
     fvMesh(io, Zero, false),
@@ -478,6 +489,12 @@ Foam::singleCellFvMesh::singleCellFvMesh
     }
 
     agglomerateMesh(mesh, agglom);
+
+    // initialise all (lower levels and current)
+    if (doInit)
+    {
+        fvMesh::init(true); // initialise fvMesh and underlying levels
+    }
 }
 
 
@@ -485,7 +502,8 @@ Foam::singleCellFvMesh::singleCellFvMesh
 (
     const IOobject& io,
     const fvMesh& mesh,
-    const labelListList& patchFaceAgglomeration
+    const labelListList& patchFaceAgglomeration,
+    const bool doInit
 )
 :
     fvMesh(io, Zero, false),
@@ -556,12 +574,17 @@ Foam::singleCellFvMesh::singleCellFvMesh
     )
 {
     agglomerateMesh(mesh, patchFaceAgglomeration);
+    // initialise all (lower levels and current)
+    if (doInit)
+    {
+        fvMesh::init(true); // initialise fvMesh and underlying levels
+    }
 }
 
 
-Foam::singleCellFvMesh::singleCellFvMesh(const IOobject& io)
+Foam::singleCellFvMesh::singleCellFvMesh(const IOobject& io, const bool doInit)
 :
-    fvMesh(io),
+    fvMesh(io, doInit),
     patchFaceAgglomeration_
     (
         IOobject

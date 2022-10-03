@@ -1091,10 +1091,62 @@ int main(int argc, char *argv[])
             }
         }
     }
+    else if (mesh.nSolutionD() == 2)
+    {
+        const boundBox& box = mesh.bounds();
+        const Vector<label>& dirs = mesh.geometricD();
+        vector emptyDir = Zero;
+        forAll(dirs, i)
+        {
+            if (dirs[i] == -1)
+            {
+                emptyDir[i] = 1.0;
+            }
+        }
+
+        scalar wideBy2 = (box.span() & emptyDir)*2.0;
+
+        forAll(localCoarseSf, coarseFaceI)
+        {
+            const vector& Ai = localCoarseSf[coarseFaceI];
+            const vector& Ci = localCoarseCf[coarseFaceI];
+            vector Ain = Ai/mag(Ai);
+            vector R1i = Ci + (mag(Ai)/wideBy2)*(Ain ^ emptyDir);
+            vector R2i = Ci - (mag(Ai)/wideBy2)*(Ain ^ emptyDir) ;
+
+            const label fromPatchId = compactPatchId[coarseFaceI];
+            patchArea[fromPatchId] += mag(Ai);
+
+            const labelList& visCoarseFaces = visibleFaceFaces[coarseFaceI];
+            forAll(visCoarseFaces, visCoarseFaceI)
+            {
+                F2LI[coarseFaceI].setSize(visCoarseFaces.size());
+                label compactJ = visCoarseFaces[visCoarseFaceI];
+                const vector& Aj = compactCoarseSf[compactJ];
+                const vector& Cj = compactCoarseCf[compactJ];
+
+                const label toPatchId = compactPatchId[compactJ];
+
+                vector Ajn = Aj/mag(Aj);
+                vector R1j = Cj + (mag(Aj)/wideBy2)*(Ajn ^ emptyDir);
+                vector R2j = Cj - (mag(Aj)/wideBy2)*(Ajn ^ emptyDir);
+
+                scalar d1 = mag(R1i - R2j);
+                scalar d2 = mag(R2i - R1j);
+                scalar s1 = mag(R1i - R1j);
+                scalar s2 = mag(R2i - R2j);
+
+                scalar Fij = mag((d1 + d2) - (s1 + s2))/(4.0*mag(Ai)/wideBy2);
+
+                F2LI[coarseFaceI][visCoarseFaceI] = Fij;
+                sumViewFactorPatch[fromPatchId][toPatchId] += Fij*mag(Ai);
+            }
+        }
+    }
     else
     {
-         FatalErrorInFunction
-            << " View factors are not available in 2D "
+        FatalErrorInFunction
+            << " View factors are not available in 1D "
             << exit(FatalError);
     }
 
