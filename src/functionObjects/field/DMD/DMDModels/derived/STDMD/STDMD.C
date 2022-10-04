@@ -742,7 +742,7 @@ void Foam::DMDModels::STDMD::writeToFile(const word& fileName) const
     // Write objects of dynamics
     {
         autoPtr<OFstream> osPtr =
-            createFile
+            newFileAtTime
             (
                 fileName + "_" + fieldName_,
                 mesh_.time().timeOutputValue()

@@ -910,7 +910,7 @@ bool Foam::functionObjects::fluxSummary::update()
         forAll(filePtrs_, zonei)
         {
             const word& zoneName = zoneNames_[zonei];
-            filePtrs_.set(zonei, createFile(zoneName));
+            filePtrs_.set(zonei, newFileAtStartTime(zoneName));
             writeFileHeader
             (
                 zoneName,

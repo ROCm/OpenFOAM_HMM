@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,19 +36,19 @@ createFileNames()
 {
     if (writeToFile() && !prodFilePtr_)
     {
-        prodFilePtr_ = createFile("production");
+        prodFilePtr_ = newFileAtStartTime("production");
         writeHeader(prodFilePtr_(), "production");
         writeFileHeader(prodFilePtr_());
 
-        consFilePtr_ = createFile("consumption");
+        consFilePtr_ = newFileAtStartTime("consumption");
         writeHeader(consFilePtr_(), "consumption");
         writeFileHeader(consFilePtr_());
 
-        prodIntFilePtr_ = createFile("productionInt");
+        prodIntFilePtr_ = newFileAtStartTime("productionInt");
         writeHeader(prodIntFilePtr_(), "productionInt");
         writeFileHeader(prodIntFilePtr_());
 
-        consIntFilePtr_ = createFile("consumptionInt");
+        consIntFilePtr_ = newFileAtStartTime("consumptionInt");
         writeHeader(consIntFilePtr_(), "consumptionInt");
         writeFileHeader(consIntFilePtr_());
     }

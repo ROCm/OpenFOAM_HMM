@@ -190,7 +190,7 @@ bool Foam::binModel::read(const dictionary& dict)
     filePtrs_.setSize(fieldNames_.size());
     forAll(filePtrs_, i)
     {
-        filePtrs_.set(i, createFile(fieldNames_[i] + "Bin"));
+        filePtrs_.set(i, newFileAtStartTime(fieldNames_[i] + "Bin"));
     }
 
     setCoordinateSystem(dict);

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,7 +29,11 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::noiseModel> Foam::noiseModel::New(const dictionary& dict)
+Foam::autoPtr<Foam::noiseModel> Foam::noiseModel::New
+(
+    const dictionary& dict,
+    const objectRegistry& obr
+)
 {
     const word modelType(dict.get<word>("noiseModel"));
 
@@ -48,7 +52,10 @@ Foam::autoPtr<Foam::noiseModel> Foam::noiseModel::New(const dictionary& dict)
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<noiseModel>(ctorPtr(dict.subDict(modelType + "Coeffs")));
+    return autoPtr<noiseModel>
+    (
+        ctorPtr(dict.subDict(modelType + "Coeffs"), obr)
+    );
 }
 
 

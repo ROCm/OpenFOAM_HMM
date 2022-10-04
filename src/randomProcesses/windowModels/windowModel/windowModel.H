@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,6 +59,9 @@ protected:
 
     // Protected Data
 
+        //- Overlap percent
+        scalar overlapPercent_;
+
         //- Number of overlap samples per window
         label nOverlapSamples_;
 
@@ -107,6 +110,12 @@ public:
 
         //- Return the number of samples in the window
         label nSamples() const;
+
+        //- Return the overlap percent
+        scalar overlapPercent() const;
+
+        //- Return number of overlap samples per window
+        label nOverlapSamples() const;
 
         //- Return the number of windows
         label nWindow() const;

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2016 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,8 +61,6 @@ Description
     componentColumns (1);
     separator       " ";
     mergeSeparators yes;
-
-    graphFormat     raw;
 
     \endverbatim
 
@@ -129,7 +127,13 @@ public:
     TypeName("pointNoise");
 
     //- Constructor
-    pointNoise(const dictionary& dict, const bool readFields = true);
+    pointNoise
+    (
+        const dictionary& dict,
+        const objectRegistry& obr,
+        const word& name = typeName,
+        const bool readFields = true
+    );
 
     //- Destructor
     virtual ~pointNoise() = default;
