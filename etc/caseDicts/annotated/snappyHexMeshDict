@@ -222,8 +222,13 @@ castellatedMeshControls
             //- Optional automatic gap refinement. See section in
             //  refinementRegions ('gapLevel', 'gapMode')
 
-            //- Optional removal of cells in thin gaps. Start removing cells
-            //  if at refinement level 10 we're detecting thin gaps.
+            //- Optional removal of cells in thin gaps.
+            //  Block any gap (opposite surfaces or opposite disconnected region
+            //  of surface):
+            //  - thinner than 2*blockcellsize where blockcellsize
+            //    is the size of a cell at blockLevel
+            //  Note: it does not relate to the refinement level of the cells
+            //        it 'blocks'/deletes.
             //blockLevel 10;
 
             //- Optional early detection of connections between inside and
