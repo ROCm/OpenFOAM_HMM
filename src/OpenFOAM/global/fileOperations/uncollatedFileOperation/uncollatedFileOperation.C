@@ -317,10 +317,11 @@ bool Foam::fileOperations::uncollatedFileOperation::rm
 bool Foam::fileOperations::uncollatedFileOperation::rmDir
 (
     const fileName& dir,
-    const bool silent
+    const bool silent,
+    const bool emptyOnly
 ) const
 {
-    return Foam::rmDir(dir, silent);
+    return Foam::rmDir(dir, silent, emptyOnly);
 }
 
 

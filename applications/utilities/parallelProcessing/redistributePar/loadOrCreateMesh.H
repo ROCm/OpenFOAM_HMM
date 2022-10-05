@@ -64,8 +64,8 @@ void removeProcAddressing(const faMesh& mesh);
 //- Remove procAddressing
 void removeProcAddressing(const polyMesh& mesh);
 
-//- Remove empty directory. Return true if removed.
-bool removeEmptyDir(const fileName& path);
+//- Remove empty directory
+void removeEmptyDir(const fileName& path);
 
 //- Remove empty directories from bottom up
 void removeEmptyDirs(const fileName& path);

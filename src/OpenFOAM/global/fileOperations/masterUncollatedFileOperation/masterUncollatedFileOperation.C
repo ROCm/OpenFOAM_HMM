@@ -1018,13 +1018,14 @@ bool Foam::fileOperations::masterUncollatedFileOperation::rm
 bool Foam::fileOperations::masterUncollatedFileOperation::rmDir
 (
     const fileName& dir,
-    const bool silent
+    const bool silent,
+    const bool emptyOnly
 ) const
 {
     return masterOp<bool>
     (
         dir,
-        rmDirOp(silent),
+        rmDirOp(silent, emptyOnly),
         Pstream::msgType(),
         comm_
     );

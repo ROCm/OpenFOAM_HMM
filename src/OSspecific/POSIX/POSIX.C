@@ -899,9 +899,6 @@ Foam::fileNameList Foam::readDir
     // Initial filename list size and the increment when resizing the list
     constexpr int maxNnames = 100;
 
-    // Basic sanity: cannot strip '.gz' from directory names
-    const bool stripgz = filtergz && (type != fileName::DIRECTORY);
-
     fileNameList dirEntries;
 
     // Iterate contents (ignores an empty directory name)
@@ -947,20 +944,28 @@ Foam::fileNameList Foam::readDir
         }
         else if
         (
-            (type == fileName::DIRECTORY)
-         || (type == fileName::FILE && !fileName::isBackup(name))
+            (type == fileName::Type::DIRECTORY)
+         || (type == fileName::Type::FILE && !fileName::isBackup(name))
         )
         {
-            if ((directory/name).type(followLink) == type)
+            fileName::Type detected = (directory/name).type(followLink);
+
+            if (detected == type)
             {
+                // Only strip '.gz' from non-directory names
+                if
+                (
+                    filtergz
+                 && (detected != fileName::Type::DIRECTORY)
+                 && name.has_ext("gz")
+                )
+                {
+                    name.remove_ext();
+                }
+
                 if (nEntries >= dirEntries.size())
                 {
                     dirEntries.resize(dirEntries.size() + maxNnames);
-                }
-
-                if (stripgz && name.has_ext("gz"))
-                {
-                    name.remove_ext();
                 }
 
                 dirEntries[nEntries] = std::move(name);
@@ -1319,18 +1324,28 @@ bool Foam::rm(const fileName& file)
 }
 
 
-bool Foam::rmDir(const fileName& directory, const bool silent)
+bool Foam::rmDir
+(
+    const fileName& directory,
+    const bool silent,
+    const bool emptyOnly
+)
 {
+    if (directory.empty())
+    {
+        return false;
+    }
+
     // Iterate contents (ignores an empty directory name)
     // Also retain hidden files/dirs for removal
 
     POSIX::directoryIterator dirIter(directory, true);
     if (!dirIter.exists())
     {
-        if (!silent)
+        if (!silent && !emptyOnly)
         {
             WarningInFunction
-                << "cannot open directory " << directory << endl;
+                << "Cannot open directory " << directory << endl;
         }
 
         return false;
@@ -1347,7 +1362,7 @@ bool Foam::rmDir(const fileName& directory, const bool silent)
     }
 
     // Process each directory entry, counting any errors encountered
-    label nErrors = 0;
+    int nErrors = 0;
 
     for (/*nil*/; dirIter; ++dirIter)
     {
@@ -1359,11 +1374,35 @@ bool Foam::rmDir(const fileName& directory, const bool silent)
 
         const fileName path(fileName::concat(directory, item));
 
-        if (path.type(false) == fileName::DIRECTORY)
+        fileName::Type detected = path.type(false);  // No followLink
+
+        if (detected == fileName::Type::DIRECTORY)
         {
-            if (!rmDir(path, true))  // Only report errors at the top-level
+            // Call silently for lower levels
+            if (!rmDir(path, true, emptyOnly))
             {
                 ++nErrors;
+            }
+        }
+        else if (emptyOnly)
+        {
+            // Only remove empty directories (not files)
+            ++nErrors;
+
+            // Check for dead symlinks
+            if (detected == fileName::Type::SYMLINK)
+            {
+                detected = path.type(true);  // followLink
+
+                if (detected == fileName::Type::UNDEFINED)
+                {
+                    --nErrors;
+
+                    if (!rm(path))
+                    {
+                        ++nErrors;
+                    }
+                }
             }
         }
         else
@@ -1375,30 +1414,28 @@ bool Foam::rmDir(const fileName& directory, const bool silent)
         }
     }
 
-    if (nErrors)
+    if (nErrors == 0)
     {
-        if (!silent)
-        {
-            WarningInFunction
-                << "failed to remove directory " << directory << nl
-                << "could not remove " << nErrors << " sub-entries" << endl;
-        }
-    }
-    else
-    {
+        // No errors encountered - try to remove the top-level
+
         if (!rm(directory))
         {
-            ++nErrors;
-            if (!silent)
-            {
-                WarningInFunction
-                    << "failed to remove directory " << directory << endl;
-            }
+            nErrors = -1;  // A top-level error
         }
     }
 
-    // clean up
-    return !nErrors;
+    if (nErrors && !silent && !emptyOnly)
+    {
+        WarningInFunction
+            << "Failed to remove directory " << directory << endl;
+
+        if (nErrors > 0)
+        {
+            Info<< "could not remove " << nErrors << " sub-entries" << endl;
+        }
+    }
+
+    return (nErrors == 0);
 }
 
 

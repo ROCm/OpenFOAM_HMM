@@ -283,15 +283,17 @@ protected:
         class rmDirOp
         {
             bool silent_;
+            bool emptyOnly_;
         public:
-            rmDirOp(const bool silent=false)
+            rmDirOp(bool silent=false, bool emptyOnly=false)
             :
-                silent_(silent)
+                silent_(silent),
+                emptyOnly_(emptyOnly)
             {}
 
             bool operator()(const fileName& f) const
             {
-                return Foam::rmDir(f, silent_);
+                return Foam::rmDir(f, silent_, emptyOnly_);
             }
         };
 
@@ -603,11 +605,14 @@ public:
             virtual bool rm(const fileName&) const;
 
             //- Remove a directory and its contents
+            //  \param dir the directory to remove
             //  \param silent do not report missing directory
+            //  \param emptyOnly only remove empty directories (recursive)
             virtual bool rmDir
             (
                 const fileName& dir,
-                const bool silent = false
+                const bool silent = false,
+                const bool emptyOnly = false
             ) const;
 
 //            //- Open a shared library. Return handle to library. Print error

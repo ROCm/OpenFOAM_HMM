@@ -69,7 +69,7 @@ Foam::boolList Foam::haveMeshFile
 
 void Foam::removeProcAddressing(const faMesh& mesh)
 {
-    IOobject ioAddr
+    IOobject io
     (
         "procAddressing",
         mesh.facesInstance(),
@@ -79,9 +79,9 @@ void Foam::removeProcAddressing(const faMesh& mesh)
 
     for (const auto prefix : {"boundary", "edge", "face", "point"})
     {
-        ioAddr.rename(prefix + word("ProcAddressing"));
+        io.rename(prefix + word("ProcAddressing"));
 
-        const fileName procFile(ioAddr.objectPath());
+        const fileName procFile(io.objectPath());
         Foam::rm(procFile);
     }
 }
@@ -89,7 +89,7 @@ void Foam::removeProcAddressing(const faMesh& mesh)
 
 void Foam::removeProcAddressing(const polyMesh& mesh)
 {
-    IOobject ioAddr
+    IOobject io
     (
         "procAddressing",
         mesh.facesInstance(),
@@ -99,89 +99,18 @@ void Foam::removeProcAddressing(const polyMesh& mesh)
 
     for (const auto prefix : {"boundary", "cell", "face", "point"})
     {
-        ioAddr.rename(prefix + word("ProcAddressing"));
+        io.rename(prefix + word("ProcAddressing"));
 
-        const fileName procFile(ioAddr.objectPath());
+        const fileName procFile(io.objectPath());
         Foam::rm(procFile);
     }
 }
 
 
-bool Foam::removeEmptyDir(const fileName& path)
+void Foam::removeEmptyDir(const fileName& path)
 {
-    // Return true if empty directory. Note bypass of fileHandler to be
-    // consistent with polyMesh.removeFiles for now.
-
-    {
-        fileNameList files
-        (
-            Foam::readDir
-            (
-                path,
-                fileName::FILE,
-                false,                  // filterGz
-                false                   // followLink
-            )
-        );
-        if (files.size())
-        {
-            return false;
-        }
-    }
-    {
-        fileNameList dirs
-        (
-            Foam::readDir
-            (
-                path,
-                fileName::DIRECTORY,
-                false,                  // filterGz
-                false                   // followLink
-            )
-        );
-        if (dirs.size())
-        {
-            return false;
-        }
-    }
-    {
-        fileNameList links
-        (
-            Foam::readDir
-            (
-                path,
-                fileName::SYMLINK,
-                false,                  // filterGz
-                false                   // followLink
-            )
-        );
-        if (links.size())
-        {
-            return false;
-        }
-    }
-    {
-        fileNameList other
-        (
-            Foam::readDir
-            (
-                path,
-                fileName::UNDEFINED,
-                false,                  // filterGz
-                false                   // followLink
-            )
-        );
-        if (other.size())
-        {
-            return false;
-        }
-    }
-
-    // Avoid checking success of deletion since initial path might not
-    // exist (e.g. contain 'region0'). Will stop when trying to delete
-    // parent directory anyway since now not empty.
-    Foam::rm(path);
-    return true;
+    // Remove directory: silent, emptyOnly
+    Foam::rmDir(path, true, true);
 }
 
 

@@ -1187,7 +1187,8 @@ int main(int argc, char *argv[])
     {
         if (decompose)
         {
-            Info<< "Removing existing processor directory" << procDir << endl;
+            Info<< "Removing existing processor directory:"
+                << args.relativePath(procDir) << endl;
             fileHandler().rmDir(procDir);
         }
     }
@@ -2348,6 +2349,8 @@ int main(int argc, char *argv[])
                 // Remove any left-over empty processor directories created
                 // by loadOrCreateMesh to get around the collated start-up
                 // problems
+                Info<< "Removing left-over empty processor directories" << nl;
+
                 if (Pstream::master())  //fileHandler().comm()))
                 {
                     const auto myProci = UPstream::myProcNo();  //comm()
@@ -2364,9 +2367,7 @@ int main(int argc, char *argv[])
                          && volMeshDir[proci] != volMeshDir[myProci]
                         )
                         {
-                            Info<< "Deleting mesh dir:"
-                                << volMeshDir[proci] << endl;
-                            Foam::rmDir(volMeshDir[proci]);
+                            Foam::rmDir(volMeshDir[proci], true); // silent
                         }
 
                         if
@@ -2375,9 +2376,18 @@ int main(int argc, char *argv[])
                          && areaMeshDir[proci] != areaMeshDir[myProci]
                         )
                         {
-                            Info<< "Deleting mesh dir:"
-                                << areaMeshDir[proci] << endl;
-                            Foam::rmDir(areaMeshDir[proci]);
+                            Foam::rmDir(areaMeshDir[proci], true); // silent
+                        }
+
+                        // Remove empty processor directories
+                        // Eg, <path-name>/processorN/constant/polyMesh
+                        // to  <path-name>/processorN
+                        if (proci != myProci)
+                        {
+                            removeEmptyDir
+                            (
+                                volMeshDir[proci].path().path()
+                            );
                         }
                     }
 
@@ -2441,7 +2451,8 @@ int main(int argc, char *argv[])
                         // Remove dummy mesh created by loadOrCreateMesh
                         const bool oldParRun = Pstream::parRun(false);
                         mesh.removeFiles();
-                        Foam::rmDir(mesh.objectRegistry::objectPath());
+                        // Silent rmdir
+                        Foam::rmDir(mesh.objectRegistry::objectPath(), true);
                         Pstream::parRun(oldParRun);  // Restore parallel state
                     }
                 }

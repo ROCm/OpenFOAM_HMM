@@ -357,11 +357,14 @@ public:
             virtual bool rm(const fileName&) const = 0;
 
             //- Remove a directory and its contents
+            //  \param dir the directory to remove
             //  \param silent do not report missing directory
+            //  \param emptyOnly only remove empty directories (recursive)
             virtual bool rmDir
             (
                 const fileName& dir,
-                const bool silent = false
+                const bool silent = false,
+                const bool emptyOnly = false
             ) const = 0;
 
 //            //- Open a shared library. Return handle to library. Print error

@@ -98,35 +98,32 @@ Foam::processorFaMeshes::processorFaMeshes
 
 void Foam::processorFaMeshes::removeFiles(const faMesh& mesh)
 {
-    IOobject ioAddr
+    IOobject io
     (
         "procAddressing",
         mesh.facesInstance(),
         faMesh::meshSubDir,
-        mesh.thisDb(),
-        IOobject::NO_READ,
-        IOobject::NO_WRITE,
-        false  // not registered
+        mesh.thisDb()
     );
 
     // procAddressing
-    rm(ioAddr.objectPath());
+    fileHandler().rm(fileHandler().filePath(io.objectPath()));
 
     // pointProcAddressing
-    ioAddr.rename("pointProcAddressing");
-    rm(ioAddr.objectPath());
+    io.rename("pointProcAddressing");
+    fileHandler().rm(fileHandler().filePath(io.objectPath()));
 
     // edgeProcAddressing
-    ioAddr.rename("edgeProcAddressing");
-    rm(ioAddr.objectPath());
+    io.rename("edgeProcAddressing");
+    fileHandler().rm(fileHandler().filePath(io.objectPath()));
 
     // faceProcAddressing
-    ioAddr.rename("faceProcAddressing");
-    rm(ioAddr.objectPath());
+    io.rename("faceProcAddressing");
+    fileHandler().rm(fileHandler().filePath(io.objectPath()));
 
     // boundaryProcAddressing
-    ioAddr.rename("boundaryProcAddressing");
-    rm(ioAddr.objectPath());
+    io.rename("boundaryProcAddressing");
+    fileHandler().rm(fileHandler().filePath(io.objectPath()));
 }
 
 

@@ -48,6 +48,14 @@ Description
 
 using namespace Foam;
 
+// Create named file with some dummy content
+void touchFileContent(const fileName& file)
+{
+    std::ofstream os(file);
+    os << "file=<" << file << ">" << nl;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 unsigned testClean(std::initializer_list<Pair<std::string>> tests)
@@ -587,14 +595,54 @@ int main(int argc, char *argv[])
     if (args.found("system"))
     {
         const fileName dirA("dirA");
+        const fileName dirB("dirB");
+        const fileName dirC("dirC");
+        const fileName dirD("dirD");
         const fileName lnA("lnA");
         const fileName lnB("lnB");
-        const fileName dirB("dirB");
 
-        Foam::rmDir(dirA);
+        // Purge anything existing
+        Foam::rmDir(dirA, true);
+        Foam::rmDir(dirB, true);
+        Foam::rmDir(dirC, true);
+        Foam::rmDir(dirD, true);
         Foam::rm(lnA);
         Foam::rm(lnB);
-        Foam::rmDir(dirB);
+
+        {
+            fileName name(dirA/dirB/dirC/"abc");
+            Foam::mkDir(name.path());
+            touchFileContent(name);           // Create real file
+
+            Foam::mkDir(dirB/dirB/dirB/dirB);
+            Foam::ln("test", dirB/"linkB");   // Create dead link
+
+            Foam::mkDir(dirC);
+            Foam::ln("../dirD", dirC/"linkC");  // Create real link
+
+            Foam::mkDir(dirD);
+
+            for (const fileName& d : { dirA, dirB, dirC, dirD })
+            {
+                Info<< "Directory: " << d << " = "
+                    << readDir(d, fileName::UNDEFINED, false, false) << nl;
+
+                if (Foam::rmDir(d, false, true))
+                {
+                    Info<< "   Removed empty dir" << nl;
+                }
+                else
+                {
+                    Info<< "   Could not remove empty dir" << nl;
+                }
+            }
+
+            // Force removal before continuing
+            Foam::rmDir(dirA, true);
+            Foam::rmDir(dirB, true);
+            Foam::rmDir(dirC, true);
+            Foam::rmDir(dirD, true);
+        }
 
         Info<< nl << "=========================" << nl
             << "Test some copying and deletion" << endl;
@@ -618,9 +666,7 @@ int main(int argc, char *argv[])
             );
 
             Info<<"    create: " << file << endl;
-
-            std::ofstream os(file);
-            os << "file=<" << file << ">" << nl;
+            touchFileContent(file);
         }
 
         const int oldDebug = POSIX::debug;

@@ -178,10 +178,14 @@ double highResLastModified(const fileName&, const bool followLink=true);
 //  Using an empty directory name returns an empty list.
 fileNameList readDir
 (
+    //! The directory name to scan
     const fileName& directory,
-    const fileName::Type type=fileName::FILE,
-    const bool filtergz=true,
-    const bool followLink=true
+    //! The content type (eg, FILE | DIRECTORY)
+    const fileName::Type type = fileName::Type::FILE,
+    //! Trim '.gz' from file names
+    const bool filtergz = true,
+    //! Check what the symlink points to, not the symlink itself
+    const bool followLink = true
 );
 
 //- Copy the source to the destination (recursively if necessary).
@@ -211,10 +215,18 @@ bool mvBak(const fileName& src, const std::string& ext = "bak");
 //  An empty name is a no-op that always returns false.
 bool rm(const fileName& file);
 
-//- Remove a directory and its contents (optionally silencing warnings)
-//  An empty directory name is a no-op that always returns false,
-//  but also produces a warning.
-bool rmDir(const fileName& directory, const bool silent=false);
+//- Remove a directory and its contents recursively,
+//  returning true if successful.
+//  An empty directory name is a no-op that always returns false (silently)
+bool rmDir
+(
+    //! The directory name to remove
+    const fileName& directory,
+    //! Silence warnings
+    const bool silent = false,
+    //! Only remove empty directories (recursive)
+    const bool emptyOnly = false
+);
 
 //- Sleep for the specified number of seconds
 unsigned int sleep(const unsigned int sec);
