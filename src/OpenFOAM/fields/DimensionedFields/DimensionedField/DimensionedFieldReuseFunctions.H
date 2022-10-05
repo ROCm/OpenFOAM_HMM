@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,8 +26,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef DimensionedFieldReuseFunctions_H
-#define DimensionedFieldReuseFunctions_H
+#ifndef Foam_DimensionedFieldReuseFunctions_H
+#define Foam_DimensionedFieldReuseFunctions_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -66,14 +66,17 @@ struct reuseTmpDimensionedField
 template<class TypeR, class GeoMesh>
 struct reuseTmpDimensionedField<TypeR, TypeR, GeoMesh>
 {
+    //- Allow optional copy assignment of the initial content
+    //- for identical input and output types
     static tmp<DimensionedField<TypeR, GeoMesh>> New
     (
         const tmp<DimensionedField<TypeR, GeoMesh>>& tdf1,
         const word& name,
-        const dimensionSet& dimensions
+        const dimensionSet& dimensions,
+        const bool initCopy = false
     )
     {
-        if (tdf1.isTmp())
+        if (tdf1.movable())
         {
             auto& df1 = tdf1.constCast();
 
@@ -84,7 +87,7 @@ struct reuseTmpDimensionedField<TypeR, TypeR, GeoMesh>
 
         const auto& df1 = tdf1();
 
-        return tmp<DimensionedField<TypeR, GeoMesh>>::New
+        auto tresult = tmp<DimensionedField<TypeR, GeoMesh>>::New
         (
             IOobject
             (
@@ -95,6 +98,13 @@ struct reuseTmpDimensionedField<TypeR, TypeR, GeoMesh>
             df1.mesh(),
             dimensions
         );
+
+        if (initCopy)
+        {
+            tresult.ref().field() = tdf1().field();
+        }
+
+        return tresult;
     }
 };
 
@@ -105,14 +115,16 @@ tmp<DimensionedField<TypeR, GeoMesh>> New
 (
     const tmp<DimensionedField<TypeR, GeoMesh>>& tdf1,
     const word& name,
-    const dimensionSet& dimensions
+    const dimensionSet& dimensions,
+    const bool initCopy = false
 )
 {
     return reuseTmpDimensionedField<TypeR, TypeR, GeoMesh>::New
     (
         tdf1,
         name,
-        dimensions
+        dimensions,
+        initCopy
     );
 }
 
@@ -156,7 +168,7 @@ struct reuseTmpTmpDimensionedField<TypeR, Type1, Type12, TypeR, GeoMesh>
         const dimensionSet& dimensions
     )
     {
-        if (tdf2.isTmp())
+        if (tdf2.movable())
         {
             auto& df2 = tdf2.constCast();
 
@@ -193,7 +205,7 @@ struct reuseTmpTmpDimensionedField<TypeR, TypeR, TypeR, Type2, GeoMesh>
         const dimensionSet& dimensions
     )
     {
-        if (tdf1.isTmp())
+        if (tdf1.movable())
         {
             auto& df1 = tdf1.constCast();
 
@@ -230,7 +242,7 @@ struct reuseTmpTmpDimensionedField<TypeR, TypeR, TypeR, TypeR, GeoMesh>
         const dimensionSet& dimensions
     )
     {
-        if (tdf1.isTmp())
+        if (tdf1.movable())
         {
             auto& df1 = tdf1.constCast();
 
@@ -238,7 +250,7 @@ struct reuseTmpTmpDimensionedField<TypeR, TypeR, TypeR, TypeR, GeoMesh>
             df1.dimensions().reset(dimensions);
             return tdf1;
         }
-        else if (tdf2.isTmp())
+        if (tdf2.movable())
         {
             auto& df2 = tdf2.constCast();
 

@@ -282,7 +282,7 @@ public:
         tmp<DimensionedField<Type, GeoMesh>> clone() const;
 
 
-    // Static Constructors
+    // Factory Methods
 
         //- Return tmp field from name, mesh, dimensions,
         //- copy of internal field.
@@ -334,7 +334,31 @@ public:
         static tmp<DimensionedField<Type, GeoMesh>> New
         (
             const word& newName,
-            const tmp<DimensionedField<Type, GeoMesh>>&
+            const tmp<DimensionedField<Type, GeoMesh>>& tfld
+        );
+
+        //- Construct tmp field based on mesh/registry information from
+        //- an existing field.
+        //  Created NO_READ, NO_WRITE, NO_REGISTER, using the instance
+        //  from the field
+        template<class AnyType>
+        static tmp<DimensionedField<Type, GeoMesh>> New
+        (
+            const DimensionedField<AnyType, GeoMesh>& fld,
+            const word& name,
+            const dimensionSet& dims
+        );
+
+        //- Construct tmp field based on mesh/registry information from
+        //- an existing field and initialise with value.
+        //  Created NO_READ, NO_WRITE, NO_REGISTER, using the instance
+        //  from the field
+        template<class AnyType>
+        static tmp<DimensionedField<Type, GeoMesh>> New
+        (
+            const DimensionedField<AnyType, GeoMesh>& fld,
+            const word& name,
+            const dimensioned<Type>& dt
         );
 
 

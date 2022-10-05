@@ -44,9 +44,9 @@ Foam::DimensionedField<Type, GeoMesh>::New
             name,
             mesh.thisDb().time().timeName(),
             mesh.thisDb(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
+            IOobjectOption::NO_READ,
+            IOobjectOption::NO_WRITE,
+            IOobjectOption::NO_REGISTER
         ),
         mesh,
         ds,
@@ -72,9 +72,9 @@ Foam::DimensionedField<Type, GeoMesh>::New
             name,
             mesh.thisDb().time().timeName(),
             mesh.thisDb(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
+            IOobjectOption::NO_READ,
+            IOobjectOption::NO_WRITE,
+            IOobjectOption::NO_REGISTER
         ),
         mesh,
         ds,
@@ -99,9 +99,9 @@ Foam::DimensionedField<Type, GeoMesh>::New
             name,
             mesh.thisDb().time().timeName(),
             mesh.thisDb(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
+            IOobjectOption::NO_READ,
+            IOobjectOption::NO_WRITE,
+            IOobjectOption::NO_REGISTER
         ),
         mesh,
         ds,
@@ -126,9 +126,9 @@ Foam::DimensionedField<Type, GeoMesh>::New
             name,
             mesh.thisDb().time().timeName(),
             mesh.thisDb(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
+            IOobjectOption::NO_READ,
+            IOobjectOption::NO_WRITE,
+            IOobjectOption::NO_REGISTER
         ),
         mesh,
         dt,
@@ -153,11 +153,65 @@ Foam::DimensionedField<Type, GeoMesh>::New
             tfld().instance(),
             tfld().local(),
             tfld().db(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
+            IOobjectOption::NO_READ,
+            IOobjectOption::NO_WRITE,
+            IOobjectOption::NO_REGISTER
         ),
         tfld
+    );
+}
+
+
+template<class Type, class GeoMesh>
+template<class AnyType>
+Foam::tmp<Foam::DimensionedField<Type, GeoMesh>>
+Foam::DimensionedField<Type, GeoMesh>::New
+(
+    const DimensionedField<AnyType, GeoMesh>& fld,
+    const word& name,
+    const dimensionSet& dims
+)
+{
+    return tmp<DimensionedField<Type, GeoMesh>>::New
+    (
+        IOobject
+        (
+            name,
+            fld.instance(),
+            fld.db(),
+            IOobjectOption::NO_READ,
+            IOobjectOption::NO_WRITE,
+            IOobjectOption::NO_REGISTER
+        ),
+        fld.mesh(),
+        dims
+    );
+}
+
+
+template<class Type, class GeoMesh>
+template<class AnyType>
+Foam::tmp<Foam::DimensionedField<Type, GeoMesh>>
+Foam::DimensionedField<Type, GeoMesh>::New
+(
+    const DimensionedField<AnyType, GeoMesh>& fld,
+    const word& name,
+    const dimensioned<Type>& dt
+)
+{
+    return tmp<DimensionedField<Type, GeoMesh>>::New
+    (
+        IOobject
+        (
+            name,
+            fld.instance(),
+            fld.db(),
+            IOobjectOption::NO_READ,
+            IOobjectOption::NO_WRITE,
+            IOobjectOption::NO_REGISTER
+        ),
+        fld.mesh(),
+        dt
     );
 }
 

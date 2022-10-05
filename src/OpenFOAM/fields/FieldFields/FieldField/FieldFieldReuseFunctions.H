@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,8 +26,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef FieldFieldReuseFunctions_H
-#define FieldFieldReuseFunctions_H
+#ifndef Foam_FieldFieldReuseFunctions_H
+#define Foam_FieldFieldReuseFunctions_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,7 +58,7 @@ struct reuseTmpFieldField<Field, TypeR, TypeR>
         const bool initCopy = false
     )
     {
-        if (tf1.isTmp())
+        if (tf1.movable())
         {
             return tf1;
         }
@@ -117,7 +117,7 @@ struct reuseTmpTmpFieldField<Field, TypeR, Type1, Type12, TypeR>
         const tmp<FieldField<Field, TypeR>>& tf2
     )
     {
-        if (tf2.isTmp())
+        if (tf2.movable())
         {
             return tf2;
         }
@@ -136,7 +136,7 @@ struct reuseTmpTmpFieldField<Field, TypeR, TypeR, TypeR, Type2>
         const tmp<FieldField<Field, Type2>>& tf2
     )
     {
-        if (tf1.isTmp())
+        if (tf1.movable())
         {
             return tf1;
         }
@@ -155,11 +155,11 @@ struct reuseTmpTmpFieldField<Field, TypeR, TypeR, TypeR, TypeR>
         const tmp<FieldField<Field, TypeR>>& tf2
     )
     {
-        if (tf1.isTmp())
+        if (tf1.movable())
         {
             return tf1;
         }
-        else if (tf2.isTmp())
+        if (tf2.movable())
         {
             return tf2;
         }

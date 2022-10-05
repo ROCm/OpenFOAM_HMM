@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,9 +45,9 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::New
             name,
             mesh.thisDb().time().timeName(),
             mesh.thisDb(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
+            IOobjectOption::NO_READ,
+            IOobjectOption::NO_WRITE,
+            IOobjectOption::NO_REGISTER
         ),
         mesh,
         ds,
@@ -74,9 +74,9 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::New
             name,
             mesh.thisDb().time().timeName(),
             mesh.thisDb(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
+            IOobjectOption::NO_READ,
+            IOobjectOption::NO_WRITE,
+            IOobjectOption::NO_REGISTER
         ),
         mesh,
         ds,
@@ -104,9 +104,9 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::New
             name,
             mesh.thisDb().time().timeName(),
             mesh.thisDb(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
+            IOobjectOption::NO_READ,
+            IOobjectOption::NO_WRITE,
+            IOobjectOption::NO_REGISTER
         ),
         mesh,
         ds,
@@ -133,9 +133,9 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::New
             name,
             mesh.thisDb().time().timeName(),
             mesh.thisDb(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
+            IOobjectOption::NO_READ,
+            IOobjectOption::NO_WRITE,
+            IOobjectOption::NO_REGISTER
         ),
         mesh,
         dt,
@@ -162,9 +162,9 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::New
             name,
             mesh.thisDb().time().timeName(),
             mesh.thisDb(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
+            IOobjectOption::NO_READ,
+            IOobjectOption::NO_WRITE,
+            IOobjectOption::NO_REGISTER
         ),
         mesh,
         dt,
@@ -190,9 +190,9 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::New
             tgf().instance(),
             tgf().local(),
             tgf().db(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
+            IOobjectOption::NO_READ,
+            IOobjectOption::NO_WRITE,
+            IOobjectOption::NO_REGISTER
         ),
         tgf
     );
@@ -217,13 +217,71 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::New
             tgf().instance(),
             tgf().local(),
             tgf().db(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
+            IOobjectOption::NO_READ,
+            IOobjectOption::NO_WRITE,
+            IOobjectOption::NO_REGISTER
         ),
         tgf,
         patchFieldTypes,
         actualPatchTypes
+    );
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+template<class AnyType>
+Foam::tmp<Foam::GeometricField<Type, PatchField, GeoMesh>>
+Foam::GeometricField<Type, PatchField, GeoMesh>::New
+(
+    const GeometricField<AnyType, PatchField, GeoMesh>& fld,
+    const word& name,
+    const dimensionSet& dims,
+    const word& patchFieldType
+)
+{
+    return tmp<GeometricField<Type, PatchField, GeoMesh>>::New
+    (
+        IOobject
+        (
+            name,
+            fld.instance(),
+            fld.db(),
+            IOobjectOption::NO_READ,
+            IOobjectOption::NO_WRITE,
+            IOobjectOption::NO_REGISTER
+        ),
+        fld.mesh(),
+        dims,
+        patchFieldType
+    );
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+template<class AnyType>
+Foam::tmp<Foam::GeometricField<Type, PatchField, GeoMesh>>
+Foam::GeometricField<Type, PatchField, GeoMesh>::New
+(
+    const GeometricField<AnyType, PatchField, GeoMesh>& fld,
+    const word& name,
+    const dimensioned<Type>& dt,
+    const word& patchFieldType
+)
+{
+    return tmp<GeometricField<Type, PatchField, GeoMesh>>::New
+    (
+        IOobject
+        (
+            name,
+            fld.instance(),
+            fld.db(),
+            IOobjectOption::NO_READ,
+            IOobjectOption::NO_WRITE,
+            IOobjectOption::NO_REGISTER
+        ),
+        fld.mesh(),
+        dt,
+        patchFieldType
     );
 }
 

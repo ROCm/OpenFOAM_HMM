@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,8 +26,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef GeometricFieldReuseFunctions_H
-#define GeometricFieldReuseFunctions_H
+#ifndef Foam_GeometricFieldReuseFunctions_H
+#define Foam_GeometricFieldReuseFunctions_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -36,46 +36,46 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//- Test if a tmp GeometricField is reusable, which means that it has been
-//- allocated (not a const-reference).
-//
-//  When GeometricField debug is on, also checks that the patches have
-//  reusable types.
-template
-<
-    class Type,
-    template<class> class PatchField,
-    class GeoMesh
->
-bool reusable(const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf)
+namespace Detail
 {
-    if (tgf.isTmp())
-    {
-        if (GeometricField<Type, PatchField, GeoMesh>::debug)
-        {
-            for (const auto& p : tgf().boundaryField())
-            {
-                if
-                (
-                    !polyPatch::constraintType(p.patch().type())
-                 && !isA<typename PatchField<Type>::Calculated>(p)
-                )
-                {
-                    WarningInFunction
-                        << "Attempt to reuse temporary with non-reusable BC "
-                        << p.type() << endl;
 
-                    return false;
-                }
+//- True if tmp GeometricField has a reusable pointer.
+//
+//  With GeometricField::debug on, check if patches have reusable types
+template<class Type, template<class> class PatchField, class GeoMesh>
+inline bool reusable
+(
+    const tmp<GeometricField<Type, PatchField, GeoMesh>>& tfld
+)
+{
+    const bool ok = tfld.movable();
+
+    if (ok && GeometricField<Type, PatchField, GeoMesh>::debug)
+    {
+        for (const auto& p : tfld().boundaryField())
+        {
+            if
+            (
+                !polyPatch::constraintType(p.patch().type())
+             && !isA<typename PatchField<Type>::Calculated>(p)
+            )
+            {
+                WarningInFunction
+                    << "Attempt to reuse temporary with non-reusable BC "
+                    << p.type() << endl;
+
+                return false;
             }
         }
-
-        return true;
     }
 
-    return false;
+    return ok;
 }
 
+} // End namespace Detail
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template
 <
@@ -113,8 +113,8 @@ struct reuseTmpGeometricField
 template<class TypeR, template<class> class PatchField, class GeoMesh>
 struct reuseTmpGeometricField<TypeR, TypeR, PatchField, GeoMesh>
 {
-    //- Since the input and output types are identical, also allow
-    //- optional copy assignment of the initial content.
+    //- Allow optional copy assignment of the initial content
+    //- for identical input and output types
     static tmp<GeometricField<TypeR, PatchField, GeoMesh>> New
     (
         const tmp<GeometricField<TypeR, PatchField, GeoMesh>>& tgf1,
@@ -123,7 +123,7 @@ struct reuseTmpGeometricField<TypeR, TypeR, PatchField, GeoMesh>
         const bool initCopy = false
     )
     {
-        if (reusable(tgf1))
+        if (Detail::reusable(tgf1))
         {
             auto& gf1 = tgf1.constCast();
 
@@ -236,7 +236,7 @@ struct reuseTmpTmpGeometricField
         const dimensionSet& dimensions
     )
     {
-        if (reusable(tgf2))
+        if (Detail::reusable(tgf2))
         {
             auto& gf2 = tgf2.constCast();
 
@@ -282,7 +282,7 @@ struct reuseTmpTmpGeometricField
         const dimensionSet& dimensions
     )
     {
-        if (reusable(tgf1))
+        if (Detail::reusable(tgf1))
         {
             auto& gf1 = tgf1.constCast();
 
@@ -322,7 +322,7 @@ struct reuseTmpTmpGeometricField
         const dimensionSet& dimensions
     )
     {
-        if (reusable(tgf1))
+        if (Detail::reusable(tgf1))
         {
             auto& gf1 = tgf1.constCast();
 
@@ -330,7 +330,7 @@ struct reuseTmpTmpGeometricField
             gf1.dimensions().reset(dimensions);
             return tgf1;
         }
-        else if (reusable(tgf2))
+        if (Detail::reusable(tgf2))
         {
             auto& gf2 = tgf2.constCast();
 

@@ -379,7 +379,7 @@ public:
         tmp<GeometricField<Type, PatchField, GeoMesh>> clone() const;
 
 
-    // Static Constructors
+    // Factory Methods
 
         //- Return tmp field from name, mesh, dimensions and patch type.
         //  The field is NO_READ, NO_WRITE, unregistered and uses the
@@ -461,6 +461,32 @@ public:
             const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf,
             const wordList& patchFieldTypes,
             const wordList& actualPatchTypes = wordList()
+        );
+
+        //- Construct tmp field based on mesh/registry information from
+        //- an existing field.
+        //  Created NO_READ, NO_WRITE, NO_REGISTER, using the instance
+        //  from the field
+        template<class AnyType>
+        static tmp<GeometricField<Type, PatchField, GeoMesh>> New
+        (
+            const GeometricField<AnyType, PatchField, GeoMesh>& fld,
+            const word& name,
+            const dimensionSet& dims,
+            const word& patchFieldType = PatchField<Type>::calculatedType()
+        );
+
+        //- Construct tmp field based on mesh/registry information from
+        //- an existing field and initialise with value.
+        //  Created NO_READ, NO_WRITE, NO_REGISTER, using the instance
+        //  from the field
+        template<class AnyType>
+        static tmp<GeometricField<Type, PatchField, GeoMesh>> New
+        (
+            const GeometricField<AnyType, PatchField, GeoMesh>& fld,
+            const word& name,
+            const dimensioned<Type>& dt,
+            const word& patchFieldType = PatchField<Type>::calculatedType()
         );
 
 

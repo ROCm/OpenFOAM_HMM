@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,8 +26,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef FieldReuseFunctions_H
-#define FieldReuseFunctions_H
+#ifndef Foam_FieldReuseFunctions_H
+#define Foam_FieldReuseFunctions_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,13 +49,15 @@ struct reuseTmp
 template<class TypeR>
 struct reuseTmp<TypeR, TypeR>
 {
+    //- Allow optional copy assignment of the initial content
+    //- for identical input and output types
     static tmp<Field<TypeR>> New
     (
         const tmp<Field<TypeR>>& tf1,
         const bool initCopy = false
     )
     {
-        if (tf1.isTmp())
+        if (tf1.movable())
         {
             return tf1;
         }
@@ -106,7 +108,7 @@ struct reuseTmpTmp<TypeR, Type1, Type12, TypeR>
         const tmp<Field<TypeR>>& tf2
     )
     {
-        if (tf2.isTmp())
+        if (tf2.movable())
         {
             return tf2;
         }
@@ -125,7 +127,7 @@ struct reuseTmpTmp<TypeR, TypeR, TypeR, Type2>
         const tmp<Field<Type2>>& tf2
     )
     {
-        if (tf1.isTmp())
+        if (tf1.movable())
         {
             return tf1;
         }
@@ -144,11 +146,11 @@ struct reuseTmpTmp<TypeR, TypeR, TypeR, TypeR>
         const tmp<Field<TypeR>>& tf2
     )
     {
-        if (tf1.isTmp())
+        if (tf1.movable())
         {
             return tf1;
         }
-        else if (tf2.isTmp())
+        if (tf2.movable())
         {
             return tf2;
         }
