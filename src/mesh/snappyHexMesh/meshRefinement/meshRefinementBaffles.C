@@ -4895,6 +4895,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMesh
     );
 }
 
+
 Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMesh
 (
     const label nBufferLayers,
@@ -5087,34 +5088,113 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMesh
 
         labelList neiCellRegion;
         syncTools::swapBoundaryCellList(mesh_, cellRegion, neiCellRegion);
-        for
-        (
-            label facei = mesh_.nInternalFaces();
-            facei < mesh_.nFaces();
-            facei++
-        )
+
+        //for
+        //(
+        //    label facei = mesh_.nInternalFaces();
+        //    facei < mesh_.nFaces();
+        //    facei++
+        //)
+        //{
+        //    if (!isFrozenFace[facei])
+        //    {
+        //        const face& f = mesh_.faces()[facei];
+        //
+        //        const label ownRegion = cellRegion[faceOwner[facei]];
+        //        const label neiRegion =
+        //            neiCellRegion[facei-mesh_.nInternalFaces()];
+        //
+        //        if (ownRegion == -1 && neiRegion != -1)
+        //        {
+        //            forAll(f, fp)
+        //            {
+        //                if (!isFrozenPoint[f[fp]])
+        //                {
+        //                    pointBaffle[f[fp]] =
+        //                        max(defaultPatch, ownPatch[facei]);
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
+
+        const auto& patches = mesh_.boundaryMesh();
+        for (const auto& pp : patches)
         {
-            if (!isFrozenFace[facei])
+            if (pp.coupled())
             {
-                const face& f = mesh_.faces()[facei];
-
-                const label ownRegion = cellRegion[faceOwner[facei]];
-                const label neiRegion =
-                    neiCellRegion[facei-mesh_.nInternalFaces()];
-
-                if (ownRegion == -1 && neiRegion != -1)
+                // Note: swapBoundaryCellList only works on cyclic&processor.
+                //       Does not handle e.g. cyclicAMI. TBD?
+                // Note: we could check check our side being in the set
+                //       since syncPointList below will push over any decision
+                //       made by the other side.
+                forAll(pp, i)
                 {
-                    forAll(f, fp)
+                    const label facei = pp.start()+i;
+                    if (!isFrozenFace[facei])
                     {
-                        if (!isFrozenPoint[f[fp]])
+                        const face& f = mesh_.faces()[facei];
+                        const label ownRegion = cellRegion[faceOwner[facei]];
+                        const label neiRegion =
+                            neiCellRegion[facei-mesh_.nInternalFaces()];
+
+                        // Same logic as for internal faces
+
+                        if (ownRegion == -1 && neiRegion != -1)
                         {
-                            pointBaffle[f[fp]] =
-                                max(defaultPatch, ownPatch[facei]);
+                            forAll(f, fp)
+                            {
+                                if (!isFrozenPoint[f[fp]])
+                                {
+                                    pointBaffle[f[fp]] =
+                                        max(defaultPatch, ownPatch[facei]);
+                                }
+                            }
+                        }
+                        else if (ownRegion != -1 && neiRegion == -1)
+                        {
+                            label newPatchI = neiPatch[facei];
+                            if (newPatchI == -1)
+                            {
+                                newPatchI = max(defaultPatch, ownPatch[facei]);
+                            }
+                            forAll(f, fp)
+                            {
+                                if (!isFrozenPoint[f[fp]])
+                                {
+                                    pointBaffle[f[fp]] = newPatchI;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                forAll(pp, i)
+                {
+                    const label facei = pp.start()+i;
+                    if (!isFrozenFace[facei])
+                    {
+                        const face& f = mesh_.faces()[facei];
+                        const label ownRegion = cellRegion[faceOwner[facei]];
+
+                        if (ownRegion != -1)
+                        {
+                            forAll(f, fp)
+                            {
+                                if (!isFrozenPoint[f[fp]])
+                                {
+                                    pointBaffle[f[fp]] =
+                                        max(defaultPatch, ownPatch[facei]);
+                                }
+                            }
                         }
                     }
                 }
             }
         }
+
 
         // Sync
         syncTools::syncPointList
