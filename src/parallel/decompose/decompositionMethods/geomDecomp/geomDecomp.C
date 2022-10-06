@@ -84,14 +84,12 @@ void Foam::geomDecomp::readCoeffs()
     }
     setOrder();
 
-    // Optional cartesian coordinate system transform
-    const dictionary* dictptr =
-        coeffsDict_.findDict("transform", keyType::LITERAL);
+    // Optional (cartesian) coordinate system transform
+    auto csysPtr = coordinateSystem::NewIfPresent(coeffsDict_, "transform");
 
-    if (dictptr)
+    if (csysPtr)
     {
-        // 'origin' (READ_IF_PRESENT)
-        csys_ = coordinateSystem(*dictptr, IOobjectOption::READ_IF_PRESENT);
+        csys_ = csysPtr();
     }
     else if (equal(delta_, 0))
     {

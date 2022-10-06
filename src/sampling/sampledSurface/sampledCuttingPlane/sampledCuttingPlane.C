@@ -60,34 +60,21 @@ Foam::plane Foam::sampledCuttingPlane::definePlane
 {
     plane pln(dict);
 
-    bool adjust = false;
-    const dictionary* dictptr = nullptr;
-    coordSystem::cartesian cs;
+    // Optional (cartesian) coordinate transform.
+    // - with registry to allow lookup from globally defined systems
 
-    // Create with registry to allow lookup from globally defined
-    // coordinate systems.
+    auto csysPtr = coordinateSystem::NewIfPresent(mesh, dict);
 
-    auto csPtr = coordinateSystem::NewIfPresent(mesh, *dictptr);
-
-    if (csPtr)
+    if (!csysPtr)
     {
-        adjust = true;
-        cs = csPtr();
+        csysPtr = coordinateSystem::NewIfPresent(dict, "transform");
     }
-    else if
-    (
-        (dictptr = dict.findDict("transform", keyType::LITERAL)) != nullptr
-    )
-    {
-        // 'origin' (READ_IF_PRESENT)
-        adjust = true;
-        cs = coordSystem::cartesian(*dictptr, IOobjectOption::READ_IF_PRESENT);
-    }
-
 
     // Make plane relative to the Cartesian coordinate system
-    if (adjust)
+    if (csysPtr)
     {
+        coordSystem::cartesian cs(csysPtr());
+
         const point  orig = cs.globalPosition(pln.origin());
         const vector norm = cs.globalVector(pln.normal());
 

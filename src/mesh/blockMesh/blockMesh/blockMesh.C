@@ -147,14 +147,12 @@ bool Foam::blockMesh::readPointTransforms(const dictionary& dict)
 {
     transformType_ = transformTypes::NO_TRANSFORM;
 
-    const dictionary* dictptr = dict.findDict("transform", keyType::LITERAL);
+    // Optional (cartesian) coordinate system transform
+    auto csysPtr = coordinateSystem::NewIfPresent(dict, "transform");
 
-    if (dictptr)
+    if (csysPtr)
     {
-        // Optional cartesian coordinate system transform, since JUL-2021
-        // - 'origin' (READ_IF_PRESENT)
-        transform_ =
-            coordSystem::cartesian(*dictptr, IOobjectOption::READ_IF_PRESENT);
+        transform_ = csysPtr();
 
         // Non-zero origin?
         if (magSqr(transform_.origin()) > ROOTVSMALL)
