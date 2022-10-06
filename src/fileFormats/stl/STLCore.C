@@ -72,7 +72,7 @@ bool Foam::fileFormats::STLCore::isBinaryName
     return
     (
         format == STLFormat::UNKNOWN
-      ? filename.hasExt("stlb")
+      ? filename.has_ext("stlb")
       : format == STLFormat::BINARY
     );
 }
@@ -236,7 +236,7 @@ void Foam::fileFormats::STLCore::writeBinaryHeader
     char header[STLHeaderSize];
     sprintf(header, "STL binary file %u facets", nTris);
 
-    // avoid trailing junk
+    // Fill trailing with zeroes (to avoid writing junk)
     for (size_t i = strlen(header); i < STLHeaderSize; ++i)
     {
         header[i] = 0;

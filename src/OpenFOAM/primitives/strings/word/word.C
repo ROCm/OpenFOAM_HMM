@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -105,34 +105,6 @@ Foam::word Foam::word::validate
     out.erase(len);
 
     return out;
-}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-Foam::word Foam::word::lessExt() const
-{
-    const auto i = find_ext();
-
-    if (i == npos)
-    {
-        return *this;
-    }
-
-    return substr(0, i);
-}
-
-
-Foam::word Foam::word::ext() const
-{
-    return string::ext();
-}
-
-
-Foam::word& Foam::word::ext(const word& ending)
-{
-    string::ext(ending);
-    return *this;
 }
 
 

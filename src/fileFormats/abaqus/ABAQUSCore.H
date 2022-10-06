@@ -76,8 +76,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ABAQUSCore_H
-#define ABAQUSCore_H
+#ifndef Foam_ABAQUSCore_H
+#define Foam_ABAQUSCore_H
 
 #include "Fstream.H"
 #include "Enum.H"
@@ -121,7 +121,7 @@ public:
         //- Classify named element type (eg, S4R) to known/supported
         //- element types.
         //  The input string must be Uppercase!
-        static shapeType getElementType(const std::string& elemTypeName);
+        static shapeType getElementType(const string& elemTypeName);
 
         //- The number of points associated with the element type
         inline static int nPoints(shapeType tag)

@@ -1718,9 +1718,9 @@ int main(int argc, char *argv[])
 
     const fileName sFeatFileName
     (
-        fileName(surf1Name).nameLessExt()
+        fileName::stem(surf1Name)
       + "_"
-      + fileName(surf2Name).nameLessExt()
+      + fileName::stem(surf2Name)
       + "_"
       + action
     );

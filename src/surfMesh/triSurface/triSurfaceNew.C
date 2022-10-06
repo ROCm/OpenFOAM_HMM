@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,8 +58,7 @@ Foam::triSurface::New
     else if (fileType == "gz")
     {
         // Degenerate call
-        fileName unzipName(name.lessExt());
-        return New(unzipName, unzipName.ext());
+        return New(name.lessExt(), name.stem().ext());
     }
     else if (ext == "gz")
     {
@@ -140,16 +139,13 @@ Foam::triSurface::New
 Foam::autoPtr<Foam::triSurface>
 Foam::triSurface::New(const fileName& name)
 {
-    const word ext(name.ext());
-    if (ext == "gz")
+    if (name.has_ext("gz"))
     {
         // Handle trailing "gz" on file name
-
-        fileName unzipName(name.lessExt());
-        return New(unzipName, unzipName.ext());
+        return New(name.lessExt(), name.stem().ext());
     }
 
-    return New(name, ext);
+    return New(name, name.ext());
 }
 
 

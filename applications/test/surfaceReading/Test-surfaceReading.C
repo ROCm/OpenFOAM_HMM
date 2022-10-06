@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -91,15 +91,15 @@ int main(int argc, char *argv[])
 
     const auto importName = args.get<fileName>(1);
 
-    word ext;
-    if (!args.readIfPresent("ext", ext))
-    {
-        ext = importName.ext();
-        if (ext == "gz")
-        {
-            ext = importName.lessExt().ext();
-        }
-    }
+    word ext =
+    (
+        importName.has_ext("gz")
+      ? importName.stem().ext()
+      : importName.ext()
+    );
+
+    // Allow override of extension
+    args.readIfPresent("ext", ext);
 
     args.readIfPresent("stl-parser", fileFormats::STLReader::parserType);
 

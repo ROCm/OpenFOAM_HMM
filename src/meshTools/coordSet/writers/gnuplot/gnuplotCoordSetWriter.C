@@ -158,7 +158,7 @@ bool Foam::coordSetWriters::gnuplotWriter::writeBuffered()
     os.precision(precision_);
 
     os  << "set term pngcairo" << nl
-        << "set output \"" << outputFile.nameLessExt() << ".png\"" << nl;
+        << "set output \"" << outputFile.stem() << ".png\"" << nl;
 
     label nplots = 0;
     do

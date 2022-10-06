@@ -327,7 +327,7 @@ Foam::dictionary::const_searcher Foam::dictionary::csearchScoped
     enum keyType::option matchOpt
 ) const
 {
-    if (keyword.find('/') != string::npos)
+    if (keyword.contains('/'))
     {
         return csearchSlashScoped(keyword, matchOpt);
     }

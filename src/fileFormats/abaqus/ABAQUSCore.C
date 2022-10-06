@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -201,11 +201,11 @@ Foam::fileFormats::ABAQUSCore::abaqusToFoamFaceAddr()
 
 
 Foam::fileFormats::ABAQUSCore::shapeType
-Foam::fileFormats::ABAQUSCore::getElementType(const std::string& elemTypeName)
+Foam::fileFormats::ABAQUSCore::getElementType(const string& elemTypeName)
 {
-    // Check for element-type
-    #undef checkElemType
-    #define checkElemType(test) (elemTypeName.find(test) != std::string::npos)
+    // Check for element-type.
+    #undef  checkElemType
+    #define checkElemType(Name) elemTypeName.contains(Name)
 
     if
     (

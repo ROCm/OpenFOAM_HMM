@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -156,10 +156,10 @@ int main(int argc, char *argv[])
 
             if (changed)
             {
-                const fileName name(surf.name());
-                surf.rename(name.lessExt() + "_patched." + name.ext());
+                const word oldName(surf.name());
+                surf.rename(oldName.lessExt() + "_patched." + oldName.ext());
 
-                Info<< "Writing repatched surface " << name << " to "
+                Info<< "Writing repatched surface " << oldName << " to "
                     << surf.name() << nl << endl;
 
                 surf.write();

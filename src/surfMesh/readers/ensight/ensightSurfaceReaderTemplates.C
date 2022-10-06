@@ -133,7 +133,7 @@ Foam::tmp<Foam::Field<Type>> Foam::ensightSurfaceReader::readField
             // The element type, optionally with 'undef'
             is.read(strValue);
 
-            if (strValue.find("undef") != std::string::npos)
+            if (strValue.contains("undef"))
             {
                 // Skip undef entry
                 scalar value;

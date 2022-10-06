@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,8 +60,7 @@ Foam::MeshedSurface<Face>::New
     else if (fileType == "gz")
     {
         // Degenerate call
-        fileName unzipName(name.lessExt());
-        return New(unzipName, unzipName.ext(), mandatory);
+        return New(name.lessExt(), name.stem().ext(), mandatory);
     }
     else if (ext == "gz")
     {
@@ -117,16 +116,13 @@ template<class Face>
 Foam::autoPtr<Foam::MeshedSurface<Face>>
 Foam::MeshedSurface<Face>::New(const fileName& name)
 {
-    const word ext(name.ext());
-    if (ext == "gz")
+    if (name.has_ext("gz"))
     {
         // Handle trailing "gz" on file name
-
-        fileName unzipName(name.lessExt());
-        return New(unzipName, unzipName.ext());
+        return New(name.lessExt(), name.stem().ext());
     }
 
-    return New(name, ext);
+    return New(name, name.ext());
 }
 
 

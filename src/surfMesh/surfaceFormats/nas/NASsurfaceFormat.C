@@ -185,7 +185,7 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
 
         // HYPERMESH extension
         // $HMNAME COMP                   1"partName"
-        if (line.starts_with("$HMNAME COMP") && line.find('"') != string::npos)
+        if (line.starts_with("$HMNAME COMP") && line.contains('"'))
         {
             label groupId = readLabel(line.substr(16, 16));
 
@@ -493,7 +493,7 @@ void Foam::fileFormats::NASsurfaceFormat<Face>::write
     fileFormats::NASCore::setPrecision(os, fieldFormat::FREE);
 
     os  << "CEND" << nl
-        << "TITLE = " << os.name().nameLessExt() << nl;
+        << "TITLE = " << os.name().stem() << nl;
 
     // Print zone names as comment
     forAll(zones, zonei)

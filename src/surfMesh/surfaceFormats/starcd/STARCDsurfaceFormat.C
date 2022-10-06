@@ -86,12 +86,12 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
     // Clear everything
     this->clear();
 
-    fileName baseName = filename.lessExt();
+    const fileName prefix(filename.lessExt());
 
     // Read cellTable names (if possible)
     Map<word> cellTableLookup = readInpCellTable
     (
-        IFstream(starFileName(baseName, STARCDCore::INP_FILE))()
+        IFstream(starFileName(prefix, STARCDCore::INP_FILE))()
     );
 
 
@@ -101,7 +101,7 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
     // read points from .vrt file
     readPoints
     (
-        IFstream(starFileName(baseName, STARCDCore::VRT_FILE))(),
+        IFstream(starFileName(prefix, STARCDCore::VRT_FILE))(),
         this->storedPoints(),
         pointId
     );
@@ -117,7 +117,7 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
 
     // Read .cel file
     // ~~~~~~~~~~~~~~
-    IFstream is(starFileName(baseName, STARCDCore::CEL_FILE));
+    IFstream is(starFileName(prefix, STARCDCore::CEL_FILE));
     if (!is.good())
     {
         FatalErrorInFunction
@@ -293,16 +293,16 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
     );
 
 
-    fileName baseName = filename.lessExt();
+    const fileName prefix(filename.lessExt());
 
     // The .vrt file
     {
-        OFstream os(starFileName(baseName, STARCDCore::VRT_FILE), streamOpt);
+        OFstream os(starFileName(prefix, STARCDCore::VRT_FILE), streamOpt);
         writePoints(os, pointLst);
     }
 
     // The .cel file
-    OFstream os(starFileName(baseName, STARCDCore::CEL_FILE), streamOpt);
+    OFstream os(starFileName(prefix, STARCDCore::CEL_FILE), streamOpt);
     writeHeader(os, STARCDCore::HEADER_CEL);
 
     label faceIndex = 0;
@@ -331,7 +331,7 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
 
     // Simple .inp file - always UNCOMPRESSED
     {
-        OFstream os(starFileName(baseName, STARCDCore::INP_FILE));
+        OFstream os(starFileName(prefix, STARCDCore::INP_FILE));
 
         writeCase
         (

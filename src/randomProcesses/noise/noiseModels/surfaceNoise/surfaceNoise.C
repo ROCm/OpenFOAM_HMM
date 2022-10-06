@@ -651,7 +651,7 @@ void surfaceNoise::calculate()
             }
         }
 
-        const word fNameBase = fName.nameLessExt();
+        const word fNameBase = fName.stem();
 
         // Output directory
         fileName outDirBase(baseFileDir(filei)/fNameBase);

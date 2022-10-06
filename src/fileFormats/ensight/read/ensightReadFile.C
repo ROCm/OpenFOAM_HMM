@@ -48,7 +48,7 @@ Foam::ensightReadFile::detectBinaryHeader(const fileName& pathname)
         istream& iss = is.stdStream();
 
         // Binary string is *exactly* 80 characters
-        std::string buf(size_t(80), '\0');
+        string buf(size_t(80), '\0');
         iss.read(&buf[0], 80);
 
         if (!iss)
@@ -64,12 +64,8 @@ Foam::ensightReadFile::detectBinaryHeader(const fileName& pathname)
             buf.erase(endp);
         }
 
-        // Contains "C Binary" ?
-        if
-        (
-            (buf.find("Binary") == std::string::npos)
-         && (buf.find("binary") == std::string::npos)
-        )
+        // ASCII if it does not contain "C Binary"
+        if (!buf.contains("Binary") && !buf.contains("binary"))
         {
             fmt = IOstreamOption::ASCII;
         }

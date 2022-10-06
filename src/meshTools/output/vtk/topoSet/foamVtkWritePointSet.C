@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,7 +69,7 @@ bool Foam::vtk::writePointSet
         // Extension is inappropriate. Legacy instead of xml, or vice versa.
         const word ext = vtk::fileExtension[vtk::fileTag::POLY_DATA];
 
-        if (file.hasExt(ext))
+        if (file.has_ext(ext))
         {
             // Extension is correct
             os_.open(file);
@@ -77,8 +77,8 @@ bool Foam::vtk::writePointSet
         else if
         (
             legacy
-          ? file.hasExt(ext)
-          : file.hasExt(vtk::legacy::fileExtension)
+          ? file.has_ext(ext)
+          : file.has_ext(vtk::legacy::fileExtension)
         )
         {
             // Extension is inappropriate. Legacy instead of xml, or vice versa.

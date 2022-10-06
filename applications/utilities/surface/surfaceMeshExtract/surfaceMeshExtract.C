@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
 
     const auto userOutFileName = args.get<fileName>(1);
 
-    if (!userOutFileName.hasExt())
+    if (!userOutFileName.has_ext())
     {
         FatalErrorInFunction
             << "Missing extension on output name " << userOutFileName

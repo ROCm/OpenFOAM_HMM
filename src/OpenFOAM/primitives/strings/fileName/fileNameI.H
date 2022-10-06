@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -157,7 +157,7 @@ inline bool Foam::fileName::isAbsolute(const std::string& str)
 
 inline bool Foam::fileName::isAbsolute() const
 {
-    return isAbsolute(*this);
+    return fileName::isAbsolute(*this);
 }
 
 
@@ -167,9 +167,9 @@ inline bool Foam::fileName::isBackup() const
 }
 
 
-inline bool Foam::fileName::hasPath() const
+inline bool Foam::fileName::has_path() const
 {
-    return string::hasPath();
+    return contains('/');
 }
 
 
@@ -177,7 +177,7 @@ inline std::string Foam::fileName::path(const std::string& str)
 {
     const auto i = str.rfind('/');
 
-    if (i == npos)
+    if (i == std::string::npos)
     {
         return ".";
     }
@@ -192,7 +192,7 @@ inline std::string Foam::fileName::path(const std::string& str)
 
 inline Foam::fileName Foam::fileName::path() const
 {
-    return path(*this);
+    return fileName::path(*this);
 }
 
 
@@ -200,7 +200,7 @@ inline std::string Foam::fileName::name(const std::string& str)
 {
     const auto i = str.rfind('/');
 
-    if (npos == i)
+    if (i == std::string::npos)
     {
         return str;
     }
@@ -221,28 +221,9 @@ Foam::word Foam::fileName::ext() const
 }
 
 
-inline Foam::word Foam::fileName::nameLessExt() const
+inline Foam::word Foam::fileName::stem() const
 {
-    return nameLessExt(*this);
-}
-
-
-inline Foam::fileName Foam::fileName::lessExt() const
-{
-    const auto i = find_ext();
-
-    if (i == npos)
-    {
-        return *this;
-    }
-
-    return substr(0, i);
-}
-
-
-inline bool Foam::fileName::removePath()
-{
-    return string::removePath();
+    return fileName::stem(*this);
 }
 
 
@@ -250,6 +231,27 @@ inline Foam::fileName& Foam::fileName::ext(const word& ending)
 {
     string::ext(ending);
     return *this;
+}
+
+
+inline Foam::fileName& Foam::fileName::replace_ext(const word& ending)
+{
+    string::remove_ext();
+    string::ext(ending);
+    return *this;
+}
+
+
+inline Foam::fileName Foam::fileName::lessExt() const
+{
+    const auto i = find_ext();
+
+    if (i == std::string::npos)
+    {
+        return *this;
+    }
+
+    return substr(0, i);
 }
 
 

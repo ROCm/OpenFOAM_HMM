@@ -258,7 +258,7 @@ Foam::fileName Foam::coordSetWriters::nastranWriter::writeTemplate
         OFstream os(outputFile);
         fileFormats::NASCore::setPrecision(os, writeFormat_);
 
-        os  << "TITLE=OpenFOAM " << outputFile.nameLessExt()
+        os  << "TITLE=OpenFOAM " << outputFile.stem()
             << " geometry" << nl
             << "BEGIN BULK" << nl;
 
@@ -301,7 +301,7 @@ Foam::fileName Foam::coordSetWriters::nastranWriter::writeTemplate
         OFstream os(outputFile);
         fileFormats::NASCore::setPrecision(os, writeFormat_);
 
-        os  << "TITLE=OpenFOAM " << outputFile.nameLessExt()
+        os  << "TITLE=OpenFOAM " << outputFile.stem()
             << " geometry" << nl
             << "BEGIN BULK" << nl;
 

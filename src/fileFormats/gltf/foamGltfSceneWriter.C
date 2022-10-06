@@ -78,8 +78,8 @@ void Foam::glTF::sceneWriter::open(const fileName& outputFile)
 {
     close();
 
-    fileName jsonFile(outputFile.lessExt());
-    jsonFile.ext("gltf");
+    fileName jsonFile(outputFile);
+    jsonFile.replace_ext("gltf");
 
     // Note: called on master only
     if (!isDir(jsonFile.path()))

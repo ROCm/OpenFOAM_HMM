@@ -161,22 +161,25 @@ public:
 
     // File-like Functions
 
-        //- Return word without extension (part before last .)
-        word lessExt() const;
-
         //- Return file name extension (part after last .)
-        word ext() const;
+        inline word ext() const;
 
         //- Append a '.' and the ending, and return the object.
         //  The '.' and ending will not be added when the ending is empty,
         //  or when the file name is empty or ended with a '/'.
-        word& ext(const word& ending);
+        inline word& ext(const word& ending);
+
+        //- Remove extension (if any) and append a new one
+        inline word& replace_ext(const word& ending);
+
+        //- Return word without extension (part before last .)
+        inline word lessExt() const;
+
+        //- Remove extension, return true if string changed.
+        using string::remove_ext;
 
         //- Various checks for extensions
-        using string::hasExt;
-
-        //- Remove extension, returning true if string changed.
-        using string::removeExt;
+        using string::has_ext;
 
 
     // Member Operators
@@ -205,6 +208,18 @@ public:
 
         //- Copy, stripping invalid characters
         inline word& operator=(const char* s);
+
+
+    // Housekeeping
+
+        //- Same as has_ext()
+        bool hasExt() const { return has_ext(); }
+
+        //- Same as has_ext()
+        bool hasExt(const std::string& s) const { return has_ext(s); }
+
+        //- Same as remove_ext()
+        bool removeExt() { return remove_ext(); }
 };
 
 

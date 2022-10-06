@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -256,7 +256,7 @@ Foam::vtk::formatter& Foam::vtk::formatter::DataSet
     {
         if (autoName)
         {
-            xmlAttr("name", fileName::nameLessExt(file));
+            xmlAttr("name", fileName::stem(file));
         }
         xmlAttr("file", file);
     }

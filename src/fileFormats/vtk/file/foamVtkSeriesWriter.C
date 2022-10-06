@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -162,7 +162,7 @@ Foam::Ostream& Foam::vtk::seriesWriter::print
     // stem = "file"
     // ext = ".vtm"
 
-    const word stem = base.nameLessExt();
+    const word stem = base.stem();
     const word ext = "." + base.ext();
 
     // Begin file-series (JSON)
@@ -240,7 +240,7 @@ void Foam::vtk::seriesWriter::write
 
     autoPtr<OFstream> osPtr =
     (
-        seriesName.hasExt("series")
+        seriesName.has_ext("series")
       ? autoPtr<OFstream>::New(seriesName)
       : autoPtr<OFstream>::New(seriesName + ".series")
     );
@@ -260,7 +260,7 @@ void Foam::vtk::seriesWriter::write
 
     autoPtr<OFstream> osPtr =
     (
-        seriesName.hasExt("series")
+        seriesName.has_ext("series")
       ? autoPtr<OFstream>::New(seriesName)
       : autoPtr<OFstream>::New(seriesName + ".series")
     );
@@ -372,7 +372,7 @@ Foam::label Foam::vtk::seriesWriter::load
     clear();
 
     fileName seriesFile(seriesName);
-    if (!seriesFile.hasExt("series"))
+    if (!seriesFile.has_ext("series"))
     {
         seriesFile.ext("series");
     }
@@ -597,12 +597,12 @@ Foam::label Foam::vtk::seriesWriter::scan
 
     fileName seriesFile(seriesName);
 
-    if (seriesName.hasExt("series"))
+    if (seriesName.has_ext("series"))
     {
-        seriesFile.removeExt();
+        seriesFile.remove_ext();
     }
 
-    const word stem = seriesFile.nameLessExt();
+    const word stem = seriesFile.stem();
     const word ext = seriesFile.ext();
 
     // Accept "fileN.ext", "fileNN.ext", but reject "file.ext"
@@ -614,7 +614,7 @@ Foam::label Foam::vtk::seriesWriter::scan
             return
             (
                 minLen < file.length()
-             && file.hasExt(ext) && file.starts_with(stem)
+             && file.has_ext(ext) && file.starts_with(stem)
             );
         };
 

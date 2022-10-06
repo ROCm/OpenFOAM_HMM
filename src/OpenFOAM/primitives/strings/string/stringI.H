@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,39 +47,43 @@ inline std::string::size_type Foam::string::find_ext() const
 }
 
 
-inline bool Foam::string::hasPath() const
+inline bool Foam::string::has_ext() const
 {
-    return (npos != find('/'));
+    return (std::string::npos != find_ext());
 }
 
 
-inline bool Foam::string::hasExt() const
+inline bool Foam::string::has_ext(const char* ending) const
 {
-    return (npos != find_ext());
+    const auto n1 = size();
+    const auto n2 = strlen(ending);
+
+    // Like ends_with with extra check for dot
+    return
+    (
+        n1 > n2
+     && operator[](n1-n2-1) == '.'  // Require a dot separator
+     && !compare(n1-n2, npos, ending, n2)
+    );
 }
 
 
-inline bool Foam::string::hasExt(const char* ending) const
+inline bool Foam::string::has_ext(const std::string& ending) const
 {
-    return (ending && string::hasExt(std::string(ending)));
+    const auto n1 = size();
+    const auto n2 = ending.size();
+
+    // Like ends_with with extra check for dot
+    return
+    (
+        n1 > n2
+     && operator[](n1-n2-1) == '.'  // Require a dot separator
+     && !compare(n1-n2, npos, ending)
+    );
 }
 
 
-inline bool Foam::string::hasExt(const std::string& ending) const
-{
-    const auto len = ending.size();
-    auto i = find_ext();
-    if (i == npos || !len)
-    {
-        return false;
-    }
-
-    ++i; // Compare *after* the dot
-    return ((size() - i) == len) && !compare(i, npos, ending);
-}
-
-
-inline bool Foam::string::removePath()
+inline bool Foam::string::remove_path()
 {
     const auto i = rfind('/');
 
@@ -93,7 +97,7 @@ inline bool Foam::string::removePath()
 }
 
 
-inline bool Foam::string::removeExt()
+inline bool Foam::string::remove_ext()
 {
     const auto i = find_ext();
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -144,11 +144,7 @@ using namespace Foam;
 //  but leave anything with '/' delimiters untouched
 bool upgradeScope(word& entryName)
 {
-    if
-    (
-        entryName.find('/') == string::npos
-     && entryName.find(':') != string::npos
-    )
+    if (!entryName.contains('/') && entryName.contains(':'))
     {
         const wordList names(fileName(entryName).components(':'));
 

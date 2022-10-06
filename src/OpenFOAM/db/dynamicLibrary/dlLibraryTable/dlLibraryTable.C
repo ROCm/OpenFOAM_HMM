@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,7 +59,7 @@ std::unique_ptr<Foam::dlLibraryTable> Foam::dlLibraryTable::global_(nullptr);
 
 Foam::word Foam::dlLibraryTable::basename(const fileName& libPath)
 {
-    word libName(libPath.nameLessExt());
+    word libName(libPath.stem());
     libName.removeStart("lib");  // Remove leading 'lib' from name
     return libName;
 }

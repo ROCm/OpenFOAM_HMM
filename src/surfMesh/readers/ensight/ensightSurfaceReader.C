@@ -171,11 +171,11 @@ Foam::ensightSurfaceReader::readGeometryHeader(ensightReadFile& is) const
     is.read(buffer);
     DebugInfo<< "buffer [" << buffer.length() << "] " << buffer << nl;
 
-    if (buffer.find("ignore") != std::string::npos)
+    if (buffer.contains("ignore"))
     {
         idHandling.first() = idTypes::IGNORE;
     }
-    else if (buffer.find("given") != std::string::npos)
+    else if (buffer.contains("given"))
     {
         idHandling.first() = idTypes::GIVEN;
     }
@@ -184,11 +184,11 @@ Foam::ensightSurfaceReader::readGeometryHeader(ensightReadFile& is) const
     is.read(buffer);
     DebugInfo<< "buffer [" << buffer.length() << "] " << buffer << nl;
 
-    if (buffer.find("ignore") != std::string::npos)
+    if (buffer.contains("ignore"))
     {
         idHandling.second() = idTypes::IGNORE;
     }
-    else if (buffer.find("given") != std::string::npos)
+    else if (buffer.contains("given"))
     {
         idHandling.second() = idTypes::GIVEN;
     }
@@ -198,7 +198,7 @@ Foam::ensightSurfaceReader::readGeometryHeader(ensightReadFile& is) const
     is.read(buffer);
     DebugInfo<< "buffer [" << buffer.length() << "] " << buffer << nl;
 
-    if (buffer.find("extents") != std::string::npos)
+    if (buffer.contains("extents"))
     {
         // Optional extents - read and discard 6 floats
         // (xmin, xmax, ymin, ymax, zmin, zmax)
@@ -278,7 +278,7 @@ void Foam::ensightSurfaceReader::readCase(ISstream& is)
 
         const auto parsed = stringOps::splitSpace(buffer);
 
-        if (buffer.find(':') == string::npos || parsed.size() < 4)
+        if (!buffer.contains(':') || parsed.size() < 4)
         {
             WarningInFunction
                 << "Error reading field file name. Current buffer: "

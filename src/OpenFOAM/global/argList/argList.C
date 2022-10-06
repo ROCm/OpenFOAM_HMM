@@ -1924,7 +1924,7 @@ void Foam::argList::displayDoc(bool source) const
     }
 
     // Can use FOAM_DOC_BROWSER='application file://%f' if required
-    if (docBrowser.find("%f") != std::string::npos)
+    if (docBrowser.contains("%f"))
     {
         docBrowser.replace("%f", url);
     }

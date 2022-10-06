@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -87,7 +87,7 @@ void Foam::fileFormats::STARCDsurfaceFormatCore::writeCase
     const UList<surfZone>& zoneLst
 )
 {
-    const word caseName = os.name().nameLessExt();
+    const word caseName = os.name().stem();
 
     os  << "! STARCD file written " << clock::dateTime().c_str() << nl
         << "! " << pts.size() << " points, " << nFaces << " faces" << nl

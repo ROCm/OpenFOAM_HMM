@@ -69,7 +69,7 @@ void Foam::fileFormats::STARCDedgeFormat::writeCase
     const label nEdges
 )
 {
-    const word caseName = os.name().nameLessExt();
+    const word caseName = os.name().stem();
 
     os  << "! STARCD file written " << clock::dateTime().c_str() << nl
         << "! " << pointLst.size() << " points, " << nEdges << " lines" << nl
@@ -114,7 +114,7 @@ bool Foam::fileFormats::STARCDedgeFormat::read
 {
     clear();
 
-    fileName baseName = filename.lessExt();
+    const fileName prefix(filename.lessExt());
 
     // STARCD index of points
     List<label> pointId;
@@ -122,7 +122,7 @@ bool Foam::fileFormats::STARCDedgeFormat::read
     // Read points from .vrt file
     readPoints
     (
-        IFstream(starFileName(baseName, STARCDCore::VRT_FILE))(),
+        IFstream(starFileName(prefix, STARCDCore::VRT_FILE))(),
         storedPoints(),
         pointId
     );
@@ -141,7 +141,7 @@ bool Foam::fileFormats::STARCDedgeFormat::read
 
     // Read .cel file
     // ~~~~~~~~~~~~~~
-    IFstream is(starFileName(baseName, STARCDCore::CEL_FILE));
+    IFstream is(starFileName(prefix, STARCDCore::CEL_FILE));
     if (!is.good())
     {
         FatalErrorInFunction
@@ -245,17 +245,17 @@ void Foam::fileFormats::STARCDedgeFormat::write
     const pointField& pointLst = mesh.points();
     const edgeList& edgeLst = mesh.edges();
 
-    fileName baseName = filename.lessExt();
+    const fileName prefix(filename.lessExt());
 
     // The .vrt file
     {
-        OFstream os(starFileName(baseName, STARCDCore::VRT_FILE), streamOpt);
+        OFstream os(starFileName(prefix, STARCDCore::VRT_FILE), streamOpt);
         writePoints(os, pointLst);
     }
 
     // The .cel file
     {
-        OFstream os(starFileName(baseName, STARCDCore::CEL_FILE), streamOpt);
+        OFstream os(starFileName(prefix, STARCDCore::CEL_FILE), streamOpt);
         writeHeader(os, STARCDCore::HEADER_CEL);
         writeLines(os, edgeLst);
     }
@@ -263,7 +263,7 @@ void Foam::fileFormats::STARCDedgeFormat::write
     // Write a simple .inp file. Never compressed
     writeCase
     (
-        OFstream(starFileName(baseName, STARCDCore::INP_FILE))(),
+        OFstream(starFileName(prefix, STARCDCore::INP_FILE))(),
         pointLst,
         edgeLst.size()
     );

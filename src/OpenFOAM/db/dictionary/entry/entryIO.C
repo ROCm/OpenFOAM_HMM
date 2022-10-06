@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -295,7 +295,7 @@ bool Foam::entry::New
         const bool scoped =
         (
             !disableFunctionEntries
-         && (keyword.find('/') != string::npos)
+         && keyword.contains('/')
         );
 
         // See (using exact match) if entry already present

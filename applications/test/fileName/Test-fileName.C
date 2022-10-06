@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -260,7 +260,7 @@ int main(int argc, char *argv[])
             "hello1",
             "hello2",
             "hello3",
-            "hello4.hmm"
+            "hello4.ext"
         };
 
         Info<< file1 << nl;
@@ -270,7 +270,7 @@ int main(int argc, char *argv[])
         {
             file1,
             "some",
-            "more/things.hmm"
+            "more/things.ext"
         };
 
         Info<< file2 << nl;
@@ -281,7 +281,7 @@ int main(int argc, char *argv[])
         {
             std::string("ffO"),
             "some",
-            "more/things.hmm"
+            "more/things.ext"
         };
         Info<< file3 << nl;
 
@@ -295,7 +295,7 @@ int main(int argc, char *argv[])
         {
             "some",
             file3,
-            "more/things.hmm",
+            "more/things.ext",
             file1
         };
         Info<< "All ==> " << file4 << nl;
@@ -328,26 +328,26 @@ int main(int argc, char *argv[])
         fileName input1("path.to/media/image.png");
 
         Info<<"File : " << input0 << " ext: "
-            << Switch(input0.hasExt())
+            << Switch(input0.has_ext())
             <<  " = " << input0.ext() << nl;
         Info<<"File : " << input1 << " ext: "
-            << Switch(input1.hasExt())
+            << Switch(input1.has_ext())
             <<  " = " << input1.ext() << nl;
         Info<<"File : " << endWithDot << " ext: "
-            << Switch(endWithDot.hasExt())
+            << Switch(endWithDot.has_ext())
             <<  " = " << endWithDot.ext() << " <-- perhaps return false?" << nl;
         Info<<"File : " << endWithSlash << " ext: "
-            << Switch(endWithSlash.hasExt())
+            << Switch(endWithSlash.has_ext())
             <<  " = " << endWithSlash.ext() << nl;
 
 
-        Info<<"Remove extension " << (input0.removeExt());
+        Info<<"Remove extension " << (input0.remove_ext());
         Info<< "  now: " << input0 << nl;
 
         Info<<"Remove extension " << (input1.removeExt());
         Info<< "  now: " << input1 << nl;
 
-        Info<<"Remove extension " << (endWithSlash.removeExt());
+        Info<<"Remove extension " << (endWithSlash.remove_ext());
         Info<< "  now: " << endWithSlash << nl;
 
         wordList exts{ "jpg", "png", "txt", word::null };
@@ -359,14 +359,14 @@ int main(int argc, char *argv[])
         Info<< nl;
 
 
-        Info<<"Test hasExt(word)" << nl
+        Info<<"Test has_ext(word)" << nl
             <<"~~~~~~~~~~~~~~~~~" << nl;
         Info<<"Has extension(s):" << nl
             << "input: " << input1 << nl;
         for (const word& e : exts)
         {
             Info<<"  '" << e << "'  -> "
-                << Switch(input1.hasExt(e)) << nl;
+                << Switch(input1.has_ext(e)) << nl;
         }
         Info<< nl;
 
@@ -375,12 +375,12 @@ int main(int argc, char *argv[])
         for (const word& e : exts)
         {
             Info<<"  '" << e << "'  -> "
-                << Switch(endWithDot.hasExt(e)) << nl;
+                << Switch(endWithDot.has_ext(e)) << nl;
         }
         Info<< nl;
 
 
-        Info<<"Test hasExt(wordRe)" << nl
+        Info<<"Test has_ext(wordRe)" << nl
             <<"~~~~~~~~~~~~~~~~~~~" << nl;
 
         // A regex with a zero length matcher doesn't work at all:
@@ -393,25 +393,25 @@ int main(int argc, char *argv[])
         Info<<"Has extension(s):" << nl
             << "input: " << endWithDot << nl;
         Info<<"    " << matcher0 << "  -> "
-            << Switch(endWithDot.hasExt(matcher0)) << nl;
+            << Switch(endWithDot.has_ext(matcher0)) << nl;
         Info<<"    " << matcher1 << "  -> "
-            << Switch(endWithDot.hasExt(matcher1)) << nl;
+            << Switch(endWithDot.has_ext(matcher1)) << nl;
         Info<<"    " << matcher2 << "  -> "
-            << Switch(endWithDot.hasExt(matcher2)) << nl;
+            << Switch(endWithDot.has_ext(matcher2)) << nl;
 
         Info<< "input: " << input1 << nl;
         Info<<"    " << matcher0 << "  -> "
-            << Switch(input1.hasExt(matcher0)) << nl;
+            << Switch(input1.has_ext(matcher0)) << nl;
         Info<<"    " << matcher1 << "  -> "
-            << Switch(input1.hasExt(matcher1)) << nl;
+            << Switch(input1.has_ext(matcher1)) << nl;
         Info<<"    " << matcher2 << "  -> "
-            << Switch(input1.hasExt(matcher2)) << nl;
+            << Switch(input1.has_ext(matcher2)) << nl;
         Info<< nl;
 
         Info<<"Remove extension(s):" << nl << "input: " << input1 << nl;
         while (!input1.empty())
         {
-            if (input1.removeExt())
+            if (input1.remove_ext())
             {
                 Info<< "   -> " << input1 << nl;
             }
@@ -708,7 +708,7 @@ int main(int argc, char *argv[])
         "hello1",
         "hello2",
         "hello3",
-        "hello4.hmm"
+        "hello4.ext"
     };
 
     fileName pathName(wrdList);
@@ -718,14 +718,28 @@ int main(int argc, char *argv[])
         << "pathName.name()     = >" << pathName.name() << "<\n"
         << "pathName.path()     = "  << pathName.path() << nl
         << "pathName.ext()      = >" << pathName.ext() << "<\n"
-        << "pathName.nameLessExt= >" << pathName.nameLessExt() << "<\n";
+        << "pathName.stem       = >" << pathName.stem() << "<\n";
 
     Info<< "pathName.components() = " << pathName.components() << nl
         << "pathName.component(2) = " << pathName.component(2) << nl
         << endl;
 
-    Info<< "hasPath = " << Switch(pathName.hasPath()) << nl;
-    pathName.removePath();
+    pathName.replace_name("newName.ext");
+    Info<< "new name = " << pathName << nl;
+    Info<< "has ext      = " << Switch::name(pathName.has_ext()) << nl;
+    Info<< "has ext('')  = " << Switch::name(pathName.has_ext("")) << nl;
+    Info<< "has ext(foo) = " << Switch::name(pathName.has_ext("foo")) << nl;
+    Info<< "has ext(ext) = " << Switch::name(pathName.has_ext("ext")) << nl;
+
+    pathName.replace_ext("png");
+    Info<< "new ext = " << pathName << nl;
+
+    pathName.replace_ext("");  // Same as remove_ext
+    Info<< "new ext = " << pathName << nl;
+
+    Info<< "has path = " << Switch::name(pathName.has_path()) << nl;
+    pathName.remove_path();
+    pathName.removePath();  // second type should be a no-op
     Info<< "removed path = " << pathName << nl;
 
     Info<< nl << nl;

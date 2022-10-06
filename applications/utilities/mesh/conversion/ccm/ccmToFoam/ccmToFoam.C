@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -175,7 +175,7 @@ int main(int argc, char *argv[])
         // strip erroneous extension (.ccm, .ccmg, .ccmp)
         if (ext == "ccm" || ext == "ccmg" || ext == "ccmp")
         {
-            exportName = exportName.lessExt();
+            exportName.remove_ext();
         }
     }
     else if (args.found("export"))

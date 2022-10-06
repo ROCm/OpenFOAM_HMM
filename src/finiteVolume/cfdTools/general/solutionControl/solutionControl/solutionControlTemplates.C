@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,11 +45,7 @@ void Foam::solutionControl::storePrevIter() const
 
         const word& fldName = fld.name();
 
-        if
-        (
-            (fldName.find("PrevIter") == std::string::npos)
-         && mesh_.relaxField(fldName)
-        )
+        if (!fldName.contains("PrevIter") && mesh_.relaxField(fldName))
         {
             DebugInfo
                 << algorithmName_ << ": storing previous iter for "

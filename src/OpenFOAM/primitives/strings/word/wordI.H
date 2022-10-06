@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -158,6 +158,54 @@ inline void Foam::word::stripInvalid()
             std::exit(1);
         }
     }
+}
+
+
+// FUTURE?
+// inline Foam::word Foam::word::stem() const
+// {
+//     const auto i = find_ext();  // Or just rfind('.')
+//
+//     if (i == std::string::npos)
+//     {
+//         return *this;
+//     }
+//
+//     return substr(0, i);
+// }
+
+
+inline Foam::word Foam::word::ext() const
+{
+    return string::ext();
+}
+
+
+inline Foam::word& Foam::word::ext(const word& ending)
+{
+    string::ext(ending);
+    return *this;
+}
+
+
+inline Foam::word& Foam::word::replace_ext(const word& ending)
+{
+    string::remove_ext();
+    string::ext(ending);
+    return *this;
+}
+
+
+inline Foam::word Foam::word::lessExt() const
+{
+    const auto i = find_ext();  // Or just rfind('.')
+
+    if (i == std::string::npos)
+    {
+        return *this;
+    }
+
+    return substr(0, i);
 }
 
 

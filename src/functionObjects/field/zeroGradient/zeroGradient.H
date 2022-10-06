@@ -137,10 +137,6 @@ class zeroGradient
 
     // Private Member Functions
 
-        //- Check that string contains the appropriate substitution token(s)
-        static bool checkFormatName(const std::string& str);
-
-
         //- Accept unless field only has constraint patches
         //  (ie, empty/zero-gradient/processor)
         //  This should also avoid fields that were already processed by

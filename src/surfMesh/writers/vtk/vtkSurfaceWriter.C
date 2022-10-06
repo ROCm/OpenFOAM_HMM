@@ -238,7 +238,7 @@ Foam::fileName Foam::surfaceWriters::vtkWriter::write()
         else
         {
             // Surface name in title
-            writer_->beginFile(outputPath_.nameLessExt());
+            writer_->beginFile(outputPath_.stem());
         }
 
         writer_->writeGeometry();

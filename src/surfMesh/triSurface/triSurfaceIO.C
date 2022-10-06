@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -98,11 +98,13 @@ bool Foam::triSurface::canWriteType(const word& fileType, bool verbose)
 
 bool Foam::triSurface::canRead(const fileName& name, bool verbose)
 {
-    word ext(name.ext());
-    if (ext == "gz")
-    {
-        ext = name.lessExt().ext();
-    }
+    const word ext =
+    (
+        name.has_ext("gz")
+      ? name.stem().ext()
+      : name.ext()
+    );
+
     return canReadType(ext, verbose);
 }
 

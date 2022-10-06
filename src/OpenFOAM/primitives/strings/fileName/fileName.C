@@ -393,7 +393,7 @@ bool Foam::fileName::clean()
 }
 
 
-std::string Foam::fileName::nameLessExt(const std::string& str)
+std::string Foam::fileName::stem(const std::string& str)
 {
     auto beg = str.rfind('/');
     auto dot = str.rfind('.');
@@ -418,6 +418,29 @@ std::string Foam::fileName::nameLessExt(const std::string& str)
     }
 
     return str.substr(beg, dot - beg);
+}
+
+
+Foam::fileName& Foam::fileName::replace_name(const word& newName)
+{
+    const auto len = newName.length();
+
+    if (len)
+    {
+        auto beg = rfind('/');
+
+        if (beg == npos)
+        {
+            fileName::assign(newName);
+        }
+        else
+        {
+            ++beg;
+            replace(beg, length()-beg, newName);
+        }
+    }
+
+    return *this;
 }
 
 

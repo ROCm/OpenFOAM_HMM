@@ -291,7 +291,7 @@ int main(int argc, char *argv[])
         // (ie, probably not a surface filename at all).
         // If it is missing, this will fail nicely with an appropriate error
         // message.
-        if (surfaceDict.found("surfaces") || !dictName.hasExt())
+        if (surfaceDict.found("surfaces") || !dictName.has_ext())
         {
             loader.select(surfaceDict.get<wordRes>("surfaces"));
         }

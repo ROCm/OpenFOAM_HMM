@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,8 +47,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef string_H
-#define string_H
+#ifndef Foam_string_H
+#define Foam_string_H
 
 #include "char.H"
 #include "Hasher.H"
@@ -118,26 +118,24 @@ protected:
         //  \return True if append occurred.
         bool ext(const word& ending);
 
-        //- Return true if it contains a '/' character
-        inline bool hasPath() const;
-
         //- Return true if it has an extension or simply ends with a '.'
-        inline bool hasExt() const;
+        inline bool has_ext() const;
 
         //- Return true if the extension is the same as the given ending.
-        inline bool hasExt(const char* ending) const;
+        //  No proper nullptr protection.
+        inline bool has_ext(const char* ending) const;
 
         //- Return true if the extension is the same as the given ending.
-        inline bool hasExt(const std::string& ending) const;
+        inline bool has_ext(const std::string& ending) const;
 
         //- Return true if the extension matches the given ending.
-        bool hasExt(const wordRe& ending) const;
+        bool has_ext(const wordRe& ending) const;
 
-        //- Remove extension, returning true if string changed.
-        inline bool removeExt();
+        //- Remove leading path, return true if string changed.
+        inline bool remove_path();
 
-        //- Remove leading path, returning true if string changed.
-        inline bool removePath();
+        //- Remove extension, return true if string changed.
+        inline bool remove_ext();
 
 
 public:
@@ -294,28 +292,60 @@ public:
 
     // Housekeeping
 
-        //- True if string starts with the given prefix (cf. C++20)
+        //- True if string contains given character (cf. C++23)
+        bool contains(char c) const noexcept
+        {
+            return (find(c) != std::string::npos);
+        }
+
+        //- True if string contains given [string view] substring (cf. C++23)
+        bool contains(const std::string& s) const noexcept
+        {
+            return (find(s) != std::string::npos);
+        }
+
+        //- True if string contains given substring (cf. C++23)
+        bool contains(const char* s) const
+        {
+            return (find(s) != std::string::npos);
+        }
+
+        //- True if string starts with given character (cf. C++20)
+        bool starts_with(char c) const
+        {
+            return (!empty() && front() == c);
+        }
+
+        //- True if string starts with given [string view] prefix (C++20)
         bool starts_with(const std::string& s) const
         {
             return (size() >= s.size() && !compare(0, s.size(), s));
         }
 
-        //- True if string starts with the given character (cf. C++20)
-        bool starts_with(const char c) const
+        //- True if string starts with given prefix (C++20)
+        bool starts_with(const char* s) const
         {
-            return (!empty() && front() == c);
+            const auto len = strlen(s);
+            return (size() >= len && !compare(0, len, s, len));
         }
 
-        //- True if string ends with the given suffix (cf. C++20)
+        //- True if string ends with given character (cf. C++20)
+        bool ends_with(char c) const
+        {
+            return (!empty() && back() == c);
+        }
+
+        //- True if string ends with given [string view] suffix (cf. C++20)
         bool ends_with(const std::string& s) const
         {
             return (size() >= s.size() && !compare(size()-s.size(), npos, s));
         }
 
-        //- True if string ends with the given character (cf. C++20)
-        bool ends_with(const char c) const
+        //- True if string ends with given suffix (cf. C++20)
+        bool ends_with(const char* s) const
         {
-            return (!empty() && back() == c);
+            const auto len = strlen(s);
+            return (size() >= len && !compare(size()-len, npos, s, len));
         }
 
         //- Count the number of occurrences of the specified character

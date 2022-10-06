@@ -334,16 +334,15 @@ bool Foam::vtk::fileWriter::open(const fileName& file, bool parallel)
     if
     (
         legacy()
-      ? outputFile_.hasExt(vtk::fileExtension[contentType_])
-      : outputFile_.hasExt(vtk::legacy::fileExtension)
+      ? outputFile_.has_ext(vtk::fileExtension[contentType_])
+      : outputFile_.has_ext(vtk::legacy::fileExtension)
     )
     {
         // Inappropriate extension. Legacy instead of xml, or vice versa.
-
-        outputFile_.removeExt();
+        outputFile_.remove_ext();
     }
 
-    if (!outputFile_.hasExt(ext()))
+    if (!outputFile_.has_ext(ext()))
     {
         // Add extension if required
         outputFile_.ext(ext());

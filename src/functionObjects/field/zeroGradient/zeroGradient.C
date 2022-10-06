@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,14 +43,16 @@ namespace functionObjects
 }
 }
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-bool Foam::functionObjects::zeroGradient::checkFormatName
-(
-    const std::string& str
-)
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
 {
-    if (std::string::npos == str.find("@@"))
+
+// Check that string contains the appropriate substitution token(s)
+static bool checkFormatName(const word& str)
+{
+    if (!str.contains("@@"))
     {
         WarningInFunction
             << "Bad result naming (no '@@' token found)."
@@ -70,6 +72,10 @@ bool Foam::functionObjects::zeroGradient::checkFormatName
     return true;
 }
 
+} // End namespace Foam
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 int Foam::functionObjects::zeroGradient::process(const word& fieldName)
 {
@@ -95,7 +101,7 @@ Foam::functionObjects::zeroGradient::zeroGradient
 :
     fvMeshFunctionObject(name, runTime, dict),
     selectFields_(),
-    resultName_(string::null),
+    resultName_(),
     results_()
 {
     read(dict);

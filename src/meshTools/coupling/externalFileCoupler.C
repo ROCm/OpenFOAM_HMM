@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,12 +60,12 @@ namespace Foam
 static enum Time::stopAtControls getStopAction(const std::string& filename)
 {
     // Slurp entire input file (must exist) as a single string
-    std::string fileContent;
+    string fileContent;
 
     std::ifstream is(filename);
     std::getline(is, fileContent, '\0');
 
-    if (fileContent.find("done") != std::string::npos)
+    if (fileContent.contains("done"))
     {
         return Time::stopAtControls::saEndTime;
     }

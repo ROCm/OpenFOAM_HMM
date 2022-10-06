@@ -174,7 +174,7 @@ Foam::expressions::exprString::toExpr
 
 inline bool Foam::expressions::exprString::valid() const
 {
-    const bool ok = (std::string::npos == find('$'));
+    const bool ok = !contains('$');
 
     #ifdef FULLDEBUG
     if (!ok)

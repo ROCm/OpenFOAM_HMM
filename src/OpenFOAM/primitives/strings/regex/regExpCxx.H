@@ -235,7 +235,7 @@ public:
     // Matching/Searching
 
         //- Find position within the text.
-        //  \return The index where it begins or string::npos if not found
+        //  \return The index where it begins or std::string::npos if not found
         //
         //  \note does not properly work with negated regex!
         inline std::string::size_type find(const std::string& text) const;

@@ -76,7 +76,7 @@ void pointNoise::processData
 {
     Info<< "Reading data file " << data.fName() << endl;
 
-    const word fNameBase(data.fName().nameLessExt());
+    const word fNameBase(data.fName().stem());
 
     // Time and pressure history data
     scalarField t, p;

@@ -725,7 +725,6 @@ Foam::fileNameList Foam::readDir
 
     // Basic sanity: cannot strip '.gz' from directory names
     const bool stripgz = filtergz && (type != fileName::DIRECTORY);
-    const word extgz("gz");
 
     fileNameList dirEntries;
 
@@ -762,7 +761,7 @@ Foam::fileNameList Foam::readDir
         // Validate filename without quotes, etc in the name.
         // No duplicate slashes to strip - dirent will not have them anyhow.
 
-        const fileName name(fileName::validate(item));
+        fileName name(fileName::validate(item));
         if (name != item)
         {
             ++nFailed;
@@ -780,14 +779,13 @@ Foam::fileNameList Foam::readDir
                     dirEntries.resize(dirEntries.size() + maxNnames);
                 }
 
-                if (stripgz && name.hasExt(extgz))
+                if (stripgz && name.has_ext("gz"))
                 {
-                    dirEntries[nEntries++] = name.lessExt();
+                    name.remove_ext();
                 }
-                else
-                {
-                    dirEntries[nEntries++] = name;
-                }
+
+                dirEntries[nEntries] = std::move(name);
+                ++nEntries;
             }
         }
     }
@@ -1238,7 +1236,7 @@ void* Foam::dlOpen(const fileName& libName, const bool check)
     if
     (
         !handle
-     && libName.find('/') == std::string::npos
+     && !libName.has_path()
      && !libso.starts_with("lib")
     )
     {

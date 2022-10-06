@@ -140,7 +140,7 @@ void printSourceFileAndLine
     // On other systems (Linux), only use relative addresses for libraries.
 
     #ifndef __APPLE__
-    if (filename.hasExt("so"))
+    if (filename.has_ext("so"))
     #endif
     {
         // Convert address into offset into dynamic library

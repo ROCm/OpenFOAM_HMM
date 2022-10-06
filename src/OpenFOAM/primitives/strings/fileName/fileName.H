@@ -254,42 +254,6 @@ public:
 
     // Decomposition
 
-        //- Return basename (part beyond last /), including its extension
-        //  The result normally corresponds to a Foam::word
-        //
-        // Behaviour compared to /usr/bin/basename:
-        // \verbatim
-        //    input           name()          basename
-        //    -----           ------          --------
-        //    ""              ""              ""
-        //    "abc"           "abc"           "abc"
-        //    "/"             ""              "/"
-        //    "/abc"          "abc"           "abc"
-        //    "abc/def"       "def"           "def"
-        //    "/abc/def"      "def"           "def"
-        //    "/abc/def/"     ""              "def"
-        //    "/abc/../def"   "def"           "def"
-        // \endverbatim
-        inline static std::string name(const std::string& str);
-
-        //- Return basename (part beyond last /), including its extension
-        inline word name() const;
-
-        //- Return basename, without extension
-        //  The result normally corresponds to a Foam::word
-        static std::string nameLessExt(const std::string& str);
-
-        //- Return basename, without extension
-        inline word nameLessExt() const;
-
-        //- Deprecated(2017-03) return basename, optionally without extension
-        //  \deprecated(2017-03) - use name() or nameLessExt() methods
-        //      which describe their behaviour explicitly
-        word name(const bool noExt) const
-        {
-            return noExt ? this->nameLessExt() : this->name();
-        }
-
         //- Return directory path name (part before last /)
         //  The result normally corresponds to a Foam::fileName
         //
@@ -311,11 +275,65 @@ public:
         //- Return directory path name (part before last /)
         inline fileName path() const;
 
-        //- Return true if it contains a '/' character
-        inline bool hasPath() const;
+        //- Remove leading path, return true if string changed.
+        using string::remove_path;
 
-        //- Remove leading path, returning true if string changed.
-        inline bool removePath();
+        //- True if it contains a '/' character
+        inline bool has_path() const;
+
+
+        //- Return basename (part beyond last /), including its extension
+        //  The result normally corresponds to a Foam::word
+        //
+        // Behaviour compared to /usr/bin/basename:
+        // \verbatim
+        //    input           name()          basename
+        //    -----           ------          --------
+        //    ""              ""              ""
+        //    "abc"           "abc"           "abc"
+        //    "/"             ""              "/"
+        //    "/abc"          "abc"           "abc"
+        //    "abc/def"       "def"           "def"
+        //    "/abc/def"      "def"           "def"
+        //    "/abc/def/"     ""              "def"
+        //    "/abc/../def"   "def"           "def"
+        // \endverbatim
+        inline static std::string name(const std::string& str);
+
+        //- Return basename (part beyond last /), including its extension
+        inline word name() const;
+
+        //- Replace basename (part beyond last /) with a new name
+        fileName& replace_name(const word& newName);
+
+        //- Return the basename, without extension
+        //  The result normally corresponds to a Foam::word
+        static std::string stem(const std::string& str);
+
+        //- Return basename, without extension
+        inline word stem() const;
+
+
+        //- Return file name extension (part after last .)
+        inline word ext() const;
+
+        //- Append a '.' and the ending, and return the object.
+        //  The '.' and ending will not be added when the ending is empty,
+        //  or when the file name is empty or ended with a '/'.
+        inline fileName& ext(const word& ending);
+
+        //- Remove extension (if any) and append a new one
+        inline fileName& replace_ext(const word& ending);
+
+        //- Return file name without extension (part before last .)
+        inline fileName lessExt() const;
+
+        //- Remove extension, returning true if string changed.
+        using string::remove_ext;
+
+        //- Various checks for extensions
+        using string::has_ext;
+
 
         //- Return a relative name by stripping off the parent directory
         //- where possible.
@@ -329,23 +347,6 @@ public:
             const fileName& parent,
             const bool caseTag = false
         ) const;
-
-        //- Return file name without extension (part before last .)
-        inline fileName lessExt() const;
-
-        //- Return file name extension (part after last .)
-        inline word ext() const;
-
-        //- Append a '.' and the ending, and return the object.
-        //  The '.' and ending will not be added when the ending is empty,
-        //  or when the file name is empty or ended with a '/'.
-        inline fileName& ext(const word& ending);
-
-        //- Various checks for extensions
-        using string::hasExt;
-
-        //- Remove extension, returning true if string changed.
-        using string::removeExt;
 
 
         //- Return path components as wordList
@@ -408,8 +409,44 @@ public:
         //- Append a path element with '/' separator.
         //  No '/' separator is added if this or the argument are empty.
         fileName& operator/=(const string& other);
+
+
+    // Housekeeping
+
+        //- Same as has_path()
+        bool hasPath() const { return has_path(); }
+
+        //- Same as remove_path()
+        bool removePath() { return remove_path(); }
+
+        //- Same as has_ext()
+        bool hasExt() const { return has_ext(); }
+
+        //- Same as has_ext()
+        bool hasExt(const std::string& s) const { return has_ext(s); }
+
+        //- Same as remove_ext()
+        bool removeExt() { return remove_ext(); }
+
+        //- Same as stem()
+        static std::string nameLessExt(const std::string& s)
+        {
+            return fileName::stem(s);
+        }
+
+        //- Same as stem()
+        word nameLessExt() const { return stem(); }
+
+        //- Deprecated(2017-03) return basename, optionally without extension
+        //  \deprecated(2017-03) - use name() or stem() methods
+        //      which describe their behaviour explicitly
+        word name(const bool noExt) const
+        {
+            return noExt ? stem() : name();
+        }
 };
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // IOstream Operators
 

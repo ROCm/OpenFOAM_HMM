@@ -150,10 +150,6 @@ class ddt2
 
     // Private Member Functions
 
-        //- Check that string contains the appropriate substitution token(s)
-        static bool checkFormatName(const std::string& str);
-
-
         //- Accept unless field name appears to have already been processed
         bool accept(const word& fieldName) const;
 

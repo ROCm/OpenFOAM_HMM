@@ -71,7 +71,7 @@ Foam::fileName Foam::coordSetWriters::gnuplotWriter::writeTemplate
         os.precision(precision_);
 
         os  << "set term pngcairo" << nl
-            << "set output \"" << outputFile.nameLessExt() << ".png\"" << nl;
+            << "set output \"" << outputFile.stem() << ".png\"" << nl;
 
         // Header
         {

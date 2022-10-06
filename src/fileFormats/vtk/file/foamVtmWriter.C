@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -421,7 +421,7 @@ bool Foam::vtk::vtmWriter::append(const fileName& file)
 {
     if (autoName_)
     {
-        return append(fileName::nameLessExt(file), file);
+        return append(fileName::stem(file), file);
     }
 
     return append(word::null, file);
@@ -436,7 +436,7 @@ bool Foam::vtk::vtmWriter::append
 {
     if (autoName_)
     {
-        return append(fileName::nameLessExt(file), file, contentType);
+        return append(fileName::stem(file), file, contentType);
     }
 
     return append(word::null, file, contentType);
@@ -471,7 +471,7 @@ bool Foam::vtk::vtmWriter::append
         return false;
     }
 
-    if (file.hasExt(vtk::fileExtension[contentType]))
+    if (file.has_ext(vtk::fileExtension[contentType]))
     {
         entries_.append(vtmEntry::entry(name, file));
     }
@@ -582,7 +582,7 @@ Foam::label Foam::vtk::vtmWriter::write(const fileName& file)
 
     mkDir(file.path());
 
-    if (file.hasExt(ext()))
+    if (file.has_ext(ext()))
     {
         os_.open(file);
     }

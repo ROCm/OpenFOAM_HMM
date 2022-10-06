@@ -156,7 +156,7 @@ bool Foam::functionObjects::vtkCloud::writeCloud
     std::ofstream os;
     autoPtr<vtk::formatter> format;
 
-    if (!file.hasExt("vtp"))
+    if (!file.has_ext("vtp"))
     {
         FatalErrorInFunction
             << type() << " File missing .vtp extension!" << nl << endl

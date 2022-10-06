@@ -255,7 +255,7 @@ void Foam::fileFormats::OBJsurfaceFormat<Face>::write
 
 
     os  << "# Wavefront OBJ file written " << clock::dateTime().c_str() << nl
-        << "o " << os.name().nameLessExt() << nl
+        << "o " << os.name().stem() << nl
         << nl
         << "# points : " << pointLst.size() << nl
         << "# faces  : " << faceLst.size() << nl

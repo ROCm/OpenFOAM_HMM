@@ -323,7 +323,7 @@ bool Foam::fileFormats::FIREMeshWriter::write(const fileName& meshName) const
             }
         }
 
-        baseName = baseName.lessExt();
+        baseName.remove_ext();
     }
 
 

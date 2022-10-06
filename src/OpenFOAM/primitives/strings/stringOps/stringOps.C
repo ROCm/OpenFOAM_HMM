@@ -704,12 +704,8 @@ std::string::size_type Foam::stringOps::count
 
 std::string::size_type Foam::stringOps::count(const char* s, const char c)
 {
-    return
-    (
-        s == nullptr
-      ? 0
-      : std::count(s, (s + std::char_traits<char>::length(s)), c)
-    );
+    size_t len = (s ? strlen(s) : 0);
+    return len ? std::count(s, (s + len), c) : 0;
 }
 
 

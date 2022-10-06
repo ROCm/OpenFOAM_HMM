@@ -161,8 +161,8 @@ void Foam::glTF::scene::addToAnimation
 
 void Foam::glTF::scene::write(const fileName& outputFile)
 {
-    fileName jsonFile(outputFile.lessExt());
-    jsonFile.ext("gltf");
+    fileName jsonFile(outputFile);
+    jsonFile.replace_ext("gltf");
 
     // Note: called on master only
 
@@ -178,8 +178,8 @@ void Foam::glTF::scene::write(const fileName& outputFile)
 
 void Foam::glTF::scene::write(Ostream& os)
 {
-    fileName binFile(os.name().lessExt());
-    binFile.ext("bin");
+    fileName binFile(os.name());
+    binFile.replace_ext("bin");
 
     // Write binary file
     // Note: using stdStream

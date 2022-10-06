@@ -901,7 +901,6 @@ Foam::fileNameList Foam::readDir
 
     // Basic sanity: cannot strip '.gz' from directory names
     const bool stripgz = filtergz && (type != fileName::DIRECTORY);
-    const word extgz("gz");
 
     fileNameList dirEntries;
 
@@ -941,7 +940,7 @@ Foam::fileNameList Foam::readDir
         // Validate filename without spaces, quotes, etc in the name.
         // No duplicate slashes to strip - dirent will not have them anyhow.
 
-        const fileName name(fileName::validate(item));
+        fileName name(fileName::validate(item));
         if (name != item)
         {
             ++nFailed;
@@ -959,14 +958,13 @@ Foam::fileNameList Foam::readDir
                     dirEntries.resize(dirEntries.size() + maxNnames);
                 }
 
-                if (stripgz && name.hasExt(extgz))
+                if (stripgz && name.has_ext("gz"))
                 {
-                    dirEntries[nEntries++] = name.lessExt();
+                    name.remove_ext();
                 }
-                else
-                {
-                    dirEntries[nEntries++] = name;
-                }
+
+                dirEntries[nEntries] = std::move(name);
+                ++nEntries;
             }
         }
     }
@@ -1696,11 +1694,7 @@ void* Foam::dlOpen(const fileName& libName, const bool check)
     {
         fileName libso;
 
-        if
-        (
-            libName.find('/') == std::string::npos
-         && !libName.starts_with("lib")
-        )
+        if (!libName.has_path() && !libName.starts_with("lib"))
         {
             // Try with 'lib' prefix
             libso = "lib" + libName;
@@ -1720,9 +1714,9 @@ void* Foam::dlOpen(const fileName& libName, const bool check)
 
         // With canonical library extension ("so" or "dylib"), which remaps
         // "libXX" to "libXX.so" as well as "libXX.so" -> "libXX.dylib"
-        if (!handle && !libso.hasExt(EXT_SO))
+        if (!handle && !libso.has_ext(EXT_SO))
         {
-            libso = libso.lessExt().ext(EXT_SO);
+            libso.replace_ext(EXT_SO);
             handle = ::dlopen(libso.c_str(), ldflags);
 
             if (POSIX::debug)

@@ -231,7 +231,7 @@ Foam::fileName Foam::coordSetWriters::vtkWriter::write()
         else
         {
             // Set name in title
-            writer_->beginFile(outputPath_.nameLessExt());
+            writer_->beginFile(outputPath_.stem());
         }
 
         writer_->writeGeometry();
