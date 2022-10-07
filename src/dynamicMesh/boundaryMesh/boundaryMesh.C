@@ -964,8 +964,6 @@ Foam::labelList Foam::boundaryMesh::getNearest
 
     labelList nearestBFacei(pMesh.nBoundaryFaces());
 
-    treeBoundBox tightest;
-
     const scalar searchDimSqr = magSqr(searchSpan);
 
     forAll(nearestBFacei, patchFacei)

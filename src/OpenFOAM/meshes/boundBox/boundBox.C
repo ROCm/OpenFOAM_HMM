@@ -28,8 +28,8 @@ License
 
 #include "boundBox.H"
 #include "PstreamReduceOps.H"
-#include "tmp.H"
 #include "plane.H"
+#include "triangle.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -68,6 +68,17 @@ const Foam::FixedList<Foam::vector, 6> Foam::boundBox::faceNormals
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::boundBox::boundBox(const boundBox& bb, const bool doReduce)
+:
+    boundBox(bb)
+{
+    if (doReduce)
+    {
+        reduce();
+    }
+}
+
 
 Foam::boundBox::boundBox(const UList<point>& points, bool doReduce)
 :
@@ -117,19 +128,19 @@ Foam::boundBox::boundBox
 
 Foam::tmp<Foam::pointField> Foam::boundBox::points() const
 {
-    auto tpt = tmp<pointField>::New(8);
-    auto& pt = tpt.ref();
+    auto tpts = tmp<pointField>::New(8);
+    auto& pts = tpts.ref();
 
-    pt[0] = min_;                                   // min-x, min-y, min-z
-    pt[1] = point(max_.x(), min_.y(), min_.z());    // max-x, min-y, min-z
-    pt[2] = point(max_.x(), max_.y(), min_.z());    // max-x, max-y, min-z
-    pt[3] = point(min_.x(), max_.y(), min_.z());    // min-x, max-y, min-z
-    pt[4] = point(min_.x(), min_.y(), max_.z());    // min-x, min-y, max-z
-    pt[5] = point(max_.x(), min_.y(), max_.z());    // max-x, min-y, max-z
-    pt[6] = max_;                                   // max-x, max-y, max-z
-    pt[7] = point(min_.x(), max_.y(), max_.z());    // min-x, max-y, max-z
+    pts[0] = hexCorner<0>();
+    pts[1] = hexCorner<1>();
+    pts[2] = hexCorner<2>();
+    pts[3] = hexCorner<3>();
+    pts[4] = hexCorner<4>();
+    pts[5] = hexCorner<5>();
+    pts[6] = hexCorner<6>();
+    pts[7] = hexCorner<7>();
 
-    return tpt;
+    return tpts;
 }
 
 
@@ -151,13 +162,6 @@ Foam::point Foam::boundBox::faceCentre(const direction facei) const
 {
     point pt = boundBox::centre();
 
-    if (facei > 5)
-    {
-        FatalErrorInFunction
-            << "face should be [0..5]"
-            << abort(FatalError);
-    }
-
     switch (facei)
     {
         case 0: pt.x() = min().x(); break;  // 0: x-min, left
@@ -166,18 +170,15 @@ Foam::point Foam::boundBox::faceCentre(const direction facei) const
         case 3: pt.y() = max().y(); break;  // 3: y-max, top
         case 4: pt.z() = min().z(); break;  // 4: z-min, back
         case 5: pt.z() = max().z(); break;  // 5: z-max, front
+        default:
+        {
+            FatalErrorInFunction
+                << "Face:" << int(facei) << " should be [0..5]"
+                << abort(FatalError);
+        }
     }
 
     return pt;
-}
-
-
-void Foam::boundBox::inflate(const scalar s)
-{
-    const vector ext = vector::one*s*mag();
-
-    min_ -= ext;
-    max_ += ext;
 }
 
 
@@ -185,6 +186,14 @@ void Foam::boundBox::reduce()
 {
     Foam::reduce(min_, minOp<point>());
     Foam::reduce(max_, maxOp<point>());
+}
+
+
+Foam::boundBox Foam::boundBox::returnReduce(const boundBox& bb)
+{
+    boundBox work(bb);
+    work.reduce();
+    return work;
 }
 
 
@@ -205,25 +214,29 @@ bool Foam::boundBox::intersects(const plane& pln) const
         return false;
     }
 
-    bool above = false;
-    bool below = false;
+    // Check as below(1) or above(2) - stop when it cuts both
+    int side = 0;
 
-    tmp<pointField> tpts(points());
-    const auto& pts = tpts();
-
-    for (const point& p : pts)
-    {
-        if (pln.sideOfPlane(p) == plane::FRONT)
-        {
-            above = true;
-        }
-        else
-        {
-            below = true;
-        }
+    #undef  doLocalCode
+    #define doLocalCode(Idx)                                                  \
+    {                                                                         \
+        side |= (pln.whichSide(hexCorner<Idx>()) == plane::BACK ? 1 : 2);     \
+        if (side == 3) return true;  /* Both below and above: done */         \
     }
 
-    return (above && below);
+    // Each box corner
+    doLocalCode(0);
+    doLocalCode(1);
+    doLocalCode(2);
+    doLocalCode(3);
+    doLocalCode(4);
+    doLocalCode(5);
+    doLocalCode(6);
+    doLocalCode(7);
+
+    #undef doLocalCode
+
+    return false;
 }
 
 
@@ -265,14 +278,15 @@ bool Foam::boundBox::containsAny(const UList<point>& points) const
 }
 
 
-Foam::point Foam::boundBox::nearest(const point& pt) const
+Foam::point Foam::boundBox::nearest(const point& p) const
 {
     // Clip the point to the range of the bounding box
-    const scalar surfPtx = Foam::max(Foam::min(pt.x(), max_.x()), min_.x());
-    const scalar surfPty = Foam::max(Foam::min(pt.y(), max_.y()), min_.y());
-    const scalar surfPtz = Foam::max(Foam::min(pt.z(), max_.z()), min_.z());
-
-    return point(surfPtx, surfPty, surfPtz);
+    return point
+    (
+        Foam::min(Foam::max(p.x(), min_.x()), max_.x()),
+        Foam::min(Foam::max(p.y(), min_.y()), max_.y()),
+        Foam::min(Foam::max(p.z(), min_.z()), max_.z())
+    );
 }
 
 

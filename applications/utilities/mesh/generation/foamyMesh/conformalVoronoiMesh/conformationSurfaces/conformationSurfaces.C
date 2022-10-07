@@ -605,7 +605,7 @@ Foam::conformationSurfaces::conformationSurfaces
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-bool Foam::conformationSurfaces::overlaps(const treeBoundBox& bb) const
+bool Foam::conformationSurfaces::overlaps(const boundBox& bb) const
 {
     forAll(surfaces_, s)
     {

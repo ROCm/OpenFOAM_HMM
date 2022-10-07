@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,6 +30,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
+// Point order using octant points
 const Foam::faceList Foam::treeBoundBox::faces
 ({
     face({0, 4, 6, 2}),  // 0: x-min, left
@@ -40,6 +41,7 @@ const Foam::faceList Foam::treeBoundBox::faces
     face({4, 5, 7, 6})   // 5: z-max, front
 });
 
+// Point order using octant points
 const Foam::edgeList Foam::treeBoundBox::edges
 ({
     {0, 1}, // 0
@@ -118,7 +120,7 @@ Foam::treeBoundBox Foam::treeBoundBox::subBbox
     if (octant > 7)
     {
         FatalErrorInFunction
-            << "octant should be [0..7]"
+            << "octant:" << int(octant) << " should be [0..7]"
             << abort(FatalError);
     }
 
@@ -188,7 +190,7 @@ bool Foam::treeBoundBox::intersects
     pt = start;
 
     // Allow maximum of 3 clips.
-    for (label i = 0; i < 4; ++i)
+    for (direction i = 0; i < 4; ++i)
     {
         direction ptBits = posBits(pt);
 

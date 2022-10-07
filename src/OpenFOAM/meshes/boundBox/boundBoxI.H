@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,73 @@ License
 
 #include "boundBox.H"
 
+// * * * * * * * * * * * * * Geometrical Information * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// Box corners as per hex cellmodel
+
+template<>
+inline Foam::point Foam::boundBox::hexCorner<0>() const
+{
+    return min_;
+}
+
+template<>
+inline Foam::point Foam::boundBox::hexCorner<1>() const
+{
+    return point(max_.x(), min_.y(), min_.z());
+}
+
+template<>
+inline Foam::point Foam::boundBox::hexCorner<2>() const
+{
+    return point(max_.x(), max_.y(), min_.z());
+}
+
+template<>
+inline Foam::point Foam::boundBox::hexCorner<3>() const
+{
+    return point(min_.x(), max_.y(), min_.z());
+}
+
+template<>
+inline Foam::point Foam::boundBox::hexCorner<4>() const
+{
+    return point(min_.x(), min_.y(), max_.z());
+}
+
+template<>
+inline Foam::point Foam::boundBox::hexCorner<5>() const
+{
+    return point(max_.x(), min_.y(), max_.z());
+}
+
+template<>
+inline Foam::point Foam::boundBox::hexCorner<6>() const
+{
+    return max_;
+}
+
+template<>
+inline Foam::point Foam::boundBox::hexCorner<7>() const
+{
+    return point(min_.x(), max_.y(), max_.z());
+}
+
+}  // End namespace Foam
+
+
+// Non-specialized version is compile-time disabled
+template<Foam::direction CornerNumber>
+inline Foam::point Foam::boundBox::hexCorner() const
+{
+    static_assert(CornerNumber < 8, "Corner index [0..7]");
+    return point();
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 inline Foam::boundBox::boundBox()
@@ -37,10 +104,10 @@ inline Foam::boundBox::boundBox()
 {}
 
 
-inline Foam::boundBox::boundBox(const point& pt)
+inline Foam::boundBox::boundBox(const point& p)
 :
-    min_(pt),
-    max_(pt)
+    min_(p),
+    max_(p)
 {}
 
 
@@ -48,6 +115,13 @@ inline Foam::boundBox::boundBox(const point& min, const point& max)
 :
     min_(min),
     max_(max)
+{}
+
+
+inline Foam::boundBox::boundBox(const Pair<point>& bb)
+:
+    min_(bb.first()),
+    max_(bb.second())
 {}
 
 
@@ -88,25 +162,25 @@ inline bool Foam::boundBox::valid() const
 }
 
 
-inline const Foam::point& Foam::boundBox::min() const
+inline const Foam::point& Foam::boundBox::min() const noexcept
 {
     return min_;
 }
 
 
-inline const Foam::point& Foam::boundBox::max() const
+inline const Foam::point& Foam::boundBox::max() const noexcept
 {
     return max_;
 }
 
 
-inline Foam::point& Foam::boundBox::min()
+inline Foam::point& Foam::boundBox::min() noexcept
 {
     return min_;
 }
 
 
-inline Foam::point& Foam::boundBox::max()
+inline Foam::point& Foam::boundBox::max() noexcept
 {
     return max_;
 }
@@ -115,12 +189,6 @@ inline Foam::point& Foam::boundBox::max()
 inline Foam::point Foam::boundBox::centre() const
 {
     return 0.5 * (min_ + max_);
-}
-
-
-inline Foam::point Foam::boundBox::midpoint() const
-{
-    return this->centre();
 }
 
 
@@ -160,9 +228,9 @@ inline Foam::scalar Foam::boundBox::avgDim() const
 }
 
 
-inline Foam::label Foam::boundBox::nDim() const
+inline int Foam::boundBox::nDim() const
 {
-    label ngood = 0;
+    int ngood = 0;
 
     for (direction dir = 0; dir < vector::nComponents; ++dir)
     {
@@ -181,7 +249,7 @@ inline Foam::label Foam::boundBox::nDim() const
 }
 
 
-inline void Foam::boundBox::clear()
+inline void Foam::boundBox::reset()
 {
     min_ = invertedBox.min();
     max_ = invertedBox.max();
@@ -215,6 +283,26 @@ inline void Foam::boundBox::add(const tmp<pointField>& tpoints)
 {
     add(tpoints());
     tpoints.clear();
+}
+
+
+inline void Foam::boundBox::grow(const scalar delta)
+{
+    min_.x() -= delta; min_.y() -= delta; min_.z() -= delta;
+    max_.x() += delta; max_.y() += delta; max_.z() += delta;
+}
+
+
+inline void Foam::boundBox::grow(const vector& delta)
+{
+    min_ -= delta;
+    max_ += delta;
+}
+
+
+inline void Foam::boundBox::inflate(const scalar factor)
+{
+    grow(factor*mag());
 }
 
 
@@ -293,28 +381,6 @@ inline bool Foam::boundBox::containsInside(const point& pt) const
      && min_.y() < pt.y() && pt.y() < max_.y()
      && min_.z() < pt.z() && pt.z() < max_.z()
     );
-}
-
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-inline void Foam::boundBox::operator+=(const boundBox& bb)
-{
-    add(bb);
-}
-
-
-// * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * * //
-
-inline bool Foam::operator==(const boundBox& a, const boundBox& b)
-{
-    return (a.min() == b.min()) && (a.max() == b.max());
-}
-
-
-inline bool Foam::operator!=(const boundBox& a, const boundBox& b)
-{
-    return !(a == b);
 }
 
 

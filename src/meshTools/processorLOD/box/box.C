@@ -75,13 +75,10 @@ void Foam::processorLODs::box::writeBoxes
 
             // Write the points
             const pointField pts(bb.points());
-            for (const point& p : pts)
-            {
-                meshTools::writeOBJ(os, p);
-            }
+            meshTools::writeOBJ(os, pts);
 
             // Write the box faces
-            for (const face& f : bb.faces)
+            for (const face& f : treeBoundBox::faces)
             {
                 os  << 'f';
                 for (const label fpi : f)

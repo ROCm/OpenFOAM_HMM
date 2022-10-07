@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,13 +61,10 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef treeBoundBox_H
-#define treeBoundBox_H
+#ifndef Foam_treeBoundBox_H
+#define Foam_treeBoundBox_H
 
 #include "boundBox.H"
-#include "direction.H"
-#include "pointField.H"
-#include "faceList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -77,8 +74,13 @@ namespace Foam
 // Forward Declarations
 class Random;
 class treeBoundBox;
+
 Istream& operator>>(Istream& is, treeBoundBox& bb);
 Ostream& operator<<(Ostream& os, const treeBoundBox& bb);
+
+// List types
+typedef List<treeBoundBox> treeBoundBoxList;   //!< A List of treeBoundBox
+
 
 /*---------------------------------------------------------------------------*\
                         Class treeBoundBox Declaration
@@ -116,7 +118,7 @@ public:
         //- Bits used for face encoding
         enum faceBit : direction
         {
-            NOFACE    = 0,
+            NOFACE    = 0,              //!<  0: none
             LEFTBIT   = 0x1 << LEFT,    //!<  1: x-min, left
             RIGHTBIT  = 0x1 << RIGHT,   //!<  2: x-max, right
             BOTTOMBIT = 0x1 << BOTTOM,  //!<  4: y-min, bottom
@@ -155,19 +157,40 @@ public:
         static const edgeList edges;
 
 
+    // Standard (Generated) Methods
+
+        //- Default construct: an inverted bounding box
+        treeBoundBox() = default;
+
+        //- Copy construct
+        treeBoundBox(const treeBoundBox&) = default;
+
+        //- Copy assignment
+        treeBoundBox& operator=(const treeBoundBox&) = default;
+
+        //- Copy construct from a boundBox
+        explicit treeBoundBox(const boundBox& bb) : boundBox(bb) {}
+
+        //- Copy assignment from a boundBox
+        void operator=(const boundBox& bb)
+        {
+            static_cast<boundBox&>(*this) = bb;
+        }
+
+
     // Constructors
 
-        //- Construct without any points - an inverted bounding box
-        inline treeBoundBox();
-
-        //- Construct from a boundBox
-        inline explicit treeBoundBox(const boundBox& bb);
-
         //- Construct a bounding box containing a single initial point
-        inline explicit treeBoundBox(const point& pt);
+        inline explicit treeBoundBox(const point& p);
 
-        //- Construct from components
+        //- Construct from bound box min/max points
         inline treeBoundBox(const point& min, const point& max);
+
+        ///TBD: Construct from bound box min/max points
+        ///inline explicit treeBoundBox(const MinMax<point>& bb);
+
+        //- Construct from bound box min/max points
+        inline explicit treeBoundBox(const Pair<point>& bb);
 
         //- Construct as the bounding box of the given pointField.
         //  Local processor domain only (no reduce as in boundBox)
@@ -187,12 +210,11 @@ public:
             const FixedList<label, N>& indices
         );
 
-
         //- Construct from Istream
-        inline treeBoundBox(Istream& is);
+        inline explicit treeBoundBox(Istream& is);
 
 
-    // Member functions
+    // Member Functions
 
         // Access
 
@@ -266,8 +288,11 @@ public:
                  FixedList<direction, 8>& octantOrder
             ) const;
 
-            //- Overlaps other bounding box?
+            //- Overlaps with other bounding box, sphere etc?
             using boundBox::overlaps;
+
+            //- intersects other bounding box, sphere etc?
+            using boundBox::intersects;
 
             //- Intersects segment; set point to intersection position and face,
             //  return true if intersection found.
@@ -294,6 +319,9 @@ public:
                 const point& end,
                 point& pt
             ) const;
+
+            //- Like above but does not return faces point is on
+            inline bool intersects(const linePointRef& ln, point& pt) const;
 
             //- Contains point or other bounding box?
             using boundBox::contains;
@@ -334,8 +362,17 @@ public:
             //  and guarantees in any direction s*mag(span) minimum width
             inline treeBoundBox extend(Random& rndGen, const scalar s) const;
 
+            //- As per two parameter version but with additional
+            //- grow() by given amount in each dimension
+            inline treeBoundBox extend
+            (
+                Random& rndGen,
+                const scalar s,
+                const scalar delta
+            ) const;
 
-    // IOstream operator
+
+    // IOstream Operators
 
         friend Istream& operator>>(Istream& is, treeBoundBox& bb);
         friend Ostream& operator<<(Ostream& os, const treeBoundBox& bb);

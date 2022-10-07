@@ -356,7 +356,7 @@ bool Foam::distributedTriSurfaceMesh::read()
         //outsideVolType_ = volumeType::UNKNOWN;
         //if (surfaceClosed_)
         //{
-        //    point outsidePt(localBb.max()+localBb.midpoint());
+        //    point outsidePt(localBb.max()+localBb.centre());
         //    List<volumeType> outsideVolTypes;
         //    triSurfaceMesh::getVolumeType
         //    (
@@ -1539,7 +1539,7 @@ void Foam::distributedTriSurfaceMesh::collectLeafMids
             // No data in this octant. Set type for octant acc. to the mid
             // of its bounding box.
             const treeBoundBox subBb = nod.bb_.subBbox(octant);
-            midPoints.append(subBb.midpoint());
+            midPoints.append(subBb.centre());
         }
     }
 }

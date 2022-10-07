@@ -52,14 +52,14 @@ void Foam::AABBTree<Type>::writeOBJ
 
     if (writeLinesOnly)
     {
-        for (const edge& e : bb.edges)
+        for (const edge& e : treeBoundBox::edges)
         {
             os  << "l " << e[0] + vertI + 1 << ' ' << e[1] + vertI + 1 << nl;
         }
     }
     else
     {
-        for (const face& f : bb.faces)
+        for (const face& f : treeBoundBox::faces)
         {
             os  << 'f';
             for (const label fpi : f)

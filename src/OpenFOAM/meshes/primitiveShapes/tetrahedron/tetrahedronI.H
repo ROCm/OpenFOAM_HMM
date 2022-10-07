@@ -174,15 +174,13 @@ inline Foam::Pair<Foam::point> Foam::tetPoints::box() const
 template<class Point, class PointRef>
 inline Foam::treeBoundBox Foam::tetrahedron<Point, PointRef>::bounds() const
 {
-    Pair<point> bb(tetrahedron<Point, PointRef>::box());
-    return treeBoundBox(bb.first(), bb.second());
+    return treeBoundBox(box());
 }
 
 
 inline Foam::treeBoundBox Foam::tetPoints::bounds() const
 {
-    Pair<point> bb(tetPoints::box());
-    return treeBoundBox(bb.first(), bb.second());
+    return treeBoundBox(box());
 }
 
 

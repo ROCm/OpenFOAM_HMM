@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,11 +37,12 @@ Note
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef boundBox_H
-#define boundBox_H
+#ifndef Foam_boundBox_H
+#define Foam_boundBox_H
 
 #include "pointField.H"
 #include "faceList.H"
+#include "Pair.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,7 +52,7 @@ namespace Foam
 // Forward Declarations
 class boundBox;
 class plane;
-template<class T> class tmp;
+template<class T> class MinMax;
 
 Istream& operator>>(Istream& is, boundBox& bb);
 Ostream& operator<<(Ostream& os, const boundBox& bb);
@@ -63,7 +64,7 @@ Ostream& operator<<(Ostream& os, const boundBox& bb);
 
 class boundBox
 {
-    // Private data
+    // Private Data
 
         //- Minimum and maximum points describing the bounding box
         point min_, max_;
@@ -93,16 +94,34 @@ public:
         static const FixedList<vector, 6> faceNormals;
 
 
-    // Constructors
+    // Standard (Generated) Methods
 
-        //- Construct without any points - an inverted bounding box
+        //- Default construct: an inverted bounding box
         inline boundBox();
 
-        //- Construct a bounding box containing a single initial point
-        inline explicit boundBox(const point& pt);
+        //- Copy construct
+        boundBox(const boundBox&) = default;
 
-        //- Construct from components
+        //- Copy assignment
+        boundBox& operator=(const boundBox&) = default;
+
+
+    // Constructors
+
+        //- Copy construct with specified global reduction
+        boundBox(const boundBox& bb, bool doReduce);
+
+        //- Construct a bounding box containing a single initial point
+        inline explicit boundBox(const point& p);
+
+        //- Construct from bound box min/max points
         inline boundBox(const point& min, const point& max);
+
+        ///TBD: Construct from bound box min/max points
+        ///inline explicit boundBox(const MinMax<point>& bb);
+
+        //- Construct from bound box min/max points
+        inline explicit boundBox(const Pair<point>& bb);
 
         //- Construct as the bounding box of the given points
         //  Does parallel communication (doReduce = true)
@@ -134,7 +153,7 @@ public:
         );
 
         //- Construct from Istream
-        inline boundBox(Istream& is);
+        inline explicit boundBox(Istream& is);
 
 
     // Member Functions
@@ -148,22 +167,19 @@ public:
             inline bool valid() const;
 
             //- Minimum describing the bounding box
-            inline const point& min() const;
+            inline const point& min() const noexcept;
 
             //- Maximum describing the bounding box
-            inline const point& max() const;
+            inline const point& max() const noexcept;
 
             //- Minimum describing the bounding box, non-const access
-            inline point& min();
+            inline point& min() noexcept;
 
             //- Maximum describing the bounding box, non-const access
-            inline point& max();
+            inline point& max() noexcept;
 
             //- The centre (midpoint) of the bounding box
             inline point centre() const;
-
-            //- The midpoint (centre) of the bounding box. Identical to centre()
-            inline point midpoint() const;
 
             //- The bounding box span (from minimum to maximum)
             inline vector span() const;
@@ -184,12 +200,17 @@ public:
             inline scalar avgDim() const;
 
             //- Count the number of positive, non-zero dimensions.
-            //  \return -1 if any dimensions are negative,
-            //  0 = 0D (point),
-            //  1 = 1D (line aligned with an axis),
-            //  2 = 2D (plane aligned with an axis),
-            //  3 = 3D (box)
-            inline label nDim() const;
+            //  \return
+            //   - -1 : if any dimensions are negative
+            //   -  0 : 0D (point)
+            //   -  1 : 1D (line aligned with an axis)
+            //   -  2 : 2D (plane aligned with an axis)
+            //   -  3 : 3D (box)
+            inline int nDim() const;
+
+            //- Return corner point [0..7] corresponding to a 'hex' cell
+            template<direction CornerNumber>
+            inline point hexCorner() const;
 
             //- Corner points in an order corresponding to a 'hex' cell
             tmp<pointField> points() const;
@@ -203,8 +224,11 @@ public:
 
         // Manipulate
 
-            //- Clear bounding box and make it an inverted box
-            inline void clear();
+            //- Reset to an inverted box
+            inline void reset();
+
+            //- Same as reset() - reset to an inverted box
+            void clear() { reset(); }
 
             //- Extend to include the second box.
             inline void add(const boundBox& bb);
@@ -242,11 +266,24 @@ public:
                 const IntContainer& indices
             );
 
-            //- Inflate box by factor*mag(span) in all dimensions
-            void inflate(const scalar s);
+            //- Expand box by adjusting min/max by specified amount
+            //- in each dimension
+            inline void grow(const scalar delta);
 
-            //- Parallel reduction of min/max values
+            //- Expand box by adjusting min/max by specified amounts
+            inline void grow(const vector& delta);
+
+            //- Expand box by factor*mag(span) in all dimensions
+            inline void inflate(const scalar factor);
+
+
+        // Parallel
+
+            //- Inplace parallel reduction of min/max values
             void reduce();
+
+            //- Perform a reduction on a copy and return the result
+            static boundBox returnReduce(const boundBox& bb);
 
 
         // Query
@@ -330,19 +367,25 @@ public:
             //- Return the nearest point on the boundBox to the supplied point.
             //  If point is inside the boundBox then the point is returned
             //  unchanged.
-            point nearest(const point& pt) const;
+            point nearest(const point& p) const;
 
 
     // Member Operators
 
         //- Extend box to include the second box, as per the add() method.
-        inline void operator+=(const boundBox& bb);
+        void operator+=(const boundBox& bb) { add(bb); }
 
 
-    // IOstream operator
+    // IOstream Operators
 
         friend Istream& operator>>(Istream& is, boundBox& bb);
         friend Ostream& operator<<(Ostream& os, const boundBox& bb);
+
+
+    // Housekeeping
+
+        //- Identical to centre()
+        point midpoint() const { return centre(); }
 };
 
 
@@ -360,8 +403,44 @@ template<> struct is_contiguous_scalar<boundBox>
 
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
-inline bool operator==(const boundBox& a, const boundBox& b);
-inline bool operator!=(const boundBox& a, const boundBox& b);
+inline bool operator==(const boundBox& a, const boundBox& b)
+{
+    return (a.min() == b.min() && a.max() == b.max());
+}
+
+
+inline bool operator!=(const boundBox& a, const boundBox& b)
+{
+    return !(a == b);
+}
+
+
+inline bool operator<(const boundBox& a, const boundBox& b)
+{
+    return
+    (
+        a.min() < b.min()
+     || (!(b.min() < a.min()) && a.max() < b.max())
+    );
+}
+
+
+inline bool operator<=(const boundBox& a, const boundBox& b)
+{
+    return !(b < a);
+}
+
+
+inline bool operator>(const boundBox& a, const boundBox& b)
+{
+    return (b < a);
+}
+
+
+inline bool operator>=(const boundBox& a, const boundBox& b)
+{
+    return !(a < b);
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,6 +39,7 @@ SourceFiles
 #define Foam_triangleFuncs_H
 
 #include "pointField.H"
+#include "triangle.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -85,6 +86,15 @@ public:
         const pointField& origin,
         const scalar maxLength,
         point& pInter
+    );
+
+    //- Intersect triangle with bounding box.
+    //  \return true if any bounding box faces intersect the triangle,
+    //      returns false if the triangle is inside the bounding box
+    static bool intersectBb
+    (
+        const triPointRef& tri,
+        const treeBoundBox& cubeBb
     );
 
     //- Intersect triangle with bounding box.

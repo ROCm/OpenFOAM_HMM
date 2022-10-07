@@ -64,13 +64,8 @@ int main(int argc, char *argv[])
 
     // Slightly extended bb. Slightly off-centred just so on symmetric
     // geometry there are less face/edge aligned items.
-    treeBoundBox bb
-    (
-        efem.points()
-    );
-
-    bb.min() -= point::uniform(ROOTVSMALL);
-    bb.max() += point::uniform(ROOTVSMALL);
+    treeBoundBox bb(efem.points());
+    bb.grow(ROOTVSMALL);
 
     labelList allEdges(identity(efem.edges().size()));
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +31,8 @@ Description
 #include "argList.H"
 #include "Time.H"
 #include "polyMesh.H"
-#include "boundBox.H"
+#include "line.H"
+#include "Random.H"
 #include "treeBoundBox.H"
 #include "cellModel.H"
 #include "bitSet.H"
@@ -84,7 +85,20 @@ int main(int argc, char *argv[])
     else
     {
         bb = cube(0, 1);
-        Info<<"starting box: " << bb << endl;
+        Info<< "starting box: " << bb << endl;
+
+        Info<< "corner: " << bb.hexCorner<0>() << nl
+            << "corner: " << bb.hexCorner<7>() << nl
+            << "corner: " << bb.hexCorner<6>() << endl;
+
+        linePoints ln1(bb.max(), bb.centre());
+        Info<< "line: " << ln1 << " box: " << ln1.box() << endl;
+
+        Info<< "box: " << boundBox(ln1.box()) << endl;
+
+        Info<< "corner: " << bb.hexCorner<0>() << nl
+            << "corner: " << bb.hexCorner<7>() << nl
+            << "corner: " << bb.hexCorner<6>() << endl;
 
         point pt(Zero);
         bb.add(pt);
@@ -145,6 +159,25 @@ int main(int argc, char *argv[])
 
         box1.add(variousPoints, select2);
         Info<< "box is now => " << box1 << endl;
+    }
+
+    List<boundBox> boxes(12);
+    {
+        Random rndGen(12345);
+        for (auto& bb : boxes)
+        {
+            bb = cube
+            (
+                rndGen.position<scalar>(-10, 10),
+                rndGen.position<scalar>(0, 5)
+            );
+        }
+
+        Info<< "boxes: " << boxes << endl;
+
+        Foam::sort(boxes);
+
+        Info<< "sorted: " << boxes << endl;
     }
 
     return 0;
