@@ -27,9 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "treeDataPoint.H"
-#include "treeBoundBox.H"
 #include "indexedOctree.H"
-#include "triangleFuncs.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

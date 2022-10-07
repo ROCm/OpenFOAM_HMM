@@ -27,9 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "AABBTree.H"
-#include "meshTools.H"
 #include "bitSet.H"
-//#include "OFstream.H"
 
 template<class Type>
 Foam::scalar Foam::AABBTree<Type>::tolerance_ = 1e-4;
@@ -46,9 +44,10 @@ void Foam::AABBTree<Type>::writeOBJ
 ) const
 {
     const pointField pts(bb.points());
-    for (const point& pt : pts)
+
+    for (const point& p : pts)
     {
-        meshTools::writeOBJ(os, pt);
+        os << "v " << p.x() << ' ' << p.y() << ' ' << p.z() << nl;
     }
 
     if (writeLinesOnly)
