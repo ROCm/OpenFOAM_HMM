@@ -83,8 +83,7 @@ Foam::searchableBoxFeatures::features() const
 {
     autoPtr<extendedFeatureEdgeMesh> features;
 
-    List<vector> faceNormalsList(treeBoundBox::faceNormals);
-    vectorField faceNormals(faceNormalsList);
+    vectorField faceNormals(List<vector>(treeBoundBox::faceNormals));
 
     vectorField edgeDirections(12);
     labelListList normalDirections(12);

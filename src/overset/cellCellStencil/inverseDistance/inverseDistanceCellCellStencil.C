@@ -239,31 +239,11 @@ Foam::treeBoundBox Foam::cellCellStencils::inverseDistance::cellBb
     const label celli
 )
 {
-    const cellList& cells = mesh.cells();
-    const faceList& faces = mesh.faces();
-    const pointField& points = mesh.points();
-
-    treeBoundBox bb
-    (
-        vector(GREAT, GREAT, GREAT),
-        vector(-GREAT, -GREAT, -GREAT)
-    );
-
-    const cell& cFaces = cells[celli];
-
-    forAll(cFaces, cFacei)
+    if (mesh.hasCellPoints())
     {
-        const face& f = faces[cFaces[cFacei]];
-
-        forAll(f, fp)
-        {
-            const point& p = points[f[fp]];
-
-            bb.min() = min(bb.min(), p);
-            bb.max() = max(bb.max(), p);
-        }
+        return treeBoundBox(mesh.points(), mesh.cellPoints(celli));
     }
-    return bb;
+    return treeBoundBox(mesh.cells()[celli].box(mesh));
 }
 
 

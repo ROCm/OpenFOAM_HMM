@@ -29,8 +29,8 @@ License
 #include "InteractionLists.H"
 #include "globalIndexAndTransform.H"
 #include "indexedOctree.H"
-#include "treeDataFace.H"
 #include "treeDataCell.H"
+#include "treeDataFace.H"
 #include "volFields.H"
 #include "meshTools.H"
 
