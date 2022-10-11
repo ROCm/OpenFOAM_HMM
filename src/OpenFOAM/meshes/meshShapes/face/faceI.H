@@ -115,6 +115,21 @@ inline Foam::scalar Foam::face::mag(const UList<point>& p) const
 }
 
 
+inline Foam::Pair<Foam::point>
+Foam::face::box(const UList<point>& pts) const
+{
+    Pair<point> bb(point::rootMax, point::rootMin);
+
+    for (const label pointi : *this)
+    {
+        bb.first()  = min(bb.first(),  pts[pointi]);
+        bb.second() = max(bb.second(), pts[pointi]);
+    }
+
+    return bb;
+}
+
+
 inline Foam::label Foam::face::nEdges() const noexcept
 {
     // for a closed polygon a number of edges is the same as number of points

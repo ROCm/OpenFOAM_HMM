@@ -168,7 +168,7 @@ inline bool Foam::MinMax<T>::valid() const
 
 
 template<class T>
-inline void Foam::MinMax<T>::clear()
+inline void Foam::MinMax<T>::reset()
 {
     min() = pTraits<T>::max;
     max() = pTraits<T>::min;

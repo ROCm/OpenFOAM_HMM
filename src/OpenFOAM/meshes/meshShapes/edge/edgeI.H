@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -427,6 +427,22 @@ inline Foam::vector Foam::edge::unitVec(const UList<point>& pts) const
 inline Foam::scalar Foam::edge::mag(const UList<point>& pts) const
 {
     return ::Foam::mag(vec(pts));
+}
+
+
+inline Foam::Pair<Foam::point>
+Foam::edge::box(const UList<point>& pts) const
+{
+    #ifdef FULLDEBUG
+    if (first() < 0 || second() < 0)
+    {
+        FatalErrorInFunction
+            << "negative point index on edge " << *this
+            << abort(FatalError);
+    }
+    #endif
+
+    return linePointRef::box(pts[first()], pts[second()]);
 }
 
 

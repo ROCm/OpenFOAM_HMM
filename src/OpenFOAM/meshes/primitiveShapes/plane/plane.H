@@ -96,40 +96,41 @@ class plane
 {
 public:
 
-    //- Side of the plane
-    enum side
-    {
-        FRONT = 1,  //!< The front (positive normal) side of the plane
-        BACK  = -1, //!< The back (negative normal) side of the plane
-        NORMAL = 1, //!< Same as FRONT
-        FLIP  = -1  //!< Same as BACK
-    };
+    // Public Data Types
 
-
-    //- A reference point and direction
-    class ray
-    {
-        point  pt_;
-        vector dir_;
-
-    public:
-
-        ray(const point& pt, const vector& dir)
-        :
-            pt_(pt),
-            dir_(dir)
-        {}
-
-        const point& refPoint() const noexcept
+        //- Side of the plane
+        enum side
         {
-            return pt_;
-        }
+            FRONT = 1,  //!< The front (positive normal) side of the plane
+            BACK  = -1, //!< The back (negative normal) side of the plane
+            NORMAL = FRONT,   //!< Alias for FRONT
+            FLIP   = BACK     //!< Alias for BACK
+        };
 
-        const vector& dir() const noexcept
+
+    // Public Classes
+
+        //- A reference point and direction
+        class ray
         {
-            return dir_;
-        }
-    };
+            point  point_;
+            vector dir_;
+
+        public:
+
+            //- Construct from reference point and direction
+            ray(const point& p, const vector& dir)
+            :
+                point_(p),
+                dir_(dir)
+            {}
+
+            //- Return the reference point
+            const point& refPoint() const noexcept { return point_; }
+
+            //- Return the direction
+            const vector& dir() const noexcept { return dir_; }
+        };
 
 
 private:
@@ -255,9 +256,9 @@ public:
         }
 
         //- Return the cutting point between the plane and
-        // a line passing through the supplied points
-        template<class Point, class PointRef>
-        scalar lineIntersect(const line<Point, PointRef>& l) const
+        //- a line passing through the supplied points
+        template<class PointType, class PointRef>
+        scalar lineIntersect(const line<PointType, PointRef>& l) const
         {
             return normalIntersect(l.start(), l.vec());
         }
@@ -278,15 +279,18 @@ public:
         point somePointInPlane(const scalar dist = 1e-3) const;
 
         //- Return the side of the plane that the point is on.
-        //  If the point is on the plane, then returns NORMAL.
-        inline side sideOfPlane(const point& p) const;
+        //  If the point is on the plane, then returns FRONT.
+        //  \return
+        //  - +1 (FRONT): above or on plane (front-side)
+        //  - -1 (BACK):  below plane (back-side)
+        inline side whichSide(const point& p) const;
 
         //- The sign for the side of the plane that the point is on.
         //  Uses the supplied tolerance for rounding around zero.
         //  \return
         //  -  0: on plane
-        //  - +1: front-side
-        //  - -1: back-side
+        //  - +1 (FRONT): above plane (front-side)
+        //  - -1 (BACK):  below plane (back-side)
         inline int sign(const point& p, const scalar tol = SMALL) const;
 
         //- Mirror the supplied point in the plane. Return the mirrored point.
@@ -300,6 +304,9 @@ public:
 
         //- The plane base point (same as origin)
         const point& refPoint() const noexcept { return origin_; }
+
+        //- Same as whichSide()
+        side sideOfPlane(const point& p) const { return whichSide(p); }
 };
 
 

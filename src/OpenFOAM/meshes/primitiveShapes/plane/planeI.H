@@ -78,11 +78,11 @@ inline Foam::scalar Foam::plane::signedDistance(const point& p) const
 }
 
 
-inline Foam::plane::side Foam::plane::sideOfPlane(const point& p) const
+inline Foam::plane::side Foam::plane::whichSide(const point& p) const
 {
     const scalar dist = signedDistance(p);
 
-    return (dist < 0 ? BACK : FRONT);
+    return (dist < 0 ? side::BACK : side::FRONT);
 }
 
 

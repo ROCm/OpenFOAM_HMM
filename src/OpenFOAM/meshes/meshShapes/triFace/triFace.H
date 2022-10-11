@@ -185,6 +185,9 @@ public:
         //- Magnitude of face area
         inline scalar mag(const UList<point>& points) const;
 
+        //- The enclosing (bounding) box for the face
+        inline Pair<point> box(const UList<point>& points) const;
+
         //- Number of triangles after splitting == 1
         inline label nTriangles() const noexcept;
 

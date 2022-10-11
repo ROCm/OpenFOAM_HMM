@@ -184,13 +184,42 @@ inline Foam::vector Foam::triangle<Point, PointRef>::unitNormal
 template<class Point, class PointRef>
 inline Foam::vector Foam::triangle<Point, PointRef>::unitNormal() const
 {
-    return triPointRef::unitNormal(a_, b_, c_);
+    return triangle<Point, PointRef>::unitNormal(a_, b_, c_);
 }
 
 
 inline Foam::vector Foam::triPoints::unitNormal() const
 {
     return triPointRef::unitNormal(a(), b(), c());
+}
+
+
+template<class Point, class PointRef>
+inline Foam::Pair<Point> Foam::triangle<Point, PointRef>::box
+(
+    const Point& p0,
+    const Point& p1,
+    const Point& p2
+)
+{
+    return Pair<Point>
+    (
+        min(p0, min(p1, p2)),
+        max(p0, max(p1, p2))
+    );
+}
+
+
+template<class Point, class PointRef>
+inline Foam::Pair<Point> Foam::triangle<Point, PointRef>::box() const
+{
+    return triangle<Point, PointRef>::box(a_, b_, c_);
+}
+
+
+inline Foam::Pair<Foam::point> Foam::triPoints::box() const
+{
+    return triPointRef::box(a(), b(), c());
 }
 
 
@@ -208,14 +237,6 @@ inline void Foam::triPoints::flip()
     point t(b());
     b() = c();
     c() = t;
-}
-
-
-inline Foam::treeBoundBox Foam::triPoints::bounds() const
-{
-    treeBoundBox bb;
-    bb.add(static_cast<const FixedList<point, 3>&>(*this));
-    return bb;
 }
 
 
@@ -420,6 +441,46 @@ inline Foam::scalar Foam::triangle<Point, PointRef>::pointToBarycentric
 
 
 template<class Point, class PointRef>
+inline bool Foam::triangle<Point, PointRef>::intersects
+(
+    const point& origin,
+    const vector& normal
+) const
+{
+    // Check points cut below(1) or above(2). Mix of above/below == 3
+    // Cf. plane::whichSide()
+    return
+    (
+        (
+            (((a_ - origin) & normal) < 0 ? 1 : 2)
+          | (((b_ - origin) & normal) < 0 ? 1 : 2)
+          | (((c_ - origin) & normal) < 0 ? 1 : 2)
+        ) == 3
+    );
+}
+
+
+template<class Point, class PointRef>
+inline bool Foam::triangle<Point, PointRef>::intersects
+(
+    const point& origin,
+    const vector::components axis
+) const
+{
+    // Direct check of points cut below(1) or above(2)
+    // Cf. plane::whichSide()
+    return
+    (
+        (
+            (a_[axis] < origin[axis] ? 1 : 2)
+          | (b_[axis] < origin[axis] ? 1 : 2)
+          | (c_[axis] < origin[axis] ? 1 : 2)
+        ) == 3
+    );
+}
+
+
+template<class Point, class PointRef>
 inline Foam::pointHit Foam::triangle<Point, PointRef>::ray
 (
     const point& p,
@@ -476,7 +537,7 @@ inline Foam::pointHit Foam::triangle<Point, PointRef>::ray
 
         if (hit)
         {
-            pInter = fastInter.rawPoint();
+            pInter = fastInter.point();
         }
         else
         {
@@ -521,7 +582,7 @@ inline Foam::pointHit Foam::triangle<Point, PointRef>::ray
         inter.setMiss(eligible);
 
         // The miss point is the nearest point on the triangle
-        inter.setPoint(nearestPoint(p).rawPoint());
+        inter.setPoint(nearestPoint(p).point());
 
         // The distance to the miss is the distance between the
         // original point and plane of intersection

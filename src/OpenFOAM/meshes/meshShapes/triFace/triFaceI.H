@@ -217,6 +217,18 @@ inline Foam::scalar Foam::triFace::mag(const UList<point>& points) const
 }
 
 
+inline Foam::Pair<Foam::point>
+Foam::triFace::box(const UList<point>& points) const
+{
+    return triPointRef::box
+    (
+        points[operator[](0)],
+        points[operator[](1)],
+        points[operator[](2)]
+    );
+}
+
+
 inline Foam::label Foam::triFace::nTriangles() const noexcept
 {
     return 1;

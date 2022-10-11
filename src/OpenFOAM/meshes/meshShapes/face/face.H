@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -206,6 +206,9 @@ public:
 
         //- Magnitude of face area
         inline scalar mag(const UList<point>& p) const;
+
+        //- The enclosing (bounding) box for the face
+        inline Pair<point> box(const UList<point>& pts) const;
 
         //- Return face with reverse direction
         //  The starting points of the original and reverse face are identical.

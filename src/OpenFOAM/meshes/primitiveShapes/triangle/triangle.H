@@ -29,9 +29,11 @@ Class
 
 Description
     A triangle primitive used to calculate face normals and swept volumes.
+    Uses referred points.
 
 SourceFiles
     triangleI.H
+    triangle.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -47,6 +49,8 @@ SourceFiles
 #include "FixedList.H"
 #include "UList.H"
 #include "line.H"
+#include "Pair.H"
+#include "Tuple2.H"
 #include "barycentric2D.H"
 #include "treeBoundBox.H"
 
@@ -150,8 +154,8 @@ public:
         //- The magnitude of the triangle area
         inline scalar mag() const;
 
-        //- The bounding box for the tetrahedron
-        inline treeBoundBox bounds() const;
+        //- The enclosing (bounding) box for the triangle
+        inline Pair<point> box() const;
 };
 
 
@@ -311,6 +315,14 @@ public:
             const Point& p2
         );
 
+        //- The enclosing (bounding) box for three points
+        inline static Pair<Point> box
+        (
+            const Point& p0,
+            const Point& p1,
+            const Point& p2
+        );
+
 
         // Properties
 
@@ -333,6 +345,9 @@ public:
 
             //- The magnitude of the triangle area
             inline scalar mag() const;
+
+            //- The enclosing (bounding) box for the triangle
+            inline Pair<Point> box() const;
 
             //- Return circum-centre
             inline Point circumCentre() const;
@@ -372,6 +387,22 @@ public:
             (
                 const point& pt,
                 barycentric2D& bary
+            ) const;
+
+            //- Fast intersection detection with a plane.
+            inline bool intersects
+            (
+                const point& origin,
+                const vector& normal
+            ) const;
+
+            //- Fast intersection detection with an \b axis plane.
+            inline bool intersects
+            (
+                //! Origin of the plane
+                const point& origin,
+                //! Normal of the plane (vector::X, vector::Y, vector::Z)
+                const vector::components axis
             ) const;
 
             //- Return point intersection with a ray.
@@ -439,8 +470,8 @@ public:
             //  Uses the supplied tolerance for rounding around zero.
             //  \return
             //  -  0: on plane
-            //  - +1: front-side
-            //  - -1: back-side
+            //  - +1: above plane
+            //  - -1: below plane
             inline int sign(const point& p, const scalar tol = SMALL) const;
 
             //- Decompose triangle into triangles above and below plane

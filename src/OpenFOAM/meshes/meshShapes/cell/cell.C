@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,7 @@ License
 
 #include "cell.H"
 #include "pyramid.H"
+#include "primitiveMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -251,6 +252,36 @@ Foam::scalar Foam::cell::mag
     }
 
     return sumV;
+}
+
+
+Foam::Pair<Foam::point>
+Foam::cell::box
+(
+    const UList<point>& meshPoints,
+    const faceUList& meshFaces
+) const
+{
+    Pair<point> bb(point::rootMax, point::rootMin);
+
+    for (const label facei : *this)
+    {
+        for (const label pointi : meshFaces[facei])
+        {
+            const point& p = meshPoints[pointi];
+
+            bb.first()  = min(bb.first(), p);
+            bb.second() = max(bb.second(), p);
+        }
+    }
+
+    return bb;
+}
+
+
+Foam::Pair<Foam::point> Foam::cell::box(const primitiveMesh& mesh) const
+{
+    return cell::box(mesh.points(), mesh.faces());
 }
 
 

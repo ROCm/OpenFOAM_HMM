@@ -139,11 +139,50 @@ inline void Foam::tetPoints::flip()
 }
 
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+template<class Point, class PointRef>
+inline Foam::Pair<Point> Foam::tetrahedron<Point, PointRef>::box
+(
+    const Point& p0,
+    const Point& p1,
+    const Point& p2,
+    const Point& p3
+)
+{
+    return Pair<Point>
+    (
+        min(p0, min(p1, min(p2, p3))),
+        max(p0, max(p1, max(p2, p3)))
+    );
+}
+
+
+template<class Point, class PointRef>
+inline Foam::Pair<Point> Foam::tetrahedron<Point, PointRef>::box() const
+{
+    return tetrahedron<Point, PointRef>::box(a_, b_, c_, d_);
+}
+
+
+inline Foam::Pair<Foam::point> Foam::tetPoints::box() const
+{
+    return tetPointRef::box(a(), b(), c(), d());
+}
+
+
+template<class Point, class PointRef>
+inline Foam::treeBoundBox Foam::tetrahedron<Point, PointRef>::bounds() const
+{
+    Pair<point> bb(tetrahedron<Point, PointRef>::box());
+    return treeBoundBox(bb.first(), bb.second());
+}
+
+
 inline Foam::treeBoundBox Foam::tetPoints::bounds() const
 {
-    treeBoundBox bb;
-    bb.add(static_cast<const FixedList<point, 4>&>(*this));
-    return bb;
+    Pair<point> bb(tetPoints::box());
+    return treeBoundBox(bb.first(), bb.second());
 }
 
 
@@ -285,7 +324,7 @@ inline Foam::scalar Foam::tetrahedron<Point, PointRef>::quality() const
         mag()
        /(
             8.0/(9.0*sqrt(3.0))
-           *pow3(min(circumRadius(), GREAT))
+           *pow3(Foam::min(circumRadius(), GREAT))
           + ROOTVSMALL
         );
 }
@@ -397,7 +436,7 @@ inline Foam::pointHit Foam::tetrahedron<Point, PointRef>::nearestPoint
 
             if (info.distance() < minOutsideDistance)
             {
-                closestPt = info.rawPoint();
+                closestPt = info.point();
 
                 minOutsideDistance = info.distance();
             }
@@ -417,7 +456,7 @@ inline Foam::pointHit Foam::tetrahedron<Point, PointRef>::nearestPoint
 
             if (info.distance() < minOutsideDistance)
             {
-                closestPt = info.rawPoint();
+                closestPt = info.point();
 
                 minOutsideDistance = info.distance();
             }
@@ -437,7 +476,7 @@ inline Foam::pointHit Foam::tetrahedron<Point, PointRef>::nearestPoint
 
             if (info.distance() < minOutsideDistance)
             {
-                closestPt = info.rawPoint();
+                closestPt = info.point();
 
                 minOutsideDistance = info.distance();
             }
@@ -457,7 +496,7 @@ inline Foam::pointHit Foam::tetrahedron<Point, PointRef>::nearestPoint
 
             if (info.distance() < minOutsideDistance)
             {
-                closestPt = info.rawPoint();
+                closestPt = info.point();
 
                 minOutsideDistance = info.distance();
             }

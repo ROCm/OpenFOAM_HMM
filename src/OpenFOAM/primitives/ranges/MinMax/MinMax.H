@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -95,8 +95,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef MinMax_H
-#define MinMax_H
+#ifndef Foam_MinMax_H
+#define Foam_MinMax_H
 
 #include "scalar.H"
 #include "Pair.H"
@@ -109,7 +109,7 @@ Description
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 template<class T> class MinMax;
 class zero;
 
@@ -205,8 +205,11 @@ public:
         //- Range is valid if it is not inverted
         inline bool valid() const;
 
-        //- Reset to an invalid, inverted range
-        inline void clear();
+        //- Reset to an inverted (invalid) range
+        inline void reset();
+
+        //- Same as reset() - reset to an inverted (invalid) range
+        void clear() { reset(); }
 
 
     // Testing / Query

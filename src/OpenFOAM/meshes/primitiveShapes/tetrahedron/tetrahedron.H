@@ -149,6 +149,9 @@ public:
         //- Invert tetrahedron by swapping third and fourth vertices
         inline void flip();
 
+        //- The enclosing (bounding) box for the tetrahedron
+        inline Pair<point> box() const;
+
         //- The bounding box for the tetrahedron
         inline treeBoundBox bounds() const;
 };
@@ -296,6 +299,18 @@ public:
         inline triPointRef tri(const label facei) const;
 
 
+    // Tet properties (static calculations)
+
+        //- The enclosing (bounding) box for four points
+        inline static Pair<Point> box
+        (
+            const Point& p0,
+            const Point& p1,
+            const Point& p2,
+            const Point& p3
+        );
+
+
         // Properties
 
             //- Face area normal for side a
@@ -315,6 +330,12 @@ public:
 
             //- Return volume
             inline scalar mag() const;
+
+            //- The enclosing (bounding) box for the tetrahedron
+            inline Pair<Point> box() const;
+
+            //- The bounding box for the tetrahedron
+            inline treeBoundBox bounds() const;
 
             //- Return circum-centre
             inline Point circumCentre() const;
@@ -391,9 +412,6 @@ public:
             void gradNiGradNi(tensorField& buffer) const;
 
             void gradNiGradNj(tensorField& buffer) const;
-
-            //- Calculate the bounding box
-            boundBox bounds() const;
 
 
     // IOstream Operators

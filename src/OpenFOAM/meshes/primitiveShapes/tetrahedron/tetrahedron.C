@@ -53,7 +53,7 @@ Foam::pointHit Foam::tetrahedron<Point, PointRef>::containmentSphere
 
     pointHit pHit(circumCentre());
     pHit.setHit();
-    scalar minRadiusSqr = magSqr(pHit.rawPoint() - a_);
+    scalar minRadiusSqr = magSqr(pHit.point() - a_);
 
 
     // 2. Try circumcentre of tet triangles. Create circumcircle for triFace and
@@ -334,18 +334,6 @@ void Foam::tetrahedron<Point, PointRef>::gradNiGradNj
     buffer[3] = (1.0/9.0)*(sd * sb)/magVol;
     buffer[4] = (1.0/9.0)*(sb * sc)/magVol;
     buffer[5] = (1.0/9.0)*(sd * sc)/magVol;
-}
-
-
-template<class Point, class PointRef>
-Foam::boundBox Foam::tetrahedron<Point, PointRef>::bounds() const
-{
-    return
-        boundBox
-        (
-            min(a(), min(b(), min(c(), d()))),
-            max(a(), max(b(), max(c(), d())))
-        );
 }
 
 

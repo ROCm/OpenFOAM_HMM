@@ -272,6 +272,9 @@ public:
         //  No special handling of negative point labels.
         inline scalar mag(const UList<point>& pts) const;
 
+        //- The enclosing (bounding) box for the edge
+        inline Pair<point> box(const UList<point>& pts) const;
+
         //- Return edge line
         //  No special handling of negative point labels.
         inline linePointRef line(const UList<point>& pts) const;

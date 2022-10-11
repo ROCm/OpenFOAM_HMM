@@ -43,8 +43,9 @@ SourceFiles
 #include "vector.H"
 #include "PointHit.H"
 #include "FixedList.H"
-#include "Pair.H"
 #include "UList.H"
+#include "Pair.H"
+#include "Tuple2.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -114,6 +115,27 @@ public:
 
         //- The second vertex
         point& b() { return Pair<point>::second(); }
+
+        //- Return as line reference
+        inline linePointRef ln() const;
+
+
+    // Properties
+
+        //- Return centre (centroid)
+        inline point centre() const;
+
+        //- The magnitude (length) of the line
+        inline scalar mag() const;
+
+        //- Return start-to-end vector
+        inline vector vec() const;
+
+        //- Return the unit vector (start-to-end)
+        inline vector unitVec() const;
+
+        //- The enclosing (bounding) box for the line
+        inline Pair<point> box() const;
 };
 
 
@@ -131,7 +153,6 @@ class line
 
         //- Second point
         PointRef b_;
-
 
 public:
 
@@ -178,12 +199,18 @@ public:
         PointRef end() const noexcept { return b_; }
 
 
+    // Line properties (static calculations)
+
+        //- The enclosing (bounding) box for two points
+        inline static Pair<Point> box(const Point& p0, const Point& p1);
+
+
     // Properties
 
         //- Return centre (centroid)
         inline Point centre() const;
 
-        //- Return scalar magnitude
+        //- The magnitude (length) of the line
         inline scalar mag() const;
 
         //- Return start-to-end vector
@@ -191,6 +218,9 @@ public:
 
         //- Return the unit vector (start-to-end)
         inline Point unitVec() const;
+
+        //- The enclosing (bounding) box for the line
+        inline Pair<Point> box() const;
 
         //- Return nearest distance to line from a given point
         //  If the nearest point is on the line, return a hit

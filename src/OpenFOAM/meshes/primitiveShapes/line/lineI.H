@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,7 +48,11 @@ inline Foam::linePoints::linePoints
 
 
 template<class Point, class PointRef>
-inline Foam::line<Point, PointRef>::line(const Point& from, const Point& to)
+inline Foam::line<Point, PointRef>::line
+(
+    const Point& from,
+    const Point& to
+)
 :
     a_(from),
     b_(to)
@@ -76,6 +80,12 @@ inline Foam::line<Point, PointRef>::line(Istream& is)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+inline Foam::linePointRef Foam::linePoints::ln() const
+{
+    return linePointRef(a(), b());
+}
+
+
 template<class Point, class PointRef>
 inline Point Foam::line<Point, PointRef>::centre() const
 {
@@ -83,17 +93,35 @@ inline Point Foam::line<Point, PointRef>::centre() const
 }
 
 
+inline Foam::point Foam::linePoints::centre() const
+{
+    return 0.5*(a() + b());
+}
+
+
 template<class Point, class PointRef>
 inline Foam::scalar Foam::line<Point, PointRef>::mag() const
 {
-    return ::Foam::mag(vec());
+    return ::Foam::mag(b() - a());
+}
+
+
+inline Foam::scalar Foam::linePoints::mag() const
+{
+    return ::Foam::mag(b() - a());
 }
 
 
 template<class Point, class PointRef>
 inline Point Foam::line<Point, PointRef>::vec() const
 {
-    return b_ - a_;
+    return (b() - a());
+}
+
+
+inline Foam::vector Foam::linePoints::vec() const
+{
+    return (b() - a());
 }
 
 
@@ -104,6 +132,36 @@ inline Point Foam::line<Point, PointRef>::unitVec() const
     const scalar s(::Foam::mag(v));
 
     return s < ROOTVSMALL ? Zero : v/s;
+}
+
+
+inline Foam::vector Foam::linePoints::unitVec() const
+{
+    return normalised(b() - a());
+}
+
+
+template<class Point, class PointRef>
+inline Foam::Pair<Point> Foam::line<Point, PointRef>::box
+(
+    const Point& p0,
+    const Point& p1
+)
+{
+    return Pair<Point>(min(p0, p1), max(p0, p1));
+}
+
+
+template<class Point, class PointRef>
+inline Foam::Pair<Point> Foam::line<Point, PointRef>::box() const
+{
+    return line<Point, PointRef>::box(a_, b_);
+}
+
+
+inline Foam::Pair<Foam::point> Foam::linePoints::box() const
+{
+    return linePointRef::box(a(), b());
 }
 
 
@@ -186,12 +244,12 @@ Foam::scalar Foam::line<Point, PointRef>::nearestDist
             {
                 if (this0.distance() < this1.distance())
                 {
-                    thisPt = this0.rawPoint();
+                    thisPt = this0.point();
                     edgePt = edge.start();
                 }
                 else
                 {
-                    thisPt = this1.rawPoint();
+                    thisPt = this1.point();
                     edgePt = edge.end();
                 }
             }
@@ -200,12 +258,12 @@ Foam::scalar Foam::line<Point, PointRef>::nearestDist
                 if (edge0.distance() < edge1.distance())
                 {
                     thisPt = start();
-                    edgePt = edge0.rawPoint();
+                    edgePt = edge0.point();
                 }
                 else
                 {
                     thisPt = end();
-                    edgePt = edge1.rawPoint();
+                    edgePt = edge1.point();
                 }
             }
         }
@@ -243,7 +301,7 @@ Foam::scalar Foam::line<Point, PointRef>::nearestDist
         {
             // maxEdge inside interval of *this
             edgePt = maxEdgePt;
-            thisPt = nearestDist(edgePt).rawPoint();
+            thisPt = nearestDist(edgePt).point();
         }
         else
         {
@@ -253,13 +311,13 @@ Foam::scalar Foam::line<Point, PointRef>::nearestDist
                 // Edge completely envelops this. Take any this point and
                 // determine nearest on edge.
                 thisPt = minThisPt;
-                edgePt = edge.nearestDist(thisPt).rawPoint();
+                edgePt = edge.nearestDist(thisPt).point();
             }
             else if (minEdge < maxThis)
             {
                 // minEdge inside this interval.
                 edgePt = minEdgePt;
-                thisPt = nearestDist(edgePt).rawPoint();
+                thisPt = nearestDist(edgePt).point();
             }
             else
             {
