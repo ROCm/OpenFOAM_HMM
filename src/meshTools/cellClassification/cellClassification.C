@@ -211,7 +211,7 @@ Foam::boolList Foam::cellClassification::markFaces
             }
             else
             {
-                label facei = faceTree.shapes().faceLabels()[pHit.index()];
+                label facei = faceTree.shapes().objectIndex(pHit.index());
 
                 if (!cutFace[facei])
                 {

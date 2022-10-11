@@ -88,7 +88,7 @@ void Foam::meshToMesh0::calcAddressing()
         << "   bounding box (shifted) : " << shiftedBb << nl
         << "   typical dimension      : " << shiftedBb.avgDim() << endl;
 
-    indexedOctree<treeDataCell> oc
+    indexedOctree<treeDataCell> cellTree
     (
         treeDataCell(false, fromMesh_, polyMesh::CELL_TETS),
         shiftedBb,      // overall bounding box
@@ -99,7 +99,7 @@ void Foam::meshToMesh0::calcAddressing()
 
     if (debug)
     {
-        oc.print(Pout, false, 0);
+        cellTree.print(Pout, false, 0);
     }
 
     cellAddresses
@@ -108,7 +108,7 @@ void Foam::meshToMesh0::calcAddressing()
         toMesh_.cellCentres(),
         fromMesh_,
         boundaryCell,
-        oc
+        cellTree
     );
 
     forAll(toMesh_.boundaryMesh(), patchi)
@@ -125,7 +125,7 @@ void Foam::meshToMesh0::calcAddressing()
                 toPatch.faceCentres(),
                 fromMesh_,
                 boundaryCell,
-                oc
+                cellTree
             );
         }
         else if
@@ -160,7 +160,7 @@ void Foam::meshToMesh0::calcAddressing()
 
                 // Note: allow more levels than in meshSearch. Assume patch
                 // is not as big as all boundary faces
-                indexedOctree<treeDataFace> oc
+                indexedOctree<treeDataFace> faceTree
                 (
                     treeDataFace(false, fromPatch),
                     shiftedBb,  // overall search domain
@@ -178,7 +178,7 @@ void Foam::meshToMesh0::calcAddressing()
 
                 forAll(toPatch, toi)
                 {
-                    boundaryAddressing_[patchi][toi] = oc.findNearest
+                    boundaryAddressing_[patchi][toi] = faceTree.findNearest
                     (
                         centresToBoundary[toi],
                         distSqr
@@ -199,7 +199,7 @@ void Foam::meshToMesh0::cellAddresses
     const pointField& points,
     const fvMesh& fromMesh,
     const List<bool>& boundaryCell,
-    const indexedOctree<treeDataCell>& oc
+    const indexedOctree<treeDataCell>& cellTree
 ) const
 {
     // the implemented search method is a simple neighbour array search.
@@ -263,7 +263,7 @@ void Foam::meshToMesh0::cellAddresses
             // the octree search to find it.
             if (boundaryCell[curCell])
             {
-                cellAddressing_[toI] = oc.findInside(p);
+                cellAddressing_[toI] = cellTree.findInside(p);
 
                 if (cellAddressing_[toI] != -1)
                 {
@@ -320,7 +320,7 @@ void Foam::meshToMesh0::cellAddresses
                 if (!found)
                 {
                     // Still not found so use the octree
-                    cellAddressing_[toI] = oc.findInside(p);
+                    cellAddressing_[toI] = cellTree.findInside(p);
 
                     if (cellAddressing_[toI] != -1)
                     {

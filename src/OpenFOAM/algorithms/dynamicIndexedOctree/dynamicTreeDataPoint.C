@@ -27,14 +27,13 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "dynamicTreeDataPoint.H"
-#include "treeBoundBox.H"
 #include "dynamicIndexedOctree.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-defineTypeNameAndDebug(dynamicTreeDataPoint, 0);
+    defineTypeName(dynamicTreeDataPoint);
 }
 
 
@@ -51,10 +50,10 @@ Foam::dynamicTreeDataPoint::dynamicTreeDataPoint
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::DynamicList<Foam::point>&
-Foam::dynamicTreeDataPoint::shapePoints() const
+Foam::treeBoundBox
+Foam::dynamicTreeDataPoint::bounds(const labelUList& indices) const
 {
-    return points_;
+    return treeBoundBox(points_, indices);
 }
 
 
@@ -71,10 +70,10 @@ Foam::volumeType Foam::dynamicTreeDataPoint::getVolumeType
 bool Foam::dynamicTreeDataPoint::overlaps
 (
     const label index,
-    const treeBoundBox& cubeBb
+    const treeBoundBox& searchBox
 ) const
 {
-    return cubeBb.contains(points_[index]);
+    return searchBox.contains(centre(index));
 }
 
 
@@ -85,7 +84,7 @@ bool Foam::dynamicTreeDataPoint::overlaps
     const scalar radiusSqr
 ) const
 {
-    return (centre.distSqr(points_[index]) <= radiusSqr);
+    return (centre.distSqr(this->centre(index)) <= radiusSqr);
 }
 
 
@@ -99,11 +98,9 @@ void Foam::dynamicTreeDataPoint::findNearest
     point& nearestPoint
 ) const
 {
-    forAll(indices, i)
+    for (const label index : indices)
     {
-        const label index = indices[i];
-
-        const point& pt = points_[index];
+        const point& pt = centre(index);
 
         const scalar distSqr = sample.distSqr(pt);
 
@@ -128,42 +125,30 @@ void Foam::dynamicTreeDataPoint::findNearest
     point& nearestPoint
 ) const
 {
+    const treeBoundBox lnBb(ln.box());
+
     // Best so far
     scalar nearestDistSqr = linePoint.distSqr(nearestPoint);
 
-    forAll(indices, i)
+    for (const label index : indices)
     {
-        const label index = indices[i];
+        const point& pt = centre(index);
 
-        const point& shapePt = points_[index];
-
-        if (tightest.contains(shapePt))
+        if (tightest.contains(pt))
         {
             // Nearest point on line
-            pointHit pHit = ln.nearestDist(shapePt);
-            scalar distSqr = sqr(pHit.distance());
+            pointHit pHit = ln.nearestDist(pt);
+            const scalar distSqr = sqr(pHit.distance());
 
             if (distSqr < nearestDistSqr)
             {
                 nearestDistSqr = distSqr;
                 minIndex = index;
                 linePoint = pHit.point();
-                nearestPoint = shapePt;
+                nearestPoint = pt;
 
-                {
-                    point& minPt = tightest.min();
-                    minPt = min(ln.start(), ln.end());
-                    minPt.x() -= pHit.distance();
-                    minPt.y() -= pHit.distance();
-                    minPt.z() -= pHit.distance();
-                }
-                {
-                    point& maxPt = tightest.max();
-                    maxPt = max(ln.start(), ln.end());
-                    maxPt.x() += pHit.distance();
-                    maxPt.y() += pHit.distance();
-                    maxPt.z() += pHit.distance();
-                }
+                tightest = lnBb;
+                tightest.grow(pHit.distance());
             }
         }
     }

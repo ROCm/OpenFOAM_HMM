@@ -159,7 +159,8 @@ bool Foam::sampledMeshedSurface::update(const meshSearch& meshSearcher)
     {
         // Search for nearest cell
 
-        const indexedOctree<treeDataCell>& cellTree = meshSearcher.cellTree();
+        const auto& cellTree = meshSearcher.cellTree();
+        const auto& treeData = cellTree.shapes();
 
         forAll(fc, facei)
         {
@@ -170,8 +171,10 @@ bool Foam::sampledMeshedSurface::update(const meshSearch& meshSearcher)
 
             if (info.hit())
             {
+                const label objectIndex = treeData.objectIndex(info.index());
+
                 near.first()  = info.point().distSqr(pt);
-                near.second() = globalCells.toGlobal(info.index());
+                near.second() = globalCells.toGlobal(objectIndex);
             }
         }
     }
@@ -180,6 +183,7 @@ bool Foam::sampledMeshedSurface::update(const meshSearch& meshSearcher)
         // Search for cell containing point
 
         const auto& cellTree = meshSearcher.cellTree();
+        const auto& treeData = cellTree.shapes();
 
         forAll(fc, facei)
         {
@@ -189,10 +193,13 @@ bool Foam::sampledMeshedSurface::update(const meshSearch& meshSearcher)
             if (cellTree.bb().contains(pt))
             {
                 const label index = cellTree.findInside(pt);
+
                 if (index != -1)
                 {
+                    const label objectIndex = treeData.objectIndex(index);
+
                     near.first()  = 0;
-                    near.second() = globalCells.toGlobal(index);
+                    near.second() = globalCells.toGlobal(objectIndex);
                 }
             }
         }
@@ -203,6 +210,7 @@ bool Foam::sampledMeshedSurface::update(const meshSearch& meshSearcher)
         // on all non-coupled boundary faces
 
         const auto& bndTree = meshSearcher.nonCoupledBoundaryTree();
+        const auto& treeData = bndTree.shapes();
 
         forAll(fc, facei)
         {
@@ -213,12 +221,10 @@ bool Foam::sampledMeshedSurface::update(const meshSearch& meshSearcher)
 
             if (info.hit())
             {
+                const label objectIndex = treeData.objectIndex(info.index());
+
                 near.first()  = info.point().distSqr(pt);
-                near.second() =
-                    globalCells.toGlobal
-                    (
-                        bndTree.shapes().faceLabels()[info.index()]
-                    );
+                near.second() = globalCells.toGlobal(objectIndex);
             }
         }
     }

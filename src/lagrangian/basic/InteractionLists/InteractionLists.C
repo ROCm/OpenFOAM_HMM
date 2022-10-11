@@ -67,19 +67,7 @@ void Foam::InteractionLists<ParticleType>::buildInteractionLists()
         extendedProcBbsOrigProc
     );
 
-    treeBoundBoxList cellBbs(mesh_.nCells());
-
-    forAll(cellBbs, celli)
-    {
-        cellBbs[celli] = treeBoundBox
-        (
-            mesh_.cells()[celli].points
-            (
-                mesh_.faces(),
-                mesh_.points()
-            )
-        );
-    }
+    treeBoundBoxList cellBbs(treeDataCell::boxes(mesh_));
 
     const globalIndexAndTransform& globalTransforms =
         mesh_.globalData().globalTransforms();
@@ -214,7 +202,7 @@ void Foam::InteractionLists<ParticleType>::buildInteractionLists()
             // i.e. a more accurate bounding volume like a OBB or
             // convex hull or an exact geometrical test.
 
-            label c = coupledPatchRangeTree.shapes().cellLabels()[elemI];
+            label c = coupledPatchRangeTree.shapes().objectIndex(elemI);
 
             ril_[bbI][i] = c;
         }
@@ -237,7 +225,7 @@ void Foam::InteractionLists<ParticleType>::buildInteractionLists()
     // At this point, cellBbsToExchange does not need to be maintained
     // or distributed as it is not longer needed.
 
-    cellBbsToExchange.setSize(0);
+    cellBbsToExchange.clearStorage();
 
     cellMap().reverseDistribute
     (
@@ -434,7 +422,7 @@ void Foam::InteractionLists<ParticleType>::buildInteractionLists()
             // i.e. a more accurate bounding volume like a OBB or
             // convex hull or an exact geometrical test.
 
-            label c = coupledPatchRangeTree.shapes().cellLabels()[elemI];
+            label c = coupledPatchRangeTree.shapes().objectIndex(elemI);
 
             rwfil_[bbI][i] = c;
         }
@@ -586,7 +574,7 @@ void Foam::InteractionLists<ParticleType>::buildInteractionLists()
 
         for (const label elemi : interactingElems)
         {
-            const label c = allCellsTree.shapes().cellLabels()[elemi];
+            const label c = allCellsTree.shapes().objectIndex(elemi);
 
             // Here, a more detailed geometric test could be applied,
             // i.e. a more accurate bounding volume like a OBB or
@@ -611,7 +599,7 @@ void Foam::InteractionLists<ParticleType>::buildInteractionLists()
         {
             const label elemi = interactingElems[i];
 
-            const label f = wallFacesTree.shapes().faceLabels()[elemi];
+            const label f = wallFacesTree.shapes().objectIndex(elemi);
 
             dwfil_[celli][i] = f;
         }

@@ -136,9 +136,12 @@ void Foam::patchSeedSet::calcSamples
 
             forAll(selectedLocations_, sampleI)
             {
+                const auto& treeData = boundaryTree.shapes();
                 const point& sample = selectedLocations_[sampleI];
 
                 pointIndexHit& nearInfo = nearest[sampleI].first();
+                auto& distSqrProc = nearest[sampleI].second();
+
                 nearInfo = boundaryTree.findNearest
                 (
                     sample,
@@ -147,17 +150,15 @@ void Foam::patchSeedSet::calcSamples
 
                 if (!nearInfo.hit())
                 {
-                    nearest[sampleI].second().first() = Foam::sqr(GREAT);
-                    nearest[sampleI].second().second() =
-                        Pstream::myProcNo();
+                    distSqrProc.first() = Foam::sqr(GREAT);
+                    distSqrProc.second() = Pstream::myProcNo();
                 }
                 else
                 {
-                    point fc(pp[nearInfo.index()].centre(pp.points()));
-                    nearInfo.setPoint(fc);
-                    nearest[sampleI].second().first() = sample.magSqr(fc);
-                    nearest[sampleI].second().second() =
-                        Pstream::myProcNo();
+                    nearInfo.setPoint(treeData.centre(nearInfo.index()));
+
+                    distSqrProc.first() = sample.distSqr(nearInfo.point());
+                    distSqrProc.second() = Pstream::myProcNo();
                 }
             }
 

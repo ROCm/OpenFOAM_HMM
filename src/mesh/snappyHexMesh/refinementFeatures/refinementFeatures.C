@@ -651,8 +651,9 @@ void Foam::refinementFeatures::findNearestEdge
     forAll(edgeTrees_, featI)
     {
         const indexedOctree<treeDataEdge>& tree = edgeTrees_[featI];
+        const treeDataEdge& treeData = tree.shapes();
 
-        if (tree.shapes().size() > 0)
+        if (!treeData.empty())
         {
             forAll(samples, sampleI)
             {
@@ -677,13 +678,9 @@ void Foam::refinementFeatures::findNearestEdge
                     (
                         info.hit(),
                         info.point(),
-                        tree.shapes().edgeLabels()[info.index()]
+                        treeData.objectIndex(info.index())
                     );
-
-                    const treeDataEdge& td = tree.shapes();
-                    const edge& e = td.edges()[nearInfo[sampleI].index()];
-
-                    nearNormal[sampleI] = e.unitVec(td.points());
+                    nearNormal[sampleI] = treeData.line(info.index()).unitVec();
                 }
             }
         }
@@ -714,6 +711,7 @@ void Foam::refinementFeatures::findNearestRegionEdge
     forAll(regionTrees, featI)
     {
         const indexedOctree<treeDataEdge>& regionTree = regionTrees[featI];
+        const treeDataEdge& treeData = regionTree.shapes();
 
         forAll(samples, sampleI)
         {
@@ -734,19 +732,14 @@ void Foam::refinementFeatures::findNearestRegionEdge
 
             if (info.hit())
             {
-                const treeDataEdge& td = regionTree.shapes();
-
                 nearFeature[sampleI] = featI;
                 nearInfo[sampleI] = pointIndexHit
                 (
                     info.hit(),
                     info.point(),
-                    regionTree.shapes().edgeLabels()[info.index()]
+                    treeData.objectIndex(info.index())
                 );
-
-                const edge& e = td.edges()[nearInfo[sampleI].index()];
-
-                nearNormal[sampleI] = e.unitVec(td.points());
+                nearNormal[sampleI] = treeData.line(info.index()).unitVec();
             }
         }
     }
@@ -770,7 +763,7 @@ void Foam::refinementFeatures::findNearestRegionEdge
 //    {
 //        const indexedOctree<treeDataPoint>& tree = pointTrees_[featI];
 //
-//        if (tree.shapes().pointLabels().size() > 0)
+//        if (!tree.shapes().empty())
 //        {
 //            forAll(samples, sampleI)
 //            {
@@ -779,14 +772,11 @@ void Foam::refinementFeatures::findNearestRegionEdge
 //                scalar distSqr;
 //                if (nearFeature[sampleI] != -1)
 //                {
-//                    label nearFeatI = nearFeature[sampleI];
-//                    const indexedOctree<treeDataPoint>& nearTree =
-//                        pointTrees_[nearFeatI];
-//                    label featPointi =
-//                        nearTree.shapes().pointLabels()[nearIndex[sampleI]];
-//                    const point& featPt =
-//                        operator[](nearFeatI).points()[featPointi];
-//                    distSqr = magSqr(featPt-sample);
+//                    const nearTree = pointTrees_[nearFeature[sampleI]];
+//                    distSqr = sample.distSqr
+//                    (
+//                        nearTree.shapes()[nearIndex[sampleI]]
+//                    );
 //                }
 //                else
 //                {
@@ -822,8 +812,9 @@ void Foam::refinementFeatures::findNearestPoint
     forAll(pointTrees_, featI)
     {
         const indexedOctree<treeDataPoint>& tree = pointTrees_[featI];
+        const auto& treeData = tree.shapes();
 
-        if (tree.shapes().pointLabels().size() > 0)
+        if (!treeData.empty())
         {
             forAll(samples, sampleI)
             {
@@ -848,7 +839,7 @@ void Foam::refinementFeatures::findNearestPoint
                     (
                         info.hit(),
                         info.point(),
-                        tree.shapes().pointLabels()[info.index()]
+                        treeData.objectIndex(info.index())
                     );
                 }
             }

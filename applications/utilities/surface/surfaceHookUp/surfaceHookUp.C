@@ -235,16 +235,14 @@ public:
 
         for (const label index : indices)
         {
-            const label edgeIndex = shape.edgeLabels()[index];
+            const label edgeIndex = shape.objectIndex(index);
 
             if (shapeMask_.found(edgeIndex))
             {
                 continue;
             }
 
-            const edge& e = shape.edges()[edgeIndex];
-
-            pointHit nearHit = e.line(shape.points()).nearestDist(sample);
+            pointHit nearHit = shape.line(index).nearestDist(sample);
 
             // Only register hit if closest point is not an edge point
             if (nearHit.hit())

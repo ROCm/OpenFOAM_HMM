@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,6 +39,7 @@ SourceFiles
 #define Foam_treeDataEdge_H
 
 #include "treeBoundBoxList.H"
+#include "labelRange.H"
 #include "line.H"
 #include "volumeType.H"
 
@@ -56,41 +57,37 @@ template<class Type> class indexedOctree;
 
 class treeDataEdge
 {
-    // Static Data
-
-        //- Tolerance on linear dimensions
-        static scalar tol;
-
-
     // Private Data
+
+        //- Reference to the underlying support points
+        const pointField& points_;
 
         //- Reference to edgeList
         const edgeList& edges_;
 
-        //- Reference to points
-        const pointField& points_;
-
-        //- Labels of edges
+        //- Subset of edges to work on
         const labelList edgeLabels_;
 
-        //- Whether to precalculate and store face bounding box
+        //- Use subset of edges (edgeLabels)
+        const bool useSubset_;
+
+        //- Whether to precalculate and store edge bounding box
         const bool cacheBb_;
 
-        //- Bbs for all above edges (valid only if cacheBb_)
+        //- Edge bounding boxes (valid only if cacheBb_)
         treeBoundBoxList bbs_;
 
 
     // Private Member Functions
 
-        //- Calculate edge bounding box
-        treeBoundBox calcBb(const label edgeI) const;
-
         //- Initialise all member data
         void update();
+
 
 public:
 
 
+    //- Forward to treeDataEdge findNearest operations
     class findNearestOp
     {
         const indexedOctree<treeDataEdge>& tree_;
@@ -122,6 +119,7 @@ public:
     };
 
 
+    //- Forward to treeDataEdge findIntersect operations
     class findIntersectOp
     {
     public:
@@ -141,10 +139,29 @@ public:
 
 
     // Declare name of the class and its debug switch
-    ClassName("treeDataEdge");
+    ClassNameNoDebug("treeDataEdge");
 
 
-    // Constructors
+    // Constructors (cachable versions)
+
+        //- Construct from all edges.
+        //  \note Holds references to edges and points!
+        treeDataEdge
+        (
+            const bool cacheBb,
+            const edgeList& edges,
+            const pointField& points
+        );
+
+        //- Construct from range of edges.
+        //  \note Holds references to edges and points!
+        treeDataEdge
+        (
+            const bool cacheBb,
+            const edgeList& edges,
+            const pointField& points,
+            const labelRange& range
+        );
 
         //- Construct from selected edges.
         //  \note Holds references to edges and points!
@@ -167,59 +184,201 @@ public:
         );
 
 
+    // Constructors (non-caching)
+
+        //- Construct from all edges.
+        //  \note Holds references to edges and points!
+        treeDataEdge(const edgeList& edges, const pointField& points)
+        :
+            treeDataEdge(false, edges, points)
+        {}
+
+        //- Construct from range of edges.
+        //  \note Holds references to edges and points!
+        treeDataEdge
+        (
+            const edgeList& edges,
+            const pointField& points,
+            const labelRange& range
+        )
+        :
+            treeDataEdge(false, edges, points, range)
+        {}
+
+        //- Construct from selected edges.
+        //  \note Holds references to edges and points!
+        treeDataEdge
+        (
+            const edgeList& edges,
+            const pointField& points,
+            const labelUList& edgeLabels
+        )
+        :
+            treeDataEdge(false, edges, points, edgeLabels)
+        {}
+
+        //- Construct from selected edges, transferring contents.
+        //  \note Holds references to edges and points!
+        treeDataEdge
+        (
+            const edgeList& edges,
+            const pointField& points,
+            labelList&& edgeLabels
+        )
+        :
+            treeDataEdge(false, edges, points, std::move(edgeLabels))
+        {}
+
+
+    // Static Functions
+
+        //- Calculate and return bounding boxes for all edges
+        static treeBoundBoxList boxes
+        (
+            const edgeList& edges,
+            const pointField& points
+        );
+
+        //- Calculate and return bounding boxes for specified range of edges
+        static treeBoundBoxList boxes
+        (
+            const edgeList& edges,
+            const pointField& points,
+            const labelRange& range
+        );
+
+        //- Calculate and return bounding boxes for specified edges
+        static treeBoundBoxList boxes
+        (
+            const edgeList& edges,
+            const pointField& points,
+            const labelUList& edgeIds
+        );
+
+        //- Return bounding box of all edges
+        static treeBoundBox bounds
+        (
+            const edgeList& edges,
+            const pointField& points
+        );
+
+        //- Return bounding box of specified range of edges
+        static treeBoundBox bounds
+        (
+            const edgeList& edges,
+            const pointField& points,
+            const labelRange& range
+        );
+
+        //- Return bounding box of specified edges
+        static treeBoundBox bounds
+        (
+            const edgeList& edges,
+            const pointField& points,
+            const labelUList& edgeIds
+        );
+
+
     // Member Functions
 
-        // Access
+        //- Object dimension == 1 (line element)
+        int nDim() const noexcept { return 1; }
 
-            const edgeList& edges() const
-            {
-                return edges_;
-            }
-
-            const pointField& points() const
-            {
-                return points_;
-            }
-
-            const labelList& edgeLabels() const
-            {
-                return edgeLabels_;
-            }
-
-            label size() const
-            {
-                return edgeLabels_.size();
-            }
-
-            //- Representative point cloud for all shapes inside
-            //- (one point per shape)
-            pointField shapePoints() const;
+        //- Return bounding box for the specified edge indices
+        treeBoundBox bounds(const labelUList& indices) const;
 
 
-        // Search
+    // Access
 
-            //- Get type (inside,outside,mixed,unknown) of point w.r.t. surface.
-            //  Only makes sense for closed surfaces.
-            volumeType getVolumeType
-            (
-                const indexedOctree<treeDataEdge>&,
-                const point&
-            ) const;
+        //- The reference point field
+        const pointField& points() const noexcept { return points_; }
 
-            //- Does (bb of) shape at index overlap bb
-            bool overlaps
-            (
-                const label index,
-                const treeBoundBox& sampleBb
-            ) const;
+        //- The original list of edges
+        const edgeList& edges() const noexcept { return edges_; }
 
-            //- Does (bb of) shape at index overlap bb
-            bool overlaps
-            (
-                const label index,
-                const point& centre,
-                const scalar radiusSqr
-            ) const;
+        //- The subset of edge ids to use
+        const labelList& edgeLabels() const noexcept { return edgeLabels_; }
+
+        //- Use a subset of edges
+        bool useSubset() const noexcept { return useSubset_; }
+
+        //- Is the effective edge selection empty?
+        bool empty() const noexcept
+        {
+            return useSubset_ ? edgeLabels_.empty() : edges_.empty();
+        }
+
+        //- The size of edge selection
+        label size() const noexcept
+        {
+            return useSubset_ ? edgeLabels_.size() : edges_.size();
+        }
+
+        //- Map from shape index to original (non-subset) edge label
+        label objectIndex(const label index) const
+        {
+            return useSubset_ && index >= 0 ? edgeLabels_[index] : index;
+        }
+
+        //- Edge at specified shape index
+        const edge& operator[](const label index) const
+        {
+            return edges_[objectIndex(index)];
+        }
+
+        //- Geometric line for edge at specified shape index. Frequently used
+        const linePointRef line(const label index) const
+        {
+            return edges_[objectIndex(index)].line(points_);
+        }
+
+        //- Representative point (edge centre) at shape index
+        point centre(const label index) const
+        {
+            return edges_[objectIndex(index)].centre(points_);
+        }
+
+        //- Representative point cloud for contained shapes.
+        //- One point per shape, corresponding to the edge centres.
+        tmp<pointField> centres() const;
+
+
+    // Search
+
+        //- Get type (inside,outside,mixed,unknown) of point w.r.t. surface.
+        //  Only makes sense for closed surfaces.
+        volumeType getVolumeType
+        (
+            const indexedOctree<treeDataEdge>&,
+            const point&
+        ) const;
+
+        //- Does (bb of) shape at index searchBox
+        bool overlaps
+        (
+            const label index,
+            const treeBoundBox& searchBox
+        ) const;
+
+        //- Does (bb of) shape at index overlap bb
+        bool overlaps
+        (
+            const label index,
+            const point& centre,
+            const scalar radiusSqr
+        ) const;
+
+        //- Calculates nearest (to sample) point in shape.
+        //  Returns actual point and distance (squared)
+        void findNearest
+        (
+            const labelUList& indices,
+            const point& sample,
+
+            scalar& nearestDistSqr,
+            label& nearestIndex,
+            point& nearestPoint
+        ) const;
 };
 
 

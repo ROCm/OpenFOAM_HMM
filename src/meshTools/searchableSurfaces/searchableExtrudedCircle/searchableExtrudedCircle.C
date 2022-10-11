@@ -223,6 +223,7 @@ void Foam::searchableExtrudedCircle::findParametricNearest
 {
     const edgeMesh& mesh = eMeshPtr_();
     const indexedOctree<treeDataEdge>& tree = edgeTree_();
+    const auto& treeData = tree.shapes();
     const edgeList& edges = mesh.edges();
     const pointField& points = mesh.points();
     const labelListList& pointEdges = mesh.pointEdges();
@@ -243,11 +244,11 @@ void Foam::searchableExtrudedCircle::findParametricNearest
 
     const pointIndexHit startInfo = tree.findNearest(start, maxDistSqr);
     curvePoints[0] = startInfo.hitPoint();
-    axialVecs[0] = edges[startInfo.index()].vec(points);
+    axialVecs[0] = treeData.line(startInfo.index()).vec();
 
     const pointIndexHit endInfo = tree.findNearest(end, maxDistSqr);
     curvePoints.last() = endInfo.hitPoint();
-    axialVecs.last() = edges[endInfo.index()].vec(points);
+    axialVecs.last() = treeData.line(endInfo.index()).vec();
 
 
 

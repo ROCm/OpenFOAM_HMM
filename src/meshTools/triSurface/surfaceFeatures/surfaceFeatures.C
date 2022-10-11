@@ -73,12 +73,11 @@ static bool onLine(const Foam::point& p, const linePointRef& line)
 
 Foam::pointIndexHit Foam::surfaceFeatures::edgeNearest
 (
-    const point& start,
-    const point& end,
+    const linePointRef& line,
     const point& sample
 )
 {
-    pointHit eHit = linePointRef(start, end).nearestDist(sample);
+    pointHit eHit = line.nearestDist(sample);
 
     // Classification of position on edge.
     label endPoint;
@@ -96,8 +95,8 @@ Foam::pointIndexHit Foam::surfaceFeatures::edgeNearest
         // which one.
         if
         (
-            eHit.point().distSqr(start)
-          < eHit.point().distSqr(end)
+            eHit.point().distSqr(line.start())
+          < eHit.point().distSqr(line.end())
         )
         {
             endPoint = 0;
@@ -1255,6 +1254,7 @@ Foam::Map<Foam::label> Foam::surfaceFeatures::nearestSamples
         10,     // leafsize
         3.0     // duplicity
     );
+    const auto& treeData = ppTree.shapes();
 
     // From patch point to surface point
     Map<label> nearest(2*pointLabels.size());
@@ -1283,7 +1283,7 @@ Foam::Map<Foam::label> Foam::surfaceFeatures::nearestSamples
 
         label sampleI = info.index();
 
-        if (magSqr(samples[sampleI] - surfPt) < maxDistSqr[sampleI])
+        if (treeData.centre(sampleI).distSqr(surfPt) < maxDistSqr[sampleI])
         {
             nearest.insert(sampleI, surfPointi);
         }
@@ -1537,7 +1537,7 @@ Foam::Map<Foam::pointIndexHit> Foam::surfaceFeatures::nearestEdges
 
             label index = info.index();
 
-            label sampleEdgeI = ppTree.shapes().edgeLabels()[index];
+            label sampleEdgeI = ppTree.shapes().objectIndex(index);
 
             const edge& e = sampleEdges[sampleEdgeI];
 
@@ -1636,6 +1636,7 @@ void Foam::surfaceFeatures::nearestSurfEdge
         10,     // leafsize
         3.0     // duplicity
     );
+    const auto& treeData = ppTree.shapes();
 
     forAll(samples, i)
     {
@@ -1653,18 +1654,14 @@ void Foam::surfaceFeatures::nearestSurfEdge
         }
         else
         {
-            edgeLabel[i] = selectedEdges[info.index()];
-
             // Need to recalculate to classify edgeEndPoint
-            const edge& e = surf_.edges()[edgeLabel[i]];
-
             pointIndexHit pHit = edgeNearest
             (
-                localPoints[e.start()],
-                localPoints[e.end()],
+                treeData.line(info.index()),
                 sample
             );
 
+            edgeLabel[i] = treeData.objectIndex(info.index());
             edgePoint[i] = pHit.point();
             edgeEndPoint[i] = pHit.index();
         }
@@ -1707,6 +1704,7 @@ void Foam::surfaceFeatures::nearestSurfEdge
         10,             // leafsize
         3.0             // duplicity
     );
+    const auto& treeData = ppTree.shapes();
 
     forAll(selectedSampleEdges, i)
     {
@@ -1731,8 +1729,7 @@ void Foam::surfaceFeatures::nearestSurfEdge
         }
         else
         {
-            edgeLabel[i] = selectedEdges[info.index()];
-
+            edgeLabel[i] = treeData.objectIndex(info.index());
             pointOnFeature[i] = info.point();
         }
     }
@@ -1766,6 +1763,7 @@ void Foam::surfaceFeatures::nearestFeatEdge
         10,     // leafsize
         3.0     // duplicity
     );
+    const auto& treeData = ppTree.shapes();
 
     const edgeList& surfEdges = surf_.edges();
     const pointField& surfLocalPoints = surf_.localPoints();
@@ -1787,8 +1785,7 @@ void Foam::surfaceFeatures::nearestFeatEdge
         {
             const vector surfEdgeDir = midPoint - startPoint;
 
-            const edge& featEdge = edges[infoMid.index()];
-            const vector featEdgeDir = featEdge.vec(points);
+            const vector featEdgeDir = treeData.line(infoMid.index()).vec();
 
             // Check that the edges are nearly parallel
             if (mag(surfEdgeDir ^ featEdgeDir) < parallelTolerance)

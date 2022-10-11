@@ -435,7 +435,7 @@ void Foam::functionObjects::propellerInfo::updateSampleDiskCells()
     // Kick the tet base points calculation to avoid parallel comms later
     (void)mesh_.tetBasePtIs();
 
-    const auto& cellLabels = tree.shapes().cellLabels();
+    const auto& treeData = tree.shapes();
 
     forAll(points_, pointi)
     {
@@ -453,9 +453,11 @@ void Foam::functionObjects::propellerInfo::updateSampleDiskCells()
         if (proci >= 0)
         {
             cellIds_[pointi] =
+            (
                 proci == Pstream::myProcNo()
-              ? cellLabels[treeCelli]
-              : -1;
+              ? treeData.objectIndex(treeCelli)
+              : -1
+            );
         }
         else
         {

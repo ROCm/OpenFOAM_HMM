@@ -107,14 +107,13 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
 
         forAll(probeLocations(), probei)
         {
+            const auto& treeData = boundaryTree.shapes();
             const point sample = probeLocations()[probei];
-
-            const scalar span = boundaryTree.bb().mag();
 
             pointIndexHit info = boundaryTree.findNearest
             (
                 sample,
-                Foam::sqr(span)
+                Foam::sqr(boundaryTree.bb().mag())
             );
 
             if (!info.hit())
@@ -122,7 +121,7 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
                 info = boundaryTree.findNearest(sample, Foam::sqr(GREAT));
             }
 
-            label facei = boundaryTree.shapes().faceLabels()[info.index()];
+            const label facei = treeData.objectIndex(info.index());
 
             const label patchi = bm.whichPatch(facei);
 

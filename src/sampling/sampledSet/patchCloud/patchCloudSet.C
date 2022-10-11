@@ -115,9 +115,11 @@ void Foam::patchCloudSet::calcSamples
 
     forAll(sampleCoords_, sampleI)
     {
+        const auto& treeData = patchTree.shapes();
         const point& sample = sampleCoords_[sampleI];
 
         pointIndexHit& nearInfo = nearest[sampleI].first();
+        auto& distSqrProc = nearest[sampleI].second();
 
         // Find the nearest locally
         if (patchFaces.size())
@@ -133,17 +135,18 @@ void Foam::patchCloudSet::calcSamples
         // Fill in the distance field and the processor field
         if (!nearInfo.hit())
         {
-            nearest[sampleI].second().first() = Foam::sqr(GREAT);
-            nearest[sampleI].second().second() = Pstream::myProcNo();
+            distSqrProc.first() = Foam::sqr(GREAT);
+            distSqrProc.second() = Pstream::myProcNo();
         }
         else
         {
             // Set nearest to mesh face label
-            nearInfo.setIndex(patchFaces[nearInfo.index()]);
+            const label objectIndex = treeData.objectIndex(nearInfo.index());
 
-            nearest[sampleI].second().first() =
-                nearInfo.point().distSqr(sample);
-            nearest[sampleI].second().second() = Pstream::myProcNo();
+            nearInfo.setIndex(objectIndex);
+
+            distSqrProc.first() = sample.distSqr(nearInfo.point());
+            distSqrProc.second() = Pstream::myProcNo();
         }
     }
 

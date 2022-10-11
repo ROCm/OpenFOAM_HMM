@@ -414,6 +414,7 @@ void Foam::mappedPatchBase::findLocalSamples
                     10,             // leafsize
                     3.0             // duplicity
                 );
+                const auto& treeData = boundaryTree.shapes();
 
                 forAll(samples, sampleI)
                 {
@@ -435,7 +436,8 @@ void Foam::mappedPatchBase::findLocalSamples
                     }
                     else
                     {
-                        point fc(pp[nearInfo.index()].centre(pp.points()));
+                        const point& fc = treeData.centre(nearInfo.index());
+
                         nearInfo.setPoint(fc);
                         near.first().second().first() = sample.distSqr(fc);
                         near.first().second().second() = myRank;

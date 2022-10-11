@@ -709,29 +709,20 @@ void Foam::extendedEdgeMesh::nearestFeatureEdgeByType
 {
     const PtrList<indexedOctree<treeDataEdge>>& edgeTrees = edgeTreesByType();
 
-    info.setSize(edgeTrees.size());
-
-    labelList sliceStarts(edgeTrees.size());
-
-    sliceStarts[0] = externalStart_;
-    sliceStarts[1] = internalStart_;
-    sliceStarts[2] = flatStart_;
-    sliceStarts[3] = openStart_;
-    sliceStarts[4] = multipleStart_;
+    info.resize(edgeTrees.size());
 
     forAll(edgeTrees, i)
     {
-        info[i] = edgeTrees[i].findNearest
-        (
-            sample,
-            searchDistSqr[i]
-        );
+        const auto& tree = edgeTrees[i];
+        const auto& treeData = edgeTrees[i].shapes();
+
+        info[i] = tree.findNearest(sample, searchDistSqr[i]);
 
         // The index returned by the indexedOctree is local to the slice of
         // edges it was supplied with, return the index to the value in the
         // complete edge list
 
-        info[i].setIndex(info[i].index() + sliceStarts[i]);
+        info[i].setIndex(treeData.objectIndex(info[i].index()));
     }
 }
 
@@ -752,11 +743,11 @@ void Foam::extendedEdgeMesh::allNearestFeaturePoints
 
     DynamicList<pointIndexHit> dynPointHit(elems.size());
 
-    forAll(elems, elemI)
+    const auto& treeData = pointTree().shapes();
+
+    for (const label index : elems)
     {
-        label index = elems[elemI];
-        label ptI = pointTree().shapes().pointLabels()[index];
-        const point& pt = points()[ptI];
+        const point& pt = treeData.centre(index);
 
         pointIndexHit nearHit(true, pt, index);
 
@@ -776,37 +767,25 @@ void Foam::extendedEdgeMesh::allNearestFeatureEdges
 {
     const PtrList<indexedOctree<treeDataEdge>>& edgeTrees = edgeTreesByType();
 
-    info.setSize(edgeTrees.size());
-
-    labelList sliceStarts(edgeTrees.size());
-
-    sliceStarts[0] = externalStart_;
-    sliceStarts[1] = internalStart_;
-    sliceStarts[2] = flatStart_;
-    sliceStarts[3] = openStart_;
-    sliceStarts[4] = multipleStart_;
-
     DynamicList<pointIndexHit> dynEdgeHit(edgeTrees.size()*3);
 
     // Loop over all the feature edge types
     forAll(edgeTrees, i)
     {
+        const auto& tree = edgeTrees[i];
+        const auto& treeData = tree.shapes();
+
         // Pick up all the edges that intersect the search sphere
-        labelList elems = edgeTrees[i].findSphere
-        (
-            sample,
-            searchRadiusSqr
-        );
+        labelList elems = tree.findSphere(sample, searchRadiusSqr);
 
-        forAll(elems, elemI)
+        for (const label index : elems)
         {
-            label index = elems[elemI];
-            label edgeI = edgeTrees[i].shapes().edgeLabels()[index];
-            const edge& e = edges()[edgeI];
+            pointHit hitPoint = treeData.line(index).nearestDist(sample);
 
-            pointHit hitPoint = e.line(points()).nearestDist(sample);
+            // The index returned by indexedOctree is local its slice of
+            // edges. Return the index into the complete edge list
 
-            label hitIndex = index + sliceStarts[i];
+            const label hitIndex = treeData.objectIndex(index);
 
             dynEdgeHit.append(pointIndexHit(hitPoint, hitIndex));
         }

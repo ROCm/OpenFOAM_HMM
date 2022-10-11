@@ -1039,7 +1039,7 @@ void Foam::faceCoupleInfo::findSlavesCoveringMaster
 
         if (nearInfo.hit())
         {
-            label mesh0Facei = tree.shapes().faceLabels()[nearInfo.index()];
+            label mesh0Facei = tree.shapes().objectIndex(nearInfo.index());
 
             // Check if points of f1 actually lie on top of mesh0 face
             // This is the bit that might fail since if f0 is severely warped

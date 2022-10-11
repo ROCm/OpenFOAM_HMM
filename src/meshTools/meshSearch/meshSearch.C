@@ -84,7 +84,7 @@ namespace Foam
             // the new face shares a point with an existing hit face and the
             // line passes through both faces in the same direction, then this
             // is also assumed to be a duplicate hit.
-            const label newFacei = tree_.shapes().faceLabels()[index];
+            const label newFacei = tree_.shapes().objectIndex(index);
             const face& newFace = mesh.faces()[newFacei];
             const scalar newDot = mesh.faceAreas()[newFacei] & (end - start);
             forAll(hits_, hiti)
@@ -161,10 +161,8 @@ bool Foam::meshSearch::findNearer
 {
     bool nearer = false;
 
-    forAll(indices, i)
+    for (const label pointi : indices)
     {
-        label pointi = indices[i];
-
         scalar distSqr = sample.distSqr(points[pointi]);
 
         if (distSqr < nearestDistSqr)
@@ -620,9 +618,10 @@ Foam::meshSearch::boundaryTree() const
     if (!boundaryTreePtr_)
     {
         // All boundary faces (not just walls)
-        labelList bndFaces
+        const labelRange bndFaces
         (
-            identity(mesh_.nBoundaryFaces(), mesh_.nInternalFaces())
+            mesh_.nInternalFaces(),
+            mesh_.nBoundaryFaces()
         );
 
         boundaryTreePtr_.reset
@@ -818,7 +817,7 @@ Foam::label Foam::meshSearch::findNearestBoundaryFace
                 );
             }
 
-            return tree.shapes().faceLabels()[info.index()];
+            return tree.shapes().objectIndex(info.index());
         }
         else
         {
@@ -867,7 +866,7 @@ Foam::pointIndexHit Foam::meshSearch::intersection
     if (curHit.hit())
     {
         // Change index into octreeData into face label
-        curHit.setIndex(boundaryTree().shapes().faceLabels()[curHit.index()]);
+        curHit.setIndex(boundaryTree().shapes().objectIndex(curHit.index()));
     }
     return curHit;
 }
@@ -889,7 +888,7 @@ Foam::List<Foam::pointIndexHit> Foam::meshSearch::intersections
         if (!curHit.hit()) break;
 
         // Change index into octreeData into face label
-        curHit.setIndex(boundaryTree().shapes().faceLabels()[curHit.index()]);
+        curHit.setIndex(boundaryTree().shapes().objectIndex(curHit.index()));
 
         hits.append(curHit);
     }

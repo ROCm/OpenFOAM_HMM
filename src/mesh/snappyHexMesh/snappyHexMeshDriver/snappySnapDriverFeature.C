@@ -3296,8 +3296,13 @@ void Foam::snappySnapDriver::reverseAttractMeshPoints
                 if (nearInfo.hit())
                 {
                     label pointi =
-                        ppTree.shapes().pointLabels()[nearInfo.index()];
-                    const point attraction = featPt-pp.localPoints()[pointi];
+                        ppTree.shapes().objectIndex(nearInfo.index());
+
+                    const point attraction
+                    (
+                        featPt
+                      - ppTree.shapes()[nearInfo.index()]
+                    );
 
                     // Check if this point is already being attracted. If so
                     // override it only if nearer.
@@ -3368,10 +3373,13 @@ void Foam::snappySnapDriver::reverseAttractMeshPoints
                 if (nearInfo.hit())
                 {
                     label pointi =
-                        ppTree.shapes().pointLabels()[nearInfo.index()];
+                        ppTree.shapes().objectIndex(nearInfo.index());
 
-                    const point& pt = pp.localPoints()[pointi];
-                    const point attraction = featPt-pt;
+                    const point attraction
+                    (
+                        featPt
+                      - ppTree.shapes()[nearInfo.index()]
+                    );
 
                     // - already attracted to feature edge : point always wins
                     // - already attracted to feature point: nearest wins
