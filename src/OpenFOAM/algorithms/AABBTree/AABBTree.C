@@ -94,21 +94,10 @@ void Foam::AABBTree<Type>::createBoxes
     DynamicList<labelList>& addressing
 ) const
 {
-    const vector span = bb.span();
-
     // Determine which direction to divide the box
 
-    direction maxDir = 0;
-    scalar maxSpan = span[maxDir];
-    for (label dirI = 1; dirI < 3; ++dirI)
-    {
-        if (span[dirI] > maxSpan)
-        {
-            maxSpan = span[dirI];
-            maxDir = dirI;
-        }
-    }
-
+    const direction maxDir = bb.maxDir();
+    const scalar maxSpan = bb.span()[maxDir];
 
     scalar pivotValue;
 

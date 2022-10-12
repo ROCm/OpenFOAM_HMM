@@ -707,9 +707,7 @@ Foam::point Foam::indexedOctree<Type>::pushPoint
     {
         if (pushInside != bb.contains(perturbedPt))
         {
-            auto fatal = FatalErrorInFunction;
-
-            fatal
+            FatalErrorInFunction
                 << "pushed point:" << pt
                 << " to:" << perturbedPt
                 << " wanted side:" << pushInside
@@ -718,7 +716,7 @@ Foam::point Foam::indexedOctree<Type>::pushPoint
 
             if (debug > 1)
             {
-                fatal << abort(FatalError);
+                FatalError << abort(FatalError);
             }
         }
     }
@@ -750,72 +748,72 @@ Foam::point Foam::indexedOctree<Type>::pushPoint
             << abort(FatalError);
     }
 
-    if (faceID & treeBoundBox::LEFTBIT)
     {
-        if (pushInside)
+        constexpr direction dir(0);  // vector::X
+
+        if (faceID & treeBoundBox::LEFTBIT)
         {
-            perturbedPt[0] = bb.min()[0] + (perturbVec[0] + ROOTVSMALL);
+            perturbedPt[dir] =
+            (
+                pushInside
+              ? (bb.min()[dir] + (perturbVec[dir] + ROOTVSMALL))
+              : (bb.min()[dir] - (perturbVec[dir] + ROOTVSMALL))
+            );
         }
-        else
+        else if (faceID & treeBoundBox::RIGHTBIT)
         {
-            perturbedPt[0] = bb.min()[0] - (perturbVec[0] + ROOTVSMALL);
-        }
-    }
-    else if (faceID & treeBoundBox::RIGHTBIT)
-    {
-        if (pushInside)
-        {
-            perturbedPt[0] = bb.max()[0] - (perturbVec[0] + ROOTVSMALL);
-        }
-        else
-        {
-            perturbedPt[0] = bb.max()[0] + (perturbVec[0] + ROOTVSMALL);
+            perturbedPt[dir] =
+            (
+                pushInside
+              ? (bb.max()[dir] - (perturbVec[dir] + ROOTVSMALL))
+              : (bb.max()[dir] + (perturbVec[dir] + ROOTVSMALL))
+            );
         }
     }
 
-    if (faceID & treeBoundBox::BOTTOMBIT)
     {
-        if (pushInside)
+        constexpr direction dir(1);  // vector::Y
+
+        if (faceID & treeBoundBox::BOTTOMBIT)
         {
-            perturbedPt[1] = bb.min()[1] + (perturbVec[1] + ROOTVSMALL);
+            perturbedPt[dir] =
+            (
+                pushInside
+              ? (bb.min()[dir] + (perturbVec[dir] + ROOTVSMALL))
+              : (bb.min()[dir] - (perturbVec[dir] + ROOTVSMALL))
+            );
         }
-        else
+        else if (faceID & treeBoundBox::TOPBIT)
         {
-            perturbedPt[1] = bb.min()[1] - (perturbVec[1] + ROOTVSMALL);
-        }
-    }
-    else if (faceID & treeBoundBox::TOPBIT)
-    {
-        if (pushInside)
-        {
-            perturbedPt[1] = bb.max()[1] - (perturbVec[1] + ROOTVSMALL);
-        }
-        else
-        {
-            perturbedPt[1] = bb.max()[1] + (perturbVec[1] + ROOTVSMALL);
+            perturbedPt[dir] =
+            (
+                pushInside
+              ? (bb.max()[dir] - (perturbVec[dir] + ROOTVSMALL))
+              : (bb.max()[dir] + (perturbVec[dir] + ROOTVSMALL))
+            );
         }
     }
 
-    if (faceID & treeBoundBox::BACKBIT)
     {
-        if (pushInside)
+        constexpr direction dir(2);  // vector::Z
+
+        if (faceID & treeBoundBox::BACKBIT)
         {
-            perturbedPt[2] = bb.min()[2] + (perturbVec[2] + ROOTVSMALL);
+            perturbedPt[dir] =
+            (
+                pushInside
+              ? (bb.min()[dir] + (perturbVec[dir] + ROOTVSMALL))
+              : (bb.min()[dir] - (perturbVec[dir] + ROOTVSMALL))
+            );
         }
-        else
+        else if (faceID & treeBoundBox::FRONTBIT)
         {
-            perturbedPt[2] = bb.min()[2] - (perturbVec[2] + ROOTVSMALL);
-        }
-    }
-    else if (faceID & treeBoundBox::FRONTBIT)
-    {
-        if (pushInside)
-        {
-            perturbedPt[2] = bb.max()[2] - (perturbVec[2] + ROOTVSMALL);
-        }
-        else
-        {
-            perturbedPt[2] = bb.max()[2] + (perturbVec[2] + ROOTVSMALL);
+            perturbedPt[dir] =
+            (
+                pushInside
+              ? (bb.max()[dir] - (perturbVec[dir] + ROOTVSMALL))
+              : (bb.max()[dir] + (perturbVec[dir] + ROOTVSMALL))
+            );
         }
     }
 
@@ -823,9 +821,7 @@ Foam::point Foam::indexedOctree<Type>::pushPoint
     {
         if (pushInside != bb.contains(perturbedPt))
         {
-            auto fatal = FatalErrorInFunction;
-
-            fatal
+            FatalErrorInFunction
                 << "pushed point:" << pt << " on face:" << faceString(faceID)
                 << " to:" << perturbedPt
                 << " wanted side:" << pushInside
@@ -834,7 +830,7 @@ Foam::point Foam::indexedOctree<Type>::pushPoint
 
             if (debug > 1)
             {
-                fatal << abort(FatalError);
+                FatalError << abort(FatalError);
             }
         }
     }
@@ -855,15 +851,13 @@ Foam::point Foam::indexedOctree<Type>::pushPointIntoFace
     {
         if (bb.posBits(pt) != 0)
         {
-            auto fatal = FatalErrorInFunction;
-
-            fatal
+            FatalErrorInFunction
                 << " bb:" << bb << endl
                 << "does not contain point " << pt << nl;
 
             if (debug > 1)
             {
-                fatal << abort(FatalError);
+                FatalError << abort(FatalError);
             }
         }
     }
@@ -984,9 +978,7 @@ Foam::point Foam::indexedOctree<Type>::pushPointIntoFace
     {
         if (faceID != bb.faceBits(facePoint))
         {
-            auto fatal = FatalErrorInFunction;
-
-            fatal
+            FatalErrorInFunction
                 << "Pushed point from " << pt
                 << " on face:" << ptFaceID << " of bb:" << bb << nl
                 << "onto " << facePoint
@@ -996,21 +988,19 @@ Foam::point Foam::indexedOctree<Type>::pushPointIntoFace
 
             if (debug > 1)
             {
-                fatal << abort(FatalError);
+                FatalError << abort(FatalError);
             }
         }
         if (bb.posBits(facePoint) != 0)
         {
-            auto fatal = FatalErrorInFunction;
-
-            fatal
+            FatalErrorInFunction
                 << " bb:" << bb << nl
                 << "does not contain perturbed point "
                 << facePoint << nl;
 
             if (debug > 1)
             {
-                fatal << abort(FatalError);
+                FatalError << abort(FatalError);
             }
         }
     }
@@ -1253,9 +1243,7 @@ bool Foam::indexedOctree<Type>::walkToNeighbour
 
         if (!subBb.contains(facePoint))
         {
-            auto fatal = FatalErrorInFunction;
-
-            fatal
+            FatalErrorInFunction
                 << "When searching for " << facePoint
                 << " ended up in node:" << nodeI
                 << " octant:" << octant
@@ -1263,7 +1251,7 @@ bool Foam::indexedOctree<Type>::walkToNeighbour
 
             if (debug > 1)
             {
-                fatal << abort(FatalError);
+                FatalError << abort(FatalError);
             }
         }
     }
@@ -1288,9 +1276,7 @@ bool Foam::indexedOctree<Type>::walkToNeighbour
 
         if (nodeI == oldNodeI && octant == oldOctant)
         {
-            auto fatal = FatalErrorInFunction;
-
-            fatal
+            FatalErrorInFunction
                 << "Did not go to neighbour when searching for " << facePoint
                 << nl
                 << "    starting from face:" << faceString(faceID)
@@ -1300,15 +1286,13 @@ bool Foam::indexedOctree<Type>::walkToNeighbour
 
             if (debug > 1)
             {
-                fatal << abort(FatalError);
+                FatalError << abort(FatalError);
             }
         }
 
         if (!subBb.contains(facePoint))
         {
-            auto fatal = FatalErrorInFunction;
-
-            fatal
+            FatalErrorInFunction
                 << "When searching for " << facePoint
                 << " ended up in node:" << nodeI
                 << " octant:" << octant
@@ -1316,7 +1300,7 @@ bool Foam::indexedOctree<Type>::walkToNeighbour
 
             if (debug > 1)
             {
-                fatal << abort(FatalError);
+                FatalError << abort(FatalError);
             }
         }
     }
@@ -1405,16 +1389,14 @@ void Foam::indexedOctree<Type>::traverseNode
 
         if (octantBb.posBits(start) != 0)
         {
-            auto fatal = FatalErrorInFunction;
-
-            fatal
+            FatalErrorInFunction
                 << "Node:" << nodeI << " octant:" << octant
                 << " bb:" << octantBb << nl
                 << "does not contain point " << start << nl;
 
             if (debug > 1)
             {
-                fatal << abort(FatalError);
+                FatalError << abort(FatalError);
             }
         }
     }
