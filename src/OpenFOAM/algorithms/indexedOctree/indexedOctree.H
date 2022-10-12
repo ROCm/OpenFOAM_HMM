@@ -254,7 +254,7 @@ class indexedOctree
         List<node> nodes_;
 
         //- List of all contents (referenced by those nodes that are contents)
-        labelListList contents_;
+        List<labelList> contents_;
 
         //- Per node per octant whether is fully inside/outside/mixed.
         mutable PackedList<2> nodeTypes_;
@@ -268,9 +268,9 @@ class indexedOctree
             //  according to where they are in relation to mid.
             void divide
             (
-                const labelList& indices,
+                const labelUList& indices,
                 const treeBoundBox& bb,
-                labelListList& result
+                FixedList<labelList, 8>& dividedIndices
             ) const;
 
             //- Subdivide the contents node at position contentI.
@@ -279,7 +279,7 @@ class indexedOctree
             (
                 const treeBoundBox& bb,
                 DynamicList<labelList>& contents,
-                const label contentI
+                label contentIndex
             ) const;
 
             //- Split any contents node with more than minSize elements.
@@ -503,7 +503,7 @@ public:
         (
             const Type& shapes,
             const List<node>& nodes,
-            const labelListList& contents
+            const List<labelList>& contents
         );
 
         //- Construct from shapes

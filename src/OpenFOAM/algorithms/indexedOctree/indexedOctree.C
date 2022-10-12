@@ -43,41 +43,30 @@ Foam::scalar Foam::indexedOctree<Type>::perturbTol_ = 10*SMALL;
 template<class Type>
 void Foam::indexedOctree<Type>::divide
 (
-    const labelList& indices,
+    const labelUList& indices,
     const treeBoundBox& bb,
-    labelListList& result
+    FixedList<labelList, 8>& dividedIndices
 ) const
 {
-    List<DynamicList<label>> subIndices(8);
-    for (direction octant = 0; octant < subIndices.size(); octant++)
-    {
-        subIndices[octant].setCapacity(indices.size()/8);
-    }
+    // Scratch array
+    DynamicList<label> contains(indices.size());
 
-    // Precalculate bounding boxes.
-    FixedList<treeBoundBox, 8> subBbs;
-    for (direction octant = 0; octant < subBbs.size(); octant++)
+    for (direction octant = 0; octant < 8; ++octant)
     {
-        subBbs[octant] = bb.subBbox(octant);
-    }
+        const treeBoundBox subBbs(bb.subBbox(octant));
 
-    forAll(indices, i)
-    {
-        label shapeI = indices[i];
+        contains.clear();
 
-        for (direction octant = 0; octant < 8; octant++)
+        for (const label index : indices)
         {
-            if (shapes_.overlaps(shapeI, subBbs[octant]))
+            if (shapes_.overlaps(index, subBbs))
             {
-                subIndices[octant].append(shapeI);
+                contains.append(index);
             }
         }
-    }
 
-    result.setSize(8);
-    for (direction octant = 0; octant < subIndices.size(); octant++)
-    {
-        result[octant].transfer(subIndices[octant]);
+        // The sub-divided indices:
+        dividedIndices[octant] = contains;
     }
 }
 
@@ -88,18 +77,14 @@ Foam::indexedOctree<Type>::divide
 (
     const treeBoundBox& bb,
     DynamicList<labelList>& contents,
-    const label contentI
+    label contentIndex
 ) const
 {
-    const labelList& indices = contents[contentI];
-
-    node nod;
-
     if
     (
-        bb.min()[0] >= bb.max()[0]
-     || bb.min()[1] >= bb.max()[1]
-     || bb.min()[2] >= bb.max()[2]
+        bb.min().x() >= bb.max().x()
+     || bb.min().y() >= bb.max().y()
+     || bb.min().z() >= bb.max().z()
     )
     {
         FatalErrorInFunction
@@ -107,38 +92,41 @@ Foam::indexedOctree<Type>::divide
             << abort(FatalError);
     }
 
+    // Divide the indices into 8 (possibly empty) subsets.
+    // Replace current contentIndex with the first (non-empty) subset.
+    // Append the rest.
+
+    const labelList& indices = contents[contentIndex];
+
+    FixedList<labelList, 8> dividedIndices;
+    divide(indices, bb, dividedIndices);
+
+    node nod;
     nod.bb_ = bb;
     nod.parent_ = -1;
 
-    labelListList dividedIndices(8);
-    divide(indices, bb, dividedIndices);
+    bool replaceNode = true;
 
-    // Have now divided the indices into 8 (possibly empty) subsets.
-    // Replace current contentI with the first (non-empty) subset.
-    // Append the rest.
-    bool replaced = false;
-
-    for (direction octant = 0; octant < dividedIndices.size(); octant++)
+    for (direction octant = 0; octant < 8; ++octant)
     {
-        labelList& subIndices = dividedIndices[octant];
+        auto& subIndices = dividedIndices[octant];
 
         if (subIndices.size())
         {
-            if (!replaced)
+            if (replaceNode)
             {
-                contents[contentI].transfer(subIndices);
-                nod.subNodes_[octant] = contentPlusOctant(contentI, octant);
-                replaced = true;
+                // Replace existing
+                contents[contentIndex] = std::move(subIndices);
+                replaceNode = false;
             }
             else
             {
-                // Store at end of contents.
-                // note dummy append + transfer trick
-                label sz = contents.size();
-                contents.append(labelList(0));
-                contents[sz].transfer(subIndices);
-                nod.subNodes_[octant] = contentPlusOctant(sz, octant);
+                // Append to contents
+                contentIndex = contents.size();
+                contents.append(std::move(subIndices));
             }
+
+            nod.subNodes_[octant] = contentPlusOctant(contentIndex, octant);
         }
         else
         {
@@ -2089,9 +2077,9 @@ template<class Type>
 Foam::indexedOctree<Type>::indexedOctree(const Type& shapes)
 :
     shapes_(shapes),
-    nodes_(0),
-    contents_(0),
-    nodeTypes_(0)
+    nodes_(),
+    contents_(),
+    nodeTypes_()
 {}
 
 
@@ -2100,13 +2088,13 @@ Foam::indexedOctree<Type>::indexedOctree
 (
     const Type& shapes,
     const List<node>& nodes,
-    const labelListList& contents
+    const List<labelList>& contents
 )
 :
     shapes_(shapes),
     nodes_(nodes),
     contents_(contents),
-    nodeTypes_(0)
+    nodeTypes_()
 {}
 
 
@@ -2121,9 +2109,9 @@ Foam::indexedOctree<Type>::indexedOctree
 )
 :
     shapes_(shapes),
-    nodes_(0),
-    contents_(0),
-    nodeTypes_(0)
+    nodes_(),
+    contents_(),
+    nodeTypes_()
 {
     int oldMemSize = 0;
     if (debug)
@@ -2299,7 +2287,7 @@ Foam::indexedOctree<Type>::indexedOctree
     shapes_(shapes),
     nodes_(is),
     contents_(is),
-    nodeTypes_(0)
+    nodeTypes_()
 {}
 
 

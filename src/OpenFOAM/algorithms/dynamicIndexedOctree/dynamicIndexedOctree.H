@@ -47,8 +47,6 @@ SourceFiles
 namespace Foam
 {
 
-typedef DynamicList<autoPtr<DynamicList<label>>> contentListList;
-
 // Forward Declarations
 class Istream;
 template<class Type> class dynamicIndexedOctree;
@@ -122,7 +120,7 @@ class dynamicIndexedOctree
         DynamicList<node> nodes_;
 
         //- List of all contents (referenced by those nodes that are contents)
-        contentListList contents_;
+        DynamicList<DynamicList<label>> contents_;
 
         //- Per node per octant whether is fully inside/outside/mixed.
         mutable PackedList<2> nodeTypes_;
@@ -136,9 +134,9 @@ class dynamicIndexedOctree
             //  according to where they are in relation to mid.
             void divide
             (
-                const autoPtr<DynamicList<label>>& indices,
+                const labelUList& indices,
                 const treeBoundBox& bb,
-                contentListList& result
+                FixedList<DynamicList<label>, 8>& dividedIndices
             ) const;
 
             //- Subdivide the contents node at position contentI.
@@ -146,7 +144,7 @@ class dynamicIndexedOctree
             node divide
             (
                 const treeBoundBox& bb,
-                const label contentI,
+                label contentIndex,
                 const label parentNodeIndex,
                 const label octantToBeDivided
             );
@@ -371,7 +369,7 @@ public:
 
         //- List of all contents
         //- (referenced by those nodes that are contents)
-        const contentListList& contents() const
+        const DynamicList<DynamicList<label>>& contents() const noexcept
         {
             return contents_;
         }
