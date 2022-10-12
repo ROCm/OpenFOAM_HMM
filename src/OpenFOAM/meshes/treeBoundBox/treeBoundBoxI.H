@@ -316,6 +316,27 @@ Foam::treeBoundBox::searchOrder(const point& pt) const
 }
 
 
+inline bool Foam::treeBoundBox::subOverlaps
+(
+    const direction octant,
+    const point& centre,
+    const scalar radiusSqr
+) const
+{
+    // Accelerated version of
+    //     subBbox(octant).overlaps(centre, radiusSqr)
+
+    // NB: ordering of corners is irrelevant
+    return box_sphere_overlaps
+    (
+        this->centre(),
+        corner(octant),
+        centre,
+        radiusSqr
+    );
+}
+
+
 inline bool Foam::treeBoundBox::intersects
 (
     const linePointRef& ln,

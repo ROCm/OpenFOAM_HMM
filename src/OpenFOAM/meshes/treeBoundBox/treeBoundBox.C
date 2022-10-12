@@ -105,12 +105,6 @@ Foam::tmp<Foam::pointField> Foam::treeBoundBox::points() const
 }
 
 
-Foam::treeBoundBox Foam::treeBoundBox::subBbox(const direction octant) const
-{
-    return subBbox(centre(), octant);
-}
-
-
 Foam::treeBoundBox Foam::treeBoundBox::subBbox
 (
     const point& mid,
@@ -124,39 +118,143 @@ Foam::treeBoundBox Foam::treeBoundBox::subBbox
             << abort(FatalError);
     }
 
-    // start with a copy of this bounding box and adjust limits accordingly
-    treeBoundBox subBb(*this);
-    point& bbMin = subBb.min();
-    point& bbMax = subBb.max();
+    // Start the box with a single point (the mid-point) and push out the
+    // min/max dimensions according to the octant.
+
+    treeBoundBox bb(mid);
 
     if (octant & treeBoundBox::RIGHTHALF)
     {
-        bbMin.x() = mid.x();    // mid -> max
+        bb.max().x() = max().x();
     }
     else
     {
-        bbMax.x() = mid.x();    // min -> mid
+        bb.min().x() = min().x();
     }
 
     if (octant & treeBoundBox::TOPHALF)
     {
-        bbMin.y() = mid.y();    // mid -> max
+        bb.max().y() = max().y();
     }
     else
     {
-        bbMax.y() = mid.y();    // min -> mid
+        bb.min().y() = min().y();
     }
 
     if (octant & treeBoundBox::FRONTHALF)
     {
-        bbMin.z() = mid.z();    // mid -> max
+        bb.max().z() = max().z();
     }
     else
     {
-        bbMax.z() = mid.z();    // min -> mid
+        bb.min().z() = min().z();
     }
 
-    return subBb;
+    return bb;
+}
+
+
+Foam::treeBoundBox Foam::treeBoundBox::subHalf
+(
+    const scalar mid,
+    const direction whichFace
+) const
+{
+    // Start with a copy of this bounding box and adjust limits accordingly
+    // - corresponds to a clipping plane
+
+    treeBoundBox bb(*this);
+
+    switch (whichFace)
+    {
+        case LEFT   : bb.max().x() = mid; break;
+        case RIGHT  : bb.min().x() = mid; break;
+
+        case BOTTOM : bb.max().y() = mid; break;
+        case TOP    : bb.min().y() = mid; break;
+
+        case BACK   : bb.max().z() = mid; break;
+        case FRONT  : bb.min().z() = mid; break;
+
+        default:
+        {
+            FatalErrorInFunction
+                << "face:" << int(whichFace) << " should be [0..5]"
+                << abort(FatalError);
+        }
+    }
+
+    return bb;
+}
+
+
+Foam::treeBoundBox Foam::treeBoundBox::subHalf
+(
+    const direction whichFace
+) const
+{
+    direction cmpt =
+    (
+        (whichFace == faceId::LEFT || whichFace == faceId::RIGHT)
+      ? vector::X
+      : (whichFace == faceId::BOTTOM || whichFace == faceId::TOP)
+      ? vector::Y
+      : vector::Z
+    );
+
+    scalar mid = 0.5*(min()[cmpt] + max()[cmpt]);
+
+    return subHalf(mid, whichFace);
+}
+
+
+Foam::treeBoundBox Foam::treeBoundBox::subBbox(const direction octant) const
+{
+    return subBbox(centre(), octant);
+}
+
+
+bool Foam::treeBoundBox::subOverlaps
+(
+    const direction octant,
+    const boundBox& bb
+) const
+{
+    // Slightly accelerated version of
+    //     subBbox(octant).overlaps(bb)
+
+    point subMin = centre();
+    point subMax = subMin;
+
+    if (octant & RIGHTHALF)
+    {
+        subMax.x() = max().x();
+    }
+    else
+    {
+        subMin.x() = min().x();
+    }
+
+    if (octant & TOPHALF)
+    {
+        subMax.y() = max().y();
+    }
+    else
+    {
+        subMin.y() = min().y();
+    }
+
+    if (octant & FRONTHALF)
+    {
+        subMax.z() = max().z();
+    }
+    else
+    {
+        subMin.z() = min().z();
+    }
+
+    // NB: ordering of corners *is* irrelevant
+    return box_box_overlaps(subMin, subMax, bb.min(), bb.max());
 }
 
 

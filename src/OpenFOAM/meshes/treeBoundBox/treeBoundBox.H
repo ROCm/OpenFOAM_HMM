@@ -254,6 +254,17 @@ public:
             //- Sub-box given by octant number. Midpoint provided.
             treeBoundBox subBbox(const point& mid, const direction) const;
 
+            //- Sub-box half for given face
+            treeBoundBox subHalf(const direction whichFace) const;
+
+            //- Sub-box half for given face with prescribed mid point value.
+            //- Eg, subHalf(scalar, LEFT)
+            treeBoundBox subHalf
+            (
+                const scalar mid,
+                const direction whichFace
+            ) const;
+
             //- Returns octant number given point and the calculated midpoint.
             inline direction subOctant
             (
@@ -314,6 +325,21 @@ public:
 
             //- Overlaps with other bounding box, sphere etc?
             using boundBox::overlaps;
+
+            //- Does sub-octant overlap/touch boundingBox?
+            bool subOverlaps
+            (
+                const direction octant,
+                const boundBox& bb
+            ) const;
+
+            //- Does sub-octant overlap boundingSphere (centre + sqr(radius))?
+            inline bool subOverlaps
+            (
+                const direction octant,
+                const point& centre,
+                const scalar radiusSqr
+            ) const;
 
             //- intersects other bounding box, sphere etc?
             using boundBox::intersects;

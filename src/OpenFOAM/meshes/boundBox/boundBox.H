@@ -73,6 +73,31 @@ class boundBox
         //- Minimum and maximum points describing the bounding box
         point min_, max_;
 
+
+protected:
+
+    // Protected Member Functions
+
+        //- Test for overlap of box and box (inclusive check)
+        inline static bool box_box_overlaps
+        (
+            const point& minA,  // boxA (min)
+            const point& maxA,  // boxA (max)
+            const point& minB,  // boxB (min)
+            const point& maxB   // boxB (max)
+        );
+
+        //- Test for overlap of box and boundingSphere (centre + sqr(radius))
+        //  Note: ordering of corners is irrelevant
+        inline static bool box_sphere_overlaps
+        (
+            const point& corner0,   // box corner
+            const point& corner1,   // box corner
+            const point& centre,    // sphere centre
+            const scalar radiusSqr  // sqr(radius)
+        );
+
+
 public:
 
     // Static Data Members

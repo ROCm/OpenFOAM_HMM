@@ -377,14 +377,61 @@ inline void Foam::boundBox::inflate(const scalar factor)
 }
 
 
-inline bool Foam::boundBox::overlaps(const boundBox& bb) const
+inline bool Foam::boundBox::box_box_overlaps
+(
+    const point& minA, const point& maxA,   // boxA
+    const point& minB, const point& maxB    // boxB
+)
 {
     return
     (
-        min_.x() <= bb.max_.x() && bb.min_.x() <= max_.x()
-     && min_.y() <= bb.max_.y() && bb.min_.y() <= max_.y()
-     && min_.z() <= bb.max_.z() && bb.min_.z() <= max_.z()
+        minA.x() <= maxB.x() && minB.x() <= maxA.x()
+     && minA.y() <= maxB.y() && minB.y() <= maxA.y()
+     && minA.z() <= maxB.z() && minB.z() <= maxA.z()
     );
+}
+
+
+inline bool Foam::boundBox::box_sphere_overlaps
+(
+    const point& corner0,
+    const point& corner1,
+    const point& centre,
+    const scalar radiusSqr
+)
+{
+    // Find out where centre is in relation to bb.
+    // Find nearest point on bb.
+    scalar distSqr = 0;
+
+    for (direction dir = 0; dir < vector::nComponents; ++dir)
+    {
+        const scalar d0 = corner0[dir] - centre[dir];
+        const scalar d1 = corner1[dir] - centre[dir];
+
+        if ((d0 > 0) != (d1 > 0))
+        {
+            // centre inside both extrema. This component does not add any
+            // distance.
+        }
+        else
+        {
+            distSqr += ::Foam::min(Foam::magSqr(d0), Foam::magSqr(d1));
+
+            if (distSqr > radiusSqr)
+            {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+
+inline bool Foam::boundBox::overlaps(const boundBox& bb) const
+{
+    return box_box_overlaps(min_, max_, bb.min(), bb.max());
 }
 
 
@@ -394,36 +441,7 @@ inline bool Foam::boundBox::overlaps
     const scalar radiusSqr
 ) const
 {
-    // Find out where centre is in relation to bb.
-    // Find nearest point on bb.
-    scalar distSqr = 0;
-
-    for (direction dir = 0; dir < vector::nComponents; ++dir)
-    {
-        const scalar d0 = min_[dir] - centre[dir];
-        const scalar d1 = max_[dir] - centre[dir];
-
-        if ((d0 > 0) != (d1 > 0))
-        {
-            // centre inside both extrema. This component does not add any
-            // distance.
-        }
-        else if (Foam::mag(d0) < Foam::mag(d1))
-        {
-            distSqr += d0*d0;
-        }
-        else
-        {
-            distSqr += d1*d1;
-        }
-
-        if (distSqr > radiusSqr)
-        {
-            return false;
-        }
-    }
-
-    return true;
+    return box_sphere_overlaps(min_, max_, centre, radiusSqr);
 }
 
 

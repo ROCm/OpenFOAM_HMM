@@ -41,78 +41,6 @@ Foam::scalar Foam::indexedOctree<Type>::perturbTol_ = 10*SMALL;
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-bool Foam::indexedOctree<Type>::overlaps
-(
-    const point& p0,
-    const point& p1,
-    const scalar nearestDistSqr,
-    const point& sample
-)
-{
-    boundBox bb(p0, p1);
-
-    return bb.overlaps(sample, nearestDistSqr);
-}
-
-
-template<class Type>
-bool Foam::indexedOctree<Type>::overlaps
-(
-    const treeBoundBox& parentBb,
-    const direction octant,
-    const scalar nearestDistSqr,
-    const point& sample
-)
-{
-    //- Accelerated version of
-    //     treeBoundBox subBb(parentBb.subBbox(mid, octant))
-    //     overlaps
-    //     (
-    //          subBb.min(),
-    //          subBb.max(),
-    //          nearestDistSqr,
-    //          sample
-    //     )
-
-    const point& min = parentBb.min();
-    const point& max = parentBb.max();
-
-    point other;
-
-    if (octant & treeBoundBox::RIGHTHALF)
-    {
-        other.x() = max.x();
-    }
-    else
-    {
-        other.x() = min.x();
-    }
-
-    if (octant & treeBoundBox::TOPHALF)
-    {
-        other.y() = max.y();
-    }
-    else
-    {
-        other.y() = min.y();
-    }
-
-    if (octant & treeBoundBox::FRONTHALF)
-    {
-        other.z() = max.z();
-    }
-    else
-    {
-        other.z() = min.z();
-    }
-
-    const point mid(0.5*(min+max));
-
-    return overlaps(mid, other, nearestDistSqr, sample);
-}
-
-
-template<class Type>
 void Foam::indexedOctree<Type>::divide
 (
     const labelList& indices,
@@ -498,14 +426,10 @@ void Foam::indexedOctree<Type>::findNearest
     const node& nod = nodes_[nodeI];
 
     // Determine order to walk through octants
-    FixedList<direction, 8> octantOrder;
-    nod.bb_.searchOrder(sample, octantOrder);
-
     // Go into all suboctants (one containing sample first) and update nearest.
-    for (direction i = 0; i < 8; i++)
-    {
-        direction octant = octantOrder[i];
 
+    for (const direction octant : nod.bb_.searchOrder(sample))
+    {
         labelBits index = nod.subNodes_[octant];
 
         if (isNode(index))
@@ -514,7 +438,7 @@ void Foam::indexedOctree<Type>::findNearest
 
             const treeBoundBox& subBb = nodes_[subNodeI].bb_;
 
-            if (overlaps(subBb.min(), subBb.max(), nearestDistSqr, sample))
+            if (subBb.overlaps(sample, nearestDistSqr))
             {
                 findNearest
                 (
@@ -531,16 +455,7 @@ void Foam::indexedOctree<Type>::findNearest
         }
         else if (isContent(index))
         {
-            if
-            (
-                overlaps
-                (
-                    nod.bb_,
-                    octant,
-                    nearestDistSqr,
-                    sample
-                )
-            )
+            if (nod.bb_.subOverlaps(octant, sample, nearestDistSqr))
             {
                 fnOp
                 (
@@ -576,14 +491,10 @@ void Foam::indexedOctree<Type>::findNearest
     const treeBoundBox& nodeBb = nod.bb_;
 
     // Determine order to walk through octants
-    FixedList<direction, 8> octantOrder;
-    nod.bb_.searchOrder(ln.centre(), octantOrder);
-
     // Go into all suboctants (one containing sample first) and update nearest.
-    for (direction i = 0; i < 8; i++)
-    {
-        direction octant = octantOrder[i];
 
+    for (const direction octant : nod.bb_.searchOrder(ln.centre()))
+    {
         labelBits index = nod.subNodes_[octant];
 
         if (isNode(index))
@@ -608,9 +519,7 @@ void Foam::indexedOctree<Type>::findNearest
         }
         else if (isContent(index))
         {
-            const treeBoundBox subBb(nodeBb.subBbox(octant));
-
-            if (subBb.overlaps(tightest))
+            if (nodeBb.subOverlaps(octant, tightest))
             {
                 fnOp
                 (
@@ -1819,9 +1728,7 @@ void Foam::indexedOctree<Type>::findBox
         }
         else if (isContent(index))
         {
-            const treeBoundBox subBb(nodeBb.subBbox(octant));
-
-            if (subBb.overlaps(searchBox))
+            if (nodeBb.subOverlaps(octant, searchBox))
             {
                 const labelList& indices = contents_[getContent(index)];
 
@@ -1867,9 +1774,7 @@ void Foam::indexedOctree<Type>::findSphere
         }
         else if (isContent(index))
         {
-            const treeBoundBox subBb(nodeBb.subBbox(octant));
-
-            if (subBb.overlaps(centre, radiusSqr))
+            if (nodeBb.subOverlaps(octant, centre, radiusSqr))
             {
                 const labelList& indices = contents_[getContent(index)];
 

@@ -127,18 +127,8 @@ class dynamicIndexedOctree
         //- Per node per octant whether is fully inside/outside/mixed.
         mutable PackedList<2> nodeTypes_;
 
-    // Private Member Functions
 
-        //- Helper: does bb intersect a sphere around sample? Or is any
-        //  corner point of bb closer than nearestDistSqr to sample.
-        //  (bb is implicitly provided as parent bb + octant)
-        static bool overlaps
-        (
-            const treeBoundBox& parentBb,
-            const direction octant,
-            const scalar nearestDistSqr,
-            const point& sample
-        );
+    // Private Member Functions
 
         // Construction
 
@@ -490,16 +480,6 @@ public:
             (
                 const vector& outsideNormal,
                 const vector& vec
-            );
-
-            //- Helper: does bb intersect a sphere around sample? Or is any
-            //  corner point of bb closer than nearestDistSqr to sample.
-            static bool overlaps
-            (
-                const point& bbMin,
-                const point& bbMax,
-                const scalar nearestDistSqr,
-                const point& sample
             );
 
             //- Find near pairs and apply CompareOp to them.
