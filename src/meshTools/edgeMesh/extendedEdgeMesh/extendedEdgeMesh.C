@@ -808,13 +808,7 @@ void Foam::extendedEdgeMesh::allNearestFeatureEdges
 
             label hitIndex = index + sliceStarts[i];
 
-            pointIndexHit nearHit
-            (
-                hitPoint,
-                hitIndex
-            );
-
-            dynEdgeHit.append(nearHit);
+            dynEdgeHit.append(pointIndexHit(hitPoint, hitIndex));
         }
     }
 

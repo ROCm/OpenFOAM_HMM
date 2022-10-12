@@ -535,11 +535,9 @@ Foam::treeBoundBox Foam::indexedOctree<Type>::subBbox
         // Use stored bb
         return nodes_[getNode(index)].bb_;
     }
-    else
-    {
-        // Calculate subBb
-        return nod.bb_.subBbox(octant);
-    }
+
+    // Calculate subBb
+    return nod.bb_.subBbox(octant);
 }
 
 
@@ -1685,15 +1683,17 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findLine
 
 
 template<class Type>
-void Foam::indexedOctree<Type>::findBox
+bool Foam::indexedOctree<Type>::findBox
 (
     const label nodeI,
     const treeBoundBox& searchBox,
-    labelHashSet& elements
+    labelHashSet* elements
 ) const
 {
     const node& nod = nodes_[nodeI];
     const treeBoundBox& nodeBb = nod.bb_;
+
+    bool foundAny = false;
 
     for (direction octant = 0; octant < node::nChildren; ++octant)
     {
@@ -1705,7 +1705,13 @@ void Foam::indexedOctree<Type>::findBox
 
             if (subBb.overlaps(searchBox))
             {
-                findBox(getNode(index), searchBox, elements);
+                if (findBox(getNode(index), searchBox, elements))
+                {
+                    // Early exit if not storing results
+                    if (!elements) return true;
+
+                    foundAny = true;
+                }
             }
         }
         else if (isContent(index))
@@ -1714,32 +1720,38 @@ void Foam::indexedOctree<Type>::findBox
             {
                 const labelList& indices = contents_[getContent(index)];
 
-                forAll(indices, i)
+                for (const label index : indices)
                 {
-                    label shapeI = indices[i];
-
-                    if (shapes_.overlaps(shapeI, searchBox))
+                    if (shapes_.overlaps(index, searchBox))
                     {
-                        elements.insert(shapeI);
+                        // Early exit if not storing results
+                        if (!elements) return true;
+
+                        foundAny = true;
+                        elements->insert(index);
                     }
                 }
             }
         }
     }
+
+    return foundAny;
 }
 
 
 template<class Type>
-void Foam::indexedOctree<Type>::findSphere
+bool Foam::indexedOctree<Type>::findSphere
 (
     const label nodeI,
     const point& centre,
     const scalar radiusSqr,
-    labelHashSet& elements
+    labelHashSet* elements
 ) const
 {
     const node& nod = nodes_[nodeI];
     const treeBoundBox& nodeBb = nod.bb_;
+
+    bool foundAny = false;
 
     for (direction octant = 0; octant < node::nChildren; ++octant)
     {
@@ -1751,7 +1763,13 @@ void Foam::indexedOctree<Type>::findSphere
 
             if (subBb.overlaps(centre, radiusSqr))
             {
-                findSphere(getNode(index), centre, radiusSqr, elements);
+                if (findSphere(getNode(index), centre, radiusSqr, elements))
+                {
+                    // Early exit if not storing results
+                    if (!elements) return true;
+
+                    foundAny = true;
+                }
             }
         }
         else if (isContent(index))
@@ -1760,18 +1778,22 @@ void Foam::indexedOctree<Type>::findSphere
             {
                 const labelList& indices = contents_[getContent(index)];
 
-                forAll(indices, i)
+                for (const label index : indices)
                 {
-                    label shapeI = indices[i];
-
-                    if (shapes_.overlaps(shapeI, centre, radiusSqr))
+                    if (shapes_.overlaps(index, centre, radiusSqr))
                     {
-                        elements.insert(shapeI);
+                        // Early exit if not storing results
+                        if (!elements) return true;
+
+                        foundAny = true;
+                        elements->insert(index);
                     }
                 }
             }
         }
     }
+
+    return foundAny;
 }
 
 
@@ -1946,6 +1968,31 @@ void Foam::indexedOctree<Type>::findNear
             }
         }
     }
+}
+
+
+template<class Type>
+Foam::label Foam::indexedOctree<Type>::countLeafs(const label nodeI) const
+{
+    label total = 0;
+
+    const node& nod = nodes_[nodeI];
+
+    for (direction octant = 0; octant < node::nChildren; ++octant)
+    {
+        labelBits index = nod.subNodes_[octant];
+
+        if (isNode(index))
+        {
+            total += countLeafs(getNode(index));
+        }
+        else if (isContent(index))
+        {
+            ++total;
+        }
+    }
+
+    return total;
 }
 
 
@@ -2449,6 +2496,43 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findLineAny
 
 
 template<class Type>
+bool Foam::indexedOctree<Type>::overlaps
+(
+    const treeBoundBox& searchBox
+) const
+{
+    // start node=0, do not store
+    return !nodes_.empty() && findBox(0, searchBox, nullptr);
+}
+
+
+template<class Type>
+Foam::label Foam::indexedOctree<Type>::findBox
+(
+    const treeBoundBox& searchBox,
+    labelHashSet& elements
+) const
+{
+    elements.clear();
+
+    if (!nodes_.empty())
+    {
+        if (!elements.capacity())
+        {
+            // Some arbitrary minimal size estimate (eg, 1/100 are found)
+            label estimatedCapacity(max(256, 2*(shapes_.size() / 100)));
+            elements.resize(estimatedCapacity);
+        }
+
+        // start node=0, store results
+        findBox(0, searchBox, &elements);
+    }
+
+    return elements.size();
+}
+
+
+template<class Type>
 Foam::labelList Foam::indexedOctree<Type>::findBox
 (
     const treeBoundBox& searchBox
@@ -2459,13 +2543,53 @@ Foam::labelList Foam::indexedOctree<Type>::findBox
         return labelList();
     }
 
-    // Storage for labels of shapes inside bb. Size estimate.
-    labelHashSet elements(shapes_.size() / 100);
+    labelHashSet elements(0);
 
-    findBox(0, searchBox, elements);
+    findBox(searchBox, elements);
 
+    //TBD: return sorted ? elements.sortedToc() : elements.toc();
     return elements.toc();
 }
+
+
+template<class Type>
+bool Foam::indexedOctree<Type>::overlaps
+(
+    const point& centre,
+    const scalar radiusSqr
+) const
+{
+    // start node=0, do not store
+    return !nodes_.empty() && findSphere(0, centre, radiusSqr, nullptr);
+}
+
+
+template<class Type>
+Foam::label Foam::indexedOctree<Type>::findSphere
+(
+    const point& centre,
+    const scalar radiusSqr,
+    labelHashSet& elements
+) const
+{
+    elements.clear();
+
+    if (!nodes_.empty())
+    {
+        if (!elements.capacity())
+        {
+            // Some arbitrary minimal size estimate (eg, 1/100 are found)
+            label estimatedCapacity(max(256, 2*(shapes_.size() / 100)));
+            elements.resize(estimatedCapacity);
+        }
+
+        // start node=0, store results
+        findSphere(0, centre, radiusSqr, &elements);
+    }
+
+    return elements.size();
+}
+
 
 
 template<class Type>
@@ -2480,11 +2604,11 @@ Foam::labelList Foam::indexedOctree<Type>::findSphere
         return labelList();
     }
 
-    // Storage for labels of shapes inside bb. Size estimate.
-    labelHashSet elements(shapes_.size() / 100);
+    labelHashSet elements(0);
 
-    findSphere(0, centre, radiusSqr, elements);
+    findSphere(centre, radiusSqr, elements);
 
+    //TBD: return sorted ? elements.sortedToc() : elements.toc();
     return elements.toc();
 }
 
@@ -2758,6 +2882,19 @@ void Foam::indexedOctree<Type>::print
             os  << "octant:" << octant << " empty:" << subBb << endl;
         }
     }
+}
+
+
+template<class Type>
+Foam::label Foam::indexedOctree<Type>::nLeafs() const
+{
+    if (nodes_.size() < 2)
+    {
+        // If 0 or 1 nodes, treat directly as content nodes
+        return nodes_.size();
+    }
+
+    return countLeafs(0);
 }
 
 

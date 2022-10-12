@@ -269,22 +269,23 @@ class dynamicIndexedOctree
                 const point& end
             ) const;
 
-            //- Find all elements intersecting box.
-            void findBox
+            //- Find elements intersecting box
+            //  Store all results in elements (if non-null), or early exit
+            bool findBox
             (
                 const label nodeI,
                 const treeBoundBox& searchBox,
-                labelHashSet& elements
+                labelHashSet* elements
             ) const;
 
-
-            //- Find all elements intersecting sphere.
-            void findSphere
+            //- Find elements intersecting sphere.
+            //  Store all results in elements (if non-null), or early exit
+            bool findSphere
             (
                 const label nodeI,
                 const point& centre,
                 const scalar radiusSqr,
-                labelHashSet& elements
+                labelHashSet* elements
             ) const;
 
 
@@ -430,18 +431,52 @@ public:
                 const point& end
             ) const;
 
-            //- Find (in no particular order) indices of all shapes inside or
-            //  overlapping bounding box (i.e. all shapes not outside box)
-            labelList findBox(const treeBoundBox& bb) const;
+            //- True if any shapes overlap the bounding box
+            bool overlaps(const treeBoundBox& bb) const;
 
-            //- Find (in no particular order) indices of all shapes inside or
-            //  overlapping a bounding sphere (i.e. all shapes not outside
-            //  sphere)
+            //- Find indices of all shapes inside or overlapping
+            //- a bounding box (i.e. all shapes not outside box)
+            //  \returns the indices (in no particular order)
+            labelList findBox
+            (
+                const treeBoundBox& bb  //!< bound box limits
+            ) const;
+
+            //- Find indices of all shapes inside or overlapping
+            //- a bounding box (i.e. all shapes not outside box)
+            //  \returns the number of elements found
+            label findBox
+            (
+                const treeBoundBox& bb, //!< bound box limits
+                labelHashSet& elements  //!< [out] elements found
+            ) const;
+
+            //- True if any shapes overlap the bounding sphere
+            bool overlaps
+            (
+                const point& centre,    //!< centre of bound sphere
+                const scalar radiusSqr  //!< radius^2 of sphere
+            ) const;
+
+            //- Find indices of all shapes inside or overlapping
+            //- a bounding sphere (i.e. all shapes not outside a sphere)
+            //  \returns the indices (in no particular order)
             labelList findSphere
             (
-                const point& centre,
-                const scalar radiusSqr
+                const point& centre,    //!< centre of bound sphere
+                const scalar radiusSqr  //!< radius^2 of sphere
             ) const;
+
+            //- Find indices of all shapes inside or overlapping
+            //- a bounding sphere (i.e. all shapes not outside sphere)
+            //  \returns the number of elements found
+            label findSphere
+            (
+                const point& centre,    //!< centre of bound sphere
+                const scalar radiusSqr, //!< radius^2 of sphere
+                labelHashSet& elements  //!< [out] elements found
+            ) const;
+
 
             //- Find deepest node (as parent+octant) containing point. Starts
             //  off from starting index in nodes_ (use 0 to start from top)
