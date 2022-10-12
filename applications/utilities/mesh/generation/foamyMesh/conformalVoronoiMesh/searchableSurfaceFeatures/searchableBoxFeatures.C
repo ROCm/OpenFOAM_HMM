@@ -83,16 +83,13 @@ Foam::searchableBoxFeatures::features() const
 {
     autoPtr<extendedFeatureEdgeMesh> features;
 
-    vectorField faceNormals(List<vector>(treeBoundBox::faceNormals));
+    List<vector> faceNormalsList(treeBoundBox::faceNormals);
+    vectorField faceNormals(std::move(faceNormalsList));
 
     vectorField edgeDirections(12);
-    labelListList normalDirections(12);
+    labelListList normalDirections(12, labelList(2, Zero));
+    labelListList edgeNormals(12, labelList(2, Zero));
 
-    labelListList edgeNormals(12);
-    forAll(edgeNormals, eI)
-    {
-        edgeNormals[eI].setSize(2, 0);
-    }
     edgeNormals[0][0] = 2; edgeNormals[0][1] = 4;
     edgeNormals[1][0] = 1; edgeNormals[1][1] = 4;
     edgeNormals[2][0] = 3; edgeNormals[2][1] = 4;
@@ -115,7 +112,6 @@ Foam::searchableBoxFeatures::features() const
             surfacePoints[treeBoundBox::edges[eI].end()]
           - surfacePoints[treeBoundBox::edges[eI].start()];
 
-        normalDirections[eI] = labelList(2, Zero);
         for (label j = 0; j < 2; ++j)
         {
             const vector cross =
@@ -137,12 +133,12 @@ Foam::searchableBoxFeatures::features() const
         }
     }
 
-    labelListList featurePointNormals(8);
-    labelListList featurePointEdges(8);
+    labelListList featurePointNormals(8, labelList(3, Zero));
+    labelListList featurePointEdges(8, labelList(3, Zero));
+
     forAll(featurePointNormals, pI)
     {
         labelList& ftPtEdges = featurePointEdges[pI];
-        ftPtEdges.setSize(3, 0);
 
         label edgeI = 0;
         forAll(treeBoundBox::edges, eI)
@@ -160,7 +156,6 @@ Foam::searchableBoxFeatures::features() const
         }
 
         labelList& ftPtNormals = featurePointNormals[pI];
-        ftPtNormals.setSize(3, 0);
 
         ftPtNormals[0] = edgeNormals[ftPtEdges[0]][0];
         ftPtNormals[1] = edgeNormals[ftPtEdges[0]][1];
