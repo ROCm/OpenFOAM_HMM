@@ -38,8 +38,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef UniformDimensionedField_H
-#define UniformDimensionedField_H
+#ifndef Foam_UniformDimensionedField_H
+#define Foam_UniformDimensionedField_H
 
 #include "regIOobject.H"
 #include "dimensionedType.H"
@@ -59,7 +59,6 @@ class UniformDimensionedField
     public regIOobject,
     public dimensioned<Type>
 {
-
 public:
 
     //- Runtime type information
@@ -78,20 +77,20 @@ public:
         );
 
         //- Construct as copy
-        UniformDimensionedField(const UniformDimensionedField<Type>& rdt);
+        UniformDimensionedField(const UniformDimensionedField<Type>&);
 
         //- Construct from Istream
         UniformDimensionedField(const IOobject& io);
 
 
     //- Destructor
-    virtual ~UniformDimensionedField();
+    virtual ~UniformDimensionedField() = default;
 
 
     // Member Functions
 
         //- Name function provided to resolve the ambiguity between the
-        //  name functions in regIOobject and dimensioned<Type>
+        //- name functions in regIOobject and dimensioned<Type>
         virtual const word& name() const
         {
             return dimensioned<Type>::name();
@@ -125,9 +124,10 @@ public:
         //- Assign name, dimensions and value.
         void operator=(const dimensioned<Type>& rhs);
 
-        Type operator[](const label) const
+        //- Return value
+        const Type& operator[](const label) const noexcept
         {
-            return this->value();
+            return dimensioned<Type>::value();
         }
 };
 

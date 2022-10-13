@@ -40,8 +40,8 @@ SeeAlso
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef one_H
-#define one_H
+#ifndef Foam_one_H
+#define Foam_one_H
 
 #include "label.H"
 
@@ -93,6 +93,12 @@ public:
     {
         return 1;
     }
+
+    //- Component-wise or element-wise access returns one
+    one operator[](const label) const noexcept
+    {
+        return one{};
+    }
 };
 
 
@@ -132,6 +138,12 @@ public:
     constexpr operator double() const noexcept
     {
         return -1;
+    }
+
+    //- Component-wise or element-wise access returns minus one
+    one::minus operator[](const label) const noexcept
+    {
+        return one::minus{};
     }
 };
 

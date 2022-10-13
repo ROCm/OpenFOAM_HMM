@@ -65,6 +65,7 @@ public:
 
     // Member Functions
 
+        //- Method name compatibility with DimensionedField
         zeroField field() const noexcept
         {
             return zeroField{};

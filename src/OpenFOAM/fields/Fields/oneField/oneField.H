@@ -70,17 +70,10 @@ public:
 
     // Member Functions
 
+        //- Method name compatibility with DimensionedField
         oneField field() const noexcept
         {
             return oneField{};
-        }
-
-
-    // Member Operators
-
-        one operator[](const label) const noexcept
-        {
-            return one{};
         }
 };
 

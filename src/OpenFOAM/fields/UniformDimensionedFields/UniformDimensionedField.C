@@ -73,19 +73,14 @@ Foam::UniformDimensionedField<Type>::UniformDimensionedField
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::UniformDimensionedField<Type>::~UniformDimensionedField()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
 bool Foam::UniformDimensionedField<Type>::readData(Istream& is)
 {
     dictionary dict(is);
+
+    // The dimensions
     scalar multiplier(1);
     this->dimensions().read
     (
@@ -93,7 +88,8 @@ bool Foam::UniformDimensionedField<Type>::readData(Istream& is)
         multiplier
     );
 
-    dict.readEntry("value", this->value());
+    // The value
+    dict.readEntry("value", this->value(), keyType::LITERAL);
     this->value() *= multiplier;
 
     return is.good();
@@ -103,9 +99,12 @@ bool Foam::UniformDimensionedField<Type>::readData(Istream& is)
 template<class Type>
 bool Foam::UniformDimensionedField<Type>::writeData(Ostream& os) const
 {
+    // The dimensions
     scalar multiplier(1);
     os.writeKeyword("dimensions");
     this->dimensions().write(os, multiplier) << token::END_STATEMENT << nl;
+
+    // The value
     os.writeEntry("value", this->value()/multiplier) << nl;
 
     return os.good();
