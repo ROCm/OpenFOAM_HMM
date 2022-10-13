@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2012 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,13 +25,56 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "indexedOctree.H"
+#include "AABBTree.H"
+#include "treeBoundBox.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
+Foam::scalar Foam::AABBTreeBase::tolerance_ = 1e-4;
+
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+void Foam::AABBTreeBase::writeOBJ
+(
+    Ostream& os,
+    const treeBoundBox& bb,
+    label& vertIndex,
+    const bool writeLinesOnly
+)
 {
-defineTypeNameAndDebug(indexedOctreeName, 0);
+    // Annotate with '#box' which can be grep'd for later
+    os  << "#box" << nl;
+
+    pointField pts(bb.points());
+
+    for (const point& p : pts)
+    {
+        os  << "v " << p.x() << ' ' << p.y() << ' ' << p.z() << nl;
+    }
+
+    if (writeLinesOnly)
+    {
+        for (const edge& e : treeBoundBox::edges)
+        {
+            os  << "l " << e[0] + vertIndex + 1
+                << ' ' << e[1] + vertIndex + 1 << nl;
+        }
+    }
+    else
+    {
+        for (const face& f : treeBoundBox::faces)
+        {
+            os  << 'f';
+            for (const label fpi : f)
+            {
+                os  << ' ' << fpi + vertIndex + 1;
+            }
+            os  << nl;
+        }
+    }
+
+    vertIndex += pts.size();
 }
 
 

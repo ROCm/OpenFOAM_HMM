@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,44 +53,60 @@ namespace Foam
 {
 
 // Forward Declarations
+class Istream;
 template<class Type> class indexedOctree;
 template<class Type> Ostream& operator<<(Ostream&, const indexedOctree<Type>&);
-class Istream;
 
 
 /*---------------------------------------------------------------------------*\
-                        Class indexedOctreeName Declaration
+                      Class indexedOctreeBase Declaration
 \*---------------------------------------------------------------------------*/
 
-TemplateName(indexedOctree);
-
-
-/*---------------------------------------------------------------------------*\
-                           Class indexedOctree Declaration
-\*---------------------------------------------------------------------------*/
-
-template<class Type>
-class indexedOctree
-:
-    public indexedOctreeName
+//- Template invariant parts for indexedOctree
+//  The internal node bookkeeping is encoded follows:
+//  - 0: empty
+//  - +ve: parent
+//  - -ve: leaf
+class indexedOctreeBase
 {
 public:
 
-    // Data types
+    // Public Data Types
 
         //- Tree node. Has up pointer and down pointers.
         class node
         {
         public:
 
+            //- Has exactly 8 sub-nodes (octants)
+            static constexpr direction nChildren = 8;
+
             //- Bounding box of this node
             treeBoundBox bb_;
 
-            //- Parent node (index into nodes_ of tree)
-            label parent_;
+            //- Parent node (index into flat list addressing for tree)
+            label parent_ = -1;
 
             //- IDs of the 8 nodes on all sides of the mid point
             FixedList<labelBits, 8> subNodes_;
+
+
+        // Operators
+
+            friend bool operator==(const node& a, const node& b)
+            {
+                return
+                (
+                    a.parent_ == b.parent_
+                 && a.subNodes_ == b.subNodes_
+                 && a.bb_ == b.bb_
+                );
+            }
+
+            friend bool operator!=(const node& a, const node& b)
+            {
+                return !(a == b);
+            }
 
             friend Ostream& operator<< (Ostream& os, const node& n)
             {
@@ -101,24 +118,124 @@ public:
             {
                 return is >> n.bb_ >> n.parent_ >> n.subNodes_;
             }
-
-            friend bool operator==(const node& a, const node& b)
-            {
-                return
-                    a.bb_ == b.bb_
-                 && a.parent_ == b.parent_
-                 && a.subNodes_ == b.subNodes_;
-            }
-
-            friend bool operator!=(const node& a, const node& b)
-            {
-                return !(a == b);
-            }
         };
 
 
-private:
+    // Static Functions
 
+    // Tests for node handling
+    // (0: empty, +ve: parent, -ve: leaf)
+
+        //- An empty node - no content
+        static bool isEmpty(labelBits i) noexcept
+        {
+            return (i.val() == 0);
+        }
+
+        //- Node with content (leaf)
+        static bool isContent(labelBits i) noexcept
+        {
+            return (i.val() < 0);
+        }
+
+        //- A parent node
+        static bool isNode(labelBits i) noexcept
+        {
+            return (i.val() > 0);
+        }
+
+
+    // Decode/retrieve node addressing
+
+        //- Return real (dereferenced) index for a content node
+        static label getContent(labelBits i)
+        {
+            if (!isContent(i))
+            {
+                FatalErrorInFunction
+                    << abort(FatalError);
+            }
+            return (-i.val()-1);
+        }
+
+        //- Return real (dereferenced) index for a parent node
+        static label getNode(const labelBits i)
+        {
+            if (!isNode(i))
+            {
+                FatalErrorInFunction
+                    << abort(FatalError);
+            }
+            return (i.val()-1);
+        }
+
+        //- Return sub-node direction/octant
+        static direction getOctant(labelBits i) noexcept
+        {
+            return i.bits();
+        }
+
+
+protected:
+
+    // Protected Member Functions
+
+    // Encode node addressing
+    // (only used when building)
+
+        //- From empty to subNodes_ entry
+        static labelBits emptyPlusOctant(direction octant)
+        {
+            return labelBits(0, octant);
+        }
+
+        //- From index into contents_ to subNodes_ entry
+        static labelBits contentPlusOctant(label i, direction octant)
+        {
+            return labelBits(-i-1, octant);
+        }
+
+        //- From index into nodes_ to subNodes_ entry
+        static labelBits nodePlusOctant(label i, direction octant)
+        {
+            return labelBits(i+1, octant);
+        }
+
+
+public:
+
+    //- Runtime type information
+    ClassName("indexedOctree");
+
+
+    // Constructors
+
+        //- Default construct
+        indexedOctreeBase() = default;
+
+
+    // Output Helpers
+
+        //- Write treeBoundBox in OBJ format
+        static void writeOBJ
+        (
+            Ostream& os,
+            const treeBoundBox& bb,
+            label& vertIndex,
+            const bool writeLinesOnly = false
+        );
+};
+
+
+/*---------------------------------------------------------------------------*\
+                           Class indexedOctree Declaration
+\*---------------------------------------------------------------------------*/
+
+template<class Type>
+class indexedOctree
+:
+    public indexedOctreeBase
+{
     // Static data
 
         //- Relative perturbation tolerance. Determines when point is
@@ -128,7 +245,7 @@ private:
         static scalar perturbTol_;
 
 
-    // Private data
+    // Private Data
 
         //- Underlying shapes for geometric queries.
         const Type shapes_;
@@ -141,6 +258,7 @@ private:
 
         //- Per node per octant whether is fully inside/outside/mixed.
         mutable PackedList<2> nodeTypes_;
+
 
     // Private Member Functions
 
@@ -361,42 +479,24 @@ private:
             );
 
 
-        // Other
+    // Other
 
-            //- Count number of elements on this and sublevels
-            label countElements(const labelBits index) const;
+        //- Count number of elements on this and sublevels
+        label countElements(const labelBits index) const;
 
-            //- Dump node+octant to an obj file
-            void writeOBJ(const label nodeI, const direction octant) const;
+        //- Write node treeBoundBoxes in OBJ format
+        void writeOBJ
+        (
+            const label nodeI,
+            Ostream& os,
+            label& vertIndex,
+            const bool leavesOnly,
+            const bool writeLinesOnly = false
+        ) const;
 
-            //- From index into contents_ to subNodes_ entry
-            static labelBits contentPlusOctant
-            (
-                const label i,
-                const direction octant
-            )
-            {
-                return labelBits(-i - 1, octant);
-            }
+        //- Dump node+octant to an obj file
+        void writeOBJ(const label nodeI, const direction octant) const;
 
-            //- From index into nodes_ to subNodes_ entry
-            static labelBits nodePlusOctant
-            (
-                const label i,
-                const direction octant
-            )
-            {
-                return labelBits(i + 1, octant);
-            }
-
-            //- From empty to subNodes_ entry
-            static labelBits emptyPlusOctant
-            (
-                const direction octant
-            )
-            {
-                return labelBits(0, octant);
-            }
 
 public:
 
@@ -437,87 +537,39 @@ public:
             return autoPtr<indexedOctree<Type>>::New(*this);
         }
 
+
     // Member Functions
 
-        // Access
+    // Access
 
-            //- Reference to shape
-            const Type& shapes() const
+        //- Reference to shape
+        const Type& shapes() const noexcept { return shapes_; }
+
+        //- List of all nodes
+        const List<node>& nodes() const noexcept { return nodes_; }
+
+        //- List of all contents
+        //- (referenced by those nodes that are contents)
+        const List<labelList>& contents() const noexcept
+        {
+            return contents_;
+        }
+
+        //- Per node, per octant whether is fully inside/outside/mixed.
+        PackedList<2>& nodeTypes() const noexcept
+        {
+            return nodeTypes_;
+        }
+
+        //- Top bounding box
+        const treeBoundBox& bb() const
+        {
+            if (nodes_.empty())
             {
-                return shapes_;
+                return treeBoundBox::null();
             }
-
-            //- List of all nodes
-            const List<node>& nodes() const
-            {
-                return nodes_;
-            }
-
-            //- List of all contents (referenced by those nodes that are
-            //  contents)
-            const labelListList& contents() const
-            {
-                return contents_;
-            }
-
-            //- Top bounding box
-            const treeBoundBox& bb() const
-            {
-                if (nodes_.empty())
-                {
-                    return treeBoundBox::null();
-                }
-                return nodes_[0].bb_;
-            }
-
-            //- Per node, per octant whether is fully inside/outside/mixed.
-            PackedList<2>& nodeTypes() const
-            {
-                return nodeTypes_;
-            }
-
-
-        // Conversions for entries in subNodes_.
-
-            static bool isContent(const labelBits i)
-            {
-                return i.val() < 0;
-            }
-
-            static bool isEmpty(const labelBits i)
-            {
-                return i.val() == 0;
-            }
-
-            static bool isNode(const labelBits i)
-            {
-                return i.val() > 0;
-            }
-
-            static label getContent(const labelBits i)
-            {
-                if (!isContent(i))
-                {
-                    FatalErrorInFunction
-                        << abort(FatalError);
-                }
-                return -i.val()-1;
-            }
-
-            static label getNode(const labelBits i)
-            {
-                if (!isNode(i))
-                {
-                    FatalErrorInFunction
-                        << abort(FatalError);
-                }
-                return i.val() - 1;
-            }
-
-            static direction getOctant(const labelBits i)
-            {
-                return i.bits();
-            }
+            return nodes_[0].bb_;
+        }
 
 
         // Queries
@@ -670,18 +722,21 @@ public:
             ) const;
 
 
-        // Write
+    // Write
 
-            //- Print tree. Either print all indices (printContent = true) or
-            //  just size of contents nodes.
-            void print
-            (
-                prefixOSstream&,
-                const bool printContents,
-                const label
-            ) const;
+        //- Write (non-empty) tree boxes in OBJ format
+        void writeOBJ(Ostream& os) const;
 
-            bool write(Ostream& os) const;
+        //- Print tree. Either print all indices (printContent = true) or
+        //  just size of contents nodes.
+        void print
+        (
+            prefixOSstream&,
+            const bool printContents,
+            const label
+        ) const;
+
+        bool write(Ostream& os) const;
 
 
     // IOstream Operators

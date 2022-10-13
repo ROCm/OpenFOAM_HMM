@@ -29,50 +29,7 @@ License
 #include "AABBTree.H"
 #include "bitSet.H"
 
-template<class Type>
-Foam::scalar Foam::AABBTree<Type>::tolerance_ = 1e-4;
-
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
-
-template<class Type>
-void Foam::AABBTree<Type>::writeOBJ
-(
-    const bool writeLinesOnly,
-    const treeBoundBox& bb,
-    label& vertI,
-    Ostream& os
-) const
-{
-    const pointField pts(bb.points());
-
-    for (const point& p : pts)
-    {
-        os << "v " << p.x() << ' ' << p.y() << ' ' << p.z() << nl;
-    }
-
-    if (writeLinesOnly)
-    {
-        for (const edge& e : treeBoundBox::edges)
-        {
-            os  << "l " << e[0] + vertI + 1 << ' ' << e[1] + vertI + 1 << nl;
-        }
-    }
-    else
-    {
-        for (const face& f : treeBoundBox::faces)
-        {
-            os  << 'f';
-            for (const label fpi : f)
-            {
-                os  << ' ' << fpi + vertI + 1;
-            }
-            os  << nl;
-        }
-    }
-
-    vertI += pts.size();
-}
-
 
 template<class Type>
 void Foam::AABBTree<Type>::writeOBJ
@@ -89,7 +46,7 @@ void Foam::AABBTree<Type>::writeOBJ
 {
     if (!leavesOnly || nodeI < 0)
     {
-        writeOBJ(writeLinesOnly, bb, vertI, os);
+        AABBTreeBase::writeOBJ(os, bb, vertI, writeLinesOnly);
     }
 
     // recurse to find leaves
@@ -126,9 +83,9 @@ void Foam::AABBTree<Type>::createBoxes
 (
     const bool equalBinSize,
     const label level,
-    const List<Type>& objects,
+    const UList<Type>& objects,
     const pointField& points,
-    const DynamicList<label>& objectIDs,
+    const labelUList& objectIDs,
     const treeBoundBox& bb,
     const label nodeI,
 
@@ -153,7 +110,7 @@ void Foam::AABBTree<Type>::createBoxes
     }
 
 
-    scalar divide;
+    scalar pivotValue;
 
     if (equalBinSize)
     {
@@ -179,17 +136,17 @@ void Foam::AABBTree<Type>::createBoxes
 
         Foam::sort(component);
 
-        divide = component[component.size()/2];
+        pivotValue = component[component.size()/2];
     }
     else
     {
         // Geometric middle
-        divide = bb.min()[maxDir] + 0.5*maxSpan;
+        pivotValue = bb.min()[maxDir] + 0.5*maxSpan;
     }
 
 
-    scalar divMin = divide + tolerance_*maxSpan;
-    scalar divMax = divide - tolerance_*maxSpan;
+    const scalar divMin = pivotValue + tolerance_*maxSpan;
+    const scalar divMax = pivotValue - tolerance_*maxSpan;
 
 
     // Assign the objects to min or max bin
@@ -333,8 +290,8 @@ Foam::AABBTree<Type>::AABBTree
     const UList<Type>& objects,
     const pointField& points,
     const bool equalBinSize,
-    const label maxLevel,
-    const label minLeafSize
+    label maxLevel,
+    label minLeafSize
 )
 :
     maxLevel_(maxLevel),
@@ -356,7 +313,7 @@ Foam::AABBTree<Type>::AABBTree
     treeBoundBox topBb(points);
     topBb.inflate(0.01);
 
-    DynamicList<label> objectIDs(identity(objects.size()));
+    labelList objectIDs(identity(objects.size()));
 
     createBoxes
     (
@@ -438,16 +395,15 @@ Foam::AABBTree<Type>::AABBTree
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-const Foam::List<Foam::treeBoundBox>& Foam::AABBTree<Type>::boundBoxes() const
+void Foam::AABBTree<Type>::writeOBJ(Ostream& os) const
 {
-    return boundBoxes_;
-}
+    label vertIndex(0);
 
-
-template<class Type>
-const Foam::List<Foam::labelList>& Foam::AABBTree<Type>::addressing() const
-{
-    return addressing_;
+    for (const treeBoundBox& bb : boundBoxes_)
+    {
+        // writeLinesOnly=false
+        AABBTreeBase::writeOBJ(os, bb, vertIndex, false);
+    }
 }
 
 
@@ -486,24 +442,7 @@ bool Foam::AABBTree<Type>::overlaps(const boundBox& bbIn) const
 template<class Type>
 Foam::Ostream& Foam::operator<<(Ostream& os, const AABBTree<Type>& tree)
 {
-    if (os.format() == IOstreamOption::ASCII)
-    {
-        os  << tree.maxLevel_ << token::SPACE
-            << tree.minLeafSize_ << token::SPACE
-            << tree.boundBoxes_ << token::SPACE
-            << tree.addressing_ << token::SPACE;
-    }
-    else
-    {
-        os.write
-        (
-            reinterpret_cast<const char*>(&tree.maxLevel_),
-            sizeof(tree.maxLevel_)
-          + sizeof(tree.minLeafSize_)
-        );
-        os  << tree.boundBoxes_
-            << tree.addressing_;
-    }
+    os  << tree.boundBoxes_ << tree.addressing_;
 
     os.check(FUNCTION_NAME);
     return os;
@@ -513,23 +452,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const AABBTree<Type>& tree)
 template<class Type>
 Foam::Istream& Foam::operator>>(Istream& is, AABBTree<Type>& tree)
 {
-    if (is.format() == IOstreamOption::ASCII)
-    {
-        is  >> tree.maxLevel_
-            >> tree.minLeafSize_;
-    }
-    else
-    {
-        is.beginRawRead();
-
-        readRawLabel(is, &tree.maxLevel_);
-        readRawLabel(is, &tree.minLeafSize_);
-
-        is.endRawRead();
-    }
-
-    is  >> tree.boundBoxes_
-        >> tree.addressing_;
+    is  >> tree.boundBoxes_ >> tree.addressing_;
 
     is.check(FUNCTION_NAME);
     return is;

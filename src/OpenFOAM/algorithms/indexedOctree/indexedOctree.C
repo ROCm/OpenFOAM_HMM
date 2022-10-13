@@ -155,7 +155,7 @@ void Foam::indexedOctree<Type>::divide
 
 
 template<class Type>
-typename Foam::indexedOctree<Type>::node
+Foam::indexedOctreeBase::node
 Foam::indexedOctree<Type>::divide
 (
     const treeBoundBox& bb,
@@ -227,7 +227,7 @@ template<class Type>
 void Foam::indexedOctree<Type>::splitNodes
 (
     const label minSize,
-    DynamicList<indexedOctree<Type>::node>& nodes,
+    DynamicList<indexedOctreeBase::node>& nodes,
     DynamicList<labelList>& contents
 ) const
 {
@@ -238,12 +238,7 @@ void Foam::indexedOctree<Type>::splitNodes
     // moved so make sure not to keep any references!
     for (label nodeI = 0; nodeI < currentSize; nodeI++)
     {
-        for
-        (
-            direction octant = 0;
-            octant < nodes[nodeI].subNodes_.size();
-            octant++
-        )
+        for (direction octant = 0; octant < node::nChildren; ++octant)
         {
             labelBits index = nodes[nodeI].subNodes_[octant];
 
@@ -294,7 +289,7 @@ Foam::label Foam::indexedOctree<Type>::compactContents
 
     if (level < compactLevel)
     {
-        for (direction octant = 0; octant < nod.subNodes_.size(); octant++)
+        for (direction octant = 0; octant < node::nChildren; ++octant)
         {
             labelBits index = nod.subNodes_[octant];
 
@@ -316,7 +311,7 @@ Foam::label Foam::indexedOctree<Type>::compactContents
     else if (level == compactLevel)
     {
         // Compact all content on this level
-        for (direction octant = 0; octant < nod.subNodes_.size(); octant++)
+        for (direction octant = 0; octant < node::nChildren; ++octant)
         {
             labelBits index = nod.subNodes_[octant];
 
@@ -356,7 +351,7 @@ Foam::volumeType Foam::indexedOctree<Type>::calcVolumeType
 
     volumeType myType = volumeType::UNKNOWN;
 
-    for (direction octant = 0; octant < nod.subNodes_.size(); octant++)
+    for (direction octant = 0; octant < node::nChildren; ++octant)
     {
         volumeType subType;
 
@@ -1048,7 +1043,7 @@ bool Foam::indexedOctree<Type>::walkToParent
     // Find octant nodeI is in.
     parentOctant = 255;
 
-    for (direction i = 0; i < parentNode.subNodes_.size(); i++)
+    for (direction i = 0; i < node::nChildren; ++i)
     {
         labelBits index = parentNode.subNodes_[i];
 
@@ -1827,7 +1822,7 @@ void Foam::indexedOctree<Type>::findBox
     const node& nod = nodes_[nodeI];
     const treeBoundBox& nodeBb = nod.bb_;
 
-    for (direction octant = 0; octant < nod.subNodes_.size(); octant++)
+    for (direction octant = 0; octant < node::nChildren; ++octant)
     {
         labelBits index = nod.subNodes_[octant];
 
@@ -1875,7 +1870,7 @@ void Foam::indexedOctree<Type>::findSphere
     const node& nod = nodes_[nodeI];
     const treeBoundBox& nodeBb = nod.bb_;
 
-    for (direction octant = 0; octant < nod.subNodes_.size(); octant++)
+    for (direction octant = 0; octant < node::nChildren; ++octant)
     {
         labelBits index = nod.subNodes_[octant];
 
@@ -1943,7 +1938,7 @@ void Foam::indexedOctree<Type>::findNear
             {
                 const node& nod2 = tree2.nodes()[tree2.getNode(index2)];
 
-                for (direction i2 = 0; i2 < nod2.subNodes_.size(); i2++)
+                for (direction i2 = 0; i2 < node::nChildren; ++i2)
                 {
                     labelBits subIndex2 = nod2.subNodes_[i2];
                     const treeBoundBox subBb2
@@ -1971,7 +1966,7 @@ void Foam::indexedOctree<Type>::findNear
         else if (tree2.isContent(index2))
         {
             // index2 is leaf, index1 not yet.
-            for (direction i1 = 0; i1 < nod1.subNodes_.size(); i1++)
+            for (direction i1 = 0; i1 < node::nChildren; ++i1)
             {
                 labelBits subIndex1 = nod1.subNodes_[i1];
                 const treeBoundBox subBb1
@@ -2011,7 +2006,7 @@ void Foam::indexedOctree<Type>::findNear
 
             if (bb2.overlaps(searchBox))
             {
-                for (direction i2 = 0; i2 < nod2.subNodes_.size(); i2++)
+                for (direction i2 = 0; i2 < node::nChildren; ++i2)
                 {
                     labelBits subIndex2 = nod2.subNodes_[i2];
                     const treeBoundBox subBb2
@@ -2100,7 +2095,7 @@ Foam::label Foam::indexedOctree<Type>::countElements
 
         const node& nod = nodes_[nodeI];
 
-        for (direction octant = 0; octant < nod.subNodes_.size(); octant++)
+        for (direction octant = 0; octant < node::nChildren; ++octant)
         {
             nElems += countElements(nod.subNodes_[octant]);
         }
@@ -2122,14 +2117,46 @@ template<class Type>
 void Foam::indexedOctree<Type>::writeOBJ
 (
     const label nodeI,
+    Ostream& os,
+    label& vertIndex,
+    const bool leavesOnly,
+    const bool writeLinesOnly
+) const
+{
+    const node& nod = nodes_[nodeI];
+    const treeBoundBox& bb = nod.bb_;
+
+    for (direction octant = 0; octant < node::nChildren; ++octant)
+    {
+        const treeBoundBox subBb(bb.subBbox(octant));
+
+        labelBits index = nod.subNodes_[octant];
+
+        if (isNode(index))
+        {
+            label subNodeI = getNode(index);
+
+            writeOBJ(subNodeI, os, vertIndex, leavesOnly, writeLinesOnly);
+        }
+        else if (isContent(index))
+        {
+            indexedOctreeBase::writeOBJ(os, subBb, vertIndex, writeLinesOnly);
+        }
+        else if (isEmpty(index) && !leavesOnly)
+        {
+            indexedOctreeBase::writeOBJ(os, subBb, vertIndex, writeLinesOnly);
+        }
+    }
+}
+
+
+template<class Type>
+void Foam::indexedOctree<Type>::writeOBJ
+(
+    const label nodeI,
     const direction octant
 ) const
 {
-    OFstream str
-    (
-        "node" + Foam::name(nodeI) + "_octant" + Foam::name(octant) + ".obj"
-    );
-
     labelBits index = nodes_[nodeI].subNodes_[octant];
 
     treeBoundBox subBb;
@@ -2143,24 +2170,28 @@ void Foam::indexedOctree<Type>::writeOBJ
         subBb = nodes_[nodeI].bb_.subBbox(octant);
     }
 
+    OFstream os
+    (
+        "node" + Foam::name(nodeI) + "_octant" + Foam::name(octant) + ".obj"
+    );
+
     Pout<< "dumpContentNode : writing node:" << nodeI << " octant:" << octant
-        << " to " << str.name() << endl;
+        << " to " << os.name() << endl;
 
-    // Dump bounding box
-    pointField bbPoints(subBb.points());
+    bool writeLinesOnly(false);
+    label vertIndex(0);
+    indexedOctreeBase::writeOBJ(os, subBb, vertIndex, writeLinesOnly);
+}
 
-    forAll(bbPoints, i)
+
+template<class Type>
+void Foam::indexedOctree<Type>::writeOBJ(Ostream& os) const
+{
+    if (!nodes_.empty())
     {
-        const point& pt = bbPoints[i];
-
-        str<< "v " << pt.x() << ' ' << pt.y() << ' ' << pt.z() << endl;
-    }
-
-    forAll(treeBoundBox::edges, i)
-    {
-        const edge& e = treeBoundBox::edges[i];
-
-        str<< "l " << e[0] + 1 << ' ' << e[1] + 1 << nl;
+        label vertIndex(0);
+        // leavesOnly=true, writeLinesOnly=false
+        writeOBJ(0, os, vertIndex, true, false);
     }
 }
 
@@ -2210,7 +2241,7 @@ Foam::indexedOctree<Type>::indexedOctree
     int oldMemSize = 0;
     if (debug)
     {
-        Pout<< "indexedOctree<Type>::indexedOctree:" << nl
+        Pout<< "indexedOctree::indexedOctree:" << nl
             << "    shapes:" << shapes.size() << nl
             << "    bb:" << bb << nl
             << endl;
@@ -2241,24 +2272,28 @@ Foam::indexedOctree<Type>::indexedOctree
     {
         // Count number of references into shapes (i.e. contents)
         label nEntries = 0;
+        label minEntries = shapes.size();
         label maxEntries = 0;
-        forAll(contents, i)
+        for (const auto& subContents : contents)
         {
-            maxEntries = max(maxEntries, contents[i].size());
-            nEntries += contents[i].size();
+            const label num = subContents.size();
+
+            nEntries += num;
+            minEntries = min(minEntries, num);
+            maxEntries = max(maxEntries, num);
         }
 
         if (debug)
         {
-            Pout<< "indexedOctree<Type>::indexedOctree:" << nl
+            Pout<< "indexedOctree::indexedOctree:" << nl
                 << "    nLevels:" << nLevels << nl
-                << "    nEntries per treeLeaf:" << nEntries/contents.size()
-                << nl
-                << "    nEntries per shape (duplicity):"
-                << nEntries/shapes.size()
-                << nl
-                << "    max nEntries:" << maxEntries
-                << nl
+                << "    nEntries:" << nEntries << nl
+                << "    - min per leaf: " << minEntries << nl
+                << "    - max per leaf: " << maxEntries << nl
+                << "    - avg per leaf: "
+                << scalar(nEntries)/contents.size() << nl
+                << "    - per shape (duplicity): "
+                << scalar(nEntries)/shapes_.size() << nl
                 << endl;
         }
 
@@ -2334,17 +2369,20 @@ Foam::indexedOctree<Type>::indexedOctree
     if (debug)
     {
         label nEntries = 0;
+        label minEntries = shapes.size();
         label maxEntries = 0;
-        forAll(contents_, i)
+        for (const auto& subContents : contents_)
         {
-            maxEntries = max(maxEntries, contents_[i].size());
-            nEntries += contents_[i].size();
+            const label num = subContents.size();
+
+            nEntries += num;
+            minEntries = min(minEntries, num);
+            maxEntries = max(maxEntries, num);
         }
 
         label memSize = memInfo().size();
 
-
-        Pout<< "indexedOctree<Type>::indexedOctree"
+        Pout<< "indexedOctree::indexedOctree"
             << " : finished construction of tree of:" << shapes.typeName
             << nl
             << "    bb:" << this->bb() << nl
@@ -2352,13 +2390,13 @@ Foam::indexedOctree<Type>::indexedOctree
             << "    nLevels:" << nLevels << nl
             << "    treeNodes:" << nodes_.size() << nl
             << "    nEntries:" << nEntries << nl
-            << "        per treeLeaf:"
+            << "    - min per leaf:" << minEntries << nl
+            << "    - max per leaf:" << maxEntries << nl
+            << "    - avg per leaf:"
             << scalar(nEntries)/contents.size() << nl
-            << "        per shape (duplicity):"
+            << "    - per shape (duplicity):"
             << scalar(nEntries)/shapes.size() << nl
-            << "    max nEntries:" << maxEntries
-            << nl
-            << "    total memory:" << memSize-oldMemSize
+            << "    total memory:" << memSize-oldMemSize << nl
             << endl;
     }
 }
@@ -2740,7 +2778,7 @@ Foam::volumeType Foam::indexedOctree<Type>::getVolumeType
                 }
             }
 
-            Pout<< "indexedOctree<Type>::getVolumeType : "
+            Pout<< "indexedOctree::getVolumeType : "
                 << " bb:" << bb()
                 << " nodes_:" << nodes_.size()
                 << " nodeTypes_:" << nodeTypes_.size()
@@ -2803,7 +2841,7 @@ void Foam::indexedOctree<Type>::print
         << "parent:" << nod.parent_ << nl
         << "n:" << countElements(nodePlusOctant(nodeI, 0)) << nl;
 
-    for (direction octant = 0; octant < nod.subNodes_.size(); octant++)
+    for (direction octant = 0; octant < node::nChildren; ++octant)
     {
         const treeBoundBox subBb(bb.subBbox(octant));
 

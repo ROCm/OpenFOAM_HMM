@@ -1517,7 +1517,7 @@ void Foam::distributedTriSurfaceMesh::collectLeafMids
     DynamicField<point>& midPoints
 ) const
 {
-    const indexedOctree<treeDataTriSurface>::node& nod = tree().nodes()[nodeI];
+    const auto& nod = tree().nodes()[nodeI];
 
     for (direction octant = 0; octant < nod.subNodes_.size(); octant++)
     {
@@ -1557,7 +1557,7 @@ Foam::volumeType Foam::distributedTriSurfaceMesh::calcVolumeType
     // Recurses to determine status of lowest level boxes. Level above is
     // combination of octants below.
 
-    const indexedOctree<treeDataTriSurface>::node& nod = tree().nodes()[nodeI];
+    const auto& nod = tree().nodes()[nodeI];
 
     volumeType myType = volumeType::UNKNOWN;
 
@@ -1619,7 +1619,7 @@ Foam::volumeType Foam::distributedTriSurfaceMesh::cachedVolumeType
     const point& sample
 ) const
 {
-    const indexedOctree<treeDataTriSurface>::node& nod = tree().nodes()[nodeI];
+    const auto& nod = tree().nodes()[nodeI];
 
     direction octant = nod.bb_.subOctant(sample);
 
@@ -4141,10 +4141,9 @@ void Foam::distributedTriSurfaceMesh::getVolumeType
         {
             // Get local tree
             const indexedOctree<treeDataTriSurface>& t = tree();
+            const auto& nodes = t.nodes();
             PackedList<2>& nt = t.nodeTypes();
-            const List<indexedOctree<treeDataTriSurface>::node>& nodes =
-                t.nodes();
-            nt.setSize(nodes.size());
+            nt.resize(nodes.size());
             nt = volumeType::UNKNOWN;
 
             // Collect midpoints

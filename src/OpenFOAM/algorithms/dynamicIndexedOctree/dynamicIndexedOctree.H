@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,14 +39,8 @@ SourceFiles
 #ifndef Foam_dynamicIndexedOctree_H
 #define Foam_dynamicIndexedOctree_H
 
-#include "treeBoundBox.H"
-#include "pointIndexHit.H"
-#include "FixedList.H"
-#include "Ostream.H"
-#include "HashSet.H"
-#include "labelBits.H"
-#include "PackedList.H"
-#include "volumeType.H"
+#include "indexedOctree.H"
+#include "DynamicList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,22 +50,36 @@ namespace Foam
 typedef DynamicList<autoPtr<DynamicList<label>>> contentListList;
 
 // Forward Declarations
-template<class Type> class dynamicIndexedOctree;
-
-template<class Type> Ostream& operator<<
-(
-    Ostream&,
-    const dynamicIndexedOctree<Type>&
-);
-
 class Istream;
+template<class Type> class dynamicIndexedOctree;
+template<class Type>
+Ostream& operator<<(Ostream&, const dynamicIndexedOctree<Type>&);
 
 
 /*---------------------------------------------------------------------------*\
-                        Class dynamicIndexedOctreeName Declaration
+                  Class dynamicIndexedOctreeBase Declaration
 \*---------------------------------------------------------------------------*/
 
-TemplateName(dynamicIndexedOctree);
+//- Template invariant parts for dynamicIndexedOctree
+//  Same type of node bookkeeping as indexedOctree
+class dynamicIndexedOctreeBase
+:
+    public indexedOctreeBase
+{
+public:
+
+    //- Document that we are using the same types of node
+    using node = indexedOctreeBase::node;
+
+    //- Runtime type information
+    ClassName("dynamicIndexedOctree");
+
+
+    // Constructors
+
+        //- Default construct
+        dynamicIndexedOctreeBase() = default;
+};
 
 
 /*---------------------------------------------------------------------------*\
@@ -80,54 +89,8 @@ TemplateName(dynamicIndexedOctree);
 template<class Type>
 class dynamicIndexedOctree
 :
-    public dynamicIndexedOctreeName
+    public dynamicIndexedOctreeBase
 {
-public:
-
-    // Data types
-
-        //- Tree node. Has up pointer and down pointers.
-        class node
-        {
-        public:
-
-            //- Bounding box of this node
-            treeBoundBox bb_;
-
-            //- Parent node (index into nodes_ of tree)
-            label parent_;
-
-            //- IDs of the 8 nodes on all sides of the mid point
-            FixedList<labelBits, 8> subNodes_;
-
-            friend Ostream& operator<< (Ostream& os, const node& n)
-            {
-                return os << n.bb_ << token::SPACE
-                    << n.parent_ << token::SPACE << n.subNodes_;
-            }
-
-            friend Istream& operator>> (Istream& is, node& n)
-            {
-                return is >> n.bb_ >> n.parent_ >> n.subNodes_;
-            }
-
-            friend bool operator==(const node& a, const node& b)
-            {
-                return
-                    a.bb_ == b.bb_
-                 && a.parent_ == b.parent_
-                 && a.subNodes_ == b.subNodes_;
-            }
-
-            friend bool operator!=(const node& a, const node& b)
-            {
-                return !(a == b);
-            }
-        };
-
-
-private:
-
     // Static data
 
         //- Relative perturbation tolerance. Determines when point is
@@ -137,7 +100,7 @@ private:
         static scalar perturbTol_;
 
 
-    // Private data
+    // Private Data
 
         //- Underlying shapes for geometric queries.
         const Type shapes_;
@@ -361,42 +324,24 @@ private:
             );
 
 
-        // Other
+    // Other
 
-            //- Count number of elements on this and sublevels
-            label countElements(const labelBits index) const;
+        //- Count number of elements on this and sublevels
+        label countElements(const labelBits index) const;
 
-            //- Dump node+octant to an obj file
-            void writeOBJ(const label nodeI, const direction octant) const;
+        //- Write node treeBoundBoxes in OBJ format
+        void writeOBJ
+        (
+            const label nodeI,
+            Ostream& os,
+            label& vertIndex,
+            const bool leavesOnly,
+            const bool writeLinesOnly = false
+        ) const;
 
-            //- From index into contents_ to subNodes_ entry
-            static labelBits contentPlusOctant
-            (
-                const label i,
-                const direction octant
-            )
-            {
-                return labelBits(-i - 1, octant);
-            }
+        //- Dump node+octant to an obj file
+        void writeOBJ(const label nodeI, const direction octant) const;
 
-            //- From index into nodes_ to subNodes_ entry
-            static labelBits nodePlusOctant
-            (
-                const label i,
-                const direction octant
-            )
-            {
-                return labelBits(i + 1, octant);
-            }
-
-            //- From empty to subNodes_ entry
-            static labelBits emptyPlusOctant
-            (
-                const direction octant
-            )
-            {
-                return labelBits(0, octant);
-            }
 
 public:
 
@@ -426,79 +371,36 @@ public:
 
     // Member Functions
 
-        // Access
+    // Access
 
-            //- Reference to shape
-            const Type& shapes() const
+        //- Reference to shape
+        const Type& shapes() const noexcept { return shapes_; }
+
+        //- List of all nodes
+        const List<node>& nodes() const noexcept { return nodes_; }
+
+        //- List of all contents
+        //- (referenced by those nodes that are contents)
+        const contentListList& contents() const
+        {
+            return contents_;
+        }
+
+        //- Per node, per octant whether is fully inside/outside/mixed.
+        PackedList<2>& nodeTypes() const noexcept
+        {
+            return nodeTypes_;
+        }
+
+        //- Top bounding box
+        const treeBoundBox& bb() const
+        {
+            if (nodes_.empty())
             {
-                return shapes_;
+                return treeBoundBox::null();
             }
-
-            //- List of all nodes
-            const List<node>& nodes() const
-            {
-                return nodes_;
-            }
-
-            //- List of all contents (referenced by those nodes that are
-            //  contents)
-            const contentListList& contents() const
-            {
-                return contents_;
-            }
-
-            //- Top bounding box
-            const treeBoundBox& bb() const
-            {
-                if (nodes_.empty())
-                {
-                    return treeBoundBox::null();
-                }
-                return nodes_[0].bb_;
-            }
-
-
-        // Conversions for entries in subNodes_.
-
-            static bool isContent(const labelBits i)
-            {
-                return i.val() < 0;
-            }
-
-            static bool isEmpty(const labelBits i)
-            {
-                return i.val() == 0;
-            }
-
-            static bool isNode(const labelBits i)
-            {
-                return i.val() > 0;
-            }
-
-            static label getContent(const labelBits i)
-            {
-                if (!isContent(i))
-                {
-                    FatalErrorInFunction
-                        << abort(FatalError);
-                }
-                return -i.val()-1;
-            }
-
-            static label getNode(const labelBits i)
-            {
-                if (!isNode(i))
-                {
-                    FatalErrorInFunction
-                        << abort(FatalError);
-                }
-                return i.val() - 1;
-            }
-
-            static direction getOctant(const labelBits i)
-            {
-                return i.bits();
-            }
+            return nodes_[0].bb_;
+        }
 
 
         // Queries
@@ -629,20 +531,23 @@ public:
             label removeIndex(const label nodIndex, const label index);
 
 
-        // Write
+    // Write
 
-            //- Print tree. Either print all indices (printContent = true) or
-            //  just size of contents nodes.
-            void print
-            (
-                prefixOSstream&,
-                const bool printContents,
-                const label
-            ) const;
+        //- Write all tree boxes as OBJ format
+        void writeOBJ(Ostream& os) const;
 
-            bool write(Ostream& os) const;
+        //- Print tree. Either print all indices (printContent = true) or
+        //  just size of contents nodes.
+        void print
+        (
+            prefixOSstream&,
+            const bool printContents,
+            const label
+        ) const;
 
-            void writeTreeInfo() const;
+        bool write(Ostream& os) const;
+
+        void writeTreeInfo() const;
 
 
     // IOstream Operators
