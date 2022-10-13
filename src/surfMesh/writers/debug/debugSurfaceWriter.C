@@ -92,9 +92,9 @@ Foam::surfaceWriters::debugWriter::mergeField
             (
                 fld,
                 allFld,
-                UPstream::worldComm,
+                (UPstream::msgType() + msgTag_),
                 commType_,
-                (UPstream::msgType() + msgTag_)
+                UPstream::worldComm
             );
         }
 
