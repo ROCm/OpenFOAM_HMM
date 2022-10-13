@@ -1650,8 +1650,8 @@ Foam::volumeType Foam::distributedTriSurfaceMesh::cachedVolumeType
             // Recurse
             volumeType subType = cachedVolumeType
             (
-                    indexedOctree<treeDataTriSurface>::getNode(index),
-                    sample
+                indexedOctree<treeDataTriSurface>::getNode(index),
+                sample
             );
 
             return subType;
@@ -4158,7 +4158,10 @@ void Foam::distributedTriSurfaceMesh::getVolumeType
 
             // Collect midpoints
             DynamicField<point> midPoints(label(0.5*nodes.size()));
-            collectLeafMids(0, midPoints);
+            if (nodes.size())
+            {
+                collectLeafMids(0, midPoints);
+            }
 
             if (debug)
             {
@@ -4186,14 +4189,17 @@ void Foam::distributedTriSurfaceMesh::getVolumeType
             }
 
             // Cache on local tree
-            label index = 0;
-            calcVolumeType
-            (
-                midVolTypes,
-                index,
-                nt,
-                0               // nodeI
-            );
+            if (nodes.size())
+            {
+                label index = 0;
+                calcVolumeType
+                (
+                    midVolTypes,
+                    index,
+                    nt,
+                    0               // nodeI
+                );
+            }
             if (debug)
             {
                 Pout<< "distributedTriSurfaceMesh::getVolumeType :"
@@ -4290,7 +4296,10 @@ void Foam::distributedTriSurfaceMesh::getVolumeType
     DynamicList<label> fullSearchMap(localPoints.size());
     forAll(localPoints, i)
     {
-        volType[i] = cachedVolumeType(0, localPoints[i]);
+        if (tree().nodes().size())
+        {
+            volType[i] = cachedVolumeType(0, localPoints[i]);
+        }
         if (volType[i] == volumeType::UNKNOWN)
         {
             fullSearchMap.append(i);
