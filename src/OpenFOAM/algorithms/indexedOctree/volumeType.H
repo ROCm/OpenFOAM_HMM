@@ -107,7 +107,7 @@ public:
         //- Construct from integer
         explicit volumeType(const int t)
         :
-            t_(static_cast<volumeType::type>(t))
+            t_(static_cast<volumeType::type>(t & 0x3))
         {}
 
 

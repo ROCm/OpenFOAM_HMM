@@ -417,21 +417,18 @@ void Foam::searchableCylinder::findLineAll
     // Check tNear, tFar
     if (tNear >= 0 && tNear <= magV)
     {
-        near.setPoint(start+tNear*V);
-        near.setHit();
+        near.hitPoint(start+tNear*V);
         near.setIndex(0);
 
         if (tFar <= magV)
         {
-            far.setPoint(start+tFar*V);
-            far.setHit();
+            far.hitPoint(start+tFar*V);
             far.setIndex(0);
         }
     }
     else if (tFar >= 0 && tFar <= magV)
     {
-        near.setPoint(start+tFar*V);
-        near.setHit();
+        near.hitPoint(start+tFar*V);
         near.setIndex(0);
     }
 }

@@ -41,7 +41,7 @@ SourceFiles
 #include "point.H"
 #include "point2D.H"
 #include "vector.H"
-#include "PointHit.H"
+#include "pointHit.H"
 #include "FixedList.H"
 #include "UList.H"
 #include "Pair.H"

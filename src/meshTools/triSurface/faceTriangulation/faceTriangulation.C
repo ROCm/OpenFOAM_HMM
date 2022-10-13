@@ -139,8 +139,7 @@ Foam::pointHit Foam::faceTriangulation::rayEdgeIntersect
         else
         {
             // Hit
-            result.setHit();
-            result.setPoint(intersectPt);
+            result.hitPoint(intersectPt);
             result.setDistance(mag(intersectPt - rayOrigin));
         }
     }

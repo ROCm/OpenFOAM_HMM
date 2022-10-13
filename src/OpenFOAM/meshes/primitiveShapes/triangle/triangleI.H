@@ -572,8 +572,7 @@ inline Foam::pointHit Foam::triangle<Point, PointRef>::ray
     if (hit && eligible)
     {
         // Hit. Set distance to intersection.
-        inter.setHit();
-        inter.setPoint(pInter);
+        inter.hitPoint(pInter);
         inter.setDistance(dist);
     }
     else
@@ -671,8 +670,7 @@ inline Foam::pointHit Foam::triangle<Point, PointRef>::intersection
         return intersection;
     }
 
-    intersection.setHit();
-    intersection.setPoint(a_ + u*edge1 + v*edge2);
+    intersection.hitPoint(a_ + u*edge1 + v*edge2);
     intersection.setDistance(t);
 
     return intersection;
@@ -898,8 +896,7 @@ inline Foam::pointHit Foam::triangle<Point, PointRef>::nearestPoint
         else
         {
             // Hit on line
-            lnInfo.setHit();
-            lnInfo.setPoint(triInfo.hitPoint());
+            lnInfo.hitPoint(triInfo.hitPoint());
             lnInfo.setDistance(0.0);
             triInfo.setDistance(0.0);
         }
@@ -972,8 +969,7 @@ inline Foam::pointHit Foam::triangle<Point, PointRef>::nearestPoint
         }
         else
         {
-            lnInfo.setHit();
-            lnInfo.setPoint(nearestLinePoint);
+            lnInfo.hitPoint(nearestLinePoint);
         }
     }
     return triInfo;

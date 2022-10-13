@@ -577,12 +577,11 @@ Foam::pointIndexHit Foam::searchableSphere::findNearest
 
         if (nearestDistSqr >= sqr(magN - radii_[0]))
         {
-            info.setPoint
+            info.hitPoint
             (
                 origin_
               + (magN < ROOTVSMALL ? vector(radii_[0],0,0) : (radii_[0]*n/magN))
             );
-            info.setHit();
             info.setIndex(0);
         }
 

@@ -131,8 +131,7 @@ Foam::pointIndexHit Foam::isoSurfaceCell::collapseSurface
     if (localTris.size() == 1)
     {
         const labelledTri& tri = localTris[0];
-        info.setPoint(tri.centre(localPoints));
-        info.setHit();
+        info.hitPoint(tri.centre(localPoints));
     }
     else if (localTris.size() == 2)
     {
@@ -157,7 +156,7 @@ Foam::pointIndexHit Foam::isoSurfaceCell::collapseSurface
              || (n0 & n1) >= 0
             )
             {
-                info.setPoint
+                info.hitPoint
                 (
                     0.5
                   * (
@@ -165,7 +164,6 @@ Foam::pointIndexHit Foam::isoSurfaceCell::collapseSurface
                       + tri1.centre(localPoints)
                     )
                 );
-                info.setHit();
             }
         }
     }
@@ -204,8 +202,7 @@ Foam::pointIndexHit Foam::isoSurfaceCell::collapseSurface
 
             if (minCos > 0)
             {
-                info.setPoint(calcCentre(surf));
-                info.setHit();
+                info.hitPoint(calcCentre(surf));
             }
         }
     }

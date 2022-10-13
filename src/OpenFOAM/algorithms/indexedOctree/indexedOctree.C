@@ -383,7 +383,7 @@ Foam::volumeType Foam::indexedOctree<Type>::calcVolumeType
         }
 
         // Store octant type
-        nodeTypes_.set((nodeI<<3)+octant, subType);
+        nodeTypes_.set(labelBits::pack(nodeI, octant), subType);
 
         // Combine sub node types into type for treeNode. Result is 'mixed' if
         // types differ among subnodes.
@@ -411,7 +411,10 @@ Foam::volumeType Foam::indexedOctree<Type>::getVolumeType
 
     direction octant = nod.bb_.subOctant(sample);
 
-    volumeType octantType = volumeType::type(nodeTypes_.get((nodeI<<3)+octant));
+    volumeType octantType = volumeType::type
+    (
+        nodeTypes_.get(labelBits::pack(nodeI, octant))
+    );
 
     if (octantType == volumeType::INSIDE)
     {
@@ -1448,9 +1451,8 @@ void Foam::indexedOctree<Type>::traverseNode
                     {
                         // Hit so pt is nearer than nearestPoint.
                         // Update hit info
-                        hitInfo.setHit();
+                        hitInfo.hitPoint(pt);
                         hitInfo.setIndex(shapeI);
-                        hitInfo.setPoint(pt);
                         return;
                     }
                 }
@@ -1480,9 +1482,8 @@ void Foam::indexedOctree<Type>::traverseNode
                         // Hit so pt is nearer than nearestPoint.
                         nearestPoint = pt;
                         // Update hit info
-                        hitInfo.setHit();
+                        hitInfo.hitPoint(pt);
                         hitInfo.setIndex(shapeI);
-                        hitInfo.setPoint(pt);
                     }
                 }
 

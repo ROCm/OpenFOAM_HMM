@@ -94,8 +94,7 @@ Foam::pointHit Foam::face::ray
             if (Foam::mag(curHit.distance()) < Foam::mag(nearestHitDist))
             {
                 nearestHitDist = curHit.distance();
-                nearest.setHit();
-                nearest.setPoint(curHit.hitPoint());
+                nearest.hitPoint(curHit.hitPoint());
             }
         }
         else if (!nearest.hit())
@@ -181,8 +180,7 @@ Foam::pointHit Foam::face::intersection
             if (Foam::mag(curHit.distance()) < Foam::mag(nearestHitDist))
             {
                 nearestHitDist = curHit.distance();
-                nearest.setHit();
-                nearest.setPoint(curHit.hitPoint());
+                nearest.hitPoint(curHit.hitPoint());
             }
         }
     }
@@ -295,8 +293,7 @@ Foam::pointHit Foam::face::nearestPointClassify
 
             if (curHit.hit())
             {
-                nearest.setHit();
-                nearest.setPoint(curHit.hitPoint());
+                nearest.hitPoint(curHit.hitPoint());
             }
             else
             {

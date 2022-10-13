@@ -277,9 +277,8 @@ Foam::pointIndexHit Foam::turbulentDFSEMInletFvPatchVectorField::setNewPosition
             const face& tf = triFace_[triI];
             const triPointRef tri(points[tf[0]], points[tf[1]], points[tf[2]]);
 
-            pos.setHit();
+            pos.hitPoint(tri.randomPoint(rndGen_));
             pos.setIndex(triToFace_[triI]);
-            pos.rawPoint() = tri.randomPoint(rndGen_);
         }
     }
     else
@@ -302,9 +301,8 @@ Foam::pointIndexHit Foam::turbulentDFSEMInletFvPatchVectorField::setNewPosition
         const face& tf = triFace_[triI];
         const triPointRef tri(points[tf[0]], points[tf[1]], points[tf[2]]);
 
-        pos.setHit();
+        pos.hitPoint(tri.randomPoint(rndGen_));
         pos.setIndex(triToFace_[triI]);
-        pos.rawPoint() = tri.randomPoint(rndGen_);
     }
 
     return pos;

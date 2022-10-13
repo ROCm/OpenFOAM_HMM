@@ -92,9 +92,7 @@ bool Foam::controlMeshRefinement::detectEdge
             magSqr(a - b) < tolSqr
         )
         {
-            pointFound.setPoint(midPoint);
-            pointFound.setHit();
-
+            pointFound.hitPoint(midPoint);
             return true;
         }
 

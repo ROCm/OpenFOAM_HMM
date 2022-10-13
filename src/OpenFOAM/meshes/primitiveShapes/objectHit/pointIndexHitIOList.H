@@ -31,8 +31,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef pointIndexHitIOList_H
-#define pointIndexHitIOList_H
+#ifndef Foam_pointIndexHitIOList_H
+#define Foam_pointIndexHitIOList_H
 
 #include "pointIndexHit.H"
 #include "IOList.H"

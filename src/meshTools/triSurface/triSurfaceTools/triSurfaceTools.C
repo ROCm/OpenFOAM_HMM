@@ -847,15 +847,13 @@ Foam::surfaceLocation Foam::triSurfaceTools::cutEdge
 
         if (d[fp1] == 0.0)
         {
-            cut.setHit();
-            cut.setPoint(points[f[fp1]]);
+            cut.hitPoint(points[f[fp1]]);
             cut.elementType() = triPointRef::POINT;
             cut.setIndex(s.localFaces()[triI][fp1]);
         }
         else if (d[fp2] == 0.0)
         {
-            cut.setHit();
-            cut.setPoint(points[f[fp2]]);
+            cut.hitPoint(points[f[fp2]]);
             cut.elementType() = triPointRef::POINT;
             cut.setIndex(s.localFaces()[triI][fp2]);
         }
@@ -870,8 +868,7 @@ Foam::surfaceLocation Foam::triSurfaceTools::cutEdge
         }
         else
         {
-            cut.setHit();
-            cut.setPoint
+            cut.hitPoint
             (
                 (d[fp2]*points[f[fp1]] - d[fp1]*points[f[fp2]])
               / (d[fp2] - d[fp1])
@@ -899,8 +896,7 @@ Foam::surfaceLocation Foam::triSurfaceTools::cutEdge
                         << "triangle:" << f.tri(points)
                         << " d:" << d << abort(FatalError);
                 }
-                inters[interI].setHit();
-                inters[interI].setPoint(points[f[fp0]]);
+                inters[interI].hitPoint(points[f[fp0]]);
                 inters[interI].elementType() = triPointRef::POINT;
                 inters[interI].setIndex(s.localFaces()[triI][fp0]);
                 interI++;
@@ -918,8 +914,7 @@ Foam::surfaceLocation Foam::triSurfaceTools::cutEdge
                         << "triangle:" << f.tri(points)
                         << " d:" << d << abort(FatalError);
                 }
-                inters[interI].setHit();
-                inters[interI].setPoint
+                inters[interI].hitPoint
                 (
                     (d[fp0]*points[f[fp1]] - d[fp1]*points[f[fp0]])
                   / (d[fp0] - d[fp1])

@@ -1596,7 +1596,7 @@ Foam::volumeType Foam::distributedTriSurfaceMesh::calcVolumeType
         }
 
         // Store octant type
-        nodeTypes.set((nodeI<<3)+octant, subType);
+        nodeTypes.set(labelBits::pack(nodeI, octant), subType);
 
         // Combine sub node types into type for treeNode. Result is 'mixed' if
         // types differ among subnodes.
@@ -1625,7 +1625,7 @@ Foam::volumeType Foam::distributedTriSurfaceMesh::cachedVolumeType
 
     volumeType octantType = volumeType::type
     (
-        tree().nodeTypes().get((nodeI<<3)+octant)
+        tree().nodeTypes().get(labelBits::pack(nodeI, octant))
     );
 
     if (octantType == volumeType::INSIDE)

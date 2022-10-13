@@ -105,8 +105,7 @@ void Foam::searchableSurfaceCollection::findNearest
                 if (distSqr < minDistSqr[pointi])
                 {
                     minDistSqr[pointi] = distSqr;
-                    nearestInfo[pointi].setPoint(globalPt);
-                    nearestInfo[pointi].setHit();
+                    nearestInfo[pointi].hitPoint(globalPt);
                     nearestInfo[pointi].setIndex
                     (
                         hitInfo[pointi].index()

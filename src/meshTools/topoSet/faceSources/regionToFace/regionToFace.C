@@ -170,8 +170,7 @@ void Foam::regionToFace::combine(topoSet& set, const bool add) const
         if (!ni.first().hit() || d2 < ni.second().first())
         {
             ni.second().first() = d2;
-            ni.first().setHit();
-            ni.first().setPoint(fc);
+            ni.first().hitPoint(fc);
             ni.first().setIndex(i);
         }
     }
