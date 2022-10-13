@@ -32,12 +32,6 @@ License
 #include "ListOps.H"
 #include "memInfo.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::scalar Foam::indexedOctree<Type>::perturbTol_ = 10*SMALL;
-
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
@@ -2292,13 +2286,6 @@ Foam::indexedOctree<Type>::indexedOctree
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::scalar& Foam::indexedOctree<Type>::perturbTol()
-{
-    return perturbTol_;
-}
-
 
 template<class Type>
 Foam::pointIndexHit Foam::indexedOctree<Type>::findNearest

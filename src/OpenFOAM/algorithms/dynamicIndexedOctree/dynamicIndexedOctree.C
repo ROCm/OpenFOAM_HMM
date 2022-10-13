@@ -31,11 +31,6 @@ License
 #include "OFstream.H"
 #include "ListOps.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::scalar Foam::dynamicIndexedOctree<Type>::perturbTol_ = 10*SMALL;
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
@@ -2045,13 +2040,6 @@ Foam::dynamicIndexedOctree<Type>::dynamicIndexedOctree
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::scalar& Foam::dynamicIndexedOctree<Type>::perturbTol()
-{
-    return perturbTol_;
-}
-
 
 template<class Type>
 Foam::pointIndexHit Foam::dynamicIndexedOctree<Type>::findNearest

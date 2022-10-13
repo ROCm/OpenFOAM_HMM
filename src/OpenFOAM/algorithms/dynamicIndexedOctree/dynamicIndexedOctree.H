@@ -89,15 +89,6 @@ class dynamicIndexedOctree
 :
     public dynamicIndexedOctreeBase
 {
-    // Static data
-
-        //- Relative perturbation tolerance. Determines when point is
-        //  considered to be close to face/edge of bb of node.
-        //  The tolerance is relative to the bounding box of the smallest
-        //  node.
-        static scalar perturbTol_;
-
-
     // Private Data
 
         //- Underlying shapes for geometric queries.
@@ -332,10 +323,6 @@ class dynamicIndexedOctree
 
 
 public:
-
-        //- Get the perturbation tolerance
-        static scalar& perturbTol();
-
 
     // Constructors
 

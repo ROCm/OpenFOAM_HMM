@@ -108,8 +108,7 @@ Foam::triSurfaceRegionSearch::treeByRegion() const
 
         forAll(regionsAddressing, regionI)
         {
-            scalar oldTol = treeType::perturbTol();
-            treeType::perturbTol() = tolerance();
+            const scalar oldTol = treeType::perturbTol(tolerance());
 
             indirectRegionPatches_.set
             (
@@ -177,7 +176,7 @@ Foam::triSurfaceRegionSearch::treeByRegion() const
                 )
             );
 
-            treeType::perturbTol() = oldTol;
+            treeType::perturbTol(oldTol);
         }
     }
 
@@ -199,8 +198,7 @@ void Foam::triSurfaceRegionSearch::findNearest
     }
     else
     {
-        scalar oldTol = treeType::perturbTol();
-        treeType::perturbTol() = tolerance();
+        const scalar oldTol = treeType::perturbTol(tolerance());
 
         const PtrList<treeType>& octrees = treeByRegion();
 
@@ -249,7 +247,7 @@ void Foam::triSurfaceRegionSearch::findNearest
             }
         }
 
-        treeType::perturbTol() = oldTol;
+        treeType::perturbTol(oldTol);
     }
 }
 

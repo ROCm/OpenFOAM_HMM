@@ -34,6 +34,8 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(indexedOctreeBase, 0);
+
+    scalar indexedOctreeBase::perturbTol_ = 10*SMALL;
 }
 
 

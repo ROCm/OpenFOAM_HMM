@@ -178,6 +178,16 @@ public:
 
 protected:
 
+    // Static Data
+
+        //- Relative perturbation tolerance.
+        //  Determines when point is considered to be close to face/edge
+        //  of bb of node.
+        //  The tolerance is relative to the bounding box of the smallest
+        //  node.
+        static scalar perturbTol_;
+
+
     // Protected Member Functions
 
     // Encode node addressing
@@ -203,6 +213,18 @@ protected:
 
 
 public:
+
+    //- Get the perturbation tolerance
+    static scalar& perturbTol() noexcept { return perturbTol_; }
+
+    //- Set the perturbation tolerance, return the old value
+    static scalar perturbTol(scalar tol) noexcept
+    {
+        scalar old(perturbTol_);
+        perturbTol_ = tol;
+        return old;
+    }
+
 
     //- Runtime type information
     ClassName("indexedOctree");
@@ -236,15 +258,6 @@ class indexedOctree
 :
     public indexedOctreeBase
 {
-    // Static data
-
-        //- Relative perturbation tolerance. Determines when point is
-        //  considered to be close to face/edge of bb of node.
-        //  The tolerance is relative to the bounding box of the smallest
-        //  node.
-        static scalar perturbTol_;
-
-
     // Private Data
 
         //- Underlying shapes for geometric queries.
@@ -488,10 +501,6 @@ class indexedOctree
 
 
 public:
-
-        //- Get the perturbation tolerance
-        static scalar& perturbTol();
-
 
     // Constructors
 
