@@ -2,13 +2,13 @@
 Description
     Compatibility include
 
-    uindirectPrimitivePatch.H combined into uindirectPrimitivePatch.H
+    primitiveFacePatch.H combined into primitivePatch.H
     (MAY-2022)
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Foam_uindirectPrimitivePatch_H
-#define Foam_uindirectPrimitivePatch_H
+#ifndef FoamCompat_primitiveFacePatch_H
+#define FoamCompat_primitiveFacePatch_H
 
 #include "indirectPrimitivePatch.H"
 

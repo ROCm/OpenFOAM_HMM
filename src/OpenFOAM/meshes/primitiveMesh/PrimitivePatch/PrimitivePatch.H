@@ -464,6 +464,9 @@ public:
             //- The enclosing (bounding) box for the patch points
             Pair<point_type> box() const;
 
+            //- The enclosing (bounding) sphere radius^2 for specified face
+            scalar sphere(const label facei) const;
+
 
         // Storage Management
 

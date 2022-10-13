@@ -160,4 +160,25 @@ Foam::PrimitivePatch<FaceList, PointField>::box() const
 }
 
 
+template<class FaceList, class PointField>
+Foam::scalar
+Foam::PrimitivePatch<FaceList, PointField>::sphere(const label facei) const
+{
+    scalar radiusSqr = 0;
+
+    const point_type& fc = this->faceCentres()[facei];
+
+    for (const label fp : this->operator[](facei))
+    {
+        const scalar sqrDist = magSqr(fc - points_[fp]);
+        if (radiusSqr < sqrDist)
+        {
+            radiusSqr = sqrDist;
+        }
+    }
+
+    return radiusSqr;
+}
+
+
 // ************************************************************************* //
