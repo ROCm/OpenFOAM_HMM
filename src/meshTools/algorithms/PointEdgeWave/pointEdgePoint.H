@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,8 +38,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef pointEdgePoint_H
-#define pointEdgePoint_H
+#ifndef Foam_pointEdgePoint_H
+#define Foam_pointEdgePoint_H
 
 #include "point.H"
 #include "label.H"
@@ -104,7 +104,7 @@ public:
 
     // Constructors
 
-        //- Default construct
+        //- Default construct. Max point
         inline pointEdgePoint();
 
         //- Construct from origin, distance
@@ -113,26 +113,33 @@ public:
 
     // Member Functions
 
-        // Access
+    // Access
 
-            const point& origin() const
-            {
-                return origin_;
-            }
-            point& origin()
-            {
-                return origin_;
-            }
+        const point& origin() const noexcept { return origin_; }
 
-            scalar distSqr() const
-            {
-                return distSqr_;
-            }
-            scalar& distSqr()
-            {
-                return distSqr_;
-            }
+        point& origin() noexcept { return origin_; }
 
+        scalar distSqr() const noexcept { return distSqr_; }
+
+        scalar& distSqr() noexcept { return distSqr_; }
+
+
+    // Member Operators
+
+        //- Test for equality
+        inline bool operator==(const pointEdgePoint&) const;
+
+        //- Test for inequality
+        inline bool operator!=(const pointEdgePoint&) const;
+
+
+    // IOstream Operators
+
+        friend Ostream& operator<<(Ostream&, const pointEdgePoint&);
+        friend Istream& operator>>(Istream&, pointEdgePoint&);
+
+
+    // Wave Methods
 
         // Needed by PointEdgeWave
 
@@ -227,21 +234,6 @@ public:
             //- Test for equality, with TrackingData
             template<class TrackingData>
             inline bool equal(const pointEdgePoint&, TrackingData& td) const;
-
-
-    // Member Operators
-
-        //- Test for equality
-        inline bool operator==(const pointEdgePoint&) const;
-
-        //- Test for inequality
-        inline bool operator!=(const pointEdgePoint&) const;
-
-
-    // IOstream Operators
-
-        friend Ostream& operator<<(Ostream&, const pointEdgePoint&);
-        friend Istream& operator>>(Istream&, pointEdgePoint&);
 };
 
 

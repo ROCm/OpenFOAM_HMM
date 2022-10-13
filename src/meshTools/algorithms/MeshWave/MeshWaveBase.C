@@ -25,13 +25,13 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "PointEdgeWave.H"
+#include "MeshWave.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(PointEdgeWaveName, 0);
+    defineTypeNameAndDebug(MeshWaveName, 0);
 }
 
 

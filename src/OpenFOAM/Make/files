@@ -810,7 +810,7 @@ meshes/preservePatchTypes/preservePatchTypes.C
 
 interpolations = interpolations
 interpolation = $(interpolations)/interpolation
-$(interpolations)/patchToPatchInterpolation/PatchToPatchInterpolationName.C
+$(interpolations)/patchToPatchInterpolation/PatchToPatchInterpolationBase.C
 
 $(interpolations)/interpolationTable/tableReaders/tableReaders.C
 $(interpolations)/interpolationTable/tableReaders/openFoam/openFoamTableReaders.C

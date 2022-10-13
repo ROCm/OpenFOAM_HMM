@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2012 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,13 +27,40 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "PatchEdgeFaceWave.H"
+#include "polyMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(PatchEdgeFaceWaveName, 0);
+    defineTypeNameAndDebug(PatchEdgeFaceWaveBase, 0);
 }
+
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+Foam::scalar Foam::PatchEdgeFaceWaveBase::propagationTol_ = 0.01;
+
+Foam::label Foam::PatchEdgeFaceWaveBase::dummyTrackData_ = 12345;
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::PatchEdgeFaceWaveBase::PatchEdgeFaceWaveBase
+(
+    const polyMesh& mesh,
+    const label nEdges,
+    const label nFaces
+)
+:
+    mesh_(mesh),
+    changedEdge_(nEdges),
+    changedFace_(nFaces),
+    changedEdges_(nEdges),
+    changedFaces_(nFaces),
+    nUnvisitedEdges_(nEdges),
+    nUnvisitedFaces_(nFaces)
+{}
 
 
 // ************************************************************************* //

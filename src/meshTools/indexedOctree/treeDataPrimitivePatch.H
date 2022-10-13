@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef treeDataPrimitivePatch_H
-#define treeDataPrimitivePatch_H
+#ifndef Foam_treeDataPrimitivePatch_H
+#define Foam_treeDataPrimitivePatch_H
 
 #include "treeBoundBoxList.H"
 #include "volumeType.H"
@@ -45,7 +45,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 template<class Type> class indexedOctree;
 
 
@@ -65,7 +65,7 @@ class treeDataPrimitivePatch
 :
     public treeDataPrimitivePatchName
 {
-    // Private data
+    // Private Data
 
         //- Underlying geometry
         const PatchType& patch_;
