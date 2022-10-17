@@ -38,8 +38,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef scalarRanges_H
-#define scalarRanges_H
+#ifndef Foam_scalarRanges_H
+#define Foam_scalarRanges_H
 
 #include "scalarRange.H"
 #include "List.H"
@@ -88,15 +88,17 @@ public:
 
     // Member Functions
 
-        //- Match any condition in the list.
-        //  \return True if the value matches any condition in the list.
-        inline bool match(const scalar& value) const;
+        //- True if the value is matched by any of the sub-ranges
+        inline bool contains(const scalar value) const;
+
+        //- True if the value is matched by any of the sub-ranges
+        inline bool match(const scalar value) const;
 
 
     // Member Operators
 
-        //- Use match() as a predicate.
-        inline bool operator()(const scalar& value) const;
+        //- For use as a predicate, same as contains(), match()
+        bool operator()(const scalar value) const { return match(value); }
 };
 
 

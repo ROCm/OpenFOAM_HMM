@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,8 +44,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef scalarRange_H
-#define scalarRange_H
+#ifndef Foam_scalarRange_H
+#define Foam_scalarRange_H
 
 #include "scalar.H"
 
@@ -187,7 +187,10 @@ public:
         inline bool empty() const noexcept;
 
         //- True if range is non-empty.
-        inline bool valid() const noexcept;
+        inline bool good() const noexcept;
+
+        //- True if range is non-empty.
+        bool valid() const noexcept { return good(); }
 
         //- True if the range bounds represent a single value.
         inline bool single() const noexcept;
@@ -202,14 +205,18 @@ public:
         //  For GE, LE bounds it is the min/max value, respectively.
         inline scalar value() const;
 
-        //- True if the value matches the condition.
-        inline bool match(const scalar& val) const;
+        //- True if the value is matched by the condition
+        inline bool contains(const scalar val) const;
+
+        //- True if the value is matched by the condition
+        inline bool match(const scalar val) const;
 
 
     // Member Operators
 
-        //- Identical to match(), for use as a predicate.
-        inline bool operator()(const scalar& val) const;
+        //- For use as a predicate, same as contains(), match()
+        bool operator()(const scalar val) const { return match(val); }
+
 
         inline constexpr bool operator==(const scalarRange& rhs) const noexcept;
         inline constexpr bool operator!=(const scalarRange& rhs) const noexcept;

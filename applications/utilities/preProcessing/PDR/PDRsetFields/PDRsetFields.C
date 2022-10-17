@@ -193,14 +193,14 @@ int main(int argc, char* argv[])
     const labelRange origBlocks(0, obstacles.size());
 
     // Intersection blockage
-    labelRange interBlocks(origBlocks.after(), 0);
+    labelRange interBlocks(origBlocks.end_value(), 0);
 
     scalar volSubtract = 0;
 
     // Do binary intersections between blocks and cylinders (or diag-beam)
     // by creating -ve blocks at the overlap
 
-    labelRange int1Blocks(origBlocks.after(), 0);
+    labelRange int1Blocks(origBlocks.end_value(), 0);
 
     if (pars.overlaps % 2 > 0)
     {
@@ -219,7 +219,7 @@ int main(int argc, char* argv[])
     // Do binary intersections between blocks
     // by creating -ve blocks at the overlap
 
-    labelRange int2Blocks(int1Blocks.after(), 0);
+    labelRange int2Blocks(int1Blocks.end_value(), 0);
     if (pars.overlaps % 4 > 1)
     {
         Info<< "    block/block intersections" << endl;
@@ -237,7 +237,7 @@ int main(int argc, char* argv[])
     // Correct for triple intersections
     // by looking for overlaps between the -ve blocks just created
 
-    labelRange int3Blocks(int2Blocks.after(), 0);
+    labelRange int3Blocks(int2Blocks.end_value(), 0);
     if (pars.overlaps % 8 > 3)
     {
         Info<< "    triple intersections" << endl;

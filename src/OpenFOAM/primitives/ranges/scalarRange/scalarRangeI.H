@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -135,9 +135,9 @@ inline bool Foam::scalarRange::empty() const noexcept
 }
 
 
-inline bool Foam::scalarRange::valid() const noexcept
+inline bool Foam::scalarRange::good() const noexcept
 {
-    return bool(type_);
+    return type_ != scalarRange::NONE;
 }
 
 
@@ -182,7 +182,13 @@ inline Foam::scalar Foam::scalarRange::value() const
 }
 
 
-inline bool Foam::scalarRange::match(const scalar& val) const
+inline bool Foam::scalarRange::contains(const scalar val) const
+{
+    return match(val);
+}
+
+
+inline bool Foam::scalarRange::match(const scalar val) const
 {
     switch (type_)
     {
@@ -199,12 +205,6 @@ inline bool Foam::scalarRange::match(const scalar& val) const
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-inline bool Foam::scalarRange::operator()(const scalar& val) const
-{
-    return match(val);
-}
-
 
 inline constexpr bool
 Foam::scalarRange::operator==

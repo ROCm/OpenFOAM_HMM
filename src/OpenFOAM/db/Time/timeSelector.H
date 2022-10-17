@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -71,8 +71,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef timeSelector_H
-#define timeSelector_H
+#ifndef Foam_timeSelector_H
+#define Foam_timeSelector_H
 
 #include "scalarRanges.H"
 #include "instantList.H"
@@ -91,15 +91,19 @@ class Time;
 \*---------------------------------------------------------------------------*/
 
 class timeSelector
-:
-    private scalarRanges
 {
+    // Private Data
+
+        //- The selectable time ranges
+        scalarRanges ranges_;
+
+
 public:
 
     // Constructors
 
         //- Default construct
-        timeSelector() = default;
+        timeSelector() noexcept = default;
 
         //- Construct by parsing string for time ranges
         explicit timeSelector(const std::string& str);
@@ -107,8 +111,14 @@ public:
 
     // Member Functions
 
-        //- Return true if the given instant is within the ranges
-        bool selected(const instant& value) const;
+        //- True if value is within any of the ranges
+        bool contains(const scalar value) const;
+
+        //- True if value of the instant is within any of the ranges
+        bool contains(const instant& t) const;
+
+        //- True if value of the instant is within any of the ranges
+        bool selected(const instant& t) const { return contains(t); }
 
         //- Return the set of selected instants in the given list that are
         //- within the ranges

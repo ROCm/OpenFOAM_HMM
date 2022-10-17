@@ -116,7 +116,7 @@ bool Foam::scalarRange::parse(const std::string& str, scalarRange& range)
         }
     }
 
-    return range.valid();
+    return range.good();
 }
 
 

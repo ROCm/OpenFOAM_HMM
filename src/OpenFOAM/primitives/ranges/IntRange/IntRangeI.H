@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,24 +58,37 @@ inline constexpr Foam::IntRange<IntType>::IntRange
 {}
 
 
-// * * * * * * * * * * * * * * Forward Iterators * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class IntType>
-inline constexpr Foam::IntRange<IntType>::const_iterator::
-const_iterator(const IntType val) noexcept
-:
-    value_(val)
-{}
-
-
-template<class IntType>
-inline constexpr IntType
-Foam::IntRange<IntType>::const_iterator::
-operator*() const noexcept
+inline IntType Foam::IntRange<IntType>::begin_value() const noexcept
 {
-    return value_;
+    return (start_);
 }
 
+
+template<class IntType>
+inline IntType Foam::IntRange<IntType>::end_value() const noexcept
+{
+    return (start_ + size_);
+}
+
+
+template<class IntType>
+inline IntType Foam::IntRange<IntType>::rbegin_value() const noexcept
+{
+    return (start_ + (size_ - 1));
+}
+
+
+template<class IntType>
+inline IntType Foam::IntRange<IntType>::rend_value() const noexcept
+{
+    return (start_ - 1);
+}
+
+
+// * * * * * * * * * * * * * * Forward Iterators * * * * * * * * * * * * * * //
 
 template<class IntType>
 inline constexpr IntType
@@ -194,23 +207,6 @@ operator<(const const_iterator& iter) const noexcept
 
 
 // * * * * * * * * * * * * * * Reverse Iterators * * * * * * * * * * * * * * //
-
-template<class IntType>
-inline constexpr Foam::IntRange<IntType>::const_reverse_iterator::
-const_reverse_iterator(const IntType val) noexcept
-:
-    value_(val)
-{}
-
-
-template<class IntType>
-inline constexpr IntType
-Foam::IntRange<IntType>::const_reverse_iterator::
-operator*() const noexcept
-{
-    return value_;
-}
-
 
 template<class IntType>
 inline constexpr IntType
@@ -342,7 +338,7 @@ template<class IntType>
 inline typename Foam::IntRange<IntType>::const_iterator
 Foam::IntRange<IntType>::begin() const noexcept
 {
-    return const_iterator(start_);
+    return const_iterator(begin_value());
 }
 
 
@@ -350,7 +346,7 @@ template<class IntType>
 inline typename Foam::IntRange<IntType>::const_iterator
 Foam::IntRange<IntType>::cbegin() const noexcept
 {
-    return const_iterator(start_);
+    return const_iterator(begin_value());
 }
 
 
@@ -358,7 +354,7 @@ template<class IntType>
 inline typename Foam::IntRange<IntType>::const_iterator
 Foam::IntRange<IntType>::end() const noexcept
 {
-    return const_iterator(start_ + size_);
+    return const_iterator(end_value());
 }
 
 
@@ -366,7 +362,7 @@ template<class IntType>
 inline typename Foam::IntRange<IntType>::const_iterator
 Foam::IntRange<IntType>::cend() const noexcept
 {
-    return const_iterator(start_ + size_);
+    return const_iterator(end_value());
 }
 
 
@@ -374,7 +370,7 @@ template<class IntType>
 inline typename Foam::IntRange<IntType>::const_reverse_iterator
 Foam::IntRange<IntType>::rbegin() const noexcept
 {
-    return const_reverse_iterator(start_ + (size_-1));
+    return const_reverse_iterator(rbegin_value());
 }
 
 
@@ -382,7 +378,7 @@ template<class IntType>
 inline typename Foam::IntRange<IntType>::const_reverse_iterator
 Foam::IntRange<IntType>::crbegin() const noexcept
 {
-    return const_reverse_iterator(start_ + (size_-1));
+    return const_reverse_iterator(rbegin_value());
 }
 
 
@@ -390,7 +386,7 @@ template<class IntType>
 inline typename Foam::IntRange<IntType>::const_reverse_iterator
 Foam::IntRange<IntType>::rend() const noexcept
 {
-    return const_reverse_iterator(start_ - 1);
+    return const_reverse_iterator(rend_value());
 }
 
 
@@ -398,74 +394,11 @@ template<class IntType>
 inline typename Foam::IntRange<IntType>::const_reverse_iterator
 Foam::IntRange<IntType>::crend() const noexcept
 {
-    return const_reverse_iterator(start_ - 1);
+    return const_reverse_iterator(rend_value());
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class IntType>
-inline IntType Foam::IntRange<IntType>::start() const noexcept
-{
-    return start_;
-}
-
-
-template<class IntType>
-inline IntType Foam::IntRange<IntType>::size() const noexcept
-{
-    return size_;
-}
-
-
-template<class IntType>
-inline IntType& Foam::IntRange<IntType>::start() noexcept
-{
-    return start_;
-}
-
-
-template<class IntType>
-inline IntType& Foam::IntRange<IntType>::size() noexcept
-{
-    return size_;
-}
-
-
-template<class IntType>
-inline bool Foam::IntRange<IntType>::empty() const noexcept
-{
-    return !size_;
-}
-
-
-template<class IntType>
-inline IntType Foam::IntRange<IntType>::first() const noexcept
-{
-    return start_;
-}
-
-
-template<class IntType>
-inline IntType Foam::IntRange<IntType>::last() const noexcept
-{
-    return (start_ + (size_-1));
-}
-
-
-template<class IntType>
-inline IntType Foam::IntRange<IntType>::rend_value() const noexcept
-{
-    return (start_ - 1);
-}
-
-
-template<class IntType>
-inline IntType Foam::IntRange<IntType>::end_value() const noexcept
-{
-    return (start_ + size_);
-}
-
 
 template<class IntType>
 inline void Foam::IntRange<IntType>::clear() noexcept
@@ -515,7 +448,8 @@ inline void Foam::IntRange<IntType>::clampSize() noexcept
 
 
 template<class IntType>
-inline bool Foam::IntRange<IntType>::found(const IntType value) const noexcept
+inline bool Foam::IntRange<IntType>::contains(const IntType value)
+const noexcept
 {
     // Avoid overflow risk:
     //   (value < (start_ + size_)) --> ((value - start_) < size_)
@@ -531,14 +465,6 @@ inline constexpr IntType Foam::IntRange<IntType>::
 operator[](const IntType i) const noexcept
 {
     return start_ + i;
-}
-
-
-template<class IntType>
-inline bool Foam::IntRange<IntType>::
-operator()(const IntType value) const noexcept
-{
-    return found(value);
 }
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -137,7 +137,7 @@ Foam::labelRanges::end() const noexcept
 }
 
 
-inline bool Foam::labelRanges::found(const label value) const
+inline bool Foam::labelRanges::contains(const label value) const
 {
     for
     (
@@ -145,7 +145,7 @@ inline bool Foam::labelRanges::found(const label value) const
       : static_cast<const StorageContainer&>(*this)
     )
     {
-        if (range.found(value))
+        if (range.contains(value))
         {
             return true;
         }

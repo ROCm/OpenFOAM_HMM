@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,8 +36,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef labelRange_H
-#define labelRange_H
+#ifndef Foam_labelRange_H
+#define Foam_labelRange_H
 
 #include "IntRange.H"
 
@@ -111,18 +111,12 @@ public:
 
     // Access
 
-        //- The (inclusive) lower value of the range - same as first(), start()
-        inline label min() const noexcept;
-
-        //- The (inclusive) upper value of the range - same as last()
-        inline label max() const noexcept;
-
         //- The value before the start of the range
-        inline label before() const noexcept;
+        label before() const noexcept { return rend_value(); }
 
         //- The value after the last element in the range
         //  This is identical to the value of cend()
-        inline label after() const noexcept;
+        label after() const noexcept { return end_value(); }
 
         //- Adjust the start to avoid negative indices.
         //  The size is decreased accordingly, but will never become negative.
@@ -181,7 +175,7 @@ public:
         //- Deprecated(2020-09) True if range is non-empty
         //
         //  \deprecated(2020-09) - use bool operator
-        bool valid() const noexcept { return bool(size()); }
+        bool valid() const noexcept { return !empty(); }
 };
 
 

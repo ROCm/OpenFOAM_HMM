@@ -74,30 +74,6 @@ inline Foam::labelRange::labelRange
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline Foam::label Foam::labelRange::min() const noexcept
-{
-    return start();
-}
-
-
-inline Foam::label Foam::labelRange::max() const noexcept
-{
-    return last();
-}
-
-
-inline Foam::label Foam::labelRange::before() const noexcept
-{
-    return IntRange<label>::rend_value();
-}
-
-
-inline Foam::label Foam::labelRange::after() const noexcept
-{
-    return IntRange<label>::end_value();
-}
-
-
 inline void Foam::labelRange::reset
 (
     const label beg,

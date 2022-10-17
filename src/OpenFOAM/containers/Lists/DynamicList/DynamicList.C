@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,23 +41,24 @@ Foam::label Foam::DynamicList<T, SizeMin>::removeElements
         // No-op
         return 0;
     }
-    else if (slice.after() >= this->size())
+    else if (slice.end_value() >= this->size())
     {
-        // Remove tail
-        this->resize(slice.first());
+        // Remove entire tail
+        this->resize(slice.begin_value());
     }
     else
     {
-        // Copy (swap) down
-        label j = slice.first();
+        // Copy (swap) down, from range rbegin() -> rend()
+        // followed by truncation
+        label j = slice.begin_value();
         const label len = this->size();
 
-        for (label i = slice.after(); i < len; ++i, ++j)
+        for (label i = slice.end_value(); i < len; ++i, ++j)
         {
             Foam::Swap(this->operator[](i), this->operator[](j));
         }
 
-        resize(this->size() - slice.size());
+        this->resize(this->size() - slice.size());
     }
 
     return slice.size();
@@ -70,10 +71,10 @@ Foam::label Foam::DynamicList<T, SizeMin>::subsetElements
     const labelRange& slice
 )
 {
-    if (slice.first() > 0)
+    if (slice.begin_value() > 0)
     {
         // Copy (swap) down
-        label j = slice.first();
+        label j = slice.begin_value();
         const label len = slice.size();
 
         for (label i = 0; i < len; ++i, ++j)

@@ -41,8 +41,8 @@ void printInfo(const labelRange& range)
         << "last    " << range.last() << nl
         << "min     " << range.min() << nl
         << "max     " << range.max() << nl
-        << "after   " << range.after() << nl
-        << "begin end " << *range.cbegin() << ' ' << *range.cend() << nl;
+        << "end     " << range.end_value() << nl
+        << "begin/end " << *range.cbegin() << ' ' << *range.cend() << nl;
 
     // Info<< "rbegin rend " << *range.rbegin() << ' ' << *range.rend() << nl;
 }
@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
     argList::noParallel();
     argList::noFunctionObjects();
     argList::addArgument("start size .. startN sizeN");
-    argList::addVerbose("enable labelRange::debug");
+    argList::addVerboseOption("enable labelRange::debug");
     argList::addNote
     (
         "The default is to add ranges, use 'add' and 'del' to toggle\n\n"

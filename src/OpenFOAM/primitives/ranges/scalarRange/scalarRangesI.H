@@ -35,7 +35,13 @@ inline Foam::scalarRanges::scalarRanges(const std::string& str, bool report)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline bool Foam::scalarRanges::match(const scalar& value) const
+inline bool Foam::scalarRanges::contains(const scalar value) const
+{
+    return match(value);
+}
+
+
+inline bool Foam::scalarRanges::match(const scalar value) const
 {
     for (const scalarRange& range : *this)
     {
@@ -46,14 +52,6 @@ inline bool Foam::scalarRanges::match(const scalar& value) const
     }
 
     return false;
-}
-
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-inline bool Foam::scalarRanges::operator()(const scalar& value) const
-{
-    return match(value);
 }
 
 

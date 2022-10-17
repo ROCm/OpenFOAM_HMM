@@ -326,13 +326,13 @@ void Foam::bitSet::set(const labelRange& range)
     // - zero fill any gaps that we might create.
     // - flood-fill the reset, which now corresponds to the full range.
     //
-    // NB: use labelRange after() for the exclusive end-value, which
+    // NB: use labelRange end_value() for the exclusive end-value, which
     // corresponds to our new set size.
-    if (slice.after() >= size())
+    if (slice.end_value() >= size())
     {
-        reserve(slice.after());
-        resize(slice.start(), false);
-        resize(slice.after(), true);
+        reserve(slice.end_value());
+        resize(slice.begin_value(), false);
+        resize(slice.end_value(), true);
         return;
     }
 
@@ -343,12 +343,12 @@ void Foam::bitSet::set(const labelRange& range)
     //    b. with partial coverage in the end block
 
     // The begin block/offset
-    unsigned int bblock = slice.first() / elem_per_block;
-    unsigned int bmask  = slice.first() % elem_per_block;
+    unsigned int bblock = slice.begin_value() / elem_per_block;
+    unsigned int bmask  = slice.begin_value() % elem_per_block;
 
     // The end block/offset
-    unsigned int eblock = slice.after() / elem_per_block;
-    unsigned int emask  = slice.after() % elem_per_block;
+    unsigned int eblock = slice.end_value() / elem_per_block;
+    unsigned int emask  = slice.end_value() % elem_per_block;
 
     // Transform offsets to lower bit masks
     if (bmask) bmask = mask_lower(bmask);
@@ -403,14 +403,14 @@ void Foam::bitSet::unset(const labelRange& range)
 
     // Range finishes at or beyond the right side.
     //
-    // NB: use labelRange after() for the exclusive end-value, which
+    // NB: use labelRange end_value() for the exclusive end-value, which
     // corresponds to our new set size.
-    if (slice.after() >= size())
+    if (slice.end_value() >= size())
     {
         // The original size
         const label orig = size();
 
-        resize(slice.start(), false);
+        resize(slice.begin_value(), false);
         resize(orig, false);
         return;
     }
@@ -423,12 +423,12 @@ void Foam::bitSet::unset(const labelRange& range)
     //    b. with partial coverage in the end block
 
     // The begin block/offset
-    unsigned int bblock = slice.first() / elem_per_block;
-    unsigned int bmask  = slice.first() % elem_per_block;
+    unsigned int bblock = slice.begin_value() / elem_per_block;
+    unsigned int bmask  = slice.begin_value() % elem_per_block;
 
     // The end block/offset
-    unsigned int eblock = slice.after() / elem_per_block;
-    unsigned int emask  = slice.after() % elem_per_block;
+    unsigned int eblock = slice.end_value() / elem_per_block;
+    unsigned int emask  = slice.end_value() % elem_per_block;
 
     // Transform offsets to lower bit masks
     if (bmask) bmask = mask_lower(bmask);

@@ -69,13 +69,13 @@ void Foam::BitOps::set(List<bool>& bools, const labelRange& range)
     }
 
     // Check maximum extent of the range.
-    // The after() method is the exclusive end-value,
+    // The end_value() method is the exclusive end-value,
     // which corresponds to our potential new length.
     // - resize now to avoid allocations within the loop
 
-    if (slice.after() >= bools.size())
+    if (slice.end_value() >= bools.size())
     {
-        bools.resize(slice.after(), false);
+        bools.resize(slice.end_value(), false);
     }
 
     for (const label i : slice)
