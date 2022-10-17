@@ -197,15 +197,6 @@ Foam::boundBox Foam::boundBox::returnReduce(const boundBox& bb)
 }
 
 
-bool Foam::boundBox::intersect(const boundBox& bb)
-{
-    min_ = ::Foam::max(min_, bb.min_);
-    max_ = ::Foam::min(max_, bb.max_);
-
-    return valid();
-}
-
-
 bool Foam::boundBox::intersects(const plane& pln) const
 {
     // Require a full 3D box
@@ -287,6 +278,15 @@ Foam::point Foam::boundBox::nearest(const point& p) const
         Foam::min(Foam::max(p.y(), min_.y()), max_.y()),
         Foam::min(Foam::max(p.z(), min_.z()), max_.z())
     );
+}
+
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+void Foam::boundBox::operator&=(const boundBox& bb)
+{
+    min_ = ::Foam::max(min_, bb.min_);
+    max_ = ::Foam::min(max_, bb.max_);
 }
 
 

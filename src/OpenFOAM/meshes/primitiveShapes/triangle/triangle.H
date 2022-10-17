@@ -40,8 +40,8 @@ SourceFiles
 #ifndef Foam_triangle_H
 #define Foam_triangle_H
 
+#include "triangleFwd.H"
 #include "intersection.H"
-#include "point.H"
 #include "vector.H"
 #include "tensor.H"
 #include "pointHit.H"
@@ -62,19 +62,11 @@ namespace Foam
 // Forward Declarations
 class plane;
 
-template<class Point, class PointRef> class triangle;
-
 template<class Point, class PointRef>
 inline Istream& operator>>(Istream&, triangle<Point, PointRef>&);
 
 template<class Point, class PointRef>
 inline Ostream& operator<<(Ostream&, const triangle<Point, PointRef>&);
-
-
-// Common Typedefs
-
-//- A triangle using referred points
-typedef triangle<point, const point&> triPointRef;
 
 
 /*---------------------------------------------------------------------------*\

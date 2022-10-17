@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -632,10 +632,16 @@ bool Foam::sampledMeshedSurface::update()
     // Calculate surface and mesh overlap bounding box
     treeBoundBox bb(surface_.points(), surface_.meshPoints());
 
-    // Check for overlap with (global!) mesh bb
-    const bool intersect = bb.intersect(mesh().bounds());
+    // Restrict surface to (global!) mesh bound box
+    bb &= mesh().bounds();
 
-    if (!intersect)
+    if (bb.good())
+    {
+        // Extend a bit
+        bb.grow(0.5*bb.span());
+        bb.inflate(1e-6);
+    }
+    else
     {
         // Surface and mesh do not overlap at all. Guarantee a valid
         // bounding box so we don't get any 'invalid bounding box' errors.
@@ -645,20 +651,8 @@ bool Foam::sampledMeshedSurface::update()
             << " does not overlap bounding box of mesh " << mesh().bounds()
             << endl;
 
-        bb = treeBoundBox(mesh().bounds());
-        const vector span(bb.span());
-
-        bb.min() += (0.5-1e-6)*span;
-        bb.max() -= (0.5-1e-6)*span;
-    }
-    else
-    {
-        // Extend a bit
-        const vector span(bb.span());
-        bb.min() -= 0.5*span;
-        bb.max() += 0.5*span;
-
-        bb.inflate(1e-6);
+        bb.reset(mesh().bounds().centre());
+        bb.grow(1e-6*mesh().bounds().span());
     }
 
     // Mesh search engine, no triangulation of faces.

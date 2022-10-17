@@ -35,6 +35,9 @@ Note
     bounding box. Points can be added later and the bounding box will grow to
     include them.
 
+SeeAlso
+    Foam::treeBoundBox
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef Foam_boundBox_H
@@ -164,7 +167,10 @@ public:
             inline bool empty() const;
 
             //- Bounding box is non-inverted.
-            inline bool valid() const;
+            inline bool good() const;
+
+            //- Bounding box is non-inverted - same as good().
+            bool valid() const { return good(); }
 
             //- Minimum describing the bounding box
             inline const point& min() const noexcept;
@@ -227,6 +233,12 @@ public:
             //- Reset to an inverted box
             inline void reset();
 
+            //- Reset min/max to be identical to the specified point
+            inline void reset(const point& pt);
+
+            //- Reset min/max to specified values
+            inline void reset(const point& min, const point& max);
+
             //- Same as reset() - reset to an inverted box
             void clear() { reset(); }
 
@@ -287,10 +299,6 @@ public:
 
 
         // Query
-
-            //- Intersection (union) with the second box.
-            //  The return value is true if the intersection is non-empty.
-            bool intersect(const boundBox& bb);
 
             //- Does plane intersect this bounding box.
             //  There is an intersection if the plane segments the corner points
@@ -372,7 +380,11 @@ public:
 
     // Member Operators
 
+        //- Restrict min/max to union with other box.
+        void operator&=(const boundBox& bb);
+
         //- Extend box to include the second box, as per the add() method.
+        //  Can be used in a reduction operation.
         void operator+=(const boundBox& bb) { add(bb); }
 
 
@@ -383,6 +395,12 @@ public:
 
 
     // Housekeeping
+
+        //- Deprecated(2022-10) - use 'operator&=' to avoid confusion with
+        //- other intersects() methods.
+        //  \deprecated(2022-10) - use 'operator&='
+        FOAM_DEPRECATED_FOR(2022-10, "boundBox::operator&=(const boundBox&)")
+        bool intersect(const boundBox& bb) { *this &= bb; return good(); }
 
         //- Identical to centre()
         point midpoint() const { return centre(); }

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -156,14 +156,15 @@ inline Foam::scalar Foam::MinMax<T>::mag() const
 template<class T>
 inline bool Foam::MinMax<T>::empty() const
 {
+    // Is empty/invalid if (max < min), ie, !(min <= max)
     return (max() < min());
 }
 
 
 template<class T>
-inline bool Foam::MinMax<T>::valid() const
+inline bool Foam::MinMax<T>::good() const
 {
-    return !(max() < min());
+    return !empty();
 }
 
 
@@ -176,12 +177,26 @@ inline void Foam::MinMax<T>::reset()
 
 
 template<class T>
-inline bool Foam::MinMax<T>::intersect(const MinMax<T>& b)
+inline void Foam::MinMax<T>::reset(const T& val)
 {
-    min() = ::Foam::max(min(), b.min());
-    max() = ::Foam::min(max(), b.max());
+    min() = val;
+    max() = val;
+}
 
-    return valid();
+
+template<class T>
+inline void Foam::MinMax<T>::reset(const T& minVal, const T& maxVal)
+{
+    min() = minVal;
+    max() = maxVal;
+}
+
+
+template<class T>
+inline bool Foam::MinMax<T>::intersects(const MinMax<T>& b) const
+{
+    const MinMax<T>& a = *this;
+    return (a.min() < b.max() && b.min() < a.max());
 }
 
 
@@ -196,7 +211,7 @@ inline bool Foam::MinMax<T>::overlaps(const MinMax<T>& b) const
 template<class T>
 inline int Foam::MinMax<T>::compare(const T& val) const
 {
-    if (valid())
+    if (good())
     {
         if (max() < val)
         {
@@ -215,14 +230,14 @@ inline int Foam::MinMax<T>::compare(const T& val) const
 template<class T>
 inline bool Foam::MinMax<T>::contains(const T& val) const
 {
-    return (valid() && !compare(val));
+    return good() && !(val < min() || max() < val);
 }
 
 
 template<class T>
 inline const T& Foam::MinMax<T>::clip(const T& val) const
 {
-    if (valid())
+    if (good())
     {
         if (val < min())
         {
@@ -241,7 +256,7 @@ inline const T& Foam::MinMax<T>::clip(const T& val) const
 template<class T>
 inline bool Foam::MinMax<T>::inplaceClip(T& val) const
 {
-    if (valid())
+    if (good())
     {
         if (val < min())
         {
@@ -309,7 +324,7 @@ inline bool Foam::MinMax<T>::operator()(const T& val) const
 //
 //     // Remove overlapping portion, but cannot create a 'hole' in the middle
 //
-//     if (!a.valid() || !b.valid())
+//     if (a.empty() || b.empty())
 //     {
 //         // Invalid range(s): no-op
 //     }
@@ -326,6 +341,16 @@ inline bool Foam::MinMax<T>::operator()(const T& val) const
 //
 //     return *this;
 // }
+
+
+template<class T>
+inline Foam::MinMax<T>& Foam::MinMax<T>::operator&=(const MinMax<T>& b)
+{
+    min() = ::Foam::max(min(), b.min());
+    max() = ::Foam::min(max(), b.max());
+
+    return *this;
+}
 
 
 template<class T>

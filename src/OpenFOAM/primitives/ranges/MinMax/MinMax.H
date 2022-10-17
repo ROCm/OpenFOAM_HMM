@@ -202,11 +202,20 @@ public:
         //- Range is empty if it is inverted
         inline bool empty() const;
 
-        //- Range is valid if it is not inverted
-        inline bool valid() const;
+        //- Range is non-inverted
+        inline bool good() const;
+
+        //- Range is non-inverted
+        bool valid() const { return good(); }
 
         //- Reset to an inverted (invalid) range
         inline void reset();
+
+        //- Reset min/max to be identical to the specified value
+        inline void reset(const T& val);
+
+        //- Reset min/max to specified values
+        inline void reset(const T& minVal, const T& maxVal);
 
         //- Same as reset() - reset to an inverted (invalid) range
         void clear() { reset(); }
@@ -214,11 +223,10 @@ public:
 
     // Testing / Query
 
-        //- Intersect (union) with the second range.
-        //  \return True if the resulting intersection is non-empty.
-        inline bool intersect(const MinMax<T>& b);
+        //- Test if the ranges intersect (exclusive check)
+        inline bool intersects(const MinMax<T>& b) const;
 
-        //- Test if the ranges overlap
+        //- Test if ranges overlap/touch (inclusive check)
         inline bool overlaps(const MinMax<T>& b) const;
 
         //- Compares the min/max range with the specified value.
@@ -228,7 +236,7 @@ public:
         //  - +1: range (min) is greater than value
         inline int compare(const T& val) const;
 
-        //- True if the value is within the range
+        //- True if the value is within the range (inclusive check)
         inline bool contains(const T& val) const;
 
         //- If out of range, return the respective min/max limits, otherwise
@@ -257,6 +265,9 @@ public:
 
         //- Identical to contains(), for use as a predicate.
         inline bool operator()(const T& val) const;
+
+        //- Restrict min/max range to union with other range
+        inline MinMax<T>& operator&=(const MinMax<T>& b);
 
         //- Extend min/max range to include other range
         //  Can be used in a reduction operation.

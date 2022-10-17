@@ -135,30 +135,19 @@ inline Foam::boundBox::boundBox(Istream& is)
 
 inline bool Foam::boundBox::empty() const
 {
-    // Check each component for max < min
-    for (direction dir = 0; dir < vector::nComponents; ++dir)
-    {
-        if (max_[dir] < min_[dir])
-        {
-            return true;
-        }
-    }
-    return false;
+    // Is empty/invalid if any component has (max < min), ie, !(min <= max)
+    return
+    (
+        (max_.x() < min_.x())
+     || (max_.y() < min_.y())
+     || (max_.z() < min_.z())
+    );
 }
 
 
-inline bool Foam::boundBox::valid() const
+inline bool Foam::boundBox::good() const
 {
-    // Check each component for max < min
-    for (direction dir = 0; dir < vector::nComponents; ++dir)
-    {
-        if (max_[dir] < min_[dir])
-        {
-            return false;
-        }
-    }
-
-    return true;
+    return !empty();
 }
 
 
@@ -256,6 +245,20 @@ inline void Foam::boundBox::reset()
 }
 
 
+inline void Foam::boundBox::reset(const point& pt)
+{
+    min_ = pt;
+    max_ = pt;
+}
+
+
+inline void Foam::boundBox::reset(const point& min, const point& max)
+{
+    min_ = min;
+    max_ = max;
+}
+
+
 inline void Foam::boundBox::add(const boundBox& bb)
 {
     min_ = ::Foam::min(min_, bb.min_);
@@ -310,9 +313,9 @@ inline bool Foam::boundBox::overlaps(const boundBox& bb) const
 {
     return
     (
-        bb.max_.x() >= min_.x() && bb.min_.x() <= max_.x()
-     && bb.max_.y() >= min_.y() && bb.min_.y() <= max_.y()
-     && bb.max_.z() >= min_.z() && bb.min_.z() <= max_.z()
+        min_.x() <= bb.max_.x() && bb.min_.x() <= max_.x()
+     && min_.y() <= bb.max_.y() && bb.min_.y() <= max_.y()
+     && min_.z() <= bb.max_.z() && bb.min_.z() <= max_.z()
     );
 }
 
