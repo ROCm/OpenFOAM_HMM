@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,8 +48,8 @@ See also
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SpatialVector_H
-#define SpatialVector_H
+#ifndef Foam_SpatialVector_H
+#define Foam_SpatialVector_H
 
 #include "Vector.H"
 
@@ -91,8 +91,8 @@ public:
 
     // Constructors
 
-        //- Construct null
-        inline SpatialVector();
+        //- Default construct
+        SpatialVector() = default;
 
         //- Construct initialized to zero
         inline SpatialVector(const Foam::zero);
@@ -119,37 +119,37 @@ public:
         );
 
         //- Construct from Istream
-        inline SpatialVector(Istream&);
+        inline explicit SpatialVector(Istream&);
 
 
     // Member Functions
 
-        // Component access
+    // Component Access
 
-            inline const Cmpt& wx() const;
-            inline const Cmpt& wy() const;
-            inline const Cmpt& wz() const;
+        const Cmpt& wx() const noexcept { return this->v_[WX]; }
+        const Cmpt& wy() const noexcept { return this->v_[WY]; }
+        const Cmpt& wz() const noexcept { return this->v_[WZ]; }
 
-            inline const Cmpt& lx() const;
-            inline const Cmpt& ly() const;
-            inline const Cmpt& lz() const;
+        const Cmpt& lx() const noexcept { return this->v_[LX]; }
+        const Cmpt& ly() const noexcept { return this->v_[LY]; }
+        const Cmpt& lz() const noexcept { return this->v_[LZ]; }
 
-            inline Cmpt& wx();
-            inline Cmpt& wy();
-            inline Cmpt& wz();
+        Cmpt& wx() noexcept { return this->v_[WX]; }
+        Cmpt& wy() noexcept { return this->v_[WY]; }
+        Cmpt& wz() noexcept { return this->v_[WZ]; }
 
-            inline Cmpt& lx();
-            inline Cmpt& ly();
-            inline Cmpt& lz();
+        Cmpt& lx() noexcept { return this->v_[LX]; }
+        Cmpt& ly() noexcept { return this->v_[LY]; }
+        Cmpt& lz() noexcept { return this->v_[LZ]; }
 
 
-        // Sub-vector access.
+    // Sub-vector access
 
-            //- Return the angular part of the spatial vector as a vector
-            inline Vector<Cmpt> w() const;
+        //- Return the angular part of the spatial vector as a vector
+        inline Vector<Cmpt> w() const;
 
-            //- Return the linear part of the spatial vector as a vector
-            inline Vector<Cmpt> l() const;
+        //- Return the linear part of the spatial vector as a vector
+        inline Vector<Cmpt> l() const;
 
 
     // Member Operators

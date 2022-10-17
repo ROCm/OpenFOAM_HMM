@@ -94,15 +94,15 @@ public:
 
     // Member Functions
 
-    // Component access
+    // Component Access
 
-        inline const Cmpt& a() const;
-        inline const Cmpt& b() const;
-        inline const Cmpt& c() const;
+        const Cmpt& a() const noexcept { return this->v_[A]; }
+        const Cmpt& b() const noexcept { return this->v_[B]; }
+        const Cmpt& c() const noexcept { return this->v_[C]; }
 
-        inline Cmpt& a();
-        inline Cmpt& b();
-        inline Cmpt& c();
+        Cmpt& a() noexcept { return this->v_[A]; }
+        Cmpt& b() noexcept { return this->v_[B]; }
+        Cmpt& c() noexcept { return this->v_[C]; }
 
 
     // Operations, Tests

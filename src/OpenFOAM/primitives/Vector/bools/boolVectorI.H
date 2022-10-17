@@ -107,15 +107,6 @@ inline unsigned int Foam::boolVector::count(const bool on) const
 }
 
 
-inline bool Foam::boolVector::x() const { return operator[](boolVector::X); }
-inline bool Foam::boolVector::y() const { return operator[](boolVector::Y); }
-inline bool Foam::boolVector::z() const { return operator[](boolVector::Z); }
-
-inline bool& Foam::boolVector::x() { return operator[](boolVector::X); }
-inline bool& Foam::boolVector::y() { return operator[](boolVector::Y); }
-inline bool& Foam::boolVector::z() { return operator[](boolVector::Z); }
-
-
 inline void Foam::boolVector::flip()
 {
     for (bool& val : *this)

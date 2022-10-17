@@ -857,32 +857,40 @@ inline bool operator!=
 
 
 template<class Form, class Cmpt, direction Ncmpts>
-inline bool operator>
-(
-    const VectorSpace<Form, Cmpt, Ncmpts>& vs1,
-    const VectorSpace<Form, Cmpt, Ncmpts>& vs2
-)
-{
-    for (direction i=0; i<Ncmpts; ++i)
-    {
-        if (!(vs1.v_[i] > vs2.v_[i])) return false;
-    }
-    return true;
-}
-
-
-template<class Form, class Cmpt, direction Ncmpts>
 inline bool operator<
 (
     const VectorSpace<Form, Cmpt, Ncmpts>& vs1,
     const VectorSpace<Form, Cmpt, Ncmpts>& vs2
 )
 {
+    // Compare all components, stop at first non less-than component
     for (direction i=0; i<Ncmpts; ++i)
     {
         if (!(vs1.v_[i] < vs2.v_[i])) return false;
     }
     return true;
+}
+
+
+template<class Form, class Cmpt, direction Ncmpts>
+inline bool operator<=
+(
+    const VectorSpace<Form, Cmpt, Ncmpts>& vs1,
+    const VectorSpace<Form, Cmpt, Ncmpts>& vs2
+)
+{
+    return !(vs2 < vs1);
+}
+
+
+template<class Form, class Cmpt, direction Ncmpts>
+inline bool operator>
+(
+    const VectorSpace<Form, Cmpt, Ncmpts>& vs1,
+    const VectorSpace<Form, Cmpt, Ncmpts>& vs2
+)
+{
+    return (vs2 < vs1);
 }
 
 
@@ -894,17 +902,6 @@ inline bool operator>=
 )
 {
     return !(vs1 < vs2);
-}
-
-
-template<class Form, class Cmpt, direction Ncmpts>
-inline bool operator<=
-(
-    const VectorSpace<Form, Cmpt, Ncmpts>& vs1,
-    const VectorSpace<Form, Cmpt, Ncmpts>& vs2
-)
-{
-    return !(vs1 > vs2);
 }
 
 

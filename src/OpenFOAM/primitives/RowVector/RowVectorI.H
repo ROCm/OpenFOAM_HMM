@@ -28,11 +28,6 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Cmpt>
-inline Foam::RowVector<Cmpt>::RowVector()
-{}
-
-
-template<class Cmpt>
 inline Foam::RowVector<Cmpt>::RowVector(const Foam::zero)
 :
     RowVector::msType(Zero)
@@ -69,46 +64,6 @@ inline Foam::RowVector<Cmpt>::RowVector(Istream& is)
 :
     RowVector::msType(is)
 {}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class Cmpt>
-inline const Cmpt& Foam::RowVector<Cmpt>::x() const
-{
-    return this->v_[X];
-}
-
-template<class Cmpt>
-inline const Cmpt& Foam::RowVector<Cmpt>::y() const
-{
-    return this->v_[Y];
-}
-
-template<class Cmpt>
-inline const Cmpt& Foam::RowVector<Cmpt>::z() const
-{
-    return this->v_[Z];
-}
-
-
-template<class Cmpt>
-inline Cmpt& Foam::RowVector<Cmpt>::x()
-{
-    return this->v_[X];
-}
-
-template<class Cmpt>
-inline Cmpt& Foam::RowVector<Cmpt>::y()
-{
-    return this->v_[Y];
-}
-
-template<class Cmpt>
-inline Cmpt& Foam::RowVector<Cmpt>::z()
-{
-    return this->v_[Z];
-}
 
 
 // ************************************************************************* //

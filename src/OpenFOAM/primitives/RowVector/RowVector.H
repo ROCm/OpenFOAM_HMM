@@ -68,8 +68,8 @@ public:
 
     // Constructors
 
-        //- Construct null
-        inline RowVector();
+        //- Default construct
+        RowVector() = default;
 
         //- Construct initialized to zero
         inline RowVector(const Foam::zero);
@@ -82,20 +82,20 @@ public:
         inline RowVector(const Cmpt& rvx, const Cmpt& rvy, const Cmpt& rvz);
 
         //- Construct from Istream
-        inline RowVector(Istream&);
+        inline explicit RowVector(Istream&);
 
 
     // Member Functions
 
-        // Access
+    // Component Access
 
-            inline const Cmpt& x() const;
-            inline const Cmpt& y() const;
-            inline const Cmpt& z() const;
+        const Cmpt& x() const noexcept { return this->v_[X]; }
+        const Cmpt& y() const noexcept { return this->v_[Y]; }
+        const Cmpt& z() const noexcept { return this->v_[Z]; }
 
-            inline Cmpt& x();
-            inline Cmpt& y();
-            inline Cmpt& z();
+        Cmpt& x() noexcept { return this->v_[X]; }
+        Cmpt& y() noexcept { return this->v_[Y]; }
+        Cmpt& z() noexcept { return this->v_[Z]; }
 };
 
 

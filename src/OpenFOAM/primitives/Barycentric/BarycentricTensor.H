@@ -109,22 +109,22 @@ public:
 
     // Member Functions
 
-    // Component access
+    // Component Access
 
-        inline const Cmpt& xa() const;
-        inline const Cmpt& xb() const;
-        inline const Cmpt& xc() const;
-        inline const Cmpt& xd() const;
+        const Cmpt& xa() const noexcept { return this->v_[XA]; }
+        const Cmpt& xb() const noexcept { return this->v_[XB]; }
+        const Cmpt& xc() const noexcept { return this->v_[XC]; }
+        const Cmpt& xd() const noexcept { return this->v_[XD]; }
 
-        inline const Cmpt& ya() const;
-        inline const Cmpt& yb() const;
-        inline const Cmpt& yc() const;
-        inline const Cmpt& yd() const;
+        const Cmpt& ya() const noexcept { return this->v_[YA]; }
+        const Cmpt& yb() const noexcept { return this->v_[YB]; }
+        const Cmpt& yc() const noexcept { return this->v_[YC]; }
+        const Cmpt& yd() const noexcept { return this->v_[YD]; }
 
-        inline const Cmpt& za() const;
-        inline const Cmpt& zb() const;
-        inline const Cmpt& zc() const;
-        inline const Cmpt& zd() const;
+        const Cmpt& za() const noexcept { return this->v_[ZA]; }
+        const Cmpt& zb() const noexcept { return this->v_[ZB]; }
+        const Cmpt& zc() const noexcept { return this->v_[ZC]; }
+        const Cmpt& zd() const noexcept { return this->v_[ZD]; }
 
 
     // Row-barycentric access

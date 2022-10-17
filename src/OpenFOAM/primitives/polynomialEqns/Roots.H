@@ -81,7 +81,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct as 'nan'
         inline Roots();
 
         //- Construct with a uniform value

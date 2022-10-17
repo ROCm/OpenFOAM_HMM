@@ -28,10 +28,6 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-inline Foam::linearEqn::linearEqn()
-{}
-
-
 inline Foam::linearEqn::linearEqn(const Foam::zero)
 :
     VectorSpace<linearEqn, scalar, 2>(Foam::zero{})
@@ -46,30 +42,6 @@ inline Foam::linearEqn::linearEqn(const scalar a, const scalar b)
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-inline Foam::scalar Foam::linearEqn::a() const
-{
-    return this->v_[A];
-}
-
-
-inline Foam::scalar Foam::linearEqn::b() const
-{
-    return this->v_[B];
-}
-
-
-inline Foam::scalar& Foam::linearEqn::a()
-{
-    return this->v_[A];
-}
-
-
-inline Foam::scalar& Foam::linearEqn::b()
-{
-    return this->v_[B];
-}
-
 
 inline Foam::scalar Foam::linearEqn::value(const scalar x) const
 {

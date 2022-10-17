@@ -27,10 +27,6 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-inline Foam::cubicEqn::cubicEqn()
-{}
-
-
 inline Foam::cubicEqn::cubicEqn(const Foam::zero)
 :
     VectorSpace<cubicEqn, scalar, 4>(Foam::zero{})
@@ -53,54 +49,6 @@ inline Foam::cubicEqn::cubicEqn
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-inline Foam::scalar Foam::cubicEqn::a() const
-{
-    return this->v_[A];
-}
-
-
-inline Foam::scalar Foam::cubicEqn::b() const
-{
-    return this->v_[B];
-}
-
-
-inline Foam::scalar Foam::cubicEqn::c() const
-{
-    return this->v_[C];
-}
-
-
-inline Foam::scalar Foam::cubicEqn::d() const
-{
-    return this->v_[D];
-}
-
-
-inline Foam::scalar& Foam::cubicEqn::a()
-{
-    return this->v_[A];
-}
-
-
-inline Foam::scalar& Foam::cubicEqn::b()
-{
-    return this->v_[B];
-}
-
-
-inline Foam::scalar& Foam::cubicEqn::c()
-{
-    return this->v_[C];
-}
-
-
-inline Foam::scalar& Foam::cubicEqn::d()
-{
-    return this->v_[D];
-}
-
 
 inline Foam::scalar Foam::cubicEqn::value(const scalar x) const
 {

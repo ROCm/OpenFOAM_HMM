@@ -60,50 +60,6 @@ inline Foam::Barycentric2D<Cmpt>::Barycentric2D
 {}
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class Cmpt>
-inline const Cmpt& Foam::Barycentric2D<Cmpt>::a() const
-{
-    return this->v_[A];
-}
-
-
-template<class Cmpt>
-inline const Cmpt& Foam::Barycentric2D<Cmpt>::b() const
-{
-    return this->v_[B];
-}
-
-
-template<class Cmpt>
-inline const Cmpt& Foam::Barycentric2D<Cmpt>::c() const
-{
-    return this->v_[C];
-}
-
-
-template<class Cmpt>
-inline Cmpt& Foam::Barycentric2D<Cmpt>::a()
-{
-    return this->v_[A];
-}
-
-
-template<class Cmpt>
-inline Cmpt& Foam::Barycentric2D<Cmpt>::b()
-{
-    return this->v_[B];
-}
-
-
-template<class Cmpt>
-inline Cmpt& Foam::Barycentric2D<Cmpt>::c()
-{
-    return this->v_[C];
-}
-
-
 // * * * * * * * * * * * * * * * Member Operations * * * * * * * * * * * * * //
 
 template<class Cmpt>

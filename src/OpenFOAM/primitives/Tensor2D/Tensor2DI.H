@@ -95,56 +95,6 @@ inline Foam::Tensor2D<Cmpt>::Tensor2D(Istream& is)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Cmpt>
-inline const Cmpt& Foam::Tensor2D<Cmpt>::xx() const
-{
-    return this->v_[XX];
-}
-
-template<class Cmpt>
-inline const Cmpt& Foam::Tensor2D<Cmpt>::xy() const
-{
-    return this->v_[XY];
-}
-
-template<class Cmpt>
-inline const Cmpt& Foam::Tensor2D<Cmpt>::yx() const
-{
-    return this->v_[YX];
-}
-
-template<class Cmpt>
-inline const Cmpt& Foam::Tensor2D<Cmpt>::yy() const
-{
-    return this->v_[YY];
-}
-
-
-template<class Cmpt>
-inline Cmpt& Foam::Tensor2D<Cmpt>::xx()
-{
-    return this->v_[XX];
-}
-
-template<class Cmpt>
-inline Cmpt& Foam::Tensor2D<Cmpt>::xy()
-{
-    return this->v_[XY];
-}
-
-template<class Cmpt>
-inline Cmpt& Foam::Tensor2D<Cmpt>::yx()
-{
-    return this->v_[YX];
-}
-
-template<class Cmpt>
-inline Cmpt& Foam::Tensor2D<Cmpt>::yy()
-{
-    return this->v_[YY];
-}
-
-
-template<class Cmpt>
 inline Foam::Vector2D<Cmpt> Foam::Tensor2D<Cmpt>::x() const
 {
     return Vector2D<Cmpt>(this->v_[XX], this->v_[XY]);

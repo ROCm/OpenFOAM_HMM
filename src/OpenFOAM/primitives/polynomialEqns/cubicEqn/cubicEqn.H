@@ -96,8 +96,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cubicEqn_H
-#define cubicEqn_H
+#ifndef Foam_cubicEqn_H
+#define Foam_cubicEqn_H
 
 #include "Roots.H"
 
@@ -122,8 +122,8 @@ public:
 
     // Constructors
 
-        //- Construct null
-        inline cubicEqn();
+        //- Default construct
+        cubicEqn() = default;
 
         //- Construct initialized to zero
         inline cubicEqn(const Foam::zero);
@@ -142,15 +142,16 @@ public:
 
     // Access
 
-        inline scalar a() const;
-        inline scalar b() const;
-        inline scalar c() const;
-        inline scalar d() const;
+        scalar a() const noexcept { return this->v_[A]; }
+        scalar b() const noexcept { return this->v_[B]; }
+        scalar c() const noexcept { return this->v_[C]; }
+        scalar d() const noexcept { return this->v_[D]; }
 
-        inline scalar& a();
-        inline scalar& b();
-        inline scalar& c();
-        inline scalar& d();
+        scalar& a() noexcept { return this->v_[A]; }
+        scalar& b() noexcept { return this->v_[B]; }
+        scalar& c() noexcept { return this->v_[C]; }
+        scalar& d() noexcept { return this->v_[D]; }
+
 
     // Evaluate
 

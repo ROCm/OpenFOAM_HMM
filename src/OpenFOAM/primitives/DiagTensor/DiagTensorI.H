@@ -70,46 +70,6 @@ inline Foam::DiagTensor<Cmpt>::DiagTensor(Istream& is)
 {}
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class Cmpt>
-inline const Cmpt& Foam::DiagTensor<Cmpt>::xx() const
-{
-    return this->v_[XX];
-}
-
-template<class Cmpt>
-inline const Cmpt& Foam::DiagTensor<Cmpt>::yy() const
-{
-    return this->v_[YY];
-}
-
-template<class Cmpt>
-inline const Cmpt& Foam::DiagTensor<Cmpt>::zz() const
-{
-    return this->v_[ZZ];
-}
-
-
-template<class Cmpt>
-inline Cmpt& Foam::DiagTensor<Cmpt>::xx()
-{
-    return this->v_[XX];
-}
-
-template<class Cmpt>
-inline Cmpt& Foam::DiagTensor<Cmpt>::yy()
-{
-    return this->v_[YY];
-}
-
-template<class Cmpt>
-inline Cmpt& Foam::DiagTensor<Cmpt>::zz()
-{
-    return this->v_[ZZ];
-}
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam

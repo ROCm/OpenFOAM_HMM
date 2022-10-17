@@ -63,34 +63,6 @@ inline Foam::Vector2D<Cmpt>::Vector2D(Istream& is)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Cmpt>
-inline const Cmpt& Foam::Vector2D<Cmpt>::x() const
-{
-    return this->v_[X];
-}
-
-
-template<class Cmpt>
-inline const Cmpt& Foam::Vector2D<Cmpt>::y() const
-{
-    return this->v_[Y];
-}
-
-
-template<class Cmpt>
-inline Cmpt& Foam::Vector2D<Cmpt>::x()
-{
-    return this->v_[X];
-}
-
-
-template<class Cmpt>
-inline Cmpt& Foam::Vector2D<Cmpt>::y()
-{
-    return this->v_[Y];
-}
-
-
-template<class Cmpt>
 inline Foam::Vector2D<Cmpt>& Foam::Vector2D<Cmpt>::normalise(const scalar tol)
 {
     const scalar s(Foam::mag(*this));

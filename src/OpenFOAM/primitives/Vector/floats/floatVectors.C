@@ -104,7 +104,7 @@ const char* const Foam::Vector<double>::vsType::typeName = "doubleVector";
     const Foam::Vector<Type> Foam::Vector<Type>::vsType::rootMin              \
     (                                                                         \
         Vector<Type>::uniform(-Prefix##ROOTVGREAT)                            \
-    );                                                                        \
+    );
 
 
 defineTraits(float, floatScalar);

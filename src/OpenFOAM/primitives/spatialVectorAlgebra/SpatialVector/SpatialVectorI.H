@@ -28,11 +28,6 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Cmpt>
-inline Foam::SpatialVector<Cmpt>::SpatialVector()
-{}
-
-
-template<class Cmpt>
 inline Foam::SpatialVector<Cmpt>::SpatialVector(const Foam::zero)
 :
     SpatialVector::vsType(Zero)
@@ -56,12 +51,12 @@ inline Foam::SpatialVector<Cmpt>::SpatialVector
     const Vector<Cmpt>& l
 )
 {
-    this->v_[0] = w.x();
-    this->v_[1] = w.y();
-    this->v_[2] = w.z();
-    this->v_[3] = l.x();
-    this->v_[4] = l.y();
-    this->v_[5] = l.z();
+    this->v_[WX] = w.x();
+    this->v_[WY] = w.y();
+    this->v_[WZ] = w.z();
+    this->v_[LX] = l.x();
+    this->v_[LY] = l.y();
+    this->v_[LZ] = l.z();
 }
 
 
@@ -76,12 +71,12 @@ inline Foam::SpatialVector<Cmpt>::SpatialVector
     const Cmpt& v5
 )
 {
-    this->v_[0] = v0;
-    this->v_[1] = v1;
-    this->v_[2] = v2;
-    this->v_[3] = v3;
-    this->v_[4] = v4;
-    this->v_[5] = v5;
+    this->v_[WX] = v0;
+    this->v_[WY] = v1;
+    this->v_[WZ] = v2;
+    this->v_[LX] = v3;
+    this->v_[LY] = v4;
+    this->v_[LZ] = v5;
 }
 
 
@@ -102,99 +97,15 @@ inline Foam::SpatialVector<Cmpt>::dual::dual(const SpatialVector& v)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Cmpt>
-inline const Cmpt& Foam::SpatialVector<Cmpt>::wx() const
-{
-    return this->v_[WX];
-}
-
-
-template<class Cmpt>
-inline const Cmpt& Foam::SpatialVector<Cmpt>::wy() const
-{
-    return this->v_[WY];
-}
-
-
-template<class Cmpt>
-inline const Cmpt& Foam::SpatialVector<Cmpt>::wz() const
-{
-    return this->v_[WZ];
-}
-
-
-template<class Cmpt>
-inline const Cmpt& Foam::SpatialVector<Cmpt>::lx() const
-{
-    return this->v_[LX];
-}
-
-
-template<class Cmpt>
-inline const Cmpt& Foam::SpatialVector<Cmpt>::ly() const
-{
-    return this->v_[LY];
-}
-
-
-template<class Cmpt>
-inline const Cmpt& Foam::SpatialVector<Cmpt>::lz() const
-{
-    return this->v_[LZ];
-}
-
-
-template<class Cmpt>
-inline Cmpt& Foam::SpatialVector<Cmpt>::wx()
-{
-    return this->v_[WX];
-}
-
-
-template<class Cmpt>
-inline Cmpt& Foam::SpatialVector<Cmpt>::wy()
-{
-    return this->v_[WY];
-}
-
-
-template<class Cmpt>
-inline Cmpt& Foam::SpatialVector<Cmpt>::wz()
-{
-    return this->v_[WZ];
-}
-
-
-template<class Cmpt>
-inline Cmpt& Foam::SpatialVector<Cmpt>::lx()
-{
-    return this->v_[LX];
-}
-
-
-template<class Cmpt>
-inline Cmpt& Foam::SpatialVector<Cmpt>::ly()
-{
-    return this->v_[LY];
-}
-
-
-template<class Cmpt>
-inline Cmpt& Foam::SpatialVector<Cmpt>::lz()
-{
-    return this->v_[LZ];
-}
-
-
-template<class Cmpt>
 inline Foam::Vector<Cmpt> Foam::SpatialVector<Cmpt>::w() const
 {
-    return Vector<Cmpt>(this->v_[0], this->v_[1], this->v_[2]);
+    return Vector<Cmpt>(this->v_[WX], this->v_[WY], this->v_[WZ]);
 }
 
 template<class Cmpt>
 inline Foam::Vector<Cmpt> Foam::SpatialVector<Cmpt>::l() const
 {
-    return Vector<Cmpt>(this->v_[3], this->v_[4], this->v_[5]);
+    return Vector<Cmpt>(this->v_[LX], this->v_[LY], this->v_[LZ]);
 }
 
 

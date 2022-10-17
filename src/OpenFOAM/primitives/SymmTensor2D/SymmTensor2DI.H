@@ -77,56 +77,6 @@ inline Foam::SymmTensor2D<Cmpt>::SymmTensor2D(Istream& is)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Cmpt>
-inline const Cmpt& Foam::SymmTensor2D<Cmpt>::xx() const
-{
-    return this->v_[XX];
-}
-
-template<class Cmpt>
-inline const Cmpt& Foam::SymmTensor2D<Cmpt>::xy() const
-{
-    return this->v_[XY];
-}
-
-template<class Cmpt>
-inline const Cmpt& Foam::SymmTensor2D<Cmpt>::yx() const
-{
-    return this->v_[XY];
-}
-
-template<class Cmpt>
-inline const Cmpt& Foam::SymmTensor2D<Cmpt>::yy() const
-{
-    return this->v_[YY];
-}
-
-
-template<class Cmpt>
-inline Cmpt& Foam::SymmTensor2D<Cmpt>::xx()
-{
-    return this->v_[XX];
-}
-
-template<class Cmpt>
-inline Cmpt& Foam::SymmTensor2D<Cmpt>::xy()
-{
-    return this->v_[XY];
-}
-
-template<class Cmpt>
-inline Cmpt& Foam::SymmTensor2D<Cmpt>::yx()
-{
-    return this->v_[XY];
-}
-
-template<class Cmpt>
-inline Cmpt& Foam::SymmTensor2D<Cmpt>::yy()
-{
-    return this->v_[YY];
-}
-
-
-template<class Cmpt>
 inline Foam::Vector2D<Cmpt> Foam::SymmTensor2D<Cmpt>::diag() const
 {
     return Vector2D<Cmpt>(this->v_[XX], this->v_[YY]);

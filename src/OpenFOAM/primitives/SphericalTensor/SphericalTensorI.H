@@ -65,20 +65,6 @@ inline Foam::SphericalTensor<Cmpt>::SphericalTensor(Istream& is)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Cmpt>
-inline const Cmpt& Foam::SphericalTensor<Cmpt>::ii() const
-{
-    return this->v_[II];
-}
-
-
-template<class Cmpt>
-inline Cmpt& Foam::SphericalTensor<Cmpt>::ii()
-{
-    return this->v_[II];
-}
-
-
-template<class Cmpt>
 inline const Foam::SphericalTensor<Cmpt>&
 Foam::SphericalTensor<Cmpt>::T() const
 {

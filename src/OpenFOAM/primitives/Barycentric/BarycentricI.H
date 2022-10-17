@@ -63,64 +63,6 @@ inline Foam::Barycentric<Cmpt>::Barycentric
 {}
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class Cmpt>
-inline const Cmpt& Foam::Barycentric<Cmpt>::a() const
-{
-    return this->v_[A];
-}
-
-
-template<class Cmpt>
-inline const Cmpt& Foam::Barycentric<Cmpt>::b() const
-{
-    return this->v_[B];
-}
-
-
-template<class Cmpt>
-inline const Cmpt& Foam::Barycentric<Cmpt>::c() const
-{
-    return this->v_[C];
-}
-
-
-template<class Cmpt>
-inline const Cmpt& Foam::Barycentric<Cmpt>::d() const
-{
-    return this->v_[D];
-}
-
-
-template<class Cmpt>
-inline Cmpt& Foam::Barycentric<Cmpt>::a()
-{
-    return this->v_[A];
-}
-
-
-template<class Cmpt>
-inline Cmpt& Foam::Barycentric<Cmpt>::b()
-{
-    return this->v_[B];
-}
-
-
-template<class Cmpt>
-inline Cmpt& Foam::Barycentric<Cmpt>::c()
-{
-    return this->v_[C];
-}
-
-
-template<class Cmpt>
-inline Cmpt& Foam::Barycentric<Cmpt>::d()
-{
-    return this->v_[D];
-}
-
-
 // * * * * * * * * * * * * * * * Member Operations * * * * * * * * * * * * * //
 
 template<class Cmpt>

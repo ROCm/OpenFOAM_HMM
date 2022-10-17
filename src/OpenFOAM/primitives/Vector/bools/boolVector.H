@@ -40,8 +40,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef boolVector_H
-#define boolVector_H
+#ifndef Foam_boolVector_H
+#define Foam_boolVector_H
 
 #include "FixedList.H"
 
@@ -126,25 +126,25 @@ public:
         inline unsigned int count(const bool on=true) const;
 
 
-    // Access
+    // Component Access
 
         //- The x component
-        inline bool x() const;
+        bool x() const { return operator[](boolVector::X); }
 
         //- The y component
-        inline bool y() const;
+        bool y() const { return operator[](boolVector::Y); }
 
         //- The z component
-        inline bool z() const;
+        bool z() const { return operator[](boolVector::Z); }
 
         //- The x component
-        inline bool& x();
+        bool& x() { return operator[](boolVector::X); }
 
         //- The y component
-        inline bool& y();
+        bool& y() { return operator[](boolVector::Y); }
 
         //- The z component
-        inline bool& z();
+        bool& z() { return operator[](boolVector::Z); }
 
 
     // Edit

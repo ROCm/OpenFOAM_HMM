@@ -128,25 +128,25 @@ public:
 
     // Component Access
 
-        inline const Cmpt& xx() const;
-        inline const Cmpt& xy() const;
-        inline const Cmpt& xz() const;
-        inline const Cmpt& yx() const;
-        inline const Cmpt& yy() const;
-        inline const Cmpt& yz() const;
-        inline const Cmpt& zx() const;
-        inline const Cmpt& zy() const;
-        inline const Cmpt& zz() const;
+        const Cmpt& xx() const noexcept { return this->v_[XX]; }
+        const Cmpt& xy() const noexcept { return this->v_[XY]; }
+        const Cmpt& xz() const noexcept { return this->v_[XZ]; }
+        const Cmpt& yx() const noexcept { return this->v_[XY]; }
+        const Cmpt& yy() const noexcept { return this->v_[YY]; }
+        const Cmpt& yz() const noexcept { return this->v_[YZ]; }
+        const Cmpt& zx() const noexcept { return this->v_[XZ]; }
+        const Cmpt& zy() const noexcept { return this->v_[YZ]; }
+        const Cmpt& zz() const noexcept { return this->v_[ZZ]; }
 
-        inline Cmpt& xx();
-        inline Cmpt& xy();
-        inline Cmpt& xz();
-        inline Cmpt& yx();
-        inline Cmpt& yy();
-        inline Cmpt& yz();
-        inline Cmpt& zx();
-        inline Cmpt& zy();
-        inline Cmpt& zz();
+        Cmpt& xx() noexcept { return this->v_[XX]; }
+        Cmpt& xy() noexcept { return this->v_[XY]; }
+        Cmpt& xz() noexcept { return this->v_[XZ]; }
+        Cmpt& yx() noexcept { return this->v_[XY]; }
+        Cmpt& yy() noexcept { return this->v_[YY]; }
+        Cmpt& yz() noexcept { return this->v_[YZ]; }
+        Cmpt& zx() noexcept { return this->v_[XZ]; }
+        Cmpt& zy() noexcept { return this->v_[YZ]; }
+        Cmpt& zz() noexcept { return this->v_[ZZ]; }
 
 
     // Column-vector access

@@ -48,8 +48,8 @@ See also
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef CompactSpatialTensor_H
-#define CompactSpatialTensor_H
+#ifndef Foam_CompactSpatialTensor_H
+#define Foam_CompactSpatialTensor_H
 
 #include "SpatialTensor.H"
 
@@ -72,8 +72,8 @@ public:
 
     // Constructors
 
-        //- Construct null
-        inline CompactSpatialTensor();
+        //- Default construct
+        CompactSpatialTensor() = default;
 
         inline CompactSpatialTensor(const Foam::zero);
 
@@ -95,7 +95,7 @@ public:
         );
 
         //- Construct from Istream
-        inline CompactSpatialTensor(Istream&);
+        inline explicit CompactSpatialTensor(Istream&);
 };
 
 

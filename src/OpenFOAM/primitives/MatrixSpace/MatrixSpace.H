@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,8 +41,8 @@ See also
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef MatrixSpace_H
-#define MatrixSpace_H
+#ifndef Foam_MatrixSpace_H
+#define Foam_MatrixSpace_H
 
 #include "VectorSpace.H"
 
@@ -238,37 +238,40 @@ public:
 
         //- Fast const element access using compile-time addressing
         template<direction Row, direction Col>
-        inline const Cmpt& elmt() const;
+        inline const Cmpt& elmt() const noexcept;
 
         //- Fast element access using compile-time addressing
         template<direction Row, direction Col>
-        inline Cmpt& elmt();
+        inline Cmpt& elmt() noexcept;
+
 
         // Const element access functions for a 3x3
         // Compile-time errors are generated for inappropriate use
 
-            inline const Cmpt& xx() const;
-            inline const Cmpt& xy() const;
-            inline const Cmpt& xz() const;
-            inline const Cmpt& yx() const;
-            inline const Cmpt& yy() const;
-            inline const Cmpt& yz() const;
-            inline const Cmpt& zx() const;
-            inline const Cmpt& zy() const;
-            inline const Cmpt& zz() const;
+            const Cmpt& xx() const noexcept { return elmt<0,0>(); }
+            const Cmpt& xy() const noexcept { return elmt<0,1>(); }
+            const Cmpt& xz() const noexcept { return elmt<0,2>(); }
+            const Cmpt& yx() const noexcept { return elmt<1,0>(); }
+            const Cmpt& yy() const noexcept { return elmt<1,1>(); }
+            const Cmpt& yz() const noexcept { return elmt<1,2>(); }
+            const Cmpt& zx() const noexcept { return elmt<2,0>(); }
+            const Cmpt& zy() const noexcept { return elmt<2,1>(); }
+            const Cmpt& zz() const noexcept { return elmt<2,2>(); }
+
 
         // Element access functions for a 3x3
         // Compile-time errors are generated for inappropriate use
 
-            inline Cmpt& xx();
-            inline Cmpt& xy();
-            inline Cmpt& xz();
-            inline Cmpt& yx();
-            inline Cmpt& yy();
-            inline Cmpt& yz();
-            inline Cmpt& zx();
-            inline Cmpt& zy();
-            inline Cmpt& zz();
+            Cmpt& xx() noexcept { return elmt<0,0>(); }
+            Cmpt& xy() noexcept { return elmt<0,1>(); }
+            Cmpt& xz() noexcept { return elmt<0,2>(); }
+            Cmpt& yx() noexcept { return elmt<1,0>(); }
+            Cmpt& yy() noexcept { return elmt<1,1>(); }
+            Cmpt& yz() noexcept { return elmt<1,2>(); }
+            Cmpt& zx() noexcept { return elmt<2,0>(); }
+            Cmpt& zy() noexcept { return elmt<2,1>(); }
+            Cmpt& zz() noexcept { return elmt<2,2>(); }
+
 
         //- Return the transpose of the matrix
         inline typename typeOfTranspose<Cmpt, Form>::type T() const;

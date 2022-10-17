@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,8 +39,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SphericalTensor2D_H
-#define SphericalTensor2D_H
+#ifndef Foam_SphericalTensor2D_H
+#define Foam_SphericalTensor2D_H
 
 #include "contiguous.H"
 #include "VectorSpace.H"
@@ -116,10 +116,11 @@ public:
 
     // Member Functions
 
-        // Access
+    // Component Access
 
-            inline const Cmpt& ii() const;
-            inline Cmpt& ii();
+        const Cmpt& ii() const noexcept { return this->v_[II]; }
+
+        Cmpt& ii() noexcept { return this->v_[II]; }
 };
 
 

@@ -104,18 +104,22 @@ public:
 
     // Member Functions
 
-        //- Access to the vector x component
-        inline const Cmpt& x() const;
-
-        //- Access to the vector y component
-        inline const Cmpt& y() const;
+    // Component Access
 
         //- Access to the vector x component
-        inline Cmpt& x();
+        const Cmpt& x() const noexcept { return this->v_[X]; }
 
         //- Access to the vector y component
-        inline Cmpt& y();
+        const Cmpt& y() const noexcept { return this->v_[Y]; }
 
+        //- Access to the vector x component
+        Cmpt& x() noexcept { return this->v_[X]; }
+
+        //- Access to the vector y component
+        Cmpt& y() noexcept { return this->v_[Y]; }
+
+
+    // Vector Operations
 
         //- Normalise the vector by its magnitude
         //  For small magnitudes (less than ROOTVSMALL) set to zero.

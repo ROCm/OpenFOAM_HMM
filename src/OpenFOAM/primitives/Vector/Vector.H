@@ -112,23 +112,25 @@ public:
 
     // Member Functions
 
-        //- Access to the vector x component
-        inline const Cmpt& x() const;
-
-        //- Access to the vector y component
-        inline const Cmpt& y() const;
-
-        //- Access to the vector z component
-        inline const Cmpt& z() const;
+    // Component Access
 
         //- Access to the vector x component
-        inline Cmpt& x();
+        const Cmpt& x() const noexcept { return this->v_[X]; }
 
         //- Access to the vector y component
-        inline Cmpt& y();
+        const Cmpt& y() const noexcept { return this->v_[Y]; }
 
         //- Access to the vector z component
-        inline Cmpt& z();
+        const Cmpt& z() const noexcept { return this->v_[Z]; }
+
+        //- Access to the vector x component
+        Cmpt& x() noexcept { return this->v_[X]; }
+
+        //- Access to the vector y component
+        Cmpt& y() noexcept { return this->v_[Y]; }
+
+        //- Access to the vector z component
+        Cmpt& z() noexcept { return this->v_[Z]; }
 
 
     // Vector Operations
@@ -153,6 +155,38 @@ public:
 
         //- Cross-product of \c this with another Vector.
         inline Vector<Cmpt> cross(const Vector<Cmpt>& v2) const;
+
+        //- The L2-norm distance from another vector.
+        //- The mag() of the difference.
+        inline scalar dist(const Vector<Cmpt>& v2) const;
+
+        //- The L2-norm distance squared from another vector.
+        //- The magSqr() of the difference.
+        inline scalar distSqr(const Vector<Cmpt>& v2) const;
+
+
+    // Comparision Operations
+
+        //- Lexicographically compare \em a and \em b with order (x:y:z)
+        static inline bool less_xyz
+        (
+            const Vector<Cmpt>& a,
+            const Vector<Cmpt>& b
+        );
+
+        //- Lexicographically compare \em a and \em b with order (y:z:x)
+        static inline bool less_yzx
+        (
+            const Vector<Cmpt>& a,
+            const Vector<Cmpt>& b
+        );
+
+        //- Lexicographically compare \em a and \em b with order (z:x:y)
+        static inline bool less_zxy
+        (
+            const Vector<Cmpt>& a,
+            const Vector<Cmpt>& b
+        );
 };
 
 

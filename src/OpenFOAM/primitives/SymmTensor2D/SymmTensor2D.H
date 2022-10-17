@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,8 +39,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SymmTensor2D_H
-#define SymmTensor2D_H
+#ifndef Foam_SymmTensor2D_H
+#define Foam_SymmTensor2D_H
 
 #include "contiguous.H"
 #include "Vector2D.H"
@@ -119,27 +119,29 @@ public:
 
     // Member Functions
 
-        // Access
+    // Component Access
 
-            inline const Cmpt& xx() const;
-            inline const Cmpt& xy() const;
-            inline const Cmpt& yx() const;
-            inline const Cmpt& yy() const;
+        const Cmpt& xx() const noexcept { return this->v_[XX]; }
+        const Cmpt& xy() const noexcept { return this->v_[XY]; }
+        const Cmpt& yx() const noexcept { return this->v_[XY]; }
+        const Cmpt& yy() const noexcept { return this->v_[YY]; }
 
-            inline Cmpt& xx();
-            inline Cmpt& xy();
-            inline Cmpt& yx();
-            inline Cmpt& yy();
+        Cmpt& xx() noexcept { return this->v_[XX]; }
+        Cmpt& xy() noexcept { return this->v_[XY]; }
+        Cmpt& yx() noexcept { return this->v_[XY]; }
+        Cmpt& yy() noexcept { return this->v_[YY]; }
 
 
-        // Diagonal access and manipulation
+    // Diagonal access and manipulation
 
-            //- Extract the diagonal as a vector
-            inline Vector2D<Cmpt> diag() const;
+        //- Extract the diagonal as a vector
+        inline Vector2D<Cmpt> diag() const;
 
-            //- Set values of the diagonal
-            inline void diag(const Vector2D<Cmpt>& v);
+        //- Set values of the diagonal
+        inline void diag(const Vector2D<Cmpt>& v);
 
+
+    // Tensor Operations
 
         //- Return non-Hermitian transpose
         inline const SymmTensor2D<Cmpt>& T() const;

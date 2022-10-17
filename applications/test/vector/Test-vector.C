@@ -33,6 +33,7 @@ Description
 
 #include "vectorField.H"
 #include "IOstreams.H"
+#include "Random.H"
 #include <algorithm>
 #include <random>
 
@@ -74,8 +75,12 @@ void doTest(vector& vec1, vector& vec2)
     printInfo(vec1);
     printInfo(vec2);
 
-    Info<< "min of " << vec1 << " and " << vec2 << " = "
-        << min(vec1, vec2) << nl << nl;
+    Info<< "vector: " << vec1 << nl
+        << "vector: " << vec2 << nl
+        << "   min: " << min(vec1, vec2) << nl
+        << "  dist: " << vec1.dist(vec2) << ' ' << mag(vec1 - vec2) << nl
+        << "dist^2: " << vec1.distSqr(vec2) << ' ' << magSqr(vec1 - vec2) << nl
+        << nl;
 }
 
 
@@ -146,6 +151,46 @@ int main(int argc, char *argv[])
 
         std::shuffle(vec2.begin(), vec2.end(), std::default_random_engine());
         Info<< "shuffled: " << vec2 << nl;
+
+        // Vectors with some identical components
+        List<vector> vectors
+        ({
+            {1.1, 2.2, 3.3 },
+            {2.2, 3.3, 4.4 },
+            {-1.1, 2.2, 3.3 },
+            {-2.2, 3.3, 4.4 },
+
+            {-1.1, -2.2, 3.3 },
+            {-2.2, -3.3, 4.4 },
+
+            {-1.1, -2.2, -3.3 },
+            {-2.2, -3.3, -4.4 },
+            {-3.3, 2.1, 12 },
+            {3.145, 1.6, 2 },
+
+            {0, 0, 0}
+        });
+
+        shuffle(vectors);
+
+        Info<< "initial vectors: ";
+        vectors.writeList(Info, 1) << nl;
+
+        Foam::sort(vectors);
+        Info<< "regular sort:";
+        vectors.writeList(Info, 1) << nl;
+
+        std::sort(vectors.begin(), vectors.end(), vector::less_xyz);
+        Info<< "sorted xyz:";
+        vectors.writeList(Info, 1) << nl;
+
+        std::sort(vectors.begin(), vectors.end(), vector::less_yzx);
+        Info<< "sorted yzx:";
+        vectors.writeList(Info, 1) << nl;
+
+        std::sort(vectors.begin(), vectors.end(), vector::less_zxy);
+        Info<< "sorted zxy:";
+        vectors.writeList(Info, 1) << nl;
     }
 
     // Basic tests for fields

@@ -135,14 +135,14 @@ Foam::Polynomial<PolySize>::Polynomial(const word& name, Istream& is)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<int PolySize>
-bool Foam::Polynomial<PolySize>::logActive() const
+bool Foam::Polynomial<PolySize>::logActive() const noexcept
 {
     return logActive_;
 }
 
 
 template<int PolySize>
-Foam::scalar Foam::Polynomial<PolySize>::logCoeff() const
+Foam::scalar Foam::Polynomial<PolySize>::logCoeff() const noexcept
 {
     return logCoeff_;
 }

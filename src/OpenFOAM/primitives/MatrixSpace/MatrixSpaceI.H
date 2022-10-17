@@ -125,7 +125,8 @@ Block(msType& matrix)
 
 template<class Form, class Cmpt, Foam::direction Mrows, Foam::direction Ncols>
 template<Foam::direction Row, Foam::direction Col>
-inline const Cmpt& Foam::MatrixSpace<Form, Cmpt, Mrows, Ncols>::elmt() const
+inline const Cmpt& Foam::MatrixSpace<Form, Cmpt, Mrows, Ncols>::elmt()
+const noexcept
 {
     static_assert(Row < Mrows && Col < Ncols, "Address outside matrix");
     return this->v_[Row*Ncols + Col];
@@ -135,135 +136,12 @@ inline const Cmpt& Foam::MatrixSpace<Form, Cmpt, Mrows, Ncols>::elmt() const
 template<class Form, class Cmpt, Foam::direction Mrows, Foam::direction Ncols>
 template<Foam::direction Row, Foam::direction Col>
 inline Cmpt& Foam::MatrixSpace<Form, Cmpt, Mrows, Ncols>::elmt()
+noexcept
 {
     static_assert(Row < Mrows && Col < Ncols, "Address outside matrix");
     return this->v_[Row*Ncols + Col];
 }
 
-
-template<class Form, class Cmpt, Foam::direction Mrows, Foam::direction Ncols>
-inline const Cmpt& Foam::MatrixSpace<Form, Cmpt, Mrows, Ncols>::xx() const
-{
-    return elmt<0, 0>();
-}
-
-
-template<class Form, class Cmpt, Foam::direction Mrows, Foam::direction Ncols>
-inline Cmpt& Foam::MatrixSpace<Form, Cmpt, Mrows, Ncols>::xx()
-{
-    return elmt<0, 0>();
-}
-
-
-template<class Form, class Cmpt, Foam::direction Mrows, Foam::direction Ncols>
-inline const Cmpt& Foam::MatrixSpace<Form, Cmpt, Mrows, Ncols>::xy() const
-{
-    return elmt<0,1>();
-}
-
-
-template<class Form, class Cmpt, Foam::direction Mrows, Foam::direction Ncols>
-inline Cmpt& Foam::MatrixSpace<Form, Cmpt, Mrows, Ncols>::xy()
-{
-    return elmt<0,1>();
-}
-
-
-template<class Form, class Cmpt, Foam::direction Mrows, Foam::direction Ncols>
-inline const Cmpt& Foam::MatrixSpace<Form, Cmpt, Mrows, Ncols>::xz() const
-{
-    return elmt<0,2>();
-}
-
-
-template<class Form, class Cmpt, Foam::direction Mrows, Foam::direction Ncols>
-inline Cmpt& Foam::MatrixSpace<Form, Cmpt, Mrows, Ncols>::xz()
-{
-    return elmt<0,2>();
-}
-
-
-template<class Form, class Cmpt, Foam::direction Mrows, Foam::direction Ncols>
-inline const Cmpt& Foam::MatrixSpace<Form, Cmpt, Mrows, Ncols>::yx() const
-{
-    return elmt<1,0>();
-}
-
-
-template<class Form, class Cmpt, Foam::direction Mrows, Foam::direction Ncols>
-inline Cmpt& Foam::MatrixSpace<Form, Cmpt, Mrows, Ncols>::yx()
-{
-    return elmt<1,0>();
-}
-
-
-template<class Form, class Cmpt, Foam::direction Mrows, Foam::direction Ncols>
-inline const Cmpt& Foam::MatrixSpace<Form, Cmpt, Mrows, Ncols>::yy() const
-{
-    return elmt<1,1>();
-}
-
-
-template<class Form, class Cmpt, Foam::direction Mrows, Foam::direction Ncols>
-inline Cmpt& Foam::MatrixSpace<Form, Cmpt, Mrows, Ncols>::yy()
-{
-    return elmt<1,1>();
-}
-
-
-template<class Form, class Cmpt, Foam::direction Mrows, Foam::direction Ncols>
-inline const Cmpt& Foam::MatrixSpace<Form, Cmpt, Mrows, Ncols>::yz() const
-{
-    return elmt<1,2>();
-}
-
-
-template<class Form, class Cmpt, Foam::direction Mrows, Foam::direction Ncols>
-inline Cmpt& Foam::MatrixSpace<Form, Cmpt, Mrows, Ncols>::yz()
-{
-    return elmt<1,2>();
-}
-
-
-template<class Form, class Cmpt, Foam::direction Mrows, Foam::direction Ncols>
-inline const Cmpt& Foam::MatrixSpace<Form, Cmpt, Mrows, Ncols>::zx() const
-{
-    return elmt<2,0>();
-}
-
-
-template<class Form, class Cmpt, Foam::direction Mrows, Foam::direction Ncols>
-inline Cmpt& Foam::MatrixSpace<Form, Cmpt, Mrows, Ncols>::zx()
-{
-    return elmt<2,0>();
-}
-
-
-template<class Form, class Cmpt, Foam::direction Mrows, Foam::direction Ncols>
-inline const Cmpt& Foam::MatrixSpace<Form, Cmpt, Mrows, Ncols>::zy() const
-{
-    return elmt<2,1>();
-}
-
-
-template<class Form, class Cmpt, Foam::direction Mrows, Foam::direction Ncols>
-inline Cmpt& Foam::MatrixSpace<Form, Cmpt, Mrows, Ncols>::zy()
-{
-    return elmt<2,1>();
-}
-
-
-template<class Form, class Cmpt, Foam::direction Mrows, Foam::direction Ncols>
-inline const Cmpt& Foam::MatrixSpace<Form, Cmpt, Mrows, Ncols>::zz() const
-{
-    return elmt<2,2>();
-}
-
-template<class Form, class Cmpt, Foam::direction Mrows, Foam::direction Ncols>
-inline Cmpt& Foam::MatrixSpace<Form, Cmpt, Mrows, Ncols>::zz()
-{
-    return elmt<2,2>();
-}
 
 template<class Form, class Cmpt, Foam::direction Mrows, Foam::direction Ncols>
 inline Foam::MatrixSpace<Form, Cmpt, Mrows, Ncols>
