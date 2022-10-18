@@ -143,6 +143,13 @@ DMD/DMDModels/DMDModel/DMDModel.C
 DMD/DMDModels/DMDModel/DMDModelNew.C
 DMD/DMDModels/derived/STDMD/STDMD.C
 
+resolutionIndex/resolutionIndex.C
+resolutionIndex/resolutionIndexModels/resolutionIndexModel/resolutionIndexModel.C
+resolutionIndex/resolutionIndexModels/resolutionIndexModel/resolutionIndexModelNew.C
+resolutionIndex/resolutionIndexModels/PopeIndex/PopeIndex.C
+resolutionIndex/resolutionIndexModels/CelikNuIndex/CelikNuIndex.C
+resolutionIndex/resolutionIndexModels/CelikEtaIndex/CelikEtaIndex.C
+
 age/age.C
 comfort/comfort.C
 
