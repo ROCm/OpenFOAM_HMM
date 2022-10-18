@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2007-2022 PCOpt/NTUA
     Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
@@ -111,7 +111,7 @@ objective::objective
     (
         IOobject
         (
-            dict.dictName(),
+            adjointSolverName + "_" + dict.dictName(),
             mesh.time().timeName(),
             fileName("uniform")/fileName("objectives")/adjointSolverName,
             mesh,
