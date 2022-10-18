@@ -113,15 +113,19 @@ int main(int argc, char *argv[])
 
             forAll(fluidRegions, i)
             {
-                #include "setRegionFluidFields.H"
+                fvMesh& mesh = fluidRegions[i];
+
                 #include "readFluidMultiRegionPIMPLEControls.H"
+                #include "setRegionFluidFields.H"
                 #include "solveFluid.H"
             }
 
             forAll(solidRegions, i)
             {
-                #include "setRegionSolidFields.H"
+                fvMesh& mesh = solidRegions[i];
+
                 #include "readSolidMultiRegionPIMPLEControls.H"
+                #include "setRegionSolidFields.H"
                 #include "solveSolid.H"
             }
 
@@ -133,8 +137,10 @@ int main(int argc, char *argv[])
 
                 forAll(fluidRegions, i)
                 {
-                    #include "setRegionFluidFields.H"
+                    fvMesh& mesh = fluidRegions[i];
+
                     #include "readFluidMultiRegionPIMPLEControls.H"
+                    #include "setRegionFluidFields.H"
                     if (!frozenFlow)
                     {
                         Info<< "\nSolving for fluid region "
@@ -166,20 +172,24 @@ int main(int argc, char *argv[])
 
                     forAll(fluidRegions, i)
                     {
+                        fvMesh& mesh = fluidRegions[i];
+
                         Info<< "\nSolving for fluid region "
                             << fluidRegions[i].name() << endl;
-                       #include "setRegionFluidFields.H"
-                       #include "readFluidMultiRegionPIMPLEControls.H"
-                       frozenFlow = true;
-                       #include "solveFluid.H"
+                        #include "readFluidMultiRegionPIMPLEControls.H"
+                        #include "setRegionFluidFields.H"
+                        frozenFlow = true;
+                        #include "solveFluid.H"
                     }
 
                     forAll(solidRegions, i)
                     {
+                        fvMesh& mesh = solidRegions[i];
+
                         Info<< "\nSolving for solid region "
                             << solidRegions[i].name() << endl;
-                        #include "setRegionSolidFields.H"
                         #include "readSolidMultiRegionPIMPLEControls.H"
+                        #include "setRegionSolidFields.H"
                         #include "solveSolid.H"
                     }
 
