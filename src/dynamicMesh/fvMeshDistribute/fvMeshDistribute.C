@@ -360,7 +360,7 @@ Foam::label Foam::fvMeshDistribute::findNonEmptyPatch() const
     if (nonEmptyPatchi == -1)
     {
         FatalErrorInFunction
-            << "Cannot find a patch which is neither of type empty nor"
+            << "Cannot find a patch which is not of type empty, mapped or"
             << " coupled in patches " << patches.names() << endl
             << "There has to be at least one such patch for"
             << " distribution to work" << abort(FatalError);
