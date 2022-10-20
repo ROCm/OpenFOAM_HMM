@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +29,28 @@ Class
 
 Description
     Processor agglomeration of GAMGAgglomerations.
+
+    - by default agglomerates onto the master processor
+    - optionally have multiple masters through the nProcessorsPerMaster
+      parameter. e.g.
+
+        p
+        {
+            solver                  GAMG;
+            tolerance               1e-06;
+            relTol                  0.1;
+            smoother                GaussSeidel;
+
+            nCellsInCoarsestLevel   10;
+
+            processorAgglomerator   masterCoarsest;
+            // Groups of 32 cores get combined so each 'master' gets
+            // (roughly) 32*nCellsInCoarsestLevel cells.
+            nProcessorsPerMaster    32;
+
+            // Alternative : specify number of (equi-distributed) masters
+            nMasters                2;
+        }
 
 SourceFiles
     masterCoarsestGAMGProcAgglomeration.C
@@ -57,7 +80,10 @@ class masterCoarsestGAMGProcAgglomeration
 {
     // Private data
 
+        label nProcessorsPerMaster_;
+
         DynamicList<label> comms_;
+
 
     // Private Member Functions
 
