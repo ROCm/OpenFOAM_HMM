@@ -2,4 +2,4 @@ LINK_LIBS   = $(cDBUG)
 
 LINKLIBSO   = $(cc) $(cARCH) -shared
 
-LINKEXE     = $(cc) $(cARCH) -Xlinker --add-needed -Xlinker -z -Xlinker nodefs
+LINKEXE     = $(cc) $(cARCH) -fuse-ld=ld  -Xlinker --add-needed -Xlinker -z -Xlinker nodefs
