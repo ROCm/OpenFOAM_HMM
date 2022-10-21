@@ -148,7 +148,7 @@ $(EXE)$(EXT_EXE): $(OBJECTS)
 	@$(WM_SCRIPTS)/makeTargetDir $(EXE)
 	$(call QUIET_MESSAGE,link,$(EXE)$(EXT_EXE))
 	$E $(LINKEXE) $(OBJECTS) -L$(LIB_PLATFORMS) \
-	    $(EXE_LIBS) $(PROJECT_LIBS) $(SYS_LIBS) \
+	    $(EXE_LIBS) -lclang-cpp $(PROJECT_LIBS) $(SYS_LIBS) \
 	    $(LINK_LIBS) $(GLIBS) -o $(EXE)$(EXT_EXE)
 
 .PHONY: exe
