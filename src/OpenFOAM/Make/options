@@ -2,7 +2,7 @@ EXE_INC = \
     -I$(OBJECTS_DIR)
 
 LIB_LIBS = \
-    $(FOAM_LIBBIN)/libOSspecific.o
+    -L$(FOAM_LIBBIN) -lOSspecific 
 
 ifeq (libo,$(FOAM_LINK_DUMMY_PSTREAM))
     LIB_LIBS += $(FOAM_LIBBIN)/dummy/libPstream.o
