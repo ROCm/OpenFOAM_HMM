@@ -43,14 +43,45 @@ namespace fv
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
+Foam::volScalarField& Foam::fv::atmPlantCanopyTurbSource::getOrReadField
+(
+    const word& fieldName
+) const
+{
+    auto* ptr = mesh_.getObjectPtr<volScalarField>(fieldName);
+
+    if (!ptr)
+    {
+        ptr = new volScalarField
+        (
+            IOobject
+            (
+                fieldName,
+                mesh_.time().timeName(),
+                mesh_,
+                IOobject::MUST_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh_
+        );
+        mesh_.objectRegistry::store(ptr);
+    }
+
+    return *ptr;
+}
+
+
 Foam::tmp<Foam::volScalarField::Internal>
 Foam::fv::atmPlantCanopyTurbSource::calcPlantCanopyTerm
 (
     const volVectorField::Internal& U
 ) const
 {
+    const volScalarField& Cd = getOrReadField(CdName_);
+    const volScalarField& LAD = getOrReadField(LADname_);
+
     // (SP:Eq. 42)
-    return 12.0*Foam::sqrt(Cmu_)*Cd_()*LAD_()*mag(U);
+    return 12.0*Foam::sqrt(Cmu_)*Cd()*LAD()*mag(U);
 }
 
 
@@ -65,36 +96,15 @@ Foam::fv::atmPlantCanopyTurbSource::atmPlantCanopyTurbSource
 )
 :
     fv::cellSetOption(sourceName, modelType, dict, mesh),
-    isEpsilon_(false),
-    rhoName_(coeffs_.getOrDefault<word>("rho", "rho")),
+    isEpsilon_(true),
     Cmu_(Zero),
     C1_(Zero),
     C2_(Zero),
-    Cd_
-    (
-        IOobject
-        (
-            "Cd",
-            mesh.time().timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh
-    ),
-    LAD_
-    (
-        IOobject
-        (
-            "LAD",
-            mesh.time().timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh
-    )
+    CdName_(),
+    LADname_()
 {
+    read(dict);
+
     const auto* turbPtr =
         mesh_.findObject<turbulenceModel>
         (
@@ -113,9 +123,8 @@ Foam::fv::atmPlantCanopyTurbSource::atmPlantCanopyTurbSource
     tmp<volScalarField> tepsilon = turbPtr->epsilon();
     tmp<volScalarField> tomega = turbPtr->omega();
 
-    if (tepsilon.is_reference())
+    if (!tepsilon.isTmp())
     {
-        isEpsilon_ = true;
         fieldNames_[0] = tepsilon().name();
 
         const dictionary& turbDict = turbPtr->coeffDict();
@@ -123,7 +132,7 @@ Foam::fv::atmPlantCanopyTurbSource::atmPlantCanopyTurbSource
         C1_.read("C1", turbDict);
         C2_.read("C2", turbDict);
     }
-    else if (tomega.is_reference())
+    else if (!tomega.isTmp())
     {
         isEpsilon_ = false;
         fieldNames_[0] = tomega().name();
@@ -211,6 +220,23 @@ void Foam::fv::atmPlantCanopyTurbSource::addSup
     {
         atmPlantCanopyTurbSourceOmega(alpha, rho, eqn, fieldi);
     }
+}
+
+
+bool Foam::fv::atmPlantCanopyTurbSource::read(const dictionary& dict)
+{
+    if (!fv::cellSetOption::read(dict))
+    {
+        return false;
+    }
+
+    CdName_ = dict.getOrDefault<word>("Cd", "Cd");
+    LADname_ = dict.getOrDefault<word>("LAD", "LAD");
+
+    (void) getOrReadField(CdName_);
+    (void) getOrReadField(LADname_);
+
+    return true;
 }
 
 

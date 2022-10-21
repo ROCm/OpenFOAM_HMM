@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2020 ENERCON GmbH
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,15 +36,16 @@ Description
 
     Corrections applied to either of the below, if exist:
     \verbatim
-      epsilon   | Turbulent kinetic energy dissipation rate [m2/s3]
+      epsilon   | Turbulent kinetic energy dissipation rate [m^2/s^3]
       omega     | Specific dissipation rate                 [1/s]
     \endverbatim
 
     Required fields:
     \verbatim
-      epsilon/omega   | Dissipation rate OR Spec. dissipation rate [m2/s3]/[1/s]
-      Cd              | Plant canopy drag coefficient              [-]
-      LAD             | Leaf area density                          [1/m]
+      Cd        | Canopy drag coefficient                   [-]
+      LAD       | Leaf area density                         [m^2/m^3]
+      epsilon   | Turbulent kinetic energy dissipation rate [m^2/s^3]
+      omega     | Specific dissipation rate                 [1/s]
     \endverbatim
 
     References:
@@ -61,28 +62,24 @@ Usage
     \verbatim
     atmPlantCanopyTurbSource1
     {
-        // Mandatory entries (unmodifiable)
-        type             atmPlantCanopyTurbSource;
+        // Mandatory entries
+        type         atmPlantCanopyTurbSource;
 
-        atmPlantCanopyTurbSourceCoeffs
-        {
-            // Mandatory (inherited) entries (unmodifiable)
-            selectionMode    all;
+        // Optional entries
+        Cd           <word>;
+        LAD          <word>;
 
-            // Optional entries (unmodifiable)
-            rho          rho;
-        }
-
-        // Optional (inherited) entries
+        // Inherited entries
         ...
     }
     \endverbatim
 
     where the entries mean:
     \table
-      Property  | Description                         | Type   | Req'd  | Dflt
-      type      | Type name: atmPlantCanopyTurbSource | word   | yes    | -
-      rho       | Name of density field               | word   | no     | rho
+      Property | Description                         | Type | Reqd | Deflt
+      type     | Type name: atmPlantCanopyTurbSource | word | yes  | -
+      Cd       | Name of operand canopy drag coefficient field | word | no | Cd
+      LAD      | Name of operand leaf area density field | word | no | LAD
     \endtable
 
     The inherited entries are elaborated in:
@@ -109,7 +106,7 @@ namespace fv
 {
 
 /*---------------------------------------------------------------------------*\
-               Class atmPlantCanopyTurbSource Declaration
+                    Class atmPlantCanopyTurbSource Declaration
 \*---------------------------------------------------------------------------*/
 
 class atmPlantCanopyTurbSource
@@ -121,25 +118,23 @@ class atmPlantCanopyTurbSource
         //- Internal flag to determine the working field is epsilon or omega
         Switch isEpsilon_;
 
-        //- Name of density field
-        const word rhoName_;
-
         //- Required turbulence model coefficients (copied from turb model)
         dimensionedScalar Cmu_;
         dimensionedScalar C1_;
         dimensionedScalar C2_;
 
+        //- Name of operand canopy drag coefficient field
+        word CdName_;
 
-        // Fields
-
-            //- Plant canopy drag coefficient field [-]
-            volScalarField Cd_;
-
-            //- Leaf area density field [1/m]
-            volScalarField LAD_;
+        //- Name of operand leaf area density field
+        word LADname_;
 
 
      // Private Member Functions
+
+        //- Return requested field from the object registry
+        //- or read+register the field to the object registry
+        volScalarField& getOrReadField(const word& fieldName) const;
 
         //- Return the modifier for plant canopy effects
         tmp<volScalarField::Internal> calcPlantCanopyTerm
@@ -221,11 +216,8 @@ public:
             const label fieldi
         );
 
-        //- Read source dictionary (effectively no-op)
-        virtual bool read(const dictionary& dict)
-        {
-            return true;
-        }
+        //- Read source dictionary
+        virtual bool read(const dictionary& dict);
 };
 
 
