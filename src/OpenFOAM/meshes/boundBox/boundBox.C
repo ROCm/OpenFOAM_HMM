@@ -231,6 +231,145 @@ bool Foam::boundBox::intersects(const plane& pln) const
 }
 
 
+bool Foam::boundBox::intersects(const triPointRef& tri) const
+{
+    // Require a full 3D box
+    if (nDim() != 3)
+    {
+        return false;
+    }
+
+    // Simplest check - if any points are inside
+    if (contains(tri.a()) || contains(tri.b()) || contains(tri.c()))
+    {
+        return true;
+    }
+
+
+    // Extent of box points projected onto axis
+    const auto project_box = []
+    (
+        const boundBox& bb,
+        const vector& axis,
+        scalarMinMax& extent
+    ) -> void
+    {
+        extent.reset(axis & bb.hexCorner<0>());
+        extent.add(axis & bb.hexCorner<1>());
+        extent.add(axis & bb.hexCorner<2>());
+        extent.add(axis & bb.hexCorner<3>());
+        extent.add(axis & bb.hexCorner<4>());
+        extent.add(axis & bb.hexCorner<5>());
+        extent.add(axis & bb.hexCorner<6>());
+        extent.add(axis & bb.hexCorner<7>());
+    };
+
+
+    // Use separating axis theorem to determine if triangle and
+    // (axis-aligned) bounding box intersect.
+
+    scalarMinMax tri_extent(0);
+    scalarMinMax box_extent(0);
+    const boundBox& bb = *this;
+
+    // 1.
+    // Test separating axis defined by the box normals
+    // (project triangle points)
+    // - do first (largely corresponds to normal bound box rejection test)
+    //
+    // No intersection if extent of projected triangle points are outside
+    // of the box range
+
+    {
+        // vector::X
+        tri_extent.reset(tri.a().x());
+        tri_extent.add(tri.b().x());
+        tri_extent.add(tri.c().x());
+
+        box_extent.reset(bb.min().x(), bb.max().x());
+
+        if (!tri_extent.overlaps(box_extent))
+        {
+            return false;
+        }
+
+        // vector::Y
+        tri_extent.reset(tri.a().y());
+        tri_extent.add(tri.b().y());
+        tri_extent.add(tri.c().y());
+
+        box_extent.reset(bb.min().y(), bb.max().y());
+
+        if (!tri_extent.overlaps(box_extent))
+        {
+            return false;
+        }
+
+        // vector::Z
+        tri_extent.reset(tri.a().z());
+        tri_extent.add(tri.b().z());
+        tri_extent.add(tri.c().z());
+
+        box_extent.reset(bb.min().z(), bb.max().z());
+
+        if (!tri_extent.overlaps(box_extent))
+        {
+            return false;
+        }
+    }
+
+
+    // 2.
+    // Test separating axis defined by the triangle normal
+    // (project box points)
+    // - can use area or unit normal since any scaling is applied to both
+    //   sides of the comparison.
+    // - by definition all triangle points lie in the plane defined by
+    //   the normal. It doesn't matter which of the points we use to define
+    //   the triangle offset (extent) when projected onto the triangle normal
+
+    vector axis = tri.areaNormal();
+
+    tri_extent.reset(axis & tri.a());
+    project_box(bb, axis, box_extent);
+
+    if (!tri_extent.overlaps(box_extent))
+    {
+        return false;
+    }
+
+
+    // 3.
+    // Test separating axes defined by the triangle edges, which are the
+    // cross product of the edge vectors and the box face normals
+
+    for (const vector& edgeVec : { tri.vecA(), tri.vecB(), tri.vecC() })
+    {
+        for (direction faceDir = 0; faceDir < vector::nComponents; ++faceDir)
+        {
+            axis = Zero;
+            axis[faceDir] = 1;
+
+            axis = (edgeVec ^ axis);
+
+            // project tri
+            tri_extent.reset(axis & tri.a());
+            tri_extent.add(axis & tri.b());
+            tri_extent.add(axis & tri.c());
+
+            project_box(bb, axis, box_extent);
+
+            if (!tri_extent.overlaps(box_extent))
+            {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+
 bool Foam::boundBox::contains(const UList<point>& points) const
 {
     if (points.empty())

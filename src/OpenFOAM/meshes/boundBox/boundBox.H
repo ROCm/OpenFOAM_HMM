@@ -46,6 +46,7 @@ SeeAlso
 #include "pointField.H"
 #include "faceList.H"
 #include "Pair.H"
+#include "triangleFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -377,6 +378,12 @@ public:
             //  \note the results are unreliable when plane coincides almost
             //  exactly with a box face
             bool intersects(const plane& pln) const;
+
+            //- Does triangle intersect this bounding box
+            //- or is contained within this bounding box.
+            //  \note results may be unreliable when it coincides almost
+            //  exactly with a box face
+            bool intersects(const triPointRef& tri) const;
 
             //- Overlaps/touches boundingBox?
             inline bool overlaps(const boundBox& bb) const;
