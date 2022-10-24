@@ -30,7 +30,7 @@ License
 #include "mapDistribute.H"
 #include "Random.H"
 #include "addToRunTimeSelectionTable.H"
-#include "triangleFuncs.H"
+#include "triangle.H"
 #include "matchPoints.H"
 #include "globalIndex.H"
 #include "Time.H"
@@ -2185,41 +2185,23 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
 bool Foam::distributedTriSurfaceMesh::overlaps
 (
     const List<treeBoundBox>& bbs,
-    const point& p0,
-    const point& p1,
-    const point& p2
+    const triPointRef& tri
 )
 {
-    treeBoundBox triBb(p0);
-    triBb.add(p1);
-    triBb.add(p2);
+    treeBoundBox triBb(tri.a());
+    triBb.add(tri.b());
+    triBb.add(tri.c());
 
-    forAll(bbs, bbi)
+    for (const treeBoundBox& bb : bbs)
     {
-        const treeBoundBox& bb = bbs[bbi];
-
         // Exact test of triangle intersecting bb
 
         // Quick rejection. If whole bounding box of tri is outside cubeBb then
         // there will be no intersection.
-        if (bb.overlaps(triBb))
+
+        if (bb.overlaps(triBb) && bb.intersects(tri))
         {
-            // Check if one or more triangle point inside
-            if (bb.contains(p0) || bb.contains(p1) || bb.contains(p2))
-            {
-                // One or more points inside
-                return true;
-            }
-
-            // Now we have the difficult case: all points are outside but
-            // connecting edges might go through cube. Use fast intersection
-            // of bounding box.
-            bool intersect = triangleFuncs::intersectBb(p0, p1, p2, bb);
-
-            if (intersect)
-            {
-                return true;
-            }
+            return true;
         }
     }
     return false;
@@ -4501,11 +4483,10 @@ void Foam::distributedTriSurfaceMesh::overlappingSurface
     forAll(s, trii)
     {
         const labelledTri& f = s[trii];
-        const point& p0 = s.points()[f[0]];
-        const point& p1 = s.points()[f[1]];
-        const point& p2 = s.points()[f[2]];
 
-        if (overlaps(bbsX, p0, p1, p2))
+        triPointRef tri(s.points(), f);
+
+        if (overlaps(bbsX, tri))
         {
             includedFace[trii] = true;
         }

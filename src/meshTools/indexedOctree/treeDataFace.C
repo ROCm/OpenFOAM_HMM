@@ -28,7 +28,7 @@ License
 
 #include "treeDataFace.H"
 #include "polyMesh.H"
-#include "triangleFuncs.H"
+#include "triangle.H"
 #include <algorithm>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -551,11 +551,18 @@ bool Foam::treeDataFace::overlaps
 
     const pointField& points = mesh_.points();
 
-
     // 2. Check if one or more face points inside
     const label facei = objectIndex(index);
 
     const face& f = mesh_.faces()[facei];
+
+    if (f.size() == 3)
+    {
+        const triPointRef tri(points[f[0]], points[f[1]], points[f[2]]);
+
+        return searchBox.intersects(tri);
+    }
+
     if (searchBox.containsAny(points, f))
     {
         return true;
@@ -563,19 +570,17 @@ bool Foam::treeDataFace::overlaps
 
     // 3. Difficult case: all points are outside but connecting edges might
     // go through cube. Use triangle-bounding box intersection.
+
     const point& fc = mesh_.faceCentres()[facei];
 
     forAll(f, fp)
     {
-        bool triIntersects = triangleFuncs::intersectBb
+        const triPointRef tri
         (
-            points[f[fp]],
-            points[f[f.fcIndex(fp)]],
-            fc,
-            searchBox
+            points[f.thisLabel(fp)], points[f.nextLabel(fp)], fc
         );
 
-        if (triIntersects)
+        if (searchBox.intersects(tri))
         {
             return true;
         }

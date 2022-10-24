@@ -28,7 +28,7 @@ License
 
 #include "treeDataPrimitivePatch.H"
 #include "indexedOctree.H"
-#include "triangleFuncs.H"
+#include "triangle.H"
 #include "triSurfaceTools.H"
 #include "triFace.H"
 #include <algorithm>
@@ -416,6 +416,13 @@ bool Foam::treeDataPrimitivePatch<PatchType>::overlaps
     const pointField& points = patch_.points();
     const typename PatchType::face_type& f = patch_[index];
 
+    if (f.size() == 3)
+    {
+        const triPointRef tri(points[f[0]], points[f[1]], points[f[2]]);
+
+        return searchBox.intersects(tri);
+    }
+
     if (searchBox.containsAny(points, f))
     {
         return true;
@@ -423,34 +430,19 @@ bool Foam::treeDataPrimitivePatch<PatchType>::overlaps
 
     // 3. Difficult case: all points are outside but connecting edges might
     // go through cube. Use triangle-bounding box intersection.
+
     const point fc = f.centre(points);
 
-    if (f.size() == 3)
+    forAll(f, fp)
     {
-        return triangleFuncs::intersectBb
+        const triPointRef tri
         (
-            points[f[0]],
-            points[f[1]],
-            points[f[2]],
-            searchBox
+            points[f.thisLabel(fp)], points[f.nextLabel(fp)], fc
         );
-    }
-    else
-    {
-        forAll(f, fp)
-        {
-            bool triIntersects = triangleFuncs::intersectBb
-            (
-                points[f[fp]],
-                points[f[f.fcIndex(fp)]],
-                fc,
-                searchBox
-            );
 
-            if (triIntersects)
-            {
-                return true;
-            }
+        if (searchBox.intersects(tri))
+        {
+            return true;
         }
     }
 
