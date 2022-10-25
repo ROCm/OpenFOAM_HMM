@@ -100,6 +100,7 @@ Description
 #endif
 #pragma clang diagnostic ignored "-Wbitwise-instead-of-logical"
 
+#include <vector>
 #include <CGAL/Simple_cartesian.h>
 #include <CGAL/AABB_tree.h>
 #include <CGAL/AABB_traits.h>
@@ -112,7 +113,7 @@ typedef K::Direction_3 Vector3C;
 typedef K::Triangle_3 Triangle;
 typedef K::Segment_3 Segment;
 
-typedef std::list<Triangle>::iterator Iterator;
+typedef std::vector<Triangle>::iterator Iterator;
 typedef CGAL::AABB_triangle_primitive<K, Iterator> Primitive;
 typedef CGAL::AABB_traits<K, Primitive> AABB_triangle_traits;
 typedef CGAL::AABB_tree<AABB_triangle_traits> Tree;
@@ -872,7 +873,7 @@ int main(int argc, char *argv[])
     GaussPoints[4][4] = -GaussPoints[4][3];
 
 
-    List<scalarList> GaussWeights(5);
+    FixedList<scalarList, 5> GaussWeights;
     GaussWeights[0].setSize(1);
     GaussWeights[0] = 2;
 
