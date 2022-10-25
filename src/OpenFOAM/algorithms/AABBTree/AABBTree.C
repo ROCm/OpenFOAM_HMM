@@ -141,39 +141,36 @@ void Foam::AABBTree<Type>::createBoxes
     // Assign the objects to min or max bin
 
     DynamicList<label> minBinObjectIDs(objectIDs.size());
-    treeBoundBox minBb;
-
     DynamicList<label> maxBinObjectIDs(objectIDs.size());
+
+    treeBoundBox minBb;
     treeBoundBox maxBb;
 
     for (const label objI : objectIDs)
     {
         const Type& obj = objects[objI];
 
-        bool intoMin = false;
-        bool intoMax = false;
+        bool addMin = false;
+        bool addMax = false;
 
-        for (const label pointI : obj)
+        for (const label pointi : obj)
         {
-            const point& pt = points[pointI];
-            if (pt[maxDir] < divMin)
-            {
-                intoMin = true;
-            }
-            if (pt[maxDir] > divMax)
-            {
-                intoMax = true;
-            }
+            const scalar& cmptValue = points[pointi][maxDir];
+
+            addMin = addMin || (cmptValue < divMin);
+            addMax = addMax || (cmptValue > divMax);
+
+            if (addMin && addMax) break;
         }
 
         // Note: object is inserted into both min/max child boxes (duplicated)
         // if it crosses the bin boundaries
-        if (intoMin)
+        if (addMin)
         {
             minBinObjectIDs.append(objI);
             minBb.add(points, obj);
         }
-        if (intoMax)
+        if (addMax)
         {
             maxBinObjectIDs.append(objI);
             maxBb.add(points, obj);
@@ -193,9 +190,22 @@ void Foam::AABBTree<Type>::createBoxes
     minBinObjectIDs.shrink();
     maxBinObjectIDs.shrink();
 
+    bool addMin = (minBinObjectIDs.size() > minLeafSize_ && level < maxLevel_);
+    bool addMax = (maxBinObjectIDs.size() > minLeafSize_ && level < maxLevel_);
+
+    // Since bounding boxes overlap, verify that splitting was effective
+
+    if
+    (
+        objectIDs.size() <= (minBinObjectIDs.size() + minLeafSize_/2)
+     || objectIDs.size() <= (maxBinObjectIDs.size() + minLeafSize_/2)
+    )
+    {
+        addMin = addMax = false;
+    }
 
     label minI;
-    if (minBinObjectIDs.size() > minLeafSize_ && level < maxLevel_)
+    if (addMin)
     {
         // New leaf
         minI = nodes.size();
@@ -209,7 +219,7 @@ void Foam::AABBTree<Type>::createBoxes
     }
 
     label maxI;
-    if (maxBinObjectIDs.size() > minLeafSize_ && level < maxLevel_)
+    if (addMax)
     {
         // New leaf
         maxI = nodes.size();
