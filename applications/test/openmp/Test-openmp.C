@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,12 +41,6 @@ Description
 
 int main(int argc, char *argv[])
 {
-#if USE_OMP
-    std::cout << "USE_OMP defined (" << USE_OMP << ")\n";
-#else
-    std::cout << "USE_OMP undefined\n";
-#endif
-
 #if _OPENMP
     std::cout << "_OPENMP = " << _OPENMP << "\n\n";
 

@@ -5,7 +5,7 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2017-2020 OpenCFD Ltd.
+#     Copyright (C) 2017-2022 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -44,6 +44,10 @@ fi
 
 
 # Add completion for commands, directories of commands
+# -clear
+# -list
+# -quiet
+# -verbose
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 unset -f foamAddCompletion 2>/dev/null
 foamAddCompletion()
@@ -52,12 +56,24 @@ foamAddCompletion()
         echo "Usage: foamAddCompletion -clear | -list | dir(s) | app(s)" 1>&2
 
     local appName choices
+    local verboseOnMissing=true
+
     for appName
     do
-        if [ "$appName" = "-clear" ]
+        if [ "$appName" = "-quiet" ]
+        then
+           # No message for missing applications
+           unset verboseOnMissing
+
+        elif [ "$appName" = "-verbose" ]
+        then
+           # Report for missing applications
+           verboseOnMissing="true"
+
+        elif [ "$appName" = "-clear" ]
         then
            # Clear cached values
-           echo "clear cached values" 1>&2
+           echo "Clear cached values" 1>&2
            _of_complete_cache_=()
 
         elif [ "$appName" = "-list" ]
@@ -81,7 +97,8 @@ foamAddCompletion()
         then
             complete -o filenames -F _of_complete_ "${appName##*/}"
             # echo "complete ${appName##*/}" 1>&2
-        elif [ -n "$appName" ]
+
+        elif [ -n "$appName" ] && [ -n "$verboseOnMissing" ]
         then
             echo "No completions for $appName" 1>&2
             echo "[ignore if OpenFOAM is not yet compiled]" 1>&2
@@ -236,8 +253,8 @@ then
         # Completions for predefined directories
         foamAddCompletion "$FOAM_APPBIN"
 
-        # A few scripts from bin/
-        foamAddCompletion paraFoam
+        # Completions for a few common scripts (allowed to be missing)
+        foamAddCompletion -quiet paraFoam wmake
     fi
 else
     # Bash version is too old.

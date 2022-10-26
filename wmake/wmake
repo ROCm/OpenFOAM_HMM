@@ -75,6 +75,7 @@ cat<<HELP_FULL
   -module-prefix=PATH   Specify FOAM_MODULE_PREFIX as absolute/relative path
   -module-prefix=TYPE   Specify FOAM_MODULE_PREFIX as predefined type
                         (u,user | g,group | o,openfoam)
+  -no-openmp        Disable openmp (adds '~openmp' to WM_COMPILE_CONTROL)
   -no-scheduler     Disable scheduled parallel compilation
 
   -show-api         Print api value (from Make rules)
@@ -307,6 +308,11 @@ do
         # Keep going, ignoring errors
         -k | -keep-going | -non-stop)
             export WM_CONTINUE_ON_ERROR=true
+            ;;
+        # Disable use of openmp
+        -no-openmp)
+            WM_COMPILE_CONTROL="$WM_COMPILE_CONTROL ~openmp"
+            export WM_COMPILE_CONTROL
             ;;
         # Disable scheduled parallel compilation
         -no-scheduler)

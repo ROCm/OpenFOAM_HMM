@@ -5,7 +5,7 @@ include $(GENERAL_RULES)/standard
 
 # Darwin-specific
 # ----
-COMP_OPENMP = -DUSE_OMP -Xpreprocessor -fopenmp
+COMP_OPENMP = -Xpreprocessor -fopenmp
 LINK_OPENMP = -lomp
 # ----
 
