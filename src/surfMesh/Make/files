@@ -60,6 +60,7 @@ triSurface/patches/surfacePatch.C
 readers = readers
 
 $(readers)/common/surfaceReader.C
+$(readers)/boundary/boundaryDataSurfaceReader.C
 $(readers)/ensight/ensightSurfaceReader.C
 
 writers = writers

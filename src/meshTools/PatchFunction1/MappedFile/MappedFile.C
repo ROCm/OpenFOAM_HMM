@@ -47,6 +47,12 @@ Foam::PatchFunction1Types::MappedFile<Type>::MappedFile
     fieldTableName_(dict.getOrDefault<word>("fieldTable", entryName)),
     pointsName_(dict.getOrDefault<word>("points", "points")),
     mapMethod_(),
+    filterRadius_(dict.getOrDefault<scalar>("filterRadius", 0)),
+    filterSweeps_(dict.getOrDefault<label>("filterSweeps", 0)),
+    filterFieldPtr_(nullptr),
+    readerFormat_(),
+    readerFile_(),
+    readerPtr_(nullptr),
     mapperPtr_(nullptr),
     sampleTimes_(),
     sampleIndex_(-1, -1),
@@ -54,6 +60,40 @@ Foam::PatchFunction1Types::MappedFile<Type>::MappedFile
     sampleValues_(),
     offset_(Function1<Type>::NewIfPresent("offset", dict))
 {
+    // Simple sanity check
+    if ((filterSweeps_ < 1) || (filterRadius_ <= VSMALL))
+    {
+        filterRadius_ = 0;
+        filterSweeps_ = 0;
+    }
+
+    if (dict.readIfPresent("sampleFormat", readerFormat_))
+    {
+        dict.readEntry("sampleFile", readerFile_);
+
+        fileName fName(readerFile_);
+        fName.expand();
+
+        readerPtr_ = surfaceReader::New(readerFormat_, fName);
+    }
+
+    if (debug)
+    {
+        Info<< "mappedFile:" << nl;
+        if (readerFormat_.empty())
+        {
+            Info<< "    boundary format" << nl;
+        }
+        else
+        {
+            Info<< "    format:" << readerFormat_
+                << " file:" << readerFile_ << nl;
+        }
+
+        Info<< "    filter radius=" << filterRadius_
+            << " sweeps=" << filterSweeps_ << endl;
+    }
+
     if
     (
         dict.readIfPresent("mapMethod", mapMethod_)
@@ -88,6 +128,12 @@ Foam::PatchFunction1Types::MappedFile<Type>::MappedFile
     fieldTableName_(fieldTableName),
     pointsName_(dict.getOrDefault<word>("points", "points")),
     mapMethod_(),
+    filterRadius_(dict.getOrDefault<scalar>("filterRadius", 0)),
+    filterSweeps_(dict.getOrDefault<label>("filterSweeps", 0)),
+    filterFieldPtr_(nullptr),
+    readerFormat_(),
+    readerFile_(),
+    readerPtr_(nullptr),
     mapperPtr_(nullptr),
     sampleTimes_(),
     sampleIndex_(-1, -1),
@@ -95,6 +141,40 @@ Foam::PatchFunction1Types::MappedFile<Type>::MappedFile
     sampleValues_(),
     offset_(Function1<Type>::NewIfPresent("offset", dict))
 {
+    // Simple sanity check
+    if ((filterSweeps_ < 1) || (filterRadius_ <= VSMALL))
+    {
+        filterRadius_ = 0;
+        filterSweeps_ = 0;
+    }
+
+    if (dict.readIfPresent("sampleFormat", readerFormat_))
+    {
+        dict.readEntry("sampleFile", readerFile_);
+
+        fileName fName(readerFile_);
+        fName.expand();
+
+        readerPtr_ = surfaceReader::New(readerFormat_, fName);
+    }
+
+    if (debug)
+    {
+        Info<< "mappedFile:" << nl;
+        if (readerFormat_.empty())
+        {
+            Info<< "    boundary format" << nl;
+        }
+        else
+        {
+            Info<< "    format:" << readerFormat_
+                << " file:" << readerFile_ << nl;
+        }
+
+        Info<< "    filter radius=" << filterRadius_
+            << " sweeps=" << filterSweeps_ << endl;
+    }
+
     if
     (
         dict.readIfPresent("mapMethod", mapMethod_)
@@ -136,13 +216,27 @@ Foam::PatchFunction1Types::MappedFile<Type>::MappedFile
     fieldTableName_(rhs.fieldTableName_),
     pointsName_(rhs.pointsName_),
     mapMethod_(rhs.mapMethod_),
+    filterRadius_(rhs.filterRadius_),
+    filterSweeps_(rhs.filterSweeps_),
+    filterFieldPtr_(nullptr),
+    readerFormat_(rhs.readerFormat_),
+    readerFile_(rhs.readerFile_),
+    readerPtr_(nullptr),
     mapperPtr_(rhs.mapperPtr_.clone()),
     sampleTimes_(rhs.sampleTimes_),
     sampleIndex_(rhs.sampleIndex_),
     sampleAverage_(rhs.sampleAverage_),
     sampleValues_(rhs.sampleValues_),
     offset_(rhs.offset_.clone())
-{}
+{
+    if (!readerFormat_.empty() && !readerFile_.empty())
+    {
+        fileName fName(readerFile_);
+        fName.expand();
+
+        readerPtr_ = surfaceReader::New(readerFormat_, fName);
+    }
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -165,6 +259,7 @@ void Foam::PatchFunction1Types::MappedFile<Type>::autoMap
     }
 
     // Clear interpolator
+    filterFieldPtr_.reset(nullptr);
     mapperPtr_.reset(nullptr);
     sampleIndex_ = labelPair(-1, -1);
 }
@@ -195,6 +290,7 @@ void Foam::PatchFunction1Types::MappedFile<Type>::rmap
     }
 
     // Clear interpolator
+    filterFieldPtr_.reset(nullptr);
     mapperPtr_.reset(nullptr);
     sampleIndex_ = labelPair(-1, -1);
 }
@@ -211,13 +307,41 @@ void Foam::PatchFunction1Types::MappedFile<Type>::updateSampledValues
     tmp<Field<Type>> tvalues;
 
     // Update sampled data fields
+    if (readerPtr_)
+    {
+        wordList fieldNames = readerPtr_->fieldNames(sampleIndex);
+
+        label fieldIndex = fieldNames.find(fieldTableName_);
+
+        DebugInfo
+            << "checkTable : Update index=" << sampleIndex
+            << " field=" << fieldNames[fieldIndex] << endl;
+
+        tvalues = readerPtr_->field
+        (
+            sampleIndex,
+            fieldIndex,
+            pTraits<Type>::zero
+        );
+
+        if (tvalues().size() != mapperPtr_().sourceSize())
+        {
+            FatalErrorInFunction
+                << "Number of values (" << tvalues().size()
+                << ") differs from the number of points ("
+                <<  mapperPtr_().sourceSize() << ")"
+                << exit(FatalError);
+        }
+    }
+    else
     {
         const polyMesh& mesh = this->patch_.boundaryMesh().mesh();
         const Time& time = mesh.time();
 
         if (debug)
         {
-            Pout<< "checkTable : Reading values from "
+            Pout<< "checkTable : Update index=" << sampleIndex
+                << " Reading values from "
                 <<
                 (
                     "boundaryData"
@@ -269,6 +393,13 @@ void Foam::PatchFunction1Types::MappedFile<Type>::updateSampledValues
         tvalues = tmp<Field<Type>>::New(std::move(vals.field()));
     }
 
+    if (filterFieldPtr_)
+    {
+        DebugInfo
+            << "apply " << filterSweeps_ << " filter sweeps" << endl;
+
+        tvalues = filterFieldPtr_().evaluate(tvalues, filterSweeps_);
+    }
 
     // From input values to interpolated (sampled) positions
     field = mapperPtr_().interpolate(tvalues);
@@ -285,7 +416,74 @@ void Foam::PatchFunction1Types::MappedFile<Type>::checkTable
     const Time& time = mesh.time();
 
     // Initialise
-    if (!mapperPtr_)
+    if (!mapperPtr_ && readerPtr_)
+    {
+        auto& reader = readerPtr_();
+
+        const meshedSurface& geom = reader.geometry(0);
+
+        sampleTimes_ = reader.times();
+
+        // We may have been passed in geometry without any faces
+        // eg, boundaryData
+
+        const pointField& samplePoints =
+        (
+            geom.nFaces() ? geom.faceCentres() : geom.points()
+        );
+
+        DebugInfo
+            << "Read " << samplePoints.size() << " sample points from "
+            << readerFile_ << endl
+            << "Found times "
+            << pointToPointPlanarInterpolation::timeNames(sampleTimes_) << nl;
+
+        // tbd: run-time selection
+        const bool nearestOnly =
+        (
+            !mapMethod_.empty() && !mapMethod_.starts_with("planar")
+        );
+
+
+        // Allocate the interpolator
+        if (this->faceValues())
+        {
+            mapperPtr_.reset
+            (
+                new pointToPointPlanarInterpolation
+                (
+                    samplePoints,
+                    this->localPosition(this->patch_.faceCentres()),
+                    perturb_,
+                    nearestOnly
+                )
+            );
+        }
+        else
+        {
+            mapperPtr_.reset
+            (
+                new pointToPointPlanarInterpolation
+                (
+                    samplePoints,
+                    this->localPosition(this->patch_.localPoints()),
+                    perturb_,
+                    nearestOnly
+                )
+            );
+        }
+
+        // Setup median filter (if any)
+        if (filterSweeps_ > 0)
+        {
+            filterFieldPtr_.reset(new FilterField(geom, filterRadius_));
+        }
+        else
+        {
+            filterFieldPtr_.reset(nullptr);
+        }
+    }
+    else if (!mapperPtr_)
     {
         // Reread values and interpolate
         const fileName samplePointsFile
@@ -349,7 +547,6 @@ void Foam::PatchFunction1Types::MappedFile<Type>::checkTable
             );
         }
 
-
         // Read the times for which data is available
         const fileName samplePointsDir = samplePointsFile.path();
         sampleTimes_ = Time::findTimes(samplePointsDir);
@@ -358,11 +555,21 @@ void Foam::PatchFunction1Types::MappedFile<Type>::checkTable
             << "Found times "
             << pointToPointPlanarInterpolation::timeNames(sampleTimes_)
             << endl;
+
+        // Setup median filter (if any)
+        if (filterSweeps_ > 0)
+        {
+            filterFieldPtr_.reset(new FilterField(samplePoints, filterRadius_));
+        }
+        else
+        {
+            filterFieldPtr_.reset(nullptr);
+        }
     }
 
 
     // Find range of current time indices in sampleTimes
-    Pair<label> timeIndices = instant::findRange
+    labelPair timeIndices = instant::findRange
     (
         sampleTimes_,
         t,  //mesh.time().value(),
@@ -555,6 +762,12 @@ void Foam::PatchFunction1Types::MappedFile<Type>::writeEntries
     Ostream& os
 ) const
 {
+    if (!readerFormat_.empty() && !readerFile_.empty())
+    {
+        os.writeEntry("readerFormat", readerFormat_);
+        os.writeEntry("readerFile", readerFile_);
+    }
+
     os.writeEntryIfDifferent
     (
         "fieldTable",
@@ -578,6 +791,12 @@ void Foam::PatchFunction1Types::MappedFile<Type>::writeEntries
     }
 
     os.writeEntryIfDifferent<scalar>("perturb", 1e-5, perturb_);
+
+    if (filterSweeps_ >= 1)
+    {
+        os.writeEntry("filterRadius", filterRadius_);
+        os.writeEntry("filterSweeps", filterSweeps_);
+    }
 
     if (offset_)
     {

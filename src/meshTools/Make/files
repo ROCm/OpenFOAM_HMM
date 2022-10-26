@@ -327,6 +327,8 @@ PatchFunction1/makePatchFunction1s.C
 PatchFunction1/coordinateScaling/coordinateScalings.C
 PatchFunction1/CodedField/makeCodedFields.C
 
+PatchFunction1/MappedFile/MappedFileFilterField.C
+
 meshStructure/meshStructure.C
 
 coupling/externalFileCoupler.C
