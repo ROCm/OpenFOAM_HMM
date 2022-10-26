@@ -450,7 +450,11 @@ Foam::triSurfaceMesh::triSurfaceMesh(const IOobject& io, const readAction r)
             // Check where surface was found
             const fileName localFile(io.localFilePath(typeName));
 
-            if (r == masterOnly && (actualFile != localFile))
+            if
+            (
+                r == masterOnly
+             && ((actualFile.empty() || actualFile != localFile))
+            )
             {
                 // Found undecomposed surface. Load on master only
                 if (Pstream::master())
@@ -563,10 +567,18 @@ Foam::triSurfaceMesh::triSurfaceMesh
 
         if (searchGlobal && Pstream::parRun())
         {
-            // Check where surface was found
+            // Check where surface was found. Bit tricky:
+            // - master will have actualFile (in parent directory)
+            //   different from localFilePath (in processor0/)
+            // - slave might have actualFile empty and localFile empty
+
             const fileName localFile(io.localFilePath(typeName));
 
-            if (r == masterOnly && (actualFile != localFile))
+            if
+            (
+                r == masterOnly
+             && ((actualFile.empty() || actualFile != localFile))
+            )
             {
                 // Surface not loaded from processor directories -> undecomposed
                 // surface. Load on master only

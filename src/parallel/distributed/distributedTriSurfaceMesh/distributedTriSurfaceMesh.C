@@ -2642,11 +2642,16 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh(const IOobject& io)
 
     bounds().reduce();
 
-    const fileName actualFile(triSurfaceMesh::checkFile(io, true));
+    // Try and find out where the triSurface was loaded from. On slave this
+    // might give empty filename.
+    const fileName actualFile(triSurfaceMesh::findFile(io, true));
 
     if
     (
-        actualFile != io.localFilePath(triSurfaceMesh::typeName)
+        (
+            actualFile.empty()
+         || actualFile != io.localFilePath(triSurfaceMesh::typeName)
+        )
      && (distType_ == INDEPENDENT || distType_ == DISTRIBUTED)
     )
     {
@@ -2779,11 +2784,16 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh
 
     bounds().reduce();
 
-    const fileName actualFile(triSurfaceMesh::checkFile(io, dict, true));
+    // Try and find out where the triSurface was loaded from. On slave this
+    // might give empty filename.
+    const fileName actualFile(triSurfaceMesh::findFile(io, dict, true));
 
     if
     (
-        actualFile != io.localFilePath(triSurfaceMesh::typeName)
+        (
+            actualFile.empty()
+         || actualFile != io.localFilePath(triSurfaceMesh::typeName)
+        )
      && (distType_ == INDEPENDENT || distType_ == DISTRIBUTED)
     )
     {
