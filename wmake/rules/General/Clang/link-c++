@@ -1,11 +1,11 @@
 LINK_LIBS   = $(c++DBUG)
 
 LINKLIBSO   = $(CC) $(c++FLAGS) -shared \
-    $(FOAM_EXTRA_LDFLAGS)  /work/lgrinber/rocm-afar001-460/lib/libroctx64.so #/opt/rocm-5.0.2/lib/libroctx64.so # /work/lgrinber/OPENMP_COMPILER_UVM/rocm-5.2.0-9846/lib/libroctx64.so #/work/lgrinber/OPENMP_COMPILER_UVM/aomp_15.0-1/lib/libroctx64.so 
+    $(FOAM_EXTRA_LDFLAGS)  ${ROCM4FOAM}/lib/libroctx64.so 
 
 LINKEXE     = $(CC) $(c++FLAGS) \
     -fuse-ld=ld  -Xlinker --add-needed \
-    $(FOAM_EXTRA_LDFLAGS) /work/lgrinber/rocm-afar001-460/lib/libroctx64.so #/opt/rocm-5.0.2/lib/libroctx64.so #/work/lgrinber/OPENMP_COMPILER_UVM/rocm-5.2.0-9846/lib/libroctx64.so #/work/lgrinber/OPENMP_COMPILER_UVM/aomp_15.0-1/lib/libroctx64.so 
+    $(FOAM_EXTRA_LDFLAGS) ${ROCM4FOAM}/lib/libroctx64.so   
 
 
 
