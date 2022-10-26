@@ -12,7 +12,10 @@
 To run [OpenFOAM](https://www.openfoam.com) on A+A systems, we demonstrate the use of OpenMP offloading with HMM. Follow the steps below to build OpenFOAM with HMM.
 
 ## Requirements
-OpenFOAM has the following dependencies. The installation has been tested
+
+on the ACP cloud all the requirements have been already satisfied, so no need to install any additional software.
+
+In general, OpenFOAM has the following dependencies. The installation has been tested
 with the mentioned versions of the libraries, which are therefore recommended.
 
 1. gcc-8.3.1
