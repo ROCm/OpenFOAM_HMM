@@ -419,26 +419,30 @@ void Foam::radiation::viewFactor::initialise()
         {
             scalar maxDelta = 0;
             scalar totalDelta = 0;
-            forAll (myF, i)
+
+            if (myF.size())
             {
-                scalar sumF = 0.0;
-                scalarList& myFij = myF[i];
-                forAll (myFij, j)
+                forAll (myF, i)
                 {
-                    sumF += myFij[j];
+                    scalar sumF = 0.0;
+                    scalarList& myFij = myF[i];
+                    forAll (myFij, j)
+                    {
+                        sumF += myFij[j];
+                    }
+                    const scalar delta = sumF - 1.0;
+                    forAll (myFij, j)
+                    {
+                        myFij[j] *= (1.0 - delta/(sumF + 0.001));
+                    }
+                    totalDelta += delta;
+                    if (delta > maxDelta)
+                    {
+                        maxDelta = delta;
+                    }
                 }
-                const scalar delta = sumF - 1.0;
-                forAll (myFij, j)
-                {
-                    myFij[j] *= (1.0 - delta/(sumF + 0.001));
-                }
-                totalDelta += delta;
-                if (delta > maxDelta)
-                {
-                    maxDelta = delta;
-                }
+                totalDelta /= myF.size();
             }
-            totalDelta /= myF.size();
             reduce(totalDelta, sumOp<scalar>());
             reduce(maxDelta, maxOp<scalar>());
             Info << "Smoothing average delta : " << totalDelta << endl;
@@ -1122,7 +1126,7 @@ void Foam::radiation::viewFactor::calculate()
 
     if (debug)
     {
-        forAll(qrBf, patchID)
+        for (const label patchID : selectedPatches_)
         {
             const scalarField& qrp = qrBf[patchID];
             const scalarField& magSf = mesh_.magSf().boundaryField()[patchID];
