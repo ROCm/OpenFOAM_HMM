@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,17 +58,20 @@ Foam::fv::limitTemperature::limitTemperature
     Tmax_(coeffs_.get<scalar>("max")),
     phase_(coeffs_.getOrDefault<word>("phase", word::null))
 {
-    // Set the field name to that of the energy
-    // field from which the temperature is obtained
-    const auto& thermo =
-        mesh_.lookupObject<basicThermo>
-        (
-            IOobject::groupName(basicThermo::dictName, phase_)
-        );
+    if (isActive())
+    {
+        // Set the field name to that of the energy
+        // field from which the temperature is obtained
+        const auto& thermo =
+            mesh_.lookupObject<basicThermo>
+            (
+                IOobject::groupName(basicThermo::dictName, phase_)
+            );
 
-    fieldNames_.resize(1, thermo.he().name());
+        fieldNames_.resize(1, thermo.he().name());
 
-    fv::option::resetApplied();
+        fv::option::resetApplied();
+    }
 }
 
 
