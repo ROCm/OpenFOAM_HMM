@@ -96,6 +96,7 @@ Foam::label Foam::fileFormats::FIRECore::getFireLabel(ISstream& is)
             reinterpret_cast<char *>(&ivalue),
             sizeof(ivalue)
         );
+        is.syncState();
 
         return ivalue;
     }
@@ -119,6 +120,7 @@ Foam::point Foam::fileFormats::FIRECore::getFirePoint(ISstream& is)
             reinterpret_cast<char *>(&coord),
             sizeof(coord)
         );
+        is.syncState();
 
         pt.x() = coord[0];
         pt.y() = coord[1];
@@ -155,6 +157,8 @@ std::string Foam::fileFormats::FIRECore::getFireString(ISstream& is)
         {
             is.stdStream().read(&(str[pos]), sizeof(char));
         }
+
+        is.syncState();
     }
     else
     {
@@ -213,6 +217,8 @@ void Foam::fileFormats::FIRECore::putFireLabel
             reinterpret_cast<char const *>(&ivalue),
             sizeof(ivalue)
         );
+
+        os.syncState();
     }
     else
     {
@@ -247,6 +253,8 @@ void Foam::fileFormats::FIRECore::putFireLabels
                 sizeof(ivalue)
             );
         }
+
+        os.syncState();
     }
     else
     {
@@ -286,6 +294,8 @@ void Foam::fileFormats::FIRECore::putFireLabels
                 sizeof(ivalue)
             );
         }
+
+        os.syncState();
     }
     else
     {
@@ -319,6 +329,8 @@ void Foam::fileFormats::FIRECore::putFirePoint
             reinterpret_cast<char const *>(&fvalue),
             sizeof(fvalue)
         );
+
+        os.syncState();
     }
     else
     {
@@ -353,6 +365,8 @@ void Foam::fileFormats::FIRECore::putFireString
         // output without surrounding quotes
         os.stdStream() << value << '\n';
     }
+
+    os.syncState();
 }
 
 

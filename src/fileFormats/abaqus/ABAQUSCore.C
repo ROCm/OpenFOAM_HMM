@@ -88,6 +88,8 @@ static void skipComments(ISstream& iss)
             }
         }
     }
+
+    iss.syncState();
 }
 
 

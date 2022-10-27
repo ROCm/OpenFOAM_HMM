@@ -46,7 +46,7 @@ inline Foam::ISstream::ISstream
     }
     else
     {
-        setState(is_.rdstate());
+        syncState();
     }
 }
 
@@ -56,9 +56,9 @@ inline Foam::ISstream::ISstream
 inline Foam::ISstream& Foam::ISstream::get(char& c)
 {
     is_.get(c);
-    setState(is_.rdstate());
+    syncState();
 
-    if (good() && c == '\n')
+    if (c == '\n' && good())
     {
         ++lineNumber_;
     }
@@ -76,7 +76,7 @@ inline int Foam::ISstream::peek()
 inline Foam::ISstream& Foam::ISstream::getLine(std::string& str, char delim)
 {
     std::getline(is_, str, delim);
-    setState(is_.rdstate());
+    syncState();
 
     if (delim == '\n')
     {
@@ -90,11 +90,11 @@ inline Foam::ISstream& Foam::ISstream::getLine(std::string& str, char delim)
 inline std::streamsize Foam::ISstream::getLine(std::nullptr_t, char delim)
 {
     is_.ignore(std::numeric_limits<std::streamsize>::max(), delim);
-    setState(is_.rdstate());
+    syncState();
 
     std::streamsize count = is_.gcount();
 
-    if (count && delim == '\n')
+    if (delim == '\n' && count)
     {
         ++lineNumber_;
     }
@@ -115,7 +115,7 @@ inline Foam::ISstream& Foam::ISstream::putback(const char c)
         setBad();
     }
 
-    setState(is_.rdstate());
+    syncState();
 
     return *this;
 }

@@ -743,7 +743,8 @@ Foam::Istream& Foam::ISstream::read(token& t)
             }
             buf[nChar] = '\0';  // Terminate string
 
-            setState(is_.rdstate());
+            syncState();
+
             if (is_.bad())
             {
                 t.setBad();
@@ -996,7 +997,7 @@ Foam::Istream& Foam::ISstream::read(string& str)
 Foam::Istream& Foam::ISstream::read(label& val)
 {
     is_ >> val;
-    setState(is_.rdstate());
+    syncState();
     return *this;
 }
 
@@ -1004,7 +1005,7 @@ Foam::Istream& Foam::ISstream::read(label& val)
 Foam::Istream& Foam::ISstream::read(float& val)
 {
     is_ >> val;
-    setState(is_.rdstate());
+    syncState();
     return *this;
 }
 
@@ -1012,7 +1013,7 @@ Foam::Istream& Foam::ISstream::read(float& val)
 Foam::Istream& Foam::ISstream::read(double& val)
 {
     is_ >> val;
-    setState(is_.rdstate());
+    syncState();
     return *this;
 }
 
@@ -1030,8 +1031,7 @@ Foam::Istream& Foam::ISstream::read(char* buf, std::streamsize count)
 Foam::Istream& Foam::ISstream::readRaw(char* buf, std::streamsize count)
 {
     is_.read(buf, count);
-    setState(is_.rdstate());
-
+    syncState();
     return *this;
 }
 
@@ -1046,8 +1046,7 @@ bool Foam::ISstream::beginRawRead()
     }
 
     readBegin("binaryBlock");
-    setState(is_.rdstate());
-
+    syncState();
     return is_.good();
 }
 
@@ -1055,8 +1054,7 @@ bool Foam::ISstream::beginRawRead()
 bool Foam::ISstream::endRawRead()
 {
     readEnd("binaryBlock");
-    setState(is_.rdstate());
-
+    syncState();
     return is_.good();
 }
 
@@ -1070,20 +1068,6 @@ void Foam::ISstream::rewind()
 
     // pubseekpos() rather than seekg() so that it works with gzstream
     stdStream().rdbuf()->pubseekpos(0, std::ios_base::in);
-}
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-std::ios_base::fmtflags Foam::ISstream::flags() const
-{
-    return is_.flags();
-}
-
-
-std::ios_base::fmtflags Foam::ISstream::flags(const ios_base::fmtflags f)
-{
-    return is_.flags(f);
 }
 
 

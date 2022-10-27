@@ -43,12 +43,6 @@ const Foam::fileName& Foam::IOstream::name() const
 }
 
 
-Foam::fileName& Foam::IOstream::name()
-{
-    return staticName_;
-}
-
-
 Foam::fileName Foam::IOstream::relativeName() const
 {
     return argList::envRelativePath(this->name());

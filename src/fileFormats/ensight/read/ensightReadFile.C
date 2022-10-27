@@ -36,16 +36,16 @@ Foam::ensightReadFile::detectBinaryHeader(const fileName& pathname)
 
     // Detect BINARY vs ASCII by testing for initial "(C|Fortran) Binary"
     {
-        IFstream is(pathname, IOstreamOption::BINARY);
+        IFstream ifs(pathname, IOstreamOption::BINARY);
 
-        if (!is.good())
+        if (!ifs.good())
         {
             FatalErrorInFunction
-                << "Cannot read file " << is.name() << nl
+                << "Cannot read file " << ifs.name() << nl
                 << exit(FatalError);
         }
 
-        istream& iss = is.stdStream();
+        istream& iss = ifs.stdStream();
 
         // Binary string is *exactly* 80 characters
         string buf(size_t(80), '\0');
@@ -105,6 +105,7 @@ Foam::Istream& Foam::ensightReadFile::read
 )
 {
     stdStream().read(buf, count);
+    syncState();
     return *this;
 }
 
@@ -118,6 +119,8 @@ Foam::Istream& Foam::ensightReadFile::read(string& value)
         // Binary string is *exactly* 80 characters
         value.resize(80, '\0');
         iss.read(&value[0], 80);
+
+        syncState();
 
         if (!iss)
         {
@@ -169,6 +172,7 @@ Foam::Istream& Foam::ensightReadFile::read(label& value)
     else
     {
         stdStream() >> ivalue;
+        syncState();
     }
 
     value = ivalue;
@@ -193,6 +197,7 @@ Foam::Istream& Foam::ensightReadFile::read(scalar& value)
     else
     {
         stdStream() >> value;
+        syncState();
     }
 
     return *this;

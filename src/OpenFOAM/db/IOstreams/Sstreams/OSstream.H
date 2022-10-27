@@ -115,21 +115,39 @@ public:
 
     // Characteristics
 
-        //- Get the name of the stream.
-        //  Useful for Fstream to remember the filename
-        virtual const fileName& name() const
-        {
-            return name_;
-        }
+        //- Get the name of the output serial stream.
+        //- (eg, the name of the Fstream file name)
+        virtual const fileName& name() const { return name_; }
 
-        //- Return stream name for modification
-        virtual fileName& name()
-        {
-            return name_;
-        }
+
+    // STL stream
+
+        //- Const access to underlying std::ostream
+        virtual const std::ostream& stdStream() const { return os_; }
+
+        //- Access to underlying std::ostream
+        virtual std::ostream& stdStream() { return os_; }
+
+
+    // Stream State
 
         //- Get stream flags
-        virtual ios_base::fmtflags flags() const;
+        virtual ios_base::fmtflags flags() const
+        {
+            return os_.flags();
+        }
+
+        //- Set stream flags
+        virtual ios_base::fmtflags flags(const ios_base::fmtflags f)
+        {
+            return os_.flags(f);
+        }
+
+        //- Set stream state to match that of the std::ostream
+        void syncState()
+        {
+            setState(os_.rdstate());
+        }
 
 
     // Write Functions
@@ -197,9 +215,6 @@ public:
 
         // Stream state functions
 
-            //- Set stream flags
-            virtual ios_base::fmtflags flags(const ios_base::fmtflags f);
-
             //- Flush stream
             virtual void flush();
 
@@ -226,21 +241,6 @@ public:
             //- Set precision of output field
             //  \return old precision
             virtual int precision(const int p);
-
-
-        // STL stream
-
-            //- Access to underlying std::ostream
-            virtual std::ostream& stdStream()
-            {
-                return os_;
-            }
-
-            //- Const access to underlying std::ostream
-            virtual const std::ostream& stdStream() const
-            {
-                return os_;
-            }
 
 
         // Print

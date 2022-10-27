@@ -90,7 +90,7 @@ public:
 
 
     //- Destructor
-    ~OFstream() = default;
+    ~OFstream();
 
 
     // Member Functions

@@ -121,21 +121,42 @@ public:
 
     // Characteristics
 
-        //- Return the name of the stream.
-        //  Useful for Fstream to return the filename
-        virtual const fileName& name() const
-        {
-            return name_;
-        }
+        //- The name of the input serial stream.
+        //- (eg, the name of the Fstream file name)
+        virtual const fileName& name() const { return name_; }
 
-        //- Return stream name for modification
-        virtual fileName& name()
-        {
-            return name_;
-        }
+        //- The name of the input serial stream, for modification.
+        virtual fileName& name() { return name_; }
+
+
+    // STL stream
+
+        //- Const access to underlying std::istream
+        virtual const std::istream& stdStream() const { return is_; }
+
+        //- Access to underlying std::istream
+        virtual std::istream& stdStream() { return is_; }
+
+
+    // Stream State
 
         //- Return flags of output stream
-        virtual ios_base::fmtflags flags() const;
+        virtual ios_base::fmtflags flags() const
+        {
+            return is_.flags();
+        }
+
+        //- Set stream flags
+        virtual ios_base::fmtflags flags(const ios_base::fmtflags f)
+        {
+            return is_.flags(f);
+        }
+
+        //- Set stream state to match that of the std::istream
+        void syncState()
+        {
+            setState(is_.rdstate());
+        }
 
 
     // Special-purpose Functions
@@ -215,27 +236,6 @@ public:
 
             //- Rewind the stream so that it may be read again
             virtual void rewind();
-
-
-        // Stream state functions
-
-            //- Set stream flags
-            virtual ios_base::fmtflags flags(const ios_base::fmtflags flags);
-
-
-        // STL stream
-
-            //- Access to underlying std::istream
-            virtual std::istream& stdStream()
-            {
-                return is_;
-            }
-
-            //- Const access to underlying std::istream
-            virtual const std::istream& stdStream() const
-            {
-                return is_;
-            }
 
 
         // Print

@@ -149,6 +149,7 @@ Foam::Ostream& Foam::ensightFile::writeString(const char* str)
     {
         buf[79] = 0;  // max 79 in ASCII, ensure it is indeed nul-terminated
         stdStream() << buf;
+        syncState();
     }
 
     return *this;
@@ -186,6 +187,7 @@ Foam::Ostream& Foam::ensightFile::write
 )
 {
     stdStream().write(buf, count);
+    syncState();
     return *this;
 }
 
@@ -204,6 +206,7 @@ Foam::Ostream& Foam::ensightFile::write(const int32_t val)
     {
         stdStream().width(10);
         stdStream() << val;
+        syncState();
     }
 
     return *this;
@@ -232,6 +235,7 @@ Foam::Ostream& Foam::ensightFile::write(const float val)
     {
         stdStream().width(12);
         stdStream() << val;
+        syncState();
     }
 
     return *this;
@@ -260,6 +264,7 @@ Foam::Ostream& Foam::ensightFile::write
     {
         stdStream().width(fieldWidth);
         stdStream() << value;
+        syncState();
     }
 
     return *this;
@@ -271,6 +276,7 @@ void Foam::ensightFile::newline()
     if (format() == IOstreamOption::ASCII)
     {
         stdStream() << nl;
+        syncState();
     }
 }
 

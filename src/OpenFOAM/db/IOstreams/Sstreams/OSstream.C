@@ -93,7 +93,7 @@ Foam::Ostream& Foam::OSstream::write(const char c)
     {
         ++lineNumber_;
     }
-    setState(os_.rdstate());
+    syncState();
     return *this;
 }
 
@@ -102,7 +102,7 @@ Foam::Ostream& Foam::OSstream::write(const char* str)
 {
     lineNumber_ += stringOps::count(str, token::NL);
     os_ << str;
-    setState(os_.rdstate());
+    syncState();
     return *this;
 }
 
@@ -110,7 +110,7 @@ Foam::Ostream& Foam::OSstream::write(const char* str)
 Foam::Ostream& Foam::OSstream::write(const word& str)
 {
     os_ << str;
-    setState(os_.rdstate());
+    syncState();
     return *this;
 }
 
@@ -127,7 +127,7 @@ Foam::Ostream& Foam::OSstream::writeQuoted
         lineNumber_ += stringOps::count(str, token::NL);
         os_ << str;
 
-        setState(os_.rdstate());
+        syncState();
         return *this;
     }
 
@@ -169,7 +169,7 @@ Foam::Ostream& Foam::OSstream::writeQuoted
     // they would otherwise appear like an escaped end-quote
     os_ << token::DQUOTE;
 
-    setState(os_.rdstate());
+    syncState();
     return *this;
 }
 
@@ -183,7 +183,7 @@ Foam::Ostream& Foam::OSstream::write(const string& str)
 Foam::Ostream& Foam::OSstream::write(const int32_t val)
 {
     os_ << val;
-    setState(os_.rdstate());
+    syncState();
     return *this;
 }
 
@@ -191,7 +191,7 @@ Foam::Ostream& Foam::OSstream::write(const int32_t val)
 Foam::Ostream& Foam::OSstream::write(const int64_t val)
 {
     os_ << val;
-    setState(os_.rdstate());
+    syncState();
     return *this;
 }
 
@@ -199,7 +199,7 @@ Foam::Ostream& Foam::OSstream::write(const int64_t val)
 Foam::Ostream& Foam::OSstream::write(const float val)
 {
     os_ << val;
-    setState(os_.rdstate());
+    syncState();
     return *this;
 }
 
@@ -207,7 +207,7 @@ Foam::Ostream& Foam::OSstream::write(const float val)
 Foam::Ostream& Foam::OSstream::write(const double val)
 {
     os_ << val;
-    setState(os_.rdstate());
+    syncState();
     return *this;
 }
 
@@ -232,8 +232,7 @@ bool Foam::OSstream::beginRawWrite(std::streamsize count)
     }
 
     os_ << token::BEGIN_LIST;
-    setState(os_.rdstate());
-
+    syncState();
     return os_.good();
 }
 
@@ -241,8 +240,7 @@ bool Foam::OSstream::beginRawWrite(std::streamsize count)
 bool Foam::OSstream::endRawWrite()
 {
     os_ << token::END_LIST;
-    setState(os_.rdstate());
-
+    syncState();
     return os_.good();
 }
 
@@ -257,8 +255,7 @@ Foam::Ostream& Foam::OSstream::writeRaw
     // beginRawWrite() method, or the caller knows what they are doing.
 
     os_.write(data, count);
-    setState(os_.rdstate());
-
+    syncState();
     return *this;
 }
 
@@ -269,6 +266,7 @@ void Foam::OSstream::indent()
     {
         os_ << ' ';
     }
+    syncState();
 }
 
 
@@ -282,18 +280,6 @@ void Foam::OSstream::endl()
 {
     write('\n');
     os_.flush();
-}
-
-
-std::ios_base::fmtflags Foam::OSstream::flags() const
-{
-    return os_.flags();
-}
-
-
-std::ios_base::fmtflags Foam::OSstream::flags(const ios_base::fmtflags f)
-{
-    return os_.flags(f);
 }
 
 

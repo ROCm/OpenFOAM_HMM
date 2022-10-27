@@ -203,6 +203,15 @@ public:
 
     // Member Functions
 
+    // Characteristics
+
+        //- The name of the input token stream.
+        virtual const fileName& name() const { return name_; }
+
+        //- The name of the input token stream, for modification.
+        virtual fileName& name() { return name_; }
+
+
     // Token Access
 
         //- True if putback token is in use
@@ -253,21 +262,6 @@ public:
         //  Use skip(2) to move forward two tokens.
         //  Use skip(-2) to move backward two tokens.
         void skip(label n = 1);
-
-
-    // Inquiry
-
-        //- Get the name of the stream
-        virtual const fileName& name() const
-        {
-            return name_;
-        }
-
-        //- Return stream name for modification
-        virtual fileName& name()
-        {
-            return name_;
-        }
 
 
     // Token list modification

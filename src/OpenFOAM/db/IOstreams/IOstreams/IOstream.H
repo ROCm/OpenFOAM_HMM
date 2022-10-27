@@ -194,12 +194,8 @@ public:
 
     // Access
 
-        //- Return the name of the stream.
-        //  Useful for Fstream to remember the filename
+        //- The name of the stream.
         virtual const fileName& name() const;
-
-        //- Return stream name for modification
-        virtual fileName& name();
 
         //- Return the name of the stream relative to the current case.
         //  Uses argList::envRelativePath()
