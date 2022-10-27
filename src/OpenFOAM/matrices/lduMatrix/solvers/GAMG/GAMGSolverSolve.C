@@ -63,7 +63,7 @@ Foam::solverPerformance Foam::GAMGSolver::solve
 ) const
 {
 
-    printf("in GAMGSolver::solve\n");
+   // printf("in GAMGSolver::solve\n");
 
     #ifdef USE_ROCTX
     roctxRangePush("GAMGSolver::solve");
@@ -237,7 +237,7 @@ void Foam::GAMGSolver::Vcycle
 ) const
 {
 
-    printf("in GAMGSolver::Vcycle\n");
+    //printf("in GAMGSolver::Vcycle\n");
 
     #ifdef USE_ROCTX
     roctxRangePush("GAMGSolver::Vcycle");
