@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenFOAM Foundation
+    Copyright (C) 2020-2022 OpenFOAM Foundation
     Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -66,8 +66,8 @@ integratedNonUniformTable
 
     for (label i = 1; i < intf_.size(); ++i)
     {
-        intf_[i] = intf_[i-1] + intfdT(0, values()[i].first());
-        intfByT_[i] = intfByT_[i-1] + intfByTdT(0, values()[i].first());
+        intf_[i] = intfdT(0, values()[i].first());
+        intfByT_[i] = intfByTdT(0, values()[i].first());
     }
 
     const scalar intfStd = intfdT(Pstd, Tstd);
