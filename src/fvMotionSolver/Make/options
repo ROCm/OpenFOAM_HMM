@@ -9,6 +9,8 @@ EXE_INC = \
 LIB_LIBS = \
     -lfiniteVolume \
     -lfvOptions \
+    -lfileFormats \
+    -lsurfMesh \
     -lmeshTools \
     -ldynamicMesh
     /* -lforces include in controlDict if needed */
