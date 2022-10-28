@@ -43,10 +43,15 @@ source ./scripts/MEMO_SETUP.sh
 
 #------------------------------------------------------------------------------
 
+```
+Example of simulation using 8 MPI ranks
 
+mpirun -np 8 ./helper.sh pisoFoam -parallel
 
+Here the role of the helper.sh script is to assign a GPU to each MPI rank.
 
 ```
+
 
 @author	: Suyash Tandon, Leopold Grinberg<br>
 @date	: June 20, 2022<br>
