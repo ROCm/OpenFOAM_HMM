@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,7 +38,7 @@ Foam::label Foam::IndirectListBase<T, Addr>::find
 
     if (pos >= 0 && len)
     {
-        List_CONST_ACCESS(T, values_, vals);
+        const T* const vals = values_.begin();
 
         while (pos < len)
         {
@@ -69,7 +69,7 @@ Foam::label Foam::IndirectListBase<T, Addr>::rfind
         pos = addr_.size()-1;
     }
 
-    List_CONST_ACCESS(T, values_, vals);
+    const T* const vals = values_.begin();
 
     while (pos >= 0)
     {

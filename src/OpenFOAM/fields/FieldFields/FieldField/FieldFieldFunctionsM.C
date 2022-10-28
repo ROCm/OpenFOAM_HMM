@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,7 +40,9 @@ void Func                                                                      \
     const FieldField<Field, Type>& f                                           \
 )                                                                              \
 {                                                                              \
-    forAll(res, i)                                                             \
+    const label loopLen = (res).size();                                        \
+                                                                               \
+    for (label i = 0; i < loopLen; ++i)                                        \
     {                                                                          \
         Func(res[i], f[i]);                                                    \
     }                                                                          \
@@ -83,7 +86,9 @@ void OpFunc                                                                    \
     const FieldField<Field, Type>& f                                           \
 )                                                                              \
 {                                                                              \
-    forAll(res, i)                                                             \
+    const label loopLen = (res).size();                                        \
+                                                                               \
+    for (label i = 0; i < loopLen; ++i)                                        \
     {                                                                          \
         OpFunc(res[i], f[i]);                                                  \
     }                                                                          \
@@ -128,7 +133,9 @@ void Func                                                                      \
     const FieldField<Field, Type2>& f2                                         \
 )                                                                              \
 {                                                                              \
-    forAll(f, i)                                                               \
+    const label loopLen = (f).size();                                          \
+                                                                               \
+    for (label i = 0; i < loopLen; ++i)                                        \
     {                                                                          \
         Func(f[i], f1[i], f2[i]);                                              \
     }                                                                          \
@@ -212,7 +219,9 @@ void Func                                                                      \
     const FieldField<Field, Type2>& f2                                         \
 )                                                                              \
 {                                                                              \
-    forAll(f, i)                                                               \
+    const label loopLen = (f).size();                                          \
+                                                                               \
+    for (label i = 0; i < loopLen; ++i)                                        \
     {                                                                          \
         Func(f[i], s, f2[i]);                                                  \
     }                                                                          \
@@ -260,7 +269,9 @@ void Func                                                                      \
     const Type2& s                                                             \
 )                                                                              \
 {                                                                              \
-    forAll(f, i)                                                               \
+    const label loopLen = (f).size();                                          \
+                                                                               \
+    for (label i = 0; i < loopLen; ++i)                                        \
     {                                                                          \
         Func(f[i], f1[i], s);                                                  \
     }                                                                          \
@@ -315,7 +326,9 @@ void OpFunc                                                                    \
     const FieldField<Field, Type2>& f2                                         \
 )                                                                              \
 {                                                                              \
-    forAll(f, i)                                                               \
+    const label loopLen = (f).size();                                          \
+                                                                               \
+    for (label i = 0; i < loopLen; ++i)                                        \
     {                                                                          \
         OpFunc(f[i], f1[i], f2[i]);                                            \
     }                                                                          \
@@ -399,7 +412,9 @@ void OpFunc                                                                    \
     const FieldField<Field, Type2>& f2                                         \
 )                                                                              \
 {                                                                              \
-    forAll(f, i)                                                               \
+    const label loopLen = (f).size();                                          \
+                                                                               \
+    for (label i = 0; i < loopLen; ++i)                                        \
     {                                                                          \
         OpFunc(f[i], s, f2[i]);                                                \
     }                                                                          \
@@ -447,7 +462,9 @@ void OpFunc                                                                    \
     const Type2& s                                                             \
 )                                                                              \
 {                                                                              \
-    forAll(f, i)                                                               \
+    const label loopLen = (f).size();                                          \
+                                                                               \
+    for (label i = 0; i < loopLen; ++i)                                        \
     {                                                                          \
         OpFunc(f[i], f1[i], s);                                                \
     }                                                                          \

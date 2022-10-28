@@ -481,13 +481,13 @@ sumProd(const UList<Type>& f1, const UList<Type>& f2)
 template<class Type>
 Type sumCmptProd(const UList<Type>& f1, const UList<Type>& f2)
 {
-    Type SumProd = Zero;
+    Type result = Zero;
     if (f1.size() && (f1.size() == f2.size()))
     {
         TFOR_ALL_S_OP_FUNC_F_F
         (
             Type,
-            SumProd,
+            result,
             +=,
             cmptMultiply,
             Type,
@@ -496,7 +496,7 @@ Type sumCmptProd(const UList<Type>& f1, const UList<Type>& f2)
             f2
         )
     }
-    return SumProd;
+    return result;
 }
 
 
