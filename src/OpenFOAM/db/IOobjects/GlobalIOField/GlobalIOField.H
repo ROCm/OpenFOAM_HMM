@@ -35,11 +35,10 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef GlobalIOField_H
-#define GlobalIOField_H
+#ifndef Foam_GlobalIOField_H
+#define Foam_GlobalIOField_H
 
-#include "regIOobject.H"
-#include "Field.H"
+#include "IOField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,9 +55,12 @@ class GlobalIOField
     public regIOobject,
     public Field<Type>
 {
-
 public:
 
+    //- The underlying content type
+    typedef Field<Type> content_type;
+
+    //- Runtime type information
     TypeName("Field");
 
 
@@ -70,17 +72,17 @@ public:
         //- Construct from IOobject
         explicit GlobalIOField(const IOobject& io);
 
-        //- Construct from IOobject and size (does not set values)
-        GlobalIOField(const IOobject& io, const label size);
+        //- Construct from IOobject and field size (if not read)
+        GlobalIOField(const IOobject& io, const label len);
 
-        //- Construct from IOobject and a List/Field content
+        //- Construct from IOobject and copy of List/Field content
         GlobalIOField(const IOobject& io, const UList<Type>& content);
 
         //- Construct by transferring the Field content
         GlobalIOField(const IOobject& io, Field<Type>&& content);
 
         //- Construct by copying/moving tmp content
-        GlobalIOField(const IOobject& io, const tmp<Field<Type>>& tf);
+        GlobalIOField(const IOobject& io, const tmp<Field<Type>>& tfld);
 
 
     //- Destructor
@@ -116,7 +118,6 @@ public:
 
         //- Copy or move assignment of entries
         using Field<Type>::operator=;
-
 };
 
 

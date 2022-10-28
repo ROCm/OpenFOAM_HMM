@@ -28,24 +28,54 @@ License
 #include "rawIOField.H"
 #include "IFstream.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-Foam::rawIOField<Type>::rawIOField(const IOobject& io, const bool readAverage)
-:
-    regIOobject(io),
-    hasAverage_(false),
-    average_(Zero)
+void Foam::rawIOField<Type>::readContents
+(
+    Istream& is,
+    IOobjectOption::readOption readAverage
+)
 {
-    // Check for MUST_READ_IF_MODIFIED
-    warnNoRereading<rawIOField<Type>>();
+    is >> static_cast<Field<Type>&>(*this);
 
-    if (io.isReadRequired() || io.isReadOptional())
+    if (IOobjectOption::isReadRequired(readAverage))
+    {
+        is >> average_;
+        hasAverage_ = true;
+    }
+    else if (IOobjectOption::isReadOptional(readAverage))
+    {
+        // Slightly heavy handed
+        const bool oldThrowingIOerr = FatalIOError.throwing(true);
+
+        try
+        {
+            is >> average_;
+            hasAverage_ = true;
+        }
+        catch (const Foam::IOerror& err)
+        {
+            average_ = Zero;
+            hasAverage_ = false;
+        }
+        FatalIOError.throwing(oldThrowingIOerr);
+    }
+}
+
+
+template<class Type>
+bool Foam::rawIOField<Type>::readContents
+(
+    IOobjectOption::readOption readAverage
+)
+{
+    if (isReadRequired() || isReadOptional())
     {
         bool haveFile = false;
         bool haveHeader = false;
 
-        // Replacement of regIOobject::headerok() since that one complains
+        // Replacement of regIOobject::headerOk() since that one complains
         // if there is no header. TBD - Move up to headerOk()/fileHandler.
         {
             const fileName fName(filePath());
@@ -66,7 +96,7 @@ Foam::rawIOField<Type>::rawIOField(const IOobject& io, const bool readAverage)
 
             if (debug)
             {
-                Pout<< "rawIOField : object:" << io.name()
+                Pout<< "rawIOField : object:" << name()
                     << " haveFile:" << haveFile
                     << " haveHeader:" << haveHeader << endl;
             }
@@ -81,35 +111,23 @@ Foam::rawIOField<Type>::rawIOField(const IOobject& io, const bool readAverage)
 
             if (is.good())
             {
-                is  >> static_cast<Field<Type>&>(*this);
-                if (readAverage)
-                {
-                    hasAverage_ = true;
-                    is >> average_;
-                }
+                readContents(is, readAverage);
                 close();
             }
         }
         else if (haveFile)
         {
             // Failed reading header - fall back to IFstream
-            autoPtr<ISstream> isPtr(fileHandler().NewIFstream(io.objectPath()));
+            autoPtr<ISstream> isPtr(fileHandler().NewIFstream(objectPath()));
 
             if (isPtr && isPtr->good())
             {
-                auto& is = *isPtr;
-
-                is  >> static_cast<Field<Type>&>(*this);
-                if (readAverage)
-                {
-                    hasAverage_ = true;
-                    is >> average_;
-                }
+                readContents(*isPtr, readAverage);
             }
             else
             {
                 // Error if required but missing
-                if (io.isReadRequired())
+                if (isReadRequired())
                 {
                     FatalIOErrorInFunction(*isPtr)
                         << "Trying to read raw field" << endl
@@ -120,22 +138,57 @@ Foam::rawIOField<Type>::rawIOField(const IOobject& io, const bool readAverage)
 
         if (debug)
         {
-            Pout<< "rawIOField : object:" << io.name()
+            Pout<< "rawIOField : object:" << name()
                 << " size:" << this->size() << endl;
         }
+
+        return true;
     }
+
+    return false;
 }
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+template<class Type>
+Foam::rawIOField<Type>::rawIOField
+(
+    const IOobject& io,
+    IOobjectOption::readOption readAverage
+)
+:
+    regIOobject(io),
+    hasAverage_(false),
+    average_(Zero)
+{
+    // Check for MUST_READ_IF_MODIFIED
+    warnNoRereading<rawIOField<Type>>();
+
+    readContents(readAverage);
+}
+
+
+template<class Type>
+Foam::rawIOField<Type>::rawIOField
+(
+    const IOobject& io,
+    const bool readAverage
+)
+:
+    rawIOField<Type>
+    (
+        io,
+        (
+            readAverage
+          ? IOobjectOption::readOption::MUST_READ
+          : IOobjectOption::readOption::NO_READ
+        )
+    )
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class Type>
-void Foam::rawIOField<Type>::setAverage(const Type& val)
-{
-    hasAverage_ = true;
-    average_ = val;
-}
-
 
 template<class Type>
 bool Foam::rawIOField<Type>::writeData(Ostream& os) const

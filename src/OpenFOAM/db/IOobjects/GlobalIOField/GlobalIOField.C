@@ -43,7 +43,7 @@ Foam::GlobalIOField<Type>::GlobalIOField(const IOobject& io)
 
 
 template<class Type>
-Foam::GlobalIOField<Type>::GlobalIOField(const IOobject& io, const label size)
+Foam::GlobalIOField<Type>::GlobalIOField(const IOobject& io, const label len)
 :
     regIOobject(io)
 {
@@ -52,7 +52,7 @@ Foam::GlobalIOField<Type>::GlobalIOField(const IOobject& io, const label size)
 
     if (!readHeaderOk(IOstreamOption::BINARY, typeName))
     {
-        Field<Type>::setSize(size);
+        Field<Type>::resize(len);
     }
 }
 
@@ -113,7 +113,7 @@ Foam::GlobalIOField<Type>::GlobalIOField
         Field<Type>::transfer(tfld.ref());
     }
 
-    if (!readHeaderOk(IOstreamOption::BINARY, typeName))
+    if (!readHeaderOk(IOstreamOption::BINARY, typeName) && !reuse)
     {
         Field<Type>::operator=(tfld());
     }

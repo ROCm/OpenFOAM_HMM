@@ -53,9 +53,10 @@ SourceFiles
 #define Foam_timeVaryingMappedFixedValuePointPatchField_H
 
 #include "fixedValuePointPatchField.H"
+#include "Function1.H"
+#include "Pair.H"
 #include "instantList.H"
 #include "pointToPointPlanarInterpolation.H"
-#include "Function1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -94,23 +95,14 @@ class timeVaryingMappedFixedValuePointPatchField
         //- List of boundaryData time directories
         instantList sampleTimes_;
 
-        //- Current start index in sampleTimes
-        label begSampleIndex_;
+        //- The first/second sample indices in sampleTimes
+        labelPair sampleIndex_;
 
-        //- Current end index in sampleTimes
-        label endSampleIndex_;
+        //- The average values at first/second sampleIndex_ (if setAverage)
+        Pair<Type> sampleAverage_;
 
-        //- Current average value at begSampleIndex (if setAverage)
-        Type begAverage_;
-
-        //- Current average value at endSampleIndex (if setAverage)
-        Type endAverage_;
-
-        //- Current interpolated values at begSampleIndex
-        Field<Type> begSampledValues_;
-
-        //- Current interpolated values at endSampleIndex
-        Field<Type> endSampledValues_;
+        //- The interpolated values at first/second sampleIndex_
+        Pair<Field<Type>> sampleValues_;
 
         //- Time varying offset values to interpolated data
         autoPtr<Function1<Type>> offset_;
@@ -118,11 +110,17 @@ class timeVaryingMappedFixedValuePointPatchField
 
     // Private Member Functions
 
-        //- Update start (0) or end (1) interpolated data
-        void updateSampledValues(const int whichEnd);
-
         //- Find boundary data between time 't' and interpolate
         void checkTable(const scalar t);
+
+        //- Update field and average value using interpolation at
+        //- given instant index
+        void updateSampledValues
+        (
+            const label sampleIndex,
+            Field<Type>& field,
+            Type& avg
+        ) const;
 
 
 public:

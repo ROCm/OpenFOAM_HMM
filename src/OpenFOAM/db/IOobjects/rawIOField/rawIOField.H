@@ -64,8 +64,21 @@ class rawIOField
         Type average_;
 
 
+    // Private Member Functions
+
+        //- Read contents and average
+        void readContents(Istream&, IOobjectOption::readOption readAverage);
+
+        //- Read if IOobject flags set. Return true if read.
+        bool readContents(IOobjectOption::readOption readAverage);
+
+
 public:
 
+    //- The underlying content type
+    typedef Field<Type> content_type;
+
+    //- Runtime type information
     TypeName("rawField");
 
 
@@ -74,8 +87,16 @@ public:
         //- Default copy construct
         rawIOField(const rawIOField&) = default;
 
-        //- Construct from IOobject
-        explicit rawIOField(const IOobject& io, const bool readAverage=false);
+        //- Construct from IOobject and specified request for reading average
+        //- (default: NO_READ)
+        explicit rawIOField
+        (
+            const IOobject& io,
+            IOobjectOption::readOption readAverage = IOobjectOption::NO_READ
+        );
+
+        //- Construct from IOobject and specified request for reading average
+        rawIOField(const IOobject& io, const bool readAverage);
 
 
     //- Destructor
@@ -84,10 +105,19 @@ public:
 
     // Member Functions
 
-        //- Has an average value
-        bool hasAverage() const noexcept
+        //- The writeData method for regIOobject write operation
+        virtual bool writeData(Ostream& os) const;
+
+        //- The field content
+        const Field<Type>& field() const noexcept
         {
-            return hasAverage_;
+            return static_cast<const Field<Type>&>(*this);
+        }
+
+        //- The field content, non-const access
+        Field<Type>& field() noexcept
+        {
+            return static_cast<Field<Type>&>(*this);
         }
 
         //- The average value (if any)
@@ -96,10 +126,25 @@ public:
             return average_;
         }
 
-        //- Set an average value
-        void setAverage(const Type& val);
+        //- Has an average value
+        bool hasAverage() const noexcept
+        {
+            return hasAverage_;
+        }
 
-        bool writeData(Ostream& os) const;
+        //- Set an average value
+        void setAverage(const Type& val)
+        {
+            hasAverage_ = true;
+            average_ = val;
+        }
+
+        //- Clear average value
+        void clearAverage()
+        {
+            hasAverage_ = false;
+            average_ = Zero;
+        }
 
 
     // Member Operators

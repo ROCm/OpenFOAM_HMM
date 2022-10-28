@@ -35,11 +35,10 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef GlobalIOList_H
-#define GlobalIOList_H
+#ifndef Foam_GlobalIOList_H
+#define Foam_GlobalIOList_H
 
-#include "List.H"
-#include "regIOobject.H"
+#include "IOList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,6 +57,10 @@ class GlobalIOList
 {
 public:
 
+    //- The underlying content type
+    typedef List<Type> content_type;
+
+    //- Runtime type information
     TypeName("List");
 
 

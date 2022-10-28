@@ -171,7 +171,7 @@ void Foam::surfaceWriters::boundaryDataWriter::serialWriteGeometry
                 iopts.db(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false  // Do not register
+                IOobject::NO_REGISTER
             )
         );
         iofld.note() = "face data";
@@ -203,7 +203,7 @@ Foam::fileName Foam::surfaceWriters::boundaryDataWriter::write()
     fileName surfaceDir = outputPath_;
 
     // Dummy Time to use as objectRegistry
-    autoPtr<Time> dummyTimePtr(Time::New(argList::envGlobalPath()));
+    refPtr<Time> timePtr(Time::New(argList::envGlobalPath()));
 
     // const meshedSurf& surf = surface();
     const meshedSurfRef& surf = adjustSurface();
@@ -221,10 +221,10 @@ Foam::fileName Foam::surfaceWriters::boundaryDataWriter::write()
             IOobject
             (
                 surfaceDir/"points",
-                *dummyTimePtr,
+                *timePtr,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false  // Do not register
+                IOobject::NO_REGISTER
             )
         );
         iopts.note() = (this->isPointData() ? "point data" : "face data");
@@ -265,7 +265,7 @@ Foam::fileName Foam::surfaceWriters::boundaryDataWriter::writeTemplate
 
 
     // Dummy Time to use as objectRegistry
-    autoPtr<Time> dummyTimePtr(Time::New(argList::envGlobalPath()));
+    refPtr<Time> timePtr(Time::New(argList::envGlobalPath()));
 
     // const meshedSurf& surf = surface();
     const meshedSurfRef& surf = adjustSurface();
@@ -284,10 +284,10 @@ Foam::fileName Foam::surfaceWriters::boundaryDataWriter::writeTemplate
                 IOobject
                 (
                     surfaceDir/"points",
-                    *dummyTimePtr,
+                    *timePtr,
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false  // Do not register
+                    IOobject::NO_REGISTER
                 )
             );
             iopts.note() = (this->isPointData() ? "point data" : "face data");
@@ -302,10 +302,10 @@ Foam::fileName Foam::surfaceWriters::boundaryDataWriter::writeTemplate
                 IOobject
                 (
                     outputFile,
-                    *dummyTimePtr,
+                    *timePtr,
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false  // Do not register
+                    IOobject::NO_REGISTER
                 )
             );
             iofld.note() = (this->isPointData() ? "point data" : "face data");

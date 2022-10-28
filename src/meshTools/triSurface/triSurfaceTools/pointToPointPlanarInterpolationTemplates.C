@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,6 +79,20 @@ Foam::pointToPointPlanarInterpolation::interpolate
         }
     }
     return tfld;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::Field<Type>>
+Foam::pointToPointPlanarInterpolation::interpolate
+(
+    const tmp<Field<Type>>& tsource
+) const
+{
+    tmp<Field<Type>> tresult = this->interpolate(tsource());
+    tsource.clear();
+
+    return tresult;
 }
 
 

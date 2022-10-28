@@ -196,6 +196,10 @@ public:
         //- Interpolate from field on source points to dest points
         template<class Type>
         tmp<Field<Type>> interpolate(const Field<Type>& sourceFld) const;
+
+        //- Interpolate from field on source points to dest points
+        template<class Type>
+        tmp<Field<Type>> interpolate(const tmp<Field<Type>>& tsource) const;
 };
 
 

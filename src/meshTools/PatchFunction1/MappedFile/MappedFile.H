@@ -64,6 +64,8 @@ SourceFiles
 
 #include "PatchFunction1.H"
 #include "Function1.H"
+#include "Pair.H"
+#include "instantList.H"
 #include "pointToPointPlanarInterpolation.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -108,23 +110,14 @@ class MappedFile
         //- List of boundaryData time directories
         mutable instantList sampleTimes_;
 
-        //- Current start index in sampleTimes
-        mutable label begSampleIndex_;
+        //- The first/second sample indices in sampleTimes
+        mutable labelPair sampleIndex_;
 
-        //- Current end index in sampleTimes
-        mutable label endSampleIndex_;
+        //- The average values at first/second sampleIndex_ (if setAverage)
+        mutable Pair<Type> sampleAverage_;
 
-        //- Current average value at begSampleIndex (if setAverage)
-        mutable Type begAverage_;
-
-        //- Current average value at endSampleIndex (if setAverage)
-        mutable Type endAverage_;
-
-        //- Current interpolated values at begSampleIndex
-        mutable Field<Type> begSampledValues_;
-
-        //- Current interpolated values at endSampleIndex
-        mutable Field<Type> endSampledValues_;
+        //- The interpolated values at first/second sampleIndex_
+        mutable Pair<Field<Type>> sampleValues_;
 
         //- Time varying offset values to interpolated data
         autoPtr<Function1<Type>> offset_;
@@ -132,11 +125,17 @@ class MappedFile
 
     // Private Member Functions
 
-        //- Update start (0) or end (1) interpolated data
-        void updateSampledValues(const int whichEnd) const;
-
         //- Find boundary data between time 't' and interpolate
         void checkTable(const scalar t) const;
+
+        //- Update field and average value using interpolation at
+        //- given instant index
+        void updateSampledValues
+        (
+            const label sampleIndex,
+            Field<Type>& field,
+            Type& avg
+        ) const;
 
 public:
 

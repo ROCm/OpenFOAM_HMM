@@ -36,9 +36,10 @@ Description
     {
         boundaryData
         {
-            header      false;
+            header      true;
             format      ascii;
             compression false;
+            normal      false;
         }
     }
     \endverbatim
