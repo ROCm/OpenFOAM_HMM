@@ -49,8 +49,46 @@ Example of simulation using 8 MPI ranks
 mpirun -np 8 ./helper.sh pisoFoam -parallel
 
 Here the role of the helper.sh script is to assign a GPU to each MPI rank.
-
+make sure you set 
+chmod +x  helper.sh
 ```
+
+
+profiling with rocprof
+1. make sure to uncomment the following line in the helper.sh file
+    #eval "rocprof -d ${outdir} -o ${outdir}/${outfile}  $*" 
+
+2. execute the code using :
+   mpirun -np 8 ./helper.sh --roctx-trace --hsa-trace  pisoFoam -parallel
+   
+3. at the end of the execution you will see a directory created for each MPI rank
+   time lines of execution are saved in *json file inside each directory
+   you can visualize time line corrponding to each MPI rank separately using 
+   for example   https://ui.perfetto.dev/
+   it is recomended to 
+   gzip *json file and load the compressed file into Perfetto.  Perfetto will gunzip it automatically.
+   
+ 4.It is possible to merge the output from rocprof tracing from all MPI ranks into a single merged output
+   to do so :
+   create a new directory , for example   "mkdir MERGE", then execute the following command:
+   
+   /global/software/rocm-afar001-732/libexec/rocprofiler/merge_traces.sh -o MERGED <list-of-files>
+   
+   for <the-of-files>  you can list space separated list of all the files you want to merge , or you can use 
+   something like:
+   
+   /global/software/rocm-afar001-732/libexec/rocprofiler/merge_traces.sh -o MERGED openfoam.*.12*
+    
+   if you want to execute without profiling - do not forget to comment  the following line in the helper.sh 
+   
+    eval "rocprof -d ${outdir} -o ${outdir}/${outfile}  $*"
+   
+   ```
+   
+   
+    
+
+
 
 
 @author	: Suyash Tandon, Leopold Grinberg<br>
