@@ -729,11 +729,21 @@ void Foam::functionObjects::propellerInfo::writeAxialWake
 }
 
 
-void Foam::functionObjects::propellerInfo::writeWakeFields(const scalar URef)
+void Foam::functionObjects::propellerInfo::writeWakeFields(const scalar URef0)
 {
     if (!writeWakeFields_)
     {
         return;
+    }
+
+    scalar URef = URef0;
+    if (mag(URef) < ROOTSMALL)
+    {
+        WarningInFunction
+            << "Magnitude of reference velocity should be greater than zero"
+            << endl;
+
+        URef = ROOTVSMALL;
     }
 
     // Normalised velocity
