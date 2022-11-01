@@ -142,10 +142,10 @@ public:
         // Editing
 
             //- Add to front of dictionary
-            void prepend(const word& keyword, T* ptr);
+            void push_front(const word& keyword, T* ptr);
 
             //- Add to back of dictionary
-            void append(const word& keyword, T* ptr);
+            void push_back(const word& keyword, T* ptr);
 
             //- Remove and return entry specified by keyword.
             //  Return nullptr if the keyword was not found.
@@ -205,9 +205,24 @@ public:
         }
 
         //- Add to front of dictionary
+        //FOAM_DEPRECATED_FOR(2022-10, "push_front()")
         void insert(const word& keyword, T* ptr)
         {
-            this->prepend(keyword, ptr);
+            this->push_front(keyword, ptr);
+        }
+
+        //- Add to front of dictionary
+        //FOAM_DEPRECATED_FOR(2022-10, "push_front()")
+        void prepend(const word& keyword, T* ptr)
+        {
+            this->push_front(keyword, ptr);
+        }
+
+        //- Add to back of dictionary
+        //FOAM_DEPRECATED_FOR(2022-10, "push_back()")
+        void append(const word& keyword, T* ptr)
+        {
+            this->push_back(keyword, ptr);
         }
 };
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -152,15 +152,15 @@ int main(int argc, char *argv[])
     Info<< " => " << flatOutput(myList) << nl;
 
     {
-        myList.swapUp(myList.DLListBase::first());
-        myList.swapUp(myList.DLListBase::last());
+        myList.swapUp(myList.DLListBase::front());
+        myList.swapUp(myList.DLListBase::back());
 
         Info<< nl << "swapUp => " << flatOutput(myList) << nl;
     }
 
     {
-        myList.swapDown(myList.DLListBase::first());
-        myList.swapDown(myList.DLListBase::last());
+        myList.swapDown(myList.DLListBase::front());
+        myList.swapDown(myList.DLListBase::back());
 
         Info<< nl << "swapDown => " << flatOutput(myList) << nl;
     }

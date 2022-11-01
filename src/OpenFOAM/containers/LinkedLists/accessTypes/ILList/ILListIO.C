@@ -60,7 +60,7 @@ void Foam::ILList<LListBase, T>::readIstream(Istream& is, const INew& inew)
                 for (label i=0; i<len; ++i)
                 {
                     T* p = inew(is).ptr();
-                    this->append(p);
+                    this->push_back(p);
 
                     is.fatalCheck
                     (
@@ -72,7 +72,7 @@ void Foam::ILList<LListBase, T>::readIstream(Istream& is, const INew& inew)
             else   // BEGIN_BLOCK
             {
                 T* p = inew(is).ptr();
-                this->append(p);
+                this->push_back(p);
 
                 is.fatalCheck
                 (
@@ -82,7 +82,7 @@ void Foam::ILList<LListBase, T>::readIstream(Istream& is, const INew& inew)
 
                 for (label i=1; i<len; ++i)
                 {
-                    this->append(new T(*p));  // Copy construct
+                    this->push_back(new T(*p));  // Copy construct
                 }
             }
         }
@@ -100,7 +100,7 @@ void Foam::ILList<LListBase, T>::readIstream(Istream& is, const INew& inew)
             is.putBack(tok);
 
             T* p = inew(is).ptr();
-            this->append(p);
+            this->push_back(p);
 
             is >> tok;
             is.fatalCheck(FUNCTION_NAME);

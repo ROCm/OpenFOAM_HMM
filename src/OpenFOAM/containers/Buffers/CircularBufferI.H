@@ -263,7 +263,7 @@ inline bool Foam::CircularBuffer<T>::found(const T& val, label pos) const
 
 
 template<class T>
-inline T& Foam::CircularBuffer<T>::first()
+inline T& Foam::CircularBuffer<T>::front()
 {
     if (empty())
     {
@@ -275,7 +275,7 @@ inline T& Foam::CircularBuffer<T>::first()
 
 
 template<class T>
-inline const T& Foam::CircularBuffer<T>::first() const
+inline const T& Foam::CircularBuffer<T>::front() const
 {
     if (empty())
     {
@@ -287,7 +287,7 @@ inline const T& Foam::CircularBuffer<T>::first() const
 
 
 template<class T>
-inline T& Foam::CircularBuffer<T>::last()
+inline T& Foam::CircularBuffer<T>::back()
 {
     if (empty())
     {
@@ -299,7 +299,7 @@ inline T& Foam::CircularBuffer<T>::last()
 
 
 template<class T>
-inline const T& Foam::CircularBuffer<T>::last() const
+inline const T& Foam::CircularBuffer<T>::back() const
 {
     if (empty())
     {
@@ -393,7 +393,7 @@ inline void Foam::CircularBuffer<T>::pop_back(label n)
 
 
 template<class T>
-inline Foam::label Foam::CircularBuffer<T>::appendUniq(const T& val)
+inline Foam::label Foam::CircularBuffer<T>::push_uniq(const T& val)
 {
     if (this->found(val))
     {
@@ -408,7 +408,7 @@ inline Foam::label Foam::CircularBuffer<T>::appendUniq(const T& val)
 
 
 template<class T>
-inline void Foam::CircularBuffer<T>::append(const UList<T>& rhs)
+inline void Foam::CircularBuffer<T>::push_back(const UList<T>& rhs)
 {
     const label len = rhs.size();
 
@@ -429,7 +429,7 @@ inline void Foam::CircularBuffer<T>::append(const UList<T>& rhs)
 
 template<class T>
 template<class Addr>
-inline void Foam::CircularBuffer<T>::append
+inline void Foam::CircularBuffer<T>::push_back
 (
     const IndirectListBase<T, Addr>& rhs
 )

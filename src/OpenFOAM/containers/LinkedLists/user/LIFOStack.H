@@ -66,25 +66,25 @@ public:
         //- Const reference to the top element
         const T& top() const
         {
-            return this->first();
+            return this->front();
         }
 
         //- Const reference to the bottom element
         const T& bottom() const
         {
-            return this->last();
+            return this->back();
         }
 
         //- Push an element onto the front of the stack
         void push(const T& elem)
         {
-            this->prepend(elem);
+            this->push_front(elem);
         }
 
         //- Move an element onto the front of the stack
         void push(T&& elem)
         {
-            this->prepend(std::move(elem));
+            this->push_front(std::move(elem));
         }
 
         //- Pop the top element off the stack

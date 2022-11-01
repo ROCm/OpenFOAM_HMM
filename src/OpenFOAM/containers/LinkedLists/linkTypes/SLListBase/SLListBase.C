@@ -31,7 +31,7 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::SLListBase::prepend(SLListBase::link* item)
+void Foam::SLListBase::push_front(SLListBase::link* item)
 {
     if (!item)
     {
@@ -53,7 +53,7 @@ void Foam::SLListBase::prepend(SLListBase::link* item)
 }
 
 
-void Foam::SLListBase::append(SLListBase::link* item)
+void Foam::SLListBase::push_back(SLListBase::link* item)
 {
     if (!item)
     {
@@ -76,14 +76,16 @@ void Foam::SLListBase::append(SLListBase::link* item)
 
 Foam::SLListBase::link* Foam::SLListBase::removeHead()
 {
-    --size_;
-
     if (last_ == nullptr)
     {
         FatalErrorInFunction
             << "remove from empty list"
             << abort(FatalError);
+
+        // return nullptr;
     }
+
+    --size_;
 
     SLListBase::link *ret = last_->next_;
 
@@ -96,6 +98,7 @@ Foam::SLListBase::link* Foam::SLListBase::removeHead()
         last_->next_ = ret->next_;
     }
 
+    ret->deregister();
     return ret;
 }
 
@@ -125,6 +128,7 @@ Foam::SLListBase::link* Foam::SLListBase::remove(SLListBase::link* item)
                 last_ = prev;
             }
 
+            item->deregister();
             return item;
         }
 
