@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +32,7 @@ Description
 
 #include "enrichedPatch.H"
 #include "boolList.H"
+#include "CircularBuffer.H"
 #include "DynamicList.H"
 #include "labelPair.H"
 #include "primitiveMesh.H"
@@ -101,6 +102,9 @@ void Foam::enrichedPatch::calcCutFaces() const
     edgeHashSet edgesUsedTwice(pp.size()*primitiveMesh::edgesPerPoint_);
 
 
+    DynamicList<bool> usedFaceEdges(256);
+    CircularBuffer<edge> edgeSeeds(256);
+
     forAll(lf, facei)
     {
         const face& curLocalFace = lf[facei];
@@ -141,25 +145,22 @@ void Foam::enrichedPatch::calcCutFaces() const
         // internal to the current face if used only once.
 
         // Track the edge usage to avoid duplicate faces and reset it to unused
-        boolList usedFaceEdges(curLocalFace.size(), false);
+        usedFaceEdges.resize_nocopy(curLocalFace.size());
+        usedFaceEdges = false;
 
-        SLList<edge> edgeSeeds;
-
-        // Insert the edges of current face into the seed list.
-        edgeList cfe = curLocalFace.edges();
-        for (const edge& e : cfe)
-        {
-            edgeSeeds.append(e);
-        }
+        // Add edges of current face into the seed list.
+        edgeSeeds.clear();
+        edgeSeeds.push_back(curLocalFace.edges());
 
         // Grab face normal
         const vector normal = curLocalFace.unitNormal(lp);
 
-        while (edgeSeeds.size())
+        while (!edgeSeeds.empty())
         {
             // Pout<< "edgeSeeds.size(): " << edgeSeeds.size() << endl;
 
-            const edge curEdge = edgeSeeds.removeHead();
+            const edge curEdge = edgeSeeds.front();
+            edgeSeeds.pop_front();
 
             // Locate the edge in current face
             const label curEdgeWhich = curLocalFace.which(curEdge.start());
@@ -407,7 +408,7 @@ void Foam::enrichedPatch::calcCutFaces() const
                             //     << curCutFaceEdge
                             //     << endl;
 
-                            edgeSeeds.append(curCutFaceEdge.reverseEdge());
+                            edgeSeeds.push_back(curCutFaceEdge.reverseEdge());
                         }
                     }
 

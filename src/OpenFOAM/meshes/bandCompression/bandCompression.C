@@ -99,7 +99,7 @@ Foam::labelList cuthill_mckee_algorithm
 
         // Starting from currCelli - walk breadth-first
 
-        queuedCells.append(currCelli);
+        queuedCells.push_back(currCelli);
 
         // Loop through queuedCells list. Add the first cell into the
         // cell order if it has not already been visited and ask for its
@@ -109,7 +109,7 @@ Foam::labelList cuthill_mckee_algorithm
         while (!queuedCells.empty())
         {
             // Process as FIFO
-            currCelli = queuedCells.first();
+            currCelli = queuedCells.front();
             queuedCells.pop_front();
 
             if (unvisited.test(currCelli))
@@ -151,7 +151,7 @@ Foam::labelList cuthill_mckee_algorithm
                 // 3. Add to FIFO in sorted order
                 for (const label nbrIdx : nbrOrder)
                 {
-                    queuedCells.append(nbrCells[nbrIdx]);
+                    queuedCells.push_back(nbrCells[nbrIdx]);
                 }
             }
         }
@@ -240,7 +240,7 @@ Foam::labelList Foam::meshTools::bandCompression
 
         // Starting from currCellii - walk breadth-first
 
-        queuedCells.append(currCelli);
+        queuedCells.push_back(currCelli);
 
         // loop through the nextCell list. Add the first cell into the
         // cell order if it has not already been visited and ask for its
@@ -255,7 +255,7 @@ Foam::labelList Foam::meshTools::bandCompression
         while (!queuedCells.empty())
         {
             // Process as FIFO
-            currCelli = queuedCells.first();
+            currCelli = queuedCells.front();
             queuedCells.pop_front();
 
             if (unvisited.test(currCelli))
@@ -298,7 +298,7 @@ Foam::labelList Foam::meshTools::bandCompression
                 // 3. Add to FIFO in sorted order
                 for (const label nbrIdx : nbrOrder)
                 {
-                    queuedCells.append(nbrCells[nbrIdx]);
+                    queuedCells.push_back(nbrCells[nbrIdx]);
                 }
             }
         }

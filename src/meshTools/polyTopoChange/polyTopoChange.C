@@ -649,7 +649,7 @@ Foam::label Foam::polyTopoChange::getCellOrder
 
         // Starting from currCelli - walk breadth-first
 
-        queuedCells.append(currCelli);
+        queuedCells.push_back(currCelli);
 
         // Loop through queuedCells list. Add the first cell into the
         // cell order if it has not already been visited and ask for its
@@ -659,7 +659,7 @@ Foam::label Foam::polyTopoChange::getCellOrder
         while (!queuedCells.empty())
         {
             // Process as FIFO
-            currCelli = queuedCells.first();
+            currCelli = queuedCells.front();
             queuedCells.pop_front();
 
             if (unvisited.test(currCelli))
@@ -701,7 +701,7 @@ Foam::label Foam::polyTopoChange::getCellOrder
                 // 3. Add to FIFO in sorted order
                 for (const label nbrIdx : nbrOrder)
                 {
-                    queuedCells.append(nbrCells[nbrIdx]);
+                    queuedCells.push_back(nbrCells[nbrIdx]);
                 }
             }
         }
