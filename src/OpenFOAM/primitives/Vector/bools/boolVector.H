@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -112,17 +112,17 @@ public:
         //- True if all components are set
         //
         //  \note Method name compatibility with bitSet
-        inline bool all() const;
+        inline bool all() const noexcept;
 
         //- True if any components are set
         //
         //  \note Method name compatibility with bitSet
-        inline bool any() const;
+        inline bool any() const noexcept;
 
         //- True if no components are set
         //
         //  \note Method name compatibility with bitSet
-        inline bool none() const;
+        inline bool none() const noexcept;
 
         //- Count number of items set.
         //  \param on can be set to false to count the number of unset bits
@@ -135,22 +135,22 @@ public:
     // Component Access
 
         //- The x component
-        bool x() const { return operator[](boolVector::X); }
+        bool x() const noexcept { return get<0>(); }
 
         //- The y component
-        bool y() const { return operator[](boolVector::Y); }
+        bool y() const noexcept { return get<1>(); }
 
         //- The z component
-        bool z() const { return operator[](boolVector::Z); }
+        bool z() const noexcept { return get<2>(); }
 
         //- The x component
-        bool& x() { return operator[](boolVector::X); }
+        bool& x() noexcept { return get<0>(); }
 
         //- The y component
-        bool& y() { return operator[](boolVector::Y); }
+        bool& y() noexcept { return get<1>(); }
 
         //- The z component
-        bool& z() { return operator[](boolVector::Z); }
+        bool& z() noexcept { return get<2>(); }
 
 
     // Edit

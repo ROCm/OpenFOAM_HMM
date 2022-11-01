@@ -204,6 +204,24 @@ inline std::streamsize Foam::FixedList<T, N>::size_bytes() noexcept
 
 
 template<class T, unsigned N>
+template<unsigned Index>
+inline T& Foam::FixedList<T, N>::get() noexcept
+{
+    static_assert(Index < N, "Address outside FixedList range");
+    return v_[Index];
+}
+
+
+template<class T, unsigned N>
+template<unsigned Index>
+inline const T& Foam::FixedList<T, N>::get() const noexcept
+{
+    static_assert(Index < N, "Address outside FixedList range");
+    return v_[Index];
+}
+
+
+template<class T, unsigned N>
 inline T& Foam::FixedList<T, N>::front() noexcept
 {
     return v_[0];

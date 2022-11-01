@@ -39,13 +39,7 @@ Type Foam::triFace::average
     // a triangle, do a direct calculation
     return
     (
-        (1.0/3.0)
-      *
-        (
-            fld[operator[](0)]
-          + fld[operator[](1)]
-          + fld[operator[](2)]
-        )
+        (1.0/3.0) * (fld[a()] + fld[b()] + fld[c()])
     );
 }
 

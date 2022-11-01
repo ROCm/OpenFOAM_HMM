@@ -189,6 +189,12 @@ int main(int argc, char *argv[])
             << " hash:" << FixedList<label, 4>::hasher()(list1) << nl
             << " hash:" << Hash<FixedList<label, 4>>()(list1) << nl;
 
+        Info<< "get<0>: " << list1.get<0>() << nl;
+        Info<< "get<1>: " << list1.get<1>() << nl;
+        Info<< "get<2>: " << list1.get<2>() << nl;
+        Info<< "get<3>: " << list1.get<3>() << nl;
+// Will not compile:  Info<< "get<4>: " << list1.get<4>() << nl;
+
         label a[4] = {0, 1, 2, 3};
         FixedList<label, 4> list2(a);
 

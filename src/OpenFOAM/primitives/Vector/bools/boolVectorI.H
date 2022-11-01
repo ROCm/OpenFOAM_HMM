@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,8 +45,6 @@ inline Foam::boolVector::boolVector
     const bool vy,
     const bool vz
 )
-:
-    FixedList<bool, 3>()
 {
     x() = vx;
     y() = vy;
@@ -62,27 +60,19 @@ inline Foam::boolVector::boolVector(Istream& is)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline bool Foam::boolVector::all() const
+inline bool Foam::boolVector::all() const noexcept
 {
-    for (const bool val : *this)
-    {
-        if (!val) return false;
-    }
-    return true;
+    return (x() && y() && z());
 }
 
 
-inline bool Foam::boolVector::any() const
+inline bool Foam::boolVector::any() const noexcept
 {
-    for (const bool val : *this)
-    {
-        if (val) return true;
-    }
-    return false;
+    return (x() || y() || z());
 }
 
 
-inline bool Foam::boolVector::none() const
+inline bool Foam::boolVector::none() const noexcept
 {
     return !any();
 }
@@ -109,10 +99,9 @@ inline unsigned int Foam::boolVector::count(const bool on) const
 
 inline void Foam::boolVector::flip()
 {
-    for (bool& val : *this)
-    {
-        val = !val;
-    }
+    x() = !x();
+    y() = !y();
+    z() = !z();
 }
 
 

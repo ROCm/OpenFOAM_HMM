@@ -88,7 +88,7 @@ public:
         inline triFace();
 
         //- Construct from three point labels
-        inline triFace(const label p0, const label p1, const label p2);
+        inline triFace(const label p0, const label p1, const label p2) noexcept;
 
         //- Construct from an initializer list of three point labels
         inline explicit triFace(std::initializer_list<label> list);
@@ -112,41 +112,31 @@ public:
     // Access
 
         //- The first vertex
-        label a() const { return operator[](0); }
+        label a() const noexcept { return get<0>(); }
 
         //- The second vertex
-        label b() const { return operator[](1); }
+        label b() const noexcept { return get<1>(); }
 
         //- The third vertex
-        label c() const { return operator[](2); }
+        label c() const noexcept { return get<2>(); }
 
         //- The first vertex
-        label& a() { return operator[](0); }
+        label& a() noexcept { return get<0>(); }
 
         //- The second vertex
-        label& b() { return operator[](1); }
+        label& b() noexcept { return get<1>(); }
 
         //- The third vertex
-        label& c() { return operator[](2); }
-
-
-        //- The first vertex label
-        using FixedList<label, 3>::first;
-
-        //- The last (third) vertex label
-        using FixedList<label, 3>::last;
-
-        //- The second vertex label
-        label& second() { return operator[](1); }
-
-        //- The second vertex label
-        label second() const { return operator[](1); }
+        label& c() noexcept { return get<2>(); }
 
 
     // Queries
 
-        //- Return true if the vertices are unique and non-negative.
-        inline bool valid() const;
+        //- True if vertices are unique and non-negative.
+        inline bool good() const noexcept;
+
+        //- True if vertices are unique and non-negative.
+        bool valid() const noexcept { return good(); }
 
 
     // Other

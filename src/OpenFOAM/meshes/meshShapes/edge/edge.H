@@ -108,38 +108,28 @@ public:
     // Access
 
         //- The first vertex
-        label a() const { return labelPair::first(); }
+        label a() const noexcept { return labelPair::first(); }
 
         //- The second vertex
-        label b() const { return labelPair::second(); }
+        label b() const noexcept { return labelPair::second(); }
 
         //- The first vertex
-        label& a() { return labelPair::first(); }
+        label& a() noexcept { return labelPair::first(); }
 
         //- The second vertex
-        label& b() { return labelPair::second(); }
-
-
-        //- The first vertex label
-        using labelPair::first;
-
-        //- The second (last) vertex label
-        using labelPair::second;
-
-        //- The last (second) vertex label
-        using labelPair::last;
+        label& b() noexcept { return labelPair::second(); }
 
         //- The start (first) vertex label
-        label start() const { return labelPair::first(); }
+        label start() const noexcept { return labelPair::first(); }
 
         //- The end (last/second) vertex label
-        label end() const { return labelPair::second(); }
+        label end() const noexcept { return labelPair::second(); }
 
         //- The start (first) vertex label
-        label& start() { return labelPair::first(); }
+        label& start() noexcept { return labelPair::first(); }
 
-        //- The end (last/second) vertex label
-        label& end() { return labelPair::second(); }
+        //- The end (second/last) vertex label
+        label& end() noexcept { return labelPair::second(); }
 
 
         //- Return reverse edge as copy.
@@ -157,8 +147,11 @@ public:
         //  No special handling of negative point labels.
         inline label maxVertex() const;
 
-        //- Return true if the vertices are unique and non-negative.
-        inline bool valid() const;
+        //- True if the vertices are unique and non-negative.
+        inline bool good() const noexcept;
+
+        //- True if the vertices are unique and non-negative.
+        bool valid() const noexcept { return good(); }
 
         //- Return true if point label is found in edge.
         //  Always false for a negative label.

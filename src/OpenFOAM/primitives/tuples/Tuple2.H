@@ -117,16 +117,16 @@ public:
 
     // Member Functions
 
-        //- Return first
+        //- Access the first element
         const T1& first() const noexcept { return f_; }
 
-        //- Return first
+        //- Access the first element
         T1& first() noexcept { return f_; }
 
-        //- Return second
+        //- Access the second element
         const T2& second() const noexcept { return s_; }
 
-        //- Return second
+        //- Access the second element
         T2& second() noexcept { return s_; }
 };
 

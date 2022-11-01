@@ -39,17 +39,17 @@ inline Foam::triPoints::triPoints
     const point& p2
 )
 {
-    operator[](0) = p0;
-    operator[](1) = p1;
-    operator[](2) = p2;
+    a() = p0;
+    b() = p1;
+    c() = p2;
 }
 
 
 inline Foam::triPoints::triPoints(const triPointRef& pts)
 {
-    operator[](0) = pts.a();
-    operator[](1) = pts.b();
-    operator[](2) = pts.c();
+    a() = pts.a();
+    b() = pts.b();
+    c() = pts.c();
 }
 
 
@@ -89,9 +89,9 @@ inline Foam::triangle<Point, PointRef>::triangle
     const FixedList<Point, 3>& pts
 )
 :
-    a_(pts[0]),
-    b_(pts[1]),
-    c_(pts[2])
+    a_(pts.template get<0>()),
+    b_(pts.template get<1>()),
+    c_(pts.template get<2>())
 {}
 
 
@@ -102,9 +102,9 @@ inline Foam::triangle<Point, PointRef>::triangle
     const FixedList<label, 3>& indices
 )
 :
-    a_(points[indices[0]]),
-    b_(points[indices[1]]),
-    c_(points[indices[2]])
+    a_(points[indices.template get<0>()]),
+    b_(points[indices.template get<1>()]),
+    c_(points[indices.template get<2>()])
 {}
 
 
@@ -220,6 +220,43 @@ inline Foam::Pair<Point> Foam::triangle<Point, PointRef>::box() const
 inline Foam::Pair<Foam::point> Foam::triPoints::box() const
 {
     return triPointRef::box(a(), b(), c());
+}
+
+
+template<class Point, class PointRef>
+inline Point Foam::triangle<Point, PointRef>::vecA() const
+{
+    return Point(c_ - b_);
+}
+
+template<class Point, class PointRef>
+inline Point Foam::triangle<Point, PointRef>::vecB() const
+{
+    return Point(a_ - c_);
+}
+
+template<class Point, class PointRef>
+inline Point Foam::triangle<Point, PointRef>::vecC() const
+{
+    return Point(b_ - a_);
+}
+
+
+inline Foam::vector Foam::triPoints::vecA() const
+{
+    return vector(c() - b());
+}
+
+
+inline Foam::vector Foam::triPoints::vecB() const
+{
+    return vector(a() - c());
+}
+
+
+inline Foam::vector Foam::triPoints::vecC() const
+{
+    return vector(b() - a());
 }
 
 

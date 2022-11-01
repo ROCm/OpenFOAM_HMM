@@ -216,6 +216,22 @@ public:
         //  \note Only meaningful for contiguous data
         inline char* data_bytes() noexcept;
 
+        //- Number of contiguous bytes for the list data,
+        //  \note Only meaningful for contiguous data
+        inline static std::streamsize size_bytes() noexcept;
+
+        //- Number of contiguous bytes for the list data,
+        //- runtime FatalError if type is not contiguous
+        static std::streamsize byteSize();
+
+        //- Element access using compile-time indexing
+        template<unsigned Index>
+        inline T& get() noexcept;
+
+        //- Element access using compile-time indexing
+        template<unsigned Index>
+        inline const T& get() const noexcept;
+
         //- Access first element of the list, position [0]
         inline T& front() noexcept;
 
@@ -227,14 +243,6 @@ public:
 
         //- Access last element of the list, position [N-1]
         inline const T& back() const noexcept;
-
-        //- Number of contiguous bytes for the list data,
-        //  \note Only meaningful for contiguous data
-        inline static std::streamsize size_bytes() noexcept;
-
-        //- Number of contiguous bytes for the list data,
-        //- runtime FatalError if type is not contiguous
-        static std::streamsize byteSize();
 
         //- Return the forward circular index, i.e. next index
         //- which returns to the first at the end of the list

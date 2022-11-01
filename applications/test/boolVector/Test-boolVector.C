@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,7 +43,7 @@ void print(const boolVector& v)
         << " any:" << Switch::name(v.any())
         << " all:" << Switch::name(v.all())
         << " none:" << Switch::name(v.none())
-        << " count:" << v.count() << nl;
+        << " on:" << v.count() << " off:" << v.count(false) << nl;
 }
 
 
@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
     Info<< nl;
 
     {
-        boolVector vec{1, 0, 1};
+        boolVector vec(1, 0, 1);
         print(vec);
 
         vec.flip();
