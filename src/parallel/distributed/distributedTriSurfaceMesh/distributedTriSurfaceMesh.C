@@ -782,8 +782,8 @@ void Foam::distributedTriSurfaceMesh::findLine
                     // Nearest intersection
                     if
                     (
-                        magSqr(allInfo.hitPoint()-start[segmenti])
-                      < magSqr(hitInfo.hitPoint()-start[segmenti])
+                        start[segmenti].distSqr(allInfo.point())
+                      < start[segmenti].distSqr(hitInfo.point())
                     )
                     {
                         hitInfo = allInfo;
@@ -1295,7 +1295,7 @@ void Foam::distributedTriSurfaceMesh::surfaceSide
             pointHit pHit =
                 f.nearestPointClassify(sample, points, nearType, nearLabel);
 
-            const point& nearestPoint(pHit.rawPoint());
+            const point& nearestPoint(pHit.point());
 
             if (nearType == triPointRef::NONE)
             {
@@ -2954,7 +2954,7 @@ const Foam::globalIndex& Foam::distributedTriSurfaceMesh::globalTris() const
 //                    if
 //                    (
 //                        surfaceClosed_
-//                    && !contains(procBb_[proci], info[i].hitPoint())
+//                    && !contains(procBb_[proci], info[i].point())
 //                    )
 //                    {
 //                        // Nearest point is not on local processor so the
@@ -3044,11 +3044,7 @@ const Foam::globalIndex& Foam::distributedTriSurfaceMesh::globalTris() const
 //                if
 //                (
 //                    surfaceClosed_
-//                && !contains
-//                    (
-//                        procBb_[Pstream::myProcNo()],
-//                        allInfo[i].hitPoint()
-//                    )
+//                && !contains(procBb_[Pstream::myProcNo()], allInfo[i].point())
 //                )
 //                {
 //                    // Nearest point is not on local processor so the
@@ -3095,8 +3091,8 @@ const Foam::globalIndex& Foam::distributedTriSurfaceMesh::globalTris() const
 //                    // Nearest intersection
 //                    if
 //                    (
-//                        magSqr(allInfo[i].hitPoint()-samples[pointi])
-//                      < magSqr(info[pointi].hitPoint()-samples[pointi])
+//                        samples[pointi].distSqr(allInfo[i].point())
+//                      < samples[pointi].distSqr(info[pointi].point())
 //                    )
 //                    {
 //                        info[pointi] = allInfo[i];
@@ -3267,7 +3263,7 @@ void Foam::distributedTriSurfaceMesh::findNearest
                 if
                 (
                     surfaceClosed_
-                && !contains(procBb_[Pstream::myProcNo()], info.hitPoint())
+                && !contains(procBb_[Pstream::myProcNo()], info.point())
                 )
                 {
                     // Nearest point is not on local processor so the
@@ -3281,7 +3277,7 @@ void Foam::distributedTriSurfaceMesh::findNearest
                 {
                     nearestAndDist& ni = nearestInfo[i];
                     ni.first() = info;
-                    ni.second() = magSqr(localPoints[i]-info.hitPoint());
+                    ni.second() = info.point().distSqr(localPoints[i]);
                 }
             }
         }
@@ -3437,7 +3433,7 @@ void Foam::distributedTriSurfaceMesh::findNearest
             if
             (
                 surfaceClosed_
-            && !contains(procBb_[Pstream::myProcNo()], info.hitPoint())
+            && !contains(procBb_[Pstream::myProcNo()], info.point())
             )
             {
                 // See above
@@ -3447,7 +3443,7 @@ void Foam::distributedTriSurfaceMesh::findNearest
             {
                 nearestAndDist& ni = localBest[i];
                 ni.first() = info;
-                ni.second() = magSqr(info.hitPoint()-localSamples[i]);
+                ni.second() = info.point().distSqr(localSamples[i]);
             }
         }
     }
@@ -3584,11 +3580,7 @@ void Foam::distributedTriSurfaceMesh::findNearest
                 if
                 (
                     surfaceClosed_
-                && !contains
-                    (
-                        procBb_[Pstream::myProcNo()],
-                        allInfo[i].hitPoint()
-                    )
+                && !contains(procBb_[Pstream::myProcNo()], allInfo[i].point())
                 )
                 {
                     // Nearest point is not on local processor so the
@@ -3628,8 +3620,8 @@ void Foam::distributedTriSurfaceMesh::findNearest
                     // Nearest intersection
                     if
                     (
-                        magSqr(allInfo[i].hitPoint()-samples[pointi])
-                      < magSqr(info[pointi].hitPoint()-samples[pointi])
+                        samples[pointi].distSqr(allInfo[i].point())
+                      < samples[pointi].distSqr(info[pointi].point())
                     )
                     {
                         info[pointi] = allInfo[i];
@@ -3760,7 +3752,7 @@ void Foam::distributedTriSurfaceMesh::findLineAll
             info[pointi].setSize(1);
             info[pointi][0] = hitInfo[pointi];
 
-            point pt = hitInfo[pointi].hitPoint() + smallVec[pointi];
+            point pt = hitInfo[pointi].point() + smallVec[pointi];
 
             if (((pt-start[pointi])&dirVec[pointi]) <= magSqrDirVec[pointi])
             {
@@ -3805,7 +3797,7 @@ void Foam::distributedTriSurfaceMesh::findLineAll
                 info[pointi].setSize(sz+1);
                 info[pointi][sz] = hitInfo[i];
 
-                point pt = hitInfo[i].hitPoint() + smallVec[pointi];
+                point pt = hitInfo[i].point() + smallVec[pointi];
 
                 // Check current coordinate along ray
                 scalar d = ((pt-start[pointi])&dirVec[pointi]);

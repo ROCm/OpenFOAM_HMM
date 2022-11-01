@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1597,14 +1597,14 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findLine
             (
                 octantBb,
                 treeVec,
-                hitInfo.rawPoint()
+                hitInfo.point()
             )
         );
 
         if (verbose)
         {
             Pout<< "iter:" << i
-                << " at current:" << hitInfo.rawPoint()
+                << " at current:" << hitInfo.point()
                 << " (perturbed:" << startPoint << ")" << endl
                 << "    node:" << nodeI
                 << " octant:" << octant
@@ -1641,7 +1641,7 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findLine
             break;
         }
 
-        if (hitFaceID == 0 || hitInfo.rawPoint() == treeEnd)
+        if (hitFaceID == 0 || hitInfo.point() == treeEnd)
         {
             // endpoint inside the tree. Return miss.
             break;
@@ -1654,7 +1654,7 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findLine
             (
                 octantBb,
                 hitFaceID,
-                hitInfo.rawPoint(),
+                hitInfo.point(),
                 false                   // push outside of octantBb
             )
         );
@@ -1663,7 +1663,7 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findLine
         {
             Pout<< "    iter:" << i
                 << " hit face:" << faceString(hitFaceID)
-                << " at:" << hitInfo.rawPoint() << nl
+                << " at:" << hitInfo.point() << nl
                 << "    node:" << nodeI
                 << " octant:" << octant
                 << " bb:" << subBbox(nodeI, octant) << nl
@@ -1694,10 +1694,10 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findLine
         if (verbose)
         {
             const treeBoundBox octantBb(subBbox(nodeI, octant));
-            Pout<< "    walked for point:" << hitInfo.rawPoint() << endl
+            Pout<< "    walked for point:" << hitInfo.point() << endl
                 << "    to neighbour node:" << nodeI
                 << " octant:" << octant
-                << " face:" << faceString(octantBb.faceBits(hitInfo.rawPoint()))
+                << " face:" << faceString(octantBb.faceBits(hitInfo.point()))
                 << " of octantBb:" << octantBb << endl
                 << endl;
         }

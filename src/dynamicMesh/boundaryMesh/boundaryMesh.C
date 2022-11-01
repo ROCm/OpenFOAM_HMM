@@ -1007,8 +1007,8 @@ Foam::labelList Foam::boundaryMesh::getNearest
                 label rightFacei = rightFaces[rightInfo.index()];
                 label leftFacei = leftFaces[leftInfo.index()];
 
-                label rightDist = mag(rightInfo.hitPoint()-ctr);
-                label leftDist = mag(leftInfo.hitPoint()-ctr);
+                label rightDist = rightInfo.point().dist(ctr);
+                label leftDist = leftInfo.point().dist(ctr);
 
                 scalar rightSign = n & ns[rightFacei];
                 scalar leftSign = n & ns[leftFacei];

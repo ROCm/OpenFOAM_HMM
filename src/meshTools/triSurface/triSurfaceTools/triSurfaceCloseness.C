@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -241,11 +241,7 @@ Foam::triSurfaceTools::writeCloseness
                 )
                 {
                     externalCloseness[fI] =
-                        mag
-                        (
-                            faceCentres[fI]
-                          - hitInfo[ownHitI + 1].hitPoint()
-                        );
+                        faceCentres[fI].dist(hitInfo[ownHitI + 1].point());
                 }
             }
             else if (ownHitI == hitInfo.size() - 1)
@@ -263,11 +259,7 @@ Foam::triSurfaceTools::writeCloseness
                 )
                 {
                     internalCloseness[fI] =
-                        mag
-                        (
-                            faceCentres[fI]
-                          - hitInfo[ownHitI - 1].hitPoint()
-                        );
+                        faceCentres[fI].dist(hitInfo[ownHitI - 1].point());
                 }
             }
             else
@@ -282,11 +274,7 @@ Foam::triSurfaceTools::writeCloseness
                 )
                 {
                     externalCloseness[fI] =
-                        mag
-                        (
-                            faceCentres[fI]
-                          - hitInfo[ownHitI + 1].hitPoint()
-                        );
+                        faceCentres[fI].dist(hitInfo[ownHitI + 1].point());
                 }
 
                 if
@@ -299,11 +287,7 @@ Foam::triSurfaceTools::writeCloseness
                 )
                 {
                     internalCloseness[fI] =
-                        mag
-                        (
-                            faceCentres[fI]
-                          - hitInfo[ownHitI - 1].hitPoint()
-                        );
+                        faceCentres[fI].dist(hitInfo[ownHitI - 1].point());
                 }
             }
         }

@@ -309,7 +309,7 @@ void Foam::surfaceIntersection::classifyHit
             // 1. Point hits point. Do nothing.
             if (debug & 2)
             {
-                Pout<< "hit-type[1] " << pHit.hitPoint() << " is surf1:"
+                Pout<< "hit-type[1] " << pHit.point() << " is surf1:"
                     << " end point of edge[" << edgeI << "] " << e1
                     << "==" << e1.line(surf1Pts)
                     << " surf2: vertex " << f2[nearLabel]
@@ -336,7 +336,7 @@ void Foam::surfaceIntersection::classifyHit
 
                 if
                 (
-                    mag(pHit.hitPoint() - nearPt)
+                    pHit.hitPoint().dist(nearPt)
                   < surf1PointTol[nearVert]
                 )
                 {
@@ -364,7 +364,7 @@ void Foam::surfaceIntersection::classifyHit
 
             if (debug & 2)
             {
-                Pout<< "hit-type[2] " << pHit.hitPoint() << " is surf1:"
+                Pout<< "hit-type[2] " << pHit.point() << " is surf1:"
                     << " from edge[" << edgeI << "] " << e1
                     << " surf2: vertex " << f2[nearLabel]
                     << " coord:" << surf2Pts[f2[nearLabel]]
@@ -443,7 +443,7 @@ void Foam::surfaceIntersection::classifyHit
 
                     if
                     (
-                        mag(pHit.hitPoint() - nearPt)
+                        pHit.hitPoint().dist(nearPt)
                       < surf1PointTol[nearVert]
                     )
                     {
@@ -477,7 +477,7 @@ void Foam::surfaceIntersection::classifyHit
 
             if (debug & 2)
             {
-                Pout<< "hit-type[3] " << pHit.hitPoint() << " is surf1:"
+                Pout<< "hit-type[3] " << pHit.point() << " is surf1:"
                     << " end point of edge[" << edgeI << "] " << e1
                     << "==" << e1.line(surf1Pts)
                     << " surf2: edge[" << edge2I << "] " << e2
@@ -572,7 +572,7 @@ void Foam::surfaceIntersection::classifyHit
 
                             if
                             (
-                                mag(pHit.hitPoint() - nearPt)
+                                pHit.hitPoint().dist(nearPt)
                               < surf1PointTol[endId]
                             )
                             {
@@ -612,7 +612,7 @@ void Foam::surfaceIntersection::classifyHit
 
             if (debug & 2)
             {
-                Pout<< "hit-type[4] " << pHit.hitPoint() << " is surf1:"
+                Pout<< "hit-type[4] " << pHit.point() << " is surf1:"
                     << " from edge[" << edgeI << "] " << e1
                     << "==" << e1.line(surf1Pts)
                     << " surf2: edge[" << edge2I << "] " << e2
@@ -714,7 +714,7 @@ void Foam::surfaceIntersection::classifyHit
 
                 if (debug & 2)
                 {
-                    Pout<< "hit-type[5] " << pHit.hitPoint()
+                    Pout<< "hit-type[5] " << pHit.point()
                         << " shifted to " << nearPt
                         << " from edge[" << edgeI << "] " << e1
                         << "==" << e1.line(surf1Pts)
@@ -738,7 +738,7 @@ void Foam::surfaceIntersection::classifyHit
             {
                 if (debug & 2)
                 {
-                    Pout<< "hit-type[5] " << pHit.hitPoint()
+                    Pout<< "hit-type[5] " << pHit.point()
                         << " from edge[" << edgeI << "] " << e1
                         << " hits inside of surf2 face[" << surf2Facei << "]"
                         << " - discarded" << endl;
@@ -750,7 +750,7 @@ void Foam::surfaceIntersection::classifyHit
             // 6. Edge pierces face. 'Normal' situation.
             if (debug & 2)
             {
-                Pout<< "hit-type[6] " << pHit.hitPoint()
+                Pout<< "hit-type[6] " << pHit.point()
                     << " from edge[" << edgeI << "] " << e1
                     << "==" << e1.line(surf1Pts)
                     << " hits surf2 face[" << surf2Facei << "]"
@@ -935,7 +935,7 @@ void Foam::surfaceIntersection::doCutEdges
 
                 if (tolerance_ > 0)
                 {
-                    if (mag(pHit.hitPoint() - ptEnd) < tolDim)
+                    if (pHit.hitPoint().dist(ptEnd) < tolDim)
                     {
                         // Near the end => done
                         doTrack = false;

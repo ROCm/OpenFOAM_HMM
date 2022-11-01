@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -88,7 +88,7 @@ label findPoint(const primitivePatch& pp, const point& nearPoint)
 
     for (const label pointi : meshPoints)
     {
-        scalar distSqr = magSqr(nearPoint - points[pointi]);
+        scalar distSqr = nearPoint.distSqr(points[pointi]);
 
         if (distSqr < minDistSqr)
         {
@@ -288,7 +288,7 @@ label findCell(const primitiveMesh& mesh, const point& nearPoint)
 
     if (celli != -1)
     {
-        scalar distToCcSqr = magSqr(nearPoint - mesh.cellCentres()[celli]);
+        scalar distToCcSqr = nearPoint.distSqr(mesh.cellCentres()[celli]);
 
         const labelList& cPoints = mesh.cellPoints()[celli];
 
@@ -297,7 +297,7 @@ label findCell(const primitiveMesh& mesh, const point& nearPoint)
 
         for (const label pointi : cPoints)
         {
-            scalar distSqr = magSqr(nearPoint - mesh.points()[pointi]);
+            scalar distSqr = nearPoint.distSqr(mesh.points()[pointi]);
 
             if (distSqr < minDistSqr)
             {

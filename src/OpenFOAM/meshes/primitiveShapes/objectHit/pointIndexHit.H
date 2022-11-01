@@ -116,6 +116,14 @@ public:
             index_(index)
         {}
 
+        //- Copy construct with different index
+        PointIndexHit(const PointIndexHit<point_type>& p, label index)
+        :
+            hit_(p.hit()),
+            point_(p.point()),
+            index_(index)
+        {}
+
         //- Construct from components
         PointIndexHit(bool success, const point_type& p, label index)
         :

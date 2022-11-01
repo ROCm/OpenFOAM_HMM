@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -110,12 +110,12 @@ void Foam::functionObjects::nearWallFields::calcAddressing()
                 label tetFacei = meshFacei;
                 label tetPti = (startInfo.index()+1) % f.size();
 
-                start = startInfo.hitPoint();
+                start = startInfo.point();
 
                 // Uncomment below to shift slightly in:
                 tetIndices tet(celli, tetFacei, tetPti);
                 start =
-                    (1.0 - 1e-6)*startInfo.hitPoint()
+                    (1.0 - 1e-6)*startInfo.point()
                   + 1e-6*tet.tet(mesh_).centre();
 
                 // Re-check that we have a valid location

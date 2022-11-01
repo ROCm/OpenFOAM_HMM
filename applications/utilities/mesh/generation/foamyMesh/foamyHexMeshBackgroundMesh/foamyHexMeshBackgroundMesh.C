@@ -353,7 +353,7 @@ tmp<scalarField> signedDistance
         forAll(volType, i)
         {
             label pointi = surfIndices[i];
-            scalar dist = mag(points[pointi] - nearest[pointi].hitPoint());
+            scalar dist = points[pointi].dist(nearest[pointi].hitPoint());
 
             volumeType vT = volType[i];
 

@@ -1119,10 +1119,7 @@ Foam::labelList Foam::backgroundMeshDecomposition::processorNearestPosition
 
         if (info.hit())
         {
-            distanceSqrToCandidate[tPI] = magSqr
-            (
-                testPoints[tPI] - info.hitPoint()
-            );
+            distanceSqrToCandidate[tPI] = info.point().distSqr(testPoints[tPI]);
         }
     }
 

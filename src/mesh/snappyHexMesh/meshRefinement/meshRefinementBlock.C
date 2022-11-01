@@ -651,8 +651,8 @@ Foam::label Foam::meshRefinement::markProximityRefinementWave
             //originNormal.clear();
             originSurface.clear();
 
-            originLocation.append(hit1[i].hitPoint());
-            originDistSqr.append(magSqr(fc-hit1[i].hitPoint()));
+            originLocation.append(hit1[i].point());
+            originDistSqr.append(hit1[i].point().distSqr(fc));
             //originNormal.append(normal1[i]);
             originSurface.append
             (
@@ -667,8 +667,8 @@ Foam::label Foam::meshRefinement::markProximityRefinementWave
             if (hit2[i].hit() && hit1[i] != hit2[i])
             {
                 const labelList& fz2 = faceZones[surface2[i]];
-                originLocation.append(hit2[i].hitPoint());
-                originDistSqr.append(magSqr(fc-hit2[i].hitPoint()));
+                originLocation.append(hit2[i].point());
+                originDistSqr.append(hit2[i].point().distSqr(fc));
                 //originNormal.append(normal2[i]);
                 originSurface.append
                 (

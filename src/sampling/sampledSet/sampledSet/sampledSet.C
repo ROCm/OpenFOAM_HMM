@@ -194,16 +194,7 @@ Foam::label Foam::sampledSet::findNearFace
 
         pointHit inter = f.nearestPoint(sample, mesh().points());
 
-        scalar dist;
-
-        if (inter.hit())
-        {
-            dist = mag(inter.hitPoint() - sample);
-        }
-        else
-        {
-            dist = mag(inter.missPoint() - sample);
-        }
+        scalar dist = inter.point().dist(sample);
 
         if (dist < smallDist)
         {

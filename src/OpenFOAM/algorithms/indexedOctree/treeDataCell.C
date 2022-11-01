@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -210,13 +210,15 @@ void Foam::treeDataCell::findNearestOp::operator()
     {
         label index = indices[i];
         label celli = shape.cellLabels()[index];
-        scalar distSqr = magSqr(sample - shape.mesh().cellCentres()[celli]);
+        const point& pt = shape.mesh().cellCentres()[celli];
+
+        scalar distSqr = sample.distSqr(pt);
 
         if (distSqr < nearestDistSqr)
         {
             nearestDistSqr = distSqr;
             minIndex = index;
-            nearestPoint = shape.mesh().cellCentres()[celli];
+            nearestPoint = pt;
         }
     }
 }
@@ -300,7 +302,7 @@ bool Foam::treeDataCell::findIntersectOp::operator()
             // since using half_ray AND zero tolerance. (note that tolerance
             // is used to look behind us)
             minDistSqr = sqr(inter.distance());
-            intersectionPoint = inter.hitPoint();
+            intersectionPoint = inter.point();
             hasMin = true;
         }
     }

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,7 +40,7 @@ inline bool Foam::externalPointEdgePoint::update
     TrackingData& td
 )
 {
-    const scalar dist2 = magSqr(pt - w2.origin());
+    const scalar dist2 = pt.distSqr(w2.origin());
 
     if (!valid(td))
     {

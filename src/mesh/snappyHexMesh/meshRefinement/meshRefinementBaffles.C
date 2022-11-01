@@ -261,9 +261,9 @@ void Foam::meshRefinement::getIntersections
         {
             if (str)
             {
-                str().writeLine(start[i], hit1[i].rawPoint());
-                str().writeLine(hit1[i].rawPoint(), hit2[i].rawPoint());
-                str().writeLine(hit2[i].rawPoint(), end[i]);
+                str().writeLine(start[i], hit1[i].point());
+                str().writeLine(hit1[i].point(), hit2[i].point());
+                str().writeLine(hit2[i].point(), end[i]);
             }
 
             // Pick up the patches
@@ -1143,13 +1143,13 @@ Foam::List<Foam::labelPair> Foam::meshRefinement::freeStandingBaffles
             (
                 hit1[i].hit()
              && hit2[i].hit()
-             && mag(hit1[i].hitPoint()-hit2[i].hitPoint()) > mergeDistance_
+             && hit1[i].point().dist(hit2[i].point()) > mergeDistance_
             )
             {
                 // Two different hits. Check angle.
                 //str.write
                 //(
-                //    linePointRef(hit1[i].hitPoint(), hit2[i].hitPoint()),
+                //    linePointRef(hit1[i].point(), hit2[i].point()),
                 //    normal1[i],
                 //    normal2[i]
                 //);

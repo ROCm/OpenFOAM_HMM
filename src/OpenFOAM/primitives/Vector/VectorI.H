@@ -80,9 +80,47 @@ inline const Foam::Vector<Cmpt>& Foam::Vector<Cmpt>::centre
 
 
 template<class Cmpt>
+inline Foam::scalar Foam::Vector<Cmpt>::magSqr() const
+{
+    return
+    (
+        Foam::magSqr(this->x())
+      + Foam::magSqr(this->y())
+      + Foam::magSqr(this->z())
+    );
+}
+
+
+template<class Cmpt>
+inline Foam::scalar Foam::Vector<Cmpt>::mag() const
+{
+    return ::sqrt(this->magSqr());
+}
+
+
+template<class Cmpt>
+inline Foam::scalar Foam::Vector<Cmpt>::distSqr(const Vector<Cmpt>& v2) const
+{
+    return
+    (
+        Foam::magSqr(v2.x() - this->x())
+      + Foam::magSqr(v2.y() - this->y())
+      + Foam::magSqr(v2.z() - this->z())
+    );
+}
+
+
+template<class Cmpt>
+inline Foam::scalar Foam::Vector<Cmpt>::dist(const Vector<Cmpt>& v2) const
+{
+    return ::sqrt(this->distSqr(v2));
+}
+
+
+template<class Cmpt>
 inline Foam::Vector<Cmpt>& Foam::Vector<Cmpt>::normalise(const scalar tol)
 {
-    const scalar s(Foam::mag(*this));
+    const scalar s = this->mag();
 
     if (s < tol)
     {
@@ -129,25 +167,6 @@ Foam::Vector<Cmpt>::cross(const Vector<Cmpt>& v2) const
         (v1.z()*v2.x() - v1.x()*v2.z()),
         (v1.x()*v2.y() - v1.y()*v2.x())
     );
-}
-
-
-template<class Cmpt>
-inline Foam::scalar Foam::Vector<Cmpt>::distSqr(const Vector<Cmpt>& v2) const
-{
-    return
-    (
-        Foam::magSqr(v2.x() - this->x())
-      + Foam::magSqr(v2.y() - this->y())
-      + Foam::magSqr(v2.z() - this->z())
-    );
-}
-
-
-template<class Cmpt>
-inline Foam::scalar Foam::Vector<Cmpt>::dist(const Vector<Cmpt>& v2) const
-{
-    return ::sqrt(this->distSqr(v2));
 }
 
 

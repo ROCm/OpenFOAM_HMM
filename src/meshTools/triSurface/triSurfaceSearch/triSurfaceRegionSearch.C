@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -240,8 +240,8 @@ void Foam::triSurfaceRegionSearch::findNearest
                         !info[i].hit()
                      ||
                         (
-                            magSqr(currentRegionHit.hitPoint() - samples[i])
-                          < magSqr(info[i].hitPoint() - samples[i])
+                            samples[i].distSqr(currentRegionHit.point())
+                          < samples[i].distSqr(info[i].point())
                         )
                     )
                 )

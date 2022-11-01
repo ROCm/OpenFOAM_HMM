@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -125,9 +125,7 @@ void Foam::surfaceSlipDisplacementPointPatchVectorField::calcProjection
             }
             else if (nearest[i].hit())
             {
-                displacement[i] =
-                    nearest[i].hitPoint()
-                  - points0[meshPoints[i]];
+                displacement[i] = nearest[i].point() - points0[meshPoints[i]];
             }
             else
             {
@@ -216,9 +214,7 @@ void Foam::surfaceSlipDisplacementPointPatchVectorField::calcProjection
             else if (nearest[i].hit())
             {
                 // Found nearest.
-                displacement[i] =
-                    nearest[i].hitPoint()
-                  - points0[meshPoints[i]];
+                displacement[i] = nearest[i].point() - points0[meshPoints[i]];
             }
             else
             {
@@ -226,24 +222,21 @@ void Foam::surfaceSlipDisplacementPointPatchVectorField::calcProjection
 
                 if (rightHit[i].hit())
                 {
-                    if (leftHit[i].hit())
-                    {
-                        if
+                    if
+                    (
+                        !leftHit[i].hit()
+                     ||
                         (
-                            magSqr(rightHit[i].hitPoint()-start[i])
-                          < magSqr(leftHit[i].hitPoint()-start[i])
+                            start[i].distSqr(rightHit[i].point())
+                          < start[i].distSqr(leftHit[i].point())
                         )
-                        {
-                            interPt = rightHit[i];
-                        }
-                        else
-                        {
-                            interPt = leftHit[i];
-                        }
+                    )
+                    {
+                        interPt = rightHit[i];
                     }
                     else
                     {
-                        interPt = rightHit[i];
+                        interPt = leftHit[i];
                     }
                 }
                 else
@@ -259,9 +252,9 @@ void Foam::surfaceSlipDisplacementPointPatchVectorField::calcProjection
                 {
                     if (wedgePlane_ >= 0 && wedgePlane_ < vector::nComponents)
                     {
-                        interPt.rawPoint()[wedgePlane_] += offset[i];
+                        interPt.point()[wedgePlane_] += offset[i];
                     }
-                    displacement[i] = interPt.rawPoint()-points0[meshPoints[i]];
+                    displacement[i] = interPt.point() - points0[meshPoints[i]];
                 }
                 else
                 {

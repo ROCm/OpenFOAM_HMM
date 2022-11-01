@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -208,7 +208,7 @@ Foam::volumeType Foam::treeDataFace::getVolumeType
     const point& fc = mesh_.faceCentres()[facei];
 
     pointHit curHit = f.nearestPoint(sample, points);
-    const point& curPt = curHit.rawPoint();
+    const point& curPt = curHit.point();
 
     //
     // 1] Check whether sample is above face
@@ -306,7 +306,7 @@ Foam::volumeType Foam::treeDataFace::getVolumeType
             ).nearestDist(sample);
 
 
-        if ((magSqr(edgeHit.rawPoint() - curPt)/typDimSqr) < tolSqr)
+        if ((edgeHit.point().distSqr(curPt)/typDimSqr) < tolSqr)
         {
             // Face intersection point lies on edge e
 
@@ -326,7 +326,7 @@ Foam::volumeType Foam::treeDataFace::getVolumeType
 
             if (debug & 2)
             {
-                Pout<< " -> real edge hit point:" << edgeHit.rawPoint()
+                Pout<< " -> real edge hit point:" << edgeHit.point()
                     << " comparing to edge normal:" << edgeNormal
                     << endl;
             }
@@ -354,7 +354,7 @@ Foam::volumeType Foam::treeDataFace::getVolumeType
             fc
         ).nearestDist(sample);
 
-        if ((magSqr(edgeHit.rawPoint() - curPt)/typDimSqr) < tolSqr)
+        if ((edgeHit.point().distSqr(curPt)/typDimSqr) < tolSqr)
         {
             // Face intersection point lies on edge between two face triangles
 
@@ -368,7 +368,7 @@ Foam::volumeType Foam::treeDataFace::getVolumeType
 
             if (debug & 2)
             {
-                Pout<< " -> internal edge hit point:" << edgeHit.rawPoint()
+                Pout<< " -> internal edge hit point:" << edgeHit.point()
                     << " comparing to edge normal "
                     << 0.5*(nLeft + nRight)
                     << endl;
@@ -488,7 +488,7 @@ void Foam::treeDataFace::findNearestOp::operator()
         {
             nearestDistSqr = distSqr;
             minIndex = index;
-            nearestPoint = nearHit.rawPoint();
+            nearestPoint = nearHit.point();
         }
     }
 }
@@ -548,7 +548,7 @@ bool Foam::treeDataFace::findIntersectOp::operator()
     {
         // Note: no extra test on whether intersection is in front of us
         // since using half_ray
-        intersectionPoint = inter.hitPoint();
+        intersectionPoint = inter.point();
         return true;
     }
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -157,7 +157,7 @@ public:
         //- Calculate nearest point on surface for single searchPoint. Returns
         //  in pointIndexHit:
         //  - hit()      : whether nearest point found within bounding box
-        //  - hitPoint() : coordinate of nearest point
+        //  - point()    : coordinate of nearest point
         //  - index()    : surface triangle label
         pointIndexHit nearest(const point& pt, const vector& span) const;
 

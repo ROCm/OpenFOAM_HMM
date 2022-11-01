@@ -88,7 +88,7 @@ Foam::functionObjects::wallBoundedStreamLine::findNearestTet
                 const scalar d2 = nearInfo.distance();
                 if (d2 < minDistSqr)
                 {
-                    nearestPt = nearInfo.rawPoint();
+                    nearestPt = nearInfo.point();
                     minDistSqr = d2;
                     minFacei = facei;
                     minTetPti = i-1;

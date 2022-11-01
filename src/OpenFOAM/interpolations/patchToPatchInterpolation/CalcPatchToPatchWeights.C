@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -208,11 +208,7 @@ void PatchToPatchInterpolation<FromPatch, ToPatch>::calcPointAddressing() const
                 pointWeights[pointi][masterPointi] =
                     1.0/
                     (
-                        mag
-                        (
-                            hitFacePoints[masterPointi]
-                          - hitPoint
-                        )
+                        hitPoint.dist(hitFacePoints[masterPointi])
                       + VSMALL
                     );
             }
@@ -300,7 +296,7 @@ void PatchToPatchInterpolation<FromPatch, ToPatch>::calcFaceAddressing() const
             const labelList& neighbours =
                 fromPatchFaceFaces[faceAddressing[facei]];
 
-            scalar m = mag(curHit.hitPoint() - hitFaceCentre);
+            scalar m = curHit.hitPoint().dist(hitFaceCentre);
 
             if
             (
@@ -326,10 +322,9 @@ void PatchToPatchInterpolation<FromPatch, ToPatch>::calcFaceAddressing() const
                     faceWeights[facei][nI + 1] =
                     1.0/
                     (
-                        mag
+                        curHit.hitPoint().dist
                         (
                             fromPatchFaceCentres[neighbours[nI]]
-                          - curHit.hitPoint()
                         )
                       + VSMALL
                     );

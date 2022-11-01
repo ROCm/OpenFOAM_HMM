@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -597,7 +597,7 @@ void Foam::meshRefinement::markFacesOnProblemCells
         {
             if (hitInfo[i].hit())
             {
-                newPoints[meshPoints[i]] = hitInfo[i].hitPoint();
+                newPoints[meshPoints[i]] = hitInfo[i].point();
             }
         }
 

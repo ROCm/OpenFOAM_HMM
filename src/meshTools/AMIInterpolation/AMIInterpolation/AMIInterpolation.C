@@ -135,7 +135,7 @@ void Foam::AMIInterpolation::projectPointsToSurface
 
         if (pi.hit())
         {
-            pts[i] = pi.hitPoint();
+            pts[i] = pi.point();
         }
         else
         {
@@ -1062,7 +1062,7 @@ const
 
         if (ray.hit())
         {
-            tgtPoint = ray.rawPoint();
+            tgtPoint = ray.point();
             return srcFacei;
         }
         else if (ray.distance() < nearest.distance())
@@ -1075,7 +1075,7 @@ const
 
     if (nearest.hit() || nearest.eligibleMiss())
     {
-        tgtPoint = nearest.rawPoint();
+        tgtPoint = nearest.point();
         return nearestFacei;
     }
 
@@ -1111,7 +1111,7 @@ const
 
         if (ray.hit())
         {
-            srcPoint = ray.rawPoint();
+            srcPoint = ray.point();
             return tgtFacei;
         }
         const pointHit near = f.nearestPoint(srcPoint, tgtPoints);
@@ -1124,8 +1124,7 @@ const
     }
     if (nearest.hit() || nearest.eligibleMiss())
     {
-
-        srcPoint = nearest.rawPoint();
+        srcPoint = nearest.point();
         return nearestFacei;
     }
 

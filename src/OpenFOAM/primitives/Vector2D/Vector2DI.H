@@ -63,9 +63,46 @@ inline Foam::Vector2D<Cmpt>::Vector2D(Istream& is)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Cmpt>
+inline Foam::scalar Foam::Vector2D<Cmpt>::magSqr() const
+{
+    return
+    (
+        Foam::magSqr(this->x())
+      + Foam::magSqr(this->y())
+    );
+}
+
+
+template<class Cmpt>
+inline Foam::scalar Foam::Vector2D<Cmpt>::mag() const
+{
+    return ::sqrt(this->magSqr());
+}
+
+
+template<class Cmpt>
+inline Foam::scalar
+Foam::Vector2D<Cmpt>::distSqr(const Vector2D<Cmpt>& v2) const
+{
+    return
+    (
+        Foam::magSqr(v2.x() - this->x())
+      + Foam::magSqr(v2.y() - this->y())
+    );
+}
+
+
+template<class Cmpt>
+inline Foam::scalar Foam::Vector2D<Cmpt>::dist(const Vector2D<Cmpt>& v2) const
+{
+    return ::sqrt(this->distSqr(v2));
+}
+
+
+template<class Cmpt>
 inline Foam::Vector2D<Cmpt>& Foam::Vector2D<Cmpt>::normalise(const scalar tol)
 {
-    const scalar s(Foam::mag(*this));
+    const scalar s = this->mag();
 
     if (s < tol)
     {
@@ -117,7 +154,7 @@ inline bool Vector2D<Cmpt>::isClose
     const scalar tol
 ) const
 {
-    return (mag(x() - b.x()) < tol && mag(y() - b.y()) < tol);
+    return (Foam::mag(x() - b.x()) < tol && Foam::mag(y() - b.y()) < tol);
 }
 
 

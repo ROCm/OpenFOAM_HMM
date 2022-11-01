@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -273,12 +273,12 @@ void Foam::patchSeedSet::calcSamples
             const point& cc = mesh().cellCentres()[celli];
             samplingPts.append
             (
-                info.hitPoint() + 1e-1*(cc-info.hitPoint())
+                info.point() + 1e-1*(cc-info.point())
             );
         }
         else
         {
-            samplingPts.append(info.rawPoint());
+            samplingPts.append(info.point());
         }
         samplingCells.append(celli);
         samplingFaces.append(facei);

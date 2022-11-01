@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -84,16 +85,7 @@ bool Foam::dynamicTreeDataPoint::overlaps
     const scalar radiusSqr
 ) const
 {
-    const point& p = points_[index];
-
-    const scalar distSqr = magSqr(p - centre);
-
-    if (distSqr <= radiusSqr)
-    {
-        return true;
-    }
-
-    return false;
+    return (centre.distSqr(points_[index]) <= radiusSqr);
 }
 
 
@@ -113,7 +105,7 @@ void Foam::dynamicTreeDataPoint::findNearest
 
         const point& pt = points_[index];
 
-        scalar distSqr = magSqr(pt - sample);
+        const scalar distSqr = sample.distSqr(pt);
 
         if (distSqr < nearestDistSqr)
         {
@@ -137,7 +129,7 @@ void Foam::dynamicTreeDataPoint::findNearest
 ) const
 {
     // Best so far
-    scalar nearestDistSqr = magSqr(linePoint - nearestPoint);
+    scalar nearestDistSqr = linePoint.distSqr(nearestPoint);
 
     forAll(indices, i)
     {
@@ -155,7 +147,7 @@ void Foam::dynamicTreeDataPoint::findNearest
             {
                 nearestDistSqr = distSqr;
                 minIndex = index;
-                linePoint = pHit.rawPoint();
+                linePoint = pHit.point();
                 nearestPoint = shapePt;
 
                 {

@@ -1654,7 +1654,7 @@ void Foam::refinementSurfaces::findNearestIntersection
     {
         if (hit1[pointI].hit())
         {
-            nearest[pointI] = hit1[pointI].hitPoint();
+            nearest[pointI] = hit1[pointI].point();
         }
         else
         {
@@ -1784,7 +1784,7 @@ void Foam::refinementSurfaces::findNearestIntersection
     {
         if (hit1[pointI].hit())
         {
-            nearest[pointI] = hit1[pointI].hitPoint();
+            nearest[pointI] = hit1[pointI].point();
         }
         else
         {
@@ -1868,7 +1868,7 @@ void Foam::refinementSurfaces::findNearestIntersection
             {
                 surface1[pointI] = surfI;
                 normal1[pointI] = normal[pointI];
-                nearest[pointI] = nearestInfo[pointI].hitPoint();
+                nearest[pointI] = nearestInfo[pointI].point();
             }
         }
     }
@@ -1918,7 +1918,7 @@ void Foam::refinementSurfaces::findNearestIntersection
                 surface1[pointI] = surfI;
                 hitInfo1[pointI] = nearestInfo[pointI];
                 normal1[pointI] = normal[pointI];
-                nearest[pointI] = nearestInfo[pointI].hitPoint();
+                nearest[pointI] = nearestInfo[pointI].point();
             }
         }
     }

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -75,7 +75,7 @@ Foam::pointIndexHit Foam::searchableDisk::findNearest
     // Clip to inner/outer radius
     info.setPoint(origin() + radialLimits_.clip(magV)*v);
 
-    if (magSqr(sample - info.rawPoint()) < nearestDistSqr)
+    if (info.point().distSqr(sample) < nearestDistSqr)
     {
         info.setHit();
         info.setIndex(0);

@@ -266,7 +266,7 @@ void Foam::searchableSurfaceWithGaps::findLine
             if (plusInfo[i].hit() && minInfo[i].hit())
             {
                 info[compactMap[i]] = plusInfo[i];
-                info[compactMap[i]].rawPoint() -= offset0[i];
+                info[compactMap[i]].point() -= offset0[i];
             }
         }
 
@@ -318,7 +318,7 @@ void Foam::searchableSurfaceWithGaps::findLine
                 if (plusInfo[i].hit() && minInfo[i].hit())
                 {
                     info[compactMap[i]] = plusInfo[i];
-                    info[compactMap[i]].rawPoint() -= offset1[i];
+                    info[compactMap[i]].point() -= offset1[i];
                 }
             }
         }

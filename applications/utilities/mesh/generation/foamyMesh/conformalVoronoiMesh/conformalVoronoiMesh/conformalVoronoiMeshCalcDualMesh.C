@@ -488,7 +488,7 @@ Foam::label Foam::conformalVoronoiMesh::mergeIdenticalDualVertices
 ////
 ////                if (surfHit.hit())
 ////                {
-////                    pt += (surfHit.hitPoint() - pt)
+////                    pt += (surfHit.point() - pt)
 ////                         *pow
 ////                          (
 ////                              foamyHexMeshControls()
@@ -969,7 +969,7 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::findOffsetPatchFaces
             if
             (
                 pHit.hit()
-             && (mag(pHit.hitPoint() - faceCentre) > allowedOffset*targetSize)
+             && (pHit.point().dist(faceCentre) > allowedOffset*targetSize)
             )
             {
                 offsetBoundaryCells.insert(fCell[pLFI]);
@@ -1362,10 +1362,10 @@ void Foam::conformalVoronoiMesh::indexDualVertices
                         if (debug)
                         {
                             Info<< "Dual        = " << dual << nl
-                                << "    Nearest = " << fpHit.hitPoint() << endl;
+                                << "    Nearest = " << fpHit.point() << endl;
                         }
 
-                        pts[cit->cellIndex()] = fpHit.hitPoint();
+                        pts[cit->cellIndex()] = fpHit.point();
                     }
                 }
             }
@@ -1401,7 +1401,7 @@ void Foam::conformalVoronoiMesh::indexDualVertices
 //                        );
 //
 //                        pointFromPoint nearestPointOnTet =
-//                            tet.nearestPoint(dual).rawPoint();
+//                            tet.nearestPoint(dual).point();
 //
 //                        // Get nearest point on surface from tet.
 //                        geometryToConformTo_.findSurfaceNearest
@@ -1440,10 +1440,10 @@ void Foam::conformalVoronoiMesh::indexDualVertices
 //                            snapping2.writeLine
 //                            (
 //                                nearestPointOnTet,
-//                                hitInfo.hitPoint()
+//                                hitInfo.point()
 //                            );
 //
-//                            pts[cit->cellIndex()] = hitInfo.hitPoint();
+//                            pts[cit->cellIndex()] = hitInfo.point();
 //                        }
 //                    }
 //                }

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2015 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -206,10 +206,10 @@ bool Foam::surfaceOffsetLinearDistance::cellSize
 
     if (hitInfo.hit())
     {
-        const point& hitPt = hitInfo.hitPoint();
+        const point& hitPt = hitInfo.point();
         const label hitIndex = hitInfo.index();
 
-        const scalar dist = mag(pt - hitPt);
+        const scalar dist = hitPt.dist(pt);
 
         if (sideMode_ == rmBothsides)
         {
@@ -220,7 +220,7 @@ bool Foam::surfaceOffsetLinearDistance::cellSize
 
         // If the nearest point is essentially on the surface, do not do a
         // getVolumeType calculation, as it will be prone to error.
-        if (mag(pt  - hitInfo.hitPoint()) < snapToSurfaceTol_)
+        if (hitInfo.point().dist(pt) < snapToSurfaceTol_)
         {
             size = sizeFunction(hitPt, 0, hitIndex);
 

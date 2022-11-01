@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -258,7 +258,7 @@ public:
                 {
                     nearestDistSqr = distSqr;
                     minIndex = index;
-                    nearestPoint = nearHit.rawPoint();
+                    nearestPoint = nearHit.point();
                 }
             }
         }
@@ -420,8 +420,8 @@ int main(int argc, char *argv[])
                             !nearestHit.hit()
                          ||
                             (
-                                magSqr(currentHit.hitPoint() - samplePt)
-                              < magSqr(nearestHit.hitPoint() - samplePt)
+                                currentHit.point().distSqr(samplePt)
+                              < nearestHit.point().distSqr(samplePt)
                             )
                         )
                     )
@@ -430,8 +430,6 @@ int main(int argc, char *argv[])
                         bPointsHitTree[bPointi] = treeI;
                     }
                 }
-
-                scalar dist2 = magSqr(nearestHit.rawPoint() - samplePt);
 
                 if (nearestHit.hit())
                 {
@@ -444,7 +442,9 @@ int main(int argc, char *argv[])
     //                        30
     //                    );
 
-                    if (dist2 > Foam::sqr(dist))
+                    scalar distSqr = nearestHit.point().distSqr(samplePt);
+
+                    if (distSqr > Foam::sqr(dist))
                     {
                         nearestHit.setMiss();
                     }
@@ -491,11 +491,11 @@ int main(int argc, char *argv[])
                     if
                     (
                         (
-                            magSqr(pt - hitSurf.localPoints()[e.start()])
+                            pt.distSqr(hitSurf.localPoints()[e.start()])
                           < matchTolerance
                         )
                      || (
-                            magSqr(pt - hitSurf.localPoints()[e.end()])
+                            pt.distSqr(hitSurf.localPoints()[e.end()])
                           < matchTolerance
                         )
                     )

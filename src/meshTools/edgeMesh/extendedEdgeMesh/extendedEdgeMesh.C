@@ -810,8 +810,7 @@ void Foam::extendedEdgeMesh::allNearestFeatureEdges
 
             pointIndexHit nearHit
             (
-                hitPoint.hit(),
-                hitPoint.rawPoint(),
+                hitPoint,
                 hitIndex
             );
 

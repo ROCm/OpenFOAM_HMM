@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,7 +85,7 @@ void Foam::searchableBox::projectOntoCoordPlane
 ) const
 {
     // Set point
-    info.rawPoint()[dir] = planePt[dir];
+    info.point()[dir] = planePt[dir];
 
     // Set face
     if (planePt[dir] == min()[dir])
@@ -135,17 +135,17 @@ Foam::pointIndexHit Foam::searchableBox::findNearest
 
     for (direction dir = 0; dir < vector::nComponents; ++dir)
     {
-        if (info.rawPoint()[dir] < min()[dir])
+        if (info.point()[dir] < min()[dir])
         {
             projectOntoCoordPlane(dir, min(), info);
             outside = true;
         }
-        else if (info.rawPoint()[dir] > max()[dir])
+        else if (info.point()[dir] > max()[dir])
         {
             projectOntoCoordPlane(dir, max(), info);
             outside = true;
         }
-        else if (info.rawPoint()[dir] > bbMid[dir])
+        else if (info.point()[dir] > bbMid[dir])
         {
             near[dir] = max()[dir];
         }
@@ -185,7 +185,7 @@ Foam::pointIndexHit Foam::searchableBox::findNearest
 
     // Check if outside. Optimisation: could do some checks on distance already
     // on components above
-    if (magSqr(info.rawPoint() - sample) > nearestDistSqr)
+    if (info.point().distSqr(sample) > nearestDistSqr)
     {
         info.setMiss();
         info.setIndex(-1);
@@ -293,11 +293,7 @@ void Foam::searchableBox::boundingSpheres
         {
             const point& pt = pts[pointi];
 
-            radiusSqr[i] = Foam::max
-            (
-                radiusSqr[i],
-                Foam::magSqr(pt-centres[i])
-            );
+            radiusSqr[i] = Foam::max(radiusSqr[i], centres[i].distSqr(pt));
         }
     }
 
@@ -339,17 +335,17 @@ Foam::pointIndexHit Foam::searchableBox::findNearestOnEdge
 
     for (direction dir = 0; dir < vector::nComponents; ++dir)
     {
-        if (info.rawPoint()[dir] < min()[dir])
+        if (info.point()[dir] < min()[dir])
         {
             projectOntoCoordPlane(dir, min(), info);
             outside = true;
         }
-        else if (info.rawPoint()[dir] > max()[dir])
+        else if (info.point()[dir] > max()[dir])
         {
             projectOntoCoordPlane(dir, max(), info);
             outside = true;
         }
-        else if (info.rawPoint()[dir] > bbMid[dir])
+        else if (info.point()[dir] > bbMid[dir])
         {
             near[dir] = max()[dir];
         }
@@ -365,7 +361,7 @@ Foam::pointIndexHit Foam::searchableBox::findNearestOnEdge
     if (!outside)
     {
         // Get the per-component distance to nearest wall
-        vector dist(cmptMag(info.rawPoint() - near));
+        vector dist(cmptMag(info.point() - near));
 
         SortableList<scalar> sortedDist(3);
         sortedDist[0] = dist[0];
@@ -382,7 +378,7 @@ Foam::pointIndexHit Foam::searchableBox::findNearestOnEdge
 
     // Check if outside. Optimisation: could do some checks on distance already
     // on components above
-    if (magSqr(info.rawPoint() - sample) > nearestDistSqr)
+    if (info.point().distSqr(sample) > nearestDistSqr)
     {
         info.setMiss();
         info.setIndex(-1);
@@ -424,13 +420,13 @@ Foam::pointIndexHit Foam::searchableBox::findLine
         else
         {
             // end is outside. Clip to bounding box.
-            foundInter = intersects(end, start, info.rawPoint());
+            foundInter = intersects(end, start, info.point());
         }
     }
     else
     {
         // start is outside. Clip to bounding box.
-        foundInter = intersects(start, end, info.rawPoint());
+        foundInter = intersects(start, end, info.point());
     }
 
 
@@ -441,12 +437,12 @@ Foam::pointIndexHit Foam::searchableBox::findLine
 
         for (direction dir = 0; dir < vector::nComponents; ++dir)
         {
-            if (info.rawPoint()[dir] == min()[dir])
+            if (info.point()[dir] == min()[dir])
             {
                 info.setIndex(2*dir);
                 break;
             }
-            else if (info.rawPoint()[dir] == max()[dir])
+            else if (info.point()[dir] == max()[dir])
             {
                 info.setIndex(2*dir+1);
                 break;
@@ -456,7 +452,7 @@ Foam::pointIndexHit Foam::searchableBox::findLine
         if (info.index() == -1)
         {
             FatalErrorInFunction
-                << "point " << info.rawPoint()
+                << "point " << info.point()
                 << " on segment " << start << end
                 << " should be on face of " << *this
                 << " but it isn't." << abort(FatalError);

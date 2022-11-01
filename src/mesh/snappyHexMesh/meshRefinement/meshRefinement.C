@@ -3692,7 +3692,7 @@ void Foam::meshRefinement::dumpIntersections(const fileName& prefix) const
             {
                 meshTools::writeOBJ(str, start[i]);
                 verti++;
-                meshTools::writeOBJ(str, surfaceHitInfo[i].hitPoint());
+                meshTools::writeOBJ(str, surfaceHitInfo[i].point());
                 verti++;
                 meshTools::writeOBJ(str, end[i]);
                 verti++;

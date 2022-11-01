@@ -869,9 +869,7 @@ Foam::DistributedDelaunayMesh<Triangulation>::rangeInsertReferredWithInfo
 
         if (!bb.contains(samplePoint))
         {
-            const Foam::point nearestPoint = bb.nearest(samplePoint);
-
-            distFromBbSqr = magSqr(nearestPoint - samplePoint);
+            distFromBbSqr = bb.nearest(samplePoint).distSqr(samplePoint);
         }
 
         pointsBbDistSqr.append

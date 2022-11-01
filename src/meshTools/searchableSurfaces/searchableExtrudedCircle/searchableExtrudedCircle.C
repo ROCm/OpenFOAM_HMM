@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -190,7 +190,7 @@ void Foam::searchableExtrudedCircle::findNearest
         if (info[i].hit())
         {
             // Derive distance to nearest surface from distance to nearest edge
-            const vector d(samples[i] - info[i].hitPoint());
+            const vector d(samples[i] - info[i].point());
             const scalar s(mag(d));
 
             if (s < ROOTVSMALL)
@@ -207,7 +207,7 @@ void Foam::searchableExtrudedCircle::findNearest
                 }
                 else
                 {
-                    info[i].setPoint(info[i].hitPoint() + d/s*radius_);
+                    info[i].setPoint(info[i].point() + d/s*radius_);
                 }
             }
         }
@@ -453,7 +453,7 @@ void Foam::searchableExtrudedCircle::getNormal
             // Find nearest on curve
             pointIndexHit curvePt = tree.findNearest
             (
-                info[i].hitPoint(),
+                info[i].point(),
                 Foam::magSqr(bounds().span())
             );
 

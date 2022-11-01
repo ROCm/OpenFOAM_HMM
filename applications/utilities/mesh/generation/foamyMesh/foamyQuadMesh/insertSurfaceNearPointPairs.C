@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2015 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -89,7 +90,7 @@ void Foam::CV2D::insertSurfaceNearPointPairs()
                         insertPointPair
                         (
                             meshControls().ppDist(),
-                            toPoint2D(pHit.hitPoint()),
+                            toPoint2D(pHit.point()),
                             toPoint2D(norm[0])
                         );
 

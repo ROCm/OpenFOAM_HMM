@@ -270,7 +270,7 @@ void Foam::surfaceToCell::combine(topoSet& set, const bool add) const
 
                 pointIndexHit inter = querySurf().nearest(c, span);
 
-                if (inter.hit() && (mag(inter.hitPoint() - c) < nearDist_))
+                if (inter.hit() && inter.point().dist(c) < nearDist_)
                 {
                     addOrDelete(set, celli, add);
                 }
@@ -302,7 +302,7 @@ void Foam::surfaceToCell::combine(topoSet& set, const bool add) const
 
                 pointIndexHit inter = querySurf().nearest(c, span);
 
-                if (inter.hit() && (mag(inter.hitPoint() - c) < nearDist_))
+                if (inter.hit() && inter.point().dist(c) < nearDist_)
                 {
                     if
                     (

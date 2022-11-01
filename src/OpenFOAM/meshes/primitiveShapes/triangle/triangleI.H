@@ -915,7 +915,7 @@ inline Foam::pointHit Foam::triangle<Point, PointRef>::nearestPoint
             // Hit beyond endpoint
             lnInfo.setMiss(true);
             lnInfo.setPoint(ln.end());
-            scalar dist = Foam::mag(triInfo.hitPoint()-lnInfo.missPoint());
+            scalar dist = triInfo.point().dist(lnInfo.point());
             lnInfo.setDistance(dist);
             triInfo.setMiss(true);
             triInfo.setDistance(dist);
@@ -925,7 +925,7 @@ inline Foam::pointHit Foam::triangle<Point, PointRef>::nearestPoint
             // Hit beyond startpoint
             lnInfo.setMiss(true);
             lnInfo.setPoint(ln.start());
-            scalar dist = Foam::mag(triInfo.hitPoint()-lnInfo.missPoint());
+            scalar dist = triInfo.point().dist(lnInfo.point());
             lnInfo.setDistance(dist);
             triInfo.setMiss(true);
             triInfo.setDistance(dist);
@@ -933,9 +933,9 @@ inline Foam::pointHit Foam::triangle<Point, PointRef>::nearestPoint
         else
         {
             // Hit on line
-            lnInfo.hitPoint(triInfo.hitPoint());
-            lnInfo.setDistance(0.0);
-            triInfo.setDistance(0.0);
+            lnInfo.hitPoint(triInfo.point());
+            lnInfo.setDistance(0);
+            triInfo.setDistance(0);
         }
     }
     else

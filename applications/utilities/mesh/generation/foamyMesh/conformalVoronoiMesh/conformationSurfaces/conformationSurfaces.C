@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -746,7 +746,7 @@ Foam::Field<bool> Foam::conformationSurfaces::wellInOutSide
                 const vector hitDir =
                     normalised
                     (
-                        info[0].rawPoint() - samplePts[i]
+                        info[0].point() - samplePts[i]
                     );
 
                 pointIndexHit surfHit;
@@ -755,7 +755,7 @@ Foam::Field<bool> Foam::conformationSurfaces::wellInOutSide
                 findSurfaceNearestIntersection
                 (
                     samplePts[i],
-                    info[0].rawPoint() - 1e-3*mag(hitDir)*hitDir,
+                    info[0].point() - 1e-3*mag(hitDir)*hitDir,
                     surfHit,
                     hitSurface
                 );
@@ -1057,7 +1057,7 @@ void Foam::conformationSurfaces::findFeaturePointNearest
 
         if (hitInfo.hit())
         {
-            minDistSqr = magSqr(hitInfo.hitPoint()- sample);
+            minDistSqr = hitInfo.point().distSqr(sample);
             fpHit = hitInfo;
             featureHit = testI;
         }
@@ -1123,11 +1123,9 @@ void Foam::conformationSurfaces::findEdgeNearest
         {
             if (hitInfo[pointi].hit())
             {
-                minDistSqr[pointi] = magSqr
-                (
-                    hitInfo[pointi].hitPoint()
-                  - samples[pointi]
-                );
+                minDistSqr[pointi] =
+                    hitInfo[pointi].point().distSqr(samples[pointi]);
+
                 edgeHits[pointi] = hitInfo[pointi];
                 featuresHit[pointi] = testI;
             }
@@ -1167,7 +1165,7 @@ void Foam::conformationSurfaces::findEdgeNearestByType
         {
             if (hitInfo[typeI].hit())
             {
-                minDistSqr[typeI] = magSqr(hitInfo[typeI].hitPoint() - sample);
+                minDistSqr[typeI] = hitInfo[typeI].point().distSqr(sample);
                 edgeHits[typeI] = hitInfo[typeI];
                 featuresHit[typeI] = testI;
             }
@@ -1207,6 +1205,7 @@ void Foam::conformationSurfaces::findAllNearestEdges
             if (hitInfo[hitI].hit())
             {
                 anyHit = true;
+                break;
             }
         }
 

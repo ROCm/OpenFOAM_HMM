@@ -238,8 +238,7 @@ Foam::PrimitivePatch<FaceList, PointField>::projectPoints
                 else if (curHit.eligibleMiss())
                 {
                     // Calculate min distance
-                    scalar missDist =
-                        Foam::mag(curHit.missPoint() - curPoint);
+                    scalar missDist = curHit.point().dist(curPoint);
 
                     if (missDist < minDistance)
                     {
@@ -466,8 +465,7 @@ Foam::PrimitivePatch<FaceList, PointField>::projectFaceCentres
                 else if (curHit.eligibleMiss())
                 {
                     // Calculate min distance
-                    scalar missDist =
-                        Foam::mag(curHit.missPoint() - curFaceCentre);
+                    scalar missDist = curHit.point().dist(curFaceCentre);
 
                     if (missDist < minDistance)
                     {

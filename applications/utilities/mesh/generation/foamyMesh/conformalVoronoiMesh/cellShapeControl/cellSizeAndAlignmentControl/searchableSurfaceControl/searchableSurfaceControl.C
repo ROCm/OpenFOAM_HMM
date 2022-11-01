@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -439,7 +439,7 @@ void Foam::searchableSurfaceControl::initialVertices
                 {
                     // Limit cell size
                     const vector vN =
-                        infoList[0].hitPoint()
+                        infoList[0].point()
                       - 2.0*normals[0]*defaultCellSize_;
 
                     List<pointIndexHit> intersectionList;
@@ -453,8 +453,7 @@ void Foam::searchableSurfaceControl::initialVertices
 
 //                if (intersectionList[0].hit())
 //                {
-//                    scalar dist =
-//                        mag(intersectionList[0].hitPoint() - pts[pI]);
+//                    scalar dist = intersectionList[0].point().dist(pts[pI]);
 //
 //                    limitedCellSize = dist/2.0;
 //                }

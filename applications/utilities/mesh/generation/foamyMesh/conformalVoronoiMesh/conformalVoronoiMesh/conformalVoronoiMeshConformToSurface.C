@@ -311,7 +311,7 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation()
                 )
                 {
                     // meshTools::writeOBJ(Pout, vert);
-                    // meshTools::writeOBJ(Pout, surfHit.hitPoint());
+                    // meshTools::writeOBJ(Pout, surfHit.point());
                     // Pout<< "l cr0 cr1" << endl;
 
                     addSurfaceAndEdgeHits
@@ -804,7 +804,7 @@ Foam::label Foam::conformalVoronoiMesh::synchroniseEdgeTrees
             if (nearest.hit())
             {
 //                Pout<< "Not inserting " << peI << " " << pt << " "
-//                    << nearest.rawPoint() << " on proc " << proci
+//                    << nearest.point() << " on proc " << proci
 //                    << ", near edge = " << nearest
 //                    << " near ftPt = "<< info
 //                    << " " << featureEdgeExclusionDistanceSqr(pt)
@@ -1477,9 +1477,9 @@ void Foam::conformalVoronoiMesh::reportProcessorOccupancy()
 //                    << vit->type() << nl
 //                    << vit->ppMaster() << nl
 //                    << "nearFeaturePt "
-//                    << nearFeaturePt(surfHit.hitPoint()) << nl
+//                    << nearFeaturePt(surfHit.point()) << nl
 //                    << vert << nl
-//                    << surfHit.hitPoint()
+//                    << surfHit.point()
 //                    << endl;
 //            }
 //        }
@@ -1614,7 +1614,7 @@ void Foam::conformalVoronoiMesh::limitDisplacement
         {
             limit = true;
 
-            if (magSqr(pt - surfHit.hitPoint()) <= searchDistanceSqr)
+            if (surfHit.point().distSqr(pt) <= searchDistanceSqr)
             {
                 // Cannot limit displacement, point closer than tolerance
                 displacement = Zero;
@@ -1711,7 +1711,7 @@ bool Foam::conformalVoronoiMesh::nearSurfacePoint
     (
         closeToSurfacePt
      && (
-            magSqr(pt - closePoint.hitPoint())
+            closePoint.hitPoint().distSqr(pt)
           > sqr(pointPairDistance(pt))
         )
     )
@@ -2079,7 +2079,7 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
 
                 if (edHit.hit())
                 {
-                    const Foam::point& edPt = edHit.hitPoint();
+                    const Foam::point& edPt = edHit.point();
 
                     if
                     (
@@ -2095,7 +2095,7 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
                     {
                         if
                         (
-                            magSqr(edPt - surfPt)
+                            surfPt.distSqr(edPt)
                           < surfacePtReplaceDistCoeffSqr*cellSizeSqr
                         )
                         {
@@ -2141,7 +2141,7 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
                             surfacePtToEdgePtDist.insert
                             (
                                 existingEdgeLocations_.size() - 1,
-                                magSqr(edPt - surfPt)
+                                surfPt.distSqr(edPt)
                             );
                         }
                         else if (firstPass)
@@ -2152,7 +2152,7 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
 
                             if
                             (
-                                magSqr(edPt - surfPt)
+                                surfPt.distSqr(edPt)
                               < surfacePtToEdgePtDist[hitIndex]
                             )
                             {
@@ -2162,7 +2162,7 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
                                 existingEdgeLocations_[hitIndex] =
                                     edHit.hitPoint();
                                 surfacePtToEdgePtDist[hitIndex] =
-                                    magSqr(edPt - surfPt);
+                                    surfPt.distSqr(edPt);
 
                                 // Change edge location in featureEdgeHits
                                 // remove index from edge tree

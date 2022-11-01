@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -198,7 +199,7 @@ void Foam::treeDataEdge::findNearestOp::operator()
         {
             nearestDistSqr = distSqr;
             minIndex = index;
-            nearestPoint = nearHit.rawPoint();
+            nearestPoint = nearHit.point();
         }
     }
 }
@@ -218,7 +219,7 @@ void Foam::treeDataEdge::findNearestOp::operator()
     const treeDataEdge& shape = tree_.shapes();
 
     // Best so far
-    scalar nearestDistSqr = magSqr(linePoint - nearestPoint);
+    scalar nearestDistSqr = linePoint.distSqr(nearestPoint);
 
     for (const label index : indices)
     {

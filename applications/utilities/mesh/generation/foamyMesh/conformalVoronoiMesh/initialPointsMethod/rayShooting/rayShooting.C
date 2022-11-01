@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2015 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -238,7 +238,7 @@ Foam::List<Vb::Point> Foam::rayShooting::initialPoints() const
 
                 if ((normStart[0] & normEnd[0]) < 0)
                 {
-                    line<point, point> l(fC, surfHitEnd.hitPoint());
+                    line<point, point> l(fC, surfHitEnd.point());
 
                     if (Pstream::parRun())
                     {
@@ -256,7 +256,7 @@ Foam::List<Vb::Point> Foam::rayShooting::initialPoints() const
                                 line<point, point>
                                 (
                                     l.start(),
-                                    procIntersection.hitPoint()
+                                    procIntersection.point()
                                 );
                         }
                     }

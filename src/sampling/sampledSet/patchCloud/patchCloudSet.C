@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -144,11 +144,8 @@ void Foam::patchCloudSet::calcSamples
             // Set nearest to mesh face label
             nearInfo.setIndex(patchFaces[nearInfo.index()]);
 
-            nearest[sampleI].second().first() = magSqr
-            (
-                nearInfo.hitPoint()
-              - sample
-            );
+            nearest[sampleI].second().first() =
+                nearInfo.point().distSqr(sample);
             nearest[sampleI].second().second() = Pstream::myProcNo();
         }
     }
@@ -177,7 +174,7 @@ void Foam::patchCloudSet::calcSamples
             {
                 meshTools::writeOBJ(str, sampleCoords_[i]);
                 ++vertI;
-                meshTools::writeOBJ(str, nearest[i].first().hitPoint());
+                meshTools::writeOBJ(str, nearest[i].first().point());
                 ++vertI;
                 str << "l " << vertI-1 << ' ' << vertI << nl;
             }
@@ -196,7 +193,7 @@ void Foam::patchCloudSet::calcSamples
             {
                 label facei = nearInfo.index();
 
-                samplingPts.append(nearInfo.hitPoint());
+                samplingPts.append(nearInfo.point());
                 samplingCells.append(mesh().faceOwner()[facei]);
                 samplingFaces.append(facei);
                 samplingSegments.append(0);

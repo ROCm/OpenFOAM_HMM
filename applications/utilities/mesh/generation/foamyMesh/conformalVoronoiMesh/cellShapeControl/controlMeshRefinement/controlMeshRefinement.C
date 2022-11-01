@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2015 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -739,7 +740,7 @@ Foam::label Foam::controlMeshRefinement::refineMesh
 
         if (hitPt.hit())
         {
-            const Foam::point& pt = hitPt.hitPoint();
+            const Foam::point& pt = hitPt.point();
 
             if (!geometryToConformTo_.inside(pt))
             {

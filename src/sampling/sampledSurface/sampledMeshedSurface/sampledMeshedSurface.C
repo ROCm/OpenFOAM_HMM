@@ -170,7 +170,7 @@ bool Foam::sampledMeshedSurface::update(const meshSearch& meshSearcher)
 
             if (info.hit())
             {
-                near.first()  = magSqr(info.hitPoint()-pt);
+                near.first()  = info.point().distSqr(pt);
                 near.second() = globalCells.toGlobal(info.index());
             }
         }
@@ -213,7 +213,7 @@ bool Foam::sampledMeshedSurface::update(const meshSearch& meshSearcher)
 
             if (info.hit())
             {
-                near.first()  = magSqr(info.hitPoint()-pt);
+                near.first()  = info.point().distSqr(pt);
                 near.second() =
                     globalCells.toGlobal
                     (
@@ -346,7 +346,7 @@ bool Foam::sampledMeshedSurface::update(const meshSearch& meshSearcher)
                         if (info.distance() < minDistSqr)
                         {
                             minDistSqr = info.distance();
-                            samplePoints_[pointi] = info.rawPoint();
+                            samplePoints_[pointi] = info.point();
                         }
                     }
                 }
@@ -385,7 +385,7 @@ bool Foam::sampledMeshedSurface::update(const meshSearch& meshSearcher)
                         (
                             pt,
                             mesh().points()
-                        ).rawPoint();
+                        ).point();
                 }
             }
         }

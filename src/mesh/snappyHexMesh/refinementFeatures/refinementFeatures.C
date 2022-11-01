@@ -399,7 +399,7 @@ void Foam::refinementFeatures::findHigherLevel
             label minDistI = findLower
             (
                 distances,
-                mag(nearInfo[candidateI].hitPoint()-candidates[candidateI])
+                nearInfo[candidateI].point().dist(candidates[candidateI])
             );
 
             label pointi = candidateMap[candidateI];
@@ -665,7 +665,7 @@ void Foam::refinementFeatures::findNearestEdge
                 scalar distSqr;
                 if (nearInfo[sampleI].hit())
                 {
-                    distSqr = magSqr(nearInfo[sampleI].hitPoint()-sample);
+                    distSqr = nearInfo[sampleI].point().distSqr(sample);
                 }
                 else
                 {
@@ -680,7 +680,7 @@ void Foam::refinementFeatures::findNearestEdge
                     nearInfo[sampleI] = pointIndexHit
                     (
                         info.hit(),
-                        info.hitPoint(),
+                        info.point(),
                         tree.shapes().edgeLabels()[info.index()]
                     );
 
@@ -726,7 +726,7 @@ void Foam::refinementFeatures::findNearestRegionEdge
             scalar distSqr;
             if (nearInfo[sampleI].hit())
             {
-                distSqr = magSqr(nearInfo[sampleI].hitPoint()-sample);
+                distSqr = nearInfo[sampleI].point().distSqr(sample);
             }
             else
             {
@@ -744,7 +744,7 @@ void Foam::refinementFeatures::findNearestRegionEdge
                 nearInfo[sampleI] = pointIndexHit
                 (
                     info.hit(),
-                    info.hitPoint(),
+                    info.point(),
                     regionTree.shapes().edgeLabels()[info.index()]
                 );
 
@@ -836,7 +836,7 @@ void Foam::refinementFeatures::findNearestPoint
                 scalar distSqr;
                 if (nearFeature[sampleI] != -1)
                 {
-                    distSqr = magSqr(nearInfo[sampleI].hitPoint()-sample);
+                    distSqr = nearInfo[sampleI].point().distSqr(sample);
                 }
                 else
                 {
@@ -851,7 +851,7 @@ void Foam::refinementFeatures::findNearestPoint
                     nearInfo[sampleI] = pointIndexHit
                     (
                         info.hit(),
-                        info.hitPoint(),
+                        info.point(),
                         tree.shapes().pointLabels()[info.index()]
                     );
                 }

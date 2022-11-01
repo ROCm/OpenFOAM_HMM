@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -145,21 +145,16 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
                 // the location written to the header.
 
                 //const point& facePt = mesh.faceCentres()[faceI];
-                const point& facePt = info.hitPoint();
+                const point& facePt = info.point();
 
                 mappedPatchBase::nearInfo sampleInfo;
 
-                sampleInfo.first() = pointIndexHit
-                (
-                    true,
-                    facePt,
-                    facei
-                );
+                sampleInfo.first() = pointIndexHit(true, facePt, facei);
 
-                sampleInfo.second().first() = magSqr(facePt - sample);
+                sampleInfo.second().first() = facePt.distSqr(sample);
                 sampleInfo.second().second() = Pstream::myProcNo();
 
-                nearest[probei]= sampleInfo;
+                nearest[probei] = sampleInfo;
             }
         }
     }
@@ -174,7 +169,7 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
     forAll(nearest, samplei)
     {
         oldPoints_[samplei] = operator[](samplei);
-        operator[](samplei) = nearest[samplei].first().rawPoint();
+        operator[](samplei) = nearest[samplei].first().point();
     }
 
     if (debug)
@@ -188,7 +183,7 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
             Info<< "    " << samplei << " coord:"<< operator[](samplei)
                 << " found on processor:" << proci
                 << " in local face:" << locali
-                << " with location:" << nearest[samplei].first().rawPoint()
+                << " with location:" << nearest[samplei].first().point()
                 << endl;
         }
     }

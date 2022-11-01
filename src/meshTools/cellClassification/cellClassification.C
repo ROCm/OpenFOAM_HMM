@@ -221,7 +221,7 @@ Foam::boolList Foam::cellClassification::markFaces
                 }
 
                 // Restart from previous endpoint
-                pt = pHit.hitPoint() + smallVec;
+                pt = pHit.point() + smallVec;
 
                 if (((pt-start) & edgeNormal) >= edgeMag)
                 {

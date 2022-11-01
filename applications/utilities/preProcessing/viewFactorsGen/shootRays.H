@@ -146,7 +146,7 @@ for (const int proci : Pstream::allProcs())
                 if (aggHitIndex[hitIndex] == startAgg[rayID])
                 {
                     const vector& endP = end[rayID];
-                    const vector& startP = hitInfo[hitIndex].hitPoint();
+                    const vector& startP = hitInfo[hitIndex].point();
                     const vector& d = endP - startP;
 
                     startHitItself.append(startP + 0.01*d);

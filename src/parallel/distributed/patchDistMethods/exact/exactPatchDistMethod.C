@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -171,12 +171,12 @@ bool Foam::patchDistMethods::exact::correct
 
     // Take over hits
     label nHits = 0;
-    forAll(info, cellI)
+    forAll(info, celli)
     {
-        if (info[cellI].hit())
+        if (info[celli].hit())
         {
-            const point& cc = mesh_.cellCentres()[cellI];
-            y[cellI] = mag(cc-info[cellI].hitPoint());
+            const point& cc = mesh_.cellCentres()[celli];
+            y[celli] = info[celli].point().dist(cc);
             nHits++;
         }
         //else
@@ -194,7 +194,7 @@ bool Foam::patchDistMethods::exact::correct
         forAll(mesh_.cellCentres(), celli)
         {
             const point& cc = mesh_.cellCentres()[celli];
-            str.writeLine(cc, info[celli].hitPoint());
+            str.writeLine(cc, info[celli].point());
         }
     }
 

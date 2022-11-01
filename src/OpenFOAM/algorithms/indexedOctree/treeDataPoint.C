@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -128,7 +128,7 @@ bool Foam::treeDataPoint::overlaps
     const scalar radiusSqr
 ) const
 {
-    return (magSqr(shapePoint(index) - centre) <= radiusSqr);
+    return (centre.distSqr(shapePoint(index)) <= radiusSqr);
 }
 
 
@@ -148,7 +148,7 @@ void Foam::treeDataPoint::findNearestOp::operator()
     {
         const point& pt = shape.shapePoint(index);
 
-        const scalar distSqr = magSqr(pt - sample);
+        const scalar distSqr = sample.distSqr(pt);
 
         if (distSqr < nearestDistSqr)
         {
@@ -177,7 +177,7 @@ void Foam::treeDataPoint::findNearestOp::operator()
     scalar nearestDistSqr = GREAT;
     if (minIndex >= 0)
     {
-        nearestDistSqr = magSqr(linePoint - nearestPoint);
+        nearestDistSqr = linePoint.distSqr(nearestPoint);
     }
 
     for (const label index : indices)
@@ -194,7 +194,7 @@ void Foam::treeDataPoint::findNearestOp::operator()
             {
                 nearestDistSqr = distSqr;
                 minIndex = index;
-                linePoint = pHit.rawPoint();
+                linePoint = pHit.point();
                 nearestPoint = shapePt;
 
                 {

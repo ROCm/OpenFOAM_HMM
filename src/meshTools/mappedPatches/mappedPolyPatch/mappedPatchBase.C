@@ -163,7 +163,7 @@ Foam::tmp<Foam::pointField> Foam::mappedPatchBase::facePoints
             mesh,
             pp.start()+facei,
             polyMesh::FACE_DIAG_TRIS
-        ).rawPoint();
+        ).point();
     }
 
     return tfacePoints;
@@ -363,11 +363,10 @@ void Foam::mappedPatchBase::findLocalSamples
                 nearInfoWorld& near = nearest[sampleI];
 
                 near.first().first() = tree.findNearest(sample, sqr(GREAT));
-                near.first().second().first() = magSqr
-                (
-                    near.first().first().hitPoint()
-                   -sample
-                );
+
+                near.first().second().first() =
+                    near.first().first().hitPoint().distSqr(sample);
+
                 near.first().second().second() = myRank;
                 near.second() = mySampleWorld;
             }
@@ -511,7 +510,7 @@ void Foam::mappedPatchBase::findLocalSamples
                     }
                     else
                     {
-                        const point& pt = nearInfo.hitPoint();
+                        const point& pt = nearInfo.point();
 
                         near.first().second().first() = magSqr(pt-sample);
                         near.first().second().second() = myRank;
@@ -690,7 +689,7 @@ void Foam::mappedPatchBase::findSamples
     //            << "    found on patchfacei:"
     //            << nearest[samplei].first().first().index() << nl
     //            << "    found at location:"
-    //            << nearest[samplei].first().first().rawPoint() << nl;
+    //            << nearest[samplei].first().first().point() << nl;
     //    }
     //    Pout<< endl;
     //}
@@ -714,7 +713,7 @@ void Foam::mappedPatchBase::findSamples
         {
             sampleProcs[sampleI] = ni.second().second();
             sampleIndices[sampleI] = ni.first().index();
-            sampleLocations[sampleI] = ni.first().hitPoint();
+            sampleLocations[sampleI] = ni.first().point();
         }
     }
 
@@ -1780,7 +1779,7 @@ Foam::pointIndexHit Foam::mappedPatchBase::facePoint
 
                 if (hitInfo.hit() && hitInfo.distance() > 0)
                 {
-                    return pointIndexHit(true, hitInfo.hitPoint(), i-2);
+                    return pointIndexHit(true, hitInfo.point(), i-2);
                 }
 
                 fp = nextFp;

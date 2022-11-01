@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -167,12 +167,12 @@ void Foam::edgeIntersections::intersectEdges
             const edge& e = surf1.edges()[edgeI];
 
             // Classify point on surface1 edge.
-            if (mag(pHit.hitPoint() - start[i]) < surf1PointTol[e[0]])
+            if (pHit.point().dist(start[i]) < surf1PointTol[e[0]])
             {
                 // Intersection is close to edge start
                 hitType = 0;
             }
-            else if (mag(pHit.hitPoint() - end[i]) < surf1PointTol[e[1]])
+            else if (pHit.point().dist(end[i]) < surf1PointTol[e[1]])
             {
                 // Intersection is close to edge end
                 hitType = 1;
@@ -737,8 +737,7 @@ void Foam::edgeIntersections::merge
             {
                 intersections[nNew] = pointIndexHit
                 (
-                    subHit.hit(),
-                    subHit.rawPoint(),
+                    subHit,
                     faceMap[subHit.index()]
                 );
                 intersectionTypes[nNew] = subClass[i];

@@ -141,6 +141,20 @@ public:
             const Foam::UList<Vector<Cmpt>>&  /* (unused) */
         ) const noexcept;
 
+        //- The length (L2-norm) of the vector
+        inline scalar mag() const;
+
+        //- The length (L2-norm) squared of the vector.
+        inline scalar magSqr() const;
+
+        //- The L2-norm distance from another vector.
+        //- The mag() of the difference.
+        inline scalar dist(const Vector<Cmpt>& v2) const;
+
+        //- The L2-norm distance squared from another vector.
+        //- The magSqr() of the difference.
+        inline scalar distSqr(const Vector<Cmpt>& v2) const;
+
         //- Inplace normalise the vector by its magnitude
         //  For small magnitudes (less than ROOTVSMALL) set to zero.
         //  Will not be particularly useful for a vector of labels
@@ -155,14 +169,6 @@ public:
 
         //- Cross-product of \c this with another Vector.
         inline Vector<Cmpt> cross(const Vector<Cmpt>& v2) const;
-
-        //- The L2-norm distance from another vector.
-        //- The mag() of the difference.
-        inline scalar dist(const Vector<Cmpt>& v2) const;
-
-        //- The L2-norm distance squared from another vector.
-        //- The magSqr() of the difference.
-        inline scalar distSqr(const Vector<Cmpt>& v2) const;
 
 
     // Comparision Operations

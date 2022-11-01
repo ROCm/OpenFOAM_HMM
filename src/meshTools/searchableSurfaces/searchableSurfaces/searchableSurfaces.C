@@ -679,7 +679,7 @@ bool Foam::searchableSurfaces::checkIntersection
                      && (i != j || !connected(s0, edgeI, hits[edgeI]))
                     )
                     {
-                        intersections.append(hits[edgeI].hitPoint());
+                        intersections.append(hits[edgeI].point());
                         intersectionEdge.append(edgeI);
                         nHits++;
                     }

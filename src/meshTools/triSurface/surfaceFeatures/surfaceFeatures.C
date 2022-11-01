@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -96,8 +96,8 @@ Foam::pointIndexHit Foam::surfaceFeatures::edgeNearest
         // which one.
         if
         (
-            mag(eHit.rawPoint() - start)
-          < mag(eHit.rawPoint() - end)
+            eHit.point().distSqr(start)
+          < eHit.point().distSqr(end)
         )
         {
             endPoint = 0;
@@ -108,7 +108,7 @@ Foam::pointIndexHit Foam::surfaceFeatures::edgeNearest
         }
     }
 
-    return pointIndexHit(eHit.hit(), eHit.rawPoint(), endPoint);
+    return pointIndexHit(eHit, endPoint);
 }
 
 
@@ -1391,7 +1391,7 @@ Foam::Map<Foam::label> Foam::surfaceFeatures::nearestSamples
 
             label sampleI = info.index();
 
-            if (magSqr(info.hitPoint() - edgePoint) < maxDistSqr[sampleI])
+            if (info.point().distSqr(edgePoint) < maxDistSqr[sampleI])
             {
                 nearest.insert(sampleI, surfEdgeI);
             }
@@ -1435,7 +1435,7 @@ Foam::Map<Foam::label> Foam::surfaceFeatures::nearestSamples
             meshTools::writeOBJ(objStream, samples[sampleI]); vertI++;
 
             point nearPt =
-                e.line(surfPoints).nearestDist(samples[sampleI]).rawPoint();
+                e.line(surfPoints).nearestDist(samples[sampleI]).point();
 
             meshTools::writeOBJ(objStream, nearPt); vertI++;
 
@@ -1541,7 +1541,7 @@ Foam::Map<Foam::pointIndexHit> Foam::surfaceFeatures::nearestEdges
 
             const edge& e = sampleEdges[sampleEdgeI];
 
-            if (magSqr(info.hitPoint() - edgePoint) < maxDistSqr[e.start()])
+            if (info.point().distSqr(edgePoint) < maxDistSqr[e.start()])
             {
                 nearest.insert
                 (
@@ -1590,7 +1590,7 @@ Foam::Map<Foam::pointIndexHit> Foam::surfaceFeatures::nearestEdges
             meshTools::writeOBJ(objStream, sampleEdge.centre(samplePoints));
             vertI++;
 
-            meshTools::writeOBJ(objStream, iter.val().rawPoint());
+            meshTools::writeOBJ(objStream, iter.val().point());
             vertI++;
 
             objStream<< "l " << vertI-1 << ' ' << vertI << endl;
@@ -1665,7 +1665,7 @@ void Foam::surfaceFeatures::nearestSurfEdge
                 sample
             );
 
-            edgePoint[i] = pHit.rawPoint();
+            edgePoint[i] = pHit.point();
             edgeEndPoint[i] = pHit.index();
         }
     }
@@ -1733,7 +1733,7 @@ void Foam::surfaceFeatures::nearestSurfEdge
         {
             edgeLabel[i] = selectedEdges[info.index()];
 
-            pointOnFeature[i] = info.hitPoint();
+            pointOnFeature[i] = info.point();
         }
     }
 }

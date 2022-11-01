@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -368,7 +368,7 @@ void Foam::isoSurfaceCell::calcSnappedCc
                 if (info.hit())
                 {
                     snappedCc[celli] = snappedPoints.size();
-                    snappedPoints.append(info.hitPoint());
+                    snappedPoints.append(info.point());
 
                     //Pout<< "cell:" << celli
                     //    << " at " << mesh_.cellCentres()[celli]
