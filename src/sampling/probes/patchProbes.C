@@ -71,7 +71,7 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
     {
         // Collect mesh faces and bounding box
         labelList bndFaces(nFaces);
-        treeBoundBox overallBb(boundBox::invertedBox);
+        treeBoundBox overallBb;
 
         nFaces = 0;
         forAll(patchIDs, i)
@@ -88,9 +88,7 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
         }
 
         Random rndGen(123456);
-        overallBb = overallBb.extend(rndGen, 1e-4);
-        overallBb.min() -= point::uniform(ROOTVSMALL);
-        overallBb.max() += point::uniform(ROOTVSMALL);
+        overallBb.inflate(rndGen, 1e-4, ROOTVSMALL);
 
 
         const indexedOctree<treeDataFace> boundaryTree

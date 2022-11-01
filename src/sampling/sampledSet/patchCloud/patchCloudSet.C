@@ -71,7 +71,7 @@ void Foam::patchCloudSet::calcSamples
 
     labelList patchFaces(sz);
     sz = 0;
-    treeBoundBox bb(boundBox::invertedBox);
+    treeBoundBox bb;
     for (const label patchi : patchSet_)
     {
         const polyPatch& pp = mesh().boundaryMesh()[patchi];
@@ -88,11 +88,8 @@ void Foam::patchCloudSet::calcSamples
     // Not very random
     Random rndGen(123456);
     // Make bb asymmetric just to avoid problems on symmetric meshes
-    bb = bb.extend(rndGen, 1e-4);
-
     // Make sure bb is 3D.
-    bb.min() -= point::uniform(ROOTVSMALL);
-    bb.max() += point::uniform(ROOTVSMALL);
+    bb.inflate(rndGen, 1e-4, ROOTVSMALL);
 
 
     indexedOctree<treeDataFace> patchTree

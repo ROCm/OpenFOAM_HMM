@@ -695,7 +695,7 @@ Foam::boundBox Foam::searchableSurfacesQueries::bounds
     const labelUList& surfacesToTest
 )
 {
-    boundBox bb(boundBox::invertedBox);
+    boundBox bb;
 
     for (const label surfi : surfacesToTest)
     {

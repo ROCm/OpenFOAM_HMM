@@ -52,13 +52,13 @@ Foam::patchDistMethods::exact::patchSurface() const
 
         Random rndGen(0);
 
-        boundBox localBb(mesh_.points(), false);
+        treeBoundBox localBb(mesh_.points());
 
         // Determine mesh bounding boxes:
         List<treeBoundBox> meshBb
         (
             1,
-            treeBoundBox(localBb).extend(rndGen, 1E-3)
+            localBb.extend(rndGen, 1E-3)
         );
 
         // Dummy bounds dictionary

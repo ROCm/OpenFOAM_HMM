@@ -300,7 +300,7 @@ Foam::label Foam::advancingFrontAMI::findTargetFace
         srcFacePti == -1 ? bb.centre() : srcPts[srcFace[srcFacePti]];
 
     const pointIndexHit sample =
-        treePtr_->findNearest(srcPt, magSqr(bb.max() - bb.centre()), fnOp);
+        treePtr_->findNearest(srcPt, 0.25*bb.magSqr(), fnOp);
 
     if (sample.hit() && isCandidate(srcFacei, sample.index()))
     {

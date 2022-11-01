@@ -564,12 +564,9 @@ Foam::conformationSurfaces::conformationSurfaces
 
     // Extend the global bounds to stop the bound box sitting on the surfaces
     // to be conformed to
-    //globalBounds_ = globalBounds_.extend(rndGen, 1e-4);
+    //globalBounds_.inflate(rndGen, 1e-4);
 
-    vector newSpan = 1e-4*globalBounds_.span();
-
-    globalBounds_.min() -= newSpan;
-    globalBounds_.max() += newSpan;
+    globalBounds_.grow(1e-4*globalBounds_.span());
 
     // Look at all surfaces at determine whether the locationInMesh point is
     // inside or outside each, to establish a signature for the domain to be

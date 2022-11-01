@@ -150,7 +150,7 @@ Foam::sampledPlane::sampledPlane
     sampledSurface(name, mesh, dict),
     cuttingPlane(definePlane(mesh, dict)),
     zoneNames_(),
-    bounds_(dict.getOrDefault("bounds", boundBox::invertedBox)),
+    bounds_(dict.getOrDefault("bounds", boundBox::null())),
     triangulate_(dict.getOrDefault("triangulate", true)),
     needsUpdate_(true)
 {

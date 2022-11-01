@@ -577,7 +577,7 @@ bool Foam::backgroundMeshDecomposition::refineCell
 //            // weightEstimate += sampleVol/pow3(s);
 //        }
 //
-//        if (sqr(spanScale_)*sqr(minCellSize) < magSqr(cellBb.span()))
+//        if (sqr(spanScale_)*sqr(minCellSize) < cellBb.magSqr())
 //        {
 //            return true;
 //        }
@@ -695,7 +695,7 @@ void Foam::backgroundMeshDecomposition::buildPatchAndTree()
     Pstream::allGatherList(allBackgroundMeshBounds_);
 
     // find global bounding box
-    globalBackgroundBounds_ = treeBoundBox(boundBox::invertedBox);
+    globalBackgroundBounds_.reset();
     forAll(allBackgroundMeshBounds_, proci)
     {
         globalBackgroundBounds_.add(allBackgroundMeshBounds_[proci]);

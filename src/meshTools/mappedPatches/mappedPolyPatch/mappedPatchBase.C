@@ -337,7 +337,7 @@ void Foam::mappedPatchBase::findLocalSamples
                         cc,
                         celli
                     );
-                    near.first().second().first() = magSqr(cc-sample);
+                    near.first().second().first() = sample.distSqr(cc);
                     near.first().second().second() = myRank;
                     near.second() = mySampleWorld;
                 }
@@ -396,11 +396,10 @@ void Foam::mappedPatchBase::findLocalSamples
                     treeBoundBox(pp.points(), pp.meshPoints()).extend
                     (
                         rndGen,
-                        1e-4
+                        1e-4,
+                        ROOTVSMALL
                     )
                 );
-                patchBb.min() -= point::uniform(ROOTVSMALL);
-                patchBb.max() += point::uniform(ROOTVSMALL);
 
                 indexedOctree<treeDataFace> boundaryTree
                 (
@@ -425,7 +424,7 @@ void Foam::mappedPatchBase::findLocalSamples
                     nearInfo = boundaryTree.findNearest
                     (
                         sample,
-                        magSqr(patchBb.span())
+                        patchBb.magSqr()
                     );
 
                     if (!nearInfo.hit())
@@ -438,7 +437,7 @@ void Foam::mappedPatchBase::findLocalSamples
                     {
                         point fc(pp[nearInfo.index()].centre(pp.points()));
                         nearInfo.setPoint(fc);
-                        near.first().second().first() = magSqr(fc-sample);
+                        near.first().second().first() = sample.distSqr(fc);
                         near.first().second().second() = myRank;
                         near.second() = mySampleWorld;
                     }
@@ -471,11 +470,10 @@ void Foam::mappedPatchBase::findLocalSamples
                     treeBoundBox(pp.points(), pp.meshPoints()).extend
                     (
                         rndGen,
-                        1e-4
+                        1e-4,
+                        ROOTVSMALL
                     )
                 );
-                patchBb.min() -= point::uniform(ROOTVSMALL);
-                patchBb.max() += point::uniform(ROOTVSMALL);
 
                 indexedOctree<treeDataPoint> boundaryTree
                 (
@@ -499,7 +497,7 @@ void Foam::mappedPatchBase::findLocalSamples
                     nearInfo = boundaryTree.findNearest
                     (
                         sample,
-                        magSqr(patchBb.span())
+                        patchBb.magSqr()
                     );
 
                     if (!nearInfo.hit())
@@ -512,7 +510,7 @@ void Foam::mappedPatchBase::findLocalSamples
                     {
                         const point& pt = nearInfo.point();
 
-                        near.first().second().first() = magSqr(pt-sample);
+                        near.first().second().first() = sample.distSqr(pt);
                         near.first().second().second() = myRank;
                         near.second() = mySampleWorld;
                     }
@@ -552,7 +550,7 @@ void Foam::mappedPatchBase::findLocalSamples
                     const point& fc = mesh.faceCentres()[facei];
 
                     near.first().first() = pointIndexHit(true, fc, facei);
-                    near.first().second().first() = magSqr(fc-sample);
+                    near.first().second().first() = sample.distSqr(fc);
                     near.first().second().second() = myRank;
                     near.second() = mySampleWorld;
                 }

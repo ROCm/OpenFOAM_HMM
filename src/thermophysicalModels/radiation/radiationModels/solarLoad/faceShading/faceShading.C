@@ -194,10 +194,7 @@ void Foam::faceShading::calculate()
     List<treeBoundBox> meshBb
     (
         1,
-        treeBoundBox
-        (
-            boundBox(mesh_.points(), false)
-        ).extend(rndGen, 1e-3)
+        treeBoundBox(mesh_.points()).extend(rndGen, 1e-3)
     );
 
     // Dummy bounds dictionary
@@ -263,9 +260,8 @@ void Foam::faceShading::calculate()
         surfacesMesh.searchableSurface::write();
     }
 
-    scalar maxBounding = 5.0*mag(mesh_.bounds().max() - mesh_.bounds().min());
-
-    reduce(maxBounding, maxOp<scalar>());
+    const scalar maxBounding =
+        returnReduce(5.0*mesh_.bounds().mag(), maxOp<scalar>());
 
     // Calculate index of faces which have a direct hit (local)
     DynamicList<label> rayStartFace(nFaces + 0.01*nFaces);

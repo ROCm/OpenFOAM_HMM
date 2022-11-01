@@ -44,19 +44,12 @@ void Foam::InteractionLists<ParticleType>::buildInteractionLists()
 
     Random rndGen(419715);
 
-    const vector interactionVec = maxDistance_*vector::one;
-
-    treeBoundBox procBb(treeBoundBox(mesh_.points()));
-
-    treeBoundBox extendedProcBb
-    (
-        procBb.min() - interactionVec,
-        procBb.max() + interactionVec
-    );
+    treeBoundBox procBb(mesh_.points());
 
     treeBoundBoxList allExtendedProcBbs(Pstream::nProcs());
 
-    allExtendedProcBbs[Pstream::myProcNo()] = extendedProcBb;
+    allExtendedProcBbs[Pstream::myProcNo()] = procBb;
+    allExtendedProcBbs[Pstream::myProcNo()].grow(maxDistance_);
 
     Pstream::allGatherList(allExtendedProcBbs);
 
@@ -194,16 +187,11 @@ void Foam::InteractionLists<ParticleType>::buildInteractionLists()
             globalTransforms.transformIndex(ciat)
         );
 
-        treeBoundBox tempTransformedBb
+        treeBoundBox extendedBb
         (
             transform.invTransformPosition(cellBbsToExchange[bbI].points())
         );
-
-        treeBoundBox extendedBb
-        (
-            tempTransformedBb.min() - interactionVec,
-            tempTransformedBb.max() + interactionVec
-        );
+        extendedBb.grow(maxDistance_);
 
         // Find all elements intersecting box.
         labelList interactingElems
@@ -419,16 +407,11 @@ void Foam::InteractionLists<ParticleType>::buildInteractionLists()
             globalTransforms.transformIndex(wfiat)
         );
 
-        treeBoundBox tempTransformedBb
+        treeBoundBox extendedBb
         (
             transform.invTransformPosition(wallFaceBbsToExchange[bbI].points())
         );
-
-        treeBoundBox extendedBb
-        (
-            tempTransformedBb.min() - interactionVec,
-            tempTransformedBb.max() + interactionVec
-        );
+        extendedBb.grow(maxDistance_);
 
         // Find all elements intersecting box.
         labelList interactingElems
@@ -592,11 +575,8 @@ void Foam::InteractionLists<ParticleType>::buildInteractionLists()
     {
         const treeBoundBox& cellBb = cellBbs[celli];
 
-        treeBoundBox extendedBb
-        (
-            cellBb.min() - interactionVec,
-            cellBb.max() + interactionVec
-        );
+        treeBoundBox extendedBb(cellBb);
+        extendedBb.grow(maxDistance_);
 
         // Find all cells intersecting extendedBb
         labelList interactingElems(allCellsTree.findBox(extendedBb));

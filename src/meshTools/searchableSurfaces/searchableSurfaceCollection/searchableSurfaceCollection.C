@@ -100,7 +100,7 @@ void Foam::searchableSurfaceCollection::findNearest
                     )
                 );
 
-                scalar distSqr = magSqr(globalPt - samples[pointi]);
+                scalar distSqr = globalPt.distSqr(samples[pointi]);
 
                 if (distSqr < minDistSqr[pointi])
                 {
@@ -249,7 +249,7 @@ Foam::searchableSurfaceCollection::searchableSurfaceCollection
     indexOffset_.setSize(surfI+1);
 
     // Bounds is the overall bounds - prepare for min/max ops
-    bounds() = boundBox::invertedBox;
+    bounds().reset();
 
     forAll(subGeom_, surfI)
     {

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -208,7 +208,7 @@ Foam::triSurfaceSearch::tree() const
     if (!treePtr_)
     {
         // Calculate bb without constructing local point numbering.
-        treeBoundBox bb(Zero, Zero);
+        treeBoundBox bb(point::zero);
 
         if (surface().size())
         {
@@ -230,9 +230,7 @@ Foam::triSurfaceSearch::tree() const
 
             // Slightly extended bb. Slightly off-centred just so on symmetric
             // geometry there are less face/edge aligned items.
-            bb = bb.extend(rndGen, 1e-4);
-            bb.min() -= point::uniform(ROOTVSMALL);
-            bb.max() += point::uniform(ROOTVSMALL);
+            bb.inflate(rndGen, 1e-4, ROOTVSMALL);
         }
 
         const scalar oldTol = indexedOctree<treeDataTriSurface>::perturbTol();

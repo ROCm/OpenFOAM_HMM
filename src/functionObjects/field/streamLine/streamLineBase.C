@@ -927,7 +927,7 @@ bool Foam::functionObjects::streamLineBase::read(const dictionary& dict)
     }
 
 
-    bounds_ = boundBox::invertedBox;
+    bounds_.reset();
     if (dict.readIfPresent("bounds", bounds_) && !bounds_.empty())
     {
         Info<< "    clipping all segments to " << bounds_ << nl << endl;

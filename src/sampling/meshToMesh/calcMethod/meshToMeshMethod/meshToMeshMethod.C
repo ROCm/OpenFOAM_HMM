@@ -46,12 +46,8 @@ Foam::scalar Foam::meshToMeshMethod::tolerance_ = 1e-6;
 
 Foam::labelList Foam::meshToMeshMethod::maskCells() const
 {
-    boundBox intersectBb
-    (
-        max(src_.bounds().min(), tgt_.bounds().min()),
-        min(src_.bounds().max(), tgt_.bounds().max())
-    );
-
+    boundBox intersectBb(src_.bounds());
+    intersectBb &= tgt_.bounds();
     intersectBb.inflate(0.01);
 
     DynamicList<label> cells(src_.nCells());

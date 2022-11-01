@@ -950,7 +950,7 @@ Foam::distributedTriSurfaceMesh::findBestProcs
                 // Minimum search distance to find the triangle
                 point near, far;
                 bbs[bbi].calcExtremities(centre, near, far);
-                minDistSqr = min(minDistSqr, magSqr(centre-far));
+                minDistSqr = min(minDistSqr, centre.distSqr(far));
             }
         }
     }
@@ -977,11 +977,11 @@ Foam::distributedTriSurfaceMesh::findBestProcs
                     point near, far;
                     bbs[bbi].calcExtremities(centre, near, far);
 
-                    scalar d2 = magSqr(centre-near);
+                    scalar d2 = centre.distSqr(near);
                     if (d2 < minDistSqr)
                     {
                         minDistSqr = d2;
-                        maxDistSqr = min(radiusSqr, magSqr(centre-far));
+                        maxDistSqr = min(radiusSqr, centre.distSqr(far));
                         minProci = proci;
                     }
                 }
@@ -1748,12 +1748,11 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
 
 
     // Initialise to inverted box
-    List<List<treeBoundBox>> bbs(Pstream::nProcs());
-    forAll(bbs, proci)
-    {
-        bbs[proci].setSize(1, treeBoundBox(boundBox::invertedBox));
-    }
-
+    List<List<treeBoundBox>> bbs
+    (
+        Pstream::nProcs(),
+        List<treeBoundBox>(1, treeBoundBox::null())
+    );
 
     const globalIndex& triIndexer = globalTris();
 
@@ -3735,7 +3734,7 @@ void Foam::distributedTriSurfaceMesh::findLineAll
     const vectorField smallVec
     (
         ROOTSMALL*dirVec
-      + vector(ROOTVSMALL,ROOTVSMALL,ROOTVSMALL)
+      + vector::uniform(ROOTVSMALL)
     );
 
     // Copy to input and compact any hits

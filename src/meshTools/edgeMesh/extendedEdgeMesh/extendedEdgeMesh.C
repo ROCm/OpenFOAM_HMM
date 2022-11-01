@@ -833,11 +833,8 @@ Foam::extendedEdgeMesh::pointTree() const
         // geometry there are less face/edge aligned items.
         treeBoundBox bb
         (
-            treeBoundBox(points()).extend(rndGen, 1e-4)
+            treeBoundBox(points()).extend(rndGen, 1e-4, ROOTVSMALL)
         );
-
-        bb.min() -= point::uniform(ROOTVSMALL);
-        bb.max() += point::uniform(ROOTVSMALL);
 
         const labelList featurePointLabels = identity(nonFeatureStart_);
 
@@ -873,11 +870,8 @@ Foam::extendedEdgeMesh::edgeTree() const
         // geometry there are less face/edge aligned items.
         treeBoundBox bb
         (
-            treeBoundBox(points()).extend(rndGen, 1e-4)
+            treeBoundBox(points()).extend(rndGen, 1e-4, ROOTVSMALL)
         );
-
-        bb.min() -= point::uniform(ROOTVSMALL);
-        bb.max() += point::uniform(ROOTVSMALL);
 
         labelList allEdges(identity(edges().size()));
 
@@ -915,11 +909,8 @@ Foam::extendedEdgeMesh::edgeTreesByType() const
         // geometry there are less face/edge aligned items.
         treeBoundBox bb
         (
-            treeBoundBox(points()).extend(rndGen, 1e-4)
+            treeBoundBox(points()).extend(rndGen, 1e-4, ROOTVSMALL)
         );
-
-        bb.min() -= point::uniform(ROOTVSMALL);
-        bb.max() += point::uniform(ROOTVSMALL);
 
         labelListList sliceEdges(nEdgeTypes);
 

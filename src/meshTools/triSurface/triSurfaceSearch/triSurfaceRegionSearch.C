@@ -126,7 +126,7 @@ Foam::triSurfaceRegionSearch::treeByRegion() const
             );
 
             // Calculate bb without constructing local point numbering.
-            treeBoundBox bb(Zero, Zero);
+            treeBoundBox bb(point::zero);
 
             if (indirectRegionPatches_[regionI].size())
             {
@@ -156,9 +156,7 @@ Foam::triSurfaceRegionSearch::treeByRegion() const
                 // Slightly extended bb. Slightly off-centred just so
                 // on symmetric geometry there are fewer face/edge
                 // aligned items.
-                bb = bb.extend(rndGen, 1e-4);
-                bb.min() -= point::uniform(ROOTVSMALL);
-                bb.max() += point::uniform(ROOTVSMALL);
+                bb.inflate(rndGen, 1e-4, ROOTVSMALL);
             }
 
             treeByRegion_.set

@@ -89,19 +89,16 @@ Foam::searchableExtrudedCircle::searchableExtrudedCircle
     const edgeList& edges = eMesh.edges();
     bounds() = boundBox(points, false);
 
-    vector halfSpan(0.5*bounds().span());
-    point ctr(bounds().centre());
+    // Make the boundBox into a perfect cube around its centre
+    const scalar halfWidth = mag(0.5*bounds().span());
 
-    bounds().min() = ctr - mag(halfSpan) * vector::one;
-    bounds().max() = ctr + mag(halfSpan) * vector::one;
-
-    // Calculate bb of all points
-    treeBoundBox bb(bounds());
+    bounds().reset(bounds().centre());
+    bounds().grow(halfWidth);
 
     // Slightly extended bb. Slightly off-centred just so on symmetric
     // geometry there are less face/edge aligned items.
-    bb.min() -= point::uniform(ROOTVSMALL);
-    bb.max() += point::uniform(ROOTVSMALL);
+    treeBoundBox bb(bounds());
+    bb.grow(ROOTVSMALL);
 
     edgeTree_.reset
     (
@@ -230,7 +227,7 @@ void Foam::searchableExtrudedCircle::findParametricNearest
     const pointField& points = mesh.points();
     const labelListList& pointEdges = mesh.pointEdges();
 
-    const scalar maxDistSqr(Foam::magSqr(bounds().span()));
+    const scalar maxDistSqr = bounds().magSqr();
 
     // Normalise lambdas
     const scalarField lambdas
@@ -446,16 +443,14 @@ void Foam::searchableExtrudedCircle::getNormal
     normal.setSize(info.size());
     normal = Zero;
 
+    const scalar distSqr = bounds().magSqr();
+
     forAll(info, i)
     {
         if (info[i].hit())
         {
             // Find nearest on curve
-            pointIndexHit curvePt = tree.findNearest
-            (
-                info[i].point(),
-                Foam::magSqr(bounds().span())
-            );
+            pointIndexHit curvePt = tree.findNearest(info[i].point(), distSqr);
 
             normal[i] = info[i].hitPoint()-curvePt.hitPoint();
 

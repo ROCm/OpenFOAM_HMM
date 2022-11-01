@@ -91,8 +91,7 @@ bool Foam::cellCellStencils::trackingInverseDistance::markBoundaries
 
                 // Mark in voxel mesh
                 boundBox faceBb(pp.points(), pp[i], false);
-                faceBb.min() -= smallVec;
-                faceBb.max() += smallVec;
+                faceBb.grow(smallVec);
 
                 if (bb.overlaps(faceBb))
                 {
@@ -127,8 +126,8 @@ bool Foam::cellCellStencils::trackingInverseDistance::markBoundaries
 
                 // Mark in voxel mesh
                 boundBox faceBb(pp.points(), pp[i], false);
-                faceBb.min() -= smallVec;
-                faceBb.max() += smallVec;
+                faceBb.grow(smallVec);
+
                 if (!bb.contains(faceCentres[i]))
                 {
                     if (!hasWarned)
@@ -224,8 +223,7 @@ void Foam::cellCellStencils::trackingInverseDistance::markPatchesAsHoles
             {
                 label celli = tgtCellMap[tgtCelli];
                 boundBox cBb(mesh_.cellBb(celli));
-                cBb.min() -= smallVec_;
-                cBb.max() += smallVec_;
+                cBb.grow(smallVec_);
 
                 if
                 (
@@ -293,8 +291,7 @@ void Foam::cellCellStencils::trackingInverseDistance::markPatchesAsHoles
                 {
                     label celli = tgtCellMap[tgtCelli];
                     boundBox cBb(mesh_.cellBb(celli));
-                    cBb.min() -= smallVec_;
-                    cBb.max() += smallVec_;
+                    cBb.grow(smallVec_);
 
                     if
                     (
@@ -410,8 +407,7 @@ void Foam::cellCellStencils::trackingInverseDistance::markDonors
         if (srcOverlapProcs.size())
         {
             treeBoundBox subBb(mesh_.cellBb(celli));
-            subBb.min() -= smallVec_;
-            subBb.max() += smallVec_;
+            subBb.grow(smallVec_);
 
             forAll(srcOverlapProcs, i)
             {
@@ -600,7 +596,7 @@ bool Foam::cellCellStencils::trackingInverseDistance::update()
             << exit(FatalIOError);
     }
 
-    const boundBox& allBb(mesh_.bounds());
+    const boundBox& allBb = mesh_.bounds();
 
     List<treeBoundBoxList> meshBb(nZones);
 

@@ -197,10 +197,7 @@ void Foam::faceReflecting::initialise(const dictionary& coeffs)
     List<treeBoundBox> meshBb
     (
         1,
-        treeBoundBox
-        (
-            boundBox(mesh_.points(), false)
-        ).extend(rndGen, 1e-3)
+        treeBoundBox(mesh_.points()).extend(rndGen, 1e-3)
     );
 
     // Dummy bounds dictionary
@@ -332,9 +329,8 @@ void Foam::faceReflecting::calculate()
     Pstream::listCombineReduce(refDisDirsIndex, maxEqOp<label>());
     Pstream::mapCombineReduce(refFacesDirIndex, minEqOp<label>());
 
-    scalar maxBounding = 5.0*mag(mesh_.bounds().max() - mesh_.bounds().min());
-
-    reduce(maxBounding, maxOp<scalar>());
+    const scalar maxBounding =
+        returnReduce(5.0*mesh_.bounds().mag(), maxOp<scalar>());
 
     // Shoot Rays
     // From faces t = 0, r = 0 and a > 0 to all 'used' discrete reflected

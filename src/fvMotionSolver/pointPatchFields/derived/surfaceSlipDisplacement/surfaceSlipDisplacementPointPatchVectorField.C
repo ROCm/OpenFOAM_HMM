@@ -64,14 +64,13 @@ void Foam::surfaceSlipDisplacementPointPatchVectorField::calcProjection
     // we're guaranteed to hit something.
 
     //- Per point projection vector:
-    const scalar projectLen = mag(mesh.bounds().max()-mesh.bounds().min());
+    const scalar projectLen = mesh.bounds().mag();
 
     // For case of fixed projection vector:
-    vector projectVec(0, 0, 0);
+    vector projectVec(Zero);
     if (projectMode_ == FIXEDNORMAL)
     {
-        vector n = projectDir_/mag(projectDir_);
-        projectVec = projectLen*n;
+        projectVec = projectLen * normalised(projectDir_);
     }
 
 

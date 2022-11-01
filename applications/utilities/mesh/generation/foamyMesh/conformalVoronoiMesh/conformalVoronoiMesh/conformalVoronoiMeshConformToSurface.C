@@ -1965,11 +1965,8 @@ void Foam::conformalVoronoiMesh::buildEdgeLocationTree
 {
     treeBoundBox overallBb
     (
-        geometryToConformTo_.globalBounds().extend(rndGen_, 1e-4)
+        geometryToConformTo_.globalBounds().extend(rndGen_, 1e-4, ROOTVSMALL)
     );
-
-    overallBb.min() -= Foam::point::uniform(ROOTVSMALL);
-    overallBb.max() += Foam::point::uniform(ROOTVSMALL);
 
     edgeLocationTreePtr_.reset
     (
@@ -1992,11 +1989,8 @@ void Foam::conformalVoronoiMesh::buildSurfacePtLocationTree
 {
     treeBoundBox overallBb
     (
-        geometryToConformTo_.globalBounds().extend(rndGen_, 1e-4)
+        geometryToConformTo_.globalBounds().extend(rndGen_, 1e-4, ROOTVSMALL)
     );
-
-    overallBb.min() -= Foam::point::uniform(ROOTVSMALL);
-    overallBb.max() += Foam::point::uniform(ROOTVSMALL);
 
     surfacePtLocationTreePtr_.reset
     (

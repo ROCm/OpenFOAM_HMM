@@ -195,10 +195,10 @@ void Foam::AABBTree<Type>::createBoxes
     // Assign the objects to min or max bin
 
     DynamicList<label> minBinObjectIDs(objectIDs.size());
-    treeBoundBox minBb(boundBox::invertedBox);
+    treeBoundBox minBb;
 
     DynamicList<label> maxBinObjectIDs(objectIDs.size());
-    treeBoundBox maxBb(boundBox::invertedBox);
+    treeBoundBox maxBb;
 
     for (const label objI : objectIDs)
     {

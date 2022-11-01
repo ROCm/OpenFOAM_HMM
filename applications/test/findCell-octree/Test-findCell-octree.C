@@ -53,20 +53,17 @@ int main(int argc, char *argv[])
     const polyMesh::cellDecomposition decompMode = polyMesh::CELL_TETS;
 
     treeBoundBox meshBb(mesh.bounds());
+    treeBoundBox shiftedBb(meshBb);
 
     // Calculate typical cell related size to shift bb by.
     scalar typDim = meshBb.avgDim()/(2.0*Foam::cbrt(scalar(mesh.nCells())));
 
-    treeBoundBox shiftedBb
-    (
-        meshBb.min(),
-        meshBb.max() + vector(typDim, typDim, typDim)
-    );
+    shiftedBb.max() += vector::uniform(typDim);
 
     Info<< "Mesh" << endl;
     Info<< "   bounding box           : " << meshBb << endl;
     Info<< "   bounding box (shifted) : " << shiftedBb << endl;
-    Info<< "   typical dimension      : " << shiftedBb.typDim() << endl;
+    Info<< "   typical dimension      : " << shiftedBb.avgDim() << endl;
 
     Info<< "Initialised mesh in "
         << runTime.cpuTimeIncrement() << " s" << endl;

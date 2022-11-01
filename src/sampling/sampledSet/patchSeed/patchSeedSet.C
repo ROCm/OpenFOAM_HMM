@@ -108,14 +108,9 @@ void Foam::patchSeedSet::calcSamples
 
             treeBoundBox patchBb
             (
-                treeBoundBox(pp.points(), pp.meshPoints()).extend
-                (
-                    rndGen,
-                    1e-4
-                )
+                treeBoundBox(pp.points(), pp.meshPoints())
+                    .extend(rndGen, 1e-4, ROOTVSMALL)
             );
-            patchBb.min() -= point::uniform(ROOTVSMALL);
-            patchBb.max() += point::uniform(ROOTVSMALL);
 
             indexedOctree<treeDataFace> boundaryTree
             (
@@ -135,15 +130,7 @@ void Foam::patchSeedSet::calcSamples
             // to be found
             const scalar globalDistSqr
             (
-                //magSqr
-                //(
-                //    boundBox
-                //    (
-                //        pp.points(),
-                //        pp.meshPoints(),
-                //        true
-                //    ).span()
-                //)
+                //boundBox(pp.points(), pp.meshPoints(), true).magSqr()
                 GREAT
             );
 
@@ -168,7 +155,7 @@ void Foam::patchSeedSet::calcSamples
                 {
                     point fc(pp[nearInfo.index()].centre(pp.points()));
                     nearInfo.setPoint(fc);
-                    nearest[sampleI].second().first() = magSqr(fc-sample);
+                    nearest[sampleI].second().first() = sample.magSqr(fc);
                     nearest[sampleI].second().second() =
                         Pstream::myProcNo();
                 }

@@ -178,11 +178,8 @@ void createBoundaryEdgeTrees
         // geometry there are less face/edge aligned items.
         treeBoundBox bb
         (
-            treeBoundBox(UList<point>(surf.localPoints())).extend(rndGen, 1e-4)
+            treeBoundBox(surf.localPoints()).extend(rndGen, 1e-4, ROOTVSMALL)
         );
-
-        bb.min() -= point::uniform(ROOTVSMALL);
-        bb.max() += point::uniform(ROOTVSMALL);
 
         bEdgeTrees.set
         (
