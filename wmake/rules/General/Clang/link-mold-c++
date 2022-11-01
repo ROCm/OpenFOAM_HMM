@@ -1,10 +1,16 @@
+#------------------------------------------------------------------------------
+
 LINK_LIBS   = $(c++DBUG)
 
 LINKLIBSO   = $(CC) $(c++FLAGS) -shared \
-    -fuse-ld=mold \
-    $(FOAM_EXTRA_LDFLAGS)
+    -fuse-ld=mold
 
 LINKEXE     = $(CC) $(c++FLAGS) \
-    -fuse-ld=mold \
-    -L$(FOAM_LIBBIN)/dummy -lPstream \
-    $(FOAM_EXTRA_LDFLAGS)
+    -fuse-ld=mold
+
+# Link dummy stub to resolve libPstream symbols used by libOpenFOAM
+ifneq (,$(findstring -lOpenFOAM,$(PROJECT_LIBS)))
+    LINKEXE += -L$(FOAM_LIBBIN)/dummy -lPstream
+endif
+
+#------------------------------------------------------------------------------

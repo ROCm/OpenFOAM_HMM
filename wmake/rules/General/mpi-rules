@@ -22,7 +22,7 @@ ifneq ("$(MPLIB_FAMILY)","$(WM_MPLIB)")
 endif
 
 # Specific rules
-ifneq ("","$(WM_MPLIB)")
+ifneq (,$(strip $(WM_MPLIB)))
     sinclude $(GENERAL_RULES)/mplib$(WM_MPLIB)
     sinclude $(DEFAULT_RULES)/mplib$(WM_MPLIB)
     # system-specific
@@ -32,7 +32,7 @@ ifneq ("","$(WM_MPLIB)")
 endif
 
 # Default target MPI libdir is PROJECT lib/<mpi-name>
-ifeq (,$(FOAM_MPI_LIBBIN))
+ifeq (,$(strip $(FOAM_MPI_LIBBIN)))
     FOAM_MPI_LIBBIN := $(FOAM_LIBBIN)/$(FOAM_MPI)
 endif
 

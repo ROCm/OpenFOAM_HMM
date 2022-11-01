@@ -7,6 +7,7 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 library/Allwmake
 
-wmake
+# Does not use libOpenFOAM or libPstream...
+wmake -no-openfoam
 
 #------------------------------------------------------------------------------

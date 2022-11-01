@@ -6,7 +6,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2014-2017 OpenFOAM Foundation
-#     Copyright (C) 2019-2021 OpenCFD Ltd.
+#     Copyright (C) 2019-2022 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -81,11 +81,13 @@ USAGE
 
 
 #------------------------------------------------------------------------------
-# Parse the arguments and options
+# Parse the arguments and options.
+# Prefix with 'wmakeOpt_' to avoid affecting the sourcing environment.
+#
 #------------------------------------------------------------------------------
 
-unset optDebug optLog optNonRecursive optQueue
-unset optWmakeFrontend
+unset wmakeOpt_frontend wmakeOpt_nonRecursive
+unset wmakeOpt_debug wmakeOpt_log wmakeOpt_queue
 
 for arg in "$@"
 do
@@ -99,13 +101,13 @@ do
 
     -with-bear)
         # Use 'bear' as frontend wrapper to wmake
-        optWmakeFrontend="-with-bear"
+        wmakeOpt_frontend="-with-bear"
         continue    # Argument handled, remove it
         ;;
 
     -no-recurs* | -fromWmake)
         # Avoid recursion (eg, if called from wmake)
-        optNonRecursive=true
+        wmakeOpt_nonRecursive=true
         # Pass onwards to other Allwmake scripts
         ;;
 
@@ -155,29 +157,29 @@ do
         ;;
 
     -l | -log)
-        optLog="log.${WM_OPTIONS:-build}"
+        wmakeOpt_log="log.${WM_OPTIONS:-build}"
         continue    # Argument handled, remove it
         ;;
 
     -log=*)
-        optLog="${arg##*=}"
-        if [ -d "$optLog" ]
+        wmakeOpt_log="${arg##*=}"
+        if [ -d "$wmakeOpt_log" ]
         then
-            optLog="${optLog%/}/log.${WM_OPTIONS:-build}"
-        elif [ -z "$optLog" ]
+            wmakeOpt_log="${wmakeOpt_log%/}/log.${WM_OPTIONS:-build}"
+        elif [ -z "$wmakeOpt_log" ]
         then
-            optLog="log.${WM_OPTIONS:-build}"
+            wmakeOpt_log="log.${WM_OPTIONS:-build}"
         fi
         continue    # Argument handled, remove it
         ;;
 
-    -debug | -debug-O[0123])
-        optDebug="$arg"
+    -debug | -debug-O[g0123])
+        wmakeOpt_debug="$arg"
         continue    # Argument handled, remove it
         ;;
 
     -q | -queue)
-        optQueue="-queue"
+        wmakeOpt_queue="-queue"
         continue    # Argument handled, remove it
         ;;
 
@@ -196,21 +198,22 @@ done
 # Execute wmake -all if not called from wmake
 #------------------------------------------------------------------------------
 
-if [ -z "$optNonRecursive" ]
+if [ -z "$wmakeOpt_nonRecursive" ]
 then
-    if [ -z "$optLog" ]
+    if [ -z "$wmakeOpt_log" ]
     then
-        exec wmake $optWmakeFrontend -all \
-            $optDebug $optQueue $*
+        exec wmake $wmakeOpt_frontend -all \
+            $wmakeOpt_debug $wmakeOpt_queue $wmakeOpt_openmp $*
         exit $? # Unneeded, but just in case something went wrong
     else
-        echo "Logging wmake -all output to '$optLog'" 1>&2
+        echo "Logging wmake -all output to '$wmakeOpt_log'" 1>&2
         echo 1>&2
-        exec wmake $optWmakeFrontend -all \
-            $optDebug $optQueue $* 2>&1 | /usr/bin/tee $optLog
+        exec wmake $wmakeOpt_frontend -all \
+            $wmakeOpt_debug $wmakeOpt_queue $wmakeOpt_openmp $* 2>&1 | \
+            /usr/bin/tee $wmakeOpt_log
         # Need to cleanup after the tee
         rc=$? # Error code from tee (not wmake), but not entirely important
-        echo "Done logging to '$optLog'" 1>&2
+        echo "Done logging to '$wmakeOpt_log'" 1>&2
         exit "$rc"
     fi
 fi
@@ -230,8 +233,8 @@ fi
 # Cleanup local variables and functions
 #------------------------------------------------------------------------------
 
-unset optWmakeFrontend
-unset optNonRecursive optDebug optLog optQueue
+unset wmakeOpt_frontend wmakeOpt_nonRecursive
+unset wmakeOpt_debug wmakeOpt_log wmakeOpt_queue
 unset -f usage
 
 

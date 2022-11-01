@@ -82,11 +82,15 @@ setenv WM_LABEL_SIZE 32
 # = Opt | Dbg | Debug | Prof
 setenv WM_COMPILE_OPTION Opt
 
-# [WM_COMPILE_CONTROL] - additional control for compiler rules
+# [WM_COMPILE_CONTROL] - additional control for compilation/linking
 #   +gold   : with gold linker
 #   +lld    : with  lld linker (with clang)
 #   +mold   : with mold linker (with clang)
+#   ~libz   : without libz compression
+#   +openmp : with openmp
 #   ~openmp : without openmp
+#   +ccache : use ccache
+#   ccache=... : ccache command (unquoted, single/double or <> quoted)
 #   version=... : compiler suffix (eg, "11" for gcc-11)
 #setenv WM_COMPILE_CONTROL "+gold"
 

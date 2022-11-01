@@ -33,7 +33,7 @@ else
 endif
 
 # Default compilation is 'Opt' - never permit an empty value
-ifeq (,$(WM_COMPILE_OPTION))
+ifeq (,$(strip $(WM_COMPILE_OPTION)))
     WM_COMPILE_OPTION := Opt
 endif
 
@@ -46,6 +46,12 @@ ifneq ("$(COMPILER_FAMILY)","$(WM_COMPILER)")
 sinclude $(RULES)/general
 sinclude $(RULES)/c++
 endif
+
+# Add compile flags for openmp
+ifneq (,$(findstring +openmp,$(WM_COMPILE_CONTROL)))
+c++FLAGS  += $(COMP_OPENMP)
+endif
+
 include $(GENERAL_RULES)/transform
 
 #------------------------------------------------------------------------------

@@ -41,8 +41,13 @@ Description
 
 int main(int argc, char *argv[])
 {
+    std::cout
+        << "c++ = " << __cplusplus << '\n';
+
 #if _OPENMP
-    std::cout << "_OPENMP = " << _OPENMP << "\n\n";
+    std::cout
+        << "openmp = " << _OPENMP << '\n'
+        << "Initial threads = " << omp_get_num_threads() << "\n\n";
 
     // Fork threads with their own copies of variables
     int nThreads, threadId;
@@ -52,15 +57,15 @@ int main(int argc, char *argv[])
         threadId = omp_get_thread_num();
         nThreads = omp_get_num_threads();
 
-        // Printf rather than cout to ensure that it emits in one go
-        printf("Called from thread = %d\n", threadId);
-
         // Master thread
         if (threadId == 0)
         {
             // Printf rather than cout to ensure that it emits in one go
             printf("Number of threads = %d\n", nThreads);
         }
+
+        // Printf rather than cout to ensure that it emits in one go
+        printf("Called from thread = %d\n", threadId);
     }
 #else
     std::cout << "Compiled without openmp!\n";

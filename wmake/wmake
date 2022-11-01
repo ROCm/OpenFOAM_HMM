@@ -75,7 +75,10 @@ cat<<HELP_FULL
   -module-prefix=PATH   Specify FOAM_MODULE_PREFIX as absolute/relative path
   -module-prefix=TYPE   Specify FOAM_MODULE_PREFIX as predefined type
                         (u,user | g,group | o,openfoam)
-  -no-openmp        Disable openmp (adds '~openmp' to WM_COMPILE_CONTROL)
+  -no-openfoam      Disable OpenFOAM linking ('~openfoam' WM_COMPILE_CONTROL)
+  -openmp           Compile/link with openmp ('+openmp' WM_COMPILE_CONTROL)
+  -no-openmp        Disable openmp ('~openmp' WM_COMPILE_CONTROL)
+
   -no-scheduler     Disable scheduled parallel compilation
 
   -show-api         Print api value (from Make rules)
@@ -92,6 +95,8 @@ cat<<HELP_FULL
   -show-path-cxx    Print path to C++ compiler
   -show-mpi-compile Print mpi-related flags used when compiling
   -show-mpi-link    Print mpi-related flags used when linking
+  -show-openmp-compile  Print openmp flags used when compiling
+  -show-openmp-link     Print openmp flags used when compiling
 
 HELP_FULL
 fi
@@ -202,12 +207,13 @@ allCores()
 #------------------------------------------------------------------------------
 
 # Default to compiling the local target only
-unset optAll optUpdate optCxx optDebug optQuiet optShow optPwd
+unset opt_all opt_update opt_quiet opt_show opt_pwd
+unset opt_debug opt_openmp opt_openfoam
 
 # Consistency with inherited values
 if [ "$WM_QUIET" = true ]
 then
-    optQuiet=true
+    opt_quiet=true
 elif [ "$WM_QUIET" = false ]
 then
     # Makefile syntax only checks set/unset, so handle true/false here
@@ -237,7 +243,7 @@ do
         # Out of order options: (-quiet)
         -check-dir) shift
             exec "$scriptsDir/wmake-check-dir" \
-                ${optQuiet:+-silent} "$@"
+                ${opt_quiet:+-silent} "$@"
             exit $?
             ;;
 
@@ -248,16 +254,16 @@ do
             ;;
 
         -s | -silent | -quiet)
-            optQuiet=true
+            opt_quiet=true
             export WM_QUIET=true
             ;;
 
         -debug)
-            optDebug="-g"
+            opt_debug="-g"
             ;;
 
         -debug-O[g0123])
-            optDebug="-g -${1##*-}"
+            opt_debug="-g -${1##*-}"
             ;;
 
         -build-root=*)
@@ -272,20 +278,26 @@ do
         -show-ext-so | \
         -show-compile-c   | -show-c   | -show-cflags   | -show-cflags-arch | \
         -show-compile-cxx | -show-cxx | -show-cxxflags | -show-cxxflags-arch | \
-        -show-mpi-compile | -show-mpi-link )
+        -show-mpi-compile | -show-mpi-link | \
+        -show-openmp-compile | -show-openmp-link)
             printInfo "${1#-show-}"
-            optShow=true
+            opt_show=true
             ;;
         -show-path-c | -show-path-cxx )
             command -v $(printInfo "${1#-show-path-}")
-            optShow=true
+            opt_show=true
             ;;
+
+        # Recursive build all targets
         -a | -all | all)
-            optAll=all
+            opt_all=all
             ;;
+
+        # Recursive build all with scheduled queuing
         -q | -queue | queue)
-            optAll=queue
+            opt_all=queue
             ;;
+
         # Parallel compilation on all cores (or specified number of cores)
         -j)
             export WM_NCOMPPROCS=0
@@ -309,10 +321,17 @@ do
         -k | -keep-going | -non-stop)
             export WM_CONTINUE_ON_ERROR=true
             ;;
-        # Disable use of openmp
+        # Compile/link with openmp
+        -openmp)
+            opt_openmp=true
+            ;;
+        # Disable openmp
         -no-openmp)
-            WM_COMPILE_CONTROL="$WM_COMPILE_CONTROL ~openmp"
-            export WM_COMPILE_CONTROL
+            opt_openmp=false
+            ;;
+        # Link without openfoam libraries
+        -no-openfoam)
+            opt_openfoam=false
             ;;
         # Disable scheduled parallel compilation
         -no-scheduler)
@@ -320,7 +339,7 @@ do
             ;;
         # Print root directory containing a Make/ directory and exit
         -pwd)
-            optPwd=true
+            opt_pwd=true
             ;;
         # Meant to be used following a pull, this will:
         # - remove dep files that depend on deleted files;
@@ -329,8 +348,8 @@ do
         # - remove empty directories, along with deprecated object directories
         #   and respective binaries.
         -update)
-            optUpdate=true
-            : "${optAll:=all}" # implies 'all', unless previously set
+            opt_update=true
+            : "${opt_all:=all}"  # implies 'all', unless previously set
             ;;
 
         -show-api | -version | --version)
@@ -348,7 +367,7 @@ do
 done
 
 # Can terminate now if it was one of the -showXXX options
-if [ "$optShow" = true ]
+if [ "$opt_show" = true ]
 then
     exit 0
 fi
@@ -397,7 +416,7 @@ MakeDir=Make
 
 unset dir
 
-if [ -n "$optPwd" ]
+if [ -n "$opt_pwd" ]
 then
     if [ $# -ge 1 ]
     then
@@ -475,10 +494,101 @@ unset dir
 
 
 #------------------------------------------------------------------------------
+# Setup additional compiler settings etc
+#------------------------------------------------------------------------------
+
+# Handle openmp flags. Since we are using bash, can easily remove
+# conflicting values from WM_COMPILE_CONTROL
+case "$opt_openmp" in
+(true)     # Override: compile/link with openmp
+    WM_COMPILE_CONTROL="${WM_COMPILE_CONTROL/~openmp/} +openmp"
+    export WM_COMPILE_CONTROL
+    ;;
+(false)     # Override: disable use of openmp
+    WM_COMPILE_CONTROL="${WM_COMPILE_CONTROL/+openmp/} ~openmp"
+    export WM_COMPILE_CONTROL
+    ;;
+esac
+
+# Handle openfoam flags - can currently only disable
+case "$opt_openfoam" in
+(false)     # Override: disable openfoam libraries
+    WM_COMPILE_CONTROL="${WM_COMPILE_CONTROL} ~openfoam"
+    export WM_COMPILE_CONTROL
+    ;;
+esac
+
+# Debug:
+##echo "WM_COMPILE_CONTROL='$WM_COMPILE_CONTROL'" 1>&2
+
+# Handle debug flags
+if [ -n "$opt_debug" ]
+then
+    # Add -debug value and -DFULLDEBUG into FOAM_EXTRA_CXXFLAGS
+    opt_debug="${FOAM_EXTRA_CXXFLAGS:+ }${opt_debug} -DFULLDEBUG"
+    case "$FOAM_EXTRA_CXXFLAGS" in
+    (*-DFULLDEBUG*)
+        # Appears to have already been added
+    ;;
+    (*)
+        export FOAM_EXTRA_CXXFLAGS="${FOAM_EXTRA_CXXFLAGS}${opt_debug}"
+    ;;
+    esac
+fi
+
+# Extract ccache controls from WM_COMPILE_CONTROL if possible
+# and when queuing is not active
+if [ "$opt_all" != queue ]
+then
+    unset opt_ccache
+
+    case "$WM_COMPILE_CONTROL" in
+    (*ccache=*)
+        opt_ccache="${WM_COMPILE_CONTROL##*ccache=}"
+        case "$opt_ccache" in
+        ('<'*)
+            # Angle bracket quoted: ccache=<command ...>
+            # - extract between < > delimiters
+            opt_ccache="${opt_ccache#<}"
+            opt_ccache="${opt_ccache%%>*}"
+        ;;
+        ("'"*)
+            # Single-quoted
+            opt_ccache="${opt_ccache#\'}"
+            opt_ccache="${opt_ccache%%\'*}"
+        ;;
+        ('"'*)
+            # Double-quoted
+            opt_ccache="${opt_ccache#\"}"
+            opt_ccache="${opt_ccache%%\"*}"
+        ;;
+        (*)
+            # Plain ccache=command - truncate after first space
+            opt_ccache="${opt_ccache%% *}"
+        ;;
+        esac
+    ;;
+    (*'+ccache'*)
+        # Simple specification
+        opt_ccache="ccache"
+    ;;
+    esac
+
+    if [ -n "$opt_ccache" ]
+    then
+        export WM_SCHEDULER="$opt_ccache"
+    fi
+fi
+
+# Debug:
+##echo "WM_SCHEDULER='$WM_SCHEDULER'" 1>&2
+
+
+#------------------------------------------------------------------------------
 # Recurse the source tree to update all
 #------------------------------------------------------------------------------
 
-if [ "$optUpdate" = true ]
+if [ "$opt_update" = true ]
 then
     wrmdep -update
     wrmdep -old
@@ -487,29 +597,14 @@ then
     export WM_UPDATE_DEPENDENCIES=yes
 fi
 
-
-unset exitCode
-
 #------------------------------------------------------------------------------
 # Recurse the source tree to compile "all" targets
 #------------------------------------------------------------------------------
 
-if [ -n "$optDebug" ]
+if [ "$opt_all" = all ]
 then
-    # Add -debug value and -DFULLDEBUG into FOAM_EXTRA_CXXFLAGS
-    optDebug="${FOAM_EXTRA_CXXFLAGS:+ }$optDebug -DFULLDEBUG"
-    case "$FOAM_EXTRA_CXXFLAGS" in
-    (*-DFULLDEBUG*)
-        # Appears to have already been added
-    ;;
-    (*)
-        export FOAM_EXTRA_CXXFLAGS="${FOAM_EXTRA_CXXFLAGS}${optDebug}"
-    ;;
-    esac
-fi
+    unset exitCode
 
-if [ "$optAll" = all ]
-then
     if [ -e Allwmake.override ]
     then
         if [ -x Allwmake.override ]
@@ -565,9 +660,10 @@ fi
 #------------------------------------------------------------------------------
 # Recurse source tree to compile "all" targets using wmakeCollect
 #------------------------------------------------------------------------------
-if [ "$optAll" = queue ]
+
+if [ "$opt_all" = queue ]
 then
-    [ "$optUpdate" = true ] || wmakeLnIncludeAll $parOpt
+    [ "$opt_update" = true ] || wmakeLnIncludeAll $parOpt
 
     if [ -n "$FOAM_BUILDROOT" ] && [ -w "$FOAM_BUILDROOT" ]
     then
@@ -705,6 +801,7 @@ esac
 
 if [ -n "$WM_UPDATE_DEPENDENCIES" ]
 then
+    unset exitCode
 
     $make -f "$WM_DIR"/makefiles/general \
         MAKE_DIR="$MakeDir" OBJECTS_DIR="$objectsDir" updatedep

@@ -5,7 +5,7 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2019-2021 OpenCFD Ltd.
+#     Copyright (C) 2019-2022 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -95,6 +95,17 @@ cflags-arch:
 .PHONY: cxxflags-arch
 cxxflags-arch:
 	@echo "$(strip $(c++ARCH))"
+
+.PHONY: openmp-compile
+openmp-compile:
+	@echo "$(strip $(COMP_OPENMP))"
+
+.PHONY: openmp-link
+openmp-link:
+	@echo "$(strip $(LINK_OPENMP))"
+
+.PHONY: openmp
+openmp: openmp-compile
 
 # Like openmpi mpicc --showme:compile
 .PHONY: mpi-compile

@@ -1,9 +1,8 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
 #------------------------------------------------------------------------------
 
-LINK_LIBS   = $(cDBUG)
-
-LINKLIBSO   = $(cc) $(cARCH) -shared
-
-LINKEXE     = $(cc) $(cARCH) -Xlinker --add-needed -Xlinker -z -Xlinker nodefs
+# Does not use libOpenFOAM or libPstream...
+wmake -no-openfoam
 
 #------------------------------------------------------------------------------

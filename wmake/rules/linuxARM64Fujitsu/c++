@@ -6,7 +6,7 @@ include $(GENERAL_RULES)/Clang/c++
 CC         := FCC$(COMPILER_VERSION) -std=c++14
 c++ARCH    := -pthread
 
-ifneq (,$(WM_COMPILE_OPTION))
+ifneq (,$(strip $(WM_COMPILE_OPTION)))
     sinclude $(DEFAULT_RULES)/c++$(WM_COMPILE_OPTION)
 endif
 
