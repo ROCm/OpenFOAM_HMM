@@ -38,8 +38,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef hexCell_H
-#define hexCell_H
+#ifndef Foam_hexCell_H
+#define Foam_hexCell_H
 
 #include "FixedList.H"
 #include "faceList.H"

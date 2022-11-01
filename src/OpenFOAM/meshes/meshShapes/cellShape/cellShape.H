@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,8 +41,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cellShape_H
-#define cellShape_H
+#ifndef Foam_cellShape_H
+#define Foam_cellShape_H
 
 #include "pointField.H"
 #include "labelList.H"
@@ -105,6 +105,22 @@ public:
         inline cellShape
         (
             const cellModel& model,
+            labelList&& labels,
+            const bool doCollapse = false
+        );
+
+        //- Copy construct from components, lookup cellModel by type
+        inline cellShape
+        (
+            const cellModel::modelType model,
+            const labelUList& labels,
+            const bool doCollapse = false
+        );
+
+        //- Move construct from components, lookup cellModel by type
+        inline cellShape
+        (
+            const cellModel::modelType model,
             labelList&& labels,
             const bool doCollapse = false
         );

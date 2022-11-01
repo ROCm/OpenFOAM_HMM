@@ -533,6 +533,7 @@ $(primitiveShapes)/line/line.C
 $(primitiveShapes)/plane/plane.C
 $(primitiveShapes)/triangle/intersection.C
 $(primitiveShapes)/objectHit/pointIndexHitIOList.C
+$(primitiveShapes)/volumeType/volumeType.C
 
 meshShapes = meshes/meshShapes
 $(meshShapes)/edge/edge.C
@@ -550,11 +551,8 @@ $(cell)/cell.C
 $(cell)/oppositeCellFace.C
 $(cell)/cellIOList.C
 
-hexCell = $(meshShapes)/hexCell
-$(hexCell)/hexCell.C
-
-tetCell = $(meshShapes)/tetCell
-$(tetCell)/tetCell.C
+$(meshShapes)/hexCell/hexCell.C
+$(meshShapes)/tetCell/tetCell.C
 
 cellModel = $(meshShapes)/cellModel
 $(cellModel)/cellModel.C
@@ -826,7 +824,6 @@ algorithms/indexedOctree/indexedOctreeName.C
 algorithms/indexedOctree/treeDataCell.C
 algorithms/indexedOctree/treeDataEdge.C
 algorithms/indexedOctree/treeDataPoint.C
-algorithms/indexedOctree/volumeType.C
 
 algorithms/dynamicIndexedOctree/dynamicIndexedOctreeName.C
 algorithms/dynamicIndexedOctree/dynamicTreeDataPoint.C

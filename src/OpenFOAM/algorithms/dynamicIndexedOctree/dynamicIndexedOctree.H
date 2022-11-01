@@ -452,8 +452,7 @@ public:
             {
                 if (nodes_.empty())
                 {
-                    FatalErrorInFunction
-                        << "Tree is empty" << abort(FatalError);
+                    return treeBoundBox::null();
                 }
                 return nodes_[0].bb_;
             }

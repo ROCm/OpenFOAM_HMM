@@ -496,8 +496,6 @@ Foam::autoPtr<Foam::fvMesh> Foam::voxelMeshSearch::makeMesh
     const IOobject& io
 ) const
 {
-    const cellModel& hex = cellModel::ref(cellModel::HEX);
-
     cellShapeList cellShapes;
     faceListList boundary;
     pointField points;
@@ -506,7 +504,7 @@ Foam::autoPtr<Foam::fvMesh> Foam::voxelMeshSearch::makeMesh
 
         block b
         (
-            cellShape(hex, identity(8)),
+            cellShape(cellModel::HEX, identity(8)),
             localBb_.points(),
             blockEdgeList(),
             blockFaceList(),

@@ -31,8 +31,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cellShapeIOList_H
-#define cellShapeIOList_H
+#ifndef Foam_cellShapeIOList_H
+#define Foam_cellShapeIOList_H
 
 #include "cellShape.H"
 #include "IOList.H"

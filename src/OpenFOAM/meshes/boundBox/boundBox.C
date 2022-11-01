@@ -29,7 +29,10 @@ License
 #include "boundBox.H"
 #include "PstreamReduceOps.H"
 #include "plane.H"
+#include "hexCell.H"
 #include "triangle.H"
+#include "MinMax.H"
+#include "Random.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -45,17 +48,6 @@ const Foam::boundBox Foam::boundBox::invertedBox
     point::uniform(-ROOTVGREAT)
 );
 
-const Foam::faceList Foam::boundBox::faces
-({
-    // Point and face order as per hex cellmodel
-    face({0, 4, 7, 3}),  // 0: x-min, left
-    face({1, 2, 6, 5}),  // 1: x-max, right
-    face({0, 1, 5, 4}),  // 2: y-min, bottom
-    face({3, 7, 6, 2}),  // 3: y-max, top
-    face({0, 3, 2, 1}),  // 4: z-min, back
-    face({4, 5, 6, 7})   // 5: z-max, front
-});
-
 const Foam::FixedList<Foam::vector, 6> Foam::boundBox::faceNormals
 ({
     vector(-1,  0,  0), // 0: x-min, left
@@ -65,6 +57,14 @@ const Foam::FixedList<Foam::vector, 6> Foam::boundBox::faceNormals
     vector( 0,  0, -1), // 4: z-min, back
     vector( 0,  0,  1)  // 5: z-max, front
 });
+
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+const Foam::faceList& Foam::boundBox::hexFaces()
+{
+    return hexCell::modelFaces();
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -126,9 +126,9 @@ Foam::boundBox::boundBox
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::pointField> Foam::boundBox::points() const
+Foam::tmp<Foam::pointField> Foam::boundBox::hexCorners() const
 {
-    auto tpts = tmp<pointField>::New(8);
+    auto tpts = tmp<pointField>::New(boundBox::nPoints());
     auto& pts = tpts.ref();
 
     pts[0] = hexCorner<0>();
@@ -146,10 +146,10 @@ Foam::tmp<Foam::pointField> Foam::boundBox::points() const
 
 Foam::tmp<Foam::pointField> Foam::boundBox::faceCentres() const
 {
-    auto tpts = tmp<pointField>::New(6);
+    auto tpts = tmp<pointField>::New(boundBox::nFaces());
     auto& pts = tpts.ref();
 
-    forAll(pts, facei)
+    for (direction facei = 0; facei < boundBox::nFaces(); ++facei)
     {
         pts[facei] = faceCentre(facei);
     }
@@ -278,6 +278,35 @@ Foam::point Foam::boundBox::nearest(const point& p) const
         Foam::min(Foam::max(p.y(), min_.y()), max_.y()),
         Foam::min(Foam::max(p.z(), min_.z()), max_.z())
     );
+}
+
+
+void Foam::boundBox::inflate(Random& rndGen, const scalar factor)
+{
+    vector newSpan(span());
+
+    // Make 3D
+    const scalar minSpan = factor * Foam::mag(newSpan);
+
+    for (direction dir = 0; dir < vector::nComponents; ++dir)
+    {
+        newSpan[dir] = Foam::max(newSpan[dir], minSpan);
+    }
+
+    min_ -= cmptMultiply(factor*rndGen.sample01<vector>(), newSpan);
+    max_ += cmptMultiply(factor*rndGen.sample01<vector>(), newSpan);
+}
+
+
+void Foam::boundBox::inflate
+(
+    Random& rndGen,
+    const scalar factor,
+    const scalar delta
+)
+{
+    inflate(rndGen, factor);
+    grow(delta);
 }
 
 

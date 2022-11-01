@@ -459,7 +459,7 @@ Foam::scalar Foam::treeBoundBox::maxDist(const point& pt) const
     point near, far;
     calcExtremities(pt, near, far);
 
-    return Foam::mag(far - pt);
+    return pt.dist(far);
 }
 
 
@@ -478,14 +478,8 @@ Foam::label Foam::treeBoundBox::distanceCmp
     // get nearest and furthest away vertex
     calcExtremities(pt, nearThis, farThis);
 
-    const scalar minDistThis =
-        sqr(nearThis.x() - pt.x())
-     +  sqr(nearThis.y() - pt.y())
-     +  sqr(nearThis.z() - pt.z());
-    const scalar maxDistThis =
-        sqr(farThis.x() - pt.x())
-     +  sqr(farThis.y() - pt.y())
-     +  sqr(farThis.z() - pt.z());
+    const scalar minDistThis = pt.distSqr(nearThis);
+    const scalar maxDistThis = pt.distSqr(farThis);
 
     //
     // Distance point <-> other
@@ -496,14 +490,8 @@ Foam::label Foam::treeBoundBox::distanceCmp
     // get nearest and furthest away vertex
     other.calcExtremities(pt, nearOther, farOther);
 
-    const scalar minDistOther =
-        sqr(nearOther.x() - pt.x())
-     +  sqr(nearOther.y() - pt.y())
-     +  sqr(nearOther.z() - pt.z());
-    const scalar maxDistOther =
-        sqr(farOther.x() - pt.x())
-     +  sqr(farOther.y() - pt.y())
-     +  sqr(farOther.z() - pt.z());
+    const scalar minDistOther = pt.distSqr(nearOther);
+    const scalar maxDistOther = pt.distSqr(farOther);
 
     //
     // Categorize

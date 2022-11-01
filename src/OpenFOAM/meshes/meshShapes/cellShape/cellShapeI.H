@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -84,6 +84,40 @@ inline Foam::cellShape::cellShape
 :
     labelList(std::move(labels)),
     m(&model)
+{
+    if (doCollapse)
+    {
+        collapse();
+    }
+}
+
+
+inline Foam::cellShape::cellShape
+(
+    const cellModel::modelType model,
+    const labelUList& labels,
+    const bool doCollapse
+)
+:
+    labelList(labels),
+    m(cellModel::ptr(model))
+{
+    if (doCollapse)
+    {
+        collapse();
+    }
+}
+
+
+inline Foam::cellShape::cellShape
+(
+    const cellModel::modelType model,
+    labelList&& labels,
+    const bool doCollapse
+)
+:
+    labelList(std::move(labels)),
+    m(cellModel::ptr(model))
 {
     if (doCollapse)
     {

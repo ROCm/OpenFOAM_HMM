@@ -542,7 +542,7 @@ void Foam::searchableBox::findLineAll
     //   we need something bigger since we're doing calculations)
     // - if the start-end vector is zero we still progress
     const vectorField dirVec(end-start);
-    const scalarField magSqrDirVec(magSqr(dirVec));
+    const scalarField magSqrDirVec(Foam::magSqr(dirVec));
     const vectorField smallVec
     (
         ROOTSMALL*dirVec + vector::uniform(ROOTVSMALL)
@@ -630,24 +630,16 @@ void Foam::searchableBox::getVolumeType
     List<volumeType>& volType
 ) const
 {
-    volType.setSize(points.size());
+    volType.resize_nocopy(points.size());
 
     forAll(points, pointi)
     {
-        const point& pt = points[pointi];
-
-        volumeType vt = volumeType::INSIDE;
-
-        for (direction dir=0; dir < vector::nComponents; ++dir)
-        {
-            if (pt[dir] < min()[dir] || pt[dir] > max()[dir])
-            {
-                vt = volumeType::OUTSIDE;
-                break;
-            }
-        }
-
-        volType[pointi] = vt;
+        volType[pointi] =
+        (
+            treeBoundBox::contains(points[pointi])
+          ? volumeType::INSIDE
+          : volumeType::OUTSIDE
+        );
     }
 }
 

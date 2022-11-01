@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "hexCellFvMesh.H"
+#include "hexCell.H"
 #include "emptyPolyPatch.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -65,22 +66,10 @@ Foam::simplifiedMeshes::hexCellFvMesh::hexCellFvMesh
             IOobject::READ_IF_PRESENT,
             IOobject::NO_WRITE
         ),
-        pointField
-        (
-            {
-                point(0, 0, 0),
-                point(d, 0, 0),
-                point(d, d, 0),
-                point(0, d, 0),
-                point(0, 0, d),
-                point(d, 0, d),
-                point(d, d, d),
-                point(0, d, d)
-            }
-        ),
-        faceList(cellModel::ref(cellModel::HEX).modelFaces()),
-        labelList(6, Zero),
-        labelList()
+        pointField(boundBox(point::zero, point::uniform(d)).hexCorners()),
+        faceList(boundBox::hexFaces()),
+        labelList(6, Zero),  // Owner
+        labelList()          // Neighbour
     )
 {
     polyPatchList patches(1);

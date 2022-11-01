@@ -38,48 +38,56 @@ namespace Foam
 template<>
 inline Foam::point Foam::boundBox::hexCorner<0>() const
 {
+    // == octCorner<0>()
     return min_;
 }
 
 template<>
 inline Foam::point Foam::boundBox::hexCorner<1>() const
 {
+    // == octCorner<1>()
     return point(max_.x(), min_.y(), min_.z());
 }
 
 template<>
 inline Foam::point Foam::boundBox::hexCorner<2>() const
 {
+    // == octCorner<3>()
     return point(max_.x(), max_.y(), min_.z());
 }
 
 template<>
 inline Foam::point Foam::boundBox::hexCorner<3>() const
 {
+    // == octCorner<2>()
     return point(min_.x(), max_.y(), min_.z());
 }
 
 template<>
 inline Foam::point Foam::boundBox::hexCorner<4>() const
 {
+    // == octCorner<4>()
     return point(min_.x(), min_.y(), max_.z());
 }
 
 template<>
 inline Foam::point Foam::boundBox::hexCorner<5>() const
 {
+    // == octCorner<5>()
     return point(max_.x(), min_.y(), max_.z());
 }
 
 template<>
 inline Foam::point Foam::boundBox::hexCorner<6>() const
 {
+    // == octCorner<7>()
     return max_;
 }
 
 template<>
 inline Foam::point Foam::boundBox::hexCorner<7>() const
 {
+    // == octCorner<6>()
     return point(min_.x(), max_.y(), max_.z());
 }
 
@@ -189,7 +197,13 @@ inline Foam::vector Foam::boundBox::span() const
 
 inline Foam::scalar Foam::boundBox::mag() const
 {
-    return ::Foam::mag(max_ - min_);
+    return min_.dist(max_);
+}
+
+
+inline Foam::scalar Foam::boundBox::magSqr() const
+{
+    return min_.distSqr(max_);
 }
 
 
@@ -217,18 +231,58 @@ inline Foam::scalar Foam::boundBox::avgDim() const
 }
 
 
+inline Foam::direction Foam::boundBox::minDir() const
+{
+    direction cmpt = 0;
+
+    scalar best = ROOTVGREAT;
+
+    for (direction dir = 0; dir < vector::nComponents; ++dir)
+    {
+        const scalar dist = (max_[dir] - min_[dir]);
+        if (dist < best && dist > 0)
+        {
+            best = dist;
+            cmpt = dir;
+        }
+    }
+
+    return cmpt;
+}
+
+
+inline Foam::direction Foam::boundBox::maxDir() const
+{
+    direction cmpt = 0;
+
+    scalar best = 0;
+
+    for (direction dir = 0; dir < vector::nComponents; ++dir)
+    {
+        const scalar dist = (max_[dir] - min_[dir]);
+        if (dist > best)
+        {
+            best = dist;
+            cmpt = dir;
+        }
+    }
+
+    return cmpt;
+}
+
+
 inline int Foam::boundBox::nDim() const
 {
     int ngood = 0;
 
     for (direction dir = 0; dir < vector::nComponents; ++dir)
     {
-        const scalar diff = (max_[dir] - min_[dir]);
-        if (diff < 0)
+        const scalar dist = (max_[dir] - min_[dir]);
+        if (dist < 0)
         {
             return -1;
         }
-        else if (diff > 0)
+        else if (dist > 0)
         {
             ++ngood;
         }
@@ -270,6 +324,20 @@ inline void Foam::boundBox::add(const point& pt)
 {
     min_ = ::Foam::min(min_, pt);
     max_ = ::Foam::max(max_, pt);
+}
+
+
+inline void Foam::boundBox::add(const point& pt0, const point& pt1)
+{
+    add(pt0);
+    add(pt1);
+}
+
+
+inline void Foam::boundBox::add(const Pair<point>& points)
+{
+    add(points.first());
+    add(points.second());
 }
 
 

@@ -227,9 +227,9 @@ public:
         //  If the nearest point is on the line, return a hit
         PointHit<Point> nearestDist(const Point& p) const;
 
-        //- Return nearest distance from line to line. Returns distance
-        //  and sets both points (one on *this, one on the provided
-        //  linePointRef.
+        //- Return nearest distance from line to line.
+        //- Returns distance and sets both points
+        //- (one on *this, one on the provided linePointRef.
         scalar nearestDist
         (
             const line<Point, const Point&>& edge,

@@ -57,12 +57,6 @@ inline Foam::treeBoundBox::treeBoundBox(Istream& is)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline Foam::scalar Foam::treeBoundBox::typDim() const
-{
-    return avgDim();
-}
-
-
 inline Foam::point Foam::treeBoundBox::corner(const direction octant) const
 {
     return point
@@ -223,8 +217,6 @@ inline Foam::direction Foam::treeBoundBox::subOctant
 }
 
 
-// Returns reference to octantOrder which defines the
-// order to do the search.
 inline void Foam::treeBoundBox::searchOrder
 (
     const point& pt,
@@ -315,6 +307,15 @@ inline void Foam::treeBoundBox::searchOrder
 }
 
 
+inline Foam::FixedList<Foam::direction, 8>
+Foam::treeBoundBox::searchOrder(const point& pt) const
+{
+    FixedList<direction, 8> octantOrder;
+    searchOrder(pt, octantOrder);
+    return octantOrder;
+}
+
+
 inline bool Foam::treeBoundBox::intersects
 (
     const linePointRef& ln,
@@ -328,23 +329,12 @@ inline bool Foam::treeBoundBox::intersects
 inline Foam::treeBoundBox Foam::treeBoundBox::extend
 (
     Random& rndGen,
-    const scalar s
+    const scalar factor
 ) const
 {
     treeBoundBox bb(*this);
 
-    vector newSpan = bb.span();
-
-    // Make 3D
-    const scalar minSpan = s * Foam::mag(newSpan);
-
-    for (direction dir = 0; dir < vector::nComponents; ++dir)
-    {
-        newSpan[dir] = Foam::max(newSpan[dir], minSpan);
-    }
-
-    bb.min() -= cmptMultiply(s*rndGen.sample01<vector>(), newSpan);
-    bb.max() += cmptMultiply(s*rndGen.sample01<vector>(), newSpan);
+    bb.inflate(rndGen, factor);
 
     return bb;
 }
@@ -357,8 +347,9 @@ inline Foam::treeBoundBox Foam::treeBoundBox::extend
     const scalar delta
 ) const
 {
-    treeBoundBox bb(extend(rndGen, factor));
-    bb.grow(delta);
+    treeBoundBox bb(*this);
+
+    bb.inflate(rndGen, factor, delta);
 
     return bb;
 }
