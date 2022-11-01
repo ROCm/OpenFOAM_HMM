@@ -206,9 +206,6 @@ void Foam::cellCellStencils::trackingInverseDistance::markPatchesAsHoles
     labelList& allCellTypes
 ) const
 {
-    const pointField& allPoints = mesh_.points();
-    const labelListList& allCellPoints = mesh_.cellPoints();
-
     const treeBoundBoxList& srcPatchBbs = patchBb[srcI];
     const treeBoundBoxList& tgtPatchBbs = patchBb[tgtI];
     const labelList& tgtCellMap = meshParts_[tgtI].cellMap();
@@ -226,7 +223,7 @@ void Foam::cellCellStencils::trackingInverseDistance::markPatchesAsHoles
             forAll(tgtCellMap, tgtCelli)
             {
                 label celli = tgtCellMap[tgtCelli];
-                boundBox cBb(allPoints, allCellPoints[celli], false);
+                boundBox cBb(mesh_.cellBb(celli));
                 cBb.min() -= smallVec_;
                 cBb.max() += smallVec_;
 
@@ -295,7 +292,7 @@ void Foam::cellCellStencils::trackingInverseDistance::markPatchesAsHoles
                 forAll(tgtCellMap, tgtCelli)
                 {
                     label celli = tgtCellMap[tgtCelli];
-                    boundBox cBb(allPoints, allCellPoints[celli], false);
+                    boundBox cBb(mesh_.cellBb(celli));
                     cBb.min() -= smallVec_;
                     cBb.max() += smallVec_;
 
@@ -412,7 +409,7 @@ void Foam::cellCellStencils::trackingInverseDistance::markDonors
         label celli = tgtCellMap[tgtCelli];
         if (srcOverlapProcs.size())
         {
-            treeBoundBox subBb(cellBb(mesh_, celli));
+            treeBoundBox subBb(mesh_.cellBb(celli));
             subBb.min() -= smallVec_;
             subBb.max() += smallVec_;
 

@@ -133,9 +133,9 @@ void Foam::snappyVoxelMeshDriver::isInside
     }
     else
     {
-        for (const cell& c : mesh.cells())
+        for (label celli = 0; celli < mesh.nCells(); ++celli)
         {
-            const boundBox cellBb(c.box(mesh));
+            const boundBox cellBb(mesh.cellBb(celli));
 
             voxelMeshSearch::fill
             (

@@ -178,12 +178,8 @@ Foam::autoPtr<Foam::mapDistribute> Foam::meshToMesh::calcProcMap
             }
 
 
-            // determine which cells of tgt mesh overlaps src mesh per proc
-            const cellList& cells = tgt.cells();
-            const faceList& faces = tgt.faces();
-            const pointField& points = tgt.points();
-
-            labelListList sendMap;
+            // Determine which cells of tgt mesh overlaps src mesh per proc
+            labelListList sendMap(Pstream::nProcs());
 
             {
                 // per processor indices into all segments to send
@@ -198,20 +194,11 @@ Foam::autoPtr<Foam::mapDistribute> Foam::meshToMesh::calcProcMap
                 // work array - whether src processor bb overlaps the tgt cell
                 // bounds
                 boolList procBbOverlaps(Pstream::nProcs());
-                forAll(cells, celli)
-                {
-                    const cell& c = cells[celli];
 
-                    // determine bounding box of tgt cell
-                    boundBox cellBb(boundBox::invertedBox);
-                    forAll(c, facei)
-                    {
-                        const face& f = faces[c[facei]];
-                        forAll(f, fp)
-                        {
-                            cellBb.add(points, f);
-                        }
-                    }
+                for (label celli = 0; celli < tgt.nCells(); ++celli)
+                {
+                    // Bounding box of tgt cell
+                    boundBox cellBb(tgt.cellBb(celli));
 
                     // find the overlapping tgt cells on each src processor
                     (void)calcOverlappingProcs(procBb, cellBb, procBbOverlaps);
@@ -226,23 +213,22 @@ Foam::autoPtr<Foam::mapDistribute> Foam::meshToMesh::calcProcMap
                 }
 
                 // convert dynamicList to labelList
-                sendMap.setSize(Pstream::nProcs());
                 forAll(sendMap, proci)
                 {
                     sendMap[proci].transfer(dynSendMap[proci]);
                 }
-            }
 
-            // debug printing
-            if (debug)
-            {
-                Pout<< "Of my " << cells.size()
-                    << " target cells I need to send to:" << nl
-                    << "\tproc\tcells" << endl;
-                forAll(sendMap, proci)
+                // debug printing
+                if (debug)
                 {
-                    Pout<< '\t' << proci << '\t' << sendMap[proci].size()
-                        << endl;
+                    Pout<< "Of my " << tgt.nCells()
+                        << " target cells I need to send to:" << nl
+                        << "\tproc\tcells" << endl;
+                    forAll(sendMap, proci)
+                    {
+                        Pout<< '\t' << proci << '\t'
+                            << sendMap[proci].size() << endl;
+                    }
                 }
             }
 
@@ -250,7 +236,7 @@ Foam::autoPtr<Foam::mapDistribute> Foam::meshToMesh::calcProcMap
             // send over how many tgt cells I need to receive from each
             // processor
             labelListList sendSizes(Pstream::nProcs());
-            sendSizes[Pstream::myProcNo()].setSize(Pstream::nProcs());
+            sendSizes[Pstream::myProcNo()].resize(Pstream::nProcs());
             forAll(sendMap, proci)
             {
                 sendSizes[Pstream::myProcNo()][proci] = sendMap[proci].size();

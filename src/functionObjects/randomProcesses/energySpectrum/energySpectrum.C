@@ -150,13 +150,7 @@ bool Foam::functionObjects::energySpectrum::read(const dictionary& dict)
     const boundBox meshBb(mesh_.bounds());
 
     // Assume all cells are the same size...
-    const cell& c = mesh_.cells()[0];
-    boundBox cellBb(boundBox::invertedBox);
-    forAll(c, facei)
-    {
-        const face& f = mesh_.faces()[c[facei]];
-        cellBb.add(mesh_.points(), f);
-    }
+    boundBox cellBb(mesh_.cellBb(0));
 
     const vector L(meshBb.max() - meshBb.min());
     const vector nCellXYZ(cmptDivide(L, cellBb.max() - cellBb.min()));

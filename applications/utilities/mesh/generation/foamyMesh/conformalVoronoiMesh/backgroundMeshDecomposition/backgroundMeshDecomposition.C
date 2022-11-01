@@ -167,7 +167,7 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
             {
                 if (volumeStatus[celli] == volumeType::UNKNOWN)
                 {
-                    treeBoundBox cellBb(mesh_.cells()[celli].box(mesh_));
+                    treeBoundBox cellBb(mesh_.cellBb(celli));
 
                     if (geometry.overlaps(cellBb))
                     {
@@ -279,7 +279,7 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
             {
                 if (volumeStatus[celli] == volumeType::UNKNOWN)
                 {
-                    treeBoundBox cellBb(mesh_.cells()[celli].box(mesh_));
+                    treeBoundBox cellBb(mesh_.cellBb(celli));
 
                     if (geometry.overlaps(cellBb))
                     {
@@ -498,7 +498,7 @@ bool Foam::backgroundMeshDecomposition::refineCell
 
 //    const conformationSurfaces& geometry = geometryToConformTo_;
 
-    treeBoundBox cellBb(mesh_.cells()[celli].box(mesh_));
+    treeBoundBox cellBb(mesh_.cellBb(celli));
 
     weightEstimate = 1.0;
 
