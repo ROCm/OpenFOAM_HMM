@@ -199,28 +199,28 @@ inline bool Foam::UList<T>::uniform() const
 
 
 template<class T>
-inline T& Foam::UList<T>::first()
+inline T& Foam::UList<T>::front()
 {
     return this->operator[](0);
 }
 
 
 template<class T>
-inline const T& Foam::UList<T>::first() const
+inline const T& Foam::UList<T>::front() const
 {
     return this->operator[](0);
 }
 
 
 template<class T>
-inline T& Foam::UList<T>::last()
+inline T& Foam::UList<T>::back()
 {
     return this->operator[](this->size()-1);
 }
 
 
 template<class T>
-inline const T& Foam::UList<T>::last() const
+inline const T& Foam::UList<T>::back() const
 {
     return this->operator[](this->size()-1);
 }

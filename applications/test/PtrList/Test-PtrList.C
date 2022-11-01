@@ -334,7 +334,7 @@ int main(int argc, char *argv[])
     {
         listApp.append(new Scalar(1.3*i));
     }
-    listApp.emplace_append(100);
+    listApp.emplace_back(100);
 
 
     Info<< nl
@@ -580,8 +580,8 @@ int main(int argc, char *argv[])
     }
 
     PtrList<plane> planes;
-    planes.emplace_append(vector::one, vector::one);
-    planes.emplace_append(vector(1,2,3), vector::one);
+    planes.emplace_back(vector::one, vector::one);
+    planes.emplace_back(vector(1,2,3), vector::one);
 
     Info<< nl << "appended values" << nl;
     for (const plane& p : planes)
@@ -594,15 +594,15 @@ int main(int argc, char *argv[])
     PtrDynList<plane> dynPlanes;
 
     {
-        dynPlanes.emplace_append(vector::one, vector::one);
-        dynPlanes.emplace_append(vector(1,2,3), vector::one);
+        dynPlanes.emplace_back(vector::one, vector::one);
+        dynPlanes.emplace_back(vector(1,2,3), vector::one);
         dynPlanes.append(nullptr);
 
         dynPlanes.set(6, new plane(vector(2,2,1), vector::one));
         dynPlanes.set(10, new plane(vector(4,5,6), vector::one));
 
         dynPlanes.emplace(12, vector(3,2,1), vector::one);
-        dynPlanes.emplace_append(Zero, vector::one);
+        dynPlanes.emplace_back(Zero, vector::one);
     }
 
     Info<< nl << "PtrDynList: ";

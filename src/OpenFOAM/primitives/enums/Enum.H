@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,8 +37,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Enum_H
-#define Enum_H
+#ifndef Foam_Enum_H
+#define Foam_Enum_H
 
 #include "wordList.H"
 #include <ostream>
@@ -131,7 +131,7 @@ public:
 
         //- Append value/key pairs to the lists of known enumerations
         //  Does not check for duplicate entries
-        void append
+        void push_back
         (
             std::initializer_list<std::pair<EnumType, const char*>> list
         );
@@ -350,6 +350,16 @@ public:
         EnumType lookup(const word& key, const dictionary& dict) const
         {
             return get(key, dict);
+        }
+
+        //- Append value/key pairs to the lists of known enumerations
+        //  Does not check for duplicate entries
+        void append
+        (
+            std::initializer_list<std::pair<EnumType, const char*>> list
+        )
+        {
+            push_back(list);
         }
 };
 

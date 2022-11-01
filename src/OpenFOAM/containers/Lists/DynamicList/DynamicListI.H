@@ -499,7 +499,7 @@ Foam::DynamicList<T, SizeMin>::transfer
 
 
 template<class T, int SizeMin>
-inline void Foam::DynamicList<T, SizeMin>::append
+inline void Foam::DynamicList<T, SizeMin>::push_back
 (
     const T& val
 )
@@ -512,7 +512,7 @@ inline void Foam::DynamicList<T, SizeMin>::append
 
 
 template<class T, int SizeMin>
-inline void Foam::DynamicList<T, SizeMin>::append
+inline void Foam::DynamicList<T, SizeMin>::push_back
 (
     T&& val
 )
@@ -525,7 +525,7 @@ inline void Foam::DynamicList<T, SizeMin>::append
 
 
 template<class T, int SizeMin>
-inline void Foam::DynamicList<T, SizeMin>::append
+inline void Foam::DynamicList<T, SizeMin>::push_back
 (
     const UList<T>& lst
 )
@@ -533,7 +533,7 @@ inline void Foam::DynamicList<T, SizeMin>::append
     if (this == &lst)
     {
         FatalErrorInFunction
-            << "Attempted appending to self"
+            << "Attempted push_back to self"
             << abort(FatalError);
     }
 
@@ -549,7 +549,7 @@ inline void Foam::DynamicList<T, SizeMin>::append
 
 template<class T, int SizeMin>
 template<unsigned N>
-inline void Foam::DynamicList<T, SizeMin>::append
+inline void Foam::DynamicList<T, SizeMin>::push_back
 (
     const FixedList<T, N>& lst
 )
@@ -565,7 +565,7 @@ inline void Foam::DynamicList<T, SizeMin>::append
 
 
 template<class T, int SizeMin>
-inline void Foam::DynamicList<T, SizeMin>::append
+inline void Foam::DynamicList<T, SizeMin>::push_back
 (
     std::initializer_list<T> lst
 )
@@ -582,7 +582,7 @@ inline void Foam::DynamicList<T, SizeMin>::append
 
 template<class T, int SizeMin>
 template<class Addr>
-inline void Foam::DynamicList<T, SizeMin>::append
+inline void Foam::DynamicList<T, SizeMin>::push_back
 (
     const IndirectListBase<T, Addr>& lst
 )
@@ -600,7 +600,7 @@ inline void Foam::DynamicList<T, SizeMin>::append
 
 
 template<class T, int SizeMin>
-inline void Foam::DynamicList<T, SizeMin>::append
+inline void Foam::DynamicList<T, SizeMin>::push_back
 (
     List<T>&& list
 )
@@ -608,7 +608,7 @@ inline void Foam::DynamicList<T, SizeMin>::append
     if (this == &list)
     {
         FatalErrorInFunction
-            << "Attempted appending to self"
+            << "Attempted push_back to self"
             << abort(FatalError);
     }
 
@@ -626,18 +626,18 @@ inline void Foam::DynamicList<T, SizeMin>::append
 
 template<class T, int SizeMin>
 template<int AnySizeMin>
-inline void Foam::DynamicList<T, SizeMin>::append
+inline void Foam::DynamicList<T, SizeMin>::push_back
 (
     DynamicList<T, AnySizeMin>&& list
 )
 {
-    append(std::move(static_cast<List<T>&>(list)));
+    push_back(std::move(static_cast<List<T>&>(list)));
     list.clearStorage();  // Ensure capacity=0
 }
 
 
 template<class T, int SizeMin>
-inline Foam::label Foam::DynamicList<T, SizeMin>::appendUniq(const T& val)
+inline Foam::label Foam::DynamicList<T, SizeMin>::push_uniq(const T& val)
 {
     if (this->found(val))
     {
@@ -645,8 +645,22 @@ inline Foam::label Foam::DynamicList<T, SizeMin>::appendUniq(const T& val)
     }
     else
     {
-        this->append(val);
+        this->push_back(val);
         return 1;  // Increased list length by one
+    }
+}
+
+
+template<class T, int SizeMin>
+inline void Foam::DynamicList<T, SizeMin>::pop_back(label n)
+{
+    if (n >= this->size())
+    {
+        clear();
+    }
+    else if (n > 0)
+    {
+        resize(this->size() - n);
     }
 }
 

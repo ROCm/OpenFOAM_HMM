@@ -204,28 +204,28 @@ inline std::streamsize Foam::FixedList<T, N>::size_bytes() noexcept
 
 
 template<class T, unsigned N>
-inline T& Foam::FixedList<T, N>::first() noexcept
+inline T& Foam::FixedList<T, N>::front() noexcept
 {
     return v_[0];
 }
 
 
 template<class T, unsigned N>
-inline const T& Foam::FixedList<T, N>::first() const noexcept
+inline const T& Foam::FixedList<T, N>::front() const noexcept
 {
     return v_[0];
 }
 
 
 template<class T, unsigned N>
-inline T& Foam::FixedList<T, N>::last() noexcept
+inline T& Foam::FixedList<T, N>::back() noexcept
 {
     return v_[N-1];
 }
 
 
 template<class T, unsigned N>
-inline const T& Foam::FixedList<T, N>::last() const noexcept
+inline const T& Foam::FixedList<T, N>::back() const noexcept
 {
     return v_[N-1];
 }

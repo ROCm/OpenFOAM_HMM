@@ -172,7 +172,7 @@ inline T& Foam::List<T>::newElmt(const label i)
 
 
 template<class T>
-inline void Foam::List<T>::append(const T& val)
+inline void Foam::List<T>::push_back(const T& val)
 {
     const label idx = this->size();
     resize(idx + 1);
@@ -182,7 +182,7 @@ inline void Foam::List<T>::append(const T& val)
 
 
 template<class T>
-inline void Foam::List<T>::append(T&& val)
+inline void Foam::List<T>::push_back(T&& val)
 {
     const label idx = this->size();
     resize(idx + 1);
@@ -192,12 +192,12 @@ inline void Foam::List<T>::append(T&& val)
 
 
 template<class T>
-inline void Foam::List<T>::append(const UList<T>& list)
+inline void Foam::List<T>::push_back(const UList<T>& list)
 {
     if (this == &list)
     {
         FatalErrorInFunction
-            << "Attempted appending to self" << abort(FatalError);
+            << "Attempted push_back to self" << abort(FatalError);
     }
 
     label idx = this->size();
@@ -214,7 +214,7 @@ inline void Foam::List<T>::append(const UList<T>& list)
 
 template<class T>
 template<class Addr>
-inline void Foam::List<T>::append(const IndirectListBase<T, Addr>& list)
+inline void Foam::List<T>::push_back(const IndirectListBase<T, Addr>& list)
 {
     label idx = this->size();
     const label n = list.size();
@@ -229,7 +229,7 @@ inline void Foam::List<T>::append(const IndirectListBase<T, Addr>& list)
 
 
 template<class T>
-inline Foam::label Foam::List<T>::appendUniq(const T& val)
+inline Foam::label Foam::List<T>::push_uniq(const T& val)
 {
     if (this->found(val))
     {
@@ -237,8 +237,22 @@ inline Foam::label Foam::List<T>::appendUniq(const T& val)
     }
     else
     {
-        this->append(val);
+        this->push_back(val);
         return 1;  // Increased list length by one
+    }
+}
+
+
+template<class T>
+inline void Foam::List<T>::pop_back(label n)
+{
+    if (n >= this->size())
+    {
+        this->clear();
+    }
+    else if (n > 0)
+    {
+        resize(this->size() - n);
     }
 }
 

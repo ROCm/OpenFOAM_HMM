@@ -73,6 +73,15 @@ class triFace
 {
 public:
 
+    // Generated Methods
+
+        //- The front() accessor (from FixedList) has no purpose
+        void front() = delete;
+
+        //- The back() accessor (from FixedList) has no purpose
+        void back() = delete;
+
+
     // Constructors
 
         //- Default construct, with invalid point labels (-1)

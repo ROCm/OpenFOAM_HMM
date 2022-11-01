@@ -91,6 +91,12 @@ public:
         //- Default construct
         tetPoints() = default;
 
+        //- The front() accessor (from FixedList) has no purpose
+        void front() = delete;
+
+        //- The back() accessor (from FixedList) has no purpose
+        void back() = delete;
+
 
     // Constructors
 

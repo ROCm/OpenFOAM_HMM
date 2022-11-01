@@ -123,49 +123,35 @@ public:
     // Access
 
         //- The number of elements in the list
-        inline label size() const noexcept
-        {
-            return addr_.size();
-        }
+        label size() const noexcept { return addr_.size(); }
 
         //- True if the list is empty (ie, size() is zero).
-        inline bool empty() const noexcept
-        {
-            return addr_.empty();
-        }
+        bool empty() const noexcept { return addr_.empty(); }
 
         //- The list of values (without addressing)
-        inline const UList<T>& values() const noexcept
-        {
-            return values_;
-        }
+        const UList<T>& values() const noexcept { return values_; }
 
         //- The list of values (without addressing)
-        inline UList<T>& values() noexcept
-        {
-            return values_;
-        }
+        UList<T>& values() noexcept { return values_; }
 
         //- The addressing used for the list
-        inline const Addr& addressing() const noexcept
-        {
-            return addr_;
-        }
+        const Addr& addressing() const noexcept { return addr_; }
+
 
         //- True if all entries have identical values, and list is non-empty
         inline bool uniform() const;
 
         //- The first element of the list.
-        inline const T& first() const;
+        inline const T& front() const;
 
         //- The first element of the list.
-        inline T& first();
+        inline T& front();
 
         //- The last element of the list.
-        inline const T& last() const;
+        inline const T& back() const;
 
         //- The last element of the list.
-        inline T& last();
+        inline T& back();
 
         //- The forward circular index. The next index in the list
         //- which returns to the first at the end of the list
@@ -186,6 +172,9 @@ public:
 
         //- Return reverse circular value (ie, previous value in the list)
         inline T& rcValue(const label i);
+
+        //- Return the addressed elements as a List
+        inline List<T> list() const;
 
 
     // Search
@@ -211,7 +200,7 @@ public:
     // Member Operators
 
         //- Return the addressed elements as a List
-        inline List<T> operator()() const;
+        List<T> operator()() const { return this->list(); }
 
         //- Non-const access to an element in the list
         inline T& operator[](const label i);
@@ -374,6 +363,25 @@ public:
         //- Write List, with line-breaks in ASCII when length exceeds shortLen.
         //  Using '0' suppresses line-breaks entirely.
         Ostream& writeList(Ostream& os, const label shortLen=0) const;
+
+
+    // Housekeeping
+
+        //- Access first element of the list, position [0]
+        //FOAM_DEPRECATED_FOR(2022-10, "front()")
+        T& first() { return front(); }
+
+        //- Access first element of the list
+        //FOAM_DEPRECATED_FOR(2022-10, "front()")
+        const T& first() const { return front(); };
+
+        //- Access last element of the list, position [size()-1]
+        //FOAM_DEPRECATED_FOR(2022-10, "back()")
+        T& last() { return back(); }
+
+        //- Access last element of the list, position [size()-1]
+        //FOAM_DEPRECATED_FOR(2022-10, "back()")
+        const T& last() const { return back(); };
 };
 
 

@@ -272,17 +272,17 @@ public:
             //  \note Only meaningful for contiguous data
             inline char* data_bytes() noexcept;
 
-            //- Return the first element of the list
-            inline T& first();
+            //- Access first element of the list, position [0]
+            inline T& front();
 
-            //- Return first element of the list
-            inline const T& first() const;
+            //- Access first element of the list
+            inline const T& front() const;
 
-            //- Return the last element of the list
-            inline T& last();
+            //- Access last element of the list, position [size()-1]
+            inline T& back();
 
-            //- Return the last element of the list
-            inline const T& last() const;
+            //- Access last element of the list, position [size()-1]
+            inline const T& back() const;
 
             //- Number of contiguous bytes for the List data.
             //  \note Only meaningful for contiguous data
@@ -580,6 +580,25 @@ public:
         {
             FOAM_DEPRECATED_FOR(2021-04, "hasher()") Hash() {}
         };
+
+
+    // Housekeeping
+
+        //- Access first element of the list, position [0]
+        //FOAM_DEPRECATED_FOR(2022-10, "front()")
+        T& first() { return front(); }
+
+        //- Access first element of the list
+        //FOAM_DEPRECATED_FOR(2022-10, "front()")
+        const T& first() const { return front(); };
+
+        //- Access last element of the list, position [size()-1]
+        //FOAM_DEPRECATED_FOR(2022-10, "back()")
+        T& last() { return back(); }
+
+        //- Access last element of the list, position [size()-1]
+        //FOAM_DEPRECATED_FOR(2022-10, "back()")
+        const T& last() const { return back(); };
 };
 
 

@@ -142,7 +142,7 @@ Foam::Istream& Foam::PackedList<Width>::readList(Istream& is)
         while (!tok.isPunctuation(token::END_LIST))
         {
             is.putBack(tok);
-            list.append(list.readValue(is));
+            list.push_back(list.readValue(is));
 
             is >> tok;
             is.fatalCheck(FUNCTION_NAME);

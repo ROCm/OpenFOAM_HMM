@@ -70,10 +70,19 @@ class Pair
 {
 public:
 
-    // Constructors
+    // Generated Methods
 
         //- Default construct
         Pair() = default;
+
+        //- The front() accessor (from FixedList) has no purpose
+        void front() = delete;
+
+        //- The back() accessor (from FixedList) has no purpose
+        void back() = delete;
+
+
+    // Constructors
 
         //- Copy construct from components
         inline Pair(const T& f, const T& s);
