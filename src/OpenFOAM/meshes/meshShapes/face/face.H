@@ -427,6 +427,14 @@ public:
                 faceList& quadFaces
             ) const;
 
+
+        //- True if the face has at least one vertex in common with other
+        inline bool connected(const labelUList& other) const;
+
+        //- True if the face has at least one vertex in common with other
+        template<unsigned N>
+        inline bool connected(const FixedList<label, N>& other) const;
+
         //- Compare faces
         //  \return
         //  -  0: different
@@ -434,7 +442,7 @@ public:
         //  - -1: same face, but different orientation
         static int compare(const face& a, const face& b);
 
-        //- Return true if the faces have the same vertices
+        //- True if the faces have all the same vertices
         static bool sameVertices(const face& a, const face& b);
 
 

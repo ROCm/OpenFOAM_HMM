@@ -49,44 +49,22 @@ void Foam::OppositeFaceCellWave<Type, TrackingData>::opposingFaceLabels
 
     const face& masterFace = this->mesh_.faces()[masterFaceLabel];
 
-    const labelList& curFaceLabels = this->mesh_.cells()[celli];
-
     oppositeFaceLabels.clear();
 
-    forAll(curFaceLabels, facei)
+    for (const label facei : this->mesh_.cells()[celli])
     {
         // Compare the face with the master
-        const face& curFace = this->mesh_.faces()[curFaceLabels[facei]];
+        const face& f = this->mesh_.faces()[facei];
 
         // Skip the master face
-        if (curFaceLabels[facei] != masterFaceLabel)
+        if
+        (
+            facei != masterFaceLabel
+         && !f.connected(masterFace)
+        )
         {
-            bool sharedPoint = false;
-
-            // Compare every vertex of the current face against the
-            // vertices of the master face
-            forAll(curFace, pointi)
-            {
-                const label l = curFace[pointi];
-
-                forAll(masterFace, masterPointi)
-                {
-                    if (masterFace[masterPointi] == l)
-                    {
-                        sharedPoint = true;
-                        break;
-                    }
-                }
-
-                if (sharedPoint) break;
-            }
-
-            // If no points are shared, this is the opposite face
-            if (!sharedPoint)
-            {
-                // Found opposite face
-                oppositeFaceLabels.append(curFaceLabels[facei]);
-            }
+            // Not connected : this is an opposite face
+            oppositeFaceLabels.push_back(facei);
         }
     }
 }

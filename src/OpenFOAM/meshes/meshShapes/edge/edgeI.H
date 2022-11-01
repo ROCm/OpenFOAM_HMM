@@ -140,7 +140,7 @@ inline Foam::label Foam::edge::which(const label pointLabel) const
 }
 
 
-inline bool Foam::edge::connects(const edge& other) const
+inline bool Foam::edge::connected(const edge& other) const
 {
     return (other.found(first()) || other.found(second()));
 }

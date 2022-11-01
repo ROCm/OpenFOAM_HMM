@@ -161,9 +161,8 @@ public:
         //  Always return -1 for a negative label.
         inline label which(const label pointLabel) const;
 
-        //- Do the edges share a common vertex index?
-        //  Negative point labels never connect.
-        inline bool connects(const edge& other) const;
+        //- True if the edge has at least one vertex in common with other
+        inline bool connected(const edge& other) const;
 
         //- Return vertex common with other edge or -1 on failure
         //  Negative point labels are never considered common between edges.
@@ -172,6 +171,10 @@ public:
         //- Given the point label for one vertex, return the other one.
         //  No special treatment for negative point labels.
         inline label otherVertex(const label pointLabel) const;
+
+        //- Do the edges share a common vertex index?
+        //  Negative point labels never connect.
+        bool connects(const edge& other) const { return connected(other); }
 
 
     // Editing

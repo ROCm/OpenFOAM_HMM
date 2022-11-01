@@ -117,7 +117,7 @@ scalar calcProximityOfFeatureEdges
                     const edge& e2 = emesh.edges()[pHit2.index()];
 
                     // Don't refine if the edges are connected to each other
-                    if (!e1.connects(e2))
+                    if (!e1.connected(e2))
                     {
                         scalar curDist =
                             mag(pHit1.hitPoint() - pHit2.hitPoint());
