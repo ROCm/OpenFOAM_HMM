@@ -162,7 +162,8 @@ public:
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
-            const dictionary&
+            const dictionary&,
+            const bool valueRequired = true
         );
 
         //- Construct by mapping given porousBafflePressureFvPatchField
