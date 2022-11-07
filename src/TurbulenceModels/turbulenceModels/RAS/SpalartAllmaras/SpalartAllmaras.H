@@ -52,18 +52,6 @@ Description
             Spalart-Allmaras One-Equation Model without ft2 Term (SA-noft2).
             https://turbmodels.larc.nasa.gov/spalart.html#sanoft2
             (Retrieved:12-01-2021).
-
-        Estimation expression for k and epsilon (tag:B), Eq. 4.50:
-            Bourgoin, A. (2019).
-            Bathymetry induced turbulence modelling the
-            Alderney Race site: regional approach with TELEMAC-LES.
-            Normandie Université.
-
-        Estimation expressions for omega (tag:P):
-            Pope, S. B. (2000).
-            Turbulent flows.
-            Cambridge, UK: Cambridge Univ. Press
-            DOI:10.1017/CBO9780511840531
     \endverbatim
 
 Usage
@@ -96,8 +84,6 @@ Note
   - The model is implemented without the trip-term since the model has almost
     always been used in fully turbulent applications rather than those where
     laminar-turbulent transition occurs.
-  - It has been argued that the \c ft2 term is not needed in the absence of the
-    trip-term, hence \c ft2 term is also not implementated.
   - The \c Stilda generation term should never be allowed to be zero or negative
     to avoid potential numerical issues and unphysical results for complex
     flows. To this end, a limiter proposed by Spalart (R:Note-1(b)) is applied
@@ -112,11 +98,12 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SpalartAllmaras_H
-#define SpalartAllmaras_H
+#ifndef Foam_SpalartAllmaras_H
+#define Foam_SpalartAllmaras_H
 
 #include "RASModel.H"
 #include "eddyViscosity.H"
+#include "SpalartAllmarasBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -132,7 +119,7 @@ namespace RASModels
 template<class BasicTurbulenceModel>
 class SpalartAllmaras
 :
-    public eddyViscosity<RASModel<BasicTurbulenceModel>>
+    public SpalartAllmarasBase<eddyViscosity<RASModel<BasicTurbulenceModel>>>
 {
     // Private Member Functions
 
@@ -145,54 +132,15 @@ class SpalartAllmaras
 
 protected:
 
-    // Protected Data
-
-        // Model coefficients
-
-            dimensionedScalar sigmaNut_;
-            dimensionedScalar kappa_;
-            dimensionedScalar Cb1_;
-            dimensionedScalar Cb2_;
-            dimensionedScalar Cw1_;
-            dimensionedScalar Cw2_;
-            dimensionedScalar Cw3_;
-            dimensionedScalar Cv1_;
-            dimensionedScalar Cs_;
-
-
-        // Fields
-
-            //- Modified kinematic viscosity [m2/s]
-            volScalarField nuTilda_;
-
-            //- Wall distance
-            //  Note: different to wall distance in parent RASModel
-            //  which is for near-wall cells only
-            const volScalarField::Internal& y_;
-
-
     // Protected Member Functions
 
-        tmp<volScalarField> chi() const;
-
-        tmp<volScalarField> fv1(const volScalarField& chi) const;
-
-        tmp<volScalarField::Internal> fv2
+        //- Return the length scale
+        virtual tmp<volScalarField> dTilda
         (
-            const volScalarField::Internal& chi,
-            const volScalarField::Internal& fv1
+            const volScalarField& chi,
+            const volScalarField& fv1,
+            const volTensorField& gradU
         ) const;
-
-        tmp<volScalarField::Internal> Stilda() const;
-
-        tmp<volScalarField::Internal> fw
-        (
-            const volScalarField::Internal& Stilda
-        ) const;
-
-
-        //- Update nut with the latest available nuTilda
-        virtual void correctNut();
 
 
 public:
@@ -224,27 +172,6 @@ public:
 
     //- Destructor
     virtual ~SpalartAllmaras() = default;
-
-
-    // Member Functions
-
-        //- Re-read model coefficients if they have changed
-        virtual bool read();
-
-        //- Return the effective diffusivity for nuTilda
-        tmp<volScalarField> DnuTildaEff() const;
-
-        //- Return the (estimated) turbulent kinetic energy
-        virtual tmp<volScalarField> k() const;
-
-        //- Return the (estimated) turbulent kinetic energy dissipation rate
-        virtual tmp<volScalarField> epsilon() const;
-
-        //- Return the (estimated) specific dissipation rate
-        virtual tmp<volScalarField> omega() const;
-
-        //- Solve the turbulence equations and correct the turbulent viscosity
-        virtual void correct();
 };
 
 

@@ -6,7 +6,8 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2015 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2022 Upstream CFD GmbH
+    Copyright (C) 2016, 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,9 +58,6 @@ class DESModel
     public DESModelBase,
     public LESeddyViscosity<BasicTurbulenceModel>
 {
-
-private:
-
     // Private Member Functions
 
         //- No copy construct
@@ -67,6 +65,14 @@ private:
 
         //- No copy assignment
         void operator=(const DESModel&) = delete;
+
+
+protected:
+
+    // Protected Data
+
+        //- Model-specific transition constant
+        dimensionedScalar Ctrans_;
 
 
 public:
@@ -92,13 +98,30 @@ public:
 
 
     //- Destructor
-    virtual ~DESModel();
+    virtual ~DESModel() = default;
 
 
     // Public Member Functions
 
+        //- Re-read model coefficients if they have changed
+        virtual bool read();
+
         //- Return the LES field indicator
         virtual tmp<volScalarField> LESRegion() const = 0;
+
+        //- Return modified strain rate
+        static tmp<volScalarField> Ssigma
+        (
+            const volTensorField& gradU,
+            const dimensionedScalar& coeff
+        );
+
+        //- Return modified strain rate
+        //  Note: uses Ctrans_ coefficient
+        virtual tmp<volScalarField> Ssigma(const volTensorField& gradU) const;
+
+        //- Return the shielding function
+        virtual tmp<volScalarField> fd() const;
 };
 
 

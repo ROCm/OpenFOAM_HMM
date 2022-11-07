@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,8 +28,7 @@ Class
     Foam::DESModelBase
 
 Description
-    Base class for DES models providing an interfaces to the LESRegion
-    function.
+    Base class for DES models providing an interfaces to DES fields.
 
 SourceFiles
     DESModelBase.C
@@ -70,6 +69,9 @@ public:
 
         //- Return the LES field indicator
         virtual tmp<volScalarField> LESRegion() const = 0;
+
+        //- Return the shielding function
+        virtual tmp<volScalarField> fd() const = 0;
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

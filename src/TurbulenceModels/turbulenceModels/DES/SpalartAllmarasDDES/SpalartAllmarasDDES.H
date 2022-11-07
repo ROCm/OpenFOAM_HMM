@@ -6,7 +6,8 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2022 Upstream CFD GmbH
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,15 +33,16 @@ Group
 
 Description
     SpalartAllmaras DDES turbulence model for incompressible and compressible
-    flows
+    flows.
 
     Reference:
     \verbatim
-        Spalart, P. R., Deck, S., Shur, M. L., Squires, K. D., Strelets, M. K.,
-        & Travin, A. (2006).
-        A new version of detached-eddy simulation, resistant to ambiguous grid
-        densities.
+        Spalart, P. R., Deck, S., Shur, M. L., Squires,
+        K. D., Strelets, M. K., & Travin, A. (2006).
+        A new version of detached-eddy simulation,
+        resistant to ambiguous grid densities.
         Theoretical and computational fluid dynamics, 20(3), 181-195.
+        DOI:10.1007/s00162-006-0015-0
     \endverbatim
 
 SourceFiles
@@ -48,10 +50,10 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SpalartAllmarasDDES_H
-#define SpalartAllmarasDDES_H
+#ifndef Foam_SpalartAllmarasDDES_H
+#define Foam_SpalartAllmarasDDES_H
 
-#include "SpalartAllmarasDES.H"
+#include "SpalartAllmarasBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -71,9 +73,8 @@ class SpalartAllmarasDDES
 {
     // Private Member Functions
 
+        //- Return the shielding function
         tmp<volScalarField> fd(const volScalarField& magGradU) const;
-
-        tmp<volScalarField> rd(const volScalarField& magGradU) const;
 
         //- No copy construct
         SpalartAllmarasDDES(const SpalartAllmarasDDES&) = delete;
@@ -84,7 +85,7 @@ class SpalartAllmarasDDES
 
 protected:
 
-    // Protected data
+    // Protected Data
 
         // Model coefficients
 
@@ -94,7 +95,16 @@ protected:
 
     // Protected Member Functions
 
-        //- Length scale
+        //- Return the production term
+        virtual tmp<volScalarField> Stilda
+        (
+            const volScalarField& chi,
+            const volScalarField& fv1,
+            const volTensorField& gradU,
+            const volScalarField& dTilda
+        ) const;
+
+        //- Return the length scale
         virtual tmp<volScalarField> dTilda
         (
             const volScalarField& chi,
@@ -138,6 +148,9 @@ public:
 
         //- Read from dictionary
         virtual bool read();
+
+        //- Return the shielding function
+        virtual tmp<volScalarField> fd() const;
 };
 
 

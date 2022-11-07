@@ -10,7 +10,8 @@ $(LESdelta)/smoothDelta/smoothDelta.C
 $(LESdelta)/maxDeltaxyz/maxDeltaxyz.C
 $(LESdelta)/IDDESDelta/IDDESDelta.C
 $(LESdelta)/maxDeltaxyzCubeRootLESDelta/maxDeltaxyzCubeRootLESDelta.C
-
+$(LESdelta)/DeltaOmegaTildeDelta/DeltaOmegaTildeDelta.C
+$(LESdelta)/SLADelta/SLADelta.C
 
 LESfilters = LES/LESfilters
 

@@ -6,7 +6,8 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2022 Upstream CFD GmbH
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,44 +39,58 @@ namespace LESModels
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
-tmp<volScalarField> SpalartAllmarasDDES<BasicTurbulenceModel>::rd
-(
-    const volScalarField& magGradU
-) const
-{
-    tmp<volScalarField> tr
-    (
-        min
-        (
-            this->nuEff()
-           /(
-                max
-                (
-                    magGradU,
-                    dimensionedScalar("SMALL", magGradU.dimensions(), SMALL)
-                )
-               *sqr(this->kappa_*this->y_)
-            ),
-            scalar(10)
-        )
-    );
-    tr.ref().boundaryFieldRef() == 0.0;
-
-    return tr;
-}
-
-
-template<class BasicTurbulenceModel>
 tmp<volScalarField> SpalartAllmarasDDES<BasicTurbulenceModel>::fd
 (
     const volScalarField& magGradU
 ) const
 {
-    return 1 - tanh(pow(Cd1_*rd(magGradU), Cd2_));
+    return
+        1
+      - tanh(pow(this->Cd1_*this->r(this->nuEff(), magGradU, this->y_), Cd2_));
 }
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+template<class BasicTurbulenceModel>
+tmp<volScalarField> SpalartAllmarasDDES<BasicTurbulenceModel>::Stilda
+(
+    const volScalarField& chi,
+    const volScalarField& fv1,
+    const volTensorField& gradU,
+    const volScalarField& dTilda
+) const
+{
+    if (this->useSigma_)
+    {
+        const volScalarField& lRAS(this->y_);
+        const volScalarField fv2(this->fv2(chi, fv1));
+        const volScalarField lLES(this->lengthScaleLES(chi, fv1));
+        const volScalarField Omega(this->Omega(gradU));
+        const volScalarField Ssigma(this->Ssigma(gradU));
+        const volScalarField SsigmaDES
+        (
+            Omega - fd(mag(gradU))*pos(lRAS - lLES)*(Omega - Ssigma)
+        );
+
+        return
+            max
+            (
+                SsigmaDES + fv2*this->nuTilda_/sqr(this->kappa_*dTilda),
+                this->Cs_*SsigmaDES
+            );
+    }
+
+    return
+        SpalartAllmarasBase<DESModel<BasicTurbulenceModel>>::Stilda
+        (
+            chi,
+            fv1,
+            gradU,
+            dTilda
+        );
+}
+
 
 template<class BasicTurbulenceModel>
 tmp<volScalarField> SpalartAllmarasDDES<BasicTurbulenceModel>::dTilda
@@ -86,17 +101,12 @@ tmp<volScalarField> SpalartAllmarasDDES<BasicTurbulenceModel>::dTilda
 ) const
 {
     const volScalarField& lRAS(this->y_);
-    const volScalarField lLES(this->psi(chi, fv1)*this->CDES_*this->delta());
+    const volScalarField lLES(this->lengthScaleLES(chi, fv1));
+    const dimensionedScalar l0(dimLength, Zero);
 
     return max
     (
-        lRAS
-      - fd(mag(gradU))
-       *max
-        (
-            lRAS - lLES,
-            dimensionedScalar(dimLength, Zero)
-        ),
+        lRAS - fd(mag(gradU))*max(lRAS - lLES, l0),
         dimensionedScalar("small", dimLength, SMALL)
     );
 }
@@ -131,12 +141,19 @@ SpalartAllmarasDDES<BasicTurbulenceModel>::SpalartAllmarasDDES
 
     Cd1_
     (
-        dimensioned<scalar>::getOrAddToDict
-        (
-            "Cd1",
-            this->coeffDict_,
-            8
-        )
+        this->useSigma_
+          ? dimensioned<scalar>::getOrAddToDict
+            (
+                "Cd1Sigma",
+                this->coeffDict_,
+                10
+            )
+          : dimensioned<scalar>::getOrAddToDict
+            (
+                "Cd1",
+                this->coeffDict_,
+                8
+            )
     ),
     Cd2_
     (
@@ -169,6 +186,13 @@ bool SpalartAllmarasDDES<BasicTurbulenceModel>::read()
     }
 
     return false;
+}
+
+
+template<class BasicTurbulenceModel>
+tmp<volScalarField> SpalartAllmarasDDES<BasicTurbulenceModel>::fd() const
+{
+    return fd(mag(fvc::grad(this->U_)));
 }
 
 

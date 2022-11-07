@@ -23,16 +23,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::DESModelBase
-
-Description
-    Base class for DES models providing an interfaces to the LESRegion
-    function.
-
-SourceFiles
-    DESModelBase.C
-
 \*---------------------------------------------------------------------------*/
 
 #include "DESModelBase.H"

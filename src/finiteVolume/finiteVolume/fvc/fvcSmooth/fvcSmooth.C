@@ -348,7 +348,7 @@ void Foam::fvc::spreadSource
         zeroGradientFvPatchField<scalar>::typeName
     );
 
-    //- Smearing of source term field
+    // Smearing of source term field
     fvScalarMatrix mSourceEqn
     (
         fvm::Sp(scalar(1), mDotSmear)
@@ -384,7 +384,7 @@ void Foam::fvc::spreadSource
     reduce(intvDotVapor.value(), sumOp<scalar>());
     reduce(intvDotLiquid.value(), sumOp<scalar>());
 
-    //- Calculate Nl and Nv
+    // Calculate Nl and Nv
     dimensionedScalar Nl ("Nl", dimless, Zero);
     dimensionedScalar Nv ("Nv", dimless, Zero);
 
@@ -399,7 +399,7 @@ void Foam::fvc::spreadSource
         Nl = intmSource0/intvDotLiquid;
     }
 
-    //- Set source terms in cells with alpha1 < cutoff or alpha1 > 1-cutoff
+    // Set source terms in cells with alpha1 < cutoff or alpha1 > 1-cutoff
     forAll(mesh.C(), celli)
     {
         if (alpha1[celli] < cutoff)
@@ -417,4 +417,6 @@ void Foam::fvc::spreadSource
         }
     }
 }
+
+
 // ************************************************************************* //

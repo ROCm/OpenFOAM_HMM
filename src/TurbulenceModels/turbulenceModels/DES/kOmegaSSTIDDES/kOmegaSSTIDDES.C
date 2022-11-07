@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,7 +64,7 @@ tmp<volScalarField> kOmegaSSTIDDES<BasicTurbulenceModel>::ft
     const volScalarField& magGradU
 ) const
 {
-    return tanh(pow3(sqr(Ct_)*rd(this->nut_, magGradU)));
+    return tanh(pow3(sqr(Ct_)*this->r(this->nut_, magGradU)));
 }
 
 
@@ -74,40 +74,9 @@ tmp<volScalarField> kOmegaSSTIDDES<BasicTurbulenceModel>::fl
     const volScalarField& magGradU
 ) const
 {
-    return tanh(pow(sqr(Cl_)*rd(this->nu(), magGradU), 10));
+    return tanh(pow(sqr(Cl_)*this->r(this->nu(), magGradU), 10));
 }
 
-
-template<class BasicTurbulenceModel>
-tmp<volScalarField> kOmegaSSTIDDES<BasicTurbulenceModel>::rd
-(
-    const volScalarField& nur,
-    const volScalarField& magGradU
-) const
-{
-    tmp<volScalarField> tr
-    (
-        min
-        (
-            nur
-           /(
-                max
-                (
-                    magGradU,
-                    dimensionedScalar("SMALL", magGradU.dimensions(), SMALL)
-                )
-                *sqr(this->kappa_*this->y_)
-            ),
-            scalar(10)
-        )
-    );
-    tr.ref().boundaryFieldRef() == 0.0;
-
-    return tr;
-}
-
-
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
 tmp<volScalarField> kOmegaSSTIDDES<BasicTurbulenceModel>::fdt
@@ -115,9 +84,11 @@ tmp<volScalarField> kOmegaSSTIDDES<BasicTurbulenceModel>::fdt
     const volScalarField& magGradU
 ) const
 {
-    return 1 - tanh(pow(Cdt1_*rd(this->nut_, magGradU), Cdt2_));
+    return 1 - tanh(pow(Cdt1_*this->r(this->nut_, magGradU), Cdt2_));
 }
 
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
 tmp<volScalarField> kOmegaSSTIDDES<BasicTurbulenceModel>::dTilda
@@ -126,35 +97,35 @@ tmp<volScalarField> kOmegaSSTIDDES<BasicTurbulenceModel>::dTilda
     const volScalarField& CDES
 ) const
 {
-    const volScalarField& k = this->k_;
-    const volScalarField& omega = this->omega_;
-
-    const volScalarField lRAS(sqrt(k)/(this->betaStar_*omega));
-    const volScalarField lLES(CDES*this->delta());
+    const volScalarField lRAS(this->lengthScaleRAS());
+    const volScalarField lLES(this->lengthScaleLES(CDES));
 
     const volScalarField alpha(this->alpha());
     const volScalarField expTerm(exp(sqr(alpha)));
 
     tmp<volScalarField> fB = min(2*pow(expTerm, -9.0), scalar(1));
-    tmp<volScalarField> fe1 =
-        2*(pos0(alpha)*pow(expTerm, -11.09) + neg(alpha)*pow(expTerm, -9.0));
-    tmp<volScalarField> fe2 = 1 - max(ft(magGradU), fl(magGradU));
-    tmp<volScalarField> fe = max(fe1 - 1, scalar(0))*fe2;
-
     const volScalarField fdTilda(max(1 - fdt(magGradU), fB));
 
-    // Simplified formulation from Gritskevich et al. paper (2011) where fe = 0
-    // return max
-    // (
-    //     fdTilda*lRAS + (1 - fdTilda)*lLES,
-    //     dimensionedScalar("SMALL", dimLength, SMALL)
-    // );
+    if (fe_)
+    {
+        tmp<volScalarField> fe1 =
+            2*(pos0(alpha)*pow(expTerm, -11.09) + neg(alpha)*pow(expTerm, -9.));
+        tmp<volScalarField> fe2 = 1 - max(ft(magGradU), fl(magGradU));
+        tmp<volScalarField> fe = max(fe1 - 1, scalar(0))*fe2;
 
-    // Original formulation from Shur et al. paper (2008)
+        // Original formulation from Shur et al. paper (2008)
+        return max
+        (
+            fdTilda*(1 + fe)*lRAS + (1 - fdTilda)*lLES,
+            dimensionedScalar(dimLength, SMALL)
+        );
+    }
+
+    // Simplified formulation from Gritskevich et al. paper (2011) where fe = 0
     return max
     (
-        fdTilda*(1 + fe)*lRAS + (1 - fdTilda)*lLES,
-        dimensionedScalar("SMALL", dimLength, SMALL)
+        fdTilda*lRAS + (1 - fdTilda)*lLES,
+        dimensionedScalar(dimLength, SMALL)
     );
 }
 
@@ -222,6 +193,16 @@ kOmegaSSTIDDES<BasicTurbulenceModel>::kOmegaSSTIDDES
             1.87
         )
     ),
+    fe_
+    (
+        Switch::getOrAddToDict
+        (
+            "fe",
+            this->coeffDict_,
+            true
+        )
+    ),
+
     IDDESDelta_(setDelta())
 {
     if (type == typeName)
@@ -247,6 +228,17 @@ bool kOmegaSSTIDDES<BasicTurbulenceModel>::read()
     }
 
     return false;
+}
+
+
+template<class BasicTurbulenceModel>
+tmp<volScalarField> kOmegaSSTIDDES<BasicTurbulenceModel>::fd() const
+{
+    const volScalarField alpha(this->alpha());
+    const volScalarField expTerm(exp(sqr(alpha)));
+
+    tmp<volScalarField> fB = min(2*pow(expTerm, -9.0), scalar(1));
+    return max(1 - fdt(mag(fvc::grad(this->U_))), fB);
 }
 
 

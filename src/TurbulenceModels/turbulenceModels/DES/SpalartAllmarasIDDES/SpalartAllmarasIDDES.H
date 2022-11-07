@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,15 +31,16 @@ Group
     grpDESTurbulence
 
 Description
-    SpalartAllmaras IDDES turbulence model for incompressible and compressible
-    flows
+    SpalartAllmaras IDDES turbulence model
+    for incompressible and compressible flows.
 
     Reference:
     \verbatim
         Shur, M. L., Spalart, P. R., Strelets, M. K., & Travin, A. K. (2008).
-        A hybrid RANS-LES approach with delayed-DES and wall-modelled LES
-        capabilities.
-        International Journal of Heat and Fluid Flow, 29(6), 1638-1649.
+        A hybrid RANS-LES approach with delayed-DES
+        and wall-modelled LES capabilities.
+        International journal of heat and fluid flow, 29(6), 1638-1649.
+        DOI:10.1016/j.ijheatfluidflow.2008.07.001
     \endverbatim
 
 SourceFiles
@@ -47,8 +48,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SpalartAllmarasIDDES_H
-#define SpalartAllmarasIDDES_H
+#ifndef Foam_SpalartAllmarasIDDES_H
+#define Foam_SpalartAllmarasIDDES_H
 
 #include "SpalartAllmarasDES.H"
 #include "IDDESDelta.H"
@@ -61,7 +62,7 @@ namespace LESModels
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class SpalartAllmarasIDDES Declaration
+                    Class SpalartAllmarasIDDES Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class BasicTurbulenceModel>
@@ -75,14 +76,10 @@ class SpalartAllmarasIDDES
         const IDDESDelta& setDelta() const;
 
         tmp<volScalarField> alpha() const;
-        tmp<volScalarField> ft(const volScalarField& magGradU) const;
-        tmp<volScalarField> fl(const volScalarField& magGradU) const;
 
-        tmp<volScalarField> rd
-        (
-            const volScalarField& nur,
-            const volScalarField& magGradU
-        ) const;
+        tmp<volScalarField> ft(const volScalarField& magGradU) const;
+
+        tmp<volScalarField> fl(const volScalarField& magGradU) const;
 
         //- Delay function
         tmp<volScalarField> fdt(const volScalarField& magGradU) const;
@@ -96,7 +93,7 @@ class SpalartAllmarasIDDES
 
 protected:
 
-    // Protected data
+    // Protected Data
 
         // Model coefficients
 
@@ -104,14 +101,16 @@ protected:
             dimensionedScalar Cdt2_;
             dimensionedScalar Cl_;
             dimensionedScalar Ct_;
+            Switch fe_;
 
-        // Fields
 
-            const IDDESDelta& IDDESDelta_;
+        //- IDDES delta
+        const IDDESDelta& IDDESDelta_;
+
 
     // Protected Member Functions
 
-        //- Length scale
+        //- Return the length scale
         virtual tmp<volScalarField> dTilda
         (
             const volScalarField& chi,
@@ -155,6 +154,9 @@ public:
 
         //- Re-read model coefficients if they have changed
         virtual bool read();
+
+        //- Return the shielding function
+        virtual tmp<volScalarField> fd() const;
 };
 
 

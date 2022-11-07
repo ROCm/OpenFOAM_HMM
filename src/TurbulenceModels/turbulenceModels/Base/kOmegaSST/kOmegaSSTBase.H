@@ -6,7 +6,8 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2022 Upstream CFD GmbH
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -141,7 +142,7 @@ class kOmegaSSTBase
 
 protected:
 
-    // Protected data
+    // Protected Data
 
         // Model coefficients
 
@@ -174,7 +175,10 @@ protected:
             //  which is for near-wall cells only
             const volScalarField& y_;
 
+            //- Turbulent kinetic energy field [m^2/s^2]
             volScalarField k_;
+
+            //- Specific dissipation rate field [1/s]
             volScalarField omega_;
 
 
@@ -188,6 +192,7 @@ protected:
 
     // Protected Member Functions
 
+        //- Set decay control with kInf and omegaInf
         void setDecayControl(const dictionary& dict);
 
         virtual tmp<volScalarField> F1(const volScalarField& CDkOmega) const;
@@ -195,6 +200,7 @@ protected:
         virtual tmp<volScalarField> F3() const;
         virtual tmp<volScalarField> F23() const;
 
+        //- Return the blended field
         tmp<volScalarField> blend
         (
             const volScalarField& F1,
@@ -205,6 +211,7 @@ protected:
             return F1*(psi1 - psi2) + psi2;
         }
 
+        //- Return the internal blended field
         tmp<volScalarField::Internal> blend
         (
             const volScalarField::Internal& F1,
@@ -253,6 +260,13 @@ protected:
 
         virtual void correctNut();
 
+        //- Return square of strain rate
+        virtual tmp<volScalarField> S2
+        (
+            const volScalarField& F1,
+            const volTensorField& gradU
+        ) const;
+
         //- Return k production rate
         virtual tmp<volScalarField::Internal> Pk
         (
@@ -264,6 +278,14 @@ protected:
         (
             const volScalarField& F1,
             const volTensorField& gradU
+        ) const;
+
+        //- Return (G/nu)_0
+        virtual tmp<volScalarField::Internal> GbyNu0
+        (
+            const volTensorField& gradU,
+            const volScalarField& F1,
+            const volScalarField& S2
         ) const;
 
         //- Return G/nu
@@ -321,22 +343,20 @@ public:
         //- Return the effective diffusivity for k
         tmp<volScalarField> DkEff(const volScalarField& F1) const
         {
-            return tmp<volScalarField>
+            return tmp<volScalarField>::New
             (
-                new volScalarField("DkEff", alphaK(F1)*this->nut_ + this->nu())
+                "DkEff",
+                alphaK(F1)*this->nut_ + this->nu()
             );
         }
 
         //- Return the effective diffusivity for omega
         tmp<volScalarField> DomegaEff(const volScalarField& F1) const
         {
-            return tmp<volScalarField>
+            return tmp<volScalarField>::New
             (
-                new volScalarField
-                (
-                    "DomegaEff",
-                    alphaOmega(F1)*this->nut_ + this->nu()
-                )
+                "DomegaEff",
+                alphaOmega(F1)*this->nut_ + this->nu()
             );
         }
 

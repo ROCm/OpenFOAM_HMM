@@ -103,6 +103,9 @@ namespace Foam
     //- Read scalar from stream.
     scalar readScalar(Istream& is);
 
+    //- Read scalar from stream if present or return default value
+    scalar readScalarOrDefault(Istream& is, const scalar defaultValue);
+
     //- Read raw scalar from binary stream.
     //  \note No internal check for binary vs ascii,
     //        the caller knows what they are doing
@@ -171,6 +174,9 @@ namespace Foam
 
     //- Read scalar from stream.
     scalar readScalar(Istream& is);
+
+    //- Read scalar from stream if present or return default value
+    scalar readScalarOrDefault(Istream& is, const scalar defaultValue);
 
     //- Read raw scalar from binary stream.
     //  \note No internal check for binary vs ascii,
