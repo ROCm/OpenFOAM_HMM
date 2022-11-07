@@ -71,10 +71,11 @@ Description
     }
     \endverbatim
 
-  Format options:
+    Format options:
     \table
         Property    | Description                           | Reqd | Default
         verbose     | Additional output verbosity           | no  | no
+        commsType   | Communication type                    | no  | scheduled
         scale       | Output geometry scaling               | no  | 1
         transform   | Output coordinate transform           | no  |
         fieldLevel  | Subtract field level before scaling   | no  | empty dict
@@ -108,6 +109,7 @@ SourceFiles
 #include "instant.H"
 #include "mergedSurf.H"
 #include "meshedSurfRef.H"
+#include "UPstream.H"
 #include "InfoProxy.H"
 #include "runTimeSelectionTables.H"
 
@@ -179,6 +181,9 @@ protected:
 
         //- Additional output verbosity
         bool verbose_;
+
+        //- Communication type (for field merging)
+        UPstream::commsTypes commType_;
 
         //- The number of fields
         label nFields_;

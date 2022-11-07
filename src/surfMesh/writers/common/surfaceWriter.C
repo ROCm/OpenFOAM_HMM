@@ -30,7 +30,6 @@ License
 #include "MeshedSurfaceProxy.H"
 
 #include "Time.H"
-#include "globalIndex.H"
 #include "coordinateRotation.H"
 #include "transformField.H"
 #include "addToRunTimeSelectionTable.H"
@@ -152,6 +151,7 @@ Foam::surfaceWriter::surfaceWriter()
     useTimeDir_(false),
     isPointData_(false),
     verbose_(false),
+    commType_(UPstream::commsTypes::scheduled),
     nFields_(0),
     currTime_(),
     outputPath_(),
@@ -167,6 +167,8 @@ Foam::surfaceWriter::surfaceWriter(const dictionary& options)
     surfaceWriter()
 {
     options.readIfPresent("verbose", verbose_);
+
+    UPstream::commsTypeNames.readIfPresent("commsType", options, commType_);
 
     geometryScale_ = 1;
     geometryCentre_ = Zero;
@@ -188,6 +190,13 @@ Foam::surfaceWriter::surfaceWriter(const dictionary& options)
 
     fieldLevel_ = options.subOrEmptyDict("fieldLevel");
     fieldScale_ = options.subOrEmptyDict("fieldScale");
+
+    if (verbose_)
+    {
+        Info<< "Create surfaceWriter ("
+            << (this->isPointData() ? "point" : "face") << " data):"
+            << " commsType=" << UPstream::commsTypeNames[commType_] << endl;
+    }
 }
 
 
@@ -393,7 +402,7 @@ bool Foam::surfaceWriter::expire()
 
 bool Foam::surfaceWriter::hasSurface() const
 {
-    return surf_.valid();
+    return surf_.good();
 }
 
 
@@ -430,6 +439,7 @@ bool Foam::surfaceWriter::merge() const
 
     if (!upToDate_)
     {
+        // Similar to expire
         adjustedSurf_.clear();
 
         if (parallel_ && Pstream::parRun())
@@ -473,7 +483,7 @@ const Foam::meshedSurfRef& Foam::surfaceWriter::adjustSurface() const
         adjustedSurf_.clear();
     }
 
-    if (!adjustedSurf_.valid())
+    if (!adjustedSurf_.good())
     {
         adjustedSurf_.reset(surface());
 
@@ -538,7 +548,23 @@ Foam::tmp<Foam::Field<Type>> Foam::surfaceWriter::mergeFieldTemplate
         auto tfield = tmp<Field<Type>>::New();
         auto& allFld = tfield.ref();
 
-        globalIndex::gatherOp(fld, allFld);
+        // Update any expired global index (as required)
+
+        const globalIndex& globIndex =
+        (
+            this->isPointData()
+          ? mergedSurf_.pointGlobalIndex()
+          : mergedSurf_.faceGlobalIndex()
+        );
+
+        globIndex.gather
+        (
+            fld,
+            allFld,
+            UPstream::msgType(),
+            commType_,
+            UPstream::worldComm
+        );
 
         // Renumber (point data) to correspond to merged points
         if

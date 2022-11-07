@@ -82,17 +82,23 @@ Foam::surfaceWriters::debugWriter::mergeField
                 fld,
                 allFld,
                 UPstream::worldComm,
-                commType_,
-                (UPstream::msgType() + msgTag_)
+                commType_
             );
         }
         else
         {
-            globalIndex::gatherOp
+            const globalIndex& globIndex =
+            (
+                this->isPointData()
+              ? mergedSurf_.pointGlobalIndex()
+              : mergedSurf_.faceGlobalIndex()
+            );
+
+            globIndex.gather
             (
                 fld,
                 allFld,
-                (UPstream::msgType() + msgTag_),
+                UPstream::msgType(),
                 commType_,
                 UPstream::worldComm
             );
@@ -125,11 +131,9 @@ Foam::surfaceWriters::debugWriter::mergeField
 Foam::surfaceWriters::debugWriter::debugWriter()
 :
     surfaceWriter(),
-    commType_(UPstream::commsTypes::nonBlocking),
     mpiGatherv_(false),
     enableWrite_(false),
     header_(true),
-    msgTag_(0),
     streamOpt_(IOstreamOption::BINARY)
 {}
 
@@ -140,25 +144,14 @@ Foam::surfaceWriters::debugWriter::debugWriter
 )
 :
     surfaceWriter(options),
-    commType_
-    (
-        UPstream::commsTypeNames.getOrDefault
-        (
-            "commsType",
-            options,
-            UPstream::commsTypes::nonBlocking
-        )
-    ),
     mpiGatherv_(options.getOrDefault("gatherv", false)),
     enableWrite_(options.getOrDefault("write", false)),
     header_(true),
-    msgTag_(options.getOrDefault<int>("msgTag", 0)),
     streamOpt_(IOstreamOption::BINARY)
 {
     Info<< "Using debug surface writer ("
         << (this->isPointData() ? "point" : "face") << " data):"
         << " commsType=" << UPstream::commsTypeNames[commType_]
-        << " msgTag=" << msgTag_
         << " gatherv=" << Switch::name(mpiGatherv_)
         << " write=" << Switch::name(enableWrite_) << endl;
 }
