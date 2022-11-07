@@ -58,7 +58,7 @@ functions
         surfaceFormat   boundaryData;
         writeControl    timeStep;
         writeInterval   100;
-        interpolationScheme cell;
+
         fields
         (
             p
@@ -76,7 +76,14 @@ functions
             {
                 type            patch;
                 patches         (window);
-                interpolate     false;
+                surfaceFormat   boundaryData;
+            }
+
+            windowPatch
+            {
+                type            patch;
+                patches         (window);
+                surfaceFormat   ensight;
             }
         }
     }
