@@ -1,2 +1,0 @@
-c++DBUG     =
-c++OPT      = -ffp-contract=fast -ffast-math -O3 -funsafe-math-optimizations
