@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2018 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -258,9 +258,9 @@ void Foam::functionEntries::ifeqEntry::skipUntil
         }
         else if (t.wordToken() == "#if" || t.wordToken() == "#ifeq")
         {
-            stack.append(filePos(is.name(), is.lineNumber()));
+            stack.push_back(filePos(is.name(), is.lineNumber()));
             skipUntil(stack, parentDict, "#endif", is);
-            stack.remove();
+            stack.pop_back();
         }
         else if (t.wordToken() == endDirective)
         {
@@ -310,12 +310,12 @@ bool Foam::functionEntries::ifeqEntry::evaluate
             {
                 // Now skip until #endif
                 skipUntil(stack, parentDict, "#endif", is);
-                stack.remove();
+                stack.pop_back();
                 break;
             }
             else if (t.wordToken() == "#endif")
             {
-                stack.remove();
+                stack.pop_back();
                 break;
             }
             else
@@ -370,9 +370,9 @@ bool Foam::functionEntries::ifeqEntry::execute
 
             if (t.wordToken() == "#if" || t.wordToken() == "#ifeq")
             {
-                stack.append(filePos(is.name(), is.lineNumber()));
+                stack.push_back(filePos(is.name(), is.lineNumber()));
                 skipUntil(stack, parentDict, "#endif", is);
-                stack.remove();
+                stack.pop_back();
             }
             else if (t.wordToken() == "#else")
             {
@@ -398,7 +398,7 @@ bool Foam::functionEntries::ifeqEntry::execute
             }
             else if (t.wordToken() == "#endif")
             {
-                stack.remove();
+                stack.pop_back();
                 break;
             }
         }
@@ -427,7 +427,7 @@ bool Foam::functionEntries::ifeqEntry::execute
 {
     const label nNested = stack.size();
 
-    stack.append(filePos(is.name(), is.lineNumber()));
+    stack.push_back(filePos(is.name(), is.lineNumber()));
 
     // Read first token and expand any string
     token cond1(is);
@@ -441,8 +441,8 @@ bool Foam::functionEntries::ifeqEntry::execute
 
     // Info<< "Using #" << typeName << " " << cond1
     //     << " == " << cond2
-    //     << " at line " << stack.last().second()
-    //     << " in file " <<  stack.last().first() << endl;
+    //     << " at line " << stack.back().second()
+    //     << " in file " <<  stack.back().first() << endl;
 
     bool ok = ifeqEntry::execute(equal, stack, parentDict, is);
 
@@ -450,8 +450,8 @@ bool Foam::functionEntries::ifeqEntry::execute
     {
         FatalIOErrorInFunction(parentDict)
             << "Did not find matching #endif for condition starting"
-            << " at line " << stack.last().second()
-            << " in file " <<  stack.last().first() << exit(FatalIOError);
+            << " at line " << stack.back().second()
+            << " in file " <<  stack.back().first() << exit(FatalIOError);
     }
 
     return ok;

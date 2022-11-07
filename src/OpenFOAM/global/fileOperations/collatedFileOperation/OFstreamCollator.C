@@ -330,7 +330,7 @@ Foam::OFstreamCollator::~OFstreamCollator()
             Pout<< "~OFstreamCollator : Waiting for write thread" << endl;
         }
         thread_->join();
-        thread_.clear();
+        thread_.reset(nullptr);
     }
 
     if (threadComm_ != -1)
