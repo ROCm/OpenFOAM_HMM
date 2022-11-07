@@ -18,5 +18,4 @@ cxxtoo      = $(Ctoo)
 
 include $(GENERAL_RULES)/Icc/link-c++
 
-#legacy: LINK_LIBS   += -L$(IA64ROOT)/lib
 #------------------------------------------------------------------------------
