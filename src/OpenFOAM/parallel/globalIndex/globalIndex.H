@@ -108,8 +108,8 @@ public:
 
     // Constructors
 
-        //- Default construct
-        globalIndex() = default;
+        //- Default construct (empty)
+        globalIndex() noexcept = default;
 
         //- Copy construct from a list of offsets.
         //- No communication required
@@ -184,8 +184,14 @@ public:
         //- Global max of localSizes
         inline label maxSize() const;
 
+
+    // Access
+
         //- Const-access to the offsets
         inline const labelList& offsets() const noexcept;
+
+        //- Write-access to the offsets, for changing after construction
+        inline labelList& offsets() noexcept;
 
 
     // Dimensions
@@ -202,8 +208,8 @@ public:
 
     // Edit
 
-        //- Write-access to the offsets, for changing after construction
-        inline labelList& offsets() noexcept;
+        //- Reset to be empty (no offsets)
+        inline void clear();
 
         //- Reset from local size, using gather/broadcast
         //- with default/specified communicator if parallel.

@@ -1408,7 +1408,7 @@ void Foam::meshRefinement::selectIntersectedFaces
 //
 //
 //    autoPtr<mapPolyMesh> mapPtr;
-//    if (returnReduce(haveLeak, orOp<bool>()))
+//    if (returnReduceOr(haveLeak))
 //    {
 //        // Use shortestPathSet to provide a minimum set of faces needed
 //        // to close hole. Tbd: maybe directly use wave?
@@ -1927,7 +1927,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::blockLeakFaces
 
 
     autoPtr<mapPolyMesh> mapPtr;
-    if (returnReduce(haveLeak, orOp<bool>()))
+    if (returnReduceOr(haveLeak))
     {
         // Use holeToFace to provide a minimum set of faces needed
         // to close hole.

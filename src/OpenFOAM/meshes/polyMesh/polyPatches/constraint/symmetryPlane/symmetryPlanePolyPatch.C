@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2015 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,9 +47,9 @@ void Foam::symmetryPlanePolyPatch::calcGeometry(PstreamBuffers&)
 {
     if (n_ == vector::rootMax)
     {
-        if (returnReduce(size(), sumOp<label>()))
+        if (returnReduceOr(size()))
         {
-            const vectorField& nf(faceNormals());
+            const vectorField& nf = faceNormals();
             n_ = gAverage(nf);
 
             if (debug)

@@ -62,8 +62,8 @@ void Foam::polyMesh::calcDirections() const
     // Knock out empty and wedge directions. Note:they will be present on all
     // domains.
 
-    label nEmptyPatches = 0;
-    label nWedgePatches = 0;
+    bool hasEmptyPatches = false;
+    bool hasWedgePatches = false;
 
     vector emptyDirVec = Zero;
     vector wedgeDirVec = Zero;
@@ -79,7 +79,7 @@ void Foam::polyMesh::calcDirections() const
 
             if (pp.size())
             {
-                nEmptyPatches++;
+                hasEmptyPatches = true;
                 emptyDirVec += sum(cmptMag(fa));
             }
         }
@@ -93,16 +93,14 @@ void Foam::polyMesh::calcDirections() const
 
             if (pp.size())
             {
-                nWedgePatches++;
+                hasWedgePatches = true;
                 wedgeDirVec += cmptMag(wpp.centreNormal());
             }
         }
     }
 
-    reduce(nEmptyPatches, maxOp<label>());
-    reduce(nWedgePatches, maxOp<label>());
 
-    if (nEmptyPatches)
+    if (returnReduceOr(hasEmptyPatches))
     {
         reduce(emptyDirVec, sumOp<vector>());
 
@@ -126,7 +124,7 @@ void Foam::polyMesh::calcDirections() const
 
     geometricD_ = solutionD_;
 
-    if (nWedgePatches)
+    if (returnReduceOr(hasWedgePatches))
     {
         reduce(wedgeDirVec, sumOp<vector>());
 
@@ -339,21 +337,21 @@ Foam::polyMesh::polyMesh(const IOobject& io, const bool doInit)
         neighbour_.write();
     }
 
-    // Warn if global empty mesh
-    if (returnReduce(boundary_.empty(), orOp<bool>()))
+    if (returnReduceOr(boundary_.empty()))
     {
         WarningInFunction
-            << "mesh missing boundary on one or more domains" << endl;
+            << "Missing mesh boundary on one or more domains" << endl;
 
-        if (returnReduce(nPoints(), sumOp<label>()) == 0)
+        // Warn if global empty mesh
+        if (returnReduceAnd(!nPoints()))
         {
             WarningInFunction
-                << "no points in mesh" << endl;
+                << "No points in mesh" << endl;
         }
-        if (returnReduce(nCells(), sumOp<label>()) == 0)
+        if (returnReduceAnd(!nCells()))
         {
             WarningInFunction
-                << "no cells in mesh" << endl;
+                << "No cells in mesh" << endl;
         }
     }
 
@@ -802,14 +800,10 @@ void Foam::polyMesh::resetPrimitives
         boundary_.calcGeometry();
 
         // Warn if global empty mesh
-        if
-        (
-            (returnReduce(nPoints(), sumOp<label>()) == 0)
-         || (returnReduce(nCells(), sumOp<label>()) == 0)
-        )
+        if (returnReduceAnd(!nPoints()) || returnReduceAnd(!nCells()))
         {
             FatalErrorInFunction
-                << "no points or no cells in mesh" << endl;
+                << "No points or no cells in mesh" << endl;
         }
     }
 }

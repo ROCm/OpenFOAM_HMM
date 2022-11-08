@@ -355,16 +355,20 @@ void Foam::functionObjects::propellerInfo::setSampleDiskSurface
         points_
     );
 
-    // Surface writer
-    word surfWriterType;
-    if (sampleDiskDict.readIfPresent("surfaceWriter", surfWriterType))
-    {
-        const auto writeOptions = sampleDiskDict.subOrEmptyDict("writeOptions");
+    // Surface writer (keywords: surfaceWriter, writeOptions)
 
+    word writerType;
+    if (sampleDiskDict.readIfPresent("surfaceWriter", writerType))
+    {
         surfaceWriterPtr_ = surfaceWriter::New
         (
-            surfWriterType,
-            writeOptions.subOrEmptyDict(surfWriterType)
+            writerType,
+            surfaceWriter::formatOptions
+            (
+                sampleDiskDict,
+                writerType,
+                "writeOptions"
+            )
         );
 
         // Use outputDir/TIME/surface-name
@@ -470,7 +474,7 @@ void Foam::functionObjects::propellerInfo::updateSampleDiskCells()
         }
     }
 
-    Pstream::listCombineAllGather(pointMask_, orEqOp<bool>());
+    Pstream::listCombineReduce(pointMask_, orEqOp<bool>());
 }
 
 
@@ -785,7 +789,7 @@ Foam::tmp<Foam::Field<Type>> Foam::functionObjects::propellerInfo::interpolate
         }
     }
 
-    Pstream::listCombineAllGather(field, maxEqOp<Type>());
+    Pstream::listCombineReduce(field, maxEqOp<Type>());
 
     return tfield;
 }

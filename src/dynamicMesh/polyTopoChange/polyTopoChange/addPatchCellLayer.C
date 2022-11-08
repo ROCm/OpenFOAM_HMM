@@ -2006,7 +2006,7 @@ void Foam::addPatchCellLayer::setRefinement
                 Pout<< "nChanged:" << nChanged << endl;
             }
 
-            if (returnReduce(nChanged, sumOp<label>()) == 0)
+            if (!returnReduceOr(nChanged))
             {
                 break;
             }

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -473,8 +473,8 @@ void Foam::radiation::solarLoad::calculateQdiff
         nLocalVFCoarseFaces += coarseMesh_->boundaryMesh()[patchI].size();
     }
 
-    label totalFVNCoarseFaces = nLocalVFCoarseFaces;
-    reduce(totalFVNCoarseFaces, sumOp<label>());
+    const label totalFVNCoarseFaces =
+        returnReduce(nLocalVFCoarseFaces, sumOp<label>());
 
     // Calculate weighted absorptivity on coarse patches
     List<scalar> localCoarseEave(nLocalVFCoarseFaces);

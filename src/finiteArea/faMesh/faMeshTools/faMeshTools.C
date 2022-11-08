@@ -187,7 +187,7 @@ Foam::autoPtr<Foam::faMesh> Foam::faMeshTools::newMesh
 
     // Some processors without patches? - add patches
 
-    if (returnReduce(mesh.boundary().empty(), orOp<bool>()))
+    if (returnReduceOr(mesh.boundary().empty()))
     {
         // Use patchEntries, which were read on master and broadcast
 

@@ -2001,12 +2001,7 @@ void Foam::polyTopoChange::reorderCoupledFaces
         }
     }
 
-    if (syncParallel)
-    {
-        reduce(anyChanged, orOp<bool>());
-    }
-
-    if (anyChanged)
+    if (syncParallel ? returnReduceOr(anyChanged) : anyChanged)
     {
         // Reorder faces according to oldToNew.
         reorderCompactFaces(oldToNew.size(), oldToNew);

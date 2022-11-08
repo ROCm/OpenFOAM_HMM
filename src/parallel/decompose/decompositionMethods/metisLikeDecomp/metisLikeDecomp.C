@@ -149,13 +149,7 @@ Foam::label Foam::metisLikeDecomp::decomposeGeneral
 
     // Ignore zero-sized weights ... and poorly sized ones too
     List<scalar> allWeights;
-    if
-    (
-        returnReduce
-        (
-            (cWeights.size() == globalCells.localSize()), andOp<bool>()
-        )
-    )
+    if (returnReduceAnd(cWeights.size() == globalCells.localSize()))
     {
         allWeights = globalCells.gather(cWeights);
     }

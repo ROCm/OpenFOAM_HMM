@@ -138,8 +138,8 @@ int main()
             maxFirstEqOp<label>()(maxIndexed, item);
         }
 
-        Pstream::combineAllGather(minIndexed, minFirstEqOp<label>());
-        Pstream::combineAllGather(maxIndexed, maxFirstEqOp<label>());
+        Pstream::combineReduce(minIndexed, minFirstEqOp<label>());
+        Pstream::combineReduce(maxIndexed, maxFirstEqOp<label>());
 
         Info<< "Min indexed: " << minIndexed << nl
             << "Max indexed: " << maxIndexed << nl;
@@ -156,8 +156,8 @@ int main()
             maxIndexed = maxFirstOp<label>()(maxIndexed, item);
         }
 
-        Pstream::combineAllGather(minIndexed, minFirstEqOp<label>());
-        Pstream::combineAllGather(maxIndexed, maxFirstEqOp<label>());
+        Pstream::combineReduce(minIndexed, minFirstEqOp<label>());
+        Pstream::combineReduce(maxIndexed, maxFirstEqOp<label>());
 
         Info<< "Min indexed: " << minIndexed << nl
             << "Max indexed: " << maxIndexed << nl;

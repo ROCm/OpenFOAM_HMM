@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -82,7 +82,7 @@ Foam::label Foam::snappySnapDriver::getCollocatedPoints
     );
     bool hasMerged = (nUnique < points.size());
 
-    if (!returnReduce(hasMerged, orOp<bool>()))
+    if (!returnReduceOr(hasMerged))
     {
         return 0;
     }
@@ -215,9 +215,8 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::smoothInternalDisplacement
 
     if (debug)
     {
-        reduce(nInterface, sumOp<label>());
-        Info<< "Found " << nInterface << " faces out of "
-            << mesh.globalData().nTotalFaces()
+        Info<< "Found " << returnReduce(nInterface, sumOp<label>())
+            << " faces out of " << mesh.globalData().nTotalFaces()
             << " inbetween refinement regions." << endl;
     }
 
@@ -275,8 +274,8 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::smoothInternalDisplacement
         }
     }
 
-    reduce(nAdapted, sumOp<label>());
-    Info<< "Smoothing " << nAdapted << " points inbetween refinement regions."
+    Info<< "Smoothing " << returnReduce(nAdapted, sumOp<label>())
+        << " points inbetween refinement regions."
         << endl;
 
     return tdisplacement;
@@ -796,15 +795,12 @@ void Foam::snappySnapDriver::freezeExposedPoints
         0u
     );
 
-    if (returnReduce(isFrozenPoint.count(), sumOp<label>()))
+    for (const label pointi : isFrozenPoint)
     {
-        for (const label pointi : isFrozenPoint)
+        const auto iter = outside.meshPointMap().find(pointi);
+        if (iter.found())
         {
-            const auto& iter = outside.meshPointMap().find(pointi);
-            if (iter.found())
-            {
-                outsideDisp[iter()] = Zero;
-            }
+            outsideDisp[iter.val()] = Zero;
         }
     }
 }
@@ -1835,7 +1831,7 @@ Foam::vectorField Foam::snappySnapDriver::calcNearestSurface
     // Displacement per patch point
     vectorField patchDisp(localPoints.size(), Zero);
 
-    if (returnReduce(localPoints.size(), sumOp<label>()) > 0)
+    if (returnReduceOr(localPoints.size()))
     {
         // Current surface snapped to. Used to check whether points have been
         // snapped at all

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -78,6 +78,6 @@ if (timeDirs.size() > 1)
 }
 
 // Ensure consistency
-reduce(hasMovingMesh, orOp<bool>());
+Pstream::reduceOr(hasMovingMesh);
 
 // ************************************************************************* //

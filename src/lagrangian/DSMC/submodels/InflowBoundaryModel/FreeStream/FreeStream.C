@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -406,10 +407,8 @@ void Foam::FreeStream<CloudType>::inflow()
         }
     }
 
-    reduce(particlesInserted, sumOp<label>());
-
     Info<< "    Particles inserted              = "
-        << particlesInserted << endl;
+        << returnReduce(particlesInserted, sumOp<label>()) << endl;
 
 }
 

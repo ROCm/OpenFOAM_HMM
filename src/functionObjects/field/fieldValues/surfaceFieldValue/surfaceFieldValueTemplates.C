@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,7 +60,7 @@ inline bool Foam::functionObjects::fieldValues::surfaceFieldValue::canWeight
 ) const
 {
     // Non-empty on some processor
-    return returnReduce(!fld.empty(), orOp<bool>());
+    return returnReduceOr(!fld.empty());
 }
 
 

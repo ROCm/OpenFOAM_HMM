@@ -176,6 +176,12 @@ inline Foam::labelList& Foam::globalIndex::offsets() noexcept
 }
 
 
+inline void Foam::globalIndex::clear()
+{
+    offsets_.clear();
+}
+
+
 inline const Foam::labelUList Foam::globalIndex::localStarts() const
 {
     const label len = (offsets_.size() - 1);

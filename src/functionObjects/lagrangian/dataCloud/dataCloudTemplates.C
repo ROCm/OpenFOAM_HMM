@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -188,7 +188,7 @@ bool Foam::functionObjects::dataCloud::writeField
     const List<Type>* fldPtr = obrTmp.findObject<IOField<Type>>(fieldName_);
     const List<Type>& values = (fldPtr ? *fldPtr : List<Type>());
 
-    if (!returnReduce((fldPtr != nullptr), orOp<bool>()))
+    if (!returnReduceOr(fldPtr != nullptr))
     {
         return false;
     }

@@ -727,14 +727,12 @@ int main(int argc, char *argv[])
 
     pointField mergedPoints;
     faceList mergedFaces;
-    labelList pointMergeMap;
     PatchTools::gatherAndMerge
     (
         tolDim,
         primitivePatch(SubList<face>(isoFaces), isoPoints),
         mergedPoints,
-        mergedFaces,
-        pointMergeMap
+        mergedFaces
     );
 
     if (Pstream::master())

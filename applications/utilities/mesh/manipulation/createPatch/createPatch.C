@@ -686,7 +686,7 @@ void syncPoints
 
     //- Note: hasTransformation is only used for warning messages so
     //  reduction not strictly necessary.
-    //reduce(hasTransformation, orOp<bool>());
+    //Pstream::reduceOr(hasTransformation);
 
     // Synchronize multiple shared points.
     const globalMeshData& pd = mesh.globalData();
@@ -714,7 +714,7 @@ void syncPoints
         }
 
         // Combine - globally consistent
-        Pstream::listCombineAllGather(sharedPts, cop);
+        Pstream::listCombineReduce(sharedPts, cop);
 
         // Now we will all have the same information. Merge it back with
         // my local information.

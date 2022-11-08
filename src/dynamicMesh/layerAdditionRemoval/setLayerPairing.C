@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -169,10 +169,7 @@ bool Foam::layerAdditionRemoval::setLayerPairing() const
         }
     }
 
-    reduce(nPointErrors, sumOp<label>());
-    reduce(nFaceErrors, sumOp<label>());
-
-    if (nPointErrors > 0 || nFaceErrors > 0)
+    if (returnReduceOr(nPointErrors || nFaceErrors))
     {
         clearAddressing();
 

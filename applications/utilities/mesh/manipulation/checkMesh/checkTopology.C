@@ -187,7 +187,7 @@ void Foam::checkPatch
     {
         const labelList& mp = pp.meshPoints();
 
-        if (returnReduce(mp.size(), sumOp<label>()) > 0)
+        if (returnReduceOr(mp.size()))
         {
             boundBox bb(pp.points(), mp, true); // reduce
             Info<< ' ' << bb;
@@ -252,10 +252,10 @@ Foam::label Foam::checkTopology
             }
         }
         reduce(nEmpty, sumOp<label>());
-        label nTotCells = returnReduce(mesh.cells().size(), sumOp<label>());
+        const label nCells = returnReduce(mesh.cells().size(), sumOp<label>());
 
         // These are actually warnings, not errors.
-        if (nTotCells && (nEmpty % nTotCells))
+        if (nCells && (nEmpty % nCells))
         {
             Info<< " ***Total number of faces on empty patches"
                 << " is not divisible by the number of cells in the mesh."
@@ -335,7 +335,7 @@ Foam::label Foam::checkTopology
         {
             noFailedChecks++;
 
-            label nPoints = returnReduce(points.size(), sumOp<label>());
+            const label nPoints = returnReduce(points.size(), sumOp<label>());
 
             Info<< "  <<Writing " << nPoints
                 << " unused points to set " << points.name() << endl;
@@ -472,7 +472,7 @@ Foam::label Foam::checkTopology
             }
         }
 
-        label nOneCells = returnReduce(oneCells.size(), sumOp<label>());
+        const label nOneCells = returnReduce(oneCells.size(), sumOp<label>());
 
         if (nOneCells > 0)
         {
@@ -488,7 +488,7 @@ Foam::label Foam::checkTopology
             }
         }
 
-        label nTwoCells = returnReduce(twoCells.size(), sumOp<label>());
+        const label nTwoCells = returnReduce(twoCells.size(), sumOp<label>());
 
         if (nTwoCells > 0)
         {
@@ -588,11 +588,7 @@ Foam::label Foam::checkTopology
                     }
                 }
 
-                Pstream::listCombineAllGather
-                (
-                    regionDisconnected,
-                    andEqOp<bool>()
-                );
+                Pstream::listCombineReduce(regionDisconnected, andEqOp<bool>());
             }
 
 
@@ -639,7 +635,7 @@ Foam::label Foam::checkTopology
                 cellRegions[i].write();
             }
 
-            label nPoints = returnReduce(points.size(), sumOp<label>());
+            const label nPoints = returnReduce(points.size(), sumOp<label>());
             if (nPoints)
             {
                 Info<< "  <<Writing " << nPoints

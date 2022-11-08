@@ -68,7 +68,7 @@ void Foam::setRefCells
             }
         }
 
-        Pstream::listCombineAllGather(regionNeedReference, orEqOp<bool>());
+        Pstream::listCombineReduce(regionNeedReference, orEqOp<bool>());
     }
 
 
@@ -188,7 +188,7 @@ void Foam::setRefCells
             }
         }
 
-        Pstream::listCombineAllGather(hasRef, plusEqOp<label>());
+        Pstream::listCombineReduce(hasRef, plusEqOp<label>());
 
         forAll(hasRef, regionI)
         {

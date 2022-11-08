@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -254,7 +254,7 @@ bool Foam::cyclicAMIPolyPatch::addAMIFaces(polyTopoChange& topoChange)
             << " "  << nbr.name() << ": " << nNewTgtFaces << endl;
     }
 
-    return returnReduce(changedFaces, orOp<bool>());
+    return returnReduceOr(changedFaces);
 }
 
 

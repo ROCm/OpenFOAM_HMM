@@ -372,9 +372,9 @@ sensitivitySurfacePoints::sensitivitySurfacePoints
     label nTotalPoints(0);
     for (const label patchI : sensitivityPatchIDs_)
     {
-        label nPoints = mesh_.boundaryMesh()[patchI].nPoints();
-        nTotalPoints += returnReduce(nPoints, sumOp<label>());
+        nTotalPoints += mesh_.boundaryMesh()[patchI].nPoints();
     }
+    reduce(nTotalPoints, sumOp<label>());
 
     // Derivatives for all (x,y,z) components of the displacement are kept
     derivatives_ = scalarField(3*nTotalPoints, Zero);

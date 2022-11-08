@@ -77,8 +77,7 @@ Foam::label Foam::particleTracksSampler::setTrackFields
 
         if (Pstream::parRun())
         {
-            Pstream::combineGather(fieldNames, ListOps::uniqueEqOp<word>());
-            Pstream::broadcast(fieldNames);
+            Pstream::combineReduce(fieldNames, ListOps::uniqueEqOp<word>());
         }
 
         for (const word& fieldName : fieldNames)

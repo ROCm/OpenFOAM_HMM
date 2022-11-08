@@ -413,7 +413,7 @@ bool Foam::processorLODs::box::doRefineBoxes
         newToOld_[proci].transfer(newProcNewToOld);
     }
 
-    return returnReduce(refineBoxes, orOp<bool>());
+    return returnReduceOr(refineBoxes);
 }
 
 

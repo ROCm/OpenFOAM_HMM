@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2014-2020 OpenCFD Ltd.
+    Copyright (C) 2014-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -137,7 +137,7 @@ void Foam::cellCellStencils::cellVolumeWeight::walkFront
     // Current interpolation fraction
     scalar fraction = 1.0;
 
-    while (fraction > SMALL && returnReduce(isFront.count(), sumOp<label>()))
+    while (fraction > SMALL && returnReduceOr(isFront.any()))
     {
         // Interpolate cells on front
 
@@ -377,7 +377,7 @@ void Foam::cellCellStencils::cellVolumeWeight::findHoles
     {
         // Synchronise region status on processors
         // (could instead swap status through processor patches)
-        Pstream::listCombineAllGather(regionType, maxEqOp<label>());
+        Pstream::listCombineReduce(regionType, maxEqOp<label>());
 
         // Communicate region status through interpolative cells
         labelList cellRegionType(labelUIndList(regionType, cellRegion));
@@ -420,8 +420,7 @@ void Foam::cellCellStencils::cellVolumeWeight::findHoles
         }
 
 
-        reduce(nChanged, sumOp<label>());
-        if (nChanged == 0)
+        if (!returnReduceOr(nChanged))
         {
             break;
         }
@@ -754,7 +753,7 @@ bool Foam::cellCellStencils::cellVolumeWeight::update()
     {
         nCellsPerZone[zoneID[cellI]]++;
     }
-    Pstream::listCombineAllGather(nCellsPerZone, plusEqOp<label>());
+    Pstream::listCombineReduce(nCellsPerZone, plusEqOp<label>());
 
 
     Info<< typeName << " : detected " << nZones

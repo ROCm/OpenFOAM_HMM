@@ -85,7 +85,7 @@ for (const int proci : Pstream::allProcs())
             }
         }
 
-    } while (returnReduce(i < myFc.size(), orOp<bool>()));
+    } while (returnReduceOr(i < myFc.size()));
 
     List<pointIndexHit> hitInfo(startIndex.size());
     surfacesMesh.findLine(start, end, hitInfo);
@@ -176,7 +176,7 @@ for (const int proci : Pstream::allProcs())
         firstLoop = false;
         iter ++;
 
-    } while (returnReduce(hitInfo.size(), orOp<bool>()) > 0 && iter < 10);
+    } while (returnReduceOr(hitInfo.size()) && iter < 10);
 
     startIndex.clear();
     end.clear();

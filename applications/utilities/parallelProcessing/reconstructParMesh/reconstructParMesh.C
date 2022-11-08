@@ -252,7 +252,7 @@ autoPtr<mapPolyMesh> mergeSharedPoints
     Info<< "mergeSharedPoints : detected " << pointToMaster.size()
         << " points that are to be merged." << endl;
 
-    if (returnReduce(pointToMaster.size(), sumOp<label>()) == 0)
+    if (returnReduceAnd(pointToMaster.empty()))
     {
         return nullptr;
     }

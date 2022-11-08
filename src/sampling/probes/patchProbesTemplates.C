@@ -111,7 +111,7 @@ Foam::patchProbes::sample(const VolumeField<Type>& vField) const
         }
     }
 
-    Pstream::listCombineAllGather(values, isNotEqOp<Type>());
+    Pstream::listCombineReduce(values, isNotEqOp<Type>());
 
     return tvalues;
 }
@@ -141,7 +141,7 @@ Foam::patchProbes::sample(const SurfaceField<Type>& sField) const
         }
     }
 
-    Pstream::listCombineAllGather(values, isNotEqOp<Type>());
+    Pstream::listCombineReduce(values, isNotEqOp<Type>());
 
     return tvalues;
 }

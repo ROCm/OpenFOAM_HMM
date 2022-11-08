@@ -482,7 +482,7 @@ bool Foam::PstreamBuffers::finishedSends
         }
     }
 
-    reduce(changed, orOp<bool>());
+    UPstream::reduceOr(changed);
 
     if (changed)
     {

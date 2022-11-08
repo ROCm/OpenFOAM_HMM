@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -341,8 +341,7 @@ bool Foam::primitiveMeshGeometry::checkFaceDotProduct
     reduce(severeNonOrth, sumOp<label>());
     reduce(errorNonOrth, sumOp<label>());
 
-    label neiSize = nei.size();
-    reduce(neiSize, sumOp<label>());
+    const label neiSize = returnReduce(nei.size(), sumOp<label>());
 
     // Only report if there are some internal faces
     if (neiSize > 0)

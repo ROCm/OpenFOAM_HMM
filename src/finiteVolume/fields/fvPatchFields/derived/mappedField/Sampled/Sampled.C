@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -278,7 +278,7 @@ Foam::PatchFunction1Types::Sampled<Type>::value
 
     // Enforce average. Either by scaling (if scaling factor > 0.5) or by
     // offsetting.
-    if (setAverage_ && returnReduce(newValues.size(), sumOp<label>()))
+    if (setAverage_ && returnReduceOr(newValues.size()))
     {
         Type averagePsi;
         if (this->faceValues())

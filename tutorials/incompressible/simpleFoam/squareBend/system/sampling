@@ -44,6 +44,15 @@ __surfaceFieldValue
 
     writeFields     false;
     surfaceFormat   vtk;
+
+    formatOptions
+    {
+        default
+        {
+            verbose true;
+        }
+    }
+
     // writeArea       true;
 
     // resetOnStartUp  true;

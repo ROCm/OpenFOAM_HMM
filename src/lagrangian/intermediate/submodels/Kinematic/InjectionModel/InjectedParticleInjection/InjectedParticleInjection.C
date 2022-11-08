@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,8 +62,7 @@ void Foam::InjectedParticleInjection<CloudType>::initialise()
     {
         List<List<scalar>> procTime(Pstream::nProcs());
         procTime[Pstream::myProcNo()].transfer(time);
-        Pstream::gatherList(procTime);
-        Pstream::scatterList(procTime);
+        Pstream::allGatherList(procTime);
         time =
             ListListOps::combine<List<scalar>>
             (
@@ -72,8 +71,7 @@ void Foam::InjectedParticleInjection<CloudType>::initialise()
 
         List<List<point>> procPosition(Pstream::nProcs());
         procPosition[Pstream::myProcNo()].transfer(position);
-        Pstream::gatherList(procPosition);
-        Pstream::scatterList(procPosition);
+        Pstream::allGatherList(procPosition);
         position =
             ListListOps::combine<List<point>>
             (
@@ -82,8 +80,7 @@ void Foam::InjectedParticleInjection<CloudType>::initialise()
 
         List<List<scalar>> procD(Pstream::nProcs());
         procD[Pstream::myProcNo()].transfer(diameter);
-        Pstream::gatherList(procD);
-        Pstream::scatterList(procD);
+        Pstream::allGatherList(procD);
         diameter =
             ListListOps::combine<List<scalar>>
             (
@@ -92,8 +89,7 @@ void Foam::InjectedParticleInjection<CloudType>::initialise()
 
         List<List<vector>> procU(Pstream::nProcs());
         procU[Pstream::myProcNo()].transfer(U);
-        Pstream::gatherList(procU);
-        Pstream::scatterList(procU);
+        Pstream::allGatherList(procU);
         U =
             ListListOps::combine<List<vector>>
             (

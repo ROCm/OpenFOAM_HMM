@@ -58,8 +58,7 @@ bool Foam::expressions::fvExprDriver::isGlobalVariable
     // Do size checking if requested
     if (good && expectedSize >= 0)
     {
-        good = (result.size() == expectedSize);
-        reduce(good, andOp<bool>());
+        good = returnReduceAnd(result.size() == expectedSize);
 
         if (debug && !good)
         {
@@ -103,7 +102,7 @@ Foam::expressions::fvExprDriver::getVariable
         if
         (
             expectedSize < 0
-         || returnReduce((vals.size() == expectedSize), andOp<bool>())
+         || returnReduceAnd(vals.size() == expectedSize)
         )
         {
             // Return a copy of the field
@@ -318,7 +317,7 @@ Foam::tmp<GeomField> Foam::expressions::fvExprDriver::getOrReadFieldImpl
             Pout<< "sizes: " << vals.size() << ' ' << fld.size() << endl;
         }
 
-        if (returnReduce((vals.size() == fld.size()), andOp<bool>()))
+        if (returnReduceAnd(vals.size() == fld.size()))
         {
             fld.primitiveFieldRef() = vals;
         }

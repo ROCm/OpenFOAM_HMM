@@ -1118,7 +1118,7 @@ void Foam::cellCellStencils::inverseDistance::findHoles
     {
         // Synchronise region status on processors
         // (could instead swap status through processor patches)
-        Pstream::listCombineAllGather(regionType, maxEqOp<label>());
+        Pstream::listCombineReduce(regionType, maxEqOp<label>());
 
         DebugInfo<< FUNCTION_NAME << " : Gathered region type" << endl;
 
@@ -1306,7 +1306,7 @@ void Foam::cellCellStencils::inverseDistance::walkFront
     }
 
 
-    while (returnReduce(isFront.any(), orOp<bool>()))
+    while (returnReduceOr(isFront.any()))
     {
         // Interpolate cells on front
         bitSet newIsFront(mesh_.nFaces());
@@ -1502,7 +1502,7 @@ void Foam::cellCellStencils::inverseDistance::createStencil
         }
 
 
-        if (returnReduce(nSamples, sumOp<label>()) == 0)
+        if (!returnReduceOr(nSamples))
         {
             break;
         }
@@ -1722,7 +1722,7 @@ bool Foam::cellCellStencils::inverseDistance::update()
     {
         nCellsPerZone[zoneID[cellI]]++;
     }
-    Pstream::listCombineAllGather(nCellsPerZone, plusEqOp<label>());
+    Pstream::listCombineReduce(nCellsPerZone, plusEqOp<label>());
 
     const boundBox& allBb(mesh_.bounds());
 
@@ -2293,18 +2293,15 @@ bool Foam::cellCellStencils::inverseDistance::update()
                 nLocal++;
             }
         }
-        reduce(nLocal, sumOp<label>());
-        reduce(nMixed, sumOp<label>());
-        reduce(nRemote, sumOp<label>());
 
         Info<< "Overset analysis : nCells : "
             << returnReduce(cellTypes_.size(), sumOp<label>()) << nl
             << incrIndent
             << indent << "calculated   : " << nCells[CALCULATED] << nl
             << indent << "interpolated : " << nCells[INTERPOLATED]
-            << " (interpolated from local:" << nLocal
-            << "  mixed local/remote:" << nMixed
-            << "  remote:" << nRemote << ")" << nl
+            << " (from local:" << returnReduce(nLocal, sumOp<label>())
+            << "  mixed local/remote:" << returnReduce(nMixed, sumOp<label>())
+            << "  remote:" << returnReduce(nRemote, sumOp<label>()) << ")" << nl
             << indent << "hole         : " << nCells[HOLE] << nl
             << decrIndent << endl;
     }

@@ -156,7 +156,7 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::setFaceZoneFaces()
 
     // Could also check this
     #if 0
-    if (!returnReduce(bool(numFaces), orOp<bool>()))
+    if (!returnReduceOr(numFaces))
     {
         WarningInFunction
             << type() << ' ' << name() << ": "
@@ -314,7 +314,7 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::setPatchFaces()
 
     // Could also check this
     #if 0
-    if (!returnReduce(bool(numFaces), orOp<bool>()))
+    if (!returnReduceOr(numFaces))
     {
         WarningInFunction
             << type() << ' ' << name() << ": "
@@ -418,15 +418,12 @@ combineSurfaceGeometry
             // Dimension as fraction of surface
             const scalar mergeDim = 1e-10*boundBox(s.points(), true).mag();
 
-            labelList pointsMap;
-
-            PatchTools::gatherAndMerge
+            Foam::PatchTools::gatherAndMerge
             (
                 mergeDim,
                 primitivePatch(SubList<face>(s.faces()), s.points()),
                 points,
-                faces,
-                pointsMap
+                faces
             );
         }
         else
@@ -444,15 +441,12 @@ combineSurfaceGeometry
             // Dimension as fraction of mesh bounding box
             const scalar mergeDim = 1e-10*mesh_.bounds().mag();
 
-            labelList pointsMap;
-
-            PatchTools::gatherAndMerge
+            Foam::PatchTools::gatherAndMerge
             (
                 mergeDim,
                 primitivePatch(SubList<face>(s.faces()), s.points()),
                 points,
-                faces,
-                pointsMap
+                faces
             );
         }
         else
@@ -807,7 +801,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::weightingFactor
     // scalar * unit-normal
 
     // Can skip this check - already used canWeight()
-    /// if (returnReduce(weightField.empty(), andOp<bool>()))
+    /// if (returnReduceAnd(weightField.empty()))
     /// {
     ///     // No weight field - revert to unweighted form?
     ///     return tmp<scalarField>::New(Sf.size(), scalar(1));
@@ -835,7 +829,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::areaWeightingFactor
     // scalar * Area
 
     // Can skip this check - already used canWeight()
-    /// if (returnReduce(weightField.empty(), andOp<bool>()))
+    /// if (returnReduceAnd(weightField.empty()))
     /// {
     ///     // No weight field - revert to unweighted form
     ///     return mag(Sf);
@@ -862,7 +856,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::weightingFactor
     // vector (dot) unit-normal
 
     // Can skip this check - already used canWeight()
-    /// if (returnReduce(weightField.empty(), andOp<bool>()))
+    /// if (returnReduceAnd(weightField.empty()))
     /// {
     ///     // No weight field - revert to unweighted form
     ///     return tmp<scalarField>::New(Sf.size(), scalar(1));
@@ -903,7 +897,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::areaWeightingFactor
     // vector (dot) Area
 
     // Can skip this check - already used canWeight()
-    /// if (returnReduce(weightField.empty(), andOp<bool>()))
+    /// if (returnReduceAnd(weightField.empty()))
     /// {
     ///     // No weight field - revert to unweighted form
     ///     return mag(Sf);
@@ -1144,14 +1138,14 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::read
 
     if (writeFields_)
     {
-        const word formatName(dict.get<word>("surfaceFormat"));
+        const word writerType = dict.get<word>("surfaceFormat");
 
         surfaceWriterPtr_.reset
         (
             surfaceWriter::New
             (
-                formatName,
-                dict.subOrEmptyDict("formatOptions").subOrEmptyDict(formatName)
+                writerType,
+                surfaceWriter::formatOptions(dict, writerType)
             )
         );
 
@@ -1165,7 +1159,7 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::read
 
         if (surfaceWriterPtr_->enabled())
         {
-            Info<< "    surfaceFormat = " << formatName << nl;
+            Info<< "    surfaceFormat = " << writerType << nl;
         }
         else
         {
@@ -1297,7 +1291,7 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::write()
 
 
     // Process the fields
-    if (returnReduce(!vectorWeights.empty(), orOp<bool>()))
+    if (returnReduceOr(!vectorWeights.empty()))
     {
         if (scalarWeights.size())
         {

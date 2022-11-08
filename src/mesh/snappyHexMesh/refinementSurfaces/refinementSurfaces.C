@@ -91,13 +91,11 @@ Foam::labelList Foam::refinementSurfaces::findHigherLevel
             }
         }
 
-        label nRetest = returnReduce(retestSet.size(), sumOp<label>());
-        if (nRetest > 0)
+        if (returnReduceOr(retestSet.size()))
         {
-            reduce(nHits, sumOp<label>());
-
-            //Info<< "Retesting " << nRetest
-            //    << " out of " << nHits
+            //Info<< "Retesting "
+            //    << returnReduce(retestSet.size(), sumOp<label>())
+            //    << " out of " << returnReduce(nHits, sumOp<label>())
             //    << " intersections on uncached elements on geometry "
             //    << geom.name() << endl;
 
@@ -1377,7 +1375,7 @@ void Foam::refinementSurfaces::findHigherIntersection
 
 
         // All done? Note that this decision should be synchronised
-        if (returnReduce(missI, sumOp<label>()) == 0)
+        if (returnReduceAnd(missI == 0))
         {
             break;
         }

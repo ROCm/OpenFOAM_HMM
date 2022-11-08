@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2015 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -727,7 +727,7 @@ void Foam::medialAxisMeshMover::syncPatchDisplacement
     const indirectPrimitivePatch& pp = adaptPatchPtr_();
     const labelList& meshPoints = pp.meshPoints();
 
-    label nChangedTotal = 0;
+    //label nChangedTotal = 0;
 
     while (true)
     {
@@ -819,9 +819,9 @@ void Foam::medialAxisMeshMover::syncPatchDisplacement
         //    }
         //}
 
-        nChangedTotal += nChanged;
+        //nChangedTotal += nChanged;
 
-        if (!returnReduce(nChanged, sumOp<label>()))
+        if (!returnReduceOr(nChanged))
         {
             break;
         }
@@ -1148,7 +1148,7 @@ void Foam::medialAxisMeshMover::findIsolatedRegions
         }
 
 
-        if (returnReduce(nChanged, sumOp<label>()) == 0)
+        if (!returnReduceOr(nChanged))
         {
             break;
         }
@@ -1238,10 +1238,9 @@ void Foam::medialAxisMeshMover::findIsolatedRegions
         }
     }
 
-    reduce(nPointCounter, sumOp<label>());
     Info<< typeName
-        << " : Number of isolated points extrusion stopped : "<< nPointCounter
-        << endl;
+        << " : Number of isolated points extrusion stopped : "
+        << returnReduce(nPointCounter, sumOp<label>()) << endl;
 }
 
 
@@ -1558,9 +1557,8 @@ void Foam::medialAxisMeshMover::calculateDisplacement
         }
     }
 
-    reduce(numThicknessRatioExclude, sumOp<label>());
     Info<< typeName << " : Reducing layer thickness at "
-        << numThicknessRatioExclude
+        << returnReduce(numThicknessRatioExclude, sumOp<label>())
         << " nodes where thickness to medial axis distance is large " << endl;
 
 

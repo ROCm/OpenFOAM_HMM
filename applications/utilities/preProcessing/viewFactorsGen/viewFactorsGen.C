@@ -531,15 +531,10 @@ int main(int argc, char *argv[])
         nFineFaces += patches[patchi].size();
     }
 
-    // total number of coarse faces
-    label totalNCoarseFaces = nCoarseFaces;
 
-    reduce(totalNCoarseFaces, sumOp<label>());
-
-    if (Pstream::master())
-    {
-        Info << "\nTotal number of coarse faces: "<< totalNCoarseFaces << endl;
-    }
+    Info<< "\nTotal number of coarse faces: "
+        << returnReduce(nCoarseFaces, sumOp<label>())
+        << endl;
 
     if (Pstream::master() && debug)
     {
@@ -829,15 +824,11 @@ int main(int argc, char *argv[])
         nCoarseFaces
     );
 
-    label totalPatches = coarsePatches.size();
-    reduce(totalPatches, maxOp<label>());
+    const label totalPatches =
+        returnReduce(coarsePatches.size(), maxOp<label>());
 
     // Matrix sum in j(Fij) for each i (if enclosure sum = 1)
-    scalarSquareMatrix sumViewFactorPatch
-    (
-        totalPatches,
-        0.0
-    );
+    scalarSquareMatrix sumViewFactorPatch(totalPatches, Zero);
 
     scalarList patchArea(totalPatches, Zero);
 

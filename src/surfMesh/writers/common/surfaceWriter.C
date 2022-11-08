@@ -30,7 +30,6 @@ License
 #include "MeshedSurfaceProxy.H"
 
 #include "Time.H"
-#include "globalIndex.H"
 #include "coordinateRotation.H"
 #include "transformField.H"
 #include "addToRunTimeSelectionTable.H"
@@ -56,6 +55,82 @@ bool Foam::surfaceWriter::supportedType(const word& writeType)
         wordConstructorTablePtr_->found(writeType)
      || wordDictConstructorTablePtr_->found(writeType)
      || MeshedSurfaceProxy<face>::canWriteType(writeType)
+    );
+}
+
+
+Foam::dictionary Foam::surfaceWriter::formatOptions
+(
+    const word& formatName,
+    std::initializer_list<const dictionary*> dicts
+)
+{
+    dictionary options;
+
+    // Default specification. Top-level and surface-specific
+    // - literal search only
+    for (const dictionary* dict : dicts)
+    {
+        if
+        (
+            dict
+         && (dict = dict->findDict("default", keyType::LITERAL)) != nullptr
+        )
+        {
+            options.merge(*dict);
+        }
+    }
+
+    // Format specification. Top-level and surface-specific
+    // - allow REGEX search
+    for (const dictionary* dict : dicts)
+    {
+        if
+        (
+            dict && !formatName.empty()
+         && (dict = dict->findDict(formatName)) != nullptr
+        )
+        {
+            options.merge(*dict);
+        }
+    }
+
+    return options;
+}
+
+
+Foam::dictionary Foam::surfaceWriter::formatOptions
+(
+    const dictionary& dict,
+    const word& formatName,
+    const word& entryName
+)
+{
+    return formatOptions
+    (
+        formatName,
+        {
+            dict.findDict(entryName, keyType::LITERAL)
+        }
+    );
+}
+
+
+Foam::dictionary Foam::surfaceWriter::formatOptions
+(
+    const dictionary& dict,
+    const dictionary& surfDict,
+    const word& formatName,
+    const word& entryName
+)
+{
+    return formatOptions
+    (
+        formatName,
+        {
+            dict.findDict(entryName, keyType::LITERAL),
+            surfDict.findDict(entryName, keyType::LITERAL)
+        }
     );
 }
 
@@ -152,6 +227,7 @@ Foam::surfaceWriter::surfaceWriter()
     useTimeDir_(false),
     isPointData_(false),
     verbose_(false),
+    commType_(UPstream::commsTypes::scheduled),
     nFields_(0),
     currTime_(),
     outputPath_(),
@@ -167,6 +243,8 @@ Foam::surfaceWriter::surfaceWriter(const dictionary& options)
     surfaceWriter()
 {
     options.readIfPresent("verbose", verbose_);
+
+    UPstream::commsTypeNames.readIfPresent("commsType", options, commType_);
 
     geometryScale_ = 1;
     geometryCentre_ = Zero;
@@ -188,6 +266,13 @@ Foam::surfaceWriter::surfaceWriter(const dictionary& options)
 
     fieldLevel_ = options.subOrEmptyDict("fieldLevel");
     fieldScale_ = options.subOrEmptyDict("fieldScale");
+
+    if (verbose_)
+    {
+        Info<< "Create surfaceWriter ("
+            << (this->isPointData() ? "point" : "face") << " data):"
+            << " commsType=" << UPstream::commsTypeNames[commType_] << endl;
+    }
 }
 
 
@@ -393,7 +478,7 @@ bool Foam::surfaceWriter::expire()
 
 bool Foam::surfaceWriter::hasSurface() const
 {
-    return surf_.valid();
+    return surf_.good();
 }
 
 
@@ -401,7 +486,7 @@ bool Foam::surfaceWriter::empty() const
 {
     const bool value = surf_.faces().empty();
 
-    return (parallel_ ? returnReduce(value, andOp<bool>()) : value);
+    return (parallel_ ? returnReduceAnd(value) : value);
 }
 
 
@@ -430,6 +515,7 @@ bool Foam::surfaceWriter::merge() const
 
     if (!upToDate_)
     {
+        // Similar to expire
         adjustedSurf_.clear();
 
         if (parallel_ && Pstream::parRun())
@@ -473,7 +559,7 @@ const Foam::meshedSurfRef& Foam::surfaceWriter::adjustSurface() const
         adjustedSurf_.clear();
     }
 
-    if (!adjustedSurf_.valid())
+    if (!adjustedSurf_.good())
     {
         adjustedSurf_.reset(surface());
 
@@ -538,7 +624,23 @@ Foam::tmp<Foam::Field<Type>> Foam::surfaceWriter::mergeFieldTemplate
         auto tfield = tmp<Field<Type>>::New();
         auto& allFld = tfield.ref();
 
-        globalIndex::gatherOp(fld, allFld);
+        // Update any expired global index (as required)
+
+        const globalIndex& globIndex =
+        (
+            this->isPointData()
+          ? mergedSurf_.pointGlobalIndex()
+          : mergedSurf_.faceGlobalIndex()
+        );
+
+        globIndex.gather
+        (
+            fld,
+            allFld,
+            UPstream::msgType(),
+            commType_,
+            UPstream::worldComm
+        );
 
         // Renumber (point data) to correspond to merged points
         if

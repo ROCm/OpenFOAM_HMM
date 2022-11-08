@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -96,12 +96,12 @@ pointCells::pointCells
             }
         }
     }
-    zeroedIDs.setSize(i);
-    zeroATCcells_ = zeroedIDs;
+    zeroedIDs.resize(i);
+    zeroATCcells_ = std::move(zeroedIDs);
 
-    label size = zeroATCcells_.size();
-    reduce(size, sumOp<label>());
-    Info<< "Zeroing ATC on "<< size << " cells" << nl << endl;
+    Info<< "Zeroing ATC on "
+        << returnReduce(zeroATCcells_.size(), sumOp<label>())
+        << " cells" << nl << endl;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

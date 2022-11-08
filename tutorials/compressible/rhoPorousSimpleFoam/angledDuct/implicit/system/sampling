@@ -96,6 +96,14 @@ plane
 
     surfaceFormat   vtk;
 
+    formatOptions
+    {
+        default
+        {
+            verbose true;
+        }
+    }
+
     surfaces
     {
         zNormal

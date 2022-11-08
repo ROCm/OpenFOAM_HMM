@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -86,7 +86,7 @@ void Foam::cyclicPeriodicAMIPolyPatch::syncTransforms() const
         );
 
         // If there are any zero-sized periodic patches
-        if (returnReduce((size() && !periodicPatch.size()), orOp<bool>()))
+        if (returnReduceOr(size() && !periodicPatch.size()))
         {
             if (periodicPatch.separation().size() > 1)
             {
@@ -119,14 +119,14 @@ void Foam::cyclicPeriodicAMIPolyPatch::syncTransforms() const
 
             // Note that a cyclic with zero faces is considered parallel so
             // explicitly check for that.
-            bool isParallel =
-            (
-                periodicPatch.size()
-             && periodicPatch.parallel()
-            );
-            reduce(isParallel, orOp<bool>());
 
-            if (isParallel)
+            if
+            (
+                returnReduceOr
+                (
+                    periodicPatch.size() && periodicPatch.parallel()
+                )
+            )
             {
                 // Sync a list of separation vectors
                 List<vectorField> sep(Pstream::nProcs());
@@ -206,14 +206,12 @@ void Foam::cyclicPeriodicAMIPolyPatch::writeOBJ
     // Collect faces and points
     pointField allPoints;
     faceList allFaces;
-    labelList pointMergeMap;
     PatchTools::gatherAndMerge
     (
         -1.0,           // do not merge points
         p,
         allPoints,
-        allFaces,
-        pointMergeMap
+        allFaces
     );
 
     if (Pstream::master())
@@ -501,9 +499,7 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI() const
         }
 
         // Print some statistics
-        const label nFace = returnReduce(size(), sumOp<label>());
-
-        if (nFace)
+        if (returnReduceOr(size()))
         {
             scalarField srcWghtSum(size(), Zero);
             forAll(srcWghtSum, faceI)

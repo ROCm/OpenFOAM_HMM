@@ -2032,7 +2032,7 @@ Foam::fileOperations::masterUncollatedFileOperation::readStream
             }
             // Reduce (not broadcast)
             // - if we have multiple master files (FUTURE)
-            reduce(bigSize, orOp<bool>());  //, UPstream::msgType(), comm_);
+            Pstream::reduceOr(bigSize);  //, comm_);
 
             const UPstream::commsTypes myCommsType
             (

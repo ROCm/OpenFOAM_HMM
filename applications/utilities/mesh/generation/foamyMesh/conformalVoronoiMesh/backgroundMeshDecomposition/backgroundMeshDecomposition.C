@@ -217,7 +217,7 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
                     );
                 }
 
-                if (returnReduce(newCellsToRefine.size(), sumOp<label>()) == 0)
+                if (returnReduceAnd(newCellsToRefine.empty()))
                 {
                     break;
                 }
@@ -878,7 +878,7 @@ Foam::backgroundMeshDecomposition::distribute
             }
         }
 
-        if (returnReduce(cellsToRefine.size(), sumOp<label>()) == 0)
+        if (returnReduceAnd(cellsToRefine.empty()))
         {
             break;
         }

@@ -724,9 +724,7 @@ bool Foam::faBoundaryMesh::checkParallelSync(const bool report) const
     }
 
     // Reduce (not broadcast) to respect local out-of-order errors (first loop)
-    reduce(hasError, orOp<bool>());
-
-    return hasError;
+    return returnReduceOr(hasError);
 }
 
 

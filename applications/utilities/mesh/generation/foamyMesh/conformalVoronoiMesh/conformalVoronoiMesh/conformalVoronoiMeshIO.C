@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -707,9 +707,7 @@ void Foam::conformalVoronoiMesh::reorderProcessorPatches
 
     Info<< incrIndent << indent << "Faces matched." << endl;
 
-    reduce(anyChanged, orOp<bool>());
-
-    if (anyChanged)
+    if (returnReduceOr(anyChanged))
     {
         label nReorderedFaces = 0;
 

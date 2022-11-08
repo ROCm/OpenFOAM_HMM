@@ -66,12 +66,12 @@ public:
     //- Types of communications
     enum class commsTypes : char
     {
-        blocking,       //!< "blocking"
-        scheduled,      //!< "scheduled"
-        nonBlocking     //!< "nonBlocking"
+        blocking,       //!< "blocking"    : (MPI_Bsend, MPI_Recv)
+        scheduled,      //!< "scheduled"   : (MPI_Send, MPI_Recv)
+        nonBlocking     //!< "nonBlocking" : (MPI_Isend, MPI_Irecv)
     };
 
-    //- Names of the communication types
+    //- Enumerated names for the communication types
     static const Enum<commsTypes> commsTypeNames;
 
 

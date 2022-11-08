@@ -753,7 +753,7 @@ Foam::conformalVoronoiMesh::createPolyMeshFromPoints
 
     forAll(patches, p)
     {
-        label totalPatchSize = patchDicts[p].get<label>("nFaces");
+        label nPatchFaces = patchDicts[p].get<label>("nFaces");
 
         if
         (
@@ -762,7 +762,7 @@ Foam::conformalVoronoiMesh::createPolyMeshFromPoints
         )
         {
             // Do not create empty processor patches
-            if (totalPatchSize > 0)
+            if (nPatchFaces)
             {
                 patchDicts[p].set("transform", "coincidentFullMatch");
 
@@ -781,9 +781,8 @@ Foam::conformalVoronoiMesh::createPolyMeshFromPoints
         else
         {
             // Check that the patch is not empty on every processor
-            reduce(totalPatchSize, sumOp<label>());
 
-            if (totalPatchSize > 0)
+            if (returnReduceOr(nPatchFaces))
             {
                 patches[nValidPatches] = polyPatch::New
                 (

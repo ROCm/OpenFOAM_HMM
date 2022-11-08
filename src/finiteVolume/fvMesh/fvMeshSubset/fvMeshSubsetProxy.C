@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -200,7 +200,7 @@ bool Foam::fvMeshSubsetProxy::correct(bool verbose)
         subsetter_.reset(selectedCells_, exposedPatchId_);
     }
 
-    return returnReduce(changed, orOp<bool>());
+    return returnReduceOr(changed);
 }
 
 

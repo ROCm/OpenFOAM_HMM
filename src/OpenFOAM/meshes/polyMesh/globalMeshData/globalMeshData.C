@@ -1934,7 +1934,7 @@ Foam::pointField Foam::globalMeshData::geometricSharedPoints() const
     pointField sharedPoints(mesh_.points(), sharedPointLabels());
 
     // Append from all processors, globally consistent
-    Pstream::combineAllGather(sharedPoints, ListOps::appendEqOp<point>());
+    Pstream::combineReduce(sharedPoints, ListOps::appendEqOp<point>());
 
     // Merge tolerance
     scalar tolDim = matchTol_ * mesh_.bounds().mag();
@@ -2730,7 +2730,7 @@ void Foam::globalMeshData::updateMesh()
     (
         mesh_.nFaces(),
         sumOp<label>(),
-        Pstream::msgType(),
+        UPstream::msgType(),
         comm
     );
 
@@ -2743,7 +2743,7 @@ void Foam::globalMeshData::updateMesh()
     (
         mesh_.nCells(),
         sumOp<label>(),
-        Pstream::msgType(),
+        UPstream::msgType(),
         comm
     );
 
@@ -2756,7 +2756,7 @@ void Foam::globalMeshData::updateMesh()
     (
         mesh_.nPoints(),
         sumOp<label>(),
-        Pstream::msgType(),
+        UPstream::msgType(),
         comm
     );
 

@@ -196,17 +196,19 @@ Foam::ParticleZoneInfo<CloudType>::ParticleZoneInfo
     data_(),
     movedParticles_(),
     maxIDs_(Pstream::nProcs(), Zero),
-    writerPtr_
-    (
-        Pstream::master()
-      ? coordSetWriter::New
-        (
-            this->coeffDict().getWord("writer"),
-            this->coeffDict().subOrEmptyDict("formatOptions")
-        )
-      : nullptr
-    )
+    writerPtr_(nullptr)
 {
+    if (Pstream::master())
+    {
+        const word writerType = this->coeffDict().getWord("writer");
+
+        writerPtr_ = coordSetWriter::New
+        (
+            writerType,
+            coordSetWriter::formatOptions(this->coeffDict(), writerType)
+        );
+    }
+
     writeFile::read(this->coeffDict());
 
     const auto& cellZones = owner.mesh().cellZones();
@@ -361,8 +363,7 @@ void Foam::ParticleZoneInfo<CloudType>::write()
     {
         // Find number of particles per proc
         labelList allMaxIDs(maxIDs_);
-        Pstream::listCombineGather(allMaxIDs, maxEqOp<label>());
-        Pstream::broadcast(allMaxIDs);
+        Pstream::listCombineReduce(allMaxIDs, maxEqOp<label>());
 
         // Combine into single list
         label n = returnReduce(data_.size(), sumOp<label>());

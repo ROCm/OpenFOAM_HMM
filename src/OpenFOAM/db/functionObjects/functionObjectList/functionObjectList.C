@@ -1171,7 +1171,7 @@ bool Foam::functionObjectList::read()
                 FatalIOError.throwing(oldThrowingIOerr);
 
                 // Require valid functionObject on all processors
-                if (!returnReduce(bool(objPtr), andOp<bool>()))
+                if (!returnReduceAnd(bool(objPtr)))
                 {
                     objPtr.reset(nullptr);
                     ok = false;

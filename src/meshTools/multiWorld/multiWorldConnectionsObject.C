@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -241,12 +241,7 @@ void Foam::multiWorldConnections::createComms()
 
     if (Pstream::parRun())
     {
-        Pstream::combineGather
-        (
-            allConnections,
-            worldConnectBitOrEq()
-        );
-        Pstream::scatter(allConnections);
+        Pstream::combineReduce(allConnections, worldConnectBitOrEq());
     }
 
     // Check for mismatched connections

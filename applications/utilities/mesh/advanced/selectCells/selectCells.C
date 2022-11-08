@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -396,12 +397,11 @@ int main(int argc, char *argv[])
     meshSearch queryMesh(mesh);
 
     // Check all 'outside' points
-    forAll(outsidePts, outsideI)
+    for (const point& outsidePoint : outsidePts)
     {
-        const point& outsidePoint = outsidePts[outsideI];
+        const label celli = queryMesh.findCell(outsidePoint, -1, false);
 
-        label celli = queryMesh.findCell(outsidePoint, -1, false);
-        if (returnReduce(celli, maxOp<label>()) == -1)
+        if (returnReduceAnd(celli < 0))
         {
             FatalErrorInFunction
                 << "outsidePoint " << outsidePoint

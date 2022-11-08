@@ -221,9 +221,48 @@ public:
     //
     //  \param[in] mergeDist Geometric merge tolerance for Foam::mergePoints
     //  \param[in] pp The patch to merge
-    //  \param[out] mergedPoints
-    //  \param[out] mergedFaces
-    //  \param[out] pointMergeMap
+    //  \param[out] mergedPoints merged points (master only, empty elsewhere)
+    //  \param[out] mergedFaces merged faces (master only, empty elsewhere)
+    //  \param[out] pointAddr Points globalIndex gather addressing
+    //      (master only, empty elsewhere)
+    //  \param[out] faceAddr Faces globalIndex gather addressing
+    //      (master only, empty elsewhere)
+    //  \param[out] pointMergeMap An old-to-new mapping from original
+    //      point index to the index into merged points.
+    //  \param[in]  useLocal  gather/merge patch localFaces/localPoints
+    //      instead of faces/points
+    //
+    //  \note
+    //  - OpenFOAM-v2112 and earlier: geometric merge on all patch points.
+    //  - OpenFOAM-v2206 and later: geometric merge on patch boundary points.
+    template<class FaceList, class PointField>
+    static void gatherAndMerge
+    (
+        const scalar mergeDist,
+        const PrimitivePatch<FaceList, PointField>& pp,
+        Field
+        <
+            typename PrimitivePatch<FaceList, PointField>::point_type
+        >& mergedPoints,
+        List
+        <
+            typename PrimitivePatch<FaceList, PointField>::face_type
+        >& mergedFaces,
+        globalIndex& pointAddr,
+        globalIndex& faceAddr,
+        labelList& pointMergeMap = const_cast<labelList&>(labelList::null()),
+        const bool useLocal = false
+    );
+
+    //- Gather points and faces onto master and merge into single patch.
+    //  Note: Normally uses faces/points (not localFaces/localPoints)
+    //
+    //  \param[in] mergeDist Geometric merge tolerance for Foam::mergePoints
+    //  \param[in] pp The patch to merge
+    //  \param[out] mergedPoints merged points (master only, empty elsewhere)
+    //  \param[out] mergedFaces merged faces (master only, empty elsewhere)
+    //  \param[out] pointMergeMap An old-to-new mapping from original
+    //      point index to the index into merged points.
     //  \param[in] useLocal gather/merge patch localFaces/localPoints
     //      instead of faces/points
     //
@@ -243,19 +282,20 @@ public:
         <
             typename PrimitivePatch<FaceList, PointField>::face_type
         >& mergedFaces,
-        labelList& pointMergeMap,
+        labelList& pointMergeMap = const_cast<labelList&>(labelList::null()),
         const bool useLocal = false
     );
 
     //- Gather (mesh!) points and faces onto master and merge collocated
     //  points into a single patch. Uses coupled point mesh
     //  structure so does not need tolerances.
-    //  On master and slave returns:
+    //  On master and sub-ranks returns:
     //  - pointToGlobal : for every local point index the global point index
     //  - uniqueMeshPointLabels : my local mesh points
     //  - globalPoints : global numbering for the global points
     //  - globalFaces : global numbering for the faces
-    //  On master only:
+    //  .
+    //  On master only returns:
     //  - mergedFaces : the merged faces
     //  - mergedPoints : the merged points
     template<class FaceList>

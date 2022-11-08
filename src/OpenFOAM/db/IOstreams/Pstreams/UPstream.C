@@ -434,7 +434,7 @@ Foam::UPstream::commsTypes Foam::UPstream::defaultCommsType
 
 namespace Foam
 {
-    // Register re-reader
+    //- Registered reader for UPstream::defaultCommsType
     class addcommsTypeToOpt
     :
         public ::Foam::simpleRegIOobject

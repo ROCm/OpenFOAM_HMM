@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -425,8 +425,7 @@ bool Foam::primitiveMesh::checkFaceOrthogonality
 
     if (debug || report)
     {
-        label neiSize = ortho.size();
-        reduce(neiSize, sumOp<label>());
+        const label neiSize = returnReduce(ortho.size(), sumOp<label>());
 
         if (neiSize > 0)
         {
@@ -929,9 +928,9 @@ bool Foam::primitiveMesh::checkUpperTriangular
     label internal = nInternalFaces();
 
     // Has error occurred?
-    bool error = false;
-    // Have multiple faces been detected?
-    label nMultipleCells = false;
+    bool hasError = false;
+    // Multiple faces detected?
+    label nMultipleCells = 0;
 
     // Loop through faceCells once more and make sure that for internal cell
     // the first label is smaller
@@ -939,7 +938,7 @@ bool Foam::primitiveMesh::checkUpperTriangular
     {
         if (own[facei] >= nei[facei])
         {
-            error  = true;
+            hasError = true;
 
             if (setPtr)
             {
@@ -1024,7 +1023,7 @@ bool Foam::primitiveMesh::checkUpperTriangular
             }
             else if (thisFace < prevFace)
             {
-                error = true;
+                hasError = true;
 
                 if (setPtr)
                 {
@@ -1042,7 +1041,7 @@ bool Foam::primitiveMesh::checkUpperTriangular
         }
     }
 
-    reduce(error, orOp<bool>());
+    Pstream::reduceOr(hasError);
     reduce(nMultipleCells, sumOp<label>());
 
     if ((debug || report) && nMultipleCells > 0)
@@ -1051,7 +1050,7 @@ bool Foam::primitiveMesh::checkUpperTriangular
             << " neighbouring cells with multiple inbetween faces." << endl;
     }
 
-    if (error)
+    if (hasError)
     {
         if (debug || report)
         {

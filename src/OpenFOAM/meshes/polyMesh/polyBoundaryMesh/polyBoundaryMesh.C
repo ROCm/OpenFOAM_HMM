@@ -1046,9 +1046,7 @@ bool Foam::polyBoundaryMesh::checkParallelSync(const bool report) const
     }
 
     // Reduce (not broadcast) to respect local out-of-order errors (first loop)
-    reduce(hasError, orOp<bool>());
-
-    return hasError;
+    return returnReduceOr(hasError);
 }
 
 
@@ -1091,7 +1089,7 @@ bool Foam::polyBoundaryMesh::checkDefinition(const bool report) const
         nextPatchStart += bm[patchi].size();
     }
 
-    reduce(hasError, orOp<bool>());
+    Pstream::reduceOr(hasError);
 
     if (debug || report)
     {

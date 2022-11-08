@@ -234,11 +234,7 @@ int main(int argc, char *argv[])
 
         Pout<< "hashed: " << hashed << nl;
 
-        Pstream::mapCombineGather
-        (
-            hashed,
-            plusEqOp<scalarMinMax>()
-        );
+        Pstream::mapCombineReduce(hashed, plusEqOp<scalarMinMax>());
 
         Info<< "reduced: " << hashed << nl;
 

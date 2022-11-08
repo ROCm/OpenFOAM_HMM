@@ -150,8 +150,8 @@ Foam::label Foam::snappyRefineDriver::featureEdgeRefine
 
 
 
-            label nCellsToRefine = cellsToRefine.size();
-            reduce(nCellsToRefine, sumOp<label>());
+            const label nCellsToRefine =
+                returnReduce(cellsToRefine.size(), sumOp<label>());
 
             Info<< "Selected for feature refinement : " << nCellsToRefine
                 << " cells (out of " << mesh.globalData().nTotalCells()
@@ -171,14 +171,7 @@ Foam::label Foam::snappyRefineDriver::featureEdgeRefine
             }
 
 
-            if
-            (
-                returnReduce
-                (
-                    (mesh.nCells() >= refineParams.maxLocalCells()),
-                    orOp<bool>()
-                )
-            )
+            if (returnReduceOr(mesh.nCells() >= refineParams.maxLocalCells()))
             {
                 meshRefiner_.balanceAndRefine
                 (
@@ -289,8 +282,8 @@ Foam::label Foam::snappyRefineDriver::smallFeatureRefine
             << mesh.time().cpuTimeIncrement() << " s" << endl;
 
 
-        label nCellsToRefine = cellsToRefine.size();
-        reduce(nCellsToRefine, sumOp<label>());
+        const label nCellsToRefine =
+            returnReduce(cellsToRefine.size(), sumOp<label>());
 
         Info<< "Selected for refinement : " << nCellsToRefine
             << " cells (out of " << mesh.globalData().nTotalCells()
@@ -312,14 +305,7 @@ Foam::label Foam::snappyRefineDriver::smallFeatureRefine
         }
 
 
-        if
-        (
-            returnReduce
-            (
-                (mesh.nCells() >= refineParams.maxLocalCells()),
-                orOp<bool>()
-            )
-        )
+        if (returnReduceOr(mesh.nCells() >= refineParams.maxLocalCells()))
         {
             meshRefiner_.balanceAndRefine
             (
@@ -466,8 +452,8 @@ Foam::label Foam::snappyRefineDriver::surfaceOnlyRefine
             << mesh.time().cpuTimeIncrement() << " s" << endl;
 
 
-        label nCellsToRefine = cellsToRefine.size();
-        reduce(nCellsToRefine, sumOp<label>());
+        const label nCellsToRefine =
+            returnReduce(cellsToRefine.size(), sumOp<label>());
 
         Info<< "Selected for refinement : " << nCellsToRefine
             << " cells (out of " << mesh.globalData().nTotalCells()
@@ -496,14 +482,7 @@ Foam::label Foam::snappyRefineDriver::surfaceOnlyRefine
         }
 
 
-        if
-        (
-            returnReduce
-            (
-                (mesh.nCells() >= refineParams.maxLocalCells()),
-                orOp<bool>()
-            )
-        )
+        if (returnReduceOr(mesh.nCells() >= refineParams.maxLocalCells()))
         {
             meshRefiner_.balanceAndRefine
             (
@@ -725,8 +704,8 @@ Foam::label Foam::snappyRefineDriver::gapOnlyRefine
             << mesh.time().cpuTimeIncrement() << " s" << endl;
 
 
-        label nCellsToRefine = cellsToRefine.size();
-        reduce(nCellsToRefine, sumOp<label>());
+        const label nCellsToRefine =
+            returnReduce(cellsToRefine.size(), sumOp<label>());
 
         Info<< "Selected for refinement : " << nCellsToRefine
             << " cells (out of " << mesh.globalData().nTotalCells()
@@ -755,14 +734,7 @@ Foam::label Foam::snappyRefineDriver::gapOnlyRefine
         }
 
 
-        if
-        (
-            returnReduce
-            (
-                (mesh.nCells() >= refineParams.maxLocalCells()),
-                orOp<bool>()
-            )
-        )
+        if (returnReduceOr(mesh.nCells() >= refineParams.maxLocalCells()))
         {
             meshRefiner_.balanceAndRefine
             (
@@ -957,8 +929,8 @@ Foam::label Foam::snappyRefineDriver::bigGapOnlyRefine
             << mesh.time().cpuTimeIncrement() << " s" << endl;
 
 
-        label nCellsToRefine = cellsToRefine.size();
-        reduce(nCellsToRefine, sumOp<label>());
+        const label nCellsToRefine =
+            returnReduce(cellsToRefine.size(), sumOp<label>());
 
         Info<< "Selected for refinement : " << nCellsToRefine
             << " cells (out of " << mesh.globalData().nTotalCells()
@@ -987,14 +959,7 @@ Foam::label Foam::snappyRefineDriver::bigGapOnlyRefine
         }
 
 
-        if
-        (
-            returnReduce
-            (
-                (mesh.nCells() >= refineParams.maxLocalCells()),
-                orOp<bool>()
-            )
-        )
+        if (returnReduceOr(mesh.nCells() >= refineParams.maxLocalCells()))
         {
             meshRefiner_.balanceAndRefine
             (
@@ -1114,8 +1079,8 @@ Foam::label Foam::snappyRefineDriver::danglingCellRefine
             << mesh.time().cpuTimeIncrement() << " s" << endl;
 
 
-        label nCellsToRefine = cellsToRefine.size();
-        reduce(nCellsToRefine, sumOp<label>());
+        const label nCellsToRefine =
+            returnReduce(cellsToRefine.size(), sumOp<label>());
 
         Info<< "Selected for refinement : " << nCellsToRefine
             << " cells (out of " << mesh.globalData().nTotalCells()
@@ -1144,14 +1109,7 @@ Foam::label Foam::snappyRefineDriver::danglingCellRefine
         }
 
 
-        if
-        (
-            returnReduce
-            (
-                (mesh.nCells() >= refineParams.maxLocalCells()),
-                orOp<bool>()
-            )
-        )
+        if (returnReduceOr(mesh.nCells() >= refineParams.maxLocalCells()))
         {
             meshRefiner_.balanceAndRefine
             (
@@ -1466,8 +1424,8 @@ Foam::label Foam::snappyRefineDriver::refinementInterfaceRefine
                 << mesh.time().cpuTimeIncrement() << " s" << endl;
 
 
-            label nCellsToRefine = cellsToRefine.size();
-            reduce(nCellsToRefine, sumOp<label>());
+            const label nCellsToRefine =
+                returnReduce(cellsToRefine.size(), sumOp<label>());
 
             Info<< "Selected for refinement : " << nCellsToRefine
                 << " cells (out of " << mesh.globalData().nTotalCells()
@@ -1496,14 +1454,7 @@ Foam::label Foam::snappyRefineDriver::refinementInterfaceRefine
             }
 
 
-            if
-            (
-                returnReduce
-                (
-                    (mesh.nCells() >= refineParams.maxLocalCells()),
-                    orOp<bool>()
-                )
-            )
+            if (returnReduceOr(mesh.nCells() >= refineParams.maxLocalCells()))
             {
                 meshRefiner_.balanceAndRefine
                 (
@@ -1721,8 +1672,8 @@ Foam::label Foam::snappyRefineDriver::boundaryRefinementInterfaceRefine
                 << mesh.time().cpuTimeIncrement() << " s" << endl;
 
 
-            label nCellsToRefine = cellsToRefine.size();
-            reduce(nCellsToRefine, sumOp<label>());
+            const label nCellsToRefine =
+                returnReduce(cellsToRefine.size(), sumOp<label>());
 
             Info<< "Selected for refinement : " << nCellsToRefine
                 << " cells (out of " << mesh.globalData().nTotalCells()
@@ -1751,14 +1702,7 @@ Foam::label Foam::snappyRefineDriver::boundaryRefinementInterfaceRefine
             }
 
 
-            if
-            (
-                returnReduce
-                (
-                    (mesh.nCells() >= refineParams.maxLocalCells()),
-                    orOp<bool>()
-                )
-            )
+            if (returnReduceOr(mesh.nCells() >= refineParams.maxLocalCells()))
             {
                 meshRefiner_.balanceAndRefine
                 (
@@ -1989,8 +1933,8 @@ Foam::label Foam::snappyRefineDriver::shellRefine
             << mesh.time().cpuTimeIncrement() << " s" << endl;
 
 
-        label nCellsToRefine = cellsToRefine.size();
-        reduce(nCellsToRefine, sumOp<label>());
+        const label nCellsToRefine =
+            returnReduce(cellsToRefine.size(), sumOp<label>());
 
         Info<< "Selected for internal refinement : " << nCellsToRefine
             << " cells (out of " << mesh.globalData().nTotalCells()
@@ -2018,14 +1962,7 @@ Foam::label Foam::snappyRefineDriver::shellRefine
             const_cast<Time&>(mesh.time())++;
         }
 
-        if
-        (
-            returnReduce
-            (
-                (mesh.nCells() >= refineParams.maxLocalCells()),
-                orOp<bool>()
-            )
-        )
+        if (returnReduceOr(mesh.nCells() >= refineParams.maxLocalCells()))
         {
             meshRefiner_.balanceAndRefine
             (
@@ -2148,8 +2085,8 @@ Foam::label Foam::snappyRefineDriver::directionalShellRefine
             Info<< "Determined cells to refine in = "
                 << mesh.time().cpuTimeIncrement() << " s" << endl;
 
-            label nCellsToRefine = cellsToRefine.size();
-            reduce(nCellsToRefine, sumOp<label>());
+            const label nCellsToRefine =
+                returnReduce(cellsToRefine.size(), sumOp<label>());
 
             Info<< "Selected for direction " << vector::componentNames[dir]
                 << " refinement : " << nCellsToRefine
@@ -3001,7 +2938,7 @@ void Foam::snappyRefineDriver::splitAndMergeBaffles
     // Merge all baffles that are still remaining after duplicating points.
     List<labelPair> couples(localPointRegion::findDuplicateFacePairs(mesh));
 
-    label nCouples = returnReduce(couples.size(), sumOp<label>());
+    const label nCouples = returnReduce(couples.size(), sumOp<label>());
 
     Info<< "Detected unsplittable baffles : " << nCouples << endl;
 
@@ -3263,9 +3200,9 @@ void Foam::snappyRefineDriver::deleteSmallRegions
         nCellsPerRegion[regioni]++;
         nCellsPerZone[zonei]++;
     }
-    Pstream::listCombineAllGather(nCellsPerRegion, plusEqOp<label>());
-    Pstream::listCombineAllGather(regionToZone, maxEqOp<label>());
-    Pstream::listCombineAllGather(nCellsPerZone, plusEqOp<label>());
+    Pstream::listCombineReduce(nCellsPerRegion, plusEqOp<label>());
+    Pstream::listCombineReduce(regionToZone, maxEqOp<label>());
+    Pstream::listCombineReduce(nCellsPerZone, plusEqOp<label>());
 
 
     // Mark small regions. Note that all processors have the same information

@@ -668,7 +668,7 @@ void Foam::mappedPatchBase::findSamples
 
 
     // Find nearest - globally consistent
-    Pstream::listCombineAllGather
+    Pstream::listCombineReduce
     (
         nearest,
         nearestWorldEqOp(),

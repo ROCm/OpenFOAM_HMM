@@ -847,7 +847,7 @@ void createAndWriteRegion
 
         if (!isA<processorPolyPatch>(pp))
         {
-            if (returnReduce(pp.size(), sumOp<label>()) > 0)
+            if (returnReduceOr(pp.size()))
             {
                 oldToNew[patchi] = newI;
                 if (!addedPatches.found(patchi))
@@ -1114,7 +1114,7 @@ label findCorrespondingRegion
         }
     }
 
-    Pstream::listCombineAllGather(cellsInZone, plusEqOp<label>());
+    Pstream::listCombineReduce(cellsInZone, plusEqOp<label>());
 
     // Pick region with largest overlap of zoneI
     label regionI = findMax(cellsInZone);

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,25 +73,21 @@ Foam::engineMesh::engineMesh(const IOobject& io)
         }
     }
 
-    reduce(foundPiston, orOp<bool>());
-    reduce(foundLiner, orOp<bool>());
-    reduce(foundCylinderHead, orOp<bool>());
-
-    if (!foundPiston)
+    if (!returnReduceOr(foundPiston))
     {
         FatalErrorInFunction
             << "cannot find piston patch"
             << exit(FatalError);
     }
 
-    if (!foundLiner)
+    if (!returnReduceOr(foundLiner))
     {
         FatalErrorInFunction
             << "cannot find liner patch"
             << exit(FatalError);
     }
 
-    if (!foundCylinderHead)
+    if (!returnReduceOr(foundCylinderHead))
     {
         FatalErrorInFunction
             << "cannot find cylinderHead patch"

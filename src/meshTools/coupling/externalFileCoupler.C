@@ -282,9 +282,9 @@ Foam::externalFileCoupler::waitForMaster() const
         }
     }
 
-    label intAction(action);
-
-    Pstream::scatter(intAction); // Also acts as MPI barrier
+    // Send to sub-ranks. Also acts as an MPI barrier
+    int intAction(action);
+    Pstream::broadcast(intAction);
 
     return Time::stopAtControls(intAction);
 }
@@ -326,9 +326,9 @@ Foam::externalFileCoupler::waitForSlave() const
         Log << type() << ": found lock file " << lck << endl;
     }
 
-    label intAction(action);
-
-    Pstream::scatter(intAction); // Also acts as MPI barrier
+    // Send to sub-ranks. Also acts as an MPI barrier
+    int intAction(action);
+    Pstream::broadcast(intAction);
 
     return Time::stopAtControls(intAction);
 }

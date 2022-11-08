@@ -412,7 +412,7 @@ public:
             const globalIndex&,
             labelList& elements,
             List<Map<label>>& compactMap,
-            const int tag = Pstream::msgType(),
+            const int tag = UPstream::msgType(),
             const label comm = UPstream::worldComm
         );
 
@@ -426,7 +426,7 @@ public:
             const globalIndex&,
             labelListList& cellCells,
             List<Map<label>>& compactMap,
-            const int tag = Pstream::msgType(),
+            const int tag = UPstream::msgType(),
             const label comm = UPstream::worldComm
         );
 

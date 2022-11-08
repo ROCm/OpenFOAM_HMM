@@ -178,11 +178,7 @@ void Foam::patchSeedSet::calcSamples
             // 2. Reduce on master. Select nearest processor.
 
             // Find nearest - globally consistent
-            Pstream::listCombineAllGather
-            (
-                nearest,
-                mappedPatchBase::nearestEqOp()
-            );
+            Pstream::listCombineReduce(nearest, mappedPatchBase::nearestEqOp());
 
             // 3. Pick up my local faces that have won
 

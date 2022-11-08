@@ -800,7 +800,7 @@ bool Foam::functionObjects::streamLineBase::writeToFile()
 
 
     // File names generated on the master but setProperty needed everywher
-    Pstream::scatter(outputFileNames);
+    Pstream::broadcast(outputFileNames);
 
     forAllConstIters(outputFileNames, iter)
     {

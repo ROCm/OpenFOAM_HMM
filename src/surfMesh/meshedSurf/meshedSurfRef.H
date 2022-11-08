@@ -114,10 +114,13 @@ public:
     // Member Functions
 
         //- Contains a valid reference?
-        bool valid() const
+        bool good() const
         {
             return (surf_ || notNull(points_.get()));
         }
+
+        //- Contains a valid reference?
+        bool valid() const { return good(); }
 
         //- The original points used for the surface
         const pointField& points0() const

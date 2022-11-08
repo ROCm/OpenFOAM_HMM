@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -113,10 +113,9 @@ void mapLagrangian(const meshToMesh& interp)
 
         if
         (
-            returnReduce
+            returnReduceOr
             (
-                (objects.found("coordinates") || objects.found("positions")),
-                orOp<bool>()
+                objects.found("coordinates") || objects.found("positions")
             )
         )
         {

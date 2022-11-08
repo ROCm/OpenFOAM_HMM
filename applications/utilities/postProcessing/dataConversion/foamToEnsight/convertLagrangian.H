@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -38,7 +38,7 @@ if (doLagrangian)
         Info<< "Cloud " << cloudName << " (";
 
         const bool cloudExists =
-            returnReduce(currentCloudDirs.found(cloudName), orOp<bool>());
+            returnReduceOr(currentCloudDirs.found(cloudName));
 
         {
             autoPtr<ensightFile> os = ensCase.newCloud(cloudName);
@@ -82,7 +82,7 @@ if (doLagrangian)
                 const bool oldParRun = Pstream::parRun(false);
                 fieldExists = fieldObject.typeHeaderOk<IOField<scalar>>(false);
                 Pstream::parRun(oldParRun);  // Restore parallel state
-                reduce(fieldExists, orOp<bool>());
+                Pstream::reduceOr(fieldExists);
             }
 
             bool wrote = false;

@@ -597,7 +597,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::createBaffles
 
 
     autoPtr<mapPolyMesh> mapPtr;
-    if (returnReduce(nBaffles, sumOp<label>()))
+    if (returnReduceOr(nBaffles))
     {
         // Remove any unnecessary fields
         mesh_.clearOut();
@@ -818,12 +818,11 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::createZoneBaffles
 
         label nLocalBaffles = sum(nBaffles);
 
-
         label nTotalBaffles = returnReduce(nLocalBaffles, sumOp<label>());
 
         if (nTotalBaffles > 0)
         {
-            Pstream::listCombineAllGather(nBaffles, plusEqOp<label>());
+            Pstream::listCombineReduce(nBaffles, plusEqOp<label>());
 
             Info<< nl
                 << setf(ios_base::left)
@@ -1194,7 +1193,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::mergeBaffles
 {
     autoPtr<mapPolyMesh> mapPtr;
 
-    if (returnReduce(couples.size()+faceToPatch.size(), sumOp<label>()))
+    if (returnReduceOr(couples.size() || faceToPatch.size()))
     {
         // Mesh change engine
         polyTopoChange meshMod(mesh_);
@@ -1401,7 +1400,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::mergeZoneBaffles
     );
 
     autoPtr<mapPolyMesh> mapPtr;
-    if (returnReduce(zoneBaffles.size(), sumOp<label>()))
+    if (returnReduceOr(zoneBaffles.size()))
     {
         mapPtr = mergeBaffles(zoneBaffles, Map<label>(0));
     }
@@ -1953,7 +1952,7 @@ void Foam::meshRefinement::findCellZoneTopo
     // - region numbers are identical on all processors
     // - keepRegion is identical ,,
     // - cellZones are identical ,,
-    Pstream::listCombineAllGather(regionToCellZone, maxEqOp<label>());
+    Pstream::listCombineReduce(regionToCellZone, maxEqOp<label>());
 
 
     // Find the region containing the keepPoint
@@ -2003,7 +2002,7 @@ void Foam::meshRefinement::findCellZoneTopo
         // - cellZones are identical ,,
         // This done at top of loop to account for geometric matching
         // not being synchronised.
-        Pstream::listCombineAllGather(regionToCellZone, maxEqOp<label>());
+        Pstream::listCombineReduce(regionToCellZone, maxEqOp<label>());
 
 
         bool changed = false;
@@ -2077,7 +2076,7 @@ void Foam::meshRefinement::findCellZoneTopo
             }
         }
 
-        if (!returnReduce(changed, orOp<bool>()))
+        if (!returnReduceOr(changed))
         {
             break;
         }
@@ -3212,8 +3211,8 @@ void Foam::meshRefinement::zonify
 
         if (debug)
         {
-            const pointZone& pz = pointZones[zonei];
             mkDir(mesh_.time().timePath());
+            const pointZone& pz = pointZones[zonei];
             OBJstream str(mesh_.time().timePath()/pz.name()+".obj");
             Pout<< "Writing " << pz.size() << " frozen points to "
                 << str.name() << endl;
@@ -3222,8 +3221,7 @@ void Foam::meshRefinement::zonify
                 str.write(mesh_.points()[pointi]);
             }
         }
-
-        if (debug && returnReduce(unnamedClosureFaces.size(), sumOp<label>()))
+        if (debug && returnReduceOr(unnamedClosureFaces.size()))
         {
             mkDir(mesh_.time().timePath());
             OBJstream str(mesh_.time().timePath()/"unnamedClosureFaces.obj");
@@ -3234,7 +3232,7 @@ void Foam::meshRefinement::zonify
                 str.write(mesh_.faces()[facei], mesh_.points(), false);
             }
         }
-        if (debug && returnReduce(namedClosureFaces.size(), sumOp<label>()))
+        if (debug && returnReduceOr(namedClosureFaces.size()))
         {
             mkDir(mesh_.time().timePath());
             OBJstream str(mesh_.time().timePath()/"namedClosureFaces.obj");
@@ -4036,7 +4034,7 @@ Foam::label Foam::meshRefinement::markPatchZones
         }
 
 
-        if (returnReduce(changedEdges.size(), sumOp<label>()) == 0)
+        if (returnReduceAnd(changedEdges.empty()))
         {
             break;
         }
@@ -4219,7 +4217,7 @@ void Foam::meshRefinement::consistentOrientation
         }
 
 
-        if (returnReduce(changedEdges.size(), sumOp<label>()) == 0)
+        if (returnReduceAnd(changedEdges.empty()))
         {
             break;
         }
@@ -4750,8 +4748,7 @@ void Foam::meshRefinement::mergeFreeStandingBaffles
         )
     );
 
-    label nCouples = couples.size();
-    reduce(nCouples, sumOp<label>());
+    const label nCouples = returnReduce(couples.size(), sumOp<label>());
 
     Info<< "Detected free-standing baffles : " << nCouples << endl;
 
@@ -5297,8 +5294,11 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMesh
     }
     cellsToRemove.shrink();
 
-    label nCellsToKeep = mesh_.nCells() - cellsToRemove.size();
-    reduce(nCellsToKeep, sumOp<label>());
+    const label nCellsToKeep = returnReduce
+    (
+        mesh_.nCells() - cellsToRemove.size(),
+        sumOp<label>()
+    );
 
     Info<< "Keeping all cells containing inside points" << endl
         << "Selected for keeping : " << nCellsToKeep << " cells." << endl;
@@ -5541,7 +5541,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::mergePoints
 
     autoPtr<mapPolyMesh> mapPtr;
 
-    if (returnReduce(nPointPairs, sumOp<label>()))
+    if (returnReduceOr(nPointPairs))
     {
         Map<label> pointToMaster(2*nPointPairs);
         forAll(pointToDuplicate, pointI)
@@ -5862,7 +5862,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
 
         // 2.Combine faceZoneNames allocated on different processors
 
-        Pstream::mapCombineAllGather(zonesToFaceZone, eqOp<word>());
+        Pstream::mapCombineReduce(zonesToFaceZone, eqOp<word>());
 
 
         // 3. Allocate faceZones from (now synchronised) faceZoneNames
@@ -6085,7 +6085,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
                     nPosOrientation.find(faceToConnectedZone[faceI])() += n;
                 }
             }
-            Pstream::mapCombineAllGather(nPosOrientation, plusEqOp<label>());
+            Pstream::mapCombineReduce(nPosOrientation, plusEqOp<label>());
 
 
             Info<< "Split " << nFreeStanding << " free-standing zone faces"

@@ -500,12 +500,14 @@ bool surfaceNoise::read(const dictionary& dict)
 
         readerType_ = dict.get<word>("reader");
 
-        const word writerType(dict.get<word>("writer"));
+        // Surface writer (keywords: writer, writeOptions)
+
+        const word writerType = dict.get<word>("writer");
 
         writerPtr_ = surfaceWriter::New
         (
             writerType,
-            dict.subOrEmptyDict("writeOptions").subOrEmptyDict(writerType)
+            surfaceWriter::formatOptions(dict, writerType, "writeOptions")
         );
 
         // Use outputDir/TIME/surface-name

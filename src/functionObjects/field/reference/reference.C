@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,7 +54,7 @@ bool Foam::functionObjects::reference::calc()
 
     Log << endl;
 
-    return returnReduce(processed, orOp<bool>());
+    return returnReduceOr(processed);
 }
 
 

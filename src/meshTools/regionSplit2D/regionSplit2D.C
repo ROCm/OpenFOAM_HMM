@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -91,7 +91,7 @@ Foam::regionSplit2D::regionSplit2D
     }
 
     // Early exit if there are no blocked faces
-    if (returnReduce(nBlockedFaces, sumOp<label>()) == 0)
+    if (!returnReduceOr(nBlockedFaces))
     {
         return;
     }
@@ -139,7 +139,7 @@ Foam::regionSplit2D::regionSplit2D
     // Ensure regionToCompactAddr consistent across all processors
     // - not concerned about the op (keys are unique)
     // - map size will be the number of regions in the set of faces
-    Pstream::mapCombineAllGather(regionToCompactAddr, minEqOp<label>());
+    Pstream::mapCombineReduce(regionToCompactAddr, minEqOp<label>());
 
     nRegions_ = regionToCompactAddr.size();
 

@@ -181,7 +181,7 @@ bool Foam::areaWrite::read(const dictionary& dict)
 
     const dictionary writerOptions
     (
-        dict.subOrEmptyDict("formatOptions").subOrEmptyDict(writerType)
+        surfaceWriter::formatOptions(dict, writerType)
     );
 
     for (const word& areaName : meshes_.keys())
@@ -267,7 +267,7 @@ bool Foam::areaWrite::write()
         }
 
         // Parallel consistency (no-op in serial)
-        Pstream::mapCombineAllGather(selected, HashSetOps::plusEqOp<word>());
+        Pstream::mapCombineReduce(selected, HashSetOps::plusEqOp<word>());
 
         missed.clear();
 

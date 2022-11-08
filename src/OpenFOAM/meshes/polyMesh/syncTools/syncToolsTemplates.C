@@ -322,7 +322,7 @@ void Foam::syncTools::syncPointMap
             }
 
             // Broadcast: send merged values to all
-            Pstream::scatter(sharedPointValues);
+            Pstream::broadcast(sharedPointValues);
         }
 
         // Merge sharedPointValues (keyed on sharedPointAddr) into
@@ -667,7 +667,7 @@ void Foam::syncTools::syncEdgeMap
         }
 
         // Broadcast: send merged values to all
-        Pstream::scatter(sharedEdgeValues);
+        Pstream::broadcast(sharedEdgeValues);
     }
 
 

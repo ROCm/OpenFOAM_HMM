@@ -1779,7 +1779,7 @@ void Foam::snappyLayerDriver::syncPatchDisplacement
     const fvMesh& mesh = meshRefiner_.mesh();
     const labelList& meshPoints = pp.meshPoints();
 
-    label nChangedTotal = 0;
+    //label nChangedTotal = 0;
 
     while (true)
     {
@@ -1879,9 +1879,9 @@ void Foam::snappyLayerDriver::syncPatchDisplacement
                 }
             }
         }
-        nChangedTotal += nChanged;
+        //nChangedTotal += nChanged;
 
-        if (!returnReduce(nChanged, sumOp<label>()))
+        if (!returnReduceOr(nChanged))
         {
             break;
         }
@@ -4423,7 +4423,7 @@ void Foam::snappyLayerDriver::mapFaceZonePoints
     // Use geometric detection of points-to-be-merged
     //  - detect any boundary face created from a duplicated face (=baffle)
     //  - on these mark any point created from a duplicated point
-    if (returnReduce(pointToMaster.size(), sumOp<label>()))
+    if (returnReduceOr(pointToMaster.size()))
     {
         // Estimate number of points-to-be-merged
         DynamicList<label> candidates(baffles.size()*4);
@@ -5435,7 +5435,7 @@ void Foam::snappyLayerDriver::doLayers
 
     patchIDs.shrink();
 
-    if (returnReduce(nFacesWithLayers, sumOp<label>()) == 0)
+    if (!returnReduceOr(nFacesWithLayers))
     {
         Info<< nl << "No layers to generate ..." << endl;
     }
@@ -5506,7 +5506,7 @@ void Foam::snappyLayerDriver::doLayers
                 }
             }
 
-            reduce(faceZoneOnCoupledFace, orOp<bool>());
+            Pstream::reduceOr(faceZoneOnCoupledFace);
         }
 
 

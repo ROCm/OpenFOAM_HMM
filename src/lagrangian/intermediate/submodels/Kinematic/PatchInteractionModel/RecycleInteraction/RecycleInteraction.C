@@ -246,7 +246,7 @@ void Foam::RecycleInteraction<CloudType>::postEvolve()
 
         pBufs.finishedSends();
 
-        if (!returnReduce(pBufs.hasRecvData(), orOp<bool>()))
+        if (!returnReduceOr(pBufs.hasRecvData()))
         {
             // No parcels to recycle
             return;

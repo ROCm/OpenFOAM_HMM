@@ -161,11 +161,12 @@ bool Foam::functionObjects::Curle::read(const dictionary& dict)
                     << abort(FatalIOError);
             }
 
-            const word surfaceType(dict.get<word>("surfaceType"));
+            const word writerType = dict.get<word>("surfaceType");
+
             surfaceWriterPtr_ = surfaceWriter::New
             (
-                surfaceType,
-                dict.subOrEmptyDict("formatOptions").subOrEmptyDict(surfaceType)
+                writerType,
+                surfaceWriter::formatOptions(dict, writerType)
             );
 
             // Use outputDir/TIME/surface-name
@@ -223,7 +224,7 @@ bool Foam::functionObjects::Curle::execute()
 
     pDash /= 4*mathematical::pi;
 
-    Pstream::listCombineAllGather(pDash, plusEqOp<scalar>());
+    Pstream::listCombineReduce(pDash, plusEqOp<scalar>());
 
     if (surfaceWriterPtr_)
     {

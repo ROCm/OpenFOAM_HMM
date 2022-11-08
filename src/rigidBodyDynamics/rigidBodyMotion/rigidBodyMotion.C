@@ -190,7 +190,7 @@ void Foam::RBD::rigidBodyMotion::solve
         solver_->solve(tau, fx);
     }
 
-    Pstream::scatter(motionState_);
+    Pstream::broadcast(motionState_);
 
     // Update the body-state to correspond to the current joint-state
     forwardDynamicsCorrection(motionState_);

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -177,12 +177,8 @@ void Foam::faceShading::calculate()
         }
     }
 
-    label numberPotentialHits = nFaces;
-
-    reduce(numberPotentialHits, sumOp<label>());
-
     Info<< "Number of 'potential' direct hits : "
-        << numberPotentialHits << endl;
+        << returnReduce(nFaces, sumOp<label>()) << endl;
 
     labelList hitFacesIds(nFaces);
     hitFacesIds.transfer(dynFacesI);
@@ -301,7 +297,7 @@ void Foam::faceShading::calculate()
 
             }
 
-        }while (returnReduce(i < Cfs.size(), orOp<bool>()));
+        } while (returnReduceOr(i < Cfs.size()));
 
         List<pointIndexHit> hitInfo(startIndex.size());
         surfacesMesh.findLine(start, end, hitInfo);
@@ -367,11 +363,8 @@ void Foam::faceShading::calculate()
         hitFaces.write();
     }
 
-    label totalHitFaces = rayStartFaces_.size();
-
-    reduce(totalHitFaces, sumOp<label>());
-
-    Info<< "Total number of hit faces : " <<  totalHitFaces << endl;
+    Info<< "Total number of hit faces : "
+        << returnReduce(rayStartFaces_.size(), sumOp<label>()) << endl;
 }
 
 

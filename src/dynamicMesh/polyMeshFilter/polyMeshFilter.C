@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -283,7 +284,7 @@ Foam::label Foam::polyMeshFilter::filterFacesLoop(const label nOriginalBadFaces)
                 }
             }
 
-            reduce(newBadFaces, orOp<bool>());
+            Pstream::reduceOr(newBadFaces);
         }
         else
         {

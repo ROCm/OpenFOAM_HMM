@@ -44,15 +44,21 @@ Description
     \verbatim
     formatOptions
     {
-        someFormat // Eg, ensight, vtk, etc
+        default
         {
-            verbose         true;
+            verbose     true;
+            commsType   scheduled;
+
             fieldLevel
             {
                 "p.*"   1e5;    // Absolute -> gauge [Pa]
                 T       273.15; // [K] -> [C]
                 U       #eval{ 10/sqrt(3) };  // Uniform magU=10
             }
+        }
+
+        someFormat // Eg, ensight, vtk, etc
+        {
             fieldScale
             {
                 "p.*"   0.01;   // [Pa] -> [mbar]
@@ -71,10 +77,11 @@ Description
     }
     \endverbatim
 
-  Format options:
+    Format options:
     \table
         Property    | Description                           | Reqd | Default
         verbose     | Additional output verbosity           | no  | no
+        commsType   | Communication type                    | no  | scheduled
         scale       | Output geometry scaling               | no  | 1
         transform   | Output coordinate transform           | no  |
         fieldLevel  | Subtract field level before scaling   | no  | empty dict
@@ -108,6 +115,7 @@ SourceFiles
 #include "instant.H"
 #include "mergedSurf.H"
 #include "meshedSurfRef.H"
+#include "UPstream.H"
 #include "InfoProxy.H"
 #include "runTimeSelectionTables.H"
 
@@ -179,6 +187,9 @@ protected:
 
         //- Additional output verbosity
         bool verbose_;
+
+        //- Communication type (for field merging)
+        UPstream::commsTypes commType_;
 
         //- The number of fields
         label nFields_;
@@ -262,6 +273,17 @@ protected:
         }
 
 
+        //- Extract and merge 'default' + formatName from
+        //- top-level and surface-specific formatOptions dictionaries
+        //
+        //  \returns dictionary of merged formatOptions
+        static dictionary formatOptions
+        (
+            const word& formatName,
+            std::initializer_list<const dictionary*> dicts
+        );
+
+
 public:
 
     // Public Data
@@ -293,6 +315,33 @@ public:
                 const dictionary& writeOpts
             ),
             (writeOpts)
+        );
+
+
+    // Helpers
+
+        //- Find "formatOptions" in a top-level dictionary.
+        //- Extract and merge 'default' + formatName values.
+        //
+        //  \returns dictionary of merged formatOptions
+        static dictionary formatOptions
+        (
+            const dictionary& dict,
+            const word& formatName,
+            const word& entryName = "formatOptions"
+        );
+
+        //- Find "formatOptions" in a top-level dictionary,
+        //- and in a set-specific dictionary.
+        //- Extract and merge 'default' + formatName values.
+        //
+        //  \returns dictionary of merged formatOptions
+        static dictionary formatOptions
+        (
+            const dictionary& dict,
+            const dictionary& surfDict,
+            const word& formatName,
+            const word& entryName = "formatOptions"
         );
 
 

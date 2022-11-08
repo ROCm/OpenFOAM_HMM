@@ -27,7 +27,6 @@ License
 
 #include "mergedSurf.H"
 #include "PatchTools.H"
-#include "globalIndex.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -36,8 +35,6 @@ Foam::mergedSurf::mergedSurf
     const meshedSurf& unmergedSurface,
     const scalar mergeDim
 )
-:
-    mergedSurf()
 {
     merge(unmergedSurface, mergeDim);
 }
@@ -49,8 +46,6 @@ Foam::mergedSurf::mergedSurf
     const faceList& unmergedFaces,
     const scalar mergeDim
 )
-:
-    mergedSurf()
 {
     merge(unmergedPoints, unmergedFaces, mergeDim);
 }
@@ -64,8 +59,6 @@ Foam::mergedSurf::mergedSurf
     const labelList& origFaceIds,
     const scalar mergeDim
 )
-:
-    mergedSurf()
 {
     merge
     (
@@ -80,12 +73,6 @@ Foam::mergedSurf::mergedSurf
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::mergedSurf::use()
-{
-    return Pstream::parRun();
-}
-
-
 void Foam::mergedSurf::clear()
 {
     points_.clear();
@@ -94,6 +81,9 @@ void Foam::mergedSurf::clear()
 
     zoneIds_.clear();
     faceIds_.clear();
+
+    pointGlobalIndex_.clear();
+    faceGlobalIndex_.clear();
 }
 
 
@@ -127,8 +117,8 @@ bool Foam::mergedSurf::merge
         (
             unmergedPoints,
             unmergedFaces,
-            labelList(),
-            labelList(),
+            labelList::null(),
+            labelList::null(),
             mergeDim
         );
 }
@@ -143,9 +133,9 @@ bool Foam::mergedSurf::merge
     const scalar mergeDim
 )
 {
-    if (!use())
+    if (!UPstream::parRun())
     {
-        clear();   // Extra safety?
+        clear();  // Safety
         return false;
     }
 
@@ -155,14 +145,25 @@ bool Foam::mergedSurf::merge
         primitivePatch(SubList<face>(unmergedFaces), unmergedPoints),
         points_,
         faces_,
+        pointGlobalIndex_,
+        faceGlobalIndex_,
         pointsMap_
     );
 
 
-    // Now handle per-face information
+    // The zone/ids information is either *exactly* the same size as
+    // the number of faces, or zero-sized everywhere.
+    // However, use gatherOp anyhow, which has redundant overhead,
+    // but safer if there are any size mis-matches
 
-    globalIndex::gatherOp(origZoneIds, zoneIds_);
-    globalIndex::gatherOp(origFaceIds, faceIds_);
+    if (notNull(origZoneIds))
+    {
+        globalIndex::gatherOp(origZoneIds, zoneIds_);
+    }
+    if (notNull(origFaceIds))
+    {
+        globalIndex::gatherOp(origFaceIds, faceIds_);
+    }
 
     return true;
 }

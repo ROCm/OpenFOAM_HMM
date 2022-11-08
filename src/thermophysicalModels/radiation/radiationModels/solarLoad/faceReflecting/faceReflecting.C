@@ -329,8 +329,8 @@ void Foam::faceReflecting::calculate()
     // Distribute ray indexes to all proc's
     // Make sure all the processors have the same information
 
-    Pstream::listCombineAllGather(refDisDirsIndex, maxEqOp<label>());
-    Pstream::mapCombineAllGather(refFacesDirIndex, minEqOp<label>());
+    Pstream::listCombineReduce(refDisDirsIndex, maxEqOp<label>());
+    Pstream::mapCombineReduce(refFacesDirIndex, minEqOp<label>());
 
     scalar maxBounding = 5.0*mag(mesh_.bounds().max() - mesh_.bounds().min());
 
@@ -375,7 +375,7 @@ void Foam::faceReflecting::calculate()
             }
         }
 
-    }while (returnReduce(i < Cfs_->size(), orOp<bool>()));
+    } while (returnReduceOr(i < Cfs_->size()));
 
     List<pointIndexHit> hitInfo(startIndex.size());
 

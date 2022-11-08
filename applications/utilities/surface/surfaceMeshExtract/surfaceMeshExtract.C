@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -302,17 +302,19 @@ int main(int argc, char *argv[])
             Pstream::mapCombineGather(patchSize, plusEqOp<label>());
             Pstream::mapCombineGather(zoneSize, plusEqOp<label>());
 
-            // Allocate compact numbering for all patches/faceZones
-            forAllConstIters(patchSize, iter)
+            if (Pstream::master())
             {
-                compactZoneID.insert(iter.key(), compactZoneID.size());
-            }
+                // Allocate compact numbering for all patches/faceZones
+                forAllConstIters(patchSize, iter)
+                {
+                    compactZoneID.insert(iter.key(), compactZoneID.size());
+                }
 
-            forAllConstIters(zoneSize, iter)
-            {
-                compactZoneID.insert(iter.key(), compactZoneID.size());
+                forAllConstIters(zoneSize, iter)
+                {
+                    compactZoneID.insert(iter.key(), compactZoneID.size());
+                }
             }
-
             Pstream::broadcast(compactZoneID);
 
 
@@ -391,13 +393,9 @@ int main(int argc, char *argv[])
         // Gather all faces
         List<faceList> gatheredFaces(Pstream::nProcs());
         gatheredFaces[Pstream::myProcNo()] = allBoundary.localFaces();
-        forAll(gatheredFaces[Pstream::myProcNo()], i)
+        for (face& f : gatheredFaces[Pstream::myProcNo()])
         {
-            inplaceRenumber
-            (
-                pointToGlobal,
-                gatheredFaces[Pstream::myProcNo()][i]
-            );
+            inplaceRenumber(pointToGlobal, f);
         }
         Pstream::gatherList(gatheredFaces);
 

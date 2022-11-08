@@ -167,7 +167,7 @@ int main(int argc, char *argv[])
         (
             localValue,
             sumOp<scalar>(),
-            Pstream::msgType(),
+            UPstream::msgType(),
             comm
         );
         Pout<< "sum             :" << sum << endl;

@@ -101,7 +101,7 @@ if (timeDirs.size() && doLagrangian)
     {
         for (auto& cloudFields : regionCloudFields)
         {
-            Pstream::mapCombineAllGather
+            Pstream::mapCombineReduce
             (
                 cloudFields,
                 HashTableOps::plusEqOp<word>()

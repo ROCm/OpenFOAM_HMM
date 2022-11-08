@@ -43,10 +43,9 @@ Description
     Format options:
     \table
         Property    | Description                           | Required | Default
-        write       | Write boundaryData (binary with header)  | no  | false
-        commsType   | blocking/nonBlocking/scheduled        | no  | nonBlocking
-        msgTag      | increment for the message tag         | no  | 0
+        commsType   | blocking/nonBlocking/scheduled        | no  | scheduled
         gatherv     | Use MPI gatherv when merging          | no  | false
+        write       | Write boundaryData (binary + header)  | no  | false
     \endtable
 
 SourceFiles
@@ -58,7 +57,6 @@ SourceFiles
 #define Foam_debugSurfaceWriter_H
 
 #include "surfaceWriter.H"
-#include "UPstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -81,9 +79,6 @@ class debugWriter
 {
     // Private Data
 
-        //- Communication type for merging
-        UPstream::commsTypes commType_;
-
         //- Use MPI gatherv in globalIndex gathering
         bool mpiGatherv_;
 
@@ -92,9 +87,6 @@ class debugWriter
 
         //- Output files with FoamFile header
         bool header_;
-
-        //- Increment for the message tag
-        int msgTag_;
 
         //- Output stream option
         IOstreamOption streamOpt_;

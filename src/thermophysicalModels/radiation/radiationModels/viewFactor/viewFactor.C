@@ -103,8 +103,7 @@ void Foam::radiation::viewFactor::initialise()
             << nLocalCoarseFaces_ << endl;
     }
 
-    totalNCoarseFaces_ = nLocalCoarseFaces_;
-    reduce(totalNCoarseFaces_, sumOp<label>());
+    totalNCoarseFaces_ = returnReduce(nLocalCoarseFaces_, sumOp<label>());
 
     DebugInFunction
         << "Total number of clusters : " << totalNCoarseFaces_ << endl;
@@ -977,13 +976,9 @@ void Foam::radiation::viewFactor::calculate()
                 qrExt[compactGlobalIds[i]] = compactCoarseHo[i];
             }
 
-            Pstream::listCombineGather(T4, maxEqOp<scalar>());
-            Pstream::listCombineGather(E, maxEqOp<scalar>());
-            Pstream::listCombineGather(qrExt, maxEqOp<scalar>());
-
-            Pstream::listCombineScatter(T4);
-            Pstream::listCombineScatter(E);
-            Pstream::listCombineScatter(qrExt);
+            Pstream::listCombineReduce(T4, maxEqOp<scalar>());
+            Pstream::listCombineReduce(E, maxEqOp<scalar>());
+            Pstream::listCombineReduce(qrExt, maxEqOp<scalar>());
 
             if (Pstream::master())
             {

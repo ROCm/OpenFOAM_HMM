@@ -118,7 +118,7 @@ void Foam::faGlobalMeshData::updateMesh()
 
     sharedPointLabels_ = sharedPointLabels.toc();
 
-    Pstream::combineAllGather(globalList, plusEqOp<labelField>());
+    Pstream::combineReduce(globalList, plusEqOp<labelField>());
 
     nGlobalPoints_ = 0;
     for (label i=0; i<globalList.size(); ++i)

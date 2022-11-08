@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
     Info<< "Reading " << file << nl << endl;
     decomposedBlockData data
     (
-        Pstream::worldComm,
+        UPstream::worldComm,
         IOobject
         (
             file,

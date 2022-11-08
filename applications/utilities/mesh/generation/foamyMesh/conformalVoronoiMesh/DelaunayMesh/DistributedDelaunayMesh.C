@@ -588,9 +588,8 @@ Foam::label Foam::DistributedDelaunayMesh<Triangulation>::referVertices
     reduce(preInsertionSize, sumOp<label>());
     reduce(postInsertionSize, sumOp<label>());
 
-    label nTotalToInsert = referredVertices.size();
-
-    reduce(nTotalToInsert, sumOp<label>());
+    label nTotalToInsert =
+        returnReduce(referredVertices.size(), sumOp<label>());
 
     if (preInsertionSize + nTotalToInsert != postInsertionSize)
     {

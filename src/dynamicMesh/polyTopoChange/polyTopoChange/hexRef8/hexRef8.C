@@ -436,7 +436,7 @@ Foam::scalar Foam::hexRef8::getLevel0EdgeLength() const
 
     // Get the minimum per level over all processors. Note minimum so if
     // cells are not cubic we use the smallest edge side.
-    Pstream::listCombineAllGather(typEdgeLenSqr, minEqOp<scalar>());
+    Pstream::listCombineReduce(typEdgeLenSqr, minEqOp<scalar>());
 
     if (debug)
     {
@@ -470,7 +470,7 @@ Foam::scalar Foam::hexRef8::getLevel0EdgeLength() const
         }
     }
 
-    Pstream::listCombineAllGather(maxEdgeLenSqr, maxEqOp<scalar>());
+    Pstream::listCombineReduce(maxEdgeLenSqr, maxEqOp<scalar>());
 
     if (debug)
     {
@@ -4991,7 +4991,7 @@ void Foam::hexRef8::checkRefinementLevels
     //        }
     //    }
     //
-    //    if (returnReduce(nHanging, sumOp<label>()) > 0)
+    //    if (returnReduceOr(nHanging))
     //    {
     //        FatalErrorInFunction
     //            << "Detected a point used by two edges only (hanging point)"

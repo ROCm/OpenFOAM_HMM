@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -276,7 +276,7 @@ bool Foam::globalPoints::mergeInfo
     // Updates database of current information on meshpoints with nbrInfo.  Uses
     // mergeInfo above. Returns true if data kept for meshPointi changed.
 
-    label infoChanged = false;
+    bool infoChanged = false;
 
     // Get the index into the procPoints list.
     const auto iter = meshToProcPoint_.cfind(localPointi);
@@ -325,7 +325,7 @@ bool Foam::globalPoints::storeInitialInfo
     // Updates database of current information on meshpoints with nbrInfo.  Uses
     // mergeInfo above. Returns true if data kept for meshPointi changed.
 
-    label infoChanged = false;
+    bool infoChanged = false;
 
     // Get the index into the procPoints list.
     const auto iter = meshToProcPoint_.find(localPointi);
@@ -929,8 +929,7 @@ void Foam::globalPoints::calculateSharedPoints
         neighbourList = meshToProcPoint_;
     }
 
-    // Exchange until nothing changes on all processors.
-    bool changed = false;
+    // Exchange until nothing changes on any processors.
 
     do
     {
@@ -959,10 +958,7 @@ void Foam::globalPoints::calculateSharedPoints
             changedPoints
         );
 
-        changed = changedPoints.size() > 0;
-        reduce(changed, orOp<bool>());
-
-    } while (changed);
+    } while (returnReduceOr(changedPoints.size()));
 
 
     //Pout<< "**ALL** connected points:" << endl;

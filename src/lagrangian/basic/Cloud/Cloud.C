@@ -273,7 +273,7 @@ void Foam::Cloud<ParticleType>::move
 
         pBufs.finishedNeighbourSends(neighbourProcs);
 
-        if (!returnReduce(pBufs.hasRecvData(), orOp<bool>()))
+        if (!returnReduceOr(pBufs.hasRecvData()))
         {
             // No parcels to transfer
             break;

@@ -462,7 +462,7 @@ Foam::triSurfaceMesh::triSurfaceMesh(const IOobject& io, const readAction r)
                     triSurface s2(actualFile);
                     triSurface::transfer(s2);
                 }
-                Pstream::scatter(triSurface::patches());
+                Pstream::broadcast(triSurface::patches());
                 if (debug)
                 {
                     Pout<< "triSurfaceMesh(const IOobject& io) :"
@@ -587,7 +587,7 @@ Foam::triSurfaceMesh::triSurfaceMesh
                     triSurface s2(actualFile, surfType, scaleFactor);
                     triSurface::transfer(s2);
                 }
-                Pstream::scatter(triSurface::patches());
+                Pstream::broadcast(triSurface::patches());
                 if (debug)
                 {
                     Pout<< "triSurfaceMesh(const IOobject& io) :"

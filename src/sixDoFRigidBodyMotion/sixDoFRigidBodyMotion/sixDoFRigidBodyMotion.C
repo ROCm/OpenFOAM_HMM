@@ -323,7 +323,7 @@ void Foam::sixDoFRigidBodyMotion::update
         }
     }
 
-    Pstream::scatter(motionState_);
+    Pstream::broadcast(motionState_);
 }
 
 

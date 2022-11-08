@@ -252,7 +252,7 @@ int main(int argc, char *argv[])
         dict.add("bounds", bbs);
 
         // Scatter patch information
-        Pstream::scatter(s.patches());
+        Pstream::broadcast(s.patches());
 
         // Construct distributedTrisurfaceMesh from components
         IOobject notReadIO(io);

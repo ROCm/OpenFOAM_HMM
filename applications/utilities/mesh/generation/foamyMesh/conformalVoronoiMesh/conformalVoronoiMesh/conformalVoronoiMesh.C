@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -87,23 +87,17 @@ void Foam::conformalVoronoiMesh::cellSizeMeshOverlapsBackground() const
 
     boundBox cellSizeMeshBb = cellSizeMesh.bounds();
 
-    bool fullyContained = true;
+    bool fullyContained = cellSizeMeshBb.contains(bb);
 
-    if (!cellSizeMeshBb.contains(bb))
+    if (!fullyContained)
     {
-        Pout<< "Triangulation not fully contained in cell size mesh."
-            << endl;
-
-        Pout<< "Cell Size Mesh Bounds = " << cellSizeMesh.bounds() << endl;
-        Pout<< "foamyHexMesh Bounds         = " << bb << endl;
-
-        fullyContained = false;
+        Pout<< "Triangulation not fully contained in cell size mesh." << endl
+            << "Cell Size Mesh Bounds = " << cellSizeMeshBb << endl
+            << "foamyHexMesh Bounds         = " << bb << endl;
     }
 
-    reduce(fullyContained, andOp<unsigned int>());
-
     Info<< "Triangulation is "
-        << (fullyContained ? "fully" : "not fully")
+        << (returnReduceAnd(fullyContained) ? "fully" : "not fully")
         << " contained in the cell size mesh"
         << endl;
 }
@@ -115,12 +109,7 @@ void Foam::conformalVoronoiMesh::insertInternalPoints
     bool distribute
 )
 {
-    label nPoints = points.size();
-
-    if (Pstream::parRun())
-    {
-        reduce(nPoints, sumOp<label>());
-    }
+    const label nPoints = returnReduce(points.size(), sumOp<label>());
 
     Info<< "    " << nPoints << " points to insert..." << endl;
 
@@ -145,16 +134,15 @@ void Foam::conformalVoronoiMesh::insertInternalPoints
         map().distribute(points);
     }
 
-    label nVert = number_of_vertices();
+    label preReinsertionSize(number_of_vertices());
 
     insert(points.begin(), points.end());
 
-    label nInserted(number_of_vertices() - nVert);
-
-    if (Pstream::parRun())
-    {
-        reduce(nInserted, sumOp<label>());
-    }
+    const label nInserted = returnReduce
+    (
+        label(number_of_vertices()) - preReinsertionSize,
+        sumOp<label>()
+    );
 
     Info<< "    " << nInserted << " points inserted"
         << ", failed to insert " << nPoints - nInserted

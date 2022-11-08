@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,7 +49,7 @@ inline bool Foam::functionObjects::fieldValues::volFieldValue::canWeight
 ) const
 {
     // Non-empty on some processor
-    return returnReduce(!fld.empty(), orOp<bool>());
+    return returnReduceOr(!fld.empty());
 }
 
 
