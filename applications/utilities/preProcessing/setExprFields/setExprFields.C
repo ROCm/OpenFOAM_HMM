@@ -272,18 +272,18 @@ void evaluate
         );
         io.typeHeaderOk<IOobject>(false);
 
-        oldFieldType = io.headerClassName();
-
-        if (oldFieldType == IOobject::typeName)
+        if (!io.hasHeaderClass() || io.isHeaderClass<IOobject>())
         {
             FatalErrorInFunction
-                << "Field " << fieldName << "(type: " << oldFieldType
-                << ") seems to be missing. Use 'create'" << nl
+                << "Field '" << fieldName
+                << "' seems to be missing. Use 'create'" << nl
                 << exit(FatalError);
         }
 
+        oldFieldType = io.headerClassName();
+
         Info<< "Modify field: " << fieldName
-            << " (type " << oldFieldType << ')';
+            << " (type: " << oldFieldType << ')';
     }
 
 

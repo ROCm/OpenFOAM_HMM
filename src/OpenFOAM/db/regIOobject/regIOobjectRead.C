@@ -60,7 +60,9 @@ bool Foam::regIOobject::readHeaderOk
         {
             if (Pstream::master())
             {
+                const bool oldParRun = Pstream::parRun(false);
                 isHeaderOk = headerOk();
+                Pstream::parRun(oldParRun);
             }
             Pstream::broadcast(isHeaderOk);
         }

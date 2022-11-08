@@ -120,6 +120,9 @@ bool Foam::IOobject::readHeader(dictionary& headerDict, Istream& is)
 
         writeHeader(Info);
 
+        // Mark as not read
+        headerClassName_.clear();
+
         return false;
     }
 

@@ -321,7 +321,7 @@ Foam::IOobject::IOobject
     sizeofScalar_(static_cast<unsigned char>(sizeof(scalar))),
 
     name_(name),
-    headerClassName_(typeName),
+    headerClassName_(),
     note_(),
     instance_(instance),
     local_(),
@@ -331,8 +331,7 @@ Foam::IOobject::IOobject
     if (objectRegistry::debug)
     {
         InfoInFunction
-            << "Constructing IOobject called " << name_
-            << " of type " << headerClassName_ << endl;
+            << "Constructing IOobject: " << name_ << endl;
     }
 }
 
@@ -352,7 +351,7 @@ Foam::IOobject::IOobject
     sizeofScalar_(static_cast<unsigned char>(sizeof(scalar))),
 
     name_(name),
-    headerClassName_(typeName),
+    headerClassName_(),
     note_(),
     instance_(instance),
     local_(local),
@@ -362,8 +361,7 @@ Foam::IOobject::IOobject
     if (objectRegistry::debug)
     {
         InfoInFunction
-            << "Constructing IOobject called " << name_
-            << " of type " << headerClassName_ << endl;
+            << "Constructing IOobject: " << name_ << endl;
     }
 }
 
@@ -381,7 +379,7 @@ Foam::IOobject::IOobject
     sizeofScalar_(static_cast<unsigned char>(sizeof(scalar))),
 
     name_(),
-    headerClassName_(typeName),
+    headerClassName_(),
     note_(),
     instance_(),
     local_(),
@@ -398,8 +396,7 @@ Foam::IOobject::IOobject
     if (objectRegistry::debug)
     {
         InfoInFunction
-            << "Constructing IOobject called " << name_
-            << " of type " << headerClassName_ << endl;
+            << "Constructing IOobject: " << name_ << endl;
     }
 }
 
