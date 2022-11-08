@@ -44,15 +44,21 @@ Description
     \verbatim
     formatOptions
     {
-        someFormat // Eg, ensight, vtk, etc
+        default
         {
-            verbose         true;
+            verbose     true;
+            commsType   scheduled;
+
             fieldLevel
             {
                 "p.*"   1e5;    // Absolute -> gauge [Pa]
                 T       273.15; // [K] -> [C]
                 U       #eval{ 10/sqrt(3) };  // Uniform magU=10
             }
+        }
+
+        someFormat // Eg, ensight, vtk, etc
+        {
             fieldScale
             {
                 "p.*"   0.01;   // [Pa] -> [mbar]
@@ -267,6 +273,17 @@ protected:
         }
 
 
+        //- Extract and merge 'default' + formatName from
+        //- top-level and surface-specific formatOptions dictionaries
+        //
+        //  \returns dictionary of merged formatOptions
+        static dictionary formatOptions
+        (
+            const word& formatName,
+            std::initializer_list<const dictionary*> dicts
+        );
+
+
 public:
 
     // Public Data
@@ -298,6 +315,33 @@ public:
                 const dictionary& writeOpts
             ),
             (writeOpts)
+        );
+
+
+    // Helpers
+
+        //- Find "formatOptions" in a top-level dictionary.
+        //- Extract and merge 'default' + formatName values.
+        //
+        //  \returns dictionary of merged formatOptions
+        static dictionary formatOptions
+        (
+            const dictionary& dict,
+            const word& formatName,
+            const word& entryName = "formatOptions"
+        );
+
+        //- Find "formatOptions" in a top-level dictionary,
+        //- and in a set-specific dictionary.
+        //- Extract and merge 'default' + formatName values.
+        //
+        //  \returns dictionary of merged formatOptions
+        static dictionary formatOptions
+        (
+            const dictionary& dict,
+            const dictionary& surfDict,
+            const word& formatName,
+            const word& entryName = "formatOptions"
         );
 
 

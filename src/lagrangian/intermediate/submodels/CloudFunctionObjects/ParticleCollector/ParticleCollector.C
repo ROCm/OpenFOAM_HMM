@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -457,13 +457,12 @@ void Foam::ParticleCollector<CloudType>::write()
         << endl;
 
 
-    if (surfaceFormat_ != "none" && Pstream::master())
+    if (Pstream::master() && surfaceFormat_ != "none")
     {
         auto writer = surfaceWriter::New
         (
             surfaceFormat_,
-            this->coeffDict().subOrEmptyDict("formatOptions")
-                .subOrEmptyDict(surfaceFormat_)
+            surfaceWriter::formatOptions(this->coeffDict(), surfaceFormat_)
         );
 
         if (debug)
@@ -536,7 +535,7 @@ Foam::ParticleCollector<CloudType>::ParticleCollector
     (
         this->coeffDict().getBool("negateParcelsOppositeNormal")
     ),
-    surfaceFormat_(this->coeffDict().lookup("surfaceFormat")),
+    surfaceFormat_(this->coeffDict().getWord("surfaceFormat")),
     totalTime_(0.0),
     mass_(),
     massTotal_(),

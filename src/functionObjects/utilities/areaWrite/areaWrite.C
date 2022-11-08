@@ -181,7 +181,7 @@ bool Foam::areaWrite::read(const dictionary& dict)
 
     const dictionary writerOptions
     (
-        dict.subOrEmptyDict("formatOptions").subOrEmptyDict(writerType)
+        surfaceWriter::formatOptions(dict, writerType)
     );
 
     for (const word& areaName : meshes_.keys())

@@ -15,10 +15,5 @@ wordRes acceptFields(propsDict.get<wordRes>("fields"));
 wordRes excludeFields;
 propsDict.readIfPresent("exclude", excludeFields);
 
-const dictionary formatOptions
-(
-    propsDict.subOrEmptyDict("formatOptions", keyType::LITERAL)
-);
-
 
 // ************************************************************************* //

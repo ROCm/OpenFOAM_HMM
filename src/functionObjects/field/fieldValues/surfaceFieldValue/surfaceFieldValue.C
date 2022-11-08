@@ -1138,14 +1138,14 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::read
 
     if (writeFields_)
     {
-        const word formatName(dict.get<word>("surfaceFormat"));
+        const word writerType = dict.get<word>("surfaceFormat");
 
         surfaceWriterPtr_.reset
         (
             surfaceWriter::New
             (
-                formatName,
-                dict.subOrEmptyDict("formatOptions").subOrEmptyDict(formatName)
+                writerType,
+                surfaceWriter::formatOptions(dict, writerType)
             )
         );
 
@@ -1159,7 +1159,7 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::read
 
         if (surfaceWriterPtr_->enabled())
         {
-            Info<< "    surfaceFormat = " << formatName << nl;
+            Info<< "    surfaceFormat = " << writerType << nl;
         }
         else
         {

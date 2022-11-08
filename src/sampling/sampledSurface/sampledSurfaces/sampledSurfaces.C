@@ -190,22 +190,20 @@ Foam::IOobjectList Foam::sampledSurfaces::preCheckFields()
 
 Foam::autoPtr<Foam::surfaceWriter> Foam::sampledSurfaces::newWriter
 (
-    word writeType,
-    const dictionary& formatOptions,
+    word writerType,
+    const dictionary& topDict,
     const dictionary& surfDict
 )
 {
     // Per-surface adjustment
-    surfDict.readIfPresent<word>("surfaceFormat", writeType);
+    surfDict.readIfPresent<word>("surfaceFormat", writerType);
 
-    dictionary options = formatOptions.subOrEmptyDict(writeType);
-
-    options.merge
+    return surfaceWriter::New
     (
-        surfDict.subOrEmptyDict("formatOptions").subOrEmptyDict(writeType)
+        writerType,
+        // Top-level/surface-specific "formatOptions"
+        surfaceWriter::formatOptions(topDict, surfDict, writerType)
     );
-
-    return surfaceWriter::New(writeType, options);
 }
 
 
@@ -305,8 +303,6 @@ bool Foam::sampledSurfaces::read(const dictionary& dict)
     const word writerType =
         (eptr ? dict.get<word>("surfaceFormat") : word::null);
 
-    const dictionary formatOptions(dict.subOrEmptyDict("formatOptions"));
-
     // Store on registry?
     const bool dfltStore = dict.getOrDefault("store", false);
 
@@ -355,7 +351,7 @@ bool Foam::sampledSurfaces::read(const dictionary& dict)
             writers_.set
             (
                 surfi,
-                newWriter(writerType, formatOptions, surfDict)
+                newWriter(writerType, dict, surfDict)
             );
 
             writers_[surfi].isPointData(surfs[surfi].isPointData());
@@ -417,7 +413,7 @@ bool Foam::sampledSurfaces::read(const dictionary& dict)
             writers_.set
             (
                 surfi,
-                newWriter(writerType, formatOptions, surfDict)
+                newWriter(writerType, dict, surfDict)
             );
 
             writers_[surfi].isPointData(surfs[surfi].isPointData());

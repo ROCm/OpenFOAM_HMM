@@ -274,6 +274,16 @@ protected:
         //- No copy assignment
         void operator=(const coordSetWriter&) = delete;
 
+        //- Extract and merge 'default' + formatName from
+        //- top-level and set-specific formatOptions dictionaries
+        //
+        //  \returns dictionary of merged formatOptions
+        static dictionary formatOptions
+        (
+            const word& formatName,
+            std::initializer_list<const dictionary*> dicts
+        );
+
 
 public:
 
@@ -299,6 +309,33 @@ public:
                 const dictionary& writeOptions
             ),
             (writeOptions)
+        );
+
+
+    // Helpers
+
+        //- Find "formatOptions" in a top-level dictionary.
+        //- Extract and merge 'default' + formatName values.
+        //
+        //  \returns dictionary of merged formatOptions
+        static dictionary formatOptions
+        (
+            const dictionary& dict,
+            const word& formatName,
+            const word& entryName = "formatOptions"
+        );
+
+        //- Find "formatOptions" in a top-level dictionary,
+        //- and in a set-specific dictionary.
+        //- Extract and merge 'default' + formatName values.
+        //
+        //  \returns dictionary of merged formatOptions
+        static dictionary formatOptions
+        (
+            const dictionary& dict,
+            const dictionary& setDict,
+            const word& formatName,
+            const word& entryName = "formatOptions"
         );
 
 

@@ -58,22 +58,20 @@ namespace Foam
 
 Foam::autoPtr<Foam::coordSetWriter> Foam::sampledSets::newWriter
 (
-    word writeType,
-    const dictionary& formatOptions,
+    word writerType,
+    const dictionary& topDict,
     const dictionary& setDict
 )
 {
     // Per-set adjustment
-    setDict.readIfPresent<word>("setFormat", writeType);
+    setDict.readIfPresent<word>("setFormat", writerType);
 
-    dictionary options = formatOptions.subOrEmptyDict(writeType);
-
-    options.merge
+    return coordSetWriter::New
     (
-        setDict.subOrEmptyDict("formatOptions").subOrEmptyDict(writeType)
+        writerType,
+        // Top-level/set-specific "formatOptions"
+        coordSetWriter::formatOptions(topDict, setDict, writerType)
     );
-
-    return coordSetWriter::New(writeType, options);
 }
 
 
@@ -338,7 +336,7 @@ void Foam::sampledSets::initDict(const dictionary& dict, const bool initial)
                 writers_.set
                 (
                     seti,
-                    newWriter(writeFormat_, writeFormatOptions_, subDict)
+                    newWriter(writeFormat_, dict_, subDict)
                 );
 
                 // Use outputDir/TIME/set-name
@@ -396,7 +394,7 @@ void Foam::sampledSets::initDict(const dictionary& dict, const bool initial)
                 writers_.set
                 (
                     seti,
-                    newWriter(writeFormat_, writeFormatOptions_, subDict)
+                    newWriter(writeFormat_, dict_, subDict)
                 );
 
                 // Use outputDir/TIME/set-name
@@ -446,7 +444,6 @@ Foam::sampledSets::sampledSets
     searchEngine_(mesh_),
     samplePointScheme_(),
     writeFormat_(),
-    writeFormatOptions_(dict.subOrEmptyDict("formatOptions")),
     selectedFieldNames_(),
     writers_(),
     probeFilePtrs_(),
@@ -484,7 +481,6 @@ Foam::sampledSets::sampledSets
     searchEngine_(mesh_),
     samplePointScheme_(),
     writeFormat_(),
-    writeFormatOptions_(dict.subOrEmptyDict("formatOptions")),
     selectedFieldNames_(),
     writers_(),
     probeFilePtrs_(),
@@ -547,12 +543,6 @@ bool Foam::sampledSets::read(const dictionary& dict)
         // Close all streams
         probeFilePtrs_.clear();
     }
-
-    // const dictionary formatOptions(dict.subOrEmptyDict("formatOptions"));
-    // Writer type and format options
-    // const word writerType =
-    //     (eptr ? dict.get<word>("setFormat") : word::null);
-    // writerType_ = (eptr ? dict.get<word>("setFormat") : word::null);
 
     initDict(dict, true);
 

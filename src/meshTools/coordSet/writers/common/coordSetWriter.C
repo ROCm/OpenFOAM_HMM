@@ -78,6 +78,82 @@ Foam::word Foam::coordSetWriter::suffix
 }
 
 
+Foam::dictionary Foam::coordSetWriter::formatOptions
+(
+    const word& formatName,
+    std::initializer_list<const dictionary*> dicts
+)
+{
+    dictionary options;
+
+    // Default specification. Top-level and surface-specific
+    // - literal search only
+    for (const dictionary* dict : dicts)
+    {
+        if
+        (
+            dict
+         && (dict = dict->findDict("default", keyType::LITERAL)) != nullptr
+        )
+        {
+            options.merge(*dict);
+        }
+    }
+
+    // Format specification. Top-level and surface-specific
+    // - allow REGEX search
+    for (const dictionary* dict : dicts)
+    {
+        if
+        (
+            dict && !formatName.empty()
+         && (dict = dict->findDict(formatName)) != nullptr
+        )
+        {
+            options.merge(*dict);
+        }
+    }
+
+    return options;
+}
+
+
+Foam::dictionary Foam::coordSetWriter::formatOptions
+(
+    const dictionary& dict,
+    const word& formatName,
+    const word& entryName
+)
+{
+    return formatOptions
+    (
+        formatName,
+        {
+            dict.findDict(entryName, keyType::LITERAL)
+        }
+    );
+}
+
+
+Foam::dictionary Foam::coordSetWriter::formatOptions
+(
+    const dictionary& dict,
+    const dictionary& setDict,
+    const word& formatName,
+    const word& entryName
+)
+{
+    return formatOptions
+    (
+        formatName,
+        {
+            dict.findDict(entryName, keyType::LITERAL),
+            setDict.findDict(entryName, keyType::LITERAL)
+        }
+    );
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::coordSetWriter::coordSetWriter()
