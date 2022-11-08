@@ -206,14 +206,12 @@ void Foam::cyclicPeriodicAMIPolyPatch::writeOBJ
     // Collect faces and points
     pointField allPoints;
     faceList allFaces;
-    labelList pointMergeMap;
     PatchTools::gatherAndMerge
     (
         -1.0,           // do not merge points
         p,
         allPoints,
-        allFaces,
-        pointMergeMap
+        allFaces
     );
 
     if (Pstream::master())

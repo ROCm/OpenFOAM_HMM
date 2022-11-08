@@ -418,15 +418,12 @@ combineSurfaceGeometry
             // Dimension as fraction of surface
             const scalar mergeDim = 1e-10*boundBox(s.points(), true).mag();
 
-            labelList pointsMap;
-
-            PatchTools::gatherAndMerge
+            Foam::PatchTools::gatherAndMerge
             (
                 mergeDim,
                 primitivePatch(SubList<face>(s.faces()), s.points()),
                 points,
-                faces,
-                pointsMap
+                faces
             );
         }
         else
@@ -444,15 +441,12 @@ combineSurfaceGeometry
             // Dimension as fraction of mesh bounding box
             const scalar mergeDim = 1e-10*mesh_.bounds().mag();
 
-            labelList pointsMap;
-
-            PatchTools::gatherAndMerge
+            Foam::PatchTools::gatherAndMerge
             (
                 mergeDim,
                 primitivePatch(SubList<face>(s.faces()), s.points()),
                 points,
-                faces,
-                pointsMap
+                faces
             );
         }
         else
