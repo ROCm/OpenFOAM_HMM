@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -84,7 +84,7 @@ Foam::points0MotionSolver::points0MotionSolver
 )
 :
     motionSolver(mesh, dict, type),
-    zoneMotion(dict, mesh),
+    zoneMotion(coeffDict(), mesh),
     points0_(points0IO(mesh))
 {
     if
@@ -128,7 +128,7 @@ Foam::points0MotionSolver::points0MotionSolver
 )
 :
     motionSolver(mesh, dict, type),
-    zoneMotion(dict, mesh),
+    zoneMotion(coeffDict(), mesh),
     points0_(points0)
 {
     if (points0_.size() != mesh.nPoints())
