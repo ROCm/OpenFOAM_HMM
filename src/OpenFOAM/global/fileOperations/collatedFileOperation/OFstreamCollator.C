@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,7 +51,7 @@ bool Foam::OFstreamCollator::writeFile
     const labelUList& recvSizes,
     const PtrList<SubList<char>>& slaveData,    // optional slave data
     IOstreamOption streamOpt,
-    const bool append,
+    IOstreamOption::appendType append,
     const dictionary& headerEntries
 )
 {
@@ -79,7 +79,7 @@ bool Foam::OFstreamCollator::writeFile
         osPtr.reset(new OFstream(fName, streamOpt, append));
         auto& os = *osPtr;
 
-        if (!append)
+        if (append == IOstreamOption::NON_APPEND)
         {
             // No IOobject so cannot use IOobject::writeHeader
 
@@ -348,7 +348,7 @@ bool Foam::OFstreamCollator::write
     const fileName& fName,
     const string& data,
     IOstreamOption streamOpt,
-    const bool append,
+    IOstreamOption::appendType append,
     const bool useThread,
     const dictionary& headerEntries
 )

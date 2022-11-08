@@ -217,13 +217,17 @@ bool Foam::fileOperations::collatedFileOperation::appendObject
 
     // Note: cannot do append + compression. This is a limitation
     // of ogzstream (or rather most compressed formats)
+    //
+    // File should always be created as non-atomic
+    // (consistency between append/non-append)
 
     OFstream os
     (
         pathName,
-        // UNCOMPRESSED
+        // UNCOMPRESSED (binary only)
         IOstreamOption(IOstreamOption::BINARY, streamOpt.version()),
-        !isMaster  // append slaves
+        // Append on sub-ranks
+        (isMaster ? IOstreamOption::NON_APPEND : IOstreamOption::APPEND)
     );
 
     if (!os.good())
@@ -381,7 +385,7 @@ bool Foam::fileOperations::collatedFileOperation::writeObject
         (
             pathName,
             streamOpt,
-            false,  // append=false
+            IOstreamOption::NON_APPEND,
             valid
         );
 
@@ -424,7 +428,7 @@ bool Foam::fileOperations::collatedFileOperation::writeObject
             (
                 pathName,
                 streamOpt,
-                false,  // append=false
+                IOstreamOption::NON_APPEND,
                 valid
             );
 

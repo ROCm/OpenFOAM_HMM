@@ -64,14 +64,14 @@ public:
 
     // Constructors
 
-        //- Construct from pathname
+        //- Construct from pathname, default or specified stream options
         explicit IFstream
         (
             const fileName& pathname,
             IOstreamOption streamOpt = IOstreamOption()
         );
 
-        //- Construct from pathname, format (version)
+        //- Construct from pathname and format
         IFstream
         (
             const fileName& pathname,

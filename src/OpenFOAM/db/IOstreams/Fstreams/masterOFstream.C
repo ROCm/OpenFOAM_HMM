@@ -83,7 +83,7 @@ void Foam::masterOFstream::checkWrite
     const std::string& s
 )
 {
-    checkWrite(fName, &s[0], s.length());
+    checkWrite(fName, s.data(), s.length());
 }
 
 
@@ -126,7 +126,7 @@ void Foam::masterOFstream::commit()
             string s(this->str());
             this->reset();
 
-            os.write(&s[0], s.length());
+            os.write(s.data(), s.length());
         }
 
         labelList recvSizes;
@@ -179,7 +179,7 @@ Foam::masterOFstream::masterOFstream
 (
     const fileName& pathName,
     IOstreamOption streamOpt,
-    const bool append,
+    IOstreamOption::appendType append,
     const bool valid
 )
 :

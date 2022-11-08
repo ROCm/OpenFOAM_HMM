@@ -79,7 +79,7 @@ Foam::ensightFile::ensightFile
     IOstreamOption::streamFormat fmt
 )
 :
-    OFstream(ensight::FileName(pathname), fmt)
+    OFstream(IOstreamOption::ATOMIC, ensight::FileName(pathname), fmt)
 {
     init();
 }
@@ -92,7 +92,7 @@ Foam::ensightFile::ensightFile
     IOstreamOption::streamFormat fmt
 )
 :
-    OFstream(path/ensight::FileName(name), fmt)
+    OFstream(IOstreamOption::ATOMIC, path/ensight::FileName(name), fmt)
 {
     init();
 }

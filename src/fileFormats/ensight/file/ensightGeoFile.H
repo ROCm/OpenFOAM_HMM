@@ -67,7 +67,7 @@ public:
     // Static Functions
 
         //- Return a null ensightGeoFile
-        inline static const ensightGeoFile& null()
+        static const ensightGeoFile& null()
         {
             return NullObjectRef<ensightGeoFile>();
         }

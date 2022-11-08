@@ -1314,7 +1314,7 @@ bool Foam::lumpedPointMovement::writeData
         (
             coupler().resolveFile(logName_),
             IOstreamOption(),
-            true  // append
+            IOstreamOption::APPEND
         );
 
         writeData(os, forces, moments, outputFormatType::PLAIN, timesWritten);

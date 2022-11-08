@@ -126,7 +126,7 @@ void Foam::IFstream::rewind()
     if (IOstreamOption::COMPRESSED == ifstreamPointer::whichCompression())
     {
         lineNumber_ = 1;  // Reset line number
-        ifstreamPointer::reopen_gz(this->name() + ".gz");
+        ifstreamPointer::reopen_gz(this->name());
         setState(ifstreamPointer::get()->rdstate());
     }
     else
@@ -150,7 +150,7 @@ Foam::IFstream& Foam::IFstream::operator()() const
     if (!good())
     {
         // Also checks .gz file
-        if (isFile(this->name(), true))
+        if (Foam::isFile(this->name(), true))
         {
             check(FUNCTION_NAME);
             FatalIOError.exit();

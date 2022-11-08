@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,7 @@ License
 #include "fstreamPointer.H"
 #include "OCountStream.H"
 #include "OSspecific.H"
+#include <cstdio>
 
 // HAVE_LIBZ defined externally
 // #define HAVE_LIBZ
@@ -36,37 +37,6 @@ License
 #ifdef HAVE_LIBZ
 #include "gzstream.h"
 #endif /* HAVE_LIBZ */
-
-// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    static inline void removeConflictingFiles
-    (
-        const fileName& otherName,
-        const bool append,
-        const fileName& targetName
-    )
-    {
-        // Remove other (compressed/uncompressed) version
-
-        const fileName::Type pathType = Foam::type(otherName, false);
-
-        if (pathType == fileName::FILE || pathType == fileName::SYMLINK)
-        {
-            Foam::rm(otherName);
-        }
-
-        // Disallow writing into symlinked files.
-        // Eg, avoid problems with symlinked initial fields
-
-        if (!append && Foam::type(targetName, false) == fileName::SYMLINK)
-        {
-            Foam::rm(targetName);
-        }
-    }
-}
-
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
@@ -112,7 +82,7 @@ Foam::ifstreamPointer::ifstreamPointer
 
         const fileName pathname_gz(pathname + ".gz");
 
-        if (isFile(pathname_gz, false))
+        if (Foam::isFile(pathname_gz, false))
         {
             #ifdef HAVE_LIBZ
 
@@ -128,13 +98,29 @@ Foam::ifstreamPointer::ifstreamPointer
 
             #endif /* HAVE_LIBZ */
         }
+        else
+        {
+            // TBD:
+            // Can also fallback and open .orig files too
+            //
+            // auto* file = dynamic_cast<std::ifstream*>(ptr_.get());
+            // file->open(pathname + ".orig", mode);
+        }
     }
 }
 
 
+Foam::ofstreamPointer::ofstreamPointer() noexcept
+:
+    ptr_(),
+    atomic_(false)
+{}
+
+
 Foam::ofstreamPointer::ofstreamPointer(std::nullptr_t)
 :
-    ptr_(new Foam::ocountstream)
+    ptr_(new Foam::ocountstream),
+    atomic_(false)
 {}
 
 
@@ -142,10 +128,12 @@ Foam::ofstreamPointer::ofstreamPointer
 (
     const fileName& pathname,
     IOstreamOption::compressionType comp,
-    const bool append
+    const bool append,
+    const bool atomic
 )
 :
-    ptr_(nullptr)
+    ptr_(nullptr),
+    atomic_(atomic)
 {
     std::ios_base::openmode mode
     (
@@ -155,18 +143,56 @@ Foam::ofstreamPointer::ofstreamPointer
     if (append)
     {
         mode |= std::ios_base::app;
+
+        // Cannot append to gzstream
+        comp = IOstreamOption::UNCOMPRESSED;
+
+        // Cannot use append + atomic operation, without lots of extra work
+        atomic_ = false;
     }
 
+
+    // When opening new files, remove file variants out of the way.
+    // Eg, opening "file1"
+    // - remove old "file1.gz" (compressed)
+    // - also remove old "file1" if it is a symlink and we are not appending
+    //
+    // Not writing into symlinked files avoids problems with symlinked
+    // initial fields (eg, 0/U -> ../0.orig/U)
+
     const fileName pathname_gz(pathname + ".gz");
+    const fileName pathname_tmp(pathname + "~tmp~");
+
+    fileName::Type fType = fileName::Type::UNDEFINED;
 
     if (IOstreamOption::COMPRESSED == comp)
     {
-        // Output compression requested
+        // Output compression requested.
 
         #ifdef HAVE_LIBZ
+        // TBD:
+        // atomic_ = true;  // Always treat COMPRESSED like an atomic
 
-        removeConflictingFiles(pathname, append, pathname_gz);
-        ptr_.reset(new ogzstream(pathname_gz, mode));
+        const fileName& target = (atomic_ ? pathname_tmp : pathname_gz);
+
+        // Remove old uncompressed version (if any)
+        fType = Foam::type(pathname, false);
+        if (fType == fileName::SYMLINK || fType == fileName::FILE)
+        {
+            Foam::rm(pathname);
+        }
+
+        // Avoid writing into symlinked files (non-append mode)
+        if (!append || atomic_)
+        {
+            fType = Foam::type(target, false);
+            if (fType == fileName::SYMLINK)
+            {
+                Foam::rm(target);
+            }
+        }
+
+        ptr_.reset(new ogzstream(target, mode));
 
         #else /* HAVE_LIBZ */
 
@@ -181,43 +207,51 @@ Foam::ofstreamPointer::ofstreamPointer
         #endif /* HAVE_LIBZ */
     }
 
-    if (IOstreamOption::UNCOMPRESSED == comp)
+    if (IOstreamOption::COMPRESSED != comp)
     {
-        removeConflictingFiles(pathname_gz, append, pathname);
-        ptr_.reset(new std::ofstream(pathname, mode));
+        const fileName& target = (atomic_ ? pathname_tmp : pathname);
+
+        // Remove old compressed version (if any)
+        fType = Foam::type(pathname_gz, false);
+        if (fType == fileName::SYMLINK || fType == fileName::FILE)
+        {
+            Foam::rm(pathname_gz);
+        }
+
+        // Avoid writing into symlinked files (non-append mode)
+        if (!append || atomic_)
+        {
+            fType = Foam::type(target, false);
+            if (fType == fileName::SYMLINK)
+            {
+                Foam::rm(target);
+            }
+        }
+
+        ptr_.reset(new std::ofstream(target, mode));
     }
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::ifstreamPointer::reopen_gz(const std::string& pathname_gz)
+void Foam::ifstreamPointer::reopen_gz(const std::string& pathname)
 {
     #ifdef HAVE_LIBZ
-    igzstream* gz = dynamic_cast<igzstream*>(ptr_.get());
+    auto* gz = dynamic_cast<igzstream*>(ptr_.get());
 
     if (gz)
     {
         // Special treatment for gzstream
         gz->close();
         gz->clear();
-        gz->open(pathname_gz);
-    }
-    #endif /* HAVE_LIBZ */
-}
 
-
-void Foam::ofstreamPointer::reopen_gz(const std::string& pathname_gz)
-{
-    #ifdef HAVE_LIBZ
-    ogzstream* gz = dynamic_cast<ogzstream*>(ptr_.get());
-
-    if (gz)
-    {
-        // Special treatment for gzstream
-        gz->close();
-        gz->clear();
-        gz->open(pathname_gz);
+        gz->open
+        (
+            pathname + ".gz",
+            (std::ios_base::in | std::ios_base::binary)
+        );
+        return;
     }
     #endif /* HAVE_LIBZ */
 }
@@ -225,7 +259,36 @@ void Foam::ofstreamPointer::reopen_gz(const std::string& pathname_gz)
 
 void Foam::ofstreamPointer::reopen(const std::string& pathname)
 {
-    std::ofstream* file = dynamic_cast<std::ofstream*>(ptr_.get());
+    #ifdef HAVE_LIBZ
+    auto* gz = dynamic_cast<ogzstream*>(ptr_.get());
+
+    if (gz)
+    {
+        // Special treatment for gzstream
+        gz->close();
+        gz->clear();
+
+        if (atomic_)
+        {
+            gz->open
+            (
+                pathname + "~tmp~",
+                (std::ios_base::out | std::ios_base::binary)
+            );
+        }
+        else
+        {
+            gz->open
+            (
+                pathname + ".gz",
+                (std::ios_base::out | std::ios_base::binary)
+            );
+        }
+        return;
+    }
+    #endif /* HAVE_LIBZ */
+
+    auto* file = dynamic_cast<std::ofstream*>(ptr_.get());
 
     if (file)
     {
@@ -234,7 +297,69 @@ void Foam::ofstreamPointer::reopen(const std::string& pathname)
             file->close();
         }
         file->clear();
-        file->open(pathname);
+
+        // Don't need original request to append since rewind implies
+        // trashing that anyhow.
+
+        if (atomic_)
+        {
+            file->open
+            (
+                pathname + "~tmp~",
+                (std::ios_base::out | std::ios_base::binary)
+            );
+        }
+        else
+        {
+            file->open
+            (
+                pathname,
+                (std::ios_base::out | std::ios_base::binary)
+            );
+        }
+        return;
+    }
+}
+
+
+void Foam::ofstreamPointer::close(const std::string& pathname)
+{
+    if (!atomic_ || pathname.empty()) return;
+
+    #ifdef HAVE_LIBZ
+    auto* gz = dynamic_cast<ogzstream*>(ptr_.get());
+
+    if (gz)
+    {
+        // Special treatment for gzstream
+        gz->close();
+        gz->clear();
+
+        std::rename
+        (
+            (pathname + "~tmp~").c_str(),
+            (pathname + ".gz").c_str()
+        );
+        return;
+    }
+    #endif /* HAVE_LIBZ */
+
+    auto* file = dynamic_cast<std::ofstream*>(ptr_.get());
+
+    if (file)
+    {
+        if (file->is_open())
+        {
+            file->close();
+        }
+        file->clear();
+
+        std::rename
+        (
+            (pathname + "~tmp~").c_str(),
+            pathname.c_str()
+        );
+        return;
     }
 }
 

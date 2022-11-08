@@ -92,7 +92,7 @@ public:
     // Static Functions
 
         //- Return a null ensightFile
-        inline static const ensightFile& null()
+        static const ensightFile& null()
         {
             return NullObjectRef<ensightFile>();
         }
@@ -102,6 +102,7 @@ public:
 
         //- Construct from path-name.
         //  The path-name is adjusted for valid ensight file naming.
+        //  Always created as an atomic
         explicit ensightFile
         (
             const fileName& pathname,
@@ -110,6 +111,7 @@ public:
 
         //- Construct from path and name.
         //  Only the name portion is adjusted for valid ensight file naming.
+        //  Always created as an atomic
         ensightFile
         (
             const fileName& path,

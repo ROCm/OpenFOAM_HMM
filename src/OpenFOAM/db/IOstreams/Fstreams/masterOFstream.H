@@ -55,11 +55,14 @@ class masterOFstream
 {
     // Private Data
 
+        //- The backend file name
         const fileName pathName_;
 
+        //- Output file compression
         const IOstreamOption::compressionType compression_;
 
-        const bool append_;
+        //- Open file in append mode
+        const IOstreamOption::appendType append_;
 
         //- Should file be written
         const bool valid_;
@@ -91,7 +94,7 @@ public:
         (
             const fileName& pathname,
             IOstreamOption streamOpt = IOstreamOption(),
-            const bool append = false,
+            IOstreamOption::appendType append = IOstreamOption::NON_APPEND,
             const bool valid = true
         );
 
