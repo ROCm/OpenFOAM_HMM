@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ensightMeshReader_H
-#define ensightMeshReader_H
+#ifndef Foam_ensightMeshReader_H
+#define Foam_ensightMeshReader_H
 
 #include "meshReader.H"
 //#include "ensightReadFile.H"
@@ -46,6 +46,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class ensightReadFile;
 
 namespace fileFormats
@@ -59,7 +60,7 @@ class ensightMeshReader
 :
     public meshReader
 {
-    // Private data
+    // Private Data
 
         //- Merge distance
         const scalar mergeTol_;
@@ -168,13 +169,13 @@ public:
     // Access
 
         //- Original node id (if supplied) or -1
-        inline const labelList& nodeIds() const
+        const labelList& nodeIds() const noexcept
         {
             return nodeIds_;
         }
 
         //- Original element id (if supplied) or -1
-        inline const labelList& elementIds() const
+        const labelList& elementIds() const noexcept
         {
             return elementIds_;
         }

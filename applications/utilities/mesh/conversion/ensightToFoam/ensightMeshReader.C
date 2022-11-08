@@ -207,7 +207,7 @@ bool Foam::fileFormats::ensightMeshReader::readGoldPart
 
 
     // Work
-    DynamicList<label> verts; 
+    DynamicList<label> verts;
 
     string line;
     while (is.good())
