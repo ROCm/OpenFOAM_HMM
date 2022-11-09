@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -103,10 +103,10 @@ void Foam::NusseltNumber<CloudType>::postEvolve
         Nu[parceli++] = heatTransfer.Nu(Re, Pr);
     }
 
-
-    if (c.size() && c.time().writeTime())
+    const bool haveParticles = c.size();
+    if (c.time().writeTime() && returnReduceOr(haveParticles))
     {
-        Nu.write();
+        Nu.write(haveParticles);
     }
 }
 

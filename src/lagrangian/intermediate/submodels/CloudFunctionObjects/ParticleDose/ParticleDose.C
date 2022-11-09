@@ -98,9 +98,10 @@ void Foam::ParticleDose<CloudType>::postEvolve
         parceli++;
     }
 
-    if (c.size() && c.time().writeTime())
+    const bool haveParticles = c.size();
+    if (c.time().writeTime() && returnReduceOr(haveParticles))
     {
-        D.write();
+        D.write(haveParticles);
     }
 }
 

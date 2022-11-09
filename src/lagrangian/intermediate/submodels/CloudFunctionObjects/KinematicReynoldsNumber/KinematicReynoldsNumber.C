@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -89,10 +89,10 @@ void Foam::KinematicReynoldsNumber<CloudType>::postEvolve
         Re[parceli++] = p.Re(td);
     }
 
-
-    if (c.size() && c.time().writeTime())
+    const bool haveParticles = c.size();
+    if (c.time().writeTime() && returnReduceOr(haveParticles))
     {
-        Re.write();
+        Re.write(haveParticles);
     }
 }
 
