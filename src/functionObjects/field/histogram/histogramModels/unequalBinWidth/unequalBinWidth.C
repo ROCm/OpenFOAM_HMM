@@ -52,7 +52,7 @@ Foam::histogramModels::unequalBinWidth::unequalBinWidth
 :
     histogramModel(name, mesh, dict),
     nBins_(-1),
-    ranges_(Zero)
+    ranges_()
 {
     read(dict);
 }
@@ -67,32 +67,26 @@ bool Foam::histogramModels::unequalBinWidth::read(const dictionary& dict)
         return false;
     }
 
-    ranges_ = dict.get<List<Pair<scalar>>>("ranges");
+    ranges_ = dict.get<List<scalarMinMax>>("ranges");
+    nBins_ = ranges_.size();
 
     forAll(ranges_, bini)
     {
         const auto& range = ranges_[bini];
-        const scalar min = range.first();
-        const scalar max = range.second();
 
-        if (max < min)
+        if (!range.good())
         {
             FatalIOErrorInFunction(dict)
-                << "For bin-" << bini
-                << ", min is larger than max."
-                << " min = " << min
-                << " max = " << max
+                << "Histogram bin-" << bini
+                << " has invalid range: " << range
                 << abort(FatalIOError);
         }
     }
 
-    nBins_ = ranges_.size();
-
     if (nBins_ < 1)
     {
         FatalIOErrorInFunction(dict)
-            << "Number of histogram bins = " << nBins_
-            << " cannot be negative or zero."
+            << "Invalid number of histogram bins: " << nBins_
             << abort(FatalIOError);
     }
 
@@ -110,13 +104,7 @@ bool Foam::histogramModels::unequalBinWidth::write(const bool log)
 
     forAll(ranges_, bini)
     {
-        point& p = midBin[bini];
-        const auto& range = ranges_[bini];
-        const scalar min = range.first();
-        const scalar max = range.second();
-
-        const scalar delta = max - min;
-        p.x() = min + 0.5*delta;
+        midBin[bini].x() = ranges_[bini].centre();
     }
 
 
@@ -130,10 +118,10 @@ bool Foam::histogramModels::unequalBinWidth::write(const bool log)
         forAll(ranges_, bini)
         {
             const auto& range = ranges_[bini];
-            const scalar min = range.first();
-            const scalar max = range.second();
 
-            if (field[celli] >= min && field[celli] < max)
+            // Like range.contains(field[celli]) but exclusive on max()
+
+            if (field[celli] >= range.min() && field[celli] < range.max())
             {
                 dataNormalised[bini] += V[celli];
                 dataCount[bini]++;

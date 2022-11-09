@@ -52,7 +52,7 @@ Usage
     \table
       Property  | Description                       | Type   | Reqd | Deflt
       ranges    | Min-max values of histogram data <!--
-                -->                 | List\<Pair\<scalar\>\> | no   | -
+                -->                 | List\<scalarMinMax\>  | no   | -
     \endtable
 
 Note
@@ -70,6 +70,7 @@ SourceFiles
 #define Foam_histogramModels_unequalBinWidth_H
 
 #include "histogramModel.H"
+#include "MinMax.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -92,7 +93,7 @@ class unequalBinWidth
         label nBins_;
 
         //- Lower and upper ranges of operand bins
-        List<Pair<scalar>> ranges_;
+        List<scalarMinMax> ranges_;
 
 
 public:

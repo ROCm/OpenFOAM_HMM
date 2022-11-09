@@ -53,8 +53,7 @@ Foam::histogramModels::equalBinWidth::equalBinWidth
 :
     histogramModel(name, mesh, dict),
     nBins_(0),
-    min_(GREAT),
-    max_(-GREAT)
+    range_()
 {
     read(dict);
 }
@@ -69,7 +68,13 @@ bool Foam::histogramModels::equalBinWidth::read(const dictionary& dict)
         return false;
     }
 
-    nBins_ = dict.getScalar("nBins");
+    range_.reset
+    (
+        dict.getOrDefault<scalar>("min", GREAT),
+        dict.getOrDefault<scalar>("max", -GREAT)
+    );
+
+    nBins_ = dict.get<scalar>("nBins");
 
     if (nBins_ < 1)
     {
@@ -78,9 +83,6 @@ bool Foam::histogramModels::equalBinWidth::read(const dictionary& dict)
             << " cannot be negative or zero."
             << abort(FatalIOError);
     }
-
-    min_ = dict.getOrDefault<scalar>("min", GREAT);
-    max_ = dict.getOrDefault<scalar>("max", -GREAT);
 
     return true;
 }
@@ -93,44 +95,44 @@ bool Foam::histogramModels::equalBinWidth::write(const bool log)
 
     // Determine min and max from the operand field
     // if the user did not provide any min or max
-    scalar histMax = max_;
-    scalar histMin = min_;
 
-    if (max_ == -GREAT)
+    scalarMinMax histRange(range_);
+
+    if (histRange.max() == -GREAT)
     {
-        histMax = max(field).value();
+        histRange.max() = max(field).value();
 
-        if (min_ == GREAT)
+        if (histRange.min() == GREAT)
         {
-            histMin = min(field).value();
+            histRange.min() = min(field).value();
         }
+
         if (log)
         {
             Info<< "    Determined histogram bounds from field"
                 << " min/max(" << fieldName() << ") = "
-                << histMin << ' ' << histMax << endl;
+                << histRange << endl;
         }
     }
-    else if (min_ == GREAT)
+    else if (histRange.min() == GREAT)
     {
-        histMin = 0;
+        histRange.min() = Zero;
     }
 
-    if (histMax < histMin)
+    if (!histRange.good())
     {
         FatalErrorInFunction
-            << "Histogram minimum = " << histMin
-            << ", cannot be larger than histogram maximum = " << histMax
+            << "Invalid histogram range: " << histRange
             << exit(FatalError);
     }
 
 
     // Calculate the mid-points of bins for the graph axis
     pointField binMidPoints(nBins_, Zero);
-    const scalar delta = (histMax - histMin)/nBins_;
+    const scalar delta = histRange.span()/nBins_;
 
     {
-        scalar x = histMin + 0.5*delta;
+        scalar x = histRange.min() + 0.5*delta;
         for (point& p : binMidPoints)
         {
             p.x() = x;
@@ -146,7 +148,7 @@ bool Foam::histogramModels::equalBinWidth::write(const bool log)
 
     forAll(field, celli)
     {
-        const label bini = (field[celli] - histMin)/delta;
+        const label bini = (field[celli] - histRange.min())/delta;
         if (bini >= 0 && bini < nBins_)
         {
             dataNormalised[bini] += V[celli];

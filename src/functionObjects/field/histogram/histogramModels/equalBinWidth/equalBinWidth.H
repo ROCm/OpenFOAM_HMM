@@ -69,6 +69,7 @@ SourceFiles
 #define Foam_histogramModels_equalBinWidth_H
 
 #include "histogramModel.H"
+#include "MinMax.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -90,11 +91,8 @@ class equalBinWidth
         //- Number of bins
         label nBins_;
 
-        //- Minimum value of histogram data
-        scalar min_;
-
-        //- Maximum value of histogram data
-        scalar max_;
+        //- Min/max for histogram data
+        scalarMinMax range_;
 
 
 public:
