@@ -32,6 +32,23 @@ License
 #include "polyMesh.H"
 #include "ListOps.H"
 #include "manifoldCellsMeshObject.H"
+#include "debug.H"
+#include "defineDebugSwitch.H"
+#include "registerSwitch.H"
+
+// * * * * * * * * * * * * * * * * Globals * * * * * * * * * * * * * * * * * //
+
+defineDebugSwitchWithName(Foam::ensightOutput, "ensight", 0);
+
+registerDebugSwitchWithName(Foam::ensightOutput, ensightOutput, "ensight");
+
+int Foam::ensightOutput::maxChunk_
+(
+    Foam::debug::optimisationSwitch("ensight.maxChunk", 0)
+);
+
+registerOptSwitch("ensight.maxChunk", int, Foam::ensightOutput::maxChunk_);
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

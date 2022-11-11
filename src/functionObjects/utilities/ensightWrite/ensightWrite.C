@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ensightWrite.H"
+#include "ensightOutput.H"
 #include "Time.H"
 #include "polyMesh.H"
 #include "addToRunTimeSelectionTable.H"
@@ -47,6 +48,9 @@ namespace functionObjects
 }
 }
 
+// Implementation
+#include "ensightWriteImpl.C"
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 Foam::label Foam::functionObjects::ensightWrite::writeAllVolFields
@@ -57,11 +61,26 @@ Foam::label Foam::functionObjects::ensightWrite::writeAllVolFields
 {
     label count = 0;
 
-    count += writeVolFields<scalar>(proxy, acceptField);
-    count += writeVolFields<vector>(proxy, acceptField);
-    count += writeVolFields<sphericalTensor>(proxy, acceptField);
-    count += writeVolFields<symmTensor>(proxy, acceptField);
-    count += writeVolFields<tensor>(proxy, acceptField);
+    ensightOutput::floatBufferType scratch;
+
+    {
+        #undef  doLocalCode
+        #define doLocalCode(PrimitiveType)              \
+            count += writeVolFieldsImpl<PrimitiveType>  \
+            (                                           \
+                scratch,                                \
+                proxy,                                  \
+                acceptField                             \
+            );
+
+        doLocalCode(scalar);
+        doLocalCode(vector);
+        doLocalCode(sphericalTensor);
+        doLocalCode(symmTensor);
+        doLocalCode(tensor);
+
+        #undef doLocalCode
+    }
 
     return count;
 }
@@ -214,6 +233,8 @@ bool Foam::functionObjects::ensightWrite::write()
         autoPtr<ensightGeoFile> os = ensCase_().newGeometry(true);
         ensMesh_().write(os);
     }
+
+    // TBD: handle allow/deny filters
 
     wordHashSet acceptField(mesh_.names<void>(selectFields_));
 

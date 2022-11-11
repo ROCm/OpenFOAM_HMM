@@ -38,6 +38,7 @@ SourceFiles
 #ifndef Foam_ensightOutput_H
 #define Foam_ensightOutput_H
 
+#include "ensightOutputFwd.H"
 #include "ensightFile.H"
 #include "ensightGeoFile.H"
 #include "ensightCells.H"
@@ -186,7 +187,8 @@ void writeFaceConnectivity
     const ensightFaces::elemType etype,
     const label nTotal,
     const UIndirectList<face>& faces,
-    bool parallel               //!< Collective write?
+    //! Prefer collective write?
+    bool parallel
 );
 
 
@@ -197,7 +199,8 @@ void writeFaceConnectivity
     const ensightFaces::elemType etype,
     const label nTotal,
     const faceUList& faces,
-    bool parallel               //!< Collective write?
+    //! Prefer collective write?
+    bool parallel
 );
 
 
@@ -207,7 +210,8 @@ void writeFaceConnectivity
     ensightGeoFile& os,
     const ensightFaces& part,
     const faceUList& faces,
-    bool parallel               //!< Collective write?
+    //! Prefer collective write?
+    bool parallel
 );
 
 
@@ -219,7 +223,8 @@ void writeFaceConnectivityPresorted
     ensightGeoFile& os,
     const ensightFaces& part,
     const faceUList& faces,
-    bool parallel               //!< Collective write?
+    //! Prefer collective write?
+    bool parallel
 );
 
 
@@ -232,10 +237,20 @@ void writeFaceConnectivityPresorted
 template<class Type>
 bool writeField
 (
+    //! Component scratch buffer
+    ensightOutput::floatBufferType& scratch,
+
+    //! Output file (must be valid on master)
     ensightFile& os,
+
+    //! The field content to be written
     const Field<Type>& fld,
+
+    //! The addressing (element-wise) into the field
     const ensightCells& part,
-    bool parallel  //!< Collective write?
+
+    //! Prefer collective write?
+    bool parallel
 );
 
 //- Write a field of faces values as an indirect list,
@@ -243,11 +258,67 @@ bool writeField
 template<class Type>
 bool writeField
 (
+    //! Component scratch buffer
+    ensightOutput::floatBufferType& scratch,
+
+    //! Output file (must be valid on master)
     ensightFile& os,
+
+    //! The field content to be written
     const Field<Type>& fld,
+
+    //! The addressing (element-wise) into the field
     const ensightFaces& part,
-    bool parallel  //!< Collective write?
+
+    //! Prefer collective write?
+    bool parallel
 );
+
+
+//- Write a field of cell values as an indirect list,
+//- using the cell ids from ensightCells
+template<class Type>
+bool writeField
+(
+    //! Output file (must be valid on master)
+    ensightFile& os,
+
+    //! The field content to be written
+    const Field<Type>& fld,
+
+    //! The addressing (element-wise) into the field
+    const ensightCells& part,
+
+    //! Prefer collective write?
+    bool parallel
+)
+{
+    ensightOutput::floatBufferType scratch;
+    return ensightOutput::writeField(scratch, os, fld, part, parallel);
+}
+
+
+//- Write a field of faces values as an indirect list,
+//- using the face ids from ensightFaces
+template<class Type>
+bool writeField
+(
+    //! Output file (must be valid on master)
+    ensightFile& os,
+
+    //! The field content to be written
+    const Field<Type>& fld,
+
+    //! The addressing (element-wise) into the field
+    const ensightFaces& part,
+
+    //! Prefer collective write?
+    bool parallel
+)
+{
+    ensightOutput::floatBufferType scratch;
+    return ensightOutput::writeField(scratch, os, fld, part, parallel);
+}
 
 
 /*---------------------------------------------------------------------------*\
@@ -302,48 +373,109 @@ void writeLabelListList
 );
 
 
-//- Copy specified field component into a scalar buffer
-//- works for various lists types. Must be adequately sized before calling
+//- Copy specified field component into a scalar buffer.
+//- Works for various lists types. Must be adequately sized before calling
 template<template<typename> class FieldContainer, class Type>
 void copyComponent
 (
-    List<scalar>& cmptBuffer,
+    //! Input field data
     const FieldContainer<Type>& input,
-    const direction cmpt
+
+    //! Component to be extracted
+    const direction cmpt,
+
+    //! [out] Component scratch buffer
+    UList<float>& cmptBuffer
 );
 
 
-//- Write field content (component-wise)
-template<template<typename> class FieldContainer, class Type>
-void writeFieldContent
-(
-    ensightFile& os,
-    const FieldContainer<Type>& fld,
-    bool parallel  //!< Collective write?
-);
-
-
-//- Write coordinates (component-wise) for the given part
+//- Write coordinates (component-wise) for the given part.
+//
+//  Has internal check for (nPoints != 0)
 template<template<typename> class FieldContainer>
 bool writeCoordinates
 (
+    //! Output file (must be valid on master)
     ensightGeoFile& os,
+
+    //! The ensight part id
     const label partId,
+
+    //! The ensight part description
     const word& partName,
+
+    //! The total number of points
     const label nPoints,
+
+    //! The point field to be written
     const FieldContainer<Foam::point>& fld,
-    bool parallel  //!< Collective write?
+
+    //! Prefer collective write?
+    bool parallel
 );
 
 
-//- Write field content (component-wise) for the given ensight element type
+//- Write field content (component-wise) for the given ensight element type.
 template<template<typename> class FieldContainer, class Type>
-bool writeFieldComponents
+void writeFieldComponents
 (
+    //! Component scratch buffer
+    ensightOutput::floatBufferType& scratch,
+
+    //! Output file (must be valid on master)
     ensightFile& os,
+
+    //! The ensight element type (ignored if nullptr)
     const char* key,
+
+    //! The field content to be written for this element type
     const FieldContainer<Type>& fld,
-    bool parallel  //!< Collective write?
+
+    //! Prefer collective write?
+    bool parallel
+);
+
+//- Write field content (component-wise) for the given ensight element type.
+template<template<typename> class FieldContainer, class Type>
+void writeFieldComponents
+(
+    //! Output file (must be valid on master)
+    ensightFile& os,
+
+    //! The ensight element type (can be nullptr)
+    const char* key,
+
+    //! The field content to be written for this element type
+    const FieldContainer<Type>& fld,
+
+    //!< Prefer collective write?
+    bool parallel
+)
+{
+    ensightOutput::floatBufferType scratch;
+    Detail::writeFieldComponents(scratch, os, key, fld, parallel);
+}
+
+
+//- Write a sub-field of faces values as an indirect list,
+//- using the sub-list sizing information from ensightFaces
+template<class Type>
+bool writeFaceSubField
+(
+    //! Component scratch buffer
+    ensightOutput::floatBufferType& scratch,
+
+    //! Output file (must be valid on master)
+    ensightFile& os,
+
+    //! The field content to be written
+    const Field<Type>& fld,
+
+    //! The addressing (element-wise) into the field
+    const ensightFaces& part,
+
+    //! Prefer collective write?
+    bool parallel
 );
 
 
@@ -352,11 +484,22 @@ bool writeFieldComponents
 template<class Type>
 bool writeFaceSubField
 (
+    //! Output file (must be valid on master)
     ensightFile& os,
+
+    //! The field content to be written
     const Field<Type>& fld,
+
+    //! The addressing (element-wise) into the field
     const ensightFaces& part,
-    bool parallel  //!< Collective write?
-);
+
+    //! Prefer collective write?
+    bool parallel
+)
+{
+    ensightOutput::floatBufferType scratch;
+    return Detail::writeFaceSubField(scratch, os, fld, part, parallel);
+}
 
 
 //- Write a field of faces values as an indirect list,
@@ -364,11 +507,43 @@ bool writeFaceSubField
 template<class Type>
 bool writeFaceLocalField
 (
+    //! Component scratch buffer
+    ensightOutput::floatBufferType& scratch,
+
+    //! Output file (must be valid on master)
     ensightFile& os,
+
+    //! The field content to be written
     const Field<Type>& fld,
+
+    //! The addressing (element-wise) into the field
     const ensightFaces& part,
-    bool parallel  //!< Collective write?
+
+    //! Prefer collective write?
+    bool parallel
 );
+
+//- Write a field of faces values as an indirect list,
+//- using the face order from ensightFaces
+template<class Type>
+bool writeFaceLocalField
+(
+    //! Output file (must be valid on master)
+    ensightFile& os,
+
+    //! The field content to be written
+    const Field<Type>& fld,
+
+    //! The addressing (element-wise) into the field
+    const ensightFaces& part,
+
+    //! Prefer collective write?
+    bool parallel
+)
+{
+    ensightOutput::floatBufferType scratch;
+    return Detail::writeFaceLocalField(scratch, os, fld, part, parallel);
+}
 
 
 } // End namespace Detail

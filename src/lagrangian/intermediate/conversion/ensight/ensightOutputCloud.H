@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,11 +35,10 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ensightOutputCloud_H
-#define ensightOutputCloud_H
+#ifndef Foam_ensightOutputCloud_H
+#define Foam_ensightOutputCloud_H
 
 #include "ensightFile.H"
-#include "autoPtr.H"
 #include "IOField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -59,10 +58,17 @@ namespace ensightOutput
 //- Write cloud positions
 bool writeCloudPositions
 (
+    //! Output file (must be valid on master)
+    ensightFile& os,
+
+    //! The associated volume mesh
     const fvMesh& mesh,
+
+    //! The name of the cloud
     const word& cloudName,
-    bool exists,
-    autoPtr<ensightFile>& output
+
+    //! The processor-local existence
+    bool exists
 );
 
 
@@ -70,19 +76,27 @@ bool writeCloudPositions
 template<class Type>
 bool writeCloudField
 (
-    const IOField<Type>& field,
-    ensightFile& os
+    //! Output file (must be valid on master)
+    ensightFile& os,
+
+    //! The cloud field
+    const IOField<Type>& field
 );
 
 
 //- Read cloud field from IOobject (if exists == true) and write,
 //- always returning true.
 template<class Type>
-bool writeCloudField
+bool readWriteCloudField
 (
-    const IOobject& io,
-    bool exists,
-    autoPtr<ensightFile>& output
+    //! Output file (must be valid on master)
+    ensightFile& os,
+
+    //! The field object name/location for reading
+    const IOobject& fieldObject,
+
+    //! Exists anywhere? May still be missing on a local processor
+    bool existsAny
 );
 
 
@@ -98,9 +112,13 @@ namespace Detail
 template<class Type>
 label writeCloudFieldContent
 (
+    //! Output file (must be valid on master)
     ensightFile& os,
+
     const UList<Type>& fld,
-    label count = 0     //!< The current output count
+
+    //! The current output count
+    label count = 0
 );
 
 

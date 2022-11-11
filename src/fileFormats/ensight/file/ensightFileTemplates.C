@@ -28,9 +28,24 @@ License
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 template<class Addr>
-bool Foam::ensightFile::hasUndef(const IndirectListBase<scalar, Addr>& field)
+bool Foam::ensightFile::hasUndef(const IndirectListBase<float, Addr>& field)
 {
-    for (const scalar val : field)
+    for (const float val : field)
+    {
+        if (std::isnan(val))
+        {
+            return true;
+        }
+    }
+
+    return true;
+}
+
+
+template<class Addr>
+bool Foam::ensightFile::hasUndef(const IndirectListBase<double, Addr>& field)
+{
+    for (const double val : field)
     {
         if (std::isnan(val))
         {
@@ -56,9 +71,27 @@ void Foam::ensightFile::writeLabels(const IndirectListBase<label, Addr>& list)
 
 
 template<class Addr>
-void Foam::ensightFile::writeList(const IndirectListBase<scalar, Addr>& field)
+void Foam::ensightFile::writeList(const IndirectListBase<float, Addr>& field)
 {
-    for (const scalar val : field)
+    for (const float val : field)
+    {
+        if (std::isnan(val))
+        {
+            writeUndef();
+        }
+        else
+        {
+            write(val);
+        }
+        newline();
+    }
+}
+
+
+template<class Addr>
+void Foam::ensightFile::writeList(const IndirectListBase<double, Addr>& field)
+{
+    for (const double val : field)
     {
         if (std::isnan(val))
         {

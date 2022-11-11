@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021-2022 OpenCFD Ltd.
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,20 +23,18 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-InNamespace
+Namespace
     Foam::ensightOutput
 
 Description
-    A collection of functions for writing areaField content in ensight format.
+    A collection of functions for writing ensight file content.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Foam_ensightOutput_areaField_H
-#define Foam_ensightOutput_areaField_H
+#ifndef Foam_ensightOutputFwd_H
+#define Foam_ensightOutputFwd_H
 
-#include "ensightOutput.H"
-#include "ensightFaces.H"
-#include "areaFields.H"
+#include "DynamicList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,50 +42,28 @@ namespace Foam
 {
 
 // Forward Declarations
-class ensightFaMesh;
+class ensightFile;
+class ensightGeoFile;
+
+
+/*---------------------------------------------------------------------------*\
+                        Namespace ensightOutput
+\*---------------------------------------------------------------------------*/
 
 namespace ensightOutput
 {
 
-/*---------------------------------------------------------------------------*\
-                            Namespace ensightOutput
-\*---------------------------------------------------------------------------*/
+//- The list type used for component-wise buffering.
+//  Always has value_type = \c float (what ensight uses internally)
+typedef DynamicList<float> floatBufferType;
 
-//- Write finite-area field component-wise
-template<class Type>
-bool writeAreaField
-(
-    //! Component scratch buffer
-    ensightOutput::floatBufferType& scratch,
+//- Static debugging option
+extern int debug;
 
-    //! Output file (must be valid on master)
-    ensightFile& os,
-
-    //! The field content to be written
-    const GeometricField<Type, faPatchField, areaMesh>& fld,
-
-    //! The addressing into the field
-    const ensightFaMesh& ensMesh
-);
-
-
-//- Write finite-area field component-wise
-template<class Type>
-bool writeAreaField
-(
-    //! Output file (must be valid on master)
-    ensightFile& os,
-
-    //! The field content to be written
-    const GeometricField<Type, faPatchField, areaMesh>& fld,
-
-    //! The addressing into the field
-    const ensightFaMesh& ensMesh
-)
-{
-    ensightOutput::floatBufferType scratch;
-    return ensightOutput::writeAreaField(scratch, os, fld, ensMesh);
-}
+//- Upper limit on number of items for bundled off-processor field transfers.
+//- The component-wise transfer uses float (4 bytes).
+//  Eg, 5M for 50 ranks of 100k cells each
+extern int maxChunk_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -96,10 +72,6 @@ bool writeAreaField
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "ensightOutputAreaFieldTemplates.C"
-#endif
 
 #endif
 

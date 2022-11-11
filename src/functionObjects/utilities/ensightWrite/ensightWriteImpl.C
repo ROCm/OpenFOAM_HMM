@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,8 +30,9 @@ License
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-Foam::label Foam::functionObjects::ensightWrite::writeVolFields
+Foam::label Foam::functionObjects::ensightWrite::writeVolFieldsImpl
 (
+    ensightOutput::floatBufferType& scratch,
     const fvMeshSubset& proxy,
     const wordHashSet& acceptField
 )
@@ -58,6 +59,7 @@ Foam::label Foam::functionObjects::ensightWrite::writeVolFields
 
         ensightOutput::writeVolField<Type>
         (
+            scratch,
             os.ref(),
             field,
             ensMesh(),

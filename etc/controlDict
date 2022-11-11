@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2206                                 |
+|  \\    /   O peration     | Version:  v2212                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -118,7 +118,14 @@ OptimisationSwitches
     //  Default: 1e9
     maxMasterFileBufferSize 1e9;
 
-    commsType       nonBlocking; //scheduled; //blocking;
+    // Upper limit when bundling off-processor field transfers (ensight).
+    // for component-wise transfer (uses float: 4 bytes)
+    // Eg, 5M for 50 ranks of 100k cells
+    ensight.maxChunk 5000000;
+
+
+    // Default communication type (nonBlocking | scheduled | blocking);
+    commsType       nonBlocking;
     floatTransfer   0;
     nProcsSimpleSum 0;
 
@@ -135,6 +142,7 @@ OptimisationSwitches
     // This is not switched on by default since it requires an additional
     // global reduction, even if multi-pass is not needed)
     maxCommsSize    0;
+
 
     // Trap floating point exception.
     // Can override with FOAM_SIGFPE env variable (true|false)
@@ -539,6 +547,7 @@ DebugSwitches
     empty               0;
     engineMesh          0;
     enrichedPatch       0;
+    ensight             0;
     epsilonWallFunction 0;
     errorDrivenRefinement   0;
     evaporationModel    0;

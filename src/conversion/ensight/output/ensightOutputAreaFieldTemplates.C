@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,6 +34,7 @@ License
 template<class Type>
 bool Foam::ensightOutput::writeAreaField
 (
+    ensightOutput::floatBufferType& scratch,
     ensightFile& os,
     const GeometricField<Type, faPatchField, areaMesh>& fld,
     const ensightFaMesh& ensMesh
@@ -45,6 +46,7 @@ bool Foam::ensightOutput::writeAreaField
     {
         ensightOutput::Detail::writeFaceLocalField
         (
+            scratch,
             os,
             fld,
             ensMesh.areaPart(),

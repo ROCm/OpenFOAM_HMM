@@ -43,9 +43,23 @@ const char* const Foam::ensightFile::coordinates = "coordinates";
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-bool Foam::ensightFile::hasUndef(const UList<scalar>& field)
+bool Foam::ensightFile::hasUndef(const UList<float>& field)
 {
-    for (const scalar& val : field)
+    for (const float val : field)
+    {
+        if (std::isnan(val))
+        {
+            return true;
+        }
+    }
+
+    return true;
+}
+
+
+bool Foam::ensightFile::hasUndef(const UList<double>& field)
+{
+    for (const double val : field)
     {
         if (std::isnan(val))
         {
@@ -354,15 +368,32 @@ void Foam::ensightFile::writeList(const UList<label>& field)
 {
     for (const label val : field)
     {
-        write(scalar(val));
+        write(float(val));
         newline();
     }
 }
 
 
-void Foam::ensightFile::writeList(const UList<scalar>& field)
+void Foam::ensightFile::writeList(const UList<float>& field)
 {
-    for (const scalar val : field)
+    for (const float val : field)
+    {
+        if (std::isnan(val))
+        {
+            writeUndef();
+        }
+        else
+        {
+            write(val);
+        }
+        newline();
+    }
+}
+
+
+void Foam::ensightFile::writeList(const UList<double>& field)
+{
+    for (const double val : field)
     {
         if (std::isnan(val))
         {
