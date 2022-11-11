@@ -194,10 +194,15 @@ triSurface triangulate
 
     // CGAL : every processor has whole surface
 
-    globalIndex globalFaceIdx(surface.size(), globalIndex::gatherOnly());
-    globalIndex globalPointIdx
+    const globalIndex globalFaceIdx
     (
-        surface.points().size(), globalIndex::gatherOnly()
+        globalIndex::gatherOnly{},
+        surface.size()
+    );
+    const globalIndex globalPointIdx
+    (
+        globalIndex::gatherOnly{},
+        surface.points().size()
     );
 
     List<labelledTri> globalSurfaceTris(globalFaceIdx.gather(surface));

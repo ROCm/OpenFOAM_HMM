@@ -164,6 +164,16 @@ void reduce
 #undef  Pstream_CommonReductions
 #define Pstream_CommonReductions(Native)                                      \
                                                                               \
+/*! \brief Reduce (min) multiple Native values (same size all procs!) */      \
+void reduce                                                                   \
+(                                                                             \
+    Native values[],                                                          \
+    const int size,                                                           \
+    const minOp<Native>&,                                                     \
+    const int tag = UPstream::msgType(),  /*!< (ignored) */                   \
+    const label comm = UPstream::worldComm                                    \
+);                                                                            \
+                                                                              \
 /*! \brief Reduce (min) single Native value */                                \
 void reduce                                                                   \
 (                                                                             \
@@ -171,6 +181,29 @@ void reduce                                                                   \
     const minOp<Native>&,                                                     \
     const int tag = UPstream::msgType(),  /*!< (ignored) */                   \
     const label comm = UPstream::worldComm                                    \
+);                                                                            \
+                                                                              \
+/*! \brief Reduce (min) multiple Native values */                             \
+template<unsigned N>                                                          \
+inline void reduce                                                            \
+(                                                                             \
+    FixedList<Native, N>& values,                                             \
+    const minOp<Native>&,                                                     \
+    const int tag = UPstream::msgType(),  /*!< (ignored) */                   \
+    const label comm = UPstream::worldComm                                    \
+)                                                                             \
+{                                                                             \
+    reduce(values.data(), int(values.size()), minOp<Native>(), tag, comm);    \
+}                                                                             \
+                                                                              \
+/*! \brief Reduce (max) multiple Native values (same size all procs!) */      \
+void reduce                                                                   \
+(                                                                             \
+    Native values[],                                                          \
+    const int size,                                                           \
+    const maxOp<Native>&,                                                     \
+    const int tag,  /*!< (ignored) */                                         \
+    const label comm                                                          \
 );                                                                            \
                                                                               \
 /*! \brief Reduce (max) single Native value */                                \
@@ -182,14 +215,18 @@ void reduce                                                                   \
     const label comm = UPstream::worldComm                                    \
 );                                                                            \
                                                                               \
-/*! \brief Reduce (sum) single Native value */                                \
-void reduce                                                                   \
+/*! \brief Reduce (max) multiple Native values */                             \
+template<unsigned N>                                                          \
+inline void reduce                                                            \
 (                                                                             \
-    Native& value,                                                            \
-    const sumOp<Native>&,                                                     \
+    FixedList<Native, N>& values,                                             \
+    const maxOp<Native>&,                                                     \
     const int tag = UPstream::msgType(),  /*!< (ignored) */                   \
     const label comm = UPstream::worldComm                                    \
-);                                                                            \
+)                                                                             \
+{                                                                             \
+    reduce(values.data(), int(values.size()), maxOp<Native>(), tag, comm);    \
+}                                                                             \
                                                                               \
 /*! \brief Reduce (sum) multiple Native values (same size all procs!) */      \
 void reduce                                                                   \
@@ -199,6 +236,15 @@ void reduce                                                                   \
     const sumOp<Native>&,                                                     \
     const int tag,  /*!< (ignored) */                                         \
     const label comm                                                          \
+);                                                                            \
+                                                                              \
+/*! \brief Reduce (sum) single Native value */                                \
+void reduce                                                                   \
+(                                                                             \
+    Native& value,                                                            \
+    const sumOp<Native>&,                                                     \
+    const int tag = UPstream::msgType(),  /*!< (ignored) */                   \
+    const label comm = UPstream::worldComm                                    \
 );                                                                            \
                                                                               \
 /*! \brief Reduce (sum) multiple Native values */                             \
@@ -224,21 +270,21 @@ inline void reduce                                                            \
                                                                               \
 Pstream_CommonReductions(Native);                                             \
                                                                               \
-/*! \brief Non-blocking reduce (sum) single Native value. Sets request */     \
+/*! \brief Non-blocking reduce (sum) multiple Native values. Sets request */  \
 void reduce                                                                   \
 (                                                                             \
-    Native& value,                                                            \
+    Native values[],                                                          \
+    const int size,                                                           \
     const sumOp<Native>&,                                                     \
     const int tag,  /*!< (ignored) */                                         \
     const label comm,                                                         \
     label& requestID                                                          \
 );                                                                            \
                                                                               \
-/*! \brief Non-blocking reduce (sum) multiple Native values. Sets request */  \
+/*! \brief Non-blocking reduce (sum) single Native value. Sets request */     \
 void reduce                                                                   \
 (                                                                             \
-    Native values[],                                                          \
-    const int size,                                                           \
+    Native& value,                                                            \
     const sumOp<Native>&,                                                     \
     const int tag,  /*!< (ignored) */                                         \
     const label comm,                                                         \

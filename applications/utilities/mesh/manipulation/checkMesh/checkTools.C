@@ -428,7 +428,7 @@ void Foam::mergeAndWrite
         // Renumber local ids -> global ids
         globalIndex(mesh.nPoints()).inplaceToGlobal(mergedIDs);
 
-        globalIndex gatherer(mergedIDs.size(), globalIndex::gatherOnly{});
+        globalIndex gatherer(globalIndex::gatherOnly{}, mergedIDs.size());
         gatherer.gatherInplace(mergedIDs);
         gatherer.gatherInplace(mergedPts);
     }

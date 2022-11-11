@@ -55,13 +55,13 @@ void Foam::PatchTools::gatherAndMerge
     typedef typename PrimitivePatch<FaceList, PointField>::face_type FaceType;
 
     // Faces from all ranks
-    faceAddr = globalIndex(pp.size(), globalIndex::gatherOnly{});
+    faceAddr.reset(globalIndex::gatherOnly{}, pp.size());
 
     // Points from all ranks
-    pointAddr = globalIndex
+    pointAddr.reset
     (
-        (useLocal ? pp.localPoints().size() : pp.points().size()),
-        globalIndex::gatherOnly{}
+        globalIndex::gatherOnly{},
+        (useLocal ? pp.localPoints().size() : pp.points().size())
     );
 
     if (useLocal)
@@ -96,14 +96,14 @@ void Foam::PatchTools::gatherAndMerge
     {
         const globalIndex localPointAddr
         (
-            pp.localPoints().size(),
-            globalIndex::gatherOnly{}
+            globalIndex::gatherOnly{},
+            pp.localPoints().size()
         );
 
         const globalIndex bndPointAddr
         (
-            pp.boundaryPoints().size(),
-            globalIndex::gatherOnly{}
+            globalIndex::gatherOnly{},
+            pp.boundaryPoints().size()
         );
 
         bndPointAddr.gather(pp.boundaryPoints(), boundaryPoints);

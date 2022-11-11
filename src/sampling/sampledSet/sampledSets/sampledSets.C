@@ -164,7 +164,7 @@ void Foam::sampledSets::gatherAllSets()
     {
         const coordSet& coords = localSets[seti];
 
-        globalIndices_[seti].reset(coords.size(), globalIndex::gatherOnly{});
+        globalIndices_[seti].reset(globalIndex::gatherOnly{}, coords.size());
         gatheredSets_.set(seti, coords.gatherSort(gatheredSorting_[seti]));
     }
 }

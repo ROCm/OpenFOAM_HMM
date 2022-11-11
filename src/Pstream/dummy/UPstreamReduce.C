@@ -67,6 +67,36 @@ void Foam::reduce
                                                                               \
 void Foam::reduce                                                             \
 (                                                                             \
+    Native values[],                                                          \
+    const int size,                                                           \
+    const minOp<Native>&,                                                     \
+    const int tag,                                                            \
+    const label comm                                                          \
+)                                                                             \
+{}                                                                            \
+                                                                              \
+void Foam::reduce                                                             \
+(                                                                             \
+    Native values[],                                                          \
+    const int size,                                                           \
+    const maxOp<Native>&,                                                     \
+    const int tag,                                                            \
+    const label comm                                                          \
+)                                                                             \
+{}                                                                            \
+                                                                              \
+void Foam::reduce                                                             \
+(                                                                             \
+    Native values[],                                                          \
+    const int size,                                                           \
+    const sumOp<Native>&,                                                     \
+    const int tag,                                                            \
+    const label comm                                                          \
+)                                                                             \
+{}                                                                            \
+                                                                              \
+void Foam::reduce                                                             \
+(                                                                             \
     Native& value,                                                            \
     const minOp<Native>&,                                                     \
     const int tag,                                                            \
@@ -90,16 +120,6 @@ void Foam::reduce                                                             \
     const int tag,                                                            \
     const label comm                                                          \
 )                                                                             \
-{}                                                                            \
-                                                                              \
-void Foam::reduce                                                             \
-(                                                                             \
-    Native values[],                                                          \
-    const int size,                                                           \
-    const sumOp<Native>&,                                                     \
-    const int tag,                                                            \
-    const label comm                                                          \
-)                                                                             \
 {}
 
 
@@ -114,7 +134,8 @@ Pstream_CommonReductions(Native);                                             \
                                                                               \
 void Foam::reduce                                                             \
 (                                                                             \
-    Native& value,                                                            \
+    Native values[],                                                          \
+    const int size,                                                           \
     const sumOp<Native>&,                                                     \
     const int tag,                                                            \
     const label comm,                                                         \
@@ -124,8 +145,7 @@ void Foam::reduce                                                             \
                                                                               \
 void Foam::reduce                                                             \
 (                                                                             \
-    Native values[],                                                          \
-    const int size,                                                           \
+    Native& value,                                                            \
     const sumOp<Native>&,                                                     \
     const int tag,                                                            \
     const label comm,                                                         \

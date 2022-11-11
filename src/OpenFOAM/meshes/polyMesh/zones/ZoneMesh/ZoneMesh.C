@@ -767,12 +767,12 @@ bool Foam::ZoneMesh<ZoneType, MeshType>::checkParallelSync
     const wordList localTypes(this->types());
 
     // Check and report error(s) on master
+    // - don't need indexing on master itself
 
     const globalIndex procAddr
     (
-        // Don't need to collect master itself
-        (Pstream::master() ? 0 : localNames.size()),
-        globalIndex::gatherOnly{}
+        globalIndex::gatherNonLocal{},
+        localNames.size()
     );
 
     const wordList allNames(procAddr.gather(localNames));

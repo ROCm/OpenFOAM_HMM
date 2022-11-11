@@ -93,8 +93,8 @@ void Foam::ensightOutput::Detail::writeFieldContent
     const globalIndex procAddr
     (
         parallel
-      ? globalIndex(fld.size(), globalIndex::gatherOnly{})
-      : globalIndex(fld.size(), globalIndex::gatherNone{})
+      ? globalIndex(globalIndex::gatherOnly{}, fld.size())
+      : globalIndex(globalIndex::gatherNone{}, fld.size())
     );
 
 
