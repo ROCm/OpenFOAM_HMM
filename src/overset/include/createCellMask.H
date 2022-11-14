@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,6 +48,11 @@ volScalarField cellMask
     mesh,
     dimensionedScalar("one", dimless, 1.0),
     zeroGradientFvPatchScalarField::typeName
+);
+
+surfaceScalarField faceMask
+(
+    localMin<scalar>(mesh).interpolate(cellMask)
 );
 
 #include "setCellMask.H"

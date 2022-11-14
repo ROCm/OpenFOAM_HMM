@@ -5,6 +5,10 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 ./Allrun.pre
 
-runApplication overPimpleDyMFoam
+runApplication decomposePar -cellDist
+
+runParallel $(getApplication)
+
+runApplication reconstructPar
 
 #------------------------------------------------------------------------------

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,7 +43,6 @@ Description
 #include "dynamicFvMesh.H"
 #include "fluidThermo.H"
 #include "turbulentFluidThermoModel.H"
-#include "bound.H"
 #include "pimpleControl.H"
 #include "pressureControl.H"
 #include "CorrectPhi.H"
@@ -89,9 +88,7 @@ int main(int argc, char *argv[])
 
     while (runTime.run())
     {
-        #include "readControls.H"
         #include "readDyMControls.H"
-
 
         // Store divrhoU from the previous mesh so that it can be mapped
         // and used in correctPhi to ensure the corrected phi has the
@@ -128,7 +125,6 @@ int main(int argc, char *argv[])
         {
             if (pimple.firstIter() || moveMeshOuterCorrectors)
             {
-
                 // Do any mesh changes
                 mesh.update();
 
@@ -137,52 +133,22 @@ int main(int argc, char *argv[])
                     MRF.update();
 
                     #include "setCellMask.H"
-
-                    const surfaceScalarField faceMaskOld
-                    (
-                        localMin<scalar>(mesh).interpolate(cellMask.oldTime())
-                    );
-
-                    // Zero Uf on old faceMask (H-I)
-                    rhoUf() *= faceMaskOld;
-
-                    surfaceVectorField rhoUfint(fvc::interpolate(rho*U));
-
-                    // Update Uf and phi on new C-I faces
-                    rhoUf() += (1-faceMaskOld)*rhoUfint;
-
-                    // Update Uf boundary
-                    forAll(rhoUf().boundaryField(), patchI)
-                    {
-                        rhoUf().boundaryFieldRef()[patchI] =
-                            rhoUfint.boundaryField()[patchI];
-                    }
-
-                    // Calculate absolute flux from the mapped surface velocity
-                    phi = mesh.Sf() & rhoUf();
+                    #include "setInterpolatedCells.H"
+                    #include "correctRhoPhiFaceMask.H"
 
                     if (correctPhi)
                     {
+                        // Corrects flux on separated regions
                         #include "correctPhi.H"
                     }
-
-                    // Zero phi on current H-I
-                    const surfaceScalarField faceMask
-                    (
-                        localMin<scalar>(mesh).interpolate(cellMask)
-                    );
-
-                    phi *= faceMask;
-                    U   *= cellMask;
 
                      // Make the fluxes relative to the mesh-motion
                     fvc::makeRelative(phi, rho, U);
 
-                }
-
-                if (checkMeshCourantNo)
-                {
-                    #include "meshCourantNo.H"
+                    if (checkMeshCourantNo)
+                    {
+                        #include "meshCourantNo.H"
+                    }
                 }
             }
 

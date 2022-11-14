@@ -1,64 +1,31 @@
 {
     rAU = 1.0/UEqn.A();
-    //mesh.interpolate(rAU);
-
-    surfaceScalarField faceMask(localMin<scalar>(mesh).interpolate(cellMask));
 
     surfaceScalarField rAUf("rAUf", fvc::interpolate(rAU));
 
     volVectorField H("H", UEqn.H());
 
     volVectorField HbyA("HbyA", U);
-    //HbyA = rAU*UEqn.H();
-    HbyA = constrainHbyA(rAU*H, U, p_rgh);
 
-    if (massFluxInterpolation)
-    {
-        #include "interpolatedFaces.H"
-    }
+    HbyA = constrainHbyA(rAU*H, U, p_rgh);
 
     surfaceScalarField phiHbyA("phiHbyA", fvc::flux(HbyA));
 
-    if (ddtCorr)
-    {
-        surfaceScalarField faceMaskOld
-        (
-            localMin<scalar>(mesh).interpolate(cellMask.oldTime())
-        );
-        phiHbyA +=
-            fvc::interpolate(rho*rAU)*faceMaskOld*fvc::ddtCorr(U, Uf);
-    }
     MRF.makeRelative(phiHbyA);
-
-    if (p_rgh.needReference())
-    {
-        fvc::makeRelative(phiHbyA, U);
-        adjustPhi(phiHbyA, U, p_rgh);
-        fvc::makeAbsolute(phiHbyA, U);
-    }
-
-    if (adjustFringe)
-    {
-        fvc::makeRelative(phiHbyA, U);
-        oversetAdjustPhi(phiHbyA, U);
-        fvc::makeAbsolute(phiHbyA, U);
-    }
 
     surfaceScalarField phig
     (
         (
             mixture.surfaceTensionForce()
-          - ghf*fvc::snGrad(rho)
-        )*faceMask*rAUf*mesh.magSf()
+          - ghf*fvc::snGrad(cellMask*rho)
+        )*rAUf*faceMask*mesh.magSf()
     );
 
     phiHbyA += phig;
 
     if (adjustFringe)
     {
-        fvc::makeRelative(phiHbyA, U);
-        oversetAdjustPhi(phiHbyA, U);
-        fvc::makeAbsolute(phiHbyA, U);
+        oversetAdjustPhi(phiHbyA, U, zoneIdMass);
     }
 
     // Update the pressure BCs to ensure flux consistency
@@ -89,6 +56,10 @@
 
             U.correctBoundaryConditions();
             fvOptions.correct(U);
+        }
+        if (oversetPatchErrOutput)
+        {
+            oversetPatchPhiErr(p_rghEqn, phiHbyA);
         }
     }
 

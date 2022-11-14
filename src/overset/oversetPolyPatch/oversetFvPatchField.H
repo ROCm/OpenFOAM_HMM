@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,7 +42,8 @@ SourceFiles
 #define oversetFvPatchField_H
 
 #include "oversetFvPatch.H"
-#include "zeroGradientFvPatchField.H"
+#include "coupledFvPatchFields.H"
+#include "oversetLduInterfaceField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,17 +57,44 @@ namespace Foam
 template<class Type>
 class oversetFvPatchField
 :
-    public zeroGradientFvPatchField<Type>
+    public oversetLduInterfaceField,
+    public coupledFvPatchField<Type>
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Local reference cast into the overset patch
         const oversetFvPatch& oversetPatch_;
 
         //- Master patch ID
         mutable label masterPatchID_;
+
+        // Hole cell controls
+
+            //- Flag to set hole cell values
+            const bool setHoleCellValue_;
+
+            //- Flag to correct fluxes
+            const bool fluxCorrection_;
+
+            //- Flag to interpolate hole cell values (from nearby non-hole cell)
+            const bool interpolateHoleCellValue_;
+
+            //- Hole cell value
+            const Type holeCellValue_;
+
+            //- Fringe upper coefficients
+            mutable scalarField fringeUpperCoeffs_;
+
+            //- Fringe lower coefficients
+            mutable scalarField fringeLowerCoeffs_;
+
+            //- Fringe faces
+            mutable labelField fringeFaces_;
+
+            //- Zone to sum flux for mass conservation
+            label zoneId_;
 
 
 public:
@@ -133,12 +161,146 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
-        // Evaluation functions
+        // Coupled and adjust flux
+
+            //- Return neighbour field.  Dummy
+            virtual tmp<Field<Type> > patchNeighbourField() const;
+
+            //- Adjust psi for mass correction. Requires storeFringeCoefficients
+            //  to have been called before
+            void adjustPsi
+            (
+                solveScalarField& psi,
+                const lduAddressing& lduAddr,
+                solveScalarField& result
+            ) const;
+
+            //- Store fringe coefficients and faces
+            void storeFringeCoefficients(const fvMatrix<Type>& matrix);
+
+            //- Calculate patch flux (helper function). Requires
+            //  storeFringeCoefficients to have been called before
+            void fringeFlux
+            (
+                 const fvMatrix<Type>& m,
+                 const surfaceScalarField& phi
+            ) const;
+
+
+        // Evaluation
 
             //- Initialise the evaluation of the patch field
             virtual void initEvaluate(const Pstream::commsTypes commsType);
+
+            //- Return the matrix diagonal coefficients corresponding to the
+            //- evaluation of the value of this patchField with given weights
+            virtual tmp<Field<Type> > valueInternalCoeffs
+            (
+                const tmp<scalarField>&
+            ) const
+            {
+                return tmp<Field<Type>>
+                (
+                    new Field<Type>(this->size(), Zero)
+                );
+            }
+
+            //- Return the matrix source coefficients corresponding to the
+            //- evaluation of the value of this patchField with given weights
+            virtual tmp<Field<Type> > valueBoundaryCoeffs
+            (
+                const tmp<scalarField>&
+            ) const
+            {
+                return tmp<Field<Type>>
+                (
+                    new Field<Type>(this->size(), Zero)
+                );
+            }
+
+            //- Return the matrix diagonal coefficients corresponding to the
+            //- evaluation of the gradient of this patchField
+            tmp<Field<Type> > gradientInternalCoeffs() const
+            {
+                return tmp<Field<Type>>
+                (
+                    new Field<Type>(this->size(), Zero)
+                );
+            }
+
+            //- Return the matrix source coefficients corresponding to the
+            //- evaluation of the gradient of this patchField
+            tmp<Field<Type> > gradientBoundaryCoeffs() const
+            {
+                return tmp<Field<Type>>
+                (
+                    new Field<Type>(this->size(), Zero)
+                );
+            }
+
+            //- Manipulate matrix
+            virtual void manipulateMatrix(fvMatrix<Type>& matrix);
+
+
+        // Coupled interface functionality
+
+            //- Update result field based on interface functionality
+            virtual void updateInterfaceMatrix
+            (
+                solveScalarField& result,
+                const bool add,
+                const lduAddressing& lduAddr,
+                const label patchId,
+                const solveScalarField& psiInternal,
+                const scalarField& coeffs,
+                const direction,
+                const Pstream::commsTypes commsType
+            ) const;
+
+            //- Update result field based on interface functionality
+            virtual void updateInterfaceMatrix
+            (
+                Field<Type>&,
+                const bool add,
+                const lduAddressing& lduAddr,
+                const label patchId,
+                const Field<Type>&,
+                const scalarField&,
+                const Pstream::commsTypes commsType
+            ) const
+            {
+                NotImplemented;
+            }
+
+            //- Initialise neighbour matrix update
+            virtual void initInterfaceMatrixUpdate
+            (
+                Field<Type>&,
+                const bool add,
+                const lduAddressing&,
+                const label interfacei,
+                const Field<Type>&,
+                const scalarField&,
+                const Pstream::commsTypes commsType
+            ) const
+            {
+                NotImplemented;
+            }
+
+            virtual void initInterfaceMatrixUpdate
+            (
+                solveScalarField& result,
+                const bool add,
+                const lduAddressing&,
+                const label interfacei,
+                const solveScalarField& psiInternal,
+                const scalarField& coeffs,
+                const direction cmpt,
+                const Pstream::commsTypes commsType
+            ) const;
+
 
         // I-O
 

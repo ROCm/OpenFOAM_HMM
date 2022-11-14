@@ -30,6 +30,7 @@ License
 #include "cellSet.H"
 #include "cellBitSet.H"
 #include "volFields.H"
+#include "cellCellStencilObject.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -53,6 +54,7 @@ Foam::fv::cellSetOption::selectionModeTypeNames_
     { selectionModeType::smPoints, "points" },
     { selectionModeType::smCellSet, "cellSet" },
     { selectionModeType::smCellZone, "cellZone" },
+    { selectionModeType::smCellType, "cellType" }
 });
 
 
@@ -95,6 +97,10 @@ void Foam::fv::cellSetOption::setSelection(const dictionary& dict)
                 selectionNames_.resize(1);
                 dict.readEntry("cellZone", selectionNames_.first());
             }
+            break;
+        }
+        case smCellType:
+        {
             break;
         }
         default:
@@ -234,6 +240,21 @@ void Foam::fv::cellSetOption::setCellSelection()
             }
             break;
         }
+        case smCellType:
+        {
+            labelHashSet selectedCells;
+            const cellCellStencilObject& overlap = Stencil::New(mesh_);
+            const labelList& cellTypes = overlap.cellTypes();
+            forAll(cellTypes, celli)
+            {
+                if (cellTypes[celli] == cellCellStencil::POROUS)
+                {
+                    selectedCells.insert(celli);
+                }
+                cells_ = selectedCells.sortedToc();
+            }
+            break;
+        }
         default:
         {
             FatalErrorInFunction
@@ -300,6 +321,7 @@ bool Foam::fv::cellSetOption::isActive()
             (
                 selectionMode_ == smGeometric
              || selectionMode_ == smPoints
+             || selectionMode_ == smCellType
             )
             {
                 // Geometric selection mode(s)

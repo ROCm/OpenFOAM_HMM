@@ -10,19 +10,6 @@
         fvc::flux(HbyA)
     );
 
-    if (ddtCorr)
-    {
-        surfaceScalarField faceMaskOld
-        (
-            localMin<scalar>(mesh).interpolate(cellMask.oldTime())
-        );
-        phiHbyA +=
-            MRF.zeroFilter
-            (
-                fvc::interpolate(rho*rAU)*faceMaskOld*fvc::ddtCorr(U, Uf)
-            );
-    }
-
     MRF.makeRelative(phiHbyA);
 
     surfaceScalarField phig

@@ -1,17 +1,9 @@
 {
-    surfaceScalarField faceMask(localMin<scalar>(mesh).interpolate(cellMask));
-
     volScalarField rAU(1.0/UEqn.A());
     surfaceScalarField rAUf("rAUf", faceMask*fvc::interpolate(rAU));
 
     volVectorField HbyA("HbyA", U);
     HbyA = constrainHbyA(cellMask*rAU*UEqn.H(), U, p);
-
-    //mesh.interpolate(HbyA);
-    if (massFluxInterpolation)
-    {
-        #include "interpolatedFaces.H"
-    }
 
     tUEqn.clear();
 

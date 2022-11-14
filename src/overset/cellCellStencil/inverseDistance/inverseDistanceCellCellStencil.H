@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,12 +69,27 @@ class inverseDistance
 :
     public cellCellStencil
 {
+    // Private Member Functions
+
+        //- No copy construct
+        inverseDistance(const inverseDistance&) = delete;
+
+        //- No copy assignment
+        void operator=(const inverseDistance&) = delete;
+
+
 protected:
 
     // Protected data
 
         //- Dictionary of motion control parameters
         const dictionary dict_;
+
+        //- Allow holes as donors
+        const bool allowHoleDonors_;
+
+        //- Allow interpolared as donors
+        const bool allowInterpolatedDonors_;
 
         //- Small perturbation vector for geometric tests
         vector smallVec_;
@@ -96,6 +111,13 @@ protected:
 
         //- Amount of interpolation
         volScalarField cellInterpolationWeight_;
+
+        //- Data for a set of interpolated/donor set
+        struct interpolatedDonorSet
+        {
+            scalar averVolRatio;
+            labelList cellTypes;
+        };
 
 
    // Protected Member Functions
@@ -217,6 +239,7 @@ protected:
             const boolList& isBlockedFace,
             labelList& cellRegion
         ) const;
+
         autoPtr<globalIndex> compactedRegionSplit
         (
             const fvMesh& mesh,
@@ -244,28 +267,18 @@ protected:
             scalarField& fraction
         ) const;
 
-        //- Surround holes with layer(s) of interpolated cells
-        void walkFront
-        (
-            const scalar layerRelax,
-            const labelListList& allStencil,
-            labelList& allCellTypes,
-            scalarField& allWeight
-        ) const;
-
         //- Create stencil starting from the donor containing the acceptor
-        virtual void createStencil(const globalIndex&);
+        //- allowHoleDonors : allow donors of type HOLE (otherwise are filtered
+        //- out)
+        virtual void createStencil
+        (
+            const globalIndex&,
+            const bool allowHoleDonors
+        );
 
-
-private:
-
-    // Private Member Functions
-
-        //- No copy construct
-        inverseDistance(const inverseDistance&) = delete;
-
-        //- No copy assignment
-        void operator=(const inverseDistance&) = delete;
+        //- Make holes next to live ones type SPECIAL and include in
+        //- interpolation stencil
+        void holeExtrapolationStencil(const globalIndex& globalCells);
 
 
 public:

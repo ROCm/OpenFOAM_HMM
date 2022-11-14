@@ -37,6 +37,7 @@ License
 #include "treeBoundBoxList.H"
 #include "voxelMeshSearch.H"
 #include "dynamicOversetFvMesh.H"
+#include "waveMethod.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -337,17 +338,24 @@ void Foam::cellCellStencils::trackingInverseDistance::markDonors
 
     const fvMesh& srcMesh = meshParts_[srcI].subMesh();
     const labelList& srcCellMap = meshParts_[srcI].cellMap();
-    const voxelMeshSearch& meshSearch = meshSearches[srcI];
     const fvMesh& tgtMesh = meshParts_[tgtI].subMesh();
     const pointField& tgtCc = tgtMesh.cellCentres();
     const labelList& tgtCellMap = meshParts_[tgtI].cellMap();
 
     // 1. do processor-local src/tgt overlap
     {
+        labelList tgtToSrcAddr;
+        waveMethod::calculate(tgtMesh, srcMesh, tgtToSrcAddr);
+
         forAll(tgtCellMap, tgtCelli)
         {
-            label srcCelli = meshSearch.findCell(tgtCc[tgtCelli]);
-            if (srcCelli != -1 && allCellTypes[srcCellMap[srcCelli]] != HOLE)
+            const label srcCelli = tgtToSrcAddr[tgtCelli];
+
+            if
+            (
+                srcCelli != -1
+             && allCellTypes[tgtCellMap[tgtCelli]] != HOLE
+            )
             {
                 label celli = tgtCellMap[tgtCelli];
 
@@ -444,8 +452,9 @@ void Foam::cellCellStencils::trackingInverseDistance::markDonors
         labelList donors(samples.size(), -1);
         forAll(samples, sampleI)
         {
-            label srcCelli = meshSearch.findCell(samples[sampleI]);
-            if (srcCelli != -1 && allCellTypes[srcCellMap[srcCelli]] != HOLE)
+            const point& sample = samples[sampleI];
+            label srcCelli = srcMesh.findCell(sample, polyMesh::CELL_TETS);
+            if (srcCelli != -1)
             {
                 donors[sampleI] = globalCells_.toGlobal(srcCellMap[srcCelli]);
             }
@@ -736,7 +745,7 @@ bool Foam::cellCellStencils::trackingInverseDistance::update()
     }
 
 
-    if (debug)
+    if (debug & 2)
     {
         forAll(patchParts, zonei)
         {
@@ -832,13 +841,19 @@ bool Foam::cellCellStencils::trackingInverseDistance::update()
     DebugInfo<< FUNCTION_NAME << " : Determined holes and donor-acceptors"
         << endl;
 
-    if (debug)
+    if ((debug & 2) && (mesh_.time().outputTime()))
     {
         tmp<volScalarField> tfld
         (
             createField(mesh_, "allCellTypes", allCellTypes)
         );
         tfld().write();
+
+        tmp<volScalarField> tallDonorID
+        (
+            createField(mesh_, "allDonorID", allDonorID)
+        );
+        tallDonorID().write();
     }
 
 
@@ -867,15 +882,86 @@ bool Foam::cellCellStencils::trackingInverseDistance::update()
     }
     DebugInfo<< FUNCTION_NAME << " : Removed bad donors" << endl;
 
-    if (debug)
+    if ((debug & 2) && (mesh_.time().outputTime()))
     {
         tmp<volScalarField> tfld
         (
             createField(mesh_, "allCellTypes_patch", allCellTypes)
         );
         tfld().write();
+
+        tmp<volScalarField> tfldOld
+        (
+            createField(mesh_, "allCellTypes_old", cellTypes_)
+        );
+        tfldOld().write();
     }
 
+    // Mark unreachable bits
+    findHoles(globalCells_, mesh_, zoneID, allStencil, allCellTypes);
+    DebugInfo<< FUNCTION_NAME << " : Flood-filled holes" << endl;
+
+    if ((debug & 2) && (mesh_.time().outputTime()))
+    {
+        tmp<volScalarField> tfld
+        (
+            createField(mesh_, "allCellTypes_hole", allCellTypes)
+        );
+        tfld().write();
+
+        labelList stencilSize(mesh_.nCells());
+        forAll(allStencil, celli)
+        {
+            stencilSize[celli] = allStencil[celli].size();
+        }
+        tmp<volScalarField> tfldsten
+        (
+            createField(mesh_, "allStencil_hole", stencilSize)
+        );
+        tfldsten().write();
+    }
+
+    // Update allStencil with new fill HOLES
+    forAll(allCellTypes, celli)
+    {
+        if (allCellTypes[celli] == HOLE && allStencil[celli].size())
+        {
+            allStencil[celli].clear();
+        }
+    }
+
+    // Add buffer interpolation layer(s) around holes
+    scalarField allWeight(mesh_.nCells(), Zero);
+
+    labelListList compactStencil(allStencil);
+    List<Map<label>> compactStencilMap;
+    mapDistribute map(globalCells, compactStencil, compactStencilMap);
+
+    scalarList compactCellVol(mesh_.V());
+    map.distribute(compactCellVol);
+
+    walkFront
+    (
+        globalCells,
+        layerRelax,
+        allStencil,
+        allCellTypes,
+        allWeight,
+        compactCellVol,
+        compactStencil,
+        zoneID,
+        dict_.getOrDefault("holeLayers", 1),
+        dict_.getOrDefault("useLayer", -1)
+    );
+
+    if ((debug & 2) && (mesh_.time().outputTime()))
+    {
+        tmp<volScalarField> tfld
+        (
+            createField(mesh_, "allCellTypes_front", allCellTypes)
+        );
+        tfld().write();
+    }
 
     // Check previous iteration cellTypes_ for any hole->calculated changes
     // If so set the cell either to interpolated (if there are donors) or
@@ -911,48 +997,47 @@ bool Foam::cellCellStencils::trackingInverseDistance::update()
     }
 
 
-    // Mark unreachable bits
-    findHoles(globalCells_, mesh_, zoneID, allStencil, allCellTypes);
-    DebugInfo<< FUNCTION_NAME << " : Flood-filled holes" << endl;
-
-    if (debug)
-    {
-        tmp<volScalarField> tfld
-        (
-            createField(mesh_, "allCellTypes_hole", allCellTypes)
-        );
-        tfld().write();
-    }
-
-    // Add buffer interpolation layer(s) around holes
-    scalarField allWeight(mesh_.nCells(), Zero);
-    walkFront(layerRelax, allStencil, allCellTypes, allWeight);
-    DebugInfo<< FUNCTION_NAME << " : Implemented layer relaxation" << endl;
-
-    if (debug)
-    {
-        tmp<volScalarField> tfld
-        (
-            createField(mesh_, "allCellTypes_front", allCellTypes)
-        );
-        tfld().write();
-    }
-
-
     // Convert cell-cell addressing to stencil in compact notation
 
     cellTypes_.transfer(allCellTypes);
     cellStencil_.setSize(mesh_.nCells());
     cellInterpolationWeights_.setSize(mesh_.nCells());
     DynamicList<label> interpolationCells;
+
+    labelList compactCellTypes(cellTypes_);
+    map.distribute(compactCellTypes);
+
+    label nHoleDonors = 0;
     forAll(cellTypes_, celli)
     {
         if (cellTypes_[celli] == INTERPOLATED)
         {
-            cellStencil_[celli].transfer(allStencil[celli]);
-            cellInterpolationWeights_[celli].setSize(1);
-            cellInterpolationWeights_[celli][0] = 1.0;
-            interpolationCells.append(celli);
+            const labelList& slots = compactStencil[celli];
+            if (slots.size())
+            {
+                if
+                (
+                    compactCellTypes[slots[0]] == HOLE
+                 ||
+                    (
+                       !allowInterpolatedDonors_
+                     && compactCellTypes[slots[0]] == INTERPOLATED
+                    )
+                )
+                {
+                    cellTypes_[celli] = POROUS;
+                    cellStencil_[celli].clear();
+                    cellInterpolationWeights_[celli].clear();
+                    nHoleDonors++;
+                }
+                else
+                {
+                    cellStencil_[celli].transfer(allStencil[celli]);
+                    cellInterpolationWeights_[celli].setSize(1);
+                    cellInterpolationWeights_[celli][0] = 1.0;
+                    interpolationCells.append(celli);
+                }
+            }
         }
         else
         {
@@ -960,6 +1045,11 @@ bool Foam::cellCellStencils::trackingInverseDistance::update()
             cellInterpolationWeights_[celli].clear();
         }
     }
+
+    reduce(nHoleDonors, sumOp<label>());
+
+    DebugInfo<< FUNCTION_NAME << "nHole Donors : " << nHoleDonors << endl;
+
     interpolationCells_.transfer(interpolationCells);
 
     List<Map<label>> compactMap;
@@ -973,16 +1063,18 @@ bool Foam::cellCellStencils::trackingInverseDistance::update()
         )
     );
     cellInterpolationWeight_.transfer(allWeight);
-    //cellInterpolationWeight_.correctBoundaryConditions();
-    dynamicOversetFvMesh::correctBoundaryConditions
+    oversetFvMeshBase::correctBoundaryConditions
     <
         volScalarField,
         oversetFvPatchField<scalar>
     >(cellInterpolationWeight_.boundaryFieldRef(), false);
 
 
-    if (debug & 2)
+    if ((debug & 2) && (mesh_.time().outputTime()))
     {
+        // Dump mesh
+        mesh_.time().write();
+
         // Dump stencil
         mkDir(mesh_.time().timePath());
         OBJstream str(mesh_.time().timePath()/"injectionStencil.obj");
@@ -1010,44 +1102,22 @@ bool Foam::cellCellStencils::trackingInverseDistance::update()
 
 
     // Extend stencil to get inverse distance weighted neighbours
-    createStencil(globalCells);
+    createStencil(globalCells, allowHoleDonors_);
     DebugInfo<< FUNCTION_NAME << " : Extended stencil" << endl;
 
+    // Optional: convert hole cells next to non-hole cells into
+    // interpolate-from-neighbours (of cell type SPECIAL)
+    if (allowHoleDonors_)
+    {
+        holeExtrapolationStencil(globalCells_);
+    }
 
-    if (debug & 2)
+
+    if ((debug & 2) && (mesh_.time().outputTime()))
     {
         // Dump weight
         cellInterpolationWeight_.instance() = mesh_.time().timeName();
         cellInterpolationWeight_.write();
-
-        // Dump cell types
-        volScalarField volTypes
-        (
-            IOobject
-            (
-                "cellTypes",
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            mesh_,
-            dimensionedScalar(dimless, Zero),
-            zeroGradientFvPatchScalarField::typeName
-        );
-
-        forAll(volTypes.internalField(), celli)
-        {
-            volTypes[celli] = cellTypes_[celli];
-        }
-        //volTypes.correctBoundaryConditions();
-        dynamicOversetFvMesh::correctBoundaryConditions
-        <
-            volScalarField,
-            oversetFvPatchField<scalar>
-        >(volTypes.boundaryFieldRef(), false);
-        volTypes.write();
 
         // Dump stencil
         mkDir(mesh_.time().timePath());

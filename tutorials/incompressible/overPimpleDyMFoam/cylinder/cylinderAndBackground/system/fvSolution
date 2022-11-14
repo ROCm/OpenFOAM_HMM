@@ -73,13 +73,9 @@ solvers
 PIMPLE
 {
     momentumPredictor   false;
-    correctPhi          false;  //true;
-    oversetAdjustPhi    true;
     nOuterCorrectors    1;
     nCorrectors         2;
     nNonOrthogonalCorrectors 0;
-
-    ddtCorr             true;
 }
 
 relaxationFactors

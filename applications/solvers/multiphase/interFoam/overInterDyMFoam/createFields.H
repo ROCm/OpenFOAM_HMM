@@ -40,8 +40,12 @@ volVectorField U
     nonInt.insert("HbyA");
     nonInt.insert("grad(p_rgh)");
     nonInt.insert("nHat");
+    nonInt.insert("surfaceIntegrate(nHatf)");
+    nonInt.insert("surfaceIntegrate(phi+meshPhi)");
     nonInt.insert("surfaceIntegrate(phi)");
     nonInt.insert("surfaceIntegrate(phiHbyA)");
+    nonInt.insert("surfaceSum(((S|magSf)*S)");
+    nonInt.insert("surfaceIntegrate(((rAUf*magSf)*snGradCorr(p_rgh)))");
     nonInt.insert("cellMask");
     nonInt.insert("cellDisplacement");
     nonInt.insert("interpolatedCells");

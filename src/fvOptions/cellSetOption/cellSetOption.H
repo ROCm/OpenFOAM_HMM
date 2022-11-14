@@ -162,7 +162,8 @@ public:
             smCellSet,      //!< "cellSet"
             smCellZone,     //!< "cellZone"
             smPoints,       //!< "points"
-            smGeometric     //!< "geometric"
+            smGeometric,    //!< "geometric"
+            smCellType      //!< "overset type cells"
         };
 
         //- List of selection mode type names

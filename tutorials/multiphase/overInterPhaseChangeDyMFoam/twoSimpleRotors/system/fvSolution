@@ -63,8 +63,8 @@ solvers
     pcorr
     {
         $p;
-        solver          PCG;
-        preconditioner  DIC;
+        solver          PBiCGStab;
+        preconditioner  DILU;
     }
 
     pcorrFinal
@@ -93,15 +93,12 @@ solvers
 PIMPLE
 {
     momentumPredictor   no;
-    correctPhi          no;
     nOuterCorrectors    2;
     nCorrectors         3;
     nNonOrthogonalCorrectors 0;
 
-    ddtCorr             false;
-
     pRefPoint           (0.0002 0.0099 0.001);
-    pRefValue           1e5; //Not used
+    pRefValue           1e5;
 }
 
 relaxationFactors

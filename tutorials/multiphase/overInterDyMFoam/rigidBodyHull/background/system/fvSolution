@@ -117,9 +117,7 @@ PIMPLE
     nOuterCorrectors    2;
     nCorrectors         2;
     nNonOrthogonalCorrectors 0;
-    correctPhi          no;
     oversetAdjustPhi    no;
-    ddtCorr             false;
     momentumPredictor   false;
 }
 

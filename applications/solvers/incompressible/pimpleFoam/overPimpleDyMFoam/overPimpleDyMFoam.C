@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,12 +46,9 @@ Description
 #include "fvOptions.H"
 
 #include "cellCellStencilObject.H"
-#include "zeroGradientFvPatchFields.H"
 #include "localMin.H"
-#include "interpolationCellPoint.H"
-#include "transform.H"
-#include "fvMeshSubset.H"
 #include "oversetAdjustPhi.H"
+#include "oversetPatchPhiErr.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -68,9 +65,8 @@ int main(int argc, char *argv[])
     #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createDynamicFvMesh.H"
+    #include "createDyMControls.H"
     #include "initContinuityErrs.H"
-
-    pimpleControl pimple(mesh);
 
     #include "createFields.H"
     #include "createUf.H"
@@ -88,7 +84,9 @@ int main(int argc, char *argv[])
 
     while (runTime.run())
     {
-        #include "readControls.H"
+        #include "readDyMControls.H"
+        #include "readOversetDyMControls.H"
+
         #include "CourantNo.H"
 
         #include "setDeltaT.H"
@@ -97,45 +95,20 @@ int main(int argc, char *argv[])
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        bool changed = mesh.update();
+        mesh.update();
 
-        if (changed)
+        if (mesh.changing())
         {
             #include "setCellMask.H"
             #include "setInterpolatedCells.H"
+            #include "correctPhiFaceMask.H"
 
-            surfaceScalarField faceMaskOld
-            (
-                localMin<scalar>(mesh).interpolate(cellMask.oldTime())
-            );
+            fvc::makeRelative(phi, U);
 
-            // Zero Uf on old faceMask (H-I)
-            Uf *= faceMaskOld;
-            // Update Uf and phi on new C-I faces
-            Uf += (1-faceMaskOld)*fvc::interpolate(U);
-            phi = mesh.Sf() & Uf;
-
-            // Zero phi on current H-I
-            surfaceScalarField faceMask
-            (
-                localMin<scalar>(mesh).interpolate(cellMask)
-            );
-            phi *= faceMask;
-        }
-
-
-        if (mesh.changing() && correctPhi)
-        {
-            // Calculate absolute flux from the mapped surface velocity
-            #include "correctPhi.H"
-        }
-
-        // Make the flux relative to the mesh motion
-        fvc::makeRelative(phi, U);
-
-        if (mesh.changing() && checkMeshCourantNo)
-        {
-            #include "meshCourantNo.H"
+            if (checkMeshCourantNo)
+            {
+                #include "meshCourantNo.H"
+            }
         }
 
         // --- Pressure-velocity PIMPLE corrector loop
