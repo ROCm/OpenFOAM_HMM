@@ -403,12 +403,8 @@ void Foam::mappedPatchBase::findLocalSamples
 
                 indexedOctree<treeDataFace> boundaryTree
                 (
-                    treeDataFace    // all information needed to search faces
-                    (
-                        false,      // do not cache bb
-                        mesh,
-                        identity(pp.range())  // boundary faces only
-                    ),
+                    treeDataFace(mesh, pp.range()),  // Patch faces
+
                     patchBb,        // overall search domain
                     8,              // maxLevel
                     10,             // leafsize
@@ -479,11 +475,9 @@ void Foam::mappedPatchBase::findLocalSamples
 
                 indexedOctree<treeDataPoint> boundaryTree
                 (
-                    treeDataPoint   // all information needed to search faces
-                    (
-                        mesh.points(),
-                        pp.meshPoints() // selection of points to search on
-                    ),
+                    // Patch points
+                    treeDataPoint(mesh.points(), pp.meshPoints()),
+
                     patchBb,        // overall search domain
                     8,              // maxLevel
                     10,             // leafsize

@@ -167,7 +167,7 @@ Foam::boolList Foam::cellClassification::markFaces
 
     indexedOctree<treeDataFace> faceTree
     (
-        treeDataFace(false, mesh_, allFaces),
+        treeDataFace(mesh_, allFaces),
         allBb,      // overall search domain
         8,          // maxLevel
         10,         // leafsize

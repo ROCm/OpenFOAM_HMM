@@ -165,7 +165,6 @@ Foam::triSurfaceRegionSearch::treeByRegion() const
                 (
                     treeDataIndirectTriSurface
                     (
-                        false,              //true,
                         indirectRegionPatches_[regionI],
                         tolerance()
                     ),

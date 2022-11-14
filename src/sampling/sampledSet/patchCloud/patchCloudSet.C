@@ -94,12 +94,8 @@ void Foam::patchCloudSet::calcSamples
 
     indexedOctree<treeDataFace> patchTree
     (
-        treeDataFace    // all information needed to search faces
-        (
-            false,      // do not cache bb
-            mesh(),
-            patchFaces  // boundary faces only
-        ),
+        treeDataFace(mesh(), patchFaces),  // boundary faces only
+
         bb,             // overall search domain
         8,              // maxLevel
         10,             // leafsize

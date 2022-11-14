@@ -104,13 +104,8 @@ Foam::searchableExtrudedCircle::searchableExtrudedCircle
     (
         new indexedOctree<treeDataEdge>
         (
-            treeDataEdge
-            (
-                false,                  // do not cache bb
-                edges,
-                points,
-                identity(edges.size())
-            ),
+            treeDataEdge(edges, points),   // All edges
+
             bb,     // overall search domain
             8,      // maxLevel
             10,     // leafsize

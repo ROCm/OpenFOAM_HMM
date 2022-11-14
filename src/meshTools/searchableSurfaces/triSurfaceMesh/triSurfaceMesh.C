@@ -768,10 +768,7 @@ Foam::triSurfaceMesh::edgeTree() const
         }
 
         // Boundary edges
-        labelList bEdges
-        (
-            identity(nEdges() - nInternalEdges(), nInternalEdges())
-        );
+        const labelRange bEdges(nInternalEdges(), nBoundaryEdges());
 
         treeBoundBox bb(point::zero);
 
@@ -808,13 +805,9 @@ Foam::triSurfaceMesh::edgeTree() const
         (
             new indexedOctree<treeDataEdge>
             (
-                treeDataEdge
-                (
-                    false,          // cachebb
-                    edges(),        // edges
-                    localPoints(),  // points
-                    bEdges          // selected edges
-                ),
+                // Boundary edges
+                treeDataEdge(edges(), localPoints(), bEdges),
+
                 bb,                 // bb
                 maxTreeDepth(),     // maxLevel
                 10,                 // leafsize

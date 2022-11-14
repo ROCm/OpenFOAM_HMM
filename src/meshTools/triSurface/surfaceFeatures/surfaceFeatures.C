@@ -1243,13 +1243,13 @@ Foam::Map<Foam::label> Foam::surfaceFeatures::nearestSamples
 {
     // Build tree out of all samples.
 
-    // Note: cannot be done one the fly - gcc4.4 compiler bug.
-    treeBoundBox bb(samples);
+    // Define bound box here (gcc-4.8.5)
+    const treeBoundBox overallBb(samples);
 
     indexedOctree<treeDataPoint> ppTree
     (
-        treeDataPoint(samples),   // all information needed to do checks
-        bb,                       // overall search domain
+        treeDataPoint(samples),
+        overallBb,
         8,      // maxLevel
         10,     // leafsize
         3.0     // duplicity
@@ -1330,13 +1330,13 @@ Foam::Map<Foam::label> Foam::surfaceFeatures::nearestSamples
 
     scalar maxSearchSqr = max(maxDistSqr);
 
-    //Note: cannot be done one the fly - gcc4.4 compiler bug.
-    treeBoundBox bb(samples);
+    // Define bound box here (gcc-4.8.5)
+    const treeBoundBox overallBb(samples);
 
     indexedOctree<treeDataPoint> ppTree
     (
-        treeDataPoint(samples),   // all information needed to do checks
-        bb,                         // overall search domain
+        treeDataPoint(samples),
+        overallBb,
         8,      // maxLevel
         10,     // leafsize
         3.0     // duplicity
@@ -1468,11 +1468,10 @@ Foam::Map<Foam::pointIndexHit> Foam::surfaceFeatures::nearestEdges
     (
         treeDataEdge
         (
-            false,
             sampleEdges,
             samplePoints,
             selectedSampleEdges
-        ),                          // geometric info container for edges
+        ),
         treeBoundBox(samplePoints), // overall search domain
         8,      // maxLevel
         10,     // leafsize
@@ -1626,11 +1625,10 @@ void Foam::surfaceFeatures::nearestSurfEdge
     (
         treeDataEdge
         (
-            false,
             surf_.edges(),
             localPoints,
             selectedEdges
-        ),          // all information needed to do geometric checks
+        ),
         searchDomain,  // overall search domain
         8,      // maxLevel
         10,     // leafsize
@@ -1694,11 +1692,10 @@ void Foam::surfaceFeatures::nearestSurfEdge
     (
         treeDataEdge
         (
-            false,
             surf_.edges(),
             surf_.localPoints(),
             selectedEdges
-        ),              // all information needed to do geometric checks
+        ),
         searchDomain,   // overall search domain
         8,              // maxLevel
         10,             // leafsize
@@ -1751,13 +1748,8 @@ void Foam::surfaceFeatures::nearestFeatEdge
 
     indexedOctree<treeDataEdge> ppTree
     (
-        treeDataEdge
-        (
-            false,
-            edges,
-            points,
-            identity(edges.size())
-        ),          // all information needed to do geometric checks
+        treeDataEdge(edges, points),  // All edges
+
         searchDomain,  // overall search domain
         8,      // maxLevel
         10,     // leafsize

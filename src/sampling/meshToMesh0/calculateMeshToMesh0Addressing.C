@@ -90,7 +90,7 @@ void Foam::meshToMesh0::calcAddressing()
 
     indexedOctree<treeDataCell> cellTree
     (
-        treeDataCell(false, fromMesh_, polyMesh::CELL_TETS),
+        treeDataCell(fromMesh_, polyMesh::CELL_TETS),
         shiftedBb,      // overall bounding box
         8,              // maxLevel
         10,             // leafsize
@@ -162,7 +162,7 @@ void Foam::meshToMesh0::calcAddressing()
                 // is not as big as all boundary faces
                 indexedOctree<treeDataFace> faceTree
                 (
-                    treeDataFace(false, fromPatch),
+                    treeDataFace(fromPatch),
                     shiftedBb,  // overall search domain
                     12,         // maxLevel
                     10,         // leafsize

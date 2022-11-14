@@ -989,23 +989,20 @@ void Foam::faceCoupleInfo::findSlavesCoveringMaster
 )
 {
     // Construct octree from all mesh0 boundary faces
-    labelList bndFaces
-    (
-        identity(mesh0.nBoundaryFaces(), mesh0.nInternalFaces())
-    );
-
-    treeBoundBox overallBb(mesh0.points());
 
     Random rndGen(123456);
 
+    treeBoundBox overallBb(mesh0.points());
+
     indexedOctree<treeDataFace> tree
     (
-        treeDataFace    // all information needed to search faces
+        treeDataFace
         (
-            false,                      // do not cache bb
             mesh0,
-            bndFaces                    // boundary faces only
+            // boundary faces only
+            identity(mesh0.nBoundaryFaces(), mesh0.nInternalFaces())
         ),
+
         overallBb.extend(rndGen, 1e-4), // overall search domain
         8,                              // maxLevel
         10,                             // leafsize

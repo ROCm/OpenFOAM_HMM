@@ -304,13 +304,8 @@ void Foam::refinementFeatures::buildTrees(const label featI)
         featI,
         new indexedOctree<treeDataEdge>
         (
-            treeDataEdge
-            (
-                false,                  // do not cache bb
-                edges,
-                points,
-                identity(edges.size())
-            ),
+            treeDataEdge(edges, points),  // All edges
+
             bb,     // overall search domain
             8,      // maxLevel
             10,     // leafsize
@@ -327,6 +322,7 @@ void Foam::refinementFeatures::buildTrees(const label featI)
         new indexedOctree<treeDataPoint>
         (
             treeDataPoint(points, featurePoints),
+
             bb,     // overall search domain
             8,      // maxLevel
             10,     // leafsize
@@ -443,13 +439,8 @@ Foam::refinementFeatures::regionEdgeTrees() const
                 featI,
                 new indexedOctree<treeDataEdge>
                 (
-                    treeDataEdge
-                    (
-                        false,                  // do not cache bb
-                        edges,
-                        points,
-                        eMesh.regionEdges()
-                    ),
+                    treeDataEdge(edges, points, eMesh.regionEdges()),
+
                     bb,     // overall search domain
                     8,      // maxLevel
                     10,     // leafsize

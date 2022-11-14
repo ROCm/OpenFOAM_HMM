@@ -815,11 +815,8 @@ Foam::extendedEdgeMesh::pointTree() const
         (
             new indexedOctree<treeDataPoint>
             (
-                treeDataPoint
-                (
-                    points(),
-                    featurePointLabels
-                ),
+                treeDataPoint(points(), featurePointLabels),
+
                 bb,     // bb
                 8,      // maxLevel
                 10,     // leafsize
@@ -846,19 +843,12 @@ Foam::extendedEdgeMesh::edgeTree() const
             treeBoundBox(points()).extend(rndGen, 1e-4, ROOTVSMALL)
         );
 
-        labelList allEdges(identity(edges().size()));
-
         edgeTree_.reset
         (
             new indexedOctree<treeDataEdge>
             (
-                treeDataEdge
-                (
-                    false,          // cachebb
-                    edges(),        // edges
-                    points(),       // points
-                    allEdges        // selected edges
-                ),
+                treeDataEdge(edges(), points()),  // All edges
+
                 bb,     // bb
                 8,      // maxLevel
                 10,     // leafsize
@@ -885,24 +875,22 @@ Foam::extendedEdgeMesh::edgeTreesByType() const
             treeBoundBox(points()).extend(rndGen, 1e-4, ROOTVSMALL)
         );
 
-        labelListList sliceEdges(nEdgeTypes);
+        List<labelRange> sliceEdges(nEdgeTypes);
 
         // External edges
-        sliceEdges[0] =
-            identity((internalStart_ - externalStart_), externalStart_);
+        sliceEdges[0].reset(externalStart_, (internalStart_ - externalStart_));
 
         // Internal edges
-        sliceEdges[1] = identity((flatStart_ - internalStart_), internalStart_);
+        sliceEdges[1].reset(internalStart_, (flatStart_ - internalStart_));
 
         // Flat edges
-        sliceEdges[2] = identity((openStart_ - flatStart_), flatStart_);
+        sliceEdges[2].reset(flatStart_, (openStart_ - flatStart_));
 
         // Open edges
-        sliceEdges[3] = identity((multipleStart_ - openStart_), openStart_);
+        sliceEdges[3].reset(openStart_, (multipleStart_ - openStart_));
 
         // Multiple edges
-        sliceEdges[4] =
-            identity((edges().size() - multipleStart_), multipleStart_);
+        sliceEdges[4].reset(multipleStart_, (edges().size() - multipleStart_));
 
 
         edgeTreesByType_.resize(nEdgeTypes);
@@ -914,13 +902,9 @@ Foam::extendedEdgeMesh::edgeTreesByType() const
                 i,
                 new indexedOctree<treeDataEdge>
                 (
-                    treeDataEdge
-                    (
-                        false,          // cachebb
-                        edges(),        // edges
-                        points(),       // points
-                        sliceEdges[i]   // selected edges
-                    ),
+                    // Selected edges
+                    treeDataEdge(edges(), points(), sliceEdges[i]),
+
                     bb,     // bb
                     8,      // maxLevel
                     10,     // leafsize

@@ -93,12 +93,8 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
 
         const indexedOctree<treeDataFace> boundaryTree
         (
-            treeDataFace    // all information needed to search faces
-            (
-                false,      // do not cache bb
-                mesh,
-                bndFaces    // patch faces only
-            ),
+            treeDataFace(mesh, bndFaces),  // patch faces only
+
             overallBb,      // overall search domain
             8,              // maxLevel
             10,             // leafsize

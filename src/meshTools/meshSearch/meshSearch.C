@@ -628,12 +628,8 @@ Foam::meshSearch::boundaryTree() const
         (
             new indexedOctree<treeDataFace>
             (
-                treeDataFace    // all information needed to search faces
-                (
-                    false,                      // do not cache bb
-                    mesh_,
-                    bndFaces                    // boundary faces only
-                ),
+                treeDataFace(mesh_, bndFaces),  // Boundary faces
+
                 dataBoundBox(),                 // overall search domain
                 8,                              // maxLevel
                 10,                             // leafsize
@@ -668,18 +664,14 @@ Foam::meshSearch::nonCoupledBoundaryTree() const
                 }
             }
         }
-        bndFaces.setSize(bndi);
+        bndFaces.resize(bndi);
 
         nonCoupledBoundaryTreePtr_.reset
         (
             new indexedOctree<treeDataFace>
             (
-                treeDataFace    // all information needed to search faces
-                (
-                    false,                      // do not cache bb
-                    mesh_,
-                    bndFaces                    // boundary faces only
-                ),
+                treeDataFace(mesh_, bndFaces),  // Boundary faces
+
                 dataBoundBox(),                 // overall search domain
                 8,                              // maxLevel
                 10,                             // leafsize

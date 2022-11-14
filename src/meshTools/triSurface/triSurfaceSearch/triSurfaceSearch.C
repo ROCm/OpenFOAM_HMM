@@ -240,7 +240,7 @@ Foam::triSurfaceSearch::tree() const
         (
             new indexedOctree<treeDataTriSurface>
             (
-                treeDataTriSurface(false, surface_, tolerance_),
+                treeDataTriSurface(surface_, tolerance_),
                 bb,
                 maxTreeDepth_,  // maxLevel
                 10,             // leafsize
