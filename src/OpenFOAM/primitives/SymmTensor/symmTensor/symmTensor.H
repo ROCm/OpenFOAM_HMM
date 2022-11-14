@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2012 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -105,6 +105,14 @@ tensor eigenVectors
 //
 //  \return tensor real eigenvectors, each row is an eigenvector
 tensor eigenVectors(const symmTensor& T);
+
+
+//- Return inverse of a given symmTensor, and fall back
+//- to pseudo-inverse if the symmTensor is singular
+//  \param st symmTensor
+//
+//  \return symmTensor inverse of symmTensor
+symmTensor inv(const symmTensor& st);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

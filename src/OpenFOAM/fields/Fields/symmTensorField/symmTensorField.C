@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,79 +50,7 @@ UNARY_FUNCTION(symmTensor, symmTensor, dev)
 UNARY_FUNCTION(symmTensor, symmTensor, dev2)
 UNARY_FUNCTION(scalar, symmTensor, det)
 UNARY_FUNCTION(symmTensor, symmTensor, cof)
-
-void inv(Field<symmTensor>& tf, const UList<symmTensor>& tf1)
-{
-    if (tf.empty())
-    {
-        return;
-    }
-
-    scalar scale = magSqr(tf1[0]);
-    Vector<bool> removeCmpts
-    (
-        magSqr(tf1[0].xx())/scale < SMALL,
-        magSqr(tf1[0].yy())/scale < SMALL,
-        magSqr(tf1[0].zz())/scale < SMALL
-    );
-
-    if (removeCmpts.x() || removeCmpts.y() || removeCmpts.z())
-    {
-        symmTensorField tf1Plus(tf1);
-
-        if (removeCmpts.x())
-        {
-            tf1Plus += symmTensor(1,0,0,0,0,0);
-        }
-
-        if (removeCmpts.y())
-        {
-            tf1Plus += symmTensor(0,0,0,1,0,0);
-        }
-
-        if (removeCmpts.z())
-        {
-            tf1Plus += symmTensor(0,0,0,0,0,1);
-        }
-
-        TFOR_ALL_F_OP_FUNC_F(symmTensor, tf, =, inv, symmTensor, tf1Plus)
-
-        if (removeCmpts.x())
-        {
-            tf -= symmTensor(1,0,0,0,0,0);
-        }
-
-        if (removeCmpts.y())
-        {
-            tf -= symmTensor(0,0,0,1,0,0);
-        }
-
-        if (removeCmpts.z())
-        {
-            tf -= symmTensor(0,0,0,0,0,1);
-        }
-    }
-    else
-    {
-        TFOR_ALL_F_OP_FUNC_F(symmTensor, tf, =, inv, symmTensor, tf1)
-    }
-}
-
-tmp<symmTensorField> inv(const UList<symmTensor>& tf)
-{
-    auto tresult = tmp<symmTensorField>::New(tf.size());
-    inv(tresult.ref(), tf);
-    return tresult;
-}
-
-tmp<symmTensorField> inv(const tmp<symmTensorField>& tf)
-{
-    tmp<symmTensorField> tresult = New(tf);
-    inv(tresult.ref(), tf());
-    tf.clear();
-    return tresult;
-}
-
+UNARY_FUNCTION(symmTensor, symmTensor, inv)
 
 template<>
 tmp<Field<symmTensor>> transformFieldMask<symmTensor>
