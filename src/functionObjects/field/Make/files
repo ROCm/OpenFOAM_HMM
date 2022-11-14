@@ -66,6 +66,10 @@ surfaceInterpolate/surfaceInterpolate.C
 
 regionSizeDistribution/regionSizeDistribution.C
 histogram/histogram.C
+histogram/histogramModels/histogramModel/histogramModel.C
+histogram/histogramModels/histogramModel/histogramModelNew.C
+histogram/histogramModels/equalBinWidth/equalBinWidth.C
+histogram/histogramModels/unequalBinWidth/unequalBinWidth.C
 
 fieldExpression/fieldExpression.C
 components/components.C
