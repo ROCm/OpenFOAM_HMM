@@ -67,14 +67,22 @@ static void writeTrackField
 
     forAll(fieldPtrs, tracki)
     {
-        // Write as point data
+        const Field<Type>& fld = fieldPtrs[tracki];
 
         os.beginPart(tracki);  // Part index (0-based)
+
+        // Skip if empty. This check is probably redundant
+        if (fld.empty())
+        {
+            continue;
+        }
+
+        // Write as coordinates data
         ensightOutput::Detail::writeFieldComponents
         (
             os,
             ensightFile::coordinates,
-            fieldPtrs[tracki],
+            fld,
             false  /* serial only! */
         );
     }

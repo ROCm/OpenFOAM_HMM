@@ -1011,13 +1011,9 @@ bool Foam::polyBoundaryMesh::checkParallelSync(const bool report) const
     localTypes.resize(nonProci);
 
     // Check and report error(s) on master
+    // - don't need indexing on master itself
 
-    const globalIndex procAddr
-    (
-        // Don't need to collect master itself
-        (Pstream::master() ? 0 : nonProci),
-        globalIndex::gatherOnly{}
-    );
+    const globalIndex procAddr(globalIndex::gatherNonLocal{}, nonProci);
 
     const wordList allNames(procAddr.gather(localNames));
     const wordList allTypes(procAddr.gather(localTypes));

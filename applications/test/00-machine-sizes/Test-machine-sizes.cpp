@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,7 +59,8 @@ void print(const char* name, bool showLimits = true)
 
 int main(int argc, char *argv[])
 {
-    std::cout<<"machine sizes\n---\n\n";
+    std::cout<< "c++ = " << __cplusplus << '\n';
+    std::cout<< "machine sizes\n---\n\n";
 
     print<short>("short");
     print<int>("int");

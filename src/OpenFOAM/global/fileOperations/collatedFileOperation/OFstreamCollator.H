@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,8 +48,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef OFstreamCollator_H
-#define OFstreamCollator_H
+#ifndef Foam_OFstreamCollator_H
+#define Foam_OFstreamCollator_H
 
 #include <thread>
 #include <mutex>
@@ -81,7 +81,7 @@ class OFstreamCollator
             const labelList sizes_;
             PtrList<List<char>> slaveData_;
             const IOstreamOption streamOpt_;
-            const bool append_;
+            IOstreamOption::appendType append_;
             const dictionary headerEntries_;
 
             writeData
@@ -92,7 +92,7 @@ class OFstreamCollator
                 const string& data,
                 const labelList& sizes,
                 IOstreamOption streamOpt,
-                const bool append,
+                IOstreamOption::appendType append,
                 const dictionary& headerEntries
             )
             :
@@ -157,7 +157,7 @@ class OFstreamCollator
             const labelUList& recvSizes,
             const PtrList<SubList<char>>& slaveData,
             IOstreamOption streamOpt,
-            const bool append,
+            IOstreamOption::appendType append,
             const dictionary& headerEntries
         );
 
@@ -200,7 +200,7 @@ public:
             const fileName&,
             const string& data,
             IOstreamOption streamOpt,
-            const bool append,
+            IOstreamOption::appendType append,
             const bool useThread = true,
             const dictionary& headerEntries = dictionary::null
         );

@@ -194,18 +194,6 @@ Foam::globalIndex::bin
 void Foam::globalIndex::reset
 (
     const label localSize,
-    const globalIndex::gatherOnly,
-    const label comm
-)
-{
-    // Gather sizes (one-sided)
-    reset(UPstream::listGatherValues(localSize, comm));
-}
-
-
-void Foam::globalIndex::reset
-(
-    const label localSize,
     const label comm,
     const bool parallel
 )

@@ -130,7 +130,7 @@ void Foam::vtk::writeListParallel
 )
 {
     // Gather sizes (offsets irrelevant)
-    const globalIndex procAddr(values.size(), globalIndex::gatherOnly{});
+    const globalIndex procAddr(globalIndex::gatherOnly{}, values.size());
 
     if (Pstream::master())
     {
@@ -146,33 +146,40 @@ void Foam::vtk::writeListParallel
 
         for (const label proci : procAddr.subProcs())
         {
-            recvData.resize_nocopy(procAddr.localSize(proci));
-            UIPstream::read
-            (
-                UPstream::commsTypes::scheduled,
-                proci,
-                recvData.data_bytes(),
-                recvData.size_bytes()
-            );
+            const label procSize = procAddr.localSize(proci);
 
-            // With value offset
-            const label offsetId = procOffset.localStart(proci);
-            for (const label val : recvData)
+            if (procSize)
             {
-                vtk::write(fmt, val + offsetId);
+                recvData.resize_nocopy(procSize);
+                UIPstream::read
+                (
+                    UPstream::commsTypes::scheduled,
+                    proci,
+                    recvData.data_bytes(),
+                    recvData.size_bytes()
+                );
+
+                // With value offset
+                const label offsetId = procOffset.localStart(proci);
+                for (const label val : recvData)
+                {
+                    vtk::write(fmt, val + offsetId);
+                }
             }
         }
     }
     else
     {
-        // Send
-        UOPstream::write
-        (
-            UPstream::commsTypes::scheduled,
-            UPstream::masterNo(),
-            values.cdata_bytes(),
-            values.size_bytes()
-        );
+        if (values.size())
+        {
+            UOPstream::write
+            (
+                UPstream::commsTypes::scheduled,
+                UPstream::masterNo(),
+                values.cdata_bytes(),
+                values.size_bytes()
+            );
+        }
     }
 }
 

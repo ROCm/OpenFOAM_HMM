@@ -6,7 +6,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2017-2021 OpenCFD Ltd.
+#     Copyright (C) 2017-2022 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -363,7 +363,6 @@ HPMPI)
     case "$(uname -m)" in
     x86_64) _foamFoundDir=lib/linux_amd64 ;;
     i686)   _foamFoundDir=lib/linux_ia32 ;;
-    ia64)   _foamFoundDir=lib/linux_ia64 ;;
     *)      unset _foamFoundDir ;;
     esac
 

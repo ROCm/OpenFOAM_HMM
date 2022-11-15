@@ -11,7 +11,7 @@ WMKDEP  := $(WMAKE_BIN)/wmkdepend
 
 WMKDEP_FLAGS := -eWM_PROJECT_DIR -eWM_THIRD_PARTY_DIR
 
-ifneq ("","$(WM_QUIET)")
+ifneq (,$(strip $(WM_QUIET)))
     E=@
     define QUIET_MESSAGE
         @echo "    $1: $2";
@@ -38,7 +38,7 @@ $(foreach s,$(SUFFIXES),$(eval $(call DEFINE_TRANSFORM,$(s))))
 
 $(OBJECTS_DIR)/%.dep : %
 	$(call QUIET_MESSAGE,dep,$(<F))
-	$(call VERBOSE_MESSAGE,Making dependency list for source file,$(<F))
+	$(call VERBOSE_MESSAGE,Making dependencies:,$(<F))
 	@$(WM_SCRIPTS)/makeTargetDir $@
 	@$(WMKDEP) $(WMKDEP_FLAGS) -o$@ -I$(*D) $(LIB_HEADER_DIRS) $<
 

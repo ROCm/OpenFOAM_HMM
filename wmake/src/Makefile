@@ -40,8 +40,11 @@ SHELL   = /bin/sh
 # Set compilation and dependency building rules
 #------------------------------------------------------------------------------
 
-# Locally set optimized compilation
+# Locally defined: optimized compilation
 WM_COMPILE_OPTION = Opt
+
+# Never want openmp for tools!
+WM_COMPILE_CONTROL += ~openmp
 
 GENERAL_RULES   = $(WM_DIR)/rules/General
 include $(GENERAL_RULES)/general
@@ -62,7 +65,7 @@ all: $(WMAKE_BIN)/lemon$(EXT_EXE) $(WMAKE_BIN)/wmkdepend$(EXT_EXE) message
 old: $(WMAKE_BIN)/wmkdep$(EXT_EXE)
 
 message:
-ifneq ($(archBuild),$(archTarget))
+ifneq ("$(archBuild)","$(archTarget)")
 	@echo "built wmake-bin ($(archTarget)) with $(archBuild)"
 else
 	@echo "built wmake-bin ($(archTarget))"

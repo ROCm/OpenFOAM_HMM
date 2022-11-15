@@ -6,7 +6,7 @@ include $(GENERAL_RULES)/Clang/c
 cc         := fcc$(COMPILER_VERSION)
 cARCH      :=
 
-ifneq (,$(WM_COMPILE_OPTION))
+ifneq (,$(strip $(WM_COMPILE_OPTION)))
     sinclude $(DEFAULT_RULES)/c$(WM_COMPILE_OPTION)
 endif
 

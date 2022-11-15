@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,7 +46,7 @@ Foam::ensightFaces::add(const elemType etype, label id, bool flip)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline const char* Foam::ensightFaces::key(const elemType etype)
+inline const char* Foam::ensightFaces::key(const elemType etype) noexcept
 {
     return elemNames[etype];
 }

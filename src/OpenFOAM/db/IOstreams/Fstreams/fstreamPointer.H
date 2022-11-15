@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -77,12 +77,14 @@ class ifstreamPointer
         //- The stream pointer (ifstream or igzstream)
         std::unique_ptr<std::istream> ptr_;
 
+
 protected:
 
     // Protected Member Functions
 
         //- Special 'rewind' method for compressed stream
-        void reopen_gz(const std::string& pathname_gz);
+        void reopen_gz(const std::string& pathname);
+
 
 public:
 
@@ -109,7 +111,9 @@ public:
 
     // Constructors
 
-        //- Construct from pathname
+        //- Construct from pathname.
+        //  Attempts to read the specified file.
+        //  If that fails, try as a compressed file (.gz ending).
         explicit ifstreamPointer(const fileName& pathname);
 
 
@@ -167,22 +171,24 @@ class ofstreamPointer
         //- The stream pointer (ofstream | ogzstream | ocountstream)
         std::unique_ptr<std::ostream> ptr_;
 
+        //- Atomic file creation
+        bool atomic_;
+
+
 protected:
 
     // Protected Member Functions
 
-        //- Special 'rewind' method for compressed stream
-        void reopen_gz(const std::string& pathname_gz);
-
-        //- General 'rewind' method (non-compressed)
+        //- Reopen for compressed/non-compressed
         void reopen(const std::string& pathname);
+
+        //- Close stream and rename file
+        void close(const std::string& pathname);
+
 
 public:
 
     // Generated Methods
-
-        //- Default construct (empty)
-        ofstreamPointer() noexcept = default;
 
         //- No copy construct
         ofstreamPointer(const ofstreamPointer&) = delete;
@@ -202,22 +208,25 @@ public:
 
     // Constructors
 
+        //- Default construct (empty)
+        ofstreamPointer() noexcept;
+
         //- Construct as null output stream using Foam::ocountstream
         explicit ofstreamPointer(std::nullptr_t);
 
-        //- Construct from pathname, with specified append option
-        ofstreamPointer(const fileName& pathname, const bool append)
-        :
-            ofstreamPointer(pathname, IOstreamOption::UNCOMPRESSED, append)
-        {}
-
-        //- Construct from pathname,
-        //- with preferred compression and specified append option
+        //- Construct from pathname, compression, append, file handling atomic
+        //  \param pathname The file name to open for writing
+        //  \param comp     UNCOMPRESSED | COMPRESSED
+        //  \param append   Open in append mode
+        //  \param atomic   Write into temporary file (not target file).
+        //      This option should only be used with a stream wrapper
+        //      (eg, OFstream) that handles the final renaming.
         explicit ofstreamPointer
         (
             const fileName& pathname,
             IOstreamOption::compressionType comp = IOstreamOption::UNCOMPRESSED,
-            const bool append = false
+            const bool append = false,
+            const bool atomic = false
         );
 
 

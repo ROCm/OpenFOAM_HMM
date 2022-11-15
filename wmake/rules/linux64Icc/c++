@@ -3,7 +3,7 @@ include $(GENERAL_RULES)/Icc/c++
 
 c++ARCH    := -pthread -fp-trap=common -fp-model precise
 
-ifneq (,$(WM_COMPILE_OPTION))
+ifneq (,$(strip $(WM_COMPILE_OPTION)))
     sinclude $(DEFAULT_RULES)/c++$(WM_COMPILE_OPTION)
 endif
 
@@ -18,5 +18,4 @@ cxxtoo      = $(Ctoo)
 
 include $(GENERAL_RULES)/Icc/link-c++
 
-#legacy: LINK_LIBS   += -L$(IA64ROOT)/lib
 #------------------------------------------------------------------------------

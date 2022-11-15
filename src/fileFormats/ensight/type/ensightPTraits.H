@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2015 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,7 +47,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class ensightPTraits Declaration
+                       Class ensightPTraits Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -69,8 +69,11 @@ struct ensightPTraits
 template<> const char* const ensightPTraits<label>::typeName;
 template<> const direction ensightPTraits<label>::componentOrder[];
 
-template<> const char* const ensightPTraits<scalar>::typeName;
-template<> const direction ensightPTraits<scalar>::componentOrder[];
+template<> const char* const ensightPTraits<float>::typeName;
+template<> const direction ensightPTraits<float>::componentOrder[];
+
+template<> const char* const ensightPTraits<double>::typeName;
+template<> const direction ensightPTraits<double>::componentOrder[];
 
 template<> const char* const ensightPTraits<vector>::typeName;
 template<> const direction ensightPTraits<vector>::componentOrder[];

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,8 +31,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ensightOutputAreaField_H
-#define ensightOutputAreaField_H
+#ifndef Foam_ensightOutput_areaField_H
+#define Foam_ensightOutput_areaField_H
 
 #include "ensightOutput.H"
 #include "ensightFaces.H"
@@ -57,10 +57,37 @@ namespace ensightOutput
 template<class Type>
 bool writeAreaField
 (
+    //! Component scratch buffer
+    ensightOutput::floatBufferType& scratch,
+
+    //! Output file (must be valid on master)
     ensightFile& os,
+
+    //! The field content to be written
     const GeometricField<Type, faPatchField, areaMesh>& fld,
+
+    //! The addressing into the field
     const ensightFaMesh& ensMesh
 );
+
+
+//- Write finite-area field component-wise
+template<class Type>
+bool writeAreaField
+(
+    //! Output file (must be valid on master)
+    ensightFile& os,
+
+    //! The field content to be written
+    const GeometricField<Type, faPatchField, areaMesh>& fld,
+
+    //! The addressing into the field
+    const ensightFaMesh& ensMesh
+)
+{
+    ensightOutput::floatBufferType scratch;
+    return ensightOutput::writeAreaField(scratch, os, fld, ensMesh);
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

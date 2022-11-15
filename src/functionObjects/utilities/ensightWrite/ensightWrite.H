@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -127,16 +127,18 @@ See also
 
 SourceFiles
     ensightWrite.C
-    ensightWriteTemplates.C
+    ensightWriteImpl.C
+    ensightWriteUpdate.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef functionObjects_ensightWrite_H
-#define functionObjects_ensightWrite_H
+#ifndef Foam_functionObjects_ensightWrite_H
+#define Foam_functionObjects_ensightWrite_H
 
 #include "fvMeshFunctionObject.H"
 #include "ensightCase.H"
 #include "ensightMesh.H"
+#include "ensightOutputFwd.H"
 
 #include "interpolation.H"
 #include "volFields.H"
@@ -223,21 +225,21 @@ class ensightWrite
 
     // Write
 
+        //- Write selected volume fields.
+        template<class Type>
+        label writeVolFieldsImpl
+        (
+            ensightOutput::floatBufferType& scratch,
+            const fvMeshSubset& proxy,
+            const wordHashSet& acceptField
+        );
+
         //- Write all volume fields
         label writeAllVolFields
         (
             const fvMeshSubset& proxy,
             const wordHashSet& acceptField
         );
-
-        //- Write selected volume fields.
-        template<class Type>
-        label writeVolFields
-        (
-            const fvMeshSubset& proxy,
-            const wordHashSet& acceptField
-        );
-
 
         //- No copy construct
         ensightWrite(const ensightWrite&) = delete;
@@ -293,12 +295,6 @@ public:
 
 } // End namespace functionObjects
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "ensightWriteTemplates.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

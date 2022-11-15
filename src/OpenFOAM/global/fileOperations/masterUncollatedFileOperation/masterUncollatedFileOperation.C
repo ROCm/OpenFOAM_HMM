@@ -2455,7 +2455,7 @@ Foam::fileOperations::masterUncollatedFileOperation::NewOFstream
         (
             pathName,
             streamOpt,
-            false,  // append=false
+            IOstreamOption::NON_APPEND,
             valid
         )
     );

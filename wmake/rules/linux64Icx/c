@@ -3,7 +3,7 @@ include $(GENERAL_RULES)/Icx/c
 
 cARCH      :=
 
-ifneq (,$(WM_COMPILE_OPTION))
+ifneq (,$(strip $(WM_COMPILE_OPTION)))
     sinclude $(DEFAULT_RULES)/c$(WM_COMPILE_OPTION)
 endif
 

@@ -4,17 +4,19 @@ EXE_INC = \
 LIB_LIBS = \
     $(FOAM_LIBBIN)/libOSspecific.o
 
+/* libz: (not disabled) */
+ifeq (,$(findstring ~libz,$(WM_COMPILE_CONTROL)))
+    EXE_INC  += -DHAVE_LIBZ
+    LIB_LIBS += -lz
+endif
+
+
+/* Never self-link (WM_PROJECT == OpenFOAM), but do link to Pstream */
+
+PROJECT_LIBS =
+
 ifeq (libo,$(FOAM_LINK_DUMMY_PSTREAM))
     LIB_LIBS += $(FOAM_LIBBIN)/dummy/libPstream.o
 else
     LIB_LIBS += -L$(FOAM_LIBBIN)/dummy -lPstream
 endif
-
-/* libz */
-EXE_INC += -DHAVE_LIBZ
-
-LIB_LIBS += -lz
-
-
-/* Project lib dependencies. Never self-link (WM_PROJECT == OpenFOAM) */
-PROJECT_LIBS =

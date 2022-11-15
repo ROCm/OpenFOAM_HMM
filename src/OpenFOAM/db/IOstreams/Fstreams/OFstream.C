@@ -56,12 +56,19 @@ Foam::OFstream::OFstream
 
 Foam::OFstream::OFstream
 (
+    IOstreamOption::atomicType atomic,
     const fileName& pathname,
     IOstreamOption streamOpt,
-    const bool append
+    IOstreamOption::appendType append
 )
 :
-    Foam::ofstreamPointer(pathname, streamOpt.compression(), append),
+    Foam::ofstreamPointer
+    (
+        pathname,
+        streamOpt.compression(),
+        (IOstreamOption::appendType::APPEND == append),
+        (IOstreamOption::atomicType::ATOMIC == atomic)
+    ),
     OSstream(*(ofstreamPointer::get()), pathname, streamOpt)
 {
     setClosed();
@@ -100,7 +107,9 @@ Foam::OFstream::OFstream
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::OFstream::~OFstream()
-{}
+{
+    ofstreamPointer::close(this->name());
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -137,15 +146,8 @@ const std::ostream& Foam::OFstream::stdStream() const
 
 void Foam::OFstream::rewind()
 {
-    if (IOstreamOption::COMPRESSED == ofstreamPointer::whichCompression())
-    {
-        ofstreamPointer::reopen_gz(this->name() + ".gz");
-    }
-    else
-    {
-        // Reopen (truncate)
-        ofstreamPointer::reopen(this->name());
-    }
+    // Reopen (truncate) std::ostream
+    ofstreamPointer::reopen(this->name());
 
     // As per OSstream::rewind()
 

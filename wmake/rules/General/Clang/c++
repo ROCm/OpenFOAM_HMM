@@ -26,7 +26,7 @@ c++LESSWARN = \
     -Wno-unknown-warning-option \
     -Wno-deprecated-copy-with-user-provided-copy \
     -Wno-tautological-overlap-compare \
-    -Wno-#pragma-messages
+    -Wno-\#pragma-messages
 
 # Tuning
 sinclude $(GENERAL_RULES)/common/c++$(WM_COMPILE_OPTION)

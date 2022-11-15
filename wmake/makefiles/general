@@ -17,6 +17,12 @@
 # Description
 #     Makefile used by wmake to make dependency files and libs and applications
 #
+# Embedded Control Parameters
+#
+#   WM_COMPILE_CONTROL (+openmp)
+#   WM_COMPILE_CONTROL (~openfoam)
+#   WM_OSTYPE (windows)
+#
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -25,7 +31,7 @@
 
 SHELL           = /bin/sh
 
-ifeq (,$(WM_OSTYPE))
+ifeq (,$(strip $(WM_OSTYPE)))
     WM_OSTYPE  := POSIX
 endif
 
@@ -55,22 +61,34 @@ OBJECTS_DIR     = $(MAKE_DIR)/$(WM_OPTIONS)
 SYS_INC         =
 SYS_LIBS        =
 
+# Add linkage for openmp into the system libraries
+ifneq (,$(findstring +openmp,$(WM_COMPILE_CONTROL)))
+SYS_LIBS        = $(LINK_OPENMP)
+endif
+
+# These are set by Make/options
+EXE_INC         =
+EXE_LIBS        =
+LIB_LIBS        =
+
+# Project include/libraries
 PROJECT_INC     = \
     -I$(LIB_SRC)/$(WM_PROJECT)/lnInclude \
     -I$(LIB_SRC)/OSspecific/$(WM_OSTYPE)/lnInclude
 
 PROJECT_LIBS    = -l$(WM_PROJECT) -ldl
 
-EXE_INC         =
-EXE_LIBS        =
-LIB_LIBS        =
-
+# Special compilation without OpenFOAM at all
+ifneq (,$(findstring ~openfoam,$(WM_COMPILE_CONTROL)))
+PROJECT_INC     =
+PROJECT_LIBS    =
+endif
 
 # These variables are used for some builds - provide fallback values
-ifeq (,$(FOAM_SOLVERS))
+ifeq (,$(strip $(FOAM_SOLVERS)))
     FOAM_SOLVERS    = $(WM_PROJECT_DIR)/applications/solvers
 endif
-ifeq (,$(FOAM_UTILITIES))
+ifeq (,$(strip $(FOAM_UTILITIES)))
     FOAM_UTILITIES  = $(WM_PROJECT_DIR)/applications/utilities
 endif
 
@@ -134,6 +152,8 @@ LIB_HEADER_DIRS = \
 
 #------------------------------------------------------------------------------
 # Define link statements for executables
+#
+# Tweak with FOAM_EXTRA_LDFLAGS
 #------------------------------------------------------------------------------
 
 .PHONY: all
@@ -147,7 +167,7 @@ silent:
 $(EXE)$(EXT_EXE): $(OBJECTS)
 	@$(WM_SCRIPTS)/makeTargetDir $(EXE)
 	$(call QUIET_MESSAGE,link,$(EXE)$(EXT_EXE))
-	$E $(LINKEXE) $(OBJECTS) -L$(LIB_PLATFORMS) \
+	$E $(LINKEXE) $(FOAM_EXTRA_LDFLAGS) $(OBJECTS) -L$(LIB_PLATFORMS) \
 	    $(EXE_LIBS) $(PROJECT_LIBS) $(SYS_LIBS) \
 	    $(LINK_LIBS) $(GLIBS) -o $(EXE)$(EXT_EXE)
 
@@ -157,12 +177,14 @@ exe: $(SEXE)$(EXT_EXE) | silent
 $(SEXE)$(EXT_EXE): $(OBJECTS)
 	@$(WM_SCRIPTS)/makeTargetDir $(SEXE)
 	$(call QUIET_MESSAGE,link,$(SEXE)$(EXT_EXE))
-	$E $(LINKEXE) $(OBJECTS) $(EXE_LIBS) \
+	$E $(LINKEXE) $(FOAM_EXTRA_LDFLAGS) $(OBJECTS) $(EXE_LIBS) \
 	    $(SYS_LIBS) $(LINK_LIBS) $(GLIBS) -o $(SEXE)$(EXT_EXE)
 
 
 #------------------------------------------------------------------------------
 # Define link statements for libraries
+#
+# Tweak with FOAM_EXTRA_LDFLAGS
 #------------------------------------------------------------------------------
 
 .PHONY: objects
@@ -175,13 +197,13 @@ ifneq (,$(findstring windows,$(WM_OSTYPE)))
 $(LIB)$(EXT_SO): $(OBJECTS)
 	@$(WM_SCRIPTS)/makeTargetDir $(LIB)
 	$(call QUIET_MESSAGE,link,$(LIB)$(EXT_SO))
-	$E $(LINKLIBSO) $(OBJECTS) -L$(LIB_PLATFORMS) \
+	$E $(LINKLIBSO) $(FOAM_EXTRA_LDFLAGS) $(OBJECTS) -L$(LIB_PLATFORMS) \
 	    $(PROJECT_LIBS) $(LIB_LIBS) $(GLIB_LIBS) -o $(LIB)$(EXT_SO)
 else
 $(LIB)$(EXT_SO): $(OBJECTS)
 	@$(WM_SCRIPTS)/makeTargetDir $(LIB)
 	$(call QUIET_MESSAGE,link,$(LIB)$(EXT_SO))
-	$E $(LINKLIBSO) $(OBJECTS) -L$(LIB_PLATFORMS) \
+	$E $(LINKLIBSO) $(FOAM_EXTRA_LDFLAGS) $(OBJECTS) -L$(LIB_PLATFORMS) \
 	    $(LIB_LIBS) $(GLIB_LIBS) -o $(LIB)$(EXT_SO)
 endif
 

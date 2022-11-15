@@ -567,8 +567,8 @@ bool Foam::vtk::fileWriter::writeProcIDs(const label nValues)
     const globalIndex procAddr
     (
         parallel_
-      ? globalIndex(nValues, globalIndex::gatherOnly{})
-      : globalIndex(nValues, globalIndex::gatherNone{})
+      ? globalIndex(globalIndex::gatherOnly{}, nValues)
+      : globalIndex(globalIndex::gatherNone{}, nValues)
     );
 
     const label totalCount = procAddr.totalSize();

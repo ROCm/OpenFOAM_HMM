@@ -398,13 +398,9 @@ void Foam::fvMeshDistribute::getFieldNames
     if (syncPar && Pstream::parRun())
     {
         // Check and report error(s) on master
+        // - don't need indexing on master itself
 
-        const globalIndex procAddr
-        (
-            // Don't need to collect master itself
-            (Pstream::master() ? 0 : list.size()),
-            globalIndex::gatherOnly{}
-        );
+        const globalIndex procAddr(globalIndex::gatherNonLocal{}, list.size());
 
         const wordList allNames(procAddr.gather(list));
 

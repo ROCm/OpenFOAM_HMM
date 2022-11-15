@@ -99,7 +99,7 @@ Foam::FixedList<Foam::label, 5> Foam::ensightCells::sizes() const
 {
     FixedList<label, 5> count;
 
-    forAll(count, typei)
+    for (int typei = 0; typei < nTypes; ++typei)
     {
         count[typei] = size(elemType(typei));
     }
@@ -108,14 +108,14 @@ Foam::FixedList<Foam::label, 5> Foam::ensightCells::sizes() const
 }
 
 
-Foam::label Foam::ensightCells::total() const
+Foam::label Foam::ensightCells::totalSize() const noexcept
 {
-    label nTotal = 0;
-    forAll(sizes_, typei)
+    label count = 0;
+    for (label n : sizes_)
     {
-        nTotal += sizes_[typei];
+        count += n;
     }
-    return nTotal;
+    return count;
 }
 
 
@@ -137,11 +137,10 @@ void Foam::ensightCells::clearOut()
 
 void Foam::ensightCells::reduce()
 {
-    forAll(sizes_, typei)
+    for (int typei = 0; typei < nTypes; ++typei)
     {
         sizes_[typei] = size(elemType(typei));
     }
-    // Can reduce FixedList with sumOp<label> in a single operation
     Foam::reduce(sizes_, sumOp<label>());
 }
 

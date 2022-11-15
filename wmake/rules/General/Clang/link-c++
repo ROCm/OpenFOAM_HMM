@@ -1,8 +1,10 @@
+#------------------------------------------------------------------------------
+
 LINK_LIBS   = $(c++DBUG)
 
-LINKLIBSO   = $(CC) $(c++FLAGS) -shared \
-    $(FOAM_EXTRA_LDFLAGS)
+LINKLIBSO   = $(CC) $(c++FLAGS) -shared
 
 LINKEXE     = $(CC) $(c++FLAGS) \
-    -Xlinker --add-needed \
-    $(FOAM_EXTRA_LDFLAGS)
+    -Xlinker --add-needed
+
+#------------------------------------------------------------------------------

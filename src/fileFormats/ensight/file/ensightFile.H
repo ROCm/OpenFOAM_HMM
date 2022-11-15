@@ -92,7 +92,7 @@ public:
     // Static Functions
 
         //- Return a null ensightFile
-        inline static const ensightFile& null()
+        static const ensightFile& null()
         {
             return NullObjectRef<ensightFile>();
         }
@@ -102,6 +102,7 @@ public:
 
         //- Construct from path-name.
         //  The path-name is adjusted for valid ensight file naming.
+        //  Always created as an atomic
         explicit ensightFile
         (
             const fileName& pathname,
@@ -110,6 +111,7 @@ public:
 
         //- Construct from path and name.
         //  Only the name portion is adjusted for valid ensight file naming.
+        //  Always created as an atomic
         ensightFile
         (
             const fileName& path,
@@ -226,26 +228,42 @@ public:
         //  Adds newline after each value (ascii stream)
         void writeList(const UList<label>& field);
 
-        //- Write a list of floating-point as "%12.5e" or as binary
-        //- (double is narrowed to float).
+        //- Write a list of floats as "%12.5e" or as binary.
         //  Adds newline after each value (ascii stream)
-        void writeList(const UList<scalar>& field);
+        void writeList(const UList<float>& field);
 
-        //- Write an indirect list of scalars as "%12.5e" or as binary
+        //- Write a list of double as "%12.5e" or as binary.
+        //- (double is narrowed to float)
+        //  Adds newline after each value (ascii stream)
+        void writeList(const UList<double>& field);
+
+        //- Write an indirect list of float as "%12.5e" or as binary
+        //  Adds newline after each value (ascii stream)
+        template<class Addr>
+        void writeList(const IndirectListBase<float, Addr>& field);
+
+        //- Write an indirect list of double as "%12.5e" or as binary.
         //- (double is narrowed to float)
         //  Adds newline after each value (ascii stream)
         template<class Addr>
-        void writeList(const IndirectListBase<scalar, Addr>& field);
+        void writeList(const IndirectListBase<double, Addr>& field);
 
 
     // Other Methods
 
         //- Check for any NaN in the field
-        static bool hasUndef(const UList<scalar>& field);
+        static bool hasUndef(const UList<float>& field);
+
+        //- Check for any NaN in the field
+        static bool hasUndef(const UList<double>& field);
 
         //- Check for any NaN in the field
         template<class Addr>
-        static bool hasUndef(const IndirectListBase<scalar, Addr>& field);
+        static bool hasUndef(const IndirectListBase<float, Addr>& field);
+
+        //- Check for any NaN in the field
+        template<class Addr>
+        static bool hasUndef(const IndirectListBase<double, Addr>& field);
 };
 
 

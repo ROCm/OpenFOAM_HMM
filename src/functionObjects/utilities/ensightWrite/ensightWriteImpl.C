@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,50 +23,55 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Simple test program for compiling/running openmp
-
 \*---------------------------------------------------------------------------*/
 
-#include <cstdio>
-#include <cstdlib>
-#include <iostream>
+#include "ensightOutputVolField.H"
 
-#if _OPENMP
-#include <omp.h>
-#endif
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-// Main program:
-
-int main(int argc, char *argv[])
+template<class Type>
+Foam::label Foam::functionObjects::ensightWrite::writeVolFieldsImpl
+(
+    ensightOutput::floatBufferType& scratch,
+    const fvMeshSubset& proxy,
+    const wordHashSet& acceptField
+)
 {
-#if _OPENMP
-    std::cout << "_OPENMP = " << _OPENMP << "\n\n";
+    typedef GeometricField<Type, fvPatchField, volMesh> GeoField;
 
-    // Fork threads with their own copies of variables
-    int nThreads, threadId;
+    const fvMesh& baseMesh = proxy.baseMesh();
 
-    #pragma omp parallel private(nThreads, threadId)
+    label count = 0;
+
+    for (const word& fieldName : baseMesh.sortedNames<GeoField>(acceptField))
     {
-        threadId = omp_get_thread_num();
-        nThreads = omp_get_num_threads();
+        const auto* fieldptr = baseMesh.findObject<GeoField>(fieldName);
 
-        // Printf rather than cout to ensure that it emits in one go
-        printf("Called from thread = %d\n", threadId);
-
-        // Master thread
-        if (threadId == 0)
+        if (!fieldptr)
         {
-            // Printf rather than cout to ensure that it emits in one go
-            printf("Number of threads = %d\n", nThreads);
+            continue;
         }
-    }
-#else
-    std::cout << "Compiled without openmp!\n";
-#endif
 
-    return 0;
+        auto tfield = fvMeshSubsetProxy::interpolate(proxy, *fieldptr);
+        const auto& field = tfield();
+
+        autoPtr<ensightFile> os = ensCase().newData<Type>(fieldName);
+
+        ensightOutput::writeVolField<Type>
+        (
+            scratch,
+            os.ref(),
+            field,
+            ensMesh(),
+            caseOpts_.nodeValues()
+        );
+
+        Log << ' ' << fieldName;
+
+        ++count;
+    }
+
+    return count;
 }
 
 

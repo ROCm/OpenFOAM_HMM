@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,54 +23,56 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Namespace
+    Foam::ensightOutput
+
+Description
+    A collection of functions for writing ensight file content.
+
 \*---------------------------------------------------------------------------*/
 
-#include "ensightOutputVolField.H"
+#ifndef Foam_ensightOutputFwd_H
+#define Foam_ensightOutputFwd_H
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+#include "DynamicList.H"
 
-template<class Type>
-Foam::label Foam::functionObjects::ensightWrite::writeVolFields
-(
-    const fvMeshSubset& proxy,
-    const wordHashSet& acceptField
-)
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
 {
-    typedef GeometricField<Type, fvPatchField, volMesh> GeoField;
 
-    const fvMesh& baseMesh = proxy.baseMesh();
+// Forward Declarations
+class ensightFile;
+class ensightGeoFile;
 
-    label count = 0;
 
-    for (const word& fieldName : baseMesh.sortedNames<GeoField>(acceptField))
-    {
-        const auto* fieldptr = baseMesh.findObject<GeoField>(fieldName);
+/*---------------------------------------------------------------------------*\
+                        Namespace ensightOutput
+\*---------------------------------------------------------------------------*/
 
-        if (!fieldptr)
-        {
-            continue;
-        }
+namespace ensightOutput
+{
 
-        auto tfield = fvMeshSubsetProxy::interpolate(proxy, *fieldptr);
-        const auto& field = tfield();
+//- The list type used for component-wise buffering.
+//  Always has value_type = \c float (what ensight uses internally)
+typedef DynamicList<float> floatBufferType;
 
-        autoPtr<ensightFile> os = ensCase().newData<Type>(fieldName);
+//- Static debugging option
+extern int debug;
 
-        ensightOutput::writeVolField<Type>
-        (
-            os.ref(),
-            field,
-            ensMesh(),
-            caseOpts_.nodeValues()
-        );
+//- Upper limit on number of items for bundled off-processor field transfers.
+//- The component-wise transfer uses float (4 bytes).
+//  Eg, 5M for 50 ranks of 100k cells each
+extern int maxChunk_;
 
-        Log << ' ' << fieldName;
 
-        ++count;
-    }
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    return count;
-}
+} // End namespace ensightOutput
+} // End namespace Foam
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //
