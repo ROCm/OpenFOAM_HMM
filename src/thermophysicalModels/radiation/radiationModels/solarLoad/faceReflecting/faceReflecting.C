@@ -443,8 +443,8 @@ void Foam::faceReflecting::calculate()
     {
         r[bandI].setSize(triangleIndex.size());
     }
-    labelList refDirIndex(triangleIndex.size());
-    labelList refIndex(triangleIndex.size());
+    labelList refDirIndex(triangleIndex.size(), -1);
+    labelList refIndex(triangleIndex.size(), -1);
     // triangleIndex includes hits on non-reflecting and reflecting faces
     forAll(triangleIndex, i)
     {
