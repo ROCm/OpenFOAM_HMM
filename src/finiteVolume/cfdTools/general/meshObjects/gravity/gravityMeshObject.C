@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "objectRegistry.H"
 #include "gravityMeshObject.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -37,6 +36,26 @@ namespace meshObjects
     defineTypeName(gravity);
 }
 }
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::meshObjects::gravity::gravity(const Time& runTime)
+:
+    MeshObject<Time, TopologicalMeshObject, gravity>(runTime),
+    uniformDimensionedVectorField
+    (
+        IOobject
+        (
+            "g",   // Must be identical to gravity::typeName!
+            runTime.constant(),
+            runTime,
+            IOobject::MUST_READ_IF_MODIFIED,
+            IOobject::NO_WRITE,
+            IOobject::NO_REGISTER  // Already registered by MeshObject
+        )
+    )
+{}
 
 
 // ************************************************************************* //

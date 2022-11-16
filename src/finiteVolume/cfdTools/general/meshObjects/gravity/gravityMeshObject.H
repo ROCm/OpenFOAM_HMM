@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,8 +36,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef meshObjects_gravity_H
-#define meshObjects_gravity_H
+#ifndef Foam_meshObjects_gravity_H
+#define Foam_meshObjects_gravity_H
 
 #include "uniformDimensionedFields.H"
 #include "MeshObject.H"
@@ -64,41 +64,48 @@ class gravity
     >,
     public uniformDimensionedVectorField
 {
-
 public:
 
     //- Run-time type information
     TypeNameNoDebug("g");
 
 
-    //- Construct on Time
-    explicit gravity(const Time& runTime)
-    :
-        MeshObject<Time, TopologicalMeshObject, gravity>(runTime),
-        uniformDimensionedVectorField
-        (
-            IOobject
-            (
-                "g",   // Must be identical to typeName!
-                runTime.constant(),
-                runTime,
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE,
-                false  // let MeshObject register it
-            )
-        )
-    {}
+    //- Construct on Time with MUST_READ_IF_MODIFIED from "constant"
+    explicit gravity(const Time& runTime);
 
-
-    //- Construct on Time
+    //- Return cached object or construct on Time
     static const gravity& New(const Time& runTime)
     {
         return MeshObject<Time, TopologicalMeshObject, gravity>::New(runTime);
     }
 
-
     //- Destructor
     virtual ~gravity() = default;
+
+
+    // Static Lookups
+
+        //- Return const pointer to the gravity "g" object field
+        static const uniformDimensionedVectorField*
+        findObject(const Time& runTime)
+        {
+            return runTime.findObject<uniformDimensionedVectorField>("g");
+        }
+
+        //- Return non-const pointer to the gravity "g" object field
+        //- using a const-cast to have it behave like a mutable.
+        static uniformDimensionedVectorField*
+        getObjectPtr(const Time& runTime)
+        {
+            return runTime.getObjectPtr<uniformDimensionedVectorField>("g");
+        }
+
+        //- Lookup and return const reference to the gravity "g" object field
+        static const uniformDimensionedVectorField&
+        lookupObject(const Time& runTime)
+        {
+            return runTime.lookupObject<uniformDimensionedVectorField>("g");
+        }
 };
 
 

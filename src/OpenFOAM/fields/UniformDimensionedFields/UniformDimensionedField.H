@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,11 +70,20 @@ public:
 
         //- Construct from components. Either reads or uses supplied value.
         //  The name of the dimensioned\<Type\> defines the name of the
-        //  field.
+        //  field (if non-empty)
         UniformDimensionedField
         (
             const IOobject& io,
             const dimensioned<Type>& dt
+        );
+
+        //- Construct from components. Either reads or uses supplied value.
+        //  The name of the IOobject defines the name of the field.
+        UniformDimensionedField
+        (
+            const IOobject& io,
+            const dimensionSet& dims,
+            const Type& val
         );
 
         //- Construct as copy

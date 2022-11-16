@@ -40,6 +40,11 @@ Foam::UniformDimensionedField<Type>::UniformDimensionedField
     regIOobject(io),
     dimensioned<Type>(dt)
 {
+    if (dimensioned<Type>::name().empty())
+    {
+        dimensioned<Type>::name() = regIOobject::name();
+    }
+
     // Read value
     readHeaderOk(IOstreamOption::BINARY, typeName);
 }
@@ -48,11 +53,27 @@ Foam::UniformDimensionedField<Type>::UniformDimensionedField
 template<class Type>
 Foam::UniformDimensionedField<Type>::UniformDimensionedField
 (
-    const UniformDimensionedField<Type>& rdt
+    const IOobject& io,
+    const dimensionSet& dims,
+    const Type& val
 )
 :
-    regIOobject(rdt),
-    dimensioned<Type>(rdt)
+    regIOobject(io),
+    dimensioned<Type>(regIOobject::name(), dims, val)
+{
+    // Read value
+    readHeaderOk(IOstreamOption::BINARY, typeName);
+}
+
+
+template<class Type>
+Foam::UniformDimensionedField<Type>::UniformDimensionedField
+(
+    const UniformDimensionedField<Type>& rhs
+)
+:
+    regIOobject(rhs),
+    dimensioned<Type>(rhs)
 {}
 
 
