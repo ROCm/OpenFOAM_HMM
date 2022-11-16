@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,53 +24,83 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 InClass
-    Foam::volFields
+    Foam::UniformDimensionedField
 
 Description
-
-SourceFiles
-    volFields.C
+    Forwards for various UniformDimensionedField types, and their
+    file-type characteristics
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Foam_volFields_H
-#define Foam_volFields_H
+#ifndef Foam_uniformDimensionedFieldsFwd_H
+#define Foam_uniformDimensionedFieldsFwd_H
 
-#include "GeometricFields.H"
-#include "volMesh.H"
-#include "fvMesh.H"
-#include "fvPatchField.H"
-#include "volFieldsFwd.H"
-#include "calculatedFvPatchFields.H"
+#include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Specializations
+// Forward Declaration
+template<class Type> class UniformDimensionedField;
+
+
+// Typedefs
+
+typedef
+    UniformDimensionedField<scalar>
+    uniformDimensionedScalarField;
+
+typedef
+    UniformDimensionedField<vector>
+    uniformDimensionedVectorField;
+
+typedef
+    UniformDimensionedField<sphericalTensor>
+    uniformDimensionedSphericalTensorField;
+
+typedef
+    UniformDimensionedField<symmTensor>
+    uniformDimensionedSymmTensorField;
+
+typedef
+    UniformDimensionedField<tensor>
+    uniformDimensionedTensorField;
+
+
+// Global file status
 
 template<>
-tmp<GeometricField<scalar, fvPatchField, volMesh>>
-GeometricField<scalar, fvPatchField, volMesh>::component
-(
-    const direction
-) const;
-
+inline bool typeGlobal<uniformDimensionedScalarField>()
+{
+    return true;
+}
 template<>
-void GeometricField<scalar, fvPatchField, volMesh>::replace
-(
-    const direction,
-    const GeometricField<scalar, fvPatchField, volMesh>& sf
-);
+inline bool typeGlobal<uniformDimensionedVectorField>()
+{
+    return true;
+}
+template<>
+inline bool typeGlobal<uniformDimensionedSphericalTensorField>()
+{
+    return true;
+}
+template<>
+inline bool typeGlobal<uniformDimensionedSymmTensorField>()
+{
+    return true;
+}
+template<>
+inline bool typeGlobal<uniformDimensionedTensorField>()
+{
+    return true;
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "volFieldsI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
