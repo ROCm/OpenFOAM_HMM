@@ -6,7 +6,7 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2019 OpenCFD Ltd.
+#     Copyright (C) 2019-2022 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -54,6 +54,9 @@ optStrip=true
 while [ "$#" -gt 0 ]
 do
     case "$1" in
+    ('') ;;
+    (- | --) shift; break ;;  # Stop option parsing
+
     # Print help
     (-h | -help*)
         usage
@@ -63,10 +66,6 @@ do
         ;;
     (-no-strip)
         unset optStrip
-        ;;
-    (--)
-        shift
-        break
         ;;
     (*)
         break

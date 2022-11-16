@@ -7,7 +7,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2019-2020 OpenCFD Ltd.
+#     Copyright (C) 2019-2022 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -22,8 +22,13 @@
 #     Link source files in the specified dir(s) into their respective
 #     lnInclude directories
 #
-#     C files:      .c .h
-#     C++ files:    .C .cc .cpp .cxx .H .hh .hpp .hxx
+#     Header files (C)       :  .h
+#     Source files (C)       :  .c
+#     Header files (C++)     :  .H .hh .hpp .hxx
+#     Source files (C++)     :  .C .cc .cpp .cxx
+#     Template files (C++)   :    .tcc .tpp .txx
+#
+# GNU make suffixes : .c .cc .C .cpp
 #
 #------------------------------------------------------------------------------
 Script="${0##*/}"                   # Need 'Script' for wmakeFunctions messages
@@ -76,6 +81,9 @@ unset optForce optUpdate optPwd
 while [ "$#" -gt 0 ]
 do
     case "$1" in
+        ('') ;;
+        (- | --) shift; break ;;  # Stop option parsing
+
         -h | -help*)
             printHelp
             ;;
@@ -103,7 +111,7 @@ do
     shift
 done
 
-[ "$optPwd" = true ] || [ "$#" -ge 1 ] || \
+[ -n "$optPwd" ] || [ "$#" -ge 1 ] || \
     die "incorrect number of arguments"
 
 #------------------------------------------------------------------------------
@@ -111,7 +119,7 @@ done
 baseDir="$1"
 
 # With -pwd, go on discovery
-if [ "$optPwd" = true ]
+if [ -n "$optPwd" ]
 then
     if [ -n "$baseDir" ]
     then
@@ -221,9 +229,9 @@ do
                 -name '*.[CHch]' \
                 -o -name '*.cc' \
                 -o -name '*.hh' \
-                -o -name '*.[ch]xx' \
-                -o -name '*.[ch]pp' \
-                -o -name '*.type' \
+                -o -name '*.[cht]xx' \
+                -o -name '*.[cht]pp' \
+                -o -name '*.tcc' \
             \)  \
             -exec ln "$optLink" {} . \;
     )

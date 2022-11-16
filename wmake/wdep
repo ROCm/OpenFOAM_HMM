@@ -7,7 +7,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2014-2015 OpenFOAM Foundation
-#     Copyright (C) 2017 OpenCFD Ltd.
+#     Copyright (C) 2017-2022 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -50,6 +50,9 @@ USAGE
 while [ "$#" -gt 0 ]
 do
     case "$1" in
+    ('') ;;
+    (- | --) shift; break ;;  # Stop option parsing
+
     -h | -help*)
         usage
         ;;

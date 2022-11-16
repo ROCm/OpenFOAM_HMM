@@ -223,8 +223,8 @@ fi
 while [ "$#" -gt 0 ]
 do
     case "$1" in
-        '') ;;
-        --) shift; break ;;
+        ('') ;;
+        (- | --) shift; break ;;  # Stop option parsing
 
         -help-f*)   # Full help
             printHelp -full
@@ -416,6 +416,7 @@ MakeDir=Make
 
 unset dir
 
+# With -pwd, go on discovery
 if [ -n "$opt_pwd" ]
 then
     if [ $# -ge 1 ]
