@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,9 @@ License
 
 Description
     Class for handling debugging switches.
+
+Note
+    Included by global/globals.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -184,9 +187,9 @@ Foam::dictionary& Foam::debug::switchSet
 {
     if (!subDictPtr)
     {
-        entry* eptr = controlDict().findEntry(subDictName, keyType::LITERAL);
+        subDictPtr = controlDict().findDict(subDictName, keyType::LITERAL);
 
-        if (!eptr || !eptr->isDict())
+        if (!subDictPtr)
         {
             std::cerr
                 << "debug::switchSet(const char*, dictionary*&):\n"
@@ -196,8 +199,6 @@ Foam::dictionary& Foam::debug::switchSet
 
             std::exit(1);
         }
-
-        subDictPtr = &(eptr->dict());
     }
 
     return *subDictPtr;

@@ -25,7 +25,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Note
-    File included by global/global.Cver
+    Included by global/globals.C
 
 \*---------------------------------------------------------------------------*/
 
