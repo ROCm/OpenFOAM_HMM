@@ -120,24 +120,30 @@ void Foam::ensightOutput::Detail::writeFieldComponents
 
     if (Pstream::master())
     {
+        // Scratch buffer:
+        // - allocate enough space to process an individual rank
+        // - potentially enough to process multiple ranks before writing
+        // - permit use of the full buffer capacity
+
         // Buffer size needed for an individual rank
         const label minSize(max(localSize, procAddr.maxSize()));
 
-        // Buffer size needed for all nonLocal ranks
-        const label nonLocalSize(procAddr.totalSize() - localSize);
-
         // Maximum off-processor transfer size
-        const label maxTransfer =
+        const label maxSize =
         (
             (ensightOutput::maxChunk_ > 0)
-          ? min(static_cast<label>(ensightOutput::maxChunk_), nonLocalSize)
-          : static_cast<label>(0)
+          ? min
+            (
+                static_cast<label>(ensightOutput::maxChunk_),
+                (procAddr.totalSize() - localSize)
+            )
+          : scratch.capacity()
         );
 
-        // Allocate at least enough to process a single rank, but potentially
-        // receive multiple ranks at a time before writing
-
-        scratch.resize_nocopy(max(minSize, maxTransfer));
+        scratch.resize_nocopy
+        (
+            max(max(minSize, maxSize), scratch.capacity())
+        );
 
         if (Pstream::master() && debug > 1)
         {
@@ -150,7 +156,7 @@ void Foam::ensightOutput::Detail::writeFieldComponents
             Info<< " total-size:" << procAddr.totalSize()
                 << " buf-size:" << scratch.size() << "/" << scratch.capacity()
                 << " any-proc:" << minSize
-                << " off-proc:" << nonLocalSize << endl;
+                << " off-proc:" << (procAddr.totalSize() - localSize) << endl;
 
             Info<< "proc-sends: (";
 
