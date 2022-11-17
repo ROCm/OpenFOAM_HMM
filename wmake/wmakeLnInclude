@@ -22,11 +22,12 @@
 #     Link source files in the specified dir(s) into their respective
 #     lnInclude directories
 #
-#     Header files (C)       :  .h
-#     Source files (C)       :  .c
-#     Header files (C++)     :  .H .hh .hpp .hxx
-#     Source files (C++)     :  .C .cc .cpp .cxx
-#     Template files (C++)   :    .tcc .tpp .txx
+#     Header files    : .h .H  .hh .hpp .hxx
+#     Template files  :    .C .tcc .tpp .txx
+#
+# Note
+#     OpenFOAM has historically used '.C' files both for compiled code
+#     and templated code.
 #
 # GNU make suffixes : .c .cc .C .cpp
 #
@@ -226,12 +227,11 @@ do
             \( -name lnInclude -o -name Make -o -name config -o -name noLink \) \
             -prune \
             -o \( \
-                -name '*.[CHch]' \
-                -o -name '*.cc' \
+                   -name '*.[CHh]' \
                 -o -name '*.hh' \
-                -o -name '*.[cht]xx' \
-                -o -name '*.[cht]pp' \
                 -o -name '*.tcc' \
+                -o -name '*.[ht]pp' \
+                -o -name '*.[ht]xx' \
             \)  \
             -exec ln "$optLink" {} . \;
     )
