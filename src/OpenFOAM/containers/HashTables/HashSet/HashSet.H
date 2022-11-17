@@ -62,8 +62,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef HashSet_H
-#define HashSet_H
+#ifndef Foam_HashSet_H
+#define Foam_HashSet_H
 
 #include "HashTable.H"
 #include "IndirectList.H"

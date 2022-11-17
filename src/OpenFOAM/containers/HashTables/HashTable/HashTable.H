@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -273,7 +273,7 @@ public:
         //- Find and return a hashed entry. FatalError if it does not exist.
         inline const T& at(const Key& key) const;
 
-        //- Return true if hashed entry is found in table
+        //- True if hashed key is found in table
         inline bool found(const Key& key) const;
 
         //- Find and return an iterator set at the hashed entry
@@ -630,39 +630,7 @@ protected:
             >::type;
 
 
-        // Member Functions
-
-            //- True if iterator points to an entry
-            //  This can be used directly instead of comparing to end()
-            inline bool good() const noexcept;
-
-            //- True if iterator points to an entry - same as good()
-            inline bool found() const noexcept;
-
-            //- The key associated with the iterator
-            inline const Key& key() const;
-
-            //- Write the (key, val) pair
-            inline Ostream& print(Ostream& os) const;
-
-
-        // Member Operators
-
-            //- True if iterator points to an entry
-            //  This can be used directly instead of comparing to end()
-            explicit inline operator bool() const noexcept;
-
-            //- Compare hash-entry element pointers.
-            //  Independent of const/non-const access
-            template<bool Any>
-            inline bool operator==(const Iterator<Any>& iter) const noexcept;
-
-            template<bool Any>
-            inline bool operator!=(const Iterator<Any>& iter) const noexcept;
-
-
         protected:
-            friend class HashTable;  // For begin/find constructors
 
         // Protected Data
 
@@ -680,10 +648,13 @@ protected:
             //  to mark the position.
             label index_;
 
+            // Friendship with HashTable, for begin/find constructors
+            friend class HashTable;
+
 
         // Protected Constructors
 
-            //- Default construct (end iterator)
+            //- Default construct. Also the same as the end iterator
             inline constexpr Iterator() noexcept;
 
             //- Construct from begin of hash-table
@@ -704,8 +675,46 @@ protected:
             {
                 return *reinterpret_cast<const Iterator<Any>*>(this);
             }
-        };
 
+
+        public:
+
+        // Member Functions
+
+            //- True if iterator points to an entry
+            //  This can be used directly instead of comparing to end()
+            bool good() const noexcept { return entry_; }
+
+            //- True if iterator points to an entry - same as good()
+            bool found() const noexcept { return entry_; }
+
+            //- The key associated with the iterator
+            const Key& key() const { return entry_->key(); }
+
+            //- Write the (key, val) pair
+            inline Ostream& print(Ostream& os) const;
+
+
+        // Member Operators
+
+            //- True if iterator points to an entry
+            //  This can be used directly instead of comparing to end()
+            explicit operator bool() const noexcept { return entry_; }
+
+            //- Compare hash-entry element pointers.
+            //  Independent of const/non-const access
+            template<bool Any>
+            bool operator==(const Iterator<Any>& iter) const noexcept
+            {
+                return (entry_ == iter.entry_);
+            }
+
+            template<bool Any>
+            bool operator!=(const Iterator<Any>& iter) const noexcept
+            {
+                return (entry_ != iter.entry_);
+            }
+        };
 
         //- Low-level entry erasure using iterator internals.
         //  This invalidates the iterator until the next ++ operation.

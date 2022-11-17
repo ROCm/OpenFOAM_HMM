@@ -240,13 +240,8 @@ int main(int argc, char *argv[])
     );
     argList::addBoolOption
     (
-        "copy-append",
-        "test move append lists (requires -filter)"
-    );
-    argList::addBoolOption
-    (
-        "move-append",
-        "test move append lists (requires -filter)"
+        "merge",
+        "test merging lists (requires -filter)"
     );
 
     // timeSelector::addOptions();
@@ -261,16 +256,10 @@ int main(int argc, char *argv[])
         Info<<"limit names: " << matcher << nl;
     }
 
-    if (args.found("copy-append") && matcher.empty())
+    if (args.found("merge") && matcher.empty())
     {
         FatalError
-            << nl << "The -copy-append test also requires -filter" << nl
-            << exit(FatalError);
-    }
-    if (args.found("move-append") && matcher.empty())
-    {
-        FatalError
-            << nl << "The -move-append test also requires -filter" << nl
+            << nl << "The -merge test also requires -filter" << nl
             << exit(FatalError);
     }
 
@@ -327,13 +316,9 @@ int main(int argc, char *argv[])
         // On last time
         if (timeI == timeDirs.size()-1)
         {
-            if (args.found("copy-append"))
+            if (args.found("merge"))
             {
-                Info<< nl << "Test move append" << nl;
-            }
-            else if (args.found("move-append"))
-            {
-                Info<< nl << "Test move append" << nl;
+                Info<< nl << "Test merge" << nl;
             }
             else
             {
@@ -349,18 +334,8 @@ int main(int argc, char *argv[])
             Info<< "==target==" << nl; reportDetail(objects);
             Info<< "==source==" << nl; reportDetail(other);
 
-            if (args.found("copy-append"))
-            {
-                objects.append(other);
-
-                Info<< nl << "After copy-append" << nl;
-            }
-            else
-            {
-                objects.append(std::move(other));
-
-                Info<< nl << "After move-append" << nl;
-            }
+            objects.merge(std::move(other));
+            Info<< nl << "After merge" << nl;
 
             Info<< "==target==" << nl; reportDetail(objects);
             Info<< "==source==" << nl; reportDetail(other);

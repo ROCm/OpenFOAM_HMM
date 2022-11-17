@@ -99,6 +99,12 @@ public:
         //- Construct given initial table capacity
         inline explicit HashPtrTable(const label size);
 
+        //- Copy construct, making a copy of each element
+        HashPtrTable(const this_type& rhs);
+
+        //- Move construct
+        inline HashPtrTable(this_type&& rhs);
+
         //- Construct from Istream using given Istream constructor class
         template<class INew>
         HashPtrTable(Istream& is, const INew& inew);
@@ -108,12 +114,6 @@ public:
 
         //- Construct from dictionary with default dictionary constructor class
         explicit HashPtrTable(const dictionary& dict);
-
-        //- Copy construct, making a copy of each element
-        HashPtrTable(const this_type& rhs);
-
-        //- Move construct
-        HashPtrTable(this_type&& rhs);
 
 
     //- Destructor

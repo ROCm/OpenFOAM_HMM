@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -111,32 +111,6 @@ Foam::HashTable<T, Key, Hash>::Iterator<Const>::increment()
 
 template<class T, class Key, class Hash>
 template<bool Const>
-inline bool
-Foam::HashTable<T, Key, Hash>::Iterator<Const>::good() const noexcept
-{
-    return entry_;
-}
-
-
-template<class T, class Key, class Hash>
-template<bool Const>
-inline bool
-Foam::HashTable<T, Key, Hash>::Iterator<Const>::found() const noexcept
-{
-    return entry_;
-}
-
-
-template<class T, class Key, class Hash>
-template<bool Const>
-inline const Key& Foam::HashTable<T, Key, Hash>::Iterator<Const>::key() const
-{
-    return entry_->key();
-}
-
-
-template<class T, class Key, class Hash>
-template<bool Const>
 inline Foam::Ostream& Foam::HashTable<T, Key, Hash>::Iterator<Const>::print
 (
     Ostream& os
@@ -147,39 +121,6 @@ inline Foam::Ostream& Foam::HashTable<T, Key, Hash>::Iterator<Const>::print
         entry_->print(os);
     }
     return os;
-}
-
-
-template<class T, class Key, class Hash>
-template<bool Const>
-inline Foam::HashTable<T, Key, Hash>::Iterator<Const>::operator
-bool() const noexcept
-{
-    return entry_;
-}
-
-
-template<class T, class Key, class Hash>
-template<bool Const>
-template<bool Any>
-inline bool Foam::HashTable<T, Key, Hash>::Iterator<Const>::operator==
-(
-    const Iterator<Any>& iter
-) const noexcept
-{
-    return entry_ == iter.entry_;
-}
-
-
-template<class T, class Key, class Hash>
-template<bool Const>
-template<bool Any>
-inline bool Foam::HashTable<T, Key, Hash>::Iterator<Const>::operator!=
-(
-    const Iterator<Any>& iter
-) const noexcept
-{
-    return entry_ != iter.entry_;
 }
 
 

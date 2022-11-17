@@ -57,16 +57,6 @@ Foam::HashPtrTable<T, Key, Hash>::HashPtrTable
 }
 
 
-template<class T, class Key, class Hash>
-Foam::HashPtrTable<T, Key, Hash>::HashPtrTable
-(
-    HashPtrTable<T, Key, Hash>&& rhs
-)
-:
-    parent_type(std::move(rhs))
-{}
-
-
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>

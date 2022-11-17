@@ -38,6 +38,16 @@ inline Foam::HashPtrTable<T, Key, Hash>::HashPtrTable(const label size)
 {}
 
 
+template<class T, class Key, class Hash>
+inline Foam::HashPtrTable<T, Key, Hash>::HashPtrTable
+(
+    HashPtrTable<T, Key, Hash>&& rhs
+)
+:
+    parent_type(std::move(rhs))
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions * * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>
