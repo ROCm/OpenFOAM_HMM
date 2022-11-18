@@ -1217,12 +1217,40 @@ void Foam::stringOps::writeWrapped
     const bool escape
 )
 {
-    const auto len = str.length();
+    // Disabled below some minimal lower limit
+    if (width <= 8)
+    {
+        char c = 0;
 
-    std::string::size_type pos = 0;
+        const auto len = str.size();
 
-    // Handle leading newlines
-    while (str[pos] == '\n' && pos < len)
+        for (std::string::size_type pos = 0; pos < len; ++pos)
+        {
+            c = str[pos];
+
+            if (escape && c == '\\')
+            {
+                os << '\\';
+            }
+            os << c;
+        }
+
+        // Trailing newline for non-empty string and if still pending
+        if (len && c != '\n')
+        {
+            os << '\n';
+        }
+
+        return;
+    }
+
+
+    // Normal case
+    std::size_t pos = 0;
+    const auto len = str.size();
+
+    // Output leading newlines without any indention
+    while (pos < len && str[pos] == '\n')
     {
         os << '\n';
         ++pos;
@@ -1230,85 +1258,139 @@ void Foam::stringOps::writeWrapped
 
     while (pos < len)
     {
-        // Potential end point and next point
-        std::string::size_type end  = pos + width - 1;
-        std::string::size_type eol  = str.find('\n', pos);
-        std::string::size_type next = string::npos;
+        // Potential end point, break point and next point
+        std::string::size_type endp  = pos + width;
+        std::string::size_type breakp = str.find('\n', pos);
+        std::string::size_type nextp = endp;
 
-        if (end >= len)
+        if (std::string::npos != breakp && breakp < endp)
         {
-            // No more wrapping needed
-            end = len;
+            // Embedded line break
+            endp = breakp;
+            nextp = breakp + 1;  // Skip this newline in the next chunk
 
-            if (std::string::npos != eol && eol <= end)
+            // Trim trailing space
+            while
+            (
+                (endp > pos)
+             && (str[endp-1] == ' ' || str[endp-1] == '\t')
+            )
             {
-                // Manual '\n' break, next follows it (default behaviour)
-                end = eol;
+                --endp;
             }
         }
-        else if (std::string::npos != eol && eol <= end)
+        else if (endp >= len)
         {
-            // Manual '\n' break, next follows it (default behaviour)
-            end = eol;
-        }
-        else if (isspace(str[end]))
-        {
-            // Ended on a space - can use this directly
-            next = str.find_first_not_of(" \t\n", end);     // Next non-space
-        }
-        else if (isspace(str[end+1]))
-        {
-            // The next one is a space - so we are okay
-            ++end;  // Otherwise the length is wrong
-            next = str.find_first_not_of(" \t\n", end);     // Next non-space
+            // Can output the rest without any wrapping, no line-breaks
+            nextp = endp = len;
         }
         else
         {
-            // Line break will be mid-word
-            auto prev = str.find_last_of(" \t\n", end);     // Prev word break
+            // Find a good point to break the string
+            // try to find space/tab, or use punctuation as a fallback
 
-            if (std::string::npos != prev && prev > pos)
+            breakp = nextp = endp;
+            std::string::size_type punc = std::string::npos;
+
+            // Backtrack to find whitespace
+            bool foundBreak = false;
+            while (breakp > pos)
             {
-                end = prev;
-                next = prev + 1;  // Continue from here
-            }
-        }
+                --breakp;
 
-        // The next position to continue from
-        if (std::string::npos == next)
-        {
-            next = end + 1;
-        }
+                const char c = str[breakp];
 
-        // Has a length
-        if (end > pos)
-        {
-            // Indent following lines.
-            // The first one was already done prior to calling this routine.
-            if (pos)
-            {
-                for (std::string::size_type i = 0; i < indent; ++i)
+                if (c == ' ' || c == '\t')
                 {
-                    os <<' ';
+                    foundBreak = true;
+                    endp = breakp;
+                    // Found a space, but continue loop anyhow
+                    // (trims trailing space)
+                }
+                else if (foundBreak)
+                {
+                    // Non-whitespace encountered while consuming
+                    // trailing space. We are done
+                    break;
+                }
+                else
+                {
+                    // Potentially viable as last non-whitespace?
+                    nextp = breakp;
+
+                    // Remember if we see any punctuation characters
+                    // - useful later as fallback
+                    if (punc == std::string::npos)
+                    {
+                        switch (c)
+                        {
+                            // Break before the punctuation
+                            case '(' : case '<' :
+                            {
+                                punc = breakp;
+                                break;
+                            }
+                            // Break after the punctuation
+                            case ')' : case '>' :
+                            case ',' : case '.' :
+                            case ':' : case ';' :
+                            case '/' : case '|' :
+                            {
+                                punc = (breakp + 1);
+                                break;
+                            }
+                        }
+                    }
                 }
             }
 
-            while (pos < end)
+            if (!foundBreak)
             {
-                const char c = str[pos];
+                // No whitespace breaks, but perhaps a punctuation break.
+                // Otherwise can't do much else
 
-                if (escape && c == '\\')
+                if (punc != std::string::npos)
                 {
-                    os << '\\';
+                    nextp = endp = punc;
                 }
-                os << c;
-
-                ++pos;
+                else
+                {
+                    nextp = endp;
+                }
             }
-            os << nl;
         }
 
-        pos = next;
+
+        // Output
+        // ~~~~~~
+        // Indent subsequent lines.
+        // - assuming the one was done prior to calling this routine.
+        // - no extra indent if it will only have a newline
+
+        if (pos && (pos < endp))
+        {
+            // Put indent
+            for (std::string::size_type i = 0; i < indent; ++i)
+            {
+                os << ' ';
+            }
+        }
+
+        while (pos < endp)
+        {
+            const char c = str[pos];
+
+            if (escape && c == '\\')
+            {
+                os << '\\';
+            }
+            os << c;
+
+            ++pos;
+        }
+        os << nl;
+
+        pos = nextp;
     }
 }
 
