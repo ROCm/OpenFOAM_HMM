@@ -34,7 +34,7 @@ Foam::label Foam::functionObjects::ensightWrite::writeVolFieldsImpl
 (
     ensightOutput::floatBufferType& scratch,
     const fvMeshSubset& proxy,
-    const wordHashSet& acceptField
+    const wordHashSet& candidateNames
 )
 {
     typedef GeometricField<Type, fvPatchField, volMesh> GeoField;
@@ -43,16 +43,15 @@ Foam::label Foam::functionObjects::ensightWrite::writeVolFieldsImpl
 
     label count = 0;
 
-    for (const word& fieldName : baseMesh.sortedNames<GeoField>(acceptField))
+    for
+    (
+        const GeoField& origField
+      : baseMesh.sorted<GeoField>(candidateNames)
+    )
     {
-        const auto* fieldptr = baseMesh.findObject<GeoField>(fieldName);
+        const word& fieldName = origField.name();
 
-        if (!fieldptr)
-        {
-            continue;
-        }
-
-        auto tfield = fvMeshSubsetProxy::interpolate(proxy, *fieldptr);
+        auto tfield = fvMeshSubsetProxy::interpolate(proxy, origField);
         const auto& field = tfield();
 
         autoPtr<ensightFile> os = ensCase().newData<Type>(fieldName);

@@ -12,6 +12,11 @@ ensightWrite
 
     writeControl    writeTime;
     writeInterval   1;
+
+    //patches       ( "motorBike.*" );
+
+    //- These patches are uninteresting
+    excludePatches  ( inlet outlet frontAndBack ".*[Ww]all" );
 }
 
 

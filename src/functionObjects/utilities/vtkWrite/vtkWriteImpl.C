@@ -28,29 +28,26 @@ License
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class GeoField>
-Foam::label Foam::functionObjects::vtkWrite::writeVolFields
+Foam::label Foam::functionObjects::vtkWrite::writeVolFieldsImpl
 (
     autoPtr<vtk::internalWriter>& internalWriter,
     UPtrList<vtk::patchWriter>& patchWriters,
     const fvMeshSubset& proxy,
-    const wordHashSet& acceptField
+    const wordHashSet& candidateNames
 ) const
 {
     const fvMesh& baseMesh = proxy.baseMesh();
 
     label count = 0;
 
-    for (const word& fieldName : baseMesh.sortedNames<GeoField>(acceptField))
+    for
+    (
+        const GeoField& origField
+      : baseMesh.sorted<GeoField>(candidateNames)
+    )
     {
         bool ok = false;
-        const auto* fieldptr = baseMesh.findObject<GeoField>(fieldName);
-
-        if (!fieldptr)
-        {
-            continue;
-        }
-
-        auto tfield = fvMeshSubsetProxy::interpolate(proxy, *fieldptr);
+        auto tfield = fvMeshSubsetProxy::interpolate(proxy, origField);
         const auto& field = tfield();
 
         // Internal
@@ -83,7 +80,7 @@ Foam::label Foam::functionObjects::vtkWrite::writeVolFields
                 {
                     Log << ' ';
                 }
-                Log << fieldName;
+                Log << origField.name();
             }
         }
     }
@@ -98,31 +95,28 @@ Foam::label Foam::functionObjects::vtkWrite::writeVolFields
 
 
 template<class GeoField>
-Foam::label Foam::functionObjects::vtkWrite::writeVolFields
+Foam::label Foam::functionObjects::vtkWrite::writeVolFieldsImpl
 (
     autoPtr<vtk::internalWriter>& internalWriter,
     const autoPtr<volPointInterpolation>& pInterp,
     UPtrList<vtk::patchWriter>& patchWriters,
     const UPtrList<PrimitivePatchInterpolation<primitivePatch>>& patchInterps,
     const fvMeshSubset& proxy,
-    const wordHashSet& acceptField
+    const wordHashSet& candidateNames
 ) const
 {
     const fvMesh& baseMesh = proxy.baseMesh();
 
     label count = 0;
 
-    for (const word& fieldName : baseMesh.sortedNames<GeoField>(acceptField))
+    for
+    (
+        const GeoField& origField
+      : baseMesh.sorted<GeoField>(candidateNames)
+    )
     {
         bool ok = false;
-        const auto* fieldptr = baseMesh.findObject<GeoField>(fieldName);
-
-        if (!fieldptr)
-        {
-            continue;
-        }
-
-        auto tfield = fvMeshSubsetProxy::interpolate(proxy, *fieldptr);
+        auto tfield = fvMeshSubsetProxy::interpolate(proxy, origField);
         const auto& field = tfield();
 
         // Internal
@@ -158,7 +152,7 @@ Foam::label Foam::functionObjects::vtkWrite::writeVolFields
                 {
                     Log << ' ';
                 }
-                Log << fieldName;
+                Log << origField.name();
             }
         }
     }

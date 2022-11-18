@@ -46,6 +46,7 @@ Description
         width           12;
 
         fields          (U p);
+        // excludeFields  ("force.*");
 
         selection
         {
@@ -85,6 +86,7 @@ Description
         Property    | Description                           | Required | Default
         type        | Type name: ensightWrite               | yes |
         fields      | Fields to output                      | yes |
+        excludeFields | Exclude fields from output (wordRe list) | no  |
         boundary    | Convert boundary fields               | no  | true
         internal    | Convert internal fields               | no  | true
         nodeValues  | Write values at nodes                 | no  | false
@@ -106,6 +108,7 @@ Description
         region      | Name for a single region              | no  | region0
         faceZones   | Select faceZones to write             | no  |
         patches     | Limit to listed patches (wordRe list) | no  |
+        excludePatches | Exclude specified patches          | no  |
         selection   | Cell selection (topoSet actions)      | no  | empty dict
     \endtable
 
@@ -182,8 +185,11 @@ class ensightWrite
         //- Track changes in mesh geometry
         enum polyMesh::readUpdateState meshState_;
 
-        //- Requested names of fields to process
+        //- Requested selection of fields to process
         wordRes selectFields_;
+
+        //- Requested selection of fields to block
+        wordRes blockFields_;
 
         //- Dictionary of volume selections
         dictionary selection_;
@@ -231,14 +237,14 @@ class ensightWrite
         (
             ensightOutput::floatBufferType& scratch,
             const fvMeshSubset& proxy,
-            const wordHashSet& acceptField
+            const wordHashSet& candidateNames
         );
 
         //- Write all volume fields
         label writeAllVolFields
         (
             const fvMeshSubset& proxy,
-            const wordHashSet& acceptField
+            const wordHashSet& candidateNames
         );
 
         //- No copy construct
