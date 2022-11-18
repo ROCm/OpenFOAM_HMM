@@ -8,7 +8,7 @@ mkdir -p constant/triSurface
 # Use 'blob' as an arbitrary enclosing surface
 runApplication surfaceTransformPoints \
     -translate '(0 0 5)' \
-    -origin '(0 0 5)' \
+    -centre '(0 0 5)' \
     -rotate-x 45 \
     "$FOAM_TUTORIALS"/resources/geometry/blob.stl.gz \
     constant/triSurface/blob.obj
