@@ -76,14 +76,14 @@ Foam::argList::initValidTables::initValidTables()
     (
         "case",
         "dir",
-        "Specify case directory to use (instead of cwd)"
+        "Case directory (instead of current directory)"
     );
     argList::addOption
     (
         "lib",
         "name",
-        "Additional library or library list to load."
-        " (Can be used multiple times)",
+        "Additional library or library list to load.\n"
+        "[Can be used multiple times]",
         true  // advanced option
     );
     argList::addBoolOption
@@ -97,9 +97,8 @@ Foam::argList::initValidTables::initValidTables()
     (
         "debug-switch",
         "name=val",
-        "Specify the value of a registered debug switch."
-        " Default is 1 if the value is omitted."
-        " (Can be used multiple times)",
+        "Set named DebugSwitch (default value: 1).\n"
+        "[Can be used multiple times]",
         true  // advanced option
     );
 
@@ -107,9 +106,8 @@ Foam::argList::initValidTables::initValidTables()
     (
         "info-switch",
         "name=val",
-        "Specify the value of a registered info switch."
-        " Default is 1 if the value is omitted."
-        " (Can be used multiple times)",
+        "Set named InfoSwitch (default value: 1).\n"
+        "[Can be used multiple times]",
         true  // advanced option
     );
 
@@ -117,9 +115,8 @@ Foam::argList::initValidTables::initValidTables()
     (
         "opt-switch",
         "name=val",
-        "Specify the value of a registered optimisation switch."
-        " Default is 1 if the value is omitted."
-        " (Can be used multiple times)",
+        "Set named OptimisationSwitch (default value: 1).\n"
+        "[Can be used multiple times]",
         true  // advanced option
     );
 
@@ -142,7 +139,7 @@ Foam::argList::initValidTables::initValidTables()
     (
         "decomposeParDict",
         "file",
-        "Use specified file for decomposePar dictionary"
+        "Alternative decomposePar dictionary file"
     );
     argList::addOption
     (

@@ -46,8 +46,8 @@ Usage
         No backup of existing output files.
 
       - \par -remap \<name\>
-        Use specified remapping dictionary instead of
-        <tt>constant/remapping</tt>
+        Alternative remapping dictionary
+        (default: <tt>constant/remapping</tt>)
 
       - \par -results
         Convert results only to CCM format
@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
     (
         "remap",
         "name",
-        "Use specified remapping dictionary instead of <constant/remapping>"
+        "Alternative remapping dictionary (default: 'constant/remapping')"
     );
     argList::addBoolOption
     (

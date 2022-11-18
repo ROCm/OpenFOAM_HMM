@@ -60,8 +60,8 @@ Usage
         Use numbered patch/zone (not names) directly from ccm ids.
 
       - \par -remap \<name\>
-        Use specified remapping dictionary instead of
-        <tt>constant/remapping</tt>
+        Alternative remapping dictionary
+        (default: <tt>constant/remapping</tt>)
 
       - \par -scale \<factor\>
         Specify an alternative geometry scaling factor.
@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
     (
         "remap",
         "name",
-        "Use specified remapping dictionary instead of <constant/remapping>"
+        "Alternative remapping dictionary (default: 'constant/remapping')"
     );
     argList::addOption
     (

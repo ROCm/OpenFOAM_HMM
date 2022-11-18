@@ -314,7 +314,7 @@ int main(int argc, char *argv[])
     (
         "decomposeParDict",
         "file",
-        "Use specified file for decomposePar dictionary"
+        "Alternative decomposePar dictionary file"
     );
 
     #include "addAllRegionOptions.H"
