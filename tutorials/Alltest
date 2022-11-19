@@ -7,7 +7,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2017-2021 OpenCFD Ltd.
+#     Copyright (C) 2017-2022 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -30,6 +30,7 @@ printHelp() {
 usage: ${0##*/} [OPTION]
 
 options:
+  -backup       Backup existing tutorialsTest directory
   -force        Force overwrite of existing tutorialsTest directory
   -debug        Adjust DebugSwitches (fvSchemes, solution)
   -default      Sets up a default scheme on all schemes
@@ -64,14 +65,15 @@ rootDir="./"
 adjustDebugSwitches=false
 useDefaultSchemes=false
 useGit=auto
-unset optForce
+unset optBackup
 
 # Parse options
 while [ "$#" -gt 0 ]
 do
     case "$1" in
     -h* | -help*)   printHelp ;;
-    -f | -force)    optForce=true ;;
+    -f | -force)    optBackup='force' ;;
+    -backup)        optBackup='backup' ;;
 
     -root=*)
         rootDir="${1#*=}"
@@ -206,15 +208,45 @@ SOLVERS_TEMP="FvSolution.temp"
 
 if [ -d "$TEST_RUN_DIR" ]
 then
-    if [ "$optForce" = true ]
-    then
-        echo "Removing old directory: $TEST_RUN_DIR" 1>&2
+    echo "Directory already exists: $TEST_RUN_DIR" 1>&2
+    case "$optBackup" in
+    (backup)
+        unset failed newName
+        # Max of ten backups should be plenty
+        for num in 01 02 03 04 05 06 07 08 09 10
+        do
+            newName=".bak$num"
+            if [ -e "${TEST_RUN_DIR}${newName}" ]
+            then
+                failed="${failed}${failed:+,}$num"
+            else
+                mv -f -- "$TEST_RUN_DIR" "${TEST_RUN_DIR}${newName}"
+                break
+            fi
+        done
+
+        if [ -d "$TEST_RUN_DIR" ]
+        then
+            echo '    could not backup as .bak{'"${failed}"'}' 1>&2
+            echo '    retry with -force?' 1>&2
+            echo 1>&2
+            exit 1
+        else
+            echo "Saved as backup: ${TEST_RUN_DIR##*/}${newName}" 1>&2
+            echo 1>&2
+        fi
+        ;;
+
+    (force)
+        echo "   ... removing" 1>&2
         rm -rf "$TEST_RUN_DIR"
-    else
-        echo "Directory already exists: $TEST_RUN_DIR" 1>&2
-        echo "    use -force to remove" 1>&2
+        ;;
+    (*)
+        echo '    use -force to remove, or -backup to preserve' 1>&2
+        echo 1>&2
         exit 1
-    fi
+        ;;
+    esac
 fi
 
 # Remove old build/ directory
@@ -257,9 +289,23 @@ then
     mkdir -p "$TEST_RUN_DIR"
     ( cd "$gitbase/tutorials" && git archive --format=tar HEAD . ) | \
     ( cd "$TEST_RUN_DIR" && tar -xf - )
+
+    # How the tutorials were created
+    # - use full commit information since the SHA1 changes if rebased
+    echo "# Tutorials based on following commit:" >| "$TEST_RUN_DIR/commit-info"
+    echo >> "$TEST_RUN_DIR/commit-info"
+    git log -1 >> "$TEST_RUN_DIR/commit-info"
+    echo >> "$TEST_RUN_DIR/commit-info"
+    echo "# end-of-file" >> "$TEST_RUN_DIR/commit-info"
+
 else
     echo "Copying the tutorials directory" 1>&2
     cp -a "$rootDir" "$TEST_RUN_DIR"
+
+    # How the tutorials were created
+    echo "# Tutorials copied from disk" >| "$TEST_RUN_DIR/commit-info"
+    echo >> "$TEST_RUN_DIR/commit-info"
+    echo "# end-of-file" >> "$TEST_RUN_DIR/commit-info"
 fi
 
 cd "$TEST_RUN_DIR" || exit
