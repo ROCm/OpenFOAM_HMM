@@ -99,38 +99,12 @@ void Foam::IOobjectList::syncNames(wordList& objNames)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::IOobjectList::IOobjectList()
-:
-    HashPtrTable<IOobject>()
-{}
-
-
-Foam::IOobjectList::IOobjectList(const label nObjects)
-:
-    HashPtrTable<IOobject>(nObjects)  // Could also use 2*nObjects instead
-{}
-
-
-Foam::IOobjectList::IOobjectList(const IOobjectList& list)
-:
-    HashPtrTable<IOobject>(list)
-{}
-
-
-Foam::IOobjectList::IOobjectList(IOobjectList&& list)
-:
-    HashPtrTable<IOobject>(std::move(list))
-{}
-
-
 Foam::IOobjectList::IOobjectList
 (
     const objectRegistry& db,
     const fileName& instance,
     const fileName& local,
-    IOobjectOption::readOption rOpt,
-    IOobjectOption::writeOption wOpt,
-    bool registerObject
+    IOobjectOption ioOpt
 )
 :
     HashPtrTable<IOobject>()
@@ -152,9 +126,7 @@ Foam::IOobjectList::IOobjectList
             newInstance,
             local,
             db,
-            rOpt,
-            wOpt,
-            registerObject
+            ioOpt
         );
 
         bool ok = false;
@@ -182,51 +154,7 @@ Foam::IOobjectList::IOobjectList
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::IOobjectList::add(autoPtr<IOobject>& objectPtr)
-{
-    if (objectPtr)
-    {
-        return insert(objectPtr->name(), objectPtr);
-    }
-
-    return false;
-}
-
-
-bool Foam::IOobjectList::add(autoPtr<IOobject>&& objectPtr)
-{
-    if (objectPtr)
-    {
-        return insert(objectPtr->name(), objectPtr);
-    }
-
-    return false;
-}
-
-
-Foam::label Foam::IOobjectList::append(const IOobjectList& other)
-{
-    label count = 0;
-
-    forAllConstIters(other, iter)
-    {
-        if (!found(iter.key()))
-        {
-            if (IOobject::debug)
-            {
-                InfoInFunction << "Copy append " << iter.key() << nl;
-            }
-
-            set(iter.key(), new IOobject(*iter.val()));
-            ++count;
-        }
-    }
-
-    return count;
-}
-
-
-Foam::label Foam::IOobjectList::append(IOobjectList&& other)
+Foam::label Foam::IOobjectList::merge(IOobjectList&& other)
 {
     // Remove by name to avoid uncertainties about invalid iterators
 
@@ -240,7 +168,7 @@ Foam::label Foam::IOobjectList::append(IOobjectList&& other)
         {
             if (IOobject::debug)
             {
-                InfoInFunction << "Move append " << key << nl;
+                InfoInFunction << "Merge " << key << nl;
             }
 
             if (add(other.remove(key)))
@@ -251,12 +179,6 @@ Foam::label Foam::IOobjectList::append(IOobjectList&& other)
     }
 
     return count;
-}
-
-
-bool Foam::IOobjectList::remove(const IOobject& io)
-{
-    return erase(io.name());
 }
 
 
@@ -441,14 +363,6 @@ void Foam::IOobjectList::checkNames(const bool syncPar) const
 
         checkNameOrder(objNames, syncPar);
     }
-}
-
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-void Foam::IOobjectList::operator=(IOobjectList&& list)
-{
-    transfer(list);
 }
 
 

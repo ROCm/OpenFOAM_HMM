@@ -887,9 +887,7 @@ int main(int argc, char *argv[])
                         mesh,
                         runTime.timeName(),
                         cloud::prefix/cloudDir,
-                        IOobject::MUST_READ,
-                        IOobject::NO_WRITE,
-                        false
+                        IOobject::NO_REGISTER
                     );
 
                     // Note: look up "positions" for backwards compatibility
@@ -972,9 +970,7 @@ int main(int argc, char *argv[])
                             mesh,
                             runTime.timeName(),
                             cloud::prefix/cloudDirs[cloudI],
-                            IOobject::MUST_READ,
-                            IOobject::NO_WRITE,
-                            false
+                            IOobject::NO_REGISTER
                         );
 
                         lagrangianFieldCache.readAllFields

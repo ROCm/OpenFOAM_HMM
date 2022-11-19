@@ -51,7 +51,7 @@ void Foam::Cloud<ParticleType>::readCloudUniformProperties()
         db(),
         IOobject::MUST_READ_IF_MODIFIED,
         IOobject::NO_WRITE,
-        false
+        IOobject::NO_REGISTER
     );
 
     if (dictObj.typeHeaderOk<IOdictionary>(true))
@@ -97,7 +97,7 @@ void Foam::Cloud<ParticleType>::writeCloudUniformProperties() const
             db(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     );
 
@@ -200,7 +200,7 @@ Foam::IOobject Foam::Cloud<ParticleType>::fieldIOobject
         *this,
         rOpt,
         IOobject::NO_WRITE,
-        false
+        IOobject::NO_REGISTER
     );
 }
 
@@ -274,10 +274,7 @@ void Foam::Cloud<ParticleType>::readFromFiles
     (
         *this,
         time().timeName(),
-        "",
-        IOobject::MUST_READ,
-        IOobject::NO_WRITE,
-        false
+        IOobject::NO_REGISTER
     );
 
     const wordRes::filter pred(selectFields, excludeFields);
