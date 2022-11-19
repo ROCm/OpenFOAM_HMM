@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -15,9 +15,21 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
+// Embed do-while to support early termination
 if (doDecompose && Pstream::parRun())
+do
 {
-    faMeshReconstructor reconstructor(aMesh);
+    faMeshReconstructor reconstructor(aMesh, IOobjectOption::READ_IF_PRESENT);
+
+    if (!reconstructor.good())
+    {
+        Info<< "Missing volume proc-addressing, "
+               "cannot generate area proc-addressing." << nl
+            << "Also skip decomposing area fields...."
+            << endl;
+        break;
+    }
+
     reconstructor.writeAddressing();
 
     Info<< "Wrote proc-addressing" << nl << endl;
@@ -77,7 +89,7 @@ if (doDecompose && Pstream::parRun())
         areaFieldsCache.decomposeAllFields(fieldDecomposer, true);
         Info<< endl;
     }
-}
+} while (false);
 
 
 // ************************************************************************* //

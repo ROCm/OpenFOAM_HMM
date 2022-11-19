@@ -402,7 +402,7 @@ class faFieldDecomposer::fieldsCache
 
         class privateCache;
 
-        //- All field and field-field types for lagrangian
+        //- All field and field-field types for finiteArea
         std::unique_ptr<privateCache> cache_;
 
 

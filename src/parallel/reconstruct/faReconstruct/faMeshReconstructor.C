@@ -466,7 +466,7 @@ void Foam::faMeshReconstructor::createMesh()
 
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false  // not registered
+                IOobject::NO_REGISTER
             ),
             pointField(singlePatchPoints_),  // copy
             faceList(singlePatchFaces_),     // copy
@@ -525,10 +525,12 @@ void Foam::faMeshReconstructor::createMesh()
 
 Foam::faMeshReconstructor::faMeshReconstructor
 (
-    const faMesh& procMesh
+    const faMesh& procMesh,
+    IOobjectOption::readOption readVolAddressing
 )
 :
-    procMesh_(procMesh)
+    procMesh_(procMesh),
+    errors_(0)
 {
     if (!Pstream::parRun())
     {
@@ -537,32 +539,49 @@ Foam::faMeshReconstructor::faMeshReconstructor
             << exit(FatalError);
     }
 
-    // Require faceProcAddressing from finiteVolume decomposition
-    labelIOList fvFaceProcAddressing
+    IOobject ioAddr
     (
-        IOobject
-        (
-            "faceProcAddressing",
-            procMesh_.mesh().facesInstance(),
+        "faceProcAddressing",
+        procMesh_.mesh().facesInstance(),
 
-            // Or search?
-            // procMesh_.time().findInstance
-            // (
-            //     // Search for polyMesh face instance
-            //     // mesh.facesInstance()
-            //     procMesh_.mesh().meshDir(),
-            //     "faceProcAddressing"
-            // ),
+        // Or search?
+        // procMesh_.time().findInstance
+        // (
+        //     // Search for polyMesh face instance
+        //     // mesh.facesInstance()
+        //     procMesh_.mesh().meshDir(),
+        //     "faceProcAddressing"
+        // ),
 
-            polyMesh::meshSubDir,
-            procMesh_.mesh(),    // The polyMesh db
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE,
-            false  // not registered
-        )
+        polyMesh::meshSubDir,
+        procMesh_.mesh(),    // The polyMesh db
+
+        readVolAddressing,   // Read option
+        IOobject::NO_WRITE,
+        IOobject::NO_REGISTER
     );
 
-    calcAddressing(fvFaceProcAddressing);
+    // Require faceProcAddressing from finiteVolume decomposition
+    labelIOList fvFaceProcAddr(ioAddr);
+
+    // Check if any/all where read.
+    // Use 'headerClassName' for checking
+    bool fileOk
+    (
+        (fvFaceProcAddr.readOpt() != IOobjectOption::NO_READ)
+     && fvFaceProcAddr.isHeaderClass<labelIOList>()
+    );
+
+    Pstream::reduceAnd(fileOk);
+
+    if (fileOk)
+    {
+        calcAddressing(fvFaceProcAddr);
+    }
+    else
+    {
+        errors_ = 1;
+    }
 }
 
 
@@ -572,7 +591,8 @@ Foam::faMeshReconstructor::faMeshReconstructor
     const labelUList& fvFaceProcAddressing
 )
 :
-    procMesh_(procMesh)
+    procMesh_(procMesh),
+    errors_(0)
 {
     if (!Pstream::parRun())
     {
