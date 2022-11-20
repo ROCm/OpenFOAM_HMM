@@ -8,15 +8,37 @@
     Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
-    This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
+    This file is part of OpenFOAM.
 
-Description
-    Summary of faMesh information
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
+#include "faMeshTools.H"
+#include "areaFields.H"
+#include "edgeFields.H"
+#include "processorFaPatch.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+void Foam::faMeshTools::printMeshChecks
+(
+    const faMesh& mesh,
+    const int verbose
+)
 {
-    const faBoundaryMesh& patches = aMesh.boundary();
+    const faBoundaryMesh& patches = mesh.boundary();
     const label nNonProcessor = patches.nNonProcessor();
     const label nPatches = patches.size();
 
@@ -36,19 +58,19 @@ Description
 
     const labelList nFaces
     (
-        UPstream::listGatherValues<label>(aMesh.nFaces())
+        UPstream::listGatherValues<label>(mesh.nFaces())
     );
     const labelList nPoints
     (
-        UPstream::listGatherValues<label>(aMesh.nPoints())
+        UPstream::listGatherValues<label>(mesh.nPoints())
     );
     const labelList nEdges
     (
-        UPstream::listGatherValues<label>(aMesh.nEdges())
+        UPstream::listGatherValues<label>(mesh.nEdges())
     );
     const labelList nIntEdges
     (
-        UPstream::listGatherValues<label>(aMesh.nInternalEdges())
+        UPstream::listGatherValues<label>(mesh.nInternalEdges())
     );
 
     // The "real" (non-processor) boundary edges
@@ -56,7 +78,7 @@ Description
     (
         UPstream::listGatherValues<label>
         (
-            aMesh.nBoundaryEdges() - nLocalProcEdges
+            mesh.nBoundaryEdges() - nLocalProcEdges
         )
     );
     const labelList nProcEdges
@@ -70,10 +92,10 @@ Description
     //         per-proc: (...)
 
     const auto reporter =
-        [&](const char* tag, const labelList& list)
+        [&,verbose](const char* tag, const labelList& list)
         {
             Info<< "  Number of " << tag << ": " << sum(list) << nl;
-            if (Pstream::parRun())
+            if (Pstream::parRun() && verbose)
             {
                 int padding = static_cast<int>
                 (
@@ -92,7 +114,7 @@ Description
     Info<< "----------------" << nl
         << "Mesh Information" << nl
         << "----------------" << nl
-        << "  " << "boundingBox: " << boundBox(aMesh.points()) << nl;
+        << "  " << "boundingBox: " << boundBox(mesh.points()) << nl;
 
     if (Pstream::master())
     {
@@ -124,26 +146,26 @@ Description
     }
 
     Info<< "----------------" << nl
-        << "Used polyPatches: " << flatOutput(aMesh.whichPolyPatches()) << nl;
+        << "Used polyPatches: " << flatOutput(mesh.whichPolyPatches()) << nl;
 
 
     // Geometry information
     Info<< nl;
     {
-        scalarMinMax limit(gMinMax(aMesh.S().field()));
+        scalarMinMax limit(gMinMax(mesh.S().field()));
         Info<< "Face area:" << nl
             << "    min = " << limit.min() << " max = "  << limit.max() << nl;
     }
 
     {
-        scalarMinMax limit(minMax(aMesh.magLe().primitiveField()));
+        scalarMinMax limit(minMax(mesh.magLe().primitiveField()));
 
         // Include processor boundaries into 'internal' edges
         if (Pstream::parRun())
         {
             for (label patchi = nNonProcessor; patchi < nPatches; ++patchi)
             {
-                limit.add(minMax(aMesh.magLe().boundaryField()[patchi]));
+                limit.add(minMax(mesh.magLe().boundaryField()[patchi]));
             }
 
             reduce(limit, minMaxOp<scalar>());
@@ -156,7 +178,7 @@ Description
         // Include (non-processor) boundaries
         for (label patchi = 0; patchi < nNonProcessor; ++patchi)
         {
-            limit.add(minMax(aMesh.magLe().boundaryField()[patchi]));
+            limit.add(minMax(mesh.magLe().boundaryField()[patchi]));
         }
 
         if (Pstream::parRun())
@@ -171,7 +193,7 @@ Description
     // Not particularly meaningful
     #if 0
     {
-        MinMax<vector> limit(gMinMax(aMesh.faceAreaNormals().field()));
+        MinMax<vector> limit(gMinMax(mesh.faceAreaNormals().field()));
 
         Info<< "Face area normals:" << nl
             << "    min = " << limit.min() << " max = " << limit.max() << nl;

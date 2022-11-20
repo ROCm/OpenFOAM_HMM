@@ -30,44 +30,63 @@ do
         break;
     }
 
-    reconstructor.writeAddressing();
+    reconstructor.writeMesh();          // Writes on master only
+    reconstructor.writeAddressing();    // Writes per-proc
 
-    Info<< "Wrote proc-addressing" << nl << endl;
+    Info<< "Wrote proc-addressing and serial mesh" << nl << endl;
 
     // Handle area fields
     // ------------------
 
     faFieldDecomposer::fieldsCache areaFieldsCache;
 
-    const faMesh& fullMesh = reconstructor.mesh();
+    const faMesh& serialMesh = reconstructor.mesh();
 
+    if (doDecompFields)
     {
-        // Use uncollated (or master uncollated) file handler here.
-        // - each processor is reading in the identical serial fields.
-        // - nothing should be parallel-coordinated.
+        // The serial finite-area mesh exists and is identical on all
+        // processors, but its fields can only reliably be read on the
+        // master (eg, running with distributed roots).
+        //
+        // - mark mesh fields as readable on master only (haveMeshOnProc)
+        // - 'subset' entire serial mesh so that a full copy will be
+        //   broadcast to other ranks (subsetterPtr)
+        // - scan available IOobjects on the master only
 
-        // Similarly, if we write the serial finite-area mesh, this is only
-        // done from one processor!
+        bitSet haveMeshOnProc;
+        std::unique_ptr<faMeshSubset> subsetter;
+        IOobjectList objects(0);
 
-        reconstructor.writeMesh();
+        const bool oldDistributed = fileHandler().distributed();
+        auto oldHandler = fileHandler(fileOperation::NewUncollated());
+        fileHandler().distributed(true);
 
-        if (doDecompFields)
+        if (Pstream::master())
         {
-            const bool oldDistributed = fileHandler().distributed();
-            auto oldHandler = fileHandler(fileOperation::NewUncollated());
-            fileHandler().distributed(true);
+            haveMeshOnProc.set(Pstream::myProcNo());
+            subsetter.reset(new faMeshSubset(serialMesh));
 
-            IOobjectList objects(fullMesh.time(), runTime.timeName());
+            const bool oldParRun = Pstream::parRun(false);
 
-            areaFieldsCache.readAllFields(fullMesh, objects);
+            objects = IOobjectList(serialMesh.time(), runTime.timeName());
 
-            // Restore old settings
-            if (oldHandler)
-            {
-                fileHandler(std::move(oldHandler));
-            }
-            fileHandler().distributed(oldDistributed);
+            Pstream::parRun(oldParRun);
         }
+
+        // Restore old settings
+        if (oldHandler)
+        {
+            fileHandler(std::move(oldHandler));
+        }
+        fileHandler().distributed(oldDistributed);
+
+        areaFieldsCache.readAllFields
+        (
+            haveMeshOnProc,
+            subsetter.get(),
+            serialMesh,
+            objects
+        );
     }
 
     const label nAreaFields = areaFieldsCache.size();
@@ -78,7 +97,7 @@ do
 
         faFieldDecomposer fieldDecomposer
         (
-            fullMesh,
+            serialMesh,
             aMesh,
             reconstructor.edgeProcAddressing(),
             reconstructor.faceProcAddressing(),

@@ -77,7 +77,11 @@ public:
 
     bool empty() const noexcept { return !size(); }
 
-    void readAll(const faMesh& mesh, const IOobjectList& objects)
+    void readAll
+    (
+        const faMesh& mesh,
+        const IOobjectList& objects
+    )
     {
         #undef  doLocalCode
         #define doLocalCode(Type)                                     \
@@ -101,6 +105,45 @@ public:
                 objects,                                              \
                 Type##EdgeFields_,                                    \
                 false  /* readOldTime = false */                      \
+            );                                                        \
+        }
+
+        doLocalCode(scalar);
+        doLocalCode(vector);
+        doLocalCode(sphericalTensor);
+        doLocalCode(symmTensor);
+        doLocalCode(tensor);
+
+        #undef doLocalCode
+    }
+
+    template<class BoolListType>
+    void readAll
+    (
+        const BoolListType& haveMeshOnProc,
+        const faMeshSubset*& subsetter,
+        const faMesh& mesh,
+        IOobjectList& objects
+    )
+    {
+        #undef  doLocalCode
+        #define doLocalCode(Type)                                     \
+        {                                                             \
+            fieldsDistributor::readFields                             \
+            (                                                         \
+                haveMeshOnProc,                                       \
+                subsetter,                                            \
+                mesh,                                                 \
+                objects,                                              \
+                Type##AreaFields_                                     \
+            );                                                        \
+            fieldsDistributor::readFields                             \
+            (                                                         \
+                haveMeshOnProc,                                       \
+                subsetter,                                            \
+                mesh,                                                 \
+                objects,                                              \
+                Type##EdgeFields_                                     \
             );                                                        \
         }
 
@@ -201,6 +244,36 @@ void Foam::faFieldDecomposer::fieldsCache::readAllFields
     if (cache_)
     {
         cache_->readAll(mesh, objects);
+    }
+}
+
+
+void Foam::faFieldDecomposer::fieldsCache::readAllFields
+(
+    const bitSet& haveMeshOnProc,
+    const faMeshSubset* subsetter,
+    const faMesh& mesh,
+    IOobjectList& objects
+)
+{
+    if (cache_)
+    {
+        cache_->readAll(haveMeshOnProc, subsetter, mesh, objects);
+    }
+}
+
+
+void Foam::faFieldDecomposer::fieldsCache::readAllFields
+(
+    const boolList& haveMeshOnProc,
+    const faMeshSubset* subsetter,
+    const faMesh& mesh,
+    IOobjectList& objects
+)
+{
+    if (cache_)
+    {
+        cache_->readAll(haveMeshOnProc, subsetter, mesh, objects);
     }
 }
 

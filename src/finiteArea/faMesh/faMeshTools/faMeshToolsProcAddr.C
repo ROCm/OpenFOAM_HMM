@@ -238,7 +238,7 @@ Foam::faMeshTools::readProcAddressing
         mesh.thisDb(),
         IOobject::READ_IF_PRESENT,
         IOobject::NO_WRITE,
-        false  // no register
+        IOobject::NO_REGISTER
     );
 
     //if (ioAddr.typeHeaderOk<labelIOList>(true))
@@ -327,7 +327,7 @@ void Foam::faMeshTools::writeProcAddressing
         (procMesh && !decompose ? procMesh->thisDb() : mesh.thisDb()),
         IOobject::NO_READ,
         IOobject::NO_WRITE,
-        false  // no register
+        IOobject::NO_REGISTER
     );
 
 
@@ -418,7 +418,7 @@ void Foam::faMeshTools::writeProcAddressing
             mesh.thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false  // no register
+            IOobject::NO_REGISTER
         ),
         map
     );

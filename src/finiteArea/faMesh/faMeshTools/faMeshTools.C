@@ -109,7 +109,7 @@ Foam::autoPtr<Foam::faMesh> Foam::faMeshTools::newMesh
                 io.db(),
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             )
         );
 
@@ -282,7 +282,7 @@ Foam::autoPtr<Foam::faMesh> Foam::faMeshTools::loadOrCreateMesh
                 io.db(),
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             )
         );
 

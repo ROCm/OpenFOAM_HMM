@@ -11,6 +11,7 @@ faMesh/faBoundaryMesh/faBoundaryMeshEntries.C
 
 faMesh/faMeshSubset/faMeshSubset.C
 faMesh/faMeshTools/faMeshTools.C
+faMesh/faMeshTools/faMeshToolsChecks.C
 faMesh/faMeshTools/faMeshToolsProcAddr.C
 
 faPatches = faMesh/faPatches
