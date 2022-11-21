@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -151,19 +151,18 @@ bool Foam::sampledFaceZone::update()
     // Could also check numFaces
 
     // The mesh face or local patch face and the patch id
-    faceId_.resize(numFaces);
-    facePatchId_.resize(numFaces);
+    faceId_.resize_nocopy(numFaces);
+    facePatchId_.resize_nocopy(numFaces);
 
     IndirectList<face> selectedFaces(mesh().faces(), labelList());
     labelList& meshFaceIds = selectedFaces.addressing();
-    meshFaceIds.resize(numFaces);
+    meshFaceIds.resize_nocopy(numFaces);
 
     numFaces = 0;
 
-    forAll(zoneIDs(), idx)
+    for (const label zoneId : zoneIDs())
     {
-        const label zonei = zoneIDs()[idx];
-        const faceZone& fZone = mesh().faceZones()[zonei];
+        const faceZone& fZone = mesh().faceZones()[zoneId];
 
         for (const label meshFacei : fZone)
         {
@@ -179,26 +178,17 @@ bool Foam::sampledFaceZone::update()
 
                 if (isA<emptyPolyPatch>(pp))
                 {
-                    // Do not sample an empty patch
-                    continue;
-                }
-
-                const auto* procPatch = isA<processorPolyPatch>(pp);
-                if (procPatch && !procPatch->owner())
-                {
-                    // Do not sample neighbour-side, retain owner-side only
-                    continue;
+                    continue;  // Ignore empty patch
                 }
 
                 const auto* cpp = isA<coupledPolyPatch>(pp);
-                if (cpp)
+
+                if (cpp && !cpp->owner())
                 {
-                    faceId = (cpp->owner() ? pp.whichFace(meshFacei) : -1);
+                    continue;  // Ignore neighbour side
                 }
-                else
-                {
-                    faceId = pp.whichFace(meshFacei);
-                }
+
+                faceId = pp.whichFace(meshFacei);
             }
 
             if (faceId >= 0)
@@ -206,6 +196,7 @@ bool Foam::sampledFaceZone::update()
                 faceId_[numFaces] = faceId;
                 facePatchId_[numFaces] = facePatchId;
                 meshFaceIds[numFaces] = meshFacei;
+
                 ++numFaces;
             }
         }

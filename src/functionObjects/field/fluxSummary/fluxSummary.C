@@ -201,56 +201,62 @@ void Foam::functionObjects::fluxSummary::initialiseFaceZone
     names.append(faceZoneName);
     directions.append(Zero); // dummy value
 
-    DynamicList<label> faceIDs(fZone.size());
-    DynamicList<label> facePatchIDs(fZone.size());
-    DynamicList<bool>  flips(fZone.size());
+    labelList faceIds(fZone.size());
+    labelList facePatchIds(fZone.size());
+    boolList  faceFlips(fZone.size());
+
+    // Total number of faces selected
+    label numFaces = 0;
 
     forAll(fZone, i)
     {
-        label facei = fZone[i];
+        const label meshFacei = fZone[i];
         const bool isFlip = fZone.flipMap()[i];
 
-        label faceID = -1;
-        label facePatchID = -1;
-        if (mesh_.isInternalFace(facei))
+        // Internal faces
+        label faceId = meshFacei;
+        label facePatchId = -1;
+
+        // Boundary faces
+        if (!mesh_.isInternalFace(meshFacei))
         {
-            faceID = facei;
-            facePatchID = -1;
-        }
-        else
-        {
-            facePatchID = mesh_.boundaryMesh().whichPatch(facei);
-            const polyPatch& pp = mesh_.boundaryMesh()[facePatchID];
+            facePatchId = mesh_.boundaryMesh().whichPatch(meshFacei);
+            const polyPatch& pp = mesh_.boundaryMesh()[facePatchId];
+
+            if (isA<emptyPolyPatch>(pp))
+            {
+                continue;  // Ignore empty patch
+            }
+
             const auto* cpp = isA<coupledPolyPatch>(pp);
 
-            if (cpp)
+            if (cpp && !cpp->owner())
             {
-                faceID = (cpp->owner() ? pp.whichFace(facei) : -1);
+                continue;  // Ignore neighbour side
             }
-            else if (!isA<emptyPolyPatch>(pp))
-            {
-                faceID = pp.whichFace(facei);
-            }
-            else
-            {
-                faceID = -1;
-                facePatchID = -1;
-            }
+
+            faceId = pp.whichFace(meshFacei);
         }
 
-        if (faceID >= 0)
+        if (faceId >= 0)
         {
             // Orientation set by faceZone flip map
-            flips.append(isFlip);
-            faceIDs.append(faceID);
-            facePatchIDs.append(facePatchID);
+            faceIds[numFaces] = faceId;
+            facePatchIds[numFaces] = facePatchId;
+            faceFlips[numFaces] = isFlip;
+
+            ++numFaces;
         }
     }
 
-    // could reduce some copying here
-    faceID.append(faceIDs);
-    facePatchID.append(facePatchIDs);
-    faceFlip.append(flips);
+    // Shrink to size used
+    faceIds.resize(numFaces);
+    facePatchIds.resize(numFaces);
+    faceFlips.resize(numFaces);
+
+    faceID.append(std::move(faceIds));
+    facePatchID.append(std::move(facePatchIds));
+    faceFlip.append(std::move(faceFlips));
 }
 
 
@@ -281,78 +287,84 @@ void Foam::functionObjects::fluxSummary::initialiseFaceZoneAndDirection
     names.append(faceZoneName);
     directions.append(refDir);
 
-    DynamicList<label> faceIDs(fZone.size());
-    DynamicList<label> facePatchIDs(fZone.size());
-    DynamicList<bool>  flips(fZone.size());
+    labelList faceIds(fZone.size());
+    labelList facePatchIds(fZone.size());
+    boolList  faceFlips(fZone.size());
 
     const surfaceVectorField& Sf = mesh_.Sf();
     const surfaceScalarField& magSf = mesh_.magSf();
 
     vector n(Zero);
 
+    // Total number of faces selected
+    label numFaces = 0;
+
     forAll(fZone, i)
     {
-        label facei = fZone[i];
+        const label meshFacei = fZone[i];
 
-        label faceID = -1;
-        label facePatchID = -1;
-        if (mesh_.isInternalFace(facei))
+        // Internal faces
+        label faceId = meshFacei;
+        label facePatchId = -1;
+
+        // Boundary faces
+        if (!mesh_.isInternalFace(meshFacei))
         {
-            faceID = facei;
-            facePatchID = -1;
-        }
-        else
-        {
-            facePatchID = mesh_.boundaryMesh().whichPatch(facei);
-            const polyPatch& pp = mesh_.boundaryMesh()[facePatchID];
+            facePatchId = mesh_.boundaryMesh().whichPatch(meshFacei);
+            const polyPatch& pp = mesh_.boundaryMesh()[facePatchId];
+
+            if (isA<emptyPolyPatch>(pp))
+            {
+                continue;  // Ignore empty patch
+            }
+
             const auto* cpp = isA<coupledPolyPatch>(pp);
 
-            if (cpp)
+            if (cpp && !cpp->owner())
             {
-                faceID = (cpp->owner() ? pp.whichFace(facei) : -1);
+                continue;  // Ignore neighbour side
             }
-            else if (!isA<emptyPolyPatch>(pp))
-            {
-                faceID = pp.whichFace(facei);
-            }
-            else
-            {
-                faceID = -1;
-                facePatchID = -1;
-            }
+
+            faceId = pp.whichFace(meshFacei);
         }
 
-        if (faceID >= 0)
+        if (faceId >= 0)
         {
-            // orientation set by comparison with reference direction
-            if (facePatchID != -1)
+            // Orientation set by comparison with reference direction
+            if (facePatchId != -1)
             {
-                n = Sf.boundaryField()[facePatchID][faceID]
-                   /(magSf.boundaryField()[facePatchID][faceID] + ROOTVSMALL);
+                n = Sf.boundaryField()[facePatchId][faceId]
+                   /(magSf.boundaryField()[facePatchId][faceId] + ROOTVSMALL);
             }
             else
             {
-                n = Sf[faceID]/(magSf[faceID] + ROOTVSMALL);
+                n = Sf[faceId]/(magSf[faceId] + ROOTVSMALL);
             }
 
             if ((n & refDir) > tolerance_)
             {
-                flips.append(false);
+                faceFlips[numFaces] = false;
             }
             else
             {
-                flips.append(true);
+                faceFlips[numFaces] = true;
             }
 
-            faceIDs.append(faceID);
-            facePatchIDs.append(facePatchID);
+            faceIds[numFaces] = faceId;
+            facePatchIds[numFaces] = facePatchId;
+
+            ++numFaces;
         }
     }
 
-    // could reduce copying here
-    faceID.append(faceIDs);
-    facePatchID.append(facePatchIDs);
-    faceFlip.append(flips);
+    // Shrink to size used
+    faceIds.resize(numFaces);
+    facePatchIds.resize(numFaces);
+    faceFlips.resize(numFaces);
+
+    faceID.append(std::move(faceIds));
+    facePatchID.append(std::move(facePatchIds));
+    faceFlip.append(std::move(faceFlips));
 }
 
 
@@ -498,7 +510,7 @@ void Foam::functionObjects::fluxSummary::initialiseCellZoneAndDirection
         << "Starting walk to split patch into faceZones"
         << endl;
 
-    globalIndex globalFaces(patch.size());
+    const globalIndex globalFaces(patch.size());
 
     label oldFaceID = 0;
     label regioni = 0;

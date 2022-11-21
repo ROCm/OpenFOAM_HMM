@@ -314,7 +314,7 @@ void Foam::ensightMesh::correct()
     }
 
 
-    // Face exclusion for empty/processor types
+    // Face exclusion for empty types and neighbour side of coupled
     // so they are ignored for face zones
 
     if (fzoneIds.size())
@@ -324,15 +324,16 @@ void Foam::ensightMesh::correct()
 
         for (const polyPatch& p : mesh_.boundaryMesh())
         {
-            const auto* procPatch = isA<processorPolyPatch>(p);
+            const auto* cpp = isA<coupledPolyPatch>(p);
 
-            if (isA<emptyPolyPatch>(p))
+            if
+            (
+                isA<emptyPolyPatch>(p)
+             || (cpp && !cpp->owner())
+            )
             {
-                excludeFace.set(p.range());
-            }
-            else if (procPatch && !procPatch->owner())
-            {
-                // Exclude neighbour-side, retain owner-side only
+                // Ignore empty patch
+                // Ignore neighbour side of coupled
                 excludeFace.set(p.range());
             }
         }

@@ -78,60 +78,62 @@ void Foam::heatExchangerModel::initialise()
 
     const faceZone& fZone = mesh_.faceZones()[zoneID];
 
-    faceId_.setSize(fZone.size());
-    facePatchId_.setSize(fZone.size());
-    faceSign_.setSize(fZone.size());
+    // Total number of faces selected
+    label numFaces = fZone.size();
 
-    label count = 0;
-    forAll(fZone, i)
+    faceId_.resize_nocopy(numFaces);
+    facePatchId_.resize_nocopy(numFaces);
+    faceSign_.resize_nocopy(numFaces);
+
+    numFaces = 0;
+
+    // TDB: handle multiple zones
     {
-        const label facei = fZone[i];
-        label faceId = -1;
-        label facePatchId = -1;
-        if (mesh_.isInternalFace(facei))
+        forAll(fZone, i)
         {
-            faceId = facei;
-            facePatchId = -1;
-        }
-        else
-        {
-            facePatchId = mesh_.boundaryMesh().whichPatch(facei);
-            const polyPatch& pp = mesh_.boundaryMesh()[facePatchId];
-            const auto* cpp = isA<coupledPolyPatch>(pp);
+            const label meshFacei = fZone[i];
+            const label flipSign = (fZone.flipMap()[i] ? -1 : 1);
 
-            if (cpp)
-            {
-                faceId = (cpp->owner() ? pp.whichFace(facei) : -1);
-            }
-            else if (!isA<emptyPolyPatch>(pp))
-            {
-                faceId = pp.whichFace(facei);
-            }
-            else
-            {
-                faceId = -1;
-                facePatchId = -1;
-            }
-        }
+            // Internal faces
+            label faceId = meshFacei;
+            label facePatchId = -1;
 
-        if (faceId >= 0)
-        {
-            if (fZone.flipMap()[i])
+            // Boundary faces
+            if (!mesh_.isInternalFace(meshFacei))
             {
-                faceSign_[count] = -1;
+                facePatchId = mesh_.boundaryMesh().whichPatch(meshFacei);
+                const polyPatch& pp = mesh_.boundaryMesh()[facePatchId];
+
+                if (isA<emptyPolyPatch>(pp))
+                {
+                    continue;  // Ignore empty patch
+                }
+
+                const auto* cpp = isA<coupledPolyPatch>(pp);
+
+                if (cpp && !cpp->owner())
+                {
+                    continue;  // Ignore neighbour side
+                }
+
+                faceId = pp.whichFace(meshFacei);
             }
-            else
+
+            if (faceId >= 0)
             {
-                faceSign_[count] = 1;
+                faceId_[numFaces] = faceId;
+                facePatchId_[numFaces] = facePatchId;
+                faceSign_[numFaces] = flipSign;
+
+                ++numFaces;
             }
-            faceId_[count] = faceId;
-            facePatchId_[count] = facePatchId;
-            count++;
         }
     }
-    faceId_.setSize(count);
-    facePatchId_.setSize(count);
-    faceSign_.setSize(count);
+
+    // Shrink to size used
+    faceId_.resize(numFaces);
+    facePatchId_.resize(numFaces);
+    faceSign_.resize(numFaces);
 }
 
 

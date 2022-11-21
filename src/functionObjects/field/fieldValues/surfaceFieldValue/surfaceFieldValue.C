@@ -168,9 +168,9 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::setFaceZoneFaces()
     }
     #endif
 
-    faceId_.resize(numFaces);
-    facePatchId_.resize(numFaces);
-    faceFlip_.resize(numFaces);
+    faceId_.resize_nocopy(numFaces);
+    facePatchId_.resize_nocopy(numFaces);
+    faceFlip_.resize_nocopy(numFaces);
 
     numFaces = 0;
 
@@ -192,21 +192,20 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::setFaceZoneFaces()
             {
                 facePatchId = mesh_.boundaryMesh().whichPatch(meshFacei);
                 const polyPatch& pp = mesh_.boundaryMesh()[facePatchId];
+
+                if (isA<emptyPolyPatch>(pp))
+                {
+                    continue;  // Ignore empty patch
+                }
+
                 const auto* cpp = isA<coupledPolyPatch>(pp);
 
-                if (cpp)
+                if (cpp && !cpp->owner())
                 {
-                    faceId = (cpp->owner() ? pp.whichFace(meshFacei) : -1);
+                    continue;  // Ignore neighbour side
                 }
-                else if (!isA<emptyPolyPatch>(pp))
-                {
-                    faceId = pp.whichFace(meshFacei);
-                }
-                else
-                {
-                    faceId = -1;
-                    facePatchId = -1;
-                }
+
+                faceId = pp.whichFace(meshFacei);
             }
 
             if (faceId >= 0)

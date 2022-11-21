@@ -76,51 +76,58 @@ void Foam::fv::directionalPressureGradientExplicitSource::initialise()
 {
     const faceZone& fZone = mesh_.faceZones()[zoneID_];
 
-    faceId_.setSize(fZone.size());
-    facePatchId_.setSize(fZone.size());
+    // Total number of faces selected
+    label numFaces = fZone.size();
 
-    label count = 0;
-    forAll(fZone, i)
+    faceId_.resize_nocopy(numFaces);
+    facePatchId_.resize_nocopy(numFaces);
+
+    numFaces = 0;
+
+    // TDB: handle multiple zones
     {
-        const label faceI = fZone[i];
-
-        label faceId = -1;
-        label facePatchId = -1;
-        if (mesh_.isInternalFace(faceI))
+        forAll(fZone, i)
         {
-            faceId = faceI;
-            facePatchId = -1;
-        }
-        else
-        {
-            facePatchId = mesh_.boundaryMesh().whichPatch(faceI);
-            const polyPatch& pp = mesh_.boundaryMesh()[facePatchId];
-            const auto* cpp = isA<coupledPolyPatch>(pp);
+            const label meshFacei = fZone[i];
 
-            if (cpp)
-            {
-                faceId = (cpp->owner() ? pp.whichFace(faceI) : -1);
-            }
-            else if (!isA<emptyPolyPatch>(pp))
-            {
-                faceId = pp.whichFace(faceI);
-            }
-            else
-            {
-                faceId = -1;
-                facePatchId = -1;
-            }
-        }
+            // Internal faces
+            label faceId = meshFacei;
+            label facePatchId = -1;
 
-        if (faceId >= 0)
-        {
-            facePatchId_[count] = facePatchId;
-            faceId_[count] = faceId;
-            count++;
+            // Boundary faces
+            if (!mesh_.isInternalFace(meshFacei))
+            {
+                facePatchId = mesh_.boundaryMesh().whichPatch(meshFacei);
+                const polyPatch& pp = mesh_.boundaryMesh()[facePatchId];
+
+                if (isA<emptyPolyPatch>(pp))
+                {
+                    continue;  // Ignore empty patch
+                }
+
+                const auto* cpp = isA<coupledPolyPatch>(pp);
+
+                if (cpp && !cpp->owner())
+                {
+                    continue;  // Ignore neighbour side
+                }
+
+                faceId = pp.whichFace(meshFacei);
+            }
+
+            if (faceId >= 0)
+            {
+                faceId_[numFaces] = faceId;
+                facePatchId_[numFaces] = facePatchId;
+
+                ++numFaces;
+            }
         }
     }
-    faceId_.setSize(count);
-    facePatchId_.setSize(count);
+
+    // Shrink to size used
+    faceId_.resize(numFaces);
+    facePatchId_.resize(numFaces);
 }
 
 

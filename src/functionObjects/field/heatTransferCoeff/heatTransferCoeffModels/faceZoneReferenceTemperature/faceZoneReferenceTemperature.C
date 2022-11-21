@@ -70,7 +70,7 @@ setFaceZoneFaces(const dictionary& dict)
 
     label numFaces = fZone.size();
 
-    if (!returnReduce(bool(numFaces), orOp<bool>()))
+    if (!returnReduceOr(numFaces))
     {
         FatalIOErrorInFunction(dict)
             << "referenceFaceZone: " << faceZoneName
@@ -78,49 +78,55 @@ setFaceZoneFaces(const dictionary& dict)
             << exit(FatalIOError);
     }
 
-    faceId_.resize(numFaces);
-    facePatchId_.resize(numFaces);
+    faceId_.resize_nocopy(numFaces);
+    facePatchId_.resize_nocopy(numFaces);
 
     numFaces = 0;
 
-    forAll(fZone, i)
+    // TDB: handle multiple zones
     {
-        const label meshFacei = fZone[i];
-
-        // Internal faces
-        label faceId = meshFacei;
-        label facePatchId = -1;
-
-        // Boundary faces
-        if (!mesh.isInternalFace(meshFacei))
+        forAll(fZone, i)
         {
-            facePatchId = mesh.boundaryMesh().whichPatch(meshFacei);
-            const polyPatch& pp = mesh.boundaryMesh()[facePatchId];
-            const auto* cpp = isA<coupledPolyPatch>(pp);
+            const label meshFacei = fZone[i];
 
-            if (cpp)
+            // Internal faces
+            label faceId = meshFacei;
+            label facePatchId = -1;
+
+            // Boundary faces
+            if (!mesh.isInternalFace(meshFacei))
             {
-                faceId = (cpp->owner() ? pp.whichFace(meshFacei) : -1);
-            }
-            else if (!isA<emptyPolyPatch>(pp))
-            {
+                facePatchId = mesh.boundaryMesh().whichPatch(meshFacei);
+                const polyPatch& pp = mesh.boundaryMesh()[facePatchId];
+
+                if (isA<emptyPolyPatch>(pp))
+                {
+                    continue;  // Ignore empty patch
+                }
+
+                const auto* cpp = isA<coupledPolyPatch>(pp);
+
+                if (cpp && !cpp->owner())
+                {
+                    continue;  // Ignore neighbour side
+                }
+
                 faceId = pp.whichFace(meshFacei);
             }
-            else
+
+            if (faceId >= 0)
             {
-                faceId = -1;
-                facePatchId = -1;
+                faceId_[numFaces] = faceId;
+                facePatchId_[numFaces] = facePatchId;
+
+                ++numFaces;
             }
         }
-
-        if (faceId >= 0)
-        {
-            faceId_[numFaces] = faceId;
-            facePatchId_[numFaces] = facePatchId;
-
-            ++numFaces;
-        }
     }
+
+    // Shrink to size used
+    faceId_.resize(numFaces);
+    facePatchId_.resize(numFaces);
 }
 
 
