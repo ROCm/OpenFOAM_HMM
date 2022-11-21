@@ -40,7 +40,23 @@ namespace Foam
 }
 
 
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::heatTransferCoeffModel::heatTransferCoeffModel
+(
+    const dictionary& dict,
+    const fvMesh& mesh,
+    const word& TName
+)
+:
+    mesh_(mesh),
+    patchSet_(),
+    TName_(TName),
+    qrName_("qr")
+{}
+
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::FieldField<Foam::Field, Foam::scalar>>
 Foam::heatTransferCoeffModel::q() const
@@ -118,34 +134,6 @@ Foam::heatTransferCoeffModel::q() const
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::heatTransferCoeffModel::heatTransferCoeffModel
-(
-    const dictionary& dict,
-    const fvMesh& mesh,
-    const word& TName
-)
-:
-    mesh_(mesh),
-    patchSet_(),
-    TName_(TName),
-    qrName_("qr")
-{}
-
-
-// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
-
-bool Foam::heatTransferCoeffModel::read(const dictionary& dict)
-{
-    patchSet_ = mesh_.boundaryMesh().patchSet(dict.get<wordRes>("patches"));
-
-    dict.readIfPresent("qr", qrName_);
-
-    return true;
-}
-
-
 bool Foam::heatTransferCoeffModel::calc
 (
     volScalarField& result,
@@ -153,6 +141,16 @@ bool Foam::heatTransferCoeffModel::calc
 )
 {
     htc(result, q);
+
+    return true;
+}
+
+
+bool Foam::heatTransferCoeffModel::read(const dictionary& dict)
+{
+    patchSet_ = mesh_.boundaryMesh().patchSet(dict.get<wordRes>("patches"));
+
+    dict.readIfPresent("qr", qrName_);
 
     return true;
 }

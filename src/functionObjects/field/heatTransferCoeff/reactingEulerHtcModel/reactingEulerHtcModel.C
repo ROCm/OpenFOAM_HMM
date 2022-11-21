@@ -26,9 +26,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "reactingEulerHtcModel.H"
+#include "heatTransferCoeffModel.H"
 #include "phaseSystem.H"
 #include "addToRunTimeSelectionTable.H"
-#include "dictionary.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -48,6 +48,17 @@ namespace functionObjects
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+bool Foam::functionObjects::reactingEulerHtcModel::calc()
+{
+    auto& htc =
+        htcModelPtr_->mesh().lookupObjectRef<volScalarField>(resultName_);
+
+    htcModelPtr_->calc(htc, q());
+
+    return true;
+}
+
 
 Foam::tmp<Foam::FieldField<Foam::Field, Foam::scalar>>
 Foam::functionObjects::reactingEulerHtcModel::q() const
@@ -110,18 +121,6 @@ Foam::functionObjects::reactingEulerHtcModel::q() const
     return tq;
 }
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-bool Foam::functionObjects::reactingEulerHtcModel::calc()
-{
-    auto& htc =
-        htcModelPtr_->mesh().lookupObjectRef<volScalarField>(resultName_);
-
-    htcModelPtr_->calc(htc, q());
-
-    return true;
-}
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -133,7 +132,7 @@ Foam::functionObjects::reactingEulerHtcModel::reactingEulerHtcModel
 )
 :
     fieldExpression(name, runTime, dict),
-    htcModelPtr_(nullptr)
+    htcModelPtr_(heatTransferCoeffModel::New(dict, mesh_, fieldName_))
 {
     read(dict);
 
@@ -162,16 +161,12 @@ Foam::functionObjects::reactingEulerHtcModel::reactingEulerHtcModel
 
 bool Foam::functionObjects::reactingEulerHtcModel::read(const dictionary& dict)
 {
-    if (fieldExpression::read(dict))
+    if (!fieldExpression::read(dict) || htcModelPtr_->read(dict))
     {
-        htcModelPtr_ = heatTransferCoeffModel::New(dict, mesh_, fieldName_);
-
-        htcModelPtr_->read(dict);
-
-        return true;
+        return false;
     }
 
-    return false;
+    return true;
 }
 
 

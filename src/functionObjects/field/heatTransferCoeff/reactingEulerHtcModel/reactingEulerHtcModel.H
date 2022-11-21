@@ -27,7 +27,56 @@ Class
     Foam::functionObjects::reactingEulerHtcModel
 
 Description
-    A heat transfer coefficient for reactingEuler solvers
+    A heat transfer coefficient for reactingEuler solvers.
+
+Usage
+    Minimal example by using \c system/controlDict.functions:
+    \verbatim
+    reactingEulerHtcModel1
+    {
+        // Mandatory entries
+        type        reactingEulerHtcModel;
+        libs        (fieldFunctionObjects);
+
+        field       <word>;
+        patches     (<wordRes>);
+        htcModel    <word>;
+
+        // Optional entries
+        qr          <word>;
+
+        // Conditional entries based on selected <htcModel>
+        ...
+
+        // Inherited entries
+        ...
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property    | Description                        | Type | Reqd | Deflt
+      type        | Type name: reactingEulerHtcModel   | word | yes  | -
+      libs        | Library name: fieldFunctionObjects | word | yes  | -
+      field       | Name of operand field              | word | yes  | -
+      patches     | Names of operand patches        | wordRes | yes  | -
+      htcModel    | Heat transfer coefficient model <!--
+                -->                        - see below | word | yes  | -
+      qr          | Name of radiative heat flux field  | word | no   | qr
+    \endtable
+
+    The inherited entries are elaborated in:
+      - \link functionObject.H \endlink
+      - \link fieldExpression.H \endlink
+      - \link heatTransferCoeffModel.H \endlink
+
+    Options for the \c htcModel entry:
+    \verbatim
+      ReynoldsAnalogy           | Reynold's analogy
+      localReferenceTemperature | Local reference temperature
+      fixedReferenceTemperature | Fixed reference temperature
+      faceZoneReferenceTemperature | Face-zone reference temperature
+    \endverbatim
 
 SourceFiles
     reactingEulerHtcModel.C
@@ -37,16 +86,16 @@ SourceFiles
 #ifndef Foam_functionObjects_reactingEulerHtcModel_H
 #define Foam_functionObjects_reactingEulerHtcModel_H
 
-#include "HashSet.H"
-#include "volFields.H"
 #include "fieldExpression.H"
-#include "runTimeSelectionTables.H"
-#include "heatTransferCoeffModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+// Forward Declarations
+class heatTransferCoeffModel;
+
 namespace functionObjects
 {
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,18 +30,18 @@ Description
     Heat transfer coefficient calculation that employs
     the patch internal field as the reference temperature.
 
-    The heat transfer coefficient is specified by:
+    The heat transfer coefficient is calculated by:
 
     \f[
-        h = \frac{q}{T_c - T_w}
+        h = \frac{q}{T_c - T_p}
     \f]
 
     where
     \vartable
-      h       | Convective heat transfer coefficient of the flow  [W/(m2 K)]
-      q       | Heat flux                                         [W/m2]
-      T_{ref} | Reference temperature of patch internal field     [K]
-      T_w     | Patch temperature                                 [K]
+      h       | Heat transfer coefficient                         [W/m^2/K]
+      q       | Heat flux                                         [W/m^2]
+      T_c     | Patch internal temperature field                  [K]
+      T_p     | Patch temperature                                 [K]
     \endvartable
 
 Usage
@@ -49,22 +49,19 @@ Usage
     \verbatim
     heatTransferCoeff1
     {
-        // Mandatory and other optional entries
+        // Inherited entries
         ...
+
+        // Mandatory entries
         htcModel        localReferenceTemperature;
     }
     \endverbatim
 
     where the entries mean:
     \table
-      Property  | Description                            | Type | Reqd | Dflt
+      Property  | Description                            | Type | Reqd | Deflt
       type      | Model name: localReferenceTemperature  | word | yes  | -
     \endtable
-
-See also
-  - Foam::heatTransferCoeffModel
-  - Foam::heatTransferCoeffModels::fixedReferenceTemperature
-  - Foam::heatTransferCoeffModels::ReynoldsAnalogy
 
 SourceFiles
     localReferenceTemperature.C

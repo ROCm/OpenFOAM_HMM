@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2022 OpenCFD Ltd.
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,11 +24,11 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::heatTransferCoeffModels::fixedReferenceTemperature
+    Foam::heatTransferCoeffModels::faceZoneReferenceTemperature
 
 Description
-    Heat transfer coefficient calculation
-    that employs a fixed reference temperature.
+    Heat transfer coefficient calculation that employs the area-average
+    temperature of a specified face zone as the reference temperature.
 
     The heat transfer coefficient is calculated by:
 
@@ -40,8 +40,8 @@ Description
     \vartable
       h       | Heat transfer coefficient                         [W/m^2/K]
       q       | Heat flux                                         [W/m^2]
-      T_{ref} | User-specified reference temperature              [K]
-      T_p     | Patch temperature field                           [K]
+      T_{ref} | Area average of reference face zone temperature   [K]
+      T_p     | Temperature field of current patch                [K]
     \endvartable
 
 Usage
@@ -53,25 +53,30 @@ Usage
         ...
 
         // Mandatory entries
-        htcModel        fixedReferenceTemperature;
-        Tref            <scalar>;
+        htcModel            faceZoneReferenceTemperature;
+        referenceFaceZone   <word>;
+
+        // Optional entries
+        referenceRegion     <word>;
     }
     \endverbatim
 
     where the entries mean:
     \table
       Property  | Description                            | Type | Reqd | Deflt
-      type      | Model name: fixedReferenceTemperature  | word | yes  | -
-      Tref      | User-specied reference temperature   | scalar | yes  | -
+      htcModel  | Model name: faceZoneReferenceTemperature  | word | yes  | -
+      referenceFaceZone | Name of reference face zone    | word | yes  | -
+      referenceRegion | Name of region that reference face zone resides  <!--
+                -->                                      | word | no   | region0
     \endtable
 
 SourceFiles
-    fixedReferenceTemperature.C
+    faceZoneReferenceTemperature.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef heatTransferCoeffModels_fixedReferenceTemperature_H
-#define heatTransferCoeffModels_fixedReferenceTemperature_H
+#ifndef heatTransferCoeffModels_faceZoneReferenceTemperature_H
+#define heatTransferCoeffModels_faceZoneReferenceTemperature_H
 
 #include "heatTransferCoeffModel.H"
 
@@ -83,22 +88,35 @@ namespace heatTransferCoeffModels
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class fixedReferenceTemperature Declaration
+                Class faceZoneReferenceTemperature Declaration
 \*---------------------------------------------------------------------------*/
 
-class fixedReferenceTemperature
+class faceZoneReferenceTemperature
 :
     public heatTransferCoeffModel
 {
-protected:
+    // Private Data
 
-    // Protected Data
+        //- Patch index of reference face zone
+        label faceZonei_;
 
-        //- Reference temperature [K]
-        scalar TRef_;
+        //- Name of region that the reference face zone resides
+        word refRegionName_;
+
+        //- Local list of face IDs
+        labelList faceId_;
+
+        //- Local list of patch ID per face
+        labelList facePatchId_;
 
 
-    // Protected Member Functions
+    // Private Member Functions
+
+        //- Set faces to evaluate based on a face zone
+        void setFaceZoneFaces(const dictionary& dict);
+
+        //- Return area average of face-zone temperature field
+        scalar faceZoneAverageTemperature();
 
         //- Set the heat transfer coefficient
         virtual void htc
@@ -111,13 +129,13 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("fixedReferenceTemperature");
+    TypeName("faceZoneReferenceTemperature");
 
 
     // Constructors
 
         //- Construct from components
-        fixedReferenceTemperature
+        faceZoneReferenceTemperature
         (
             const dictionary& dict,
             const fvMesh& mesh,
@@ -125,14 +143,14 @@ public:
         );
 
         //- No copy construct
-        fixedReferenceTemperature(const fixedReferenceTemperature&) = delete;
+        faceZoneReferenceTemperature(const faceZoneReferenceTemperature&) = delete;
 
         //- No copy assignment
-        void operator=(const fixedReferenceTemperature&) = delete;
+        void operator=(const faceZoneReferenceTemperature&) = delete;
 
 
     //- Destructor
-    virtual ~fixedReferenceTemperature() = default;
+    virtual ~faceZoneReferenceTemperature() = default;
 
 
     // Member Functions
