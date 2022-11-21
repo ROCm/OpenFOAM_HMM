@@ -724,6 +724,8 @@ void Foam::mappedPatchBase::findSamples
 
 void Foam::mappedPatchBase::calcMapping() const
 {
+    DebugInFunction;
+
     static bool hasWarned = false;
     if (mapPtr_)
     {
@@ -1051,6 +1053,9 @@ void Foam::mappedPatchBase::calcMapping() const
             }
         }
     }
+
+    updateMeshTime().setUpToDate();
+    updateSampleMeshTime().setUpToDate();
 }
 
 
