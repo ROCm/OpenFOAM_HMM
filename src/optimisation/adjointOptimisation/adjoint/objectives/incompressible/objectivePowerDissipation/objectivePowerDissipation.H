@@ -26,32 +26,21 @@ License
 
 
 Class
-    Foam::objectives::objectiveNutSqr
+    Foam::objectives::objectivePowerDissipation
 
 Description
-    Objective qualitatively quantifying noise through the integral of the
-    squared turbulent viscosity over specified cellZones. Requires the adjoint
-    to the turbulence model to be incorporated into the optimisation loop.
-
-    Reference:
-    \verbatim
-        Objective function initially presented in
-
-            Papoutsis-Kiachagias, E. M., Magoulas, N., Mueller, J., Othmer, C.,
-            & Giannakoglou, K. C. (2015).
-            Noise reduction in car aerodynamics using a surrogate objective
-            function and the continuous adjoint method with wall functions.
-            Computers & Fluids, 122(20), 223-232.
-            https://doi.org/10.1016/j.compfluid.2015.09.002
-    \endverbatim
+    Computes and minimizes the power dissipation within given cellZones.
+    In the absence of significant viscous stresses on the "inlet" and "outlet"
+    of the cellZones, this value is equal to the volume flow rate-weigthed
+    total pressure losses (see also objectivePtLosses) within th cellZones
 
 SourceFiles
-    objectiveNutSqrNoise.C
+    objectivePowerDissipation.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef objectiveNutSqr_H
-#define objectiveNutSqr_H
+#ifndef objectivePowerDissipation_H
+#define objectivePowerDissipation_H
 
 #include "objectiveIncompressible.H"
 
@@ -64,10 +53,10 @@ namespace objectives
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class objectiveNutSqr Declaration
+                  Class objectivePowerDissipation Declaration
 \*---------------------------------------------------------------------------*/
 
-class objectiveNutSqr
+class objectivePowerDissipation
 :
     public objectiveIncompressible
 {
@@ -80,13 +69,13 @@ class objectiveNutSqr
 public:
 
     //- Runtime type information
-    TypeName("nutSqr");
+    TypeName("powerDissipation");
 
 
     // Constructors
 
         //- Construct from components
-        objectiveNutSqr
+        objectivePowerDissipation
         (
             const fvMesh& mesh,
             const dictionary& dict,
@@ -96,7 +85,7 @@ public:
 
 
     //- Destructor
-    virtual ~objectiveNutSqr() = default;
+    virtual ~objectivePowerDissipation() = default;
 
 
     // Member Functions
@@ -113,9 +102,11 @@ public:
         //- Update field to be added to the second adjoint turbulence model PDE
         void update_dJdTMvar2();
 
-        //- Update field to be added to be added to volume-based
-        //- sensitivity derivatives, emerging from delta ( dV ) / delta b
-        void update_divDxDbMultiplier();
+        //- Update div(dx/db multiplier). Volume-based sensitivity term
+        virtual void update_divDxDbMultiplier();
+
+        //- Update grad(dx/db multiplier). Volume-based sensitivity term
+        virtual void update_gradDxDbMultiplier();
 };
 
 

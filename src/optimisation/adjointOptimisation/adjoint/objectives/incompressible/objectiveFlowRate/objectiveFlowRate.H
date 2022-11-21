@@ -26,32 +26,18 @@ License
 
 
 Class
-    Foam::objectives::objectiveNutSqr
+    Foam::objectives::objectiveFlowRate
 
 Description
-    Objective qualitatively quantifying noise through the integral of the
-    squared turbulent viscosity over specified cellZones. Requires the adjoint
-    to the turbulence model to be incorporated into the optimisation loop.
-
-    Reference:
-    \verbatim
-        Objective function initially presented in
-
-            Papoutsis-Kiachagias, E. M., Magoulas, N., Mueller, J., Othmer, C.,
-            & Giannakoglou, K. C. (2015).
-            Noise reduction in car aerodynamics using a surrogate objective
-            function and the continuous adjoint method with wall functions.
-            Computers & Fluids, 122(20), 223-232.
-            https://doi.org/10.1016/j.compfluid.2015.09.002
-    \endverbatim
+    Minimize/maximize flow rate through a given set of patches
 
 SourceFiles
-    objectiveNutSqrNoise.C
+    objectiveFlowRate.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef objectiveNutSqr_H
-#define objectiveNutSqr_H
+#ifndef objectiveFlowRate_H
+#define objectiveFlowRate_H
 
 #include "objectiveIncompressible.H"
 
@@ -64,29 +50,32 @@ namespace objectives
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class objectiveNutSqr Declaration
+                      Class objectiveFlowRate Declaration
 \*---------------------------------------------------------------------------*/
 
-class objectiveNutSqr
+class objectiveFlowRate
 :
     public objectiveIncompressible
 {
     // Private data
 
-        //- Where to define the objective
-        labelList zones_;
+        //- Patches used to define the objective function
+        labelList patches_;
+
+        //- Flow rate in each patch
+        scalarList flowRates_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("nutSqr");
+    TypeName("flowRate");
 
 
     // Constructors
 
-        //- Construct from components
-        objectiveNutSqr
+        //- from components
+        objectiveFlowRate
         (
             const fvMesh& mesh,
             const dictionary& dict,
@@ -96,7 +85,7 @@ public:
 
 
     //- Destructor
-    virtual ~objectiveNutSqr() = default;
+    ~objectiveFlowRate() = default;
 
 
     // Member Functions
@@ -105,17 +94,18 @@ public:
         scalar J();
 
         //- Update values to be added to the adjoint outlet velocity
-        void update_dJdv();
+        void update_boundarydJdv();
 
-        //- Update field to be added to the first adjoint turbulence model PDE
-        void update_dJdTMvar1();
+        //- Update values to be added to the adjoint outlet pressure
+        void update_boundarydJdvn();
 
-        //- Update field to be added to the second adjoint turbulence model PDE
-        void update_dJdTMvar2();
+        // Helper write functions
 
-        //- Update field to be added to be added to volume-based
-        //- sensitivity derivatives, emerging from delta ( dV ) / delta b
-        void update_divDxDbMultiplier();
+            //- Write headers for additional columns
+            virtual void addHeaderColumns() const;
+
+            //- Write information to additional columns
+            virtual void addColumnValues() const;
 };
 
 

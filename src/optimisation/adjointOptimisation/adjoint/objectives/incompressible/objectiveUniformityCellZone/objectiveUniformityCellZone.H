@@ -26,32 +26,19 @@ License
 
 
 Class
-    Foam::objectives::objectiveNutSqr
+    Foam::objectives::objectiveUniformityCellZone
 
 Description
-    Objective qualitatively quantifying noise through the integral of the
-    squared turbulent viscosity over specified cellZones. Requires the adjoint
-    to the turbulence model to be incorporated into the optimisation loop.
-
-    Reference:
-    \verbatim
-        Objective function initially presented in
-
-            Papoutsis-Kiachagias, E. M., Magoulas, N., Mueller, J., Othmer, C.,
-            & Giannakoglou, K. C. (2015).
-            Noise reduction in car aerodynamics using a surrogate objective
-            function and the continuous adjoint method with wall functions.
-            Computers & Fluids, 122(20), 223-232.
-            https://doi.org/10.1016/j.compfluid.2015.09.002
-    \endverbatim
+    Computes and minimizes (half) the variance of the velocity distribution in
+    a given set of cellZones
 
 SourceFiles
-    objectiveNutSqrNoise.C
+    objectiveUniformityCellZone.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef objectiveNutSqr_H
-#define objectiveNutSqr_H
+#ifndef objectiveUniformityCellZone_H
+#define objectiveUniformityCellZone_H
 
 #include "objectiveIncompressible.H"
 
@@ -64,10 +51,10 @@ namespace objectives
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class objectiveNutSqr Declaration
+                 Class objectiveUniformityCellZone Declaration
 \*---------------------------------------------------------------------------*/
 
-class objectiveNutSqr
+class objectiveUniformityCellZone
 :
     public objectiveIncompressible
 {
@@ -76,17 +63,26 @@ class objectiveNutSqr
         //- Where to define the objective
         labelList zones_;
 
+        //- Mean velocity value per objective zone
+        vectorField UMean_;
+
+        //- Velocity variance per objective zone
+        scalarField UVar_;
+
+        //- Volume integral per objective zone
+        scalarField volZone_;
+
 
 public:
 
     //- Runtime type information
-    TypeName("nutSqr");
+    TypeName("uniformityCellZone");
 
 
     // Constructors
 
-        //- Construct from components
-        objectiveNutSqr
+        //- from components
+        objectiveUniformityCellZone
         (
             const fvMesh& mesh,
             const dictionary& dict,
@@ -96,10 +92,13 @@ public:
 
 
     //- Destructor
-    virtual ~objectiveNutSqr() = default;
+    virtual ~objectiveUniformityCellZone() = default;
 
 
     // Member Functions
+
+        //- Return the objectiveReportPatches
+        void initialize();
 
         //- Return the objective function value
         scalar J();
@@ -107,15 +106,16 @@ public:
         //- Update values to be added to the adjoint outlet velocity
         void update_dJdv();
 
-        //- Update field to be added to the first adjoint turbulence model PDE
-        void update_dJdTMvar1();
+        //- Update div( dx/db multiplier). Volume-based sensitivity term
+        virtual void update_divDxDbMultiplier();
 
-        //- Update field to be added to the second adjoint turbulence model PDE
-        void update_dJdTMvar2();
+        // Helper write functions
 
-        //- Update field to be added to be added to volume-based
-        //- sensitivity derivatives, emerging from delta ( dV ) / delta b
-        void update_divDxDbMultiplier();
+            //- Write headers for additional columns
+            virtual void addHeaderColumns() const;
+
+            //- Write information to additional columns
+            virtual void addColumnValues() const;
 };
 
 

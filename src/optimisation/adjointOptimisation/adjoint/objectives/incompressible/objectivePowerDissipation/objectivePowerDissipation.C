@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2020 PCOpt/NTUA
-    Copyright (C) 2013-2020 FOSS GP
+    Copyright (C) 2007-2022 PCOpt/NTUA
+    Copyright (C) 2013-2022 FOSS GP
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,9 +26,10 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "objectiveNutSqr.H"
+#include "objectivePowerDissipation.H"
 #include "incompressibleAdjointSolver.H"
 #include "createZeroField.H"
+#include "IOmanip.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -41,18 +42,18 @@ namespace objectives
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(objectiveNutSqr, 0);
+defineTypeNameAndDebug(objectivePowerDissipation, 0);
 addToRunTimeSelectionTable
 (
     objectiveIncompressible,
-    objectiveNutSqr,
+    objectivePowerDissipation,
     dictionary
 );
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-objectiveNutSqr::objectiveNutSqr
+objectivePowerDissipation::objectivePowerDissipation
 (
     const fvMesh& mesh,
     const dictionary& dict,
@@ -63,19 +64,50 @@ objectiveNutSqr::objectiveNutSqr
     objectiveIncompressible(mesh, dict, adjointSolverName, primalSolverName),
     zones_(mesh_.cellZones().indices(dict.get<wordRes>("zones")))
 {
+    // Append Ua name to fieldNames
+    /*
+    fieldNames_.setSize
+    (
+        1,
+        mesh_.lookupObject<solver>(adjointSolverName_).
+            extendedVariableName("Ua")
+    );
+    */
+
     // Check if cellZones provided include at least one cell
     checkCellZonesSize(zones_);
+
     // Allocate dJdTMvar1Ptr_ and dJdTMvar2Ptr_ if needed
     allocatedJdTurbulence();
-    // Allocate term to be added to volume-based sensitivity derivatives
+
+    // Allocate source term to the adjoint momentum equations
+    dJdvPtr_.reset
+    (
+        createZeroFieldPtr<vector>
+        (
+            mesh_,
+            "dJdv" + type(),
+            dimLength/sqr(dimTime)
+        )
+    );
+    // Allocate terms to be added to volume-based sensitivity derivatives
     divDxDbMultPtr_.reset
     (
         createZeroFieldPtr<scalar>
         (
             mesh_,
-            ("divDxdbMult"+type()) ,
+            ("divDxdbMult" + type()),
             // Dimensions are set in a way that the gradient of this term
             // matches the source of the adjoint grid displacement PDE
+            sqr(dimLength)/pow3(dimTime)
+        )
+    );
+    gradDxDbMultPtr_.reset
+    (
+        createZeroFieldPtr<tensor>
+        (
+            mesh_,
+            ("gradDxdbMult" + type()),
             sqr(dimLength)/pow3(dimTime)
         )
     );
@@ -84,33 +116,38 @@ objectiveNutSqr::objectiveNutSqr
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-scalar objectiveNutSqr::J()
+scalar objectivePowerDissipation::J()
 {
     J_ = Zero;
 
-    const autoPtr<incompressible::RASModelVariables>&
-       turbVars = vars_.RASModelVariables();
-    const volScalarField& nut = turbVars->nutRefInst();
+    // References
+    const volVectorField& U = vars_.UInst();
+    const autoPtr<incompressible::turbulenceModel>& turb = vars_.turbulence();
+    const scalarField& V = mesh_.V().field();
 
-    //scalar zoneVol(Zero);
+    volScalarField integrand(turb->nuEff()*magSqr(twoSymm(fvc::grad(U))));
+
     for (const label zI : zones_)
     {
         const cellZone& zoneI = mesh_.cellZones()[zI];
-        for (const label cellI : zoneI)
-        {
-            J_ += sqr(nut[cellI])*(mesh_.V()[cellI]);
-            //zoneVol += mesh_.V()[cellI];
-        }
+        scalarField VZone(V, zoneI);
+        scalarField integrandZone(integrand.primitiveField(), zoneI);
+
+        J_ += 0.5*gSum(integrandZone*VZone);
     }
-    reduce(J_, sumOp<scalar>());
-    //reduce(zoneVol, sumOp<scalar>());
 
     return J_;
 }
 
 
-void objectiveNutSqr::update_dJdv()
+void objectivePowerDissipation::update_dJdv()
 {
+    dJdvPtr_().primitiveFieldRef() = Zero;
+
+    const volVectorField& U = vars_.U();
+    const autoPtr<incompressible::turbulenceModel>& turb = vars_.turbulence();
+    tmp<volSymmTensorField> S = twoSymm(fvc::grad(U));
+
     // Add source from possible dependencies of nut on U
     if (mesh_.foundObject<incompressibleAdjointSolver>(adjointSolverName_))
     {
@@ -119,24 +156,10 @@ void objectiveNutSqr::update_dJdv()
                 (adjointSolverName_);
         const autoPtr<incompressibleAdjoint::adjointRASModel>& adjointRAS =
             adjSolver.getAdjointVars().adjointTurbulence();
-        const autoPtr<incompressible::RASModelVariables>& turbVars =
-            vars_.RASModelVariables();
-        tmp<volScalarField> dnutdUMult = 2*turbVars->nutRef();
+        tmp<volScalarField> dnutdUMult = 0.5*magSqr(S());
         tmp<volVectorField> dnutdU = adjointRAS->nutJacobianU(dnutdUMult);
         if (dnutdU)
         {
-            if (!dJdvPtr_)
-            {
-                dJdvPtr_.reset
-                (
-                    createZeroFieldPtr<vector>
-                    (
-                        mesh_,
-                        "dJdv" + type(),
-                        dimLength/sqr(dimTime)
-                    )
-                );
-            }
             for (const label zI : zones_)
             {
                 const cellZone& zoneI = mesh_.cellZones()[zI];
@@ -147,16 +170,24 @@ void objectiveNutSqr::update_dJdv()
             }
         }
     }
+
+    // Add source from the strain rate magnitude
+    volVectorField integrand(-2.0*fvc::div(turb->nuEff()*S));
+    for (const label zI : zones_)
+    {
+        const cellZone& zoneI = mesh_.cellZones()[zI];
+        for (const label cellI : zoneI)
+        {
+            dJdvPtr_()[cellI] += integrand[cellI];
+        }
+    }
 }
 
 
-void objectiveNutSqr::update_dJdTMvar1()
+void objectivePowerDissipation::update_dJdTMvar1()
 {
-    const autoPtr<incompressible::RASModelVariables>&
-       turbVars = vars_.RASModelVariables();
-    const volScalarField& nut = turbVars->nutRef();
-    volScalarField JacobianMultiplier(2*nut);
-
+    const volVectorField& U = vars_.U();
+    volScalarField JacobianMultiplier(0.5*magSqr(twoSymm(fvc::grad(U))));
     update_dJdTMvar
     (
         dJdTMvar1Ptr_,
@@ -167,13 +198,10 @@ void objectiveNutSqr::update_dJdTMvar1()
 }
 
 
-void objectiveNutSqr::update_dJdTMvar2()
+void objectivePowerDissipation::update_dJdTMvar2()
 {
-    const autoPtr<incompressible::RASModelVariables>&
-       turbVars = vars_.RASModelVariables();
-    const volScalarField& nut = turbVars->nutRef();
-    volScalarField JacobianMultiplier(2*nut);
-
+    const volVectorField& U = vars_.U();
+    volScalarField JacobianMultiplier(0.5*magSqr(twoSymm(fvc::grad(U))));
     update_dJdTMvar
     (
         dJdTMvar2Ptr_,
@@ -184,23 +212,45 @@ void objectiveNutSqr::update_dJdTMvar2()
 }
 
 
-void objectiveNutSqr::update_divDxDbMultiplier()
+void objectivePowerDissipation::update_divDxDbMultiplier()
 {
-    const autoPtr<incompressible::RASModelVariables>&
-       turbVars = vars_.RASModelVariables();
-    const volScalarField& nut = turbVars->nutRef();
-
+    // References
     volScalarField& divDxDbMult = divDxDbMultPtr_();
+    const volVectorField& U = vars_.U();
+    const autoPtr<incompressible::turbulenceModel>& turb = vars_.turbulence();
+    volScalarField integrand(0.5*turb->nuEff()*magSqr(twoSymm(fvc::grad(U))));
 
     for (const label zI : zones_)
     {
         const cellZone& zoneI = mesh_.cellZones()[zI];
         for (const label cellI : zoneI)
         {
-            divDxDbMult[cellI] = sqr(nut[cellI]);
+            divDxDbMult[cellI] = integrand[cellI];
         }
     }
     divDxDbMult.correctBoundaryConditions();
+}
+
+
+void objectivePowerDissipation::update_gradDxDbMultiplier()
+{
+    // References
+    volTensorField& gradDxDbMult = gradDxDbMultPtr_();
+    const volVectorField& U = vars_.U();
+    const autoPtr<incompressible::turbulenceModel>& turb = vars_.turbulence();
+    tmp<volTensorField> gradU = fvc::grad(U);
+    volTensorField integrand(-2.0*turb->nuEff()*(gradU() & twoSymm(gradU())));
+
+    for (const label zI : zones_)
+    {
+        const cellZone& zoneI = mesh_.cellZones()[zI];
+        for (const label cellI : zoneI)
+        {
+            gradDxDbMult[cellI] = integrand[cellI];
+        }
+    }
+    gradDxDbMult.correctBoundaryConditions();
+    // Missing contribution from gradU in nut
 }
 
 

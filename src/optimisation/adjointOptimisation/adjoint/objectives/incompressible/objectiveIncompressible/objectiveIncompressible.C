@@ -211,7 +211,7 @@ const volVectorField& objectiveIncompressible::dJdv()
             (
                 mesh_,
                 ("dJdv_"+type()),
-                dimensionSet(0, 3, -2, 0, 0, 0, 0)
+                dimLength/sqr(dimTime)
             )
         );
     }

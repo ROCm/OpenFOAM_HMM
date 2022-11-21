@@ -26,32 +26,19 @@ License
 
 
 Class
-    Foam::objectives::objectiveNutSqr
+    Foam::objectives::objectiveUniformityPatch
 
 Description
-    Objective qualitatively quantifying noise through the integral of the
-    squared turbulent viscosity over specified cellZones. Requires the adjoint
-    to the turbulence model to be incorporated into the optimisation loop.
-
-    Reference:
-    \verbatim
-        Objective function initially presented in
-
-            Papoutsis-Kiachagias, E. M., Magoulas, N., Mueller, J., Othmer, C.,
-            & Giannakoglou, K. C. (2015).
-            Noise reduction in car aerodynamics using a surrogate objective
-            function and the continuous adjoint method with wall functions.
-            Computers & Fluids, 122(20), 223-232.
-            https://doi.org/10.1016/j.compfluid.2015.09.002
-    \endverbatim
+    Computes and minimizes (half) the variance of the velocity distribution in
+    a given set of patches
 
 SourceFiles
-    objectiveNutSqrNoise.C
+    objectiveUniformityPatch.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef objectiveNutSqr_H
-#define objectiveNutSqr_H
+#ifndef objectiveUniformityPatch_H
+#define objectiveUniformityPatch_H
 
 #include "objectiveIncompressible.H"
 
@@ -64,29 +51,35 @@ namespace objectives
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class objectiveNutSqr Declaration
+                   Class objectiveUniformityPatch Declaration
 \*---------------------------------------------------------------------------*/
 
-class objectiveNutSqr
+class objectiveUniformityPatch
 :
     public objectiveIncompressible
 {
     // Private data
 
         //- Where to define the objective
-        labelList zones_;
+        labelList patches_;
+
+        //- Mean velocity value per objective patch
+        vectorField UMean_;
+
+        //- Velocity variance per objective patch
+        scalarField UVar_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("nutSqr");
+    TypeName("uniformityPatch");
 
 
     // Constructors
 
-        //- Construct from components
-        objectiveNutSqr
+        //- from components
+        objectiveUniformityPatch
         (
             const fvMesh& mesh,
             const dictionary& dict,
@@ -96,26 +89,33 @@ public:
 
 
     //- Destructor
-    virtual ~objectiveNutSqr() = default;
+    virtual ~objectiveUniformityPatch() = default;
 
 
     // Member Functions
+
+        //- Return the objectiveReportPatches
+        void initialize();
 
         //- Return the objective function value
         scalar J();
 
         //- Update values to be added to the adjoint outlet velocity
-        void update_dJdv();
+        void update_boundarydJdv();
 
-        //- Update field to be added to the first adjoint turbulence model PDE
-        void update_dJdTMvar1();
+        //- Update values to be added to the adjoint outlet pressure
+        void update_boundarydJdvn();
 
-        //- Update field to be added to the second adjoint turbulence model PDE
-        void update_dJdTMvar2();
+        //- Update values to be added to the adjoint outlet tangential velocity
+        void update_boundarydJdvt();
 
-        //- Update field to be added to be added to volume-based
-        //- sensitivity derivatives, emerging from delta ( dV ) / delta b
-        void update_divDxDbMultiplier();
+        // Helper write functions
+
+            //- Write headers for additional columns
+            virtual void addHeaderColumns() const;
+
+            //- Write information to additional columns
+            virtual void addColumnValues() const;
 };
 
 
