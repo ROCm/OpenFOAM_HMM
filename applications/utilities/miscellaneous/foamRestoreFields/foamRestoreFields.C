@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,6 +65,9 @@ Usage
 #include "TimePaths.H"
 #include "ListOps.H"
 #include "stringOps.H"
+#include "regionProperties.H"
+#include "polyMesh.H"
+#include "Time.H"
 
 using namespace Foam;
 
@@ -243,7 +246,22 @@ int main(int argc, char *argv[])
 
     timeSelector::addOptions(true, true);  // constant(true), zero(true)
 
+    #include "addAllRegionOptions.H"
     #include "setRootCase.H"
+
+    wordList regionNames0;
+    {
+        // Dummy time just for the database to read regionProperties
+
+        autoPtr<Time> dummyTimePtr(Time::New(args));
+
+        const auto& runTime = *dummyTimePtr;
+
+        // Handle -allRegions, -regions, -region
+        #include "getAllRegionOptions.H"
+
+        regionNames0 = std::move(regionNames);
+    }
 
     dryrun = args.dryRun();
     verbose = args.verbose();
@@ -414,51 +432,65 @@ int main(int argc, char *argv[])
 
         Info<< "\nTime = " << timeName << nl;
 
-        label count = 0;
-        wordList files;
-
-        if (nProcs)
+        for (const word& regionName : regionNames0)
         {
-            if (leadProcIdx >= 0)
+            const word& regionDir = polyMesh::regionName(regionName);
+
+            if (regionNames0.size() > 1)
             {
-                files = getFiles(args.path()/procDirs[leadProcIdx], timeName);
+                Info<< "region = " << regionName << nl;
             }
 
-            for (const fileName& procDir : procDirs)
+            label count = 0;
+            wordList files;
+
+            if (nProcs)
             {
+                if (leadProcIdx >= 0)
+                {
+                    files =
+                        getFiles
+                        (
+                            args.path()/procDirs[leadProcIdx],
+                            timeName/regionDir
+                        );
+                }
+
+                for (const fileName& procDir : procDirs)
+                {
+                    count += restoreFields
+                    (
+                        method,
+                        args.path()/procDir/timeName/regionDir,
+                        wordHashSet(files),
+                        targetNames
+                    );
+                }
+            }
+            else
+            {
+                if (Pstream::master())
+                {
+                    files = getFiles(args.path(), timeName/regionDir);
+                }
+                Pstream::broadcast(files);
+
                 count += restoreFields
                 (
                     method,
-                    args.path()/procDir/timeName,
+                    args.path()/timeName/regionDir,
                     wordHashSet(files),
                     targetNames
                 );
             }
-        }
-        else
-        {
-            if (Pstream::master())
+
+            if (dryrun)
             {
-                files = getFiles(args.path(), timeName);
+                Info<< "dry-run: ";
             }
-            Pstream::broadcast(files);
-
-            count += restoreFields
-            (
-                method,
-                args.path()/timeName,
-                wordHashSet(files),
-                targetNames
-            );
+            Info<< "moved " << count << " files" << nl;
         }
-
-        if (dryrun)
-        {
-            Info<< "dry-run: ";
-        }
-        Info<< "moved " << count << " files" << nl;
     }
-
     Info<< "\nEnd\n" << endl;
     return 0;
 }
