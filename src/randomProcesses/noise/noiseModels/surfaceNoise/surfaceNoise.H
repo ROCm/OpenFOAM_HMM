@@ -68,7 +68,7 @@ Description
     reader          ensight;
 
     // Surface writer
-    writer          ensight;
+    writer          ensight;  // none
 
     // Collate times for ensight output - ensures geometry is only written once
     writeOptions
@@ -96,12 +96,18 @@ Description
 
     \endverbatim
 
+    Communication Options
+    \table
+      Property     | Description                           | Type | Req'd | Dflt
+      commsType    | Communication type for send/receive field | word | no  | scheduled
+      broadcast    | (Experimental) broadcast all fields   | bool | no | false
+    \endtable
+
 SourceFiles
     surfaceNoise.C
 
 SeeAlso
     noiseModel.H
-
 
 \*---------------------------------------------------------------------------*/
 
@@ -109,8 +115,8 @@ SeeAlso
 #define Foam_noiseModels_surfaceNoise_H
 
 #include "noiseModel.H"
-#include "labelList.H"
 #include "scalarField.H"
+#include "UPstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -118,6 +124,7 @@ namespace Foam
 {
 
 // Forward Declarations
+class globalIndex;
 class surfaceReader;
 class surfaceWriter;
 
@@ -154,8 +161,8 @@ protected:
         //- Start time index
         label startTimeIndex_;
 
-        //- Number of surface faces
-        label nFace_;
+        //- Global number of surface faces
+        label nFaces_;
 
         //- Frequency data output interval, default = 1
         //  nSamples/2 data points are returned from the FFT, which can
@@ -165,6 +172,12 @@ protected:
         //- Apply area average; default = no (ensemble average) for backwards
         //- compatibility
         bool areaAverage_;
+
+        //- Use broadcast to send entire field to sub-ranks
+        bool useBroadcast_;
+
+        //- Communication type (for sending/receiving fields)
+        UPstream::commsTypes commType_;
 
         //- Reader type
         word readerType_;
@@ -184,9 +197,16 @@ protected:
         //- Read surface data
         void readSurfaceData
         (
-            const labelList& procFaceOffset,
+            const globalIndex& procFaceAddr,
             List<scalarField>& pData
         );
+
+        //- Calculate the area average value
+        scalar surfaceAverage
+        (
+            const scalarField& data,
+            const globalIndex& procFaceAddr
+        ) const;
 
         //- Write surface data to file
         //  Returns the area average value
@@ -197,15 +217,8 @@ protected:
             const word& title,
             const scalar freq,
             const scalarField& data,
-            const labelList& procFaceOffset,
+            const globalIndex& procFaceAddr,
             const bool writeSurface
-        ) const;
-
-        //- Calculate the area average value
-        scalar surfaceAverage
-        (
-            const scalarField& data,
-            const labelList& procFaceOffset
         ) const;
 
 

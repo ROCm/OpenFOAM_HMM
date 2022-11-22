@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2206                                 |
+|  \\    /   O peration     | Version:  v2212                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -36,6 +36,9 @@ surfaceNoiseCoeffs
     file        "postProcessing/curleSurface/surface/surface.case";
 
     areaAverage yes;
+
+    // commsType   scheduled;  // nonBlocking
+    // broadcast   false;
 
     // Surface reader
     reader      ensight;

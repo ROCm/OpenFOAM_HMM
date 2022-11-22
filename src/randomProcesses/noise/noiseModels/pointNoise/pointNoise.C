@@ -74,7 +74,8 @@ void pointNoise::processData
     const Function1Types::CSV<scalar>& data
 )
 {
-    Info<< "Reading data file " << data.fName() << endl;
+    Info<< "Reading data file: "
+        << fileObr_.time().relativePath(data.fName()) << endl;
 
     const word fNameBase(data.fName().stem());
 

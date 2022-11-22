@@ -735,7 +735,7 @@ bool Foam::noiseModel::read(const dictionary& dict)
             );
     }
 
-    Info<< nl << endl;
+    Info<< endl;
 
     return true;
 }
