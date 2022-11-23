@@ -289,6 +289,18 @@ public:
         //  Needed for objective functions that depend on nut. Defaults to zero
         virtual tmp<volScalarField> nutJacobianTMVar2() const;
 
+        //- Jacobian of nut wrt the flow velocity
+        //  Assumes we want to get contributions of mult*d(nut)/dU
+        //  Since the dependency of nut to U is usually through a differential
+        //  operator, the term multiplying d(nut)/dU is passed as an argument
+        //  to this function; the latter should then compute the
+        //  contribution of the afforementioned term to the adjoint mean flow
+        //  equations
+        virtual tmp<volVectorField> nutJacobianU
+        (
+            tmp<volScalarField>& dNutdUMult
+        ) const;
+
         //- Diffusion coefficient of the first primal and adjoint turbulence
         //- model equation. Needed for some adjoint BCs. Defaults to zero
         virtual tmp<scalarField> diffusionCoeffVar1(label patchI) const;

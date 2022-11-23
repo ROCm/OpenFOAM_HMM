@@ -404,6 +404,16 @@ tmp<volScalarField> adjointRASModel::nutJacobianTMVar2() const
 }
 
 
+tmp<volVectorField> adjointRASModel::nutJacobianU
+(
+    tmp<volScalarField>& dNutdUMult
+) const
+{
+    // Deliberately returning a null pointer in the base class
+    return nullptr;
+}
+
+
 tmp<scalarField> adjointRASModel::diffusionCoeffVar1(label patchI) const
 {
     return tmp<scalarField>::New(mesh_.boundary()[patchI].size(), Zero);
