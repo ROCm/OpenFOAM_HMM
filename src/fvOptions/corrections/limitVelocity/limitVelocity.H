@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,8 +69,9 @@ Usage
     \endtable
 
     The inherited entries are elaborated in:
-     - \link fvOption.H \endlink
-     - \link cellSetOption.H \endlink
+      - \link fvOption.H \endlink
+      - \link cellSetOption.H \endlink
+      - \link writeFile.H \endlink
 
 See also
   - Foam::fv::velocityDampingConstraint
@@ -80,10 +81,11 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef limitVelocity_H
-#define limitVelocity_H
+#ifndef fv_limitVelocity_H
+#define fv_limitVelocity_H
 
 #include "cellSetOption.H"
+#include "writeFile.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -93,12 +95,13 @@ namespace fv
 {
 
 /*---------------------------------------------------------------------------*\
-                 Class limitVelocity Declaration
+                        Class limitVelocity Declaration
 \*---------------------------------------------------------------------------*/
 
 class limitVelocity
 :
-    public fv::cellSetOption
+    public fv::cellSetOption,
+    public functionObjects::writeFile
 {
 protected:
 
@@ -109,6 +112,12 @@ protected:
 
         //- Maximum velocity magnitude
         scalar max_;
+
+
+    // Protected Member Functions
+
+        //- Write file header information
+        void writeFileHeader(Ostream& os);
 
 
 public:

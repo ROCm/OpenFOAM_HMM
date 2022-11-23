@@ -49,7 +49,7 @@ namespace fv
 }
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void Foam::fv::velocityDampingConstraint::addDamping(fvMatrix<vector>& eqn)
 {
@@ -89,10 +89,35 @@ void Foam::fv::velocityDampingConstraint::addDamping(fvMatrix<vector>& eqn)
         return (denom ? 1e-2*round(1e4*num/denom) : 0);
     };
 
+    const scalar nDampedPercent = percent(nDamped, nTotCells);
+
     Info<< type() << ' ' << name_ << " damped "
         << nDamped << " ("
-        << percent(nDamped, nTotCells)
+        << nDampedPercent
         << "%) of cells, with max limit " << UMax_ << endl;
+
+
+    if (canWriteToFile())
+    {
+        file()
+            << mesh_.time().timeOutputValue() << token::TAB
+            << nDamped << token::TAB
+            << nDampedPercent
+            << endl;
+    }
+}
+
+
+void Foam::fv::velocityDampingConstraint::writeFileHeader(Ostream& os)
+{
+    writeHeaderValue(os, "UMax", Foam::name(UMax_));
+    writeCommented(os, "Time");
+    writeTabbed(os, "nDamped_[count]");
+    writeTabbed(os, "nDamped_[%]");
+
+    os  << endl;
+
+    writtenHeader_ = true;
 }
 
 
@@ -107,6 +132,8 @@ Foam::fv::velocityDampingConstraint::velocityDampingConstraint
 )
 :
     fv::cellSetOption(name, modelType, dict, mesh),
+    writeFile(mesh, name, typeName, dict, false),
+    UMax_(GREAT),  // overwritten later
     C_(1)
 {
     read(dict);
@@ -133,24 +160,35 @@ void Foam::fv::velocityDampingConstraint::writeData(Ostream& os) const
 
 bool Foam::fv::velocityDampingConstraint::read(const dictionary& dict)
 {
-    if (fv::cellSetOption::read(dict))
+    if (!(fv::cellSetOption::read(dict) && writeFile::read(dict)))
     {
-        coeffs_.readEntry("UMax", UMax_);
-
-        coeffs_.readIfPresent("C", C_);
-
-        if (!coeffs_.readIfPresent("UNames", fieldNames_))
-        {
-            fieldNames_.resize(1);
-            fieldNames_.first() = coeffs_.getOrDefault<word>("U", "U");
-        }
-
-        fv::option::resetApplied();
-
-        return true;
+        return false;
     }
 
-    return false;
+    coeffs_.readEntry("UMax", UMax_);
+    coeffs_.readIfPresent("C", C_);
+
+    if (!coeffs_.readIfPresent("UNames", fieldNames_))
+    {
+        fieldNames_.resize(1);
+        fieldNames_.first() = coeffs_.getOrDefault<word>("U", "U");
+    }
+
+    fv::option::resetApplied();
+
+
+    if (canResetFile())
+    {
+        resetFile(typeName);
+    }
+
+    if (canWriteHeader())
+    {
+        writeFileHeader(file());
+    }
+
+
+    return true;
 }
 
 
