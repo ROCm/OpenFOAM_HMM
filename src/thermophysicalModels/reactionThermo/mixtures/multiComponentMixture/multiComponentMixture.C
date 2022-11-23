@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,15 +64,23 @@ void Foam::multiComponentMixture<ThermoType>::correctMassFractions()
     {
         FatalErrorInFunction
             << "Sum of mass fractions is zero for species " << this->species()
+            << nl
+            << incrIndent << indent
+            << "Min of mass fraction sum " << min(Yt).value()
+            << decrIndent
             << exit(FatalError);
     }
 
-    if (mag(max(Yt).value()) != scalar(1))
+    const scalar diff(mag(max(Yt).value()) - scalar(1));
+
+    if (diff > ROOTVSMALL)
     {
         WarningInFunction
             << "Sum of mass fractions is different from one for species "
             << this->species()
-            << nl;
+            << nl << incrIndent << indent
+            << "Max of mass fraction sum differs from 1 by " << diff
+            << decrIndent << nl;
     }
 
     forAll(Y_, n)
