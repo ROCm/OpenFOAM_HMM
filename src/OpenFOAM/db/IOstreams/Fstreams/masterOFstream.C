@@ -52,6 +52,7 @@ void Foam::masterOFstream::checkWrite
 
     OFstream os
     (
+        atomic_,
         fName,
         IOstreamOption(IOstreamOption::BINARY, version(), compression_),
         append_
@@ -177,6 +178,7 @@ void Foam::masterOFstream::commit()
 
 Foam::masterOFstream::masterOFstream
 (
+    IOstreamOption::atomicType atomic,
     const fileName& pathName,
     IOstreamOption streamOpt,
     IOstreamOption::appendType append,
@@ -185,6 +187,7 @@ Foam::masterOFstream::masterOFstream
 :
     OStringStream(streamOpt),
     pathName_(pathName),
+    atomic_(atomic),
     compression_(streamOpt.compression()),
     append_(append),
     valid_(valid)

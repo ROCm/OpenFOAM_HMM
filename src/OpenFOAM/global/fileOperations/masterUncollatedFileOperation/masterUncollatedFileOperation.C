@@ -2462,6 +2462,29 @@ Foam::fileOperations::masterUncollatedFileOperation::NewOFstream
 }
 
 
+Foam::autoPtr<Foam::OSstream>
+Foam::fileOperations::masterUncollatedFileOperation::NewOFstream
+(
+    IOstreamOption::atomicType atomic,
+    const fileName& pathName,
+    IOstreamOption streamOpt,
+    const bool valid
+) const
+{
+    return autoPtr<OSstream>
+    (
+        new masterOFstream
+        (
+            atomic,
+            pathName,
+            streamOpt,
+            IOstreamOption::NON_APPEND,
+            valid
+        )
+    );
+}
+
+
 void Foam::fileOperations::masterUncollatedFileOperation::flush() const
 {
     fileOperation::flush();

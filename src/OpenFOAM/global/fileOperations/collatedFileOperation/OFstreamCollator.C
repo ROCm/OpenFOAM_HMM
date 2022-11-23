@@ -51,6 +51,7 @@ bool Foam::OFstreamCollator::writeFile
     const labelUList& recvSizes,
     const PtrList<SubList<char>>& slaveData,    // optional slave data
     IOstreamOption streamOpt,
+    IOstreamOption::atomicType atomic,
     IOstreamOption::appendType append,
     const dictionary& headerEntries
 )
@@ -76,7 +77,7 @@ bool Foam::OFstreamCollator::writeFile
     if (UPstream::master(comm))
     {
         Foam::mkDir(fName.path());
-        osPtr.reset(new OFstream(fName, streamOpt, append));
+        osPtr.reset(new OFstream(atomic, fName, streamOpt, append));
         auto& os = *osPtr;
 
         if (append == IOstreamOption::NON_APPEND)
@@ -213,6 +214,7 @@ void* Foam::OFstreamCollator::writeAll(void *threadarg)
                 ptr->sizes_,
                 slaveData,
                 ptr->streamOpt_,
+                ptr->atomic_,
                 ptr->append_,
                 ptr->headerEntries_
             );
@@ -348,6 +350,7 @@ bool Foam::OFstreamCollator::write
     const fileName& fName,
     const string& data,
     IOstreamOption streamOpt,
+    IOstreamOption::atomicType atomic,
     IOstreamOption::appendType append,
     const bool useThread,
     const dictionary& headerEntries
@@ -387,6 +390,7 @@ bool Foam::OFstreamCollator::write
             recvSizes,
             dummySlaveData,
             streamOpt,
+            atomic,
             append,
             headerEntries
         );
@@ -425,6 +429,7 @@ bool Foam::OFstreamCollator::write
                 ),
                 recvSizes,
                 streamOpt,
+                atomic,
                 append,
                 headerEntries
             )
@@ -550,6 +555,7 @@ bool Foam::OFstreamCollator::write
                     data,
                     recvSizes,
                     streamOpt,
+                    atomic,
                     append,
                     headerEntries
                 )

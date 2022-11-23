@@ -381,6 +381,7 @@ bool Foam::fileOperations::collatedFileOperation::writeObject
                 << endl;
         }
 
+        // Note: currently still NON_ATOMIC (Dec-2022)
         masterOFstream os
         (
             pathName,
@@ -424,6 +425,7 @@ bool Foam::fileOperations::collatedFileOperation::writeObject
                     << endl;
             }
 
+            // Note: currently still NON_ATOMIC (Dec-2022)
             masterOFstream os
             (
                 pathName,
@@ -481,6 +483,7 @@ bool Foam::fileOperations::collatedFileOperation::writeObject
                 writer_.waitAll();
             }
 
+            // Note: currently still NON_ATOMIC (Dec-2022)
             threadedCollatedOFstream os
             (
                 writer_,

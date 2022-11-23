@@ -705,4 +705,17 @@ Foam::fileOperations::uncollatedFileOperation::NewOFstream
 }
 
 
+Foam::autoPtr<Foam::OSstream>
+Foam::fileOperations::uncollatedFileOperation::NewOFstream
+(
+    IOstreamOption::atomicType atomic,
+    const fileName& pathName,
+    IOstreamOption streamOpt,
+    const bool valid
+) const
+{
+    return autoPtr<OSstream>(new OFstream(atomic, pathName, streamOpt));
+}
+
+
 // ************************************************************************* //

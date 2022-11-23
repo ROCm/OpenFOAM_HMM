@@ -471,6 +471,15 @@ public:
                 const bool valid = true
             ) const = 0;
 
+            //- Generate an OSstream that writes a file
+            virtual autoPtr<OSstream> NewOFstream
+            (
+                IOstreamOption::atomicType atomic,
+                const fileName& pathname,
+                IOstreamOption streamOpt = IOstreamOption(),
+                const bool valid = true
+            ) const = 0;
+
 
         // File modification checking
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -286,6 +286,15 @@ public:
             //- Generate an OSstream that writes a file
             virtual autoPtr<OSstream> NewOFstream
             (
+                const fileName& pathname,
+                IOstreamOption streamOpt = IOstreamOption(),
+                const bool valid = true
+            ) const;
+
+            //- Generate an OSstream that writes a file
+            virtual autoPtr<OSstream> NewOFstream
+            (
+                IOstreamOption::atomicType,
                 const fileName& pathname,
                 IOstreamOption streamOpt = IOstreamOption(),
                 const bool valid = true

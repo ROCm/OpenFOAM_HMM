@@ -81,6 +81,7 @@ class OFstreamCollator
             const labelList sizes_;
             PtrList<List<char>> slaveData_;
             const IOstreamOption streamOpt_;
+            IOstreamOption::atomicType atomic_;
             IOstreamOption::appendType append_;
             const dictionary headerEntries_;
 
@@ -92,6 +93,7 @@ class OFstreamCollator
                 const string& data,
                 const labelList& sizes,
                 IOstreamOption streamOpt,
+                IOstreamOption::atomicType atomic,
                 IOstreamOption::appendType append,
                 const dictionary& headerEntries
             )
@@ -103,6 +105,7 @@ class OFstreamCollator
                 sizes_(sizes),
                 slaveData_(),
                 streamOpt_(streamOpt),
+                atomic_(atomic),
                 append_(append),
                 headerEntries_(headerEntries)
             {}
@@ -157,6 +160,7 @@ class OFstreamCollator
             const labelUList& recvSizes,
             const PtrList<SubList<char>>& slaveData,
             IOstreamOption streamOpt,
+            IOstreamOption::atomicType atomic,
             IOstreamOption::appendType append,
             const dictionary& headerEntries
         );
@@ -200,6 +204,7 @@ public:
             const fileName&,
             const string& data,
             IOstreamOption streamOpt,
+            IOstreamOption::atomicType atomic,
             IOstreamOption::appendType append,
             const bool useThread = true,
             const dictionary& headerEntries = dictionary::null

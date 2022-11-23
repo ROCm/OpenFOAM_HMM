@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,10 +62,16 @@ class threadedCollatedOFstream
         //- The backend writer
         OFstreamCollator& writer_;
 
+        //- The backend file name
         const fileName pathName_;
 
+        //- Atomic file creation (ignored with append)
+        const IOstreamOption::atomicType atomic_;
+
+        //- Output file compression
         const IOstreamOption::compressionType compression_;
 
+        //- Use threading
         const bool useThread_;
 
         //- Additional FoamFile entries for decomposed data
@@ -75,6 +81,16 @@ class threadedCollatedOFstream
 public:
 
     // Constructors
+
+        //- Construct and set stream status
+        threadedCollatedOFstream
+        (
+            OFstreamCollator& writer,
+            IOstreamOption::atomicType atomic,
+            const fileName& pathname,
+            IOstreamOption streamOpt = IOstreamOption(),
+            const bool useThread = true
+        );
 
         //- Construct and set stream status
         threadedCollatedOFstream

@@ -58,13 +58,16 @@ class masterOFstream
         //- The backend file name
         const fileName pathName_;
 
+        //- Atomic file creation (ignored with append)
+        const IOstreamOption::atomicType atomic_;
+
         //- Output file compression
         const IOstreamOption::compressionType compression_;
 
         //- Open file in append mode
         const IOstreamOption::appendType append_;
 
-        //- Should file be written
+        //- Should file be written (on this processor)
         const bool valid_;
 
 
@@ -89,14 +92,36 @@ public:
 
     // Constructors
 
-        //- Construct from pathname and set stream status
+        //- Construct with specified atomic behaviour (with worldComm)
+        //- from pathname, stream option, optional append
+        masterOFstream
+        (
+            IOstreamOption::atomicType atomic,
+            const fileName& pathname,
+            IOstreamOption streamOpt = IOstreamOption(),
+            IOstreamOption::appendType append = IOstreamOption::NON_APPEND,
+            const bool valid = true
+        );
+
+        //- Construct (with worldComm)
+        //- from pathname, stream option, optional append
         explicit masterOFstream
         (
             const fileName& pathname,
             IOstreamOption streamOpt = IOstreamOption(),
             IOstreamOption::appendType append = IOstreamOption::NON_APPEND,
             const bool valid = true
-        );
+        )
+        :
+            masterOFstream
+            (
+                IOstreamOption::NON_ATOMIC,
+                pathname,
+                streamOpt,
+                append,
+                valid
+            )
+        {}
 
 
     //- Destructor - commits buffered information to file
