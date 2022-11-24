@@ -251,8 +251,18 @@ void decomposeUniform
             << runTime.timePath()/uniformDir
             << endl;
 
-        const fileName timePath =
-            fileHandler().filePath(processorDb.timePath());
+        // Bit of trickery to synthesise the correct directory base,
+        // e.g. processors4/0.01
+        const fileName timePath = fileHandler().objectPath
+        (
+            IOobject
+            (
+                "dummy",
+                runTime.timeName(),
+                processorDb
+            ),
+            word::null
+        ).path();
 
         // If no fields have been decomposed the destination
         // directory will not have been created so make sure.
