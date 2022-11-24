@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef RASModel_H
-#define RASModel_H
+#ifndef Foam_RASModel_H
+#define Foam_RASModel_H
 
 #include "TurbulenceModel.H"
 
@@ -45,7 +45,28 @@ SourceFiles
 namespace Foam
 {
 
-TemplateName(RASModelBase);
+/*---------------------------------------------------------------------------*\
+                        Class RASModelBase Declaration
+\*---------------------------------------------------------------------------*/
+
+class RASModelBase
+{
+public:
+
+    //- Runtime type information
+    ClassName("RASModelBase");
+
+
+    // Constructors
+
+        //- Constructor
+        RASModelBase() noexcept = default;
+
+
+    //- Destructor
+    virtual ~RASModelBase() = default;
+};
+
 
 /*---------------------------------------------------------------------------*\
                            Class RASModel Declaration
@@ -54,13 +75,12 @@ TemplateName(RASModelBase);
 template<class BasicTurbulenceModel>
 class RASModel
 :
-    public RASModelBaseName,
+    public RASModelBase,
     public BasicTurbulenceModel
 {
-
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- RAS coefficients dictionary
         dictionary RASDict_;
@@ -171,37 +191,37 @@ public:
         // Access
 
             //- Return the lower allowable limit for k (default: SMALL)
-            const dimensionedScalar& kMin() const
+            const dimensionedScalar& kMin() const noexcept
             {
                 return kMin_;
             }
 
             //- Return the lower allowable limit for epsilon (default: SMALL)
-            const dimensionedScalar& epsilonMin() const
+            const dimensionedScalar& epsilonMin() const noexcept
             {
                 return epsilonMin_;
             }
 
             //- Return the lower allowable limit for omega (default: SMALL)
-            const dimensionedScalar& omegaMin() const
+            const dimensionedScalar& omegaMin() const noexcept
             {
                 return omegaMin_;
             }
 
             //- Allow kMin to be changed
-            dimensionedScalar& kMin()
+            dimensionedScalar& kMin() noexcept
             {
                 return kMin_;
             }
 
             //- Allow epsilonMin to be changed
-            dimensionedScalar& epsilonMin()
+            dimensionedScalar& epsilonMin() noexcept
             {
                 return epsilonMin_;
             }
 
             //- Allow omegaMin to be changed
-            dimensionedScalar& omegaMin()
+            dimensionedScalar& omegaMin() noexcept
             {
                 return omegaMin_;
             }

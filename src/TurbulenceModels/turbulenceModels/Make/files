@@ -21,8 +21,8 @@ $(LESfilters)/laplaceFilter/laplaceFilter.C
 $(LESfilters)/anisotropicFilter/anisotropicFilter.C
 
 
-/* Base class for DES models */
 DES/DESModel/DESModelBase.C
+RAS/RASModel/RASModelBase.C
 
 
 /* Turbulence BCs */

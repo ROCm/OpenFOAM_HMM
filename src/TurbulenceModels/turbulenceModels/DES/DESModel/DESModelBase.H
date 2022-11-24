@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef DESModelBase_H
-#define DESModelBase_H
+#ifndef Foam_DESModelBase_H
+#define Foam_DESModelBase_H
 
 #include "className.H"
 #include "tmp.H"
@@ -55,14 +55,17 @@ class DESModelBase
 {
 public:
 
-    //- Constructor
-    DESModelBase()
-    {}
+    //- Runtime type information
+    ClassName("DESModelBase");
+
+    // Constructors
+
+        //- Constructor
+        DESModelBase() noexcept = default;
+
 
     //- Destructor
     virtual ~DESModelBase() = default;
-
-    ClassName("DESModelBase");
 
 
     // Public Member Functions

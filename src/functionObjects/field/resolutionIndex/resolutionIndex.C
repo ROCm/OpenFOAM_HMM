@@ -69,7 +69,7 @@ Foam::functionObjects::resolutionIndex::~resolutionIndex()
 
 bool Foam::functionObjects::resolutionIndex::read(const dictionary& dict)
 {
-    if (mesh_.foundObject<RASModelBaseName>(turbulenceModel::propertiesName))
+    if (mesh_.foundObject<RASModelBase>(turbulenceModel::propertiesName))
     {
         FatalIOErrorInFunction(dict)
             << type() << " " << name()
