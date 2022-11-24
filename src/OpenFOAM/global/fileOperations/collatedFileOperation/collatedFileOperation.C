@@ -258,6 +258,17 @@ bool Foam::fileOperations::collatedFileOperation::appendObject
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+void Foam::fileOperations::collatedFileOperation::init(bool verbose)
+{
+    verbose = (verbose && Foam::infoDetailLevel > 0);
+
+    if (verbose)
+    {
+        this->printBanner(ioRanks_.size());
+    }
+}
+
+
 Foam::fileOperations::collatedFileOperation::collatedFileOperation
 (
     bool verbose
@@ -281,10 +292,7 @@ Foam::fileOperations::collatedFileOperation::collatedFileOperation
     nProcs_(Pstream::nProcs()),
     ioRanks_(ioRanks())
 {
-    if (verbose && Foam::infoDetailLevel > 0)
-    {
-        this->printBanner(ioRanks_.size());
-    }
+    init(verbose);
 }
 
 
@@ -302,10 +310,7 @@ Foam::fileOperations::collatedFileOperation::collatedFileOperation
     nProcs_(Pstream::nProcs()),
     ioRanks_(ioRanks)
 {
-    if (verbose && Foam::infoDetailLevel > 0)
-    {
-        this->printBanner(ioRanks_.size());
-    }
+    init(verbose);
 }
 
 

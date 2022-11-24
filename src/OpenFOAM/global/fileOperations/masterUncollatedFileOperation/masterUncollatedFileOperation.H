@@ -88,6 +88,11 @@ class masterUncollatedFileOperation
 :
     public fileOperation
 {
+    // Private Member Functions
+
+        //- Any initialisation steps after constructing
+        void init(bool verbose);
+
 protected:
 
     // Protected Data
@@ -351,7 +356,7 @@ protected:
                 (
                     (isFile_ ? Foam::isFile(f) : Foam::isDir(f))
                   ? f
-                  : fileName::null
+                  : fileName::null  // const reference, not temporary
                 );
             }
         };
@@ -426,7 +431,7 @@ protected:
         (
             const bool checkGlobal,
             const bool isFile,
-            const IOobject&,
+            const IOobject& io,
             const bool search,
             pathType& searchType,
             word& processorsDir,
@@ -614,14 +619,6 @@ public:
                 const bool silent = false,
                 const bool emptyOnly = false
             ) const;
-
-//            //- Open a shared library. Return handle to library. Print error
-//            //  message if library cannot be loaded (check = true)
-//            virtual void* dlOpen
-//            (
-//                const fileName& lib,
-//                const bool check = true
-//            ) const;
 
 
         // (reg)IOobject functinality

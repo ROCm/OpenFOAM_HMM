@@ -241,6 +241,51 @@ static void printHostsSubscription(const UList<string>& hostProcs)
     Info<< ')' << nl;
 }
 
+
+static bool printRootsSubscription
+(
+    const UList<string>& hostProcs,
+    const UList<fileName>& roots
+)
+{
+    if (hostProcs.size() == roots.size()+1)
+    {
+        // Sort roots according to hostProc
+        DynamicList<string> sortedProcs;
+        DynamicList<label> sortedRoots;
+
+        forAll(roots, i)
+        {
+            const fileName& root = roots[i];
+            const string& host = hostProcs[i+1];
+            const label index = sortedProcs.find(host);
+
+            if (index == -1)
+            {
+                sortedProcs.append(host);
+                sortedRoots.append(i);
+            }
+            else if (roots[sortedRoots[index]] != root)
+            {
+                // Not properly sorted...
+                return false;
+            }
+        }
+
+        Info<< "Roots  :\n(" << nl;
+        forAll(sortedProcs, i)
+        {
+            Info<< "    (" << sortedProcs[i].c_str() << ' '
+                << roots[sortedRoots[i]] << ')' << nl;
+        }
+        Info<< ')' << nl;
+
+        return true;
+    }
+
+    return false;
+}
+
 } // End namespace Foam
 
 
@@ -1184,6 +1229,7 @@ void Foam::argList::parse
     stringList hostMachine;
     stringList hostProcs;
     const int writeHostsSwitch = Foam::debug::infoSwitch("writeHosts", 1);
+    const int writeRootsSwitch = Foam::debug::infoSwitch("writeRoots", 1);
 
     // Collect machine/pid, and check that the build is identical
     if (runControl_.parRun())
@@ -1615,7 +1661,7 @@ void Foam::argList::parse
             // Clear here to ensures it doesn't show in the jobInfo
             hostProcs.clear();
         }
-        if (!debug::infoSwitch("writeRoots", 1))
+        if (!writeRootsSwitch)
         {
             roots.clear();
         }
@@ -1654,7 +1700,17 @@ void Foam::argList::parse
             }
             if (roots.size())
             {
-                Info<< "Roots  : " << roots << nl;
+                bool hasPrinted = false;
+                if (writeRootsSwitch == 1)
+                {
+                    // Compact output
+                    hasPrinted = printRootsSubscription(hostProcs, roots);
+                }
+                if (writeRootsSwitch && !hasPrinted)
+                {
+                    // Full output
+                    Info<< "Roots  : " << roots << nl;
+                }
             }
             Info<< "Pstream initialized with:" << nl
                 << "    floatTransfer      : " << Pstream::floatTransfer << nl
@@ -2000,7 +2056,7 @@ bool Foam::argList::checkRootCase() const
         return false;
     }
 
-    const fileName pathDir(fileHandler().filePath(path()));
+    const fileName pathDir(fileHandler().filePath(path(), false));
 
     if (checkProcessorDirectories_ && pathDir.empty() && Pstream::master())
     {

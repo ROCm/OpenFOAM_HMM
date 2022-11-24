@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,17 +50,37 @@ Foam::fileOperations::fileOperationInitialise::fileOperationInitialise
     char**& argv
 )
 {
-    // Filter out commonly known arguments
-    const string s("-ioRanks");
-
+    // Check for -ioRanks, which requires an argument
     int index = -1;
-    for (int i=1; i<argc-1; i++)
+    for (int argi = 1; argi < argc; ++argi)
     {
-        if (argv[i] == s)
+        if (argv[argi][0] == '-')
         {
-            index = i;
-            Foam::setEnv("FOAM_IORANKS", argv[i+1], true);
-            break;
+            const char *optName = &argv[argi][1];
+
+            if (strcmp(optName, "ioRanks") == 0)
+            {
+                if (argi < argc-1)
+                {
+                    index = argi;
+                    Foam::setEnv("FOAM_IORANKS", argv[argi+1], true);
+                    break;
+                }
+                else
+                {
+                    // No argument to -ioRanks.
+                    // Give error message as in argList.
+                    // Slight problem: Pstream not yet initialised so
+                    // - no master-only output
+                    // - no early exit
+
+                    Info<< nl
+                        << "Error: option '-ioRanks' requires a list of"
+                           " IO ranks as argument" << nl << nl;
+
+                    //Pstream::exit(1);  // works for serial and parallel
+                }
+            }
         }
     }
 

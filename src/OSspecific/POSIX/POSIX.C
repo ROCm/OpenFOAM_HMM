@@ -1169,7 +1169,7 @@ bool Foam::ln(const fileName& src, const fileName& dst)
     {
         //InfoInFunction
         Pout<< FUNCTION_NAME
-            << " : Create softlink from : " << src << " to " << dst << endl;
+            << " : Create symlink from : " << src << " to " << dst << endl;
         if ((POSIX::debug & 2) && !Pstream::master())
         {
             error::printStack(Pout);
@@ -1216,6 +1216,40 @@ bool Foam::ln(const fileName& src, const fileName& dst)
 }
 
 
+Foam::fileName Foam::readLink(const fileName& link)
+{
+    if (POSIX::debug)
+    {
+        //InfoInFunction
+        Pout<< FUNCTION_NAME
+            << " : Returning symlink destination for : " << link << endl;
+        if ((POSIX::debug & 2) && !Pstream::master())
+        {
+            error::printStack(Pout);
+        }
+    }
+
+    if (link.empty())
+    {
+        // Treat an empty path as a no-op.
+        return fileName();
+    }
+
+    fileName result;
+    result.resize(1024);  // Should be large enough (mostly relative anyhow)
+
+    ssize_t len = ::readlink(link.c_str(), &(result.front()), result.size());
+    if (len > 0)
+    {
+        result.resize(len);
+        return result;
+    }
+
+    // Failure: return empty result
+    return fileName();
+}
+
+
 bool Foam::mv(const fileName& src, const fileName& dst, const bool followLink)
 {
     if (POSIX::debug)
@@ -1228,7 +1262,7 @@ bool Foam::mv(const fileName& src, const fileName& dst, const bool followLink)
         }
     }
 
-    // Ignore an empty names => always false
+    // Ignore empty names => always false
     if (src.empty() || dst.empty())
     {
         return false;

@@ -67,6 +67,11 @@ class collatedFileOperation
 :
     public masterUncollatedFileOperation
 {
+    // Private Member Functions
+
+        //- Any initialisation steps after constructing
+        void init(bool verbose);
+
 protected:
 
     // Protected Data

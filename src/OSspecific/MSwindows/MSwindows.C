@@ -940,10 +940,21 @@ bool Foam::ln(const fileName& src, const fileName& dst)
 
     if (MSwindows::debug)
     {
-        Info<< "MSwindows does not support ln - softlinking" << endl;
+        Info<< "MSwindows does not support softlinks" << endl;
     }
 
     return false;
+}
+
+
+Foam::fileName Foam::readLink(const fileName& link)
+{
+    if (MSwindows::debug)
+    {
+        Info<< "MSwindows does not support softlinks" << endl;
+    }
+
+    return fileName();
 }
 
 
@@ -954,7 +965,7 @@ bool Foam::mv(const fileName& src, const fileName& dst, const bool followLink)
         Info<< "Move : " << src << " to " << dst << endl;
     }
 
-    // Ignore an empty names => always false
+    // Ignore empty names => always false
     if (src.empty() || dst.empty())
     {
         return false;

@@ -144,8 +144,8 @@ fileName::Type type(const fileName& name, const bool followLink=true);
 bool exists
 (
     const fileName& name,
-    const bool checkGzip=true,
-    const bool followLink=true
+    const bool checkGzip = true,
+    const bool followLink = true
 );
 
 //- Does the name exist as a DIRECTORY in the file system?
@@ -158,8 +158,8 @@ bool isDir(const fileName& name, const bool followLink=true);
 bool isFile
 (
     const fileName& name,
-    const bool checkGzip=true,
-    const bool followLink=true
+    const bool checkGzip = true,
+    const bool followLink = true
 );
 
 //- Return size of file or -1 on failure (normally follows symbolic links).
@@ -196,6 +196,13 @@ bool cp(const fileName& src, const fileName& dst, const bool followLink=true);
 //  An empty source or destination name is a no-op that always returns false,
 //  but also produces a warning.
 bool ln(const fileName& src, const fileName& dst);
+
+//- Return the contents (target) of a symlink.
+//  For example, returns \c target for <code>ln -s target linkName</code>
+//
+//  An empty link name is a no-op that always returns an empty string.
+//  Following a non-link is an error that returns an empty string.
+fileName readLink(const fileName& link);
 
 //- Rename src to dst.
 //  An empty source or destination name is a no-op that always returns false.

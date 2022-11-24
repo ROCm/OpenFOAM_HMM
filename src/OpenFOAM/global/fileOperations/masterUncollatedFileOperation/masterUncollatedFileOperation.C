@@ -715,21 +715,7 @@ Foam::fileOperations::masterUncollatedFileOperation::read
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::fileOperations::masterUncollatedFileOperation::
-masterUncollatedFileOperation
-(
-    bool verbose
-)
-:
-    fileOperation
-    (
-        UPstream::allocateCommunicator
-        (
-            UPstream::worldComm,
-            subRanks(Pstream::nProcs())
-        )
-    ),
-    myComm_(comm_)
+void Foam::fileOperations::masterUncollatedFileOperation::init(bool verbose)
 {
     verbose = (verbose && Foam::infoDetailLevel > 0);
 
@@ -766,6 +752,26 @@ masterUncollatedFileOperation
 Foam::fileOperations::masterUncollatedFileOperation::
 masterUncollatedFileOperation
 (
+    bool verbose
+)
+:
+    fileOperation
+    (
+        UPstream::allocateCommunicator
+        (
+            UPstream::worldComm,
+            subRanks(Pstream::nProcs())
+        )
+    ),
+    myComm_(comm_)
+{
+    init(verbose);
+}
+
+
+Foam::fileOperations::masterUncollatedFileOperation::
+masterUncollatedFileOperation
+(
     const label comm,
     bool verbose
 )
@@ -773,35 +779,7 @@ masterUncollatedFileOperation
     fileOperation(comm),
     myComm_(-1)
 {
-    verbose = (verbose && Foam::infoDetailLevel > 0);
-
-    if (verbose)
-    {
-        DetailInfo
-            << "I/O    : " << typeName
-            << " (maxMasterFileBufferSize " << maxMasterFileBufferSize << ')'
-            << endl;
-    }
-
-    if (IOobject::fileModificationChecking == IOobject::timeStampMaster)
-    {
-        if (verbose)
-        {
-            WarningInFunction
-                << "Resetting fileModificationChecking to timeStamp" << endl;
-        }
-        IOobject::fileModificationChecking = IOobject::timeStamp;
-    }
-    else if (IOobject::fileModificationChecking == IOobject::inotifyMaster)
-    {
-        if (verbose)
-        {
-            WarningInFunction
-                << "Resetting fileModificationChecking to inotify"
-                << endl;
-        }
-        IOobject::fileModificationChecking = IOobject::inotify;
-    }
+    init(verbose);
 }
 
 

@@ -176,6 +176,18 @@ Foam::fileOperations::uncollatedFileOperation::lookupProcessorsPath
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+void Foam::fileOperations::uncollatedFileOperation::init(bool verbose)
+{
+    verbose = (verbose && Foam::infoDetailLevel > 0);
+
+    if (verbose)
+    {
+        DetailInfo
+            << "I/O    : " << typeName << endl;
+    }
+}
+
+
 Foam::fileOperations::uncollatedFileOperation::uncollatedFileOperation
 (
     bool verbose
@@ -183,11 +195,7 @@ Foam::fileOperations::uncollatedFileOperation::uncollatedFileOperation
 :
     fileOperation(Pstream::worldComm)
 {
-    if (verbose)
-    {
-        DetailInfo
-            << "I/O    : " << typeName << endl;
-    }
+    init(verbose);
 }
 
 

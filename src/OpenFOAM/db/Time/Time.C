@@ -195,13 +195,14 @@ void Foam::Time::setControls()
 
     // Check if time directory exists
     // If not increase time precision to see if it is formatted differently.
-    // Note: do not use raw fileHandler().exists(...) since does not check
+    // Note: - do not use raw fileHandler().exists(...) since does not check
     //       alternative processorsDDD directories naming
-    if (fileHandler().filePath(timePath()).empty())
+    //       - do not look for compressed (is directory)
+
+    if (fileHandler().filePath(timePath(), false).empty())
     {
-        int oldPrecision = precision_;
+        const int oldPrecision = precision_;
         int requiredPrecision = -1;
-        bool found = false;
         word oldTime(timeName());
         for
         (
@@ -218,14 +219,10 @@ void Foam::Time::setControls()
             {
                 break;
             }
-            oldTime = newTime;
+            oldTime = std::move(newTime);
 
-            // Check the existence of the time directory with the new format
-            //found = fileHandler().exists(timePath(), false);
-            const fileName dirName(fileHandler().filePath(timePath()));
-            found = !dirName.empty();
-
-            if (found)
+            // Does a time directory exist with the new format?
+            if (!fileHandler().filePath(timePath(), false).empty())
             {
                 requiredPrecision = precision_;
             }

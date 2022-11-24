@@ -123,6 +123,17 @@ Foam::labelList Foam::fileOperations::hostCollatedFileOperation::subRanks
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+void Foam::fileOperations::hostCollatedFileOperation::init(bool verbose)
+{
+    verbose = (verbose && Foam::infoDetailLevel > 0);
+
+    if (verbose)
+    {
+        this->printBanner(ioRanks_.size());
+    }
+}
+
+
 Foam::fileOperations::hostCollatedFileOperation::hostCollatedFileOperation
 (
     bool verbose
@@ -140,10 +151,7 @@ Foam::fileOperations::hostCollatedFileOperation::hostCollatedFileOperation
         false // verbose
     )
 {
-    if (verbose && Foam::infoDetailLevel > 0)
-    {
-        this->printBanner(ioRanks_.size());
-    }
+    init(verbose);
 }
 
 

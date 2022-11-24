@@ -53,6 +53,11 @@ class uncollatedFileOperation
 :
     public fileOperation
 {
+    // Private Member Functions
+
+        //- Any initialisation steps after constructing
+        void init(bool verbose);
+
 protected:
 
     // Protected Member Functions
@@ -214,14 +219,6 @@ public:
                 const bool silent = false,
                 const bool emptyOnly = false
             ) const;
-
-//            //- Open a shared library. Return handle to library. Print error
-//            //  message if library cannot be loaded (check = true)
-//            virtual void* dlOpen
-//            (
-//                const fileName& lib,
-//                const bool check = true
-//            ) const;
 
 
         // (reg)IOobject functionality

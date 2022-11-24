@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,6 +69,8 @@ class Time;
 class fileOperation
 {
 public:
+
+    // Public Data Types
 
         //- Enumeration for the location of an IOobject
         enum pathType : int
@@ -274,7 +276,7 @@ public:
             virtual bool exists
             (
                 const fileName&,
-                const bool checkGzip=true,
+                const bool checkGzip = true,
                 const bool followLink = true
             ) const = 0;
 
@@ -290,7 +292,7 @@ public:
             virtual bool isFile
             (
                 const fileName&,
-                const bool checkGzip=true,
+                const bool checkGzip = true,
                 const bool followLink = true
             ) const = 0;
 
@@ -366,14 +368,6 @@ public:
                 const bool silent = false,
                 const bool emptyOnly = false
             ) const = 0;
-
-//            //- Open a shared library. Return handle to library. Print error
-//            //  message if library cannot be loaded (check = true)
-//            virtual void* dlOpen
-//            (
-//                const fileName& lib,
-//                const bool check = true
-//            ) const = 0;
 
 
         // (reg)IOobject functionality
@@ -456,9 +450,14 @@ public:
 
         // Filename (not IOobject) operations
 
-            //- Search for a file or directory. Use IOobject version in
-            //  preference
-            virtual fileName filePath(const fileName&) const;
+            //- Search for a file or directory.
+            //- Use IOobject version in preference
+            virtual fileName filePath
+            (
+                const fileName&,
+                const bool checkGzip = true,
+                const bool followLink = true
+            ) const;
 
             //- Generate an ISstream that reads a file
             virtual autoPtr<ISstream> NewIFstream(const fileName&) const = 0;
@@ -605,6 +604,24 @@ public:
             //- Detect processor number from '/aa/bb/processorDDD/cc'
             static label detectProcessorPath(const fileName& objPath);
 };
+
+
+//- Read pathType as an integer value
+inline Istream& operator>>(Istream& is, fileOperation::pathType& b)
+{
+    int val(0);
+    is >> val;
+
+    b = static_cast<fileOperation::pathType>(val);
+    return is;
+}
+
+//- Write pathType as an integer value
+inline Ostream& operator<<(Ostream& os, const fileOperation::pathType b)
+{
+    os << static_cast<int>(b);
+    return os;
+}
 
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //

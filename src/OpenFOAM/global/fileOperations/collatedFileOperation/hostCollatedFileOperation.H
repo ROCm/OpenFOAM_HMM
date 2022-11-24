@@ -77,11 +77,13 @@ class hostCollatedFileOperation
 :
     public collatedFileOperation
 {
-   // Private Member Functions
+    // Private Member Functions
+
+        //- Any initialisation steps after constructing
+        void init(bool verbose);
 
         //- Get the list of processors part of this set
         static labelList subRanks(const label n);
-
 
 public:
 

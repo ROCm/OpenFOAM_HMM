@@ -414,6 +414,15 @@ public:
                 return runTimeModifiable_;
             }
 
+            //- Set re-reading support on/off (use with caution).
+            //  \return the previous value
+            Switch runTimeModifiable(const Switch sw) noexcept
+            {
+                Switch old(runTimeModifiable_);
+                runTimeModifiable_ = sw;
+                return old;
+            }
+
             //- Read control dictionary, update controls and time
             virtual bool read();
 

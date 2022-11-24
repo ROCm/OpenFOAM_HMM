@@ -59,6 +59,8 @@ namespace Foam
     );
 }
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
 const Foam::Enum<Foam::fileOperation::pathType>
 Foam::fileOperation::pathTypeNames_
 ({
@@ -792,7 +794,12 @@ bool Foam::fileOperation::writeObject
 }
 
 
-Foam::fileName Foam::fileOperation::filePath(const fileName& fName) const
+Foam::fileName Foam::fileOperation::filePath
+(
+    const fileName& fName,
+    const bool checkGzip,
+    const bool followLink
+) const
 {
     if (debug)
     {
@@ -820,7 +827,7 @@ Foam::fileName Foam::fileOperation::filePath(const fileName& fName) const
             const fileName& procDir = dirIdx.first();
 
             fileName collatedName(path/procDir/local);
-            if (exists(collatedName))
+            if (exists(collatedName, checkGzip, followLink))
             {
                 if (debug)
                 {
@@ -831,7 +838,7 @@ Foam::fileName Foam::fileOperation::filePath(const fileName& fName) const
         }
     }
 
-    if (exists(fName))
+    if (exists(fName, checkGzip, followLink))
     {
         if (debug)
         {
@@ -844,7 +851,8 @@ Foam::fileName Foam::fileOperation::filePath(const fileName& fName) const
     {
         Pout<< "fileOperation::filePath : Not found" << endl;
     }
-    return fileName::null;
+
+    return fileName();
 }
 
 
@@ -992,7 +1000,8 @@ Foam::instantList Foam::fileOperation::findTimes
 
     if (debug)
     {
-        Pout<< "fileOperation::findTimes : Found times:" << times << endl;
+        Pout<< "fileOperation::findTimes : Found times:" << flatOutput(times)
+            << endl;
     }
     return times;
 }
@@ -1177,7 +1186,7 @@ Foam::fileNameList Foam::fileOperation::readObjects
 
     fileName path(db.path(instance, db.dbDir()/local));
 
-    newInstance = word::null;
+    newInstance.clear();
     fileNameList objectNames;
 
     if (Foam::isDir(path))
@@ -1311,7 +1320,7 @@ Foam::fileName Foam::fileOperation::processorsPath
         return dir.path()/procsDir;
     }
 
-    return fileName::null;
+    return fileName();
 }
 
 
@@ -1502,7 +1511,7 @@ const Foam::fileOperation& Foam::fileHandler()
 {
     if (!fileOperation::fileHandlerPtr_)
     {
-        word handler(getEnv("FOAM_FILEHANDLER"));
+        word handler(Foam::getEnv("FOAM_FILEHANDLER"));
 
         if (handler.empty())
         {
