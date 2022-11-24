@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,11 +37,12 @@ Description
 
 SourceFiles
     AABBTree.C
+    AABBTreeBase.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef AABBTree_H
-#define AABBTree_H
+#ifndef Foam_AABBTree_H
+#define Foam_AABBTree_H
 
 #include "labelList.H"
 #include "labelPair.H"
@@ -54,10 +56,8 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
-
-template<class Type>
-class AABBTree;
+// Forward Declarations
+template<class Type> class AABBTree;
 
 template<class Type>
 Istream& operator>>(Istream&, AABBTree<Type>&);
@@ -65,20 +65,55 @@ Istream& operator>>(Istream&, AABBTree<Type>&);
 template<class Type>
 Ostream& operator<<(Ostream&, const AABBTree<Type>&);
 
+
+/*---------------------------------------------------------------------------*\
+                        Class AABBTreeBase Declaration
+\*---------------------------------------------------------------------------*/
+
+//- Template invariant parts for AABBTree
+class AABBTreeBase
+{
+protected:
+
+    // Static Data
+
+        //- Relative tolerance.
+        static scalar tolerance_;
+
+
+public:
+
+    // Constructors
+
+        //- Default construct
+        AABBTreeBase() = default;
+
+
+    // Output Helpers
+
+        //- Write treeBoundBox in OBJ format
+        static void writeOBJ
+        (
+            Ostream& os,
+            const treeBoundBox& bb,
+            label& vertIndex,
+            const bool writeLinesOnly = false
+        );
+};
+
+
 /*---------------------------------------------------------------------------*\
                           Class AABBTree Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
 class AABBTree
+:
+    public AABBTreeBase
 {
-
 protected:
 
     // Protected Data
-
-        //- Tolerance
-        static scalar tolerance_;
 
         //- Maximum tree level
         label maxLevel_;
@@ -94,15 +129,6 @@ protected:
 
 
     // Protected Member Functions
-
-        //- Write OBJ file of bounding box
-        void writeOBJ
-        (
-            const bool writeLinesOnly,
-            const treeBoundBox& bb,
-            label& vertI,
-            Ostream& os
-        ) const;
 
         //- Write OBJ for all bounding boxes
         void writeOBJ
@@ -122,9 +148,9 @@ protected:
         (
             const bool equalBinSize,
             const label level,
-            const List<Type>& objects,
+            const UList<Type>& objects,
             const pointField& points,
-            const DynamicList<label>& objectIDs,
+            const labelUList& objectIDs,
             const treeBoundBox& bb,
             const label nodeI,
 
@@ -138,7 +164,7 @@ public:
 
     // Constructors
 
-        //- Null constructor
+        //- Default construct
         AABBTree();
 
         //- Construct from components
@@ -148,33 +174,44 @@ public:
             const UList<Type>& objects,
             const pointField& points,
             const bool equalBinSize = true,
-            const label maxLevel = 3,
-            const label minBinSize = 100
+            label maxLevel = 3,
+            label minBinSize = 100
         );
 
 
     // Public Member Functions
 
-        // Access
+    // Access
 
-            //- Return the bounding boxes making up the tree
-            const List<treeBoundBox>& boundBoxes() const;
+        //- Return the bounding boxes making up the tree
+        const List<treeBoundBox>& boundBoxes() const noexcept
+        {
+            return boundBoxes_;
+        }
 
-            //- Return the contents addressing
-            const List<labelList>& addressing() const;
-
-
-        // Evaluation
-
-            //- Determine whether a point is inside the bounding boxes
-            bool pointInside(const point& pt) const;
-
-            //- Determine whether a bounding box overlaps the tree bounding
-            //- boxes
-            bool overlaps(const boundBox& bbIn) const;
+        //- Return the contents addressing
+        const List<labelList>& addressing() const noexcept
+        {
+            return addressing_;
+        }
 
 
-    // IOstream operators
+    // Evaluation
+
+        //- Determine whether a point is inside the bounding boxes
+        bool pointInside(const point& pt) const;
+
+        //- Determine whether a bounding box overlaps the tree bounding boxes
+        bool overlaps(const boundBox& bbIn) const;
+
+
+    // Write
+
+        //- Write all tree boxes (leaves) in OBJ format
+        void writeOBJ(Ostream& os) const;
+
+
+    // IOstream Operators
 
         friend Istream& operator>> <Type>(Istream&, AABBTree&);
         friend Ostream& operator<< <Type>(Ostream&, const AABBTree&);

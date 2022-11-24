@@ -55,7 +55,7 @@ Description
 class TemplateNameString##Name                                                 \
 {                                                                              \
 public:                                                                        \
-    TemplateNameString##Name() {}                                              \
+    TemplateNameString##Name() noexcept = default;                             \
     ClassNameNoDebug(#TemplateNameString);                                     \
 }
 
@@ -81,7 +81,7 @@ public:                                                                        \
 class TemplateNameString##Name                                                 \
 {                                                                              \
 public:                                                                        \
-    TemplateNameString##Name() {}                                              \
+    TemplateNameString##Name() noexcept = default;                             \
     ClassName(#TemplateNameString);                                            \
 }
 

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,8 +38,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef PatchToPatchInterpolation_H
-#define PatchToPatchInterpolation_H
+#ifndef Foam_PatchToPatchInterpolation_H
+#define Foam_PatchToPatchInterpolation_H
 
 #include "className.H"
 #include "labelList.H"
@@ -54,10 +55,55 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                Class PatchToPatchInterpolationName Declaration
+                Class PatchToPatchInterpolationBase Declaration
 \*---------------------------------------------------------------------------*/
 
-TemplateName(PatchToPatchInterpolation);
+class PatchToPatchInterpolationBase
+{
+protected:
+
+    // Protected Static Data
+
+        //- Relative merge tolerance for projected points missing the target
+        //  Expressed as the fraction of min involved edge size
+        static scalar projectionTol_;
+
+        //- Direct hit tolerance
+        static const scalar directHitTol;
+
+
+public:
+
+    //- Runtime type information
+    ClassName("PatchToPatchInterpolation");
+
+
+    // Constructors
+
+        //- Default construct
+        PatchToPatchInterpolationBase() noexcept = default;
+
+
+    // Member Functions
+
+        //- Access to projection tolerance
+        static scalar projectionTol() noexcept
+        {
+            return projectionTol_;
+        }
+
+        //- Change propagation tolerance, return previous value
+        static scalar setProjectionTol(const scalar tol)
+        {
+            if (tol < -VSMALL)
+            {
+                FatalErrorInFunction << abort(FatalError);
+            }
+            scalar old(projectionTol_);
+            projectionTol_ = tol;
+            return old;
+        }
+};
 
 
 /*---------------------------------------------------------------------------*\
@@ -67,9 +113,9 @@ TemplateName(PatchToPatchInterpolation);
 template<class FromPatch, class ToPatch>
 class PatchToPatchInterpolation
 :
-    public PatchToPatchInterpolationName
+    public PatchToPatchInterpolationBase
 {
-    // Private data
+    // Private Data
 
         //- Reference to the source patch
         const FromPatch& fromPatch_;
@@ -84,34 +130,28 @@ class PatchToPatchInterpolation
         intersection::direction dir_;
 
 
-    // Static data
+    // Point Addressing
 
-        //- Relative merge tolerance for projected points missing the target
-        //  Expressed as the fraction of min involved edge size
-        static scalar projectionTol_;
+        //- Face into which each point of target patch is projected
+        mutable std::unique_ptr<labelList> pointAddressingPtr_;
+
+        //- Weighting factors
+        mutable std::unique_ptr<FieldField<Field, scalar>> pointWeightsPtr_;
+
+        //- Distance to intersection for patch points
+        mutable std::unique_ptr<scalarField> pointDistancePtr_;
 
 
-        // Point addressing
+    // Face Addressing
 
-            //- Face into which each point of target patch is projected
-            mutable labelList* pointAddressingPtr_;
+        //- Face into which each face centre of target patch is projected
+        mutable std::unique_ptr<labelList> faceAddressingPtr_;
 
-            //- Weighting factors
-            mutable FieldField<Field, scalar>* pointWeightsPtr_;
+        //- Weighting factors
+        mutable std::unique_ptr<FieldField<Field, scalar>> faceWeightsPtr_;
 
-            //- Distance to intersection for patch points
-            mutable scalarField* pointDistancePtr_;
-
-        // Face addressing
-
-            //- Face into which each face centre of target patch is projected
-            mutable labelList* faceAddressingPtr_;
-
-            //- Weighting factors
-            mutable FieldField<Field, scalar>* faceWeightsPtr_;
-
-            //- Distance to intersection for patch face centres
-            mutable scalarField* faceDistancePtr_;
+        //- Distance to intersection for patch face centres
+        mutable std::unique_ptr<scalarField> faceDistancePtr_;
 
 
     // Private Member Functions
@@ -145,12 +185,6 @@ class PatchToPatchInterpolation
         const FieldField<Field, scalar>& faceWeights() const;
 
 
-    // Private static data members
-
-        //- Direct hit tolerance
-        static const scalar directHitTol;
-
-
 public:
 
     // Constructors
@@ -170,21 +204,6 @@ public:
 
 
     // Member Functions
-
-        //- Set the projection tolerance, returning the previous value
-        static scalar setProjectionTol(const scalar t)
-        {
-            if (t < -VSMALL)
-            {
-                FatalErrorInFunction
-                    << abort(FatalError);
-            }
-
-            scalar oldTol = projectionTol_;
-            projectionTol_ = t;
-
-            return oldTol;
-        }
 
         //- Return ype of intersection algorithm to use in projection
         intersection::algorithm projectionAlgo() const

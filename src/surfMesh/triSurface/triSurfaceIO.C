@@ -359,7 +359,7 @@ void Foam::triSurface::writeStats(Ostream& os) const
 
     bitSet pointIsUsed(points().size());
 
-    boundBox bb(boundBox::invertedBox);
+    boundBox bb;
     labelHashSet regionsUsed;
 
     for (const auto& f : *this)

@@ -163,7 +163,7 @@ Foam::tmp<Foam::pointField> Foam::mappedPatchBase::facePoints
             mesh,
             pp.start()+facei,
             polyMesh::FACE_DIAG_TRIS
-        ).rawPoint();
+        ).point();
     }
 
     return tfacePoints;
@@ -337,7 +337,7 @@ void Foam::mappedPatchBase::findLocalSamples
                         cc,
                         celli
                     );
-                    near.first().second().first() = magSqr(cc-sample);
+                    near.first().second().first() = sample.distSqr(cc);
                     near.first().second().second() = myRank;
                     near.second() = mySampleWorld;
                 }
@@ -363,11 +363,10 @@ void Foam::mappedPatchBase::findLocalSamples
                 nearInfoWorld& near = nearest[sampleI];
 
                 near.first().first() = tree.findNearest(sample, sqr(GREAT));
-                near.first().second().first() = magSqr
-                (
-                    near.first().first().hitPoint()
-                   -sample
-                );
+
+                near.first().second().first() =
+                    near.first().first().hitPoint().distSqr(sample);
+
                 near.first().second().second() = myRank;
                 near.second() = mySampleWorld;
             }
@@ -397,25 +396,21 @@ void Foam::mappedPatchBase::findLocalSamples
                     treeBoundBox(pp.points(), pp.meshPoints()).extend
                     (
                         rndGen,
-                        1e-4
+                        1e-4,
+                        ROOTVSMALL
                     )
                 );
-                patchBb.min() -= point::uniform(ROOTVSMALL);
-                patchBb.max() += point::uniform(ROOTVSMALL);
 
                 indexedOctree<treeDataFace> boundaryTree
                 (
-                    treeDataFace    // all information needed to search faces
-                    (
-                        false,      // do not cache bb
-                        mesh,
-                        identity(pp.range())  // boundary faces only
-                    ),
+                    treeDataFace(mesh, pp.range()),  // Patch faces
+
                     patchBb,        // overall search domain
                     8,              // maxLevel
                     10,             // leafsize
                     3.0             // duplicity
                 );
+                const auto& treeData = boundaryTree.shapes();
 
                 forAll(samples, sampleI)
                 {
@@ -426,7 +421,7 @@ void Foam::mappedPatchBase::findLocalSamples
                     nearInfo = boundaryTree.findNearest
                     (
                         sample,
-                        magSqr(patchBb.span())
+                        patchBb.magSqr()
                     );
 
                     if (!nearInfo.hit())
@@ -437,9 +432,10 @@ void Foam::mappedPatchBase::findLocalSamples
                     }
                     else
                     {
-                        point fc(pp[nearInfo.index()].centre(pp.points()));
+                        const point& fc = treeData.centre(nearInfo.index());
+
                         nearInfo.setPoint(fc);
-                        near.first().second().first() = magSqr(fc-sample);
+                        near.first().second().first() = sample.distSqr(fc);
                         near.first().second().second() = myRank;
                         near.second() = mySampleWorld;
                     }
@@ -472,19 +468,16 @@ void Foam::mappedPatchBase::findLocalSamples
                     treeBoundBox(pp.points(), pp.meshPoints()).extend
                     (
                         rndGen,
-                        1e-4
+                        1e-4,
+                        ROOTVSMALL
                     )
                 );
-                patchBb.min() -= point::uniform(ROOTVSMALL);
-                patchBb.max() += point::uniform(ROOTVSMALL);
 
                 indexedOctree<treeDataPoint> boundaryTree
                 (
-                    treeDataPoint   // all information needed to search faces
-                    (
-                        mesh.points(),
-                        pp.meshPoints() // selection of points to search on
-                    ),
+                    // Patch points
+                    treeDataPoint(mesh.points(), pp.meshPoints()),
+
                     patchBb,        // overall search domain
                     8,              // maxLevel
                     10,             // leafsize
@@ -500,7 +493,7 @@ void Foam::mappedPatchBase::findLocalSamples
                     nearInfo = boundaryTree.findNearest
                     (
                         sample,
-                        magSqr(patchBb.span())
+                        patchBb.magSqr()
                     );
 
                     if (!nearInfo.hit())
@@ -511,9 +504,9 @@ void Foam::mappedPatchBase::findLocalSamples
                     }
                     else
                     {
-                        const point& pt = nearInfo.hitPoint();
+                        const point& pt = nearInfo.point();
 
-                        near.first().second().first() = magSqr(pt-sample);
+                        near.first().second().first() = sample.distSqr(pt);
                         near.first().second().second() = myRank;
                         near.second() = mySampleWorld;
                     }
@@ -553,7 +546,7 @@ void Foam::mappedPatchBase::findLocalSamples
                     const point& fc = mesh.faceCentres()[facei];
 
                     near.first().first() = pointIndexHit(true, fc, facei);
-                    near.first().second().first() = magSqr(fc-sample);
+                    near.first().second().first() = sample.distSqr(fc);
                     near.first().second().second() = myRank;
                     near.second() = mySampleWorld;
                 }
@@ -690,7 +683,7 @@ void Foam::mappedPatchBase::findSamples
     //            << "    found on patchfacei:"
     //            << nearest[samplei].first().first().index() << nl
     //            << "    found at location:"
-    //            << nearest[samplei].first().first().rawPoint() << nl;
+    //            << nearest[samplei].first().first().point() << nl;
     //    }
     //    Pout<< endl;
     //}
@@ -714,7 +707,7 @@ void Foam::mappedPatchBase::findSamples
         {
             sampleProcs[sampleI] = ni.second().second();
             sampleIndices[sampleI] = ni.first().index();
-            sampleLocations[sampleI] = ni.first().hitPoint();
+            sampleLocations[sampleI] = ni.first().point();
         }
     }
 
@@ -1780,7 +1773,7 @@ Foam::pointIndexHit Foam::mappedPatchBase::facePoint
 
                 if (hitInfo.hit() && hitInfo.distance() > 0)
                 {
-                    return pointIndexHit(true, hitInfo.hitPoint(), i-2);
+                    return pointIndexHit(true, hitInfo.point(), i-2);
                 }
 
                 fp = nextFp;

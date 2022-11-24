@@ -105,12 +105,8 @@ public:
         inline void clear();
 
         //- Append an element if not already in the list.
-        FOAM_DEPRECATED_FOR(2022-05, "appendUniq method")
-        inline void append(const word& val);
-
-        //- Append an element if not already in the list.
         //  \return the change in list length
-        inline label appendUniq(const word& val);
+        inline label push_uniq(const word& val);
 
         //- Return the hash of words/indices for inspection
         inline const HashTable<label>& lookup() const;
@@ -184,6 +180,18 @@ public:
 
 
     // Housekeeping
+
+        //- Append an element if not already in the list.
+        FOAM_DEPRECATED_FOR(2022-05, "push_uniq method")
+        void append(const word& val) { this->push_uniq(val); }
+
+        //- Append an element if not already in the list.
+        FOAM_DEPRECATED_FOR(2022-10, "push_uniq method")
+        void push_back(const word& val) { this->push_uniq(val); }
+
+        //- Append an element if not already in the list.
+        //FOAM_DEPRECATED_FOR(2022-10, "push_uniq method")
+        label appendUniq(const word& val) { return this->push_uniq(val); }
 
         //- Deprecated(2019-01) Is the specified name found in the list?
         //  \deprecated(2019-01) - use found() method

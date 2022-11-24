@@ -61,7 +61,7 @@ void Foam::LPtrList<LListBase, T>::readIstream(Istream& is, const INew& inew)
                 for (label i=0; i<len; ++i)
                 {
                     T* p = inew(is).ptr();
-                    this->append(p);
+                    this->push_back(p);
 
                     is.fatalCheck
                     (
@@ -73,7 +73,7 @@ void Foam::LPtrList<LListBase, T>::readIstream(Istream& is, const INew& inew)
             else  // Assumed to be token::BEGIN_BLOCK
             {
                 T* p = inew(is).ptr();
-                this->append(p);
+                this->push_back(p);
 
                 is.fatalCheck
                 (
@@ -83,7 +83,7 @@ void Foam::LPtrList<LListBase, T>::readIstream(Istream& is, const INew& inew)
 
                 for (label i=1; i<len; ++i)
                 {
-                    this->append(p->clone().ptr());
+                    this->push_back(p->clone().ptr());
                 }
             }
         }
@@ -99,7 +99,7 @@ void Foam::LPtrList<LListBase, T>::readIstream(Istream& is, const INew& inew)
         while (!tok.isPunctuation(token::END_LIST))
         {
             is.putBack(tok);
-            this->append(inew(is).ptr());
+            this->push_back(inew(is).ptr());
 
             is >> tok;
             is.fatalCheck(FUNCTION_NAME);

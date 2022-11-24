@@ -101,6 +101,8 @@ Foam::triad::triad(const quaternion& q)
 
 void Foam::triad::orthogonalise()
 {
+    //int which = ((set(0) ? 1 : 0) | (set(1) ? 2 : 0) | (set(2) ? 4 : 0));
+
     // Hack for 2D z-slab cases
     // if (!set(2))
     // {
@@ -126,9 +128,9 @@ void Foam::triad::orthogonalise()
     {
         for (int i=0; i<2; i++)
         {
-            scalar o01 = mag(operator[](0) & operator[](1));
-            scalar o02 = mag(operator[](0) & operator[](2));
-            scalar o12 = mag(operator[](1) & operator[](2));
+            scalar o01 = Foam::mag(operator[](0) & operator[](1));
+            scalar o02 = Foam::mag(operator[](0) & operator[](2));
+            scalar o12 = Foam::mag(operator[](1) & operator[](2));
 
             if (o01 < o02 && o01 < o12)
             {
@@ -220,7 +222,7 @@ void Foam::triad::operator+=(const triad& t2)
                 if (!set)
                 {
                     scalar a = operator[](i) & t2.operator[](j);
-                    scalar maga = mag(a);
+                    scalar maga = Foam::mag(a);
 
                     if (maga > mostAligned)
                     {
@@ -243,9 +245,9 @@ void Foam::triad::align(const vector& v)
     {
         vector mostAligned
         (
-            mag(v & operator[](0)),
-            mag(v & operator[](1)),
-            mag(v & operator[](2))
+            Foam::mag(v & operator[](0)),
+            Foam::mag(v & operator[](1)),
+            Foam::mag(v & operator[](2))
         );
 
         scalar mav;
@@ -293,13 +295,13 @@ Foam::triad Foam::triad::sortxyz() const
 
     if
     (
-        mag(operator[](0).x()) > mag(operator[](1).x())
-     && mag(operator[](0).x()) > mag(operator[](2).x())
+        Foam::mag(operator[](0).x()) > Foam::mag(operator[](1).x())
+     && Foam::mag(operator[](0).x()) > Foam::mag(operator[](2).x())
     )
     {
         t[0] = operator[](0);
 
-        if (mag(operator[](1).y()) > mag(operator[](2).y()))
+        if (Foam::mag(operator[](1).y()) > Foam::mag(operator[](2).y()))
         {
             t[1] = operator[](1);
             t[2] = operator[](2);
@@ -312,12 +314,12 @@ Foam::triad Foam::triad::sortxyz() const
     }
     else if
     (
-        mag(operator[](1).x()) > mag(operator[](2).x())
+        Foam::mag(operator[](1).x()) > Foam::mag(operator[](2).x())
     )
     {
         t[0] = operator[](1);
 
-        if (mag(operator[](0).y()) > mag(operator[](2).y()))
+        if (Foam::mag(operator[](0).y()) > Foam::mag(operator[](2).y()))
         {
             t[1] = operator[](0);
             t[2] = operator[](2);
@@ -332,7 +334,7 @@ Foam::triad Foam::triad::sortxyz() const
     {
         t[0] = operator[](2);
 
-        if (mag(operator[](0).y()) > mag(operator[](1).y()))
+        if (Foam::mag(operator[](0).y()) > Foam::mag(operator[](1).y()))
         {
             t[1] = operator[](0);
             t[2] = operator[](1);
@@ -391,7 +393,7 @@ Foam::scalar Foam::diff(const triad& A, const triad& B)
 
         scalar cosPhi =
             (tmpA[dir] & tmpB[dir])
-           /(mag(tmpA[dir])*mag(tmpA[dir]) + SMALL);
+           /(Foam::mag(tmpA[dir])*Foam::mag(tmpA[dir]) + SMALL);
 
         cosPhi = min(max(cosPhi, -1), 1);
 

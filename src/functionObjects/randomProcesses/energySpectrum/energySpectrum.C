@@ -150,16 +150,10 @@ bool Foam::functionObjects::energySpectrum::read(const dictionary& dict)
     const boundBox meshBb(mesh_.bounds());
 
     // Assume all cells are the same size...
-    const cell& c = mesh_.cells()[0];
-    boundBox cellBb(boundBox::invertedBox);
-    forAll(c, facei)
-    {
-        const face& f = mesh_.faces()[c[facei]];
-        cellBb.add(mesh_.points(), f);
-    }
+    boundBox cellBb(mesh_.cellBb(0));
 
-    const vector L(meshBb.max() - meshBb.min());
-    const vector nCellXYZ(cmptDivide(L, cellBb.max() - cellBb.min()));
+    const vector L(meshBb.span());
+    const vector nCellXYZ(cmptDivide(L, cellBb.span()));
 
     N_ = Vector<int>
     (
@@ -169,7 +163,7 @@ bool Foam::functionObjects::energySpectrum::read(const dictionary& dict)
     );
 
     // Check that the mesh is a structured box
-    vector cellDx(cellBb.max() - cellBb.min());
+    vector cellDx(cellBb.span());
     vector expectedMax(N_.x()*cellDx.x(), N_.y()*cellDx.y(), N_.z()*cellDx.z());
     vector relativeSize(cmptDivide(L, expectedMax));
     for (direction i = 0; i < 3; ++i)
@@ -189,8 +183,8 @@ bool Foam::functionObjects::energySpectrum::read(const dictionary& dict)
     // Map into i-j-k co-ordinates
     const vectorField& C = mesh_.C();
     c0_ = returnReduce(min(C), minOp<vector>());
-    const vector cMax = returnReduce(max(C), maxOp<vector>());
-    deltaC_ = cMax - c0_;
+    deltaC_ = returnReduce(max(C), maxOp<vector>());
+    deltaC_ -= c0_;
 
     forAll(C, celli)
     {

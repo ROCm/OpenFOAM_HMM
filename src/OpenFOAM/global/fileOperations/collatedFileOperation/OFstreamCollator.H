@@ -130,7 +130,7 @@ class OFstreamCollator
 
         mutable std::mutex mutex_;
 
-        autoPtr<std::thread> thread_;
+        std::unique_ptr<std::thread> thread_;
 
         //- Stack of files to write + contents
         FIFOStack<writeData*> objects_;

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2020,2022 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -488,7 +488,7 @@ Foam::label Foam::meshRefinement::markSurfaceGapRefinement
                     cellI != -1
                  && (mag(normal1[i]&normal2[i]) > planarCos)
                  && (
-                        magSqr(hit1[i].hitPoint()-hit2[i].hitPoint())
+                        hit1[i].hitPoint().distSqr(hit2[i].hitPoint())
                       < Foam::sqr(gapSize[i])
                     )
                 )
@@ -565,14 +565,14 @@ Foam::label Foam::meshRefinement::markSurfaceGapRefinement
 //            // Nearer. Check if
 //            // - a bit way from other hit
 //            // - in correct search cone
-//            vector d(nearHit.rawPoint()-oppositePoint_);
+//            vector d(nearHit.point()-oppositePoint_);
 //            scalar normalDist(d&oppositeNormal_);
 //
 //            if (normalDist > Foam::sqr(SMALL) && normalDist/mag(d) > minCos_)
 //            {
 //                nearestDistSqr = distSqr;
 //                minIndex = index;
-//                nearestPoint = nearHit.rawPoint();
+//                nearestPoint = nearHit.point();
 //            }
 //        }
 //    }
@@ -1402,7 +1402,8 @@ Foam::label Foam::meshRefinement::markInternalGapRefinement
 
                 const label cellI = cellMap[i];
 
-                const scalar d2 = magSqr(hit1[i].hitPoint()-hit2[i].hitPoint());
+                const scalar d2 =
+                    hit1[i].hitPoint().distSqr(hit2[i].hitPoint());
 
                 if
                 (

@@ -37,8 +37,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef PointData_H
-#define PointData_H
+#ifndef Foam_PointData_H
+#define Foam_PointData_H
 
 #include "pointEdgePoint.H"
 
@@ -77,7 +77,7 @@ public:
     // Constructors
 
         //- Default construct
-        inline PointData();
+        PointData() = default;
 
         //- Construct from origin, distance and data
         inline PointData
@@ -90,17 +90,37 @@ public:
 
     // Member Functions
 
-        // Access
+    // Access
 
-            const DataType& data() const
-            {
-                return data_;
-            }
-            DataType& data()
-            {
-                return data_;
-            }
+        const DataType& data() const noexcept { return data_; }
 
+        DataType& data() noexcept { return data_; }
+
+
+    // Member Operators
+
+        //- Test for equality
+        inline bool operator==(const PointData<DataType>&) const;
+
+        //- Test for inequality
+        inline bool operator!=(const PointData<DataType>&) const;
+
+
+    // IOstream Operators
+
+        friend Ostream& operator<< <DataType>
+        (
+            Ostream&,
+            const PointData<DataType>&
+        );
+        friend Istream& operator>> <DataType>
+        (
+            Istream&,
+            PointData<DataType>&
+        );
+
+
+    // Wave Methods
 
         // Needed by MeshWave
 
@@ -157,29 +177,6 @@ public:
                 const scalar tol,
                 TrackingData& td
             );
-
-
-    // Member Operators
-
-        //- Test for equality
-        inline bool operator==(const PointData<DataType>&) const;
-
-        //- Test for inequality
-        inline bool operator!=(const PointData<DataType>&) const;
-
-
-    // IOstream Operators
-
-        friend Ostream& operator<< <DataType>
-        (
-            Ostream&,
-            const PointData<DataType>&
-        );
-        friend Istream& operator>> <DataType>
-        (
-            Istream&,
-            PointData<DataType>&
-        );
 };
 
 

@@ -134,7 +134,7 @@ Foam::autoPtr<Foam::mapDistribute> Foam::nearestFaceAMI::calcDistributed
             if (test.hit())
             {
                 // With a search radius2 of GREAT all cells should receive a hit
-                localInfo[srcCelli].second() = magSqr(srcCc - test.hitPoint());
+                localInfo[srcCelli].second() = test.point().distSqr(srcCc);
                 test.setIndex(globalTgtCells.toGlobal(test.index()));
             }
         }
@@ -178,7 +178,7 @@ Foam::autoPtr<Foam::mapDistribute> Foam::nearestFaceAMI::calcDistributed
             if (test.hit())
             {
                 test.setIndex(globalTgtCells.toGlobal(test.index()));
-                testInfo.second() = magSqr(test.hitPoint() - srcCcs[i]);
+                testInfo.second() = test.point().distSqr(srcCcs[i]);
                 nearestEqOp()(remoteInfo[i], testInfo);
             }
         }

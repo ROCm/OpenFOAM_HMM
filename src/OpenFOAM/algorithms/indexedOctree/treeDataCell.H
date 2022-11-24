@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +36,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef treeDataCell_H
-#define treeDataCell_H
+#ifndef Foam_treeDataCell_H
+#define Foam_treeDataCell_H
 
 #include "polyMesh.H"
 #include "treeBoundBoxList.H"
@@ -47,7 +48,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 template<class Type> class indexedOctree;
 
 /*---------------------------------------------------------------------------*\
@@ -56,12 +57,16 @@ template<class Type> class indexedOctree;
 
 class treeDataCell
 {
-    // Private data
+    // Private Data
 
+        //- Reference to the mesh
         const polyMesh& mesh_;
 
         //- Subset of cells to work on
         const labelList cellLabels_;
+
+        //- Use subset of cells (cellLabels)
+        const bool useSubset_;
 
         //- Whether to precalculate and store cell bounding box
         const bool cacheBb_;
@@ -75,8 +80,8 @@ class treeDataCell
 
     // Private Member Functions
 
-        //- Calculate cell bounding box
-        treeBoundBox calcCellBb(const label celli) const;
+        //- Get cell bounding box at specified index
+        inline treeBoundBox getBounds(const label index) const;
 
         //- Initialise all member data
         void update();
@@ -133,11 +138,19 @@ public:
     };
 
 
-    // Declare name of the class and its debug switch
-    ClassName("treeDataCell");
+    // Declare name of the class
+    ClassNameNoDebug("treeDataCell");
 
 
-    // Constructors
+    // Constructors (cachable versions)
+
+        //- Construct from mesh, using all cells in mesh.
+        treeDataCell
+        (
+            const bool cacheBb,
+            const polyMesh& mesh,
+            polyMesh::cellDecomposition decompMode
+        );
 
         //- Construct from mesh, copying subset of cells.
         treeDataCell
@@ -145,7 +158,7 @@ public:
             const bool cacheBb,
             const polyMesh& mesh,
             const labelUList& cellLabels,
-            const polyMesh::cellDecomposition decompMode
+            polyMesh::cellDecomposition decompMode
         );
 
         //- Construct from mesh, moving subset of cells
@@ -154,74 +167,166 @@ public:
             const bool cacheBb,
             const polyMesh& mesh,
             labelList&& cellLabels,
-            const polyMesh::cellDecomposition decompMode
+            polyMesh::cellDecomposition decompMode
         );
 
-        //- Construct from mesh. Uses all cells in mesh.
+
+    // Constructors (non-caching)
+
+        //- Construct from mesh, using all cells in mesh.
         treeDataCell
         (
-            const bool cacheBb,
             const polyMesh& mesh,
-            const polyMesh::cellDecomposition decompMode
+            polyMesh::cellDecomposition decompMode
+        )
+        :
+            treeDataCell(false, mesh, decompMode)
+        {}
+
+        //- Construct from mesh, copying subset of cells.
+        treeDataCell
+        (
+            const polyMesh& mesh,
+            const labelUList& cellLabels,
+            polyMesh::cellDecomposition decompMode
+        )
+        :
+            treeDataCell(false, mesh, cellLabels, decompMode)
+        {}
+
+        //- Construct from mesh, moving subset of cells
+        treeDataCell
+        (
+            const polyMesh& mesh,
+            labelList&& cellLabels,
+            polyMesh::cellDecomposition decompMode
+        )
+        :
+            treeDataCell(false, mesh, std::move(cellLabels), decompMode)
+        {}
+
+
+    // Static Functions
+
+        //- Calculate and return bounding boxes for all mesh cells
+        static treeBoundBoxList boxes
+        (
+            const primitiveMesh& mesh
+        );
+
+        //- Calculate and return bounding boxes for specified mesh cells
+        static treeBoundBoxList boxes
+        (
+            const primitiveMesh& mesh,
+            const labelUList& cellIds
+        );
+
+        //- Return bounding box of specified mesh cells
+        static treeBoundBox bounds
+        (
+            const primitiveMesh& mesh,
+            const labelUList& cellIds
         );
 
 
     // Member Functions
 
-        // Access
+        //- Object dimension == 3 (volume element)
+        int nDim() const noexcept { return 3; }
 
-            inline const labelList& cellLabels() const
-            {
-                return cellLabels_;
-            }
-
-            inline const polyMesh& mesh() const
-            {
-                return mesh_;
-            }
-
-            inline polyMesh::cellDecomposition decompMode() const
-            {
-                return decompMode_;
-            }
-
-            inline label size() const
-            {
-                return cellLabels_.size();
-            }
-
-            //- Get representative point cloud for all shapes inside
-            //  (one point per shape)
-            pointField shapePoints() const;
+        //- Return bounding box for the specified cell indices
+        treeBoundBox bounds(const labelUList& indices) const;
 
 
-        // Search
+    // Access
 
-            //- Get type (inside,outside,mixed,unknown) of point w.r.t. surface.
-            //  Only makes sense for closed surfaces.
-            volumeType getVolumeType
-            (
-                const indexedOctree<treeDataCell>&,
-                const point&
-            ) const
-            {
-                NotImplemented;
-                return volumeType::UNKNOWN;
-            }
+        //- Reference to the supporting mesh
+        const polyMesh& mesh() const noexcept { return mesh_; }
 
-            //- Does (bb of) shape at index overlap bb
-            bool overlaps
-            (
-                const label index,
-                const treeBoundBox& sampleBb
-            ) const;
+        //- The cell decomposition mode used
+        polyMesh::cellDecomposition decompMode() const noexcept
+        {
+            return decompMode_;
+        }
 
-            //- Does shape at index contain sample
-            bool contains
-            (
-                const label index,
-                const point& sample
-            ) const;
+        //- The subset of cell ids to use
+        const labelList& cellLabels() const noexcept { return cellLabels_; }
+
+        //- Use a subset of cells
+        bool useSubset() const noexcept { return useSubset_; }
+
+        //- Is the effective cell selection empty?
+        bool empty() const noexcept
+        {
+            return useSubset_ ? cellLabels_.empty() : !mesh_.nCells();
+        }
+
+        //- The size of the cell selection
+        label size() const noexcept
+        {
+            return useSubset_ ? cellLabels_.size() : mesh_.nCells();
+        }
+
+        //- Map from shape index to original (non-subset) cell label
+        label objectIndex(const label index) const
+        {
+            return useSubset_ && index >= 0 ? cellLabels_[index] : index;
+        }
+
+        //TBD //- Cell at specified shape index
+        ///const cell& operator[](const label index) const
+        ///{ return mesh_.cells()[objectIndex(index)]; }
+
+        //- Representative point (cell centre) at shape index
+        const point& centre(const label index) const
+        {
+            return mesh_.cellCentres()[objectIndex(index)];
+        }
+
+        //- Representative point cloud for contained shapes.
+        //- One point per shape, corresponding to the cell centres.
+        tmp<pointField> centres() const;
+
+
+    // Search
+
+        //- Get type (inside,outside,mixed,unknown) of point w.r.t. surface.
+        //  Only makes sense for closed surfaces.
+        volumeType getVolumeType
+        (
+            const indexedOctree<treeDataCell>&,
+            const point&
+        ) const
+        {
+            NotImplemented;
+            return volumeType::UNKNOWN;
+        }
+
+        //- Does (bb of) shape at index overlap searchBox
+        bool overlaps
+        (
+            const label index,
+            const treeBoundBox& searchBox
+        ) const;
+
+        //- Does shape at index contain sample
+        bool contains
+        (
+            const label index,
+            const point& sample
+        ) const;
+
+        //- Calculates nearest (to sample) point in shape.
+        //  Returns actual point and distance (squared)
+        void findNearest
+        (
+            const labelUList& indices,
+            const point& sample,
+
+            scalar& nearestDistSqr,
+            label& nearestIndex,
+            point& nearestPoint
+        ) const;
 };
 
 

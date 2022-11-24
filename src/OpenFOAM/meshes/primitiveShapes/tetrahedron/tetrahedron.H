@@ -91,6 +91,12 @@ public:
         //- Default construct
         tetPoints() = default;
 
+        //- The front() accessor (from FixedList) has no purpose
+        void front() = delete;
+
+        //- The back() accessor (from FixedList) has no purpose
+        void back() = delete;
+
 
     // Constructors
 
@@ -120,28 +126,28 @@ public:
     // Member Functions
 
         //- The first vertex
-        const point& a() const { return operator[](0); }
+        const point& a() const noexcept { return get<0>(); }
 
         //- The second vertex
-        const point& b() const { return operator[](1); }
+        const point& b() const noexcept { return get<1>(); }
 
         //- The third vertex
-        const point& c() const { return operator[](2); }
+        const point& c() const noexcept { return get<2>(); }
 
         //- The fourth vertex
-        const point& d() const { return operator[](3); }
+        const point& d() const noexcept { return get<3>(); }
 
         //- The first vertex
-        point& a() { return operator[](0); }
+        point& a() noexcept { return get<0>(); }
 
         //- The second vertex
-        point& b() { return operator[](1); }
+        point& b() noexcept { return get<1>(); }
 
         //- The third vertex
-        point& c() { return operator[](2); }
+        point& c() noexcept { return get<2>(); }
 
         //- The fourth vertex
-        point& d() { return operator[](3); }
+        point& d() noexcept { return get<3>(); }
 
         //- Return as tetrahedron reference
         inline tetPointRef tet() const;

@@ -626,7 +626,7 @@ turbulentDFSEMInletFvPatchVectorField
     triCumulativeMagSf_(),
     sumTriMagSf_(Pstream::nProcs() + 1, Zero),
     patchNormal_(Zero),
-    patchBounds_(boundBox::invertedBox),
+    patchBounds_(),
 
     eddies_(Zero),
     v0_(Zero),
@@ -709,7 +709,7 @@ turbulentDFSEMInletFvPatchVectorField
     triCumulativeMagSf_(),
     sumTriMagSf_(Pstream::nProcs() + 1, Zero),
     patchNormal_(Zero),
-    patchBounds_(boundBox::invertedBox),
+    patchBounds_(),
 
     eddies_(),
     v0_(Zero),

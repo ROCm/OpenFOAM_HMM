@@ -5,7 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2012 OpenFOAM Foundation
+    Copyright (C) 2016 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,14 +26,26 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "PatchEdgeFaceWave.H"
+#include "OppositeFaceCellWave.H"
+#include "polyMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(PatchEdgeFaceWaveName, 0);
+    defineTypeNameAndDebug(OppositeFaceCellWaveBase, 0);
 }
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::OppositeFaceCellWaveBase::OppositeFaceCellWaveBase
+(
+    const polyMesh& mesh
+)
+:
+    changedOppositeFaces_(mesh.nCells())
+{}
 
 
 // ************************************************************************* //

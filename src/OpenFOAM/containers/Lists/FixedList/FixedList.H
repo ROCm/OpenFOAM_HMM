@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -216,19 +216,6 @@ public:
         //  \note Only meaningful for contiguous data
         inline char* data_bytes() noexcept;
 
-
-        //- The first element of the list, position [0]
-        inline T& first() noexcept;
-
-        //- The first element of the list, position [0]
-        inline const T& first() const noexcept;
-
-        //- The last element of the list, position [N-1]
-        inline T& last() noexcept;
-
-        //- The last element of the list, position [N-1]
-        inline const T& last() const noexcept;
-
         //- Number of contiguous bytes for the list data,
         //  \note Only meaningful for contiguous data
         inline static std::streamsize size_bytes() noexcept;
@@ -236,6 +223,26 @@ public:
         //- Number of contiguous bytes for the list data,
         //- runtime FatalError if type is not contiguous
         static std::streamsize byteSize();
+
+        //- Element access using compile-time indexing
+        template<unsigned Index>
+        inline T& get() noexcept;
+
+        //- Element access using compile-time indexing
+        template<unsigned Index>
+        inline const T& get() const noexcept;
+
+        //- Access first element of the list, position [0]
+        inline T& front() noexcept;
+
+        //- Access first element of the list, position [0]
+        inline const T& front() const noexcept;
+
+        //- Access last element of the list, position [N-1]
+        inline T& back() noexcept;
+
+        //- Access last element of the list, position [N-1]
+        inline const T& back() const noexcept;
 
         //- Return the forward circular index, i.e. next index
         //- which returns to the first at the end of the list
@@ -501,6 +508,21 @@ public:
         {
             FOAM_DEPRECATED_FOR(2021-04, "hasher()") Hash() {}
         };
+
+
+    // Housekeeping
+
+        //- Access first element of the list, position [0] - front()
+        T& first() noexcept { return front(); }
+
+        //- Access first element of the list, position [0] - front()
+        const T& first() const noexcept { return front(); }
+
+        //- Access last element of the list, position [N-1] - back()
+        T& last() noexcept { return back(); }
+
+        //- Access last element of the list, position [N-1] - back()
+        const T& last() const noexcept { return back(); }
 };
 
 

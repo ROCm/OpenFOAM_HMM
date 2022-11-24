@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -106,27 +106,27 @@ Foam::pointIndexHit Foam::searchablePlate::findNearest
 
     // Project point on plane.
     pointIndexHit info(true, sample, 0);
-    info.rawPoint()[normalDir_] = origin_[normalDir_];
+    info.point()[normalDir_] = origin_[normalDir_];
 
     // Clip to edges if outside
     for (direction dir = 0; dir < vector::nComponents; ++dir)
     {
         if (dir != normalDir_)
         {
-            if (info.rawPoint()[dir] < origin_[dir])
+            if (info.point()[dir] < origin_[dir])
             {
-                info.rawPoint()[dir] = origin_[dir];
+                info.point()[dir] = origin_[dir];
             }
-            else if (info.rawPoint()[dir] > origin_[dir]+span_[dir])
+            else if (info.point()[dir] > origin_[dir]+span_[dir])
             {
-                info.rawPoint()[dir] = origin_[dir]+span_[dir];
+                info.point()[dir] = origin_[dir]+span_[dir];
             }
         }
     }
 
     // Check if outside. Optimisation: could do some checks on distance already
     // on components above
-    if (magSqr(info.rawPoint() - sample) > nearestDistSqr)
+    if (info.point().distSqr(sample) > nearestDistSqr)
     {
         info.setMiss();
         info.setIndex(-1);
@@ -167,21 +167,21 @@ Foam::pointIndexHit Foam::searchablePlate::findLine
         }
         else
         {
-            info.rawPoint() = start+t*dir;
-            info.rawPoint()[normalDir_] = origin_[normalDir_];
+            info.point() = start+t*dir;
+            info.point()[normalDir_] = origin_[normalDir_];
 
             // Clip to edges
             for (direction dir = 0; dir < vector::nComponents; ++dir)
             {
                 if (dir != normalDir_)
                 {
-                    if (info.rawPoint()[dir] < origin_[dir])
+                    if (info.point()[dir] < origin_[dir])
                     {
                         info.setMiss();
                         info.setIndex(-1);
                         break;
                     }
-                    else if (info.rawPoint()[dir] > origin_[dir]+span_[dir])
+                    else if (info.point()[dir] > origin_[dir]+span_[dir])
                     {
                         info.setMiss();
                         info.setIndex(-1);
@@ -199,14 +199,14 @@ Foam::pointIndexHit Foam::searchablePlate::findLine
         bb.min()[normalDir_] -= 1e-6;
         bb.max()[normalDir_] += 1e-6;
 
-        if (!bb.contains(info.hitPoint()))
+        if (!bb.contains(info.point()))
         {
             FatalErrorInFunction
                 << "bb:" << bb << endl
                 << "origin_:" << origin_ << endl
                 << "span_:" << span_ << endl
                 << "normalDir_:" << normalDir_ << endl
-                << "hitPoint:" << info.hitPoint()
+                << "hitPoint:" << info.point()
                 << abort(FatalError);
         }
     }

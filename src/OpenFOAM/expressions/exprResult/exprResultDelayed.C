@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2012-2018 Bernhard Gschaider <bgschaid@hfd-research.com>
+    Copyright (C) 2012-2018 Bernhard Gschaider
     Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -120,9 +120,7 @@ bool Foam::expressions::exprResultDelayed::updateReadValue
         return false;
     }
 
-    const ValueAtTime& first = storedValues_.first();
-
-    if (first.first() > (timeVal-delay_))
+    if (storedValues_.front().first() > (timeVal-delay_))
     {
         // No matching data yet
         return false;
@@ -189,7 +187,7 @@ void Foam::expressions::exprResultDelayed::storeValue
 
     if (!append)
     {
-        const scalar lastTime = storedValues_.last().first();
+        const scalar lastTime = storedValues_.back().first();
 
         if (lastTime + SMALL >= currTime)
         {
@@ -214,19 +212,19 @@ void Foam::expressions::exprResultDelayed::storeValue
         (
             storedValues_.empty()
           ? 0
-          : storedValues_.last().first()
+          : storedValues_.back().first()
         );
 
-        storedValues_.append(ValueAtTime(currTime, settingResult_));
+        storedValues_.push_back(ValueAtTime(currTime, settingResult_));
 
         while
         (
             storedValues_.size() > 1
-         && (oldLastTime - storedValues_.first().first()) >= delay_
+         && (oldLastTime - storedValues_.front().first()) >= delay_
         )
         {
             // Remove values that are older than delay_
-            storedValues_.removeHead();
+            storedValues_.pop_front();
         }
     }
     else

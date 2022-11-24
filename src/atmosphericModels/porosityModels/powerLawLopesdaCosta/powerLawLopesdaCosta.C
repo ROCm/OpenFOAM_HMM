@@ -145,7 +145,7 @@ Foam::porosityModels::powerLawLopesdaCostaZone::powerLawLopesdaCostaZone
             porousCells[porousCelli] = porousCells[celli];
 
             zTop[porousCelli] =
-                (hit.hitPoint() - C[porousCells[porousCelli]]) & zDir;
+                (hit.point() - C[porousCells[porousCelli]]) & zDir;
 
             porousCelli++;
         }
@@ -245,7 +245,7 @@ Foam::porosityModels::powerLawLopesdaCostaZone::powerLawLopesdaCostaZone
         if (hit.hit())
         {
             zBottom[porousCelli] =
-                (C[porousCells[porousCelli]] - hit.hitPoint()) & zDir;
+                (C[porousCells[porousCelli]] - hit.point()) & zDir;
         }
     }
 

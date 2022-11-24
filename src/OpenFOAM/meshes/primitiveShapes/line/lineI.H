@@ -43,7 +43,7 @@ inline Foam::linePoints::linePoints
     const FixedList<label, 2>& indices
 )
 :
-    Pair<point>(points[indices.first()], points[indices.last()])
+    Pair<point>(points[indices.get<0>()], points[indices.get<1>()])
 {}
 
 
@@ -66,8 +66,8 @@ inline Foam::line<Point, PointRef>::line
     const FixedList<label, 2>& indices
 )
 :
-    a_(points[indices.first()]),
-    b_(points[indices.last()])
+    a_(points[indices.template get<0>()]),
+    b_(points[indices.template get<1>()])
 {}
 
 

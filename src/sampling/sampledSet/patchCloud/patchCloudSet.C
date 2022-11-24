@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -71,7 +71,7 @@ void Foam::patchCloudSet::calcSamples
 
     labelList patchFaces(sz);
     sz = 0;
-    treeBoundBox bb(boundBox::invertedBox);
+    treeBoundBox bb;
     for (const label patchi : patchSet_)
     {
         const polyPatch& pp = mesh().boundaryMesh()[patchi];
@@ -88,21 +88,14 @@ void Foam::patchCloudSet::calcSamples
     // Not very random
     Random rndGen(123456);
     // Make bb asymmetric just to avoid problems on symmetric meshes
-    bb = bb.extend(rndGen, 1e-4);
-
     // Make sure bb is 3D.
-    bb.min() -= point::uniform(ROOTVSMALL);
-    bb.max() += point::uniform(ROOTVSMALL);
+    bb.inflate(rndGen, 1e-4, ROOTVSMALL);
 
 
     indexedOctree<treeDataFace> patchTree
     (
-        treeDataFace    // all information needed to search faces
-        (
-            false,      // do not cache bb
-            mesh(),
-            patchFaces  // boundary faces only
-        ),
+        treeDataFace(mesh(), patchFaces),  // boundary faces only
+
         bb,             // overall search domain
         8,              // maxLevel
         10,             // leafsize
@@ -118,9 +111,11 @@ void Foam::patchCloudSet::calcSamples
 
     forAll(sampleCoords_, sampleI)
     {
+        const auto& treeData = patchTree.shapes();
         const point& sample = sampleCoords_[sampleI];
 
         pointIndexHit& nearInfo = nearest[sampleI].first();
+        auto& distSqrProc = nearest[sampleI].second();
 
         // Find the nearest locally
         if (patchFaces.size())
@@ -136,20 +131,18 @@ void Foam::patchCloudSet::calcSamples
         // Fill in the distance field and the processor field
         if (!nearInfo.hit())
         {
-            nearest[sampleI].second().first() = Foam::sqr(GREAT);
-            nearest[sampleI].second().second() = Pstream::myProcNo();
+            distSqrProc.first() = Foam::sqr(GREAT);
+            distSqrProc.second() = Pstream::myProcNo();
         }
         else
         {
             // Set nearest to mesh face label
-            nearInfo.setIndex(patchFaces[nearInfo.index()]);
+            const label objectIndex = treeData.objectIndex(nearInfo.index());
 
-            nearest[sampleI].second().first() = magSqr
-            (
-                nearInfo.hitPoint()
-              - sample
-            );
-            nearest[sampleI].second().second() = Pstream::myProcNo();
+            nearInfo.setIndex(objectIndex);
+
+            distSqrProc.first() = sample.distSqr(nearInfo.point());
+            distSqrProc.second() = Pstream::myProcNo();
         }
     }
 
@@ -177,7 +170,7 @@ void Foam::patchCloudSet::calcSamples
             {
                 meshTools::writeOBJ(str, sampleCoords_[i]);
                 ++vertI;
-                meshTools::writeOBJ(str, nearest[i].first().hitPoint());
+                meshTools::writeOBJ(str, nearest[i].first().point());
                 ++vertI;
                 str << "l " << vertI-1 << ' ' << vertI << nl;
             }
@@ -196,7 +189,7 @@ void Foam::patchCloudSet::calcSamples
             {
                 label facei = nearInfo.index();
 
-                samplingPts.append(nearInfo.hitPoint());
+                samplingPts.append(nearInfo.point());
                 samplingCells.append(mesh().faceOwner()[facei]);
                 samplingFaces.append(facei);
                 samplingSegments.append(0);

@@ -3228,10 +3228,11 @@ void Foam::meshRefinement::distribute(const mapDistributePolyMesh& map)
         Random rndGen(653213);
 
         // Get local mesh bounding box. Single box for now.
-        List<treeBoundBox> meshBb(1);
-        treeBoundBox& bb = meshBb[0];
-        bb = treeBoundBox(mesh_.points());
-        bb = bb.extend(rndGen, 1e-4);
+        List<treeBoundBox> meshBb
+        (
+            1,
+            treeBoundBox(mesh_.points()).extend(rndGen, 1e-4)
+        );
 
         // Distribute all geometry (so refinementSurfaces and shellSurfaces)
         searchableSurfaces& geometry =
@@ -3692,7 +3693,7 @@ void Foam::meshRefinement::dumpIntersections(const fileName& prefix) const
             {
                 meshTools::writeOBJ(str, start[i]);
                 verti++;
-                meshTools::writeOBJ(str, surfaceHitInfo[i].hitPoint());
+                meshTools::writeOBJ(str, surfaceHitInfo[i].point());
                 verti++;
                 meshTools::writeOBJ(str, end[i]);
                 verti++;

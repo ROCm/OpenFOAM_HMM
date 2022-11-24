@@ -1115,7 +1115,7 @@ void Foam::isoSurfacePoint::trimToBox
     }
 
     // Generate inwards pointing planes
-    PtrList<plane> planes(treeBoundBox::faceNormals.size());
+    PtrList<plane> planes(boundBox::nFaces());
     forAll(treeBoundBox::faceNormals, faceI)
     {
         const vector& n = treeBoundBox::faceNormals[faceI];

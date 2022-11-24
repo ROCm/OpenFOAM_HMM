@@ -231,7 +231,7 @@ void Foam::conformalVoronoiMesh::insertSurfacePointPairs
 
         const vector& normal = norm[0];
 
-        const Foam::point& surfacePt(surfaceHit.hitPoint());
+        const Foam::point& surfacePt = surfaceHit.hitPoint();
 
         extendedFeatureEdgeMesh::sideVolumeType meshableSide =
             geometryToConformTo_.meshableSide(featureIndex, surfaceHit);

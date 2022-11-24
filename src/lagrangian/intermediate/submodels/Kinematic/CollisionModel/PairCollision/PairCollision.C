@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -241,7 +241,7 @@ void Foam::PairCollision<CloudType>::wallInteraction()
                     const vector normal =
                         normalised(mesh.faceAreas()[realFacei]);
 
-                    const vector& nearPt = nearest.rawPoint();
+                    const vector& nearPt = nearest.point();
 
                     const vector pW = normalised(nearPt - pos);
 
@@ -316,7 +316,7 @@ void Foam::PairCollision<CloudType>::wallInteraction()
                 {
                     const vector normal = rwf.unitNormal(pts);
 
-                    const vector& nearPt = nearest.rawPoint();
+                    const vector& nearPt = nearest.point();
 
                     const vector pW = normalised(nearPt - pos);
 

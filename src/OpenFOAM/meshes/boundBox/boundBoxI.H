@@ -38,48 +38,56 @@ namespace Foam
 template<>
 inline Foam::point Foam::boundBox::hexCorner<0>() const
 {
+    // == octCorner<0>()
     return min_;
 }
 
 template<>
 inline Foam::point Foam::boundBox::hexCorner<1>() const
 {
+    // == octCorner<1>()
     return point(max_.x(), min_.y(), min_.z());
 }
 
 template<>
 inline Foam::point Foam::boundBox::hexCorner<2>() const
 {
+    // == octCorner<3>()
     return point(max_.x(), max_.y(), min_.z());
 }
 
 template<>
 inline Foam::point Foam::boundBox::hexCorner<3>() const
 {
+    // == octCorner<2>()
     return point(min_.x(), max_.y(), min_.z());
 }
 
 template<>
 inline Foam::point Foam::boundBox::hexCorner<4>() const
 {
+    // == octCorner<4>()
     return point(min_.x(), min_.y(), max_.z());
 }
 
 template<>
 inline Foam::point Foam::boundBox::hexCorner<5>() const
 {
+    // == octCorner<5>()
     return point(max_.x(), min_.y(), max_.z());
 }
 
 template<>
 inline Foam::point Foam::boundBox::hexCorner<6>() const
 {
+    // == octCorner<7>()
     return max_;
 }
 
 template<>
 inline Foam::point Foam::boundBox::hexCorner<7>() const
 {
+    // == octCorner<6>()
     return point(min_.x(), max_.y(), max_.z());
 }
 
@@ -189,7 +197,13 @@ inline Foam::vector Foam::boundBox::span() const
 
 inline Foam::scalar Foam::boundBox::mag() const
 {
-    return ::Foam::mag(max_ - min_);
+    return min_.dist(max_);
+}
+
+
+inline Foam::scalar Foam::boundBox::magSqr() const
+{
+    return min_.distSqr(max_);
 }
 
 
@@ -217,18 +231,58 @@ inline Foam::scalar Foam::boundBox::avgDim() const
 }
 
 
+inline Foam::direction Foam::boundBox::minDir() const
+{
+    direction cmpt = 0;
+
+    scalar best = ROOTVGREAT;
+
+    for (direction dir = 0; dir < vector::nComponents; ++dir)
+    {
+        const scalar dist = (max_[dir] - min_[dir]);
+        if (dist < best && dist > 0)
+        {
+            best = dist;
+            cmpt = dir;
+        }
+    }
+
+    return cmpt;
+}
+
+
+inline Foam::direction Foam::boundBox::maxDir() const
+{
+    direction cmpt = 0;
+
+    scalar best = 0;
+
+    for (direction dir = 0; dir < vector::nComponents; ++dir)
+    {
+        const scalar dist = (max_[dir] - min_[dir]);
+        if (dist > best)
+        {
+            best = dist;
+            cmpt = dir;
+        }
+    }
+
+    return cmpt;
+}
+
+
 inline int Foam::boundBox::nDim() const
 {
     int ngood = 0;
 
     for (direction dir = 0; dir < vector::nComponents; ++dir)
     {
-        const scalar diff = (max_[dir] - min_[dir]);
-        if (diff < 0)
+        const scalar dist = (max_[dir] - min_[dir]);
+        if (dist < 0)
         {
             return -1;
         }
-        else if (diff > 0)
+        else if (dist > 0)
         {
             ++ngood;
         }
@@ -273,6 +327,20 @@ inline void Foam::boundBox::add(const point& pt)
 }
 
 
+inline void Foam::boundBox::add(const point& pt0, const point& pt1)
+{
+    add(pt0);
+    add(pt1);
+}
+
+
+inline void Foam::boundBox::add(const Pair<point>& points)
+{
+    add(points.first());
+    add(points.second());
+}
+
+
 inline void Foam::boundBox::add(const UList<point>& points)
 {
     for (const point& p : points)
@@ -309,14 +377,61 @@ inline void Foam::boundBox::inflate(const scalar factor)
 }
 
 
-inline bool Foam::boundBox::overlaps(const boundBox& bb) const
+inline bool Foam::boundBox::box_box_overlaps
+(
+    const point& minA, const point& maxA,   // boxA
+    const point& minB, const point& maxB    // boxB
+)
 {
     return
     (
-        min_.x() <= bb.max_.x() && bb.min_.x() <= max_.x()
-     && min_.y() <= bb.max_.y() && bb.min_.y() <= max_.y()
-     && min_.z() <= bb.max_.z() && bb.min_.z() <= max_.z()
+        minA.x() <= maxB.x() && minB.x() <= maxA.x()
+     && minA.y() <= maxB.y() && minB.y() <= maxA.y()
+     && minA.z() <= maxB.z() && minB.z() <= maxA.z()
     );
+}
+
+
+inline bool Foam::boundBox::box_sphere_overlaps
+(
+    const point& corner0,
+    const point& corner1,
+    const point& centre,
+    const scalar radiusSqr
+)
+{
+    // Find out where centre is in relation to bb.
+    // Find nearest point on bb.
+    scalar distSqr = 0;
+
+    for (direction dir = 0; dir < vector::nComponents; ++dir)
+    {
+        const scalar d0 = corner0[dir] - centre[dir];
+        const scalar d1 = corner1[dir] - centre[dir];
+
+        if ((d0 > 0) != (d1 > 0))
+        {
+            // centre inside both extrema. This component does not add any
+            // distance.
+        }
+        else
+        {
+            distSqr += ::Foam::min(Foam::magSqr(d0), Foam::magSqr(d1));
+
+            if (distSqr > radiusSqr)
+            {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+
+inline bool Foam::boundBox::overlaps(const boundBox& bb) const
+{
+    return box_box_overlaps(min_, max_, bb.min(), bb.max());
 }
 
 
@@ -326,36 +441,7 @@ inline bool Foam::boundBox::overlaps
     const scalar radiusSqr
 ) const
 {
-    // Find out where centre is in relation to bb.
-    // Find nearest point on bb.
-    scalar distSqr = 0;
-
-    for (direction dir = 0; dir < vector::nComponents; ++dir)
-    {
-        const scalar d0 = min_[dir] - centre[dir];
-        const scalar d1 = max_[dir] - centre[dir];
-
-        if ((d0 > 0) != (d1 > 0))
-        {
-            // centre inside both extrema. This component does not add any
-            // distance.
-        }
-        else if (Foam::mag(d0) < Foam::mag(d1))
-        {
-            distSqr += d0*d0;
-        }
-        else
-        {
-            distSqr += d1*d1;
-        }
-
-        if (distSqr > radiusSqr)
-        {
-            return false;
-        }
-    }
-
-    return true;
+    return box_sphere_overlaps(min_, max_, centre, radiusSqr);
 }
 
 

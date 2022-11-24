@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2015 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -97,7 +98,7 @@ bool uniform::cellSize
 
     if (hitInfo.hit())
     {
-        const point& hitPt = hitInfo.hitPoint();
+        const point& hitPt = hitInfo.point();
         const label index = hitInfo.index();
 
         if (sideMode_ == rmBothsides)

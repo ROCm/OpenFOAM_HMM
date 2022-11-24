@@ -222,41 +222,47 @@ public:
         void setSize(const label n, const T& val) { this->resize(n, val); }
 
 
-        // Edit
+    // Edit
 
-            //- Append an element at the end of the list
-            //  If this is frequently required, consider a DynamicList
-            inline void append(const T& val);
+        //- Transfer the contents of the argument List into this list
+        //- and annul the argument list
+        void transfer(List<T>& list);
 
-            //- Move append an element at the end of the list
-            //  If this is frequently required, consider a DynamicList
-            inline void append(T&& val);
+        //- Transfer the contents of the argument List into this list
+        //- and annul the argument list
+        template<int SizeMin>
+        void transfer(DynamicList<T, SizeMin>& list);
 
-            //- Append a List to the end of this list
-            //  If this is frequently required, consider a DynamicList
-            inline void append(const UList<T>& list);
+        //- Return subscript-checked element of UList and resizing the list
+        //- if required.
+        inline T& newElmt(const label i);
 
-            //- Append IndirectList contents at the end of this list
-            //  If this is frequently required, consider a DynamicList
-            template<class Addr>
-            inline void append(const IndirectListBase<T, Addr>& list);
 
-            //- Append an element if not already in the list.
-            //  \return the change in list length
-            inline label appendUniq(const T& val);
+    // Edit
 
-            //- Transfer the contents of the argument List into this list
-            //- and annul the argument list
-            void transfer(List<T>& list);
+        //- Append an element at the end of the list
+        //  If this is frequently required, consider a DynamicList
+        inline void push_back(const T& val);
 
-            //- Transfer the contents of the argument List into this list
-            //- and annul the argument list
-            template<int SizeMin>
-            void transfer(DynamicList<T, SizeMin>& list);
+        //- Move append an element at the end of the list
+        //  If this is frequently required, consider a DynamicList
+        inline void push_back(T&& val);
 
-            //- Return subscript-checked element of UList and resizing the list
-            //- if required.
-            inline T& newElmt(const label i);
+        //- Append a List to the end of this list
+        //  If this is frequently required, consider a DynamicList
+        inline void push_back(const UList<T>& list);
+
+        //- Append IndirectList contents at the end of this list
+        //  If this is frequently required, consider a DynamicList
+        template<class Addr>
+        inline void push_back(const IndirectListBase<T, Addr>& list);
+
+        //- Append an element if not already in the list.
+        //  \return the change in list length
+        inline label push_uniq(const T& val);
+
+        //- Reduce size by 1 or more elements. Can be called on an empty list.
+        inline void pop_back(label n = 1);
 
 
     // Member Operators
@@ -346,6 +352,37 @@ public:
             (*this)[i] = val;
             return true;
         }
+
+
+    // Housekeeping
+
+        //- Append an element at the end of the list
+        //  If this is frequently required, consider a DynamicList
+        //FOAM_DEPRECATED_FOR(2022-10, "push_back()")
+        void append(const T& val) { this->push_back(val); }
+
+        //- Move append an element at the end of the list
+        //  If this is frequently required, consider a DynamicList
+        //FOAM_DEPRECATED_FOR(2022-10, "push_back()")
+        void append(T&& val) { this->push_back(std::move(val)); }
+
+        //- Append a List to the end of this list
+        //  If this is frequently required, consider a DynamicList
+        //FOAM_DEPRECATED_FOR(2022-10, "push_back()")
+        void append(const UList<T>& list) { this->push_back(list); }
+
+        //- Append IndirectList contents at the end of this list
+        //  If this is frequently required, consider a DynamicList
+        //FOAM_DEPRECATED_FOR(2022-10, "push_back()")
+        template<class Addr>
+        void append(const IndirectListBase<T, Addr>& list)
+        {
+            this->push_back(list);
+        }
+
+        //- Append an element if not already in the list.
+        //FOAM_DEPRECATED_FOR(2022-10, "push_uniq()")
+        label appendUniq(const T& val) { return this->push_uniq(val); }
 };
 
 

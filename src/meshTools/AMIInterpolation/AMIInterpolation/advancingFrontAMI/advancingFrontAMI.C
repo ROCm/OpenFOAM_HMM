@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020,2022 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -300,7 +300,7 @@ Foam::label Foam::advancingFrontAMI::findTargetFace
         srcFacePti == -1 ? bb.centre() : srcPts[srcFace[srcFacePti]];
 
     const pointIndexHit sample =
-        treePtr_->findNearest(srcPt, magSqr(bb.max() - bb.centre()), fnOp);
+        treePtr_->findNearest(srcPt, 0.25*bb.magSqr(), fnOp);
 
     if (sample.hit() && isCandidate(srcFacei, sample.index()))
     {
@@ -309,7 +309,7 @@ Foam::label Foam::advancingFrontAMI::findTargetFace
         if (debug)
         {
             Pout<< "Source point = " << srcPt << ", Sample point = "
-                << sample.hitPoint() << ", Sample index = " << sample.index()
+                << sample.point() << ", Sample index = " << sample.index()
                 << endl;
         }
     }

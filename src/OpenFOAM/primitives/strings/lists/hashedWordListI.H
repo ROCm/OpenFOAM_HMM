@@ -97,20 +97,11 @@ inline void Foam::hashedWordList::clear()
 }
 
 
-inline void Foam::hashedWordList::append(const word& val)
+inline Foam::label Foam::hashedWordList::push_uniq(const word& val)
 {
     if (lookup_.insert(val, size()))
     {
-        wordList::append(val);
-    }
-}
-
-
-inline Foam::label Foam::hashedWordList::appendUniq(const word& val)
-{
-    if (lookup_.insert(val, size()))
-    {
-        wordList::append(val);
+        wordList::push_back(val);
         return 1;  // Increased list length by one
     }
 

@@ -179,13 +179,6 @@ protected:
             labelList& patchCellTypes
         );
 
-        //- Calculate bounding box of cell
-        static treeBoundBox cellBb
-        (
-            const primitiveMesh& mesh,
-            const label celli
-        );
-
         //- Mark all cells overlapping (a voxel covered by) a src patch
         //  with type HOLE
         void markPatchesAsHoles

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,8 +58,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef PointEdgeWave_H
-#define PointEdgeWave_H
+#ifndef Foam_PointEdgeWave_H
+#define Foam_PointEdgeWave_H
 
 #include "bitSet.H"
 #include "scalarField.H"
@@ -75,10 +75,100 @@ class polyMesh;
 class polyPatch;
 
 /*---------------------------------------------------------------------------*\
-                        Class PointEdgeWaveName Declaration
+                        Class PointEdgeWaveBase Declaration
 \*---------------------------------------------------------------------------*/
 
-TemplateName(PointEdgeWave);
+class PointEdgeWaveBase
+{
+protected:
+
+    // Protected Static Data
+
+        //- Relative tolerance.
+        //  Stop propagation if relative changes less than this tolerance
+        //  (responsibility for checking this is up to Type implementation)
+        static scalar propagationTol_;
+
+
+    // Protected Data
+
+        //- Reference to mesh
+        const polyMesh& mesh_;
+
+        //- Track if point has changed
+        bitSet changedPoint_;
+
+        //- Track if edge has changed
+        bitSet changedEdge_;
+
+        //- List of changed points
+        DynamicList<label> changedPoints_;
+
+        //- List of changed edges
+        DynamicList<label> changedEdges_;
+
+        //- Number of unvisited points
+        label nUnvisitedPoints_;
+
+        //- Number of unvisited edges
+        label nUnvisitedEdges_;
+
+
+public:
+
+    //- Default trackData value (for default template argument)
+    static int dummyTrackData_;
+
+
+    //- Runtime type information
+    ClassName("PointEdgeWave");
+
+
+    // Constructors
+
+        //- Construct with mesh reference and set initial sizes
+        PointEdgeWaveBase(const polyMesh& mesh);
+
+
+    // Static Functions
+
+        //- Access to propagation tolerance
+        static scalar propagationTol() noexcept
+        {
+            return propagationTol_;
+        }
+
+        //- Change propagation tolerance, return previous value
+        static scalar setPropagationTol(const scalar tol) noexcept
+        {
+            scalar old(propagationTol_);
+            propagationTol_ = tol;
+            return old;
+        }
+
+
+    // Member Functions
+
+        //- Return access to the mesh
+        const polyMesh& mesh() const noexcept { return mesh_; }
+
+        //- Current number of changed points
+        label nChangedPoints() const noexcept { return changedPoints_.size(); }
+
+        //- Current number of changed edges
+        label nChangedEdges() const noexcept { return changedEdges_.size(); }
+
+        //- Number of unvisited edges,
+        //- i.e. edges that were not (yet) reached from walking across mesh.
+        // This can happen from
+        //  - not enough iterations done
+        //  - a disconnected mesh
+        //  - a mesh without walls in it
+        label nUnvisitedEdges() const noexcept { return nUnvisitedEdges_; }
+
+        //- Get number of unvisited points
+        label nUnvisitedPoints() const noexcept { return nUnvisitedPoints_; }
+};
 
 
 /*---------------------------------------------------------------------------*\
@@ -88,23 +178,9 @@ TemplateName(PointEdgeWave);
 template<class Type, class TrackingData = int>
 class PointEdgeWave
 :
-    public PointEdgeWaveName
+    public PointEdgeWaveBase
 {
-    // Private Static Data
-
-        //- Relative tolerance. Stop propagation if relative changes
-        //  less than this tolerance (responsibility for checking this is
-        //  up to Type implementation)
-        static scalar propagationTol_;
-
-        //- Default trackdata value to satisfy default template argument.
-        static int dummyTrackData_;
-
-
     // Private Data
-
-        //- Reference to mesh
-        const polyMesh& mesh_;
 
         //- Wall information for all points
         UList<Type>& allPointInfo_;
@@ -115,30 +191,11 @@ class PointEdgeWave
         //- Additional data to be passed into container
         TrackingData& td_;
 
-        //- Has point changed
-        bitSet changedPoint_;
-
-        //- List of changed points
-        labelList changedPoints_;
-
-        //- Number of changed points
-        label nChangedPoints_;
-
-        //- Edges that have changed
-        bitSet changedEdge_;
-
-        labelList changedEdges_;
-        label nChangedEdges_;
-
         //- Number of cyclic patches
         label nCyclicPatches_;
 
         //- Number of evaluations
         label nEvals_;
-
-        //- Number of unvisited edges/points
-        label nUnvisitedPoints_;
-        label nUnvisitedEdges_;
 
 
     // Private Member Functions
@@ -222,21 +279,6 @@ class PointEdgeWave
 
 public:
 
-    // Static Functions
-
-        //- Access to tolerance
-        static scalar propagationTol()
-        {
-            return propagationTol_;
-        }
-
-        //- Change tolerance
-        static void setPropagationTol(const scalar tol)
-        {
-            propagationTol_ = tol;
-        }
-
-
     // Constructors
 
         //- Construct from mesh, list of changed points with the Type
@@ -273,31 +315,22 @@ public:
     // Member Functions
 
         //- Access allPointInfo
-        UList<Type>& allPointInfo() const
+        UList<Type>& allPointInfo() const noexcept
         {
             return allPointInfo_;
         }
 
         //- Access allEdgeInfo
-        UList<Type>& allEdgeInfo() const
+        UList<Type>& allEdgeInfo() const noexcept
         {
             return allEdgeInfo_;
         }
 
         //- Additional data to be passed into container
-        const TrackingData& data() const
+        const TrackingData& data() const noexcept
         {
             return td_;
         }
-
-        //- Number of unvisited edges, i.e. edges that were not (yet)
-        //  reached from walking across mesh. This can happen from
-        //  - not enough iterations done
-        //  - a disconnected mesh
-        //  - a mesh without walls in it
-        label nUnvisitedEdges() const;
-
-        label nUnvisitedPoints() const;
 
         //- Copy initial data into allPointInfo_
         void setPointInfo

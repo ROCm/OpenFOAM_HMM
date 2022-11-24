@@ -295,7 +295,7 @@ inline bool Foam::pointEdgePoint::operator==
     const pointEdgePoint& rhs
 ) const
 {
-    return origin_ == rhs.origin_ && distSqr_ == rhs.distSqr_;
+    return distSqr_ == rhs.distSqr_ && origin_ == rhs.origin_;
 }
 
 

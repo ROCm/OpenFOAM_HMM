@@ -130,7 +130,7 @@ void Foam::PDRblock::adjustSizes()
         grid_.y().clear();
         grid_.z().clear();
 
-        bounds_ = boundBox::invertedBox;
+        bounds_.reset();
         edgeLimits_.min() = 0;
         edgeLimits_.max() = 0;
         return;

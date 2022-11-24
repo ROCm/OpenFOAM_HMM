@@ -67,11 +67,16 @@ inline Foam::triFace::triFace()
 {}
 
 
-inline Foam::triFace::triFace(const label p0, const label p1, const label p2)
+inline Foam::triFace::triFace
+(
+    const label p0,
+    const label p1,
+    const label p2
+) noexcept
 {
-    operator[](0) = p0;
-    operator[](1) = p1;
-    operator[](2) = p2;
+    a() = p0;
+    b() = p1;
+    c() = p2;
 }
 
 
@@ -105,13 +110,13 @@ inline Foam::triFace::triFace(Istream& is)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline bool Foam::triFace::valid() const
+inline bool Foam::triFace::good() const noexcept
 {
     return
     (
-        operator[](0) >= 0 && operator[](0) != operator[](1)
-     && operator[](1) >= 0 && operator[](1) != operator[](2)
-     && operator[](2) >= 0 && operator[](0) != operator[](2)
+        a() >= 0 && a() != b()
+     && b() >= 0 && b() != c()
+     && c() >= 0 && c() != a()
     );
 }
 
@@ -145,7 +150,7 @@ inline Foam::label Foam::triFace::collapse()
 
 inline void Foam::triFace::flip()
 {
-    std::swap(operator[](1), operator[](2));
+    std::swap(get<1>(), get<2>());
 }
 
 
@@ -153,9 +158,9 @@ inline Foam::pointField Foam::triFace::points(const UList<point>& pts) const
 {
     pointField p(3);
 
-    p[0] = pts[operator[](0)];
-    p[1] = pts[operator[](1)];
-    p[2] = pts[operator[](2)];
+    p[0] = pts[a()];
+    p[1] = pts[b()];
+    p[2] = pts[c()];
 
     return p;
 }
@@ -169,45 +174,25 @@ inline Foam::face Foam::triFace::triFaceFace() const
 
 inline Foam::triPointRef Foam::triFace::tri(const UList<point>& points) const
 {
-    return triPointRef
-    (
-        points[operator[](0)],
-        points[operator[](1)],
-        points[operator[](2)]
-    );
+    return triPointRef(points[a()], points[b()], points[c()]);
 }
 
 
 inline Foam::point Foam::triFace::centre(const UList<point>& points) const
 {
-    return triPointRef::centre
-    (
-        points[operator[](0)],
-        points[operator[](1)],
-        points[operator[](2)]
-    );
+    return triPointRef::centre(points[a()], points[b()], points[c()]);
 }
 
 
 inline Foam::vector Foam::triFace::areaNormal(const UList<point>& points) const
 {
-    return triPointRef::areaNormal
-    (
-        points[operator[](0)],
-        points[operator[](1)],
-        points[operator[](2)]
-    );
+    return triPointRef::areaNormal(points[a()], points[b()], points[c()]);
 }
 
 
 inline Foam::vector Foam::triFace::unitNormal(const UList<point>& points) const
 {
-    return triPointRef::unitNormal
-    (
-        points[operator[](0)],
-        points[operator[](1)],
-        points[operator[](2)]
-    );
+    return triPointRef::unitNormal(points[a()], points[b()], points[c()]);
 }
 
 
@@ -220,12 +205,7 @@ inline Foam::scalar Foam::triFace::mag(const UList<point>& points) const
 inline Foam::Pair<Foam::point>
 Foam::triFace::box(const UList<point>& points) const
 {
-    return triPointRef::box
-    (
-        points[operator[](0)],
-        points[operator[](1)],
-        points[operator[](2)]
-    );
+    return triPointRef::box(points[a()], points[b()], points[c()]);
 }
 
 
@@ -238,7 +218,7 @@ inline Foam::label Foam::triFace::nTriangles() const noexcept
 inline Foam::triFace Foam::triFace::reverseFace() const
 {
     // The starting points of the original and reverse face are identical.
-    return triFace(operator[](0), operator[](2), operator[](1));
+    return triFace(a(), c(), b());
 }
 
 
@@ -433,14 +413,14 @@ inline Foam::edgeList Foam::triFace::edges() const
 {
     edgeList theEdges(3);
 
-    theEdges[0].first()  = operator[](0);
-    theEdges[0].second() = operator[](1);
+    theEdges[0].first()  = a();
+    theEdges[0].second() = b();
 
-    theEdges[1].first()  = operator[](1);
-    theEdges[1].second() = operator[](2);
+    theEdges[1].first()  = b();
+    theEdges[1].second() = c();
 
-    theEdges[2].first()  = operator[](2);
-    theEdges[2].second() = operator[](0);
+    theEdges[2].first()  = c();
+    theEdges[2].second() = a();
 
     return theEdges;
 }
@@ -450,14 +430,14 @@ inline Foam::edgeList Foam::triFace::rcEdges() const
 {
     edgeList theEdges(3);
 
-    theEdges[0].first()  = operator[](0);
-    theEdges[0].second() = operator[](2);
+    theEdges[0].first()  = a();
+    theEdges[0].second() = c();
 
-    theEdges[1].first()  = operator[](2);
-    theEdges[1].second() = operator[](1);
+    theEdges[1].first()  = c();
+    theEdges[1].second() = b();
 
-    theEdges[2].first()  = operator[](1);
-    theEdges[2].second() = operator[](0);
+    theEdges[2].first()  = b();
+    theEdges[2].second() = a();
 
     return theEdges;
 }
@@ -465,20 +445,20 @@ inline Foam::edgeList Foam::triFace::rcEdges() const
 
 inline int Foam::triFace::edgeDirection(const Foam::edge& e) const
 {
-    if (e.first() == operator[](0))
+    if (e.first() == a())
     {
-        if (e.second() == operator[](1)) return 1;  // Forward
-        if (e.second() == operator[](2)) return -1; // Reverse
+        if (e.second() == b()) return 1;    // Forward
+        if (e.second() == c()) return -1;   // Reverse
     }
-    if (e.first() == operator[](1))
+    if (e.first() == b())
     {
-        if (e.second() == operator[](2)) return 1;  // Forward
-        if (e.second() == operator[](0)) return -1; // Reverse
+        if (e.second() == c()) return 1;    // Forward
+        if (e.second() == a()) return -1;   // Reverse
     }
-    if (e.first() == operator[](2))
+    if (e.first() == c())
     {
-        if (e.second() == operator[](0)) return 1;  // Forward
-        if (e.second() == operator[](1)) return -1; // Reverse
+        if (e.second() == a()) return 1;    // Forward
+        if (e.second() == b()) return -1;   // Reverse
     }
 
     return 0;  // Not found

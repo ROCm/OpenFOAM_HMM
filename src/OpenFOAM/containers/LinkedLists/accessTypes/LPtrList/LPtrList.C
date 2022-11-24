@@ -37,7 +37,7 @@ Foam::LPtrList<LListBase, T>::LPtrList(const LPtrList<LListBase, T>& lst)
 {
     for (auto iter = lst.cbegin(); iter != lst.cend(); ++iter)
     {
-        this->append((*iter).clone().ptr());
+        this->push_back((*iter).clone().ptr());
     }
 }
 
@@ -63,24 +63,26 @@ Foam::LPtrList<LListBase, T>::~LPtrList()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class LListBase, class T>
-bool Foam::LPtrList<LListBase, T>::eraseHead()
+void Foam::LPtrList<LListBase, T>::pop_front(label n)
 {
-    T* p = this->removeHead();
-    delete p;
-    return bool(p);
+    if (n > this->size())
+    {
+        n = this->size();
+    }
+
+    while (n > 0)
+    {
+        T* p = this->removeHead();
+        delete p;
+        --n;
+    }
 }
 
 
 template<class LListBase, class T>
 void Foam::LPtrList<LListBase, T>::clear()
 {
-    label len = this->size();
-
-    while (len--)
-    {
-        eraseHead();
-    }
-
+    this->pop_front(this->size());
     LList<LListBase, T*>::clear();
 }
 
@@ -102,7 +104,7 @@ void Foam::LPtrList<LListBase, T>::operator=(const LPtrList<LListBase, T>& lst)
 
     for (auto iter = lst.cbegin(); iter != lst.cend(); ++iter)
     {
-        this->append((*iter).clone().ptr());
+        this->push_back((*iter).clone().ptr());
     }
 }
 

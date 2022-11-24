@@ -185,20 +185,28 @@ Foam::wordList Foam::DictionaryBase<IDLListType, T>::sortedToc
 
 
 template<class IDLListType, class T>
-void Foam::DictionaryBase<IDLListType, T>::prepend(const word& keyword, T* ptr)
+void Foam::DictionaryBase<IDLListType, T>::push_front
+(
+    const word& keyword,
+    T* ptr
+)
 {
     // NOTE: we should probably check that HashTable::insert actually worked
     hashedTs_.insert(keyword, ptr);
-    IDLListType::prepend(ptr);
+    IDLListType::push_front(ptr);
 }
 
 
 template<class IDLListType, class T>
-void Foam::DictionaryBase<IDLListType, T>::append(const word& keyword, T* ptr)
+void Foam::DictionaryBase<IDLListType, T>::push_back
+(
+    const word& keyword,
+    T* ptr
+)
 {
     // NOTE: we should probably check that HashTable::insert actually worked
     hashedTs_.insert(keyword, ptr);
-    IDLListType::append(ptr);
+    IDLListType::push_back(ptr);
 }
 
 

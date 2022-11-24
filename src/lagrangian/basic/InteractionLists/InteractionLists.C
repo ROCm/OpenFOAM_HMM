@@ -44,19 +44,12 @@ void Foam::InteractionLists<ParticleType>::buildInteractionLists()
 
     Random rndGen(419715);
 
-    const vector interactionVec = maxDistance_*vector::one;
-
-    treeBoundBox procBb(treeBoundBox(mesh_.points()));
-
-    treeBoundBox extendedProcBb
-    (
-        procBb.min() - interactionVec,
-        procBb.max() + interactionVec
-    );
+    treeBoundBox procBb(mesh_.points());
 
     treeBoundBoxList allExtendedProcBbs(Pstream::nProcs());
 
-    allExtendedProcBbs[Pstream::myProcNo()] = extendedProcBb;
+    allExtendedProcBbs[Pstream::myProcNo()] = procBb;
+    allExtendedProcBbs[Pstream::myProcNo()].grow(maxDistance_);
 
     Pstream::allGatherList(allExtendedProcBbs);
 
@@ -74,19 +67,7 @@ void Foam::InteractionLists<ParticleType>::buildInteractionLists()
         extendedProcBbsOrigProc
     );
 
-    treeBoundBoxList cellBbs(mesh_.nCells());
-
-    forAll(cellBbs, celli)
-    {
-        cellBbs[celli] = treeBoundBox
-        (
-            mesh_.cells()[celli].points
-            (
-                mesh_.faces(),
-                mesh_.points()
-            )
-        );
-    }
+    treeBoundBoxList cellBbs(treeDataCell::boxes(mesh_));
 
     const globalIndexAndTransform& globalTransforms =
         mesh_.globalData().globalTransforms();
@@ -194,16 +175,11 @@ void Foam::InteractionLists<ParticleType>::buildInteractionLists()
             globalTransforms.transformIndex(ciat)
         );
 
-        treeBoundBox tempTransformedBb
+        treeBoundBox extendedBb
         (
             transform.invTransformPosition(cellBbsToExchange[bbI].points())
         );
-
-        treeBoundBox extendedBb
-        (
-            tempTransformedBb.min() - interactionVec,
-            tempTransformedBb.max() + interactionVec
-        );
+        extendedBb.grow(maxDistance_);
 
         // Find all elements intersecting box.
         labelList interactingElems
@@ -226,7 +202,7 @@ void Foam::InteractionLists<ParticleType>::buildInteractionLists()
             // i.e. a more accurate bounding volume like a OBB or
             // convex hull or an exact geometrical test.
 
-            label c = coupledPatchRangeTree.shapes().cellLabels()[elemI];
+            label c = coupledPatchRangeTree.shapes().objectIndex(elemI);
 
             ril_[bbI][i] = c;
         }
@@ -249,7 +225,7 @@ void Foam::InteractionLists<ParticleType>::buildInteractionLists()
     // At this point, cellBbsToExchange does not need to be maintained
     // or distributed as it is not longer needed.
 
-    cellBbsToExchange.setSize(0);
+    cellBbsToExchange.clearStorage();
 
     cellMap().reverseDistribute
     (
@@ -419,16 +395,11 @@ void Foam::InteractionLists<ParticleType>::buildInteractionLists()
             globalTransforms.transformIndex(wfiat)
         );
 
-        treeBoundBox tempTransformedBb
+        treeBoundBox extendedBb
         (
             transform.invTransformPosition(wallFaceBbsToExchange[bbI].points())
         );
-
-        treeBoundBox extendedBb
-        (
-            tempTransformedBb.min() - interactionVec,
-            tempTransformedBb.max() + interactionVec
-        );
+        extendedBb.grow(maxDistance_);
 
         // Find all elements intersecting box.
         labelList interactingElems
@@ -451,7 +422,7 @@ void Foam::InteractionLists<ParticleType>::buildInteractionLists()
             // i.e. a more accurate bounding volume like a OBB or
             // convex hull or an exact geometrical test.
 
-            label c = coupledPatchRangeTree.shapes().cellLabels()[elemI];
+            label c = coupledPatchRangeTree.shapes().objectIndex(elemI);
 
             rwfil_[bbI][i] = c;
         }
@@ -592,11 +563,8 @@ void Foam::InteractionLists<ParticleType>::buildInteractionLists()
     {
         const treeBoundBox& cellBb = cellBbs[celli];
 
-        treeBoundBox extendedBb
-        (
-            cellBb.min() - interactionVec,
-            cellBb.max() + interactionVec
-        );
+        treeBoundBox extendedBb(cellBb);
+        extendedBb.grow(maxDistance_);
 
         // Find all cells intersecting extendedBb
         labelList interactingElems(allCellsTree.findBox(extendedBb));
@@ -606,7 +574,7 @@ void Foam::InteractionLists<ParticleType>::buildInteractionLists()
 
         for (const label elemi : interactingElems)
         {
-            const label c = allCellsTree.shapes().cellLabels()[elemi];
+            const label c = allCellsTree.shapes().objectIndex(elemi);
 
             // Here, a more detailed geometric test could be applied,
             // i.e. a more accurate bounding volume like a OBB or
@@ -631,7 +599,7 @@ void Foam::InteractionLists<ParticleType>::buildInteractionLists()
         {
             const label elemi = interactingElems[i];
 
-            const label f = wallFacesTree.shapes().faceLabels()[elemi];
+            const label f = wallFacesTree.shapes().objectIndex(elemi);
 
             dwfil_[celli][i] = f;
         }

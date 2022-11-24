@@ -195,8 +195,7 @@ void Foam::cellCellStencils::inverseDistance::markBoundaries
 
                 // Mark in voxel mesh
                 boundBox faceBb(pp.points(), pp[i], false);
-                faceBb.min() -= smallVec;
-                faceBb.max() += smallVec;
+                faceBb.grow(smallVec);
 
                 if (bb.overlaps(faceBb))
                 {
@@ -223,8 +222,7 @@ void Foam::cellCellStencils::inverseDistance::markBoundaries
 
                 // Mark in voxel mesh
                 boundBox faceBb(pp.points(), pp[i], false);
-                faceBb.min() -= smallVec;
-                faceBb.max() += smallVec;
+                faceBb.grow(smallVec);
 
                 if (bb.overlaps(faceBb))
                 {
@@ -233,20 +231,6 @@ void Foam::cellCellStencils::inverseDistance::markBoundaries
             }
         }
     }
-}
-
-
-Foam::treeBoundBox Foam::cellCellStencils::inverseDistance::cellBb
-(
-    const primitiveMesh& mesh,
-    const label celli
-)
-{
-    if (mesh.hasCellPoints())
-    {
-        return treeBoundBox(mesh.points(), mesh.cellPoints(celli));
-    }
-    return treeBoundBox(mesh.cells()[celli].box(mesh));
 }
 
 
@@ -326,9 +310,8 @@ void Foam::cellCellStencils::inverseDistance::markPatchesAsHoles
             forAll(tgtCellMap, tgtCelli)
             {
                 label celli = tgtCellMap[tgtCelli];
-                treeBoundBox cBb(cellBb(mesh_, celli));
-                cBb.min() -= smallVec_;
-                cBb.max() += smallVec_;
+                treeBoundBox cBb(mesh_.cellBb(celli));
+                cBb.grow(smallVec_);
 
                 if
                 (
@@ -396,9 +379,9 @@ void Foam::cellCellStencils::inverseDistance::markPatchesAsHoles
                 forAll(tgtCellMap, tgtCelli)
                 {
                     label celli = tgtCellMap[tgtCelli];
-                    treeBoundBox cBb(cellBb(mesh_, celli));
-                    cBb.min() -= smallVec_;
-                    cBb.max() += smallVec_;
+                    treeBoundBox cBb(mesh_.cellBb(celli));
+                    cBb.grow(smallVec_);
+
                     if
                     (
                         overlaps
@@ -554,9 +537,8 @@ void Foam::cellCellStencils::inverseDistance::markDonors
         label celli = tgtCellMap[tgtCelli];
         if (srcOverlapProcs.size())
         {
-            treeBoundBox subBb(cellBb(mesh_, celli));
-            subBb.min() -= smallVec_;
-            subBb.max() += smallVec_;
+            treeBoundBox subBb(mesh_.cellBb(celli));
+            subBb.grow(smallVec_);
 
             forAll(srcOverlapProcs, i)
             {
@@ -1831,7 +1813,7 @@ bool Foam::cellCellStencils::inverseDistance::update()
     }
     Pstream::listCombineReduce(nCellsPerZone, plusEqOp<label>());
 
-    const boundBox& allBb(mesh_.bounds());
+    const boundBox& allBb = mesh_.bounds();
 
     PtrList<fvMeshSubset> meshParts(nZones);
     List<treeBoundBoxList> meshBb(nZones);

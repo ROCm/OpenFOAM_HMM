@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +32,18 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+Foam::boundBox Foam::primitiveMesh::cellBb(const label celli) const
+{
+    if (hasCellPoints())
+    {
+        // No reduction!
+        return boundBox(points(), cellPoints()[celli], false);
+    }
+
+    return boundBox(cells()[celli].box(points(), faces()));
+}
+
+
 bool Foam::primitiveMesh::pointInCellBB
 (
     const point& p,
@@ -39,15 +51,7 @@ bool Foam::primitiveMesh::pointInCellBB
     scalar inflationFraction
 ) const
 {
-    boundBox bb
-    (
-        cells()[celli].points
-        (
-            faces(),
-            points()
-        ),
-        false
-    );
+    boundBox bb(cellBb(celli));
 
     if (inflationFraction > SMALL)
     {

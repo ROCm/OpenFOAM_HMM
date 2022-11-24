@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,7 +52,7 @@ Foam::Enum<EnumType>::Enum
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class EnumType>
-void Foam::Enum<EnumType>::append
+void Foam::Enum<EnumType>::push_back
 (
     std::initializer_list<std::pair<EnumType, const char*>> list
 )

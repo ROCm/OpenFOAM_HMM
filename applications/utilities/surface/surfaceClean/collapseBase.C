@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -642,7 +643,7 @@ static void projectNonSpanPoints
                     << abort(FatalError);
             }
 
-            scalar w = mag(pHit.hitPoint() - p0) / mag(p1 - p0);
+            scalar w = pHit.point().dist(p0) / p1.dist(p0);
 
             insertSorted(v, w, sortedVertices, sortedWeights);
         }

@@ -46,31 +46,24 @@ Foam::scalar Foam::meshToMeshMethod::tolerance_ = 1e-6;
 
 Foam::labelList Foam::meshToMeshMethod::maskCells() const
 {
-    boundBox intersectBb
-    (
-        max(src_.bounds().min(), tgt_.bounds().min()),
-        min(src_.bounds().max(), tgt_.bounds().max())
-    );
-
+    boundBox intersectBb(src_.bounds());
+    intersectBb &= tgt_.bounds();
     intersectBb.inflate(0.01);
 
-    const cellList& srcCells = src_.cells();
-    const faceList& srcFaces = src_.faces();
-    const pointField& srcPts = src_.points();
-
     DynamicList<label> cells(src_.nCells());
-    forAll(srcCells, srcI)
+
+    for (label srcCelli = 0; srcCelli < src_.nCells(); ++srcCelli)
     {
-        boundBox cellBb(srcCells[srcI].points(srcFaces, srcPts), false);
+        boundBox cellBb(src_.cellBb(srcCelli));
         if (intersectBb.overlaps(cellBb))
         {
-            cells.append(srcI);
+            cells.append(srcCelli);
         }
     }
 
     if (debug)
     {
-        Pout<< "participating source mesh cells: " << cells.size() << endl;
+        Pout<< "participating source mesh cells: " << src_.nCells() << endl;
     }
 
     return cells;
@@ -87,14 +80,7 @@ bool Foam::meshToMeshMethod::intersect
 
     tetOverlapVolume overlapEngine;
 
-    // Note: avoid demand-driven construction of cellPoints
-    // treeBoundBox bbTgtCell(tgt_.points(), tgt_.cellPoints()[tgtCelli]);
-    const UList<label>& cellFaces = tgt_.cells()[tgtCelli];
-    treeBoundBox bbTgtCell(tgt_.points(), tgt_.faces()[cellFaces[0]]);
-    for (label i = 1; i < cellFaces.size(); ++i)
-    {
-        bbTgtCell.add(tgt_.points(), tgt_.faces()[cellFaces[i]]);
-    }
+    treeBoundBox bbTgtCell(tgt_.cellBb(tgtCelli));
 
     return overlapEngine.cellCellOverlapMinDecomp
     (
@@ -116,14 +102,7 @@ Foam::scalar Foam::meshToMeshMethod::interVol
 {
     tetOverlapVolume overlapEngine;
 
-    // Note: avoid demand-driven construction of cellPoints
-    // treeBoundBox bbTgtCell(tgt_.points(), tgt_.cellPoints()[tgtCelli]);
-    const UList<label>& cellFaces = tgt_.cells()[tgtCelli];
-    treeBoundBox bbTgtCell(tgt_.points(), tgt_.faces()[cellFaces[0]]);
-    for (label i = 1; i < cellFaces.size(); ++i)
-    {
-        bbTgtCell.add(tgt_.points(), tgt_.faces()[cellFaces[i]]);
-    }
+    treeBoundBox bbTgtCell(tgt_.cellBb(tgtCelli));
 
     scalar vol = overlapEngine.cellCellOverlapVolumeMinDecomp
     (
@@ -147,14 +126,7 @@ Foam::meshToMeshMethod::interVolAndCentroid
 {
     tetOverlapVolume overlapEngine;
 
-    // Note: avoid demand-driven construction of cellPoints
-    // treeBoundBox bbTgtCell(tgt_.points(), tgt_.cellPoints()[tgtCelli]);
-    const UList<label>& cellFaces = tgt_.cells()[tgtCelli];
-    treeBoundBox bbTgtCell(tgt_.points(), tgt_.faces()[cellFaces[0]]);
-    for (label i = 1; i < cellFaces.size(); ++i)
-    {
-        bbTgtCell.add(tgt_.points(), tgt_.faces()[cellFaces[i]]);
-    }
+    treeBoundBox bbTgtCell(tgt_.cellBb(tgtCelli));
 
     Tuple2<scalar, point> volAndInertia =
     overlapEngine.cellCellOverlapMomentMinDecomp

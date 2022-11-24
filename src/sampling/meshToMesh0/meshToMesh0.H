@@ -116,7 +116,7 @@ class meshToMesh0
             const pointField& points,
             const fvMesh& fromMesh,
             const List<bool>& boundaryCell,
-            const indexedOctree<treeDataCell>& oc
+            const indexedOctree<treeDataCell>& cellTree
         ) const;
 
         void calculateInverseDistanceWeights() const;

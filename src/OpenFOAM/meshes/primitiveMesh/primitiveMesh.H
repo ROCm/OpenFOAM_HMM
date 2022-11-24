@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -71,6 +71,7 @@ namespace Foam
 
 // Forward Declarations
 class bitSet;
+class boundBox;
 
 /*---------------------------------------------------------------------------*\
                       Class primitiveMesh Declaration
@@ -769,6 +770,9 @@ public:
 
         // Useful derived info
 
+            //- The bounding box for given cell index
+            boundBox cellBb(const label celli) const;
+
             //- Return true if the point in the cell bounding box.
             //  The bounding box may be isotropically inflated by the fraction
             //  inflationFraction
@@ -779,7 +783,7 @@ public:
                 scalar inflationFraction = 0
             ) const;
 
-            //- Return true if the  point is in the cell
+            //- Return true if the point is in the cell
             bool pointInCell(const point& p, label celli) const;
 
             //- Find the cell with the nearest cell centre to location

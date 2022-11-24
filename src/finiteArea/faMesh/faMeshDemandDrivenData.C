@@ -1924,24 +1924,15 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit(vectorField& result) const
 
                 // Remove duplicate points
                 vectorField allPoints(nAllPoints, Zero);
-                boundBox bb(allPointsExt, false);
-                scalar tol = 0.001*mag(bb.max() - bb.min());
+                const scalar tol = 0.001*treeBoundBox(allPointsExt).mag();
 
                 nAllPoints = 0;
-                forAll(allPointsExt, pI)
+                for (const point& pt : allPointsExt)
                 {
                     bool duplicate = false;
-                    for (label i=0; i<nAllPoints; ++i)
+                    for (label i = 0; i < nAllPoints; ++i)
                     {
-                        if
-                        (
-                            mag
-                            (
-                                allPoints[i]
-                              - allPointsExt[pI]
-                            )
-                          < tol
-                        )
+                        if (pt.dist(allPoints[i]) < tol)
                         {
                             duplicate = true;
                             break;
@@ -1950,7 +1941,7 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit(vectorField& result) const
 
                     if (!duplicate)
                     {
-                        allPoints[nAllPoints++] = allPointsExt[pI];
+                        allPoints[nAllPoints++] = pt;
                     }
                 }
 
@@ -2069,8 +2060,7 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit(vectorField& result) const
 
                 procLsPoints[Pstream::myProcNo()] = locPoints;
 
-                const boundBox bb(locPoints, false);
-                tol = 0.001*mag(bb.max() - bb.min());
+                tol = 0.001*treeBoundBox(locPoints).mag();
             }
 
             Pstream::allGatherList(procLsPoints);

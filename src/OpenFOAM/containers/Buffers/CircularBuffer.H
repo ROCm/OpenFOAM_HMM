@@ -246,16 +246,16 @@ public:
     // Access
 
         //- Access the first element (front). Requires !empty().
-        T& first();
+        T& front();
 
         //- Access the last element (back). Requires !empty().
-        T& last();
+        T& back();
 
         //- Const access to the first element (front). Requires !empty().
-        const T& first() const;
+        const T& front() const;
 
         //- Const access to the last element (back). Requires !empty().
-        const T& last() const;
+        const T& back() const;
 
 
     // Sizing
@@ -315,31 +315,32 @@ public:
         //- Shrink by moving the end of the buffer 1 or more times
         inline void pop_back(label n = 1);
 
-        //- Copy append an element to the end of the buffer
-        void append(const T& val) { this->push_back(val); }
-
-        //- Move append an element to the end of the buffer
-        void append(T&& val) { this->push_back(std::move(val)); }
-
         //- Copy append multiple elements the end of the buffer
-        inline void append(const UList<T>& list);
+        inline void push_back(const UList<T>& list);
 
         //- Copy append IndirectList elements the end of the buffer
         template<class Addr>
-        inline void append(const IndirectListBase<T, Addr>& list);
+        inline void push_back(const IndirectListBase<T, Addr>& list);
 
         //- Append an element if not already in the buffer.
         //  \return the change in the buffer length
-        inline label appendUniq(const T& val);
+        inline label push_uniq(const T& val);
 
 
     // Other Operations
+
+        //- Return a copy of the buffer flattened into a single List.
+        //- Use sparingly!
+        List<T> list() const;
 
         //- Reverse the buffer order, swapping elements
         void reverse();
 
 
     // Member Operators
+
+        //- Return the buffer flattened as a single List. Use sparingly!
+        List<T> operator()() const { return this->list(); }
 
         //- Non-const access to an element in the list.
         //  The index is allowed to wrap in both directions
@@ -475,6 +476,41 @@ public:
 
         //- Return a const_iterator at end of buffer
         inline const_iterator end() const { return cend(); }
+
+
+    // Housekeeping
+
+        //- Access the first element (front). Requires !empty().
+        //FOAM_DEPRECATED_FOR(2022-10, "front()")
+        T& first() { return front(); }
+
+        //- Access the first element (front). Requires !empty().
+        //FOAM_DEPRECATED_FOR(2022-10, "front()")
+        const T& first() const { return front(); }
+
+        //- Access the last element (back). Requires !empty().
+        //FOAM_DEPRECATED_FOR(2022-10, "back()")
+        T& last() { return back(); }
+
+        //- Access the last element (back). Requires !empty().
+        //FOAM_DEPRECATED_FOR(2022-10, "back()")
+        const T& last() const { return back(); }
+
+        //- Copy append an element to the end of the buffer
+        //FOAM_DEPRECATED_FOR(2022-10, "push_back()")
+        void append(const T& val) { this->push_back(val); }
+
+        //- Move append an element to the end of the buffer
+        //FOAM_DEPRECATED_FOR(2022-10, "push_back()")
+        void append(T&& val) { this->push_back(std::move(val)); }
+
+        //- Copy append multiple elements the end of the buffer
+        //FOAM_DEPRECATED_FOR(2022-10, "push_back()")
+        void append(const UList<T>& list) { this->push_back(list); }
+
+        //- Append an element if not already in the buffer.
+        //FOAM_DEPRECATED_FOR(2022-10, "push_uniq()")
+        label appendUniq(const T& val) { return this->push_uniq(val); }
 };
 
 

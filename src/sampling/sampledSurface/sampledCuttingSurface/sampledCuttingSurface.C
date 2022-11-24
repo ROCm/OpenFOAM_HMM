@@ -94,7 +94,7 @@ Foam::sampledCuttingSurface::sampledCuttingSurface
     sampledSurface(defaultSurfaceName, mesh, dict),
     cuttingSurface(defaultSurfaceName, mesh, dict),
     zoneNames_(),
-    bounds_(dict.getOrDefault("bounds", boundBox::invertedBox)),
+    bounds_(dict.getOrDefault("bounds", boundBox::null())),
     triangulate_(dict.getOrDefault("triangulate", true)),
     needsUpdate_(true)
 {

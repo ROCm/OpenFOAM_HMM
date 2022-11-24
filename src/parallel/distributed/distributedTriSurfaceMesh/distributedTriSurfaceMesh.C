@@ -30,7 +30,7 @@ License
 #include "mapDistribute.H"
 #include "Random.H"
 #include "addToRunTimeSelectionTable.H"
-#include "triangleFuncs.H"
+#include "triangle.H"
 #include "matchPoints.H"
 #include "globalIndex.H"
 #include "Time.H"
@@ -782,8 +782,8 @@ void Foam::distributedTriSurfaceMesh::findLine
                     // Nearest intersection
                     if
                     (
-                        magSqr(allInfo.hitPoint()-start[segmenti])
-                      < magSqr(hitInfo.hitPoint()-start[segmenti])
+                        start[segmenti].distSqr(allInfo.point())
+                      < start[segmenti].distSqr(hitInfo.point())
                     )
                     {
                         hitInfo = allInfo;
@@ -950,7 +950,7 @@ Foam::distributedTriSurfaceMesh::findBestProcs
                 // Minimum search distance to find the triangle
                 point near, far;
                 bbs[bbi].calcExtremities(centre, near, far);
-                minDistSqr = min(minDistSqr, magSqr(centre-far));
+                minDistSqr = min(minDistSqr, centre.distSqr(far));
             }
         }
     }
@@ -977,11 +977,11 @@ Foam::distributedTriSurfaceMesh::findBestProcs
                     point near, far;
                     bbs[bbi].calcExtremities(centre, near, far);
 
-                    scalar d2 = magSqr(centre-near);
+                    scalar d2 = centre.distSqr(near);
                     if (d2 < minDistSqr)
                     {
                         minDistSqr = d2;
-                        maxDistSqr = min(radiusSqr, magSqr(centre-far));
+                        maxDistSqr = min(radiusSqr, centre.distSqr(far));
                         minProci = proci;
                     }
                 }
@@ -1295,7 +1295,7 @@ void Foam::distributedTriSurfaceMesh::surfaceSide
             pointHit pHit =
                 f.nearestPointClassify(sample, points, nearType, nearLabel);
 
-            const point& nearestPoint(pHit.rawPoint());
+            const point& nearestPoint(pHit.point());
 
             if (nearType == triPointRef::NONE)
             {
@@ -1517,7 +1517,7 @@ void Foam::distributedTriSurfaceMesh::collectLeafMids
     DynamicField<point>& midPoints
 ) const
 {
-    const indexedOctree<treeDataTriSurface>::node& nod = tree().nodes()[nodeI];
+    const auto& nod = tree().nodes()[nodeI];
 
     for (direction octant = 0; octant < nod.subNodes_.size(); octant++)
     {
@@ -1557,7 +1557,7 @@ Foam::volumeType Foam::distributedTriSurfaceMesh::calcVolumeType
     // Recurses to determine status of lowest level boxes. Level above is
     // combination of octants below.
 
-    const indexedOctree<treeDataTriSurface>::node& nod = tree().nodes()[nodeI];
+    const auto& nod = tree().nodes()[nodeI];
 
     volumeType myType = volumeType::UNKNOWN;
 
@@ -1619,7 +1619,7 @@ Foam::volumeType Foam::distributedTriSurfaceMesh::cachedVolumeType
     const point& sample
 ) const
 {
-    const indexedOctree<treeDataTriSurface>::node& nod = tree().nodes()[nodeI];
+    const auto& nod = tree().nodes()[nodeI];
 
     direction octant = nod.bb_.subOctant(sample);
 
@@ -1748,12 +1748,11 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
 
 
     // Initialise to inverted box
-    List<List<treeBoundBox>> bbs(Pstream::nProcs());
-    forAll(bbs, proci)
-    {
-        bbs[proci].setSize(1, treeBoundBox(boundBox::invertedBox));
-    }
-
+    List<List<treeBoundBox>> bbs
+    (
+        Pstream::nProcs(),
+        List<treeBoundBox>(1, treeBoundBox::null())
+    );
 
     const globalIndex& triIndexer = globalTris();
 
@@ -2186,41 +2185,23 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
 bool Foam::distributedTriSurfaceMesh::overlaps
 (
     const List<treeBoundBox>& bbs,
-    const point& p0,
-    const point& p1,
-    const point& p2
+    const triPointRef& tri
 )
 {
-    treeBoundBox triBb(p0);
-    triBb.add(p1);
-    triBb.add(p2);
+    treeBoundBox triBb(tri.a());
+    triBb.add(tri.b());
+    triBb.add(tri.c());
 
-    forAll(bbs, bbi)
+    for (const treeBoundBox& bb : bbs)
     {
-        const treeBoundBox& bb = bbs[bbi];
-
         // Exact test of triangle intersecting bb
 
         // Quick rejection. If whole bounding box of tri is outside cubeBb then
         // there will be no intersection.
-        if (bb.overlaps(triBb))
+
+        if (bb.overlaps(triBb) && bb.intersects(tri))
         {
-            // Check if one or more triangle point inside
-            if (bb.contains(p0) || bb.contains(p1) || bb.contains(p2))
-            {
-                // One or more points inside
-                return true;
-            }
-
-            // Now we have the difficult case: all points are outside but
-            // connecting edges might go through cube. Use fast intersection
-            // of bounding box.
-            bool intersect = triangleFuncs::intersectBb(p0, p1, p2, bb);
-
-            if (intersect)
-            {
-                return true;
-            }
+            return true;
         }
     }
     return false;
@@ -2954,7 +2935,7 @@ const Foam::globalIndex& Foam::distributedTriSurfaceMesh::globalTris() const
 //                    if
 //                    (
 //                        surfaceClosed_
-//                    && !contains(procBb_[proci], info[i].hitPoint())
+//                    && !contains(procBb_[proci], info[i].point())
 //                    )
 //                    {
 //                        // Nearest point is not on local processor so the
@@ -3044,11 +3025,7 @@ const Foam::globalIndex& Foam::distributedTriSurfaceMesh::globalTris() const
 //                if
 //                (
 //                    surfaceClosed_
-//                && !contains
-//                    (
-//                        procBb_[Pstream::myProcNo()],
-//                        allInfo[i].hitPoint()
-//                    )
+//                && !contains(procBb_[Pstream::myProcNo()], allInfo[i].point())
 //                )
 //                {
 //                    // Nearest point is not on local processor so the
@@ -3095,8 +3072,8 @@ const Foam::globalIndex& Foam::distributedTriSurfaceMesh::globalTris() const
 //                    // Nearest intersection
 //                    if
 //                    (
-//                        magSqr(allInfo[i].hitPoint()-samples[pointi])
-//                      < magSqr(info[pointi].hitPoint()-samples[pointi])
+//                        samples[pointi].distSqr(allInfo[i].point())
+//                      < samples[pointi].distSqr(info[pointi].point())
 //                    )
 //                    {
 //                        info[pointi] = allInfo[i];
@@ -3267,7 +3244,7 @@ void Foam::distributedTriSurfaceMesh::findNearest
                 if
                 (
                     surfaceClosed_
-                && !contains(procBb_[Pstream::myProcNo()], info.hitPoint())
+                && !contains(procBb_[Pstream::myProcNo()], info.point())
                 )
                 {
                     // Nearest point is not on local processor so the
@@ -3281,7 +3258,7 @@ void Foam::distributedTriSurfaceMesh::findNearest
                 {
                     nearestAndDist& ni = nearestInfo[i];
                     ni.first() = info;
-                    ni.second() = magSqr(localPoints[i]-info.hitPoint());
+                    ni.second() = info.point().distSqr(localPoints[i]);
                 }
             }
         }
@@ -3437,7 +3414,7 @@ void Foam::distributedTriSurfaceMesh::findNearest
             if
             (
                 surfaceClosed_
-            && !contains(procBb_[Pstream::myProcNo()], info.hitPoint())
+            && !contains(procBb_[Pstream::myProcNo()], info.point())
             )
             {
                 // See above
@@ -3447,7 +3424,7 @@ void Foam::distributedTriSurfaceMesh::findNearest
             {
                 nearestAndDist& ni = localBest[i];
                 ni.first() = info;
-                ni.second() = magSqr(info.hitPoint()-localSamples[i]);
+                ni.second() = info.point().distSqr(localSamples[i]);
             }
         }
     }
@@ -3584,11 +3561,7 @@ void Foam::distributedTriSurfaceMesh::findNearest
                 if
                 (
                     surfaceClosed_
-                && !contains
-                    (
-                        procBb_[Pstream::myProcNo()],
-                        allInfo[i].hitPoint()
-                    )
+                && !contains(procBb_[Pstream::myProcNo()], allInfo[i].point())
                 )
                 {
                     // Nearest point is not on local processor so the
@@ -3628,8 +3601,8 @@ void Foam::distributedTriSurfaceMesh::findNearest
                     // Nearest intersection
                     if
                     (
-                        magSqr(allInfo[i].hitPoint()-samples[pointi])
-                      < magSqr(info[pointi].hitPoint()-samples[pointi])
+                        samples[pointi].distSqr(allInfo[i].point())
+                      < samples[pointi].distSqr(info[pointi].point())
                     )
                     {
                         info[pointi] = allInfo[i];
@@ -3743,7 +3716,7 @@ void Foam::distributedTriSurfaceMesh::findLineAll
     const vectorField smallVec
     (
         ROOTSMALL*dirVec
-      + vector(ROOTVSMALL,ROOTVSMALL,ROOTVSMALL)
+      + vector::uniform(ROOTVSMALL)
     );
 
     // Copy to input and compact any hits
@@ -3760,7 +3733,7 @@ void Foam::distributedTriSurfaceMesh::findLineAll
             info[pointi].setSize(1);
             info[pointi][0] = hitInfo[pointi];
 
-            point pt = hitInfo[pointi].hitPoint() + smallVec[pointi];
+            point pt = hitInfo[pointi].point() + smallVec[pointi];
 
             if (((pt-start[pointi])&dirVec[pointi]) <= magSqrDirVec[pointi])
             {
@@ -3805,7 +3778,7 @@ void Foam::distributedTriSurfaceMesh::findLineAll
                 info[pointi].setSize(sz+1);
                 info[pointi][sz] = hitInfo[i];
 
-                point pt = hitInfo[i].hitPoint() + smallVec[pointi];
+                point pt = hitInfo[i].point() + smallVec[pointi];
 
                 // Check current coordinate along ray
                 scalar d = ((pt-start[pointi])&dirVec[pointi]);
@@ -4150,10 +4123,9 @@ void Foam::distributedTriSurfaceMesh::getVolumeType
         {
             // Get local tree
             const indexedOctree<treeDataTriSurface>& t = tree();
+            const auto& nodes = t.nodes();
             PackedList<2>& nt = t.nodeTypes();
-            const List<indexedOctree<treeDataTriSurface>::node>& nodes =
-                t.nodes();
-            nt.setSize(nodes.size());
+            nt.resize(nodes.size());
             nt = volumeType::UNKNOWN;
 
             // Collect midpoints
@@ -4511,11 +4483,10 @@ void Foam::distributedTriSurfaceMesh::overlappingSurface
     forAll(s, trii)
     {
         const labelledTri& f = s[trii];
-        const point& p0 = s.points()[f[0]];
-        const point& p1 = s.points()[f[1]];
-        const point& p2 = s.points()[f[2]];
 
-        if (overlaps(bbsX, p0, p1, p2))
+        triPointRef tri(s.points(), f);
+
+        if (overlaps(bbsX, tri))
         {
             includedFace[trii] = true;
         }

@@ -180,7 +180,7 @@ void Foam::regionToFace::combine(topoSet& set, const bool add) const
 
     if (verbose_)
     {
-        Info<< "    Found nearest face at " << ni.first().rawPoint()
+        Info<< "    Found nearest face at " << ni.first().point()
             << " on processor " << ni.second().second()
             << " face " << ni.first().index()
             << " distance " << Foam::sqrt(ni.second().first()) << endl;

@@ -871,17 +871,16 @@ Foam::label Foam::checkTopology
             Info<< "    "
                 << setw(20) << "PointZone"
                 << setw(8) << "Points"
-                << "BoundingBox" << endl;
+                << "BoundingBox" << nl;
 
             for (const auto& zone : pointZones)
             {
-                boundBox bb;
-                for (const label pointi : zone)
-                {
-                    bb.add(mesh.points()[pointi]);
-                }
-
-                bb.reduce();  // Global min/max
+                boundBox bb
+                (
+                    mesh.points(),
+                    static_cast<const labelUList&>(zone),
+                    true  // Reduce (global min/max)
+                );
 
                 Info<< "    "
                     << setw(20) << zone.name()

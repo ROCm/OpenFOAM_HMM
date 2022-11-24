@@ -153,25 +153,25 @@ public:
 
         //- Construct and append an element to the end of the list
         template<class... Args>
-        inline void emplace_append(Args&&... args);
+        inline void emplace_back(Args&&... args);
 
         //- Append an element to the end of the list
-        inline void append(T* ptr);
+        inline void push_back(T* ptr);
 
         //- Move append an element to the end of the list
-        inline void append(std::unique_ptr<T>&& ptr);
+        inline void push_back(std::unique_ptr<T>&& ptr);
 
         //- Move append an element to the end of the list
-        inline void append(autoPtr<T>&& ptr);
+        inline void push_back(autoPtr<T>&& ptr);
 
         //- Move or clone append a refPtr to the end of the list
-        inline void append(const refPtr<T>& ptr);
+        inline void push_back(const refPtr<T>& ptr);
 
         //- Move or clone append a tmp to the end of the list
-        inline void append(const tmp<T>& ptr);
+        inline void push_back(const tmp<T>& ptr);
 
         //- Move append another list to the end of this list.
-        inline void append(PtrList<T>&& other);
+        inline void push_back(PtrList<T>&& other);
 
         //- Construct and set an element
         template<class... Args>
@@ -220,17 +220,41 @@ public:
 
     // Housekeeping
 
-        //- Move append an element to the end of the list
-        void append(autoPtr<T>& ptr)
-        {
-            this->append(std::move(ptr));
-        }
-
         //- Set element to given autoPtr and return old element
         autoPtr<T> set(const label i, autoPtr<T>& ptr)
         {
             return this->set(i, std::move(ptr));
         }
+
+        //- Move append an element to the end of the list
+        void append(autoPtr<T>& ptr) { this->push_back(std::move(ptr)); }
+
+        //- Append an element to the end of the list
+        //FOAM_DEPRECATED_FOR(2022-10, "push_back()")
+        void append(T* ptr) { this->push_back(ptr); }
+
+        //- Move append an element to the end of the list
+        //FOAM_DEPRECATED_FOR(2022-10, "push_back()")
+        void append(std::unique_ptr<T>&& ptr)
+        {
+            this->push_back(std::move(ptr));
+        }
+
+        //- Move append an element to the end of the list
+        //FOAM_DEPRECATED_FOR(2022-10, "push_back()")
+        void append(autoPtr<T>&& ptr) { this->push_back(std::move(ptr)); }
+
+        //- Move or clone append a tmp to the end of the list
+        //FOAM_DEPRECATED_FOR(2022-10, "push_back()")
+        void append(const refPtr<T>& ptr) { this->push_back(ptr); }
+
+        //- Move or clone append a tmp to the end of the list
+        //FOAM_DEPRECATED_FOR(2022-10, "push_back()")
+        void append(const tmp<T>& ptr) { this->push_back(ptr); }
+
+        //- Move append another list to the end of this list.
+        //FOAM_DEPRECATED_FOR(2022-10, "push_back()")
+        void append(PtrList<T>&& other) { this->push_back(std::move(other)); }
 };
 
 

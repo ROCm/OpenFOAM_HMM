@@ -108,7 +108,7 @@ Ostream& printAddr
 
     for (label i=0; i < len; ++i)
     {
-        os << "addr=" << name(list(i)) << nl;
+        os << "addr=" << Foam::name(list.get(i)) << nl;
     }
 
     // End delimiter
@@ -140,7 +140,7 @@ Ostream& print
 
     for (label i=0; i < len; ++i)
     {
-        const T* ptr = list(i);
+        const T* ptr = list.get(i);
 
         if (ptr)
         {
@@ -174,7 +174,7 @@ Ostream& print
 
     for (label i=0; i < len; ++i)
     {
-        const T* ptr = list(i);
+        const T* ptr = list.get(i);
 
         if (ptr)
         {
@@ -192,7 +192,7 @@ Ostream& print
 
         for (label i=len; i < cap; ++i)
         {
-            const T* ptr = list(i);
+            const T* ptr = list.get(i);
 
             os << "unused " << name(ptr) << nl;
         }
@@ -274,9 +274,9 @@ int main(int argc, char *argv[])
 
     {
         DLPtrList<Scalar> llist1;
-        llist1.prepend(new Scalar(100));
-        llist1.prepend(new Scalar(200));
-        llist1.prepend(new Scalar(300));
+        llist1.push_front(new Scalar(100));
+        llist1.push_front(new Scalar(200));
+        llist1.push_front(new Scalar(300));
 
         auto citer = llist1.begin();
 
@@ -305,9 +305,9 @@ int main(int argc, char *argv[])
     // Same but as SLPtrList
     {
         SLPtrList<Scalar> llist1;
-        llist1.prepend(new Scalar(100));
-        llist1.prepend(new Scalar(200));
-        llist1.prepend(new Scalar(300));
+        llist1.push_front(new Scalar(100));
+        llist1.push_front(new Scalar(200));
+        llist1.push_front(new Scalar(300));
 
         for (const auto& it : llist1)
         {
@@ -334,7 +334,7 @@ int main(int argc, char *argv[])
     {
         listApp.append(new Scalar(1.3*i));
     }
-    listApp.emplace_append(100);
+    listApp.emplace_back(100);
 
 
     Info<< nl
@@ -580,8 +580,8 @@ int main(int argc, char *argv[])
     }
 
     PtrList<plane> planes;
-    planes.emplace_append(vector::one, vector::one);
-    planes.emplace_append(vector(1,2,3), vector::one);
+    planes.emplace_back(vector::one, vector::one);
+    planes.emplace_back(vector(1,2,3), vector::one);
 
     Info<< nl << "appended values" << nl;
     for (const plane& p : planes)
@@ -594,15 +594,15 @@ int main(int argc, char *argv[])
     PtrDynList<plane> dynPlanes;
 
     {
-        dynPlanes.emplace_append(vector::one, vector::one);
-        dynPlanes.emplace_append(vector(1,2,3), vector::one);
+        dynPlanes.emplace_back(vector::one, vector::one);
+        dynPlanes.emplace_back(vector(1,2,3), vector::one);
         dynPlanes.append(nullptr);
 
         dynPlanes.set(6, new plane(vector(2,2,1), vector::one));
         dynPlanes.set(10, new plane(vector(4,5,6), vector::one));
 
         dynPlanes.emplace(12, vector(3,2,1), vector::one);
-        dynPlanes.emplace_append(Zero, vector::one);
+        dynPlanes.emplace_back(Zero, vector::one);
     }
 
     Info<< nl << "PtrDynList: ";
@@ -633,7 +633,7 @@ int main(int argc, char *argv[])
 
         forAll(dynPlanes, i)
         {
-            const plane* pln = dynPlanes.set(i);
+            const plane* pln = dynPlanes.get(i);
             if (pln)
             {
                 stdPlanes.set(i, new plane(*pln));

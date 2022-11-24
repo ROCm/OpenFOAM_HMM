@@ -34,7 +34,6 @@ Description
 #include "line.H"
 #include "Random.H"
 #include "treeBoundBox.H"
-#include "cellModel.H"
 #include "bitSet.H"
 #include "HashSet.H"
 #include "ListOps.H"
@@ -59,8 +58,7 @@ int main(int argc, char *argv[])
 {
     #include "setRootCase.H"
 
-    Info<<"boundBox faces: " << boundBox::faces << nl
-        <<"hex faces: " << cellModel::ref(cellModel::HEX).modelFaces() << nl
+    Info<<"boundBox faces: " << boundBox::hexFaces() << nl
         <<"tree-bb faces: " << treeBoundBox::faces << nl
         <<"tree-bb edges: " << treeBoundBox::edges << endl;
 
@@ -113,10 +111,8 @@ int main(int argc, char *argv[])
         Info<<"enclose point " << pt << " -> " << bb << endl;
 
         // restart with same points
-        bb = boundBox::invertedBox;
-        bb.add(point(1,1,1));
-        bb.add(point::zero);
-        bb.add(point(0,1.5,0.5));
+        bb.reset(point::zero);
+        bb.add(point(1,1,1), point(0,1.5,0.5));
         bb.add(point(5,2,-2));
 
         Info<<"repeated " << bb << endl;

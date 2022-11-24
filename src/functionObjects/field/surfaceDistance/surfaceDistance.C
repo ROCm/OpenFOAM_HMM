@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -135,7 +135,7 @@ bool Foam::functionObjects::surfaceDistance::execute()
             scalarField dist(fc.size());
             forAll(nearestInfo, i)
             {
-                dist[i] = mag(nearestInfo[i].hitPoint()-fc[i]);
+                dist[i] = nearestInfo[i].hitPoint().dist(fc[i]);
             }
             bfld[patchi] == dist;
         }
@@ -157,7 +157,7 @@ bool Foam::functionObjects::surfaceDistance::execute()
 
         forAll(nearestInfo, celli)
         {
-            distance[celli] = mag(nearestInfo[celli].hitPoint()-cc[celli]);
+            distance[celli] = nearestInfo[celli].hitPoint().dist(cc[celli]);
         }
     }
     distance.correctBoundaryConditions();
@@ -194,7 +194,7 @@ bool Foam::functionObjects::surfaceDistance::write()
 //            scalarField dist(fc.size());
 //            forAll(nearestInfo, i)
 //            {
-//                dist[i] = mag(nearestInfo[i].hitPoint()-fc[i]);
+//                dist[i] = nearestInfo[i].hitPoint().dist(fc[i]);
 //            }
 //            bfld[patchi] == dist;
 //        }
@@ -216,7 +216,7 @@ bool Foam::functionObjects::surfaceDistance::write()
 //
 //        forAll(nearestInfo, celli)
 //        {
-//            distance[celli] = mag(nearestInfo[celli].hitPoint()-cc[celli]);
+//            distance[celli] = nearestInfo[celli].hitPoint().dist(cc[celli]);
 //        }
 //    }
 //    distance.correctBoundaryConditions();

@@ -177,13 +177,13 @@ public:
         //- Construct and copy add initial item
         explicit LList(const T& elem)
         {
-            this->prepend(elem);
+            this->push_front(elem);
         }
 
         //- Construct and move add initial item
         explicit LList(T&& elem)
         {
-            this->prepend(std::move(elem));
+            this->push_front(std::move(elem));
         }
 
         //- Construct from Istream
@@ -199,68 +199,66 @@ public:
         LList(std::initializer_list<T> lst);
 
 
-    //- Destructor
+    //- Destructor. Calls clear()
     ~LList();
 
 
     // Member Functions
 
         //- The first entry in the list
-        reference first()
+        reference front()
         {
-            return link::ref(LListBase::first());
+            return link::ref(LListBase::front());
         }
 
         //- The first entry in the list (const access)
-        const_reference first() const
+        const_reference front() const
         {
-            return link::ref(LListBase::first());
+            return link::ref(LListBase::front());
         }
 
         //- The last entry in the list
-        reference last()
+        reference back()
         {
-            return link::ref(LListBase::last());
+            return link::ref(LListBase::back());
         }
 
         //- The last entry in the list (const access)
-        const_reference last() const
+        const_reference back() const
         {
-            return link::ref(LListBase::last());
+            return link::ref(LListBase::back());
         }
 
 
         //- Add copy at front of list
-        void prepend(const T& elem)
+        void push_front(const T& elem)
         {
-            LListBase::prepend(new link(elem));
+            LListBase::push_front(new link(elem));
         }
 
         //- Move construct at front of list
-        void prepend(T&& elem)
+        void push_front(T&& elem)
         {
-            LListBase::prepend(new link(std::move(elem)));
+            LListBase::push_front(new link(std::move(elem)));
         }
 
         //- Add copy at back of list
-        void append(const T& elem)
+        void push_back(const T& elem)
         {
-            LListBase::append(new link(elem));
+            LListBase::push_back(new link(elem));
         }
 
         //- Move construct at back of list
-        void append(T&& elem)
+        void push_back(T&& elem)
         {
-            LListBase::append(new link(std::move(elem)));
+            LListBase::push_back(new link(std::move(elem)));
         }
 
-        //- Erase the first entry
-        bool eraseHead()
-        {
-            link* p = static_cast<link*>(LListBase::removeHead());
-            delete p;
-            return bool(p);
-        }
+        //- Delete contents of list
+        void clear();
+
+        //- Remove first element(s) from the list (deletes pointers)
+        void pop_front(label n = 1);
 
         //- Remove and return first entry
         T removeHead()
@@ -279,10 +277,6 @@ public:
         {
             return link::remove(LListBase::remove(iter));
         }
-
-
-        //- Delete contents of list
-        void clear();
 
         //- Transfer the contents of the argument into this List
         //- and annul the argument list.
@@ -576,11 +570,45 @@ public:
 
     // Housekeeping
 
-        //- Add copy at front of list. Same as prepend()
-        void insert(const T& elem) { this->prepend(elem); }
+        //- The first entry in the list
+        //FOAM_DEPRECATED_FOR(2022-10, "front()")
+        reference first() { return front(); }
 
-        //- Move construct at front of list. Same as prepend()
-        void insert(T&& elem) { this->prepend(std::move(elem)); }
+        //- The first entry in the list (const access)
+        //FOAM_DEPRECATED_FOR(2022-10, "front()")
+        const_reference first() const { return front(); }
+
+        //- The last entry in the list
+        //FOAM_DEPRECATED_FOR(2022-10, "back()")
+        reference last() { return back(); }
+
+        //- The last entry in the list (const access)
+        //FOAM_DEPRECATED_FOR(2022-10, "back()")
+        const_reference last() const { return back(); }
+
+        //- Add copy at front of list
+        //FOAM_DEPRECATED_FOR(2022-10, "push_front()")
+        void prepend(const T& elem) { push_front(elem); }
+
+        //- Move construct at front of list
+        //FOAM_DEPRECATED_FOR(2022-10, "push_front()")
+        void prepend(T&& elem) { push_front(std::move(elem)); }
+
+        //- Add copy at back of list
+        //FOAM_DEPRECATED_FOR(2022-10, "push_back()")
+        void append(const T& elem) { push_back(elem); }
+
+        //- Move construct at back of list
+        //FOAM_DEPRECATED_FOR(2022-10, "push_back()")
+        void append(T&& elem) { push_back(std::move(elem)); }
+
+        //- Add copy at front of list. Same as push_front()
+        //FOAM_DEPRECATED_FOR(2022-01, "push_front()")
+        void insert(const T& elem) { push_front(elem); }
+
+        //- Move construct at front of list. Same as push_front()
+        //FOAM_DEPRECATED_FOR(2022-01, "push_front()")
+        void insert(T&& elem) { push_front(std::move(elem)); }
 };
 
 

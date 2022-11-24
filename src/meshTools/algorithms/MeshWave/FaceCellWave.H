@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,8 +47,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef FaceCellWave_H
-#define FaceCellWave_H
+#ifndef Foam_FaceCellWave_H
+#define Foam_FaceCellWave_H
 
 #include "bitSet.H"
 #include "DynamicList.H"
@@ -65,10 +65,101 @@ class polyMesh;
 class polyPatch;
 
 /*---------------------------------------------------------------------------*\
-                        Class FaceCellWaveName Declaration
+                        Class FaceCellWaveBase Declaration
 \*---------------------------------------------------------------------------*/
 
-TemplateName(FaceCellWave);
+class FaceCellWaveBase
+{
+protected:
+
+    // Protected Static Data
+
+        static const scalar geomTol_;
+        static scalar propagationTol_;
+
+
+    // Protected Data
+
+        //- Reference to mesh
+        const polyMesh& mesh_;
+
+        //- Track if face has changed
+        bitSet changedFace_;
+
+        //- Track if cell has changed
+        bitSet changedCell_;
+
+        //- List of changed faces
+        DynamicList<label> changedFaces_;
+
+        //- List of changed cells
+        DynamicList<label> changedCells_;
+
+        //- Current count of unvisited faces
+        label nUnvisitedFaces_;
+
+        //- Current count of unvisited cells
+        label nUnvisitedCells_;
+
+
+public:
+
+    //- Default trackData value (for default template argument)
+    static int dummyTrackData_;
+
+
+    //- Runtime type information
+    ClassName("FaceCellWave");
+
+
+    // Constructors
+
+        //- Construct with mesh reference and set initial sizes
+        FaceCellWaveBase(const polyMesh& mesh);
+
+
+    // Static Functions
+
+        //- Access to propagation tolerance
+        static scalar propagationTol() noexcept
+        {
+            return propagationTol_;
+        }
+
+        //- Change propagation tolerance, return previous value
+        static scalar setPropagationTol(const scalar tol) noexcept
+        {
+            scalar old(propagationTol_);
+            propagationTol_ = tol;
+            return old;
+        }
+
+
+    // Member Functions
+
+        //- Return access to the mesh
+        const polyMesh& mesh() const noexcept
+        {
+            return mesh_;
+        }
+
+        //- Current number of changed cells
+        label nChangedCells() const noexcept { return changedCells_.size(); }
+
+        //- Current number of changed faces
+        label nChangedFaces() const noexcept { return changedFaces_.size(); }
+
+        //- Get number of unvisited cells,
+        //- i.e. cells that were not (yet) reached from walking across mesh.
+        //  This can happen from
+        //  - not enough iterations done
+        //  - a disconnected mesh
+        //  - a mesh without walls in it
+        label nUnvisitedCells() const noexcept { return nUnvisitedCells_; }
+
+        //- Get number of unvisited faces
+        label nUnvisitedFaces() const noexcept { return nUnvisitedFaces_; }
+};
 
 
 /*---------------------------------------------------------------------------*\
@@ -78,7 +169,7 @@ TemplateName(FaceCellWave);
 template<class Type, class TrackingData = int>
 class FaceCellWave
 :
-    public FaceCellWaveName
+    public FaceCellWaveBase
 {
 protected:
 
@@ -87,19 +178,7 @@ protected:
     typedef std::pair<label,Type> taggedInfoType;
 
 
-    // Protected Static Data
-
-        static const scalar geomTol_;
-        static scalar propagationTol_;
-
-        //- Default trackdata value to satisfy default template argument.
-        static int dummyTrackData_;
-
-
     // Protected Data
-
-        //- Reference to mesh
-        const polyMesh& mesh_;
 
         //- Optional boundary faces that information should travel through
         const labelPairList explicitConnections_;
@@ -113,18 +192,6 @@ protected:
         //- Additional data to be passed into container
         TrackingData& td_;
 
-        //- Has face changed
-        bitSet changedFace_;
-
-        //- Has cell changed
-        bitSet changedCell_;
-
-        //- List of changed faces
-        DynamicList<label> changedFaces_;
-
-        // Cells that have changed
-        DynamicList<label> changedCells_;
-
         // Information exchange for explicit baffle connections
         // Max capacity = 2x number of explicit connections
         DynamicList<taggedInfoType> changedBaffles_;
@@ -137,10 +204,6 @@ protected:
 
         //- Number of evaluations
         label nEvals_;
-
-        //- Number of unvisited cells/faces
-        label nUnvisitedCells_;
-        label nUnvisitedFaces_;
 
 
     // Protected Member Functions
@@ -266,21 +329,6 @@ protected:
 
 public:
 
-    // Static Functions
-
-        //- Access to tolerance
-        static scalar propagationTol()
-        {
-            return propagationTol_;
-        }
-
-        //- Change tolerance
-        static void setPropagationTol(const scalar tol)
-        {
-            propagationTol_ = tol;
-        }
-
-
     // Constructors
 
         //- Construct from mesh.
@@ -290,7 +338,7 @@ public:
             const polyMesh& mesh,
             UList<Type>& allFaceInfo,
             UList<Type>& allCellInfo,
-            TrackingData& td = dummyTrackData_
+            TrackingData& td = FaceCellWaveBase::dummyTrackData_
         );
 
         //- Construct from mesh and list of changed faces with the Type
@@ -304,7 +352,7 @@ public:
             UList<Type>& allFaceInfo,
             UList<Type>& allCellInfo,
             const label maxIter,
-            TrackingData& td = dummyTrackData_
+            TrackingData& td = FaceCellWaveBase::dummyTrackData_
         );
 
         //- Construct from mesh and explicitly connected boundary faces
@@ -321,7 +369,7 @@ public:
             UList<Type>& allFaceInfo,
             UList<Type>& allCellInfo,
             const label maxIter,
-            TrackingData& td = dummyTrackData_
+            TrackingData& td = FaceCellWaveBase::dummyTrackData_
         );
 
 
@@ -334,39 +382,22 @@ public:
     // Access
 
         //- Access allFaceInfo
-        UList<Type>& allFaceInfo()
+        UList<Type>& allFaceInfo() noexcept
         {
             return allFaceInfo_;
         }
 
         //- Access allCellInfo
-        UList<Type>& allCellInfo()
+        UList<Type>& allCellInfo() noexcept
         {
             return allCellInfo_;
         }
 
         //- Additional data to be passed into container
-        const TrackingData& data() const
+        const TrackingData& data() const noexcept
         {
             return td_;
         }
-
-        //- Access mesh
-        const polyMesh& mesh() const
-        {
-            return mesh_;
-        }
-
-        //- Get number of unvisited cells,
-        //- i.e. cells that were not (yet) reached from walking across mesh.
-        //  This can happen from
-        //  - not enough iterations done
-        //  - a disconnected mesh
-        //  - a mesh without walls in it
-        label nUnvisitedCells() const;
-
-        //- Get number of unvisited faces
-        label nUnvisitedFaces() const;
 
 
     // Edit

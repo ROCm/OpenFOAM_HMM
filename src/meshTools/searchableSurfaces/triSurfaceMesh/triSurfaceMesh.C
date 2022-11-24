@@ -304,9 +304,7 @@ Foam::triSurfaceMesh::triSurfaceMesh(const IOobject& io, const triSurface& s)
     surfaceClosed_(-1),
     outsideVolType_(volumeType::UNKNOWN)
 {
-    const pointField& pts = triSurface::points();
-
-    bounds() = boundBox(pts, false);
+    bounds() = boundBox(triSurface::points(), false);
 }
 
 
@@ -334,9 +332,7 @@ Foam::triSurfaceMesh::triSurfaceMesh(const IOobject& io)
     surfaceClosed_(-1),
     outsideVolType_(volumeType::UNKNOWN)
 {
-    const pointField& pts = triSurface::points();
-
-    bounds() = boundBox(pts, false);
+    bounds() = boundBox(triSurface::points(), false);
 }
 
 
@@ -387,9 +383,7 @@ Foam::triSurfaceMesh::triSurfaceMesh
             << " : using scale " << scaleFactor << endl;
     }
 
-    const pointField& pts = triSurface::points();
-
-    bounds() = boundBox(pts, false);
+    bounds() = boundBox(triSurface::points(), false);
 
     // Have optional minimum quality for normal calculation
     if (dict.readIfPresent("minQuality", minQuality_) && minQuality_ > 0)
@@ -494,8 +488,7 @@ Foam::triSurfaceMesh::triSurfaceMesh(const IOobject& io, const readAction r)
         }
     }
 
-    const pointField& pts = triSurface::points();
-    bounds() = boundBox(pts, false);
+    bounds() = boundBox(triSurface::points(), false);
 }
 
 
@@ -629,8 +622,7 @@ Foam::triSurfaceMesh::triSurfaceMesh
     }
 
 
-    const pointField& pts = triSurface::points();
-    bounds() = boundBox(pts, false);
+    bounds() = boundBox(triSurface::points(), false);
 
     // Have optional minimum quality for normal calculation
     if (dict.readIfPresent("minQuality", minQuality_) && minQuality_ > 0)
@@ -706,8 +698,7 @@ void Foam::triSurfaceMesh::boundingSpheres
         const point& fc = centres[facei];
         for (const label pointi : f)
         {
-            const point& pt = pts[pointi];
-            radiusSqr[facei] = max(radiusSqr[facei], Foam::magSqr(fc-pt));
+            radiusSqr[facei] = max(radiusSqr[facei], fc.distSqr(pts[pointi]));
         }
     }
 
@@ -777,12 +768,9 @@ Foam::triSurfaceMesh::edgeTree() const
         }
 
         // Boundary edges
-        labelList bEdges
-        (
-            identity(nEdges() - nInternalEdges(), nInternalEdges())
-        );
+        const labelRange bEdges(nInternalEdges(), nBoundaryEdges());
 
-        treeBoundBox bb(Zero, Zero);
+        treeBoundBox bb(point::zero);
 
         if (bEdges.size())
         {
@@ -800,9 +788,7 @@ Foam::triSurfaceMesh::edgeTree() const
             // Slightly extended bb. Slightly off-centred just so on symmetric
             // geometry there are less face/edge aligned items.
 
-            bb = bb.extend(rndGen, 1e-4);
-            bb.min() -= point::uniform(ROOTVSMALL);
-            bb.max() += point::uniform(ROOTVSMALL);
+            bb.inflate(rndGen, 1e-4, ROOTVSMALL);
         }
 
 
@@ -812,20 +798,16 @@ Foam::triSurfaceMesh::edgeTree() const
                 << "calculating edge tree for bb:" << bb << endl;
         }
 
-        scalar oldTol = indexedOctree<treeDataEdge>::perturbTol();
-        indexedOctree<treeDataEdge>::perturbTol() = tolerance();
+        const scalar oldTol =
+            indexedOctree<treeDataEdge>::perturbTol(tolerance());
 
         edgeTree_.reset
         (
             new indexedOctree<treeDataEdge>
             (
-                treeDataEdge
-                (
-                    false,          // cachebb
-                    edges(),        // edges
-                    localPoints(),  // points
-                    bEdges          // selected edges
-                ),
+                // Boundary edges
+                treeDataEdge(edges(), localPoints(), bEdges),
+
                 bb,                 // bb
                 maxTreeDepth(),     // maxLevel
                 10,                 // leafsize
@@ -833,7 +815,7 @@ Foam::triSurfaceMesh::edgeTree() const
             )
         );
 
-        indexedOctree<treeDataEdge>::perturbTol() = oldTol;
+        indexedOctree<treeDataEdge>::perturbTol(oldTol);
 
         if (debug)
         {
@@ -1232,8 +1214,8 @@ void Foam::triSurfaceMesh::getVolumeType
     List<volumeType>& volType
 ) const
 {
-    const scalar oldTol = indexedOctree<treeDataTriSurface>::perturbTol();
-    indexedOctree<treeDataTriSurface>::perturbTol() = tolerance();
+    const scalar oldTol =
+        indexedOctree<treeDataTriSurface>::perturbTol(tolerance());
 
     if (debug)
     {
@@ -1269,7 +1251,8 @@ void Foam::triSurfaceMesh::getVolumeType
         }
     }
 
-    indexedOctree<treeDataTriSurface>::perturbTol() = oldTol;
+    indexedOctree<treeDataTriSurface>::perturbTol(oldTol);
+
     if (debug)
     {
         Pout<< "triSurfaceMesh::getVolumeType :"

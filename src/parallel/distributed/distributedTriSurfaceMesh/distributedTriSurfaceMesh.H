@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,8 +57,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef distributedTriSurfaceMesh_H
-#define distributedTriSurfaceMesh_H
+#ifndef Foam_distributedTriSurfaceMesh_H
+#define Foam_distributedTriSurfaceMesh_H
 
 #include "triSurfaceMesh.H"
 #include "localIOdictionary.H"
@@ -66,6 +66,7 @@ SourceFiles
 #include "Pair.H"
 #include "globalIndex.H"
 #include "DynamicField.H"
+#include "triangleFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -330,9 +331,7 @@ private:
             static bool overlaps
             (
                 const List<treeBoundBox>& bb,
-                const point& p0,
-                const point& p1,
-                const point& p2
+                const triPointRef& tri
             );
 
             //- Find points used in subset

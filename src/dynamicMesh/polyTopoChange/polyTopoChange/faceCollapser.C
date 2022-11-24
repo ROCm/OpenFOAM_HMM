@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -274,7 +274,7 @@ void Foam::faceCollapser::setRefinement
             // See where fp sorts. Make sure it is above fpMin1!
             pointHit near = lineAB.nearestDist(points[f[fp]]);
 
-            scalar w = magSqr(near.rawPoint() - pA);
+            scalar w = near.point().distSqr(pA);
 
             if (w <= dist[fpMin1])
             {
@@ -287,7 +287,7 @@ void Foam::faceCollapser::setRefinement
                 );
 
                 Pout<< "Adapting position of vertex " << f[fp] << " on face "
-                    << f << " from " << near.rawPoint() << " to " << newPoint
+                    << f << " from " << near.point() << " to " << newPoint
                     << endl;
 
                 near.setPoint(newPoint);
@@ -301,7 +301,7 @@ void Foam::faceCollapser::setRefinement
                 polyModifyPoint
                 (
                     f[fp],
-                    near.rawPoint(),
+                    near.point(),
                     false,
                     -1,
                     true
@@ -327,7 +327,7 @@ void Foam::faceCollapser::setRefinement
             // See where fp sorts. Make sure it is below fpMin1!
             pointHit near = lineAB.nearestDist(points[f[fp]]);
 
-            scalar w = magSqr(near.rawPoint() - pA);
+            scalar w = near.point().distSqr(pA);
 
             if (w <= dist[fpMin1])
             {
@@ -340,7 +340,7 @@ void Foam::faceCollapser::setRefinement
                 );
 
                 Pout<< "Adapting position of vertex " << f[fp] << " on face "
-                    << f << " from " << near.rawPoint() << " to " << newPoint
+                    << f << " from " << near.point() << " to " << newPoint
                     << endl;
 
                 near.setPoint(newPoint);
@@ -354,7 +354,7 @@ void Foam::faceCollapser::setRefinement
                 polyModifyPoint
                 (
                     f[fp],
-                    near.rawPoint(),
+                    near.point(),
                     false,
                     -1,
                     true

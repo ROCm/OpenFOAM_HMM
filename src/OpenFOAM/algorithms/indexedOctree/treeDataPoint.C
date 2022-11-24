@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,7 +33,7 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(treeDataPoint, 0);
+    defineTypeName(treeDataPoint);
 }
 
 
@@ -72,29 +72,29 @@ Foam::treeDataPoint::treeDataPoint
 {}
 
 
-Foam::treeDataPoint::findNearestOp::findNearestOp
-(
-    const indexedOctree<treeDataPoint>& tree
-)
-:
-    tree_(tree)
-{}
-
-
-Foam::treeDataPoint::findIntersectOp::findIntersectOp
-(
-    const indexedOctree<treeDataPoint>& tree
-)
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::pointField Foam::treeDataPoint::shapePoints() const
+Foam::treeBoundBox Foam::treeDataPoint::bounds(const labelUList& indices) const
 {
     if (useSubset_)
     {
-        return pointField(points_, pointLabels_);
+        treeBoundBox bb;
+        for (const label index : indices)
+        {
+            bb.add(points_[pointLabels_[index]]);
+        }
+        return bb;
+    }
+
+    return treeBoundBox(points_, indices);
+}
+
+
+Foam::tmp<Foam::pointField> Foam::treeDataPoint::centres() const
+{
+    if (useSubset_)
+    {
+        return tmp<pointField>::New(points_, pointLabels_);
     }
 
     return points_;
@@ -114,10 +114,10 @@ Foam::volumeType Foam::treeDataPoint::getVolumeType
 bool Foam::treeDataPoint::overlaps
 (
     const label index,
-    const treeBoundBox& cubeBb
+    const treeBoundBox& searchBox
 ) const
 {
-    return cubeBb.contains(shapePoint(index));
+    return searchBox.contains(centre(index));
 }
 
 
@@ -128,7 +128,51 @@ bool Foam::treeDataPoint::overlaps
     const scalar radiusSqr
 ) const
 {
-    return (magSqr(shapePoint(index) - centre) <= radiusSqr);
+    return (centre.distSqr(this->centre(index)) <= radiusSqr);
+}
+
+
+// * * * * * * * * * * * * * * * * Searching * * * * * * * * * * * * * * * * //
+
+Foam::treeDataPoint::findNearestOp::findNearestOp
+(
+    const indexedOctree<treeDataPoint>& tree
+)
+:
+    tree_(tree)
+{}
+
+
+Foam::treeDataPoint::findIntersectOp::findIntersectOp
+(
+    const indexedOctree<treeDataPoint>& tree
+)
+{}
+
+
+void Foam::treeDataPoint::findNearest
+(
+    const labelUList& indices,
+    const point& sample,
+
+    scalar& nearestDistSqr,
+    label& minIndex,
+    point& nearestPoint
+) const
+{
+    for (const label index : indices)
+    {
+        const point& pt = centre(index);
+
+        const scalar distSqr = sample.distSqr(pt);
+
+        if (distSqr < nearestDistSqr)
+        {
+            nearestDistSqr = distSqr;
+            minIndex = index;
+            nearestPoint = pt;
+        }
+    }
 }
 
 
@@ -142,21 +186,14 @@ void Foam::treeDataPoint::findNearestOp::operator()
     point& nearestPoint
 ) const
 {
-    const treeDataPoint& shape = tree_.shapes();
-
-    for (const label index : indices)
-    {
-        const point& pt = shape.shapePoint(index);
-
-        const scalar distSqr = magSqr(pt - sample);
-
-        if (distSqr < nearestDistSqr)
-        {
-            nearestDistSqr = distSqr;
-            minIndex = index;
-            nearestPoint = pt;
-        }
-    }
+    tree_.shapes().findNearest
+    (
+        indices,
+        sample,
+        nearestDistSqr,
+        minIndex,
+        nearestPoint
+    );
 }
 
 
@@ -173,44 +210,34 @@ void Foam::treeDataPoint::findNearestOp::operator()
 {
     const treeDataPoint& shape = tree_.shapes();
 
+    const treeBoundBox lnBb(ln.box());
+
     // Best so far
     scalar nearestDistSqr = GREAT;
     if (minIndex >= 0)
     {
-        nearestDistSqr = magSqr(linePoint - nearestPoint);
+        nearestDistSqr = linePoint.distSqr(nearestPoint);
     }
 
     for (const label index : indices)
     {
-        const point& shapePt = shape.shapePoint(index);
+        const point& pt = shape.centre(index);
 
-        if (tightest.contains(shapePt))
+        if (tightest.contains(pt))
         {
             // Nearest point on line
-            pointHit pHit = ln.nearestDist(shapePt);
+            pointHit pHit = ln.nearestDist(pt);
             const scalar distSqr = sqr(pHit.distance());
 
             if (distSqr < nearestDistSqr)
             {
                 nearestDistSqr = distSqr;
                 minIndex = index;
-                linePoint = pHit.rawPoint();
-                nearestPoint = shapePt;
+                linePoint = pHit.point();
+                nearestPoint = pt;
 
-                {
-                    point& minPt = tightest.min();
-                    minPt = min(ln.start(), ln.end());
-                    minPt.x() -= pHit.distance();
-                    minPt.y() -= pHit.distance();
-                    minPt.z() -= pHit.distance();
-                }
-                {
-                    point& maxPt = tightest.max();
-                    maxPt = max(ln.start(), ln.end());
-                    maxPt.x() += pHit.distance();
-                    maxPt.y() += pHit.distance();
-                    maxPt.z() += pHit.distance();
-                }
+                tightest = lnBb;
+                tightest.grow(pHit.distance());
             }
         }
     }

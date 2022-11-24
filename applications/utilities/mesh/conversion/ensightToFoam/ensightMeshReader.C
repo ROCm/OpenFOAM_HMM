@@ -293,7 +293,7 @@ bool Foam::fileFormats::ensightMeshReader::readGoldPart
                 elemIdToCells
             );
 
-            const auto& model = *cellModel::ptr(cellModel::TET);
+            const auto& model = cellModel::ref(cellModel::TET);
             for (label shapei = 0; shapei < nShapes; shapei++)
             {
                 readVerts(is, 4, nodeIdToPoints, verts);
@@ -326,7 +326,7 @@ bool Foam::fileFormats::ensightMeshReader::readGoldPart
                 elemIdToCells
             );
 
-            const auto& model = *cellModel::ptr(cellModel::PYR);
+            const auto& model = cellModel::ref(cellModel::PYR);
             for (label shapei = 0; shapei < nShapes; shapei++)
             {
                 readVerts(is, 5, nodeIdToPoints, verts);
@@ -359,7 +359,7 @@ bool Foam::fileFormats::ensightMeshReader::readGoldPart
                 elemIdToCells
             );
 
-            const auto& model = *cellModel::ptr(cellModel::PRISM);
+            const auto& model = cellModel::ref(cellModel::PRISM);
             for (label shapei = 0; shapei < nShapes; shapei++)
             {
                 readVerts(is, 6, nodeIdToPoints, verts);
@@ -392,7 +392,7 @@ bool Foam::fileFormats::ensightMeshReader::readGoldPart
                 elemIdToCells
             );
 
-            const auto& model = *cellModel::ptr(cellModel::HEX);
+            const auto& model = cellModel::ref(cellModel::HEX);
             for (label shapei = 0; shapei < nShapes; shapei++)
             {
                 readVerts(is, 8, nodeIdToPoints, verts);

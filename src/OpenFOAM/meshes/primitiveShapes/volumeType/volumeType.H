@@ -48,7 +48,6 @@ namespace Foam
 {
 
 // Forward Declarations
-class dictionary;
 class volumeType;
 Istream& operator>>(Istream& is, volumeType& vt);
 Ostream& operator<<(Ostream& os, const volumeType& vt);
@@ -113,8 +112,8 @@ public:
 
     // Member Functions
 
-        //- Return the enumeration
-        operator type() const
+        //- Implicit cast to the enumeration
+        operator type() const noexcept
         {
             return t_;
         }

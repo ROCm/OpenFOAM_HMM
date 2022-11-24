@@ -77,24 +77,20 @@ void Foam::meshToMesh0::calcAddressing()
     }
 
     treeBoundBox meshBb(fromPoints);
+    treeBoundBox shiftedBb(meshBb);
 
     scalar typDim = meshBb.avgDim()/(2.0*cbrt(scalar(fromCells.size())));
-
-    treeBoundBox shiftedBb
-    (
-        meshBb.min(),
-        meshBb.max() + vector(typDim, typDim, typDim)
-    );
+    shiftedBb.max() += vector::uniform(typDim);
 
     DebugInfo
         << "\nMesh" << nl
         << "   bounding box           : " << meshBb << nl
         << "   bounding box (shifted) : " << shiftedBb << nl
-        << "   typical dimension      : " << shiftedBb.typDim() << endl;
+        << "   typical dimension      : " << shiftedBb.avgDim() << endl;
 
-    indexedOctree<treeDataCell> oc
+    indexedOctree<treeDataCell> cellTree
     (
-        treeDataCell(false, fromMesh_, polyMesh::CELL_TETS),
+        treeDataCell(fromMesh_, polyMesh::CELL_TETS),
         shiftedBb,      // overall bounding box
         8,              // maxLevel
         10,             // leafsize
@@ -103,7 +99,7 @@ void Foam::meshToMesh0::calcAddressing()
 
     if (debug)
     {
-        oc.print(Pout, false, 0);
+        cellTree.print(Pout, false, 0);
     }
 
     cellAddresses
@@ -112,7 +108,7 @@ void Foam::meshToMesh0::calcAddressing()
         toMesh_.cellCentres(),
         fromMesh_,
         boundaryCell,
-        oc
+        cellTree
     );
 
     forAll(toMesh_.boundaryMesh(), patchi)
@@ -129,7 +125,7 @@ void Foam::meshToMesh0::calcAddressing()
                 toPatch.faceCentres(),
                 fromMesh_,
                 boundaryCell,
-                oc
+                cellTree
             );
         }
         else if
@@ -155,20 +151,18 @@ void Foam::meshToMesh0::calcAddressing()
             else
             {
                 treeBoundBox wallBb(fromPatch.localPoints());
+                treeBoundBox shiftedBb(wallBb);
+
                 scalar typDim =
                     wallBb.avgDim()/(2.0*sqrt(scalar(fromPatch.size())));
 
-                treeBoundBox shiftedBb
-                (
-                    wallBb.min(),
-                    wallBb.max() + vector(typDim, typDim, typDim)
-                );
+                shiftedBb.max() += vector::uniform(typDim);
 
                 // Note: allow more levels than in meshSearch. Assume patch
                 // is not as big as all boundary faces
-                indexedOctree<treeDataFace> oc
+                indexedOctree<treeDataFace> faceTree
                 (
-                    treeDataFace(false, fromPatch),
+                    treeDataFace(fromPatch),
                     shiftedBb,  // overall search domain
                     12,         // maxLevel
                     10,         // leafsize
@@ -180,11 +174,11 @@ void Foam::meshToMesh0::calcAddressing()
 
                 boundaryAddressing_[patchi].setSize(toPatch.size());
 
-                scalar distSqr = sqr(wallBb.mag());
+                scalar distSqr = wallBb.magSqr();
 
                 forAll(toPatch, toi)
                 {
-                    boundaryAddressing_[patchi][toi] = oc.findNearest
+                    boundaryAddressing_[patchi][toi] = faceTree.findNearest
                     (
                         centresToBoundary[toi],
                         distSqr
@@ -205,7 +199,7 @@ void Foam::meshToMesh0::cellAddresses
     const pointField& points,
     const fvMesh& fromMesh,
     const List<bool>& boundaryCell,
-    const indexedOctree<treeDataCell>& oc
+    const indexedOctree<treeDataCell>& cellTree
 ) const
 {
     // the implemented search method is a simple neighbour array search.
@@ -229,7 +223,7 @@ void Foam::meshToMesh0::cellAddresses
         const vector& p = points[toI];
 
         // set the sqr-distance
-        scalar distSqr = magSqr(p - centresFrom[curCell]);
+        scalar distSqr = p.distSqr(centresFrom[curCell]);
 
         bool closer;
 
@@ -242,8 +236,7 @@ void Foam::meshToMesh0::cellAddresses
 
             forAll(neighbours, nI)
             {
-                scalar curDistSqr =
-                    magSqr(p - centresFrom[neighbours[nI]]);
+                scalar curDistSqr = p.distSqr(centresFrom[neighbours[nI]]);
 
                 // search through all the neighbours.
                 // If the cell is closer, reset current cell and distance
@@ -270,7 +263,7 @@ void Foam::meshToMesh0::cellAddresses
             // the octree search to find it.
             if (boundaryCell[curCell])
             {
-                cellAddressing_[toI] = oc.findInside(p);
+                cellAddressing_[toI] = cellTree.findInside(p);
 
                 if (cellAddressing_[toI] != -1)
                 {
@@ -327,7 +320,7 @@ void Foam::meshToMesh0::cellAddresses
                 if (!found)
                 {
                     // Still not found so use the octree
-                    cellAddressing_[toI] = oc.findInside(p);
+                    cellAddressing_[toI] = cellTree.findInside(p);
 
                     if (cellAddressing_[toI] != -1)
                     {

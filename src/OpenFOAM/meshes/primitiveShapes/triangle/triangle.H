@@ -85,6 +85,12 @@ public:
         //- Default construct
         triPoints() = default;
 
+        //- The front() accessor (from FixedList) has no purpose
+        void front() = delete;
+
+        //- The back() accessor (from FixedList) has no purpose
+        void back() = delete;
+
 
     // Constructors
 
@@ -108,22 +114,22 @@ public:
     // Member Functions
 
         //- The first vertex
-        const point& a() const { return operator[](0); }
+        const point& a() const noexcept { return get<0>(); }
 
         //- The second vertex
-        const point& b() const { return operator[](1); }
+        const point& b() const noexcept { return get<1>(); }
 
         //- The third vertex
-        const point& c() const { return operator[](2); }
+        const point& c() const noexcept { return get<2>(); }
 
         //- The first vertex
-        point& a() { return operator[](0); }
+        point& a() noexcept { return get<0>(); }
 
         //- The second vertex
-        point& b() { return operator[](1); }
+        point& b() noexcept { return get<1>(); }
 
         //- The third vertex
-        point& c() { return operator[](2); }
+        point& c() noexcept { return get<2>(); }
 
         //- Flip triangle orientation by swapping second and third vertices
         inline void flip();
@@ -148,6 +154,15 @@ public:
 
         //- The enclosing (bounding) box for the triangle
         inline Pair<point> box() const;
+
+        //- Edge vector opposite point a(): from b() to c()
+        inline vector vecA() const;
+
+        //- Edge vector opposite point b(): from c() to a()
+        inline vector vecB() const;
+
+        //- Edge vector opposite point c(): from a() to b()
+        inline vector vecC() const;
 };
 
 
@@ -218,7 +233,14 @@ private:
 
     // Private Data
 
-        PointRef a_, b_, c_;
+        //- Reference to the first triangle point
+        PointRef a_;
+
+        //- Reference to the second triangle point
+        PointRef b_;
+
+        //- Reference to the third triangle point
+        PointRef c_;
 
 
    // Private Member Functions
@@ -316,30 +338,42 @@ public:
         );
 
 
-        // Properties
+    // Properties
 
-            //- Return centre (centroid)
-            inline Point centre() const;
+        //- Return centre (centroid)
+        inline Point centre() const;
 
-            //- The area normal - with magnitude equal to area of triangle
-            inline vector areaNormal() const;
+        //- The area normal - with magnitude equal to area of triangle
+        inline vector areaNormal() const;
 
-            //- Return unit normal
-            inline vector unitNormal() const;
+        //- Return unit normal
+        inline vector unitNormal() const;
 
-            //- Legacy name for areaNormal().
-            //  \deprecated(2018-06) Deprecated for new use
-            FOAM_DEPRECATED_FOR(2018-12, "areaNormal() or unitNormal()")
-            vector normal() const
-            {
-                return areaNormal();
-            }
+        //- Legacy name for areaNormal().
+        //  \deprecated(2018-06) Deprecated for new use
+        FOAM_DEPRECATED_FOR(2018-12, "areaNormal() or unitNormal()")
+        vector normal() const
+        {
+            return areaNormal();
+        }
 
-            //- The magnitude of the triangle area
-            inline scalar mag() const;
+        //- The magnitude of the triangle area
+        inline scalar mag() const;
 
-            //- The enclosing (bounding) box for the triangle
-            inline Pair<Point> box() const;
+        //- The enclosing (bounding) box for the triangle
+        inline Pair<Point> box() const;
+
+        //- Edge vector opposite point a(): from b() to c()
+        inline Point vecA() const;
+
+        //- Edge vector opposite point b(): from c() to a()
+        inline Point vecB() const;
+
+        //- Edge vector opposite point c(): from a() to b()
+        inline Point vecC() const;
+
+
+    // Properties
 
             //- Return circum-centre
             inline Point circumCentre() const;

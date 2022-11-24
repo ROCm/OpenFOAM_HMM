@@ -121,6 +121,20 @@ public:
 
     // Vector Operations
 
+        //- The length (L2-norm) of the vector
+        inline scalar mag() const;
+
+        //- The length (L2-norm) squared of the vector.
+        inline scalar magSqr() const;
+
+        //- The L2-norm distance from another vector.
+        //- The mag() of the difference.
+        inline scalar dist(const Vector2D<Cmpt>& v2) const;
+
+        //- The L2-norm distance squared from another vector.
+        //- The magSqr() of the difference.
+        inline scalar distSqr(const Vector2D<Cmpt>& v2) const;
+
         //- Normalise the vector by its magnitude
         //  For small magnitudes (less than ROOTVSMALL) set to zero.
         //  Will not be particularly useful for a vector of labels
@@ -129,7 +143,6 @@ public:
         //- Inplace removal of components that are collinear to the given
         //- unit vector.
         inline Vector2D<Cmpt>& removeCollinear(const Vector2D<Cmpt>& unitVec);
-
 
         //- Perp dot product (dot product with perpendicular vector)
         inline scalar perp(const Vector2D<Cmpt>& b) const;

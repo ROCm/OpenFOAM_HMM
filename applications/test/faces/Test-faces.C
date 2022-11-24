@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,6 +33,7 @@ Description
 
 #include "argList.H"
 #include "labelledTri.H"
+#include "edge.H"
 #include "faceList.H"
 #include "triFaceList.H"
 #include "pointList.H"
@@ -131,9 +132,24 @@ int main(int argc, char *argv[])
     testSign(f1, points2, testPoints);
     Info<< nl;
 
-    triFace t1({1, 2, 3});
+    // Initializer list
+    // triFace t1({1, 2, 3});
+
+    // Component-wise
+    {
+        edge e1(3, 2, 1);  // Inadvertent sort!!!
+        Info<< "edge:" << e1 << nl;
+    }
+
+    // Component-wise
+    triFace t1(1, 2, 3);
     Info<< "triFace:"; faceInfo(t1, points1); Info << nl;
     testSign(t1, points1, testPoints);
+
+    {
+        scalarField fld({0, 20, 20, 30});
+        Info<< "avg:" << t1.average(pointField::null(), fld) << nl;
+    }
 
     Info<< "triFace:"; faceInfo(t1, points2); Info << nl;
     testSign(t1, points2, testPoints);

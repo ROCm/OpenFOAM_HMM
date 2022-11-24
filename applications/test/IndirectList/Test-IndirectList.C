@@ -101,6 +101,9 @@ int main(int argc, char *argv[])
 
     printInfo(idl1);
 
+    Info<< "list() = ";
+    idl1.list().writeList(Info, 0) << endl;
+
     for (const label val : { 10, 30, 40, 50, 90, 80, 120 } )
     {
         testFind(val, idl1);

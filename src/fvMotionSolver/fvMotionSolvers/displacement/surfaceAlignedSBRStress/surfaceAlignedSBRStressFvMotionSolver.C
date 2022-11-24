@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -174,14 +174,14 @@ void Foam::surfaceAlignedSBRStressFvMotionSolver::calculateCellRot()
             if (hit[facei].hit())
             {
                 label rotCellId(-1);
-                const vector hitPoint = hit[facei].hitPoint();
+                const vector& hitPoint = hit[facei].point();
 
                 if (fvMesh_.isInternalFace(facei))
                 {
-                    const vector cCOne = Cc[fvMesh_.faceOwner()[facei]];
-                    const vector cCTwo = Cc[fvMesh_.faceNeighbour()[facei]];
+                    const point& ownCc = Cc[fvMesh_.faceOwner()[facei]];
+                    const point& nbrCc = Cc[fvMesh_.faceNeighbour()[facei]];
 
-                    if (mag(cCOne - hitPoint) < mag(cCTwo - hitPoint))
+                    if (hitPoint.distSqr(ownCc) < hitPoint.distSqr(nbrCc))
                     {
                         rotCellId = fvMesh_.faceOwner()[facei];
                     }

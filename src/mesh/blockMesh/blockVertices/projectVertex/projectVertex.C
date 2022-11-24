@@ -94,7 +94,7 @@ Foam::blockVertices::projectVertex::operator point() const
         geometry_,
         surfaces_,
         start,
-        scalarField(start.size(), magSqr(bb.span())),
+        scalarField(start.size(), bb.magSqr()),
         boundaryNear,
         boundaryConstraint
     );

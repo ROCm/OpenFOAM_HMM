@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -975,7 +975,7 @@ Foam::booleanSurface::booleanSurface
     {
         Pout<< "booleanSurface : found for point:" << outsidePoint
             << "  nearest face:" << minFacei
-            << "  nearest point:" << minHit.rawPoint()
+            << "  nearest point:" << minHit.point()
             << endl;
     }
 
@@ -1002,7 +1002,7 @@ Foam::booleanSurface::booleanSurface
         {
             FatalErrorInFunction
                 << "Face " << facei << " has not been reached by walking from"
-                << " nearest point " << minHit.rawPoint()
+                << " nearest point " << minHit.point()
                 << " nearest face " << minFacei << exit(FatalError);
         }
         else if (side[facei] == OUTSIDE)

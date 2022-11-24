@@ -114,13 +114,30 @@ Foam::label Foam::CircularBuffer<T>::find(const T& val, label pos) const
 
     if (pos < list1.size())
     {
+        // Can start search in first array
         i = list1.find(val, pos);
+
+        // Position for continued search in second array
+        pos = 0;
+    }
+    else
+    {
+        // Position for continued search in second array
+        pos -= list1.size();
     }
 
-    if (i < 0)
+    const auto list2 = this->array_two();
+
+    if (i < 0 && list2.size())
     {
-        // Not found - search the second list
-        return this->array_two().find(val, 0);
+        // Not yet found, continue search in second array
+        i = list2.find(val, pos);
+
+        if (i >= 0)
+        {
+            // As flat index into the entire buffer
+            i += list1.size();
+        }
     }
 
     return i;
@@ -137,6 +154,27 @@ void Foam::CircularBuffer<T>::reverse()
     {
         Foam::Swap(operator[](i), operator[](n-1-i));
     }
+}
+
+
+template<class T>
+Foam::List<T> Foam::CircularBuffer<T>::list() const
+{
+    const auto list1 = array_one();
+    const auto list2 = array_two();
+
+    List<T> result(list1.size() + list2.size());
+
+    if (list1.size())
+    {
+        result.slice(0, list1.size()) = list1;
+    }
+    if (list2.size())
+    {
+        result.slice(list1.size(), list1.size() + list2.size()) = list2;
+    }
+
+    return result;
 }
 
 

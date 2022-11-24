@@ -88,7 +88,7 @@ public:
             const polyMesh& mesh,
             const meshSearch& searchEngine,
             const word& axis,
-            const boundBox& bbox = boundBox::invertedBox
+            const boundBox& bbox = boundBox::null()
         );
 
         //- Construct from dictionary

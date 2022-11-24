@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -568,7 +568,7 @@ void Foam::slidingInterface::modifyMotionPoints(pointField& motionPoints) const
                             scalar cutOnSlave =
                                 (
                                     (
-                                        slaveCut.hitPoint()
+                                        slaveCut.point()
                                       - curSlaveLine.start()
                                     ) & curSlaveLine.vec()
                                 )/sqr(curSlaveLineMag);
@@ -599,7 +599,7 @@ void Foam::slidingInterface::modifyMotionPoints(pointField& motionPoints) const
                                 << " weight: " <<
                                 (
                                     (
-                                        slaveCut.missPoint()
+                                        slaveCut.point()
                                       - curSlaveLine.start()
                                     ) & curSlaveLine.vec()
                                 )/sqr(curSlaveLineMag)

@@ -179,28 +179,28 @@ inline void Foam::UPtrList<T>::transfer(UPtrList<T>& list)
 
 
 template<class T>
-inline T& Foam::UPtrList<T>::first()
+inline T& Foam::UPtrList<T>::front()
 {
     return this->operator[](0);
 }
 
 
 template<class T>
-inline const T& Foam::UPtrList<T>::first() const
+inline const T& Foam::UPtrList<T>::front() const
 {
     return this->operator[](0);
 }
 
 
 template<class T>
-inline T& Foam::UPtrList<T>::last()
+inline T& Foam::UPtrList<T>::back()
 {
     return this->operator[](this->size()-1);
 }
 
 
 template<class T>
-inline const T& Foam::UPtrList<T>::last() const
+inline const T& Foam::UPtrList<T>::back() const
 {
     return this->operator[](this->size()-1);
 }
@@ -214,16 +214,16 @@ inline void Foam::UPtrList<T>::resize(const label newLen)
 
 
 template<class T>
-inline void Foam::UPtrList<T>::append(T* ptr)
+inline void Foam::UPtrList<T>::push_back(T* ptr)
 {
-    ptrs_.append(ptr);
+    ptrs_.push_back(ptr);
 }
 
 
 template<class T>
-inline void Foam::UPtrList<T>::append(UPtrList<T>&& other)
+inline void Foam::UPtrList<T>::push_back(UPtrList<T>&& other)
 {
-    ptrs_.append(other.ptrs_);
+    ptrs_.push_back(other.ptrs_);
     other.ptrs_.clear();
 }
 

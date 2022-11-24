@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
 
     while (buf1.size() > 2)
     {
-        (void) buf1.pop_front();
+        buf1.pop_front();
     }
     report(buf1);
 
@@ -122,6 +122,8 @@ int main(int argc, char *argv[])
         }
         Info<< endl;
     }
+
+    Info<< nl << "list: " << flatOutput(buf2.list()) << nl;
 
     Info<< "normal: " << flatOutput(buf2) << nl;
     buf2.reverse();

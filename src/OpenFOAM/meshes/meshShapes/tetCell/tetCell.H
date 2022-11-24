@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -76,6 +76,15 @@ class tetCell
 
 
 public:
+
+    // Generated Methods
+
+        //- The front() accessor (from FixedList) has no purpose
+        void front() = delete;
+
+        //- The back() accessor (from FixedList) has no purpose
+        void back() = delete;
+
 
     // Constructors
 

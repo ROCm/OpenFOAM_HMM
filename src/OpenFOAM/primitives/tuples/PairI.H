@@ -103,7 +103,7 @@ inline Foam::Pair<T>::Pair(const T& f, const T& s, const bool doSort)
 template<class T>
 inline Foam::Pair<T>::Pair(const FixedList<T, 2>& list, const bool doSort)
 :
-    Pair<T>(list.first(), list.last(), doSort)
+    Pair<T>(list.template get<0>(), list.template get<1>(), doSort)
 {}
 
 
@@ -115,20 +115,6 @@ inline Foam::Pair<T>::Pair(Istream& is)
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class T>
-inline const T& Foam::Pair<T>::second() const noexcept
-{
-    return last();
-}
-
-
-template<class T>
-inline T& Foam::Pair<T>::second() noexcept
-{
-    return last();
-}
-
 
 template<class T>
 inline const T& Foam::Pair<T>::other(const T& val) const

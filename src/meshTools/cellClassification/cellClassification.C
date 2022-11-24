@@ -167,7 +167,7 @@ Foam::boolList Foam::cellClassification::markFaces
 
     indexedOctree<treeDataFace> faceTree
     (
-        treeDataFace(false, mesh_, allFaces),
+        treeDataFace(mesh_, allFaces),
         allBb,      // overall search domain
         8,          // maxLevel
         10,         // leafsize
@@ -211,7 +211,7 @@ Foam::boolList Foam::cellClassification::markFaces
             }
             else
             {
-                label facei = faceTree.shapes().faceLabels()[pHit.index()];
+                label facei = faceTree.shapes().objectIndex(pHit.index());
 
                 if (!cutFace[facei])
                 {
@@ -221,7 +221,7 @@ Foam::boolList Foam::cellClassification::markFaces
                 }
 
                 // Restart from previous endpoint
-                pt = pHit.hitPoint() + smallVec;
+                pt = pHit.point() + smallVec;
 
                 if (((pt-start) & edgeNormal) >= edgeMag)
                 {

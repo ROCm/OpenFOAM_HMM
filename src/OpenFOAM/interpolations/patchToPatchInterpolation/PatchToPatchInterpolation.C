@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,18 +27,11 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "PatchToPatchInterpolation.H"
-#include "demandDrivenData.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-template<class FromPatch, class ToPatch>
-const scalar
-PatchToPatchInterpolation<FromPatch, ToPatch>::directHitTol = 1e-5;
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -96,12 +90,12 @@ PatchToPatchInterpolation<FromPatch, ToPatch>::faceWeights() const
 template<class FromPatch, class ToPatch>
 void PatchToPatchInterpolation<FromPatch, ToPatch>::clearOut()
 {
-    deleteDemandDrivenData(pointAddressingPtr_);
-    deleteDemandDrivenData(pointWeightsPtr_);
-    deleteDemandDrivenData(pointDistancePtr_);
-    deleteDemandDrivenData(faceAddressingPtr_);
-    deleteDemandDrivenData(faceWeightsPtr_);
-    deleteDemandDrivenData(faceDistancePtr_);
+    pointAddressingPtr_.reset(nullptr);
+    pointWeightsPtr_.reset(nullptr);
+    pointDistancePtr_.reset(nullptr);
+    faceAddressingPtr_.reset(nullptr);
+    faceWeightsPtr_.reset(nullptr);
+    faceDistancePtr_.reset(nullptr);
 }
 
 

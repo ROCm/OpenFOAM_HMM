@@ -193,10 +193,7 @@ int main(int argc, char *argv[])
         meshBb[Pstream::myProcNo()] = List<treeBoundBox>
         (
             1,
-            treeBoundBox
-            (
-                boundBox(mesh.points(), false)
-            ).extend(rndGen, 1e-3)
+            treeBoundBox(mesh.points()).extend(rndGen, 1e-3)
         );
         Pstream::allGatherList(meshBb);
     }
@@ -243,7 +240,7 @@ int main(int argc, char *argv[])
         }
         else
         {
-            bbs = List<treeBoundBox>(1, treeBoundBox(boundBox::invertedBox));
+            bbs = List<treeBoundBox>(1, treeBoundBox::null());
         }
 
         dictionary dict;

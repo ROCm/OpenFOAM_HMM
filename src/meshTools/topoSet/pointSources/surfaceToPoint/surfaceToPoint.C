@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -101,7 +101,7 @@ void Foam::surfaceToPoint::combine(topoSet& set, const bool add) const
 
             pointIndexHit inter = querySurf.nearest(pt, span);
 
-            if (inter.hit() && (mag(inter.hitPoint() - pt) < nearDist_))
+            if (inter.hit() && inter.point().dist(pt) < nearDist_)
             {
                 addOrDelete(set, pointi, add);
             }

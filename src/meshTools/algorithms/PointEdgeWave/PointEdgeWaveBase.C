@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2012 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,14 +26,37 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "indexedOctree.H"
+#include "PointEdgeWave.H"
+#include "polyMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-defineTypeNameAndDebug(indexedOctreeName, 0);
+    defineTypeNameAndDebug(PointEdgeWaveBase, 0);
 }
+
+
+Foam::scalar Foam::PointEdgeWaveBase::propagationTol_ = 0.01;
+
+int Foam::PointEdgeWaveBase::dummyTrackData_ = 12345;
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::PointEdgeWaveBase::PointEdgeWaveBase
+(
+    const polyMesh& mesh
+)
+:
+    mesh_(mesh),
+    changedPoint_(mesh_.nPoints()),
+    changedEdge_(mesh_.nEdges()),
+    changedPoints_(mesh_.nPoints()),
+    changedEdges_(mesh_.nEdges()),
+    nUnvisitedPoints_(mesh_.nPoints()),
+    nUnvisitedEdges_(mesh_.nEdges())
+{}
 
 
 // ************************************************************************* //

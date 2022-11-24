@@ -141,7 +141,7 @@ Foam::isoSurfaceParams::isoSurfaceParams
     filter_(filter),
     snap_(true),
     mergeTol_(1e-6),
-    clipBounds_(boundBox::invertedBox)
+    clipBounds_()
 {}
 
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -89,19 +89,13 @@ void Foam::cuttingSurface::calcCellCuts
     );
 
 
-    boundBox cellBb;
-
     for (const label celli : cellCuts)
     {
-        cellBb.clear();
-        cellBb.add(pts, fvm.cellPoints(celli));
-
-        if (!cellBb.contains(nearest[celli].hitPoint()))
+        if (!fvm.cellBb(celli).contains(nearest[celli].point()))
         {
             cellCuts.unset(celli);
         }
     }
-
 
     if (debug)
     {

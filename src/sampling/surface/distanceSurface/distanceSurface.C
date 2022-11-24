@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -204,23 +204,18 @@ static bitSet simpleGeometricFilter
     // A deny filter. Initially false (accept everything)
     ignoreCells.resize(mesh.nCells());
 
-    bitSet pointFilter;
+    bitSet ignorePoints;
     if (WantPointFilter)
     {
-        // Create as accept filter. Initially false (deny everything)
-        pointFilter.resize(mesh.nPoints());
+        // Create deny filter
+        ignorePoints.resize(mesh.nPoints(), true);
     }
-
-    boundBox cellBb;
 
     forAll(nearest, celli)
     {
         const point& pt = nearest[celli].point();
 
-        const labelList& cPoints = mesh.cellPoints(celli);
-
-        cellBb.clear();
-        cellBb.add(mesh.points(), cPoints);
+        boundBox cellBb(mesh.cellBb(celli));
         cellBb.inflate(boundBoxInflate);
 
         if (!cellBb.contains(pt))
@@ -229,15 +224,12 @@ static bitSet simpleGeometricFilter
         }
         else if (WantPointFilter)
         {
-            // Good cell candidate, accept its points
-            pointFilter.set(cPoints);
+            // Good cell candidate, do not ignore its points
+            ignorePoints.unset(mesh.cellPoints(celli));
         }
     }
 
-    // Flip from accept to deny filter
-    pointFilter.flip();
-
-    return pointFilter;
+    return ignorePoints;
 }
 
 

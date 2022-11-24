@@ -1002,7 +1002,7 @@ int main(int argc, char *argv[])
 
                 if (intStreamPtr)
                 {
-                    intStreamPtr().write(hitInfo.hitPoint());
+                    intStreamPtr().write(hitInfo.point());
                 }
 
                 // Try and find from other side.
@@ -1014,7 +1014,7 @@ int main(int argc, char *argv[])
 
                     if (intStreamPtr)
                     {
-                        intStreamPtr().write(hitInfo2.hitPoint());
+                        intStreamPtr().write(hitInfo2.point());
                     }
                 }
             }
@@ -1044,7 +1044,7 @@ int main(int argc, char *argv[])
         //
         //        if (hitInfo.hit() && intStreamPtr)
         //        {
-        //            intStreamPtr().write(hitInfo.hitPoint());
+        //            intStreamPtr().write(hitInfo.point());
         //
         //            label nearFaceI = hitInfo.index();
         //            triPointRef nearTri(surf[nearFaceI].tri(surf.points()));

@@ -178,7 +178,7 @@ public:
         //- Alter the size of the underlying storage.
         //  The addressed size will be truncated if needed to fit, but will
         //  remain otherwise untouched.
-        //  Use this or reserve() in combination with append().
+        //  Use this or reserve() in combination with push_back().
         inline void setCapacity(const label len);
 
         //- Alter the size of the underlying storage,
@@ -245,47 +245,53 @@ public:
 
     // Edit
 
-            //- Swap content, independent of sizing parameter
-            template<int AnySizeMin>
-            inline void swap(DynamicList<T, AnySizeMin>& other);
+        //- Swap content, independent of sizing parameter
+        template<int AnySizeMin>
+        inline void swap(DynamicList<T, AnySizeMin>& other);
 
-            //- Transfer contents of the argument List into this.
-            inline void transfer(List<T>& list);
+        //- Transfer contents of the argument List into this.
+        inline void transfer(List<T>& list);
 
-            //- Transfer contents of any sized DynamicList into this.
-            template<int AnySizeMin>
-            inline void transfer(DynamicList<T, AnySizeMin>& list);
+        //- Transfer contents of any sized DynamicList into this.
+        template<int AnySizeMin>
+        inline void transfer(DynamicList<T, AnySizeMin>& list);
 
-            //- Copy append an element to the end of this list.
-            inline void append(const T& val);
+        //- Copy append an element to the end of this list.
+        inline void push_back(const T& val);
 
-            //- Move append an element
-            inline void append(T&& val);
+        //- Move append an element
+        inline void push_back(T&& val);
 
-            //- Append another list to the end of this list.
-            inline void append(const UList<T>& lst);
+        //- Copy append another list to the end of this list.
+        inline void push_back(const UList<T>& list);
 
-            //- Append a FixedList to the end of this list.
-            template<unsigned N>
-            inline void append(const FixedList<T, N>& lst);
+        //- Copy append a FixedList to the end of this list.
+        template<unsigned N>
+        inline void push_back(const FixedList<T, N>& list);
 
-            //- Append an initializer list at the end of this list.
-            inline void append(std::initializer_list<T> lst);
+        //- Copy append an initializer list at the end of this list.
+        inline void push_back(std::initializer_list<T> list);
 
-            //- Append a IndirectList at the end of this list
-            template<class Addr>
-            inline void append(const IndirectListBase<T, Addr>& lst);
+        //- Copy append an IndirectList at the end of this list
+        template<class Addr>
+        inline void push_back(const IndirectListBase<T, Addr>& lst);
 
-            //- Move append list
-            inline void append(List<T>&& lst);
+        //- Move append list
+        inline void push_back(List<T>&& list);
 
-            //- Move append list
-            template<int AnySizeMin>
-            inline void append(DynamicList<T, AnySizeMin>&& list);
+        //- Move append list
+        template<int AnySizeMin>
+        inline void push_back(DynamicList<T, AnySizeMin>&& list);
 
-            //- Append an element if not already in the list.
-            //  \return the change in list length
-            inline label appendUniq(const T& val);
+        //- Append an element if not already in the list.
+        //  \return the change in list length
+        inline label push_uniq(const T& val);
+
+        //- Reduce size by 1 or more elements. Can be called on an empty list.
+        inline void pop_back(label n = 1);
+
+
+        // Edit
 
             //- Remove and return the last element. Fatal on an empty list.
             inline T remove();
@@ -381,6 +387,51 @@ public:
             Ostream& os,
             const DynamicList<T, SizeMin>& list
         );
+
+
+    // Housekeeping
+
+        //- Copy append an element to the end of this list.
+        //FOAM_DEPRECATED_FOR(2022-10, "push_back()")
+        void append(const T& val) { this->push_back(val); }
+
+        //- Move append an element
+        //FOAM_DEPRECATED_FOR(2022-10, "push_back()")
+        void append(T&& val) { this->push_back(std::move(val)); }
+
+        //- Append another list to the end of this list.
+        void append(const UList<T>& list) { this->push_back(list); }
+
+        //- Append a FixedList to the end of this list.
+        //FOAM_DEPRECATED_FOR(2022-10, "push_back()")
+        template<unsigned N>
+        void append(const FixedList<T, N>& list) { this->push_back(list); }
+
+        //- Append an initializer list at the end of this list.
+        //FOAM_DEPRECATED_FOR(2022-10, "push_back()")
+        void append(std::initializer_list<T> list) { this->push_back(list); }
+
+        //- Append a IndirectList at the end of this list
+        template<class Addr>
+        void append(const IndirectListBase<T, Addr>& list)
+        {
+            this->push_back(list);
+        }
+
+        //- Move append list
+        //FOAM_DEPRECATED_FOR(2022-10, "push_back()")
+        void append(List<T>&& list) { this->push_back(std::move(list)); }
+
+        //- Move append list
+        template<int AnySizeMin>
+        void append(DynamicList<T, AnySizeMin>&& list)
+        {
+            this->push_back(std::move(list));
+        }
+
+        //- Append an element if not already in the list.
+        //FOAM_DEPRECATED_FOR(2022-10, "push_uniq()")
+        label appendUniq(const T& val) { return this->push_uniq(val); }
 };
 
 

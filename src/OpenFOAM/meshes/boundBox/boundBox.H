@@ -46,6 +46,7 @@ SeeAlso
 #include "pointField.H"
 #include "faceList.H"
 #include "Pair.H"
+#include "triangleFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,6 +56,7 @@ namespace Foam
 // Forward Declarations
 class boundBox;
 class plane;
+class Random;
 template<class T> class MinMax;
 
 Istream& operator>>(Istream& is, boundBox& bb);
@@ -72,16 +74,41 @@ class boundBox
         //- Minimum and maximum points describing the bounding box
         point min_, max_;
 
+
+protected:
+
+    // Protected Member Functions
+
+        //- Test for overlap of box and box (inclusive check)
+        inline static bool box_box_overlaps
+        (
+            const point& minA,  // boxA (min)
+            const point& maxA,  // boxA (max)
+            const point& minB,  // boxB (min)
+            const point& maxB   // boxB (max)
+        );
+
+        //- Test for overlap of box and boundingSphere (centre + sqr(radius))
+        //  Note: ordering of corners is irrelevant
+        inline static bool box_sphere_overlaps
+        (
+            const point& corner0,   // box corner
+            const point& corner1,   // box corner
+            const point& centre,    // sphere centre
+            const scalar radiusSqr  // sqr(radius)
+        );
+
+
 public:
 
     // Static Data Members
 
-        //- Bits used for (x/y/z) direction encoding.
+        //- Bits used for (x/y/z) directional encoding.
         enum directionBit : direction
         {
-            XDIR = 0x1,  //!< 1: x-direction (vector component 0)
-            YDIR = 0x2,  //!< 2: y-direction (vector component 1)
-            ZDIR = 0x4   //!< 4: z-direction (vector component 2)
+            XDIR = 1,  //!< 1: x-direction. Same as (1 << vector::X)
+            YDIR = 2,  //!< 2: y-direction. Same as (1 << vector::Y)
+            ZDIR = 4   //!< 4: z-direction. Same as (1 << vector::Z)
         };
 
         //- A large boundBox: min/max == -/+ ROOTVGREAT
@@ -90,11 +117,30 @@ public:
         //- A large inverted boundBox: min/max == +/- ROOTVGREAT
         static const boundBox invertedBox;
 
-        //- Faces to point addressing, as per a 'hex' cell
-        static const faceList faces;
-
         //- The unit normal per face
         static const FixedList<vector, 6> faceNormals;
+
+
+    // Static Methods
+
+        //- The null boundBox is the same as an inverted box
+        static const boundBox& null() noexcept
+        {
+            return invertedBox;
+        }
+
+        //- The boundBox faces as a hexCell, using hexCorner points.
+        //- Same as hexCell::modelFaces()
+        static const Foam::faceList& hexFaces();
+
+        //- Number of points for boundBox and HEX
+        static constexpr label nPoints() noexcept { return 8; }
+
+        //- Number of edges for boundBox and HEX
+        static constexpr label nEdges() noexcept { return 12; }
+
+        //- Number of faces for boundBox and HEX
+        static constexpr label nFaces() noexcept { return 6; }
 
 
     // Standard (Generated) Methods
@@ -190,8 +236,11 @@ public:
             //- The bounding box span (from minimum to maximum)
             inline vector span() const;
 
-            //- The magnitude of the bounding box span
+            //- The magnitude/length of the bounding box diagonal
             inline scalar mag() const;
+
+            //- The magnitude/length squared of bounding box diagonal
+            inline scalar magSqr() const;
 
             //- The volume of the bound box
             inline scalar volume() const;
@@ -204,6 +253,12 @@ public:
 
             //- Average length/height/width dimension
             inline scalar avgDim() const;
+
+            //- Direction (X/Y/Z) of the smallest span (for empty box: 0)
+            inline direction minDir() const;
+
+            //- Direction (X/Y/Z) of the largest span (for empty box: 0)
+            inline direction maxDir() const;
 
             //- Count the number of positive, non-zero dimensions.
             //  \return
@@ -219,7 +274,10 @@ public:
             inline point hexCorner() const;
 
             //- Corner points in an order corresponding to a 'hex' cell
-            tmp<pointField> points() const;
+            tmp<pointField> hexCorners() const;
+
+            //- Corner points in an order corresponding to a 'hex' cell
+            tmp<pointField> points() const { return hexCorners(); }
 
             //- Face midpoints
             tmp<pointField> faceCentres() const;
@@ -247,6 +305,12 @@ public:
 
             //- Extend to include the point.
             inline void add(const point& pt);
+
+            //- Extend to include two additional points.
+            inline void add(const point& pt0, const point& pt1);
+
+            //- Extend to include two additional points.
+            inline void add(const Pair<point>& points);
 
             //- Extend to include the points.
             inline void add(const UList<point>& points);
@@ -288,6 +352,15 @@ public:
             //- Expand box by factor*mag(span) in all dimensions
             inline void inflate(const scalar factor);
 
+            //- Expand box slightly by expanding all dimensions with
+            //- factor*span*(random 0-1) and guarantees
+            //- factor*mag(span) minimum width in any direction
+            void inflate(Random& rndGen, const scalar factor);
+
+            //- As per two parameter version but with additional
+            //- grow() by given amount in each dimension
+            void inflate(Random& r, const scalar factor, const scalar delta);
+
 
         // Parallel
 
@@ -305,6 +378,12 @@ public:
             //  \note the results are unreliable when plane coincides almost
             //  exactly with a box face
             bool intersects(const plane& pln) const;
+
+            //- Does triangle intersect this bounding box
+            //- or is contained within this bounding box.
+            //  \note results may be unreliable when it coincides almost
+            //  exactly with a box face
+            bool intersects(const triPointRef& tri) const;
 
             //- Overlaps/touches boundingBox?
             inline bool overlaps(const boundBox& bb) const;

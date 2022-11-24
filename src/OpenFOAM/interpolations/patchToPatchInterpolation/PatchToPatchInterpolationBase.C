@@ -25,14 +25,19 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "dynamicIndexedOctree.H"
+#include "PatchToPatchInterpolation.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-defineTypeNameAndDebug(dynamicIndexedOctreeName, 0);
+    defineTypeNameAndDebug(PatchToPatchInterpolationBase, 0);
 }
+
+
+Foam::scalar Foam::PatchToPatchInterpolationBase::projectionTol_ = 0.05;
+
+const Foam::scalar Foam::PatchToPatchInterpolationBase::directHitTol = 1e-5;
 
 
 // ************************************************************************* //

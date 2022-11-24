@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -106,20 +106,20 @@ public:
         ILList(Istream& is, const INew& inew);
 
 
-    //- Destructor
+    //- Destructor. Calls clear()
     ~ILList();
 
 
     // Member Functions
 
-        //- Remove the head element specified from the list and delete it
-        bool eraseHead();
+        //- Clear the contents of the list
+        void clear();
+
+        //- Remove first element(s) from the list (deletes pointers)
+        void pop_front(label n = 1);
 
         //- Remove the specified element from the list and delete it
         bool erase(T* item);
-
-        //- Clear the contents of the list
-        void clear();
 
         //- Transfer the contents of the argument into this List
         //- and annul the argument list.

@@ -1296,11 +1296,11 @@ void Foam::snappySnapDriver::detectNearSurfaces
     //        {
     //            if (hit1[i].hit())
     //            {
-    //                str.writeLine(start[i], hit1[i].hitPoint());
+    //                str.writeLine(start[i], hit1[i].point());
     //            }
     //            if (hit2[i].hit())
     //            {
-    //                str.writeLine(start[i], hit2[i].hitPoint());
+    //                str.writeLine(start[i], hit2[i].point());
     //            }
     //        }
     //    }
@@ -1331,7 +1331,7 @@ void Foam::snappySnapDriver::detectNearSurfaces
     //            {
     //                if (hit1[rayi].hit())
     //                {
-    //                    const point& pt = hit1[rayi].hitPoint();
+    //                    const point& pt = hit1[rayi].point();
     //                    const vector& n = normal1[rayi];
     //
     //                    if (!hasNormal)
@@ -1363,7 +1363,7 @@ void Foam::snappySnapDriver::detectNearSurfaces
     //                }
     //                if (hit2[rayi].hit())
     //                {
-    //                    const point& pt = hit2[rayi].hitPoint();
+    //                    const point& pt = hit2[rayi].point();
     //                    const vector& n = normal2[rayi];
     //
     //                    if (!hasNormal)
@@ -1498,12 +1498,12 @@ void Foam::snappySnapDriver::detectNearSurfaces
             //            planarCos,
             //            nearestPoint[pointi],
             //            nearestNormal[pointi],
-            //            hit1[pointi].hitPoint(),
+            //            hit1[pointi].point(),
             //            normal1[pointi]
             //        )
             //    )
             //    {
-            //        disp[pointi] = hit1[pointi].hitPoint()-pt;
+            //        disp[pointi] = hit1[pointi].point()-pt;
             //        override = true;
             //    }
             //}
@@ -1516,12 +1516,12 @@ void Foam::snappySnapDriver::detectNearSurfaces
             //            planarCos,
             //            nearestPoint[pointi],
             //            nearestNormal[pointi],
-            //            hit2[pointi].hitPoint(),
+            //            hit2[pointi].point(),
             //            normal2[pointi]
             //        )
             //    )
             //    {
-            //        disp[pointi] = hit2[pointi].hitPoint()-pt;
+            //        disp[pointi] = hit2[pointi].point()-pt;
             //        override = true;
             //    }
             //}
@@ -1533,9 +1533,9 @@ void Foam::snappySnapDriver::detectNearSurfaces
                     meshRefiner_.isGap
                     (
                         planarCos,
-                        hit1[pointi].hitPoint(),
+                        hit1[pointi].point(),
                         normal1[pointi],
-                        hit2[pointi].hitPoint(),
+                        hit2[pointi].point(),
                         normal2[pointi]
                     )
                 )
@@ -1545,12 +1545,11 @@ void Foam::snappySnapDriver::detectNearSurfaces
 
                     if (gapStr)
                     {
-                        const point& intPt = hit2[pointi].hitPoint();
-                        gapStr().writeLine(pt, intPt);
+                        gapStr().writeLine(pt, hit2[pointi].point());
                     }
 
                     // Choose hit2 : nearest to end point (so inside the domain)
-                    disp[pointi] = hit2[pointi].hitPoint()-pt;
+                    disp[pointi] = hit2[pointi].point()-pt;
                     override = true;
                 }
             }
@@ -1643,12 +1642,12 @@ void Foam::snappySnapDriver::detectNearSurfaces
                     //            planarCos,
                     //            nearestPoint[pointi],
                     //            nearestNormal[pointi],
-                    //            hit1[i].hitPoint(),
+                    //            hit1[i].point(),
                     //            normal1[i]
                     //        )
                     //    )
                     //    {
-                    //        disp[pointi] = hit1[i].hitPoint()-pt;
+                    //        disp[pointi] = hit1[i].point()-pt;
                     //        override = true;
                     //    }
                     //}
@@ -1661,12 +1660,12 @@ void Foam::snappySnapDriver::detectNearSurfaces
                     //            planarCos,
                     //            nearestPoint[pointi],
                     //            nearestNormal[pointi],
-                    //            hit2[i].hitPoint(),
+                    //            hit2[i].point(),
                     //            normal2[i]
                     //        )
                     //    )
                     //    {
-                    //        disp[pointi] = hit2[i].hitPoint()-pt;
+                    //        disp[pointi] = hit2[i].point()-pt;
                     //        override = true;
                     //    }
                     //}
@@ -1678,20 +1677,19 @@ void Foam::snappySnapDriver::detectNearSurfaces
                             meshRefiner_.isGap
                             (
                                 planarCos,
-                                hit1[i].hitPoint(),
+                                hit1[i].point(),
                                 normal1[i],
-                                hit2[i].hitPoint(),
+                                hit2[i].point(),
                                 normal2[i]
                             )
                         )
                         {
                             if (gapStr)
                             {
-                                const point& intPt = hit2[i].hitPoint();
-                                gapStr().writeLine(pt, intPt);
+                                gapStr().writeLine(pt, hit2[i].point());
                             }
 
-                            disp[pointi] = hit2[i].hitPoint()-pt;
+                            disp[pointi] = hit2[i].point()-pt;
                             override = true;
                         }
                     }
@@ -1758,7 +1756,7 @@ void Foam::snappySnapDriver::calcNearestSurface
             if (hitInfo[i].hit())
             {
                 label pointi = zonePointIndices[i];
-                nearestPoint[pointi] = hitInfo[i].hitPoint();
+                nearestPoint[pointi] = hitInfo[i].point();
                 nearestNormal[pointi] = hitNormal[i];
             }
         }
@@ -1784,7 +1782,7 @@ void Foam::snappySnapDriver::calcNearestSurface
         {
             label pointi = zonePointIndices[i];
 
-            patchDisp[pointi] = hitInfo[i].hitPoint() - localPoints[pointi];
+            patchDisp[pointi] = hitInfo[i].point() - localPoints[pointi];
             minSnapDist[pointi] = mag(patchDisp[pointi]);
             snapSurf[pointi] = hitSurface[i];
         }
@@ -1958,7 +1956,7 @@ Foam::vectorField Foam::snappySnapDriver::calcNearestSurface
                 {
                     if (hitInfo[pointi].hit())
                     {
-                        nearestPoint[pointi] = hitInfo[pointi].hitPoint();
+                        nearestPoint[pointi] = hitInfo[pointi].point();
                         nearestNormal[pointi] = hitNormal[pointi];
                     }
                 }
@@ -1980,7 +1978,7 @@ Foam::vectorField Foam::snappySnapDriver::calcNearestSurface
                 if (hitInfo[pointi].hit())
                 {
                     patchDisp[pointi] =
-                        hitInfo[pointi].hitPoint()
+                        hitInfo[pointi].point()
                       - localPoints[pointi];
 
                     snapSurf[pointi] = hitSurface[pointi];

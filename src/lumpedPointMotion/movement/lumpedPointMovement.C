@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -435,25 +435,23 @@ void Foam::lumpedPointMovement::setPatchControl
     }
 
 
-    treeDataPoint treePoints
-    (
-        lumpedCentres0,
-        subsetPointIds.sortedToc(),
-        subsetPointIds.size()
-    );
-
-
     treeBoundBox bb(lumpedCentres0);
     bb.inflate(0.01);
 
     indexedOctree<treeDataPoint> ppTree
     (
-        treePoints,
+        treeDataPoint
+        (
+            lumpedCentres0,
+            subsetPointIds.sortedToc(),
+            subsetPointIds.size()   // subset is optional/required
+        ),
         bb,     // overall search domain
         8,      // maxLevel
         10,     // leafsize
         3.0     // duplicity
     );
+    const auto& treePoints = ppTree.shapes();
 
     const scalar searchDistSqr(sqr(GREAT));
 
@@ -464,7 +462,7 @@ void Foam::lumpedPointMovement::setPatchControl
 
         // Store the original pointId, not subset id
         faceToPoint[patchFacei] =
-            treePoints.pointLabel
+            treePoints.objectIndex
             (
                 ppTree.findNearest(fc, searchDistSqr).index()
             );
@@ -655,24 +653,23 @@ void Foam::lumpedPointMovement::setInterpolator
         }
     }
 
-    treeDataPoint treePoints
-    (
-        lumpedCentres0,
-        subsetPointIds.sortedToc(),
-        subsetPointIds.size()
-    );
-
     treeBoundBox bb(lumpedCentres0);
     bb.inflate(0.01);
 
     indexedOctree<treeDataPoint> ppTree
     (
-        treePoints,
+        treeDataPoint
+        (
+            lumpedCentres0,
+            subsetPointIds.sortedToc(),
+            subsetPointIds.size()   // subset is optional/required
+        ),
         bb,     // overall search domain
         8,      // maxLevel
         10,     // leafsize
         3.0     // duplicity
     );
+    const auto& treePoints = ppTree.shapes();
 
 
     // Searching
@@ -692,7 +689,7 @@ void Foam::lumpedPointMovement::setInterpolator
 
         // Nearest (original) point id
         const label nearest =
-            treePoints.pointLabel
+            treePoints.objectIndex
             (
                 ppTree.findNearest(ptOnMesh, searchDistSqr).index()
             );

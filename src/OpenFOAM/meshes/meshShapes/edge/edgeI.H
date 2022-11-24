@@ -58,7 +58,7 @@ inline Foam::edge::edge(const labelPair& pair)
 
 inline Foam::edge::edge(const FixedList<label, 2>& list)
 :
-    labelPair(list.first(), list.last())
+    labelPair(list.get<0>(), list.get<1>())
 {}
 
 
@@ -80,7 +80,7 @@ inline Foam::edge::edge
     const FixedList<label, 2>& indices
 )
 :
-    labelPair(list[indices.first()], list[indices.last()])
+    labelPair(list[indices.get<0>()], list[indices.get<1>()])
 {}
 
 
@@ -104,7 +104,7 @@ inline Foam::label Foam::edge::maxVertex() const
 }
 
 
-inline bool Foam::edge::valid() const
+inline bool Foam::edge::good() const noexcept
 {
     return (first() != second() && first() >= 0 && second() >= 0);
 }
@@ -140,7 +140,7 @@ inline Foam::label Foam::edge::which(const label pointLabel) const
 }
 
 
-inline bool Foam::edge::connects(const edge& other) const
+inline bool Foam::edge::connected(const edge& other) const
 {
     return (other.found(first()) || other.found(second()));
 }

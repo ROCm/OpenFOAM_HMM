@@ -160,7 +160,7 @@ void Foam::shellSurfaces::setAndCheckLevels
 void Foam::shellSurfaces::orient()
 {
     // Determine outside point.
-    boundBox overallBb = boundBox::invertedBox;
+    boundBox overallBb;
 
     bool hasSurface = false;
 
@@ -295,7 +295,7 @@ void Foam::shellSurfaces::findHigherLevel
                 const label minDistI = findLower
                 (
                     distances,
-                    mag(nearInfo[i].hitPoint()-pt[pointi])
+                    nearInfo[i].point().dist(pt[pointi])
                 );
 
                 // pt is inbetween shell[minDistI] and shell[minDistI+1]
@@ -526,7 +526,7 @@ void Foam::shellSurfaces::findLevel
                 label minDistI = findLower
                 (
                     distances,
-                    mag(nearInfo[i].hitPoint()-candidates[i])
+                    nearInfo[i].point().dist(candidates[i])
                 );
 
                 label pointI = candidateMap[i];

@@ -35,7 +35,7 @@ Foam::UILList<LListBase, T>::UILList(const UILList<LListBase, T>& lst)
 {
     for (auto iter = lst.cbegin(); iter != lst.cend(); ++iter)
     {
-        this->append(&(*iter));
+        this->push_back(&(*iter));
     }
 }
 
@@ -49,7 +49,7 @@ void Foam::UILList<LListBase, T>::operator=(const UILList<LListBase, T>& lst)
 
     for (auto iter = lst.cbegin(); iter != lst.cend(); ++iter)
     {
-        this->append(&(*iter));
+        this->push_back(&(*iter));
     }
 }
 

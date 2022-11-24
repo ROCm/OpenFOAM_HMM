@@ -25,13 +25,13 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "FaceCellWave.H"
+#include "dynamicIndexedOctree.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(FaceCellWaveName, 0);
+    defineTypeNameAndDebug(dynamicIndexedOctreeBase, 0);
 }
 
 

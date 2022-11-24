@@ -49,59 +49,35 @@ Foam::label Foam::cell::opposingFaceLabel
 
     const face& masterFace = meshFaces[masterFaceLabel];
 
-    const labelList& curFaceLabels = *this;
-
     label oppositeFaceLabel = -1;
 
-    forAll(curFaceLabels, facei)
+    for (const label facei : *this)
     {
         // Compare the face with the master
-        const face& curFace = meshFaces[curFaceLabels[facei]];
+        const face& f = meshFaces[facei];
 
         // Skip the master face
         if
         (
-            curFaceLabels[facei] != masterFaceLabel
-         && curFace.size() == masterFace.size()
+            facei != masterFaceLabel
+         && f.size() == masterFace.size()
+         && !f.connected(masterFace)
         )
         {
-            bool sharedPoint = false;
-
-            // Compare every vertex of the current face against the
-            // vertices of the master face
-            forAll(curFace, pointi)
+            // Not connected : this is an opposite face
+            if (oppositeFaceLabel == -1)
             {
-                const label l = curFace[pointi];
-
-                forAll(masterFace, masterPointi)
-                {
-                    if (masterFace[masterPointi] == l)
-                    {
-                        sharedPoint = true;
-                        break;
-                    }
-                }
-
-                if (sharedPoint) break;
+                // Not previously found
+                oppositeFaceLabel = facei;
             }
-
-            // If no points are shared, this is the opposite face
-            if (!sharedPoint)
+            else
             {
-                if (oppositeFaceLabel == -1)
-                {
-                    // Found opposite face
-                    oppositeFaceLabel = curFaceLabels[facei];
-                }
-                else
-                {
-                    // There has already been an opposite face.
-                    // Non-prismatic cell
-                    Info<< "Multiple faces not sharing vertex: "
-                        << oppositeFaceLabel << " and "
-                        << curFaceLabels[facei] << endl;
-                    return -1;
-                }
+                // There has already been an opposite face.
+                // Non-prismatic cell
+                Info<< "Multiple faces not sharing vertex: "
+                    << oppositeFaceLabel << " and "
+                    << facei << endl;
+                return -1;
             }
         }
     }

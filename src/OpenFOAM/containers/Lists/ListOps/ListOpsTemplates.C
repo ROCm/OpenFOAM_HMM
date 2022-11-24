@@ -1097,7 +1097,7 @@ void Foam::ListOps::uniqueEqOp<T>::operator()
             {
                 if (!x.found(val))
                 {
-                    x.append(val);
+                    x.push_back(val);
                 }
             }
         }

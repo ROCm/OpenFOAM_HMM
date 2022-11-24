@@ -31,7 +31,7 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::DLListBase::prepend(DLListBase::link* item)
+void Foam::DLListBase::push_front(DLListBase::link* item)
 {
     if (!item)
     {
@@ -56,7 +56,7 @@ void Foam::DLListBase::prepend(DLListBase::link* item)
 }
 
 
-void Foam::DLListBase::append(DLListBase::link* item)
+void Foam::DLListBase::push_back(DLListBase::link* item)
 {
     if (!item)
     {
@@ -161,14 +161,16 @@ bool Foam::DLListBase::swapDown(DLListBase::link* a)
 
 Foam::DLListBase::link* Foam::DLListBase::removeHead()
 {
-    --size_;
-
     if (!first_)
     {
         FatalErrorInFunction
             << "remove from empty list"
             << abort(FatalError);
+
+        // return nullptr;
     }
+
+    --size_;
 
     DLListBase::link *ret = first_;
     first_ = first_->next_;

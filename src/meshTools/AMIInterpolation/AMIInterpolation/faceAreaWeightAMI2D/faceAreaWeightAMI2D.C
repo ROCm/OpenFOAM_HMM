@@ -337,9 +337,6 @@ bool Foam::faceAreaWeightAMI2D::calculate
     // Find an approximate face length scale
     const scalar lf(Cbb_*Foam::sqrt(gAverage(srcMagSf_)));
 
-    // Expansion to apply to source face bounding box
-    const vector d(lf*vector::one);
-
     if (validSize)
     {
         // Create the tgt tree
@@ -371,8 +368,7 @@ bool Foam::faceAreaWeightAMI2D::calculate
             const face& srcFace = src[srcFacei];
 
             treeBoundBox srcFaceBb(srcPoints, srcFace);
-            srcFaceBb.min() -= d;
-            srcFaceBb.max() += d;
+            srcFaceBb.grow(lf);
 
             const labelList tgtFaces
             (

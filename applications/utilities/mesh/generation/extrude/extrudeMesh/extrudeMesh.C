@@ -890,11 +890,10 @@ int main(int argc, char *argv[])
 
 
     const boundBox& bb = mesh.bounds();
-    const vector span = bb.span();
     const scalar mergeDim = mergeTol * bb.minDim();
 
     Info<< "Mesh bounding box : " << bb << nl
-        << "        with span : " << span << nl
+        << "        with span : " << bb.span() << nl
         << "Merge distance    : " << mergeDim << nl
         << endl;
 

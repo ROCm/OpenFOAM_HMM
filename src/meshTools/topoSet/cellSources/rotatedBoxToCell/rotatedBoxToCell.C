@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,7 @@ License
 
 #include "rotatedBoxToCell.H"
 #include "polyMesh.H"
-#include "cellModel.H"
+#include "hexCell.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -71,22 +71,18 @@ Foam::topoSetSource::addToUsageTable Foam::rotatedBoxToCell::usage_
 void Foam::rotatedBoxToCell::combine(topoSet& set, const bool add) const
 {
     // Define a cell for the box
-    pointField boxPoints(8);
-    boxPoints[0] = origin_;
-    boxPoints[1] = origin_ + i_;
-    boxPoints[2] = origin_ + i_ + j_;
-    boxPoints[3] = origin_ + j_;
-    boxPoints[4] = origin_ + k_;
-    boxPoints[5] = origin_ + k_ + i_;
-    boxPoints[6] = origin_ + k_ + i_ + j_;
-    boxPoints[7] = origin_ + k_ + j_;
-
-    labelList boxVerts(identity(8));
-
-    const cellModel& hex = cellModel::ref(cellModel::HEX);
+    pointField boxPoints(8, origin_);
+    // boxPoints[0] = origin_;
+    boxPoints[1] += i_;
+    boxPoints[2] += i_ + j_;
+    boxPoints[3] += j_;
+    boxPoints[4] += k_;
+    boxPoints[5] += k_ + i_;
+    boxPoints[6] += k_ + i_ + j_;
+    boxPoints[7] += k_ + j_;
 
     // Get outwards pointing faces.
-    faceList boxFaces(cellShape(hex, boxVerts).faces());
+    faceList boxFaces(hexCell::modelFaces());
 
     // Precalculate normals
     vectorField boxFaceNormals(boxFaces.size());

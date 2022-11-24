@@ -133,7 +133,7 @@ Foam::cellCentreSet::cellCentreSet
         searchEngine,
         dict.getOrDefault<word>("axis", "xyz")
     ),
-    bounds_(dict.getOrDefault("bounds", boundBox::invertedBox))
+    bounds_(dict.getOrDefault("bounds", boundBox::null()))
 {
     genSamples();
 }

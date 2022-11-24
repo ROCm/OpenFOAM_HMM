@@ -98,7 +98,7 @@ public:
         typedef const T& const_reference;
 
 
-    // Forward declaration of STL iterators
+    // Forward Declaration (iterators)
 
         class iterator;
         class const_iterator;
@@ -118,7 +118,7 @@ public:
         //- Construct and add initial item pointer
         explicit LPtrList(T* item)
         {
-            this->prepend(item);
+            this->push_front(item);
         }
 
         //- Copy construct by using 'clone()' for each element
@@ -135,39 +135,38 @@ public:
         explicit LPtrList(Istream& is);
 
 
-    //- Destructor
+    //- Destructor. Calls clear()
     ~LPtrList();
 
 
     // Member Functions
 
         //- The first entry in the list
-        T& first()
+        T& front()
         {
-            return *(parent_type::first());
+            return *(parent_type::front());
         }
 
         //- The first entry in the list (const access)
-        const T& first() const
+        const T& front() const
         {
-            return *(parent_type::first());
+            return *(parent_type::front());
         }
 
         //- The last entry in the list
-        T& last()
+        T& back()
         {
-            return *(parent_type::last());
+            return *(parent_type::back());
         }
 
         //- The last entry in the list (const access)
-        const T& last() const
+        const T& back() const
         {
-            return *(parent_type::last());
+            return *(parent_type::back());
         }
 
-
-        //- Remove the head element from the list and delete the pointer
-        bool eraseHead();
+        //- Remove first element(s) from the list (deletes pointers)
+        void pop_front(label n = 1);
 
         //- Clear the contents of the list
         void clear();
@@ -177,7 +176,7 @@ public:
         void transfer(LPtrList<LListBase, T>& lst);
 
 
-    // Member operators
+    // Member Operators
 
         //- Copy assign by using 'clone()' for each element
         void operator=(const LPtrList<LListBase, T>& lst);
@@ -428,6 +427,25 @@ public:
             Ostream& os,
             const LPtrList<LListBase, T>& list
         );
+
+
+    // Housekeeping
+
+        //- The first entry in the list
+        //FOAM_DEPRECATED_FOR(2022-10, "front()")
+        T& first() { return front(); }
+
+        //- The first entry in the list (const access)
+        //FOAM_DEPRECATED_FOR(2022-10, "front()")
+        const T& first() const { return front(); }
+
+        //- The last entry in the list
+        //FOAM_DEPRECATED_FOR(2022-10, "back()")
+        T& last() { return back(); }
+
+        //- The last entry in the list (const access)
+        //FOAM_DEPRECATED_FOR(2022-10, "back()")
+        const T& last() const { return back(); }
 };
 
 

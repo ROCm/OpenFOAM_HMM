@@ -125,7 +125,7 @@ public:
             const word& surfaceType,
             const word& surfaceName,
             const bool triangulate = true,
-            const boundBox& bounds = boundBox::invertedBox
+            const boundBox& bounds = boundBox::null()
         );
 
         //- Construct from dictionary

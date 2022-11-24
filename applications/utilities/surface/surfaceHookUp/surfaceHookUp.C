@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -166,11 +166,7 @@ void createBoundaryEdgeTrees
 
         // Boundary edges
         treeBoundaryEdges[surfI] =
-            identity
-            (
-                surf.nEdges() - surf.nInternalEdges(),
-                surf.nInternalEdges()
-            );
+            identity(surf.nBoundaryEdges(), surf.nInternalEdges());
 
         Random rndGen(17301893);
 
@@ -178,11 +174,8 @@ void createBoundaryEdgeTrees
         // geometry there are less face/edge aligned items.
         treeBoundBox bb
         (
-            treeBoundBox(UList<point>(surf.localPoints())).extend(rndGen, 1e-4)
+            treeBoundBox(surf.localPoints()).extend(rndGen, 1e-4, ROOTVSMALL)
         );
-
-        bb.min() -= point::uniform(ROOTVSMALL);
-        bb.max() += point::uniform(ROOTVSMALL);
 
         bEdgeTrees.set
         (
@@ -191,9 +184,8 @@ void createBoundaryEdgeTrees
             (
                 treeDataEdge
                 (
-                    false,                      // cachebb
-                    surf.edges(),               // edges
-                    surf.localPoints(),         // points
+                    surf.edges(),
+                    surf.localPoints(),
                     treeBoundaryEdges[surfI]    // selected edges
                 ),
                 bb,     // bb
@@ -238,16 +230,14 @@ public:
 
         for (const label index : indices)
         {
-            const label edgeIndex = shape.edgeLabels()[index];
+            const label edgeIndex = shape.objectIndex(index);
 
             if (shapeMask_.found(edgeIndex))
             {
                 continue;
             }
 
-            const edge& e = shape.edges()[edgeIndex];
-
-            pointHit nearHit = e.line(shape.points()).nearestDist(sample);
+            pointHit nearHit = shape.line(index).nearestDist(sample);
 
             // Only register hit if closest point is not an edge point
             if (nearHit.hit())
@@ -258,7 +248,7 @@ public:
                 {
                     nearestDistSqr = distSqr;
                     minIndex = index;
-                    nearestPoint = nearHit.rawPoint();
+                    nearestPoint = nearHit.point();
                 }
             }
         }
@@ -420,8 +410,8 @@ int main(int argc, char *argv[])
                             !nearestHit.hit()
                          ||
                             (
-                                magSqr(currentHit.hitPoint() - samplePt)
-                              < magSqr(nearestHit.hitPoint() - samplePt)
+                                currentHit.point().distSqr(samplePt)
+                              < nearestHit.point().distSqr(samplePt)
                             )
                         )
                     )
@@ -430,8 +420,6 @@ int main(int argc, char *argv[])
                         bPointsHitTree[bPointi] = treeI;
                     }
                 }
-
-                scalar dist2 = magSqr(nearestHit.rawPoint() - samplePt);
 
                 if (nearestHit.hit())
                 {
@@ -444,7 +432,9 @@ int main(int argc, char *argv[])
     //                        30
     //                    );
 
-                    if (dist2 > Foam::sqr(dist))
+                    scalar distSqr = nearestHit.point().distSqr(samplePt);
+
+                    if (distSqr > Foam::sqr(dist))
                     {
                         nearestHit.setMiss();
                     }
@@ -491,11 +481,11 @@ int main(int argc, char *argv[])
                     if
                     (
                         (
-                            magSqr(pt - hitSurf.localPoints()[e.start()])
+                            pt.distSqr(hitSurf.localPoints()[e.start()])
                           < matchTolerance
                         )
                      || (
-                            magSqr(pt - hitSurf.localPoints()[e.end()])
+                            pt.distSqr(hitSurf.localPoints()[e.end()])
                           < matchTolerance
                         )
                     )

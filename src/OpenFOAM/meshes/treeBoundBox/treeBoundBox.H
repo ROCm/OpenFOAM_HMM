@@ -30,29 +30,36 @@ Class
 Description
     Standard boundBox with extra functionality for use in octree.
 
-    Numbering of corner points is according to octant numbering.
-
-    On the back plane (z=0):
+    Numbering of corner points is according to octant numbering as shown below.
+    For vertex numbering in the sequence 0 to 7:
+    - faces 0 and 1 are x-min and x-max, respectively;
+    - faces 2 and 3 are y-min and y-max, respectively;
+    - faces 4 and 5 are z-min and z-max, respectively.
+    .
 
     \verbatim
-        Y
-        ^
-        |
-        +--------+
-        |2      3|
-        |        |
-        |        |
-        |        |
-        |0      1|
-        +--------+->X
-    \endverbatim
-
-    For the front plane add 4 to the point labels.
+    Octant vertex ordering               | Hex cell ordering
+    (treeBoundBox)                       | (boundBox, blockMesh, hexCell)
+                                         |
+                    6 ---- 7             |         7 ---- 6
+              f5    |\     :\    f3      |   f5    |\     :\    f3
+               |    | 4 ---- 5    \      |    |    | 4 ---- 5    \
+               |    2.|....3 |     \     |    |    3.|....2 |     \
+               |     \|     \|     f2    |    |     \|     \|     f2
+              f4      0 ---- 1           |   f4      0 ---- 1
+      Y  Z                               |
+       \ |          f0 ------ f1         |         f0 ------ f1
+        \|                               |
+         o--- X                          |
+     \endverbatim
 
 Note
     When a bounding box is created without any points, it creates an inverted
     bounding box. Points can be added later and the bounding box will grow to
     include them.
+
+SeeAlso
+    Foam::boundBox
 
 SourceFiles
     treeBoundBoxI.H
@@ -72,7 +79,6 @@ namespace Foam
 {
 
 // Forward Declarations
-class Random;
 class treeBoundBox;
 
 Istream& operator>>(Istream& is, treeBoundBox& bb);
@@ -94,37 +100,42 @@ public:
 
     // Enumerations
 
-        //- Bits used for octant/point encoding.
+        //- Bits used for octant/point directional encoding.
         //  Every octant/corner point is the combination of three directions.
+        //  Defined as (1 << vector::components).
         enum octantBit : direction
         {
-            RIGHTHALF = 0x1,  //!< 1: positive x-direction
-            TOPHALF   = 0x2,  //!< 2: positive y-direction
-            FRONTHALF = 0x4   //!< 4: positive z-direction
+            RIGHTHALF = 1,  //!< 1: positive x-direction
+            TOPHALF   = 2,  //!< 2: positive y-direction
+            FRONTHALF = 4   //!< 4: positive z-direction
         };
 
         //- Face codes. Identical order and meaning as per hex cellmodel
         //- and boundBox, but have a different point ordering.
-        enum faceId
+        //  Defined as (2 * vector::components + positive).
+        enum faceId : direction
         {
-            LEFT   = 0,  //!< 0: x-min, left
-            RIGHT  = 1,  //!< 1: x-max, right
-            BOTTOM = 2,  //!< 2: y-min, bottom
-            TOP    = 3,  //!< 3: y-max, top
-            BACK   = 4,  //!< 4: z-min, back
-            FRONT  = 5   //!< 5: z-max, front
+            LEFT   = 0,  //!< 0: x-min face
+            RIGHT  = 1,  //!< 1: x-max face
+            BOTTOM = 2,  //!< 2: y-min face
+            TOP    = 3,  //!< 3: y-max face
+            BACK   = 4,  //!< 4: z-min face
+            FRONT  = 5   //!< 5: z-max face
         };
 
-        //- Bits used for face encoding
+        //- Bits used for face encoding.
+        //  Defined as (1 << (2 * vector::components + positive)).
+        //  For example, the positive Z-face:
+        //  (1 << (2 * vector::Z + 1))
         enum faceBit : direction
         {
             NOFACE    = 0,              //!<  0: none
-            LEFTBIT   = 0x1 << LEFT,    //!<  1: x-min, left
-            RIGHTBIT  = 0x1 << RIGHT,   //!<  2: x-max, right
-            BOTTOMBIT = 0x1 << BOTTOM,  //!<  4: y-min, bottom
-            TOPBIT    = 0x1 << TOP,     //!<  8: y-max, top
-            BACKBIT   = 0x1 << BACK,    //!< 16: z-min, back
-            FRONTBIT  = 0x1 << FRONT    //!< 32: z-max, front
+            LEFTBIT   = (1 << LEFT),    //!<  1: x-min face
+            RIGHTBIT  = (1 << RIGHT),   //!<  2: x-max face
+            BOTTOMBIT = (1 << BOTTOM),  //!<  4: y-min face
+            TOPBIT    = (1 << TOP),     //!<  8: y-max face
+            BACKBIT   = (1 << BACK),    //!< 16: z-min face
+            FRONTBIT  = (1 << FRONT)    //!< 32: z-max face
         };
 
         //- Edges codes.
@@ -150,11 +161,21 @@ public:
 
     // Static Data Members
 
-        //- Face to point addressing
+        //- Face to point addressing, using octant corner points.
         static const faceList faces;
 
-        //- Edge to point addressing
+        //- Edge to point addressing, using octant corner points.
         static const edgeList edges;
+
+
+    // Static Methods
+
+        //- The null treeBoundBox is the same as an inverted box
+        static const treeBoundBox& null() noexcept
+        {
+            return
+                reinterpret_cast<const treeBoundBox&>(boundBox::invertedBox);
+        }
 
 
     // Standard (Generated) Methods
@@ -218,14 +239,11 @@ public:
 
         // Access
 
-            //- Typical dimension length,height,width
-            inline scalar typDim() const;
-
             //- Vertex coordinates. In octant coding.
             tmp<pointField> points() const;
 
 
-        // Check
+        // Octant handling
 
             //- Corner point of given octant
             inline point corner(const direction octant) const;
@@ -235,6 +253,17 @@ public:
 
             //- Sub-box given by octant number. Midpoint provided.
             treeBoundBox subBbox(const point& mid, const direction) const;
+
+            //- Sub-box half for given face
+            treeBoundBox subHalf(const direction whichFace) const;
+
+            //- Sub-box half for given face with prescribed mid point value.
+            //- Eg, subHalf(scalar, LEFT)
+            treeBoundBox subHalf
+            (
+                const scalar mid,
+                const direction whichFace
+            ) const;
 
             //- Returns octant number given point and the calculated midpoint.
             inline direction subOctant
@@ -288,8 +317,29 @@ public:
                  FixedList<direction, 8>& octantOrder
             ) const;
 
+            //- Return optimal search order to look for nearest to point.
+            inline FixedList<direction, 8> searchOrder(const point& pt) const;
+
+
+        // Check
+
             //- Overlaps with other bounding box, sphere etc?
             using boundBox::overlaps;
+
+            //- Does sub-octant overlap/touch boundingBox?
+            bool subOverlaps
+            (
+                const direction octant,
+                const boundBox& bb
+            ) const;
+
+            //- Does sub-octant overlap boundingSphere (centre + sqr(radius))?
+            inline bool subOverlaps
+            (
+                const direction octant,
+                const point& centre,
+                const scalar radiusSqr
+            ) const;
 
             //- intersects other bounding box, sphere etc?
             using boundBox::intersects;
@@ -376,6 +426,12 @@ public:
 
         friend Istream& operator>>(Istream& is, treeBoundBox& bb);
         friend Ostream& operator<<(Ostream& os, const treeBoundBox& bb);
+
+
+    // Housekeeping
+
+        //- Typical dimension length,height,width. Identical to avgDim()
+        scalar typDim() const { return avgDim(); }
 };
 
 

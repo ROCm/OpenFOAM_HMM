@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2012 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,14 +26,39 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "PatchToPatchInterpolation.H"
+#include "FaceCellWave.H"
+#include "polyMesh.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-defineTypeNameAndDebug(PatchToPatchInterpolationName, 0);
+    defineTypeNameAndDebug(FaceCellWaveBase, 0);
 }
+
+
+const Foam::scalar Foam::FaceCellWaveBase::geomTol_ = 1e-6;
+
+Foam::scalar Foam::FaceCellWaveBase::propagationTol_ = 0.01;
+
+int Foam::FaceCellWaveBase::dummyTrackData_ = 12345;
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::FaceCellWaveBase::FaceCellWaveBase
+(
+    const polyMesh& mesh
+)
+:
+    mesh_(mesh),
+    changedFace_(mesh_.nFaces()),
+    changedCell_(mesh_.nCells()),
+    changedFaces_(mesh_.nFaces()),
+    changedCells_(mesh_.nCells()),
+    nUnvisitedFaces_(mesh_.nFaces()),
+    nUnvisitedCells_(mesh_.nCells())
+{}
 
 
 // ************************************************************************* //

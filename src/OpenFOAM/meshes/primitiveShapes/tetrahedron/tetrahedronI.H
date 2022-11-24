@@ -40,19 +40,19 @@ inline Foam::tetPoints::tetPoints
     const point& p3
 )
 {
-    operator[](0) = p0;
-    operator[](1) = p1;
-    operator[](2) = p2;
-    operator[](3) = p3;
+    a() = p0;
+    b() = p1;
+    c() = p2;
+    d() = p3;
 }
 
 
 inline Foam::tetPoints::tetPoints(const tetPointRef& pts)
 {
-    operator[](0) = pts.a();
-    operator[](1) = pts.b();
-    operator[](2) = pts.c();
-    operator[](3) = pts.d();
+    a() = pts.a();
+    b() = pts.b();
+    c() = pts.c();
+    d() = pts.d();
 }
 
 
@@ -94,10 +94,10 @@ inline Foam::tetrahedron<Point, PointRef>::tetrahedron
     const FixedList<Point, 4>& pts
 )
 :
-    a_(pts[0]),
-    b_(pts[1]),
-    c_(pts[2]),
-    d_(pts[3])
+    a_(pts.template get<0>()),
+    b_(pts.template get<1>()),
+    c_(pts.template get<2>()),
+    d_(pts.template get<3>())
 {}
 
 
@@ -108,10 +108,10 @@ inline Foam::tetrahedron<Point, PointRef>::tetrahedron
     const FixedList<label, 4>& indices
 )
 :
-    a_(points[indices[0]]),
-    b_(points[indices[1]]),
-    c_(points[indices[2]]),
-    d_(points[indices[3]])
+    a_(points[indices.template get<0>()]),
+    b_(points[indices.template get<1>()]),
+    c_(points[indices.template get<2>()]),
+    d_(points[indices.template get<3>()])
 {}
 
 

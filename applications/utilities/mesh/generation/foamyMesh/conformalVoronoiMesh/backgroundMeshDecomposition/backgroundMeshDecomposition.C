@@ -167,7 +167,7 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
             {
                 if (volumeStatus[celli] == volumeType::UNKNOWN)
                 {
-                    treeBoundBox cellBb(mesh_.cells()[celli].box(mesh_));
+                    treeBoundBox cellBb(mesh_.cellBb(celli));
 
                     if (geometry.overlaps(cellBb))
                     {
@@ -279,7 +279,7 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
             {
                 if (volumeStatus[celli] == volumeType::UNKNOWN)
                 {
-                    treeBoundBox cellBb(mesh_.cells()[celli].box(mesh_));
+                    treeBoundBox cellBb(mesh_.cellBb(celli));
 
                     if (geometry.overlaps(cellBb))
                     {
@@ -498,7 +498,7 @@ bool Foam::backgroundMeshDecomposition::refineCell
 
 //    const conformationSurfaces& geometry = geometryToConformTo_;
 
-    treeBoundBox cellBb(mesh_.cells()[celli].box(mesh_));
+    treeBoundBox cellBb(mesh_.cellBb(celli));
 
     weightEstimate = 1.0;
 
@@ -577,7 +577,7 @@ bool Foam::backgroundMeshDecomposition::refineCell
 //            // weightEstimate += sampleVol/pow3(s);
 //        }
 //
-//        if (sqr(spanScale_)*sqr(minCellSize) < magSqr(cellBb.span()))
+//        if (sqr(spanScale_)*sqr(minCellSize) < cellBb.magSqr())
 //        {
 //            return true;
 //        }
@@ -695,7 +695,7 @@ void Foam::backgroundMeshDecomposition::buildPatchAndTree()
     Pstream::allGatherList(allBackgroundMeshBounds_);
 
     // find global bounding box
-    globalBackgroundBounds_ = treeBoundBox(boundBox::invertedBox);
+    globalBackgroundBounds_.reset();
     forAll(allBackgroundMeshBounds_, proci)
     {
         globalBackgroundBounds_.add(allBackgroundMeshBounds_[proci]);
@@ -1119,10 +1119,7 @@ Foam::labelList Foam::backgroundMeshDecomposition::processorNearestPosition
 
         if (info.hit())
         {
-            distanceSqrToCandidate[tPI] = magSqr
-            (
-                testPoints[tPI] - info.hitPoint()
-            );
+            distanceSqrToCandidate[tPI] = info.point().distSqr(testPoints[tPI]);
         }
     }
 

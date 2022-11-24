@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -95,12 +95,12 @@ void Foam::searchableSurfaceCollection::findNearest
                 (
                     cmptMultiply
                     (
-                        hitInfo[pointi].rawPoint(),
+                        hitInfo[pointi].point(),
                         scale_[surfI]
                     )
                 );
 
-                scalar distSqr = magSqr(globalPt - samples[pointi]);
+                scalar distSqr = globalPt.distSqr(samples[pointi]);
 
                 if (distSqr < minDistSqr[pointi])
                 {
@@ -165,8 +165,7 @@ void Foam::searchableSurfaceCollection::sortHits
             label localI = nHits[surfI]++;
             surfInfo[surfI][localI] = pointIndexHit
             (
-                info[pointi].hit(),
-                info[pointi].rawPoint(),
+                info[pointi],
                 index-indexOffset_[surfI]
             );
             infoMap[surfI][localI] = pointi;
@@ -250,7 +249,7 @@ Foam::searchableSurfaceCollection::searchableSurfaceCollection
     indexOffset_.setSize(surfI+1);
 
     // Bounds is the overall bounds - prepare for min/max ops
-    bounds() = boundBox::invertedBox;
+    bounds().reset();
 
     forAll(subGeom_, surfI)
     {
@@ -500,12 +499,12 @@ void Foam::searchableSurfaceCollection::findLine
                 (
                     cmptMultiply
                     (
-                        hitInfo[pointi].rawPoint(),
+                        hitInfo[pointi].point(),
                         scale_[surfI]
                     )
                 );
                 info[pointi] = hitInfo[pointi];
-                info[pointi].rawPoint() = nearest[pointi];
+                info[pointi].point() = nearest[pointi];
                 info[pointi].setIndex
                 (
                     hitInfo[pointi].index()
@@ -530,7 +529,7 @@ void Foam::searchableSurfaceCollection::findLine
                 {
                     n /= mag(n);
 
-                    scalar s = ((info[pointi].rawPoint()-start[pointi])&n);
+                    scalar s = ((info[pointi].point()-start[pointi])&n);
 
                     if (s < 0 || s > 1)
                     {

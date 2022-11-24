@@ -70,7 +70,7 @@ Foam::Istream& Foam::LList<LListBase, T>::readList(Istream& is)
                 {
                     T elem;
                     is >> elem;
-                    list.append(std::move(elem));
+                    list.push_back(std::move(elem));
                 }
             }
             else
@@ -82,7 +82,7 @@ Foam::Istream& Foam::LList<LListBase, T>::readList(Istream& is)
 
                 for (label i=0; i<len; ++i)
                 {
-                    list.append(elem);
+                    list.push_back(elem);
                 }
             }
         }
@@ -101,7 +101,7 @@ Foam::Istream& Foam::LList<LListBase, T>::readList(Istream& is)
 
             T elem;
             is >> elem;
-            list.append(std::move(elem));
+            list.push_back(std::move(elem));
 
             is >> tok;
             is.fatalCheck(FUNCTION_NAME);

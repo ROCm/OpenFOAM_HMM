@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -71,7 +71,7 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
     {
         // Collect mesh faces and bounding box
         labelList bndFaces(nFaces);
-        treeBoundBox overallBb(boundBox::invertedBox);
+        treeBoundBox overallBb;
 
         nFaces = 0;
         forAll(patchIDs, i)
@@ -88,19 +88,13 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
         }
 
         Random rndGen(123456);
-        overallBb = overallBb.extend(rndGen, 1e-4);
-        overallBb.min() -= point::uniform(ROOTVSMALL);
-        overallBb.max() += point::uniform(ROOTVSMALL);
+        overallBb.inflate(rndGen, 1e-4, ROOTVSMALL);
 
 
         const indexedOctree<treeDataFace> boundaryTree
         (
-            treeDataFace    // all information needed to search faces
-            (
-                false,      // do not cache bb
-                mesh,
-                bndFaces    // patch faces only
-            ),
+            treeDataFace(mesh, bndFaces),  // patch faces only
+
             overallBb,      // overall search domain
             8,              // maxLevel
             10,             // leafsize
@@ -109,14 +103,13 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
 
         forAll(probeLocations(), probei)
         {
+            const auto& treeData = boundaryTree.shapes();
             const point sample = probeLocations()[probei];
-
-            const scalar span = boundaryTree.bb().mag();
 
             pointIndexHit info = boundaryTree.findNearest
             (
                 sample,
-                Foam::sqr(span)
+                Foam::sqr(boundaryTree.bb().mag())
             );
 
             if (!info.hit())
@@ -124,7 +117,7 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
                 info = boundaryTree.findNearest(sample, Foam::sqr(GREAT));
             }
 
-            label facei = boundaryTree.shapes().faceLabels()[info.index()];
+            const label facei = treeData.objectIndex(info.index());
 
             const label patchi = bm.whichPatch(facei);
 
@@ -145,21 +138,16 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
                 // the location written to the header.
 
                 //const point& facePt = mesh.faceCentres()[faceI];
-                const point& facePt = info.hitPoint();
+                const point& facePt = info.point();
 
                 mappedPatchBase::nearInfo sampleInfo;
 
-                sampleInfo.first() = pointIndexHit
-                (
-                    true,
-                    facePt,
-                    facei
-                );
+                sampleInfo.first() = pointIndexHit(true, facePt, facei);
 
-                sampleInfo.second().first() = magSqr(facePt - sample);
+                sampleInfo.second().first() = facePt.distSqr(sample);
                 sampleInfo.second().second() = Pstream::myProcNo();
 
-                nearest[probei]= sampleInfo;
+                nearest[probei] = sampleInfo;
             }
         }
     }
@@ -174,7 +162,7 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
     forAll(nearest, samplei)
     {
         oldPoints_[samplei] = operator[](samplei);
-        operator[](samplei) = nearest[samplei].first().rawPoint();
+        operator[](samplei) = nearest[samplei].first().point();
     }
 
     if (debug)
@@ -188,7 +176,7 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
             Info<< "    " << samplei << " coord:"<< operator[](samplei)
                 << " found on processor:" << proci
                 << " in local face:" << locali
-                << " with location:" << nearest[samplei].first().rawPoint()
+                << " with location:" << nearest[samplei].first().point()
                 << endl;
         }
     }

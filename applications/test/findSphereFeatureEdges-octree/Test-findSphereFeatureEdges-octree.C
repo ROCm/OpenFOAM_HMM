@@ -67,17 +67,10 @@ int main(int argc, char *argv[])
     treeBoundBox bb(efem.points());
     bb.grow(ROOTVSMALL);
 
-    labelList allEdges(identity(efem.edges().size()));
-
     indexedOctree<treeDataEdge> edgeTree
     (
-        treeDataEdge
-        (
-            false,          // cachebb
-            efem.edges(),        // edges
-            efem.points(),       // points
-            allEdges        // selected edges
-        ),
+        treeDataEdge(efem.edges(), efem.points()),   // All edges
+
         bb,     // bb
         8,      // maxLevel
         10,     // leafsize

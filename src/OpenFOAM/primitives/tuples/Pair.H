@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,10 +70,19 @@ class Pair
 {
 public:
 
-    // Constructors
+    // Generated Methods
 
         //- Default construct
         Pair() = default;
+
+        //- The front() accessor (from FixedList) has no purpose
+        void front() = delete;
+
+        //- The back() accessor (from FixedList) has no purpose
+        void back() = delete;
+
+
+    // Constructors
 
         //- Copy construct from components
         inline Pair(const T& f, const T& s);
@@ -104,17 +113,17 @@ public:
 
     // Access
 
-        //- Return first element
-        using FixedList<T, 2>::first;
+        //- Access the first element
+        const T& first() const noexcept { return this->template get<0>(); }
 
-        //- Return last element
-        using FixedList<T, 2>::last;
+        //- Access the first element
+        T& first() noexcept { return this->template get<0>(); }
 
-        //- Return second element, which is also the last element
-        inline const T& second() const noexcept;
+        //- Access the second element
+        const T& second() const noexcept { return this->template get<1>(); }
 
-        //- Return second element, which is also the last element
-        inline T& second() noexcept;
+        //- Access the second element
+        T& second() noexcept { return this->template get<1>(); }
 
         //- Return other element
         inline const T& other(const T& a) const;

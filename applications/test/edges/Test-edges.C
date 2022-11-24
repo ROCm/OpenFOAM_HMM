@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
     Info<<"collapse? -> " << e4.collapse() << endl;
     printInfo(e4);
 
-    Info<< e3 << " connects " << e2 << " => " << e2.connects(e3) << endl;
+    Info<< e3 << " connects " << e2 << " => " << e2.connected(e3) << endl;
 
     labelPair labels(e3);
 

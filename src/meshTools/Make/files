@@ -69,19 +69,19 @@ meshTools/meshTools.C
 algorithms = algorithms
 
 pWave = $(algorithms)/PointEdgeWave
-$(pWave)/PointEdgeWaveName.C
+$(pWave)/PointEdgeWaveBase.C
 $(pWave)/pointEdgePoint.C
 
 patchWave = $(algorithms)/PatchEdgeFaceWave
-$(patchWave)/PatchEdgeFaceWaveName.C
+$(patchWave)/PatchEdgeFaceWaveBase.C
 $(patchWave)/patchEdgeFaceInfo.C
 $(patchWave)/patchPatchDist.C
 $(patchWave)/patchEdgeFaceRegions.C
 
 
 meshWave = $(algorithms)/MeshWave
-$(meshWave)/MeshWaveName.C
-$(meshWave)/FaceCellWaveName.C
+$(meshWave)/MeshWaveBase.C
+$(meshWave)/FaceCellWaveBase.C
 
 
 regionSplit/regionSplit.C
@@ -90,7 +90,7 @@ regionSplit/localPointRegion.C
 regionSplit2D/regionSplit2D.C
 
 indexedOctree/treeDataFace.C
-indexedOctree/treeDataPrimitivePatchName.C
+indexedOctree/treeDataPrimitivePatchBase.C
 indexedOctree/treeDataTriSurface.C
 
 

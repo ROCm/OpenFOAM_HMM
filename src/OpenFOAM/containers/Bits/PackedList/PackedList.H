@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -437,7 +437,10 @@ public:
     // Member Operators
 
         //- Append a value at the end of the list
-        inline PackedList<Width>& append(const unsigned int val);
+        inline void push_back(const unsigned int val);
+
+        //- Reduce size by 1 or more elements. Can be called on an empty list.
+        inline void pop_back(label n = 1);
 
         //- Remove and return the last element
         inline unsigned int remove();
@@ -556,6 +559,14 @@ public:
 
         //- Alias for resize()
         void setSize(const label n, unsigned int val = 0u) { resize(n, val); }
+
+        //- Append a value at the end of the list
+        //FOAM_DEPRECATED_FOR(2022-10, "push_back()")
+        PackedList<Width>& append(const unsigned int val)
+        {
+            this->push_back(val);
+            return *this;
+        }
 };
 
 

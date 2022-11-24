@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -206,10 +206,10 @@ void Foam::searchableCone::findNearestAndNormal
     // cone)
 
     FixedList<scalar, 4> dist;
-    dist[0] = magSqr(nearCone-sample);
-    dist[1] = magSqr(disk1Point-sample);
-    dist[2] = magSqr(disk2Point-sample);
-    dist[3] = magSqr(iCnearCone-sample);
+    dist[0] = sample.distSqr(nearCone);
+    dist[1] = sample.distSqr(disk1Point);
+    dist[2] = sample.distSqr(disk2Point);
+    dist[3] = sample.distSqr(iCnearCone);
 
     const label minI = findMin(dist);
 
@@ -301,7 +301,7 @@ void Foam::searchableCone::findNearestAndNormal
     }
 
 
-    if (magSqr(sample - info.rawPoint()) < nearestDistSqr)
+    if (info.point().distSqr(sample) < nearestDistSqr)
     {
         info.setHit();
         info.setIndex(0);
@@ -615,11 +615,11 @@ void Foam::searchableCone::insertHit
 {
     scalar smallDistSqr = SMALL*magSqr(end-start);
 
-    scalar hitMagSqr = magSqr(hit.hitPoint()-start);
+    scalar hitMagSqr = hit.hitPoint().distSqr(start);
 
     forAll(info, i)
     {
-        scalar d2 = magSqr(info[i].hitPoint()-start);
+        scalar d2 = info[i].hitPoint().distSqr(start);
 
         if (d2 > hitMagSqr+smallDistSqr)
         {
@@ -827,7 +827,7 @@ void Foam::searchableCone::findLine
             point newEnd;
             if (info[i].hit())
             {
-                newEnd = info[i].hitPoint();
+                newEnd = info[i].point();
             }
             else
             {
@@ -1048,7 +1048,7 @@ void Foam::searchableCone::getNormal
             pointIndexHit nearInfo;
             findNearestAndNormal
             (
-                info[i].hitPoint(),
+                info[i].point(),
                 Foam::sqr(GREAT),
                 nearInfo,
                 normal[i]

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,15 +52,10 @@ PatchToPatchInterpolation<FromPatch, ToPatch>::pointInterpolate
             << abort(FatalError);
     }
 
-    tmp<Field<Type>> tresult
-    (
-        new Field<Type>(toPatch_.nPoints(), Zero)
-    );
+    auto tresult = tmp<Field<Type>>::New(toPatch_.nPoints(), Zero);
+    auto& result = tresult.ref();
 
-    Field<Type>& result = tresult.ref();
-
-    const List<typename FromPatch::face_type>& fromPatchLocalFaces =
-        fromPatch_.localFaces();
+    const auto& fromPatchLocalFaces = fromPatch_.localFaces();
 
     const FieldField<Field, scalar>& weights = pointWeights();
 
@@ -116,12 +111,8 @@ PatchToPatchInterpolation<FromPatch, ToPatch>::faceInterpolate
             << abort(FatalError);
     }
 
-    tmp<Field<Type>> tresult
-    (
-        new Field<Type>(toPatch_.size(), Zero)
-    );
-
-    Field<Type>& result = tresult.ref();
+    auto tresult = tmp<Field<Type>>::New(toPatch_.size(), Zero);
+    auto& result = tresult.ref();
 
     const labelListList& fromPatchFaceFaces = fromPatch_.faceFaces();
 

@@ -205,6 +205,33 @@ inline Foam::label Foam::face::nTriangles() const
 }
 
 
+inline bool Foam::face::connected(const labelUList& other) const
+{
+    for (const label pointi : *this)
+    {
+        if (other.found(pointi))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+
+template<unsigned N>
+inline bool Foam::face::connected(const FixedList<label, N>& other) const
+{
+    for (const label pointi : *this)
+    {
+        if (other.found(pointi))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 inline void Foam::face::operator+=(const label vertexOffset)

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef MeshWave_H
-#define MeshWave_H
+#ifndef Foam_MeshWave_H
+#define Foam_MeshWave_H
 
 #include "FaceCellWave.H"
 
@@ -61,12 +61,6 @@ class MeshWave
 :
     public MeshWaveName
 {
-    // Private Static Data
-
-        //- Default trackdata value to satisfy default template argument.
-        static int dummyTrackData_;
-
-
     // Private Data
 
         //- Wall information for all faces
@@ -102,7 +96,7 @@ public:
             const labelList& initialChangedFaces,
             const List<Type>& changedFacesInfo,
             const label maxIter,
-            TrackingData& td = dummyTrackData_
+            TrackingData& td = FaceCellWaveBase::dummyTrackData_
         );
 
         //- Construct from mesh, list of changed faces with the Type
@@ -116,26 +110,26 @@ public:
             const List<Type>& changedFacesInfo,
             const List<Type>& allCellInfo,
             const label maxIter,
-            TrackingData& td = dummyTrackData_
+            TrackingData& td = FaceCellWaveBase::dummyTrackData_
         );
 
 
     // Member Functions
 
         //- Get allFaceInfo
-        const List<Type>& allFaceInfo() const
+        const List<Type>& allFaceInfo() const noexcept
         {
             return allFaceInfo_;
         }
 
         //- Get allCellInfo
-        const List<Type>& allCellInfo() const
+        const List<Type>& allCellInfo() const noexcept
         {
             return allCellInfo_;
         }
 
         //- Additional data to be passed into container
-        const TrackingData& data() const
+        const TrackingData& data() const noexcept
         {
             return calc_.data();
         }
@@ -147,20 +141,20 @@ public:
             return calc_.iterate(maxIter);
         }
 
-        //- Number of unvisited cells, i.e. cells that were not (yet)
-        //- reached from walking across mesh.
-        //
-        //  This can happen from
-        //  - not enough iterations done
-        //  - a disconnected mesh
-        //  - a mesh without walls in it
-        label nUnvisitedCells() const
+        //- Current number of changed cells
+        label nChangedCells() const noexcept { return calc_.nChangedCells(); }
+
+        //- Current number of changed faces
+        label nChangedFaces() const noexcept { return calc_.nChangedFaces(); }
+
+        //- Number of unvisited cells
+        label nUnvisitedCells() const noexcept
         {
             return calc_.nUnvisitedCells();
         }
 
         //- Number of unvisited faces
-        label nUnvisitedFaces() const
+        label nUnvisitedFaces() const noexcept
         {
             return calc_.nUnvisitedFaces();
         }

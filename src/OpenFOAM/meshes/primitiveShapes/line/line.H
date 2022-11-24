@@ -105,16 +105,16 @@ public:
     // Member Functions
 
         //- The first vertex
-        const point& a() const { return Pair<point>::first(); }
+        const point& a() const noexcept { return Pair<point>::first(); }
 
         //- The second vertex
-        const point& b() const { return Pair<point>::second(); }
+        const point& b() const noexcept { return Pair<point>::second(); }
 
         //- The first vertex
-        point& a() { return Pair<point>::first(); }
+        point& a() noexcept { return Pair<point>::first(); }
 
         //- The second vertex
-        point& b() { return Pair<point>::second(); }
+        point& b() noexcept { return Pair<point>::second(); }
 
         //- Return as line reference
         inline linePointRef ln() const;
@@ -148,11 +148,12 @@ class line
 {
     // Private Data
 
-        //- First point
+        //- Reference to the first line point
         PointRef a_;
 
-        //- Second point
+        //- Reference to the second line point
         PointRef b_;
+
 
 public:
 
@@ -189,14 +190,14 @@ public:
         //- The second (last) point
         PointRef second() const noexcept { return b_; }
 
-        //- The last (second) point
-        PointRef last() const noexcept { return b_; }
-
         //- The start (first) point
         PointRef start() const noexcept { return a_; }
 
         //- The end (second) point
         PointRef end() const noexcept { return b_; }
+
+        //- The last (second) point
+        PointRef last() const noexcept { return b_; }
 
 
     // Line properties (static calculations)
@@ -226,9 +227,9 @@ public:
         //  If the nearest point is on the line, return a hit
         PointHit<Point> nearestDist(const Point& p) const;
 
-        //- Return nearest distance from line to line. Returns distance
-        //  and sets both points (one on *this, one on the provided
-        //  linePointRef.
+        //- Return nearest distance from line to line.
+        //- Returns distance and sets both points
+        //- (one on *this, one on the provided linePointRef.
         scalar nearestDist
         (
             const line<Point, const Point&>& edge,

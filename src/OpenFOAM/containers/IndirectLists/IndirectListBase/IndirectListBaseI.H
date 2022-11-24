@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -124,28 +124,28 @@ inline Foam::label Foam::IndirectListBase<T, Addr>::rcIndex(const label i) const
 
 
 template<class T, class Addr>
-inline const T& Foam::IndirectListBase<T, Addr>::first() const
+inline const T& Foam::IndirectListBase<T, Addr>::front() const
 {
-    return values_[addr_.first()];
+    return values_[addr_.front()];
 }
 
 template<class T, class Addr>
-inline T& Foam::IndirectListBase<T, Addr>::first()
+inline T& Foam::IndirectListBase<T, Addr>::front()
 {
-    return values_[addr_.first()];
+    return values_[addr_.front()];
 }
 
 
 template<class T, class Addr>
-inline const T& Foam::IndirectListBase<T, Addr>::last() const
+inline const T& Foam::IndirectListBase<T, Addr>::back() const
 {
-    return values_[addr_.last()];
+    return values_[addr_.back()];
 }
 
 template<class T, class Addr>
-inline T& Foam::IndirectListBase<T, Addr>::last()
+inline T& Foam::IndirectListBase<T, Addr>::back()
 {
-    return values_[addr_.last()];
+    return values_[addr_.back()];
 }
 
 
@@ -176,12 +176,8 @@ inline T& Foam::IndirectListBase<T, Addr>::rcValue(const label i)
     return values_[this->rcIndex(i)];
 }
 
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
 template<class T, class Addr>
-inline Foam::List<T>
-Foam::IndirectListBase<T, Addr>::operator()() const
+inline Foam::List<T> Foam::IndirectListBase<T, Addr>::list() const
 {
     const label len = addr_.size();
 
@@ -196,6 +192,8 @@ Foam::IndirectListBase<T, Addr>::operator()() const
     return result;
 }
 
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T, class Addr>
 inline T& Foam::IndirectListBase<T, Addr>::operator[](const label i)
