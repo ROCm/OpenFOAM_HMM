@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is derivative work of OpenFOAM.
@@ -48,20 +48,6 @@ Description
 using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-// Return the absolute tolerance value for bitwise comparisons of floatScalars
-floatScalar getTol(floatScalar)
-{
-    return 1e-2;
-}
-
-
-// Return the absolute tolerance value for bitwise comparisons of doubleScalars
-doubleScalar getTol(doubleScalar)
-{
-    return 1e-10;
-}
-
 
 // Create each constructor of EigenMatrix<Type>, and print output
 template<class Type>

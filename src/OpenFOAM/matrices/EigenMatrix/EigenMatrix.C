@@ -9,7 +9,7 @@
     Contributed 2018-07-31 to the OpenFOAM Foundation
     Copyright (C) 2018 OpenFOAM Foundation
     Copyright (C) 2019-2020 Alberto Passalacqua
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -221,12 +221,8 @@ void Foam::EigenMatrix<cmptType>::symmTridiagonalQL()
         // If m == l, EValsRe_[l] is an eigenvalue, otherwise, iterate
         if (m > l)
         {
-            label iter = 0;
-
             do
             {
-                iter += 1;
-
                 // Compute implicit shift
                 cmptType g = EValsRe_[l];
                 cmptType p = (EValsRe_[l + 1] - g)/(2.0*EValsIm_[l]);
