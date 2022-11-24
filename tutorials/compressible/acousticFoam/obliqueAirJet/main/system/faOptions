@@ -24,7 +24,11 @@ pressure
     duration        0.03;
     region          vibrationShell;
     selectionMode   all;
-    format          binary;
+
+    sampleFormat    ensight;
+    sampleFile      "<constant>/sampled/window/windowPatch.case";
+    filterRadius    3e-3;
+    filterSweeps    10;
 }
 
 

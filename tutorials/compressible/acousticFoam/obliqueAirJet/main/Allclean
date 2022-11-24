@@ -6,6 +6,7 @@ cd "${0%/*}" || exit                                # Run from this directory
 cleanCase0
 
 rm -rf constant/boundaryData
+rm -rf constant/sampled
 rm -rf constant/triSurface
 
 # -----------------------------------------------------------------------------

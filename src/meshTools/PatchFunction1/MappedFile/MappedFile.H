@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,10 +49,26 @@ Description
     \endtable
 
     Options for the \c mapMethod entry:
-    \verbatim
+    \table
+      Property    | Description
       nearest     | Use nearest points only (avoids triangulation)
       planar      | Interpolation using 2D Delaunay triangulation
-    \endverbatim
+    \endtable
+
+    Options for reading and filtering:
+    \table
+      Property     | Description
+      sampleFormat | The surfaceReader format (eg, ensight)
+      sampleFile   | <case>/foo/bar/window.case
+      filterRadius | Search radius [m] for median filter neighbours
+      filterSweeps | Filter sweeps for median filter
+    \endtable
+
+Note
+    The MappedFile handling currently has two different reading types:
+    a builtin boundaryData reader (default) and a surfaceReader
+    (specified by sampleFormat and sampleFile keywords). The generic
+    surfaceReader handling does \em not support field averaging.
 
 SourceFiles
     MappedFile.C
@@ -66,6 +82,8 @@ SourceFiles
 #include "Function1.H"
 #include "Pair.H"
 #include "instantList.H"
+#include "surfaceReader.H"
+#include "MappedFileFilterField.H"
 #include "pointToPointPlanarInterpolation.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -103,6 +121,24 @@ class MappedFile
 
         //- Interpolation scheme to use (default is empty == "planar")
         word mapMethod_;
+
+        //- Radius for filter
+        scalar filterRadius_;
+
+        //- Number of median filter sweeps
+        label filterSweeps_;
+
+        //- Median filtering (for input values)
+        mutable autoPtr<FilterField> filterFieldPtr_;
+
+        //- Format name for surfaceReader
+        word readerFormat_;
+
+        //- File name associated with surfaceReader
+        fileName readerFile_;
+
+        //- Meshed surface with fields (for input values)
+        mutable autoPtr<surfaceReader> readerPtr_;
 
         //- 2D interpolation (for 'planar' mapMethod)
         mutable autoPtr<pointToPointPlanarInterpolation> mapperPtr_;
