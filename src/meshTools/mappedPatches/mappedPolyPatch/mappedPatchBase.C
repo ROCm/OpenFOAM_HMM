@@ -1048,7 +1048,10 @@ void Foam::mappedPatchBase::calcMapping() const
     }
 
     updateMeshTime().setUpToDate();
-    updateSampleMeshTime().setUpToDate();
+    if (sameWorld())
+    {
+        updateSampleMeshTime().setUpToDate();
+    }
 }
 
 
