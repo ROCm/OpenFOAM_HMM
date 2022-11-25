@@ -249,9 +249,15 @@ void Foam::fvMatrix<Type>::setValuesFromList
 
         psi[celli] = value;
         source_[celli] = value*Diag[celli];
+    }
 
-        if (symmetric() || asymmetric())
+    if (symmetric() || asymmetric())
+    {
+        forAll(cellLabels, i)
         {
+            const label celli = cellLabels[i];
+            const Type& value = values[i];
+
             for (const label facei : cells[celli])
             {
                 if (mesh.isInternalFace(facei))

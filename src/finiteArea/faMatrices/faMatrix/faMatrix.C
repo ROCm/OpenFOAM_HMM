@@ -335,9 +335,15 @@ void Foam::faMatrix<Type>::setValuesFromList
 
         psi[facei] = value;
         source_[facei] = value*Diag[facei];
+    }
 
-        if (symmetric() || asymmetric())
+    if (symmetric() || asymmetric())
+    {
+        forAll(faceLabels, i)
         {
+            const label facei = faceLabels[i];
+            const Type& value = values[i];
+
             for (const label edgei : edges[facei])
             {
                 if (mesh.isInternalEdge(edgei))
