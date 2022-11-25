@@ -1815,7 +1815,7 @@ Foam::argList::~argList()
     jobInfo.stop();     // Normal job termination
 
     // Delete file handler to flush any remaining IO
-    Foam::fileHandler(nullptr);
+    (void)Foam::fileHandler(nullptr);
 }
 
 

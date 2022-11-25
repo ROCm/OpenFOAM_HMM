@@ -149,7 +149,8 @@ Foam::fileOperations::hostCollatedFileOperation::hostCollatedFileOperation
         (Pstream::parRun() ? labelList() : ioRanks()), // processor dirs
         typeName,
         false // verbose
-    )
+    ),
+    managedComm_(comm_)
 {
     init(verbose);
 }
@@ -159,9 +160,9 @@ Foam::fileOperations::hostCollatedFileOperation::hostCollatedFileOperation
 
 Foam::fileOperations::hostCollatedFileOperation::~hostCollatedFileOperation()
 {
-    if (comm_ != -1 && comm_ != UPstream::worldComm)
+    if (UPstream::isUserComm(managedComm_))
     {
-        UPstream::freeCommunicator(comm_);
+        UPstream::freeCommunicator(managedComm_);
     }
 }
 

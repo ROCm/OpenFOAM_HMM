@@ -196,6 +196,9 @@ public:
             const bool distributedRoots = false
         );
 
+        //- Clone fileHandler
+        /// virtual autoPtr<fileOperation> clone() const = 0;
+
 
     // Declare run-time constructor selection table
 
@@ -213,7 +216,8 @@ public:
 
     // Selectors
 
-        //- Select fileHandler-type
+        //- Select fileHandler-type.
+        //- Uses defaultFileHandler if the handlerType is empty.
         static autoPtr<fileOperation> New
         (
             const word& handlerType,
@@ -234,6 +238,12 @@ public:
             const fileNameList& dirEntries,
             const word& constantName = "constant"
         );
+
+        //- True if the file names are identical. False on an empty list
+        static bool uniformFile(const fileNameList& names);
+
+        //- True if the file name is identical on all ranks
+        static bool uniformFile(const label comm, const fileName& name);
 
 
     // Member Functions
@@ -628,11 +638,21 @@ inline Ostream& operator<<(Ostream& os, const fileOperation::pathType b)
 
 // Note: defined in fileOperation.C
 
-//- Get current file handler
+//- Return the current file handler.
+//- Will create the default file handler if necessary.
 const fileOperation& fileHandler();
 
-//- Replace, reset file handler.
-//  \return old handler on change, null otherwise
+//- Delete current file handler.
+//  \returns the old handler
+autoPtr<fileOperation> fileHandler(std::nullptr_t);
+
+//- Replace the current file handler.
+//  The following are considered no-ops:
+//  - an empty/invalid newHandler does \b not delete,
+//    use fileHandler(std::nullptr_t) - ie, a literal \c nullptr for that
+//  - if new handler and current handler are identical (same pointer).
+//  .
+//  \returns the old handler (on change), nullptr otherwise
 autoPtr<fileOperation> fileHandler(autoPtr<fileOperation>&& newHandler);
 
 

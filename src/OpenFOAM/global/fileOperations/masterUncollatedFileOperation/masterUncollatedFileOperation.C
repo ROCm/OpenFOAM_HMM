@@ -474,24 +474,6 @@ Foam::fileOperations::masterUncollatedFileOperation::localObjectPath
 }
 
 
-bool Foam::fileOperations::masterUncollatedFileOperation::uniformFile
-(
-    const fileNameList& filePaths
-)
-{
-    const fileName& object0 = filePaths[0];
-
-    for (label i = 1; i < filePaths.size(); i++)
-    {
-        if (filePaths[i] != object0)
-        {
-            return false;
-        }
-    }
-    return true;
-}
-
-
 void Foam::fileOperations::masterUncollatedFileOperation::readAndSend
 (
     const fileName& filePath,
@@ -763,7 +745,7 @@ masterUncollatedFileOperation
             subRanks(Pstream::nProcs())
         )
     ),
-    myComm_(comm_)
+    managedComm_(comm_)
 {
     init(verbose);
 }
@@ -777,7 +759,7 @@ masterUncollatedFileOperation
 )
 :
     fileOperation(comm),
-    myComm_(-1)
+    managedComm_(-1)  // Externally managed
 {
     init(verbose);
 }
@@ -788,9 +770,9 @@ masterUncollatedFileOperation
 Foam::fileOperations::masterUncollatedFileOperation::
 ~masterUncollatedFileOperation()
 {
-    if (myComm_ != -1 && myComm_ != UPstream::worldComm)
+    if (UPstream::isUserComm(managedComm_))
     {
-        UPstream::freeCommunicator(myComm_);
+        UPstream::freeCommunicator(managedComm_);
     }
 }
 

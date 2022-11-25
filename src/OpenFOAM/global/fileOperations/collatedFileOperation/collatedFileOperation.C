@@ -287,7 +287,7 @@ Foam::fileOperations::collatedFileOperation::collatedFileOperation
         ),
         false
     ),
-    myComm_(comm_),
+    managedComm_(comm_),
     writer_(mag(maxThreadFileBufferSize), comm_),
     nProcs_(Pstream::nProcs()),
     ioRanks_(ioRanks())
@@ -305,7 +305,7 @@ Foam::fileOperations::collatedFileOperation::collatedFileOperation
 )
 :
     masterUncollatedFileOperation(comm, false),
-    myComm_(-1),
+    managedComm_(-1),  // Externally managed
     writer_(mag(maxThreadFileBufferSize), comm),
     nProcs_(Pstream::nProcs()),
     ioRanks_(ioRanks)
@@ -321,9 +321,9 @@ Foam::fileOperations::collatedFileOperation::~collatedFileOperation()
     // Wait for any outstanding file operations
     flush();
 
-    if (myComm_ != -1 && myComm_ != UPstream::worldComm)
+    if (UPstream::isUserComm(managedComm_))
     {
-        UPstream::freeCommunicator(myComm_);
+        UPstream::freeCommunicator(managedComm_);
     }
 }
 
