@@ -953,8 +953,10 @@ Foam::argList::argList
                     Info<< nl
                         <<"Error: option '-" << optName
                         << "' requires an argument" << nl << nl
-                        << "See '" << executable_ << " -help' for usage"
-                        << nl << nl;
+                        << "See '" << executable_ << " -help' for usage" << nl
+                        << " or '" << executable_
+                        << " -help-full' for extended usage" << nl
+                        << nl;
 
                     Pstream::exit(1);  // works for serial and parallel
                 }
@@ -2035,8 +2037,10 @@ bool Foam::argList::check(bool checkArgs, bool checkOpts) const
         {
             FatalError
                 << nl
-                << "See '" << executable_ << " -help' for usage"
-                << nl << nl;
+                << "See '" << executable_ << " -help' for usage" << nl
+                << " or '" << executable_
+                << " -help-full' for extended usage" << nl
+                << nl;
         }
     }
 

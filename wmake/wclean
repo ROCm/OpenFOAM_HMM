@@ -86,6 +86,7 @@ die()
     while [ "$#" -ge 1 ]; do echo "    $1"; shift; done
     echo
     echo "See '${0##*/} -help' for usage"
+    echo " or '${0##*/} -help-full' for extended usage"
     echo
     exit 1
 }
