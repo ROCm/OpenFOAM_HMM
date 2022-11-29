@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,18 +24,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::solidArrheniusReactionRate
+    Foam::solidIsothermalReactionRate
 
 Description
-    Arrhenius reaction rate for solids
+    Isothermal reaction rate for solids
 
 SourceFiles
-    solidArrheniusReactionRateI.H
+    solidIsothermalReactionRateI.H
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Foam_solidArrheniusReactionRate_H
-#define Foam_solidArrheniusReactionRate_H
+#ifndef Foam_solidIsothermalReactionRate_H
+#define Foam_solidIsothermalReactionRate_H
 
 #include "scalarField.H"
 #include "typeInfo.H"
@@ -47,27 +46,30 @@ namespace Foam
 {
 
 // Forward Declarations
-class solidArrheniusReactionRate;
+class solidIsothermalReactionRate;
 
-Ostream& operator<<(Ostream&, const solidArrheniusReactionRate&);
+Ostream& operator<<(Ostream&, const solidIsothermalReactionRate&);
 
 
 /*---------------------------------------------------------------------------*\
-                  Class solidArrheniusReactionRate Declaration
+                Class solidIsothermalReactionRate Declaration
 \*---------------------------------------------------------------------------*/
 
-class solidArrheniusReactionRate
+class solidIsothermalReactionRate
 {
     // Private Data
 
-        //- Pre-exponential factor
-        scalar A_;
+        //- Model constant
+        scalar C_;
 
-        //- Activation temperature
-        scalar Ta_;
+        //- Specific heat of solid material (assumed constant)
+        scalar Cp_;
 
-        //- Critical temperature
-        scalar Tcrit_;
+        //- Phase change temperature
+        scalar Tpc_;
+
+        //- Latent heat of phase change
+        scalar Elat_;
 
 
 public:
@@ -75,16 +77,17 @@ public:
     // Constructors
 
         //- Construct from components
-        inline solidArrheniusReactionRate
+        inline solidIsothermalReactionRate
         (
-            const scalar A,
-            const scalar Ta,
-            const scalar Tcrit
+            const scalar C,
+            const scalar Cp,
+            const scalar Tpc,
+            const scalar Elat
         );
 
 
         //- Construct from dictionary
-        inline solidArrheniusReactionRate
+        inline solidIsothermalReactionRate
         (
             const speciesTable& species,
             const dictionary& dict
@@ -92,7 +95,7 @@ public:
 
 
     //- Destructor
-    virtual ~solidArrheniusReactionRate() = default;
+    virtual ~solidIsothermalReactionRate() = default;
 
 
     // Member Functions
@@ -100,7 +103,7 @@ public:
         //- Return the type name
         static word type()
         {
-            return "Arrhenius";
+            return "Isothermal";
         }
 
         //- Return reaction rate constant
@@ -112,7 +115,6 @@ public:
             const scalarField& c
         ) const;
 
-
         //- Write to stream
         inline void write(Ostream& os) const;
 
@@ -122,7 +124,7 @@ public:
         inline friend Ostream& operator<<
         (
             Ostream&,
-            const solidArrheniusReactionRate&
+            const solidIsothermalReactionRate&
         );
 };
 
@@ -133,7 +135,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "solidArrheniusReactionRateI.H"
+#include "solidIsothermalReactionRateI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
