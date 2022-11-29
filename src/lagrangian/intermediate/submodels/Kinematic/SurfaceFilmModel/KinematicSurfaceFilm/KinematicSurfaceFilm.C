@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -541,6 +541,7 @@ Foam::KinematicSurfaceFilm<CloudType>::KinematicSurfaceFilm
     (
         interactionTypeEnum(this->coeffDict().getWord("interactionType"))
     ),
+    parcelTypes_(this->coeffDict().getOrDefault("parcelTypes", labelList())),
     deltaWet_(0.0),
     splashParcelType_(0),
     parcelsPerSplash_(0),
@@ -580,6 +581,7 @@ Foam::KinematicSurfaceFilm<CloudType>::KinematicSurfaceFilm
     filmModel_(nullptr),
     areaFilms_(),
     interactionType_(sfm.interactionType_),
+    parcelTypes_(sfm.parcelTypes_),
     deltaWet_(sfm.deltaWet_),
     splashParcelType_(sfm.splashParcelType_),
     parcelsPerSplash_(sfm.parcelsPerSplash_),
@@ -605,6 +607,18 @@ bool Foam::KinematicSurfaceFilm<CloudType>::transferParcel
     bool& keepParticle
 )
 {
+    if (parcelTypes_.size() && parcelTypes_.find(p.typeId()) == -1)
+    {
+        if (debug)
+        {
+            Pout<< "transferParcel: ignoring particle with typeId="
+                << p.typeId()
+                << endl;
+        }
+
+        return false;
+    }
+
     const label patchi = pp.index();
     const label meshFacei = p.face();
     const label facei = pp.whichFace(meshFacei);
