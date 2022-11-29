@@ -1412,8 +1412,6 @@ void Foam::refinementSurfaces::findAllIntersections
 
     // Work arrays
     List<List<pointIndexHit>> hitInfo;
-    labelList pRegions;
-    vectorField pNormals;
 
     forAll(surfaces_, surfI)
     {
@@ -1507,8 +1505,6 @@ void Foam::refinementSurfaces::findAllIntersections
 
     // Work arrays
     List<List<pointIndexHit>> hitInfo;
-    labelList pRegions;
-    vectorField pNormals;
 
     forAll(surfaces_, surfI)
     {
@@ -1577,6 +1573,88 @@ void Foam::refinementSurfaces::findAllIntersections
         }
     }
 }
+
+
+//void Foam::refinementSurfaces::findAllIntersections
+//(
+//    const labelList& surfacesToTest,
+//    const pointField& start,
+//    const pointField& end,
+//
+//    List<labelList>& hitSurface,            // surface index
+//    List<pointList>& hitLocation,           // surface location
+//    List<labelList>& hitRegion,
+//    List<vectorField>& hitNormal
+//) const
+//{
+//    hitSurface.setSize(start.size());
+//    hitLocation.setSize(start.size());
+//    hitRegion.setSize(start.size());
+//    hitNormal.setSize(start.size());
+//
+//    if (surfaces_.empty())
+//    {
+//        return;
+//    }
+//
+//    // Work arrays
+//    List<List<pointIndexHit>> hitInfo;
+//
+//    for (const label surfI : surfacesToTest)
+//    {
+//        const searchableSurface& surface = allGeometry_[surfaces_[surfI]];
+//
+//        surface.findLineAll(start, end, hitInfo);
+//
+//        // Repack hits for surface into flat list
+//        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//        // To avoid overhead of calling getRegion for every point
+//
+//        label n = 0;
+//        forAll(hitInfo, pointI)
+//        {
+//            n += hitInfo[pointI].size();
+//        }
+//
+//        List<pointIndexHit> surfInfo(n);
+//        labelList pointMap(n);
+//        n = 0;
+//
+//        forAll(hitInfo, pointI)
+//        {
+//            const List<pointIndexHit>& pHits = hitInfo[pointI];
+//
+//            forAll(pHits, i)
+//            {
+//                surfInfo[n] = pHits[i];
+//                pointMap[n] = pointI;
+//                n++;
+//            }
+//        }
+//
+//        labelList surfRegion(n);
+//        vectorField surfNormal(n);
+//        surface.getRegion(surfInfo, surfRegion);
+//        surface.getNormal(surfInfo, surfNormal);
+//
+//        surfInfo.clear();
+//
+//
+//        // Extract back into pointwise
+//        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//        forAll(surfRegion, i)
+//        {
+//            const label pointI = pointMap[i];
+//
+//            // Append to pointI info
+//            hitSurface[pointI].append(surfI);
+//            hitRegion[pointI].append(globalRegion(surfI, surfRegion[i]));
+//            hitLocation[pointI].append(surfInfo[i].hitPoint());
+//            hitNormal[pointI].append(surfNormal[i]);
+//        }
+//    }
+//}
 
 
 void Foam::refinementSurfaces::findNearestIntersection

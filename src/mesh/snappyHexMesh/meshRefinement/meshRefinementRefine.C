@@ -1109,7 +1109,6 @@ Foam::label Foam::meshRefinement::countMatches
 }
 
 
-//XXXXXX
 //bool Foam::meshRefinement::highCurvature
 //(
 //    const scalar minCosAngle,
@@ -1143,7 +1142,7 @@ bool Foam::meshRefinement::highCurvature
         // Co-planar
         return false;
     }
-    else
+    else if (lengthScale > SMALL)
     {
         // Calculate radius of curvature
 
@@ -1169,6 +1168,10 @@ bool Foam::meshRefinement::highCurvature
         {
             return false;
         }
+    }
+    else
+    {
+        return false;
     }
 }
 //XXXXX
@@ -1249,6 +1252,10 @@ Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
     }
 
 
+    // If no curvature supplied behave as before
+    const bool hasCurvatureLevels = (max(surfaces_.maxCurvatureLevel()) > 0);
+
+
     // Test for all intersections (with surfaces of higher max level than
     // minLevel) and cache per cell the interesting inter
     labelListList cellSurfLevels(mesh_.nCells());
@@ -1295,6 +1302,69 @@ Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
             pNormals = List<vector>(pNormals, visitOrder);
             pLevel = labelUIndList(pLevel, visitOrder);
         }
+
+
+        //- At some point could just return the intersected surface+region
+        //  and derive all the surface information (maxLevel, curvatureLevel)
+        //  from that - we're now doing it inside refinementSurfaces itself.
+        //// Per segment the surfaces hit
+        //List<labelList> hitSurface;
+        //List<pointList> hitLocation;
+        //List<labelList> hitRegion;
+        //List<vectorField> hitNormal;
+        //surfaces_.findAllIntersections
+        //(
+        //    identity(surfaces_.surfaces()), // all refinement geometries
+        //    start,
+        //    end,
+        //
+        //    hitSurface,
+        //    hitLocation,
+        //    hitRegion,
+        //    hitNormal
+        //);
+        //
+        //// Filter out levels. minLevel = (mesh) cellLevel (on inbetween face).
+        //// Ignore any surface with higher level
+        //const auto& maxLevel = surfaces_.maxLevel();
+        //labelList visitOrder;
+        //DynamicList<label> valid;
+        //forAll(hitSurface, segmenti)
+        //{
+        //    const label meshLevel = minLevel[segmenti];
+        //
+        //    auto& fSurface = hitSurface[segmenti];
+        //    auto& fLocation = hitLocation[segmenti];
+        //    auto& fRegion = hitRegion[segmenti];
+        //    auto& fNormal = hitNormal[segmenti];
+        //
+        //    // Sort the data according to intersection location. This will
+        //    // guarantee
+        //    // that on coupled faces both sides visit the intersections in
+        //    // the same order so will decide the same
+        //    sortedOrder(fLocation, visitOrder, normalLess(hfLocation));
+        //    fLocation = List<point>(fLocation, visitOrder);
+        //    fSurface = labelUIndList(fSurface, visitOrder);
+        //    fRegion = labelUIndList(fRegion, visitOrder);
+        //    fNormal = List<vector>(fNormal, visitOrder);
+        //
+        //    // Filter out any intersections with surfaces outside cell level.
+        //    // Note that min refinement level of surfaces is ignored.
+        //    valid.clear();
+        //    forAll(fSurface, hiti)
+        //    {
+        //        const label regioni =
+        //            surfaces_.globalRegion(fSurface[hiti], fRegion[hiti]);
+        //        if (meshLevel < maxLevel[regioni]) //&& >= minLevel(regioni)
+        //        {
+        //            valid.append(hiti);
+        //        }
+        //    }
+        //    fLocation = List<point>(fLocation, valid);
+        //    fSurface = labelUIndList(fSurface, valid);
+        //    fRegion = labelUIndList(fRegion, valid);
+        //    fNormal = List<vector>(fNormal, valid);
+        //}
 
         // Clear out unnecessary data
         start.clear();
@@ -1387,13 +1457,16 @@ Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
         {
             for (label j = i+1; !reachedLimit && j < normals.size(); j++)
             {
+                // TBD: calculate curvature size (if curvatureLevel specified)
+                //      and pass in instead of cellSize
+
                 //if ((normals[i] & normals[j]) < curvature)
                 if
                 (
                     highCurvature
                     (
                         curvature,
-                        cellSize,
+                        (hasCurvatureLevels ? cellSize : scalar(0)),
                         points[i],
                         normals[i],
                         points[j],
@@ -1489,7 +1562,7 @@ Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
                         highCurvature
                         (
                             curvature,
-                            cellSize,
+                            (hasCurvatureLevels ? cellSize : scalar(0)),
                             ownPoints[i],
                             ownNormals[i],
                             neiPoints[j],
@@ -1610,7 +1683,7 @@ Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
                         highCurvature
                         (
                             curvature,
-                            cellSize,
+                            (hasCurvatureLevels ? cellSize : scalar(0)),
                             ownPoints[i],
                             ownNormals[i],
                             neiPoints[j],
