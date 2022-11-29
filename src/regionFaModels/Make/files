@@ -24,6 +24,7 @@ liquidFilm/subModels/kinematic/injectionModel/injectionModel/injectionModel.C
 liquidFilm/subModels/kinematic/injectionModel/injectionModel/injectionModelNew.C
 
 liquidFilm/subModels/kinematic/injectionModel/curvatureSeparation/curvatureSeparation.C
+liquidFilm/subModels/kinematic/injectionModel/BrunDrippingInjection/BrunDrippingInjection.C
 
 liquidFilm/subModels/kinematic/force/forceList/forceList.C
 liquidFilm/subModels/kinematic/force/force/force.C
