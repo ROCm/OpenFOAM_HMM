@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,7 +51,7 @@ inline Foam::solidIsothermalReactionRate::solidIsothermalReactionRate
     C_(dict.get<scalar>("C")),
     Cp_(dict.get<scalar>("Cp")),
     Tpc_(dict.get<scalar>("Tpc")),
-    Elat_(dict.getCheck<scalar>("Elat", scalarMinMax::ge(SMALL)))
+    Elat_(dict.get<scalar>("Elat"))
 {}
 
 

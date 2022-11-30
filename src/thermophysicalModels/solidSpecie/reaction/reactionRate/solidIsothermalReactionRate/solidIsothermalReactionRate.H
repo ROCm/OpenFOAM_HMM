@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,32 @@ Class
 
 Description
     Isothermal reaction rate for solids
+
+Usage
+    Minimal example:
+    \verbatim
+    {
+        // Mandatory entries
+        C       <scalar>;
+        Cp      <scalar>;
+        Tpc     <scalar>;
+        Elat    <scalar>;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property  | Description             | Type   | Reqd | Deflt
+      C         | Model constant          | scalar | yes  | -
+      Cp | Specific heat of solid material (assumed constant) | scalar | yes | -
+      Tpc       | Phase change temperature | scalar | yes | -
+      Elat      | Latent heat of phase change | scalar | yes | -
+    \endtable
+
+Note
+  - \c Elat, the latent energy is defined in the present
+    implementation as a negative value (using the convention
+    endothermic process has negative enthalpy.)
 
 SourceFiles
     solidIsothermalReactionRateI.H
