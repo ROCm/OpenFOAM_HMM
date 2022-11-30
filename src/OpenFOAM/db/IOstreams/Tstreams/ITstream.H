@@ -76,6 +76,19 @@ class ITstream
         void reserveCapacity(const label nElem, const bool lazy);
 
 
+        //- Failsafe read-access to token at specified location
+        //- or undefinedToken
+        inline const token& peekAt(const label i) const
+        {
+            return
+            (
+                i >= 0 && i < tokenList::size()
+                ? tokenList::operator[](i)
+                : token::undefinedToken
+            );
+        }
+
+
 public:
 
     // Constructors
@@ -222,28 +235,22 @@ public:
 
         //- Failsafe peek at the \b first token in the list.
         //  \return \c undefinedToken if the list is empty.
-        const token& peekFirst() const;
+        const token& front() const { return peekAt(0); }
 
         //- Failsafe peek at the \b last token in the list.
         //  \return \c undefinedToken if the list is empty.
-        const token& peekLast() const;
+        const token& back() const { return peekAt(tokenList::size()-1); }
 
         //- Failsafe peek at what the next read would return,
-        //  including handling of any putback
+        //- including handling of any putback
         //  \return \c undefinedToken if list is exhausted
         const token& peek() const;
 
         //- The current token index when reading, or the insertion point.
-        label tokenIndex() const noexcept
-        {
-            return tokenIndex_;
-        }
+        label tokenIndex() const noexcept { return tokenIndex_; }
 
         //- Non-const access to the current token index
-        label& tokenIndex() noexcept
-        {
-            return tokenIndex_;
-        }
+        label& tokenIndex() noexcept { return tokenIndex_; }
 
         //- Number of tokens remaining
         label nRemainingTokens() const noexcept
@@ -268,11 +275,11 @@ public:
 
         //- Copy append a token at the current tokenIndex,
         //- incrementing the index.
-        void append(const token& t, const bool lazy);
+        void push_back(const token& t, const bool lazy);
 
         //- Move append a token at the current tokenIndex,
         //- incrementing the index.
-        void append(token&& t, const bool lazy);
+        void push_back(token&& t, const bool lazy);
 
         //- Copy append a list of tokens at the current tokenIndex,
         //- incrementing the index.
@@ -280,7 +287,7 @@ public:
         //  \param newTokens the list of tokens to copy append
         //  \param lazy leaves any excess capacity for further appends.
         //      The caller will be responsible for resizing later.
-        void append(const UList<token>& newTokens, const bool lazy);
+        void push_back(const UList<token>& newTokens, const bool lazy);
 
         //- Move append a list of tokens at the current tokenIndex,
         //- incrementing the index.
@@ -288,7 +295,7 @@ public:
         //  \param newTokens the list of tokens to move append
         //  \param lazy leaves any excess capacity for further appends.
         //      The caller will be responsible for resizing later.
-        void append(List<token>&& newTokens, const bool lazy);
+        void push_back(List<token>&& newTokens, const bool lazy);
 
 
     // Stream State Functions
@@ -404,6 +411,48 @@ public:
         {}
 
     #endif /* Foam_IOstream_extras */
+
+
+    // Housekeeping
+
+        //- Same as front()
+        const token& peekFirst() const { return front(); }
+
+        //- Copy append a token at the current tokenIndex,
+        //- incrementing the index.
+        void append(const token& t, const bool lazy)
+        {
+            this->push_back(std::move(t), lazy);
+        }
+
+        //- Move append a token at the current tokenIndex,
+        //- incrementing the index.
+        void append(token&& t, const bool lazy)
+        {
+            this->push_back(std::move(t), lazy);
+        }
+
+        //- Copy append a list of tokens at the current tokenIndex,
+        //- incrementing the index.
+        //
+        //  \param newTokens the list of tokens to copy append
+        //  \param lazy leaves any excess capacity for further appends.
+        //      The caller will be responsible for resizing later.
+        void append(const UList<token>& newTokens, const bool lazy)
+        {
+            this->push_back(newTokens, lazy);
+        }
+
+        //- Move append a list of tokens at the current tokenIndex,
+        //- incrementing the index.
+        //
+        //  \param newTokens the list of tokens to move append
+        //  \param lazy leaves any excess capacity for further appends.
+        //      The caller will be responsible for resizing later.
+        void append(List<token>&& newTokens, const bool lazy)
+        {
+            this->push_back(std::move(newTokens), lazy);
+        }
 };
 
 

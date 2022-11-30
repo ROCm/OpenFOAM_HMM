@@ -1014,7 +1014,7 @@ bool Foam::functionObjectList::read()
 
                 if (key == "useNamePrefix")  // As per functionObject
                 {
-                    Switch sw(dEntry.stream().peekFirst());
+                    Switch sw(dEntry.stream().front());
                     if (sw.good())
                     {
                         functionObject::defaultUseNamePrefix = sw;

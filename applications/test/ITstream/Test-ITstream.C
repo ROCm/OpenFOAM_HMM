@@ -126,8 +126,8 @@ void doTest
 
     if (testskip)
     {
-        Info<< " first : " << its.peekFirst().info() << nl
-            << " last  : " << its.peekLast().info() << nl;
+        Info<< " front : " << its.front().info() << nl
+            << " back  : " << its.back().info() << nl;
 
         Info<< "rewind():" << nl;
         reportPeek(its);

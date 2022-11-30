@@ -56,10 +56,10 @@ bool Foam::functionEntries::ifEntry::isTrue(ITstream& its)
 {
     Switch logic;
 
-    if (its.peekFirst().isScalar())
+    if (its.front().isScalar())
     {
         // Use default rounding tolerance
-        logic = Switch(its.first().scalarToken());
+        logic = Switch(its.front().scalarToken());
     }
     else
     {

@@ -36,23 +36,6 @@ License
 namespace Foam
 {
 
-// Failsafe read-access.
-// Return the token at location, or undefinedToken.
-inline static const token& peekTokenAt
-(
-    const UList<token>& list,
-    const label i
-)
-{
-    return
-    (
-        i >= 0 && i < list.size()
-      ? list[i]
-      : token::undefinedToken
-    );
-}
-
-
 // Convert input sequence into a list of tokens.
 // Return the number of tokens in the resulting list.
 static label parseStream(ISstream& is, tokenList& tokens)
@@ -337,18 +320,6 @@ std::string Foam::ITstream::toString() const
 }
 
 
-const Foam::token& Foam::ITstream::peekFirst() const
-{
-    return peekTokenAt(*this, 0);
-}
-
-
-const Foam::token& Foam::ITstream::peekLast() const
-{
-    return peekTokenAt(*this, tokenList::size()-1);
-}
-
-
 const Foam::token& Foam::ITstream::peek() const
 {
     // Use putback token if it exists
@@ -357,7 +328,7 @@ const Foam::token& Foam::ITstream::peek() const
         return Istream::peekBack();
     }
 
-    return peekTokenAt(*this, tokenIndex_);
+    return peekAt(tokenIndex_);
 }
 
 
@@ -564,7 +535,7 @@ void Foam::ITstream::rewind()
 }
 
 
-void Foam::ITstream::append(const token& t, const bool lazy)
+void Foam::ITstream::push_back(const token& t, const bool lazy)
 {
     reserveCapacity(tokenIndex_ + 1, lazy);
     tokenList& toks = *this;
@@ -574,7 +545,7 @@ void Foam::ITstream::append(const token& t, const bool lazy)
 }
 
 
-void Foam::ITstream::append(token&& t, const bool lazy)
+void Foam::ITstream::push_back(token&& t, const bool lazy)
 {
     reserveCapacity(tokenIndex_ + 1, lazy);
     tokenList& toks = *this;
@@ -584,7 +555,7 @@ void Foam::ITstream::append(token&& t, const bool lazy)
 }
 
 
-void Foam::ITstream::append(const UList<token>& newTokens, const bool lazy)
+void Foam::ITstream::push_back(const UList<token>& newTokens, const bool lazy)
 {
     reserveCapacity(tokenIndex_ + newTokens.size(), lazy);
     tokenList& toks = *this;
@@ -597,7 +568,7 @@ void Foam::ITstream::append(const UList<token>& newTokens, const bool lazy)
 }
 
 
-void Foam::ITstream::append(List<token>&& newTokens, const bool lazy)
+void Foam::ITstream::push_back(List<token>&& newTokens, const bool lazy)
 {
     reserveCapacity(tokenIndex_ + newTokens.size(), lazy);
     tokenList& toks = *this;
