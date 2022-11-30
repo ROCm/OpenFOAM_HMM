@@ -67,11 +67,11 @@ int main(int argc, char *argv[])
 
     for (int i = 0; i<10; i++)
     {
-        myList.append(1.3*i);
+        myList.push_back(1.3*i);
     }
 
-    myList.append(100.3);
-    myList.append(500.3);
+    myList.push_back(100.3);
+    myList.push_back(500.3);
 
     Info<< "SLList<scalar>" << myList << nl;
     Info<< nl << "flat-output: " << flatOutput(myList) << nl;
@@ -103,11 +103,11 @@ int main(int argc, char *argv[])
 
     for (int i = 0; i<10; i++)
     {
-        myList.append(1.3*i);
+        myList.push_back(1.3*i);
     }
 
-    myList.append(100.3);
-    myList.append(500.3);
+    myList.push_back(100.3);
+    myList.push_back(500.3);
 
     Info<< nl << "Transfer: " << nl;
     Info<< "original: " << flatOutput(myList) << endl;
@@ -143,7 +143,7 @@ int main(int argc, char *argv[])
 
         for (int i = 0; i<5; i++)
         {
-            labList.append(identity(6));
+            labList.push_back(identity(6));
         }
 
         Info<< nl
@@ -164,16 +164,16 @@ int main(int argc, char *argv[])
         List<label> content1 = identity(10);
 
         Info<< nl
-            << " move append ";
+            << " move push_back ";
         printAddress(content1);
 
-        labList.append(std::move(content1));
+        labList.push_back(std::move(content1));
 
         Info<< " content " << flatOutput(content1) << nl
             << " list" << labList  << nl;
 
         printAddresses(labList);
-        // labList.append(content1);
+        // labList.push_back(content1);
     }
 
     Info<< nl << "Done." << endl;

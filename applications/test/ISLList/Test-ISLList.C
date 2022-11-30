@@ -76,11 +76,11 @@ int main(int argc, char *argv[])
 
     for (int i = 0; i<10; i++)
     {
-        myList.append(new Scalar(1.3*i));
+        myList.push_back(new Scalar(1.3*i));
     }
 
-    myList.append(new Scalar(100.3));
-    myList.append(new Scalar(500.3));
+    myList.push_back(new Scalar(100.3));
+    myList.push_back(new Scalar(500.3));
 
     Info<< "ISLList<scalar>" << myList << nl;
     Info<< nl << "flat-output: " << flatOutput(myList) << nl;

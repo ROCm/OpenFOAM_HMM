@@ -214,8 +214,8 @@ int main(int argc, char *argv[])
     forAllReverseIters(list2, iter) { *iter *= 0.5; Info<< " " << *iter; }
     Info<< endl;
 
-    list1.append(list2);
-    Info<< "list1.append(list2): " << list1 << endl;
+    list1.push_back(list2);
+    Info<< "list1.push_back(list2): " << list1 << endl;
 
     for (const vector& val : { vector(3, 4, 5), vector(10,11, 12)} )
     {

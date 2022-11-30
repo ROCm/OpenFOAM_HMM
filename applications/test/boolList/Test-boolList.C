@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -165,24 +165,24 @@ int main(int argc, char *argv[])
 
         // Use predicate, or test() method
 
-        if (list2(1))
+        if (list2.test(1))
         {
             Info<< "1 is on (original)" << nl;
         }
-        if (!list2(2))
+        if (!list2.test(2))
         {
             Info<< "2 is off (original)" << nl;
         }
-        if (!list2(100))
+        if (!list2.test(100))
         {
             Info<< "100 is off (original)" << nl;
         }
 
-        if (wrapper(1))
+        if (wrapper.test(1))
         {
             Info<< "1 is on (wrapped)" << nl;
         }
-        if (!wrapper(2))
+        if (!wrapper.test(2))
         {
             Info<< "2 is off (wrapped)" << nl;
         }

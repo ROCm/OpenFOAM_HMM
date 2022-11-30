@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -245,10 +245,10 @@ int main(int argc, char *argv[])
     list1.resize(8);
     report(list1);
 
-    Info<< "\ntest append() operation\n";
-    list1.append(2);
-    list1.append(3);
-    list1.append(4);
+    Info<< "\ntest push_back() operation\n";
+    list1.push_back(2);
+    list1.push_back(3);
+    list1.push_back(4);
     report(list1);
 
     Info<< "\ntest reserve() operation\n";
@@ -326,9 +326,9 @@ int main(int argc, char *argv[])
     report(list1);
 
 
-    Info<< "\ntest copy constructor + append\n";
+    Info<< "\ntest copy constructor + push_back\n";
     PackedList<3> list2(list1);
-    list2.append(4);
+    list2.push_back(4);
     Info<< "source list:\n";
     report(list1);
 

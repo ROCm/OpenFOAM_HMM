@@ -103,7 +103,7 @@ public:
     // Sizing
 
         //- Size of the underlying storage.
-        inline label capacity() const noexcept;
+        label capacity() const noexcept { return capacity_; }
 
         //- Reserve allocation space for at least this size.
         inline void reserve(const label len);
@@ -268,7 +268,7 @@ public:
         template<int AnySizeMin>
         void append(PtrDynList<T, AnySizeMin>&& other)
         {
-            this->push_back(other);
+            this->push_back(std::move(other));
         }
 };
 

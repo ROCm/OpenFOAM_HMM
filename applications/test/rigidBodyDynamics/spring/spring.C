@@ -31,6 +31,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
+#include "argList.H"
+#include "Time.H"
 #include "rigidBodyMotion.H"
 #include "masslessBody.H"
 #include "sphere.H"
@@ -46,10 +48,14 @@ using namespace RBD;
 
 int main(int argc, char *argv[])
 {
+    #include "setRootCase.H"
+
+    autoPtr<Time> dummyTimePtr(Time::New(args));
+
     dictionary springDict(IFstream("spring")());
 
     // Create the spring model from dictionary
-    rigidBodyMotion spring(springDict);
+    rigidBodyMotion spring(dummyTimePtr(), springDict);
 
     label nIter(springDict.get<label>("nIter"));
 

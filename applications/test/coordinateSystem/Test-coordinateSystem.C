@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,7 +59,7 @@ void basicTests(const coordinateSystem& cs)
 {
     cs.writeEntry(cs.name(), Info);
 
-    if ((const auto* cartptr = isA<coordSystem::cartesian>(cs)) != nullptr)
+    if (const auto* cartptr = isA<coordSystem::cartesian>(cs))
     {
         if (!cartptr->valid())
         {
