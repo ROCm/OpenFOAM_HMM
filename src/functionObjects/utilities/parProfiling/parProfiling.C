@@ -86,7 +86,7 @@ void Foam::functionObjects::parProfiling::report()
 
     // (Time, Processor) for each of: min/max/sum
     typedef FixedList<Tuple2<double, int>, 3> statData;
-    typedef FixedList<statData, 2> statDataTimes;
+    typedef FixedList<statData, 3> statDataTimes;
 
     // Reduction: if x and y are unequal assign value.
     auto statsEqOp = [](statDataTimes& xStats, const statDataTimes& yStats)
@@ -111,8 +111,9 @@ void Foam::functionObjects::parProfiling::report()
 
     statDataTimes times;
 
+    // Master time
     {
-        const double masterTime =
+        const double total =
         (
             profilingPstream::times(profilingPstream::REDUCE)
           + profilingPstream::times(profilingPstream::GATHER)
@@ -121,17 +122,29 @@ void Foam::functionObjects::parProfiling::report()
           + profilingPstream::times(profilingPstream::BROADCAST)
         );
 
-        times[0] = Tuple2<double, int>(masterTime, Pstream::myProcNo());
+        times[0] = Tuple2<double, int>(total, Pstream::myProcNo());
     }
 
+    // All time
     {
-        const double allTime =
+        const double total =
         (
             profilingPstream::times(profilingPstream::WAIT)
           + profilingPstream::times(profilingPstream::ALL_TO_ALL)
+          + profilingPstream::times(profilingPstream::OTHER)
         );
 
-        times[1] = Tuple2<double, int>(allTime, Pstream::myProcNo());
+        times[1] = Tuple2<double, int>(total, Pstream::myProcNo());
+    }
+
+    // Other time
+    {
+        const double total =
+        (
+            profilingPstream::times(profilingPstream::OTHER)
+        );
+
+        times[2] = Tuple2<double, int>(total, Pstream::myProcNo());
     }
 
     profilingPstream::suspend();
@@ -143,27 +156,43 @@ void Foam::functionObjects::parProfiling::report()
 
     if (Pstream::master())
     {
-        const statData& reduceStats = times[0];
-        const statData& allToAllStats = times[1];
-
-        double reduceAvg = reduceStats[2].first()/Pstream::nProcs();
-        double allToAllAvg = allToAllStats[2].first()/Pstream::nProcs();
-
         Info<< type() << ':' << nl
-            << incrIndent
+            << incrIndent;
 
-            << indent << "reduce    : avg = " << reduceAvg << 's' << nl
-            << indent << "            min = " << reduceStats[0].first()
-            << "s (processor " << reduceStats[0].second() << ')' << nl
-            << indent << "            max = " << reduceStats[1].first()
-            << "s (processor " << reduceStats[1].second() << ')' << nl
+        {
+            const statData& stats = times[0];
+            double avg = stats[2].first()/Pstream::nProcs();
 
-            << indent << "all-all   : avg = " << allToAllAvg << 's' << nl
-            << indent << "            min = " << allToAllStats[0].first()
-            << "s (processor " << allToAllStats[0].second() << ')' << nl
-            << indent << "            max = " << allToAllStats[1].first()
-            << "s (processor " << allToAllStats[1].second() << ')'
-            << decrIndent << endl;
+            Info<< indent << "reduce    : avg = " << avg << 's' << nl
+                << indent << "            min = " << stats[0].first()
+                << "s (processor " << stats[0].second() << ')' << nl
+                << indent << "            max = " << stats[1].first()
+                << "s (processor " << stats[1].second() << ')' << nl;
+        }
+
+        {
+            const statData& stats = times[1];
+            double avg = stats[2].first()/Pstream::nProcs();
+
+            Info<< indent << "all-all   : avg = " << avg << 's' << nl
+                << indent << "            min = " << stats[0].first()
+                << "s (processor " << stats[0].second() << ')' << nl
+                << indent << "            max = " << stats[1].first()
+                << "s (processor " << stats[1].second() << ')' << nl;
+        }
+
+        {
+            const statData& stats = times[2];
+            double avg = stats[2].first()/Pstream::nProcs();
+
+            Info<< indent << "other     : avg = " << avg << 's' << nl
+                << indent << "            min = " << stats[0].first()
+                << "s (processor " << stats[0].second() << ')' << nl
+                << indent << "            max = " << stats[1].first()
+                << "s (processor " << stats[1].second() << ')' << nl;
+        }
+
+        Info<< decrIndent;
     }
 }
 

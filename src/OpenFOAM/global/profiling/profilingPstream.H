@@ -65,11 +65,12 @@ public:
             BROADCAST,
             REDUCE,
             WAIT,
-            ALL_TO_ALL
+            ALL_TO_ALL,
+            OTHER
         };
 
         //- The timing values
-        typedef FixedList<double, 6> timingList;
+        typedef FixedList<double, 7> timingList;
 
 
 private:
@@ -104,40 +105,40 @@ public:
         static void enable();
 
         //- Remove timer for measuring communication activity
-        static void disable();
+        static void disable() noexcept;
 
         //- Suspend use of timer (if active)
-        inline static void suspend()
+        static void suspend() noexcept
         {
             suspend_ = bool(timer_);
         }
 
         //- Resume use of timer (if previously active)
-        static void resume()
+        static void resume() noexcept
         {
             suspend_ = false;
         }
 
-        //- Timer is active
-        inline static bool active()
+        //- Timer is active (not suspended and enabled)
+        static bool active() noexcept
         {
             return !suspend_ && bool(timer_);
         }
 
         //- Access to the timing information
-        inline static timingList& times()
+        static timingList& times() noexcept
         {
             return times_;
         }
 
         //- Access to the timing information at given index
-        inline static double times(const enum timingType idx)
+        static double times(const timingType idx)
         {
             return times_[idx];
         }
 
         //- Update timer prior to measurement
-        inline static void beginTiming()
+        static void beginTiming()
         {
             if (active())
             {
@@ -146,7 +147,7 @@ public:
         }
 
         //- Add time increment
-        inline static void addTime(const enum timingType idx)
+        static void addTime(const timingType idx)
         {
             if (active())
             {
@@ -154,40 +155,46 @@ public:
             }
         }
 
-        //- Add time increment to gatherTime
-        inline static void addGatherTime()
+        //- Add time increment to \em gather time
+        static void addGatherTime()
         {
-            addTime(GATHER);
+            addTime(timingType::GATHER);
         }
 
-        //- Add time increment to scatterTime
-        inline static void addScatterTime()
+        //- Add time increment to \em scatter time
+        static void addScatterTime()
         {
-            addTime(SCATTER);
+            addTime(timingType::SCATTER);
         }
 
-        //- Add time increment to broadcastTime
-        inline static void addBroadcastTime()
+        //- Add time increment to \em broadcast time
+        static void addBroadcastTime()
         {
-            addTime(BROADCAST);
+            addTime(timingType::BROADCAST);
         }
 
-        //- Add time increment to reduceTime
-        inline static void addReduceTime()
+        //- Add time increment to \em reduce time
+        static void addReduceTime()
         {
-            addTime(REDUCE);
+            addTime(timingType::REDUCE);
         }
 
-        //- Add time increment to waitTime
-        inline static void addWaitTime()
+        //- Add time increment to \em wait time
+        static void addWaitTime()
         {
-            addTime(WAIT);
+            addTime(timingType::WAIT);
         }
 
-        //- Add time increment to allToAllTime
-        inline static void addAllToAllTime()
+        //- Add time increment to \em allToAll time
+        static void addAllToAllTime()
         {
-            addTime(ALL_TO_ALL);
+            addTime(timingType::ALL_TO_ALL);
+        }
+
+        //- Add time increment to \em other time
+        static void addOtherTime()
+        {
+            addTime(timingType::OTHER);
         }
 };
 
