@@ -147,6 +147,10 @@ protected:
             //- Interaction type enumeration
             interactionType interactionType_;
 
+            //- Particle type IDs that can interact with the film
+            //  If empty (default) all type IDs are included
+            labelList parcelTypes_;
+
             //- Film thickness beyond which patch is assumed to be wet
             scalar deltaWet_;
 
