@@ -28,7 +28,6 @@ License
 
 #include "UList.H"
 #include "SLList.H"
-#include <utility>
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 

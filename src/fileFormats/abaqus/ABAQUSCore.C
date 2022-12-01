@@ -31,7 +31,6 @@ License
 #include "stringOps.H"
 #include "UIListStream.H"
 #include "cellModel.H"
-#include <algorithm>
 #include <cctype>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //

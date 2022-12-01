@@ -61,8 +61,6 @@ SourceFiles
 #include "vtkPoints.h"
 #include "vtkPolyData.h"
 
-#include <utility>
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Forward Declarations

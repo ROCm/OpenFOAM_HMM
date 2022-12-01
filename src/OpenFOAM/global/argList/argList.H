@@ -96,8 +96,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef argList_H
-#define argList_H
+#ifndef Foam_argList_H
+#define Foam_argList_H
 
 #include "stringList.H"
 #include "SLList.H"
@@ -107,7 +107,6 @@ SourceFiles
 #include "ITstream.H"
 #include "dlLibraryTable.H"
 #include "OSspecific.H"
-#include <utility>
 
 // Transitional features - older style access (including 1712 release)
 #define Foam_argList_1712

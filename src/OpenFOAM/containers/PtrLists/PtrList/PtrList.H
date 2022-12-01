@@ -48,8 +48,6 @@ SourceFiles
 
 #include "UPtrList.H"
 #include "SLPtrListFwd.H"
-#include <memory>
-#include <utility>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -33,7 +33,6 @@ Description
 #include "IOstreams.H"
 #include "stdFoam.H"
 
-#include <algorithm>
 #include <type_traits>
 #include <limits>
 

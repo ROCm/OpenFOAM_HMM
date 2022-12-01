@@ -51,10 +51,9 @@ SourceFiles
 #include "SLListFwd.H"
 #include "ListPolicy.H"
 
-#include <initializer_list>
 #include <iterator>
-#include <type_traits>
 #include <limits>
+#include <type_traits>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

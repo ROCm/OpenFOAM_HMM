@@ -40,8 +40,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef HashOps_H
-#define HashOps_H
+#ifndef Foam_HashOps_H
+#define Foam_HashOps_H
 
 #include "HashSet.H"
 #include "List.H"

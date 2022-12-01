@@ -28,7 +28,6 @@ License
 
 #include "treeDataEdge.H"
 #include "indexedOctree.H"
-#include <algorithm>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

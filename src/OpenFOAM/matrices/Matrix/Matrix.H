@@ -47,8 +47,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Matrix_H
-#define Matrix_H
+#ifndef Foam_Matrix_H
+#define Foam_Matrix_H
 
 #include "uLabel.H"
 #include "Pair.H"

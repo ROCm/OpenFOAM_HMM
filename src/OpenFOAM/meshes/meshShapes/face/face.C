@@ -31,7 +31,6 @@ License
 #include "triangle.H"
 #include "mathematicalConstants.H"
 #include "Circulator.H"
-#include <algorithm>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

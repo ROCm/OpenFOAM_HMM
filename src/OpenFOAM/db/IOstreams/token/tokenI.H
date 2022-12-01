@@ -26,7 +26,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include <algorithm>
+#include <utility>  // For std::move, std::swap
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 

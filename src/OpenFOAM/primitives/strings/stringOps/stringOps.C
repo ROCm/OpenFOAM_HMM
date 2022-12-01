@@ -33,7 +33,6 @@ License
 #include "StringStream.H"
 #include "OSstream.H"
 #include "OSspecific.H"
-#include <algorithm>
 #include <cctype>
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //

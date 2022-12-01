@@ -31,7 +31,6 @@ License
 #include "MinMax.H"
 #include "indexedOctree.H"
 #include "treeDataPoint.H"
-#include <algorithm>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

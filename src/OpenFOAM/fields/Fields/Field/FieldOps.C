@@ -27,7 +27,6 @@ License
 
 #include "Pstream.H"
 #include "ops.H"
-#include <algorithm>
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 

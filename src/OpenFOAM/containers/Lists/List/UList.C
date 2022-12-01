@@ -31,7 +31,6 @@ License
 #include "contiguous.H"
 #include "labelRange.H"
 
-#include <algorithm>
 #include <random>
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //

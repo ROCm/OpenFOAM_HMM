@@ -137,14 +137,13 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef EigenMatrix_H
-#define EigenMatrix_H
+#ifndef Foam_EigenMatrix_H
+#define Foam_EigenMatrix_H
 
 #include "scalarMatrices.H"
 #include "DiagonalMatrix.H"
 #include "SquareMatrix.H"
 #include "complex.H"
-#include <algorithm>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

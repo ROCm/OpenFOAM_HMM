@@ -31,7 +31,6 @@ License
 #include "triangle.H"
 #include "triSurfaceTools.H"
 #include "triFace.H"
-#include <algorithm>
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 

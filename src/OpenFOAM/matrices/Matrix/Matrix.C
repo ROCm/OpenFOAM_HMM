@@ -28,7 +28,6 @@ License
 
 #include "Matrix.H"
 #include <functional>
-#include <algorithm>
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 

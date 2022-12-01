@@ -30,7 +30,6 @@ License
 #include "HashSet.H"
 #include "List.H"
 #include "labelRange.H"
-#include <algorithm>
 
 // * * * * * * * * * * * * * * * * * BitOps  * * * * * * * * * * * * * * * * //
 

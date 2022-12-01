@@ -28,7 +28,6 @@ License
 
 #include "IOstreams.H"
 #include "face.H"
-#include <algorithm>  // For std::swap
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 

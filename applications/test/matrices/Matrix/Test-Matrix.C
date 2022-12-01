@@ -32,7 +32,6 @@ License
 #include "Random.H"
 #include "SortList.H"
 #include "Switch.H"
-#include <algorithm>
 
 using namespace Foam;
 using namespace Foam::MatrixTools;

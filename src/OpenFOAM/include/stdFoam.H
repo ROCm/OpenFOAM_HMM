@@ -32,6 +32,7 @@ Description
 #ifndef Foam_stdFoam_H
 #define Foam_stdFoam_H
 
+#include <algorithm>
 #include <initializer_list>
 #include <memory>
 #include <utility>

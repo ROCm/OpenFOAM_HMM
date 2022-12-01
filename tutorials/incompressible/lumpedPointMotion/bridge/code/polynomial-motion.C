@@ -45,7 +45,6 @@ Note
 #include "lumpedPointTools.H"
 #include "lumpedPointState.H"
 #include "lumpedPointIOMovement.H"
-#include <algorithm>
 
 using namespace Foam;
 

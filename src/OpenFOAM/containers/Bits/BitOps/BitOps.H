@@ -46,13 +46,10 @@ Description
 #ifndef Foam_BitOps_H
 #define Foam_BitOps_H
 
-#include "label.H"
 #include "UList.H"
 #include "HashSet.H"
 #include "Ostream.H"
-#include <algorithm>
 #include <limits>
-#include <utility>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

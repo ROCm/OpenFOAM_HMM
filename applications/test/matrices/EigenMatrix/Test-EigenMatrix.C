@@ -43,7 +43,6 @@ Description
 #include "IOmanip.H"
 #include "EigenMatrix.H"
 #include "TestTools.H"
-#include <algorithm>
 
 using namespace Foam;
 

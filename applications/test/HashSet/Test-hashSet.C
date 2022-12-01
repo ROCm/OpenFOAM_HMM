@@ -37,8 +37,6 @@ Description
 #include "labelPairHashes.H"
 #include "FlatOutput.H"
 
-#include <algorithm>
-
 using namespace Foam;
 
 template<class Iter>

@@ -56,10 +56,9 @@ SourceFiles
 #include "Hash.H"
 #include "ListPolicy.H"
 
-#include <initializer_list>
 #include <iterator>
 #include <type_traits>
-#include <vector>
+#include <vector>  // i.e, std::vector
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

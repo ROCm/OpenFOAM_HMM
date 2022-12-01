@@ -40,7 +40,7 @@ Note
 #define Foam_UniformList_H
 
 #include "labelFwd.H"
-#include <utility>
+#include <utility>  // For std::move
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

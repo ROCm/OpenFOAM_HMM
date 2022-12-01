@@ -32,7 +32,6 @@ License
 #include "token.H"
 #include "contiguous.H"
 #include "ListPolicy.H"
-#include <algorithm>
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

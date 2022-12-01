@@ -30,7 +30,6 @@ License
 #include "argList.H"
 #include "Time.H"
 #include "addToRunTimeSelectionTable.H"
-#include <algorithm>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

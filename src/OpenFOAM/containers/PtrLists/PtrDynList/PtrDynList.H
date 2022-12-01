@@ -43,8 +43,6 @@ SourceFiles
 
 #include "PtrList.H"
 #include <type_traits>
-#include <memory>
-#include <utility>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

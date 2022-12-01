@@ -44,7 +44,7 @@ See also
 
 #include "FixedList.H"
 #include "Istream.H"
-#include <utility>
+#include <utility>  // For std::move
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

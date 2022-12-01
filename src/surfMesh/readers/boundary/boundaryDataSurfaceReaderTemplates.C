@@ -29,7 +29,6 @@ License
 #include "rawIOField.H"
 #include "argList.H"
 #include "Time.H"
-#include <algorithm>
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 

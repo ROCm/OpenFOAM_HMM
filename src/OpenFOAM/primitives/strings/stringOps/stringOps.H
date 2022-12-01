@@ -36,8 +36,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef stringOps_H
-#define stringOps_H
+#ifndef Foam_stringOps_H
+#define Foam_stringOps_H
 
 #include "scalar.H"
 #include "string.H"
@@ -48,7 +48,6 @@ SourceFiles
 #include "stringOpsSort.H"
 #include "stringOpsEvaluate.H"
 #include "wordRes.H"
-#include <utility>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

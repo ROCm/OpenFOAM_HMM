@@ -84,15 +84,14 @@ SourceFiles
 #ifndef Foam_HashTable_H
 #define Foam_HashTable_H
 
+#include "stdFoam.H"
 #include "word.H"
 #include "zero.H"
 #include "Hash.H"
 #include "HashTableDetail.H"
 #include "HashTableCore.H"
 
-#include <initializer_list>
 #include <iterator>
-#include <utility>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

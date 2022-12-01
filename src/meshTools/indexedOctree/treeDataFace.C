@@ -29,7 +29,6 @@ License
 #include "treeDataFace.H"
 #include "polyMesh.H"
 #include "triangle.H"
-#include <algorithm>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
