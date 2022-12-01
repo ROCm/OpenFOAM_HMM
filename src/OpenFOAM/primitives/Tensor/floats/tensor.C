@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,7 @@ License
 #include "tensor.H"
 #include "cubicEqn.H"
 #include "mathematicalConstants.H"
+#include "SVD.H"
 
 using namespace Foam::constant::mathematical;
 
@@ -298,6 +299,31 @@ Foam::Tensor<Foam::complex> Foam::eigenVectors(const tensor& T)
     const Vector<complex> eVals(eigenValues(T));
 
     return eigenVectors(T, eVals);
+}
+
+
+Foam::tensor Foam::inv(const tensor& t)
+{
+    const scalar dt = det(t);
+
+    if (dt < ROOTVSMALL)
+    {
+        // Fall back to pseudo inverse
+        scalarRectangularMatrix pinv(3, 3);
+
+        std::copy(t.cbegin(), t.cend(), pinv.begin());
+
+        pinv = SVDinv(pinv);
+
+        return tensor
+        (
+            pinv(0,0), pinv(0,1), pinv(0,2),
+            pinv(1,0), pinv(1,1), pinv(1,2),
+            pinv(2,0), pinv(2,1), pinv(2,2)
+        );
+    }
+
+    return inv(t, dt);
 }
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,79 +49,7 @@ UNARY_FUNCTION(tensor, tensor, dev)
 UNARY_FUNCTION(tensor, tensor, dev2)
 UNARY_FUNCTION(scalar, tensor, det)
 UNARY_FUNCTION(tensor, tensor, cof)
-
-void inv(Field<tensor>& tf, const UList<tensor>& tf1)
-{
-    if (tf.empty())
-    {
-        return;
-    }
-
-    scalar scale = magSqr(tf1[0]);
-    Vector<bool> removeCmpts
-    (
-        magSqr(tf1[0].xx())/scale < SMALL,
-        magSqr(tf1[0].yy())/scale < SMALL,
-        magSqr(tf1[0].zz())/scale < SMALL
-    );
-
-    if (removeCmpts.x() || removeCmpts.y() || removeCmpts.z())
-    {
-        tensorField tf1Plus(tf1);
-
-        if (removeCmpts.x())
-        {
-            tf1Plus += tensor(1,0,0,0,0,0,0,0,0);
-        }
-
-        if (removeCmpts.y())
-        {
-            tf1Plus += tensor(0,0,0,0,1,0,0,0,0);
-        }
-
-        if (removeCmpts.z())
-        {
-            tf1Plus += tensor(0,0,0,0,0,0,0,0,1);
-        }
-
-        TFOR_ALL_F_OP_FUNC_F(tensor, tf, =, inv, tensor, tf1Plus)
-
-        if (removeCmpts.x())
-        {
-            tf -= tensor(1,0,0,0,0,0,0,0,0);
-        }
-
-        if (removeCmpts.y())
-        {
-            tf -= tensor(0,0,0,0,1,0,0,0,0);
-        }
-
-        if (removeCmpts.z())
-        {
-            tf -= tensor(0,0,0,0,0,0,0,0,1);
-        }
-    }
-    else
-    {
-        TFOR_ALL_F_OP_FUNC_F(tensor, tf, =, inv, tensor, tf1)
-    }
-}
-
-tmp<tensorField> inv(const UList<tensor>& tf)
-{
-    auto tres = tmp<tensorField>::New(tf.size());
-    inv(tres.ref(), tf);
-    return tres;
-}
-
-tmp<tensorField> inv(const tmp<tensorField>& tf)
-{
-    auto tres = New(tf);
-    inv(tres.ref(), tf());
-    tf.clear();
-    return tres;
-}
-
+UNARY_FUNCTION(tensor, tensor, inv)
 UNARY_FUNCTION(vector, symmTensor, eigenValues)
 UNARY_FUNCTION(tensor, symmTensor, eigenVectors)
 
