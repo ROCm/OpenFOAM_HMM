@@ -17,5 +17,6 @@ $(derivedSources)/externalFileSource/externalFileSource.C
 corrections=corrections
 
 $(corrections)/limitVelocity/limitVelocity.C
+$(corrections)/limitHeight/limitHeight.C
 
 LIB = $(FOAM_LIBBIN)/libfaOptions
