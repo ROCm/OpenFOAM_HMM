@@ -58,10 +58,14 @@ extern int nTags_;
 //- Free'd message tags
 extern DynamicList<int> freedTags_;
 
-// Current communicators. First element will be MPI_COMM_WORLD
+// Current communicators, which may be allocated or predefined
+// (eg, MPI_COMM_SELF, MPI_COMM_WORLD)
 extern DynamicList<MPI_Comm> MPICommunicators_;
+
+// Groups associated with the currrent communicators.
 extern DynamicList<MPI_Group> MPIGroups_;
 
+//- Fatal if comm is outside the allocated range
 void checkCommunicator(const label comm, const label toProcNo);
 
 

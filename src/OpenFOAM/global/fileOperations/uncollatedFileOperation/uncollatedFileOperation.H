@@ -53,6 +53,12 @@ class uncollatedFileOperation
 :
     public fileOperation
 {
+    // Private Data
+
+        //- Communicator allocated/managed by us
+        label managedComm_;
+
+
     // Private Member Functions
 
         //- Any initialisation steps after constructing
@@ -95,7 +101,7 @@ public:
 
 
     //- Destructor
-    virtual ~uncollatedFileOperation() = default;
+    virtual ~uncollatedFileOperation();
 
 
     // Member Functions

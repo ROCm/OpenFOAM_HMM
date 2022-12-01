@@ -88,6 +88,12 @@ class masterUncollatedFileOperation
 :
     public fileOperation
 {
+    // Private Data
+
+        //- Communicator allocated/managed by us
+        label managedComm_;
+
+
     // Private Member Functions
 
         //- Any initialisation steps after constructing
@@ -96,9 +102,6 @@ class masterUncollatedFileOperation
 protected:
 
     // Protected Data
-
-        //- Any communicator allocated by me
-        const label myComm_;
 
         //- Cached times for a given directory
         mutable HashPtrTable<DynamicList<instant>> times_;
@@ -743,9 +746,6 @@ public:
 
 
         // Other
-
-            //- Same file?
-            static bool uniformFile(const fileNameList&);
 
             //- Get sorted list of times
             virtual instantList findTimes(const fileName&, const word&) const;

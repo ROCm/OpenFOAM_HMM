@@ -295,6 +295,42 @@ Foam::fileOperation::sortTimes
 }
 
 
+bool Foam::fileOperation::uniformFile(const fileNameList& names)
+{
+    if (names.empty())
+    {
+        return false;
+    }
+
+    const auto& object0 = names[0];
+
+    for (label i = 1; i < names.size(); ++i)
+    {
+        if (object0 != names[i])
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
+bool Foam::fileOperation::uniformFile(const label comm, const fileName& name)
+{
+    if (!Pstream::parRun())
+    {
+        return true;
+    }
+
+    fileName masterName(name);
+
+    Pstream::broadcast(masterName, comm);
+
+    return returnReduceAnd((masterName == name), comm);
+}
+
+
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 Foam::fileMonitor& Foam::fileOperation::monitor() const
@@ -710,6 +746,18 @@ Foam::fileOperation::New
     bool verbose
 )
 {
+    if (handlerType.empty())
+    {
+        if (fileOperation::defaultFileHandler.empty())
+        {
+            FatalErrorInFunction
+                << "defaultFileHandler name is undefined" << nl
+                << abort(FatalError);
+        }
+
+        return fileOperation::New(fileOperation::defaultFileHandler, verbose);
+    }
+
     DebugInFunction
         << "Constructing fileHandler" << endl;
 
@@ -1511,14 +1559,14 @@ const Foam::fileOperation& Foam::fileHandler()
 {
     if (!fileOperation::fileHandlerPtr_)
     {
-        word handler(Foam::getEnv("FOAM_FILEHANDLER"));
+        word handlerType(Foam::getEnv("FOAM_FILEHANDLER"));
 
-        if (handler.empty())
+        if (handlerType.empty())
         {
-            handler = fileOperation::defaultFileHandler;
+            handlerType = fileOperation::defaultFileHandler;
         }
 
-        fileOperation::fileHandlerPtr_ = fileOperation::New(handler, true);
+        fileOperation::fileHandlerPtr_ = fileOperation::New(handlerType, true);
     }
 
     return *fileOperation::fileHandlerPtr_;
@@ -1526,21 +1574,40 @@ const Foam::fileOperation& Foam::fileHandler()
 
 
 Foam::autoPtr<Foam::fileOperation>
+Foam::fileHandler(std::nullptr_t)
+{
+    return autoPtr<fileOperation>(fileOperation::fileHandlerPtr_.release());
+}
+
+
+Foam::autoPtr<Foam::fileOperation>
 Foam::fileHandler(autoPtr<fileOperation>&& newHandler)
 {
+    // - do nothing if newHandler is empty. Does not delete current
+    // - do nothing if newHandler is identical to current handler
+
+    // Change ownership as atomic operations
+
+    // If newHandler and current handler are actually identical, we
+    // have a bit problem somewhere else since this means that the pointer
+    // is managed is done in two places!
+    // Should flag as a FatalError (in the future), but there may still be
+    // some place where we would like to fake shared pointers?
+
+    // TBD: add a flush() operation on the old handler first,
+    // instead of waiting for it to be run on destruction?
+
+    autoPtr<fileOperation> old;
+
     if
     (
-        newHandler
-     && fileOperation::fileHandlerPtr_
-     && newHandler->type() == fileOperation::fileHandlerPtr_->type()
+        newHandler.get() != nullptr
+     && newHandler.get() != fileOperation::fileHandlerPtr_.get()
     )
     {
-        return nullptr;  // No change
+        old.reset(newHandler.release());
+        old.swap(fileOperation::fileHandlerPtr_);
     }
-
-    autoPtr<fileOperation> old(std::move(fileOperation::fileHandlerPtr_));
-
-    fileOperation::fileHandlerPtr_ = std::move(newHandler);
 
     return old;
 }

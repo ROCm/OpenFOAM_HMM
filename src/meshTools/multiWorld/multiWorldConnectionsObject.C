@@ -161,8 +161,8 @@ Foam::label Foam::multiWorldConnections::createCommunicator(const edge& worlds)
         }
     }
 
-    // Allocate new communicator with parent 0 (= world)
-    comm = UPstream::allocateCommunicator(0, subRanks, true);
+    // Allocate new communicator with global world
+    comm = UPstream::allocateCommunicator(UPstream::globalComm, subRanks, true);
 
     if (debug & 2)
     {
@@ -234,10 +234,10 @@ void Foam::multiWorldConnections::createComms()
 
 
     // Use MPI_COMM_WORLD
-    const label oldWorldComm(Pstream::worldComm);
-    const label oldWarnComm(Pstream::warnComm);
-    Pstream::worldComm = 0;
-    Pstream::warnComm = Pstream::worldComm;
+    const label oldWorldComm(UPstream::worldComm);
+    const label oldWarnComm(UPstream::warnComm);
+    UPstream::worldComm = UPstream::globalComm;
+    UPstream::warnComm = UPstream::worldComm;
 
     if (Pstream::parRun())
     {

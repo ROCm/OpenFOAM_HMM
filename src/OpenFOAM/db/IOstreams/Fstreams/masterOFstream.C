@@ -96,11 +96,7 @@ void Foam::masterOFstream::commit()
         filePaths[Pstream::myProcNo()] = pathName_;
         Pstream::gatherList(filePaths);
 
-        bool uniform =
-            fileOperations::masterUncollatedFileOperation::uniformFile
-            (
-                filePaths
-            );
+        bool uniform = fileOperation::uniformFile(filePaths);
 
         Pstream::broadcast(uniform);
 

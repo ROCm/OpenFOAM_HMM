@@ -42,9 +42,9 @@ Foam::UPstream::commsStruct::commsStruct() noexcept
 Foam::UPstream::commsStruct::commsStruct
 (
     const label above,
-    const labelList& below,
-    const labelList& allBelow,
-    const labelList& allNotBelow
+    const labelUList& below,
+    const labelUList& allBelow,
+    const labelUList& allNotBelow
 )
 :
     above_(above),
@@ -59,8 +59,8 @@ Foam::UPstream::commsStruct::commsStruct
     const label nProcs,
     const label myProcID,
     const label above,
-    const labelList& below,
-    const labelList& allBelow
+    const labelUList& below,
+    const labelUList& allBelow
 )
 :
     above_(above),
@@ -87,6 +87,17 @@ Foam::UPstream::commsStruct::commsStruct
     {
         FatalErrorInFunction << "problem!" << Foam::abort(FatalError);
     }
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::UPstream::commsStruct::clear()
+{
+    above_ = -1;
+    below_.clear();
+    allBelow_.clear();
+    allNotBelow_.clear();
 }
 
 
