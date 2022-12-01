@@ -1806,7 +1806,7 @@ void Foam::boundaryMesh::changeFaces
 
     // Reconstruct 'mesh' from new faces and (copy of) existing points.
 
-    unique_ptr<bMesh> newMeshPtr(new bMesh(newFaces, mesh().points()));
+    std::unique_ptr<bMesh> newMeshPtr(new bMesh(newFaces, mesh().points()));
 
     // Reset meshFace_ to new ordering.
     meshFace_.transfer(newMeshFace);

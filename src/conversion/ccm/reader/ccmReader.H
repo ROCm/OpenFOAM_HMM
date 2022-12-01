@@ -206,7 +206,7 @@ private:
     // Private Data
 
         //- Reader options
-        const unique_ptr<options> options_;
+        const std::unique_ptr<options> options_;
 
 
         //- Enumeration defining the status of a ccmio node

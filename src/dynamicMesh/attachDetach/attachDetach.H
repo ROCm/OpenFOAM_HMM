@@ -105,7 +105,7 @@ class attachDetach
         // Private addressing data.  Created on topology change
 
         //- Map of matching points
-        mutable unique_ptr<Map<label>> pointMatchMapPtr_;
+        mutable std::unique_ptr<Map<label>> pointMatchMapPtr_;
 
 
     // Private Member Functions

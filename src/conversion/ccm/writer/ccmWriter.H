@@ -133,7 +133,7 @@ class writer
     // Member Data
 
         //- MapIds for various components (cell, internalFaces, boundaries)
-        unique_ptr<ccmMaps> maps_;
+        std::unique_ptr<ccmMaps> maps_;
 
         //- mesh reference
         const polyMesh& mesh_;

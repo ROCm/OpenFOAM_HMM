@@ -134,7 +134,7 @@ class cellCuts
 
             //- Cuts per existing face (includes those along edge of face)
             //  Cuts in no particular order.
-            mutable unique_ptr<labelListList> faceCutsPtr_;
+            mutable std::unique_ptr<labelListList> faceCutsPtr_;
 
             //- Per face : cut across edge (so not along existing edge)
             //  (can only be one per face)

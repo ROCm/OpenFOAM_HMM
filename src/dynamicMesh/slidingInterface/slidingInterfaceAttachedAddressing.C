@@ -278,7 +278,7 @@ void Foam::slidingInterface::renumberAttachedAddressing
     const labelList& sfc = slaveFaceCells();
 
     // Master side
-    unique_ptr<labelList> newMfcPtr(new labelList(mfc.size(), -1));
+    std::unique_ptr<labelList> newMfcPtr(new labelList(mfc.size(), -1));
     auto& newMfc = *newMfcPtr;
 
     const labelList& mfzRenumber =
@@ -295,7 +295,7 @@ void Foam::slidingInterface::renumberAttachedAddressing
     }
 
     // Slave side
-    unique_ptr<labelList> newSfcPtr(new labelList(sfc.size(), -1));
+    std::unique_ptr<labelList> newSfcPtr(new labelList(sfc.size(), -1));
     auto& newSfc = *newSfcPtr;
 
     const labelList& sfzRenumber =
@@ -331,7 +331,7 @@ void Foam::slidingInterface::renumberAttachedAddressing
     // Master side
     const labelList& msof = masterStickOutFaces();
 
-    unique_ptr<labelList> newMsofPtr(new labelList(msof.size(), -1));
+    std::unique_ptr<labelList> newMsofPtr(new labelList(msof.size(), -1));
     auto& newMsof = *newMsofPtr;
 
     forAll(msof, facei)
@@ -347,7 +347,7 @@ void Foam::slidingInterface::renumberAttachedAddressing
     // Slave side
     const labelList& ssof = slaveStickOutFaces();
 
-    unique_ptr<labelList> newSsofPtr(new labelList(ssof.size(), -1));
+    std::unique_ptr<labelList> newSsofPtr(new labelList(ssof.size(), -1));
     auto& newSsof = *newSsofPtr;
 
     forAll(ssof, facei)
@@ -376,7 +376,7 @@ void Foam::slidingInterface::renumberAttachedAddressing
     // Renumber the retired point map. Need to take a copy!
     const Map<label> rpm = retiredPointMap();
 
-    unique_ptr<Map<label>> newRpmPtr(new Map<label>(rpm.size()));
+    std::unique_ptr<Map<label>> newRpmPtr(new Map<label>(rpm.size()));
     auto& newRpm = *newRpmPtr;
 
     // Get reference to point renumbering
@@ -406,7 +406,10 @@ void Foam::slidingInterface::renumberAttachedAddressing
     // Renumber the cut point edge pair map. Need to take a copy!
     const Map<Pair<edge>> cpepm = cutPointEdgePairMap();
 
-    unique_ptr<Map<Pair<edge>>> newCpepmPtr(new Map<Pair<edge>>(cpepm.size()));
+    std::unique_ptr<Map<Pair<edge>>> newCpepmPtr
+    (
+        new Map<Pair<edge>>(cpepm.size())
+    );
     auto& newCpepm = *newCpepmPtr;
 
     forAllConstIters(cpepm, iter)
@@ -447,7 +450,7 @@ void Foam::slidingInterface::renumberAttachedAddressing
     // Renumber the projected slave zone points
     const pointField& projectedSlavePoints = *projectedSlavePointsPtr_;
 
-    unique_ptr<pointField> newProjectedSlavePointsPtr
+    std::unique_ptr<pointField> newProjectedSlavePointsPtr
     (
         new pointField(projectedSlavePoints.size())
     );

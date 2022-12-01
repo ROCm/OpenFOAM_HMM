@@ -91,13 +91,13 @@ class meshToMesh0
         labelListList boundaryAddressing_;
 
         //- Inverse-distance interpolation weights
-        mutable unique_ptr<scalarListList> inverseDistanceWeightsPtr_;
+        mutable std::unique_ptr<scalarListList> inverseDistanceWeightsPtr_;
 
         //- Inverse-volume interpolation weights
-        mutable unique_ptr<scalarListList> inverseVolumeWeightsPtr_;
+        mutable std::unique_ptr<scalarListList> inverseVolumeWeightsPtr_;
 
         //- Cell to cell overlap addressing
-        mutable unique_ptr<labelListList> cellToCellAddressingPtr_;
+        mutable std::unique_ptr<labelListList> cellToCellAddressingPtr_;
 
         //- Overlap volume
         mutable scalar V_;

@@ -161,53 +161,53 @@ private:
             //- Cut face master face.  Gives the index of face in master patch
             //  the cut face has been created from.  For a slave-only face
             //  this will be -1
-            mutable unique_ptr<labelList> cutFaceMasterPtr_;
+            mutable std::unique_ptr<labelList> cutFaceMasterPtr_;
 
             //- Cut face slave face.  Gives the index of face in slave patch
             //  the cut face has been created from.  For a master-only face
             //  this will be -1
-            mutable unique_ptr<labelList> cutFaceSlavePtr_;
+            mutable std::unique_ptr<labelList> cutFaceSlavePtr_;
 
             //- Master zone faceCells
-            mutable unique_ptr<labelList> masterFaceCellsPtr_;
+            mutable std::unique_ptr<labelList> masterFaceCellsPtr_;
 
             //- Slave zone faceCells
-            mutable unique_ptr<labelList> slaveFaceCellsPtr_;
+            mutable std::unique_ptr<labelList> slaveFaceCellsPtr_;
 
             //- Master stick-out faces
-            mutable unique_ptr<labelList> masterStickOutFacesPtr_;
+            mutable std::unique_ptr<labelList> masterStickOutFacesPtr_;
 
             //- Slave stick-out faces
-            mutable unique_ptr<labelList> slaveStickOutFacesPtr_;
+            mutable std::unique_ptr<labelList> slaveStickOutFacesPtr_;
 
             //- Retired point mapping.
             //  For every retired slave side point, gives the label of the
             //  master point that replaces it
-            mutable unique_ptr<Map<label>> retiredPointMapPtr_;
+            mutable std::unique_ptr<Map<label>> retiredPointMapPtr_;
 
             //- Cut edge pairs
             //  For cut points created by intersection two edges,
             //  store the master-slave edge pair used in creation
-            mutable unique_ptr<Map<Pair<edge>>> cutPointEdgePairMapPtr_;
+            mutable std::unique_ptr<Map<Pair<edge>>> cutPointEdgePairMapPtr_;
 
             //- Slave point hit.  The index of master point hit by the
             //  slave point in projection.  For no point hit, set to -1
-            mutable unique_ptr<labelList> slavePointPointHitsPtr_;
+            mutable std::unique_ptr<labelList> slavePointPointHitsPtr_;
 
             //- Slave edge hit.  The index of master edge hit by the
             //  slave point in projection.  For point or no edge  hit, set to -1
-            mutable unique_ptr<labelList> slavePointEdgeHitsPtr_;
+            mutable std::unique_ptr<labelList> slavePointEdgeHitsPtr_;
 
             //- Slave face hit.  The index of master face hit by the
             //  slave point in projection.
-            mutable unique_ptr<List<objectHit>> slavePointFaceHitsPtr_;
+            mutable std::unique_ptr<List<objectHit>> slavePointFaceHitsPtr_;
 
             //- Master point edge hit.  The index of slave edge hit by
             //  a master point.  For no hit set to -1
-            mutable unique_ptr<labelList> masterPointEdgeHitsPtr_;
+            mutable std::unique_ptr<labelList> masterPointEdgeHitsPtr_;
 
             //- Projected slave points
-            mutable unique_ptr<pointField> projectedSlavePointsPtr_;
+            mutable std::unique_ptr<pointField> projectedSlavePointsPtr_;
 
 
     // Private Member Functions

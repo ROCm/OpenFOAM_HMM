@@ -77,7 +77,7 @@ class boundaryMesh
     // Private Data
 
         //- All boundary mesh data. Reconstructed every time faces are repatched
-        unique_ptr<bMesh> meshPtr_;
+        std::unique_ptr<bMesh> meshPtr_;
 
         //- Patches. Reconstructed every time faces are repatched.
         PtrList<boundaryPatch> patches_;

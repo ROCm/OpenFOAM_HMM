@@ -122,7 +122,7 @@ private:
         //- Point-cell addressing. Used for topological analysis
         // Warning. This point cell addressing list potentially contains
         // duplicate cell entries. Use additional checking
-        mutable unique_ptr<labelListList> pointCellsPtr_;
+        mutable std::unique_ptr<labelListList> pointCellsPtr_;
 
         //- Association between two faces
         List<labelPair> interfaces_;
