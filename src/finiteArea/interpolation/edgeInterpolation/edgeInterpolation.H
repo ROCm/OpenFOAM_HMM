@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -92,6 +93,9 @@ class edgeInterpolation
 
 
     // Private Member Functions
+
+        //- Return skewness correction per edge
+        const vector& skewCorr(const label edgeI) const;
 
         //- Construct geodesic distance between P and N
         void makeLPN() const;

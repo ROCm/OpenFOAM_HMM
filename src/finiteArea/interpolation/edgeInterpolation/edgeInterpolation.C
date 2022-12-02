@@ -174,6 +174,25 @@ bool Foam::edgeInterpolation::movePoints() const
 }
 
 
+const Foam::vector& Foam::edgeInterpolation::skewCorr(const label edgeI) const
+{
+    #ifdef FA_SKEW_CORRECTION
+
+    return
+        (
+            skewCorrectionVectors_
+          ? (*skewCorrectionVectors_)[edgeI]
+          : pTraits<vector>::zero
+        );
+
+    #else
+
+    return (*skewCorrectionVectors_)[edgeI];
+
+    #endif
+}
+
+
 void Foam::edgeInterpolation::makeLPN() const
 {
     DebugInFunction
@@ -205,20 +224,18 @@ void Foam::edgeInterpolation::makeLPN() const
 
     scalarField& lPNIn = lPN.primitiveFieldRef();
 
+    // Calculate skewness correction vectors if necessary
+    (void) skew();
+
     forAll(owner, edgeI)
     {
-        vector curSkewCorrVec(Zero);
-
-        if (skew())
-        {
-            curSkewCorrVec = skewCorrectionVectors()[edgeI];
-        }
+        const vector& skewCorrEdge = skewCorr(edgeI);
 
         scalar lPE =
             mag
             (
                 edgeCentres[edgeI]
-              - curSkewCorrVec
+              - skewCorrEdge
               - faceCentres[owner[edgeI]]
             );
 
@@ -227,7 +244,7 @@ void Foam::edgeInterpolation::makeLPN() const
             (
                 faceCentres[neighbour[edgeI]]
               - edgeCentres[edgeI]
-              + curSkewCorrVec
+              + skewCorrEdge
             );
 
         lPNIn[edgeI] = (lPE + lEN);
@@ -283,20 +300,18 @@ void Foam::edgeInterpolation::makeWeights() const
 
     scalarField& weightingFactorsIn = weightingFactors.primitiveFieldRef();
 
+    // Calculate skewness correction vectors if necessary
+    (void) skew();
+
     forAll(owner, edgeI)
     {
-        vector curSkewCorrVec(Zero);
-
-        if (skew())
-        {
-            curSkewCorrVec = skewCorrectionVectors()[edgeI];
-        }
+        const vector& skewCorrEdge = skewCorr(edgeI);
 
         scalar lPE =
             mag
             (
                 edgeCentres[edgeI]
-              - curSkewCorrVec
+              - skewCorrEdge
               - faceCentres[owner[edgeI]]
             );
 
@@ -305,7 +320,7 @@ void Foam::edgeInterpolation::makeWeights() const
             (
                 faceCentres[neighbour[edgeI]]
               - edgeCentres[edgeI]
-              + curSkewCorrVec
+              + skewCorrEdge
             );
 
         weightingFactorsIn[edgeI] =
@@ -370,6 +385,8 @@ void Foam::edgeInterpolation::makeDeltaCoeffs() const
     const edgeList& edges = mesh().edges();
     const pointField& points = mesh().points();
 
+    // Calculate skewness correction vectors if necessary
+    (void) skew();
 
     forAll(owner, edgeI)
     {
@@ -386,19 +403,13 @@ void Foam::edgeInterpolation::makeDeltaCoeffs() const
         unitDelta.normalise();
 
 
-        // Calc PN arc length
-        vector curSkewCorrVec(Zero);
-
-        if (skew())
-        {
-            curSkewCorrVec = skewCorrectionVectors()[edgeI];
-        }
+        const vector& skewCorrEdge = skewCorr(edgeI);
 
         scalar lPE =
             mag
             (
                 edgeCentres[edgeI]
-              - curSkewCorrVec
+              - skewCorrEdge
               - faceCentres[owner[edgeI]]
             );
 
@@ -407,7 +418,7 @@ void Foam::edgeInterpolation::makeDeltaCoeffs() const
             (
                 faceCentres[neighbour[edgeI]]
               - edgeCentres[edgeI]
-              + curSkewCorrVec
+              + skewCorrEdge
             );
 
         scalar lPN = lPE + lEN;
@@ -643,46 +654,54 @@ void Foam::edgeInterpolation::makeSkewCorrectionVectors() const
         }
     }
 
+    #ifdef FA_SKEW_CORRECTION
 
-    scalar skewCoeff = 0.0;
+    constexpr scalar maxSkewRatio = 0.1;
+    scalar skewCoeff = 0;
 
-    // Calculating PN arc length
-    scalarField lPN(owner.size());
-
-    forAll(owner, edgeI)
+    forAll(own, edgeI)
     {
-        lPN[edgeI] =
+        const scalar magSkew = mag(skewCorrVecs[edgeI]);
+
+        const scalar lPN =
             mag
             (
                 Ce[edgeI]
-              - SkewCorrVecs[edgeI]
+              - skewCorrVecs[edgeI]
               - C[owner[edgeI]]
             )
           + mag
             (
                 C[neighbour[edgeI]]
               - Ce[edgeI]
-              + SkewCorrVecs[edgeI]
+              + skewCorrVecs[edgeI]
             );
-    }
 
-    if (lPN.size() > 0)
-    {
-        skewCoeff = max(mag(SkewCorrVecs.internalField())/mag(lPN));
+        const scalar ratio = magSkew/lPN;
+
+        if (skewCoeff < ratio)
+        {
+            skewCoeff = ratio;
+
+            if (skewCoeff > maxSkewRatio)
+            {
+                break;
+            }
+        }
     }
 
     DebugInFunction
         << "skew coefficient = " << skewCoeff << endl;
 
-    if (skewCoeff < 0.1)
+    if (skewCoeff < maxSkewRatio)
     {
-        skew_ = false;
         deleteDemandDrivenData(skewCorrectionVectors_);
     }
-    else
-    {
-        skew_ = true;
-    }
+
+    #endif
+
+    skew_ = bool(skewCorrectionVectors_);
+
 
     DebugInFunction
         << "Finished constructing skew correction vectors"
