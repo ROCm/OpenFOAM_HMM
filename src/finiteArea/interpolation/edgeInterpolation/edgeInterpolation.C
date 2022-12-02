@@ -248,6 +248,12 @@ void Foam::edgeInterpolation::makeLPN() const
             );
 
         lPNIn[edgeI] = (lPE + lEN);
+
+        // Do not allow any mag(val) < SMALL
+        if (mag(lPNIn[edgeI]) < SMALL)
+        {
+            lPNIn[edgeI] = SMALL;
+        }
     }
 
 
@@ -287,7 +293,7 @@ void Foam::edgeInterpolation::makeWeights() const
             false
         ),
         mesh(),
-        dimless
+        dimensionedScalar(dimless, 1)
     );
     edgeScalarField& weightingFactors = *weightingFactors_;
 
@@ -323,15 +329,12 @@ void Foam::edgeInterpolation::makeWeights() const
               + skewCorrEdge
             );
 
-        weightingFactorsIn[edgeI] =
-            lEN
-            /(
-                lPE
-#               ifdef BAD_MESH_STABILISATION
-              + VSMALL
-#               endif
-              + lEN
-            );
+        // weight = (0,1]
+        const scalar lPN = lPE + lEN;
+        if (mag(lPN) > SMALL)
+        {
+            weightingFactorsIn[edgeI] = lEN/lPN;
+        }
     }
 
     forAll(mesh().boundary(), patchI)
@@ -370,7 +373,7 @@ void Foam::edgeInterpolation::makeDeltaCoeffs() const
             false
         ),
         mesh(),
-        dimless/dimLength
+        dimensionedScalar(dimless/dimLength, SMALL)
     );
     edgeScalarField& DeltaCoeffs = *differenceFactors_;
     scalarField& dc = DeltaCoeffs.primitiveFieldRef();
@@ -427,11 +430,12 @@ void Foam::edgeInterpolation::makeDeltaCoeffs() const
         // Edge normal - area tangent
         edgeNormal = normalised(lengths[edgeI]);
 
-        // Delta coefficient as per definition
-//         dc[edgeI] = 1.0/(lPN*(unitDelta & edgeNormal));
-
-        // Stabilised form for bad meshes.  HJ, 23/Jul/2009
-        dc[edgeI] = 1.0/max((lPN*(unitDelta & edgeNormal)), 0.05*lPN);
+        // Do not allow any mag(val) < SMALL
+        const scalar alpha = lPN*(unitDelta & edgeNormal);
+        if (mag(alpha) > SMALL)
+        {
+            dc[edgeI] = scalar(1)/max(alpha, 0.05*lPN);
+        }
     }
 
 
@@ -478,7 +482,7 @@ void Foam::edgeInterpolation::makeCorrectionVectors() const
     const edgeList& edges = mesh().edges();
     const pointField& points = mesh().points();
 
-    scalarField deltaCoeffs(owner.size());
+    scalarField deltaCoeffs(owner.size(), SMALL);
 
     vectorField& CorrVecsIn = CorrVecs.primitiveFieldRef();
 
@@ -499,8 +503,12 @@ void Foam::edgeInterpolation::makeCorrectionVectors() const
         // Edge normal - area tangent
         edgeNormal = normalised(lengths[edgeI]);
 
-        // Delta coeffs
-        deltaCoeffs[edgeI] = 1.0/(unitDelta & edgeNormal);
+        // Do not allow any mag(val) < SMALL
+        const scalar alpha = unitDelta & edgeNormal;
+        if (mag(alpha) > SMALL)
+        {
+            deltaCoeffs[edgeI] = scalar(1)/alpha;
+        }
 
         // Edge correction vector
         CorrVecsIn[edgeI] =
@@ -570,7 +578,7 @@ void Foam::edgeInterpolation::makeSkewCorrectionVectors() const
             false
         ),
         mesh(),
-        dimless
+        dimensionedVector(dimless, Zero)
     );
     edgeVectorField& SkewCorrVecs = *skewCorrectionVectors_;
 
@@ -590,19 +598,22 @@ void Foam::edgeInterpolation::makeSkewCorrectionVectors() const
         const vector& P = C[owner[edgeI]];
         const vector& N = C[neighbour[edgeI]];
         const vector& S = points[edges[edgeI].start()];
-        vector e = edges[edgeI].vec(points);
 
-        const scalar beta = magSqr((N - P)^e);
+        // (T:Eq. 5.4)
+        const vector d(N - P);
+        const vector e(edges[edgeI].vec(points));
+        const vector de(d^e);
+        const scalar alpha = magSqr(de);
 
-        if (beta < ROOTVSMALL)
+        if (alpha < SMALL)
         {
             // Too small - skew correction remains zero
             continue;
         }
+        const scalar beta = -((d^(S - P)) & de)/alpha;
 
-        const scalar alpha = -(((N - P)^(S - P))&((N - P)^e))/beta;
-
-        vector E(S + alpha*e);
+        // (T:Eq. 5.3)
+        const vector E(S + beta*e);
 
         SkewCorrVecs[edgeI] = Ce[edgeI] - E;
     }
@@ -630,27 +641,25 @@ void Foam::edgeInterpolation::makeSkewCorrectionVectors() const
                 const vector& P = C[edgeFaces[edgeI]];
                 const vector& N = ngbC[edgeI];
                 const vector& S = points[patchEdges[edgeI].start()];
-                vector e = patchEdges[edgeI].vec(points);
 
-                const scalar beta = magSqr((N - P)^e);
+                // (T:Eq. 5.4)
+                const vector d(N - P);
+                const vector e(patchEdges[edgeI].vec(points));
+                const vector de(d^e);
+                const scalar alpha = magSqr(de);
 
-                if (beta < ROOTVSMALL)
+                if (alpha < SMALL)
                 {
                     // Too small - skew correction remains zero
                     continue;
                 }
+                const scalar beta = -((d^(S - P)) & de)/alpha;
 
-                const scalar alpha = -(((N - P)^(S - P))&((N - P)^e))/beta;
-
-                vector E(S + alpha*e);
+                const vector E(S + beta*e);
 
                 patchSkewCorrVecs[edgeI] =
                     Ce.boundaryField()[patchI][edgeI] - E;
             }
-        }
-        else
-        {
-            patchSkewCorrVecs = vector::zero;
         }
     }
 

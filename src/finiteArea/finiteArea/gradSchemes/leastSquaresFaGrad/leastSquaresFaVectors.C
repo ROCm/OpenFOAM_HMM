@@ -115,6 +115,13 @@ void Foam::leastSquaresFaVectors::makeLeastSquaresVectors() const
         label nei = neighbour[facei];
 
         vector d = C[nei] - C[own];
+
+        // Do not allow any mag(val) < SMALL
+        if (mag(d) < SMALL)
+        {
+            d = vector::uniform(SMALL);
+        }
+
         symmTensor wdd = (1.0/magSqr(d))*sqr(d);
 
         dd[own] += wdd;
@@ -169,6 +176,13 @@ void Foam::leastSquaresFaVectors::makeLeastSquaresVectors() const
         label nei = neighbour[facei];
 
         vector d = C[nei] - C[own];
+
+        // Do not allow any mag(val) < SMALL
+        if (mag(d) < SMALL)
+        {
+            d = vector::uniform(SMALL);
+        }
+
         scalar magSfByMagSqrd = 1.0/magSqr(d);
 
         lsP[facei] = magSfByMagSqrd*(invDd[own] & d);

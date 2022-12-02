@@ -594,6 +594,12 @@ Foam::tmp<Foam::vectorField> Foam::faMesh::calcRawEdgeNormals(int order) const
 
         edgeNormals[edgei].removeCollinear(edgeLine.unitVec());
         edgeNormals[edgei].normalise();
+
+        // Do not allow any mag(val) < SMALL
+        if (mag(edgeNormals[edgei]) < SMALL)
+        {
+            edgeNormals[edgei] = vector::uniform(SMALL);
+        }
     }
 
     return tedgeNormals;
@@ -658,6 +664,12 @@ void Foam::faMesh::calcLe() const
                 edges_[edgei].line(localPoints),
                 edgeNormals[edgei]
             );
+
+            // Do not allow any mag(val) < SMALL
+            if (mag(leVectors[edgei]) < SMALL)
+            {
+                leVectors[edgei] = vector::uniform(SMALL);
+            }
         }
 
         // Copy internal field
@@ -672,6 +684,15 @@ void Foam::faMesh::calcLe() const
         {
             const faPatch& fap = boundary()[patchi];
             bfld[patchi] = fap.patchRawSlice(leVectors);
+
+            for (auto& patchEdge : bfld[patchi])
+            {
+                // Do not allow any mag(val) < SMALL
+                if (mag(patchEdge) < SMALL)
+                {
+                    patchEdge = vector::uniform(SMALL);
+                }
+            }
         }
     }
     else
@@ -692,6 +713,12 @@ void Foam::faMesh::calcLe() const
                     edges_[edgei].line(localPoints),
                     edgeNormals[edgei]
                 );
+
+                // Do not allow any mag(val) < SMALL
+                if (mag(fld[edgei]) < SMALL)
+                {
+                    fld[edgei] = vector::uniform(SMALL);
+                }
             }
         }
 
@@ -714,6 +741,12 @@ void Foam::faMesh::calcLe() const
                     edges_[edgei].line(localPoints),
                     bndEdgeNormals[patchEdgei]
                 );
+
+                // Do not allow any mag(val) < SMALL
+                if (mag(pfld[patchEdgei]) < SMALL)
+                {
+                    pfld[patchEdgei] = vector::uniform(SMALL);
+                }
 
                 ++edgei;
             }
@@ -759,6 +792,13 @@ void Foam::faMesh::calcMagLe() const
         for (const edge& e : internalEdges())
         {
             *iter = e.mag(localPoints);
+
+            // Do not allow any mag(val) < SMALL
+            if (mag(*iter) < SMALL)
+            {
+                *iter = SMALL;
+            }
+
             ++iter;
         }
     }
@@ -774,6 +814,13 @@ void Foam::faMesh::calcMagLe() const
             for (const edge& e : boundary()[patchi].patchSlice(edges_))
             {
                 *iter = e.mag(localPoints);
+
+                // Do not allow any mag(val) < SMALL
+                if (mag(*iter) < SMALL)
+                {
+                    *iter = SMALL;
+                }
+
                 ++iter;
             }
         }
@@ -955,6 +1002,12 @@ void Foam::faMesh::calcS() const
         forAll(fld, facei)
         {
             fld[facei] = Foam::mag(meshFaceAreas[facei]);
+
+            // Do not allow any mag(val) < SMALL
+            if (mag(fld[facei]) < SMALL)
+            {
+                fld[facei] = SMALL;
+            }
         }
     }
     else
@@ -968,6 +1021,13 @@ void Foam::faMesh::calcS() const
         for (const face& f : faces())
         {
             *iter = f.mag(localPoints);
+
+            // Do not allow any mag(val) < SMALL
+            if (mag(*iter) < SMALL)
+            {
+                *iter = SMALL;
+            }
+
             ++iter;
         }
     }
@@ -1028,6 +1088,15 @@ void Foam::faMesh::calcFaceAreaNormals() const
 
         // Make unit normals
         fld.normalise();
+
+        for (auto& f : fld)
+        {
+            // Do not allow any mag(val) < SMALL
+            if (mag(f) < SMALL)
+            {
+                f = vector::uniform(SMALL);
+            }
+        }
     }
 
 
@@ -1122,6 +1191,12 @@ void Foam::faMesh::calcEdgeAreaNormals() const
 
             fld[edgei].removeCollinear(edgeLine.unitVec());
             fld[edgei].normalise();
+
+            // Do not allow any mag(val) < SMALL
+            if (mag(fld[edgei]) < SMALL)
+            {
+                fld[edgei] = vector::uniform(SMALL);
+            }
         }
     }
 
@@ -1148,6 +1223,12 @@ void Foam::faMesh::calcEdgeAreaNormals() const
 
                 pfld[patchEdgei].removeCollinear(edgeLine.unitVec());
                 pfld[patchEdgei].normalise();
+
+                // Do not allow any mag(val) < SMALL
+                if (mag(pfld[patchEdgei]) < SMALL)
+                {
+                    pfld[patchEdgei] = vector::uniform(SMALL);
+                }
             }
         }
     }
