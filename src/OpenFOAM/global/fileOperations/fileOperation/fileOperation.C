@@ -27,7 +27,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "fileOperation.H"
-#include "uncollatedFileOperation.H"
 #include "regIOobject.H"
 #include "argList.H"
 #include "HashSet.H"
@@ -80,8 +79,6 @@ Foam::fileOperation::pathTypeNames_
 
 
 Foam::word Foam::fileOperation::processorsBaseDir = "processors";
-
-Foam::autoPtr<Foam::fileOperation> Foam::fileOperation::fileHandlerPtr_;
 
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
@@ -218,6 +215,7 @@ void sortProcessorDirs(Foam::UList<Foam::fileOperation::dirIndex>& dirs)
 
 } // End anonymous namespace
 #endif
+
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
@@ -739,53 +737,7 @@ Foam::fileOperation::fileOperation
 {}
 
 
-Foam::autoPtr<Foam::fileOperation>
-Foam::fileOperation::New
-(
-    const word& handlerType,
-    bool verbose
-)
-{
-    if (handlerType.empty())
-    {
-        if (fileOperation::defaultFileHandler.empty())
-        {
-            FatalErrorInFunction
-                << "defaultFileHandler name is undefined" << nl
-                << abort(FatalError);
-        }
-
-        return fileOperation::New(fileOperation::defaultFileHandler, verbose);
-    }
-
-    DebugInFunction
-        << "Constructing fileHandler" << endl;
-
-    auto* ctorPtr = wordConstructorTable(handlerType);
-
-    if (!ctorPtr)
-    {
-        FatalErrorInLookup
-        (
-            "fileHandler",
-            handlerType,
-            *wordConstructorTablePtr_
-        ) << abort(FatalError);
-    }
-
-    return autoPtr<fileOperation>(ctorPtr(verbose));
-}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-bool Foam::fileOperation::distributed(bool on) const noexcept
-{
-    bool old(distributed_);
-    distributed_ = on;
-    return old;
-}
-
 
 Foam::fileName Foam::fileOperation::objectPath
 (
@@ -1539,77 +1491,6 @@ Foam::label Foam::fileOperation::detectProcessorPath(const fileName& fName)
     procRangeType group;
     label nProcs;
     return splitProcessorPath(fName, path, pDir, local, group, nProcs);
-}
-
-
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
-
-Foam::autoPtr<Foam::fileOperation> Foam::fileOperation::NewUncollated()
-{
-    return autoPtr<fileOperation>
-    (
-        new fileOperations::uncollatedFileOperation(false)
-    );
-}
-
-
-// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
-
-const Foam::fileOperation& Foam::fileHandler()
-{
-    if (!fileOperation::fileHandlerPtr_)
-    {
-        word handlerType(Foam::getEnv("FOAM_FILEHANDLER"));
-
-        if (handlerType.empty())
-        {
-            handlerType = fileOperation::defaultFileHandler;
-        }
-
-        fileOperation::fileHandlerPtr_ = fileOperation::New(handlerType, true);
-    }
-
-    return *fileOperation::fileHandlerPtr_;
-}
-
-
-Foam::autoPtr<Foam::fileOperation>
-Foam::fileHandler(std::nullptr_t)
-{
-    return autoPtr<fileOperation>(fileOperation::fileHandlerPtr_.release());
-}
-
-
-Foam::autoPtr<Foam::fileOperation>
-Foam::fileHandler(autoPtr<fileOperation>&& newHandler)
-{
-    // - do nothing if newHandler is empty. Does not delete current
-    // - do nothing if newHandler is identical to current handler
-
-    // Change ownership as atomic operations
-
-    // If newHandler and current handler are actually identical, we
-    // have a bit problem somewhere else since this means that the pointer
-    // is managed is done in two places!
-    // Should flag as a FatalError (in the future), but there may still be
-    // some place where we would like to fake shared pointers?
-
-    // TBD: add a flush() operation on the old handler first,
-    // instead of waiting for it to be run on destruction?
-
-    autoPtr<fileOperation> old;
-
-    if
-    (
-        newHandler.get() != nullptr
-     && newHandler.get() != fileOperation::fileHandlerPtr_.get()
-    )
-    {
-        old.reset(newHandler.release());
-        old.swap(fileOperation::fileHandlerPtr_);
-    }
-
-    return old;
 }
 
 

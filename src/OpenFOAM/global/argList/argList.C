@@ -1231,7 +1231,10 @@ void Foam::argList::parse
             handlerType = fileOperation::defaultFileHandler;
         }
 
-        Foam::fileHandler(fileOperation::New(handlerType, bannerEnabled()));
+        (void) fileOperation::fileHandler
+        (
+            fileOperation::New(handlerType, bannerEnabled())
+        );
     }
 
 
@@ -1830,7 +1833,7 @@ Foam::argList::~argList()
     jobInfo.stop();     // Normal job termination
 
     // Delete file handler to flush any remaining IO
-    (void)Foam::fileHandler(nullptr);
+    (void) fileOperation::fileHandler(nullptr);
 }
 
 

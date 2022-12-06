@@ -19,6 +19,7 @@ global/etcFiles/etcFiles.C
 fileOps = global/fileOperations
 $(fileOps)/fileOperation/fileOperation.C
 $(fileOps)/fileOperation/fileOperationBroadcast.C
+$(fileOps)/fileOperation/fileOperationNew.C
 $(fileOps)/fileOperationInitialise/fileOperationInitialise.C
 $(fileOps)/uncollatedFileOperation/uncollatedFileOperation.C
 $(fileOps)/masterUncollatedFileOperation/masterUncollatedFileOperation.C

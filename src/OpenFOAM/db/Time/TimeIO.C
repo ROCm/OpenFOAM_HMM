@@ -166,17 +166,19 @@ void Foam::Time::readDict()
         }
         controlDict_.watchIndices().clear();
 
-        // The new handler, with verbosity
-        autoPtr<fileOperation> newHandler =
-            fileOperation::New(fileHandlerName, true);
+        // The new handler, create with some verbosity
+        refPtr<fileOperation> newHandler
+        (
+            fileOperation::New(fileHandlerName, true)
+        );
 
-        if (TimePaths::distributed() && newHandler)
+        // Install the new handler
+        (void) fileOperation::fileHandler(newHandler);
+
+        if (TimePaths::distributed())
         {
             newHandler->distributed(true);
         }
-
-        // Installing the new handler
-        Foam::fileHandler(std::move(newHandler));
 
         // Reinstall old watches
         fileHandler().addWatches(controlDict_, oldWatched);

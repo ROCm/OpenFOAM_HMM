@@ -43,10 +43,9 @@ Description
 
 #include "ISstream.H"
 #include "Ostream.H"
-#include "autoPtr.H"
+#include "fileMonitor.H"
 #include "fileNameList.H"
 #include "instantList.H"
-#include "fileMonitor.H"
 #include "refPtr.H"
 #include "Enum.H"
 #include "Tuple2.H"
@@ -105,13 +104,12 @@ public:
         //- identical to UPstream::rangeType
         typedef IntRange<int> procRangeType;
 
-
 protected:
 
     // Protected Data
 
         //- Communicator to use
-        const label comm_;
+        mutable label comm_;
 
         //- Distributed roots (parallel run)
         mutable bool distributed_;
@@ -120,7 +118,7 @@ protected:
         mutable HashTable<dirIndexList> procsDirs_;
 
         //- File-change monitor for all registered files
-        mutable autoPtr<fileMonitor> monitorPtr_;
+        mutable std::unique_ptr<fileMonitor> monitorPtr_;
 
 
    // Protected Member Functions
@@ -180,11 +178,8 @@ public:
         TypeName("fileOperation");
 
 
-    //- Static fileOperation
-    static autoPtr<fileOperation> fileHandlerPtr_;
-
-    //- Static construct the commonly used uncollatedFileOperation
-    static autoPtr<fileOperation> NewUncollated();
+    //- The currently active file handler. Avoid accessing directly
+    static refPtr<fileOperation> fileHandlerPtr_;
 
 
     // Constructors
@@ -229,6 +224,60 @@ public:
     virtual ~fileOperation() = default;
 
 
+   // Factory Methods, Singleton-type Functions
+
+        //- The commonly used uncollatedFileOperation
+        static autoPtr<fileOperation> NewUncollated();
+
+        //- Return the current file handler.
+        //- Will create the default file handler if necessary.
+        static const fileOperation& fileHandler();
+
+        //- Delete current file handler.
+        //  \returns the old handler.
+        //  Should have [[nodiscard]], but gcc ignores void casting.
+        static refPtr<fileOperation> fileHandler(std::nullptr_t);
+
+        //- Replace the current file handler.
+        //  The following are considered no-ops:
+        //  - an empty/invalid newHandler does \b not delete, use a literal
+        //    \c nullptr (std::nullptr_t) for that
+        //  - if new handler and current handler are identical (same pointer).
+        //  .
+        //  \returns the old handler (on change), nullptr otherwise
+        //  Should have [[nodiscard]], but gcc ignores void casting.
+        static refPtr<fileOperation> fileHandler
+        (
+            refPtr<fileOperation>& newHandler
+        );
+
+        //- Replace the current file handler.
+        //  The following are considered no-ops:
+        //  - an empty/invalid newHandler does \b not delete, use a literal
+        //    \c nullptr (std::nullptr_t) for that
+        //  - if new handler and current handler are identical (same pointer).
+        //  .
+        //  \returns the old handler (on change), nullptr otherwise
+        //  Should have [[nodiscard]], but gcc ignores void casting.
+        static refPtr<fileOperation> fileHandler
+        (
+            refPtr<fileOperation>&& newHandler
+        );
+
+        //- Replace the current file handler.
+        //  The following are considered no-ops:
+        //  - an empty/invalid newHandler does \b not delete, use a literal
+        //    \c nullptr (std::nullptr_t) for that
+        //  - if new handler and current handler are identical (same pointer).
+        //  .
+        //  \returns the old handler (on change), nullptr otherwise
+        //  Should have [[nodiscard]], but gcc ignores void casting.
+        static refPtr<fileOperation> fileHandler
+        (
+            autoPtr<fileOperation>&& newHandler
+        );
+
+
    // Static Functions
 
         //- Sort directory entries according to time value,
@@ -248,16 +297,40 @@ public:
 
     // Member Functions
 
+    // Characteristics
+
+        //- Communicator to use
+        label comm() const noexcept
+        {
+            return comm_;
+        }
+
+        //- Set communicator to use [mutable]. Negative values are a no-op.
+        //  \return old value
+        label comm(label communicator) const noexcept
+        {
+            label old(comm_);
+            if (communicator >= 0) comm_ = communicator;
+            return old;
+        }
+
         //- Distributed roots (parallel run)
         bool distributed() const noexcept
         {
             return distributed_;
         }
 
-        //- Set distributed roots on/off (mutable)
+        //- Set distributed roots on/off [mutable]
         //  \return old value
-        bool distributed(bool on) const noexcept;
+        bool distributed(bool on) const noexcept
+        {
+            bool old(distributed_);
+            distributed_ = on;
+            return old;
+        }
 
+
+    // Member Functions
 
         // OSSpecific equivalents
 
@@ -653,23 +726,23 @@ inline Ostream& operator<<(Ostream& os, const fileOperation::pathType b)
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-// Note: defined in fileOperation.C
+//- Return the current file handler
+//- (will create default file handler if necessary).
+//- Forwards to fileOperation::handler()
+inline const fileOperation& fileHandler()
+{
+    return fileOperation::fileHandler();
+}
 
-//- Return the current file handler.
-//- Will create the default file handler if necessary.
-const fileOperation& fileHandler();
+//- Delete current file handler - forwards to fileOperation::handler()
+//  Should have [[nodiscard]], but gcc ignores void casting.
+inline refPtr<fileOperation> fileHandler(std::nullptr_t)
+{
+    return fileOperation::fileHandler(nullptr);
+}
 
-//- Delete current file handler.
-//  \returns the old handler
-autoPtr<fileOperation> fileHandler(std::nullptr_t);
-
-//- Replace the current file handler.
-//  The following are considered no-ops:
-//  - an empty/invalid newHandler does \b not delete,
-//    use fileHandler(std::nullptr_t) - ie, a literal \c nullptr for that
-//  - if new handler and current handler are identical (same pointer).
-//  .
-//  \returns the old handler (on change), nullptr otherwise
+//- Replace the current file handler - forwards to fileOperation::handler().
+//  \note legacy behaviour, so returns autoPtr instead of refPtr!
 autoPtr<fileOperation> fileHandler(autoPtr<fileOperation>&& newHandler);
 
 
