@@ -179,24 +179,40 @@ Foam::label Foam::UPstream::allocateCommunicator
     // Initialise; overwritten by allocatePstreamCommunicator
     myProcNo_[index] = 0;
 
-    const label numSubRanks = subRanks.size();
+    // The selected sub-ranks.
+    // - transcribe from label to int. Treat negative values as 'ignore'
+    // - enforce incremental order (so index is rank in next communicator)
 
-    // Convert from label to int
-    procIDs_[index].resize_nocopy(numSubRanks);
-    forAll(procIDs_[index], i)
+    auto& procIds = procIDs_[index];
+    procIds.resize_nocopy(subRanks.size());
+
+    label numSubRanks = 0;
+    bool monotonicOrder = true;
+    for (const label subRanki : subRanks)
     {
-        procIDs_[index][i] = subRanks[i];
-
-        // Enforce incremental order (so index is rank in next communicator)
-        if (i >= 1 && subRanks[i] <= subRanks[i-1])
+        if (subRanki < 0)
         {
-            FatalErrorInFunction
-                << "subranks not sorted : " << subRanks
-                << " when allocating subcommunicator from parent "
-                << parentIndex
-                << Foam::abort(FatalError);
+            continue;
         }
+        if (monotonicOrder && numSubRanks)
+        {
+            monotonicOrder = (procIds[numSubRanks-1] < subRanki);
+        }
+
+        procIds[numSubRanks] = subRanki;
+        ++numSubRanks;
     }
+
+    if (!monotonicOrder)
+    {
+        auto last = procIds.begin() + numSubRanks;
+        std::sort(procIds.begin(), last);
+        last = std::unique(procIds.begin(), last);
+        numSubRanks = label(last - procIds.begin());
+    }
+
+    procIds.resize(numSubRanks);
+
     parentComm_[index] = parentIndex;
 
     // Size but do not fill structure - this is done on-the-fly
@@ -206,6 +222,20 @@ Foam::label Foam::UPstream::allocateCommunicator
     if (doPstream && parRun())
     {
         allocatePstreamCommunicator(parentIndex, index);
+
+        // Could 'remember' locations of uninvolved ranks
+        /// if (myProcNo_[index] < 0 && parentIndex >= 0)
+        /// {
+        ///     // As global rank
+        ///     myProcNo_[index] = -(myProcNo_[worldComm]+1);
+        ///
+        /// OR:
+        ///     // As parent rank number
+        ///     if (myProcNo_[parentIndex] >= 0)
+        ///     {
+        ///         myProcNo_[index] = -(myProcNo_[parentIndex]+1);
+        ///     }
+        /// }
     }
 
     return index;
@@ -226,9 +256,9 @@ void Foam::UPstream::freeCommunicator
 
     if (debug)
     {
-        Pout<< "Communicators : Freeing communicator " << communicator << endl
-            << "    parent   : " << parentComm_[communicator] << endl
-            << "    myProcNo : " << myProcNo_[communicator] << endl
+        Pout<< "Communicators : Freeing communicator " << communicator
+            << " parent: " << parentComm_[communicator]
+            << " myProcNo: " << myProcNo_[communicator]
             << endl;
     }
 
@@ -252,7 +282,7 @@ void Foam::UPstream::freeCommunicators(const bool doPstream)
 {
     forAll(myProcNo_, communicator)
     {
-        if (myProcNo_[communicator] != -1)
+        if (myProcNo_[communicator] >= 0)
         {
             freeCommunicator(communicator, doPstream);
         }
@@ -262,7 +292,7 @@ void Foam::UPstream::freeCommunicators(const bool doPstream)
 
 int Foam::UPstream::baseProcNo(label comm, int procID)
 {
-    while (parent(comm) >= 0)
+    while (parent(comm) >= 0 && procID >= 0)
     {
         const auto& parentRanks = UPstream::procID(comm);
         procID = parentRanks[procID];

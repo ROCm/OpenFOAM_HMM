@@ -40,17 +40,15 @@ Foam::DynamicList<MPI_Comm> Foam::PstreamGlobals::MPICommunicators_;
 Foam::DynamicList<MPI_Group> Foam::PstreamGlobals::MPIGroups_;
 
 
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
 void Foam::PstreamGlobals::checkCommunicator
 (
     const label comm,
     const label toProcNo
 )
 {
-    if
-    (
-        comm < 0
-     || comm >= PstreamGlobals::MPICommunicators_.size()
-    )
+    if (comm < 0 || comm >= PstreamGlobals::MPICommunicators_.size())
     {
         FatalErrorInFunction
             << "toProcNo:" << toProcNo << " : illegal communicator "

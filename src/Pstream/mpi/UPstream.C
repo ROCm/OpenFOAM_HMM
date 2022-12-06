@@ -687,6 +687,9 @@ void Foam::UPstream::waitRequests(const label start)
             << " outstanding requests starting at " << start << endl;
     }
 
+    // TBD: check for
+    // (start < 0 || start > PstreamGlobals::outstandingRequests_.size())
+
     if (PstreamGlobals::outstandingRequests_.size())
     {
         SubList<MPI_Request> waitRequests
@@ -698,6 +701,7 @@ void Foam::UPstream::waitRequests(const label start)
 
         profilingPstream::beginTiming();
 
+        // On success: sets each request to MPI_REQUEST_NULL
         if
         (
             MPI_Waitall
@@ -714,7 +718,7 @@ void Foam::UPstream::waitRequests(const label start)
 
         profilingPstream::addWaitTime();
 
-        resetRequests(start);
+        PstreamGlobals::outstandingRequests_.resize(start);
     }
 
     if (debug)
@@ -749,6 +753,7 @@ void Foam::UPstream::waitRequest(const label i)
 
     profilingPstream::beginTiming();
 
+    // On success: sets request to MPI_REQUEST_NULL
     if
     (
         MPI_Wait
@@ -797,6 +802,7 @@ bool Foam::UPstream::finishedRequest(const label i)
             << Foam::abort(FatalError);
     }
 
+    // On success: sets request to MPI_REQUEST_NULL
     int flag;
     MPI_Test
     (
@@ -821,7 +827,7 @@ int Foam::UPstream::allocateTag(const char* const msg)
     if (PstreamGlobals::freedTags_.size())
     {
         tag = PstreamGlobals::freedTags_.back();
-        (void)PstreamGlobals::freedTags_.pop_back();
+        PstreamGlobals::freedTags_.pop_back();
     }
     else
     {

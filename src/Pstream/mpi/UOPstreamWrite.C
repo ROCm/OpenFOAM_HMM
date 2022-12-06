@@ -159,7 +159,7 @@ bool Foam::UOPstream::write
                 << Foam::endl;
         }
 
-        PstreamGlobals::outstandingRequests_.append(request);
+        PstreamGlobals::outstandingRequests_.push_back(request);
     }
     else
     {

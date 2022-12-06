@@ -250,7 +250,7 @@ private:
 
 public:
 
-    // Declare name of the class and its debug switch
+    //- Declare name of the class and its debug switch
     ClassName("UPstream");
 
 
@@ -313,11 +313,16 @@ public:
 
     // Member Functions
 
-        //- Allocate a new communicator
+        //- Allocate a new communicator with subRanks of parent communicator
         static label allocateCommunicator
         (
+            //! The parent communicator
             const label parent,
+
+            //! The sub-ranks of parent to use (ignore negative values)
             const labelUList& subRanks,
+
+            //! Call allocatePstreamCommunicator
             const bool doPstream = true
         );
 
@@ -332,6 +337,7 @@ public:
         //- Free all communicators
         static void freeCommunicators(const bool doPstream);
 
+
         //- Wrapper class for allocating/freeing communicators
         class communicator
         {
@@ -339,38 +345,65 @@ public:
 
         public:
 
-            //- Default construct (a placeholder communicator)
-            communicator() : comm_(-1) {}
-
-            //- Move construct
-            communicator(communicator&&) = default;
-
-            //- Move assignment
-            communicator& operator=(communicator&&) = default;
-
             //- No copy construct
             communicator(const communicator&) = delete;
 
             //- No copy assignment
             void operator=(const communicator&) = delete;
 
-            //- Allocate a communicator from given parent
+            //- Default construct (a placeholder communicator)
+            communicator() noexcept : comm_(-1) {}
+
+            //- Move construct, takes ownership
+            communicator(communicator&& c) : comm_(c.comm_) { c.comm_ = -1; }
+
+            //- Allocate a communicator based on given parent
             communicator
             (
+                //! The parent communicator
                 const label parent,
+
+                //! The sub-ranks of parent to use (ignore negative values)
                 const labelUList& subRanks,
-                const bool doPstream
+
+                //! Call allocatePstreamCommunicator
+                const bool doPstream = true
             )
             :
                 comm_(allocateCommunicator(parent, subRanks, doPstream))
             {}
 
             //- Free allocated communicator and group
-            ~communicator()
+            ~communicator() { freeCommunicator(comm_); }
+
+            //- True if communicator is non-negative (ie, was allocated)
+            bool good() const noexcept { return (comm_ >= 0); }
+
+            //- The communicator label
+            label comm() const noexcept { return comm_; }
+
+            //- Free allocated communicator and group
+            void reset() { freeCommunicator(comm_); comm_ = -1; }
+
+            //- Allocate with subRanks of parent communicator
+            void reset(label parent, const labelUList& subRanks)
             {
                 freeCommunicator(comm_);
+                comm_ = allocateCommunicator(parent, subRanks);
             }
 
+            //- Take ownership, free allocated communicator and group.
+            void reset(communicator&& c)
+            {
+                if (comm_ != c.comm_) freeCommunicator(comm_);
+                comm_ = c.comm_;
+                c.comm_ = -1;
+            }
+
+            //- Move assignment, takes ownership
+            void operator=(communicator&& c) { reset(std::move(c)); }
+
+            //- Cast to label - the same as comm()
             operator label() const noexcept { return comm_; }
         };
 
@@ -468,10 +501,16 @@ public:
             return 0;
         }
 
-        //- Am I the master process
+        //- Am I the master rank
         static bool master(const label communicator = worldComm)
         {
             return myProcNo_[communicator] == masterNo();
+        }
+
+        //- Is this process a sub-rank on the communicator
+        static bool is_subrank(const label communicator = worldComm)
+        {
+            return myProcNo_[communicator] > masterNo();
         }
 
         //- Number of this process (starting from masterNo() = 0)

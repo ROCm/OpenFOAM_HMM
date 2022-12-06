@@ -218,7 +218,7 @@ Foam::label Foam::UIPstream::read
                 << Foam::endl;
         }
 
-        PstreamGlobals::outstandingRequests_.append(request);
+        PstreamGlobals::outstandingRequests_.push_back(request);
 
         // Assume the message is completely received.
         return bufSize;

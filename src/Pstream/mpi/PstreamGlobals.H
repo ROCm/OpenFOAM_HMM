@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2015 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,8 +66,34 @@ extern DynamicList<MPI_Comm> MPICommunicators_;
 // Groups associated with the currrent communicators.
 extern DynamicList<MPI_Group> MPIGroups_;
 
+
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
 //- Fatal if comm is outside the allocated range
 void checkCommunicator(const label comm, const label toProcNo);
+
+//- Reuse previously freed request locations or push request onto list
+//- of outstanding requests.
+//
+//  \return index of request within outstandingRequests_
+inline label push_request(MPI_Request request)
+{
+    label index;
+
+    if (freedRequests_.size())
+    {
+        index = freedRequests_.back();
+        freedRequests_.pop_back();
+        outstandingRequests_[index] = request;
+    }
+    else
+    {
+        index = outstandingRequests_.size();
+        outstandingRequests_.push_back(request);
+    }
+
+    return index;
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
