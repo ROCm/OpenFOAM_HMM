@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,31 +24,66 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::regionModels::areaSurfaceFilmModels::
-        perturbedTemperatureDependentContactAngleForce
+    Foam::regionModels::areaSurfaceFilmModels::dynamicContactAngleForce
 
 Description
-    Temperature dependent contact angle force with a stochastic perturbation.
+    Film-speed or film-temperature dependent
+    contact-angle force with a stochastic perturbation.
 
     The contact angle in degrees is specified as a \c Foam::Function1 type,
     to enable the use of, e.g. \c constant, \c polynomial, \c table values
     and the stochastic perturbation obtained from a
     \c Foam::distributionModels::distributionModel.
 
-See also
-  - Foam::regionModels::areaSurfaceFilmModels::contactAngleForce
-  - areaSurfaceFilmModels::temperatureDependentContactAngleForce
-  - Foam::regionModels::areaSurfaceFilmModels::distributionContactAngleForce
-  - Foam::Function1Types
-  - Foam::distributionModel
+Usage
+    Minimal example:
+    \verbatim
+    forces
+    (
+        dynamicContactAngle
+    );
+
+    dynamicContactAngleForceCoeffs
+    {
+        // Mandatory entries
+        distribution    <subDict>;
+
+        // Conditional entries
+
+            // Option-1
+            Utheta           <Function1<scalar>>;
+
+            // Option-2
+            Ttheta           <Function1<scalar>>;
+
+        // Inherited entries
+        ...
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property              | Description              | Type  | Reqd | Deflt
+      dynamicContactAngle   | Type name                | word  | yes  | -
+      Utheta      | Contact angle as a function of film speed <!--
+            -->                        | \<Function1\<scalar\> | choice | -
+      Ttheta      | Contact angle as a function of film temperature <!--
+            -->                        | \<Function1\<scalar\> | choice | -
+      distribution  | Probability distribution model  | subDict | yes | -
+    \endtable
+
+    The inherited entries are elaborated in:
+      - \link contactAngleForce.H \endlink
+      - \link Function1.H \endlink
+      - \link distributionModel.H \endlink
 
 SourceFiles
-    perturbedTemperatureDependentContactAngleForce.C
+    dynamicContactAngleForce.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef perturbedTemperatureDependentContactAngleForce_H
-#define perturbedTemperatureDependentContactAngleForce_H
+#ifndef areaSurfaceFilmModels_dynamicContactAngleForce_H
+#define areaSurfaceFilmModels_dynamicContactAngleForce_H
 
 #include "contactAngleForce.H"
 #include "Function1.H"
@@ -65,17 +100,20 @@ namespace areaSurfaceFilmModels
 {
 
 /*---------------------------------------------------------------------------*\
-       Class perturbedTemperatureDependentContactAngleForce Declaration
+                  Class dynamicContactAngleForce Declaration
 \*---------------------------------------------------------------------------*/
 
-class perturbedTemperatureDependentContactAngleForce
+class dynamicContactAngleForce
 :
     public contactAngleForce
 {
     // Private Data
 
-        //- Contact angle function
-        autoPtr<Function1<scalar>> thetaPtr_;
+        //- Contact angle as a function of film speed
+        autoPtr<Function1<scalar>> U_vs_thetaPtr_;
+
+        //- Contact angle as a function of film temperature
+        autoPtr<Function1<scalar>> T_vs_thetaPtr_;
 
         //- Random number generator
         Random rndGen_;
@@ -87,16 +125,10 @@ class perturbedTemperatureDependentContactAngleForce
     // Private Member Functions
 
         //- No copy construct
-        perturbedTemperatureDependentContactAngleForce
-        (
-            const perturbedTemperatureDependentContactAngleForce&
-        ) = delete;
+        dynamicContactAngleForce(const dynamicContactAngleForce&) = delete;
 
         //- No copy assignment
-        void operator=
-        (
-            const perturbedTemperatureDependentContactAngleForce&
-        ) = delete;
+        void operator=(const dynamicContactAngleForce&) = delete;
 
 
 protected:
@@ -108,13 +140,13 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("perturbedTemperatureDependentContactAngle");
+    TypeName("dynamicContactAngle");
 
 
     // Constructors
 
         //- Construct from surface film model
-        perturbedTemperatureDependentContactAngleForce
+        dynamicContactAngleForce
         (
             liquidFilmBase& film,
             const dictionary& dict
@@ -122,7 +154,7 @@ public:
 
 
     //- Destructor
-    virtual ~perturbedTemperatureDependentContactAngleForce();
+    virtual ~dynamicContactAngleForce() = default;
 };
 
 
