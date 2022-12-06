@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -159,7 +159,7 @@ void Foam::leastSquaresFaVectors::makeLeastSquaresVectors() const
 
 
     // Invert the dd tensor
-    const symmTensorField invDd(inv(dd));
+    const symmTensorField invDd(pinv(dd));
 
 
     // Revisit all faces and calculate the lsP and lsN vectors
