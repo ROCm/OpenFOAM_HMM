@@ -62,6 +62,7 @@ contactAngleForce::contactAngleForce
 :
     force(typeName, film, dict),
     Ccf_(coeffDict_.get<scalar>("Ccf")),
+    hCrit_(coeffDict_.getOrDefault<scalar>("hCrit", GREAT)),
     mask_
     (
         IOobject
@@ -113,14 +114,19 @@ tmp<faVectorMatrix> contactAngleForce::correct(areaVectorField& U)
     const labelUList& nbr = film().regionMesh().neighbour();
 
     const DimensionedField<scalar, areaMesh>& magSf = film().regionMesh().S();
+    const scalarField& magSff = magSf.field();
 
     tmp<areaScalarField> talpha = film().alpha();
     const areaScalarField& sigma = film().sigma();
 
+    const areaScalarField& mu = film().mu();
     const areaScalarField& rhof = film().rho();
 
     tmp<areaScalarField> ttheta = theta();
     const areaScalarField& theta = ttheta();
+
+    const areaVectorField& Uf = film().Uf();
+    const areaScalarField& hf = film().h();
 
     const areaVectorField gradAlpha(fac::grad(talpha()));
 
@@ -148,13 +154,19 @@ tmp<faVectorMatrix> contactAngleForce::correct(areaVectorField& U)
             );
             const scalar cosTheta = cos(degToRad(theta[facei]));
 
+            // (MHDX:Eq. 13)
             force[facei] +=
-                Ccf_*n*sigma[facei]*(1 - cosTheta)/invDx/rhof[facei];
+                Ccf_*n*sigma[facei]*(1 - cosTheta)
+               /invDx/rhof[facei]/magSff[facei];
+
+            // (NDPC:Eq. 11)
+            if (hf[facei] > hCrit_)
+            {
+                force[facei] -= mu[facei]*Uf[facei]/hCrit_;
+            }
         }
     }
 
-
-    force /= magSf.field();
 
     if (film().regionMesh().time().writeTime())
     {

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,6 +31,20 @@ Description
 
     The effect of the contact angle force can be ignored over a specified
     distance from patches.
+
+    Reference:
+    \verbatim
+        Governing equations (tag:MHDX):
+            Meredith, K. V., Heather, A., De Vries, J., & Xin, Y. (2011).
+            A numerical model for partially-wetted flow of thin liquid films.
+            Computational Methods in Multiphase Flow VI, 70, 239.
+
+        Contact line movement (tag:NDPC):
+            Novák, M., Devaradja, R., Papper, J., & Černý, M. (2020).
+            Efficient CFD methods for assessment of water management.
+            In 20. Internationales Stuttgarter Symposium (pp. 151-170).
+            Springer Vieweg, Wiesbaden.
+    \endverbatim
 
 SourceFiles
     contactAngleForce.C
@@ -63,6 +77,9 @@ class contactAngleForce
 
         //- Coefficient applied to the contact angle force
         scalar Ccf_;
+
+        //- Critical film thickness [m]
+        scalar hCrit_;
 
         //- Mask over which force is applied
         areaScalarField mask_;
