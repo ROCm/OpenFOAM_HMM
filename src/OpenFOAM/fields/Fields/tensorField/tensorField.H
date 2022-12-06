@@ -190,6 +190,7 @@ UNARY_FUNCTION(tensor, tensor, dev2)
 UNARY_FUNCTION(scalar, tensor, det)
 UNARY_FUNCTION(tensor, tensor, cof)
 UNARY_FUNCTION(tensor, tensor, inv)
+UNARY_FUNCTION(tensor, tensor, pinv)
 
 UNARY_FUNCTION(vector, symmTensor, eigenValues)
 UNARY_FUNCTION(tensor, symmTensor, eigenVectors)

@@ -49,7 +49,62 @@ UNARY_FUNCTION(tensor, tensor, dev)
 UNARY_FUNCTION(tensor, tensor, dev2)
 UNARY_FUNCTION(scalar, tensor, det)
 UNARY_FUNCTION(tensor, tensor, cof)
-UNARY_FUNCTION(tensor, tensor, inv)
+
+void inv(Field<tensor>& tf, const UList<tensor>& tf1)
+{
+    if (tf.empty())
+    {
+        return;
+    }
+
+    // Attempting to identify 2-D cases
+    const scalar minThreshold = SMALL*magSqr(tf1[0]);
+    const Vector<bool> removeCmpts
+    (
+        magSqr(tf1[0].xx()) < minThreshold,
+        magSqr(tf1[0].yy()) < minThreshold,
+        magSqr(tf1[0].zz()) < minThreshold
+    );
+
+    if (removeCmpts.x() || removeCmpts.y() || removeCmpts.z())
+    {
+        tensor adjust(Zero);
+
+        if (removeCmpts.x()) adjust.xx() = 1;
+        if (removeCmpts.y()) adjust.yy() = 1;
+        if (removeCmpts.z()) adjust.zz() = 1;
+
+        tensorField tf1Plus(tf1);
+
+        tf1Plus += adjust;
+
+        TFOR_ALL_F_OP_FUNC_F(tensor, tf, =, inv, tensor, tf1Plus)
+
+        tf -= adjust;
+    }
+    else
+    {
+        TFOR_ALL_F_OP_FUNC_F(tensor, tf, =, inv, tensor, tf1)
+    }
+}
+
+tmp<tensorField> inv(const UList<tensor>& tf)
+{
+    auto tres = tmp<tensorField>::New(tf.size());
+    inv(tres.ref(), tf);
+    return tres;
+}
+
+tmp<tensorField> inv(const tmp<tensorField>& tf)
+{
+    auto tres = New(tf);
+    inv(tres.ref(), tf());
+    tf.clear();
+    return tres;
+}
+
+UNARY_FUNCTION(tensor, tensor, pinv)
+
 UNARY_FUNCTION(vector, symmTensor, eigenValues)
 UNARY_FUNCTION(tensor, symmTensor, eigenVectors)
 

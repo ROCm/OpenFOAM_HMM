@@ -50,7 +50,60 @@ UNARY_FUNCTION(symmTensor, symmTensor, dev)
 UNARY_FUNCTION(symmTensor, symmTensor, dev2)
 UNARY_FUNCTION(scalar, symmTensor, det)
 UNARY_FUNCTION(symmTensor, symmTensor, cof)
-UNARY_FUNCTION(symmTensor, symmTensor, inv)
+
+void inv(Field<symmTensor>& tf, const UList<symmTensor>& tf1)
+{
+    if (tf.empty())
+    {
+        return;
+    }
+
+    // Attempting to identify 2-D cases
+    const scalar minThreshold = SMALL*magSqr(tf1[0]);
+    const Vector<bool> removeCmpts
+    (
+        magSqr(tf1[0].xx()) < minThreshold,
+        magSqr(tf1[0].yy()) < minThreshold,
+        magSqr(tf1[0].zz()) < minThreshold
+    );
+
+    if (removeCmpts.x() || removeCmpts.y() || removeCmpts.z())
+    {
+        symmTensor adjust(Zero);
+
+        if (removeCmpts.x()) adjust.xx() = 1;
+        if (removeCmpts.y()) adjust.yy() = 1;
+        if (removeCmpts.z()) adjust.zz() = 1;
+
+        symmTensorField tf1Plus(tf1);
+
+        tf1Plus += adjust;
+
+        TFOR_ALL_F_OP_FUNC_F(symmTensor, tf, =, inv, symmTensor, tf1Plus)
+
+        tf -= adjust;
+    }
+    else
+    {
+        TFOR_ALL_F_OP_FUNC_F(symmTensor, tf, =, inv, symmTensor, tf1)
+    }
+}
+
+tmp<symmTensorField> inv(const UList<symmTensor>& tf)
+{
+    auto tresult = tmp<symmTensorField>::New(tf.size());
+    inv(tresult.ref(), tf);
+    return tresult;
+}
+
+tmp<symmTensorField> inv(const tmp<symmTensorField>& tf)
+{
+    tmp<symmTensorField> tresult = New(tf);
+    inv(tresult.ref(), tf());
+    tf.clear();
+    return tresult;
+}
+
 
 template<>
 tmp<Field<symmTensor>> transformFieldMask<symmTensor>
@@ -90,6 +143,8 @@ tmp<Field<symmTensor>> transformFieldMask<symmTensor>
 {
     return tstf;
 }
+
+UNARY_FUNCTION(symmTensor, symmTensor, pinv)
 
 
 // * * * * * * * * * * * * * * * global operators  * * * * * * * * * * * * * //

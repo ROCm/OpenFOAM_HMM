@@ -122,7 +122,7 @@ Tensor<complex> eigenVectors(const tensor& T);
 //  \param t tensor
 //
 //  \return tensor inverse of tensor
-tensor inv(const tensor& t);
+tensor pinv(const tensor& t);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

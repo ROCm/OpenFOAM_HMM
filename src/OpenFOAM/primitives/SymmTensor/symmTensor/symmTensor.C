@@ -338,29 +338,26 @@ Foam::tensor Foam::eigenVectors(const symmTensor& T)
 }
 
 
-Foam::symmTensor Foam::inv(const symmTensor& st)
+Foam::symmTensor Foam::pinv(const symmTensor& st)
 {
     const scalar dt = det(st);
 
     if (dt < ROOTVSMALL)
     {
         // Fall back to pseudo inverse
-        scalarRectangularMatrix pinv(3, 3, Zero);
+        scalarRectangularMatrix mat(3, 3);
 
-        pinv(0,0) = st.xx();
-        pinv(0,1) = st.xy();
-        pinv(0,2) = st.xz();
-        pinv(1,1) = st.yy();
-        pinv(1,2) = st.yz();
-        pinv(2,2) = st.zz();
+        mat(0,0) = st.xx(); mat(0,1) = st.xy(); mat(0,2) = st.xz();
+        mat(1,0) = st.yx(); mat(1,1) = st.yy(); mat(1,2) = st.yz();
+        mat(2,0) = st.zx(); mat(2,1) = st.zy(); mat(2,2) = st.zz();
 
-        pinv = SVDinv(pinv);
+        mat = SVDinv(mat);
 
         return symmTensor
         (
-            pinv(0,0), pinv(0,1), pinv(0,2),
-                       pinv(1,1), pinv(1,2),
-                                  pinv(2,2)
+            mat(0,0), mat(0,1), mat(0,2),
+                      mat(1,1), mat(1,2),
+                                mat(2,2)
         );
     }
 

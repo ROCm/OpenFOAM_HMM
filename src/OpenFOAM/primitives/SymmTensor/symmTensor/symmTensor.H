@@ -112,7 +112,7 @@ tensor eigenVectors(const symmTensor& T);
 //  \param st symmTensor
 //
 //  \return symmTensor inverse of symmTensor
-symmTensor inv(const symmTensor& st);
+symmTensor pinv(const symmTensor& st);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

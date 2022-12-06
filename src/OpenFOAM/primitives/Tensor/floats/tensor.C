@@ -302,24 +302,26 @@ Foam::Tensor<Foam::complex> Foam::eigenVectors(const tensor& T)
 }
 
 
-Foam::tensor Foam::inv(const tensor& t)
+Foam::tensor Foam::pinv(const tensor& t)
 {
     const scalar dt = det(t);
 
     if (dt < ROOTVSMALL)
     {
         // Fall back to pseudo inverse
-        scalarRectangularMatrix pinv(3, 3);
+        scalarRectangularMatrix mat(3, 3);
 
-        std::copy(t.cbegin(), t.cend(), pinv.begin());
+        mat(0,0) = t.xx(); mat(0,1) = t.xy(); mat(0,2) = t.xz();
+        mat(1,0) = t.yx(); mat(1,1) = t.yy(); mat(1,2) = t.yz();
+        mat(2,0) = t.zx(); mat(2,1) = t.zy(); mat(2,2) = t.zz();
 
-        pinv = SVDinv(pinv);
+        mat = SVDinv(mat);
 
         return tensor
         (
-            pinv(0,0), pinv(0,1), pinv(0,2),
-            pinv(1,0), pinv(1,1), pinv(1,2),
-            pinv(2,0), pinv(2,1), pinv(2,2)
+            mat(0,0), mat(0,1), mat(0,2),
+            mat(1,0), mat(1,1), mat(1,2),
+            mat(2,0), mat(2,1), mat(2,2)
         );
     }
 
