@@ -167,6 +167,21 @@ tmp<faVectorMatrix> contactAngleForce::correct(areaVectorField& U)
         }
     }
 
+    for (const faPatchScalarField& sigmaBf : sigma.boundaryField())
+    {
+        const faPatch& p = sigmaBf.patch();
+
+        if (!p.coupled())
+        {
+            const labelUList& faces = p.edgeFaces();
+
+            forAll(sigmaBf, edgei)
+            {
+                const label face0 = faces[edgei];
+                force[face0] = Zero;
+            }
+        }
+    }
 
     if (film().regionMesh().time().writeTime())
     {
