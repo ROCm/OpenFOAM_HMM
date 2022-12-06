@@ -49,7 +49,6 @@ namespace Foam
 
 // Forward Declarations
 class mapDistributePolyMesh;
-class writeHandler;
 
 /*---------------------------------------------------------------------------*\
                          Class fvMeshTools Declaration

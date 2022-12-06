@@ -51,7 +51,6 @@ namespace Foam
 
 // Forward Declarations
 class mapDistributePolyMesh;
-class writeHandler;
 class polyMesh;
 class IOobject;
 
