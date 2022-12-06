@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -94,7 +94,7 @@ public:
 
     // Member Functions
 
-        //- Return the matrix inverse into itself if no elem is equal to zero
+        //- Return the matrix inverse into itself
         void invert();
 
         //- Return a sort permutation labelList according to

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -74,11 +74,9 @@ void Foam::DiagonalMatrix<Type>::invert()
 {
     for (Type& val : *this)
     {
-        if (mag(val) < VSMALL)
-        {
-            val = Zero;
-        }
-        else
+        // If mag(val)<VSMALL, leave untouched
+        // forcing of val=Zero sometimes confuses compiler
+        if (mag(val) > VSMALL)
         {
             val = Type(1)/val;
         }
@@ -149,21 +147,19 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-//- Return the matrix inverse as a DiagonalMatrix if no elem is equal to zero
+//- Return the matrix inverse as a DiagonalMatrix
 template<class Type>
 DiagonalMatrix<Type> inv(const DiagonalMatrix<Type>& mat)
 {
-    DiagonalMatrix<Type> Ainv(mat.size());
+    // Construct with fall-back value conditional calculation
+    // of invert to avoid over-eager compiler optimisation
+    DiagonalMatrix<Type> Ainv(mat.size(), Zero);
 
     Type* iter = Ainv.begin();
 
     for (const Type& val : mat)
     {
-        if (mag(val) < VSMALL)
-        {
-            *iter = Zero;
-        }
-        else
+        if (mag(val) > VSMALL)
         {
             *iter = Type(1)/val;
         }
