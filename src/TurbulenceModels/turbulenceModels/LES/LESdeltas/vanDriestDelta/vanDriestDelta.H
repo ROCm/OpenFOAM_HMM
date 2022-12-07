@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019,2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,25 @@ Class
 
 Description
     Simple cube-root of cell volume delta used in incompressible LES models.
+
+    Example of the delta specification in turbulenceProperties:
+    \verbatim
+        delta               vanDriest;
+
+        vanDriestCoeffs
+        {
+            // Underlying geometric delta
+            delta           cubeRootVol;
+            // Coefficients for geometric delta
+            cubeRootVolCoeffs
+            {
+                deltaCoeff      2.0;
+            }
+            // Optional update interval
+            // Default is 1 (update every step)
+            updateInterval    1000;
+        }
+    \endverbatim
 
 SourceFiles
     vanDriestDelta.C
