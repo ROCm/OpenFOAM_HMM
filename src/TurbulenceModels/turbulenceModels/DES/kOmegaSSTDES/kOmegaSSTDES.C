@@ -77,16 +77,26 @@ tmp<volScalarField> kOmegaSSTDES<BasicTurbulenceModel>::r
 template<class BasicTurbulenceModel>
 tmp<volScalarField> kOmegaSSTDES<BasicTurbulenceModel>::S2
 (
-    const volScalarField& F1,
     const volTensorField& gradU
 ) const
 {
     tmp<volScalarField> tS2 =
-        kOmegaSSTBase<DESModel<BasicTurbulenceModel>>::S2(F1, gradU);
+        kOmegaSSTBase<DESModel<BasicTurbulenceModel>>::S2(gradU);
 
     if (this->useSigma_)
     {
         volScalarField& S2 = tS2.ref();
+
+        const volScalarField& k = this->k_;
+        const volScalarField& omega = this->omega_;
+
+        const volScalarField CDkOmega
+        (
+            (2*this->alphaOmega2_)*(fvc::grad(k) & fvc::grad(omega))/omega
+        );
+
+        const volScalarField F1(this->F1(CDkOmega));
+
         const volScalarField CDES(this->CDES(F1));
         const volScalarField dTilda(this->dTilda(mag(gradU), CDES));
         const volScalarField lengthScaleRAS(this->lengthScaleRAS());
@@ -128,7 +138,6 @@ template<class BasicTurbulenceModel>
 tmp<volScalarField::Internal> kOmegaSSTDES<BasicTurbulenceModel>::GbyNu0
 (
     const volTensorField& gradU,
-    const volScalarField& F1,
     const volScalarField& S2
 ) const
 {
@@ -138,7 +147,7 @@ tmp<volScalarField::Internal> kOmegaSSTDES<BasicTurbulenceModel>::GbyNu0
     }
 
     return
-        kOmegaSSTBase<DESModel<BasicTurbulenceModel>>::GbyNu0(gradU, F1, S2);
+        kOmegaSSTBase<DESModel<BasicTurbulenceModel>>::GbyNu0(gradU, S2);
 }
 
 

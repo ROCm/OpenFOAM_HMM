@@ -118,7 +118,6 @@ protected:
         //- Return square of strain rate
         virtual tmp<volScalarField> S2
         (
-            const volScalarField& F1,
             const volTensorField& gradU
         ) const;
 
@@ -140,7 +139,6 @@ protected:
         virtual tmp<volScalarField::Internal> GbyNu0
         (
             const volTensorField& gradU,
-            const volScalarField& F1,
             const volScalarField& S2
         ) const;
 

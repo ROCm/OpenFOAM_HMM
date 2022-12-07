@@ -136,7 +136,6 @@ void kOmegaSSTBase<BasicEddyViscosityModel>::correctNut()
 template<class BasicEddyViscosityModel>
 Foam::tmp<Foam::volScalarField> kOmegaSSTBase<BasicEddyViscosityModel>::S2
 (
-    const volScalarField& F1,
     const volTensorField& gradU
 ) const
 {
@@ -169,8 +168,7 @@ template<class BasicEddyViscosityModel>
 tmp<volScalarField::Internal> kOmegaSSTBase<BasicEddyViscosityModel>::GbyNu0
 (
     const volTensorField& gradU,
-    const volScalarField& F1,
-    const volScalarField& S2
+    const volScalarField& /* S2 not used */
 ) const
 {
     return tmp<volScalarField::Internal>::New
@@ -521,6 +519,14 @@ void kOmegaSSTBase<BasicEddyViscosityModel>::correct()
         fvc::div(fvc::absolute(this->phi(), U))
     );
 
+    tmp<volTensorField> tgradU = fvc::grad(U);
+    const volScalarField S2(this->S2(tgradU()));
+    volScalarField::Internal GbyNu0(this->GbyNu0(tgradU(), S2));
+    volScalarField::Internal G(this->GName(), nut*GbyNu0);
+
+    // Update omega and G at the wall
+    omega_.boundaryFieldRef().updateCoeffs();
+
     const volScalarField CDkOmega
     (
         (2*alphaOmega2_)*(fvc::grad(k_) & fvc::grad(omega_))/omega_
@@ -528,14 +534,6 @@ void kOmegaSSTBase<BasicEddyViscosityModel>::correct()
 
     const volScalarField F1(this->F1(CDkOmega));
     const volScalarField F23(this->F23());
-
-    tmp<volTensorField> tgradU = fvc::grad(U);
-    const volScalarField S2(this->S2(F1, tgradU()));
-    volScalarField::Internal GbyNu0(this->GbyNu0(tgradU(), F1, S2));
-    volScalarField::Internal G(this->GName(), nut*GbyNu0);
-
-    // Update omega and G at the wall
-    omega_.boundaryFieldRef().updateCoeffs();
 
     {
         const volScalarField::Internal gamma(this->gamma(F1));
