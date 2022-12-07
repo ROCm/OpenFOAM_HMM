@@ -32,6 +32,36 @@ Description
     The effect of the contact angle force can be ignored over a specified
     distance from patches.
 
+    The contact-angle force is implemented as follows:
+    \f[
+        \vec{f}_\theta =
+            \beta \frac{\sigma (1 - cos(\theta))}{\Delta_{cl}} \vec{n}_{cl}
+            \frac{1}{\rho_f|\vec{S}_f|}
+          - \vec{f}_{cl}
+    \f]
+
+    with if \f$ h > h_{crit} \f$:
+
+    \f[
+        \vec{f}_{cl} = \nu_f \frac{\vec{U}_f}{h_{crit}}
+    \f]
+
+    where
+    \vartable
+        \vec{f}_\theta | Contact-angle force            [N/m^2/rho]
+        \beta          | Empirical constant             [-]
+        \sigma         | Liquid-air interfacial surface tension [kg/s^2]
+        \theta         | Contact angle                  [rad]
+        \Delta_{cl}    | Inverse width in direction normal to contact line [1/m]
+        \vec{n}_{cl}   | Direction normal to contact line [-]
+        \rho_f         | Film density                   [kg/m^3]
+        \vec{S}_f      | Face-area vector               [m^2]
+        \vec{f}_{cl}   | Contact-line movement force    [N/m^2/rho]
+        \nu_f          | Film kinematic viscosity       [m^2/s]
+        \vec{U}_f      | Film velocity                  [m/s]
+        h_{crit}       | Critical film height           [m]
+    \endvartable
+
     Reference:
     \verbatim
         Governing equations (tag:MHDX):
@@ -46,13 +76,38 @@ Description
             Springer Vieweg, Wiesbaden.
     \endverbatim
 
+Usage
+    Minimal example:
+    \verbatim
+    {
+        // Mandatory entries
+        Ccf             <scalar>;
+
+        // Optional entries
+        hCrit           <scalar>;
+
+        // Inherited entries
+        ...
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property         | Description               | Type  | Reqd | Deflt
+      Ccf              | Empirical coefficient    | scalar | yes  | -
+      hCrit            | Critical film height [m] | scalar | no   | GREAT
+    \endtable
+
+    The inherited entries are elaborated in:
+      - \link force.H \endlink
+
 SourceFiles
     contactAngleForce.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef contactAngleForce_H
-#define contactAngleForce_H
+#ifndef areaSurfaceFilmModels_contactAngleForce_H
+#define areaSurfaceFilmModels_contactAngleForce_H
 
 #include "force.H"
 
@@ -81,14 +136,8 @@ class contactAngleForce
         //- Critical film thickness [m]
         scalar hCrit_;
 
-        //- Mask over which force is applied
-        areaScalarField mask_;
-
 
     // Private Member Functions
-
-        //- Initialise
-        void initialise();
 
         //- No copy construct
         contactAngleForce(const contactAngleForce&) = delete;
@@ -121,7 +170,7 @@ public:
 
 
     //- Destructor
-    virtual ~contactAngleForce();
+    virtual ~contactAngleForce() = default;
 
 
     // Member Functions

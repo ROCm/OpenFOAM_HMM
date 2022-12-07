@@ -44,13 +44,6 @@ namespace areaSurfaceFilmModels
 
 defineTypeNameAndDebug(contactAngleForce, 0);
 
-// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
-
-void contactAngleForce::initialise()
-{
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 contactAngleForce::contactAngleForce
@@ -62,28 +55,7 @@ contactAngleForce::contactAngleForce
 :
     force(typeName, film, dict),
     Ccf_(coeffDict_.get<scalar>("Ccf")),
-    hCrit_(coeffDict_.getOrDefault<scalar>("hCrit", GREAT)),
-    mask_
-    (
-        IOobject
-        (
-            typeName + ":fContactForceMask",
-            film.primaryMesh().time().timeName(),
-            film.primaryMesh(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        film.regionMesh(),
-        dimensionedScalar("mask", dimless, 1.0)
-    )
-{
-    initialise();
-}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-contactAngleForce::~contactAngleForce()
+    hCrit_(coeffDict_.getOrDefault<scalar>("hCrit", GREAT))
 {}
 
 
@@ -91,73 +63,69 @@ contactAngleForce::~contactAngleForce()
 
 tmp<faVectorMatrix> contactAngleForce::correct(areaVectorField& U)
 {
-    tmp<areaVectorField> tForce
+    auto tforce = tmp<areaVectorField>::New
     (
-        new areaVectorField
+        IOobject
         (
-            IOobject
-            (
-                typeName + ":contactForce",
-                film().primaryMesh().time().timeName(),
-                film().primaryMesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            film().regionMesh(),
-            dimensionedVector(dimForce/dimDensity/dimArea, Zero)
-        )
+            IOobject::scopedName(typeName, "contactForce"),
+            film().primaryMesh().time().timeName(),
+            film().primaryMesh(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            IOobject::NO_REGISTER
+        ),
+        film().regionMesh(),
+        dimensionedVector(dimForce/dimDensity/dimArea, Zero)
     );
-
-    vectorField& force = tForce.ref().primitiveFieldRef();
+    vectorField& force = tforce.ref().primitiveFieldRef();
 
     const labelUList& own = film().regionMesh().owner();
-    const labelUList& nbr = film().regionMesh().neighbour();
+    const labelUList& nei = film().regionMesh().neighbour();
 
     const DimensionedField<scalar, areaMesh>& magSf = film().regionMesh().S();
     const scalarField& magSff = magSf.field();
 
-    tmp<areaScalarField> talpha = film().alpha();
-    const areaScalarField& sigma = film().sigma();
+    const edgeScalarField& invDx = film().regionMesh().deltaCoeffs();
 
+    const areaScalarField& sigma = film().sigma();
     const areaScalarField& mu = film().mu();
     const areaScalarField& rhof = film().rho();
+    const areaVectorField& Uf = film().Uf();
+    const areaScalarField& hf = film().h();
+
+    tmp<areaScalarField> talpha = film().alpha();
+    const areaScalarField& alpha = talpha();
 
     tmp<areaScalarField> ttheta = theta();
     const areaScalarField& theta = ttheta();
 
-    const areaVectorField& Uf = film().Uf();
-    const areaScalarField& hf = film().h();
+    tmp<areaVectorField> tgradAlpha = fac::grad(alpha);
+    const areaVectorField& gradAlpha = tgradAlpha();
 
-    const areaVectorField gradAlpha(fac::grad(talpha()));
-
-    forAll(nbr, edgei)
+    forAll(nei, edgei)
     {
         const label faceO = own[edgei];
-        const label faceN = nbr[edgei];
+        const label faceN = nei[edgei];
 
         label facei = -1;
-        if ((talpha()[faceO] > 0.5) && (talpha()[faceN] < 0.5))
+        if ((alpha[faceO] > 0.5) && (alpha[faceN] < 0.5))
         {
             facei = faceO;
         }
-        else if ((talpha()[faceO] < 0.5) && (talpha()[faceN] > 0.5))
+        else if ((alpha[faceO] < 0.5) && (alpha[faceN] > 0.5))
         {
             facei = faceN;
         }
 
-        if (facei != -1 && mask_[facei] > 0.5)
+        if (facei != -1)
         {
-            const scalar invDx = film().regionMesh().deltaCoeffs()[edgei];
-            const vector n
-            (
-                gradAlpha[facei]/(mag(gradAlpha[facei]) + ROOTVSMALL)
-            );
+            const vector n(normalised(gradAlpha[facei]));
             const scalar cosTheta = cos(degToRad(theta[facei]));
 
             // (MHDX:Eq. 13)
             force[facei] +=
                 Ccf_*n*sigma[facei]*(1 - cosTheta)
-               /invDx/rhof[facei]/magSff[facei];
+               /invDx[edgei]/rhof[facei]/magSff[facei];
 
             // (NDPC:Eq. 11)
             if (hf[facei] > hCrit_)
@@ -185,16 +153,13 @@ tmp<faVectorMatrix> contactAngleForce::correct(areaVectorField& U)
 
     if (film().regionMesh().time().writeTime())
     {
-        tForce().write();
+        tforce().write();
         gradAlpha.write();
     }
 
-    tmp<faVectorMatrix> tfvm
-    (
-        new faVectorMatrix(U, dimForce/dimDensity)
-    );
+    auto tfvm = tmp<faVectorMatrix>::New(U, dimForce/dimDensity);
 
-    tfvm.ref() += tForce;
+    tfvm.ref() += tforce;
 
     return tfvm;
 }
