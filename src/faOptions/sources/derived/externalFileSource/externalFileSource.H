@@ -54,6 +54,7 @@ Usage
       type      | Type name: externalFileSource  | word  | yes  | -
       fieldName | Name of operand field          | word  | yes  | -
       tableName | Name of operand table file     | word  | yes  | -
+      store     | Register external field 'pExt' | bool  | no   | false
     \endtable
 
     The inherited entries are elaborated in:

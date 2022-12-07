@@ -27,93 +27,14 @@ License
 
 #include "polyMesh.H"
 #include "rawIOField.H"
+#include "clockTime.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
 Foam::PatchFunction1Types::MappedFile<Type>::MappedFile
 (
-    const polyPatch& pp,
-    const word& redirectType,
-    const word& entryName,
-    const dictionary& dict,
-    const bool faceValues
-)
-:
-    PatchFunction1<Type>(pp, entryName, dict, faceValues),
-    dictConstructed_(true),
-    setAverage_(dict.getOrDefault("setAverage", false)),
-    perturb_(dict.getOrDefault<scalar>("perturb", 1e-5)),
-    fieldTableName_(dict.getOrDefault<word>("fieldTable", entryName)),
-    pointsName_(dict.getOrDefault<word>("points", "points")),
-    mapMethod_(),
-    filterRadius_(dict.getOrDefault<scalar>("filterRadius", 0)),
-    filterSweeps_(dict.getOrDefault<label>("filterSweeps", 0)),
-    filterFieldPtr_(nullptr),
-    readerFormat_(),
-    readerFile_(),
-    readerPtr_(nullptr),
-    mapperPtr_(nullptr),
-    sampleTimes_(),
-    sampleIndex_(-1, -1),
-    sampleAverage_(Zero, Zero),
-    sampleValues_(),
-    offset_(Function1<Type>::NewIfPresent("offset", dict))
-{
-    // Simple sanity check
-    if ((filterSweeps_ < 1) || (filterRadius_ <= VSMALL))
-    {
-        filterRadius_ = 0;
-        filterSweeps_ = 0;
-    }
-
-    if (dict.readIfPresent("sampleFormat", readerFormat_))
-    {
-        dict.readEntry("sampleFile", readerFile_);
-
-        fileName fName(readerFile_);
-        fName.expand();
-
-        readerPtr_ = surfaceReader::New(readerFormat_, fName);
-    }
-
-    if (debug)
-    {
-        Info<< "mappedFile:" << nl;
-        if (readerFormat_.empty())
-        {
-            Info<< "    boundary format" << nl;
-        }
-        else
-        {
-            Info<< "    format:" << readerFormat_
-                << " file:" << readerFile_ << nl;
-        }
-
-        Info<< "    filter radius=" << filterRadius_
-            << " sweeps=" << filterSweeps_ << endl;
-    }
-
-    if
-    (
-        dict.readIfPresent("mapMethod", mapMethod_)
-     && !mapMethod_.empty()
-     && mapMethod_ != "nearest"
-     && !mapMethod_.starts_with("planar")
-    )
-    {
-        FatalIOErrorInFunction(dict)
-            << "Unknown mapMethod type " << mapMethod_
-            << "\n\nValid mapMethod types :\n"
-            << "(nearest planar)" << nl
-            << exit(FatalIOError);
-    }
-}
-
-
-template<class Type>
-Foam::PatchFunction1Types::MappedFile<Type>::MappedFile
-(
+    const bool dictConstructed,
     const polyPatch& pp,
     const word& entryName,
     const dictionary& dict,
@@ -122,7 +43,7 @@ Foam::PatchFunction1Types::MappedFile<Type>::MappedFile
 )
 :
     PatchFunction1<Type>(pp, entryName, dict, faceValues),
-    dictConstructed_(false),
+    dictConstructed_(dictConstructed),
     setAverage_(dict.getOrDefault("setAverage", false)),
     perturb_(dict.getOrDefault<scalar>("perturb", 1e-5)),
     fieldTableName_(fieldTableName),
@@ -141,6 +62,11 @@ Foam::PatchFunction1Types::MappedFile<Type>::MappedFile
     sampleValues_(),
     offset_(Function1<Type>::NewIfPresent("offset", dict))
 {
+    if (fieldTableName_.empty())
+    {
+        fieldTableName_ = entryName;
+    }
+
     // Simple sanity check
     if ((filterSweeps_ < 1) || (filterRadius_ <= VSMALL))
     {
@@ -155,7 +81,12 @@ Foam::PatchFunction1Types::MappedFile<Type>::MappedFile
         fileName fName(readerFile_);
         fName.expand();
 
-        readerPtr_ = surfaceReader::New(readerFormat_, fName);
+        readerPtr_ = surfaceReader::New
+        (
+            readerFormat_,
+            fName,
+            surfaceReader::formatOptions(dict, readerFormat_, "readOptions")
+        );
     }
 
     if (debug)
@@ -190,6 +121,50 @@ Foam::PatchFunction1Types::MappedFile<Type>::MappedFile
             << exit(FatalIOError);
     }
 }
+
+
+template<class Type>
+Foam::PatchFunction1Types::MappedFile<Type>::MappedFile
+(
+    const polyPatch& pp,
+    const word& redirectType,
+    const word& entryName,
+    const dictionary& dict,
+    const bool faceValues
+)
+:
+    MappedFile<Type>
+    (
+        true,  // dictConstructed = true
+        pp,
+        entryName,
+        dict,
+        dict.getOrDefault<word>("fieldTable", entryName),
+        faceValues
+    )
+{}
+
+
+template<class Type>
+Foam::PatchFunction1Types::MappedFile<Type>::MappedFile
+(
+    const polyPatch& pp,
+    const word& entryName,
+    const dictionary& dict,
+    const word& fieldTableName,
+    const bool faceValues
+)
+:
+    MappedFile<Type>
+    (
+        false,  // dictConstructed = false
+        pp,
+        entryName,
+        dict,
+        fieldTableName,
+        faceValues
+    )
+{}
 
 
 template<class Type>
@@ -313,9 +288,20 @@ void Foam::PatchFunction1Types::MappedFile<Type>::updateSampledValues
 
         label fieldIndex = fieldNames.find(fieldTableName_);
 
-        DebugInfo
-            << "checkTable : Update index=" << sampleIndex
-            << " field=" << fieldNames[fieldIndex] << endl;
+        if (fieldIndex < 0)
+        {
+            FatalErrorInFunction
+                << "Sample field='" << fieldTableName_
+                << "' not found. Known field names: "
+                << flatOutput(fieldNames) << nl
+                << exit(FatalError);
+        }
+
+        if (debug)
+        {
+            Pout<< "checkTable : Update index=" << sampleIndex
+                << " field=" << fieldNames[fieldIndex] << endl;
+        }
 
         tvalues = readerPtr_->field
         (
@@ -418,6 +404,8 @@ void Foam::PatchFunction1Types::MappedFile<Type>::checkTable
     // Initialise
     if (!mapperPtr_ && readerPtr_)
     {
+        clockTime timing;
+
         auto& reader = readerPtr_();
 
         const meshedSurface& geom = reader.geometry(0);
@@ -436,14 +424,14 @@ void Foam::PatchFunction1Types::MappedFile<Type>::checkTable
             << "Read " << samplePoints.size() << " sample points from "
             << readerFile_ << endl
             << "Found times "
-            << pointToPointPlanarInterpolation::timeNames(sampleTimes_) << nl;
+            << pointToPointPlanarInterpolation::timeNames(sampleTimes_) << nl
+            << "... in " << timing.timeIncrement() << 's' << endl;
 
         // tbd: run-time selection
         const bool nearestOnly =
         (
             !mapMethod_.empty() && !mapMethod_.starts_with("planar")
         );
-
 
         // Allocate the interpolator
         if (this->faceValues())
@@ -473,10 +461,19 @@ void Foam::PatchFunction1Types::MappedFile<Type>::checkTable
             );
         }
 
+        DebugInfo
+            << "Created point/point planar interpolation"
+            << " - in " << timing.timeIncrement() << 's' << endl;
+
+
         // Setup median filter (if any)
         if (filterSweeps_ > 0)
         {
             filterFieldPtr_.reset(new FilterField(geom, filterRadius_));
+
+            DebugInfo
+                << "Calculated field-filter"
+                << " - in " << timing.timeIncrement() << 's' << endl;
         }
         else
         {
@@ -485,6 +482,8 @@ void Foam::PatchFunction1Types::MappedFile<Type>::checkTable
     }
     else if (!mapperPtr_)
     {
+        clockTime timing;
+
         // Reread values and interpolate
         const fileName samplePointsFile
         (
@@ -509,15 +508,22 @@ void Foam::PatchFunction1Types::MappedFile<Type>::checkTable
         // Read data (no average value!)
         const rawIOField<point> samplePoints(io);
 
+        // Read the times for which data is available
+        sampleTimes_ = Time::findTimes(samplePointsFile.path());
+
+        DebugInfo
+            << "Read " << samplePoints.size() << " sample points from "
+            << samplePointsFile << endl
+            << "Found times "
+            << pointToPointPlanarInterpolation::timeNames(sampleTimes_) << nl
+            << "... in " << timing.timeIncrement() << 's' << endl;
+
+
         // tbd: run-time selection
         const bool nearestOnly =
         (
             !mapMethod_.empty() && !mapMethod_.starts_with("planar")
         );
-
-        DebugInfo
-            << "Read " << samplePoints.size() << " sample points from "
-            << samplePointsFile << endl;
 
         // Allocate the interpolator
         if (this->faceValues())
@@ -547,19 +553,19 @@ void Foam::PatchFunction1Types::MappedFile<Type>::checkTable
             );
         }
 
-        // Read the times for which data is available
-        const fileName samplePointsDir = samplePointsFile.path();
-        sampleTimes_ = Time::findTimes(samplePointsDir);
-
         DebugInfo
-            << "Found times "
-            << pointToPointPlanarInterpolation::timeNames(sampleTimes_)
-            << endl;
+            << "Created point/point planar interpolation"
+            << " - in " << timing.timeIncrement() << 's' << endl;
+
 
         // Setup median filter (if any)
         if (filterSweeps_ > 0)
         {
             filterFieldPtr_.reset(new FilterField(samplePoints, filterRadius_));
+
+            DebugInfo
+                << "Calculated field-filter"
+                << " - in " << timing.timeIncrement() << 's' << endl;
         }
         else
         {

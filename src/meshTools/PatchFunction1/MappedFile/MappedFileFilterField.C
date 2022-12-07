@@ -227,7 +227,7 @@ void Foam::PatchFunction1Types::FilterField::buildWeightsImpl
             total += n;
         }
 
-        Info<< "Weight neighbours: min=" << limits.min()
+        Pout<< "Weight neighbours: min=" << limits.min()
             << " avg=" << (total / addressing_.size())
             << " max=" << limits.max() << endl;
     }
@@ -279,7 +279,7 @@ void Foam::PatchFunction1Types::FilterField::reset
 
     if (debug)
     {
-        Info<< "Apply " << RBF_typeNames_[interp] << " filter,"
+        Pout<< "Apply " << RBF_typeNames_[interp] << " filter,"
             << " radius=" << radius << nl
             << "Create tree..." << endl;
     }
@@ -325,15 +325,9 @@ void Foam::PatchFunction1Types::FilterField::reset
 
     if (debug)
     {
-        Info<< "Apply " << RBF_typeNames_[interp] << " filter,";
-
-        if (relative)
-        {
-            Info<< " relative";
-        }
-
-        Info<< " radius=" << radius << endl;
-        Info<< "Create tree..." << endl;
+        Pout<< "Apply " << RBF_typeNames_[interp] << " filter,"
+            << (relative ? " relative" : "") << " radius=" << radius << nl
+            << "Create tree..." << endl;
     }
 
     autoPtr<indexedOctree<treeDataPoint>> treePtr

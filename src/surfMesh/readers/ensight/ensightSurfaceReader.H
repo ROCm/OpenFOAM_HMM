@@ -29,6 +29,24 @@ Class
 Description
     Ensight format surface reader
 
+    \verbatim
+    readOptions
+    {
+        ensight
+        {
+            debug       false;
+            masterOnly  false;
+        }
+    }
+    \endverbatim
+
+    Format options for ensight:
+    \table
+        Property | Description                              | Required | Default
+        debug    | Add debug flag                           | no  | false
+        masterOnly | Read files on master and broadcast values | no  | true
+    \endtable
+
 SourceFiles
     ensightSurfaceReader.C
     ensightSurfaceReaderTemplates.C
@@ -75,6 +93,9 @@ protected:
 
 
     // Protected Data
+
+        //- Read on master and broadcast (in parallel)
+        bool masterOnly_;
 
         //- Format flag
         IOstreamOption::streamFormat readFormat_;
@@ -135,6 +156,9 @@ protected:
         //- Read the case file
         void readCase(ISstream& is);
 
+        //- Read and return surface geometry. Updates faceTypeInfo_
+        meshedSurface readGeometry(const fileName& geometryFile);
+
         //- Helper function to return Type after skipping n tokens
         template<class Type>
         void readFromLine(const label nSkip, Istream& is, Type& value) const;
@@ -146,6 +170,14 @@ protected:
             const label nSkip,
             const string& buffer,
             Type& value
+        ) const;
+
+        //- Helper function to return a field
+        template<class Type>
+        tmp<Field<Type>> readField
+        (
+            const fileName& dataFile,
+            const word& fieldName
         ) const;
 
         //- Helper function to return a field
@@ -165,8 +197,12 @@ public:
 
     // Constructors
 
-        //- Construct from fileName
-        explicit ensightSurfaceReader(const fileName& fName);
+        //- Construct from fileName, with reader options
+        explicit ensightSurfaceReader
+        (
+            const fileName& fName,
+            const dictionary& options = dictionary()
+        );
 
 
     //- Destructor

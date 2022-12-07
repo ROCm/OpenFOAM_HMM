@@ -37,8 +37,25 @@ Description
     // Values
     <case>/constant/region0/"boundaryData"/patchName/TIME/field
 
+    \verbatim
+    readOptions
+    {
+        boundaryData
+        {
+            points      points;
+        }
+    }
+    \endverbatim
+
+    Format options for boundaryData:
+    \table
+        Property | Description                              | Required | Default
+        points   | Name of the "points" file                | no  | points
+    \endtable
+
 SourceFiles
     boundaryDataSurfaceReader.C
+    boundaryDataSurfaceReaderTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -110,6 +127,14 @@ public:
         explicit boundaryDataSurfaceReader
         (
             const fileName& fName,
+            const word& pointsName = "points"
+        );
+
+        //- Construct from fileName with reader options
+        boundaryDataSurfaceReader
+        (
+            const fileName& fName,
+            const dictionary& options,
             const word& pointsName = "points"
         );
 

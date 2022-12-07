@@ -337,9 +337,18 @@ void Foam::ensightSurfaceReader::readCase(ISstream& is)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::ensightSurfaceReader::ensightSurfaceReader(const fileName& fName)
+Foam::ensightSurfaceReader::ensightSurfaceReader
+(
+    const fileName& fName,
+    const dictionary& options
+)
 :
-    surfaceReader(fName),
+    surfaceReader(fName, options),
+    masterOnly_
+    (
+        Pstream::parRun()
+     && options.getOrDefault("masterOnly", false)
+    ),
     readFormat_(IOstreamOption::ASCII),  // Placeholder value
     baseDir_(fName.path()),
     meshFileName_(),
@@ -351,24 +360,46 @@ Foam::ensightSurfaceReader::ensightSurfaceReader(const fileName& fName)
     timeValues_(),
     surfPtr_(nullptr)
 {
-    IFstream is(fName);
-    readCase(is);
+    if (options.getOrDefault("debug", false))
+    {
+        debug |= 1;
+    }
+
+    if (!masterOnly_ || UPstream::master(UPstream::worldComm))
+    {
+        IFstream is(fName);
+        readCase(is);
+    }
+
+    if (masterOnly_ && Pstream::parRun())
+    {
+        Pstream::broadcasts
+        (
+            UPstream::worldComm,
+            meshFileName_,
+            fieldNames_,
+            fieldFileNames_,
+            nTimeSteps_,
+            timeStartIndex_,
+            timeIncrement_,
+            timeValues_
+        );
+    }
 }
 
 
 // * * * * * * * * * * * * * Public Member Functions   * * * * * * * * * * * //
 
-const Foam::meshedSurface& Foam::ensightSurfaceReader::geometry
+Foam::meshedSurface Foam::ensightSurfaceReader::readGeometry
 (
-    const label timeIndex
+    const fileName& geometryFile
 )
 {
     DebugInFunction << endl;
 
-    if (!surfPtr_)
     {
         // Auto-detect ascii/binary format
-        ensightReadFile is(baseDir_/replaceMask(meshFileName_, timeIndex));
+        ensightReadFile is(geometryFile);
 
         // Format detected from the geometry
         readFormat_ = is.format();
@@ -573,15 +604,8 @@ const Foam::meshedSurface& Foam::ensightSurfaceReader::geometry
             }
         }
 
-        faceTypeInfo_.transfer(faceTypeInfo);
-        faceList faces(std::move(dynFaces));
-
-        DebugInfo
-            << "read nFaces: " << faces.size() << nl
-            << "file schema: " << faceTypeInfo_ << nl;
-
-        // Convert from 1-based Ensight addressing to 0-based OF addressing
-        for (face& f : faces)
+        // From 1-based Ensight addressing to 0-based OF addressing
+        for (face& f : dynFaces)
         {
             for (label& fp : f)
             {
@@ -589,7 +613,42 @@ const Foam::meshedSurface& Foam::ensightSurfaceReader::geometry
             }
         }
 
-        surfPtr_.reset(new meshedSurface(std::move(points), std::move(faces)));
+        faceTypeInfo_.transfer(faceTypeInfo);
+        faceList faces(std::move(dynFaces));
+
+        DebugInfo
+            << "read nFaces: " << faces.size() << nl
+            << "file schema: " << faceTypeInfo_ << nl;
+
+        return meshedSurface(std::move(points), std::move(faces));
+    }
+}
+
+
+const Foam::meshedSurface& Foam::ensightSurfaceReader::geometry
+(
+    const label timeIndex
+)
+{
+    DebugInFunction << endl;
+
+    if (!surfPtr_)
+    {
+        surfPtr_.reset(new meshedSurface);
+        auto& surf = *surfPtr_;
+
+        fileName geomFile(baseDir_/replaceMask(meshFileName_, timeIndex));
+
+        if (!masterOnly_ || UPstream::master(UPstream::worldComm))
+        {
+            surf = readGeometry(geomFile);
+        }
+
+        if (masterOnly_ && Pstream::parRun())
+        {
+            // Note: don't need faceTypeInfo_ on (non-reading) ranks
+            Pstream::broadcast(surf, UPstream::worldComm);
+        }
     }
 
     return *surfPtr_;

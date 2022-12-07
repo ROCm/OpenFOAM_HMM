@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,6 +90,15 @@ const Foam::wordList Foam::fieldTypes::area
     "areaSphericalTensorField",
     "areaSymmTensorField",
     "areaTensorField"
+});
+
+const Foam::wordList Foam::fieldTypes::area_internal
+({
+    "areaScalarField::Internal",
+    "areaVectorField::Internal",
+    "areaSphericalTensorField::Internal",
+    "areaSymmTensorField::Internal",
+    "areaTensorField::Internal"
 });
 
 

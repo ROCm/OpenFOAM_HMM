@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,24 @@ Class
 
 Description
     Abstract base class for surface readers with fields.
+
+    Some readers support different input options, these are typically
+    specified as 'readOptions' in the containing dictionary.
+
+    \verbatim
+    readOptions
+    {
+        default
+        {
+            verbose     false;
+        }
+
+        ensight
+        {
+            masterOnly  false;
+        }
+    }
+    \endverbatim
 
 SourceFiles
     surfaceReader.C
@@ -73,9 +91,21 @@ public:
             surfaceReader,
             fileName,
             (
-                const fileName& fName
+                const fileName& fName,
+                const dictionary& options
             ),
-            (fName)
+            (fName, options)
+        );
+
+
+    // Helpers
+
+        //- Same as fileFormats::getFormatOptions
+        static dictionary formatOptions
+        (
+            const dictionary& dict,
+            const word& formatName,
+            const word& entryName = "formatOptions"
         );
 
 
@@ -85,7 +115,8 @@ public:
         static autoPtr<surfaceReader> New
         (
             const word& readType,
-            const fileName& fName
+            const fileName& fName,
+            const dictionary& options = dictionary()
         );
 
 
@@ -93,6 +124,9 @@ public:
 
         //- Construct from fileName
         explicit surfaceReader(const fileName& fName);
+
+        //- Construct from fileName and specified options
+        surfaceReader(const fileName& fName, const dictionary& options);
 
 
     //- Destructor

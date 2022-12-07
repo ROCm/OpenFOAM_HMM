@@ -180,7 +180,27 @@ Foam::Istream& Foam::ensightReadFile::read(label& value)
 }
 
 
-Foam::Istream& Foam::ensightReadFile::read(scalar& value)
+Foam::Istream& Foam::ensightReadFile::read(float& value)
+{
+    if (format() == IOstreamOption::BINARY)
+    {
+        read
+        (
+            reinterpret_cast<char*>(&value),
+            sizeof(value)
+        );
+    }
+    else
+    {
+        stdStream() >> value;
+        syncState();
+    }
+
+    return *this;
+}
+
+
+Foam::Istream& Foam::ensightReadFile::read(double& value)
 {
     float fvalue;
 
@@ -191,15 +211,14 @@ Foam::Istream& Foam::ensightReadFile::read(scalar& value)
             reinterpret_cast<char*>(&fvalue),
             sizeof(fvalue)
         );
-
-        value = fvalue;
     }
     else
     {
-        stdStream() >> value;
+        stdStream() >> fvalue;
         syncState();
     }
 
+    value = fvalue;
     return *this;
 }
 

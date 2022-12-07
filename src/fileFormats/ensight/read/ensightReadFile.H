@@ -27,7 +27,8 @@ Class
     Foam::ensightReadFile
 
 Description
-    Ensight output with specialized read() for strings, integers and floats.
+    A variant of IFstream with specialised read() for
+    strings, integers and floats.
     Correctly handles binary read as well.
 
 \*---------------------------------------------------------------------------*/
@@ -98,13 +99,16 @@ public:
         virtual Istream& read(char* buf, std::streamsize count);
 
         //- Read string as "%80s" or as binary
-        Istream& read(string& value);
+        virtual Istream& read(string& value);
 
         //- Read integer as "%10d" or as binary
-        Istream& read(label& value);
+        virtual Istream& read(label& value);
 
-        //- Read float as "%12.5e" or as binary
-        Istream& read(scalar& value);
+        //- Read floating-point as "%12.5e" or as binary
+        virtual Istream& read(float& value);
+
+        //- Read floating-point as "%12.5e" or as a binary (narrowed) float
+        virtual Istream& read(double& value);
 
         //- Read element keyword
         virtual Istream& readKeyword(string& key);

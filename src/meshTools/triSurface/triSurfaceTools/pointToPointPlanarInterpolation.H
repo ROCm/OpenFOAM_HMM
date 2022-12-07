@@ -178,6 +178,12 @@ public:
             return nPoints_;
         }
 
+        //- Number of target points
+        label targetSize() const noexcept
+        {
+            return nearestVertex_.size();
+        }
+
         //- Interpolation addressing to face centres of underlying patch
         const List<FixedList<label, 3>>& nearestVertex() const noexcept
         {

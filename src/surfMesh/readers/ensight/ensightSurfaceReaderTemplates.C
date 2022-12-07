@@ -61,105 +61,141 @@ void Foam::ensightSurfaceReader::readFromLine
 template<class Type>
 Foam::tmp<Foam::Field<Type>> Foam::ensightSurfaceReader::readField
 (
+    const fileName& dataFile,
+    const word& fieldName
+) const
+{
+    auto tfield = tmp<Field<Type>>::New(surfPtr_->nFaces(), Zero);
+    auto& field = tfield.ref();
+
+    if (!masterOnly_ || UPstream::master(UPstream::worldComm))
+    {
+        // Use previously detected ascii/binary format
+        ensightReadFile is(dataFile, readFormat_);
+
+        if (!is.good())
+        {
+            FatalErrorInFunction
+                << "Cannot read file " << is.name()
+                << " for field " << fieldName
+                << exit(FatalError);
+        }
+
+        // Check that data type is as expected
+        // (assumes OpenFOAM generated the data set)
+        string primitiveType;
+        is.read(primitiveType);
+
+        DebugInfo << "primitiveType: " << primitiveType << endl;
+
+        if
+        (
+            primitiveType != ensightPTraits<Type>::typeName
+         && primitiveType != pTraits<Type>::typeName
+        )
+        {
+            IOWarningInFunction(is)
+                << "Expected <" << ensightPTraits<Type>::typeName
+                << "> values for <" << pTraits<Type>::typeName
+                << "> but found " << primitiveType << nl
+                << "    This may be okay, but could indicate an error"
+                << nl << nl;
+        }
+
+        string strValue;
+        label iValue;
+
+        // Read header info: part index, e.g. part 1
+        is.read(strValue);
+        is.read(iValue);
+
+        label begFace = 0;
+
+        // Loop through different element types when reading the field values
+        for (const faceInfoTuple& facesInfo : faceTypeInfo_)
+        {
+            // [faceType, faceCount]
+            const label endFace = begFace + facesInfo.second();
+
+            DebugInfo
+                << "Reading <" << pTraits<Type>::typeName << "> face type "
+                << ensightFaces::elemNames[facesInfo.first()]
+                << " data:" << facesInfo.second() << endl;
+
+            if (begFace < endFace)
+            {
+                // The element type, optionally with 'undef'
+                is.read(strValue);
+
+                if (strValue.contains("undef"))
+                {
+                    // Skip undef entry
+                    scalar value;
+                    is.read(value);
+                }
+
+                // Ensight fields are written component-wise
+                // (can be in different order than OpenFOAM uses)
+
+                for (direction d = 0; d < pTraits<Type>::nComponents; ++d)
+                {
+                    const direction cmpt =
+                        ensightPTraits<Type>::componentOrder[d];
+
+                    for (label facei = begFace; facei < endFace; ++facei)
+                    {
+                        scalar value;
+                        is.read(value);
+                        setComponent(field[facei], cmpt) = value;
+                    }
+                }
+
+                begFace = endFace;
+            }
+        }
+    }
+
+    if (masterOnly_ && Pstream::parRun())
+    {
+        Pstream::broadcast(field, UPstream::worldComm);
+    }
+
+    return tfield;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::Field<Type>> Foam::ensightSurfaceReader::readField
+(
     const label timeIndex,
     const label fieldIndex
 ) const
 {
-    DebugInFunction << endl;
+    if (fieldIndex < 0 || fieldIndex >= fieldNames_.size())
+    {
+        FatalErrorInFunction
+            << "Invalid timeIndex:" << timeIndex
+            << " should be in range [0.." << fieldNames_.size() << ')' << nl
+            << "Possibly used incorrect field lookup name. Known field names: "
+            << flatOutput(fieldNames_) << nl
+            << exit(FatalError);
+    }
 
     const word& fieldName = fieldNames_[fieldIndex];
     const label fileIndex = timeStartIndex_ + timeIndex*timeIncrement_;
 
-    // Use previously detected ascii/binary format
-    ensightReadFile is
+    const fileName dataFile
     (
-        baseDir_/replaceMask(fieldFileNames_[fieldIndex], fileIndex),
-        readFormat_
+        baseDir_/replaceMask(fieldFileNames_[fieldIndex], fileIndex)
     );
 
-    if (!is.good())
+    if (debug)
     {
-        FatalErrorInFunction
-            << "Cannot read file " << is.name()
-            << " for field " << fieldName
-            << exit(FatalError);
+        Pout<< "Read <" << pTraits<Type>::typeName << "> field, file="
+            << dataFile << endl;
     }
 
-    // Check that data type is as expected
-    // (assumes OpenFOAM generated the data set)
-    string primitiveType;
-    is.read(primitiveType);
-
-    DebugInfo << "primitiveType: " << primitiveType << endl;
-
-    if
-    (
-        primitiveType != ensightPTraits<Type>::typeName
-     && primitiveType != pTraits<Type>::typeName
-    )
-    {
-        IOWarningInFunction(is)
-            << "Expected <" << ensightPTraits<Type>::typeName
-            << "> values for <" << pTraits<Type>::typeName
-            << "> but found " << primitiveType << nl
-            << "    This may be okay, but could indicate an error" << nl << nl;
-    }
-
-    auto tfield = tmp<Field<Type>>::New(surfPtr_->nFaces(), Zero);
-    auto& field = tfield.ref();
-
-    string strValue;
-    label iValue;
-
-    // Read header info: part index, e.g. part 1
-    is.read(strValue);
-    is.read(iValue);
-
-    label begFace = 0;
-
-    // Loop through different element types when reading the field values
-    for (const faceInfoTuple& facesInfo : faceTypeInfo_)
-    {
-        // [faceType, faceCount]
-        const label endFace = begFace + facesInfo.second();
-
-        DebugInfo
-            << "Reading <" << pTraits<Type>::typeName << "> face type "
-            << ensightFaces::elemNames[facesInfo.first()]
-            << " data:" << facesInfo.second() << endl;
-
-        if (begFace < endFace)
-        {
-            // The element type, optionally with 'undef'
-            is.read(strValue);
-
-            if (strValue.contains("undef"))
-            {
-                // Skip undef entry
-                scalar value;
-                is.read(value);
-            }
-
-            // Ensight fields are written component-wise
-            // (can be in different order than OpenFOAM uses)
-
-            for (direction d = 0; d < pTraits<Type>::nComponents; ++d)
-            {
-                const direction cmpt = ensightPTraits<Type>::componentOrder[d];
-
-                for (label facei = begFace; facei < endFace; ++facei)
-                {
-                    scalar value;
-                    is.read(value);
-                    setComponent(field[facei], cmpt) = value;
-                }
-            }
-
-            begFace = endFace;
-        }
-    }
-
-    return tfield;
+    return readField<Type>(dataFile, fieldName);
 }
 
 

@@ -26,6 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "surfaceReader.H"
+#include "fileFormats.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -36,11 +37,37 @@ namespace Foam
 }
 
 
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+Foam::dictionary Foam::surfaceReader::formatOptions
+(
+    const dictionary& dict,
+    const word& formatName,
+    const word& entryName
+)
+{
+    return fileFormats::getFormatOptions(dict, formatName, entryName);
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::surfaceReader::surfaceReader(const fileName& fName)
+Foam::surfaceReader::surfaceReader
+(
+    const fileName& fName
+)
 :
     fileName_(fName)
+{}
+
+
+Foam::surfaceReader::surfaceReader
+(
+    const fileName& fName,
+    const dictionary& options
+)
+:
+    surfaceReader(fName)
 {}
 
 
@@ -50,7 +77,8 @@ Foam::autoPtr<Foam::surfaceReader>
 Foam::surfaceReader::New
 (
     const word& readerType,
-    const fileName& fName
+    const fileName& fName,
+    const dictionary& options
 )
 {
     auto* ctorPtr = fileNameConstructorTable(readerType);
@@ -65,7 +93,7 @@ Foam::surfaceReader::New
         ) << exit(FatalError);
     }
 
-    return autoPtr<surfaceReader>(ctorPtr(fName));
+    return autoPtr<surfaceReader>(ctorPtr(fName, options));
 }
 
 

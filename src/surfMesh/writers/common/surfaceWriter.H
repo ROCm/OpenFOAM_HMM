@@ -272,18 +272,6 @@ protected:
             return fileName::null;
         }
 
-
-        //- Extract and merge 'default' + formatName from
-        //- top-level and surface-specific formatOptions dictionaries
-        //
-        //  \returns dictionary of merged formatOptions
-        static dictionary formatOptions
-        (
-            const word& formatName,
-            std::initializer_list<const dictionary*> dicts
-        );
-
-
 public:
 
     // Public Data
@@ -320,10 +308,7 @@ public:
 
     // Helpers
 
-        //- Find "formatOptions" in a top-level dictionary.
-        //- Extract and merge 'default' + formatName values.
-        //
-        //  \returns dictionary of merged formatOptions
+        //- Same as fileFormats::getFormatOptions
         static dictionary formatOptions
         (
             const dictionary& dict,
@@ -331,11 +316,7 @@ public:
             const word& entryName = "formatOptions"
         );
 
-        //- Find "formatOptions" in a top-level dictionary,
-        //- and in a set-specific dictionary.
-        //- Extract and merge 'default' + formatName values.
-        //
-        //  \returns dictionary of merged formatOptions
+        //- Same as fileFormats::getFormatOptions
         static dictionary formatOptions
         (
             const dictionary& dict,

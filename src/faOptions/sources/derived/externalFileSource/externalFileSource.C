@@ -65,7 +65,11 @@ Foam::fa::externalFileSource::externalFileSource
             mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false  // Do not register
+            (
+                dict.getOrDefault("store", false)
+              ? IOobject::REGISTER
+              : IOobject::NO_REGISTER
+            )
         ),
         regionMesh(),
         dimensionedScalar(dimPressure, Zero)
@@ -74,6 +78,10 @@ Foam::fa::externalFileSource::externalFileSource
     mapping_()
 {
     fieldNames_.resize(1, fieldName_);
+
+    /// FUTURE?
+    /// // Optional entry (mandatory = false)
+    /// pExt_.dimensions().readEntry("dimensions",  dict, false);
 
     fa::option::resetApplied();
 
@@ -155,7 +163,7 @@ bool Foam::fa::externalFileSource::read(const dictionary& dict)
                     new PatchFunction1Types::MappedFile<scalar>
                     (
                         p,
-                        "uniformValue",
+                        "uniformValue", // entryName
                         dict,
                         tableName_,     // field table name
                         true            // face values

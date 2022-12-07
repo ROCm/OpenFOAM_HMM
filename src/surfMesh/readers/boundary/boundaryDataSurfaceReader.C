@@ -150,13 +150,26 @@ Foam::boundaryDataSurfaceReader::boundaryDataSurfaceReader
     const word& pointsName
 )
 :
-    surfaceReader(fName),
+    boundaryDataSurfaceReader(fName, dictionary(), pointsName)
+{}
+
+
+Foam::boundaryDataSurfaceReader::boundaryDataSurfaceReader
+(
+    const fileName& fName,
+    const dictionary& options,
+    const word& pointsName
+)
+:
+    surfaceReader(fName, options),
     baseDir_(fName.path()),
     pointsName_(pointsName),
     timeValues_(),
     fieldNames_(),
     surfPtr_(nullptr)
 {
+    options.readIfPresent("points", pointsName_);
+
     baseDir_.toAbsolute();
     debug = 1;
     DebugInFunction << endl;

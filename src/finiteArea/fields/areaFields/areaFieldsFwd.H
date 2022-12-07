@@ -92,6 +92,9 @@ namespace fieldTypes
     //- Standard area field types (scalar, vector, tensor, etc)
     extern const wordList area;
 
+    //- Standard dimensioned field types (scalar, vector, tensor, etc)
+    extern const wordList area_internal;
+
 } // End namespace fieldTypes
 
 

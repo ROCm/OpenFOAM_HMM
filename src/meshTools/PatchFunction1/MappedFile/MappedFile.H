@@ -62,6 +62,7 @@ Description
       sampleFile   | <case>/foo/bar/window.case
       filterRadius | Search radius [m] for median filter neighbours
       filterSweeps | Filter sweeps for median filter
+      readOptions  | Format options for surfaceReader format (eg, ensight)
     \endtable
 
 Note
@@ -173,6 +174,17 @@ class MappedFile
             Type& avg
         ) const;
 
+        //- Construct from entry name and dictionary
+        MappedFile
+        (
+            const bool dictConstructed,
+            const polyPatch& pp,
+            const word& entryName,
+            const dictionary& dict,
+            const word& fieldTableName,
+            const bool faceValues
+        );
+
 public:
 
     //- Runtime type information
@@ -204,7 +216,7 @@ public:
             const word& entryName,
             const dictionary& dict,
             const word& fieldTableName,
-            const bool faceValues
+            const bool faceValues = true
         );
 
         //- Copy construct
