@@ -214,27 +214,44 @@ tmp<volScalarField> adjointkOmegaSST::dR_dnut()
 }
 
 
-tmp<volScalarField> adjointkOmegaSST::dnut_domega() const
+tmp<volScalarField> adjointkOmegaSST::dnut_domega
+(
+    const volScalarField& F2,
+    const volScalarField& S,
+    const volScalarField& case_1_nut,
+    const volScalarField& case_2_nut,
+    const volScalarField& case_3_nut
+) const
 {
     return
         (
-          - case_1_nut_*k()/sqr(omega())
-          - a1_*k()/(b1_*S_*F2_*F2_)*dF2_domega()
+          - case_1_nut*k()/sqr(omega())
+          - a1_*k()/(b1_*S*F2*F2)*dF2_domega(F2, case_2_nut, case_3_nut)
         );
 }
 
 
-tmp<volScalarField> adjointkOmegaSST::dnut_dk() const
+tmp<volScalarField> adjointkOmegaSST::dnut_dk
+(
+    const volScalarField& F2,
+    const volScalarField& S,
+    const volScalarField& case_2_nut
+) const
 {
     return
     (
-        a1_/max(a1_*omega(), b1_*F2_*S_)
-      - a1_*k()/(b1_*S_*F2_*F2_)*dF2_dk()
+        a1_/max(a1_*omega(), b1_*F2*S)
+      - a1_*k()/(b1_*S*F2*F2)*dF2_dk(F2, case_2_nut)
     );
 }
 
 
-tmp<volScalarField> adjointkOmegaSST::dF2_domega() const
+tmp<volScalarField> adjointkOmegaSST::dF2_domega
+(
+    const volScalarField& F2,
+    const volScalarField& case_2_nut,
+    const volScalarField& case_3_nut
+) const
 {
     tmp<volScalarField> arg2 = min
     (
@@ -247,15 +264,19 @@ tmp<volScalarField> adjointkOmegaSST::dF2_domega() const
     );
 
     return
-      - scalar(2)*arg2*(1 - F2_*F2_)*
+      - scalar(2)*arg2*(1 - F2*F2)*
         (
-            case_2_nut_*scalar(2)*sqrt(k())/(betaStar_*sqr(omega())*y_)
-          + case_3_nut_*scalar(500)*nu()/sqr(omega()*y_)
+            case_2_nut*scalar(2)*sqrt(k())/(betaStar_*sqr(omega())*y_)
+          + case_3_nut*scalar(500)*nu()/sqr(omega()*y_)
         );
 }
 
 
-tmp<volScalarField> adjointkOmegaSST::dF2_dk() const
+tmp<volScalarField> adjointkOmegaSST::dF2_dk
+(
+    const volScalarField& F2,
+    const volScalarField& case_2_nut
+) const
 {
     tmp<volScalarField> arg2 = min
     (
@@ -268,8 +289,8 @@ tmp<volScalarField> adjointkOmegaSST::dF2_dk() const
     );
 
     return
-        case_2_nut_*scalar(2)*arg2*(1 - F2_*F2_)/(betaStar_*omega()*y_
-       *sqrt(k()));
+        case_2_nut*scalar(2)*arg2*(1 - F2*F2)
+       /(betaStar_*omega()*y_*sqrt(k()));
 }
 
 
@@ -281,7 +302,8 @@ tmp<volScalarField> adjointkOmegaSST::dGPrime_domega() const
            *(
                 max(a1_*omega(), b1_*F2_*S_)
               + case_1_nut_*a1_*omega()
-              + (scalar(1) - case_1_nut_)*omega()*b1_*S_*dF2_domega()
+              + (scalar(1) - case_1_nut_)*omega()*b1_*S_
+               *dF2_domega(F2_, case_2_nut_, case_3_nut_)
             )
         );
 }
@@ -289,7 +311,9 @@ tmp<volScalarField> adjointkOmegaSST::dGPrime_domega() const
 
 tmp<volScalarField> adjointkOmegaSST::dGPrime_dk() const
 {
-    return case_2_GPrime_*c1_*betaStar_/a1_*omega()*b1_*S_*dF2_dk();
+    return
+        case_2_GPrime_*c1_*betaStar_/a1_*omega()*b1_*S_
+       *dF2_dk(F2_, case_2_nut_);
 }
 
 
@@ -870,12 +894,16 @@ tmp<volScalarField> adjointkOmegaSST::diffusionNutMeanFlowMult
 
 tmp<volVectorField> adjointkOmegaSST::nutMeanFlowSource
 (
-    tmp<volScalarField>& mult
+    tmp<volScalarField>& mult,
+    const volScalarField& F2,
+    const volScalarField& S,
+    const volScalarField& case_1_nut,
+    const volTensorField& gradU
 ) const
 {
     volSymmTensorField M
     (
-        mult*a1_*k()*(1 - case_1_nut_)/(b1_*F2_*S_*S2_)*twoSymm(gradU_)
+        mult*a1_*k()*(1 - case_1_nut)/(b1_*F2*S*S*S)*twoSymm(gradU)
     );
     M.correctBoundaryConditions();
     mult.clear();
@@ -1140,8 +1168,9 @@ void adjointkOmegaSST::updatePrimalRelatedFields()
             case_2_GPrime_ = pos0(GPrime_C1);
         }
 
-        dnut_domega_ = dnut_domega();
-        dnut_dk_ = dnut_dk();
+        dnut_domega_ =
+            dnut_domega(F2_, S_, case_1_nut_, case_2_nut_, case_3_nut_);
+        dnut_dk_ = dnut_dk(F2_, S_, case_2_nut_);
         DOmegaEff_ = DomegaEff(F1_);
         DkEff_ = DkEff(F1_);
 
@@ -1932,7 +1961,15 @@ tmp<volVectorField> adjointkOmegaSST::adjointMeanFlowSource()
         // nut in G
       - ka()*case_1_Pk_*zeroFirstCell_*GbyNu0_
     );
-    meanFlowSource += nutMeanFlowSource(nutMeanFlowSourceMult);
+    meanFlowSource +=
+        nutMeanFlowSource
+        (
+            nutMeanFlowSourceMult,
+            F2_,
+            S_,
+            case_1_nut_,
+            gradU_
+        );
 
     // G at the first cell includes mag(U.snGrad())
     // Add term here
@@ -1984,13 +2021,94 @@ tmp<volVectorField> adjointkOmegaSST::adjointMeanFlowSource()
 
 tmp<volScalarField> adjointkOmegaSST::nutJacobianTMVar1() const
 {
-    return dnut_dk_;
+    // Compute dnut_dk anew since the current copy of dnut_dk_
+    // might not be updated
+    const volVectorField& U = primalVars_.U();
+    tmp<volScalarField> S2
+    (
+        2*magSqr(symm(fvc::grad(U)))
+      + dimensionedScalar(dimless/sqr(dimTime), 1.e-21)
+    );
+    volScalarField S(sqrt(S2));
+    volScalarField F2(this->F2());
+
+    // Computation of nut switches
+    volScalarField nut_C1(a1_*omega() - b1_*F2*S);
+    volScalarField arg2_C2
+    (
+        (scalar(2)/betaStar_)*sqrt(k())/(omega()*y_)
+      - scalar(500)*nu()/(sqr(y_)*omega())
+    );
+    volScalarField arg2_C1
+    (
+        max
+        (
+            (scalar(2)/betaStar_)*sqrt(k())/(omega()*y_),
+            scalar(500)*nu()/(sqr(y_)*omega())
+        ) - scalar(100)
+    );
+    volScalarField case_2_nut(neg0(nut_C1)*pos(arg2_C2)*neg(arg2_C1));
+
+    return dnut_dk(F2, S, case_2_nut);
 }
 
 
 tmp<volScalarField> adjointkOmegaSST::nutJacobianTMVar2() const
 {
-    return dnut_domega_;
+    // Compute dnut_omega anew since the current copy of dnut_domega_
+    // might not be updated
+    const volVectorField& U = primalVars_.U();
+    tmp<volScalarField> S2
+    (
+        2*magSqr(symm(fvc::grad(U)))
+      + dimensionedScalar(dimless/sqr(dimTime), 1.e-21)
+    );
+    volScalarField S(sqrt(S2));
+    volScalarField F2(this->F2());
+
+    // Computation of nut switches
+    volScalarField nut_C1(a1_*omega() - b1_*F2*S);
+    volScalarField arg2_C2
+    (
+        (scalar(2)/betaStar_)*sqrt(k())/(omega()*y_)
+      - scalar(500)*nu()/(sqr(y_)*omega())
+    );
+    volScalarField arg2_C1
+    (
+        max
+        (
+            (scalar(2)/betaStar_)*sqrt(k())/(omega()*y_),
+            scalar(500)*nu()/(sqr(y_)*omega())
+        ) - scalar(100)
+    );
+    volScalarField case_1_nut(pos(nut_C1));
+    volScalarField case_2_nut(neg0(nut_C1)*pos(arg2_C2)*neg(arg2_C1));
+    volScalarField case_3_nut(neg0(nut_C1)*neg0(arg2_C2)*neg(arg2_C1));
+
+    return dnut_domega(F2, S, case_1_nut, case_2_nut, case_3_nut);
+}
+
+
+tmp<volVectorField> adjointkOmegaSST::nutJacobianU
+(
+    tmp<volScalarField>& dNutdUMult
+) const
+{
+    const volVectorField& U = primalVars_.U();
+    volTensorField gradU(fvc::grad(U));
+    tmp<volScalarField> S2
+    (
+        2*magSqr(symm(gradU))
+      + dimensionedScalar(dimless/sqr(dimTime), 1.e-21)
+    );
+    volScalarField S(sqrt(S2));
+    volScalarField F2(this->F2());
+
+    // Computation of nut switches
+    volScalarField nut_C1(a1_*omega() - b1_*F2*S);
+    volScalarField case_1_nut(pos(nut_C1));
+
+    return nutMeanFlowSource(dNutdUMult, F2, S, case_1_nut, gradU);
 }
 
 

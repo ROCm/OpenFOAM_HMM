@@ -27,6 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "objectiveNutSqr.H"
+#include "incompressibleAdjointSolver.H"
 #include "createZeroField.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -40,7 +41,7 @@ namespace objectives
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(objectiveNutSqr, 1);
+defineTypeNameAndDebug(objectiveNutSqr, 0);
 addToRunTimeSelectionTable
 (
     objectiveIncompressible,
@@ -60,21 +61,12 @@ objectiveNutSqr::objectiveNutSqr
 )
 :
     objectiveIncompressible(mesh, dict, adjointSolverName, primalSolverName),
-    zones_
-    (
-        mesh_.cellZones().indices(this->dict().get<wordRes>("zones"))
-    )
+    zones_(mesh_.cellZones().indices(dict.get<wordRes>("zones")))
 {
-    // Allocate source term for the adjoint turbulence model
-    dJdTMvar1Ptr_.reset
-    (
-        createZeroFieldPtr<scalar>
-        (
-            mesh_,
-            "ATMSource",
-            (dimless/dimTime/dimTime)
-        )
-    );
+    // Check if cellZones provided include at least one cell
+    checkCellZonesSize(zones_);
+    // Allocate dJdTMvar1Ptr_ and dJdTMvar2Ptr_ if needed
+    allocatedJdTurbulence();
     // Allocate term to be added to volume-based sensitivity derivatives
     divDxDbMultPtr_.reset
     (
@@ -82,13 +74,11 @@ objectiveNutSqr::objectiveNutSqr
         (
             mesh_,
             ("divDxdbMult"+type()) ,
-            //variable dimensions!!
-            //Dummy zeroes. Only the internalField will be used
-            dimless
+            // Dimensions are set in a way that the gradient of this term
+            // matches the source of the adjoint grid displacement PDE
+            sqr(dimLength)/pow3(dimTime)
         )
     );
-    // set file pointer
-    //objFunctionFilePtr_ = new OFstream(objFunctionFolder_/type());
 }
 
 
@@ -119,26 +109,78 @@ scalar objectiveNutSqr::J()
 }
 
 
+void objectiveNutSqr::update_dJdv()
+{
+    // Add source from possible dependencies of nut on U
+    if (mesh_.foundObject<incompressibleAdjointSolver>(adjointSolverName_))
+    {
+        const incompressibleAdjointSolver& adjSolver =
+            mesh_.lookupObject<incompressibleAdjointSolver>
+                (adjointSolverName_);
+        const autoPtr<incompressibleAdjoint::adjointRASModel>& adjointRAS =
+            adjSolver.getAdjointVars().adjointTurbulence();
+        const autoPtr<incompressible::RASModelVariables>& turbVars =
+            vars_.RASModelVariables();
+        tmp<volScalarField> dnutdUMult = 2*turbVars->nutRef();
+        tmp<volVectorField> dnutdU = adjointRAS->nutJacobianU(dnutdUMult);
+        if (dnutdU)
+        {
+            if (!dJdvPtr_)
+            {
+                dJdvPtr_.reset
+                (
+                    createZeroFieldPtr<vector>
+                    (
+                        mesh_,
+                        "dJdv" + type(),
+                        dimLength/sqr(dimTime)
+                    )
+                );
+            }
+            for (const label zI : zones_)
+            {
+                const cellZone& zoneI = mesh_.cellZones()[zI];
+                for (const label cellI : zoneI)
+                {
+                    dJdvPtr_()[cellI] = dnutdU()[cellI];
+                }
+            }
+        }
+    }
+}
+
+
 void objectiveNutSqr::update_dJdTMvar1()
 {
     const autoPtr<incompressible::RASModelVariables>&
        turbVars = vars_.RASModelVariables();
-    const singlePhaseTransportModel& lamTransp = vars_.laminarTransport();
     const volScalarField& nut = turbVars->nutRef();
+    volScalarField JacobianMultiplier(2*nut);
 
-    tmp<volScalarField> tnutJacobian = turbVars->nutJacobianVar1(lamTransp);
-    const volScalarField& nutJacobian = tnutJacobian();
+    update_dJdTMvar
+    (
+        dJdTMvar1Ptr_,
+        &incompressibleAdjoint::adjointRASModel::nutJacobianTMVar1,
+        JacobianMultiplier,
+        zones_
+    );
+}
 
-    volScalarField& dJdTMvar1 = dJdTMvar1Ptr_();
 
-    for (const label zI : zones_)
-    {
-        const cellZone& zoneI = mesh_.cellZones()[zI];
-        for (const label cellI : zoneI)
-        {
-            dJdTMvar1[cellI] = 2.*nut[cellI]*nutJacobian[cellI];
-        }
-    }
+void objectiveNutSqr::update_dJdTMvar2()
+{
+    const autoPtr<incompressible::RASModelVariables>&
+       turbVars = vars_.RASModelVariables();
+    const volScalarField& nut = turbVars->nutRef();
+    volScalarField JacobianMultiplier(2*nut);
+
+    update_dJdTMvar
+    (
+        dJdTMvar2Ptr_,
+        &incompressibleAdjoint::adjointRASModel::nutJacobianTMVar2,
+        JacobianMultiplier,
+        zones_
+    );
 }
 
 
@@ -158,6 +200,7 @@ void objectiveNutSqr::update_divDxDbMultiplier()
             divDxDbMult[cellI] = sqr(nut[cellI]);
         }
     }
+    divDxDbMult.correctBoundaryConditions();
 }
 
 

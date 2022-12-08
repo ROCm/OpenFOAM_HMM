@@ -42,6 +42,7 @@ SourceFiles
 
 #include "objective.H"
 #include "incompressibleVars.H"
+#include "adjointRASModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -251,6 +252,27 @@ public:
 
         //- Update objective function derivatives
         virtual void nullify();
+
+        // Funtions used in objectives including turbulent quantities
+
+            //- Allocate fields related to the differentiation of turbulence
+            //- models, if necessary
+            void allocatedJdTurbulence();
+
+            //- Check if cellZones provided include at least one cell
+            void checkCellZonesSize(const labelList& zoneIDs) const;
+
+            //- Compute dJdTMVar{1,2}
+            void update_dJdTMvar
+            (
+                autoPtr<volScalarField>& dJdTMvarPtr,
+                tmp<volScalarField>
+                    (incompressibleAdjoint::adjointRASModel::*JacobianFunc)()
+                    const,
+                const volScalarField& JacobianMultiplier,
+                const labelList& zones
+            );
+
 
         //- Update vol and boundary fields and derivatives
         //  Do nothing in the base. The relevant ones should be overwritten

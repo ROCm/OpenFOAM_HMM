@@ -29,6 +29,7 @@ License
 
 #include "objectiveIncompressible.H"
 #include "incompressiblePrimalSolver.H"
+#include "incompressibleAdjointSolver.H"
 #include "createZeroField.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -210,7 +211,7 @@ const volVectorField& objectiveIncompressible::dJdv()
             (
                 mesh_,
                 ("dJdv_"+type()),
-                dimensionSet(0, 3, -2, 0, 0, 0, 0)
+                dimLength/sqr(dimTime)
             )
         );
     }
@@ -607,6 +608,116 @@ void objectiveIncompressible::nullify()
 
         // Nullify geometric fields and sets nullified_ to true
         objective::nullify();
+    }
+}
+
+
+void objectiveIncompressible::allocatedJdTurbulence()
+{
+    // Figure out the availability of the adjoint turbulence model variables
+    // through their primal counterparts, since the contructor of the adjoint
+    // solver has not been completed yet
+    const incompressiblePrimalSolver& primSolver =
+        mesh_.lookupObject<incompressiblePrimalSolver>(primalSolverName_);
+    const autoPtr<incompressible::RASModelVariables>& rasVars =
+        primSolver.getIncoVars().RASModelVariables();
+
+    if (rasVars().hasTMVar1())
+    {
+        const dimensionSet primalVarDims = rasVars->TMVar1Inst().dimensions();
+        const dimensionSet sourceDims = dimArea/pow3(dimTime)/primalVarDims;
+        dJdTMvar1Ptr_.reset
+        (
+            createZeroFieldPtr<scalar>
+            (
+                mesh_,
+                "ATMSource1",
+                sourceDims
+            )
+        );
+    }
+    if (rasVars().hasTMVar2())
+    {
+        const dimensionSet primalVarDims = rasVars->TMVar2Inst().dimensions();
+        const dimensionSet sourceDims = dimArea/pow3(dimTime)/primalVarDims;
+        dJdTMvar2Ptr_.reset
+        (
+            createZeroFieldPtr<scalar>
+            (
+                mesh_,
+                "ATMSource2",
+                sourceDims
+            )
+        );
+    }
+}
+
+
+void objectiveIncompressible::checkCellZonesSize
+(
+    const labelList& zoneIDs
+) const
+{
+    label nCells(0);
+    for (const label zI : zoneIDs)
+    {
+        nCells += mesh_.cellZones()[zI].size();
+    }
+    reduce(nCells, sumOp<label>());
+    if (!nCells)
+    {
+        FatalErrorInFunction
+            << "Provided cellZones include no cells"
+            << exit(FatalError);
+    }
+}
+
+
+void objectiveIncompressible::update_dJdTMvar
+(
+    autoPtr<volScalarField>& dJdTMvarPtr,
+    tmp<volScalarField>
+        (incompressibleAdjoint::adjointRASModel::*JacobianFunc)() const,
+    const volScalarField& JacobianMultiplier,
+    const labelList& zones
+)
+{
+    if (dJdTMvarPtr)
+    {
+        // nut Jacobians are currently computed in the adjoint turbulence
+        // models, though they would be better placed within the primal
+        // turbulence model.
+        // Safeguard the computation until the adjoint solver is complete
+        if (mesh_.foundObject<incompressibleAdjointSolver>(adjointSolverName_))
+        {
+            const incompressibleAdjointSolver& adjSolver =
+                mesh_.lookupObject<incompressibleAdjointSolver>
+                    (adjointSolverName_);
+            const autoPtr<incompressibleAdjoint::adjointRASModel>& adjointRAS =
+                adjSolver.getAdjointVars().adjointTurbulence();
+
+            tmp<volScalarField> tnutJacobian = (adjointRAS->*JacobianFunc)();
+            const volScalarField& nutJacobian = tnutJacobian();
+
+            volScalarField& dJdTMvar = dJdTMvarPtr();
+
+            for (const label zI : zones)
+            {
+                const cellZone& zoneI = mesh_.cellZones()[zI];
+                for (const label cellI : zoneI)
+                {
+                    dJdTMvar[cellI] =
+                        JacobianMultiplier[cellI]*nutJacobian[cellI];
+                }
+            }
+        }
+        else
+        {
+            WarningInFunction
+                << "Skipping the computation of nutJacobian until "
+                << "the adjoint solver is complete"
+                << endl;
+        }
     }
 }
 

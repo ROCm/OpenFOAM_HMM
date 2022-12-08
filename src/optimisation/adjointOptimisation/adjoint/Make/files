@@ -48,8 +48,13 @@ objectives/incompressible/objectiveIncompressible/objectiveIncompressible.C
 objectives/incompressible/objectiveForce/objectiveForce.C
 objectives/incompressible/objectiveMoment/objectiveMoment.C
 objectives/incompressible/objectivePtLosses/objectivePtLosses.C
+objectives/incompressible/objectivePowerDissipation/objectivePowerDissipation.C
 objectives/incompressible/objectivePartialVolume/objectivePartialVolume.C
 objectives/incompressible/objectiveNutSqr/objectiveNutSqr.C
+objectives/incompressible/objectiveFlowRate/objectiveFlowRate.C
+objectives/incompressible/objectiveFlowRatePartition/objectiveFlowRatePartition.C
+objectives/incompressible/objectiveUniformityPatch/objectiveUniformityPatch.C
+objectives/incompressible/objectiveUniformityCellZone/objectiveUniformityCellZone.C
 
 /* OBJECTIVE MANAGER*/
 objectiveManager/objectiveManager/objectiveManager.C
