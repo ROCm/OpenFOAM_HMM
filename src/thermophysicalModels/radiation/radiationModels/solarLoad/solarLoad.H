@@ -99,6 +99,7 @@ SourceFiles
 #define radiation_solarLoad_H
 
 #include "radiationModel.H"
+#include "solarLoadBase.H"
 #include "volFields.H"
 #include "faceShading.H"
 #include "faceReflecting.H"
@@ -118,7 +119,8 @@ namespace radiation
 
 class solarLoad
 :
-    public radiationModel
+    public radiationModel,
+    public solarLoadBase
 {
     // Private Data
 
@@ -152,9 +154,6 @@ class solarLoad
 
         //- Primary solar radiative heat flux per band [W/m2]
         PtrList<volScalarField> qprimaryRad_;
-
-        //- Vertical direction (default is g vector)
-        vector verticalDir_;
 
         //- Number of bands
         label nBands_;
@@ -262,6 +261,12 @@ public:
             {
                 return qprimaryRad_[bandI];
             }
+
+            //- Return const reference to the solar calculator
+            virtual const solarCalculator& solarCalculatorRef() const;
+
+            //- Return const reference to the face shading calculator
+            virtual const faceShading& faceShadingRef() const;
 };
 
 

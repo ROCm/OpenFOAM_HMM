@@ -48,10 +48,11 @@ namespace Foam
 Foam::topoSetSource::addToUsageTable Foam::cellToFace::usage_
 (
     cellToFace::typeName,
-    "\n    Usage: cellToFace <cellSet> all|both\n\n"
+    "\n    Usage: cellToFace <cellSet> all|both|outside\n\n"
     "    Select -all : all faces of cells in the cellSet\n"
     "           -both: faces where both neighbours are in the cellSet\n\n"
 );
+
 
 const Foam::Enum
 <
@@ -61,6 +62,7 @@ Foam::cellToFace::cellActionNames_
 ({
     { cellAction::ALL, "all" },
     { cellAction::BOTH, "both" },
+    { cellAction::OUTSIDE, "outside" }
 });
 
 
@@ -147,6 +149,65 @@ void Foam::cellToFace::combine
                 }
             }
         }
+    }
+    else if (option_ == OUTSIDE)
+    {
+        // Add all faces where only one neighbour is in set.
+
+        const label nInt = mesh_.nInternalFaces();
+        const labelList& own = mesh_.faceOwner();
+        const labelList& nei = mesh_.faceNeighbour();
+        const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+
+
+        // Check all internal faces
+        for (label facei = 0; facei < nInt; ++facei)
+        {
+            if (cellLabels.found(own[facei]) != cellLabels.found(nei[facei]))
+            {
+                addOrDelete(set, facei, add);
+            }
+        }
+
+
+        // Get coupled cell status
+        boolList neiInSet(mesh_.nBoundaryFaces(), false);
+
+        for (const polyPatch& pp : patches)
+        {
+            if (pp.coupled())
+            {
+                label facei = pp.start();
+                forAll(pp, i)
+                {
+                    neiInSet[facei-nInt] = cellLabels.found(own[facei]);
+                    ++facei;
+                }
+            }
+        }
+        syncTools::swapBoundaryFaceList(mesh_, neiInSet);
+
+
+        // Check all boundary faces
+        for (const polyPatch& pp : patches)
+        {
+            label facei = pp.start();
+            forAll(pp, i)
+            {
+                if (cellLabels.found(own[facei]) != neiInSet[facei-nInt])
+                {
+                    addOrDelete(set, facei, add);
+                }
+                ++facei;
+            }
+        }
+    }
+    else
+    {
+        FatalErrorInFunction
+            << "Selected option is not available"
+            << ", option: " << cellActionNames_[option_]
+            << exit(FatalError);
     }
 }
 

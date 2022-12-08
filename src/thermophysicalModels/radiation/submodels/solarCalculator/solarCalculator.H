@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -394,6 +394,11 @@ public:
 
             //- Correct diffuse solar irradiation
             void correctDiffuseSolarRad();
+
+            //- Return the diffusive solar irradiation
+            //- for sunLoadModel = fairWeather
+            //- or for sunLoadModel = theoreticalMaximum
+            tmp<scalarField> diffuseSolarRad(const vectorField& n) const;
 
 
         // Access

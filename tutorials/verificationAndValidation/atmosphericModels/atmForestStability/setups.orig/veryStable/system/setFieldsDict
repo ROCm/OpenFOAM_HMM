@@ -17,8 +17,8 @@ FoamFile
 defaultFieldValues
 (
     volScalarFieldValue qPlant 0
-    volScalarFieldValue plantCd 0
-    volScalarFieldValue leafAreaDensity 0
+    volScalarFieldValue Cd 0
+    volScalarFieldValue LAD 0
 );
 
 regions
@@ -37,8 +37,8 @@ regions
         box (0 0 0) (200 200 18.2192);
         fieldValues
         (
-            volScalarFieldValue plantCd 0.2
-            volScalarFieldValue leafAreaDensity 0.14
+            volScalarFieldValue Cd 0.2
+            volScalarFieldValue LAD 0.14
         );
     }
 
@@ -47,8 +47,8 @@ regions
         patch                    bottom;
         fieldValues
         (
-            volScalarFieldValue plantCd 0.2
-            volScalarFieldValue leafAreaDensity 0.14
+            volScalarFieldValue Cd 0.2
+            volScalarFieldValue LAD 0.14
         );
     }
 );

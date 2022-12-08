@@ -224,6 +224,7 @@ $(faceZoneSources)/setToFaceZone/setToFaceZone.C
 $(faceZoneSources)/setAndNormalToFaceZone/setAndNormalToFaceZone.C
 $(faceZoneSources)/searchableSurfaceToFaceZone/searchableSurfaceToFaceZone.C
 $(faceZoneSources)/planeToFaceZone/planeToFaceZone.C
+$(faceZoneSources)/cellToFaceZone/cellToFaceZone.C
 
 cellZoneSources = topoSet/cellZoneSources
 $(cellZoneSources)/topoSetCellZoneSource/topoSetCellZoneSource.C

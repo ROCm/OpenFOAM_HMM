@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -330,6 +330,62 @@ void Foam::solarCalculator::correctDiffuseSolarRad()
     {
         diffuseSolarRad_ = diffuseSolarRads_->value(mesh_.time().value());
     }
+}
+
+
+Foam::tmp<Foam::scalarField> Foam::solarCalculator::diffuseSolarRad
+(
+    const vectorField& n
+) const
+{
+    auto tload = tmp<scalarField>::New(n.size());
+    auto& load = tload.ref();
+
+    forAll(n, facei)
+    {
+        const scalar cosEpsilon(gridUp_ & -n[facei]);
+
+        scalar Ed = 0;
+        scalar Er = 0;
+        const scalar cosTheta(direction_ & -n[facei]);
+
+        // Above the horizon
+        if (cosEpsilon == 0.0)
+        {
+            // Vertical walls
+            scalar Y = 0;
+
+            if (cosTheta > -0.2)
+            {
+                Y = 0.55+0.437*cosTheta + 0.313*sqr(cosTheta);
+            }
+            else
+            {
+                Y = 0.45;
+            }
+
+            Ed = C_*Y*directSolarRad_;
+        }
+        else
+        {
+            //Other than vertical walls
+            Ed =
+                C_
+              * directSolarRad_
+              * 0.5*(1.0 + cosEpsilon);
+        }
+
+        // Ground reflected
+        Er =
+            directSolarRad_
+            * (C_ + Foam::sin(beta_))
+            * groundReflectivity_
+            * 0.5*(1.0 - cosEpsilon);
+
+        load[facei] = Ed + Er;
+    }
+
+    return tload;
 }
 
 
