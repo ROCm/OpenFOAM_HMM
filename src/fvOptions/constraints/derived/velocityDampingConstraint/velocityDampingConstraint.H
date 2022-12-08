@@ -85,8 +85,9 @@ Usage
     \endtable
 
     The inherited entries are elaborated in:
-     - \link fvOption.H \endlink
-     - \link cellSetOption.H \endlink
+      - \link fvOption.H \endlink
+      - \link cellSetOption.H \endlink
+      - \link writeFile.H \endlink
 
 Note
   - When active, this constraint manipulates the system of equations.
@@ -102,10 +103,11 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef velocityDampingConstraint_H
-#define velocityDampingConstraint_H
+#ifndef fv_velocityDampingConstraint_H
+#define fv_velocityDampingConstraint_H
 
 #include "cellSetOption.H"
+#include "writeFile.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -120,7 +122,8 @@ namespace fv
 
 class velocityDampingConstraint
 :
-    public fv::cellSetOption
+    public fv::cellSetOption,
+    public functionObjects::writeFile
 {
 protected:
 
@@ -137,6 +140,9 @@ protected:
 
         //- Constrain the given velocity fields by a given maximum value
         void addDamping(fvMatrix<vector>& eqn);
+
+        //- Write file header information
+        void writeFileHeader(Ostream& os);
 
 
 public:

@@ -42,6 +42,23 @@ namespace fv
 }
 
 
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+void Foam::fv::limitVelocity::writeFileHeader(Ostream& os)
+{
+    writeHeaderValue(os, "UMax", Foam::name(max_));
+    writeCommented(os, "Time");
+    writeTabbed(os, "nDampedCells_[count]");
+    writeTabbed(os, "nDampedCells_[%]");
+    writeTabbed(os, "nDampedFaces_[count]");
+    writeTabbed(os, "nDampedFaces_[%]");
+
+    os  << endl;
+
+    writtenHeader_ = true;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::fv::limitVelocity::limitVelocity
@@ -53,11 +70,11 @@ Foam::fv::limitVelocity::limitVelocity
 )
 :
     fv::cellSetOption(name, modelType, dict, mesh),
-    UName_(coeffs_.getOrDefault<word>("U", "U")),
-    max_(coeffs_.get<scalar>("max"))
+    writeFile(mesh, name, typeName, dict, false),
+    UName_(word::null),
+    max_(0)
 {
-    fieldNames_.resize(1, UName_);
-    fv::option::resetApplied();
+    read(dict);
 }
 
 
@@ -65,14 +82,32 @@ Foam::fv::limitVelocity::limitVelocity
 
 bool Foam::fv::limitVelocity::read(const dictionary& dict)
 {
-    if (fv::cellSetOption::read(dict))
+    if (!(fv::cellSetOption::read(dict) && writeFile::read(dict)))
     {
-        coeffs_.readEntry("max", max_);
-
-        return true;
+        return false;
     }
 
-    return false;
+    coeffs_.readEntry("max", max_);
+    coeffs_.readIfPresent("U", UName_);
+
+
+    fieldNames_.resize(1, UName_);
+
+    fv::option::resetApplied();
+
+
+    if (canResetFile())
+    {
+        resetFile(typeName);
+    }
+
+    if (canWriteHeader())
+    {
+        writeFileHeader(file());
+    }
+
+
+    return true;
 }
 
 
@@ -137,19 +172,24 @@ void Foam::fv::limitVelocity::correct(volVectorField& U)
 
     reduce(nCellsAbove, sumOp<label>());
 
+    const scalar nCellsAbovePercent = percent(nCellsAbove, nTotCells);
+
     // Report total numbers and percent
     Info<< type() << ' ' << name_ << " Limited ";
 
     Info<< nCellsAbove << " ("
-        << percent(nCellsAbove, nTotCells)
+        << nCellsAbovePercent
         << "%) of cells";
 
     reduce(nTotFaces, sumOp<label>());
     reduce(nFacesAbove, sumOp<label>());
+    scalar nFacesAbovePercent(0);
     if (nTotFaces)
     {
+        nFacesAbovePercent = percent(nFacesAbove, nTotFaces);
+
         Info<< ", " << nFacesAbove << " ("
-            << percent(nFacesAbove, nTotFaces)
+            << nFacesAbovePercent
             << "%) of faces";
     }
     Info<< ", with max limit " << max_ << endl;
@@ -159,6 +199,18 @@ void Foam::fv::limitVelocity::correct(volVectorField& U)
         // We've changed internal values so give
         // boundary conditions opportunity to correct
         U.correctBoundaryConditions();
+    }
+
+
+    if (canWriteToFile())
+    {
+        file()
+            << mesh_.time().timeOutputValue() << token::TAB
+            << nCellsAbove << token::TAB
+            << nCellsAbovePercent << token::TAB
+            << nFacesAbove << token::TAB
+            << nFacesAbovePercent
+            << endl;
     }
 }
 

@@ -291,9 +291,22 @@ bool Foam::functionObjects::writeFile::writeToFile() const
 }
 
 
+bool Foam::functionObjects::writeFile::canWriteToFile() const
+{
+    return (Pstream::master() && writeToFile_ && filePtr_);
+}
+
+
+bool Foam::functionObjects::writeFile::canResetFile() const
+{
+    return (Pstream::master() && writeToFile_ && !filePtr_);
+}
+
+
 bool Foam::functionObjects::writeFile::canWriteHeader() const
 {
-    return writeToFile_ && (updateHeader_ || !writtenHeader_);
+    return
+        Pstream::master() && writeToFile_ && (updateHeader_ || !writtenHeader_);
 }
 
 

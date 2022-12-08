@@ -31,23 +31,23 @@ Description
     Base class for writing single files from the function objects.
 
 Usage
-
     \verbatim
-    <userDefinedSubDictName1>
+    <dictName>
     {
-        // Mandatory and other optional entries
+        // Inherited entries
         ...
 
-        // Optional (inherited) entries (runtime modifiable)
-        writePrecision    8;
-        writeToFile       true;
-        useUserTime       true;
+        // Optional entries
+        writePrecision    <int>;
+        writeToFile       <bool>;
+        useUserTime       <bool>;
+        updateHeader      <bool>;
     }
     \endverbatim
 
     where the entries mean:
     \table
-      Property        | Description                      | Type | Reqd | Dflt
+      Property        | Description                      | Type | Reqd | Deflt
       writePrecision  | Number of decimal points | int  | no  | \<system dflt\>
       writeToFile     | Produce text file output?        | bool | no  | true
       useUserTime     | Use user time (e.g. degrees)?    | bool | no  | true
@@ -60,12 +60,9 @@ Note
     unaffected by these changes.
     Use the \c updateHeader flag to override the default behaviour.
 
-See also
-    - Foam::functionObject
-    - Foam::functionObjects::logFiles
-
 SourceFiles
     writeFile.C
+    writeFileTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -91,7 +88,7 @@ class writeFile
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Reference to the region objectRegistry
         const objectRegistry& fileObr_;
@@ -243,6 +240,12 @@ public:
 
         //- Flag to allow writing to file
         virtual bool writeToFile() const;
+
+        //- Flag to allow writing to the file
+        virtual bool canWriteToFile() const;
+
+        //- Flag to allow resetting the file
+        virtual bool canResetFile() const;
 
         //- Flag to allow writing the header
         virtual bool canWriteHeader() const;
