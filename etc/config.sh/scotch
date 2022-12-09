@@ -30,10 +30,12 @@
 #
 #     Can also disable by renaming/removing this file or by creating an empty
 #     file with the same name at a user or site location.
+#
+# regressions noted in scotch-v7.0.1
 #------------------------------------------------------------------------------
 # USER EDITABLE PART: Changes made here may be lost with the next upgrade
 
-SCOTCH_VERSION=scotch-v7.0.1
+SCOTCH_VERSION=scotch_6.1.0
 export SCOTCH_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER$WM_PRECISION_OPTION$WM_LABEL_OPTION/$SCOTCH_VERSION
 
 # END OF (NORMAL) USER EDITABLE PART
