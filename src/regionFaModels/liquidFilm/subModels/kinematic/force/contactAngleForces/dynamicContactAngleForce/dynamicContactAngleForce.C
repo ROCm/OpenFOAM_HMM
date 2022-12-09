@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "perturbedTemperatureDependentContactAngleForce.H"
+#include "dynamicContactAngleForce.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -39,26 +39,44 @@ namespace areaSurfaceFilmModels
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(perturbedTemperatureDependentContactAngleForce, 0);
+defineTypeNameAndDebug(dynamicContactAngleForce, 0);
 addToRunTimeSelectionTable
 (
     force,
-    perturbedTemperatureDependentContactAngleForce,
+    dynamicContactAngleForce,
     dictionary
 );
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-perturbedTemperatureDependentContactAngleForce::
-perturbedTemperatureDependentContactAngleForce
+dynamicContactAngleForce::dynamicContactAngleForce
 (
     liquidFilmBase& film,
     const dictionary& dict
 )
 :
     contactAngleForce(typeName, film, dict),
-    thetaPtr_(Function1<scalar>::New("theta", coeffDict_, &film.primaryMesh())),
+    U_vs_thetaPtr_
+    (
+        Function1<scalar>::NewIfPresent
+        (
+            "Utheta",
+            coeffDict_,
+            word::null,
+            &film.primaryMesh()
+        )
+    ),
+    T_vs_thetaPtr_
+    (
+        Function1<scalar>::NewIfPresent
+        (
+            "Ttheta",
+            coeffDict_,
+            word::null,
+            &film.primaryMesh()
+        )
+    ),
     rndGen_(label(0)),
     distribution_
     (
@@ -68,43 +86,53 @@ perturbedTemperatureDependentContactAngleForce
             rndGen_
         )
     )
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-perturbedTemperatureDependentContactAngleForce::
-~perturbedTemperatureDependentContactAngleForce()
-{}
+{
+    if (U_vs_thetaPtr_ && T_vs_thetaPtr_)
+    {
+        FatalIOErrorInFunction(dict)
+            << "Entries Utheta and Ttheta could not be used together"
+            << abort(FatalIOError);
+    }
+}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-tmp<areaScalarField> perturbedTemperatureDependentContactAngleForce::
-theta() const
+tmp<areaScalarField> dynamicContactAngleForce::theta() const
 {
-    tmp<areaScalarField> ttheta
+    auto ttheta = tmp<areaScalarField>::New
     (
-        new areaScalarField
+        IOobject
         (
-            IOobject
-            (
-                typeName + ":theta",
-                film().primaryMesh().time().timeName(),
-                film().primaryMesh()
-            ),
-            film().regionMesh(),
-            dimensionedScalar(dimless, Zero)
-        )
+            IOobject::scopedName(typeName, "theta"),
+            film().primaryMesh().time().timeName(),
+            film().primaryMesh(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            IOobject::NO_REGISTER
+        ),
+        film().regionMesh(),
+        dimensionedScalar(dimless, Zero)
     );
-
     areaScalarField& theta = ttheta.ref();
     scalarField& thetai = theta.ref();
 
-    const areaScalarField& T = film().Tf();
 
-    // Initialize with the function of temperature
-    thetai = thetaPtr_->value(T());
+    if (U_vs_thetaPtr_)
+    {
+        // Initialize with the function of film speed
+        const areaVectorField& U = film().Uf();
+
+        thetai = U_vs_thetaPtr_->value(mag(U()));
+    }
+
+    if (T_vs_thetaPtr_)
+    {
+        // Initialize with the function of film temperature
+        const areaScalarField& T = film().Tf();
+
+        thetai = T_vs_thetaPtr_->value(T());
+    }
 
     // Add the stochastic perturbation
     forAll(thetai, facei)
@@ -114,6 +142,7 @@ theta() const
 
     return ttheta;
 }
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

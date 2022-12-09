@@ -30,7 +30,7 @@ liquidFilm/subModels/kinematic/force/forceList/forceList.C
 liquidFilm/subModels/kinematic/force/force/force.C
 liquidFilm/subModels/kinematic/force/force/forceNew.C
 liquidFilm/subModels/kinematic/force/contactAngleForces/contactAngleForce/contactAngleForce.C
-liquidFilm/subModels/kinematic/force/contactAngleForces/perturbedTemperatureDependent/perturbedTemperatureDependentContactAngleForce.C
+liquidFilm/subModels/kinematic/force/contactAngleForces/dynamicContactAngleForce/dynamicContactAngleForce.C
 
 liquidFilm/subModels/filmSubModelBase.C
 
