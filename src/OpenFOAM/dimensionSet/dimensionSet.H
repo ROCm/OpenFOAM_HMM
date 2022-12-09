@@ -59,6 +59,7 @@ SourceFiles
 #include "scalarField.H"
 #include "PtrList.H"
 #include "HashTable.H"
+#include "IOobjectOption.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -146,10 +147,7 @@ private:
 
             // Member Functions
 
-                Istream& stream()
-                {
-                    return is_;
-                }
+                Istream& stream() noexcept { return is_; }
 
                 bool hasToken() const;
 
@@ -230,7 +228,7 @@ public:
         (
             const word& entryName,  //!< Lookup key. LITERAL (not REGEX)
             const dictionary& dict,
-            const bool mandatory = true
+            IOobjectOption::readOption readOpt = IOobjectOption::MUST_READ
         );
 
         //- Construct and return a clone
@@ -272,8 +270,23 @@ public:
         (
             const word& entryName,      //!< Lookup key. LITERAL (not REGEX)
             const dictionary& dict,     //!< The dictionary
-            const bool mandatory = true //!< The entry is mandatory
+            //! The read option
+            IOobjectOption::readOption readOpt = IOobjectOption::MUST_READ
         );
+
+        //- Update the dimensions from dictionary entry.
+        //- FatalIOError if it is found and the number of tokens is incorrect,
+        //- or it is mandatory and not found.
+        //
+        //  \return true if the entry was found.
+        bool readIfPresent
+        (
+            const word& entryName,      //!< Lookup key. LITERAL (not REGEX)
+            const dictionary& dict      //!< The dictionary
+        )
+        {
+            return readEntry(entryName, dict, IOobjectOption::READ_IF_PRESENT);
+        }
 
         //- Read using provided units, return scaling in multiplier.
         //- Used only in initial parsing

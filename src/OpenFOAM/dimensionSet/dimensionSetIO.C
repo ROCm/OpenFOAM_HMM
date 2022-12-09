@@ -38,12 +38,12 @@ Foam::dimensionSet::dimensionSet
 (
     const word& entryName,
     const dictionary& dict,
-    const bool mandatory
+    IOobjectOption::readOption readOpt
 )
 :
     exponents_(Zero)
 {
-    readEntry(entryName, dict, mandatory);
+    readEntry(entryName, dict, readOpt);
 }
 
 
@@ -416,9 +416,14 @@ bool Foam::dimensionSet::readEntry
 (
     const word& entryName,
     const dictionary& dict,
-    const bool mandatory
+    IOobjectOption::readOption readOpt
 )
 {
+    if (readOpt == IOobjectOption::NO_READ)
+    {
+        return false;
+    }
+
     const entry* eptr = dict.findEntry(entryName, keyType::LITERAL);
 
     if (eptr)
@@ -432,7 +437,7 @@ bool Foam::dimensionSet::readEntry
 
         return true;
     }
-    else if (mandatory)
+    else if (IOobjectOption::isReadRequired(readOpt))
     {
         FatalIOErrorInFunction(dict)
             << "Entry '" << entryName << "' not found in dictionary "

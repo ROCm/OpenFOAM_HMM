@@ -35,13 +35,14 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef dimensionedType_H
-#define dimensionedType_H
+#ifndef Foam_dimensionedType_H
+#define Foam_dimensionedType_H
 
 #include "word.H"
 #include "direction.H"
 #include "dimensionSet.H"
 #include "VectorSpace.H"
+#include "IOobjectOption.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -107,7 +108,7 @@ class dimensioned
         (
             const word& key,
             const dictionary& dict,
-            const bool mandatory = true, //!< entry is mandatory
+            IOobjectOption::readOption readOpt = IOobjectOption::MUST_READ,
             const bool checkDims = true, //!< verify dimensions read
             enum keyType::option matchOpt = keyType::REGEX
         );

@@ -393,7 +393,7 @@ bool Foam::functionObjects::fvExpressionField::read(const dictionary& dict)
 
     // "dimensions" is optional
     dimensions_.clear();
-    hasDimensions_ = dimensions_.readEntry("dimensions", dict, false);
+    hasDimensions_ = dimensions_.readIfPresent("dimensions", dict);
 
     if (action_ == actionType::opNew)
     {

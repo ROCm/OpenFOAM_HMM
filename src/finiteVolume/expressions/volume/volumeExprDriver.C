@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -166,12 +166,7 @@ bool Foam::expressions::volumeExpr::parseDriver::readDict
 
     resultDimensions_.clear();  // Avoid stickiness
 
-    hasDimensions_ = resultDimensions_.readEntry
-    (
-        "dimensions",
-        dict,
-        false  // mandatory=false
-    );
+    hasDimensions_ = resultDimensions_.readIfPresent("dimensions", dict);
 
     return true;
 }

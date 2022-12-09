@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -75,11 +75,16 @@ bool Foam::dimensioned<Type>::readEntry
 (
     const word& key,
     const dictionary& dict,
-    const bool mandatory,
+    IOobjectOption::readOption readOpt,
     const bool checkDims,
     enum keyType::option matchOpt
 )
 {
+    if (readOpt == IOobjectOption::NO_READ)
+    {
+        return false;
+    }
+
     // Largely identical to dictionary::readEntry(),
     // but with optional handling of checkDims
 
@@ -95,7 +100,7 @@ bool Foam::dimensioned<Type>::readEntry
 
         return true;
     }
-    else if (mandatory)
+    else if (IOobjectOption::isReadRequired(readOpt))
     {
         FatalIOErrorInFunction(dict)
             << "Entry '" << key << "' not found in dictionary "
@@ -205,7 +210,7 @@ Foam::dimensioned<Type>::dimensioned
 {
     ITstream& is = e.stream();
 
-    // no checkDims
+    // checkDims = false
     initialize(is, false);
 
     e.checkITstream(is);
@@ -225,7 +230,7 @@ Foam::dimensioned<Type>::dimensioned
 {
     ITstream& is = e.stream();
 
-    // checkDims
+    // checkDims = true
     initialize(is, true);
 
     e.checkITstream(is);
@@ -243,8 +248,8 @@ Foam::dimensioned<Type>::dimensioned
     dimensions_(),
     value_(Zero)
 {
-    // mandatory, no checkDims
-    readEntry(name, dict, true, false);
+    // checkDims = false
+    readEntry(name, dict, IOobjectOption::MUST_READ, false);
 }
 
 
@@ -260,8 +265,8 @@ Foam::dimensioned<Type>::dimensioned
     dimensions_(dims),
     value_(Zero)
 {
-    // mandatory, checkDims
-    readEntry(name, dict);
+    // checkDims = true
+    readEntry(name, dict, IOobjectOption::MUST_READ);
 }
 
 
@@ -278,8 +283,8 @@ Foam::dimensioned<Type>::dimensioned
     dimensions_(dims),
     value_(Zero)
 {
-    // mandatory, checkDims
-    readEntry(entryName, dict);
+    // checkDims = true
+    readEntry(entryName, dict, IOobjectOption::MUST_READ);
 }
 
 
@@ -296,8 +301,8 @@ Foam::dimensioned<Type>::dimensioned
     dimensions_(dims),
     value_(val)
 {
-    // non-mandatory, checkDims
-    readEntry(name, dict, false);
+    // checkDims = true
+    readEntry(name, dict, IOobjectOption::READ_IF_PRESENT);
 }
 
 
@@ -336,7 +341,7 @@ Foam::dimensioned<Type>::dimensioned
     dimensions_(dims),
     value_(Zero)
 {
-    // checkDims
+    // checkDims = true
     initialize(is, true);
 }
 
@@ -451,8 +456,8 @@ bool Foam::dimensioned<Type>::read
     const dictionary& dict
 )
 {
-    // mandatory, checkDims
-    return readEntry(entryName, dict);
+    // checkDims = true
+    return readEntry(entryName, dict, IOobjectOption::MUST_READ);
 }
 
 
@@ -463,8 +468,8 @@ bool Foam::dimensioned<Type>::readIfPresent
     const dictionary& dict
 )
 {
-    // non-mandatory, checkDims
-    return readEntry(entryName, dict, false);
+    // checkDims = true
+    return readEntry(entryName, dict, IOobjectOption::READ_IF_PRESENT);
 }
 
 

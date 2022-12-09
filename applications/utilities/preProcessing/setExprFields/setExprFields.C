@@ -874,10 +874,7 @@ int main(int argc, char *argv[])
 
                 // Optional: "dimensions"
                 dimensionSet dims;
-                if (dims.readEntry("dimensions", dict, false))
-                {
-                    ctrl.hasDimensions = true;
-                }
+                ctrl.hasDimensions = dims.readIfPresent("dimensions", dict);
 
                 if (args.verbose() && !timei)
                 {
