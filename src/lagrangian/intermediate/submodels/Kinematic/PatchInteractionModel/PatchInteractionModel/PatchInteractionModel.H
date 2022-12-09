@@ -191,8 +191,8 @@ public:
         //- Post-evolve hook
         virtual void postEvolve();
 
-        //- Write patch interaction info to stream
-        virtual void info(Ostream& os);
+        //- Write patch interaction info
+        virtual void info();
 };
 
 

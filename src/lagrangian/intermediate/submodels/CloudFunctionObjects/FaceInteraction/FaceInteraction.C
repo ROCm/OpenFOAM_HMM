@@ -70,7 +70,7 @@ void Foam::FaceInteraction<CloudType>::write()
     const fvMesh& mesh = this->owner().mesh();
     const faceZoneMesh& fzm = mesh.faceZones();
 
-    Info<< type() << " output:" << nl;
+    Log_<< type() << " output:" << nl;
 
     // Retrieve any stored data
     const label nZones = faceZoneIDs_.size();
@@ -98,7 +98,7 @@ void Foam::FaceInteraction<CloudType>::write()
     forAll(faceZoneIDs_, i)
     {
         const label zonei = faceZoneIDs_[i];
-        Info<< "    Zone : " << fzm[zonei].name() << nl
+        Log_<< "    Zone : " << fzm[zonei].name() << nl
             << "        Escape  : " << npe[i] << nl
             << "        Stick   : " << nps[i] << nl
             << "        Rebound : " << npr[i] << nl;
@@ -116,7 +116,7 @@ void Foam::FaceInteraction<CloudType>::write()
                 << endl;
         }
     }
-    Info<< endl;
+    Log_<< endl;
 
     // Set restart data
     this->setModelProperty("nEscape", npe);

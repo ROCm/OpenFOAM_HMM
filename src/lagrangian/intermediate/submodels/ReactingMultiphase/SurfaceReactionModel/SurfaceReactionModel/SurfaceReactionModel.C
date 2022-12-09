@@ -78,12 +78,14 @@ void Foam::SurfaceReactionModel<CloudType>::addToSurfaceReactionMass
 
 
 template<class CloudType>
-void Foam::SurfaceReactionModel<CloudType>::info(Ostream& os)
+void Foam::SurfaceReactionModel<CloudType>::info()
 {
+    CloudSubModelBase<CloudType>::info();
+
     const scalar mass0 = this->template getBaseProperty<scalar>("mass");
     const scalar massTotal = mass0 + returnReduce(dMass_, sumOp<scalar>());
 
-    Info<< "    Mass transfer surface reaction  = " << massTotal << nl;
+    Log_<< "    Mass transfer surface reaction  = " << massTotal << nl;
 
     if (this->writeTime())
     {

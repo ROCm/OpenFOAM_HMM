@@ -133,6 +133,8 @@ void Foam::KinematicCloud<CloudType>::solve
 {
     addProfiling(prof, "cloud::solve");
 
+    log = solution_.log();
+
     if (solution_.steadyState())
     {
         cloud.storeState();
@@ -267,7 +269,7 @@ void Foam::KinematicCloud<CloudType>::postEvolve
     const typename parcelType::trackingData& td
 )
 {
-    Info<< endl;
+    Log_<< endl;
 
     if (debug)
     {
@@ -457,7 +459,8 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
             mesh_,
             dimensionedScalar(dimMass, Zero)
         )
-    )
+    ),
+    log(true)
 {
     if (solution_.active())
     {
@@ -545,7 +548,8 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
             ),
             c.UCoeff_()
         )
-    )
+    ),
+    log(c.log)
 {}
 
 
@@ -611,7 +615,8 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
 
     UIntegrator_(nullptr),
     UTrans_(nullptr),
-    UCoeff_(nullptr)
+    UCoeff_(nullptr),
+    log(c.log)
 {}
 
 
@@ -743,7 +748,7 @@ void Foam::KinematicCloud<CloudType>::preEvolve
     // with topology change due to lazy evaluation of valid mesh dimensions
     label nGeometricD = mesh_.nGeometricD();
 
-    Info<< "\nSolving" << nGeometricD << "-D cloud " << this->name() << endl;
+    Log_<< "\nSolving" << nGeometricD << "-D cloud " << this->name() << endl;
 
     this->dispersion().cacheFields(true);
     forces_.cacheFields(true);
@@ -881,7 +886,7 @@ void Foam::KinematicCloud<CloudType>::info()
       : 0
     );
 
-    Info<< "Cloud: " << this->name() << nl
+    Log_<< "Cloud: " << this->name() << nl
         << "    Current number of parcels       = " << nTotParcel << nl
         << "    Current mass in system          = "
         << returnReduce(massInSystem(), sumOp<scalar>()) << nl
@@ -890,9 +895,10 @@ void Foam::KinematicCloud<CloudType>::info()
         << "    Linear kinetic energy           = " << linearKineticEnergy << nl
         << "    Average particle per parcel     = " << particlePerParcel << nl;
 
-    injectors_.info(Info);
-    this->surfaceFilm().info(Info);
-    this->patchInteraction().info(Info);
+
+    injectors_.info();
+    this->surfaceFilm().info();
+    this->patchInteraction().info();
 
     if (this->packingModel().active())
     {
@@ -906,8 +912,8 @@ void Foam::KinematicCloud<CloudType>::info()
         const scalar alphaMin = gMin(alpha().primitiveField());
         const scalar alphaMax = gMax(alpha().primitiveField());
 
-        Info<< "    Min cell volume fraction        = " << alphaMin << endl;
-        Info<< "    Max cell volume fraction        = " << alphaMax << endl;
+        Log_<< "    Min cell volume fraction        = " << alphaMin << nl
+            << "    Max cell volume fraction        = " << alphaMax << endl;
 
         if (alphaMax < SMALL)
         {
@@ -933,7 +939,7 @@ void Foam::KinematicCloud<CloudType>::info()
 
         reduce(nMin, minOp<scalar>());
 
-        Info<< "    Min dense number of parcels     = " << nMin << endl;
+        Log_<< "    Min dense number of parcels     = " << nMin << endl;
     }
 }
 

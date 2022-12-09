@@ -44,12 +44,9 @@ void Foam::FacePostProcessing<CloudType>::makeLogFile
 )
 {
     // Create the output file if not already created
-    if (log_)
+    if (logToFile_)
     {
-        if (debug)
-        {
-            Info<< "Creating output file." << endl;
-        }
+        DebugInfo << "Creating output file." << endl;
 
         if (Pstream::master())
         {
@@ -102,7 +99,7 @@ void Foam::FacePostProcessing<CloudType>::write()
 
     const label proci = Pstream::myProcNo();
 
-    Info<< type() << " output:" << nl;
+    Log_<< type() << " output:" << nl;
 
     List<scalarField> zoneMassTotal(mass_.size());
     List<scalarField> zoneMassFlowRate(massFlowRate_.size());
@@ -130,7 +127,7 @@ void Foam::FacePostProcessing<CloudType>::write()
             );
         const scalar sumMassFlowRate = sum(zoneMassFlowRate[zoneI]);
 
-        Info<< "    " << zoneName
+        Log_<< "    " << zoneName
             << ": total mass = " << sumMassTotal
             << "; average mass flow rate = " << sumMassFlowRate
             << nl;
@@ -143,7 +140,7 @@ void Foam::FacePostProcessing<CloudType>::write()
         }
     }
 
-    Info<< endl;
+    Log_<< endl;
 
 
     if (surfaceFormat_ != "none")
@@ -259,7 +256,7 @@ Foam::FacePostProcessing<CloudType>::FacePostProcessing
     faceZoneIDs_(),
     surfaceFormat_(this->coeffDict().getWord("surfaceFormat")),
     resetOnWrite_(this->coeffDict().getBool("resetOnWrite")),
-    log_(this->coeffDict().getBool("log")),
+    logToFile_(this->coeffDict().getBool("log")),
     totalTime_(0.0),
     mass_(),
     massTotal_(),
@@ -340,7 +337,7 @@ Foam::FacePostProcessing<CloudType>::FacePostProcessing
     faceZoneIDs_(pff.faceZoneIDs_),
     surfaceFormat_(pff.surfaceFormat_),
     resetOnWrite_(pff.resetOnWrite_),
-    log_(pff.log_),
+    logToFile_(pff.logToFile_),
     totalTime_(pff.totalTime_),
     mass_(pff.mass_),
     massTotal_(pff.massTotal_),

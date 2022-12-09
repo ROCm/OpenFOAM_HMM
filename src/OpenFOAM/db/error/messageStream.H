@@ -365,6 +365,10 @@ extern messageStream SeriousError;
 #define Log                                                                    \
     if (log) Info
 
+//- Report write to Foam::Info if the class log switch is true
+#define Log_                                                                   \
+    if (this->log) Info
+
 
 //- Report an IO information message using Foam::Info
 //  for functionName in file __FILE__ at line __LINE__

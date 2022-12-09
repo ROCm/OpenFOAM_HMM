@@ -302,6 +302,12 @@ protected:
 
 public:
 
+    // Public Data
+
+        //- Flag to write log into Info
+        bool log;
+
+
     // Constructors
 
         //- Construct given carrier gas fields

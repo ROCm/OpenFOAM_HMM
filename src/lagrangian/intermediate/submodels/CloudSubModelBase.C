@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,7 +36,9 @@ Foam::CloudSubModelBase<CloudType>::CloudSubModelBase(CloudType& owner)
 :
     subModelBase(owner.outputProperties()),
     owner_(owner)
-{}
+{
+    this->log = owner_.solution().log();
+}
 
 
 template<class CloudType>
@@ -57,7 +60,9 @@ Foam::CloudSubModelBase<CloudType>::CloudSubModelBase
         dictExt
     ),
     owner_(owner)
-{}
+{
+    this->log = owner_.solution().log();
+}
 
 
 template<class CloudType>
@@ -79,7 +84,9 @@ Foam::CloudSubModelBase<CloudType>::CloudSubModelBase
         modelType
     ),
     owner_(owner)
-{}
+{
+    this->log = owner_.solution().log();
+}
 
 
 template<class CloudType>
@@ -90,14 +97,9 @@ Foam::CloudSubModelBase<CloudType>::CloudSubModelBase
 :
     subModelBase(smb),
     owner_(smb.owner_)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::CloudSubModelBase<CloudType>::~CloudSubModelBase()
-{}
+{
+    this->log = owner_.solution().log();
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -135,6 +137,13 @@ Foam::fileName Foam::CloudSubModelBase<CloudType>::localPath() const
     }
 
     return cloud::prefix/owner_.name()/baseName_;
+}
+
+
+template<class CloudType>
+void Foam::CloudSubModelBase<CloudType>::info()
+{
+    this->log = owner_.solution().log();
 }
 
 

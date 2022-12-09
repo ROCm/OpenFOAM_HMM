@@ -237,7 +237,7 @@ void Foam::InjectionModel<CloudType>::postInjectCheck
 
     if (allParcelsAdded > 0)
     {
-        Info<< nl
+        Log_<< nl
             << "Cloud: " << this->owner().name()
             << " injector: " << this->modelName() << nl
             << "    Added " << allParcelsAdded << " new parcels" << nl << endl;
@@ -666,9 +666,11 @@ void Foam::InjectionModel<CloudType>::injectSteadyState
 
 
 template<class CloudType>
-void Foam::InjectionModel<CloudType>::info(Ostream& os)
+void Foam::InjectionModel<CloudType>::info()
 {
-    os  << "    Injector " << this->modelName() << ":" << nl
+    CloudSubModelBase<CloudType>::info();
+
+    Log_<< "    Injector " << this->modelName() << ":" << nl
         << "      - parcels added               = " << parcelsAddedTotal_ << nl
         << "      - mass introduced             = " << massInjected_ << nl;
 

@@ -43,7 +43,7 @@ void Foam::RemoveParcels<CloudType>::makeLogFile
 )
 {
     // Create the output file if not already created
-    if (log_)
+    if (logToFile_)
     {
         DebugInfo<< "Creating output file." << endl;
 
@@ -81,7 +81,7 @@ void Foam::RemoveParcels<CloudType>::postEvolve
     const typename parcelType::trackingData& td
 )
 {
-    Info<< this->modelName() << " output:" << nl;
+    Log_<< this->modelName() << " output:" << nl;
 
     const fvMesh& mesh = this->owner().mesh();
     const faceZoneMesh& fzm = mesh.faceZones();
@@ -93,7 +93,7 @@ void Foam::RemoveParcels<CloudType>::postEvolve
         scalar zoneMass = returnReduce(mass_[i], sumOp<scalar>());
         label zoneNParcels = returnReduce(nParcels_[i], sumOp<label>());
 
-        Info<< "    faceZone " << zoneName
+        Log_<< "    faceZone " << zoneName
             << ": removed " << zoneNParcels
             << " parcels with mass " << zoneMass
             << nl;
@@ -127,7 +127,7 @@ void Foam::RemoveParcels<CloudType>::write()
         }
     }
 
-    Info<< endl;
+    Log_<< endl;
 
     if (resetOnWrite_)
     {
@@ -158,7 +158,7 @@ Foam::RemoveParcels<CloudType>::RemoveParcels
     nParcels_(),
     mass_(),
     typeId_(this->coeffDict().template getOrDefault<label>("parcelType", -1)),
-    log_(this->coeffDict().getBool("log")),
+    logToFile_(this->coeffDict().getBool("log")),
     resetOnWrite_(this->coeffDict().getBool("resetOnWrite")),
     resetOnStart_(this->coeffDict().getBool("resetOnStart")),
     outputFilePtr_()
@@ -239,7 +239,7 @@ Foam::RemoveParcels<CloudType>::RemoveParcels
     nParcels_(rpf.nParcels_),
     mass_(rpf.mass_),
     typeId_(rpf.typeId_),
-    log_(rpf.log_),
+    logToFile_(rpf.logToFile_),
     resetOnWrite_(rpf.resetOnWrite_),
     resetOnStart_(rpf.resetOnStart_),
     outputFilePtr_()

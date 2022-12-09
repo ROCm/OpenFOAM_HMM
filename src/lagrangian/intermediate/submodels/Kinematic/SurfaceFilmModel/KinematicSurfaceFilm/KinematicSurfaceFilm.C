@@ -184,10 +184,7 @@ void Foam::KinematicSurfaceFilm<CloudType>::absorbInteraction
     bool& keepParticle
 )
 {
-    if (debug)
-    {
-        Info<< "Parcel " << p.origId() << " absorbInteraction" << endl;
-    }
+    DebugInfo<< "Parcel " << p.origId() << " absorbInteraction" << endl;
 
     // Patch face normal
     const vector& nf = pp.faceNormals()[facei];
@@ -231,10 +228,7 @@ void Foam::KinematicSurfaceFilm<CloudType>::bounceInteraction
     bool& keepParticle
 ) const
 {
-    if (debug)
-    {
-        Info<< "Parcel " << p.origId() << " bounceInteraction" << endl;
-    }
+    DebugInfo<< "Parcel " << p.origId() << " bounceInteraction" << endl;
 
     // Patch face normal
     const vector& nf = pp.faceNormals()[facei];
@@ -265,10 +259,7 @@ void Foam::KinematicSurfaceFilm<CloudType>::drySplashInteraction
     bool& keepParticle
 )
 {
-    if (debug)
-    {
-        Info<< "Parcel " << p.origId() << " drySplashInteraction" << endl;
-    }
+    DebugInfo<< "Parcel " << p.origId() << " drySplashInteraction" << endl;
 
     // Patch face velocity and normal
     const vector& Up = this->owner().U().boundaryField()[pp.index()][facei];
@@ -321,10 +312,7 @@ void Foam::KinematicSurfaceFilm<CloudType>::wetSplashInteraction
     bool& keepParticle
 )
 {
-    if (debug)
-    {
-        Info<< "Parcel " << p.origId() << " wetSplashInteraction" << endl;
-    }
+    DebugInfo<< "Parcel " << p.origId() << " wetSplashInteraction" << endl;
 
     // Patch face velocity and normal
     const vector& Up = this->owner().U().boundaryField()[pp.index()][facei];
@@ -815,15 +803,15 @@ void Foam::KinematicSurfaceFilm<CloudType>::setParcelProperties
 
 
 template<class CloudType>
-void Foam::KinematicSurfaceFilm<CloudType>::info(Ostream& os)
+void Foam::KinematicSurfaceFilm<CloudType>::info()
 {
-    SurfaceFilmModel<CloudType>::info(os);
+    SurfaceFilmModel<CloudType>::info();
 
     label nSplash0 = this->template getModelProperty<label>("nParcelsSplashed");
     label nSplashTotal =
         nSplash0 + returnReduce(nParcelsSplashed_, sumOp<label>());
 
-    os  << "      - new splash parcels          = " << nSplashTotal << endl;
+    Log_<< "      - new splash parcels          = " << nSplashTotal << endl;
 
     if (this->writeTime())
     {

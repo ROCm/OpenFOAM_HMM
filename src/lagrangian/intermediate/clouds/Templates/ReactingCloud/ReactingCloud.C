@@ -336,7 +336,7 @@ void Foam::ReactingCloud<CloudType>::info()
 {
     CloudType::info();
 
-    this->phaseChange().info(Info);
+    this->phaseChange().info();
 }
 
 

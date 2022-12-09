@@ -287,7 +287,7 @@ void Foam::ParticleZoneInfo<CloudType>::postEvolve
     const typename parcelType::trackingData& td
 )
 {
-    Info<< this->type() << ":" << nl
+    Log_<< this->type() << ":" << nl
         << "    Cell zone                       = " << cellZoneName_ << nl
         << "    Contributions                   = "
         << returnReduce(movedParticles_.size(), sumOp<label>())
@@ -295,7 +295,7 @@ void Foam::ParticleZoneInfo<CloudType>::postEvolve
 
     if (!this->writeTime())
     {
-        Info<< endl;
+        Log_<< endl;
     }
 
     for (const auto& p : movedParticles_)
@@ -412,7 +412,7 @@ void Foam::ParticleZoneInfo<CloudType>::write()
                 }
             }
 
-            Info<< "    Number of particles             = " << nData << nl
+            Log_<< "    Number of particles             = " << nData << nl
                 << "    Written data to " << os.name() << endl;
 
             this->setModelProperty("data", globalParticles);
@@ -437,14 +437,14 @@ void Foam::ParticleZoneInfo<CloudType>::write()
             os << p << nl;
         }
 
-        Info<< "    Number of particles             = " << data_.size() << nl
+        Log_<< "    Number of particles             = " << data_.size() << nl
             << "    Written data to " << os.name() << endl;
 
         this->setModelProperty("data", data_);
         this->setModelProperty("maxIDs", maxIDs_);
     }
 
-    Info<< endl;
+    Log_<< endl;
 }
 
 

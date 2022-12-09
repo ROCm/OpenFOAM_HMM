@@ -208,8 +208,8 @@ public:
 
         // I-O
 
-            //- Write injection info to stream
-            void info(Ostream& os);
+            //- Write injection info
+            void info();
 };
 
 

@@ -45,12 +45,9 @@ void Foam::ParticleCollector<CloudType>::makeLogFile
 )
 {
     // Create the output file if not already created
-    if (log_)
+    if (logToFile_)
     {
-        if (debug)
-        {
-            Info<< "Creating output file" << endl;
-        }
+        DebugInfo<< "Creating output file" << endl;
 
         if (Pstream::master())
         {
@@ -419,7 +416,7 @@ void Foam::ParticleCollector<CloudType>::write()
         massTotal_[facei] += mass_[facei];
     }
 
-    Info<< type() << " output:" << nl;
+    Log_<< type() << " output:" << nl;
 
     Field<scalar> faceMassTotal(mass_.size(), Zero);
     this->getModelProperty("massTotal", faceMassTotal);
@@ -452,7 +449,7 @@ void Foam::ParticleCollector<CloudType>::write()
         }
     }
 
-    Info<< "    sum(total mass) = " << sumTotalMass << nl
+    Log_<< "    sum(total mass) = " << sumTotalMass << nl
         << "    sum(average mass flow rate) = " << sumAverageMFR << nl
         << endl;
 
@@ -523,7 +520,7 @@ Foam::ParticleCollector<CloudType>::ParticleCollector
     parcelType_(this->coeffDict().getOrDefault("parcelType", -1)),
     removeCollected_(this->coeffDict().getBool("removeCollected")),
     resetOnWrite_(this->coeffDict().getBool("resetOnWrite")),
-    log_(this->coeffDict().getBool("log")),
+    logToFile_(this->coeffDict().getBool("log")),
     points_(),
     faces_(),
     faceTris_(),
@@ -608,7 +605,7 @@ Foam::ParticleCollector<CloudType>::ParticleCollector
     parcelType_(pc.parcelType_),
     removeCollected_(pc.removeCollected_),
     resetOnWrite_(pc.resetOnWrite_),
-    log_(pc.log_),
+    logToFile_(pc.logToFile_),
     points_(pc.points_),
     faces_(pc.faces_),
     faceTris_(pc.faceTris_),

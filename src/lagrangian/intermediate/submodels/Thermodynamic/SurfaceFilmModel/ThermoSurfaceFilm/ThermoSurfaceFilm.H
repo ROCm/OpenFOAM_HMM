@@ -157,8 +157,8 @@ public:
 
         // I-O
 
-            //- Write surface film info to stream
-            virtual void info(Ostream& os);
+            //- Write surface film info
+            virtual void info();
 };
 
 

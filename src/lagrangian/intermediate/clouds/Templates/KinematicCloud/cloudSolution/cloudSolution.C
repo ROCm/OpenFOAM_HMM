@@ -39,6 +39,7 @@ Foam::cloudSolution::cloudSolution(const fvMesh& mesh, const dictionary& dict)
     active_(dict.lookup("active")),
     transient_(false),
     calcFrequency_(1),
+    logFrequency_(1),
     maxCo_(0.3),
     iter_(1),
     trackTime_(0.0),
@@ -82,6 +83,7 @@ Foam::cloudSolution::cloudSolution(const cloudSolution& cs)
     active_(cs.active_),
     transient_(cs.transient_),
     calcFrequency_(cs.calcFrequency_),
+    logFrequency_(cs.logFrequency_),
     maxCo_(cs.maxCo_),
     iter_(cs.iter_),
     trackTime_(cs.trackTime_),
@@ -101,6 +103,7 @@ Foam::cloudSolution::cloudSolution(const fvMesh& mesh)
     active_(false),
     transient_(false),
     calcFrequency_(0),
+    logFrequency_(0),
     maxCo_(GREAT),
     iter_(0),
     trackTime_(0.0),
@@ -152,6 +155,8 @@ void Foam::cloudSolution::read()
     dict_.readEntry("cellValueSourceCorrection", cellValueSourceCorrection_);
     dict_.readIfPresent("maxCo", maxCo_);
     dict_.readIfPresent("deltaTMax", deltaTMax_);
+
+    dict_.readIfPresent("logFrequency", logFrequency_);
 
     if (steadyState())
     {
@@ -261,6 +266,15 @@ bool Foam::cloudSolution::canEvolve()
     }
 
     return solveThisStep();
+}
+
+
+bool Foam::cloudSolution::log() const
+{
+    return
+        active_
+     && (logFrequency_ > 0)
+     && (mesh_.time().timeIndex() % logFrequency_ == 0);
 }
 
 

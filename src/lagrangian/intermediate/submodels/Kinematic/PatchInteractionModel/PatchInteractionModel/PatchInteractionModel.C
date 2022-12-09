@@ -214,8 +214,10 @@ void Foam::PatchInteractionModel<CloudType>::postEvolve()
 
 
 template<class CloudType>
-void Foam::PatchInteractionModel<CloudType>::info(Ostream& os)
+void Foam::PatchInteractionModel<CloudType>::info()
 {
+    CloudSubModelBase<CloudType>::info();
+
     const label escapedParcels0 =
         this->template getBaseProperty<label>("escapedParcels");
     const label escapedParcelsTotal =
@@ -226,7 +228,7 @@ void Foam::PatchInteractionModel<CloudType>::info(Ostream& os)
     const scalar escapedMassTotal =
         escapedMass0 + returnReduce(escapedMass_, sumOp<scalar>());
 
-    os  << "    Parcel fate: system (number, mass)" << nl
+    Log_<< "    Parcel fate: system (number, mass)" << nl
         << "      - escape                      = " << escapedParcelsTotal
         << ", " << escapedMassTotal << endl;
 
