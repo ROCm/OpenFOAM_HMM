@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef labelVector_H
-#define labelVector_H
+#ifndef Foam_labelVector_H
+#define Foam_labelVector_H
 
 #include "label.H"
 #include "Vector.H"

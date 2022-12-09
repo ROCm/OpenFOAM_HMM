@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,56 +25,59 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "labelVector.H"
+#include "labelVector2D.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 template<>
-const char* const Foam::labelVector::vsType::typeName = "labelVector";
+const char* const Foam::labelVector2D::vsType::typeName = "labelVector2D";
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #undef  defineTraits
 #define defineTraits(Type, Prefix)                                            \
                                                                               \
     template<>                                                                \
-    const char* const Foam::Vector<Type>::vsType::componentNames[] =          \
+    const char* const Foam::Vector2D<Type>::vsType::componentNames[] =        \
     {                                                                         \
-        "x", "y", "z"                                                         \
+        "x", "y"                                                              \
     };                                                                        \
                                                                               \
     template<>                                                                \
-    const Foam::Vector<Type> Foam::Vector<Type>::vsType::zero                 \
+    const Foam::Vector2D<Type> Foam::Vector2D<Type>::vsType::zero             \
     (                                                                         \
-        Vector<Type>::uniform(0)                                              \
+        Vector2D<Type>::uniform(0)                                            \
     );                                                                        \
                                                                               \
     template<>                                                                \
-    const Foam::Vector<Type> Foam::Vector<Type>::vsType::one                  \
+    const Foam::Vector2D<Type> Foam::Vector2D<Type>::vsType::one              \
     (                                                                         \
-        Vector<Type>::uniform(1)                                              \
+        Vector2D<Type>::uniform(1)                                            \
     );                                                                        \
                                                                               \
     template<>                                                                \
-    const Foam::Vector<Type> Foam::Vector<Type>::vsType::max                  \
+    const Foam::Vector2D<Type> Foam::Vector2D<Type>::vsType::max              \
     (                                                                         \
-        Vector<Type>::uniform(Prefix##Max)                                    \
+        Vector2D<Type>::uniform(Prefix##Max)                                  \
     );                                                                        \
                                                                               \
     template<>                                                                \
-    const Foam::Vector<Type> Foam::Vector<Type>::vsType::min                  \
+    const Foam::Vector2D<Type> Foam::Vector2D<Type>::vsType::min              \
     (                                                                         \
-        Vector<Type>::uniform(-Prefix##Max)                                   \
+        Vector2D<Type>::uniform(-Prefix##Max)                                 \
     );                                                                        \
                                                                               \
     template<>                                                                \
-    const Foam::Vector<Type> Foam::Vector<Type>::vsType::rootMax              \
+    const Foam::Vector2D<Type> Foam::Vector2D<Type>::vsType::rootMax          \
     (                                                                         \
-        Vector<Type>::uniform(::sqrt(double(Prefix##Max)))                    \
+        Vector2D<Type>::uniform(::sqrt(double(Prefix##Max)))                  \
     );                                                                        \
                                                                               \
     template<>                                                                \
-    const Foam::Vector<Type> Foam::Vector<Type>::vsType::rootMin              \
+    const Foam::Vector2D<Type> Foam::Vector2D<Type>::vsType::rootMin          \
     (                                                                         \
-        Vector<Type>::uniform(-::sqrt(double(Prefix##Max)))                   \
+        Vector2D<Type>::uniform(-::sqrt(double(Prefix##Max)))                 \
     );
 
 

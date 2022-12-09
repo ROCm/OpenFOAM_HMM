@@ -67,13 +67,13 @@ const Foam::labelSymmTensor Foam::labelSymmTensor::vsType::min
 template<>
 const Foam::labelSymmTensor Foam::labelSymmTensor::vsType::rootMax
 (
-    labelSymmTensor::uniform(sqrt(scalar(labelMax)))
+    labelSymmTensor::uniform(::sqrt(double(labelMax)))
 );
 
 template<>
 const Foam::labelSymmTensor Foam::labelSymmTensor::vsType::rootMin
 (
-    labelSymmTensor::uniform(-sqrt(scalar(labelMax)))
+    labelSymmTensor::uniform(-::sqrt(double(labelMax)))
 );
 
 template<>

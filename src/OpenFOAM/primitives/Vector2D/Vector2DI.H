@@ -126,12 +126,38 @@ Foam::Vector2D<Cmpt>::removeCollinear(const Vector2D<Cmpt>& unitVec)
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Comparison Operations * * * * * * * * * * * * * //
+
+template<class Cmpt>
+inline bool
+Foam::Vector2D<Cmpt>::less_xy(const Vector2D<Cmpt>& a, const Vector2D<Cmpt>& b)
+{
+    return
+    (
+        (a.x() < b.x())
+     || (!(b.x() < a.x()) && (a.y() < b.y()))
+    );
+}
+
+
+template<class Cmpt>
+inline bool
+Foam::Vector2D<Cmpt>::less_yx(const Vector2D<Cmpt>& a, const Vector2D<Cmpt>& b)
+{
+    return
+    (
+        (a.y() < b.y())
+     || (!(b.y() < a.y()) && (a.x() < b.x()))
+    );
+}
+
+
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Cmpt>
 inline Cmpt operator&(const Vector2D<Cmpt>& v1, const Vector2D<Cmpt>& v2)

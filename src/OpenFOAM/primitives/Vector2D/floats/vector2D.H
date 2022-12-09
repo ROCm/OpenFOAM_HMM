@@ -5,7 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,56 +24,47 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Typedef
+    Foam::vector2D
+
 Description
-    Vector2D of scalars.
+    A 2D vector of scalars obtained from the generic Vector2D.
+
+SourceFiles
+    vector2D.C
 
 \*---------------------------------------------------------------------------*/
 
-#include "vector2D.H"
+#ifndef Foam_vector2D_H
+#define Foam_vector2D_H
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+#include "scalar.H"
+#include "Vector2D.H"
 
-template<>
-const char* const Foam::vector2D::vsType::typeName = "vector2D";
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<>
-const char* const Foam::vector2D::vsType::componentNames[] = {"x", "y"};
+namespace Foam
+{
 
-template<>
-const Foam::vector2D Foam::vector2D::vsType::vsType::zero
-(
-    vector2D::uniform(0)
-);
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<>
-const Foam::vector2D Foam::vector2D::vsType::one
-(
-    vector2D::uniform(1)
-);
+//! \class Foam::floatVector2D
+//! \brief A Vector2D of values with float precision
+typedef Vector2D<float> floatVector2D;
 
-template<>
-const Foam::vector2D Foam::vector2D::vsType::max
-(
-    vector2D::uniform(VGREAT)
-);
+//! \class Foam::doubleVector2D
+//! \brief A Vector2D of values with double precision
+typedef Vector2D<double> doubleVector2D;
 
-template<>
-const Foam::vector2D Foam::vector2D::vsType::min
-(
-    vector2D::uniform(-VGREAT)
-);
+// With float or double precision (depending on compilation)
+typedef Vector2D<scalar> vector2D;
 
-template<>
-const Foam::vector2D Foam::vector2D::vsType::rootMax
-(
-    vector2D::uniform(ROOTVGREAT)
-);
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<>
-const Foam::vector2D Foam::vector2D::vsType::rootMin
-(
-    vector2D::uniform(-ROOTVGREAT)
-);
+} // End namespace Foam
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

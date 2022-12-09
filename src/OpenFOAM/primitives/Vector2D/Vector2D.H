@@ -153,6 +153,23 @@ public:
             const Vector2D<Cmpt>& b,
             const scalar tol = 1e-10
         ) const;
+
+
+    // Comparison Operations
+
+        //- Lexicographically compare \em a and \em b with order (x:y)
+        static inline bool less_xy
+        (
+            const Vector2D<Cmpt>& a,
+            const Vector2D<Cmpt>& b
+        );
+
+        //- Lexicographically compare \em a and \em b with order (y:x)
+        static inline bool less_yx
+        (
+            const Vector2D<Cmpt>& a,
+            const Vector2D<Cmpt>& b
+        );
 };
 
 

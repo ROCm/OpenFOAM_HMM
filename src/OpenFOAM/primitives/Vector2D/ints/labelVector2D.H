@@ -23,53 +23,38 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Typedef
+    Foam::labelVector2D
+
+Description
+    A 2D vector of labels obtained from the generic Vector2D.
+
+SourceFiles
+    labelVector2D.C
+
 \*---------------------------------------------------------------------------*/
 
-#include "labelVector2D.H"
+#ifndef Foam_labelVector2D_H
+#define Foam_labelVector2D_H
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+#include "label.H"
+#include "Vector2D.H"
 
-template<>
-const char* const Foam::labelVector2D::vsType::typeName = "labelVector2D";
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<>
-const char* const Foam::labelVector2D::vsType::componentNames[] = { "x", "y" };
+namespace Foam
+{
 
-template<>
-const Foam::labelVector2D Foam::labelVector2D::vsType::zero
-(
-    labelVector2D::uniform(0)
-);
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<>
-const Foam::labelVector2D Foam::labelVector2D::vsType::one
-(
-    labelVector2D::uniform(1)
-);
+typedef Vector2D<label> labelVector2D;
 
-template<>
-const Foam::labelVector2D Foam::labelVector2D::vsType::max
-(
-    labelVector2D::uniform(labelMax)
-);
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<>
-const Foam::labelVector2D Foam::labelVector2D::vsType::min
-(
-    labelVector2D::uniform(-labelMax)
-);
+} // End namespace Foam
 
-template<>
-const Foam::labelVector2D Foam::labelVector2D::vsType::rootMax
-(
-    labelVector2D::uniform(sqrt(scalar(labelMax)))
-);
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<>
-const Foam::labelVector2D Foam::labelVector2D::vsType::rootMin
-(
-    labelVector2D::uniform(-sqrt(scalar(labelMax)))
-);
-
+#endif
 
 // ************************************************************************* //

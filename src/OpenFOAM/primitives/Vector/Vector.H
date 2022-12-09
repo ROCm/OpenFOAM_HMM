@@ -171,7 +171,7 @@ public:
         inline Vector<Cmpt> cross(const Vector<Cmpt>& v2) const;
 
 
-    // Comparision Operations
+    // Comparison Operations
 
         //- Lexicographically compare \em a and \em b with order (x:y:z)
         static inline bool less_xyz

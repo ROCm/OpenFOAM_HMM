@@ -69,13 +69,13 @@ const Foam::labelSphericalTensor Foam::labelSphericalTensor::vsType::min
 template<>
 const Foam::labelSphericalTensor Foam::labelSphericalTensor::vsType::rootMax
 (
-    labelSphericalTensor::uniform(sqrt(scalar(labelMax)))
+    labelSphericalTensor::uniform(::sqrt(double(labelMax)))
 );
 
 template<>
 const Foam::labelSphericalTensor Foam::labelSphericalTensor::vsType::rootMin
 (
-    labelSphericalTensor::uniform(-sqrt(scalar(labelMax)))
+    labelSphericalTensor::uniform(-::sqrt(double(labelMax)))
 );
 
 template<>

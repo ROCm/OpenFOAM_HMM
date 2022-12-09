@@ -170,7 +170,7 @@ Foam::Vector<Cmpt>::cross(const Vector<Cmpt>& v2) const
 }
 
 
-// * * * * * * * * * * * * * Comparision Operations  * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Comparison Operations * * * * * * * * * * * * * //
 
 template<class Cmpt>
 inline bool
