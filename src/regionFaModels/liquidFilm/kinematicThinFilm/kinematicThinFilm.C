@@ -162,10 +162,8 @@ void kinematicThinFilm::evolveRegion()
         }
     }
 
-     Info<< "Film h min/max   = " << min(h_).value() << ", "
-        << max(h_).value() << endl;
-
-     Info<< "Film U min/max   = " << max(mag(Uf_)).value() << endl;
+    Info<< "Film h min/max   = " << gMinMax(h_) << nl
+        << "Film mag(U) min/max   = " << gMinMaxMag(Uf_) << endl;
 }
 
 
