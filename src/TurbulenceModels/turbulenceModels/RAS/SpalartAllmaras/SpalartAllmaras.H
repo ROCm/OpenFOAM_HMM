@@ -142,6 +142,8 @@ protected:
             const volTensorField& gradU
         ) const;
 
+        virtual void correctNut();
+
 
 public:
 

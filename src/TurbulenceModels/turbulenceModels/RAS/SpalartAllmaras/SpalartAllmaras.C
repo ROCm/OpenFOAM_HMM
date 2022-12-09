@@ -49,6 +49,18 @@ Foam::tmp<Foam::volScalarField> SpalartAllmaras<BasicTurbulenceModel>::dTilda
 }
 
 
+template<class BasicTurbulenceModel>
+void SpalartAllmaras<BasicTurbulenceModel>::correctNut()
+{
+    // Correct the turbulence viscosity
+    typedef eddyViscosity<RASModel<BasicTurbulenceModel>> evmType;
+    SpalartAllmarasBase<evmType>::correctNut();
+
+    // Correct the turbulence thermal diffusivity
+    BasicTurbulenceModel::correctNut();
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
