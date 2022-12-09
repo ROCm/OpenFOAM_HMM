@@ -456,10 +456,12 @@ public:
 
             //- Wait until request i has finished.
             //  A no-op if parRun() == false
+            //  or for placeholder (negative) request indices
             static void waitRequest(const label i);
 
             //- Non-blocking comms: has request i finished?
             //  A no-op and returns true if parRun() == false
+            //  or for placeholder (negative) request indices
             static bool finishedRequest(const label i);
 
             static int allocateTag(const char* const msg = nullptr);

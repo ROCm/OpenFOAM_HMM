@@ -453,7 +453,7 @@ void Foam::UPstream::shutdown(int errNo)
     // Clean mpi communicators
     forAll(myProcNo_, communicator)
     {
-        if (myProcNo_[communicator] != -1)
+        if (myProcNo_[communicator] >= 0)
         {
             freePstreamCommunicator(communicator);
         }
@@ -730,9 +730,9 @@ void Foam::UPstream::waitRequests(const label start)
 
 void Foam::UPstream::waitRequest(const label i)
 {
-    if (!UPstream::parRun())
+    if (!UPstream::parRun() || i < 0)
     {
-        return;  // No-op for non-parallel
+        return;  // No-op for non-parallel, or placeholder indices
     }
 
     if (debug)
@@ -741,13 +741,13 @@ void Foam::UPstream::waitRequest(const label i)
             << endl;
     }
 
-    if (i < 0 || i >= PstreamGlobals::outstandingRequests_.size())
+    if (i >= PstreamGlobals::outstandingRequests_.size())
     {
         FatalErrorInFunction
-            << "There are " << PstreamGlobals::outstandingRequests_.size()
-            << " outstanding send requests and you are asking for i=" << i
-            << nl
-            << "Maybe you are mixing blocking/non-blocking comms?"
+            << "You asked for request=" << i
+            << " from " << PstreamGlobals::outstandingRequests_.size()
+            << " outstanding requests!" << nl
+            << "Mixing use of blocking/non-blocking comms?"
             << Foam::abort(FatalError);
     }
 
@@ -781,9 +781,9 @@ void Foam::UPstream::waitRequest(const label i)
 
 bool Foam::UPstream::finishedRequest(const label i)
 {
-    if (!UPstream::parRun())
+    if (!UPstream::parRun() || i < 0)
     {
-        return true;  // No-op for non-parallel
+        return true;  // No-op for non-parallel, or placeholder indices
     }
 
     if (debug)
@@ -792,13 +792,13 @@ bool Foam::UPstream::finishedRequest(const label i)
             << endl;
     }
 
-    if (i < 0 || i >= PstreamGlobals::outstandingRequests_.size())
+    if (i >= PstreamGlobals::outstandingRequests_.size())
     {
         FatalErrorInFunction
-            << "There are " << PstreamGlobals::outstandingRequests_.size()
-            << " outstanding send requests and you are asking for i=" << i
-            << nl
-            << "Maybe you are mixing blocking/non-blocking comms?"
+            << "You asked for request=" << i
+            << " from " << PstreamGlobals::outstandingRequests_.size()
+            << " outstanding requests!" << nl
+            << "Mixing use of blocking/non-blocking comms?"
             << Foam::abort(FatalError);
     }
 
