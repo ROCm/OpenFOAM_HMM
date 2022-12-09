@@ -52,7 +52,7 @@
 #------------------------------------------------------------------------------
 # USER EDITABLE PART: Changes made here may be lost with the next upgrade
 
-set ParaView_VERSION=5.10.1
+set ParaView_VERSION=5.11.0
 set ParaView_QT=qt-system
 
 # END OF (NORMAL) USER EDITABLE PART
