@@ -361,6 +361,8 @@ void Foam::advancingFrontAMI::triangulatePatch
     tris.setSize(patch.size());
     magSf.setSize(patch.size());
 
+    const auto& faceNormals = patch.faceNormals();
+
     // Using methods that index into existing points
     forAll(patch, facei)
     {
@@ -390,7 +392,8 @@ void Foam::advancingFrontAMI::triangulatePatch
                     points[f[0]],
                     points[f[1]],
                     points[f[2]]
-                ).mag();
+                ).areaNormal()
+              & faceNormals[facei];
         }
     }
 }
