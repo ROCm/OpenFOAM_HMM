@@ -1,4 +1,4 @@
-## Known Build Issues (v2206, v2112, v2106, v2012)
+## Known Build Issues (v2212, v2206, v2112, v2106, v2012)
 
 ### Windows cross-compilation
 
