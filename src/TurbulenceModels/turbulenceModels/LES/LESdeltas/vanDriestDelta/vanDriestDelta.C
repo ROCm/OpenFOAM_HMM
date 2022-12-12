@@ -135,6 +135,7 @@ Foam::LESModels::vanDriestDelta::vanDriestDelta
         )
     )
 {
+    calcInterval_ = 1;
     const dictionary& coeffsDict(dict.optionalSubDict(type() + "Coeffs"));
     if (!coeffsDict.readIfPresent("calcInterval", calcInterval_))
     {
@@ -155,6 +156,7 @@ void Foam::LESModels::vanDriestDelta::read(const dictionary& dict)
     dict.readIfPresent<scalar>("kappa", kappa_);
     coeffsDict.readIfPresent<scalar>("Aplus", Aplus_);
     coeffsDict.readIfPresent<scalar>("Cdelta", Cdelta_);
+    calcInterval_ = 1;
     if (!coeffsDict.readIfPresent<label>("calcInterval", calcInterval_))
     {
         coeffsDict.readIfPresent("updateInterval", calcInterval_);
