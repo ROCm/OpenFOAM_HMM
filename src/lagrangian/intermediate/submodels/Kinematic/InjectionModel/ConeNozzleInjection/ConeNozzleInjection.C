@@ -186,6 +186,7 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
     tetPti_(-1),
     directionVsTime_(nullptr),
     direction_(Zero),
+    omegaPtr_(nullptr),
     parcelsPerSecond_(this->coeffDict().getScalar("parcelsPerSecond")),
     flowRateProfile_
     (
@@ -246,6 +247,19 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
     thetaInner_->userTimeToTime(time);
     thetaOuter_->userTimeToTime(time);
 
+    if (this->coeffDict().found("omega"))
+    {
+        omegaPtr_ =
+            Function1<scalar>::New
+            (
+                "omega",
+                this->coeffDict(),
+                &owner.mesh()
+            );
+
+        omegaPtr_->userTimeToTime(time);
+    }
+
     setInjectionGeometry();
 
     setFlowType();
@@ -277,6 +291,7 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
     tetPti_(im.tetPti_),
     directionVsTime_(im.directionVsTime_.clone()),
     direction_(im.direction_),
+    omegaPtr_(im.omegaPtr_.clone()),
     parcelsPerSecond_(im.parcelsPerSecond_),
     flowRateProfile_(im.flowRateProfile_.clone()),
     thetaInner_(im.thetaInner_.clone()),
@@ -503,6 +518,19 @@ void Foam::ConeNozzleInjection<CloudType>::setProperties
                 << flowTypeNames[flowType_]
                 << exit(FatalError);
         }
+    }
+
+    if (omegaPtr_)
+    {
+        const scalar omega = omegaPtr_->value(t);
+
+        const vector p0(parcel.position() - positionVsTime_->value(t));
+        const vector r(p0 - (p0 & direction_)*direction_);
+        const scalar rMag = mag(r);
+
+        const vector d = normalised(normal_ ^ dirVec);
+
+        parcel.U() += omega*rMag*d;
     }
 
     // Set particle diameter
