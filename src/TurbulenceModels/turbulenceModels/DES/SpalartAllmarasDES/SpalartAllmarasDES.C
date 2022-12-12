@@ -152,6 +152,17 @@ tmp<volScalarField> SpalartAllmarasDES<BasicTurbulenceModel>::dTilda
 }
 
 
+template<class BasicTurbulenceModel>
+void SpalartAllmarasDES<BasicTurbulenceModel>::correctNut()
+{
+    // Correct the turbulence viscosity
+    SpalartAllmarasBase<DESModel<BasicTurbulenceModel>>::correctNut();
+
+    // Correct the turbulence thermal diffusivity
+    BasicTurbulenceModel::correctNut();
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
