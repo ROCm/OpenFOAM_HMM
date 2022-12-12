@@ -6,7 +6,7 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
-#     Copyright (C) 2020 OpenCFD Ltd.
+#     Copyright (C) 2020-2022 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -26,7 +26,7 @@ sed -ne '1,/^[Oo]ptions:/d' \
     -e '/^ \{8\}/d;' \
     -e 's/^ *//; /^$/d; /^[^-]/d; /^--/d; /^-help-man/d;' \
     -e '/^-hostRoots /d; /^-roots /d;' \
-    -e '/^-lib /d;' \
+    -e '/^-lib /d; /^-no-libs /d;' \
     -e '/^-[a-z]*-switch /d;' \
     -e 'y/,/ /; s/=.*$/=/;' \
     -e '/^-[^ ]* </{ s/^\(-[^ ]* <\).*$/\1/; p; d }' \

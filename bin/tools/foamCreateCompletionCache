@@ -165,7 +165,7 @@ extractOptions()
             -e '/^ \{8\}/d;' \
             -e 's/^ *//; /^$/d; /^[^-]/d; /^--/d; /^-help-man/d;' \
             -e '/^-hostRoots /d; /^-roots /d;' \
-            -e '/^-lib /d;' \
+            -e '/^-lib /d; /^-no-libs /d;' \
             -e '/^-[a-z]*-switch /d;' \
             -e 'y/,/ /; s/=.*$/=/;' \
             -e '/^-[^ ]* </{ s/^\(-[^ ]* <\).*$/\1/; p; d }' \
@@ -198,7 +198,10 @@ extractOptions()
 
 for item
 do
-    if [ -d "$item" ]
+    if command -v "$item" >/dev/null
+    then
+        extractOptions "$item"
+    elif [ -d "$item" ]
     then
         # Process directory for applications - sort with ignore-case
         echo "[directory] $item" 1>&2
@@ -207,9 +210,6 @@ do
         do
             extractOptions $appName
         done
-    elif command -v "$item" >/dev/null
-    then
-        extractOptions $item
     else
         echo "No such file or directory: $item" 1>&2
     fi
