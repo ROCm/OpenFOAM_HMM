@@ -84,7 +84,7 @@ void Foam::processorFaPatchField<Foam::scalar>::updateInterfaceMatrix
     {
         forAll(edgeFaces, facei)
         {
-            result[edgeFaces[facei]] -= coeffs[facei]*pnf[facei];
+            result[edgeFaces[facei]] += coeffs[facei]*pnf[facei];
         }
     }
     else
