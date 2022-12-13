@@ -91,7 +91,7 @@ Foam::radiation::boundaryRadiationProperties::boundaryRadiationProperties
 
                 const auto* ePtr = radiationDict.findEntry(pp.name());
 
-                if (ePtr->isDict())
+                if (ePtr && ePtr->isDict())
                 {
                     radBoundaryPropertiesPtrList_.set
                     (
