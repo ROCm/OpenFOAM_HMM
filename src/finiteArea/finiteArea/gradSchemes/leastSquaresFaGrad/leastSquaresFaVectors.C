@@ -159,7 +159,7 @@ void Foam::leastSquaresFaVectors::makeLeastSquaresVectors() const
 
 
     // Invert the dd tensor
-    const symmTensorField invDd(pinv(dd));
+    const symmTensorField invDd(inv(dd));
 
 
     // Revisit all faces and calculate the lsP and lsN vectors
