@@ -327,7 +327,7 @@ Foam::List<Foam::pointField> Foam::refinementParameters::zonePoints
     {
         const word name
         (
-            zonesInMesh[i] == word::null
+            zonesInMesh[i].empty()
           ? "none"
           : zonesInMesh[i]
         );
@@ -348,9 +348,7 @@ Foam::List<Foam::pointField> Foam::refinementParameters::zonePoints
     allZoneNames.append("outside");
     allLocations.append(locationsOutsideMesh);
 
-    allLocations.shrink();
-
-    return std::move(allLocations);
+    return List<pointField>(std::move(allLocations));
 }
 
 
