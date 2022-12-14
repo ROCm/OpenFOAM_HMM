@@ -16,8 +16,14 @@ runApplication blockMesh
 runApplication surfaceFeatureExtract
 
 runApplication snappyHexMesh -overwrite
-runApplication topoSet -dict system/topoSetDict.f1
 
+#- Alternatively if snappyHexMesh has not set the faceZones correctly
+#  can do some topoSet magic:
+#   - pick up the outside of the cellZones
+#   - put into faceZones
+#runApplication topoSet -dict system/topoSetDict.f1
+
+# Use faceZones in combination with preserveFaceZones constraint
 runApplication $decompDict decomposePar
 
 # Restore initial fields

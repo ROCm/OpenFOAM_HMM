@@ -27,7 +27,17 @@ constraints
     faces
     {
         type    preserveFaceZones;
-        zones   (f1 f2 f3 f4 f5);
+        zones
+        (
+            heater_to_bottomAir
+            heater_to_leftSolid
+            heater_to_rightSolid
+            heater_to_topAir
+            leftSolid_to_bottomAir
+            leftSolid_to_topAir
+            rightSolid_to_bottomAir
+            rightSolid_to_topAir
+        );
         enabled true;
     }
 }
