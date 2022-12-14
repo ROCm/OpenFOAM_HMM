@@ -8,3 +8,5 @@
 
     const bool momentumPredictor =
         pimple.getOrDefault("momentumPredictor", true);
+
+    pimple.readIfPresent("frozenFlow", frozenFlowFluid[i]);
