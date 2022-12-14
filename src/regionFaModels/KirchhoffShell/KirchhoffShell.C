@@ -121,9 +121,7 @@ void KirchhoffShell::solveDisplacement()
         }
     }
 
-    Info<< "ws_vibrationShell: "
-        << "min = " << min(w_).value() << ", "
-        << "max = " << max(w_).value() << endl;
+    Info<< w_.name() << " min/max   = " << gMinMax(w_) << endl;
 
     // Restore old time in main time
     w_.oldTime() = w0;

@@ -178,7 +178,7 @@ void thermalShell::evolveRegion()
         solveEnergy();
     }
 
-    Info<< "T min/max   = " << min(T_) << ", " << max(T_) << endl;
+    Info<< T_.name() << " min/max   = " << gMinMax(T_) << endl;
 }
 
 

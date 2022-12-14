@@ -361,12 +361,11 @@ void liquidFilmModel::info()
     const DimensionedField<scalar, areaMesh>& sf = regionMesh().S();
 
     Info<< indent << "min/max(mag(Uf))    = "
-        << gMin(mag(Uf_.field())) << ", "
-        << gMax(mag(Uf_.field())) << nl
+        << gMinMaxMag(Uf_.field()) << nl
         << indent << "min/max(delta)     = "
-        << gMin(h_.field()) << ", " << gMax(h_.field()) << nl
+        << gMinMax(h_.field()) << nl
         << indent << "coverage           = "
-        << gSum(alpha()().field()*mag(sf.field()))/gSum(mag(sf.field())) <<  nl
+        << gSum(alpha()().field()*mag(sf.field()))/gSumMag(sf.field()) <<  nl
         << indent << "total mass         = "
         << gSum(availableMass_) << nl;
 

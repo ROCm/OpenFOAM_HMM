@@ -478,7 +478,19 @@ Foam::tmp<Foam::vectorField> Foam::faPatch::delta() const
 {
     // Use patch-normal delta for all non-coupled BCs
     const vectorField nHat(edgeNormals());
-    return nHat*(nHat & (edgeCentres() - edgeFaceCentres()));
+
+    vectorField edgePN(edgeCentres() - edgeFaceCentres());
+
+    // Do not allow any mag(val) < SMALL
+    for (vector& edgei : edgePN)
+    {
+        if (mag(edgei) < SMALL)
+        {
+            edgei = vector::uniform(SMALL);
+        }
+    }
+
+    return nHat*(nHat & edgePN);
 }
 
 
