@@ -1928,7 +1928,7 @@ int main(int argc, char *argv[])
 
     forAll(regionSizes, regionI)
     {
-        Info<< regionI << "\t\t" << regionSizes[regionI] << nl;
+        Info<< regionI << '\t' << regionSizes[regionI] << nl;
     }
     Info<< endl;
 
@@ -1939,7 +1939,7 @@ int main(int argc, char *argv[])
         << "------\t----\t----" << endl;
     forAll(regionToZones, regionI)
     {
-        Info<< regionI << "\t\t" << flatOutput(regionToZones[regionI])
+        Info<< regionI << '\t' << flatOutput(regionToZones[regionI])
             << '\t'
             << regionNames[regionI] << nl;
     }
@@ -1987,8 +1987,8 @@ int main(int argc, char *argv[])
         const edge& e = interfaces[interI];
 
         Info<< interI
-            << "\t\t\t" << e[0] << "\t\t" << e[1]
-            << "\t\t" << interfaceSizes[interI] << nl;
+            << "\t\t" << e[0] << "\t" << e[1]
+            << "\t" << interfaceSizes[interI] << nl;
     }
     Info<< endl;
 
