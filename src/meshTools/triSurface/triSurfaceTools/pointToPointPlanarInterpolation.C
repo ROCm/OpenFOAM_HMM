@@ -183,7 +183,10 @@ void Foam::pointToPointPlanarInterpolation::calcWeights
                     << endl;
             }
 
-            OBJstream str("destToSource.obj");
+            OBJstream str
+            (
+                "destToSource_" + Foam::name(UPstream::myProcNo()) + ".obj"
+            );
             Pout<< "pointToPointPlanarInterpolation::calcWeights :"
                 << " Dumping lines from face centres to original points to "
                 << str.name() << endl;
@@ -232,15 +235,24 @@ void Foam::pointToPointPlanarInterpolation::calcWeights
 
         if (debug)
         {
-            Pout<< "pointToPointPlanarInterpolation::calcWeights :"
-                <<" Dumping triangulated surface to triangulation.stl" << endl;
-            s.write("triangulation.stl");
+            fileName outName
+            (
+                "triangulation_" + Foam::name(UPstream::myProcNo()) + ".obj"
+            );
 
-            OBJstream str("localFaceCentres.obj");
             Pout<< "pointToPointPlanarInterpolation::calcWeights :"
-                << " Dumping face centres to " << str.name() << endl;
+                <<" Dumping triangulated surface to " << outName << endl;
 
-            str.write(localFaceCentres);
+            s.write(outName);
+
+            OBJstream os
+            (
+                "localFaceCentres_" + Foam::name(UPstream::myProcNo()) + ".obj"
+            );
+            Pout<< "pointToPointPlanarInterpolation::calcWeights :"
+                << " Dumping face centres to " << os.name() << endl;
+
+            os.write(localFaceCentres);
         }
 
         // Determine interpolation onto face centres.
@@ -261,7 +273,10 @@ void Foam::pointToPointPlanarInterpolation::calcWeights
                     << endl;
             }
 
-            OBJstream str("stencil.obj");
+            OBJstream str
+            (
+                "stencil_" + Foam::name(UPstream::myProcNo()) + ".obj"
+            );
             Pout<< "pointToPointPlanarInterpolation::calcWeights :"
                 << " Dumping stencil to " << str.name() << endl;
 
