@@ -33,6 +33,9 @@
 #     WM_COMPILER_LIB_ARCH
 #     DEB_TARGET_MULTIARCH
 #
+# Possible Dependencies
+#     - dpkg-architecture
+#
 #------------------------------------------------------------------------------
 
 if [ -z "$WMAKE_SCRIPTS_SYSFUNCTIONS" ]
@@ -40,10 +43,17 @@ then
     # Load once, but do not rely on this variable elsewhere
     WMAKE_SCRIPTS_SYSFUNCTIONS=loaded
 
-    # Debian multi-arch, ignore missing/bad dpkg-architecture.
-    if [ -z "$DEB_TARGET_MULTIARCH" ]
+    # Handle debian multi-arch...
+    # but dpkg-architecture command may also be missing
+    if [ -z "$DEB_TARGET_MULTIARCH" ] && [ -f /etc/debian_version ]
     then
-        DEB_TARGET_MULTIARCH=$(dpkg-architecture -qDEB_TARGET_MULTIARCH 2>/dev/null || true)
+        DEB_TARGET_MULTIARCH="$(dpkg-architecture -qDEB_TARGET_MULTIARCH 2>/dev/null || true)"
+        if [ -z "$DEB_TARGET_MULTIARCH" ] && [ "${WM_ARCH#linux}" != "${WM_ARCH}" ]
+        then
+            # Reasonable guess at a multi-arch name (eg, x86_64-linux-gnu)
+            # TODO: aarch64 -> arm64 ?
+            DEB_TARGET_MULTIARCH="$(uname -m)-linux-gnu"
+        fi
     fi
 
     # True if OS is <darwin>.

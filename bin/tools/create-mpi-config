@@ -6,7 +6,7 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2020 OpenCFD Ltd.
+#     Copyright (C) 2020-2022 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -27,7 +27,7 @@
 #
 # Possible Dependencies
 #     - dpkg-architecture
-#     - mpicc
+#     - mpicc, orte-info
 #
 # Notes
 #     Run from top-level directory when creating config files
@@ -42,7 +42,7 @@ usage: ${0##*/} options
 
 options:
   -dry-run, -n      Report but do not write config files
-  -no-mpicc         Bypass any use of mpicc
+  -no-mpicc         Bypass any use of mpicc (or orte-info)
   -query-openmpi    Report installation directory for system openmpi
   -write-openmpi    Query system openmpi and write config files
   -write            Write config files using FOAM_MPI, MPI_ARCH_PATH
@@ -75,11 +75,17 @@ die()
 #------------------------------------------------------------------------------
 # Options
 unset optDryRun
-withMpicc="mpicc"
+optUseMpicc=true
 
 # Get installation directory for system openmpi
+# - from "orte-info"
 # - from "mpicc --showme:link"
 # - manual fallback
+#
+# The orte-info content looks like this:
+# ----
+# path:prefix:/usr/lib64/mpi/gcc/openmpi2
+# ----
 #
 # The mpicc content looks like this:
 # ----
@@ -92,10 +98,22 @@ query_system_openmpi()
 {
     unset arch_path
 
-    if [ -n "$withMpicc" ]
+    # Query as per etc/config.sh/mpi
+    if [ -n "$optUseMpicc" ]
     then
-        arch_path=$(mpicc --showme:link 2>/dev/null | sed -e 's/^.*-L\([^ ]*\).*/\1/')
-        arch_path="${arch_path%/*}"  # prefix from libdir
+        # On the assumption that this is being called during compilation,
+        # skip orte-info and just take mpicc information
+        ## Use <orte-info> (openmpi only command) to query configuration.
+        ## Parse "path:prefix:<pathname>" type of output
+        #arch_path="$(orte-info --path prefix --parsable 2>/dev/null | sed -e 's#^path:[^:]*:##')"
+
+        # Use <mpicc> to get the link information and (slight hack)
+        # strip off 'lib' to get the prefix directory
+        if [ -z "$arch_path" ]
+        then
+            arch_path="$(mpicc --showme:link 2>/dev/null | sed -ne 's#.*-L\([^ ]*\).*#\1#p')"
+            arch_path="${arch_path%/*}"  # Prefix from libdir
+        fi
 
         if [ -n "$arch_path" ]
         then
@@ -103,22 +121,32 @@ query_system_openmpi()
             return 0  # Clean exit
         fi
 
-        echo "No mpicc found. Attempt manually" 1>&2
+        echo "No orte-info or mpicc found. Attempt manually" 1>&2
     fi
 
-
     # Manual discovery
-    if [ -z "$DEB_TARGET_MULTIARCH" ]
+
+    # Handle debian multi-arch...
+    # but dpkg-architecture command may also be missing
+    target_multiarch="$DEB_TARGET_MULTIARCH"
+    if [ -z "$target_multiarch" ] && [ -f /etc/debian_version ]
     then
-        DEB_TARGET_MULTIARCH=$(dpkg-architecture -qDEB_TARGET_MULTIARCH 2>/dev/null || true)
+        target_multiarch="$(dpkg-architecture -qDEB_TARGET_MULTIARCH 2>/dev/null || true)"
+        if [ -z "$target_multiarch" ] && [ "$(uname -s)" = Linux ]
+        then
+            # Reasonable guess at a multi-arch name (eg, x86_64-linux-gnu)
+            # TODO: aarch64 -> arm64 ?
+            target_multiarch="$(uname -m)-linux-gnu"
+        fi
     fi
 
     # Include is under /usr/lib...  (eg, debian, openSUSE)
     # Note this cannot handle (openmpi | openmpi1 | openmpi2 | ...) include directories
     # unless we also try to grab information out of PATH or LD_LIBRARY_PATH
     for testdir in \
-        /usr/lib/"${DEB_TARGET_MULTIARCH:+${DEB_TARGET_MULTIARCH}/}"openmpi \
         /usr/lib64/mpi/gcc/openmpi \
+        /usr/lib/"${target_multiarch}${target_multiarch:+/}"openmpi \
+        /usr/lib/openmpi \
     ;
     do
         if [ -e "$testdir/include/mpi.h" ]
@@ -250,7 +278,7 @@ do
     -n | -dry-run) optDryRun="(dry-run) " ;;
 
     -no-mpicc)
-        unset withMpicc
+        unset optUseMpicc
         ;;
 
     -query-openmpi | -query-system-openmpi)
