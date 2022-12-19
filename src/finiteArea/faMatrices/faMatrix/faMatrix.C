@@ -328,14 +328,11 @@ void Foam::faMatrix<Type>::setValuesFromList
             GeometricField<Type, faPatchField, areaMesh>&
         >(psi_).primitiveFieldRef();
 
-    forAll(faceLabels, i)
-    {
-        const label facei = faceLabels[i];
-        const Type& value = values[i];
-
-        psi[facei] = value;
-        source_[facei] = value*Diag[facei];
-    }
+    // Following actions:
+    // - adjust local field psi
+    // - set local matrix to be diagonal (so adjust source)
+    //      - cut connections to neighbours
+    // - make (on non-adjusted cells) contribution explicit
 
     if (symmetric() || asymmetric())
     {
@@ -391,6 +388,17 @@ void Foam::faMatrix<Type>::setValuesFromList
                 }
             }
         }
+    }
+
+    // Note: above loop might have affected source terms on adjusted cells
+    // so make sure to adjust them afterwards
+    forAll(faceLabels, i)
+    {
+        const label facei = faceLabels[i];
+        const Type& value = values[i];
+
+        psi[facei] = value;
+        source_[facei] = value*Diag[facei];
     }
 }
 
