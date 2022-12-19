@@ -74,6 +74,14 @@ void pointNoise::processData
     const Function1Types::CSV<scalar>& data
 )
 {
+    if (!Pstream::master())
+    {
+        // Only ever called on master, report if we have odd logic...
+        WarningInFunction
+            << "Currently only to be called from master process..." << endl;
+        return;
+    }
+
     Info<< "Reading data file: "
         << fileObr_.time().relativePath(data.fName()) << endl;
 
@@ -131,7 +139,7 @@ void pointNoise::processData
         auto filePtr = newFile(outDir/"PSD_f");
         auto& os = filePtr();
 
-        Info<< "    Writing " << os.name() << endl;
+        Info<< "    Writing " << os.relativeName() << endl;
 
         writeFileHeader(os, "f [Hz]", "PSD(f) [PaPa_Hz]");
         writeFreqDataToFile(os, f, PSDf);
@@ -143,7 +151,7 @@ void pointNoise::processData
         auto filePtr = newFile(outDir/"PSD_dB_Hz_f");
         auto& os = filePtr();
 
-        Info<< "    Writing " << os.name() << endl;
+        Info<< "    Writing " << os.relativeName() << endl;
 
         writeFileHeader(os, "f [Hz]", "PSD(f) [dB_Hz]");
         writeFreqDataToFile(os, f, PSD(PSDf));
@@ -155,7 +163,7 @@ void pointNoise::processData
         auto filePtr = newFile(outDir/"SPL_dB_f");
         auto& os = filePtr();
 
-        Info<< "    Writing " << os.name() << endl;
+        Info<< "    Writing " << os.relativeName() << endl;
 
         writeFileHeader
         (
@@ -190,7 +198,7 @@ void pointNoise::processData
         auto filePtr = newFile(outDir/"SPL13_dB_fm");
         auto& os = filePtr();
 
-        Info<< "    Writing " << os.name() << endl;
+        Info<< "    Writing " << os.relativeName() << endl;
 
         writeFileHeader
         (

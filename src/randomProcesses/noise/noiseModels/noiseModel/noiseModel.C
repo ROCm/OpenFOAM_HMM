@@ -157,30 +157,28 @@ namespace Foam
 }
 
 
-// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
-void Foam::noiseModel::readWriteOption
+namespace Foam
+{
+
+// Get bool option (eg, read/write) and provide Info feedback
+static void readWriteOption
 (
     const dictionary& dict,
     const word& lookup,
     bool& option
-) const
+)
 {
     dict.readIfPresent(lookup, option);
 
-    // Only writing on the master process
-    option = option && Pstream::master();
-
-    if (option)
-    {
-        Info<< "        " << lookup << ": " << "yes" << endl;
-    }
-    else
-    {
-        Info<< "        " << lookup << ": " << "no" << endl;
-    }
+    Info<< "        " << lookup << ": " << (option ? "yes" : "no") << endl;
 }
 
+} // End namespace Foam
+
+
+// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
 Foam::scalar Foam::noiseModel::checkUniformTimeStep
 (
@@ -255,7 +253,7 @@ void Foam::noiseModel::writeFileHeader
     Ostream& os,
     const string& x,
     const string& y,
-    const List<Tuple2<string, token>>& headerValues
+    const UList<Tuple2<string, token>>& headerValues
 ) const
 {
     writeHeader(os, x + " vs " + y);

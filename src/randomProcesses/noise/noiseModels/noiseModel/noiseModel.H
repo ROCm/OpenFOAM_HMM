@@ -76,8 +76,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef noiseModel_H
-#define noiseModel_H
+#ifndef Foam_noiseModel_H
+#define Foam_noiseModel_H
 
 #include "writeFile.H"
 #include "dictionary.H"
@@ -220,14 +220,6 @@ protected:
 
     // Protected Member Functions
 
-        //- Helper function to read write options and provide info feedback
-        void readWriteOption
-        (
-            const dictionary& dict,
-            const word& lookup,
-            bool& option
-        ) const;
-
         //- Check and return uniform time step
         scalar checkUniformTimeStep
         (
@@ -257,7 +249,7 @@ protected:
             Ostream& os,
             const string& x,
             const string& y,
-            const List<Tuple2<string, token>>& headerValues = {}
+            const UList<Tuple2<string, token>>& headerValues = {}
         ) const;
 
         // Write frequency-based data to file

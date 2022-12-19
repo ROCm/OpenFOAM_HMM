@@ -362,7 +362,7 @@ scalar surfaceNoise::writeSurfaceData
                 areaAverage = sum(allData)/(allData.size() + ROOTVSMALL);
             }
 
-            if (writeSurface)
+            // (writeSurface == true)
             {
                 // Time-aware, with time spliced into the output path
                 writerPtr_->beginTime(freqInst);
@@ -397,7 +397,7 @@ scalar surfaceNoise::writeSurfaceData
             areaAverage = sum(data)/(data.size() + ROOTVSMALL);
         }
 
-        if (writeSurface)
+        // (writeSurface == true)
         {
             // Time-aware, with time spliced into the output path
             writerPtr_->beginTime(freqInst);
@@ -693,15 +693,19 @@ void surfaceNoise::calculate()
             surfArea = sum(surf.magSf());
             surfSize = surf.size();
         }
-        Pstream::broadcast(surfArea);
-        Pstream::broadcast(surfSize);
+        Pstream::broadcasts
+        (
+            UPstream::worldComm,
+            surfArea,
+            surfSize
+        );
 
-        List<Tuple2<string, token>> commonInfo =
-            {
-                {"Area average", token(word(Switch::name(areaAverage_)))},
-                {"Area sum", token(surfArea)},
-                {"Number of faces", token(surfSize)}
-            };
+        List<Tuple2<string, token>> commonInfo
+        ({
+            {"Area average", token(word(Switch::name(areaAverage_)))},
+            {"Area sum", token(surfArea)},
+            {"Number of faces", token(surfSize)}
+        });
 
         {
             fileName outDir(outDirBase/"fft");
@@ -782,7 +786,7 @@ void surfaceNoise::calculate()
                     auto filePtr = newFile(outDir/"Average_Prms_f");
                     auto& os = filePtr();
 
-                    Info<< "    Writing " << os.name() << endl;
+                    Info<< "    Writing " << os.relativeName() << endl;
 
                     writeFileHeader(os, "f [Hz]", "P(f) [Pa]", commonInfo);
                     writeFreqDataToFile(os, fOut, PrmsfAve);
@@ -791,7 +795,7 @@ void surfaceNoise::calculate()
                     auto filePtr = newFile(outDir/"Average_PSD_f_f");
                     auto& os = filePtr();
 
-                    Info<< "    Writing " << os.name() << endl;
+                    Info<< "    Writing " << os.relativeName() << endl;
 
                     writeFileHeader
                     (
@@ -806,7 +810,7 @@ void surfaceNoise::calculate()
                     auto filePtr = newFile(outDir/"Average_PSD_dB_Hz_f");
                     auto& os = filePtr();
 
-                    Info<< "    Writing " << os.name() << endl;
+                    Info<< "    Writing " << os.relativeName() << endl;
 
                     writeFileHeader
                     (
@@ -821,7 +825,7 @@ void surfaceNoise::calculate()
                     auto filePtr = newFile(outDir/"Average_SPL_dB_f");
                     auto& os = filePtr();
 
-                    Info<< "    Writing " << os.name() << endl;
+                    Info<< "    Writing " << os.relativeName() << endl;
 
                     writeFileHeader
                     (
@@ -866,7 +870,7 @@ void surfaceNoise::calculate()
                 auto filePtr = newFile(outDir/"Average_SPL13_dB_fm");
                 auto& os = filePtr();
 
-                Info<< "    Writing " << os.name() << endl;
+                Info<< "    Writing " << os.relativeName() << endl;
 
                 writeFileHeader
                 (
