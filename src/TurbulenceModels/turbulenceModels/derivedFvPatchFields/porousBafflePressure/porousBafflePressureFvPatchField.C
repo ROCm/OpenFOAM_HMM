@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,10 +53,11 @@ Foam::porousBafflePressureFvPatchField::porousBafflePressureFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
-    const dictionary& dict
+    const dictionary& dict,
+    const bool valueRequired
 )
 :
-    fixedJumpFvPatchField<scalar>(p, iF),
+    fixedJumpFvPatchField<scalar>(p, iF, dict, false),
     phiName_(dict.getOrDefault<word>("phi", "phi")),
     rhoName_(dict.getOrDefault<word>("rho", "rho")),
     D_(Function1<scalar>::New("D", dict, &db())),
@@ -64,10 +65,20 @@ Foam::porousBafflePressureFvPatchField::porousBafflePressureFvPatchField
     length_(dict.get<scalar>("length")),
     uniformJump_(dict.getOrDefault("uniformJump", false))
 {
-    fvPatchField<scalar>::operator=
-    (
-        Field<scalar>("value", dict, p.size())
-    );
+    if (valueRequired)
+    {
+        if (dict.found("value"))
+        {
+            fvPatchField<scalar>::operator=
+            (
+                Field<scalar>("value", dict, p.size())
+            );
+        }
+        else
+        {
+            this->evaluate(Pstream::commsTypes::blocking);
+        }
+    }
 }
 
 
@@ -177,6 +188,8 @@ void Foam::porousBafflePressureFvPatchField::updateCoeffs()
             jump()*patch().lookupPatchField<volScalarField, scalar>(rhoName_)
         );
     }
+
+    this->relax();
 
     if (debug)
     {
