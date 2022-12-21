@@ -139,17 +139,6 @@ public:
     };
 
 
-private:
-
-    // Private Member Functions
-
-        //- No copy construct
-        noiseModel(const noiseModel&) = delete;
-
-        //- No copy assignment
-        void operator=(const noiseModel&) = delete;
-
-
 protected:
 
     // Protected Data
@@ -249,7 +238,8 @@ protected:
             Ostream& os,
             const string& x,
             const string& y,
-            const UList<Tuple2<string, token>>& headerValues = {}
+            const UList<Tuple2<string, token>>& headerValues
+                = UList<Tuple2<string, token>>::null()
         ) const;
 
         // Write frequency-based data to file
@@ -348,21 +338,34 @@ public:
         (dict, obr)
     );
 
-    //- Selector
-    static autoPtr<noiseModel> New
-    (
-        const dictionary& dict,
-        const objectRegistry& obr
-    );
 
-    //- Constructor
-    noiseModel
-    (
-        const dictionary& dict,
-        const objectRegistry& obr,
-        const word& name,
-        const bool readFields = true
-    );
+    // Generated Methods
+
+        //- No copy construct
+        noiseModel(const noiseModel&) = delete;
+
+        //- No copy assignment
+        void operator=(const noiseModel&) = delete;
+
+
+    // Constructors
+
+        //- Constructor
+        noiseModel
+        (
+            const dictionary& dict,
+            const objectRegistry& obr,
+            const word& name,
+            const bool readFields = true
+        );
+
+        //- Selector
+        static autoPtr<noiseModel> New
+        (
+            const dictionary& dict,
+            const objectRegistry& obr
+        );
+
 
     //- Destructor
     virtual ~noiseModel() = default;
