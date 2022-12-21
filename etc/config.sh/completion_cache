@@ -252,6 +252,7 @@ _of_complete_cache_[simpleSprayFoam]="-case -decomposeParDict -fileHandler -worl
 _of_complete_cache_[singleCellMesh]="-case -decomposeParDict -fileHandler -time -world | -constant -latestTime -noFunctionObjects -noZero -parallel -doc -doc-source -help"
 _of_complete_cache_[slopeMesh]="-case -decomposeParDict -fileHandler -world | -noFunctionObjects -parallel -doc -doc-source -help"
 _of_complete_cache_[smapToFoam]="-case -fileHandler | -noFunctionObjects -doc -doc-source -help"
+_of_complete_cache_[smoothSurfaceData]="-case -decomposeParDict -field -fileHandler -radius -read-format -sweeps -world | -noFunctionObjects -parallel -verbose -doc -doc-source -help"
 _of_complete_cache_[snappyHexMesh]="-case -decomposeParDict -dict -fileHandler -outFile -patches -region -surfaceSimplify -world | -checkGeometry -dry-run -overwrite -parallel -profiling -doc -doc-source -help"
 _of_complete_cache_[snappyRefineMesh]="-case -fileHandler | -noFunctionObjects -doc -doc-source -help"
 _of_complete_cache_[solidDisplacementFoam]="-case -decomposeParDict -fileHandler -world | -dry-run -dry-run-write -listFunctionObjects -listRegisteredSwitches -listScalarBCs -listSwitches -listUnsetSwitches -listVectorBCs -noFunctionObjects -parallel -postProcess -doc -doc-source -help"
