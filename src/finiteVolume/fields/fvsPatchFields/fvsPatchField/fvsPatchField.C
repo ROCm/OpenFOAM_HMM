@@ -365,8 +365,4 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const fvsPatchField<Type>& ptf)
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "fvsPatchFieldNew.C"
-
 // ************************************************************************* //

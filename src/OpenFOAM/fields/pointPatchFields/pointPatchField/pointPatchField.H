@@ -390,24 +390,27 @@ public:
                 return patch().size();
             }
 
-            //- Return dimensioned internal field reference
+            //- Return const-reference to the dimensioned internal field
             const DimensionedField<Type, pointMesh>& internalField()
             const noexcept
             {
                 return internalField_;
             }
 
-            //- Return internal field reference
+            //- Return const-reference to the internal field values
             const Field<Type>& primitiveField() const noexcept
             {
                 return internalField_;
             }
 
+
+        // Evaluation Functions
+
             //- Return field created from appropriate internal field values
             tmp<Field<Type>> patchInternalField() const;
 
             //- Return field created from appropriate internal field values
-            //  given internal field reference
+            //- given internal field reference
             template<class Type1>
             tmp<Field<Type1>> patchInternalField
             (
@@ -415,16 +418,16 @@ public:
             ) const;
 
             //- Return field created from selected internal field values
-            //  given internal field reference
+            //- given internal field reference
             template<class Type1>
             tmp<Field<Type1>> patchInternalField
             (
                 const Field<Type1>& iF,
-                const labelList& meshPoints
+                const labelUList& meshPoints
             ) const;
 
             //- Given the internal field and a patch field,
-            //  add the patch field to the internal field
+            //- add the patch field to the internal field
             template<class Type1>
             void addToInternalField
             (
@@ -433,27 +436,27 @@ public:
             ) const;
 
             //- Given the internal field and a patch field,
-            //  add selected elements of the patch field to the internal field
+            //- add selected elements of the patch field to the internal field
             template<class Type1>
             void addToInternalField
             (
                 Field<Type1>& iF,
                 const Field<Type1>& pF,
-                const labelList& points
+                const labelUList& points
             ) const;
 
             //- Given the internal field and a patch field,
-            //  set the patch field in the internal field
+            //- set the patch field in the internal field
             template<class Type1>
             void setInInternalField
             (
                 Field<Type1>& iF,
                 const Field<Type1>& pF,
-                const labelList& meshPoints
+                const labelUList& meshPoints
             ) const;
 
             //- Given the internal field and a patch field,
-            //  set the patch field in the internal field
+            //- set the patch field in the internal field
             template<class Type1>
             void setInInternalField
             (
@@ -581,6 +584,7 @@ const pointPatchField<Type>& operator+
 
 #ifdef NoRepository
     #include "pointPatchField.C"
+    #include "pointPatchFieldNew.C"
     #include "calculatedPointPatchField.H"
     #include "zeroGradientPointPatchField.H"
 #endif

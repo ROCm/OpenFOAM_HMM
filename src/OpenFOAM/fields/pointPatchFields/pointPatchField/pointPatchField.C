@@ -122,7 +122,7 @@ Foam::tmp<Foam::Field<Type1>>
 Foam::pointPatchField<Type>::patchInternalField
 (
     const Field<Type1>& iF,
-    const labelList& meshPoints
+    const labelUList& meshPoints
 ) const
 {
     // Check size
@@ -194,7 +194,7 @@ void Foam::pointPatchField<Type>::addToInternalField
 (
     Field<Type1>& iF,
     const Field<Type1>& pF,
-    const labelList& points
+    const labelUList& points
 ) const
 {
     // Check size
@@ -233,7 +233,7 @@ void Foam::pointPatchField<Type>::setInInternalField
 (
     Field<Type1>& iF,
     const Field<Type1>& pF,
-    const labelList& meshPoints
+    const labelUList& meshPoints
 ) const
 {
     // Check size
@@ -309,9 +309,5 @@ Foam::Ostream& Foam::operator<<
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "pointPatchFieldNew.C"
 
 // ************************************************************************* //

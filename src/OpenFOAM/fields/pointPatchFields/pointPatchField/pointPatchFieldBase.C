@@ -105,7 +105,7 @@ void Foam::pointPatchFieldBase::readDict(const dictionary& dict)
 
 const Foam::objectRegistry& Foam::pointPatchFieldBase::db() const
 {
-    return patch_.boundaryMesh().mesh()();
+    return patch_.boundaryMesh().mesh().thisDb();
 }
 
 

@@ -166,7 +166,7 @@ public:
         // Coupled and adjust flux
 
             //- Return neighbour field.  Dummy
-            virtual tmp<Field<Type> > patchNeighbourField() const;
+            virtual tmp<Field<Type>> patchNeighbourField() const;
 
             //- Adjust psi for mass correction. Requires storeFringeCoefficients
             //  to have been called before
@@ -196,7 +196,7 @@ public:
 
             //- Return the matrix diagonal coefficients corresponding to the
             //- evaluation of the value of this patchField with given weights
-            virtual tmp<Field<Type> > valueInternalCoeffs
+            virtual tmp<Field<Type>> valueInternalCoeffs
             (
                 const tmp<scalarField>&
             ) const
@@ -209,7 +209,7 @@ public:
 
             //- Return the matrix source coefficients corresponding to the
             //- evaluation of the value of this patchField with given weights
-            virtual tmp<Field<Type> > valueBoundaryCoeffs
+            virtual tmp<Field<Type>> valueBoundaryCoeffs
             (
                 const tmp<scalarField>&
             ) const
@@ -222,7 +222,7 @@ public:
 
             //- Return the matrix diagonal coefficients corresponding to the
             //- evaluation of the gradient of this patchField
-            tmp<Field<Type> > gradientInternalCoeffs() const
+            tmp<Field<Type>> gradientInternalCoeffs() const
             {
                 return tmp<Field<Type>>
                 (
@@ -232,7 +232,7 @@ public:
 
             //- Return the matrix source coefficients corresponding to the
             //- evaluation of the gradient of this patchField
-            tmp<Field<Type> > gradientBoundaryCoeffs() const
+            tmp<Field<Type>> gradientBoundaryCoeffs() const
             {
                 return tmp<Field<Type>>
                 (

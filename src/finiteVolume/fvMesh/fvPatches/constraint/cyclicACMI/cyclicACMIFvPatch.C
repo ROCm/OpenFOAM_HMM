@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2019,2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -295,7 +295,9 @@ Foam::tmp<Foam::labelField> Foam::cyclicACMIFvPatch::interfaceInternalField
     const labelUList& faceCells
 ) const
 {
-    return patchInternalField(internalData, faceCells);
+    auto tpfld = tmp<labelField>::New();
+    patchInternalField(internalData, faceCells, tpfld.ref());
+    return tpfld;
 }
 
 
@@ -401,5 +403,6 @@ void Foam::cyclicACMIFvPatch::movePoints()
         }
     }
 }
+
 
 // ************************************************************************* //

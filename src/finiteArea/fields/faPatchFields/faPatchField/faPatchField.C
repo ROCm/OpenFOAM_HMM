@@ -129,14 +129,6 @@ Foam::faPatchField<Type>::faPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-const Foam::objectRegistry& Foam::faPatchField<Type>::db() const
-{
-    // Note: Lookup fields from the field DB rather than the mesh
-    return internalField_.db();
-}
-
-
-template<class Type>
 void Foam::faPatchField<Type>::check(const faPatchField<Type>& rhs) const
 {
     faPatchFieldBase::checkPatch(rhs);
@@ -155,6 +147,13 @@ Foam::tmp<Foam::Field<Type>>
 Foam::faPatchField<Type>::patchInternalField() const
 {
     return patch().patchInternalField(internalField_);
+}
+
+
+template<class Type>
+void Foam::faPatchField<Type>::patchInternalField(Field<Type>& pfld) const
+{
+    patch().patchInternalField(internalField_, pfld);
 }
 
 
@@ -406,9 +405,5 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const faPatchField<Type>& ptf)
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "faPatchFieldNew.C"
 
 // ************************************************************************* //

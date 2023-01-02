@@ -126,14 +126,6 @@ Foam::faePatchField<Type>::faePatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-const Foam::objectRegistry& Foam::faePatchField<Type>::db() const
-{
-    // Note: Lookup fields from the field DB rather than the mesh
-    return internalField_.db();
-}
-
-
-template<class Type>
 void Foam::faePatchField<Type>::check(const faePatchField<Type>& rhs) const
 {
     faePatchFieldBase::checkPatch(rhs);
@@ -372,9 +364,5 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const faePatchField<Type>& ptf)
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "faePatchFieldNew.C"
 
 // ************************************************************************* //

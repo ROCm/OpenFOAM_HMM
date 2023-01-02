@@ -193,9 +193,9 @@ Foam::fvPatchField<Type>::patchInternalField() const
 
 
 template<class Type>
-void Foam::fvPatchField<Type>::patchInternalField(Field<Type>& pif) const
+void Foam::fvPatchField<Type>::patchInternalField(Field<Type>& pfld) const
 {
-    patch().patchInternalField(internalField_, pif);
+    patch().patchInternalField(internalField_, pfld);
 }
 
 
@@ -551,9 +551,5 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const fvPatchField<Type>& ptf)
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "fvPatchFieldNew.C"
 
 // ************************************************************************* //

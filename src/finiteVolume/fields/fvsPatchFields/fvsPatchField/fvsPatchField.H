@@ -357,14 +357,14 @@ public:
 
         // Access
 
-            //- Return dimensioned internal field reference
+            //- Return const-reference to the dimensioned internal field
             const DimensionedField<Type, surfaceMesh>& internalField()
             const noexcept
             {
                 return internalField_;
             }
 
-            //- Return internal field reference
+            //- Return const-reference to the internal field values
             const Field<Type>& primitiveField() const noexcept
             {
                 return internalField_;
@@ -441,6 +441,7 @@ public:
 
 #ifdef NoRepository
     #include "fvsPatchField.C"
+    #include "fvsPatchFieldNew.C"
     #include "calculatedFvsPatchField.H"
 #endif
 

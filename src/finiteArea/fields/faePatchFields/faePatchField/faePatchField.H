@@ -128,7 +128,7 @@ public:
     // Access
 
         //- The associated objectRegistry
-        /// const objectRegistry& db() const;
+        const objectRegistry& db() const;
 
         //- Return the patch
         const faPatch& patch() const noexcept
@@ -358,17 +358,14 @@ public:
 
         // Access
 
-            //- Return local objectRegistry
-            const objectRegistry& db() const;
-
-            //- Return dimensioned internal field reference
+            //- Return const-reference to the dimensioned internal field
             const DimensionedField<Type, edgeMesh>& internalField()
             const noexcept
             {
                 return internalField_;
             }
 
-            //- Return internal field reference
+            //- Return const-reference to the internal field values
             const Field<Type>& primitiveField() const noexcept
             {
                 return internalField_;
@@ -445,6 +442,7 @@ public:
 
 #ifdef NoRepository
     #include "faePatchField.C"
+    #include "faePatchFieldNew.C"
     #include "calculatedFaePatchField.H"
 #endif
 

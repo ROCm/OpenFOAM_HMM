@@ -143,7 +143,7 @@ public:
     // Access
 
         //- The associated objectRegistry
-        /// const objectRegistry& db() const;
+        const objectRegistry& db() const;
 
         //- Return the patch
         const faPatch& patch() const noexcept
@@ -394,17 +394,14 @@ public:
 
         // Access
 
-            //- Return local objectRegistry
-            const objectRegistry& db() const;
-
-            //- Return dimensioned internal field reference
-            const DimensionedField<Type, areaMesh>&
-            internalField() const noexcept
+            //- Return const-reference to the dimensioned internal field
+            const DimensionedField<Type, areaMesh>& internalField()
+            const noexcept
             {
                 return internalField_;
             }
 
-            //- Return internal field reference
+            //- Return const-reference to the internal field values
             const Field<Type>& primitiveField() const noexcept
             {
                 return internalField_;
@@ -432,8 +429,12 @@ public:
             //- Return patch-normal gradient
             virtual tmp<Field<Type>> snGrad() const;
 
-            //- Return internal field next to patch as patch field
+            //- Return internal field next to patch
             virtual tmp<Field<Type>> patchInternalField() const;
+
+            //- Extract internal field next to patch
+            //  \param [out] pfld The extracted patch field.
+            virtual void patchInternalField(Field<Type>& pfld) const;
 
             //- Return patchField on the opposite patch of a coupled patch
             virtual tmp<Field<Type>> patchNeighbourField() const
@@ -556,6 +557,7 @@ public:
 
 #ifdef NoRepository
     #include "faPatchField.C"
+    #include "faPatchFieldNew.C"
     #include "calculatedFaPatchField.H"
     #include "zeroGradientFaPatchField.H"
 #endif

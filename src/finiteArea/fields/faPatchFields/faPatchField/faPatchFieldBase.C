@@ -26,6 +26,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "faPatchField.H"
+#include "faBoundaryMesh.H"
+#include "faMesh.H"
 #include "dictionary.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -103,10 +105,10 @@ void Foam::faPatchFieldBase::readDict(const dictionary& dict)
 }
 
 
-// const Foam::objectRegistry& Foam::faPatchFieldBase::db() const
-// {
-//     return patch_.boundaryMesh().mesh().thisDb();
-// }
+const Foam::objectRegistry& Foam::faPatchFieldBase::db() const
+{
+    return patch_.boundaryMesh().mesh().thisDb();
+}
 
 
 void Foam::faPatchFieldBase::checkPatch(const faPatchFieldBase& rhs) const

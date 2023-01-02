@@ -461,14 +461,14 @@ public:
 
         // Access
 
-            //- Return dimensioned internal field reference
+            //- Return const-reference to the dimensioned internal field
             const DimensionedField<Type, volMesh>& internalField()
             const noexcept
             {
                 return internalField_;
             }
 
-            //- Return internal field reference
+            //- Return const-reference to the internal field values
             const Field<Type>& primitiveField() const noexcept
             {
                 return internalField_;
@@ -517,11 +517,12 @@ public:
             //  patches. Sets Updated to true
             virtual void updateWeightedCoeffs(const scalarField& weights);
 
-            //- Return internal field next to patch as patch field
+            //- Return internal field next to patch
             virtual tmp<Field<Type>> patchInternalField() const;
 
-            //- Return internal field next to patch as patch field
-            virtual void patchInternalField(Field<Type>&) const;
+            //- Extract internal field next to patch
+            // \param [out] pfld The extracted patch field.
+            virtual void patchInternalField(Field<Type>& pfld) const;
 
             //- Return patchField on the opposite patch of a coupled patch
             virtual tmp<Field<Type>> patchNeighbourField() const
@@ -684,6 +685,7 @@ public:
 
 #ifdef NoRepository
     #include "fvPatchField.C"
+    #include "fvPatchFieldNew.C"
     #include "calculatedFvPatchField.H"
     #include "zeroGradientFvPatchField.H"
 #endif

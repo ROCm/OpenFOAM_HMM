@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
-    Copyright (C) 2020-2022 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,6 +33,8 @@ Description
 SourceFiles
     fvPatch.C
     fvPatchNew.C
+    fvPatchTemplates.C
+    fvPatchFvMeshTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -274,31 +276,41 @@ public:
 
         // Evaluation Functions
 
-            //- Extract internal field next to patch using faceCells mapping
+            //- Extract internal field next to patch using specified addressing
+            // \param internalData The internal field to extract from
+            // \param addressing Addressing from patch into internal field
+            // \param [out] pfld The extracted patch field.
+            //     It is always resized according to the patch size(),
+            //     which can be smaller than the addressing size
             template<class Type>
             inline void patchInternalField
             (
-                const UList<Type>& f,
-                const labelUList& faceCells,
+                const UList<Type>& internalData,
+                const labelUList& addressing,
+                Field<Type>& pfld
+            ) const;
+
+            //- Extract internal field next to patch as patch field
+            //- using faceCells() mapping.
+            // \param internalData The internal field to extract from
+            // \param [out] pfld The extracted patch field.
+            //     It is always resized according to the patch size(),
+            //     which can be smaller than the faceCells() size
+            template<class Type>
+            void patchInternalField
+            (
+                const UList<Type>& internalData,
                 Field<Type>& pfld
             ) const;
 
             //- Return given internal field next to patch as patch field
-            template<class Type>
-            tmp<Field<Type>> patchInternalField(const UList<Type>&) const;
-
-            //- Return given internal field next to patch as patch field
-            //- using provided addressing
+            //- using faceCells() mapping.
+            // \param internalData The internal field to extract from
             template<class Type>
             tmp<Field<Type>> patchInternalField
             (
-                const UList<Type>& f,
-                const labelUList& faceCells
+                const UList<Type>& internalData
             ) const;
-
-            //- Return given internal field next to patch as patch field
-            template<class Type>
-            void patchInternalField(const UList<Type>&, Field<Type>&) const;
 
             //- Return the patch field of the GeometricField
             //- corresponding to this patch.

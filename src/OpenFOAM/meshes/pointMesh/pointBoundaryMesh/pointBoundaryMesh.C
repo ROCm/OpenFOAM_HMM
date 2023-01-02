@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,7 +67,7 @@ Foam::labelList Foam::pointBoundaryMesh::indices
     const bool useGroups
 ) const
 {
-    return mesh()().boundaryMesh().indices(matcher, useGroups);
+    return mesh().boundaryMesh().indices(matcher, useGroups);
 }
 
 
@@ -77,13 +77,13 @@ Foam::labelList Foam::pointBoundaryMesh::indices
     const bool useGroups
 ) const
 {
-    return mesh()().boundaryMesh().indices(matcher, useGroups);
+    return mesh().boundaryMesh().indices(matcher, useGroups);
 }
 
 
 Foam::label Foam::pointBoundaryMesh::findPatchID(const word& patchName) const
 {
-    return mesh()().boundaryMesh().findPatchID(patchName);
+    return mesh().boundaryMesh().findPatchID(patchName);
 }
 
 

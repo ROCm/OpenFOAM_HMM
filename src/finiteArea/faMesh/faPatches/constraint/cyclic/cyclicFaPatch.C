@@ -321,7 +321,9 @@ Foam::tmp<Foam::labelField> Foam::cyclicFaPatch::interfaceInternalField
     const labelUList& edgeFaces
 ) const
 {
-    return patchInternalField(internalData, edgeFaces);
+    auto tpfld = tmp<labelField>::New();
+    patchInternalField(internalData, edgeFaces, tpfld.ref());
+    return tpfld;
 }
 
 

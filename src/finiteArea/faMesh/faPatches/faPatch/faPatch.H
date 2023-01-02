@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2020-2022 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -421,31 +421,41 @@ public:
 
         // Evaluation
 
-            //- Extract internal field next to patch using edgeFaces mapping
+            //- Extract internal field next to patch using specified addressing
+            // \param internalData The internal field to extract from
+            // \param addressing Addressing from patch into internal field
+            // \param [out] pfld The extracted patch field.
+            //     It is always resized according to the patch size(),
+            //     which can be smaller than the addressing size
             template<class Type>
             inline void patchInternalField
             (
-                const UList<Type>& f,
-                const labelUList& edgeFaces,
+                const UList<Type>& internalData,
+                const labelUList& addressing,
+                Field<Type>& pfld
+            ) const;
+
+            //- Extract internal field next to patch as patch field
+            //- using edgeFaces() mapping.
+            // \param internalData The internal field to extract from
+            // \param [out] pfld The extracted patch field.
+            //     It is always resized according to the patch size(),
+            //     which can be smaller than the edgeFaces() size
+            template<class Type>
+            void patchInternalField
+            (
+                const UList<Type>& internalData,
                 Field<Type>& pfld
             ) const;
 
             //- Return given internal field next to patch as patch field
+            //- using edgeFaces() mapping.
+            // \param internalData The internal field to extract from
             template<class Type>
-            tmp<Field<Type>> patchInternalField(const UList<Type>&) const;
-
-            //- Return given internal field next to patch as patch field
-            //- using provided addressing
-            template<class Type>
-            tmp<Foam::Field<Type>> patchInternalField
+            tmp<Field<Type>> patchInternalField
             (
-                const UList<Type>& f,
-                const labelUList& edgeFaces
+                const UList<Type>& internalData
             ) const;
-
-            //- Extract internal field next to patch as patch field
-            template<class Type>
-            void patchInternalField(const UList<Type>&, Field<Type>&) const;
 
             //- Return the patch field of the GeometricField
             //- corresponding to this patch.

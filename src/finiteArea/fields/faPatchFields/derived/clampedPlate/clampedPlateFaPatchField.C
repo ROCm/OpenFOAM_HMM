@@ -128,18 +128,17 @@ void clampedPlateFaPatchField<scalar>::evaluate(const Pstream::commsTypes)
 
 
 template<class Type>
-tmp<Field<Type> > clampedPlateFaPatchField<Type>::valueInternalCoeffs
+tmp<Field<Type>> clampedPlateFaPatchField<Type>::valueInternalCoeffs
 (
     const tmp<scalarField>&
 ) const
 {
-    return tmp<Field<Type>>
-        (new Field<Type>(this->size(), pTraits<Type>::zero));
+    return tmp<Field<Type>>::New(this->size(), Zero);
 }
 
 
 template<class Type>
-tmp<Field<Type> > clampedPlateFaPatchField<Type>::valueBoundaryCoeffs
+tmp<Field<Type>> clampedPlateFaPatchField<Type>::valueBoundaryCoeffs
 (
     const tmp<scalarField>&
 ) const
@@ -149,7 +148,7 @@ tmp<Field<Type> > clampedPlateFaPatchField<Type>::valueBoundaryCoeffs
 
 
 template<class Type>
-tmp<Field<Type> >
+tmp<Field<Type>>
 clampedPlateFaPatchField<Type>::gradientInternalCoeffs() const
 {
     return -Type(pTraits<Type>::one)*this->patch().deltaCoeffs();
@@ -157,7 +156,7 @@ clampedPlateFaPatchField<Type>::gradientInternalCoeffs() const
 
 
 template<class Type>
-tmp<Field<Type> >
+tmp<Field<Type>>
 clampedPlateFaPatchField<Type>::gradientBoundaryCoeffs() const
 {
     return this->patch().deltaCoeffs()*(*this);

@@ -112,7 +112,7 @@ void Foam::fvPatchFieldBase::readDict(const dictionary& dict)
 
 const Foam::objectRegistry& Foam::fvPatchFieldBase::db() const
 {
-    return patch_.boundaryMesh().mesh();
+    return patch_.boundaryMesh().mesh().thisDb();
 }
 
 
