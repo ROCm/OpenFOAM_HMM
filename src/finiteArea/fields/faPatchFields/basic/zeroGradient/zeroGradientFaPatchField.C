@@ -68,12 +68,13 @@ Foam::zeroGradientFaPatchField<Type>::zeroGradientFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF,
-    const dictionary&
+    const dictionary& dict
 )
 :
-    faPatchField<Type>(p, iF)
+    faPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ)
 {
-    faPatchField<Type>::operator=(this->patchInternalField());
+    // Set to the internal field
+    faPatchField<Type>::patchInternalField(*this);
 }
 
 

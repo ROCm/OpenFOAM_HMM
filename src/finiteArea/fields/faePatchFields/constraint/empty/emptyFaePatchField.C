@@ -37,7 +37,7 @@ Foam::emptyFaePatchField<Type>::emptyFaePatchField
     const DimensionedField<Type, edgeMesh>& iF
 )
 :
-    faePatchField<Type>(p, iF, Field<Type>(0))
+    faePatchField<Type>(p, iF, Field<Type>())
 {}
 
 
@@ -50,7 +50,7 @@ Foam::emptyFaePatchField<Type>::emptyFaePatchField
     const faPatchFieldMapper&
 )
 :
-    faePatchField<Type>(p, iF, Field<Type>(0))
+    faePatchField<Type>(p, iF, Field<Type>())
 {
     if (!isType<emptyFaPatch>(this->patch()))
     {
@@ -72,7 +72,7 @@ Foam::emptyFaePatchField<Type>::emptyFaePatchField
     const dictionary& dict
 )
 :
-    faePatchField<Type>(p, iF, Field<Type>(0))
+    faePatchField<Type>(p, iF, Field<Type>())
 {
     if (!isType<emptyFaPatch>(p))
     {
@@ -90,12 +90,7 @@ Foam::emptyFaePatchField<Type>::emptyFaePatchField
     const emptyFaePatchField<Type>& ptf
 )
 :
-    faePatchField<Type>
-    (
-        ptf.patch(),
-        ptf.internalField(),
-        Field<Type>(0)
-    )
+    faePatchField<Type>(ptf.patch(), ptf.internalField(), Field<Type>())
 {}
 
 
@@ -106,7 +101,7 @@ Foam::emptyFaePatchField<Type>::emptyFaePatchField
     const DimensionedField<Type, edgeMesh>& iF
 )
 :
-    faePatchField<Type>(ptf.patch(), iF, Field<Type>(0))
+    faePatchField<Type>(ptf.patch(), iF, Field<Type>())
 {}
 
 

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,7 +53,7 @@ timeVaryingUniformFixedValueFaPatchField
     const dictionary& dict
 )
 :
-    fixedValueFaPatchField<Type>(p, iF),
+    fixedValueFaPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ),
     timeSeries_(dict)
 {
    if (dict.found("value"))

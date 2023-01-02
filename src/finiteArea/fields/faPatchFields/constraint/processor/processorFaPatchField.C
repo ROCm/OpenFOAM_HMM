@@ -101,7 +101,7 @@ Foam::processorFaPatchField<Type>::processorFaPatchField
     const dictionary& dict
 )
 :
-    coupledFaPatchField<Type>(p, iF, dict),
+    coupledFaPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ),
     procPatch_(refCast<const processorFaPatch>(p, dict)),
     sendRequest_(-1),
     recvRequest_(-1)
@@ -115,6 +115,12 @@ Foam::processorFaPatchField<Type>::processorFaPatchField
             << " of field " << this->internalField().name()
             << " in file " << this->internalField().objectPath()
             << exit(FatalIOError);
+    }
+
+    // Use 'value' supplied, or set to internal field
+    if (!this->readValueEntry(dict))
+    {
+        faPatchField<Type>::patchInternalField(*this);
     }
 }
 

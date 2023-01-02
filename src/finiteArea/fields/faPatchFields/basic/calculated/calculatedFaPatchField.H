@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,8 +38,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef calculatedFaPatchField_H
-#define calculatedFaPatchField_H
+#ifndef Foam_calculatedFaPatchField_H
+#define Foam_calculatedFaPatchField_H
 
 #include "faPatchField.H"
 
@@ -56,7 +57,6 @@ class calculatedFaPatchField
 :
     public faPatchField<Type>
 {
-
 public:
 
     //- Runtime type information
@@ -77,7 +77,9 @@ public:
         (
             const faPatch&,
             const DimensionedField<Type, areaMesh>&,
-            const dictionary&
+            const dictionary& dict,
+            //! The "value" entry (default: optional)
+            IOobjectOption::readOption valueRequired = IOobjectOption::LAZY_READ
         );
 
         //- Construct by mapping given patch field onto a new patch

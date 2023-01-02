@@ -27,7 +27,7 @@ Class
     Foam::clampedPlateFaPatchField
 
 Description
-    This BC provides a clamped BC. It sets zero fixe value and zeroGradient.
+    This BC provides a clamped BC. It sets zero fixed value and zeroGradient.
 
 Usage
     Example of the boundary condition specification:
@@ -91,6 +91,7 @@ public:
         );
 
         //- Construct from patch, internal field and dictionary
+        //  The "value" entry: NO_READ
         clampedPlateFaPatchField
         (
             const faPatch&,
@@ -143,9 +144,8 @@ public:
         }
 
 
-     //- Destructor
-    virtual ~clampedPlateFaPatchField()
-    {}
+    //- Destructor
+    virtual ~clampedPlateFaPatchField() = default;
 
 
     // Member Functions

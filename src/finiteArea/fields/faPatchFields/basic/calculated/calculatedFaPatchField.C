@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,7 +38,7 @@ const Foam::word& Foam::faPatchField<Type>::calculatedType()
 }
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
 Foam::calculatedFaPatchField<Type>::calculatedFaPatchField
@@ -54,6 +54,19 @@ Foam::calculatedFaPatchField<Type>::calculatedFaPatchField
 template<class Type>
 Foam::calculatedFaPatchField<Type>::calculatedFaPatchField
 (
+    const faPatch& p,
+    const DimensionedField<Type, areaMesh>& iF,
+    const dictionary& dict,
+    IOobjectOption::readOption valueRequired
+)
+:
+    faPatchField<Type>(p, iF, dict, valueRequired)
+{}
+
+
+template<class Type>
+Foam::calculatedFaPatchField<Type>::calculatedFaPatchField
+(
     const calculatedFaPatchField<Type>& ptf,
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF,
@@ -61,18 +74,6 @@ Foam::calculatedFaPatchField<Type>::calculatedFaPatchField
 )
 :
     faPatchField<Type>(ptf, p, iF, mapper)
-{}
-
-
-template<class Type>
-Foam::calculatedFaPatchField<Type>::calculatedFaPatchField
-(
-    const faPatch& p,
-    const DimensionedField<Type, areaMesh>& iF,
-    const dictionary& dict
-)
-:
-    faPatchField<Type>(p, iF, Field<Type>("value", dict, p.size()))
 {}
 
 
@@ -98,10 +99,10 @@ Foam::calculatedFaPatchField<Type>::calculatedFaPatchField
 
 
 template<class Type>
-template<class Type2>
+template<class AnyType>
 Foam::tmp<Foam::faPatchField<Type>> Foam::faPatchField<Type>::NewCalculatedType
 (
-    const faPatchField<Type2>& pf
+    const faPatchField<AnyType>& pf
 )
 {
     auto* patchTypeCtor = patchConstructorTable(pf.patch().type());

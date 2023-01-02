@@ -60,9 +60,9 @@ class edgeNormalFixedValueFaPatchVectorField
 :
     public fixedValueFaPatchVectorField
 {
-    // Private data
+    // Private Data
 
-        //- Surface-normal velocity value
+        //- Edge-normal velocity value
         scalarField refValue_;
 
 
@@ -81,6 +81,14 @@ public:
             const DimensionedField<vector, areaMesh>&
         );
 
+        //- Construct from patch, internal field and reference value
+        edgeNormalFixedValueFaPatchVectorField
+        (
+            const faPatch&,
+            const DimensionedField<vector, areaMesh>&,
+            const scalar refValue
+        );
+
         //- Construct from patch, internal field and dictionary
         edgeNormalFixedValueFaPatchVectorField
         (
@@ -89,9 +97,8 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping given
-        //  edgeNormalFixedValueFaPatchVectorField
-        //  onto a new patch
+        //- Construct by mapping given edgeNormalFixedValueFaPatchVectorField
+        //- onto a new patch
         edgeNormalFixedValueFaPatchVectorField
         (
             const edgeNormalFixedValueFaPatchVectorField&,

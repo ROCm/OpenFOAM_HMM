@@ -39,8 +39,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef slipFaPatchField_H
-#define slipFaPatchField_H
+#ifndef Foam_slipFaPatchField_H
+#define Foam_slipFaPatchField_H
 
 #include "basicSymmetryFaPatchField.H"
 
@@ -58,7 +58,6 @@ class slipFaPatchField
 :
     public basicSymmetryFaPatchField<Type>
 {
-
 public:
 
     //- Runtime type information
@@ -75,6 +74,7 @@ public:
         );
 
         //- Construct from patch, internal field and dictionary
+        //  The "value" entry: NO_READ
         slipFaPatchField
         (
             const faPatch&,
@@ -124,6 +124,7 @@ public:
                 new slipFaPatchField<Type>(*this, iF)
             );
         }
+
 
     //- Destructor
     virtual ~slipFaPatchField() = default;

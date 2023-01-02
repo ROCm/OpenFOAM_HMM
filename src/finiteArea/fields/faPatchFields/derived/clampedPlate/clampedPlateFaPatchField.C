@@ -56,7 +56,7 @@ clampedPlateFaPatchField<Type>::clampedPlateFaPatchField
     const dictionary& dict
 )
 :
-    faPatchField<Type>(p, iF)
+    faPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ)
 {
     faPatchField<Type>::operator=(this->patchInternalField());
 }
@@ -113,14 +113,13 @@ void clampedPlateFaPatchField<scalar>::evaluate(const Pstream::commsTypes)
         this->updateCoeffs();
     }
 
-    Field<scalar>::operator=(pTraits<scalar>::zero);
+    Field<scalar>::operator=(Zero);
 
-    const labelUList& edgeFaces = this->patch().edgeFaces();
-    forAll(edgeFaces, edgeID)
+    auto& iF = const_cast<Field<scalar>&>(this->primitiveField());
+
+    for (const label facei : this->patch().edgeFaces())
     {
-        label faceID = edgeFaces[edgeID];
-        const_cast<Field<scalar>&>(this->primitiveField())[faceID] =
-            pTraits<scalar>::zero;
+        iF[facei] = Zero;
     }
 
     faPatchField<scalar>::evaluate();

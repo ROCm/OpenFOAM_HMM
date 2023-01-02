@@ -75,6 +75,7 @@ public:
         );
 
         //- Construct from patch, internal field and dictionary
+        //  The "value" entry: NO_READ
         symmetryFaePatchField
         (
             const faPatch&,

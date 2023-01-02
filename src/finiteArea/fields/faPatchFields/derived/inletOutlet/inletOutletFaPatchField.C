@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,11 +68,11 @@ Foam::inletOutletFaPatchField<Type>::inletOutletFaPatchField
     const dictionary& dict
 )
 :
-    mixedFaPatchField<Type>(p, iF),
+    // No reading of refValue, refGradient, valueFraction entries
+    mixedFaPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ),
     phiName_(dict.getOrDefault<word>("phi", "phi"))
 {
-    faPatchFieldBase::readDict(dict);
-
+    // Require inletValue (MUST_READ)
     this->refValue().assign("inletValue", dict, p.size());
 
     if (!this->readValueEntry(dict))

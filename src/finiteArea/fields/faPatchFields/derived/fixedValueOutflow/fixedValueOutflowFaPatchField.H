@@ -56,7 +56,6 @@ class fixedValueOutflowFaPatchField
 :
     public faPatchField<Type>
 {
-
 public:
 
     //- Runtime type information
@@ -73,6 +72,7 @@ public:
         );
 
         //- Construct from patch, internal field and dictionary
+        //  The "value" entry: MUST_READ
         fixedValueOutflowFaPatchField
         (
             const faPatch&,

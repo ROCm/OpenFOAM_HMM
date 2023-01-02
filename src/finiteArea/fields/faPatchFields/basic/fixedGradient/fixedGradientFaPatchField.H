@@ -129,20 +129,19 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
-        // Return defining fields
+        //- The reference gradient at boundary
+        virtual Field<Type>& gradient() noexcept
+        {
+            return gradient_;
+        }
 
-            //- Return gradient at boundary
-            virtual Field<Type>& gradient()
-            {
-                return gradient_;
-            }
-
-            virtual const Field<Type>& gradient() const
-            {
-                return gradient_;
-            }
+        //- The reference gradient at boundary
+        virtual const Field<Type>& gradient() const noexcept
+        {
+            return gradient_;
+        }
 
 
         // Mapping functions

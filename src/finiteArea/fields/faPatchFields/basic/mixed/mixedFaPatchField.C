@@ -188,8 +188,7 @@ void Foam::mixedFaPatchField<Type>::rmap
 {
     faPatchField<Type>::rmap(ptf, addr);
 
-    const mixedFaPatchField<Type>& mptf =
-        refCast<const mixedFaPatchField<Type>>(ptf);
+    const auto& mptf = refCast<const mixedFaPatchField<Type>>(ptf);
 
     refValue_.rmap(mptf.refValue_, addr);
     refGrad_.rmap(mptf.refGrad_, addr);

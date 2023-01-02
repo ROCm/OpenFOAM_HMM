@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,10 +46,11 @@ Foam::fixedValueFaePatchField<Type>::fixedValueFaePatchField
 (
     const faPatch& p,
     const DimensionedField<Type, edgeMesh>& iF,
-    const dictionary& dict
+    const dictionary& dict,
+    IOobjectOption::readOption valueRequired
 )
 :
-    faePatchField<Type>(p, iF, Field<Type>("value", dict, p.size()))
+    faePatchField<Type>(p, iF, dict, valueRequired)
 {}
 
 

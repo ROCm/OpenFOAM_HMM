@@ -62,7 +62,7 @@ Foam::transformFaPatchField<Type>::transformFaPatchField
     const dictionary& dict
 )
 :
-    faPatchField<Type>(p, iF, dict)
+    faPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ)
 {}
 
 

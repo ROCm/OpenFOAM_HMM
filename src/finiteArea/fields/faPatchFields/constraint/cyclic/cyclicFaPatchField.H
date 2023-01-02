@@ -62,7 +62,7 @@ class cyclicFaPatchField
     virtual public cyclicLduInterfaceField,
     public coupledFaPatchField<Type>
 {
-    // Private data
+    // Private Data
 
         //- Local reference cast into the cyclic patch
         const cyclicFaPatch& cyclicPatch_;
@@ -98,7 +98,9 @@ public:
         (
             const faPatch&,
             const DimensionedField<Type, areaMesh>&,
-            const dictionary&
+            const dictionary& dict,
+            //! Evaluate (default: mandatory)
+            IOobjectOption::readOption valueRequired = IOobjectOption::MUST_READ
         );
 
         //- Construct by mapping given cyclicFaPatchField onto a new patch

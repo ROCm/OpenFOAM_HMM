@@ -26,6 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "fixedGradientFaPatchField.H"
+#include "dictionary.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -63,7 +64,7 @@ Foam::fixedGradientFaPatchField<Type>::fixedGradientFaPatchField
     const dictionary& dict
 )
 :
-    faPatchField<Type>(p, iF),
+    faPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ),
     gradient_("gradient", dict, p.size())
 {
     evaluate();

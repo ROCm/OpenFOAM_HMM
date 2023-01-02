@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,6 +36,7 @@ const Foam::word& Foam::faePatchField<Type>::calculatedType()
 {
     return Foam::calculatedFaePatchField<Type>::typeName;
 }
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -68,10 +69,11 @@ Foam::calculatedFaePatchField<Type>::calculatedFaePatchField
 (
     const faPatch& p,
     const DimensionedField<Type, edgeMesh>& iF,
-    const dictionary& dict
+    const dictionary& dict,
+    IOobjectOption::readOption valueRequired
 )
 :
-    faePatchField<Type>(p, iF, Field<Type>("value", dict, p.size()))
+    faePatchField<Type>(p, iF, dict, valueRequired)
 {}
 
 
