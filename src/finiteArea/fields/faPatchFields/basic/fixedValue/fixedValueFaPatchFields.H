@@ -25,11 +25,10 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fixedValueFaPatchFields_H
-#define fixedValueFaPatchFields_H
+#ifndef Foam_fixedValueFaPatchFields_H
+#define Foam_fixedValueFaPatchFields_H
 
 #include "fixedValueFaPatchField.H"
-#include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -38,7 +37,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makeFaPatchTypeFieldTypedefs(fixedValue)
+makeFaPatchTypeFieldTypedefs(fixedValue);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

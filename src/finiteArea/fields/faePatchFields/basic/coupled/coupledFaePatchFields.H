@@ -25,11 +25,10 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef coupledFaePatchFields_H
-#define coupledFaePatchFields_H
+#ifndef Foam_coupledFaePatchFields_H
+#define Foam_coupledFaePatchFields_H
 
 #include "coupledFaePatchField.H"
-#include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -38,7 +37,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makeFaePatchTypeFieldTypedefs(coupled)
+makeFaePatchTypeFieldTypedefs(coupled);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

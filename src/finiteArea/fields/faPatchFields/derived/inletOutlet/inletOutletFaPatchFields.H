@@ -25,11 +25,10 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef inletOutletFaPatchFields_H
-#define inletOutletFaPatchFields_H
+#ifndef Foam_inletOutletFaPatchFields_H
+#define Foam_inletOutletFaPatchFields_H
 
 #include "inletOutletFaPatchField.H"
-#include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -38,7 +37,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makeFaPatchTypeFieldTypedefs(inletOutlet)
+makeFaPatchTypeFieldTypedefs(inletOutlet);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

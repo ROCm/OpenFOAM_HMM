@@ -26,11 +26,10 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef timeVaryingUniformFixedValueFaPatchFields_H
-#define timeVaryingUniformFixedValueFaPatchFields_H
+#ifndef Foam_timeVaryingUniformFixedValueFaPatchFields_H
+#define Foam_timeVaryingUniformFixedValueFaPatchFields_H
 
 #include "timeVaryingUniformFixedValueFaPatchField.H"
-#include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -39,7 +38,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makeFaPatchTypeFieldTypedefs(timeVaryingUniformFixedValue)
+makeFaPatchTypeFieldTypedefs(timeVaryingUniformFixedValue);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

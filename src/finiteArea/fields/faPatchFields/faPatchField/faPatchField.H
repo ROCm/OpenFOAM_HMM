@@ -52,6 +52,7 @@ SourceFiles
 #include "faPatch.H"
 #include "DimensionedField.H"
 #include "fieldTypes.H"
+#include "scalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -66,6 +67,7 @@ class areaMesh;
 
 template<class Type> class faPatchField;
 template<class Type> class calculatedFaPatchField;
+template<class Type> class zeroGradientFaPatchField;
 
 template<class Type>
 Ostream& operator<<(Ostream&, const faPatchField<Type>&);
@@ -383,10 +385,10 @@ public:
 
         //- Return a pointer to a new calculatedFaPatchField created on
         //- freestore without setting patchField values
-        template<class Type2>
+        template<class AnyType>
         static tmp<faPatchField<Type>> NewCalculatedType
         (
-            const faPatchField<Type2>&
+            const faPatchField<AnyType>& pf
         );
 
 
@@ -589,93 +591,8 @@ public:
     #include "zeroGradientFaPatchField.H"
 #endif
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Runtime selection macros
-
-#define addToFaPatchFieldRunTimeSelection(PatchTypeField, typePatchTypeField) \
-                                                                              \
-addToRunTimeSelectionTable                                                    \
-(                                                                             \
-    PatchTypeField, typePatchTypeField, patch                                 \
-);                                                                            \
-                                                                              \
-addToRunTimeSelectionTable                                                    \
-(                                                                             \
-    PatchTypeField,                                                           \
-    typePatchTypeField,                                                       \
-    patchMapper                                                               \
-);                                                                            \
-                                                                              \
-addToRunTimeSelectionTable                                                    \
-(                                                                             \
-    PatchTypeField, typePatchTypeField, dictionary                            \
-);
-
-
-#define makeFaPatchTypeFieldTypeName(typePatchTypeField)                      \
-                                                                              \
-defineNamedTemplateTypeNameAndDebug(typePatchTypeField, 0);
-
-
-#define makeFaPatchFieldsTypeName(typePatchField)                             \
-                                                                              \
-makeFaPatchTypeFieldTypeName(typePatchField##FaPatchScalarField);             \
-makeFaPatchTypeFieldTypeName(typePatchField##FaPatchVectorField);             \
-makeFaPatchTypeFieldTypeName(typePatchField##FaPatchSphericalTensorField);    \
-makeFaPatchTypeFieldTypeName(typePatchField##FaPatchSymmTensorField);         \
-makeFaPatchTypeFieldTypeName(typePatchField##FaPatchTensorField);
-
-
-#define makeFaPatchTypeField(PatchTypeField, typePatchTypeField)              \
-                                                                              \
-defineTypeNameAndDebug(typePatchTypeField, 0);                                \
-                                                                              \
-addToFaPatchFieldRunTimeSelection                                             \
-(                                                                             \
-    PatchTypeField, typePatchTypeField                                        \
-);
-
-#define makeTemplateFaPatchTypeField(PatchTypeField, typePatchTypeField)      \
-                                                                              \
-defineNamedTemplateTypeNameAndDebug(typePatchTypeField, 0);                   \
-                                                                              \
-addToFaPatchFieldRunTimeSelection                                             \
-(                                                                             \
-    PatchTypeField, typePatchTypeField                                        \
-);
-
-
-#define makeFaPatchFields(type)                                               \
-                                                                              \
-makeTemplateFaPatchTypeField(faPatchScalarField, type##FaPatchScalarField);   \
-makeTemplateFaPatchTypeField(faPatchVectorField, type##FaPatchVectorField);   \
-makeTemplateFaPatchTypeField                                                  \
-(                                                                             \
-    faPatchSphericalTensorField,                                              \
-    type##FaPatchSphericalTensorField                                         \
-);                                                                            \
-makeTemplateFaPatchTypeField                                                  \
-(                                                                             \
-    faPatchSymmTensorField,                                                   \
-    type##FaPatchSymmTensorField                                              \
-);                                                                            \
-makeTemplateFaPatchTypeField                                                  \
-(                                                                             \
-    faPatchTensorField,                                                       \
-    type##FaPatchTensorField                                                  \
-);
-
-
-#define makeFaPatchTypeFieldTypedefs(type)                                    \
-                                                                              \
-typedef type##FaPatchField<scalar> type##FaPatchScalarField;                  \
-typedef type##FaPatchField<vector> type##FaPatchVectorField;                  \
-typedef type##FaPatchField<sphericalTensor>                                   \
-     type##FaPatchSphericalTensorField;                                       \
-typedef type##FaPatchField<symmTensor> type##FaPatchSymmTensorField;          \
-typedef type##FaPatchField<tensor> type##FaPatchTensorField;
-
+#include "faPatchFieldMacros.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

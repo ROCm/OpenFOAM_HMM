@@ -25,11 +25,10 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef wedgeFaePatchFields_H
-#define wedgeFaePatchFields_H
+#ifndef Foam_wedgeFaePatchFields_H
+#define Foam_wedgeFaePatchFields_H
 
 #include "wedgeFaePatchField.H"
-#include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -38,7 +37,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makeFaePatchTypeFieldTypedefs(wedge)
+makeFaePatchTypeFieldTypedefs(wedge);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

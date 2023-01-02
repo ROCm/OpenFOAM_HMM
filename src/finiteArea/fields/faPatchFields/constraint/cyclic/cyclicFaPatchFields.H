@@ -25,11 +25,10 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cyclicFaPatchFields_H
-#define cyclicFaPatchFields_H
+#ifndef Foam_cyclicFaPatchFields_H
+#define Foam_cyclicFaPatchFields_H
 
 #include "cyclicFaPatchField.H"
-#include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -38,7 +37,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makeFaPatchTypeFieldTypedefs(cyclic)
+makeFaPatchTypeFieldTypedefs(cyclic);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

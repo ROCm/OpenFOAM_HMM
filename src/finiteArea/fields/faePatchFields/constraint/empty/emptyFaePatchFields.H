@@ -25,11 +25,10 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef emptyFaePatchFields_H
-#define emptyFaePatchFields_H
+#ifndef Foam_emptyFaePatchFields_H
+#define Foam_emptyFaePatchFields_H
 
 #include "emptyFaePatchField.H"
-#include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -38,7 +37,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makeFaePatchTypeFieldTypedefs(empty)
+makeFaePatchTypeFieldTypedefs(empty);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

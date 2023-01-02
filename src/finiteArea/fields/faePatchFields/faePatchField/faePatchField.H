@@ -472,67 +472,8 @@ public:
     #include "calculatedFaePatchField.H"
 #endif
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Runtime selection macros
-
-#define makeFaePatchTypeFieldTypeName(typePatchTypeField)                      \
-                                                                               \
-defineNamedTemplateTypeNameAndDebug(typePatchTypeField, 0);
-
-#define makeFaePatchFieldsTypeName(typePatchField)                             \
-                                                                               \
-makeFaePatchTypeFieldTypeName(typePatchField##FaePatchScalarField);            \
-makeFaePatchTypeFieldTypeName(typePatchField##FaePatchVectorField);            \
-makeFaePatchTypeFieldTypeName(typePatchField##FaePatchSphericalTensorField);   \
-makeFaePatchTypeFieldTypeName(typePatchField##FaePatchSymmTensorField);        \
-makeFaePatchTypeFieldTypeName(typePatchField##FaePatchTensorField);
-
-
-#define makeFaePatchTypeField(PatchTypeField, typePatchTypeField)              \
-                                                                               \
-defineNamedTemplateTypeNameAndDebug(typePatchTypeField, 0);                    \
-                                                                               \
-addToRunTimeSelectionTable                                                     \
-(                                                                              \
-    PatchTypeField, typePatchTypeField, patch                                  \
-);                                                                             \
-                                                                               \
-addToRunTimeSelectionTable                                                     \
-(                                                                              \
-    PatchTypeField,                                                            \
-    typePatchTypeField,                                                        \
-    patchMapper                                                                \
-);                                                                             \
-                                                                               \
-addToRunTimeSelectionTable                                                     \
-(                                                                              \
-    PatchTypeField, typePatchTypeField, dictionary                             \
-);
-
-
-#define makeFaePatchFields(type)                                               \
-                                                                               \
-makeFaePatchTypeField(faePatchScalarField, type##FaePatchScalarField);         \
-makeFaePatchTypeField(faePatchVectorField, type##FaePatchVectorField);         \
-makeFaePatchTypeField                                                          \
-(                                                                              \
-    faePatchSphericalTensorField,                                              \
-    type##FaePatchSphericalTensorField                                         \
-);                                                                             \
-makeFaePatchTypeField(faePatchSymmTensorField, type##FaePatchSymmTensorField); \
-makeFaePatchTypeField(faePatchTensorField, type##FaePatchTensorField);
-
-
-#define makeFaePatchTypeFieldTypedefs(type)                                    \
-                                                                               \
-typedef type##FaePatchField<scalar> type##FaePatchScalarField;                 \
-typedef type##FaePatchField<vector> type##FaePatchVectorField;                 \
-typedef type##FaePatchField<sphericalTensor>                                   \
-    type##FaePatchSphericalTensorField;                                        \
-typedef type##FaePatchField<symmTensor> type##FaePatchSymmTensorField;         \
-typedef type##FaePatchField<tensor> type##FaePatchTensorField;
-
+#include "faePatchFieldMacros.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

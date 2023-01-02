@@ -25,11 +25,10 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef symmetryFaPatchFields_H
-#define symmetryFaPatchFields_H
+#ifndef Foam_symmetryFaPatchFields_H
+#define Foam_symmetryFaPatchFields_H
 
 #include "symmetryFaPatchField.H"
-#include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -38,7 +37,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makeFaPatchTypeFieldTypedefs(symmetry)
+makeFaPatchTypeFieldTypedefs(symmetry);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

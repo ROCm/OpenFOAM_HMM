@@ -31,6 +31,14 @@ License
 #include "volFields.H"
 #include "surfaceFields.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    makePatchFieldType(scalar, fan);
+}
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<>
@@ -99,14 +107,6 @@ void Foam::fanFvPatchField<Foam::scalar>::calcFanJump()
 
         this->relax();
     }
-}
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    makeTemplatePatchTypeField(scalar, fan);
 }
 
 

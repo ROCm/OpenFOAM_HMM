@@ -23,15 +23,13 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::faePatchField
-
 Description
+    Forward declarations for faePatchField types
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef faePatchFieldsFwd_H
-#define faePatchFieldsFwd_H
+#ifndef Foam_faePatchFieldsFwd_H
+#define Foam_faePatchFieldsFwd_H
 
 #include "fieldTypes.H"
 
