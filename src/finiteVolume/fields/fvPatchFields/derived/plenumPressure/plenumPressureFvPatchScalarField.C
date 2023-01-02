@@ -196,7 +196,7 @@ void Foam::plenumPressureFvPatchScalarField::updateCoeffs()
 
     // Calculate the current mass flow rate
     scalar massFlowRate(1.0);
-    if (phi.internalField().dimensions() == dimVelocity*dimArea)
+    if (phi.internalField().dimensions() == dimVolume/dimTime)
     {
         if (hasRho_)
         {
@@ -209,11 +209,7 @@ void Foam::plenumPressureFvPatchScalarField::updateCoeffs()
                 << exit(FatalError);
         }
     }
-    else if
-    (
-        phi.internalField().dimensions()
-     == dimDensity*dimVelocity*dimArea
-    )
+    else if (phi.internalField().dimensions() == dimMass/dimTime)
     {
         if (hasRho_)
         {

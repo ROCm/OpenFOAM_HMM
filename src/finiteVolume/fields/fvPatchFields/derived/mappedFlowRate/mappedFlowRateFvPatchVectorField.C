@@ -140,12 +140,12 @@ void Foam::mappedFlowRateFvPatchVectorField::updateCoeffs()
 
     vectorField n(patch().nf());
 
-    if (phiName.dimensions() == dimVelocity*dimArea)
+    if (phiName.dimensions() == dimVolume/dimTime)
     {
         // volumetric flow-rate
         operator==(n*U);
     }
-    else if (phiName.dimensions() == dimDensity*dimVelocity*dimArea)
+    else if (phiName.dimensions() == dimMass/dimTime)
     {
         const fvPatchField<scalar>& rhop =
             patch().lookupPatchField<volScalarField, scalar>(rhoName_);

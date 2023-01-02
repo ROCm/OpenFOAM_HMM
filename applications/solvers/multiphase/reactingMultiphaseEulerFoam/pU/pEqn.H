@@ -180,7 +180,7 @@ while (pimple.correct())
             IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionedScalar("phiHbyA", dimArea*dimVelocity, 0)
+        dimensionedScalar(dimVelocity*dimArea, Zero)
     );
 
     forAll(phases, phasei)

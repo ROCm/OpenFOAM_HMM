@@ -208,7 +208,7 @@ public:
             const fvMesh& mesh = this->mesh();
             tmp<surfaceScalarField> tUflux = faceFlux_;
 
-            if (faceFlux_.dimensions() == dimDensity*dimVelocity*dimArea)
+            if (faceFlux_.dimensions() == dimMass/dimTime)
             {
                 // Currently assume that the density field
                 // corresponding to the mass-flux is named "rho"
@@ -218,7 +218,7 @@ public:
 
                 tUflux = faceFlux_/fvc::interpolate(rho);
             }
-            else if (faceFlux_.dimensions() != dimVelocity*dimArea)
+            else if (faceFlux_.dimensions() != dimVolume/dimTime)
             {
                 FatalErrorInFunction
                     << "dimensions of faceFlux are not correct"

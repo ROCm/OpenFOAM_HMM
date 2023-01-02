@@ -115,11 +115,11 @@ void Foam::fluxCorrectedVelocityFvPatchVectorField::evaluate
     const vectorField n(patch().nf());
     const Field<scalar>& magS = patch().magSf();
 
-    if (phi.dimensions() == dimVelocity*dimArea)
+    if (phi.dimensions() == dimVolume/dimTime)
     {
         operator==(*this - n*(n & *this) + n*phip/magS);
     }
-    else if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
+    else if (phi.dimensions() == dimMass/dimTime)
     {
         const fvPatchField<scalar>& rhop =
             patch().lookupPatchField<volScalarField, scalar>(rhoName_);

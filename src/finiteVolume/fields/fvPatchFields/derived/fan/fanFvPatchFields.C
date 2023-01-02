@@ -77,7 +77,7 @@ void Foam::fanFvPatchField<Foam::scalar>::calcFanJump()
             }
         }
 
-        if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
+        if (phi.dimensions() == dimMass/dimTime)
         {
             Un /= patch().lookupPatchField<volScalarField, scalar>(rhoName_);
         }

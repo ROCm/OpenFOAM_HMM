@@ -138,11 +138,11 @@ updateCoeffs()
 
     const vectorField n(patch().nf());
 
-    if (phi.dimensions() == dimVelocity*dimArea)
+    if (phi.dimensions() == dimVolume/dimTime)
     {
         refValue() = (phip/patch().magSf())*n;
     }
-    else if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
+    else if (phi.dimensions() == dimMass/dimTime)
     {
         const fvPatchField<scalar>& rhop =
             patch().lookupPatchField<volScalarField, scalar>(rhoName_);

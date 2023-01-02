@@ -53,7 +53,7 @@
             IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionedScalar(dimArea*dimVelocity, Zero)
+        dimensionedScalar(dimVelocity*dimArea, Zero)
     );
 
     volScalarField rho("rho", fluid.rho());

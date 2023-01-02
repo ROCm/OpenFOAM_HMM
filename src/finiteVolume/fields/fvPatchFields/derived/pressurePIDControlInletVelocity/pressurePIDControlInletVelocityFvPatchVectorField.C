@@ -238,11 +238,11 @@ void Foam::pressurePIDControlInletVelocityFvPatchVectorField::updateCoeffs()
 
     // Get the density
     scalar rho = 1;
-    if (phi.dimensions() == dimVelocity*dimArea)
+    if (phi.dimensions() == dimVolume/dimTime)
     {
         // do nothing ...
     }
-    else if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
+    else if (phi.dimensions() == dimMass/dimTime)
     {
         const fvPatchField<scalar>& rhoField =
             patch().lookupPatchField<volScalarField, scalar>(rhoName_);
@@ -254,9 +254,9 @@ void Foam::pressurePIDControlInletVelocityFvPatchVectorField::updateCoeffs()
         FatalErrorInFunction
             << "The dimensions of the field " << phiName_
             << "are not recognised. The dimensions are " << phi.dimensions()
-            << ". The dimensions should be either " << dimVelocity*dimArea
+            << ". The dimensions should be either " << dimVolume/dimTime
             << " for an incompressible case, or "
-            << dimDensity*dimVelocity*dimArea << " for a compressible case."
+            << dimMass/dimTime << " for a compressible case."
             << exit(FatalError);
     }
 

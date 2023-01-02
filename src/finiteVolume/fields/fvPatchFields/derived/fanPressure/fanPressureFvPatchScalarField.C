@@ -162,11 +162,11 @@ void Foam::fanPressureFvPatchScalarField::updateCoeffs()
     // Average volumetric flow rate
     scalar volFlowRate = 0;
 
-    if (phi.dimensions() == dimVelocity*dimArea)
+    if (phi.dimensions() == dimVolume/dimTime)
     {
         volFlowRate = dir*gSum(phip);
     }
-    else if (phi.dimensions() == dimVelocity*dimArea*dimDensity)
+    else if (phi.dimensions() == dimMass/dimTime)
     {
         const scalarField& rhop =
             patch().lookupPatchField<volScalarField, scalar>(rhoName());

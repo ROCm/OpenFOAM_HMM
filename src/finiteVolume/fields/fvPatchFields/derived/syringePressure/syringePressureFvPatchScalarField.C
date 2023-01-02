@@ -206,11 +206,11 @@ void Foam::syringePressureFvPatchScalarField::updateCoeffs()
     const fvsPatchField<scalar>& phip =
         patch().patchField<surfaceScalarField, scalar>(phi);
 
-    if (phi.dimensions() == dimVelocity*dimArea)
+    if (phi.dimensions() == dimVolume/dimTime)
     {
         ams_ = ams0_ + deltaT*sum((*this*psi_)*phip);
     }
-    else if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
+    else if (phi.dimensions() == dimMass/dimTime)
     {
         ams_ = ams0_ + deltaT*sum(phip);
     }

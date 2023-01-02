@@ -166,7 +166,7 @@ Foam::advectiveFvPatchField<Type>::advectionSpeed() const
             phiName_
         );
 
-    if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
+    if (phi.dimensions() == dimMass/dimTime)
     {
         const fvPatchScalarField& rhop =
             this->patch().template lookupPatchField<volScalarField, scalar>

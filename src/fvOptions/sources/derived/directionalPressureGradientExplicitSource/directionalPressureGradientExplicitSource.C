@@ -268,7 +268,7 @@ void Foam::fv::directionalPressureGradientExplicitSource::correct
     {
         case pDarcyForchheimer:
         {
-            if (phi.dimensions() == dimVelocity*dimArea)
+            if (phi.dimensions() == dimVolume/dimTime)
             {
                 const auto& turbModel =
                     mesh().lookupObject<incompressible::turbulenceModel>
@@ -323,7 +323,7 @@ void Foam::fv::directionalPressureGradientExplicitSource::correct
             }
             reduce(totalphi, sumOp<scalar>());
 
-            if (phi.dimensions() == dimVelocity*dimArea)
+            if (phi.dimensions() == dimVolume/dimTime)
             {
                 volFlowRate = mag(totalphi);
             }

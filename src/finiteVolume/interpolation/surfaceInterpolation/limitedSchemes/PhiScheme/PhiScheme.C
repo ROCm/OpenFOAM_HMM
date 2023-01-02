@@ -68,7 +68,7 @@ Foam::PhiScheme<Type, PhiLimiter>::limiter
 
     tmp<surfaceScalarField> tUflux = this->faceFlux_;
 
-    if (this->faceFlux_.dimensions() == dimDensity*dimVelocity*dimArea)
+    if (this->faceFlux_.dimensions() == dimMass/dimTime)
     {
         const volScalarField& rho =
             phi.db().objectRegistry::template lookupObject<volScalarField>
@@ -76,7 +76,7 @@ Foam::PhiScheme<Type, PhiLimiter>::limiter
 
         tUflux = this->faceFlux_/fvc::interpolate(rho);
     }
-    else if (this->faceFlux_.dimensions() != dimVelocity*dimArea)
+    else if (this->faceFlux_.dimensions() != dimVolume/dimTime)
     {
         FatalErrorInFunction
             << "dimensions of faceFlux are not correct"

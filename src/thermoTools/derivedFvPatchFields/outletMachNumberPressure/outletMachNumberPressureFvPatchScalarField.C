@@ -160,7 +160,7 @@ void Foam::outletMachNumberPressureFvPatchScalarField::updateCoeffs()
         patch().lookupPatchField<surfaceScalarField, scalar>(phiName_);
 
     // Calculate the current mass flow rate
-    if (phi.internalField().dimensions() != dimDensity*dimVelocity*dimArea)
+    if (phi.internalField().dimensions() != dimMass/dimTime)
     {
         FatalErrorInFunction
             <<"phi is not a mass flux." << exit(FatalError);

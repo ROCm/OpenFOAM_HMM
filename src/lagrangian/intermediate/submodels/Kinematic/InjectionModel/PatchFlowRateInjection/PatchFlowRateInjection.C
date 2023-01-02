@@ -133,7 +133,7 @@ Foam::scalar Foam::PatchFlowRateInjection<CloudType>::flowRate() const
     const scalarField& phip = phi.boundaryField()[patchId_];
 
     scalar flowRateIn = 0.0;
-    if (phi.dimensions() == dimVelocity*dimArea)
+    if (phi.dimensions() == dimVolume/dimTime)
     {
         flowRateIn = max(0.0, -sum(phip));
     }

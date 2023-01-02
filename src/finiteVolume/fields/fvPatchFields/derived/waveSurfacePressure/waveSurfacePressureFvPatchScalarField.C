@@ -164,7 +164,7 @@ void Foam::waveSurfacePressureFvPatchScalarField::updateCoeffs()
     // Change in zeta due to flux
     vectorField dZetap(dt*nf()*phi.boundaryField()[patchi]/patch().magSf());
 
-    if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
+    if (phi.dimensions() == dimMass/dimTime)
     {
         const scalarField& rhop =
             patch().lookupPatchField<volScalarField, scalar>(rhoName_);
