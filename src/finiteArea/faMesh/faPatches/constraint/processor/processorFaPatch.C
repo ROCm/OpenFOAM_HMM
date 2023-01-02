@@ -135,12 +135,11 @@ void Foam::processorFaPatch::makeNonGlobalPatchPoints() const
     // create a 1->1 map
 
     // Can not use faGlobalMeshData at this point yet
+    // - use polyMesh globalData instead
 
-    if
-    (
-        !Pstream::parRun()
-     || !boundaryMesh().mesh()().globalData().nGlobalPoints()
-    )
+    const auto& pMeshGlobalData = boundaryMesh().mesh().mesh().globalData();
+
+    if (!Pstream::parRun() || !pMeshGlobalData.nGlobalPoints())
     {
         // 1 -> 1 mapping
         nonGlobalPatchPointsPtr_.reset(new labelList(identity(nPoints())));
@@ -151,8 +150,7 @@ void Foam::processorFaPatch::makeNonGlobalPatchPoints() const
         labelList& ngpp = *nonGlobalPatchPointsPtr_;
 
         // Get reference to shared points
-        const labelList& sharedPoints =
-            boundaryMesh().mesh()().globalData().sharedPointLabels();
+        const labelList& sharedPoints = pMeshGlobalData.sharedPointLabels();
 
         const labelList& faMeshPatchPoints = pointLabels();
 

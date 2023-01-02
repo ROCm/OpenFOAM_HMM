@@ -157,7 +157,7 @@ CrankNicolsonDdtScheme<Type>::ddt0_
                     (
                         name,
                         mesh().time().timeName(),
-                        mesh(),
+                        mesh().thisDb(),
                         IOobject::NO_READ,
                         IOobject::AUTO_WRITE
                     ),
@@ -360,7 +360,7 @@ CrankNicolsonDdtScheme<Type>::fvcDdt
     (
         "ddt(" + dt.name() + ')',
         mesh().time().timeName(),
-        mesh()
+        mesh().thisDb()
     );
 
     tmp<GeometricField<Type, fvPatchField, volMesh>> tdtdt
@@ -417,7 +417,7 @@ CrankNicolsonDdtScheme<Type>::fvcDdt
     (
         "ddt(" + vf.name() + ')',
         mesh().time().timeName(),
-        mesh()
+        mesh().thisDb()
     );
 
     dimensionedScalar rDtCoef = rDtCoef_(ddt0);
@@ -505,7 +505,7 @@ CrankNicolsonDdtScheme<Type>::fvcDdt
     (
         "ddt(" + rho.name() + ',' + vf.name() + ')',
         mesh().time().timeName(),
-        mesh()
+        mesh().thisDb()
     );
 
     dimensionedScalar rDtCoef = rDtCoef_(ddt0);
@@ -595,7 +595,7 @@ CrankNicolsonDdtScheme<Type>::fvcDdt
     (
         "ddt(" + rho.name() + ',' + vf.name() + ')',
         mesh().time().timeName(),
-        mesh()
+        mesh().thisDb()
     );
 
     dimensionedScalar rDtCoef = rDtCoef_(ddt0);
@@ -696,7 +696,7 @@ CrankNicolsonDdtScheme<Type>::fvcDdt
     (
         "ddt(" + alpha.name() + ',' + rho.name() + ',' + vf.name() + ')',
         mesh().time().timeName(),
-        mesh()
+        mesh().thisDb()
     );
 
     dimensionedScalar rDtCoef = rDtCoef_(ddt0);
@@ -1218,7 +1218,7 @@ CrankNicolsonDdtScheme<Type>::fvcDdtUfCorr
             (
                 "ddtCorr(" + U.name() + ',' + Uf.name() + ')',
                 mesh().time().timeName(),
-                mesh()
+                mesh().thisDb()
             ),
             this->fvcDdtPhiCoeff(U.oldTime(), mesh().Sf() & Uf.oldTime())
            *(
@@ -1280,7 +1280,7 @@ CrankNicolsonDdtScheme<Type>::fvcDdtPhiCorr
             (
                 "ddtCorr(" + U.name() + ',' + phi.name() + ')',
                 mesh().time().timeName(),
-                mesh()
+                mesh().thisDb()
             ),
             this->fvcDdtPhiCoeff(U.oldTime(), phi.oldTime())
            *(
@@ -1357,7 +1357,7 @@ CrankNicolsonDdtScheme<Type>::fvcDdtUfCorr
                     "ddtCorr("
                   + rho.name() + ',' + U.name() + ',' + Uf.name() + ')',
                     mesh().time().timeName(),
-                    mesh()
+                    mesh().thisDb()
                 ),
                 this->fvcDdtPhiCoeff
                 (
@@ -1421,7 +1421,7 @@ CrankNicolsonDdtScheme<Type>::fvcDdtUfCorr
                 (
                     "ddtCorr(" + U.name() + ',' + Uf.name() + ')',
                     mesh().time().timeName(),
-                    mesh()
+                    mesh().thisDb()
                 ),
                 this->fvcDdtPhiCoeff
                 (
@@ -1514,7 +1514,7 @@ CrankNicolsonDdtScheme<Type>::fvcDdtPhiCorr
                     "ddtCorr("
                   + rho.name() + ',' + U.name() + ',' + phi.name() + ')',
                     mesh().time().timeName(),
-                    mesh()
+                    mesh().thisDb()
                 ),
                 this->fvcDdtPhiCoeff(rhoU0, phi.oldTime(), rho.oldTime())
                *(
@@ -1574,7 +1574,7 @@ CrankNicolsonDdtScheme<Type>::fvcDdtPhiCorr
                 (
                     "ddtCorr(" + U.name() + ',' + phi.name() + ')',
                     mesh().time().timeName(),
-                    mesh()
+                    mesh().thisDb()
                 ),
                 this->fvcDdtPhiCoeff(U.oldTime(), phi.oldTime(), rho.oldTime())
                *(
@@ -1627,7 +1627,7 @@ tmp<surfaceScalarField> CrankNicolsonDdtScheme<Type>::meshPhi
             (
                 mesh().phi().name(),
                 mesh().time().timeName(),
-                mesh(),
+                mesh().thisDb(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
                 false

@@ -54,7 +54,7 @@ steadyStateDdtScheme<Type>::fvcDdt
         (
             "ddt("+dt.name()+')',
             mesh().time().timeName(),
-            mesh()
+            mesh().thisDb()
         ),
         mesh(),
         dimensioned<Type>(dt.dimensions()/dimTime, Zero)
@@ -75,7 +75,7 @@ steadyStateDdtScheme<Type>::fvcDdt
         (
             "ddt("+vf.name()+')',
             mesh().time().timeName(),
-            mesh()
+            mesh().thisDb()
         ),
         mesh(),
         dimensioned<Type>(vf.dimensions()/dimTime, Zero)
@@ -97,7 +97,7 @@ steadyStateDdtScheme<Type>::fvcDdt
         (
             "ddt("+rho.name()+','+vf.name()+')',
             mesh().time().timeName(),
-            mesh()
+            mesh().thisDb()
         ),
         mesh(),
         dimensioned<Type>(rho.dimensions()*vf.dimensions()/dimTime, Zero)
@@ -119,7 +119,7 @@ steadyStateDdtScheme<Type>::fvcDdt
         (
             "ddt("+rho.name()+','+vf.name()+')',
             mesh().time().timeName(),
-            mesh()
+            mesh().thisDb()
         ),
         mesh(),
         dimensioned<Type>(rho.dimensions()*vf.dimensions()/dimTime, Zero)
@@ -142,7 +142,7 @@ steadyStateDdtScheme<Type>::fvcDdt
         (
             "ddt("+alpha.name()+','+rho.name()+','+vf.name()+')',
             mesh().time().timeName(),
-            mesh()
+            mesh().thisDb()
         ),
         mesh(),
         dimensioned<Type>(rho.dimensions()*vf.dimensions()/dimTime, Zero)
@@ -250,7 +250,7 @@ steadyStateDdtScheme<Type>::fvcDdtUfCorr
             (
                 "ddtCorr(" + U.name() + ',' + Uf.name() + ')',
                 mesh().time().timeName(),
-                mesh()
+                mesh().thisDb()
             ),
             mesh(),
             dimensioned<typename flux<Type>::type>
@@ -282,7 +282,7 @@ steadyStateDdtScheme<Type>::fvcDdtPhiCorr
             (
                 "ddtCorr(" + U.name() + ',' + phi.name() + ')',
                 mesh().time().timeName(),
-                mesh()
+                mesh().thisDb()
             ),
             mesh(),
             dimensioned<typename flux<Type>::type>
@@ -317,7 +317,7 @@ steadyStateDdtScheme<Type>::fvcDdtUfCorr
               + rho.name()
               + ',' + U.name() + ',' + Uf.name() + ')',
                 mesh().time().timeName(),
-                mesh()
+                mesh().thisDb()
             ),
             mesh(),
             dimensioned<typename flux<Type>::type>
@@ -352,7 +352,7 @@ steadyStateDdtScheme<Type>::fvcDdtPhiCorr
               + rho.name()
               + ',' + U.name() + ',' + phi.name() + ')',
                 mesh().time().timeName(),
-                mesh()
+                mesh().thisDb()
             ),
             mesh(),
             dimensioned<typename flux<Type>::type>
@@ -380,7 +380,7 @@ tmp<surfaceScalarField> steadyStateDdtScheme<Type>::meshPhi
         (
             "meshPhi",
             mesh().time().timeName(),
-            mesh(),
+            mesh().thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
             false

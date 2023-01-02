@@ -205,8 +205,8 @@ void Foam::edgeInterpolation::makeLPN() const
         IOobject
         (
             "lPN",
-            faMesh_.time().constant(),
-            faMesh_(),
+            mesh().time().constant(),
+            mesh().thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
             false
@@ -286,8 +286,8 @@ void Foam::edgeInterpolation::makeWeights() const
         IOobject
         (
             "weightingFactors",
-            mesh()().pointsInstance(),
-            mesh()(),
+            mesh().pointsInstance(),
+            mesh().thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
             false
@@ -366,8 +366,8 @@ void Foam::edgeInterpolation::makeDeltaCoeffs() const
         IOobject
         (
             "differenceFactors_",
-            mesh()().pointsInstance(),
-            mesh()(),
+            mesh().pointsInstance(),
+            mesh().thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
             false
@@ -460,8 +460,8 @@ void Foam::edgeInterpolation::makeCorrectionVectors() const
         IOobject
         (
             "correctionVectors",
-            mesh()().pointsInstance(),
-            mesh()(),
+            mesh().pointsInstance(),
+            mesh().thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
             false
@@ -571,8 +571,8 @@ void Foam::edgeInterpolation::makeSkewCorrectionVectors() const
         IOobject
         (
             "skewCorrectionVectors",
-            mesh()().pointsInstance(),
-            mesh()(),
+            mesh().pointsInstance(),
+            mesh().thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
             false

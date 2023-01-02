@@ -213,8 +213,8 @@ void Foam::interfaceTrackingFvMesh::makeUs() const
         IOobject
         (
             "Us",
-            mesh().time().timeName(),
-            mesh(),
+            aMesh().time().timeName(),
+            aMesh().thisDb(),
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
@@ -271,8 +271,8 @@ void Foam::interfaceTrackingFvMesh::makeFsNetPhi() const
         IOobject
         (
             "fsNetPhi",
-            mesh().time().timeName(),
-            mesh(),
+            aMesh().time().timeName(),
+            aMesh().thisDb(),
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
@@ -462,8 +462,8 @@ void Foam::interfaceTrackingFvMesh::makePhis()
         IOobject
         (
             "phis",
-            mesh().time().timeName(),
-            mesh(),
+            aMesh().time().timeName(),
+            aMesh().thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
@@ -494,7 +494,7 @@ void Foam::interfaceTrackingFvMesh::makeSurfactConc() const
                 mesh().time().startTime().value()
             ),
             // mesh().time().timeName(),
-            mesh(),
+            aMesh().thisDb(),
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
@@ -525,7 +525,7 @@ void Foam::interfaceTrackingFvMesh::makeBulkSurfactConc() const
                 mesh().time().startTime().value()
             ),
             // mesh().time().timeName(),
-            mesh(),
+            aMesh().thisDb(),
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
@@ -559,8 +559,8 @@ void Foam::interfaceTrackingFvMesh::makeSurfaceTension() const
         IOobject
         (
             "surfaceTension",
-            mesh().time().timeName(),
-            mesh(),
+            aMesh().time().timeName(),
+            aMesh().thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
@@ -604,28 +604,17 @@ void Foam::interfaceTrackingFvMesh::makeContactAngle()
     IOobject contactAngleHeader
     (
         "contactAngle",
-        mesh().time().timeName(),
-        mesh(),
-        IOobject::MUST_READ
+        aMesh().time().timeName(),
+        aMesh().thisDb(),
+        IOobject::MUST_READ,
+        IOobject::AUTO_WRITE
     );
 
     if (contactAngleHeader.typeHeaderOk<areaScalarField>())
     {
         Info<< "Reading contact angle field" << endl;
 
-        contactAnglePtr_ =
-            new areaScalarField
-            (
-                IOobject
-                (
-                    "contactAngle",
-                    mesh().time().timeName(),
-                    mesh(),
-                    IOobject::MUST_READ,
-                    IOobject::AUTO_WRITE
-                ),
-                aMesh()
-            );
+        contactAnglePtr_ = new areaScalarField(contactAngleHeader, aMesh());
     }
 }
 
@@ -886,8 +875,8 @@ void Foam::interfaceTrackingFvMesh::updateSurfactantConcentration()
                 IOobject
                 (
                     "Cb",
-                    mesh().time().timeName(),
-                    mesh(),
+                    aMesh().time().timeName(),
+                    aMesh().thisDb(),
                     IOobject::NO_READ,
                     IOobject::NO_WRITE
                 ),
@@ -1303,8 +1292,8 @@ void Foam::interfaceTrackingFvMesh::correctContactLinePointNormals()
             IOobject
             (
                 "tangent",
-                mesh().time().timeName(),
-                mesh(),
+                aMesh().time().timeName(),
+                aMesh().thisDb(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
@@ -2051,8 +2040,8 @@ Foam::interfaceTrackingFvMesh::surfaceTensionGrad()
         IOobject
         (
             "surfaceTensionGrad",
-            mesh().time().timeName(),
-            mesh(),
+            aMesh().time().timeName(),
+            aMesh().thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),

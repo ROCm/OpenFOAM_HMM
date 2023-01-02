@@ -23,7 +23,7 @@ Description
         // vtk::formatType::INLINE_ASCII,
         fileName
         (
-            aMesh.mesh().time().globalPath() / "finiteArea"
+            aMesh.time().globalPath() / "finiteArea"
         )
     );
 
@@ -66,7 +66,7 @@ Description
         // vtk::formatType::INLINE_ASCII,
         fileName
         (
-            aMesh.mesh().time().globalPath() / "finiteArea-edges"
+            aMesh.time().globalPath() / "finiteArea-edges"
         )
     );
 
@@ -102,7 +102,7 @@ Description
         // vtk::formatType::INLINE_ASCII,
         fileName
         (
-            aMesh.mesh().time().globalPath() / "finiteArea-edgesCentres"
+            aMesh.time().globalPath() / "finiteArea-edgesCentres"
         )
     );
 

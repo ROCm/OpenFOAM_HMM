@@ -53,8 +53,8 @@ EulerFaDdtScheme<Type>::facDdt
     IOobject ddtIOobject
     (
         "ddt("+dt.name()+')',
-        mesh()().time().timeName(),
-        mesh()(),
+        mesh().time().timeName(),
+        mesh().thisDb(),
         IOobject::NO_READ,
         IOobject::NO_WRITE
     );
@@ -100,8 +100,8 @@ EulerFaDdtScheme<Type>::facDdt0
     IOobject ddtIOobject
     (
         "ddt("+dt.name()+')',
-        mesh()().time().timeName(),
-        mesh()(),
+        mesh().time().timeName(),
+        mesh().thisDb(),
         IOobject::NO_READ,
         IOobject::NO_WRITE
     );
@@ -138,8 +138,8 @@ EulerFaDdtScheme<Type>::facDdt
     IOobject ddtIOobject
     (
         "ddt("+vf.name()+')',
-        mesh()().time().timeName(),
-        mesh()(),
+        mesh().time().timeName(),
+        mesh().thisDb(),
         IOobject::NO_READ,
         IOobject::NO_WRITE
     );
@@ -191,8 +191,8 @@ EulerFaDdtScheme<Type>::facDdt0
     IOobject ddtIOobject
     (
         "ddt0("+vf.name()+')',
-        mesh()().time().timeName(),
-        mesh()(),
+        mesh().time().timeName(),
+        mesh().thisDb(),
         IOobject::NO_READ,
         IOobject::NO_WRITE
     );
@@ -238,8 +238,8 @@ EulerFaDdtScheme<Type>::facDdt
     IOobject ddtIOobject
     (
         "ddt("+rho.name()+','+vf.name()+')',
-        mesh()().time().timeName(),
-        mesh()(),
+        mesh().time().timeName(),
+        mesh().thisDb(),
         IOobject::NO_READ,
         IOobject::NO_WRITE
     );
@@ -291,8 +291,8 @@ EulerFaDdtScheme<Type>::facDdt0
     IOobject ddtIOobject
     (
         "ddt0("+rho.name()+','+vf.name()+')',
-        mesh()().time().timeName(),
-        mesh()(),
+        mesh().time().timeName(),
+        mesh().thisDb(),
         IOobject::NO_READ,
         IOobject::NO_WRITE
     );
@@ -340,8 +340,8 @@ EulerFaDdtScheme<Type>::facDdt
     IOobject ddtIOobject
     (
         "ddt("+rho.name()+','+vf.name()+')',
-        mesh()().time().timeName(),
-        mesh()(),
+        mesh().time().timeName(),
+        mesh().thisDb(),
         IOobject::NO_READ,
         IOobject::NO_WRITE
     );
@@ -397,8 +397,8 @@ EulerFaDdtScheme<Type>::facDdt0
     IOobject ddtIOobject
     (
         "ddt0("+rho.name()+','+vf.name()+')',
-        mesh()().time().timeName(),
-        mesh()(),
+        mesh().time().timeName(),
+        mesh().thisDb(),
         IOobject::NO_READ,
         IOobject::NO_WRITE
     );

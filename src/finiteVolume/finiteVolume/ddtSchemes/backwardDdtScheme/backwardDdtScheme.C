@@ -87,7 +87,7 @@ backwardDdtScheme<Type>::fvcDdt
     (
         "ddt("+dt.name()+')',
         mesh().time().timeName(),
-        mesh()
+        mesh().thisDb()
     );
 
     scalar deltaT = deltaT_();
@@ -140,7 +140,7 @@ backwardDdtScheme<Type>::fvcDdt
     (
         "ddt("+vf.name()+')',
         mesh().time().timeName(),
-        mesh()
+        mesh().thisDb()
     );
 
     scalar deltaT = deltaT_();
@@ -212,7 +212,7 @@ backwardDdtScheme<Type>::fvcDdt
     (
         "ddt("+rho.name()+','+vf.name()+')',
         mesh().time().timeName(),
-        mesh()
+        mesh().thisDb()
     );
 
     scalar deltaT = deltaT_();
@@ -284,7 +284,7 @@ backwardDdtScheme<Type>::fvcDdt
     (
         "ddt("+rho.name()+','+vf.name()+')',
         mesh().time().timeName(),
-        mesh()
+        mesh().thisDb()
     );
 
     scalar deltaT = deltaT_();
@@ -360,7 +360,7 @@ backwardDdtScheme<Type>::fvcDdt
     (
         "ddt("+alpha.name()+','+rho.name()+','+vf.name()+')',
         mesh().time().timeName(),
-        mesh()
+        mesh().thisDb()
     );
 
     scalar deltaT = deltaT_();
@@ -686,7 +686,7 @@ backwardDdtScheme<Type>::fvcDdtUfCorr
             (
                 "ddtCorr(" + U.name() + ',' + Uf.name() + ')',
                 mesh().time().timeName(),
-                mesh()
+                mesh().thisDb()
             ),
             this->fvcDdtPhiCoeff(U.oldTime(), (mesh().Sf() & Uf.oldTime()))
            *rDeltaT
@@ -730,7 +730,7 @@ backwardDdtScheme<Type>::fvcDdtPhiCorr
             (
                 "ddtCorr(" + U.name() + ',' + phi.name() + ')',
                 mesh().time().timeName(),
-                mesh()
+                mesh().thisDb()
             ),
             this->fvcDdtPhiCoeff(U.oldTime(), phi.oldTime())
            *rDeltaT
@@ -790,7 +790,7 @@ backwardDdtScheme<Type>::fvcDdtUfCorr
                     "ddtCorr("
                   + rho.name() + ',' + U.name() + ',' + Uf.name() + ')',
                     mesh().time().timeName(),
-                    mesh()
+                    mesh().thisDb()
                 ),
                 this->fvcDdtPhiCoeff
                 (
@@ -824,7 +824,7 @@ backwardDdtScheme<Type>::fvcDdtUfCorr
                     "ddtCorr("
                   + rho.name() + ',' + U.name() + ',' + Uf.name() + ')',
                     mesh().time().timeName(),
-                    mesh()
+                    mesh().thisDb()
                 ),
                 this->fvcDdtPhiCoeff
                 (
@@ -901,7 +901,7 @@ backwardDdtScheme<Type>::fvcDdtPhiCorr
                     "ddtCorr("
                   + rho.name() + ',' + U.name() + ',' + phi.name() + ')',
                     mesh().time().timeName(),
-                    mesh()
+                    mesh().thisDb()
                 ),
                 this->fvcDdtPhiCoeff(rhoU0, phi.oldTime(), rho.oldTime())
                *rDeltaT
@@ -931,7 +931,7 @@ backwardDdtScheme<Type>::fvcDdtPhiCorr
                     "ddtCorr("
                   + rho.name() + ',' + U.name() + ',' + phi.name() + ')',
                     mesh().time().timeName(),
-                    mesh()
+                    mesh().thisDb()
                 ),
                 this->fvcDdtPhiCoeff(U.oldTime(), phi.oldTime(), rho.oldTime())
                *rDeltaT
@@ -980,7 +980,7 @@ tmp<surfaceScalarField> backwardDdtScheme<Type>::meshPhi
             (
                 mesh().phi().name(),
                 mesh().time().timeName(),
-                mesh(),
+                mesh().thisDb(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
                 false

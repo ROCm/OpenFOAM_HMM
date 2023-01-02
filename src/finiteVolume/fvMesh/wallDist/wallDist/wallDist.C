@@ -49,7 +49,7 @@ void Foam::wallDist::constructn() const
             (
                 "n" & patchTypeName_,
                 mesh().time().timeName(),
-                mesh()
+                mesh().thisDb()
             ),
             mesh(),
             dimensionedVector(dimless, Zero),
@@ -115,7 +115,7 @@ Foam::wallDist::wallDist
         (
             "y" & patchTypeName_,
             mesh.time().timeName(),
-            mesh
+            mesh.thisDb()
         ),
         mesh,
         dimensionedScalar("y" & patchTypeName_, dimLength, SMALL),

@@ -160,7 +160,7 @@ tmp<surfaceScalarField> ddtScheme<Type>::fvcDdtPhiCoeff
             (
                 "ddtCouplingCoeff",
                 U.mesh().time().timeName(),
-                U.mesh()
+                U.mesh().thisDb()
             ),
             U.mesh(),
             dimensionedScalar("one", dimless, 1.0)
@@ -234,7 +234,7 @@ tmp<surfaceScalarField> ddtScheme<Type>::fvcDdtPhiCoeffExperimental
             (
                 "ddtCouplingCoeff",
                 U.mesh().time().timeName(),
-                U.mesh()
+                U.mesh().thisDb()
             ),
             U.mesh(),
             dimensionedScalar("one", dimless, 1.0)

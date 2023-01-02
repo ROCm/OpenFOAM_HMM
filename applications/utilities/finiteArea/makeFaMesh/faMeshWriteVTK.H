@@ -23,7 +23,7 @@ Description
         // vtk::formatType::INLINE_ASCII,
         fileName
         (
-            aMesh.mesh().time().globalPath() / "finiteArea"
+            aMesh.time().globalPath() / "finiteArea"
         )
     );
 

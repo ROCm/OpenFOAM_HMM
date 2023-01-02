@@ -55,7 +55,7 @@ EulerDdtScheme<Type>::fvcDdt
     (
         "ddt("+dt.name()+')',
         mesh().time().timeName(),
-        mesh()
+        mesh().thisDb()
     );
 
     if (mesh().moving())
@@ -99,7 +99,7 @@ EulerDdtScheme<Type>::fvcDdt
     (
         "ddt("+vf.name()+')',
         mesh().time().timeName(),
-        mesh()
+        mesh().thisDb()
     );
 
     if (mesh().moving())
@@ -149,7 +149,7 @@ EulerDdtScheme<Type>::fvcDdt
     (
         "ddt("+rho.name()+','+vf.name()+')',
         mesh().time().timeName(),
-        mesh()
+        mesh().thisDb()
     );
 
     if (mesh().moving())
@@ -199,7 +199,7 @@ EulerDdtScheme<Type>::fvcDdt
     (
         "ddt("+rho.name()+','+vf.name()+')',
         mesh().time().timeName(),
-        mesh()
+        mesh().thisDb()
     );
 
     if (mesh().moving())
@@ -253,7 +253,7 @@ EulerDdtScheme<Type>::fvcDdt
     (
         "ddt("+alpha.name()+','+rho.name()+','+vf.name()+')',
         mesh().time().timeName(),
-        mesh()
+        mesh().thisDb()
     );
 
     if (mesh().moving())
@@ -317,7 +317,7 @@ EulerDdtScheme<Type>::fvcDdt
     (
         "ddt("+sf.name()+')',
         mesh().time().timeName(),
-        mesh()
+        mesh().thisDb()
     );
 
     return tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
@@ -509,7 +509,7 @@ EulerDdtScheme<Type>::fvcDdtUfCorr
             (
                 "ddtCorr(" + U.name() + ',' + Uf.name() + ')',
                 mesh().time().timeName(),
-                mesh()
+                mesh().thisDb()
             ),
             this->fvcDdtPhiCoeff(U.oldTime(), phiUf0, phiCorr)
            *rDeltaT*phiCorr
@@ -541,7 +541,7 @@ EulerDdtScheme<Type>::fvcDdtPhiCorr
             (
                 "ddtCorr(" + U.name() + ',' + phi.name() + ')',
                 mesh().time().timeName(),
-                mesh()
+                mesh().thisDb()
             ),
             this->fvcDdtPhiCoeff(U.oldTime(), phi.oldTime(), phiCorr)
            *rDeltaT*phiCorr
@@ -584,7 +584,7 @@ EulerDdtScheme<Type>::fvcDdtUfCorr
                     "ddtCorr("
                   + rho.name() + ',' + U.name() + ',' + Uf.name() + ')',
                     mesh().time().timeName(),
-                    mesh()
+                    mesh().thisDb()
                 ),
                 this->fvcDdtPhiCoeff(rhoU0, phiUf0, phiCorr, rho.oldTime())
                *rDeltaT*phiCorr
@@ -612,7 +612,7 @@ EulerDdtScheme<Type>::fvcDdtUfCorr
                     "ddtCorr("
                   + rho.name() + ',' + U.name() + ',' + Uf.name() + ')',
                     mesh().time().timeName(),
-                    mesh()
+                    mesh().thisDb()
                 ),
                 this->fvcDdtPhiCoeff
                 (
@@ -671,7 +671,7 @@ EulerDdtScheme<Type>::fvcDdtPhiCorr
                     "ddtCorr("
                   + rho.name() + ',' + U.name() + ',' + phi.name() + ')',
                     mesh().time().timeName(),
-                    mesh()
+                    mesh().thisDb()
                 ),
                 this->fvcDdtPhiCoeff
                 (
@@ -703,7 +703,7 @@ EulerDdtScheme<Type>::fvcDdtPhiCorr
                     "ddtCorr("
                   + rho.name() + ',' + U.name() + ',' + phi.name() + ')',
                     mesh().time().timeName(),
-                    mesh()
+                    mesh().thisDb()
                 ),
                 this->fvcDdtPhiCoeff
                 (

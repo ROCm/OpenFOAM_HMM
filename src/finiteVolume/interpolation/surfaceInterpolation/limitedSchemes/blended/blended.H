@@ -139,7 +139,7 @@ public:
                     (
                         vf.name() + "BlendingFactor",
                         this->mesh().time().timeName(),
-                        this->mesh(),
+                        this->mesh().thisDb(),
                         IOobject::NO_READ,
                         IOobject::NO_WRITE,
                         false
@@ -169,7 +169,7 @@ public:
                     (
                         "blendedLimiter",
                         this->mesh().time().timeName(),
-                        this->mesh(),
+                        this->mesh().thisDb(),
                         IOobject::NO_READ,
                         IOobject::NO_WRITE,
                         false

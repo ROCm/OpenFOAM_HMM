@@ -120,7 +120,8 @@ public:
                 (
                     "upwindLimiter",
                     this->mesh().time().timeName(),
-                    this->mesh(),
+                    this->mesh().time().timeName(),
+                    this->mesh().thisDb(),
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
                     false

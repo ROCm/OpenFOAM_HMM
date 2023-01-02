@@ -926,9 +926,10 @@ void Foam::fvMatrix<Type>::createOrUpdateLduPrimitiveAssembly()
     (
         lduAssemblyName_,
         psi_.mesh().time().timeName(),
-        psi_.mesh(),
+        psi_.mesh().thisDb(),
         IOobject::NO_READ,
-        IOobject::NO_WRITE
+        IOobject::NO_WRITE,
+        IOobject::REGISTER
     );
 
     UPtrList<lduMesh> uMeshPtr(nMatrices());

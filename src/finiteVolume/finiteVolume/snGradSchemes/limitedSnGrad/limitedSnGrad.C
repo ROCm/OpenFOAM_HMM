@@ -100,7 +100,7 @@ limitedSnGrad<Type>::correction
                 (
                     fieldName,
                     vf.mesh().time().timeName(),
-                    vf.mesh(),
+                    vf.mesh().thisDb(),
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
                     false

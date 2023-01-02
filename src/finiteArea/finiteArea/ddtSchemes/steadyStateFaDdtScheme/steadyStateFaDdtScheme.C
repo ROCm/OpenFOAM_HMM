@@ -53,8 +53,8 @@ steadyStateFaDdtScheme<Type>::facDdt
         IOobject
         (
             "ddt("+dt.name()+')',
-            mesh()().time().timeName(),
-            mesh()()
+            mesh().time().timeName(),
+            mesh().thisDb()
         ),
         mesh(),
         dimensioned<Type>(dt.dimensions()/dimTime, Zero)
@@ -74,8 +74,8 @@ steadyStateFaDdtScheme<Type>::facDdt0
         IOobject
         (
             "ddt("+dt.name()+')',
-            mesh()().time().timeName(),
-            mesh()()
+            mesh().time().timeName(),
+            mesh().thisDb()
         ),
         mesh(),
         dimensioned<Type>(dt.dimensions()/dimTime, Zero)
@@ -95,8 +95,8 @@ steadyStateFaDdtScheme<Type>::facDdt
         IOobject
         (
             "ddt("+vf.name()+')',
-            mesh()().time().timeName(),
-            mesh()()
+            mesh().time().timeName(),
+            mesh().thisDb()
         ),
         mesh(),
         dimensioned<Type>(vf.dimensions()/dimTime, Zero)
@@ -116,8 +116,8 @@ steadyStateFaDdtScheme<Type>::facDdt0
         IOobject
         (
             "ddt0("+vf.name()+')',
-            mesh()().time().timeName(),
-            mesh()()
+            mesh().time().timeName(),
+            mesh().thisDb()
         ),
         mesh(),
         dimensioned<Type>(vf.dimensions()/dimTime, Zero)
@@ -138,8 +138,8 @@ steadyStateFaDdtScheme<Type>::facDdt
         IOobject
         (
             "ddt("+rho.name()+','+vf.name()+')',
-            mesh()().time().timeName(),
-            mesh()()
+            mesh().time().timeName(),
+            mesh().thisDb()
         ),
         mesh(),
         dimensioned<Type>(rho.dimensions()*vf.dimensions()/dimTime, Zero)
@@ -159,8 +159,8 @@ steadyStateFaDdtScheme<Type>::facDdt0
         IOobject
         (
             "ddt0("+rho.name()+','+vf.name()+')',
-            mesh()().time().timeName(),
-            mesh()()
+            mesh().time().timeName(),
+            mesh().thisDb()
         ),
         mesh(),
         dimensioned<Type>(rho.dimensions()*vf.dimensions()/dimTime, Zero)
@@ -181,8 +181,8 @@ steadyStateFaDdtScheme<Type>::facDdt
         IOobject
         (
             "ddt("+rho.name()+','+vf.name()+')',
-            mesh()().time().timeName(),
-            mesh()()
+            mesh().time().timeName(),
+            mesh().thisDb()
         ),
         mesh(),
         dimensioned<Type>(rho.dimensions()*vf.dimensions()/dimTime, Zero)
@@ -203,8 +203,8 @@ steadyStateFaDdtScheme<Type>::facDdt0
         IOobject
         (
             "ddt0("+rho.name()+','+vf.name()+')',
-            mesh()().time().timeName(),
-            mesh()()
+            mesh().time().timeName(),
+            mesh().thisDb()
         ),
         mesh(),
         dimensioned<Type>(rho.dimensions()*vf.dimensions()/dimTime, Zero)
