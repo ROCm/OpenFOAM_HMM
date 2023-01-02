@@ -179,37 +179,29 @@ void Foam::JohnsonJacksonParticleThetaFvPatchScalarField::updateCoeffs()
     );
 
     // lookup all the fields on this patch
-    const fvPatchScalarField& alpha
-    (
-        patch().lookupPatchField<volScalarField, scalar>
+    const auto& alpha =
+        patch().lookupPatchField<volScalarField>
         (
             phased.volScalarField::name()
-        )
-    );
+        );
 
-    const fvPatchVectorField& U
-    (
-        patch().lookupPatchField<volVectorField, vector>
+    const auto& U =
+        patch().lookupPatchField<volVectorField>
         (
             IOobject::groupName("U", phased.name())
-        )
-    );
+        );
 
-    const fvPatchScalarField& gs0
-    (
-        patch().lookupPatchField<volScalarField, scalar>
+    const auto& gs0 =
+        patch().lookupPatchField<volScalarField>
         (
             IOobject::groupName("gs0", phased.name())
-        )
-    );
+        );
 
-    const fvPatchScalarField& kappa
-    (
-        patch().lookupPatchField<volScalarField, scalar>
+    const auto& kappa =
+        patch().lookupPatchField<volScalarField>
         (
             IOobject::groupName("kappa", phased.name())
-        )
-    );
+        );
 
     const scalarField Theta(patchInternalField());
 

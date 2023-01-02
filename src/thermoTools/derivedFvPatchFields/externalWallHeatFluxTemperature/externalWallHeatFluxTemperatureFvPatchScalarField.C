@@ -319,7 +319,7 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
     {
         qr =
             qrRelaxation_
-           *patch().lookupPatchField<volScalarField, scalar>(qrName_)
+           *patch().lookupPatchField<volScalarField>(qrName_)
           + (1 - qrRelaxation_)*qrPrevious_;
 
         qrPrevious_ = qr;

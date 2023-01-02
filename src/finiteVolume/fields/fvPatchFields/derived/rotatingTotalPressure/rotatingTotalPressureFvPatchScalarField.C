@@ -114,7 +114,7 @@ void Foam::rotatingTotalPressureFvPatchScalarField::updateCoeffs()
 
     const vectorField Up
     (
-        patch().lookupPatchField<volVectorField, vector>(UName())
+        patch().lookupPatchField<volVectorField>(UName())
       + rotationVelocity
     );
 

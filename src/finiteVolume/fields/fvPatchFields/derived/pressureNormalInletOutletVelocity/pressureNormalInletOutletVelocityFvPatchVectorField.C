@@ -121,23 +121,18 @@ void Foam::pressureNormalInletOutletVelocityFvPatchVectorField::updateCoeffs()
         return;
     }
 
-    const surfaceScalarField& phi =
-        db().lookupObject<surfaceScalarField>(phiName_);
-
-    const fvsPatchField<scalar>& phip =
-        patch().patchField<surfaceScalarField, scalar>(phi);
+    const auto& phip = patch().lookupPatchField<surfaceScalarField>(phiName_);
 
     tmp<vectorField> n = patch().nf();
     const Field<scalar>& magS = patch().magSf();
 
-    if (phi.dimensions() == dimVolume/dimTime)
+    if (phip.internalField().dimensions() == dimVolume/dimTime)
     {
         refValue() = n*phip/magS;
     }
-    else if (phi.dimensions() == dimMass/dimTime)
+    else if (phip.internalField().dimensions() == dimMass/dimTime)
     {
-        const fvPatchField<scalar>& rhop =
-            patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+        const auto& rhop = patch().lookupPatchField<volScalarField>(rhoName_);
 
         refValue() = n*phip/(rhop*magS);
     }

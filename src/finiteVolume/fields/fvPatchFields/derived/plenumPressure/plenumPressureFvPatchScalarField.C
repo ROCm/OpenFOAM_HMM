@@ -177,10 +177,9 @@ void Foam::plenumPressureFvPatchScalarField::updateCoeffs()
         (
             internalField().name()
         ).oldTime().boundaryField()[patch().index()];
-    const fvPatchField<vector>& U =
-        patch().lookupPatchField<volVectorField, vector>(UName_);
-    const fvsPatchField<scalar>& phi =
-        patch().lookupPatchField<surfaceScalarField, scalar>(phiName_);
+
+    const auto& U = patch().lookupPatchField<volVectorField>(UName_);
+    const auto& phi = patch().lookupPatchField<surfaceScalarField>(phiName_);
 
     // Get the timestep
     const scalar dt = db().time().deltaTValue();

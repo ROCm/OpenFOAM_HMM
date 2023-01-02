@@ -147,10 +147,8 @@ void Foam::prghPressureFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    const scalarField& rhop = patch().lookupPatchField<volScalarField, scalar>
-    (
-        rhoName_
-    );
+    const scalarField& rhop =
+        patch().lookupPatchField<volScalarField>(rhoName_);
 
     const uniformDimensionedVectorField& g =
         meshObjects::gravity::New(db().time());

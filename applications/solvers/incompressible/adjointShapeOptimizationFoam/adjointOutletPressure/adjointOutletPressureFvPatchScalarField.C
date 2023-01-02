@@ -89,17 +89,10 @@ void Foam::adjointOutletPressureFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    const fvsPatchField<scalar>& phip =
-        patch().lookupPatchField<surfaceScalarField, scalar>("phi");
-
-    const fvsPatchField<scalar>& phiap =
-        patch().lookupPatchField<surfaceScalarField, scalar>("phia");
-
-    const fvPatchField<vector>& Up =
-        patch().lookupPatchField<volVectorField, vector>("U");
-
-    const fvPatchField<vector>& Uap =
-        patch().lookupPatchField<volVectorField, vector>("Ua");
+    const auto& phip = patch().lookupPatchField<surfaceScalarField>("phi");
+    const auto& phiap = patch().lookupPatchField<surfaceScalarField>("phia");
+    const auto& Up = patch().lookupPatchField<volVectorField>("U");
+    const auto& Uap = patch().lookupPatchField<volVectorField>("Ua");
 
     operator==((phiap/patch().magSf() - 1.0)*phip/patch().magSf() + (Up & Uap));
 

@@ -158,7 +158,7 @@ void Foam::totalFlowRateAdvectiveDiffusiveFvPatchScalarField::updateCoeffs()
 
     const label patchi = patch().index();
 
-    const compressible::turbulenceModel& turbModel =
+    const auto& turbModel =
         db().lookupObject<compressible::turbulenceModel>
         (
             IOobject::groupName
@@ -168,8 +168,7 @@ void Foam::totalFlowRateAdvectiveDiffusiveFvPatchScalarField::updateCoeffs()
             )
         );
 
-    const fvsPatchField<scalar>& phip =
-        patch().lookupPatchField<surfaceScalarField, scalar>(phiName_);
+    const auto& phip = patch().lookupPatchField<surfaceScalarField>(phiName_);
 
     const scalarField alphap(turbModel.alphaEff(patchi));
 

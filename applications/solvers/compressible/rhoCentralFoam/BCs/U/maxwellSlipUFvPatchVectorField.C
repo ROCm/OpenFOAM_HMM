@@ -155,12 +155,9 @@ void Foam::maxwellSlipUFvPatchVectorField::updateCoeffs()
         return;
     }
 
-    const fvPatchScalarField& pmu =
-        patch().lookupPatchField<volScalarField, scalar>(muName_);
-    const fvPatchScalarField& prho =
-        patch().lookupPatchField<volScalarField, scalar>(rhoName_);
-    const fvPatchField<scalar>& ppsi =
-        patch().lookupPatchField<volScalarField, scalar>(psiName_);
+    const auto& pmu = patch().lookupPatchField<volScalarField>(muName_);
+    const auto& prho = patch().lookupPatchField<volScalarField>(rhoName_);
+    const auto& ppsi = patch().lookupPatchField<volScalarField>(psiName_);
 
     Field<scalar> C1
     (
@@ -187,8 +184,8 @@ void Foam::maxwellSlipUFvPatchVectorField::updateCoeffs()
 
     if (curvature_)
     {
-        const fvPatchTensorField& ptauMC =
-            patch().lookupPatchField<volTensorField, tensor>(tauMCName_);
+        const auto& ptauMC =
+            patch().lookupPatchField<volTensorField>(tauMCName_);
         vectorField n(patch().nf());
 
         refValue() -= C1/prho*transform(I - n*n, (n & ptauMC));

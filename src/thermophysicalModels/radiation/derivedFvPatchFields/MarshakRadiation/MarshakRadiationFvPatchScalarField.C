@@ -133,15 +133,13 @@ void Foam::radiation::MarshakRadiationFvPatchScalarField::updateCoeffs()
     UPstream::msgType() = oldTag+1;
 
     // Temperature field
-    const scalarField& Tp =
-        patch().lookupPatchField<volScalarField, scalar>(TName_);
+    const auto& Tp = patch().lookupPatchField<volScalarField>(TName_);
 
     // Re-calc reference value
     refValue() = 4.0*constant::physicoChemical::sigma.value()*pow4(Tp);
 
     // Diffusion coefficient - created by radiation model's ::updateCoeffs()
-    const scalarField& gamma =
-        patch().lookupPatchField<volScalarField, scalar>("gammaRad");
+    const auto& gamma = patch().lookupPatchField<volScalarField>("gammaRad");
 
     const boundaryRadiationProperties& boundaryRadiation =
         boundaryRadiationProperties::New(internalField().mesh());

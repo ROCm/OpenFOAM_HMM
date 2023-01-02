@@ -152,7 +152,7 @@ void Foam::uniformInletOutletFvPatchField<Type>::updateCoeffs()
     this->refValue() = uniformInletValue_->value(t);
 
     const Field<scalar>& phip =
-        this->patch().template lookupPatchField<surfaceScalarField, scalar>
+        this->patch().template lookupPatchField<surfaceScalarField>
         (
             phiName_
         );

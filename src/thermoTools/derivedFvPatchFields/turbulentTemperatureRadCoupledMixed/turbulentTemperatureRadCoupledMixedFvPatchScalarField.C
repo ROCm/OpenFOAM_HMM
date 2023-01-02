@@ -373,7 +373,7 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
         const auto& nbrField = refCast
                 <const turbulentTemperatureRadCoupledMixedFvPatchScalarField>
                 (
-                    nbrPatch.lookupPatchField<volScalarField, scalar>(TnbrName_)
+                    nbrPatch.lookupPatchField<volScalarField>(TnbrName_)
                 );
 
         // Swap to obtain full local values of neighbour K*delta
@@ -421,7 +421,7 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
     scalarField qr(Tp.size(), Zero);
     if (qrName_ != "none")
     {
-        qr = patch().lookupPatchField<volScalarField, scalar>(qrName_);
+        qr = patch().lookupPatchField<volScalarField>(qrName_);
     }
 
     scalarField qrNbr(Tp.size(), Zero);
@@ -433,13 +433,11 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
             const label samplePatchi = mpp.samplePolyPatch().index();
             const fvPatch& nbrPatch =
                 refCast<const fvMesh>(nbrMesh).boundary()[samplePatchi];
-            qrNbr =
-                nbrPatch.lookupPatchField<volScalarField, scalar>(qrNbrName_);
+            qrNbr = nbrPatch.lookupPatchField<volScalarField>(qrNbrName_);
         }
         else
         {
-            qrNbr =
-                patch().lookupPatchField<volScalarField, scalar>(qrNbrName_);
+            qrNbr = patch().lookupPatchField<volScalarField>(qrNbrName_);
         }
         distribute(qrNbrName_, qrNbr);
     }
@@ -635,7 +633,7 @@ beta() const
         nbrField = refCast
             <const turbulentTemperatureRadCoupledMixedFvPatchScalarField>
             (
-                nbrPatch.lookupPatchField<volScalarField, scalar>(TnbrName_)
+                nbrPatch.lookupPatchField<volScalarField>(TnbrName_)
             );
 
     // Swap to obtain full local values of neighbour internal field

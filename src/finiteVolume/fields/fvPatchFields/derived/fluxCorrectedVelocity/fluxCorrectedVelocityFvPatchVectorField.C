@@ -106,23 +106,18 @@ void Foam::fluxCorrectedVelocityFvPatchVectorField::evaluate
 
     zeroGradientFvPatchVectorField::evaluate();
 
-    const surfaceScalarField& phi =
-        db().lookupObject<surfaceScalarField>(phiName_);
-
-    const fvsPatchField<scalar>& phip =
-        patch().patchField<surfaceScalarField, scalar>(phi);
+    const auto& phip = patch().lookupPatchField<surfaceScalarField>(phiName_);
 
     const vectorField n(patch().nf());
     const Field<scalar>& magS = patch().magSf();
 
-    if (phi.dimensions() == dimVolume/dimTime)
+    if (phip.internalField().dimensions() == dimVolume/dimTime)
     {
         operator==(*this - n*(n & *this) + n*phip/magS);
     }
-    else if (phi.dimensions() == dimMass/dimTime)
+    else if (phip.internalField().dimensions() == dimMass/dimTime)
     {
-        const fvPatchField<scalar>& rhop =
-            patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+        const auto& rhop = patch().lookupPatchField<volScalarField>(rhoName_);
 
         operator==(*this - n*(n & *this) + n*phip/(rhop*magS));
     }

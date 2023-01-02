@@ -173,15 +173,13 @@ void Foam::filmPyrolysisVelocityCoupledFvPatchVectorField::updateCoeffs()
     pyrModel.toPrimary(pyrPatchi, phiPyr);
 
 
-    const surfaceScalarField& phi =
-        db().lookupObject<surfaceScalarField>(phiName_);
+    const auto& phi = db().lookupObject<surfaceScalarField>(phiName_);
 
     if (phi.dimensions() == dimVolume/dimTime)
     {}
     else if (phi.dimensions() == dimMass/dimTime)
     {
-        const fvPatchField<scalar>& rhop =
-            patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+        const auto& rhop = patch().lookupPatchField<volScalarField>(rhoName_);
         phiPyr /= rhop;
     }
     else

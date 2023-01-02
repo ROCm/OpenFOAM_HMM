@@ -200,17 +200,13 @@ void Foam::syringePressureFvPatchScalarField::updateCoeffs()
     scalar t = db().time().value();
     scalar deltaT = db().time().deltaTValue();
 
-    const surfaceScalarField& phi =
-        db().lookupObject<surfaceScalarField>(phiName_);
+    const auto& phip = patch().lookupPatchField<surfaceScalarField>(phiName_);
 
-    const fvsPatchField<scalar>& phip =
-        patch().patchField<surfaceScalarField, scalar>(phi);
-
-    if (phi.dimensions() == dimVolume/dimTime)
+    if (phip.internalField().dimensions() == dimVolume/dimTime)
     {
         ams_ = ams0_ + deltaT*sum((*this*psi_)*phip);
     }
-    else if (phi.dimensions() == dimMass/dimTime)
+    else if (phip.internalField().dimensions() == dimMass/dimTime)
     {
         ams_ = ams0_ + deltaT*sum(phip);
     }

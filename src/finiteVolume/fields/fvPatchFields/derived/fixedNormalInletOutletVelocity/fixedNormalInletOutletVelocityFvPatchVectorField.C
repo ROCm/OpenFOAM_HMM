@@ -166,8 +166,8 @@ void Foam::fixedNormalInletOutletVelocityFvPatchVectorField::updateCoeffs()
 
     if (fixTangentialInflow_)
     {
-        const fvsPatchField<scalar>& phip =
-            patch().lookupPatchField<surfaceScalarField, scalar>(phiName_);
+        const auto& phip =
+            patch().lookupPatchField<surfaceScalarField>(phiName_);
 
         valueFraction() += neg(phip)*(I - valueFraction());
     }

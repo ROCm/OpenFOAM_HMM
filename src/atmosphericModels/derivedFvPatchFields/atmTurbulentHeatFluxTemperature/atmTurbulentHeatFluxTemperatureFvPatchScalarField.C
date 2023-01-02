@@ -186,7 +186,7 @@ void atmTurbulentHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
     }
 
     const scalarField& alphaEffp =
-        patch().lookupPatchField<volScalarField, scalar>(alphaEffName_);
+        patch().lookupPatchField<volScalarField>(alphaEffName_);
 
     const scalar t = db().time().timeOutputValue();
     const scalar Cp0 = Cp0_->value(t);

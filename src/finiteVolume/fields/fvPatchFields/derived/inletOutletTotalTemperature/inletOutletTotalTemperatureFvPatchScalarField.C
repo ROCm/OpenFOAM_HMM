@@ -169,14 +169,14 @@ void Foam::inletOutletTotalTemperatureFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    const fvPatchVectorField& Up =
-        patch().lookupPatchField<volVectorField, vector>(UName_);
+    const auto& Up =
+        patch().lookupPatchField<volVectorField>(UName_);
 
-    const fvsPatchField<scalar>& phip =
-        patch().lookupPatchField<surfaceScalarField, scalar>(this->phiName_);
+    const auto& phip =
+        patch().lookupPatchField<surfaceScalarField>(this->phiName_);
 
-    const fvPatchField<scalar>& psip =
-        patch().lookupPatchField<volScalarField, scalar>(psiName_);
+    const auto& psip =
+        patch().lookupPatchField<volScalarField>(psiName_);
 
     scalar gM1ByG = (gamma_ - 1.0)/gamma_;
 

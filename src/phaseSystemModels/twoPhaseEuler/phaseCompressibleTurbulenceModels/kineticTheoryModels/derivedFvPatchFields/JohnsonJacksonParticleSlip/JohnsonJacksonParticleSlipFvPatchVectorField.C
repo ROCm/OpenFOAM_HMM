@@ -163,25 +163,21 @@ void Foam::JohnsonJacksonParticleSlipFvPatchVectorField::updateCoeffs()
     );
 
     // lookup all the fields on this patch
-    const fvPatchScalarField& alpha
-    (
-        patch().lookupPatchField<volScalarField, scalar>
+    const auto& alpha =
+        patch().lookupPatchField<volScalarField>
         (
             phased.volScalarField::name()
-        )
-    );
+        );
 
-    const fvPatchScalarField& gs0
-    (
-        patch().lookupPatchField<volScalarField, scalar>
+    const auto& gs0 =
+        patch().lookupPatchField<volScalarField>
         (
             IOobject::groupName("gs0", phased.name())
-        )
-    );
+        );
 
     const scalarField nu
     (
-        patch().lookupPatchField<volScalarField, scalar>
+        patch().lookupPatchField<volScalarField>
         (
             IOobject::groupName("nut", phased.name())
         )
@@ -189,7 +185,7 @@ void Foam::JohnsonJacksonParticleSlipFvPatchVectorField::updateCoeffs()
 
     const scalarField nuFric
     (
-        patch().lookupPatchField<volScalarField, scalar>
+        patch().lookupPatchField<volScalarField>
         (
             IOobject::groupName("nuFric", phased.name())
         )
@@ -200,7 +196,7 @@ void Foam::JohnsonJacksonParticleSlipFvPatchVectorField::updateCoeffs()
     const fvPatchScalarField& Theta
     (
         db().foundObject<volScalarField>(ThetaName)
-      ? patch().lookupPatchField<volScalarField, scalar>(ThetaName)
+      ? patch().lookupPatchField<volScalarField>(ThetaName)
       : alpha
     );
 

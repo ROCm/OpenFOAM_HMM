@@ -205,10 +205,8 @@ void Foam::CLASS::updateCoeffs()
     );
 
     const scalarField& phip =
-        this->patch().template lookupPatchField<surfaceScalarField, scalar>
-        (
-            "phi"
-        );
+        this->patch().template lookupPatchField<surfaceScalarField>("phi");
+
     this->valueFraction() = 1.0 - pos0(phip);
 
     PARENT::updateCoeffs();

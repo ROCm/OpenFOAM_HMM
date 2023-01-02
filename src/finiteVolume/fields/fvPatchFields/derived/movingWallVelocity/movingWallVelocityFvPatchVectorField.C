@@ -117,7 +117,7 @@ Foam::movingWallVelocityFvPatchVectorField::Uwall() const
 
     scalarField phip
     (
-        p.patchField<surfaceScalarField, scalar>(fvc::meshPhi(U))
+        p.patchField<surfaceScalarField>(fvc::meshPhi(U))
     );
 
     const vectorField n(p.nf());

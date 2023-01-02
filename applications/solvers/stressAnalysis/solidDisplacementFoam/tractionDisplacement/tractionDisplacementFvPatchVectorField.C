@@ -152,14 +152,9 @@ void tractionDisplacementFvPatchVectorField::updateCoeffs()
         db().lookupObject<IOdictionary>("thermalProperties");
 
 
-    const fvPatchField<scalar>& rho =
-        patch().lookupPatchField<volScalarField, scalar>("rho");
-
-    const fvPatchField<scalar>& rhoE =
-        patch().lookupPatchField<volScalarField, scalar>("E");
-
-    const fvPatchField<scalar>& nu =
-        patch().lookupPatchField<volScalarField, scalar>("nu");
+    const auto& rho = patch().lookupPatchField<volScalarField>("rho");
+    const auto& rhoE = patch().lookupPatchField<volScalarField>("E");
+    const auto& nu = patch().lookupPatchField<volScalarField>("nu");
 
     scalarField E(rhoE/rho);
     scalarField mu(E/(2.0*(1.0 + nu)));
@@ -176,8 +171,7 @@ void tractionDisplacementFvPatchVectorField::updateCoeffs()
 
     vectorField n(patch().nf());
 
-    const fvPatchField<symmTensor>& sigmaD =
-        patch().lookupPatchField<volSymmTensorField, symmTensor>("sigmaD");
+    const auto& sigmaD = patch().lookupPatchField<volSymmTensorField>("sigmaD");
 
     gradient() =
     (
@@ -187,11 +181,10 @@ void tractionDisplacementFvPatchVectorField::updateCoeffs()
 
     if (thermalProperties.get<bool>("thermalStress"))
     {
-        const fvPatchField<scalar>&  threeKalpha=
-            patch().lookupPatchField<volScalarField, scalar>("threeKalpha");
+        const auto& threeKalpha =
+            patch().lookupPatchField<volScalarField>("threeKalpha");
 
-        const fvPatchField<scalar>& T =
-            patch().lookupPatchField<volScalarField, scalar>("T");
+        const auto& T = patch().lookupPatchField<volScalarField>("T");
 
         gradient() += n*threeKalpha*T/twoMuLambda;
     }

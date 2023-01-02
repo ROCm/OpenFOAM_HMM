@@ -110,22 +110,23 @@ Foam::tmp<Foam::scalarField>
 Foam::waveTransmissiveFvPatchField<Type>::advectionSpeed() const
 {
     // Lookup the velocity and compressibility of the patch
-    const fvPatchField<scalar>& psip =
-        this->patch().template
-            lookupPatchField<volScalarField, scalar>(psiName_);
+    const auto& psip =
+        this->patch().template lookupPatchField<volScalarField>(psiName_);
 
-    const surfaceScalarField& phi =
+    const auto& phi =
         this->db().template lookupObject<surfaceScalarField>(this->phiName_);
 
-    fvsPatchField<scalar> phip =
+    scalarField phip
+    (
         this->patch().template
-            lookupPatchField<surfaceScalarField, scalar>(this->phiName_);
+            lookupPatchField<surfaceScalarField>(this->phiName_)
+    );
 
     if (phi.dimensions() == dimMass/dimTime)
     {
-        const fvPatchScalarField& rhop =
+        const auto& rhop =
             this->patch().template
-                lookupPatchField<volScalarField, scalar>(this->rhoName_);
+                lookupPatchField<volScalarField>(this->rhoName_);
 
         phip /= rhop;
     }

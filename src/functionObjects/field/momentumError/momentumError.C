@@ -147,7 +147,7 @@ Foam::functionObjects::momentumError::momentumError
 {
     read(dict);
 
-    const auto& phi =lookupObject<surfaceScalarField>(phiName_);
+    const auto& phi = lookupObject<surfaceScalarField>(phiName_);
 
     const dimensionSet momDims
     (

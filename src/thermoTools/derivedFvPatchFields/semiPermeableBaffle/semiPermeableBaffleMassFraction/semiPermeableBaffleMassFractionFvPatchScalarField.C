@@ -132,8 +132,7 @@ Foam::semiPermeableBaffleMassFractionFvPatchScalarField::phiY() const
     const label nbrPatchi = samplePolyPatch().index();
     const fvPatch& nbrPatch = patch().boundaryMesh()[nbrPatchi];
 
-    const fvPatchScalarField& nbrYp =
-        nbrPatch.lookupPatchField<volScalarField, scalar>(YName);
+    const auto& nbrYp = nbrPatch.lookupPatchField<volScalarField>(YName);
     scalarField nbrYc(nbrYp.patchInternalField());
     mappedPatchBase::map().distribute(nbrYc);
 
@@ -149,7 +148,7 @@ void Foam::semiPermeableBaffleMassFractionFvPatchScalarField::updateCoeffs()
     }
 
     const scalarField& phip =
-        patch().lookupPatchField<surfaceScalarField, scalar>(phiName_);
+        patch().lookupPatchField<surfaceScalarField>(phiName_);
 
     const turbulenceModel& turbModel =
         db().lookupObject<turbulenceModel>

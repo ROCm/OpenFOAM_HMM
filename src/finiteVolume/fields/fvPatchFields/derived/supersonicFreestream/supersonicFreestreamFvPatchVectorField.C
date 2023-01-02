@@ -166,14 +166,11 @@ void Foam::supersonicFreestreamFvPatchVectorField::updateCoeffs()
         return;
     }
 
-    const fvPatchField<scalar>& pT =
-        patch().lookupPatchField<volScalarField, scalar>(TName_);
+    const auto& pT = patch().lookupPatchField<volScalarField>(TName_);
 
-    const fvPatchField<scalar>& pp =
-        patch().lookupPatchField<volScalarField, scalar>(pName_);
+    const auto& pp = patch().lookupPatchField<volScalarField>(pName_);
 
-    const fvPatchField<scalar>& ppsi =
-        patch().lookupPatchField<volScalarField, scalar>(psiName_);
+    const auto& ppsi = patch().lookupPatchField<volScalarField>(psiName_);
 
     // Need R of the free-stream flow.  Assume R is independent of location
     // along patch so use face 0

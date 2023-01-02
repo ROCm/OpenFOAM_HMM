@@ -155,8 +155,7 @@ void Foam::waveSurfacePressureFvPatchScalarField::updateCoeffs()
     ddtSchemeType ddtScheme(ddtSchemeTypeNames_[ddtSchemeName]);
 
     // Retrieve the flux field from the database
-    const surfaceScalarField& phi =
-        db().lookupObject<surfaceScalarField>(phiName_);
+    const auto& phi = db().lookupObject<surfaceScalarField>(phiName_);
 
     // Cache the patch face-normal vectors
     tmp<vectorField> nf(patch().nf());
@@ -166,8 +165,7 @@ void Foam::waveSurfacePressureFvPatchScalarField::updateCoeffs()
 
     if (phi.dimensions() == dimMass/dimTime)
     {
-        const scalarField& rhop =
-            patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+        const auto& rhop = patch().lookupPatchField<volScalarField>(rhoName_);
 
         dZetap /= rhop;
     }

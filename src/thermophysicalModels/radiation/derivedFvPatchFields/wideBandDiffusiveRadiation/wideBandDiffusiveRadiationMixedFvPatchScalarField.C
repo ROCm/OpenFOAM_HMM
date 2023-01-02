@@ -211,7 +211,7 @@ updateCoeffs()
     if (dom.useSolarLoad())
     {
         // Looking for primary heat flux single band
-        Ir += patch().lookupPatchField<volScalarField,scalar>
+        Ir += patch().lookupPatchField<volScalarField>
         (
             dom.primaryFluxName_ + "_" + name(lambdaId)
         );

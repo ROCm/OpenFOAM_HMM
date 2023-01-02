@@ -112,8 +112,7 @@ functions
 
         codeWrite
         #{
-            const volScalarField& rho =
-                mesh().lookupObject<volScalarField>("rho");
+            const auto& rho = mesh().lookupObject<volScalarField>("rho");
 
             Info<< "rho volume = " << rho.weightedAverage(mesh().Vsc()) << endl;
         #};

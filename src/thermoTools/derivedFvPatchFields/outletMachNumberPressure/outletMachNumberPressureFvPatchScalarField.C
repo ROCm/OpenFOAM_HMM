@@ -156,8 +156,7 @@ void Foam::outletMachNumberPressureFvPatchScalarField::updateCoeffs()
 
     const scalarField pb(p.oldTime().boundaryField()[patchi]);
 
-    const fvsPatchField<scalar>& phi =
-        patch().lookupPatchField<surfaceScalarField, scalar>(phiName_);
+    const auto& phi = patch().lookupPatchField<surfaceScalarField>(phiName_);
 
     // Calculate the current mass flow rate
     if (phi.internalField().dimensions() != dimMass/dimTime)
@@ -179,8 +178,7 @@ void Foam::outletMachNumberPressureFvPatchScalarField::updateCoeffs()
 
     const scalarField gamma(thermoPtr->gamma()().boundaryField()[patchi]);
 
-    const fvPatchField<scalar>& rho =
-        patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+    const auto& rho = patch().lookupPatchField<volScalarField>(rhoName_);
 
     const scalarField Mb(mag(Ub)/sqrt(gamma*pb/rho));
 

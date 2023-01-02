@@ -156,23 +156,13 @@ template<class Type>
 Foam::tmp<Foam::scalarField>
 Foam::advectiveFvPatchField<Type>::advectionSpeed() const
 {
-    const surfaceScalarField& phi =
-        this->db().objectRegistry::template lookupObject<surfaceScalarField>
-        (phiName_);
+    const auto& phip =
+        this->patch().template lookupPatchField<surfaceScalarField>(phiName_);
 
-    fvsPatchField<scalar> phip =
-        this->patch().template lookupPatchField<surfaceScalarField, scalar>
-        (
-            phiName_
-        );
-
-    if (phi.dimensions() == dimMass/dimTime)
+    if (phip.internalField().dimensions() == dimMass/dimTime)
     {
-        const fvPatchScalarField& rhop =
-            this->patch().template lookupPatchField<volScalarField, scalar>
-            (
-                rhoName_
-            );
+        const auto& rhop =
+            this->patch().template lookupPatchField<volScalarField>(rhoName_);
 
         return phip/(rhop*this->patch().magSf());
     }

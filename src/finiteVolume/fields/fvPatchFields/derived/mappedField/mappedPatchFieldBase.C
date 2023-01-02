@@ -904,11 +904,7 @@ void Foam::mappedPatchFieldBase<Type>::mappedWeightField
     if (!fieldName.empty())
     {
         thisWeights.ref() *=
-            patchField_.patch().template lookupPatchField
-            <
-                volScalarField,
-                scalar
-            >
+            patchField_.patch().template lookupPatchField<volScalarField>
             (
                 fieldName
             ).patchInternalField();

@@ -56,13 +56,13 @@ functions
         #{
             // Lookup U
             Info<< "Looking up field U\n" << endl;
-            const volVectorField& U = mesh().lookupObject<volVectorField>("U");
+            const auto& U = mesh().lookupObject<volVectorField>("U");
 
             Info<< "Reading inlet velocity uInfX\n" << endl;
 
             scalar ULeft = 0.0;
             label leftI = mesh().boundaryMesh().findPatchID("left");
-            const fvPatchVectorField& fvp = U.boundaryField()[leftI];
+            const auto& fvp = U.boundaryField()[leftI];
             if (fvp.size())
             {
                 ULeft = fvp[0].x();
@@ -76,7 +76,7 @@ functions
 
             scalar magCylinder = 0.0;
             label cylI = mesh().boundaryMesh().findPatchID("cylinder");
-            const fvPatchVectorField& cylFvp = mesh().C().boundaryField()[cylI];
+            const auto& cylFvp = mesh().C().boundaryField()[cylI];
             if (cylFvp.size())
             {
                 magCylinder = mag(cylFvp[0]);

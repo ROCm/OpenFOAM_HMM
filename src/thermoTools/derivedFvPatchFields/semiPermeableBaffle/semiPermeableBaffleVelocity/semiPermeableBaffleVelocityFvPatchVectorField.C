@@ -139,7 +139,7 @@ void Foam::semiPermeableBaffleVelocityFvPatchVectorField::updateCoeffs()
     typedef semiPermeableBaffleMassFractionFvPatchScalarField YBCType;
 
     const scalarField& rhop =
-        patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+        patch().lookupPatchField<volScalarField>(rhoName_);
 
     const PtrList<volScalarField>& Y = composition().Y();
 

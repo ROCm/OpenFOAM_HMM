@@ -131,21 +131,17 @@ updateCoeffs()
         return;
     }
 
-    const auto& phi = db().lookupObject<surfaceScalarField>(phiName_);
-
-    const fvsPatchField<scalar>& phip =
-        patch().patchField<surfaceScalarField, scalar>(phi);
+    const auto& phip = patch().lookupPatchField<surfaceScalarField>(phiName_);
 
     const vectorField n(patch().nf());
 
-    if (phi.dimensions() == dimVolume/dimTime)
+    if (phip.internalField().dimensions() == dimVolume/dimTime)
     {
         refValue() = (phip/patch().magSf())*n;
     }
-    else if (phi.dimensions() == dimMass/dimTime)
+    else if (phip.internalField().dimensions() == dimMass/dimTime)
     {
-        const fvPatchField<scalar>& rhop =
-            patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+        const auto& rhop = patch().lookupPatchField<volScalarField>(rhoName_);
 
         refValue() = (phip/(rhop*patch().magSf()))*n;
     }
@@ -164,7 +160,7 @@ updateCoeffs()
     if (alphaName_ != "none")
     {
         const scalarField& alphap =
-            patch().lookupPatchField<volScalarField, scalar>(alphaName_);
+            patch().lookupPatchField<volScalarField>(alphaName_);
 
         const scalarField alphaCut(pos(alphap - alphaMin_));
         valueFraction() = max(alphaCut, valueFraction());

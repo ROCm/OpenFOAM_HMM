@@ -113,7 +113,7 @@ Foam::temperatureDependentAlphaContactAngleFvPatchScalarField::theta
 {
     return theta0_->value
     (
-        patch().lookupPatchField<volScalarField, scalar>(TName_)
+        patch().lookupPatchField<volScalarField>(TName_)
     );
 }
 

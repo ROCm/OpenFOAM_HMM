@@ -369,8 +369,7 @@ void Foam::speciesSorptionFvPatchScalarField::updateCoeffs()
             // mole fraction
             tmp<scalarField> tco = calcMoleFractions();
 
-            const fvPatchField<scalar>& pp =
-                patch().lookupPatchField<volScalarField, scalar>(pName_);
+            const auto& pp = patch().lookupPatchField<volScalarField>(pName_);
 
             cEq = max_*(kl_*tco()*pp/(1 + kl_*tco()*pp));
             break;

@@ -98,7 +98,7 @@ functions
         codeWrite
         #{
 
-            const volScalarField& alpha =
+            const auto& alpha =
                 mesh().lookupObject<volScalarField>("alpha.water");
 
             Info<< "Alpha volume = " << alpha.weightedAverage(mesh().Vsc())

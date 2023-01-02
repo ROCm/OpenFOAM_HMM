@@ -38,11 +38,8 @@ void Foam::fanFvPatchField<Foam::scalar>::calcFanJump()
 {
     if (this->cyclicPatch().owner())
     {
-        const surfaceScalarField& phi =
-            db().lookupObject<surfaceScalarField>(phiName_);
-
-        const fvsPatchField<scalar>& phip =
-            patch().patchField<surfaceScalarField, scalar>(phi);
+        const auto& phip =
+            patch().lookupPatchField<surfaceScalarField>(phiName_);
 
         scalarField Un(max(phip/patch().magSf(), scalar(0)));
 
@@ -77,9 +74,9 @@ void Foam::fanFvPatchField<Foam::scalar>::calcFanJump()
             }
         }
 
-        if (phi.dimensions() == dimMass/dimTime)
+        if (phip.internalField().dimensions() == dimMass/dimTime)
         {
-            Un /= patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+            Un /= patch().lookupPatchField<volScalarField>(rhoName_);
         }
 
         if (nonDimensional_)

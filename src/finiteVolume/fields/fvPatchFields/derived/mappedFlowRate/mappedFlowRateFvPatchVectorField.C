@@ -127,8 +127,10 @@ void Foam::mappedFlowRateFvPatchVectorField::updateCoeffs()
         nbrMesh
     ).boundary()[mpp.samplePolyPatch().index()];
 
-    scalarList phi =
-        nbrPatch.lookupPatchField<surfaceScalarField, scalar>(nbrPhiName_);
+    scalarList phi
+    (
+        nbrPatch.lookupPatchField<surfaceScalarField>(nbrPhiName_)
+    );
 
     mpp.distribute(phi);
 
@@ -147,8 +149,7 @@ void Foam::mappedFlowRateFvPatchVectorField::updateCoeffs()
     }
     else if (phiName.dimensions() == dimMass/dimTime)
     {
-        const fvPatchField<scalar>& rhop =
-            patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+        const auto& rhop = patch().lookupPatchField<volScalarField>(rhoName_);
 
         // mass flow-rate
         operator==(n*U/rhop);

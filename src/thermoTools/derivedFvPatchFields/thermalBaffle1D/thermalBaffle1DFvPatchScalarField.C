@@ -220,7 +220,7 @@ const solidType& thermalBaffle1DFvPatchScalarField<solidType>::solid() const
         const thermalBaffle1DFvPatchScalarField& nbrField =
         refCast<const thermalBaffle1DFvPatchScalarField>
         (
-            nbrPatch.template lookupPatchField<volScalarField, scalar>(TName_)
+            nbrPatch.template lookupPatchField<volScalarField>(TName_)
         );
 
         return nbrField.solid();
@@ -253,7 +253,7 @@ baffleThickness() const
         const thermalBaffle1DFvPatchScalarField& nbrField =
         refCast<const thermalBaffle1DFvPatchScalarField>
         (
-            nbrPatch.template lookupPatchField<volScalarField, scalar>(TName_)
+            nbrPatch.template lookupPatchField<volScalarField>(TName_)
         );
 
         tmp<scalarField> tthickness
@@ -284,7 +284,7 @@ tmp<scalarField> thermalBaffle1DFvPatchScalarField<solidType>::qs() const
         const thermalBaffle1DFvPatchScalarField& nbrField =
         refCast<const thermalBaffle1DFvPatchScalarField>
         (
-            nbrPatch.template lookupPatchField<volScalarField, scalar>(TName_)
+            nbrPatch.template lookupPatchField<volScalarField>(TName_)
         );
 
         tmp<scalarField> tqs(new scalarField(nbrField.qs()));
@@ -365,15 +365,14 @@ void thermalBaffle1DFvPatchScalarField<solidType>::updateCoeffs()
         const scalarField kappaw(turbModel.kappaEff(patchi));
 
         const fvPatchScalarField& Tp =
-            patch().template lookupPatchField<volScalarField, scalar>(TName_);
+            patch().template lookupPatchField<volScalarField>(TName_);
 
 
         scalarField qr(Tp.size(), Zero);
 
         if (qrName_ != "none")
         {
-            qr = patch().template lookupPatchField<volScalarField, scalar>
-                (qrName_);
+            qr = patch().template lookupPatchField<volScalarField>(qrName_);
 
             qr = qrRelaxation_*qr + (1.0 - qrRelaxation_)*qrPrevious_;
             qrPrevious_ = qr;

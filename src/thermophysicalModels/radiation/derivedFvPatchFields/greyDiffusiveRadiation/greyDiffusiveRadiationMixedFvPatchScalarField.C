@@ -151,8 +151,7 @@ updateCoeffs()
     int oldTag = UPstream::msgType();
     UPstream::msgType() = oldTag+1;
 
-    const scalarField& Tp =
-        patch().lookupPatchField<volScalarField, scalar>(TName_);
+    const auto& Tp = patch().lookupPatchField<volScalarField>(TName_);
 
     const fvDOM& dom = db().lookupObject<fvDOM>("radiationProperties");
 
@@ -224,7 +223,7 @@ updateCoeffs()
     if (dom.useSolarLoad())
     {
         // Looking for primary heat flux single band
-        Ir += patch().lookupPatchField<volScalarField,scalar>
+        Ir += patch().lookupPatchField<volScalarField>
         (
             dom.primaryFluxName_ + "_0"
         );

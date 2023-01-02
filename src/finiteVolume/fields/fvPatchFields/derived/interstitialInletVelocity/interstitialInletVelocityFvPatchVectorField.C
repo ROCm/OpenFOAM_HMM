@@ -135,8 +135,7 @@ void Foam::interstitialInletVelocityFvPatchVectorField::updateCoeffs()
         return;
     }
 
-    const fvPatchField<scalar>& alphap =
-        patch().lookupPatchField<volScalarField, scalar>(alphaName_);
+    const auto& alphap = patch().lookupPatchField<volScalarField>(alphaName_);
 
     operator==(inletVelocity_/alphap);
     fixedValueFvPatchVectorField::updateCoeffs();

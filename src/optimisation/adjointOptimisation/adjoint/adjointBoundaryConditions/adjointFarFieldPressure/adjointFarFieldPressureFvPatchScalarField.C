@@ -110,7 +110,7 @@ void Foam::adjointFarFieldPressureFvPatchScalarField::updateCoeffs()
 
     // Adjoint flux
     //const fvsPatchField<scalar>& phiap =
-    //    patch().lookupPatchField<surfaceScalarField, scalar>("phia");
+    //    patch().lookupPatchField<surfaceScalarField>("phia");
 
     // Primal velocity
     const fvPatchField<vector>& Up = boundaryContrPtr_->Ub();

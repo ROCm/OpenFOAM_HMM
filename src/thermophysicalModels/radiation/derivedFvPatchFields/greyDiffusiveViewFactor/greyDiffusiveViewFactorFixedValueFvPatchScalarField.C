@@ -173,7 +173,7 @@ greyDiffusiveViewFactorFixedValueFvPatchScalarField::qro(label bandI) const
 
     if (radiation.useSolarLoad())
     {
-        tqrt.ref() += patch().lookupPatchField<volScalarField, scalar>
+        tqrt.ref() += patch().lookupPatchField<volScalarField>
         (
             radiation.primaryFluxName_ + "_"  + name(bandI)
         );

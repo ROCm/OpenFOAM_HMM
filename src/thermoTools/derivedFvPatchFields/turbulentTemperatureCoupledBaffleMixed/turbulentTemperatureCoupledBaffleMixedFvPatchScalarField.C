@@ -346,10 +346,7 @@ void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::updateCoeffs()
         const turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
         >
         (
-            nbrPatch.lookupPatchField<volScalarField, scalar>
-            (
-                TnbrName_
-            )
+            nbrPatch.lookupPatchField<volScalarField>(TnbrName_)
         );
 
         // Swap to obtain full local values of neighbour K*delta

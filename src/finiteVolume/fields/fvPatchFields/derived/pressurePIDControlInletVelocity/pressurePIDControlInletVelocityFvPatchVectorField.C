@@ -222,10 +222,7 @@ void Foam::pressurePIDControlInletVelocityFvPatchVectorField::updateCoeffs()
     const scalar deltaT(db().time().deltaTValue());
 
     // Get the flux field
-    const surfaceScalarField& phi
-    (
-        db().lookupObject<surfaceScalarField>(phiName_)
-    );
+    const auto& phi = db().lookupObject<surfaceScalarField>(phiName_);
 
     // Update the old-time quantities
     if (timeIndex_ != db().time().timeIndex())
@@ -244,10 +241,9 @@ void Foam::pressurePIDControlInletVelocityFvPatchVectorField::updateCoeffs()
     }
     else if (phi.dimensions() == dimMass/dimTime)
     {
-        const fvPatchField<scalar>& rhoField =
-            patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+        const auto& rhop = patch().lookupPatchField<volScalarField>(rhoName_);
 
-        rho = gSum(rhoField*patch().magSf())/gSum(patch().magSf());
+        rho = gSum(rhop*patch().magSf())/gSum(patch().magSf());
     }
     else
     {

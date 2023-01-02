@@ -121,10 +121,7 @@ void Foam::freestreamPressureFvPatchScalarField::updateCoeffs()
     }
 
     const Field<vector>& Up =
-        patch().template lookupPatchField<volVectorField, vector>
-        (
-            UName_
-        );
+        patch().template lookupPatchField<volVectorField>(UName_);
 
     valueFraction() = 0.5 + 0.5*(Up & patch().nf())/mag(Up);
 

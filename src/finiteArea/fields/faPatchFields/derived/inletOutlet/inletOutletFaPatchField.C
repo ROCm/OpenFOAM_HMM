@@ -124,10 +124,7 @@ void Foam::inletOutletFaPatchField<Type>::updateCoeffs()
     }
 
     const Field<scalar>& phip =
-        this->patch(). template lookupPatchField<edgeScalarField, scalar>
-        (
-            phiName_
-        );
+        this->patch().template lookupPatchField<edgeScalarField>(phiName_);
 
     this->valueFraction() = 1.0 - pos(phip);
 

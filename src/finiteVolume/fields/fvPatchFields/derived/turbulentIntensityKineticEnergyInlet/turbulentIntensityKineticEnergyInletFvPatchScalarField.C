@@ -133,11 +133,11 @@ updateCoeffs()
         return;
     }
 
-    const fvPatchVectorField& Up =
-        patch().lookupPatchField<volVectorField, vector>(UName_);
+    const auto& Up =
+        patch().lookupPatchField<volVectorField>(UName_);
 
-    const fvsPatchScalarField& phip =
-        patch().lookupPatchField<surfaceScalarField, scalar>(this->phiName_);
+    const auto& phip =
+        patch().lookupPatchField<surfaceScalarField>(this->phiName_);
 
     this->refValue() = 1.5*sqr(intensity_)*magSqr(Up);
     this->valueFraction() = 1.0 - pos0(phip);

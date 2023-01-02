@@ -167,8 +167,7 @@ void Foam::totalPressureFvPatchScalarField::updateCoeffs
         return;
     }
 
-    const fvsPatchField<scalar>& phip =
-        patch().lookupPatchField<surfaceScalarField, scalar>(phiName_);
+    const auto& phip = patch().lookupPatchField<surfaceScalarField>(phiName_);
 
     if (internalField().dimensions() == dimPressure)
     {
@@ -176,8 +175,8 @@ void Foam::totalPressureFvPatchScalarField::updateCoeffs
         {
             // Variable density and low-speed compressible flow
 
-            const fvPatchField<scalar>& rho =
-                patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+            const auto& rho =
+                patch().lookupPatchField<volScalarField>(rhoName_);
 
             operator==(p0p - 0.5*rho*(1.0 - pos0(phip))*magSqr(Up));
         }
@@ -185,8 +184,8 @@ void Foam::totalPressureFvPatchScalarField::updateCoeffs
         {
             // High-speed compressible flow
 
-            const fvPatchField<scalar>& psip =
-                patch().lookupPatchField<volScalarField, scalar>(psiName_);
+            const auto& psip =
+                patch().lookupPatchField<volScalarField>(psiName_);
 
             if (gamma_ > 1)
             {
@@ -238,7 +237,7 @@ void Foam::totalPressureFvPatchScalarField::updateCoeffs()
     updateCoeffs
     (
         p0(),
-        patch().lookupPatchField<volVectorField, vector>(UName())
+        patch().lookupPatchField<volVectorField>(UName())
     );
 }
 

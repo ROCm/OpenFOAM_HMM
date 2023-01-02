@@ -142,10 +142,7 @@ void Foam::phaseHydrostaticPressureFvPatchScalarField::updateCoeffs()
     }
 
     const scalarField& alphap =
-        patch().lookupPatchField<volScalarField, scalar>
-        (
-            phaseFraction_
-        );
+        patch().lookupPatchField<volScalarField>(phaseFraction_);
 
     const uniformDimensionedVectorField& g =
         meshObjects::gravity::New(db().time());

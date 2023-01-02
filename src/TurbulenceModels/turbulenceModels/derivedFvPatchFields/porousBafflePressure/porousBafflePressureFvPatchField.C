@@ -141,16 +141,13 @@ void Foam::porousBafflePressureFvPatchField::updateCoeffs()
         return;
     }
 
-    const auto& phi = db().lookupObject<surfaceScalarField>(phiName_);
-
-    const fvsPatchField<scalar>& phip =
-        patch().patchField<surfaceScalarField, scalar>(phi);
+    const auto& phip = patch().lookupPatchField<surfaceScalarField>(phiName_);
 
     scalarField Un(phip/patch().magSf());
 
-    if (phi.dimensions() == dimMass/dimTime)
+    if (phip.internalField().dimensions() == dimMass/dimTime)
     {
-        Un /= patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+        Un /= patch().lookupPatchField<volScalarField>(rhoName_);
     }
 
     if (uniformJump_)
@@ -185,7 +182,7 @@ void Foam::porousBafflePressureFvPatchField::updateCoeffs()
     {
         setJump
         (
-            jump()*patch().lookupPatchField<volScalarField, scalar>(rhoName_)
+            jump()*patch().lookupPatchField<volScalarField>(rhoName_)
         );
     }
 

@@ -60,16 +60,15 @@ totalMass
 
     code
     #{
-        const volScalarField& alphaGas =
+        const auto& alphaGas =
             mesh().lookupObject<volScalarField>("alpha.gas");
-        const volScalarField& alphaLiquid =
+        const auto& alphaLiquid =
             mesh().lookupObject<volScalarField>("alpha.liquid");
 
-        const volScalarField& rhoGas =
+        const auto& rhoGas =
             mesh().lookupObject<volScalarField>("thermo:rho.gas");
-        const volScalarField& rhoLiquid =
+        const auto& rhoLiquid =
             mesh().lookupObject<volScalarField>("thermo:rho.liquid");
-
 
         const scalarField& v = mesh().V();
 

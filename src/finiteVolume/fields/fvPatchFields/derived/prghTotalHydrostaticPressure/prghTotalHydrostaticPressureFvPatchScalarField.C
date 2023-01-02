@@ -122,16 +122,16 @@ void Foam::prghTotalHydrostaticPressureFvPatchScalarField::updateCoeffs()
     }
 
     const scalarField& rhop =
-        patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+        patch().lookupPatchField<volScalarField>(rhoName_);
 
     const scalarField& ph_rghp =
-        patch().lookupPatchField<volScalarField, scalar>(ph_rghName_);
+        patch().lookupPatchField<volScalarField>(ph_rghName_);
 
     const scalarField& phip =
-        patch().lookupPatchField<surfaceScalarField, scalar>(phiName_);
+        patch().lookupPatchField<surfaceScalarField>(phiName_);
 
     const vectorField& Up =
-        patch().lookupPatchField<volVectorField, vector>(UName_);
+        patch().lookupPatchField<volVectorField>(UName_);
 
     operator==
     (

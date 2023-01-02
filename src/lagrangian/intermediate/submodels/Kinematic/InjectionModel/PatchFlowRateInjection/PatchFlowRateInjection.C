@@ -127,8 +127,7 @@ Foam::scalar Foam::PatchFlowRateInjection<CloudType>::flowRate() const
 {
    const polyMesh& mesh = this->owner().mesh();
 
-    const surfaceScalarField& phi =
-        mesh.lookupObject<surfaceScalarField>(phiName_);
+    const auto& phi = mesh.lookupObject<surfaceScalarField>(phiName_);
 
     const scalarField& phip = phi.boundaryField()[patchId_];
 
@@ -139,8 +138,7 @@ Foam::scalar Foam::PatchFlowRateInjection<CloudType>::flowRate() const
     }
     else
     {
-        const volScalarField& rho =
-            mesh.lookupObject<volScalarField>(rhoName_);
+        const auto& rho = mesh.lookupObject<volScalarField>(rhoName_);
         const scalarField& rhop = rho.boundaryField()[patchId_];
 
         flowRateIn = max(0.0, -sum(phip/rhop));

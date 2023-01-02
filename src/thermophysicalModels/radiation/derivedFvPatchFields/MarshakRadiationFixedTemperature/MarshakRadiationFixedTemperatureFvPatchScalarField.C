@@ -158,7 +158,7 @@ updateCoeffs()
 
     // Diffusion coefficient - created by radiation model's ::updateCoeffs()
     const scalarField& gamma =
-        patch().lookupPatchField<volScalarField, scalar>("gammaRad");
+        patch().lookupPatchField<volScalarField>("gammaRad");
 
     //const scalarField temissivity = emissivity();
     const boundaryRadiationProperties& boundaryRadiation =

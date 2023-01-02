@@ -126,10 +126,7 @@ void Foam::outletInletFvPatchField<Type>::updateCoeffs()
     }
 
     const Field<scalar>& phip =
-        this->patch().template lookupPatchField<surfaceScalarField, scalar>
-        (
-            phiName_
-        );
+        this->patch().template lookupPatchField<surfaceScalarField>(phiName_);
 
     this->valueFraction() = pos0(phip);
 

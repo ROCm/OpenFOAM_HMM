@@ -208,10 +208,7 @@ patchSource() const
     const auto& Yp =
         refCast<const speciesSorptionFvPatchScalarField>
         (
-            patch().lookupPatchField<volScalarField, scalar>
-            (
-                speciesName_
-            )
+            patch().lookupPatchField<volScalarField>(speciesName_)
         );
 
     // mass rate [kg/sec/m3]
@@ -224,11 +221,8 @@ patchSource() const
 
     if (includeHs_)
     {
-        const fvPatchField<scalar>& pp =
-            patch().lookupPatchField<volScalarField, scalar>(pName_);
-
-        const fvPatchField<scalar>& Tp =
-            patch().lookupPatchField<volScalarField, scalar>(TName_);
+        const auto& pp = patch().lookupPatchField<volScalarField>(pName_);
+        const auto& Tp = patch().lookupPatchField<volScalarField>(TName_);
 
         const auto& thermo = db().lookupObject<rhoReactionThermo>
         (
@@ -270,10 +264,7 @@ void Foam::enthalpySorptionFvPatchScalarField::updateCoeffs()
     const auto& Yp =
         refCast<const speciesSorptionFvPatchScalarField>
         (
-            patch().lookupPatchField<volScalarField, scalar>
-            (
-                speciesName_
-            )
+            patch().lookupPatchField<volScalarField>(speciesName_)
         );
 
     switch (enthalpyModel_)

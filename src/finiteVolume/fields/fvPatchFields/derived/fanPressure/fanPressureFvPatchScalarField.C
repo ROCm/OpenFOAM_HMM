@@ -153,23 +153,20 @@ void Foam::fanPressureFvPatchScalarField::updateCoeffs()
     }
 
     // Retrieve flux field
-    const auto& phi = db().lookupObject<surfaceScalarField>(phiName());
-
-    const auto& phip = patch().patchField<surfaceScalarField, scalar>(phi);
+    const auto& phip = patch().lookupPatchField<surfaceScalarField>(phiName());
 
     const int dir = 2*direction_ - 1;
 
     // Average volumetric flow rate
     scalar volFlowRate = 0;
 
-    if (phi.dimensions() == dimVolume/dimTime)
+    if (phip.internalField().dimensions() == dimVolume/dimTime)
     {
         volFlowRate = dir*gSum(phip);
     }
-    else if (phi.dimensions() == dimMass/dimTime)
+    else if (phip.internalField().dimensions() == dimMass/dimTime)
     {
-        const scalarField& rhop =
-            patch().lookupPatchField<volScalarField, scalar>(rhoName());
+        const auto& rhop = patch().lookupPatchField<volScalarField>(rhoName());
         volFlowRate = dir*gSum(phip/rhop);
     }
     else
@@ -218,7 +215,7 @@ void Foam::fanPressureFvPatchScalarField::updateCoeffs()
     totalPressureFvPatchScalarField::updateCoeffs
     (
         p0() - dir*pdFan,
-        patch().lookupPatchField<volVectorField, vector>(UName())
+        patch().lookupPatchField<volVectorField>(UName())
     );
 }
 

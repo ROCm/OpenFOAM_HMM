@@ -105,8 +105,7 @@ void Foam::fixedPressureCompressibleDensityFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    const fvPatchField<scalar>& pp =
-        patch().lookupPatchField<volScalarField, scalar>(pName_);
+    const auto& pp = patch().lookupPatchField<volScalarField>(pName_);
 
     const dictionary& thermoProps =
         db().lookupObject<IOdictionary>("thermodynamicProperties");

@@ -189,13 +189,13 @@ void Foam::prghPermeableAlphaTotalPressureFvPatchScalarField::updateSnGrad
     }
 
     const scalarField& rhop =
-        patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+        patch().lookupPatchField<volScalarField>(rhoName_);
 
     const scalarField& phip =
-        patch().lookupPatchField<surfaceScalarField, scalar>(phiName_);
+        patch().lookupPatchField<surfaceScalarField>(phiName_);
 
     const vectorField& Up =
-        patch().lookupPatchField<volVectorField, vector>(UName_);
+        patch().lookupPatchField<volVectorField>(UName_);
 
     const uniformDimensionedVectorField& g =
         meshObjects::gravity::New(db().time());
@@ -226,7 +226,8 @@ void Foam::prghPermeableAlphaTotalPressureFvPatchScalarField::updateSnGrad
     if (alphaName_ != "none")
     {
         const scalarField& alphap =
-            patch().lookupPatchField<volScalarField, scalar>(alphaName_);
+            patch().lookupPatchField<volScalarField>(alphaName_);
+
         tmp<scalarField> alphaCut(pos(alphap - alphaMin_));
         valueFraction() = 1 - alphaCut;
     }
