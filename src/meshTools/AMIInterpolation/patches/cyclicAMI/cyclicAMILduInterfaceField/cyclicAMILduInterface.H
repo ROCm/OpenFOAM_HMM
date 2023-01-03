@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cyclicAMILduInterface_H
-#define cyclicAMILduInterface_H
+#ifndef Foam_cyclicAMILduInterface_H
+#define Foam_cyclicAMILduInterface_H
 
 #include "primitiveFieldsFwd.H"
 #include "AMIPatchToPatchInterpolation.H"
@@ -52,17 +52,16 @@ namespace Foam
 
 class cyclicAMILduInterface
 {
-
 public:
 
     //- Runtime type information
-    TypeName("cyclicAMILduInterface");
+    TypeNameNoDebug("cyclicAMILduInterface");
 
 
     // Constructors
 
-        //- Construct null
-        cyclicAMILduInterface() = default;
+        //- Default construct
+        cyclicAMILduInterface() noexcept = default;
 
 
     //- Destructor

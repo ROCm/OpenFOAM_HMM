@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cyclicACMILduInterface_H
-#define cyclicACMILduInterface_H
+#ifndef Foam_cyclicACMILduInterface_H
+#define Foam_cyclicACMILduInterface_H
 
 #include "cyclicAMILduInterface.H"
 
@@ -56,13 +56,13 @@ class cyclicACMILduInterface
 public:
 
     //- Runtime type information
-    TypeName("cyclicACMILduInterface");
+    TypeNameNoDebug("cyclicACMILduInterface");
 
 
     // Constructors
 
-        //- Construct null
-        cyclicACMILduInterface() = default;
+        //- Default construct
+        cyclicACMILduInterface() noexcept = default;
 
 
     //- Destructor

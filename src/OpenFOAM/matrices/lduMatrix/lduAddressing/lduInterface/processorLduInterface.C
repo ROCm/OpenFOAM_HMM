@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2012 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2011 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,19 +31,7 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(processorLduInterface, 0);
-}
-
-
-// * * * * * * * * * * * * * Private Member Functions *  * * * * * * * * * * //
-
-void Foam::processorLduInterface::resizeBuf(List<char>& buf, const label len)
-{
-    if (buf.size() < len)
-    {
-        // Use nocopy variant since it will be overwritten
-        buf.resize_nocopy(len);
-    }
+    defineTypeName(processorLduInterface);
 }
 
 

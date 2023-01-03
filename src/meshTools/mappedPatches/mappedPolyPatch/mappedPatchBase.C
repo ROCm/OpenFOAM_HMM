@@ -1571,7 +1571,7 @@ void Foam::mappedPatchBase::clearOut()
 {
     mapPtr_.reset(nullptr);
     surfPtr_.reset(nullptr);
-    AMIPtr_->upToDate() = false;
+    AMIPtr_->upToDate(false);
 }
 
 

@@ -155,7 +155,12 @@ void Foam::processorLduInterface::compressedSend
     const UList<Type>& f
 ) const
 {
-    if (sizeof(scalar) != sizeof(float) && Pstream::floatTransfer && f.size())
+    if
+    (
+        f.size()
+     && UPstream::floatTransfer
+     && (!std::is_integral<Type>::value && sizeof(scalar) != sizeof(float))
+    )
     {
         static const label nCmpts = sizeof(Type)/sizeof(scalar);
         label nm1 = (f.size() - 1)*nCmpts;
@@ -236,7 +241,12 @@ void Foam::processorLduInterface::compressedReceive
     UList<Type>& f
 ) const
 {
-    if (sizeof(scalar) != sizeof(float) && Pstream::floatTransfer && f.size())
+    if
+    (
+        f.size()
+     && UPstream::floatTransfer
+     && (!std::is_integral<Type>::value && sizeof(scalar) != sizeof(float))
+    )
     {
         static const label nCmpts = sizeof(Type)/sizeof(scalar);
         label nm1 = (f.size() - 1)*nCmpts;

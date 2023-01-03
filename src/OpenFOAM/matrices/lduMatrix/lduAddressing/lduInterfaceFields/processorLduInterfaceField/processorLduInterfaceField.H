@@ -52,7 +52,6 @@ namespace Foam
 
 class processorLduInterfaceField
 {
-
 public:
 
     //- Runtime type information
@@ -61,7 +60,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         processorLduInterfaceField() = default;
 
 

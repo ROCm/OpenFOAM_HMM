@@ -60,13 +60,13 @@ class lduInterface
 public:
 
     //- Runtime type information
-    TypeName("lduInterface");
+    TypeNameNoDebug("lduInterface");
 
 
     // Constructors
 
-        //- Construct null
-        lduInterface() = default;
+        //- Default construct
+        lduInterface() noexcept = default;
 
 
     //- Destructor
@@ -74,7 +74,6 @@ public:
 
 
     // Member Functions
-
 
         // Access
 
@@ -123,7 +122,6 @@ public:
                 const Pstream::commsTypes commsType,
                 const labelUList& iF
             ) const = 0;
-
 };
 
 

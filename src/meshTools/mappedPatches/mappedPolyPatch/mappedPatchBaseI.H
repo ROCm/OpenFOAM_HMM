@@ -275,7 +275,7 @@ inline const Foam::mapDistribute& Foam::mappedPatchBase::map() const
 
         if (AMIPtr_)
         {
-            AMIPtr_->upToDate() = false;
+            AMIPtr_->upToDate(false);
         }
     }
 
@@ -296,12 +296,12 @@ inline const Foam::AMIPatchToPatchInterpolation& Foam::mappedPatchBase::AMI
     if (!upToDate())
     {
         mapPtr_.reset(nullptr);
-        AMIPtr_->upToDate() = false;
+        AMIPtr_->upToDate(false);
     }
 
     if (forceUpdate)
     {
-        AMIPtr_->upToDate() = false;
+        AMIPtr_->upToDate(false);
     }
 
     calcAMI();

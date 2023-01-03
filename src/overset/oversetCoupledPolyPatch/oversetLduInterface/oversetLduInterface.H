@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef oversetLduInterface_H
-#define oversetLduInterface_H
+#ifndef Foam_oversetLduInterface_H
+#define Foam_oversetLduInterface_H
 
 #include "typeInfo.H"
 
@@ -53,18 +53,17 @@ class oversetLduInterface
 public:
 
     //- Runtime type information
-    TypeName("oversetLduInterface");
+    TypeNameNoDebug("oversetLduInterface");
 
 
     // Constructors
 
-        //- Construct null
-        oversetLduInterface()
-        {}
+        //- Default construct
+        oversetLduInterface() noexcept = default;
 
 
     //- Destructor
-    virtual ~oversetLduInterface();
+    virtual ~oversetLduInterface() = default;
 };
 
 

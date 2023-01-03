@@ -67,19 +67,25 @@ class processorLduInterface
     // Private Member Functions
 
         //- Increase buffer size if required
-        static void resizeBuf(List<char>& buf, const label len);
-
+        //  Uses the nocopy variant since it will be overwritten
+        static void resizeBuf(List<char>& buf, const label len)
+        {
+            if (buf.size() < len)
+            {
+                buf.resize_nocopy(len);
+            }
+        }
 
 public:
 
     //- Runtime type information
-    TypeName("processorLduInterface");
+    TypeNameNoDebug("processorLduInterface");
 
 
     // Constructors
 
         //- Default construct
-        processorLduInterface() = default;
+        processorLduInterface() noexcept = default;
 
 
     //- Destructor

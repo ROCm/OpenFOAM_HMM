@@ -36,8 +36,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef lduPrimitiveProcessorInterface_H
-#define lduPrimitiveProcessorInterface_H
+#ifndef Foam_lduPrimitiveProcessorInterface_H
+#define Foam_lduPrimitiveProcessorInterface_H
 
 #include "GAMGInterface.H"
 #include "processorLduInterface.H"
@@ -86,7 +86,7 @@ class lduPrimitiveProcessorInterface
 public:
 
     //- Runtime type information
-    TypeName("calculatedProcessor");
+    TypeNameNoDebug("processorInterface");
 
 
     // Constructors
@@ -107,6 +107,7 @@ public:
         (
             const lduPrimitiveProcessorInterface&
         );
+
 
     //- Destructor
     virtual ~lduPrimitiveProcessorInterface() = default;

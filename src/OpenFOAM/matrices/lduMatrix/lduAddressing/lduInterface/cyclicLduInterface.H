@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cyclicLduInterface_H
-#define cyclicLduInterface_H
+#ifndef Foam_cyclicLduInterface_H
+#define Foam_cyclicLduInterface_H
 
 #include "lduInterface.H"
 #include "primitiveFieldsFwd.H"
@@ -55,12 +55,13 @@ class cyclicLduInterface
 public:
 
     //- Runtime type information
-    TypeName("cyclicLduInterface");
+    TypeNameNoDebug("cyclicLduInterface");
+
 
     // Constructors
 
-        //- Construct null
-        cyclicLduInterface() = default;
+        //- Default construct
+        cyclicLduInterface() noexcept = default;
 
 
     //- Destructor

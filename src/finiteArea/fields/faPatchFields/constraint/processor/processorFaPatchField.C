@@ -197,7 +197,7 @@ void Foam::processorFaPatchField<Type>::initInterfaceMatrixUpdate
         this->patch().patchInternalField(psiInternal)()
     );
 
-    const_cast<processorFaPatchField<Type>&>(*this).updatedMatrix() = false;
+    this->updatedMatrix(false);
 }
 
 
@@ -235,7 +235,7 @@ void Foam::processorFaPatchField<Type>::updateInterfaceMatrix
     // Multiply the field by coefficients and add into the result
     this->addToInternalField(result, !add, faceCells, coeffs, pnf);
 
-    const_cast<processorFaPatchField<Type>&>(*this).updatedMatrix() = true;
+    this->updatedMatrix(true);
 }
 
 
@@ -257,7 +257,7 @@ void Foam::processorFaPatchField<Type>::initInterfaceMatrixUpdate
         this->patch().patchInternalField(psiInternal)()
     );
 
-    const_cast<processorFaPatchField<Type>&>(*this).updatedMatrix() = false;
+    this->updatedMatrix(false);
 }
 
 
@@ -291,7 +291,7 @@ void Foam::processorFaPatchField<Type>::updateInterfaceMatrix
     // Multiply the field by coefficients and add into the result
     this->addToInternalField(result, !add, faceCells, coeffs, pnf);
 
-    const_cast<processorFaPatchField<Type>&>(*this).updatedMatrix() = true;
+    this->updatedMatrix(true);
 }
 
 

@@ -215,7 +215,7 @@ void Foam::processorFvPatchField<Type>::initEvaluate
         if
         (
             commsType == Pstream::commsTypes::nonBlocking
-         && !Pstream::floatTransfer
+         && (std::is_integral<Type>::value || !UPstream::floatTransfer)
         )
         {
             if (!is_contiguous<Type>::value)
@@ -269,7 +269,7 @@ void Foam::processorFvPatchField<Type>::evaluate
         if
         (
             commsType == Pstream::commsTypes::nonBlocking
-         && !Pstream::floatTransfer
+         && (std::is_integral<Type>::value || !UPstream::floatTransfer)
         )
         {
             // Fast path: received into *this
@@ -329,7 +329,7 @@ void Foam::processorFvPatchField<Type>::initInterfaceMatrixUpdate
     if
     (
         commsType == Pstream::commsTypes::nonBlocking
-     && !Pstream::floatTransfer
+     && !UPstream::floatTransfer
     )
     {
         // Fast path.
@@ -371,7 +371,7 @@ void Foam::processorFvPatchField<Type>::initInterfaceMatrixUpdate
         procPatch_.compressedSend(commsType, scalarSendBuf_);
     }
 
-    const_cast<processorFvPatchField<Type>&>(*this).updatedMatrix() = false;
+    this->updatedMatrix(false);
 }
 
 
@@ -398,7 +398,7 @@ void Foam::processorFvPatchField<Type>::updateInterfaceMatrix
     if
     (
         commsType == Pstream::commsTypes::nonBlocking
-     && !Pstream::floatTransfer
+     && !UPstream::floatTransfer
     )
     {
         // Fast path: consume straight from receive buffer
@@ -445,7 +445,7 @@ void Foam::processorFvPatchField<Type>::updateInterfaceMatrix
         this->addToInternalField(result, !add, faceCells, coeffs, pnf);
     }
 
-    const_cast<processorFvPatchField<Type>&>(*this).updatedMatrix() = true;
+    this->updatedMatrix(true);
 }
 
 
@@ -473,7 +473,7 @@ void Foam::processorFvPatchField<Type>::initInterfaceMatrixUpdate
     if
     (
         commsType == Pstream::commsTypes::nonBlocking
-     && !Pstream::floatTransfer
+     && (std::is_integral<Type>::value || !UPstream::floatTransfer)
     )
     {
         // Fast path.
@@ -515,7 +515,7 @@ void Foam::processorFvPatchField<Type>::initInterfaceMatrixUpdate
         procPatch_.compressedSend(commsType, sendBuf_);
     }
 
-    const_cast<processorFvPatchField<Type>&>(*this).updatedMatrix() = false;
+    this->updatedMatrix(false);
 }
 
 
@@ -541,7 +541,7 @@ void Foam::processorFvPatchField<Type>::updateInterfaceMatrix
     if
     (
         commsType == Pstream::commsTypes::nonBlocking
-     && !Pstream::floatTransfer
+     && (std::is_integral<Type>::value || !UPstream::floatTransfer)
     )
     {
         // Fast path: consume straight from receive buffer
@@ -571,7 +571,7 @@ void Foam::processorFvPatchField<Type>::updateInterfaceMatrix
         this->addToInternalField(result, !add, faceCells, coeffs, pnf);
     }
 
-    const_cast<processorFvPatchField<Type>&>(*this).updatedMatrix() = true;
+    this->updatedMatrix(true);
 }
 
 

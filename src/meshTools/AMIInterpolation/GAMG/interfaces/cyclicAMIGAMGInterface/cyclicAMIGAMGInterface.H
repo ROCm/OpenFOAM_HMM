@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cyclicAMIGAMGInterface_H
-#define cyclicAMIGAMGInterface_H
+#ifndef Foam_cyclicAMIGAMGInterface_H
+#define Foam_cyclicAMIGAMGInterface_H
 
 #include "GAMGInterface.H"
 #include "cyclicAMILduInterface.H"

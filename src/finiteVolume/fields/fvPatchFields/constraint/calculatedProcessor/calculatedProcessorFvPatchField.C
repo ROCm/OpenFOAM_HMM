@@ -228,10 +228,7 @@ void Foam::calculatedProcessorFvPatchField<Type>::initInterfaceMatrixUpdate
         procInterface_.comm()
     );
 
-    const_cast<lduInterfaceField&>
-    (
-        static_cast<const lduInterfaceField&>(*this)
-    ).updatedMatrix() = false;
+    this->updatedMatrix(false);
 }
 
 
@@ -293,10 +290,7 @@ void Foam::calculatedProcessorFvPatchField<Type>::updateInterfaceMatrix
     // helper to avoid using fvPatch addressing
     addToInternalField(result, !add, coeffs, scalarReceiveBuf_);
 
-    const_cast<lduInterfaceField&>
-    (
-        static_cast<const lduInterfaceField&>(*this)
-    ).updatedMatrix() = true;
+    this->updatedMatrix(true);
 }
 
 

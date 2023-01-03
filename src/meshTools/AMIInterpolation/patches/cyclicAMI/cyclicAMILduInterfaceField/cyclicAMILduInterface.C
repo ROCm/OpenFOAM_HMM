@@ -31,7 +31,7 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(cyclicAMILduInterface, 0);
+    defineTypeName(cyclicAMILduInterface);
 }
 
 

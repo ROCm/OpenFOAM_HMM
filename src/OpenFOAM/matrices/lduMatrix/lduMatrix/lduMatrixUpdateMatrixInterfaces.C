@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -149,28 +149,29 @@ void Foam::lduMatrix::updateMatrixInterfaces
 
             forAll(interfaces, interfacei)
             {
-                if (interfaces.set(interfacei))
+                if
+                (
+                    interfaces.set(interfacei)
+                && !interfaces[interfacei].updatedMatrix()
+                )
                 {
-                    if (!interfaces[interfacei].updatedMatrix())
+                    if (interfaces[interfacei].ready())
                     {
-                        if (interfaces[interfacei].ready())
-                        {
-                            interfaces[interfacei].updateInterfaceMatrix
-                            (
-                                result,
-                                add,
-                                mesh().lduAddr(),
-                                interfacei,
-                                psiif,
-                                coupleCoeffs[interfacei],
-                                cmpt,
-                                commsType
-                            );
-                        }
-                        else
-                        {
-                            allUpdated = false;
-                        }
+                        interfaces[interfacei].updateInterfaceMatrix
+                        (
+                            result,
+                            add,
+                            mesh().lduAddr(),
+                            interfacei,
+                            psiif,
+                            coupleCoeffs[interfacei],
+                            cmpt,
+                            commsType
+                        );
+                    }
+                    else
+                    {
+                        allUpdated = false;
                     }
                 }
             }

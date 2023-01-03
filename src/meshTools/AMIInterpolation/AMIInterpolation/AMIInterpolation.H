@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,8 +48,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef AMIInterpolation_H
-#define AMIInterpolation_H
+#ifndef Foam_AMIInterpolation_H
+#define Foam_AMIInterpolation_H
 
 #include "className.H"
 #include "searchableSurface.H"
@@ -81,7 +81,7 @@ class AMIInterpolation
 {
 public:
 
-    // Public data types
+    // Public Data Types
 
         static bool cacheIntersections_;
 
@@ -350,11 +350,20 @@ public:
 
         // Access
 
-            //- Access to the up-to-date flag
-            inline bool upToDate() const;
+            //- Is up-to-date?
+            bool upToDate() const noexcept { return upToDate_; }
+
+            //- Set as up-to-date, return the previous value
+            bool upToDate(bool flag) noexcept
+            {
+                bool old(upToDate_);
+                upToDate_ = flag;
+                return old;
+            }
 
             //- Access to the up-to-date flag
-            inline bool& upToDate();
+            //  \deprecated Prefer the upToDate(bool) setter (JAN-2023)
+            bool upToDate() noexcept { return upToDate_; }
 
             //- Access to the distributed flag
             inline bool distributed() const;

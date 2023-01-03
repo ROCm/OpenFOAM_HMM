@@ -108,7 +108,7 @@ void Foam::calculatedProcessorGAMGInterfaceField::initInterfaceMatrixUpdate
     if
     (
         commsType == Pstream::commsTypes::nonBlocking
-     && !Pstream::floatTransfer
+     && !UPstream::floatTransfer
     )
     {
         // Fast path.
@@ -141,8 +141,7 @@ void Foam::calculatedProcessorGAMGInterfaceField::initInterfaceMatrixUpdate
         procInterface_.compressedSend(commsType, scalarSendBuf_);
     }
 
-    const_cast<calculatedProcessorGAMGInterfaceField&>(*this).updatedMatrix()
-        = false;
+    this->updatedMatrix(false);
 }
 
 
@@ -158,7 +157,7 @@ void Foam::calculatedProcessorGAMGInterfaceField::updateInterfaceMatrix
     const Pstream::commsTypes commsType
 ) const
 {
-    if (updatedMatrix())
+    if (this->updatedMatrix())
     {
         return;
     }
@@ -168,7 +167,7 @@ void Foam::calculatedProcessorGAMGInterfaceField::updateInterfaceMatrix
     if
     (
         commsType == Pstream::commsTypes::nonBlocking
-     && !Pstream::floatTransfer
+     && !UPstream::floatTransfer
     )
     {
         // Fast path: consume straight from receive buffer
@@ -199,8 +198,7 @@ void Foam::calculatedProcessorGAMGInterfaceField::updateInterfaceMatrix
         addToInternalField(result, !add, faceCells, coeffs, pnf);
     }
 
-    const_cast<calculatedProcessorGAMGInterfaceField&>(*this).updatedMatrix()
-        = true;
+    this->updatedMatrix(true);
 }
 
 

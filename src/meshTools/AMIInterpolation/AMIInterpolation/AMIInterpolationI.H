@@ -53,18 +53,6 @@ inline const Foam::primitivePatch& Foam::AMIInterpolation::tgtPatch0() const
 }
 
 
-inline bool Foam::AMIInterpolation::upToDate() const
-{
-    return upToDate_;
-}
-
-
-inline bool& Foam::AMIInterpolation::upToDate()
-{
-    return upToDate_;
-}
-
-
 inline bool Foam::AMIInterpolation::distributed() const
 {
     return singlePatchProc_ == -1;

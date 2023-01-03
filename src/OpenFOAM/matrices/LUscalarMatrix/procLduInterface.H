@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef procLduInterface_H
-#define procLduInterface_H
+#ifndef Foam_procLduInterface_H
+#define Foam_procLduInterface_H
 
 #include "labelList.H"
 #include "scalarField.H"
@@ -45,15 +45,11 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class lduInterfaceField;
-
-
-// Forward declaration of friend functions and operators
-
 class procLduInterface;
 
 Ostream& operator<<(Ostream&, const procLduInterface&);
-
 
 /*---------------------------------------------------------------------------*\
                            Class procLduInterface Declaration
@@ -61,7 +57,7 @@ Ostream& operator<<(Ostream&, const procLduInterface&);
 
 class procLduInterface
 {
-    // Private data
+    // Private Data
 
         labelList faceCells_;
         scalarField coeffs_;
@@ -70,16 +66,15 @@ class procLduInterface
         label tag_;
         label comm_;
 
-
-    // Private Member Functions
-
-        //- No copy construct
-        procLduInterface(const procLduInterface&) = delete;
-
-
 public:
 
     friend class LUscalarMatrix;
+
+
+    // Generated Methods
+
+        //- No copy construct
+        procLduInterface(const procLduInterface&) = delete;
 
 
     // Constructors
@@ -104,7 +99,7 @@ public:
         }
 
 
-    // Ostream operator
+    // Ostream Operator
 
         friend Ostream& operator<<(Ostream&, const procLduInterface&);
 };
