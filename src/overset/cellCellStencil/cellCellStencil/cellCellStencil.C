@@ -411,7 +411,7 @@ void Foam::cellCellStencil::setUpFrontOnOversetPatch
 void Foam::cellCellStencil::walkFront
 (
     const globalIndex& globalCells,
-    const label layerRelax,
+    const scalar layerRelax,
     const labelListList& allStencil,
     labelList& allCellTypes,
     scalarField& allWeight,
@@ -611,9 +611,11 @@ void Foam::cellCellStencil::walkFront
                                     allWeightWork[nei] = fraction[facei];
                                     allCellTypesWork[nei] = INTERPOLATED;
 
-                                    const label donorId =  compactStencil[nei][0];
+                                    const label donorId =
+                                        compactStencil[nei][0];
 
-                                    volRatio[nei] = V[nei]/compactCellVol[donorId];
+                                    volRatio[nei] =
+                                        V[nei]/compactCellVol[donorId];
 
                                     seedCell
                                     (
