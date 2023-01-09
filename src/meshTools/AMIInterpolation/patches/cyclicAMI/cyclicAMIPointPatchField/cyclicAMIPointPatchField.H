@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cyclicAMIPointPatchField_H
-#define cyclicAMIPointPatchField_H
+#ifndef Foam_cyclicAMIPointPatchField_H
+#define Foam_cyclicAMIPointPatchField_H
 
 #include "coupledPointPatchField.H"
 #include "cyclicAMIPointPatch.H"
@@ -189,11 +189,7 @@ public:
             //- Does the patch field perform the transformation
             virtual bool doTransform() const
             {
-                return
-                   !(
-                        cyclicAMIPatch_.parallel()
-                     || pTraits<Type>::rank == 0
-                    );
+                return (pTraits<Type>::rank && !cyclicAMIPatch_.parallel());
             }
 
             //- Return face transformation tensor

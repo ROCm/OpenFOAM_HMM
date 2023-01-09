@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef processorPointPatchField_H
-#define processorPointPatchField_H
+#ifndef Foam_processorPointPatchField_H
+#define Foam_processorPointPatchField_H
 
 #include "coupledPointPatchField.H"
 #include "processorPointPatch.H"
@@ -145,10 +145,10 @@ public:
             virtual bool doTransform() const
             {
                 return
-                   !(
-                        procPatch_.procPolyPatch().parallel()
-                     || pTraits<Type>::rank == 0
-                    );
+                (
+                    pTraits<Type>::rank
+                 && !procPatch_.procPolyPatch().parallel()
+                );
             }
 
 

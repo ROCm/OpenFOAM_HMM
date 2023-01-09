@@ -38,8 +38,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef processorFaPatchField_H
-#define processorFaPatchField_H
+#ifndef Foam_processorFaPatchField_H
+#define Foam_processorFaPatchField_H
 
 #include "coupledFaPatchField.H"
 #include "processorLduInterfaceField.H"
@@ -254,7 +254,7 @@ public:
             //- Does the patch field perform the transformation
             virtual bool doTransform() const
             {
-                return !(procPatch_.parallel() || pTraits<Type>::rank == 0);
+                return (pTraits<Type>::rank && !procPatch_.parallel());
             }
 
             //- Return face transformation tensor

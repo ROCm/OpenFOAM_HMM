@@ -168,7 +168,7 @@ Foam::cyclicAMIFvPatchField<Type>::patchNeighbourField() const
 
     if (doTransform())
     {
-        tpnf.ref() = transform(forwardT(), tpnf());
+        transform(tpnf.ref(), forwardT(), tpnf());
     }
 
     return tpnf;

@@ -47,8 +47,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef processorFvPatchField_H
-#define processorFvPatchField_H
+#ifndef Foam_processorFvPatchField_H
+#define Foam_processorFvPatchField_H
 
 #include "coupledFvPatchField.H"
 #include "processorLduInterfaceField.H"
@@ -251,7 +251,6 @@ public:
                 const scalarField& coeffs,
                 const Pstream::commsTypes commsType
             ) const;
-            
 
 
         //- Processor coupled interface functions
@@ -277,7 +276,7 @@ public:
             //- Does the patch field perform the transformation
             virtual bool doTransform() const
             {
-                return !(procPatch_.parallel() || pTraits<Type>::rank == 0);
+                return (pTraits<Type>::rank && !procPatch_.parallel());
             }
 
             //- Return face transformation tensor
@@ -291,7 +290,6 @@ public:
             {
                 return pTraits<Type>::rank;
             }
-
 };
 
 
