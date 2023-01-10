@@ -33,7 +33,7 @@ License
 
 Foam::UIPBstream::UIPBstream
 (
-    const commsTypes commsType,
+    const UPstream::commsTypes commsType,
     const int fromProcNo,
     DynamicList<char>& receiveBuf,
     label& receiveBufPosition,
@@ -61,7 +61,7 @@ Foam::UIPBstream::UIPBstream
 
 Foam::IPBstream::IPBstream
 (
-    const commsTypes commsType,
+    const UPstream::commsTypes commsType,
     const int fromProcNo,
     const label bufSize,
     const int tag,

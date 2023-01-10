@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,8 +29,6 @@ License
 #include "UOPstream.H"
 #include "PstreamGlobals.H"
 #include "profilingPstream.H"
-
-#include <mpi.h>
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -57,7 +55,9 @@ bool Foam::UOPstream::write
     const char* buf,
     const std::streamsize bufSize,
     const int tag,
-    const label communicator
+    const label communicator,
+    UPstream::Request* req,
+    const UPstream::sendModes sendMode
 )
 {
     if (debug)
@@ -87,7 +87,7 @@ bool Foam::UOPstream::write
 
     profilingPstream::beginTiming();
 
-    if (commsType == commsTypes::blocking)
+    if (commsType == UPstream::commsTypes::blocking)
     {
         failed = MPI_Bsend
         (
@@ -110,17 +110,32 @@ bool Foam::UOPstream::write
                 << Foam::endl;
         }
     }
-    else if (commsType == commsTypes::scheduled)
+    else if (commsType == UPstream::commsTypes::scheduled)
     {
-        failed = MPI_Send
-        (
-            const_cast<char*>(buf),
-            bufSize,
-            MPI_BYTE,
-            toProcNo,
-            tag,
-            PstreamGlobals::MPICommunicators_[communicator]
-        );
+        if (UPstream::sendModes::sync == sendMode)
+        {
+            failed = MPI_Ssend
+            (
+                const_cast<char*>(buf),
+                bufSize,
+                MPI_BYTE,
+                toProcNo,
+                tag,
+                PstreamGlobals::MPICommunicators_[communicator]
+            );
+        }
+        else
+        {
+            failed = MPI_Send
+            (
+                const_cast<char*>(buf),
+                bufSize,
+                MPI_BYTE,
+                toProcNo,
+                tag,
+                PstreamGlobals::MPICommunicators_[communicator]
+            );
+        }
 
         // Assume these are from scatters ...
         profilingPstream::addScatterTime();
@@ -133,20 +148,36 @@ bool Foam::UOPstream::write
                 << Foam::endl;
         }
     }
-    else if (commsType == commsTypes::nonBlocking)
+    else if (commsType == UPstream::commsTypes::nonBlocking)
     {
         MPI_Request request;
 
-        failed = MPI_Isend
-        (
-            const_cast<char*>(buf),
-            bufSize,
-            MPI_BYTE,
-            toProcNo,
-            tag,
-            PstreamGlobals::MPICommunicators_[communicator],
-            &request
-        );
+        if (UPstream::sendModes::sync == sendMode)
+        {
+            failed = MPI_Issend
+            (
+                const_cast<char*>(buf),
+                bufSize,
+                MPI_BYTE,
+                toProcNo,
+                tag,
+                PstreamGlobals::MPICommunicators_[communicator],
+               &request
+            );
+        }
+        else
+        {
+            failed = MPI_Isend
+            (
+                const_cast<char*>(buf),
+                bufSize,
+                MPI_BYTE,
+                toProcNo,
+                tag,
+                PstreamGlobals::MPICommunicators_[communicator],
+               &request
+            );
+        }
 
         profilingPstream::addWaitTime();
 
@@ -155,11 +186,20 @@ bool Foam::UOPstream::write
             Pout<< "UOPstream::write : started write to:" << toProcNo
                 << " tag:" << tag << " size:" << label(bufSize)
                 << " commType:" << UPstream::commsTypeNames[commsType]
-                << " request:" << PstreamGlobals::outstandingRequests_.size()
+                << " request:"
+                <<
+                (req ? label(-1) : PstreamGlobals::outstandingRequests_.size())
                 << Foam::endl;
         }
 
-        PstreamGlobals::outstandingRequests_.push_back(request);
+        if (req)
+        {
+            *req = UPstream::Request(request);
+        }
+        else
+        {
+            PstreamGlobals::outstandingRequests_.push_back(request);
+        }
     }
     else
     {

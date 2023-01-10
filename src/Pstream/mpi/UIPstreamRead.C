@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,8 +30,6 @@ License
 #include "PstreamGlobals.H"
 #include "profilingPstream.H"
 #include "IOstreams.H"
-
-#include <mpi.h>
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -99,12 +97,13 @@ void Foam::UIPstream::bufferIPCrecv()
 
 Foam::label Foam::UIPstream::read
 (
-    const commsTypes commsType,
+    const UPstream::commsTypes commsType,
     const int fromProcNo,
     char* buf,
     const std::streamsize bufSize,
     const int tag,
-    const label communicator
+    const label communicator,
+    UPstream::Request* req
 )
 {
     if (debug)
@@ -130,8 +129,8 @@ Foam::label Foam::UIPstream::read
 
     if
     (
-        commsType == commsTypes::blocking
-     || commsType == commsTypes::scheduled
+        commsType == UPstream::commsTypes::blocking
+     || commsType == UPstream::commsTypes::scheduled
     )
     {
         MPI_Status status;
@@ -182,7 +181,7 @@ Foam::label Foam::UIPstream::read
 
         return messageSize;
     }
-    else if (commsType == commsTypes::nonBlocking)
+    else if (commsType == UPstream::commsTypes::nonBlocking)
     {
         MPI_Request request;
 
@@ -214,11 +213,19 @@ Foam::label Foam::UIPstream::read
             Pout<< "UIPstream::read : started read from:" << fromProcNo
                 << " tag:" << tag << " read size:" << label(bufSize)
                 << " commsType:" << UPstream::commsTypeNames[commsType]
-                << " request:" << PstreamGlobals::outstandingRequests_.size()
+                <<
+                (req ? label(-1) : PstreamGlobals::outstandingRequests_.size())
                 << Foam::endl;
         }
 
-        PstreamGlobals::outstandingRequests_.push_back(request);
+        if (req)
+        {
+            *req = UPstream::Request(request);
+        }
+        else
+        {
+            PstreamGlobals::outstandingRequests_.push_back(request);
+        }
 
         // Assume the message is completely received.
         return bufSize;

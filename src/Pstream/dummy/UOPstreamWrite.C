@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,7 +46,9 @@ bool Foam::UOPstream::write
     const char* buf,
     const std::streamsize bufSize,
     const int tag,
-    const label communicator
+    const label communicator,
+    UPstream::Request* req,
+    const UPstream::sendModes sendMode
 )
 {
     NotImplemented;

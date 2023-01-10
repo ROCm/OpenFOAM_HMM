@@ -27,17 +27,40 @@ License
 
 #include "UPstream.H"
 
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::UPstream::Request::Request() noexcept
+:
+    UPstream::Request(nullptr)
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::UPstream::Request::good() const noexcept
+{
+    return false;
+}
+
+
+void Foam::UPstream::Request::reset() noexcept
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::label Foam::UPstream::nRequests() noexcept { return 0; }
 
 void Foam::UPstream::resetRequests(const label n) {}
 
-void Foam::UPstream::waitRequests(const label start) {}
+void Foam::UPstream::waitRequests(const label pos) {}
+void Foam::UPstream::waitRequests(UList<UPstream::Request>&) {}
 
 void Foam::UPstream::waitRequest(const label i) {}
+void Foam::UPstream::waitRequest(UPstream::Request&) {}
 
 bool Foam::UPstream::finishedRequest(const label i) { return true; }
+bool Foam::UPstream::finishedRequest(UPstream::Request&) { return true; }
 
 
 // ************************************************************************* //

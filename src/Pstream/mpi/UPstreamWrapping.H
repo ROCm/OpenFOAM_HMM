@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,12 +23,6 @@ License
 
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
-
-Namespace
-    Foam::PstreamDetail
-
-Description
-    Some implementation details for Pstream and/or MPI.
 
 InNamespace
     Foam::PstreamDetail
@@ -53,6 +47,27 @@ namespace Foam
 {
 namespace PstreamDetail
 {
+
+// Helper for casting to MPI_Request
+struct Request
+{
+    // To pointer
+    template<typename Type = MPI_Request>
+    static typename std::enable_if<std::is_pointer<Type>::value, Type>::type
+    get(const UPstream::Request& req) noexcept
+    {
+        return reinterpret_cast<Type>(req.value());
+    }
+
+    // To integer
+    template<typename Type = MPI_Request>
+    static typename std::enable_if<std::is_integral<Type>::value, Type>::type
+    get(const UPstream::Request& req) noexcept
+    {
+        return static_cast<Type>(req.value());
+    }
+};
+
 
 // MPI_Bcast, using root=0
 template<class Type>
@@ -84,7 +99,8 @@ void allReduce
     MPI_Datatype datatype,
     MPI_Op optype,
     const label comm,                   // Communicator
-    label* requestID = nullptr          // Non-null for MPI_Iallreduce
+    UPstream::Request* req = nullptr,   // Non-null for non-blocking
+    label* requestID = nullptr          // (alternative to UPstream::Request)
 );
 
 
@@ -96,7 +112,8 @@ void allToAll
     UList<Type>& recvData,
     MPI_Datatype datatype,
     const label comm,                   // Communicator
-    label* requestID = nullptr          // Non-null for MPI_Ialltoall
+    UPstream::Request* req = nullptr,   // Non-null for non-blocking
+    label* requestID = nullptr          // (alternative to UPstream::Request)
 );
 
 
@@ -114,7 +131,8 @@ void allToAllv
 
     MPI_Datatype datatype,
     const label comm,                   // Communicator
-    label* requestID = nullptr          // Non-null for MPI_Ialltoallv
+    UPstream::Request* req = nullptr,   // Non-null for non-blocking
+    label* requestID = nullptr          // (alternative to UPstream::Request)
 );
 
 
@@ -130,7 +148,8 @@ void gather
 
     MPI_Datatype datatype,              // The send/recv data type
     const label comm,                   // Communicator
-    label* requestID = nullptr          // Non-null for MPI_Igather
+    UPstream::Request* req = nullptr,   // Non-null for non-blocking
+    label* requestID = nullptr          // (alternative to UPstream::Request)
 );
 
 
@@ -146,7 +165,8 @@ void scatter
 
     MPI_Datatype datatype,              // The send/recv data type
     const label comm,                   // Communicator
-    label* requestID = nullptr          // Non-null for MPI_Iscatter
+    UPstream::Request* req = nullptr,   // Non-null for non-blocking
+    label* requestID = nullptr          // (alternative to UPstream::Request)
 );
 
 
@@ -163,7 +183,8 @@ void gatherv
 
     MPI_Datatype datatype,              // The send/recv data type
     const label comm,                   // Communicator
-    label* requestID = nullptr          // Non-null for MPI_Igatherv
+    UPstream::Request* req = nullptr,   // Non-null for non-blocking
+    label* requestID = nullptr          // (alternative to UPstream::Request)
 );
 
 
@@ -180,7 +201,8 @@ void scatterv
 
     MPI_Datatype datatype,              // The send/recv data type
     const label comm,                   // Communicator
-    label* requestID = nullptr          // Non-null for MPI_Igatherv
+    UPstream::Request* req = nullptr,   // Non-null for non-blocking
+    label* requestID = nullptr          // (alternative to UPstream::Request)
 );
 
 

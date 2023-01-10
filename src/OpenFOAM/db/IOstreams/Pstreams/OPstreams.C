@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,7 +33,7 @@ License
 
 Foam::UOPstream::UOPstream
 (
-    const commsTypes commsType,
+    const UPstream::commsTypes commsType,
     const int toProcNo,
     DynamicList<char>& sendBuf,
     const int tag,
@@ -54,7 +54,7 @@ Foam::UOPstream::UOPstream(const int toProcNo, PstreamBuffers& buffers)
 
 Foam::OPstream::OPstream
 (
-    const commsTypes commsType,
+    const UPstream::commsTypes commsType,
     const int toProcNo,
     const label bufSize,
     const int tag,

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
-    Copyright (C) 2017-2022 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -107,7 +107,7 @@ protected:
         //- and IO format
         UIPstreamBase
         (
-            const commsTypes commsType,
+            const UPstream::commsTypes commsType,
             const int fromProcNo,
             DynamicList<char>& receiveBuf,
             label& receiveBufPosition,
@@ -225,7 +225,7 @@ public:
         //- and IO format
         UIPstream
         (
-            const commsTypes commsType,
+            const UPstream::commsTypes commsType,
             const int fromProcNo,
             DynamicList<char>& receiveBuf,
             label& receiveBufPosition,
@@ -255,13 +255,40 @@ public:
         //  \return the message size
         static label read
         (
-            const commsTypes commsType,
+            const UPstream::commsTypes commsType,
             const int fromProcNo,
             char* buf,
             const std::streamsize bufSize,
             const int tag = UPstream::msgType(),
-            const label comm = UPstream::worldComm
+            const label comm = UPstream::worldComm,
+            //! [out] request information (for non-blocking)
+            UPstream::Request* req = nullptr
         );
+
+        //- Read buffer contents (non-blocking) from given processor
+        //  \return the message size
+        inline static label read
+        (
+            //! [out] request information
+            UPstream::Request& req,
+            const int fromProcNo,
+            char* buf,
+            const std::streamsize bufSize,
+            const int tag,
+            const label communicator
+        )
+        {
+            return UIPstream::read
+            (
+                UPstream::commsTypes::nonBlocking,
+                fromProcNo,
+                buf,
+                bufSize,
+                tag,
+                communicator,
+               &req
+            );
+        }
 };
 
 
@@ -290,7 +317,7 @@ public:
         //- and IO format
         UIPBstream
         (
-            const commsTypes commsType,     //!< ignored
+            const UPstream::commsTypes,     //!< ignored
             const int rootProcNo,           //!< normally UPstream::masterNo()
             DynamicList<char>& receiveBuf,
             label& receiveBufPosition,
@@ -317,11 +344,9 @@ public:
         //  \return the message size
         static label read
         (
-            const commsTypes commsTypes,    //!< ignored
-            const int rootProcNo,           //!< normally UPstream::masterNo()
+            const int rootProcNo,  //!< normally UPstream::masterNo()
             char* buf,
             const std::streamsize bufSize,
-            const int tag = UPstream::msgType(),  //!< ignored
             const label comm = UPstream::worldComm
         );
 };

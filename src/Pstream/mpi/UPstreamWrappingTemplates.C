@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2015 OpenFOAM Foundation
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -119,6 +119,8 @@ void Foam::PstreamDetail::allReduce
     MPI_Datatype datatype,
     MPI_Op optype,
     const label comm,
+
+    UPstream::Request* req,
     label* requestID
 )
 {
@@ -127,9 +129,11 @@ void Foam::PstreamDetail::allReduce
         return;
     }
 
+    const bool immediate = (req || requestID);
+
     if (UPstream::warnComm != -1 && comm != UPstream::warnComm)
     {
-        if (requestID != nullptr)
+        if (immediate)
         {
             Pout<< "** MPI_Iallreduce (non-blocking):";
         }
@@ -155,10 +159,11 @@ void Foam::PstreamDetail::allReduce
     bool handled(false);
 
 #if defined(MPI_VERSION) && (MPI_VERSION >= 3)
-    if (requestID != nullptr)
+    if (immediate)
     {
         handled = true;
         MPI_Request request;
+
         if
         (
             MPI_Iallreduce
@@ -179,16 +184,23 @@ void Foam::PstreamDetail::allReduce
                 << Foam::abort(FatalError);
         }
 
-        *requestID = PstreamGlobals::push_request(request);
+        if (req)
+        {
+            *req = UPstream::Request(request);
+            if (requestID) *requestID = -1;
+        }
+        else
+        {
+            *requestID = PstreamGlobals::push_request(request);
+        }
     }
 #endif
 
     if (!handled)
     {
-        if (requestID != nullptr)
-        {
-            *requestID = -1;
-        }
+        if (req) req->reset();
+        if (requestID) *requestID = -1;
+
         if
         (
             MPI_Allreduce
@@ -220,14 +232,18 @@ void Foam::PstreamDetail::allToAll
     UList<Type>& recvData,
     MPI_Datatype datatype,
     const label comm,
+
+    UPstream::Request* req,
     label* requestID
 )
 {
+    const bool immediate = (req || requestID);
+
     const label np = UPstream::nProcs(comm);
 
     if (UPstream::warnComm != -1 && comm != UPstream::warnComm)
     {
-        if (requestID != nullptr)
+        if (immediate)
         {
             Pout<< "** MPI_Ialltoall (non-blocking):";
         }
@@ -262,11 +278,12 @@ void Foam::PstreamDetail::allToAll
 
     bool handled(false);
 
-    #if defined(MPI_VERSION) && (MPI_VERSION >= 3)
-    if (requestID != nullptr)
+#if defined(MPI_VERSION) && (MPI_VERSION >= 3)
+    if (immediate)
     {
         handled = true;
         MPI_Request request;
+
         if
         (
             MPI_Ialltoall
@@ -290,17 +307,23 @@ void Foam::PstreamDetail::allToAll
                 << Foam::abort(FatalError);
         }
 
-        *requestID = PstreamGlobals::push_request(request);
+        if (req)
+        {
+            *req = UPstream::Request(request);
+            if (requestID) *requestID = -1;
+        }
+        else
+        {
+            *requestID = PstreamGlobals::push_request(request);
+        }
     }
 #endif
 
-
     if (!handled)
     {
-        if (requestID != nullptr)
-        {
-            *requestID = -1;
-        }
+        if (req) req->reset();
+        if (requestID) *requestID = -1;
+
         if
         (
             MPI_Alltoall
@@ -341,14 +364,18 @@ void Foam::PstreamDetail::allToAllv
 
     MPI_Datatype datatype,
     const label comm,
+
+    UPstream::Request* req,
     label* requestID
 )
 {
+    const bool immediate = (req || requestID);
+
     const label np = UPstream::nProcs(comm);
 
     if (UPstream::warnComm != -1 && comm != UPstream::warnComm)
     {
-        if (requestID != nullptr)
+        if (immediate)
         {
             Pout<< "** MPI_Ialltoallv (non-blocking):";
         }
@@ -402,7 +429,7 @@ void Foam::PstreamDetail::allToAllv
     bool handled(false);
 
 #if defined(MPI_VERSION) && (MPI_VERSION >= 3)
-    if (requestID != nullptr)
+    if (immediate)
     {
         handled = true;
         MPI_Request request;
@@ -431,16 +458,23 @@ void Foam::PstreamDetail::allToAllv
                 << Foam::abort(FatalError);
         }
 
-        *requestID = PstreamGlobals::push_request(request);
+        if (req)
+        {
+            *req = UPstream::Request(request);
+            if (requestID) *requestID = -1;
+        }
+        else
+        {
+            *requestID = PstreamGlobals::push_request(request);
+        }
     }
 #endif
 
     if (!handled)
     {
-        if (requestID != nullptr)
-        {
-            *requestID = -1;
-        }
+        if (req) req->reset();
+        if (requestID) *requestID = -1;
+
         if
         (
             MPI_Alltoallv
@@ -480,6 +514,8 @@ void Foam::PstreamDetail::gather
 
     MPI_Datatype datatype,
     const label comm,
+
+    UPstream::Request* req,
     label* requestID
 )
 {
@@ -489,11 +525,13 @@ void Foam::PstreamDetail::gather
         return;
     }
 
+    const bool immediate = (req || requestID);
+
     const label np = UPstream::nProcs(comm);
 
     if (UPstream::warnComm != -1 && comm != UPstream::warnComm)
     {
-        if (requestID != nullptr)
+        if (immediate)
         {
             Pout<< "** MPI_Igather (non-blocking):";
         }
@@ -514,10 +552,11 @@ void Foam::PstreamDetail::gather
     bool handled(false);
 
 #if defined(MPI_VERSION) && (MPI_VERSION >= 3)
-    if (requestID != nullptr)
+    if (immediate)
     {
         handled = true;
         MPI_Request request;
+
         if
         (
             MPI_Igather
@@ -541,16 +580,23 @@ void Foam::PstreamDetail::gather
                 << Foam::abort(FatalError);
         }
 
-        *requestID = PstreamGlobals::push_request(request);
+        if (req)
+        {
+            *req = UPstream::Request(request);
+            if (requestID) *requestID = -1;
+        }
+        else
+        {
+            *requestID = PstreamGlobals::push_request(request);
+        }
     }
 #endif
 
     if (!handled)
     {
-        if (requestID != nullptr)
-        {
-            *requestID = -1;
-        }
+        if (req) req->reset();
+        if (requestID) *requestID = -1;
+
         if
         (
             MPI_Gather
@@ -589,6 +635,8 @@ void Foam::PstreamDetail::scatter
 
     MPI_Datatype datatype,
     const label comm,
+
+    UPstream::Request* req,
     label* requestID
 )
 {
@@ -598,11 +646,13 @@ void Foam::PstreamDetail::scatter
         return;
     }
 
+    const bool immediate = (req || requestID);
+
     const label np = UPstream::nProcs(comm);
 
     if (UPstream::warnComm != -1 && comm != UPstream::warnComm)
     {
-        if (requestID != nullptr)
+        if (immediate)
         {
             Pout<< "** MPI_Iscatter (non-blocking):";
         }
@@ -623,10 +673,11 @@ void Foam::PstreamDetail::scatter
     bool handled(false);
 
 #if defined(MPI_VERSION) && (MPI_VERSION >= 3)
-    if (requestID != nullptr)
+    if (immediate)
     {
         handled = true;
         MPI_Request request;
+
         if
         (
             MPI_Iscatter
@@ -650,16 +701,23 @@ void Foam::PstreamDetail::scatter
                 << Foam::abort(FatalError);
         }
 
-        *requestID = PstreamGlobals::push_request(request);
+        if (req)
+        {
+            *req = UPstream::Request(request);
+            if (requestID) *requestID = -1;
+        }
+        else
+        {
+            *requestID = PstreamGlobals::push_request(request);
+        }
     }
 #endif
 
     if (!handled)
     {
-        if (requestID != nullptr)
-        {
-            *requestID = -1;
-        }
+        if (req) req->reset();
+        if (requestID) *requestID = -1;
+
         if
         (
             MPI_Scatter
@@ -676,7 +734,7 @@ void Foam::PstreamDetail::scatter
         )
         {
             FatalErrorInFunction
-                << "MPI_Iscatter [comm: " << comm << "] failed."
+                << "MPI_Scatter [comm: " << comm << "] failed."
                 << " sendCount " << sendCount
                 << " recvCount " << recvCount
                 << Foam::abort(FatalError);
@@ -699,6 +757,8 @@ void Foam::PstreamDetail::gatherv
 
     MPI_Datatype datatype,
     const label comm,
+
+    UPstream::Request* req,
     label* requestID
 )
 {
@@ -709,11 +769,13 @@ void Foam::PstreamDetail::gatherv
         return;
     }
 
+    const bool immediate = (req || requestID);
+
     const label np = UPstream::nProcs(comm);
 
     if (UPstream::warnComm != -1 && comm != UPstream::warnComm)
     {
-        if (requestID != nullptr)
+        if (immediate)
         {
             Pout<< "** MPI_Igatherv (non-blocking):";
         }
@@ -757,10 +819,11 @@ void Foam::PstreamDetail::gatherv
     bool handled(false);
 
 #if defined(MPI_VERSION) && (MPI_VERSION >= 3)
-    if (requestID != nullptr)
+    if (immediate)
     {
         handled = true;
         MPI_Request request;
+
         if
         (
             MPI_Igatherv
@@ -785,16 +848,23 @@ void Foam::PstreamDetail::gatherv
                 << Foam::abort(FatalError);
         }
 
-        *requestID = PstreamGlobals::push_request(request);
+        if (req)
+        {
+            *req = UPstream::Request(request);
+            if (requestID) *requestID = -1;
+        }
+        else
+        {
+            *requestID = PstreamGlobals::push_request(request);
+        }
     }
 #endif
 
     if (!handled)
     {
-        if (requestID != nullptr)
-        {
-            *requestID = -1;
-        }
+        if (req) req->reset();
+        if (requestID) *requestID = -1;
+
         if
         (
             MPI_Gatherv
@@ -835,6 +905,8 @@ void Foam::PstreamDetail::scatterv
 
     MPI_Datatype datatype,
     const label comm,
+
+    UPstream::Request* req,
     label* requestID
 )
 {
@@ -844,11 +916,13 @@ void Foam::PstreamDetail::scatterv
         return;
     }
 
+    const bool immediate = (req || requestID);
+
     const label np = UPstream::nProcs(comm);
 
     if (UPstream::warnComm != -1 && comm != UPstream::warnComm)
     {
-        if (requestID != nullptr)
+        if (immediate)
         {
             Pout<< "** MPI_Iscatterv (non-blocking):";
         }
@@ -886,10 +960,11 @@ void Foam::PstreamDetail::scatterv
     bool handled(false);
 
 #if defined(MPI_VERSION) && (MPI_VERSION >= 3)
-    if (requestID != nullptr)
+    if (immediate)
     {
         handled = true;
         MPI_Request request;
+
         if
         (
             MPI_Iscatterv
@@ -914,16 +989,23 @@ void Foam::PstreamDetail::scatterv
                 << Foam::abort(FatalError);
         }
 
-        *requestID = PstreamGlobals::push_request(request);
+        if (req)
+        {
+            *req = UPstream::Request(request);
+            if (requestID) *requestID = -1;
+        }
+        else
+        {
+            *requestID = PstreamGlobals::push_request(request);
+        }
     }
 #endif
 
     if (!handled)
     {
-        if (requestID != nullptr)
-        {
-            *requestID = -1;
-        }
+        if (req) req->reset();
+        if (requestID) *requestID = -1;
+
         if
         (
             MPI_Scatterv

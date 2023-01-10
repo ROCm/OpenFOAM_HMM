@@ -102,13 +102,13 @@ protected:
 
 public:
 
-    // Declare name of the class and its debug switch
+    //- Declare name of the class and its debug switch
     ClassName("Pstream");
 
 
     // Constructors
 
-        //- Construct for given commsTypes, with optional buffer size
+        //- Construct for given communication type, with optional buffer size
         explicit Pstream
         (
             const UPstream::commsTypes commsType,

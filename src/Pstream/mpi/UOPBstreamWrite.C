@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,8 +27,6 @@ License
 
 #include "UOPstream.H"
 #include "PstreamGlobals.H"
-
-#include <mpi.h>
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -92,11 +90,9 @@ bool Foam::UOPBstream::bufferIPCsend()
 
 bool Foam::UOPBstream::write
 (
-    const commsTypes commsType,  /* unused */
     const int rootProcNo,
     const char* buf,
     const std::streamsize bufSize,
-    const int tag,  /* unused */
     const label comm
 )
 {

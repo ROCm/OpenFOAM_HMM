@@ -52,6 +52,10 @@ SourceFiles
 namespace Foam
 {
 
+//- Implementation details for UPstream/Pstream/MPI etc.
+namespace PstreamDetail {}
+
+
 /*---------------------------------------------------------------------------*\
                           Class UPstream Declaration
 \*---------------------------------------------------------------------------*/
@@ -63,7 +67,7 @@ public:
     //- Int ranges are used for MPI ranks (processes)
     typedef IntRange<int> rangeType;
 
-    //- Types of communications
+    //- Communications types
     enum class commsTypes : char
     {
         blocking,       //!< "blocking"    : (MPI_Bsend, MPI_Recv)
@@ -74,8 +78,20 @@ public:
     //- Enumerated names for the communication types
     static const Enum<commsTypes> commsTypeNames;
 
+    //- Different MPI-send modes (ignored for commsTypes::blocking)
+    enum class sendModes : char
+    {
+        normal,         //!< (MPI_Send, MPI_Isend)
+        sync            //!< (MPI_Ssend, MPI_Issend)
+    };
+
 
     // Public Classes
+
+        // Forward Declarations
+
+        //- Wrapper for MPI_Request
+        class Request;
 
         //- Structure for communicating between processors
         class commsStruct
@@ -100,8 +116,8 @@ public:
 
             // Constructors
 
-                //- Default construct. Above == -1
-                commsStruct() noexcept;
+                //- Default construct with above == -1
+                commsStruct() noexcept : above_(-1) {}
 
                 //- Construct from components
                 commsStruct
@@ -165,7 +181,6 @@ public:
 
                 friend Ostream& operator<<(Ostream&, const commsStruct&);
         };
-
 
         //- combineReduce operator for lists. Used for counting.
         struct listEq
@@ -305,7 +320,7 @@ public:
     // Constructors
 
         //- Construct for given communication type
-        explicit UPstream(const commsTypes commsType)
+        explicit UPstream(const commsTypes commsType) noexcept
         :
             commsType_(commsType)
         {}
@@ -441,6 +456,13 @@ public:
         //      Fatal if MPI has already been finalized.
         static bool initNull();
 
+        //- Impose a synchronisation barrier (optionally non-blocking)
+        static void barrier
+        (
+            const label communicator,
+            UPstream::Request* req = nullptr
+        );
+
 
         // Non-blocking comms
 
@@ -452,10 +474,14 @@ public:
             //  A no-op for out-of-range values.
             static void resetRequests(const label n);
 
-            //- Wait until all requests (from start onwards) have finished.
+            //- Wait until all requests (from position onwards) have finished.
             //  A no-op if parRun() == false, if there are no pending requests
             //  or if the start is out-of-range (0 to nRequests)
-            static void waitRequests(const label start = 0);
+            static void waitRequests(const label pos);
+
+            //- Wait until all requests have finished.
+            //  A no-op if parRun() == false or the list is empty
+            static void waitRequests(UList<UPstream::Request>& requests);
 
             //- Wait until request i has finished.
             //  A no-op if parRun() == false,
@@ -463,11 +489,20 @@ public:
             //  or if the index is out-of-range (0 to nRequests)
             static void waitRequest(const label i);
 
+            //- Wait until specified request has finished.
+            //  A no-op if parRun() == false or for a null-request
+            static void waitRequest(UPstream::Request& req);
+
             //- Non-blocking comms: has request i finished?
             //  A no-op and returns true if parRun() == false,
             //  there are no pending requests,
             //  or if the index is out-of-range (0 to nRequests)
             static bool finishedRequest(const label i);
+
+            //- Non-blocking comms: has request finished?
+            //  A no-op and returns true if parRun() == false
+            //  or for a null-request
+            static bool finishedRequest(UPstream::Request& req);
 
             static int allocateTag(const char* const msg = nullptr);
             static void freeTag(const int tag, const char* const msg = nullptr);
@@ -789,6 +824,12 @@ public:
 
     // Housekeeping
 
+        //- Wait for all requests to finish.
+        //  \deprecated(2023-01) Probably not what you want.
+        //     Should normally be restricted to a particular starting request.
+        FOAM_DEPRECATED_FOR(2023-01, "waitRequests(int) method")
+        static void waitRequests() { waitRequests(0); }
+
         //- Process index of first sub-process
         //  \deprecated(2020-09) use subProcs() method instead
         static constexpr int firstSlave() noexcept
@@ -805,7 +846,113 @@ public:
 };
 
 
+/*---------------------------------------------------------------------------*\
+                      Class UPstream::Request Declaration
+\*---------------------------------------------------------------------------*/
+
+//- An opaque wrapper for MPI_Request with a vendor-independent
+//- representation independent of any \c <mpi.h> header
+//
+//  The MPI standard states that MPI_Request is always an opaque object.
+//  Generally it is either an integer (eg, mpich) or a pointer (eg, openmpi).
+class UPstream::Request
+{
+public:
+
+    // Public Types
+
+        //- Storage for MPI_Request (as integer or pointer)
+        typedef std::intptr_t value_type;
+
+
+private:
+
+    // Private Data
+
+        //- The MPI_Request (as wrapped value)
+        value_type value_;
+
+public:
+
+    // Generated Methods
+
+        //- Copy construct
+        Request(const Request&) noexcept = default;
+
+        //- Move construct
+        Request(Request&&) noexcept = default;
+
+        //- Copy assignment
+        Request& operator=(const Request&) noexcept = default;
+
+        //- Move assignment
+        Request& operator=(Request&&) noexcept = default;
+
+
+    // Member Operators
+
+        //- Test for equality
+        bool operator==(const Request& rhs) const noexcept
+        {
+            return (value_ == rhs.value_);
+        }
+
+        //- Test for inequality
+        bool operator!=(const Request& rhs) const noexcept
+        {
+            return (value_ != rhs.value_);
+        }
+
+
+    // Constructors
+
+        //- Default construct as MPI_REQUEST_NULL
+        Request() noexcept;
+
+        //- Construct from MPI_Request (as pointer type)
+        explicit Request(const void* p) noexcept
+        :
+            value_(reinterpret_cast<value_type>(p))
+        {}
+
+        //- Construct from MPI_Request (as integer type)
+        explicit Request(value_type val) noexcept
+        :
+            value_(val)
+        {}
+
+
+    // Member Functions
+
+        //- Return raw value
+        value_type value() const noexcept { return value_; }
+
+        //- Return as pointer value
+        const void* pointer() const noexcept
+        {
+            return reinterpret_cast<const void*>(value_);
+        }
+
+        //- True if not equal to MPI_REQUEST_NULL
+        bool good() const noexcept;
+
+        //- Reset to default constructed value (MPI_REQUEST_NULL)
+        void reset() noexcept;
+
+        //- Same as calling UPstream::waitRequest()
+        void wait() { UPstream::waitRequest(*this); }
+
+        //- Same as calling UPstream::finishedRequest()
+        bool finished() { return UPstream::finishedRequest(*this); }
+};
+
+
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
 Ostream& operator<<(Ostream&, const UPstream::commsStruct&);
+
+
+// * * * * * * * * * * * * Template Specialisations  * * * * * * * * * * * * //
 
 // Template specialisation for access of commsStruct
 template<>

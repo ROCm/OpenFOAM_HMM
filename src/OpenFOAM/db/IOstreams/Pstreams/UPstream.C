@@ -519,6 +519,8 @@ Foam::UPstream::commsTypes Foam::UPstream::defaultCommsType
     )
 );
 
+
+//! \cond file_scope
 namespace Foam
 {
     //- Registered reader for UPstream::defaultCommsType
@@ -549,6 +551,7 @@ namespace Foam
 
     addcommsTypeToOpt addcommsTypeToOpt_("commsType");
 }
+//! \endcond
 
 int Foam::UPstream::nPollProcInterfaces
 (

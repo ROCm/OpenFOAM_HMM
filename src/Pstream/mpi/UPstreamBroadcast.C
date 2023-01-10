@@ -29,8 +29,6 @@ License
 #include "PstreamGlobals.H"
 #include "profilingPstream.H"
 
-#include <mpi.h>
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::UPstream::broadcast

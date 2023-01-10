@@ -30,15 +30,6 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::UPstream::commsStruct::commsStruct() noexcept
-:
-    above_(-1),
-    below_(),
-    allBelow_(),
-    allNotBelow_()
-{}
-
-
 Foam::UPstream::commsStruct::commsStruct
 (
     const label above,

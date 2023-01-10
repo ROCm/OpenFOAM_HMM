@@ -28,7 +28,6 @@ License
 #include "Pstream.H"
 #include "UPstreamWrapping.H"
 
-#include <mpi.h>
 #include <cinttypes>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

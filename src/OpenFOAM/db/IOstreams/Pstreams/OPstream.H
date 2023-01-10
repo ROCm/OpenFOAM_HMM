@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
-    Copyright (C) 2021-2022 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,7 +64,7 @@ public:
         //- and optional buffer size, write format
         OPstream
         (
-            const commsTypes commsType,
+            const UPstream::commsTypes commsType,
             const int toProcNo,
             const label bufSize = 0,
             const int tag = UPstream::msgType(),
@@ -92,7 +92,7 @@ public:
         //- Construct for broadcast root, optional buffer size, write format
         OPBstream
         (
-            const commsTypes commsType,     //!< ignored
+            const UPstream::commsTypes,     //!< ignored
             const int rootProcNo,           //!< normally UPstream::masterNo()
             const label bufSize = 0,
             const int tag = UPstream::msgType(),  //!< ignored

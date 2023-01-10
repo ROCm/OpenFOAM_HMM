@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2017-2022 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -110,7 +110,7 @@ protected:
         //- and IO format
         UOPstreamBase
         (
-            const commsTypes commsType,
+            const UPstream::commsTypes commsType,
             const int toProcNo,
             DynamicList<char>& sendBuf,
             const int tag = UPstream::msgType(),
@@ -298,7 +298,7 @@ public:
         //- and IO format
         UOPstream
         (
-            const commsTypes commsType,
+            const UPstream::commsTypes commsType,
             const int toProcNo,
             DynamicList<char>& sendBuf,
             const int tag = UPstream::msgType(),
@@ -332,8 +332,38 @@ public:
             const char* buf,
             const std::streamsize bufSize,
             const int tag = UPstream::msgType(),
-            const label comm = UPstream::worldComm
+            const label comm = UPstream::worldComm,
+            //! [out] request information (for non-blocking)
+            UPstream::Request* req = nullptr,
+            const UPstream::sendModes sendMode = UPstream::sendModes::normal
         );
+
+        //- Write buffer contents (non-blocking) to given processor
+        //  \return True on success
+        inline static bool write
+        (
+            //! [out] request information
+            UPstream::Request& req,
+            const int toProcNo,
+            const char* buf,
+            const std::streamsize bufSize,
+            const int tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm,
+            const UPstream::sendModes sendMode = UPstream::sendModes::normal
+        )
+        {
+            return UOPstream::write
+            (
+                UPstream::commsTypes::nonBlocking,
+                toProcNo,
+                buf,
+                bufSize,
+                tag,
+                comm,
+               &req,
+                sendMode
+            );
+        }
 };
 
 
@@ -364,7 +394,7 @@ public:
         //- and IO format
         UOPBstream
         (
-            const commsTypes commsType,     //!< ignored
+            const UPstream::commsTypes,     //!< ignored
             const int toProcNo,             //!< normally UPstream::masterNo()
             DynamicList<char>& sendBuf,
             const int tag = UPstream::msgType(),  //!< ignored
@@ -390,11 +420,9 @@ public:
         //  \return True on success
         static bool write
         (
-            const commsTypes commsType,     //!< ignored
-            const int rootProcNo,           //!< normally UPstream::masterNo()
+            const int rootProcNo,  //!< normally UPstream::masterNo()
             const char* buf,
             const std::streamsize bufSize,
-            const int tag = UPstream::msgType(),  //!< ignored
             const label comm = UPstream::worldComm
         );
 };

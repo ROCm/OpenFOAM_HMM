@@ -33,7 +33,7 @@ License
 
 Foam::UIPstream::UIPstream
 (
-    const commsTypes commsType,
+    const UPstream::commsTypes commsType,
     const int fromProcNo,
     DynamicList<char>& receiveBuf,
     label& receiveBufPosition,
@@ -55,7 +55,7 @@ Foam::UIPstream::UIPstream
         fmt
     )
 {
-    if (commsType == commsTypes::nonBlocking)
+    if (commsType == UPstream::commsTypes::nonBlocking)
     {
         // Message is already received into buffer
     }
@@ -70,7 +70,7 @@ Foam::UIPstream::UIPstream(const int fromProcNo, PstreamBuffers& buffers)
 :
     UIPstreamBase(fromProcNo, buffers)
 {
-    if (commsType() == commsTypes::nonBlocking)
+    if (commsType() == UPstream::commsTypes::nonBlocking)
     {
         // Message is already received into buffer
         messageSize_ = recvBuf_.size();
@@ -93,7 +93,7 @@ Foam::UIPstream::UIPstream(const int fromProcNo, PstreamBuffers& buffers)
 
 Foam::IPstream::IPstream
 (
-    const commsTypes commsType,
+    const UPstream::commsTypes commsType,
     const int fromProcNo,
     const label bufSize,
     const int tag,

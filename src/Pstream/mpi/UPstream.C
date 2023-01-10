@@ -693,4 +693,50 @@ void Foam::UPstream::freeTag(const int tag, const char* const msg)
 }
 
 
+void Foam::UPstream::barrier(const label communicator, UPstream::Request* req)
+{
+    // No-op for non-parallel
+    if (!UPstream::parRun())
+    {
+        return;
+    }
+
+    if (req)
+    {
+        MPI_Request request;
+
+        if
+        (
+            MPI_Ibarrier
+            (
+                PstreamGlobals::MPICommunicators_[communicator],
+               &request
+            )
+        )
+        {
+            FatalErrorInFunction
+                << "MPI_Ibarrier returned with error"
+                << Foam::abort(FatalError);
+        }
+
+        *req = UPstream::Request(request);
+    }
+    else
+    {
+        if
+        (
+            MPI_Barrier
+            (
+                PstreamGlobals::MPICommunicators_[communicator]
+            )
+        )
+        {
+            FatalErrorInFunction
+                << "MPI_Barrier returned with error"
+                << Foam::abort(FatalError);
+        }
+    }
+}
+
+
 // ************************************************************************* //

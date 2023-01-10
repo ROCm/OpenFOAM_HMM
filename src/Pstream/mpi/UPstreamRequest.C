@@ -30,6 +30,28 @@ License
 #include "PstreamGlobals.H"
 #include "profilingPstream.H"
 
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::UPstream::Request::Request() noexcept
+:
+    UPstream::Request(MPI_REQUEST_NULL)
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::UPstream::Request::good() const noexcept
+{
+    return MPI_REQUEST_NULL != PstreamDetail::Request::get(*this);
+}
+
+
+void Foam::UPstream::Request::reset() noexcept
+{
+    *this = UPstream::Request(MPI_REQUEST_NULL);
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::label Foam::UPstream::nRequests() noexcept
@@ -47,26 +69,35 @@ void Foam::UPstream::resetRequests(const label n)
 }
 
 
-void Foam::UPstream::waitRequests(const label start)
+void Foam::UPstream::waitRequests(const label pos)
 {
     // No-op for non-parallel, no pending requests or out-of-range
     if
     (
         !UPstream::parRun()
-     || start < 0
-     || start >= PstreamGlobals::outstandingRequests_.size()
+     || pos < 0
+     || pos >= PstreamGlobals::outstandingRequests_.size()
+     /// || !len
     )
     {
         return;
     }
 
-    const label count = (PstreamGlobals::outstandingRequests_.size() - start);
-    auto* waitRequests = (PstreamGlobals::outstandingRequests_.data() + start);
+    label count = (PstreamGlobals::outstandingRequests_.size() - pos);
+
+    /// // Treat len < 0 like npos (ie, the rest of the list) but also
+    /// // apply range checking to avoid bad slices
+    /// if (len > 0 && len < count)
+    /// {
+    ///     count = len;
+    /// }
+
+    auto* waitRequests = (PstreamGlobals::outstandingRequests_.data() + pos);
 
     if (UPstream::debug)
     {
         Pout<< "UPstream::waitRequests : starting wait for "
-            << count << " requests starting at " << start << endl;
+            << count << " requests starting at " << pos << endl;
     }
 
     profilingPstream::beginTiming();
@@ -81,14 +112,112 @@ void Foam::UPstream::waitRequests(const label start)
 
     profilingPstream::addWaitTime();
 
-    // ie, resetRequests(start)
-    PstreamGlobals::outstandingRequests_.resize(start);
+    // ie, resetRequests(pos)
+    PstreamGlobals::outstandingRequests_.resize(pos);
 
     if (UPstream::debug)
     {
         Pout<< "UPstream::waitRequests : finished wait." << endl;
     }
 }
+
+
+void Foam::UPstream::waitRequests(UList<UPstream::Request>& requests)
+{
+    // No-op for non-parallel or no pending requests
+    if (!UPstream::parRun() || requests.empty())
+    {
+        return;
+    }
+
+    // Looks ugly but is legitimate since UPstream::Request is an intptr_t,
+    // which is always large enough to hold an MPI_Request (int or pointer)
+
+    label count = 0;
+    auto* waitRequests = reinterpret_cast<MPI_Request*>(requests.data());
+
+    for (auto& req : requests)
+    {
+        if (req.good())
+        {
+            waitRequests[count] = PstreamDetail::Request::get(req);
+            ++count;
+        }
+    }
+
+    if (!count)
+    {
+        return;
+    }
+
+    profilingPstream::beginTiming();
+
+    // On success: sets request to MPI_REQUEST_NULL
+    if (MPI_Waitall(count, waitRequests, MPI_STATUSES_IGNORE))
+    {
+        FatalErrorInFunction
+            << "MPI_Waitall returned with error"
+            << Foam::abort(FatalError);
+    }
+
+    profilingPstream::addWaitTime();
+
+    // Everything handled, reset all to MPI_REQUEST_NULL
+    for (auto& req : requests)
+    {
+        req.reset();
+    }
+}
+
+
+// FUTURE?
+//
+/// void Foam::UPstream::waitRequests
+/// (
+///     UPstream::Request& req1,
+///     UPstream::Request& req2
+/// )
+/// {
+///     // No-op for non-parallel
+///     if (!UPstream::parRun())
+///     {
+///         return;
+///     }
+///
+///     int count = 0;
+///     MPI_Request waitRequests[2];
+///
+///     waitRequests[count] = PstreamDetail::Request::get(req1);
+///     if (MPI_REQUEST_NULL != waitRequests[count])
+///     {
+///         req1.reset();
+///         ++count;
+///     }
+///
+///     waitRequests[count] = PstreamDetail::Request::get(req2);
+///     if (MPI_REQUEST_NULL != waitRequests[count])
+///     {
+///         req2.reset();
+///         ++count;
+///     }
+///
+///     if (!count)
+///     {
+///         return;
+///     }
+///
+///     profilingPstream::beginTiming();
+///
+///     // On success: sets request to MPI_REQUEST_NULL
+///     if (MPI_Waitall(count, waitRequests, MPI_STATUSES_IGNORE))
+///     {
+///         FatalErrorInFunction
+///             << "MPI_Waitall returned with error"
+///             << Foam::abort(FatalError);
+///     }
+///
+///     profilingPstream::addWaitTime();
+/// }
 
 
 void Foam::UPstream::waitRequest(const label i)
@@ -141,6 +270,37 @@ void Foam::UPstream::waitRequest(const label i)
 }
 
 
+void Foam::UPstream::waitRequest(UPstream::Request& req)
+{
+    // No-op for non-parallel
+    if (!UPstream::parRun())
+    {
+        return;
+    }
+
+    MPI_Request request = PstreamDetail::Request::get(req);
+
+    // No-op for null request
+    if (MPI_REQUEST_NULL == request)
+    {
+        return;
+    }
+
+    profilingPstream::beginTiming();
+
+    if (MPI_Wait(&request, MPI_STATUS_IGNORE))
+    {
+        FatalErrorInFunction
+            << "MPI_Wait returned with error"
+            << Foam::abort(FatalError);
+    }
+
+    profilingPstream::addWaitTime();
+
+    req.reset();  // Handled, reset to MPI_REQUEST_NULL
+}
+
+
 bool Foam::UPstream::finishedRequest(const label i)
 {
     // No-op for non-parallel, or out-of-range (eg, placeholder indices)
@@ -176,6 +336,35 @@ bool Foam::UPstream::finishedRequest(const label i)
     {
         Pout<< "UPstream::finishedRequest : finished request:" << i
             << endl;
+    }
+
+    return flag != 0;
+}
+
+
+bool Foam::UPstream::finishedRequest(UPstream::Request& req)
+{
+    // No-op for non-parallel
+    if (!UPstream::parRun())
+    {
+        return true;
+    }
+
+    MPI_Request request = PstreamDetail::Request::get(req);
+
+    // No-op for null request
+    if (MPI_REQUEST_NULL == request)
+    {
+        return true;
+    }
+
+    int flag = 0;
+    MPI_Test(&request, &flag, MPI_STATUS_IGNORE);
+
+    if (flag)
+    {
+        // Done - reset to MPI_REQUEST_NULL
+        req.reset();
     }
 
     return flag != 0;
