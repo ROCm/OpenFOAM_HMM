@@ -130,13 +130,6 @@ Foam::processorFaPatchField<Type>::processorFaPatchField
 {}
 
 
-// * * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::processorFaPatchField<Type>::~processorFaPatchField()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
@@ -203,6 +196,8 @@ void Foam::processorFaPatchField<Type>::initInterfaceMatrixUpdate
         commsType,
         this->patch().patchInternalField(psiInternal)()
     );
+
+    const_cast<processorFaPatchField<Type>&>(*this).updatedMatrix() = false;
 }
 
 
@@ -219,32 +214,28 @@ void Foam::processorFaPatchField<Type>::updateInterfaceMatrix
     const Pstream::commsTypes commsType
 ) const
 {
+    if (this->updatedMatrix())
+    {
+        return;
+    }
+
+    const labelUList& faceCells = this->patch().edgeFaces();
+
     solveScalarField pnf
     (
-        procPatch_.receive<solveScalar>(commsType, this->size())()
+        procPatch_.receive<solveScalar>(commsType, this->size())
     );
 
-    // Transform according to the transformation tensor
-    transformCoupleField(pnf, cmpt);
+    if (!std::is_arithmetic<Type>::value)
+    {
+        // Transform non-scalar data according to the transformation tensor
+        transformCoupleField(pnf, cmpt);
+    }
 
     // Multiply the field by coefficients and add into the result
+    this->addToInternalField(result, !add, faceCells, coeffs, pnf);
 
-    const labelUList& edgeFaces = this->patch().edgeFaces();
-
-    if (add)
-    {
-        forAll(edgeFaces, elemI)
-        {
-            result[edgeFaces[elemI]] += coeffs[elemI]*pnf[elemI];
-        }
-    }
-    else
-    {
-        forAll(edgeFaces, elemI)
-        {
-            result[edgeFaces[elemI]] -= coeffs[elemI]*pnf[elemI];
-        }
-    }
+    const_cast<processorFaPatchField<Type>&>(*this).updatedMatrix() = true;
 }
 
 
@@ -265,6 +256,8 @@ void Foam::processorFaPatchField<Type>::initInterfaceMatrixUpdate
         commsType,
         this->patch().patchInternalField(psiInternal)()
     );
+
+    const_cast<processorFaPatchField<Type>&>(*this).updatedMatrix() = false;
 }
 
 
@@ -280,29 +273,25 @@ void Foam::processorFaPatchField<Type>::updateInterfaceMatrix
     const Pstream::commsTypes commsType
 ) const
 {
+    if (this->updatedMatrix())
+    {
+        return;
+    }
+
+    const labelUList& faceCells = this->patch().edgeFaces();
+
     Field<Type> pnf
     (
-        procPatch_.receive<Type>(commsType, this->size())()
+        procPatch_.receive<Type>(commsType, this->size())
     );
 
+    // Transform according to the transformation tensor
+    transformCoupleField(pnf);
+
     // Multiply the field by coefficients and add into the result
+    this->addToInternalField(result, !add, faceCells, coeffs, pnf);
 
-    const labelUList& edgeFaces = this->patch().edgeFaces();
-
-    if (add)
-    {
-        forAll(edgeFaces, elemI)
-        {
-            result[edgeFaces[elemI]] += coeffs[elemI]*pnf[elemI];
-        }
-    }
-    else
-    {
-        forAll(edgeFaces, elemI)
-        {
-            result[edgeFaces[elemI]] -= coeffs[elemI]*pnf[elemI];
-        }
-    }
+    const_cast<processorFaPatchField<Type>&>(*this).updatedMatrix() = true;
 }
 
 

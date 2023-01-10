@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,8 +38,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef processorFaPatchField_H
-#define processorFaPatchField_H
+#ifndef Foam_processorFaPatchField_H
+#define Foam_processorFaPatchField_H
 
 #include "coupledFaPatchField.H"
 #include "processorLduInterfaceField.H"
@@ -139,9 +139,8 @@ public:
         }
 
 
-    // Destructor
-
-        ~processorFaPatchField();
+    //- Destructor
+    ~processorFaPatchField() = default;
 
 
     // Member functions
@@ -169,17 +168,8 @@ public:
             //- Return patch-normal gradient
             virtual tmp<Field<Type>> snGrad() const;
 
-        // Coupled interface functionality
 
-            //- Transform neighbour field
-            virtual void transformCoupleField
-            (
-                solveScalarField& f,
-                const direction cmpt
-            ) const
-            {
-                processorLduInterfaceField::transformCoupleField(f, cmpt);
-            }
+        // Coupled interface functionality
 
             //- Initialise neighbour matrix update
             virtual void initInterfaceMatrixUpdate

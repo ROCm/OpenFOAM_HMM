@@ -181,13 +181,6 @@ public:
 
         // Coupled interface functionality
 
-            //- Transform given patch component field
-            virtual void transformCoupleField
-            (
-                solveScalarField& f,
-                const direction cmpt
-            ) const = 0;
-
             //- Update result field based on interface functionality
             virtual void updateInterfaceMatrix
             (
