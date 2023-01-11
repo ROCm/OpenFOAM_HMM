@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2019-2020 Mattijs Janssens
-    Copyright (C) 2020-2022 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,7 +49,7 @@ void Foam::PPCG::gSumMagProd
     const solveScalarField& b,
     const solveScalarField& c,
     const solveScalarField& sumMag,
-    label& outstandingRequest,
+    UPstream::Request& request,
     const label comm
 ) const
 {
@@ -72,7 +72,7 @@ void Foam::PPCG::gSumMagProd
             sumOp<solveScalar>(),
             Pstream::msgType(),
             comm,
-            outstandingRequest
+            request
         );
     }
 }
@@ -136,7 +136,7 @@ Foam::solverPerformance Foam::PPCG::scalarSolveCG
     solveScalarField m(nCells);
 
     FixedList<solveScalar, 3> globalSum;
-    label outstandingRequest = -1;
+    UPstream::Request outstandingRequest;
     if (cgMode)
     {
         // --- Start global reductions for inner products
@@ -170,11 +170,7 @@ Foam::solverPerformance Foam::PPCG::scalarSolveCG
     )
     {
         // Make sure gamma,delta are available
-        if (outstandingRequest != -1)
-        {
-            UPstream::waitRequest(outstandingRequest);
-            outstandingRequest = -1;
-        }
+        outstandingRequest.wait();
 
         const solveScalar gammaOld = gamma;
         gamma = globalSum[0];
@@ -249,10 +245,7 @@ Foam::solverPerformance Foam::PPCG::scalarSolveCG
     }
 
     // Cleanup any outstanding requests
-    if (outstandingRequest != -1)
-    {
-        UPstream::waitRequest(outstandingRequest);
-    }
+    outstandingRequest.wait();
 
     return solverPerf;
 }
