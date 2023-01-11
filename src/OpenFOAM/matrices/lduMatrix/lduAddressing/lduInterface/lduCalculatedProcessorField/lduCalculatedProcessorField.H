@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,8 +42,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef lduCalculatedProcessorField_H
-#define lduCalculatedProcessorField_H
+#ifndef Foam_lduCalculatedProcessorField_H
+#define Foam_lduCalculatedProcessorField_H
 
 #include "lduPrimitiveProcessorInterface.H"
 #include "processorLduInterfaceField.H"
@@ -74,6 +74,12 @@ protected:
 
         // Sending and receiving
 
+            //- Current (non-blocking) send request
+            mutable label sendRequest_;
+
+            //- Current (non-blocking) recv request
+            mutable label recvRequest_;
+
             //- Send buffer
             mutable Field<Type> sendBuf_;
 
@@ -85,12 +91,6 @@ protected:
 
             //- Scalar receive buffer
             mutable solveScalarField scalarReceiveBuf_;
-
-            //- Outstanding request
-            mutable label outstandingSendRequest_;
-
-            //- Outstanding request
-            mutable label outstandingRecvRequest_;
 
 
     // Protected Member Functions

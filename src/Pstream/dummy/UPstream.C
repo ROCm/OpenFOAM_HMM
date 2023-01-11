@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,7 +26,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "Pstream.H"
+#include "UPstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -87,28 +87,12 @@ void Foam::UPstream::freePstreamCommunicator(const label)
 {}
 
 
-Foam::label Foam::UPstream::nRequests() noexcept
-{
-    return 0;
-}
+int Foam::UPstream::allocateTag(const char* const msg) { return 0; }
 
 
-void Foam::UPstream::resetRequests(const label n)
+void Foam::UPstream::freeTag(const int tag, const char* const msg)
 {}
 
-
-void Foam::UPstream::waitRequests(const label start)
-{}
-
-
-void Foam::UPstream::waitRequest(const label i)
-{}
-
-
-bool Foam::UPstream::finishedRequest(const label i)
-{
-    return true;
-}
 
 
 // ************************************************************************* //

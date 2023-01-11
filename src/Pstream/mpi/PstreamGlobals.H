@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2015 OpenFOAM Foundation
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,6 +49,13 @@ namespace Foam
 namespace PstreamGlobals
 {
 
+// Current communicators, which may be allocated or predefined
+// (eg, MPI_COMM_SELF, MPI_COMM_WORLD)
+extern DynamicList<MPI_Comm> MPICommunicators_;
+
+// Groups associated with the currrent communicators.
+extern DynamicList<MPI_Group> MPIGroups_;
+
 //- Outstanding non-blocking operations.
 extern DynamicList<MPI_Request> outstandingRequests_;
 extern DynamicList<label> freedRequests_;
@@ -59,38 +66,32 @@ extern int nTags_;
 //- Free'd message tags
 extern DynamicList<int> freedTags_;
 
-// Current communicators, which may be allocated or predefined
-// (eg, MPI_COMM_SELF, MPI_COMM_WORLD)
-extern DynamicList<MPI_Comm> MPICommunicators_;
-
-// Groups associated with the currrent communicators.
-extern DynamicList<MPI_Group> MPIGroups_;
-
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 //- Fatal if comm is outside the allocated range
 void checkCommunicator(const label comm, const label toProcNo);
 
-//- Reuse previously freed request locations or push request onto list
-//- of outstanding requests.
+//- Push request onto list of outstanding requests,
+//- optionally reusing previously freed request locations
 //
 //  \return index of request within outstandingRequests_
 inline label push_request(MPI_Request request)
 {
-    label index;
-
-    if (freedRequests_.size())
+    while (!freedRequests_.empty())
     {
-        index = freedRequests_.back();
+        const label index = freedRequests_.back();
         freedRequests_.pop_back();
-        outstandingRequests_[index] = request;
+
+        if (index < outstandingRequests_.size())
+        {
+            outstandingRequests_[index] = request;
+            return index;
+        }
     }
-    else
-    {
-        index = outstandingRequests_.size();
-        outstandingRequests_.push_back(request);
-    }
+
+    const label index = outstandingRequests_.size();
+    outstandingRequests_.push_back(request);
 
     return index;
 }

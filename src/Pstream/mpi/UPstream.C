@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,11 +31,9 @@ License
 #include "PstreamGlobals.H"
 #include "profilingPstream.H"
 #include "int.H"
-#include "SubList.H"
 #include "UPstreamWrapping.H"
 #include "collatedFileOperation.H"
 
-#include <mpi.h>
 #include <cstring>
 #include <cstdlib>
 #include <csignal>
@@ -428,21 +426,22 @@ void Foam::UPstream::shutdown(int errNo)
     {
         label nOutstanding = 0;
 
-        forAll(PstreamGlobals::outstandingRequests_, requestID)
+        for (MPI_Request request : PstreamGlobals::outstandingRequests_)
         {
-            if (!PstreamGlobals::freedRequests_.found(requestID))
+            if (MPI_REQUEST_NULL != request)
             {
                 ++nOutstanding;
             }
         }
 
         PstreamGlobals::outstandingRequests_.clear();
+        PstreamGlobals::freedRequests_.clear();
 
         if (nOutstanding)
         {
             WarningInFunction
                 << "There were still " << nOutstanding
-                << " outstanding MPI_Requests." << nl
+                << " outstanding MPI requests." << nl
                 << "Which means your code exited before doing a "
                 << " UPstream::waitRequests()." << nl
                 << "This should not happen for a normal code exit."
@@ -655,169 +654,6 @@ void Foam::UPstream::freePstreamCommunicator(const label communicator)
             MPI_Group_free(&PstreamGlobals::MPIGroups_[communicator]);
         }
     }
-}
-
-
-Foam::label Foam::UPstream::nRequests() noexcept
-{
-    return PstreamGlobals::outstandingRequests_.size();
-}
-
-
-void Foam::UPstream::resetRequests(const label n)
-{
-    if (n >= 0 && n < PstreamGlobals::outstandingRequests_.size())
-    {
-        PstreamGlobals::outstandingRequests_.resize(n);
-    }
-}
-
-
-void Foam::UPstream::waitRequests(const label start)
-{
-    if (!UPstream::parRun())
-    {
-        return;  // No-op for non-parallel
-    }
-
-    if (UPstream::debug)
-    {
-        Pout<< "UPstream::waitRequests : starting wait for "
-            << PstreamGlobals::outstandingRequests_.size()-start
-            << " outstanding requests starting at " << start << endl;
-    }
-
-    // TBD: check for
-    // (start < 0 || start > PstreamGlobals::outstandingRequests_.size())
-
-    if (PstreamGlobals::outstandingRequests_.size())
-    {
-        SubList<MPI_Request> waitRequests
-        (
-            PstreamGlobals::outstandingRequests_,
-            PstreamGlobals::outstandingRequests_.size() - start,
-            start
-        );
-
-        profilingPstream::beginTiming();
-
-        // On success: sets each request to MPI_REQUEST_NULL
-        if
-        (
-            MPI_Waitall
-            (
-                waitRequests.size(),
-                waitRequests.data(),
-                MPI_STATUSES_IGNORE
-            )
-        )
-        {
-            FatalErrorInFunction
-                << "MPI_Waitall returned with error" << Foam::endl;
-        }
-
-        profilingPstream::addWaitTime();
-
-        PstreamGlobals::outstandingRequests_.resize(start);
-    }
-
-    if (debug)
-    {
-        Pout<< "UPstream::waitRequests : finished wait." << endl;
-    }
-}
-
-
-void Foam::UPstream::waitRequest(const label i)
-{
-    if (!UPstream::parRun() || i < 0)
-    {
-        return;  // No-op for non-parallel, or placeholder indices
-    }
-
-    if (debug)
-    {
-        Pout<< "UPstream::waitRequest : starting wait for request:" << i
-            << endl;
-    }
-
-    if (i >= PstreamGlobals::outstandingRequests_.size())
-    {
-        FatalErrorInFunction
-            << "You asked for request=" << i
-            << " from " << PstreamGlobals::outstandingRequests_.size()
-            << " outstanding requests!" << nl
-            << "Mixing use of blocking/non-blocking comms?"
-            << Foam::abort(FatalError);
-    }
-
-    profilingPstream::beginTiming();
-
-    // On success: sets request to MPI_REQUEST_NULL
-    if
-    (
-        MPI_Wait
-        (
-           &PstreamGlobals::outstandingRequests_[i],
-            MPI_STATUS_IGNORE
-        )
-    )
-    {
-        FatalErrorInFunction
-            << "MPI_Wait returned with error" << Foam::endl;
-    }
-
-    profilingPstream::addWaitTime();
-    // Push index onto free cache
-    PstreamGlobals::freedRequests_.push_back(i);
-
-    if (debug)
-    {
-        Pout<< "UPstream::waitRequest : finished wait for request:" << i
-            << endl;
-    }
-}
-
-
-bool Foam::UPstream::finishedRequest(const label i)
-{
-    if (!UPstream::parRun() || i < 0)
-    {
-        return true;  // No-op for non-parallel, or placeholder indices
-    }
-
-    if (debug)
-    {
-        Pout<< "UPstream::finishedRequest : checking request:" << i
-            << endl;
-    }
-
-    if (i >= PstreamGlobals::outstandingRequests_.size())
-    {
-        FatalErrorInFunction
-            << "You asked for request=" << i
-            << " from " << PstreamGlobals::outstandingRequests_.size()
-            << " outstanding requests!" << nl
-            << "Mixing use of blocking/non-blocking comms?"
-            << Foam::abort(FatalError);
-    }
-
-    // On success: sets request to MPI_REQUEST_NULL
-    int flag;
-    MPI_Test
-    (
-       &PstreamGlobals::outstandingRequests_[i],
-       &flag,
-        MPI_STATUS_IGNORE
-    );
-
-    if (debug)
-    {
-        Pout<< "UPstream::finishedRequest : finished request:" << i
-            << endl;
-    }
-
-    return flag != 0;
 }
 
 

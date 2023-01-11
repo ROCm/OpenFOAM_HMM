@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,24 +69,25 @@ class processorFvPatchField
     public processorLduInterfaceField,
     public coupledFvPatchField<Type>
 {
-    // Private data
+    // Private Data
 
         //- Local reference cast into the processor patch
         const processorFvPatch& procPatch_;
 
+
         // Sending and receiving
+
+            //- Current (non-blocking) send request
+            mutable label sendRequest_;
+
+            //- Current (non-blocking) recv request
+            mutable label recvRequest_;
 
             //- Send buffer.
             mutable Field<Type> sendBuf_;
 
             //- Receive buffer.
             mutable Field<Type> receiveBuf_;
-
-            //- Outstanding request
-            mutable label outstandingSendRequest_;
-
-            //- Outstanding request
-            mutable label outstandingRecvRequest_;
 
             //- Scalar send buffer
             mutable solveScalarField scalarSendBuf_;

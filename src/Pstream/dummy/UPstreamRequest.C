@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2013-2015 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,38 +25,19 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "PstreamGlobals.H"
+#include "UPstream.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::DynamicList<MPI_Comm> Foam::PstreamGlobals::MPICommunicators_;
-Foam::DynamicList<MPI_Group> Foam::PstreamGlobals::MPIGroups_;
+Foam::label Foam::UPstream::nRequests() noexcept { return 0; }
 
-Foam::DynamicList<MPI_Request> Foam::PstreamGlobals::outstandingRequests_;
-Foam::DynamicList<Foam::label> Foam::PstreamGlobals::freedRequests_;
+void Foam::UPstream::resetRequests(const label n) {}
 
-int Foam::PstreamGlobals::nTags_ = 0;
-Foam::DynamicList<int> Foam::PstreamGlobals::freedTags_;
+void Foam::UPstream::waitRequests(const label start) {}
 
+void Foam::UPstream::waitRequest(const label i) {}
 
-// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
-
-void Foam::PstreamGlobals::checkCommunicator
-(
-    const label comm,
-    const label toProcNo
-)
-{
-    if (comm < 0 || comm >= PstreamGlobals::MPICommunicators_.size())
-    {
-        FatalErrorInFunction
-            << "toProcNo:" << toProcNo << " : illegal communicator "
-            << comm << nl
-            << "Communicator should be within range [0,"
-            << PstreamGlobals::MPICommunicators_.size()
-            << ')' << abort(FatalError);
-    }
-}
+bool Foam::UPstream::finishedRequest(const label i) { return true; }
 
 
 // ************************************************************************* //

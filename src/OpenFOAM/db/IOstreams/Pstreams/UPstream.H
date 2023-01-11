@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -447,21 +447,26 @@ public:
             //- Number of outstanding requests
             static label nRequests() noexcept;
 
-            //- Truncate outstanding requests to given length
+            //- Truncate outstanding requests to given length, which is
+            //- expected to be in the range 0 to nRequests.
+            //  A no-op for out-of-range values.
             static void resetRequests(const label n);
 
             //- Wait until all requests (from start onwards) have finished.
-            //  A no-op if parRun() == false
+            //  A no-op if parRun() == false, if there are no pending requests
+            //  or if the start is out-of-range (0 to nRequests)
             static void waitRequests(const label start = 0);
 
             //- Wait until request i has finished.
-            //  A no-op if parRun() == false
-            //  or for placeholder (negative) request indices
+            //  A no-op if parRun() == false,
+            //  there are no pending requests,
+            //  or if the index is out-of-range (0 to nRequests)
             static void waitRequest(const label i);
 
             //- Non-blocking comms: has request i finished?
-            //  A no-op and returns true if parRun() == false
-            //  or for placeholder (negative) request indices
+            //  A no-op and returns true if parRun() == false,
+            //  there are no pending requests,
+            //  or if the index is out-of-range (0 to nRequests)
             static bool finishedRequest(const label i);
 
             static int allocateTag(const char* const msg = nullptr);

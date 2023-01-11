@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,8 +44,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef calculatedProcessorFvPatchField_H
-#define calculatedProcessorFvPatchField_H
+#ifndef Foam_calculatedProcessorFvPatchField_H
+#define Foam_calculatedProcessorFvPatchField_H
 
 #include "lduPrimitiveProcessorInterface.H"
 #include "coupledFvPatchField.H"
@@ -73,7 +73,14 @@ protected:
          //- Local reference cast into the interface
          const lduPrimitiveProcessorInterface& procInterface_;
 
+
         // Sending and receiving
+
+            //- Current (non-blocking) send request
+            mutable label sendRequest_;
+
+            //- Current (non-blocking) recv request
+            mutable label recvRequest_;
 
             //- Send buffer
             mutable Field<Type> sendBuf_;
@@ -86,12 +93,6 @@ protected:
 
             //- Scalar receive buffer
             mutable solveScalarField scalarReceiveBuf_;
-
-            //- Outstanding request
-            mutable label outstandingSendRequest_;
-
-            //- Outstanding request
-            mutable label outstandingRecvRequest_;
 
 
     // Protected Member Functions
