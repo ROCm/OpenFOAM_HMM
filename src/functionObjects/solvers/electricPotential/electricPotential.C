@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,16 +44,20 @@ namespace functionObjects
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::volScalarField&
-Foam::functionObjects::electricPotential::operandField()
+Foam::volScalarField& Foam::functionObjects::electricPotential::getOrReadField
+(
+    const word& fieldName
+) const
 {
-    if (!foundObject<volScalarField>(fieldName_))
+    auto* ptr = mesh_.getObjectPtr<volScalarField>(fieldName);
+
+    if (!ptr)
     {
-        auto tfldPtr = tmp<volScalarField>::New
+        ptr = new volScalarField
         (
             IOobject
             (
-                fieldName_,
+                fieldName,
                 mesh_.time().timeName(),
                 mesh_,
                 IOobject::MUST_READ,
@@ -62,10 +66,10 @@ Foam::functionObjects::electricPotential::operandField()
             ),
             mesh_
         );
-        store(fieldName_, tfldPtr);
+        mesh_.objectRegistry::store(ptr);
     }
 
-    return lookupObjectRef<volScalarField>(fieldName_);
+    return *ptr;
 }
 
 
@@ -212,7 +216,7 @@ Foam::functionObjects::electricPotential::electricPotential
 
     // Force creation of transported field so any BCs using it can
     // look it up
-    volScalarField& eV = operandField();
+    volScalarField& eV = getOrReadField(fieldName_);
     eV.correctBoundaryConditions();
 }
 
@@ -316,7 +320,7 @@ bool Foam::functionObjects::electricPotential::execute()
     tmp<volScalarField> tsigma = this->sigma();
     const volScalarField& sigma = tsigma();
 
-    volScalarField& eV = operandField();
+    volScalarField& eV = getOrReadField(fieldName_);
 
     for (label i = 1; i <= nCorr_; ++i)
     {
@@ -342,7 +346,7 @@ bool Foam::functionObjects::electricPotential::write()
         << tab << fieldName_
         << endl;
 
-    volScalarField& eV = operandField();
+    volScalarField& eV = getOrReadField(fieldName_);
 
     if (writeDerivedFields_)
     {

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -212,8 +212,10 @@ class electricPotential
 
     // Private Member Functions
 
-        //- Return reference to the registered operand field
-        volScalarField& operandField();
+        //- Return requested field from the object registry
+        //- or read+register the field to the object registry
+        volScalarField& getOrReadField(const word& fieldName) const;
+
 
         //- Return the isotropic electrical conductivity field of the mixture
         tmp<volScalarField> sigma() const;
