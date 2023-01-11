@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,10 +42,10 @@ inline constexpr Foam::PtrDynList<T, SizeMin>::PtrDynList() noexcept
 template<class T, int SizeMin>
 inline Foam::PtrDynList<T, SizeMin>::PtrDynList(const label len)
 :
-    PtrList<T>(len),
-    capacity_(len)
+    PtrList<T>(),
+    capacity_(0)
 {
-    PtrList<T>::setAddressableSize(0);
+    reserve(len);
 }
 
 

@@ -122,11 +122,11 @@ public:
 
     // Access
 
-        //- The number of elements in the list
-        label size() const noexcept { return addr_.size(); }
-
         //- True if the list is empty (ie, size() is zero).
         bool empty() const noexcept { return addr_.empty(); }
+
+        //- The number of elements in the list
+        label size() const noexcept { return addr_.size(); }
 
         //- The list of values (without addressing)
         const UList<T>& values() const noexcept { return values_; }

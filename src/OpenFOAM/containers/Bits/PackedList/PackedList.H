@@ -283,13 +283,13 @@ public:
         //- Check index is within valid range [0,size)
         inline void checkIndex(const label i) const;
 
-        //- Number of entries.
-        inline label size() const noexcept;
-
         //- True if the list is empty (ie, size() is zero).
-        inline bool empty() const noexcept;
+        bool empty() const noexcept { return !size_; }
 
-        //- The number of elements that can be stored with reallocating
+        //- Number of entries.
+        label size() const noexcept { return size_; }
+
+        //- Number of elements that can be stored without reallocating
         inline label capacity() const noexcept;
 
         //- True if all entries have identical values, and list is non-empty

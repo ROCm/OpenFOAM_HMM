@@ -440,7 +440,7 @@ public:
         const SubField<Type> slice(const labelRange& range) const;
 
 
-    // Member Operators
+    // Assignment
 
         //- Copy assignment
         void operator=(const Field<Type>&);
@@ -460,13 +460,17 @@ public:
         template<int SizeMin>
         inline void operator=(DynamicList<Type, SizeMin>&& rhs);
 
-
-        //- Value assignment
+        //- Assign entries to the given value
         inline void operator=(const Type& val);
+
+        //- Assign entries to zero
         inline void operator=(const Foam::zero);
 
         template<class Form, class Cmpt, direction nCmpt>
         void operator=(const VectorSpace<Form,Cmpt,nCmpt>&);
+
+
+    // Member Operators
 
         void operator+=(const UList<Type>&);
         void operator+=(const tmp<Field<Type>>&);
@@ -487,7 +491,7 @@ public:
         void operator/=(const scalar&);
 
 
-    // IOstream operators
+    // IOstream Operators
 
         friend Ostream& operator<< <Type>
         (Ostream&, const Field<Type>&);

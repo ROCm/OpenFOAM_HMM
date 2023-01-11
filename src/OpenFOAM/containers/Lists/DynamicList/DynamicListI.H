@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,7 +32,7 @@ License
 
 template<class T, int SizeMin>
 template<class ListType>
-inline void Foam::DynamicList<T, SizeMin>::assignDynList
+inline void Foam::DynamicList<T, SizeMin>::doAssignDynList
 (
     const ListType& list
 )
@@ -211,6 +211,18 @@ inline Foam::DynamicList<T, SizeMin>::DynamicList
 
 
 template<class T, int SizeMin>
+inline Foam::DynamicList<T, SizeMin>::DynamicList
+(
+    const UList<T>& list,
+    const labelUList& indices
+)
+:
+    List<T>(list, indices),
+    capacity_(List<T>::size())
+{}
+
+
+template<class T, int SizeMin>
 template<unsigned N>
 inline Foam::DynamicList<T, SizeMin>::DynamicList
 (
@@ -282,13 +294,6 @@ inline Foam::DynamicList<T, SizeMin>::DynamicList
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class T, int SizeMin>
-inline Foam::label Foam::DynamicList<T, SizeMin>::capacity() const noexcept
-{
-    return capacity_;
-}
-
 
 template<class T, int SizeMin>
 inline std::streamsize
@@ -791,7 +796,7 @@ inline void Foam::DynamicList<T, SizeMin>::operator=
     const UList<T>& lst
 )
 {
-    assignDynList(lst);
+    doAssignDynList(lst);
 }
 
 
@@ -802,7 +807,7 @@ inline void Foam::DynamicList<T, SizeMin>::operator=
     const FixedList<T, N>& lst
 )
 {
-    assignDynList(lst);
+    doAssignDynList(lst);
 }
 
 
@@ -817,7 +822,7 @@ inline void Foam::DynamicList<T, SizeMin>::operator=
         return;  // Self-assignment is a no-op
     }
 
-    assignDynList(lst);
+    doAssignDynList(lst);
 }
 
 
@@ -837,7 +842,7 @@ inline void Foam::DynamicList<T, SizeMin>::operator=
         return;  // Self-assignment is a no-op
     }
 
-    assignDynList(list);
+    doAssignDynList(list);
 }
 
 
@@ -847,7 +852,7 @@ inline void Foam::DynamicList<T, SizeMin>::operator=
     std::initializer_list<T> lst
 )
 {
-    assignDynList(lst);
+    doAssignDynList(lst);
 }
 
 
@@ -858,7 +863,14 @@ inline void Foam::DynamicList<T, SizeMin>::operator=
     const IndirectListBase<T, Addr>& lst
 )
 {
-    assignDynList(lst);
+    // NOTE: Self-assignment needs special handling
+    /// if
+    /// (
+    ///     static_cast<const UList<T>*>(this)
+    ///  == static_cast<const UList<T>*>(&list.values())
+    /// )
+
+    doAssignDynList(lst);
 }
 
 

@@ -103,16 +103,16 @@ inline Foam::UPtrList<T>::UPtrList(UList<T>& list)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
-inline Foam::label Foam::UPtrList<T>::size() const noexcept
+inline bool Foam::UPtrList<T>::empty() const noexcept
 {
-    return ptrs_.size();
+    return ptrs_.empty();
 }
 
 
 template<class T>
-inline bool Foam::UPtrList<T>::empty() const noexcept
+inline Foam::label Foam::UPtrList<T>::size() const noexcept
 {
-    return ptrs_.empty();
+    return ptrs_.size();
 }
 
 

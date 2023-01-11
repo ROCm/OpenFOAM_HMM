@@ -374,20 +374,6 @@ inline void Foam::PackedList<Width>::checkIndex(const label i) const
 
 
 template<unsigned Width>
-inline Foam::label Foam::PackedList<Width>::size() const noexcept
-{
-    return size_;
-}
-
-
-template<unsigned Width>
-inline bool Foam::PackedList<Width>::empty() const noexcept
-{
-    return !size_;
-}
-
-
-template<unsigned Width>
 inline Foam::label Foam::PackedList<Width>::capacity() const noexcept
 {
     return elem_per_block * blocks_.size();

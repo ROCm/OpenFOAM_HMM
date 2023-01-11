@@ -90,8 +90,8 @@ struct HashTableCore
         //- Construct begin/end pair for table
         inline const_iterator_pair(const TableType& tbl);
 
-        label size() const noexcept { return size_; }
         bool empty() const noexcept { return !size_; }
+        label size() const noexcept { return size_; }
 
         inline IteratorType begin() const;
         inline IteratorType cbegin() const;

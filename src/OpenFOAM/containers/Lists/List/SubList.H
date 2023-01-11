@@ -159,7 +159,7 @@ public:
 
 #include "SubListI.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Implementations * * * * * * * * * * * * * * //
 
 template<class Type>
 Foam::SubList<Type>

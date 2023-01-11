@@ -53,8 +53,8 @@ SourceFiles
 #define Foam_IndirectList_H
 
 #include "List.H"
-#include "IndirectListBase.H"
 #include "IndirectListAddressing.H"
+#include "IndirectListBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

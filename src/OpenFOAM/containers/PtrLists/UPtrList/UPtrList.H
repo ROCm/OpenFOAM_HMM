@@ -211,11 +211,11 @@ public:
 
     // Access
 
-        //- The number of elements in the list
-        inline label size() const noexcept;
-
         //- True if the list is empty (ie, size() is zero)
         inline bool empty() const noexcept;
+
+        //- The number of elements in the list
+        inline label size() const noexcept;
 
         //- Reference to the first element of the list
         inline T& front();

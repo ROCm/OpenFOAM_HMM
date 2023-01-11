@@ -42,27 +42,6 @@ Foam::HashTable<T, Key, Hash>::hashKeyIndex(const Key& key) const
 // * * * * * * * * * * * * * * * Member Functions * * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>
-inline Foam::label Foam::HashTable<T, Key, Hash>::capacity() const noexcept
-{
-    return capacity_;
-}
-
-
-template<class T, class Key, class Hash>
-inline Foam::label Foam::HashTable<T, Key, Hash>::size() const noexcept
-{
-    return size_;
-}
-
-
-template<class T, class Key, class Hash>
-inline bool Foam::HashTable<T, Key, Hash>::empty() const noexcept
-{
-    return !size_;
-}
-
-
-template<class T, class Key, class Hash>
 inline T& Foam::HashTable<T, Key, Hash>::at(const Key& key)
 {
     iterator iter(this->find(key));

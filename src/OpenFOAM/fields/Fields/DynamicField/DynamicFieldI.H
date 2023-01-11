@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,7 +30,7 @@ License
 
 template<class T, int SizeMin>
 template<class ListType>
-inline void Foam::DynamicField<T, SizeMin>::assignDynList
+inline void Foam::DynamicField<T, SizeMin>::doAssignDynList
 (
     const ListType& list
 )
@@ -322,13 +322,6 @@ Foam::DynamicField<T, SizeMin>::clone() const
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class T, int SizeMin>
-inline Foam::label Foam::DynamicField<T, SizeMin>::capacity() const noexcept
-{
-    return capacity_;
-}
-
 
 template<class T, int SizeMin>
 inline std::streamsize
@@ -716,7 +709,7 @@ inline void Foam::DynamicField<T, SizeMin>::operator=
     const UList<T>& list
 )
 {
-    assignDynList(list);
+    doAssignDynList(list);
 }
 
 
@@ -731,7 +724,25 @@ inline void Foam::DynamicField<T, SizeMin>::operator=
         return;  // Self-assignment is a no-op
     }
 
-    assignDynList(list);
+    doAssignDynList(list);
+}
+
+
+template<class T, int SizeMin>
+template<class Addr>
+inline void Foam::DynamicField<T, SizeMin>::operator=
+(
+    const IndirectListBase<T, Addr>& list
+)
+{
+    // NOTE: Self-assignment needs special handling
+    /// if
+    /// (
+    ///     static_cast<const UList<T>*>(this)
+    ///  == static_cast<const UList<T>*>(&list.values())
+    /// )
+
+    doAssignDynList(list);
 }
 
 

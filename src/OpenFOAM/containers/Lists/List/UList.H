@@ -74,6 +74,7 @@ template<class T> class List;
 template<class T> class SubList;
 template<class T> class UList;
 template<class T> class IndirectList;
+template<class T> class UIndirectList;
 template<class T, class Addr> class IndirectListBase;
 
 template<class T> Istream& operator>>(Istream&, UList<T>&);
@@ -448,11 +449,11 @@ public:
 
     // STL member functions
 
-        //- The number of elements in the UList
-        inline label size() const noexcept;
+        //- True if List is empty (ie, size() is zero)
+        bool empty() const noexcept { return !size_; }
 
-        //- True if the UList is empty (ie, size() is zero)
-        inline bool empty() const noexcept;
+        //- The number of elements in the List
+        label size() const noexcept { return size_; }
 
         //- The size of the largest possible UList
         static constexpr label max_size() noexcept { return labelMax; }

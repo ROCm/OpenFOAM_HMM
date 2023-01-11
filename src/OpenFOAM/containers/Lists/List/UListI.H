@@ -417,20 +417,6 @@ inline void Foam::UList<T>::setAddressableSize(const label n) noexcept
 
 
 template<class T>
-inline Foam::label Foam::UList<T>::size() const noexcept
-{
-    return size_;
-}
-
-
-template<class T>
-inline bool Foam::UList<T>::empty() const noexcept
-{
-    return !size_;
-}
-
-
-template<class T>
 inline void Foam::UList<T>::swap(UList<T>& list)
 {
     if (&list == this)
