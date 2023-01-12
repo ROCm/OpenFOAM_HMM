@@ -61,10 +61,31 @@ class processorFaPatchField
     public processorLduInterfaceField,
     public coupledFaPatchField<Type>
 {
-    // Private data
+    // Private Data
 
         //- Local reference cast into the processor patch
         const processorFaPatch& procPatch_;
+
+
+        // Sending and receiving
+
+            //- Current (non-blocking) send request
+            mutable label sendRequest_;
+
+            //- Current (non-blocking) recv request
+            mutable label recvRequest_;
+
+            //- Send buffer.
+            mutable Field<Type> sendBuf_;
+
+            //- Receive buffer.
+            mutable Field<Type> recvBuf_;
+
+            //- Scalar send buffer
+            mutable solveScalarField scalarSendBuf_;
+
+            //- Scalar recv buffer
+            mutable solveScalarField scalarRecvBuf_;
 
 
 public:
@@ -167,6 +188,9 @@ public:
 
             //- Return patch-normal gradient
             virtual tmp<Field<Type>> snGrad() const;
+
+            //- Is all data available
+            virtual bool ready() const;
 
 
         // Coupled interface functionality

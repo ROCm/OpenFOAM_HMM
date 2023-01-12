@@ -414,7 +414,7 @@ void Foam::processorFvPatchField<Type>::updateInterfaceMatrix
     }
 
 
-    if (!std::is_arithmetic<Type>::value)
+    if (pTraits<Type>::rank)
     {
         // Transform non-scalar data according to the transformation tensor
         transformCoupleField(scalarRecvBuf_, cmpt);
