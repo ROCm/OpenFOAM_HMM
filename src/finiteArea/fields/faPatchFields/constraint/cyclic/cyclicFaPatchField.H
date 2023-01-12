@@ -164,16 +164,6 @@ public:
 
         // Coupled interface functionality
 
-            //- Transform neighbour field
-            virtual void transformCoupleField
-            (
-                solveScalarField& f,
-                const direction cmpt
-            ) const
-            {
-                cyclicLduInterfaceField::transformCoupleField(f, cmpt);
-            }
-
             //- Update result field based on interface functionality
             virtual void updateInterfaceMatrix
             (

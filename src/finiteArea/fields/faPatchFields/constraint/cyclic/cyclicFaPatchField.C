@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -187,20 +187,7 @@ void Foam::cyclicFaPatchField<Type>::updateInterfaceMatrix
     transformCoupleField(pnf, cmpt);
 
     // Multiply the field by coefficients and add into the result
-    if (add)
-    {
-        forAll(faceCells, elemI)
-        {
-            result[faceCells[elemI]] += coeffs[elemI]*pnf[elemI];
-        }
-    }
-    else
-    {
-        forAll(faceCells, elemI)
-        {
-            result[faceCells[elemI]] -= coeffs[elemI]*pnf[elemI];
-        }
-    }
+    this->addToInternalField(result, !add, faceCells, coeffs, pnf);
 }
 
 
@@ -227,21 +214,11 @@ void Foam::cyclicFaPatchField<Type>::updateInterfaceMatrix
         pnf[facei + sizeby2] = psiInternal[faceCells[facei]];
     }
 
+    // Transform according to the transformation tensors
+    transformCoupleField(pnf);
+
     // Multiply the field by coefficients and add into the result
-    if (add)
-    {
-        forAll(faceCells, elemI)
-        {
-            result[faceCells[elemI]] += coeffs[elemI]*pnf[elemI];
-        }
-    }
-    else
-    {
-        forAll(faceCells, elemI)
-        {
-            result[faceCells[elemI]] -= coeffs[elemI]*pnf[elemI];
-        }
-    }
+    this->addToInternalField(result, !add, faceCells, coeffs, pnf);
 }
 
 

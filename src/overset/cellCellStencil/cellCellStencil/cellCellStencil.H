@@ -276,7 +276,7 @@ public:
         void walkFront
         (
             const globalIndex& globalCells,
-            const label layerRelax,
+            const scalar layerRelax,
             const labelListList& allStencil,
             labelList& allCellTypes,
             scalarField& allWeight,

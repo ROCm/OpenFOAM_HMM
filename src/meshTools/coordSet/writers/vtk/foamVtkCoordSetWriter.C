@@ -80,6 +80,19 @@ void Foam::vtk::coordSetWriter::beginPiece()
         }
     }
 
+    // Update sizes, similar to
+    // vtk::polyWriter::beginPiece(const pointField&, const edgeList&)
+
+    numberOfPoints_ = nLocalPoints_;
+    numberOfCells_  = nLocalLines_;
+
+    // if (parallel_)
+    // {
+    //     reduce(numberOfPoints_, sumOp<label>());
+    //     reduce(numberOfCells_,  sumOp<label>());
+    // }
+
+
     // Nothing else to do for legacy
     if (legacy()) return;
 
@@ -88,7 +101,7 @@ void Foam::vtk::coordSetWriter::beginPiece()
         format().openTag
         (
             vtk::fileTag::PIECE,
-            vtk::fileAttr::NUMBER_OF_POINTS, nLocalPoints_
+            vtk::fileAttr::NUMBER_OF_POINTS, numberOfPoints_
         );
         if (nLocalVerts_)
         {
@@ -105,7 +118,7 @@ void Foam::vtk::coordSetWriter::beginPiece()
 
 void Foam::vtk::coordSetWriter::writePoints()
 {
-    this->beginPoints(nLocalPoints_);
+    this->beginPoints(numberOfPoints_);  //<- same as nLocalPoints_
 
     {
         for (const pointField& pts : points_)

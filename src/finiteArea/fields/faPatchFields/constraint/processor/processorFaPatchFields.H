@@ -25,10 +25,10 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef processorFaPatchFields_H
-#define processorFaPatchFields_H
+#ifndef Foam_processorFaPatchFields_H
+#define Foam_processorFaPatchFields_H
 
-#include "processorFaPatchScalarField.H"
+#include "processorFaPatchField.H"
 #include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -1798,7 +1798,7 @@ Foam::cellCellStencils::inverseDistance::~inverseDistance()
 
 bool Foam::cellCellStencils::inverseDistance::update()
 {
-    label layerRelax(dict_.getOrDefault("layerRelax", 1));
+    scalar layerRelax(dict_.getOrDefault("layerRelax", 1.0));
 
     scalar tol = dict_.getOrDefault("tolerance", 1e-10);
     smallVec_ = mesh_.bounds().span()*tol;
