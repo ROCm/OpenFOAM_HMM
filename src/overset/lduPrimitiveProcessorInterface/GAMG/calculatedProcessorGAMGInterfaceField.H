@@ -78,8 +78,8 @@ class calculatedProcessorGAMGInterfaceField
             //- Scalar send buffer
             mutable solveScalarField scalarSendBuf_;
 
-            //- Scalar receive buffer
-            mutable solveScalarField scalarReceiveBuf_;
+            //- Scalar recv buffer
+            mutable solveScalarField scalarRecvBuf_;
 
 
 

@@ -1590,7 +1590,7 @@ void Foam::faMesh::calcPointAreaNormals(vectorField& result) const
             }
 
             // Receive neighbour values
-            patchPointNormals.resize(nbrPatchPoints.size());
+            patchPointNormals.resize_nocopy(nbrPatchPoints.size());
 
             {
                 UIPstream::read

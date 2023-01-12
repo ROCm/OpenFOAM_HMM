@@ -112,15 +112,15 @@ void Foam::calculatedProcessorGAMGInterfaceField::initInterfaceMatrixUpdate
     )
     {
         // Fast path.
-        scalarReceiveBuf_.setSize(scalarSendBuf_.size());
+        scalarRecvBuf_.resize_nocopy(scalarSendBuf_.size());
 
         recvRequest_ = UPstream::nRequests();
         UIPstream::read
         (
             UPstream::commsTypes::nonBlocking,
             procInterface_.neighbProcNo(),
-            scalarReceiveBuf_.data_bytes(),
-            scalarReceiveBuf_.size_bytes(),
+            scalarRecvBuf_.data_bytes(),
+            scalarRecvBuf_.size_bytes(),
             procInterface_.tag(),
             comm()
         );
@@ -176,27 +176,19 @@ void Foam::calculatedProcessorGAMGInterfaceField::updateInterfaceMatrix
         UPstream::waitRequest(recvRequest_);
         recvRequest_ = -1;
         sendRequest_ = -1;
-
-        // Transform according to the transformation tensor
-        transformCoupleField(scalarReceiveBuf_, cmpt);
-
-        // Multiply the field by coefficients and add into the result
-        addToInternalField(result, !add, faceCells, coeffs, scalarReceiveBuf_);
     }
     else
     {
-        solveScalarField pnf
-        (
-            procInterface_.compressedReceive<solveScalar>
-            (
-                commsType,
-                this->size()
-            )()
-        );
-        transformCoupleField(pnf, cmpt);
-
-        addToInternalField(result, !add, faceCells, coeffs, pnf);
+        scalarRecvBuf_.resize_nocopy(this->size());
+        procInterface_.compressedReceive(commsType, scalarRecvBuf_);
     }
+
+
+    // Transform according to the transformation tensor
+    transformCoupleField(scalarRecvBuf_, cmpt);
+
+    // Multiply the field by coefficients and add into the result
+    addToInternalField(result, !add, faceCells, coeffs, scalarRecvBuf_);
 
     this->updatedMatrix(true);
 }

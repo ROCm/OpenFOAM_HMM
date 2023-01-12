@@ -87,13 +87,13 @@ class processorFvPatchField
             mutable Field<Type> sendBuf_;
 
             //- Receive buffer.
-            mutable Field<Type> receiveBuf_;
+            mutable Field<Type> recvBuf_;
 
             //- Scalar send buffer
             mutable solveScalarField scalarSendBuf_;
 
-            //- Scalar receive buffer
-            mutable solveScalarField scalarReceiveBuf_;
+            //- Scalar recv buffer
+            mutable solveScalarField scalarRecvBuf_;
 
 
 public:

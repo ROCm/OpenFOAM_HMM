@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,13 +55,13 @@ class processorCyclicPointPatchField
 :
     public coupledPointPatchField<Type>
 {
-    // Private data
+    // Private Data
 
         //- Local reference to processor patch
         const processorCyclicPointPatch& procPatch_;
 
         //- Receive buffer for non-blocking communication
-        mutable Field<Type> receiveBuf_;
+        mutable Field<Type> recvBuf_;
 
 
 public:
@@ -132,7 +133,7 @@ public:
 
 
     //- Destructor
-    virtual ~processorCyclicPointPatchField();
+    virtual ~processorCyclicPointPatchField() = default;
 
 
     // Member functions

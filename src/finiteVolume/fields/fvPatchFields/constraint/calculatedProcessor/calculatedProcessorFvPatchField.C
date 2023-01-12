@@ -123,7 +123,7 @@ void Foam::calculatedProcessorFvPatchField<Type>::initEvaluate
         {
             const Field<Type>& iF = this->internalField();
             const labelList& fc = procInterface_.faceCells();
-            sendBuf_.setSize(fc.size());
+            sendBuf_.resize_nocopy(fc.size());
             forAll(fc, i)
             {
                 sendBuf_[i] = iF[fc[i]];
@@ -131,7 +131,7 @@ void Foam::calculatedProcessorFvPatchField<Type>::initEvaluate
         }
 
         // Receive straight into *this
-        this->setSize(sendBuf_.size());
+        this->resize_nocopy(sendBuf_.size());
 
         recvRequest_ = UPstream::nRequests();
         UIPstream::read
@@ -198,21 +198,21 @@ void Foam::calculatedProcessorFvPatchField<Type>::initInterfaceMatrixUpdate
     // Bypass patchInternalField since uses fvPatch addressing
     const labelList& fc = lduAddr.patchAddr(patchId);
 
-    scalarSendBuf_.setSize(fc.size());
+    scalarSendBuf_.resize_nocopy(fc.size());
     forAll(fc, i)
     {
         scalarSendBuf_[i] = psiInternal[fc[i]];
     }
 
-    scalarReceiveBuf_.setSize(scalarSendBuf_.size());
+    scalarRecvBuf_.resize_nocopy(scalarSendBuf_.size());
 
     recvRequest_ = UPstream::nRequests();
     UIPstream::read
     (
         UPstream::commsTypes::nonBlocking,
         procInterface_.neighbProcNo(),
-        scalarReceiveBuf_.data_bytes(),
-        scalarReceiveBuf_.size_bytes(),
+        scalarRecvBuf_.data_bytes(),
+        scalarRecvBuf_.size_bytes(),
         procInterface_.tag(),
         procInterface_.comm()
     );
@@ -288,7 +288,7 @@ void Foam::calculatedProcessorFvPatchField<Type>::updateInterfaceMatrix
 
     // Consume straight from receive buffer. Note use of our own
     // helper to avoid using fvPatch addressing
-    addToInternalField(result, !add, coeffs, scalarReceiveBuf_);
+    addToInternalField(result, !add, coeffs, scalarRecvBuf_);
 
     this->updatedMatrix(true);
 }

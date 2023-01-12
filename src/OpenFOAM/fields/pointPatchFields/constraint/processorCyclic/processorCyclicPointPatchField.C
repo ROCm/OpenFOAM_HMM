@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,8 +41,7 @@ Foam::processorCyclicPointPatchField<Type>::processorCyclicPointPatchField
 )
 :
     coupledPointPatchField<Type>(p, iF),
-    procPatch_(refCast<const processorCyclicPointPatch>(p)),
-    receiveBuf_(0)
+    procPatch_(refCast<const processorCyclicPointPatch>(p))
 {}
 
 
@@ -55,8 +54,7 @@ Foam::processorCyclicPointPatchField<Type>::processorCyclicPointPatchField
 )
 :
     coupledPointPatchField<Type>(p, iF, dict),
-    procPatch_(refCast<const processorCyclicPointPatch>(p, dict)),
-    receiveBuf_(0)
+    procPatch_(refCast<const processorCyclicPointPatch>(p, dict))
 {}
 
 
@@ -70,8 +68,7 @@ Foam::processorCyclicPointPatchField<Type>::processorCyclicPointPatchField
 )
 :
     coupledPointPatchField<Type>(ptf, p, iF, mapper),
-    procPatch_(refCast<const processorCyclicPointPatch>(ptf.patch())),
-    receiveBuf_(0)
+    procPatch_(refCast<const processorCyclicPointPatch>(ptf.patch()))
 {}
 
 
@@ -83,15 +80,7 @@ Foam::processorCyclicPointPatchField<Type>::processorCyclicPointPatchField
 )
 :
     coupledPointPatchField<Type>(ptf, iF),
-    procPatch_(refCast<const processorCyclicPointPatch>(ptf.patch())),
-    receiveBuf_(0)
-{}
-
-
-// * * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::processorCyclicPointPatchField<Type>::~processorCyclicPointPatchField()
+    procPatch_(refCast<const processorCyclicPointPatch>(ptf.patch()))
 {}
 
 
@@ -118,13 +107,13 @@ void Foam::processorCyclicPointPatchField<Type>::initSwapAddSeparated
 
         if (commsType == Pstream::commsTypes::nonBlocking)
         {
-            receiveBuf_.setSize(pf.size());
+            recvBuf_.resize_nocopy(pf.size());
             UIPstream::read
             (
                 commsType,
                 procPatch_.neighbProcNo(),
-                receiveBuf_.data_bytes(),
-                receiveBuf_.size_bytes(),
+                recvBuf_.data_bytes(),
+                recvBuf_.size_bytes(),
                 procPatch_.tag(),
                 procPatch_.comm()
             );
@@ -151,16 +140,17 @@ void Foam::processorCyclicPointPatchField<Type>::swapAddSeparated
 {
     if (Pstream::parRun())
     {
-        // If nonblocking data has already been received into receiveBuf_
+        // If nonblocking, data is already in receive buffer
+
         if (commsType != Pstream::commsTypes::nonBlocking)
         {
-            receiveBuf_.setSize(this->size());
+            recvBuf_.resize_nocopy(this->size());
             UIPstream::read
             (
                 commsType,
                 procPatch_.neighbProcNo(),
-                receiveBuf_.data_bytes(),
-                receiveBuf_.size_bytes(),
+                recvBuf_.data_bytes(),
+                recvBuf_.size_bytes(),
                 procPatch_.tag(),
                 procPatch_.comm()
             );
@@ -172,11 +162,11 @@ void Foam::processorCyclicPointPatchField<Type>::swapAddSeparated
                 procPatch_.procCyclicPolyPatch();
             const tensor& forwardT = ppp.forwardT()[0];
 
-            transform(receiveBuf_, forwardT, receiveBuf_);
+            transform(recvBuf_, forwardT, recvBuf_);
         }
 
         // All points are separated
-        this->addToInternalField(pField, receiveBuf_);
+        this->addToInternalField(pField, recvBuf_);
     }
 }
 

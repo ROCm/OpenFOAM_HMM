@@ -138,9 +138,9 @@ Foam::processorFvPatchField<Type>::processorFvPatchField
     sendRequest_(-1),
     recvRequest_(-1),
     sendBuf_(std::move(ptf.sendBuf_)),
-    receiveBuf_(std::move(ptf.receiveBuf_)),
+    recvBuf_(std::move(ptf.recvBuf_)),
     scalarSendBuf_(std::move(ptf.scalarSendBuf_)),
-    scalarReceiveBuf_(std::move(ptf.scalarReceiveBuf_))
+    scalarRecvBuf_(std::move(ptf.scalarRecvBuf_))
 {
     if (debug && !ptf.ready())
     {
@@ -226,7 +226,7 @@ void Foam::processorFvPatchField<Type>::initEvaluate
             }
 
             // Receive straight into *this
-            this->setSize(sendBuf_.size());
+            this->resize_nocopy(sendBuf_.size());
 
             recvRequest_ = UPstream::nRequests();
             UIPstream::read
@@ -320,7 +320,7 @@ void Foam::processorFvPatchField<Type>::initInterfaceMatrixUpdate
 
     const labelUList& faceCells = lduAddr.patchAddr(patchId);
 
-    scalarSendBuf_.setSize(this->patch().size());
+    scalarSendBuf_.resize_nocopy(this->patch().size());
     forAll(scalarSendBuf_, facei)
     {
         scalarSendBuf_[facei] = psiInternal[faceCells[facei]];
@@ -341,16 +341,15 @@ void Foam::processorFvPatchField<Type>::initInterfaceMatrixUpdate
                 << abort(FatalError);
         }
 
-
-        scalarReceiveBuf_.setSize(scalarSendBuf_.size());
+        scalarRecvBuf_.resize_nocopy(scalarSendBuf_.size());
 
         recvRequest_ = UPstream::nRequests();
         UIPstream::read
         (
             UPstream::commsTypes::nonBlocking,
             procPatch_.neighbProcNo(),
-            scalarReceiveBuf_.data_bytes(),
-            scalarReceiveBuf_.size_bytes(),
+            scalarRecvBuf_.data_bytes(),
+            scalarRecvBuf_.size_bytes(),
             procPatch_.tag(),
             procPatch_.comm()
         );
@@ -407,43 +406,22 @@ void Foam::processorFvPatchField<Type>::updateInterfaceMatrix
         UPstream::waitRequest(recvRequest_);
         recvRequest_ = -1;
         sendRequest_ = -1;
-
-        if (!std::is_arithmetic<Type>::value)
-        {
-            // Transform non-scalar data according to the transformation tensor
-            transformCoupleField(scalarReceiveBuf_, cmpt);
-        }
-
-        // Multiply the field by coefficients and add into the result
-        this->addToInternalField
-        (
-            result,
-            !add,
-            faceCells,
-            coeffs,
-            scalarReceiveBuf_
-        );
     }
     else
     {
-        solveScalarField pnf
-        (
-            procPatch_.compressedReceive<solveScalar>
-            (
-                commsType,
-                this->size()
-            )()
-        );
-
-        if (!std::is_arithmetic<Type>::value)
-        {
-            // Transform non-scalar data according to the transformation tensor
-            transformCoupleField(pnf, cmpt);
-        }
-
-        // Multiply the field by coefficients and add into the result
-        this->addToInternalField(result, !add, faceCells, coeffs, pnf);
+        scalarRecvBuf_.resize_nocopy(this->size());
+        procPatch_.compressedReceive(commsType, scalarRecvBuf_);
     }
+
+
+    if (!std::is_arithmetic<Type>::value)
+    {
+        // Transform non-scalar data according to the transformation tensor
+        transformCoupleField(scalarRecvBuf_, cmpt);
+    }
+
+    // Multiply the field by coefficients and add into the result
+    this->addToInternalField(result, !add, faceCells, coeffs, scalarRecvBuf_);
 
     this->updatedMatrix(true);
 }
@@ -461,7 +439,7 @@ void Foam::processorFvPatchField<Type>::initInterfaceMatrixUpdate
     const Pstream::commsTypes commsType
 ) const
 {
-    sendBuf_.setSize(this->patch().size());
+    sendBuf_.resize_nocopy(this->patch().size());
 
     const labelUList& faceCells = lduAddr.patchAddr(patchId);
 
@@ -485,16 +463,15 @@ void Foam::processorFvPatchField<Type>::initInterfaceMatrixUpdate
                 << abort(FatalError);
         }
 
-
-        receiveBuf_.setSize(sendBuf_.size());
+        recvBuf_.resize_nocopy(sendBuf_.size());
 
         recvRequest_ = UPstream::nRequests();
         UIPstream::read
         (
             UPstream::commsTypes::nonBlocking,
             procPatch_.neighbProcNo(),
-            receiveBuf_.data_bytes(),
-            receiveBuf_.size_bytes(),
+            recvBuf_.data_bytes(),
+            recvBuf_.size_bytes(),
             procPatch_.tag(),
             procPatch_.comm()
         );
@@ -550,26 +527,19 @@ void Foam::processorFvPatchField<Type>::updateInterfaceMatrix
         UPstream::waitRequest(recvRequest_);
         recvRequest_ = -1;
         sendRequest_ = -1;
-
-        // Transform according to the transformation tensor
-        transformCoupleField(receiveBuf_);
-
-        // Multiply the field by coefficients and add into the result
-        this->addToInternalField(result, !add, faceCells, coeffs, receiveBuf_);
     }
     else
     {
-        Field<Type> pnf
-        (
-            procPatch_.compressedReceive<Type>(commsType, this->size())()
-        );
-
-        // Transform according to the transformation tensor
-        transformCoupleField(pnf);
-
-        // Multiply the field by coefficients and add into the result
-        this->addToInternalField(result, !add, faceCells, coeffs, pnf);
+        recvBuf_.resize_nocopy(this->size());
+        procPatch_.compressedReceive(commsType, recvBuf_);
     }
+
+
+    // Transform according to the transformation tensor
+    transformCoupleField(recvBuf_);
+
+    // Multiply the field by coefficients and add into the result
+    this->addToInternalField(result, !add, faceCells, coeffs, recvBuf_);
 
     this->updatedMatrix(true);
 }
