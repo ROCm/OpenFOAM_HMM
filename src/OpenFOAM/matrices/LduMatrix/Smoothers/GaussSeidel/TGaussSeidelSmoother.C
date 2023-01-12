@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -98,6 +98,8 @@ void Foam::TGaussSeidelSmoother<Type, DType, LUType>::smooth
     {
         bPrime = matrix_.source();
 
+        const label startRequest = UPstream::nRequests();
+
         matrix_.initMatrixInterfaces
         (
             false,
@@ -111,7 +113,8 @@ void Foam::TGaussSeidelSmoother<Type, DType, LUType>::smooth
             false,
             matrix_.interfacesUpper(),
             psi,
-            bPrime
+            bPrime,
+            startRequest
         );
 
         Type curPsi;

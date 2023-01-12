@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -111,10 +111,17 @@ void Foam::LduMatrix<Type, DType, LUType>::updateMatrixInterfaces
     const bool add,
     const FieldField<Field, LUType>& interfaceCoeffs,
     const Field<Type>& psiif,
-    Field<Type>& result
+    Field<Type>& result,
+    const label startRequest
 ) const
 {
     const UPstream::commsTypes commsType = UPstream::defaultCommsType;
+
+    // Block until sends/receives have finished
+    if (commsType == UPstream::commsTypes::nonBlocking)
+    {
+        UPstream::waitRequests(startRequest);
+    }
 
     if
     (
@@ -122,12 +129,6 @@ void Foam::LduMatrix<Type, DType, LUType>::updateMatrixInterfaces
      || commsType == UPstream::commsTypes::nonBlocking
     )
     {
-        // Block until all sends/receives have been finished
-        if (commsType == UPstream::commsTypes::nonBlocking)
-        {
-            UPstream::waitRequests();
-        }
-
         forAll(interfaces_, interfacei)
         {
             if (interfaces_.set(interfacei))

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -80,6 +80,8 @@ void Foam::LduMatrix<Type, DType, LUType>::Amul
     const LUType* const __restrict__ upperPtr = upper().begin();
     const LUType* const __restrict__ lowerPtr = lower().begin();
 
+    const label startRequest = UPstream::nRequests();
+
     // Initialise the update of interfaced interfaces
     initMatrixInterfaces
     (
@@ -109,7 +111,8 @@ void Foam::LduMatrix<Type, DType, LUType>::Amul
         true,
         interfacesUpper_,
         psi,
-        Apsi
+        Apsi,
+        startRequest
     );
 
     tpsi.clear();
@@ -135,6 +138,8 @@ void Foam::LduMatrix<Type, DType, LUType>::Tmul
 
     const LUType* const __restrict__ lowerPtr = lower().begin();
     const LUType* const __restrict__ upperPtr = upper().begin();
+
+    const label startRequest = UPstream::nRequests();
 
     // Initialise the update of interfaced interfaces
     initMatrixInterfaces
@@ -164,7 +169,8 @@ void Foam::LduMatrix<Type, DType, LUType>::Tmul
         true,
         interfacesLower_,
         psi,
-        Tpsi
+        Tpsi,
+        startRequest
     );
 
     tpsi.clear();
@@ -242,6 +248,8 @@ void Foam::LduMatrix<Type, DType, LUType>::residual
     // Note: there is a change of sign in the coupled
     // interface update to add the contibution to the r.h.s.
 
+    const label startRequest = UPstream::nRequests();
+
     // Initialise the update of interfaced interfaces
     initMatrixInterfaces
     (
@@ -271,7 +279,8 @@ void Foam::LduMatrix<Type, DType, LUType>::residual
         false,
         interfacesUpper_,
         psi,
-        rA
+        rA,
+        startRequest
     );
 }
 
