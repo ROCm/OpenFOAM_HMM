@@ -42,7 +42,7 @@ $(faPatchFields)/faPatchField/faPatchFieldBase.C
 $(faPatchFields)/faPatchField/faPatchFields.C
 
 basicFaPatchFields = $(faPatchFields)/basic
-$(basicFaPatchFields)/basicSymmetry/basicSymmetryFaPatchScalarField.C
+$(basicFaPatchFields)/basicSymmetry/basicSymmetryFaPatchFields.C
 $(basicFaPatchFields)/calculated/calculatedFaPatchFields.C
 $(basicFaPatchFields)/coupled/coupledFaPatchFields.C
 $(basicFaPatchFields)/zeroGradient/zeroGradientFaPatchFields.C
@@ -50,13 +50,11 @@ $(basicFaPatchFields)/fixedValue/fixedValueFaPatchFields.C
 $(basicFaPatchFields)/fixedGradient/fixedGradientFaPatchFields.C
 $(basicFaPatchFields)/mixed/mixedFaPatchFields.C
 $(basicFaPatchFields)/transform/transformFaPatchFields.C
-$(basicFaPatchFields)/transform/transformFaPatchScalarField.C
 
 constraintFaPatchFields = $(faPatchFields)/constraint
 $(constraintFaPatchFields)/empty/emptyFaPatchFields.C
 $(constraintFaPatchFields)/processor/processorFaPatchFields.C
 $(constraintFaPatchFields)/wedge/wedgeFaPatchFields.C
-$(constraintFaPatchFields)/wedge/wedgeFaPatchScalarField.C
 $(constraintFaPatchFields)/cyclic/cyclicFaPatchFields.C
 $(constraintFaPatchFields)/symmetry/symmetryFaPatchFields.C
 

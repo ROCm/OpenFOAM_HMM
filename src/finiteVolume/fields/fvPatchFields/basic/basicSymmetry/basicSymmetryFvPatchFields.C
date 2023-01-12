@@ -28,7 +28,9 @@ License
 #include "basicSymmetryFvPatchField.H"
 #include "volFields.H"
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// No run-time selection
+
+// * * * * * * * * * * * * * * * Specialisations * * * * * * * * * * * * * * //
 
 template<>
 Foam::tmp<Foam::scalarField>

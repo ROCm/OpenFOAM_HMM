@@ -29,17 +29,22 @@ License
 #include "transformFaPatchFields.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    makeFaPatchFieldsTypeName(transform);
+}
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-makeFaPatchFieldsTypeName(transform);
+// * * * * * * * * * * * * * * * Specialisations * * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+template<>
+Foam::tmp<Foam::scalarField>
+Foam::transformFaPatchField<Foam::scalar>::gradientInternalCoeffs() const
+{
+    return tmp<scalarField>::New(size(), Zero);
+}
 
-} // End namespace Foam
 
 // ************************************************************************* //

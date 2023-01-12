@@ -29,17 +29,33 @@ License
 #include "fvPatchFields.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    makePatchFieldTypeNames(transform);
+}
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-makePatchFieldTypeNames(transform);
+// * * * * * * * * * * * * * * * Specialisations * * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+template<>
+Foam::tmp<Foam::scalarField>
+Foam::transformFvPatchField<Foam::scalar>::valueInternalCoeffs
+(
+    const tmp<scalarField>&
+) const
+{
+    return tmp<scalarField>::New(size(), 1.0);
+}
 
-} // End namespace Foam
+
+template<>
+Foam::tmp<Foam::scalarField>
+Foam::transformFvPatchField<Foam::scalar>::gradientInternalCoeffs() const
+{
+    return tmp<scalarField>::New(size(), Zero);
+}
+
 
 // ************************************************************************* //

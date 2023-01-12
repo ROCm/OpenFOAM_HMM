@@ -126,7 +126,7 @@ $(fvPatchFields)/fvPatchField/fvPatchFieldBase.C
 $(fvPatchFields)/fvPatchField/fvPatchFields.C
 
 basicFvPatchFields = $(fvPatchFields)/basic
-$(basicFvPatchFields)/basicSymmetry/basicSymmetryFvPatchScalarField.C
+$(basicFvPatchFields)/basicSymmetry/basicSymmetryFvPatchFields.C
 $(basicFvPatchFields)/calculated/calculatedFvPatchFields.C
 $(basicFvPatchFields)/extrapolatedCalculated/extrapolatedCalculatedFvPatchFields.C
 $(basicFvPatchFields)/coupled/coupledFvPatchFields.C
@@ -136,7 +136,6 @@ $(basicFvPatchFields)/fixedValue/fixedValueFvPatchFields.C
 $(basicFvPatchFields)/mixed/mixedFvPatchFields.C
 $(basicFvPatchFields)/sliced/slicedFvPatchFields.C
 $(basicFvPatchFields)/transform/transformFvPatchFields.C
-$(basicFvPatchFields)/transform/transformFvPatchScalarField.C
 $(basicFvPatchFields)/zeroGradient/zeroGradientFvPatchFields.C
 
 constraintFvPatchFields = $(fvPatchFields)/constraint
@@ -152,10 +151,8 @@ $(constraintFvPatchFields)/processor/processorFvPatchFields.C
 $(constraintFvPatchFields)/processorCyclic/processorCyclicFvPatchFields.C
 $(constraintFvPatchFields)/calculatedProcessor/calculatedProcessorFvPatchFields.C
 $(constraintFvPatchFields)/symmetryPlane/symmetryPlaneFvPatchFields.C
-$(constraintFvPatchFields)/symmetryPlane/symmetryPlaneFvPatchScalarField.C
 $(constraintFvPatchFields)/symmetry/symmetryFvPatchFields.C
 $(constraintFvPatchFields)/wedge/wedgeFvPatchFields.C
-$(constraintFvPatchFields)/wedge/wedgeFvPatchScalarField.C
 
 derivedFvPatchFields = $(fvPatchFields)/derived
 $(derivedFvPatchFields)/activeBaffleVelocity/activeBaffleVelocityFvPatchVectorField.C

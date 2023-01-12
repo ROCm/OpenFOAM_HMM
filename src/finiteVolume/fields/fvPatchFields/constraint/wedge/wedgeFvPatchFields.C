@@ -29,17 +29,37 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "volFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    makePatchFields(wedge);
+}
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-makePatchFields(wedge);
+// * * * * * * * * * * * * * * * Specialisations * * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+template<>
+Foam::tmp<Foam::scalarField>
+Foam::wedgeFvPatchField<Foam::scalar>::snGrad() const
+{
+    return tmp<scalarField>::New(size(), Zero);
+}
 
-} // End namespace Foam
+
+template<>
+void Foam::wedgeFvPatchField<Foam::scalar>::evaluate
+(
+    const Pstream::commsTypes
+)
+{
+    if (!updated())
+    {
+        updateCoeffs();
+    }
+
+    this->operator==(patchInternalField());
+}
+
 
 // ************************************************************************* //

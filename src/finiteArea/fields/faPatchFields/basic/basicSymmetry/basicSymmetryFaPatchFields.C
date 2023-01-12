@@ -25,22 +25,35 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicSymmetryFaPatchFields.H"
-#include "faPatchFields.H"
-#include "areaFaMesh.H"
-#include "addToRunTimeSelectionTable.H"
+#include "basicSymmetryFaPatchField.H"
+#include "areaFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// No run-time selection
 
-namespace Foam
+// * * * * * * * * * * * * * * * Specialisations * * * * * * * * * * * * * * //
+
+template<>
+Foam::tmp<Foam::scalarField>
+Foam::basicSymmetryFaPatchField<Foam::scalar>::snGrad() const
 {
+    return tmp<scalarField>::New(size(), Zero);
+}
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-makeFaPatchFields(basicSymmetry);
+template<>
+void Foam::basicSymmetryFaPatchField<Foam::scalar>::evaluate
+(
+    const Pstream::commsTypes
+)
+{
+    if (!updated())
+    {
+        updateCoeffs();
+    }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    scalarField::operator=(patchInternalField());
+    transformFaPatchField<scalar>::evaluate();
+}
 
-} // End namespace Foam
 
 // ************************************************************************* //
