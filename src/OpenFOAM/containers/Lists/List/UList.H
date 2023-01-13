@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -407,6 +407,10 @@ public:
         //- Return an iterator to end traversing the UList
         inline iterator end() noexcept;
 
+        //- Return iterator at offset i from begin,
+        //- clamped to [0,size] range
+        inline iterator begin(const label i) noexcept;
+
 
     // Random access iterator (const)
 
@@ -421,6 +425,14 @@ public:
 
         //- Return const_iterator to end traversing the constant UList
         inline const_iterator end() const noexcept;
+
+        //- Return const_iterator at offset i from begin,
+        //- clamped to [0,size] range
+        inline const_iterator cbegin(const label i) const noexcept;
+
+        //- Return const_iterator at offset i from begin,
+        //- clamped to [0,size] range
+        inline const_iterator begin(const label i) const noexcept;
 
 
     // Reverse iterators (non-const)

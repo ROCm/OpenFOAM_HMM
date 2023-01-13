@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -365,6 +365,12 @@ int main(int argc, char *argv[])
             Info<<"assigned identity in range:" << subset
                 << "=> " << flatOutput(longLabelList) << nl;
 
+            // Assign values in iterator range
+            std::iota(longLabelList.begin(15), longLabelList.begin(50), 115);
+
+            Info<<"assigned values in iterator range "
+                << "=> " << flatOutput(longLabelList) << nl;
+
             labelList someList(identity(24));
 
             longLabelList.slice(subset) =
@@ -410,8 +416,20 @@ int main(int argc, char *argv[])
         longLabelList.slice({5,-5}) = 42;
         longLabelList.slice({21,100}) = 42;
 
-        //Good: does not compile
-        longLabelList.slice(labelRange(20,50)) = constLabelList;
+        #if 0
+        // Compiles, but is runtime abort!
+        const bool oldThrowingError = FatalError.throwing(true);
+        try
+        {
+            longLabelList.slice(labelRange(20,50)) = constLabelList;
+        }
+        catch (const Foam::error& err)
+        {
+            Info<< "Caught FatalError "
+                << err << nl << endl;
+        }
+        FatalError.throwing(oldThrowingError);
+        #endif
 
         //Good: does not compile
         // longLabelList[labelRange(20,50)] = fixedLabelList;

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -344,6 +344,29 @@ Foam::UList<T>::cbegin() const noexcept
 {
     return v_;
 }
+
+
+template<class T>
+inline typename Foam::UList<T>::iterator
+Foam::UList<T>::begin(const label i) noexcept
+{
+    return (v_ + (i < 0 ? 0 : size_ < i ? size_ : i));
+}
+
+template<class T>
+inline typename Foam::UList<T>::const_iterator
+Foam::UList<T>::begin(const label i) const noexcept
+{
+    return (v_ + (i < 0 ? 0 : size_ < i ? size_ : i));
+}
+
+template<class T>
+inline typename Foam::UList<T>::const_iterator
+Foam::UList<T>::cbegin(const label i) const noexcept
+{
+    return (v_ + (i < 0 ? 0 : size_ < i ? size_ : i));
+}
+
 
 template<class T>
 inline typename Foam::UList<T>::iterator
