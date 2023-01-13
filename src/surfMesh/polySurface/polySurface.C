@@ -93,7 +93,7 @@ Foam::polySurface::polySurface(const IOobject& io, bool doCheckIn)
             io.db(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            true
+            IOobject::REGISTER
         )
     ),
     MeshReference(faceList(), pointField()),
@@ -124,7 +124,7 @@ Foam::polySurface::polySurface
             obr,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            true
+            IOobject::REGISTER
         ),
         doCheckIn
     )

@@ -72,7 +72,7 @@ bool Foam::functionObjects::ObukhovLength::calcOL()
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                true
+                IOobject::REGISTER
             ),
             mesh_,
             dimLength,
@@ -90,7 +90,7 @@ bool Foam::functionObjects::ObukhovLength::calcOL()
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                true
+                IOobject::REGISTER
             ),
             mesh_,
             dimVelocity,

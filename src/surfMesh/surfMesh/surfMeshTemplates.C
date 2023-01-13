@@ -58,7 +58,7 @@ void Foam::surfMesh::storeField
                 fieldDb,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                true
+                IOobject::REGISTER
             ),
             *this,
             dims,
@@ -98,7 +98,7 @@ void Foam::surfMesh::storeField
                 fieldDb,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                true
+                IOobject::REGISTER
             ),
             *this,
             dims,

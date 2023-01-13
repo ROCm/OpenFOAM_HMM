@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -184,6 +184,12 @@ private:
 
         //- Reference to the objectRegistry
         const objectRegistry& db_;
+
+
+    // Private Member Functions
+
+        //- Construct from registry, io options. Without name, instance, local
+        IOobject(const objectRegistry& registry, IOobjectOption ioOpt);
 
 
 protected:
@@ -450,7 +456,7 @@ public:
         const objectRegistry& db() const noexcept;
 
         //- Return Time associated with the objectRegistry
-        const Time& time() const;
+        const Time& time() const noexcept;
 
         //- Return the object name
         inline const word& name() const noexcept;

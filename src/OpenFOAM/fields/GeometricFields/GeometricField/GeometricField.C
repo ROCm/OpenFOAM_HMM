@@ -85,7 +85,7 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::readFields()
             this->db(),
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         typeName
     );

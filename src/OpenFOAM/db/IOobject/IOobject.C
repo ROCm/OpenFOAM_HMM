@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -285,7 +285,7 @@ Foam::word Foam::IOobject::group(const word& name)
 
     if (i == std::string::npos || i == 0)
     {
-        return word::null;
+        return word();
     }
 
     return name.substr(i+1);
@@ -307,6 +307,16 @@ Foam::word Foam::IOobject::member(const word& name)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+Foam::IOobject::IOobject(const objectRegistry& registry, IOobjectOption ioOpt)
+:
+    IOobjectOption(ioOpt),
+    objState_(objectState::GOOD),
+    sizeofLabel_(static_cast<unsigned char>(sizeof(label))),
+    sizeofScalar_(static_cast<unsigned char>(sizeof(scalar))),
+    db_(registry)
+{}
+
+
 Foam::IOobject::IOobject
 (
     const word& name,
@@ -315,19 +325,11 @@ Foam::IOobject::IOobject
     IOobjectOption ioOpt
 )
 :
-    IOobjectOption(ioOpt),
-    objState_(objectState::GOOD),
-    sizeofLabel_(static_cast<unsigned char>(sizeof(label))),
-    sizeofScalar_(static_cast<unsigned char>(sizeof(scalar))),
-
-    name_(name),
-    headerClassName_(),
-    note_(),
-    instance_(instance),
-    local_(),
-
-    db_(registry)
+    IOobject(registry, ioOpt)
 {
+    name_ = name;
+    instance_ = instance;
+
     if (objectRegistry::debug)
     {
         InfoInFunction
@@ -345,19 +347,12 @@ Foam::IOobject::IOobject
     IOobjectOption ioOpt
 )
 :
-    IOobjectOption(ioOpt),
-    objState_(objectState::GOOD),
-    sizeofLabel_(static_cast<unsigned char>(sizeof(label))),
-    sizeofScalar_(static_cast<unsigned char>(sizeof(scalar))),
-
-    name_(name),
-    headerClassName_(),
-    note_(),
-    instance_(instance),
-    local_(local),
-
-    db_(registry)
+    IOobject(registry, ioOpt)
 {
+    name_ = name;
+    instance_ = instance;
+    local_ = local;
+
     if (objectRegistry::debug)
     {
         InfoInFunction
@@ -373,18 +368,7 @@ Foam::IOobject::IOobject
     IOobjectOption ioOpt
 )
 :
-    IOobjectOption(ioOpt),
-    objState_(objectState::GOOD),
-    sizeofLabel_(static_cast<unsigned char>(sizeof(label))),
-    sizeofScalar_(static_cast<unsigned char>(sizeof(scalar))),
-
-    name_(),
-    headerClassName_(),
-    note_(),
-    instance_(),
-    local_(),
-
-    db_(registry)
+    IOobject(registry, ioOpt)
 {
     if (!fileNameComponents(path, instance_, local_, name_))
     {
@@ -451,7 +435,7 @@ const Foam::objectRegistry& Foam::IOobject::db() const noexcept
 }
 
 
-const Foam::Time& Foam::IOobject::time() const
+const Foam::Time& Foam::IOobject::time() const noexcept
 {
     return db_.time();
 }

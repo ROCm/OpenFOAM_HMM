@@ -526,7 +526,7 @@ bool Foam::Time::writeTimeDict() const
             *this,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     );
 

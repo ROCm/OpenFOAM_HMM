@@ -115,7 +115,8 @@ Foam::codedBase::codeDict
                 obr.time().system(),
                 obr,
                 IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
             )
         );
 

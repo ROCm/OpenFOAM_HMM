@@ -114,7 +114,7 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
                 *this,
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             )
         );
 
@@ -128,7 +128,7 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
                 *this,
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             )
         );
 
@@ -142,7 +142,7 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
                 *this,
                 IOobject::READ_IF_PRESENT,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             )
         );
 
@@ -156,7 +156,7 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
                 *this,
                 IOobject::READ_IF_PRESENT,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             )
         );
 
@@ -171,7 +171,7 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
                 *this,
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             *this
         );
@@ -256,7 +256,7 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
                     *this,
                     IOobject::MUST_READ,
                     IOobject::NO_WRITE,
-                    false
+                    IOobject::NO_REGISTER
                 )
             );
 
@@ -291,7 +291,7 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
                 *this,
                 IOobject::READ_IF_PRESENT,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             *this
         );
@@ -328,7 +328,7 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
                 *this,
                 IOobject::READ_IF_PRESENT,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             *this
         );
@@ -369,7 +369,7 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
                 *this,
                 IOobject::READ_IF_PRESENT,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             *this
         );
@@ -426,7 +426,7 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
                 *this,
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             )
         );
 

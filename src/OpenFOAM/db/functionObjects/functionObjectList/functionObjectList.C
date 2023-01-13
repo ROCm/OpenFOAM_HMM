@@ -113,7 +113,8 @@ void Foam::functionObjectList::createPropertiesDict() const
                 "uniform"/word("functionObjects"),
                 time_,
                 IOobject::READ_IF_PRESENT,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
             )
         )
     );
@@ -132,7 +133,8 @@ void Foam::functionObjectList::createOutputRegistry() const
                 time_.timeName(),
                 time_,
                 IOobject::NO_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
             )
         )
     );
@@ -453,7 +455,9 @@ Foam::autoPtr<Foam::functionObjectList> Foam::functionObjectList::New
                 (
                     args["dict"],
                     runTime,
-                    IOobject::MUST_READ_IF_MODIFIED
+                    IOobject::MUST_READ_IF_MODIFIED,
+                    IOobject::NO_WRITE,
+                    IOobject::REGISTER
                 )
             )
         );

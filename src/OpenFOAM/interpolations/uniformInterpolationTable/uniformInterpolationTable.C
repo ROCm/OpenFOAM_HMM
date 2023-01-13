@@ -94,7 +94,8 @@ Foam::uniformInterpolationTable<Type>::uniformInterpolationTable
         db,
         IOobject::NO_READ,
         IOobject::NO_WRITE,
-        false // if used in BCs, could be used by multiple patches
+        IOobject::NO_REGISTER
+        // No register: could be used by multiple patches if used in BCs
     ),
     List<scalar>(2, Zero),
     x0_(dict.get<scalar>("x0")),

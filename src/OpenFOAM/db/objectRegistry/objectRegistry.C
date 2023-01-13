@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -88,9 +88,9 @@ Foam::objectRegistry::objectRegistry(const Time& t, const label nObjects)
             word::validate(t.caseName()),
             t.path(),
             t,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE,
-            false
+            IOobjectOption::NO_READ,
+            IOobjectOption::AUTO_WRITE,
+            IOobjectOption::NO_REGISTER
         ),
         true    // to flag that this is the top-level regIOobject
     ),
@@ -207,8 +207,9 @@ const Foam::objectRegistry& Foam::objectRegistry::subRegistry
                 name,
                 time().constant(),
                 *this,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
+                IOobjectOption::NO_READ,
+                IOobjectOption::NO_WRITE,
+                IOobjectOption::REGISTER
             )
         );
         subObr->store();

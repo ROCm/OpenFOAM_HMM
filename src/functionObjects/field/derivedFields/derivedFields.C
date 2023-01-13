@@ -88,7 +88,7 @@ static bool calc_rhoU
                 mesh,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                true
+                IOobject::REGISTER
             ),
             mesh,
             (dimDensity * dimVelocity)
@@ -142,7 +142,7 @@ static bool calc_pTotal
                 mesh,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                true
+                IOobject::REGISTER
             ),
             mesh,
             dimPressure

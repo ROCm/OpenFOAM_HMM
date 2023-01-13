@@ -279,7 +279,7 @@ void Foam::Time::setControls()
             *this,
             IOobject::READ_IF_PRESENT,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     );
 
@@ -440,7 +440,7 @@ Foam::Time::Time
             *this,
             IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     ),
 
@@ -506,7 +506,7 @@ Foam::Time::Time
             *this,
             IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     ),
 
@@ -589,7 +589,7 @@ Foam::Time::Time
             *this,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         dict
     ),
@@ -666,7 +666,7 @@ Foam::Time::Time
             *this,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     ),
 
@@ -1006,7 +1006,7 @@ void Foam::Time::setTime(const instant& inst, const label newIndex)
             *this,
             IOobject::READ_IF_PRESENT,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     );
 

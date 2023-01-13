@@ -236,7 +236,8 @@ void Foam::ReadFields
                     timeName,
                     fieldsCache,
                     IOobject::NO_READ,
-                    IOobject::NO_WRITE
+                    IOobject::NO_WRITE,
+                    IOobject::REGISTER
                 )
             );
             timeCachePtr->store();
@@ -261,7 +262,7 @@ void Foam::ReadFields
                     mesh.thisDb(),
                     IOobject::MUST_READ,
                     IOobject::NO_WRITE,
-                    false  // do not register
+                    IOobject::NO_REGISTER
                 ),
                 mesh
             );
@@ -275,7 +276,8 @@ void Foam::ReadFields
                     timeName,
                     timeCache,
                     IOobject::NO_READ,
-                    IOobject::NO_WRITE
+                    IOobject::NO_WRITE,
+                    IOobject::REGISTER
                 ),
                 loadedFld
             );
@@ -347,7 +349,8 @@ void Foam::readFields
                 io.local(),
                 io.db(),
                 IOobject::MUST_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
             ),
             mesh
         );
@@ -402,7 +405,8 @@ void Foam::readUniformFields
                 io.local(),
                 io.db(),
                 IOobject::MUST_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
             )
         );
         fieldPtr->store();

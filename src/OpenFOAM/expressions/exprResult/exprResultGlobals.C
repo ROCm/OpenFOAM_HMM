@@ -59,7 +59,7 @@ Foam::expressions::exprResultGlobals::exprResultGlobals
             obr.time(),
             IOobject::READ_IF_PRESENT,
             IOobject::AUTO_WRITE,
-            true  // register
+            IOobject::REGISTER
         )
     ),
     variables_(),

@@ -433,7 +433,7 @@ Foam::regionModels::regionModel::regionModel
             mesh.time(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            true
+            IOobject::REGISTER
         ),
         dict
     ),

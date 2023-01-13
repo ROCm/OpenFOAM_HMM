@@ -61,7 +61,7 @@ Foam::extrudePatchMesh::extrudePatchMesh
             mesh,
             IOobject::READ_IF_PRESENT,
             IOobject::NO_WRITE,
-            true
+            IOobject::REGISTER
         ),
         Zero,
         false
