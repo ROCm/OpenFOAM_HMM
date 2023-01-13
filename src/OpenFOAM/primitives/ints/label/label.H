@@ -132,6 +132,16 @@ inline constexpr label component(const label val, const direction) noexcept
 }
 
 
+// * * * * * * * * * * * * * * * General Functions * * * * * * * * * * * * * //
+
+//- Compare two values for equality
+template<class T>
+inline bool equal(const T& a, const T& b)
+{
+    return (a == b);
+}
+
+
 /*---------------------------------------------------------------------------*\
                           Struct labelOp Declaration
 \*---------------------------------------------------------------------------*/

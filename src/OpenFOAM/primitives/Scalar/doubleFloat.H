@@ -26,8 +26,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef doubleFloat_H
-#define doubleFloat_H
+#ifndef Foam_doubleFloat_H
+#define Foam_doubleFloat_H
 
 #include "label.H"
 #include "products.H"
@@ -40,14 +40,6 @@ namespace Foam
 {
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-//- Compare two values for equality
-template<class T>
-inline bool equal(const T& s1, const T& s2)
-{
-    return s1 == s2;
-}
-
 
 #define MAXMINPOW(retType, type1, type2)                \
                                                         \

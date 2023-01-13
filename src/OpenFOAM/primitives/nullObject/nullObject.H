@@ -39,8 +39,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef nullObject_H
-#define nullObject_H
+#ifndef Foam_nullObject_H
+#define Foam_nullObject_H
 
 #include "labelFwd.H"
 
@@ -101,37 +101,37 @@ public:
     // Member Functions
 
         //- A nullptr pointer content
-        inline const void* pointer() const
+        const void* pointer() const noexcept
         {
             return data_[0].ptr;
         }
 
         //- Zero valued integer content
-        inline unsigned long value() const
+        unsigned long value() const noexcept
         {
             return 0;
         }
 
         //- No elements
-        inline bool empty() const
+        bool empty() const noexcept
         {
             return true;
         }
 
         //- Zero elements
-        inline label size() const
+        label size() const noexcept
         {
             return 0;
         }
 
         //- No-op method (for HashTable replacement)
-        inline const NullObject& toc() const
+        const NullObject& toc() const noexcept
         {
             return *this;
         }
 
         //- No-op method (for HashTable replacement)
-        inline const NullObject& sortedToc() const
+        const NullObject& sortedToc() const noexcept
         {
             return *this;
         }
@@ -141,7 +141,7 @@ public:
 
         //- Swallow assignment (cf, std::ignore)
         template<class T>
-        inline const NullObject& operator=(const T&) const
+        const NullObject& operator=(const T&) const
         {
             return *this;
         }

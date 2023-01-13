@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,21 +24,20 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Typedef
-    Foam::dimensionedSymmTensor
+    Foam::dimensionedLabel
 
 Description
-    Dimensioned tensor obtained from generic dimensioned type.
+    Dimensioned label obtained from generic dimensioned type.
 
 SourceFiles
-    dimensionedSymmTensor.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Foam_dimensionedSymmTensor_H
-#define Foam_dimensionedSymmTensor_H
+#ifndef Foam_dimensionedLabel_H
+#define Foam_dimensionedLabel_H
 
-#include "dimensionedVector.H"
-#include "symmTensor.H"
+#include "dimensionedType.H"
+#include "label.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,29 +46,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-typedef dimensioned<symmTensor> dimensionedSymmTensor;
-
-
-// global functions
-
-dimensionedSymmTensor sqr(const dimensionedVector&);
-dimensionedSymmTensor innerSqr(const dimensionedSymmTensor&);
-
-dimensionedScalar tr(const dimensionedSymmTensor&);
-dimensionedSymmTensor symm(const dimensionedSymmTensor&);
-dimensionedSymmTensor twoSymm(const dimensionedSymmTensor&);
-dimensionedSymmTensor dev(const dimensionedSymmTensor&);
-dimensionedSymmTensor dev2(const dimensionedSymmTensor&);
-dimensionedScalar det(const dimensionedSymmTensor&);
-dimensionedSymmTensor cof(const dimensionedSymmTensor&);
-dimensionedSymmTensor inv(const dimensionedSymmTensor&);
-
-
-// global operators
-
-//- Hodge Dual operator (tensor -> vector)
-dimensionedVector operator*(const dimensionedSymmTensor&);
-
+typedef dimensioned<label> dimensionedLabel;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

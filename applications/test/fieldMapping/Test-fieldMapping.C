@@ -48,12 +48,6 @@ using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-bool notEqual(const scalar s1, const scalar s2, const scalar tol)
-{
-    return mag(s1-s2) > tol;
-}
-
-
 // Main program:
 
 int main(int argc, char *argv[])
@@ -154,6 +148,8 @@ int main(int argc, char *argv[])
     // Face removal engine. No checking for not merging boundary faces.
     removeFaces faceRemover(mesh, GREAT);
 
+    // Comparison for inequality
+    const auto isNotEqual = notEqualOp<scalar>(1e-10);
 
     while (runTime.loop())
     {
@@ -254,7 +250,6 @@ int main(int argc, char *argv[])
             }
         }
 
-
         // Check constant profile
         {
             const scalar max = gMax(one);
@@ -263,7 +258,7 @@ int main(int argc, char *argv[])
             Info<< "Uniform one field min = " << min
                 << "  max = " << max << endl;
 
-            if (notEqual(max, 1.0, 1e-10) || notEqual(min, 1.0, 1e-10))
+            if (isNotEqual(max, 1) || isNotEqual(min, 1))
             {
                 FatalErrorInFunction
                     << "Uniform volVectorField not preserved."
@@ -287,7 +282,7 @@ int main(int argc, char *argv[])
             Info<< "Linear profile field min = " << min
                 << "  max = " << max << endl;
 
-            if (notEqual(max, 0.0, 1e-10) || notEqual(min, 0.0, 1e-10))
+            if (isNotEqual(max, 0) || isNotEqual(min, 0))
             {
                 FatalErrorInFunction
                     << "Linear profile not preserved."
@@ -310,7 +305,7 @@ int main(int argc, char *argv[])
             Info<< "Uniform surface field min = " << min
                 << "  max = " << max << endl;
 
-            if (notEqual(max, 1.0, 1e-10) || notEqual(min, 1.0, 1e-10))
+            if (isNotEqual(max, 1) || isNotEqual(min, 1))
             {
                 FatalErrorInFunction
                     << "Uniform surfaceScalarField not preserved."

@@ -40,8 +40,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef dimensionedMinMax_H
-#define dimensionedMinMax_H
+#ifndef Foam_dimensionedMinMax_H
+#define Foam_dimensionedMinMax_H
 
 #include "dimensionedType.H"
 #include "MinMax.H"

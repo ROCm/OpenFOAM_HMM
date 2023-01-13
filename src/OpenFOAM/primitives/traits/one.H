@@ -43,7 +43,7 @@ SeeAlso
 #ifndef Foam_one_H
 #define Foam_one_H
 
-#include "label.H"
+#include "labelFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

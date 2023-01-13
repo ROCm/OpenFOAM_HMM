@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,11 +26,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef dimensionedTypes_H
-#define dimensionedTypes_H
+#ifndef Foam_dimensionedTypes_H
+#define Foam_dimensionedTypes_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#include "dimensionedLabel.H"
 #include "dimensionedScalar.H"
 #include "dimensionedVector.H"
 #include "dimensionedSphericalTensor.H"

@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef dimensionedVector_H
-#define dimensionedVector_H
+#ifndef Foam_dimensionedVector_H
+#define Foam_dimensionedVector_H
 
 #include "dimensionedScalar.H"
 #include "vector.H"

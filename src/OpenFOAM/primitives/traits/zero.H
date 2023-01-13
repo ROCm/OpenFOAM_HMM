@@ -53,6 +53,7 @@ namespace Foam
 
 // Forward Declarations
 class zero;
+class zero_one;
 class Istream;
 class Ostream;
 
@@ -124,11 +125,29 @@ public:
     //- A static zero::null for dereferencing as a dummy element
     static null dummy;
 
-    //- Null constructible
+    //- Default construct
     constexpr null() noexcept {}
 
     //- Construct from Istream consumes no content.
     explicit constexpr null(Istream&) noexcept {}
+};
+
+
+/*---------------------------------------------------------------------------*\
+                          Class zero_one Declaration
+\*---------------------------------------------------------------------------*/
+
+//- Represents 0/1 concept, eg for tagged dispatch
+class zero_one
+{
+public:
+    typedef zero_one value_type;
+
+    //- Default construct
+    constexpr zero_one() noexcept {}
+
+    //- Construct from Istream consumes no content.
+    explicit constexpr zero_one(Istream&) noexcept {}
 };
 
 

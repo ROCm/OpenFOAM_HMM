@@ -282,15 +282,15 @@ inline Scalar negPart(const Scalar s) noexcept
 }
 
 
-inline bool equal(const Scalar& s1, const Scalar& s2)
+inline bool equal(const Scalar& a, const Scalar& b)
 {
-    return mag(s1 - s2) <= ScalarVSMALL;
+    return mag(a - b) <= ScalarVSMALL;
 }
 
 
-inline bool notEqual(const Scalar s1, const Scalar s2)
+inline bool notEqual(const Scalar a, const Scalar b)
 {
-    return mag(s1 - s2) > ScalarVSMALL;
+    return mag(a - b) > ScalarVSMALL;
 }
 
 
