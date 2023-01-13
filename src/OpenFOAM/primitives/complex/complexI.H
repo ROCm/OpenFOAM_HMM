@@ -238,6 +238,19 @@ inline complex limit(const complex& c1, const complex& c2)
 }
 
 
+//- Linear interpolation of complex a and b by factor t
+inline complex lerp(const complex& a, const complex& b, const scalar t)
+{
+    const scalar onet = (1-t);
+
+    return complex
+    (
+        onet*a.real() + t*b.real(),
+        onet*a.imag() + t*b.imag()
+    );
+}
+
+
 inline const complex& sum(const complex& c)
 {
     return c;

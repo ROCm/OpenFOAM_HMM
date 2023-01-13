@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -135,6 +135,26 @@ template<class Cmpt>
 inline DiagTensor<Cmpt> diag(const SymmTensor<Cmpt>& st)
 {
     return DiagTensor<Cmpt>(st.xx(), st.yy(), st.zz());
+}
+
+
+//- Linear interpolation of diagonal tensors a and b by factor t
+template<class Cmpt>
+inline DiagTensor<Cmpt> lerp
+(
+    const DiagTensor<Cmpt>& a,
+    const DiagTensor<Cmpt>& b,
+    const scalar t
+)
+{
+    const scalar onet = (1-t);
+
+    return DiagTensor<Cmpt>
+    (
+        onet*a.xx() + t*b.xx(),
+        onet*a.yy() + t*b.yy(),
+        onet*a.zz() + t*b.zz()
+    );
 }
 
 

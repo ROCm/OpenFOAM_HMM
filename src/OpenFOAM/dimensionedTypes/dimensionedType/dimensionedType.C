@@ -738,11 +738,19 @@ Foam::dimensioned<Type> Foam::min
 }
 
 
+template<class Type>
+Foam::dimensioned<Type> Foam::lerp
+(
+    const dimensioned<Type>& a,
+    const dimensioned<Type>& b,
+    const scalar t
+)
+{
     return dimensioned<Type>
     (
-        "min(" + dt1.name() + ',' + dt2.name() + ')',
-        dt1.dimensions(),
-        min(dt1.value(), dt2.value())
+        "lerp(" + a.name() + ',' + b.name() + ',' + ::Foam::name(t) + ')',
+        lerp(a.dimensions(), b.dimensions()),
+        lerp(a.value(), b.value(), t)
     );
 }
 

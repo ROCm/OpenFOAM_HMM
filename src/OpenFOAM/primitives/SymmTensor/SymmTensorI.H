@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -414,6 +414,29 @@ inline SymmTensor<Cmpt> sqr(const Vector<Cmpt>& v)
         v.x()*v.x(), v.x()*v.y(), v.x()*v.z(),
                      v.y()*v.y(), v.y()*v.z(),
                                   v.z()*v.z()
+    );
+}
+
+
+//- Linear interpolation of symmetric tensors a and b by factor t
+template<class Cmpt>
+inline SymmTensor<Cmpt> lerp
+(
+    const SymmTensor<Cmpt>& a,
+    const SymmTensor<Cmpt>& b,
+    const scalar t
+)
+{
+    const scalar onet = (1-t);
+
+    return SymmTensor<Cmpt>
+    (
+        onet*a.xx() + t*b.xx(),
+        onet*a.xy() + t*b.xy(),
+        onet*a.xz() + t*b.xz(),
+        onet*a.yy() + t*b.yy(),
+        onet*a.yz() + t*b.yz(),
+        onet*a.zz() + t*b.zz()
     );
 }
 

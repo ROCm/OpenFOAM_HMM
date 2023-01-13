@@ -357,6 +357,7 @@ Ostream& operator<<(Ostream& os, const dimensionSet& ds);
 dimensionSet min(const dimensionSet& a, const dimensionSet& b);
 dimensionSet max(const dimensionSet& a, const dimensionSet& b);
 dimensionSet clamp(const dimensionSet& a, const dimensionSet& range);
+dimensionSet lerp(const dimensionSet& a, const dimensionSet& b);
 
 dimensionSet cmptMultiply(const dimensionSet& ds1, const dimensionSet& ds2);
 dimensionSet cmptDivide(const dimensionSet& ds1, const dimensionSet& ds2);

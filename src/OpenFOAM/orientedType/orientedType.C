@@ -199,6 +199,15 @@ Foam::orientedType Foam::max(const orientedType& a, const orientedType& b)
 }
 
 
+Foam::orientedType Foam::lerp(const orientedType& a, const orientedType& b)
+{
+    (void) checkTypes("Function lerp", a, b);
+
+    // Behaves like addition
+    return orientedType(a.is_oriented() || b.is_oriented());
+}
+
+
 Foam::orientedType Foam::cmptMultiply
 (
     const orientedType& ot1,

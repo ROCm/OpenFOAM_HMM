@@ -40,6 +40,8 @@ Description
 #include "Tuple2.H"
 #include "Switch.H"
 #include "dictionary.H"
+#include "primitiveFields.H"
+#include "labelVector.H"
 
 using namespace Foam;
 
@@ -90,6 +92,13 @@ template<class T1, class T2>
 void printValPair(const char* desc, const T1& val1, const T2& val2)
 {
     Info<< desc << ' ' << val1 << ' ' << val2 << nl;
+}
+
+
+// The 'naive' implementation. Not exact at end points
+inline scalar naive_lerp(const scalar a, const scalar b, const scalar t)
+{
+    return a + t*(b - a);
 }
 
 
@@ -179,6 +188,113 @@ unsigned testParsing
 int main(int argc, char *argv[])
 {
     unsigned nFail = 0;
+
+    {
+        const float a = 1e8f, b = 1.0f;
+
+        Info<< "lerp exact: "
+            << (a == lerp(a, b, 0.0f)) << " "
+            << (b == lerp(a, b, 1.0f)) << nl;
+
+        Info<< "naive lerp exact: "
+            << (a == naive_lerp(a, b, 0.0f)) << " "
+            << (b == naive_lerp(a, b, 1.0f)) << nl;
+    }
+
+    {
+        const scalar a = 1e24, b = 1.0;
+
+        Info<< "lerp exact: "
+            << (a == lerp(a, b, 0.0)) << " "
+            << (b == lerp(a, b, 1.0)) << nl;
+
+        Info<< "naive lerp exact: "
+            << (a == naive_lerp(a, b, 0.0)) << " "
+            << (b == naive_lerp(a, b, 1.0)) << nl;
+    }
+
+    {
+        const vector a(vector::uniform(1e24)), b(vector::uniform(1.0));
+
+        Info<<"lerp exact: "
+            << (a == lerp(a, b, 0.0f)) << " "
+            << (b == lerp(a, b, 1.0f)) << nl;
+
+        Info<< "lerp: "
+            << lerp(vector::uniform(0), vector::uniform(100), 0.5) << nl;
+    }
+
+    {
+        const lerpOp1<vector> half(0.5);
+
+        const vector a(vector::uniform(20));
+        const vector b(vector::uniform(100));
+
+        Info<< "lerp half: "
+            << a << " : " << b << " => " << half(a, b) << nl;
+    }
+
+    {
+        const labelVector a(labelVector::uniform(10000));
+        const labelVector b(labelVector::uniform(1));
+
+        Info<< "lerp (labelVector) = "
+            << lerp(a, b, 0.1) << nl;
+    }
+
+    {
+        const scalar a(0);
+        const scalar b(100);
+
+        Info<< "lerp of " << a << " : " << b << nl;
+
+        for (const double t : { 0.0, 0.5, 1.0, -0.5, 1.5 })
+        {
+            Info<< "    " << t << " = " << lerp(a, b, t) << nl;
+        }
+    }
+
+
+    // No yet
+    #if 0
+    {
+        const label a(10000);
+        const label b(1);
+
+        Info<<"lerp (label) = "
+            << label(lerp(a, b, 0.1)) << nl;
+    }
+
+    {
+        const bool a(true);
+        const bool b(false);
+
+        Info<<"lerp (bool) = "
+            << (lerp(a, b, 0.5)) << nl;
+    }
+    #endif
+
+    {
+        const sphericalTensor a(10), b(20);
+
+        Info<<"lerp exact: "
+            << (a == lerp(a, b, 0.0f)) << " "
+            << (b == lerp(a, b, 1.0f)) << nl;
+//        Info<< "lerp: "
+//            << lerp(vector::uniform(0), vector::uniform(100), 0.5) << nl;
+    }
+
+    {
+        const tensor a(tensor::uniform(1e24));
+        const tensor b(tensor::uniform(0));
+
+        Info<<"lerp exact: "
+            << (a == lerp(a, b, 0.0f)) << " "
+            << (b == lerp(a, b, 1.0f)) << nl;
+//        Info<< "lerp: "
+//            << lerp(vector::uniform(0), vector::uniform(100), 0.5) << nl;
+    }
+
 
     {
         Info<< nl << "Test Switch parsing:" << nl;

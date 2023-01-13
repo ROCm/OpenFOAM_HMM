@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,9 +59,24 @@ int main(int argc, char *argv[])
         << "complexVector::one  : " << complexVector::one << nl
         << nl;
 
+    {
+        const complex a(0, 1);
+        const complex b(20, 100);
+
+        Info<< "lerp of " << a << " : " << b << nl;
+
+        for (const double t : { 0.0, 0.5, 1.0, -0.5, 1.5 })
+        {
+            Info<< "    " << t << " = " << lerp(a, b, t) << nl;
+        }
+    }
+
     for (complex c : { complex{1, 0}, complex{1, 2}} )
     {
-        Info<< nl << "complex : " << c << nl;
+        Info<< nl << "complex : " << c
+            << " mag = " << c.magnitude()
+            << " norm = " << c.magSqr()
+            << nl;
 
         Info<< "sin: " << sin(c) << nl
             << "pow(3.0f): " << pow(c, 3.0f) << nl

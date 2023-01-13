@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -684,6 +684,32 @@ template<class Cmpt>
 inline Cmpt invariantIII(const Tensor<Cmpt>& t)
 {
     return det(t);
+}
+
+
+//- Linear interpolation of tensors a and b by factor t
+template<class Cmpt>
+inline Tensor<Cmpt> lerp
+(
+    const Tensor<Cmpt>& a,
+    const Tensor<Cmpt>& b,
+    const scalar t
+)
+{
+    const scalar onet = (1-t);
+
+    return Tensor<Cmpt>
+    (
+        onet*a.xx() + t*b.xx(),
+        onet*a.xy() + t*b.xy(),
+        onet*a.xz() + t*b.xz(),
+        onet*a.yx() + t*b.yx(),
+        onet*a.yy() + t*b.yy(),
+        onet*a.yz() + t*b.yz(),
+        onet*a.zx() + t*b.zx(),
+        onet*a.zy() + t*b.zy(),
+        onet*a.zz() + t*b.zz()
+    );
 }
 
 

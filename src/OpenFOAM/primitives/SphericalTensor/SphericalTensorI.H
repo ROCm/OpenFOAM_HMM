@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -158,6 +158,19 @@ template<class Cmpt>
 inline Cmpt cmptAv(const SphericalTensor<Cmpt>& st)
 {
     return st.ii();
+}
+
+
+//- Linear interpolation of spherical tensors a and b by factor t
+template<class Cmpt>
+inline SphericalTensor<Cmpt> lerp
+(
+    const SphericalTensor<Cmpt>& a,
+    const SphericalTensor<Cmpt>& b,
+    const scalar t
+)
+{
+    return SphericalTensor<Cmpt>((1-t)*a.ii() + t*b.ii());
 }
 
 

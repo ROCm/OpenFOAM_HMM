@@ -174,6 +174,7 @@ public:
 
 orientedType min(const orientedType& a, const orientedType& b);
 orientedType max(const orientedType& a, const orientedType& b);
+orientedType lerp(const orientedType& a, const orientedType& b);
 
 orientedType cmptMultiply(const orientedType& ot1, const orientedType& ot2);
 orientedType cmptDivide(const orientedType& ot1, const orientedType& ot);

@@ -313,6 +313,15 @@ inline Scalar minMod(const Scalar s1, const Scalar s2)
 }
 
 
+//- Linear interpolation of scalars a and b by factor t
+//  Explicit form (not fused multiply add etc) for exact values at end points.
+//  Unlike std::lerp (C++20) there are no isfinite() checks etc.
+inline constexpr Scalar lerp(const Scalar a, const Scalar b, const Scalar t)
+{
+    return (Scalar{1}-t)*a + t*b;
+}
+
+
 inline Scalar magSqr(const Scalar s)
 {
     return s*s;

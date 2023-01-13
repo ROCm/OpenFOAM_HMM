@@ -287,6 +287,16 @@ Foam::dimensionSet Foam::clamp(const dimensionSet& a, const dimensionSet& range)
     return a;
 }
 
+Foam::dimensionSet Foam::lerp(const dimensionSet& a, const dimensionSet& b)
+{
+    if (dimensionSet::checking())
+    {
+        checkDims("lerp(a, b)", a, b);
+    }
+
+    return a;
+}
+
 
 Foam::dimensionSet Foam::cmptMultiply
 (
