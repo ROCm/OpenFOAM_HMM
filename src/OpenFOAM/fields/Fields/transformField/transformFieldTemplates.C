@@ -56,7 +56,7 @@ void Foam::transform
 {
     if (rot.size() == 1)
     {
-        return transform(result, rot.first(), fld);
+        return transform(result, rot.front(), fld);
     }
 
     TFOR_ALL_F_OP_FUNC_F_F
@@ -180,7 +180,7 @@ void Foam::invTransform
 {
     if (rot.size() == 1)
     {
-        return invTransform(result, rot.first(), fld);
+        return invTransform(result, rot.front(), fld);
     }
 
     TFOR_ALL_F_OP_FUNC_F_F

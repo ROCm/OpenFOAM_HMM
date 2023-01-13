@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef transformList_H
-#define transformList_H
+#ifndef Foam_transformList_H
+#define Foam_transformList_H
 
 #include "transform.H"
 #include "List.H"
@@ -67,7 +67,7 @@ void transformList(const tensorField& rotTensor, UList<T>& field);
 template<class T>
 void transformList(const tensor& rotTensor, Map<T>& field);
 
-//- Inplace transform a Map of elements using one tensor per element.
+//- Inplace transform a Map of elements.
 //  Using multiple tensors is ill-defined (Fatal).
 template<class T>
 void transformList(const tensorField& rotTensor, Map<T>& field);
@@ -77,7 +77,7 @@ void transformList(const tensorField& rotTensor, Map<T>& field);
 template<class T>
 void transformList(const tensor& rotTensor, EdgeMap<T>& field);
 
-//- Inplace transform a Map of elements using one tensor per element.
+//- Inplace transform a Map of elements.
 //  Using multiple tensors is ill-defined (Fatal).
 template<class T>
 void transformList(const tensorField& rotTensor, EdgeMap<T>& field);

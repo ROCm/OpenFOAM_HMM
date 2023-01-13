@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef transformField_H
-#define transformField_H
+#ifndef Foam_transformField_H
+#define Foam_transformField_H
 
 #include "transform.H"
 #include "quaternion.H"
@@ -177,6 +177,7 @@ tmp<Field<Type>> invTransform
 );
 
 
+// transformFieldMask()
 
 template<class Type1, class Type2>
 tmp<Field<Type1>> transformFieldMask(const Field<Type2>& fld);

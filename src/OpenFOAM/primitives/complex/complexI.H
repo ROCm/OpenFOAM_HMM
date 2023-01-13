@@ -274,6 +274,7 @@ inline const complex& sum(const complex& c)
 
 template<class Cmpt> class Tensor;
 
+//- No-op rotational transform for complex
 inline complex transform(const Tensor<scalar>&, const complex c)
 {
     return c;

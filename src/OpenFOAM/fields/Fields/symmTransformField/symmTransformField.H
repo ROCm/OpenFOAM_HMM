@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef symmTransformField_H
-#define symmTransformField_H
+#ifndef Foam_symmTransformField_H
+#define Foam_symmTransformField_H
 
 #include "symmTransform.H"
 #include "symmTensorField.H"
@@ -48,73 +49,96 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class Type>
-void transform(Field<Type>&, const symmTensorField&, const Field<Type>&);
+// transform()
 
 template<class Type>
-tmp<Field<Type>> transform(const symmTensorField&, const Field<Type>&);
+void transform
+(
+    Field<Type>& result,
+    const symmTensor& rot,
+    const Field<Type>& fld
+);
 
 template<class Type>
-tmp<Field<Type>> transform(const symmTensorField&, const tmp<Field<Type>>&);
+void transform
+(
+    Field<Type>& result,
+    const symmTensorField& rot,
+    const Field<Type>& fld
+);
 
-template<class Type>
-tmp<Field<Type>> transform(const tmp<symmTensorField>&, const Field<Type>&);
 
 template<class Type>
 tmp<Field<Type>> transform
 (
-    const tmp<symmTensorField>&,
-    const tmp<Field<Type>>&
+    const symmTensorField& rot,
+    const Field<Type>& fld
+);
+
+template<class Type>
+tmp<Field<Type>> transform
+(
+    const symmTensorField& rot,
+    const tmp<Field<Type>>& tfld
+);
+
+template<class Type>
+tmp<Field<Type>> transform
+(
+    const tmp<symmTensorField>& trot,
+    const Field<Type>& tfld
+);
+
+template<class Type>
+tmp<Field<Type>> transform
+(
+    const tmp<symmTensorField>& trot,
+    const tmp<Field<Type>>& tfld
 );
 
 
 template<class Type>
-void transform(Field<Type>&, const tensor&, const Field<Type>&);
+tmp<Field<Type>> transform
+(
+    const symmTensor& rot,
+    const Field<Type>& fld
+);
 
 template<class Type>
-tmp<Field<Type>> transform(const tensor&, const Field<Type>&);
-
-template<class Type>
-tmp<Field<Type>> transform(const tensor&, const tmp<Field<Type>>&);
-
-
-template<>
-tmp<Field<sphericalTensor>> transformFieldMask<sphericalTensor>
+tmp<Field<Type>> transform
 (
-    const symmTensorField&
-);
-
-template<>
-tmp<Field<sphericalTensor>> transformFieldMask<sphericalTensor>
-(
-    const tmp<symmTensorField>&
+    const symmTensor& rot,
+    const tmp<Field<Type>>& tfld
 );
 
 
-template<>
-tmp<Field<symmTensor>> transformFieldMask<symmTensor>
-(
-    const symmTensorField&
-);
+// Specializations
 
 template<>
-tmp<Field<symmTensor>> transformFieldMask<symmTensor>
-(
-    const tmp<symmTensorField>&
-);
+tmp<Field<sphericalTensor>>
+transformFieldMask<sphericalTensor>(const symmTensorField&);
+
+template<>
+tmp<Field<sphericalTensor>>
+transformFieldMask<sphericalTensor>(const tmp<symmTensorField>&);
 
 
 template<>
-tmp<Field<tensor>> transformFieldMask<tensor>
-(
-    const symmTensorField&
-);
+tmp<Field<symmTensor>>
+transformFieldMask<symmTensor>(const symmTensorField&);
 
 template<>
-tmp<Field<tensor>> transformFieldMask<tensor>
-(
-    const tmp<symmTensorField>&
-);
+tmp<Field<symmTensor>>
+transformFieldMask<symmTensor>(const tmp<symmTensorField>&);
+
+
+template<>
+tmp<Field<tensor>>
+transformFieldMask<tensor>(const symmTensorField&);
+
+template<>
+tmp<Field<tensor>>
+transformFieldMask<tensor>(const tmp<symmTensorField>&);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

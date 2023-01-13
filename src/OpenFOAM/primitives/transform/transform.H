@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -146,6 +146,8 @@ inline tensor Ra(const vector& a, const scalar omega)
 }
 
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 //- No-op rotational transform for base types
 template<class T>
 constexpr typename std::enable_if<std::is_arithmetic<T>::value, T>::type
@@ -154,10 +156,35 @@ transform(const tensor&, const T val)
     return val;
 }
 
+
+//- No-op rotational transform for spherical tensor
+template<class Cmpt>
+inline SphericalTensor<Cmpt> transform
+(
+    const tensor&,
+    const SphericalTensor<Cmpt>& val
+)
+{
+    return val;
+}
+
+
 //- No-op inverse rotational transform for base types
 template<class T>
 constexpr typename std::enable_if<std::is_arithmetic<T>::value, T>::type
 invTransform(const tensor&, const T val)
+{
+    return val;
+}
+
+
+//- No-op inverse rotational transform for spherical tensor
+template<class Cmpt>
+inline SphericalTensor<Cmpt> invTransform
+(
+    const tensor&,
+    const SphericalTensor<Cmpt>& val
+)
 {
     return val;
 }
@@ -188,38 +215,47 @@ inline Tensor<Cmpt> transform(const tensor& tt, const Tensor<Cmpt>& t)
 {
     return Tensor<Cmpt>
     (
+        // xx:
         (tt.xx()*t.xx() + tt.xy()*t.yx() + tt.xz()*t.zx())*tt.xx()
       + (tt.xx()*t.xy() + tt.xy()*t.yy() + tt.xz()*t.zy())*tt.xy()
       + (tt.xx()*t.xz() + tt.xy()*t.yz() + tt.xz()*t.zz())*tt.xz(),
 
+        // xy:
         (tt.xx()*t.xx() + tt.xy()*t.yx() + tt.xz()*t.zx())*tt.yx()
       + (tt.xx()*t.xy() + tt.xy()*t.yy() + tt.xz()*t.zy())*tt.yy()
       + (tt.xx()*t.xz() + tt.xy()*t.yz() + tt.xz()*t.zz())*tt.yz(),
 
+        // xz:
         (tt.xx()*t.xx() + tt.xy()*t.yx() + tt.xz()*t.zx())*tt.zx()
       + (tt.xx()*t.xy() + tt.xy()*t.yy() + tt.xz()*t.zy())*tt.zy()
       + (tt.xx()*t.xz() + tt.xy()*t.yz() + tt.xz()*t.zz())*tt.zz(),
 
+        // yx:
         (tt.yx()*t.xx() + tt.yy()*t.yx() + tt.yz()*t.zx())*tt.xx()
       + (tt.yx()*t.xy() + tt.yy()*t.yy() + tt.yz()*t.zy())*tt.xy()
       + (tt.yx()*t.xz() + tt.yy()*t.yz() + tt.yz()*t.zz())*tt.xz(),
 
+        // yy:
         (tt.yx()*t.xx() + tt.yy()*t.yx() + tt.yz()*t.zx())*tt.yx()
       + (tt.yx()*t.xy() + tt.yy()*t.yy() + tt.yz()*t.zy())*tt.yy()
       + (tt.yx()*t.xz() + tt.yy()*t.yz() + tt.yz()*t.zz())*tt.yz(),
 
+        // yz:
         (tt.yx()*t.xx() + tt.yy()*t.yx() + tt.yz()*t.zx())*tt.zx()
       + (tt.yx()*t.xy() + tt.yy()*t.yy() + tt.yz()*t.zy())*tt.zy()
       + (tt.yx()*t.xz() + tt.yy()*t.yz() + tt.yz()*t.zz())*tt.zz(),
 
+        // zx:
         (tt.zx()*t.xx() + tt.zy()*t.yx() + tt.zz()*t.zx())*tt.xx()
       + (tt.zx()*t.xy() + tt.zy()*t.yy() + tt.zz()*t.zy())*tt.xy()
       + (tt.zx()*t.xz() + tt.zy()*t.yz() + tt.zz()*t.zz())*tt.xz(),
 
+        // zy:
         (tt.zx()*t.xx() + tt.zy()*t.yx() + tt.zz()*t.zx())*tt.yx()
       + (tt.zx()*t.xy() + tt.zy()*t.yy() + tt.zz()*t.zy())*tt.yy()
       + (tt.zx()*t.xz() + tt.zy()*t.yz() + tt.zz()*t.zz())*tt.yz(),
 
+        // zz:
         (tt.zx()*t.xx() + tt.zy()*t.yx() + tt.zz()*t.zx())*tt.zx()
       + (tt.zx()*t.xy() + tt.zy()*t.yy() + tt.zz()*t.zy())*tt.zy()
       + (tt.zx()*t.xz() + tt.zy()*t.yz() + tt.zz()*t.zz())*tt.zz()
@@ -234,66 +270,51 @@ inline Tensor<Cmpt> invTransform(const tensor& tt, const Tensor<Cmpt>& t)
 {
     return Tensor<Cmpt>
     (
+        // xx:
         (tt.xx()*t.xx() + tt.yx()*t.yx() + tt.zx()*t.zx())*tt.xx()
       + (tt.xx()*t.xy() + tt.yx()*t.yy() + tt.zx()*t.zy())*tt.yx()
       + (tt.xx()*t.xz() + tt.yx()*t.yz() + tt.zx()*t.zz())*tt.zx(),
 
+        // xy:
         (tt.xx()*t.xx() + tt.yx()*t.yx() + tt.zx()*t.zx())*tt.xy()
       + (tt.xx()*t.xy() + tt.yx()*t.yy() + tt.zx()*t.zy())*tt.yy()
       + (tt.xx()*t.xz() + tt.yx()*t.yz() + tt.zx()*t.zz())*tt.zy(),
 
+        // xz:
         (tt.xx()*t.xx() + tt.yx()*t.yx() + tt.zx()*t.zx())*tt.xz()
       + (tt.xx()*t.xy() + tt.yx()*t.yy() + tt.zx()*t.zy())*tt.yz()
       + (tt.xx()*t.xz() + tt.yx()*t.yz() + tt.zx()*t.zz())*tt.zz(),
 
+        // yx:
         (tt.xy()*t.xx() + tt.yy()*t.yx() + tt.zy()*t.zx())*tt.xx()
       + (tt.xy()*t.xy() + tt.yy()*t.yy() + tt.zy()*t.zy())*tt.yx()
       + (tt.xy()*t.xz() + tt.yy()*t.yz() + tt.zy()*t.zz())*tt.zx(),
 
+        // yy:
         (tt.xy()*t.xx() + tt.yy()*t.yx() + tt.zy()*t.zx())*tt.xy()
       + (tt.xy()*t.xy() + tt.yy()*t.yy() + tt.zy()*t.zy())*tt.yy()
       + (tt.xy()*t.xz() + tt.yy()*t.yz() + tt.zy()*t.zz())*tt.zy(),
 
+        // yz:
         (tt.xy()*t.xx() + tt.yy()*t.yx() + tt.zy()*t.zx())*tt.xz()
       + (tt.xy()*t.xy() + tt.yy()*t.yy() + tt.zy()*t.zy())*tt.yz()
       + (tt.xy()*t.xz() + tt.yy()*t.yz() + tt.zy()*t.zz())*tt.zz(),
 
+        // zx:
         (tt.xz()*t.xx() + tt.yz()*t.yx() + tt.zz()*t.zx())*tt.xx()
       + (tt.xz()*t.xy() + tt.yz()*t.yy() + tt.zz()*t.zy())*tt.yx()
       + (tt.xz()*t.xz() + tt.yz()*t.yz() + tt.zz()*t.zz())*tt.zx(),
 
+        // zy:
         (tt.xz()*t.xx() + tt.yz()*t.yx() + tt.zz()*t.zx())*tt.xy()
       + (tt.xz()*t.xy() + tt.yz()*t.yy() + tt.zz()*t.zy())*tt.yy()
       + (tt.xz()*t.xz() + tt.yz()*t.yz() + tt.zz()*t.zz())*tt.zy(),
 
+        // zz:
         (tt.xz()*t.xx() + tt.yz()*t.yx() + tt.zz()*t.zx())*tt.xz()
       + (tt.xz()*t.xy() + tt.yz()*t.yy() + tt.zz()*t.zy())*tt.yz()
       + (tt.xz()*t.xz() + tt.yz()*t.yz() + tt.zz()*t.zz())*tt.zz()
     );
-}
-
-
-//- Use rotational tensor to transform a spherical tensor (no-op).
-template<class Cmpt>
-inline SphericalTensor<Cmpt> transform
-(
-    const tensor& tt,
-    const SphericalTensor<Cmpt>& st
-)
-{
-    return st;
-}
-
-
-//- Use rotational tensor to inverse transform a spherical tensor (no-op).
-template<class Cmpt>
-inline SphericalTensor<Cmpt> invTransform
-(
-    const tensor& tt,
-    const SphericalTensor<Cmpt>& st
-)
-{
-    return st;
 }
 
 
@@ -304,26 +325,32 @@ inline SymmTensor<Cmpt> transform(const tensor& tt, const SymmTensor<Cmpt>& st)
 {
     return SymmTensor<Cmpt>
     (
+        // xx:
         (tt.xx()*st.xx() + tt.xy()*st.xy() + tt.xz()*st.xz())*tt.xx()
       + (tt.xx()*st.xy() + tt.xy()*st.yy() + tt.xz()*st.yz())*tt.xy()
       + (tt.xx()*st.xz() + tt.xy()*st.yz() + tt.xz()*st.zz())*tt.xz(),
 
+        // xy:
         (tt.xx()*st.xx() + tt.xy()*st.xy() + tt.xz()*st.xz())*tt.yx()
       + (tt.xx()*st.xy() + tt.xy()*st.yy() + tt.xz()*st.yz())*tt.yy()
       + (tt.xx()*st.xz() + tt.xy()*st.yz() + tt.xz()*st.zz())*tt.yz(),
 
+        // xz:
         (tt.xx()*st.xx() + tt.xy()*st.xy() + tt.xz()*st.xz())*tt.zx()
       + (tt.xx()*st.xy() + tt.xy()*st.yy() + tt.xz()*st.yz())*tt.zy()
       + (tt.xx()*st.xz() + tt.xy()*st.yz() + tt.xz()*st.zz())*tt.zz(),
 
+        // yy:
         (tt.yx()*st.xx() + tt.yy()*st.xy() + tt.yz()*st.xz())*tt.yx()
       + (tt.yx()*st.xy() + tt.yy()*st.yy() + tt.yz()*st.yz())*tt.yy()
       + (tt.yx()*st.xz() + tt.yy()*st.yz() + tt.yz()*st.zz())*tt.yz(),
 
+        // yz:
         (tt.yx()*st.xx() + tt.yy()*st.xy() + tt.yz()*st.xz())*tt.zx()
       + (tt.yx()*st.xy() + tt.yy()*st.yy() + tt.yz()*st.yz())*tt.zy()
       + (tt.yx()*st.xz() + tt.yy()*st.yz() + tt.yz()*st.zz())*tt.zz(),
 
+        // zz:
         (tt.zx()*st.xx() + tt.zy()*st.xy() + tt.zz()*st.xz())*tt.zx()
       + (tt.zx()*st.xy() + tt.zy()*st.yy() + tt.zz()*st.yz())*tt.zy()
       + (tt.zx()*st.xz() + tt.zy()*st.yz() + tt.zz()*st.zz())*tt.zz()
@@ -339,32 +366,40 @@ invTransform(const tensor& tt, const SymmTensor<Cmpt>& st)
 {
     return SymmTensor<Cmpt>
     (
+        // xx:
         (tt.xx()*st.xx() + tt.yx()*st.xy() + tt.zx()*st.xz())*tt.xx()
       + (tt.xx()*st.xy() + tt.yx()*st.yy() + tt.zx()*st.yz())*tt.yx()
       + (tt.xx()*st.xz() + tt.yx()*st.yz() + tt.zx()*st.zz())*tt.zx(),
 
+        // xy:
         (tt.xx()*st.xx() + tt.yx()*st.xy() + tt.zx()*st.xz())*tt.xy()
       + (tt.xx()*st.xy() + tt.yx()*st.yy() + tt.zx()*st.yz())*tt.yy()
       + (tt.xx()*st.xz() + tt.yx()*st.yz() + tt.zx()*st.zz())*tt.zy(),
 
+        // xz:
         (tt.xx()*st.xx() + tt.yx()*st.xy() + tt.zx()*st.xz())*tt.xz()
       + (tt.xx()*st.xy() + tt.yx()*st.yy() + tt.zx()*st.yz())*tt.yz()
       + (tt.xx()*st.xz() + tt.yx()*st.yz() + tt.zx()*st.zz())*tt.zz(),
 
+        // yy:
         (tt.xy()*st.xx() + tt.yy()*st.xy() + tt.zy()*st.xz())*tt.xy()
       + (tt.xy()*st.xy() + tt.yy()*st.yy() + tt.zy()*st.yz())*tt.yy()
       + (tt.xy()*st.xz() + tt.yy()*st.yz() + tt.zy()*st.zz())*tt.zy(),
 
+        // yz:
         (tt.xy()*st.xx() + tt.yy()*st.xy() + tt.zy()*st.xz())*tt.xz()
       + (tt.xy()*st.xy() + tt.yy()*st.yy() + tt.zy()*st.yz())*tt.yz()
       + (tt.xy()*st.xz() + tt.yy()*st.yz() + tt.zy()*st.zz())*tt.zz(),
 
+        // zz:
         (tt.xz()*st.xx() + tt.yz()*st.xy() + tt.zz()*st.xz())*tt.xz()
       + (tt.xz()*st.xy() + tt.yz()*st.yy() + tt.zz()*st.yz())*tt.yz()
       + (tt.xz()*st.xz() + tt.yz()*st.yz() + tt.zz()*st.zz())*tt.zz()
     );
 }
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type1, class Type2>
 inline Type1 transformMask(const Type2& t)
