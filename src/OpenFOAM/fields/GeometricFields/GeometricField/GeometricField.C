@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1250,60 +1250,88 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::replace
 
 
 template<class Type, template<class> class PatchField, class GeoMesh>
-void Foam::GeometricField<Type, PatchField, GeoMesh>::min
+void Foam::GeometricField<Type, PatchField, GeoMesh>::clamp
 (
-    const dimensioned<Type>& dt
+    const Type& lower,
+    const Type& upper
 )
 {
-    Foam::min(primitiveFieldRef(), primitiveField(), dt.value());
-    Foam::min(boundaryFieldRef(), boundaryField(), dt.value());
+    primitiveFieldRef().clamp(lower, upper);
+    boundaryFieldRef().clamp(lower, upper);
 }
 
 
 template<class Type, template<class> class PatchField, class GeoMesh>
-void Foam::GeometricField<Type, PatchField, GeoMesh>::max
+void Foam::GeometricField<Type, PatchField, GeoMesh>::clamp
 (
-    const dimensioned<Type>& dt
+    const MinMax<Type>& range
 )
 {
-    Foam::max(primitiveFieldRef(), primitiveField(), dt.value());
-    Foam::max(boundaryFieldRef(), boundaryField(), dt.value());
+    primitiveFieldRef().clamp(range.min(), range.max());
+    boundaryFieldRef().clamp(range.min(), range.max());
 }
 
 
 template<class Type, template<class> class PatchField, class GeoMesh>
-void Foam::GeometricField<Type, PatchField, GeoMesh>::clip
+void Foam::GeometricField<Type, PatchField, GeoMesh>::clamp
+(
+    const dimensioned<Type>& lower,
+    const dimensioned<Type>& upper
+)
+{
+    this->clamp(lower.value(), upper.value());
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+void Foam::GeometricField<Type, PatchField, GeoMesh>::clamp
 (
     const dimensioned<MinMax<Type>>& range
 )
 {
-    Foam::clip(primitiveFieldRef(), primitiveField(), range.value());
-    Foam::clip(boundaryFieldRef(), boundaryField(), range.value());
+    this->clamp(range.value());
 }
 
 
 template<class Type, template<class> class PatchField, class GeoMesh>
-void Foam::GeometricField<Type, PatchField, GeoMesh>::clip
+void Foam::GeometricField<Type, PatchField, GeoMesh>::clamp_min
 (
-    const dimensioned<Type>& minVal,
-    const dimensioned<Type>& maxVal
+    const Type& lower
 )
 {
-    MinMax<Type> range(minVal.value(), maxVal.value());
-
-    Foam::clip(primitiveFieldRef(), primitiveField(), range);
-    Foam::clip(boundaryFieldRef(), boundaryField(), range);
+    primitiveFieldRef().clamp_min(lower);
+    boundaryFieldRef().clamp_min(lower);
 }
 
 
 template<class Type, template<class> class PatchField, class GeoMesh>
-void Foam::GeometricField<Type, PatchField, GeoMesh>::maxMin
+void Foam::GeometricField<Type, PatchField, GeoMesh>::clamp_max
 (
-    const dimensioned<Type>& minVal,
-    const dimensioned<Type>& maxVal
+    const Type& upper
 )
 {
-    this->clip(minVal, maxVal);
+    primitiveFieldRef().clamp_max(upper);
+    boundaryFieldRef().clamp_max(upper);
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+void Foam::GeometricField<Type, PatchField, GeoMesh>::clamp_min
+(
+    const dimensioned<Type>& lower
+)
+{
+    this->clamp_min(lower.value());
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+void Foam::GeometricField<Type, PatchField, GeoMesh>::clamp_max
+(
+    const dimensioned<Type>& upper
+)
+{
+    this->clamp_max(upper.value());
 }
 
 

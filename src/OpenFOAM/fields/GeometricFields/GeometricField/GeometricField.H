@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -133,7 +133,6 @@ private:
 
         //- Read the field - create the field dictionary on-the-fly
         void readFields();
-
 
 public:
 
@@ -630,32 +629,39 @@ public:
             const dimensioned<cmptType>& ds
         );
 
-        //- Use the minimum of the field and specified value
-        //  This sets the \em ceiling on the field values
-        void min(const dimensioned<Type>& dt);
+        //- Clamp field values (in-place) to the specified range.
+        //  A no-op for an invalid range.
+        void clamp(const Type& lower, const Type& upper);
 
-        //- Use the maximum of the field and specified value
-        //  This sets the \em floor on the field values
-        void max(const dimensioned<Type>& dt);
+        //- Clamp field values (in-place) to the specified range.
+        //  A no-op for an invalid range.
+        void clamp(const MinMax<Type>& range);
 
-        //- Clip the field to be bounded within the specified range
-        void clip(const dimensioned<MinMax<Type>>& range);
-
-        //- Clip the field to be bounded within the specified range
-        void clip
+        //- Clamp field values (in-place) to the specified range.
+        //  A no-op for an invalid range. No dimension checking.
+        void clamp
         (
-            const dimensioned<Type>& minVal,
-            const dimensioned<Type>& maxVal
+            const dimensioned<Type>& lower,
+            const dimensioned<Type>& upper
         );
 
-        //- Deprecated(2019-01) identical to clip()
-        //  \deprecated(2019-01) identical to clip()
-        FOAM_DEPRECATED_FOR(2019-01, "clip() method")
-        void maxMin
-        (
-            const dimensioned<Type>& minVal,
-            const dimensioned<Type>& maxVal
-        );
+        //- Clamp field values (in-place) to the specified range.
+        //  A no-op for an invalid range. No dimension checking.
+        void clamp(const dimensioned<MinMax<Type>>& range);
+
+        //- Impose lower (floor) clamp on the field values (in-place)
+        void clamp_min(const Type& lower);
+
+        //- Impose upper (ceiling) clamp on the field values (in-place)
+        void clamp_max(const Type& upper);
+
+        //- Impose lower (floor) clamp on the field values (in-place)
+        //  No dimension checking
+        void clamp_min(const dimensioned<Type>& lower);
+
+        //- Impose upper (ceiling) clamp on the field values (in-place)
+        //  No dimension checking
+        void clamp_max(const dimensioned<Type>& upper);
 
 
     // Member Operators
@@ -691,7 +697,7 @@ public:
         void operator/=(const dimensioned<scalar>&);
 
 
-    // Ostream operators
+    // Ostream Operators
 
         friend Ostream& operator<< <Type, PatchField, GeoMesh>
         (
@@ -704,6 +710,41 @@ public:
             Ostream&,
             const tmp<GeometricField<Type, PatchField, GeoMesh>>&
         );
+
+
+    // Housekeeping
+
+        //- Clamp field values (in-place) to the specified range.
+        //  \deprecated(2023-01) prefer clamp() naming
+        void clip(const dimensioned<MinMax<Type>>& range)
+        {
+            this->clamp(range);
+        }
+
+        //- Clamp field values (in-place) to the specified range.
+        //  \deprecated(2023-01) prefer clamp() naming
+        void clip(const dimensioned<Type>& lo, const dimensioned<Type>& hi)
+        {
+            this->clamp(lo.value(), hi.value());
+        }
+
+        //- Use minimum of the field and specified value. ie, clamp_max().
+        //  This sets the \em ceiling on the field values
+        //  \deprecated(2023-01) prefer clamp_max()
+        void min(const dimensioned<Type>& upper) { this->clamp_max(upper); }
+
+        //- Use maximum of the field and specified value. ie, clamp_min().
+        //  This sets the \em floor on the field values
+        //  \deprecated(2023-01) prefer clamp_min()
+        void max(const dimensioned<Type>& lower) { this->clamp_min(lower); }
+
+        //- Deprecated(2019-01) identical to clamp()
+        //  \deprecated(2019-01) identical to clamp()
+        FOAM_DEPRECATED_FOR(2019-01, "clamp() method")
+        void maxMin(const dimensioned<Type>& lo, const dimensioned<Type>& hi)
+        {
+            return this->clamp(lo.value(), hi.value());
+        }
 };
 
 

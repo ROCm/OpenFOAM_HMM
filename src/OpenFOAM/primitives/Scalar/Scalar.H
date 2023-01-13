@@ -294,6 +294,13 @@ inline bool notEqual(const Scalar a, const Scalar b)
 }
 
 
+// Fast implementation, and with scalar promotion of upper/lower limits
+inline Scalar clamp(const Scalar& val, const Scalar& lower, const Scalar& upper)
+{
+    return (val < lower) ? lower : (upper < val) ? upper : val;
+}
+
+
 inline Scalar limit(const Scalar s1, const Scalar s2)
 {
     return (mag(s1) < mag(s2)) ? s1: 0.0;

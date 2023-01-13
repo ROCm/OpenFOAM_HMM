@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -622,6 +622,50 @@ void Foam::Field<Type>::replace
 {
     TFOR_ALL_F_OP_FUNC_S_S(Type, *this, ., replace, const direction, d,
         cmptType, c)
+}
+
+
+template<class Type>
+void Foam::Field<Type>::clamp(const Type& lower, const Type& upper)
+{
+    // Use free functions min(), max() to impose component-wise clamping
+    if (lower < upper)
+    {
+        // std::for_each
+        for (auto& val : *this)
+        {
+            val = min(max(val, lower), upper);
+        }
+    }
+}
+
+template<class Type>
+void Foam::Field<Type>::clamp(const MinMax<Type>& range)
+{
+    clamp(range.min(), range.max());
+}
+
+
+template<class Type>
+void Foam::Field<Type>::clamp_min(const Type& lower)
+{
+    // Use free function max() [sic] to impose component-wise clamp_min
+    // std::for_each
+    for (auto& val : *this)
+    {
+        val = max(val, lower);
+    }
+}
+
+template<class Type>
+void Foam::Field<Type>::clamp_max(const Type& upper)
+{
+    // Use free function min() [sic] to impose component-wise clamp_max
+    // std::for_each
+    for (auto& val : *this)
+    {
+        val = min(val, upper);
+    }
 }
 
 

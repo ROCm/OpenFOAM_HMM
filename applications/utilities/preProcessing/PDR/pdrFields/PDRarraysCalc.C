@@ -1279,7 +1279,7 @@ void write_scalarField
             continue;
         }
 
-        os << limits.clip(fld(cellIdx)) << nl;
+        os << limits.clamp(fld(cellIdx)) << nl;
     }
 
     os << token::END_LIST << token::END_STATEMENT << nl;

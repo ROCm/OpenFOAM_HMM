@@ -110,8 +110,7 @@ unsigned checkDimensions
 
         try
         {
-            // min(a, b);
-            clip(a, b);
+            min(a, b);
             dimsOk = true;
         }
         catch (const Foam::error& err)

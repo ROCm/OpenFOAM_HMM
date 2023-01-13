@@ -54,35 +54,60 @@ inline scalar mag(const MinMax<T>& range)
 }
 
 
-//- Return the value after clipping by the min/max limiter
+//- Return the value after clamping by the min/max limiter
 template<class T>
 inline T clip(const T& val, const MinMax<T>& range)
 {
-    return range.clip(val);
+    return range.clamp(val);
 }
 
 
-
-//- Return the value after clipping by the min/max limiter
+//- Unary function for applying component-wise clamping
 template<class T>
-struct clipOp
+struct clampOp
 {
-    T operator()(T& val, const MinMax<T>& range) const
+    const T lower;
+    const T upper;
+
+    //- Construct from min/max limits. No validity checks
+    clampOp(const T& min, const T& max)
+    :
+        lower(min),
+        upper(max)
+    {}
+
+    //- Construct from min/max range. No validity checks
+    clampOp(const MinMax<T>& range)
+    :
+        lower(range.min()),
+        upper(range.max())
+    {}
+
+    //- Construct as 0-1 min/max range
+    clampOp(const Foam::zero_one)
+    :
+        clampOp(MinMax<T>(Foam::zero_one{}))
+    {}
+
+    T operator()(const T& val) const
     {
-        return range.clip(val);
+        return min(max(val, lower), upper);
     }
 };
 
 
-//- Clip value and assign inplace
-template<class T>
-struct clipEqOp
-{
-    bool operator()(T& val, const MinMax<T>& range) const
-    {
-        return range.inplaceClip(val);
-    }
-};
+/// Not really needed
+/// //- Unary function for applying component-wise clamping (inplace)
+/// template<class T>
+/// struct clampEqOp : public clampOp<T>
+/// {
+///     using clampOp<T>::clampOp;
+///
+///     void operator()(T& val) const
+///     {
+///         val = clampOp<T>::operator()(val);
+///     }
+/// };
 
 
 //- Extract the min/max range from a list of values.
@@ -156,14 +181,14 @@ struct minMaxEqOp
 };
 
 
-//- The magnitude of an initial single value.
+//- The magnitude of a single value.
 inline scalarMinMax minMaxMag(const scalar val)
 {
     return scalarMinMax(Foam::mag(val));
 }
 
 
-//- The magnitude of from an initial VectorSpace.
+//- The magnitude of a VectorSpace.
 template<class Form, class Cmpt, direction nCmpt>
 inline scalarMinMax minMaxMag(const VectorSpace<Form,Cmpt,nCmpt>& vs)
 {

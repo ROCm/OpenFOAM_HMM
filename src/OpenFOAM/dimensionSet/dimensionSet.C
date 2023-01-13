@@ -253,36 +253,38 @@ bool Foam::dimensionSet::operator/=(const dimensionSet& ds)
 
 // * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
 
-Foam::dimensionSet Foam::min(const dimensionSet& ds1, const dimensionSet& ds2)
+Foam::dimensionSet Foam::min(const dimensionSet& a, const dimensionSet& b)
 {
     if (dimensionSet::checking())
     {
-        checkDims("min(a, b)", ds1, ds2);
+        checkDims("min(a, b)", a, b);
     }
 
-    return ds1;
+    return a;
 }
 
 
-Foam::dimensionSet Foam::max(const dimensionSet& ds1, const dimensionSet& ds2)
+Foam::dimensionSet Foam::max(const dimensionSet& a, const dimensionSet& b)
 {
     if (dimensionSet::checking())
     {
-        checkDims("max(a, b)", ds1, ds2);
+        checkDims("max(a, b)", a, b);
     }
 
-    return ds1;
+    return a;
 }
 
 
-Foam::dimensionSet Foam::clip(const dimensionSet& ds1, const dimensionSet& ds2)
+Foam::dimensionSet Foam::clamp(const dimensionSet& a, const dimensionSet& range)
 {
-    if (dimensionSet::checking())
+    // In may cases the min/max range will be created from raw values
+    // (no dimension) so accept those without error
+    if (dimensionSet::checking() && !range.dimensionless())
     {
-        checkDims("clip(a, b)", ds1, ds2);
+        checkDims("clamp(a, b)", a, range);
     }
 
-    return ds1;
+    return a;
 }
 
 

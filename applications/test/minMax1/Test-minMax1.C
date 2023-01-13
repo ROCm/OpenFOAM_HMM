@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,6 +83,9 @@ int main(int argc, char *argv[])
     Info<<"Construct zero : ";
     printInfo(MinMax<scalar>(Zero)) << nl;
 
+    Info<<"Construct zero_one : ";
+    printInfo(MinMax<scalar>(zero_one{})) << nl;
+
     Info<<"Construct range : ";
     printInfo(MinMax<scalar>(1, 20)) << nl;
 
@@ -91,6 +94,26 @@ int main(int argc, char *argv[])
 
     Info<<"A 0-1 vector range : ";
     printInfo(MinMax<vector>::zero_one()) << nl;
+
+    {
+        vector a(0, 1, 20);
+        vector b(2, 1, 0);
+        vector c(4, 10, 12);
+
+        Info<< "vectors:"
+            << " a = " << a
+            << " b = " << b
+            << " c = " << c << nl;
+
+        Info<< "min max    = " << min(max(a, b), c) << nl;
+        Info<< "range clamp= " << MinMax<vector>(b, c).clamp(a) << nl;
+        Info<< "clamp      = " << clamp(a, b, c) << nl;
+
+        Info<< "clamp 0/1  = " << clamp(a, vector::zero, vector::one) << nl;
+    }
+
+    // Scalar promotion
+    Info<< "clamp (scalar) = " << clamp(15.0, -1, 1) << nl;
 
 
     {
@@ -180,6 +203,9 @@ int main(int argc, char *argv[])
 
     {
         MinMax<scalar> limiter(10, 200);
+        clampOp<scalar> clipper(limiter);
+        // clampOp<scalar> clipper(zero_one{});
+        // clampOp<scalar> clipper(10, 200);
 
         Info<< nl
             << "Test clipping limiter: " << limiter << nl
@@ -196,7 +222,10 @@ int main(int argc, char *argv[])
         Info<< nl << "test clip() with limiter: " << limiter << nl;
         for (const scalar& val : values1)
         {
-            Info<< "clipped : " << val << " = " << clip(val, limiter) << nl;
+            Info<< "clipped : " << val << " = "
+                << clip(val, limiter)
+                << " or " << clip(val, limiter)
+                << " or " << clipper(val) << nl;
         }
 
         Info<< nl << "test clip(Field) with limiter: " << limiter << nl;
@@ -208,9 +237,15 @@ int main(int argc, char *argv[])
 
         Info<< "before " << flatOutput(values2) << nl;
 
+        // Too much clutter
+        // for (scalar& val : values2)
+        // {
+        //     clampEqOp<scalar>{limiter}(val);
+        // }
+
         for (scalar& val : values2)
         {
-            clipEqOp<scalar>()(val, limiter);
+            val = clipper(val);
         }
 
         Info<< "after: " << flatOutput(values2) << nl;

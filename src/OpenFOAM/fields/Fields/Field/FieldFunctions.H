@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -313,10 +313,11 @@ BINARY_TYPE_FUNCTION(Type, Type, Type, min)
 BINARY_TYPE_FUNCTION(Type, Type, Type, cmptMultiply)
 BINARY_TYPE_FUNCTION(Type, Type, Type, cmptDivide)
 
-BINARY_TYPE_FUNCTION_FS(Type, Type, MinMax<Type>, clip)
+BINARY_TYPE_FUNCTION_FS(Type, Type, MinMax<Type>, clamp)
+BINARY_TYPE_FUNCTION_FS(Type, Type, MinMax<Type>, clip)  // Same as clamp
 
 
-// * * * * * * * * * * * * * * * Global operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
 UNARY_OPERATOR(Type, Type, -, negate)
 

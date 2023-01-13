@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2022 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -354,9 +354,9 @@ Ostream& operator<<(Ostream& os, const dimensionSet& ds);
 
 // Global Functions
 
-dimensionSet min(const dimensionSet& ds1, const dimensionSet& ds2);
-dimensionSet max(const dimensionSet& ds1, const dimensionSet& ds2);
-dimensionSet clip(const dimensionSet& ds1, const dimensionSet& ds2);
+dimensionSet min(const dimensionSet& a, const dimensionSet& b);
+dimensionSet max(const dimensionSet& a, const dimensionSet& b);
+dimensionSet clamp(const dimensionSet& a, const dimensionSet& range);
 
 dimensionSet cmptMultiply(const dimensionSet& ds1, const dimensionSet& ds2);
 dimensionSet cmptDivide(const dimensionSet& ds1, const dimensionSet& ds2);

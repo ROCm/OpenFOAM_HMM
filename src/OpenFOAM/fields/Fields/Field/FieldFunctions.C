@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -656,6 +656,64 @@ TMP_UNARY_FUNCTION(Type, gAverage)
 
 #undef TMP_UNARY_FUNCTION
 
+template<class Type>
+void clamp
+(
+    Field<Type>& result,
+    const UList<Type>& f1,
+    const MinMax<Type>& range
+)
+{
+    if (result.cdata() == f1.cdata())
+    {
+        // Apply in-place
+        result.clamp(range);
+    }
+    else
+    {
+        if (range.good())
+        {
+            std::transform
+            (
+                f1.cbegin(),
+                f1.cbegin(result.size()),
+                result.begin(),
+                clampOp<Type>(range)
+            );
+        }
+        else
+        {
+            // No clamping
+            std::copy(f1.cbegin(), f1.cbegin(result.size()), result.begin());
+        }
+    }
+}
+
+template<class Type>
+tmp<Field<Type>> clamp
+(
+    const UList<Type>& f1,
+    const MinMax<Type>& range
+)
+{
+    auto tres = tmp<Field<Type>>::New(f1.size());
+    clamp(tres.ref(), f1, range);
+    return tres;
+}
+
+template<class Type>
+tmp<Field<Type>> clamp
+(
+    const tmp<Field<Type>>& tf1,
+    const MinMax<Type>& range
+)
+{
+    auto tres = reuseTmp<Type, Type>::New(tf1);
+    clamp(tres.ref(), tf1(), range);
+    tf1.clear();
+    return tres;
+}
+
 
 BINARY_FUNCTION(Type, Type, Type, max)
 BINARY_FUNCTION(Type, Type, Type, min)
@@ -667,10 +725,10 @@ BINARY_TYPE_FUNCTION(Type, Type, Type, min)
 BINARY_TYPE_FUNCTION(Type, Type, Type, cmptMultiply)
 BINARY_TYPE_FUNCTION(Type, Type, Type, cmptDivide)
 
-BINARY_TYPE_FUNCTION_FS(Type, Type, MinMax<Type>, clip)
+BINARY_TYPE_FUNCTION_FS(Type, Type, MinMax<Type>, clip)  // Same as clamp
 
 
-/* * * * * * * * * * * * * * * * Global operators  * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * */
 
 UNARY_OPERATOR(Type, Type, -, negate)
 

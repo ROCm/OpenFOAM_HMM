@@ -141,6 +141,15 @@ inline bool equal(const T& a, const T& b)
     return (a == b);
 }
 
+//- Return value clamped between upper and lower limits.
+//  Unlike the std::clamp, which selects between references, this version
+//  wraps the min/max free functions for component-wise clamping
+template<class T>
+inline T clamp(const T& val, const T& lower, const T& upper)
+{
+    return min(max(val, lower), upper);
+}
+
 
 /*---------------------------------------------------------------------------*\
                           Struct labelOp Declaration

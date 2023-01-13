@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,7 +44,7 @@ inline Foam::MinMax<T> Foam::MinMax<T>::le(const T& maxVal)
 template<class T>
 inline Foam::MinMax<T> Foam::MinMax<T>::zero_one()
 {
-    return MinMax<T>(pTraits<T>::zero, pTraits<T>::one);
+    return MinMax<T>(Foam::zero_one{});
 }
 
 
@@ -82,6 +82,13 @@ template<class T>
 inline Foam::MinMax<T>::MinMax(const Foam::zero)
 :
     Tuple2<T,T>(pTraits<T>::zero, pTraits<T>::zero)
+{}
+
+
+template<class T>
+inline Foam::MinMax<T>::MinMax(const Foam::zero_one)
+:
+    Tuple2<T,T>(pTraits<T>::zero, pTraits<T>::one)
 {}
 
 
@@ -235,42 +242,14 @@ inline bool Foam::MinMax<T>::contains(const T& val) const
 
 
 template<class T>
-inline const T& Foam::MinMax<T>::clip(const T& val) const
+inline T Foam::MinMax<T>::clamp(const T& val) const
 {
     if (good())
     {
-        if (val < min())
-        {
-            return min();
-        }
-        else if (max() < val)
-        {
-            return max();
-        }
+        return Foam::min(Foam::max(val, min()), max());
     }
 
     return val; // Pass-through
-}
-
-
-template<class T>
-inline bool Foam::MinMax<T>::inplaceClip(T& val) const
-{
-    if (good())
-    {
-        if (val < min())
-        {
-            val = min();
-            return true;
-        }
-        else if (max() < val)
-        {
-            val = max();
-            return true;
-        }
-    }
-
-    return false;  // No change
 }
 
 

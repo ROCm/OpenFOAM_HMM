@@ -421,6 +421,8 @@ public:
             const tmp<DimensionedField<cmptType, GeoMesh>>& tdf
         );
 
+        // Inherits clamp, clamp_min, clamp_max (without dimensions) from Field
+
         //- Return the field transpose (only defined for second rank tensors)
         tmp<DimensionedField<Type, GeoMesh>> T() const;
 
