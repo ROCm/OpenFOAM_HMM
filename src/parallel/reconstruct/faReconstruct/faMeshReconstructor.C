@@ -568,7 +568,7 @@ Foam::faMeshReconstructor::faMeshReconstructor
     // Use 'headerClassName' for checking
     bool fileOk
     (
-        (fvFaceProcAddr.readOpt() != IOobjectOption::NO_READ)
+        fvFaceProcAddr.isAnyRead()
      && fvFaceProcAddr.isHeaderClass<labelIOList>()
     );
 

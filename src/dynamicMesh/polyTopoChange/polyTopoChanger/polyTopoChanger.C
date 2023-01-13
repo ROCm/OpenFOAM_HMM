@@ -114,9 +114,9 @@ Foam::polyTopoChanger::polyTopoChanger
                 mesh.meshDir(),
                 "meshModifiers",
                 (
-                    // Safety? promote NO_READ to READ_IF_PRESENT
+                    // Safety? promote NO_READ to LAZY_READ
                     rOpt == IOobject::NO_READ
-                  ? IOobject::READ_IF_PRESENT
+                  ? IOobject::LAZY_READ
                   : rOpt
                 )
             ),

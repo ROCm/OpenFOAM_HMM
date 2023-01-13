@@ -69,7 +69,7 @@ Foam::IOPtrList<T>::IOPtrList(const IOobject& io, const label len)
     regIOobject(io),
     PtrList<T>(len)
 {
-    if (io.readOpt() != IOobject::NO_READ)
+    if (io.isAnyRead())
     {
         FatalErrorInFunction
             << "NO_READ must be set if specifying size" << nl

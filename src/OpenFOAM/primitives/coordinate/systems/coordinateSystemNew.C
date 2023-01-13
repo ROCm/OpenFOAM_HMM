@@ -157,10 +157,7 @@ Foam::coordinateSystem::New
     {
         // Using a sub-dictionary
         // - the 'origin' can be optional
-        if (IOobjectOption::isReadRequired(readOrigin))
-        {
-            readOrigin = IOobjectOption::READ_IF_PRESENT;
-        }
+        readOrigin = IOobjectOption::lazierRead(readOrigin);
     }
     else
     {

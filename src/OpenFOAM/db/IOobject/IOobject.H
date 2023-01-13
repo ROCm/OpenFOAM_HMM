@@ -50,7 +50,7 @@ Description
         Error if Istream does not exist or cannot be read. If object is
         registered its timestamp will be checked every timestep and possibly
         re-read.
-      - \par READ_IF_PRESENT
+      - \par LAZY_READ (READ_IF_PRESENT)
         Read object from Istream, but only if Istream exists. \n
         Error only if Istream exists but cannot be read.
         Does not check timestamp or re-read.

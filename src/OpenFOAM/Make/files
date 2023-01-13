@@ -240,11 +240,12 @@ containers/Lists/ListOps/ListOps.C
 containers/LinkedLists/linkTypes/SLListBase/SLListBase.C
 containers/LinkedLists/linkTypes/DLListBase/DLListBase.C
 
+db/options/IOstreamOption.C
+
 Streams = db/IOstreams
 $(Streams)/token/tokenIO.C
 
 IOstreams = $(Streams)/IOstreams
-$(IOstreams)/IOstreamOption.C
 $(IOstreams)/IOstream.C
 $(IOstreams)/Istream.C
 $(IOstreams)/Ostream.C

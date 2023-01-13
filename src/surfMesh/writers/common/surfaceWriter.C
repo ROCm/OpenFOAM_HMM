@@ -207,9 +207,9 @@ Foam::surfaceWriter::surfaceWriter(const dictionary& options)
     {
         dictptr->readIfPresent("rotationCentre", geometryCentre_);
 
-        // 'origin' (READ_IF_PRESENT)
+        // 'origin' is optional within sub-dictionary
         geometryTransform_ =
-            coordSystem::cartesian(*dictptr, IOobjectOption::READ_IF_PRESENT);
+            coordSystem::cartesian(*dictptr, IOobjectOption::LAZY_READ);
     }
 
     fieldLevel_ = options.subOrEmptyDict("fieldLevel");

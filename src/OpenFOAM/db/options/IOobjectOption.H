@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,7 +60,8 @@ public:
     // Public Data Types
 
         //- Enumeration defining read preferences
-        //  Lowest bit encodes must read
+        //  Lowest bit encodes 'must read'.
+        //  Possible (future) named variants (none | normal | modified | lazy)
         enum readOption : unsigned char
         {
             //! Nothing to be read
@@ -72,7 +73,10 @@ public:
             //! Reading required, file watched for runTime modification
             MUST_READ_IF_MODIFIED = 0x3,
 
-            //! Reading is optional
+            //! Reading is optional [identical to READ_IF_PRESENT]
+            LAZY_READ = 0x4,
+
+            //! Reading is optional [identical to LAZY_READ]
             READ_IF_PRESENT = 0x4
         };
 
@@ -256,28 +260,46 @@ public:
 
     // Checks
 
+        //- True if not (NO_READ)
+        static bool isAnyRead(readOption opt) noexcept
+        {
+            return (opt != readOption::NO_READ);
+        }
+
+        //- True if not (NO_READ)
+        bool isAnyRead() const noexcept
+        {
+            return (readOpt_ != readOption::NO_READ);
+        }
+
         //- True if (MUST_READ | MUST_READ_IF_MODIFIED) bits are set
         static bool isReadRequired(readOption opt) noexcept
         {
-            return static_cast<bool>(opt & readOption::MUST_READ);
+            return (opt & readOption::MUST_READ);
         }
 
         //- True if (MUST_READ | MUST_READ_IF_MODIFIED) bits are set
         bool isReadRequired() const noexcept
         {
-            return static_cast<bool>(readOpt_ & readOption::MUST_READ);
+            return (readOpt_ & readOption::MUST_READ);
         }
 
-        //- True if (READ_IF_PRESENT) bits are set
+        //- True if (LAZY_READ) bits are set [same as READ_IF_PRESENT]
         static bool isReadOptional(readOption opt) noexcept
         {
-            return (opt == readOption::READ_IF_PRESENT);
+            return (opt == readOption::LAZY_READ);
         }
 
-        //- True if (READ_IF_PRESENT) bits are set
+        //- True if (LAZY_READ) bits are set [same as READ_IF_PRESENT]
         bool isReadOptional() const noexcept
         {
-            return (readOpt_ == readOption::READ_IF_PRESENT);
+            return (readOpt_ == readOption::LAZY_READ);
+        }
+
+        //- Downgrade readOption optional (LAZY_READ), leaves NO_READ intact.
+        static readOption lazierRead(readOption opt) noexcept
+        {
+            return (opt == readOption::NO_READ ? opt : readOption::LAZY_READ);
         }
 
 

@@ -84,7 +84,7 @@ void Foam::coordinateSystem::assign
      && (dict.dictName() == coordinateSystem::typeName)
     )
     {
-        readOrigin = IOobjectOption::READ_IF_PRESENT;
+        readOrigin = IOobjectOption::lazierRead(readOrigin);
     }
 
     dict.readEntry("origin", origin_, keyType::LITERAL, readOrigin);
@@ -286,10 +286,8 @@ Foam::coordinateSystem::coordinateSystem
     if (dictName.size())
     {
         // Allow 'origin' to be optional if reading from a sub-dict
-        if (IOobjectOption::isReadRequired(readOrigin))
-        {
-            readOrigin = IOobjectOption::READ_IF_PRESENT;
-        }
+        readOrigin = IOobjectOption::lazierRead(readOrigin);
+
         assign(dict.subDict(dictName), readOrigin);
     }
     else

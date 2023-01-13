@@ -420,7 +420,7 @@ Foam::triSurfaceMesh::triSurfaceMesh(const IOobject& io, const readAction r)
     outsideVolType_(volumeType::UNKNOWN)
 {
     // Check IO flags
-    if (io.readOpt() != IOobject::NO_READ)
+    if (io.isAnyRead())
     {
         const bool searchGlobal(r == localOrGlobal || r == masterOnly);
 
@@ -520,7 +520,7 @@ Foam::triSurfaceMesh::triSurfaceMesh
     surfaceClosed_(-1),
     outsideVolType_(volumeType::UNKNOWN)
 {
-    if (io.readOpt() != IOobject::NO_READ)
+    if (io.isAnyRead())
     {
         // Surface type (optional)
         const word surfType(dict.getOrDefault<word>("fileType", word::null));

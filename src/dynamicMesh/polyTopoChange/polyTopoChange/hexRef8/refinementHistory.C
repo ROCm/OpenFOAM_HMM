@@ -734,7 +734,7 @@ Foam::refinementHistory::refinementHistory
     regIOobject(io),
     active_(false)
 {
-    if (io.readOpt() != IOobject::NO_READ)
+    if (io.isAnyRead())
     {
         WarningInFunction
             << "read option IOobject::MUST_READ or READ_IF_PRESENT "
