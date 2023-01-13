@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,45 +72,21 @@ inline Foam::complex::complex(const std::complex<double>& c)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline void Foam::complex::real(scalar val)
-{
-    re = val;
-}
-
-
-inline void Foam::complex::imag(scalar val)
-{
-    im = val;
-}
-
-
-inline Foam::scalar Foam::complex::Re() const
-{
-    return re;
-}
-
-
-inline Foam::scalar Foam::complex::Im() const
-{
-    return im;
-}
-
-
-inline Foam::scalar& Foam::complex::Re()
-{
-    return re;
-}
-
-
-inline Foam::scalar& Foam::complex::Im()
-{
-    return im;
-}
-
-
 inline Foam::complex Foam::complex::conjugate() const
 {
     return complex(re, -im);
+}
+
+
+inline Foam::scalar Foam::complex::magnitude() const
+{
+    return std::hypot(re, im);
+}
+
+
+inline Foam::scalar Foam::complex::magSqr() const
+{
+    return (re*re + im*im);
 }
 
 
@@ -202,20 +178,20 @@ inline Foam::complex Foam::operator~(const complex& c)
 }
 
 
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-inline scalar magSqr(const complex& c)
+inline scalar mag(const complex& c)
 {
-    return (c.re*c.re + c.im*c.im);
+    return c.magnitude();
 }
 
 
-inline scalar mag(const complex& c)
+inline scalar magSqr(const complex& c)
 {
-    return std::hypot(c.re, c.im);
+    return c.magSqr();
 }
 
 
@@ -225,6 +201,7 @@ inline complex sqr(const complex& c)
 }
 
 
+//- sgn() https://en.wikipedia.org/wiki/Sign_function#Complex_signum
 inline complex sign(const complex& c)
 {
     const scalar s(mag(c));
@@ -232,37 +209,32 @@ inline complex sign(const complex& c)
 }
 
 
+//- csgn() https://en.wikipedia.org/wiki/Sign_function#Complex_signum
 inline scalar csign(const complex& c)
 {
-    return equal(c.Re(), 0) ? sign(c.Im()) : sign(c.Re());
+    return equal(c.real(), 0) ? sign(c.imag()) : sign(c.real());
 }
 
 
 inline const complex& min(const complex& c1, const complex& c2)
 {
-    if (magSqr(c1) < magSqr(c2))
-    {
-        return c1;
-    }
-
-    return c2;
+    return (c1.magSqr() < c2.magSqr()) ? c1 : c2;
 }
 
 
 inline const complex& max(const complex& c1, const complex& c2)
 {
-    if (magSqr(c1) < magSqr(c2))
-    {
-        return c2;
-    }
-
-    return c1;
+    return (c1.magSqr() < c2.magSqr()) ? c2 : c1;
 }
 
 
 inline complex limit(const complex& c1, const complex& c2)
 {
-    return complex(limit(c1.re, c2.re), limit(c1.im, c2.im));
+    return complex
+    (
+        limit(c1.real(), c2.real()),
+        limit(c1.imag(), c2.imag())
+    );
 }
 
 
@@ -357,7 +329,7 @@ inline complex operator*(const scalar s, const complex& c)
 
 inline complex operator/(const complex& c1, const complex& c2)
 {
-    const scalar sqrC2 = magSqr(c2);
+    const scalar sqrC2 = c2.magSqr();
 
     return complex
     (

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2022 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,17 +48,52 @@ Foam::orientedType::orientedOptionNames
 
 bool Foam::orientedType::checkType
 (
-    const orientedType& ot1,
-    const orientedType& ot2
+    const orientedType& a,
+    const orientedType& b
 ) noexcept
 {
     return
     (
-        (ot1.oriented() == ot2.oriented())
-     || (ot1.oriented() == orientedType::UNKNOWN)
-     || (ot2.oriented() == orientedType::UNKNOWN)
+        (a.oriented() == b.oriented())
+     || (a.oriented() == orientedOption::UNKNOWN)
+     || (b.oriented() == orientedOption::UNKNOWN)
     );
 }
+
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+static inline bool checkTypes
+(
+    const char* what,
+    const orientedType& a,
+    const orientedType& b
+)
+{
+    // ie, checkType(a,b)
+    const bool ok
+    (
+        (a.oriented() == b.oriented())
+     || (a.oriented() == orientedType::orientedOption::UNKNOWN)
+     || (b.oriented() == orientedType::orientedOption::UNKNOWN)
+    );
+
+    if (!ok)
+    {
+        FatalErrorInFunction
+            << what << " : undefined for "
+            << orientedType::orientedOptionNames[a.oriented()] << " and "
+            << orientedType::orientedOptionNames[b.oriented()] << " types"
+            << abort(FatalError);
+    }
+
+    return ok;
+}
+
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -108,33 +143,19 @@ void Foam::orientedType::operator+=(const orientedType& ot)
         oriented_ = ot.oriented();
     }
 
-    if (!checkType(*this, ot))
-    {
-        FatalErrorInFunction
-            << "Operator += is undefined for "
-            << orientedOptionNames[oriented_] << " and "
-            << orientedOptionNames[ot.oriented()] << " types"
-            << abort(FatalError);
-    }
+    (void) checkTypes("Operator +=", *this, ot);
 }
 
 
 void Foam::orientedType::operator-=(const orientedType& ot)
 {
     // Set the oriented status if it was unknown
-    if (oriented_ == UNKNOWN)
+    if (oriented_ == orientedOption::UNKNOWN)
     {
         oriented_ = ot.oriented();
     }
 
-    if (!checkType(*this, ot))
-    {
-        FatalErrorInFunction
-            << "Operator -= is undefined for "
-            << orientedOptionNames[oriented_] << " and "
-            << orientedOptionNames[ot.oriented()] << " types"
-            << abort(FatalError);
-    }
+    (void) checkTypes("Operator -=", *this, ot);
 }
 
 
@@ -164,33 +185,17 @@ void Foam::orientedType::operator/=(const scalar s)
 
 // * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
 
-Foam::orientedType Foam::max(const orientedType& ot1, const orientedType& ot2)
+Foam::orientedType Foam::min(const orientedType& a, const orientedType& b)
 {
-    if (!orientedType::checkType(ot1, ot2))
-    {
-        FatalErrorInFunction
-            << "Operator max is undefined for "
-            << orientedType::orientedOptionNames[ot1.oriented()] << " and "
-            << orientedType::orientedOptionNames[ot2.oriented()] << " types"
-            << abort(FatalError);
-    }
-
-    return ot1;
+    (void) checkTypes("Function min", a, b);
+    return a;
 }
 
 
-Foam::orientedType Foam::min(const orientedType& ot1, const orientedType& ot2)
+Foam::orientedType Foam::max(const orientedType& a, const orientedType& b)
 {
-    if (!orientedType::checkType(ot1, ot2))
-    {
-        FatalErrorInFunction
-            << "Operator min is undefined for "
-            << orientedType::orientedOptionNames[ot1.oriented()] << " and "
-            << orientedType::orientedOptionNames[ot2.oriented()] << "types"
-            << abort(FatalError);
-    }
-
-    return ot1;
+    (void) checkTypes("Function max", a, b);
+    return a;
 }
 
 
@@ -220,7 +225,7 @@ Foam::orientedType Foam::cmptAv(const orientedType& ot)
 }
 
 
-Foam::orientedType Foam::pow(const orientedType& ot, const scalar r)
+Foam::orientedType Foam::pow(const orientedType& ot, const scalar p)
 {
     // Undefined???
     // - only defined for integers where:
@@ -231,6 +236,12 @@ Foam::orientedType Foam::pow(const orientedType& ot, const scalar r)
 
 
 Foam::orientedType Foam::sqr(const orientedType& ot)
+{
+    return orientedType(false);
+}
+
+
+Foam::orientedType Foam::pow2(const orientedType& ot)
 {
     return orientedType(false);
 }
@@ -350,14 +361,7 @@ Foam::orientedType Foam::atan2
     const orientedType& ot2
 )
 {
-    if (!orientedType::checkType(ot1, ot2))
-    {
-        FatalErrorInFunction
-            << "Operator atan2 is undefined for "
-            << orientedType::orientedOptionNames[ot1.oriented()] << " and "
-            << orientedType::orientedOptionNames[ot2.oriented()] << "types"
-            << abort(FatalError);
-    }
+    (void) checkTypes("Function atan2", ot1, ot2);
 
     return ot1;
 }
@@ -369,14 +373,7 @@ Foam::orientedType Foam::hypot
     const orientedType& ot2
 )
 {
-    if (!orientedType::checkType(ot1, ot2))
-    {
-        FatalErrorInFunction
-            << "Operator hypot is undefined for "
-            << orientedType::orientedOptionNames[ot1.oriented()] << " and "
-            << orientedType::orientedOptionNames[ot2.oriented()] << "types"
-            << abort(FatalError);
-    }
+    (void) checkTypes("Function hypot", ot1, ot2);
 
     return ot1;
 }
@@ -418,14 +415,7 @@ Foam::orientedType Foam::operator+
     const orientedType& ot2
 )
 {
-    if (!orientedType::checkType(ot1, ot2))
-    {
-        FatalErrorInFunction
-            << "Operator + is undefined for "
-            << orientedType::orientedOptionNames[ot1.oriented()] << " and "
-            << orientedType::orientedOptionNames[ot2.oriented()] << " types"
-            << abort(FatalError);
-    }
+    (void) checkTypes("Operator +", ot1, ot2);
 
     return orientedType(ot1.is_oriented() || ot2.is_oriented());
 }
@@ -443,14 +433,7 @@ Foam::orientedType Foam::operator-
     const orientedType& ot2
 )
 {
-    if (!orientedType::checkType(ot1, ot2))
-    {
-        FatalErrorInFunction
-            << "Operator - is undefined for "
-            << orientedType::orientedOptionNames[ot1.oriented()] << " and "
-            << orientedType::orientedOptionNames[ot2.oriented()] << " types"
-            << abort(FatalError);
-    }
+    (void) checkTypes("Operator -", ot1, ot2);
 
     return orientedType(ot1.is_oriented() || ot2.is_oriented());
 }

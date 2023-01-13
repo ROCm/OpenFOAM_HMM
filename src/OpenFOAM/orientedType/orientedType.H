@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2022 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,10 +63,13 @@ public:
         //- Enumeration defining oriented flags
         enum orientedOption : unsigned char
         {
-            UNKNOWN = 0,
-            ORIENTED = 1,
-            UNORIENTED = 2
+            UNKNOWN = 0,        //!< Unknown/undefined orientation
+            ORIENTED = 1,       //!< Is oriented
+            UNORIENTED = 2      //!< Is unoriented
         };
+
+
+    // Static Data
 
         //- Named enumerations for oriented flags
         static const Enum<orientedOption> orientedOptionNames;
@@ -117,11 +120,11 @@ public:
 
     // Member Functions
 
-        //- Return true if can operate on this pair of oriented types
+        //- True if can operate on this combination of oriented types
         static bool checkType
         (
-            const orientedType& ot1,
-            const orientedType& ot2
+            const orientedType& a,
+            const orientedType& b
         ) noexcept;
 
         //- Return the oriented flag
@@ -167,17 +170,18 @@ public:
 };
 
 
-// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-orientedType max(const orientedType& ot1, const orientedType& ot2);
-orientedType min(const orientedType& ot1, const orientedType& ot2);
+orientedType min(const orientedType& a, const orientedType& b);
+orientedType max(const orientedType& a, const orientedType& b);
+
 orientedType cmptMultiply(const orientedType& ot1, const orientedType& ot2);
 orientedType cmptDivide(const orientedType& ot1, const orientedType& ot);
 orientedType cmptAv(const orientedType& ot);
 
-
-orientedType pow(const orientedType& ot, const scalar r);
+orientedType pow(const orientedType& ot, const scalar p);
 orientedType sqr(const orientedType& ot);
+orientedType pow2(const orientedType& ot);
 orientedType pow3(const orientedType& ot);
 orientedType pow4(const orientedType& ot);
 orientedType pow5(const orientedType& ot);
@@ -203,6 +207,9 @@ orientedType trans(const orientedType& ot);
 orientedType atan2(const orientedType& ot1, const orientedType& ot2);
 orientedType hypot(const orientedType& ot1, const orientedType& ot2);
 orientedType transform(const orientedType& ot);
+
+
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
 orientedType operator-(const orientedType& ot);
 orientedType operator*(const scalar s, const orientedType& ot);

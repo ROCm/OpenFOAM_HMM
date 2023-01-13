@@ -709,22 +709,15 @@ Foam::dimensioned<Type> Foam::cmptDivide
 template<class Type>
 Foam::dimensioned<Type> Foam::max
 (
-    const dimensioned<Type>& dt1,
-    const dimensioned<Type>& dt2
+    const dimensioned<Type>& a,
+    const dimensioned<Type>& b
 )
 {
-    if (dt1.dimensions() != dt2.dimensions())
-    {
-        FatalErrorInFunction
-            << "dimensions of arguments are not equal"
-            << abort(FatalError);
-    }
-
     return dimensioned<Type>
     (
-        "max(" + dt1.name() + ',' + dt2.name() + ')',
-        dt1.dimensions(),
-        max(dt1.value(), dt2.value())
+        "max(" + a.name() + ',' + b.name() + ')',
+        max(a.dimensions(), b.dimensions()),
+        max(a.value(), b.value())
     );
 }
 
@@ -732,16 +725,18 @@ Foam::dimensioned<Type> Foam::max
 template<class Type>
 Foam::dimensioned<Type> Foam::min
 (
-    const dimensioned<Type>& dt1,
-    const dimensioned<Type>& dt2
+    const dimensioned<Type>& a,
+    const dimensioned<Type>& b
 )
 {
-    if (dt1.dimensions() != dt2.dimensions())
-    {
-        FatalErrorInFunction
-            << "dimensions of arguments are not equal"
-            << abort(FatalError);
-    }
+    return dimensioned<Type>
+    (
+        "min(" + a.name() + ',' + b.name() + ')',
+        min(a.dimensions(), b.dimensions()),
+        min(a.value(), b.value())
+    );
+}
+
 
     return dimensioned<Type>
     (
