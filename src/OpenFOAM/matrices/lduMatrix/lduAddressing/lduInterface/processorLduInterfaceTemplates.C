@@ -67,6 +67,12 @@ void Foam::processorLduInterface::send
 
         resizeBuf(byteRecvBuf_, nBytes);
 
+        if (!nBytes)
+        {
+            // Can skip empty messages
+            return;
+        }
+
         UIPstream::read
         (
             commsType,
@@ -164,11 +170,15 @@ void Foam::processorLduInterface::compressedSend
      && (!std::is_integral<Type>::value && sizeof(scalar) != sizeof(float))
     )
     {
-        static const label nCmpts = sizeof(Type)/sizeof(scalar);
-        label nm1 = (f.size() - 1)*nCmpts;
-        label nlast = sizeof(Type)/sizeof(float);
-        label nFloats = nm1 + nlast;
-        label nBytes = nFloats*sizeof(float);
+        static const label nCmpts =
+        (
+            // Placeholder value for unusable template instantiation
+            std::is_integral<Type>::value
+          ? 1
+          : sizeof(Type)/sizeof(scalar)
+        );
+        const label nm1 = (f.size() - 1)*nCmpts;
+        const label nBytes = f.size()*nCmpts*sizeof(float);
 
         const scalar *sArray = reinterpret_cast<const scalar*>(f.cdata());
         const scalar *slast = &sArray[nm1];
@@ -250,11 +260,15 @@ void Foam::processorLduInterface::compressedReceive
      && (!std::is_integral<Type>::value && sizeof(scalar) != sizeof(float))
     )
     {
-        static const label nCmpts = sizeof(Type)/sizeof(scalar);
-        label nm1 = (f.size() - 1)*nCmpts;
-        label nlast = sizeof(Type)/sizeof(float);
-        label nFloats = nm1 + nlast;
-        label nBytes = nFloats*sizeof(float);
+        static const label nCmpts =
+        (
+            // Placeholder value for unusable template instantiation
+            std::is_integral<Type>::value
+          ? 1
+          : sizeof(Type)/sizeof(scalar)
+        );
+        const label nm1 = (f.size() - 1)*nCmpts;
+        const label nBytes = f.size()*nCmpts*sizeof(float);
 
         if
         (
