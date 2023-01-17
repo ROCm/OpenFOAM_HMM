@@ -531,7 +531,7 @@ in the injection models set above we have
 36  μm ->  2 parcels per second
 45  μm ->  2 parcels per second
 
-therefore in the following "patchParticleHistogram1" we can set
+therefore in the following "particleHistogram1" we can set
     nBins = 9
     min = 0μm
     max = 45μm
@@ -547,9 +547,9 @@ in this ways the particles hitting the patches will be classified in the followi
     9) 40.01μm to 45.01μm <- the 45μm particles will be counted in this range
 */
 
-    patchParticleHistogram1
+    particleHistogram1
     {
-        type            patchParticleHistogram;
+        type            particleHistogram;
         patches
         (
             roof

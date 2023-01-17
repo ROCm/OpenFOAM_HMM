@@ -167,9 +167,9 @@ cloudFunctions
         writer          vtk;
     }
 
-    patchParticleHistogram1
+    particleHistogram1
     {
-        type            patchParticleHistogram;
+        type            particleHistogram;
         patches
         (
             cycLeft_half0
