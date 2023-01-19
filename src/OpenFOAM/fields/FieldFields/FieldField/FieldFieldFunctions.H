@@ -290,7 +290,7 @@ BINARY_TYPE_FUNCTION(Type, Type, Type, cmptDivide)
 BINARY_TYPE_FUNCTION_FS(Type, Type, MinMax<Type>, clamp)
 
 
-/* * * * * * * * * * * * * * * * Global operators  * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * */
 
 UNARY_OPERATOR(Type, Type, -, negate)
 

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,32 +31,46 @@ License
 #define UNARY_FUNCTION(ReturnType, Type1, Func, Dfunc)                         \
                                                                                \
 TEMPLATE                                                                       \
-tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+void Func                                                                      \
 (                                                                              \
-    const DimensionedField<Type1, GeoMesh>& df                                 \
+    DimensionedField<ReturnType, GeoMesh>& result,                             \
+    const DimensionedField<Type1, GeoMesh>& f1                                 \
 );                                                                             \
                                                                                \
 TEMPLATE                                                                       \
 tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
 (                                                                              \
-    const tmp<DimensionedField<Type1, GeoMesh>>& tdf1                          \
+    const DimensionedField<Type1, GeoMesh>& f1                                 \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+(                                                                              \
+    const tmp<DimensionedField<Type1, GeoMesh>>& tf1                           \
 );
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define UNARY_OPERATOR(ReturnType, Type1, Op, opFunc, Dfunc)                   \
+#define UNARY_OPERATOR(ReturnType, Type1, Op, OpFunc, Dfunc)                   \
                                                                                \
 TEMPLATE                                                                       \
-tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
+void OpFunc                                                                    \
 (                                                                              \
-    const DimensionedField<Type1, GeoMesh>& df1                                \
+    DimensionedField<ReturnType, GeoMesh>& result,                             \
+    const DimensionedField<Type1, GeoMesh>& f1                                 \
 );                                                                             \
                                                                                \
 TEMPLATE                                                                       \
 tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
 (                                                                              \
-    const tmp<DimensionedField<Type1, GeoMesh>>& tdf1                          \
+    const DimensionedField<Type1, GeoMesh>& f1                                 \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
+(                                                                              \
+    const tmp<DimensionedField<Type1, GeoMesh>>& tf1                           \
 );
 
 
@@ -64,31 +79,39 @@ tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
 #define BINARY_FUNCTION(ReturnType, Type1, Type2, Func)                        \
                                                                                \
 TEMPLATE                                                                       \
-tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+void Func                                                                      \
 (                                                                              \
-    const DimensionedField<Type1, GeoMesh>& df1,                               \
-    const DimensionedField<Type2, GeoMesh>& df2                                \
+    DimensionedField<ReturnType, GeoMesh>& result,                             \
+    const DimensionedField<Type1, GeoMesh>& f1,                                \
+    const DimensionedField<Type2, GeoMesh>& f2                                 \
 );                                                                             \
                                                                                \
 TEMPLATE                                                                       \
 tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
 (                                                                              \
-    const DimensionedField<Type1, GeoMesh>& df1,                               \
-    const tmp<DimensionedField<Type2, GeoMesh>>& tdf2                          \
+    const DimensionedField<Type1, GeoMesh>& f1,                                \
+    const DimensionedField<Type2, GeoMesh>& f2                                 \
 );                                                                             \
                                                                                \
 TEMPLATE                                                                       \
 tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
 (                                                                              \
-    const tmp<DimensionedField<Type1, GeoMesh>>& tdf1,                         \
-    const DimensionedField<Type2, GeoMesh>& df2                                \
+    const DimensionedField<Type1, GeoMesh>& f1,                                \
+    const tmp<DimensionedField<Type2, GeoMesh>>& tf2                           \
 );                                                                             \
                                                                                \
 TEMPLATE                                                                       \
 tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
 (                                                                              \
-    const tmp<DimensionedField<Type1, GeoMesh>>& tdf1,                         \
-    const tmp<DimensionedField<Type2, GeoMesh>>& tdf2                          \
+    const tmp<DimensionedField<Type1, GeoMesh>>& tf1,                          \
+    const DimensionedField<Type2, GeoMesh>& f2                                 \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+(                                                                              \
+    const tmp<DimensionedField<Type1, GeoMesh>>& tf1,                          \
+    const tmp<DimensionedField<Type2, GeoMesh>>& tf2                           \
 );
 
 
@@ -97,62 +120,78 @@ tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
 #define BINARY_TYPE_FUNCTION_SF(ReturnType, Type1, Type2, Func)                \
                                                                                \
 TEMPLATE                                                                       \
-tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+void Func                                                                      \
 (                                                                              \
+    DimensionedField<ReturnType, GeoMesh>& result,                             \
     const dimensioned<Type1>& dt1,                                             \
-    const DimensionedField<Type2, GeoMesh>& df2                                \
-);                                                                             \
-                                                                               \
-TEMPLATE                                                                       \
-tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
-(                                                                              \
-    const Type1& t1,                                                           \
-    const DimensionedField<Type2, GeoMesh>& df2                                \
+    const DimensionedField<Type2, GeoMesh>& f2                                 \
 );                                                                             \
                                                                                \
 TEMPLATE                                                                       \
 tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
 (                                                                              \
     const dimensioned<Type1>& dt1,                                             \
-    const tmp<DimensionedField<Type2, GeoMesh>>& tdf2                          \
+    const DimensionedField<Type2, GeoMesh>& f2                                 \
 );                                                                             \
                                                                                \
 TEMPLATE                                                                       \
 tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
 (                                                                              \
-    const Type1& t1,                                                           \
-    const tmp<DimensionedField<Type2, GeoMesh>>& tdf2                          \
+    const Type1& s1,                                                           \
+    const DimensionedField<Type2, GeoMesh>& f2                                 \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+(                                                                              \
+    const dimensioned<Type1>& dt1,                                             \
+    const tmp<DimensionedField<Type2, GeoMesh>>& tf2                           \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+(                                                                              \
+    const Type1& s1,                                                           \
+    const tmp<DimensionedField<Type2, GeoMesh>>& tf2                           \
 );
 
 
 #define BINARY_TYPE_FUNCTION_FS(ReturnType, Type1, Type2, Func)                \
                                                                                \
 TEMPLATE                                                                       \
-tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+void Func                                                                      \
 (                                                                              \
-    const DimensionedField<Type1, GeoMesh>& df1,                               \
+    DimensionedField<ReturnType, GeoMesh>& result,                             \
+    const DimensionedField<Type1, GeoMesh>& f1,                                \
     const dimensioned<Type2>& dt2                                              \
 );                                                                             \
                                                                                \
 TEMPLATE                                                                       \
 tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
 (                                                                              \
-    const DimensionedField<Type1, GeoMesh>& df1,                               \
-    const Type2& t2                                                            \
-);                                                                             \
-                                                                               \
-TEMPLATE                                                                       \
-tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
-(                                                                              \
-    const tmp<DimensionedField<Type1, GeoMesh>>& tdf1,                         \
+    const DimensionedField<Type1, GeoMesh>& f1,                                \
     const dimensioned<Type2>& dt2                                              \
 );                                                                             \
                                                                                \
 TEMPLATE                                                                       \
 tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
 (                                                                              \
-    const tmp<DimensionedField<Type1, GeoMesh>>& tdf2,                         \
-    const Type2& t2                                                            \
+    const DimensionedField<Type1, GeoMesh>& f1,                                \
+    const Type2& s2                                                            \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+(                                                                              \
+    const tmp<DimensionedField<Type1, GeoMesh>>& tf1,                          \
+    const dimensioned<Type2>& dt2                                              \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+(                                                                              \
+    const tmp<DimensionedField<Type1, GeoMesh>>& tf1,                          \
+    const Type2& s2                                                            \
 );
 
 
@@ -166,31 +205,39 @@ tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
 #define BINARY_OPERATOR(ReturnType, Type1, Type2, Op, OpName, OpFunc)          \
                                                                                \
 TEMPLATE                                                                       \
-tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
+void OpFunc                                                                    \
 (                                                                              \
-    const DimensionedField<Type1, GeoMesh>& df1,                               \
-    const DimensionedField<Type2, GeoMesh>& df2                                \
+    DimensionedField<ReturnType, GeoMesh>& result,                             \
+    const DimensionedField<Type1, GeoMesh>& f1,                                \
+    const DimensionedField<Type2, GeoMesh>& f2                                 \
 );                                                                             \
                                                                                \
 TEMPLATE                                                                       \
 tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
 (                                                                              \
-    const DimensionedField<Type1, GeoMesh>& df1,                               \
-    const tmp<DimensionedField<Type2, GeoMesh>>& tdf2                          \
+    const DimensionedField<Type1, GeoMesh>& f1,                                \
+    const DimensionedField<Type2, GeoMesh>& f2                                 \
 );                                                                             \
                                                                                \
 TEMPLATE                                                                       \
 tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
 (                                                                              \
-    const tmp<DimensionedField<Type1, GeoMesh>>& tdf1,                         \
-    const DimensionedField<Type2, GeoMesh>& df2                                \
+    const DimensionedField<Type1, GeoMesh>& f1,                                \
+    const tmp<DimensionedField<Type2, GeoMesh>>& tf2                           \
 );                                                                             \
                                                                                \
 TEMPLATE                                                                       \
 tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
 (                                                                              \
-    const tmp<DimensionedField<Type1, GeoMesh>>& tdf1,                         \
-    const tmp<DimensionedField<Type2, GeoMesh>>& tdf2                          \
+    const tmp<DimensionedField<Type1, GeoMesh>>& tf1,                          \
+    const DimensionedField<Type2, GeoMesh>& f2                                 \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
+(                                                                              \
+    const tmp<DimensionedField<Type1, GeoMesh>>& tf1,                          \
+    const tmp<DimensionedField<Type2, GeoMesh>>& tf2                           \
 );
 
 
@@ -199,62 +246,78 @@ tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
 #define BINARY_TYPE_OPERATOR_SF(ReturnType, Type1, Type2, Op, OpName, OpFunc)  \
                                                                                \
 TEMPLATE                                                                       \
-tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
+void OpFunc                                                                    \
 (                                                                              \
+    DimensionedField<ReturnType, GeoMesh>& result,                             \
     const dimensioned<Type1>& dt1,                                             \
-    const DimensionedField<Type2, GeoMesh>& df2                                \
-);                                                                             \
-                                                                               \
-TEMPLATE                                                                       \
-tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
-(                                                                              \
-    const Type1& t1,                                                           \
-    const DimensionedField<Type2, GeoMesh>& df2                                \
+    const DimensionedField<Type2, GeoMesh>& f2                                 \
 );                                                                             \
                                                                                \
 TEMPLATE                                                                       \
 tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
 (                                                                              \
     const dimensioned<Type1>& dt1,                                             \
-    const tmp<DimensionedField<Type2, GeoMesh>>& tdf2                          \
+    const DimensionedField<Type2, GeoMesh>& f2                                 \
 );                                                                             \
                                                                                \
 TEMPLATE                                                                       \
 tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
 (                                                                              \
-    const Type1& t1,                                                           \
-    const tmp<DimensionedField<Type2, GeoMesh>>& tdf2                          \
+    const Type1& s1,                                                           \
+    const DimensionedField<Type2, GeoMesh>& f2                                 \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
+(                                                                              \
+    const dimensioned<Type1>& dt1,                                             \
+    const tmp<DimensionedField<Type2, GeoMesh>>& tf2                           \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
+(                                                                              \
+    const Type1& s1,                                                           \
+    const tmp<DimensionedField<Type2, GeoMesh>>& tf2                           \
 );
 
 
 #define BINARY_TYPE_OPERATOR_FS(ReturnType, Type1, Type2, Op, OpName, OpFunc)  \
                                                                                \
 TEMPLATE                                                                       \
-tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
+void OpFunc                                                                    \
 (                                                                              \
-    const DimensionedField<Type1, GeoMesh>& df1,                               \
+    DimensionedField<ReturnType, GeoMesh>& result,                             \
+    const DimensionedField<Type1, GeoMesh>& f1,                                \
     const dimensioned<Type2>& dt2                                              \
 );                                                                             \
                                                                                \
 TEMPLATE                                                                       \
 tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
 (                                                                              \
-    const DimensionedField<Type1, GeoMesh>& df1,                               \
-    const Type2& t2                                                            \
-);                                                                             \
-                                                                               \
-TEMPLATE                                                                       \
-tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
-(                                                                              \
-    const tmp<DimensionedField<Type1, GeoMesh>>& tdf1,                         \
+    const DimensionedField<Type1, GeoMesh>& f1,                                \
     const dimensioned<Type2>& dt2                                              \
 );                                                                             \
                                                                                \
 TEMPLATE                                                                       \
 tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
 (                                                                              \
-    const tmp<DimensionedField<Type1, GeoMesh>>& tdf1,                         \
-    const Type2& t2                                                            \
+    const DimensionedField<Type1, GeoMesh>& f1,                                \
+    const Type2& s2                                                            \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
+(                                                                              \
+    const tmp<DimensionedField<Type1, GeoMesh>>& tf1,                          \
+    const dimensioned<Type2>& dt2                                              \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
+(                                                                              \
+    const tmp<DimensionedField<Type1, GeoMesh>>& tf1,                          \
+    const Type2& s2                                                            \
 );
 
 
