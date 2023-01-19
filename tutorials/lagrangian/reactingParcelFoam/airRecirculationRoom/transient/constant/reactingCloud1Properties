@@ -564,9 +564,9 @@ in this ways the particles hitting the patches will be classified in the followi
         maxStoredParcels 100000000;
     }
 
-    patchPostProcessing1
+    particlePostProcessing1
     {
-        type            patchPostProcessing;
+        type            particlePostProcessing;
         fields          (position origId d);
         maxStoredParcels 100000000;
         patches

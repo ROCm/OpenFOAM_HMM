@@ -181,9 +181,9 @@ cloudFunctions
         maxStoredParcels 20;
     }
 
-    patchPostProcessing1
+    particlePostProcessing1
     {
-        type            patchPostProcessing;
+        type            particlePostProcessing;
         fields          (position "U.*" d T nParticle);
         maxStoredParcels 20;
         patches
