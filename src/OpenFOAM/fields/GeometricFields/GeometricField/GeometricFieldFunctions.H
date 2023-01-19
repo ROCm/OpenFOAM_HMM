@@ -304,6 +304,12 @@ clamp
 BINARY_TYPE_FUNCTION_FS(Type, Type, MinMax<Type>, clamp)
 
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+TERNARY_FUNCTION(Type, Type, Type, scalar, lerp)
+TERNARY_TYPE_FUNCTION_FFS(Type, Type, Type, scalar, lerp)
+
+
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
 UNARY_OPERATOR(Type, Type, -, negate, transform)

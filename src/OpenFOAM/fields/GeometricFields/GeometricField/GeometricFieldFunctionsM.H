@@ -326,4 +326,158 @@ tmp<GeometricField<ReturnType, PatchField, GeoMesh>> operator Op               \
     BINARY_TYPE_OPERATOR_FS(ReturnType, Type1, Type2, Op, OpName, OpFunc)
 
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#define TERNARY_FUNCTION(ReturnType, Type1, Type2, Type3, Func)                \
+                                                                               \
+TEMPLATE                                                                       \
+void Func                                                                      \
+(                                                                              \
+    GeometricField<Type1, PatchField, GeoMesh>& result,                        \
+    const GeometricField<Type1, PatchField, GeoMesh>& f1,                      \
+    const GeometricField<Type2, PatchField, GeoMesh>& f2,                      \
+    const GeometricField<Type3, PatchField, GeoMesh>& f3                       \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<GeometricField<ReturnType, PatchField, GeoMesh>> Func                      \
+(                                                                              \
+    const GeometricField<Type1, PatchField, GeoMesh>& f1,                      \
+    const GeometricField<Type2, PatchField, GeoMesh>& f2,                      \
+    const GeometricField<Type3, PatchField, GeoMesh>& f3                       \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<GeometricField<ReturnType, PatchField, GeoMesh>> Func                      \
+(                                                                              \
+    const tmp<GeometricField<Type1, PatchField, GeoMesh>>& tf1,                \
+    const GeometricField<Type2, PatchField, GeoMesh>& f2,                      \
+    const GeometricField<Type3, PatchField, GeoMesh>& f3                       \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<GeometricField<ReturnType, PatchField, GeoMesh>> Func                      \
+(                                                                              \
+    const GeometricField<Type1, PatchField, GeoMesh>& f1,                      \
+    const tmp<GeometricField<Type2, PatchField, GeoMesh>>& tf2,                \
+    const GeometricField<Type3, PatchField, GeoMesh>& f3                       \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<GeometricField<ReturnType, PatchField, GeoMesh>> Func                      \
+(                                                                              \
+    const GeometricField<Type1, PatchField, GeoMesh>& f1,                      \
+    const GeometricField<Type2, PatchField, GeoMesh>& f2,                      \
+    const tmp<GeometricField<Type3, PatchField, GeoMesh>>& tf3                 \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<GeometricField<ReturnType, PatchField, GeoMesh>> Func                      \
+(                                                                              \
+    const tmp<GeometricField<Type1, PatchField, GeoMesh>>& tf1,                \
+    const tmp<GeometricField<Type2, PatchField, GeoMesh>>& tf2,                \
+    const GeometricField<Type3, PatchField, GeoMesh>& f3                       \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<GeometricField<ReturnType, PatchField, GeoMesh>> Func                      \
+(                                                                              \
+    const tmp<GeometricField<Type1, PatchField, GeoMesh>>& tf1,                \
+    const GeometricField<Type2, PatchField, GeoMesh>& f2,                      \
+    const tmp<GeometricField<Type3, PatchField, GeoMesh>>& tf3                 \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<GeometricField<ReturnType, PatchField, GeoMesh>> Func                      \
+(                                                                              \
+    const GeometricField<Type1, PatchField, GeoMesh>& f1,                      \
+    const tmp<GeometricField<Type2, PatchField, GeoMesh>>& tf2,                \
+    const tmp<GeometricField<Type3, PatchField, GeoMesh>>& tf3                 \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<GeometricField<ReturnType, PatchField, GeoMesh>> Func                      \
+(                                                                              \
+    const tmp<GeometricField<Type1, PatchField, GeoMesh>>& tf1,                \
+    const tmp<GeometricField<Type2, PatchField, GeoMesh>>& tf2,                \
+    const tmp<GeometricField<Type3, PatchField, GeoMesh>>& tf3                 \
+);
+
+
+#define TERNARY_TYPE_FUNCTION_FFS(ReturnType, Type1, Type2, Type3, Func)       \
+                                                                               \
+TEMPLATE                                                                       \
+void Func                                                                      \
+(                                                                              \
+    GeometricField<Type1, PatchField, GeoMesh>& result,                        \
+    const GeometricField<Type1, PatchField, GeoMesh>& f1,                      \
+    const GeometricField<Type2, PatchField, GeoMesh>& f2,                      \
+    const dimensioned<Type3>& dt3                                              \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<GeometricField<ReturnType, PatchField, GeoMesh>> Func                      \
+(                                                                              \
+    const GeometricField<Type1, PatchField, GeoMesh>& f1,                      \
+    const GeometricField<Type2, PatchField, GeoMesh>& f2,                      \
+    const dimensioned<Type3>& dt3                                              \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<GeometricField<ReturnType, PatchField, GeoMesh>> Func                      \
+(                                                                              \
+    const GeometricField<Type1, PatchField, GeoMesh>& f1,                      \
+    const GeometricField<Type2, PatchField, GeoMesh>& f2,                      \
+    const Type3& s3                                                            \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<GeometricField<ReturnType, PatchField, GeoMesh>> Func                      \
+(                                                                              \
+    const tmp<GeometricField<Type1, PatchField, GeoMesh>>& tf1,                \
+    const GeometricField<Type2, PatchField, GeoMesh>& f2,                      \
+    const dimensioned<Type3>& dt3                                              \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<GeometricField<ReturnType, PatchField, GeoMesh>> Func                      \
+(                                                                              \
+    const tmp<GeometricField<Type1, PatchField, GeoMesh>>& tf1,                \
+    const GeometricField<Type2, PatchField, GeoMesh>& f2,                      \
+    const Type3& s3                                                            \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<GeometricField<ReturnType, PatchField, GeoMesh>> Func                      \
+(                                                                              \
+    const GeometricField<Type1, PatchField, GeoMesh>& f1,                      \
+    const tmp<GeometricField<Type2, PatchField, GeoMesh>>& tf2,                \
+    const dimensioned<Type3>& dt3                                              \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<GeometricField<ReturnType, PatchField, GeoMesh>> Func                      \
+(                                                                              \
+    const GeometricField<Type1, PatchField, GeoMesh>& f1,                      \
+    const tmp<GeometricField<Type2, PatchField, GeoMesh>>& tf2,                \
+    const Type3& s3                                                            \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<GeometricField<ReturnType, PatchField, GeoMesh>> Func                      \
+(                                                                              \
+    const tmp<GeometricField<Type1, PatchField, GeoMesh>>& tf1,                \
+    const tmp<GeometricField<Type2, PatchField, GeoMesh>>& tf2,                \
+    const dimensioned<Type3>& dt3                                              \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<GeometricField<ReturnType, PatchField, GeoMesh>> Func                      \
+(                                                                              \
+    const tmp<GeometricField<Type1, PatchField, GeoMesh>>& tf1,                \
+    const tmp<GeometricField<Type2, PatchField, GeoMesh>>& tf2,                \
+    const Type3& s3                                                            \
+);
+
+
 // ************************************************************************* //

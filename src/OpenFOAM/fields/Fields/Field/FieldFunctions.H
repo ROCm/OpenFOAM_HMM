@@ -317,6 +317,11 @@ BINARY_TYPE_FUNCTION_FS(Type, Type, MinMax<Type>, clamp)
 BINARY_TYPE_FUNCTION_FS(Type, Type, Foam::zero_one, clamp)
 BINARY_TYPE_FUNCTION_FS(Type, Type, MinMax<Type>, clip)  // Same as clamp
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+TERNARY_FUNCTION(Type, Type, Type, scalar, lerp)
+TERNARY_TYPE_FUNCTION_FFS(Type, Type, Type, scalar, lerp)
+
 
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 

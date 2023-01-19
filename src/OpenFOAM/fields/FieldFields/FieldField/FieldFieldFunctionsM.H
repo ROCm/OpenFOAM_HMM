@@ -273,4 +273,126 @@ tmp<FieldField<Field, ReturnType>> operator Op                                 \
     BINARY_TYPE_OPERATOR_FS(ReturnType, Type1, Type2, Op, OpFunc)
 
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#define TERNARY_FUNCTION(ReturnType, Type1, Type2, Type3, Func)                \
+                                                                               \
+TEMPLATE                                                                       \
+void Func                                                                      \
+(                                                                              \
+    FieldField<Field, ReturnType>& result,                                     \
+    const FieldField<Field, Type1>& f1,                                        \
+    const FieldField<Field, Type2>& f2,                                        \
+    const FieldField<Field, Type3>& f3                                         \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<FieldField<Field, ReturnType>> Func                                        \
+(                                                                              \
+    const FieldField<Field, Type1>& f1,                                        \
+    const FieldField<Field, Type2>& f2,                                        \
+    const FieldField<Field, Type3>& f3                                         \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<FieldField<Field, ReturnType>> Func                                        \
+(                                                                              \
+    const tmp<FieldField<Field, Type1>>& tf1,                                  \
+    const FieldField<Field, Type2>& f2,                                        \
+    const FieldField<Field, Type3>& f3                                         \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<FieldField<Field, ReturnType>> Func                                        \
+(                                                                              \
+    const FieldField<Field, Type1>& f1,                                        \
+    const tmp<FieldField<Field, Type2>>& tf2,                                  \
+    const FieldField<Field, Type3>& f3                                         \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<FieldField<Field, ReturnType>> Func                                        \
+(                                                                              \
+    const FieldField<Field, Type1>& f1,                                        \
+    const FieldField<Field, Type2>& f2,                                        \
+    const tmp<FieldField<Field, Type3>>& tf3                                   \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<FieldField<Field, ReturnType>> Func                                        \
+(                                                                              \
+    const tmp<FieldField<Field, Type1>>& tf1,                                  \
+    const tmp<FieldField<Field, Type2>>& tf2,                                  \
+    const FieldField<Field, Type3>& f3                                         \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<FieldField<Field, ReturnType>> Func                                        \
+(                                                                              \
+    const tmp<FieldField<Field, Type1>>& tf1,                                  \
+    const FieldField<Field, Type2>& f2,                                        \
+    const tmp<FieldField<Field, Type3>>& tf3                                   \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<FieldField<Field, ReturnType>> Func                                        \
+(                                                                              \
+    const FieldField<Field, Type1>& f1,                                        \
+    const tmp<FieldField<Field, Type2>>& tf2,                                  \
+    const tmp<FieldField<Field, Type3>>& tf3                                   \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<FieldField<Field, ReturnType>> Func                                        \
+(                                                                              \
+    const tmp<FieldField<Field, Type1>>& tf1,                                  \
+    const tmp<FieldField<Field, Type2>>& tf2,                                  \
+    const tmp<FieldField<Field, Type3>>& tf3                                   \
+);
+
+
+#define TERNARY_TYPE_FUNCTION_FFS(ReturnType, Type1, Type2, Type3, Func)       \
+                                                                               \
+TEMPLATE                                                                       \
+void Func                                                                      \
+(                                                                              \
+    FieldField<Field, ReturnType>& result,                                     \
+    const FieldField<Field, Type1>& f1,                                        \
+    const FieldField<Field, Type2>& f2,                                        \
+    const Type3& s3                                                            \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<FieldField<Field, ReturnType>> Func                                        \
+(                                                                              \
+    const FieldField<Field, Type1>& f1,                                        \
+    const FieldField<Field, Type2>& f2,                                        \
+    const Type3& s3                                                            \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<FieldField<Field, ReturnType>> Func                                        \
+(                                                                              \
+    const tmp<FieldField<Field, Type1>>& tf1,                                  \
+    const FieldField<Field, Type2>& f2,                                        \
+    const Type3& s3                                                            \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<FieldField<Field, ReturnType>> Func                                        \
+(                                                                              \
+    const FieldField<Field, Type1>& f1,                                        \
+    const tmp<FieldField<Field, Type2>>& tf2,                                  \
+    const Type3& s3                                                            \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<FieldField<Field, ReturnType>> Func                                        \
+(                                                                              \
+    const tmp<FieldField<Field, Type1>>& tf1,                                  \
+    const tmp<FieldField<Field, Type2>>& tf2,                                  \
+    const Type3& s3                                                            \
+);
+
+
 // ************************************************************************* //

@@ -694,4 +694,378 @@ tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
     BINARY_TYPE_OPERATOR_FS(ReturnType, Type1, Type2, Op, OpName, OpFunc)
 
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#define TERNARY_FUNCTION(ReturnType, Type1, Type2, Type3, Func)                \
+                                                                               \
+TEMPLATE                                                                       \
+void Func                                                                      \
+(                                                                              \
+    DimensionedField<ReturnType, GeoMesh>& result,                             \
+    const DimensionedField<Type1, GeoMesh>& f1,                                \
+    const DimensionedField<Type2, GeoMesh>& f2,                                \
+    const DimensionedField<Type3, GeoMesh>& f3                                 \
+)                                                                              \
+{                                                                              \
+    /* TBD: reset dimensions? */                                               \
+    Func(result.field(), f1.field(), f2.field(), f3.field());                  \
+    result.oriented() = Func(f1.oriented(), f2.oriented());                    \
+}                                                                              \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+(                                                                              \
+    const DimensionedField<Type1, GeoMesh>& f1,                                \
+    const DimensionedField<Type2, GeoMesh>& f2,                                \
+    const DimensionedField<Type3, GeoMesh>& f3                                 \
+)                                                                              \
+{                                                                              \
+    auto tres =                                                                \
+        reuseTmpDimensionedField<ReturnType, Type1, GeoMesh>::New              \
+        (                                                                      \
+            f1,                                                                \
+            #Func "(" + f1.name() + ',' + f2.name() + ',' + f3.name() + ')',   \
+            Func(f1.dimensions(), f2.dimensions())                             \
+        );                                                                     \
+                                                                               \
+    Func(tres.ref(), f1, f2, f3);                                              \
+    return tres;                                                               \
+}                                                                              \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+(                                                                              \
+    const tmp<DimensionedField<Type1, GeoMesh>>& tf1,                          \
+    const DimensionedField<Type2, GeoMesh>& f2,                                \
+    const DimensionedField<Type3, GeoMesh>& f3                                 \
+)                                                                              \
+{                                                                              \
+    const auto& f1 = tf1();                                                    \
+                                                                               \
+    auto tres =                                                                \
+        reuseTmpDimensionedField<ReturnType, Type1, GeoMesh>::New              \
+        (                                                                      \
+            tf1,                                                               \
+            #Func "(" + f1.name() + ',' + f2.name() + ',' + f3.name() + ')',   \
+            Func(f1.dimensions(), f2.dimensions())                             \
+        );                                                                     \
+                                                                               \
+    Func(tres.ref(), f1, f2, f3);                                              \
+    tf1.clear();                                                               \
+    return tres;                                                               \
+}                                                                              \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+(                                                                              \
+    const DimensionedField<Type1, GeoMesh>& f1,                                \
+    const tmp<DimensionedField<Type2, GeoMesh>>& tf2,                          \
+    const DimensionedField<Type3, GeoMesh>& f3                                 \
+)                                                                              \
+{                                                                              \
+    const auto& f2 = tf2();                                                    \
+                                                                               \
+    auto tres =                                                                \
+        reuseTmpDimensionedField<ReturnType, Type2, GeoMesh>::New              \
+        (                                                                      \
+            tf2,                                                               \
+            #Func "(" + f1.name() +','+ f2.name() +','+ f3.name() +')',        \
+            Func(f1.dimensions(), f2.dimensions())                             \
+        );                                                                     \
+                                                                               \
+    Func(tres.ref(), f1, f2, f3);                                              \
+    tf2.clear();                                                               \
+    return tres;                                                               \
+}                                                                              \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+(                                                                              \
+    const DimensionedField<Type1, GeoMesh>& f1,                                \
+    const DimensionedField<Type2, GeoMesh>& f2,                                \
+    const tmp<DimensionedField<Type3, GeoMesh>>& tf3                           \
+)                                                                              \
+{                                                                              \
+    const auto& f3 = tf3();                                                    \
+                                                                               \
+    auto tres =                                                                \
+        reuseTmpDimensionedField<ReturnType, Type3, GeoMesh>::New              \
+        (                                                                      \
+            tf3,                                                               \
+            #Func "(" + f1.name() +','+ f2.name() +','+ f3.name() +')',        \
+            Func(f1.dimensions(), f2.dimensions())                             \
+        );                                                                     \
+                                                                               \
+    Func(tres.ref(), f1, f2, f3);                                              \
+    tf3.clear();                                                               \
+    return tres;                                                               \
+}                                                                              \
+                                                                               \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+(                                                                              \
+    const tmp<DimensionedField<Type1, GeoMesh>>& tf1,                          \
+    const tmp<DimensionedField<Type2, GeoMesh>>& tf2,                          \
+    const DimensionedField<Type3, GeoMesh>& f3                                 \
+)                                                                              \
+{                                                                              \
+    const auto& f1 = tf1();                                                    \
+    const auto& f2 = tf2();                                                    \
+                                                                               \
+    auto tres =                                                                \
+        reuseTmpTmpDimensionedField                                            \
+        <ReturnType, Type1, Type1, Type2, GeoMesh>::New                        \
+        (                                                                      \
+            tf1,                                                               \
+            tf2,                                                               \
+            #Func "(" + f1.name() +','+ f2.name() +','+ f3.name() +')',        \
+            Func(f1.dimensions(), f2.dimensions())                             \
+        );                                                                     \
+                                                                               \
+    Func(tres.ref(), f1, f2, f3);                                              \
+    tf1.clear();                                                               \
+    tf2.clear();                                                               \
+    return tres;                                                               \
+}                                                                              \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+(                                                                              \
+    const tmp<DimensionedField<Type1, GeoMesh>>& tf1,                          \
+    const DimensionedField<Type2, GeoMesh>& f2,                                \
+    const tmp<DimensionedField<Type3, GeoMesh>>& tf3                           \
+)                                                                              \
+{                                                                              \
+    const auto& f1 = tf1();                                                    \
+    const auto& f3 = tf3();                                                    \
+                                                                               \
+    auto tres =                                                                \
+        reuseTmpTmpDimensionedField                                            \
+        <ReturnType, Type1, Type1, Type3, GeoMesh>::New                        \
+        (                                                                      \
+            tf1,                                                               \
+            tf3,                                                               \
+            #Func "(" + f1.name() +','+ f2.name() +','+ f3.name() +')',        \
+            Func(f1.dimensions(), f2.dimensions())                             \
+        );                                                                     \
+                                                                               \
+    Func(tres.ref(), f1, f2, f3);                                              \
+    tf1.clear();                                                               \
+    tf3.clear();                                                               \
+    return tres;                                                               \
+}                                                                              \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+(                                                                              \
+    const DimensionedField<Type1, GeoMesh>& f1,                                \
+    const tmp<DimensionedField<Type2, GeoMesh>>& tf2,                          \
+    const tmp<DimensionedField<Type3, GeoMesh>>& tf3                           \
+)                                                                              \
+{                                                                              \
+    const auto& f2 = tf2();                                                    \
+    const auto& f3 = tf3();                                                    \
+                                                                               \
+    auto tres =                                                                \
+        reuseTmpTmpDimensionedField                                            \
+        <ReturnType, Type2, Type2, Type3, GeoMesh>::New                        \
+        (                                                                      \
+            tf2,                                                               \
+            tf3,                                                               \
+            #Func "(" + f1.name() +','+ f2.name() +','+ f3.name() +')',        \
+            Func(f1.dimensions(), f2.dimensions())                             \
+        );                                                                     \
+                                                                               \
+    Func(tres.ref(), f1, f2, f3);                                              \
+    tf2.clear();                                                               \
+    tf3.clear();                                                               \
+    return tres;                                                               \
+}                                                                              \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+(                                                                              \
+    const tmp<DimensionedField<Type1, GeoMesh>>& tf1,                          \
+    const tmp<DimensionedField<Type2, GeoMesh>>& tf2,                          \
+    const tmp<DimensionedField<Type3, GeoMesh>>& tf3                           \
+)                                                                              \
+{                                                                              \
+    const auto& f1 = tf1();                                                    \
+    const auto& f2 = tf2();                                                    \
+    const auto& f3 = tf3();                                                    \
+                                                                               \
+    /* TBD: check all three types? */                                          \
+    auto tres =                                                                \
+        reuseTmpTmpDimensionedField                                            \
+        <ReturnType, Type1, Type1, Type2, GeoMesh>::New                        \
+        (                                                                      \
+            tf1,                                                               \
+            tf2,                                                               \
+            #Func "(" + f1.name() +','+ f2.name() +','+ f3.name() +')',        \
+            Func(f1.dimensions(), f2.dimensions())                             \
+        );                                                                     \
+                                                                               \
+    Func(tres.ref(), f1, f2, f3);                                              \
+    tf1.clear();                                                               \
+    tf2.clear();                                                               \
+    tf3.clear();                                                               \
+    return tres;                                                               \
+}                                                                              \
+
+
+#define TERNARY_TYPE_FUNCTION_FFS(ReturnType, Type1, Type2, Type3, Func)       \
+                                                                               \
+TEMPLATE                                                                       \
+void Func                                                                      \
+(                                                                              \
+    DimensionedField<ReturnType, GeoMesh>& result,                             \
+    const DimensionedField<Type1, GeoMesh>& f1,                                \
+    const DimensionedField<Type2, GeoMesh>& f2,                                \
+    const dimensioned<Type3>& dt3                                              \
+)                                                                              \
+{                                                                              \
+    /* TBD: reset dimensions? */                                               \
+    Func(result.field(), f1.field(), f2.field(), dt3.value());                 \
+    result.oriented() = Func(f1.oriented(), f2.oriented());                    \
+}                                                                              \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+(                                                                              \
+    const DimensionedField<Type1, GeoMesh>& f1,                                \
+    const DimensionedField<Type2, GeoMesh>& f2,                                \
+    const dimensioned<Type3>& dt3                                              \
+)                                                                              \
+{                                                                              \
+    auto tres =                                                                \
+        reuseTmpDimensionedField<ReturnType, Type1, GeoMesh>::New              \
+        (                                                                      \
+            f1,                                                                \
+            #Func "(" + f1.name() + ',' + f2.name() + ',' + dt3.name() + ')',  \
+            Func(f1.dimensions(), f2.dimensions())                             \
+        );                                                                     \
+                                                                               \
+    Func(tres.ref(), f1, f2, dt3);                                             \
+    return tres;                                                               \
+}                                                                              \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+(                                                                              \
+    const DimensionedField<Type1, GeoMesh>& f1,                                \
+    const DimensionedField<Type2, GeoMesh>& f2,                                \
+    const Type3& s3                                                            \
+)                                                                              \
+{                                                                              \
+    return Func(f1, f2, dimensioned<Type3>(s3));                               \
+}                                                                              \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+(                                                                              \
+    const tmp<DimensionedField<Type1, GeoMesh>>& tf1,                          \
+    const DimensionedField<Type2, GeoMesh>& f2,                                \
+    const dimensioned<Type3>& dt3                                              \
+)                                                                              \
+{                                                                              \
+    const auto& f1 = tf1();                                                    \
+                                                                               \
+    auto tres =                                                                \
+        reuseTmpDimensionedField<ReturnType, Type1, GeoMesh>::New              \
+        (                                                                      \
+            tf1,                                                               \
+            #Func "(" + f1.name() + ',' + f2.name() + ',' + dt3.name() + ')',  \
+            Func(f1.dimensions(), f2.dimensions())                             \
+        );                                                                     \
+                                                                               \
+    Func(tres.ref(), f1, f2, dt3);                                             \
+    tf1.clear();                                                               \
+    return tres;                                                               \
+}                                                                              \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+(                                                                              \
+    const tmp<DimensionedField<Type1, GeoMesh>>& tf1,                          \
+    const DimensionedField<Type2, GeoMesh>& f2,                                \
+    const Type3& s3                                                            \
+)                                                                              \
+{                                                                              \
+    return Func(tf1, f2, dimensioned<Type3>(s3));                              \
+}                                                                              \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+(                                                                              \
+    const DimensionedField<Type1, GeoMesh>& f1,                                \
+    const tmp<DimensionedField<Type2, GeoMesh>>& tf2,                          \
+    const dimensioned<Type3>& dt3                                              \
+)                                                                              \
+{                                                                              \
+    const auto& f2 = tf2();                                                    \
+                                                                               \
+    auto tres =                                                                \
+        reuseTmpDimensionedField<ReturnType, Type2, GeoMesh>::New              \
+        (                                                                      \
+            tf2,                                                               \
+            #Func "(" + f1.name() + ',' + f2.name() + ',' + dt3.name() + ')',  \
+            Func(f1.dimensions(), f2.dimensions())                             \
+        );                                                                     \
+                                                                               \
+    Func(tres.ref(), f1, f2, dt3);                                             \
+    tf2.clear();                                                               \
+    return tres;                                                               \
+}                                                                              \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+(                                                                              \
+    const DimensionedField<Type1, GeoMesh>& f1,                                \
+    const tmp<DimensionedField<Type2, GeoMesh>>& tf2,                          \
+    const Type3& s3                                                            \
+)                                                                              \
+{                                                                              \
+    return Func(f1, tf2, dimensioned<Type3>(s3));                              \
+}                                                                              \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+(                                                                              \
+    const tmp<DimensionedField<Type1, GeoMesh>>& tf1,                          \
+    const tmp<DimensionedField<Type2, GeoMesh>>& tf2,                          \
+    const dimensioned<Type3>& dt3                                              \
+)                                                                              \
+{                                                                              \
+    const auto& f1 = tf1();                                                    \
+    const auto& f2 = tf2();                                                    \
+                                                                               \
+    auto tres =                                                                \
+        reuseTmpTmpDimensionedField                                            \
+        <ReturnType, Type1, Type1, Type2, GeoMesh>::New                        \
+        (                                                                      \
+            tf1,                                                               \
+            tf2,                                                               \
+            #Func "(" + f1.name() + ',' + f2.name() + ',' + dt3.name() + ')',  \
+            Func(f1.dimensions(), f2.dimensions())                             \
+        );                                                                     \
+                                                                               \
+    Func(tres.ref(), f1, f2, dt3);                                             \
+    tf1.clear();                                                               \
+    tf2.clear();                                                               \
+    return tres;                                                               \
+}                                                                              \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+(                                                                              \
+    const tmp<DimensionedField<Type1, GeoMesh>>& tf1,                          \
+    const tmp<DimensionedField<Type2, GeoMesh>>& tf2,                          \
+    const Type3& s3                                                            \
+)                                                                              \
+{                                                                              \
+    return Func(tf1, tf2, dimensioned<Type3>(s3));                             \
+}
+
+
 // ************************************************************************* //

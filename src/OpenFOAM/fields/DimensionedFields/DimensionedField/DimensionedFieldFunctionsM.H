@@ -326,4 +326,158 @@ tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
     BINARY_TYPE_OPERATOR_FS(ReturnType, Type1, Type2, Op, OpName, OpFunc)
 
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#define TERNARY_FUNCTION(ReturnType, Type1, Type2, Type3, Func)                \
+                                                                               \
+TEMPLATE                                                                       \
+void Func                                                                      \
+(                                                                              \
+    DimensionedField<ReturnType, GeoMesh>& result,                             \
+    const DimensionedField<Type1, GeoMesh>& f1,                                \
+    const DimensionedField<Type2, GeoMesh>& f2,                                \
+    const DimensionedField<Type3, GeoMesh>& f3                                 \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+(                                                                              \
+    const DimensionedField<Type1, GeoMesh>& f1,                                \
+    const DimensionedField<Type2, GeoMesh>& f2,                                \
+    const DimensionedField<Type3, GeoMesh>& f3                                 \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+(                                                                              \
+    const tmp<DimensionedField<Type1, GeoMesh>>& tf1,                          \
+    const DimensionedField<Type2, GeoMesh>& f2,                                \
+    const DimensionedField<Type3, GeoMesh>& f3                                 \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+(                                                                              \
+    const DimensionedField<Type1, GeoMesh>& f1,                                \
+    const tmp<DimensionedField<Type2, GeoMesh>>& tf2,                          \
+    const DimensionedField<Type3, GeoMesh>& f3                                 \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+(                                                                              \
+    const DimensionedField<Type1, GeoMesh>& f1,                                \
+    const DimensionedField<Type2, GeoMesh>& f2,                                \
+    const tmp<DimensionedField<Type3, GeoMesh>>& tf3                           \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+(                                                                              \
+    const tmp<DimensionedField<Type1, GeoMesh>>& tf1,                          \
+    const tmp<DimensionedField<Type2, GeoMesh>>& tf2,                          \
+    const DimensionedField<Type3, GeoMesh>& f3                                 \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+(                                                                              \
+    const tmp<DimensionedField<Type1, GeoMesh>>& tf1,                          \
+    const DimensionedField<Type2, GeoMesh>& f2,                                \
+    const tmp<DimensionedField<Type3, GeoMesh>>& tf3                           \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+(                                                                              \
+    const DimensionedField<Type1, GeoMesh>& f1,                                \
+    const tmp<DimensionedField<Type2, GeoMesh>>& tf2,                          \
+    const tmp<DimensionedField<Type3, GeoMesh>>& tf3                           \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+(                                                                              \
+    const tmp<DimensionedField<Type1, GeoMesh>>& tf1,                          \
+    const tmp<DimensionedField<Type2, GeoMesh>>& tf2,                          \
+    const tmp<DimensionedField<Type3, GeoMesh>>& tf3                           \
+);
+
+
+#define TERNARY_TYPE_FUNCTION_FFS(ReturnType, Type1, Type2, Type3, Func)       \
+                                                                               \
+TEMPLATE                                                                       \
+void Func                                                                      \
+(                                                                              \
+    DimensionedField<ReturnType, GeoMesh>& result,                             \
+    const DimensionedField<Type1, GeoMesh>& f1,                                \
+    const DimensionedField<Type2, GeoMesh>& f2,                                \
+    const dimensioned<Type3>& dt3                                              \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+(                                                                              \
+    const DimensionedField<Type1, GeoMesh>& f1,                                \
+    const DimensionedField<Type2, GeoMesh>& f2,                                \
+    const dimensioned<Type3>& dt3                                              \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+(                                                                              \
+    const DimensionedField<Type1, GeoMesh>& f1,                                \
+    const DimensionedField<Type2, GeoMesh>& f2,                                \
+    const Type3& s3                                                            \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+(                                                                              \
+    const tmp<DimensionedField<Type1, GeoMesh>>& tf1,                          \
+    const DimensionedField<Type2, GeoMesh>& f2,                                \
+    const dimensioned<Type3>& dt3                                              \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+(                                                                              \
+    const tmp<DimensionedField<Type1, GeoMesh>>& tf1,                          \
+    const DimensionedField<Type2, GeoMesh>& f2,                                \
+    const Type3& s3                                                            \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+(                                                                              \
+    const DimensionedField<Type1, GeoMesh>& f1,                                \
+    const tmp<DimensionedField<Type2, GeoMesh>>& tf2,                          \
+    const dimensioned<Type3>& dt3                                              \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+(                                                                              \
+    const DimensionedField<Type1, GeoMesh>& f1,                                \
+    const tmp<DimensionedField<Type2, GeoMesh>>& tf2,                          \
+    const Type3& s3                                                            \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+(                                                                              \
+    const tmp<DimensionedField<Type1, GeoMesh>>& tf1,                          \
+    const tmp<DimensionedField<Type2, GeoMesh>>& tf2,                          \
+    const dimensioned<Type3>& dt3                                              \
+);                                                                             \
+                                                                               \
+TEMPLATE                                                                       \
+tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
+(                                                                              \
+    const tmp<DimensionedField<Type1, GeoMesh>>& tf1,                          \
+    const tmp<DimensionedField<Type2, GeoMesh>>& tf2,                          \
+    const Type3& s3                                                            \
+);
+
+
 // ************************************************************************* //
