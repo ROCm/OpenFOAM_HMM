@@ -170,7 +170,7 @@ void Foam::totalTemperatureFvPatchScalarField::updateCoeffs()
 
     operator==
     (
-        T0_/(1.0 + 0.5*psip*gM1ByG*(1.0 - pos0(phip))*magSqr(Up))
+        T0_/(1.0 + 0.5*psip*gM1ByG*(neg(phip))*magSqr(Up))
     );
 
     fixedValueFvPatchScalarField::updateCoeffs();

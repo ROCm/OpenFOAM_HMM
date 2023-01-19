@@ -136,7 +136,7 @@ void Foam::prghTotalHydrostaticPressureFvPatchScalarField::updateCoeffs()
     operator==
     (
         ph_rghp
-      - 0.5*rhop*(1.0 - pos0(phip))*magSqr(Up)
+      - 0.5*rhop*(neg(phip))*magSqr(Up)
     );
 
     fixedValueFvPatchScalarField::updateCoeffs();

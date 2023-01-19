@@ -152,7 +152,7 @@ void Foam::SRFFreestreamVelocityFvPatchVectorField::updateCoeffs()
     }
 
     // Set the inlet-outlet choice based on the direction of the freestream
-    valueFraction() = 1.0 - pos0(refValue() & patch().Sf());
+    valueFraction() = neg(refValue() & patch().Sf());
 
     mixedFvPatchField<vector>::updateCoeffs();
 }

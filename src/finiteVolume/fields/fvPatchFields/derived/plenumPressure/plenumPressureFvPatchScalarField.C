@@ -272,7 +272,12 @@ void Foam::plenumPressureFvPatchScalarField::updateCoeffs()
     // Limit to prevent outflow
     const scalarField p_new
     (
-        (1.0 - pos0(phi))*t*plenumPressure + pos0(phi)*max(p, plenumPressure)
+        lerp
+        (
+            t*plenumPressure,           // Negative phi
+            max(p, plenumPressure),     // Positive phi
+            pos0(phi)                   // 0-1 selector
+        )
     );
 
     // Relaxation fraction
@@ -280,7 +285,7 @@ void Foam::plenumPressureFvPatchScalarField::updateCoeffs()
     const scalar fraction = oneByFraction < 1.0 ? 1.0 : 1.0/oneByFraction;
 
     // Set the new value
-    operator==((1.0 - fraction)*p_old + fraction*p_new);
+    operator==(lerp(p_old, p_new, fraction));
     fixedValueFvPatchScalarField::updateCoeffs();
 }
 

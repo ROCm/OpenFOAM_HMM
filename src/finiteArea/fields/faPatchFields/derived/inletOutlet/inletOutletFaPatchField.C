@@ -126,7 +126,7 @@ void Foam::inletOutletFaPatchField<Type>::updateCoeffs()
     const Field<scalar>& phip =
         this->patch().template lookupPatchField<edgeScalarField>(phiName_);
 
-    this->valueFraction() = 1.0 - pos(phip);
+    this->valueFraction() = neg(phip);
 
     mixedFaPatchField<Type>::updateCoeffs();
 }

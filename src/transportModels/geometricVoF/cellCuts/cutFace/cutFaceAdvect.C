@@ -412,7 +412,7 @@ Foam::scalar Foam::cutFaceAdvect::timeIntegratedArea
         // If all cuttings are in the future but non of them within [0,dt] then
         // if cell is filling up (Un0 > 0) face must be empty during whole time
         // interval
-        tIntArea = magSf * dt * (1 - pos0(Un0));
+        tIntArea = magSf * dt * neg(Un0);
         return tIntArea;
     }
 
@@ -437,7 +437,7 @@ Foam::scalar Foam::cutFaceAdvect::timeIntegratedArea
         // If Un0 > 0 cell is filling up and it must initially be empty.
         // If Un0 < 0 cell must initially be full(y immersed in fluid A).
         time = firstTime;
-        initialArea = magSf * (1.0 - pos0(Un0));
+        initialArea = magSf * neg(Un0);
         tIntArea = initialArea * time;
         cutPoints(fPts, pTimes, time, FIIL);
     }
@@ -669,7 +669,7 @@ Foam::scalar Foam::cutFaceAdvect::timeIntegratedArea
         // If all cuttings are in the future but non of them within [0,dt] then
         // if cell is filling up (Un0 > 0) face must be empty during whole time
         // interval
-        tIntArea = magSf * dt * (1 - pos0(Un0));
+        tIntArea = magSf * dt * neg(Un0);
         return tIntArea;
     }
 
@@ -694,7 +694,7 @@ Foam::scalar Foam::cutFaceAdvect::timeIntegratedArea
         // If Un0 > 0 cell is filling up and it must initially be empty.
         // If Un0 < 0 cell must initially be full(y immersed in fluid A).
         time = firstTime;
-        initialArea = magSf * (1.0 - pos0(Un0));
+        initialArea = magSf * neg(Un0);
         tIntArea = initialArea * time;
         cutPoints(faceI, time, FIIL);
     }

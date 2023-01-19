@@ -215,7 +215,7 @@ void Foam::prghPermeableAlphaTotalPressureFvPatchScalarField::updateSnGrad
     tmp<scalarField> p
     (
         p0_->value(t)
-      - 0.5*rhop*(1.0 - pos0(phip))*magSqr(Up)
+      - 0.5*rhop*(neg(phip))*magSqr(Up)
       - rhop*((g.value() & patch().Cf()) - ghRef.value())
     );
 

@@ -140,7 +140,7 @@ updateCoeffs()
         patch().lookupPatchField<surfaceScalarField>(this->phiName_);
 
     this->refValue() = 1.5*sqr(intensity_)*magSqr(Up);
-    this->valueFraction() = 1.0 - pos0(phip);
+    this->valueFraction() = neg(phip);
 
     inletOutletFvPatchScalarField::updateCoeffs();
 }
