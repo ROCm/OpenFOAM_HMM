@@ -212,7 +212,7 @@ void Foam::fixedJumpFvPatchField<Type>::relax()
         return;
     }
 
-    jump_ = relaxFactor_*jump_ + (1 - relaxFactor_)*jump0_;
+    jump_ = lerp(jump0_, jump_, relaxFactor_);
 
     if (timeIndex_ != this->db().time().timeIndex())
     {

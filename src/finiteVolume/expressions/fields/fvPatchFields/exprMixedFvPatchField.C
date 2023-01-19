@@ -234,25 +234,14 @@ Foam::exprMixedFvPatchField<Type>::exprMixedFvPatchField
     }
     else
     {
-        // Emulate mixedFvPatchField<Type>::evaluate,
+        // Like mixedFvPatchField<Type>::evaluate()
         // but avoid our own updateCoeffs
         if (!this->updated())
         {
-            this->parent_bctype::updateCoeffs();
+            mixedFvPatchField<Type>::updateCoeffs();
         }
 
-        Field<Type>::operator=
-        (
-            this->valueFraction()*this->refValue()
-          +
-            (1.0 - this->valueFraction())*
-            (
-                this->patchInternalField()
-              + this->refGrad()/this->patch().deltaCoeffs()
-            )
-        );
-
-        fvPatchField<Type>::evaluate();
+        mixedFvPatchField<Type>::evaluate();
     }
 }
 

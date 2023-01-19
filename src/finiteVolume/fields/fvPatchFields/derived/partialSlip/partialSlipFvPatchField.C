@@ -153,8 +153,12 @@ Foam::partialSlipFvPatchField<Type>::snGrad() const
 
     return
     (
-        valueFraction_*refValue_
-      + (1.0 - valueFraction_)*transform(I - sqr(nHat), pif) - pif
+        lerp
+        (
+            transform(I - sqr(nHat), pif),
+            refValue_,
+            valueFraction_
+        ) - pif
     )*this->patch().deltaCoeffs();
 }
 
@@ -174,10 +178,12 @@ void Foam::partialSlipFvPatchField<Type>::evaluate
 
     Field<Type>::operator=
     (
-        valueFraction_*refValue_
-      +
-        (1.0 - valueFraction_)
-       *transform(I - sqr(nHat), this->patchInternalField())
+        lerp
+        (
+            transform(I - sqr(nHat), this->patchInternalField()),
+            refValue_,
+            valueFraction_
+        )
     );
 
     parent_bctype::evaluate();

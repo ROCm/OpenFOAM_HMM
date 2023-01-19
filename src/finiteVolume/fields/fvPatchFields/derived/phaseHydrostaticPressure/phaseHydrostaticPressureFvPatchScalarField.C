@@ -180,7 +180,7 @@ void Foam::phaseHydrostaticPressureFvPatchScalarField::operator=
 {
     fvPatchScalarField::operator=
     (
-        valueFraction()*refValue() + (1 - valueFraction())*ptf
+        lerp(ptf, refValue(), valueFraction())
     );
 }
 
