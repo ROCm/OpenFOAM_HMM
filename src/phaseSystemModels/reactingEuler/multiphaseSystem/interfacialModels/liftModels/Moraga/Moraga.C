@@ -87,11 +87,8 @@ Foam::tmp<Foam::volScalarField> Foam::liftModels::Moraga::Cl() const
             << endl;
     }
 
-    Re.min(1200.0);
-    Re.max(18800.0);
-
-    sqrSr.min(0.0016);
-    sqrSr.max(0.04);
+    Re.clamp_range(1200.0, 18800.0);
+    sqrSr.clamp_range(0.0016, 0.04);
 
     return 0.2*exp(- Re*sqrSr/3.6e5 - 0.12)*exp(Re*sqrSr/3.0e7);
 }

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -127,9 +127,10 @@ public:
 
         enum limitType : unsigned
         {
-            MIN = 0x1,          //!< limit by minimum value
-            MAX = 0x2,          //!< limit by maximum value
-            BOTH = (MIN | MAX)  //!< limit by both minimum and maximum values
+            CLAMP_NONE = 0,     //!< No limit
+            CLAMP_MIN = 0x1,    //!< Clamp minimum value
+            CLAMP_MAX = 0x2,    //!< Clamp maximum value
+            CLAMP_RANGE = (CLAMP_MIN | CLAMP_MAX)  //!< Clamp min/max
         };
 
 
@@ -140,11 +141,11 @@ protected:
         //- Limit type names
         static const Enum<limitType> limitTypeNames_;
 
-        //- Limiting type
-        limitType limit_;
-
         //- Fields to limit
         volFieldSelection fieldSet_;
+
+        //- Limiting type
+        limitType withBounds_;
 
         //- Minimum limit
         scalar min_;

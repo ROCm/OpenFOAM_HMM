@@ -47,23 +47,23 @@ bool Foam::functionObjects::limitFields::limitField(const word& fieldName)
 
     const dimensionedScalar eps("eps", field.dimensions(), ROOTVSMALL);
 
-    if (limit_ & MIN)
+    if (withBounds_ & limitType::CLAMP_MIN)
     {
         volScalarField mField(typeName + ":mag" + field.name(), mag(field));
         Log << " min(|" << gMin(mField) << "|)";
         //field.normalise();
         field /= mag(field) + eps;
-        mField.max(dimensionedScalar("min", field.dimensions(), min_));
+        mField.clamp_min(min_);
         field *= mField;
     }
 
-    if (limit_ & MAX)
+    if (withBounds_ & limitType::CLAMP_MAX)
     {
         volScalarField mField(typeName + ":mag" + field.name(), mag(field));
         Log << " max(|" << gMax(mField) << "|)";
         //field.normalise();
         field /= mag(field) + eps;
-        mField.min(dimensionedScalar("max", field.dimensions(), max_));
+        mField.clamp_max(max_);
         field *= mField;
     }
 

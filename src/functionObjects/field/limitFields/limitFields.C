@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd
+    Copyright (C) 2019-2023 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,9 +46,10 @@ const Foam::Enum
 >
 Foam::functionObjects::limitFields::limitTypeNames_
 ({
-    { limitType::MIN, "min" },
-    { limitType::MAX, "max" },
-    { limitType::BOTH, "both" },
+    { limitType::CLAMP_MIN, "min" },
+    { limitType::CLAMP_MAX, "max" },
+    { limitType::CLAMP_RANGE, "range" },
+    { limitType::CLAMP_RANGE, "both" },
 });
 
 
@@ -67,16 +68,31 @@ bool Foam::functionObjects::limitFields::limitScalarField
 
     auto& field = *fieldPtr;
 
-    if (limit_ & MIN)
+    if (limitType::CLAMP_NONE != withBounds_)
     {
-        Log << ": min(" << gMin(field) << ")";
-        field.max(dimensionedScalar("", field.dimensions(), min_));
+        MinMax<scalar> currentRange = gMinMax(field);
+
+        if (withBounds_ & limitType::CLAMP_MIN)
+        {
+            Log << ": min(" << currentRange.min() << ')';
+        }
+        if (withBounds_ & limitType::CLAMP_MAX)
+        {
+            Log << ": max(" << currentRange.max() << ')';
+        }
     }
 
-    if (limit_ & MAX)
+    if (limitType::CLAMP_MIN == withBounds_)
     {
-        Log << ": max(" << gMax(field) << ")";
-        field.min(dimensionedScalar("", field.dimensions(), max_));
+        field.clamp_min(min_);
+    }
+    else if (limitType::CLAMP_MAX == withBounds_)
+    {
+        field.clamp_max(max_);
+    }
+    else if (limitType::CLAMP_RANGE == withBounds_)
+    {
+        field.clamp_range(min_, max_);
     }
 
     return true;
@@ -93,8 +109,8 @@ Foam::functionObjects::limitFields::limitFields
 )
 :
     fvMeshFunctionObject(name, runTime, dict),
-    limit_(MIN),
     fieldSet_(mesh_),
+    withBounds_(limitType::CLAMP_NONE),
     min_(-VGREAT),
     max_(VGREAT)
 {
@@ -106,19 +122,21 @@ Foam::functionObjects::limitFields::limitFields
 
 bool Foam::functionObjects::limitFields::read(const dictionary& dict)
 {
+    withBounds_ = limitType::CLAMP_NONE;
+
     if (fvMeshFunctionObject::read(dict))
     {
         Info<< type() << " " << name() << ":" << nl;
 
-        limit_ = limitTypeNames_.get("limit", dict);
+        withBounds_ = limitTypeNames_.get("limit", dict);
 
-        if (limit_ & MIN)
+        if (withBounds_ & limitType::CLAMP_MIN)
         {
             min_ = dict.get<scalar>("min");
             Info<< "    Imposing lower limit " << min_ << nl;
         }
 
-        if (limit_ & MAX)
+        if (withBounds_ & limitType::CLAMP_MAX)
         {
             max_ = dict.get<scalar>("max");
             Info<< "    Imposing upper limit " << max_ << nl;

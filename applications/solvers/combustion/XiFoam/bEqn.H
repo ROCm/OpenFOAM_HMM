@@ -171,10 +171,7 @@ if (ign.ignited())
 
         fvOptions.correct(Su);
 
-        // Limit the maximum Su
-        // ~~~~~~~~~~~~~~~~~~~~
-        Su.min(SuMax);
-        Su.max(SuMin);
+        Su.clamp_range(SuMin, SuMax);
     }
     else
     {

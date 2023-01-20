@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -448,8 +448,7 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
     }
 
     indicator.correctBoundaryConditions();
-    indicator.min(1.0);
-    indicator.max(0.0);
+    indicator.clamp_range(zero_one{});
 
     // Update the blended surface field
     auto& surBlended = mesh_.lookupObjectRef<surfaceScalarField>(resultName_);

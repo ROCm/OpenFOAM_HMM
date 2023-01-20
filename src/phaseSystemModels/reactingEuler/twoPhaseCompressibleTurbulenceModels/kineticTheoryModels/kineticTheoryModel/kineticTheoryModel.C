@@ -526,8 +526,7 @@ void Foam::RASModels::kineticTheoryModel::correct()
         kappa_ = conductivityModel_->kappa(alpha, Theta_, gs0_, rho, da, e_);
     }
 
-    Theta_.max(0);
-    Theta_.min(100);
+    Theta_.clamp_range(0, 100);
 
     {
         // particle viscosity (Table 3.2, p.47)
@@ -559,7 +558,8 @@ void Foam::RASModels::kineticTheoryModel::correct()
         );
 
         // Limit viscosity and add frictional viscosity
-        nut_.min(maxNut_);
+        nut_.clamp_max(maxNut_);
+
         nuFric_ = min(nuFric_, maxNut_ - nut_);
         nut_ += nuFric_;
     }

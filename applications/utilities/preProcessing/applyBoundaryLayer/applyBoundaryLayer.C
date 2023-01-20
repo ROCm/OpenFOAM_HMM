@@ -92,7 +92,7 @@ void blendField
         volScalarField fld(fieldHeader, mesh);
         scalarField& pf = fld.primitiveFieldRef();
         pf = (1 - mask)*pf + mask*boundaryLayerField;
-        fld.max(SMALL);
+        fld.clamp_min(SMALL);
 
         // Correct the processor patches only.
         // Do not correct BC
@@ -131,7 +131,7 @@ void calcOmegaField
         scalarField& pf = omega.primitiveFieldRef();
 
         pf = (1 - mask)*pf + mask*epsilonBL/(Cmu*kBL + SMALL);
-        omega.max(SMALL);
+        omega.clamp_min(SMALL);
 
         // Correct the processor patches only.
         // Do not correct BC

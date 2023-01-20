@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -478,18 +478,23 @@ thermoSingleLayer::thermoSingleLayer
     ),
     phaseChange_(phaseChangeModel::New(*this, coeffs())),
     radiation_(filmRadiationModel::New(*this, coeffs())),
-    Tmin_(-VGREAT),
-    Tmax_(VGREAT)
+    withTbounds_(limitType::CLAMP_NONE),
+    Tbounds_(0, 5000)
 {
-    if (coeffs().readIfPresent("Tmin", Tmin_))
+    unsigned userLimits(limitType::CLAMP_NONE);
+
+    if (coeffs().readIfPresent("Tmin", Tbounds_.min()))
     {
-        Info<< "    limiting minimum temperature to " << Tmin_ << endl;
+        userLimits |= limitType::CLAMP_MIN;
+        Info<< "    limiting minimum temperature to " << Tbounds_.min() << nl;
     }
 
-    if (coeffs().readIfPresent("Tmax", Tmax_))
+    if (coeffs().readIfPresent("Tmax", Tbounds_.max()))
     {
-        Info<< "    limiting maximum temperature to " << Tmax_ << endl;
+        userLimits |= limitType::CLAMP_MAX;
+        Info<< "    limiting maximum temperature to " << Tbounds_.max() << nl;
     }
+    withTbounds_ = limitType(userLimits);
 
     if (thermo_.hasMultiComponentCarrier())
     {

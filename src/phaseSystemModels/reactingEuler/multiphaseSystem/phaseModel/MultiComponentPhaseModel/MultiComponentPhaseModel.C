@@ -124,14 +124,14 @@ void Foam::MultiComponentPhaseModel<BasePhaseModel>::correctThermo()
     if (inertIndex_ != -1)
     {
         Yi[inertIndex_] = scalar(1) - Yt;
-        Yi[inertIndex_].max(0);
+        Yi[inertIndex_].clamp_min(0);
     }
     else
     {
         forAll(Yi, i)
         {
             Yi[i] /= Yt;
-            Yi[i].max(0);
+            Yi[i].clamp_min(0);
         }
     }
 

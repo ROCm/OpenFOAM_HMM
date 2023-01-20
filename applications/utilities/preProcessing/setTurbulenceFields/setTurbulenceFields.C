@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -241,13 +241,7 @@ void calcF
     solve(fEqn);
 
     // (M:p. 2)
-    const dimensioned<scalarMinMax> fMinMax
-    (
-        dimless,
-        scalarMinMax(Zero, scalar(1) - Foam::exp(-scalar(400)/scalar(50)))
-    );
-
-    f.clip(fMinMax);
+    f.clamp_range(0, scalar(1) - Foam::exp(-scalar(400)/scalar(50)));
 }
 
 

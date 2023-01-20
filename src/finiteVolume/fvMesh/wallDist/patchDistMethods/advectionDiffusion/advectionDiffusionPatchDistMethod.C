@@ -153,7 +153,7 @@ bool Foam::patchDistMethods::advectionDiffusion::correct
     // Need to stabilise the y for overset meshes since the holed cells
     // keep the initial value (0.0) so the gradient of that will be
     // zero as well. Turbulence models do not like zero wall distance.
-    y.max(SMALL);
+    y.clamp_min(SMALL);
 
     // Only calculate n if the field is defined
     if (notNull(n))
