@@ -111,11 +111,12 @@ Foam::isoSurfacePoint::adaptPatchFields
                 sliceFldBf[patchi]
             );
 
-            const scalarField& w = mesh.weights().boundaryField()[patchi];
-
-            tmp<Field<Type>> f =
-                w*pfld.patchInternalField()
-              + (1.0-w)*pfld.patchNeighbourField();
+            tmp<Field<Type>> f = lerp
+            (
+                pfld.patchNeighbourField(),
+                pfld.patchInternalField(),
+                mesh.weights().boundaryField()[patchi]
+            );
 
             bitSet isCollocated
             (

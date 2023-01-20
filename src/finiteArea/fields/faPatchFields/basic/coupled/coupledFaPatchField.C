@@ -130,8 +130,12 @@ void Foam::coupledFaPatchField<Type>::evaluate(const Pstream::commsTypes)
 {
     Field<Type>::operator=
     (
-        this->patch().weights()*this->patchInternalField()
-      + (1.0 - this->patch().weights())*patchNeighbourField()
+        lerp
+        (
+            this->patchNeighbourField(),
+            this->patchInternalField(),
+            this->patch().weights()
+        )
     );
 }
 
