@@ -480,6 +480,74 @@ BINARY_TYPE_FUNCTION(Type, Type, Type, cmptMultiply)
 BINARY_TYPE_FUNCTION(Type, Type, Type, cmptDivide)
 
 
+// ------------------------------------------------------------------------- //
+
+// Clamp Methods
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+void clamp
+(
+    GeometricField<Type, PatchField, GeoMesh>& result,
+    const GeometricField<Type, PatchField, GeoMesh>& f1,
+    const Foam::zero_one
+)
+{
+    const MinMax<Type> range(Foam::zero_one{});
+
+    clamp(result.primitiveFieldRef(), f1.primitiveField(), range);
+    clamp(result.boundaryFieldRef(), f1.boundaryField(), range);
+    result.oriented() = f1.oriented();
+}
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+tmp<GeometricField<Type, PatchField, GeoMesh>>
+clamp
+(
+    const GeometricField<Type, PatchField, GeoMesh>& f1,
+    const Foam::zero_one
+)
+{
+    auto tres =
+        reuseTmpGeometricField<Type, Type, PatchField, GeoMesh>::New
+        (
+            f1,
+            "clamp01(" + f1.name() + ')',
+            f1.dimensions()
+        );
+
+    clamp(tres.ref(), f1, Foam::zero_one{});
+
+    return tres;
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+tmp<GeometricField<Type, PatchField, GeoMesh>>
+clamp
+(
+    const tmp<GeometricField<Type, PatchField, GeoMesh>>& tf1,
+    const Foam::zero_one
+)
+{
+    const auto& f1 = tf1();
+
+    auto tres =
+        reuseTmpGeometricField<Type, Type, PatchField, GeoMesh>::New
+        (
+            tf1,
+            "clamp01(" + f1.name() + ')',
+            f1.dimensions()
+        );
+
+    clamp(tres.ref(), f1, Foam::zero_one{});
+
+    tf1.clear();
+    return tres;
+}
+
+BINARY_TYPE_FUNCTION_FS(Type, Type, MinMax<Type>, clamp)
+
+
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
 UNARY_OPERATOR(Type, Type, -, negate, transform)

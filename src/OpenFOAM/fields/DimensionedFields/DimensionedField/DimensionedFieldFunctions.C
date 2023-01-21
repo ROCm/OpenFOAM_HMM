@@ -319,7 +319,72 @@ BINARY_TYPE_FUNCTION(Type, Type, Type, min)
 BINARY_TYPE_FUNCTION(Type, Type, Type, cmptMultiply)
 BINARY_TYPE_FUNCTION(Type, Type, Type, cmptDivide)
 
-BINARY_TYPE_FUNCTION_FS(Type, Type, MinMax<Type>, clip)
+
+// ------------------------------------------------------------------------- //
+
+// Clamp Methods
+
+template<class Type, class GeoMesh>
+void clamp
+(
+    DimensionedField<Type, GeoMesh>& result,
+    const DimensionedField<Type, GeoMesh>& f1,
+    const Foam::zero_one
+)
+{
+    const MinMax<Type> range(Foam::zero_one{});
+
+    clamp(result.field(), f1.field(), range);
+    result.oriented() = f1.oriented();
+}
+
+template<class Type, class GeoMesh>
+tmp<DimensionedField<Type, GeoMesh>>
+clamp
+(
+    const DimensionedField<Type, GeoMesh>& f1,
+    const Foam::zero_one
+)
+{
+    auto tres =
+        reuseTmpDimensionedField<Type, Type, GeoMesh>::New
+        (
+            f1,
+            "clamp01(" + f1.name() + ')',
+            f1.dimensions()
+        );
+
+    clamp(tres.ref(), f1, Foam::zero_one{});
+
+    return tres;
+}
+
+
+template<class Type, class GeoMesh>
+tmp<DimensionedField<Type, GeoMesh>>
+clamp
+(
+    const tmp<DimensionedField<Type, GeoMesh>>& tf1,
+    const Foam::zero_one
+)
+{
+    const auto& f1 = tf1();
+
+    auto tres =
+        reuseTmpDimensionedField<Type, Type, GeoMesh>::New
+        (
+            tf1,
+            "clamp01(" + f1.name() + ')',
+            f1.dimensions()
+        );
+
+    clamp(tres.field(), f1, Foam::zero_one{});
+
+    tf1.clear();
+    return tres;
+}
+
+BINARY_TYPE_FUNCTION_FS(Type, Type, MinMax<Type>, clamp)
 
 
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //

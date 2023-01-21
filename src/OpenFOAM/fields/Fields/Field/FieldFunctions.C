@@ -700,7 +700,33 @@ void clamp
     }
 }
 
+template<class Type>
+void clamp
+(
+    Field<Type>& result,
+    const UList<Type>& f1,
+    const Foam::zero_one&   // Note: macros generate a const reference
+)
+{
+    if (result.cdata() == f1.cdata())
+    {
+        // Apply in-place
+        result.clamp_range(Foam::zero_one{});
+    }
+    else
+    {
+        std::transform
+        (
+            f1.cbegin(),
+            f1.cbegin(result.size()),
+            result.begin(),
+            clampOp<Type>(Foam::zero_one{})
+        );
+    }
+}
+
 BINARY_FUNCTION_INTERFACE_FS(Type, Type, MinMax<Type>, clamp)
+BINARY_FUNCTION_INTERFACE_FS(Type, Type, Foam::zero_one, clamp)
 
 
 BINARY_FUNCTION(Type, Type, Type, max)
