@@ -79,8 +79,8 @@ bool Foam::laminarModels::generalizedNewtonianViscosityModels::Casson::read
 
     coeffs.readEntry("m", m_);
     coeffs.readEntry("tau0", tau0_);
-    coeffs.readEntry("nuMin_", nuMin_);
-    coeffs.readEntry("nuMax_", nuMax_);
+    coeffs.readEntry("nuMin", nuMin_);
+    coeffs.readEntry("nuMax", nuMax_);
 
     return true;
 }
