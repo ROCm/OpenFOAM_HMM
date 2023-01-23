@@ -68,7 +68,7 @@ phaseHydrostaticPressureFvPatchScalarField
     pRefValue_(dict.get<scalar>("pRefValue")),
     pRefPoint_(dict.lookup("pRefPoint"))
 {
-    this->patchType() = dict.getOrDefault<word>("patchType", word::null);
+    fvPatchFieldBase::readDict(dict);
 
     this->refValue() = pRefValue_;
 

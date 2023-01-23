@@ -71,7 +71,7 @@ Foam::outletInletFvPatchField<Type>::outletInletFvPatchField
     mixedFvPatchField<Type>(p, iF),
     phiName_(dict.getOrDefault<word>("phi", "phi"))
 {
-    this->patchType() = dict.getOrDefault<word>("patchType", word::null);
+    fvPatchFieldBase::readDict(dict);
 
     this->refValue() = Field<Type>("outletValue", dict, p.size());
 

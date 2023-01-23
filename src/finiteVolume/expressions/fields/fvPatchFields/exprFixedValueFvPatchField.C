@@ -121,9 +121,8 @@ Foam::exprFixedValueFvPatchField<Type>::exprFixedValueFvPatchField
 
     driver_.readDict(dict_);
 
-    // Similar to fvPatchField constructor, which we have bypassed
-    dict.readIfPresent("patchType", this->patchType(), keyType::LITERAL);
-
+    // Since we bypassed dictionary constructor
+    fvPatchFieldBase::readDict(dict);
 
     const auto* hasValue = dict.findEntry("value", keyType::LITERAL);
 

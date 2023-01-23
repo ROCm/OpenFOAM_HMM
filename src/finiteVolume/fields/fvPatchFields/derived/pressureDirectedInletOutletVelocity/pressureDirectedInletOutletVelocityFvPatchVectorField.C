@@ -81,7 +81,7 @@ pressureDirectedInletOutletVelocityFvPatchVectorField
     rhoName_(dict.getOrDefault<word>("rho", "rho")),
     inletDir_("inletDirection", dict, p.size())
 {
-    patchType() = dict.getOrDefault<word>("patchType", word::null);
+    fvPatchFieldBase::readDict(dict);
     fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
     refValue() = *this;
     refGrad() = Zero;

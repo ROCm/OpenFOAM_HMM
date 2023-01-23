@@ -81,7 +81,7 @@ Foam::variableHeightFlowRateFvPatchScalarField
     lowerBound_(dict.get<scalar>("lowerBound")),
     upperBound_(dict.get<scalar>("upperBound"))
 {
-    patchType() = dict.getOrDefault<word>("patchType", word::null);
+    fvPatchFieldBase::readDict(dict);
     this->refValue() = 0.0;
 
     if (dict.found("value"))

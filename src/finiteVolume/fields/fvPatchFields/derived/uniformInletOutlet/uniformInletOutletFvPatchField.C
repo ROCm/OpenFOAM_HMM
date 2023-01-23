@@ -61,7 +61,8 @@ Foam::uniformInletOutletFvPatchField<Type>::uniformInletOutletFvPatchField
         Function1<Type>::New("uniformInletValue", dict, &this->db())
     )
 {
-    this->patchType() = dict.getOrDefault<word>("patchType", word::null);
+    fvPatchFieldBase::readDict(dict);
+
     this->refValue() =
         uniformInletValue_->value(this->db().time().timeOutputValue());
 

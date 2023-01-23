@@ -78,7 +78,7 @@ Foam::outletPhaseMeanVelocityFvPatchVectorField
     Umean_(dict.get<scalar>("Umean")),
     alphaName_(dict.lookup("alpha"))
 {
-    patchType() = dict.getOrDefault<word>("patchType", word::null);
+    fvPatchFieldBase::readDict(dict);
 
     refValue() = Zero;
     refGrad() = Zero;

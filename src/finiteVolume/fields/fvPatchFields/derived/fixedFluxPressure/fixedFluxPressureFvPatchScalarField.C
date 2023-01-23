@@ -55,7 +55,8 @@ Foam::fixedFluxPressureFvPatchScalarField::fixedFluxPressureFvPatchScalarField
     fixedGradientFvPatchScalarField(p, iF),
     curTimeIndex_(-1)
 {
-    patchType() = dict.getOrDefault<word>("patchType", word::null);
+    fvPatchFieldBase::readDict(dict);
+
     if (dict.found("value") && dict.found("gradient"))
     {
         fvPatchField<scalar>::operator=

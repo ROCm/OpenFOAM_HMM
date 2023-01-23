@@ -79,7 +79,7 @@ pressureInletOutletParSlipVelocityFvPatchVectorField
     phiName_(dict.getOrDefault<word>("phi", "phi")),
     rhoName_(dict.getOrDefault<word>("rho", "rho"))
 {
-    patchType() = dict.getOrDefault<word>("patchType", word::null);
+    fvPatchFieldBase::readDict(dict);
     fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
     refValue() = *this;
     refGrad() = Zero;

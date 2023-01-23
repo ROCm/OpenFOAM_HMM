@@ -69,7 +69,7 @@ freeSurfaceVelocityFvPatchVectorField
 :
     fixedGradientFvPatchVectorField(p, iF)
 {
-    patchType() = dict.getOrDefault<word>("patchType", word::null);
+    fvPatchFieldBase::readDict(dict);
     fvPatchVectorField::operator=(patchInternalField());
 }
 

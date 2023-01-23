@@ -76,7 +76,7 @@ turbulentIntensityKineticEnergyInletFvPatchScalarField
     intensity_(dict.get<scalar>("intensity")),
     UName_(dict.getOrDefault<word>("U", "U"))
 {
-    this->patchType() = dict.getOrDefault<word>("patchType", word::null);
+    fvPatchFieldBase::readDict(dict);
     this->phiName_ = dict.getOrDefault<word>("phi", "phi");
 
     if (intensity_ < 0 || intensity_ > 1)

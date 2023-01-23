@@ -91,7 +91,6 @@ rotatingPressureInletOutletVelocityFvPatchVectorField
     pressureInletOutletVelocityFvPatchVectorField(p, iF, dict),
     omega_(Function1<vector>::New("omega", dict, &db()))
 {
-    patchType() = dict.getOrDefault<word>("patchType", word::null);
     calcTangentialVelocity();
 }
 

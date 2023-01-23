@@ -72,7 +72,7 @@ supersonicFreestreamFvPatchVectorField
     TInf_(dict.get<scalar>("TInf")),
     gamma_(dict.get<scalar>("gamma"))
 {
-    patchType() = dict.getOrDefault<word>("patchType", word::null);
+    fvPatchFieldBase::readDict(dict);
 
     if (dict.found("value"))
     {

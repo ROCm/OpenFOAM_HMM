@@ -71,7 +71,7 @@ fixedNormalInletOutletVelocityFvPatchVectorField
         fvPatchVectorField::New(p, iF, dict.subDict("normalVelocity"))
     )
 {
-    patchType() = dict.getOrDefault<word>("patchType", word::null);
+    fvPatchFieldBase::readDict(dict);
     fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
     refValue() = normalVelocity();
     refGrad() = Zero;

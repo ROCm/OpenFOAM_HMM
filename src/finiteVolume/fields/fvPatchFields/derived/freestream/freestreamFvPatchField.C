@@ -53,7 +53,7 @@ Foam::freestreamFvPatchField<Type>::freestreamFvPatchField
     inletOutletFvPatchField<Type>(p, iF),
     freestreamBCPtr_()
 {
-    this->patchType() = dict.getOrDefault<word>("patchType", word::null);
+    fvPatchFieldBase::readDict(dict);
 
     this->phiName_ = dict.getOrDefault<word>("phi", "phi");
 

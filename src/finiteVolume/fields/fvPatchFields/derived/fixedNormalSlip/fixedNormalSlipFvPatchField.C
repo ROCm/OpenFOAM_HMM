@@ -71,7 +71,7 @@ Foam::fixedNormalSlipFvPatchField<Type>::fixedNormalSlipFvPatchField
     fixedValue_("fixedValue", dict, p.size()),
     writeValue_(dict.getOrDefault("writeValue", false))
 {
-    this->patchType() = dict.getOrDefault<word>("patchType", word::null);
+    fvPatchFieldBase::readDict(dict);
     evaluate();
 }
 

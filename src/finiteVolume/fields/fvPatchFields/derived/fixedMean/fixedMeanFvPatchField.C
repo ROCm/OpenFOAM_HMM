@@ -53,9 +53,7 @@ Foam::fixedMeanFvPatchField<Type>::fixedMeanFvPatchField
 :
     fixedValueFvPatchField<Type>(p, iF, dict),
     meanValue_(Function1<Type>::New("meanValue", dict, &this->db()))
-{
-    this->patchType() = dict.getOrDefault<word>("patchType", word::null);
-}
+{}
 
 
 template<class Type>

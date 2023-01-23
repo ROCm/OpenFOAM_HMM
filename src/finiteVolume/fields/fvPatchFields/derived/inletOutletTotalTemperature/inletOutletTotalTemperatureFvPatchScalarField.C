@@ -84,7 +84,7 @@ inletOutletTotalTemperatureFvPatchScalarField
     gamma_(dict.get<scalar>("gamma")),
     T0_("T0", dict, p.size())
 {
-    this->patchType() = dict.getOrDefault<word>("patchType", word::null);
+    fvPatchFieldBase::readDict(dict);
 
     this->phiName_ = dict.getOrDefault<word>("phi", "phi");
 

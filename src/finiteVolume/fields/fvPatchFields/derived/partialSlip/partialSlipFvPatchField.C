@@ -74,7 +74,7 @@ Foam::partialSlipFvPatchField<Type>::partialSlipFvPatchField
     valueFraction_("valueFraction", dict, p.size()),
     writeValue_(dict.getOrDefault("writeValue", false))
 {
-    this->patchType() = dict.getOrDefault<word>("patchType", word::null);
+    fvPatchFieldBase::readDict(dict);
 
     // Backwards compatibility - leave refValue as zero unless specified
     if (dict.found("refValue"))

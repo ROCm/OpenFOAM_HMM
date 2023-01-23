@@ -80,7 +80,7 @@ pressureInletOutletVelocityFvPatchVectorField
     directionMixedFvPatchVectorField(p, iF),
     phiName_(dict.getOrDefault<word>("phi", "phi"))
 {
-    patchType() = dict.getOrDefault<word>("patchType", word::null);
+    fvPatchFieldBase::readDict(dict);
     fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
 
     if (dict.found("tangentialVelocity"))

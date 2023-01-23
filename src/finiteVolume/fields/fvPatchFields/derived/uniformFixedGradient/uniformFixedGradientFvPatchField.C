@@ -69,7 +69,7 @@ Foam::uniformFixedGradientFvPatchField<Type>::uniformFixedGradientFvPatchField
         PatchFunction1<Type>::New(p.patch(), "uniformGradient", dict)
     )
 {
-    this->patchType() = dict.getOrDefault<word>("patchType", word::null);
+    fvPatchFieldBase::readDict(dict);
     this->evaluate();
 }
 
