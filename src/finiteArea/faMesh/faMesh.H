@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2021-2022 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -616,6 +616,10 @@ public:
 
         //- Initialise non-demand-driven data etc
         bool init(const bool doInit);
+
+        //- Processor/processor synchronisation for geometry fields.
+        //  Largely internal use only (slightly hacky).
+        void syncGeom();
 
 
     // Database

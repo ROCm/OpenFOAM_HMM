@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2020-2022 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -277,6 +277,27 @@ void Foam::faMesh::clearOut() const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+void Foam::faMesh::syncGeom()
+{
+    if (UPstream::parRun())
+    {
+        // areaCentres()
+        if (faceCentresPtr_)
+        {
+            faceCentresPtr_->boundaryFieldRef()
+                .evaluateCoupled<processorFaPatch>();
+        }
+
+        // faceAreaNormals()
+        if (faceAreaNormalsPtr_)
+        {
+            faceAreaNormalsPtr_->boundaryFieldRef()
+                .evaluateCoupled<processorFaPatch>();
+        }
+    }
+}
+
+
 bool Foam::faMesh::init(const bool doInit)
 {
     if (doInit)
@@ -296,18 +317,7 @@ bool Foam::faMesh::init(const bool doInit)
     // Calculate the geometry for the patches (transformation tensors etc.)
     boundary_.calcGeometry();
 
-    // Ensure processor/processor information is properly synchronised
-    if (Pstream::parRun())
-    {
-        const_cast<areaVectorField&>(areaCentres()).boundaryFieldRef()
-            .evaluateCoupled<processorFaPatch>();
-
-        // This roughly corresponds to what OpenFOAM-v2112 (and earlier) had,
-        // but should nominally be unnecessary.
-        //
-        /// const_cast<areaVectorField&>(faceAreaNormals()).boundaryFieldRef()
-        ///     .evaluateCoupled<processorFaPatch>();
-    }
+    syncGeom();
 
     return false;
 }
@@ -989,7 +999,6 @@ bool Foam::faMesh::movePoints()
 
     clearGeomNotAreas();
 
-    // To satisfy the motion interface for MeshObject, const cast is needed
     if (patchPtr_)
     {
         patchPtr_->movePoints(newPoints);
@@ -1002,6 +1011,8 @@ bool Foam::faMesh::movePoints()
     edgeInterpolation::movePoints();
 
     // Note: Fluxes were dummy?
+
+    syncGeom();
 
     return true;
 }

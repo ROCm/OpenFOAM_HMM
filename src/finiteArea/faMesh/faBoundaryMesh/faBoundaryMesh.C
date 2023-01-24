@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -180,11 +180,25 @@ Foam::faBoundaryMesh::faBoundaryMesh
 
 void Foam::faBoundaryMesh::calcGeometry()
 {
-    // processorFaPatch geometry triggers calculation of pointNormals.
+    // processor initGeometry send/recv the following:
+    //   - edgeCentres() : faMesh::edgeCentres()
+    //   - edgeLengths() : faMesh::Le()
+    //   - edgeFaceCentres() : faMesh::areaCentres()
+    //
+    // faMesh::Le() has its own point-to-point communication (OK) but
+    // triggers either/or edgeAreaNormals(), pointAreaNormals()
+    // with their own communication that can block.
+
     // This uses parallel comms and hence will not be trigggered
     // on processors that do not have a processorFaPatch so instead
     // force construction.
+
+    (void)mesh_.edgeAreaNormals();
     (void)mesh_.pointAreaNormals();
+
+    (void)mesh_.areaCentres();
+    (void)mesh_.faceAreaNormals();
+
 
     PstreamBuffers pBufs(Pstream::defaultCommsType);
 
@@ -773,11 +787,14 @@ bool Foam::faBoundaryMesh::checkDefinition(const bool report) const
 
 void Foam::faBoundaryMesh::movePoints(const pointField& p)
 {
-    // processorFaPatch geometry triggers calculation of pointNormals.
-    // This uses parallel comms and hence will not be trigggered
-    // on processors that do not have a processorFaPatch so instead
-    // force construction.
+    // See comments in calcGeometry()
+
+    (void)mesh_.edgeAreaNormals();
     (void)mesh_.pointAreaNormals();
+
+    (void)mesh_.areaCentres();
+    (void)mesh_.faceAreaNormals();
+
 
     PstreamBuffers pBufs(Pstream::defaultCommsType);
 
