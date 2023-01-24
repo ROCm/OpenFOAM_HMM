@@ -196,6 +196,10 @@ void Foam::faBoundaryMesh::calcGeometry()
     (void)mesh_.edgeAreaNormals();
     (void)mesh_.pointAreaNormals();
 
+    (void)mesh_.areaCentres();
+    (void)mesh_.faceAreaNormals();
+
+
     PstreamBuffers pBufs(Pstream::defaultCommsType);
 
     if
@@ -787,6 +791,10 @@ void Foam::faBoundaryMesh::movePoints(const pointField& p)
 
     (void)mesh_.edgeAreaNormals();
     (void)mesh_.pointAreaNormals();
+
+    (void)mesh_.areaCentres();
+    (void)mesh_.faceAreaNormals();
+
 
     PstreamBuffers pBufs(Pstream::defaultCommsType);
 
