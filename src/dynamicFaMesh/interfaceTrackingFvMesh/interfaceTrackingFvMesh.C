@@ -92,6 +92,7 @@ void Foam::interfaceTrackingFvMesh::initializeData()
     }
 
     // Set point normal correction for finite area mesh
+    if (!pointNormalsCorrectionPatches_.empty())
     {
         boolList& correction = aMesh().correctPatchPointNormals();
 

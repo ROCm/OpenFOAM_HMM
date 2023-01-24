@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2021-2022 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -425,6 +425,9 @@ class faMesh
             //- Clear geometry but not the face areas
             void clearGeomNotAreas() const;
 
+            //- Has halo face centers/normals
+            bool hasHaloFaceGeometry() const noexcept;
+
             //- Clear boundary halo information
             void clearHalo() const;
 
@@ -616,6 +619,10 @@ public:
 
         //- Initialise non-demand-driven data etc
         bool init(const bool doInit);
+
+        //- Processor/processor synchronisation for geometry fields.
+        //  Largely internal use only (slightly hacky).
+        void syncGeom();
 
 
     // Database
@@ -840,6 +847,12 @@ public:
         bool hasFaceCurvatures() const noexcept
         {
             return bool(faceCurvaturesPtr_);
+        }
+
+        //- Has patch point normals corrections
+        bool hasPatchPointNormalsCorrection() const noexcept
+        {
+            return bool(correctPatchPointNormalsPtr_);
         }
 
 

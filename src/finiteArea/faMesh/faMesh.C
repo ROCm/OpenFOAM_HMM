@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2020-2022 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -276,6 +276,27 @@ void Foam::faMesh::clearOut() const
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+void Foam::faMesh::syncGeom()
+{
+    if (UPstream::parRun())
+    {
+        // areaCentres()
+        if (faceCentresPtr_)
+        {
+            faceCentresPtr_->boundaryFieldRef()
+                .evaluateCoupled<processorFaPatch>();
+        }
+
+        // faceAreaNormals()
+        if (faceAreaNormalsPtr_)
+        {
+            faceAreaNormalsPtr_->boundaryFieldRef()
+                .evaluateCoupled<processorFaPatch>();
+        }
+    }
+}
+
 
 bool Foam::faMesh::init(const bool doInit)
 {

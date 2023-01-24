@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021-2022 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -811,6 +811,13 @@ const Foam::faMeshBoundaryHalo& Foam::faMesh::boundaryHaloMap() const
 }
 
 
+bool Foam::faMesh::hasHaloFaceGeometry() const noexcept
+{
+    // Always create/destroy in tandem
+    return (haloFaceCentresPtr_ && haloFaceNormalsPtr_);
+}
+
+
 void Foam::faMesh::calcHaloFaceGeometry() const
 {
     if (haloFaceCentresPtr_ || haloFaceNormalsPtr_)
@@ -856,6 +863,7 @@ void Foam::faMesh::calcHaloFaceGeometry() const
 
 const Foam::pointField& Foam::faMesh::haloFaceCentres() const
 {
+    // Always create/destroy in tandem
     if (!haloFaceCentresPtr_ || !haloFaceNormalsPtr_)
     {
         calcHaloFaceGeometry();
@@ -867,6 +875,7 @@ const Foam::pointField& Foam::faMesh::haloFaceCentres() const
 
 const Foam::vectorField& Foam::faMesh::haloFaceNormals() const
 {
+    // Always create/destroy in tandem
     if (!haloFaceCentresPtr_ || !haloFaceNormalsPtr_)
     {
         calcHaloFaceGeometry();
