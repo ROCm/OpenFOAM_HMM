@@ -109,7 +109,7 @@ Foam::tmp<Foam::edgeScalarField> Foam::faNVDscheme<Type,NVDweight>::weights
         d *= mesh.edgeInterpolation::lPN().internalField()[edge];
 
         // Do not allow any mag(val) < SMALL
-        if (mag(d) < SMALL)
+        if (d.magSqr() < ROOTSMALL)
         {
             d = vector::uniform(SMALL);
         }
@@ -196,7 +196,7 @@ Foam::tmp<Foam::edgeScalarField> Foam::faNVDscheme<Type,NVDweight>::weights
                 d *= pLPN[edgeI];
 
                 // Do not allow any mag(val) < SMALL
-                if (mag(d) < SMALL)
+                if (d.magSqr() < ROOTSMALL)
                 {
                     d = vector::uniform(SMALL);
                 }
