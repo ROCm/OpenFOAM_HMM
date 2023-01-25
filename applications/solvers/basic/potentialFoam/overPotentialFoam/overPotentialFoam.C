@@ -83,6 +83,7 @@ Description
     \heading Options
     \plaintable
         -writep   | write the Euler pressure
+        -writephi | Write the final volumetric flux
         -writePhi | Write the final velocity potential
         -initialiseUBCs | Update the velocity boundaries before solving for Phi
     \endplaintable
@@ -119,6 +120,12 @@ int main(int argc, char *argv[])
 
     argList::addBoolOption
     (
+        "writephi",
+        "Write the final volumetric flux field"
+    );
+
+    argList::addBoolOption
+    (
         "writePhi",
         "Write the final velocity potential field"
     );
@@ -135,6 +142,8 @@ int main(int argc, char *argv[])
         "Execute functionObjects"
     );
 
+    #include "addRegionOption.H"
+    #include "addCheckCaseOptions.H"
     #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createNamedDynamicFvMesh.H"
@@ -194,11 +203,16 @@ int main(int argc, char *argv[])
             << endl;
     }
 
-    // Write U and phi
+    // Write U
     U.write();
-    phi.write();
 
-    // Optionally write Phi
+    // Optionally write the volumetric flux, phi
+    if (args.found("writephi"))
+    {
+        phi.write();
+    }
+
+    // Optionally write velocity potential, Phi
     if (args.found("writePhi"))
     {
         Phi.write();
