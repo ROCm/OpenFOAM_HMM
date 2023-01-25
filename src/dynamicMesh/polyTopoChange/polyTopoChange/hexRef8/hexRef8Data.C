@@ -40,6 +40,16 @@ License
 
 Foam::hexRef8Data::hexRef8Data(const IOobject& io)
 {
+    if
+    (
+        // Or: !io.anyRead() ?
+        io.readOpt() != IOobject::MUST_READ
+     && io.readOpt() != IOobject::LAZY_READ
+    )
+    {
+        return;
+    }
+
     {
         typedef labelIOList Type;
         IOobject rio(io, "cellLevel");
@@ -237,8 +247,7 @@ void Foam::hexRef8Data::sync(const IOobject& io)
 {
     const polyMesh& mesh = dynamic_cast<const polyMesh&>(io.db());
 
-    bool hasCellLevel = returnReduceOr(bool(cellLevelPtr_));
-    if (hasCellLevel && !cellLevelPtr_)
+    if (returnReduceOr(cellLevelPtr_) && !cellLevelPtr_)
     {
         IOobject rio(io, "cellLevel");
         rio.readOpt(IOobject::NO_READ);
@@ -247,9 +256,13 @@ void Foam::hexRef8Data::sync(const IOobject& io)
             new labelIOList(rio, labelList(mesh.nCells(), Zero))
         );
     }
+    // Take over IOobject settings
+    if (cellLevelPtr_)
+    {
+        cellLevelPtr_->IOobjectOption::operator=(io);
+    }
 
-    bool hasPointLevel = returnReduceOr(bool(pointLevelPtr_));
-    if (hasPointLevel && !pointLevelPtr_)
+    if (returnReduceOr(pointLevelPtr_) && !pointLevelPtr_)
     {
         IOobject rio(io, "pointLevel");
         rio.readOpt(IOobject::NO_READ);
@@ -258,12 +271,16 @@ void Foam::hexRef8Data::sync(const IOobject& io)
             new labelIOList(rio, labelList(mesh.nPoints(), Zero))
         );
     }
+    // Take over IOobject settings
+    if (pointLevelPtr_)
+    {
+        pointLevelPtr_->IOobjectOption::operator=(io);
+    }
 
-    bool hasLevel0Edge = returnReduceOr(bool(level0EdgePtr_));
-    if (hasLevel0Edge)
+    if (returnReduceOr(level0EdgePtr_))
     {
         // Get master length
-        scalar masterLen = (Pstream::master() ? level0EdgePtr_().value() : 0);
+        scalar masterLen = (UPstream::master() ? level0EdgePtr_().value() : 0);
         Pstream::broadcast(masterLen);
         if (!level0EdgePtr_)
         {
@@ -275,13 +292,22 @@ void Foam::hexRef8Data::sync(const IOobject& io)
             );
         }
     }
+    // Take over IOobject settings
+    if (level0EdgePtr_)
+    {
+        level0EdgePtr_->IOobjectOption::operator=(io);
+    }
 
-    bool hasHistory = returnReduceOr(bool(refHistoryPtr_));
-    if (hasHistory && !refHistoryPtr_)
+    if (returnReduceOr(refHistoryPtr_) && !refHistoryPtr_)
     {
         IOobject rio(io, "refinementHistory");
         rio.readOpt(IOobject::NO_READ);
         refHistoryPtr_.reset(new refinementHistory(rio, mesh.nCells(), true));
+    }
+    // Take over IOobject settings
+    if (refHistoryPtr_)
+    {
+        refHistoryPtr_->IOobjectOption::operator=(io);
     }
 }
 
