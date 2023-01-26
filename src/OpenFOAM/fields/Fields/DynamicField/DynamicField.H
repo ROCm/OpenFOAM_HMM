@@ -279,20 +279,22 @@ public:
         template<int AnySizeMin>
         inline void transfer(DynamicField<T, AnySizeMin>& list);
 
-        //- Append an element at the end of the list
+        //- Construct an element at the end of the list,
+        //- return reference to the new list element
+        template<class... Args>
+        inline T& emplace_back(Args&&... args);
+
+        //- Copy append an element at the end of the list
         inline void push_back(const T& val);
 
         //- Move append an element
         inline void push_back(T&& val);
 
-        //- Append a List at the end of this list
+        //- Copy append another list to the end of this list
         inline void push_back(const UList<T>& list);
 
         //- Reduce size by 1 or more elements. Can be called on an empty list.
         inline void pop_back(label n = 1);
-
-        //- Remove and return the last element. Fatal on an empty list.
-        inline T remove();
 
 
     // Reading/writing

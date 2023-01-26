@@ -504,6 +504,23 @@ Foam::DynamicList<T, SizeMin>::transfer
 
 
 template<class T, int SizeMin>
+template<class... Args>
+inline T& Foam::DynamicList<T, SizeMin>::emplace_back(Args&&... args)
+{
+    // This could/should be better with inplace construction
+    // (as per std::vector), but currently lacking the methods for that
+    // so resize and move assign
+
+    const label idx = List<T>::size();
+    resize(idx + 1);
+
+    // move assign element
+    this->operator[](idx) = T(std::forward<Args>(args)...);
+    return this->back();
+}
+
+
+template<class T, int SizeMin>
 inline void Foam::DynamicList<T, SizeMin>::push_back
 (
     const T& val

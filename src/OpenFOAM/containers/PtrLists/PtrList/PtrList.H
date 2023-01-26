@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -149,9 +149,10 @@ public:
         //- Same as resize()
         void setSize(const label newLen) { this->resize(newLen); }
 
-        //- Construct and append an element to the end of the list
+        //- Construct and append an element to the end of the list,
+        //- return reference to the new list element
         template<class... Args>
-        inline void emplace_back(Args&&... args);
+        inline T& emplace_back(Args&&... args);
 
         //- Append an element to the end of the list
         inline void push_back(T* ptr);

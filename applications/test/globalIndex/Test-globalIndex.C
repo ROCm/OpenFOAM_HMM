@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2021-2022 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
     DynamicList<label> globalIDs;
     for (label i = 0; i < 100; i++)
     {
-        globalIDs.append(rndGen.position(label(0), nTotalCells-1));
+        globalIDs.push_back(rndGen.position(label(0), nTotalCells-1));
     }
 
     // Get the cell centres at those cell indices

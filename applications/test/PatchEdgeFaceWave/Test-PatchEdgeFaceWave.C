@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -71,16 +72,9 @@ int main(int argc, char *argv[])
             label edgeI = 0;
             Info<< "Starting walk on edge " << edgeI << endl;
 
-            initialEdges.append(edgeI);
+            initialEdges.push_back(edgeI);
             const edge& e = patch.edges()[edgeI];
-            initialEdgesInfo.append
-            (
-                patchEdgeFaceInfo
-                (
-                    e.centre(patch.localPoints()),
-                    0.0
-                )
-            );
+            initialEdgesInfo.emplace_back(e.centre(patch.localPoints()), 0);
         }
 
 

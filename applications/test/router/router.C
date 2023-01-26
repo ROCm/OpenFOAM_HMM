@@ -249,7 +249,7 @@ void Foam::router::storeRoute
         {
             if (weights_[nodeI] == pathValue)
             {
-                route.append(nodeI);
+                route.push_back(nodeI);
 
                 storeRoute
                 (
@@ -386,7 +386,7 @@ Foam::labelList Foam::router::getRoute(const label pathValue) const
 
     DynamicList<label> route(weights_.size());
 
-    route.append(startNodeI);
+    route.push_back(startNodeI);
 
     storeRoute(startNodeI, -1, pathValue, route);
 

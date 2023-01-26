@@ -85,8 +85,8 @@ int main(int argc, char *argv[])
         }
         else
         {
-            libPtrs_.append(ptr);
-            libNames_.append(libName);
+            libPtrs_.push_back(ptr);
+            libNames_.push_back(libName);
 
             if (verbose)
             {

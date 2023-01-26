@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -168,6 +168,23 @@ inline T& Foam::List<T>::newElmt(const label i)
     }
 
     return UList<T>::operator[](i);
+}
+
+
+template<class T>
+template<class... Args>
+inline T& Foam::List<T>::emplace_back(Args&&... args)
+{
+    // This could/should be better with inplace construction
+    // (as per std::vector), but currently lacking the methods for that
+    // so resize and move assign
+
+    const label idx = this->size();
+    resize(idx + 1);
+
+    // move assign element
+    this->operator[](idx) = T(std::forward<Args>(args)...);
+    return this->back();
 }
 
 

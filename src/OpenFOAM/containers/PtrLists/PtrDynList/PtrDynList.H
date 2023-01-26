@@ -141,9 +141,10 @@ public:
         template<int AnySizeMin>
         inline void swap(PtrDynList<T, AnySizeMin>& other);
 
-        //- Construct an element at the end of the list
+        //- Construct an element at the end of the list,
+        //- return reference to the new list element
         template<class... Args>
-        inline void emplace_back(Args&&... args);
+        inline T& emplace_back(Args&&... args);
 
         //- Append an element to the end of the list
         inline void push_back(T* ptr);

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
             {
                 if (nameFilter(f))
                 {
-                    functionNames.append(f);
+                    functionNames.push_back(f);
                 }
             }
         }
@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
         {
             for (label argi=1; argi < args.size(); ++argi)
             {
-                functionNames.append(args[argi]);
+                functionNames.push_back(args[argi]);
             }
         }
 

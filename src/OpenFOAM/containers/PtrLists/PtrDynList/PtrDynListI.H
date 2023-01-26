@@ -218,9 +218,10 @@ inline void Foam::PtrDynList<T, SizeMin>::swap
 
 template<class T, int SizeMin>
 template<class... Args>
-inline void Foam::PtrDynList<T, SizeMin>::emplace_back(Args&&... args)
+inline T& Foam::PtrDynList<T, SizeMin>::emplace_back(Args&&... args)
 {
     this->push_back(new T(std::forward<Args>(args)...));
+    return this->back();
 }
 
 

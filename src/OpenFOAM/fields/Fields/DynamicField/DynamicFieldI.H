@@ -584,6 +584,23 @@ inline void Foam::DynamicField<T, SizeMin>::transfer
 
 
 template<class T, int SizeMin>
+template<class... Args>
+inline T& Foam::DynamicField<T, SizeMin>::emplace_back(Args&&... args)
+{
+    // This could/should be better with inplace construction
+    // (as per std::vector), but currently lacking the methods for that
+    // so resize and move assign
+
+    const label idx = List<T>::size();
+    resize(idx + 1);
+
+    // move assign element
+    this->operator[](idx) = T(std::forward<Args>(args)...);
+    return this->back();
+}
+
+
+template<class T, int SizeMin>
 inline void Foam::DynamicField<T, SizeMin>::push_back
 (
     const T& val
@@ -643,26 +660,6 @@ inline void Foam::DynamicField<T, SizeMin>::pop_back(label n)
     {
         resize(this->size() - n);
     }
-}
-
-
-template<class T, int SizeMin>
-inline T Foam::DynamicField<T, SizeMin>::remove()
-{
-    // Location of last element and simultaneously the new size
-    const label idx = List<T>::size() - 1;
-
-    if (idx < 0)
-    {
-        FatalErrorInFunction
-            << "List is empty" << abort(FatalError);
-    }
-
-    const T& val = List<T>::operator[](idx);
-
-    List<T>::setAddressableSize(idx);
-
-    return val;
 }
 
 

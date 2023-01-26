@@ -240,6 +240,12 @@ public:
 
     // Edit
 
+        //- Construct an element at the end of the list,
+        //- return reference to the new list element.
+        //  If this is frequently required, consider a DynamicList instead.
+        template<class... Args>
+        inline T& emplace_back(Args&&... args);
+
         //- Append an element at the end of the list
         //  If this is frequently required, consider a DynamicList
         inline void push_back(const T& val);

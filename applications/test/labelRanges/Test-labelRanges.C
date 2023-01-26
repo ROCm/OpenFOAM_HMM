@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,10 +78,10 @@ int main(int argc, char *argv[])
     {
         Info<<"test sorting" << endl;
         DynamicList<labelRange> list1(10);
-        list1.append(labelRange(25, 8));
-        list1.append(labelRange(8));
-        list1.append(labelRange(15, 5));
-        list1.append(labelRange(50, -10, true));
+        list1.emplace_back(25, 8);
+        list1.emplace_back(8);
+        list1.emplace_back(15, 5);
+        list1.emplace_back(50, -10, true);
 
         sort(list1);
         Info<<"sorted" << list1 << endl;

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
     {
         0, 1, 2, 3, 4
     };
-    dlA.append({ 5, 6 });
+    dlA.push_back({ 5, 6 });
     dlA = { 1, 2, 4 };
 
     DynamicList<label> dlB;
@@ -172,7 +172,7 @@ int main(int argc, char *argv[])
     // Copy back and append a few time
     for (label i=0; i < 3; i++)
     {
-        dlB.append(lstA);
+        dlB.push_back(lstA);
     }
 
     Info<< "appended list a few times" << endl;
@@ -186,7 +186,7 @@ int main(int argc, char *argv[])
     // Copy back and append a few time
     for (label i=0; i < 3; i++)
     {
-        dlB.append(lstA);
+        dlB.push_back(lstA);
     }
 
 
@@ -220,8 +220,8 @@ int main(int argc, char *argv[])
 
     for (label elemI=0; elemI < 5; ++elemI)
     {
-        dlE1.append(4 - elemI);
-        dlE2.append(elemI);
+        dlE1.push_back(4 - elemI);
+        dlE2.push_back(elemI);
     }
 
     printInfo("dlE2", dlE2, true);
@@ -243,9 +243,12 @@ int main(int argc, char *argv[])
 
     {
         DynamicList<label> addr(10);
-        addr.append(3);
-        addr.append(1);
-        addr.append(2);
+        addr.emplace_back(3);
+        addr.emplace_back(1);
+        addr.emplace_back(2);
+
+        // Can also use the return value
+        Info<< "adding " << addr.emplace_back(4) << endl;
 
         forAll(dlE2, i)
         {
@@ -297,9 +300,9 @@ int main(int argc, char *argv[])
         Info<< "test move-append with "
             << flatOutput(input1) << " and " << flatOutput(input2) << endl;
 
-        list2.append(std::move(list1));
-        list2.append(std::move(input1));
-        list2.append(std::move(input2));
+        list2.push_back(std::move(list1));
+        list2.push_back(std::move(input1));
+        list2.push_back(std::move(input2));
 
         Info<< "result: " << flatOutput(list2) << nl
             << "inputs: " << flatOutput(list1) << " / "

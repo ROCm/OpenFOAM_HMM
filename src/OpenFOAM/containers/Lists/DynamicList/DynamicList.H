@@ -259,6 +259,11 @@ public:
         template<int AnySizeMin>
         inline void transfer(DynamicList<T, AnySizeMin>& list);
 
+        //- Construct an element at the end of the list,
+        //- return reference to the new list element
+        template<class... Args>
+        inline T& emplace_back(Args&&... args);
+
         //- Copy append an element to the end of this list.
         inline void push_back(const T& val);
 

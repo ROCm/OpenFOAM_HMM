@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -332,10 +332,8 @@ int main(int argc, char *argv[])
 
     for (label i = 0; i < 5; ++i)
     {
-        listApp.append(new Scalar(1.3*i));
+        listApp.emplace_back(1.3*i);
     }
-    listApp.emplace_back(100);
-
 
     Info<< nl
         << "list1: " << list1 << nl
@@ -353,7 +351,7 @@ int main(int argc, char *argv[])
 
             if (old)
             {
-                ptrs.append(old.release());
+                ptrs.push_back(old.release());
             }
         }
 
@@ -459,8 +457,8 @@ int main(int argc, char *argv[])
         printAddr(Info, dynlist1b);
         printAddr(Info, dynlist1c);
 
-        dynlist1d.append(std::move(dynlist1b));
-        dynlist1d.append(std::move(dynlist1c));
+        dynlist1d.push_back(std::move(dynlist1b));
+        dynlist1d.push_back(std::move(dynlist1c));
 
         Info<< "result:" << nl;
         print(Info, dynlist1d);
@@ -477,8 +475,8 @@ int main(int argc, char *argv[])
         printAddr(Info, list1b);
         printAddr(Info, list1c);
 
-        list1d.append(std::move(list1b));
-        list1d.append(std::move(list1c));
+        list1d.push_back(std::move(list1b));
+        list1d.push_back(std::move(list1c));
 
         Info<< "result:" << nl;
         print(Info, list1d);
@@ -523,7 +521,7 @@ int main(int argc, char *argv[])
     printAddr(Info, ulist1);
     Info<< nl;
 
-    ulist1c.append(std::move(ulist1b));
+    ulist1c.push_back(std::move(ulist1b));
 
     Info<< "UPtrList append/append:";
     printAddr(Info, ulist1c);
@@ -596,7 +594,7 @@ int main(int argc, char *argv[])
     {
         dynPlanes.emplace_back(vector::one, vector::one);
         dynPlanes.emplace_back(vector(1,2,3), vector::one);
-        dynPlanes.append(nullptr);
+        dynPlanes.push_back(nullptr);
 
         dynPlanes.set(6, new plane(vector(2,2,1), vector::one));
         dynPlanes.set(10, new plane(vector(4,5,6), vector::one));
@@ -619,10 +617,10 @@ int main(int argc, char *argv[])
 
     Info<< "now append again" << endl;
     {
-        dynPlanes.append(new plane(vector::one, vector::one));
-        dynPlanes.append(new plane(vector(1,2,3), vector::one));
+        dynPlanes.emplace_back(vector::one, vector::one);
+        dynPlanes.emplace_back(vector(1,2,3), vector::one);
 
-        dynPlanes.set(5, new plane(vector(2,2,1), vector::one));
+        dynPlanes.emplace(5, vector(2,2,1), vector::one);
     }
 
     report(Info, dynPlanes, true);
@@ -658,12 +656,12 @@ int main(int argc, char *argv[])
     {
         PtrDynList<plane> dynPlanes2;
 
-        dynPlanes2.append(new plane(vector::one, vector::one));
-        dynPlanes2.append(new plane(vector(1,2,3), vector::one));
-        dynPlanes2.append(nullptr);
+        dynPlanes2.emplace_back(vector::one, vector::one);
+        dynPlanes2.emplace_back(vector(1,2,3), vector::one);
+        dynPlanes2.push_back(nullptr);
 
-        dynPlanes2.set(6, new plane(vector(2,2,1), vector::one));
-        dynPlanes2.set(10, new plane(Zero, vector::one));
+        dynPlanes2.emplace(6, vector(2,2,1), vector::one);
+        dynPlanes2.emplace(10, Zero, vector::one);
 
         labelList order;
         sortedOrder(dynPlanes2, order);
@@ -701,7 +699,7 @@ int main(int argc, char *argv[])
         Info<< "Append" << endl;
         report(Info, dynPlanes2, false);
 
-        dynPlanes.append(std::move(dynPlanes2));
+        dynPlanes.push_back(std::move(dynPlanes2));
 
         Info<< "Result" << endl;
         report(Info, dynPlanes, false);

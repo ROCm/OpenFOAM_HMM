@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,28 +53,29 @@ int main(int argc, char *argv[])
 
     Info << "testField:" << testField << endl;
 
-    testField.append(vector(0.5, 4.8, 6.2));
+    testField.emplace_back(0.5, 4.8, 6.2);
 
     Info << "testField after appending:" << testField << endl;
 
-    testField.append(vector(2.7, 2.3, 6.1));
+    testField.emplace_back(2.7, 2.3, 6.1);
 
     Info << "testField after appending:" << testField << endl;
 
-    vector elem = testField.remove();
+    vector elem = testField.back();
+    testField.pop_back();
 
     Info << "removed element:" << elem << endl;
     Info << "testField:" << testField << endl;
 
-    testField.append(vector(3.0, 1.3, 9.2));
+    testField.emplace_back(3.0, 1.3, 9.2);
 
     Info << "testField:" << testField << endl;
 
-    testField.setSize(10, vector(1.5, 0.6, -1.0));
+    testField.resize(10, vector(1.5, 0.6, -1.0));
 
     Info << "testField after setSize:" << testField << endl;
 
-    testField.append(testField2);
+    testField.push_back(testField2);
 
     Info << "testField after appending testField2:" << testField << endl;
 
@@ -87,7 +89,7 @@ int main(int argc, char *argv[])
 
     testField.clear();
 
-    testField.append(vector(3.0, 1.3, 9.2));
+    testField.emplace_back(3.0, 1.3, 9.2);
 
     Info << "testField after clear and append:" << testField << endl;
 

@@ -108,8 +108,8 @@ int main(int argc, char *argv[])
     {
         if (surf->interfaceCell()[celli])
         {
-            centres.append(surf->centre()[celli]);
-            normals.append(surf->normal()[celli]);
+            centres.push_back(surf->centre()[celli]);
+            normals.push_back(surf->normal()[celli]);
         }
     }
 
