@@ -166,78 +166,79 @@ public:
 
     // Access
 
-            //- Return the polyPatch
-            const polyPatch& patch() const noexcept
-            {
-                return polyPatch_;
-            }
+        //- Return the polyPatch
+        const polyPatch& patch() const noexcept
+        {
+            return polyPatch_;
+        }
 
-            //- Return name
-            virtual const word& name() const
-            {
-                return polyPatch_.name();
-            }
+        //- Return name
+        virtual const word& name() const
+        {
+            return polyPatch_.name();
+        }
 
-            //- Return start label of this patch in the polyMesh face list
-            virtual label start() const
-            {
-                return polyPatch_.start();
-            }
+        //- The index of this patch in the boundary mesh
+        label index() const noexcept
+        {
+            return polyPatch_.index();
+        }
 
-            //- Return size
-            virtual label size() const
-            {
-                return polyPatch_.size();
-            }
+        //- The patch start within the polyMesh face list
+        label start() const noexcept
+        {
+            return polyPatch_.start();
+        }
 
-            //- Return true if this patch is coupled
-            virtual bool coupled() const
-            {
-                return polyPatch_.coupled();
-            }
+        //- Patch size is the number of faces, but can be overloaded
+        virtual label size() const
+        {
+            return polyPatch_.size();
+        }
 
-            //- Return true if the given type is a constraint type
-            static bool constraintType(const word& patchType);
+        //- Return true if this patch is coupled
+        virtual bool coupled() const
+        {
+            return polyPatch_.coupled();
+        }
 
-            //- Return a list of all the constraint patch types
-            static wordList constraintTypes();
+        //- Return true if the given type is a constraint type
+        static bool constraintType(const word& patchType);
 
-            //- Return the index of this patch in the fvBoundaryMesh
-            label index() const noexcept
-            {
-                return polyPatch_.index();
-            }
+        //- Return a list of all the constraint patch types
+        static wordList constraintTypes();
 
-            //- Return boundaryMesh reference
-            const fvBoundaryMesh& boundaryMesh() const noexcept
-            {
-                return boundaryMesh_;
-            }
+        //- Return boundaryMesh reference
+        const fvBoundaryMesh& boundaryMesh() const noexcept
+        {
+            return boundaryMesh_;
+        }
 
-            //- Slice List to patch, using the virtual patch size
-            template<class T>
-            const typename List<T>::subList patchSlice(const List<T>& l) const
-            {
-                return typename List<T>::subList(l, size(), start());
-            }
+        //- This patch slice from the complete list, which has size
+        //- mesh::nFaces(), using the virtual patch size.
+        template<class T>
+        const typename List<T>::subList
+        patchSlice(const List<T>& values) const
+        {
+            return typename List<T>::subList(values, size(), start());
+        }
 
-            //- Slice List to patch, using the underlying polyPatch information
-            template<class T>
-            const typename List<T>::subList patchRawSlice
+        //- This patch slice from the list of boundary values, which has size
+        //- mesh::nBoundaryFaces(), using the virtual patch size.
+        template<class T>
+        const typename List<T>::subList
+        boundarySlice(const List<T>& values) const
+        {
+            return typename List<T>::subList
             (
-                const List<T>& l
-            ) const
-            {
-                return typename List<T>::subList
-                (
-                    l,
-                    polyPatch_.size(),
-                    polyPatch_.start()
-                );
-            }
+                values,
+                size(),
+                polyPatch_.offset()
+            );
+        }
 
-            //- Return faceCells
-            virtual const labelUList& faceCells() const;
+        //- Return faceCells
+        virtual const labelUList& faceCells() const;
 
 
         // Access functions for geometrical data

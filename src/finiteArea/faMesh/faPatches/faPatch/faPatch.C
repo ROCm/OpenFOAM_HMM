@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -191,6 +191,17 @@ Foam::faPatch::~faPatch()
 const Foam::faBoundaryMesh& Foam::faPatch::boundaryMesh() const noexcept
 {
     return boundaryMesh_;
+}
+
+
+Foam::label Foam::faPatch::offset() const
+{
+    return max
+    (
+        0,
+        boundaryMesh().mesh().patchStarts()[index()]
+      - boundaryMesh().mesh().nInternalEdges()
+    );
 }
 
 

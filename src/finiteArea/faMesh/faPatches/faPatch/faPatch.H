@@ -305,6 +305,10 @@ public:
             return false;
         }
 
+        //- The offset where this patch starts in the boundary edge list.
+        //  The value is the same as patch.start() - mesh.nInternalEdges()
+        label offset() const;
+
         //- Patch start in edge list
         label start() const;
 
@@ -320,18 +324,26 @@ public:
             return edgei - start();
         }
 
-        //- Slice List to patch, using the virtual patch size
+        //- This patch slice from the complete list of values, which has
+        //- size mesh::nEdges(), using the virtual patch size.
         template<class T>
-        typename List<T>::subList patchSlice(const List<T>& l) const
+        const typename List<T>::subList patchSlice(const List<T>& values) const
         {
-            return typename List<T>::subList(l, size(), start());
+            return typename List<T>::subList(values, size(), start());
         }
 
-        //- Slice List to patch, using the number of patch edges
+        //- This patch slice from the list of boundary values, which has
+        //- size mesh::nBoundaryEdges(), using the virtual patch size.
         template<class T>
-        typename List<T>::subList patchRawSlice(const List<T>& l) const
+        const typename List<T>::subList
+        boundarySlice(const List<T>& values) const
         {
-            return typename List<T>::subList(l, nEdges(), start());
+            return typename List<T>::subList
+            (
+                values,
+                size(),
+                offset()
+            );
         }
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,13 +35,22 @@ Foam::slicedFvPatchField<Type>::slicedFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
-    const Field<Type>& completeField
+    const Field<Type>& completeOrBoundaryField,
+    const bool isBoundaryOnly
 )
 :
     fvPatchField<Type>(p, iF, Field<Type>())
 {
-    // Set fvPatchField to a slice of the given complete field
-    UList<Type>::shallowCopy(p.patchSlice(completeField));
+    if (isBoundaryOnly)
+    {
+        // Set to a slice of the boundary field
+        UList<Type>::shallowCopy(p.boundarySlice(completeOrBoundaryField));
+    }
+    else
+    {
+        // Set to a slice of the complete field
+        UList<Type>::shallowCopy(p.patchSlice(completeOrBoundaryField));
+    }
 }
 
 
@@ -64,8 +73,11 @@ Foam::slicedFvPatchField<Type>::slicedFvPatchField
     const dictionary& dict
 )
 :
-    fvPatchField<Type>(p, iF, dict, false)
+    fvPatchField<Type>(p, iF)  // bypass dictionary constructor
 {
+    fvPatchFieldBase::readDict(dict);
+    // Read "value" if present...
+
     NotImplemented;
 }
 
@@ -142,10 +154,12 @@ Foam::slicedFvPatchField<Type>::clone
 }
 
 
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
 template<class Type>
 Foam::slicedFvPatchField<Type>::~slicedFvPatchField()
 {
-    // Set fvPatchField to nullptr to avoid deletion of underlying field
+    // Set to nullptr to avoid deletion of underlying field
     UList<Type>::shallowCopy(UList<Type>());
 }
 

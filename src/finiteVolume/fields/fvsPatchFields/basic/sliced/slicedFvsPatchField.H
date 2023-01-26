@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,10 +41,11 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef slicedFvsPatchField_H
-#define slicedFvsPatchField_H
+#ifndef Foam_slicedFvsPatchField_H
+#define Foam_slicedFvsPatchField_H
 
 #include "fvsPatchField.H"
+#include "processorFvPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,7 +53,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class slicedFvsPatch Declaration
+                     Class slicedFvsPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -59,8 +61,11 @@ class slicedFvsPatchField
 :
     public fvsPatchField<Type>
 {
-
 public:
+
+    //- The mesh processor patch type
+    typedef processorFvPatch processorPatchType;
+
 
     //- Runtime type information
     TypeName("sliced");
@@ -73,7 +78,8 @@ public:
         (
             const fvPatch&,
             const DimensionedField<Type, surfaceMesh>&,
-            const Field<Type>&
+            const Field<Type>& completeOrBoundaryField,
+            const bool isBoundaryOnly = false
         );
 
         //- Construct from patch and internal field

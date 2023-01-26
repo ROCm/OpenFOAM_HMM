@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017,2022 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -201,7 +201,7 @@ void Foam::fvMesh::storeOldVol(const scalarField& V)
             scalarField& V0 = *V0Ptr_;
             // Note: V0 now sized with current mesh, not with (potentially
             //       different size) V.
-            V0.setSize(V.size());
+            V0.resize_nocopy(V.size());
             V0 = V;
         }
 
@@ -665,7 +665,6 @@ void Foam::fvMesh::removeFvBoundary()
 
     // Remove fvBoundaryMesh data first.
     boundary_.clear();
-    boundary_.setSize(0);
     polyMesh::removeBoundary();
 
     clearOut();
@@ -706,12 +705,6 @@ Foam::polyMesh::readUpdateState Foam::fvMesh::readUpdate()
     }
 
     return state;
-}
-
-
-const Foam::fvBoundaryMesh& Foam::fvMesh::boundary() const
-{
-    return boundary_;
 }
 
 
@@ -814,7 +807,7 @@ void Foam::fvMesh::mapFields(const mapPolyMesh& meshMap)
         scalarField& V0 = *V0Ptr_;
 
         scalarField savedV0(V0);
-        V0.setSize(nCells());
+        V0.resize_nocopy(nCells());
 
         forAll(V0, i)
         {
@@ -856,7 +849,7 @@ void Foam::fvMesh::mapFields(const mapPolyMesh& meshMap)
         scalarField& V00 = *V00Ptr_;
 
         scalarField savedV00(V00);
-        V00.setSize(nCells());
+        V00.resize_nocopy(nCells());
 
         forAll(V00, i)
         {

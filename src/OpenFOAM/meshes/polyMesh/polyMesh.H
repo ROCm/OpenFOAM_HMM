@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017, 2020 OpenFOAM Foundation
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -454,13 +454,13 @@ public:
             virtual const pointField& oldCellCentres() const;
 
             //- Return boundary mesh
-            const polyBoundaryMesh& boundaryMesh() const
+            const polyBoundaryMesh& boundaryMesh() const noexcept
             {
                 return boundary_;
             }
 
             //- Return mesh bounding box
-            const boundBox& bounds() const
+            const boundBox& bounds() const noexcept
             {
                 return bounds_;
             }

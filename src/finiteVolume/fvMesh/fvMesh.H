@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017,2022 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -96,6 +96,7 @@ protected:
 
         //- Boundary mesh
         fvBoundaryMesh boundary_;
+
 
     // Demand-driven data
 
@@ -314,7 +315,10 @@ public:
             }
 
             //- Return reference to boundary mesh
-            const fvBoundaryMesh& boundary() const;
+            const fvBoundaryMesh& boundary() const noexcept
+            {
+                return boundary_;
+            }
 
             //- Return ldu addressing
             virtual const lduAddressing& lduAddr() const;

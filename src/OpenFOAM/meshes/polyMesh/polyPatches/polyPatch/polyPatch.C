@@ -307,13 +307,14 @@ Foam::wordList Foam::polyPatch::constraintTypes()
 }
 
 
-Foam::label Foam::polyPatch::offset() const
+Foam::label Foam::polyPatch::offset() const noexcept
 {
-    return start_ - boundaryMesh().start();
+    // Same as start_ - polyMesh::nInternalFaces()
+    return start_ - boundaryMesh_.start();
 }
 
 
-const Foam::polyBoundaryMesh& Foam::polyPatch::boundaryMesh() const
+const Foam::polyBoundaryMesh& Foam::polyPatch::boundaryMesh() const noexcept
 {
     return boundaryMesh_;
 }
