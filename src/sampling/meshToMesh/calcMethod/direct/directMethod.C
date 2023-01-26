@@ -174,27 +174,23 @@ void Foam::directMethod::appendToDirectSeeds
     const labelList& srcNbr = src_.cellCells()[srcSeedI];
     const labelList& tgtNbr = tgt_.cellCells()[tgtSeedI];
 
-    forAll(srcNbr, i)
+    for (const label srcI : srcNbr)
     {
-        label srcI = srcNbr[i];
-
         if (mapFlag[srcI] && (srcTgtSeed[srcI] == -1))
         {
             // source cell srcI not yet mapped
 
             // identify if target cell exists for source cell srcI
             bool found = false;
-            forAll(tgtNbr, j)
+            for (const label tgtI : tgtNbr)
             {
-                label tgtI = tgtNbr[j];
-
                 if (intersect(srcI, tgtI))
                 {
                     // new match - append to lists
                     found = true;
 
                     srcTgtSeed[srcI] = tgtI;
-                    srcSeeds.append(srcI);
+                    srcSeeds.push_back(srcI);
 
                     break;
                 }
@@ -208,10 +204,11 @@ void Foam::directMethod::appendToDirectSeeds
         }
     }
 
-    if (srcSeeds.size())
+    if (!srcSeeds.empty())
     {
-        srcSeedI = srcSeeds.remove();
+        srcSeedI = srcSeeds.back();
         tgtSeedI = srcTgtSeed[srcSeedI];
+        srcSeeds.pop_back();
     }
     else
     {

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -399,18 +399,17 @@ Foam::label Foam::vtk::vtmWriter::endBlock(const word& blockName)
 {
     if (!blocks_.empty())
     {
-        const word curr(blocks_.remove());
-
         // Verify expected end tag
-        if (!blockName.empty() && blockName != curr)
+        if (!blockName.empty() && blockName != blocks_.back())
         {
             WarningInFunction
                 << "expecting to end block '" << blockName
-                << "' but found '" << curr << "' instead"
+                << "' but found '" << blocks_.back() << "' instead"
                 << endl;
         }
 
-        entries_.append(vtmEntry::endblock());
+        blocks_.pop_back();
+        entries_.push_back(vtmEntry::endblock());
     }
 
     return blocks_.size();

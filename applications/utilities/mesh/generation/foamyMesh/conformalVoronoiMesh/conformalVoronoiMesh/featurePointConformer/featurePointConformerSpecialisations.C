@@ -266,11 +266,8 @@ bool Foam::featurePointConformer::createSpecialisedFeaturePoint
                     << endl;
 
                 // Remove points that have just been added before returning
-                for (label i = 0; i < 2; ++i)
-                {
-                    pts.remove();
-                    nVert--;
-                }
+                pts.pop_back(2);
+                nVert -= 2;
 
                 return false;
             }
@@ -702,11 +699,8 @@ bool Foam::featurePointConformer::createSpecialisedFeaturePoint
                     << endl;
 
                 // Remove points that have just been added before returning
-                for (label i = 0; i < 2; ++i)
-                {
-                    pts.remove();
-                    nVert--;
-                }
+                pts.pop_back(2);
+                nVert -= 2;
 
                 return false;
             }

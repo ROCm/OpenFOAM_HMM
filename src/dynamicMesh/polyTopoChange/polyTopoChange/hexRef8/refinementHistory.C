@@ -271,15 +271,15 @@ Foam::label Foam::refinementHistory::allocateSplitCell
 
     if (freeSplitCells_.size())
     {
-        index = freeSplitCells_.remove();
+        index = freeSplitCells_.back();
+        freeSplitCells_.pop_back();
 
         splitCells_[index] = splitCell8(parent);
     }
     else
     {
         index = splitCells_.size();
-
-        splitCells_.append(splitCell8(parent));
+        splitCells_.push_back(splitCell8(parent));
     }
 
 

@@ -27,8 +27,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "clock.H"
-#include "string.H"
 
+#include <string>
 #include <sstream>
 #include <iomanip>
 

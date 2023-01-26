@@ -217,27 +217,29 @@ void Foam::mapNearestMethod::findNearestCell
 
     const vector& p1 = Cc1[cell1];
 
-    DynamicList<label> cells2(10);
-    cells2.append(cell2);
-
+    DynamicList<label> queuedCells(10);
     DynamicList<label> visitedCells(10);
+
+    queuedCells.push_back(cell2);
 
     scalar d = GREAT;
 
-    do
+    while (!queuedCells.empty())
     {
-        label c2 = cells2.remove();
-        visitedCells.append(c2);
+        // Process as LIFO
+        const label currCelli = queuedCells.back();
+        queuedCells.pop_back();
+        visitedCells.push_back(currCelli);
 
-        scalar dTest = magSqr(Cc2[c2] - p1);
+        scalar dTest = p1.distSqr(Cc2[currCelli]);
+
         if (dTest < d)
         {
-            cell2 = c2;
+            cell2 = currCelli;
             d = dTest;
-            appendNbrCells(cell2, mesh2, visitedCells, cells2);
+            appendNbrCells(cell2, mesh2, visitedCells, queuedCells);
         }
-
-    } while (cells2.size() > 0);
+    }
 }
 
 
@@ -290,19 +292,22 @@ Foam::label Foam::mapNearestMethod::findMappedSrcCell
     const List<DynamicList<label>>& tgtToSrc
 ) const
 {
-    DynamicList<label> testCells(16);
+    DynamicList<label> queuedCells(16);
     DynamicList<label> visitedCells(16);
 
-    testCells.append(tgtCelli);
+    queuedCells.push_back(tgtCelli);
 
-    do
+    while (!queuedCells.empty())
     {
+        // Process as LIFO
+        const label tgtI = queuedCells.back();
+        queuedCells.pop_back();
+
         // search target tgtCelli neighbours for match with source cell
-        label tgtI = testCells.remove();
 
         if (!visitedCells.found(tgtI))
         {
-            visitedCells.append(tgtI);
+            visitedCells.push_back(tgtI);
 
             if (tgtToSrc[tgtI].size())
             {
@@ -316,12 +321,12 @@ Foam::label Foam::mapNearestMethod::findMappedSrcCell
                 {
                     if (!visitedCells.found(nbrCelli))
                     {
-                        testCells.append(nbrCelli);
+                        queuedCells.push_back(nbrCelli);
                     }
                 }
             }
         }
-    } while (testCells.size());
+    }
 
     // did not find any match - should not be possible to get here!
     return -1;

@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef profilingInformation_H
-#define profilingInformation_H
+#ifndef Foam_profilingInformation_H
+#define Foam_profilingInformation_H
 
 #include "label.H"
 #include "scalar.H"

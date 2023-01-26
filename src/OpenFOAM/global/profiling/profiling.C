@@ -51,9 +51,9 @@ Foam::profilingInformation* Foam::profiling::create()
 
     Information* info = new Information;
 
-    pool_.append(info);
+    pool_.push_back(info);
     children_.resize(pool_.size());
-    children_.last().clear();  // safety
+    children_.back().clear();  // safety
 
     return info;
 }
@@ -77,10 +77,10 @@ Foam::profilingInformation* Foam::profiling::create
 
     Information* info = new Information(parent, descr, pool_.size());
 
-    pool_.append(info);
+    pool_.push_back(info);
     children_.resize(pool_.size());
-    children_.last().clear();  // safety
-    children_[parentId].append(info);
+    children_.back().clear();  // safety
+    children_[parentId].push_back(info);
 
     return info;
 }
@@ -88,16 +88,18 @@ Foam::profilingInformation* Foam::profiling::create
 
 void Foam::profiling::beginTimer(profilingInformation *info)
 {
-    stack_.append(info);
-    times_.append(clockValue::now());
+    stack_.push_back(info);
+    times_.push_back(clockValue::now());
     info->setActive(true);              // Mark as on stack
 }
 
 
 Foam::profilingInformation* Foam::profiling::endTimer()
 {
-    Information *info = stack_.remove();
-    clockValue clockval = times_.remove();
+    Information *info = stack_.back();
+    clockValue clockval = times_.back();
+    stack_.pop_back();
+    times_.pop_back();
 
     info->update(clockval.elapsed());   // Update elapsed time
     info->setActive(false);             // Mark as off stack
@@ -184,7 +186,7 @@ Foam::profilingInformation* Foam::profiling::New(const string& descr)
 
     if (active())
     {
-        Information *parent = singleton_->stack_.last();
+        Information *parent = singleton_->stack_.back();
 
         info = singleton_->create(parent, descr);
         singleton_->beginTimer(info);
@@ -320,7 +322,7 @@ bool Foam::profiling::writeData(Ostream& os) const
     {
         elapsed[stacki] = (now - times_[stacki]);
     }
-    elapsed.last() = 0;
+    elapsed.back() = 0;
 
     os.beginBlock("profiling");
 

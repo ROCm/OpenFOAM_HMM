@@ -94,7 +94,7 @@ if (mesh.changing())
             {
                 if (refCells[zoneId] != -1)
                 {
-                    validCells.append(refCells[zoneId]);
+                    validCells.push_back(refCells[zoneId]);
                 }
             }
 

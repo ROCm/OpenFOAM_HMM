@@ -38,7 +38,6 @@ SourceFiles
 #define FIRECore_H
 
 #include "point.H"
-#include "string.H"
 #include "labelList.H"
 #include "pointField.H"
 #include "IOstreams.H"
