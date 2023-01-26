@@ -109,8 +109,8 @@ Note
 #include "singlePhaseTransportModel.H"
 #include "turbulentTransportModel.H"
 #include "turbulentFluidThermoModel.H"
-#include "processorFvPatchField.H"
 #include "wallFvPatch.H"
+#include "processorFvPatch.H"
 #include "fixedValueFvPatchFields.H"
 
 using namespace Foam;
@@ -124,35 +124,11 @@ void InfoField(const word& fldName)
 
 
 template<class Type>
-void correctProcessorPatches
-(
-    GeometricField<Type, fvPatchField, volMesh>& vf
-)
+void correctProcessorPatches(GeometricField<Type, fvPatchField, volMesh>& fld)
 {
-    if (!Pstream::parRun())
+    if (UPstream::parRun())
     {
-        return;
-    }
-
-    // Not possible to use correctBoundaryConditions on fields as they may
-    // use local info as opposed to the constraint values employed here,
-    // but still need to update processor patches
-    auto& bf = vf.boundaryFieldRef();
-
-    forAll(bf, patchi)
-    {
-        if (isA<processorFvPatchField<Type>>(bf[patchi]))
-        {
-            bf[patchi].initEvaluate();
-        }
-    }
-
-    forAll(bf, patchi)
-    {
-        if (isA<processorFvPatchField<Type>>(bf[patchi]))
-        {
-            bf[patchi].evaluate();
-        }
+        fld.boundaryFieldRef().template evaluateCoupled<processorFvPatch>();
     }
 }
 
@@ -411,7 +387,7 @@ int main(int argc, char *argv[])
         ),
         mesh,
         dimensionedScalar(dimless, scalar(1)),
-        fixedValueFvPatchField<scalar>::typeName
+        fixedValueFvPatchScalarField::typeName
     );
 
     for (fvPatchScalarField& pfld : f.boundaryFieldRef())
@@ -482,31 +458,31 @@ int main(int argc, char *argv[])
         // (M:Eq. 9)
         const dimensionedScalar maxU(dimVelocity, SMALL);
         U *= min(scalar(1), fRei*uTau/max(mag(U), maxU));
-        correctProcessorPatches<vector>(U);
+        correctProcessorPatches(U);
     }
 
     if (tepsilon.valid())
     {
         tepsilon.ref() = epsilon;
-        correctProcessorPatches<scalar>(tepsilon.ref());
+        correctProcessorPatches(tepsilon.ref());
     }
 
     if (tk.valid())
     {
         tk.ref() = k;
-        correctProcessorPatches<scalar>(tk.ref());
+        correctProcessorPatches(tk.ref());
     }
 
     if (tomega.valid())
     {
         const dimensionedScalar k0(sqr(dimLength/dimTime), SMALL);
         tomega.ref() = Cmu*epsilon/(k + k0);
-        correctProcessorPatches<scalar>(tomega.ref());
+        correctProcessorPatches(tomega.ref());
     }
 
     if (tR.valid())
     {
-        volSymmTensorField& R = tR.ref();
+        auto& R = tR.ref();
 
         // (M:Eq. 3)
         const volSphericalTensorField Rdiag(k*twoThirdsI);
@@ -514,7 +490,7 @@ int main(int argc, char *argv[])
         {
             R[celli] = Rdiag[celli];
         }
-        correctProcessorPatches<symmTensor>(R);
+        correctProcessorPatches(R);
     }
 
 

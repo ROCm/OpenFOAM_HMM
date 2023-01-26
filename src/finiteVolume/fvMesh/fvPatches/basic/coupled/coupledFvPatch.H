@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef coupledFvPatch_H
-#define coupledFvPatch_H
+#ifndef Foam_coupledFvPatch_H
+#define Foam_coupledFvPatch_H
 
 #include "fvPatch.H"
 #include "lduInterface.H"
@@ -56,7 +56,7 @@ class coupledFvPatch
     public lduInterface,
     public fvPatch
 {
-    // Private data
+    // Private Data
 
         const coupledPolyPatch& coupledPolyPatch_;
 
@@ -75,7 +75,7 @@ public:
 
 
     //- Runtime type information
-    TypeName(coupledPolyPatch::typeName_());
+    TypeNameNoDebug(coupledPolyPatch::typeName_());
 
 
     // Constructors
@@ -89,7 +89,7 @@ public:
 
 
     //- Destructor
-    virtual ~coupledFvPatch();
+    virtual ~coupledFvPatch() = default;
 
 
     // Member Functions

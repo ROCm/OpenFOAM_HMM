@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,7 +33,7 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(coupledFaPatch, 0);
+    defineTypeName(coupledFaPatch);
 }
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
@@ -47,25 +48,28 @@ void Foam::coupledFaPatch::calcTransformTensors
 {
     if (mag(nf & nr) < 1 - SMALL)
     {
-        separation_.setSize(0);
+        separation_.clear();
+        forwardT_.resize(1);
+        reverseT_.resize(1);
 
-        forwardT_ = tensorField(1, rotationTensor(-nr, nf));
-        reverseT_ = tensorField(1, rotationTensor(nf, -nr));
+        forwardT_[0] = rotationTensor(-nr, nf);
+        reverseT_[0] = rotationTensor(nf, -nr);
     }
     else
     {
-        forwardT_.setSize(0);
-        reverseT_.setSize(0);
+        forwardT_.clear();
+        reverseT_.clear();
 
         vector separation = (nf & (Cr - Cf))*nf;
 
         if (mag(separation) > SMALL)
         {
-            separation_ = vectorField(1, separation);
+            separation_.resize(1);
+            separation_[0] = separation;
         }
         else
         {
-            separation_.setSize(0);
+            separation_.clear();
         }
     }
 }
@@ -81,10 +85,10 @@ void Foam::coupledFaPatch::calcTransformTensors
 {
     if (sum(mag(nf & nr)) < Cf.size() - SMALL)
     {
-        separation_.setSize(0);
+        separation_.clear();
 
-        forwardT_.setSize(size());
-        reverseT_.setSize(size());
+        forwardT_.resize_nocopy(size());
+        reverseT_.resize_nocopy(size());
 
         forAll(forwardT_, facei)
         {
@@ -94,26 +98,34 @@ void Foam::coupledFaPatch::calcTransformTensors
 
         if (sum(mag(forwardT_ - forwardT_[0])) < SMALL)
         {
-            forwardT_.setSize(1);
-            reverseT_.setSize(1);
+            forwardT_.resize(1);
+            reverseT_.resize(1);
         }
     }
     else
     {
-        forwardT_.setSize(0);
-        reverseT_.setSize(0);
+        forwardT_.clear();
+        reverseT_.clear();
 
         separation_ = (nf&(Cr - Cf))*nf;
 
         if (sum(mag(separation_)) < SMALL)
         {
-            separation_.setSize(0);
+            separation_.clear();
         }
         else if (sum(mag(separation_ - separation_[0])) < SMALL)
         {
-            separation_.setSize(1);
+            separation_.resize(1);
         }
     }
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::tmp<Foam::vectorField> Foam::coupledFaPatch::delta() const
+{
+    return (edgeCentres() - edgeFaceCentres());
 }
 
 

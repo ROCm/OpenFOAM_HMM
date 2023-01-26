@@ -482,11 +482,11 @@ Foam::tmp<Foam::vectorField> Foam::faPatch::delta() const
     vectorField edgePN(edgeCentres() - edgeFaceCentres());
 
     // Do not allow any mag(val) < SMALL
-    for (vector& edgei : edgePN)
+    for (vector& e : edgePN)
     {
-        if (mag(edgei) < SMALL)
+        if (e.magSqr() < ROOTSMALL)
         {
-            edgei = vector::uniform(SMALL);
+            e = vector::uniform(SMALL);
         }
     }
 

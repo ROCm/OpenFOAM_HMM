@@ -50,8 +50,7 @@ Description
 #include "turbulentTransportModel.H"
 #include "turbulentFluidThermoModel.H"
 #include "wallDist.H"
-#include "processorFvPatchField.H"
-#include "zeroGradientFvPatchField.H"
+#include "processorFvPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -61,35 +60,11 @@ static const scalar kappa(0.41);
 
 
 template<class Type>
-void correctProcessorPatches
-(
-    GeometricField<Type, fvPatchField, volMesh>& vf
-)
+void correctProcessorPatches(GeometricField<Type, fvPatchField, volMesh>& fld)
 {
-    if (!Pstream::parRun())
+    if (UPstream::parRun())
     {
-        return;
-    }
-
-    // Not possible to use correctBoundaryConditions on fields as they may
-    // use local info as opposed to the constraint values employed here,
-    // but still need to update processor patches
-    auto& bf = vf.boundaryFieldRef();
-
-    forAll(bf, patchi)
-    {
-        if (isA<processorFvPatchField<Type>>(bf[patchi]))
-        {
-            bf[patchi].initEvaluate();
-        }
-    }
-
-    forAll(bf, patchi)
-    {
-        if (isA<processorFvPatchField<Type>>(bf[patchi]))
-        {
-            bf[patchi].evaluate();
-        }
+        fld.boundaryFieldRef().template evaluateCoupled<processorFvPatch>();
     }
 }
 
@@ -119,11 +94,11 @@ void blendField
         pf = (1 - mask)*pf + mask*boundaryLayerField;
         fld.max(SMALL);
 
+        // Correct the processor patches only.
         // Do not correct BC
         // - operation may use inconsistent fields wrt these local
         //   manipulations
-        //fld.correctBoundaryConditions();
-        correctProcessorPatches<scalar>(fld);
+        correctProcessorPatches(fld);
 
         Info<< "Writing " << fieldName << nl << endl;
         fld.write();
@@ -158,11 +133,11 @@ void calcOmegaField
         pf = (1 - mask)*pf + mask*epsilonBL/(Cmu*kBL + SMALL);
         omega.max(SMALL);
 
+        // Correct the processor patches only.
         // Do not correct BC
         // - operation may use inconsistent fields wrt these local
         //   manipulations
-        // omega.correctBoundaryConditions();
-        correctProcessorPatches<scalar>(omega);
+        correctProcessorPatches(omega);
 
         Info<< "Writing omega\n" << endl;
         omega.write();
@@ -192,11 +167,11 @@ void setField
         volScalarField fld(fldHeader, mesh);
         fld = value;
 
+        // Correct the processor patches only.
         // Do not correct BC
         // - operation may use inconsistent fields wrt these local
         //   manipulations
-        // fld.correctBoundaryConditions();
-        correctProcessorPatches<scalar>(fld);
+        correctProcessorPatches(fld);
 
         Info<< "Writing " << fieldName << nl << endl;
         fld.write();
@@ -343,7 +318,7 @@ int main(int argc, char *argv[])
         }
     }
     mask.correctBoundaryConditions();
-    correctProcessorPatches<vector>(U);
+    correctProcessorPatches(U);
 
     if (writeTurbulenceFields)
     {
@@ -356,7 +331,7 @@ int main(int argc, char *argv[])
 
         // Do not correct BC - wall functions will 'undo' manipulation above
         // by using nut from turbulence model
-        correctProcessorPatches<scalar>(nut);
+        correctProcessorPatches(nut);
 
         Info<< "Writing nut\n" << endl;
         nut.write();

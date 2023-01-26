@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -395,7 +395,7 @@ void Foam::processorFaPatch::makeWeights(scalarField& w) const
         (
             (
                 neighbEdgeLengths()
-               /mag(neighbEdgeLengths())
+               /(mag(neighbEdgeLengths()) + VSMALL)
             )
           & (
               neighbEdgeCentres()
@@ -405,13 +405,13 @@ void Foam::processorFaPatch::makeWeights(scalarField& w) const
 
         w = neighbEdgeCentresCn/
             (
-                (edgeNormals() & faPatch::delta())
-              + neighbEdgeCentresCn
+                (edgeNormals() & coupledFaPatch::delta())
+              + neighbEdgeCentresCn + VSMALL
             );
     }
     else
     {
-        w = 1.0;
+        w = scalar(1);
     }
 }
 
@@ -420,11 +420,13 @@ void Foam::processorFaPatch::makeDeltaCoeffs(scalarField& dc) const
 {
     if (Pstream::parRun())
     {
-        dc = (1.0 - weights())/(edgeNormals() & faPatch::delta());
+        dc = (1.0 - weights())
+            /((edgeNormals() & coupledFaPatch::delta()) + VSMALL);
     }
     else
     {
-        dc = 1.0/(edgeNormals() & faPatch::delta());
+        dc = scalar(1)
+            /((edgeNormals() & coupledFaPatch::delta()) + VSMALL);
     }
 }
 
@@ -433,11 +435,11 @@ Foam::tmp<Foam::vectorField> Foam::processorFaPatch::delta() const
 {
     if (Pstream::parRun())
     {
-        // To the transformation if necessary
+        // Do the transformation if necessary
         if (parallel())
         {
             return
-                faPatch::delta()
+                coupledFaPatch::delta()
               - (
                     neighbEdgeCentres()
                   - neighbEdgeFaceCentres()
@@ -446,7 +448,7 @@ Foam::tmp<Foam::vectorField> Foam::processorFaPatch::delta() const
         else
         {
             return
-                faPatch::delta()
+                coupledFaPatch::delta()
               - transform
                 (
                     forwardT(),
@@ -459,7 +461,7 @@ Foam::tmp<Foam::vectorField> Foam::processorFaPatch::delta() const
     }
     else
     {
-        return faPatch::delta();
+        return coupledFaPatch::delta();
     }
 }
 

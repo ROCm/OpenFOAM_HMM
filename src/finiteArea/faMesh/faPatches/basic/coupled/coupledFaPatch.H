@@ -104,7 +104,7 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("coupled");
+    TypeNameNoDebug("coupled");
 
 
     // Constructors
