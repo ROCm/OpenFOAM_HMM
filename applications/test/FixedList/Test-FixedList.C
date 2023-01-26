@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -309,32 +309,45 @@ int main(int argc, char *argv[])
 
     if (Pstream::parRun())
     {
+        // Fixed buffer would also work, but want to test using UList
+        List<labelPair> buffer;
+
+        const label startOfRequests = UPstream::nRequests();
+
         if (Pstream::master())
         {
+            buffer.resize(UPstream::nProcs());
+            buffer[0] = labelPair(0, UPstream::myProcNo());
+
             for (const int proci : Pstream::subProcs())
             {
-                IPstream fromSlave(Pstream::commsTypes::blocking, proci);
-                FixedList<label, 2> list3(fromSlave);
-
-                Serr<< "Receiving from " << proci
-                    << " : " << list3 << endl;
+                UIPstream::read
+                (
+                    UPstream::commsTypes::nonBlocking,
+                    proci,
+                    buffer.slice(proci, 1)
+                );
             }
         }
         else
         {
-            Perr<< "Sending to master" << endl;
+            buffer.resize(1);
+            buffer[0] = labelPair(0, UPstream::myProcNo());
 
-            OPstream toMaster
+            Perr<< "Sending to master: " << buffer << endl;
+
+            UOPstream::write
             (
-                Pstream::commsTypes::blocking,
-                Pstream::masterNo()
+                UPstream::commsTypes::nonBlocking,
+                UPstream::masterNo(),
+                buffer.slice(0, 1)  // OK
+                /// buffer  // Also OK
             );
-
-            FixedList<label, 2> list3;
-            list3[0] = 0;
-            list3[1] = Pstream::myProcNo();
-            toMaster << list3;
         }
+
+        UPstream::waitRequests(startOfRequests);
+
+        Info<< "Gathered: " << buffer << endl;
     }
 
     return 0;

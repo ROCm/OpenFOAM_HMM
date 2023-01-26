@@ -364,6 +364,63 @@ public:
                 sendMode
             );
         }
+
+        //- Write UList contents to given processor.
+        //  Only valid for contiguous data types.
+        //  \return True on success
+        template<class Type>
+        inline static bool write
+        (
+            const UPstream::commsTypes commsType,
+            const int toProcNo,
+            const UList<Type>& buffer,
+            const int tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm,
+            //! [out] request information (for non-blocking)
+            UPstream::Request* req = nullptr,
+            const UPstream::sendModes sendMode = UPstream::sendModes::normal
+        )
+        {
+            return UOPstream::write
+            (
+                commsType,
+                toProcNo,
+                buffer.cdata_bytes(),
+                buffer.size_bytes(),
+                tag,
+                comm,
+                req,
+                sendMode
+            );
+        }
+
+        //- Write UList contents (non-blocking) to given processor.
+        //  Only valid for contiguous data types.
+        //  \return True on success
+        template<class Type>
+        inline static bool write
+        (
+            //! [out] request information
+            UPstream::Request& req,
+            const int toProcNo,
+            const UList<Type>& buffer,
+            const int tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm,
+            const UPstream::sendModes sendMode = UPstream::sendModes::normal
+        )
+        {
+            return UOPstream::write
+            (
+                UPstream::commsTypes::nonBlocking,
+                toProcNo,
+                buffer.cdata_bytes(),
+                buffer.size_bytes(),
+                tag,
+                comm,
+               &req,
+                sendMode
+            );
+        }
 };
 
 
@@ -394,10 +451,10 @@ public:
         //- and IO format
         UOPBstream
         (
-            const UPstream::commsTypes,     //!< ignored
+            const UPstream::commsTypes,     //!< irrelevant
             const int toProcNo,             //!< normally UPstream::masterNo()
             DynamicList<char>& sendBuf,
-            const int tag = UPstream::msgType(),  //!< ignored
+            const int tag = UPstream::msgType(),  //!< irrelevant
             const label comm = UPstream::worldComm,
             const bool sendAtDestruct = true,
             IOstreamOption::streamFormat fmt = IOstreamOption::BINARY

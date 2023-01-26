@@ -251,8 +251,8 @@ public:
 
     // Static Functions
 
-        //- Read buffer contents from given processor
-        //  \return the message size
+        //- Read buffer contents from given processor.
+        //  \return the message size (bytes read)
         static label read
         (
             const UPstream::commsTypes commsType,
@@ -265,8 +265,8 @@ public:
             UPstream::Request* req = nullptr
         );
 
-        //- Read buffer contents (non-blocking) from given processor
-        //  \return the message size
+        //- Read buffer contents (non-blocking) from given processor.
+        //  \return the message size (bytes read)
         inline static label read
         (
             //! [out] request information
@@ -274,8 +274,8 @@ public:
             const int fromProcNo,
             char* buf,
             const std::streamsize bufSize,
-            const int tag,
-            const label communicator
+            const int tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm
         )
         {
             return UIPstream::read
@@ -285,7 +285,113 @@ public:
                 buf,
                 bufSize,
                 tag,
-                communicator,
+                comm,
+               &req
+            );
+        }
+
+        //- Read into UList storage from given processor.
+        //  Only valid for contiguous data types.
+        //  \return the message size (bytes read). May change in the future
+        template<class Type>
+        inline static label read
+        (
+            const UPstream::commsTypes commsType,
+            const int fromProcNo,
+            UList<Type>& buffer,
+            const int tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm,
+            //! [out] request information (for non-blocking)
+            UPstream::Request* req = nullptr
+        )
+        {
+            return UIPstream::read
+            (
+                commsType,
+                fromProcNo,
+                buffer.data_bytes(),
+                buffer.size_bytes(),
+                tag,
+                comm,
+                req
+            );
+        }
+
+        //- Read into SubList storage from given processor.
+        //  Only valid for contiguous data types.
+        //  \return the message size (bytes read). May change in the future
+        template<class Type>
+        inline static label read
+        (
+            const UPstream::commsTypes commsType,
+            const int fromProcNo,
+            SubList<Type> buffer,  // passed by shallow copy
+            const int tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm,
+            //! [out] request information (for non-blocking)
+            UPstream::Request* req = nullptr
+        )
+        {
+            return UIPstream::read
+            (
+                commsType,
+                fromProcNo,
+                buffer.data_bytes(),
+                buffer.size_bytes(),
+                tag,
+                comm,
+                req
+            );
+        }
+
+        //- Read into UList storage (non-blocking) from given processor.
+        //  Only valid for contiguous data types.
+        //  \return the message size (bytes read). May change in the future
+        template<class Type>
+        inline static label read
+        (
+            //! [out] request information
+            UPstream::Request& req,
+            const int fromProcNo,
+            UList<Type>& buffer,
+            const int tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm
+        )
+        {
+            return UIPstream::read
+            (
+                UPstream::commsTypes::nonBlocking,
+                fromProcNo,
+                buffer.data_bytes(),
+                buffer.size_bytes(),
+                tag,
+                comm,
+               &req
+            );
+        }
+
+        //- Read into SubList storage (non-blocking) from given processor.
+        //  Only valid for contiguous data types.
+        //  \return the message size (bytes read). May change in the future
+        template<class Type>
+        inline static label read
+        (
+            //! [out] request information
+            UPstream::Request& req,
+            const int fromProcNo,
+            SubList<Type> buffer,  // passed by shallow copy
+            const int tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm
+        )
+        {
+            return UIPstream::read
+            (
+                UPstream::commsTypes::nonBlocking,
+                fromProcNo,
+                buffer.data_bytes(),
+                buffer.size_bytes(),
+                tag,
+                comm,
                &req
             );
         }
@@ -317,11 +423,11 @@ public:
         //- and IO format
         UIPBstream
         (
-            const UPstream::commsTypes,     //!< ignored
+            const UPstream::commsTypes,     //!< irrelevant
             const int rootProcNo,           //!< normally UPstream::masterNo()
             DynamicList<char>& receiveBuf,
             label& receiveBufPosition,
-            const int tag = UPstream::msgType(),  //!< ignored
+            const int tag = UPstream::msgType(),  //!< irrelevant
             const label comm = UPstream::worldComm,
             const bool clearAtEnd = false,  //!< destroy receiveBuf if at end
             IOstreamOption::streamFormat fmt = IOstreamOption::BINARY
@@ -341,7 +447,7 @@ public:
     // Static Functions
 
         //- Wrapped version of UPstream::broadcast
-        //  \return the message size
+        //  \return the message size (bytes read)
         static label read
         (
             const int rootProcNo,  //!< normally UPstream::masterNo()
