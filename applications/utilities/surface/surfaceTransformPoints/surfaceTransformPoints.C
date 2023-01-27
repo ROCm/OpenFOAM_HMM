@@ -149,14 +149,9 @@ void applyScaling(pointField& points, const List<scalar>& scaling)
     }
     else if (scaling.size() == 3)
     {
-        Info<< "Scaling points by ("
-            << scaling[0] << ' '
-            << scaling[1] << ' '
-            << scaling[2] << ')' << nl;
-
-        points.replace(vector::X, scaling[0]*points.component(vector::X));
-        points.replace(vector::Y, scaling[1]*points.component(vector::Y));
-        points.replace(vector::Z, scaling[2]*points.component(vector::Z));
+        const vector factor(scaling[0], scaling[1], scaling[2]);
+        Info<< "Scaling points by " << factor << nl;
+        cmptMultiply(points, points, factor);
     }
 }
 

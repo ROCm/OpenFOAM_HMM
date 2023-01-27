@@ -188,12 +188,7 @@ template<class Type>
 Foam::tmp<Foam::Field<Type>>
 Foam::partialSlipFvPatchField<Type>::snGradTransformDiag() const
 {
-    const vectorField nHat(this->patch().nf());
-    vectorField diag(nHat.size());
-
-    diag.replace(vector::X, mag(nHat.component(vector::X)));
-    diag.replace(vector::Y, mag(nHat.component(vector::Y)));
-    diag.replace(vector::Z, mag(nHat.component(vector::Z)));
+    tmp<vectorField> diag(cmptMag(this->patch().nf()));
 
     return
         valueFraction_*pTraits<Type>::one

@@ -130,12 +130,7 @@ template<class Type>
 Foam::tmp<Foam::Field<Type>>
 Foam::basicSymmetryFaPatchField<Type>::snGradTransformDiag() const
 {
-    const vectorField nHat(this->patch().edgeNormals());
-    vectorField diag(nHat.size());
-
-    diag.replace(vector::X, mag(nHat.component(vector::X)));
-    diag.replace(vector::Y, mag(nHat.component(vector::Y)));
-    diag.replace(vector::Z, mag(nHat.component(vector::Z)));
+    tmp<vectorField> diag(cmptMag(this->patch().edgeNormals()));
 
     return transformFieldMask<Type>(pow<vector, pTraits<Type>::rank>(diag));
 }
