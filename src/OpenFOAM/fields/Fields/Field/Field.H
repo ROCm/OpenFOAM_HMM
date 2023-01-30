@@ -52,6 +52,7 @@ SourceFiles
 #include "keyType.H"
 #include "scalarList.H"
 #include "VectorSpace.H"
+#include "IOobjectOption.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -68,7 +69,6 @@ template<class Type> class SubField;
 
 template<class Type> Ostream& operator<<(Ostream&, const Field<Type>&);
 template<class Type> Ostream& operator<<(Ostream&, const tmp<Field<Type>>&);
-
 
 /*---------------------------------------------------------------------------*\
                           Class FieldBase Declaration
@@ -264,17 +264,22 @@ public:
         //- Construct from Istream
         inline Field(Istream& is);
 
-        //- Construct from a dictionary (primitive) entry
+        //- Construct from a dictionary (primitive) entry.
         Field(const entry& e, const label len);
 
-        //- Construct from lookup of a dictionary (primitive) entry.
-        //  Uses REGEX lookup for legacy compatibility.
+        //- Lookup of a primitive dictionary entry by (literal) name
+        //- and assign its contents to this. The behaviour largely as
+        //- described in assign():
+        //  - For MUST_READ and key not found: FatalIOError.
+        //  - For LAZY_READ and key not found: initialise field with Zero.
+        //  - For NO_READ and key not found: simply size the field.
+        //  .
         Field
         (
-            const word& keyword,
-            const dictionary& dict,
-            const label len,
-            enum keyType::option matchOpt = keyType::REGEX
+            const word& key,        //!< Lookup key. Uses LITERAL (not REGEX)
+            const dictionary& dict, //!< dictionary
+            const label len,        //!< length
+            IOobjectOption::readOption readOpt = IOobjectOption::MUST_READ
         );
 
         //- Clone
@@ -297,17 +302,31 @@ public:
 
     // Member Functions
 
-        //- Assign from a dictionary (primitive) entry
+        //- Assign from a primitive dictionary entry with the following
+        //- behaviour:
+        //  - If len == 0 : a no-op
+        //  - If len < 0  : no size checking
+        //  - If len > 0  : resize \em uniform entries to this size
+        //    before assigning. Use as length check for \em nonuniform
+        //    entries. A mismatch is possibly Fatal, except when
+        //    allowConstructFromLargerSize is true (eg, for column mesh).
+        //  .
         void assign(const entry& e, const label len);
 
-        //- Assign from lookup of a dictionary (primitive) entry
-        //  Uses REGEX lookup for legacy compatibility.
-        void assign
+        //- Lookup a primitive dictionary entry by (literal) name
+        //- and assign its contents to this (behaviour as described above).
+        //  - If len == 0 : a no-op and return True.
+        //  - For NO_READ : a no-op and return False.
+        //  - For LAZY_READ and key not found : a no-op and return False.
+        //  - For MUST_READ and key not found : FatalIOError
+        //  .
+        //  \returns True if an assignment occurred or for zero-length.
+        bool assign
         (
-            const word& keyword,
-            const dictionary& dict,
-            const label len,
-            enum keyType::option matchOpt = keyType::REGEX
+            const word& key,        //!< Lookup key. Uses LITERAL (not REGEX)
+            const dictionary& dict, //!< dictionary
+            const label len,        //!< expected length
+            IOobjectOption::readOption readOpt = IOobjectOption::MUST_READ
         );
 
         //- 1 to 1 map from the given field
