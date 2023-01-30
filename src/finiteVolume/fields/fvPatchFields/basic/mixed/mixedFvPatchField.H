@@ -103,7 +103,6 @@ class mixedFvPatchField
         //- Source field
         Field<Type> source_;
 
-
 protected:
 
         //- Read the 'refValue', 'refGradient' and 'valueFraction' entries
@@ -139,7 +138,10 @@ public:
         (
             const fvPatch&,
             const DimensionedField<Type, volMesh>&,
-            const dictionary&
+            const dictionary&,
+            //! The "refValue", "refGradient", "valueFraction" entries
+            //! (default: mandatory)
+            IOobjectOption::readOption requireMixed = IOobjectOption::MUST_READ
         );
 
         //- Construct by mapping the given mixedFvPatchField onto a new patch

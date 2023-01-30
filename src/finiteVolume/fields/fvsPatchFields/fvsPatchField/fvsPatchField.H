@@ -258,9 +258,26 @@ public:
         (
             const fvPatch&,
             const DimensionedField<Type, surfaceMesh>&,
-            const dictionary&,
-            const bool valueRequired=true
+            const dictionary& dict,
+            //! The "value" entry (default: mandatory)
+            IOobjectOption::readOption requireValue = IOobjectOption::MUST_READ
         );
+
+        //- Construct, forwarding to readOption variant
+        fvsPatchField
+        (
+            const fvPatch& p,
+            const DimensionedField<Type, surfaceMesh>& iF,
+            const dictionary& dict,
+            const bool valueReqd
+        )
+        :
+            fvsPatchField
+            (
+                p, iF, dict,
+                (valueReqd? IOobjectOption::MUST_READ : IOobjectOption::NO_READ)
+            )
+        {}
 
         //- Construct by mapping the given fvsPatchField onto a new patch
         fvsPatchField

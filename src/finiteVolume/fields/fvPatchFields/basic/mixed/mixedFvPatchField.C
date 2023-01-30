@@ -101,16 +101,24 @@ Foam::mixedFvPatchField<Type>::mixedFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
-    const dictionary& dict
+    const dictionary& dict,
+    IOobjectOption::readOption requireMixed
 )
 :
-    fvPatchField<Type>(p, iF, dict, false),
-    refValue_("refValue", dict, p.size()),
-    refGrad_("refGradient", dict, p.size()),
-    valueFraction_("valueFraction", dict, p.size()),
+    // The "value" entry is not required
+    fvPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ),
+    refValue_(p.size()),
+    refGrad_(p.size()),
+    valueFraction_(p.size()),
     source_(p.size(), Zero)
 {
-    // Could also check/clip fraction to 0-1 range
+    if (!readMixedEntries(dict, requireMixed))
+    {
+        // Not read (eg, optional and missing): no evaluate possible/need
+        return;
+    }
+
+    // Could also check/clamp fraction to 0-1 range
     evaluate();
 }
 

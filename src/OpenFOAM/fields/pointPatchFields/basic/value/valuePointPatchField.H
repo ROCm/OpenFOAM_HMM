@@ -101,9 +101,26 @@ public:
         (
             const pointPatch&,
             const DimensionedField<Type, pointMesh>&,
-            const dictionary&,
-            const bool valueRequired=true
+            const dictionary& dict,
+            //! The "value" entry (default: mandatory)
+            IOobjectOption::readOption requireValue = IOobjectOption::MUST_READ
         );
+
+        //- Construct, forwarding to readOption variant
+        valuePointPatchField
+        (
+            const pointPatch& p,
+            const DimensionedField<Type, pointMesh>& iF,
+            const dictionary& dict,
+            const bool valueReqd
+        )
+        :
+            valuePointPatchField
+            (
+                p, iF, dict,
+                (valueReqd? IOobjectOption::MUST_READ : IOobjectOption::NO_READ)
+            )
+        {}
 
         //- Construct by mapping given patch field onto a new patch
         valuePointPatchField

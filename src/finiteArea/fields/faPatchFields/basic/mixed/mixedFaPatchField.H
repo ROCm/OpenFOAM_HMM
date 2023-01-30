@@ -79,7 +79,6 @@ class mixedFaPatchField
         //- Fraction (0-1) of value used for boundary condition
         scalarField valueFraction_;
 
-
 protected:
 
         //- Read the "refValue", "refGradient" and "valueFraction" entries
@@ -115,7 +114,10 @@ public:
         (
             const faPatch&,
             const DimensionedField<Type, areaMesh>&,
-            const dictionary&
+            const dictionary&,
+            //! The "refValue", "refGradient", "valueFraction" entries
+            //! (default: mandatory)
+            IOobjectOption::readOption requireMixed = IOobjectOption::MUST_READ
         );
 
         //- Construct by mapping the given mixedFaPatchField onto a new patch

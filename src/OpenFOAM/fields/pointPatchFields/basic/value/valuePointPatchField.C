@@ -84,28 +84,16 @@ Foam::valuePointPatchField<Type>::valuePointPatchField
     const pointPatch& p,
     const DimensionedField<Type, pointMesh>& iF,
     const dictionary& dict,
-    const bool valueRequired
+    IOobjectOption::readOption requireValue
 )
 :
     pointPatchField<Type>(p, iF, dict),
     Field<Type>(p.size())
 {
-    const auto* hasValue = dict.findEntry("value", keyType::LITERAL);
-
-    if (hasValue)
+    if (!readValueEntry(dict, requireValue))
     {
-        Field<Type>::assign(*hasValue, p.size());
-    }
-    else if (!valueRequired)
-    {
+        // Not read (eg, optional and missing): define zero
         Field<Type>::operator=(Zero);
-    }
-    else
-    {
-        FatalIOErrorInFunction(dict)
-            << "Essential entry 'value' missing on patch "
-            << p.name() << endl
-            << exit(FatalIOError);
     }
 }
 

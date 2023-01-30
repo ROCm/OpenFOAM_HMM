@@ -98,6 +98,32 @@ Foam::mixedFaPatchField<Type>::mixedFaPatchField
 template<class Type>
 Foam::mixedFaPatchField<Type>::mixedFaPatchField
 (
+    const faPatch& p,
+    const DimensionedField<Type, areaMesh>& iF,
+    const dictionary& dict,
+    IOobjectOption::readOption requireMixed
+)
+:
+    // The "value" entry is not required
+    faPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ),
+    refValue_(p.size()),
+    refGrad_(p.size()),
+    valueFraction_(p.size())
+{
+    if (!readMixedEntries(dict, requireMixed))
+    {
+        // Not read (eg, optional and missing): no evaluate possible/need
+        return;
+    }
+
+    // Could also check/clamp fraction to 0-1 range
+    evaluate();
+}
+
+
+template<class Type>
+Foam::mixedFaPatchField<Type>::mixedFaPatchField
+(
     const mixedFaPatchField<Type>& ptf,
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF,
@@ -109,23 +135,6 @@ Foam::mixedFaPatchField<Type>::mixedFaPatchField
     refGrad_(ptf.refGrad_, mapper),
     valueFraction_(ptf.valueFraction_, mapper)
 {}
-
-
-template<class Type>
-Foam::mixedFaPatchField<Type>::mixedFaPatchField
-(
-    const faPatch& p,
-    const DimensionedField<Type, areaMesh>& iF,
-    const dictionary& dict
-)
-:
-    faPatchField<Type>(p, iF),
-    refValue_("refValue", dict, p.size()),
-    refGrad_("refGradient", dict, p.size()),
-    valueFraction_("valueFraction", dict, p.size())
-{
-    evaluate();
-}
 
 
 template<class Type>

@@ -112,21 +112,17 @@ Foam::faePatchField<Type>::faePatchField
 (
     const faPatch& p,
     const DimensionedField<Type, edgeMesh>& iF,
-    const dictionary& dict
+    const dictionary& dict,
+    IOobjectOption::readOption requireValue
 )
 :
     faePatchFieldBase(p, dict),
     Field<Type>(p.size()),
     internalField_(iF)
 {
-    const auto* hasValue = dict.findEntry("value", keyType::LITERAL);
-
-    if (hasValue)
+    if (!readValueEntry(dict, requireValue))
     {
-        Field<Type>::assign(*hasValue, p.size());
-    }
-    else
-    {
+        // Not read (eg, optional and missing): define zero
         Field<Type>::operator=(Zero);
     }
 }

@@ -351,9 +351,26 @@ public:
         (
             const fvPatch&,
             const DimensionedField<Type, volMesh>&,
-            const dictionary&,
-            const bool valueRequired=true
+            const dictionary& dict,
+            //! The "value" entry (default: mandatory)
+            IOobjectOption::readOption requireValue = IOobjectOption::MUST_READ
         );
+
+        //- Construct, forwarding to readOption variant
+        fvPatchField
+        (
+            const fvPatch& p,
+            const DimensionedField<Type, volMesh>& iF,
+            const dictionary& dict,
+            const bool valueReqd
+        )
+        :
+            fvPatchField
+            (
+                p, iF, dict,
+                (valueReqd? IOobjectOption::MUST_READ : IOobjectOption::NO_READ)
+            )
+        {}
 
         //- Construct by mapping the given fvPatchField onto a new patch
         fvPatchField

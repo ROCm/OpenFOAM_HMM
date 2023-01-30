@@ -116,29 +116,14 @@ Foam::fvsPatchField<Type>::fvsPatchField
     const fvPatch& p,
     const DimensionedField<Type, surfaceMesh>& iF,
     const dictionary& dict,
-    const bool valueRequired
+    IOobjectOption::readOption requireValue
 )
 :
     fvsPatchFieldBase(p, dict),
     Field<Type>(p.size()),
     internalField_(iF)
 {
-    if (valueRequired)
-    {
-        const auto* hasValue = dict.findEntry("value", keyType::LITERAL);
-
-        if (hasValue)
-        {
-            Field<Type>::assign(*hasValue, p.size());
-        }
-        else
-        {
-            FatalIOErrorInFunction(dict)
-                << "Essential entry 'value' missing on patch "
-                << p.name() << endl
-                << exit(FatalIOError);
-        }
-    }
+    readValueEntry(dict, requireValue);
 }
 
 

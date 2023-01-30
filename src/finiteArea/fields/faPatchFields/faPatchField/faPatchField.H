@@ -297,13 +297,15 @@ public:
             Field<Type>&& pfld
         );
 
-        //- Construct from patch, internal field and dictionary
+        //- Construct from patch, internal field and dictionary.
+        //  \note older versions have always treated "value" as optional
         faPatchField
         (
             const faPatch&,
             const DimensionedField<Type, areaMesh>&,
-            const dictionary&,
-            const bool valueRequired=true
+            const dictionary& dict,
+            //! The "value" entry (default: optional)
+            IOobjectOption::readOption requireValue = IOobjectOption::LAZY_READ
         );
 
         //- Construct by mapping the given faPatchField onto a new patch

@@ -114,23 +114,16 @@ Foam::faPatchField<Type>::faPatchField
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF,
     const dictionary& dict,
-    const bool valueRequired
+    IOobjectOption::readOption requireValue
 )
 :
     faPatchFieldBase(p, dict),
     Field<Type>(p.size()),
     internalField_(iF)
 {
-    /// if (valueRequired) - not yet needed. Already a lazy evaluation
-
-    const auto* hasValue = dict.findEntry("value", keyType::LITERAL);
-
-    if (hasValue)
+    if (!readValueEntry(dict, requireValue))
     {
-        Field<Type>::assign(*hasValue, p.size());
-    }
-    else
-    {
+        // Not read (eg, optional and missing): define zero
         Field<Type>::operator=(Zero);
     }
 }

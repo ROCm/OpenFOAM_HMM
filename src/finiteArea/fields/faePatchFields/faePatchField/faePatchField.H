@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -259,11 +259,14 @@ public:
         );
 
         //- Construct from patch, internal field and dictionary
+        //  \note older versions have always treated "value" as optional
         faePatchField
         (
             const faPatch&,
             const DimensionedField<Type, edgeMesh>&,
-            const dictionary&
+            const dictionary& dict,
+            //! The "value" entry (default: mandatory)
+            IOobjectOption::readOption requireValue = IOobjectOption::LAZY_READ
         );
 
         //- Construct by mapping the given faePatchField onto a new patch
