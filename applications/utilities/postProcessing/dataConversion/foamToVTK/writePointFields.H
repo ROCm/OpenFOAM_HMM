@@ -5,38 +5,19 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
-    This file is part of OpenFOAM.
-
-    OpenFOAM is free software: you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-    for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
-
-InNamespace
-    Foam
+    This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 
 Description
-    Read point fields from disk
+    Code chunk for reading point fields from disk
     and write with vtk::internalWriter and vtk::patchWriter
-
-SourceFiles
-    writePointFields.H
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef writePointFields_H
-#define writePointFields_H
+#ifndef FoamToVTK_writePointFields_H
+#define FoamToVTK_writePointFields_H
 
 #include "readFields.H"
 #include "foamVtkInternalWriter.H"
@@ -57,6 +38,9 @@ bool writePointField
     const fvMeshSubsetProxy& proxy
 )
 {
+    // Sanity test
+    if (!internalWriter && patchWriters.empty()) return false;
+
     if (!tfield)
     {
         return false;
@@ -113,6 +97,9 @@ label writePointFields
     const bool syncPar
 )
 {
+    // Sanity test
+    if (!internalWriter && patchWriters.empty()) return 0;
+
     label count = 0;
 
     for (const word& fieldName : objects.sortedNames<GeoField>())
@@ -146,6 +133,9 @@ label writeAllPointFields
     const bool syncPar
 )
 {
+    // Sanity test
+    if (!internalWriter && patchWriters.empty()) return 0;
+
     const pointMesh& ptMesh = pointMesh::New(proxy.baseMesh());
 
     #undef  foamToVtk_WRITE_FIELD

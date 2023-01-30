@@ -5,38 +5,19 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
-    This file is part of OpenFOAM.
-
-    OpenFOAM is free software: you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-    for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
-
-InNamespace
-    Foam
+    This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 
 Description
-    Read volume fields from disk
+    Code chunk for reading volume fields from disk
     and write with vtk::internalWriter and vtk::patchWriter
-
-SourceFiles
-    writeVolFields.H
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef writeVolFields_H
-#define writeVolFields_H
+#ifndef FoamToVTK_writeVolFields_H
+#define FoamToVTK_writeVolFields_H
 
 #include "readFields.H"
 #include "foamVtkInternalWriter.H"
@@ -48,102 +29,41 @@ namespace Foam
 {
 
 template<class GeoField>
-bool writeVolField
-(
-    autoPtr<vtk::internalWriter>& internalWriter,
-    UPtrList<vtk::patchWriter>& patchWriters,
-    const tmp<GeoField>& tfield
-)
-{
-    if (!tfield)
-    {
-        return false;
-    }
-
-    const auto& field = tfield();
-
-    // Internal
-    if (internalWriter)
-    {
-        internalWriter->write(field);
-    }
-
-    // Boundary
-    for (vtk::patchWriter& writer : patchWriters)
-    {
-        writer.write(field);
-    }
-
-    tfield.clear();
-    return true;
-}
-
-
-template<class GeoField>
-bool writeVolField
-(
-    autoPtr<vtk::internalWriter>& internalWriter,
-    const autoPtr<volPointInterpolation>& pInterp,
-
-    UPtrList<vtk::patchWriter>& patchWriters,
-    const UPtrList<PrimitivePatchInterpolation<primitivePatch>>& patchInterps,
-
-    const tmp<GeoField>& tfield
-)
-{
-    if (!tfield)
-    {
-        return false;
-    }
-
-    const auto& field = tfield();
-
-    // Internal
-    if (internalWriter && pInterp)
-    {
-        internalWriter->write(field, *pInterp);
-    }
-
-    // Boundary
-    label writeri = 0;
-    for (vtk::patchWriter& writer : patchWriters)
-    {
-        if (writeri < patchInterps.size() && patchInterps.set(writeri))
-        {
-            writer.write(field, patchInterps[writeri]);
-        }
-        ++writeri;
-    }
-
-    tfield.clear();
-    return true;
-}
-
-
-template<class GeoField>
 label writeVolFields
 (
     autoPtr<vtk::internalWriter>& internalWriter,
     UPtrList<vtk::patchWriter>& patchWriters,
     const fvMeshSubsetProxy& proxy,
     const IOobjectList& objects,
-    const bool syncPar
+    const bool syncPar,
+    objectRegistry* cache
 )
 {
+    // Sanity test
+    if (!internalWriter && patchWriters.empty()) return 0;
+
     label count = 0;
 
     for (const word& fieldName : objects.sortedNames<GeoField>())
     {
-        if
-        (
-            writeVolField<GeoField>
-            (
-                internalWriter,
-                patchWriters,
-                getField<GeoField>(proxy, objects, fieldName, syncPar)
-            )
-        )
+        tmp<GeoField> tfield =
+            getField<GeoField>(proxy, objects, fieldName, syncPar, cache);
+
+        if (tfield)
         {
+            // Internal
+            if (internalWriter)
+            {
+                internalWriter->write(tfield());
+            }
+
+            // Boundary
+            for (vtk::patchWriter& writer : patchWriters)
+            {
+                writer.write(tfield());
+            }
+
+            tfield.clear();
             ++count;
         }
     }
@@ -163,23 +83,47 @@ label writeVolFields
 
     const fvMeshSubsetProxy& proxy,
     const IOobjectList& objects,
-    const bool syncPar
+    const bool syncPar,
+    objectRegistry* cache
 )
 {
+    // Sanity test
+    if
+    (
+        (!internalWriter || !pInterp)
+     && (patchWriters.empty() || patchInterps.empty())
+    )
+    {
+        return 0;
+    }
+
     label count = 0;
 
     for (const word& fieldName : objects.sortedNames<GeoField>())
     {
-        if
-        (
-            writeVolField<GeoField>
-            (
-                internalWriter, pInterp,
-                patchWriters,   patchInterps,
-                getField<GeoField>(proxy, objects, fieldName, syncPar)
-            )
-        )
+        tmp<GeoField> tfield =
+            getField<GeoField>(proxy, objects, fieldName, syncPar, cache);
+
+        if (tfield)
         {
+            // Internal
+            if (internalWriter && pInterp)
+            {
+                internalWriter->write(tfield(), *pInterp);
+            }
+
+            // Boundary
+            label writeri = 0;
+            for (vtk::patchWriter& writer : patchWriters)
+            {
+                if (writeri < patchInterps.size() && patchInterps.set(writeri))
+                {
+                    writer.write(tfield(), patchInterps[writeri]);
+                }
+                ++writeri;
+            }
+
+            tfield.clear();
             ++count;
         }
     }
@@ -195,9 +139,13 @@ label writeAllVolFields
 
     const fvMeshSubsetProxy& proxy,
     const IOobjectList& objects,
-    const bool syncPar
+    const bool syncPar,
+    objectRegistry* cache
 )
 {
+    // Sanity test
+    if (!internalWriter && patchWriters.empty()) return 0;
+
     #undef  foamToVtk_WRITE_FIELD
     #define foamToVtk_WRITE_FIELD(FieldType)    \
         writeVolFields<FieldType>               \
@@ -206,7 +154,8 @@ label writeAllVolFields
             patchWriters,                       \
             proxy,                              \
             objects,                            \
-            syncPar                             \
+            syncPar,                            \
+            cache                               \
         )
 
     label count = 0;
@@ -231,7 +180,8 @@ label writeAllVolFields
 
     const fvMeshSubsetProxy& proxy,
     const IOobjectList& objects,
-    const bool syncPar
+    const bool syncPar,
+    objectRegistry* cache
 )
 {
     #undef  foamToVtk_WRITE_FIELD
@@ -242,7 +192,8 @@ label writeAllVolFields
             patchWriters,   patchInterps,       \
             proxy,                              \
             objects,                            \
-            syncPar                             \
+            syncPar,                            \
+            cache                               \
         )
 
 

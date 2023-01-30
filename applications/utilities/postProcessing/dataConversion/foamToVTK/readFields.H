@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,10 +35,11 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Foam_readFields_H
-#define Foam_readFields_H
+#ifndef FoamToVTK_readFields_H
+#define FoamToVTK_readFields_H
 
 #include "fvMeshSubsetProxy.H"
+#include "objectRegistry.H"
 #include "IOobjectList.H"
 #include "PtrList.H"
 
@@ -63,7 +64,8 @@ tmp<GeoField> getField
 (
     const IOobject* io,
     const fvMeshSubsetProxy& proxy,
-    const bool syncPar
+    const bool syncPar,
+    objectRegistry* cache = nullptr
 );
 
 
@@ -78,14 +80,17 @@ tmp<GeoField> getField
 );
 
 
-//- Get the named field from the objects and subset it, or return nullptr
+//- Return the named field from the optional cache (if found),
+//- or get it from the objects and subset it (add to cache).
+//- Return nullptr if nothing worked.
 template<class GeoField>
 tmp<GeoField> getField
 (
     const fvMeshSubsetProxy& proxy,
     const IOobjectList& objects,
     const word& fieldName,
-    const bool syncPar
+    const bool syncPar,
+    objectRegistry* cache = nullptr
 );
 
 

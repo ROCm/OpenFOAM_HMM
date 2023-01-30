@@ -5,23 +5,10 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
-    This file is part of OpenFOAM.
-
-    OpenFOAM is free software: you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-    for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+    This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 
 Description
     Code chunk for converting volume and dimensioned fields
@@ -56,8 +43,14 @@ Description
     );
 
 
-    reportFields::volume(Info, objects);
-    reportFields::internal(Info, objects);
+    if (doInternal || doBoundary)
+    {
+        reportFields::volume(Info, objects);
+    }
+    if (doInternal)
+    {
+        reportFields::internal(Info, objects);
+    }
 
 
     // Setup for the vtm writer.
@@ -269,6 +262,26 @@ Description
         patchInterps.resize(nPatchInterps);
     }
 
+    // With point-interpolation, cache fields to avoid multiple re-reading
+    std::unique_ptr<objectRegistry> cacheFieldsPtr;
+
+    if (doPointValues && (nVolFields || nDimFields))
+    {
+        cacheFieldsPtr.reset
+        (
+            new objectRegistry
+            (
+                IOobject
+                (
+                    "foamToVTK::volume",
+                    runTime.timeName(),
+                    runTime,
+                    IOobject::NO_REGISTER
+                )
+            )
+        );
+    }
+
 
     // CellData
     {
@@ -314,7 +327,8 @@ Description
             patchWriters,
             meshProxy,
             objects,
-            true  // syncPar
+            true, // syncPar
+            cacheFieldsPtr.get()
         );
 
         writeAllDimFields
@@ -322,7 +336,8 @@ Description
             internalWriter,
             meshProxy,
             objects,
-            true  // syncPar
+            true, // syncPar
+            cacheFieldsPtr.get()
         );
 
         // End CellData is implicit
@@ -373,7 +388,8 @@ Description
             patchWriters,   patchInterps,
             meshProxy,
             objects,
-            true  // syncPar
+            true, // syncPar
+            cacheFieldsPtr.get()
         );
 
         writeAllDimFields
@@ -381,7 +397,8 @@ Description
             internalWriter, pInterp,
             meshProxy,
             objects,
-            true  // syncPar
+            true, // syncPar
+            cacheFieldsPtr.get()
         );
 
         writeAllPointFields
