@@ -1,0 +1,19 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
+
+runApplication blockMesh
+
+runApplication makeFaMesh
+
+# For the cell ids etc
+runApplication -s finiteVolume.serial foamToVTK -name VTK-serial -time 0 \
+    -no-finite-area -no-internal -no-lagrangian -no-fields -with-ids
+
+runApplication $(getApplication)
+
+runApplication -s finiteArea.serial foamToVTK -name VTK-serial \
+    -no-boundary -no-internal -no-lagrangian
+
+#------------------------------------------------------------------------------

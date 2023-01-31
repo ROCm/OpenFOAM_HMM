@@ -1,0 +1,21 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
+
+runApplication blockMesh
+
+runApplication makeFaMesh
+
+runApplication decomposePar
+
+# For the processor partitioning
+runParallel -s finiteVolume foamToVTK -name VTK-parallel -time 0 \
+    -no-finite-area -no-internal -no-lagrangian -no-fields -with-ids
+
+runParallel $(getApplication)
+
+runParallel -s finiteArea foamToVTK -name VTK-parallel \
+    -no-boundary -no-internal -no-lagrangian
+
+#------------------------------------------------------------------------------
