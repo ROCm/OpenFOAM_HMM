@@ -108,7 +108,7 @@ void Foam::genericFvPatchField<Type>::write(Ostream& os) const
 {
     // Handle "value" separately
     genericPatchFieldBase::writeGeneric(os, true);
-    this->writeEntry("value", os);
+    fvPatchField<Type>::writeValueEntry(os);
 }
 
 

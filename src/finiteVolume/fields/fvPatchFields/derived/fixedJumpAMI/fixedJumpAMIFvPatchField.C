@@ -178,7 +178,7 @@ void Foam::fixedJumpAMIFvPatchField<Type>::write(Ostream& os) const
         jump_.writeEntry("jump", os);
     }
 
-    this->writeEntry("value", os);
+    fvPatchField<Type>::writeValueEntry(os);
 }
 
 

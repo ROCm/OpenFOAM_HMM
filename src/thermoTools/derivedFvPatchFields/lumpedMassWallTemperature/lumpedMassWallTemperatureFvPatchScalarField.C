@@ -217,7 +217,7 @@ void Foam::lumpedMassWallTemperatureFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    mixedFvPatchScalarField::write(os);
+    mixedFvPatchField<scalar>::write(os);
     temperatureCoupledBase::write(os);
 
     os.writeEntry("Cp", Cp_);

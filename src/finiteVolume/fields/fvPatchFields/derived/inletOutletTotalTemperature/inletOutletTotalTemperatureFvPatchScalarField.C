@@ -191,13 +191,13 @@ void Foam::inletOutletTotalTemperatureFvPatchScalarField::updateCoeffs()
 void Foam::inletOutletTotalTemperatureFvPatchScalarField::write(Ostream& os)
 const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
     os.writeEntryIfDifferent<word>("U", "U", UName_);
     os.writeEntryIfDifferent<word>("phi", "phi", this->phiName_);
     os.writeEntryIfDifferent<word>("psi", "psi", psiName_);
     os.writeEntry("gamma", gamma_);
     T0_.writeEntry("T0", os);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

@@ -194,7 +194,8 @@ void Foam::inclinedFilmNusseltHeightFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    fixedValueFvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
+
     os.writeEntryIfDifferent<word>
     (
         "filmRegion",
@@ -204,7 +205,8 @@ void Foam::inclinedFilmNusseltHeightFvPatchScalarField::write
     GammaMean_->writeData(os);
     a_->writeData(os);
     omega_->writeData(os);
-    writeEntry("value", os);
+
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

@@ -412,7 +412,7 @@ void filmPyrolysisRadiativeCoupledMixedFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    mixedFvPatchScalarField::write(os);
+    mixedFvPatchField<scalar>::write(os);
     os.writeEntryIfDifferent<word>
     (
         "filmRegion",

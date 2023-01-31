@@ -80,8 +80,8 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping the given zeroGradientFaPatchField<Type>
-        //  onto a new patch
+        //- Construct by mapping the given zeroGradient patch field
+        //- onto a new patch
         zeroGradientFaPatchField
         (
             const zeroGradientFaPatchField<Type>&,

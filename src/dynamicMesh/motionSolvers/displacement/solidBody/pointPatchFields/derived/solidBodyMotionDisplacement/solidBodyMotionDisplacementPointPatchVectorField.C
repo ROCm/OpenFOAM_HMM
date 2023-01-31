@@ -181,7 +181,7 @@ void solidBodyMotionDisplacementPointPatchVectorField::
 write(Ostream& os) const
 {
     // Note: write value
-    fixedValuePointPatchVectorField::write(os);
+    fixedValuePointPatchField<vector>::write(os);
 
     os.writeEntry(solidBodyMotionFunction::typeName, SBMFPtr_->type());
 

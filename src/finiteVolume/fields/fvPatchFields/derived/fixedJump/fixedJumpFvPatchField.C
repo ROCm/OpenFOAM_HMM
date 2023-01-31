@@ -277,7 +277,7 @@ void Foam::fixedJumpFvPatchField<Type>::write(Ostream& os) const
         os.writeEntry("minJump", minJump_);
     }
 
-    this->writeEntry("value", os);
+    fvPatchField<Type>::writeValueEntry(os);
 }
 
 

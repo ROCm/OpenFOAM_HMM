@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,41 @@ License
 #include "faePatchField.H"
 #include "faPatchFieldMapper.H"
 
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+template<class Type>
+bool Foam::faePatchField<Type>::readValueEntry
+(
+    const dictionary& dict,
+    IOobjectOption::readOption readOpt
+)
+{
+    const auto& p = faePatchFieldBase::patch();
+
+    if (!p.size()) return true;  // Can be exceptionally lazy
+    if (!IOobjectOption::isAnyRead(readOpt)) return false;
+
+
+    const auto* eptr = dict.findEntry("value", keyType::LITERAL);
+
+    if (eptr)
+    {
+        Field<Type>::assign(*eptr, p.size());
+        return true;
+    }
+
+    if (IOobjectOption::isReadRequired(readOpt))
+    {
+        FatalIOErrorInFunction(dict)
+            << "Required entry 'value' : missing for patch " << p.name()
+            << " in dictionary " << dict.relativeName() << nl
+            << exit(FatalIOError);
+    }
+
+    return false;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
@@ -49,11 +84,11 @@ Foam::faePatchField<Type>::faePatchField
 (
     const faPatch& p,
     const DimensionedField<Type, edgeMesh>& iF,
-    const Field<Type>& f
+    const Field<Type>& pfld
 )
 :
     faePatchFieldBase(p),
-    Field<Type>(f),
+    Field<Type>(pfld),
     internalField_(iF)
 {}
 
@@ -61,14 +96,13 @@ Foam::faePatchField<Type>::faePatchField
 template<class Type>
 Foam::faePatchField<Type>::faePatchField
 (
-    const faePatchField<Type>& ptf,
     const faPatch& p,
     const DimensionedField<Type, edgeMesh>& iF,
-    const faPatchFieldMapper& mapper
+    Field<Type>&& pfld
 )
 :
-    faePatchFieldBase(ptf, p),
-    Field<Type>(ptf, mapper),
+    faePatchFieldBase(p),
+    Field<Type>(std::move(pfld)),
     internalField_(iF)
 {}
 
@@ -96,6 +130,21 @@ Foam::faePatchField<Type>::faePatchField
         Field<Type>::operator=(Zero);
     }
 }
+
+
+template<class Type>
+Foam::faePatchField<Type>::faePatchField
+(
+    const faePatchField<Type>& ptf,
+    const faPatch& p,
+    const DimensionedField<Type, edgeMesh>& iF,
+    const faPatchFieldMapper& mapper
+)
+:
+    faePatchFieldBase(ptf, p),
+    Field<Type>(ptf, mapper),
+    internalField_(iF)
+{}
 
 
 template<class Type>

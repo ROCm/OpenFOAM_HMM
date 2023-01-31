@@ -476,7 +476,7 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
 
     os.writeEntry("mode", operationModeNames[mode_]);
     temperatureCoupledBase::write(os);
@@ -537,7 +537,7 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::write
     refValue().writeEntry("refValue", os);
     refGrad().writeEntry("refGradient", os);
     valueFraction().writeEntry("valueFraction", os);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

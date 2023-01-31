@@ -767,7 +767,7 @@ void Foam::humidityTemperatureCoupledMixedFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    mixedFvPatchScalarField::write(os);
+    mixedFvPatchField<scalar>::write(os);
     os.writeEntryIfDifferent<word>("p", "p", pName_);
     os.writeEntryIfDifferent<word>("U", "U", UName_);
     os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);

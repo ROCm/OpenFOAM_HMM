@@ -158,7 +158,7 @@ void Foam::cylindricalInletVelocityFvPatchVectorField::write(Ostream& os) const
     axialVelocity_->writeData(os);
     radialVelocity_->writeData(os);
     rpm_->writeData(os);
-    writeEntry("value", os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

@@ -147,11 +147,11 @@ void Foam::rotatingWallVelocityFvPatchVectorField::updateCoeffs()
 
 void Foam::rotatingWallVelocityFvPatchVectorField::write(Ostream& os) const
 {
-    fvPatchVectorField::write(os);
+    fvPatchField<vector>::write(os);
     os.writeEntry("origin", origin_);
     os.writeEntry("axis", axis_);
     omega_->writeData(os);
-    writeEntry("value", os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

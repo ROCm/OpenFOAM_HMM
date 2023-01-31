@@ -159,9 +159,9 @@ void Foam::alphaFixedPressureFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
     p_.writeEntry("p", os);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

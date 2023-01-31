@@ -261,7 +261,7 @@ const
     pointPatchField<vector>::write(os);
     os.writeEntry("field", fieldName_);
     os.writeEntry("interpolationScheme", interpolationScheme_);
-    writeEntry("value", os);
+    this->writeValueEntry(os);
 }
 
 

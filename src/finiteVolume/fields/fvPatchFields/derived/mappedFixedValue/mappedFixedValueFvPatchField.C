@@ -140,7 +140,7 @@ void Foam::mappedFixedValueFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
     mappedPatchFieldBase<Type>::write(os);
-    this->writeEntry("value", os);
+    fvPatchField<Type>::writeValueEntry(os);
 }
 
 

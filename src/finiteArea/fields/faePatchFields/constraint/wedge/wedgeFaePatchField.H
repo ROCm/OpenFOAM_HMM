@@ -37,8 +37,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef wedgeFaePatchField_H
-#define wedgeFaePatchField_H
+#ifndef Foam_wedgeFaePatchField_H
+#define Foam_wedgeFaePatchField_H
 
 #include "faePatchField.H"
 #include "wedgeFaPatch.H"
@@ -57,7 +57,6 @@ class wedgeFaePatchField
 :
     public faePatchField<Type>
 {
-
 public:
 
     //- Runtime type information

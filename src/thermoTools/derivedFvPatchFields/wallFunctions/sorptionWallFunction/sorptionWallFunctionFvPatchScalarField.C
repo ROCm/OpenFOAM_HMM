@@ -405,11 +405,11 @@ void sorptionWallFunctionFvPatchScalarField::updateCoeffs()
 
 void sorptionWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
-    fixedGradientFvPatchScalarField::write(os);
+    fixedGradientFvPatchField<scalar>::write(os);
 
     writeLocalEntries(os);
 
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

@@ -238,7 +238,7 @@ void Foam::flowRateOutletVelocityFvPatchVectorField::write(Ostream& os) const
         os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);
         os.writeEntryIfDifferent<scalar>("rhoOutlet", -VGREAT, rhoOutlet_);
     }
-    writeEntry("value", os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

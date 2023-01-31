@@ -155,7 +155,7 @@ void Foam::waveTransmissiveFvPatchField<Type>::write(Ostream& os) const
         os.writeEntry("lInf", this->lInf_);
     }
 
-    this->writeEntry("value", os);
+    fvPatchField<Type>::writeValueEntry(os);
 }
 
 

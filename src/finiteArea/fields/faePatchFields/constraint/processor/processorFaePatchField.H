@@ -37,8 +37,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef processorFaePatchField_H
-#define processorFaePatchField_H
+#ifndef Foam_processorFaePatchField_H
+#define Foam_processorFaePatchField_H
 
 #include "coupledFaePatchField.H"
 #include "processorFaPatch.H"
@@ -57,7 +57,7 @@ class processorFaePatchField
 :
     public coupledFaePatchField<Type>
 {
-    // Private data
+    // Private Data
 
         //- Local reference cast into the processor patch
         const processorFaPatch& procPatch_;
@@ -135,8 +135,8 @@ public:
         }
 
 
-    // Destructor
-    virtual ~processorFaePatchField();
+    //- Destructor
+    virtual ~processorFaePatchField() = default;
 
 
     // Member Functions

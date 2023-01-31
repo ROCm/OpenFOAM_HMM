@@ -207,7 +207,7 @@ void Foam::partialSlipFvPatchField<Type>::write(Ostream& os) const
     if (writeValue_)
     {
         os.writeEntry("writeValue", "true");
-        this->writeEntry("value", os);
+        fvPatchField<Type>::writeValueEntry(os);
     }
 }
 

@@ -188,7 +188,7 @@ void Foam::radiation::MarshakRadiationFixedTemperatureFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    mixedFvPatchScalarField::write(os);
+    mixedFvPatchField<scalar>::write(os);
     Trad_.writeEntry("Trad", os);
 }
 

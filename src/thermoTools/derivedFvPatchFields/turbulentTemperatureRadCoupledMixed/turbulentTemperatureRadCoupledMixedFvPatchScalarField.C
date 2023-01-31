@@ -721,7 +721,7 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    mixedFvPatchScalarField::write(os);
+    mixedFvPatchField<scalar>::write(os);
 
     //os.writeEntry("Tnbr", TnbrName_);
     os.writeEntryIfDifferent<word>("Tnbr", "T", TnbrName_);

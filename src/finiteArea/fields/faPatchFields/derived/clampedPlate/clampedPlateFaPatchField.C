@@ -167,7 +167,7 @@ template<class Type>
 void clampedPlateFaPatchField<Type>::write(Ostream& os) const
 {
     faPatchField<Type>::write(os);
-    this->writeEntry("value", os);
+    faPatchField<Type>::writeValueEntry(os);
 }
 
 

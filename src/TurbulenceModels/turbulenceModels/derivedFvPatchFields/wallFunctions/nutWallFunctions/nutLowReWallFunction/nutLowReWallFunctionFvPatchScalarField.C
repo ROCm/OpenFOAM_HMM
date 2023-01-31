@@ -137,7 +137,7 @@ void Foam::nutLowReWallFunctionFvPatchScalarField::write
 ) const
 {
     nutWallFunctionFvPatchScalarField::write(os);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

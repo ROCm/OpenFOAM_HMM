@@ -178,7 +178,7 @@ template<class Type>
 void Foam::coupledFaPatchField<Type>::write(Ostream& os) const
 {
     faPatchField<Type>::write(os);
-    this->writeEntry("value", os);
+    faPatchField<Type>::writeValueEntry(os);
 }
 
 

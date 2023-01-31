@@ -193,7 +193,8 @@ void Foam::inclinedFilmNusseltInletVelocityFvPatchVectorField::write
     Ostream& os
 ) const
 {
-    fvPatchVectorField::write(os);
+    fvPatchField<vector>::write(os);
+
     os.writeEntryIfDifferent<word>
     (
         "filmRegion",
@@ -203,7 +204,8 @@ void Foam::inclinedFilmNusseltInletVelocityFvPatchVectorField::write
     GammaMean_->writeData(os);
     a_->writeData(os);
     omega_->writeData(os);
-    writeEntry("value", os);
+
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

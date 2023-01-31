@@ -339,7 +339,7 @@ void Foam::advectiveFvPatchField<Type>::write(Ostream& os) const
         os.writeEntry("lInf", lInf_);
     }
 
-    this->writeEntry("value", os);
+    fvPatchField<Type>::writeValueEntry(os);
 }
 
 

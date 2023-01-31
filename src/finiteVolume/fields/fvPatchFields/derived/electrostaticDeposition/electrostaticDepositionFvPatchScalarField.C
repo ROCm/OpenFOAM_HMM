@@ -543,7 +543,7 @@ void Foam::electrostaticDepositionFvPatchScalarField::updateCoeffs()
 
 void Foam::electrostaticDepositionFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
 
     h_.writeEntry("h", os);
 
@@ -574,7 +574,7 @@ void Foam::electrostaticDepositionFvPatchScalarField::write(Ostream& os) const
     qcum_.writeEntry("qCumulative", os);
     Vfilm_.writeEntry("Vfilm", os);
 
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

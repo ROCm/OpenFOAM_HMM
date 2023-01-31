@@ -174,11 +174,11 @@ void Foam::variableHeightFlowRateFvPatchScalarField::updateCoeffs()
 
 void Foam::variableHeightFlowRateFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
     os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
     os.writeEntry("lowerBound", lowerBound_);
     os.writeEntry("upperBound", upperBound_);
-    this->writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

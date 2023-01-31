@@ -230,7 +230,7 @@ void Foam::syringePressureFvPatchScalarField::updateCoeffs()
 
 void Foam::syringePressureFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
 
     os.writeEntry("Ap", Ap_);
     os.writeEntry("Sp", Sp_);
@@ -244,7 +244,7 @@ void Foam::syringePressureFvPatchScalarField::write(Ostream& os) const
     os.writeEntry("ams", ams_);
     os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
 
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

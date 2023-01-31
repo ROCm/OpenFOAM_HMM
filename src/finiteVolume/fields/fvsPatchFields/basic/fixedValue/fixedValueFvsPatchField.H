@@ -77,8 +77,8 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping the given fixedValueFvsPatchField<Type>
-        //  onto a new patch
+        //- Construct by mapping the given fixedValue patch field
+        //- onto a new patch
         fixedValueFvsPatchField
         (
             const fixedValueFvsPatchField<Type>&,

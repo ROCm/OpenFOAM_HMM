@@ -1323,7 +1323,7 @@ void alphatWallBoilingWallFunctionFvPatchScalarField::write(Ostream& os) const
     qq_.writeEntry("qQuenching", os);
     alphatConv_.writeEntry("alphatConv", os);
 
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

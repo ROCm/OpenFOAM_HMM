@@ -425,7 +425,7 @@ void Foam::turbulentDigitalFilterInletFvPatchField<Type>::write
     }
     L_.write(os);
 
-    this->writeEntry("value", os);
+    fvPatchField<Type>::writeValueEntry(os);
 }
 
 

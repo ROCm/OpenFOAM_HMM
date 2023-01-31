@@ -84,8 +84,8 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping the given fixedGradientFaPatchField<Type>
-        //  onto a new patch
+        //- Construct by mapping the given fixedGradient patch field
+        //- onto a new patch
         fixedGradientFaPatchField
         (
             const fixedGradientFaPatchField<Type>&,

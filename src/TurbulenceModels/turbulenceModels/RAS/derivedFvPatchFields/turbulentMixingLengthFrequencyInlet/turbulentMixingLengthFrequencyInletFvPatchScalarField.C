@@ -157,11 +157,11 @@ void turbulentMixingLengthFrequencyInletFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
     os.writeEntry("mixingLength", mixingLength_);
     os.writeEntry("phi", this->phiName_);
     os.writeEntry("k", kName_);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

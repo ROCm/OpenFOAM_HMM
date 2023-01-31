@@ -367,7 +367,7 @@ void Foam::pressurePIDControlInletVelocityFvPatchVectorField::write
     os.writeEntry("error", error_);
     os.writeEntry("errorIntegral", errorIntegral_);
 
-    writeEntry("value", os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

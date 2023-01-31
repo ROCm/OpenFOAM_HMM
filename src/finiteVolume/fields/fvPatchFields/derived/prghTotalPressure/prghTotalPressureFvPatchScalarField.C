@@ -188,12 +188,12 @@ void Foam::prghTotalPressureFvPatchScalarField::updateCoeffs()
 
 void Foam::prghTotalPressureFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
     os.writeEntryIfDifferent<word>("U", "U", UName_);
     os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
     os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);
     p0_.writeEntry("p0", os);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

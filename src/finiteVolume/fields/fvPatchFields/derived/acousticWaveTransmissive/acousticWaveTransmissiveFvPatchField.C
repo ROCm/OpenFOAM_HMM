@@ -112,7 +112,7 @@ void Foam::acousticWaveTransmissiveFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
     os.writeEntry("advectiveSpeed", advectiveU_);
-    this->writeEntry("value", os);
+    fvPatchField<Type>::writeValueEntry(os);
 }
 
 

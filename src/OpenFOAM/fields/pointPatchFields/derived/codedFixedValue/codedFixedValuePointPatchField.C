@@ -238,7 +238,7 @@ Foam::codedFixedValuePointPatchField<Type>::redirectPatchField() const
         // Make sure to construct the patchfield with up-to-date value
 
         OStringStream os;
-        static_cast<const Field<Type>&>(*this).writeEntry("value", os);
+        this->writeValueEntry(os);
         IStringStream is(os.str());
         dictionary constructDict(is);
 

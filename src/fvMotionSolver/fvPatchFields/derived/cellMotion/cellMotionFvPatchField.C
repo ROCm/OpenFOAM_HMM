@@ -126,7 +126,7 @@ template<class Type>
 void Foam::cellMotionFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
-    this->writeEntry("value", os);
+    fvPatchField<Type>::writeValueEntry(os);
 }
 
 // ************************************************************************* //

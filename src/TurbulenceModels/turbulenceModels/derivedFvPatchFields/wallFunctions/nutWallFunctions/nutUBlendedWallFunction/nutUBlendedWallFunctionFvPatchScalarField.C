@@ -232,7 +232,7 @@ void Foam::nutUBlendedWallFunctionFvPatchScalarField::write
 {
     nutWallFunctionFvPatchScalarField::write(os);
     writeLocalEntries(os);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

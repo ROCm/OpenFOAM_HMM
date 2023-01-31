@@ -210,7 +210,7 @@ void Foam::swirlFlowRateInletVelocityFvPatchVectorField::write
     os.writeEntry("axis", axis_);
     flowRate_->writeData(os);
     rpm_->writeData(os);
-    writeEntry("value", os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

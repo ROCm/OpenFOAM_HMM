@@ -166,9 +166,9 @@ void Foam::freeSurfacePressureFvPatchScalarField::updateCoeffs()
 
 void Foam::freeSurfacePressureFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
     pa_.writeEntry("pa", os);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

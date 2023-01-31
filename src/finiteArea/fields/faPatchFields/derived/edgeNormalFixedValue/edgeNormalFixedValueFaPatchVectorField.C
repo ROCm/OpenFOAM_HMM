@@ -134,7 +134,7 @@ void Foam::edgeNormalFixedValueFaPatchVectorField::updateCoeffs()
 
 void Foam::edgeNormalFixedValueFaPatchVectorField::write(Ostream& os) const
 {
-    fixedValueFaPatchVectorField::write(os);
+    fixedValueFaPatchField<vector>::write(os);
     refValue_.writeEntry("refValue", os);
 }
 

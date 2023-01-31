@@ -47,6 +47,7 @@ SourceFiles
 
 #include "pointPatch.H"
 #include "DimensionedField.H"
+#include "fieldTypes.H"
 #include "autoPtr.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -55,8 +56,8 @@ namespace Foam
 {
 
 // Forward Declarations
-class objectRegistry;
 class dictionary;
+class objectRegistry;
 class pointPatchFieldMapper;
 class pointMesh;
 
@@ -266,7 +267,7 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping given patchField<Type> onto a new patch
+        //- Construct by mapping given patch field onto a new patch
         pointPatchField
         (
             const pointPatchField<Type>&,
@@ -361,47 +362,46 @@ public:
         static const word& zeroGradientType();
 
 
-        // Attributes
+    // Attributes
 
-            //- True if this patch field fixes a value
-            virtual bool fixesValue() const
-            {
-                return false;
-            }
+        //- True if this patch field fixes a value
+        virtual bool fixesValue() const
+        {
+            return false;
+        }
 
-            //- True if this patch field is coupled
-            virtual bool coupled() const
-            {
-                return false;
-            }
+        //- True if this patch field is coupled
+        virtual bool coupled() const
+        {
+            return false;
+        }
 
-            //- The constraint type this pointPatchField implements.
-            virtual const word& constraintType() const
-            {
-                return word::null;
-            }
+        //- The constraint type this pointPatchField implements.
+        virtual const word& constraintType() const
+        {
+            return word::null;
+        }
 
 
-        // Access
+    // Access
 
-            //- Return the patch size
-            label size() const
-            {
-                return patch().size();
-            }
+        //- Return the patch size
+        label size() const
+        {
+            return patch().size();
+        }
 
-            //- Return const-reference to the dimensioned internal field
-            const DimensionedField<Type, pointMesh>& internalField()
-            const noexcept
-            {
-                return internalField_;
-            }
+        //- Return const-reference to the dimensioned internal field
+        const DimensionedField<Type, pointMesh>& internalField() const noexcept
+        {
+            return internalField_;
+        }
 
-            //- Return const-reference to the internal field values
-            const Field<Type>& primitiveField() const noexcept
-            {
-                return internalField_;
-            }
+        //- Return const-reference to the internal field values
+        const Field<Type>& primitiveField() const noexcept
+        {
+            return internalField_;
+        }
 
 
         // Evaluation Functions
@@ -537,9 +537,9 @@ public:
         // By generic these do nothing unless the patch actually has boundary
         // values
 
-            virtual void operator==(const pointPatchField<Type>&){}
-            virtual void operator==(const Field<Type>&){}
-            virtual void operator==(const Type&){}
+        virtual void operator==(const pointPatchField<Type>&){}
+        virtual void operator==(const Field<Type>&){}
+        virtual void operator==(const Type&){}
 
 
     // Ostream Operator

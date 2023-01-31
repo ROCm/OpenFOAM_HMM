@@ -201,7 +201,7 @@ void Foam::turbulentInletFvPatchField<Type>::write(Ostream& os) const
     os.writeEntry("fluctuationScale", fluctuationScale_);
     referenceField_.writeEntry("referenceField", os);
     os.writeEntry("alpha", alpha_);
-    this->writeEntry("value", os);
+    fvPatchField<Type>::writeValueEntry(os);
 }
 
 

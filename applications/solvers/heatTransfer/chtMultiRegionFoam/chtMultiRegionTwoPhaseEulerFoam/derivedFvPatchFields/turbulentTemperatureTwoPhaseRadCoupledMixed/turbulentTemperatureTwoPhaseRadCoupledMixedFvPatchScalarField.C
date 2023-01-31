@@ -485,7 +485,7 @@ void turbulentTemperatureTwoPhaseRadCoupledMixedFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    mixedFvPatchScalarField::write(os);
+    mixedFvPatchField<scalar>::write(os);
     os.writeEntry("kappaMethod", KMethodTypeNames_[method_]);
     os.writeEntryIfDifferent<word>("kappa","none", kappaName_);
 

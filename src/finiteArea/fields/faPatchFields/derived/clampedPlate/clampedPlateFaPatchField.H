@@ -98,7 +98,7 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping the given clampedPlateFaPatchField<Type>
+        //- Construct by mapping the given clampedPlate patch field
         //- onto a new patch
         clampedPlateFaPatchField
         (

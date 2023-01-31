@@ -175,10 +175,10 @@ void Foam::wallHeatTransferFvPatchScalarField::updateCoeffs()
 
 void Foam::wallHeatTransferFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
     Tinf_.writeEntry("Tinf", os);
     alphaWall_.writeEntry("alphaWall", os);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

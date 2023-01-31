@@ -1027,7 +1027,7 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::write(Ostream& os) const
     {
         L_->writeData(os);
     }
-    writeEntry("value", os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

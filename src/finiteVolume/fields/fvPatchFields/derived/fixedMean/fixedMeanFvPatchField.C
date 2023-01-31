@@ -132,7 +132,7 @@ void Foam::fixedMeanFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
     meanValue_->writeData(os);
-    this->writeEntry("value", os);
+    fvPatchField<Type>::writeValueEntry(os);
 }
 
 

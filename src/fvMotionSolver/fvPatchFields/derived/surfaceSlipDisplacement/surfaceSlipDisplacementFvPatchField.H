@@ -143,7 +143,7 @@ public:
         {
             slipFvPatchField<Type>::write(os);
             // Only so we can easily postprocess.
-            this->writeEntry("value", os);
+            fvPatchField<Type>::writeValueEntry(os);
         }
 };
 

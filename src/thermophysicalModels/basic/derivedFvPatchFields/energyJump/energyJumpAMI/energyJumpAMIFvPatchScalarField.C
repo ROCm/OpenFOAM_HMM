@@ -138,7 +138,7 @@ void Foam::energyJumpAMIFvPatchScalarField::updateCoeffs()
 void Foam::energyJumpAMIFvPatchScalarField::write(Ostream& os) const
 {
     fixedJumpAMIFvPatchField<scalar>::write(os);
-    this->writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

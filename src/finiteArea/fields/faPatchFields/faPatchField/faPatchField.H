@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,6 +51,7 @@ SourceFiles
 
 #include "faPatch.H"
 #include "DimensionedField.H"
+#include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,8 +59,8 @@ namespace Foam
 {
 
 // Forward Declarations
-class objectRegistry;
 class dictionary;
+class objectRegistry;
 class faPatchFieldMapper;
 class areaMesh;
 
@@ -195,6 +196,25 @@ class faPatchField
         //- Reference to internal field
         const DimensionedField<Type, areaMesh>& internalField_;
 
+protected:
+
+    // Protected Member Functions
+
+        //- Read the "value" entry into \c *this.
+        //  The reading can be optional (default), mandatory etc.
+        //  \returns True on success
+        bool readValueEntry
+        (
+            const dictionary& dict,
+            IOobjectOption::readOption readOpt = IOobjectOption::LAZY_READ
+        );
+
+        //- Write *this field as a "value" entry
+        void writeValueEntry(Ostream& os) const
+        {
+            Field<Type>::writeEntry("value", os);
+        }
+
 
 public:
 
@@ -259,12 +279,20 @@ public:
             const DimensionedField<Type, areaMesh>&
         );
 
-        //- Construct from patch and internal field and patch field
+        //- Construct from patch, internal field and patch field
         faPatchField
         (
             const faPatch&,
             const DimensionedField<Type, areaMesh>&,
-            const Field<Type>&
+            const Field<Type>& pfld
+        );
+
+        //- Construct from patch, internal field and patch field
+        faPatchField
+        (
+            const faPatch&,
+            const DimensionedField<Type, areaMesh>&,
+            Field<Type>&& pfld
         );
 
         //- Construct from patch, internal field and dictionary
@@ -375,37 +403,36 @@ public:
         static const word& zeroGradientType();
 
 
-        // Attributes
+    // Attributes
 
-            //- True if this patch field fixes a value.
-            //  Needed to check if a level has to be specified while solving
-            //  Poissons equations.
-            virtual bool fixesValue() const
-            {
-                return false;
-            }
+        //- True if this patch field fixes a value.
+        //  Needed to check if a level has to be specified while solving
+        //  Poissons equations.
+        virtual bool fixesValue() const
+        {
+            return false;
+        }
 
-            //- True if this patch field is coupled
-            virtual bool coupled() const
-            {
-                return false;
-            }
+        //- True if this patch field is coupled
+        virtual bool coupled() const
+        {
+            return false;
+        }
 
 
-        // Access
+    // Access
 
-            //- Return const-reference to the dimensioned internal field
-            const DimensionedField<Type, areaMesh>& internalField()
-            const noexcept
-            {
-                return internalField_;
-            }
+        //- Return const-reference to the dimensioned internal field
+        const DimensionedField<Type, areaMesh>& internalField() const noexcept
+        {
+            return internalField_;
+        }
 
-            //- Return const-reference to the internal field values
-            const Field<Type>& primitiveField() const noexcept
-            {
-                return internalField_;
-            }
+        //- Return const-reference to the internal field values
+        const Field<Type>& primitiveField() const noexcept
+        {
+            return internalField_;
+        }
 
 
         // Mapping

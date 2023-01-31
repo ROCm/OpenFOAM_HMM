@@ -240,7 +240,7 @@ void Foam::exprValuePointPatchField<Type>::write(Ostream& os) const
     this->parent_bctype::write(os);
     expressions::patchExprFieldBase::write(os);
 
-    this->writeEntry("value", os);
+    this->writeValueEntry(os);
 
     driver_.writeCommon(os, this->debug_ || debug);
 }

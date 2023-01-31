@@ -115,11 +115,10 @@ void Foam::fixedRhoFvPatchScalarField::updateCoeffs()
 
 void Foam::fixedRhoFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchScalarField::write(os);
-
+    fvPatchField<scalar>::write(os);
     os.writeEntryIfDifferent<word>("p", "p", pName_);
     os.writeEntryIfDifferent<word>("psi", "thermo:psi", psiName_);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

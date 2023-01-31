@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef valuePointPatchField_H
-#define valuePointPatchField_H
+#ifndef Foam_valuePointPatchField_H
+#define Foam_valuePointPatchField_H
 
 #include "pointPatchField.H"
 
@@ -55,6 +55,26 @@ class valuePointPatchField
     public pointPatchField<Type>,
     public Field<Type>
 {
+protected:
+
+    // Protected Member Functions
+
+        //- Read the "value" entry into \c *this.
+        //  The reading can be optional (default), mandatory etc.
+        //  \returns True on success
+        bool readValueEntry
+        (
+            const dictionary& dict,
+            IOobjectOption::readOption readOpt = IOobjectOption::LAZY_READ
+        );
+
+        //- Write \c *this field as a "value" entry
+        void writeValueEntry(Ostream& os) const
+        {
+            Field<Type>::writeEntry("value", os);
+        }
+
+
 public:
 
     //- Declare type-name, virtual type (with debug switch)
@@ -85,7 +105,7 @@ public:
             const bool valueRequired=true
         );
 
-        //- Construct by mapping given patchField<Type> onto a new patch
+        //- Construct by mapping given patch field onto a new patch
         valuePointPatchField
         (
             const valuePointPatchField<Type>&,

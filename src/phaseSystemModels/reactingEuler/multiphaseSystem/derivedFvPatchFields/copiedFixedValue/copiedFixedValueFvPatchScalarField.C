@@ -112,7 +112,7 @@ void Foam::copiedFixedValueFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
     os.writeEntry("sourceFieldName", sourceFieldName_);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

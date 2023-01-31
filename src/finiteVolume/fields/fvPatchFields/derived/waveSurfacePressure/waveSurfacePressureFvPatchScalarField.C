@@ -225,11 +225,11 @@ void Foam::waveSurfacePressureFvPatchScalarField::updateCoeffs()
 
 void Foam::waveSurfacePressureFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
     os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
     os.writeEntryIfDifferent<word>("zeta", "zeta", zetaName_);
     os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

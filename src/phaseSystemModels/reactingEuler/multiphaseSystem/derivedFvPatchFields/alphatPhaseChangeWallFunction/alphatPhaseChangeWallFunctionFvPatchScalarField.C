@@ -128,7 +128,7 @@ write(Ostream& os) const
     fvPatchField<scalar>::write(os);
     dmdt_.writeEntry("dmdt", os);
     mDotL_.writeEntry("mDotL", os);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

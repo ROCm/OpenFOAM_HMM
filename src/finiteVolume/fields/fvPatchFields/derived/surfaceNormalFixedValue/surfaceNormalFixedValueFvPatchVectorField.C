@@ -171,7 +171,7 @@ void Foam::surfaceNormalFixedValueFvPatchVectorField::updateCoeffs()
 
 void Foam::surfaceNormalFixedValueFvPatchVectorField::write(Ostream& os) const
 {
-    fvPatchVectorField::write(os);
+    fvPatchField<vector>::write(os);
     refValue_.writeEntry("refValue", os);
     if (ramp_)
     {

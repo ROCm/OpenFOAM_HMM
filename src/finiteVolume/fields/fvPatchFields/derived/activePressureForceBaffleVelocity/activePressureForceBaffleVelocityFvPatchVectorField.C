@@ -380,7 +380,7 @@ void Foam::activePressureForceBaffleVelocityFvPatchVectorField::updateCoeffs()
 void Foam::activePressureForceBaffleVelocityFvPatchVectorField::
 write(Ostream& os) const
 {
-    fvPatchVectorField::write(os);
+    fvPatchField<vector>::write(os);
     os.writeEntryIfDifferent<word>("p", "p", pName_);
     os.writeEntry("cyclicPatch", cyclicPatchName_);
     os.writeEntry("openingTime", openingTime_);
@@ -389,7 +389,7 @@ write(Ostream& os) const
     os.writeEntry("minThresholdValue", minThresholdValue_);
     os.writeEntry("forceBased", fBased_);
     os.writeEntry("opening", opening_);
-    writeEntry("value", os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

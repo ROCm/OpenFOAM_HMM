@@ -170,9 +170,9 @@ void Foam::semiPermeableBaffleVelocityFvPatchVectorField::write
     Ostream& os
 ) const
 {
-    fvPatchVectorField::write(os);
+    fvPatchField<vector>::write(os);
     os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);
-    writeEntry("value", os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

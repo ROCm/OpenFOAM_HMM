@@ -323,7 +323,7 @@ void alphatPhaseChangeJayatillekeWallFunctionFvPatchScalarField::write
     os.writeEntry("kappa", kappa_);
     os.writeEntry("E", E_);
     dmdt_.writeEntry("dmdt", os);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

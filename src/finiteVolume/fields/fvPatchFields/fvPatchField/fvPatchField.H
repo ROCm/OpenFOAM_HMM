@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,8 +59,8 @@ namespace Foam
 {
 
 // Forward Declarations
-class objectRegistry;
 class dictionary;
+class objectRegistry;
 class fvPatchFieldMapper;
 class volMesh;
 
@@ -231,6 +231,25 @@ class fvPatchField
         //- Reference to internal field
         const DimensionedField<Type, volMesh>& internalField_;
 
+protected:
+
+    // Protected Member Functions
+
+        //- Read the "value" entry into \c *this.
+        //  The reading can be optional (default), mandatory etc.
+        //  \returns True on success
+        bool readValueEntry
+        (
+            const dictionary& dict,
+            IOobjectOption::readOption readOpt = IOobjectOption::LAZY_READ
+        );
+
+        //- Write \c *this field as a "value" entry
+        void writeValueEntry(Ostream& os) const
+        {
+            Field<Type>::writeEntry("value", os);
+        }
+
 
 public:
 
@@ -295,6 +314,14 @@ public:
             const DimensionedField<Type, volMesh>&
         );
 
+        //- Construct from patch, internal field and patch type
+        fvPatchField
+        (
+            const fvPatch&,
+            const DimensionedField<Type, volMesh>&,
+            const word& patchType
+        );
+
         //- Construct from patch, internal field and value
         fvPatchField
         (
@@ -303,20 +330,20 @@ public:
             const Type& value
         );
 
-        //- Construct from patch and internal field and patch type
+        //- Construct from patch, internal field and patch field
         fvPatchField
         (
             const fvPatch&,
             const DimensionedField<Type, volMesh>&,
-            const word& patchType
+            const Field<Type>& pfld
         );
 
-        //- Construct from patch and internal field and patch field
+        //- Construct from patch, internal field and patch field
         fvPatchField
         (
             const fvPatch&,
             const DimensionedField<Type, volMesh>&,
-            const Field<Type>&
+            Field<Type>&& pfld
         );
 
         //- Construct from patch, internal field and dictionary
@@ -435,44 +462,43 @@ public:
         static const word& zeroGradientType();
 
 
-        // Attributes
+    // Attributes
 
-            //- True if this patch field fixes a value.
-            //  Needed to check if a level has to be specified while solving
-            //  Poissons equations.
-            virtual bool fixesValue() const
-            {
-                return false;
-            }
+        //- True if this patch field fixes a value.
+        //  Needed to check if a level has to be specified while solving
+        //  Poissons equations.
+        virtual bool fixesValue() const
+        {
+            return false;
+        }
 
-            //- True if the value of the patch field
-            //- is altered by assignment (the default)
-            virtual bool assignable() const
-            {
-                return true;
-            }
+        //- True if the value of the patch field
+        //- is altered by assignment (the default)
+        virtual bool assignable() const
+        {
+            return true;
+        }
 
-            //- True if this patch field is coupled
-            virtual bool coupled() const
-            {
-                return false;
-            }
+        //- True if this patch field is coupled
+        virtual bool coupled() const
+        {
+            return false;
+        }
 
 
-        // Access
+    // Access
 
-            //- Return const-reference to the dimensioned internal field
-            const DimensionedField<Type, volMesh>& internalField()
-            const noexcept
-            {
-                return internalField_;
-            }
+        //- Return const-reference to the dimensioned internal field
+        const DimensionedField<Type, volMesh>& internalField() const noexcept
+        {
+            return internalField_;
+        }
 
-            //- Return const-reference to the internal field values
-            const Field<Type>& primitiveField() const noexcept
-            {
-                return internalField_;
-            }
+        //- Return const-reference to the internal field values
+        const Field<Type>& primitiveField() const noexcept
+        {
+            return internalField_;
+        }
 
 
         // Mapping Functions

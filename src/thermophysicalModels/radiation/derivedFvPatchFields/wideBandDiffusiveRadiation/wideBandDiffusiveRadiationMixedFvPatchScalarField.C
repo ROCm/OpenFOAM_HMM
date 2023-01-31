@@ -305,7 +305,7 @@ void Foam::radiation::wideBandDiffusiveRadiationMixedFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    mixedFvPatchScalarField::write(os);
+    mixedFvPatchField<scalar>::write(os);
 }
 
 

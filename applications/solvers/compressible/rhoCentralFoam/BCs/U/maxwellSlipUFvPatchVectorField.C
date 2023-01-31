@@ -197,7 +197,7 @@ void Foam::maxwellSlipUFvPatchVectorField::updateCoeffs()
 
 void Foam::maxwellSlipUFvPatchVectorField::write(Ostream& os) const
 {
-    fvPatchVectorField::write(os);
+    fvPatchField<vector>::write(os);
     os.writeEntryIfDifferent<word>("T", "T", TName_);
     os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);
     os.writeEntryIfDifferent<word>("psi", "thermo:psi", psiName_);
@@ -212,7 +212,7 @@ void Foam::maxwellSlipUFvPatchVectorField::write(Ostream& os) const
     refValue().writeEntry("refValue", os);
     valueFraction().writeEntry("valueFraction", os);
 
-    writeEntry("value", os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

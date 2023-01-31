@@ -132,7 +132,7 @@ void Foam::timeVaryingUniformFixedValueFaPatchField<Type>::write
 {
     faPatchField<Type>::write(os);
     timeSeries_.write(os);
-    this->writeEntry("value", os);
+    faPatchField<Type>::writeValueEntry(os);
 }
 
 

@@ -131,10 +131,10 @@ void Foam::freestreamPressureFvPatchScalarField::updateCoeffs()
 
 void Foam::freestreamPressureFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
     os.writeEntryIfDifferent<word>("U", "U", UName_);
     freestreamValue().writeEntry("freestreamValue", os);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

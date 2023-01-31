@@ -244,7 +244,7 @@ void Foam::outletMachNumberPressureFvPatchScalarField::updateCoeffs()
 
 void Foam::outletMachNumberPressureFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
     os.writeEntry("pBack", pBack_);
     os.writeEntryIfDifferent<scalar>("c1", 0, c1_);
     os.writeEntryIfDifferent<scalar>("A1", 0, A1_);
@@ -256,7 +256,7 @@ void Foam::outletMachNumberPressureFvPatchScalarField::write(Ostream& os) const
     os.writeEntryIfDifferent<word>("U", "U", UName_);
     os.writeEntryIfDifferent<scalar>("M", 0, M_);
 
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

@@ -373,7 +373,7 @@ void Foam::radiation::greyDiffusiveRadiationMixedFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    mixedFvPatchScalarField::write(os);
+    mixedFvPatchField<scalar>::write(os);
     os.writeEntryIfDifferent<word>("T", "T", TName_);
     os.writeEntryIfDifferent<scalar>("qRadExt", Zero, qRadExt_);
     os.writeEntryIfDifferent<vector>("qRadExtDir", Zero, qRadExtDir_);

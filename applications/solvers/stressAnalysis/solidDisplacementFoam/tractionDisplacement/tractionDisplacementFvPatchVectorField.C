@@ -195,10 +195,10 @@ void tractionDisplacementFvPatchVectorField::updateCoeffs()
 
 void tractionDisplacementFvPatchVectorField::write(Ostream& os) const
 {
-    fvPatchVectorField::write(os);
+    fvPatchField<vector>::write(os);
     traction_.writeEntry("traction", os);
     pressure_.writeEntry("pressure", os);
-    writeEntry("value", os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

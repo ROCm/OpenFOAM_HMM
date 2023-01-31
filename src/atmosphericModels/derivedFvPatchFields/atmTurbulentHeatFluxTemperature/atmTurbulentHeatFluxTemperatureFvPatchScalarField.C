@@ -230,12 +230,12 @@ void atmTurbulentHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
 
 void atmTurbulentHeatFluxTemperatureFvPatchScalarField::write(Ostream& os) const
 {
-    fixedGradientFvPatchScalarField::write(os);
+    fixedGradientFvPatchField<scalar>::write(os);
     os.writeEntry("heatSource", heatSourceTypeNames[heatSource_]);
     os.writeEntry("alphaEff", alphaEffName_);
     Cp0_->writeData(os);
     q_->writeData(os);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

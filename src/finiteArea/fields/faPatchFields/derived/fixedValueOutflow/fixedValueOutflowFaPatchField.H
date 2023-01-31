@@ -80,8 +80,8 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping the given fixedValueOutflowFaPatchField<Type>
-        //  onto a new patch
+        //- Construct by mapping the given fixedValueOutflow patch field
+        //- onto a new patch
         fixedValueOutflowFaPatchField
         (
             const fixedValueOutflowFaPatchField<Type>&,

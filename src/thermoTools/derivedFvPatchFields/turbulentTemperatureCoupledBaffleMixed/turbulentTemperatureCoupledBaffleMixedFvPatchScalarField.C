@@ -460,7 +460,7 @@ void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    mixedFvPatchScalarField::write(os);
+    mixedFvPatchField<scalar>::write(os);
     os.writeEntry("Tnbr", TnbrName_);
     if (thicknessLayer_)
     {

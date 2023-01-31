@@ -119,9 +119,9 @@ void Foam::translatingWallVelocityFvPatchVectorField::updateCoeffs()
 
 void Foam::translatingWallVelocityFvPatchVectorField::write(Ostream& os) const
 {
-    fvPatchVectorField::write(os);
+    fvPatchField<vector>::write(os);
     U_->writeData(os);
-    writeEntry("value", os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

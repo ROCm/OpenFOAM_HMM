@@ -258,13 +258,13 @@ void Foam::timeVaryingMassSorptionFvPatchScalarField::updateCoeffs()
 
 void Foam::timeVaryingMassSorptionFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
 
     os.writeEntry("kabs", kabs_);
     os.writeEntry("max", max_);
     os.writeEntryIfDifferent<scalar>("kdes", scalar(0), kdes_);
 
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

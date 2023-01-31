@@ -159,9 +159,9 @@ valueBoundaryCoeffs
 
 void adjointFarFieldNuaTildaFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchScalarField::write(os);
-    writeEntry("value", os);
+    fvPatchField<scalar>::write(os);
     os.writeEntry("solverName", adjointSolverName_);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

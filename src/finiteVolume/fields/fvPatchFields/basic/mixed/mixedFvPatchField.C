@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +28,58 @@ License
 
 #include "mixedFvPatchField.H"
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+template<class Type>
+bool Foam::mixedFvPatchField<Type>::readMixedEntries
+(
+    const dictionary& dict,
+    IOobjectOption::readOption readOpt
+)
+{
+    const auto& p = fvPatchFieldBase::patch();
+
+    if (!p.size()) return true;  // Can be exceptionally lazy
+    if (!IOobjectOption::isAnyRead(readOpt)) return false;
+
+
+    // If there is a 'refValue', also require all others
+    const auto* hasValue = dict.findEntry("refValue", keyType::LITERAL);
+
+    if (!hasValue && IOobjectOption::isReadOptional(readOpt))
+    {
+        return false;
+    }
+
+    const auto* hasGrad = dict.findEntry("refGradient", keyType::LITERAL);
+    const auto* hasFrac = dict.findEntry("valueFraction", keyType::LITERAL);
+
+    // Combined error message on failure
+    if (!hasValue || !hasGrad || !hasFrac)
+    {
+        FatalIOErrorInFunction(dict)
+            << "Required entries:";
+
+        if (!hasValue) FatalIOError << " 'refValue'";
+        if (!hasGrad)  FatalIOError << " 'refGradient'";
+        if (!hasFrac)  FatalIOError << " 'valueFraction'";
+
+        FatalIOError
+            << " : missing for patch " << p.name()
+            << " : in dictionary " << dict.relativeName() << nl
+            << exit(FatalIOError);
+    }
+
+    // Everything verified - can assign
+    refValue_.assign(*hasValue, p.size());
+    refGrad_.assign(*hasGrad, p.size());
+    valueFraction_.assign(*hasFrac, p.size());
+
+    return true;
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
 Foam::mixedFvPatchField<Type>::mixedFvPatchField
@@ -239,7 +291,7 @@ void Foam::mixedFvPatchField<Type>::write(Ostream& os) const
     refGrad_.writeEntry("refGradient", os);
     valueFraction_.writeEntry("valueFraction", os);
     source_.writeEntry("source", os);
-    this->writeEntry("value", os);
+    fvPatchField<Type>::writeValueEntry(os);
 }
 
 

@@ -287,7 +287,7 @@ void Foam::plenumPressureFvPatchScalarField::updateCoeffs()
 
 void Foam::plenumPressureFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
     os.writeEntry("gamma", gamma_);
     os.writeEntry("R", R_);
     os.writeEntry("supplyMassFlowRate", supplyMassFlowRate_);
@@ -304,7 +304,7 @@ void Foam::plenumPressureFvPatchScalarField::write(Ostream& os) const
     os.writeEntryIfDifferent<scalar>("timeScale", 0.0, timeScale_);
     os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
     os.writeEntryIfDifferent<word>("U", "U", UName_);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

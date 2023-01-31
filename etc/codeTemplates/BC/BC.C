@@ -225,7 +225,7 @@ void Foam::CLASS::write
     fieldData_.writeEntry("fieldData", os);
     timeVsData_->writeData(os);
     os.writeEntry("wordData", wordData_);
-    this->writeEntry("value", os);
+    FVPATCHF::writeValueEntry(os);
 }
 
 

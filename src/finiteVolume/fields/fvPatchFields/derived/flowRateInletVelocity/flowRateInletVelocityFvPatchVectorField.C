@@ -258,7 +258,7 @@ void Foam::flowRateInletVelocityFvPatchVectorField::write(Ostream& os) const
     {
         os.writeEntry("extrapolateProfile", extrapolateProfile_);
     }
-    writeEntry("value", os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

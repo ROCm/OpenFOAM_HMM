@@ -97,8 +97,7 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping the given slicedFaePatchField<Type>
-        //  onto a new patch
+        //- Construct by mapping the given sliced patch field onto a new patch
         slicedFaePatchField
         (
             const slicedFaePatchField<Type>&,

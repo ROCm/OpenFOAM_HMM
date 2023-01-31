@@ -178,13 +178,13 @@ void Foam::uniformNormalFixedValueFvPatchVectorField::updateCoeffs()
 
 void Foam::uniformNormalFixedValueFvPatchVectorField::write(Ostream& os) const
 {
-    fvPatchVectorField::write(os);
+    fvPatchField<vector>::write(os);
     uniformValue_->writeData(os);
     if (ramp_)
     {
         ramp_->writeData(os);
     }
-    this->writeEntry("value", os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

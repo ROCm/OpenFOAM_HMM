@@ -160,11 +160,11 @@ void Foam::SRFFreestreamVelocityFvPatchVectorField::updateCoeffs()
 
 void Foam::SRFFreestreamVelocityFvPatchVectorField::write(Ostream& os) const
 {
-    fvPatchVectorField::write(os);
+    fvPatchField<vector>::write(os);
     os.writeEntry("relative", relative_);
     os.writeEntry("UInf", UInf_);
     os.writeEntry("phi", this->phiName_);
-    writeEntry("value", os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

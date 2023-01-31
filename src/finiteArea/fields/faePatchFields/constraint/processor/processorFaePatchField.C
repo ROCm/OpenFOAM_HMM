@@ -122,11 +122,4 @@ Foam::processorFaePatchField<Type>::processorFaePatchField
 {}
 
 
-// * * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::processorFaePatchField<Type>::~processorFaePatchField()
-{}
-
-
 // ************************************************************************* //

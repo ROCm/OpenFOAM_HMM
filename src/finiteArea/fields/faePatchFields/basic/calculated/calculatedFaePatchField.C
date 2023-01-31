@@ -134,7 +134,7 @@ template<class Type>
 void Foam::calculatedFaePatchField<Type>::write(Ostream& os) const
 {
     faePatchField<Type>::write(os);
-    this->writeEntry("value", os);
+    faePatchField<Type>::writeValueEntry(os);
 }
 
 

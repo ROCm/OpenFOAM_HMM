@@ -120,7 +120,7 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping given patchField<vector> onto a new patch
+        //- Construct by mapping given patch field onto a new patch
         uniformInterpolatedDisplacementPointPatchVectorField
         (
             const uniformInterpolatedDisplacementPointPatchVectorField&,

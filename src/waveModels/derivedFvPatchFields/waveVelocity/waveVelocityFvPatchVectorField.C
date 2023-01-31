@@ -125,7 +125,7 @@ void Foam::waveVelocityFvPatchVectorField::write(Ostream& os) const
 
     os.writeEntry("waveDictName", waveDictName_);
 
-    writeEntry("value", os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

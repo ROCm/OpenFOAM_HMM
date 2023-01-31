@@ -253,7 +253,7 @@ void Foam::matchedFlowRateOutletVelocityFvPatchVectorField::write
         os.writeEntry("volumetric", volumetric_);
         os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);
     }
-    writeEntry("value", os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

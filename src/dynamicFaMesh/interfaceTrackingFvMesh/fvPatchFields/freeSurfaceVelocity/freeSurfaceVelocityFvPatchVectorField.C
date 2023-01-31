@@ -113,8 +113,8 @@ void Foam::freeSurfaceVelocityFvPatchVectorField::updateCoeffs()
 
 void Foam::freeSurfaceVelocityFvPatchVectorField::write(Ostream& os) const
 {
-    fixedGradientFvPatchVectorField::write(os);
-    writeEntry("value", os);
+    fixedGradientFvPatchField<vector>::write(os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

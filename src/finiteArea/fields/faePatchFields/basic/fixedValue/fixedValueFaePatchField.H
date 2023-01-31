@@ -38,8 +38,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fixedValueFaePatchField_H
-#define fixedValueFaePatchField_H
+#ifndef Foam_fixedValueFaePatchField_H
+#define Foam_fixedValueFaePatchField_H
 
 #include "faePatchField.H"
 
@@ -57,7 +57,6 @@ class fixedValueFaePatchField
 :
     public faePatchField<Type>
 {
-
 public:
 
     //- Runtime type information
@@ -81,8 +80,8 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping the given fixedValueFaePatchField<Type>
-        //  onto a new patch
+        //- Construct by mapping the given fixedValue patch field
+        //- onto a new patch
         fixedValueFaePatchField
         (
             const fixedValueFaePatchField<Type>&,

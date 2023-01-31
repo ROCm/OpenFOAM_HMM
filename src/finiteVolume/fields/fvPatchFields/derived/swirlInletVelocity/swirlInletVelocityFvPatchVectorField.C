@@ -159,7 +159,7 @@ void Foam::swirlInletVelocityFvPatchVectorField::write(Ostream& os) const
     axialVelocity_->writeData(os);
     radialVelocity_->writeData(os);
     tangentialVelocity_->writeData(os);
-    writeEntry("value", os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

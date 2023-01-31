@@ -606,7 +606,7 @@ void Foam::omegaWallFunctionFvPatchScalarField::write
 {
     fvPatchField<scalar>::write(os);
     writeLocalEntries(os);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

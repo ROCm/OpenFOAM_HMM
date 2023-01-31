@@ -304,7 +304,7 @@ void Foam::enthalpySorptionFvPatchScalarField::updateCoeffs()
 
 void Foam::enthalpySorptionFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
 
     os.writeEntry("enthalpyModel", enthalpyModelTypeNames[enthalpyModel_]);
 
@@ -323,7 +323,7 @@ void Foam::enthalpySorptionFvPatchScalarField::write(Ostream& os) const
 
     dhdt_.writeEntry("dhdt", os);
 
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

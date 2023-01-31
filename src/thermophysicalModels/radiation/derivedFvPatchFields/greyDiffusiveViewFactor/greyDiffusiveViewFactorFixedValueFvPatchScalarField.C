@@ -199,7 +199,7 @@ write
     Ostream& os
 ) const
 {
-    fixedValueFvPatchScalarField::write(os);
+    fixedValueFvPatchField<scalar>::write(os);
     qro_.writeEntry("qro", os);
 }
 

@@ -38,8 +38,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef calculatedFaePatchField_H
-#define calculatedFaePatchField_H
+#ifndef Foam_calculatedFaePatchField_H
+#define Foam_calculatedFaePatchField_H
 
 #include "faePatchField.H"
 
@@ -57,7 +57,6 @@ class calculatedFaePatchField
 :
     public faePatchField<Type>
 {
-
 public:
 
     //- Runtime type information
@@ -81,7 +80,7 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping given patchField<Type> onto a new patch
+        //- Construct by mapping given patch field onto a new patch
         calculatedFaePatchField
         (
             const calculatedFaePatchField<Type>&,
@@ -91,10 +90,7 @@ public:
         );
 
         //- Construct as copy
-        calculatedFaePatchField
-        (
-            const calculatedFaePatchField<Type>&
-        );
+        calculatedFaePatchField(const calculatedFaePatchField<Type>&);
 
         //- Construct and return a clone
         virtual tmp<faePatchField<Type>> clone() const
@@ -128,7 +124,7 @@ public:
     virtual ~calculatedFaePatchField() = default;
 
 
-    // Member functions
+    // Member Functions
 
         // Access
 

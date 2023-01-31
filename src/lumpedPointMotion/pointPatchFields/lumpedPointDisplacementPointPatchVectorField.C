@@ -446,7 +446,7 @@ const
         os.writeEntry("dataWritten", dataWritten_);
     }
 
-    writeEntry("value", os);
+    this->writeValueEntry(os);
 }
 
 

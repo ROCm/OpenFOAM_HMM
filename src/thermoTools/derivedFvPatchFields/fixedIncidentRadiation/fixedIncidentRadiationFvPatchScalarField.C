@@ -195,10 +195,10 @@ void Foam::radiation::fixedIncidentRadiationFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    fixedGradientFvPatchScalarField::write(os);
+    fixedGradientFvPatchField<scalar>::write(os);
     temperatureCoupledBase::write(os);
     qrIncident_.writeEntry("qrIncident", os);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

@@ -202,7 +202,7 @@ void Foam::timeVaryingMappedFixedValueFvPatchField<Type>::write
 {
     fvPatchField<Type>::write(os);
     uniformValue_->writeData(os);
-    this->writeEntry("value", os);
+    fvPatchField<Type>::writeValueEntry(os);
 }
 
 

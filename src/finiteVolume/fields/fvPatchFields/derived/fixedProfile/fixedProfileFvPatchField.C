@@ -163,7 +163,7 @@ void Foam::fixedProfileFvPatchField<Type>::write(Ostream& os) const
     profile_->writeData(os);
     os.writeEntry("direction", dir_);
     os.writeEntry("origin", origin_);
-    this->writeEntry("value", os);
+    fvPatchField<Type>::writeValueEntry(os);
 }
 
 

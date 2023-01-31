@@ -38,8 +38,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef emptyFaePatchField_H
-#define emptyFaePatchField_H
+#ifndef Foam_emptyFaePatchField_H
+#define Foam_emptyFaePatchField_H
 
 #include "faePatchField.H"
 #include "emptyFaPatch.H"
@@ -58,7 +58,6 @@ class emptyFaePatchField
 :
     public faePatchField<Type>
 {
-
 public:
 
     //- Runtime type information

@@ -330,7 +330,7 @@ void alphatJayatillekeWallFunctionFvPatchScalarField::write(Ostream& os) const
     os.writeEntryIfDifferent<scalar>("Prt", 0.85, Prt_);
     os.writeEntryIfDifferent<scalar>("kappa", 0.41, kappa_);
     os.writeEntryIfDifferent<scalar>("E", 9.8, E_);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

@@ -147,7 +147,7 @@ void Foam::interstitialInletVelocityFvPatchVectorField::write(Ostream& os) const
     fvPatchField<vector>::write(os);
     os.writeEntryIfDifferent<word>("alpha", "alpha", alphaName_);
     inletVelocity_.writeEntry("inletVelocity", os);
-    writeEntry("value", os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

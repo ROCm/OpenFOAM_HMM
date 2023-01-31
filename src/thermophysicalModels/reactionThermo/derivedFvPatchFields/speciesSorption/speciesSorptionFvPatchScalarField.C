@@ -417,7 +417,7 @@ void Foam::speciesSorptionFvPatchScalarField::updateCoeffs()
 
 void Foam::speciesSorptionFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
 
     os.writeEntry
     (
@@ -440,7 +440,7 @@ void Foam::speciesSorptionFvPatchScalarField::write(Ostream& os) const
     mass_.writeEntry("mass", os);
     os.writeEntryIfDifferent<word>("p", "p", pName_);
 
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

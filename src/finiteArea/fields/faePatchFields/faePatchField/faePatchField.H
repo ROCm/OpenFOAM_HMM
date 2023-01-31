@@ -51,6 +51,7 @@ SourceFiles
 
 #include "faPatch.H"
 #include "DimensionedField.H"
+#include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,9 +59,8 @@ namespace Foam
 {
 
 // Forward Declarations
-
-class objectRegistry;
 class dictionary;
+class objectRegistry;
 class faPatchFieldMapper;
 class edgeMesh;
 
@@ -159,6 +159,25 @@ class faePatchField
         //- Reference to internal field
         const DimensionedField<Type, edgeMesh>& internalField_;
 
+protected:
+
+    // Protected Member Functions
+
+        //- Read the "value" entry into \c *this.
+        //  The reading can be optional (default), mandatory etc.
+        //  \returns True on success
+        bool readValueEntry
+        (
+            const dictionary& dict,
+            IOobjectOption::readOption readOpt = IOobjectOption::LAZY_READ
+        );
+
+        //- Write \c *this field as a "value" entry
+        void writeValueEntry(Ostream& os) const
+        {
+            Field<Type>::writeEntry("value", os);
+        }
+
 
 public:
 
@@ -223,12 +242,20 @@ public:
             const DimensionedField<Type, edgeMesh>&
         );
 
-        //- Construct from patch and internal field and patch field
+        //- Construct from patch, internal field and patch field
         faePatchField
         (
             const faPatch&,
             const DimensionedField<Type, edgeMesh>&,
-            const Field<Type>&
+            const Field<Type>& pfld
+        );
+
+        //- Construct from patch, internal field and patch field
+        faePatchField
+        (
+            const faPatch&,
+            const DimensionedField<Type, edgeMesh>&,
+            Field<Type>&& pfld
         );
 
         //- Construct from patch, internal field and dictionary
@@ -339,37 +366,36 @@ public:
         static const word& calculatedType();
 
 
-        // Attributes
+    // Attributes
 
-            //- True if this patch field fixes a value.
-            //  Needed to check if a level has to be specified while solving
-            //  Poissons equations.
-            virtual bool fixesValue() const
-            {
-                return false;
-            }
+        //- True if this patch field fixes a value.
+        //  Needed to check if a level has to be specified while solving
+        //  Poissons equations.
+        virtual bool fixesValue() const
+        {
+            return false;
+        }
 
-            //- True if this patch field is coupled
-            virtual bool coupled() const
-            {
-                return false;
-            }
+        //- True if this patch field is coupled
+        virtual bool coupled() const
+        {
+            return false;
+        }
 
 
-        // Access
+    // Access
 
-            //- Return const-reference to the dimensioned internal field
-            const DimensionedField<Type, edgeMesh>& internalField()
-            const noexcept
-            {
-                return internalField_;
-            }
+        //- Return const-reference to the dimensioned internal field
+        const DimensionedField<Type, edgeMesh>& internalField() const noexcept
+        {
+            return internalField_;
+        }
 
-            //- Return const-reference to the internal field values
-            const Field<Type>& primitiveField() const noexcept
-            {
-                return internalField_;
-            }
+        //- Return const-reference to the internal field values
+        const Field<Type>& primitiveField() const noexcept
+        {
+            return internalField_;
+        }
 
 
         // Mapping

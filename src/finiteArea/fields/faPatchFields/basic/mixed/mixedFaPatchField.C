@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +28,58 @@ License
 
 #include "mixedFaPatchField.H"
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+template<class Type>
+bool Foam::mixedFaPatchField<Type>::readMixedEntries
+(
+    const dictionary& dict,
+    IOobjectOption::readOption readOpt
+)
+{
+    const auto& p = faPatchFieldBase::patch();
+
+    if (!p.size()) return true;  // Can be exceptionally lazy
+    if (!IOobjectOption::isAnyRead(readOpt)) return false;
+
+
+    // If there is a 'refValue', also require all others
+    const auto* hasValue = dict.findEntry("refValue", keyType::LITERAL);
+
+    if (!hasValue && IOobjectOption::isReadOptional(readOpt))
+    {
+        return false;
+    }
+
+    const auto* hasGrad = dict.findEntry("refGradient", keyType::LITERAL);
+    const auto* hasFrac = dict.findEntry("valueFraction", keyType::LITERAL);
+
+    // Combined error message on failure
+    if (!hasValue || !hasGrad || !hasFrac)
+    {
+        FatalIOErrorInFunction(dict)
+            << "Required entries:";
+
+        if (!hasValue) FatalIOError << " 'refValue'";
+        if (!hasGrad)  FatalIOError << " 'refGradient'";
+        if (!hasFrac)  FatalIOError << " 'valueFraction'";
+
+        FatalIOError
+            << " : missing for patch " << p.name()
+            << " : in dictionary " << dict.relativeName() << nl
+            << exit(FatalIOError);
+    }
+
+    // Everything verified - can assign
+    refValue_.assign(*hasValue, p.size());
+    refGrad_.assign(*hasGrad, p.size());
+    valueFraction_.assign(*hasFrac, p.size());
+
+    return true;
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
 Foam::mixedFaPatchField<Type>::mixedFaPatchField
@@ -217,7 +269,7 @@ void Foam::mixedFaPatchField<Type>::write(Ostream& os) const
     refValue_.writeEntry("refValue", os);
     refGrad_.writeEntry("refGradient", os);
     valueFraction_.writeEntry("valueFraction", os);
-    this->writeEntry("value", os);
+    faPatchField<Type>::writeValueEntry(os);
 }
 
 

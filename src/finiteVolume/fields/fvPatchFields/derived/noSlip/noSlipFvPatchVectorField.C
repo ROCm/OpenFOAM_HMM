@@ -89,7 +89,7 @@ Foam::noSlipFvPatchVectorField::noSlipFvPatchVectorField
 
 void Foam::noSlipFvPatchVectorField::write(Ostream& os) const
 {
-    fvPatchVectorField::write(os);
+    fvPatchField<vector>::write(os);
 }
 
 

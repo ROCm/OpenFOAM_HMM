@@ -460,7 +460,7 @@ void Foam::waveMakerPointPatchVectorField::write(Ostream& os) const
     os.writeEntry("rampTime", rampTime_);
     os.writeEntry("secondOrder", secondOrder_);
     os.writeEntry("nPaddle", nPaddle_);
-    writeEntry("value", os);
+    this->writeValueEntry(os);
 }
 
 

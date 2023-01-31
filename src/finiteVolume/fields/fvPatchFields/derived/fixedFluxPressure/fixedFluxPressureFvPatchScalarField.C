@@ -174,8 +174,8 @@ void Foam::fixedFluxPressureFvPatchScalarField::updateCoeffs()
 
 void Foam::fixedFluxPressureFvPatchScalarField::write(Ostream& os) const
 {
-    fixedGradientFvPatchScalarField::write(os);
-    writeEntry("value", os);
+    fixedGradientFvPatchField<scalar>::write(os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

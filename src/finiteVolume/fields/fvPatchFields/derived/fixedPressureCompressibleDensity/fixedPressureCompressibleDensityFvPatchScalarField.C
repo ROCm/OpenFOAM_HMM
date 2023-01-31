@@ -129,7 +129,7 @@ void Foam::fixedPressureCompressibleDensityFvPatchScalarField::write
 {
     fvPatchField<scalar>::write(os);
     os.writeEntryIfDifferent<word>("p", "p", pName_);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

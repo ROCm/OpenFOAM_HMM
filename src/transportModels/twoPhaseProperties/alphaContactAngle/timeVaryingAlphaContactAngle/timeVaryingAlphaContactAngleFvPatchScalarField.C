@@ -138,7 +138,7 @@ void Foam::timeVaryingAlphaContactAngleFvPatchScalarField::write
     os.writeEntry("thetaT0", thetaT0_);
     os.writeEntry("te", te_);
     os.writeEntry("thetaTe", thetaTe_);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

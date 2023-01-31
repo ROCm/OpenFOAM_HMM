@@ -105,8 +105,8 @@ public:
             const bool valueRequired=true
         );
 
-        //- Construct by mapping the given fixedValueFvPatchField<Type>
-        //  onto a new patch
+        //- Construct by mapping the given fixedValue patch field
+        //- onto a new patch
         fixedValueFvPatchField
         (
             const fixedValueFvPatchField<Type>&,

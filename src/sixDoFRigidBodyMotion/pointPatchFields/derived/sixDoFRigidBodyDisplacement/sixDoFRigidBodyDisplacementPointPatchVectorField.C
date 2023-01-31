@@ -274,7 +274,7 @@ void sixDoFRigidBodyDisplacementPointPatchVectorField::write(Ostream& os) const
 
     initialPoints_.writeEntry("initialPoints", os);
 
-    writeEntry("value", os);
+    this->writeValueEntry(os);
 }
 
 

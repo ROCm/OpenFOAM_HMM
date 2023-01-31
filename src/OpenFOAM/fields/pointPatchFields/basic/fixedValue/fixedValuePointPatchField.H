@@ -78,7 +78,7 @@ public:
             const bool valueRequired=true
         );
 
-        //- Construct by mapping given patchField<Type> onto a new patch
+        //- Construct by mapping given patch field onto a new patch
         fixedValuePointPatchField
         (
             const fixedValuePointPatchField<Type>&,

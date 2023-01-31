@@ -139,7 +139,7 @@ void Foam::uniformFixedGradientFvPatchField<Type>::write(Ostream& os) const
 {
     fixedGradientFvPatchField<Type>::write(os);
     uniformGradient_->writeData(os);
-    this->writeEntry("value", os);
+    fvPatchField<Type>::writeValueEntry(os);
 }
 
 

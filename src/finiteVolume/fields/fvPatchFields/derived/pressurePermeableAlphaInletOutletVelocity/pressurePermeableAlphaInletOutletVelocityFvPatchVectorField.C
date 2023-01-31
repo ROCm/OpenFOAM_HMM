@@ -182,7 +182,7 @@ void Foam::pressurePermeableAlphaInletOutletVelocityFvPatchVectorField::write
     Ostream& os
 ) const
 {
-    mixedFvPatchVectorField::write(os);
+    mixedFvPatchField<vector>::write(os);
     os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
     os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);
     os.writeEntryIfDifferent<word>("alpha", "none", alphaName_);

@@ -138,7 +138,7 @@ void Foam::inletOutletFaPatchField<Type>::write(Ostream& os) const
     faPatchField<Type>::write(os);
     os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
     this->refValue().writeEntry("inletValue", os);
-    this->writeEntry("value", os);
+    faPatchField<Type>::writeValueEntry(os);
 }
 
 

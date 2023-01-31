@@ -225,11 +225,11 @@ void Foam::adjointWallVelocityFvPatchVectorField::updateCoeffs()
 
 void Foam::adjointWallVelocityFvPatchVectorField::write(Ostream& os) const
 {
-    fvPatchVectorField::write(os);
-    writeEntry("value", os);
+    fvPatchField<vector>::write(os);
     os.writeEntry("kappa", kappa_);
     os.writeEntry("E", E_);
     os.writeEntry("solverName", adjointSolverName_);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 
