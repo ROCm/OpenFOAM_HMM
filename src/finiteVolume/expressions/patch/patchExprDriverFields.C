@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -164,6 +164,13 @@ Foam::tmp<Foam::vectorField>
 Foam::expressions::patchExpr::parseDriver::field_areaNormal() const
 {
     return patch_.Sf();
+}
+
+
+Foam::tmp<Foam::vectorField>
+Foam::expressions::patchExpr::parseDriver::field_unitNormal() const
+{
+    return patch_.nf();
 }
 
 

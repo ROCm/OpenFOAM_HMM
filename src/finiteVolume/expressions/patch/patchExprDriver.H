@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,7 +41,8 @@ Description
         area        | The face area magnitudes              | 0 |
         weightAverage| Area weighted average                | 1 |
         weightSum   | Area weighted sum                     | 1 |
-        face        | The face areaNormal vectors           | 0 |
+        face        | The face area normal vectors          | 0 |
+        normal      | The face unit normal vectors          | 0 |
         point       | A point-field point value             | 1 |
         faceToPoint | Interpolate face values onto points   | 1 |
         pointToFace | Interpolate point values onto faces   | 1 |
@@ -292,6 +293,9 @@ public:
 
         //- The face areas with their vector direction [Sf] - (swak = face)
         tmp<vectorField> field_areaNormal() const;
+
+        //- The face unit normal direction [nf] - (expression: normal)
+        tmp<vectorField> field_unitNormal() const;
 
         //- The patch point locations - (swak = pts)
         tmp<vectorField> field_pointField() const;

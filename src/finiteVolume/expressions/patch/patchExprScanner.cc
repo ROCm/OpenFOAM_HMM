@@ -7,7 +7,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,7 +36,6 @@ Description
 #include "patchExprLemonParser.h"
 #include "patchExprParser.H"
 #include "Enum.H"
-//#include "macros.H"
 
 #pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 #pragma GCC diagnostic ignored "-Wunused-const-variable"
@@ -159,6 +158,7 @@ static const Enum<int> funcTokenEnums
     TOKEN_PAIR("faceToPoint", FACE_TO_POINT),
     TOKEN_PAIR("pointToFace", POINT_TO_FACE),
 
+    TOKEN_PAIR("normal", FACE_NORMAL),  // Face unitNormal
     TOKEN_PAIR("area", FACE_AREA),
     TOKEN_PAIR("pts", POINTS),
 });
