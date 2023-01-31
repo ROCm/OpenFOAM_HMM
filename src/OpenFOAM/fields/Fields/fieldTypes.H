@@ -44,8 +44,10 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#define CAPITALIZE_bool Bool
 #define CAPITALIZE_label Label
 #define CAPITALIZE_scalar Scalar
+#define CAPITALIZE_complex Complex
 #define CAPITALIZE_vector Vector
 #define CAPITALIZE_sphericalTensor SphericalTensor
 #define CAPITALIZE_symmTensor SymmTensor
