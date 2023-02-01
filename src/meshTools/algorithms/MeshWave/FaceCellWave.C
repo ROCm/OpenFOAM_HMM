@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -725,6 +725,12 @@ void Foam::FaceCellWave<Type, TrackingData>::handleAMICyclicPatches()
     {
         const cyclicAMIPolyPatch* cpp = isA<cyclicAMIPolyPatch>(patch);
 
+        // Note:
+        // - can either do owner and neighbour separately or have owner
+        //   do both
+        // - separately means that neighbour will receive updated owner
+        //   properties which might be beneficial or involve extra work?
+
         if (cpp)
         {
             const auto& cycPatch = *cpp;
@@ -733,14 +739,9 @@ void Foam::FaceCellWave<Type, TrackingData>::handleAMICyclicPatches()
             List<Type> receiveInfo;
 
             {
-                // Get nbrPatch data (so not just changed faces)
-                typename List<Type>::subList sendInfo
-                (
-                    nbrPatch.patchSlice
-                    (
-                        allFaceInfo_
-                    )
-                );
+                // Get nbrPatch data (so not just changed faces). Do not use
+                // a slice here since the leaveDomain might change the values
+                List<Type> sendInfo(nbrPatch.patchSlice(allFaceInfo_));
 
                 if (!nbrPatch.parallel() || nbrPatch.separated())
                 {
