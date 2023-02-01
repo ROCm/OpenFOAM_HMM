@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,12 +63,13 @@ Note
     MeshObjects of type UpdateableMeshObject.
 
 SourceFiles
+    meshObject.C
     MeshObject.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef MeshObject_H
-#define MeshObject_H
+#ifndef Foam_MeshObject_H
+#define Foam_MeshObject_H
 
 #include "regIOobject.H"
 #include "objectRegistry.H"
@@ -78,7 +79,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -90,10 +91,9 @@ class MeshObject
 :
     public MeshObjectType<Mesh>
 {
-
 protected:
 
-        // Reference to Mesh
+        //- Reference to the mesh
         const Mesh& mesh_;
 
 
@@ -101,30 +101,52 @@ public:
 
     // Constructors
 
-        //- Construct on Mesh type
+        //- Construct with Type::typeName on Mesh
         explicit MeshObject(const Mesh& mesh);
 
-    // Selectors
+        //- Construct with given object name on Mesh
+        MeshObject(const word& objName, const Mesh& mesh);
 
-        //- Get existing or create a new MeshObject
+
+    // Factory Methods
+
+        //- Get existing or create a new MeshObject. Registered with typeName
         template<class... Args>
         static const Type& New(const Mesh& mesh, Args&&... args);
+
+        //- Get existing or create a new MeshObject using supplied
+        //- registration name
+        template<class... Args>
+        static const Type& New
+        (
+            const word& objName,
+            const Mesh& mesh,
+            Args&&... args
+        );
 
 
     //- Destructor
     virtual ~MeshObject() = default;
 
-        //- Static destructor
-        static bool Delete(const Mesh& mesh);
+        //- Static destructor using supplied registration name
+        static bool Delete(const word& objName, const Mesh& mesh);
+
+        //- Static destructor using Type::typeName
+        static bool Delete(const Mesh& mesh)
+        {
+            return Delete(Type::typeName, mesh);
+        }
 
 
     // Member Functions
 
-        const Mesh& mesh() const
+        //- Reference to the mesh
+        const Mesh& mesh() const noexcept
         {
             return mesh_;
         }
 
+        //- Dummy write
         virtual bool writeData(Ostream& os) const
         {
             return true;
@@ -136,19 +158,21 @@ public:
                            Class meshObject Declaration
 \*---------------------------------------------------------------------------*/
 
+//- The meshObject is a concrete regIOobject
 class meshObject
 :
     public regIOobject
 {
 public:
 
-    // Declare name of the class and its debug switch
+    //- Runtime declaration and debug switch
     ClassName("meshObject");
+
 
     // Constructors
 
-        //- Construct from name and instance on registry
-        meshObject(const word& typeName, const objectRegistry& obr);
+        //- Construct with given object name on a registry
+        meshObject(const word& objName, const objectRegistry& obr);
 
 
     // Static Member Functions
@@ -187,9 +211,9 @@ class TopologicalMeshObject
 public:
 
     //- Construct from name and instance on registry
-    TopologicalMeshObject(const word& typeName, const objectRegistry& obr)
+    TopologicalMeshObject(const word& objName, const objectRegistry& obr)
     :
-        meshObject(typeName, obr)
+        meshObject(objName, obr)
     {}
 };
 
@@ -206,9 +230,9 @@ class GeometricMeshObject
 public:
 
     //- Construct from name and instance on registry
-    GeometricMeshObject(const word& typeName, const objectRegistry& obr)
+    GeometricMeshObject(const word& objName, const objectRegistry& obr)
     :
-        TopologicalMeshObject<Mesh>(typeName, obr)
+        TopologicalMeshObject<Mesh>(objName, obr)
     {}
 };
 
@@ -225,9 +249,9 @@ class MoveableMeshObject
 public:
 
     //- Construct from name and instance on registry
-    MoveableMeshObject(const word& typeName, const objectRegistry& obr)
+    MoveableMeshObject(const word& objName, const objectRegistry& obr)
     :
-        GeometricMeshObject<Mesh>(typeName, obr)
+        GeometricMeshObject<Mesh>(objName, obr)
     {}
 
     virtual bool movePoints() = 0;
@@ -246,9 +270,9 @@ class UpdateableMeshObject
 public:
 
     //- Construct from name and instance on registry
-    UpdateableMeshObject(const word& typeName, const objectRegistry& obr)
+    UpdateableMeshObject(const word& objName, const objectRegistry& obr)
     :
-        MoveableMeshObject<Mesh>(typeName, obr)
+        MoveableMeshObject<Mesh>(objName, obr)
     {}
 
     virtual void updateMesh(const mapPolyMesh& mpm) = 0;

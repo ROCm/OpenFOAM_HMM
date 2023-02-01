@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,15 +38,18 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::meshObject::meshObject(const word& typeName, const objectRegistry& obr)
+Foam::meshObject::meshObject(const word& objName, const objectRegistry& obr)
 :
     regIOobject
     (
         IOobject
         (
-            typeName,
+            objName,
             obr.instance(),
-            obr
+            obr,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            IOobject::REGISTER
         )
     )
 {}

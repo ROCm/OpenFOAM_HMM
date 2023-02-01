@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,6 +40,18 @@ Foam::MeshObject<Mesh, MeshObjectType, Type>::MeshObject(const Mesh& mesh)
 {}
 
 
+template<class Mesh, template<class> class MeshObjectType, class Type>
+Foam::MeshObject<Mesh, MeshObjectType, Type>::MeshObject
+(
+    const word& objName,
+    const Mesh& mesh
+)
+:
+    MeshObjectType<Mesh>(objName, mesh.thisDb()),
+    mesh_(mesh)
+{}
+
+
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
 template<class Mesh, template<class> class MeshObjectType, class Type>
@@ -50,11 +62,9 @@ const Type& Foam::MeshObject<Mesh, MeshObjectType, Type>::New
     Args&&... args
 )
 {
-    const Type* ptr =
-        mesh.thisDb().objectRegistry::template cfindObject<Type>
-        (
-            Type::typeName
-        );
+    Type* ptr =
+        mesh.thisDb().objectRegistry::template
+        getObjectPtr<Type>(Type::typeName);
 
     if (ptr)
     {
@@ -68,34 +78,71 @@ const Type& Foam::MeshObject<Mesh, MeshObjectType, Type>::New
             << " for region " << mesh.name() << endl;
     }
 
-    Type* objectPtr = new Type(mesh, std::forward<Args>(args)...);
+    ptr = new Type(mesh, std::forward<Args>(args)...);
 
-    regIOobject::store(static_cast<MeshObjectType<Mesh>*>(objectPtr));
+    regIOobject::store(static_cast<MeshObjectType<Mesh>*>(ptr));
 
-    return *objectPtr;
+    return *ptr;
+}
+
+
+template<class Mesh, template<class> class MeshObjectType, class Type>
+template<class... Args>
+const Type& Foam::MeshObject<Mesh, MeshObjectType, Type>::New
+(
+    const word& objName,
+    const Mesh& mesh,
+    Args&&... args
+)
+{
+    Type* ptr =
+        mesh.thisDb().objectRegistry::template
+        getObjectPtr<Type>(objName);
+
+    if (ptr)
+    {
+        return *ptr;
+    }
+
+    if (meshObject::debug)
+    {
+        Pout<< "MeshObject::New('" << objName
+            << "', const " << Mesh::typeName
+            << "&, ...) : constructing " << objName
+            << " of type " << Type::typeName
+            << " for region " << mesh.name() << endl;
+    }
+
+    ptr = new Type(objName, mesh, std::forward<Args>(args)...);
+
+    regIOobject::store(static_cast<MeshObjectType<Mesh>*>(ptr));
+
+    return *ptr;
 }
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
 
 template<class Mesh, template<class> class MeshObjectType, class Type>
-bool Foam::MeshObject<Mesh, MeshObjectType, Type>::Delete(const Mesh& mesh)
+bool Foam::MeshObject<Mesh, MeshObjectType, Type>::Delete
+(
+    const word& objName,
+    const Mesh& mesh
+)
 {
     Type* ptr =
-        mesh.thisDb().objectRegistry::template getObjectPtr<Type>
-        (
-            Type::typeName
-        );
+        mesh.thisDb().objectRegistry::template
+        getObjectPtr<Type>(objName);
 
     if (ptr)
     {
         if (meshObject::debug)
         {
             Pout<< "MeshObject::Delete(const Mesh&) : deleting "
-                << Type::typeName << endl;
+                << objName << endl;
         }
 
-        return mesh.thisDb().checkOut(ptr);
+        return mesh.thisDb().checkOut(static_cast<MeshObjectType<Mesh>*>(ptr));
     }
 
     return false;
