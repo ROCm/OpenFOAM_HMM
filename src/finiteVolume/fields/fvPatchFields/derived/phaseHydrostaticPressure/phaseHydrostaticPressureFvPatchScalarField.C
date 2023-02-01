@@ -148,9 +148,9 @@ void Foam::phaseHydrostaticPressureFvPatchScalarField::updateCoeffs()
         meshObjects::gravity::New(db().time());
 
     // scalar rhor = 1000;
-    // scalarField alphap1 = max(min(alphap, scalar(1)), scalar(0));
+    // scalarField alphap1 = clamp(alphap, zero_one{});
     // valueFraction() = alphap1/(alphap1 + rhor*(1.0 - alphap1));
-    valueFraction() = max(min(alphap, scalar(1)), scalar(0));
+    valueFraction() = clamp(alphap, zero_one{});
 
     refValue() =
         pRefValue_

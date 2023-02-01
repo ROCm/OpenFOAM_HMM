@@ -36,7 +36,7 @@ Description
     face-based Courant number and the lower and upper Courant number limits
     supplied:
     \f[
-        weight = 1 - max(min((Co - Co1)/(Co2 - Co1), 1), 0)
+        weight = 1 - clamp((Co - Co1)/(Co2 - Co1), 0, 1)
     \f]
     where
     \vartable
@@ -222,18 +222,14 @@ public:
                 (
                     vf.name() + "BlendingFactor",
                     scalar(1)
-                  - max
+                  - clamp
                     (
-                        min
                         (
-                            (
-                                mesh.time().deltaT()*mesh.deltaCoeffs()
-                               *mag(tUflux)/mesh.magSf()
-                              - Co1_
-                            )/(Co2_ - Co1_),
-                            scalar(1)
-                        ),
-                        scalar(0)
+                            mesh.time().deltaT()*mesh.deltaCoeffs()
+                            *mag(tUflux)/mesh.magSf()
+                          - Co1_
+                        )/(Co2_ - Co1_),
+                        zero_one{}
                     )
                 )
             );

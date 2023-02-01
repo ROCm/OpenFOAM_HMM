@@ -141,7 +141,7 @@ public:
         }
 
         // Limit the limiter between linear and upwind
-        return max(min(limiter, 1), 0);
+        return clamp(limiter, 0, 1);
     }
 };
 

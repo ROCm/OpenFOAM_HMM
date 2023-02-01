@@ -512,22 +512,11 @@ void Foam::averageNeighbourFvGeometryScheme::makeNonOrthoWeights
     scalarField& faceWeights
 ) const
 {
-    cosAngles =
-        max
-        (
-            scalar(0),
-            min
-            (
-                scalar(1),
-                polyMeshTools::faceOrthogonality
-                (
-                    mesh_,
-                    faceNormals,
-                    cellCentres
-                )
-            )
-        );
-
+    cosAngles = clamp
+    (
+        polyMeshTools::faceOrthogonality(mesh_, faceNormals, cellCentres),
+        zero_one{}
+    );
 
     // Make weight: 0 for ortho faces, 1 for 90degrees non-ortho
     //const scalarField faceWeights(scalar(1)-cosAngles);

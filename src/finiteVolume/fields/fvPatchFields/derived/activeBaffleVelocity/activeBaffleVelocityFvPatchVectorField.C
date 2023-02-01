@@ -249,21 +249,17 @@ void Foam::activeBaffleVelocityFvPatchVectorField::updateCoeffs()
         }
 
         openFraction_ =
-            max
             (
-                min
+                openFraction_
+              + min
                 (
-                    openFraction_
-                  + min
-                    (
-                        this->db().time().deltaTValue()/openingTime_,
-                        maxOpenFractionDelta_
-                    )
-                   *(orientation_*sign(forceDiff)),
-                    1 - 1e-6
-                ),
-                1e-6
+                    this->db().time().deltaTValue()/openingTime_,
+                    maxOpenFractionDelta_
+                )
+                *(orientation_*sign(forceDiff))
             );
+
+        openFraction_ = clamp(openFraction_, 1e-6, 1 - 1e-6);
 
         Info<< "openFraction = " << openFraction_ << endl;
 

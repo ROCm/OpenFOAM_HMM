@@ -124,11 +124,11 @@ public:
             cubicLimiter = twor;
         }
 
-        return max(min(cubicLimiter, 2), 0);
+        return clamp(cubicLimiter, 0, 2);
         */
 
         // Limit the limiter to obey the TVD constraint
-        return max(min(min(twor, cubicLimiter), 2), 0);
+        return clamp(min(twor, cubicLimiter), 0, 2);
     }
 };
 

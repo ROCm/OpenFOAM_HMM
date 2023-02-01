@@ -58,25 +58,24 @@ class clippedLinear
 :
     public surfaceInterpolationScheme<Type>
 {
-    // Private data
+    // Private Data
 
-        const scalar cellSizeRatio_;
         scalar wfLimit_;
 
 
     // Private Member Functions
 
-        void calcWfLimit()
+        static scalar calcWfLimit(scalar cellSizeRatio)
         {
-            if (cellSizeRatio_ <= 0 || cellSizeRatio_ > 1)
+            if (cellSizeRatio <= 0 || cellSizeRatio > 1)
             {
                 FatalErrorInFunction
-                    << "Given cellSizeRatio of " << cellSizeRatio_
+                    << "Given cellSizeRatio of " << cellSizeRatio
                     << " is not between 0 and 1"
                     << exit(FatalError);
             }
 
-            wfLimit_ = cellSizeRatio_/(1.0 + cellSizeRatio_);
+            return cellSizeRatio/(1.0 + cellSizeRatio);
         }
 
 
@@ -96,19 +95,15 @@ public:
         clippedLinear(const fvMesh& mesh, const scalar cellSizeRatio)
         :
             surfaceInterpolationScheme<Type>(mesh),
-            cellSizeRatio_(cellSizeRatio)
-        {
-            calcWfLimit();
-        }
+            wfLimit_(calcWfLimit(cellSizeRatio))
+        {}
 
         //- Construct from Istream
         clippedLinear(const fvMesh& mesh, Istream& is)
         :
             surfaceInterpolationScheme<Type>(mesh),
-            cellSizeRatio_(readScalar(is))
-        {
-            calcWfLimit();
-        }
+            wfLimit_(calcWfLimit(readScalar(is)))
+        {}
 
         //- Construct from faceFlux and Istream
         clippedLinear
@@ -119,10 +114,8 @@ public:
         )
         :
             surfaceInterpolationScheme<Type>(mesh),
-            cellSizeRatio_(readScalar(is))
-        {
-            calcWfLimit();
-        }
+            wfLimit_(calcWfLimit(readScalar(is)))
+        {}
 
 
     // Member Functions
@@ -140,6 +133,8 @@ public:
                 mesh.surfaceInterpolation::weights()
             );
             const surfaceScalarField& cdWeights = tcdWeights();
+
+            const scalarMinMax bounds(wfLimit_, 1 - wfLimit_);
 
             tmp<surfaceScalarField> tclippedLinearWeights
             (
@@ -159,7 +154,7 @@ public:
                 tclippedLinearWeights.ref();
 
             clippedLinearWeights.primitiveFieldRef() =
-                max(min(cdWeights.primitiveField(), 1 - wfLimit_), wfLimit_);
+                clamp(cdWeights.primitiveField(), bounds);
 
             surfaceScalarField::Boundary& clwbf =
                 clippedLinearWeights.boundaryFieldRef();
@@ -169,15 +164,7 @@ public:
                 if (clwbf[patchi].coupled())
                 {
                     clwbf[patchi] =
-                        max
-                        (
-                            min
-                            (
-                                cdWeights.boundaryField()[patchi],
-                                1 - wfLimit_
-                            ),
-                            wfLimit_
-                        );
+                        clamp(cdWeights.boundaryField()[patchi], bounds);
                 }
                 else
                 {

@@ -192,16 +192,7 @@ void Foam::highAspectRatioFvGeometryScheme::calcAspectRatioWeights
         delta = SMALL;
     }
 
-    cellWeight =
-    max
-    (
-        scalar(0),
-        min
-        (
-            scalar(1),
-            (aratio-minAspect_)/delta
-        )
-    );
+    cellWeight = clamp((aratio-minAspect_)/delta, zero_one{});
 
     faceWeight.setSize(mesh_.nFaces());
 
