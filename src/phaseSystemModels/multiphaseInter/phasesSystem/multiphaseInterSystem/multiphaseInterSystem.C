@@ -1277,12 +1277,12 @@ Foam::tmp<Foam::volVectorField> Foam::multiphaseInterSystem::nVolHatfv
 {
     const volScalarField alpha1m
     (
-        min(max(alpha1, scalar(0)), scalar(1))
+        clamp(alpha1, zero_one{})
     );
 
     const volScalarField alpha2m
     (
-        min(max(alpha2, scalar(0)), scalar(1))
+        clamp(alpha2, zero_one{})
     );
 
     const volVectorField gradAlphaf
@@ -1311,12 +1311,12 @@ Foam::tmp<Foam::surfaceVectorField> Foam::multiphaseInterSystem::nHatfv
 
     const volScalarField alpha1b
     (
-        min(max(alpha1, scalar(0)), scalar(1))
+        clamp(alpha1, zero_one{})
     );
 
     const volScalarField alpha2b
     (
-        min(max(alpha2, scalar(0)), scalar(1))
+        clamp(alpha2, zero_one{})
     );
 
     surfaceVectorField gradAlphaf

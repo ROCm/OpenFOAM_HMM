@@ -170,7 +170,7 @@ void Foam::outletMappedUniformInletHeatAdditionFvPatchField::updateCoeffs()
 
         scalar totalPhiCp = gSum(outletPatchPhi)*gAverage(Cpf);
 
-        operator==(min(max(averageOutletField + Q_/totalPhiCp, TMin_), TMax_));
+        operator==(clamp(averageOutletField + Q_/totalPhiCp, TMin_, TMax_));
     }
     else
     {

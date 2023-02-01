@@ -326,8 +326,8 @@ void Foam::cyclicACMIPolyPatch::resetAMI(const UList<point>& points) const
     // Note:
     // - assumes that the non-overlap patches are decomposed using the same
     //   decomposition as the coupled patches (per side)
-    srcMask_ = min(scalar(1), max(scalar(0), AMI.srcWeightsSum()));
-    tgtMask_ = min(scalar(1), max(scalar(0), AMI.tgtWeightsSum()));
+    srcMask_ = clamp(AMI.srcWeightsSum(), zero_one{});
+    tgtMask_ = clamp(AMI.tgtWeightsSum(), zero_one{});
 
     if (debug)
     {

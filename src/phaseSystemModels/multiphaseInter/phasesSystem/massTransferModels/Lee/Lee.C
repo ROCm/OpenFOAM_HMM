@@ -57,7 +57,7 @@ Foam::meltingEvaporationModels::Lee<Thermo, OtherThermo>::Kexp
     {
         const volScalarField from
         (
-            min(max(this->pair().from(), scalar(0)), scalar(1))
+            clamp(this->pair().from(), zero_one{})
         );
 
         const volScalarField coeff
@@ -95,9 +95,9 @@ Foam::meltingEvaporationModels::Lee<Thermo, OtherThermo>::KSp
 {
     if (this->modelVariable_ == variable)
     {
-        volScalarField from
+        const volScalarField from
         (
-            min(max(this->pair().from(), scalar(0)), scalar(1))
+            clamp(this->pair().from(), zero_one{})
         );
 
         const volScalarField coeff
@@ -123,7 +123,7 @@ Foam::meltingEvaporationModels::Lee<Thermo, OtherThermo>::KSp
     }
     else
     {
-        return tmp<volScalarField> ();
+        return nullptr;
     }
 }
 
@@ -138,9 +138,9 @@ Foam::meltingEvaporationModels::Lee<Thermo, OtherThermo>::KSu
 {
     if (this->modelVariable_ == variable)
     {
-        volScalarField from
+        const volScalarField from
         (
-            min(max(this->pair().from(), scalar(0)), scalar(1))
+            clamp(this->pair().from(), zero_one{})
         );
 
         const volScalarField coeff
@@ -165,7 +165,7 @@ Foam::meltingEvaporationModels::Lee<Thermo, OtherThermo>::KSu
     }
     else
     {
-        return tmp<volScalarField> ();
+        return nullptr;
     }
 }
 

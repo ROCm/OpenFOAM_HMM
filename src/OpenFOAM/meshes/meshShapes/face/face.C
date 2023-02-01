@@ -76,7 +76,7 @@ Foam::label Foam::face::mostConcaveAngle
 
         // NOTE: is -ve angle since left edge pointing in other direction
         scalar edgeCos = (leftEdge & rightEdge);
-        scalar edgeAngle = acos(max(-1.0, min(1.0, edgeCos)));
+        scalar edgeAngle = acos(clamp(edgeCos, -1, 1));
 
         scalar angle;
 
@@ -205,7 +205,7 @@ Foam::label Foam::face::split
             splitEdge.normalise();
 
             const scalar splitCos = splitEdge & rightEdge;
-            const scalar splitAngle = acos(max(-1.0, min(1.0, splitCos)));
+            const scalar splitAngle = acos(clamp(splitCos, -1, 1));
             const scalar angleDiff = fabs(splitAngle - bisectAngle);
 
             if (angleDiff < minDiff)

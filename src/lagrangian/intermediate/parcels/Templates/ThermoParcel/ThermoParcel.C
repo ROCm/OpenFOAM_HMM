@@ -300,7 +300,7 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
 
     // Calculate the new temperature and the enthalpy transfer terms
     scalar Tnew = T_ + deltaT;
-    Tnew = min(max(Tnew, cloud.constProps().TMin()), cloud.constProps().TMax());
+    Tnew = clamp(Tnew, cloud.constProps().TMin(), cloud.constProps().TMax());
 
     dhsTrans -= m*Cp_*deltaTcp;
 

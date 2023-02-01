@@ -101,7 +101,7 @@ void Foam::adaptiveSolver::solve
     if (err > pow(maxScale_/safeScale_, -1.0/alphaInc_))
     {
         dxTry =
-            min(max(safeScale_*pow(err, -alphaInc_), minScale_), maxScale_)*dx;
+            clamp(safeScale_*pow(err, -alphaInc_), minScale_, maxScale_)*dx;
     }
     else
     {

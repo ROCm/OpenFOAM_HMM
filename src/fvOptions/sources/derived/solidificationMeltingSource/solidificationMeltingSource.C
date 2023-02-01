@@ -147,7 +147,7 @@ void Foam::fv::solidificationMeltingSource::update(const volScalarField& Cp)
         scalar Cpc = Cp[celli];
         scalar alpha1New = alpha1_[celli] + relax_*Cpc*(Tc - Tmelt_)/L_;
 
-        alpha1_[celli] = max(0, min(alpha1New, 1));
+        alpha1_[celli] = clamp(alpha1New, 0, 1);
         deltaT_[i] = Tc - Tmelt_;
     }
 

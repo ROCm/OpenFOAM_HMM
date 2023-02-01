@@ -177,8 +177,7 @@ bool Foam::ETAB<CloudType>::update
                     Kbr =k2_*omega*sqrtWe;
                 }
 
-                scalar rWetmp = 1.0/Wetmp;
-                scalar cosdtbu = max(-1.0, min(1.0, 1.0 - rWetmp));
+                scalar cosdtbu = clamp((1.0 - 1.0/Wetmp), -1, 1);
                 scalar dtbu = romega*acos(cosdtbu);
                 scalar decay = exp(-Kbr*dtbu);
 

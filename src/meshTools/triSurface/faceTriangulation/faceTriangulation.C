@@ -83,7 +83,7 @@ void Foam::faceTriangulation::calcHalfAngle
 )
 {
     // truncate cos to +-1 to prevent negative numbers
-    scalar cos = max(-1, min(1, e0 & e1));
+    scalar cos = clamp((e0 & e1), -1, 1);
 
     scalar sin = (e0 ^ e1) & normal;
 

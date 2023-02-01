@@ -70,7 +70,7 @@ tmp<volScalarField::Internal> kOmegaSSTLM<BasicTurbulenceModel>::epsilonByk
 ) const
 {
     return
-        min(max(gammaIntEff_, scalar(0.1)), scalar(1))
+        clamp(gammaIntEff_, scalarMinMax(0.1, 1))
        *kOmegaSST<BasicTurbulenceModel>::epsilonByk(F1, gradU);
 }
 

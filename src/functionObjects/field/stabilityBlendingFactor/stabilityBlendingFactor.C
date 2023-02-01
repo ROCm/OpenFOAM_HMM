@@ -417,7 +417,7 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
             max
             (
                 indicator,
-                min(max(scalar(0), (Co - Co1_)/(Co2_ - Co1_)), scalar(1))
+                clamp((Co - Co1_)/(Co2_ - Co1_), zero_one{})
             );
 
         if (first)

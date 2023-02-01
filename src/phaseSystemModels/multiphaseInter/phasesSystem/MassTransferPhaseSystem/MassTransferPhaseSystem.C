@@ -600,11 +600,8 @@ void Foam::MassTransferPhaseSystem<BasePhaseSystem>::alphaTransfer
 
         if (includeDivU)
         {
-            SuPhase1 +=
-                fvc::div(phi)*min(max(alpha1, scalar(0)), scalar(1));
-
-            SuPhase2 +=
-                fvc::div(phi)*min(max(alpha2, scalar(0)), scalar(1));
+            SuPhase1 += fvc::div(phi)*clamp(alpha1, zero_one{});
+            SuPhase2 += fvc::div(phi)*clamp(alpha2, zero_one{});
         }
 
         // NOTE: dmdtNet is distributed in terms =

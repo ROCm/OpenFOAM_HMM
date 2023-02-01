@@ -286,8 +286,7 @@ void Foam::multiphaseInter::multiphaseSystem::solveAlphas()
 
             // Add alpha*div(U)
             //const volScalarField& alpha = phase;
-            //Su_[phase.name()] +=
-            //    fvc::div(phi)*min(max(alpha, scalar(0)), scalar(1));
+            //Su_[phase.name()] += fvc::div(phi)*clamp(alpha, zero_one{});
         }
 
         // Fill Su and Sp

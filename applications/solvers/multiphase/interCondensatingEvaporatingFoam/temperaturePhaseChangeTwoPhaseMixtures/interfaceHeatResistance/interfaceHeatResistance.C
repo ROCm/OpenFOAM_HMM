@@ -167,20 +167,10 @@ Foam::Pair<Foam::tmp<Foam::volScalarField>>
 Foam::temperaturePhaseChangeTwoPhaseMixtures::interfaceHeatResistance::
 mDotAlphal() const
 {
-    volScalarField limitedAlpha1
-    (
-        min(max(mixture_.alpha1(), scalar(0)), scalar(1))
-    );
-
-    volScalarField limitedAlpha2
-    (
-        min(max(mixture_.alpha2(), scalar(0)), scalar(1))
-    );
-
     return Pair<tmp<volScalarField>>
     (
-        (mDotc_/(limitedAlpha2 + SMALL)),
-       -(mDote_/(limitedAlpha1 + SMALL))
+        (mDotc_/clamp(mixture_.alpha2(), scalarMinMax(SMALL, 1))),
+       -(mDote_/clamp(mixture_.alpha1(), scalarMinMax(SMALL, 1)))
     );
 }
 

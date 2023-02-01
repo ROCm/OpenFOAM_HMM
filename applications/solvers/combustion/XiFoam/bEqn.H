@@ -215,7 +215,7 @@ if (ign.ignited())
           + (
                 scalar(1)
               + (2*XiShapeCoef)
-               *(scalar(0.5) - min(max(b, scalar(0)), scalar(1)))
+               *(scalar(0.5) - clamp(b, zero_one{}))
             )*(XiEqStar - scalar(1.001))
         );
 
