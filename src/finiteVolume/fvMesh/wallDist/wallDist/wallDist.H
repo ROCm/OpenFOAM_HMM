@@ -57,8 +57,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef wallDist_H
-#define wallDist_H
+#ifndef Foam_wallDist_H
+#define Foam_wallDist_H
 
 #include "MeshObject.H"
 #include "patchDistMethod.H"
@@ -160,13 +160,13 @@ public:
     // Member Functions
 
         //- Return the patchIDs
-        const labelHashSet& patchIDs() const
+        const labelHashSet& patchIDs() const noexcept
         {
             return patchIDs_;
         }
 
         //- Return reference to cached distance-to-wall field
-        const volScalarField& y() const
+        const volScalarField& y() const noexcept
         {
             return y_;
         }

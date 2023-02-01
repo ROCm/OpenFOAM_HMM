@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,14 +25,33 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "globalIndexAndTransform.H"
+#include "globalMeshData.H"
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+inline void Foam::wallPointAddressing::setNull
+(
+    const globalIndexAndTransform& gt
+)
+{
+    if (data_ == labelPair(-1, -1))
+    {
+        const label proci = 0;
+        const label index = -1;
+
+        // Add sending side transform
+        data_ = gt.encode(proci, index, gt.nullTransformIndex());
+    }
+}
+
 
 // Update this with w2 if w2 nearer to pt.
 template<class TrackingData>
-inline bool Foam::wallPointYPlus::update
+inline bool Foam::wallPointAddressing::update
 (
     const point& pt,
-    const wallPointYPlus& w2,
+    const wallPointAddressing& w2,
     const scalar tol,
     TrackingData& td
 )
@@ -57,65 +75,104 @@ inline bool Foam::wallPointYPlus::update
         }
     }
 
-
     // Either *this is not yet valid or w2 is closer
     {
-        // only propagate if interesting (i.e. y+ < 100)
-        const scalar yPlus = Foam::sqrt(dist2)/w2.data();
+        // current not yet set so use any value
+        distSqr() = dist2;
+        origin() = w2.origin();
+        data_ = w2.data();
 
-        if (yPlus < yPlusCutOff)
-        {
-            // update with new values
-            distSqr() = dist2;
-            origin() = w2.origin();
-            data() = w2.data();
-
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return true;
     }
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-inline Foam::wallPointYPlus::wallPointYPlus()
+inline Foam::wallPointAddressing::wallPointAddressing()
 :
-    wallPointData<scalar>()
-{
-    // Important: value of yStar where meshWave does not come.
-    data() = 1.0;
-}
+    wallPoint(),
+    data_(labelPair(-1, -1))
+{}
 
 
-inline Foam::wallPointYPlus::wallPointYPlus
+inline Foam::wallPointAddressing::wallPointAddressing
 (
     const point& origin,
-    const scalar yStar,
+    const labelPair& data,
     const scalar distSqr
 )
 :
-    wallPointData<scalar>(origin, yStar, distSqr)
+    wallPoint(origin, distSqr),
+    data_(data)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+template<class TrackingData>
+inline void Foam::wallPointAddressing::leaveDomain
+(
+    const polyMesh& mesh,
+    const polyPatch& pp,
+    const label patchFacei,
+    const point& faceCentre,
+    TrackingData& td
+)
+{
+    const auto& gt = mesh.globalData().globalTransforms();
+
+    setNull(gt);
+
+    // Convert to relative form
+    wallPoint::leaveDomain(mesh, pp, patchFacei, faceCentre, td);
+
+    // Add to transformation
+    const label transformi = gt.transformIndex(data_);
+    const label proci = gt.processor(data_);
+    const label index = gt.index(data_);
+
+    // Add sending side transform
+    const label newTransformi = gt.addToTransformIndex
+    (
+        transformi,
+        pp.index()
+    );
+    data_ = gt.encode(proci, index, newTransformi);
+}
+
+
+//// Update absolute geometric quantities. Note that distance (distSqr_)
+//// is not affected by leaving/entering domain.
+//template<class TrackingData>
+//inline void Foam::wallPointAddressing::enterDomain
+//(
+//    const polyMesh& mesh,
+//    const polyPatch& pp,
+//    const label patchFacei,
+//    const point& faceCentre,
+//    TrackingData& td
+//)
+//{
+//    // back to absolute form
+//    wallPoint::enterDomain(mesh, pp, patchFacei, faceCentre, td);
+//}
+
+
 // Update this with w2 if w2 nearer to pt.
 template<class TrackingData>
-inline bool Foam::wallPointYPlus::updateCell
+inline bool Foam::wallPointAddressing::updateCell
 (
     const polyMesh& mesh,
     const label thisCelli,
     const label neighbourFacei,
-    const wallPointYPlus& neighbourWallInfo,
+    const wallPointAddressing& neighbourWallInfo,
     const scalar tol,
     TrackingData& td
 )
 {
+    setNull(mesh.globalData().globalTransforms());
+
     const vectorField& cellCentres = mesh.primitiveMesh::cellCentres();
 
     return update
@@ -130,16 +187,18 @@ inline bool Foam::wallPointYPlus::updateCell
 
 // Update this with w2 if w2 nearer to pt.
 template<class TrackingData>
-inline bool Foam::wallPointYPlus::updateFace
+inline bool Foam::wallPointAddressing::updateFace
 (
     const polyMesh& mesh,
     const label thisFacei,
-    const label neighbourCelli,
-    const wallPointYPlus& neighbourWallInfo,
+    const label,
+    const wallPointAddressing& neighbourWallInfo,
     const scalar tol,
     TrackingData& td
 )
 {
+    setNull(mesh.globalData().globalTransforms());
+
     const vectorField& faceCentres = mesh.faceCentres();
 
     return update
@@ -154,15 +213,17 @@ inline bool Foam::wallPointYPlus::updateFace
 
 // Update this with w2 if w2 nearer to pt.
 template<class TrackingData>
-inline bool Foam::wallPointYPlus::updateFace
+inline bool Foam::wallPointAddressing::updateFace
 (
     const polyMesh& mesh,
     const label thisFacei,
-    const wallPointYPlus& neighbourWallInfo,
+    const wallPointAddressing& neighbourWallInfo,
     const scalar tol,
     TrackingData& td
 )
 {
+    setNull(mesh.globalData().globalTransforms());
+
     const vectorField& faceCentres = mesh.faceCentres();
 
     return update

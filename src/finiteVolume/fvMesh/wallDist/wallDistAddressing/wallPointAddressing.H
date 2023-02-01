@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,53 +24,65 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::wallPointYPlus
+    Foam::wallPointAddressing
 
 Description
-    Holds information (coordinate and yStar) regarding nearest wall point.
+    Holds information (coordinate and origin) regarding nearest wall point.
 
-    Used in VanDriest wall damping where the interest is in y+ but only
-    needs to be calculated up to e.g. y+ < 200. In all other cells/faces
-    the damping function becomes 1, since y gets initialized to GREAT and
-    yStar to 1.
-
-    Note: should feed the additional argument (yPlusCutoff) through as a
-    template argument into FaceCellWave
+    Is like wallPoint but transfer extra (passive) data.
+    Used e.g. in wall distance calculation with wall reflection vectors.
 
 SourceFiles
-    wallPointYPlusI.H
-    wallPointYPlus.C
+    wallPointAddressingI.H
+    wallPointAddressing.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef wallPointYPlus_H
-#define wallPointYPlus_H
+#ifndef wallPointAddressing_H
+#define wallPointAddressing_H
 
-#include "wallPointData.H"
+#include "wallPoint.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Forward Declarations
+class globalIndexAndTransform;
+class wallPointAddressing;
+
+Ostream& operator<<(Ostream&, const wallPointAddressing&);
+Istream& operator>>(Istream&, wallPointAddressing&);
+
+
 /*---------------------------------------------------------------------------*\
-                           Class wallPointYPlus Declaration
+                     Class wallPointAddressing Declaration
 \*---------------------------------------------------------------------------*/
 
-class wallPointYPlus
+class wallPointAddressing
 :
-    public wallPointData<scalar>
+    public wallPoint
 {
+    // Private Data
+
+        //- Data at nearest wall center
+        labelPair data_;
+
+
     // Private Member Functions
 
-        //- Evaluate distance to point. Update distSqr, origin from whomever
-        //  is nearer pt. Return true if w2 is closer to point,
-        //  false otherwise.
+        //- Initialise data so it uses the nulltransformindex
+        inline void setNull(const globalIndexAndTransform& gt);
+
+        //- Evaluate distance to point.
+        //  Update distSqr, origin from whomever is nearer pt.
+        //  \return true if w2 is closer to point, false otherwise.
         template<class TrackingData>
         inline bool update
         (
             const point&,
-            const wallPointYPlus& w2,
+            const wallPointAddressing& w2,
             const scalar tol,
             TrackingData& td
         );
@@ -79,29 +90,47 @@ class wallPointYPlus
 
 public:
 
-    // Static data members
-
-        //- The cut-off value for y+
-        static scalar yPlusCutOff;
-
-
     // Constructors
 
-        //- Construct null
-        inline wallPointYPlus();
+        //- Default construct
+        inline wallPointAddressing();
 
-        //- Construct from origin, yStar, distance
-        inline wallPointYPlus
+        //- Construct from origin, transforms, distance
+        inline wallPointAddressing
         (
             const point& origin,
-            const scalar yStar,
+            const labelPair& data,
             const scalar distSqr
         );
 
 
     // Member Functions
 
-        // Needed by FaceCellWave
+        // Access
+
+            const labelPair& data() const
+            {
+                return data_;
+            }
+            labelPair& data()
+            {
+                return data_;
+            }
+
+
+        // Needed by MeshWave
+
+            //- Convert any absolute coordinates into relative to (patch)face
+            //- centre
+            template<class TrackingData>
+            inline void leaveDomain
+            (
+                const polyMesh&,
+                const polyPatch&,
+                const label patchFacei,
+                const point& faceCentre,
+                TrackingData& td
+            );
 
             //- Influence of neighbouring face.
             //  Calls update(...) with cellCentre of celli
@@ -111,7 +140,7 @@ public:
                 const polyMesh& mesh,
                 const label thisCelli,
                 const label neighbourFacei,
-                const wallPointYPlus& neighbourWallInfo,
+                const wallPointAddressing& neighbourWallInfo,
                 const scalar tol,
                 TrackingData& td
             );
@@ -124,7 +153,7 @@ public:
                 const polyMesh& mesh,
                 const label thisFacei,
                 const label neighbourCelli,
-                const wallPointYPlus& neighbourWallInfo,
+                const wallPointAddressing& neighbourWallInfo,
                 const scalar tol,
                 TrackingData& td
             );
@@ -137,19 +166,31 @@ public:
             (
                 const polyMesh& mesh,
                 const label thisFacei,
-                const wallPointYPlus& neighbourWallInfo,
+                const wallPointAddressing& neighbourWallInfo,
                 const scalar tol,
                 TrackingData& td
             );
+
+
+    // IOstream Operators
+
+        friend Ostream& operator<<(Ostream&, const wallPointAddressing&);
+        friend Istream& operator>>(Istream&, wallPointAddressing&);
 };
 
 
 // * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
 
-//- Contiguous data for wallPointYPlus
+//- Data are contiguous if data type is contiguous
 template<>
-struct is_contiguous<wallPointYPlus> : is_contiguous<wallPointData<scalar>> {};
+struct is_contiguous<wallPointAddressing>
+: is_contiguous<wallPoint>
+{};
 
+template<>
+struct is_contiguous_scalar<wallPointAddressing>
+: is_contiguous_scalar<wallPoint>
+{};
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -157,7 +198,7 @@ struct is_contiguous<wallPointYPlus> : is_contiguous<wallPointData<scalar>> {};
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "wallPointYPlusI.H"
+#include "wallPointAddressingI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
