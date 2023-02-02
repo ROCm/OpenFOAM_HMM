@@ -103,7 +103,7 @@ bool Foam::functionObjects::ensightWrite::readSelection(const dictionary& dict)
     selectFields_.uniq();
 
     blockFields_.clear();
-    dict.readIfPresent("blockFields", blockFields_);
+    dict.readIfPresent("excludeFields", blockFields_);
     blockFields_.uniq();
 
     // Actions to define selection
