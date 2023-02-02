@@ -1250,50 +1250,6 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::replace
 
 
 template<class Type, template<class> class PatchField, class GeoMesh>
-void Foam::GeometricField<Type, PatchField, GeoMesh>::clamp
-(
-    const Type& lower,
-    const Type& upper
-)
-{
-    primitiveFieldRef().clamp(lower, upper);
-    boundaryFieldRef().clamp(lower, upper);
-}
-
-
-template<class Type, template<class> class PatchField, class GeoMesh>
-void Foam::GeometricField<Type, PatchField, GeoMesh>::clamp
-(
-    const MinMax<Type>& range
-)
-{
-    primitiveFieldRef().clamp(range.min(), range.max());
-    boundaryFieldRef().clamp(range.min(), range.max());
-}
-
-
-template<class Type, template<class> class PatchField, class GeoMesh>
-void Foam::GeometricField<Type, PatchField, GeoMesh>::clamp
-(
-    const dimensioned<Type>& lower,
-    const dimensioned<Type>& upper
-)
-{
-    this->clamp(lower.value(), upper.value());
-}
-
-
-template<class Type, template<class> class PatchField, class GeoMesh>
-void Foam::GeometricField<Type, PatchField, GeoMesh>::clamp
-(
-    const dimensioned<MinMax<Type>>& range
-)
-{
-    this->clamp(range.value());
-}
-
-
-template<class Type, template<class> class PatchField, class GeoMesh>
 void Foam::GeometricField<Type, PatchField, GeoMesh>::clamp_min
 (
     const Type& lower
@@ -1332,6 +1288,50 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::clamp_max
 )
 {
     this->clamp_max(upper.value());
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+void Foam::GeometricField<Type, PatchField, GeoMesh>::clamp_range
+(
+    const Type& lower,
+    const Type& upper
+)
+{
+    primitiveFieldRef().clamp_range(lower, upper);
+    boundaryFieldRef().clamp_range(lower, upper);
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+void Foam::GeometricField<Type, PatchField, GeoMesh>::clamp_range
+(
+    const MinMax<Type>& range
+)
+{
+    primitiveFieldRef().clamp_range(range.min(), range.max());
+    boundaryFieldRef().clamp_range(range.min(), range.max());
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+void Foam::GeometricField<Type, PatchField, GeoMesh>::clamp_range
+(
+    const dimensioned<Type>& lower,
+    const dimensioned<Type>& upper
+)
+{
+    this->clamp_range(lower.value(), upper.value());
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+void Foam::GeometricField<Type, PatchField, GeoMesh>::clamp_range
+(
+    const dimensioned<MinMax<Type>>& range
+)
+{
+    this->clamp_range(range.value());
 }
 
 

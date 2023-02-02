@@ -664,28 +664,22 @@ void clamp
     const MinMax<Type>& range
 )
 {
+    // Note: no checks for bad/invalid clamping ranges
+
     if (result.cdata() == f1.cdata())
     {
         // Apply in-place
-        result.clamp(range);
+        result.clamp_range(range);
     }
     else
     {
-        if (range.good())
-        {
-            std::transform
-            (
-                f1.cbegin(),
-                f1.cbegin(result.size()),
-                result.begin(),
-                clampOp<Type>(range)
-            );
-        }
-        else
-        {
-            // No clamping
-            std::copy(f1.cbegin(), f1.cbegin(result.size()), result.begin());
-        }
+        std::transform
+        (
+            f1.cbegin(),
+            f1.cbegin(result.size()),
+            result.begin(),
+            clampOp<Type>(range)
+        );
     }
 }
 

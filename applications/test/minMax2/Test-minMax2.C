@@ -162,9 +162,16 @@ int main(int argc, char *argv[])
 
         Info<< "result: " << result << nl;
 
-        someField.clamp(zero_one{});
-
+        someField.clamp_range(zero_one{});
         Info<< "inplace: " << someField << nl;
+
+        scalar val(1.414);
+
+        Info<< "clamp " << val
+            // nope << " : " << clamp(val, zero_one{})
+            // nope << " : " << clamp(val, scalarMinMax(zero_one{}))
+            << " : " << clamp(val, 0, 1)
+            << nl;
     }
 
     Info<< nl << "\nDone\n" << endl;

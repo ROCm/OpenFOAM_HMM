@@ -283,39 +283,6 @@ void FieldField<Field, Type>::replace
 
 
 template<template<class> class Field, class Type>
-void FieldField<Field, Type>::clamp
-(
-    const Type& lower,
-    const Type& upper
-)
-{
-    if (lower < upper)
-    {
-        for (auto& ff : *this)
-        {
-            ff.clamp(lower, upper);
-        }
-    }
-}
-
-
-template<template<class> class Field, class Type>
-void FieldField<Field, Type>::clamp
-(
-    const MinMax<Type>& range
-)
-{
-    if (range.min() < range.max())
-    {
-        for (auto& ff : *this)
-        {
-            ff.clamp(range.min(), range.max());
-        }
-    }
-}
-
-
-template<template<class> class Field, class Type>
 void FieldField<Field, Type>::clamp_min
 (
     const Type& lower
@@ -337,6 +304,37 @@ void FieldField<Field, Type>::clamp_max
     for (auto& ff : *this)
     {
         ff.clamp_max(upper);
+    }
+}
+
+
+template<template<class> class Field, class Type>
+void FieldField<Field, Type>::clamp_range
+(
+    const Type& lower,
+    const Type& upper
+)
+{
+    // Note: no checks for bad/invalid clamping ranges
+
+    for (auto& ff : *this)
+    {
+        ff.clamp_range(lower, upper);
+    }
+}
+
+
+template<template<class> class Field, class Type>
+void FieldField<Field, Type>::clamp_range
+(
+    const MinMax<Type>& range
+)
+{
+    // Note: no checks for bad/invalid clamping ranges
+
+    for (auto& ff : *this)
+    {
+        ff.clamp_range(range.min(), range.max());
     }
 }
 

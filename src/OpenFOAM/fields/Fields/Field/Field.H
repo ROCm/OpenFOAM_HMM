@@ -434,19 +434,19 @@ public:
         //- Replace a component field of the field
         void replace(const direction, const cmptType&);
 
-        //- Clamp field values (in-place) to the specified range.
-        //  A no-op for an invalid range.
-        void clamp(const Type& lower, const Type& upper);
-
-        //- Clamp field values (in-place) to the specified range.
-        //  A no-op for an invalid range.
-        void clamp(const MinMax<Type>& range);
-
         //- Impose lower (floor) clamp on the field values (in-place)
         void clamp_min(const Type& lower);
 
         //- Impose upper (ceiling) clamp on the field values (in-place)
         void clamp_max(const Type& upper);
+
+        //- Clamp field values (in-place) to the specified range.
+        //  Does not check if range is valid or not.
+        void clamp_range(const Type& lower, const Type& upper);
+
+        //- Clamp field values (in-place) to the specified range.
+        //  Does not check if range is valid or not.
+        void clamp_range(const MinMax<Type>& range);
 
         template<class VSForm>
         VSForm block(const label start) const;
