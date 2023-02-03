@@ -133,17 +133,6 @@ public:
 
 // * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
 
-//- Hashing for std::pair data
-template<class T1, class T2>
-struct Hash<std::pair<T1, T2>>
-{
-    unsigned operator()(const std::pair<T1, T2>& obj, unsigned seed=0) const
-    {
-        return Hash<T2>()(obj.second, Hash<T1>()(obj.first, seed));
-    }
-};
-
-
 //- Hashing for Tuple2 data
 template<class T1, class T2>
 struct Hash<Tuple2<T1, T2>>
@@ -291,19 +280,6 @@ struct maxFirstEqOp
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-//- Read std::pair from Istream
-template<class T1, class T2>
-inline Istream& operator>>(Istream& is, std::pair<T1,T2>& t)
-{
-    is.readBegin("pair");
-    is >> t.first >> t.second;
-    is.readEnd("pair");
-
-    is.check(FUNCTION_NAME);
-    return is;
-}
-
-
 //- Read Tuple2 from Istream
 template<class T1, class T2>
 inline Istream& operator>>(Istream& is, Tuple2<T1,T2>& t)
@@ -317,18 +293,7 @@ inline Istream& operator>>(Istream& is, Tuple2<T1,T2>& t)
 }
 
 
-//- Write std::pair to Ostream.
-template<class T1, class T2>
-inline Ostream& operator<<(Ostream& os, const std::pair<T1,T2>& t)
-{
-    os  << token::BEGIN_LIST
-        << t.first << token::SPACE << t.second
-        << token::END_LIST;
-    return os;
-}
-
-
-//- Write Tuple2 to Ostream.
+//- Write Tuple2 to Ostream
 template<class T1, class T2>
 inline Ostream& operator<<(Ostream& os, const Tuple2<T1,T2>& t)
 {
