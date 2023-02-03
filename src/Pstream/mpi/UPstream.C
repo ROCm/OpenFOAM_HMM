@@ -37,6 +37,7 @@ License
 #include <cstring>
 #include <cstdlib>
 #include <csignal>
+#include <numeric>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -502,15 +503,17 @@ void Foam::UPstream::allocatePstreamCommunicator
     const label index
 )
 {
-    if (index == PstreamGlobals::MPIGroups_.size())
+    if (index == PstreamGlobals::MPICommunicators_.size())
     {
-        // Extend storage with dummy values
-        MPI_Comm newComm = MPI_COMM_NULL;
-        MPI_Group newGroup = MPI_GROUP_NULL;
-        PstreamGlobals::MPIGroups_.push_back(newGroup);
-        PstreamGlobals::MPICommunicators_.push_back(newComm);
+        // Extend storage with null values
+
+        PstreamGlobals::
+            pendingMPIFree_.emplace_back(PstreamGlobals::NonePending);
+
+        PstreamGlobals::MPICommunicators_.emplace_back(MPI_COMM_NULL);
+        PstreamGlobals::MPIGroups_.emplace_back(MPI_GROUP_NULL);
     }
-    else if (index > PstreamGlobals::MPIGroups_.size())
+    else if (index > PstreamGlobals::MPICommunicators_.size())
     {
         FatalErrorInFunction
             << "PstreamGlobals out of sync with UPstream data. Problem."
@@ -530,27 +533,40 @@ void Foam::UPstream::allocatePstreamCommunicator
                 << Foam::exit(FatalError);
         }
 
+        PstreamGlobals::pendingMPIFree_[index] = PstreamGlobals::NonePending;
         PstreamGlobals::MPICommunicators_[index] = MPI_COMM_WORLD;
-        MPI_Comm_group(MPI_COMM_WORLD, &PstreamGlobals::MPIGroups_[index]);
-        MPI_Comm_rank(MPI_COMM_WORLD, &myProcNo_[index]);
+        PstreamGlobals::MPIGroups_[index] = MPI_GROUP_NULL;
+
+        // TBD: MPI_Comm_dup(MPI_COMM_WORLD, ...);
+        // with pendingMPIFree_[index] = CommPending ...
+        // Note: freePstreamCommunicator may need an update
+
+        MPI_Comm_rank
+        (
+            PstreamGlobals::MPICommunicators_[index],
+           &myProcNo_[index]
+        );
 
         // Set the number of ranks to the actual number
         int numProcs;
-        MPI_Comm_size(MPI_COMM_WORLD, &numProcs);
+        MPI_Comm_size
+        (
+            PstreamGlobals::MPICommunicators_[index],
+           &numProcs
+        );
 
-        //procIDs_[index] = identity(numProcs);
+        // identity [0-numProcs], as 'int'
         procIDs_[index].resize_nocopy(numProcs);
-        forAll(procIDs_[index], i)
-        {
-            procIDs_[index][i] = i;
-        }
+        std::iota(procIDs_[index].begin(), procIDs_[index].end(), 0);
     }
     else if (parentIndex == -2)
     {
         // Self communicator
 
+        PstreamGlobals::pendingMPIFree_[index] = PstreamGlobals::NonePending;
         PstreamGlobals::MPICommunicators_[index] = MPI_COMM_SELF;
-        MPI_Comm_group(MPI_COMM_SELF, &PstreamGlobals::MPIGroups_[index]);
+        PstreamGlobals::MPIGroups_[index] = MPI_GROUP_NULL;
+
         MPI_Comm_rank(MPI_COMM_SELF, &myProcNo_[index]);
 
         // Number of ranks is always 1 (self communicator)
@@ -573,6 +589,11 @@ void Foam::UPstream::allocatePstreamCommunicator
     }
     else
     {
+        // General sub-communicator
+
+        PstreamGlobals::pendingMPIFree_[index]
+            = (PstreamGlobals::CommPending | PstreamGlobals::GroupPending);
+
         // Create new group
         MPI_Group_incl
         (
@@ -603,7 +624,10 @@ void Foam::UPstream::allocatePstreamCommunicator
 
         if (PstreamGlobals::MPICommunicators_[index] == MPI_COMM_NULL)
         {
+            // No communicator created, group only
             myProcNo_[index] = -1;
+            PstreamGlobals::
+                pendingMPIFree_[index] = PstreamGlobals::GroupPending;
         }
         else
         {
@@ -629,30 +653,48 @@ void Foam::UPstream::allocatePstreamCommunicator
 }
 
 
-void Foam::UPstream::freePstreamCommunicator(const label communicator)
+void Foam::UPstream::freePstreamCommunicator(const label index)
 {
     // Skip placeholders and pre-defined (not allocated) communicators
 
     if (UPstream::debug)
     {
-        Pout<< "freePstreamCommunicator: " << communicator
+        Pout<< "freePstreamCommunicator: " << index
             << " from " << PstreamGlobals::MPICommunicators_.size() << endl;
     }
 
     // Not touching the first two communicators (SELF, WORLD)
-    if (communicator > 1)
+    if (index > 1)
     {
-        if (MPI_COMM_NULL != PstreamGlobals::MPICommunicators_[communicator])
+        if
+        (
+            (MPI_COMM_NULL != PstreamGlobals::MPICommunicators_[index])
+         &&
+            (
+                PstreamGlobals::pendingMPIFree_[index]
+              & PstreamGlobals::CommPending
+            )
+        )
         {
             // Free communicator. Sets communicator to MPI_COMM_NULL
-            MPI_Comm_free(&PstreamGlobals::MPICommunicators_[communicator]);
+            MPI_Comm_free(&PstreamGlobals::MPICommunicators_[index]);
         }
 
-        if (MPI_GROUP_NULL != PstreamGlobals::MPIGroups_[communicator])
+        if
+        (
+            (MPI_GROUP_NULL != PstreamGlobals::MPIGroups_[index])
+         &&
+            (
+                PstreamGlobals::pendingMPIFree_[index]
+              & PstreamGlobals::GroupPending
+            )
+        )
         {
             // Free group. Sets group to MPI_GROUP_NULL
-            MPI_Group_free(&PstreamGlobals::MPIGroups_[communicator]);
+            MPI_Group_free(&PstreamGlobals::MPIGroups_[index]);
         }
+
+        PstreamGlobals::pendingMPIFree_[index] = PstreamGlobals::NonePending;
     }
 }
 
@@ -705,6 +747,7 @@ void Foam::UPstream::barrier(const label communicator, UPstream::Request* req)
     {
         MPI_Request request;
 
+        // Non-blocking
         if
         (
             MPI_Ibarrier
@@ -723,6 +766,7 @@ void Foam::UPstream::barrier(const label communicator, UPstream::Request* req)
     }
     else
     {
+        // Blocking
         if
         (
             MPI_Barrier
@@ -736,6 +780,79 @@ void Foam::UPstream::barrier(const label communicator, UPstream::Request* req)
                 << Foam::abort(FatalError);
         }
     }
+}
+
+
+std::pair<int,int>
+Foam::UPstream::probeMessage
+(
+    const UPstream::commsTypes commsType,
+    const int fromProcNo,
+    const int tag,
+    const label comm
+)
+{
+    std::pair<int,int> result(-1, 0);
+
+    if (!UPstream::parRun())
+    {
+        return result;
+    }
+
+    const int source = (fromProcNo < 0) ? MPI_ANY_SOURCE : fromProcNo;
+    // Supporting MPI_ANY_TAG is not particularly useful...
+
+    int flag = 0;
+    MPI_Status status;
+
+    if (UPstream::commsTypes::blocking == commsType)
+    {
+        // Blocking
+        if
+        (
+            MPI_Probe
+            (
+                source,
+                tag,
+                PstreamGlobals::MPICommunicators_[comm],
+                &status
+            )
+        )
+        {
+            FatalErrorInFunction
+                << "MPI_Probe returned with error"
+                << Foam::abort(FatalError);
+        }
+        flag = 1;
+    }
+    else
+    {
+        // Non-blocking
+        if
+        (
+            MPI_Iprobe
+            (
+                source,
+                tag,
+                PstreamGlobals::MPICommunicators_[comm],
+                &flag,
+                &status
+            )
+        )
+        {
+            FatalErrorInFunction
+                << "MPI_Iprobe returned with error"
+                << Foam::abort(FatalError);
+        }
+    }
+
+    if (flag)
+    {
+        result.first = status.MPI_SOURCE;
+        MPI_Get_count(&status, MPI_BYTE, &result.second);
+    }
+
+    return result;
 }
 
 

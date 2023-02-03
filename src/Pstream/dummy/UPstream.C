@@ -98,4 +98,17 @@ void Foam::UPstream::barrier(const label communicator, UPstream::Request* req)
 {}
 
 
+std::pair<int,int>
+Foam::UPstream::probeMessage
+(
+    const UPstream::commsTypes commsType,
+    const int fromProcNo,
+    const int tag,
+    const label comm
+)
+{
+    return std::pair<int,int>(-1, 0);
+}
+
+
 // ************************************************************************* //

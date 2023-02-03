@@ -138,21 +138,24 @@ void Foam::UPstream::waitRequests(UList<UPstream::Request>& requests)
 
     for (auto& req : requests)
     {
-        if (req.good())
+        MPI_Request request = PstreamDetail::Request::get(req);
+
+        if (MPI_REQUEST_NULL != request)
         {
-            waitRequests[count] = PstreamDetail::Request::get(req);
+            waitRequests[count] = request;
             ++count;
         }
     }
 
     if (!count)
     {
+        // Early exit: non-NULL requests found
         return;
     }
 
     profilingPstream::beginTiming();
 
-    // On success: sets request to MPI_REQUEST_NULL
+    // On success: sets each request to MPI_REQUEST_NULL
     if (MPI_Waitall(count, waitRequests, MPI_STATUSES_IGNORE))
     {
         FatalErrorInFunction
@@ -163,10 +166,7 @@ void Foam::UPstream::waitRequests(UList<UPstream::Request>& requests)
     profilingPstream::addWaitTime();
 
     // Everything handled, reset all to MPI_REQUEST_NULL
-    for (auto& req : requests)
-    {
-        req.reset();
-    }
+    requests = UPstream::Request(MPI_REQUEST_NULL);
 }
 
 
@@ -190,14 +190,16 @@ void Foam::UPstream::waitRequests(UList<UPstream::Request>& requests)
 ///     waitRequests[count] = PstreamDetail::Request::get(req1);
 ///     if (MPI_REQUEST_NULL != waitRequests[count])
 ///     {
-///         req1.reset();
+///         // Flag in advance as being handled
+///         req1 = UPstream::Request(MPI_REQUEST_NULL);
 ///         ++count;
 ///     }
 ///
 ///     waitRequests[count] = PstreamDetail::Request::get(req2);
 ///     if (MPI_REQUEST_NULL != waitRequests[count])
 ///     {
-///         req2.reset();
+///         // Flag in advance as being handled
+///         req2 = UPstream::Request(MPI_REQUEST_NULL);
 ///         ++count;
 ///     }
 ///
@@ -208,7 +210,7 @@ void Foam::UPstream::waitRequests(UList<UPstream::Request>& requests)
 ///
 ///     profilingPstream::beginTiming();
 ///
-///     // On success: sets request to MPI_REQUEST_NULL
+///     // On success: sets each request to MPI_REQUEST_NULL
 ///     if (MPI_Waitall(count, waitRequests, MPI_STATUSES_IGNORE))
 ///     {
 ///         FatalErrorInFunction
@@ -297,7 +299,8 @@ void Foam::UPstream::waitRequest(UPstream::Request& req)
 
     profilingPstream::addWaitTime();
 
-    req.reset();  // Handled, reset to MPI_REQUEST_NULL
+    // Handled, reset to MPI_REQUEST_NULL
+    req = UPstream::Request(MPI_REQUEST_NULL);
 }
 
 
@@ -363,8 +366,69 @@ bool Foam::UPstream::finishedRequest(UPstream::Request& req)
 
     if (flag)
     {
-        // Done - reset to MPI_REQUEST_NULL
-        req.reset();
+        // Success: reset request to MPI_REQUEST_NULL
+        req = UPstream::Request(MPI_REQUEST_NULL);
+    }
+
+    return flag != 0;
+}
+
+
+bool Foam::UPstream::finishedRequests(UList<UPstream::Request>& requests)
+{
+    // No-op for non-parallel or no pending requests
+    if (!UPstream::parRun() || requests.empty())
+    {
+        return true;
+    }
+
+    // Looks ugly but is legitimate since UPstream::Request is an intptr_t,
+    // which is always large enough to hold an MPI_Request (int or pointer)
+
+    label count = 0;
+    auto* waitRequests = reinterpret_cast<MPI_Request*>(requests.data());
+
+    for (auto& req : requests)
+    {
+        MPI_Request request = PstreamDetail::Request::get(req);
+
+        if (MPI_REQUEST_NULL != request)
+        {
+            waitRequests[count] = request;
+            ++count;
+        }
+    }
+
+    if (!count)
+    {
+        // Early exit: non-NULL requests found
+        return true;
+    }
+
+    // On success: sets each request to MPI_REQUEST_NULL
+    // On failure: no request is modified
+    int flag = 0;
+    MPI_Testall(count, waitRequests, &flag, MPI_STATUSES_IGNORE);
+
+    if (flag)
+    {
+        // Success: reset all requests to MPI_REQUEST_NULL
+        requests = UPstream::Request(MPI_REQUEST_NULL);
+    }
+    else
+    {
+        // Not all done. Recover wrapped representation but in reverse order
+        // since sizeof(MPI_Request) can be smaller than
+        // sizeof(UPstream::Request::value_type)
+        // eg, mpich has MPI_Request as 'int'
+        //
+        // This is uglier that we'd like, but much better than allocating
+        // and freeing a scratch buffer each time we query things.
+
+        while (--count >= 0)
+        {
+            requests[count] = UPstream::Request(waitRequests[count]);
+        }
     }
 
     return flag != 0;

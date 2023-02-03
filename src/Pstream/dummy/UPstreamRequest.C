@@ -61,6 +61,10 @@ void Foam::UPstream::waitRequest(UPstream::Request&) {}
 
 bool Foam::UPstream::finishedRequest(const label i) { return true; }
 bool Foam::UPstream::finishedRequest(UPstream::Request&) { return true; }
+bool Foam::UPstream::finishedRequests(UList<UPstream::Request>&)
+{
+    return true;
+}
 
 
 // ************************************************************************* //

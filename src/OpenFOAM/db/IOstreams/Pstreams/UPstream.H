@@ -463,6 +463,23 @@ public:
             UPstream::Request* req = nullptr
         );
 
+        //- Probe for an incoming message.
+        //
+        //  \param commsType    Blocking or not
+        //  \param fromProcNo   The source rank (negative == ANY_SOURCE)
+        //  \param tag          The source message tag
+        //  \param communicator The communicator index
+        //
+        //  \returns source rank and message size (bytes)
+        //      and (-1, 0) on failure
+        static std::pair<int,int> probeMessage
+        (
+            const UPstream::commsTypes commsType,
+            const int fromProcNo,
+            const int tag = UPstream::msgType(),
+            const label communicator = worldComm
+        );
+
 
         // Non-blocking comms
 
@@ -503,6 +520,10 @@ public:
             //  A no-op and returns true if parRun() == false
             //  or for a null-request
             static bool finishedRequest(UPstream::Request& req);
+
+            //- Non-blocking comms: have all requests finished?
+            //  A no-op and returns true if parRun() == false or list is empty
+            static bool finishedRequests(UList<UPstream::Request>& requests);
 
             static int allocateTag(const char* const msg = nullptr);
             static void freeTag(const int tag, const char* const msg = nullptr);
