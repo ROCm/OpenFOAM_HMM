@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2021-2022 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -117,11 +117,6 @@ class bitSet;
 
 class PstreamBuffers
 {
-    // Friendship
-    friend class UOPstreamBase;  // Access to sendBuf_
-    friend class UIPstreamBase;  // Access to recvBuf_, recvBufPos_
-
-
     // Private Data
 
         //- Track if sends are complete
@@ -142,14 +137,20 @@ class PstreamBuffers
         //- Communicator
         const label comm_;
 
-        //- Send buffer. Size is nProcs()
-        List<DynamicList<char>> sendBuf_;
+        //  Number of ranks associated with PstreamBuffers
+        //  currently obtained from recvPositions_
 
-        //- Receive buffer. Size is nProcs()
-        List<DynamicList<char>> recvBuf_;
 
-        //- Current read positions within recvBuf_. Size is nProcs()
-        labelList recvBufPos_;
+    // Buffer storage
+
+        //- Send buffers. Size is nProcs()
+        List<DynamicList<char>> sendBuffers_;
+
+        //- Receive buffers. Size is nProcs()
+        List<DynamicList<char>> recvBuffers_;
+
+        //- Current read positions within recvBuffers_. Size is nProcs()
+        labelList recvPositions_;
 
 
     // Private Member Functions
@@ -171,6 +172,22 @@ class PstreamBuffers
 
         //- For all-to-one or one-to-all
         void finalExchangeGatherScatter(const bool isGather, const bool wait);
+
+
+    // Friendship Access
+
+        //- Access a send buffer for given proc (in range 0-nProcs)
+        DynamicList<char>& accessSendBuffer(const label proci);
+
+        //- Access a recv buffer for given proc (in range 0-nProcs).
+        DynamicList<char>& accessRecvBuffer(const label proci);
+
+        //- Access the recv position within recv buffer for given proc
+        //- (in range 0-nProcs).
+        label& accessRecvPosition(const label proci);
+
+        friend class UOPstreamBase;  // accessSendBuffer()
+        friend class UIPstreamBase;  // accessRecvBuffer(), accessRecvPosition()
 
 
 public:
@@ -202,7 +219,7 @@ public:
 
     // Member Functions
 
-    // Access
+    // Attributes
 
         //- The associated buffer format (ascii | binary)
         IOstreamOption::streamFormat format() const noexcept
@@ -216,26 +233,26 @@ public:
             return commsType_;
         }
 
-        //- The transfer message type
+        //- The transfer message tag
         int tag() const noexcept
         {
             return tag_;
         }
 
-        //- Communicator
+        //- The communicator index
         label comm() const noexcept
         {
             return comm_;
         }
 
-
-    // Sizing
-
         //- Number of ranks associated with PstreamBuffers
         label nProcs() const noexcept
         {
-            return recvBufPos_.size();
+            return recvPositions_.size();
         }
+
+
+    // Sizing
 
         //- Range of ranks indices associated with PstreamBuffers
         UPstream::rangeType allProcs() const noexcept

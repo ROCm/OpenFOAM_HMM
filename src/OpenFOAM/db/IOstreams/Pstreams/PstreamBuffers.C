@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2021-2022 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,13 +44,13 @@ void Foam::PstreamBuffers::finalExchange
     if (commsType_ == UPstream::commsTypes::nonBlocking)
     {
         // all-to-all
-        Pstream::exchangeSizes(sendBuf_, recvSizes, comm_);
+        Pstream::exchangeSizes(sendBuffers_, recvSizes, comm_);
 
         Pstream::exchange<DynamicList<char>, char>
         (
-            sendBuf_,
+            sendBuffers_,
             recvSizes,
-            recvBuf_,
+            recvBuffers_,
             tag_,
             comm_,
             wait
@@ -77,7 +77,7 @@ void Foam::PstreamBuffers::finalExchange
         (
             sendProcs,
             recvProcs,
-            sendBuf_,
+            sendBuffers_,
             recvSizes,
             tag_,
             comm_
@@ -85,9 +85,9 @@ void Foam::PstreamBuffers::finalExchange
 
         Pstream::exchange<DynamicList<char>, char>
         (
-            sendBuf_,
+            sendBuffers_,
             recvSizes,
-            recvBuf_,
+            recvBuffers_,
             tag_,
             comm_,
             wait
@@ -114,11 +114,12 @@ void Foam::PstreamBuffers::finalExchangeGatherScatter
         {
             // gather mode (all-to-one): master [0] <- everyone
 
-            recvSizes = UPstream::listGatherValues(sendBuf_[0].size(), comm_);
+            recvSizes =
+                UPstream::listGatherValues(sendBuffers_[0].size(), comm_);
 
             if (!UPstream::master(comm_))
             {
-                recvSizes.resize_nocopy(recvBuf_.size());
+                recvSizes.resize_nocopy(recvBuffers_.size());
                 recvSizes = Zero;
             }
         }
@@ -126,13 +127,13 @@ void Foam::PstreamBuffers::finalExchangeGatherScatter
         {
             // scatter mode (one-to-all): master [0] -> everyone
 
-            recvSizes.resize_nocopy(sendBuf_.size());
+            recvSizes.resize_nocopy(sendBuffers_.size());
 
             if (UPstream::master(comm_))
             {
-                forAll(sendBuf_, proci)
+                forAll(sendBuffers_, proci)
                 {
-                    recvSizes[proci] = sendBuf_[proci].size();
+                    recvSizes[proci] = sendBuffers_[proci].size();
                 }
             }
 
@@ -145,9 +146,9 @@ void Foam::PstreamBuffers::finalExchangeGatherScatter
 
         Pstream::exchange<DynamicList<char>, char>
         (
-            sendBuf_,
+            sendBuffers_,
             recvSizes,
-            recvBuf_,
+            recvBuffers_,
             tag_,
             comm_,
             wait
@@ -172,9 +173,9 @@ Foam::PstreamBuffers::PstreamBuffers
     commsType_(commsType),
     tag_(tag),
     comm_(comm),
-    sendBuf_(UPstream::nProcs(comm_)),
-    recvBuf_(UPstream::nProcs(comm_)),
-    recvBufPos_(UPstream::nProcs(comm_), Zero)
+    sendBuffers_(UPstream::nProcs(comm)),
+    recvBuffers_(UPstream::nProcs(comm)),
+    recvPositions_(UPstream::nProcs(comm), Zero)
 {}
 
 
@@ -192,9 +193,9 @@ Foam::PstreamBuffers::PstreamBuffers
     commsType_(commsType),
     tag_(tag),
     comm_(comm),
-    sendBuf_(UPstream::nProcs(comm_)),
-    recvBuf_(UPstream::nProcs(comm_)),
-    recvBufPos_(UPstream::nProcs(comm_), Zero)
+    sendBuffers_(UPstream::nProcs(comm)),
+    recvBuffers_(UPstream::nProcs(comm)),
+    recvPositions_(UPstream::nProcs(comm), Zero)
 {}
 
 
@@ -203,17 +204,45 @@ Foam::PstreamBuffers::PstreamBuffers
 Foam::PstreamBuffers::~PstreamBuffers()
 {
     // Check that all data has been consumed.
-    forAll(recvBufPos_, proci)
+    forAll(recvPositions_, proci)
     {
-        if (recvBufPos_[proci] < recvBuf_[proci].size())
+        const label pos = recvPositions_[proci];
+        const label len = recvBuffers_[proci].size();
+
+        if (pos < len)
         {
             FatalErrorInFunction
                 << "Message from processor " << proci
-                << " Only consumed " << recvBufPos_[proci] << " of "
-                << recvBuf_[proci].size() << " bytes" << nl
+                << " Only consumed " << pos << " of " << len << " bytes" << nl
                 << Foam::abort(FatalError);
         }
     }
+}
+
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+Foam::DynamicList<char>& Foam::PstreamBuffers::accessSendBuffer
+(
+    const label proci
+)
+{
+    return sendBuffers_[proci];
+}
+
+
+Foam::DynamicList<char>& Foam::PstreamBuffers::accessRecvBuffer
+(
+    const label proci
+)
+{
+    return recvBuffers_[proci];
+}
+
+
+Foam::label& Foam::PstreamBuffers::accessRecvPosition(const label proci)
+{
+    return recvPositions_[proci];
 }
 
 
@@ -221,15 +250,15 @@ Foam::PstreamBuffers::~PstreamBuffers()
 
 void Foam::PstreamBuffers::clear()
 {
-    for (DynamicList<char>& buf : sendBuf_)
+    for (DynamicList<char>& buf : sendBuffers_)
     {
         buf.clear();
     }
-    for (DynamicList<char>& buf : recvBuf_)
+    for (DynamicList<char>& buf : recvBuffers_)
     {
         buf.clear();
     }
-    recvBufPos_ = 0;
+    recvPositions_ = 0;
 
     finishedSendsCalled_ = false;
 }
@@ -237,24 +266,24 @@ void Foam::PstreamBuffers::clear()
 
 void Foam::PstreamBuffers::clearRecv(const label proci)
 {
-    recvBuf_[proci].clear();
-    recvBufPos_[proci] = 0;
+    recvBuffers_[proci].clear();
+    recvPositions_[proci] = 0;
 }
 
 
 void Foam::PstreamBuffers::clearStorage()
 {
-    // Could also clear out entire sendBuf_, recvBuf_ and reallocate.
+    // Could also clear out entire sendBuffers_, recvBuffers_ and reallocate.
     // Not sure if it makes much difference
-    for (DynamicList<char>& buf : sendBuf_)
+    for (DynamicList<char>& buf : sendBuffers_)
     {
         buf.clearStorage();
     }
-    for (DynamicList<char>& buf : recvBuf_)
+    for (DynamicList<char>& buf : recvBuffers_)
     {
         buf.clearStorage();
     }
-    recvBufPos_ = 0;
+    recvPositions_ = 0;
 
     finishedSendsCalled_ = false;
 }
@@ -262,7 +291,7 @@ void Foam::PstreamBuffers::clearStorage()
 
 bool Foam::PstreamBuffers::hasSendData() const
 {
-    for (const DynamicList<char>& buf : sendBuf_)
+    for (const DynamicList<char>& buf : sendBuffers_)
     {
         if (!buf.empty())
         {
@@ -277,9 +306,9 @@ bool Foam::PstreamBuffers::hasRecvData() const
 {
     if (finishedSendsCalled_)
     {
-        forAll(recvBufPos_, proci)
+        forAll(recvPositions_, proci)
         {
-            if (recvBuf_[proci].size() > recvBufPos_[proci])
+            if (recvPositions_[proci] < recvBuffers_[proci].size())
             {
                 return true;
             }
@@ -299,7 +328,7 @@ bool Foam::PstreamBuffers::hasRecvData() const
 
 Foam::label Foam::PstreamBuffers::sendDataCount(const label proci) const
 {
-    return sendBuf_[proci].size();
+    return sendBuffers_[proci].size();
 }
 
 
@@ -307,7 +336,7 @@ Foam::label Foam::PstreamBuffers::recvDataCount(const label proci) const
 {
     if (finishedSendsCalled_)
     {
-        const label len(recvBuf_[proci].size() > recvBufPos_[proci]);
+        const label len(recvBuffers_[proci].size() - recvPositions_[proci]);
 
         if (len > 0)
         {
@@ -328,13 +357,13 @@ Foam::label Foam::PstreamBuffers::recvDataCount(const label proci) const
 
 Foam::labelList Foam::PstreamBuffers::recvDataCounts() const
 {
-    labelList counts(recvBuf_.size(), Zero);
+    labelList counts(recvPositions_.size(), Zero);
 
     if (finishedSendsCalled_)
     {
-        forAll(recvBufPos_, proci)
+        forAll(recvPositions_, proci)
         {
-            const label len(recvBuf_[proci].size() - recvBufPos_[proci]);
+            const label len(recvBuffers_[proci].size() - recvPositions_[proci]);
 
             if (len > 0)
             {
@@ -359,14 +388,15 @@ Foam::PstreamBuffers::peekRecvData(const label proci) const
 {
     if (finishedSendsCalled_)
     {
-        const label len(recvBuf_[proci].size() - recvBufPos_[proci]);
+        const label pos = recvPositions_[proci];
+        const label len = recvBuffers_[proci].size();
 
-        if (len > 0)
+        if (pos < len)
         {
             return UList<char>
             (
-                const_cast<char*>(&recvBuf_[proci][recvBufPos_[proci]]),
-                len
+                const_cast<char*>(recvBuffers_[proci].cdata()) + pos,
+                (len - pos)
             );
         }
     }
@@ -472,17 +502,17 @@ bool Foam::PstreamBuffers::finishedSends
 
     // Update send connections
     // - reasonable to assume there are no self-sends on UPstream::myProcNo
-    forAll(sendBuf_, proci)
+    forAll(sendBuffers_, proci)
     {
         // ie, sendDataCount(proci) != 0
-        if (sendConnections.set(proci, !sendBuf_[proci].empty()))
+        if (sendConnections.set(proci, !sendBuffers_[proci].empty()))
         {
             // The state changed
             changed = true;
         }
     }
 
-    UPstream::reduceOr(changed);
+    UPstream::reduceOr(changed, comm_);
 
     if (changed)
     {
@@ -490,12 +520,12 @@ bool Foam::PstreamBuffers::finishedSends
 
         // The send ranks
         sendProcs.clear();
-        forAll(sendBuf_, proci)
+        forAll(sendBuffers_, proci)
         {
             // ie, sendDataCount(proci) != 0
-            if (!sendBuf_[proci].empty())
+            if (!sendBuffers_[proci].empty())
             {
-                sendProcs.append(proci);
+                sendProcs.push_back(proci);
             }
         }
 
@@ -503,12 +533,12 @@ bool Foam::PstreamBuffers::finishedSends
 
         // The recv ranks
         recvProcs.clear();
-        forAll(recvBuf_, proci)
+        forAll(recvBuffers_, proci)
         {
             // ie, recvDataCount(proci)
-            if (!recvBuf_[proci].empty())
+            if (!recvBuffers_[proci].empty())
             {
-                recvProcs.append(proci);
+                recvProcs.push_back(proci);
             }
         }
     }

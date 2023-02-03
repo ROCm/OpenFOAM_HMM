@@ -160,7 +160,7 @@ Foam::UOPstreamBase::UOPstreamBase(const int toProcNo, PstreamBuffers& buffers)
     UPstream(buffers.commsType()),
     Ostream(buffers.format()),
     toProcNo_(toProcNo),
-    sendBuf_(buffers.sendBuf_[toProcNo]),
+    sendBuf_(buffers.accessSendBuffer(toProcNo)),
     tag_(buffers.tag()),
     comm_(buffers.comm()),
     sendAtDestruct_(buffers.commsType() != UPstream::commsTypes::nonBlocking)
