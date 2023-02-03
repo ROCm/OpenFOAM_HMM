@@ -1715,8 +1715,11 @@ void Foam::argList::parse
                 }
             }
             Info<< "Pstream initialized with:" << nl
-                << "    floatTransfer      : " << Pstream::floatTransfer << nl
+                << "    floatTransfer      : "
+                << Switch::name(Pstream::floatTransfer) << nl
                 << "    nProcsSimpleSum    : " << Pstream::nProcsSimpleSum << nl
+                << "    nonBlockingExchange: "
+                << Pstream::nProcsNonblockingExchange << nl
                 << "    commsType          : "
                 << Pstream::commsTypeNames[Pstream::defaultCommsType] << nl
                 << "    polling iterations : " << Pstream::nPollProcInterfaces

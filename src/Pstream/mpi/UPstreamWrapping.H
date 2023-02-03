@@ -136,6 +136,30 @@ void allToAllv
 );
 
 
+// Non-blocking consensual integer (size) exchange
+template<class Type>
+void allToAllConsensus
+(
+    const UList<Type>& sendData,
+    UList<Type>& recvData,
+    MPI_Datatype datatype,
+    const int tag,                      // Message tag
+    const label comm                    // Communicator
+);
+
+
+// Non-blocking consensual integer (size) exchange
+template<class Type>
+void allToAllConsensus
+(
+    const Map<Type>& sendData,
+    Map<Type>& recvData,
+    MPI_Datatype datatype,
+    const int tag,                      // Message tag
+    const label comm                    // Communicator
+);
+
+
 // MPI_Gather or MPI_Igather
 template<class Type>
 void gather

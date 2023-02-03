@@ -597,7 +597,7 @@ void Foam::Pstream::mapCombineGather
             {
                 auto masterIter = values.find(recvIter.key());
 
-                if (masterIter != values.end())  // == found()
+                if (masterIter.good())
                 {
                     // Combine with existing
                     cop(masterIter.val(), recvIter.val());

@@ -127,7 +127,10 @@ OptimisationSwitches
     // Default communication type (nonBlocking | scheduled | blocking);
     commsType       nonBlocking;
     floatTransfer   0;
+    // Number processors to change to tree communication
     nProcsSimpleSum 0;
+    // Min numProc to use non-blocking exchange algorithm (Hoeffler: NBX)
+    nonBlockingExchange 0;
 
     // MPI buffer size (bytes)
     // Can override with the MPI_BUFFER_SIZE env variable.

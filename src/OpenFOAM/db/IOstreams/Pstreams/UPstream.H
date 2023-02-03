@@ -55,6 +55,8 @@ namespace Foam
 //- Implementation details for UPstream/Pstream/MPI etc.
 namespace PstreamDetail {}
 
+// Forward Declarations
+template<class T> class Map;
 
 /*---------------------------------------------------------------------------*\
                           Class UPstream Declaration
@@ -279,11 +281,15 @@ public:
         //- Number of processors to change from linear to tree communication
         static int nProcsSimpleSum;
 
-        //- Default commsType
-        static commsTypes defaultCommsType;
+        //- Number of processors to change to nonBlocking consensual
+        //- exchange (NBX). Ignored for zero or negative values.
+        static int nProcsNonblockingExchange;
 
         //- Number of polling cycles in processor updates
         static int nPollProcInterfaces;
+
+        //- Default commsType
+        static commsTypes defaultCommsType;
 
         //- Optional maximum message size (bytes)
         static int maxCommsSize;
@@ -705,6 +711,8 @@ public:
         //- Exchange integer data with all processors (in the communicator).
         //  \c sendData[proci] is the value to send to proci.
         //  After return recvData contains the data from the other processors.
+        //  \n
+        //  For \b non-parallel : does a simple copy of sendData to recvData
         static void allToAll
         (
             const UList<int32_t>& sendData,
@@ -715,10 +723,82 @@ public:
         //- Exchange integer data with all processors (in the communicator).
         //  \c sendData[proci] is the value to send to proci.
         //  After return recvData contains the data from the other processors.
+        //  \n
+        //  For \b non-parallel : does a simple copy of sendData to recvData
         static void allToAll
         (
             const UList<int64_t>& sendData,
             UList<int64_t>& recvData,
+            const label communicator = worldComm
+        );
+
+        //- Exchange integer data with all processors (in the communicator)
+        //- using non-blocking consensus exchange
+        //  \c sendData[proci] is the value to send to proci.
+        //  After return recvData contains the data from the other processors.
+        //  \n
+        //  For \b non-parallel : does a simple copy of sendData to recvData
+        //
+        //  \note The message tag should be chosen to be a unique value
+        //  since the implementation uses probing with ANY_SOURCE !!
+        static void allToAllConsensus
+        (
+            const UList<int32_t>& sendData,
+            UList<int32_t>& recvData,
+            const int tag,
+            const label communicator = worldComm
+        );
+
+        //- Exchange integer data with all processors (in the communicator)
+        //- using non-blocking consensus exchange
+        //  \c sendData[proci] is the value to send to proci.
+        //  After return recvData contains the data from the other processors.
+        //  \n
+        //  For \b non-parallel : does a simple copy of sendData to recvData
+        //
+        //  \note The message tag should be chosen to be a unique value
+        //  since the implementation uses probing with ANY_SOURCE !!
+        static void allToAllConsensus
+        (
+            const UList<int64_t>& sendData,
+            UList<int64_t>& recvData,
+            const int tag,
+            const label communicator = worldComm
+        );
+
+        //- Exchange integer data with all processors (in the communicator)
+        //- using non-blocking consensus exchange
+        //  \c sendData[proci] is the value to send to proci.
+        //  After return recvData contains the data from the other processors.
+        //  \n
+        //  For \b non-parallel : copy own rank (if it exists and non-zero)
+        //  from sendData to recvData.
+        //
+        //  \note The message tag should be chosen to be a unique value
+        //  since the implementation uses probing with ANY_SOURCE !!
+        static void allToAllConsensus
+        (
+            const Map<int32_t>& sendData,
+            Map<int32_t>& recvData,
+            const int tag,
+            const label communicator = worldComm
+        );
+
+        //- Exchange integer data with all processors (in the communicator)
+        //- using non-blocking consensus exchange
+        //  \c sendData[proci] is the value to send to proci.
+        //  After return recvData contains the data from the other processors.
+        //  \n
+        //  For \b non-parallel : copy own rank (if it exists and non-zero)
+        //  from sendData to recvData.
+        //
+        //  \note The message tag should be chosen to be a unique value
+        //  since the implementation uses probing with ANY_SOURCE !!
+        static void allToAllConsensus
+        (
+            const Map<int64_t>& sendData,
+            Map<int64_t>& recvData,
+            const int tag,
             const label communicator = worldComm
         );
 
@@ -791,7 +871,8 @@ public:
 
         //- Gather individual values into list locations.
         //  On master list length == nProcs, otherwise zero length.
-        //  If called in non-parallel mode,
+        //  \n
+        //  For \b non-parallel :
         //  the returned list length is 1 with localValue.
         template<class T>
         static List<T> listGatherValues
@@ -802,7 +883,8 @@ public:
 
         //- Scatter individual values from list locations.
         //  On master input list length == nProcs, ignored on other procs.
-        //  If called in non-parallel mode,
+        //  \n
+        //  For \b non-parallel :
         //  returns the first list element (or zero).
         template<class T>
         static T listScatterValues
@@ -816,6 +898,7 @@ public:
 
         //- Broadcast buffer contents to all processes in communicator.
         //- The sizes must match on all processes.
+        //  For \b non-parallel : do nothing.
         //  \return True on success
         static bool broadcast
         (
@@ -829,6 +912,7 @@ public:
     // Logical reductions
 
         //- Logical (and) reduction (cf. MPI AllReduce)
+        //  For \b non-parallel : do nothing
         static void reduceAnd
         (
             bool& value,
@@ -836,6 +920,7 @@ public:
         );
 
         //- Logical (or) reduction (cf. MPI AllReduce)
+        //  For \b non-parallel : do nothing
         static void reduceOr
         (
             bool& value,
@@ -873,7 +958,6 @@ public:
 
 //- An opaque wrapper for MPI_Request with a vendor-independent
 //- representation independent of any \c <mpi.h> header
-//
 //  The MPI standard states that MPI_Request is always an opaque object.
 //  Generally it is either an integer (eg, mpich) or a pointer (eg, openmpi).
 class UPstream::Request

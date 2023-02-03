@@ -510,6 +510,30 @@ registerOptSwitch
     Foam::UPstream::nProcsSimpleSum
 );
 
+int Foam::UPstream::nProcsNonblockingExchange
+(
+    Foam::debug::optimisationSwitch("nonBlockingExchange", 0)
+);
+registerOptSwitch
+(
+    "nonBlockingExchange",
+    int,
+    Foam::UPstream::nProcsNonblockingExchange
+);
+
+
+int Foam::UPstream::nPollProcInterfaces
+(
+    Foam::debug::optimisationSwitch("nPollProcInterfaces", 0)
+);
+registerOptSwitch
+(
+    "nPollProcInterfaces",
+    int,
+    Foam::UPstream::nPollProcInterfaces
+);
+
+
 Foam::UPstream::commsTypes Foam::UPstream::defaultCommsType
 (
     commsTypeNames.get
@@ -552,18 +576,6 @@ namespace Foam
     addcommsTypeToOpt addcommsTypeToOpt_("commsType");
 }
 //! \endcond
-
-int Foam::UPstream::nPollProcInterfaces
-(
-    Foam::debug::optimisationSwitch("nPollProcInterfaces", 0)
-);
-registerOptSwitch
-(
-    "nPollProcInterfaces",
-    int,
-    Foam::UPstream::nPollProcInterfaces
-);
-
 
 int Foam::UPstream::maxCommsSize
 (

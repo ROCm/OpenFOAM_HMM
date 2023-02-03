@@ -43,6 +43,32 @@ void Foam::PstreamBuffers::finalExchange
 
     if (commsType_ == UPstream::commsTypes::nonBlocking)
     {
+        if
+        (
+            wait
+         && UPstream::parRun()
+         && UPstream::nProcsNonblockingExchange > 1
+         && UPstream::nProcsNonblockingExchange <= nProcs()
+        )
+        {
+            Pstream::exchangeConsensus<DynamicList<char>, char>
+            (
+                sendBuffers_,
+                recvBuffers_,
+                (tag_ + 314159),  // some unique tag?
+                comm_
+            );
+
+            // Copy back out
+            recvSizes.resize_nocopy(recvBuffers_.size());
+            forAll(recvBuffers_, proci)
+            {
+                recvSizes[proci] = recvBuffers_[proci].size();
+            }
+
+            return;
+        }
+
         // all-to-all
         Pstream::exchangeSizes(sendBuffers_, recvSizes, comm_);
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "UPstream.H"
+#include "Map.H"
 
 #include <cinttypes>
 #include <cstring>  // memmove
@@ -42,7 +43,39 @@ void Foam::UPstream::allToAll                                                 \
 )                                                                             \
 {                                                                             \
     recvData.deepCopy(sendData);                                              \
+}
+
+
+Pstream_CommonRoutines(int32_t);
+Pstream_CommonRoutines(int64_t);
+
+#undef Pstream_CommonRoutines
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#undef  Pstream_CommonRoutines
+#define Pstream_CommonRoutines(Native)                                        \
+void Foam::UPstream::allToAllConsensus                                        \
+(                                                                             \
+    const UList<Native>& sendData,                                            \
+    UList<Native>& recvData,                                                  \
+    const int tag,                                                            \
+    const label comm                                                          \
+)                                                                             \
+{                                                                             \
+    recvData.deepCopy(sendData);                                              \
 }                                                                             \
+void Foam::UPstream::allToAllConsensus                                        \
+(                                                                             \
+    const Map<Native>& sendData,                                              \
+    Map<Native>& recvData,                                                    \
+    const int tag,                                                            \
+    const label comm                                                          \
+)                                                                             \
+{                                                                             \
+    recvData = sendData;                                                      \
+}
 
 
 Pstream_CommonRoutines(int32_t);
