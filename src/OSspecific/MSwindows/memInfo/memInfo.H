@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,15 +39,15 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef memInfo_H
-#define memInfo_H
+#ifndef Foam_memInfo_H
+#define Foam_memInfo_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward Declarations
 class memInfo;
 class Istream;
 class Ostream;
@@ -62,7 +62,7 @@ Ostream& operator<<(Ostream& os, const memInfo& m);
 
 class memInfo
 {
-    // Private data
+    // Private Data
 
         //- Peak memory used by the process (VmPeak in /proc/PID/status)
         int peak_;
@@ -91,38 +91,25 @@ public:
     // Member Functions
 
         //- True if the memory information appears valid
-        bool valid() const;
+        bool good() const noexcept;
 
         //- Reset to zero
-        void clear();
+        void clear() noexcept;
 
         //- Update according to /proc/PID/status and /proc/memory contents
         const memInfo& update();
 
-
         //- Peak memory (VmPeak in /proc/PID/status) at last update()
-        inline int peak() const
-        {
-            return peak_;
-        }
+        int peak() const noexcept { return peak_; }
 
         //- Memory size (VmSize in /proc/PID/status) at last update()
-        inline int size() const
-        {
-            return size_;
-        }
+        int size() const noexcept { return size_; }
 
         //- Resident set size (VmRSS in /proc/PID/status) at last update()
-        inline int rss() const
-        {
-            return rss_;
-        }
+        int rss() const noexcept { return rss_; }
 
         //- System memory free (MemFree in /proc/meminfo)
-        inline int free() const
-        {
-            return free_;
-        }
+        int free() const noexcept { return free_; }
 
 
       // Write
@@ -138,6 +125,12 @@ public:
 
         //- Write peak/size/rss to stream
         friend Ostream& operator<<(Ostream& os, const memInfo& m);
+
+
+    // Housekeeping
+
+        //- True if the memory information appears valid
+        bool valid() const noexcept { return good(); }
 };
 
 

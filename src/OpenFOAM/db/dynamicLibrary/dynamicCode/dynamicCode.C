@@ -183,7 +183,7 @@ bool Foam::dynamicCode::writeCommentSHA1(Ostream& os) const
 {
     const auto fnd = filterVars_.cfind("SHA1sum");
 
-    if (!fnd.found())
+    if (!fnd.good())
     {
         return false;
     }

@@ -46,7 +46,7 @@ void Foam::syncTools::combine
 {
     auto iter = pointValues.find(index);
 
-    if (iter.found())
+    if (iter.good())
     {
         cop(*iter, val);
     }
@@ -68,7 +68,7 @@ void Foam::syncTools::combine
 {
     auto iter = edgeValues.find(index);
 
-    if (iter.found())
+    if (iter.good())
     {
         cop(*iter, val);
     }
@@ -111,7 +111,7 @@ void Foam::syncTools::syncPointMap
         {
             const auto fnd = pointValues.cfind(sharedPtLabels[i]);
 
-            if (fnd.found())
+            if (fnd.good())
             {
                 combine
                 (
@@ -153,7 +153,7 @@ void Foam::syncTools::syncPointMap
                 {
                     const auto iter = pointValues.cfind(meshPts[i]);
 
-                    if (iter.found())
+                    if (iter.good())
                     {
                         patchInfo.insert(nbrPts[i], *iter);
                     }
@@ -227,14 +227,14 @@ void Foam::syncTools::syncPointMap
 
                 const auto point0Fnd = pointValues.cfind(meshPtsA[e[0]]);
 
-                if (point0Fnd.found())
+                if (point0Fnd.good())
                 {
                     half0Values.insert(i, *point0Fnd);
                 }
 
                 const auto point1Fnd = pointValues.cfind(meshPtsB[e[1]]);
 
-                if (point1Fnd.found())
+                if (point1Fnd.good())
                 {
                     half1Values.insert(i, *point1Fnd);
                 }
@@ -250,7 +250,7 @@ void Foam::syncTools::syncPointMap
 
                 const auto half0Fnd = half0Values.cfind(i);
 
-                if (half0Fnd.found())
+                if (half0Fnd.good())
                 {
                     combine
                     (
@@ -263,7 +263,7 @@ void Foam::syncTools::syncPointMap
 
                 const auto half1Fnd = half1Values.cfind(i);
 
-                if (half1Fnd.found())
+                if (half1Fnd.good())
                 {
                     combine
                     (
@@ -340,7 +340,7 @@ void Foam::syncTools::syncPointMap
             // Do I have a value for my shared point
             const auto sharedFnd = sharedPointValues.cfind(iter.key());
 
-            if (sharedFnd.found())
+            if (sharedFnd.good())
             {
                 pointValues.set(*iter, *sharedFnd);
             }
@@ -397,7 +397,7 @@ void Foam::syncTools::syncEdgeMap
 
                     const auto iter = edgeValues.cfind(meshEdge);
 
-                    if (iter.found())
+                    if (iter.good())
                     {
                         const edge nbrEdge(nbrPts[e[0]], nbrPts[e[1]]);
                         patchInfo.insert(nbrEdge, *iter);
@@ -490,7 +490,7 @@ void Foam::syncTools::syncEdgeMap
 
                     const auto iter = edgeValues.cfind(meshEdge0);
 
-                    if (iter.found())
+                    if (iter.good())
                     {
                         half0Values.insert(edgei, *iter);
                     }
@@ -501,7 +501,7 @@ void Foam::syncTools::syncEdgeMap
 
                     const auto iter = edgeValues.cfind(meshEdge1);
 
-                    if (iter.found())
+                    if (iter.good())
                     {
                         half1Values.insert(edgei, *iter);
                     }
@@ -521,7 +521,7 @@ void Foam::syncTools::syncEdgeMap
 
                 const auto half1Fnd = half1Values.cfind(edgei);
 
-                if (half1Fnd.found())
+                if (half1Fnd.good())
                 {
                     const edge& e0 = edgesA[twoEdges[0]];
                     const edge meshEdge0(meshPtsA[e0[0]], meshPtsA[e0[1]]);
@@ -537,7 +537,7 @@ void Foam::syncTools::syncEdgeMap
 
                 const auto half0Fnd = half0Values.cfind(edgei);
 
-                if (half0Fnd.found())
+                if (half0Fnd.good())
                 {
                     const edge& e1 = edgesB[twoEdges[1]];
                     const edge meshEdge1(meshPtsB[e1[0]], meshPtsB[e1[1]]);
@@ -591,11 +591,11 @@ void Foam::syncTools::syncEdgeMap
 
             const auto v0Fnd = meshToShared.cfind(v0);
 
-            if (v0Fnd.found())
+            if (v0Fnd.good())
             {
                 const auto v1Fnd = meshToShared.cfind(v1);
 
-                if (v1Fnd.found())
+                if (v1Fnd.good())
                 {
                     const edge meshEdge(v0, v1);
 
@@ -607,7 +607,7 @@ void Foam::syncTools::syncEdgeMap
 
                     const auto edgeFnd = edgeValues.cfind(meshEdge);
 
-                    if (edgeFnd.found())
+                    if (edgeFnd.good())
                     {
                         // edge exists in edgeValues. See if already in map
                         // (since on same processor, e.g. cyclic)
@@ -683,7 +683,7 @@ void Foam::syncTools::syncEdgeMap
         // Do I have a value for the shared edge?
         const auto sharedFnd = sharedEdgeValues.cfind(sharedEdge);
 
-        if (sharedFnd.found())
+        if (sharedFnd.good())
         {
             combine
             (
@@ -747,7 +747,7 @@ void Foam::syncTools::syncPointList
     {
         const auto iter = mpm.cfind(meshPoints[i]);
 
-        if (iter.found())
+        if (iter.good())
         {
             cppFld[*iter] = pointValues[i];
         }
@@ -768,7 +768,7 @@ void Foam::syncTools::syncPointList
     {
         const auto iter = mpm.cfind(meshPoints[i]);
 
-        if (iter.found())
+        if (iter.good())
         {
             pointValues[i] = cppFld[*iter];
         }
@@ -906,7 +906,7 @@ void Foam::syncTools::syncEdgeList
     {
         const label meshEdgei = meshEdges[i];
         const auto iter = mpm.cfind(meshEdgei);
-        if (iter.found())
+        if (iter.good())
         {
             const label cppEdgei = iter();
             const edge& cppE = cppEdges[cppEdgei];
@@ -951,8 +951,8 @@ void Foam::syncTools::syncEdgeList
     forAll(meshEdges, i)
     {
         label meshEdgei = meshEdges[i];
-        Map<label>::const_iterator iter = mpm.find(meshEdgei);
-        if (iter != mpm.end())
+        const auto iter = mpm.cfind(meshEdgei);
+        if (iter.good())
         {
             label cppEdgei = iter();
             const edge& cppE = cppEdges[cppEdgei];

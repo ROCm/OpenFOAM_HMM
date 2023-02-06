@@ -280,7 +280,7 @@ void Foam::multiWorldConnections::createComms()
             // - create a communicator and cache its value
 
             auto iter = table_.find(connect);
-            if (iter.found() && iter.val() == -1)
+            if (iter.good() && iter.val() == -1)
             {
                 iter.val() = createCommunicator(connect);
             }
@@ -353,7 +353,7 @@ Foam::label Foam::multiWorldConnections::getCommById
 
     const auto iter = table_.cfind(worlds);
 
-    if (!iter.found())
+    if (!iter.good())
     {
         FatalErrorInFunction
             << "No connection registered for worlds " << worlds
@@ -394,7 +394,7 @@ Foam::label Foam::multiWorldConnections::getCommByName
 
     const auto iter = table_.cfind(worlds);
 
-    if (!iter.found())
+    if (!iter.good())
     {
         FatalErrorInFunction
             << "No connection registered for worlds " << worlds

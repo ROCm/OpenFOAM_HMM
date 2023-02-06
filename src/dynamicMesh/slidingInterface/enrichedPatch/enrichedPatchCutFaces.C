@@ -363,7 +363,7 @@ void Foam::enrichedPatch::calcCutFaces() const
                         // Increment the usage count using two hash sets
                         auto euoIter = edgesUsedOnce.find(curCutFaceEdge);
 
-                        if (!euoIter.found())
+                        if (!euoIter.good())
                         {
                             // Pout<< "Found edge not used before: "
                             //     << curCutFaceEdge
@@ -439,7 +439,7 @@ void Foam::enrichedPatch::calcCutFaces() const
 
                         bool otherSideFound = false;
 
-                        if (mpfAddrIter.found())
+                        if (mpfAddrIter.good())
                         {
                             bool miss = false;
 
@@ -461,7 +461,7 @@ void Foam::enrichedPatch::calcCutFaces() const
                                         cutFaceGlobal[pointi]
                                     );
 
-                                if (!mpfAddrPointIter.found())
+                                if (!mpfAddrPointIter.good())
                                 {
                                     // Point is off the master patch. Skip
                                     miss = true;

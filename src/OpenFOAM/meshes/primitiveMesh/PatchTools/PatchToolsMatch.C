@@ -55,7 +55,7 @@ void Foam::PatchTools::matchPoints
 
         const auto iter = p2.meshPointMap().cfind(meshPointi);
 
-        if (iter.found())
+        if (iter.good())
         {
             p1PointLabels[nMatches] = pointi;
             p2PointLabels[nMatches] = iter.val();
@@ -103,7 +103,7 @@ void Foam::PatchTools::matchEdges
 
         const auto iter = edgeToIndex.cfind(meshEdge2);
 
-        if (iter.found())
+        if (iter.good())
         {
             p1EdgeLabels[nMatches] = iter.val();
             p2EdgeLabels[nMatches] = edgei;

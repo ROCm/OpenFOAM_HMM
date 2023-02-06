@@ -90,12 +90,12 @@ Foam::autoPtr<CombustionModel> Foam::combustionModel::New
 
     auto ctorIter = cnstrTable.cfind(thermoCombModelName);
 
-    if (!ctorIter.found())
+    if (!ctorIter.good())
     {
         ctorIter = cnstrTable.cfind(compCombModelName);
     }
 
-    if (!ctorIter.found())
+    if (!ctorIter.good())
     {
         const wordList names(cnstrTable.sortedToc());
 

@@ -353,7 +353,7 @@ int main(int argc, char *argv[])
         /// Currently unused
         /// List<vectorField> dirs(nTracks);
         /// const auto Uiter = vectorFields.cfind(UName);
-        /// if (Uiter.found())
+        /// if (Uiter.good())
         /// {
         ///     const auto& UTracks = *Uiter;
         ///     forAll(UTracks, tracki)

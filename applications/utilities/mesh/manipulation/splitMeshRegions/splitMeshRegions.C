@@ -292,11 +292,11 @@ void addToInterface
 
     auto iter = regionsToSize.find(interface);
 
-    if (iter.found())
+    if (iter.good())
     {
         // Check if zone present
         auto zoneIter = iter().find(zoneID);
-        if (zoneIter.found())
+        if (zoneIter.good())
         {
             // Found zone. Increment count.
             ++(*zoneIter);
@@ -408,7 +408,7 @@ void getInterfaceSizes
 
                     auto masterIter = regionsToSize.find(slaveIter.key());
 
-                    if (masterIter.found())
+                    if (masterIter.good())
                     {
                         // Same inter-region
                         Map<label>& masterInfo = *masterIter;
@@ -419,7 +419,7 @@ void getInterfaceSizes
                             const label slaveSize = iter.val();
 
                             auto zoneIter = masterInfo.find(zoneID);
-                            if (zoneIter.found())
+                            if (zoneIter.good())
                             {
                                 *zoneIter += slaveSize;
                             }

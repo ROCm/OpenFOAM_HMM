@@ -610,7 +610,7 @@ void Foam::meshToMesh::distributeAndMergeCells
 
                 const auto fnd = procFaceToGlobalCell.cfind(key);
 
-                if (!fnd.found())
+                if (!fnd.good())
                 {
                     procFaceToGlobalCell.insert(key, -1);
                 }
@@ -725,7 +725,7 @@ void Foam::meshToMesh::distributeAndMergeCells
 
                 auto fnd = procFaceToGlobalCell.find(key);
 
-                if (fnd.found())
+                if (fnd.good())
                 {
                     label tgtFacei = fnd();
                     if (tgtFacei == -1)

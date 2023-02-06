@@ -734,7 +734,7 @@ void Foam::PstreamDetail::allToAllConsensus
     {
         // Do myself
         const auto iter = sendBufs.find(myProci);
-        if (iter.found() && (iter.val() != zeroValue))
+        if (iter.good() && (iter.val() != zeroValue))
         {
             // Do myself: insert_or_assign
             recvBufs(iter.key()) = iter.val();

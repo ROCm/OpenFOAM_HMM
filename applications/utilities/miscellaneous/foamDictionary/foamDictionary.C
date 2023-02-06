@@ -248,7 +248,7 @@ void removeDict(dictionary& dict, const dictionary& dictToRemove)
                 purge = finder.dict().empty();
             }
         }
-        else if (finder.found() && !refEntry.isDict())
+        else if (finder.good() && !refEntry.isDict())
         {
             // Purge if entries match
             purge = (finder.ref() == refEntry);
@@ -482,7 +482,7 @@ int main(int argc, char *argv[])
             // Print the changed entry
             const auto finder = dict.csearchScoped(scopedName, keyType::REGEX);
 
-            if (finder.found())
+            if (finder.good())
             {
                 Info<< finder.ref();
             }
@@ -531,7 +531,7 @@ int main(int argc, char *argv[])
 
             const auto finder = dict.csearchScoped(scopedName, keyType::REGEX);
 
-            if (!finder.found())
+            if (!finder.good())
             {
                 FatalIOErrorInFunction(dictFile())
                     << "Cannot find entry " << scopedName

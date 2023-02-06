@@ -101,9 +101,9 @@ const T* Foam::DictionaryBase<IDLListType, T>::cfind
 {
     const auto iter = hashedTs_.cfind(keyword);
 
-    if (iter.found())
+    if (iter.good())
     {
-        return *iter;
+        return iter.val();
     }
 
     return nullptr;
@@ -115,9 +115,9 @@ T* Foam::DictionaryBase<IDLListType, T>::find(const word& keyword)
 {
     auto iter = hashedTs_.find(keyword);
 
-    if (iter.found())
+    if (iter.good())
     {
-        return *iter;
+        return iter.val();
     }
 
     return nullptr;
@@ -129,14 +129,14 @@ const T* Foam::DictionaryBase<IDLListType, T>::lookup(const word& keyword) const
 {
     const auto iter = hashedTs_.cfind(keyword);
 
-    if (!iter.found())
+    if (!iter.good())
     {
         FatalErrorInFunction
             << "'" << keyword << "' not found"
             << exit(FatalError);
     }
 
-    return *iter;
+    return iter.val();
 }
 
 
@@ -145,14 +145,14 @@ T* Foam::DictionaryBase<IDLListType, T>::lookup(const word& keyword)
 {
     auto iter = hashedTs_.find(keyword);
 
-    if (!iter.found())
+    if (!iter.good())
     {
         FatalErrorInFunction
             << "'" << keyword << "' not found"
             << exit(FatalError);
     }
 
-    return *iter;
+    return iter.val();
 }
 
 
@@ -215,7 +215,7 @@ T* Foam::DictionaryBase<IDLListType, T>::remove(const word& keyword)
 {
     auto iter = hashedTs_.find(keyword);
 
-    if (iter.found())
+    if (iter.good())
     {
         T* ptr = IDLListType::remove(iter.val());
         hashedTs_.erase(iter);

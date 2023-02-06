@@ -68,7 +68,7 @@ void Foam::multiDirRefinement::addCells
 
         const auto iter = splitMap.cfind(refCell.cellNo());
 
-        if (!iter.found())
+        if (!iter.good())
         {
             FatalErrorInFunction
                 << "Problem : cannot find added cell for cell "
@@ -289,7 +289,7 @@ void Foam::multiDirRefinement::refineHex8
 
             auto iter = hexCellSet.find(celli);
 
-            if (iter.found())
+            if (iter.good())
             {
                 iter.val() = 2;
             }

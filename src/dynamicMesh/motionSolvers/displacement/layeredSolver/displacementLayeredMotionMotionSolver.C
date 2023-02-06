@@ -69,7 +69,7 @@ Foam::displacementLayeredMotionMotionSolver::getCylindrical
 {
     auto iter = cylSystems_.cfind(cellZoneI);
 
-    if (iter.found())
+    if (iter.good())
     {
         return *(iter.val());
     }

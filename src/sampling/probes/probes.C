@@ -295,7 +295,7 @@ Foam::label Foam::probes::prepare(unsigned request)
         {                                                                     \
             Target.clear();  /* Remove old values */                          \
             const auto iter = selected.cfind(InputType::typeName);            \
-            if (iter.found())                                                 \
+            if (iter.good())                                                  \
             {                                                                 \
                 /* Add new (current) values */                                \
                 Target.append(iter.val().sortedToc());                        \

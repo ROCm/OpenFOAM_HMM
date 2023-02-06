@@ -257,7 +257,7 @@ void Foam::globalMeshData::countSharedEdges
 
         auto globalFnd = globalShared.find(e);
 
-        if (globalFnd.found())
+        if (globalFnd.good())
         {
             if (globalFnd() == -1)
             {
@@ -328,11 +328,11 @@ void Foam::globalMeshData::calcSharedEdges() const
 
         const auto e0Fnd = meshToShared.cfind(e[0]);
 
-        if (e0Fnd.found())
+        if (e0Fnd.good())
         {
             const auto e1Fnd = meshToShared.cfind(e[1]);
 
-            if (e1Fnd.found())
+            if (e1Fnd.good())
             {
                 // Found edge which uses shared points. Probably shared.
 
@@ -346,7 +346,7 @@ void Foam::globalMeshData::calcSharedEdges() const
 
                 auto iter = localShared.find(sharedEdge);
 
-                if (!iter.found())
+                if (!iter.good())
                 {
                     // First occurrence of this point combination. Store.
                     localShared.insert(sharedEdge, labelList(1, edgeI));
@@ -463,7 +463,7 @@ void Foam::globalMeshData::calcSharedEdges() const
 
         const auto edgeFnd = globalShared.cfind(e);
 
-        if (edgeFnd.found())
+        if (edgeFnd.good())
         {
             // My local edge is indeed a shared one. Go through all local edge
             // labels with this point combination.
@@ -1225,7 +1225,7 @@ void Foam::globalMeshData::calcPointBoundaryFaces
                 forAll(f, fp)
                 {
                     const auto iter = meshPointMap.cfind(f[fp]);
-                    if (iter.found())
+                    if (iter.good())
                     {
                         nPointFaces[iter.val()]++;
                     }
@@ -1260,7 +1260,7 @@ void Foam::globalMeshData::calcPointBoundaryFaces
                 {
                     const auto iter = meshPointMap.cfind(f[fp]);
 
-                    if (iter.found())
+                    if (iter.good())
                     {
                         label bFacei =
                              pp.start() + i - mesh_.nInternalFaces();
@@ -1497,7 +1497,7 @@ void Foam::globalMeshData::calcGlobalPointBoundaryCells() const
             const label celli = pCells[i];
             const auto fnd = meshCellMap.cfind(celli);
 
-            if (fnd.found())
+            if (fnd.good())
             {
                 bCells[i] = fnd();
             }
@@ -2514,7 +2514,7 @@ Foam::autoPtr<Foam::globalIndex> Foam::globalMeshData::mergePoints
 
         const auto iter = cpp.meshPointMap().cfind(meshPointi);
 
-        if (iter.found())
+        if (iter.good())
         {
             patchToCoupled[patchPointi] = iter();
             coupledToGlobalPatch[iter()] = globalPPoints.toGlobal(patchPointi);

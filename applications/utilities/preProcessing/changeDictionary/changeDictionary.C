@@ -116,7 +116,7 @@ HashTable<wordList> extractPatchGroups(const dictionary& boundaryDict)
         for (const word& groupName : groupNames)
         {
             auto groupIter = groupToPatch.find(groupName);
-            if (groupIter.found())
+            if (groupIter.good())
             {
                 (*groupIter).append(patchName);
             }

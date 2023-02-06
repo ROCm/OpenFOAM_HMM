@@ -85,7 +85,7 @@ Foam::cyclicAMIGAMGInterface::cyclicAMIGAMGInterface
         {
             const auto iter = masterToCoarseFace.cfind(curMaster);
 
-            if (iter.found())
+            if (iter.good())
             {
                 // Already have coarse face
                 dynFaceRestrictAddressing.append(iter.val());
@@ -127,7 +127,7 @@ Foam::cyclicAMIGAMGInterface::cyclicAMIGAMGInterface
             {
                 const auto iter = masterToCoarseFace.cfind(curMaster);
 
-                if (iter.found())
+                if (iter.good())
                 {
                     // Already have coarse face
                     dynNbrFaceRestrictAddressing.append(iter.val());

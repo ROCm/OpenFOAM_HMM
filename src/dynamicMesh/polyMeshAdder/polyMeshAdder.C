@@ -425,10 +425,10 @@ void Foam::polyMeshAdder::insertVertices
         // See if any edge between v0,v1
 
         const auto v0Fnd = meshToMaster.cfind(v0);
-        if (v0Fnd.found())
+        if (v0Fnd.good())
         {
             const auto v1Fnd = meshToMaster.cfind(v1);
-            if (v1Fnd.found())
+            if (v1Fnd.good())
             {
                 // Get edge in cutPoint numbering
                 edge cutEdge
@@ -439,7 +439,7 @@ void Foam::polyMeshAdder::insertVertices
 
                 const auto iter = cutEdgeToPoints.cfind(cutEdge);
 
-                if (iter.found())
+                if (iter.good())
                 {
                     const edge& e = iter.key();
                     const labelList& addedPoints = iter.val();
@@ -2011,7 +2011,7 @@ Foam::Map<Foam::label> Foam::polyMeshAdder::findSharedPoints
 
         auto iter = sharedToMesh.find(sharedI);
 
-        if (iter.found())
+        if (iter.good())
         {
             // sharedI already used by other point. Add this one.
 
@@ -2202,7 +2202,7 @@ void Foam::polyMeshAdder::mergePoints
     {
         const auto iter = pointToMaster.cfind(pointi);
 
-        if (iter.found())
+        if (iter.good())
         {
             if (iter.val() != pointi)
             {
@@ -2227,7 +2227,7 @@ void Foam::polyMeshAdder::mergePoints
 
             const auto iter = pointToMaster.cfind(pointi);
 
-            if (iter.found())
+            if (iter.good())
             {
                 if (iter.val() != pointi)
                 {
@@ -2247,7 +2247,7 @@ void Foam::polyMeshAdder::mergePoints
 
                 const auto iter = pointToMaster.cfind(pointi);
 
-                if (iter.found())
+                if (iter.good())
                 {
                     newF[fp] = iter.val();
                 }

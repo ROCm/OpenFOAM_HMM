@@ -127,7 +127,7 @@ Foam::cyclicGAMGInterface::cyclicGAMGInterface
 
         const auto fnd = cellsToCoarseFace.cfind(cellPair);
 
-        if (fnd.found())
+        if (fnd.good())
         {
             // Already have coarse face
             dynFaceRestrictAddressing.append(fnd.val());

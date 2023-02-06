@@ -97,7 +97,7 @@ IOobjectList preFilterFields
         for (const word& fldName : allNames)
         {
             const auto iter = cloudObjects.cfind(fldName);
-            if (!pred(fldName) || !iter.found())
+            if (!pred(fldName) || !iter.good())
             {
                 continue;  // reject
             }
@@ -223,7 +223,7 @@ int main(int argc, char *argv[])
 
                 const auto iter = trackTable.cfind(key);
 
-                if (iter.found())
+                if (iter.good())
                 {
                     particleToTrack[np] = *iter;
                 }

@@ -1376,7 +1376,7 @@ Foam::label Foam::meshRefinement::splitFacesUndo
 
                 const auto oldFaceFnd = splitFaceToIndex.cfind(oldFacei);
 
-                if (oldFaceFnd.found())
+                if (oldFaceFnd.good())
                 {
                     labelPair& twoFaces = facePairs[oldFaceFnd.val()];
                     if (twoFaces[0] == -1)

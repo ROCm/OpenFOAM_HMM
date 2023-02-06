@@ -124,7 +124,7 @@ bool Foam::fileFormats::OBJsurfaceFormat<Face>::read
             const word groupName = word::validate(tokens[1]);
             const auto iterGroup = groupLookup.cfind(groupName);
 
-            if (iterGroup.found())
+            if (iterGroup.good())
             {
                 if (zoneId != *iterGroup)
                 {

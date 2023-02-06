@@ -249,7 +249,7 @@ void Foam::undoableMeshCutter::setRefinement
             // Check if celli already part of split.
             auto findCell = liveSplitCells_.find(celli);
 
-            if (!findCell.found())
+            if (!findCell.good())
             {
                 // Celli not yet split. It cannot be unlive split cell
                 // since that would be illegal to split in the first
@@ -501,7 +501,7 @@ Foam::labelList Foam::undoableMeshCutter::removeSplitFaces
         auto ownFind = liveSplitCells_.find(own);
         auto nbrFind = liveSplitCells_.find(nbr);
 
-        if (ownFind.found() && nbrFind.found())
+        if (ownFind.good() && nbrFind.good())
         {
             // Face is original splitFace.
 

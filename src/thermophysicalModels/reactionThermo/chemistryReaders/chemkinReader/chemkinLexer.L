@@ -653,7 +653,7 @@ bool finishReaction = false;
         const auto reactionKeywordIter =
             reactionKeywordTable_.cfind(keyword);
 
-        if (reactionKeywordIter.found())
+        if (reactionKeywordIter.good())
         {
             switch (reactionKeywordIter.val())
             {
@@ -763,7 +763,7 @@ bool finishReaction = false;
             const auto specieIndexIter =
                 specieIndices_.cfind(currentSpecieName);
 
-            if (specieIndexIter.found())
+            if (specieIndexIter.good())
             {
                 if (finishReaction)
                 {
@@ -807,7 +807,7 @@ bool finishReaction = false;
         const auto reactionKeywordIter =
             reactionKeywordTable_.cfind(keyword);
 
-        if (reactionKeywordIter.found())
+        if (reactionKeywordIter.good())
         {
             switch (reactionKeywordIter.val())
             {
@@ -1118,7 +1118,7 @@ bool finishReaction = false;
             const auto specieIndexIter =
                 specieIndices_.cfind(keyword);
 
-            if (specieIndexIter.found())
+            if (specieIndexIter.good())
             {
                 currentThirdBodyIndex = specieIndexIter.val();
             }
@@ -1142,7 +1142,7 @@ bool finishReaction = false;
         const auto specieIndexIter =
             specieIndices_.cfind(currentSpecieName);
 
-        if (specieIndexIter.found())
+        if (specieIndexIter.good())
         {
             if (finishReaction)
             {
@@ -1309,7 +1309,7 @@ bool finishReaction = false;
             const auto specieIndexIter =
                 specieIndices_.cfind(pDependentSpecieName);
 
-            if (specieIndexIter.found())
+            if (specieIndexIter.good())
             {
                 thirdBodyEfficiencies = 0.0;
                 thirdBodyEfficiencies[specieIndexIter.val()] = 1.0;
@@ -1352,7 +1352,7 @@ bool finishReaction = false;
 
         const auto specieIndexIter = specieIndices_.cfind(currentSpecieName);
 
-        if (specieIndexIter.found())
+        if (specieIndexIter.good())
         {
             currentSpecieIndex = specieIndexIter.val();
         }

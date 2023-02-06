@@ -496,7 +496,7 @@ void Foam::genericPatchFieldBase::rmapGeneric
     {
         const auto iter2 = rhs.scalarFields_.cfind(iter.key());
 
-        if (iter2.found())
+        if (iter2.good())
         {
             (*iter)->rmap(*iter2(), addr);
         }
@@ -506,7 +506,7 @@ void Foam::genericPatchFieldBase::rmapGeneric
     {
         const auto iter2 = rhs.vectorFields_.cfind(iter.key());
 
-        if (iter2.found())
+        if (iter2.good())
         {
             (*iter)->rmap(*iter2(), addr);
         }
@@ -516,7 +516,7 @@ void Foam::genericPatchFieldBase::rmapGeneric
     {
         const auto iter2 = rhs.sphTensorFields_.cfind(iter.key());
 
-        if (iter2.found())
+        if (iter2.good())
         {
             (*iter)->rmap(*iter2(), addr);
         }
@@ -526,7 +526,7 @@ void Foam::genericPatchFieldBase::rmapGeneric
     {
         const auto iter2 = rhs.symmTensorFields_.cfind(iter.key());
 
-        if (iter2.found())
+        if (iter2.good())
         {
             (*iter)->rmap(*iter2(), addr);
         }
@@ -536,7 +536,7 @@ void Foam::genericPatchFieldBase::rmapGeneric
     {
         const auto iter2 = rhs.tensorFields_.find(iter.key());
 
-        if (iter2.found())
+        if (iter2.good())
         {
             (*iter)->rmap(*iter2(), addr);
         }

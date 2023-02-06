@@ -52,7 +52,7 @@ Foam::wallBoilingModels::nucleateFluxModel::New
 
     auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
-    if (!cstrIter.found())
+    if (!cstrIter.good())
     {
         FatalIOErrorInLookup
         (

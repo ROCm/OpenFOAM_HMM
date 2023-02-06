@@ -657,7 +657,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
         // We don't want to map the decomposition (mapping already tested when
         // mapping the cell centre field)
         auto iter = objects.find("cellDist");
-        if (iter.found())
+        if (iter.good())
         {
             objects.erase(iter);
         }

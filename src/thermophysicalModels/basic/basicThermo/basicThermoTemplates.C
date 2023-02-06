@@ -45,7 +45,7 @@ Foam::basicThermo::getThermoOrDie
     auto ctorIter = thermoTable.cfind(thermoTypeName);
 
     // Print error message if package not found in the table
-    if (!ctorIter.found())
+    if (!ctorIter.good())
     {
         FatalIOErrorInLookup
         (
@@ -109,7 +109,7 @@ Foam::basicThermo::getThermoOrDie
 
         auto ctorIter = thermoTable.cfind(thermoTypeName);
 
-        if (!ctorIter.found())
+        if (!ctorIter.good())
         {
             FatalIOErrorInLookup
             (

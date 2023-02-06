@@ -2263,7 +2263,7 @@ void Foam::conformalVoronoiMesh::reinsertSurfaceConformation()
 
         const auto iter = oldToNewIndices.cfind(vIndex);
 
-        if (iter.found())
+        if (iter.good())
         {
             const label newIndex = *iter;
 

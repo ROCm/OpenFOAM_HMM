@@ -52,7 +52,7 @@ Foam::labelList Foam::snappySnapDriver::getFacePoints
 
             const auto iter = pp.meshPointMap().cfind(meshPointi);
 
-            if (iter.found())
+            if (iter.good())
             {
                 const label pointi = iter.val();
                 pointOnZone[pointi] = true;

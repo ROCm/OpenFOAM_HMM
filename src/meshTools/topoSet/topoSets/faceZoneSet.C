@@ -183,7 +183,7 @@ void Foam::faceZoneSet::subset(const topoSet& set)
 
         const auto iter = faceToIndex.cfind(facei);
 
-        if (iter.found())
+        if (iter.good())
         {
             const label index = *iter;
 
@@ -231,7 +231,7 @@ void Foam::faceZoneSet::addSet(const topoSet& set)
 
         const auto iter = faceToIndex.cfind(facei);
 
-        if (iter.found())
+        if (iter.good())
         {
             const label index = *iter;
 
@@ -282,7 +282,7 @@ void Foam::faceZoneSet::subtractSet(const topoSet& set)
 
         const auto iter = faceToIndex.cfind(facei);
 
-        if (iter.found())
+        if (iter.good())
         {
             const label index = *iter;
 

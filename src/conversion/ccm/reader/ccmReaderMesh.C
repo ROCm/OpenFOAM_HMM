@@ -479,7 +479,7 @@ void Foam::ccm::reader::readCells
 
         // Lookup the name, type from boundary region info:
         auto dictIter = boundaryRegion_.find(info.ccmIndex);
-        if (dictIter.found())
+        if (dictIter.good())
         {
             dictionary& dict = dictIter.val();
 
@@ -1037,7 +1037,7 @@ void Foam::ccm::reader::readMonitoring
             auto iter = boundaryRegion_.cfind(ccmRegionId);
 
             word zoneName;
-            if (iter.found())
+            if (iter.good())
             {
                 iter().readEntry("Label", zoneName);
             }
@@ -2435,7 +2435,7 @@ void Foam::ccm::reader::addPatches
 
         auto citer = boundaryRegion_.cfind(origBndId_[patchI]);
 
-        if (citer.found())
+        if (citer.good())
         {
             citer().readEntry("Label", patchName);
             citer().readEntry("BoundaryType", patchType);

@@ -970,7 +970,7 @@ Foam::label Foam::hexRef8::storeMidPointInfo
 
     auto edgeMidFnd = midPointToAnchors.find(edgeMidPointi);
 
-    if (!edgeMidFnd.found())
+    if (!edgeMidFnd.good())
     {
         midPointToAnchors.insert(edgeMidPointi, edge(anchorPointi, -1));
     }
@@ -997,7 +997,7 @@ Foam::label Foam::hexRef8::storeMidPointInfo
 
     auto faceMidFnd = midPointToFaceMids.find(edgeMidPointi);
 
-    if (!faceMidFnd.found())
+    if (!faceMidFnd.good())
     {
         midPointToFaceMids.insert(edgeMidPointi, edge(faceMidPointi, -1));
     }
@@ -1844,7 +1844,7 @@ bool Foam::hexRef8::matchHexShape
                     {
                         auto iter = pointFaces.find(pointi);
 
-                        if (iter.found())
+                        if (iter.good())
                         {
                             labelList& pFaces = iter.val();
                             pFaces.appendUniq(facei);
@@ -4313,7 +4313,7 @@ void Foam::hexRef8::updateMesh
 
             const auto fnd = savedCellLevel_.cfind(storedCelli);
 
-            if (!fnd.found())
+            if (!fnd.good())
             {
                 FatalErrorInFunction
                     << "Problem : trying to restore old value for new cell "
@@ -4386,7 +4386,7 @@ void Foam::hexRef8::updateMesh
 
             auto fnd = savedPointLevel_.find(storedPointi);
 
-            if (!fnd.found())
+            if (!fnd.good())
             {
                 FatalErrorInFunction
                     << "Problem : trying to restore old value for new point "

@@ -217,7 +217,7 @@ void Foam::layerAdditionRemoval::removeCellLayer
         {
             const auto rpmIter = removedPointMap.cfind(newFace[pointi]);
 
-            if (rpmIter.found())
+            if (rpmIter.good())
             {
                 // Point mapped. Replace it
                 newFace[pointi] = rpmIter();

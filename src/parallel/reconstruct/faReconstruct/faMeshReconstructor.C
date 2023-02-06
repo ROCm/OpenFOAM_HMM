@@ -335,7 +335,7 @@ void Foam::faMeshReconstructor::calcAddressing
 
             const auto fnd = globalEdgeMapping.cfind(globalEdge);
 
-            if (fnd.found())
+            if (fnd.good())
             {
                 faEdgeProcAddr_[edgei] = fnd.val();
             }
@@ -409,7 +409,7 @@ void Foam::faMeshReconstructor::calcAddressing
                 const label globalEdgei = faEdgeProcAddr_[patchEdgei];
 
                 const auto fnd = remapGlobal.cfind(globalEdgei);
-                if (fnd.found())
+                if (fnd.good())
                 {
                     newEdgeProcAddr[edgei] = fnd.val();
                     ++edgei;

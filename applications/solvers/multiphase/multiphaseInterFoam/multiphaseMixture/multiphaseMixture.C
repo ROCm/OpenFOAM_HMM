@@ -287,7 +287,7 @@ Foam::multiphaseMixture::surfaceTensionForce() const
 
             auto sigma = sigmas_.cfind(interfacePair(alpha1, alpha2));
 
-            if (!sigma.found())
+            if (!sigma.good())
             {
                 FatalErrorInFunction
                     << "Cannot find interface " << interfacePair(alpha1, alpha2)
@@ -463,7 +463,7 @@ void Foam::multiphaseMixture::correctBoundaryContactAngle
 
     const auto tp = acap.thetaProps().cfind(interfacePair(alpha1, alpha2));
 
-    if (!tp.found())
+    if (!tp.good())
     {
         FatalErrorInFunction
             << "Cannot find interface " << interfacePair(alpha1, alpha2)

@@ -428,7 +428,7 @@ Foam::labelList Foam::ZoneMesh<ZoneType, MeshType>::indices
         {
             const auto iter = groupZoneIDs().cfind(matcher);
 
-            if (iter.found())
+            if (iter.good())
             {
                 // Hash ids associated with the group
                 ids.insert(iter.val());

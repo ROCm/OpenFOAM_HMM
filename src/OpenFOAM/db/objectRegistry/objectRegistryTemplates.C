@@ -546,9 +546,9 @@ const Type& Foam::objectRegistry::lookupObject
 {
     const_iterator iter = cfind(name);
 
-    if (iter.found())
+    if (iter.good())
     {
-        const Type* ptr = dynamic_cast<const Type*>(iter());
+        const Type* ptr = dynamic_cast<const Type*>(iter.val());
 
         if (ptr)
         {

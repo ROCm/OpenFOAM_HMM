@@ -52,13 +52,13 @@ int main(int argc, char *argv[])
     // Same, but with non-const access
     // Map<bool>::iterator map1Iter = map1.find(5);
 
-    if (!map1Iter.found()) // same as  (map1Iter == map1.end())
+    if (!map1Iter.good())
     {
         Info<< "not found" << endl;
     }
     else
     {
-        Info<< "5 is " << *map1Iter << endl;
+        Info<< "5 is " << map1Iter.val() << endl;
     }
 
     // Repeat with std::map

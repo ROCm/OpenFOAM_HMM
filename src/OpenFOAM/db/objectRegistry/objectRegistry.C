@@ -281,7 +281,7 @@ bool Foam::objectRegistry::checkOut(regIOobject* io) const
 
     iterator iter = obr.find(io->name());
 
-    if (iter.found())
+    if (iter.good())
     {
         if (objectRegistry::debug)
         {
@@ -374,7 +374,7 @@ bool Foam::objectRegistry::erase(const iterator& iter)
 {
     // Remove from registry - see notes in objectRegistry::clear()
 
-    if (iter.found())
+    if (iter.good())
     {
         regIOobject* ptr = const_cast<iterator&>(iter).val();
 
@@ -437,7 +437,7 @@ const Foam::regIOobject* Foam::objectRegistry::cfindIOobject
 {
     const_iterator iter = cfind(name);
 
-    if (iter.found())
+    if (iter.good())
     {
         return iter.val();
     }

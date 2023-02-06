@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -120,7 +120,7 @@ public:
     // Access
 
         //- True if file-stat was successful
-        bool valid() const noexcept
+        bool good() const noexcept
         {
             return valid_;
         }
@@ -165,6 +165,12 @@ public:
 
         friend Istream& operator>>(Istream& is, fileStat& fs);
         friend Ostream& operator<<(Ostream& os, const fileStat& fs);
+
+
+    // Housekeeping
+
+        //- True if file-stat was successful
+        bool valid() const noexcept { return good(); }
 };
 
 

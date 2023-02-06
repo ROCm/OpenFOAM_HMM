@@ -306,9 +306,9 @@ Foam::label Foam::inplaceMapValue
         label& value = iter.val();
 
         auto mapIter = mapper.find(value);
-        if (mapIter.found() && value != *mapIter)
+        if (mapIter.good() && value != mapIter.val())
         {
-            value = *mapIter;
+            value = mapIter.val();
             ++nChanged;
         }
     }

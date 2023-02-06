@@ -1376,7 +1376,7 @@ void Foam::snappyLayerDriver::determineSidePatches
         {
             label patchi = edgePatchID[i];
             const auto fnd = wantedToAddedPatch.cfind(patchi);
-            if (fnd.found())
+            if (fnd.good())
             {
                 edgePatchID[i] = fnd.val();
             }
@@ -1968,7 +1968,7 @@ void Foam::snappyLayerDriver::getPatchDisplacement
 //                const label meshFacei = pp.addressing()[patchFacei];
 //                const label celli = mesh.faceOwner()[meshFacei];
 //                Map<labelList>::iterator faceFnd = cellToFaces.find(celli);
-//                if (faceFnd.found())
+//                if (faceFnd.good())
 //                {
 //                    labelList& faces = faceFnd();
 //                    faces.appendUniq(patchFacei);
@@ -2256,7 +2256,7 @@ Foam::label Foam::snappyLayerDriver::truncateDisplacement
         forAll(f, fp)
         {
             const auto fnd = meshPointMap.cfind(f[fp]);
-            if (fnd.found())
+            if (fnd.good())
             {
                 const label patchPointi = fnd.val();
 
@@ -2973,7 +2973,7 @@ Foam::List<Foam::labelPair> Foam::snappyLayerDriver::getBafflesOnAddedMesh
         label oldFacei = newToOldFaces[facei];
 
         const auto faceFnd = baffleSet.find(oldFacei);
-        if (faceFnd.found())
+        if (faceFnd.good())
         {
             label bafflei = faceFnd();
             labelPair& p = newBaffles[bafflei];
@@ -4454,7 +4454,7 @@ void Foam::snappyLayerDriver::mapFaceZonePoints
         {
             const label oldFacei = map.faceMap()[facei];
             const auto iter = oldFaceToBaffle.find(oldFacei);
-            if (oldFacei != -1 && iter.found())
+            if (oldFacei != -1 && iter.good())
             {
                 const label bafflei = iter();
                 auto& newBaffle = newBaffles[bafflei];
@@ -4588,7 +4588,7 @@ void Foam::snappyLayerDriver::updatePatch
             const label oldMeshPointi =
                 map.pointMap()[newMeshPointi];
             const auto iter = baseMap.find(oldMeshPointi);
-            if (iter.found())
+            if (iter.good())
             {
                 newToOldPatchPoints[newPointi] = iter();
             }

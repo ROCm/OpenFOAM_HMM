@@ -64,7 +64,7 @@ Foam::PatchTools::pointNormals
             const label meshPointi = p.meshPoints()[patchPointi];
 
             const auto fnd = coupledPatchMP.cfind(meshPointi);
-            if (fnd.found())
+            if (fnd.good())
             {
                 const label coupledPointi = fnd.val();
 
@@ -181,7 +181,7 @@ Foam::PatchTools::pointNormals
         const label meshPointi = p.meshPoints()[patchPointi];
 
         const auto fnd = coupledPatchMP.cfind(meshPointi);
-        if (fnd.found())
+        if (fnd.good())
         {
             const label coupledPointi = fnd.val();
             extrudeN[patchPointi] = coupledPointNormals[coupledPointi];

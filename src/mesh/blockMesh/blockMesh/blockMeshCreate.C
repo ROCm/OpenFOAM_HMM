@@ -409,7 +409,7 @@ Foam::blockMesh::mesh(const IOobject& io) const
 
                 label zonei = freeZonei;
 
-                if (iter.found())
+                if (iter.good())
                 {
                     zonei = *iter;
                 }

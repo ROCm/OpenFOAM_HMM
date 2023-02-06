@@ -96,7 +96,7 @@ Foam::label Foam::cellMatcher::calcLocalFaces
             const label vertI = f[localVertI];
 
             const auto iter = localPoint_.cfind(vertI);
-            if (iter.found())
+            if (iter.good())
             {
                 // Reuse local vertex number.
                 localFace[localVertI] = iter.val();

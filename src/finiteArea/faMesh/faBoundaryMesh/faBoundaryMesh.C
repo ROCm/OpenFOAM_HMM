@@ -509,7 +509,7 @@ Foam::labelList Foam::faBoundaryMesh::indices
         {
             const auto iter = groupPatchIDs().cfind(matcher);
 
-            if (iter.found())
+            if (iter.good())
             {
                 // Hash ids associated with the group
                 ids.insert(iter.val());

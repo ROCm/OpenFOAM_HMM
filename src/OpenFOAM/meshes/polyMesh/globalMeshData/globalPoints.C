@@ -281,7 +281,7 @@ bool Foam::globalPoints::mergeInfo
     // Get the index into the procPoints list.
     const auto iter = meshToProcPoint_.cfind(localPointi);
 
-    if (iter.found())
+    if (iter.good())
     {
         if (mergeInfo(nbrInfo, localPointi, procPoints_[iter.val()]))
         {
@@ -330,7 +330,7 @@ bool Foam::globalPoints::storeInitialInfo
     // Get the index into the procPoints list.
     const auto iter = meshToProcPoint_.find(localPointi);
 
-    if (iter.found())
+    if (iter.good())
     {
         if (mergeInfo(nbrInfo, localPointi, procPoints_[iter.val()]))
         {
@@ -683,7 +683,7 @@ void Foam::globalPoints::receivePatchPoints
                     // Do we have information on pointA?
                     const auto procPointA = meshToProcPoint_.cfind(localA);
 
-                    if (procPointA.found())
+                    if (procPointA.good())
                     {
                         const labelPairList infoA = addSendTransform
                         (
@@ -700,7 +700,7 @@ void Foam::globalPoints::receivePatchPoints
                     // Same for info on pointB
                     const auto procPointB = meshToProcPoint_.cfind(localB);
 
-                    if (procPointB.found())
+                    if (procPointB.good())
                     {
                         const labelPairList infoB = addSendTransform
                         (

@@ -257,7 +257,7 @@ Foam::fileOperations::masterUncollatedFileOperation::filePathInfo
         // directory is 0.01 (due to different time formats)
         const auto pathFnd = times_.cfind(io.time().path());
 
-        if (search && pathFnd.found())
+        if (search && pathFnd.good())
         {
             newInstancePath = findInstancePath
             (
@@ -2184,7 +2184,7 @@ Foam::instantList Foam::fileOperations::masterUncollatedFileOperation::findTimes
 ) const
 {
     const auto iter = times_.cfind(directory);
-    if (iter.found())
+    if (iter.good())
     {
         if (debug)
         {
@@ -2241,7 +2241,7 @@ void Foam::fileOperations::masterUncollatedFileOperation::setTime
 
     HashPtrTable<DynamicList<instant>>::iterator iter = times_.find(tm.path());
 
-    if (iter.found())
+    if (iter.good())
     {
         DynamicList<instant>& times = *(iter.val());
 

@@ -399,7 +399,7 @@ void Foam::createShellMesh::calcPointRegions
 
             const auto fnd = globalToLocalRegion.cfind(globalRegionI);
 
-            if (fnd.found())
+            if (fnd.good())
             {
                 // Already encountered this global region. Assign same local one
                 pRegions[fp] = fnd();

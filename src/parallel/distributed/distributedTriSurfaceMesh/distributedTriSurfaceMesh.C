@@ -1369,7 +1369,7 @@ void Foam::distributedTriSurfaceMesh::surfaceSide
                     for (const edge& e : edges)
                     {
                         auto iter = edgeToFaces.find(e);
-                        if (iter.found())
+                        if (iter.good())
                         {
                             if (iter().second() == -1)
                             {

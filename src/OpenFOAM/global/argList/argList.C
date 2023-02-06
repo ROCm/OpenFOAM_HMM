@@ -626,7 +626,7 @@ Foam::word Foam::argList::optionCompat(const word& optName)
     {
         const auto fnd = validOptionsCompat.cfind(optName.substr(1));
 
-        if (fnd.found())
+        if (fnd.good())
         {
             const auto& alt = fnd.val();
 
@@ -661,7 +661,7 @@ int Foam::argList::optionIgnore(const word& optName)
     {
         const auto fnd = ignoreOptionsCompat.cfind(optName);
 
-        if (fnd.found())
+        if (fnd.good())
         {
             const auto& alt = fnd.val();
 
@@ -790,7 +790,7 @@ void Foam::argList::setCasePaths()
 
     const auto optIter = options_.cfind("case");  // [-case dir] specified?
 
-    if (optIter.found())
+    if (optIter.good())
     {
         caseDir = fileName::validate(optIter.val());  // includes 'clean'
 
@@ -932,8 +932,8 @@ Foam::argList::argList
             auto optIter = validOptions.cfind(optName);
             if
             (
-                optIter.found()
-             || (optIter = validParOptions.cfind(optName)).found()
+                optIter.good()
+             || (optIter = validParOptions.cfind(optName)).good()
             )
             {
                 wantArg = !optIter.val().empty();

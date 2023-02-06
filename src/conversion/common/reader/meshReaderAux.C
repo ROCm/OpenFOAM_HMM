@@ -46,7 +46,7 @@ void Foam::meshReader::warnDuplicates
     {
         // Check duplicate name
         auto iter = hashed.find(w);
-        if (iter.found())
+        if (iter.good())
         {
             ++(*iter);
             duplicates = true;

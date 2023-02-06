@@ -416,7 +416,7 @@ void Foam::DistributedDelaunayMesh<Triangulation>::markVerticesToRefer
         const auto iter = circumsphereOverlaps.cfind(cit->cellIndex());
 
         // Pre-tested circumsphere potential influence
-        if (iter.found())
+        if (iter.good())
         {
             const labelList& citOverlaps = iter();
 

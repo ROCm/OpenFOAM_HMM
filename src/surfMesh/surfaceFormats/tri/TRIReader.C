@@ -111,7 +111,7 @@ bool Foam::fileFormats::TRIReader::readFile(const fileName& filename)
         const word name("zone" + rawName.substr(1));
 
         const auto iter = lookup.cfind(name);
-        if (iter.found())
+        if (iter.good())
         {
             if (zoneI != iter.val())
             {

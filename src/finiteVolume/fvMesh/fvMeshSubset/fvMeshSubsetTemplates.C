@@ -513,7 +513,7 @@ Foam::fvMeshSubset::interpolate
 
                 const auto iter = meshPointMap.cfind(meshPointi);
 
-                if (iter.found())
+                if (iter.good())
                 {
                     directAddressing[localI] = *iter;
                 }

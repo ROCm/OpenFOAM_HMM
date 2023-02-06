@@ -193,7 +193,7 @@ void Foam::pointPairs<Triangulation>::reIndex(const Map<label>& oldToNewIndices)
         {
             const auto iter2 = oldToNewIndices.cfind(start.first());
 
-            if (iter2.found())
+            if (iter2.good())
             {
                 if (iter2() != -1)
                 {
@@ -210,7 +210,7 @@ void Foam::pointPairs<Triangulation>::reIndex(const Map<label>& oldToNewIndices)
         {
             const auto iter2 = oldToNewIndices.cfind(end.first());
 
-            if (iter2.found())
+            if (iter2.good())
             {
                 if (iter2() != -1)
                 {

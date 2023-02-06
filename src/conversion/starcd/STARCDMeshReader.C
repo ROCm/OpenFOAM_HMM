@@ -718,7 +718,7 @@ void Foam::fileFormats::STARCDMeshReader::readBoundary
 
         auto iter = boundaryRegion_.cfind(origRegion[patchi]);
 
-        if (iter.found())
+        if (iter.good())
         {
             const dictionary& dict = *iter;
 

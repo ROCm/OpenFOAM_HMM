@@ -151,7 +151,7 @@ Foam::autoPtr<Foam::functionObject> Foam::functionObjectList::remove
 
     auto iter = indices_.find(key);  // Index of existing functionObject
 
-    if (iter.found())
+    if (iter.good())
     {
         oldIndex = *iter;
 

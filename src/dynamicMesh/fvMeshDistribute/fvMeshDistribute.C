@@ -736,7 +736,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::mergeSharedPoints
         {
             const auto iter = globalMasterToLocalMaster.cfind(globali);
 
-            if (iter.found())
+            if (iter.good())
             {
                 // Matched to existing master
                 pointToMaster.insert(pointi, *iter);
@@ -1133,7 +1133,7 @@ void Foam::fvMeshDistribute::findCouples
 
             const auto iter = map.cfind(myData);
 
-            if (iter.found())
+            if (iter.good())
             {
                 label nbrBFacei = *iter;
 
@@ -1239,7 +1239,7 @@ void Foam::fvMeshDistribute::findCouples
                     );
                     auto fnd = map.find(key);
 
-                    if (!fnd.found())
+                    if (!fnd.good())
                     {
                         // Insert
                         map.emplace(key, meshi, bFacei);

@@ -1959,7 +1959,7 @@ void Foam::addPatchCellLayer::setRefinement
                     forAll(f, fp)
                     {
                         const auto fnd = minPointValue.find(f[fp]);
-                        if (fnd.found())
+                        if (fnd.good())
                         {
                             baseF.setSize(f.size(), labelMax);
                             if (baseF[fp] == labelMax)

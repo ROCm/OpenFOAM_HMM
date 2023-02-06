@@ -131,7 +131,7 @@ bool Foam::fileFormats::STLReader::readBINARY
         const label origId = stlTri.attrib();
 
         auto fnd = lookup.cfind(origId);
-        if (fnd.found())
+        if (fnd.good())
         {
             if (zoneI != *fnd)
             {

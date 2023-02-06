@@ -111,7 +111,7 @@ Foam::autoPtr<Foam::LESdelta> Foam::LESdelta::New
     {
         auto ctorIter = additionalConstructors.cfind(deltaType);
 
-        if (ctorIter.found())
+        if (ctorIter.good())
         {
             return autoPtr<LESdelta>(ctorIter.val()(name, turbulence, dict));
         }

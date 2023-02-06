@@ -51,7 +51,7 @@ Foam::label Foam::coupleGroupIdentifier::findOtherPatchID
 
     const auto fnd = pbm.groupPatchIDs().cfind(name());
 
-    if (!fnd.found())
+    if (!fnd.good())
     {
         if (&mesh == &thisPatch.boundaryMesh().mesh())
         {

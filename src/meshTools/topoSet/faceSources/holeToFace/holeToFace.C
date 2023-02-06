@@ -1282,7 +1282,7 @@ Foam::autoPtr<Foam::mapDistribute> Foam::holeToFace::calcClosure
         const edge meshE = edge(mp[e[0]], mp[e[1]]);
 
         auto iter = edgeMap.cfind(meshE);
-        if (iter.found())
+        if (iter.good())
         {
             // Found edge on patch connected to blocked face. Seed with the
             // (global) index of that blocked face

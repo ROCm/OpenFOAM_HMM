@@ -353,7 +353,7 @@ Foam::polyBoundaryMesh::neighbourEdges() const
 
                 auto fnd = pointsToEdge.find(meshEdge);
 
-                if (!fnd.found())
+                if (!fnd.good())
                 {
                     // First occurrence of mesh edge. Store patch and my
                     // local index.
@@ -672,7 +672,7 @@ Foam::labelList Foam::polyBoundaryMesh::indices
         {
             const auto iter = groupPatchIDs().cfind(matcher);
 
-            if (iter.found())
+            if (iter.good())
             {
                 // Hash ids associated with the group
                 ids.insert(iter.val());
@@ -894,7 +894,7 @@ Foam::labelHashSet Foam::polyBoundaryMesh::patchSet
             {
                 const auto iter = groupPatchIDs().cfind(matcher);
 
-                if (iter.found())
+                if (iter.good())
                 {
                     // Hash ids associated with the group
                     ids.insert(iter.val());

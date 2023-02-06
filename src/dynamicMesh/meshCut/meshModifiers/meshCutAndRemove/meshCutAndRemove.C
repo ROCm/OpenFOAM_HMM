@@ -485,7 +485,7 @@ Foam::face Foam::meshCutAndRemove::addEdgeCutsToFace(const label facei) const
         EdgeMap<label>::const_iterator fnd =
             addedPoints_.find(edge(f[fp], f[fp1]));
 
-        if (fnd.found())
+        if (fnd.good())
         {
             // edge has been cut. Introduce new vertex.
             newFace[newFp++] = fnd.val();
@@ -547,7 +547,7 @@ Foam::face Foam::meshCutAndRemove::loopToFace
                     EdgeMap<label>::const_iterator fnd =
                         addedPoints_.find(mesh().edges()[edgeI]);
 
-                    if (fnd.found())
+                    if (fnd.good())
                     {
                         newFace[newFacei++] = fnd.val();
                     }

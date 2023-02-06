@@ -804,7 +804,7 @@ void Foam::stringOps::inplaceExpand
 
                 const auto fnd = mapping.cfind(varName);
 
-                if (fnd.found() ? (altType == '+') : (altType == '-'))
+                if (fnd.good() ? (altType == '+') : (altType == '-'))
                 {
                     // Found and ":+" alternative
                     // Not-found and ":-" alternative
@@ -812,7 +812,7 @@ void Foam::stringOps::inplaceExpand
                     s.replace(varBeg, varEnd - varBeg + 1, altValue);
                     varBeg += altValue.size();
                 }
-                else if (fnd.found())
+                else if (fnd.good())
                 {
                     // Found: use value
                     s.replace(varBeg, varEnd - varBeg + 1, *fnd);

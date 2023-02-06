@@ -776,7 +776,7 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
                         const auto fnd =
                             mergedMap.cfind(edge(agglom0, agglom1));
 
-                        if (fnd.found())
+                        if (fnd.good())
                         {
                             const labelPairList& elems = fnd();
 

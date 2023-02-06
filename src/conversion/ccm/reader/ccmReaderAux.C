@@ -79,7 +79,7 @@ void Foam::ccm::reader::warnDuplicates
     {
         // Check duplicate names
         auto iter = hashed.find(item);
-        if (iter.found())
+        if (iter.good())
         {
             (*iter)++;
             duplicates = true;

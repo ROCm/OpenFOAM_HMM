@@ -280,7 +280,7 @@ bool Foam::vtk::seriesWriter::appendCheck(fileNameInstant inst)
 
     const auto iter = existing_.find(inst.name());
 
-    if (iter.found())
+    if (iter.good())
     {
         for (fileNameInstant& dst : entries_)
         {
@@ -320,7 +320,7 @@ bool Foam::vtk::seriesWriter::removeDuplicates()
         {
             auto iter = filesSeen.find(inst.name());
 
-            if (iter.found())
+            if (iter.good())
             {
                 // Mark previous location as being superseded
                 entries_[*iter].name().clear();

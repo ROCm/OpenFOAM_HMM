@@ -443,7 +443,7 @@ int main(int argc, char *argv[])
 
                         const auto patchFind = regionToPatch.cfind(region);
 
-                        if (patchFind.found())
+                        if (patchFind.good())
                         {
                             patchi = *patchFind;
                         }

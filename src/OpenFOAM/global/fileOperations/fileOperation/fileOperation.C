@@ -453,7 +453,7 @@ Foam::fileOperation::lookupAndCacheProcessorsPath
 
         const auto iter = procsDirs_.cfind(procPath);
 
-        if (iter.found())
+        if (iter.good())
         {
             return iter.val();
         }

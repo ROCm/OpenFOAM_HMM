@@ -98,7 +98,7 @@ createZeroBoundaryPtr
     {
         auto patchTypeCstrIter =
             fvPatchField<Type>::patchConstructorTablePtr_->cfind(bm[pI].type());
-        if (patchTypeCstrIter.found())
+        if (patchTypeCstrIter.good())
         {
             actualPatchTypes[pI] = bm[pI].type();
         }

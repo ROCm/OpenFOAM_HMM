@@ -86,7 +86,7 @@ Foam::label Foam::cellSplitter::newOwner
 
     const auto iter = cellToCells.cfind(old);
 
-    if (!iter.found())
+    if (!iter.good())
     {
         // Unsplit cell
         return old;
@@ -113,7 +113,7 @@ Foam::label Foam::cellSplitter::newNeighbour
 
     const auto iter = cellToCells.cfind(old);
 
-    if (!iter.found())
+    if (!iter.good())
     {
         // Unsplit cell
         return old;

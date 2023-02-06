@@ -222,7 +222,7 @@ int main(int argc, char *argv[])
             // (uses commutative hash)
             auto iter = vertsToBoundary.find(triFace(f[0], f[1], f[2]));
 
-            if (iter.found())
+            if (iter.good())
             {
                 const triFace& tri = iter.key();
                 const label facei = iter.val();
