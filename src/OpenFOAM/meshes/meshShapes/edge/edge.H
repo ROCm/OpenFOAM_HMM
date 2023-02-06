@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2017-2022 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -153,9 +153,9 @@ public:
         //- True if the vertices are unique and non-negative.
         bool valid() const noexcept { return good(); }
 
-        //- Return true if point label is found in edge.
+        //- Return true if the point label is contained in the edge.
         //  Always false for a negative label.
-        inline bool found(const label pointLabel) const;
+        inline bool contains(const label pointLabel) const;
 
         //- Return local index (0,1) of point label in edge -1 on failure
         //  Always return -1 for a negative label.
@@ -320,6 +320,12 @@ public:
                 return obj.hash_code(seed);
             }
         };
+
+
+    // Housekeeping
+
+        //- Same as contains()
+        bool found(label vertex) const { return contains(vertex); }
 
         //- Deprecated(2021-04) hashing functor. Use hasher()
         // \deprecated(2021-04) - use hasher() functor

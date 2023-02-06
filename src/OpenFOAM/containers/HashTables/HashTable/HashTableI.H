@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -76,7 +76,7 @@ inline const T& Foam::HashTable<T, Key, Hash>::at(const Key& key) const
 
 
 template<class T, class Key, class Hash>
-inline bool Foam::HashTable<T, Key, Hash>::found(const Key& key) const
+inline bool Foam::HashTable<T, Key, Hash>::contains(const Key& key) const
 {
     if (size_)
     {

@@ -209,7 +209,7 @@ inline bool Foam::face::connected(const labelUList& other) const
 {
     for (const label pointi : *this)
     {
-        if (other.found(pointi))
+        if (other.contains(pointi))
         {
             return true;
         }
@@ -223,7 +223,7 @@ inline bool Foam::face::connected(const FixedList<label, N>& other) const
 {
     for (const label pointi : *this)
     {
-        if (other.found(pointi))
+        if (other.contains(pointi))
         {
             return true;
         }

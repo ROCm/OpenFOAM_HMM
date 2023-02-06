@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -176,11 +176,11 @@ public:
 
     // Member Functions
 
-        //- Same as found() - return true if key exists in the set.
+        //- Same as contains() - return true if key exists in the set.
         //  Method name compatibility with bitSet and boolList.
         bool test(const Key& key) const
         {
-            return this->found(key);
+            return this->contains(key);
         }
 
 
@@ -322,11 +322,11 @@ public:
 
     // Member Operators
 
-        //- Return true if the entry exists, same as found()
+        //- Return true if the entry exists, same as contains()
         //  \note this allows use of HashSet as a predicate test
         inline bool operator()(const Key& key) const noexcept;
 
-        //- Return true if the entry exists, same as found().
+        //- Return true if the entry exists, same as contains().
         inline bool operator[](const Key& key) const noexcept;
 
         //- Copy assign

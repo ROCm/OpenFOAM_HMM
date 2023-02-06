@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -100,16 +100,16 @@ inline Foam::label Foam::Enum<EnumType>::find(const EnumType e) const
 
 
 template<class EnumType>
-inline bool Foam::Enum<EnumType>::found(const word& enumName) const
+inline bool Foam::Enum<EnumType>::contains(const word& enumName) const
 {
-    return keys_.found(enumName);
+    return keys_.contains(enumName);
 }
 
 
 template<class EnumType>
-inline bool Foam::Enum<EnumType>::found(const EnumType e) const
+inline bool Foam::Enum<EnumType>::contains(const EnumType e) const
 {
-    return vals_.found(int(e));
+    return vals_.contains(int(e));
 }
 
 

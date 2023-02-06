@@ -553,7 +553,7 @@ Foam::label Foam::HashTable<T, Key, Hash>::erase
             ++iter
         )
         {
-            if (other.found(iter.key()) && erase(iter))
+            if (other.contains(iter.key()) && erase(iter))
             {
                 ++changed;
             }
@@ -586,7 +586,7 @@ Foam::label Foam::HashTable<T, Key, Hash>::retain
 
         for (iterator iter = begin(); iter != end(); ++iter)
         {
-            if (!other.found(iter.key()) && erase(iter))
+            if (!other.contains(iter.key()) && erase(iter))
             {
                 ++changed;
             }

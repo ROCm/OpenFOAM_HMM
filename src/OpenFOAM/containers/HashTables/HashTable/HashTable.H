@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2022 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,7 +57,7 @@ Note
         forAllConstIters(table, iter)
         {
             Info<< "val:" << *iter << nl
-                << "key:" << iter.key() << nl;
+                << "key:" << iter.key() << nl
                 << "val:" << iter.val() << nl;
         }
     \endcode
@@ -213,18 +213,6 @@ private:
         Ostream& writeTable(Ostream& os) const;
 
 
-protected:
-
-        //- Internally used base for iterator and const_iterator
-        template<bool Const> class Iterator;
-
-        //- An iterator with const access to HashTable internals.
-        friend class Iterator<true>;
-
-        //- An iterator with non-const access to HashTable internals.
-        friend class Iterator<false>;
-
-
 public:
 
     // Constructors
@@ -272,8 +260,8 @@ public:
         //- Find and return a hashed entry. FatalError if it does not exist.
         inline const T& at(const Key& key) const;
 
-        //- True if hashed key is found in table
-        inline bool found(const Key& key) const;
+        //- True if hashed key is contained (found) in table
+        inline bool contains(const Key& key) const;
 
         //- Find and return an iterator set at the hashed entry
         //  If not found iterator = end()
@@ -548,9 +536,11 @@ public:
     // Member Operators
 
         //- Find and return a hashed entry. FatalError if it does not exist.
+        //  Same as at().
         inline T& operator[](const Key& key);
 
         //- Find and return a hashed entry. FatalError if it does not exist.
+        //  Same as at().
         inline const T& operator[](const Key& key) const;
 
         //- Return existing entry or create a new entry.
@@ -585,6 +575,15 @@ public:
 protected:
 
     // Iterators and helpers
+
+        //- Internally used base for iterator and const_iterator
+        template<bool Const> class Iterator;
+
+        //- Allow iterator access to HashTable internals.
+        friend class Iterator<true>;
+
+        //- Allow iterator access to HashTable internals.
+        friend class Iterator<false>;
 
         //- The iterator base for HashTable (internal use only).
         //  Note: data and functions are protected, to allow reuse by iterator
@@ -908,13 +907,13 @@ public:
             reference operator*() const  { return this->key(); }
             reference operator()() const { return this->key(); }
 
-            inline key_iterator_base& operator++()
+            key_iterator_base& operator++()
             {
                 this->increment();
                 return *this;
             }
 
-            inline key_iterator_base operator++(int)
+            key_iterator_base operator++(int)
             {
                 key_iterator_base iter(*this);
                 this->increment();
@@ -981,6 +980,12 @@ public:
             Ostream&,
             const HashTable<T, Key, Hash>& tbl
         );
+
+
+    // Housekeeping
+
+        //- Same as contains()
+        bool found(const Key& key) const { return this->contains(key); }
 };
 
 

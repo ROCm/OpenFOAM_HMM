@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -87,9 +87,9 @@ Foam::DictionaryBase<IDLListType, T>::DictionaryBase(Istream& is)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class IDLListType, class T>
-bool Foam::DictionaryBase<IDLListType, T>::found(const word& keyword) const
+bool Foam::DictionaryBase<IDLListType, T>::contains(const word& keyword) const
 {
-    return hashedTs_.found(keyword);
+    return hashedTs_.contains(keyword);
 }
 
 
@@ -217,7 +217,7 @@ T* Foam::DictionaryBase<IDLListType, T>::remove(const word& keyword)
 
     if (iter.found())
     {
-        T* ptr = IDLListType::remove(iter());
+        T* ptr = IDLListType::remove(iter.val());
         hashedTs_.erase(iter);
         return ptr;
     }

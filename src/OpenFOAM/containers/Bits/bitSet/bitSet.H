@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -260,15 +260,17 @@ public:
         //  \note Method name compatibility with boost::dynamic_bitset
         bool intersects(const bitSet& other) const;
 
-        //- Test value at specified position, never auto-vivify entries.
+        //- Test for \em True value at specified position,
+        //- never auto-vivify entries.
         //
         //  \note Method name compatibility with std::bitset
-        inline bool test(const label pos) const;
+        bool test(const label pos) const { return this->get(pos); }
 
-        //- Test value at specified position, never auto-vivify entries.
+        //- Test for \em True value at specified position,
+        //- never auto-vivify entries.
         //
         //  \note Method name compatibility with HashSet
-        inline bool found(const label pos) const;
+        bool contains(const label pos) const { return this->get(pos); }
 
         //- Locate the first bit that is set.
         //  \return the location or -1 if there are no bits set.
@@ -610,6 +612,9 @@ public:
 
 
     // Housekeeping
+
+        //- Same as contains()
+        bool found(const label pos) const { return this->contains(pos); }
 
         //- Deprecated(2020-11) use fill()
         //  \deprecated(2020-11) use fill()

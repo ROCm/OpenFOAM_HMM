@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2022 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -209,12 +209,12 @@ public:
         //- A string representation of bool as "false" / "true"
         static const char* name(const bool b) noexcept;
 
+        //- True if there is a switch type corresponding to the given string.
+        static bool contains(const std::string& str);
+
         //- Find switchType for the given string, returning as a Switch that
         //- can be tested for good() or bad().
         static Switch find(const std::string& str);
-
-        //- Test if there is a switch type corresponding to the given string.
-        static bool found(const std::string& str);
 
 
     // Member Functions
@@ -271,6 +271,9 @@ public:
 
     // Housekeeping
 
+        //- Same as contains()
+        static bool found(const std::string& str) { return contains(str); }
+
         //- Deprecated(2020-01) From string with/without bad input test
         //  \deprecated(2020-01) - confusing syntax, use static find() method
         FOAM_DEPRECATED_FOR(2019-02, "static find() method")
@@ -281,13 +284,10 @@ public:
         FOAM_DEPRECATED_FOR(2019-02, "static find() method")
         Switch(const char* str, bool allowBad);
 
-        //- Deprecated(2020-01) Use good() method, or static found() method
-        //  \deprecated(2020-01) Use good() method, or static found() method
-        FOAM_DEPRECATED_FOR(2019-02, "good() or static found() method")
-        bool valid() const noexcept
-        {
-            return good();
-        }
+        //- Deprecated(2020-01) Use good() method, or static contains() method
+        //  \deprecated(2020-01) Use good() method, or static contains() method
+        FOAM_DEPRECATED_FOR(2019-02, "good() or static contains() method")
+        bool valid() const noexcept { return good(); }
 
         //- Same as getOrAddToDict()
         static Switch lookupOrAddToDict

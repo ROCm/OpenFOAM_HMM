@@ -413,11 +413,11 @@ public:
             const bool recursive = false
         ) const;
 
-        //- Can the regIOobject object be found (by name).
+        //- Does the registry contain the regIOobject object (by name).
         //
+        //  \param name the object name
         //  \param recursive search parent registries
-        bool found(const word& name, const bool recursive = false) const;
-
+        bool contains(const word& name, const bool recursive = false) const;
 
         //- Is the named Type found?
         //
@@ -590,6 +590,12 @@ public:
 
 
     // Housekeeping
+
+        //- Same as contains()
+        bool found(const word& name, bool recursive = false) const
+        {
+            return this->contains(name, recursive);
+        }
 
         //- Deprecated(2018-10) find object
         //  \deprecated(2018-10) - use findObject() method

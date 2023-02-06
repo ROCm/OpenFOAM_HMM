@@ -87,7 +87,7 @@ inline bool Foam::HashPtrTable<T, Key, Hash>::emplace
     // Use insertion semantics
     return
     (
-        !parent_type::found(key)
+        !parent_type::contains(key)
      && this->parent_type::set(key, new T(std::forward<Args>(args)...))
     );
 }

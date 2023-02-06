@@ -237,14 +237,14 @@ inline Foam::label Foam::HashSet<Key, Hash>::unset
 template<class Key, class Hash>
 inline bool Foam::HashSet<Key, Hash>::operator()(const Key& key) const noexcept
 {
-    return this->found(key);
+    return this->contains(key);
 }
 
 
 template<class Key, class Hash>
 inline bool Foam::HashSet<Key, Hash>::operator[](const Key& key) const noexcept
 {
-    return this->found(key);
+    return this->contains(key);
 }
 
 
@@ -281,7 +281,7 @@ bool Foam::HashSet<Key, Hash>::operator==(const HashSet<Key, Hash>& rhs) const
 
     for (const_iterator iter = rhs.cbegin(); iter != rhs.cend(); ++iter)
     {
-        if (!this->found(iter.key()))
+        if (!this->contains(iter.key()))
         {
             return false;
         }
@@ -328,7 +328,7 @@ Foam::HashSet<Key, Hash>::operator^=(const HashSet<Key, Hash>& rhs)
     // Add missed rhs elements, remove duplicate elements
     for (const_iterator iter = rhs.cbegin(); iter != rhs.cend(); ++iter)
     {
-        if (this->found(iter.key()))
+        if (this->contains(iter.key()))
         {
             this->erase(iter.key());
         }
@@ -395,7 +395,7 @@ Foam::HashSet<Key, Hash> Foam::operator&
 
     for (const Key& k : a)
     {
-        if (b.found(k))
+        if (b.contains(k))
         {
             result.insert(k);
         }
@@ -429,7 +429,7 @@ Foam::HashSet<Key, Hash> Foam::operator-
 
     for (const Key& k : a)
     {
-        if (!b.found(k))
+        if (!b.contains(k))
         {
             result.insert(k);
         }

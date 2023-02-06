@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020-2022 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -114,7 +114,7 @@ public:
         // Search and lookup
 
             //- Search for given keyword
-            bool found(const word& keyword) const;
+            bool contains(const word& keyword) const;
 
             //- Find and return an entry, nullptr on failure.
             const T* cfind(const word& keyword) const;
@@ -187,6 +187,9 @@ public:
 
 
     // Housekeeping
+
+        //- Same as contains()
+        bool found(const word& key) const { return this->contains(key); }
 
         //- Deprecated(2020-03) use cfind()
         //  \deprecated(2020-03) - use cfind() method

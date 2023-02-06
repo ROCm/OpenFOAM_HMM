@@ -661,7 +661,7 @@ inline void Foam::DynamicList<T, SizeMin>::push_back
 template<class T, int SizeMin>
 inline Foam::label Foam::DynamicList<T, SizeMin>::push_uniq(const T& val)
 {
-    if (this->found(val))
+    if (this->contains(val))
     {
         return 0;
     }

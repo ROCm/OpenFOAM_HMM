@@ -248,7 +248,7 @@ inline void Foam::List<T>::push_back(const IndirectListBase<T, Addr>& list)
 template<class T>
 inline Foam::label Foam::List<T>::push_uniq(const T& val)
 {
-    if (this->found(val))
+    if (this->contains(val))
     {
         return 0;
     }

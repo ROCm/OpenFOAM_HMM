@@ -325,11 +325,11 @@ public:
         //  \return position in list or -1 if not found.
         label rfind(const T& val, label pos = -1) const;
 
-        //- True if the value if found in the list.
+        //- Is the value contained in the list?
+        //  Linear search from start pos until the end of the list.
         //  Any occurrences before the start pos are ignored.
-        //  Linear search.
         //  \return true if found.
-        inline bool found(const T& val, label pos = 0) const;
+        inline bool contains(const T& val, label pos = 0) const;
 
 
     // Edit
@@ -611,6 +611,12 @@ public:
         //- Access last element of the list, position [size()-1]
         //FOAM_DEPRECATED_FOR(2022-10, "back()")
         const T& last() const { return back(); };
+
+        //- Same as contains()
+        bool found(const T& val, label pos = 0) const
+        {
+            return this->contains(val, pos);
+        }
 };
 
 

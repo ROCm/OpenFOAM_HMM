@@ -450,7 +450,7 @@ const Foam::regIOobject* Foam::objectRegistry::cfindIOobject
 }
 
 
-bool Foam::objectRegistry::found
+bool Foam::objectRegistry::contains
 (
     const word& name,
     const bool recursive

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -256,7 +256,7 @@ inline void Foam::CircularBuffer<T>::reserve_nocopy(const label len)
 
 
 template<class T>
-inline bool Foam::CircularBuffer<T>::found(const T& val, label pos) const
+inline bool Foam::CircularBuffer<T>::contains(const T& val, label pos) const
 {
     return (this->find(val, pos) >= 0);
 }
@@ -395,7 +395,7 @@ inline void Foam::CircularBuffer<T>::pop_back(label n)
 template<class T>
 inline Foam::label Foam::CircularBuffer<T>::push_uniq(const T& val)
 {
-    if (this->found(val))
+    if (this->contains(val))
     {
         return 0;
     }

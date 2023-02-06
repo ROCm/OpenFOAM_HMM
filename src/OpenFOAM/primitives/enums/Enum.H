@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2022 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -139,6 +139,12 @@ public:
 
     // Query
 
+        //- True if there is an enumeration corresponding to the given name.
+        inline bool contains(const word& enumName) const;
+
+        //- True if there is a name corresponding to the given enumeration.
+        inline bool contains(const EnumType e) const;
+
         //- Find the index of the given name.
         //  \return position in list or -1 if not found.
         inline label find(const word& enumName) const;
@@ -146,12 +152,6 @@ public:
         //- Find the first index of given enumeration.
         //  \return position in list or -1 if not found.
         inline label find(const EnumType e) const;
-
-        //- True if there is an enumeration corresponding to the given name.
-        inline bool found(const word& enumName) const;
-
-        //- True if there is a name corresponding to the given enumeration.
-        inline bool found(const EnumType e) const;
 
         //- The enumeration corresponding to the given name.
         //  FatalError if not found.
@@ -319,7 +319,6 @@ public:
             return getOrDefault(key, dict, deflt, failsafe);
         }
 
-
         //- Deprecated(2020-11) use get() method
         //  \deprecated(2020-11) - use get() method
         FOAM_DEPRECATED_FOR(2020-11, "get() method")
@@ -361,6 +360,12 @@ public:
         {
             push_back(list);
         }
+
+        //- Same as contains()
+        bool found(const word& enumName) const { return contains(enumName); }
+
+        //- Same as contains()
+        bool found(const EnumType e) const { return contains(e); }
 };
 
 

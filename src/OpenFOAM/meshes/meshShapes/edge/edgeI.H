@@ -110,7 +110,7 @@ inline bool Foam::edge::good() const noexcept
 }
 
 
-inline bool Foam::edge::found(const label pointLabel) const
+inline bool Foam::edge::contains(const label pointLabel) const
 {
     // -1: always false
     return
@@ -142,17 +142,17 @@ inline Foam::label Foam::edge::which(const label pointLabel) const
 
 inline bool Foam::edge::connected(const edge& other) const
 {
-    return (other.found(first()) || other.found(second()));
+    return (other.contains(first()) || other.contains(second()));
 }
 
 
 inline Foam::label Foam::edge::commonVertex(const edge& other) const
 {
-    if (other.found(first()))
+    if (other.contains(first()))
     {
         return first();
     }
-    if (other.found(second()))
+    if (other.contains(second()))
     {
         return second();
     }
