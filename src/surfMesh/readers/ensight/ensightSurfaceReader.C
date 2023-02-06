@@ -254,7 +254,7 @@ void Foam::ensightSurfaceReader::readCase(ISstream& is)
     //     model: data/directory/geometry
     //
     // - use the last entry
-    meshFileName_ = stringOps::splitSpace(buffer).last().str();
+    meshFileName_ = stringOps::splitSpace(buffer).back().str();
 
     DebugInfo << "mesh file:" << meshFileName_ << endl;
 
@@ -295,8 +295,8 @@ void Foam::ensightSurfaceReader::readCase(ISstream& is)
             Info<< nl;
         }
 
-        fieldNames.append(parsed[parsed.size()-2].str());
-        fieldFileNames.append(parsed.last().str());
+        fieldNames.push_back(parsed[parsed.size()-2].str());
+        fieldFileNames.push_back(parsed.back().str());
     }
     fieldNames_.transfer(fieldNames);
     fieldFileNames_.transfer(fieldFileNames);
@@ -471,7 +471,7 @@ Foam::meshedSurface Foam::ensightSurfaceReader::readGeometry
             {
                 is.read(faceCount);
 
-                faceTypeInfo.append
+                faceTypeInfo.push_back
                 (
                     faceInfoTuple(ensightFaces::elemType::TRIA3, faceCount)
                 );
@@ -501,7 +501,7 @@ Foam::meshedSurface Foam::ensightSurfaceReader::readGeometry
                         is.read(fp);
                     }
 
-                    dynFaces.append(std::move(f));
+                    dynFaces.push_back(std::move(f));
                 }
             }
             else if
@@ -512,7 +512,7 @@ Foam::meshedSurface Foam::ensightSurfaceReader::readGeometry
             {
                 is.read(faceCount);
 
-                faceTypeInfo.append
+                faceTypeInfo.push_back
                 (
                     faceInfoTuple(ensightFaces::elemType::QUAD4, faceCount)
                 );
@@ -542,7 +542,7 @@ Foam::meshedSurface Foam::ensightSurfaceReader::readGeometry
                         is.read(fp);
                     }
 
-                    dynFaces.append(std::move(f));
+                    dynFaces.push_back(std::move(f));
                 }
             }
             else if
@@ -553,7 +553,7 @@ Foam::meshedSurface Foam::ensightSurfaceReader::readGeometry
             {
                 is.read(faceCount);
 
-                faceTypeInfo.append
+                faceTypeInfo.push_back
                 (
                     faceInfoTuple(ensightFaces::elemType::NSIDED, faceCount)
                 );
@@ -588,7 +588,7 @@ Foam::meshedSurface Foam::ensightSurfaceReader::readGeometry
                         is.read(fp);
                     }
 
-                    dynFaces.append(std::move(f));
+                    dynFaces.push_back(std::move(f));
                 }
             }
             else
