@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,10 +44,8 @@ Warning
 #define Foam_processorTopologyNew_H
 
 #include "processorTopology.H"
-#include "bitSet.H"
 #include "commSchedule.H"
 #include "DynamicList.H"
-#include "Pstream.H"
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
@@ -58,73 +56,31 @@ Foam::processorTopology Foam::processorTopology::New
     const label comm
 )
 {
-    const label myProci = Pstream::myProcNo(comm);
-    const label nProcs = Pstream::nProcs(comm);
+    processorTopology topo;
 
-    processorTopology procTopo;
+    topo.comm_ = comm;  // The communicator
+    auto& schedule = topo.patchSchedule_;
 
-    auto& procToProcs = procTopo.procNeighbours_;
-    auto& procToPatch = procTopo.procPatchMap_;
-    auto& schedule = procTopo.patchSchedule_;
-
-    procToProcs.resize(nProcs);
     schedule.resize(2*patches.size());
 
 
-    if (Pstream::parRun())
-    {
-        // Fill my 'slot' with my neighbours
-        auto& procSlot = procToProcs[myProci];
-
-        bitSet isNeighbour(procToProcs.size());
-
-        forAll(patches, patchi)
-        {
-            const auto* cpp = isA<ProcPatch>(patches[patchi]);
-            if (cpp)
-            {
-                const label nbrProci = cpp->neighbProcNo();
-
-                isNeighbour.set(nbrProci);
-            }
-        }
-
-        // The neighbouring procs in sorted (ascending) order
-        procSlot = isNeighbour.sortedToc();
-
-        const label maxNbrProci = procSlot.empty() ? -1 : procSlot.last();
-
-        // Note could also use Map<label> if desired
-        procToPatch.resize_nocopy(maxNbrProci + 1);
-        procToPatch = -1;
-
-        forAll(patches, patchi)
-        {
-            const auto* cpp = isA<ProcPatch>(patches[patchi]);
-            if (cpp)
-            {
-                const label nbrProci = cpp->neighbProcNo();
-
-                // Reverse map
-                procToPatch[nbrProci] = patchi;
-            }
-        }
-
-        // Synchronize on all processors
-        Pstream::allGatherList(procToProcs, UPstream::msgType(), comm);
-    }
-
-
-    // Define the schedule
-
+    // The evaluation number within the schedule
     label patchEvali = 0;
 
-    // 1. All non-processor patches
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Number of processor patches
+    label numProcPatches = 0;
+
+    //
+    // 1. Schedule all non-processor patches
+    //
 
     forAll(patches, patchi)
     {
-        if (!isA<ProcPatch>(patches[patchi]))
+        if (isA<ProcPatch>(patches[patchi]))
+        {
+            ++numProcPatches;
+        }
+        else
         {
             schedule[patchEvali++].setInitEvaluate(patchi);
             schedule[patchEvali++].setEvaluate(patchi);
@@ -132,15 +88,42 @@ Foam::processorTopology Foam::processorTopology::New
     }
 
 
-    // 2. All processor patches
-    // ~~~~~~~~~~~~~~~~~~~~~~~~
+    // Assemble processor patch information
+    if (UPstream::parRun() && numProcPatches)
+    {
+        // Create reverse map (from proc to patch)
+        // - assumes single connections between processors
+
+        auto& patchMap = topo.procPatchMap_;
+        patchMap.resize(2*numProcPatches);
+
+        forAll(patches, patchi)
+        {
+            const auto* cpp = isA<ProcPatch>(patches[patchi]);
+            if (cpp)
+            {
+                patchMap.set(cpp->neighbProcNo(), patchi);
+            }
+        }
+    }
+
+
+    //
+    // 2. Handle processor patches
+    //
 
     if
     (
-        Pstream::parRun()
-     && Pstream::defaultCommsType == Pstream::commsTypes::scheduled
+        UPstream::parRun()
+     && UPstream::defaultCommsType == UPstream::commsTypes::scheduled
     )
     {
+        const label myProci = UPstream::myProcNo(comm);
+        const label nProcs = UPstream::nProcs(comm);
+
+        // Synchronized on all processors
+        const auto& procToProcs = topo.procAdjacency();
+
         // Determine the schedule for all processor patches.
         // Insert processor pair once to determine the schedule.
         // Each processor pair stands for both send and receive.
@@ -158,30 +141,28 @@ Foam::processorTopology Foam::processorTopology::New
             {
                 if (proci < nbrProci)
                 {
-                    comms.append(labelPair(proci, nbrProci));
+                    // Owner to neighbour connection
+                    comms.push_back(labelPair(proci, nbrProci));
                 }
             }
         }
 
         // Determine a schedule.
+
         labelList mySchedule
         (
-            commSchedule
-            (
-                nProcs,
-                comms
-            ).procSchedule()[myProci]
+            commSchedule(nProcs, comms).procSchedule()[myProci]
         );
 
         for (const label scheduleIndex : mySchedule)
         {
             // Get the other processor
-            label nbrProci = comms[scheduleIndex][0];
+            label nbrProci = comms[scheduleIndex].first();
             if (nbrProci == myProci)
             {
-                nbrProci = comms[scheduleIndex][1];
+                nbrProci = comms[scheduleIndex].second();
             }
-            const label patchi = procToPatch[nbrProci];
+            const label patchi = topo.procPatchLookup(nbrProci);
 
             if (myProci > nbrProci)
             {
@@ -199,26 +180,21 @@ Foam::processorTopology Foam::processorTopology::New
     {
         // Non-blocking schedule for processor patches
 
-        // initEvaluate
-        forAll(patches, patchi)
+        if (numProcPatches)
         {
-            if (isA<ProcPatch>(patches[patchi]))
+            forAll(patches, patchi)
             {
-                schedule[patchEvali++].setInitEvaluate(patchi);
-            }
-        }
-
-        // evaluate
-        forAll(patches, patchi)
-        {
-            if (isA<ProcPatch>(patches[patchi]))
-            {
-                schedule[patchEvali++].setEvaluate(patchi);
+                if (isA<ProcPatch>(patches[patchi]))
+                {
+                    schedule[patchEvali].setInitEvaluate(patchi);
+                    schedule[patchEvali + numProcPatches].setEvaluate(patchi);
+                    ++patchEvali;
+                }
             }
         }
     }
 
-    return procTopo;
+    return topo;
 }
 
 

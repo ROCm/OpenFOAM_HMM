@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
 
     // Adjacency table
     const labelListList& connectivity =
-        mesh.globalData().topology().procNeighbours();
+        mesh.globalData().topology().procAdjacency();
 
     if (Pstream::master())
     {

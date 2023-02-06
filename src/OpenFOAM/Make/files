@@ -26,6 +26,8 @@ $(fileOps)/collatedFileOperation/hostCollatedFileOperation.C
 $(fileOps)/collatedFileOperation/threadedCollatedOFstream.C
 $(fileOps)/collatedFileOperation/OFstreamCollator.C
 
+parallel/processorTopology/processorTopology.C
+
 bools = primitives/bools
 $(bools)/bool/bool.C
 $(bools)/Switch/Switch.C
