@@ -207,9 +207,9 @@ public:
         inline bool emplace(const Key& key, Args&&... args);
 
         //- Emplace set an entry, overwriting any existing entries.
-        //  \return True, since it always overwrites any entries.
+        //  \return Reference to the new element.
         template<class... Args>
-        inline bool emplace_set(const Key& key, Args&&... args);
+        inline T& emplace_set(const Key& key, Args&&... args);
 
         //- No insert() with raw pointers (potential memory leaks).
         //- Use insert() with autoPtr or set()

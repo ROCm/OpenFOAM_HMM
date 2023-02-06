@@ -95,13 +95,15 @@ inline bool Foam::HashPtrTable<T, Key, Hash>::emplace
 
 template<class T, class Key, class Hash>
 template<class... Args>
-inline bool Foam::HashPtrTable<T, Key, Hash>::emplace_set
+inline T& Foam::HashPtrTable<T, Key, Hash>::emplace_set
 (
     const Key& key,
     Args&&... args
 )
 {
-    return this->set(key, new T(std::forward<Args>(args)...));
+    T* ptr = new T(std::forward<Args>(args)...);
+    (void)this->set(key, ptr);
+    return *ptr;
 }
 
 

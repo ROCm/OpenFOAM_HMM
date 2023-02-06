@@ -220,8 +220,9 @@ template<class T, int SizeMin>
 template<class... Args>
 inline T& Foam::PtrDynList<T, SizeMin>::emplace_back(Args&&... args)
 {
-    this->push_back(new T(std::forward<Args>(args)...));
-    return this->back();
+    T* ptr = new T(std::forward<Args>(args)...);
+    this->push_back(ptr);
+    return *ptr;
 }
 
 
@@ -346,13 +347,15 @@ inline Foam::autoPtr<T> Foam::PtrDynList<T, SizeMin>::remove()
 
 template<class T, int SizeMin>
 template<class... Args>
-inline Foam::autoPtr<T> Foam::PtrDynList<T, SizeMin>::emplace
+inline T& Foam::PtrDynList<T, SizeMin>::emplace
 (
     const label i,
     Args&&... args
 )
 {
-    return this->set(i, new T(std::forward<Args>(args)...));
+    T* ptr = new T(std::forward<Args>(args)...);
+    (void)this->set(i, ptr);
+    return *ptr;
 }
 
 

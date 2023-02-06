@@ -172,9 +172,11 @@ public:
         //- Move append another list to the end of this list.
         inline void push_back(PtrList<T>&& other);
 
-        //- Construct and set an element
+        //- Construct and set a new element at given position,
+        //- (discard old element at that location).
+        //- Return reference to the new list element.
         template<class... Args>
-        inline autoPtr<T> emplace(const label i, Args&&... args);
+        inline T& emplace(const label i, Args&&... args);
 
         //- Set element to given pointer and return old element (can be null)
         //  No-op if the new pointer value is identical to the current content.

@@ -599,7 +599,9 @@ int main(int argc, char *argv[])
         dynPlanes.set(6, new plane(vector(2,2,1), vector::one));
         dynPlanes.set(10, new plane(vector(4,5,6), vector::one));
 
-        dynPlanes.emplace(12, vector(3,2,1), vector::one);
+        Info<< "emplaced :"
+            << dynPlanes.emplace(12, vector(3,2,1), vector::one) << endl;
+
         dynPlanes.emplace_back(Zero, vector::one);
     }
 

@@ -174,9 +174,11 @@ public:
         //- Remove and return the top element. Can be called on an empty list.
         inline autoPtr<T> remove();
 
-        //- Construct and set an element
+        //- Construct and set a new element at given position,
+        //- (discard old element at that location).
+        //- Return reference to the new list element.
         template<class... Args>
-        inline autoPtr<T> emplace(const label i, Args&&... args);
+        inline T& emplace(const label i, Args&&... args);
 
         //- Set element to given pointer and return old element (can be null).
         //- Auto-sizes list as required.
