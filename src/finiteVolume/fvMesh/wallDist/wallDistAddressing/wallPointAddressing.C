@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,10 +25,31 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "wallPointYPlus.H"
+#include "wallPointAddressing.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Foam::scalar Foam::wallPointYPlus::yPlusCutOff = 200;
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const wallPointAddressing& rhs
+)
+{
+    return os
+        << static_cast<const wallPoint&>(rhs)
+        << token::SPACE
+        << rhs.data();
+}
+
+
+Foam::Istream& Foam::operator>>
+(
+    Istream& is,
+    wallPointAddressing& rhs
+)
+{
+    return is >> static_cast<wallPoint&>(rhs) >> rhs.data_;
+}
+
 
 // ************************************************************************* //
