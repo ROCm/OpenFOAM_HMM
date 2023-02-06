@@ -73,6 +73,22 @@ void printMinMax(const HashSet<Key, Hash>& set)
 }
 
 
+template<class Key, class Hash>
+void printHashSet(const HashSet<Key, Hash>& table)
+{
+    Info<< table.size() << '(' << nl;
+
+    for (const auto& key : table.sortedToc())
+    {
+        const auto iter = table.find(key);
+
+        Info<< "    " << key << " : " << Foam::name(&(iter.key())) << nl;
+    }
+
+    Info<< ')' << nl;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Main program:
 
@@ -84,33 +100,33 @@ int main(int argc, char *argv[])
         << typeid(HashSet<label>::hasher).name() << nl << nl;
 
     hashedWordList words
-    {
+    ({
         "abc",
         "def",
         "ghi"
-    };
+    });
     words = { "def", "ghi", "xy", "all", "end", "all" };
 
     wordHashSet setA
-    {
+    ({
         "xx",
         "yy",
         "zz"
-    };
+    });
 
     setA = { "kjhk", "kjhk2", "abced" };
 
     HashTable<label> tableA
-    {
+    ({
         { "value1", 1 },
         { "value2", 2 },
         { "value3", 3 }
-    };
+    });
 
     HashTable<nil> tableB;
-    tableB.insert("value4", nil());
-    tableB.insert("value5", nil());
-    tableB.insert("value6", nil());
+    tableB.emplace("value4");
+    tableB.emplace("value5");
+    tableB.emplace("value6");
 
     Info<< "tableA keys: "; tableA.writeKeys(Info) << endl;
 
@@ -123,11 +139,11 @@ int main(int argc, char *argv[])
     }
 
     Map<label> mapA
-    {
+    ({
         { 1, 1 },
         { 2, 2 },
         { 3, 3 }
-    };
+    });
     mapA.set(4, 4);
 
     Info<< "hashedWordList: " << words << nl
@@ -185,9 +201,9 @@ int main(int argc, char *argv[])
     }
 
     labelHashSet setB
-    {
+    ({
         1, 11, 42
-    };
+    });
 
     Info<<"Set with min/max:" << minMax(setB)
         << " min:" << min(setB) << " max:" << max(setB) << nl;
@@ -308,6 +324,26 @@ int main(int argc, char *argv[])
 
     Info<< "setA1: " << setA1 << nl
         << "setB1: " << setB1 << nl;
+
+
+    // Merging
+    {
+        wordHashSet set0({ "abc", "kjhk", "kjhk2" });
+        wordHashSet set1({ "abc", "def", "ghi", "jkl" });
+
+        Info<< nl
+            << "Set0" << nl;
+        printHashSet(set0);
+        Info<< "Set1" << nl;
+        printHashSet(set1);
+
+        set1.merge(set0);
+
+        Info<< "merged 0" << nl;
+        printHashSet(set0);
+        Info<< "merged 1" << nl;
+        printHashSet(set1);
+    }
 
     return 0;
 }

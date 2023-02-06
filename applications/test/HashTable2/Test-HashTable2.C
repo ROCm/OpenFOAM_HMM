@@ -79,26 +79,56 @@ public:
 };
 
 
+template<class T, class Key, class Hash>
+void printTable(const HashPtrTable<T, Key, Hash>& table)
+{
+    Info<< table.size() << '(' << nl;
+
+    for (const auto& key : table.sortedToc())
+    {
+        const auto iter = table.find(key);
+
+        Info
+            << "    " << iter.key() << " (" << Foam::name(&(iter.key()))
+            << ") : ";
+
+        if (iter.val())
+        {
+            Info<< *(iter.val());
+        }
+        else
+        {
+            Info<< "nullptr";
+        }
+
+        Info<< " (" << Foam::name(iter.val()) << ")" << nl;;
+    }
+
+    Info<< ')' << nl;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Main program:
 
 int main(int argc, char *argv[])
 {
-    HashTable<label, Foam::string> table1
-    {
+    HashTable<Label, Foam::string> table0
+    ({
+        {"abc", 123},
         {"kjhk", 10},
         {"kjhk2", 12}
-    };
+    });
 
-    Info<< "table1: " << table1 << nl
-        << "toc: " << flatOutput(table1.toc()) << nl;
+    Info<< "table0: " << table0 << nl
+        << "toc: " << flatOutput(table0.toc()) << nl;
 
     HashTable<label, label, Hash<label>> table2
-    {
+    ({
         {3, 10},
         {5, 12},
         {7, 16}
-    };
+    });
 
     Info<< "table2: " << table2 << nl
         << "toc: " << flatOutput(table2.toc()) << nl;
@@ -127,7 +157,7 @@ int main(int argc, char *argv[])
         table1.insert("ghi", 15);
         table1.insert("jkl", 20);
 
-        Info<< nl << "Table toc: " << flatOutput(table1.toc()) << nl;
+        Info<< nl << "Table toc: " << flatOutput(table1.sortedToc()) << nl;
 
         for (const word k : { "abc" })
         {
@@ -153,16 +183,30 @@ int main(int argc, char *argv[])
                     ;
             }
         }
+
+        Info<< nl
+            << "Table0: " << flatOutput(table0.sortedToc()) << nl
+            << "Table1: " << flatOutput(table1.sortedToc()) << nl;
+
+        table1.merge(table0);
+
+        Info<< "merged 0: " << flatOutput(table0.sortedToc()) << nl
+            << "merged 1: " << flatOutput(table1.sortedToc()) << nl;
     }
 
     {
+        HashPtrTable<Label> ptable0(0);
+        ptable0.emplace("abc", 123),
+        ptable0.emplace("kjhk", 10);
+        ptable0.emplace("kjhk2", 12);
+
         HashPtrTable<Label> ptable1(0);
         ptable1.insert("abc", autoPtr<Label>::New(5));
-        ptable1.insert("def", autoPtr<Label>::New(10));
-        ptable1.insert("ghi", autoPtr<Label>::New(15));
-        ptable1.insert("jkl", autoPtr<Label>::New(20));
+        ptable1.emplace("def", 10);
+        ptable1.emplace("ghi", 15);
+        ptable1.emplace("jkl", 20);
 
-        Info<< nl << "PtrTable toc: " << flatOutput(ptable1.toc()) << nl;
+        Info<< nl << "PtrTable toc: " << flatOutput(ptable1.sortedToc()) << nl;
 
         for (const word k : { "abc" })
         {
@@ -242,6 +286,20 @@ int main(int argc, char *argv[])
             }
         }
 
+        Info<< nl
+            << "Table0" << nl;
+        printTable(ptable0);
+
+        Info<< "Table1" << nl;
+        printTable(ptable1);
+
+        ptable1.merge(ptable0);
+
+        Info<< "merged 0" << nl;
+        printTable(ptable0);
+        Info<< "merged 1" << nl;
+        printTable(ptable1);
+
         Info<< nl << "Ending scope" << nl;
     }
 
@@ -277,6 +335,28 @@ int main(int argc, char *argv[])
             Info<< "got with " << (*iter).size() << nl;
         }
 
+        Info<< nl
+            << "Test (DIY) insert_or_assign" << nl;
+
+        label nKeys = 0;
+
+        for (const auto& key : { "abc", "foo", "mno", "xyz" })
+        {
+            Info<< key;
+            if (ltable1.contains(key))
+            {
+                Info<< " : " << ltable1[key];
+            }
+            else
+            {
+                Info<< " : n/a";
+            }
+
+            /// ltable1.insert_or_assign(key, identity(++nKeys));
+            ltable1(key) = identity(++nKeys);
+
+            Info<< "  --> " << ltable1[key] << nl;
+        }
     }
 
     Info<< "\nEnd\n" << endl;

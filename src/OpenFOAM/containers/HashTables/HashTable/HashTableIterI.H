@@ -70,7 +70,8 @@ inline Foam::HashTable<T, Key, Hash>::Iterator<Const>::Iterator
 
 
 //
-// Any changes here may need changes in iterator_erase() method too
+// Any changes here may need changes in iterator_erase(), iterator_extract()
+// methods too
 //
 template<class T, class Key, class Hash>
 template<bool Const>

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -229,6 +229,20 @@ inline Foam::label Foam::HashSet<Key, Hash>::unset
 )
 {
     return unset(list.begin(), list.end());
+}
+
+
+template<class Key, class Hash>
+void Foam::HashSet<Key, Hash>::merge(HashSet<Key, Hash>& source)
+{
+    parent_type::merge(source);
+}
+
+
+template<class Key, class Hash>
+void Foam::HashSet<Key, Hash>::merge(HashSet<Key, Hash>&& source)
+{
+    parent_type::merge(source);
 }
 
 

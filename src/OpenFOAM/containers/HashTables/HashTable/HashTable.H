@@ -206,6 +206,17 @@ private:
         template<class... Args>
         bool setEntry(const bool overwrite, const Key& key, Args&&... args);
 
+        //- Insert node (low-level). The node must not previously exist!
+        void insert_node(node_type* entry);
+
+        //- Low-level entry erasure using iterator internals.
+        //  This invalidates the iterator until the next ++ operation.
+        //  \return True if the corresponding entry existed and was removed
+        bool iterator_erase(iterator& iter);
+
+        //- Unlink node from iterator (low-level).
+        node_type* iterator_extract(iterator& iter);
+
         //- Read hash table
         Istream& readTable(Istream& is);
 
@@ -532,6 +543,16 @@ public:
         //- Transfer contents into this table.
         void transfer(HashTable<T, Key, Hash>& rhs);
 
+        //- Attempts to extract entries from source parameter and insert them
+        //- into \c this, does not overwrite existing entries.
+        //- The source will contains any items that could not be merged.
+        void merge(HashTable<T, Key, Hash>& source);
+
+        //- Attempts to extract entries from source parameter and insert them
+        //- into \c this, does not overwrite existing entries.
+        //- The source will contains any items that could not be merged.
+        void merge(HashTable<T, Key, Hash>&& source);
+
 
     // Member Operators
 
@@ -713,11 +734,6 @@ protected:
                 return (entry_ != iter.entry_);
             }
         };
-
-        //- Low-level entry erasure using iterator internals.
-        //  This invalidates the iterator until the next ++ operation.
-        //  \return True if the corresponding entry existed and was removed
-        bool iterator_erase(node_type*& entry, label& index);
 
 public:
 

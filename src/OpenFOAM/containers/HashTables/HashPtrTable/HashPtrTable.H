@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2022 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -172,6 +172,16 @@ public:
 
         //- Clear all entries from table and delete any allocated pointers
         void clear();
+
+        //- Attempts to extract entries from source parameter and insert them
+        //- into \c this, does not overwrite existing entries.
+        //- The source will contains any items that could not be merged.
+        void merge(HashPtrTable<T, Key, Hash>& source);
+
+        //- Attempts to extract entries from source parameter and insert them
+        //- into \c this, does not overwrite existing entries.
+        //- The source will contains any items that could not be merged.
+        void merge(HashPtrTable<T, Key, Hash>&& source);
 
 
     // Reading/writing

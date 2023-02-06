@@ -152,36 +152,6 @@ Foam::IOobjectList::IOobjectList
 }
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-Foam::label Foam::IOobjectList::merge(IOobjectList&& other)
-{
-    // Remove by name to avoid uncertainties about invalid iterators
-
-    label count = 0;
-
-    wordList keys(other.toc());
-
-    for (const word& key : keys)
-    {
-        if (!found(key))
-        {
-            if (IOobject::debug)
-            {
-                InfoInFunction << "Merge " << key << nl;
-            }
-
-            if (add(other.remove(key)))
-            {
-                ++count;
-            }
-        }
-    }
-
-    return count;
-}
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 const Foam::IOobject* Foam::IOobjectList::cfindObject

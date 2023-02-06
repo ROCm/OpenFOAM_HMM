@@ -198,6 +198,32 @@ inline bool Foam::HashTable<T, Key, Hash>::set
 }
 
 
+// FUTURE?
+// If 'key' already exists, assign \c std::forward<T>(obj) to the
+// entry. If it does not exist, uses insert()
+//
+// template<class T, class Key, class Hash>
+// inline void Foam::HashTable<T, Key, Hash>::insert_or_assign
+// (
+//     const Key& key,
+//     T&& obj
+// )
+// {
+//     iterator iter(this->find(key));
+//
+//     if (iter.good())
+//     {
+//         iter.val() = std::forward<T>(obj);
+//     }
+//     else
+//     {
+//         this->setEntry(true, key, std::forward<T>(obj));
+//         // iter = this->find(key);
+//     }
+//     // return iter.val();
+// }
+
+
 template<class T, class Key, class Hash>
 inline const T& Foam::HashTable<T, Key, Hash>::lookup
 (

@@ -225,18 +225,10 @@ public:
     // Basic methods
 
         //- Move insert IOobject into the list
-        inline bool add(autoPtr<IOobject>&& objectPtr);
-
-        //- Move insert IOobject into the list
         inline bool add(autoPtr<IOobject>& objectPtr);
 
-        //- Add objects from other to this list without overwriting
-        //- existing keys.
-        //  After calling this, the other parameter will contains any items
-        //  that could not be merged.
-        //
-        //  \return number of items merged
-        label merge(IOobjectList&& other);
+        //- Move insert IOobject into the list
+        inline bool add(autoPtr<IOobject>&& objectPtr);
 
         //- Remove object from the list, by name or by iterator.
         //
@@ -362,7 +354,7 @@ public:
         //  word checkType = volScalarField::typeName;
         //
         //  Info<< checkType << "="
-        //      << (classes.found(checkType) ? classes[checkType].size() : 0)
+        //      << (classes.contains(checkType) ? classes[checkType].size() : 0)
         //      << nl;
         //  \endcode
         //  Using the two-parameter HashTable::lookup method lets us avoid

@@ -197,7 +197,7 @@ public:
         //- Same as insert (no value to overwrite)
         bool set(const Key& key)
         {
-            return insert(key);
+            return this->parent_type::emplace(key);
         }
 
         //- Unset the specified key - same as erase
@@ -206,6 +206,16 @@ public:
         {
             return this->parent_type::erase(key);
         }
+
+        //- Attempts to extract entries from source parameter and insert them
+        //- into \c this, does not overwrite existing entries.
+        //- The source will contains any items that could not be merged.
+        void merge(HashSet<Key, Hash>& source);
+
+        //- Attempts to extract entries from source parameter and insert them
+        //- into \c this, does not overwrite existing entries.
+        //- The source will contains any items that could not be merged.
+        void merge(HashSet<Key, Hash>&& source);
 
 
     // Convenience
@@ -370,7 +380,7 @@ public:
         //- Add entries to this HashSet
         this_type& operator|=(const this_type& rhs);
 
-        //- Only retain entries found in both HashSets
+        //- Only retain entries contained in both HashSets
         inline this_type& operator&=(const this_type& rhs);
 
         //- Only retain unique entries (xor)

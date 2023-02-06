@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2022 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -359,7 +359,8 @@ bool Foam::HashTable<T, Key, Hash>::setEntry
 {
     if (!capacity_)
     {
-        resize(2);
+        // Same as default sizing
+        resize(128);
     }
 
     const label index = hashKeyIndex(key);
@@ -384,13 +385,9 @@ bool Foam::HashTable<T, Key, Hash>::setEntry
             new node_type(table_[index], key, std::forward<Args>(args)...);
 
         ++size_;
-        if (double(size_)/capacity_ > 0.8 && capacity_ < maxTableSize)
+        if (0.8*capacity_ < size_)  // Resize after 80% fill factor
         {
-            #ifdef FULLDEBUG
-            DebugInFunction << "Doubling table size\n";
-            #endif
-
-            resize(2*capacity_);
+            if (capacity_ < maxTableSize) resize(2*capacity_);
         }
     }
     else if (overwrite)
@@ -425,14 +422,57 @@ bool Foam::HashTable<T, Key, Hash>::setEntry
     }
     else
     {
-        // Do not overwrite existing entry (STL 'insert' convention)
-        #ifdef FULLDEBUG
-        DebugInFunction << "Not inserting " << key << ": already in table\n";
-        #endif
+        // Not overwriting existing entry
         return false;
     }
 
     return true;
+}
+
+
+template<class T, class Key, class Hash>
+void Foam::HashTable<T, Key, Hash>::insert_node(node_type* entry)
+{
+    if (!entry) return;
+
+    if (!capacity_)
+    {
+        // Same as default sizing
+        resize(128);
+    }
+
+    const label index = hashKeyIndex(entry->key());
+
+    node_type* curr = nullptr;
+    //node_type* prev = nullptr;
+
+    for (node_type* ep = table_[index]; ep; ep = ep->next_)
+    {
+        if (entry->key() == ep->key())
+        {
+            curr = ep;
+            break;
+        }
+        //prev = ep;
+    }
+
+    if (!curr)
+    {
+        // Not found, insert it at the head
+        table_[index] = entry;
+
+        ++size_;
+        if (0.8*capacity_ < size_)  // Resize after 80% fill factor
+        {
+            if (capacity_ < maxTableSize) resize(2*capacity_);
+        }
+    }
+    else
+    {
+        FatalErrorInFunction
+            << "Not inserting " << entry->key() << ": already in table\n"
+            << exit(FatalError);
+    }
 }
 
 
@@ -444,9 +484,7 @@ bool Foam::HashTable<T, Key, Hash>::erase(const iterator& iter)
     // The parameter should be (iterator&), but then the compiler doesn't find
     // it correctly and tries to call as (iterator) instead.
 
-    iterator& it = const_cast<iterator&>(iter);
-
-    return iterator_erase(it.entry_, it.index_);
+    return iterator_erase(const_cast<iterator&>(iter));
 }
 
 
@@ -454,7 +492,7 @@ template<class T, class Key, class Hash>
 bool Foam::HashTable<T, Key, Hash>::erase(const Key& key)
 {
     iterator iter(find(key));
-    return erase(iter);
+    return iterator_erase(iter);
 }
 
 
@@ -605,10 +643,6 @@ void Foam::HashTable<T, Key, Hash>::resize(const label sz)
 
     if (newCapacity == oldCapacity)
     {
-        #ifdef FULLDEBUG
-        DebugInFunction << "New table size == old table size\n";
-        #endif
-
         return;
     }
     else if (!newCapacity)
@@ -617,7 +651,8 @@ void Foam::HashTable<T, Key, Hash>::resize(const label sz)
         if (size_)
         {
             WarningInFunction
-                << "HashTable contains " << size_ << " cannot resize(0)" << nl;
+                << "HashTable contains " << size_
+                << " elements, cannot resize(0)" << nl;
         }
         else
         {
@@ -646,8 +681,7 @@ void Foam::HashTable<T, Key, Hash>::resize(const label sz)
 
     // Move to new table[] but with new chaining.
 
-    label nMove = size_;  // Allow early completion
-    for (label i=0; nMove && i < oldCapacity; ++i)
+    for (label i = 0, nPending = size_; nPending && i < oldCapacity; ++i)
     {
         for (node_type* ep = oldTable[i]; ep; /*nil*/)
         {
@@ -661,8 +695,8 @@ void Foam::HashTable<T, Key, Hash>::resize(const label sz)
                 table_[newIdx] = ep;
             }
 
-            ep = next;  // continue in the linked-list
-            --nMove;    // note any early completion
+            ep = next;      // continue in the linked-list
+            --nPending;     // note any early completion
         }
         oldTable[i] = nullptr;
     }
@@ -806,6 +840,46 @@ Foam::label Foam::HashTable<T, Key, Hash>::filterEntries
     }
 
     return changed;
+}
+
+
+template<class T, class Key, class Hash>
+void Foam::HashTable<T, Key, Hash>::merge(HashTable<T, Key, Hash>& source)
+{
+    // Self-merge implicitly a no-op
+
+    if (node_type::stores_value())
+    {
+        // key/val pair
+        for (iterator iter = source.begin(); iter != source.end(); ++iter)
+        {
+            if (!contains(iter.key()))
+            {
+                node_type* entry = source.iterator_extract(iter);
+                this->insert_node(entry);
+            }
+        }
+    }
+    else
+    {
+        // key only, does not store a value.
+        // Since the key is const, juggling the node does not work
+
+        for (iterator iter = source.begin(); iter != source.end(); ++iter)
+        {
+            if (emplace(iter.key()))
+            {
+                source.erase(iter);
+            }
+        }
+    }
+}
+
+
+template<class T, class Key, class Hash>
+void Foam::HashTable<T, Key, Hash>::merge(HashTable<T, Key, Hash>&& source)
+{
+    merge(source);
 }
 
 
