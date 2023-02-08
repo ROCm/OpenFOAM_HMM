@@ -533,7 +533,7 @@ void Foam::PstreamDetail::allToAllConsensus
 
     if (UPstream::warnComm != -1 && comm != UPstream::warnComm)
     {
-        Pout<< "** non-blocking consensus Alltoall:";
+        Pout<< "** non-blocking consensus Alltoall (list):";
         Pout<< " numProc:" << numProc
             << " sendData:" << sendData.size()
             << " with comm:" << comm
@@ -551,7 +551,9 @@ void Foam::PstreamDetail::allToAllConsensus
             << Foam::abort(FatalError);
     }
 
+    // Initial: assign zero everywhere. Values of zero are never transmitted
     const Type zeroValue = pTraits<Type>::zero;
+    recvData = zeroValue;
 
     if (!UPstream::parRun() || numProc < 2)
     {
@@ -559,6 +561,7 @@ void Foam::PstreamDetail::allToAllConsensus
         recvData.deepCopy(sendData);
         return;
     }
+
 
     // Implementation description
     // --------------------------
@@ -577,15 +580,13 @@ void Foam::PstreamDetail::allToAllConsensus
     // This is because we are dealing with a flat list of entries to
     // send and not a sparse Map etc.
 
-    recvData = zeroValue;
-
     DynamicList<MPI_Request> requests(sendData.size());
 
     profilingPstream::beginTiming();
 
     // If there are synchronisation problems,
     // a beginning barrier can help, but should not be necessary
-    // if the unique message tags are being used.
+    // when unique message tags are being used.
 
     //// MPI_Barrier(PstreamGlobals::MPICommunicators_[comm]);
 
@@ -716,7 +717,7 @@ void Foam::PstreamDetail::allToAllConsensus
 
     if (UPstream::warnComm != -1 && comm != UPstream::warnComm)
     {
-        Pout<< "** non-blocking consensus Alltoall:";
+        Pout<< "** non-blocking consensus Alltoall (map):";
         Pout<< " numProc:" << numProc
             << " sendData:" << sendBufs.size()
             << " with comm:" << comm
@@ -725,9 +726,9 @@ void Foam::PstreamDetail::allToAllConsensus
         error::printStack(Pout);
     }
 
-    recvBufs.clear();
-
+    // Initial: clear out everything
     const Type zeroValue = pTraits<Type>::zero;
+    recvBufs.clear();
 
     if (!UPstream::parRun() || numProc < 2)
     {
@@ -735,7 +736,8 @@ void Foam::PstreamDetail::allToAllConsensus
         const auto iter = sendBufs.find(myProci);
         if (iter.found() && (iter.val() != zeroValue))
         {
-            recvBufs.emplace(iter.key(), iter.val());
+            // Do myself: insert_or_assign
+            recvBufs(iter.key()) = iter.val();
         }
         return;
     }
@@ -750,7 +752,7 @@ void Foam::PstreamDetail::allToAllConsensus
 
     // If there are synchronisation problems,
     // a beginning barrier can help, but should not be necessary
-    // if the unique message tags are being used.
+    // when unique message tags are being used.
 
     //// MPI_Barrier(PstreamGlobals::MPICommunicators_[comm]);
 
@@ -769,8 +771,8 @@ void Foam::PstreamDetail::allToAllConsensus
         }
         else if (proci == myProci)
         {
-            // Do myself
-            recvBufs.emplace(proci, sendData);
+            // Do myself: insert_or_assign
+            recvBufs(proci) = sendData;
         }
         else
         {

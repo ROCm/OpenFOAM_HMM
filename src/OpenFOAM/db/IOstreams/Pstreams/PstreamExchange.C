@@ -438,6 +438,7 @@ void Foam::Pstream::exchangeSizes
 )
 {
     Map<label> sendSizes(2*sendBufs.size());
+    recvSizes.clear();  // Done in allToAllConsensus too, but be explicit here
 
     forAllConstIters(sendBufs, iter)
     {

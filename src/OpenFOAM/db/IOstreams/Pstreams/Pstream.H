@@ -564,8 +564,13 @@ public:
 
     // Non-blocking exchange
 
-        //- Determine the exchange sizes of sendBufs (sparse map).
-        //- Only populates sizes for sendBufs with non-zero sizes.
+        //- Exchange the \b non-zero sizes of sendBufs entries (sparse map)
+        //- with all ranks in the communicator
+        //- using non-blocking consensus exchange.
+        //
+        //  Since the recvData map always cleared before receipt and sizes
+        //  of zero are never transmitted, a simple check
+        //  of its keys is sufficient to determine connectivity.
         //
         //  For \b non-parallel : copy size of rank (if it exists and non-empty)
         //  from sendBufs to recvSizes.
@@ -583,6 +588,7 @@ public:
         //- Exchange \em contiguous data using non-blocking consensus
         //- Sends sendData, receives into recvData.
         //
+        //  Each entry of the recvBufs list is cleared before receipt.
         //  For \b non-parallel : copy own rank from sendBufs to recvBufs.
         //
         //  \note The message tag should be chosen to be a unique value
@@ -598,6 +604,10 @@ public:
 
         //- Exchange \em contiguous data using non-blocking consensus
         //- Sends sendData, receives into recvData.
+        //
+        //  Each \em entry of the recvBufs map is cleared before receipt,
+        //  but the map itself if not cleared. This allows the map to preserve
+        //  allocated space (eg DynamicList entries) between calls.
         //
         //  For \b non-parallel : copy own rank (if it exists and non-empty)
         //  from sendBufs to recvBufs.

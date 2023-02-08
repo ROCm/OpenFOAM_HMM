@@ -69,18 +69,19 @@ void Foam::Pstream::exchangeConsensus
             << Foam::abort(FatalError);
     }
 
+    // Initial: resize and clear everything
     recvBufs.resize_nocopy(sendBufs.size());
+
+    for (auto& buf : recvBufs)
+    {
+        buf.clear();
+    }
 
     if (!UPstream::parRun() || numProc < 2)
     {
         // Do myself
         recvBufs[myProci] = sendBufs[myProci];
         return;
-    }
-
-    for (auto& buf : recvBufs)
-    {
-        buf.clear();
     }
 
     // This largely follows PstreamDetail::allToAllConsensus
@@ -92,7 +93,7 @@ void Foam::Pstream::exchangeConsensus
 
     // If there are synchronisation problems,
     // a beginning barrier can help, but should not be necessary
-    // if the unique message tags are being used.
+    // when unique message tags are being used.
 
     //// UPstream::barrier(comm);
 
@@ -210,40 +211,49 @@ void Foam::Pstream::exchangeConsensus
     const label myProci = UPstream::myProcNo(comm);
     const label numProc = UPstream::nProcs(comm);
 
-    recvBufs.clear();
+    // Initial: clear out receive 'slots'
+    // Preferrable to clear out the map entries instead of the map itself
+    // since this can potentially preserve allocated space
+    // (eg DynamicList entries) between calls
+
+    forAllIters(recvBufs, iter)
+    {
+        iter.val().clear();
+    }
 
     if (!UPstream::parRun() || numProc < 2)
     {
         // Do myself
         const auto iter = sendBufs.find(myProci);
-        if (iter.found())
+        if (iter.good())
         {
             const auto& sendData = iter.val();
 
             if (!sendData.empty())
             {
-                // Do myself
-                recvBufs.emplace(iter.key(), sendData);
+                // Do myself: insert_or_assign
+                recvBufs(iter.key()) = sendData;
             }
         }
         return;
     }
 
 
-    // The NBX algorithm but packed into Map (HashTable) containers
+    // Algorithm NBX: Nonblocking consensus with Map (HashTable) containers
 
     DynamicList<UPstream::Request> requests(sendBufs.size());
 
     //// profilingPstream::beginTiming();
 
-    // Beginning barrier (optional)
-    UPstream::barrier(comm);
+    // If there are synchronisation problems,
+    // a beginning barrier can help, but should not be necessary
+    // when unique message tags are being used.
+
+    //// UPstream::barrier(comm);
+
 
     // Start nonblocking synchronous send to process dest
-
-    // Same as forAllConstIters()
-    const auto endIter = sendBufs.cend();
-    for (auto iter = sendBufs.cbegin(); iter != endIter; ++iter)
+    forAllConstIters(sendBufs, iter)
     {
         const label proci = iter.key();
         const auto& sendData = iter.val();
@@ -254,8 +264,8 @@ void Foam::Pstream::exchangeConsensus
         }
         else if (proci == myProci)
         {
-            // Do myself
-            recvBufs.emplace(proci, sendData);
+            // Do myself: insert_or_assign
+            recvBufs(proci) = sendData;
         }
         else
         {

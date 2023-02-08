@@ -732,9 +732,12 @@ public:
             const label communicator = worldComm
         );
 
-        //- Exchange integer data with all processors (in the communicator)
-        //- using non-blocking consensus exchange
-        //  \c sendData[proci] is the value to send to proci.
+        //- Exchange \b non-zero integer data with all ranks in the communicator
+        //- using non-blocking consensus exchange.
+        //  The \c sendData[proci] is the (non-zero) value to send to proci.
+        //  After return recvData contains the non-zero values sent from the
+        //  other processors. The recvData list is always assigned zero before
+        //  receipt and values of zero are never transmitted.
         //  After return recvData contains the data from the other processors.
         //  \n
         //  For \b non-parallel : does a simple copy of sendData to recvData
@@ -749,9 +752,12 @@ public:
             const label communicator = worldComm
         );
 
-        //- Exchange integer data with all processors (in the communicator)
-        //- using non-blocking consensus exchange
-        //  \c sendData[proci] is the value to send to proci.
+        //- Exchange \b non-zero integer data with all ranks in the communicator
+        //- using non-blocking consensus exchange.
+        //  The \c sendData[proci] is the (non-zero) value to send to proci.
+        //  After return recvData contains the non-zero values sent from the
+        //  other processors. The recvData list is always assigned zero before
+        //  receipt and values of zero are never transmitted.
         //  After return recvData contains the data from the other processors.
         //  \n
         //  For \b non-parallel : does a simple copy of sendData to recvData
@@ -766,10 +772,13 @@ public:
             const label communicator = worldComm
         );
 
-        //- Exchange integer data with all processors (in the communicator)
-        //- using non-blocking consensus exchange
-        //  \c sendData[proci] is the value to send to proci.
-        //  After return recvData contains the data from the other processors.
+        //- Exchange \b non-zero integer data with all ranks in the communicator
+        //- using non-blocking consensus exchange.
+        //  The \c sendData[proci] is the (non-zero) value to send to proci.
+        //  After return recvData contains the non-zero values sent from the
+        //  other processors. Since the recvData map always cleared before
+        //  receipt and values of zero are never transmitted, a simple check
+        //  of its keys is sufficient to determine connectivity.
         //  \n
         //  For \b non-parallel : copy own rank (if it exists and non-zero)
         //  from sendData to recvData.
@@ -784,10 +793,13 @@ public:
             const label communicator = worldComm
         );
 
-        //- Exchange integer data with all processors (in the communicator)
-        //- using non-blocking consensus exchange
-        //  \c sendData[proci] is the value to send to proci.
-        //  After return recvData contains the data from the other processors.
+        //- Exchange \b non-zero integer data with all ranks in the communicator
+        //- using non-blocking consensus exchange.
+        //  The \c sendData[proci] is the (non-zero) value to send to proci.
+        //  After return recvData contains the non-zero values sent from the
+        //  other processors. Since the recvData map always cleared before
+        //  receipt and values of zero are never transmitted, a simple check
+        //  of its keys is sufficient to determine connectivity.
         //  \n
         //  For \b non-parallel : copy own rank (if it exists and non-zero)
         //  from sendData to recvData.
