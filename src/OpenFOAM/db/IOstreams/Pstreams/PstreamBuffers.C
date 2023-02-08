@@ -33,13 +33,15 @@ License
 
 void Foam::PstreamBuffers::finalExchange
 (
-    labelList& recvSizes,
-    const bool wait
+    const bool wait,
+    const bool needSizes,
+    labelList& recvSizes
 )
 {
     // Could also check that it is not called twice
     // but that is used for overlapping send/recv (eg, overset)
     finishedSendsCalled_ = true;
+    recvPositions_ = Zero;
 
     if (commsType_ == UPstream::commsTypes::nonBlocking)
     {
@@ -60,10 +62,13 @@ void Foam::PstreamBuffers::finalExchange
             );
 
             // Copy back out
-            recvSizes.resize_nocopy(recvBuffers_.size());
-            forAll(recvBuffers_, proci)
+            if (needSizes)
             {
-                recvSizes[proci] = recvBuffers_[proci].size();
+                recvSizes.resize_nocopy(recvBuffers_.size());
+                forAll(recvBuffers_, proci)
+                {
+                    recvSizes[proci] = recvBuffers_[proci].size();
+                }
             }
 
             return;
@@ -89,13 +94,15 @@ void Foam::PstreamBuffers::finalExchange
 (
     const labelUList& sendProcs,
     const labelUList& recvProcs,
-    labelList& recvSizes,
-    const bool wait
+    const bool wait,
+    const bool needSizes, // unused
+    labelList& recvSizes
 )
 {
     // Could also check that it is not called twice
     // but that is used for overlapping send/recv (eg, overset)
     finishedSendsCalled_ = true;
+    recvPositions_ = Zero;
 
     if (commsType_ == UPstream::commsTypes::nonBlocking)
     {
@@ -125,17 +132,18 @@ void Foam::PstreamBuffers::finalExchange
 void Foam::PstreamBuffers::finalExchangeGatherScatter
 (
     const bool isGather,
-    const bool wait
+    const bool wait,
+    const bool needSizes,
+    labelList& recvSizes
 )
 {
     // Could also check that it is not called twice
     // but that is used for overlapping send/recv (eg, overset)
     finishedSendsCalled_ = true;
+    recvPositions_ = Zero;
 
     if (commsType_ == UPstream::commsTypes::nonBlocking)
     {
-        labelList recvSizes;
-
         if (isGather)
         {
             // gather mode (all-to-one): master [0] <- everyone
@@ -145,7 +153,7 @@ void Foam::PstreamBuffers::finalExchangeGatherScatter
 
             if (!UPstream::master(comm_))
             {
-                recvSizes.resize_nocopy(recvBuffers_.size());
+                recvSizes.resize_nocopy(nProcs_);
                 recvSizes = Zero;
             }
         }
@@ -153,7 +161,7 @@ void Foam::PstreamBuffers::finalExchangeGatherScatter
         {
             // scatter mode (one-to-all): master [0] -> everyone
 
-            recvSizes.resize_nocopy(sendBuffers_.size());
+            recvSizes.resize_nocopy(nProcs_);
 
             if (UPstream::master(comm_))
             {
@@ -187,9 +195,9 @@ void Foam::PstreamBuffers::finalExchangeGatherScatter
 
 Foam::PstreamBuffers::PstreamBuffers
 (
-    const UPstream::commsTypes commsType,
-    const int tag,
-    const label comm,
+    UPstream::commsTypes commsType,
+    int tag,
+    label communicator,
     IOstreamOption::streamFormat fmt
 )
 :
@@ -198,30 +206,11 @@ Foam::PstreamBuffers::PstreamBuffers
     format_(fmt),
     commsType_(commsType),
     tag_(tag),
-    comm_(comm),
-    sendBuffers_(UPstream::nProcs(comm)),
-    recvBuffers_(UPstream::nProcs(comm)),
-    recvPositions_(UPstream::nProcs(comm), Zero)
-{}
-
-
-Foam::PstreamBuffers::PstreamBuffers
-(
-    const label comm,
-    const UPstream::commsTypes commsType,
-    const int tag,
-    IOstreamOption::streamFormat fmt
-)
-:
-    finishedSendsCalled_(false),
-    allowClearRecv_(true),
-    format_(fmt),
-    commsType_(commsType),
-    tag_(tag),
-    comm_(comm),
-    sendBuffers_(UPstream::nProcs(comm)),
-    recvBuffers_(UPstream::nProcs(comm)),
-    recvPositions_(UPstream::nProcs(comm), Zero)
+    comm_(communicator),
+    nProcs_(UPstream::nProcs(comm_)),
+    sendBuffers_(nProcs_),
+    recvBuffers_(nProcs_),
+    recvPositions_(nProcs_, Zero)
 {}
 
 
@@ -284,7 +273,7 @@ void Foam::PstreamBuffers::clear()
     {
         buf.clear();
     }
-    recvPositions_ = 0;
+    recvPositions_ = Zero;
 
     finishedSendsCalled_ = false;
 }
@@ -309,7 +298,7 @@ void Foam::PstreamBuffers::clearStorage()
     {
         buf.clearStorage();
     }
-    recvPositions_ = 0;
+    recvPositions_ = Zero;
 
     finishedSendsCalled_ = false;
 }
@@ -409,6 +398,46 @@ Foam::labelList Foam::PstreamBuffers::recvDataCounts() const
 }
 
 
+Foam::label Foam::PstreamBuffers::maxNonLocalRecvCount(const label proci) const
+{
+    label maxLen = 0;
+
+    if (finishedSendsCalled_)
+    {
+        forAll(recvPositions_, i)
+        {
+            if (i != proci)
+            {
+                const label len(recvBuffers_[i].size() - recvPositions_[i]);
+                maxLen = max(maxLen, len);
+            }
+        }
+    }
+    #ifdef FULLDEBUG
+    else
+    {
+        FatalErrorInFunction
+            << "Call finishedSends first" << exit(FatalError);
+    }
+    #endif
+
+    return maxLen;
+}
+
+
+Foam::label Foam::PstreamBuffers::maxRecvCount() const
+{
+    // Use out-of-range proci to avoid excluding any processor
+    return maxNonLocalRecvCount(-1);
+}
+
+
+Foam::label Foam::PstreamBuffers::maxNonLocalRecvCount() const
+{
+    return maxNonLocalRecvCount(UPstream::myProcNo(comm_));
+}
+
+
 const Foam::UList<char>
 Foam::PstreamBuffers::peekRecvData(const label proci) const
 {
@@ -449,7 +478,7 @@ bool Foam::PstreamBuffers::allowClearRecv(bool on) noexcept
 void Foam::PstreamBuffers::finishedSends(const bool wait)
 {
     labelList recvSizes;
-    finalExchange(recvSizes, wait);
+    finalExchange(wait, false, recvSizes);
 }
 
 
@@ -459,7 +488,7 @@ void Foam::PstreamBuffers::finishedSends
     const bool wait
 )
 {
-    finalExchange(recvSizes, wait);
+    finalExchange(wait, true, recvSizes);
 
     if (commsType_ != UPstream::commsTypes::nonBlocking)
     {
@@ -483,7 +512,7 @@ void Foam::PstreamBuffers::finishedSends
 )
 {
     labelList recvSizes;
-    finalExchange(sendProcs, recvProcs, recvSizes, wait);
+    finalExchange(sendProcs, recvProcs, wait, false, recvSizes);
 }
 
 
@@ -495,7 +524,7 @@ void Foam::PstreamBuffers::finishedSends
     const bool wait
 )
 {
-    finalExchange(sendProcs, recvProcs, recvSizes, wait);
+    finalExchange(sendProcs, recvProcs, wait, true, recvSizes);
 
     if (commsType_ != UPstream::commsTypes::nonBlocking)
     {
@@ -555,14 +584,14 @@ bool Foam::PstreamBuffers::finishedSends
             }
         }
 
-        finishedSends(wait);  // All-to-all
+        labelList recvSizes;
+        finishedSends(recvSizes, wait);  // All-to-all
 
         // The recv ranks
         recvProcs.clear();
-        forAll(recvBuffers_, proci)
+        forAll(recvSizes, proci)
         {
-            // ie, recvDataCount(proci)
-            if (!recvBuffers_[proci].empty())
+            if (recvSizes[proci] > 0)
             {
                 recvProcs.push_back(proci);
             }
@@ -581,13 +610,15 @@ bool Foam::PstreamBuffers::finishedSends
 
 void Foam::PstreamBuffers::finishedGathers(const bool wait)
 {
-    finalExchangeGatherScatter(true, wait);
+    labelList recvSizes;
+    finalExchangeGatherScatter(true, wait, false, recvSizes);
 }
 
 
 void Foam::PstreamBuffers::finishedScatters(const bool wait)
 {
-    finalExchangeGatherScatter(false, wait);
+    labelList recvSizes;
+    finalExchangeGatherScatter(false, wait, false, recvSizes);
 }
 
 
@@ -597,7 +628,7 @@ void Foam::PstreamBuffers::finishedGathers
     const bool wait
 )
 {
-    finalExchangeGatherScatter(true, wait);
+    finalExchangeGatherScatter(true, wait, true, recvSizes);
 
     if (commsType_ != UPstream::commsTypes::nonBlocking)
     {
@@ -610,11 +641,6 @@ void Foam::PstreamBuffers::finishedGathers
         // Note: maybe possible only if using different tag from write started
         // by ~UOPstream. Needs some work.
     }
-
-    // For nonBlocking mode, simply recover received sizes
-    // from the buffers themselves.
-
-    recvSizes = recvDataCounts();
 }
 
 
@@ -624,7 +650,7 @@ void Foam::PstreamBuffers::finishedScatters
     const bool wait
 )
 {
-    finalExchangeGatherScatter(false, wait);
+    finalExchangeGatherScatter(false, wait, true, recvSizes);
 
     if (commsType_ != UPstream::commsTypes::nonBlocking)
     {
@@ -637,11 +663,6 @@ void Foam::PstreamBuffers::finishedScatters
         // Note: maybe possible only if using different tag from write started
         // by ~UOPstream. Needs some work.
     }
-
-    // For nonBlocking mode, simply recover received sizes
-    // from the buffers themselves.
-
-    recvSizes = recvDataCounts();
 }
 
 

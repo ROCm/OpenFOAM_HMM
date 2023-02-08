@@ -137,8 +137,8 @@ class PstreamBuffers
         //- Communicator
         const label comm_;
 
-        //  Number of ranks associated with PstreamBuffers
-        //  currently obtained from recvPositions_
+        //- Number of ranks associated with PstreamBuffers (at construction)
+        const label nProcs_;
 
 
     // Buffer storage
@@ -157,7 +157,12 @@ class PstreamBuffers
 
         //- Mark all sends as having been done.
         //  This will start receives (nonBlocking comms).
-        void finalExchange(labelList& recvSizes, const bool wait);
+        void finalExchange
+        (
+            const bool wait,
+            const bool needSizes,   // If recvSizes needed or scratch
+            labelList& recvSizes
+        );
 
         //- Mark sends as done.
         //  Only exchange sizes using the sendProcs/recvProcs subset
@@ -166,12 +171,19 @@ class PstreamBuffers
         (
             const labelUList& sendProcs,
             const labelUList& recvProcs,
-            labelList& recvSizes,
-            const bool wait
+            const bool wait,
+            const bool needSizes,   // If recvSizes needed or scratch
+            labelList& recvSizes
         );
 
         //- For all-to-one or one-to-all
-        void finalExchangeGatherScatter(const bool isGather, const bool wait);
+        void finalExchangeGatherScatter
+        (
+            const bool isGather,
+            const bool wait,
+            const bool needSizes,   // If recvSizes needed or scratch
+            labelList& recvSizes
+        );
 
 
     // Friendship Access
@@ -194,23 +206,41 @@ public:
 
     // Constructors
 
-        //- Construct given comms type, message tag, communicator, IO format
+        //- Construct given communication type (default: nonBlocking), message
+        //- tag, communicator (default: worldComm), IO format (default: binary)
         explicit PstreamBuffers
         (
-            const UPstream::commsTypes commsType,
-            const int tag = UPstream::msgType(),
-            const label comm = UPstream::worldComm,
+            UPstream::commsTypes commsType = UPstream::commsTypes::nonBlocking,
+            int tag = UPstream::msgType(),
+            label communicator = UPstream::worldComm,
             IOstreamOption::streamFormat fmt = IOstreamOption::BINARY
         );
 
-        //- Construct given communicator, comms type, message tag, IO format
+        //- Construct given communicator, communication type
+        //- (default: nonBlocking), message tag, IO format (default: binary)
         explicit PstreamBuffers
         (
-            const label comm,
-            const UPstream::commsTypes commsType,
-            const int tag = UPstream::msgType(),
+            label communicator,
+            UPstream::commsTypes commsType = UPstream::commsTypes::nonBlocking,
+            int tag = UPstream::msgType(),
             IOstreamOption::streamFormat fmt = IOstreamOption::BINARY
-        );
+        )
+        :
+            PstreamBuffers(commsType, tag, communicator, fmt)
+        {}
+
+        //- Construct given communicator, message tag, communication type
+        //- (default: nonBlocking), IO format (default: binary)
+        PstreamBuffers
+        (
+            label communicator,
+            int tag,
+            UPstream::commsTypes commsType = UPstream::commsTypes::nonBlocking,
+            IOstreamOption::streamFormat fmt = IOstreamOption::BINARY
+        )
+        :
+            PstreamBuffers(commsType, tag, communicator, fmt)
+        {}
 
 
     //- Destructor - checks that all data have been consumed
@@ -248,7 +278,7 @@ public:
         //- Number of ranks associated with PstreamBuffers
         label nProcs() const noexcept
         {
-            return recvPositions_.size();
+            return nProcs_;
         }
 
 
@@ -258,14 +288,14 @@ public:
         UPstream::rangeType allProcs() const noexcept
         {
             // Proc 0 -> nProcs (int value)
-            return UPstream::rangeType(static_cast<int>(nProcs()));
+            return UPstream::rangeType(static_cast<int>(nProcs_));
         }
 
         //- Range of sub-processes indices associated with PstreamBuffers
         UPstream::rangeType subProcs() const noexcept
         {
             // Proc 1 -> nProcs (int value)
-            return UPstream::rangeType(1, static_cast<int>(nProcs()-1));
+            return UPstream::rangeType(1, static_cast<int>(nProcs_-1));
         }
 
 
@@ -301,6 +331,18 @@ public:
         //- Number of unconsumed receive bytes for all processors.
         //- Must call finishedSends() or other finished.. method first!
         labelList recvDataCounts() const;
+
+        //- Maximum receive size from any rocessor rank.
+        //- Must call finishedSends() or other finished.. method first!
+        label maxRecvCount() const;
+
+        //- Maximum receive size, excluding current processor rank
+        //- Must call finishedSends() or other finished.. method first!
+        label maxNonLocalRecvCount() const;
+
+        //- Maximum receive size, excluding the specified processor rank
+        //- Must call finishedSends() or other finished.. method first!
+        label maxNonLocalRecvCount(const label proci) const;
 
         //- Number of unconsumed receive bytes for the specified processor.
         //- Must call finishedSends() or other finished.. method first!
@@ -447,7 +489,7 @@ public:
         //- Mark all sends to master as done.
         //
         //  Non-blocking mode: populates receive buffers.
-        //  Can use recvDataCounts() method to recover sizes received.
+        //  Can use recvDataCount, maxRecvCount etc to recover sizes received.
         //
         //  \param wait wait for requests to complete (in nonBlocking mode)
         //
@@ -467,7 +509,7 @@ public:
         //- Mark all sends to sub-procs as done.
         //
         //  Non-blocking mode: populates receive buffers.
-        //  Can use recvDataCounts() method to recover sizes received.
+        //  Can use recvDataCount, maxRecvCount etc to recover sizes received.
         //
         //  \param wait wait for requests to complete (in nonBlocking mode)
         //
