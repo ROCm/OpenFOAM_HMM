@@ -52,6 +52,16 @@ Foam::UOPstream::UOPstream(const int toProcNo, PstreamBuffers& buffers)
 {}
 
 
+Foam::UOPstream::UOPstream
+(
+    DynamicList<char>& sendBuf,
+    IOstreamOption::streamFormat fmt
+)
+:
+    UOPstreamBase(sendBuf, fmt)
+{}
+
+
 Foam::OPstream::OPstream
 (
     const UPstream::commsTypes commsType,

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -91,6 +91,16 @@ Foam::UIPstream::UIPstream(const int fromProcNo, PstreamBuffers& buffers)
 }
 
 
+Foam::UIPstream::UIPstream
+(
+    const DynamicList<char>& recvBuf,
+    IOstreamOption::streamFormat fmt
+)
+:
+    UIPstreamBase(recvBuf, fmt)
+{}
+
+
 Foam::IPstream::IPstream
 (
     const UPstream::commsTypes commsType,
@@ -107,13 +117,12 @@ Foam::IPstream::IPstream
         commsType,
         fromProcNo,
         Pstream::transferBuf_,
-        transferBufPosition_,
+        UIPstreamBase::storedRecvBufPos_,   // Internal only
         tag,
         comm,
         false,  // Do not clear Pstream::transferBuf_ if at end
         fmt
-    ),
-    transferBufPosition_(0)
+    )
 {}
 
 

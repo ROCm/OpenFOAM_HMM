@@ -92,15 +92,20 @@ protected:
 
     // Protected Data
 
-        int toProcNo_;
+        //- Destination rank for the data
+        const int toProcNo_;
 
-        DynamicList<char>& sendBuf_;
-
+        //- Message tag for communication
         const int tag_;
 
-        const label comm_;
+        //- The communicator index
+        const int comm_;
 
+        //- Call bufferIPCsend on termination (in the destructor)
         const bool sendAtDestruct_;
+
+        //- Reference to the send buffer data
+        DynamicList<char>& sendBuf_;
 
 
     // Protected Constructors
@@ -122,6 +127,12 @@ protected:
         //- Construct given buffers
         UOPstreamBase(const int toProcNo, PstreamBuffers& buffers);
 
+        //- Construct for externally obtained buffers
+        UOPstreamBase
+        (
+            DynamicList<char>& sendBuf,
+            IOstreamOption::streamFormat fmt
+        );
 
 public:
 
@@ -309,6 +320,14 @@ public:
 
         //- Construct given buffers
         UOPstream(const int toProcNo, PstreamBuffers& buffers);
+
+        //- Construct for writing into a standalone buffer.
+        //- Data transfer is handled externally by the caller.
+        explicit UOPstream
+        (
+            DynamicList<char>& sendBuf,
+            IOstreamOption::streamFormat fmt = IOstreamOption::BINARY
+        );
 
 
     //- Destructor, usually sends buffer on destruct.
