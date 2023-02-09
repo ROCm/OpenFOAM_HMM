@@ -506,6 +506,11 @@ public:
             //  A no-op if parRun() == false or the list is empty
             static void waitRequests(UList<UPstream::Request>& requests);
 
+            //- Wait until any request has finished and return its index.
+            //  Returns -1 if parRun() == false, or the list is empty,
+            //  or if all the requests have already been handled
+            static label waitAnyRequest(UList<UPstream::Request>& requests);
+
             //- Wait until request i has finished.
             //  A no-op if parRun() == false,
             //  there are no pending requests,

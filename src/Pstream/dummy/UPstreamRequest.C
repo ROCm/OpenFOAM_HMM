@@ -56,6 +56,11 @@ void Foam::UPstream::resetRequests(const label n) {}
 void Foam::UPstream::waitRequests(const label pos) {}
 void Foam::UPstream::waitRequests(UList<UPstream::Request>&) {}
 
+Foam::label Foam::UPstream::waitAnyRequest(UList<UPstream::Request>&)
+{
+    return -1;
+}
+
 void Foam::UPstream::waitRequest(const label i) {}
 void Foam::UPstream::waitRequest(UPstream::Request&) {}
 

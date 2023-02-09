@@ -170,6 +170,57 @@ void Foam::UPstream::waitRequests(UList<UPstream::Request>& requests)
 }
 
 
+Foam::label Foam::UPstream::waitAnyRequest(UList<UPstream::Request>& requests)
+{
+    // No-op for non-parallel or no pending requests
+    if (!UPstream::parRun() || requests.empty())
+    {
+        return -1;
+    }
+
+    // Looks ugly but is legitimate since UPstream::Request is an intptr_t,
+    // which is always large enough to hold an MPI_Request (int or pointer)
+
+    label count = 0;
+    auto* waitRequests = reinterpret_cast<MPI_Request*>(requests.data());
+
+    // Transcribe UPstream::Request into MPI_Request
+    // - do not change locations within the list since these are relevant
+    //   for the return index.
+    for (auto& req : requests)
+    {
+        waitRequests[count] = PstreamDetail::Request::get(req);
+        ++count;
+    }
+
+    profilingPstream::beginTiming();
+
+    // On success: sets request to MPI_REQUEST_NULL
+    int index = -1;
+    if (MPI_Waitany(count, waitRequests, &index, MPI_STATUS_IGNORE))
+    {
+        FatalErrorInFunction
+            << "MPI_Waitany returned with error"
+            << Foam::abort(FatalError);
+    }
+
+    profilingPstream::addWaitTime();
+
+    if (index == MPI_UNDEFINED)
+    {
+        index = -1;  // No outstanding requests
+    }
+
+    // Transcribe MPI_Request back into UPstream::Request
+    while (--count >= 0)
+    {
+        requests[count] = UPstream::Request(waitRequests[count]);
+    }
+
+    return index;
+}
+
+
 // FUTURE?
 //
 /// void Foam::UPstream::waitRequests
