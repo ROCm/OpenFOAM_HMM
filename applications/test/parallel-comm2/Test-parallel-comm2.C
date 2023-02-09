@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,6 +39,7 @@ Description
 #include "Tuple2.H"
 #include "IOstreams.H"
 #include "PstreamReduceOps.H"
+#include <mpi.h>
 
 using namespace Foam;
 
@@ -62,6 +63,8 @@ int main(int argc, char *argv[])
     argList::noBanner();
     argList::noCheckProcessorDirectories();
     argList::addBoolOption("verbose", "Set debug level");
+    argList::addBoolOption("comm-split", "Test simple comm split");
+    argList::addBoolOption("host-comm", "Test DIY host-comm split");
 
     // Capture manually. We need values before proper startup
     int nVerbose = 0;
@@ -138,6 +141,91 @@ int main(int argc, char *argv[])
     rankInfo(newComm);
     Pout<< endl;
     #endif
+
+    if (Pstream::parRun() && args.found("comm-split"))
+    {
+        MPI_Comm hostComm;
+        MPI_Comm_split_type
+        (
+            MPI_COMM_WORLD,
+            MPI_COMM_TYPE_SHARED,  // OMPI_COMM_TYPE_NODE
+            0, MPI_INFO_NULL, &hostComm
+        );
+
+        int host_nprocs = 0;
+        int host_rank = 0;
+        MPI_Comm_size(hostComm, &host_nprocs);
+        MPI_Comm_rank(hostComm, &host_rank);
+
+        Pout<< nl << "Host comm with "
+            << host_rank << " / " << host_nprocs
+            << " (using MPI_Comm_split_type)" << endl;
+
+        MPI_Comm_free(&hostComm);
+    }
+    if (Pstream::parRun() && args.found("host-comm"))
+    {
+        // Host communicator, based on the current worldComm
+        // Use hostname
+        // Lowest rank per hostname is the IO rank
+
+        label numprocs = UPstream::nProcs(UPstream::globalComm);
+
+        stringList hosts(numprocs);
+        hosts[Pstream::myProcNo(UPstream::globalComm)] = hostName();
+
+        labelList hostIDs_;
+
+        // Compact
+        if (Pstream::master(UPstream::globalComm))
+        {
+            DynamicList<word> hostNames(numprocs);
+            hostIDs_.resize_nocopy(numprocs);
+
+            forAll(hosts, proci)
+            {
+                const word& host = hosts[proci];
+
+                hostIDs_[proci] = hostNames.find(host);
+
+                if (hostIDs_[proci] == -1)
+                {
+                    hostIDs_[proci] = hostNames.size();
+                    hostNames.push_back(host);
+                }
+            }
+        }
+
+        Pstream::broadcasts(UPstream::globalComm, hostIDs_);
+
+        const label myHostId =
+            hostIDs_[Pstream::myProcNo(UPstream::globalComm)];
+
+        DynamicList<label> subRanks;
+        forAll(hostIDs_, proci)
+        {
+            if (hostIDs_[proci] == myHostId)
+            {
+                subRanks.push_back(proci);
+            }
+        }
+
+        // Allocate new communicator with globalComm as its parent
+        const label hostComm =
+            UPstream::allocateCommunicator
+            (
+                UPstream::globalComm,  // parent
+                subRanks,
+                true
+            );
+
+        Pout<< nl << "Host comm with "
+            << UPstream::myProcNo(hostComm)
+            << " / " << UPstream::nProcs(hostComm)
+            << nl;
+
+        UPstream::freeCommunicator(hostComm, true);
+    }
 
     Info<< "\nEnd\n" << endl;
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2021-2022 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -117,11 +117,6 @@ class bitSet;
 
 class PstreamBuffers
 {
-    // Friendship
-    friend class UOPstreamBase;  // Access to sendBuf_
-    friend class UIPstreamBase;  // Access to recvBuf_, recvBufPos_
-
-
     // Private Data
 
         //- Track if sends are complete
@@ -142,21 +137,32 @@ class PstreamBuffers
         //- Communicator
         const label comm_;
 
-        //- Send buffer. Size is nProcs()
-        List<DynamicList<char>> sendBuf_;
+        //- Number of ranks associated with PstreamBuffers (at construction)
+        const label nProcs_;
 
-        //- Receive buffer. Size is nProcs()
-        List<DynamicList<char>> recvBuf_;
 
-        //- Current read positions within recvBuf_. Size is nProcs()
-        labelList recvBufPos_;
+    // Buffer storage
+
+        //- Send buffers. Size is nProcs()
+        List<DynamicList<char>> sendBuffers_;
+
+        //- Receive buffers. Size is nProcs()
+        List<DynamicList<char>> recvBuffers_;
+
+        //- Current read positions within recvBuffers_. Size is nProcs()
+        labelList recvPositions_;
 
 
     // Private Member Functions
 
         //- Mark all sends as having been done.
         //  This will start receives (nonBlocking comms).
-        void finalExchange(labelList& recvSizes, const bool wait);
+        void finalExchange
+        (
+            const bool wait,
+            const bool needSizes,   // If recvSizes needed or scratch
+            labelList& recvSizes
+        );
 
         //- Mark sends as done.
         //  Only exchange sizes using the sendProcs/recvProcs subset
@@ -165,35 +171,76 @@ class PstreamBuffers
         (
             const labelUList& sendProcs,
             const labelUList& recvProcs,
-            labelList& recvSizes,
-            const bool wait
+            const bool wait,
+            const bool needSizes,   // If recvSizes needed or scratch
+            labelList& recvSizes
         );
 
         //- For all-to-one or one-to-all
-        void finalExchangeGatherScatter(const bool isGather, const bool wait);
+        void finalExchangeGatherScatter
+        (
+            const bool isGather,
+            const bool wait,
+            const bool needSizes,   // If recvSizes needed or scratch
+            labelList& recvSizes
+        );
+
+
+    // Friendship Access
+
+        //- Access a send buffer for given proc (in range 0-nProcs)
+        DynamicList<char>& accessSendBuffer(const label proci);
+
+        //- Access a recv buffer for given proc (in range 0-nProcs).
+        DynamicList<char>& accessRecvBuffer(const label proci);
+
+        //- Access the recv position within recv buffer for given proc
+        //- (in range 0-nProcs).
+        label& accessRecvPosition(const label proci);
+
+        friend class UOPstreamBase;  // accessSendBuffer()
+        friend class UIPstreamBase;  // accessRecvBuffer(), accessRecvPosition()
 
 
 public:
 
     // Constructors
 
-        //- Construct given comms type, message tag, communicator, IO format
+        //- Construct given communication type (default: nonBlocking), message
+        //- tag, communicator (default: worldComm), IO format (default: binary)
         explicit PstreamBuffers
         (
-            const UPstream::commsTypes commsType,
-            const int tag = UPstream::msgType(),
-            const label comm = UPstream::worldComm,
+            UPstream::commsTypes commsType = UPstream::commsTypes::nonBlocking,
+            int tag = UPstream::msgType(),
+            label communicator = UPstream::worldComm,
             IOstreamOption::streamFormat fmt = IOstreamOption::BINARY
         );
 
-        //- Construct given communicator, comms type, message tag, IO format
+        //- Construct given communicator, communication type
+        //- (default: nonBlocking), message tag, IO format (default: binary)
         explicit PstreamBuffers
         (
-            const label comm,
-            const UPstream::commsTypes commsType,
-            const int tag = UPstream::msgType(),
+            label communicator,
+            UPstream::commsTypes commsType = UPstream::commsTypes::nonBlocking,
+            int tag = UPstream::msgType(),
             IOstreamOption::streamFormat fmt = IOstreamOption::BINARY
-        );
+        )
+        :
+            PstreamBuffers(commsType, tag, communicator, fmt)
+        {}
+
+        //- Construct given communicator, message tag, communication type
+        //- (default: nonBlocking), IO format (default: binary)
+        PstreamBuffers
+        (
+            label communicator,
+            int tag,
+            UPstream::commsTypes commsType = UPstream::commsTypes::nonBlocking,
+            IOstreamOption::streamFormat fmt = IOstreamOption::BINARY
+        )
+        :
+            PstreamBuffers(commsType, tag, communicator, fmt)
+        {}
 
 
     //- Destructor - checks that all data have been consumed
@@ -202,7 +249,7 @@ public:
 
     // Member Functions
 
-    // Access
+    // Attributes
 
         //- The associated buffer format (ascii | binary)
         IOstreamOption::streamFormat format() const noexcept
@@ -216,39 +263,39 @@ public:
             return commsType_;
         }
 
-        //- The transfer message type
+        //- The transfer message tag
         int tag() const noexcept
         {
             return tag_;
         }
 
-        //- Communicator
+        //- The communicator index
         label comm() const noexcept
         {
             return comm_;
         }
 
-
-    // Sizing
-
         //- Number of ranks associated with PstreamBuffers
         label nProcs() const noexcept
         {
-            return recvBufPos_.size();
+            return nProcs_;
         }
+
+
+    // Sizing
 
         //- Range of ranks indices associated with PstreamBuffers
         UPstream::rangeType allProcs() const noexcept
         {
             // Proc 0 -> nProcs (int value)
-            return UPstream::rangeType(static_cast<int>(nProcs()));
+            return UPstream::rangeType(static_cast<int>(nProcs_));
         }
 
         //- Range of sub-processes indices associated with PstreamBuffers
         UPstream::rangeType subProcs() const noexcept
         {
             // Proc 1 -> nProcs (int value)
-            return UPstream::rangeType(1, static_cast<int>(nProcs()-1));
+            return UPstream::rangeType(1, static_cast<int>(nProcs_-1));
         }
 
 
@@ -284,6 +331,18 @@ public:
         //- Number of unconsumed receive bytes for all processors.
         //- Must call finishedSends() or other finished.. method first!
         labelList recvDataCounts() const;
+
+        //- Maximum receive size from any rocessor rank.
+        //- Must call finishedSends() or other finished.. method first!
+        label maxRecvCount() const;
+
+        //- Maximum receive size, excluding current processor rank
+        //- Must call finishedSends() or other finished.. method first!
+        label maxNonLocalRecvCount() const;
+
+        //- Maximum receive size, excluding the specified processor rank
+        //- Must call finishedSends() or other finished.. method first!
+        label maxNonLocalRecvCount(const label proci) const;
 
         //- Number of unconsumed receive bytes for the specified processor.
         //- Must call finishedSends() or other finished.. method first!
@@ -430,7 +489,7 @@ public:
         //- Mark all sends to master as done.
         //
         //  Non-blocking mode: populates receive buffers.
-        //  Can use recvDataCounts() method to recover sizes received.
+        //  Can use recvDataCount, maxRecvCount etc to recover sizes received.
         //
         //  \param wait wait for requests to complete (in nonBlocking mode)
         //
@@ -450,7 +509,7 @@ public:
         //- Mark all sends to sub-procs as done.
         //
         //  Non-blocking mode: populates receive buffers.
-        //  Can use recvDataCounts() method to recover sizes received.
+        //  Can use recvDataCount, maxRecvCount etc to recover sizes received.
         //
         //  \param wait wait for requests to complete (in nonBlocking mode)
         //

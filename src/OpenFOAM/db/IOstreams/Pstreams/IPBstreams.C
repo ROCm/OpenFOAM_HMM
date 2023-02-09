@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -75,13 +75,12 @@ Foam::IPBstream::IPBstream
         commsType,
         fromProcNo,
         Pstream::transferBuf_,
-        transferBufPosition_,
+        UIPstreamBase::storedRecvBufPos_,   // Internal only
         tag,
         comm,
         false,  // Do not clear Pstream::transferBuf_ if at end
         fmt
-    ),
-    transferBufPosition_(0)
+    )
 {}
 
 

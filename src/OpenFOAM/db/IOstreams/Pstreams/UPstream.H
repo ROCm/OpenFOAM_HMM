@@ -55,6 +55,8 @@ namespace Foam
 //- Implementation details for UPstream/Pstream/MPI etc.
 namespace PstreamDetail {}
 
+// Forward Declarations
+template<class T> class Map;
 
 /*---------------------------------------------------------------------------*\
                           Class UPstream Declaration
@@ -279,11 +281,15 @@ public:
         //- Number of processors to change from linear to tree communication
         static int nProcsSimpleSum;
 
-        //- Default commsType
-        static commsTypes defaultCommsType;
+        //- Number of processors to change to nonBlocking consensual
+        //- exchange (NBX). Ignored for zero or negative values.
+        static int nProcsNonblockingExchange;
 
         //- Number of polling cycles in processor updates
         static int nPollProcInterfaces;
+
+        //- Default commsType
+        static commsTypes defaultCommsType;
 
         //- Optional maximum message size (bytes)
         static int maxCommsSize;
@@ -463,6 +469,23 @@ public:
             UPstream::Request* req = nullptr
         );
 
+        //- Probe for an incoming message.
+        //
+        //  \param commsType    Blocking or not
+        //  \param fromProcNo   The source rank (negative == ANY_SOURCE)
+        //  \param tag          The source message tag
+        //  \param communicator The communicator index
+        //
+        //  \returns source rank and message size (bytes)
+        //      and (-1, 0) on failure
+        static std::pair<int,int> probeMessage
+        (
+            const UPstream::commsTypes commsType,
+            const int fromProcNo,
+            const int tag = UPstream::msgType(),
+            const label communicator = worldComm
+        );
+
 
         // Non-blocking comms
 
@@ -482,6 +505,11 @@ public:
             //- Wait until all requests have finished.
             //  A no-op if parRun() == false or the list is empty
             static void waitRequests(UList<UPstream::Request>& requests);
+
+            //- Wait until any request has finished and return its index.
+            //  Returns -1 if parRun() == false, or the list is empty,
+            //  or if all the requests have already been handled
+            static label waitAnyRequest(UList<UPstream::Request>& requests);
 
             //- Wait until request i has finished.
             //  A no-op if parRun() == false,
@@ -503,6 +531,10 @@ public:
             //  A no-op and returns true if parRun() == false
             //  or for a null-request
             static bool finishedRequest(UPstream::Request& req);
+
+            //- Non-blocking comms: have all requests finished?
+            //  A no-op and returns true if parRun() == false or list is empty
+            static bool finishedRequests(UList<UPstream::Request>& requests);
 
             static int allocateTag(const char* const msg = nullptr);
             static void freeTag(const int tag, const char* const msg = nullptr);
@@ -684,6 +716,8 @@ public:
         //- Exchange integer data with all processors (in the communicator).
         //  \c sendData[proci] is the value to send to proci.
         //  After return recvData contains the data from the other processors.
+        //  \n
+        //  For \b non-parallel : does a simple copy of sendData to recvData
         static void allToAll
         (
             const UList<int32_t>& sendData,
@@ -694,10 +728,94 @@ public:
         //- Exchange integer data with all processors (in the communicator).
         //  \c sendData[proci] is the value to send to proci.
         //  After return recvData contains the data from the other processors.
+        //  \n
+        //  For \b non-parallel : does a simple copy of sendData to recvData
         static void allToAll
         (
             const UList<int64_t>& sendData,
             UList<int64_t>& recvData,
+            const label communicator = worldComm
+        );
+
+        //- Exchange \b non-zero integer data with all ranks in the communicator
+        //- using non-blocking consensus exchange.
+        //  The \c sendData[proci] is the (non-zero) value to send to proci.
+        //  After return recvData contains the non-zero values sent from the
+        //  other processors. The recvData list is always assigned zero before
+        //  receipt and values of zero are never transmitted.
+        //  After return recvData contains the data from the other processors.
+        //  \n
+        //  For \b non-parallel : does a simple copy of sendData to recvData
+        //
+        //  \note The message tag should be chosen to be a unique value
+        //  since the implementation uses probing with ANY_SOURCE !!
+        static void allToAllConsensus
+        (
+            const UList<int32_t>& sendData,
+            UList<int32_t>& recvData,
+            const int tag,
+            const label communicator = worldComm
+        );
+
+        //- Exchange \b non-zero integer data with all ranks in the communicator
+        //- using non-blocking consensus exchange.
+        //  The \c sendData[proci] is the (non-zero) value to send to proci.
+        //  After return recvData contains the non-zero values sent from the
+        //  other processors. The recvData list is always assigned zero before
+        //  receipt and values of zero are never transmitted.
+        //  After return recvData contains the data from the other processors.
+        //  \n
+        //  For \b non-parallel : does a simple copy of sendData to recvData
+        //
+        //  \note The message tag should be chosen to be a unique value
+        //  since the implementation uses probing with ANY_SOURCE !!
+        static void allToAllConsensus
+        (
+            const UList<int64_t>& sendData,
+            UList<int64_t>& recvData,
+            const int tag,
+            const label communicator = worldComm
+        );
+
+        //- Exchange \b non-zero integer data with all ranks in the communicator
+        //- using non-blocking consensus exchange.
+        //  The \c sendData[proci] is the (non-zero) value to send to proci.
+        //  After return recvData contains the non-zero values sent from the
+        //  other processors. Since the recvData map always cleared before
+        //  receipt and values of zero are never transmitted, a simple check
+        //  of its keys is sufficient to determine connectivity.
+        //  \n
+        //  For \b non-parallel : copy own rank (if it exists and non-zero)
+        //  from sendData to recvData.
+        //
+        //  \note The message tag should be chosen to be a unique value
+        //  since the implementation uses probing with ANY_SOURCE !!
+        static void allToAllConsensus
+        (
+            const Map<int32_t>& sendData,
+            Map<int32_t>& recvData,
+            const int tag,
+            const label communicator = worldComm
+        );
+
+        //- Exchange \b non-zero integer data with all ranks in the communicator
+        //- using non-blocking consensus exchange.
+        //  The \c sendData[proci] is the (non-zero) value to send to proci.
+        //  After return recvData contains the non-zero values sent from the
+        //  other processors. Since the recvData map always cleared before
+        //  receipt and values of zero are never transmitted, a simple check
+        //  of its keys is sufficient to determine connectivity.
+        //  \n
+        //  For \b non-parallel : copy own rank (if it exists and non-zero)
+        //  from sendData to recvData.
+        //
+        //  \note The message tag should be chosen to be a unique value
+        //  since the implementation uses probing with ANY_SOURCE !!
+        static void allToAllConsensus
+        (
+            const Map<int64_t>& sendData,
+            Map<int64_t>& recvData,
+            const int tag,
             const label communicator = worldComm
         );
 
@@ -770,7 +888,8 @@ public:
 
         //- Gather individual values into list locations.
         //  On master list length == nProcs, otherwise zero length.
-        //  If called in non-parallel mode,
+        //  \n
+        //  For \b non-parallel :
         //  the returned list length is 1 with localValue.
         template<class T>
         static List<T> listGatherValues
@@ -781,7 +900,8 @@ public:
 
         //- Scatter individual values from list locations.
         //  On master input list length == nProcs, ignored on other procs.
-        //  If called in non-parallel mode,
+        //  \n
+        //  For \b non-parallel :
         //  returns the first list element (or zero).
         template<class T>
         static T listScatterValues
@@ -795,6 +915,7 @@ public:
 
         //- Broadcast buffer contents to all processes in communicator.
         //- The sizes must match on all processes.
+        //  For \b non-parallel : do nothing.
         //  \return True on success
         static bool broadcast
         (
@@ -808,6 +929,7 @@ public:
     // Logical reductions
 
         //- Logical (and) reduction (cf. MPI AllReduce)
+        //  For \b non-parallel : do nothing
         static void reduceAnd
         (
             bool& value,
@@ -815,6 +937,7 @@ public:
         );
 
         //- Logical (or) reduction (cf. MPI AllReduce)
+        //  For \b non-parallel : do nothing
         static void reduceOr
         (
             bool& value,
@@ -852,7 +975,6 @@ public:
 
 //- An opaque wrapper for MPI_Request with a vendor-independent
 //- representation independent of any \c <mpi.h> header
-//
 //  The MPI standard states that MPI_Request is always an opaque object.
 //  Generally it is either an integer (eg, mpich) or a pointer (eg, openmpi).
 class UPstream::Request

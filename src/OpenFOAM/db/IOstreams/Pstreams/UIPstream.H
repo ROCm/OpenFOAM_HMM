@@ -85,19 +85,30 @@ protected:
 
     // Protected Data
 
-        int fromProcNo_;
+        //- Source rank for the data
+        const int fromProcNo_;
 
-        DynamicList<char>& recvBuf_;
-
-        label& recvBufPos_;
-
+        //- Message tag for communication
         const int tag_;
 
-        const label comm_;
+        //- The communicator index
+        const int comm_;
 
+        //- The message size, read on bufferIPCrecv or set directly
+        int messageSize_;
+
+        //- Receive position in buffer data, if ony
+        //- If there is no external location for recvBufPos_
+        label storedRecvBufPos_;
+
+        //- Clear the receive buffer on termination (in the destructor)
         const bool clearAtEnd_;
 
-        int messageSize_;
+        //- Reference to the receive buffer data
+        DynamicList<char>& recvBuf_;
+
+        //- Reference to the receive position in buffer data
+        label& recvBufPos_;
 
 
     // Protected Constructors
@@ -120,9 +131,16 @@ protected:
         //- Construct given buffers
         UIPstreamBase(const int fromProcNo, PstreamBuffers& buffers);
 
+        //- Construct for an externally obtained buffer.
+        //  The parameter is allowed to be const (since reading will not
+        //  affect it), but must reference a concrete variable.
+        UIPstreamBase
+        (
+            const DynamicList<char>& receiveBuf,
+            IOstreamOption::streamFormat fmt
+        );
 
 public:
-
 
     //- Destructor. Optionally clears external receive buffer.
     virtual ~UIPstreamBase();
@@ -237,6 +255,16 @@ public:
 
         //- Construct given buffers
         UIPstream(const int fromProcNo, PstreamBuffers& buffers);
+
+        //- Construct for reading from a standalone buffer that has
+        //- been obtained externally by the caller.
+        //  The parameter is allowed to be const (since reading will not
+        //  affect it), but must reference a concrete variable.
+        explicit UIPstream
+        (
+            const DynamicList<char>& recvBuf,
+            IOstreamOption::streamFormat fmt = IOstreamOption::BINARY
+        );
 
 
     //- Destructor

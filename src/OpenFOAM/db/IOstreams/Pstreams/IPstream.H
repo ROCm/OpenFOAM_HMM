@@ -56,11 +56,6 @@ class IPstream
     public Pstream,
     public UIPstream
 {
-    // Private Data
-
-        //- Receive index into Pstream::transferBuf_
-        label transferBufPosition_;
-
 public:
 
     // Constructors
@@ -90,11 +85,6 @@ class IPBstream
     public Pstream,
     public UIPBstream
 {
-    // Private Data
-
-        //- Receive index into Pstream::transferBuf_
-        label transferBufPosition_;
-
 public:
 
     // Constructors

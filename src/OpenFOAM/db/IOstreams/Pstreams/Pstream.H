@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,6 +36,7 @@ SourceFiles
     PstreamGather.C
     PstreamCombineGather.C
     PstreamGatherList.C
+    PstreamExchangeConsensus.C
     PstreamExchange.C
 
 \*---------------------------------------------------------------------------*/
@@ -64,8 +65,11 @@ class Pstream
 {
    // Private Static Functions
 
-        //- Exchange contiguous data. Sends sendBufs, receives into recvBufs.
+        //- Exchange \em contiguous data.
+        //- Sends sendBufs, receives into recvBufs.
         //  Data provided and received as container.
+        //
+        // No internal guards or resizing.
         template<class Container, class T>
         static void exchangeContainer
         (
@@ -77,8 +81,11 @@ class Pstream
             const bool wait               //!< Wait for requests to complete
         );
 
-        //- Exchange contiguous data. Sends sendBufs, receives into recvBufs.
+        //- Exchange \em contiguous data.
+        //- Sends sendBufs, receives into recvBufs.
         //  Data provided and received as pointers.
+        //
+        // No internal guards or resizing.
         template<class T>
         static void exchangeBuf
         (
@@ -133,6 +140,7 @@ public:
 
         //- Broadcast content (contiguous or non-contiguous)
         //- to all processes in communicator.
+        //  For \b non-parallel : do nothing.
         template<class Type>
         static void broadcast
         (
@@ -141,6 +149,7 @@ public:
         );
 
         //- Broadcast multiple items to all processes in communicator.
+        //  For \b non-parallel : do nothing.
         template<class Type, class... Args>
         static void broadcasts(const label comm, Type& arg1, Args&&... args);
 
@@ -513,6 +522,8 @@ public:
             //- Helper: exchange sizes of sendData.
             //- The sendData is the data per processor (in the communicator).
             //  Returns sizes of sendData on the sending processor.
+            //  \n
+            //  For \b non-parallel : copy sizes from sendData directly.
             template<class Container>
             static void exchangeSizes
             (
@@ -522,10 +533,10 @@ public:
             );
 
 
-            //- Helper: exchange contiguous data.
+            //- Helper: exchange \em contiguous data.
             //- Sends sendData, receives into recvData.
             //  If wait=true will wait for all transfers to finish.
-            template<class Container, class T>
+            template<class Container, class Type>
             static void exchange
             (
                 const UList<Container>& sendData,
@@ -536,11 +547,11 @@ public:
                 const bool wait = true  //!< Wait for requests to complete
             );
 
-            //- Exchange contiguous data.
+            //- Exchange \em contiguous data.
             //- Sends sendData, receives into recvData.
             //- Determines sizes to receive.
             //  If wait=true will wait for all transfers to finish.
-            template<class Container, class T>
+            template<class Container, class Type>
             static void exchange
             (
                 const UList<Container>& sendData,
@@ -549,6 +560,68 @@ public:
                 const label comm = UPstream::worldComm,
                 const bool wait = true  //!< Wait for requests to complete
             );
+
+
+    // Non-blocking exchange
+
+        //- Exchange the \b non-zero sizes of sendBufs entries (sparse map)
+        //- with all ranks in the communicator
+        //- using non-blocking consensus exchange.
+        //
+        //  Since the recvData map always cleared before receipt and sizes
+        //  of zero are never transmitted, a simple check
+        //  of its keys is sufficient to determine connectivity.
+        //
+        //  For \b non-parallel : copy size of rank (if it exists and non-empty)
+        //  from sendBufs to recvSizes.
+        //
+        //  \note The message tag is adjusted internally to improve uniqueness
+        template<class Container>
+        static void exchangeSizes
+        (
+            const Map<Container>& sendBufs,
+            Map<label>& recvSizes,
+            const label tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm
+        );
+
+        //- Exchange \em contiguous data using non-blocking consensus
+        //- Sends sendData, receives into recvData.
+        //
+        //  Each entry of the recvBufs list is cleared before receipt.
+        //  For \b non-parallel : copy own rank from sendBufs to recvBufs.
+        //
+        //  \note The message tag should be chosen to be a unique value
+        //  since the implementation uses probing with ANY_SOURCE !!
+        template<class Container, class Type>
+        static void exchangeConsensus
+        (
+            const UList<Container>& sendBufs,
+            List<Container>& recvBufs,
+            const int tag,
+            const label comm
+        );
+
+        //- Exchange \em contiguous data using non-blocking consensus
+        //- Sends sendData, receives into recvData.
+        //
+        //  Each \em entry of the recvBufs map is cleared before receipt,
+        //  but the map itself if not cleared. This allows the map to preserve
+        //  allocated space (eg DynamicList entries) between calls.
+        //
+        //  For \b non-parallel : copy own rank (if it exists and non-empty)
+        //  from sendBufs to recvBufs.
+        //
+        //  \note The message tag should be chosen to be a unique value
+        //  since the implementation uses probing with ANY_SOURCE !!
+        template<class Container, class Type>
+        static void exchangeConsensus
+        (
+            const Map<Container>& sendBufs,
+            Map<Container>& recvBufs,
+            const int tag,
+            const label comm
+        );
 };
 
 
@@ -563,6 +636,7 @@ public:
     #include "PstreamGather.C"
     #include "PstreamCombineGather.C"
     #include "PstreamGatherList.C"
+    #include "PstreamExchangeConsensus.C"
     #include "PstreamExchange.C"
 #endif
 

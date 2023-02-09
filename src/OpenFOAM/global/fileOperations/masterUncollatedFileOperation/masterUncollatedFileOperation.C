@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -641,8 +641,7 @@ Foam::fileOperations::masterUncollatedFileOperation::read
         }
     }
 
-    labelList recvSizes;
-    pBufs.finishedSends(recvSizes);
+    pBufs.finishedSends();
 
     // isPtr will be valid on master and will be the unbuffered
     // IFstream. Else the information is in the PstreamBuffers (and
@@ -653,12 +652,11 @@ Foam::fileOperations::masterUncollatedFileOperation::read
         if (procValid[Pstream::myProcNo(comm)])
         {
             // This processor needs to return something
+            List<char> buf(pBufs.recvDataCount(Pstream::masterNo()));
 
-            UIPstream is(Pstream::masterNo(), pBufs);
-
-            List<char> buf(recvSizes[Pstream::masterNo()]);
             if (!buf.empty())
             {
+                UIPstream is(Pstream::masterNo(), pBufs);
                 is.read(buf.data(), buf.size());
             }
 
@@ -2353,8 +2351,7 @@ Foam::fileOperations::masterUncollatedFileOperation::NewIFstream
         }
 
 
-        labelList recvSizes;
-        pBufs.finishedSends(recvSizes);
+        pBufs.finishedSends();
 
         if (Pstream::master(Pstream::worldComm))
         {
@@ -2370,10 +2367,13 @@ Foam::fileOperations::masterUncollatedFileOperation::NewIFstream
                     << " from processor " << Pstream::masterNo() << endl;
             }
 
-            UIPstream is(Pstream::masterNo(), pBufs);
+            List<char> buf(pBufs.recvDataCount(Pstream::masterNo()));
 
-            List<char> buf(recvSizes[Pstream::masterNo()]);
-            is.read(buf.data(), buf.size());
+            if (!buf.empty())
+            {
+                UIPstream is(Pstream::masterNo(), pBufs);
+                is.read(buf.data(), buf.size());
+            }
 
             if (debug)
             {

@@ -159,12 +159,13 @@ Foam::UIPstreamBase::UIPstreamBase
     UPstream(commsType),
     Istream(fmt),
     fromProcNo_(fromProcNo),
-    recvBuf_(receiveBuf),
-    recvBufPos_(receiveBufPosition),
     tag_(tag),
     comm_(comm),
+    messageSize_(0),
+    storedRecvBufPos_(0),
     clearAtEnd_(clearAtEnd),
-    messageSize_(0)
+    recvBuf_(receiveBuf),
+    recvBufPos_(receiveBufPosition)
 {
     setOpened();
     setGood();
@@ -180,12 +181,13 @@ Foam::UIPstreamBase::UIPstreamBase
     UPstream(buffers.commsType()),
     Istream(buffers.format()),
     fromProcNo_(fromProcNo),
-    recvBuf_(buffers.recvBuf_[fromProcNo]),
-    recvBufPos_(buffers.recvBufPos_[fromProcNo]),
     tag_(buffers.tag()),
     comm_(buffers.comm()),
+    messageSize_(0),
+    storedRecvBufPos_(0),
     clearAtEnd_(buffers.allowClearRecv()),
-    messageSize_(0)
+    recvBuf_(buffers.accessRecvBuffer(fromProcNo)),
+    recvBufPos_(buffers.accessRecvPosition(fromProcNo))
 {
     if
     (
@@ -200,6 +202,32 @@ Foam::UIPstreamBase::UIPstreamBase
             << " receives (using UIPstream)" << Foam::exit(FatalError);
     }
 
+    setOpened();
+    setGood();
+}
+
+
+Foam::UIPstreamBase::UIPstreamBase
+(
+    const DynamicList<char>& receiveBuf,
+    IOstreamOption::streamFormat fmt
+)
+:
+    UPstream(UPstream::commsTypes::nonBlocking), // placeholder
+    Istream(fmt),
+    fromProcNo_(UPstream::masterNo()),      // placeholder
+    tag_(UPstream::msgType()),              // placeholder
+    comm_(UPstream::selfComm),              // placeholder
+    messageSize_(receiveBuf.size()),        // Message == buffer
+    storedRecvBufPos_(0),
+    clearAtEnd_(false),   // Do not clear recvBuf if at end!!
+    recvBuf_
+    (
+        // The receive buffer is never modified with this code path
+        const_cast<DynamicList<char>&>(receiveBuf)
+    ),
+    recvBufPos_(storedRecvBufPos_)          // Internal reference
+{
     setOpened();
     setGood();
 }
@@ -517,8 +545,7 @@ void Foam::UIPstreamBase::print(Ostream& os) const
 {
     os  << "Reading from processor " << fromProcNo_
         << " using communicator " << comm_
-        <<  " and tag " << tag_
-        << Foam::endl;
+        <<  " and tag " << tag_ << Foam::endl;
 }
 
 

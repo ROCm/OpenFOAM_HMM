@@ -35,7 +35,7 @@ Description
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class Container, class T>
+template<class Container, class Type>
 void Foam::Pstream::exchangeContainer
 (
     const UList<Container>& sendBufs,
@@ -60,7 +60,7 @@ void Foam::Pstream::exchangeContainer
                 UPstream::commsTypes::nonBlocking,
                 proci,
                 recvBufs[proci].data_bytes(),
-                recvSizes[proci]*sizeof(T),
+                recvSizes[proci]*sizeof(Type),
                 tag,
                 comm
             );
@@ -108,7 +108,7 @@ void Foam::Pstream::exchangeContainer
 }
 
 
-template<class T>
+template<class Type>
 void Foam::Pstream::exchangeBuf
 (
     const labelUList& sendSizes,
@@ -134,7 +134,7 @@ void Foam::Pstream::exchangeBuf
                 UPstream::commsTypes::nonBlocking,
                 proci,
                 recvBufs[proci],
-                recvSizes[proci]*sizeof(T),
+                recvSizes[proci]*sizeof(Type),
                 tag,
                 comm
             );
@@ -156,7 +156,7 @@ void Foam::Pstream::exchangeBuf
                     UPstream::commsTypes::nonBlocking,
                     proci,
                     sendBufs[proci],
-                    sendSizes[proci]*sizeof(T),
+                    sendSizes[proci]*sizeof(Type),
                     tag,
                     comm
                 )
@@ -165,7 +165,7 @@ void Foam::Pstream::exchangeBuf
                 FatalErrorInFunction
                     << "Cannot send outgoing message. "
                     << "to:" << proci << " nBytes:"
-                    << label(sendSizes[proci]*sizeof(T))
+                    << label(sendSizes[proci]*sizeof(Type))
                     << Foam::abort(FatalError);
             }
         }
@@ -182,7 +182,7 @@ void Foam::Pstream::exchangeBuf
 }
 
 
-template<class Container, class T>
+template<class Container, class Type>
 void Foam::Pstream::exchange
 (
     const UList<Container>& sendBufs,
@@ -193,12 +193,13 @@ void Foam::Pstream::exchange
     const bool wait
 )
 {
-    // OR  static_assert(is_contiguous<T>::value, "Contiguous data only!")
-    if (!is_contiguous<T>::value)
-    {
-        FatalErrorInFunction
-            << "Contiguous data only." << sizeof(T) << Foam::abort(FatalError);
-    }
+    static_assert(is_contiguous<Type>::value, "Contiguous data only!");
+    // if (!is_contiguous<Type>::value)
+    // {
+    //     FatalErrorInFunction
+    //         << "Contiguous data only: "
+    //         << sizeof(Type) << Foam::abort(FatalError);
+    // }
 
     if (sendBufs.size() != UPstream::nProcs(comm))
     {
@@ -227,7 +228,7 @@ void Foam::Pstream::exchange
         if (UPstream::maxCommsSize <= 0)
         {
             // Do the exchanging in one go
-            exchangeContainer<Container, T>
+            exchangeContainer<Container, Type>
             (
                 sendBufs,
                 recvSizes,
@@ -257,7 +258,7 @@ void Foam::Pstream::exchange
                 max
                 (
                     static_cast<label>(1),
-                    static_cast<label>(UPstream::maxCommsSize/sizeof(T))
+                    static_cast<label>(UPstream::maxCommsSize/sizeof(Type))
                 )
             );
 
@@ -324,11 +325,11 @@ void Foam::Pstream::exchange
                     );
                 }
 
-                /// Info<< "iter " << iter
-                ///     << ": beg=" << flatOutput(startSend)
-                ///     << " len=" << flatOutput(nSend) << endl;
+                // Info<< "iter " << iter
+                //     << ": beg=" << flatOutput(startSend)
+                //     << " len=" << flatOutput(nSend) << endl;
 
-                exchangeBuf<T>
+                exchangeBuf<Type>
                 (
                     nSend,
                     charPtrSend,
@@ -414,20 +415,50 @@ void Foam::Pstream::exchangeSizes
 }
 
 
-/// FUTURE?
-///
-/// template<class Container>
-/// void Foam::Pstream::exchangeSizes
-/// (
-///     const labelUList& neighProcs,
-///     const Container& sendBufs,
-///     labelList& recvSizes,
-///     const label tag,
-///     const label comm
-/// )
-/// {
-///     exchangeSizes<Container>(neighProcs, neighProcs, sendBufs, tag, comm);
-/// }
+// FUTURE?
+// template<class Container>
+// void Foam::Pstream::exchangeSizes
+// (
+//     const labelUList& neighProcs,
+//     const Container& sendBufs,
+//     labelList& recvSizes,
+//     const label tag,
+//     const label comm
+// );
+
+
+// Sparse sending
+template<class Container>
+void Foam::Pstream::exchangeSizes
+(
+    const Map<Container>& sendBufs,
+    Map<label>& recvSizes,
+    const label tag,
+    const label comm
+)
+{
+    Map<label> sendSizes(2*sendBufs.size());
+    recvSizes.clear();  // Done in allToAllConsensus too, but be explicit here
+
+    forAllConstIters(sendBufs, iter)
+    {
+        const label proci = iter.key();
+        const label count = iter.val().size();
+
+        if (count)
+        {
+            sendSizes.emplace(proci, count);
+        }
+    }
+
+    UPstream::allToAllConsensus
+    (
+        sendSizes,
+        recvSizes,
+        (tag + 314159),  // some unique tag?
+        comm
+    );
+}
 
 
 template<class Container>
@@ -438,26 +469,46 @@ void Foam::Pstream::exchangeSizes
     const label comm
 )
 {
-    if (sendBufs.size() != UPstream::nProcs(comm))
+    const label numProcs = UPstream::nProcs(comm);
+
+    if (sendBufs.size() != numProcs)
     {
         FatalErrorInFunction
             << "Size of container " << sendBufs.size()
-            << " does not equal the number of processors "
-            << UPstream::nProcs(comm)
+            << " does not equal the number of processors " << numProcs
             << Foam::abort(FatalError);
     }
 
-    labelList sendSizes(sendBufs.size());
+    labelList sendSizes(numProcs);
     forAll(sendBufs, proci)
     {
         sendSizes[proci] = sendBufs[proci].size();
     }
     recvSizes.resize_nocopy(sendSizes.size());
+
+    if
+    (
+        UPstream::nProcsNonblockingExchange > 1
+     && UPstream::nProcsNonblockingExchange <= numProcs
+    )
+    {
+        // Use algorithm NBX: Nonblocking Consensus Exchange
+
+        UPstream::allToAllConsensus
+        (
+            sendSizes,
+            recvSizes,
+            (UPstream::msgType() + 314159),  // some unique tag?
+            comm
+        );
+        return;
+    }
+
     UPstream::allToAll(sendSizes, recvSizes, comm);
 }
 
 
-template<class Container, class T>
+template<class Container, class Type>
 void Foam::Pstream::exchange
 (
     const UList<Container>& sendBufs,
@@ -467,10 +518,36 @@ void Foam::Pstream::exchange
     const bool wait
 )
 {
+    if
+    (
+        wait
+     && UPstream::parRun()
+     && UPstream::nProcsNonblockingExchange > 1
+     && UPstream::nProcsNonblockingExchange <= UPstream::nProcs(comm)
+    )
+    {
+        // Use algorithm NBX: Nonblocking Consensus Exchange
+
+        Pstream::exchangeConsensus<Container, Type>
+        (
+            sendBufs,
+            recvBufs,
+            (tag + 314159),  // some unique tag?
+            comm
+        );
+        return;
+    }
+
+    // Algorithm PEX: Personalized Exchange
+    // - Step 1: each process writes the data sizes to each peer and
+    //   redistributes the vector (eg, MPI_Alltoall)
+    // - Step 2: size receive buffers and setup receives for all
+    //   non-zero sendcounts. Post all sends and wait.
+
     labelList recvSizes;
     exchangeSizes(sendBufs, recvSizes, comm);
 
-    exchange<Container, T>(sendBufs, recvSizes, recvBufs, tag, comm, wait);
+    exchange<Container, Type>(sendBufs, recvSizes, recvBufs, tag, comm, wait);
 }
 
 

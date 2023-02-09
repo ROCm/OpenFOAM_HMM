@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2022 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,7 +44,8 @@ See also
 
 #include "FixedList.H"
 #include "Istream.H"
-#include <utility>  // For std::move
+#include "Ostream.H"
+#include <utility>  // For std::move, std::pair
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -194,6 +195,16 @@ struct is_contiguous_scalar<Pair<T>> : is_contiguous_scalar<T> {};
 template<class T>
 struct Hash<Pair<T>> : Pair<T>::hasher {};
 
+//- Hashing for std::pair data
+template<class T1, class T2>
+struct Hash<std::pair<T1, T2>>
+{
+    unsigned operator()(const std::pair<T1, T2>& obj, unsigned seed=0) const
+    {
+        return Hash<T2>()(obj.second, Hash<T1>()(obj.first, seed));
+    }
+};
+
 
 // * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
 
@@ -250,6 +261,32 @@ template<class T>
 bool operator>=(const Pair<T>& a, const Pair<T>& b)
 {
     return !(a < b);
+}
+
+
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
+//- Read std::pair from Istream
+template<class T1, class T2>
+inline Istream& operator>>(Istream& is, std::pair<T1,T2>& t)
+{
+    is.readBegin("pair");
+    is >> t.first >> t.second;
+    is.readEnd("pair");
+
+    is.check(FUNCTION_NAME);
+    return is;
+}
+
+
+//- Write std::pair to Ostream
+template<class T1, class T2>
+inline Ostream& operator<<(Ostream& os, const std::pair<T1,T2>& t)
+{
+    os  << token::BEGIN_LIST
+        << t.first << token::SPACE << t.second
+        << token::END_LIST;
+    return os;
 }
 
 

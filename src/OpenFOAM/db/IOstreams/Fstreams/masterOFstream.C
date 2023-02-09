@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2020-2022 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +31,6 @@ License
 #include "OSspecific.H"
 #include "PstreamBuffers.H"
 #include "masterUncollatedFileOperation.H"
-#include <algorithm>
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -111,49 +110,45 @@ void Foam::masterOFstream::commit()
             return;
         }
 
-        boolList procValid(UPstream::listGatherValues<bool>(valid_));
-
         // Different files
         PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
 
-        // Send my buffer to master
+        // Send my (valid) buffer to master
         if (!Pstream::master())
         {
-            UOPstream os(Pstream::masterNo(), pBufs);
-            string s(this->str());
-            this->reset();
+            if (valid_)
+            {
+                string s(this->str());
 
-            os.write(s.data(), s.length());
+                UOPstream os(Pstream::masterNo(), pBufs);
+                os.write(s.data(), s.length());
+            }
+            this->reset();
         }
 
-        labelList recvSizes;
-        pBufs.finishedGathers(recvSizes);
+        pBufs.finishedGathers();
 
         if (Pstream::master())
         {
-            // Write master data
-            if (procValid[Pstream::masterNo()])
+            // Write (valid) master data
+            if (valid_)
             {
                 checkWrite(filePaths[Pstream::masterNo()], this->str());
             }
             this->reset();
 
-            // Find the max receive size
-            recvSizes[Pstream::masterNo()] = 0;
-            List<char> buf
-            (
-                *std::max_element(recvSizes.cbegin(), recvSizes.cend())
-            );
+            // Allocate large enough to read without resizing
+            List<char> buf(pBufs.maxRecvCount());
 
             for (const int proci : Pstream::subProcs())
             {
-                UIPstream is(proci, pBufs);
+                const std::streamsize count(pBufs.recvDataCount(proci));
 
-                const std::streamsize count(recvSizes[proci]);
-                is.read(buf.data(), count);
-
-                if (procValid[proci])
+                if (count)
                 {
+                    UIPstream is(proci, pBufs);
+
+                    is.read(buf.data(), count);
                     checkWrite(filePaths[proci], buf.cdata(), count);
                 }
             }

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -161,11 +161,11 @@ Foam::label Foam::UPstream::allocateCommunicator
         // Extend storage
         index = parentComm_.size();
 
-        myProcNo_.append(-1);
-        procIDs_.append(List<int>());
-        parentComm_.append(-1);
-        linearCommunication_.append(List<commsStruct>());
-        treeCommunication_.append(List<commsStruct>());
+        myProcNo_.push_back(-1);
+        procIDs_.emplace_back();
+        parentComm_.push_back(-1);
+        linearCommunication_.emplace_back();
+        treeCommunication_.emplace_back();
     }
 
     if (debug)
@@ -292,7 +292,7 @@ void Foam::UPstream::freeCommunicators(const bool doPstream)
 
 int Foam::UPstream::baseProcNo(label comm, int procID)
 {
-    while (parent(comm) >= 0 && procID >= 0)
+    while (UPstream::parent(comm) >= 0 && procID >= 0)
     {
         const auto& parentRanks = UPstream::procID(comm);
         procID = parentRanks[procID];
@@ -305,14 +305,14 @@ int Foam::UPstream::baseProcNo(label comm, int procID)
 
 Foam::label Foam::UPstream::procNo(const label comm, const int baseProcID)
 {
-    const auto& parentRanks = procID(comm);
-    label parentComm = parent(comm);
+    const auto& parentRanks = UPstream::procID(comm);
+    label parentComm = UPstream::parent(comm);
 
     int procID = baseProcID;
 
     if (parentComm >= 0)
     {
-        procID = procNo(parentComm, baseProcID);
+        procID = UPstream::procNo(parentComm, baseProcID);
     }
 
     return parentRanks.find(procID);
@@ -327,7 +327,7 @@ Foam::label Foam::UPstream::procNo
 )
 {
     label physProcID = UPstream::baseProcNo(currentComm, currentProcID);
-    return procNo(comm, physProcID);
+    return UPstream::procNo(comm, physProcID);
 }
 
 
@@ -510,6 +510,30 @@ registerOptSwitch
     Foam::UPstream::nProcsSimpleSum
 );
 
+int Foam::UPstream::nProcsNonblockingExchange
+(
+    Foam::debug::optimisationSwitch("nonBlockingExchange", 0)
+);
+registerOptSwitch
+(
+    "nonBlockingExchange",
+    int,
+    Foam::UPstream::nProcsNonblockingExchange
+);
+
+
+int Foam::UPstream::nPollProcInterfaces
+(
+    Foam::debug::optimisationSwitch("nPollProcInterfaces", 0)
+);
+registerOptSwitch
+(
+    "nPollProcInterfaces",
+    int,
+    Foam::UPstream::nPollProcInterfaces
+);
+
+
 Foam::UPstream::commsTypes Foam::UPstream::defaultCommsType
 (
     commsTypeNames.get
@@ -552,18 +576,6 @@ namespace Foam
     addcommsTypeToOpt addcommsTypeToOpt_("commsType");
 }
 //! \endcond
-
-int Foam::UPstream::nPollProcInterfaces
-(
-    Foam::debug::optimisationSwitch("nPollProcInterfaces", 0)
-);
-registerOptSwitch
-(
-    "nPollProcInterfaces",
-    int,
-    Foam::UPstream::nPollProcInterfaces
-);
-
 
 int Foam::UPstream::maxCommsSize
 (
