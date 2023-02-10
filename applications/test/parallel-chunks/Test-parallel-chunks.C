@@ -32,6 +32,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
+#define Foam_PstreamExchange_debug_chunks
+
 #include "List.H"
 #include "argList.H"
 #include "Time.H"
@@ -371,6 +373,7 @@ int main(int argc, char *argv[])
     }
 
     // Manually
+    Info<< "perform list exchange" << endl;
     {
         labelListList sendBufs(UPstream::nProcs());
         labelListList recvBufs(UPstream::nProcs());
@@ -383,6 +386,34 @@ int main(int argc, char *argv[])
                 if (proci != Pstream::myProcNo())
                 {
                     sendBufs[proci] = identity(500);
+                }
+            }
+        }
+
+        Pstream::exchangeSizes(sendBufs, recvSizes);
+
+        Pstream::exchange<labelList, label>
+        (
+            sendBufs,
+            recvSizes,
+            recvBufs
+        );
+    }
+
+
+    Info<< "perform Map exchange" << endl;
+    {
+        Map<labelList> sendBufs;
+        Map<labelList> recvBufs;
+        Map<label> recvSizes;
+
+        if (Pstream::master())
+        {
+            for (const int proci : Pstream::allProcs())
+            {
+                if (proci != Pstream::myProcNo())
+                {
+                    sendBufs(proci) = identity(500);
                 }
             }
         }

@@ -496,6 +496,27 @@ public:
             const label comm = UPstream::worldComm
         );
 
+        //- Exchange the \b non-zero sizes of sendBufs entries (sparse map)
+        //- with other ranks in the communicator
+        //- using non-blocking consensus exchange.
+        //
+        //  Since the recvData map always cleared before receipt and sizes
+        //  of zero are never transmitted, a simple check
+        //  of its keys is sufficient to determine connectivity.
+        //
+        //  For \b non-parallel : copy size of rank (if it exists and non-empty)
+        //  from sendBufs to recvSizes.
+        //
+        //  \note The message tag is adjusted internally to improve uniqueness
+        template<class Container>
+        static void exchangeSizes
+        (
+            const Map<Container>& sendBufs,
+            Map<label>& recvSizes,
+            const label tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm
+        );
+
         //- Helper: exchange \em contiguous data.
         //- Sends sendBufs, receives into recvBufs using predetermined receive
         //- sizing.
@@ -506,6 +527,22 @@ public:
             const UList<Container>& sendBufs,
             const labelUList& recvSizes,
             List<Container>& recvBufs,
+            const int tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm,
+            const bool wait = true  //!< Wait for requests to complete
+        );
+
+        //- Exchange \em contiguous data.
+        //- Sends sendBufs, receives into recvBufs.
+        //  Data provided and received as container.
+        //
+        // No internal guards or resizing.
+        template<class Container, class Type>
+        static void exchange
+        (
+            const Map<Container>& sendBufs,
+            const Map<label>& recvSizes,  //!< Num of recv elements (not bytes)
+            Map<Container>& recvBufs,
             const int tag = UPstream::msgType(),
             const label comm = UPstream::worldComm,
             const bool wait = true  //!< Wait for requests to complete
@@ -525,29 +562,22 @@ public:
             const bool wait = true  //!< Wait for requests to complete
         );
 
-
-    // Non-blocking exchange
-
-        //- Exchange the \b non-zero sizes of sendBufs entries (sparse map)
-        //- with all ranks in the communicator
-        //- using non-blocking consensus exchange.
-        //
-        //  Since the recvData map always cleared before receipt and sizes
-        //  of zero are never transmitted, a simple check
-        //  of its keys is sufficient to determine connectivity.
-        //
-        //  For \b non-parallel : copy size of rank (if it exists and non-empty)
-        //  from sendBufs to recvSizes.
-        //
-        //  \note The message tag is adjusted internally to improve uniqueness
-        template<class Container>
-        static void exchangeSizes
+        //- Exchange \em contiguous data.
+        //- Sends sendBufs, receives into recvBufs.
+        //- Determines sizes to receive.
+        //  If wait=true will wait for all transfers to finish.
+        template<class Container, class Type>
+        static void exchange
         (
             const Map<Container>& sendBufs,
-            Map<label>& recvSizes,
-            const label tag = UPstream::msgType(),
-            const label comm = UPstream::worldComm
+            Map<Container>& recvBufs,
+            const int tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm,
+            const bool wait = true  //!< Wait for requests to complete
         );
+
+
+    // Non-blocking exchange
 
         //- Exchange \em contiguous data using non-blocking consensus
         //- Sends sendData, receives into recvData.
