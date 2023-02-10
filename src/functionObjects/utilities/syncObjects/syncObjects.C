@@ -90,9 +90,8 @@ void Foam::functionObjects::syncObjects::sync()
     // Note provision of explicit all-world communicator
     PstreamBuffers pBufs
     (
-        Pstream::commsTypes::nonBlocking,
-        UPstream::msgType(),
-        0
+        UPstream::globalComm,
+        UPstream::commsTypes::nonBlocking
     );
 
 

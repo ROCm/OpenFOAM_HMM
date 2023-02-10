@@ -41,7 +41,6 @@ void Foam::PstreamBuffers::finalExchange
     // Could also check that it is not called twice
     // but that is used for overlapping send/recv (eg, overset)
     finishedSendsCalled_ = true;
-    recvPositions_ = Zero;
 
     if (commsType_ == UPstream::commsTypes::nonBlocking)
     {
@@ -102,7 +101,6 @@ void Foam::PstreamBuffers::finalExchange
     // Could also check that it is not called twice
     // but that is used for overlapping send/recv (eg, overset)
     finishedSendsCalled_ = true;
-    recvPositions_ = Zero;
 
     if (commsType_ == UPstream::commsTypes::nonBlocking)
     {
@@ -140,7 +138,6 @@ void Foam::PstreamBuffers::finalExchangeGatherScatter
     // Could also check that it is not called twice
     // but that is used for overlapping send/recv (eg, overset)
     finishedSendsCalled_ = true;
-    recvPositions_ = Zero;
 
     if (commsType_ == UPstream::commsTypes::nonBlocking)
     {

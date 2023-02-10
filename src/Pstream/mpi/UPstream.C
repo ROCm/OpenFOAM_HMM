@@ -535,12 +535,16 @@ void Foam::UPstream::allocatePstreamCommunicator
 
         PstreamGlobals::pendingMPIFree_[index] = PstreamGlobals::NonePending;
         PstreamGlobals::MPICommunicators_[index] = MPI_COMM_WORLD;
-        PstreamGlobals::MPIGroups_[index] = MPI_GROUP_NULL;
 
         // TBD: MPI_Comm_dup(MPI_COMM_WORLD, ...);
         // with pendingMPIFree_[index] = CommPending ...
         // Note: freePstreamCommunicator may need an update
 
+        MPI_Comm_group
+        (
+            PstreamGlobals::MPICommunicators_[index],
+           &PstreamGlobals::MPIGroups_[index]
+        );
         MPI_Comm_rank
         (
             PstreamGlobals::MPICommunicators_[index],
@@ -565,8 +569,8 @@ void Foam::UPstream::allocatePstreamCommunicator
 
         PstreamGlobals::pendingMPIFree_[index] = PstreamGlobals::NonePending;
         PstreamGlobals::MPICommunicators_[index] = MPI_COMM_SELF;
-        PstreamGlobals::MPIGroups_[index] = MPI_GROUP_NULL;
 
+        MPI_Comm_group(MPI_COMM_SELF, &PstreamGlobals::MPIGroups_[index]);
         MPI_Comm_rank(MPI_COMM_SELF, &myProcNo_[index]);
 
         // Number of ranks is always 1 (self communicator)
