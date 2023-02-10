@@ -63,42 +63,6 @@ class Pstream
 :
     public UPstream
 {
-   // Private Static Functions
-
-        //- Exchange \em contiguous data.
-        //- Sends sendBufs, receives into recvBufs.
-        //  Data provided and received as container.
-        //
-        // No internal guards or resizing.
-        template<class Container, class T>
-        static void exchangeContainer
-        (
-            const UList<Container>& sendBufs,
-            const labelUList& recvSizes,  //!< Num of recv elements (not bytes)
-            List<Container>& recvBufs,
-            const int tag,
-            const label comm,
-            const bool wait               //!< Wait for requests to complete
-        );
-
-        //- Exchange \em contiguous data.
-        //- Sends sendBufs, receives into recvBufs.
-        //  Data provided and received as pointers.
-        //
-        // No internal guards or resizing.
-        template<class T>
-        static void exchangeBuf
-        (
-            const labelUList& sendSizes,  //!< Num of send elements (not bytes)
-            const UList<const char*>& sendBufs,
-            const labelUList& recvSizes,  //!< Num of recv elements (not bytes)
-            List<char*>& recvBufs,
-            const int tag,
-            const label comm,
-            const bool wait               //!< Wait for requests to complete
-        );
-
-
 protected:
 
     // Protected Data
@@ -504,62 +468,62 @@ public:
             );
 
 
-        // Exchange
+    // Exchange
 
-            //- Helper: exchange sizes of sendData for specified
-            //- set of send/receive processes.
-            template<class Container>
-            static void exchangeSizes
-            (
-                const labelUList& sendProcs,
-                const labelUList& recvProcs,
-                const Container& sendData,
-                labelList& sizes,
-                const label tag = UPstream::msgType(),
-                const label comm = UPstream::worldComm
-            );
+        //- Helper: exchange sizes of sendBufs for specified
+        //- set of send/receive processes.
+        template<class Container>
+        static void exchangeSizes
+        (
+            const labelUList& sendProcs,
+            const labelUList& recvProcs,
+            const Container& sendBufs,
+            labelList& sizes,
+            const label tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm
+        );
 
-            //- Helper: exchange sizes of sendData.
-            //- The sendData is the data per processor (in the communicator).
-            //  Returns sizes of sendData on the sending processor.
-            //  \n
-            //  For \b non-parallel : copy sizes from sendData directly.
-            template<class Container>
-            static void exchangeSizes
-            (
-                const Container& sendData,
-                labelList& sizes,
-                const label comm = UPstream::worldComm
-            );
+        //- Helper: exchange sizes of sendBufs.
+        //- The sendBufs is the data per processor (in the communicator).
+        //  Returns sizes of sendBufs on the sending processor.
+        //  \n
+        //  For \b non-parallel : copy sizes from sendBufs directly.
+        template<class Container>
+        static void exchangeSizes
+        (
+            const Container& sendBufs,
+            labelList& recvSizes,
+            const label comm = UPstream::worldComm
+        );
 
+        //- Helper: exchange \em contiguous data.
+        //- Sends sendBufs, receives into recvBufs using predetermined receive
+        //- sizing.
+        //  If wait=true will wait for all transfers to finish.
+        template<class Container, class Type>
+        static void exchange
+        (
+            const UList<Container>& sendBufs,
+            const labelUList& recvSizes,
+            List<Container>& recvBufs,
+            const int tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm,
+            const bool wait = true  //!< Wait for requests to complete
+        );
 
-            //- Helper: exchange \em contiguous data.
-            //- Sends sendData, receives into recvData.
-            //  If wait=true will wait for all transfers to finish.
-            template<class Container, class Type>
-            static void exchange
-            (
-                const UList<Container>& sendData,
-                const labelUList& recvSizes,
-                List<Container>& recvData,
-                const int tag = UPstream::msgType(),
-                const label comm = UPstream::worldComm,
-                const bool wait = true  //!< Wait for requests to complete
-            );
-
-            //- Exchange \em contiguous data.
-            //- Sends sendData, receives into recvData.
-            //- Determines sizes to receive.
-            //  If wait=true will wait for all transfers to finish.
-            template<class Container, class Type>
-            static void exchange
-            (
-                const UList<Container>& sendData,
-                List<Container>& recvData,
-                const int tag = UPstream::msgType(),
-                const label comm = UPstream::worldComm,
-                const bool wait = true  //!< Wait for requests to complete
-            );
+        //- Exchange \em contiguous data.
+        //- Sends sendBufs, receives into recvBufs.
+        //- Determines sizes to receive.
+        //  If wait=true will wait for all transfers to finish.
+        template<class Container, class Type>
+        static void exchange
+        (
+            const UList<Container>& sendBufs,
+            List<Container>& recvBufs,
+            const int tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm,
+            const bool wait = true  //!< Wait for requests to complete
+        );
 
 
     // Non-blocking exchange
@@ -636,7 +600,6 @@ public:
     #include "PstreamGather.C"
     #include "PstreamCombineGather.C"
     #include "PstreamGatherList.C"
-    #include "PstreamExchangeConsensus.C"
     #include "PstreamExchange.C"
 #endif
 

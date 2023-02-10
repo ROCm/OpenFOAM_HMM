@@ -51,12 +51,6 @@ void Foam::Pstream::exchangeConsensus
 )
 {
     static_assert(is_contiguous<Type>::value, "Contiguous data only!");
-    // if (!is_contiguous<Type>::value)
-    // {
-    //     FatalErrorInFunction
-    //         << "Contiguous data only." << sizeof(Type)
-    //         << Foam::abort(FatalError);
-    // }
 
     const label myProci = UPstream::myProcNo(comm);
     const label numProc = UPstream::nProcs(comm);
@@ -201,12 +195,6 @@ void Foam::Pstream::exchangeConsensus
 )
 {
     static_assert(is_contiguous<Type>::value, "Contiguous data only!");
-    // if (!is_contiguous<Type>::value)
-    // {
-    //     FatalErrorInFunction
-    //         << "Contiguous data only." << sizeof(Type)
-    //         << Foam::abort(FatalError);
-    // }
 
     const label myProci = UPstream::myProcNo(comm);
     const label numProc = UPstream::nProcs(comm);
