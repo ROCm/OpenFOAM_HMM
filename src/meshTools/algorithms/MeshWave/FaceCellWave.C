@@ -526,13 +526,15 @@ void Foam::FaceCellWave<Type, TrackingData>::handleProcPatches()
     // Which patches are processor patches
     const labelList& procPatches = pData.processorPatches();
 
-    // Send all
+    // Which processors this processor is connected to
+    const labelList& neighbourProcs = pData.topology().procNeighbours();
 
-    PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
+    // Reset buffers
+    pBufs_.clear();
 
     for (const label patchi : procPatches)
     {
-        const processorPolyPatch& procPatch =
+        const auto& procPatch =
             refCast<const processorPolyPatch>(mesh_.boundaryMesh()[patchi]);
 
         // Allocate buffers
@@ -567,20 +569,20 @@ void Foam::FaceCellWave<Type, TrackingData>::handleProcPatches()
                 << endl;
         }
 
-        UOPstream toNeighbour(procPatch.neighbProcNo(), pBufs);
+        UOPstream toNeighbour(procPatch.neighbProcNo(), pBufs_);
         //writeFaces(nSendFaces, sendFaces, sendFacesInfo, toNeighbour);
         toNeighbour
             << SubList<label>(sendFaces, nSendFaces)
             << SubList<Type>(sendFacesInfo, nSendFaces);
     }
 
-    pBufs.finishedSends();
+    // Finished sends
+    pBufs_.finishedNeighbourSends(neighbourProcs);
 
-    // Receive all
 
     for (const label patchi : procPatches)
     {
-        const processorPolyPatch& procPatch =
+        const auto& procPatch =
             refCast<const processorPolyPatch>(mesh_.boundaryMesh()[patchi]);
 
         // Allocate buffers
@@ -588,7 +590,7 @@ void Foam::FaceCellWave<Type, TrackingData>::handleProcPatches()
         List<Type> receiveFacesInfo;
 
         {
-            UIPstream fromNeighbour(procPatch.neighbProcNo(), pBufs);
+            UIPstream fromNeighbour(procPatch.neighbProcNo(), pBufs_);
             fromNeighbour >> receiveFaces >> receiveFacesInfo;
         }
 

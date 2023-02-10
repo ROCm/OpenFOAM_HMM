@@ -891,19 +891,22 @@ void Foam::globalPoints::calculateSharedPoints
     //   a point or edge.
     initOwnPoints(meshToPatchPoint, true, changedPoints);
 
+    // Note: to use 'scheduled' would have to intersperse send and receive.
+    // So for now just use nonBlocking. Also globalPoints itself gets
+    // constructed by mesh.globalData().patchSchedule() so creates a loop.
+    PstreamBuffers pBufs
+    (
+        (
+            Pstream::defaultCommsType == Pstream::commsTypes::scheduled
+          ? Pstream::commsTypes::nonBlocking
+          : Pstream::defaultCommsType
+        )
+    );
+
     // Do one exchange iteration to get neighbour points.
     {
-        // Note: to use 'scheduled' would have to intersperse send and receive.
-        // So for now just use nonBlocking. Also globalPoints itself gets
-        // constructed by mesh.globalData().patchSchedule() so creates a loop.
-        PstreamBuffers pBufs
-        (
-            (
-                Pstream::defaultCommsType == Pstream::commsTypes::scheduled
-              ? Pstream::commsTypes::nonBlocking
-              : Pstream::defaultCommsType
-            )
-        );
+        pBufs.clear();
+
         sendPatchPoints
         (
             mergeSeparated,
@@ -911,7 +914,9 @@ void Foam::globalPoints::calculateSharedPoints
             pBufs,
             changedPoints
         );
+
         pBufs.finishedSends();
+
         receivePatchPoints
         (
             mergeSeparated,
@@ -933,14 +938,8 @@ void Foam::globalPoints::calculateSharedPoints
 
     do
     {
-        PstreamBuffers pBufs
-        (
-            (
-                Pstream::defaultCommsType == Pstream::commsTypes::scheduled
-              ? Pstream::commsTypes::nonBlocking
-              : Pstream::defaultCommsType
-            )
-        );
+        pBufs.clear();
+
         sendPatchPoints
         (
             mergeSeparated,
@@ -948,7 +947,9 @@ void Foam::globalPoints::calculateSharedPoints
             pBufs,
             changedPoints
         );
+
         pBufs.finishedSends();
+
         receivePatchPoints
         (
             mergeSeparated,

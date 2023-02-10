@@ -305,16 +305,24 @@ void Foam::PointEdgeWave<Type, TrackingData>::handleProcPatches()
 {
     // 1. Send all point info on processor patches.
 
-    PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
+    const globalMeshData& pData = mesh_.globalData();
+
+    // Which patches are processor patches
+    const labelList& procPatches = pData.processorPatches();
+
+    // Which processors this processor is connected to
+    const labelList& neighbourProcs = pData.topology().procNeighbours();
+
+    // Reset buffers
+    pBufs_.clear();
 
     DynamicList<Type> patchInfo;
     DynamicList<label> thisPoints;
     DynamicList<label> nbrPoints;
 
-    forAll(mesh_.globalData().processorPatches(), i)
+    for (const label patchi : procPatches)
     {
-        label patchi = mesh_.globalData().processorPatches()[i];
-        const processorPolyPatch& procPatch =
+        const auto& procPatch =
             refCast<const processorPolyPatch>(mesh_.boundaryMesh()[patchi]);
 
         patchInfo.clear();
@@ -347,28 +355,28 @@ void Foam::PointEdgeWave<Type, TrackingData>::handleProcPatches()
         //        << "  Sending:" << patchInfo.size() << endl;
         //}
 
-        UOPstream toNeighbour(procPatch.neighbProcNo(), pBufs);
+        UOPstream toNeighbour(procPatch.neighbProcNo(), pBufs_);
         toNeighbour << nbrPoints << patchInfo;
     }
 
 
-    pBufs.finishedSends();
+    // Finished sends
+    pBufs_.finishedNeighbourSends(neighbourProcs);
 
     //
     // 2. Receive all point info on processor patches.
     //
 
-    forAll(mesh_.globalData().processorPatches(), i)
+    for (const label patchi : procPatches)
     {
-        label patchi = mesh_.globalData().processorPatches()[i];
-        const processorPolyPatch& procPatch =
+        const auto& procPatch =
             refCast<const processorPolyPatch>(mesh_.boundaryMesh()[patchi]);
 
         List<Type> patchInfo;
         labelList patchPoints;
 
         {
-            UIPstream fromNeighbour(procPatch.neighbProcNo(), pBufs);
+            UIPstream fromNeighbour(procPatch.neighbProcNo(), pBufs_);
             fromNeighbour >> patchPoints >> patchInfo;
         }
 
