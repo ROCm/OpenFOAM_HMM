@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2022 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,6 +36,7 @@ Description
 #include <initializer_list>
 #include <memory>
 #include <utility>
+#include <type_traits>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -396,6 +397,176 @@ constexpr inline const T& max(const T& a, const T& b)
         ++iter                                                                 \
     )
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace stdFoam
+{
+
+/*---------------------------------------------------------------------------*\
+                        Class stdFoam::span Declaration
+\*---------------------------------------------------------------------------*/
+
+//- Rudimentary functionality similar to std::span for holding memory view
+template<class Type>
+class span
+{
+    // Private Data
+
+        //- The data pointer
+        Type* data_;
+
+        //- The size of the span
+        std::size_t size_;
+
+
+public:
+
+    // STL type definitions
+
+        using element_type = Type;
+        using value_type = std::remove_cv<Type>;
+        using size_type = std::size_t;
+        using pointer = Type*;
+        using const_pointer = const Type*;
+        using reference = Type&;
+        using const_reference = const Type&;
+        using difference_type = std::ptrdiff_t;
+        using iterator = Type*;
+
+
+    // Generated Methods
+
+        //- Copy construct
+        span(const span& other) noexcept = default;
+
+        //- Copy assignment
+        span& operator=(const span& other) noexcept = default;
+
+
+    // Constructors
+
+        //- Default construct
+        constexpr span() noexcept
+        :
+            data_(nullptr),
+            size_(0)
+        {}
+
+        //- Construct from pointer and size
+        constexpr span(pointer ptr, size_type count) noexcept
+        :
+            data_(ptr),
+            size_(count)
+        {}
+
+        //- Construct from begin/end pointers
+        constexpr span(pointer first, pointer last) noexcept
+        :
+            data_(first),
+            size_(last - first)
+        {}
+
+
+    //- Destructor
+    ~span() noexcept = default;
+
+
+    // Member Functions
+
+    // Iterators
+
+        //- Iterator to begin of span
+        constexpr iterator begin() const noexcept { return data_; }
+
+        //- Iterator to one-past end of span
+        constexpr iterator end() const noexcept { return (data_ + size_); }
+
+
+    // Element access
+
+        //- Access the first element. Undefined if span is empty
+        constexpr reference front() const { return *(data_); }
+
+        //- Access the last element. Undefined if span is empty
+        constexpr reference back() const { return *(data_ + size_ - 1); }
+
+        //- Access an element of the sequence
+        constexpr reference operator[](size_type idx) const
+        {
+           return *(data_ + idx);
+        }
+
+        //- Return a pointer to the beginning of the sequence
+        constexpr pointer data() const noexcept { return data_; }
+
+
+    // Observers
+
+        //- Number of elements in the sequence
+        constexpr size_type size() const noexcept { return size_; }
+
+        //- The size of the sequence in bytes
+        constexpr size_type size_bytes() const noexcept
+        {
+            return (size_*sizeof(Type));
+        }
+
+        //- True if the sequence is empty
+        constexpr bool empty() const noexcept { return !size_; }
+
+
+    // Subview
+
+        //- Obtains a span of the first count elements
+        span<Type> first(size_type count) const noexcept
+        {
+            return span<Type>(data_, count);
+        }
+
+        //- Obtains a span of the last count elements
+        span<Type> last(size_type count) const noexcept
+        {
+            return span<Type>(data_ + (size_ - count), count);
+        }
+
+        //- Obtains a sub-span starting at pos until end of the sequence
+        span<Type> subspan(size_type pos) const noexcept
+        {
+            return span<Type>(data_ + pos, size_ - pos);
+        }
+
+        //- Obtains a sub-span of length len starting at pos.
+        //  Graciously handles excess lengths.
+        span<Type> subspan(size_type pos, size_type len) const noexcept
+        {
+            return span<Type>(data_ + pos, std::min(size_ - pos, len));
+        }
+
+
+    // Additional members, similar to UList etc.
+    // The std::span has as_bytes() and as_writeable_bytes() as free functions
+
+        //- A readonly view as byte content
+        constexpr const char* cdata_bytes() const noexcept
+        {
+            return reinterpret_cast<const char*>(data_);
+        }
+
+        //- A writable view as byte content (if the pointer type is non-const).
+        //- Like data(), the const access itself is const.
+        template<class TypeT = Type>
+        typename std::enable_if<!std::is_const<TypeT>::value, char*>::type
+        data_bytes() const noexcept
+        {
+            return reinterpret_cast<char*>(data_);
+        }
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace stdFoam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
