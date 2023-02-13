@@ -160,7 +160,6 @@ class PstreamBuffers
         void finalExchange
         (
             const bool wait,
-            const bool needSizes,   // If recvSizes needed or scratch
             labelList& recvSizes
         );
 
@@ -172,7 +171,6 @@ class PstreamBuffers
             const labelUList& sendProcs,
             const labelUList& recvProcs,
             const bool wait,
-            const bool needSizes,   // If recvSizes needed or scratch
             labelList& recvSizes
         );
 
@@ -354,15 +352,24 @@ public:
 
     // Edit
 
-        //- Clear individual buffers and reset states.
+        //- Clear all send/recv buffers and reset states.
         //  Does not remove the buffer storage.
         void clear();
+
+        //- Clear all send buffers (does not remove buffer storage)
+        void clearSends();
+
+        //- Clear all recv buffer and positions (does not remove buffer storage)
+        void clearRecvs();
+
+        //- Clear an individual send buffer (eg, data not required)
+        void clearSend(const label proci);
 
         //- Clear an individual receive buffer (eg, data not required)
         //  Does not remove the buffer storage.
         void clearRecv(const label proci);
 
-        //- Clear individual buffer storage and reset states.
+        //- Clear storage for all send/recv buffers and reset states.
         void clearStorage();
 
         //- Change allowClearRecv, return previous value
@@ -458,10 +465,7 @@ public:
         (
             const labelUList& neighProcs,
             const bool wait = true
-        )
-        {
-            finishedSends(neighProcs, neighProcs, wait);
-        }
+        );
 
         //- Mark sends as done using subset of send/recv ranks
         //- and recover the sizes (bytes) received.
@@ -478,10 +482,7 @@ public:
             const labelUList& neighProcs,
             labelList& recvSizes,
             const bool wait = true
-        )
-        {
-            finishedSends(neighProcs, neighProcs, recvSizes, wait);
-        }
+        );
 
 
     // Gather/scatter modes

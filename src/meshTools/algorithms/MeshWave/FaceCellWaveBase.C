@@ -59,7 +59,10 @@ Foam::FaceCellWaveBase::FaceCellWaveBase
     changedCells_(mesh_.nCells()),
     nUnvisitedFaces_(mesh_.nFaces()),
     nUnvisitedCells_(mesh_.nCells())
-{}
+{
+    // Don't clear storage on persistent buffer
+    pBufs_.allowClearRecv(false);
+}
 
 
 // ************************************************************************* //

@@ -57,7 +57,10 @@ Foam::PointEdgeWaveBase::PointEdgeWaveBase
     changedEdges_(mesh_.nEdges()),
     nUnvisitedPoints_(mesh_.nPoints()),
     nUnvisitedEdges_(mesh_.nEdges())
-{}
+{
+    // Don't clear storage on persistent buffer
+    pBufs_.allowClearRecv(false);
+}
 
 
 // ************************************************************************* //

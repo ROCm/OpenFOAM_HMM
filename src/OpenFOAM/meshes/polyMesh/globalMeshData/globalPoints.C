@@ -903,6 +903,9 @@ void Foam::globalPoints::calculateSharedPoints
         )
     );
 
+    // Don't clear storage on persistent buffer
+    pBufs.allowClearRecv(false);
+
     // Do one exchange iteration to get neighbour points.
     {
         pBufs.clear();
