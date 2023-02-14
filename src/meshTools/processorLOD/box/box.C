@@ -110,7 +110,7 @@ void Foam::processorLODs::box::setRefineFlags
     // Identify src boxes that can be refined and send to all remote procs
     for (const int proci : Pstream::allProcs())
     {
-        if (proci != Pstream::myProcNo())
+        if (proci != Pstream::myProcNo() && !boxes_[proci].empty())
         {
             UOPstream toProc(proci, pBufs);
             toProc << nObjectsOfType_ << boxes_[proci] << newToOld_[proci];
@@ -123,10 +123,8 @@ void Foam::processorLODs::box::setRefineFlags
     // src boxes can/should be refined
     for (const int proci : Pstream::allProcs())
     {
-        if (proci == Pstream::myProcNo())
+        if (proci == Pstream::myProcNo() || !pBufs.recvDataCount(proci))
         {
-            // Not refining boxes I send to myself - will be sending all local
-            // elements
             continue;
         }
 

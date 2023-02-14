@@ -273,19 +273,19 @@ void Foam::cellCellStencils::trackingInverseDistance::markPatchesAsHoles
             if (srcPatchBb.overlaps(tgtPatchBb))
             {
                 UIPstream is(procI, pBufs);
-                {
-                    treeBoundBox receivedBb(is);
-                    if (srcPatchBb != receivedBb)
-                    {
-                        FatalErrorInFunction
-                            << "proc:" << procI
-                            << " srcPatchBb:" << srcPatchBb
-                            << " receivedBb:" << receivedBb
-                            << exit(FatalError);
-                    }
-                }
+                const treeBoundBox receivedBb(is);
                 const labelVector srcDivs(is);
                 const PackedList<2> srcPatchTypes(is);
+
+                // Verify validity
+                if (srcPatchBb != receivedBb)
+                {
+                    FatalErrorInFunction
+                        << "proc:" << procI
+                        << " srcPatchBb:" << srcPatchBb
+                        << " receivedBb:" << receivedBb
+                        << exit(FatalError);
+                }
 
                 forAll(tgtCellMap, tgtCelli)
                 {

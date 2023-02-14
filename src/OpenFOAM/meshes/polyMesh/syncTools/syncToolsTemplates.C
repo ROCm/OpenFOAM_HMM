@@ -140,6 +140,8 @@ void Foam::syncTools::syncPointMap
                 const auto& procPatch = *ppp;
                 const label nbrProci = procPatch.neighbProcNo();
 
+                neighbProcs.append(nbrProci);
+
                 // Get data per patchPoint in neighbouring point numbers.
 
                 const labelList& meshPts = procPatch.meshPoints();
@@ -159,14 +161,17 @@ void Foam::syncTools::syncPointMap
                     }
                 }
 
-                neighbProcs.append(nbrProci);
-                UOPstream toNbr(nbrProci, pBufs);
-                toNbr << patchInfo;
+                if (!patchInfo.empty())
+                {
+                    UOPstream toNbr(nbrProci, pBufs);
+                    toNbr << patchInfo;
+                }
             }
         }
 
         // Limit exchange to involved procs
         pBufs.finishedNeighbourSends(neighbProcs);
+
 
         // Receive and combine.
         for (const polyPatch& pp : patches)
@@ -178,8 +183,16 @@ void Foam::syncTools::syncPointMap
                 const auto& procPatch = *ppp;
                 const label nbrProci = procPatch.neighbProcNo();
 
-                UIPstream fromNbr(nbrProci, pBufs);
-                Map<T> nbrPatchInfo(fromNbr);
+                if (!pBufs.recvDataCount(nbrProci))
+                {
+                    continue;
+                }
+
+                Map<T> nbrPatchInfo(0);
+                {
+                    UIPstream fromNbr(nbrProci, pBufs);
+                    fromNbr >> nbrPatchInfo;
+                }
 
                 // Transform
                 top(procPatch, nbrPatchInfo);
@@ -383,6 +396,8 @@ void Foam::syncTools::syncEdgeMap
                 const auto& procPatch = *ppp;
                 const label nbrProci = procPatch.neighbProcNo();
 
+                neighbProcs.append(nbrProci);
+
                 // Get data per patch edge in neighbouring edge.
 
                 const edgeList& edges = procPatch.edges();
@@ -404,9 +419,11 @@ void Foam::syncTools::syncEdgeMap
                     }
                 }
 
-                neighbProcs.append(nbrProci);
-                UOPstream toNbr(nbrProci, pBufs);
-                toNbr << patchInfo;
+                if (!patchInfo.empty())
+                {
+                    UOPstream toNbr(nbrProci, pBufs);
+                    toNbr << patchInfo;
+                }
             }
         }
 
@@ -422,10 +439,16 @@ void Foam::syncTools::syncEdgeMap
             if (ppp && pp.nEdges())
             {
                 const auto& procPatch = *ppp;
+                const label nbrProci = procPatch.neighbProcNo();
 
-                EdgeMap<T> nbrPatchInfo;
+                if (!pBufs.recvDataCount(nbrProci))
                 {
-                    UIPstream fromNbr(procPatch.neighbProcNo(), pBufs);
+                    continue;
+                }
+
+                EdgeMap<T> nbrPatchInfo(0);
+                {
+                    UIPstream fromNbr(nbrProci, pBufs);
                     fromNbr >> nbrPatchInfo;
                 }
 
@@ -1115,6 +1138,8 @@ void Foam::syncTools::syncBoundaryFaceList
                     const auto& procPatch = *ppp;
                     const label nbrProci = procPatch.neighbProcNo();
 
+                    neighbProcs.append(nbrProci);
+
                     const SubList<T> fld
                     (
                         faceValues,
@@ -1122,7 +1147,6 @@ void Foam::syncTools::syncBoundaryFaceList
                         pp.start()-boundaryOffset
                     );
 
-                    neighbProcs.append(nbrProci);
                     UOPstream toNbr(nbrProci, pBufs);
                     toNbr << fld;
                 }
@@ -1140,11 +1164,13 @@ void Foam::syncTools::syncBoundaryFaceList
                 if (ppp && pp.size())
                 {
                     const auto& procPatch = *ppp;
+                    const label nbrProci = procPatch.neighbProcNo();
 
-                    List<T> recvFld(pp.size());
-
-                    UIPstream fromNbr(procPatch.neighbProcNo(), pBufs);
-                    fromNbr >> recvFld;
+                    List<T> recvFld;
+                    {
+                        UIPstream fromNbr(nbrProci, pBufs);
+                        fromNbr >> recvFld;
+                    }
 
                     top(procPatch, recvFld);
 

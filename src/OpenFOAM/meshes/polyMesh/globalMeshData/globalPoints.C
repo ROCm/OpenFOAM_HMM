@@ -487,6 +487,18 @@ void Foam::globalPoints::sendPatchPoints
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
     const labelPairList& patchInfo = globalTransforms_.patchTransformSign();
 
+    // Information to send:
+
+    // The patch face
+    DynamicList<label> patchFaces;
+
+    // Index in patch face
+    DynamicList<label> indexInFace;
+
+    // All information I currently hold about the patchPoint
+    DynamicList<labelPairList> allInfo;
+
+
     forAll(patches, patchi)
     {
         const polyPatch& pp = patches[patchi];
@@ -500,17 +512,17 @@ void Foam::globalPoints::sendPatchPoints
          && (mergeSeparated || patchInfo[patchi].first() == -1)
         )
         {
-            const processorPolyPatch& procPatch =
-                refCast<const processorPolyPatch>(pp);
+            const auto& procPatch = refCast<const processorPolyPatch>(pp);
+            const label nbrProci = procPatch.neighbProcNo();
 
-            // Information to send:
-            // patch face
-            DynamicList<label> patchFaces(pp.nPoints());
-            // index in patch face
-            DynamicList<label> indexInFace(pp.nPoints());
-            // all information I currently hold about this patchPoint
-            DynamicList<labelPairList> allInfo(pp.nPoints());
+            patchFaces.clear();
+            patchFaces.reserve(pp.nPoints());
 
+            indexInFace.clear();
+            indexInFace.reserve(pp.nPoints());
+
+            allInfo.clear();
+            allInfo.reserve(pp.nPoints());
 
             // Now collect information on all points mentioned in
             // changedPoints. Note that these points only should occur on
@@ -548,16 +560,20 @@ void Foam::globalPoints::sendPatchPoints
                 }
             }
 
-            // Send to neighbour
-            if (debug)
-            {
-                Pout<< " Sending from " << pp.name() << " to "
-                    << procPatch.neighbProcNo() << "   point information:"
-                    << patchFaces.size() << endl;
-            }
 
-            UOPstream toNeighbour(procPatch.neighbProcNo(), pBufs);
-            toNeighbour << patchFaces << indexInFace << allInfo;
+            if (!patchFaces.empty())
+            {
+                // Send to neighbour
+                if (debug)
+                {
+                    Pout<< " Sending from " << pp.name() << " to proc:"
+                        << nbrProci << " point information:"
+                        << patchFaces.size() << endl;
+                }
+
+                UOPstream toNeighbour(nbrProci, pBufs);
+                toNeighbour << patchFaces << indexInFace << allInfo;
+            }
         }
     }
 }
@@ -594,15 +610,20 @@ void Foam::globalPoints::receivePatchPoints
          && (mergeSeparated || patchInfo[patchi].first() == -1)
         )
         {
-            const processorPolyPatch& procPatch =
-                refCast<const processorPolyPatch>(pp);
+            const auto& procPatch = refCast<const processorPolyPatch>(pp);
+            const label nbrProci = procPatch.neighbProcNo();
+
+            if (!pBufs.recvDataCount(nbrProci))
+            {
+                continue;
+            }
 
             labelList patchFaces;
             labelList indexInFace;
             List<labelPairList> nbrInfo;
 
             {
-                UIPstream fromNeighbour(procPatch.neighbProcNo(), pBufs);
+                UIPstream fromNeighbour(nbrProci, pBufs);
                 fromNeighbour >> patchFaces >> indexInFace >> nbrInfo;
             }
 
@@ -610,7 +631,7 @@ void Foam::globalPoints::receivePatchPoints
             {
                 Pout<< " On " << pp.name()
                     << " Received from "
-                    << procPatch.neighbProcNo() << "   point information:"
+                    << nbrProci << "   point information:"
                     << patchFaces.size() << endl;
             }
 

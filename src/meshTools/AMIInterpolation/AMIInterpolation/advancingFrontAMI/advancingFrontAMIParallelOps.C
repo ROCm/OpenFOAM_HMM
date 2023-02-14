@@ -74,20 +74,28 @@ void Foam::advancingFrontAMI::distributePatches
     List<labelList>& faceIDs
 ) const
 {
+    faces.resize_nocopy(Pstream::nProcs());
+    points.resize_nocopy(Pstream::nProcs());
+    faceIDs.resize_nocopy(Pstream::nProcs());
+
+
     PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
 
     for (const int domain : Pstream::allProcs())
     {
         const labelList& sendElems = map.subMap()[domain];
 
-        if (domain != Pstream::myProcNo() && sendElems.size())
+        if (sendElems.empty())
+        {
+            // Safety
+            faces[domain].clear();
+            points[domain].clear();
+            faceIDs[domain].clear();
+        }
+        else
         {
             faceList subFaces(UIndirectList<face>(pp, sendElems));
-            primitivePatch subPatch
-            (
-                SubList<face>(subFaces),
-                pp.points()
-            );
+            primitivePatch subPatch(SubList<face>(subFaces), pp.points());
 
             if (debug & 2)
             {
@@ -95,41 +103,27 @@ void Foam::advancingFrontAMI::distributePatches
                     << " sending faces " << subPatch.faceCentres() << endl;
             }
 
-            UOPstream toDomain(domain, pBufs);
-            toDomain
-                << subPatch.localFaces() << subPatch.localPoints()
-                << gi.toGlobal(sendElems);
+
+            if (domain == Pstream::myProcNo())
+            {
+                // Do send/receive for myself
+                faces[domain] = subPatch.localFaces();
+                points[domain] = subPatch.localPoints();
+                faceIDs[domain] = gi.toGlobal(sendElems);
+            }
+            else
+            {
+                // Normal send
+                UOPstream str(domain, pBufs);
+                str
+                    << subPatch.localFaces()
+                    << subPatch.localPoints()
+                    << gi.toGlobal(sendElems);
+            }
         }
     }
 
-    // Start receiving
     pBufs.finishedSends();
-
-    faces.setSize(Pstream::nProcs());
-    points.setSize(Pstream::nProcs());
-    faceIDs.setSize(Pstream::nProcs());
-
-    {
-        // Set up 'send' to myself
-        const labelList& sendElems = map.subMap()[Pstream::myProcNo()];
-        faceList subFaces(UIndirectList<face>(pp, sendElems));
-        primitivePatch subPatch
-        (
-            SubList<face>(subFaces),
-            pp.points()
-        );
-
-        // Receive
-        if (debug & 2)
-        {
-            Pout<< "distributePatches: to processor " << Pstream::myProcNo()
-                << " sending faces " << subPatch.faceCentres() << endl;
-        }
-
-        faces[Pstream::myProcNo()] = subPatch.localFaces();
-        points[Pstream::myProcNo()] = subPatch.localPoints();
-        faceIDs[Pstream::myProcNo()] = gi.toGlobal(sendElems);
-    }
 
     // Consume
     for (const int domain : Pstream::allProcs())
@@ -138,9 +132,9 @@ void Foam::advancingFrontAMI::distributePatches
 
         if (domain != Pstream::myProcNo() && recvElems.size())
         {
-            UIPstream str(domain, pBufs);
+            UIPstream is(domain, pBufs);
 
-            str >> faces[domain]
+            is  >> faces[domain]
                 >> points[domain]
                 >> faceIDs[domain];
         }

@@ -325,6 +325,8 @@ void Foam::PointEdgeWave<Type, TrackingData>::handleProcPatches()
         const auto& procPatch =
             refCast<const processorPolyPatch>(mesh_.boundaryMesh()[patchi]);
 
+        const label nbrProci = procPatch.neighbProcNo();
+
         patchInfo.clear();
         patchInfo.reserve(procPatch.nPoints());
         thisPoints.clear();
@@ -348,20 +350,24 @@ void Foam::PointEdgeWave<Type, TrackingData>::handleProcPatches()
         // Adapt for leaving domain
         leaveDomain(procPatch, thisPoints, patchInfo);
 
-        //if (debug)
-        //{
-        //    Pout<< "Processor patch " << patchi << ' ' << procPatch.name()
-        //        << " communicating with " << procPatch.neighbProcNo()
-        //        << "  Sending:" << patchInfo.size() << endl;
-        //}
+        if (patchInfo.size())
+        {
+            //if (debug & 2)
+            //{
+            //    Pout<< "Processor patch " << patchi << ' ' << procPatch.name()
+            //        << "  send:" << patchInfo.size()
+            //        << " to proc:" << nbrProci << endl;
+            //}
 
-        UOPstream toNeighbour(procPatch.neighbProcNo(), pBufs_);
-        toNeighbour << nbrPoints << patchInfo;
+            UOPstream os(nbrProci, pBufs_);
+            os << nbrPoints << patchInfo;
+        }
     }
 
 
     // Finished sends
     pBufs_.finishedNeighbourSends(neighbourProcs);
+
 
     //
     // 2. Receive all point info on processor patches.
@@ -372,19 +378,25 @@ void Foam::PointEdgeWave<Type, TrackingData>::handleProcPatches()
         const auto& procPatch =
             refCast<const processorPolyPatch>(mesh_.boundaryMesh()[patchi]);
 
-        List<Type> patchInfo;
-        labelList patchPoints;
+        const label nbrProci = procPatch.neighbProcNo();
 
+        if (!pBufs_.recvDataCount(nbrProci))
         {
-            UIPstream fromNeighbour(procPatch.neighbProcNo(), pBufs_);
-            fromNeighbour >> patchPoints >> patchInfo;
+            continue;
         }
 
-        //if (debug)
+        labelList patchPoints;
+        List<Type> patchInfo;
+        {
+            UIPstream is(nbrProci, pBufs_);
+            is >> patchPoints >> patchInfo;
+        }
+
+        //if (debug & 2)
         //{
         //    Pout<< "Processor patch " << patchi << ' ' << procPatch.name()
-        //        << " communicating with " << procPatch.neighbProcNo()
-        //        << "  Received:" << patchInfo.size() << endl;
+        //        << "  recv:" << patchInfo.size() << " from proc:"
+        //        << nbrProci << endl;
         //}
 
         // Apply transform to received data for non-parallel planes

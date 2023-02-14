@@ -185,16 +185,12 @@ void Foam::fvMeshSubset::doCoupledPatches
             {
                 const label nbrProci = procPatch->neighbProcNo();
 
-                UOPstream toNeighbour(nbrProci, pBufs);
-
                 if (!nCellsUsingFace.empty())
                 {
+                    UOPstream toNeighbour(nbrProci, pBufs);
+
                     toNeighbour <<
                         SubList<label>(nCellsUsingFace, pp.size(), pp.start());
-                }
-                else
-                {
-                    toNeighbour << labelList();
                 }
             }
         }
@@ -209,6 +205,11 @@ void Foam::fvMeshSubset::doCoupledPatches
             if (procPatch)
             {
                 const label nbrProci = procPatch->neighbProcNo();
+
+                if (!pBufs.recvDataCount(nbrProci))
+                {
+                    continue;
+                }
 
                 UIPstream fromNeighbour(nbrProci, pBufs);
 

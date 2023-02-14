@@ -318,8 +318,8 @@ void Foam::processorFaPatch::updateMesh(PstreamBuffers& pBufs)
 
     if (Pstream::parRun())
     {
-        labelList nbrPatchEdge(nPoints());
-        labelList nbrIndexInEdge(nPoints());
+        labelList nbrPatchEdge;
+        labelList nbrIndexInEdge;
 
         {
             // Note cannot predict exact size since edgeList not (yet) sent as

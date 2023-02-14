@@ -537,6 +537,8 @@ void Foam::FaceCellWave<Type, TrackingData>::handleProcPatches()
         const auto& procPatch =
             refCast<const processorPolyPatch>(mesh_.boundaryMesh()[patchi]);
 
+        const label nbrProci = procPatch.neighbProcNo();
+
         // Allocate buffers
         label nSendFaces;
         labelList sendFaces(procPatch.size());
@@ -561,45 +563,50 @@ void Foam::FaceCellWave<Type, TrackingData>::handleProcPatches()
             sendFacesInfo
         );
 
-        if (debug & 2)
+        if (nSendFaces)
         {
-            Pout<< " Processor patch " << patchi << ' ' << procPatch.name()
-                << " communicating with " << procPatch.neighbProcNo()
-                << "  Sending:" << nSendFaces
-                << endl;
-        }
+            if (debug & 2)
+            {
+                Pout<< " Processor patch " << patchi << ' ' << procPatch.name()
+                    << "  send:" << nSendFaces << " to proc:" << nbrProci
+                    << endl;
+            }
 
-        UOPstream toNeighbour(procPatch.neighbProcNo(), pBufs_);
-        //writeFaces(nSendFaces, sendFaces, sendFacesInfo, toNeighbour);
-        toNeighbour
-            << SubList<label>(sendFaces, nSendFaces)
-            << SubList<Type>(sendFacesInfo, nSendFaces);
+            UOPstream os(nbrProci, pBufs_);
+            os
+                << SubList<label>(sendFaces, nSendFaces)
+                << SubList<Type>(sendFacesInfo, nSendFaces);
+        }
     }
 
     // Finished sends
     pBufs_.finishedNeighbourSends(neighbourProcs);
-
 
     for (const label patchi : procPatches)
     {
         const auto& procPatch =
             refCast<const processorPolyPatch>(mesh_.boundaryMesh()[patchi]);
 
-        // Allocate buffers
+        const label nbrProci = procPatch.neighbProcNo();
+
+        if (!pBufs_.recvDataCount(nbrProci))
+        {
+            continue;
+        }
+
+
         labelList receiveFaces;
         List<Type> receiveFacesInfo;
-
         {
-            UIPstream fromNeighbour(procPatch.neighbProcNo(), pBufs_);
-            fromNeighbour >> receiveFaces >> receiveFacesInfo;
+            UIPstream is(nbrProci, pBufs_);
+            is >> receiveFaces >> receiveFacesInfo;
         }
 
         if (debug & 2)
         {
             Pout<< " Processor patch " << patchi << ' ' << procPatch.name()
-                << " communicating with " << procPatch.neighbProcNo()
-                << "  Receiving:" << receiveFaces.size()
-                << endl;
+                << "  recv:" << receiveFaces.size() << " from proci:"
+                << nbrProci << endl;
         }
 
         // Apply transform to received data for non-parallel planes
