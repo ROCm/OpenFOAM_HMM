@@ -80,7 +80,6 @@ Foam::autoPtr<Foam::mapDistribute> Foam::nearestFaceAMI::calcFaceMap
     labelListList sendMap(Pstream::nProcs());
     forAll(sendMap, proci)
     {
-        dynSendMap[proci].shrink();
         sendMap[proci].transfer(dynSendMap[proci]);
 
         if (debug)

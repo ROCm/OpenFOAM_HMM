@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2022 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -511,7 +511,7 @@ Foam::autoPtr<Foam::mapDistribute> Foam::processorLODs::box::createMap
                 allIDs.insert(elems);
             }
 
-            sendElems[proci] = allIDs.toc();
+            sendElems[proci] = allIDs.sortedToc();
         }
     }
 
@@ -530,59 +530,7 @@ Foam::autoPtr<Foam::mapDistribute> Foam::processorLODs::box::createMap
         }
     }
 
-    return createLODMap(sendElems);
-}
-
-
-Foam::autoPtr<Foam::mapDistribute> Foam::processorLODs::box::createLODMap
-(
-    List<labelList>& sendElems
-) const
-{
-    // Send over how many objects I need to receive
-    const label localProci = Pstream::myProcNo();
-    labelListList sendSizes(Pstream::nProcs());
-    sendSizes[localProci].setSize(Pstream::nProcs());
-    forAll(sendElems, proci)
-    {
-        sendSizes[localProci][proci] = sendElems[proci].size();
-    }
-    Pstream::allGatherList(sendSizes);
-
-
-    // Determine order of receiving
-    labelListList constructMap(Pstream::nProcs());
-
-    // My local segment first
-    constructMap[localProci] = identity(sendElems[localProci].size());
-
-    label segmenti = constructMap[localProci].size();
-    forAll(constructMap, proci)
-    {
-        if (proci != localProci)
-        {
-            // What I need to receive is what other processor is sending to me
-            label nRecv = sendSizes[proci][localProci];
-            constructMap[proci].setSize(nRecv);
-
-            for (label& addr : constructMap[proci])
-            {
-                addr = segmenti++;
-            }
-        }
-    }
-
-    autoPtr<mapDistribute> mapPtr
-    (
-        new mapDistribute
-        (
-            segmenti,                   // size after construction
-            std::move(sendElems),
-            std::move(constructMap)
-        )
-    );
-
-    return mapPtr;
+    return autoPtr<mapDistribute>::New(std::move(sendElems));
 }
 
 
@@ -618,9 +566,8 @@ Foam::processorLODs::box::box
             treeBoundBox srcBb(srcPoints_);
             srcBb.inflate(0.01);
 
-            DynamicList<treeBoundBox> newProcBoxes(1);
-            newProcBoxes.append(srcBb);
-            procBoxes.transfer(newProcBoxes);
+            procBoxes.resize(1);
+            procBoxes.front() = srcBb;
         }
     }
 }

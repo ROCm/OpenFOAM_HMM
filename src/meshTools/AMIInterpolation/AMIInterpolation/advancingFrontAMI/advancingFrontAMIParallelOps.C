@@ -344,48 +344,7 @@ Foam::autoPtr<Foam::mapDistribute> Foam::advancingFrontAMI::calcProcMap
         }
     }
 
-
-    // Send over how many faces I need to receive
-    labelListList sendSizes(Pstream::nProcs());
-    sendSizes[Pstream::myProcNo()].setSize(Pstream::nProcs());
-    forAll(sendMap, proci)
-    {
-        sendSizes[Pstream::myProcNo()][proci] = sendMap[proci].size();
-    }
-    Pstream::allGatherList(sendSizes);
-
-
-    // Determine order of receiving
-    labelListList constructMap(Pstream::nProcs());
-
-    // My local segment first
-    constructMap[Pstream::myProcNo()] = identity
-    (
-        sendMap[Pstream::myProcNo()].size()
-    );
-
-    label segmentI = constructMap[Pstream::myProcNo()].size();
-    forAll(constructMap, proci)
-    {
-        if (proci != Pstream::myProcNo())
-        {
-            // What I need to receive is what other processor is sending to me
-            label nRecv = sendSizes[proci][Pstream::myProcNo()];
-            constructMap[proci].setSize(nRecv);
-
-            for (label i = 0; i < nRecv; ++i)
-            {
-                constructMap[proci][i] = segmentI++;
-            }
-        }
-    }
-
-    return autoPtr<mapDistribute>::New
-    (
-        segmentI, // size after construction
-        std::move(sendMap),
-        std::move(constructMap)
-    );
+    return autoPtr<mapDistribute>::New(std::move(sendMap));
 }
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -232,42 +232,7 @@ Foam::autoPtr<Foam::mapDistribute> Foam::meshToMesh::calcProcMap
                 }
             }
 
-
-            // send over how many tgt cells I need to receive from each
-            // processor
-            labelListList sendSizes(Pstream::nProcs());
-            sendSizes[Pstream::myProcNo()].resize(Pstream::nProcs());
-            forAll(sendMap, proci)
-            {
-                sendSizes[Pstream::myProcNo()][proci] = sendMap[proci].size();
-            }
-            Pstream::allGatherList(sendSizes);
-
-
-            // determine order of receiving
-            labelListList constructMap(Pstream::nProcs());
-
-            label segmentI = 0;
-            forAll(constructMap, proci)
-            {
-                // what I need to receive is what other processor is sending
-                // to me
-                label nRecv = sendSizes[proci][Pstream::myProcNo()];
-                constructMap[proci].setSize(nRecv);
-
-                for (label i = 0; i < nRecv; i++)
-                {
-                    constructMap[proci][i] = segmentI++;
-                }
-            }
-
-            return autoPtr<mapDistribute>::New
-            (
-                segmentI,       // size after construction
-                std::move(sendMap),
-                std::move(constructMap)
-            );
-
+            return autoPtr<mapDistribute>::New(std::move(sendMap));
             break;
         }
     }
