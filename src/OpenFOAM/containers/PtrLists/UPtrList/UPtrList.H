@@ -106,10 +106,10 @@ public:
         //- A const reference to the value_type
         typedef const T& const_reference;
 
-        //- Random-access iterator with non-const access
+        //- Forward iterator with non-const access
         class iterator;
 
-        //- Random-access iterator with const access
+        //- Forward iterator with const access
         class const_iterator;
 
 
@@ -346,7 +346,7 @@ public:
 
     // Iterators
 
-        //- Random-access iterator with non-const access
+        //- Forward iterator with non-const access
         class iterator
         {
             // Pointer to parent
@@ -354,7 +354,7 @@ public:
 
         public:
 
-            using iterator_category = std::random_access_iterator_tag;
+            using iterator_category = std::forward_iterator_tag;
             using value_type = T;
             using difference_type = label;
             using pointer = T*;
@@ -374,37 +374,16 @@ public:
             inline pointer operator->() const;
             inline reference operator*() const;
 
-            reference operator()() const { return this->operator*(); }
-            inline reference operator[](difference_type n) const;
-
-            // Forward iteration
+            // Forward Iteration
             inline iterator& operator++() noexcept;
             inline iterator operator++(int) noexcept;
 
-            inline iterator& operator--() noexcept;
-            inline iterator operator--(int) noexcept;
-
-            // Random-access
-            inline iterator& operator+=(difference_type n) noexcept;
-            inline iterator& operator-=(difference_type n) noexcept;
-            inline iterator operator+(difference_type n) const noexcept;
-            inline iterator operator-(difference_type n) const noexcept;
-
-            inline difference_type operator-(const iterator& iter)
-            const noexcept;
-
             inline bool operator==(const iterator& iter) const noexcept;
             inline bool operator!=(const iterator& iter) const noexcept;
-
-            inline bool operator<(const iterator& iter) const noexcept;
-            inline bool operator>(const iterator& iter) const noexcept;
-
-            inline bool operator<=(const iterator& iter) const noexcept;
-            inline bool operator>=(const iterator& iter) const noexcept;
         };
 
 
-        //- Random-access iterator with const access
+        //- Forward iterator with const access
         class const_iterator
         {
             // Pointer to parent
@@ -412,7 +391,7 @@ public:
 
         public:
 
-            using iterator_category = std::random_access_iterator_tag;
+            using iterator_category = std::forward_iterator_tag;
             using value_type = const T;
             using difference_type = label;
             using pointer = const T*;
@@ -434,33 +413,12 @@ public:
             inline pointer operator->() const;
             inline reference operator*() const;
 
-            reference operator()() const { return this->operator*(); }
-            inline reference operator[](difference_type n) const;
-
-            // Forward iteration
+            // Forward Iteration
             inline const_iterator& operator++() noexcept;
             inline const_iterator operator++(int) noexcept;
 
-            inline const_iterator& operator--() noexcept;
-            inline const_iterator operator--(int) noexcept;
-
-            // Random-access
-            inline const_iterator& operator+=(difference_type n) noexcept;
-            inline const_iterator& operator-=(difference_type n) noexcept;
-            inline const_iterator operator+(difference_type n) const noexcept;
-            inline const_iterator operator-(difference_type n) const noexcept;
-
-            inline difference_type operator-(const const_iterator& iter)
-            const noexcept;
-
             inline bool operator==(const const_iterator& iter) const noexcept;
             inline bool operator!=(const const_iterator& iter) const noexcept;
-
-            inline bool operator<(const const_iterator& iter) const noexcept;
-            inline bool operator>(const const_iterator& iter) const noexcept;
-
-            inline bool operator<=(const const_iterator& iter) const noexcept;
-            inline bool operator>=(const const_iterator& iter) const noexcept;
         };
 
 

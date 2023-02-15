@@ -562,6 +562,7 @@ int main(int argc, char *argv[])
         << "ulist2: " << ulist2 << nl;
 
     // Test iterator random access
+    #if (OPENFOAM <= 2212)
     {
         auto iter1 = ulist1.begin();
         auto iter2 = iter1 + 3;
@@ -576,6 +577,7 @@ int main(int argc, char *argv[])
         Info<< "*"  << (*iter1).value() << nl;
         Info<< "()" << iter1().value() << nl;
     }
+    #endif
 
     PtrList<plane> planes;
     planes.emplace_back(vector::one, vector::one);
