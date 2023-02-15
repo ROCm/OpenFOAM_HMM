@@ -268,10 +268,7 @@ Ostream& report
 
 int main(int argc, char *argv[])
 {
-    PtrList<Scalar> list1(10);
-    PtrList<Scalar> list2(15);
-    PtrList<Scalar> listApp;
-
+    #if 0
     {
         DLPtrList<Scalar> llist1;
         llist1.push_front(new Scalar(100));
@@ -301,8 +298,10 @@ int main(int argc, char *argv[])
                 << "for-: " << it << endl;
         }
     }
+    #endif
 
     // Same but as SLPtrList
+    #if 0
     {
         SLPtrList<Scalar> llist1;
         llist1.push_front(new Scalar(100));
@@ -318,18 +317,23 @@ int main(int argc, char *argv[])
         PtrList<Scalar> list1b(llist1);
         Info<< list1b << endl;
     }
+    #endif
+
+    PtrList<Scalar> list1(10);
 
     forAll(list1, i)
     {
         list1.set(i, new Scalar(1.3*i));
     }
 
+    PtrList<Scalar> list2(15);
     Info<< "Emplace set " << list2.size() << " values" << nl;
     forAll(list2, i)
     {
         list2.emplace(i, (10 + 1.3*i));
     }
 
+    PtrList<Scalar> listApp;
     for (label i = 0; i < 5; ++i)
     {
         listApp.emplace_back(1.3*i);
@@ -373,6 +377,24 @@ int main(int argc, char *argv[])
     for (label i = 2; i < 5; i++)
     {
         list1.set(i, nullptr);
+    }
+
+    {
+        Info<< "range-for of list (" << list1.count() << '/'
+            << list1.size() << ") non-null entries" << nl
+            << "(" << nl;
+        for (const auto& item : list1)
+        {
+            Info<< "    " << item << nl;
+        }
+        Info<< ")" << nl;
+    }
+    {
+        Info<< "iterate on non-null:" << endl;
+        forAllConstIters(list1, iter)
+        {
+            Info<< "    " << iter.key() << " : " << iter.val() << nl;
+        }
     }
 
     Info<< "release some items:" << endl;
