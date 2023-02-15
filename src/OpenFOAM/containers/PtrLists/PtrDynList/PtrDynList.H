@@ -109,9 +109,6 @@ public:
         //- Alter the addressed list size.
         inline void resize(const label newLen);
 
-        //- Same as resize()
-        void setSize(const label n) { this->resize(n); }
-
         //- Clear the addressed list, i.e. set the size to zero.
         //  Allocated size does not change
         inline void clear();
@@ -234,6 +231,9 @@ public:
         {
             return this->set(i, std::move(ptr));
         }
+
+        //- Same as resize()
+        void setSize(const label n) { this->resize(n); }
 
         //- Move append an element to the end of the list
         void append(autoPtr<T>& ptr) { this->push_back(std::move(ptr)); }

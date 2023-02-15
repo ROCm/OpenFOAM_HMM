@@ -83,6 +83,9 @@ protected:
         //- Adjust addressable size
         inline void setAddressableSize(const label n) noexcept;
 
+        //- The next non-null entry after the specified position
+        inline label find_next(label pos) const;
+
 
     // Constructors
 
@@ -214,8 +217,11 @@ public:
         //- True if the list is empty (ie, size() is zero)
         inline bool empty() const noexcept;
 
-        //- The number of elements in the list
+        //- The number of entries in the list
         inline label size() const noexcept;
+
+        //- The number of non-null entries in the list
+        inline label size_nonNull() const noexcept;
 
         //- Reference to the first element of the list
         inline T& front();
@@ -247,7 +253,7 @@ public:
         //- Return const pointer to element (can be nullptr),
         //- or nullptr for out-of-range access (ie, \em with bounds checking).
         //  The return value can be tested as a bool.
-        inline const T* set(const label i) const;
+        const T* set(const label i) const { return this->get(i); }
 
 
     // Edit
@@ -258,9 +264,6 @@ public:
         //- Change the size of the list.
         //  New entries are initialized to nullptr.
         inline void resize(const label newLen);
-
-        //- Alias for resize()
-        void setSize(const label n) { this->resize(n); }
 
         //- Squeeze out nullptr entries in the list of pointers after which
         //- any null pointers will be at the end of the list
@@ -304,13 +307,23 @@ public:
         //- Check and raise FatalError if any nullptr exists in the list
         inline void checkNonNull() const;
 
+        //- Return const reference to the element at given position.
+        //- FatalError for bounds problem or nullptr.
+        inline const T& at(const label i) const;
+
+        //- Return reference to the element at given position.
+        //- FatalError for bounds problem or nullptr.
+        inline T& at(const label i);
+
 
     // Member Operators
 
-        //- Return const reference to the element
+        //- Return const reference to the element at given position.
+        //- FatalError for bounds problem or nullptr. Same as at().
         inline const T& operator[](const label i) const;
 
-        //- Return reference to the element
+        //- Return reference to the element at given position.
+        //- FatalError for bounds problem or nullptr. Same as at().
         inline T& operator[](const label i);
 
         //- Deprecated(2022-09) - same as get()
@@ -323,6 +336,12 @@ public:
 
         //- Move assignment
         inline void operator=(UPtrList<T>&& list);
+
+
+    // IOstream Operators
+
+        //- Write UPtrList to Ostream
+        friend Ostream& operator<< <T>(Ostream& os, const UPtrList<T>& list);
 
 
     // Iterators
@@ -471,17 +490,10 @@ public:
         inline const_iterator end() const noexcept;
 
 
-    // IOstream operator
-
-        //- Write UPtrList to Ostream
-        friend Ostream& operator<< <T>
-        (
-            Ostream& os,
-            const UPtrList<T>& list
-        );
-
-
     // Housekeeping
+
+        //- Alias for resize()
+        void setSize(const label n) { this->resize(n); }
 
         //- Reference to the first element of the list
         //FOAM_DEPRECATED_FOR(2022-10, "front()")

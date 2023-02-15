@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +32,13 @@ template<class T>
 inline void Foam::UPtrList<T>::setAddressableSize(const label n) noexcept
 {
     ptrs_.setAddressableSize(n);
+}
+
+
+template<class T>
+inline Foam::label Foam::UPtrList<T>::find_next(label pos) const
+{
+    return ptrs_.find_next(pos);
 }
 
 
@@ -117,30 +124,64 @@ inline Foam::label Foam::UPtrList<T>::size() const noexcept
 
 
 template<class T>
+inline Foam::label Foam::UPtrList<T>::size_nonNull() const noexcept
+{
+    return ptrs_.count();
+}
+
+
+template<class T>
 inline const T* Foam::UPtrList<T>::test(const label i) const
 {
-    return (i >= 0 && i < ptrs_.size()) ? ptrs_[i] : nullptr;
+    return ptrs_.get(i);
 }
 
 
 template<class T>
 inline const T* Foam::UPtrList<T>::get(const label i) const
 {
-    return (i >= 0 && i < ptrs_.size()) ? ptrs_[i] : nullptr;
+    return ptrs_.get(i);
 }
 
 
 template<class T>
 inline T* Foam::UPtrList<T>::get(const label i)
 {
-    return (i >= 0 && i < ptrs_.size()) ? ptrs_[i] : nullptr;
+    return ptrs_.get(i);
 }
 
 
 template<class T>
-inline const T* Foam::UPtrList<T>::set(const label i) const
+inline const T& Foam::UPtrList<T>::at(const label i) const
 {
-    return (i >= 0 && i < ptrs_.size()) ? ptrs_[i] : nullptr;
+    const T* ptr = ptrs_.get(i);
+
+    if (!ptr)
+    {
+        FatalErrorInFunction
+            << "Cannot dereference nullptr at index " << i
+            << " in range [0," << size() << ")\n"
+            << abort(FatalError);
+    }
+
+    return *ptr;
+}
+
+
+template<class T>
+inline T& Foam::UPtrList<T>::at(const label i)
+{
+    T* ptr = ptrs_.get(i);
+
+    if (!ptr)
+    {
+        FatalErrorInFunction
+            << "Cannot dereference nullptr at index " << i
+            << " in range [0," << size() << ")\n"
+            << abort(FatalError);
+    }
+
+    return *ptr;
 }
 
 
@@ -181,28 +222,28 @@ inline void Foam::UPtrList<T>::transfer(UPtrList<T>& list)
 template<class T>
 inline T& Foam::UPtrList<T>::front()
 {
-    return this->operator[](0);
+    return this->at(0);
 }
 
 
 template<class T>
 inline const T& Foam::UPtrList<T>::front() const
 {
-    return this->operator[](0);
+    return this->at(0);
 }
 
 
 template<class T>
 inline T& Foam::UPtrList<T>::back()
 {
-    return this->operator[](this->size()-1);
+    return this->at(this->size()-1);
 }
 
 
 template<class T>
 inline const T& Foam::UPtrList<T>::back() const
 {
-    return this->operator[](this->size()-1);
+    return this->at(this->size()-1);
 }
 
 
@@ -240,34 +281,14 @@ inline void Foam::UPtrList<T>::checkNonNull() const
 template<class T>
 inline const T& Foam::UPtrList<T>::operator[](const label i) const
 {
-    const T* ptr = ptrs_[i];
-
-    if (!ptr)
-    {
-        FatalErrorInFunction
-            << "Cannot dereference nullptr at index " << i
-            << " in range [0," << size() << ")\n"
-            << abort(FatalError);
-    }
-
-    return *ptr;
+    return this->at(i);
 }
 
 
 template<class T>
 inline T& Foam::UPtrList<T>::operator[](const label i)
 {
-    T* ptr = ptrs_[i];
-
-    if (!ptr)
-    {
-        FatalErrorInFunction
-            << "Cannot dereference nullptr at index " << i
-            << " in range [0," << size() << ")\n"
-            << abort(FatalError);
-    }
-
-    return *ptr;
+    return this->at(i);
 }
 
 

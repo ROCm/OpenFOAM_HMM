@@ -146,9 +146,6 @@ public:
         //  New entries are initialized to nullptr, removed entries are deleted
         void resize(const label newLen);
 
-        //- Same as resize()
-        void setSize(const label newLen) { this->resize(newLen); }
-
         //- Construct and append an element to the end of the list,
         //- return reference to the new list element
         template<class... Args>
@@ -213,7 +210,7 @@ public:
         inline void operator=(PtrList<T>&& list);
 
 
-    // IOstream operator
+    // IOstream Operators
 
         //- Read from Istream, discarding contents of existing list
         friend Istream& operator>> <T>(Istream& is, PtrList<T>& list);
@@ -226,6 +223,9 @@ public:
         {
             return this->set(i, std::move(ptr));
         }
+
+        //- Same as resize()
+        void setSize(const label newLen) { this->resize(newLen); }
 
         //- Move append an element to the end of the list
         void append(autoPtr<T>& ptr) { this->push_back(std::move(ptr)); }
