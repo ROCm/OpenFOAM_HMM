@@ -187,7 +187,7 @@ template<class T, int SizeMin>
 inline Foam::label Foam::PtrDynList<T, SizeMin>::squeezeNull()
 {
     const label newLen = UPtrList<T>::squeezeNull();
-    resize(newLen);
+    PtrList<T>::setAddressableSize(newLen);
     return newLen;
 }
 

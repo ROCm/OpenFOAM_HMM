@@ -129,7 +129,7 @@ public:
             //- Compare dereferenced pointers
             bool operator()(const T* const a, const T* const b) const
             {
-                return (a && b) ? comp(*a, *b) : bool(a);
+                return (a && b) ? comp(*a, *b) : !b;
             }
         };
 
@@ -150,7 +150,7 @@ public:
                 const T* const a = values.get(ai);
                 const T* const b = values.get(bi);
 
-                return (a && b) ? (*a < *b) : bool(a);
+                return (a && b) ? (*a < *b) : !b;
             }
         };
 
@@ -171,7 +171,7 @@ public:
                 const T* const a = values.get(ai);
                 const T* const b = values.get(bi);
 
-                return (a && b) ? (*b < *a) : bool(b);
+                return (a && b) ? (*b < *a) : !a;
             }
         };
 
@@ -262,9 +262,14 @@ public:
         //- Alias for resize()
         void setSize(const label n) { this->resize(n); }
 
-        //- Squeeze out intermediate nullptr entries in the list of pointers
+        //- Squeeze out nullptr entries in the list of pointers after which
+        //- any null pointers will be at the end of the list
         //  \return the number of non-null entries
         label squeezeNull();
+
+        //- Reduce addressable list size to ignore any trailing null pointers.
+        //  The reduces the effective list length without reallocation
+        void trimTrailingNull();
 
         //- Append an element to the end of the list
         inline void push_back(T* ptr);
@@ -343,7 +348,7 @@ public:
             // Member Functions
 
             //- Return pointer, can be nullptr.
-            inline pointer get() const;
+            pointer get() const { return *ptr_; }
 
             // Member Operators
 
@@ -403,7 +408,7 @@ public:
             // Member Functions
 
             //- Return pointer, can be nullptr.
-            inline pointer get() const;
+            pointer get() const { return *ptr_; }
 
             // Member Operators
 
@@ -507,6 +512,8 @@ public:
 // * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
 
 //- Inplace (stable) sorting of pointer list.
+//  This sort function includes null pointer guards and will also sort
+//  any null pointers to the end (eg, rubbish that can be truncated)
 template<class T>
 void sort(UPtrList<T>& list);
 

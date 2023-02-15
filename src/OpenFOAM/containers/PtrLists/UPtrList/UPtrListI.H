@@ -282,13 +282,6 @@ iterator(T** ptr) noexcept
 
 
 template<class T>
-inline T* Foam::UPtrList<T>::iterator::get() const
-{
-    return *ptr_;
-}
-
-
-template<class T>
 inline T* Foam::UPtrList<T>::iterator::operator->() const
 {
     return *ptr_;
@@ -453,13 +446,6 @@ const_iterator(const iterator& iter) noexcept
 :
     ptr_(iter.ptr_)
 {}
-
-
-template<class T>
-inline const T* Foam::UPtrList<T>::const_iterator::get() const
-{
-    return *ptr_;
-}
 
 
 template<class T>
