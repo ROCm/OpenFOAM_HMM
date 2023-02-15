@@ -75,14 +75,7 @@ prghPermeableAlphaTotalPressureFvPatchScalarField
     refGrad() = 0.0;
     valueFraction() = 0.0;
 
-    if (dict.found("value"))
-    {
-        fvPatchField<scalar>::operator=
-        (
-            Field<scalar>("value", dict, p.size())
-        );
-    }
-    else
+    if (!this->readValueEntry(dict))
     {
         fvPatchField<scalar>::operator=(refValue());
     }

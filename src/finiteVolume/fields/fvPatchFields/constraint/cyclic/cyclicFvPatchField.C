@@ -54,7 +54,7 @@ Foam::cyclicFvPatchField<Type>::cyclicFvPatchField
     const bool valueRequired
 )
 :
-    coupledFvPatchField<Type>(p, iF, dict, false), // Pass no valueRequired
+    coupledFvPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ),
     cyclicPatch_(refCast<const cyclicFvPatch>(p, dict))
 {
     if (!isA<cyclicFvPatch>(p))

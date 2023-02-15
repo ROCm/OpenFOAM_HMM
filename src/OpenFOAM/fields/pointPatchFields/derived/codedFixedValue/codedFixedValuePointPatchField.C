@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -161,11 +161,11 @@ Foam::codedFixedValuePointPatchField<Type>::codedFixedValuePointPatchField
 (
     const pointPatch& p,
     const DimensionedField<Type, pointMesh>& iF,
-    const dictionary& dict,
-    const bool valueRequired
+    const dictionary& dict
 )
 :
-    parent_bctype(p, iF, dict, false),
+    // The 'value' is optional (handled below)
+    parent_bctype(p, iF, dict, IOobjectOption::NO_READ),
     codedBase(),
     dict_
     (
@@ -186,10 +186,7 @@ Foam::codedFixedValuePointPatchField<Type>::codedFixedValuePointPatchField
 {
     updateLibrary(name_);
 
-    // Note: 'value' is used even with valueRequired = false ! This is
-    // inconsistent with fixedValueFvPatchField behaviour.
-
-    if (!dict.found("value")) // Q: check for valueRequired?
+    if (!this->readValueEntry(dict))
     {
         // Evaluate to assign a value
         this->evaluate(Pstream::commsTypes::blocking);

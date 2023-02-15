@@ -84,25 +84,15 @@ Foam::fixedJumpFvPatchField<Type>::fixedJumpFvPatchField
     {
         if (valueRequired)
         {
-            jump_ = Field<Type>("jump", dict, p.size());
+            jump_.assign("jump", dict, p.size(), IOobjectOption::MUST_READ);
         }
 
-        if (dict.found("jump0"))
-        {
-            jump0_ = Field<Type>("jump0", dict, p.size());
-        }
+        jump0_.assign("jump0", dict, p.size(), IOobjectOption::LAZY_READ);
     }
 
     if (valueRequired)
     {
-        if (dict.found("value"))
-        {
-            fvPatchField<Type>::operator=
-            (
-                Field<Type>("value", dict, p.size())
-            );
-        }
-        else
+        if (!this->readValueEntry(dict))
         {
             this->evaluate(Pstream::commsTypes::blocking);
         }

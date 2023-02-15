@@ -103,14 +103,7 @@ Foam::enthalpySorptionFvPatchScalarField::enthalpySorptionFvPatchScalarField
         }
     }
 
-    if (dict.found("value"))
-    {
-        fvPatchScalarField::operator=
-        (
-            scalarField("value", dict, p.size())
-        );
-    }
-    else
+    if (!this->readValueEntry(dict))
     {
         fvPatchField<scalar>::operator=(Zero);
     }

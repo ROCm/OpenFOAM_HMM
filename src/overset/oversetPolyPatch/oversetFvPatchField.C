@@ -83,7 +83,7 @@ Foam::oversetFvPatchField<Type>::oversetFvPatchField
     const dictionary& dict
 )
 :
-    coupledFvPatchField<Type>(p, iF, dict, false),
+    coupledFvPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ),
     oversetPatch_(refCast<const oversetFvPatch>(p, dict)),
     setHoleCellValue_(dict.getOrDefault("setHoleCellValue", false)),
     fluxCorrection_
@@ -110,14 +110,8 @@ Foam::oversetFvPatchField<Type>::oversetFvPatchField
     fringeFaces_(),
     zoneId_(dict.getOrDefault<label>("zone", -1))
 {
-    if (dict.found("value"))
-    {
-        Field<Type>::operator=
-        (
-            Field<Type>("value", dict, p.size())
-        );
-    }
-    else
+    // Use 'value' supplied, or set to internal field
+    if (!this->readValueEntry(dict))
     {
         Field<Type>::operator=(this->patchInternalField());
     }

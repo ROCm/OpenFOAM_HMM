@@ -89,14 +89,8 @@ inletOutletTotalTemperatureFvPatchScalarField
     this->phiName_ = dict.getOrDefault<word>("phi", "phi");
 
     this->refValue() = Zero;
-    if (dict.found("value"))
-    {
-        fvPatchField<scalar>::operator=
-        (
-            scalarField("value", dict, p.size())
-        );
-    }
-    else
+
+    if (!this->readValueEntry(dict))
     {
         fvPatchField<scalar>::operator=(T0_);
     }

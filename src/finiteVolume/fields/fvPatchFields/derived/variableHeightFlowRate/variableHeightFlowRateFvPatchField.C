@@ -84,14 +84,7 @@ Foam::variableHeightFlowRateFvPatchScalarField
     fvPatchFieldBase::readDict(dict);
     this->refValue() = 0.0;
 
-    if (dict.found("value"))
-    {
-        fvPatchScalarField::operator=
-        (
-            scalarField("value", dict, p.size())
-        );
-    }
-    else
+    if (!this->readValueEntry(dict))
     {
         fvPatchScalarField::operator=(this->patchInternalField());
     }

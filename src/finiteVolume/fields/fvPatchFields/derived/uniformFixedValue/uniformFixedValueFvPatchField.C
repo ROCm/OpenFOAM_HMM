@@ -63,17 +63,10 @@ Foam::uniformFixedValueFvPatchField<Type>::uniformFixedValueFvPatchField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchField<Type>(p, iF, dict, false),
+    fixedValueFvPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ),
     uniformValue_(PatchFunction1<Type>::New(p.patch(), "uniformValue", dict))
 {
-    if (dict.found("value"))
-    {
-        fvPatchField<Type>::operator=
-        (
-            Field<Type>("value", dict, p.size())
-        );
-    }
-    else
+    if (!this->readValueEntry(dict))
     {
         this->evaluate();
     }

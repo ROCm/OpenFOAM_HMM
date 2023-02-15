@@ -88,15 +88,10 @@ greyDiffusiveRadiationMixedFvPatchScalarField
     qRadExt_(dict.getOrDefault<scalar>("qRadExt", 0)),
     qRadExtDir_(dict.getOrDefault<vector>("qRadExtDir", Zero))
 {
-    if (dict.found("refValue"))
+    if (this->readMixedEntries(dict))
     {
-        fvPatchScalarField::operator=
-        (
-            scalarField("value", dict, p.size())
-        );
-        refValue() = scalarField("refValue", dict, p.size());
-        refGrad() = scalarField("refGradient", dict, p.size());
-        valueFraction() = scalarField("valueFraction", dict, p.size());
+        // Full restart
+        this->readValueEntry(dict, IOobjectOption::MUST_READ);
     }
     else
     {

@@ -46,8 +46,8 @@ MarshakRadiationFixedTemperatureFvPatchScalarField
     mixedFvPatchScalarField(p, iF),
     Trad_(p.size())
 {
-    refValue() = 0.0;
-    refGrad() = 0.0;
+    refValue() = Zero;
+    refGrad() = Zero;
     valueFraction() = 0.0;
 }
 
@@ -79,10 +79,7 @@ MarshakRadiationFixedTemperatureFvPatchScalarField
 {
     // refValue updated on each call to updateCoeffs()
     refValue() = 4.0*constant::physicoChemical::sigma.value()*pow4(Trad_);
-
-    // zero gradient
-    refGrad() = 0.0;
-
+    refGrad() = Zero;  // zero gradient
     valueFraction() = 1.0;
 
     fvPatchScalarField::operator=(refValue());

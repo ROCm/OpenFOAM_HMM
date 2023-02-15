@@ -122,6 +122,7 @@ protected:
             manipulatedMatrix_ = state;
         }
 
+
 public:
 
     //- Debug switch to disallow the use of generic fvPatchField

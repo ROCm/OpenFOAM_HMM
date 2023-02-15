@@ -92,7 +92,7 @@ atmTurbulentHeatFluxTemperatureFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedGradientFvPatchScalarField(p, iF),
+    fixedGradientFvPatchScalarField(p, iF),  // Bypass dictionary constructor
     heatSource_
     (
         heatSourceTypeNames.getOrDefault
@@ -106,13 +106,11 @@ atmTurbulentHeatFluxTemperatureFvPatchScalarField
     Cp0_(Function1<scalar>::New("Cp0", dict, &db())),
     q_(PatchFunction1<scalar>::New(p.patch(), "q", dict))
 {
-    if (dict.found("value") && dict.found("gradient"))
+    const auto* hasGrad = dict.findEntry("gradient", keyType::LITERAL);
+
+    if (hasGrad && this->readValueEntry(dict))
     {
-        fvPatchField<scalar>::operator =
-            (
-                Field<scalar>("value", dict, p.size())
-            );
-        gradient() = Field<scalar>("gradient", dict, p.size());
+        gradient().assign(*hasGrad, p.size());
     }
     else
     {

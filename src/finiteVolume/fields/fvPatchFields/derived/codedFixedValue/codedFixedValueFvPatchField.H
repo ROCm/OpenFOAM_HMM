@@ -102,8 +102,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef codedFixedValueFvPatchField_H
-#define codedFixedValueFvPatchField_H
+#ifndef Foam_codedFixedValueFvPatchField_H
+#define Foam_codedFixedValueFvPatchField_H
 
 #include "fixedValueFvPatchFields.H"
 #include "codedBase.H"

@@ -48,7 +48,7 @@ Foam::fixedValueOutflowFaPatchField<Type>::fixedValueOutflowFaPatchField
     const dictionary& dict
 )
 :
-    faPatchField<Type>(p, iF, Field<Type>("value", dict, p.size()))
+    faPatchField<Type>(p, iF, dict, IOobjectOption::MUST_READ)
 {}
 
 

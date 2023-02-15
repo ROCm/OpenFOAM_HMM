@@ -77,10 +77,7 @@ Foam::partialSlipFvPatchField<Type>::partialSlipFvPatchField
     fvPatchFieldBase::readDict(dict);
 
     // Backwards compatibility - leave refValue as zero unless specified
-    if (dict.found("refValue"))
-    {
-        refValue_ = Field<Type>("refValue", dict, p.size());
-    }
+    refValue_.assign("refValue", dict, p.size(), IOobjectOption::LAZY_READ);
 
     evaluate();
 }

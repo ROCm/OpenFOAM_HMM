@@ -77,14 +77,7 @@ Foam::wallHeatTransferFvPatchScalarField::wallHeatTransferFvPatchScalarField
     refGrad() = 0.0;
     valueFraction() = 0.0;
 
-    if (dict.found("value"))
-    {
-        fvPatchField<scalar>::operator=
-        (
-            scalarField("value", dict, p.size())
-        );
-    }
-    else
+    if (!this->readValueEntry(dict))
     {
         evaluate();
     }

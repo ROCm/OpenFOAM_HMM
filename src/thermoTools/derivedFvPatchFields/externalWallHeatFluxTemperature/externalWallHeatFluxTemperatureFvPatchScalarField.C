@@ -136,8 +136,6 @@ externalWallHeatFluxTemperatureFvPatchScalarField
         }
     }
 
-    fvPatchScalarField::operator=(scalarField("value", dict, p.size()));
-
     if (qrName_ != "none")
     {
         if (dict.found("qrPrevious"))
@@ -150,12 +148,11 @@ externalWallHeatFluxTemperatureFvPatchScalarField
         }
     }
 
-    if (dict.found("refValue"))
+    this->readValueEntry(dict, IOobjectOption::MUST_READ);
+
+    if (this->readMixedEntries(dict))
     {
         // Full restart
-        refValue() = scalarField("refValue", dict, p.size());
-        refGrad() = scalarField("refGradient", dict, p.size());
-        valueFraction() = scalarField("valueFraction", dict, p.size());
     }
     else
     {

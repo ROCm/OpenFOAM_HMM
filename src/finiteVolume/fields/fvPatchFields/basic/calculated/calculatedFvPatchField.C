@@ -57,10 +57,10 @@ Foam::calculatedFvPatchField<Type>::calculatedFvPatchField
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
     const dictionary& dict,
-    const bool valueRequired
+    IOobjectOption::readOption requireValue
 )
 :
-    fvPatchField<Type>(p, iF, dict, valueRequired)
+    fvPatchField<Type>(p, iF, dict, requireValue)
 {}
 
 

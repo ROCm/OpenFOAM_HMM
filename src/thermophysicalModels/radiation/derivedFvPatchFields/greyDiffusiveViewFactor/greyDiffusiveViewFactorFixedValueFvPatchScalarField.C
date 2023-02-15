@@ -72,17 +72,9 @@ greyDiffusiveViewFactorFixedValueFvPatchScalarField
     fixedValueFvPatchScalarField(p, iF, dict, false),
     qro_("qro", dict, p.size())
 {
-    if (dict.found("value"))
+    if (!this->readValueEntry(dict))
     {
-        fvPatchScalarField::operator=
-        (
-            scalarField("value", dict, p.size())
-        );
-
-    }
-    else
-    {
-         fvPatchScalarField::operator=(0.0);
+         fvPatchScalarField::operator=(Zero);
     }
 }
 

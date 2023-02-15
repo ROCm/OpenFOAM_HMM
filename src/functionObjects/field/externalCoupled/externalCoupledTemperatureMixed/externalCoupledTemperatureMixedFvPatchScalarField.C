@@ -149,27 +149,16 @@ externalCoupledTemperatureMixedFvPatchScalarField
         Tref_ = Function1<scalar>::New("Tref", dict, &db());
     }
 
-    if (dict.found("refValue"))
+    if (this->readMixedEntries(dict))
     {
         // Initialise same way as mixed
-        this->refValue() = scalarField("refValue", dict, p.size());
-        this->refGrad() = scalarField("refGradient", dict, p.size());
-        this->valueFraction() = scalarField("valueFraction", dict, p.size());
-
         evaluate();
     }
     else
     {
         // For convenience: initialise as fixedValue with either read value
         // or extrapolated value
-        if (dict.found("value"))
-        {
-            fvPatchField<scalar>::operator=
-            (
-                scalarField("value", dict, p.size())
-            );
-        }
-        else
+        if (!this->readValueEntry(dict))
         {
             fvPatchField<scalar>::operator=(this->patchInternalField());
         }

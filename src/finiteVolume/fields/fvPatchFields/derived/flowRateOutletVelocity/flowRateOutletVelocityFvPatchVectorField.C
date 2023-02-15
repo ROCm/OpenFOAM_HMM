@@ -56,7 +56,7 @@ flowRateOutletVelocityFvPatchVectorField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchField<vector>(p, iF, dict, false),
+    fixedValueFvPatchField<vector>(p, iF, dict, IOobjectOption::NO_READ),
     flowRate_(nullptr),
     rhoName_("rho"),
     rhoOutlet_(dict.getOrDefault<scalar>("rhoOutlet", -VGREAT)),
@@ -84,15 +84,8 @@ flowRateOutletVelocityFvPatchVectorField
             << exit(FatalIOError);
     }
 
-    // Value field require if mass based
-    if (dict.found("value"))
-    {
-        fvPatchField<vector>::operator=
-        (
-            vectorField("value", dict, p.size())
-        );
-    }
-    else
+    // Value field required if mass based
+    if (!this->readValueEntry(dict))
     {
         evaluate(Pstream::commsTypes::blocking);
     }

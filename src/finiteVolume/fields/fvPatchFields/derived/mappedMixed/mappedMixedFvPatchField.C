@@ -61,7 +61,8 @@ Foam::mappedMixedFvPatchField<Type>::mappedMixedFvPatchField
     const dictionary& dict
 )
 :
-    mixedFvPatchField<Type>(p, iF, dict),
+    // Reading of mixed entries handled later...
+    mixedFvPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ),
     mappedPatchFieldBase<Type>
     (
         mappedFixedValueFvPatchField<Type>::mapper(p, iF),
@@ -70,17 +71,11 @@ Foam::mappedMixedFvPatchField<Type>::mappedMixedFvPatchField
     ),
     weightFieldName_(dict.getOrDefault<word>("weightField", word::null))
 {
-    mixedFvPatchField<Type>::operator=
-    (
-        Field<Type>("value", dict, p.size())
-    );
+    this->readValueEntry(dict, IOobjectOption::MUST_READ);
 
-    if (dict.found("refValue"))
+    if (this->readMixedEntries(dict))
     {
         // Full restart
-        this->refValue() = Field<Type>("refValue", dict, p.size());
-        this->refGrad() = Field<Type>("refGradient", dict, p.size());
-        this->valueFraction() = scalarField("valueFraction", dict, p.size());
     }
     else
     {

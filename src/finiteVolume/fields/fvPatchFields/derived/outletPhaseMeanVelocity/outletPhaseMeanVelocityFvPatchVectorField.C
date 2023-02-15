@@ -84,14 +84,7 @@ Foam::outletPhaseMeanVelocityFvPatchVectorField
     refGrad() = Zero;
     valueFraction() = 0.0;
 
-    if (dict.found("value"))
-    {
-        fvPatchVectorField::operator=
-        (
-            vectorField("value", dict, p.size())
-        );
-    }
-    else
+    if (!this->readValueEntry(dict))
     {
         fvPatchVectorField::operator=(patchInternalField());
     }

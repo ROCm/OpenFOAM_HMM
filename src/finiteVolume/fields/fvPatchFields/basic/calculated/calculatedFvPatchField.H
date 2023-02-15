@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,8 +50,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef calculatedFvPatchField_H
-#define calculatedFvPatchField_H
+#ifndef Foam_calculatedFvPatchField_H
+#define Foam_calculatedFvPatchField_H
 
 #include "fvPatchField.H"
 
@@ -90,8 +91,24 @@ public:
             const fvPatch&,
             const DimensionedField<Type, volMesh>&,
             const dictionary&,
-            const bool valueRequired=true
+            IOobjectOption::readOption requireValue = IOobjectOption::MUST_READ
         );
+
+        //- Compatibility (prefer with readOption)
+        calculatedFvPatchField
+        (
+            const fvPatch& p,
+            const DimensionedField<Type, volMesh>& iF,
+            const dictionary& dict,
+            const bool valueReqd
+        )
+        :
+            calculatedFvPatchField
+            (
+                p, iF, dict,
+                (valueReqd? IOobjectOption::MUST_READ : IOobjectOption::NO_READ)
+            )
+        {}
 
         //- Construct by mapping given patch field onto a new patch
         calculatedFvPatchField

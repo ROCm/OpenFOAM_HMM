@@ -55,19 +55,12 @@ rotatingWallVelocityFvPatchVectorField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchField<vector>(p, iF, dict, false),
+    fixedValueFvPatchField<vector>(p, iF, dict, IOobjectOption::NO_READ),
     origin_(dict.lookup("origin")),
     axis_(dict.lookup("axis")),
     omega_(Function1<scalar>::New("omega", dict, &db()))
 {
-    if (dict.found("value"))
-    {
-        fvPatchField<vector>::operator=
-        (
-            vectorField("value", dict, p.size())
-        );
-    }
-    else
+    if (!this->readValueEntry(dict))
     {
         // Evaluate the wall velocity
         updateCoeffs();

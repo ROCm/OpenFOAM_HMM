@@ -52,7 +52,7 @@ Foam::scaledFixedValueFvPatchField<Type>::scaledFixedValueFvPatchField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchField<Type>(p, iF, dict, false),
+    fixedValueFvPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ),
     scalePtr_(PatchFunction1<scalar>::New(p.patch(), "scale", dict)),
     refValuePtr_(fvPatchField<Type>::New(p, iF, dict.subDict("refValue")))
 {

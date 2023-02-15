@@ -105,18 +105,15 @@ Foam::maxwellSlipUFvPatchVectorField::maxwellSlipUFvPatchVectorField
             << exit(FatalIOError);
     }
 
-    if (dict.found("value"))
+    if (this->readValueEntry(dict))
     {
-        fvPatchField<vector>::operator=
-        (
-            vectorField("value", dict, p.size())
-        );
+        const auto* hasRefValue = dict.findEntry("refValue", keyType::LITERAL);
+        const auto* hasFrac = dict.findEntry("valueFraction", keyType::LITERAL);
 
-        if (dict.found("refValue") && dict.found("valueFraction"))
+        if (hasRefValue && hasFrac)
         {
-            this->refValue() = vectorField("refValue", dict, p.size());
-            this->valueFraction() =
-                scalarField("valueFraction", dict, p.size());
+            this->refValue().assign(*hasRefValue, p.size());
+            this->valueFraction().assign(*hasFrac, p.size());
         }
         else
         {

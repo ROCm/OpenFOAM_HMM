@@ -274,7 +274,7 @@ sorptionWallFunctionFvPatchScalarField::sorptionWallFunctionFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedGradientFvPatchScalarField(p, iF),
+    fixedGradientFvPatchScalarField(p, iF),  // Bypass dictionary constructor
     wallFunctionBlenders(dict, blenderType::STEPWISE, scalar(2)),
     laminar_(dict.getOrDefault<bool>("laminar", false)),
     kAbsPtr_(PatchFunction1<scalar>::New(p.patch(), "kAbs", dict)),
@@ -303,13 +303,11 @@ sorptionWallFunctionFvPatchScalarField::sorptionWallFunctionFvPatchScalarField
             << exit(FatalIOError);
     }
 
-    if (dict.found("value") && dict.found("gradient"))
+    const auto* hasGrad = dict.findEntry("gradient", keyType::LITERAL);
+
+    if (hasGrad && this->readValueEntry(dict))
     {
-        fvPatchField<scalar>::operator =
-            (
-                Field<scalar>("value", dict, p.size())
-            );
-        gradient() = Field<scalar>("gradient", dict, p.size());
+        gradient().assign(*hasGrad, p.size());
     }
     else
     {

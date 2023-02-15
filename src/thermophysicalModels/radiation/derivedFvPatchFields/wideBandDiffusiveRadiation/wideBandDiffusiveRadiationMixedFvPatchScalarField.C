@@ -77,22 +77,17 @@ wideBandDiffusiveRadiationMixedFvPatchScalarField
     const dictionary& dict
 )
 :
-    mixedFvPatchScalarField(p, iF)
+    mixedFvPatchScalarField(p, iF, dict, IOobjectOption::NO_READ)
 {
-    if (dict.found("refValue"))
+    if (this->readMixedEntries(dict))
     {
-        fvPatchScalarField::operator=
-        (
-            scalarField("value", dict, p.size())
-        );
-        refValue() = scalarField("refValue", dict, p.size());
-        refGrad() = scalarField("refGradient", dict, p.size());
-        valueFraction() = scalarField("valueFraction", dict, p.size());
+        // Full restart
+        this->readValueEntry(dict, IOobjectOption::MUST_READ);
     }
     else
     {
-        refValue() = 0.0;
-        refGrad() = 0.0;
+        refValue() = Zero;
+        refGrad() = Zero;
         valueFraction() = 1.0;
 
         fvPatchScalarField::operator=(refValue());

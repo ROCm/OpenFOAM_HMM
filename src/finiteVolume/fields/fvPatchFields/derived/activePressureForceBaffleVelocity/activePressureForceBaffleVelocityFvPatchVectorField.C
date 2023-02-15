@@ -94,7 +94,7 @@ activePressureForceBaffleVelocityFvPatchVectorField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchVectorField(p, iF, dict, false),
+    fixedValueFvPatchVectorField(p, iF, dict, IOobjectOption::NO_READ),
     pName_(dict.getOrDefault<word>("p", "p")),
     cyclicPatchName_(dict.lookup("cyclicPatch")),
     cyclicPatchLabel_(p.patch().boundaryMesh().findPatchID(cyclicPatchName_)),

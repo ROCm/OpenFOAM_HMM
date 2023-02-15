@@ -59,7 +59,7 @@ uniformTotalPressureFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchScalarField(p, iF, dict, false),
+    fixedValueFvPatchScalarField(p, iF, dict, IOobjectOption::NO_READ),
     UName_(dict.getOrDefault<word>("U", "U")),
     phiName_(dict.getOrDefault<word>("phi", "phi")),
     rhoName_(dict.getOrDefault<word>("rho", "rho")),
@@ -67,14 +67,7 @@ uniformTotalPressureFvPatchScalarField
     gamma_(psiName_ != "none" ? dict.get<scalar>("gamma") : 1),
     p0_(Function1<scalar>::New("p0", dict, &db()))
 {
-    if (dict.found("value"))
-    {
-        fvPatchField<scalar>::operator=
-        (
-            scalarField("value", dict, p.size())
-        );
-    }
-    else
+    if (!this->readValueEntry(dict))
     {
         const scalar t = this->db().time().timeOutputValue();
         fvPatchScalarField::operator==(p0_->value(t));

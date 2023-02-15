@@ -49,8 +49,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef extrapolatedCalculatedFvPatchField_H
-#define extrapolatedCalculatedFvPatchField_H
+#ifndef Foam_extrapolatedCalculatedFvPatchField_H
+#define Foam_extrapolatedCalculatedFvPatchField_H
 
 #include "calculatedFvPatchField.H"
 
@@ -68,7 +68,6 @@ class extrapolatedCalculatedFvPatchField
 :
     public calculatedFvPatchField<Type>
 {
-
 public:
 
     //- Runtime type information

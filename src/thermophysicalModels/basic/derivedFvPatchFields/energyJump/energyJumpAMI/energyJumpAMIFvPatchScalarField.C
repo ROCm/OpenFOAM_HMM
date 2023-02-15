@@ -64,14 +64,7 @@ Foam::energyJumpAMIFvPatchScalarField::energyJumpAMIFvPatchScalarField
 :
     fixedJumpAMIFvPatchField<scalar>(p, iF)
 {
-    if (dict.found("value"))
-    {
-        fvPatchScalarField::operator=
-        (
-            scalarField("value", dict, p.size())
-        );
-    }
-    else
+    if (!this->readValueEntry(dict))
     {
         evaluate(Pstream::commsTypes::blocking);
     }

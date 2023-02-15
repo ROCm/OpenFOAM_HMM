@@ -48,7 +48,7 @@ Foam::fixedValueFvsPatchField<Type>::fixedValueFvsPatchField
     const dictionary& dict
 )
 :
-    fvsPatchField<Type>(p, iF, Field<Type>("value", dict, p.size()))
+    fvsPatchField<Type>(p, iF, dict, IOobjectOption::MUST_READ)
 {}
 
 

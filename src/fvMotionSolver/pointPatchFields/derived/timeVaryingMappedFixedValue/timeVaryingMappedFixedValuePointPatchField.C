@@ -101,14 +101,7 @@ timeVaryingMappedFixedValuePointPatchField
         fieldTableName_
     );
 
-    if (dict.found("value"))
-    {
-        fixedValuePointPatchField<Type>::operator==
-        (
-            Field<Type>("value", dict, p.size())
-        );
-    }
-    else
+    if (!this->readValueEntry(dict))
     {
         // Note: use evaluate to do updateCoeffs followed by a reset
         //       of the pointPatchField::updated_ flag. This is

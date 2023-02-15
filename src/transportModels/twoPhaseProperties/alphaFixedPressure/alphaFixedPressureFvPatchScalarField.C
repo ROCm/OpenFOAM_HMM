@@ -72,14 +72,7 @@ alphaFixedPressureFvPatchScalarField
     fixedValueFvPatchScalarField(p, iF, dict, false),
     p_("p", dict, p.size())
 {
-    if (dict.found("value"))
-    {
-        fvPatchField<scalar>::operator=
-        (
-            scalarField("value", dict, p.size())
-        );
-    }
-    else
+    if (!this->readValueEntry(dict))
     {
         fvPatchField<scalar>::operator=(p_);
     }

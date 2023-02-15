@@ -52,23 +52,21 @@ Foam::fixedFluxPressureFvPatchScalarField::fixedFluxPressureFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedGradientFvPatchScalarField(p, iF),
+    fixedGradientFvPatchScalarField(p, iF),  // Bypass dictionary constructor
     curTimeIndex_(-1)
 {
     fvPatchFieldBase::readDict(dict);
 
-    if (dict.found("value") && dict.found("gradient"))
+    const auto* hasGrad = dict.findEntry("gradient", keyType::LITERAL);
+
+    if (hasGrad && this->readValueEntry(dict))
     {
-        fvPatchField<scalar>::operator=
-        (
-            scalarField("value", dict, p.size())
-        );
-        gradient() = scalarField("gradient", dict, p.size());
+        gradient().assign(*hasGrad, p.size());
     }
     else
     {
         fvPatchField<scalar>::operator=(patchInternalField());
-        gradient() = 0.0;
+        gradient() = Zero;
     }
 }
 

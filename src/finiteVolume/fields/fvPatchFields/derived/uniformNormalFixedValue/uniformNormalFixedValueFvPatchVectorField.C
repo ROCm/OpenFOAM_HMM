@@ -53,18 +53,11 @@ uniformNormalFixedValueFvPatchVectorField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchVectorField(p, iF, dict, false),
+    fixedValueFvPatchVectorField(p, iF, dict, IOobjectOption::NO_READ),
     uniformValue_(PatchFunction1<scalar>::New(p.patch(), "uniformValue", dict)),
     ramp_(Function1<scalar>::NewIfPresent("ramp", dict, word::null, &db()))
 {
-    if (dict.found("value"))
-    {
-        fvPatchVectorField::operator=
-        (
-            vectorField("value", dict, p.size())
-        );
-    }
-    else
+    if (!this->readValueEntry(dict))
     {
         this->evaluate();
     }

@@ -56,14 +56,10 @@ timeVaryingUniformFixedValueFaPatchField
     fixedValueFaPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ),
     timeSeries_(dict)
 {
-   if (dict.found("value"))
-   {
-       faPatchField<Type>::operator==(Field<Type>("value", dict, p.size()));
-   }
-   else
-   {
-       updateCoeffs();
-   }
+    if (!this->readValueEntry(dict))
+    {
+        updateCoeffs();
+    }
 }
 
 

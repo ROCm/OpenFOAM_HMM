@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,7 +54,7 @@ Foam::cyclicAMIFvPatchField<Type>::cyclicAMIFvPatchField
 )
 :
     cyclicAMILduInterfaceField(),
-    coupledFvPatchField<Type>(p, iF, dict, dict.found("value")),
+    coupledFvPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ),
     cyclicAMIPatch_(refCast<const cyclicAMIFvPatch>(p, dict))
 {
     if (!isA<cyclicAMIFvPatch>(p))
@@ -68,7 +68,8 @@ Foam::cyclicAMIFvPatchField<Type>::cyclicAMIFvPatchField
             << exit(FatalIOError);
     }
 
-    if (!dict.found("value"))
+    // Use 'value' supplied, or set to coupled or internal field
+    if (!this->readValueEntry(dict))
     {
         if (this->coupled())
         {

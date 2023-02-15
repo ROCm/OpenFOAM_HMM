@@ -85,14 +85,7 @@ timeVaryingMassSorptionFvPatchScalarField
     max_(dict.getCheck<scalar>("max", scalarMinMax::ge(0))),
     kdes_(dict.getCheckOrDefault<scalar>("kdes", 0, scalarMinMax::ge(0)))
 {
-    if (dict.found("value"))
-    {
-        fvPatchScalarField::operator=
-        (
-            scalarField("value", dict, p.size())
-        );
-    }
-    else
+    if (!this->readValueEntry(dict))
     {
         fvPatchField<scalar>::operator=(Zero);
     }

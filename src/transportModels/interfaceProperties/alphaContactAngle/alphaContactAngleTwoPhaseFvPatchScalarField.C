@@ -67,19 +67,21 @@ alphaContactAngleTwoPhaseFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedGradientFvPatchScalarField(p, iF),
+    fixedGradientFvPatchScalarField(p, iF),  // Bypass dictionary constructor
     limit_(limitControlNames_.get("limit", dict))
 {
-    if (dict.found("gradient"))
+    const auto* hasGrad = dict.findEntry("gradient", keyType::LITERAL);
+
+    if (hasGrad)
     {
-        gradient() = scalarField("gradient", dict, p.size());
+        gradient().assign(*hasGrad, p.size());
         fixedGradientFvPatchScalarField::updateCoeffs();
         fixedGradientFvPatchScalarField::evaluate();
     }
     else
     {
         fvPatchField<scalar>::operator=(patchInternalField());
-        gradient() = 0.0;
+        gradient() = Zero;
     }
 }
 

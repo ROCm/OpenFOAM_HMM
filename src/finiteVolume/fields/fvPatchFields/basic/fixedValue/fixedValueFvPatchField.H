@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,8 +54,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fixedValueFvPatchField_H
-#define fixedValueFvPatchField_H
+#ifndef Foam_fixedValueFvPatchField_H
+#define Foam_fixedValueFvPatchField_H
 
 #include "fvPatchField.H"
 
@@ -72,7 +73,6 @@ class fixedValueFvPatchField
 :
     public fvPatchField<Type>
 {
-
 public:
 
     //- Runtime type information
@@ -102,8 +102,24 @@ public:
             const fvPatch&,
             const DimensionedField<Type, volMesh>&,
             const dictionary&,
-            const bool valueRequired=true
+            IOobjectOption::readOption requireValue = IOobjectOption::MUST_READ
         );
+
+        //- Compatibility (prefer with readOption)
+        fixedValueFvPatchField
+        (
+            const fvPatch& p,
+            const DimensionedField<Type, volMesh>& iF,
+            const dictionary& dict,
+            const bool valueReqd
+        )
+        :
+            fixedValueFvPatchField
+            (
+                p, iF, dict,
+                (valueReqd? IOobjectOption::MUST_READ : IOobjectOption::NO_READ)
+            )
+        {}
 
         //- Construct by mapping the given fixedValue patch field
         //- onto a new patch

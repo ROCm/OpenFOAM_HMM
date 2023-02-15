@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019,2021 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,14 +73,15 @@ fixedIncidentRadiationFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedGradientFvPatchScalarField(p, iF),
+    fixedGradientFvPatchScalarField(p, iF),  // Bypass dictionary constructor
     temperatureCoupledBase(patch(), dict),
     qrIncident_("qrIncident", dict, p.size())
 {
-    if (dict.found("value") && dict.found("gradient"))
+    const auto* hasGrad = dict.findEntry("gradient", keyType::LITERAL);
+
+    if (hasGrad && this->readValueEntry(dict))
     {
-        fvPatchField<scalar>::operator=(Field<scalar>("value", dict, p.size()));
-        gradient() = Field<scalar>("gradient", dict, p.size());
+        gradient().assign(*hasGrad, p.size());
     }
     else
     {

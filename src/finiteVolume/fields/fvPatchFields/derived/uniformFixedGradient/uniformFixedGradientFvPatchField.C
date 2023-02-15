@@ -63,7 +63,7 @@ Foam::uniformFixedGradientFvPatchField<Type>::uniformFixedGradientFvPatchField
     const dictionary& dict
 )
 :
-    fixedGradientFvPatchField<Type>(p, iF),
+    fixedGradientFvPatchField<Type>(p, iF),  // Bypass dictionary constructor
     uniformGradient_
     (
         PatchFunction1<Type>::New(p.patch(), "uniformGradient", dict)

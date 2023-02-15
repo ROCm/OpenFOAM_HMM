@@ -67,7 +67,7 @@ Foam::fixedProfileFvPatchField<Type>::fixedProfileFvPatchField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchField<Type>(p, iF, dict, false),
+    fixedValueFvPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ),
     profile_(Function1<Type>::New("profile", dict, &this->db())),
     dir_(dict.lookup("direction")),
     origin_(dict.get<scalar>("origin"))

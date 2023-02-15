@@ -172,20 +172,10 @@ electrostaticDepositionFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchScalarField(p, iF, dict, false),
+    fixedValueFvPatchScalarField(p, iF, dict, IOobjectOption::NO_READ),
     h_("h", dict, p.size()),
-    qcum_
-    (
-        dict.found("qCumulative")
-      ? scalarField("qCumulative", dict, p.size())
-      : scalarField(p.size(), 0)
-    ),
-    Vfilm_
-    (
-        dict.found("Vfilm")
-      ? scalarField("Vfilm", dict, p.size())
-      : scalarField(p.size(), 0)
-    ),
+    qcum_("qCumulative", dict, p.size(), IOobjectOption::LAZY_READ),
+    Vfilm_("Vfilm", dict, p.size(), IOobjectOption::LAZY_READ),
     Ceffptr_
     (
         PatchFunction1<scalar>::New(p.patch(), "CoulombicEfficiency", dict)
@@ -216,14 +206,7 @@ electrostaticDepositionFvPatchScalarField
     timei_(-1),
     master_(-1)
 {
-    if (dict.found("value"))
-    {
-        fvPatchScalarField::operator=
-        (
-            scalarField("value", dict, p.size())
-        );
-    }
-    else
+    if (!this->readValueEntry(dict))
     {
         fvPatchScalarField::operator=(patchInternalField());
     }

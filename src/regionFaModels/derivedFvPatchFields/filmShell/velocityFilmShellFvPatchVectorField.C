@@ -102,14 +102,11 @@ velocityFilmShellFvPatchVectorField::velocityFilmShellFvPatchVectorField
     curTimeIndex_(-1),
     zeroWallVelocity_(dict.getOrDefault<bool>("zeroWallVelocity", true))
 {
-    fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
+    this->readValueEntry(dict, IOobjectOption::MUST_READ);
 
-    if (dict.found("refValue"))
+    if (this->readMixedEntries(dict))
     {
         // Full restart
-        refValue() = vectorField("refValue", dict, p.size());
-        refGrad() = vectorField("refGradient", dict, p.size());
-        valueFraction() = scalarField("valueFraction", dict, p.size());
     }
     else
     {

@@ -42,8 +42,8 @@ matchedFlowRateOutletVelocityFvPatchVectorField
 :
     fixedValueFvPatchField<vector>(p, iF),
     inletPatchName_(),
-    volumetric_(false),
-    rhoName_("rho")
+    rhoName_("rho"),
+    volumetric_(false)
 {}
 
 
@@ -55,8 +55,9 @@ matchedFlowRateOutletVelocityFvPatchVectorField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchField<vector>(p, iF, dict, false),
+    fixedValueFvPatchField<vector>(p, iF, dict, IOobjectOption::NO_READ),
     inletPatchName_(dict.get<word>("inletPatch")),
+    rhoName_(),
     volumetric_(dict.getOrDefault("volumetric", true))
 {
     if (volumetric_)
@@ -68,15 +69,8 @@ matchedFlowRateOutletVelocityFvPatchVectorField
         rhoName_ = dict.getOrDefault<word>("rho", "rho");
     }
 
-    // Value field require if mass based
-    if (dict.found("value"))
-    {
-        fvPatchField<vector>::operator=
-        (
-            vectorField("value", dict, p.size())
-        );
-    }
-    else
+    // Value field required if mass based
+    if (!this->readValueEntry(dict))
     {
         evaluate(Pstream::commsTypes::blocking);
     }
@@ -94,8 +88,8 @@ matchedFlowRateOutletVelocityFvPatchVectorField
 :
     fixedValueFvPatchField<vector>(ptf, p, iF, mapper),
     inletPatchName_(ptf.inletPatchName_),
-    volumetric_(ptf.volumetric_),
-    rhoName_(ptf.rhoName_)
+    rhoName_(ptf.rhoName_),
+    volumetric_(ptf.volumetric_)
 {}
 
 
@@ -107,8 +101,8 @@ matchedFlowRateOutletVelocityFvPatchVectorField
 :
     fixedValueFvPatchField<vector>(ptf),
     inletPatchName_(ptf.inletPatchName_),
-    volumetric_(ptf.volumetric_),
-    rhoName_(ptf.rhoName_)
+    rhoName_(ptf.rhoName_),
+    volumetric_(ptf.volumetric_)
 {}
 
 
@@ -121,8 +115,8 @@ matchedFlowRateOutletVelocityFvPatchVectorField
 :
     fixedValueFvPatchField<vector>(ptf, iF),
     inletPatchName_(ptf.inletPatchName_),
-    volumetric_(ptf.volumetric_),
-    rhoName_(ptf.rhoName_)
+    rhoName_(ptf.rhoName_),
+    volumetric_(ptf.volumetric_)
 {}
 
 

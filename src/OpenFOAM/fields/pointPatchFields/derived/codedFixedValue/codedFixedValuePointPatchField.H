@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -100,8 +100,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef codedFixedValuePointPatchField_H
-#define codedFixedValuePointPatchField_H
+#ifndef Foam_codedFixedValuePointPatchField_H
+#define Foam_codedFixedValuePointPatchField_H
 
 #include "fixedValuePointPatchFields.H"
 #include "codedBase.H"
@@ -187,8 +187,7 @@ public:
         (
             const pointPatch&,
             const DimensionedField<Type, pointMesh>&,
-            const dictionary&,
-            const bool valueRequired=true
+            const dictionary&
         );
 
         //- Construct by mapping given codedFixedValuePointPatchField

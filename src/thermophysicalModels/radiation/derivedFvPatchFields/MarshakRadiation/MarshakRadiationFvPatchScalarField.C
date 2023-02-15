@@ -46,8 +46,8 @@ MarshakRadiationFvPatchScalarField
     mixedFvPatchScalarField(p, iF),
     TName_("T")
 {
-    refValue() = 0.0;
-    refGrad() = 0.0;
+    refValue() = Zero;
+    refGrad() = Zero;
     valueFraction() = 0.0;
 }
 
@@ -77,20 +77,14 @@ MarshakRadiationFvPatchScalarField
     mixedFvPatchScalarField(p, iF),
     TName_(dict.getOrDefault<word>("T", "T"))
 {
-    if (dict.found("value"))
+    if (!this->readValueEntry(dict))
     {
-        refValue() = scalarField("value", dict, p.size());
-    }
-    else
-    {
-        refValue() = 0.0;
+        fvPatchScalarField::operator=(Zero);
     }
 
-    // zero gradient
-    refGrad() = 0.0;
-
+    refValue() = *this;
+    refGrad() = Zero;  // zero gradient
     valueFraction() = 1.0;
-
     fvPatchScalarField::operator=(refValue());
 }
 

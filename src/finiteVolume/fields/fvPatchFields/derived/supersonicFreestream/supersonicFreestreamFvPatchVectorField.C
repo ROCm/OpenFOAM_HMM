@@ -74,14 +74,7 @@ supersonicFreestreamFvPatchVectorField
 {
     fvPatchFieldBase::readDict(dict);
 
-    if (dict.found("value"))
-    {
-        fvPatchField<vector>::operator=
-        (
-            vectorField("value", dict, p.size())
-        );
-    }
-    else
+    if (!this->readValueEntry(dict))
     {
         fvPatchField<vector>::operator=(patchInternalField());
     }

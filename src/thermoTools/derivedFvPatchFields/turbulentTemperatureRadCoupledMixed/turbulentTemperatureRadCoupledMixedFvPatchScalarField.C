@@ -191,14 +191,11 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
         );
     }
 
-    fvPatchScalarField::operator=(scalarField("value", dict, p.size()));
+    this->readValueEntry(dict, IOobjectOption::MUST_READ);
 
-    if (dict.found("refValue"))
+    if (this->readMixedEntries(dict))
     {
         // Full restart
-        refValue() = scalarField("refValue", dict, p.size());
-        refGrad() = scalarField("refGradient", dict, p.size());
-        valueFraction() = scalarField("valueFraction", dict, p.size());
     }
     else
     {

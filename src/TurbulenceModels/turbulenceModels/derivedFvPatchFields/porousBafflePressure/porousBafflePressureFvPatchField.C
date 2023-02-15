@@ -67,14 +67,7 @@ Foam::porousBafflePressureFvPatchField::porousBafflePressureFvPatchField
 {
     if (valueRequired)
     {
-        if (dict.found("value"))
-        {
-            fvPatchField<scalar>::operator=
-            (
-                Field<scalar>("value", dict, p.size())
-            );
-        }
-        else
+        if (!this->readValueEntry(dict))
         {
             this->evaluate(Pstream::commsTypes::blocking);
         }

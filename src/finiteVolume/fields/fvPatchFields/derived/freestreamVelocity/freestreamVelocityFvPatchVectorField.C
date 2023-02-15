@@ -51,14 +51,7 @@ Foam::freestreamVelocityFvPatchVectorField::freestreamVelocityFvPatchVectorField
 {
     freestreamValue() = vectorField("freestreamValue", dict, p.size());
 
-    if (dict.found("value"))
-    {
-        fvPatchVectorField::operator=
-        (
-            vectorField("value", dict, p.size())
-        );
-    }
-    else
+    if (!this->readValueEntry(dict))
     {
         fvPatchVectorField::operator=(freestreamValue());
     }

@@ -65,13 +65,8 @@ Foam::adjointOutletFluxFvPatchField<Type>::adjointOutletFluxFvPatchField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchField<Type>(p, iF)
-{
-    fvPatchField<Type>::operator=
-    (
-        Field<Type>("value", dict, p.size())
-    );
-}
+    fixedValueFvPatchField<Type>(p, iF, dict, IOobjectOption::MUST_READ)
+{}
 
 
 template<class Type>

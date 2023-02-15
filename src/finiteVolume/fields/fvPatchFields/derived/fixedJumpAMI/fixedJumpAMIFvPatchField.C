@@ -68,17 +68,10 @@ Foam::fixedJumpAMIFvPatchField<Type>::fixedJumpAMIFvPatchField
 {
     if (this->cyclicAMIPatch().owner())
     {
-        jump_ = Field<Type>("jump", dict, p.size());
+        jump_.assign("jump", dict, p.size(), IOobjectOption::MUST_READ);
     }
 
-    if (dict.found("value"))
-    {
-        fvPatchField<Type>::operator=
-        (
-            Field<Type>("value", dict, p.size())
-        );
-    }
-    else
+    if (!this->readValueEntry(dict))
     {
         this->evaluate(Pstream::commsTypes::blocking);
     }

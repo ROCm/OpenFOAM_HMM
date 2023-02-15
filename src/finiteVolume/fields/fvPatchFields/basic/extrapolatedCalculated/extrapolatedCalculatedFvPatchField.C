@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,7 +52,7 @@ extrapolatedCalculatedFvPatchField
     const dictionary& dict
 )
 :
-    calculatedFvPatchField<Type>(p, iF, dict, false)
+    calculatedFvPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ)
 {
     evaluate();
 }

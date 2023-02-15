@@ -168,14 +168,7 @@ outletMappedUniformInletFvPatchField
     }
 
 
-    if (dict.found("value"))
-    {
-        fvPatchField<Type>::operator=
-        (
-            Field<Type>("value", dict, p.size())
-        );
-    }
-    else
+    if (!this->readValueEntry(dict))
     {
         fvPatchField<Type>::operator=(this->patchInternalField());
     }

@@ -50,7 +50,7 @@ Foam::fixedGradientFvPatchField<Type>::fixedGradientFvPatchField
     const dictionary& dict
 )
 :
-    fvPatchField<Type>(p, iF, dict, false),
+    fvPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ),
     gradient_("gradient", dict, p.size())
 {
     evaluate();

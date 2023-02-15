@@ -100,7 +100,7 @@ thermalBaffle1DFvPatchScalarField
     TName_("T"),
     baffleActivated_(dict.getOrDefault("baffleActivated", true)),
     thickness_(),
-    qs_(p.size(), 0),
+    qs_(p.size(), Zero),
     solidDict_(dict),
     solidPtr_(),
     qrPrevious_(p.size(), Zero),
@@ -110,7 +110,7 @@ thermalBaffle1DFvPatchScalarField
     ),
     qrName_(dict.getOrDefault<word>("qr", "none"))
 {
-    fvPatchScalarField::operator=(scalarField("value", dict, p.size()));
+    this->readValueEntry(dict, IOobjectOption::MUST_READ);
 
     if (dict.found("thickness"))
     {
@@ -127,12 +127,9 @@ thermalBaffle1DFvPatchScalarField
         qrPrevious_ = scalarField("qrPrevious", dict, p.size());
     }
 
-    if (dict.found("refValue") && baffleActivated_)
+    if (baffleActivated_ && this->readMixedEntries(dict))
     {
         // Full restart
-        refValue() = scalarField("refValue", dict, p.size());
-        refGrad() = scalarField("refGradient", dict, p.size());
-        valueFraction() = scalarField("valueFraction", dict, p.size());
     }
     else
     {

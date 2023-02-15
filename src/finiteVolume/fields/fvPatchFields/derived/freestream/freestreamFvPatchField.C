@@ -57,19 +57,15 @@ Foam::freestreamFvPatchField<Type>::freestreamFvPatchField
 
     this->phiName_ = dict.getOrDefault<word>("phi", "phi");
 
-    if (dict.found("freestreamValue"))
+    if
+    (
+        freestreamValue().assign
+        (
+            "freestreamValue", dict, p.size(), IOobjectOption::LAZY_READ
+        )
+    )
     {
-        freestreamValue() =
-            Field<Type>("freestreamValue", dict, p.size());
-
-        if (dict.found("value"))
-        {
-            fvPatchField<Type>::operator=
-            (
-                Field<Type>("value", dict, p.size())
-            );
-        }
-        else
+        if (!this->readValueEntry(dict))
         {
             fvPatchField<Type>::operator=(freestreamValue());
         }
@@ -82,10 +78,7 @@ Foam::freestreamFvPatchField<Type>::freestreamFvPatchField
 
         // Force user to supply an initial value
         // - we do not know if the supplied BC has all dependencies available
-        fvPatchField<Type>::operator=
-        (
-            Field<Type>("value", dict, p.size())
-        );
+        this->readValueEntry(dict, IOobjectOption::MUST_READ);
     }
 }
 

@@ -70,7 +70,7 @@ Foam::processorFvPatchField<Type>::processorFvPatchField
     const dictionary& dict
 )
 :
-    coupledFvPatchField<Type>(p, iF, dict, dict.found("value")),
+    coupledFvPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ),
     procPatch_(refCast<const processorFvPatch>(p, dict)),
     sendRequest_(-1),
     recvRequest_(-1)
@@ -86,8 +86,8 @@ Foam::processorFvPatchField<Type>::processorFvPatchField
             << exit(FatalIOError);
     }
 
-    // If the value is not supplied set to the internal field
-    if (!dict.found("value"))
+    // Use 'value' supplied, or set to internal field
+    if (!this->readValueEntry(dict))
     {
         fvPatchField<Type>::operator=(this->patchInternalField());
     }

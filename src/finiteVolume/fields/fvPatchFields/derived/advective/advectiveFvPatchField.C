@@ -88,14 +88,8 @@ Foam::advectiveFvPatchField<Type>::advectiveFvPatchField
     fieldInf_(Zero),
     lInf_(-GREAT)
 {
-    if (dict.found("value"))
-    {
-        fvPatchField<Type>::operator=
-        (
-            Field<Type>("value", dict, p.size())
-        );
-    }
-    else
+    // Use 'value' supplied, or set to internal field
+    if (!this->readValueEntry(dict))
     {
         fvPatchField<Type>::operator=(this->patchInternalField());
     }

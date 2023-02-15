@@ -58,7 +58,7 @@ Foam::totalPressureFvPatchScalarField::totalPressureFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchScalarField(p, iF, dict, false),
+    fixedValueFvPatchScalarField(p, iF, dict, IOobjectOption::NO_READ),
     UName_(dict.getOrDefault<word>("U", "U")),
     phiName_(dict.getOrDefault<word>("phi", "phi")),
     rhoName_(dict.getOrDefault<word>("rho", "rho")),
@@ -66,14 +66,7 @@ Foam::totalPressureFvPatchScalarField::totalPressureFvPatchScalarField
     gamma_(psiName_ != "none" ? dict.get<scalar>("gamma") : 1),
     p0_("p0", dict, p.size())
 {
-    if (dict.found("value"))
-    {
-        fvPatchField<scalar>::operator=
-        (
-            scalarField("value", dict, p.size())
-        );
-    }
-    else
+    if (!this->readValueEntry(dict))
     {
         fvPatchField<scalar>::operator=(p0_);
     }

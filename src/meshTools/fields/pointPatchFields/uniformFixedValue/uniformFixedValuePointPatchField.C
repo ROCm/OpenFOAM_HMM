@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,7 +73,7 @@ uniformFixedValuePointPatchField
     const dictionary& dict
 )
 :
-    fixedValuePointPatchField<Type>(p, iF, dict, false),
+    fixedValuePointPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ),
     uniformValue_
     (
         PatchFunction1<Type>::New
@@ -85,14 +85,7 @@ uniformFixedValuePointPatchField
         )
     )
 {
-    if (dict.found("value"))
-    {
-        fixedValuePointPatchField<Type>::operator==
-        (
-            Field<Type>("value", dict, p.size())
-        );
-    }
-    else
+    if (!this->readValueEntry(dict))
     {
         this->evaluate();
     }

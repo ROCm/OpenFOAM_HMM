@@ -73,21 +73,14 @@ Foam::totalTemperatureFvPatchScalarField::totalTemperatureFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchScalarField(p, iF, dict, false),
+    fixedValueFvPatchScalarField(p, iF, dict, IOobjectOption::NO_READ),
     UName_(dict.getOrDefault<word>("U", "U")),
     phiName_(dict.getOrDefault<word>("phi", "phi")),
     psiName_(dict.getOrDefault<word>("psi", "thermo:psi")),
     gamma_(dict.get<scalar>("gamma")),
     T0_("T0", dict, p.size())
 {
-    if (dict.found("value"))
-    {
-        fvPatchField<scalar>::operator=
-        (
-            scalarField("value", dict, p.size())
-        );
-    }
-    else
+    if (!this->readValueEntry(dict))
     {
         fvPatchField<scalar>::operator=(T0_);
     }
