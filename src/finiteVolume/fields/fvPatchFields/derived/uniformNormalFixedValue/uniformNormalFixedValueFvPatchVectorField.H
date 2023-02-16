@@ -64,8 +64,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef uniformNormalFixedValueFvPatchVectorField_H
-#define uniformNormalFixedValueFvPatchVectorField_H
+#ifndef Foam_uniformNormalFixedValueFvPatchVectorField_H
+#define Foam_uniformNormalFixedValueFvPatchVectorField_H
 
 #include "fvPatchFields.H"
 #include "fixedValueFvPatchFields.H"
@@ -86,9 +86,10 @@ class uniformNormalFixedValueFvPatchVectorField
 {
     // Private Data
 
-        autoPtr<PatchFunction1<scalar>> uniformValue_;
+        //- Function providing the value
+        autoPtr<PatchFunction1<scalar>> refValueFunc_;
 
-        //- Optional time ramping
+        //- Optional ramping
         autoPtr<Function1<scalar>> ramp_;
 
 

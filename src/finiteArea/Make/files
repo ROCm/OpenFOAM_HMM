@@ -67,6 +67,7 @@ $(derivedFaPatchFields)/outletInlet/outletInletFaPatchFields.C
 $(derivedFaPatchFields)/slip/slipFaPatchFields.C
 $(derivedFaPatchFields)/edgeNormalFixedValue/edgeNormalFixedValueFaPatchVectorField.C
 $(derivedFaPatchFields)/timeVaryingUniformFixedValue/timeVaryingUniformFixedValueFaPatchFields.C
+$(derivedFaPatchFields)/uniformFixedValue/uniformFixedValueFaPatchFields.C
 $(derivedFaPatchFields)/clampedPlate/clampedPlateFaPatchFields.C
 
 faePatchFields = fields/faePatchFields

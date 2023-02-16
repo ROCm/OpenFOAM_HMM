@@ -60,7 +60,7 @@ uniformFixedValuePointPatchField
 )
 :
     fixedValuePointPatchField<Type>(p, iF),
-    uniformValue_()
+    refValueFunc_(nullptr)
 {}
 
 
@@ -74,7 +74,7 @@ uniformFixedValuePointPatchField
 )
 :
     fixedValuePointPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ),
-    uniformValue_
+    refValueFunc_
     (
         PatchFunction1<Type>::New
         (
@@ -103,7 +103,7 @@ uniformFixedValuePointPatchField
 )
 :
     fixedValuePointPatchField<Type>(ptf, p, iF, mapper),
-    uniformValue_(ptf.uniformValue_.clone(this->getPatch(p)))
+    refValueFunc_(ptf.refValueFunc_.clone(this->getPatch(p)))
 {
     if (mapper.direct() && !mapper.hasUnmapped())
     {
@@ -126,7 +126,7 @@ uniformFixedValuePointPatchField
 )
 :
     fixedValuePointPatchField<Type>(ptf),
-    uniformValue_(ptf.uniformValue_.clone(this->getPatch(this->patch())))
+    refValueFunc_(ptf.refValueFunc_.clone(this->getPatch(this->patch())))
 {}
 
 
@@ -139,7 +139,7 @@ uniformFixedValuePointPatchField
 )
 :
     fixedValuePointPatchField<Type>(ptf, iF),
-    uniformValue_(ptf.uniformValue_.clone(this->getPatch(this->patch())))
+    refValueFunc_(ptf.refValueFunc_.clone(this->getPatch(this->patch())))
 {}
 
 
@@ -152,9 +152,9 @@ void Foam::uniformFixedValuePointPatchField<Type>::autoMap
 )
 {
     fixedValuePointPatchField<Type>::autoMap(mapper);
-    uniformValue_().autoMap(mapper);
+    refValueFunc_().autoMap(mapper);
 
-    if (uniformValue_().constant())
+    if (refValueFunc_().constant())
     {
         // If mapper is not dependent on time we're ok to evaluate
         this->evaluate();
@@ -174,7 +174,7 @@ void Foam::uniformFixedValuePointPatchField<Type>::rmap
     const uniformFixedValuePointPatchField& tiptf =
         refCast<const uniformFixedValuePointPatchField>(ptf);
 
-    uniformValue_().rmap(tiptf.uniformValue_(), addr);
+    refValueFunc_().rmap(tiptf.refValueFunc_(), addr);
 }
 
 
@@ -186,7 +186,7 @@ void Foam::uniformFixedValuePointPatchField<Type>::updateCoeffs()
         return;
     }
     const scalar t = this->db().time().timeOutputValue();
-    fixedValuePointPatchField<Type>::operator==(uniformValue_->value(t));
+    fixedValuePointPatchField<Type>::operator==(refValueFunc_->value(t));
     fixedValuePointPatchField<Type>::updateCoeffs();
 }
 
@@ -197,7 +197,7 @@ write(Ostream& os) const
 {
     // Note: write value
     fixedValuePointPatchField<Type>::write(os);
-    uniformValue_->writeData(os);
+    refValueFunc_->writeData(os);
 }
 
 

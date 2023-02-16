@@ -62,8 +62,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef uniformFixedValueFvPatchField_H
-#define uniformFixedValueFvPatchField_H
+#ifndef Foam_uniformFixedValueFvPatchField_H
+#define Foam_uniformFixedValueFvPatchField_H
 
 #include "fixedValueFvPatchFields.H"
 #include "PatchFunction1.H"
@@ -84,8 +84,8 @@ class uniformFixedValueFvPatchField
 {
     // Private Data
 
-        //- Value
-        autoPtr<PatchFunction1<Type>> uniformValue_;
+        //- Function providing the value
+        autoPtr<PatchFunction1<Type>> refValueFunc_;
 
 
 public:
@@ -163,7 +163,7 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
         // Mapping functions
 

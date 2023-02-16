@@ -33,11 +33,10 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef uniformFixedValuePointPatchFields_H
-#define uniformFixedValuePointPatchFields_H
+#ifndef Foam_uniformFixedValuePointPatchFields_H
+#define Foam_uniformFixedValuePointPatchFields_H
 
 #include "uniformFixedValuePointPatchField.H"
-#include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

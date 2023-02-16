@@ -40,7 +40,7 @@ uniformNormalFixedValueFvPatchVectorField
 )
 :
     fixedValueFvPatchVectorField(p, iF),
-    uniformValue_(nullptr),
+    refValueFunc_(nullptr),
     ramp_(nullptr)
 {}
 
@@ -54,7 +54,7 @@ uniformNormalFixedValueFvPatchVectorField
 )
 :
     fixedValueFvPatchVectorField(p, iF, dict, IOobjectOption::NO_READ),
-    uniformValue_(PatchFunction1<scalar>::New(p.patch(), "uniformValue", dict)),
+    refValueFunc_(PatchFunction1<scalar>::New(p.patch(), "uniformValue", dict)),
     ramp_(Function1<scalar>::NewIfPresent("ramp", dict, word::null, &db()))
 {
     if (!this->readValueEntry(dict))
@@ -74,7 +74,7 @@ uniformNormalFixedValueFvPatchVectorField
 )
 :
     fixedValueFvPatchVectorField(p, iF),   // Don't map
-    uniformValue_(ptf.uniformValue_.clone(p.patch())),
+    refValueFunc_(ptf.refValueFunc_.clone(p.patch())),
     ramp_(ptf.ramp_.clone())
 {
     if (mapper.direct() && !mapper.hasUnmapped())
@@ -97,7 +97,7 @@ uniformNormalFixedValueFvPatchVectorField
 )
 :
     fixedValueFvPatchVectorField(ptf),
-    uniformValue_(ptf.uniformValue_.clone(this->patch().patch())),
+    refValueFunc_(ptf.refValueFunc_.clone(this->patch().patch())),
     ramp_(ptf.ramp_.clone())
 {}
 
@@ -110,7 +110,7 @@ uniformNormalFixedValueFvPatchVectorField
 )
 :
     fixedValueFvPatchVectorField(ptf, iF),
-    uniformValue_(ptf.uniformValue_.clone(this->patch().patch())),
+    refValueFunc_(ptf.refValueFunc_.clone(this->patch().patch())),
     ramp_(ptf.ramp_.clone())
 {}
 
@@ -123,9 +123,9 @@ void Foam::uniformNormalFixedValueFvPatchVectorField::autoMap
 )
 {
     fixedValueFvPatchVectorField::autoMap(mapper);
-    uniformValue_().autoMap(mapper);
+    refValueFunc_().autoMap(mapper);
 
-    if (uniformValue_().constant())
+    if (refValueFunc_().constant())
     {
         // If mapper is not dependent on time we're ok to evaluate
         this->evaluate();
@@ -144,7 +144,7 @@ void Foam::uniformNormalFixedValueFvPatchVectorField::rmap
     const uniformNormalFixedValueFvPatchVectorField& tiptf =
         refCast<const uniformNormalFixedValueFvPatchVectorField>(ptf);
 
-    uniformValue_().rmap(tiptf.uniformValue_(), addr);
+    refValueFunc_().rmap(tiptf.refValueFunc_(), addr);
 }
 
 
@@ -157,7 +157,7 @@ void Foam::uniformNormalFixedValueFvPatchVectorField::updateCoeffs()
 
     const scalar t = this->db().time().timeOutputValue();
 
-    tmp<vectorField> tvalues(uniformValue_->value(t)*patch().nf());
+    tmp<vectorField> tvalues(refValueFunc_->value(t)*patch().nf());
 
     if (ramp_)
     {
@@ -172,7 +172,7 @@ void Foam::uniformNormalFixedValueFvPatchVectorField::updateCoeffs()
 void Foam::uniformNormalFixedValueFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchField<vector>::write(os);
-    uniformValue_->writeData(os);
+    refValueFunc_->writeData(os);
     if (ramp_)
     {
         ramp_->writeData(os);

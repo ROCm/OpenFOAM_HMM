@@ -25,11 +25,10 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef uniformFixedValueFvPatchFields_H
-#define uniformFixedValueFvPatchFields_H
+#ifndef Foam_uniformFixedValueFvPatchFields_H
+#define Foam_uniformFixedValueFvPatchFields_H
 
 #include "uniformFixedValueFvPatchField.H"
-#include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

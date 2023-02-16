@@ -5,7 +5,6 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2017 Wikki Ltd
     Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -26,27 +25,37 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "timeVaryingUniformFixedValueFaPatchField.H"
-#include "Time.H"
+#include "uniformFixedValueFaPatchField.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::timeVaryingUniformFixedValueFaPatchField<Type>::
-timeVaryingUniformFixedValueFaPatchField
+Foam::uniformFixedValueFaPatchField<Type>::uniformFixedValueFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF
 )
 :
     fixedValueFaPatchField<Type>(p, iF),
-    timeSeries_()
+    refValueFunc_(nullptr)
 {}
 
 
 template<class Type>
-Foam::timeVaryingUniformFixedValueFaPatchField<Type>::
-timeVaryingUniformFixedValueFaPatchField
+Foam::uniformFixedValueFaPatchField<Type>::uniformFixedValueFaPatchField
+(
+    const faPatch& p,
+    const DimensionedField<Type, areaMesh>& iF,
+    const Field<Type>& fld
+)
+:
+    fixedValueFaPatchField<Type>(p, iF, fld),
+    refValueFunc_(nullptr)
+{}
+
+
+template<class Type>
+Foam::uniformFixedValueFaPatchField<Type>::uniformFixedValueFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF,
@@ -54,85 +63,99 @@ timeVaryingUniformFixedValueFaPatchField
 )
 :
     fixedValueFaPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ),
-    timeSeries_(dict)
+    refValueFunc_
+    (
+        Function1<Type>::New
+        (
+            /* p.patch(), */
+            "uniformValue",
+            dict
+        )
+    )
 {
-    if (!this->readValueEntry(dict))
+    if (this->readValueEntry(dict))
     {
-        updateCoeffs();
+        // Full restart
     }
-
-    DeprecatedInFunction(2212)
-        << "Use uniformFixedValue instead." << nl
-        << "    This boundary condition will be removed in the future" << endl;
+    else
+    {
+        this->evaluate();
+    }
 }
 
 
 template<class Type>
-Foam::timeVaryingUniformFixedValueFaPatchField<Type>::
-timeVaryingUniformFixedValueFaPatchField
+Foam::uniformFixedValueFaPatchField<Type>::uniformFixedValueFaPatchField
 (
-    const timeVaryingUniformFixedValueFaPatchField<Type>& ptf,
+    const uniformFixedValueFaPatchField<Type>& ptf,
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF,
     const faPatchFieldMapper& mapper
 )
 :
-    fixedValueFaPatchField<Type>(ptf, p, iF, mapper),
-    timeSeries_(ptf.timeSeries_)
-{}
+    fixedValueFaPatchField<Type>(p, iF),   // Don't map
+    refValueFunc_(ptf.refValueFunc_.clone(/*p.patch()*/))
+{
+    if (mapper.direct() && !mapper.hasUnmapped())
+    {
+        // Use mapping instead of re-evaluation
+        this->map(ptf, mapper);
+    }
+    else
+    {
+        // Evaluate since value not mapped
+        this->evaluate();
+    }
+}
 
 
 template<class Type>
-Foam::timeVaryingUniformFixedValueFaPatchField<Type>::
-timeVaryingUniformFixedValueFaPatchField
+Foam::uniformFixedValueFaPatchField<Type>::uniformFixedValueFaPatchField
 (
-    const timeVaryingUniformFixedValueFaPatchField<Type>& ptf
+    const uniformFixedValueFaPatchField<Type>& ptf
 )
 :
     fixedValueFaPatchField<Type>(ptf),
-    timeSeries_(ptf.timeSeries_)
+    refValueFunc_(ptf.refValueFunc_.clone(/*this->patch().patch()*/))
 {}
 
 
 template<class Type>
-Foam::timeVaryingUniformFixedValueFaPatchField<Type>::
-timeVaryingUniformFixedValueFaPatchField
+Foam::uniformFixedValueFaPatchField<Type>::uniformFixedValueFaPatchField
 (
-    const timeVaryingUniformFixedValueFaPatchField<Type>& ptf,
+    const uniformFixedValueFaPatchField<Type>& ptf,
     const DimensionedField<Type, areaMesh>& iF
 )
 :
     fixedValueFaPatchField<Type>(ptf, iF),
-    timeSeries_(ptf.timeSeries_)
+    refValueFunc_(ptf.refValueFunc_.clone(/*this->patch().patch()*/))
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::timeVaryingUniformFixedValueFaPatchField<Type>::updateCoeffs()
+void Foam::uniformFixedValueFaPatchField<Type>::updateCoeffs()
 {
     if (this->updated())
     {
         return;
     }
 
-    faPatchField<Type>::operator==
-    (
-        timeSeries_(this->db().time().timeOutputValue())
-    );
+    const scalar t = this->db().time().timeOutputValue();
+    faPatchField<Type>::operator==(refValueFunc_->value(t));
     fixedValueFaPatchField<Type>::updateCoeffs();
 }
 
 
 template<class Type>
-void Foam::timeVaryingUniformFixedValueFaPatchField<Type>::write
-(
-    Ostream& os
-) const
+void Foam::uniformFixedValueFaPatchField<Type>::write(Ostream& os) const
 {
     faPatchField<Type>::write(os);
-    timeSeries_.write(os);
+    if (refValueFunc_)
+    {
+        refValueFunc_->writeData(os);
+    }
     faPatchField<Type>::writeValueEntry(os);
 }
 

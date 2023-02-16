@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,34 +24,48 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::uniformFixedValuePointPatchField
+    Foam::uniformFixedValueFaPatchField
+
+Group
+    grpGenericBoundaryConditions
 
 Description
-    Enables the specification of a uniform fixed value boundary condition.
+    This boundary condition provides a uniform fixed value condition.
+
+Usage
+    \table
+        Property     | Description                  | Required | Default
+        uniformValue | uniform value                | yes |
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim
-    inlet
+    <patchName>
     {
         type            uniformFixedValue;
         uniformValue    constant 0.2;
     }
     \endverbatim
 
-    The uniformValue entry is a PatchFunction1 type,
-    able to describe time and spatial varying functions.
+Note
+    The uniformValue entry is a Function1 type,
+    able to describe time varying functions.
     The example above gives the usage for supplying a constant value.
 
+See also
+    Foam::Function1Types
+    Foam::fixedValueFaPatchField
+
 SourceFiles
-    uniformFixedValuePointPatchField.C
+    uniformFixedValueFaPatchField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Foam_uniformFixedValuePointPatchField_H
-#define Foam_uniformFixedValuePointPatchField_H
+#ifndef Foam_uniformFixedValueFaPatchField_H
+#define Foam_uniformFixedValueFaPatchField_H
 
-#include "fixedValuePointPatchField.H"
-#include "PatchFunction1.H"
+#include "fixedValueFaPatchField.H"
+#include "Function1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -60,23 +73,18 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-              Class uniformFixedValuePointPatchField Declaration
+                Class uniformFixedValueFaPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class uniformFixedValuePointPatchField
+class uniformFixedValueFaPatchField
 :
-    public fixedValuePointPatchField<Type>
+    public fixedValueFaPatchField<Type>
 {
     // Private Data
 
         //- Function providing the value
-        autoPtr<PatchFunction1<Type>> refValueFunc_;
-
-
-    // Private Member Functions
-
-        static const polyPatch& getPatch(const pointPatch&);
+        autoPtr<Function1<Type>> refValueFunc_;
 
 
 public:
@@ -88,98 +96,79 @@ public:
     // Constructors
 
         //- Construct from patch and internal field
-        uniformFixedValuePointPatchField
+        uniformFixedValueFaPatchField
         (
-            const pointPatch&,
-            const DimensionedField<Type, pointMesh>&
+            const faPatch&,
+            const DimensionedField<Type, areaMesh>&
+        );
+
+        //- Construct from patch and internal field and patch field
+        uniformFixedValueFaPatchField
+        (
+            const faPatch&,
+            const DimensionedField<Type, areaMesh>&,
+            const Field<Type>& fld
         );
 
         //- Construct from patch, internal field and dictionary
-        uniformFixedValuePointPatchField
+        uniformFixedValueFaPatchField
         (
-            const pointPatch&,
-            const DimensionedField<Type, pointMesh>&,
+            const faPatch&,
+            const DimensionedField<Type, areaMesh>&,
             const dictionary&
         );
 
-        //- Construct by mapping given patch field onto a new patch
-        uniformFixedValuePointPatchField
+        //- Construct by mapping onto a new patch
+        uniformFixedValueFaPatchField
         (
-            const uniformFixedValuePointPatchField<Type>&,
-            const pointPatch&,
-            const DimensionedField<Type, pointMesh>&,
-            const pointPatchFieldMapper&
+            const uniformFixedValueFaPatchField<Type>&,
+            const faPatch&,
+            const DimensionedField<Type, areaMesh>&,
+            const faPatchFieldMapper&
         );
 
         //- Construct as copy
-        uniformFixedValuePointPatchField
+        uniformFixedValueFaPatchField
         (
-            const uniformFixedValuePointPatchField<Type>&
+            const uniformFixedValueFaPatchField<Type>&
         );
 
         //- Construct and return a clone
-        virtual autoPtr<pointPatchField<Type>> clone() const
+        virtual tmp<faPatchField<Type>> clone() const
         {
-            return autoPtr<pointPatchField<Type>>
+            return tmp<faPatchField<Type>>
             (
-                new uniformFixedValuePointPatchField<Type>
-                (
-                    *this
-                )
+                new uniformFixedValueFaPatchField<Type>(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        uniformFixedValuePointPatchField
+        uniformFixedValueFaPatchField
         (
-            const uniformFixedValuePointPatchField<Type>&,
-            const DimensionedField<Type, pointMesh>&
+            const uniformFixedValueFaPatchField<Type>&,
+            const DimensionedField<Type, areaMesh>&
         );
 
-
         //- Construct and return a clone setting internal field reference
-        virtual autoPtr<pointPatchField<Type>> clone
+        virtual tmp<faPatchField<Type>> clone
         (
-            const DimensionedField<Type, pointMesh>& iF
+            const DimensionedField<Type, areaMesh>& iF
         ) const
         {
-            return autoPtr<pointPatchField<Type>>
+            return tmp<faPatchField<Type>>
             (
-                new uniformFixedValuePointPatchField<Type>
-                (
-                    *this,
-                    iF
-                )
+                new uniformFixedValueFaPatchField<Type>(*this, iF)
             );
         }
 
 
     // Member Functions
 
-        // Mapping functions
-
-            //- Map (and resize as needed) from self given a mapping object
-            virtual void autoMap
-            (
-                const pointPatchFieldMapper&
-            );
-
-            //- Reverse map the given fvPatchField onto this fvPatchField
-            virtual void rmap
-            (
-                const pointPatchField<Type>&,
-                const labelList&
-            );
-
-
-        // Evaluation functions
-
-            //- Update the coefficients associated with the patch field
-            virtual void updateCoeffs();
-
+        //- Update the coefficients associated with the patch field
+        virtual void updateCoeffs();
 
         //- Write
-        virtual void write(Ostream&) const;
+        virtual void write(Ostream& os) const;
 };
 
 
@@ -190,7 +179,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "uniformFixedValuePointPatchField.C"
+    #include "uniformFixedValueFaPatchField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -38,7 +38,7 @@ Foam::uniformFixedValueFvPatchField<Type>::uniformFixedValueFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(p, iF),
-    uniformValue_(nullptr)
+    refValueFunc_(nullptr)
 {}
 
 
@@ -51,7 +51,7 @@ Foam::uniformFixedValueFvPatchField<Type>::uniformFixedValueFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(p, iF, fld),
-    uniformValue_(nullptr)
+    refValueFunc_(nullptr)
 {}
 
 
@@ -64,7 +64,7 @@ Foam::uniformFixedValueFvPatchField<Type>::uniformFixedValueFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ),
-    uniformValue_(PatchFunction1<Type>::New(p.patch(), "uniformValue", dict))
+    refValueFunc_(PatchFunction1<Type>::New(p.patch(), "uniformValue", dict))
 {
     if (!this->readValueEntry(dict))
     {
@@ -83,7 +83,7 @@ Foam::uniformFixedValueFvPatchField<Type>::uniformFixedValueFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(p, iF),   // Don't map
-    uniformValue_(ptf.uniformValue_.clone(p.patch()))
+    refValueFunc_(ptf.refValueFunc_.clone(p.patch()))
 {
     if (mapper.direct() && !mapper.hasUnmapped())
     {
@@ -105,7 +105,7 @@ Foam::uniformFixedValueFvPatchField<Type>::uniformFixedValueFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(ptf),
-    uniformValue_(ptf.uniformValue_.clone(this->patch().patch()))
+    refValueFunc_(ptf.refValueFunc_.clone(this->patch().patch()))
 {}
 
 
@@ -117,7 +117,7 @@ Foam::uniformFixedValueFvPatchField<Type>::uniformFixedValueFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(ptf, iF),
-    uniformValue_(ptf.uniformValue_.clone(this->patch().patch()))
+    refValueFunc_(ptf.refValueFunc_.clone(this->patch().patch()))
 {}
 
 
@@ -130,9 +130,9 @@ void Foam::uniformFixedValueFvPatchField<Type>::autoMap
 )
 {
     fixedValueFvPatchField<Type>::autoMap(mapper);
-    uniformValue_().autoMap(mapper);
+    refValueFunc_().autoMap(mapper);
 
-    if (uniformValue_().constant())
+    if (refValueFunc_().constant())
     {
         // If mapper is not dependent on time we're ok to evaluate
         this->evaluate();
@@ -152,7 +152,7 @@ void Foam::uniformFixedValueFvPatchField<Type>::rmap
     const uniformFixedValueFvPatchField& tiptf =
         refCast<const uniformFixedValueFvPatchField>(ptf);
 
-    uniformValue_().rmap(tiptf.uniformValue_(), addr);
+    refValueFunc_().rmap(tiptf.refValueFunc_(), addr);
 }
 
 
@@ -165,7 +165,7 @@ void Foam::uniformFixedValueFvPatchField<Type>::updateCoeffs()
     }
 
     const scalar t = this->db().time().timeOutputValue();
-    fvPatchField<Type>::operator==(uniformValue_->value(t));
+    fvPatchField<Type>::operator==(refValueFunc_->value(t));
     fixedValueFvPatchField<Type>::updateCoeffs();
 }
 
@@ -174,7 +174,7 @@ template<class Type>
 void Foam::uniformFixedValueFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
-    uniformValue_->writeData(os);
+    refValueFunc_->writeData(os);
     fvPatchField<Type>::writeValueEntry(os);
 }
 

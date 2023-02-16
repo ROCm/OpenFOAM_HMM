@@ -29,17 +29,11 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "volFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-makePatchFields(uniformFixedValue);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+    makePatchFields(uniformFixedValue);
+}
 
 // ************************************************************************* //
