@@ -35,7 +35,7 @@ bool Foam::OTstream::write(const token& tok)
 {
     if (tok.good())
     {
-        append(tok);
+        tokens().push_back(tok);
         return true;
     }
 
@@ -48,7 +48,7 @@ Foam::Ostream& Foam::OTstream::write(const char c)
     if (!std::isspace(c) && std::isprint(c))
     {
         // Should generally work, but need to verify corner cases
-        append(token(token::punctuationToken(c)));
+        tokens().push_back(token(token::punctuationToken(c)));
     }
 
     return *this;
@@ -76,7 +76,7 @@ Foam::Ostream& Foam::OTstream::write(const char* str)
 
 Foam::Ostream& Foam::OTstream::write(const word& str)
 {
-    append(token(str)); // tokenType::WORD
+    tokens().push_back(token(str)); // tokenType::WORD
 
     return *this;
 }
@@ -84,7 +84,7 @@ Foam::Ostream& Foam::OTstream::write(const word& str)
 
 Foam::Ostream& Foam::OTstream::write(const string& str)
 {
-    append(token(str)); // tokenType::STRING
+    tokens().push_back(token(str)); // tokenType::STRING
 
     return *this;
 }
@@ -98,11 +98,11 @@ Foam::Ostream& Foam::OTstream::writeQuoted
 {
     if (quoted)
     {
-        append(token(string(str))); // tokenType::STRING
+        tokens().push_back(token(string(str))); // tokenType::STRING
     }
     else if (!str.empty())
     {
-        append(token(word(str, false))); // tokenType::WORD
+        tokens().push_back(token(word(str, false))); // tokenType::WORD
     }
 
     return *this;
@@ -111,7 +111,7 @@ Foam::Ostream& Foam::OTstream::writeQuoted
 
 Foam::Ostream& Foam::OTstream::write(const int32_t val)
 {
-    append(token(label(val))); // tokenType::LABEL
+    tokens().push_back(token(label(val))); // tokenType::LABEL
 
     return *this;
 }
@@ -119,7 +119,7 @@ Foam::Ostream& Foam::OTstream::write(const int32_t val)
 
 Foam::Ostream& Foam::OTstream::write(const int64_t val)
 {
-    append(token(label(val))); // tokenType::LABEL
+    tokens().push_back(token(label(val))); // tokenType::LABEL
 
     return *this;
 }
@@ -127,7 +127,7 @@ Foam::Ostream& Foam::OTstream::write(const int64_t val)
 
 Foam::Ostream& Foam::OTstream::write(const float val)
 {
-    append(token(val)); // tokenType::FLOAT
+    tokens().push_back(token(val)); // tokenType::FLOAT
 
     return *this;
 }
@@ -135,7 +135,7 @@ Foam::Ostream& Foam::OTstream::write(const float val)
 
 Foam::Ostream& Foam::OTstream::write(const double val)
 {
-    append(token(val)); // tokenType::DOUBLE
+    tokens().push_back(token(val)); // tokenType::DOUBLE
 
     return *this;
 }

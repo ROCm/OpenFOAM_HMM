@@ -687,8 +687,8 @@ Foam::label Foam::polyTopoChange::getCellOrder
                     if (unvisited.test(nbr))
                     {
                         // Not visited (or removed), add to the list
-                        nbrCells.append(nbr);
-                        weights.append(nbrCount);
+                        nbrCells.push_back(nbr);
+                        weights.push_back(nbrCount);
                     }
                 }
 

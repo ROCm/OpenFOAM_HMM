@@ -101,13 +101,13 @@ public:
     // Member Functions
 
         //- The tokens
-        const DynamicList<token>& tokens() const
+        const DynamicList<token>& tokens() const noexcept
         {
             return *this;
         }
 
         //- The tokens
-        DynamicList<token>& tokens()
+        DynamicList<token>& tokens() noexcept
         {
             return *this;
         }
