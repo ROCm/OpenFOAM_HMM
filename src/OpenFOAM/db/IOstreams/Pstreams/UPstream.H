@@ -184,22 +184,6 @@ public:
                 friend Ostream& operator<<(Ostream&, const commsStruct&);
         };
 
-        //- combineReduce operator for lists. Used for counting.
-        struct listEq
-        {
-            template<class T>
-            void operator()(T& x, const T& y) const
-            {
-                forAll(y, i)
-                {
-                    if (y[i].size())
-                    {
-                        x[i] = y[i];
-                    }
-                }
-            }
-        };
-
 
 private:
 

@@ -86,8 +86,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ListListOps_H
-#define ListListOps_H
+#ifndef Foam_ListListOps_H
+#define Foam_ListListOps_H
 
 #include "labelList.H"
 
